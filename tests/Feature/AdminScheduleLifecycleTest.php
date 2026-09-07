@@ -5,7 +5,9 @@ namespace Tests\Feature;
 use App\Models\AuditLog;
 use App\Models\Role;
 use App\Services\DemoService;
+use App\Services\ScheduleDeletionService;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Str;
 use Tests\Feature\Concerns\CreatesScheduleData;
@@ -106,6 +108,26 @@ class AdminScheduleLifecycleTest extends TestCase
 
         $this->get('/'.$released->fresh()->subdomain)->assertRedirect();
         $this->get('/haifa')->assertRedirect();
+    }
+
+    /**
+     * The iCal and RSS feeds carry the same events as the guest page, are public, and are served
+     * with a one-hour public Cache-Control - so a deleted schedule left syndicating there stays
+     * readable long after its page has gone. They were the two endpoints that kept the old
+     * `! $role->isClaimed()` idiom when the rest were guarded.
+     */
+    public function test_the_syndication_feeds_refuse_a_deleted_schedule(): void
+    {
+        $role = $this->createRole($this->createOwner(), 'venue', ['subdomain' => 'tel-aviv']);
+        $this->createEvent($role, ['name' => 'Upcoming Show', 'creator_role_id' => $role->id]);
+
+        $this->get(route('feed.ical', ['subdomain' => 'tel-aviv']))->assertOk()->assertSee('Upcoming Show');
+        $this->get(route('feed.rss', ['subdomain' => 'tel-aviv']))->assertOk()->assertSee('Upcoming Show', false);
+
+        Role::whereKey($role->id)->update(['is_deleted' => true]);
+
+        $this->get(route('feed.ical', ['subdomain' => 'tel-aviv']))->assertNotFound();
+        $this->get(route('feed.rss', ['subdomain' => 'tel-aviv']))->assertNotFound();
     }
 
     /**
@@ -395,6 +417,134 @@ class AdminScheduleLifecycleTest extends TestCase
         $this->assertSame('tel-aviv-deleted-'.$role->id, $log->new_values['subdomain']);
     }
 
+    /**
+     * An operator may legitimately blank a junk schedule's address - the owner-facing form
+     * requires one, so only this page can.
+     *
+     * It used to throw from inside Role's `updating` hook, which fired a verification mail at a
+     * null address; the resulting LogicException escaped before the UPDATE, so the whole save was
+     * lost - name and subdomain included, with a 500 for the admin.
+     */
+    public function test_clearing_the_email_saves_the_rest_of_the_form(): void
+    {
+        $role = $this->createRole($this->createOwner(), 'venue', ['subdomain' => 'tel-aviv']);
+
+        $this->actingAsAdmin()->put(route('admin.schedules.update_details', ['role' => $role->encodeId()]), [
+            'name' => 'Renamed While Clearing Email',
+            'new_subdomain' => 'tel-aviv',
+            'email' => '',
+        ])->assertSessionHasNoErrors();
+
+        $role->refresh();
+        $this->assertNull($role->email);
+        $this->assertSame('Renamed While Clearing Email', $role->name);
+    }
+
+    /**
+     * A field the request never carried is a no-op, not a clear. `?? null` conflated "submitted
+     * empty" with "absent" and silently wiped stored contact details - and for phone that drops
+     * phone_verified_at through the updating hook too.
+     */
+    public function test_omitting_a_contact_field_leaves_it_alone(): void
+    {
+        $role = $this->createRole($this->createOwner(), 'venue', ['subdomain' => 'tel-aviv']);
+        Role::whereKey($role->id)->update(['phone' => '+15551234567', 'phone_verified_at' => now()]);
+
+        $this->actingAsAdmin()->put(route('admin.schedules.update_details', ['role' => $role->encodeId()]), [
+            'name' => 'Only The Name Changed',
+            'new_subdomain' => 'tel-aviv',
+            'email' => $role->email,
+        ])->assertSessionHasNoErrors();
+
+        $role->refresh();
+        $this->assertSame('+15551234567', $role->phone);
+        $this->assertNotNull($role->phone_verified_at);
+    }
+
+    /** A restored schedule that could not reclaim its name must not keep advertising the old one. */
+    public function test_the_was_name_is_only_shown_while_deleted(): void
+    {
+        $role = $this->createRole($this->createOwner(), 'venue', ['subdomain' => 'tel-aviv']);
+        $admin = $this->actingAsAdmin();
+
+        $admin->post(route('admin.schedules.mark_deleted', ['role' => $role->encodeId()]));
+        $this->createRole($this->createOwner(), 'venue', ['subdomain' => 'tel-aviv']);
+        $admin->post(route('admin.schedules.restore', ['role' => $role->encodeId()]));
+
+        // The column is kept on purpose so the edit page can explain what happened, but the list
+        // must not badge a live schedule with it.
+        $this->assertSame('tel-aviv', $role->fresh()->subdomain_before_delete);
+        $admin->get(route('admin.schedules', ['search' => 'Test Schedule']))
+            ->assertOk()
+            ->assertDontSee('was tel-aviv');
+    }
+
+    /**
+     * A repeat release must not forget what the schedule was originally called.
+     *
+     * releasedSubdomain() is idempotent, but the write around it was not: it recorded the row's
+     * CURRENT name, which on a second pass is the mangled one - losing the real original and
+     * leaving restore() nothing to reclaim. Reachable by a double-submitted POST.
+     */
+    public function test_releasing_twice_keeps_the_first_recorded_name(): void
+    {
+        $role = $this->createRole($this->createOwner(), 'venue', ['subdomain' => 'tel-aviv']);
+        $service = app(ScheduleDeletionService::class);
+
+        $service->markDeleted($role);
+        $service->markDeleted($role->fresh());
+
+        $role->refresh();
+        $this->assertSame('tel-aviv', $role->subdomain_before_delete);
+        $this->assertSame('tel-aviv-deleted-'.$role->id, $role->subdomain);
+    }
+
+    /**
+     * Pruning an approve list must not run Role's saving hook on the curator.
+     *
+     * That hook geocodes through a 10-second Http::get() whenever a row's stored geo_address does
+     * not match its composed address, and this runs inside markDeleted()'s transaction holding a
+     * row lock. It also re-renders description_html and friends on a row we only meant to drop one
+     * entry from. A query-builder write fires no model events, which is what this pins.
+     */
+    public function test_pruning_an_approve_list_fires_no_model_events_on_the_curator(): void
+    {
+        Http::fake();
+        // Without a key the geocode branch is skipped and the test would prove nothing about it.
+        config(['services.google.backend' => 'test-key']);
+
+        $junk = $this->createRole($this->createOwner(), 'talent', ['subdomain' => 'tel-aviv']);
+
+        $curator = $this->createRole($this->createOwner(), 'curator', ['city' => 'Haifa']);
+        $curator->approved_subdomains = ['tel-aviv'];
+        $curator->save();
+
+        // Stale rendered HTML the saving hook would rewrite, and a stale geocode watermark that
+        // would send it to Google. Written past the model so no hook runs here either.
+        Role::whereKey($curator->id)->update([
+            'description' => '# Heading',
+            'description_html' => '<!--stale-->',
+            'geo_address' => null,
+        ]);
+
+        // Only requests made by the release itself count; building the fixtures above legitimately
+        // geocodes through the same hook.
+        $before = count(Http::recorded());
+
+        app(ScheduleDeletionService::class)->markDeleted($junk->fresh());
+
+        $curator->refresh();
+
+        $this->assertNull($curator->approved_subdomains, 'the entry is still pruned');
+        $this->assertSame('<!--stale-->', $curator->description_html, 'the saving hook must not have run');
+        $this->assertCount($before, Http::recorded(), 'the release must make no outbound request');
+    }
+
+    /**
+     * All three mutating routes, not just the first. update_details matters most: its FormRequest
+     * loads the schedule and runs full validation BEFORE the controller's own isAdmin() guard, so
+     * EnsureUserIsAdmin is the only thing standing in front of it.
+     */
     public function test_a_non_admin_cannot_reach_any_of_it(): void
     {
         if (! Route::has('admin.schedules')) {
@@ -402,14 +552,30 @@ class AdminScheduleLifecycleTest extends TestCase
         }
 
         $owner = $this->createOwner();
-        $role = $this->createRole($owner, 'venue', ['subdomain' => 'tel-aviv']);
+        $role = $this->createRole($owner, 'venue', ['subdomain' => 'tel-aviv', 'name' => 'Untouched']);
+        Role::whereKey($role->id)->update(['is_deleted' => true, 'subdomain_before_delete' => 'tel-aviv']);
 
+        // Asserted against home rather than a bare assertRedirect(): the controllers' own
+        // redirect()->back() would also satisfy that, so it would not prove the middleware ran.
         $this->actingAs($owner)
             ->post(route('admin.schedules.mark_deleted', ['role' => $role->encodeId()]))
-            ->assertRedirect();
+            ->assertRedirect(route('home'));
+
+        $this->actingAs($owner)
+            ->post(route('admin.schedules.restore', ['role' => $role->encodeId()]))
+            ->assertRedirect(route('home'));
+
+        $this->actingAs($owner)
+            ->put(route('admin.schedules.update_details', ['role' => $role->encodeId()]), [
+                'name' => 'Hijacked',
+                'new_subdomain' => 'hijacked',
+                'email' => 'attacker@gmail.com',
+            ])
+            ->assertRedirect(route('home'));
 
         $role->refresh();
-        $this->assertFalse((bool) $role->is_deleted);
+        $this->assertTrue((bool) $role->is_deleted, 'restore must not have run');
         $this->assertSame('tel-aviv', $role->subdomain);
+        $this->assertSame('Untouched', $role->name);
     }
 }

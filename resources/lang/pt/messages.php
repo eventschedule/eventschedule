@@ -1647,7 +1647,6 @@ return [
     'unclaimed' => 'Sem proprietário',
     'original_subdomain' => 'era :subdomain',
     'subdomain_reserved' => 'Esse subdomínio é reservado',
-    'subdomain_taken_by' => ':subdomain agora é usado por :name',
     'restore' => 'Restaurar',
     'release' => 'Liberar',
     'mark_schedule_deleted' => 'Marcar como excluída',

@@ -1702,7 +1702,6 @@ return [
     'unclaimed' => 'غير مملوك',
     'original_subdomain' => 'كان :subdomain',
     'subdomain_reserved' => 'هذا النطاق الفرعي محجوز',
-    'subdomain_taken_by' => ':subdomain يستخدمه الآن :name',
     'restore' => 'استعادة',
     'release' => 'تحرير',
     'mark_schedule_deleted' => 'تحديد كمحذوف',

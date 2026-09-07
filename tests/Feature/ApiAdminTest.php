@@ -97,6 +97,50 @@ class ApiAdminTest extends TestCase
     }
 
     /**
+     * Deleting through the API releases the subdomain, like the admin action does.
+     *
+     * It used to only set is_deleted, which left the name consumed forever - roles.subdomain is
+     * UNIQUE and nothing checking availability looks at the flag - making this endpoint the
+     * supported way to squat a good name permanently.
+     */
+    public function test_api_delete_schedule_releases_the_subdomain(): void
+    {
+        $owner = $this->createOwner();
+        $role = $this->createRole($owner);
+        $subdomain = $role->subdomain;
+        $key = $this->apiKey($owner);
+
+        $this->deleteJson('/api/schedules/'.$subdomain, [], ['X-API-Key' => $key])->assertSuccessful();
+
+        $this->assertTrue((bool) $role->fresh()->is_deleted);
+        $this->assertSame($subdomain, $role->fresh()->subdomain_before_delete);
+        $this->assertFalse(\App\Models\Role::where('subdomain', $subdomain)->exists(), 'the name is free again');
+    }
+
+    /**
+     * An owner deleting their own schedule is not an admin action.
+     *
+     * The shared ScheduleDeletionService defaults to admin.schedule_delete, which is the category
+     * /admin/audit-log filters on - so this path has to pass its own action, and must not also log
+     * the event a second time inline.
+     */
+    public function test_api_delete_schedule_is_audited_once_and_not_as_an_admin_action(): void
+    {
+        $owner = $this->createOwner();
+        $role = $this->createRole($owner);
+        $key = $this->apiKey($owner);
+
+        $this->deleteJson('/api/schedules/'.$role->subdomain, [], ['X-API-Key' => $key])->assertSuccessful();
+
+        $actions = \App\Models\AuditLog::where('model_id', $role->id)
+            ->whereIn('action', ['schedule.delete', 'admin.schedule_delete'])
+            ->pluck('action')
+            ->all();
+
+        $this->assertSame(['schedule.delete'], $actions);
+    }
+
+    /**
      * Role::boot() has no created hook, so the create-time verification email is an
      * explicit call in each store() path. The API path used to omit it, leaving the
      * schedule permanently unverified - and an unverified schedule never gets a public

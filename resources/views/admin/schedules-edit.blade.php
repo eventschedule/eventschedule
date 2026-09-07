@@ -278,7 +278,7 @@
 
             @if ($role->is_deleted)
                 <p class="text-sm text-gray-600 dark:text-gray-400">
-                    @if ($role->subdomain_before_delete && $originalHolder)
+                    @if ($role->subdomain_before_delete && $originalTaken)
                         @lang('messages.restore_keeps_subdomain', ['original' => $role->subdomain_before_delete, 'subdomain' => $role->subdomain])
                     @elseif ($role->subdomain_before_delete)
                         @lang('messages.restore_reclaims_subdomain', ['subdomain' => $role->subdomain_before_delete])

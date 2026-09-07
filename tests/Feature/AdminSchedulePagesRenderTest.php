@@ -57,6 +57,21 @@ class AdminSchedulePagesRenderTest extends TestCase
         }
     }
 
+    /**
+     * Query params arrive with whatever type the client sent. The controller's match() falls
+     * through to the default for a non-string owner, but the view interpolated the same value
+     * into the picker's data attribute - and urlencode(array) is a TypeError, so ?owner[]=any
+     * 500'd from inside the template.
+     */
+    public function test_an_array_filter_param_does_not_break_the_page(): void
+    {
+        $this->createRole($this->createOwner(), 'venue', ['name' => 'Live']);
+
+        $this->actingAsAdmin()
+            ->get(route('admin.schedules').'?owner[]=any&status[]=deleted')
+            ->assertOk();
+    }
+
     /** Each branch of the deletion card, plus the ownerless copy. */
     public function test_the_edit_page_renders_every_deletion_card_branch(): void
     {

@@ -203,7 +203,7 @@ class AdminSchedulesFilterPickerTest extends TestCase
     }
 
     /**
-     * include_deleted is opt-in. The owner-facing pickers that share this endpoint - the approve
+     * deleted_only is opt-in. The owner-facing pickers that share this endpoint - the approve
      * list, curator sources, the merge targets - must never be offered a deleted schedule.
      */
     public function test_the_picker_offers_deleted_schedules_only_when_asked(): void
@@ -221,9 +221,48 @@ class AdminSchedulesFilterPickerTest extends TestCase
         $offered = $admin->getJson(route('role.search-subdomains', [
             'q' => $role->subdomain,
             'admin_listable' => 1,
-            'include_deleted' => 1,
+            'deleted_only' => 1,
         ]))->assertOk()->json();
 
         $this->assertSame([$role->subdomain], array_column($offered, 'subdomain'));
+    }
+
+    /**
+     * Under Status = Deleted the table shows deleted rows ONLY, so the picker has to as well.
+     *
+     * A flag that merely ADDED deleted rows would make the dropdown a superset of the table there,
+     * offering a live schedule that then filters to nothing - the same failure the test above
+     * exists to prevent, mirrored.
+     */
+    public function test_the_deleted_picker_does_not_offer_live_schedules(): void
+    {
+        $owner = $this->createOwner();
+        $live = $this->createRole($owner, 'venue', ['name' => 'Shared Name Venue']);
+        $deleted = $this->createRole($owner, 'venue', ['name' => 'Shared Name Hall', 'is_deleted' => true]);
+
+        $offered = $this->actingAsAdmin()->getJson(route('role.search-subdomains', [
+            'q' => 'Shared Name',
+            'admin_listable' => 1,
+            'deleted_only' => 1,
+        ]))->assertOk()->json();
+
+        $subdomains = array_column($offered, 'subdomain');
+        $this->assertContains($deleted->subdomain, $subdomains);
+        $this->assertNotContains($live->subdomain, $subdomains, 'the Deleted view returns deleted rows only');
+    }
+
+    /**
+     * The flag changes which rows exist at all, and this endpoint is reachable by any signed-in
+     * user with no throttle - so unlike admin_listable, which only ever narrows, it needs a gate.
+     */
+    public function test_a_non_admin_cannot_ask_for_deleted_schedules(): void
+    {
+        $owner = $this->createOwner();
+        $role = $this->createRole($owner, 'venue', ['name' => 'Closed Venue', 'is_deleted' => true]);
+
+        $this->assertSame([], $this->actingAs($owner)->getJson(route('role.search-subdomains', [
+            'q' => $role->subdomain,
+            'deleted_only' => 1,
+        ]))->assertOk()->json());
     }
 }

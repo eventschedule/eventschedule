@@ -70,6 +70,29 @@ class AdminSchedulesUnverifiedCountTest extends TestCase
     }
 
     /**
+     * A deleted schedule is in neither, or the card promises a row the list will not show.
+     *
+     * The list excludes deleted rows from every state but status=deleted, so the counts above it
+     * have to track that - this is the same "count and list must never disagree" property as the
+     * test above, for the axis the release feature introduced.
+     */
+    public function test_a_deleted_schedule_is_counted_in_neither(): void
+    {
+        $owner = $this->createOwner();
+        $this->createRole($owner, 'venue', ['email_verified_at' => null]);
+        $this->createRole($owner, 'venue', ['email_verified_at' => null, 'is_deleted' => true]);
+
+        $admin = $this->actingAsAdmin();
+
+        $admin->get(route('admin.schedules'))->assertOk()->assertViewHas('unverifiedCount', 1);
+
+        $this->assertSame(
+            1,
+            $admin->get(route('admin.schedules', ['verification' => 'unverified']))->viewData('roles')->total()
+        );
+    }
+
+    /**
      * isClaimed() is email OR phone, and so is the list's unverified filter. A schedule
      * that verified by SMS is live and must not be counted.
      */

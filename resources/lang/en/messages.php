@@ -2041,7 +2041,6 @@ return [
     'unclaimed' => 'Unclaimed',
     'original_subdomain' => 'was :subdomain',
     'subdomain_reserved' => 'That subdomain is reserved',
-    'subdomain_taken_by' => ':subdomain is now used by :name',
     'restore' => 'Restore',
     'release' => 'Release',
     'mark_schedule_deleted' => 'Mark as Deleted',

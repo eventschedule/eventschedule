@@ -6811,12 +6811,20 @@ class RoleController extends Controller
             $query->where('subdomain', 'like', "{$q}%")
                 ->orWhere('name', 'like', "%{$q}%");
         })
-            // Deleted schedules are excluded unless the caller says otherwise, because most
-            // callers here are owner-facing pickers (the approve list, curator sources, the merge
-            // targets) that must never be offered one. Only /admin/schedules opts in, and only
-            // when its own list is showing them - the two have to agree, or the dropdown offers
-            // rows the table cannot return.
-            ->when(! $request->boolean('include_deleted'), fn ($query) => $query->where('is_deleted', false))
+            // Deleted schedules are excluded unless an ADMIN asks for them specifically, because
+            // most callers here are owner-facing pickers (the approve list, curator sources, the
+            // merge targets) that must never be offered one.
+            //
+            // deleted_only, not include_deleted: the table on /admin/schedules has exactly two
+            // states - everything live, or `status=deleted` showing deleted ONLY - so a flag that
+            // merely ADDED deleted rows would make the dropdown a superset of the table under the
+            // Deleted view, offering live schedules that then filter to nothing. Mirroring the two
+            // states keeps "the picker offers exactly what the table can return" true either way.
+            //
+            // The isAdmin() gate is load-bearing, unlike the ungated admin_listable below: that
+            // one only ever NARROWS the result, while this one changes which rows are visible at
+            // all, and this endpoint is reachable by any signed-in user with no throttle.
+            ->where('is_deleted', $request->boolean('deleted_only') && auth()->user()?->isAdmin())
             ->when(! empty($exclude), fn ($query) => $query->whereNotIn('subdomain', $exclude))
             ->when(! empty($types), fn ($query) => $query->whereIn('type', $types))
             ->when($request->boolean('claimed'), fn ($query) => $query->claimed())

@@ -303,8 +303,6 @@ class ApiScheduleController extends Controller
         AnalyticsReferrersDaily::where('role_id', $role->id)->delete();
         AnalyticsAppearancesDaily::where('role_id', $role->id)->delete();
 
-        AuditService::log(AuditService::SCHEDULE_DELETE, $user->id, 'Role', $role->id, null, null, $role->name);
-
         try {
             Notification::route('mail', $emails)->notify(new DeletedRoleNotification($role, $user));
         } catch (\Exception $e) {
@@ -369,7 +367,12 @@ class ApiScheduleController extends Controller
         // name consumed forever - roles.subdomain is UNIQUE and every availability check ignores
         // the flag - which made this endpoint the supported way to squat a good subdomain
         // permanently. Shared with the admin action so "deleted" means one thing.
-        app(ScheduleDeletionService::class)->markDeleted($role, $request->user()?->id);
+        //
+        // Logs SCHEDULE_DELETE, not the admin.* default: this is an owner deleting their own
+        // schedule, and /admin/audit-log filters on the admin. prefix. The service writes that
+        // entry, which is why there is no separate AuditService::log() call here.
+        app(ScheduleDeletionService::class)
+            ->markDeleted($role, $user->id, AuditService::SCHEDULE_DELETE);
 
         return response()->json([
             'data' => [

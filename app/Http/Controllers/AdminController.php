@@ -1593,6 +1593,10 @@ class AdminController extends Controller
         // Plan statistics (excluding demo roles) using actualPlanTier() for accurate counts
         $verifiedNonDemoScope = function ($query) {
             $query->whereNotNull('user_id')
+                // Deleted schedules are not customers, and the list below excludes them from
+                // every state but status=deleted - so counting them here would put these cards
+                // at odds with the page they sit on.
+                ->where('is_deleted', false)
                 ->where(function ($q) {
                     $q->whereNotNull('email_verified_at')
                         ->orWhereNotNull('phone_verified_at');
@@ -1659,10 +1663,12 @@ class AdminController extends Controller
             ->count();
 
         // The complement of the plan cards, which all use $verifiedNonDemoScope: free +
-        // pro + enterprise + unverified is every non-demo schedule with an owner, so the
+        // pro + enterprise + unverified is every live non-demo schedule with an owner, so the
         // top row adds up. Mirrors the list query below plus its verification=unverified
-        // filter exactly, so the card and the page it links to can never disagree.
+        // filter exactly, so the card and the page it links to can never disagree - which is
+        // why the is_deleted filter below has to track the list's own default.
         $unverifiedCount = Role::whereNotNull('user_id')
+            ->where('is_deleted', false)
             ->whereNull('email_verified_at')
             ->whereNull('phone_verified_at')
             ->where('subdomain', '!=', DemoService::DEMO_ROLE_SUBDOMAIN)
@@ -1791,14 +1797,13 @@ class AdminController extends Controller
         $decodedId = UrlUtils::decodeId($roleId);
         $role = Role::with('user', 'subscriptions')->findOrFail($decodedId);
 
-        // Who holds the schedule's original name now, if anyone. Restore can only reclaim it when
-        // nothing has - which is the expected outcome of a release that did its job - so the card
-        // says which of the two will happen BEFORE the admin clicks.
-        $originalHolder = $role->subdomain_before_delete
-            ? Role::where('subdomain', $role->subdomain_before_delete)->where('id', '!=', $role->id)->first()
-            : null;
+        // Whether the schedule's original name is spoken for now. Restore can only reclaim it when
+        // nothing holds it - which is the expected outcome of a release that did its job - so the
+        // card says which of the two will happen BEFORE the admin clicks.
+        $originalTaken = $role->subdomain_before_delete
+            && Role::where('subdomain', $role->subdomain_before_delete)->where('id', '!=', $role->id)->exists();
 
-        return view('admin.schedules-edit', compact('role', 'originalHolder'));
+        return view('admin.schedules-edit', compact('role', 'originalTaken'));
     }
 
     /**
@@ -1967,8 +1972,18 @@ class AdminController extends Controller
         ];
 
         $role->name = $validated['name'];
-        $role->email = $validated['email'] ?? null;
-        $role->phone = $validated['phone'] ?? null;
+
+        // array_key_exists, not ??: both fields are nullable, so a SUBMITTED but empty box arrives
+        // as null and must clear the value, while a field the request never carried must be left
+        // alone. `?? null` conflates the two and silently wipes a stored address or number - and
+        // for phone that also drops phone_verified_at through the updating hook.
+        if (array_key_exists('email', $validated)) {
+            $role->email = $validated['email'];
+        }
+
+        if (array_key_exists('phone', $validated)) {
+            $role->phone = $validated['phone'];
+        }
 
         $renamedFrom = null;
         if ($validated['new_subdomain'] !== $role->subdomain) {
@@ -1977,7 +1992,20 @@ class AdminController extends Controller
         }
 
         try {
-            $role->save();
+            // One transaction, so a rename cannot commit while the approve-list rewrite that keeps
+            // it honest fails half way - which would leave curators still auto-accepting the OLD
+            // name, ready to hand that trust to whoever claims it next. Safe to hold now that
+            // rewriteApprovedSubdomainReferences() writes through the query builder and fires no
+            // model events (and so makes no geocoding call).
+            DB::transaction(function () use ($role, $renamedFrom) {
+                $role->save();
+
+                // The schedule still exists, it just moved - so approve-list entries follow it
+                // rather than being dropped.
+                if ($renamedFrom !== null) {
+                    Role::rewriteApprovedSubdomainReferences($renamedFrom, $role->subdomain);
+                }
+            });
         } catch (\Illuminate\Database\QueryException $e) {
             // The uniqueness check in the request is a check-then-write; the index is the only
             // real authority. Surface the same message rather than a 500, and never the driver's.
@@ -1988,13 +2016,6 @@ class AdminController extends Controller
             }
 
             throw $e;
-        }
-
-        // The schedule still exists, it just moved - so approve-list entries follow it rather
-        // than being dropped. Left alone, the old name would keep auto-accepting onto curators'
-        // public pages once somebody else claimed it.
-        if ($renamedFrom !== null) {
-            Role::rewriteApprovedSubdomainReferences($renamedFrom, $role->subdomain);
         }
 
         AuditService::log(

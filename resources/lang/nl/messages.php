@@ -1646,7 +1646,6 @@ return [
     'unclaimed' => 'Niet geclaimd',
     'original_subdomain' => 'was :subdomain',
     'subdomain_reserved' => 'Dat subdomein is gereserveerd',
-    'subdomain_taken_by' => ':subdomain wordt nu gebruikt door :name',
     'restore' => 'Herstellen',
     'release' => 'Vrijgeven',
     'mark_schedule_deleted' => 'Markeren als verwijderd',

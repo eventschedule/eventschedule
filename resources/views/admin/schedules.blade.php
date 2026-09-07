@@ -135,7 +135,7 @@
                          handed this page's own owner and state filters. --}}
                     <input type="text" name="search" value="{{ request('search') }}"
                         placeholder="{{ __('messages.search_schedules') }}" autocomplete="off" data-subdomain-autocomplete
-                        data-subdomain-params="{{ 'admin_listable=1&owner='.urlencode(request('owner', '')).(request('status') === 'deleted' ? '&include_deleted=1' : '') }}"
+                        data-subdomain-params="{{ 'admin_listable=1&owner='.urlencode((string) (is_array(request('owner')) ? '' : request('owner', ''))).(request('status') === 'deleted' ? '&deleted_only=1' : '') }}"
                         class="block w-full rounded-lg border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white shadow-sm focus:border-[var(--brand-blue)] focus:ring-[var(--brand-blue)]">
                     <div data-subdomain-dropdown class="hidden absolute left-0 right-0 mt-1 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl shadow-lg max-h-60 overflow-y-auto z-50"></div>
                 </div>
@@ -272,7 +272,10 @@
                                             </div>
                                             <div class="text-sm text-gray-500 dark:text-gray-400">
                                                 {{ $role->subdomain }}
-                                                @if ($role->subdomain_before_delete)
+                                                {{-- Gated on is_deleted too: restore() keeps the column when it
+                                                     could not reclaim the original, so a live schedule would
+                                                     otherwise carry a "was ..." note forever. --}}
+                                                @if ($role->is_deleted && $role->subdomain_before_delete)
                                                     <span class="text-xs text-gray-400 dark:text-gray-500">
                                                         &middot; @lang('messages.original_subdomain', ['subdomain' => $role->subdomain_before_delete])
                                                     </span>

@@ -1704,7 +1704,6 @@ return [
     'unclaimed' => 'Nerevendicat',
     'original_subdomain' => 'a fost :subdomain',
     'subdomain_reserved' => 'Acest subdomeniu este rezervat',
-    'subdomain_taken_by' => ':subdomain este acum folosit de :name',
     'restore' => 'Restaurează',
     'release' => 'Eliberează',
     'mark_schedule_deleted' => 'Marchează ca șters',

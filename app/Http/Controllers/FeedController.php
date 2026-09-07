@@ -12,7 +12,10 @@ class FeedController extends Controller
     {
         $role = Role::subdomain($subdomain)->first();
 
-        if (! $role || ! $role->isClaimed()) {
+        // is_deleted as well as isClaimed(), matching viewGuest and the calendar feeds: these are
+        // public, unauthenticated and cached for an hour, so without it a deleted schedule keeps
+        // syndicating its events long after its page has gone.
+        if (! $role || $role->is_deleted || ! $role->isClaimed()) {
             abort(404);
         }
 
@@ -81,7 +84,7 @@ class FeedController extends Controller
     {
         $role = Role::subdomain($subdomain)->first();
 
-        if (! $role || ! $role->isClaimed()) {
+        if (! $role || $role->is_deleted || ! $role->isClaimed()) {
             abort(404);
         }
 

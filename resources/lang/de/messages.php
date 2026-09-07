@@ -1643,7 +1643,6 @@ return [
     'unclaimed' => 'Nicht beansprucht',
     'original_subdomain' => 'war :subdomain',
     'subdomain_reserved' => 'Diese Subdomain ist reserviert',
-    'subdomain_taken_by' => ':subdomain wird jetzt von :name verwendet',
     'restore' => 'Wiederherstellen',
     'release' => 'Freigeben',
     'mark_schedule_deleted' => 'Als gelöscht markieren',

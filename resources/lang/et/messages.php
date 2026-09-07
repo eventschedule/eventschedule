@@ -1688,7 +1688,6 @@ return [
     'unclaimed' => 'Omanikuta',
     'original_subdomain' => 'oli :subdomain',
     'subdomain_reserved' => 'See alamdomeen on reserveeritud',
-    'subdomain_taken_by' => ':subdomain on nüüd kasutusel: :name',
     'restore' => 'Taasta',
     'release' => 'Vabasta',
     'mark_schedule_deleted' => 'Märgi kustutatuks',

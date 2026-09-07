@@ -1751,7 +1751,6 @@ return [
     'unclaimed' => 'Без владельца',
     'original_subdomain' => 'было :subdomain',
     'subdomain_reserved' => 'Этот субдомен зарезервирован',
-    'subdomain_taken_by' => ':subdomain теперь используется: :name',
     'restore' => 'Восстановить',
     'release' => 'Освободить',
     'mark_schedule_deleted' => 'Пометить как удалённое',

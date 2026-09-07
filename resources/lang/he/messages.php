@@ -1701,7 +1701,6 @@ return [
     'unclaimed' => 'ללא בעלים',
     'original_subdomain' => 'היה :subdomain',
     'subdomain_reserved' => 'תת-הדומיין הזה שמור',
-    'subdomain_taken_by' => ':subdomain נמצא כעת בשימוש של :name',
     'restore' => 'שחזר',
     'release' => 'שחרר',
     'mark_schedule_deleted' => 'סמן כנמחק',

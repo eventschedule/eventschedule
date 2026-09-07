@@ -510,7 +510,17 @@ class Role extends Model implements MustVerifyEmail
         static::updating(function ($model) {
             if ($model->isDirty('email') && config('app.hosted')) {
                 $model->email_verified_at = null;
-                $model->sendEmailVerificationNotification();
+
+                // Only when there is somewhere to send it. VerifyEmail::toMail() returns a
+                // Mailable that does to($notifiable->getEmailForVerification()), and a Mailable
+                // bypasses MailChannel's null-route guard - so a cleared address reaches
+                // Symfony as a message with no To and throws "An email must have a To, Cc, or
+                // Bcc header" from INSIDE this hook, before the UPDATE runs. The whole save is
+                // lost, not just the mail. Reachable from /admin/schedules, where an operator may
+                // legitimately blank a junk schedule's address (the owner-facing form requires it).
+                if ($model->email) {
+                    $model->sendEmailVerificationNotification();
+                }
             }
 
             if ($model->isDirty('phone')) {
@@ -1794,9 +1804,26 @@ class Role extends Model implements MustVerifyEmail
                     }
                 }
 
-                // Null rather than [] when the list empties, matching RoleController::update().
-                $role->approved_subdomains = $updated ?: null;
-                $role->save();
+                // Query-builder update, NOT $role->save(): this runs inside
+                // ScheduleDeletionService::markDeleted()'s transaction, holding a row lock, and
+                // Role's `saving` hook geocodes through a 10-second Http::get() whenever a row's
+                // stored geo_address does not match its composed address - which is any row whose
+                // address never geocoded successfully. Network I/O under a lock is the shape that
+                // already caused a live 1213 on this table. It also avoids re-rendering
+                // description_html, sanitising custom_css and recomputing the *_normalized columns
+                // on somebody else's row to change one column. Same reasoning as the federation
+                // fan-out in boot(): a query-builder update fires no model events.
+                //
+                // The array cast does not apply to a query-builder write, so encode by hand. Null
+                // rather than [] when the list empties, matching RoleController::update().
+                //
+                // updated_at is deliberately left alone. SitemapController uses roles.updated_at
+                // as the <lastmod> for that schedule's guest page, and dropping a name from an
+                // approve list changes nothing it publishes - only whether a FUTURE submission
+                // from a name it no longer trusts would auto-accept.
+                self::whereKey($role->id)->update([
+                    'approved_subdomains' => $updated ? json_encode($updated) : null,
+                ]);
                 $changed++;
             });
 

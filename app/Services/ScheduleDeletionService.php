@@ -43,13 +43,20 @@ class ScheduleDeletionService
      * An admin takedown should not email the owner, and an ownerless auto-created row - the
      * likeliest squatter - has no members to email anyway.
      *
+     * $auditAction is the caller's to choose: an admin takedown is an admin.* event, but the API
+     * endpoint is an owner deleting their own schedule and must not land in the admin category
+     * that /admin/audit-log filters on.
+     *
      * @return string the released subdomain
      */
-    public function markDeleted(Role $role, ?int $actorUserId = null): string
-    {
+    public function markDeleted(
+        Role $role,
+        ?int $actorUserId = null,
+        string $auditAction = AuditService::ADMIN_SCHEDULE_DELETE,
+    ): string {
         $host = $role->custom_domain_host;
 
-        $released = DB::transaction(function () use ($role, $actorUserId) {
+        $released = DB::transaction(function () use ($role, $actorUserId, $auditAction) {
             // Re-read under a row lock so a double-clicked button, or a Mark deleted racing a
             // Restore on the same row, serializes instead of interleaving.
             $locked = Role::whereKey($role->id)->lockForUpdate()->firstOrFail();
@@ -64,7 +71,12 @@ class ScheduleDeletionService
             // skips them.
             $locked->subdomain = $released;
             $locked->is_deleted = true;
-            $locked->subdomain_before_delete = $original;
+            // Never overwrite a name we already recorded. releasedSubdomain() is idempotent, but
+            // this is not: on a second call against an already-released row $original is the
+            // MANGLED name, so assigning it unconditionally would lose the real original and
+            // leave restore() able to "reclaim" nothing but foo-deleted-42. Reachable by a
+            // double-submitted POST, which the row lock serialises but does not make idempotent.
+            $locked->subdomain_before_delete = $locked->subdomain_before_delete ?: $original;
 
             // Clearing the custom domain is deliberately NOT done here. Unlike this rename,
             // DigitalOceanService::removeDomain() cannot be undone by restore(), and a failed
@@ -78,7 +90,7 @@ class ScheduleDeletionService
             Role::rewriteApprovedSubdomainReferences($original, null);
 
             AuditService::log(
-                AuditService::ADMIN_SCHEDULE_DELETE,
+                $auditAction,
                 $actorUserId,
                 'App\\Models\\Role',
                 $locked->id,
@@ -132,13 +144,29 @@ class ScheduleDeletionService
             $reclaimed = $original !== null
                 && ! Role::where('subdomain', $original)->where('id', '!=', $locked->id)->exists();
 
+            $locked->is_deleted = false;
+
             if ($reclaimed) {
                 $locked->subdomain = $original;
                 $locked->subdomain_before_delete = null;
-            }
 
-            $locked->is_deleted = false;
-            $this->save($locked);
+                try {
+                    $this->save($locked);
+                } catch (SubdomainUnavailableException $e) {
+                    // Somebody claimed the original between the check above and this write. That
+                    // is the ordinary "the name went to someone else" outcome, not a reason to
+                    // refuse the restore - so fall back to keeping the released name rather than
+                    // letting the caller surface "subdomain is already taken" with the schedule
+                    // still deleted. InnoDB leaves the transaction usable after a duplicate-key
+                    // error, so re-saving here is safe.
+                    $locked->subdomain = $before;
+                    $locked->subdomain_before_delete = $original;
+                    $reclaimed = false;
+                    $this->save($locked);
+                }
+            } else {
+                $this->save($locked);
+            }
 
             if ($reclaimed) {
                 // Reversing markDeleted()'s prune would be wrong: consent to auto-accept was
