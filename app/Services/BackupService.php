@@ -670,7 +670,7 @@ class BackupService
 
     private function exportSales(Event $event): array
     {
-        return Sale::where('event_id', $event->id)->with('saleTickets')->get()->map(function ($sale) {
+        return Sale::where('event_id', $event->id)->with('saleTickets', 'refunds')->get()->map(function ($sale) {
             $saleData = [
                 '_ref_id' => $sale->id,
                 '_promo_code_ref_id' => $sale->promo_code_id,
@@ -734,6 +734,22 @@ class BackupService
                         'transaction_reference' => $i->transaction_reference,
                     ])->toArray(),
                 ];
+            }
+
+            // Refund history, as a RECORD only - no idempotency key, since that is a live claim on
+            // the exporting owner's gateway account and means nothing to an importer. Carried at
+            // all because a restored sale that had lost its refunds would read as fully refundable
+            // again, and the same money could go back a second time.
+            if ($sale->refunds->isNotEmpty()) {
+                $saleData['refunds'] = $sale->refunds->map(fn ($refund) => [
+                    'amount' => $refund->amount,
+                    'currency_code' => $refund->currency_code,
+                    'gateway' => $refund->gateway,
+                    'gateway_refund_id' => $refund->gateway_refund_id,
+                    'status' => $refund->status,
+                    'reason' => $refund->reason,
+                    'created_at' => $refund->created_at?->toDateTimeString(),
+                ])->toArray();
             }
 
             $saleData['sale_tickets'] = $sale->saleTickets->map(function ($st) {
@@ -2342,8 +2358,48 @@ class BackupService
         }
 
         $this->importInstallmentPlan($data, $sale);
+        $this->importSaleRefunds($data, $sale);
 
         return $sale;
+    }
+
+    /**
+     * Restore refund history as HISTORY, and specifically so the money cannot go back twice.
+     *
+     * A restored sale whose refunds were dropped reads as fully refundable again, and the ceiling
+     * in SaleRefundService is computed from these rows - so without them an already-refunded sale
+     * could be refunded a second time on the importing install.
+     *
+     * Every row comes back `succeeded` or `failed` and nothing else: `pending` and
+     * `awaiting_reconciliation` describe a call in flight against the EXPORTING owner's gateway
+     * account, which this install can neither finish nor check. They are folded into `succeeded`
+     * because a claim that may have moved money must keep holding its amount. The idempotency key
+     * is regenerated rather than copied for the same reason - the original belongs to someone
+     * else's account, and it is unique.
+     */
+    private function importSaleRefunds(array $data, Sale $sale): void
+    {
+        foreach (($data['refunds'] ?? []) as $refundData) {
+            if (! is_array($refundData)) {
+                continue;
+            }
+
+            $refund = new \App\Models\SaleRefund;
+            $refund->sale_id = $sale->id;
+            $refund->amount = $refundData['amount'] ?? 0;
+            $refund->currency_code = $refundData['currency_code'] ?? null;
+            $refund->gateway = $refundData['gateway'] ?? 'unknown';
+            $refund->gateway_refund_id = $refundData['gateway_refund_id'] ?? null;
+            $refund->status = ($refundData['status'] ?? null) === 'failed' ? 'failed' : 'succeeded';
+            $refund->reason = $refundData['reason'] ?? null;
+            $refund->idempotency_key = 'restored_'.$sale->id.'_'.Str::uuid();
+            $refund->saveQuietly();
+
+            if (! empty($refundData['created_at'])) {
+                \App\Models\SaleRefund::where('id', $refund->id)
+                    ->update(['created_at' => $refundData['created_at']]);
+            }
+        }
     }
 
     /**

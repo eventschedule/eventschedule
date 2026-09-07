@@ -1330,13 +1330,18 @@
                                 <tbody>
                                     <tr><td><code class="doc-inline-code">mark_paid</code></td><td>unpaid</td><td>paid</td><td><code class="doc-inline-code">sale.paid</code></td></tr>
                                     <tr><td><code class="doc-inline-code">refund</code></td><td>paid</td><td>refunded</td><td><code class="doc-inline-code">sale.refunded</code></td></tr>
+                                    <tr><td><code class="doc-inline-code">refund</code> with <code class="doc-inline-code">amount</code></td><td>paid</td><td>paid</td><td>none</td></tr>
                                     <tr><td><code class="doc-inline-code">cancel</code></td><td>unpaid, paid</td><td>cancelled</td><td><code class="doc-inline-code">sale.cancelled</code></td></tr>
                                 </tbody>
                             </table>
                         </div>
-                        <div class="doc-callout doc-callout-warning">
-                            <div class="doc-callout-title">refund does not move money</div>
-                            <p>This action records the sale as refunded and backs the amount out of your revenue figures. It does not send anything through Stripe, Invoice Ninja or Payfast. Issue the actual refund in your payment provider, then call this to keep the two in step.</p>
+                        <div class="doc-callout doc-callout-info">
+                            <div class="doc-callout-title">refund moves money on Stripe only</div>
+                            <p>For a Stripe sale, <code class="doc-inline-code">refund</code> sends the money back through Stripe and then updates the status. Send an optional <code class="doc-inline-code">amount</code> to return part of it; omit it and the whole remaining balance goes back. A partial refund leaves the sale <code class="doc-inline-code">paid</code>, fires no webhook, and returns <code class="doc-inline-code">200</code> with the message <code class="doc-inline-code">Partial refund sent</code>.</p>
+                            <p>Every other method - Invoice Ninja, Payfast, a payment link, cash, or a sale marked paid by hand - only records the refund and backs the amount out of your revenue figures. Issue the money in your payment provider, then call this to keep the two in step.</p>
+                            <p>A refund the gateway refuses returns <code class="doc-inline-code">422</code> and leaves the sale <code class="doc-inline-code">paid</code>. A refund whose outcome could not be confirmed returns <code class="doc-inline-code">409</code>: nothing is retried automatically, because retrying a refund that may already have gone through is how one refund becomes two. Check it against your provider before acting.</p>
+                            <p>Send an <code class="doc-inline-code">idempotency_key</code> of your own to make retrying safe. A repeat carrying the same key returns the first attempt's outcome instead of issuing a second refund, and a repeat sent while the first is still running returns <code class="doc-inline-code">409</code>. Without a key, a retried request is a second refund.</p>
+                            <p>A payment plan is refunded in full only: sending <code class="doc-inline-code">amount</code> for one returns <code class="doc-inline-code">422</code>. Each collected payment goes back separately, and an attempt that stops partway can be repeated to return the rest.</p>
                         </div>
                         <p class="text-gray-600 dark:text-gray-300 mb-6">Cancelling or refunding releases the seats back into stock and notifies anyone on the waitlist for that date. For a multi-event order, act on the primary sale: a non-primary row returns <code class="doc-inline-code">403</code>, and the change cascades to the rest of the order for you.</p>
                     </div>

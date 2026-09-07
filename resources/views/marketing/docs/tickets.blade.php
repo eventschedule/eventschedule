@@ -546,7 +546,7 @@
 
         <div class="doc-callout doc-callout-info mb-6">
             <div class="doc-callout-title">Refunds</div>
-            <p>Refunds are issued from your own Payfast dashboard. Marking a sale refunded here records it without moving money, which is the same as every other payment method.</p>
+            <p>Refunds are issued from your own Payfast dashboard. Marking a sale refunded here records it without moving money. Stripe is the exception: a Stripe sale is refunded from this page and the money goes back automatically.</p>
         </div>
 
         <div class="doc-callout doc-callout-tip">
@@ -769,7 +769,7 @@
         <p class="text-gray-600 dark:text-gray-300 mb-4">Running out of retries is the common route to a hold, but not the only one. A plan also goes on hold if a bank authentication request goes unanswered for a week, or if your own Stripe connection is disconnected so nothing can be collected at all. That second one is worth knowing: the buyer has done nothing wrong and cannot fix it, so you are the one we email, and reconnecting Stripe is what restarts collection. For the ordinary routes, the buyer replacing or re-confirming their card lifts the hold and puts the remaining payments back on schedule.</p>
         <p class="text-gray-600 dark:text-gray-300 mb-4">One state deliberately waits for a person: if a charge is interrupted and we cannot tell whether the money moved, we stop rather than retry, because retrying a payment that may already have succeeded is how a buyer gets charged twice. The same applies to a payment that arrives but does not match anything we can apply it to. Both show on the Installments tab as needing your attention, with the Stripe reference to check against your dashboard, and neither is resolved by the buyer changing their card.</p>
         <p class="text-gray-600 dark:text-gray-300 mb-4">Scanning a ticket that is on hold shows your door staff the attendee's name and the amount outstanding rather than a flat rejection, so they can take payment or let the guest in at your discretion.</p>
-        <p class="text-gray-600 dark:text-gray-300 mb-6">Cancelling or refunding an order, cancelling the event, or deleting the schedule all stop the remaining payments immediately. Refunding the money already collected is done from your own Stripe dashboard; the Installments tab lists every payment reference so you can find them.</p>
+        <p class="text-gray-600 dark:text-gray-300 mb-6">Cancelling or refunding an order, cancelling the event, or deleting the schedule all stop the remaining payments immediately. Refunding an installment plan returns each payment that was already collected, one at a time, and the Installments tab still lists every payment reference so you can check them against your own Stripe dashboard.</p>
 
         <div class="doc-callout doc-callout-info">
             <div class="doc-callout-title">Selfhosted installs</div>
@@ -914,8 +914,10 @@
         <p class="text-gray-600 dark:text-gray-300 mb-6">Refunding, cancelling or deleting a sale returns its tickets to stock, gives back any promo code use, credits any gift card balance the buyer spent, and notifies the next person on the <a href="#waitlist" class="doc-link">waitlist</a>.</p>
 
         <div class="doc-callout doc-callout-info">
-            <div class="doc-callout-title">Refunds move no money</div>
-            <p>Refund Ticket changes the status in Event Schedule and adjusts your revenue figures. The actual money is returned in your payment provider's own dashboard - Stripe, Invoice Ninja or Payfast. Cancelling or deleting a sale that was paid for shows you a reminder to handle the refund yourself. These actions fire the matching <x-link href="{{ route('marketing.docs.developer.webhooks') }}">webhook</x-link>: <code class="doc-inline-code">sale.paid</code>, <code class="doc-inline-code">sale.refunded</code> or <code class="doc-inline-code">sale.cancelled</code>.</p>
+            <div class="doc-callout-title">How refunds work</div>
+            <p>For a Stripe sale, Refund Ticket sends the money back through Stripe and then updates the status here. You can return the whole amount or part of it - a partial refund leaves the sale paid, keeps the tickets valid and shows how much has gone back so far. If the refund cannot be confirmed, nothing is retried automatically and the sale is left for you to check against your Stripe dashboard, because retrying a refund that may already have gone through is how one refund becomes two.</p>
+            <p>Every other method - Invoice Ninja, Payfast, a payment link, cash, or any sale you marked paid by hand - shows Mark as Refunded instead. That records the refund and adjusts your revenue figures, and you return the money in your provider's own dashboard. Cancelling or deleting a paid sale also shows you a reminder to handle the money yourself.</p>
+            <p>These actions fire the matching <x-link href="{{ route('marketing.docs.developer.webhooks') }}">webhook</x-link>: <code class="doc-inline-code">sale.paid</code>, <code class="doc-inline-code">sale.refunded</code> or <code class="doc-inline-code">sale.cancelled</code>. A partial refund does not fire one, because the sale is still paid.</p>
         </div>
     </section>
 

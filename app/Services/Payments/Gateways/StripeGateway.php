@@ -3,6 +3,7 @@
 namespace App\Services\Payments\Gateways;
 
 use App\Models\Sale;
+use App\Models\SaleInstallment;
 use App\Models\User;
 use App\Services\Payments\CheckoutContext;
 use App\Services\Payments\PaymentGatewayDriver;
@@ -56,6 +57,99 @@ class StripeGateway extends PaymentGatewayDriver
     public function supportsInstallments(): bool
     {
         return true;
+    }
+
+    public function supportsRefunds(): bool
+    {
+        return true;
+    }
+
+    public function supportsPartialRefunds(): bool
+    {
+        return true;
+    }
+
+    /**
+     * The PaymentIntent a refund would be issued against, or null if this sale has no usable one.
+     *
+     * The prefix test is the whole point of this method existing. sales.payment_method = 'stripe'
+     * does NOT mean Stripe holds any money: marking a sale paid by hand writes the translated
+     * string __('messages.manual_payment') into transaction_reference (DemoService writes it too),
+     * and the selfhost checkout.session.completed branch passes `$session->payment_intent ?: null`,
+     * so the column can be a localised phrase or empty. Both would reach the API as a bogus id.
+     */
+    public function refundReferenceFor(Sale $sale, ?SaleInstallment $leg = null): ?string
+    {
+        $reference = trim((string) ($leg ? $leg->transaction_reference : $sale->transaction_reference));
+
+        return str_starts_with($reference, 'pi_') ? $reference : null;
+    }
+
+    /**
+     * Issue the refund and return Stripe's own refund id.
+     *
+     * Deliberately mirrors createStripeSession()'s rail choice rather than trying one key and then
+     * the other. AdminController::refundSale() does try both, and it is wrong twice over: it never
+     * passes `stripe_account`, so on a hosted Connect charge the first call fails resource_missing,
+     * and the fallback then reaches for a different account's credentials entirely. Refunding from
+     * the wrong account is worse than failing to refund.
+     */
+    public function refund(Sale $sale, ?float $amount, string $idempotencyKey, ?SaleInstallment $leg = null): string
+    {
+        $reference = $this->refundReferenceFor($sale, $leg);
+
+        if ($reference === null) {
+            throw new \LogicException('Sale '.$sale->id.' has no Stripe payment reference to refund.');
+        }
+
+        [$stripe, $options] = $this->stripeContextFor($sale, $leg);
+
+        $currency = $sale->event?->ticket_currency_code ?: 'USD';
+
+        $params = [
+            'payment_intent' => $reference,
+            'metadata' => array_filter([
+                'sale_id' => UrlUtils::encodeId($sale->id),
+                'installment_id' => $leg ? UrlUtils::encodeId($leg->id) : null,
+            ], fn ($v) => $v !== null),
+        ];
+
+        // Omitted entirely for a full refund, so Stripe gives back whatever it actually holds.
+        // Rounded, not cast: (int) (0.29 * 100) is 28. The multiplier comes from MoneyUtils rather
+        // than a literal 100, or every zero-decimal currency (JPY, KRW) would be refunded a
+        // hundred times over.
+        if ($amount !== null) {
+            $params['amount'] = (int) round($amount * MoneyUtils::getSmallestUnitMultiplier($currency));
+        }
+
+        $refund = $stripe->refunds->create($params, $options + ['idempotency_key' => $idempotencyKey]);
+
+        return (string) $refund->id;
+    }
+
+    /**
+     * Which Stripe rail this sale settled on, as [client, requestOptions].
+     *
+     * An installment leg answers with its PLAN's snapshotted account: a plan records the account
+     * at creation precisely because an owner can reconnect a different one mid-plan, and the
+     * charge being refunded lives on whichever account took it.
+     *
+     * A plain sale has no such snapshot, so it resolves the owner's CURRENT account. If the owner
+     * has reconnected since, Stripe answers resource_missing and SaleRefundService reports that
+     * rather than reaching for another credential set.
+     */
+    private function stripeContextFor(Sale $sale, ?SaleInstallment $leg = null): array
+    {
+        $account = $leg?->plan?->stripe_account_id ?: $sale->event?->user?->stripe_account_id;
+
+        $useConnect = config('app.hosted') && $account;
+
+        return [
+            new StripeClient($useConnect
+                ? config('services.stripe.key')
+                : config('services.stripe_platform.secret')),
+            $useConnect ? ['stripe_account' => $account] : [],
+        ];
     }
 
     /**

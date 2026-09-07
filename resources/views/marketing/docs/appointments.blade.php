@@ -309,7 +309,7 @@
         </div>
         <div class="doc-callout doc-callout-warning mb-2">
             <div class="doc-callout-title">Refunds are manual</div>
-            <p>Cancelling a paid booking does not move any money. Refund it in Stripe or your payment provider, then mark the sale refunded on the Sales page. The cancellation email to you shows the amount and reference so you have both to hand.</p>
+            <p>Cancelling a paid booking does not move any money on its own. To return it, refund the sale on the Sales page: a Stripe booking is refunded through Stripe from there, and every other payment method is marked refunded here and returned in your provider's own dashboard. The cancellation email to you shows the amount and reference so you have both to hand.</p>
         </div>
     </section>
 

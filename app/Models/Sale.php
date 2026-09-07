@@ -133,10 +133,11 @@ class Sale extends Model
                 // that fires no model events, so the cascade re-saves each sibling individually
                 // to land back in this branch.
                 //
-                // Refunding does NOT move money in this app (refundSale() only flips status; the
-                // organizer refunds by hand on their own Stripe dashboard), so cancelling the
-                // remaining installments is the entire job. Miss it and a refunded four-part plan
-                // keeps debiting the card monthly for seats that are already back in inventory.
+                // Refunding the money already collected is SaleRefundService's job, and it has
+                // already run by the time the status reaches this branch. Stopping the FUTURE
+                // charges is this hook's, and it is not optional: miss it and a refunded four-part
+                // plan keeps debiting the card monthly for seats that are already back in
+                // inventory.
                 // One query, not two: cancelPlan() is nullable-typed and no-ops on null, so the
                 // exists() guard only cost an extra round trip per row - and the group/order
                 // cascade re-saves every sibling individually.
@@ -242,6 +243,11 @@ class Sale extends Model
     public function event()
     {
         return $this->belongsTo(Event::class);
+    }
+
+    public function refunds()
+    {
+        return $this->hasMany(SaleRefund::class);
     }
 
     public function saleTickets()
@@ -482,6 +488,93 @@ class Sale extends Model
         return $this->isPrimarySale()
             ? $this->groupTotalPayment()
             : (float) $this->payment_amount;
+    }
+
+    /**
+     * What the gateway actually took for this sale, and therefore the most that can be refunded.
+     *
+     * NOT payment_amount. On a group or order primary that column is deliberately left as the
+     * PER-SEAT figure so orderTotalPayment(), the sales table and revenue do not count every other
+     * leg twice - see SaleSettlementService's comment where it declines to overwrite it. Capping a
+     * refund on it would limit a six-seat order to one seat's price.
+     *
+     * This is the same expression settlement reconciles the incoming payment against, which is
+     * what makes it the charged amount by construction. It is net of any gift card and discount,
+     * and that is load-bearing: a $100 sale paid with a $30 gift card only put $70 through the
+     * gateway, and Sale::booted credits the $30 back to the card separately on a full refund.
+     * Refunding the gross would hand the buyer $130.
+     */
+    public function chargedTotal(): float
+    {
+        return $this->isOrderPrimary()
+            ? $this->orderTotalPayment()
+            : $this->legTotalPayment();
+    }
+
+    /**
+     * Sum of every refund row that still holds its claim - everything except `failed`.
+     *
+     * Uses the eager-loaded relation when the caller has one, so the sales table does not fire a
+     * query per row; falls back to SQL otherwise. SaleRefundService always lands on the SQL path
+     * because it re-reads the sale under lockForUpdate, which is what makes the ceiling check
+     * inside the claim transaction see other claims rather than a collection loaded before them.
+     */
+    public function refundedTotal(): float
+    {
+        if ($this->relationLoaded('refunds')) {
+            return (float) $this->refunds
+                ->whereIn('status', SaleRefund::CLAIMING_STATUSES)
+                ->sum('amount');
+        }
+
+        return (float) $this->refunds()
+            ->whereIn('status', SaleRefund::CLAIMING_STATUSES)
+            ->sum('amount');
+    }
+
+    /**
+     * Money we have actually seen leave, for DISPLAY.
+     *
+     * Deliberately narrower than refundedTotal(). The ceiling has to count `pending` and
+     * `awaiting_reconciliation` rows so the same money cannot be claimed twice, but showing those
+     * to an owner as "refunded" would tell them a customer has been paid when the gateway never
+     * confirmed it - and an `awaiting_reconciliation` row exists precisely because we do not know.
+     */
+    public function refundedConfirmedTotal(): float
+    {
+        if ($this->relationLoaded('refunds')) {
+            return (float) $this->refunds->where('status', 'succeeded')->sum('amount');
+        }
+
+        return (float) $this->refunds()->where('status', 'succeeded')->sum('amount');
+    }
+
+    /**
+     * Is there a claim whose outcome we have not confirmed?
+     *
+     * Such a row holds its amount against the ceiling, so it also removes the Refund control. The
+     * owner needs to be told that rather than watching the button vanish.
+     */
+    public function hasUnconfirmedRefund(): bool
+    {
+        $unconfirmed = ['pending', 'awaiting_reconciliation'];
+
+        if ($this->relationLoaded('refunds')) {
+            return $this->refunds->whereIn('status', $unconfirmed)->isNotEmpty();
+        }
+
+        return $this->refunds()->whereIn('status', $unconfirmed)->exists();
+    }
+
+    /**
+     * How much of this sale may still be sent back.
+     *
+     * Floored at zero rather than allowed to go negative: an over-refund recorded by hand at the
+     * gateway would otherwise read as headroom here.
+     */
+    public function refundableRemaining(): float
+    {
+        return max(0.0, round($this->chargedTotal() - $this->refundedTotal(), 3));
     }
 
     public function legTotalDiscount(): float

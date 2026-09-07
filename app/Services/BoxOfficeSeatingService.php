@@ -113,7 +113,9 @@ class BoxOfficeSeatingService
      * map, the line's quantity drops by one, and the ticket's sold counter is decremented directly
      * - SaleTicket only takes stock on CREATE, so an update would otherwise leave the counter high.
      *
-     * The money is the organizer's to refund, exactly as `refundSale()` works today.
+     * The money is handled separately, and on purpose: releasing a seat from a four-seat order
+     * leaves it a paid order, so there is no status change to hang a refund on. SaleRefundService
+     * takes a partial amount for exactly this case.
      */
     /**
      * Release several sold seats at once - a party refunding together.

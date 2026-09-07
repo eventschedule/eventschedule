@@ -148,10 +148,10 @@
                             </tr>
                         @endif
 
-                        {{-- Every payment reference, so the organizer can find the charges to
-                             refund on their own Stripe dashboard. Nothing in this app refunds a
-                             Connect ticket sale, and the sale's single transaction_reference
-                             cannot identify N charges. --}}
+                        {{-- Every payment reference, one per charge. Refunding the sale walks
+                             these, because the sale's single transaction_reference cannot identify
+                             N charges; they stay listed so an organizer can reconcile a leg by
+                             hand against their own dashboard. --}}
                         @if ($row['payments']->where('reference', '!=', null)->isNotEmpty())
                             <tr class="bg-gray-50 dark:bg-[#252526]">
                                 <td colspan="7" class="px-4 py-2">

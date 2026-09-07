@@ -762,7 +762,7 @@
             ],
             [
                 'q' => 'How do refunds work?',
-                'a' => 'You refund in your Stripe Dashboard, because that is where the money is. Marking the sale refunded in Event Schedule updates the record, invalidates the ticket and takes the amount back out of your revenue figures, but it does not move money on its own.',
+                'a' => 'From the Sales page. Refunding a Stripe sale sends the money back through Stripe, invalidates the ticket and takes the amount back out of your revenue figures. You can return the whole amount or part of it, and a partial refund leaves the sale paid with the tickets still valid. Refunds still show in your Stripe Dashboard, and you can issue one there instead if you prefer.',
             ],
             [
                 'q' => 'Can a selfhosted install take Stripe payments?',

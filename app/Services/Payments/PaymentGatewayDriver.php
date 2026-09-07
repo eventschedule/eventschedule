@@ -4,6 +4,7 @@ namespace App\Services\Payments;
 
 use App\Models\Event;
 use App\Models\Sale;
+use App\Models\SaleInstallment;
 use App\Models\User;
 use App\Services\AuditService;
 use App\Utils\UrlUtils;
@@ -135,6 +136,67 @@ abstract class PaymentGatewayDriver
     public function supportsInstallments(): bool
     {
         return false;
+    }
+
+    /**
+     * Can this gateway send money back programmatically?
+     *
+     * False by default, and the default is the honest answer for most rails here: cash never took
+     * money through us, a payment link is a redirect we hear nothing back from, and Payfast and
+     * Invoice Ninja could refund in principle but neither client implements it. A gateway that
+     * says false gets "Mark as refunded" in the UI instead of "Refund", so an owner is never told
+     * money moved when it did not.
+     */
+    public function supportsRefunds(): bool
+    {
+        return false;
+    }
+
+    /**
+     * Can it refund PART of a charge? Separate from supportsRefunds() because the UI has to decide
+     * whether to offer an amount field at all, and a gateway can perfectly well do one and not the
+     * other.
+     */
+    public function supportsPartialRefunds(): bool
+    {
+        return false;
+    }
+
+    /**
+     * The gateway-side identifier a refund for this sale would be issued against, or null if there
+     * is not a usable one.
+     *
+     * Asked of the driver rather than derived from sales.payment_method at the call site, because
+     * the payment method is NOT sufficient to decide refundability. Marking a sale paid by hand
+     * writes the translated string __('messages.manual_payment') into transaction_reference, and
+     * the selfhost checkout.session.completed path can leave it null - so a row can read
+     * payment_method = 'stripe' and carry nothing a gateway could act on. Only the driver knows
+     * what its own references look like.
+     *
+     * $leg is set when refunding one installment: a plan is N charges with their own references,
+     * and the sale's single transaction_reference cannot identify them.
+     */
+    public function refundReferenceFor(Sale $sale, ?SaleInstallment $leg = null): ?string
+    {
+        return null;
+    }
+
+    /**
+     * Send $amount back, returning the gateway's own refund id.
+     *
+     * A null $amount means the WHOLE charge, which is not the same as passing the sale's expected
+     * total: an `amount_mismatch` sale is parked precisely because what arrived was not what we
+     * asked for, so only the gateway knows what there is to give back.
+     *
+     * Called AFTER the claiming transaction has committed and with no row lock held - holding one
+     * across a gateway round trip is what SaleSettlementService's comment forbids. $idempotencyKey
+     * is the claim row's key, so a retried HTTP request settles once.
+     *
+     * Throws on failure; SaleRefundService decides whether the failure was definite or unknown.
+     */
+    public function refund(Sale $sale, ?float $amount, string $idempotencyKey, ?SaleInstallment $leg = null): string
+    {
+        throw new \LogicException(static::class.' does not support refunds.');
     }
 
     /**

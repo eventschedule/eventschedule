@@ -141,6 +141,13 @@ class ApiSaleController extends Controller
         try {
             $request->validate([
                 'action' => 'required|string|in:mark_paid,refund,cancel',
+                // Optional, and only meaningful with action=refund. Omitted means the whole
+                // remaining balance, which is what this endpoint has always implied.
+                'amount' => 'sometimes|numeric|min:0.01',
+                // Send one to make a retry safe: a repeat carrying the same key returns the first
+                // attempt's outcome instead of issuing a second refund. Without it a retried
+                // request is a second refund, because the fallback key is generated per attempt.
+                'idempotency_key' => 'sometimes|string|max:64',
             ]);
         } catch (ValidationException $e) {
             return response()->json([
@@ -155,6 +162,7 @@ class ApiSaleController extends Controller
 
         $previousStatus = $sale->status;
         $actionPerformed = false;
+        $refundResult = null;
 
         switch ($request->action) {
             case 'mark_paid':
@@ -162,7 +170,54 @@ class ApiSaleController extends Controller
                 break;
 
             case 'refund':
-                $prev = $this->refundSale($sale);
+                $refundResult = app(\App\Services\SaleRefundService::class)->refund(
+                    $sale,
+                    $request->filled('amount') ? (float) $request->input('amount') : null,
+                    auth()->id(),
+                    null,
+                    null,
+                    $request->input('idempotency_key'),
+                );
+
+                // The second clause guards the installment walk raising UNSUPPORTED after some
+                // legs have already been refunded; flipping the status there would release the
+                // seats and the gift card on a sale we had just paid out on.
+                if ($refundResult->shouldFallBackToStatusOnly() && ! $sale->refunds()->exists()) {
+                    // Nothing is held at a gateway for this rail, so the status flip is the whole
+                    // job - the behaviour this endpoint had before refunds moved money.
+                    $prev = $this->refundSale($sale);
+                    break;
+                }
+
+                if (! $refundResult->moved()) {
+                    return response()->json(
+                        ['error' => $refundResult->message ?? 'Refund failed'],
+                        in_array($refundResult->status, [
+                            \App\Services\SaleRefundResult::NEEDS_RECONCILIATION,
+                            \App\Services\SaleRefundResult::IN_PROGRESS,
+                        ], true) ? 409 : 422,
+                    );
+                }
+
+                if ($refundResult->status === \App\Services\SaleRefundResult::PARTIALLY_REFUNDED) {
+                    // Returns early rather than falling through to $prev. A partial refund leaves
+                    // the sale `paid` on purpose, and the code below reads a null $prev as "the
+                    // action could not be performed" and would 422 a refund that just succeeded.
+                    AuditService::log(AuditService::SALE_REFUND, auth()->id(), 'Sale', $sale->id,
+                        null,
+                        ['refunded' => $refundResult->refund?->amount],
+                        'partial_refund:event_id:'.$sale->event_id
+                    );
+
+                    $sale->refresh()->load(['saleTickets.ticket', 'event']);
+
+                    return response()->json([
+                        'data' => $sale->toApiData(),
+                        'meta' => ['message' => 'Partial refund sent'],
+                    ], 200, [], JSON_PRETTY_PRINT);
+                }
+
+                $prev = 'paid';
                 break;
 
             case 'cancel':

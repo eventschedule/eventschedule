@@ -1386,9 +1386,9 @@
                     <h3 class="es-book-ink mb-2 text-base font-bold">Cancel releases the line</h3>
                     <p class="es-book-muted text-sm">
                         Cancel a booking and the guest is emailed and the time goes back on offer.
-                        Money does not move on its own: refund it with your payment provider, then mark
-                        the sale refunded. The cancellation email to you carries the amount and the
-                        reference so you have both to hand.
+                        Money does not move on its own: refunding is its own action on the Sales page,
+                        where a Stripe booking goes back through Stripe. The cancellation email to you
+                        carries the amount and the reference so you have both to hand.
                     </p>
                 </div>
             </div>
@@ -1537,8 +1537,8 @@
                     <div>
                         <h3 class="es-book-ink mb-2 text-base font-bold">Refunds are a decision, not a side effect</h3>
                         <p class="es-book-muted text-sm">
-                            Cancelling a paid booking never moves money. Refund it in Stripe or your
-                            provider, then mark the sale refunded, so the money and the record only ever
+                            Cancelling a paid booking never moves money. Refunding is a separate,
+                            deliberate action on the Sales page, so the money and the record only ever
                             change because you said so.
                         </p>
                     </div>

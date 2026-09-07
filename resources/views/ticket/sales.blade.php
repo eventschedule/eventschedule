@@ -176,6 +176,36 @@
     </div>
     @endif
 
+    {{-- Refund dialog. Plain markup driven by the vanilla helpers below rather than a Vue mount:
+         this page's popups are still jQuery-delegated, and dropping a second reactivity system
+         beside them to ask for one number is not a trade worth making. --}}
+    <div id="refund-dialog" class="fixed inset-0 z-50 items-center justify-center p-4" style="display: none;" role="dialog" aria-modal="true" aria-labelledby="refund-dialog-title">
+        <div class="absolute inset-0 bg-black/50" data-refund-dismiss></div>
+        <div class="ap-card relative w-full max-w-md rounded-xl p-6">
+            <h2 id="refund-dialog-title" class="text-lg font-semibold text-gray-900 dark:text-white">{{ __('messages.refund_ticket') }}</h2>
+
+            <p class="mt-2 text-sm text-gray-600 dark:text-gray-400">
+                {{ __('messages.refund_remaining') }}: <span id="refund-dialog-remaining" class="font-semibold text-gray-900 dark:text-white"></span>
+            </p>
+
+            <div class="mt-4">
+                <label for="refund-dialog-amount" class="block text-sm font-medium text-gray-700 dark:text-gray-300">{{ __('messages.refund_amount') }}</label>
+                <input type="number" step="0.01" min="0.01" id="refund-dialog-amount"
+                    class="mt-1 block w-full rounded-lg border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-300 focus:ring-[var(--brand-blue)] focus:border-[var(--brand-blue)]">
+                <p id="refund-dialog-error" class="mt-2 text-sm text-red-600 dark:text-red-400" style="display: none;"></p>
+            </div>
+
+            <div class="mt-6 flex justify-end gap-3">
+                <button type="button" data-refund-dismiss class="px-4 py-3 text-base rounded-lg border border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700 transition-all duration-200">
+                    {{ __('messages.cancel') }}
+                </button>
+                <x-danger-button type="button" id="refund-dialog-confirm">
+                    {{ __('messages.refund') }}
+                </x-danger-button>
+            </div>
+        </div>
+    </div>
+
 </x-app-admin-layout>
 
 <script {!! nonce_attr() !!}>
@@ -581,9 +611,20 @@ function updateResults(value) {
     });
 }
 
-function handleAction(saleId, action) {
-    if (!confirm(@json(__("messages.are_you_sure")))) {
+function handleAction(saleId, action, refundAmount, idempotencyKey) {
+    // The refund dialog has already confirmed, and asked for more than a yes/no.
+    if (idempotencyKey === undefined && !confirm(@json(__("messages.are_you_sure")))) {
         return;
+    }
+
+    const payload = { action: action };
+    if (refundAmount !== undefined && refundAmount !== null && refundAmount !== '') {
+        payload.refund_amount = refundAmount;
+    }
+    // Sent so a resubmission of THIS request settles once. Without it the server mints a fresh key
+    // per attempt, which cannot deduplicate anything and lets a double-click refund twice.
+    if (idempotencyKey) {
+        payload.idempotency_key = idempotencyKey;
     }
 
     fetch(`{{ url('/sales/action') }}/${saleId}`, {
@@ -593,7 +634,7 @@ function handleAction(saleId, action) {
             'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content,
             'X-Requested-With': 'XMLHttpRequest'
         },
-        body: JSON.stringify({ action: action })
+        body: JSON.stringify(payload)
     })
     .then(async response => {
         const data = await response.json().catch(() => ({}));
@@ -609,8 +650,14 @@ function handleAction(saleId, action) {
             // Refresh the table
             updateResults(document.getElementById('filter').value);
 
-            var message = '';
-            if (action === 'mark_paid') {
+            // The server's own message wins where it sends one: only it knows whether a refund
+            // moved money in full, in part, or merely changed a status on a rail that never held
+            // any. Guessing from the action alone is what made "Successfully refunded ticket"
+            // appear for years while nothing was refunded.
+            var message = data.message || '';
+            if (message) {
+                // already decided
+            } else if (action === 'mark_paid') {
                 message = @json(__("messages.mark_paid_success"));
             } else if (action === 'refund') {
                 message = @json(__("messages.refund_success"));
@@ -678,8 +725,111 @@ $(document).on('click', '[data-popup-toggle]', function(e) {
 
     var saleAction = $(this).attr('data-sale-action');
     if (saleAction) {
-        handleAction($(this).attr('data-sale-id'), saleAction);
+        var saleId = $(this).attr('data-sale-id');
+
+        // Only a gateway-backed refund asks for an amount. A status-only "mark as refunded" and
+        // every other action keep the plain confirm they have always had.
+        if (saleAction === 'refund' && $(this).attr('data-refund-remaining')) {
+            openRefundDialog(
+                saleId,
+                $(this).attr('data-refund-remaining'),
+                $(this).attr('data-refund-remaining-formatted'),
+                $(this).attr('data-refund-decimals')
+            );
+        } else {
+            handleAction(saleId, saleAction);
+        }
     }
+});
+
+var refundDialogSaleId = null;
+var refundDialogMax = 0;
+var refundDialogDecimals = 2;
+var refundDialogKey = null;
+
+function newIdempotencyKey() {
+    if (window.crypto && typeof window.crypto.randomUUID === 'function') {
+        return window.crypto.randomUUID();
+    }
+
+    return 'k' + Date.now() + Math.random().toString(36).slice(2);
+}
+
+// Half a minor unit of this sale's currency: 0.005 where cents exist, 0.5 for JPY. The server
+// measures with the same figure, so "everything" means the same thing on both sides.
+function refundDialogTolerance() {
+    return 0.5 / Math.pow(10, refundDialogDecimals);
+}
+
+function openRefundDialog(saleId, remaining, remainingFormatted, decimals) {
+    refundDialogSaleId = saleId;
+    refundDialogMax = parseFloat(remaining);
+    refundDialogDecimals = (decimals === undefined || decimals === null) ? 2 : parseInt(decimals, 10);
+    // One key per opening of the dialog, so every submission of THIS refund carries the same one.
+    refundDialogKey = newIdempotencyKey();
+
+    var dialog = document.getElementById('refund-dialog');
+    var amount = document.getElementById('refund-dialog-amount');
+
+    document.getElementById('refund-dialog-remaining').textContent = remainingFormatted || remaining;
+    document.getElementById('refund-dialog-error').style.display = 'none';
+    document.getElementById('refund-dialog-confirm').disabled = false;
+
+    // Defaults to the whole remaining balance, so the common case is one click and the partial
+    // case is an edit rather than a calculation. Rounded to the currency's own precision: the
+    // remainder can carry a third decimal, and a JPY sale has none at all.
+    amount.value = refundDialogMax.toFixed(refundDialogDecimals);
+    amount.step = refundDialogDecimals === 0 ? '1' : (1 / Math.pow(10, refundDialogDecimals)).toFixed(refundDialogDecimals);
+    amount.max = refundDialogMax;
+
+    dialog.style.display = 'flex';
+    amount.focus();
+    amount.select();
+}
+
+function closeRefundDialog() {
+    document.getElementById('refund-dialog').style.display = 'none';
+    refundDialogSaleId = null;
+}
+
+document.addEventListener('click', function (e) {
+    if (e.target.closest('[data-refund-dismiss]')) {
+        closeRefundDialog();
+    }
+});
+
+document.addEventListener('keydown', function (e) {
+    if (e.key === 'Escape' && refundDialogSaleId) {
+        closeRefundDialog();
+    }
+});
+
+document.getElementById('refund-dialog-confirm').addEventListener('click', function () {
+    var amount = parseFloat(document.getElementById('refund-dialog-amount').value);
+    var error = document.getElementById('refund-dialog-error');
+    var tolerance = refundDialogTolerance();
+
+    // Checked here only to save a round trip; SaleRefundService re-asserts the ceiling under the
+    // sale's lock, which is the check that actually counts.
+    if (!(amount > 0) || amount - refundDialogMax > tolerance) {
+        error.textContent = @json(__('messages.refund_amount_invalid'));
+        error.style.display = 'block';
+        return;
+    }
+
+    // Refunding the whole remainder sends NO amount, so the gateway gives back exactly what it
+    // holds. The figure above is rounded to the currency's precision while the balance is stored
+    // to three decimals, so naming it would leave a fraction behind and the sale would never
+    // reach `refunded`.
+    var isFullRemainder = Math.abs(amount - refundDialogMax) <= tolerance;
+
+    // Guards the double-click. The key below makes a resubmission safe even if this does not fire.
+    this.disabled = true;
+
+    var saleId = refundDialogSaleId;
+    var key = refundDialogKey;
+    closeRefundDialog();
+    handleAction(saleId, 'refund', isFullRemainder ? undefined : amount, key);
 });
 
 function resendEmail(saleId) {

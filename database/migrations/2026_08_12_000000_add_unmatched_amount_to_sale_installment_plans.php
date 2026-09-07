@@ -14,9 +14,10 @@ return new class extends Migration
      * second PaymentIntent for a row another payment already settled.
      *
      * Both used to be a `Log::warning` and nothing else, which is the worst possible handling for
-     * money the buyer has actually paid: nothing in this app refunds a Connect ticket sale, so the
-     * organizer has to act in their own Stripe dashboard - and they can only do that if something
-     * tells them it happened.
+     * money the buyer has actually paid. An unmatched payment is still not refunded automatically -
+     * it matched no sale, so there is nothing to meter a refund against and no way to tell a
+     * duplicate from a partial without a person - so the organizer has to act on it, and they can
+     * only do that if something tells them it happened.
      */
     public function up(): void
     {

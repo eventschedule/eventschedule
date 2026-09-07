@@ -35,9 +35,11 @@ return new class extends Migration
             $table->timestamp('paid_at')->nullable();
 
             // Per-installment, because the sale's single transaction_reference cannot identify N
-            // charges. The organizer refunds by hand on their own Stripe dashboard (nothing in
-            // this app refunds a Connect ticket sale), so these are what the Installments tab
-            // shows them.
+            // charges. Refunding a plan walks these, one gateway call per leg, and the Installments
+            // tab lists them so an organizer can also reconcile a leg by hand.
+            //
+            // (When this shipped nothing in the app refunded a Connect ticket sale at all;
+            // SaleRefundService does now.)
             $table->string('transaction_reference')->nullable();
 
             $table->unsignedTinyInteger('attempts')->default(0);

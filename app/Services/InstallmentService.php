@@ -515,9 +515,10 @@ class InstallmentService
      * Money that arrived but belongs to nothing chargeable: a dead plan, or a second payment for a
      * row already settled by a different PaymentIntent.
      *
-     * Nothing in this app refunds a Connect ticket sale, so the organizer has to act on it in
-     * their own Stripe dashboard. Recording it on the plan gives them somewhere to see it; a log
-     * line does not.
+     * Deliberately not refunded automatically. SaleRefundService can send money back for a sale,
+     * but this payment matched nothing, so there is no sale to meter it against and no way to tell
+     * a duplicate from a partial without a person looking. Recording it on the plan gives them
+     * somewhere to see it; a log line does not.
      */
     private function recordUnmatchedPayment(SaleInstallmentPlan $plan, float $amount, ?string $reference): void
     {

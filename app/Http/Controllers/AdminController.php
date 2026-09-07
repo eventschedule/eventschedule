@@ -3581,30 +3581,18 @@ class AdminController extends Controller
             return redirect()->back()->with('error', __('messages.sale_not_found'));
         }
 
-        try {
-            $stripe = new \Stripe\StripeClient(config('services.stripe.key'));
-            $stripe->refunds->create([
-                'payment_intent' => $sale->transaction_reference,
-            ]);
-        } catch (\Exception $e) {
-            // Try platform key if Connect key fails
-            try {
-                $stripe = new \Stripe\StripeClient(config('services.stripe_platform.secret'));
-                $stripe->refunds->create([
-                    'payment_intent' => $sale->transaction_reference,
-                ]);
-            } catch (\Exception $e2) {
-                Log::error('Failed to refund amount_mismatch sale', [
-                    'sale_id' => $sale->id,
-                    'error' => $e2->getMessage(),
-                ]);
+        // Routed through SaleRefundService rather than calling Stripe here.
+        //
+        // The version this replaced never passed `stripe_account`, so on a hosted Connect charge
+        // its first call failed resource_missing - and its "fallback" then retried with a
+        // completely different account's credentials, which is not a retry at all. It also had no
+        // idempotency key, recorded no refund id, and reported failures in an untranslated string.
+        $result = app(\App\Services\SaleRefundService::class)
+            ->refund($sale, null, auth()->id(), 'admin_amount_mismatch');
 
-                return redirect()->back()->with('error', 'Refund failed. Check logs for details.');
-            }
+        if (! $result->moved()) {
+            return redirect()->back()->with('error', $result->message ?? __('messages.error'));
         }
-
-        $sale->status = 'refunded';
-        $sale->save();
 
         AuditService::log(AuditService::ADMIN_UPDATE, auth()->id(), 'Sale', $sale->id, null, null, 'Refunded amount_mismatch sale');
 

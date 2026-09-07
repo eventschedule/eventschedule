@@ -431,9 +431,10 @@ class TicketController extends Controller
                 'needs_check' => $plan->installments
                     ->where('status', 'awaiting_reconciliation')
                     ->isNotEmpty(),
-                // Every payment reference the organizer needs to refund by hand on their own
-                // Stripe dashboard: nothing in this app refunds a Connect ticket sale, and the
-                // sale's single transaction_reference cannot identify N charges.
+                // Every payment reference, one per charge. Refunding the sale walks these
+                // rather than sales.transaction_reference, which is a single id and cannot
+                // identify N charges - and they stay listed so an organizer can still reconcile
+                // any leg by hand against their own dashboard.
                 'payments' => $plan->installments->map(fn ($i) => [
                     'sequence' => $i->sequence,
                     'amount' => (float) $i->amount,
@@ -493,7 +494,7 @@ class TicketController extends Controller
     {
         $user = auth()->user();
 
-        $query = Sale::with('event.creatorRole', 'saleTickets.ticket', 'promoCode', 'feedback')
+        $query = Sale::with('event.creatorRole', 'saleTickets.ticket', 'promoCode', 'feedback', 'refunds', 'installmentPlan')
             ->where('is_deleted', false)
             ->whereHas('event', fn ($query) => $query->managedBy($user));
 
@@ -3122,6 +3123,7 @@ class TicketController extends Controller
         // $previousStatus captures the locked pre-transition status for the audit log.
         $previousStatus = $sale->status;
         $actionPerformed = false;
+        $refundResult = null;
 
         switch ($request->action) {
             case 'mark_paid':
@@ -3133,9 +3135,58 @@ class TicketController extends Controller
                 break;
 
             case 'refund':
-                $prev = $this->refundSale($sale);
-                if ($prev !== null) {
-                    $previousStatus = $prev;
+                // Validated rather than cast. `(float)` on an array is 1.0 in PHP 8 with no error,
+                // so an unvalidated refund_amount[]=100 quietly refunds a dollar; the API path has
+                // always validated its equivalent and these two must not disagree on a money route.
+                try {
+                    $request->validate([
+                        'refund_amount' => 'sometimes|numeric|min:0.01',
+                        'idempotency_key' => 'sometimes|string|max:64',
+                    ]);
+                } catch (\Illuminate\Validation\ValidationException $e) {
+                    return response()->json(['error' => __('messages.refund_amount_invalid')], 422);
+                }
+
+                $refundResult = app(\App\Services\SaleRefundService::class)->refund(
+                    $sale,
+                    $request->filled('refund_amount') ? (float) $request->input('refund_amount') : null,
+                    $user->id,
+                    null,
+                    null,
+                    $request->input('idempotency_key'),
+                );
+
+                // The second clause is the belt-and-braces one. UNSUPPORTED normally means "this
+                // rail never held any money", but the installment walk can also raise it after
+                // some legs have already been refunded - and flipping the status there would hand
+                // back every seat and the whole gift card on a sale we had just paid out on.
+                if ($refundResult->shouldFallBackToStatusOnly() && ! $sale->refunds()->exists()) {
+                    // Cash, an RSVP, or a sale marked paid by hand: nothing is held at a gateway,
+                    // so this stays the status-only transition it has always been. The button that
+                    // got here says "Mark as Refunded" rather than "Refund".
+                    $prev = $this->refundSale($sale);
+                    if ($prev !== null) {
+                        $previousStatus = $prev;
+                        $actionPerformed = true;
+                    }
+                    break;
+                }
+
+                if ($refundResult->status === \App\Services\SaleRefundResult::PARTIALLY_REFUNDED) {
+                    // Deliberately NOT $actionPerformed. The sale is still paid, so it must not
+                    // reach the sale.refunded webhook, the appointment cancellation mail, or
+                    // Sale::booted's released branch - that branch hands back every seat, the whole
+                    // promo redemption and the entire gift card, all of which assume the sale is
+                    // dead. Audited here instead, since nothing below will do it.
+                    AuditService::log(AuditService::SALE_REFUND, $user->id, 'Sale', $sale->id,
+                        null,
+                        ['refunded' => $refundResult->refund?->amount],
+                        'partial_refund:event_id:'.$sale->event_id
+                    );
+                    break;
+                }
+
+                if ($refundResult->status === \App\Services\SaleRefundResult::REFUNDED) {
                     $actionPerformed = true;
                 }
                 break;
@@ -3155,6 +3206,22 @@ class TicketController extends Controller
                     $actionPerformed = true;
                 }
                 break;
+        }
+
+        // A refund that reached the gateway and did not move money must not report success. The
+        // message is already translated and deliberately generic: SaleRefundService reported the
+        // underlying exception to Sentry rather than handing it to an owner.
+        if ($refundResult && ! $refundResult->moved() && ! $refundResult->shouldFallBackToStatusOnly()) {
+            $status = in_array($refundResult->status, [
+                \App\Services\SaleRefundResult::NEEDS_RECONCILIATION,
+                \App\Services\SaleRefundResult::IN_PROGRESS,
+            ], true) ? 409 : 422;
+
+            if ($request->ajax()) {
+                return response()->json(['error' => $refundResult->message ?? __('messages.error')], $status);
+            }
+
+            return back()->with('error', $refundResult->message ?? __('messages.error'));
         }
 
         // Reflect the committed status change on the outer instance for the audit/webhook/email below.
@@ -3205,10 +3272,15 @@ class TicketController extends Controller
         }
 
         if ($request->ajax()) {
-            return response()->json(['success' => true]);
+            return response()->json(array_filter([
+                'success' => true,
+                // Lets the toast distinguish a full refund from a partial one, and a real refund
+                // from a status-only "mark as refunded", without the JS re-deriving any of it.
+                'message' => $refundResult?->message,
+            ], fn ($value) => $value !== null));
         }
 
-        return back()->with('message', __('messages.action_completed'));
+        return back()->with('message', $refundResult?->message ?: __('messages.action_completed'));
     }
 
     public function release()

@@ -6,6 +6,7 @@ use App\Models\BoostCampaign;
 use App\Models\FederatedInstance;
 use App\Models\Role;
 use App\Models\Sale;
+use App\Models\SaleRefund;
 use App\Models\SupportMessage;
 use App\Models\TranslationOverride;
 use App\Models\TranslationSuggestion;
@@ -58,6 +59,11 @@ class AdminAlertService
         'boosts_stuck',
         'boosts_failed',
         'sales_mismatch',
+        // Above the review queues below it for the same reason as sales_mismatch: a refund whose
+        // outcome the gateway never confirmed may ALREADY have moved the buyer's money, and
+        // nothing else in the app reports it. The claim also holds its amount against the sale's
+        // refundable balance, so until a person resolves it the owner's Refund control is gone.
+        'refunds_unconfirmed',
         'boosts_mismatch',
         'promos_pending',
         'federation_flagged',
@@ -214,6 +220,12 @@ class AdminAlertService
                 ->count(),
 
             'sales_mismatch' => fn () => Sale::where('status', 'amount_mismatch')->count(),
+            // The grace window keeps a refund that is merely in flight out of the list; a claim
+            // still unresolved after it is one a person has to settle against the dashboard,
+            // because nothing here will ever retry it.
+            'refunds_unconfirmed' => fn () => SaleRefund::whereIn('status', ['pending', 'awaiting_reconciliation'])
+                ->where('created_at', '<=', now()->subMinutes(15))
+                ->count(),
 
             'boosts_mismatch' => fn () => BoostCampaign::where('billing_status', 'amount_mismatch')->count(),
 
@@ -408,6 +420,7 @@ class AdminAlertService
             'boosts_stuck' => ['manage', 'boost', 'admin.boost', [], '#boost-alerts', 'red', 'Boost'],
             'boosts_failed' => ['manage', 'boost', 'admin.boost', [], '#boost-alerts', 'red', 'Boost'],
             'sales_mismatch' => ['insights', 'revenue', 'admin.revenue', [], '#amount-mismatch', 'red', __('messages.revenue')],
+            'refunds_unconfirmed' => ['insights', 'revenue', 'admin.revenue', [], '#amount-mismatch', 'red', __('messages.revenue')],
             'boosts_mismatch' => ['insights', 'revenue', 'admin.revenue', [], '#amount-mismatch', 'red', __('messages.revenue')],
             // Points at the existing Boost screen rather than adding a nav item, so there is
             // no new Route::has failure mode and the badge lands where the operator already

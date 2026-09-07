@@ -643,7 +643,9 @@
                                         <h4 class="font-medium text-blue-900 dark:text-blue-100 mb-2">Available Actions</h4>
                                         <ul class="text-sm text-blue-800 dark:text-blue-200 mt-2 space-y-1">
                                             <li><strong>mark_paid</strong>: unpaid -> paid</li>
-                                            <li><strong>refund</strong>: paid -> refunded</li>
+                                            <li><strong>refund</strong>: paid -> refunded. Sends the money back through Stripe; every other payment method records the refund only.</li>
+                                            <li><strong>refund</strong> with <strong>amount</strong>: returns part of it and leaves the sale paid.</li>
+                                            <li><strong>idempotency_key</strong> (optional): send your own so a retry returns the first attempt's outcome instead of refunding twice.</li>
                                             <li><strong>cancel</strong>: unpaid or paid -> cancelled</li>
                                         </ul>
                                     </div>

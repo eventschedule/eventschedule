@@ -55,6 +55,18 @@ class SaleInstallment extends Model
 
     // `amount` is deliberately uncast - see the note in SaleInstallmentPlan.
 
+    /**
+     * Refund attempts against THIS leg's own charge.
+     *
+     * A plan is N separate PaymentIntents, so a refund is metered per leg rather than against the
+     * sale's balance - and this relation is what lets a retried plan refund skip the legs it has
+     * already claimed instead of aborting on the first one.
+     */
+    public function refunds()
+    {
+        return $this->hasMany(SaleRefund::class, 'sale_installment_id');
+    }
+
     public function plan()
     {
         return $this->belongsTo(SaleInstallmentPlan::class, 'sale_installment_plan_id');

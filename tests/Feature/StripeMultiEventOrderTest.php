@@ -7,6 +7,7 @@ use App\Models\Sale;
 use App\Utils\UrlUtils;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\Feature\Concerns\CreatesScheduleData;
+use Tests\Feature\Concerns\FakesStripeRefunds;
 use Tests\TestCase;
 
 /**
@@ -22,6 +23,7 @@ use Tests\TestCase;
 class StripeMultiEventOrderTest extends TestCase
 {
     use CreatesScheduleData;
+    use FakesStripeRefunds;
     use RefreshDatabase;
 
     private const WEBHOOK_SECRET = 'whsec_test_multi_event_order';
@@ -36,6 +38,11 @@ class StripeMultiEventOrderTest extends TestCase
             'services.stripe.key' => 'sk_test_multi_event_order',
             'services.stripe.webhook_secret' => self::WEBHOOK_SECRET,
         ]);
+
+        // These sales settle with real-looking PaymentIntent references, so a refund now genuinely
+        // calls Stripe. Without a stub the SDK rejects phpunit.xml's placeholder key and the
+        // refund fails before the analytics netting this test is actually about.
+        $this->fakeStripeRefunds();
     }
 
     /**
