@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Console\Commands\RetryFailedJobs;
 use App\Http\Requests\AdminPlanUpdateRequest;
+use App\Http\Requests\AdminScheduleDetailsRequest;
 use App\Mail\PromotionDecision;
 use App\Models\AnalyticsDaily;
 use App\Models\AnalyticsEventsDaily;
@@ -29,7 +30,9 @@ use App\Services\DemoService;
 use App\Services\DigitalOceanService;
 use App\Services\GrowthExportService;
 use App\Services\OneSignalService;
+use App\Services\ScheduleDeletionService;
 use App\Services\SchedulerHealth;
+use App\Services\SubdomainUnavailableException;
 use App\Services\TranslationQueue;
 use App\Services\WebhookService;
 use App\Services\WorkBacklog;
@@ -1666,11 +1669,25 @@ class AdminController extends Controller
             ->where('subdomain', 'not like', 'demo-%')
             ->count();
 
-        // Build query for role list (excluding demo roles). adminListable() is the shared
-        // definition the search-subdomains autocomplete behind the filter box also uses, so
-        // the picker can never offer a schedule this list is unable to return.
-        $query = Role::adminListable()
-            ->with(['user', 'subscriptions']);
+        // Build query for role list (excluding demo roles). The adminListable* scopes are the
+        // shared definitions the search-subdomains autocomplete behind the filter box also uses,
+        // so the picker can never offer a schedule this list is unable to return.
+        //
+        // Owner scope. Defaults to owned-only, which is what this page has always shown.
+        // Widening it by default would put the count on the Unverified card (owner-only, and
+        // pinned by AdminSchedulesUnverifiedCountTest) at odds with the list it links to, and
+        // ownerless auto-created rows are the long tail - they would bury the paying customers
+        // the page exists to manage. But they ARE reachable now, because a venue EventRepo
+        // auto-created while importing an event takes a subdomain like any other schedule and is
+        // the likeliest squatter of a good name.
+        $owner = $request->input('owner');
+        $query = match ($owner) {
+            'unclaimed' => Role::adminListableUnclaimed(),
+            'any' => Role::adminListableAny(),
+            default => Role::adminListable(),
+        };
+
+        $query->with(['user', 'subscriptions']);
 
         // Search filter
         if ($search = $request->input('search')) {
@@ -1687,8 +1704,21 @@ class AdminController extends Controller
             $query->where('plan_type', $planType);
         }
 
+        // Deleted schedules are shown only when asked for. Until this filter existed they were
+        // mixed into every view unbadged, while the autocomplete that feeds the box above
+        // refused to offer them - so searching the dropdown for one found nothing and typing the
+        // same name and pressing Filter found it. Excluding them by default is what makes the
+        // picker and the table agree.
+        $status = $request->input('status');
+
+        if ($status === 'deleted') {
+            $query->where('is_deleted', true);
+        } else {
+            $query->where('is_deleted', false);
+        }
+
         // Status filter
-        if ($status = $request->input('status')) {
+        if ($status && $status !== 'deleted') {
             if ($status === 'active') {
                 $query->where(function ($q) use ($validSubscriptionScope) {
                     $q->where('plan_expires', '>=', now()->format('Y-m-d'))
@@ -1761,7 +1791,14 @@ class AdminController extends Controller
         $decodedId = UrlUtils::decodeId($roleId);
         $role = Role::with('user', 'subscriptions')->findOrFail($decodedId);
 
-        return view('admin.schedules-edit', compact('role'));
+        // Who holds the schedule's original name now, if anyone. Restore can only reclaim it when
+        // nothing has - which is the expected outcome of a release that did its job - so the card
+        // says which of the two will happen BEFORE the admin clicks.
+        $originalHolder = $role->subdomain_before_delete
+            ? Role::where('subdomain', $role->subdomain_before_delete)->where('id', '!=', $role->id)->first()
+            : null;
+
+        return view('admin.schedules-edit', compact('role', 'originalHolder'));
     }
 
     /**
@@ -1823,6 +1860,160 @@ class AdminController extends Controller
         );
 
         return redirect()->route('admin.schedules')->with('success', 'Plan updated successfully for '.$role->name.'.');
+    }
+
+    /**
+     * Mark a schedule deleted and release its subdomain, so a newer schedule can take the name.
+     *
+     * Also the way to clear the backlog: rows that ApiScheduleController::destroy(),
+     * RoleController::unfollow(), bulkUnfollow() and performMerge() soft-deleted WITHOUT renaming
+     * are already is_deleted and still hold their names, so the handler tolerates one and simply
+     * releases it. The button reads "Release subdomain" in that case.
+     *
+     * There is deliberately no bulk backfill of that population. It would rename rows
+     * performMerge() created, and the merge UI can still revive a merged-away venue
+     * (RoleController::mergeVenuesGroup), so renaming them behind the operator's back changes
+     * what those flows restore - and a bulk rename touches FEDERATION_FIELDS on every row at
+     * once. Each release is a visible, per-name decision instead.
+     */
+    public function markScheduleDeleted($roleId, ScheduleDeletionService $deletions)
+    {
+        if (! auth()->user()->isAdmin()) {
+            return redirect()->back()->with('error', __('messages.not_authorized'));
+        }
+
+        $role = Role::findOrFail(UrlUtils::decodeId($roleId));
+
+        // editSchedule() finds by id, so a hand-crafted hash reaches the demo schedule even
+        // though adminListable() hides it from the list - and renaming it would break
+        // DemoService::DEMO_ROLE_SUBDOMAIN, which is hardcoded in that scope.
+        if (is_demo_role($role)) {
+            return redirect()->back()->with('error', __('messages.demo_mode_settings_disabled'));
+        }
+
+        $original = $role->subdomain;
+
+        try {
+            $deletions->markDeleted($role, auth()->id());
+        } catch (SubdomainUnavailableException $e) {
+            return redirect()->back()->with('error', __('messages.subdomain_taken'));
+        }
+
+        return redirect()->route('admin.schedules.edit', ['role' => $role->encodeId()])
+            ->with('success', __('messages.schedule_marked_deleted', ['subdomain' => $original]));
+    }
+
+    /**
+     * Undo a mark-deleted, reclaiming the original subdomain when nothing else has taken it.
+     */
+    public function restoreSchedule($roleId, ScheduleDeletionService $deletions)
+    {
+        if (! auth()->user()->isAdmin()) {
+            return redirect()->back()->with('error', __('messages.not_authorized'));
+        }
+
+        $role = Role::findOrFail(UrlUtils::decodeId($roleId));
+
+        if (is_demo_role($role)) {
+            return redirect()->back()->with('error', __('messages.demo_mode_settings_disabled'));
+        }
+
+        try {
+            $result = $deletions->restore($role, auth()->id());
+        } catch (SubdomainUnavailableException $e) {
+            return redirect()->back()->with('error', __('messages.subdomain_taken'));
+        }
+
+        // The restore SUCCEEDED either way, so both branches flash success. Losing the original
+        // name is the expected outcome of a release that did its job, not a failure.
+        $message = $result['reclaimed']
+            ? __('messages.schedule_restored', ['subdomain' => $result['subdomain']])
+            : __('messages.schedule_restored_under_new_subdomain', [
+                'subdomain' => $result['subdomain'],
+                'original' => $result['original'],
+            ]);
+
+        return redirect()->route('admin.schedules.edit', ['role' => $role->encodeId()])
+            ->with('success', $message);
+    }
+
+    /**
+     * Edit a schedule's identity: name, subdomain and contact details.
+     *
+     * The subdomain change here is validate-and-REJECT, not cleanSubdomain()'s silent rewrite.
+     * That rewrite is right for an owner - it rescues a name typed in Hebrew - but an operator
+     * typing an exact name on purpose should be told when it is reserved rather than handed
+     * Str::random(8). See AdminScheduleDetailsRequest.
+     */
+    public function updateScheduleDetails(AdminScheduleDetailsRequest $request, $roleId)
+    {
+        if (! auth()->user()->isAdmin()) {
+            return redirect()->back()->with('error', __('messages.not_authorized'));
+        }
+
+        $role = Role::findOrFail(UrlUtils::decodeId($roleId));
+
+        if (is_demo_role($role)) {
+            return redirect()->back()->with('error', __('messages.demo_mode_settings_disabled'));
+        }
+
+        $validated = $request->validated();
+
+        $oldValues = [
+            'name' => $role->name,
+            'subdomain' => $role->subdomain,
+            'email' => $role->email,
+            'phone' => $role->phone,
+        ];
+
+        $role->name = $validated['name'];
+        $role->email = $validated['email'] ?? null;
+        $role->phone = $validated['phone'] ?? null;
+
+        $renamedFrom = null;
+        if ($validated['new_subdomain'] !== $role->subdomain) {
+            $renamedFrom = $role->subdomain;
+            $role->subdomain = $validated['new_subdomain'];
+        }
+
+        try {
+            $role->save();
+        } catch (\Illuminate\Database\QueryException $e) {
+            // The uniqueness check in the request is a check-then-write; the index is the only
+            // real authority. Surface the same message rather than a 500, and never the driver's.
+            if ((int) ($e->errorInfo[1] ?? 0) === 1062) {
+                report($e);
+
+                return redirect()->back()->withInput()->withErrors(['new_subdomain' => __('messages.subdomain_taken')]);
+            }
+
+            throw $e;
+        }
+
+        // The schedule still exists, it just moved - so approve-list entries follow it rather
+        // than being dropped. Left alone, the old name would keep auto-accepting onto curators'
+        // public pages once somebody else claimed it.
+        if ($renamedFrom !== null) {
+            Role::rewriteApprovedSubdomainReferences($renamedFrom, $role->subdomain);
+        }
+
+        AuditService::log(
+            AuditService::ADMIN_SCHEDULE_UPDATE,
+            auth()->id(),
+            'App\\Models\\Role',
+            $role->id,
+            $oldValues,
+            [
+                'name' => $role->name,
+                'subdomain' => $role->subdomain,
+                'email' => $role->email,
+                'phone' => $role->phone,
+            ],
+            "Details updated for {$role->subdomain}",
+        );
+
+        return redirect()->route('admin.schedules.edit', ['role' => $role->encodeId()])
+            ->with('success', __('messages.saved'));
     }
 
     /**

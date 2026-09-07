@@ -10,6 +10,11 @@
     document.querySelectorAll('[data-subdomain-autocomplete]').forEach(function(input) {
         var dropdown = input.parentElement.querySelector('[data-subdomain-dropdown]');
         var debounceTimer = null;
+        // Extra query string for this one input. This partial is included by three pages
+        // (schedules, domains, boost), so the params cannot be hardcoded in the fetch below:
+        // /admin/schedules forwards its own owner and status filters here so the dropdown offers
+        // exactly what its table can return, while the other two keep the plain default.
+        var extraParams = input.getAttribute('data-subdomain-params') || 'admin_listable=1';
 
         input.addEventListener('input', function() {
             var q = this.value.trim();
@@ -22,10 +27,10 @@
             }
 
             debounceTimer = setTimeout(function() {
-                // admin_listable keeps the dropdown to the same set the schedules table can
+                // admin_listable keeps the dropdown to the same set the calling table can
                 // render. Without it, unclaimed auto-created schedules show up here and then
                 // filter to nothing.
-                fetch('{{ route("role.search-subdomains") }}' + '?q=' + encodeURIComponent(q) + '&admin_listable=1', {
+                fetch('{{ route("role.search-subdomains") }}' + '?q=' + encodeURIComponent(q) + '&' + extraParams, {
                     headers: { 'Accept': 'application/json', 'X-Requested-With': 'XMLHttpRequest' }
                 })
                 .then(function(res) { return res.json(); })

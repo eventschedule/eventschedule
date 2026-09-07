@@ -29,6 +29,10 @@ class Role extends Model implements MustVerifyEmail
         // POST a future timestamp and permanently silence their own schedule's announcements
         // (the command compares diffInHours() against it and skips on a negative). Same rule the
         // Event model's $casts block documents for is_cancelled and friends.
+        //
+        // subdomain, is_deleted and subdomain_before_delete are absent for the same reason. The
+        // three of them together are what decides which schedule answers to a name, and
+        // ScheduleDeletionService is the only thing that should ever move them as a set.
         'design',
         'header_style',
         'background',
@@ -279,6 +283,73 @@ class Role extends Model implements MustVerifyEmail
         'language_code',
     ];
 
+    /**
+     * Names a schedule may not take, because an app route or a robots.txt rule already owns
+     * the path. Extracted from cleanSubdomain() so the admin rename can REJECT one with a
+     * message instead of silently substituting Str::random(8) the way cleanSubdomain() must
+     * for an owner. One list, two policies.
+     */
+    public const RESERVED_SUBDOMAINS = [
+        'eventschedule',
+        'event',
+        'events',
+        'admin',
+        'schedule',
+        'availability',
+        'requests',
+        'profile',
+        'followers',
+        'following',
+        'team',
+        'plan',
+        'home',
+        'privacy',
+        'terms',
+        'terms-of-service',
+        'cookie-policy',
+        'register',
+        'venues',
+        'profile',
+        'view',
+        'edit',
+        'sign_up',
+        'login',
+        'logout',
+        'app',
+        'www',
+        'dev',
+        'contact',
+        'info',
+        'blog',
+        'docs',
+        'api',
+        'faq',
+        'demo',
+        'getting-started',
+        'thenightowls',
+        'marketing',
+        'features',
+        'pricing',
+        'about',
+        'ticketing',
+        // Disallowed in robots.txt or owned by an app route, so a schedule holding one of these would
+        // have its own pages de-indexed (selfhost serves tenants from the same path space).
+        'appointment',
+        'appointments',
+        'checkout',
+        'payments',
+        'settings',
+        'promo',
+        'promotions',
+        'boost',
+        // Owned by the public ownership-handover route, which is registered ahead of
+        // the selfhost /{subdomain} catch-all and would shadow this schedule's pages.
+        'schedule-transfer',
+        // Owned by the public audience confirm/unsubscribe routes (/sub/c, /sub/u), registered
+        // ahead of the selfhost /{subdomain} catch-all for the same reason as the above.
+        'sub',
+    ];
+
     protected static function boot()
     {
         parent::boot();
@@ -523,7 +594,12 @@ class Role extends Model implements MustVerifyEmail
             // Explicit Event query rather than $model->events()->update(), which would
             // update through the belongsToMany join and can hit ambiguous columns.
             // A query-builder update fires no model events, so this cannot recurse.
-            if ($model->wasChanged(self::FEDERATION_FIELDS)) {
+            // Skipped for a soft-deleted schedule: an admin releasing a squatted subdomain
+            // renames the row, and subdomain is a FEDERATION_FIELD, so without this every event
+            // of a schedule we just took down gets re-queued for a federation push.
+            // federatableQuery() filters is_deleted, so those pushes would be dropped anyway -
+            // this is churn, not a leak - but re-queueing a deleted schedule is still wrong.
+            if ($model->wasChanged(self::FEDERATION_FIELDS) && ! $model->is_deleted) {
                 Event::whereIn('id', $model->events()->pluck('events.id'))
                     ->where(function ($q) {
                         $q->whereNotNull('federated_at')->orWhereNotNull('federated_skipped_at');
@@ -1265,19 +1341,48 @@ class Role extends Model implements MustVerifyEmail
     }
 
     /**
-     * The set of schedules /admin/schedules can actually show: real, owned schedules,
+     * The demo exclusions on their own. Extracted so the three admin-listing scopes below cannot
+     * drift on what "not a demo schedule" means.
+     */
+    public function scopeNotDemoSchedule($query)
+    {
+        return $query->where('subdomain', '!=', \App\Services\DemoService::DEMO_ROLE_SUBDOMAIN)
+            ->where('subdomain', 'not like', 'demo-%');
+    }
+
+    /**
+     * The set of schedules /admin/schedules shows by default: real, owned schedules,
      * never the demo ones.
      *
      * Shared with the search-subdomains autocomplete that feeds that page's filter box.
      * When the two drifted apart, the picker offered auto-created schedules (which have no
      * user_id - see EventRepo::saveEvent) that the table could never return, so picking one
      * and filtering produced an empty list.
+     *
+     * Kept owner-only rather than widened. AdminSchedulesUnverifiedCountTest exists to pin that
+     * the Unverified card and the list it links to never disagree, and that card is owner-only;
+     * ownerless auto-created rows are also the long tail, so defaulting to them would bury the
+     * paying customers this page exists to manage. The admin opts into them with ?owner=.
      */
     public function scopeAdminListable($query)
     {
-        return $query->whereNotNull('user_id')
-            ->where('subdomain', '!=', \App\Services\DemoService::DEMO_ROLE_SUBDOMAIN)
-            ->where('subdomain', 'not like', 'demo-%');
+        return $query->notDemoSchedule()->whereNotNull('user_id');
+    }
+
+    /**
+     * The ownerless rows: venues and talent EventRepo::saveEvent() auto-creates while importing an
+     * event. They take a subdomain via generateSubdomain() like any other schedule, which makes
+     * them the likeliest squatter of a good name - and adminListable() hides every one of them.
+     */
+    public function scopeAdminListableUnclaimed($query)
+    {
+        return $query->notDemoSchedule()->whereNull('user_id');
+    }
+
+    /** Both of the above. */
+    public function scopeAdminListableAny($query)
+    {
+        return $query->notDemoSchedule();
     }
 
     // Query-level mirror of isClaimed(): has an owner + a verified contact channel.
@@ -1505,67 +1610,6 @@ class Role extends Model implements MustVerifyEmail
             // else: $subdomain stays the (empty) lossy slug -> <= 2 guard below -> random.
         }
 
-        $reserved = [
-            'eventschedule',
-            'event',
-            'events',
-            'admin',
-            'schedule',
-            'availability',
-            'requests',
-            'profile',
-            'followers',
-            'following',
-            'team',
-            'plan',
-            'home',
-            'privacy',
-            'terms',
-            'terms-of-service',
-            'cookie-policy',
-            'register',
-            'venues',
-            'profile',
-            'view',
-            'edit',
-            'sign_up',
-            'login',
-            'logout',
-            'app',
-            'www',
-            'dev',
-            'contact',
-            'info',
-            'blog',
-            'docs',
-            'api',
-            'faq',
-            'demo',
-            'getting-started',
-            'thenightowls',
-            'marketing',
-            'features',
-            'pricing',
-            'about',
-            'ticketing',
-            // Disallowed in robots.txt or owned by an app route, so a schedule holding one of these would
-            // have its own pages de-indexed (selfhost serves tenants from the same path space).
-            'appointment',
-            'appointments',
-            'checkout',
-            'payments',
-            'settings',
-            'promo',
-            'promotions',
-            'boost',
-            // Owned by the public ownership-handover route, which is registered ahead of
-            // the selfhost /{subdomain} catch-all and would shadow this schedule's pages.
-            'schedule-transfer',
-            // Owned by the public audience confirm/unsubscribe routes (/sub/c, /sub/u), registered
-            // ahead of the selfhost /{subdomain} catch-all for the same reason as the above.
-            'sub',
-        ];
-
         // Unconditional, NOT hosted-only. The list's own entries explain why: several are there
         // because "selfhost serves tenants from the same path space", and 'schedule-transfer' was
         // added for a route registered ahead of the selfhost /{subdomain} catch-all - so gating the
@@ -1576,7 +1620,7 @@ class Role extends Model implements MustVerifyEmail
         // RoleController::update() only calls this when new_subdomain actually differs from the
         // stored value, so a schedule already holding one of these keeps it rather than being
         // silently renamed on its next unrelated save.
-        if (in_array($subdomain, $reserved)) {
+        if (in_array($subdomain, self::RESERVED_SUBDOMAINS, true)) {
             $subdomain = '';
         }
 
@@ -1664,6 +1708,99 @@ class Role extends Model implements MustVerifyEmail
         }
 
         return $subdomain;
+    }
+
+    /** How much of the released name is the id suffix allowed to cost. Matches the cap in cleanSubdomain(). */
+    private const SUBDOMAIN_MAX = 50;
+
+    /**
+     * The name this schedule takes when it gives its own up, so another schedule can have it.
+     *
+     * roles.subdomain is UNIQUE, so releasing a name is necessarily a RENAME - the row cannot keep
+     * the name and let someone else have it. Computes only; the caller saves.
+     *
+     * The primary key is the disambiguator rather than a counter or a random string: no other row
+     * can have this id, so the result is unique against the index by construction, AND it is
+     * deterministic, so a double-submitted form recomputes the same value instead of chaining
+     * another suffix onto it.
+     *
+     * Deliberately NOT routed through cleanSubdomain(), for three reasons that each look like a
+     * bug fix from the outside:
+     *   - it truncates to 50 AFTER we appended the id, which would silently destroy the uniqueness
+     *     the id is here to provide;
+     *   - it replaces anything <= 2 characters with Str::random(8), turning a recognizable name
+     *     into noise;
+     *   - for a name Str::slug mangles it calls GeminiUtils::translate(), so releasing a
+     *     Hebrew-named schedule would fire a live AI request on an admin's click.
+     */
+    public function releasedSubdomain(): string
+    {
+        // The ORIGINAL name where we have it, so re-releasing a row whose Restore could not
+        // reclaim its name yields foo-deleted-42 again rather than foo-deleted-42-deleted-42.
+        $base = $this->subdomain_before_delete ?: $this->subdomain;
+
+        $n = 1;
+        do {
+            $suffix = '-deleted-'.$this->id.($n > 1 ? '-'.$n : '');
+            // Recomputed each pass: truncating once and then appending the disambiguator would
+            // push the result back over the cap. Subdomains longer than 50 chars were
+            // grandfathered in before the cap existed, so this genuinely has to truncate.
+            $stem = rtrim(substr((string) $base, 0, self::SUBDOMAIN_MAX - strlen($suffix)), '-');
+            if ($stem === '') {
+                $stem = 'schedule';
+            }
+            $candidate = $stem.$suffix;
+            $n++;
+        } while (self::where('subdomain', $candidate)->where('id', '!=', $this->id)->exists());
+
+        return $candidate;
+    }
+
+    /**
+     * Repoint every curator's approve-list entry for a subdomain that is changing hands.
+     *
+     * roles.approved_subdomains holds SUBDOMAIN STRINGS, and autoAcceptsEventFrom() reads it to
+     * decide whether a submitted event goes live on the curator's public page immediately or waits
+     * in Requests. So a name that is freed and then claimed by someone else carries the previous
+     * holder's auto-accept trust to a stranger. Releasing passes null (the schedule is gone,
+     * nothing is left to trust); renaming passes the new name (same schedule, new address).
+     *
+     * The column is TEXT cast to array, not a native JSON column, so whereJsonContains() is not
+     * reliable on it. The LIKE only narrows the candidate set; the exact match is done in PHP.
+     *
+     * @return int number of schedules whose list changed
+     */
+    public static function rewriteApprovedSubdomainReferences(string $from, ?string $to): int
+    {
+        $escaped = str_replace(['%', '_'], ['\%', '\_'], $from);
+
+        $changed = 0;
+
+        self::whereNotNull('approved_subdomains')
+            ->where('approved_subdomains', 'like', '%"'.$escaped.'"%')
+            ->get()
+            ->each(function (self $role) use ($from, $to, &$changed) {
+                $list = $role->approved_subdomains;
+
+                if (! is_array($list) || ! in_array($from, $list, true)) {
+                    return;
+                }
+
+                $updated = [];
+                foreach ($list as $entry) {
+                    $entry = $entry === $from ? $to : $entry;
+                    if ($entry !== null && ! in_array($entry, $updated, true)) {
+                        $updated[] = $entry;
+                    }
+                }
+
+                // Null rather than [] when the list empties, matching RoleController::update().
+                $role->approved_subdomains = $updated ?: null;
+                $role->save();
+                $changed++;
+            });
+
+        return $changed;
     }
 
     public function decodeLinks($field)

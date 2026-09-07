@@ -437,18 +437,27 @@
         <ul class="doc-list mb-6">
             <li><strong class="text-gray-900 dark:text-white">Plan counts</strong> - how many verified, non-demo schedules resolve to Free, Pro and Enterprise, plus how many pay through Stripe, how many were granted a plan by hand, how many are on trial, and how many expire in the next 30 days</li>
             <li><strong class="text-gray-900 dark:text-white">Search</strong> - by schedule name, subdomain or email address</li>
-            <li><strong class="text-gray-900 dark:text-white">Filters</strong> - plan type, status (active, expired or trial), source (Stripe, manual or trial) and verification (verified or unverified)</li>
-            <li><strong class="text-gray-900 dark:text-white">Listing</strong> - twenty schedules per page, newest first. Demo schedules are left out, but unverified ones are listed even though the counts above exclude them.</li>
+            <li><strong class="text-gray-900 dark:text-white">Filters</strong> - plan type, status (active, expired, trial or deleted), source (Stripe, manual or trial), verification (verified or unverified) and owner</li>
+            <li><strong class="text-gray-900 dark:text-white">Owner filter</strong> - schedules with an owner are shown by default. Switch it to <strong class="text-gray-900 dark:text-white">Unclaimed</strong> to reach the venue and performer schedules that were created automatically while importing an event: they have no owner and no public page, but they do hold a subdomain, so they are the usual reason a good name is unavailable.</li>
+            <li><strong class="text-gray-900 dark:text-white">Listing</strong> - twenty schedules per page, newest first. Demo schedules are left out, deleted ones appear only under the Deleted status, and unverified ones are listed even though the counts above exclude them.</li>
         </ul>
 
         <h3 class="doc-subheading">Editing one schedule</h3>
-        <p class="text-gray-600 dark:text-gray-300 mb-4">Opening a schedule shows a read-only <strong class="text-gray-900 dark:text-white">Current Subscription Status</strong> panel (status, Stripe customer, trial end and whether a subscription is active) and gives you three actions, and nothing else:</p>
+        <p class="text-gray-600 dark:text-gray-300 mb-4">Opening a schedule shows a read-only <strong class="text-gray-900 dark:text-white">Current Subscription Status</strong> panel (status, Stripe customer, trial end and whether a subscription is active), and gives you these actions:</p>
         <ol class="doc-list doc-list-numbered mb-6">
             <li><strong class="text-gray-900 dark:text-white">Assign a plan</strong> - set <strong class="text-gray-900 dark:text-white">Plan Type</strong> to Free, Pro or Enterprise, set <strong class="text-gray-900 dark:text-white">Plan Term</strong> to monthly or yearly, and set <strong class="text-gray-900 dark:text-white">Plan Expires</strong>. The expiry field has <strong class="text-gray-900 dark:text-white">+30 days</strong>, <strong class="text-gray-900 dark:text-white">+90 days</strong>, <strong class="text-gray-900 dark:text-white">+1 year</strong> and <strong class="text-gray-900 dark:text-white">Clear</strong> shortcuts. A paid plan granted this way is tagged as an admin grant, which is what keeps the small Event Schedule credit on that schedule's public pages. Setting it back to Free, or editing a schedule that pays through Stripe, clears that tag.</li>
             <li><strong class="text-gray-900 dark:text-white">Mark Email as Verified</strong> - mark the schedule's email address as verified without the owner clicking the link.</li>
             <li><strong class="text-gray-900 dark:text-white">Mark Phone as Verified</strong> - the same for a phone number.</li>
+            <li><strong class="text-gray-900 dark:text-white">Edit the schedule's details</strong> - its name, subdomain, email address and phone number. Changing the email address clears the verified badge and sends a fresh verification email, so the page warns you before you do. A subdomain that is reserved or already in use is refused with a message rather than quietly changed to something else.</li>
+            <li><strong class="text-gray-900 dark:text-white">Mark as Deleted</strong> - takes the schedule's public page down and <strong class="text-gray-900 dark:text-white">releases its subdomain</strong>, so a newer schedule can use the name straight away. The schedule itself is kept, along with its events, ticket sales and statistics, and the action can be undone. For a schedule with no owner, only the subdomain is released, since there was never a public page.</li>
+            <li><strong class="text-gray-900 dark:text-white">Restore</strong> - brings a deleted schedule back. It takes its original subdomain back if nothing else has claimed it in the meantime; if something has, the schedule keeps the name it was given when it was deleted, and the page tells you which will happen before you click.</li>
         </ol>
-        <p class="text-gray-600 dark:text-gray-300 mb-6">All three are recorded in the audit log with the values before and after.</p>
+        <p class="text-gray-600 dark:text-gray-300 mb-6">All of them are recorded in the audit log with the values before and after, including both subdomains, so a release can be traced later.</p>
+
+        <div class="doc-callout doc-callout-info">
+            <div class="doc-callout-title">Why deleting renames the schedule</div>
+            <p>Only one schedule can hold a subdomain at a time, so a schedule cannot keep its name and let another schedule use it. Marking one deleted therefore moves it to a name like <code class="doc-inline-code">tel-aviv-deleted-42</code> and remembers what it was called. Two things are not undone by a restore: an active subscription keeps billing (cancel it separately), and a connected custom domain stops resolving but stays attached to the schedule until you remove it on the Domains page.</p>
+        </div>
 
         <div class="doc-callout doc-callout-info">
             <div class="doc-callout-title">Hosted installs only</div>

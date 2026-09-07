@@ -127,14 +127,19 @@
 
         {{-- Filters --}}
         <div class="ap-card rounded-xl shadow p-4">
-            <form method="GET" action="{{ route('admin.schedules') }}" class="flex flex-col sm:flex-row gap-4">
-                <div class="flex-1 relative">
+            {{-- Wraps rather than sharing one row: with six controls the flex-1 search box was
+                 squeezed to a few pixels at 1440px wide. --}}
+            <form method="GET" action="{{ route('admin.schedules') }}" class="flex flex-wrap items-center gap-3">
+                <div class="relative flex-1 min-w-[240px]">
+                    {{-- The dropdown must offer exactly what the table below can return, so it is
+                         handed this page's own owner and state filters. --}}
                     <input type="text" name="search" value="{{ request('search') }}"
                         placeholder="{{ __('messages.search_schedules') }}" autocomplete="off" data-subdomain-autocomplete
+                        data-subdomain-params="{{ 'admin_listable=1&owner='.urlencode(request('owner', '')).(request('status') === 'deleted' ? '&include_deleted=1' : '') }}"
                         class="block w-full rounded-lg border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white shadow-sm focus:border-[var(--brand-blue)] focus:ring-[var(--brand-blue)]">
                     <div data-subdomain-dropdown class="hidden absolute left-0 right-0 mt-1 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl shadow-lg max-h-60 overflow-y-auto z-50"></div>
                 </div>
-                <div class="w-full sm:w-40">
+                <div class="w-full sm:w-44 flex-none">
                     <select name="plan_type" class="block w-full rounded-lg border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white shadow-sm focus:border-[var(--brand-blue)] focus:ring-[var(--brand-blue)]">
                         <option value="">@lang('messages.all_plans')</option>
                         <option value="free" {{ request('plan_type') === 'free' ? 'selected' : '' }}>@lang('messages.free')</option>
@@ -142,15 +147,23 @@
                         <option value="enterprise" {{ request('plan_type') === 'enterprise' ? 'selected' : '' }}>@lang('messages.enterprise')</option>
                     </select>
                 </div>
-                <div class="w-full sm:w-40">
+                <div class="w-full sm:w-44 flex-none">
                     <select name="status" class="block w-full rounded-lg border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white shadow-sm focus:border-[var(--brand-blue)] focus:ring-[var(--brand-blue)]">
                         <option value="">@lang('messages.all_status')</option>
                         <option value="active" {{ request('status') === 'active' ? 'selected' : '' }}>@lang('messages.active')</option>
                         <option value="expired" {{ request('status') === 'expired' ? 'selected' : '' }}>@lang('messages.expired')</option>
                         <option value="trial" {{ request('status') === 'trial' ? 'selected' : '' }}>@lang('messages.trial')</option>
+                        <option value="deleted" {{ request('status') === 'deleted' ? 'selected' : '' }}>@lang('messages.deleted')</option>
                     </select>
                 </div>
-                <div class="w-full sm:w-40">
+                <div class="w-full sm:w-44 flex-none">
+                    <select name="owner" class="block w-full rounded-lg border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white shadow-sm focus:border-[var(--brand-blue)] focus:ring-[var(--brand-blue)]">
+                        <option value="">@lang('messages.claimed')</option>
+                        <option value="unclaimed" {{ request('owner') === 'unclaimed' ? 'selected' : '' }}>@lang('messages.unclaimed')</option>
+                        <option value="any" {{ request('owner') === 'any' ? 'selected' : '' }}>@lang('messages.all_owners')</option>
+                    </select>
+                </div>
+                <div class="w-full sm:w-44 flex-none">
                     <select name="source" class="block w-full rounded-lg border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white shadow-sm focus:border-[var(--brand-blue)] focus:ring-[var(--brand-blue)]">
                         <option value="">@lang('messages.all_sources')</option>
                         <option value="stripe" {{ request('source') === 'stripe' ? 'selected' : '' }}>@lang('messages.stripe')</option>
@@ -158,7 +171,7 @@
                         <option value="trial" {{ request('source') === 'trial' ? 'selected' : '' }}>@lang('messages.trial')</option>
                     </select>
                 </div>
-                <div class="w-full sm:w-40">
+                <div class="w-full sm:w-44 flex-none">
                     <select name="verification" class="block w-full rounded-lg border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white shadow-sm focus:border-[var(--brand-blue)] focus:ring-[var(--brand-blue)]">
                         <option value="">@lang('messages.all')</option>
                         <option value="verified" {{ request('verification') === 'verified' ? 'selected' : '' }}>@lang('messages.verified')</option>
@@ -169,7 +182,7 @@
                     <x-brand-button type="submit">
                         @lang('messages.filter')
                     </x-brand-button>
-                    @if(request('search') || request('plan_type') || request('status') || request('source') || request('verification'))
+                    @if(request('search') || request('plan_type') || request('status') || request('source') || request('verification') || request('owner'))
                         <x-secondary-link :href="route('admin.schedules')">
                             @lang('messages.clear')
                         </x-secondary-link>
@@ -220,6 +233,18 @@
                                                 <a href="{{ route('role.view_guest', ['subdomain' => $role->subdomain]) }}" target="_blank" class="text-sm font-medium text-gray-900 dark:text-white hover:text-indigo-600 dark:hover:text-indigo-400">
                                                     {{ $role->name }}
                                                 </a>
+                                                @if ($role->is_deleted)
+                                                    <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-300">
+                                                        @lang('messages.deleted')
+                                                    </span>
+                                                @endif
+                                                @if (! $role->user_id)
+                                                    {{-- No owner: a venue or talent EventRepo auto-created while importing an
+                                                         event. It has no public page, but it does hold a subdomain. --}}
+                                                    <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-gray-100 text-gray-700 dark:bg-gray-700 dark:text-gray-300">
+                                                        @lang('messages.unclaimed')
+                                                    </span>
+                                                @endif
                                                 @if (! $role->email && ! $role->phone)
                                                     <span class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-amber-100 text-amber-800 dark:bg-amber-900 dark:text-amber-300">
                                                         @lang('messages.unverified')
@@ -245,7 +270,14 @@
                                                     @endif
                                                 @endif
                                             </div>
-                                            <div class="text-sm text-gray-500 dark:text-gray-400">{{ $role->subdomain }}</div>
+                                            <div class="text-sm text-gray-500 dark:text-gray-400">
+                                                {{ $role->subdomain }}
+                                                @if ($role->subdomain_before_delete)
+                                                    <span class="text-xs text-gray-400 dark:text-gray-500">
+                                                        &middot; @lang('messages.original_subdomain', ['subdomain' => $role->subdomain_before_delete])
+                                                    </span>
+                                                @endif
+                                            </div>
                                         </div>
                                     </div>
                                 </td>
@@ -315,9 +347,33 @@
                                     @endif
                                 </td>
                                 <td class="px-6 py-4 whitespace-nowrap text-end text-sm font-medium">
-                                    <a href="{{ route('admin.schedules.edit', ['role' => $role->encodeId()]) }}" class="text-indigo-600 hover:text-indigo-900 dark:text-indigo-400 dark:hover:text-indigo-300">
-                                        @lang('messages.edit')
-                                    </a>
+                                    {{-- One action beside Edit, not three: the row is already the
+                                         widest on the page, and the full set (with the copy that
+                                         explains what a release does) lives on the edit page. --}}
+                                    <div class="flex items-center justify-end gap-3">
+                                        <a href="{{ route('admin.schedules.edit', ['role' => $role->encodeId()]) }}" class="text-indigo-600 hover:text-indigo-900 dark:text-indigo-400 dark:hover:text-indigo-300">
+                                            @lang('messages.edit')
+                                        </a>
+                                        @if ($role->is_deleted && $role->subdomain_before_delete)
+                                            <form method="POST" action="{{ route('admin.schedules.restore', ['role' => $role->encodeId()]) }}" class="inline">
+                                                @csrf
+                                                <button type="submit" class="text-[var(--brand-blue)] hover:underline"
+                                                    data-confirm="{{ __('messages.restore_schedule_confirm') }}">
+                                                    @lang('messages.restore')
+                                                </button>
+                                            </form>
+                                        @else
+                                            {{-- A deleted row with no recorded original is one the API, unfollow or
+                                                 merge paths left behind: still deleted, still holding its name. --}}
+                                            <form method="POST" action="{{ route('admin.schedules.mark_deleted', ['role' => $role->encodeId()]) }}" class="inline">
+                                                @csrf
+                                                <button type="submit" class="text-red-600 hover:underline dark:text-red-400"
+                                                    data-confirm="{{ $role->is_deleted ? __('messages.release_subdomain_confirm') : __('messages.mark_deleted_confirm') }}">
+                                                    {{ $role->is_deleted ? __('messages.release') : __('messages.delete') }}
+                                                </button>
+                                            </form>
+                                        @endif
+                                    </div>
                                 </td>
                             </tr>
                         @empty

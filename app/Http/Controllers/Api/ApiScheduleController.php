@@ -12,6 +12,7 @@ use App\Notifications\DeletedRoleNotification;
 use App\Services\AuditService;
 use App\Services\BoostBillingService;
 use App\Services\MetaAdsService;
+use App\Services\ScheduleDeletionService;
 use App\Utils\ColorUtils;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Notification;
@@ -364,8 +365,11 @@ class ApiScheduleController extends Controller
             }
         }
 
-        $role->is_deleted = true;
-        $role->save();
+        // Releases the subdomain as well as setting the flag. Setting is_deleted alone left the
+        // name consumed forever - roles.subdomain is UNIQUE and every availability check ignores
+        // the flag - which made this endpoint the supported way to squat a good subdomain
+        // permanently. Shared with the admin action so "deleted" means one thing.
+        app(ScheduleDeletionService::class)->markDeleted($role, $request->user()?->id);
 
         return response()->json([
             'data' => [

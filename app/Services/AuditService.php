@@ -179,6 +179,12 @@ class AuditService
 
     const ADMIN_DOMAIN_REMOVE = 'admin.domain_remove';
 
+    const ADMIN_SCHEDULE_DELETE = 'admin.schedule_delete';
+
+    const ADMIN_SCHEDULE_RESTORE = 'admin.schedule_restore';
+
+    const ADMIN_SCHEDULE_UPDATE = 'admin.schedule_update';
+
     const ADMIN_GRANT = 'admin.grant';
 
     const ADMIN_REVOKE = 'admin.revoke';

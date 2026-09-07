@@ -1719,7 +1719,12 @@ class RoleController extends Controller
 
         $role = Role::subdomain($subdomain)->with('groups')->first();
 
-        if (! $role || ! $role->isClaimed()) {
+        // is_deleted too, not just isClaimed(). An admin releasing a squatted subdomain renames
+        // this row, but the API delete, unfollow and merge paths have all been soft-deleting
+        // WITHOUT renaming - so those schedules kept serving this page indefinitely while their
+        // owner had already lost access to them (User::roles() filters is_deleted). The web app
+        // manifest has always filtered here; this makes the page agree with it.
+        if (! $role || $role->is_deleted || ! $role->isClaimed()) {
             return redirect(app_url());
         }
 
@@ -2386,7 +2391,7 @@ class RoleController extends Controller
     {
         $role = Role::subdomain($subdomain)->with('groups')->first();
 
-        if (! $role || ! $role->isClaimed()) {
+        if (! $role || $role->is_deleted || ! $role->isClaimed()) {
             return response()->json(['events' => [], 'has_more' => false]);
         }
 
@@ -2701,7 +2706,7 @@ class RoleController extends Controller
     {
         $role = Role::subdomain($subdomain)->with('groups')->first();
 
-        if (! $role || ! $role->isClaimed()) {
+        if (! $role || $role->is_deleted || ! $role->isClaimed()) {
             return response()->json(['events' => [], 'eventsMap' => (object) [], 'pastEvents' => [], 'hasMorePastEvents' => false, 'filterMeta' => ['uniqueCategoryIds' => [], 'hasOnlineEvents' => false]]);
         }
 
@@ -6806,11 +6811,20 @@ class RoleController extends Controller
             $query->where('subdomain', 'like', "{$q}%")
                 ->orWhere('name', 'like', "%{$q}%");
         })
-            ->where('is_deleted', false)
+            // Deleted schedules are excluded unless the caller says otherwise, because most
+            // callers here are owner-facing pickers (the approve list, curator sources, the merge
+            // targets) that must never be offered one. Only /admin/schedules opts in, and only
+            // when its own list is showing them - the two have to agree, or the dropdown offers
+            // rows the table cannot return.
+            ->when(! $request->boolean('include_deleted'), fn ($query) => $query->where('is_deleted', false))
             ->when(! empty($exclude), fn ($query) => $query->whereNotIn('subdomain', $exclude))
             ->when(! empty($types), fn ($query) => $query->whereIn('type', $types))
             ->when($request->boolean('claimed'), fn ($query) => $query->claimed())
-            ->when($request->boolean('admin_listable'), fn ($query) => $query->adminListable())
+            ->when($request->boolean('admin_listable'), fn ($query) => match ($request->input('owner')) {
+                'unclaimed' => $query->adminListableUnclaimed(),
+                'any' => $query->adminListableAny(),
+                default => $query->adminListable(),
+            })
             ->limit(10)
             ->get(['subdomain', 'name', 'city']);
 

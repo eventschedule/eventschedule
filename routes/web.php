@@ -926,6 +926,13 @@ Route::middleware(['auth', 'verified', 'app_subdomain'])->group(function () {
             Route::put('/admin/schedules/{role}', [AdminController::class, 'updateSchedule'])->name('admin.schedules.update');
             Route::post('/admin/schedules/{role}/verify-email', [AdminController::class, 'verifyScheduleEmail'])->name('admin.schedules.verify_email');
             Route::post('/admin/schedules/{role}/verify-phone', [AdminController::class, 'verifySchedulePhone'])->name('admin.schedules.verify_phone');
+            // Taking a squatted subdomain back. mark-deleted also RELEASES the name (roles.subdomain
+            // is UNIQUE, so the row has to be renamed for anyone else to have it), and it tolerates
+            // an already-deleted row so the backlog the API/unfollow/merge paths left behind -
+            // deleted but still holding their names - is reachable too.
+            Route::post('/admin/schedules/{role}/mark-deleted', [AdminController::class, 'markScheduleDeleted'])->name('admin.schedules.mark_deleted');
+            Route::post('/admin/schedules/{role}/restore', [AdminController::class, 'restoreSchedule'])->name('admin.schedules.restore');
+            Route::put('/admin/schedules/{role}/details', [AdminController::class, 'updateScheduleDetails'])->name('admin.schedules.update_details');
         }
 
         if (config('app.hosted')) {

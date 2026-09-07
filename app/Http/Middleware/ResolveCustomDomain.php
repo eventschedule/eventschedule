@@ -34,6 +34,12 @@ class ResolveCustomDomain
                 return Role::where('custom_domain_host', $host)
                     ->where('custom_domain_mode', 'direct')
                     ->where('custom_domain_status', 'active')
+                    // A deleted schedule must not resolve here. This rewrites HOST to
+                    // {$role->subdomain}.{$baseDomain}, and an admin releasing a squatted
+                    // subdomain renames the row - so without this filter, a request on the old
+                    // custom domain would be routed to whichever schedule has since CLAIMED that
+                    // name. The release forgets this cache key for the same reason.
+                    ->where('is_deleted', false)
                     ->first(['id', 'subdomain', 'custom_domain_host']);
             });
         } catch (\Illuminate\Database\QueryException $e) {

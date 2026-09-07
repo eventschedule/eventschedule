@@ -148,4 +148,82 @@ class AdminSchedulesFilterPickerTest extends TestCase
             ->getJson(route('role.search-subdomains', ['q' => 'Alpha']))
             ->json());
     }
+
+    /**
+     * The default list no longer includes deleted schedules.
+     *
+     * It used to: adminListable() never filtered is_deleted, while the picker above the table
+     * hardcoded a filter against them. So searching the dropdown for a deleted schedule found
+     * nothing, and typing the same name and pressing Filter found it. Both sides now agree.
+     */
+    public function test_the_default_list_excludes_deleted_schedules(): void
+    {
+        $owner = $this->createOwner();
+        $this->createRole($owner, 'venue', ['name' => 'Live Venue']);
+        $this->createRole($owner, 'venue', ['name' => 'Closed Venue', 'is_deleted' => true]);
+
+        $admin = $this->actingAsAdmin();
+
+        $this->assertSame(1, $admin->get(route('admin.schedules'))->viewData('roles')->total());
+        $this->assertSame(
+            1,
+            $admin->get(route('admin.schedules', ['status' => 'deleted']))->viewData('roles')->total()
+        );
+    }
+
+    /**
+     * An ownerless auto-created schedule is the likeliest squatter of a good subdomain, so the
+     * admin can now opt into seeing them - and the picker has to follow, or it is back to
+     * offering rows the table cannot return.
+     */
+    public function test_the_picker_follows_the_owner_filter(): void
+    {
+        $unclaimed = $this->createUnclaimedRole('Ownerless Hall');
+
+        $admin = $this->actingAsAdmin();
+
+        $this->assertSame([], $admin->getJson(route('role.search-subdomains', [
+            'q' => $unclaimed->subdomain,
+            'admin_listable' => 1,
+        ]))->assertOk()->json(), 'still absent by default');
+
+        $offered = $admin->getJson(route('role.search-subdomains', [
+            'q' => $unclaimed->subdomain,
+            'admin_listable' => 1,
+            'owner' => 'unclaimed',
+        ]))->assertOk()->json();
+
+        $this->assertSame([$unclaimed->subdomain], array_column($offered, 'subdomain'));
+
+        // And the table can genuinely return it, which is the property that matters.
+        $this->assertSame(1, $admin->get(route('admin.schedules', [
+            'search' => $unclaimed->subdomain,
+            'owner' => 'unclaimed',
+        ]))->viewData('roles')->total());
+    }
+
+    /**
+     * include_deleted is opt-in. The owner-facing pickers that share this endpoint - the approve
+     * list, curator sources, the merge targets - must never be offered a deleted schedule.
+     */
+    public function test_the_picker_offers_deleted_schedules_only_when_asked(): void
+    {
+        $owner = $this->createOwner();
+        $role = $this->createRole($owner, 'venue', ['name' => 'Closed Venue', 'is_deleted' => true]);
+
+        $admin = $this->actingAsAdmin();
+
+        $this->assertSame([], $admin->getJson(route('role.search-subdomains', [
+            'q' => $role->subdomain,
+            'admin_listable' => 1,
+        ]))->assertOk()->json());
+
+        $offered = $admin->getJson(route('role.search-subdomains', [
+            'q' => $role->subdomain,
+            'admin_listable' => 1,
+            'include_deleted' => 1,
+        ]))->assertOk()->json();
+
+        $this->assertSame([$role->subdomain], array_column($offered, 'subdomain'));
+    }
 }

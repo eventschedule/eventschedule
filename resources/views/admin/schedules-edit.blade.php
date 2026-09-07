@@ -21,6 +21,18 @@
             </x-secondary-link>
         </div>
 
+        @if (session('success'))
+            <div class="bg-green-50 dark:bg-green-900/30 border border-green-200 dark:border-green-800 rounded-lg p-4">
+                <p class="text-sm text-green-800 dark:text-green-200">{{ session('success') }}</p>
+            </div>
+        @endif
+
+        @if (session('error'))
+            <div class="bg-red-50 dark:bg-red-900/30 border border-red-200 dark:border-red-800 rounded-lg p-4">
+                <p class="text-sm text-red-800 dark:text-red-200">{{ session('error') }}</p>
+            </div>
+        @endif
+
         {{-- Current Status Info Box --}}
         <div class="bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-lg p-4">
             <h3 class="text-sm font-medium text-blue-800 dark:text-blue-300 mb-3">@lang('messages.current_subscription_status')</h3>
@@ -47,6 +59,71 @@
                 @endif
             </div>
         </div>
+
+        {{-- Schedule Details --}}
+        <form method="POST" action="{{ route('admin.schedules.update_details', ['role' => $role->encodeId()]) }}" class="ap-card rounded-xl shadow">
+            @csrf
+            @method('PUT')
+
+            <div class="p-6 space-y-6">
+                <h3 class="text-sm font-medium text-gray-900 dark:text-white">@lang('messages.schedule_details')</h3>
+
+                <div>
+                    <label for="name" class="block text-sm font-medium text-gray-700 dark:text-gray-300">@lang('messages.name')</label>
+                    <input type="text" name="name" id="name" value="{{ old('name', $role->name) }}" dir="auto"
+                        class="mt-1 block w-full rounded-lg border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white shadow-sm focus:border-[var(--brand-blue)] focus:ring-[var(--brand-blue)]">
+                    @error('name')
+                        <p class="mt-1 text-sm text-red-600 dark:text-red-400">{{ $message }}</p>
+                    @enderror
+                </div>
+
+                <div>
+                    <label for="new_subdomain" class="block text-sm font-medium text-gray-700 dark:text-gray-300">@lang('messages.subdomain')</label>
+                    <input type="text" name="new_subdomain" id="new_subdomain" value="{{ old('new_subdomain', $role->subdomain) }}"
+                        class="mt-1 block w-full rounded-lg border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white shadow-sm focus:border-[var(--brand-blue)] focus:ring-[var(--brand-blue)]">
+                    @error('new_subdomain')
+                        <p class="mt-1 text-sm text-red-600 dark:text-red-400">{{ $message }}</p>
+                    @enderror
+                </div>
+
+                <div>
+                    <label for="email" class="block text-sm font-medium text-gray-700 dark:text-gray-300">@lang('messages.email')</label>
+                    <input type="email" name="email" id="email" value="{{ old('email', $role->email) }}"
+                        class="mt-1 block w-full rounded-lg border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white shadow-sm focus:border-[var(--brand-blue)] focus:ring-[var(--brand-blue)]">
+                    @error('email')
+                        <p class="mt-1 text-sm text-red-600 dark:text-red-400">{{ $message }}</p>
+                    @enderror
+
+                    {{-- Role::boot()'s `updating` hook does this, and it is easy to trip over. --}}
+                    <div class="mt-2 bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-700 rounded-lg p-3">
+                        <div class="flex items-start gap-3">
+                            <svg class="w-5 h-5 text-amber-600 dark:text-amber-400 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+                            </svg>
+                            <p class="text-sm text-amber-800 dark:text-amber-300">@lang('messages.email_change_resends_verification')</p>
+                        </div>
+                    </div>
+                </div>
+
+                <div>
+                    <label for="phone" class="block text-sm font-medium text-gray-700 dark:text-gray-300">@lang('messages.phone')</label>
+                    <input type="text" name="phone" id="phone" value="{{ old('phone', $role->phone) }}" placeholder="+15551234567"
+                        class="mt-1 block w-full rounded-lg border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white shadow-sm focus:border-[var(--brand-blue)] focus:ring-[var(--brand-blue)]">
+                    @error('phone')
+                        <p class="mt-1 text-sm text-red-600 dark:text-red-400">{{ $message }}</p>
+                    @enderror
+                </div>
+            </div>
+
+            <div class="px-6 py-4 bg-gray-50 dark:bg-gray-700/50 rounded-b-lg flex items-center justify-end gap-4">
+                <x-secondary-link :href="route('admin.schedules')">
+                    @lang('messages.cancel')
+                </x-secondary-link>
+                <x-brand-button type="submit">
+                    @lang('messages.save_changes')
+                </x-brand-button>
+            </div>
+        </form>
 
         {{-- Email Verification --}}
         @if ($role->hasVerifiedEmail())
@@ -185,6 +262,84 @@
                 </x-brand-button>
             </div>
         </form>
+
+        {{-- Deletion / subdomain release.
+
+             roles.subdomain is UNIQUE, so freeing a squatted name means renaming the row that
+             holds it. The schedule and all its history survive and this is reversible; what may
+             not survive is getting the original name back, because the whole point is that
+             somebody else can take it. --}}
+        <div class="ap-card rounded-xl shadow p-6 space-y-4">
+            {{-- Neutral heading once deleted: the card can offer Restore AND Release at that
+                 point, so naming it after either one reads as the only choice. --}}
+            <h3 class="text-sm font-medium text-gray-900 dark:text-white">
+                {{ $role->is_deleted ? __('messages.deleted') : __('messages.mark_schedule_deleted') }}
+            </h3>
+
+            @if ($role->is_deleted)
+                <p class="text-sm text-gray-600 dark:text-gray-400">
+                    @if ($role->subdomain_before_delete && $originalHolder)
+                        @lang('messages.restore_keeps_subdomain', ['original' => $role->subdomain_before_delete, 'subdomain' => $role->subdomain])
+                    @elseif ($role->subdomain_before_delete)
+                        @lang('messages.restore_reclaims_subdomain', ['subdomain' => $role->subdomain_before_delete])
+                    @else
+                        @lang('messages.release_subdomain_description', ['subdomain' => $role->subdomain])
+                    @endif
+                </p>
+
+                <div class="flex items-center justify-end gap-4">
+                    @if (! $role->subdomain_before_delete)
+                        <form method="POST" action="{{ route('admin.schedules.mark_deleted', ['role' => $role->encodeId()]) }}">
+                            @csrf
+                            <x-danger-button data-confirm="{{ __('messages.release_subdomain_confirm') }}">
+                                @lang('messages.release_subdomain')
+                            </x-danger-button>
+                        </form>
+                    @endif
+                    <form method="POST" action="{{ route('admin.schedules.restore', ['role' => $role->encodeId()]) }}">
+                        @csrf
+                        <x-brand-button type="submit" data-confirm="{{ __('messages.restore_schedule_confirm') }}">
+                            @lang('messages.restore_schedule')
+                        </x-brand-button>
+                    </form>
+                </div>
+            @else
+                <p class="text-sm text-gray-600 dark:text-gray-400">
+                    {{ $role->user_id ? __('messages.mark_deleted_description') : __('messages.mark_deleted_description_unclaimed') }}
+                </p>
+
+                @if ($role->hasActiveSubscription())
+                    <div class="bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-700 rounded-lg p-3">
+                        <div class="flex items-start gap-3">
+                            <svg class="w-5 h-5 text-amber-600 dark:text-amber-400 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+                            </svg>
+                            <p class="text-sm text-amber-800 dark:text-amber-300">@lang('messages.delete_keeps_subscription')</p>
+                        </div>
+                    </div>
+                @endif
+
+                @if ($role->custom_domain_host)
+                    <div class="bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-700 rounded-lg p-3">
+                        <div class="flex items-start gap-3">
+                            <svg class="w-5 h-5 text-amber-600 dark:text-amber-400 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+                            </svg>
+                            <p class="text-sm text-amber-800 dark:text-amber-300">@lang('messages.delete_keeps_custom_domain')</p>
+                        </div>
+                    </div>
+                @endif
+
+                <div class="flex items-center justify-end">
+                    <form method="POST" action="{{ route('admin.schedules.mark_deleted', ['role' => $role->encodeId()]) }}">
+                        @csrf
+                        <x-danger-button data-confirm="{{ __('messages.mark_deleted_confirm') }}">
+                            @lang('messages.mark_schedule_deleted')
+                        </x-danger-button>
+                    </form>
+                </div>
+            @endif
+        </div>
     </div>
     </div>
 
