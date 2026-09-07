@@ -4445,6 +4445,7 @@ return [
     'event_sources_help' => 'Voeg hier schema\'s van artiesten en locaties toe en al hun evenementen, zowel afgelopen als aankomend, verschijnen automatisch in dit schema. Nieuwe evenementen verschijnen zodra ze gepubliceerd worden.',
     'suggested_sources' => 'Voorgesteld',
     'suggested_sources_help' => 'Schema\'s waarmee je al evenementen deelt.',
+    'source_events_on_calendar' => '{0} Nog geen evenementen in je agenda|{1} :count evenement in je agenda|[2,*] :count evenementen in je agenda',
 
     // Installment ticket payments.
     'installments' => 'Betalen in termijnen',

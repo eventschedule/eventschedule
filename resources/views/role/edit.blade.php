@@ -4382,7 +4382,10 @@
                                  data-groups="{{ json_encode($curatorGroupOptions) }}"
                                  data-group-none="{{ __('messages.none') }}">
                                 @foreach($sourceRows as $row)
-                                    <div class="mb-2 relative" data-source-row>
+                                    {{-- mb-4, not mb-2: the count line below sits mt-1 off its own
+                                         select, so the gap BETWEEN rows has to be clearly larger or
+                                         the count reads as a label on the next source. --}}
+                                    <div class="mb-4 relative" data-source-row>
                                         <div class="flex items-center">
                                             <input type="text" data-source-search
                                                    value="{{ isset($sourceNames[$row['subdomain']]) ? $sourceNames[$row['subdomain']] . ' (' . $row['subdomain'] . ')' : $row['subdomain'] }}"
@@ -4403,6 +4406,16 @@
                                         </select>
                                         @else
                                         <input type="hidden" name="source_groups[]" value="" />
+                                        @endif
+                                        @php $sourceCount = ($sourceEventCounts ?? [])[$row['subdomain']] ?? null; @endphp
+                                        @if ($sourceCount !== null)
+                                        {{-- Saved sources only. A source already saved still shows its count when
+                                             the rows are rebuilt from old() after a failed save, since the map is
+                                             keyed by subdomain; only a genuinely new row falls through to null,
+                                             where "0" would read as a failure rather than as "not saved yet". --}}
+                                        <p class="mt-1 text-xs text-gray-500 dark:text-gray-400">
+                                            {{ trans_choice('messages.source_events_on_calendar', $sourceCount, ['count' => number_format($sourceCount)]) }}
+                                        </p>
                                         @endif
                                         <div data-source-dropdown class="hidden absolute left-0 right-0 mt-1 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl shadow-lg max-h-60 overflow-y-auto z-50"></div>
                                     </div>
@@ -5743,7 +5756,7 @@ function addSourceScheduleField(subdomain, name) {
 
     const groups = JSON.parse(container.dataset.groups || '{}');
     const div = document.createElement('div');
-    div.className = 'mb-2 relative';
+    div.className = 'mb-4 relative';
     div.setAttribute('data-source-row', '');
 
     let groupField = '<input type="hidden" name="source_groups[]" value="" />';

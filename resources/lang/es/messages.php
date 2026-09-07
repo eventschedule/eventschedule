@@ -4445,6 +4445,7 @@ return [
     'event_sources_help' => 'Añade aquí horarios de artistas y lugares y todos sus eventos, pasados y próximos, aparecerán en este horario automáticamente. Los nuevos eventos aparecen en cuanto se publican.',
     'suggested_sources' => 'Sugeridos',
     'suggested_sources_help' => 'Horarios con los que ya compartes eventos.',
+    'source_events_on_calendar' => '{0} Aún no hay eventos en tu calendario|{1} :count evento en tu calendario|[2,*] :count eventos en tu calendario',
 
     // Installment ticket payments.
     'installments' => 'Pagos a plazos',

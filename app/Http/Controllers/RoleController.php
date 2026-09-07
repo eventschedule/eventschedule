@@ -4364,6 +4364,7 @@ class RoleController extends Controller
         // Event sources: the talent/venue schedules this curator pulls events from.
         $sourceSchedules = collect();
         $suggestedSources = collect();
+        $sourceEventCounts = [];
         if ($role->exists && $role->isCurator()) {
             $sourceSchedules = $role->sources()
                 ->with('sourceRole')
@@ -4371,6 +4372,43 @@ class RoleController extends Controller
                 ->filter(fn ($source) => $source->sourceRole !== null)
                 ->sortBy(fn ($source) => $source->sourceRole->name)
                 ->values();
+
+            // How many of each source's events are on this curator's calendar right now.
+            //
+            // Coverage, not provenance: filtering on is_auto_sourced here would read zero for a
+            // venue that already fans its events across through default_curator_ids and is ALSO
+            // listed as a source, because linkMissing() never overwrites the row the push side
+            // wrote first, so no auto-sourced row is ever created. A working source reporting
+            // "none" is worse than showing no number at all.
+            //
+            // er.is_accepted drops an event the curator removed by hand - that leaves an
+            // is_accepted = false tombstone which unlinkStale() deliberately keeps - and
+            // src.is_accepted stops a source that has not accepted the event onto its own
+            // schedule from taking credit for it.
+            //
+            // event_role records no provenance, so an event covered by two sources counts under
+            // both and these do not sum to the curator's event total.
+            if ($sourceSchedules->isNotEmpty()) {
+                $landed = DB::table('event_role as src')
+                    ->join('event_role as er', function ($join) use ($role) {
+                        $join->on('er.event_id', '=', 'src.event_id')
+                            ->where('er.role_id', '=', $role->id)
+                            ->where('er.is_accepted', '=', true);
+                    })
+                    ->whereIn('src.role_id', $sourceSchedules->pluck('source_role_id')->all())
+                    ->where('src.is_accepted', true)
+                    ->groupBy('src.role_id')
+                    ->select('src.role_id', DB::raw('COUNT(DISTINCT src.event_id) as event_count'))
+                    ->pluck('event_count', 'src.role_id');
+
+                // Keyed by subdomain: that is all the view's row list carries, since it can be
+                // rebuilt from old() input after a failed save.
+                $sourceEventCounts = $sourceSchedules
+                    ->mapWithKeys(fn ($source) => [
+                        $source->sourceRole->subdomain => (int) ($landed[$source->source_role_id] ?? 0),
+                    ])
+                    ->all();
+            }
 
             // Schedules this curator has already shared events with, minus the ones it
             // already pulls from. Same event_role self-join the AI import venue list uses.
@@ -4451,6 +4489,7 @@ class RoleController extends Controller
             'availableCurators' => $availableCurators,
             'sourceSchedules' => $sourceSchedules,
             'suggestedSources' => $suggestedSources,
+            'sourceEventCounts' => $sourceEventCounts,
             'notificationSettings' => $notificationSettings,
             'userCalendarId' => $pivot?->google_calendar_id,
             'userMicrosoftCalendarId' => $pivot?->microsoft_calendar_id,

@@ -4824,6 +4824,7 @@ return [
     'event_sources_help' => 'Add talent and venue schedules here and all of their events, past and upcoming, appear on this schedule automatically. New events show up as soon as they are published.',
     'suggested_sources' => 'Suggested',
     'suggested_sources_help' => 'Schedules you already share events with.',
+    'source_events_on_calendar' => '{0} No events on your calendar yet|{1} :count event on your calendar|[2,*] :count events on your calendar',
     // Installment ticket payments. Two vocabularies on purpose: the schema value is
     // `delinquent`, but a buyer is never told that. Buyers read "on hold", organizers read
     // "overdue". SCA has its own strings because it is not a decline and must not read like one.

@@ -4445,6 +4445,7 @@ return [
     'event_sources_help' => 'Adicione aqui agendas de artistas e locais e todos os seus eventos, passados e futuros, aparecerão nesta agenda automaticamente. Os novos eventos aparecem assim que são publicados.',
     'suggested_sources' => 'Sugeridas',
     'suggested_sources_help' => 'Agendas com as quais já partilha eventos.',
+    'source_events_on_calendar' => '{0} Ainda não há eventos na sua agenda|{1} :count evento na sua agenda|[2,*] :count eventos na sua agenda',
 
     // Installment ticket payments.
     'installments' => 'Pagamento parcelado',

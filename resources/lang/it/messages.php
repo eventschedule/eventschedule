@@ -4445,6 +4445,7 @@ return [
     'event_sources_help' => 'Aggiungi qui i programmi di artisti e locali e tutti i loro eventi, passati e futuri, compariranno automaticamente in questo programma. I nuovi eventi compaiono appena vengono pubblicati.',
     'suggested_sources' => 'Suggeriti',
     'suggested_sources_help' => 'Programmi con cui condividi già degli eventi.',
+    'source_events_on_calendar' => '{0} Nessun evento nel tuo calendario|{1} :count evento nel tuo calendario|[2,*] :count eventi nel tuo calendario',
 
     // Installment ticket payments.
     'installments' => 'Pagamento rateale',

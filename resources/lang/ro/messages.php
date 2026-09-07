@@ -4484,6 +4484,7 @@ return [
     'event_sources_help' => 'Adaugă aici programe de artiști și locații, iar toate evenimentele lor, trecute și viitoare, vor apărea automat în acest program. Evenimentele noi apar imediat ce sunt publicate.',
     'suggested_sources' => 'Sugerate',
     'suggested_sources_help' => 'Programe cu care împarți deja evenimente.',
+    'source_events_on_calendar' => '{0} Încă niciun eveniment în calendarul tău|{1} :count eveniment în calendarul tău|[2,*] :count evenimente în calendarul tău',
 
     // Installment ticket payments.
     'installments' => 'Plata în rate',

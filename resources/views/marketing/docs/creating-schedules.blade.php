@@ -1126,7 +1126,8 @@
             <div class="doc-field">
                 <h3 class="font-semibold text-gray-900 dark:text-white mb-2">Schedules</h3>
                 <p class="text-sm text-gray-500 dark:text-gray-400 mb-3">Search by name or address and pick the talent or venue schedule you want. Only talent and venue schedules can be a source, so one curator never chains onto another.</p>
-                <p class="text-sm text-gray-500 dark:text-gray-400">Anything the schedule has chosen not to publish stays private: drafts, internal events, unlisted events and anything it has not accepted are all left out.</p>
+                <p class="text-sm text-gray-500 dark:text-gray-400 mb-3">Anything the schedule has chosen not to publish stays private: drafts, internal events, unlisted events and anything it has not accepted are all left out.</p>
+                <p class="text-sm text-gray-500 dark:text-gray-400">Each saved source shows how many of its events are on your calendar right now, past and upcoming, so you can tell at a glance whether it is feeding your schedule. An event you removed by hand is left out of that number.</p>
             </div>
             <div class="doc-field">
                 <h4 class="font-semibold text-gray-900 dark:text-white mb-2">Sub-schedule</h4>

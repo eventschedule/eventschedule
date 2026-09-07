@@ -4452,6 +4452,7 @@ return [
     'event_sources_help' => 'Ajoutez ici des plannings d\'artistes et de lieux et tous leurs événements, passés et à venir, apparaîtront automatiquement sur ce planning. Les nouveaux événements apparaissent dès leur publication.',
     'suggested_sources' => 'Suggestions',
     'suggested_sources_help' => 'Plannings avec lesquels vous partagez déjà des événements.',
+    'source_events_on_calendar' => '{0} Aucun événement dans votre agenda pour le moment|{1} :count événement dans votre agenda|[2,*] :count événements dans votre agenda',
 
     // Installment ticket payments.
     'installments' => 'Paiement en plusieurs fois',

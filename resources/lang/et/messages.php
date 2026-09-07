@@ -4464,6 +4464,7 @@ return [
     'event_sources_help' => 'Lisa siia esinejate ja toimumiskohtade ajakavad ning kõik nende sündmused, nii möödunud kui tulevased, ilmuvad sellesse ajakavasse automaatselt. Uued sündmused ilmuvad kohe pärast avaldamist.',
     'suggested_sources' => 'Soovitatud',
     'suggested_sources_help' => 'Ajakavad, millega juba jagad sündmusi.',
+    'source_events_on_calendar' => '{0} Sinu kalendris pole veel sündmusi|{1} :count sündmus sinu kalendris|[2,*] :count sündmust sinu kalendris',
 
     // Installment ticket payments.
     'installments' => 'Osamaksed',

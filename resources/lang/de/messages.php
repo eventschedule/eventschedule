@@ -4449,6 +4449,7 @@ return [
     'event_sources_help' => 'Fügen Sie hier Künstler- und Veranstaltungsort-Zeitpläne hinzu, und alle ihre vergangenen und kommenden Veranstaltungen erscheinen automatisch in diesem Zeitplan. Neue Veranstaltungen erscheinen, sobald sie veröffentlicht werden.',
     'suggested_sources' => 'Vorschläge',
     'suggested_sources_help' => 'Zeitpläne, mit denen Sie bereits Veranstaltungen teilen.',
+    'source_events_on_calendar' => '{0} Noch keine Veranstaltungen in Ihrem Kalender|{1} :count Veranstaltung in Ihrem Kalender|[2,*] :count Veranstaltungen in Ihrem Kalender',
 
     // Installment ticket payments.
     'installments' => 'Ratenzahlung',

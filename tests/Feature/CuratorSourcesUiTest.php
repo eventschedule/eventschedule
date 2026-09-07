@@ -311,4 +311,254 @@ class CuratorSourcesUiTest extends TestCase
             array_column($results, 'name')
         );
     }
+
+    /**
+     * The per-source count on the edit page.
+     *
+     * It counts this source's events that are on the curator's calendar and still accepted,
+     * so it says what the calendar shows rather than what the source holds.
+     */
+    public function test_a_source_row_shows_how_many_of_its_events_are_on_the_calendar(): void
+    {
+        $owner = $this->createOwner();
+        $curator = $this->createCurator($owner);
+        $venue = $this->createRole($owner, 'venue');
+        for ($i = 0; $i < 3; $i++) {
+            $this->createEvent($venue, ['name' => 'Event '.$i]);
+        }
+
+        $this->putRole($curator, ['source_schedules' => [$venue->subdomain], 'source_groups' => ['']]);
+
+        $this->actingAs($owner)
+            ->get(route('role.edit', ['subdomain' => $curator->subdomain]))
+            ->assertOk()
+            ->assertSee('3 events on your calendar')
+            ->assertDontSee('No events on your calendar yet');
+    }
+
+    /** A connected source with nothing to give says so, rather than showing nothing. */
+    public function test_a_source_with_no_events_on_the_calendar_says_so(): void
+    {
+        $owner = $this->createOwner();
+        $curator = $this->createCurator($owner);
+        $venue = $this->createRole($owner, 'venue');
+        $this->createEvent($venue, ['is_draft' => true]);
+
+        $this->putRole($curator, ['source_schedules' => [$venue->subdomain], 'source_groups' => ['']]);
+
+        $this->actingAs($owner)
+            ->get(route('role.edit', ['subdomain' => $curator->subdomain]))
+            ->assertOk()
+            ->assertSee('No events on your calendar yet');
+    }
+
+    /**
+     * An event the curator removed by hand is not counted.
+     *
+     * Removal leaves an is_accepted = false tombstone on the auto-sourced row rather than
+     * deleting it, so counting the rows without that gate would keep reporting the event
+     * long after it left the calendar.
+     */
+    public function test_an_event_removed_from_the_curator_is_not_counted(): void
+    {
+        $owner = $this->createOwner();
+        $curator = $this->createCurator($owner);
+        $venue = $this->createRole($owner, 'venue');
+        $events = [];
+        for ($i = 0; $i < 3; $i++) {
+            $events[] = $this->createEvent($venue, ['name' => 'Event '.$i]);
+        }
+
+        $this->putRole($curator, ['source_schedules' => [$venue->subdomain], 'source_groups' => ['']]);
+
+        // The shape EventController::uncurate() writes.
+        DB::table('event_role')
+            ->where('role_id', $curator->id)
+            ->where('event_id', $events[0]->id)
+            ->update(['is_accepted' => false]);
+
+        $this->actingAs($owner)
+            ->get(route('role.edit', ['subdomain' => $curator->subdomain]))
+            ->assertOk()
+            ->assertSee('2 events on your calendar');
+    }
+
+    /**
+     * An event the curator had already added by hand still counts against the source.
+     *
+     * The number is coverage, not provenance: linkMissing() never overwrites an existing
+     * event_role row, so that one keeps is_auto_sourced = 0 - but it is on the calendar and it
+     * is one of the source's events, so the source gets credit for it. Filtering on
+     * is_auto_sourced here is what made a fully working source report zero.
+     */
+    public function test_an_event_added_by_hand_still_counts_against_the_source(): void
+    {
+        $owner = $this->createOwner();
+        $curator = $this->createCurator($owner);
+        $venue = $this->createRole($owner, 'venue');
+        $byHand = $this->createEvent($venue, ['name' => 'By hand']);
+        $this->createEvent($venue, ['name' => 'Sourced']);
+
+        // Added before the source exists, so the reconcile leaves the row alone.
+        $curator->events()->attach($byHand->id, ['is_accepted' => true]);
+
+        $this->putRole($curator, ['source_schedules' => [$venue->subdomain], 'source_groups' => ['']]);
+
+        // Only one of the two carries the auto-sourced marker.
+        $this->assertSame(1, DB::table('event_role')
+            ->where('role_id', $curator->id)
+            ->where('is_auto_sourced', true)
+            ->count());
+
+        $this->actingAs($owner)
+            ->get(route('role.edit', ['subdomain' => $curator->subdomain]))
+            ->assertOk()
+            ->assertSee('2 events on your calendar');
+    }
+
+    /**
+     * A venue that fans its events across with default_curator_ids AND is listed as a source
+     * still reports them.
+     *
+     * Role::autoCurateEvent() attaches without is_auto_sourced, and linkMissing() never
+     * overwrites the row the push side wrote first, so not one of those events carries the
+     * marker. Counting provenance made this read "No events on your calendar yet" while every
+     * one of the venue's events was on the calendar - a working source looking broken.
+     */
+    public function test_a_push_curated_source_still_reports_its_events(): void
+    {
+        $owner = $this->createOwner();
+        $curator = $this->createCurator($owner);
+        $venue = $this->createRole($owner, 'venue');
+
+        $venue->default_curator_ids = [$curator->id];
+        $venue->save();
+
+        for ($i = 0; $i < 3; $i++) {
+            $venue->autoCurateEvent($this->createEvent($venue, ['name' => 'E'.$i]), $owner);
+        }
+
+        $this->putRole($curator, ['source_schedules' => [$venue->subdomain], 'source_groups' => ['']]);
+
+        $this->assertSame(0, DB::table('event_role')
+            ->where('role_id', $curator->id)
+            ->where('is_auto_sourced', true)
+            ->count(), 'the push side got there first, so nothing is marked auto-sourced');
+
+        $this->actingAs($owner)
+            ->get(route('role.edit', ['subdomain' => $curator->subdomain]))
+            ->assertOk()
+            ->assertSee('3 events on your calendar')
+            ->assertDontSee('No events on your calendar yet');
+    }
+
+    /** Each row carries its own number, not the same one repeated. */
+    public function test_each_source_row_carries_its_own_count(): void
+    {
+        $owner = $this->createOwner();
+        $curator = $this->createCurator($owner);
+        // Sorted by name, so the rows render Alpha first.
+        $alpha = $this->createRole($owner, 'venue', ['name' => 'Alpha Venue']);
+        $beta = $this->createRole($owner, 'venue', ['name' => 'Beta Venue']);
+        $this->createEvent($alpha, ['name' => 'A1']);
+        $this->createEvent($alpha, ['name' => 'A2']);
+        $this->createEvent($beta, ['name' => 'B1']);
+
+        $this->putRole($curator, [
+            'source_schedules' => [$alpha->subdomain, $beta->subdomain],
+            'source_groups' => ['', ''],
+        ]);
+
+        $this->actingAs($owner)
+            ->get(route('role.edit', ['subdomain' => $curator->subdomain]))
+            ->assertOk()
+            ->assertSeeInOrder([
+                $alpha->subdomain,
+                '2 events on your calendar',
+                $beta->subdomain,
+                '1 event on your calendar',
+            ]);
+    }
+
+    /**
+     * A source that has not accepted the event onto its own schedule gets no credit for it.
+     *
+     * linkMissing() only pulls through a source whose own pivot is accepted, so an event that
+     * is merely pending on a second source was never supplied by it. Without the src.is_accepted
+     * half of the join the count would credit that source for an event it has not even taken.
+     */
+    public function test_a_source_that_has_not_accepted_the_event_gets_no_credit(): void
+    {
+        $owner = $this->createOwner();
+        $curator = $this->createCurator($owner);
+        // Named so the name sort renders the venue first.
+        $venue = $this->createRole($owner, 'venue', ['name' => 'Alpha Venue']);
+        $talent = $this->createRole($owner, 'talent', ['name' => 'Beta Talent']);
+
+        $event = $this->createEvent($venue, ['name' => 'Shared']);
+        // Pending on the talent: the shape a submission leaves when the talent has not answered.
+        $event->roles()->attach($talent->id, ['is_accepted' => null]);
+
+        $this->putRole($curator, [
+            'source_schedules' => [$venue->subdomain, $talent->subdomain],
+            'source_groups' => ['', ''],
+        ]);
+
+        // It landed once, through the venue.
+        $this->assertSame(1, DB::table('event_role')
+            ->where('role_id', $curator->id)
+            ->where('is_auto_sourced', true)
+            ->count());
+
+        $this->actingAs($owner)
+            ->get(route('role.edit', ['subdomain' => $curator->subdomain]))
+            ->assertOk()
+            ->assertSeeInOrder([
+                $venue->subdomain,
+                '1 event on your calendar',
+                $talent->subdomain,
+                'No events on your calendar yet',
+            ]);
+    }
+
+    /**
+     * An event covered by two sources counts under both.
+     *
+     * event_role records no provenance, so each source reports what it supplies and the numbers
+     * deliberately do not sum to the curator's total - here 2 + 2 over 3 distinct events. A
+     * later de-duplication across sources would be a behaviour change, not a fix.
+     */
+    public function test_an_event_on_two_sources_counts_under_both(): void
+    {
+        $owner = $this->createOwner();
+        $curator = $this->createCurator($owner);
+        $venue = $this->createRole($owner, 'venue', ['name' => 'Alpha Venue']);
+        $talent = $this->createRole($owner, 'talent', ['name' => 'Beta Talent']);
+
+        $shared = $this->createEvent($venue, ['name' => 'Shared']);
+        $shared->roles()->attach($talent->id, ['is_accepted' => true]);
+        $this->createEvent($venue, ['name' => 'Venue only']);
+        $this->createEvent($talent, ['name' => 'Talent only']);
+
+        $this->putRole($curator, [
+            'source_schedules' => [$venue->subdomain, $talent->subdomain],
+            'source_groups' => ['', ''],
+        ]);
+
+        // Three distinct events on the curator, but each source supplies two of them.
+        $this->assertSame(3, DB::table('event_role')
+            ->where('role_id', $curator->id)
+            ->where('is_auto_sourced', true)
+            ->count());
+
+        $this->actingAs($owner)
+            ->get(route('role.edit', ['subdomain' => $curator->subdomain]))
+            ->assertOk()
+            ->assertSeeInOrder([
+                $venue->subdomain,
+                '2 events on your calendar',
+                $talent->subdomain,
+                '2 events on your calendar',
+            ]);
+    }
 }
