@@ -64,6 +64,29 @@ class UnclaimedSchedulePageTest extends TestCase
             ->assertSee(__('messages.claim_strip_not_me'));
     }
 
+    public function test_a_page_whose_dates_have_all_passed_still_names_its_creator(): void
+    {
+        // The strip's first line is the whole point of the page, and the creator is derived from
+        // the events on it. When they have all been and gone the upcoming query is empty and a
+        // second lookup answers instead - a branch nothing else reaches, and a common one: an act
+        // listed once, months ago.
+        $placeholder = $this->placeholder(['name' => 'Second On']);
+        $organizer = $this->createOwner();
+        $curator = $this->createRole($organizer, 'venue', ['name' => 'Ba-Be Bar']);
+        $past = $this->createEvent($curator, [
+            'name' => 'Last Winter',
+            'creator_role_id' => $curator->id,
+            'starts_at' => now()->subMonths(4)->setTime(20, 0)->format('Y-m-d H:i:s'),
+        ]);
+        $past->roles()->attach($placeholder->id, ['is_accepted' => true]);
+
+        $this->get($this->url($placeholder))
+            ->assertOk()
+            ->assertSee(__('messages.claim_strip_title', ['schedule' => 'Ba-Be Bar']))
+            ->assertDontSee(__('messages.claim_strip_title_generic'))
+            ->assertSee(__('messages.claim_strip_no_events'));
+    }
+
     public function test_the_page_is_never_indexable(): void
     {
         // Even after an admin verifies the address by hand, which is one click away from the
@@ -133,6 +156,41 @@ class UnclaimedSchedulePageTest extends TestCase
             ->assertOk()
             ->assertSee('Second On')
             ->assertSee($placeholder->getClaimUrl(), false);
+    }
+
+    public function test_a_bill_of_bare_names_does_not_become_a_stack_of_empty_cards(): void
+    {
+        // Showing the whole lineup is the point, but a card is a poor container for a name and
+        // nothing else: eight acts typed in by a promoter would be eight white boxes holding one
+        // line each, which is a worse page than the one this replaced. Anything with something to
+        // show keeps its card; the rest become one compact list, and every name still links to its
+        // own page.
+        $organizer = $this->createOwner();
+        $curator = $this->createRole($organizer, 'venue', ['name' => 'Ba-Be Bar']);
+        $event = $this->createEvent($curator, ['name' => 'Festival Night', 'creator_role_id' => $curator->id]);
+
+        $withBio = $this->placeholder(['name' => 'Headliner', 'description' => 'A band with a bio.']);
+        $event->roles()->attach($withBio->id, ['is_accepted' => true]);
+
+        $bare = collect(range(1, 5))->map(function ($i) use ($event) {
+            $act = $this->placeholder(['name' => "Support Act $i"]);
+            $event->roles()->attach($act->id, ['is_accepted' => true]);
+
+            return $act;
+        });
+
+        $html = $this->get(route('role.view_guest', ['subdomain' => $curator->subdomain]).'/'.$event->slug.'?id='.\App\Utils\UrlUtils::encodeId($event->id))
+            ->assertOk()
+            ->getContent();
+
+        $body = substr($html, strpos($html, '<body'));
+        $cards = preg_match_all('/<div class="bg-white\/95 dark:bg-gray-900\/95 backdrop-blur-sm sm:rounded-2xl overflow-hidden">/', $body);
+        $this->assertSame(1, $cards, 'only the act with something to show gets a card of its own');
+
+        foreach ($bare->push($withBio) as $act) {
+            $this->assertStringContainsString($act->name, $body);
+            $this->assertStringContainsString($act->getClaimUrl(), $body, 'every name on the bill reaches its own page');
+        }
     }
 
     public function test_an_unclaimed_acts_picture_is_rendered_once_not_twice(): void

@@ -173,7 +173,14 @@
           // to be dropped from this page entirely, name and all, while an unclaimed VENUE has
           // always rendered as plain text further down - an asymmetry rather than a policy, and
           // the reason a curator's carefully entered bill could come out empty.
-          $talentMembers = $event->members();
+          //
+          // Split in two, because a card is a poor container for a bare name. An eight-act
+          // festival whose acts were all typed in by the promoter renders eight white boxes with
+          // one line of text each, which is a worse page than the one this replaced. Anything with
+          // something to show keeps its card; the rest become one compact list below.
+          $allMembers = $event->members();
+          $talentMembers = $allMembers->filter(fn($m) => $m->isClaimed() || $m->getFirstVideoUrl() || $m->profile_image_url || $m->description);
+          $bareTalent = $allMembers->reject(fn($m) => $talentMembers->contains('id', $m->id));
           // Follows the widened list, and must. This gates the big square hero fallback below,
           // whose whole job is to supply an image when no talent card carries one - and an
           // unclaimed act with a picture now gets a card with that picture in it. Pinning this to
@@ -445,6 +452,33 @@
         </div>
         @php unset($talentUrl); @endphp
         @endforeach
+
+        {{-- The rest of the bill: acts somebody typed in by name and nothing more. One card and a
+             list, not one card each - see the note where $bareTalent is built. Each name links to
+             its own claim page where it has one, which is how an act finds out a page exists for
+             them without an invitation in hand. --}}
+        @if ($bareTalent->isNotEmpty())
+        <div class="bg-white/95 dark:bg-gray-900/95 backdrop-blur-sm sm:rounded-2xl p-5">
+          <h2 class="text-sm font-semibold uppercase tracking-wide text-gray-500 dark:text-gray-400">
+            {{ __('messages.talent') }}
+          </h2>
+          <ul class="mt-2 flex flex-col gap-1">
+            @foreach ($bareTalent as $bare)
+            <li dir="{{ content_dir_for_language($bare->nameInLanguage($displayLang), $displayLang) }}">
+              @if ($bare->getClaimUrl())
+                <a href="{{ $bare->getClaimUrl() }}" class="text-base text-gray-900 dark:text-gray-100 hover:underline">
+                  {!! str_replace(' , ', '<br>', e($bare->nameInLanguage($displayLang))) !!}
+                </a>
+              @else
+                <span class="text-base text-gray-900 dark:text-gray-100">
+                  {!! str_replace(' , ', '<br>', e($bare->nameInLanguage($displayLang))) !!}
+                </span>
+              @endif
+            </li>
+            @endforeach
+          </ul>
+        </div>
+        @endif
 
         {{-- Venue card --}}
         @if ($event->venue && ($event->venue->name || $event->venue->formatted_address))
