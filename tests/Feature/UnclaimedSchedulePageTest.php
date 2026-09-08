@@ -155,7 +155,11 @@ class UnclaimedSchedulePageTest extends TestCase
         $this->get(route('role.view_guest', ['subdomain' => $curator->subdomain]).'/'.$event->slug.'?id='.\App\Utils\UrlUtils::encodeId($event->id))
             ->assertOk()
             ->assertSee('Second On')
-            ->assertSee($placeholder->getClaimUrl(), false);
+            ->assertSee($placeholder->getClaimUrl(), false)
+            // The target is noindex,nofollow and these rows are unbounded. app-guest records five
+            // demo schedules taking ~165k of 637k Googlebot requests in 89 days; do not hand the
+            // crawler an unbounded new surface from every event page on the platform.
+            ->assertSee('rel="nofollow"', false);
     }
 
     public function test_a_bill_of_bare_names_does_not_become_a_stack_of_empty_cards(): void

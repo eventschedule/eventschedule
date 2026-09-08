@@ -339,7 +339,7 @@
                     @elseif ($each->getClaimUrl())
                       {{-- The act has a page of its own now, unclaimed but real, and this link is
                            the only way anybody reaches one without an invitation in hand. --}}
-                      <a href="{{ $each->getClaimUrl() }}" class="group inline {{ $role->isRtl() ? 'rtl' : '' }}" dir="{{ content_dir_for_language($each->nameInLanguage($displayLang), $displayLang) }}">
+                      <a href="{{ $each->getClaimUrl() }}" rel="nofollow" class="group inline {{ $role->isRtl() ? 'rtl' : '' }}" dir="{{ content_dir_for_language($each->nameInLanguage($displayLang), $displayLang) }}">
                         <span class="inline text-lg font-semibold text-gray-900 dark:text-gray-100 group-hover:underline" style="font-family: '{{ str_replace('_', ' ', $each->font_family) }}', sans-serif;">
                           {!! str_replace(' , ', '<br>', e($each->nameInLanguage($displayLang))) !!}
                         </span>
@@ -466,7 +466,7 @@
             @foreach ($bareTalent as $bare)
             <li dir="{{ content_dir_for_language($bare->nameInLanguage($displayLang), $displayLang) }}">
               @if ($bare->getClaimUrl())
-                <a href="{{ $bare->getClaimUrl() }}" class="text-base text-gray-900 dark:text-gray-100 hover:underline">
+                <a href="{{ $bare->getClaimUrl() }}" rel="nofollow" class="text-base text-gray-900 dark:text-gray-100 hover:underline">
                   {!! str_replace(' , ', '<br>', e($bare->nameInLanguage($displayLang))) !!}
                 </a>
               @else
