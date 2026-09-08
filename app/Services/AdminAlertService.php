@@ -87,6 +87,12 @@ class AdminAlertService
     public const BOOST_ALERT_DAYS = 30;
 
     /**
+     * How long a refund claim may sit unconfirmed before it is a person's problem rather than
+     * latency. Public because AdminController::revenue() windows its list to match.
+     */
+    public const REFUND_GRACE_MINUTES = 15;
+
+    /**
      * How long a DUE job may sit before the queue counts as stalled. Matches the threshold the
      * /admin/queue banner renders, so the badge and the page it links to cannot disagree.
      */
@@ -222,10 +228,9 @@ class AdminAlertService
             'sales_mismatch' => fn () => Sale::where('status', 'amount_mismatch')->count(),
             // The grace window keeps a refund that is merely in flight out of the list; a claim
             // still unresolved after it is one a person has to settle against the dashboard,
-            // because nothing here will ever retry it.
-            'refunds_unconfirmed' => fn () => SaleRefund::whereIn('status', ['pending', 'awaiting_reconciliation'])
-                ->where('created_at', '<=', now()->subMinutes(15))
-                ->count(),
+            // because nothing here will ever retry it. Shares its predicate with the panel on
+            // /admin/revenue that lists them, so the badge and the table cannot disagree.
+            'refunds_unconfirmed' => fn () => self::unconfirmedRefunds()->count(),
 
             'boosts_mismatch' => fn () => BoostCampaign::where('billing_status', 'amount_mismatch')->count(),
 
@@ -386,6 +391,23 @@ class AdminAlertService
     }
 
     /**
+     * Refund claims whose outcome the gateway never confirmed, past the grace window.
+     *
+     * Public because AdminController::revenue() lists exactly these rows: the badge says how many,
+     * the panel says which, and an operator cannot query production themselves. Never resolved by
+     * re-issuing the call - Stripe idempotency keys expire after 24h, so a later retry with a fresh
+     * key is how one refund becomes two - which is why this is a person's queue rather than a job's.
+     *
+     * The claim also holds its amount against the sale's refundable balance, so until someone
+     * settles it the owner's Refund control is gone.
+     */
+    public static function unconfirmedRefunds()
+    {
+        return SaleRefund::whereIn('status', ['pending', 'awaiting_reconciliation'])
+            ->where('created_at', '<=', now()->subMinutes(self::REFUND_GRACE_MINUTES));
+    }
+
+    /**
      * The four price ids this install currently sells, read through PlanPriceUtils rather than
      * from config directly so the alert cannot drift from the recognition the rest of the app
      * performs. Empty means the install sells no plans - not that every subscription is stranded.
@@ -420,7 +442,7 @@ class AdminAlertService
             'boosts_stuck' => ['manage', 'boost', 'admin.boost', [], '#boost-alerts', 'red', 'Boost'],
             'boosts_failed' => ['manage', 'boost', 'admin.boost', [], '#boost-alerts', 'red', 'Boost'],
             'sales_mismatch' => ['insights', 'revenue', 'admin.revenue', [], '#amount-mismatch', 'red', __('messages.revenue')],
-            'refunds_unconfirmed' => ['insights', 'revenue', 'admin.revenue', [], '#amount-mismatch', 'red', __('messages.revenue')],
+            'refunds_unconfirmed' => ['insights', 'revenue', 'admin.revenue', [], '#unconfirmed-refunds', 'red', __('messages.revenue')],
             'boosts_mismatch' => ['insights', 'revenue', 'admin.revenue', [], '#amount-mismatch', 'red', __('messages.revenue')],
             // Points at the existing Boost screen rather than adding a nav item, so there is
             // no new Route::has failure mode and the badge lands where the operator already

@@ -114,10 +114,19 @@
                                     @csrf
                                     <button type="submit" class="text-green-600 hover:text-green-800 dark:text-green-400 dark:hover:text-green-200 text-sm font-medium" data-confirm="Approve this sale as paid?">@lang('messages.approve_sale')</button>
                                 </form>
+                                {{-- Asked of the driver, because the row's transaction_reference being
+                                     non-empty proves nothing: a hand-marked sale carries the translated
+                                     manual_payment string, and Invoice Ninja carries an invoice id. Offering
+                                     Refund on those only ever produced an error and left the sale parked. --}}
+                                @php
+                                    $mismatchDriver = payment_gateways()->get($sale->payment_method);
+                                @endphp
+                                @if ($mismatchDriver?->supportsRefunds() && $mismatchDriver->refundReferenceFor($sale) !== null)
                                 <form method="POST" action="{{ route('admin.sale.refund', $sale->id) }}" class="inline ms-3">
                                     @csrf
                                     <button type="submit" class="text-red-600 hover:text-red-800 dark:text-red-400 dark:hover:text-red-200 text-sm font-medium" data-confirm="Refund this sale via Stripe?">@lang('messages.refund_sale')</button>
                                 </form>
+                                @endif
                             </td>
                         </tr>
                         @endforeach
@@ -196,6 +205,61 @@
                             <td class="px-4 py-3 text-sm text-red-600 dark:text-red-400">{{ $subscription->stripe_status }}</td>
                             <td class="px-4 py-3 text-sm text-gray-500 dark:text-gray-400" title="{{ $subscription->created_at }}">
                                 {{ \Illuminate\Support\Carbon::parse($subscription->created_at)->diffForHumans() }}
+                            </td>
+                        </tr>
+                        @endforeach
+                    </tbody>
+                </table>
+            </div>
+        </div>
+        @endif
+
+        {{-- Refund claims the gateway never confirmed.
+
+             Its own panel rather than a column on the mismatch table above: nothing in the app
+             will ever resolve one, because retrying a refund whose idempotency key has expired is
+             how one refund becomes two. Someone settles it against the gateway's dashboard, using
+             the reference below, and until they do the claim holds its amount against the sale's
+             refundable balance. --}}
+        @if ($unconfirmedRefunds->count() > 0)
+        <div id="unconfirmed-refunds" class="ap-card rounded-xl shadow p-6 border-l-4 border-red-500 scroll-mt-4">
+            <h3 class="text-lg font-medium text-red-600 dark:text-red-400 mb-2">@lang('messages.unconfirmed_refunds')</h3>
+            <p class="text-sm text-gray-600 dark:text-gray-300 mb-4 max-w-3xl">@lang('messages.unconfirmed_refunds_help')</p>
+            <div class="overflow-x-auto">
+                <table class="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
+                    <thead>
+                        <tr>
+                            <th class="px-4 py-3 text-start text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">@lang('messages.date')</th>
+                            <th class="px-4 py-3 text-start text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">@lang('messages.event')</th>
+                            <th class="px-4 py-3 text-end text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">@lang('messages.amount')</th>
+                            <th class="px-4 py-3 text-start text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">@lang('messages.status')</th>
+                            <th class="px-4 py-3 text-start text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">@lang('messages.reference')</th>
+                            <th class="px-4 py-3 text-start text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">@lang('messages.error')</th>
+                        </tr>
+                    </thead>
+                    <tbody class="divide-y divide-gray-200 dark:divide-gray-700">
+                        @foreach ($unconfirmedRefunds as $refund)
+                        <tr>
+                            <td class="px-4 py-3 text-sm text-gray-900 dark:text-white" title="{{ $refund->created_at->format('Y-m-d H:i:s') }}">
+                                {{ $refund->created_at->diffForHumans() }}
+                            </td>
+                            <td class="px-4 py-3 text-sm text-gray-900 dark:text-white">
+                                {{ \Illuminate\Support\Str::limit($refund->sale?->event?->name ?? '-', 30) }}
+                            </td>
+                            {{-- The refund's own snapshotted currency, not the event's: the event's
+                                 can be edited after the fact and this is a historical figure. --}}
+                            <td class="px-4 py-3 text-sm text-end font-medium text-amber-600 dark:text-amber-400">
+                                {{ \App\Utils\MoneyUtils::format($refund->amount, $refund->currency_code) }}
+                            </td>
+                            <td class="px-4 py-3 text-sm text-red-600 dark:text-red-400">{{ $refund->status }}</td>
+                            {{-- The gateway's refund id once we have one, otherwise the idempotency
+                                 key, which is what an operator searches the dashboard for when the
+                                 call's outcome was never reported back. --}}
+                            <td class="px-4 py-3 text-sm font-mono text-gray-500 dark:text-gray-400" title="{{ $refund->gateway_refund_id ?: $refund->idempotency_key }}">
+                                {{ \Illuminate\Support\Str::limit($refund->gateway_refund_id ?: $refund->idempotency_key, 24) }}
+                            </td>
+                            <td class="px-4 py-3 text-sm text-gray-500 dark:text-gray-400" title="{{ $refund->last_error }}">
+                                {{ $refund->last_error ? \Illuminate\Support\Str::limit($refund->last_error, 40) : '-' }}
                             </td>
                         </tr>
                         @endforeach

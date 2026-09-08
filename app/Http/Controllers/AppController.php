@@ -431,6 +431,16 @@ class AppController extends Controller
                     report($e);
                 }
 
+                // Keeps the stored GitHub star count warm so the "star us" badges never make an
+                // outbound call during a page render. Keep in sync with routes/console.php. Runs
+                // on nexus ONLY, and that gate lives inside the command rather than here.
+                try {
+                    \Artisan::call('app:check-github-stars');
+                } catch (\Throwable $e) {
+                    \Log::error('Scheduled command app:check-github-stars failed: '.$e->getMessage());
+                    report($e);
+                }
+
                 // Republish the admin translation manager's overrides from the database onto this
                 // container's disk. config('app.lang_overrides_path') defaults to storage/app/lang, which is
                 // per-container and does not survive a deploy - so on any host with more than one container,

@@ -2,7 +2,9 @@
 
 namespace Tests\Feature;
 
+use App\Utils\GitHubUtils;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Support\Facades\Http;
 use Tests\TestCase;
 
 /**
@@ -47,6 +49,37 @@ class TestEnvironmentTest extends TestCase
 
         // The end-to-end proof in one line: a marketing GET that nothing intercepts.
         $this->get('/pricing')->assertOk();
+    }
+
+    /**
+     * No page render may reach the network.
+     *
+     * GitHubUtils::getStars() is called by two view composers - layouts.app-admin and
+     * marketing.partials.header - so it sat on the render path of nearly every admin and marketing
+     * page. Its hour-long cache makes that one call an hour in production, but CACHE_STORE is
+     * `array` here and the container is rebuilt per test method, so the cache never hit and the
+     * suite made one live GET to api.github.com per rendered page. Unauthenticated GitHub allows
+     * 60 an hour: the run exhausted that almost immediately and every render afterwards blocked
+     * for the full timeout(5), turning a ~20s suite into minutes of a process sitting at 0% CPU
+     * inside curl_exec - and making it fail outright without a network.
+     *
+     * The test above renders /pricing, so it was one of the callers.
+     *
+     * Http::fake() rather than preventStrayRequests(): a fake records what WOULD have been sent,
+     * so this fails with the URL in the message instead of an exception from inside a composer.
+     * It only sees the Http facade, so a raw curl_exec (GeminiUtils and friends) would slip past.
+     */
+    public function test_no_page_render_reaches_the_network(): void
+    {
+        Http::fake();
+
+        // The function itself, which is what both composers call.
+        $this->assertNull(GitHubUtils::getStars());
+
+        // End to end, on the marketing header composer's own path.
+        $this->get('/pricing')->assertOk();
+
+        Http::assertNothingSent();
     }
 
     /**

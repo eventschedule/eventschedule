@@ -307,9 +307,9 @@
             <div class="doc-callout-title">Paid types need a payment method</div>
             <p>A paid type stays hidden from guests until a working payment method is connected, and the Appointments tab marks the type that is being held back. Connect Stripe or add a payment link under <a href="{{ route('marketing.docs.account_settings') }}#payments" class="doc-link">Account Settings</a> to make the type bookable.</p>
         </div>
-        <div class="doc-callout doc-callout-warning mb-2">
-            <div class="doc-callout-title">Refunds are manual</div>
-            <p>Cancelling a paid booking does not move any money on its own. To return it, refund the sale on the Sales page: a Stripe booking is refunded through Stripe from there, and every other payment method is marked refunded here and returned in your provider's own dashboard. The cancellation email to you shows the amount and reference so you have both to hand.</p>
+        <div class="doc-callout doc-callout-info mb-2">
+            <div class="doc-callout-title">How refunds work</div>
+            <p>Cancelling a paid booking does not move any money on its own. To return it, refund the sale on the Sales page: a Stripe booking is refunded through Stripe from there, and every other payment method is marked refunded here and returned in your provider's own dashboard. Refund only appears while the sale is still paid, so refund before you cancel - the cancellation email shows the amount and reference so you can return it in your provider's dashboard if you cancelled first.</p>
         </div>
     </section>
 

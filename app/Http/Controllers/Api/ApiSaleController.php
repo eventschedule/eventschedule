@@ -217,7 +217,11 @@ class ApiSaleController extends Controller
                     ], 200, [], JSON_PRETTY_PRINT);
                 }
 
-                $prev = 'paid';
+                // The status this refund was actually issued against, not a hardcoded 'paid'.
+                // REFUNDABLE_STATUSES also accepts amount_mismatch, so quoting 'paid' logged a
+                // transition that never happened. Read before the service call, which is the same
+                // instant the trait methods capture for the other actions.
+                $prev = $previousStatus;
                 break;
 
             case 'cancel':

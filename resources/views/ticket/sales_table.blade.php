@@ -143,31 +143,6 @@
                                             </svg>
                                             {{ __('messages.paid') }}
                                         </span>
-
-                                        {{-- A partially refunded sale stays `paid` on purpose, so the badge alone
-                                             would say nothing happened. Reads the eager-loaded relation, so this
-                                             costs no query per row. --}}
-                                        @php
-                                            // Confirmed only. refundedTotal() also counts claims we
-                                            // have not heard back on, and showing those as refunded
-                                            // would tell an owner a customer was paid when the
-                                            // gateway never said so.
-                                            $refundedSoFar = $sale->refundedConfirmedTotal();
-                                        @endphp
-                                        @if($refundedSoFar > 0)
-                                            <div class="mt-1 text-xs text-gray-500 dark:text-gray-400">
-                                                {{ __('messages.refunded_so_far') }}:
-                                                {{ \App\Utils\MoneyUtils::format($refundedSoFar, $sale->event?->ticket_currency_code) }}
-                                            </div>
-                                        @endif
-                                        @if($sale->hasUnconfirmedRefund())
-                                            <div class="mt-2 flex items-start gap-2 rounded-lg border border-amber-200 bg-amber-50 p-3 dark:border-amber-700 dark:bg-amber-900/20">
-                                                <svg class="mt-0.5 h-5 w-5 shrink-0 text-amber-600 dark:text-amber-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
-                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z" />
-                                                </svg>
-                                                <span class="text-xs text-amber-800 dark:text-amber-200">{{ __('messages.refund_awaiting_confirmation') }}</span>
-                                            </div>
-                                        @endif
                                     @elseif($sale->status === 'unpaid')
                                         <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-yellow-100 dark:bg-yellow-900 text-yellow-800 dark:text-yellow-300">
                                             <svg class="w-3 h-3 me-1" fill="currentColor" viewBox="0 0 20 20">
@@ -193,6 +168,32 @@
                                         <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-gray-100 dark:bg-gray-700 text-gray-800 dark:text-gray-300">
                                             {{ __('messages.' . $sale->status) }}
                                         </span>
+                                    @endif
+                                    {{-- Outside the status branch on purpose. A partially refunded sale stays `paid`, but a
+                                         sale can also reach `refunded` while a claim is still unconfirmed - refundableRemaining()
+                                         counts pending and awaiting_reconciliation rows against the ceiling - and hiding the
+                                         warning behind `paid` made it vanish at exactly the moment it matters. Reads the
+                                         eager-loaded relation, so this costs no query per row. --}}
+                                    @php
+                                        // Confirmed only. refundedTotal() also counts claims we
+                                        // have not heard back on, and showing those as refunded
+                                        // would tell an owner a customer was paid when the
+                                        // gateway never said so.
+                                        $refundedSoFar = $sale->refundedConfirmedTotal();
+                                    @endphp
+                                    @if($refundedSoFar > 0)
+                                        <div class="mt-1 text-xs text-gray-500 dark:text-gray-400">
+                                            {{ __('messages.refunded_so_far') }}:
+                                            {{ \App\Utils\MoneyUtils::format($refundedSoFar, $sale->event?->ticket_currency_code) }}
+                                        </div>
+                                    @endif
+                                    @if($sale->hasUnconfirmedRefund())
+                                        <div class="mt-2 flex items-start gap-2 rounded-lg border border-amber-200 bg-amber-50 p-3 dark:border-amber-700 dark:bg-amber-900/20">
+                                            <svg class="mt-0.5 h-5 w-5 shrink-0 text-amber-600 dark:text-amber-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z" />
+                                            </svg>
+                                            <span class="text-xs text-amber-800 dark:text-amber-200">{{ __('messages.refund_awaiting_confirmation') }}</span>
+                                        </div>
                                     @endif
                                     @if ($sale->feedback)
                                         <svg class="inline-block w-4 h-4 ms-1 text-yellow-400" viewBox="0 0 24 24" fill="currentColor" title="{{ __('messages.feedback') }}: {{ $sale->feedback->rating }}/5">
@@ -254,7 +255,12 @@
                                                             // A payment plan refunds leg by leg and only in full, so there is
                                                             // no amount to ask for.
                                                             && ! $sale->installmentPlan;
-                                                        $refundShow = $sale->status === 'paid' && (! $refundViaGateway || $refundRemaining > 0);
+                                                        // 'rsvp' is a provenance marker with no driver behind it (config/payments.php
+                                                        // says so), so it can never be a capability question. A free registration took
+                                                        // no money, and Cancel Ticket below is what the action would really be.
+                                                        $refundShow = $sale->status === 'paid'
+                                                            && $sale->payment_method !== 'rsvp'
+                                                            && (! $refundViaGateway || $refundRemaining > 0);
                                                     @endphp
                                                     @if($refundShow)
                                                     <button data-popup-toggle="sale-actions-pop-up-menu-{{ \App\Utils\UrlUtils::encodeId($sale->id) }}" data-sale-action="refund" data-sale-id="{{ \App\Utils\UrlUtils::encodeId($sale->id) }}" @if($refundAskAmount) data-refund-remaining="{{ number_format($refundRemaining, 3, '.', '') }}" data-refund-decimals="{{ \App\Utils\MoneyUtils::decimalsFor($sale->event?->ticket_currency_code) }}" data-refund-remaining-formatted="{{ \App\Utils\MoneyUtils::format($refundRemaining, $sale->event?->ticket_currency_code) }}" @endif class="group flex items-center px-5 py-3 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 focus:bg-gray-100 dark:focus:bg-gray-700 focus:outline-none transition-colors w-full text-start" role="menuitem" tabindex="0">
@@ -455,22 +461,6 @@
                                 </svg>
                                 {{ __('messages.paid') }}
                             </span>
-
-                            @php $refundedSoFar = $sale->refundedConfirmedTotal(); @endphp
-                            @if($refundedSoFar > 0)
-                                <div class="mt-1 text-xs text-gray-500 dark:text-gray-400">
-                                    {{ __('messages.refunded_so_far') }}:
-                                    {{ \App\Utils\MoneyUtils::format($refundedSoFar, $sale->event?->ticket_currency_code) }}
-                                </div>
-                            @endif
-                            @if($sale->hasUnconfirmedRefund())
-                                <div class="mt-2 flex items-start gap-2 rounded-lg border border-amber-200 bg-amber-50 p-3 dark:border-amber-700 dark:bg-amber-900/20">
-                                    <svg class="mt-0.5 h-5 w-5 shrink-0 text-amber-600 dark:text-amber-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z" />
-                                    </svg>
-                                    <span class="text-xs text-amber-800 dark:text-amber-200">{{ __('messages.refund_awaiting_confirmation') }}</span>
-                                </div>
-                            @endif
                         @elseif($sale->status === 'unpaid')
                             <span class="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-yellow-100 dark:bg-yellow-900 text-yellow-800 dark:text-yellow-300">
                                 <svg class="w-4 h-4 me-1.5" fill="currentColor" viewBox="0 0 20 20">
@@ -496,6 +486,21 @@
                             <span class="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-gray-100 dark:bg-gray-700 text-gray-800 dark:text-gray-300">
                                 {{ __('messages.' . $sale->status) }}
                             </span>
+                        @endif
+                        @php $refundedSoFar = $sale->refundedConfirmedTotal(); @endphp
+                        @if($refundedSoFar > 0)
+                            <div class="mt-1 text-xs text-gray-500 dark:text-gray-400">
+                                {{ __('messages.refunded_so_far') }}:
+                                {{ \App\Utils\MoneyUtils::format($refundedSoFar, $sale->event?->ticket_currency_code) }}
+                            </div>
+                        @endif
+                        @if($sale->hasUnconfirmedRefund())
+                            <div class="mt-2 flex items-start gap-2 rounded-lg border border-amber-200 bg-amber-50 p-3 dark:border-amber-700 dark:bg-amber-900/20">
+                                <svg class="mt-0.5 h-5 w-5 shrink-0 text-amber-600 dark:text-amber-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z" />
+                                </svg>
+                                <span class="text-xs text-amber-800 dark:text-amber-200">{{ __('messages.refund_awaiting_confirmation') }}</span>
+                            </div>
                         @endif
                     </div>
                 </div>
@@ -705,7 +710,10 @@
                                 $refundRemaining = $refundViaGateway ? $sale->refundableRemaining() : 0.0;
                                 $refundAskAmount = $refundViaGateway && $refundDriver->supportsPartialRefunds() && $refundRemaining > 0
                                     && ! $sale->installmentPlan;
-                                $refundShow = $sale->status === 'paid' && (! $refundViaGateway || $refundRemaining > 0);
+                                // See the desktop table: 'rsvp' has no driver and took no money.
+                                $refundShow = $sale->status === 'paid'
+                                    && $sale->payment_method !== 'rsvp'
+                                    && (! $refundViaGateway || $refundRemaining > 0);
                             @endphp
                             @if($refundShow)
                                 {{-- Raw, because Js::from() has already made every argument safe for a

@@ -30,12 +30,13 @@ class MarketingDataCharacterizationTest extends TestCase
     {
         parent::setUp();
 
-        // getReplacementData() embeds GitHubUtils::getStars(), which would
-        // otherwise make a LIVE GitHub API call (array cache is empty per
-        // process) and leak a varying star count into the golden fixture.
-        // Seed the cached-failure marker so getStars() deterministically
-        // returns null, and block any accidental outbound HTTP.
-        cache()->put('github_stars', false, 300);
+        // getReplacementData() embeds GitHubUtils::getStars(), and a varying star count must not
+        // leak into the golden fixture. getStars() no longer fetches - it reads a settings row the
+        // daily app:check-github-stars command writes - so the old cached-failure seed would be a
+        // no-op. This class has no RefreshDatabase, so it reads committed schema state: delete the
+        // row rather than trusting the table to be empty. Idempotent, and it can only ever remove
+        // something a scheduled command wrote.
+        \App\Models\Setting::where('key', \App\Utils\GitHubUtils::STARS_KEY)->delete();
         \Illuminate\Support\Facades\Http::fake();
     }
 

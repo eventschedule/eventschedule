@@ -322,7 +322,7 @@ class SaleRefundService
             $this->refundSale($sale);
             $sale->refresh();
 
-            return new SaleRefundResult(SaleRefundResult::REFUNDED, null, __('messages.refund_success'));
+            return new SaleRefundResult(SaleRefundResult::REFUNDED, null, $this->settledMessage($sale));
         }
 
         $moved = 0;
@@ -367,7 +367,7 @@ class SaleRefundService
         $this->refundSale($sale);
         $sale->refresh();
 
-        return new SaleRefundResult(SaleRefundResult::REFUNDED, $last?->refund, __('messages.refund_success'));
+        return new SaleRefundResult(SaleRefundResult::REFUNDED, $last?->refund, $this->settledMessage($sale));
     }
 
     /**
@@ -396,6 +396,12 @@ class SaleRefundService
         // unit of this sale's currency, matching the one the claim measured against.
         $fullyRefunded = $wasMismatch || $sale->refundableRemaining() <= self::toleranceFor($sale);
 
+        // Revenue is deliberately NOT debited here, and the omission is worth stating: a partial
+        // refund leaves analytics_events_daily carrying the full amount for this event until the
+        // sale is refunded outright. Do not "fix" it with a decrement in this branch -
+        // decrementSaleAnalytics() debits legTotalPayment(), the WHOLE leg, so the later full
+        // refund would take the partial back a second time. Netting prior partials out of that
+        // figure is the real change, and it belongs in HandlesSaleStatusActions.
         if (! $fullyRefunded) {
             return new SaleRefundResult(
                 SaleRefundResult::PARTIALLY_REFUNDED,
@@ -423,7 +429,7 @@ class SaleRefundService
 
         $sale->refresh();
 
-        return new SaleRefundResult(SaleRefundResult::REFUNDED, $claim, __('messages.refund_success'));
+        return new SaleRefundResult(SaleRefundResult::REFUNDED, $claim, $this->settledMessage($sale));
     }
 
     /**
@@ -449,13 +455,11 @@ class SaleRefundService
     private function replay(SaleRefund $claim): SaleRefundResult
     {
         return match ($claim->status) {
-            'succeeded' => new SaleRefundResult(
-                $claim->sale?->status === 'refunded'
-                    ? SaleRefundResult::REFUNDED
-                    : SaleRefundResult::PARTIALLY_REFUNDED,
-                $claim,
-                __('messages.refund_success'),
-            ),
+            // Answers what the first attempt answered, message included: a replayed partial
+            // reported "Successfully refunded ticket" where the original said "Partial refund sent".
+            'succeeded' => $claim->sale?->status === 'refunded'
+                ? new SaleRefundResult(SaleRefundResult::REFUNDED, $claim, $this->settledMessage($claim->sale))
+                : new SaleRefundResult(SaleRefundResult::PARTIALLY_REFUNDED, $claim, __('messages.refund_partial_success')),
             'failed' => new SaleRefundResult(SaleRefundResult::FAILED, $claim, __('messages.refund_failed')),
             'awaiting_reconciliation' => new SaleRefundResult(
                 SaleRefundResult::NEEDS_RECONCILIATION,
@@ -501,6 +505,26 @@ class SaleRefundService
             $claim->refresh(),
             __('messages.refund_needs_reconciliation'),
         );
+    }
+
+    /**
+     * "Successfully refunded" is only true once every claim on this sale has been confirmed.
+     *
+     * A `pending` or `awaiting_reconciliation` row holds its amount against refundableRemaining(),
+     * so a sale can reach `refunded` while money we never watched leave is being counted as
+     * returned. The status flip is still right - the owner asked for a full refund and the seats
+     * have to go back - but telling them it succeeded is not, because nothing here will ever retry
+     * that claim and only they can settle it against the gateway.
+     *
+     * Reachable two ways: a parked partial followed by a refund of the remainder, and a plan whose
+     * leg parked, since refundInstallmentPlan() then skips that leg on the next attempt and the
+     * walk completes without it.
+     */
+    private function settledMessage(?Sale $sale): string
+    {
+        return $sale?->hasUnconfirmedRefund()
+            ? __('messages.refund_needs_reconciliation')
+            : __('messages.refund_success');
     }
 
     private function messageFor(string $status): string

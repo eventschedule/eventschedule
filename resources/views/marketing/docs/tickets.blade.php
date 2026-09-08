@@ -916,7 +916,7 @@
         <div class="doc-callout doc-callout-info">
             <div class="doc-callout-title">How refunds work</div>
             <p>For a Stripe sale, Refund Ticket sends the money back through Stripe and then updates the status here. You can return the whole amount or part of it - a partial refund leaves the sale paid, keeps the tickets valid and shows how much has gone back so far. If the refund cannot be confirmed, nothing is retried automatically and the sale is left for you to check against your Stripe dashboard, because retrying a refund that may already have gone through is how one refund becomes two.</p>
-            <p>Every other method - Invoice Ninja, Payfast, a payment link, cash, or any sale you marked paid by hand - shows Mark as Refunded instead. That records the refund and adjusts your revenue figures, and you return the money in your provider's own dashboard. Cancelling or deleting a paid sale also shows you a reminder to handle the money yourself.</p>
+            <p>Every other method - Invoice Ninja, Payfast, a payment link, cash, or any sale you marked paid by hand - shows Mark as Refunded instead. That records the refund and adjusts your revenue figures, and you return the money in your provider's own dashboard. Cancelling or deleting a paid sale also shows you a reminder to handle the money yourself. Refund only appears while a sale is still paid, so refund first and cancel after - once a sale is cancelled the money has to go back in your provider's own dashboard.</p>
             <p>These actions fire the matching <x-link href="{{ route('marketing.docs.developer.webhooks') }}">webhook</x-link>: <code class="doc-inline-code">sale.paid</code>, <code class="doc-inline-code">sale.refunded</code> or <code class="doc-inline-code">sale.cancelled</code>. A partial refund does not fire one, because the sale is still paid.</p>
         </div>
     </section>
@@ -1191,7 +1191,7 @@
         <div class="doc-fields">
             <div class="doc-field">
                 <h3 class="font-semibold text-gray-900 dark:text-white mb-2">Refunds</h3>
-                <p class="text-sm text-gray-500 dark:text-gray-400">Refunds are handled through your payment provider (Stripe, Invoice Ninja or Payfast). Event Schedule marks the sale as cancelled, but you must process the actual refund in that provider's dashboard. A Payfast reference is shown as plain text rather than a link, so you will need to search for it in your Payfast dashboard. Stripe refunds appear on customer statements within 5-10 business days.</p>
+                <p class="text-sm text-gray-500 dark:text-gray-400">Refunding a Stripe sale on the Sales page sends the money back through Stripe and then marks the sale refunded here. Every other method - Invoice Ninja, Payfast, a payment link or cash - is recorded here only, and you process the money in that provider's own dashboard. A Payfast reference is shown as plain text rather than a link, so you will need to search for it in your Payfast dashboard. Stripe refunds appear on customer statements within 5-10 business days.</p>
             </div>
             <div class="doc-field">
                 <h4 class="font-semibold text-gray-900 dark:text-white mb-2">Taxes</h4>

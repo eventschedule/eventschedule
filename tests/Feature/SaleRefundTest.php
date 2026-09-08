@@ -453,6 +453,17 @@ class SaleRefundTest extends TestCase
         // the dialog's own heading uses messages.refund_ticket and renders on every Sales page,
         // so assertSee() on it passes even with the button disabled and pins nothing.
         $response->assertDontSee(__('messages.mark_as_refunded'));
+
+        // The mobile card is the other half of this table and reaches the dialog by a different
+        // route: an Alpine @click whose arguments are Js::from() values concatenated into a
+        // double-quoted attribute. Nothing had ever rendered it - the button lived behind
+        // `@if(false && ...)` until refunds shipped - and a malformed concatenation there is a
+        // silent JS error at click time, not a failing page.
+        $response->assertSee(sprintf(
+            "openRefundDialog('%s', '100.000', '%s', 2)",
+            UrlUtils::encodeId($sale->id),
+            \App\Utils\MoneyUtils::format(100.0, 'USD'),
+        ), false);
     }
 
     /**
@@ -673,6 +684,177 @@ class SaleRefundTest extends TestCase
 
         $this->assertNotNull($row, 'A parked refund must appear in the admin to-do list.');
         $this->assertSame(1, $row['count']);
+    }
+
+    /**
+     * A sale can reach `refunded` while a claim is still unconfirmed, and the owner has to be told.
+     *
+     * refundableRemaining() counts pending and awaiting_reconciliation rows against the ceiling -
+     * correct, or the same money could be claimed twice - so a parked $30 plus a confirmed $70
+     * satisfies record()'s fullyRefunded test and flips the status. Money that may never have left
+     * is then being counted as returned, and the warning used to be rendered only under the `paid`
+     * badge, so it disappeared at exactly that moment.
+     */
+    public function test_a_refunded_sale_with_a_parked_claim_still_warns_the_owner(): void
+    {
+        $fake = $this->fakeStripeRefunds();
+        [$sale, , , $owner] = $this->paidStripeSale(100.0);
+
+        // An earlier attempt whose outcome the gateway never reported.
+        SaleRefund::create([
+            'sale_id' => $sale->id,
+            'amount' => 30.0,
+            'gateway' => 'stripe',
+            'status' => 'awaiting_reconciliation',
+            'idempotency_key' => 'parked_thirty',
+        ]);
+
+        $result = app(SaleRefundService::class)->refund($sale->fresh());
+
+        // The status flip is right - the owner asked for the rest back and the seats must go.
+        $this->assertSame(SaleRefundResult::REFUNDED, $result->status);
+        $this->assertSame('refunded', $sale->fresh()->status);
+        // No amount is sent, and here that is load-bearing rather than incidental: the parked $30
+        // may or may not have moved, so only Stripe knows what is left. Naming our own $70 would
+        // under-refund the buyer whenever the parked call never landed.
+        $this->assertCount(1, $fake->calls);
+        $this->assertNull($fake->calls[0]['amount']);
+
+        // ...but "Successfully refunded ticket" is not true while $30 is unaccounted for.
+        $this->assertSame(__('messages.refund_needs_reconciliation'), $result->message);
+
+        $response = $this->actingAs($owner)->get(route('sales'));
+        $response->assertOk();
+
+        // Counted, not assertSee'd. The table renders every sale TWICE - the desktop row and the
+        // mobile card - and each carries its own copy of this block, so a bare assertSee passes
+        // with either one still nested under the `paid` badge and pins only the other.
+        $this->assertSame(
+            2,
+            substr_count($response->getContent(), __('messages.refund_awaiting_confirmation')),
+            'Both the desktop row and the mobile card must warn on a refunded sale.',
+        );
+    }
+
+    /**
+     * The same thing on the plan rail, which reaches it without the owner doing anything unusual.
+     *
+     * refundInstallmentPlan() skips legs that already carry a claiming row, so the leg that parked
+     * on attempt one is simply absent from attempt two - the walk then "completes" and used to
+     * report a clean full refund for a leg it never confirmed.
+     */
+    public function test_a_plan_with_a_parked_leg_does_not_report_a_clean_refund(): void
+    {
+        $fake = $this->fakeStripeRefunds();
+        [$sale, $plan] = $this->paidInstallmentSale();
+
+        SaleRefund::create([
+            'sale_id' => $sale->id,
+            'sale_installment_id' => $plan->installments->firstWhere('sequence', 1)->id,
+            'amount' => 250.0,
+            'gateway' => 'stripe',
+            'status' => 'awaiting_reconciliation',
+            'idempotency_key' => 'parked_leg_one',
+        ]);
+
+        $result = app(SaleRefundService::class)->refund($sale->fresh());
+
+        $this->assertSame(SaleRefundResult::REFUNDED, $result->status,
+            'The status must still flip, or the caller skips the audit entry and the webhook.');
+        $this->assertCount(1, $fake->calls, 'Only leg 2 is outstanding.');
+        $this->assertSame(__('messages.refund_needs_reconciliation'), $result->message);
+    }
+
+    /**
+     * The resume path with nothing left to send: every collected leg is claimed, none confirmed.
+     *
+     * This branch calls no gateway at all, so reporting success here told the owner the money was
+     * back on the strength of two timeouts.
+     */
+    public function test_a_plan_whose_every_leg_parked_reports_no_clean_refund(): void
+    {
+        $fake = $this->fakeStripeRefunds();
+        [$sale, $plan] = $this->paidInstallmentSale();
+
+        foreach ([1, 2] as $sequence) {
+            SaleRefund::create([
+                'sale_id' => $sale->id,
+                'sale_installment_id' => $plan->installments->firstWhere('sequence', $sequence)->id,
+                'amount' => 250.0,
+                'gateway' => 'stripe',
+                'status' => 'awaiting_reconciliation',
+                'idempotency_key' => 'parked_leg_'.$sequence,
+            ]);
+        }
+
+        $result = app(SaleRefundService::class)->refund($sale->fresh());
+
+        $this->assertSame(SaleRefundResult::REFUNDED, $result->status);
+        $this->assertCount(0, $fake->calls, 'Nothing is left to send.');
+        $this->assertSame(__('messages.refund_needs_reconciliation'), $result->message);
+        $this->assertSame('refunded', $sale->fresh()->status);
+    }
+
+    /**
+     * A free registration took no money, so it gets Cancel, not a refund control.
+     *
+     * 'rsvp' is a provenance marker with no driver behind it, so payment_gateways()->get() returns
+     * null and the row would otherwise fall through to the status-only "Mark as Refunded".
+     */
+    public function test_the_sales_page_offers_no_refund_control_for_an_rsvp(): void
+    {
+        $owner = $this->createOwner();
+        $role = $this->createRole($owner);
+        $event = $this->createEvent($role, ['tickets_enabled' => true, 'ticket_currency_code' => 'USD']);
+        $ticket = $this->createTicket($event, ['price' => 0, 'quantity' => 10]);
+        $this->createSale($event, $role, [
+            'payment_amount' => 0,
+            'payment_method' => 'rsvp',
+            'status' => 'paid',
+        ], $ticket);
+
+        $response = $this->actingAs($owner)->get(route('sales'));
+
+        $response->assertOk();
+        $response->assertDontSee('data-sale-action="refund"', false);
+        $response->assertSee('data-sale-action="cancel"', false);
+    }
+
+    /**
+     * The alert has to lead somewhere. It is the only surface in the app that knows a parked claim
+     * exists, and nothing will ever retry one - a person settles it against the dashboard, using
+     * the reference this panel prints.
+     */
+    public function test_the_admin_revenue_page_lists_an_unconfirmed_refund(): void
+    {
+        [$sale] = $this->paidStripeSale(100.0);
+        $admin = $this->createOwner(true);
+
+        SaleRefund::create([
+            'sale_id' => $sale->id,
+            'amount' => 100.0,
+            'currency_code' => 'USD',
+            'gateway' => 'stripe',
+            'status' => 'awaiting_reconciliation',
+            'idempotency_key' => 'sale_refund_needs_a_person',
+            'last_error' => 'Connection timed out',
+        ])->forceFill(['created_at' => now()->subHour()])->save();
+
+        $response = $this->actingAs($admin)
+            ->withSession(['admin_password_confirmed_at' => now()->timestamp])
+            ->get(route('admin.revenue'));
+
+        $response->assertOk();
+        $response->assertSee('id="unconfirmed-refunds"', false);
+        $response->assertSee('sale_refund_needs_a_person');
+        $response->assertSee('Connection timed out');
+
+        // The badge and the panel must count the same rows, or a red row links to an empty page.
+        \App\Services\AdminAlertService::flush();
+        $this->assertSame(
+            1,
+            \App\Services\AdminAlertService::items()->firstWhere('type', 'refunds_unconfirmed')['count'] ?? 0,
+        );
     }
 
     /**

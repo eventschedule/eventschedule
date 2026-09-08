@@ -106,6 +106,14 @@ Schedule::call(function () {
     Artisan::call('app:check-version');
 })->daily()->name('app-check-version')->withoutOverlapping(30)->appendOutputTo(storage_path('logs/scheduler.log'));
 
+// Keeps the stored GitHub star count warm so the "star us" badges never make an outbound call
+// during a page render - it used to fetch inline from nine call sites, which put a blocking
+// five-second request on nearly every admin and marketing page. Keep in sync with
+// AppController::translateData(). Runs on nexus ONLY (the gate is inside the command).
+Schedule::call(function () {
+    Artisan::call('app:check-github-stars');
+})->daily()->name('app-check-github-stars')->withoutOverlapping(30)->appendOutputTo(storage_path('logs/scheduler.log'));
+
 // Republish the admin translation manager's overrides from the database onto this
 // container's disk. config('app.lang_overrides_path') defaults to storage/app/lang, which is
 // per-container and does not survive a deploy - so on any host with more than one container,

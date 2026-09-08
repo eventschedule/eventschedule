@@ -744,6 +744,20 @@ class AdminController extends Controller
             ->orderByDesc('created_at')
             ->get();
 
+        // Refund claims the gateway never confirmed. Same predicate as AdminAlertService's
+        // refunds_unconfirmed row, which links here - the alert says how many, this says which,
+        // because the operator cannot query production themselves.
+        //
+        // Nothing in the app will ever resolve these: a retry after the idempotency key expires is
+        // how one refund becomes two, so they are settled by a person against the gateway's own
+        // dashboard. Until then the claim holds its amount against the sale's refundable balance,
+        // so the owner's Refund control is gone and, if the sale reached `refunded` anyway, money
+        // that may never have moved is being counted as returned.
+        $unconfirmedRefunds = AdminAlertService::unconfirmedRefunds()
+            ->with('sale.event:id,name')
+            ->orderBy('created_at')
+            ->get();
+
         // Live subscriptions on a Stripe price ID config no longer names. Same predicate as
         // AdminAlertService's subscriptions_unrecognized row, which links here - the alert says
         // how many, this says which, because the operator cannot query production themselves.
@@ -804,6 +818,7 @@ class AdminController extends Controller
             'recentSales',
             'mismatchSales',
             'mismatchBoosts',
+            'unconfirmedRefunds',
             'unrecognizedSubscriptions'
         ));
     }

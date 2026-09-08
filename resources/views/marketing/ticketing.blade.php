@@ -678,7 +678,7 @@
             ],
             [
                 'q' => 'How are refunds handled?',
-                'a' => 'You cancel or refund the sale from the Sales list, and the money movement happens in your Stripe dashboard, where you keep full control of your own refund policy. Cancelling a sale returns its tickets to the pool for that date, which is also what can trigger the next waitlist notification.',
+                'a' => 'You refund the sale from the Sales list. For a Stripe sale the money goes back through Stripe from there, in full or in part - a partial refund leaves the sale paid and the tickets valid. Every other method records the refund here and you return the money in your own provider dashboard, so your refund policy stays yours either way. Cancelling a sale instead returns its tickets to the pool for that date, which is also what can trigger the next waitlist notification.',
             ],
             [
                 'q' => 'Can I offer promo codes or discounts?',
