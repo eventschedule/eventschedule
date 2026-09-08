@@ -78,10 +78,11 @@ return [
         'webhook_id' => env('PAYPAL_WEBHOOK_ID'),
 
         /*
-         * The currencies PayPal settles, minus two.
+         * The currencies PayPal settles, minus three.
          *
-         * PayPal publishes 25. HUF and TWD are deliberately LEFT OUT, and the reason is not that
-         * PayPal refuses them - it is that this app and PayPal disagree about them, which is worse.
+         * PayPal publishes 25. HUF, JPY and TWD are deliberately LEFT OUT, and the reason is not
+         * that PayPal refuses them - it is that this app and PayPal disagree about them, which is
+         * worse.
          *
          * PayPal treats HUF, JPY and TWD as zero-decimal and errors on any fractional amount. This
          * app can produce a fractional amount in all three, so all three are out.

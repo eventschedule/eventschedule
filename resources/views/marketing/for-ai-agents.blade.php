@@ -525,7 +525,7 @@
         // The heading below counts these, so the two have to be changed together.
         $webhookEvents = [
             ['sale.created', 'A sale is created, still unpaid.'],
-            ['sale.paid', 'Confirmed paid, whether by Stripe, Invoice Ninja, by hand or free.'],
+            ['sale.paid', 'Confirmed paid, whether by Stripe, PayPal, Invoice Ninja, by hand or free.'],
             ['sale.refunded', 'A paid sale is refunded.'],
             ['sale.cancelled', 'A sale is cancelled.'],
             ['installment.paid', 'A payment of an installment plan is collected.'],
@@ -1119,7 +1119,7 @@
                         <span class="es-cons-plan es-cons-plan-pro mb-4 self-start">pro</span>
                         <h3 class="es-cons-ink mb-3 text-2xl font-bold tracking-tight lg:text-3xl">Money, without a middleman</h3>
                         <p class="es-cons-muted mb-6 text-base leading-relaxed lg:text-lg">
-                            Ticket types created through the API sell through your own Stripe account, or through Invoice Ninja, a payment URL, or by hand. Event Schedule takes zero platform fees on ticket sales: the only deduction is your processor's. Sales come back through the sales endpoints and through <span class="es-cons-mono es-cons-key">sale.paid</span> webhooks, with the ticket lines attached.
+                            Ticket types created through the API sell through your own Stripe or PayPal account, or through Invoice Ninja, Payfast, a payment URL, or by hand. Event Schedule takes zero platform fees on ticket sales: the only deduction is your processor's. Sales come back through the sales endpoints and through <span class="es-cons-mono es-cons-key">sale.paid</span> webhooks, with the ticket lines attached.
                         </p>
                         <div class="mt-auto flex flex-wrap gap-2">
                             <span class="es-cons-chip">stripe</span>

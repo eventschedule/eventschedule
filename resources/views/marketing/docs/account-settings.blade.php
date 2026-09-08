@@ -281,15 +281,15 @@
             </div>
             <div class="doc-field">
                 <h4 class="font-semibold text-gray-900 dark:text-white mb-2">Removing it</h4>
-                <p class="text-sm text-gray-500 dark:text-gray-400">Click <strong class="text-gray-900 dark:text-white">Unlink Account</strong> and confirm. Any event still set to PayPal keeps the setting but shows it as no longer available, so you can see it and pick something else.</p>
+                <p class="text-sm text-gray-500 dark:text-gray-400">Click <strong class="text-gray-900 dark:text-white">Unlink Account</strong> and confirm. The listener we registered with PayPal is removed at the same time. Any event still set to PayPal keeps the setting but shows it as no longer available, so you can see it and pick something else. The exception is a site that provides its own PayPal account (below): there, unlinking hands your events back to the site's account rather than stopping them selling, and the money goes there instead.</p>
             </div>
             <div class="doc-field">
                 <h4 class="font-semibold text-gray-900 dark:text-white mb-2">"Provided by this installation"</h4>
-                <p class="text-sm text-gray-500 dark:text-gray-400">On a selfhosted site, the administrator can set up one PayPal account for everyone, exactly as with Payfast. Enter your own details to be paid into your own account instead.</p>
+                <p class="text-sm text-gray-500 dark:text-gray-400">On a selfhosted site, the administrator can set up one PayPal account for everyone, exactly as with Payfast. If you see this, you can start selling immediately and there is nothing to fill in - payments settle into the site's account. Enter your own details to be paid into your own account instead, and unlink them again to go back.</p>
             </div>
         </div>
         <p class="text-gray-600 dark:text-gray-300 mb-6">
-            For the full walkthrough, including which currencies PayPal settles, see <a href="{{ route('marketing.docs.tickets') }}#paypal" class="doc-link">Connecting PayPal</a>.
+            PayPal settles Australian, Canadian, Hong Kong, New Zealand, Singapore and US dollars, the euro, sterling, the Swiss franc, the Czech koruna, the Danish, Norwegian and Swedish krone, the Brazilian real, the Chinese yuan, the Israeli shekel, the Malaysian ringgit, the Mexican peso, the Philippine peso, the Polish zloty, the Russian rouble and the Thai baht. For the full walkthrough see <a href="{{ route('marketing.docs.tickets') }}#paypal" class="doc-link">Connecting PayPal</a>.
         </p>
 
         <div class="doc-callout doc-callout-info">
@@ -622,7 +622,7 @@
                 {
                     "@type": "HowToStep",
                     "name": "Configure Payment Methods",
-                    "text": "Connect Stripe, Invoice Ninja or Payfast, or set a payment link, to start selling tickets.",
+                    "text": "Connect Stripe, PayPal, Invoice Ninja or Payfast, or set a payment link, to start selling tickets.",
                     "url": "{{ url(route('marketing.docs.account_settings')) }}#payments"
                 },
                 {

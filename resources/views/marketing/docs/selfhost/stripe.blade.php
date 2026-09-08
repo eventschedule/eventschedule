@@ -510,15 +510,31 @@
 <span class="code-variable">PAYPAL_WEBHOOK_ID</span>=</code></pre>
         </div>
 
-        <p class="text-gray-600 dark:text-gray-300 mb-6">Both credentials come from an app at <a href="https://developer.paypal.com" target="_blank" rel="noopener noreferrer" class="doc-link">developer.paypal.com</a>, under Apps &amp; Credentials. As with Payfast, install-wide credentials are a <strong class="text-gray-900 dark:text-white">default rather than an override</strong>: a user who connects their own account keeps being paid into it.</p>
+        <p class="text-gray-600 dark:text-gray-300 mb-6">Both credentials come from an app at <a href="https://developer.paypal.com" target="_blank" rel="noopener noreferrer" class="doc-link">developer.paypal.com</a>, under Apps &amp; Credentials.</p>
+
+        <ul class="doc-list mb-6">
+            <li><code class="doc-inline-code">PAYPAL_CLIENT_ID</code> and <code class="doc-inline-code">PAYPAL_CLIENT_SECRET</code> - required together. Set one without the other and PayPal is simply not offered.</li>
+            <li><code class="doc-inline-code">PAYPAL_SANDBOX</code> - sends payments to PayPal's sandbox. The sandbox has its OWN client id and secret, so switching this on means swapping both values too. Sandbox tickets look completely normal, so leave it <code class="doc-inline-code">false</code> unless you are testing.</li>
+            <li><code class="doc-inline-code">PAYPAL_WEBHOOK_ID</code> - optional, and the next callout explains when you want it.</li>
+        </ul>
+
+        <p class="text-gray-600 dark:text-gray-300 mb-6">Run <code class="doc-inline-code">php artisan config:clear</code> after editing, and note that these are <strong class="text-gray-900 dark:text-white">a default rather than an override</strong>, exactly as with Payfast: a user who connects their own PayPal account keeps being paid into it, so adding an install-wide account cannot quietly re-route anybody's money. Users who have connected nothing see <strong class="text-gray-900 dark:text-white">Provided by this installation</strong> on their PayPal tab. Ignored entirely in hosted mode, where every owner connects their own.</p>
+
+        <div class="doc-callout doc-callout-warning mb-6">
+            <div class="doc-callout-title">On an install-wide account, add the webhook yourself</div>
+            <p>When a user connects their <em>own</em> PayPal account we register a listener for them automatically. That does not happen for the install-wide account configured here, so if you want one you have to add it in PayPal and set <code class="doc-inline-code">PAYPAL_WEBHOOK_ID</code> to its id.</p>
+            <p>In your PayPal app under <strong class="text-gray-900 dark:text-white">Apps &amp; Credentials</strong>, add a webhook pointing at <code class="doc-inline-code">https://your-site/payments/paypal/webhook</code> and subscribe it to <code class="doc-inline-code">PAYMENT.CAPTURE.COMPLETED</code> and <code class="doc-inline-code">PAYMENT.CAPTURE.DENIED</code>. Copy the webhook id it gives you into <code class="doc-inline-code">.env</code>.</p>
+            <p>Ordinary payments settle without it - that is the return from PayPal, not a notification. What you lose are the two cases that finish later: a payment PayPal holds for review, and a payment PayPal took whose reply never reached us. Without a listener those sales stay unpaid, and an unpaid sale is eventually expired and its seats resold, so on a site taking real money it is worth setting up.</p>
+        </div>
 
         <div class="doc-callout doc-callout-info mb-6">
             <div class="doc-callout-title">Unlike Payfast, this works on localhost</div>
-            <p>A PayPal payment is confirmed by a call <em>we</em> make to PayPal, not by a notification PayPal has to reach us with, so the whole path works on a laptop with no tunnel and no public hostname. A webhook is used only to finish the rare payment PayPal holds for review; without one, that single case waits rather than failing, and everything else is unaffected. That is why <code class="doc-inline-code">PAYPAL_WEBHOOK_ID</code> is optional where Payfast's passphrase is mandatory.</p>
+            <p>A PayPal payment is confirmed by a call <em>we</em> make to PayPal, not by a notification PayPal has to reach us with, so a purchase completes end to end on a laptop with no tunnel and no public hostname. That is why <code class="doc-inline-code">PAYPAL_WEBHOOK_ID</code> is optional where Payfast's passphrase is mandatory, and why you can test the whole flow before your site is reachable.</p>
+            <p>You will see <code class="doc-inline-code">PayPal webhook registration failed</code> in the log when a user connects an account on such an install. That is expected - PayPal cannot register a listener it cannot reach - and it does not stop anyone selling.</p>
         </div>
 
         <div class="doc-callout doc-callout-warning">
-            <div class="doc-callout-title">Two currencies are deliberately not offered</div>
+            <div class="doc-callout-title">Three currencies are deliberately not offered</div>
             <p>PayPal settles the Hungarian forint, the Japanese yen and the New Taiwan dollar, but will not accept an amount with decimals in any of them - and this app can produce one, because the discount arithmetic rounds to two decimals whatever the currency. Rather than take money and then withhold the ticket, PayPal is not offered on events priced in those three. The reasoning, and the underlying rounding bug it works around, are recorded in <code class="doc-inline-code">config/payments.php</code>.</p>
         </div>
     </section>

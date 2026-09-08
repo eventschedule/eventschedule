@@ -1,6 +1,6 @@
 <x-marketing-layout>
     <x-slot name="title">Integrations | Calendars, Stripe, Webhooks and the API</x-slot>
-    <x-slot name="description">Thirteen real integrations, each with its direction, its trigger and its plan written on the label: Google Calendar, Outlook, CalDAV, Stripe, webhooks and more.</x-slot>
+    <x-slot name="description">Fourteen real integrations, each with its direction, its trigger and its plan written on the label: Google Calendar, Outlook, CalDAV, Stripe, webhooks and more.</x-slot>
     <x-slot name="breadcrumbTitle">Integrations</x-slot>
 
     <x-slot name="structuredData">
@@ -584,7 +584,7 @@
     </style>
 
     @php
-        // The thirteen ports. Direction is the first thing a reader needs, so it is
+        // The fourteen ports. Direction is the first thing a reader needs, so it is
         // screen-printed on the panel and repeated in the register below. It is
         // the direction the DATA runs, not the direction the call is made in:
         // CalDAV and Eventbrite arrive by us asking rather than them telling.
@@ -635,7 +635,7 @@
             ],
             [
                 'PayPal', 'out then in', 'Free',
-                'The buyer approves on PayPal and the payment is taken by a call we make straight afterwards, so the ticket is issued at once rather than waiting for a callback. A PayPal event CAN join the multi-event cart, unlike Payfast, because the whole order is taken as one payment. Installments are not supported. A selfhost operator can supply one account for the whole install, which an owner who connected their own keeps overriding.',
+                'The buyer approves on PayPal and the payment is taken by a call we make straight afterwards, so the ticket is issued on their return rather than waiting for a callback. A PayPal event CAN join the multi-event cart, unlike Payfast, because the whole order is taken as one payment. Installments are not supported. A selfhost operator can supply one account for the whole install, which an owner who connected their own keeps overriding.',
             ],
             [
                 'Webhooks', 'out', 'Pro',
@@ -742,7 +742,7 @@
                         <svg aria-hidden="true" class="es-wire-accent h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8">
                             <path stroke-linecap="round" stroke-linejoin="round" d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1" />
                         </svg>
-                        <span class="es-wire-muted text-sm font-medium tracking-wide">Thirteen ports, both ends visible</span>
+                        <span class="es-wire-muted text-sm font-medium tracking-wide">Fourteen ports, both ends visible</span>
                     </div>
 
                     <h1 class="es-balance es-wire-ink mb-8 text-[2.4rem] font-black leading-[1.05] tracking-tight sm:text-6xl">
@@ -751,7 +751,7 @@
                     </h1>
 
                     <p class="es-fade-up es-d-2 es-wire-muted mb-8 max-w-xl text-lg sm:text-xl">
-                        Event Schedule talks straight to the services you already run: your calendar or your own CalDAV server, your own Stripe account, your own endpoint. Thirteen ports, each labelled with which way it runs, what makes data move, and which plan it is on.
+                        Event Schedule talks straight to the services you already run: your calendar or your own CalDAV server, your own Stripe account, your own endpoint. Fourteen ports, each labelled with which way it runs, what makes data move, and which plan it is on.
                     </p>
 
                     <div class="es-fade-up es-d-3 flex flex-col items-start gap-4 sm:flex-row">
@@ -778,7 +778,7 @@
 
                         <div class="mb-2 flex items-baseline justify-between gap-3 px-1">
                             <p class="es-wire-tag">Integration panel</p>
-                            <p class="es-wire-dir">13 ports</p>
+                            <p class="es-wire-dir">14 ports</p>
                         </div>
                         <div class="es-wire-bar mb-1.5" aria-hidden="true"></div>
 
@@ -886,7 +886,7 @@
                 <div class="es-wire-corner mb-6" data-reveal aria-hidden="true"><span>03</span></div>
                 <p class="es-wire-tag mb-4" data-reveal style="--reveal-delay: 0.05s;">The register</p>
                 <h2 class="es-balance es-wire-ink text-3xl font-black tracking-tight md:text-5xl" data-reveal style="--reveal-delay: 0.1s;">
-                    Thirteen ports, <span class="es-wire-accent">written down.</span>
+                    Fourteen ports, <span class="es-wire-accent">written down.</span>
                 </h2>
                 <p class="es-wire-muted mt-5 text-lg" data-reveal style="--reveal-delay: 0.15s;">
                     Every one of them is on this page in full: the direction it runs, what makes data move along it, and the plan it is on. No marketplace, no logos we merely admire, and the gaps people hit are spelled out further down rather than left for you to find.
@@ -896,7 +896,7 @@
             <div class="es-wire-card p-5 sm:p-7" data-reveal="panel">
                 <div class="es-wire-scroll">
                     <table class="es-wire-reg">
-                        <caption class="sr-only">The thirteen Event Schedule integration ports, with the direction each one runs, what makes data move along it, and the plan it is on</caption>
+                        <caption class="sr-only">The fourteen Event Schedule integration ports, with the direction each one runs, what makes data move along it, and the plan it is on</caption>
                         <thead>
                             <tr class="es-wire-tag">
                                 <th scope="col" class="font-bold">Port</th>
@@ -1498,7 +1498,7 @@
                         <span class="es-wire-screw" style="bottom: 0.5rem; left: 0.5rem;"></span>
                         <span class="es-wire-screw" style="bottom: 0.5rem; right: 0.5rem;"></span>
                         <div class="mb-1.5 flex items-baseline justify-between gap-3 px-1">
-                            <p class="es-wire-tag">Port 13</p>
+                            <p class="es-wire-tag">Port 15</p>
                             <p class="es-wire-dir">open</p>
                         </div>
                         <div class="es-wire-bar mb-1"></div>

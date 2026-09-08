@@ -268,7 +268,7 @@
             </svg>
             Payments
         </h2>
-        <p class="text-gray-600 dark:text-gray-300 mb-4">Leave the <strong class="text-gray-900 dark:text-white">Price</strong> at zero for a free type. Enter an amount and the currency and payment method appear: paid types take payment by <strong class="text-gray-900 dark:text-white">cash</strong>, <strong class="text-gray-900 dark:text-white">Stripe</strong>, or a <strong class="text-gray-900 dark:text-white">payment link</strong>. A currency is required once there is a price.</p>
+        <p class="text-gray-600 dark:text-gray-300 mb-4">Leave the <strong class="text-gray-900 dark:text-white">Price</strong> at zero for a free type. Enter an amount and the currency and payment method appear: paid types take payment by <strong class="text-gray-900 dark:text-white">cash</strong>, <strong class="text-gray-900 dark:text-white">Stripe</strong>, or a <strong class="text-gray-900 dark:text-white">payment link</strong>. Those three only - PayPal and Payfast cannot be used for appointments even when they are connected, so a schedule whose only payment method is one of those needs another before a paid type can be booked. A currency is required once there is a price.</p>
         <div class="doc-table-wrap mb-6">
             <table class="doc-table">
                 <thead>
@@ -305,7 +305,7 @@
         <p class="text-gray-600 dark:text-gray-300 mb-4">Stripe payments are created directly on your own connected Stripe account with no platform fee, exactly as ticket sales are.</p>
         <div class="doc-callout doc-callout-info mb-6">
             <div class="doc-callout-title">Paid types need a payment method</div>
-            <p>A paid type stays hidden from guests until a working payment method is connected, and the Appointments tab marks the type that is being held back. Connect Stripe or add a payment link under <a href="{{ route('marketing.docs.account_settings') }}#payments" class="doc-link">Account Settings</a> to make the type bookable.</p>
+            <p>A paid type stays hidden from guests until a payment method it can use is connected, and the Appointments tab marks the type that is being held back. Connect Stripe or add a payment link under <a href="{{ route('marketing.docs.account_settings') }}#payments" class="doc-link">Account Settings</a> to make the type bookable. PayPal and Payfast do not count here, so a type can stay held back even though your Payment Methods tab shows a connected account.</p>
         </div>
         <div class="doc-callout doc-callout-info mb-2">
             <div class="doc-callout-title">How refunds work</div>

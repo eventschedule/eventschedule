@@ -70,7 +70,7 @@
                 "@type": "HowToStep",
                 "position": 1,
                 "name": "Connect a payment method",
-                "text": "Connect your own Stripe account, or Invoice Ninja, or a payment URL, or take cash at the door. Money from card sales settles into your account, not ours."
+                "text": "Connect your own Stripe or PayPal account, or Invoice Ninja, Payfast, or a payment URL, or take cash at the door. Money from card sales settles into your account, not ours."
             },
             {
                 "@type": "HowToStep",
@@ -650,7 +650,7 @@
         ];
 
         $steps = [
-            ['01', 'Connect a payment method', 'Your own Stripe account, Invoice Ninja, a payment URL, or cash at the door. Card money settles into your account, not ours.'],
+            ['01', 'Connect a payment method', 'Your own Stripe or PayPal account, Invoice Ninja, Payfast, a payment URL, or cash at the door. The money settles into your account, not ours.'],
             ['02', 'Add your ticket types', 'A name, a price, a quantity, and a sales window if you want one. Promo codes, add-ons and custom questions have their own tabs.'],
             ['03', 'Scan at the door', 'Open Sales on your phone and tap Scan Tickets. Each ticket admits once, and the dashboard keeps the count.'],
         ];
@@ -674,11 +674,11 @@
             ],
             [
                 'q' => 'What payment methods are supported?',
-                'a' => 'Stripe for credit cards, Apple Pay and Google Pay; Invoice Ninja for invoice or payment-link billing; a custom payment URL to send buyers to any system you already use; or cash, where you add payment instructions to the confirmation email and mark the sale paid yourself.',
+                'a' => 'Stripe for credit cards, Apple Pay and Google Pay; PayPal, where buyers pay from a PayPal balance or a card; Payfast for South African rand; Invoice Ninja for invoice or payment-link billing; a custom payment URL to send buyers to any system you already use; or cash, where you add payment instructions to the confirmation email and mark the sale paid yourself.',
             ],
             [
                 'q' => 'How are refunds handled?',
-                'a' => 'You refund the sale from the Sales list. For a Stripe sale the money goes back through Stripe from there, in full or in part - a partial refund leaves the sale paid and the tickets valid. Every other method records the refund here and you return the money in your own provider dashboard, so your refund policy stays yours either way. Cancelling a sale instead returns its tickets to the pool for that date, which is also what can trigger the next waitlist notification.',
+                'a' => 'You refund the sale from the Sales list. For a Stripe or PayPal sale the money goes back through the provider from there, in full or in part - a partial refund leaves the sale paid and the tickets valid. Every other method records the refund here and you return the money in your own provider dashboard, so your refund policy stays yours either way. Cancelling a sale instead returns its tickets to the pool for that date, which is also what can trigger the next waitlist notification.',
             ],
             [
                 'q' => 'Can I offer promo codes or discounts?',

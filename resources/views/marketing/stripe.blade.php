@@ -23,7 +23,7 @@
             "Signed webhooks confirm payment before a ticket is issued",
             "The charged amount is checked against the ticket total before the sale is marked paid",
             "Promo codes, volume discounts and gift cards priced into the same charge",
-            "Invoice Ninja, a payment link, or cash at the door as alternatives",
+            "PayPal, Payfast, Invoice Ninja, a payment link, or cash at the door as alternatives",
             "Sales exportable as CSV for your records"
         ],
         "offers": {
@@ -705,6 +705,18 @@
                 'micro' => 'Cards and wallets',
             ],
             [
+                'name'  => 'PayPal',
+                'held'  => 'Your own PayPal account',
+                'desc'  => 'The buyer approves on PayPal, from a balance or a card, and the payment is taken straight afterwards so the ticket is issued on their return.',
+                'micro' => 'PayPal balance or card',
+            ],
+            [
+                'name'  => 'Payfast',
+                'held'  => 'Your own Payfast account',
+                'desc'  => 'Card, Instant EFT, Capitec Pay and the rest of the South African methods. Settles in rand, so it is offered on ZAR events only.',
+                'micro' => 'South African rand',
+            ],
+            [
                 'name'  => 'Invoice Ninja',
                 'held'  => 'Your Invoice Ninja gateway',
                 'desc'  => 'Raise a real invoice, or send a payment link, from your own Invoice Ninja instance. Choose which of the two on the Invoice Ninja tab under Payment Methods.',
@@ -1123,7 +1135,7 @@
                 <div class="es-payout-mark mb-6" data-reveal aria-hidden="true">04</div>
                 <p class="es-payout-tag mb-4" data-reveal style="--reveal-delay: 0.05s;">Other routes</p>
                 <h2 class="es-balance es-payout-ink mb-5 text-3xl font-black tracking-tight md:text-5xl" data-reveal style="--reveal-delay: 0.1s;">
-                    Four lanes, <span class="es-payout-grad">all of them yours</span>.
+                    Six lanes, <span class="es-payout-grad">all of them yours</span>.
                 </h2>
                 <p class="es-payout-muted text-lg" data-reveal style="--reveal-delay: 0.15s;">
                     Every event carries its own route, and a new one starts on cash at the door until you

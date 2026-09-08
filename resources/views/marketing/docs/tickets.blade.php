@@ -13,8 +13,8 @@
             <x-doc-nav-link href="#free-events">Free Tickets</x-doc-nav-link>
         </x-doc-nav-group>
         <x-doc-nav-group label="Payment" href="#payment">
-            <x-doc-nav-link href="#payfast">Payfast</x-doc-nav-link>
             <x-doc-nav-link href="#paypal">PayPal</x-doc-nav-link>
+            <x-doc-nav-link href="#payfast">Payfast</x-doc-nav-link>
             <x-doc-nav-link href="#invoiceninja-modes">Invoice Ninja Modes</x-doc-nav-link>
         </x-doc-nav-group>
         <x-doc-nav-link href="#options">Options</x-doc-nav-link>
@@ -471,7 +471,7 @@
             </svg>
             Payment
         </h2>
-        <p class="text-gray-600 dark:text-gray-300 mb-6">Before you can take money online you need to connect a payment method. Payment methods belong to your account, not to a single event, so you connect one once and pick it per event. Event Schedule supports five options:</p>
+        <p class="text-gray-600 dark:text-gray-300 mb-6">Before you can take money online you need to connect a payment method. Payment methods belong to your account, not to a single event, so you connect one once and pick it per event. Event Schedule supports six options:</p>
 
         <div class="doc-fields" id="payment-setup">
             <div class="doc-field">
@@ -488,7 +488,7 @@
             </div>
             <div class="doc-field">
                 <h4 class="font-semibold text-gray-900 dark:text-white mb-2">PayPal</h4>
-                <p class="text-sm text-gray-500 dark:text-gray-400">Buyers pay with their PayPal balance or a card, and the ticket is issued straight away. Settles a fixed list of currencies. See <a href="#paypal" class="doc-link">Connecting PayPal</a>.</p>
+                <p class="text-sm text-gray-500 dark:text-gray-400">Buyers pay with their PayPal balance or a card, and the ticket is issued as soon as they return. Settles a fixed list of currencies. See <a href="#paypal" class="doc-link">Connecting PayPal</a>.</p>
             </div>
             <div class="doc-field">
                 <h4 class="font-semibold text-gray-900 dark:text-white mb-2">Payfast</h4>
@@ -533,12 +533,32 @@
 
         <p class="text-gray-600 dark:text-gray-300 mb-6">PayPal settles a fixed list of currencies, and an event priced in anything else simply will not offer it. Three currencies PayPal does support - the Hungarian forint, the Japanese yen and the New Taiwan dollar - are deliberately left out. PayPal will not accept an amount with decimals in any of them, and a percentage discount here can produce one, so an event priced that way would have money taken and the ticket withheld. Rather than let that happen, PayPal is not offered for those three at all.</p>
 
-        <p class="text-gray-600 dark:text-gray-300 mb-6">Payments that PayPal holds for review are the one case where a ticket is not issued at once. The sale stays unpaid and the buyer is told the payment is being reviewed rather than being asked to pay again - on any event of the order, so nobody can accidentally pay twice for the same basket. If PayPal then declines it, the buyer can try again straight away; if PayPal clears it, the ticket is issued when we hear back. We also ask PayPal not to accept funding that takes days to settle, such as eChecks, so that this stays a short wait rather than an open-ended one.</p>
+        <p class="text-gray-600 dark:text-gray-300 mb-6">Payments that PayPal holds for review are the one case where a ticket is not issued at once. The sale stays unpaid and the buyer is told the payment is being reviewed rather than being asked to pay again - on every event of the order, so nobody can accidentally pay twice for the same basket. We also ask PayPal not to accept funding that takes days to settle, such as an eCheck, so this should be a short wait rather than an open-ended one.</p>
+
+        <p class="text-gray-600 dark:text-gray-300 mb-6">Finishing a reviewed payment - issuing the ticket if PayPal clears it, or letting the buyer try again if PayPal declines it - depends on PayPal notifying us, which needs a webhook. We register one for you when you connect your own PayPal account, so there is nothing to do. If your site provides one PayPal account for everyone, that registration does not happen and the administrator has to add a listener themselves; without it a reviewed payment on such a site stays unresolved. Selfhost administrators: see the <a href="{{ route('marketing.docs.selfhost.stripe') }}#paypal" class="doc-link">Payments guide</a>.</p>
 
         <div class="doc-callout doc-callout-tip mb-6">
             <div class="doc-callout-title">Your site may already have an account</div>
-            <p>On a selfhosted site, the administrator can configure one PayPal account for everyone, exactly as with Payfast. If the PayPal tab says <strong class="text-gray-900 dark:text-white">Provided by this installation</strong>, skip the steps above. Entering your own details still takes precedence, so you are paid into your own account instead.</p>
+            <p>On a selfhosted site, the administrator can configure one PayPal account for everyone, exactly as with Payfast. If the PayPal tab says <strong class="text-gray-900 dark:text-white">Provided by this installation</strong>, skip the steps above. Entering your own details still takes precedence, so you are paid into your own account instead; unlink them to go back. Selfhost administrators: see the <a href="{{ route('marketing.docs.selfhost.stripe') }}#paypal" class="doc-link">Payments guide</a>.</p>
         </div>
+
+        <div class="doc-callout doc-callout-tip mb-6">
+            <div class="doc-callout-title">Testing with the sandbox</div>
+            <p>Turn on <strong class="text-gray-900 dark:text-white">Test mode</strong> to use PayPal's sandbox instead of taking real money. Unlike a single on/off flag, the sandbox is a separate environment with its own credentials: open <strong class="text-gray-900 dark:text-white">Apps &amp; Credentials</strong> at developer.paypal.com, switch to the <strong class="text-gray-900 dark:text-white">Sandbox</strong> tab, and paste that app's Client ID and Secret. Your live pair will not work in test mode and the sandbox pair will not work outside it, so the tab you copied from has to match the toggle.</p>
+            <p>You also need somebody to play the buyer. PayPal's sandbox creates a personal test account alongside your business one - sign in with that at the checkout. While test mode is on, the payment method reads <strong class="text-gray-900 dark:text-white">(Test mode)</strong> on the event form and the Payment tab shows a warning, because a test ticket otherwise looks exactly like a real one. Turn it off before you sell.</p>
+            <p>One thing PayPal makes easier than Payfast: the whole purchase works on a laptop. A PayPal payment is confirmed by a call we make out to PayPal rather than by a notification PayPal has to reach us with, so a sandbox purchase completes end to end on <code class="doc-inline-code">localhost</code> with no tunnel and no public hostname.</p>
+        </div>
+
+        <h4 id="paypal-refused" class="font-semibold text-gray-900 dark:text-white mb-2">When a PayPal checkout is refused</h4>
+        <p class="text-gray-600 dark:text-gray-300 mb-4">Some orders never reach PayPal, because it would reject them on its own page after the seats were already held. An event priced in a currency PayPal does not settle - or in one of the three left out above - and an order PayPal declines to create. In both cases the buyer is returned to the ticket page with a message and the seats go straight back on sale, so nothing is lost.</p>
+        <p class="text-gray-600 dark:text-gray-300 mb-4">If you see that on your own event, check the event's <strong class="text-gray-900 dark:text-white">Currency</strong> on the Payment tab: an event can keep PayPal selected after its currency is changed, and it then shows in the dropdown marked <em>no longer available</em> until you pick something else. The same happens if you unlink PayPal while an event still names it - there the buyer is simply returned to the ticket page, so an event left that way is worth catching before a real buyer finds it.</p>
+        <p class="text-gray-600 dark:text-gray-300 mb-6">Two more outcomes are worth recognising. A buyer who approves the payment, closes the tab and comes back much later may find the reservation has already expired - nothing is charged in that case. And if PayPal reports a total that does not match the order, the sale is held as an <strong class="text-gray-900 dark:text-white">amount mismatch</strong> for you to look at rather than being completed: the money is with PayPal and the ticket is not issued, so it needs a person.</p>
+
+        <h4 class="font-semibold text-gray-900 dark:text-white mb-2">Refunds</h4>
+        <p class="text-gray-600 dark:text-gray-300 mb-6">PayPal is one of only two methods - Stripe is the other - where <strong class="text-gray-900 dark:text-white">Refund Ticket</strong> on the Sales page sends the money back for you. You can return the whole amount or part of it, and the sale's PayPal reference is shown there as a link into your PayPal activity. See <a href="#financial" class="doc-link">Financial information</a> for what happens when a refund cannot be confirmed.</p>
+
+        <h4 class="font-semibold text-gray-900 dark:text-white mb-2">What PayPal does not do</h4>
+        <p class="text-gray-600 dark:text-gray-300 mb-6">PayPal cannot offer monthly installments, which need a card the gateway can charge again later, and gift cards cannot be sold through it. It is also not offered on events priced in Hungarian forints, Japanese yen or New Taiwan dollars, or on appointment bookings. Everything else works normally - promo codes, add-ons, volume discounts, per-attendee tickets - and unlike Payfast a PayPal event <em>can</em> be combined with others in the multi-event cart, because the whole basket is taken as one payment.</p>
 
         <h3 id="payfast" class="doc-subheading">Connecting Payfast</h3>
         <p class="text-gray-600 dark:text-gray-300 mb-4"><x-link href="https://payfast.io" target="_blank">Payfast</x-link> is a South African gateway, useful where Stripe is not available. It settles in rand (ZAR) only, so Payfast appears as an option only on events priced in ZAR - and if an event is later switched to another currency, or its method is set through the API, checkout refuses rather than charging the wrong currency. See <a href="#payfast-refused" class="doc-link">When a Payfast checkout is refused</a>.</p>
@@ -571,7 +591,7 @@
 
         <div class="doc-callout doc-callout-info mb-6">
             <div class="doc-callout-title">Refunds</div>
-            <p>Refunds are issued from your own Payfast dashboard. Marking a sale refunded here records it without moving money. Stripe is the exception: a Stripe sale is refunded from this page and the money goes back automatically.</p>
+            <p>Refunds are issued from your own Payfast dashboard. Marking a sale refunded here records it without moving money. Stripe and PayPal are the exceptions: those sales are refunded from this page and the money goes back automatically.</p>
         </div>
 
         <div class="doc-callout doc-callout-tip">
@@ -1216,7 +1236,7 @@
         <div class="doc-fields">
             <div class="doc-field">
                 <h3 class="font-semibold text-gray-900 dark:text-white mb-2">Refunds</h3>
-                <p class="text-sm text-gray-500 dark:text-gray-400">Refunding a Stripe sale on the Sales page sends the money back through Stripe and then marks the sale refunded here. Every other method - Invoice Ninja, Payfast, a payment link or cash - is recorded here only, and you process the money in that provider's own dashboard. A Payfast reference is shown as plain text rather than a link, so you will need to search for it in your Payfast dashboard. Stripe refunds appear on customer statements within 5-10 business days.</p>
+                <p class="text-sm text-gray-500 dark:text-gray-400">Refunding a Stripe or PayPal sale on the Sales page sends the money back through the provider and then marks the sale refunded here. Every other method - Invoice Ninja, Payfast, a payment link or cash - is recorded here only, and you process the money in that provider's own dashboard. A Payfast reference is shown as plain text rather than a link, so you will need to search for it in your Payfast dashboard. Stripe refunds appear on customer statements within 5-10 business days.</p>
             </div>
             <div class="doc-field">
                 <h4 class="font-semibold text-gray-900 dark:text-white mb-2">Taxes</h4>

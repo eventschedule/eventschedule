@@ -38,7 +38,7 @@
             "Every ticket type, add-on and pass on sale for that date",
             "Buyer details, per-attendee details, and your own custom questions",
             "Promo codes, with a code pre-fillable from the embed URL",
-            "Stripe, Invoice Ninja, custom payment URL, and cash or at the door",
+            "Stripe, PayPal, Payfast, Invoice Ninja, custom payment URL, and cash or at the door",
             "Zero platform fees on ticket sales",
             "RSVP and registration mode for events that take no payment",
             "Light or dark, following the visitor's own system setting",
@@ -719,7 +719,7 @@
             ],
             [
                 'q' => 'Which payment methods work inside the widget?',
-                'a' => 'All of them: Stripe, Invoice Ninja, a custom payment URL, and cash or at the door. Which window the checkout finishes in is decided by the event\'s payment method rather than by the amount. On cash it completes inside the frame. Stripe, Invoice Ninja and custom payment URL open in the parent window instead, because payment portals frequently refuse to be framed, and the buyer lands back on your page afterwards.',
+                'a' => 'All of them: Stripe, PayPal, Payfast, Invoice Ninja, a custom payment URL, and cash or at the door. Which window the checkout finishes in is decided by the event\'s payment method rather than by the amount. On cash it completes inside the frame. Stripe, Invoice Ninja and custom payment URL open in the parent window instead, because payment portals frequently refuse to be framed, and the buyer lands back on your page afterwards.',
             ],
             [
                 'q' => 'Can I use it for free events and registrations?',
@@ -1181,6 +1181,8 @@
             <div class="grid gap-4 md:grid-cols-2 lg:grid-cols-4" data-reveal-group="100">
                 @foreach ([
                     ['Stripe', 'Opens in the parent window', 'Your own connected account. The buyer leaves the frame for the payment page and comes back to your site when it is done.'],
+                    ['PayPal', 'Opens in the parent window', 'Your own connected account. The buyer approves on PayPal and returns to your site, and the ticket is issued as soon as they land.'],
+                    ['Payfast', 'Opens in the parent window', 'South African rand only. The buyer pays on Payfast and returns to your site.'],
                     ['Invoice Ninja', 'Opens in the parent window', 'For anyone already invoicing through Invoice Ninja, including the payment-link mode.'],
                     ['Custom payment URL', 'Opens in the parent window', 'Point the event at any payment page you already run, and it is used instead.'],
                     ['Cash or at the door', 'Finishes in the frame', 'No processor involved. The order is recorded, confirmed and emailed without the buyer leaving your page, and a free ticket on a cash event finishes here too.'],
