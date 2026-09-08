@@ -1670,7 +1670,7 @@ return [
     'release_subdomain_confirm' => 'Libérer le sous-domaine de ce planning pour qu\'un autre planning puisse l\'utiliser ?',
     'restore_schedule_confirm' => 'Restaurer ce planning ?',
     'mark_deleted_description' => 'Le planning cesse d\'afficher sa page publique et son sous-domaine est libéré, afin qu\'un planning plus récent puisse prendre le nom. Les événements, les ventes de billets et les statistiques sont conservés, et cette action est réversible.',
-    'mark_deleted_description_unclaimed' => 'Ce planning n\'a ni propriétaire ni page publique, seul son sous-domaine est donc libéré. Rien d\'autre ne change, et cette action est réversible.',
+    'mark_deleted_description_unclaimed' => 'Ce planning n\'a pas de propriétaire : le marquer comme supprimé retire sa page de revendication et libère son sous-domaine. Rien d\'autre ne change, et l\'action est réversible.',
     'release_subdomain_description' => 'Ce planning est déjà supprimé mais occupe encore :subdomain. Le libérer rend le nom disponible pour un autre planning.',
     'restore_reclaims_subdomain' => 'La restauration récupérera :subdomain.',
     'restore_keeps_subdomain' => ':original est maintenant utilisé par un autre planning, celui-ci restera donc sur :subdomain.',

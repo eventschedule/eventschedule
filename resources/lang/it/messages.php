@@ -1675,7 +1675,7 @@ return [
     'release_subdomain_confirm' => 'Rilasciare il sottodominio di questo programma perché un altro programma possa usarlo?',
     'restore_schedule_confirm' => 'Ripristinare questo programma?',
     'mark_deleted_description' => 'Il programma smette di mostrare la sua pagina pubblica e il suo sottodominio viene rilasciato, così un programma più recente può prendere il nome. Eventi, vendite di biglietti e statistiche vengono conservati, e l\'operazione è reversibile.',
-    'mark_deleted_description_unclaimed' => 'Questo programma non ha proprietario né pagina pubblica, quindi viene rilasciato solo il suo sottodominio. Nient\'altro cambia, e l\'operazione è reversibile.',
+    'mark_deleted_description_unclaimed' => 'Questo programma non ha un proprietario, quindi contrassegnarlo come eliminato rimuove la sua pagina di rivendicazione e libera il suo sottodominio. Non cambia nient\'altro e l\'azione è reversibile.',
     'release_subdomain_description' => 'Questo programma è già eliminato ma occupa ancora :subdomain. Rilasciarlo rende il nome disponibile per un altro programma.',
     'restore_reclaims_subdomain' => 'Il ripristino riprenderà :subdomain.',
     'restore_keeps_subdomain' => ':original è ora usato da un altro programma, quindi questo resterà su :subdomain.',

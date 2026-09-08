@@ -1715,7 +1715,7 @@ return [
     'release_subdomain_confirm' => 'Kas vabastada selle ajakava alamdomeen, et teine ajakava saaks seda kasutada?',
     'restore_schedule_confirm' => 'Kas taastada see ajakava?',
     'mark_deleted_description' => 'Ajakava lõpetab oma avaliku lehe kuvamise ja selle alamdomeen vabastatakse, nii et uuem ajakava saab nime endale võtta. Sündmused, piletimüük ja statistika säilivad ning selle saab tagasi võtta.',
-    'mark_deleted_description_unclaimed' => 'Sellel ajakaval ei ole omanikku ega avalikku lehte, seega vabastatakse ainult selle alamdomeen. Muud ei muutu ja selle saab tagasi võtta.',
+    'mark_deleted_description_unclaimed' => 'Sellel ajakaval ei ole omanikku, seega kustutatuks märkimine eemaldab selle omaksvõtmise lehe ja vabastab alamdomeeni. Muud ei muutu ja selle saab tagasi võtta.',
     'release_subdomain_description' => 'See ajakava on juba kustutatud, kuid hoiab endiselt alamdomeeni :subdomain. Vabastamine annab nime teisele ajakavale.',
     'restore_reclaims_subdomain' => 'Taastamine võtab :subdomain tagasi.',
     'restore_keeps_subdomain' => ':original on nüüd teise ajakava kasutuses, seega jääb see ajakava aadressile :subdomain.',

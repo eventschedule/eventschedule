@@ -1666,7 +1666,7 @@ return [
     'release_subdomain_confirm' => '¿Liberar el subdominio de este horario para que otro horario pueda usarlo?',
     'restore_schedule_confirm' => '¿Restaurar este horario?',
     'mark_deleted_description' => 'El horario deja de mostrar su página pública y se libera su subdominio, para que un horario más nuevo pueda tomar el nombre. Los eventos, las ventas de entradas y las estadísticas se conservan, y esto se puede deshacer.',
-    'mark_deleted_description_unclaimed' => 'Este horario no tiene propietario ni página pública, así que solo se libera su subdominio. Nada más cambia, y esto se puede deshacer.',
+    'mark_deleted_description_unclaimed' => 'Este horario no tiene propietario, así que marcarlo como eliminado retira su página de reclamación y libera su subdominio. No cambia nada más, y se puede deshacer.',
     'release_subdomain_description' => 'Este horario ya está eliminado pero todavía ocupa :subdomain. Liberarlo deja el nombre disponible para otro horario.',
     'restore_reclaims_subdomain' => 'Al restaurar se recuperará :subdomain.',
     'restore_keeps_subdomain' => ':original ahora lo usa otro horario, así que este se quedará en :subdomain.',

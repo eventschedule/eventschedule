@@ -1673,7 +1673,7 @@ return [
     'release_subdomain_confirm' => 'Het subdomein van dit schema vrijgeven zodat een ander schema het kan gebruiken?',
     'restore_schedule_confirm' => 'Dit schema herstellen?',
     'mark_deleted_description' => 'Het schema toont zijn openbare pagina niet meer en het subdomein wordt vrijgegeven, zodat een nieuwer schema de naam kan overnemen. Evenementen, ticketverkoop en statistieken blijven behouden, en dit kan ongedaan worden gemaakt.',
-    'mark_deleted_description_unclaimed' => 'Dit schema heeft geen eigenaar en geen openbare pagina, dus alleen het subdomein wordt vrijgegeven. Er verandert verder niets, en dit kan ongedaan worden gemaakt.',
+    'mark_deleted_description_unclaimed' => 'Dit schema heeft geen eigenaar, dus als verwijderd markeren haalt de claimpagina offline en geeft het subdomein vrij. Verder verandert er niets, en dit kan ongedaan worden gemaakt.',
     'release_subdomain_description' => 'Dit schema is al verwijderd maar bezet nog steeds :subdomain. Vrijgeven maakt de naam beschikbaar voor een ander schema.',
     'restore_reclaims_subdomain' => 'Bij herstellen wordt :subdomain teruggenomen.',
     'restore_keeps_subdomain' => ':original wordt nu door een ander schema gebruikt, dus dit schema blijft op :subdomain.',

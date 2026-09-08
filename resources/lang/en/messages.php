@@ -2068,7 +2068,7 @@ return [
     'release_subdomain_confirm' => 'Release this schedule\'s subdomain so another schedule can use it?',
     'restore_schedule_confirm' => 'Restore this schedule?',
     'mark_deleted_description' => 'The schedule stops serving its public page and its subdomain is released, so a newer schedule can take the name. Events, ticket sales and analytics are kept, and this can be undone.',
-    'mark_deleted_description_unclaimed' => 'This schedule has no owner and no public page, so only its subdomain is released. Nothing else changes, and this can be undone.',
+    'mark_deleted_description_unclaimed' => 'This schedule has no owner, so marking it deleted takes its claim page down and releases its subdomain. Nothing else changes, and this can be undone.',
     'release_subdomain_description' => 'This schedule is already deleted but still holds :subdomain. Releasing it frees the name for another schedule.',
     'restore_reclaims_subdomain' => 'Restoring will take :subdomain back.',
     'restore_keeps_subdomain' => ':original is now used by another schedule, so this one will stay at :subdomain.',

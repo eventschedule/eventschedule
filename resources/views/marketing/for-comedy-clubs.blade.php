@@ -338,7 +338,7 @@
             ],
             [
                 'q' => 'What happens to the comics I add to a show?',
-                'a' => 'Adding someone as a participant attaches them to the event. If they already run their own schedule on Event Schedule, the date turns up there for them to accept, or straight away if they have added your club to their approved list. If they do not have one yet, you are creating a profile for them and you can tick a box to email them an invitation to claim it. Until they claim it, that profile has no public page of its own.',
+                'a' => 'Adding someone as a participant attaches them to the event. If they already run their own schedule on Event Schedule, the date turns up there for them to accept, or straight away if they have added your club to their approved list. If they do not have one yet, you are creating a page for them and you can tick a box to email them an invitation to claim it. Until they claim it, that page stays out of search engines.',
             ],
             [
                 'q' => 'How do comics ask for a spot?',
@@ -527,7 +527,7 @@
             <div class="grid gap-4 md:grid-cols-3" data-reveal-group="100">
                 @foreach ([
                     ['They already have a schedule', 'The date arrives on their own page for them to accept, or immediately if they have put your club on their approved list. Nobody is retyping your booking.'],
-                    ['They do not have one yet', 'You are creating a profile for them, and you can tick a box to email an invitation to claim it. Until they claim it, that profile has no public page of its own.'],
+                    ['They do not have one yet', 'You are creating a page for them, and you can tick a box to email an invitation to claim it. Until they claim it, that page stays out of search engines.'],
                     ['You enter it once', 'The bill lives on the show. Change it on Wednesday and every place it appears changes with it.'],
                 ] as [$t, $d])
                     <div class="es-night-card es-night-hover p-6" data-reveal>

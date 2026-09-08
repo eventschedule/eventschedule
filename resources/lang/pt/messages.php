@@ -1674,7 +1674,7 @@ return [
     'release_subdomain_confirm' => 'Liberar o subdomínio desta agenda para que outra agenda possa usá-lo?',
     'restore_schedule_confirm' => 'Restaurar esta agenda?',
     'mark_deleted_description' => 'A agenda deixa de exibir a página pública e o subdomínio é liberado, para que uma agenda mais nova possa assumir o nome. Eventos, vendas de ingressos e estatísticas são mantidos, e isso pode ser desfeito.',
-    'mark_deleted_description_unclaimed' => 'Esta agenda não tem proprietário nem página pública, então apenas o subdomínio é liberado. Nada mais muda, e isso pode ser desfeito.',
+    'mark_deleted_description_unclaimed' => 'Esta agenda não tem proprietário, por isso marcá-la como eliminada retira a sua página de reivindicação e liberta o seu subdomínio. Mais nada muda, e a ação pode ser anulada.',
     'release_subdomain_description' => 'Esta agenda já foi excluída, mas ainda ocupa :subdomain. Liberá-lo deixa o nome disponível para outra agenda.',
     'restore_reclaims_subdomain' => 'Restaurar vai retomar :subdomain.',
     'restore_keeps_subdomain' => ':original agora é usado por outra agenda, então esta permanecerá em :subdomain.',

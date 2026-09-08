@@ -1670,7 +1670,7 @@ return [
     'release_subdomain_confirm' => 'Die Subdomain dieses Zeitplans freigeben, damit ein anderer Zeitplan sie verwenden kann?',
     'restore_schedule_confirm' => 'Diesen Zeitplan wiederherstellen?',
     'mark_deleted_description' => 'Der Zeitplan zeigt seine öffentliche Seite nicht mehr an und seine Subdomain wird freigegeben, sodass ein neuerer Zeitplan den Namen übernehmen kann. Veranstaltungen, Ticketverkäufe und Statistiken bleiben erhalten, und dies lässt sich rückgängig machen.',
-    'mark_deleted_description_unclaimed' => 'Dieser Zeitplan hat keinen Eigentümer und keine öffentliche Seite, daher wird nur seine Subdomain freigegeben. Sonst ändert sich nichts, und dies lässt sich rückgängig machen.',
+    'mark_deleted_description_unclaimed' => 'Dieser Zeitplan hat keinen Eigentümer. Als gelöscht zu markieren nimmt seine Anspruchsseite offline und gibt seine Subdomain frei. Sonst ändert sich nichts, und das lässt sich rückgängig machen.',
     'release_subdomain_description' => 'Dieser Zeitplan ist bereits gelöscht, belegt aber weiterhin :subdomain. Durch die Freigabe wird der Name für einen anderen Zeitplan verfügbar.',
     'restore_reclaims_subdomain' => 'Beim Wiederherstellen wird :subdomain zurückgeholt.',
     'restore_keeps_subdomain' => ':original wird jetzt von einem anderen Zeitplan verwendet, daher bleibt dieser unter :subdomain.',

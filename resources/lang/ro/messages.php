@@ -1731,7 +1731,7 @@ return [
     'release_subdomain_confirm' => 'Eliberezi subdomeniul acestui program pentru ca alt program să îl poată folosi?',
     'restore_schedule_confirm' => 'Restaurezi acest program?',
     'mark_deleted_description' => 'Programul nu își mai afișează pagina publică, iar subdomeniul său este eliberat, astfel încât un program mai nou să poată prelua numele. Evenimentele, vânzările de bilete și statisticile sunt păstrate, iar acțiunea poate fi anulată.',
-    'mark_deleted_description_unclaimed' => 'Acest program nu are proprietar și nici pagină publică, așa că se eliberează doar subdomeniul. Nimic altceva nu se schimbă, iar acțiunea poate fi anulată.',
+    'mark_deleted_description_unclaimed' => 'Acest program nu are proprietar, așa că marcarea lui ca șters retrage pagina de revendicare și eliberează subdomeniul. Nimic altceva nu se schimbă, iar acțiunea poate fi anulată.',
     'release_subdomain_description' => 'Acest program este deja șters, dar încă ocupă :subdomain. Eliberarea lui pune numele la dispoziția altui program.',
     'restore_reclaims_subdomain' => 'Restaurarea va recupera :subdomain.',
     'restore_keeps_subdomain' => ':original este acum folosit de alt program, așa că acesta va rămâne la :subdomain.',

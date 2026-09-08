@@ -98,7 +98,9 @@ class AdminSchedulePagesRenderTest extends TestCase
         $admin->get(route('admin.schedules.edit', ['role' => $backlog->encodeId()]))->assertOk()
             ->assertSee('Release Subdomain');
 
-        // An ownerless row never had a public page, so the card must not claim one is coming down.
+        // An ownerless row DOES have a page now - the claim page that invites the performer or
+        // venue to take it over - so the card has to say that releasing the subdomain takes it
+        // down. It used to promise the opposite, which was true until that page existed.
         $orphan = new Role;
         $orphan->subdomain = 'orphan2';
         $orphan->name = 'Orphan';
@@ -106,6 +108,7 @@ class AdminSchedulePagesRenderTest extends TestCase
         $orphan->timezone = 'America/New_York';
         $orphan->save();
         $admin->get(route('admin.schedules.edit', ['role' => $orphan->encodeId()]))->assertOk()
-            ->assertSee('has no owner and no public page');
+            ->assertSee(__('messages.mark_deleted_description_unclaimed'))
+            ->assertDontSee('no public page');
     }
 }
