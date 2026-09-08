@@ -149,6 +149,47 @@ class ScheduleClaimByEmailTest extends TestCase
         $this->assertSame($buyer->id, $sale->fresh()->user_id);
     }
 
+    public function test_claiming_does_not_break_the_relationship_that_produced_it(): void
+    {
+        // autoAcceptsEventFrom() short-circuits to true while user_id is null, so everything a
+        // promoter adds to a placeholder is accepted. The instant it has an owner that stops, and
+        // getRequireApprovalAttribute() forces require_approval true for talent regardless of the
+        // column - so without pre-approving, the promoter who invited the act would find every
+        // future date silently queued, and the act could not switch it back on.
+        $organizer = $this->createOwner();
+        $curator = $this->createRole($organizer, 'venue', ['name' => 'Ba-Be Bar']);
+        $stranger = $this->createRole($this->createOwner(), 'venue', ['name' => 'Somewhere Else']);
+
+        $act = $this->placeholder(['email' => 'band@gmail.com']);
+        $event = $this->createEvent($curator, ['name' => 'Double Bill', 'creator_role_id' => $curator->id]);
+        $event->roles()->attach($act->id, ['is_accepted' => true]);
+
+        $this->assertTrue($act->autoAcceptsEventFrom($organizer, $curator), 'the fixture must start out auto-accepting');
+
+        $this->register('band@gmail.com');
+        $act = $act->fresh();
+
+        $this->assertTrue($act->isClaimed());
+        $this->assertTrue($act->autoAcceptsEventFrom(null, $curator), 'a schedule already listing this act keeps doing so');
+        $this->assertFalse($act->autoAcceptsEventFrom(null, $stranger), 'and nobody else is granted anything');
+    }
+
+    public function test_a_pending_listing_does_not_earn_a_pre_approval(): void
+    {
+        // Only what the page was ALREADY doing is preserved. A declined or never-accepted pivot is
+        // not evidence of a relationship.
+        $organizer = $this->createOwner();
+        $curator = $this->createRole($organizer, 'venue', ['name' => 'Ba-Be Bar']);
+
+        $act = $this->placeholder(['email' => 'band@gmail.com']);
+        $event = $this->createEvent($curator, ['name' => 'Double Bill', 'creator_role_id' => $curator->id]);
+        $event->roles()->attach($act->id, ['is_accepted' => false]);
+
+        $this->register('band@gmail.com');
+
+        $this->assertFalse($act->fresh()->autoAcceptsEventFrom(null, $curator));
+    }
+
     public function test_the_admin_listing_scopes_partition_every_schedule(): void
     {
         $owner = $this->createOwner();

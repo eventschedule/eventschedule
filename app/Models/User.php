@@ -506,6 +506,37 @@ class User extends Authenticatable implements MustVerifyEmail
      * hold a valid code for the same page at the same moment, and the second has to lose rather
      * than overwrite user_id.
      */
+    /**
+     * Keep the schedules that were already listing this act listing it.
+     *
+     * Without this, claiming silently breaks the relationship that produced the claim.
+     * autoAcceptsEventFrom() short-circuits to true while user_id is null, so everything a
+     * promoter adds to a placeholder is accepted; the moment it has an owner that stops, and for a
+     * TALENT schedule getRequireApprovalAttribute() forces require_approval true regardless of the
+     * column, so the pre-approved list is the only route back. role/edit.blade.php hides both that
+     * toggle and this list from talent, so the new owner cannot even switch it on: they would
+     * simply find the promoter's next date sitting in a request queue with no explanation, and the
+     * promoter would see nothing at all.
+     *
+     * Only schedules that ALREADY had an accepted event here are added, so this preserves what the
+     * page did yesterday rather than granting anything new. Anyone else still has to ask.
+     */
+    private function preserveExistingListers(Role $role): void
+    {
+        $subdomains = Role::query()
+            ->whereIn('id', $role->events()->wherePivot('is_accepted', true)->pluck('events.creator_role_id')->filter()->unique())
+            ->where('id', '!=', $role->id)
+            ->pluck('subdomain')
+            ->all();
+
+        if (! $subdomains) {
+            return;
+        }
+
+        $role->approved_subdomains = array_values(array_unique(array_merge($role->approved_subdomains ?: [], $subdomains)));
+        $role->saveQuietly();
+    }
+
     public function claimSchedule(Role $role, string $channel = 'email'): bool
     {
         $claimed = false;
@@ -531,6 +562,8 @@ class User extends Authenticatable implements MustVerifyEmail
             // (EventRepo attaches the creating user as a follower, and the follow-to-edit path put
             // strangers there before it was closed) and role_user is unique on (user_id, role_id).
             $this->roles()->syncWithoutDetaching([$fresh->id => ['level' => 'owner', 'created_at' => now()]]);
+
+            $this->preserveExistingListers($fresh);
 
             $claimed = true;
         });
