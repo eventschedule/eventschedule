@@ -481,65 +481,76 @@ class User extends Authenticatable implements MustVerifyEmail
             return false;
         }
 
-        $claimedIds = [];
+        // Full SELECT, deliberately: Role::saving recomputes description_html and its three
+        // siblings from in-memory attributes on every save, so narrowing the columns here to the
+        // ones a claim touches would write NULL over the placeholder's description.
+        $claimed = false;
 
-        DB::transaction(function () use (&$claimedIds) {
-            // ownerless(), not whereNull('user_id'): ConvertsLocationToVenue stamps the curator's
-            // id onto the venues it invents, so the placeholders likeliest to carry a real venue's
-            // address are exactly the ones a null check misses. notDemoSchedule() and is_deleted
-            // are new here too - unfollow() soft-deletes an ownerless row when its last follower
-            // leaves, and inheriting one of those would resurrect a page somebody removed.
-            // The two whereNulls are load-bearing, not belt and braces. ownerless() is "nobody
-            // holds an owner or admin pivot", and a REAL schedule can be in that state: it is the
-            // exact drift CheckData::checkRoleOwnership() exists to detect and repair. Such a row
-            // belongs to a paying customer, carries a verified address, and would otherwise be
-            // handed to anyone who registered with the address in roles.email - with user_id
-            // overwritten, so the owner would simply lose it. A placeholder never has either stamp
-            // (nothing verifies a contact nobody has claimed); a real schedule always has one,
-            // because that is half of what isClaimed() means.
-            //
-            // Full SELECT, deliberately: Role::saving recomputes description_html and its three
-            // siblings from in-memory attributes on every save, so narrowing the columns here to
-            // the three this loop touches would write NULL over the placeholder's description.
-            $roles = Role::whereEmail($this->email)
-                ->ownerless()
-                ->whereNull('email_verified_at')
-                ->whereNull('phone_verified_at')
-                ->notDemoSchedule()
-                ->where('is_deleted', false)
-                ->lockForUpdate()
-                ->get();
+        foreach (Role::whereEmail($this->email)->claimable()->get() as $role) {
+            $claimed = $this->claimSchedule($role) || $claimed;
+        }
 
-            foreach ($roles as $role) {
-                $role->user_id = $this->id;
-                $role->save();
+        return $claimed;
+    }
 
-                if ($role->markEmailAsVerified()) {
-                    event(new \Illuminate\Auth\Events\Verified($role));
-                }
+    /**
+     * Take ownership of one placeholder. The single definition of what claiming writes.
+     *
+     * $channel names the contact that was proved, and therefore which stamp to set. Proving it is
+     * the CALLER's job and the bar differs by door: registration and email verification prove the
+     * address by owning the account it belongs to, while the claim page proves it with a code sent
+     * to the address on the ROW. What must never differ is the writes, which is why they live here
+     * rather than in a fourth copy.
+     *
+     * Re-reads claimable() inside the lock instead of trusting what the caller saw. Two people can
+     * hold a valid code for the same page at the same moment, and the second has to lose rather
+     * than overwrite user_id.
+     */
+    public function claimSchedule(Role $role, string $channel = 'email'): bool
+    {
+        $claimed = false;
 
-                // syncWithoutDetaching, not attach: the claimant may already follow this schedule
-                // (EventRepo attaches the creating user as a follower, and the follow-to-edit path
-                // puts strangers there too) and role_user is unique on (user_id, role_id).
-                $this->roles()->syncWithoutDetaching([$role->id => ['level' => 'owner', 'created_at' => now()]]);
+        DB::transaction(function () use ($role, $channel, &$claimed) {
+            $fresh = Role::whereKey($role->id)->claimable()->lockForUpdate()->first();
 
-                $claimedIds[] = $role->id;
+            if (! $fresh) {
+                return;
             }
+
+            $fresh->user_id = $this->id;
+            $fresh->save();
+
+            if ($channel === 'phone') {
+                $fresh->phone_verified_at = now();
+                $fresh->saveQuietly();
+            } elseif ($fresh->markEmailAsVerified()) {
+                event(new \Illuminate\Auth\Events\Verified($fresh));
+            }
+
+            // syncWithoutDetaching, not attach: the claimant may already follow this schedule
+            // (EventRepo attaches the creating user as a follower, and the follow-to-edit path put
+            // strangers there before it was closed) and role_user is unique on (user_id, role_id).
+            $this->roles()->syncWithoutDetaching([$fresh->id => ['level' => 'owner', 'created_at' => now()]]);
+
+            $claimed = true;
         });
 
-        // users is written AFTER the roles transaction commits, never inside it. claimRolesByPhone()
-        // locks users first and roles second; doing the reverse here would give the pair a deadlock
-        // cycle, which is the failure ScheduleTransferService's docblock records as a live 1213.
-        if ($claimedIds && ! $this->default_role_id) {
-            $this->default_role_id = $claimedIds[0];
+        if (! $claimed) {
+            return false;
+        }
+
+        // users is written AFTER the roles transaction commits, never inside it.
+        // claimRolesByPhone() locks users first and roles second; doing the reverse here would give
+        // the pair a deadlock cycle, the failure ScheduleTransferService's docblock records as a
+        // live 1213.
+        if (! $this->default_role_id) {
+            $this->default_role_id = $role->id;
             $this->saveQuietly();
         }
 
-        foreach ($claimedIds as $roleId) {
-            AuditService::log(AuditService::SCHEDULE_CLAIM, $this->id, 'Role', $roleId);
-        }
+        AuditService::log(AuditService::SCHEDULE_CLAIM, $this->id, 'Role', $role->id);
 
-        return $claimedIds !== [];
+        return true;
     }
 
     /**

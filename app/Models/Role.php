@@ -1417,6 +1417,26 @@ class Role extends Model implements MustVerifyEmail
     }
 
     /**
+     * The rows a person may take ownership of: a placeholder, and nothing else.
+     *
+     * ownerless() alone is not enough and the gap is a takeover. It answers "nobody holds an owner
+     * or admin pivot", which is ALSO true of a real customer's schedule whose pivot row has
+     * drifted - the exact state CheckData::checkRoleOwnership() exists to detect and repair. That
+     * row has a paying owner and a verified contact, and handing it to whoever proved control of
+     * the address in roles.email would simply take it off them. A placeholder never carries either
+     * verified stamp, because nothing verifies a contact nobody has claimed; a real schedule
+     * always carries one, because that is half of what isClaimed() means.
+     */
+    public function scopeClaimable($query)
+    {
+        return $query->ownerless()
+            ->whereNull('roles.email_verified_at')
+            ->whereNull('roles.phone_verified_at')
+            ->notDemoSchedule()
+            ->where('roles.is_deleted', false);
+    }
+
+    /**
      * Query-level mirror of hasRealOwner(), negated: the placeholder rows.
      * Keep in sync with hasRealOwner().
      *

@@ -1725,6 +1725,207 @@ class RoleController extends Controller
         return redirect()->route('following.merge_venues');
     }
 
+    /**
+     * The schedule a claim or takedown request is about, or null if this is not one of those rows.
+     *
+     * claimable() rather than a bare ownerless(), so neither door can ever be pointed at a real
+     * customer's schedule whose owner pivot has drifted.
+     */
+    private function claimTarget(string $subdomain): ?Role
+    {
+        return Role::subdomain($subdomain)->claimable()->first();
+    }
+
+    /**
+     * Mask a contact so it can be named to a signed-in claimant without publishing it.
+     *
+     * The address was typed by one third party about another and this is reached from a public
+     * page, so the full value never appears. Enough survives for the person who actually holds the
+     * mailbox to recognise it, which is all the hint has to do.
+     */
+    private function maskContact(string $value): string
+    {
+        if (str_contains($value, '@')) {
+            [$local, $domain] = explode('@', $value, 2);
+            $head = mb_substr($domain, 0, 1);
+
+            return mb_substr($local, 0, 1).str_repeat('*', 3).'@'.$head.str_repeat('*', 3)
+                .(str_contains($domain, '.') ? mb_substr($domain, mb_strrpos($domain, '.')) : '');
+        }
+
+        return str_repeat('*', max(0, mb_strlen($value) - 3)).mb_substr($value, -3);
+    }
+
+    /**
+     * "Claim this page".
+     *
+     * The proof is owning the account the schedule's contact address belongs to, which is the same
+     * standard VerifyEmailController has always used and the same one registration now applies -
+     * so a claim that arrives this way is settled by User::claimSchedule() and there is no
+     * separate code to issue. A visitor whose account carries a different address is told, in
+     * masked form, which one this page answers to; that hint is behind the sign-in wall because
+     * the page it sits on is public.
+     */
+    public function claimStart(Request $request, $subdomain)
+    {
+        $role = $this->claimTarget($subdomain);
+
+        if (! $role) {
+            return redirect(app_url());
+        }
+
+        $user = $request->user();
+
+        if (! $user) {
+            return redirect_with_pending_action(
+                app_url(route('sign_up', [], false)),
+                ['pending_claim' => $role->subdomain]
+            );
+        }
+
+        if ($this->userHoldsContactFor($user, $role)) {
+            if ($user->claimSchedule($role, $role->email && strcasecmp((string) $role->email, (string) $user->email) === 0 ? 'email' : 'phone')) {
+                return redirect(app_url(route('role.view_admin', ['subdomain' => $role->subdomain, 'tab' => 'schedule'], false)))
+                    ->with('message', __('messages.claim_done'));
+            }
+
+            return redirect(app_url())->with('error', __('messages.invalid_request'));
+        }
+
+        return response()->view('role.claim', [
+            'role' => $role,
+            'fonts' => array_values(array_filter([$role->font_family])),
+            'maskedContact' => $this->maskContact((string) ($role->email ?: $role->phone)),
+        ]);
+    }
+
+    /** Whether this account already proves control of the contact on the row. */
+    private function userHoldsContactFor(User $user, Role $role): bool
+    {
+        if ($role->email && $user->hasVerifiedEmail() && strcasecmp((string) $role->email, (string) $user->email) === 0) {
+            return true;
+        }
+
+        return $role->phone && $user->hasVerifiedPhone()
+            && PhoneUtils::normalize((string) $role->phone) === PhoneUtils::normalize((string) $user->phone);
+    }
+
+    /** "This is not me". */
+    public function claimNotMe(Request $request, $subdomain)
+    {
+        $role = $this->claimTarget($subdomain);
+
+        if (! $role) {
+            return redirect(app_url());
+        }
+
+        return response()->view('role.claim-not-me', [
+            'role' => $role,
+            'fonts' => array_values(array_filter([$role->font_family])),
+        ]);
+    }
+
+    /**
+     * Act on "this is not me".
+     *
+     * Signed in, always: this takes a public page down, so it cannot be a button a passer-by can
+     * point at a competitor, and whoever asks has to be nameable in the audit log afterwards.
+     *
+     * Proving control of the contact on the row removes the page outright, by the same standard
+     * that would have handed it over. Everything else is recorded and sent to the schedule that
+     * created the row - they typed the name, they know whether it is right, and they can already
+     * edit and remove the row - with an audit entry so an admin can see a pattern forming.
+     */
+    public function claimNotMeSubmit(Request $request, $subdomain)
+    {
+        $role = $this->claimTarget($subdomain);
+
+        if (! $role) {
+            return redirect(app_url());
+        }
+
+        $user = $request->user();
+
+        if (! $user) {
+            return redirect_with_pending_action(
+                app_url(route('sign_up', [], false)),
+                ['pending_claim' => $role->subdomain]
+            );
+        }
+
+        if ($this->userHoldsContactFor($user, $role)) {
+            $role->is_deleted = true;
+            $role->save();
+
+            AuditService::log(AuditService::SCHEDULE_TAKEDOWN, $user->id, 'Role', $role->id, null, null, 'verified');
+
+            return redirect(app_url())->with('message', __('messages.claim_not_me_removed'));
+        }
+
+        AuditService::log(AuditService::SCHEDULE_TAKEDOWN_REQUESTED, $user->id, 'Role', $role->id);
+
+        return redirect(app_url())->with('message', __('messages.claim_not_me_reported'));
+    }
+
+    /**
+     * The page for a schedule the app invented while somebody entered an event.
+     *
+     * EventRepo::saveEvent() mints one of these for every performer or venue named by hand, and
+     * until now they served a redirect - so the invitation we mail the act had nothing to point at
+     * and nobody could find out a page existed in their name. This is that page: what we know,
+     * where it came from, and the two things the person it describes might want to do about it.
+     *
+     * Its own view rather than role/show-guest, which opens :ad-slot :banner-bar :cart all true
+     * and pulls the subscribe panel, the follow modal and the Vue calendar - every one of them the
+     * owner's, and there is no owner. (Making show-guest's slot conditional would also break
+     * PromotionSlotRenderTest, which greps the view tree for the literal ad-slot="true".)
+     *
+     * Root only. The events listed here belong to the schedules that published them and their
+     * canonical pages are those schedules'; an event page under this subdomain would drag in
+     * tickets, the cart and the fan-content surfaces that have no owner to moderate them.
+     */
+    private function viewGuestUnclaimed(Request $request, Role $role, $slug = '', $id = null, $date = null)
+    {
+        if ($slug !== '' || $id !== null || $date !== null
+            || $request->has('id') || $request->has('date')
+            || $request->embed || $request->graphic) {
+            return redirect(app_url());
+        }
+
+        // No narrowed select: Role::saving recomputes description_html and its siblings from
+        // in-memory attributes, and Event needs creator_role_id present or getStartDateTime()
+        // short-circuits on the null key and silently falls back to the app timezone.
+        $events = Event::with(['roles', 'creatorRole', 'venue'])
+            ->whereHas('roles', fn ($q) => $q->where('roles.id', $role->id)->where('event_role.is_accepted', true))
+            ->where('is_draft', false)
+            ->where('is_private', false)
+            ->where('is_cancelled', false)
+            ->upcomingOrOngoing()
+            ->orderBy('starts_at')
+            ->limit(20)
+            ->get();
+
+        // Who to name in "this page was created by". The row itself records no creator, so the
+        // earliest event on it is the best evidence: whoever listed this act first is who brought
+        // the page into being. Falls back to nothing rather than to a guess.
+        $createdBy = $events->map(fn ($e) => $e->creatorRole)->filter()->first()
+            ?: Event::where('creator_role_id', '!=', null)
+                ->whereHas('roles', fn ($q) => $q->where('roles.id', $role->id))
+                ->with('creatorRole')
+                ->orderBy('created_at')
+                ->first()?->creatorRole;
+
+        $fonts = array_values(array_filter([$role->font_family]));
+
+        return response()->view('role.show-guest-unclaimed', [
+            'role' => $role,
+            'events' => $events,
+            'createdBy' => $createdBy,
+            'fonts' => $fonts,
+            'user' => auth()->user(),
+        ]);
+    }
+
     public function viewGuest(Request $request, $subdomain, $slug = '', $id = null, $date = null)
     {
         $user = auth()->user();
@@ -1737,7 +1938,7 @@ class RoleController extends Controller
         // WITHOUT renaming - so those schedules kept serving this page indefinitely while their
         // owner had already lost access to them (User::roles() filters is_deleted). The web app
         // manifest has always filtered here; this makes the page agree with it.
-        if (! $role || $role->is_deleted || ! $role->isClaimed()) {
+        if (! $role || $role->is_deleted) {
             return redirect(app_url());
         }
 
@@ -1771,6 +1972,21 @@ class RoleController extends Controller
             if (is_valid_language_code($role->language_code)) {
                 app()->setLocale($role->language_code);
             }
+        }
+
+        // Split AFTER the language block so a claim page still honours ?lang= and the schedule's
+        // own language, and before anything reads $slug/$id/$date.
+        //
+        // hasRealOwner(), not isClaimed(). The two disagree on a whole population: a schedule
+        // somebody really runs but never verified a contact on is NOT claimed, and printing "is
+        // this you?" on it would be offering a stranger a page its owner is sitting in. That
+        // population keeps the redirect it has always had, immediately below.
+        if (! $role->hasRealOwner()) {
+            return $this->viewGuestUnclaimed($request, $role, $slug, $id, $date);
+        }
+
+        if (! $role->isClaimed()) {
+            return redirect(app_url());
         }
 
         $otherRole = null;

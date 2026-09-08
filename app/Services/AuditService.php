@@ -71,6 +71,14 @@ class AuditService
     // handed this over, so there is no counterparty and no invitation to correlate it with.
     const SCHEDULE_CLAIM = 'schedule.claim';
 
+    // Somebody said a placeholder created about them is not theirs. Two outcomes, one for each
+    // half of the same question: TAKEDOWN is the page actually coming down, after they proved they
+    // hold the contact on it; TAKEDOWN_REQUESTED is the request being passed to the schedule that
+    // created the row, because there was nothing to prove control of.
+    const SCHEDULE_TAKEDOWN = 'schedule.takedown';
+
+    const SCHEDULE_TAKEDOWN_REQUESTED = 'schedule.takedown_requested';
+
     // Event actions
     const EVENT_CREATE = 'event.create';
 
