@@ -18,9 +18,23 @@
         $guestLang = $role->displayLanguageCode();
         $guestEventName = ($event && $event->exists) ? $event->nameInLanguage($guestLang, $role) : null;
         $guestEventDescriptionHtml = ($event && $event->exists) ? $event->descriptionHtmlInLanguage($guestLang, $role) : null;
+        // user_id as well as the contact columns, because only one half was being asked.
+        // AdminController::verifyScheduleEmail() stamps email_verified_at on whatever row it is
+        // handed - including a placeholder, reachable in one click from the ?owner=unclaimed list -
+        // and RoleController::verify() does the same for anyone holding the link. Either one used
+        // to flip a page about a third party who never signed up to "index, follow".
+        //
+        // Deliberately NOT hasRealOwner(), which is the predicate showAds() uses. That one is also
+        // false for a real customer whose owner pivot has drifted (the state
+        // CheckData::checkRoleOwnership() repairs), and de-indexing a paying customer's live page
+        // over a missing pivot row is a worse failure than the one being fixed. The residue is a
+        // ConvertsLocationToVenue venue whose address an admin verified by hand, which is an admin
+        // deliberately adopting it. Costs no query, unlike hasRealOwner().
         $isUnverifiedRole = $role && $role->exists
-            && !($role->email && $role->email_verified_at)
-            && !($role->phone && $role->phone_verified_at);
+            && (
+                (!($role->email && $role->email_verified_at) && !($role->phone && $role->phone_verified_at))
+                || !$role->user_id
+            );
 
         // Demo schedules exist to be LOOKED AT from /examples, not to rank. They are seeded
         // fabricated venues and events, and Googlebot was spending a quarter of its crawl on them:

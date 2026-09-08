@@ -390,6 +390,19 @@ class RoleController extends Controller
     {
         $role = Role::subdomain($subdomain)->firstOrFail();
 
+        // Nobody may follow a placeholder from the outside, and this is a guard rather than a
+        // missing button. isEditableBy() grants edit rights on an unclaimed schedule to anyone
+        // who follows it, and canMergeRoles() needs no more than that - so a public Follow on a
+        // published placeholder is a one-click path to editing, and then absorbing, a page about
+        // a stranger. The curator who created the row does not come through here: EventRepo
+        // attaches them as a follower at creation, which is what their cleanup rights hang off.
+        // unfollow() is the other half of the reason - it soft-deletes an ownerless, email-less
+        // role once the last pivot goes, so a follow-then-unfollow would delete the page.
+        if ($role->is_deleted || ! $role->hasRealOwner()) {
+            return redirect(app_url(route('following', [], false)))
+                ->with('error', __('messages.invalid_request'));
+        }
+
         if (! auth()->user()) {
             $lang = session()->has('translate') ? $role->translation_language_code : $role->language_code;
 

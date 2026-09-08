@@ -2039,6 +2039,26 @@ class Role extends Model implements MustVerifyEmail
         }
     }
 
+    /**
+     * The public address of a schedule nobody has claimed yet.
+     *
+     * A separate method rather than relaxing getGuestUrl(), whose '' for an unclaimed schedule is
+     * load-bearing falsiness: SitemapController::writeSchedules skips on it, Event::getGuestUrlData()
+     * picks a subdomain by it, and two guest views print a fallback when it is empty. Widening it
+     * would put placeholders into the sitemap and behind other schedules' canonical URLs.
+     *
+     * Returns '' for anything that has an owner, is deleted, or is a demo row, so a caller can use
+     * it the same falsy way.
+     */
+    public function getClaimUrl(): string
+    {
+        if ($this->is_deleted || $this->hasRealOwner() || is_demo_role($this)) {
+            return '';
+        }
+
+        return route('role.view_guest', ['subdomain' => $this->subdomain]);
+    }
+
     public function getGuestUrl($useCustomDomain = false)
     {
         if (! $this->isClaimed()) {
@@ -2382,6 +2402,14 @@ class Role extends Model implements MustVerifyEmail
 
         // The demo schedule is a sales surface.
         if (is_demo_role($this)) {
+            return false;
+        }
+
+        // A placeholder nobody has claimed is on the free tier by definition, so without this it
+        // would be the most ad-eligible page on the platform - and it is a page about a named
+        // third party who never signed up. Serving somebody else's paid promotion beside their
+        // name is not a trade we are entitled to make on their behalf.
+        if (! $this->hasRealOwner()) {
             return false;
         }
 
