@@ -2694,6 +2694,7 @@ return [
     'paid_amount' => 'Оплачено',
     'approve_sale' => 'Одобрить',
     'refund_sale' => 'Возврат',
+    'refund_sale_confirm' => 'Вернуть средства по этой продаже через :gateway?',
     'sale_approved' => 'Продажа успешно одобрена.',
     'sale_refunded' => 'Продажа успешно возвращена.',
     'sale_not_found' => 'Продажа не найдена.',

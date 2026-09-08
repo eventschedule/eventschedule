@@ -519,7 +519,7 @@
 
         <div class="doc-callout doc-callout-warning">
             <div class="doc-callout-title">Two currencies are deliberately not offered</div>
-            <p>PayPal settles the Hungarian forint and the New Taiwan dollar, but will not accept an amount with decimals in either - and this app can produce one from a percentage discount. Rather than let that fail at checkout, PayPal is not offered on events priced in those two. The reasoning is recorded in <code class="doc-inline-code">config/payments.php</code>.</p>
+            <p>PayPal settles the Hungarian forint, the Japanese yen and the New Taiwan dollar, but will not accept an amount with decimals in any of them - and this app can produce one, because the discount arithmetic rounds to two decimals whatever the currency. Rather than take money and then withhold the ticket, PayPal is not offered on events priced in those three. The reasoning, and the underlying rounding bug it works around, are recorded in <code class="doc-inline-code">config/payments.php</code>.</p>
         </div>
     </section>
 

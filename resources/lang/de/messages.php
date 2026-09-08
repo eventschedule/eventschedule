@@ -2619,6 +2619,7 @@ return [
     'paid_amount' => 'Bezahlt',
     'approve_sale' => 'Genehmigen',
     'refund_sale' => 'Erstatten',
+    'refund_sale_confirm' => 'Diesen Verkauf uber :gateway erstatten?',
     'sale_approved' => 'Verkauf erfolgreich genehmigt.',
     'sale_refunded' => 'Verkauf erfolgreich erstattet.',
     'sale_not_found' => 'Verkauf nicht gefunden.',

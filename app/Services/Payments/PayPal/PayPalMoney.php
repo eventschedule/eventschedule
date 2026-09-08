@@ -43,16 +43,21 @@ class PayPalMoney
      * 0.01. On a zero-decimal currency the gap between 1000.50 and the 1001 we are obliged to send is
      * 0.50, which would land every such sale in `amount_mismatch`.
      */
+    /**
+     * The figure we will actually charge, as a float.
+     *
+     * Internal to value(). It is deliberately NOT offered as a reconciliation helper: settle() is
+     * handed the amount the gateway REPORTS, never an expected one, so there is no seam at which a
+     * driver could reconcile against this. Keeping the two currencies where that gap bites off the
+     * allowlist is what stands in for it - see config/payments.php.
+     */
+    private static function rounded(float $amount, string $currencyCode): float
+    {
+        return round($amount, self::decimals($currencyCode));
+    }
+
     public static function value(float $amount, string $currencyCode): string
     {
         return number_format(self::rounded($amount, $currencyCode), self::decimals($currencyCode), '.', '');
-    }
-
-    /**
-     * What we will actually be charging, as a float - the figure to reconcile a capture against.
-     */
-    public static function rounded(float $amount, string $currencyCode): float
-    {
-        return round($amount, self::decimals($currencyCode));
     }
 }

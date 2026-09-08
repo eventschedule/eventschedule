@@ -234,8 +234,6 @@ class PayPalCaptureTest extends TestCase
 
     public function test_a_capture_naming_a_different_sale_is_refused(): void
     {
-        $other = $this->createOwner();
-
         $this->captureResponse = fn () => Http::response(
             $this->orderWithCapture(['custom_id' => UrlUtils::encodeId($this->sale->id + 999)])
         );
@@ -294,26 +292,60 @@ class PayPalCaptureTest extends TestCase
         $this->assertSame(2, $this->soldCount());
     }
 
-    public function test_a_refreshed_return_settles_only_once(): void
+    /**
+     * A buyer refreshing the return URL must not produce a second capture ATTEMPT.
+     *
+     * The first version of this test asserted only that the sale ended `paid` and that seats had not
+     * doubled - neither of which could fail, since seats are set at checkout and settle() is
+     * idempotent. It passed with PayPal-Request-Id removed entirely. What actually matters is that
+     * the second request short-circuits before the money call, which is what the status guard added
+     * to handleReturn() does.
+     */
+    public function test_a_refreshed_return_does_not_attempt_a_second_capture(): void
     {
         $this->returnFromPayPal();
+
+        $this->assertSame('paid', $this->sale->fresh()->status);
+        $this->assertSame(1, $this->captureCalls);
+
         $this->returnFromPayPal();
 
-        $sale = $this->sale->fresh();
-
-        $this->assertSame('paid', $sale->status);
-        // Two capture attempts is fine - PayPal deduplicates on PayPal-Request-Id and answers 422 -
-        // but the seats must not double.
+        // Still one. The sale is no longer `unpaid`, so the second return never reaches PayPal -
+        // belt and braces on top of PayPal's own idempotency, and the only half we control.
+        $this->assertSame(1, $this->captureCalls, 'a refresh must not re-enter the money call');
+        $this->assertSame('paid', $this->sale->fresh()->status);
         $this->assertSame(2, $this->soldCount());
     }
 
-    public function test_a_payment_for_a_released_sale_is_escalated_not_just_logged(): void
+    /**
+     * The return path must REFUSE to capture a sale whose seats have already gone back.
+     *
+     * Every other driver here is called after the money moved, so settle()'s released-sale guard is
+     * early enough for them. Here the capture is the money, so the check has to come first - otherwise
+     * we take the payment and only then discover the seats were resold. Reachable by approving,
+     * closing the tab, letting ReleaseTickets expire the sale, then hitting Back.
+     */
+    public function test_a_released_sale_is_never_captured_in_the_first_place(): void
+    {
+        $this->sale->forceFill(['status' => 'expired'])->saveQuietly();
+
+        $this->returnFromPayPal();
+
+        $this->assertSame(0, $this->captureCalls, 'no money may move for a sale that cannot be honoured');
+        $this->assertSame('expired', $this->sale->fresh()->status);
+    }
+
+    /**
+     * The webhook is where that escalation still belongs: there the money genuinely HAS moved - PayPal
+     * is telling us about a capture it completed - and the sale was released in between.
+     */
+    public function test_a_webhook_payment_for_a_released_sale_is_escalated_not_just_logged(): void
     {
         Exceptions::fake();
 
         $this->sale->forceFill(['status' => 'expired'])->saveQuietly();
 
-        $this->returnFromPayPal();
+        $this->webhook();
 
         // PayPal has the buyer's money and this install cannot honour it: a person must act, so it
         // has to reach Sentry rather than only a log file.
@@ -332,6 +364,61 @@ class PayPalCaptureTest extends TestCase
 
         // Already counted by AdminAlertService; reporting it too would be noise.
         Exceptions::assertNothingReported();
+    }
+
+    /**
+     * The settlement half of the cart claim. The checkout test proves ONE purchase unit at the order
+     * total goes out; this proves one capture brings the whole order back.
+     */
+    public function test_one_capture_settles_every_leg_of_a_cart(): void
+    {
+        $eventB = $this->createEvent($this->role, [
+            'tickets_enabled' => true, 'payment_method' => 'paypal', 'ticket_currency_code' => 'USD',
+        ]);
+        $ticketB = $this->createTicket($eventB, ['type' => 'B', 'price' => 30, 'quantity' => 50]);
+
+        $leg = fn ($event, $ticket, $qty) => [
+            'event_id' => UrlUtils::encodeId($event->id),
+            'event_date' => Carbon::parse($event->starts_at)->format('Y-m-d'),
+            'tickets' => [UrlUtils::encodeId($ticket->id) => $qty],
+        ];
+
+        $this->post(route('event.checkout', ['subdomain' => $this->role->subdomain]), [
+            'name' => 'Cart Buyer',
+            'email' => 'cart-buyer@gmail.com',
+            'legs' => [$leg($this->event, $this->ticket, 2), $leg($eventB, $ticketB, 1)],
+        ])->assertRedirect();
+
+        $legs = Sale::where('email', 'cart-buyer@gmail.com')->get();
+        $primary = $legs->firstWhere(fn ($sale) => $sale->isOrderPrimary());
+        $other = $legs->firstWhere(fn ($sale) => ! $sale->isOrderPrimary());
+
+        $this->captureResponse = fn () => Http::response([
+            'id' => 'ORDER123',
+            'purchase_units' => [['payments' => ['captures' => [[
+                'id' => 'CAPTURE000000009B',
+                'status' => 'COMPLETED',
+                'custom_id' => UrlUtils::encodeId($primary->id),
+                'amount' => ['currency_code' => 'USD', 'value' => '80.00'],
+            ]]]]],
+        ]);
+
+        $this->get(route('payments.return', [
+            'gateway' => 'paypal',
+            'sale_id' => UrlUtils::encodeId($primary->id),
+            'secret' => $primary->secret,
+            'token' => 'ORDER123',
+        ]));
+
+        $this->assertSame('paid', $primary->fresh()->status);
+        $this->assertSame('paid', $other->fresh()->status, 'the cascade must carry the whole order');
+
+        // Recorded rather than asserted as desirable: the paid cascade is a raw builder update of
+        // status and paid_at only, so a non-primary leg keeps a NULL reference and its own Refund
+        // control falls back to Mark as Refunded. Identical to Stripe today - a platform property,
+        // not a PayPal one - but pinned here so a future change to either is a visible decision.
+        $this->assertSame('CAPTURE000000009B', $primary->fresh()->transaction_reference);
+        $this->assertNull($other->fresh()->transaction_reference);
     }
 
     // ----------------------------------------------------------------- pending
@@ -382,6 +469,100 @@ class PayPalCaptureTest extends TestCase
         $view->assertSee(__('messages.complete_payment'), escape: false);
     }
 
+    /**
+     * The half the pending flag was missing.
+     *
+     * PENDING suppresses the Complete payment button, which is right. But a capture that PayPal then
+     * DECLINES is terminal - it will never clear - so the flag has to come back off, or the buyer is
+     * left on a ticket page that says "not paid" and offers no route forward, permanently.
+     */
+    public function test_a_declined_capture_after_a_pending_one_gives_the_buyer_the_button_back(): void
+    {
+        $this->captureResponse = fn () => Http::response($this->orderWithCapture(['status' => 'PENDING']));
+        $this->returnFromPayPal();
+        $this->assertNotNull($this->sale->fresh()->paypal_pending_at, 'fixture: the sale must start out pending');
+
+        $this->captureResponse = fn () => Http::response($this->orderWithCapture(['status' => 'DECLINED']));
+        $this->returnFromPayPal();
+
+        $sale = $this->sale->fresh();
+
+        $this->assertSame('unpaid', $sale->status);
+        $this->assertNull($sale->paypal_pending_at);
+
+        $this->get(route('ticket.view', [
+            'event_id' => UrlUtils::encodeId($this->event->id),
+            'secret' => $this->sale->secret,
+        ]))->assertOk()->assertSee(__('messages.complete_payment'), escape: false);
+    }
+
+    public function test_settling_clears_the_pending_flag(): void
+    {
+        $this->captureResponse = fn () => Http::response($this->orderWithCapture(['status' => 'PENDING']));
+        $this->returnFromPayPal();
+
+        $this->captureResponse = null;
+        $this->returnFromPayPal();
+
+        $this->assertSame('paid', $this->sale->fresh()->status);
+        $this->assertNull($this->sale->fresh()->paypal_pending_at);
+    }
+
+    /**
+     * The cart's own version of the pay-twice bug, and the reason the review flag is written across
+     * the order rather than onto the row the capture named.
+     *
+     * Every leg of an order gets its own ticket page with its own Complete payment button, and that
+     * button starts a FRESH checkout against a NEW sale. Stamping the flag on the order primary alone
+     * left leg B fully able to start a second payment while PayPal was still reviewing the first.
+     */
+    public function test_no_leg_of_a_cart_can_be_paid_again_while_the_order_is_under_review(): void
+    {
+        $eventB = $this->createEvent($this->role, [
+            'tickets_enabled' => true, 'payment_method' => 'paypal', 'ticket_currency_code' => 'USD',
+        ]);
+        $ticketB = $this->createTicket($eventB, ['type' => 'B', 'price' => 30, 'quantity' => 50]);
+
+        $leg = fn ($event, $ticket, $qty) => [
+            'event_id' => UrlUtils::encodeId($event->id),
+            'event_date' => Carbon::parse($event->starts_at)->format('Y-m-d'),
+            'tickets' => [UrlUtils::encodeId($ticket->id) => $qty],
+        ];
+
+        $this->post(route('event.checkout', ['subdomain' => $this->role->subdomain]), [
+            'name' => 'Cart Buyer', 'email' => 'cart-buyer@gmail.com',
+            'legs' => [$leg($this->event, $this->ticket, 2), $leg($eventB, $ticketB, 1)],
+        ])->assertRedirect();
+
+        $legs = Sale::where('email', 'cart-buyer@gmail.com')->get();
+        $primary = $legs->firstWhere(fn ($sale) => $sale->isOrderPrimary());
+        $other = $legs->firstWhere(fn ($sale) => ! $sale->isOrderPrimary());
+
+        $this->captureResponse = fn () => Http::response([
+            'id' => 'ORDER123',
+            'purchase_units' => [['payments' => ['captures' => [[
+                'id' => 'CAPTURE000000009B', 'status' => 'PENDING',
+                'custom_id' => UrlUtils::encodeId($primary->id),
+                'amount' => ['currency_code' => 'USD', 'value' => '80.00'],
+            ]]]]],
+        ]);
+
+        $this->get(route('payments.return', [
+            'gateway' => 'paypal',
+            'sale_id' => UrlUtils::encodeId($primary->id),
+            'secret' => $primary->secret,
+            'token' => 'ORDER123',
+        ]));
+
+        $this->assertNotNull($other->fresh()->paypal_pending_at, 'the flag has to reach every leg');
+
+        // Leg B's own ticket page, reached from the order page by its own secret.
+        $this->get(route('ticket.view', [
+            'event_id' => UrlUtils::encodeId($eventB->id),
+            'secret' => $other->secret,
+        ]))->assertOk()->assertDontSee(__('messages.complete_payment'), escape: false);
+    }
+
     // ----------------------------------------------------------------- webhook
 
     public function test_a_webhook_settles_a_sale_the_return_never_did(): void
@@ -397,8 +578,9 @@ class PayPalCaptureTest extends TestCase
 
         // PaymentWebhookController makes this check only when a sale id is in the URL, and PayPal's
         // listener URL carries none - so the driver owns it. Without this line a PayPal webhook
-        // could settle a Payfast sale.
-        $this->webhook()->assertStatus(400);
+        // could settle a Payfast sale. Acknowledged rather than refused: no retry can change whose
+        // gateway a sale is on, and a non-2xx would earn three days of them.
+        $this->webhook()->assertNoContent();
 
         $this->assertSame('unpaid', $this->sale->fresh()->status);
     }
@@ -417,7 +599,8 @@ class PayPalCaptureTest extends TestCase
         $this->lookupResponse = fn () => Http::response([], 404);
 
         // The real gate: nobody can make PayPal's own API report a capture that never happened.
-        $this->webhook()->assertStatus(400);
+        // 503 rather than 400 - if PayPal's API was merely unreachable, a retry is what we want.
+        $this->webhook()->assertStatus(503);
 
         $this->assertSame('unpaid', $this->sale->fresh()->status);
     }
@@ -426,8 +609,38 @@ class PayPalCaptureTest extends TestCase
     {
         $this->verifyResponse = fn () => Http::response(['verification_status' => 'FAILURE']);
 
-        $this->webhook()->assertStatus(400);
+        $this->webhook()->assertStatus(503);
 
+        $this->assertSame('unpaid', $this->sale->fresh()->status);
+    }
+
+    /**
+     * The owner's OTHER PayPal activity, which is the common case and used to be answered 400.
+     *
+     * A listener is registered against the whole PayPal app, so every capture on that account reaches
+     * us - invoices, another storefront, a payment button on their own site. None carry a custom_id
+     * we minted, and refusing them earns three days of retries each for news that can never become
+     * actionable.
+     */
+    public function test_a_capture_this_app_never_created_is_acknowledged_not_refused(): void
+    {
+        $response = $this->call(
+            'POST',
+            route('payments.webhook', ['gateway' => 'paypal']),
+            [], [], [],
+            $this->serverHeaders([
+                'paypal-cert-url' => 'https://api.sandbox.paypal.com/cert.pem',
+                'Content-Type' => 'application/json',
+            ]),
+            json_encode([
+                'event_type' => 'PAYMENT.CAPTURE.COMPLETED',
+                'id' => 'WH-EVT-OTHER',
+                // A real capture on the owner's account, with no custom_id of ours.
+                'resource' => ['id' => 'CAPTUREZZZZZZZZZZZ', 'status' => 'COMPLETED'],
+            ])
+        );
+
+        $response->assertNoContent();
         $this->assertSame('unpaid', $this->sale->fresh()->status);
     }
 

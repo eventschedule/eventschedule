@@ -2646,6 +2646,7 @@ return [
     'paid_amount' => 'Plătit',
     'approve_sale' => 'Aprobă',
     'refund_sale' => 'Rambursează',
+    'refund_sale_confirm' => 'Rambursezi aceasta vanzare prin :gateway?',
     'sale_approved' => 'Vânzare aprobată cu succes.',
     'sale_refunded' => 'Vânzare rambursată cu succes.',
     'sale_not_found' => 'Vânzare negăsită.',

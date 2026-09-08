@@ -150,6 +150,25 @@ class PayPalRefundTest extends TestCase
         );
     }
 
+    /**
+     * The third arm of the classifier, and the one with the most at stake: no response at all.
+     *
+     * A timeout or a reset means the refund may well have been issued, so the claim must be parked
+     * for a person rather than released. Releasing it would tell the owner nothing moved; they would
+     * click again, and the buyer would be paid twice.
+     */
+    public function test_an_unreachable_paypal_parks_rather_than_failing(): void
+    {
+        $this->refundResponse = fn () => throw new \Illuminate\Http\Client\ConnectionException('timed out');
+
+        $this->refund(20.0);
+
+        $this->assertContains(
+            SaleRefund::where('sale_id', $this->sale->id)->firstOrFail()->status,
+            SaleRefund::CLAIMING_STATUSES
+        );
+    }
+
     public function test_a_sale_marked_paid_by_hand_offers_no_gateway_refund(): void
     {
         $this->sale->forceFill(['transaction_reference' => __('messages.manual_payment')])->saveQuietly();

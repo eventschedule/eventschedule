@@ -2668,6 +2668,7 @@ return [
     'paid_amount' => 'שולם',
     'approve_sale' => 'אישור',
     'refund_sale' => 'החזר',
+    'refund_sale_confirm' => 'לבצע החזר עבור מכירה זו דרך :gateway?',
     'sale_approved' => 'המכירה אושרה בהצלחה.',
     'sale_refunded' => 'המכירה הוחזרה בהצלחה.',
     'sale_not_found' => 'המכירה לא נמצאה.',

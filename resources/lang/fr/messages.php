@@ -2618,6 +2618,7 @@ return [
     'paid_amount' => 'Payé',
     'approve_sale' => 'Approuver',
     'refund_sale' => 'Rembourser',
+    'refund_sale_confirm' => 'Rembourser cette vente via :gateway ?',
     'sale_approved' => 'Vente approuvée avec succès.',
     'sale_refunded' => 'Vente remboursée avec succès.',
     'sale_not_found' => 'Vente introuvable.',

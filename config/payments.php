@@ -83,27 +83,39 @@ return [
          * PayPal publishes 25. HUF and TWD are deliberately LEFT OUT, and the reason is not that
          * PayPal refuses them - it is that this app and PayPal disagree about them, which is worse.
          *
-         * PayPal treats HUF, JPY and TWD as zero-decimal and errors on any fractional amount.
-         * MoneyUtils::$zeroDecimalCurrencies is STRIPE's list: it holds JPY but not HUF or TWD. So
-         * for those two the app prices, stores and displays fractions (sales.payment_amount is
-         * decimal(13,3), and a percentage promo or a gift-card split routinely lands one there)
-         * while PayPal can only be sent a whole number.
+         * PayPal treats HUF, JPY and TWD as zero-decimal and errors on any fractional amount. This
+         * app can produce a fractional amount in all three, so all three are out.
          *
          * Rounding on the way out does not rescue it. SaleSettlementService::AMOUNT_TOLERANCE is a
          * flat 0.01 and is not currency-scaled, so a 1500.50 HUF sale charged as 1501 reconciles
          * 0.50 out and lands in `amount_mismatch`: money captured, ticket withheld, admin alert.
-         * Every discounted HUF or TWD sale, silently.
          *
-         * JPY is fine and included - there the two lists agree, so nothing fractional is ever stored.
+         * JPY was on this list at first, on the reasoning that MoneyUtils::$zeroDecimalCurrencies
+         * (which is STRIPE's list) already holds it, so nothing fractional could be stored. That was
+         * wrong, and the pricing path does not honour that list anyway:
          *
-         * Re-adding these two means teaching settlement a per-currency tolerance (the idiom already
-         * exists at SaleRefundService::toleranceFor()) and reconciling the two decimal tables. That
-         * is a money-handling change in its own right, not a line in this config.
+         *   - PromoCode::calculateDiscount() rounds with MoneyUtils::decimalsFor($this->event?->currency_code),
+         *     and Event has NO `currency_code` attribute - only `ticket_currency_code`. So the
+         *     argument is always null, decimalsFor(null) is 2, and EVERY currency's promo discount is
+         *     rounded to two decimals.
+         *   - The volume/promo seat shares round to a hardcoded 2, and the gift-card shares to a
+         *     hardcoded 3, both currency-blind.
+         *
+         * So a ¥1333 ticket with a 10% promo stores 1199.700, we are obliged to send "1200", and the
+         * sale parks in amount_mismatch. Excluding JPY costs a currency; shipping it costs a buyer
+         * their ticket after taking their money.
+         *
+         * That Event/`currency_code` mismatch is a pre-existing platform bug, not a PayPal one - it
+         * mis-rounds for Stripe too, where it is invisible only because Stripe accepts the decimals.
+         * Fixing it is its own change; this list is the containment until then.
+         *
+         * Re-adding these three means teaching settlement a per-currency tolerance (the idiom already
+         * exists at SaleRefundService::toleranceFor()) and making the pricing path currency-aware.
          */
         'currencies' => [
             'AUD', 'BRL', 'CAD', 'CHF', 'CNY', 'CZK', 'DKK', 'EUR', 'GBP', 'HKD',
-            'ILS', 'JPY', 'MXN', 'MYR', 'NOK', 'NZD', 'PHP', 'PLN', 'RUB', 'SEK',
-            'SGD', 'THB', 'USD',
+            'ILS', 'MXN', 'MYR', 'NOK', 'NZD', 'PHP', 'PLN', 'RUB', 'SEK', 'SGD',
+            'THB', 'USD',
         ],
 
     ],

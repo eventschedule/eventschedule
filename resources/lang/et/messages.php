@@ -2630,6 +2630,7 @@ return [
     'paid_amount' => 'Makstud',
     'approve_sale' => 'Kinnita',
     'refund_sale' => 'Tagasta',
+    'refund_sale_confirm' => 'Kas tagastada see muuk :gateway kaudu?',
     'sale_approved' => 'Müük edukalt kinnitatud.',
     'sale_refunded' => 'Müük edukalt tagastatud.',
     'sale_not_found' => 'Müüki ei leitud.',

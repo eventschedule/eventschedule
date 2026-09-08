@@ -2985,6 +2985,7 @@ return [
     'paid_amount' => 'Paid',
     'approve_sale' => 'Approve',
     'refund_sale' => 'Refund',
+    'refund_sale_confirm' => 'Refund this sale via :gateway?',
     'sale_approved' => 'Sale approved successfully.',
     'sale_refunded' => 'Sale refunded successfully.',
     'sale_not_found' => 'Sale not found.',

@@ -2614,6 +2614,7 @@ return [
     'paid_amount' => 'Pago',
     'approve_sale' => 'Aprovar',
     'refund_sale' => 'Reembolsar',
+    'refund_sale_confirm' => 'Reembolsar esta venda atraves do :gateway?',
     'sale_approved' => 'Venda aprovada com sucesso.',
     'sale_refunded' => 'Venda reembolsada com sucesso.',
     'sale_not_found' => 'Venda não encontrada.',

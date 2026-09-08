@@ -122,9 +122,9 @@ class SaleRefundService
         // must never land there: the owner would be told nothing moved, click again, and the buyer
         // would be paid twice.
         //
-        // The hierarchy makes the split clean. ApiErrorException extends \Exception, while Stripe's
-        // own InvalidArgumentException extends \InvalidArgumentException extends \LogicException -
-        // so no API-layer exception is ever caught by the first arm.
+        // The driver gets first refusal (its own exception classes are the only ones it can
+        // classify), and everything it declines to judge falls through to rethrowIntoLadder(), where
+        // the Stripe-shaped arms live and where that hierarchy argument now belongs.
         try {
             $refundId = $driver->refund($sale, $fullCharge ? null : (float) $claim->amount, $claim->idempotency_key, $leg);
         } catch (\Throwable $e) {

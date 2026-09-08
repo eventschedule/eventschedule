@@ -131,11 +131,16 @@ class PayPalClient
             return [null, []];
         }
 
-        if (! $response->successful()) {
+        $body = (array) $response->json();
+
+        // 422 ORDER_ALREADY_CAPTURED is the normal result of a buyer refreshing the return URL, or
+        // of the webhook winning the race. The caller treats it as a success, so logging it as a
+        // failure would put a warning on the happy path.
+        if (! $response->successful() && ! $this->mentionsIssue($body, 'ORDER_ALREADY_CAPTURED')) {
             $this->logFailure('capture order', $response);
         }
 
-        return [$response->status(), (array) $response->json()];
+        return [$response->status(), $body];
     }
 
     /** @return array<string, mixed>|null */
@@ -304,6 +309,18 @@ class PayPalClient
             ->filter()
             ->map(fn ($issue) => (string) $issue)
             ->values();
+    }
+
+    /** @param  array<string, mixed>  $body */
+    public function mentionsIssue(array $body, string $issue): bool
+    {
+        foreach ((array) ($body['details'] ?? []) as $detail) {
+            if (($detail['issue'] ?? null) === $issue) {
+                return true;
+            }
+        }
+
+        return false;
     }
 
     /**

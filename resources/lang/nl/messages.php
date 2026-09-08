@@ -2613,6 +2613,7 @@ return [
     'paid_amount' => 'Betaald',
     'approve_sale' => 'Goedkeuren',
     'refund_sale' => 'Terugbetalen',
+    'refund_sale_confirm' => 'Deze verkoop terugbetalen via :gateway?',
     'sale_approved' => 'Verkoop succesvol goedgekeurd.',
     'sale_refunded' => 'Verkoop succesvol terugbetaald.',
     'sale_not_found' => 'Verkoop niet gevonden.',

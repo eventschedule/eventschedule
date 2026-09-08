@@ -424,7 +424,15 @@ class PayPalGateway extends PaymentGatewayDriver
             return null;
         }
 
-        $sandbox = ! empty($this->credentialsFor($sale->event?->user)['paypal_sandbox']);
+        // The owner's flag directly, NOT credentialsFor(): that materialises every declared field,
+        // including the client secret, which is an EncryptedString - so rendering a fifty-row sales
+        // page would perform fifty AES decryptions of a merchant secret to read one boolean.
+        //
+        // Known limitation, and why this is a convenience link rather than a promise: the flag is
+        // read as it is NOW. An owner who tested in sandbox and then went live gets a live-host link
+        // for their old sandbox sales, which 404s. transaction_reference carries no record of which
+        // host it came from, and adding a column to fix a deep link is not worth it.
+        $sandbox = (bool) ($sale->event?->user?->paypal_sandbox);
 
         return 'https://www.'.($sandbox ? 'sandbox.' : '').'paypal.com/activity/payment/'.$reference;
     }
@@ -564,6 +572,26 @@ class PayPalGateway extends PaymentGatewayDriver
             return $landing();
         }
 
+        // Check BEFORE capturing, which no other driver here has to do: for Payfast and Stripe the
+        // money has already moved by the time we are called, so settle()'s own released-sale guard is
+        // early enough. Here the capture IS the money, so that guard would fire one step too late -
+        // we would take the payment and only then discover the seats had gone.
+        //
+        // Reachable: buyer approves, closes the tab, ReleaseTickets expires the sale on an event that
+        // opted into a window, then the buyer hits Back and follows a return URL that is still valid.
+        if ($sale->status !== 'unpaid') {
+            // 'paid' is the ordinary refresh and is not worth a warning; anything else means the sale
+            // was released or is parked, and capturing into it is what we are refusing to do.
+            if ($sale->status !== 'paid') {
+                Log::warning('PayPal return for a sale that can no longer be paid - not capturing', [
+                    'sale_id' => $sale->id,
+                    'status' => $sale->status,
+                ]);
+            }
+
+            return $landing();
+        }
+
         // Both sets that could legitimately settle this, owner's first. An owner who connects their
         // own account between checkout and return would otherwise have the capture attempted with
         // credentials that never created the order.
@@ -594,7 +622,7 @@ class PayPalGateway extends PaymentGatewayDriver
                 continue;
             }
 
-            return $this->settleCapture($sale, $capture, $landing);
+            return $this->settleCapture($sale, $capture, $landing, isReturn: true);
         }
 
         Log::warning('PayPal capture did not complete', ['sale_id' => $sale->id]);
@@ -629,25 +657,43 @@ class PayPalGateway extends PaymentGatewayDriver
 
         $sale ??= $this->saleFromWebhook($request);
 
+        // Not ours, and that is ROUTINE rather than suspicious: the listener is registered against
+        // the owner's whole PayPal app, so every capture on that account reaches us - an invoice they
+        // sent, another storefront, a payment button on their own site. None of those carry a
+        // custom_id we minted. 204 for the same reason an unsubscribed event type gets one: a
+        // non-2xx here would earn three days of retries for news that will never become actionable,
+        // on traffic that may well outnumber ours.
         if (! $sale) {
-            return response('missing sale', 400);
+            Log::info('PayPal webhook for a capture this app did not create - acknowledged', [
+                'event_id' => $payload['id'] ?? null,
+            ]);
+
+            return response()->noContent();
         }
 
         // PaymentWebhookController enforces this only when a sale id is in the URL, and ours has
-        // none - so without this line a PayPal webhook could settle a Payfast sale.
+        // none - so without this line a PayPal webhook could settle a Payfast sale. Also a 204: a
+        // retry cannot change whose gateway the sale belongs to.
         if ($sale->payment_method !== $this->key()) {
-            return response('gateway mismatch', 400);
+            Log::warning('PayPal webhook named a sale on another gateway', [
+                'sale_id' => $sale->id,
+                'payment_method' => $sale->payment_method,
+            ]);
+
+            return response()->noContent();
         }
 
-        $owner = $sale->event?->user;
+        $owner = $this->resolveOwnerFromWebhook($request, $sale);
         $candidates = $this->candidateCredentials($owner);
 
         if (! $owner || ! $candidates) {
             // Deliberately its own message: an operator chasing a missing payment needs "the account
             // went away" to read differently from "somebody is forging notifications".
+            // Nothing a retry can fix - the account is gone. Logged distinctly so an operator
+            // chasing a missing payment can tell this apart from a forgery.
             Log::warning('PayPal webhook for a sale whose owner has no credentials', ['sale_id' => $sale->id]);
 
-            return response('not configured', 400);
+            return response()->noContent();
         }
 
         $captureId = (string) ($payload['resource']['id'] ?? '');
@@ -682,9 +728,13 @@ class PayPalGateway extends PaymentGatewayDriver
             return $this->settleCapture($sale, $capture, fn () => response()->noContent());
         }
 
+        // 503, not 400. Either PayPal would not confirm the capture - in which case this did not
+        // come from them and they are not retrying anyway - or their API was unreachable just now,
+        // and a retry is exactly what we want. 400 would tell a genuine PayPal to keep trying too,
+        // but it says "your request was malformed", which is the one thing it was not.
         Log::warning('PayPal webhook could not be confirmed with PayPal', ['sale_id' => $sale->id]);
 
-        return response('unconfirmed', 400);
+        return response('unconfirmed', 503);
     }
 
     /**
@@ -697,12 +747,26 @@ class PayPalGateway extends PaymentGatewayDriver
      * why: this only chooses WHICH credentials to check against. A forged body naming any owner still
      * has to survive the capture lookup made with that owner's own keys.
      */
-    public function resolveOwnerFromWebhook(Request $request): ?User
+    public function resolveOwnerFromWebhook(Request $request, ?Sale $sale = null): ?User
     {
-        return $this->saleFromWebhook($request)?->event?->user;
+        return ($sale ?? $this->saleFromWebhook($request))?->event?->user;
     }
 
     // ----------------------------------------------------------------- helpers
+
+    /**
+     * Set or clear the review flag across every leg of an order.
+     *
+     * Keyed on the order rather than the row because the flag is READ per leg - ticket/view renders a
+     * Complete payment button for each one - while it is WRITTEN once, against whichever row the
+     * capture named.
+     */
+    private function markOrderPending(Sale $sale, ?\Illuminate\Support\Carbon $at): void
+    {
+        Sale::where('id', $sale->id)
+            ->orWhere('order_id', $sale->id)
+            ->update(['paypal_pending_at' => $at]);
+    }
 
     private function saleFromWebhook(Request $request): ?Sale
     {
@@ -738,7 +802,7 @@ class PayPalGateway extends PaymentGatewayDriver
      *
      * @param  array<string, mixed>  $capture
      */
-    private function settleCapture(Sale $sale, array $capture, callable $respond): Response
+    private function settleCapture(Sale $sale, array $capture, callable $respond, bool $isReturn = false): Response
     {
         $expectedCurrency = strtoupper((string) ($sale->event?->ticket_currency_code ?: 'USD'));
         $captureCurrency = strtoupper((string) ($capture['amount']['currency_code'] ?? ''));
@@ -770,12 +834,34 @@ class PayPalGateway extends PaymentGatewayDriver
             // take seats out of circulation on a payment that has not happened.
             Log::info('PayPal capture is not complete', ['sale_id' => $sale->id, 'status' => $status]);
 
-            if ($status === 'PENDING') {
-                $sale->forceFill(['paypal_pending_at' => now()])->saveQuietly();
+            // PENDING is the only status that should suppress the buyer's Complete payment button,
+            // and the flag has to come back OFF for every other one. A DECLINED capture arriving
+            // after a PENDING one is the case that matters: without the else the sale would sit
+            // unpaid with the flag set forever, and the buyer would be left on a ticket page that
+            // says "not paid" and offers no way forward, for a payment that will never clear.
+            // Across the WHOLE order, not just the row the capture settled. A cart's legs each get
+            // their own ticket page with their own Complete payment button, and that button starts a
+            // fresh checkout - so writing this to the order primary alone left leg B able to start a
+            // second payment while PayPal was still reviewing the first. A raw update because no
+            // model event needs to fire; for a single-event sale order_id is null and the orWhere
+            // matches nothing extra.
+            $this->markOrderPending($sale, $status === 'PENDING' ? now() : null);
+
+            if ($status === 'PENDING' && $isReturn) {
+                // Only on the buyer's own request. handleWebhook() shares this method and has no
+                // reader for a flash - the webhook route is in the web group so this does not throw,
+                // it just writes a message nobody will ever see.
                 session()->flash('message', __('messages.paypal_payment_pending'));
             }
 
             return $respond();
+        }
+
+        // Settled, so nothing is in review any more. Belt and braces: an unpaid sale is the only one
+        // whose button the flag suppresses, but leaving stale state on a paid row invites the next
+        // reader to wonder.
+        if ($sale->paypal_pending_at) {
+            $this->markOrderPending($sale, null);
         }
 
         $outcome = $this->settlement->settle(

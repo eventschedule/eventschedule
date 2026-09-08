@@ -2678,6 +2678,7 @@ return [
     'paid_amount' => 'المدفوع',
     'approve_sale' => 'موافقة',
     'refund_sale' => 'استرداد',
+    'refund_sale_confirm' => 'هل تريد رد مبلغ هذه المبيعة عبر :gateway؟',
     'sale_approved' => 'تمت الموافقة على البيع بنجاح.',
     'sale_refunded' => 'تم استرداد البيع بنجاح.',
     'sale_not_found' => 'لم يتم العثور على البيع.',

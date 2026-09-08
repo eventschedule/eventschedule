@@ -586,7 +586,7 @@ abstract class PaymentGatewayDriver
      * once per merchant account rather than per sale. Compare shared secrets with hash_equals here,
      * never a plain string compare.
      */
-    public function resolveOwnerFromWebhook(Request $request): ?User
+    public function resolveOwnerFromWebhook(Request $request, ?Sale $sale = null): ?User
     {
         return null;
     }

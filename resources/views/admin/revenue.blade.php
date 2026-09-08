@@ -124,7 +124,9 @@
                                 @if ($mismatchDriver?->supportsRefunds() && $mismatchDriver->refundReferenceFor($sale) !== null)
                                 <form method="POST" action="{{ route('admin.sale.refund', $sale->id) }}" class="inline ms-3">
                                     @csrf
-                                    <button type="submit" class="text-red-600 hover:text-red-800 dark:text-red-400 dark:hover:text-red-200 text-sm font-medium" data-confirm="Refund this sale via Stripe?">@lang('messages.refund_sale')</button>
+                                    {{-- Gateway-neutral: this control is driver-gated, and Stripe stopped being the only rail
+                                         that can move money the moment PayPal shipped. --}}
+                                    <button type="submit" class="text-red-600 hover:text-red-800 dark:text-red-400 dark:hover:text-red-200 text-sm font-medium" data-confirm="{{ __('messages.refund_sale_confirm', ['gateway' => $mismatchDriver->label($sale->event?->user)]) }}">@lang('messages.refund_sale')</button>
                                 </form>
                                 @endif
                             </td>

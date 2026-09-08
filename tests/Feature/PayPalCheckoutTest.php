@@ -28,6 +28,9 @@ class PayPalCheckoutTest extends TestCase
     /** @var list<array{url: string, body: array<string, mixed>}> */
     private array $sent = [];
 
+    /** @var list<string> decoded "client_id:secret" pairs, in call order */
+    private array $authHeaders = [];
+
     /**
      * What the create-order call answers. Overridden by a test that needs PayPal to refuse.
      *
@@ -44,13 +47,25 @@ class PayPalCheckoutTest extends TestCase
         parent::setUp();
 
         $this->sent = [];
+        $this->authHeaders = [];
         $this->orderResponse = null;
+        $this->tokenResponse = null;
 
         Http::fake(function ($request) {
             $this->sent[] = ['url' => $request->url(), 'body' => (array) $request->data()];
 
+            // Which credentials actually went out. Decoded here because it is the only signal that
+            // distinguishes an owner's own account from the installation's when both are sandbox.
+            foreach ((array) $request->header('Authorization') as $header) {
+                if (str_starts_with((string) $header, 'Basic ')) {
+                    $this->authHeaders[] = base64_decode(substr((string) $header, 6));
+                }
+            }
+
             if (str_contains($request->url(), '/v1/oauth2/token')) {
-                return Http::response(['access_token' => 'fake-token', 'expires_in' => 32400]);
+                return $this->tokenResponse
+                    ? ($this->tokenResponse)($request)
+                    : Http::response(['access_token' => 'fake-token', 'expires_in' => 32400]);
             }
 
             if (str_contains($request->url(), '/v2/checkout/orders')) {
@@ -180,7 +195,62 @@ class PayPalCheckoutTest extends TestCase
         ]);
     }
 
-    public function test_the_client_secret_never_reaches_the_browser(): void
+    /**
+     * The multi-event cart, which supportsCart() promises and the docs, the integrations register and
+     * FEATURES.md all publish - and which nothing exercised until now. The single-event assertion
+     * above cannot stand in for it: one event always yields one purchase unit.
+     *
+     * The shape being pinned is the whole reason PayPal can be carted where Payfast cannot. ONE
+     * purchase unit at the ORDER total, so the order settles as a single capture - which is all
+     * settle() takes, all transaction_reference holds, and all refundReferenceFor() can return.
+     */
+    public function test_a_two_event_cart_sends_one_purchase_unit_at_the_order_total(): void
+    {
+        $owner = $this->connectedOwner();
+        $role = $this->createRole($owner);
+
+        $eventA = $this->paypalEvent($role);
+        $eventB = $this->paypalEvent($role);
+        $ticketA = $this->createTicket($eventA, ['type' => 'A', 'price' => 25, 'quantity' => 50]);
+        $ticketB = $this->createTicket($eventB, ['type' => 'B', 'price' => 30, 'quantity' => 50]);
+
+        $leg = fn ($event, $ticket, $qty) => [
+            'event_id' => UrlUtils::encodeId($event->id),
+            'event_date' => Carbon::parse($event->starts_at)->format('Y-m-d'),
+            'tickets' => [UrlUtils::encodeId($ticket->id) => $qty],
+        ];
+
+        $this->post(route('event.checkout', ['subdomain' => $role->subdomain]), [
+            'name' => 'Cart Buyer',
+            'email' => 'cart-buyer@gmail.com',
+            'legs' => [$leg($eventA, $ticketA, 2), $leg($eventB, $ticketB, 1)],
+        ])->assertRedirect(self::APPROVE_URL);
+
+        $body = $this->orderBody();
+        $units = $body['purchase_units'];
+
+        $this->assertCount(1, $units, 'several units would mean several captures, which nothing downstream can hold');
+        // 2 x 25 + 1 x 30. The ORDER total, not the anchoring leg's own 50.
+        $this->assertSame('80.00', $units[0]['amount']['value']);
+
+        $legs = Sale::where('email', 'cart-buyer@gmail.com')->get();
+        $primary = $legs->firstWhere(fn ($sale) => $sale->isOrderPrimary());
+
+        $this->assertCount(2, $legs);
+        $this->assertNotNull($primary, 'the driver is handed the order primary, which is what makes total() the order total');
+        $this->assertSame(UrlUtils::encodeId($primary->id), $units[0]['custom_id']);
+    }
+
+    /**
+     * The secret must not reach PayPal in anything except the Basic-auth header, and must not reach
+     * the buyer at all.
+     *
+     * The obvious version of this test - assertDontSee on the checkout response - pins nothing: the
+     * response is a redirect to PayPal's own approve link, so the secret could not appear in it
+     * however badly the driver behaved. Assert against what this code actually composes instead: the
+     * order payload and the callback URLs inside it.
+     */
+    public function test_the_client_secret_never_reaches_the_browser_or_the_order_payload(): void
     {
         $owner = $this->connectedOwner();
         $role = $this->createRole($owner);
@@ -188,6 +258,14 @@ class PayPalCheckoutTest extends TestCase
         $ticket = $this->createTicket($event, ['type' => 'General', 'price' => 10, 'quantity' => 5]);
 
         $this->checkout($role, $event, $ticket)->assertDontSee('super-secret', escape: false);
+
+        $this->assertStringNotContainsString('super-secret', json_encode($this->orderBody()));
+
+        // The token call is the ONE place it legitimately goes, and it goes as Basic auth rather
+        // than in the body or the query string.
+        $tokenCall = collect($this->sent)->first(fn ($c) => str_contains($c['url'], '/v1/oauth2/token'));
+        $this->assertStringNotContainsString('super-secret', $tokenCall['url']);
+        $this->assertStringNotContainsString('super-secret', json_encode($tokenCall['body']));
     }
 
     public function test_the_live_host_is_used_when_sandbox_is_off(): void
@@ -199,43 +277,74 @@ class PayPalCheckoutTest extends TestCase
 
         $this->checkout($role, $event, $ticket);
 
+        $orderCall = collect($this->sent)->first(fn ($c) => str_contains($c['url'], '/v2/checkout/orders'));
         $hosts = array_map(fn ($call) => parse_url($call['url'], PHP_URL_HOST), $this->sent);
 
-        $this->assertContains('api-m.paypal.com', $hosts);
+        // The ORDER specifically, not merely "some call went to the live host" - the token mint alone
+        // would satisfy that even if order creation never happened.
+        $this->assertNotNull($orderCall);
+        $this->assertSame('api-m.paypal.com', parse_url($orderCall['url'], PHP_URL_HOST));
         $this->assertNotContains('api-m.sandbox.paypal.com', $hosts);
     }
 
     /**
-     * The two currencies PayPal takes and this app disagrees with it about.
+     * The three currencies PayPal takes and this app cannot price safely.
      *
-     * MoneyUtils holds STRIPE's zero-decimal list - JPY but not HUF or TWD - so the app stores
-     * fractions PayPal will not accept. They are excluded from the allowlist for that reason, and
-     * this pins the exclusion so a future "PayPal supports 25 currencies" tidy-up cannot quietly
-     * reintroduce a class of amount_mismatch.
+     * PayPal rejects any fractional amount in HUF, JPY and TWD. Our pricing path produces fractions
+     * in all three - PromoCode::calculateDiscount() rounds against `Event->currency_code`, an
+     * attribute that does not exist, so every currency is rounded to two decimals - and
+     * SaleSettlementService's tolerance is a flat 0.01, so the rounded figure we are obliged to send
+     * parks the sale in amount_mismatch. Money captured, ticket withheld.
+     *
+     * JPY was on the allowlist until review: the reasoning was that MoneyUtils already treats it as
+     * zero-decimal, which is true and irrelevant, because nothing in the pricing path consults that
+     * list. Pinned here so a future "but PayPal supports 25 currencies" tidy-up has to read why.
      */
-    public function test_the_currencies_our_own_rounding_disagrees_about_are_not_offered(): void
+    public function test_the_currencies_our_own_rounding_cannot_price_are_not_offered(): void
     {
         $driver = app(PaymentGatewayManager::class)->get('paypal');
 
         $this->assertTrue($driver->supportsCurrency('USD'));
-        $this->assertTrue($driver->supportsCurrency('JPY'), 'JPY is zero-decimal on both sides, so it is safe');
         $this->assertFalse($driver->supportsCurrency('HUF'));
         $this->assertFalse($driver->supportsCurrency('TWD'));
+        $this->assertFalse($driver->supportsCurrency('JPY'));
         // PayPal settles neither, so offering them would be a buyer-facing rejection.
         $this->assertFalse($driver->supportsCurrency('ZAR'));
         $this->assertFalse($driver->supportsCurrency('INR'));
     }
 
-    public function test_a_jpy_order_carries_no_decimals(): void
+    /**
+     * The arithmetic that made the exclusion necessary, pinned against the real pricing path rather
+     * than asserted in a comment. A tenth off ¥1333 is what PayPal cannot be sent.
+     */
+    public function test_a_discounted_zero_decimal_price_really_does_go_fractional(): void
     {
         $owner = $this->connectedOwner();
         $role = $this->createRole($owner);
-        $event = $this->paypalEvent($role, ['ticket_currency_code' => 'JPY']);
-        $ticket = $this->createTicket($event, ['type' => 'General', 'price' => 1500, 'quantity' => 5]);
+        // USD, because JPY can no longer reach checkout - the arithmetic is the currency-blind part.
+        $event = $this->paypalEvent($role);
+        $ticket = $this->createTicket($event, ['type' => 'General', 'price' => 1333, 'quantity' => 5]);
 
-        $this->checkout($role, $event, $ticket);
+        $promo = \App\Models\PromoCode::create([
+            'event_id' => $event->id, 'code' => 'TENOFF', 'type' => 'percentage',
+            'value' => 10, 'is_active' => true,
+        ]);
 
-        $this->assertSame('1500', $this->orderBody()['purchase_units'][0]['amount']['value']);
+        $this->post(route('event.checkout', ['subdomain' => $role->subdomain]), [
+            'event_id' => UrlUtils::encodeId($event->id),
+            'event_date' => Carbon::parse($event->starts_at)->format('Y-m-d'),
+            'name' => 'PayPal Buyer', 'email' => 'paypal-buyer@gmail.com',
+            'tickets' => [UrlUtils::encodeId($ticket->id) => 1],
+            'promo_code' => 'TENOFF',
+        ]);
+
+        $stored = (float) Sale::where('email', 'paypal-buyer@gmail.com')->firstOrFail()->payment_amount;
+
+        // 1199.70, not 1200. In a zero-decimal currency PayPal could only be sent "1200", and
+        // settlement's flat 0.01 tolerance would park the difference as an amount mismatch.
+        $this->assertEqualsWithDelta(1199.70, $stored, 0.001);
+        $this->assertNotSame(round($stored), $stored, 'the whole point: the stored amount is fractional');
+        $this->assertSame($promo->id, Sale::where('email', 'paypal-buyer@gmail.com')->firstOrFail()->promo_code_id);
     }
 
     public function test_an_unsupported_currency_is_refused_and_gives_the_seats_back(): void
@@ -331,6 +440,82 @@ class PayPalCheckoutTest extends TestCase
             ->assertDontSee(__('messages.paypal_test_mode_warning'), escape: false);
     }
 
+    // ---------------------------------------------------------------- connecting
+
+    /**
+     * The headline claim of the credentials work, and it had no test: a mistyped secret used to read
+     * as "Connected" until a BUYER found out. PayPal is the only gateway here that can be asked
+     * cheaply, so it is asked.
+     */
+    public function test_credentials_paypal_rejects_are_refused_and_not_stored(): void
+    {
+        $this->tokenResponse = fn () => Http::response(['error' => 'invalid_client'], 401);
+
+        $owner = $this->createOwner();
+
+        $this->actingAs($owner)->post(route('payments.connect', ['gateway' => 'paypal']), [
+            'paypal_client_id' => 'AaBbCc-client-id',
+            'paypal_client_secret' => 'wrong-secret',
+        ])->assertSessionHasErrors('paypal_client_id');
+
+        $this->assertNull($owner->fresh()->paypal_client_id);
+        $this->assertNull($owner->fresh()->paypal_client_secret);
+    }
+
+    /**
+     * The other half of the same split, and the one that matters more: refusing to store good
+     * credentials because a third party happens to be down is the worse error. Same
+     * definite-versus-unknown distinction SaleRefundService draws about refunds.
+     */
+    public function test_credentials_paypal_cannot_be_reached_about_are_stored_with_a_warning(): void
+    {
+        $this->tokenResponse = fn () => throw new \Illuminate\Http\Client\ConnectionException('network is down');
+
+        $owner = $this->createOwner();
+
+        $this->actingAs($owner)->post(route('payments.connect', ['gateway' => 'paypal']), [
+            'paypal_client_id' => 'AaBbCc-client-id',
+            'paypal_client_secret' => 'probably-fine',
+        ])->assertSessionHasNoErrors()->assertSessionHas('warning');
+
+        $this->assertSame('AaBbCc-client-id', $owner->fresh()->paypal_client_id);
+    }
+
+    /**
+     * The listener is registered for the owner rather than asked for, which is why there is no
+     * "Webhook ID" field on the form.
+     */
+    public function test_connecting_registers_a_webhook_and_stores_its_id(): void
+    {
+        $owner = $this->createOwner();
+
+        $this->actingAs($owner)->post(route('payments.connect', ['gateway' => 'paypal']), [
+            'paypal_client_id' => 'AaBbCc-client-id',
+            'paypal_client_secret' => 'super-secret',
+        ])->assertSessionHasNoErrors();
+
+        $this->assertSame('WH-TEST-1', $owner->fresh()->paypal_webhook_id);
+
+        $registered = collect($this->sent)->first(fn ($c) => str_contains($c['url'], '/v1/notifications/webhooks'));
+        $this->assertNotNull($registered);
+        $this->assertStringContainsString('/payments/paypal/webhook', $registered['body']['url']);
+    }
+
+    public function test_disconnecting_removes_the_listener_and_clears_every_field(): void
+    {
+        $owner = $this->connectedOwner(['paypal_webhook_id' => 'WH-TEST-1']);
+
+        $this->actingAs($owner)->post(route('payments.disconnect', ['gateway' => 'paypal']));
+
+        $fresh = $owner->fresh();
+
+        $this->assertNull($fresh->paypal_client_id);
+        $this->assertNull($fresh->paypal_client_secret);
+        // Not a declared credential field, so the base disconnect() does not clear it - the driver
+        // has to, or a reconnect adopts a listener pointing at credentials that are gone.
+        $this->assertNull($fresh->paypal_webhook_id);
+    }
+
     public function test_the_install_account_lets_an_unconnected_owner_sell(): void
     {
         $this->platformAccount();
@@ -354,14 +539,14 @@ class PayPalCheckoutTest extends TestCase
 
         $this->checkout($role, $event, $ticket);
 
-        $tokenCall = collect($this->sent)->first(fn ($c) => str_contains($c['url'], '/v1/oauth2/token'));
+        // The CLIENT ID, not the host: both fixtures are sandbox, so a host assertion passes
+        // whichever account was used and pins nothing. The id rides in the Basic-auth header, which
+        // is the only place the two accounts actually differ.
+        $auth = collect($this->authHeaders)->first();
 
-        // Their money must reach their account, not the operator's.
-        $this->assertNotNull($tokenCall);
-        $this->assertSame('api-m.sandbox.paypal.com', parse_url($tokenCall['url'], PHP_URL_HOST));
-        $this->assertTrue(
-            app(PaymentGatewayManager::class)->get('paypal')->hasOwnCredentials($owner)
-        );
+        $this->assertNotNull($auth, 'the token call must have happened');
+        $this->assertStringStartsWith('AaBbCc-client-id:', $auth, 'their money must reach their account, not the operator\'s');
+        $this->assertStringNotContainsString('platform-client-id', $auth);
     }
 
     public function test_install_wide_credentials_are_ignored_when_hosted(): void
