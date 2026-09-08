@@ -257,6 +257,18 @@ abstract class PaymentGatewayDriver
      * An already-translated sentence shown above the credentials form, or null. Typically where to
      * find these values in the gateway's own dashboard.
      */
+    /**
+     * 'required' on a first connect, 'nullable' once a value is stored - the blank-means-unchanged
+     * convention the credentials form uses for every secret.
+     *
+     * Lives here rather than on one driver because every credential-form gateway needs it: it was
+     * private on PayfastGateway until PayPal became the second caller.
+     */
+    protected function requiredUnlessStored(string $field): string
+    {
+        return request()->user()?->{$field} ? 'nullable' : 'required';
+    }
+
     public function credentialHelp(): ?string
     {
         return null;

@@ -494,7 +494,11 @@ class TicketController extends Controller
     {
         $user = auth()->user();
 
-        $query = Sale::with('event.creatorRole', 'saleTickets.ticket', 'promoCode', 'feedback', 'refunds', 'installmentPlan')
+        // event.user, not just event.creatorRole: sales_table.blade.php calls
+        // PaymentGatewayDriver::referenceUrl() once per row, and PayPal's is the first that has to
+        // read the OWNER (for the sandbox flag, which decides whether the deep link points at
+        // paypal.com or sandbox.paypal.com). Without this it lazy-loads the owner per row.
+        $query = Sale::with('event.creatorRole', 'event.user', 'saleTickets.ticket', 'promoCode', 'feedback', 'refunds', 'installmentPlan')
             ->where('is_deleted', false)
             ->whereHas('event', fn ($query) => $query->managedBy($user));
 

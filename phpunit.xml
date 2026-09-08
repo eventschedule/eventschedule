@@ -72,6 +72,17 @@
         <env name="PAYFAST_MERCHANT_ID" value="" force="true"/>
         <env name="PAYFAST_MERCHANT_KEY" value="" force="true"/>
         <env name="PAYFAST_PASSPHRASE" value="" force="true"/>
+        <!--
+            And the same again for PayPal, which matters more than Payfast's did: PayPal settles USD,
+            so an operator's populated keys would make it a connected gateway for EVERY user in the
+            suite's default currency. PaymentMethodEventFormTest nulls Stripe out by hand and then
+            asserts an exact list of what is left, and one of its cases asserts that a USD event with
+            no usable gateway warns the owner - a live PayPal would silently delete the warning that
+            test exists to pin.
+        -->
+        <env name="PAYPAL_CLIENT_ID" value="" force="true"/>
+        <env name="PAYPAL_CLIENT_SECRET" value="" force="true"/>
+        <env name="PAYPAL_WEBHOOK_ID" value="" force="true"/>
         <env name="DEFAULT_PAYMENT_METHOD" value="" force="true"/>
         <!-- The homepage poster wall renders straight from the database under test. The `array`
              cache store survives RefreshDatabase within a process, so a cached wall would

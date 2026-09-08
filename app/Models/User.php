@@ -43,6 +43,9 @@ class User extends Authenticatable implements MustVerifyEmail
         'payfast_passphrase',
         'payfast_sandbox',
         'payfast_payment_types',
+        'paypal_client_id',
+        'paypal_client_secret',
+        'paypal_sandbox',
         'is_subscribed',
         // Note: is_admin intentionally NOT in $fillable to prevent mass assignment attacks
         // Admin status should only be set explicitly via $user->is_admin = true
@@ -112,6 +115,9 @@ class User extends Authenticatable implements MustVerifyEmail
         'payfast_merchant_id',
         'payfast_merchant_key',
         'payfast_passphrase',
+        'paypal_client_id',
+        'paypal_client_secret',
+        'paypal_webhook_id',
         'google_token',
         'google_refresh_token',
         'google_token_expires_at',
@@ -191,6 +197,8 @@ class User extends Authenticatable implements MustVerifyEmail
             'payfast_merchant_key' => EncryptedString::class,
             'payfast_passphrase' => EncryptedString::class,
             'payfast_sandbox' => 'boolean',
+            'paypal_client_secret' => EncryptedString::class,
+            'paypal_sandbox' => 'boolean',
             'api_key_expires_at' => 'datetime',
             'two_factor_secret' => EncryptedString::class,
             'two_factor_recovery_codes' => EncryptedString::class,

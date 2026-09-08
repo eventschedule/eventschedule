@@ -245,15 +245,6 @@ class PayfastGateway extends PaymentGatewayDriver
         ];
     }
 
-    /**
-     * 'required' on a first connect, 'nullable' once a value is stored - the blank-means-unchanged
-     * convention the credentials form uses for every secret.
-     */
-    private function requiredUnlessStored(string $field): string
-    {
-        return request()->user()?->{$field} ? 'nullable' : 'required';
-    }
-
     public function credentialHelp(): ?string
     {
         return __('messages.payfast_help');

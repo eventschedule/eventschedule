@@ -72,6 +72,11 @@ class PaymentGatewayRegistryTest extends TestCase
         $this->assertTrue($manager->supportsCart('cash'));
         $this->assertFalse($manager->supportsCart('invoiceninja'));
         $this->assertFalse($manager->supportsCart('payment_url'));
+        // PayPal takes the whole order as ONE purchase unit, so a cart is one capture and one
+        // reference - which is all settle() and transaction_reference can hold. Payfast cannot:
+        // one ITN carries one m_payment_id.
+        $this->assertTrue($manager->supportsCart('paypal'));
+        $this->assertFalse($manager->supportsCart('payfast'));
     }
 
     public function test_resume_and_offsite_match_the_previous_hardcoded_triples(): void
@@ -116,7 +121,7 @@ class PaymentGatewayRegistryTest extends TestCase
     {
         $keys = $this->manager()->selectableKeys();
 
-        $this->assertSame(['cash', 'stripe', 'invoiceninja', 'payment_url', 'payfast'], $keys);
+        $this->assertSame(['cash', 'stripe', 'invoiceninja', 'payment_url', 'payfast', 'paypal'], $keys);
         $this->assertNotContains('rsvp', $keys);
         $this->assertNotContains('import', $keys);
     }
@@ -125,7 +130,7 @@ class PaymentGatewayRegistryTest extends TestCase
     {
         // The event dropdown renders in registry order, so the config array is the single place that
         // decides it. Cash first matches what the hand-written option list used to do.
-        $this->assertSame(['cash', 'stripe', 'invoiceninja', 'payment_url', 'payfast'], $this->manager()->keys());
+        $this->assertSame(['cash', 'stripe', 'invoiceninja', 'payment_url', 'payfast', 'paypal'], $this->manager()->keys());
     }
 
     public function test_amount_limits_carry_the_stripe_minimum_charge(): void

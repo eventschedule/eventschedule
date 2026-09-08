@@ -28,6 +28,7 @@ return [
         'invoiceninja' => App\Services\Payments\Gateways\InvoiceNinjaGateway::class,
         'payment_url' => App\Services\Payments\Gateways\PaymentUrlGateway::class,
         'payfast' => App\Services\Payments\Gateways\PayfastGateway::class,
+        'paypal' => App\Services\Payments\Gateways\PayPalGateway::class,
     ],
 
     'payfast' => [
@@ -56,6 +57,54 @@ return [
         'passphrase' => env('PAYFAST_PASSPHRASE'),
         'sandbox' => env('PAYFAST_SANDBOX', false),
         'payment_types' => env('PAYFAST_PAYMENT_TYPES'),
+
+    ],
+
+    'paypal' => [
+
+        /*
+         * Installation-wide credentials, read by PayPalGateway::platformCredentials().
+         *
+         * Selfhost only, and a DEFAULT rather than an override: an owner who has connected their own
+         * PayPal account keeps using it. See PaymentGatewayDriver::credentialsFor().
+         *
+         * The webhook id is optional where Payfast's passphrase is mandatory. Payfast needs its
+         * passphrase or the ITN signature proves nothing; PayPal's gate is a server-side re-fetch of
+         * the capture, so a missing webhook id costs only the late-settlement path.
+         */
+        'client_id' => env('PAYPAL_CLIENT_ID'),
+        'client_secret' => env('PAYPAL_CLIENT_SECRET'),
+        'sandbox' => env('PAYPAL_SANDBOX', false),
+        'webhook_id' => env('PAYPAL_WEBHOOK_ID'),
+
+        /*
+         * The currencies PayPal settles, minus two.
+         *
+         * PayPal publishes 25. HUF and TWD are deliberately LEFT OUT, and the reason is not that
+         * PayPal refuses them - it is that this app and PayPal disagree about them, which is worse.
+         *
+         * PayPal treats HUF, JPY and TWD as zero-decimal and errors on any fractional amount.
+         * MoneyUtils::$zeroDecimalCurrencies is STRIPE's list: it holds JPY but not HUF or TWD. So
+         * for those two the app prices, stores and displays fractions (sales.payment_amount is
+         * decimal(13,3), and a percentage promo or a gift-card split routinely lands one there)
+         * while PayPal can only be sent a whole number.
+         *
+         * Rounding on the way out does not rescue it. SaleSettlementService::AMOUNT_TOLERANCE is a
+         * flat 0.01 and is not currency-scaled, so a 1500.50 HUF sale charged as 1501 reconciles
+         * 0.50 out and lands in `amount_mismatch`: money captured, ticket withheld, admin alert.
+         * Every discounted HUF or TWD sale, silently.
+         *
+         * JPY is fine and included - there the two lists agree, so nothing fractional is ever stored.
+         *
+         * Re-adding these two means teaching settlement a per-currency tolerance (the idiom already
+         * exists at SaleRefundService::toleranceFor()) and reconciling the two decimal tables. That
+         * is a money-handling change in its own right, not a line in this config.
+         */
+        'currencies' => [
+            'AUD', 'BRL', 'CAD', 'CHF', 'CNY', 'CZK', 'DKK', 'EUR', 'GBP', 'HKD',
+            'ILS', 'JPY', 'MXN', 'MYR', 'NOK', 'NZD', 'PHP', 'PLN', 'RUB', 'SEK',
+            'SGD', 'THB', 'USD',
+        ],
 
     ],
 
