@@ -111,7 +111,7 @@ abstract class PaymentGatewayDriver
      * Can a buyer come back to an unpaid sale and finish paying it? False for cash, which is settled
      * in person and has nothing for the buyer to return to.
      */
-    public function canResumePayment(): bool
+    public function canResumePayment(?Sale $sale = null): bool
     {
         return true;
     }

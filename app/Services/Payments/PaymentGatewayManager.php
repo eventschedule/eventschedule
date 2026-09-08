@@ -2,6 +2,7 @@
 
 namespace App\Services\Payments;
 
+use App\Models\Sale;
 use App\Models\User;
 
 /**
@@ -193,9 +194,9 @@ class PaymentGatewayManager
      * methods say no - offering a "complete payment" button that leads nowhere is worse than
      * offering nothing.
      */
-    public function canResumePayment(?string $key): bool
+    public function canResumePayment(?string $key, ?Sale $sale = null): bool
     {
-        return (bool) $this->get($key)?->canResumePayment();
+        return (bool) $this->get($key)?->canResumePayment($sale);
     }
 
     /**

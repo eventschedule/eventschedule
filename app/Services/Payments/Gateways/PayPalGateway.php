@@ -8,7 +8,10 @@ use App\Services\Payments\CheckoutContext;
 use App\Services\Payments\CredentialField;
 use App\Services\Payments\PaymentGatewayDriver;
 use App\Services\Payments\PayPal\PayPalClient;
+use App\Services\Payments\PayPal\PayPalMoney;
 use App\Services\SaleSettlementService;
+use App\Utils\UrlUtils;
+use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Validation\ValidationException;
 use Symfony\Component\HttpFoundation\Response;
@@ -339,5 +342,451 @@ class PayPalGateway extends PaymentGatewayDriver
         $sandbox = ! empty($this->credentialsFor($sale->event?->user)['paypal_sandbox']);
 
         return 'https://www.'.($sandbox ? 'sandbox.' : '').'paypal.com/activity/payment/'.$reference;
+    }
+
+    /**
+     * Resumable in general - but NOT while PayPal is still reviewing a payment for this sale.
+     *
+     * The sale is `unpaid` either way, and ticket/view.blade.php renders "this ticket is not paid"
+     * plus a Complete payment button for any unpaid sale on a resumable rail. That button starts a
+     * FRESH checkout against a NEW Sale, so a buyer whose payment is merely under review would be
+     * charged a second time for the same seat. The base method takes a $sale for exactly this: a
+     * rail can be resumable in principle and not for one row.
+     */
+    public function canResumePayment(?Sale $sale = null): bool
+    {
+        return ! $sale?->paypal_pending_at;
+    }
+
+    // ---------------------------------------------------------------- checkout
+
+    /**
+     * Create the order and send the buyer to PayPal to approve it.
+     *
+     * A plain redirect, not a rendered form: PayPal takes a GET, so there is nothing to sign and
+     * nothing to POST. ResolveCustomDomain only rewrites a Location by str_replace of our own
+     * subdomain URL, so a paypal.com Location passes through it untouched.
+     */
+    public function startCheckout(CheckoutContext $context): Response
+    {
+        $sale = $context->sale;
+        $event = $context->event;
+        $currency = $context->currency();
+
+        $credentials = $this->credentialsFor($context->owner());
+
+        if (! $credentials) {
+            // Reachable when an owner disconnects PayPal while an event still names it. Give the
+            // seats back first: TicketController has committed the Sale and SaleTicket rows and
+            // `sold` is already incremented, so simply landing the buyer would hold that inventory
+            // forever - expire_unpaid_tickets defaults to 0 and ReleaseTickets only sweeps events
+            // that opted in.
+            Log::warning('PayPal checkout attempted with no credentials', ['sale_id' => $sale->id]);
+            $this->releaseAbandonedSale($sale, 'paypal_unconfigured');
+
+            return $this->redirectToPurchaseLanding($sale, $event, $context->isEmbed);
+        }
+
+        // Checked again here, not just in the dropdown: the stored payment method outlives a
+        // currency edit and can be set straight through the API.
+        if (! $this->supportsCurrency($currency)) {
+            Log::warning('PayPal checkout refused - unsupported currency', [
+                'sale_id' => $sale->id,
+                'currency' => $currency,
+            ]);
+            $this->releaseAbandonedSale($sale, 'paypal_refused');
+
+            return back()->withInput()->with('error', __('messages.paypal_checkout_unavailable'));
+        }
+
+        $encodedSaleId = UrlUtils::encodeId($sale->id);
+        $value = PayPalMoney::value($context->total(), $currency);
+
+        $callbackParams = [
+            'gateway' => $this->key(),
+            'sale_id' => $encodedSaleId,
+            // The id alone is a Sqid and proves nothing; PaymentGatewayController::resolve() refuses
+            // both callbacks without the secret.
+            'secret' => $sale->secret,
+        ];
+
+        if ($context->isEmbed) {
+            $callbackParams['embed'] = 'true';
+        }
+
+        $payload = [
+            'intent' => 'CAPTURE',
+            'purchase_units' => [[
+                // ONE unit for the whole order, even for a multi-event cart - see supportsCart().
+                // custom_id is how both callbacks find their way back to this sale, and it is the
+                // only identifier of ours that rides onto the capture.
+                'custom_id' => $encodedSaleId,
+                'description' => $this->clean($event->name ?: __('messages.tickets'), 127),
+                'amount' => ['currency_code' => strtoupper($currency), 'value' => $value],
+            ]],
+            'payment_source' => ['paypal' => ['experience_context' => [
+                'return_url' => custom_domain_url(route('payments.return', $callbackParams)),
+                'cancel_url' => custom_domain_url(route('payments.cancel', $callbackParams)),
+                'user_action' => 'PAY_NOW',
+                'shipping_preference' => 'NO_SHIPPING',
+                'brand_name' => $this->clean($event->creatorRole?->name ?: config('app.name'), 127),
+                // Refuse funding that settles days later - an eCheck. A ticket is issued at once or
+                // not at all, and a sale left unpaid for three days is one ReleaseTickets expires
+                // (its gift-card sweep does so at a hard 48 hours regardless of the event's own
+                // setting), which would hand the seats back on money PayPal had already taken.
+                'payment_method_preference' => 'IMMEDIATE_PAYMENT_REQUIRED',
+            ]]],
+        ];
+
+        // Sale-scoped so a double-submit reuses one order, amount-hashed so a resumed checkout at a
+        // different total is a NEW order rather than a DUPLICATE_REQUEST_ID rejection.
+        $requestId = 'ord-'.$encodedSaleId.'-'.substr(sha1($value.'|'.$currency), 0, 8);
+
+        $order = (new PayPalClient($credentials))->createOrder($payload, $requestId);
+        $approveUrl = $order ? $this->approveUrlFrom($order) : null;
+
+        if (! $approveUrl) {
+            // This arm stands in for the amount floor Payfast has to model: PayPal refuses an amount
+            // it will not take here, server-side, before the buyer has gone anywhere.
+            Log::warning('PayPal order could not be created', ['sale_id' => $sale->id]);
+            $this->releaseAbandonedSale($sale, 'paypal_order_failed');
+
+            return back()->withInput()->with('error', __('messages.paypal_checkout_unavailable'));
+        }
+
+        $sale->forceFill(['paypal_order_id' => (string) $order['id']])->saveQuietly();
+
+        return redirect($approveUrl);
+    }
+
+    // -------------------------------------------------------------- settlement
+
+    /**
+     * The buyer is back from approving. Capture, then settle.
+     *
+     * This is where the money moves, which is why it does not follow the base class's advice to
+     * treat the return as untrustworthy - see the class docblock. Everything the buyer could have
+     * tampered with is cross-checked against PayPal's own answer before a cent is recognised.
+     */
+    public function handleReturn(Request $request, Sale $sale): Response
+    {
+        $orderId = (string) ($request->query('token') ?: $sale->paypal_order_id);
+        $landing = fn () => $this->redirectToPurchaseLanding($sale, $sale->event, $request->boolean('embed'));
+
+        if ($orderId === '') {
+            Log::warning('PayPal return carried no order id', ['sale_id' => $sale->id]);
+
+            return $landing();
+        }
+
+        // Both sets that could legitimately settle this, owner's first. An owner who connects their
+        // own account between checkout and return would otherwise have the capture attempted with
+        // credentials that never created the order.
+        foreach ($this->candidateCredentials($sale->event?->user) as $credentials) {
+            $client = new PayPalClient($credentials);
+
+            // Deterministic, so a refreshed return URL is the same request to PayPal rather than a
+            // second one.
+            [$status, $body] = $client->captureOrder($orderId, 'cap-'.UrlUtils::encodeId($sale->id));
+
+            if ($status !== null && $status >= 400) {
+                // 422 ORDER_ALREADY_CAPTURED is a SUCCESS, not a failure: the buyer refreshed the
+                // return URL, or the webhook won the race. Read the order back and settle from the
+                // capture that already exists. Treating it as a failure and calling
+                // releaseAbandonedSale() would hand back the seats, the promo redemption and the
+                // gift-card balance for a payment PayPal actually took - by far the worst outcome
+                // available here, and the reason this branch exists at all.
+                if (! $this->mentionsAlreadyCaptured($body)) {
+                    continue;
+                }
+
+                $body = $client->getOrder($orderId) ?? [];
+            }
+
+            $capture = $this->captureFrom($body);
+
+            if (! $capture) {
+                continue;
+            }
+
+            return $this->settleCapture($sale, $capture, $landing);
+        }
+
+        Log::warning('PayPal capture did not complete', ['sale_id' => $sale->id]);
+
+        return $landing();
+    }
+
+    /**
+     * PayPal's account-level webhook. Late settlement only - the return above is the normal path.
+     *
+     * $sale arrives null: the listener is registered once per PayPal app, so its URL carries no sale
+     * segment and PaymentWebhookController has nothing to look up.
+     */
+    public function handleWebhook(Request $request, ?Sale $sale): Response
+    {
+        $payload = (array) $request->json()->all();
+
+        if (! in_array((string) ($payload['event_type'] ?? ''), self::WEBHOOK_EVENTS, true)) {
+            // Not something we subscribed to. 204 rather than an error: PayPal retries a non-2xx for
+            // three days and disables a listener that keeps failing.
+            return response()->noContent();
+        }
+
+        // Cheap gates first. Verification here is an outbound API call on an unauthenticated route,
+        // so anything that can refuse a forgery without spending one must run ahead of it.
+        $certUrl = (string) $request->header('paypal-cert-url');
+        $certHost = parse_url($certUrl, PHP_URL_HOST);
+
+        if (! in_array($certHost, ['api.paypal.com', 'api.sandbox.paypal.com'], true)) {
+            return response('bad cert url', 400);
+        }
+
+        $sale ??= $this->saleFromWebhook($request);
+
+        if (! $sale) {
+            return response('missing sale', 400);
+        }
+
+        // PaymentWebhookController enforces this only when a sale id is in the URL, and ours has
+        // none - so without this line a PayPal webhook could settle a Payfast sale.
+        if ($sale->payment_method !== $this->key()) {
+            return response('gateway mismatch', 400);
+        }
+
+        $owner = $sale->event?->user;
+        $candidates = $this->candidateCredentials($owner);
+
+        if (! $owner || ! $candidates) {
+            // Deliberately its own message: an operator chasing a missing payment needs "the account
+            // went away" to read differently from "somebody is forging notifications".
+            Log::warning('PayPal webhook for a sale whose owner has no credentials', ['sale_id' => $sale->id]);
+
+            return response('not configured', 400);
+        }
+
+        $captureId = (string) ($payload['resource']['id'] ?? '');
+
+        if ($captureId === '') {
+            return response('no capture', 400);
+        }
+
+        foreach ($candidates as $credentials) {
+            $client = new PayPalClient($credentials);
+
+            // Advisory, exactly as Payfast demoted its source-IP check and for the same reason: it is
+            // subsumed by the lookup below. An explicit FAILURE is still a refusal; not holding a
+            // webhook id at all is not.
+            $webhookId = (string) ($credentials['paypal_webhook_id'] ?? $owner->paypal_webhook_id ?? '');
+
+            if ($webhookId !== '') {
+                $verified = $client->verifyWebhookSignature($request->headers->all(), $request->getContent(), $webhookId);
+
+                if ($verified === false) {
+                    continue;
+                }
+            }
+
+            // THE gate. Nobody can make PayPal's own API report a capture that never happened.
+            $capture = $client->getCapture($captureId);
+
+            if (! $capture) {
+                continue;
+            }
+
+            return $this->settleCapture($sale, $capture, fn () => response()->noContent());
+        }
+
+        Log::warning('PayPal webhook could not be confirmed with PayPal', ['sale_id' => $sale->id]);
+
+        return response('unconfirmed', 400);
+    }
+
+    /**
+     * Which owner an account-level webhook belongs to.
+     *
+     * First implementation of this hook - nothing called it before, because every other gateway here
+     * registers its callback per payment.
+     *
+     * Resolving the owner from the payload before the payload is trusted is fine, and worth saying
+     * why: this only chooses WHICH credentials to check against. A forged body naming any owner still
+     * has to survive the capture lookup made with that owner's own keys.
+     */
+    public function resolveOwnerFromWebhook(Request $request): ?User
+    {
+        return $this->saleFromWebhook($request)?->event?->user;
+    }
+
+    // ----------------------------------------------------------------- helpers
+
+    private function saleFromWebhook(Request $request): ?Sale
+    {
+        $customId = (string) $request->json('resource.custom_id', '');
+
+        if ($customId === '') {
+            return null;
+        }
+
+        $id = UrlUtils::decodeId($customId);
+
+        return $id ? Sale::with('event.user')->find($id) : null;
+    }
+
+    /**
+     * The completed capture out of an order or capture payload, whichever shape arrived.
+     *
+     * @param  array<string, mixed>  $body
+     * @return array<string, mixed>|null
+     */
+    private function captureFrom(array $body): ?array
+    {
+        if (isset($body['purchase_units'][0]['payments']['captures'][0])) {
+            return $body['purchase_units'][0]['payments']['captures'][0];
+        }
+
+        // A getCapture() response is already the capture.
+        return isset($body['id'], $body['amount']) ? $body : null;
+    }
+
+    /**
+     * Cross-check a capture against the sale it claims to pay for, then settle.
+     *
+     * @param  array<string, mixed>  $capture
+     */
+    private function settleCapture(Sale $sale, array $capture, callable $respond): Response
+    {
+        $expectedCurrency = strtoupper((string) ($sale->event?->ticket_currency_code ?: 'USD'));
+        $captureCurrency = strtoupper((string) ($capture['amount']['currency_code'] ?? ''));
+
+        // Stops a tampered token naming another order inside the same merchant account - the same
+        // guard Payfast gets from m_payment_id.
+        if (! hash_equals(UrlUtils::encodeId($sale->id), (string) ($capture['custom_id'] ?? ''))) {
+            Log::warning('PayPal capture named a different sale', ['sale_id' => $sale->id]);
+
+            return $respond();
+        }
+
+        // Otherwise a yen capture would reconcile against a dollar sale on face value.
+        if ($captureCurrency !== $expectedCurrency) {
+            Log::warning('PayPal capture currency did not match the event', [
+                'sale_id' => $sale->id,
+                'expected' => $expectedCurrency,
+                'received' => $captureCurrency,
+            ]);
+
+            return $respond();
+        }
+
+        $status = strtoupper((string) ($capture['status'] ?? ''));
+
+        if ($status !== 'COMPLETED') {
+            // PENDING (a fraud review; eChecks are refused up front) and DECLINED both leave the sale
+            // unpaid for ReleaseTickets to expire on its own schedule. Marking it anything else would
+            // take seats out of circulation on a payment that has not happened.
+            Log::info('PayPal capture is not complete', ['sale_id' => $sale->id, 'status' => $status]);
+
+            if ($status === 'PENDING') {
+                $sale->forceFill(['paypal_pending_at' => now()])->saveQuietly();
+                session()->flash('message', __('messages.paypal_payment_pending'));
+            }
+
+            return $respond();
+        }
+
+        $outcome = $this->settlement->settle(
+            $sale,
+            (string) ($capture['id'] ?? ''),
+            isset($capture['amount']['value']) ? (float) $capture['amount']['value'] : null,
+            $this->key(),
+        );
+
+        $this->recordOutcome($sale, $outcome);
+
+        return $respond();
+    }
+
+    /**
+     * How loudly a settlement outcome is recorded. Exhaustive on purpose.
+     *
+     * Some of these mean PayPal HAS the buyer's money and this install cannot honour it, which is a
+     * person's problem, not a retry's. An outcome nobody anticipated is far more likely to be that
+     * than business as usual, so a new settle() return value must fail LOUD rather than land in a
+     * quiet default logged as "settled".
+     */
+    private function recordOutcome(Sale $sale, string $outcome): void
+    {
+        match ($outcome) {
+            'released', 'deleted', 'missing' => (function () use ($sale, $outcome) {
+                Log::error('PayPal payment received for a sale that can no longer be honoured', [
+                    'sale_id' => $sale->id,
+                    'outcome' => $outcome,
+                ]);
+
+                // report() so hosted surfaces this in Sentry. Only the sale id and outcome: the
+                // capture id and amount would ride Sentry's breadcrumbs to a vendor DSN on a
+                // selfhost install, and both are already in the database.
+                report(new \RuntimeException(
+                    'PayPal payment received for sale '.$sale->id." that can no longer be honoured (outcome: {$outcome})"
+                ));
+            })(),
+
+            // Parked for review; AdminAlertService already counts these.
+            'amount_mismatch' => Log::warning('PayPal capture amount mismatch - sale parked for review', [
+                'sale_id' => $sale->id,
+            ]),
+
+            'paid', 'already_paid' => Log::info('PayPal capture settled', [
+                'sale_id' => $sale->id,
+                'outcome' => $outcome,
+            ]),
+
+            default => (function () use ($sale, $outcome) {
+                Log::error('PayPal capture produced an unhandled settlement outcome', [
+                    'sale_id' => $sale->id,
+                    'outcome' => $outcome,
+                ]);
+
+                report(new \RuntimeException(
+                    'PayPal capture produced an unhandled settlement outcome for sale '.$sale->id." (outcome: {$outcome})"
+                ));
+            })(),
+        };
+    }
+
+    /**
+     * The link the buyer is sent to.
+     *
+     * Both rel names are accepted: Orders v2 returns 'payer-action' alongside payment_source, and
+     * 'approve' with the older application_context. Pinning one is a silent breakage the day PayPal
+     * changes which shape it answers with.
+     *
+     * @param  array<string, mixed>  $order
+     */
+    private function approveUrlFrom(array $order): ?string
+    {
+        foreach ((array) ($order['links'] ?? []) as $link) {
+            if (in_array($link['rel'] ?? '', ['payer-action', 'approve'], true) && ! empty($link['href'])) {
+                return (string) $link['href'];
+            }
+        }
+
+        return null;
+    }
+
+    /** @param  array<string, mixed>  $body */
+    private function mentionsAlreadyCaptured(array $body): bool
+    {
+        foreach ((array) ($body['details'] ?? []) as $detail) {
+            if (($detail['issue'] ?? null) === 'ORDER_ALREADY_CAPTURED') {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+    private function clean(?string $value, int $max): string
+    {
+        return mb_substr(trim(preg_replace('/\s+/u', ' ', (string) $value)), 0, $max);
     }
 }

@@ -215,7 +215,7 @@
                   default     => '',
               };
               $canShowPayNow = $isUnpaid
-                  && payment_gateways()->canResumePayment($sale->payment_method)
+                  && payment_gateways()->canResumePayment($sale->payment_method, $sale)
                   && (!$sale->group_id || $sale->isPrimarySale());
               $tierBg     = $isUnpaid ? 'bg-yellow-500/25 print:bg-yellow-50' : 'bg-red-500/25 print:bg-red-50';
               $tierBorder = $isUnpaid ? 'border-yellow-400/70 print:border-yellow-300' : 'border-red-400/70 print:border-red-300';

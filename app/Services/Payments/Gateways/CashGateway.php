@@ -2,6 +2,7 @@
 
 namespace App\Services\Payments\Gateways;
 
+use App\Models\Sale;
 use App\Models\User;
 use App\Services\Payments\PaymentGatewayDriver;
 
@@ -49,7 +50,7 @@ class CashGateway extends PaymentGatewayDriver
     /**
      * Nothing for the buyer to come back and pay online.
      */
-    public function canResumePayment(): bool
+    public function canResumePayment(?Sale $sale = null): bool
     {
         return false;
     }

@@ -46,12 +46,15 @@ class Sale extends Model
         'order_id',
         'guest_timezone',
         'reminder_sent_at',
+        'paypal_order_id',
+        'paypal_pending_at',
         'confirmed_at',
     ];
 
     protected $casts = [
         'feedback_sent_at' => 'datetime',
         'reminder_sent_at' => 'datetime',
+        'paypal_pending_at' => 'datetime',
         'confirmed_at' => 'datetime',
         'paid_at' => 'datetime',
     ];
