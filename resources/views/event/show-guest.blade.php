@@ -169,7 +169,16 @@
 
         {{-- Talent/performer cards --}}
         @php
-          $talentMembers = $event->members()->filter(fn($m) => $m->isClaimed() || $m->getFirstVideoUrl());
+          // The lineup somebody typed in is now shown in full. An unclaimed act with no video used
+          // to be dropped from this page entirely, name and all, while an unclaimed VENUE has
+          // always rendered as plain text further down - an asymmetry rather than a policy, and
+          // the reason a curator's carefully entered bill could come out empty.
+          $talentMembers = $event->members();
+          // Follows the widened list, and must. This gates the big square hero fallback below,
+          // whose whole job is to supply an image when no talent card carries one - and an
+          // unclaimed act with a picture now gets a card with that picture in it. Pinning this to
+          // the old narrower set renders the same file twice, once in the card and once as the
+          // fallback above it. Verified by rendering, not reasoned about.
           $hasTalentImage = $talentMembers->contains(fn($m) => $m->profile_image_url);
         @endphp
 
@@ -318,6 +327,14 @@
                           <svg class="inline-block w-5 h-5 {{ $role->isRtl() ? 'ms-1 scale-x-[-1]' : 'ms-1' }} align-text-bottom fill-gray-900 dark:fill-gray-100 opacity-70 group-hover:opacity-100 transition-opacity" viewBox="0 0 24 24" aria-hidden="true">
                             <path d="M8.59,16.58L13.17,12L8.59,7.41L10,6L16,12L10,18L8.59,16.58Z"/>
                           </svg>
+                        </span>
+                      </a>
+                    @elseif ($each->getClaimUrl())
+                      {{-- The act has a page of its own now, unclaimed but real, and this link is
+                           the only way anybody reaches one without an invitation in hand. --}}
+                      <a href="{{ $each->getClaimUrl() }}" class="group inline {{ $role->isRtl() ? 'rtl' : '' }}" dir="{{ content_dir_for_language($each->nameInLanguage($displayLang), $displayLang) }}">
+                        <span class="inline text-lg font-semibold text-gray-900 dark:text-gray-100 group-hover:underline" style="font-family: '{{ str_replace('_', ' ', $each->font_family) }}', sans-serif;">
+                          {!! str_replace(' , ', '<br>', e($each->nameInLanguage($displayLang))) !!}
                         </span>
                       </a>
                     @else

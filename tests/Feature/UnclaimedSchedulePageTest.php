@@ -121,6 +121,39 @@ class UnclaimedSchedulePageTest extends TestCase
         $this->get($this->url($unverified))->assertRedirect();
     }
 
+    public function test_an_unclaimed_act_appears_on_the_event_that_listed_it(): void
+    {
+        // It used to be dropped from the page entirely, name and all, unless somebody had matched
+        // a YouTube video to it - while an unclaimed VENUE has always rendered as plain text. This
+        // link is also the only way anyone reaches a claim page without an invitation in hand.
+        $placeholder = $this->placeholder(['name' => 'Second On']);
+        [, $curator, $event] = $this->listedOn($placeholder);
+
+        $this->get(route('role.view_guest', ['subdomain' => $curator->subdomain]).'/'.$event->slug.'?id='.\App\Utils\UrlUtils::encodeId($event->id))
+            ->assertOk()
+            ->assertSee('Second On')
+            ->assertSee($placeholder->getClaimUrl(), false);
+    }
+
+    public function test_an_unclaimed_acts_picture_is_rendered_once_not_twice(): void
+    {
+        // $hasTalentImage gates the big square hero fallback, whose job is to supply an image when
+        // no talent card carries one. Now that an unclaimed act gets a card, that flag has to
+        // follow the widened list: computing it from the old narrower set renders the same file
+        // both in the card and as the fallback above it.
+        $placeholder = $this->placeholder(['name' => 'Second On', 'profile_image_url' => 'https://example.com/act.jpg']);
+        [, $curator, $event] = $this->listedOn($placeholder);
+
+        $html = $this->get(route('role.view_guest', ['subdomain' => $curator->subdomain]).'/'.$event->slug.'?id='.\App\Utils\UrlUtils::encodeId($event->id))
+            ->assertOk()
+            ->getContent();
+
+        // Count <img> tags only: og:image, twitter:image and the JSON-LD all legitimately name the
+        // same file, and the JSON-LD block sits in the body.
+        preg_match_all('/<img[^>]*act\\.jpg/', $html, $tags);
+        $this->assertCount(1, $tags[0], 'the act\'s picture belongs in its card, not also above it');
+    }
+
     public function test_a_deleted_placeholder_still_redirects(): void
     {
         $this->get($this->url($this->placeholder(['is_deleted' => true])))->assertRedirect();
