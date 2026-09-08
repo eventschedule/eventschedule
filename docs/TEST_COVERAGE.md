@@ -2,7 +2,7 @@
 
 Tracks which app features have automated **integration-test** coverage and which are gaps to fill.
 
-_Last updated: 2026-07-10_
+_Last updated: 2026-09-08_
 
 > **Refactor-campaign characterization suites** (2026-07-10, `tests/Feature/Characterization/`): `EventSave*CharacterizationTest` (saveEvent matrix, 43 tests), `RoleGuestSurfaceCharacterizationTest`, `CheckoutBranchCharacterizationTest`, `EventCurationModerationCharacterizationTest`, `ViewGuestDeepCharacterizationTest`, `RoleUpdateCharacterizationTest`, `ModelBootClosureCharacterizationTest`, `NewsletterValidationCharacterizationTest`, `MarketingDataCharacterizationTest`, `EventGraphicStructuralTest`, `EncodedIdRoutingCharacterizationTest`, `NoFakeEmailCharacterizationTest`. These pin CURRENT behavior (bug-for-bug) ahead of REFACTOR_PLAN.md; several also add first-time feature coverage (rows flipped below).
 
@@ -97,6 +97,9 @@ New Feature-test suites added this session (all use `tests/Feature/Concerns/Crea
 | Mobile-optimized / responsive design | ✗ | — (non-functional) |
 | Venue location maps (Google Maps) | ✗ | — |
 | Sponsor / partner logos (Pro) | ✓ | `SponsorsTest` (cap, grid density, panel background, load gating) |
+| Claim page for an auto-created schedule | ✓ | `UnclaimedSchedulePageTest` (page, claim, takedown, root-only, noindex), `UnclaimedScheduleGuardsTest` (no ads, no follow, claim URL) |
+| Claim on sign-up / email verification | ✓ | `ScheduleClaimByEmailTest` (registration, drifted-pivot refusal, pre-approval, one owner row) |
+| Claim invitation email | ✓ | `ClaimInvitationMailTest` (per-recipient addressing, no-talent venue event, links to the page) |
 | Schedule / venue merge | ✓ | `ScheduleFeaturesTest` |
 | Schedule audit log (owner) | ✓ | `ScheduleFeaturesTest` |
 | YouTube video matching (Talent) | ✓ | `ScheduleFeaturesTest` |

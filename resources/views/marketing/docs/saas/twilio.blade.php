@@ -40,7 +40,7 @@
                     </tr>
                     <tr>
                         <td><strong class="text-gray-900 dark:text-white">SMS invitations</strong></td>
-                        <td>When an invited team member, venue or talent has a phone number but no email address on file, the sign-up link goes out by SMS instead of email</td>
+                        <td>When an invited team member, venue or talent has a phone number but no email address on file, the invitation goes out by SMS instead of email</td>
                         <td>Hosted deployments</td>
                     </tr>
                     <tr>

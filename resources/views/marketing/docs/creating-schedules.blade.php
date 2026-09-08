@@ -164,7 +164,7 @@
             </table>
         </div>
 
-        <p class="text-gray-600 dark:text-gray-300 mb-6"><a href="#merge" class="doc-link">Merge Venue</a> is an eleventh section, shown on an unclaimed Venue schedule when you manage at least one other venue it could be folded into.</p>
+        <p class="text-gray-600 dark:text-gray-300 mb-6"><a href="#merge" class="doc-link">Merge Venue</a> is an eleventh section, shown on an <a href="{{ route('marketing.docs.creating_events') }}#claim" class="doc-link">unclaimed</a> Venue schedule when you manage at least one other venue it could be folded into.</p>
         <p class="text-gray-600 dark:text-gray-300 mb-6">The <strong class="text-gray-900 dark:text-white">Details</strong> section holds your schedule's core identity, on three tabs: General, Localization, and Contact Info.</p>
 
         <x-doc-screenshot id="creating-schedules--section-details" alt="Schedule details settings" loading="eager" />
@@ -324,7 +324,7 @@
         <p class="text-gray-600 dark:text-gray-300 mb-4">A <strong class="text-gray-900 dark:text-white">Merge Venue</strong> section appears on the edit page when a schedule looks mergeable. The <strong class="text-gray-900 dark:text-white">Merge into</strong> dropdown lists the other venues you manage; pick one and confirm. All of this schedule's events move to the target and this one is removed. If Event Schedule spots a likely match by name, city and country, it names it for you above the dropdown, so usually you only have to confirm.</p>
         <div class="doc-callout mb-6">
             <div class="doc-callout-title">Only unclaimed schedules can be merged</div>
-            <p>Merging is offered for schedules nobody has claimed yet, which is exactly the kind an import creates. Once someone claims a schedule it has a real operator behind it, so it can no longer be absorbed into another. Both schedules must also be the same type, so a venue merges into a venue and never into a talent.</p>
+            <p>Merging is offered for schedules nobody has claimed yet, which is exactly the kind an import creates - the pages described under <a href="{{ route('marketing.docs.creating_events') }}#claim" class="doc-link">Pages Created for Others</a>. Once someone claims a schedule it has a real operator behind it, so it can no longer be absorbed into another. Both schedules must also be the same type, so a venue merges into a venue and never into a talent.</p>
         </div>
         <p class="text-gray-600 dark:text-gray-300 mb-6">If some events already exist on the target, you are told how many before you commit. Those are not duplicated: where the same event sits on both schedules, the two entries are combined and any detail the target is missing is filled in from the schedule you are merging away.</p>
 

@@ -9,6 +9,7 @@
         <x-doc-nav-link href="#ai-details-generator">AI Details Generator</x-doc-nav-link>
         <x-doc-nav-link href="#venue">Venue</x-doc-nav-link>
         <x-doc-nav-link href="#participants">Participants</x-doc-nav-link>
+        <x-doc-nav-link href="#claim">Pages Created for Others</x-doc-nav-link>
         <x-doc-nav-link href="#recurring">Recurring</x-doc-nav-link>
         <x-doc-nav-link href="#agenda">Agenda</x-doc-nav-link>
         <x-doc-nav-link href="#schedules">Schedules</x-doc-nav-link>
@@ -268,7 +269,7 @@
             </div>
             <div class="doc-field">
                 <h4 class="font-semibold text-gray-900 dark:text-white mb-2">Venue Contact and Notifications</h4>
-                <p class="text-sm text-gray-500 dark:text-gray-400">You can store the venue's email, phone number, and website on the venue record. On the hosted platform, entering an email for a new venue reveals <strong class="text-gray-900 dark:text-white">"Send an email to notify them"</strong> so the venue hears about the event. On installs with SMS configured, a phone number offers <strong class="text-gray-900 dark:text-white">"Send an SMS to notify them"</strong> instead.</p>
+                <p class="text-sm text-gray-500 dark:text-gray-400">You can store the venue's email, phone number, and website on the venue record. On the hosted platform, entering an email for a new venue reveals <strong class="text-gray-900 dark:text-white">"Send an email to notify them"</strong>, which tells the venue about the event and invites them to claim their page. On installs with SMS configured, a phone number offers <strong class="text-gray-900 dark:text-white">"Send an SMS to notify them"</strong> instead.</p>
             </div>
         </div>
     </section>
@@ -281,21 +282,64 @@
             </svg>
             Participants
         </h2>
-        <p class="text-gray-600 dark:text-gray-300 mb-6">The Participants section tags performers, speakers, or other participants on an event. They appear on the public event page, linked to their own schedule pages.</p>
+        <p class="text-gray-600 dark:text-gray-300 mb-6">The Participants section tags performers, speakers, or other participants on an event. They appear on the public event page, linked to their own schedule pages. Anyone you name who is not already on Event Schedule gets a page of their own at the same time, which they can claim later - see <a href="#claim" class="doc-link">Pages Created for Others</a>.</p>
 
         <div class="doc-fields">
             <div class="doc-field">
                 <h3 class="font-semibold text-gray-900 dark:text-white mb-2">Adding Participants</h3>
-                <p class="text-sm text-gray-500 dark:text-gray-400">Click <strong class="text-gray-900 dark:text-white">Add</strong>, then either <strong class="text-gray-900 dark:text-white">Use Existing</strong> to choose someone who has appeared on your schedule before, or <strong class="text-gray-900 dark:text-white">Create New</strong> and fill in a name (required) plus an optional email, phone number, and <strong class="text-gray-900 dark:text-white">YouTube Video URL</strong>. Click <strong class="text-gray-900 dark:text-white">Done</strong> to add them to the list, where each entry can be edited or removed.</p>
+                <p class="text-sm text-gray-500 dark:text-gray-400">Click <strong class="text-gray-900 dark:text-white">Add</strong>, then either <strong class="text-gray-900 dark:text-white">Use Existing</strong> to choose someone who has appeared on your schedule before, or <strong class="text-gray-900 dark:text-white">Create New</strong> and fill in a name (required) plus an optional email, phone number, and <strong class="text-gray-900 dark:text-white">YouTube Video URL</strong>. The email matters beyond your own records: it is what lets that person claim the page created for them. Click <strong class="text-gray-900 dark:text-white">Done</strong> to add them to the list, where each entry can be edited or removed.</p>
             </div>
             <div class="doc-field">
                 <h4 class="font-semibold text-gray-900 dark:text-white mb-2">Notify Participants</h4>
-                <p class="text-sm text-gray-500 dark:text-gray-400">On the hosted platform, a participant with an email address who does not already have an account can be sent <strong class="text-gray-900 dark:text-white">"Send an email to notify them"</strong>. Where SMS is configured, a phone number offers an SMS instead.</p>
+                <p class="text-sm text-gray-500 dark:text-gray-400">On the hosted platform, a participant with an email address who does not already have an account can be sent <strong class="text-gray-900 dark:text-white">"Send an email to notify them"</strong>. That email tells them you added them to the event and invites them to claim their page. Where SMS is configured, a phone number offers an SMS instead.</p>
             </div>
             <div class="doc-field">
                 <h4 class="font-semibold text-gray-900 dark:text-white mb-2">When to Use</h4>
                 <p class="text-sm text-gray-500 dark:text-gray-400">Participants are most useful for Talent and Curator schedules, where events feature specific performers, speakers, or artists. On a Venue schedule the section is marked optional.</p>
             </div>
+        </div>
+    </section>
+
+    <!-- Pages created for others -->
+    <section id="claim" class="doc-section">
+        <h2 class="doc-heading">
+            <svg aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-5 h-5 text-gray-500 dark:text-gray-400 flex-shrink-0">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M15.75 6a3.75 3.75 0 1 1-7.5 0 3.75 3.75 0 0 1 7.5 0ZM4.501 20.118a7.5 7.5 0 0 1 14.998 0A17.933 17.933 0 0 1 12 21.75c-2.676 0-5.216-.584-7.499-1.632Z" />
+            </svg>
+            Pages Created for Others
+        </h2>
+        <p class="text-gray-600 dark:text-gray-300 mb-6">Naming a performer or a venue who is not yet on Event Schedule creates a schedule for them there and then. It carries the name you typed, any contact details you added, and every date you list them on. This happens whether or not you send them an invitation, because it is what lets their name appear on your event page at all.</p>
+
+        <h3 class="doc-subheading">What the page shows</h3>
+        <p class="text-gray-600 dark:text-gray-300 mb-6">Until it is claimed, the page opens by saying who created it and that the act has not claimed it yet, so nobody mistakes it for a page they built themselves. Below that it lists the upcoming dates other schedules have added them to, each one credited to the schedule that added it. It carries no contact details, no follow button and no tickets, and it stays out of search engines until it is claimed.</p>
+
+        <div class="doc-fields">
+            <div class="doc-field">
+                <h3 class="font-semibold text-gray-900 dark:text-white mb-2">Inviting them</h3>
+                <p class="text-sm text-gray-500 dark:text-gray-400">Ticking <strong class="text-gray-900 dark:text-white">"Send an email to notify them"</strong> on the participant or venue sends a one-off email telling them you added them to the event, with a link to their page. Replies go to you, not to us. If they would rather not hear from you again, the email carries an unsubscribe link that stops any further invitation to that address.</p>
+            </div>
+            <div class="doc-field">
+                <h4 class="font-semibold text-gray-900 dark:text-white mb-2">How they claim it</h4>
+                <p class="text-sm text-gray-500 dark:text-gray-400">They press <strong class="text-gray-900 dark:text-white">Claim this page</strong> and sign in with the email address on the page. That is the whole check, so the address you enter decides who can claim it: a booking agent's address means the agent claims the page, not the act. Once claimed, the page is an ordinary schedule and they can edit everything on it.</p>
+            </div>
+            <div class="doc-field">
+                <h4 class="font-semibold text-gray-900 dark:text-white mb-2">If it is not them</h4>
+                <p class="text-sm text-gray-500 dark:text-gray-400"><strong class="text-gray-900 dark:text-white">This is not me</strong> is the other answer. Somebody who holds the address on the page can take it down immediately; anyone else has their request recorded for review, so the button cannot be aimed at a competitor.</p>
+            </div>
+            <div class="doc-field">
+                <h4 class="font-semibold text-gray-900 dark:text-white mb-2">After they claim it</h4>
+                <p class="text-sm text-gray-500 dark:text-gray-400">Dates you have already listed them on stay exactly where they are, and your future dates keep appearing on their page without waiting for approval, because you were already listing them. Any schedule that starts listing them afterwards has to ask first.</p>
+            </div>
+        </div>
+
+        <div class="doc-callout doc-callout-info">
+            <div class="doc-callout-title">Claiming by phone works differently</div>
+            <p>Where SMS is configured, verifying the phone number on your account also claims any unclaimed schedule carrying that number, as long as it was created in the past year. Claiming by email has no such time limit.</p>
+        </div>
+
+        <div class="doc-callout doc-callout-warning">
+            <div class="doc-callout-title">You are creating a page about someone else</div>
+            <p>Enter a name they would recognise and a contact address that is really theirs. The page is public from the moment it exists, and the address on it is what decides who can take it over.</p>
         </div>
     </section>
 

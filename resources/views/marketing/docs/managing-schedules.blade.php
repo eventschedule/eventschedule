@@ -230,7 +230,7 @@
         <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-sky-100 text-sky-800 dark:bg-sky-900/30 dark:text-sky-400 mb-4">Curator schedules only</span>
 
         <p class="text-gray-600 dark:text-gray-300 mb-4">
-            The <strong class="text-gray-900 dark:text-white">Videos</strong> tab helps you put a video on the profile of every act you have booked. It lists the talent appearing on your <strong>upcoming accepted events</strong> who do not have a video yet, and searches YouTube for each one by name automatically as the page loads.
+            The <strong class="text-gray-900 dark:text-white">Videos</strong> tab helps you put a video on the page of every act you have booked. It lists the talent appearing on your <strong>upcoming accepted events</strong> who do not have a video yet, and searches YouTube for each one by name automatically as the page loads.
         </p>
 
         <x-doc-screenshot id="managing-schedules--videos-tab" alt="Videos tab showing YouTube search results" />
@@ -492,7 +492,7 @@
 
         <h3 id="transfer-ownership" class="doc-subheading">Transferring Ownership</h3>
         <p class="text-gray-600 dark:text-gray-300 mb-4">
-            Ownership can be handed to another account: a venue changes hands, an organizer leaves, or you set a schedule up for someone and want it to be theirs. It is available on every plan, and only the owner can start it.
+            Ownership can be handed to another account: a venue changes hands, an organizer leaves, or you set a schedule up for someone and want it to be theirs. It is available on every plan, and only the owner can start it. A schedule that nobody owns yet changes hands a different way, by being claimed - see <a href="{{ route('marketing.docs.creating_events') }}#claim" class="doc-link">Pages Created for Others</a>.
         </p>
         <ol class="doc-list doc-list-numbered mb-6">
             <li>On the Team tab click <strong>Transfer ownership</strong> and enter the new owner's email address.</li>

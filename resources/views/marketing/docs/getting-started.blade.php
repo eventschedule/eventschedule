@@ -252,6 +252,10 @@
                 <p class="text-sm text-gray-500 dark:text-gray-400">Yes, with no time limit and no credit card. The free plan covers unlimited events, your own schedule URL, calendar sync, analytics, RSVP with capacity limits, embedding your calendar, one appointment type, selling up to 25 paid tickets a month with no platform fee, and 10 newsletter emails a month (each recipient counts as one email, so one send to 100 followers uses 100). Pro is {{ plan_price($proMonthly) }} a month and removes the ticket cap, Enterprise is {{ plan_price($entMonthly) }} a month for custom domains and team features, and both start with a 7-day free trial.</p>
             </div>
             <div class="doc-field">
+                <h4 class="font-semibold text-gray-900 dark:text-white mb-2">Someone has already made a page for my venue. How do I claim it?</h4>
+                <p class="text-sm text-gray-500 dark:text-gray-400">If a promoter or venue listed you on their event before you signed up, Event Schedule created a page for you at that moment. Open it and press <strong class="text-gray-900 dark:text-white">Claim this page</strong>, then sign in with the email address shown on the page. That address is the whole check, so if it is not one you can reach, ask whoever listed you to correct it. If the page is not about you at all, press <strong class="text-gray-900 dark:text-white">This is not me</strong> instead. See <a href="{{ route('marketing.docs.creating_events') }}#claim" class="doc-link">Pages Created for Others</a>.</p>
+            </div>
+            <div class="doc-field">
                 <h4 class="font-semibold text-gray-900 dark:text-white mb-2">My schedule page will not open. What is wrong?</h4>
                 <p class="text-sm text-gray-500 dark:text-gray-400">Almost always an unverified contact email. A schedule stays offline until its email address is confirmed, so check your inbox for the verification link, or use the <strong class="text-gray-900 dark:text-white">Resend Email</strong> button on the yellow banner at the top of the admin panel.</p>
             </div>
@@ -323,6 +327,14 @@
                     "acceptedAnswer": {
                         "@type": "Answer",
                         "text": "Yes, with no time limit and no credit card. The free plan covers unlimited events, your own schedule URL, calendar sync, analytics, RSVP with capacity limits, embedding your calendar, one appointment type, selling up to 25 paid tickets a month with no platform fee, and 10 newsletter emails a month (each recipient counts as one email). Pro is {{ plan_price($proMonthly) }} a month and removes the ticket cap, Enterprise is {{ plan_price($entMonthly) }} a month for custom domains and team features, and both start with a 7-day free trial."
+                    }
+                },
+                {
+                    "@type": "Question",
+                    "name": "Someone has already made a page for my venue. How do I claim it?",
+                    "acceptedAnswer": {
+                        "@type": "Answer",
+                        "text": "If a promoter or venue listed you on their event before you signed up, Event Schedule created a page for you at that moment. Open it and press Claim this page, then sign in with the email address shown on the page. That address is the whole check, so if it is not one you can reach, ask whoever listed you to correct it. If the page is not about you at all, press This is not me instead."
                     }
                 },
                 {
