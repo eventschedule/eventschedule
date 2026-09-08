@@ -1553,7 +1553,7 @@ class MarketingController extends Controller
                 ['Free plan', 'Yes (forever)', 'Free to publish events', 'Yes (forever)', 'Free events only', 'Yes (forever)'],
                 ['Paid plan price', 'From '.plan_price($this->planPrice()).'/mo (7-day free trial)', 'Free (fees on tickets)', '$59/mo', 'From $0.28/ticket', 'Free'],
                 ['Platform fees', '0%', '3.7% + $1.79/ticket', '5% (free plan), 0% (Plus)', '$0.28-$0.60/ticket', 'N/A (no ticketing)'],
-                ['Payment processing', 'Stripe (2.9% + $0.30)', 'Built-in (included above)', 'Stripe (2.9% + $0.30)', 'Stripe/PayPal/Square', 'No'],
+                ['Payment processing', 'Stripe/PayPal/Payfast', 'Built-in (included above)', 'Stripe (2.9% + $0.30)', 'Stripe/PayPal/Square', 'No'],
             ],
             'Events & Ticketing' => [
                 ['Ticketing', 'Yes (Free)', 'Yes', 'Yes', 'Yes', 'No'],
@@ -2037,7 +2037,7 @@ class MarketingController extends Controller
                         ['Free plan', 'Yes (forever)', 'Free events only', true],
                         ['Paid plan price', plan_price($this->planPrice()).'/mo (7-day free trial)', 'From $0.28/ticket', true],
                         ['Platform fees', '0%', '$0.28 to $0.60/ticket', true],
-                        ['Payment processing', 'Stripe (2.9% + $0.30)', 'Stripe/PayPal/Square', false],
+                        ['Payment processing', 'Stripe/PayPal/Payfast (processor rates apply)', 'Stripe/PayPal/Square', false],
                     ],
                     'Events & Ticketing' => [
                         ['Ticketing', 'Yes (Free)', 'Yes', false],
@@ -3276,7 +3276,7 @@ class MarketingController extends Controller
                         ['Free plan', 'Yes (forever)', 'Free for free events', false],
                         ['Paid plan price', plan_price($this->planPrice()).'/mo (7-day free trial)', '3% per ticket (cap 25 EUR)', true],
                         ['Platform fees', '0%', '3% per ticket', true],
-                        ['Payment processing', 'Stripe (2.9% + $0.30)', 'Stripe/PayPal', false],
+                        ['Payment processing', 'Stripe/PayPal/Payfast (processor rates apply)', 'Stripe/PayPal', true],
                     ],
                     'Events & Ticketing' => [
                         ['Ticketing', 'Yes (Free)', 'Yes', false],
@@ -3543,7 +3543,7 @@ class MarketingController extends Controller
                         ['Free plan', 'Yes (forever)', 'Selfhosted only (Community Edition)', true],
                         ['Hosted pricing', plan_price($this->planPrice()).'/mo (7-day free trial)', '2.5%/ticket (cap 15 EUR)', true],
                         ['Platform fees', '0%', '2.5% per ticket', true],
-                        ['Payment processing', 'Stripe (2.9% + $0.30)', 'Stripe/PayPal/Mollie', false],
+                        ['Payment processing', 'Stripe/PayPal/Payfast (processor rates apply)', 'Stripe/PayPal/Mollie', false],
                     ],
                     'Events & Ticketing' => [
                         ['Ticketing', 'Yes (Free)', 'Yes', false],
@@ -3817,7 +3817,7 @@ class MarketingController extends Controller
                         ['Free plan', 'Yes (forever)', 'Free for free events only', true],
                         ['Paid plan price', plan_price($this->planPrice()).'/mo (7-day free trial)', '$1.50/ticket + up to 2.9%', true],
                         ['Platform fees', '0%', '1.9% to 2.9% (Pro/Plus plans)', true],
-                        ['Payment processing', 'Stripe (2.9% + $0.30)', 'Stripe/PayPal (separate fees)', false],
+                        ['Payment processing', 'Stripe/PayPal/Payfast (processor rates apply)', 'Stripe/PayPal (separate fees)', true],
                     ],
                     'Events & Ticketing' => [
                         ['Ticketing', 'Yes (Free)', 'Yes', false],
@@ -5565,7 +5565,8 @@ class MarketingController extends Controller
             ['page' => 'Selling Tickets', 'section' => 'Volume Discount', 'description' => 'Discount a ticket type once a buyer takes a minimum quantity, as a percentage or a fixed amount.', 'url' => $r['tickets'].'#ticket-types', 'category' => 'User Guide', 'keywords' => 'volume discount bulk group minimum quantity percentage fixed amount stacks promo code'],
             ['page' => 'Selling Tickets', 'section' => 'Max Per Order', 'description' => 'Cap how many of one ticket type a single buyer can take in one order.', 'url' => $r['tickets'].'#ticket-types', 'category' => 'User Guide', 'keywords' => 'max per order limit cap quantity per buyer add limit'],
             ['page' => 'Selling Tickets', 'section' => 'Free Tickets', 'description' => 'Offer free tickets by setting the price to zero.', 'url' => $r['tickets'].'#free-events', 'category' => 'User Guide', 'keywords' => 'free no cost zero price ticket'],
-            ['page' => 'Selling Tickets', 'section' => 'Payment Processing', 'description' => 'Configure payment methods for ticket sales.', 'url' => $r['tickets'].'#payment', 'category' => 'User Guide', 'keywords' => 'payment stripe invoice ninja payfast gateway'],
+            ['page' => 'Selling Tickets', 'section' => 'Payment Processing', 'description' => 'Configure payment methods for ticket sales.', 'url' => $r['tickets'].'#payment', 'category' => 'User Guide', 'keywords' => 'payment stripe paypal invoice ninja payfast gateway'],
+            ['page' => 'Selling Tickets', 'section' => 'PayPal', 'description' => 'Connect PayPal to sell tickets.', 'url' => $r['tickets'].'#paypal', 'category' => 'User Guide', 'keywords' => 'paypal client id secret sandbox test mode developer dashboard apps and credentials orders capture currencies supported pending review echeck'],
             ['page' => 'Selling Tickets', 'section' => 'Payfast', 'description' => 'Connect Payfast to sell tickets in South African rand.', 'url' => $r['tickets'].'#payfast', 'category' => 'User Guide', 'keywords' => 'payfast south africa zar rand instant eft capitec pay merchant id merchant key passphrase sandbox test mode itn instant transaction notification notify url payfast refund provided by this installation'],
             ['page' => 'Selling Tickets', 'section' => 'Invoice Ninja Modes', 'description' => 'Invoice mode vs. payment link mode for Invoice Ninja.', 'url' => $r['tickets'].'#invoiceninja-modes', 'category' => 'User Guide', 'keywords' => 'invoice ninja mode payment link'],
             ['page' => 'Selling Tickets', 'section' => 'Additional Options', 'description' => 'Extra checkout and ticket options.', 'url' => $r['tickets'].'#options', 'category' => 'User Guide', 'keywords' => 'options settings configuration'],
@@ -5650,10 +5651,11 @@ class MarketingController extends Controller
             // Account Settings
             ['page' => 'Account Settings', 'section' => 'Profile Information', 'description' => 'Manage name, email, timezone, language, and profile image.', 'url' => $r['account_settings'].'#profile', 'category' => 'User Guide', 'keywords' => 'name email timezone language profile'],
             ['page' => 'Account Settings', 'section' => 'Appearance', 'description' => 'Choose light or dark mode and pick from three light and three dark colour palettes.', 'url' => $r['account_settings'].'#appearance', 'category' => 'User Guide', 'keywords' => 'appearance theme dark mode light palette colours colors sand mist paper espresso midnight carbon'],
-            ['page' => 'Account Settings', 'section' => 'Payment Methods', 'description' => 'Configure payment methods for ticket sales.', 'url' => $r['account_settings'].'#payments', 'category' => 'User Guide', 'keywords' => 'payment method gateway stripe invoice ninja payfast payment link'],
+            ['page' => 'Account Settings', 'section' => 'Payment Methods', 'description' => 'Configure payment methods for ticket sales.', 'url' => $r['account_settings'].'#payments', 'category' => 'User Guide', 'keywords' => 'payment method gateway stripe paypal invoice ninja payfast payment link'],
             ['page' => 'Account Settings', 'section' => 'Stripe', 'description' => 'Connect Stripe for payment processing.', 'url' => $r['account_settings'].'#stripe', 'category' => 'User Guide', 'keywords' => 'stripe connect payment'],
             ['page' => 'Account Settings', 'section' => 'Invoice Ninja', 'description' => 'Set up Invoice Ninja as a payment gateway.', 'url' => $r['account_settings'].'#invoice-ninja', 'category' => 'User Guide', 'keywords' => 'invoice ninja payment'],
             ['page' => 'Account Settings', 'section' => 'Payment URL', 'description' => 'Configure a custom payment URL.', 'url' => $r['account_settings'].'#payment-url', 'category' => 'User Guide', 'keywords' => 'payment url link custom'],
+            ['page' => 'Account Settings', 'section' => 'PayPal', 'description' => 'Connect PayPal to take payments.', 'url' => $r['account_settings'].'#paypal', 'category' => 'User Guide', 'keywords' => 'paypal client id secret test mode sandbox developer dashboard checked when you save provided by this installation administrator account'],
             ['page' => 'Account Settings', 'section' => 'Payfast', 'description' => 'Connect Payfast to take South African payments.', 'url' => $r['account_settings'].'#payfast', 'category' => 'User Guide', 'keywords' => 'payfast south africa zar rand merchant id merchant key passphrase test mode sandbox instant eft capitec provided by this installation administrator account'],
             ['page' => 'Account Settings', 'section' => 'API Settings', 'description' => 'Manage API access and keys (Pro).', 'url' => $r['account_settings'].'#api', 'category' => 'User Guide', 'keywords' => 'api key token access'],
             ['page' => 'Account Settings', 'section' => 'Webhooks', 'description' => 'Configure webhook notifications (Pro).', 'url' => $r['account_settings'].'#webhooks', 'category' => 'User Guide', 'keywords' => 'webhooks notifications callback'],
@@ -5716,9 +5718,11 @@ class MarketingController extends Controller
             ['page' => 'Stripe Integration', 'section' => 'Testing', 'description' => 'Test your payment setup.', 'url' => $r['selfhost_stripe'].'#testing', 'category' => 'Selfhost', 'keywords' => 'test payment debug'],
             ['page' => 'Stripe Integration', 'section' => 'Troubleshooting', 'description' => 'Fix common payment issues.', 'url' => $r['selfhost_stripe'].'#troubleshooting', 'category' => 'Selfhost', 'keywords' => 'troubleshoot fix problem'],
             ['page' => 'Stripe Integration', 'section' => 'Security', 'description' => 'Payment security considerations.', 'url' => $r['selfhost_stripe'].'#security', 'category' => 'Selfhost', 'keywords' => 'security keys secrets'],
+            ['page' => 'Stripe Integration', 'section' => 'PayPal', 'description' => 'PayPal on a selfhosted install: one account for everyone via .env, or one per user.', 'url' => $r['selfhost_stripe'].'#paypal', 'category' => 'Selfhost', 'keywords' => 'paypal selfhost client id secret webhook localhost capture no public host needed'],
+            ['page' => 'Stripe Integration', 'section' => 'PayPal for the whole install', 'description' => 'Set PAYPAL_CLIENT_ID and PAYPAL_CLIENT_SECRET so every schedule can sell without connecting an account.', 'url' => $r['selfhost_stripe'].'#paypal', 'category' => 'Selfhost', 'keywords' => 'PAYPAL_CLIENT_ID PAYPAL_CLIENT_SECRET PAYPAL_SANDBOX PAYPAL_WEBHOOK_ID env platform wide install wide paypal every schedule default account stripe not available'],
             ['page' => 'Stripe Integration', 'section' => 'Payfast', 'description' => 'Payfast on a selfhosted install: one account for everyone via .env, or one per user.', 'url' => $r['selfhost_stripe'].'#payfast', 'category' => 'Selfhost', 'keywords' => 'payfast selfhost south africa zar itn notification publicly reachable localhost'],
             ['page' => 'Stripe Integration', 'section' => 'Payfast for the whole install', 'description' => 'Set PAYFAST_MERCHANT_ID, PAYFAST_MERCHANT_KEY and PAYFAST_PASSPHRASE so every schedule can sell without connecting an account.', 'url' => $r['selfhost_stripe'].'#payfast', 'category' => 'Selfhost', 'keywords' => 'PAYFAST_MERCHANT_ID PAYFAST_MERCHANT_KEY PAYFAST_PASSPHRASE PAYFAST_SANDBOX PAYFAST_PAYMENT_TYPES env platform wide install wide payfast every schedule default account south africa stripe not available'],
-            ['page' => 'Stripe Integration', 'section' => 'Default payment method', 'description' => 'DEFAULT_PAYMENT_METHOD sets what new events start on instead of Cash.', 'url' => $r['selfhost_stripe'].'#payfast', 'category' => 'Selfhost', 'keywords' => 'DEFAULT_PAYMENT_METHOD default payment method new event cash payfast stripe env'],
+            ['page' => 'Stripe Integration', 'section' => 'Default payment method', 'description' => 'DEFAULT_PAYMENT_METHOD sets what new events start on instead of Cash.', 'url' => $r['selfhost_stripe'].'#payfast', 'category' => 'Selfhost', 'keywords' => 'DEFAULT_PAYMENT_METHOD default payment method new event cash payfast paypal stripe env'],
             ['page' => 'Stripe Integration', 'section' => 'Payfast ITN and proxies', 'description' => 'Why the unrecognised source address warning is harmless behind Cloudflare or Docker.', 'url' => $r['selfhost_stripe'].'#payfast', 'category' => 'Selfhost', 'keywords' => 'payfast itn unrecognised source address trusted proxies cloudflare docker reverse proxy warning'],
 
             // Google Calendar (Selfhost)

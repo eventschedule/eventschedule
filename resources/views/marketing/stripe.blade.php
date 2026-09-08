@@ -696,7 +696,7 @@
         ];
 
         // Event.payment_method, per event. TicketController::checkout() resolves it through
-        // config/payments.php: cash, stripe, invoiceninja, payment_url, payfast.
+        // config/payments.php: cash, stripe, invoiceninja, payment_url, payfast, paypal.
         $routes = [
             [
                 'name'  => 'Stripe',

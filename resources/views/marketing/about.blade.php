@@ -599,7 +599,7 @@
             ],
             [
                 'q' => 'Do you take a cut of ticket sales?',
-                'a' => 'No. Event Schedule charges zero platform fees. You connect your own Stripe account and the money settles into it directly, so past Stripe\'s own processing charge nothing is taken. Payfast, an external payment link, cash at the door and Invoice Ninja are the other routes, and none of them is plan gated either.',
+                'a' => 'No. Event Schedule charges zero platform fees. You connect your own Stripe or PayPal account and the money settles into it directly, so past the processor\'s own charge nothing is taken. Payfast, an external payment link, cash at the door and Invoice Ninja are the other routes, and none of them is plan gated either.',
             ],
             [
                 'q' => 'Who is behind it?',

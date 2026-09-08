@@ -300,6 +300,37 @@ class PayPalCheckoutTest extends TestCase
         $this->assertSame('PayPal', $driver->label(null));
     }
 
+    /**
+     * Test mode has nowhere else to announce itself.
+     *
+     * Payfast warns on the interstitial it renders before redirecting. PayPal is a plain redirect, so
+     * without this panel the only signal is a suffix in a dropdown - and a forgotten toggle sells
+     * tickets that look entirely normal and take no money.
+     */
+    public function test_the_event_form_warns_when_paypal_is_in_test_mode(): void
+    {
+        $owner = $this->connectedOwner();
+        $role = $this->createRole($owner);
+        $event = $this->paypalEvent($role);
+
+        $this->actingAs($owner)
+            ->get(route('event.edit', ['subdomain' => $role->subdomain, 'hash' => UrlUtils::encodeId($event->id)]))
+            ->assertOk()
+            ->assertSee(__('messages.paypal_test_mode_warning'), escape: false);
+    }
+
+    public function test_the_event_form_does_not_warn_when_paypal_is_live(): void
+    {
+        $owner = $this->connectedOwner(['paypal_sandbox' => false]);
+        $role = $this->createRole($owner);
+        $event = $this->paypalEvent($role);
+
+        $this->actingAs($owner)
+            ->get(route('event.edit', ['subdomain' => $role->subdomain, 'hash' => UrlUtils::encodeId($event->id)]))
+            ->assertOk()
+            ->assertDontSee(__('messages.paypal_test_mode_warning'), escape: false);
+    }
+
     public function test_the_install_account_lets_an_unconnected_owner_sell(): void
     {
         $this->platformAccount();

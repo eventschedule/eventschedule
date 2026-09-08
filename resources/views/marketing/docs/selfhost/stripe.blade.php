@@ -10,6 +10,7 @@
             <x-doc-nav-link href="#saas-operators">SaaS Operators</x-doc-nav-link>
         </x-doc-nav-group>
         <x-doc-nav-link href="#invoice-ninja">Invoice Ninja</x-doc-nav-link>
+        <x-doc-nav-link href="#paypal">PayPal</x-doc-nav-link>
         <x-doc-nav-link href="#payfast">Payfast</x-doc-nav-link>
         <x-doc-nav-link href="#testing">Testing</x-doc-nav-link>
         <x-doc-nav-link href="#troubleshooting">Troubleshooting</x-doc-nav-link>
@@ -39,7 +40,7 @@
         </div>
 
         <h3 class="doc-subheading">Where the payment method is chosen</h3>
-        <p class="text-gray-600 dark:text-gray-300 mb-4">Server configuration only makes Stripe <em>available</em>. Each event still picks one payment method in the event editor, under <strong class="text-gray-900 dark:text-white">Tickets &rarr; Payment</strong>: Cash, Stripe, Invoice Ninja, Payfast or Payment Link. The five options are described on the <a href="{{ route('marketing.docs.tickets') }}#payment" class="doc-link">Tickets</a> page.</p>
+        <p class="text-gray-600 dark:text-gray-300 mb-4">Server configuration only makes Stripe <em>available</em>. Each event still picks one payment method in the event editor, under <strong class="text-gray-900 dark:text-white">Tickets &rarr; Payment</strong>: Cash, Stripe, PayPal, Invoice Ninja, Payfast or Payment Link. The six options are described on the <a href="{{ route('marketing.docs.tickets') }}#payment" class="doc-link">Tickets</a> page.</p>
 
         <div class="doc-callout doc-callout-plan">
             <div class="doc-callout-title">Plan requirement</div>
@@ -475,6 +476,53 @@
     </section>
 
     <!-- Testing -->
+    <section id="paypal" class="doc-section">
+        <h2 class="doc-heading">
+            <svg aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-5 h-5 text-gray-500 dark:text-gray-400 flex-shrink-0">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M2.25 8.25h19.5M2.25 9h19.5m-16.5 5.25h6m-6 2.25h3m-3.75 3h15a2.25 2.25 0 002.25-2.25V6.75A2.25 2.25 0 0019.5 4.5h-15a2.25 2.25 0 00-2.25 2.25v10.5A2.25 2.25 0 004.5 19.5z" />
+            </svg>
+            PayPal (Alternative Payment Method)
+        </h2>
+        <p class="text-gray-600 dark:text-gray-300 mb-6"><a href="https://www.paypal.com" target="_blank" rel="noopener noreferrer" class="doc-link">PayPal</a> is useful where Stripe is not available, and where buyers would rather pay from a PayPal balance than enter a card. Setup is documented in the <a href="{{ route('marketing.docs.tickets') }}#paypal" class="doc-link">user guide</a>; the notes below are the parts specific to running your own install.</p>
+
+        <h3 class="doc-subheading">Two ways to set it up</h3>
+        <p class="text-gray-600 dark:text-gray-300 mb-4">The same two as Payfast, and you can mix them on one install:</p>
+
+        <div class="doc-fields doc-fields--2 mb-6">
+            <div class="doc-field">
+                <h4 class="font-semibold text-gray-900 dark:text-white mb-2">One account for the whole install</h4>
+                <p class="text-gray-600 dark:text-gray-400 text-sm">Put your app credentials in <code class="doc-inline-code">.env</code>. Every schedule can then sell straight away with no setup of their own, and all the money reaches your account.</p>
+            </div>
+            <div class="doc-field">
+                <h4 class="font-semibold text-gray-900 dark:text-white mb-2">Each user brings their own</h4>
+                <p class="text-gray-600 dark:text-gray-400 text-sm">Leave <code class="doc-inline-code">.env</code> alone and each user connects an account from <strong>Settings &rarr; Payment Methods &rarr; PayPal</strong>, so different event owners on the same install are paid into different PayPal accounts.</p>
+            </div>
+        </div>
+
+        <div class="doc-code-block">
+            <div class="doc-code-header">
+                <span>.env</span>
+                <button class="doc-copy-btn">Copy</button>
+            </div>
+            <pre><code><span class="code-variable">PAYPAL_CLIENT_ID</span>=<span class="code-string">your-client-id</span>
+<span class="code-variable">PAYPAL_CLIENT_SECRET</span>=<span class="code-string">your-secret</span>
+<span class="code-variable">PAYPAL_SANDBOX</span>=<span class="code-string">false</span>
+<span class="code-variable">PAYPAL_WEBHOOK_ID</span>=</code></pre>
+        </div>
+
+        <p class="text-gray-600 dark:text-gray-300 mb-6">Both credentials come from an app at <a href="https://developer.paypal.com" target="_blank" rel="noopener noreferrer" class="doc-link">developer.paypal.com</a>, under Apps &amp; Credentials. As with Payfast, install-wide credentials are a <strong class="text-gray-900 dark:text-white">default rather than an override</strong>: a user who connects their own account keeps being paid into it.</p>
+
+        <div class="doc-callout doc-callout-info mb-6">
+            <div class="doc-callout-title">Unlike Payfast, this works on localhost</div>
+            <p>A PayPal payment is confirmed by a call <em>we</em> make to PayPal, not by a notification PayPal has to reach us with, so the whole path works on a laptop with no tunnel and no public hostname. A webhook is used only to finish the rare payment PayPal holds for review; without one, that single case waits rather than failing, and everything else is unaffected. That is why <code class="doc-inline-code">PAYPAL_WEBHOOK_ID</code> is optional where Payfast's passphrase is mandatory.</p>
+        </div>
+
+        <div class="doc-callout doc-callout-warning">
+            <div class="doc-callout-title">Two currencies are deliberately not offered</div>
+            <p>PayPal settles the Hungarian forint and the New Taiwan dollar, but will not accept an amount with decimals in either - and this app can produce one from a percentage discount. Rather than let that fail at checkout, PayPal is not offered on events priced in those two. The reasoning is recorded in <code class="doc-inline-code">config/payments.php</code>.</p>
+        </div>
+    </section>
+
     <section id="payfast" class="doc-section">
         <h2 class="doc-heading">
             <svg aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-5 h-5 text-gray-500 dark:text-gray-400 flex-shrink-0">
@@ -542,7 +590,7 @@
             <pre><code><span class="code-variable">DEFAULT_PAYMENT_METHOD</span>=<span class="code-string">payfast</span></code></pre>
         </div>
 
-        <p class="text-gray-600 dark:text-gray-300 mb-6">Accepts any gateway key - <code class="doc-inline-code">cash</code>, <code class="doc-inline-code">stripe</code>, <code class="doc-inline-code">invoiceninja</code>, <code class="doc-inline-code">payment_url</code> or <code class="doc-inline-code">payfast</code> - and applies to events created through the API as well as the form. It only takes effect where the gateway can actually be used: an owner who has not connected it, or an event in a currency it cannot settle, still starts on Cash. On the event form a schedule's own saved ticket defaults take priority over it; the API has never read those, so there it applies whenever <code class="doc-inline-code">payment_method</code> is omitted.</p>
+        <p class="text-gray-600 dark:text-gray-300 mb-6">Accepts any gateway key - <code class="doc-inline-code">cash</code>, <code class="doc-inline-code">stripe</code>, <code class="doc-inline-code">invoiceninja</code>, <code class="doc-inline-code">payment_url</code>, <code class="doc-inline-code">payfast</code> or <code class="doc-inline-code">paypal</code> - and applies to events created through the API as well as the form. It only takes effect where the gateway can actually be used: an owner who has not connected it, or an event in a currency it cannot settle, still starts on Cash. On the event form a schedule's own saved ticket defaults take priority over it; the API has never read those, so there it applies whenever <code class="doc-inline-code">payment_method</code> is omitted.</p>
 
         <div class="doc-callout doc-callout-warning mb-6">
             <div class="doc-callout-title">Your install must be publicly reachable</div>

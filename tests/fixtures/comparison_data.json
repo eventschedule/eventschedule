@@ -832,7 +832,7 @@
                 ],
                 [
                     "Payment processing",
-                    "Stripe (2.9% + $0.30)",
+                    "Stripe/PayPal/Payfast (processor rates apply)",
                     "Stripe/PayPal/Square",
                     false
                 ]
@@ -4078,9 +4078,9 @@
                 ],
                 [
                     "Payment processing",
-                    "Stripe (2.9% + $0.30)",
+                    "Stripe/PayPal/Payfast (processor rates apply)",
                     "Stripe/PayPal",
-                    false
+                    true
                 ]
             ],
             "Events & Ticketing": [
@@ -4776,7 +4776,7 @@
                 ],
                 [
                     "Payment processing",
-                    "Stripe (2.9% + $0.30)",
+                    "Stripe/PayPal/Payfast (processor rates apply)",
                     "Stripe/PayPal/Mollie",
                     false
                 ]
@@ -5504,9 +5504,9 @@
                 ],
                 [
                     "Payment processing",
-                    "Stripe (2.9% + $0.30)",
+                    "Stripe/PayPal/Payfast (processor rates apply)",
                     "Stripe/PayPal (separate fees)",
-                    false
+                    true
                 ]
             ],
             "Events & Ticketing": [

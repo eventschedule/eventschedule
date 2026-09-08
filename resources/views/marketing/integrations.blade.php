@@ -595,13 +595,14 @@
             ['04', 'Stripe',           'checkout + webhook',  'both', 'Free'],
             ['05', 'Invoice Ninja',    'invoice or pay link', 'both', 'Free'],
             ['06', 'Payfast',          'ZAR checkout + ITN',  'both', 'Free'],
-            ['07', 'Webhooks',         'your endpoint',       'out',  'Pro'],
-            ['08', 'REST API',         'you call us',         'in',   'Pro'],
-            ['09', 'Eventbrite',       'import on demand',    'in',   'Pro'],
-            ['10', 'Web push',         'OneSignal',           'out',  'Pro'],
-            ['11', 'Accommodation',    'Stay22 map',          'out',  'Free'],
-            ['12', 'Meta ads',         'boost a campaign',    'out',  'Pro'],
-            ['13', 'WhatsApp',         'Twilio inbound',      'in',   'Ent'],
+            ['07', 'PayPal',           'orders v2 + capture', 'both', 'Free'],
+            ['08', 'Webhooks',         'your endpoint',       'out',  'Pro'],
+            ['09', 'REST API',         'you call us',         'in',   'Pro'],
+            ['10', 'Eventbrite',       'import on demand',    'in',   'Pro'],
+            ['11', 'Web push',         'OneSignal',           'out',  'Pro'],
+            ['12', 'Accommodation',    'Stay22 map',          'out',  'Free'],
+            ['13', 'Meta ads',         'boost a campaign',    'out',  'Pro'],
+            ['14', 'WhatsApp',         'Twilio inbound',      'in',   'Ent'],
         ];
 
         // The register. Every row is traceable to code: the calendar services,
@@ -631,6 +632,10 @@
             [
                 'Payfast', 'out then in', 'Free',
                 'South African rand only, so it is offered on ZAR events and nowhere else. The buyer pays on Payfast and the sale is confirmed by an ITN callback. A Payfast event cannot join the multi-event cart or use installments. A selfhost operator can supply one merchant account for the whole install, which an owner who connected their own keeps overriding.',
+            ],
+            [
+                'PayPal', 'out then in', 'Free',
+                'The buyer approves on PayPal and the payment is taken by a call we make straight afterwards, so the ticket is issued at once rather than waiting for a callback. A PayPal event CAN join the multi-event cart, unlike Payfast, because the whole order is taken as one payment. Installments are not supported. A selfhost operator can supply one account for the whole install, which an owner who connected their own keeps overriding.',
             ],
             [
                 'Webhooks', 'out', 'Pro',

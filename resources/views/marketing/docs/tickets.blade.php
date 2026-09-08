@@ -14,6 +14,7 @@
         </x-doc-nav-group>
         <x-doc-nav-group label="Payment" href="#payment">
             <x-doc-nav-link href="#payfast">Payfast</x-doc-nav-link>
+            <x-doc-nav-link href="#paypal">PayPal</x-doc-nav-link>
             <x-doc-nav-link href="#invoiceninja-modes">Invoice Ninja Modes</x-doc-nav-link>
         </x-doc-nav-group>
         <x-doc-nav-link href="#options">Options</x-doc-nav-link>
@@ -281,7 +282,7 @@
         <p class="text-gray-600 dark:text-gray-300 mb-6">The Tickets mode has five sub-tabs:</p>
         <ul class="doc-list mb-6">
             <li><strong class="text-gray-900 dark:text-white">General:</strong> the ticket types themselves, plus passes and per-type sales dates</li>
-            <li><strong class="text-gray-900 dark:text-white"><a href="#payment" class="doc-link">Payment</a>:</strong> payment method (Cash, Stripe, Invoice Ninja, Payfast or Payment URL) and the currency</li>
+            <li><strong class="text-gray-900 dark:text-white"><a href="#payment" class="doc-link">Payment</a>:</strong> payment method (Cash, Stripe, PayPal, Invoice Ninja, Payfast or Payment URL) and the currency</li>
             <li><strong class="text-gray-900 dark:text-white"><a href="#options" class="doc-link">Options</a>:</strong> checkout toggles, custom fields, ticket notes and a terms link</li>
             <li><strong class="text-gray-900 dark:text-white"><a href="#promo-codes" class="doc-link">Promo Codes</a>:</strong> discount codes <x-doc-badge plan="pro" /></li>
             <li><strong class="text-gray-900 dark:text-white"><a href="#add-ons" class="doc-link">Add-ons</a>:</strong> optional extras buyers can attach to an order <x-doc-badge plan="pro" /></li>
@@ -423,7 +424,7 @@
 
         <div class="doc-callout doc-callout-info mb-6">
             <div class="doc-callout-title">What can share a cart</div>
-            <p>A single payment cannot be split across payment accounts, currencies or payment rails, so a cart only holds events that agree on all three: the same owner, the same ticket currency, and the same payment method. The cart says so when an event cannot join. Stripe and cash are supported; Invoice Ninja, Payfast and Payment URL are not, since each sends the buyer to a page built for one event.</p>
+            <p>A single payment cannot be split across payment accounts, currencies or payment rails, so a cart only holds events that agree on all three: the same owner, the same ticket currency, and the same payment method. The cart says so when an event cannot join. Stripe, PayPal and cash are supported; Invoice Ninja, Payfast and Payment URL are not, since each sends the buyer to a page built for one event.</p>
             <p>Events using individual tickets keep their own checkout. The cart collects one name and email for the whole purchase and has nowhere to put a guest list, so carting one would lose exactly the attendee details that setting exists to collect.</p>
         </div>
 
@@ -486,6 +487,10 @@
                 <p class="text-sm text-gray-500 dark:text-gray-400">Use any payment link (PayPal, Venmo, Square, etc.) by entering the URL.</p>
             </div>
             <div class="doc-field">
+                <h4 class="font-semibold text-gray-900 dark:text-white mb-2">PayPal</h4>
+                <p class="text-sm text-gray-500 dark:text-gray-400">Buyers pay with their PayPal balance or a card, and the ticket is issued straight away. Settles a fixed list of currencies. See <a href="#paypal" class="doc-link">Connecting PayPal</a>.</p>
+            </div>
+            <div class="doc-field">
                 <h4 class="font-semibold text-gray-900 dark:text-white mb-2">Payfast</h4>
                 <p class="text-sm text-gray-500 dark:text-gray-400">Take card, Instant EFT, Capitec Pay and the other South African methods. Settles in rand (ZAR) only. See <a href="#payfast" class="doc-link">Connecting Payfast</a>.</p>
             </div>
@@ -513,6 +518,26 @@
         <div class="doc-callout doc-callout-tip">
             <div class="doc-callout-title">Recommended</div>
             <p>We recommend using Stripe with Invoice Ninja for the best experience. Invoice Ninja provides additional features like invoicing, payment reminders, and financial reporting.</p>
+        </div>
+
+        <h3 id="paypal" class="doc-subheading">Connecting PayPal</h3>
+        <p class="text-gray-600 dark:text-gray-300 mb-4"><x-link href="https://www.paypal.com" target="_blank">PayPal</x-link> is worth connecting where Stripe is not available, or where your buyers would rather pay from a PayPal balance than type a card into a page they have not seen before. Like Stripe, it confirms the payment and issues the ticket with no manual step.</p>
+        <ol class="doc-list doc-list-numbered mb-6">
+            <li>Sign in at <x-link href="https://developer.paypal.com" target="_blank">developer.paypal.com</x-link> and open <strong class="text-gray-900 dark:text-white">Apps &amp; Credentials</strong></li>
+            <li>Stay on the <strong class="text-gray-900 dark:text-white">Live</strong> tab (the Sandbox tab issues a different pair, for testing), and create an app if you have not already</li>
+            <li>Copy its <strong class="text-gray-900 dark:text-white">Client ID</strong> and <strong class="text-gray-900 dark:text-white">Secret</strong></li>
+            <li>Go to <strong class="text-gray-900 dark:text-white">Admin Panel &rarr; Settings &rarr; Payment Methods</strong> and open the <strong class="text-gray-900 dark:text-white">PayPal</strong> tab</li>
+            <li>Paste both and save. We check them with PayPal before storing them, so a typo is caught here rather than by a buyer</li>
+            <li>PayPal now appears on the <strong class="text-gray-900 dark:text-white">Payment</strong> tab of any event priced in a currency it settles</li>
+        </ol>
+
+        <p class="text-gray-600 dark:text-gray-300 mb-6">PayPal settles a fixed list of currencies, and an event priced in anything else simply will not offer it. Two currencies PayPal does support - the Hungarian forint and the New Taiwan dollar - are deliberately left out, because PayPal will not accept an amount with decimals in them while this app can produce one from a percentage discount. Rather than let that fail at checkout, PayPal is not offered for those two at all.</p>
+
+        <p class="text-gray-600 dark:text-gray-300 mb-6">Payments that PayPal holds for review are the one case where a ticket is not issued at once. The sale stays unpaid, the buyer is told the payment is being reviewed rather than being asked to pay again, and the ticket is issued as soon as PayPal confirms it. Payment methods that take days to clear, such as eChecks, are declined at checkout rather than accepted and left hanging.</p>
+
+        <div class="doc-callout doc-callout-tip mb-6">
+            <div class="doc-callout-title">Your site may already have an account</div>
+            <p>On a selfhosted site, the administrator can configure one PayPal account for everyone, exactly as with Payfast. If the PayPal tab says <strong class="text-gray-900 dark:text-white">Provided by this installation</strong>, skip the steps above. Entering your own details still takes precedence, so you are paid into your own account instead.</p>
         </div>
 
         <h3 id="payfast" class="doc-subheading">Connecting Payfast</h3>

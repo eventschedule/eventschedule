@@ -2165,6 +2165,25 @@
                                 </div>
                                 @endif
 
+                                {{-- PayPal in test mode, which has nowhere else to announce itself.
+                                     Payfast puts its warning on the interstitial it renders before
+                                     redirecting; PayPal is a plain redirect, so the only signal an
+                                     owner gets is the suffix in the dropdown below - and a forgotten
+                                     toggle sells tickets that look entirely normal and take no money.
+                                     Worth more here than for Payfast, because PayPal's sandbox is a
+                                     separate API host AND a separate set of credentials, so it is
+                                     easier to leave switched on by accident.
+
+                                     v-show on the Vue model rather than a server-side branch on the
+                                     stored method: the owner can pick PayPal without reloading. --}}
+                                @if (! empty($paymentGateways->get('paypal')?->credentialsFor($user)['paypal_sandbox']))
+                                <div class="mb-6 bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-700 rounded-lg p-3 flex items-start gap-2"
+                                     v-show="event.tickets_enabled && event.payment_method === 'paypal'">
+                                    <svg class="w-5 h-5 text-amber-600 dark:text-amber-400 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M12 9v3.75m-9.303 3.376c-.866 1.5.217 3.374 1.948 3.374h14.71c1.73 0 2.813-1.874 1.948-3.374L13.949 3.378c-.866-1.5-3.032-1.5-3.898 0L2.697 16.126ZM12 15.75h.007v.008H12v-.008Z" /></svg>
+                                    <div class="text-sm text-amber-800 dark:text-amber-200">{{ __('messages.paypal_test_mode_warning') }}</div>
+                                </div>
+                                @endif
+
                                 @if ($connectedGateways || $storedGateway)
                                 <div class="mb-6">
                                     <x-input-label for="payment_method" :value="__('messages.payment_method')"/>

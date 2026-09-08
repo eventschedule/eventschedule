@@ -164,7 +164,7 @@
             Payment Methods
         </h2>
         <p class="text-gray-600 dark:text-gray-300 mb-6">
-            To sell tickets you need at least one payment method on your account. Event Schedule supports four - Stripe, Invoice Ninja, Payfast and a plain payment link - each on its own tab in this section. Which one an event uses is decided per event, on the event's <a href="{{ route('marketing.docs.tickets') }}#payment" class="doc-link">Payment</a> tab, so connecting more than one lets you route different events differently. Without any connected method the only option an event has is cash on the door.
+            To sell tickets you need at least one payment method on your account. Event Schedule supports five - Stripe, PayPal, Invoice Ninja, Payfast and a plain payment link - each on its own tab in this section. Which one an event uses is decided per event, on the event's <a href="{{ route('marketing.docs.tickets') }}#payment" class="doc-link">Payment</a> tab, so connecting more than one lets you route different events differently. Without any connected method the only option an event has is cash on the door.
         </p>
 
         <h3 id="stripe" class="doc-subheading">Stripe</h3>
@@ -262,9 +262,39 @@
             For the full walkthrough, including the sandbox credentials and what happens to an event priced in another currency, see <a href="{{ route('marketing.docs.tickets') }}#payfast" class="doc-link">Connecting Payfast</a>.
         </p>
 
+        <h3 id="paypal" class="doc-subheading">PayPal</h3>
+        <p class="text-gray-600 dark:text-gray-300 mb-4">
+            <x-link href="https://www.paypal.com" target="_blank">PayPal</x-link> confirms the payment and releases the ticket on its own, with no manual step. It is worth choosing where Stripe is not available, or where your buyers would rather pay from a PayPal balance than type a card into a page they have not seen before. It settles a fixed list of currencies - if your event is priced in something else, PayPal simply does not appear as an option.
+        </p>
+        <div class="doc-fields">
+            <div class="doc-field">
+                <h4 class="font-semibold text-gray-900 dark:text-white mb-2">What to enter</h4>
+                <p class="text-sm text-gray-500 dark:text-gray-400">Your <strong class="text-gray-900 dark:text-white">Client ID</strong> and <strong class="text-gray-900 dark:text-white">Secret</strong>. Both come from an app you create at <x-link href="https://developer.paypal.com" target="_blank">developer.paypal.com</x-link> under <strong class="text-gray-900 dark:text-white">Apps &amp; Credentials</strong>. Make sure you are on the <strong class="text-gray-900 dark:text-white">Live</strong> tab unless you are testing - the Sandbox tab issues a different pair.</p>
+            </div>
+            <div class="doc-field">
+                <h4 class="font-semibold text-gray-900 dark:text-white mb-2">They are checked when you save</h4>
+                <p class="text-sm text-gray-500 dark:text-gray-400">We ask PayPal whether the details work before storing them, so a mistyped secret is caught here rather than by a buyer. If PayPal itself cannot be reached, the details are saved anyway and you are told they could not be checked - take a test payment before you sell.</p>
+            </div>
+            <div class="doc-field">
+                <h4 class="font-semibold text-gray-900 dark:text-white mb-2">Test mode</h4>
+                <p class="text-sm text-gray-500 dark:text-gray-400">Uses your PayPal sandbox credentials so nothing is really charged. While it is on, the payment method reads <strong class="text-gray-900 dark:text-white">(Test mode)</strong> on the event form and the Payment tab shows a warning. Turn it off before you sell real tickets - test tickets look exactly like real ones.</p>
+            </div>
+            <div class="doc-field">
+                <h4 class="font-semibold text-gray-900 dark:text-white mb-2">Removing it</h4>
+                <p class="text-sm text-gray-500 dark:text-gray-400">Click <strong class="text-gray-900 dark:text-white">Unlink Account</strong> and confirm. Any event still set to PayPal keeps the setting but shows it as no longer available, so you can see it and pick something else.</p>
+            </div>
+            <div class="doc-field">
+                <h4 class="font-semibold text-gray-900 dark:text-white mb-2">"Provided by this installation"</h4>
+                <p class="text-sm text-gray-500 dark:text-gray-400">On a selfhosted site, the administrator can set up one PayPal account for everyone, exactly as with Payfast. Enter your own details to be paid into your own account instead.</p>
+            </div>
+        </div>
+        <p class="text-gray-600 dark:text-gray-300 mb-6">
+            For the full walkthrough, including which currencies PayPal settles, see <a href="{{ route('marketing.docs.tickets') }}#paypal" class="doc-link">Connecting PayPal</a>.
+        </p>
+
         <div class="doc-callout doc-callout-info">
             <div class="doc-callout-title">Note</div>
-            <p>One payment method is enough. Stripe is the one to pick if you have a choice: it is the only method that confirms payment and delivers the ticket without any manual step.</p>
+            <p>One payment method is enough. Stripe, PayPal and Payfast all confirm payment and deliver the ticket without any manual step, so pick whichever of them works where you are - Invoice Ninja and a payment link both need you to mark the sale paid yourself.</p>
         </div>
     </section>
 

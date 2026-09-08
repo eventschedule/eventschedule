@@ -80,7 +80,7 @@
 - 📲 **QR Code Ticketing:** Generate and scan QR codes for easy and secure event check-ins.
 - 👛 **Add to Google Wallet:** Let buyers save their ticket to Google Wallet, carrying the same QR code the door scanner already reads.
 - 💻 **Online Events:** Use the platform to sell tickets to online events.
-- 💳 **Online Payments:** Accept secure online payments via [Stripe](https://stripe.com), [Invoice Ninja](https://www.invoiceninja.com), [Payfast](https://payfast.io) (South Africa), or payment links.
+- 💳 **Online Payments:** Accept secure online payments via [Stripe](https://stripe.com), [PayPal](https://www.paypal.com), [Invoice Ninja](https://www.invoiceninja.com), [Payfast](https://payfast.io) (South Africa), or payment links.
 - 🏷️ **Promo Codes:** Create discount codes with percentage or fixed amounts, usage limits, and ticket-specific targeting.
 - 🎫 **Individual Tickets:** Collect per-attendee details with individual confirmation emails and QR codes.
 - 📊 **Check-in Dashboard:** Track real-time attendance with per-ticket breakdown.
