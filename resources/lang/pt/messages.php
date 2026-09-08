@@ -766,7 +766,7 @@ return [
     'choose_file' => 'Escolher arquivo',
     'event_added' => 'Evento adicionado com sucesso',
     'please_select' => 'Por favor selecione',
-    'claim_email_line1' => 'Inscreva-se para personalizar a página do evento ou sinta-se à vontade para ignorar este e-mail',
+    'claim_email_line1' => 'Foi criada uma página para si. Reivindique-a para editar os dados e acrescentar as suas próprias datas, ou ignore este e-mail se preferir.',
     'claim_email_line2' => 'Para cancelar a inscrição em eventos futuros :click_here',
     'click_here' => 'clique aqui',
     'unsubscribed' => 'Cancelamento de inscrição em e-mails realizado com sucesso',

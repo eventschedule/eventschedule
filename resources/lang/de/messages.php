@@ -340,7 +340,7 @@ return [
     'invalid_file_type' => 'Ungültiger Dateityp',
     'event_added' => 'Veranstaltung erfolgreich hinzugefügt',
     'please_select' => 'Bitte wählen Sie',
-    'claim_email_line1' => 'Registrieren Sie sich, um die Veranstaltungsseite anzupassen, oder ignorieren Sie diese E-Mail',
+    'claim_email_line1' => 'Für Sie wurde eine Seite erstellt. Beanspruchen Sie sie, um die Angaben zu bearbeiten und eigene Termine hinzuzufügen, oder ignorieren Sie diese E-Mail einfach.',
     'claim_email_line2' => 'Um sich von zukünftigen Veranstaltungen abzumelden :click_here',
     'click_here' => 'hier klicken',
     'unsubscribed' => 'Erfolgreich von E-Mails abgemeldet',

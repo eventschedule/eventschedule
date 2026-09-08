@@ -12,7 +12,11 @@
 
 {{ __('messages.claim_email_line1') }}
 
+@if ($role->getClaimUrl())
+{{ __('messages.view_schedule') }}: {{ $role->getClaimUrl() }}
+@else
 {{ __('messages.sign_up') }}: {{ route('sign_up', ['email' => base64_encode($role->email)]) }}
+@endif
 
 {{ strip_tags(__('messages.claim_email_line2', ['click_here' => __('messages.click_here')])) }}: {{ route('role.show_unsubscribe', ['email' => base64_encode($role->email)]) }}
 

@@ -60,6 +60,23 @@ class ClaimInvitationMailTest extends TestCase
         $this->assertStringNotContainsString($actA->subdomain, $unsubscribe);
     }
 
+    public function test_the_invitation_links_to_the_page_it_is_about(): void
+    {
+        // The whole loop: until the page existed the only call to action was a bare sign-up form,
+        // which told the recipient nothing about what they were being offered.
+        $organizer = $this->createOwner();
+        $venue = $this->createRole($organizer, 'venue');
+        $event = $this->createEvent($venue, ['name' => 'Double Bill']);
+
+        $act = $this->placeholder('talent', 'Second On', 'second@gmail.com');
+        $event->roles()->attach($act->id, ['is_accepted' => true]);
+
+        $html = (new ClaimRole($event->fresh(), $act))->render();
+
+        $this->assertNotSame('', $act->getClaimUrl());
+        $this->assertStringContainsString($act->getClaimUrl(), $html);
+    }
+
     public function test_a_venue_invitation_survives_an_event_with_no_performers(): void
     {
         // Event::role() is talent-only and returns null for a curator- or venue-created event with

@@ -36,9 +36,15 @@
         <div style="background-color: white; padding: 20px; border-radius: 8px; margin: 20px 0;">
             <p style="margin: 0 0 15px 0; color: #666;">{{ __('messages.claim_email_line1') }}</p>
             <div style="text-align: center;">
-                <a href="{{ route('sign_up', ['email' => base64_encode($venue->email)]) }}" style="display: inline-block; background-color: #48bb78; color: white; padding: 12px 30px; text-decoration: none; border-radius: 6px; font-weight: 600;">
+                @if ($venue->getClaimUrl())
+                <a href="{{ $venue->getClaimUrl() }}" style="display: inline-block; background-color: #2563eb; color: white; padding: 12px 30px; text-decoration: none; border-radius: 6px; font-weight: 600;">
+                    {{ __('messages.view_schedule') }}
+                </a>
+                @else
+                <a href="{{ route('sign_up', ['email' => base64_encode($venue->email)]) }}" style="display: inline-block; background-color: #2563eb; color: white; padding: 12px 30px; text-decoration: none; border-radius: 6px; font-weight: 600;">
                     {{ __('messages.sign_up') }}
                 </a>
+                @endif
             </div>
         </div>
 

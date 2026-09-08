@@ -389,7 +389,7 @@ return [
     'invalid_file_type' => 'Tip de fișier invalid',
     'event_added' => 'Eveniment adăugat cu succes',
     'please_select' => 'Vă rugăm selectați',
-    'claim_email_line1' => 'Înregistrați-vă pentru a personaliza pagina evenimentului sau ignorați acest email',
+    'claim_email_line1' => 'A fost creată o pagină pentru tine. Revendic-o ca să editezi detaliile și să adaugi propriile date, sau poți ignora acest e-mail.',
     'claim_email_line2' => 'Pentru a vă dezabona de la viitoarele evenimente :click_here',
     'click_here' => 'faceți clic aici',
     'unsubscribed' => 'V-ați dezabonat cu succes de la emailuri',

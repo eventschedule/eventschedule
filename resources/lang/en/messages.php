@@ -389,7 +389,7 @@ return [
     'invalid_file_type' => 'Invalid file type',
     'event_added' => 'Successfully added event',
     'please_select' => 'Please select',
-    'claim_email_line1' => 'Sign up to customize the event page or feel free to ignore this email',
+    'claim_email_line1' => 'A page has been created for you. Claim it to edit the details and add your own dates, or feel free to ignore this email.',
     'claim_email_line2' => 'To unsubscribe from future events :click_here',
     'click_here' => 'click here',
     'unsubscribed' => 'Successfully unsubscribed from emails',

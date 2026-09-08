@@ -761,7 +761,7 @@ return [
     'choose_file' => 'Bestand kiezen',
     'event_added' => 'Evenement succesvol toegevoegd',
     'please_select' => 'Selecteer',
-    'claim_email_line1' => 'Meld je aan om de evenementpagina aan te passen of negeer deze e-mail gerust',
+    'claim_email_line1' => 'Er is een pagina voor je aangemaakt. Claim hem om de gegevens te bewerken en je eigen data toe te voegen, of negeer deze e-mail gerust.',
     'claim_email_line2' => 'Om je af te melden voor toekomstige evenementen :click_here',
     'click_here' => 'klik hier',
     'unsubscribed' => 'Succesvol afgemeld voor e-mails',

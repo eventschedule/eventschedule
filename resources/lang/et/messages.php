@@ -388,7 +388,7 @@ return [
     'invalid_file_type' => 'Vale failitüüp',
     'event_added' => 'Sündmuse lisamine õnnestus',
     'please_select' => 'Palun valige',
-    'claim_email_line1' => 'Registreeruge sündmuse lehe kohandamiseks või ignoreerige seda meili',
+    'claim_email_line1' => 'Sulle on loodud leht. Võta see enda omaks, et andmeid muuta ja oma kuupäevi lisada, või jäta see kiri lihtsalt tähelepanuta.',
     'claim_email_line2' => 'Tulevaste sündmuste tellimusest loobumiseks klõpsake siin',
     'click_here' => 'klõpsake siin',
     'unsubscribed' => 'Meilide tellimusest loobumine õnnestus',

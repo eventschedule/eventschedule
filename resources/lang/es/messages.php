@@ -362,7 +362,7 @@ return [
     'invalid_file_type' => 'Tipo de archivo no valido',
     'event_added' => 'Evento agregado exitosamente',
     'please_select' => 'Por favor selecciona',
-    'claim_email_line1' => 'Regístrate para personalizar la página del evento o simplemente ignora este correo',
+    'claim_email_line1' => 'Se ha creado una página para ti. Reclámala para editar los datos y añadir tus propias fechas, o ignora este correo si lo prefieres.',
     'claim_email_line2' => 'Para cancelar la suscripción a futuros eventos :click_here',
     'click_here' => 'haz clic aquí',
     'unsubscribed' => 'Cancelaste tu suscripción a correos electrónicos con éxito',

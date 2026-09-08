@@ -367,7 +367,7 @@ return [
     'invalid_file_type' => 'Type de fichier invalide',
     'event_added' => 'Événement ajouté avec succès',
     'please_select' => 'Veuillez sélectionner',
-    'claim_email_line1' => 'Inscrivez-vous pour personnaliser la page de l\'événement ou ignorez cet e-mail si vous n\'êtes pas intéressé.',
+    'claim_email_line1' => 'Une page a été créée pour vous. Revendiquez-la pour modifier les informations et ajouter vos propres dates, ou ignorez simplement cet e-mail.',
     'claim_email_line2' => 'Pour vous désabonner des événements futurs :click_here',
     'click_here' => 'cliquez ici',
     'unsubscribed' => 'Désabonné des e-mails avec succès',
