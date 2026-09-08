@@ -5079,7 +5079,8 @@ return [
     // Claiming a schedule the app created while somebody entered an event.
     'claim_strip_title' => 'Cette page a été créée par :schedule',
     'claim_strip_title_generic' => 'Cette page a été créée automatiquement',
-    'claim_strip_body' => ':name ne l\'a pas encore revendiquée. Les dates ci-dessous ont été ajoutées par d\'autres plannings sur :app.',
+    'claim_strip_body' => ':name ne l\'a pas encore revendiquée.',
+    'claim_strip_body_dates' => ':name ne l\'a pas encore revendiquée. Chaque date ci-dessous est créditée au planning qui l\'a ajoutée.',
     'claim_strip_cta' => 'Revendiquer cette page',
     'claim_strip_not_me' => 'Ce n\'est pas moi',
     'claim_strip_no_contact' => 'Cette page ne comporte aucune coordonnée, il n\'y a donc rien pour vérifier une revendication. Demandez au planning qui vous a listé de vous envoyer une invitation.',
@@ -5088,7 +5089,7 @@ return [
     'claim_strip_listed_by' => 'Listé par :schedule',
     'claim_done' => 'Ce planning est désormais le vôtre.',
     'claim_wrong_account_heading' => 'Revendiquer ce planning',
-    'claim_wrong_account' => ':name est enregistré sur :contact. Connectez-vous avec cette adresse pour le revendiquer.',
+    'claim_wrong_account' => ':name est enregistré sur :contact. Connectez-vous avec un compte associé pour revendiquer la page.',
     'claim_confirm_body' => ':name est enregistré sur l\'adresse de votre compte, vous pouvez donc le reprendre. En le revendiquant vous en devenez le propriétaire et pouvez modifier tout ce qui figure sur la page.',
     'claim_not_me_heading' => 'Ce n\'est pas moi',
     'claim_not_me_body' => 'Si :name n\'est pas vous, dites-le-nous. Si l\'adresse de contact de cette page est la vôtre, elle est retirée immédiatement. Sinon, votre demande est enregistrée pour examen.',

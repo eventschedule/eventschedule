@@ -695,26 +695,26 @@ class EventRepo
                     $roleId = UrlUtils::decodeId($memberId);
                     $role = Role::findOrFail($roleId);
 
-                    // NOTE the venue branch above deliberately carries no such guard. Venues
-                    // already have a sanctioned takeover with no proof at all - the "I manage this
-                    // venue" checkbox, EventRepo::claimVenueOwnership(), reachable from the AI
-                    // import by any signed-in user - so guarding the contact write there would
-                    // break that flow while closing nothing. Talent has no equivalent, which is
-                    // why the escalation this guard fixes was newly reachable and venues' is not.
+                    // KNOWN WEAK, deliberately. $memberId is an arbitrary encoded role id off the
+                    // request and nothing here ties the sender to the row, so anyone who can edit
+                    // any schedule can rewrite an unclaimed act's name, contact and video. Since
+                    // /{subdomain}/claim hands a placeholder to whoever holds the address on it,
+                    // that is two requests from taking somebody else's page.
                     //
-                    // isEditableBy, not just "unclaimed". $memberId is an arbitrary encoded role id
-                    // off the request and nothing here checks that the sender has anything to do
-                    // with the row, so overwriting the contact on any placeholder used to be open
-                    // to anyone who could edit any schedule. That was survivable while a typed
-                    // address granted nothing, but /{subdomain}/claim now hands a placeholder to
-                    // whoever holds the address on it - so writing my own address onto somebody
-                    // else's page and then claiming it would have been two requests.
+                    // An isEditableBy() guard was tried and reverted, because the legitimate action
+                    // and the attack are the same request. That pivot is attached to one user, once,
+                    // at creation, while EventController::update() admits any editor of the EVENT's
+                    // schedule - so the guard silently no-opped for teammates and for the
+                    // /search-roles autocomplete, and worse, silently stopped the invitation: the
+                    // dispatch below keys on the STORED roles.email, which the skipped write left
+                    // null. Guarding here also closes nothing on the venue side, where
+                    // claimVenueOwnership() already grants ownership with no proof at all.
                     //
-                    // The organizer who created the row is unaffected: EventRepo attaches them as a
-                    // follower at creation, which is exactly what isEditableBy() reads. Strangers
-                    // cannot acquire that pivot either, because follow() refuses an ownerless
-                    // schedule.
-                    if (! $role->isClaimed() && $role->isEditableBy($user)) {
+                    // The real fix separates "a field organizers fill in" from "the credential that
+                    // grants ownership", which needs the contact's provenance recorded. Until that
+                    // decision is taken, unclaimed rows are weakly protected by design, for talent
+                    // and venues alike. EventSaveMembersCharacterizationTest pins both halves.
+                    if (! $role->isClaimed()) {
                         if (! empty($member['name'])) {
                             $role->name = $member['name'];
                         }

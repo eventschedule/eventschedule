@@ -20,6 +20,9 @@ use Illuminate\Support\Facades\DB;
  */
 class GrowthExportService
 {
+    /** The month the schedule.claim audit action shipped; nothing before it can be counted. */
+    private const CLAIMS_TRACKED_FROM = '2026-09';
+
     /** How many trailing months of per-schedule ticket volume to emit. */
     public const RECENT_MONTHS = 6;
 
@@ -402,6 +405,10 @@ class GrowthExportService
             'activation, cohorts and acquisition count EVERY verified account. funnel counts only the '
                 .'organizer cohort (signup_intent null or organizer), so its denominator is smaller and '
                 .'the two sets of rates are not comparable.',
+            'claims counts OWNERLESS schedules, which every other section deliberately excludes. Do '
+                .'not add its totals to anything else. claims.claimed is null for months before the '
+                .'claim feature shipped, not 0 - it comes from schedule.claim audit rows. '
+                .'claims.auto_created comes from roles.created_at and is real for every month.',
             'signup_code_requests and signup_code_verified are NOT a funnel pair. Both are deduped per '
                 .'IP+user-agent per day rather than counted per event, and the request counter is also '
                 .'raised by the guest-add flow, which never reaches the verified counter.',
@@ -422,7 +429,7 @@ class GrowthExportService
                 'is_hosted' => (bool) config('app.hosted'),
                 'is_nexus' => (bool) config('app.is_nexus'),
                 'app_version' => config('self-update.version_installed'),
-                'schema_version' => 2,
+                'schema_version' => 3,
                 'free_ticket_cap' => config('usage.ticket_sale_monthly_limit_free'),
                 'row_cap' => $this->rowCap(),
                 'truncated' => [
@@ -442,6 +449,7 @@ class GrowthExportService
             'monetization' => $this->monetization(),
             'retention' => $this->retentionFrom($schedules),
             'traffic' => $this->traffic(),
+            'claims' => $this->claims($months),
             'signups' => ['columns' => $signups['columns'], 'rows' => $signups['rows']],
             'schedules' => ['columns' => $schedules['columns'], 'rows' => $schedules['rows']],
         ];
@@ -1149,6 +1157,47 @@ class GrowthExportService
     }
 
     /** Monthly marketing traffic against verified signups. */
+    /**
+     * The placeholder schedules the app mints, and how many of them get claimed.
+     *
+     * Its own section because every other section here is about OWNED schedules and deliberately
+     * filters these out. Counting them in with the rest would silently double the denominator of
+     * every activation rate; leaving them out entirely is why the claim feature shipped unable to
+     * report on itself.
+     *
+     * auto_created is answerable for every past month because it comes from roles.created_at - the
+     * same property that makes verified_signups the one traffic column that never goes null.
+     * claimed is not: it is counted from schedule.claim audit rows, which did not exist before the
+     * feature, so earlier months emit null rather than a zero that would read as "nobody ever
+     * claimed anything".
+     */
+    private function claims(array $months): array
+    {
+        $ownerless = fn () => Role::query()->ownerless()->notDemoSchedule()->where('roles.is_deleted', false);
+
+        $created = $ownerless()
+            ->groupBy(DB::raw("DATE_FORMAT(roles.created_at, '%Y-%m')"))
+            ->selectRaw("DATE_FORMAT(roles.created_at, '%Y-%m') as ym, COUNT(*) as c")
+            ->pluck('c', 'ym');
+
+        $claimed = DB::table('audit_logs')
+            ->where('action', AuditService::SCHEDULE_CLAIM)
+            ->groupBy(DB::raw("DATE_FORMAT(created_at, '%Y-%m')"))
+            ->selectRaw("DATE_FORMAT(created_at, '%Y-%m') as ym, COUNT(*) as c")
+            ->pluck('c', 'ym');
+
+        return [
+            'unclaimed_total' => $ownerless()->count(),
+            'unclaimed_with_event' => $ownerless()
+                ->whereHas('events', fn ($q) => $q->where('event_role.is_accepted', true))
+                ->count(),
+            'auto_created' => collect($months)->mapWithKeys(fn ($m) => [$m => (int) ($created[$m] ?? 0)])->all(),
+            'claimed' => collect($months)
+                ->mapWithKeys(fn ($m) => [$m => $m < self::CLAIMS_TRACKED_FROM ? null : (int) ($claimed[$m] ?? 0)])
+                ->all(),
+        ];
+    }
+
     private function traffic(): array
     {
         $isNexus = (bool) config('app.is_nexus');

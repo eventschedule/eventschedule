@@ -41,7 +41,12 @@
     // prompt, whereas a blocked one is a console error on every ticket page.
     $manifestUrl = null;
 
-    if ($manifestRole) {
+    // isClaimed(), mirroring the claimed() scope AppController::scheduleManifest() itself applies.
+    // Without it the claim page - the one tenant surface that renders for a schedule nobody owns -
+    // advertises a document that abort(404)s, costing a failed request and a console error on every
+    // view. Every other tenant page already needs a claimed schedule to render at all, so this
+    // changes nothing else.
+    if ($manifestRole && $manifestRole->isClaimed()) {
         $manifestUrl = route('role.manifest', ['subdomain' => $manifestRole->subdomain]);
 
         if (parse_url($manifestUrl, PHP_URL_HOST) !== request()->getHost()) {

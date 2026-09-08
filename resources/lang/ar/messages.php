@@ -5073,7 +5073,8 @@ return [
     // Claiming a schedule the app created while somebody entered an event.
     'claim_strip_title' => 'أنشأ هذه الصفحة :schedule',
     'claim_strip_title_generic' => 'أُنشئت هذه الصفحة تلقائيًا',
-    'claim_strip_body' => 'لم يطالب :name بها بعد. أضافت الجداول الأخرى على :app التواريخ أدناه.',
+    'claim_strip_body' => 'لم يطالب :name بها بعد.',
+    'claim_strip_body_dates' => 'لم يطالب :name بها بعد. كل تاريخ أدناه منسوب إلى الجدول الذي أضافه.',
     'claim_strip_cta' => 'المطالبة بهذه الصفحة',
     'claim_strip_not_me' => 'هذا ليس أنا',
     'claim_strip_no_contact' => 'لا تحتوي هذه الصفحة على بيانات اتصال، لذا لا يوجد ما يمكن التحقق من المطالبة به. اطلب من الجدول الذي أدرجك أن يرسل إليك دعوة.',
@@ -5082,7 +5083,7 @@ return [
     'claim_strip_listed_by' => 'أدرجه :schedule',
     'claim_done' => 'أصبح هذا الجدول ملكك الآن.',
     'claim_wrong_account_heading' => 'المطالبة بهذا الجدول',
-    'claim_wrong_account' => ':name مسجَّل على :contact. سجّل الدخول بهذا العنوان للمطالبة به.',
+    'claim_wrong_account' => ':name مسجَّل على :contact. سجّل الدخول بحساب مرتبط به للمطالبة بالصفحة.',
     'claim_confirm_body' => ':name مسجَّل على العنوان الموجود في حسابك، لذا يمكنك أخذه. بالمطالبة به تصبح المالك ويمكنك تعديل كل ما في الصفحة.',
     'claim_not_me_heading' => 'هذا ليس أنا',
     'claim_not_me_body' => 'إذا لم يكن :name هو أنت، فأخبرنا. إذا كان عنوان الاتصال في هذه الصفحة يخصك، فستُزال فورًا. وإن لم يكن كذلك، فسيُسجَّل طلبك للمراجعة.',

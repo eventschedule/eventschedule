@@ -197,7 +197,7 @@ class ScheduleClaimByEmailTest extends TestCase
             'email' => $act->email,
             'new_subdomain' => $act->subdomain,
             'timezone' => $act->timezone,
-        ])->assertRedirect();
+        ])->assertSessionHasNoErrors()->assertRedirect();
 
         $this->assertTrue(
             $act->fresh()->autoAcceptsEventFrom(null, $curator),

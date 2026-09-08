@@ -80,7 +80,33 @@ class GrowthExportTest extends TestCase
         $this->assertArrayHasKey('meta', $decoded);
         $this->assertArrayHasKey('signups', $decoded);
         $this->assertArrayHasKey('schedules', $decoded);
-        $this->assertSame(2, $decoded['meta']['schema_version']);
+        // 3 since the claims section landed. Bumping this is deliberate: a reader diffing two
+        // pulls needs to know the shape moved.
+        $this->assertSame(3, $decoded['meta']['schema_version']);
+    }
+
+    public function test_claims_reports_untracked_months_as_null_not_zero(): void
+    {
+        // Mirrors test_traffic_reports_untracked_months_as_null_not_zero. auto_created comes from
+        // roles.created_at and is real for every month; claimed comes from schedule.claim audit
+        // rows, which did not exist before the feature, so an earlier month must say "not measured"
+        // rather than "nobody claimed anything".
+        $admin = $this->createOwner(true);
+
+        $response = $this->adminActing($admin)->get('/admin/growth/export');
+        $response->assertOk();
+
+        $claims = json_decode($response->streamedContent(), true, 512, JSON_THROW_ON_ERROR)['claims'];
+
+        $this->assertArrayHasKey('unclaimed_total', $claims);
+        $this->assertNotEmpty($claims['claimed']);
+
+        $months = array_keys($claims['claimed']);
+        $this->assertNull($claims['claimed'][$months[0]], 'the oldest month predates the audit action');
+        $this->assertSame(0, $claims['claimed'][end($months)], 'the current month is measured, so a real zero');
+        foreach ($claims['auto_created'] as $month => $count) {
+            $this->assertIsInt($count, "auto_created is answerable for every month, including {$month}");
+        }
     }
 
     public function test_the_export_funnel_matches_the_admin_users_page(): void

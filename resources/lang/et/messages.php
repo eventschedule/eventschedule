@@ -5091,7 +5091,8 @@ return [
     // Claiming a schedule the app created while somebody entered an event.
     'claim_strip_title' => 'Selle lehe lõi :schedule',
     'claim_strip_title_generic' => 'See leht loodi automaatselt',
-    'claim_strip_body' => ':name ei ole seda veel enda omaks võtnud. Allolevad kuupäevad lisasid teised ajakavad rakenduses :app.',
+    'claim_strip_body' => ':name ei ole seda veel enda omaks võtnud.',
+    'claim_strip_body_dates' => ':name ei ole seda veel enda omaks võtnud. Iga allolev kuupäev on omistatud ajakavale, kes selle lisas.',
     'claim_strip_cta' => 'Võta see leht enda omaks',
     'claim_strip_not_me' => 'See ei ole mina',
     'claim_strip_no_contact' => 'Sellel lehel ei ole kontaktandmeid, seega ei ole millegagi taotlust kontrollida. Palu ajakaval, kes sind lisas, saata kutse.',
@@ -5100,7 +5101,7 @@ return [
     'claim_strip_listed_by' => 'Lisas :schedule',
     'claim_done' => 'See ajakava kuulub nüüd sulle.',
     'claim_wrong_account_heading' => 'Võta see ajakava enda omaks',
-    'claim_wrong_account' => ':name on registreeritud aadressile :contact. Logi sisse selle aadressiga, et see enda omaks võtta.',
+    'claim_wrong_account' => ':name on registreeritud kontaktile :contact. Logi sisse sellega seotud kontoga, et leht enda omaks võtta.',
     'claim_confirm_body' => ':name on registreeritud sinu konto aadressile, seega saad selle enda omaks võtta. Omaksvõtmisega saad omanikuks ja võid muuta kõike, mis lehel on.',
     'claim_not_me_heading' => 'See ei ole mina',
     'claim_not_me_body' => 'Kui :name ei ole sina, anna meile teada. Kui sellel lehel olev kontaktaadress kuulub sulle, eemaldatakse leht kohe. Kui mitte, märgitakse sinu taotlus ülevaatamiseks üles.',

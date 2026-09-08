@@ -1775,11 +1775,19 @@ class RoleController extends Controller
     {
         $role = $this->claimTarget($subdomain);
 
-        if (! $role) {
-            return redirect(app_url());
-        }
-
         $user = $request->user();
+
+        if (! $role) {
+            // The commonest way to arrive here is success: registering with the matching address
+            // already handed the schedule over, so by the time home() forwards the pending marker
+            // there is nothing left to claim. Say so, rather than dropping them on the marketing
+            // home page wondering whether it worked.
+            $redirect = redirect(app_url());
+
+            return $user && $user->isMember($subdomain)
+                ? $redirect->with('message', __('messages.claim_done'))
+                : $redirect;
+        }
 
         if (! $user) {
             return redirect_with_pending_action(
@@ -1896,7 +1904,9 @@ class RoleController extends Controller
 
         // Recorded, and that is all - deliberately. There is no notification behind this yet, so
         // the copy says "recorded" and not "passed on"; an admin reads it in the audit log.
-        AuditService::log(AuditService::SCHEDULE_TAKEDOWN_REQUESTED, $user->id, 'Role', $role->id);
+        // Role::class, matching what ScheduleDeletionService writes for the granted half. The
+        // two outcomes of one action should be filterable together.
+        AuditService::log(AuditService::SCHEDULE_TAKEDOWN_REQUESTED, $user->id, Role::class, $role->id);
 
         return redirect(app_url())->with('message', __('messages.claim_not_me_reported'));
     }
@@ -1948,6 +1958,13 @@ class RoleController extends Controller
                 ->with('creatorRole')
                 ->orderBy('created_at')
                 ->first()?->creatorRole;
+
+        // Recorded like both sibling paths in viewGuest(). Without it this feature emits no signal
+        // at all - the page is noindex, every inbound link is rel=nofollow, and the only other
+        // trace is a schedule.claim audit row, which fires ONLY on success. That leaves "nobody
+        // sees these pages" and "people see them and do not claim" indistinguishable, which are
+        // opposite problems. The eventual owner inherits the history.
+        app(AnalyticsService::class)->recordView($role, null, $request);
 
         $fonts = array_values(array_filter([$role->font_family]));
 

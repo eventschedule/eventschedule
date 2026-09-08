@@ -21,14 +21,15 @@
     came from, and only then the two things the person it describes might want to do. A visitor who
     is not the act needs the first three to correctly discount everything below them.
 --}}
-<x-app-guest-layout :role="$role" :fonts="$fonts" :no-index="true">
+{{-- page-title, like both sibling views: a tab or a bookmark carries no disclosure strip, so
+     without it the tab reads as the act's own name with no hint the page is unclaimed. --}}
+<x-app-guest-layout :role="$role" :fonts="$fonts" :no-index="true" :page-title="__('messages.unclaimed')">
 
 @php
     $accent = '#2563eb'; // blue-600. The schedule's own accent is not used: this is the platform
                          // speaking about a page it generated, not the schedule speaking. It also
                          // clears 4.5:1 against white in both colour modes, which the brand blue
                          // does not - the same reasoning components/needs-attention.blade.php uses.
-    $appName = config('app.name');
     $canClaim = (bool) ($role->email || $role->phone);
     // Page direction follows the schedule's language, but a name does not have to be in it: an
     // English-language promoter listing a Hebrew act is the ordinary case here, and without a per
@@ -55,7 +56,12 @@
                     @endif
                 </h2>
                 <p class="mt-1 text-sm text-gray-600 dark:text-gray-400">
-                    <x-user-text dir="{{ content_dir_for_language($role->translatedName(), $lang) }}">{{ __('messages.claim_strip_body', ['name' => $role->translatedName(), 'app' => $appName]) }}</x-user-text>
+                    {{-- Two strings, because the one that mentions the dates below is false on a
+                         page that has none - and a page whose dates have all passed is a common
+                         shape, an act listed once months ago. --}}
+                    <x-user-text dir="{{ content_dir_for_language($role->translatedName(), $lang) }}">{{ $events->isEmpty()
+                        ? __('messages.claim_strip_body', ['name' => $role->translatedName()])
+                        : __('messages.claim_strip_body_dates', ['name' => $role->translatedName()]) }}</x-user-text>
                 </p>
 
                 <div class="mt-4 flex flex-wrap items-center gap-x-5 gap-y-3">

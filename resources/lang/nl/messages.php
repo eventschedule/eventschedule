@@ -5072,7 +5072,8 @@ return [
     // Claiming a schedule the app created while somebody entered an event.
     'claim_strip_title' => 'Deze pagina is aangemaakt door :schedule',
     'claim_strip_title_generic' => 'Deze pagina is automatisch aangemaakt',
-    'claim_strip_body' => ':name heeft hem nog niet geclaimd. De data hieronder zijn toegevoegd door andere schema\'s op :app.',
+    'claim_strip_body' => ':name heeft hem nog niet geclaimd.',
+    'claim_strip_body_dates' => ':name heeft hem nog niet geclaimd. Elke datum hieronder is toegeschreven aan het schema dat hem heeft toegevoegd.',
     'claim_strip_cta' => 'Claim deze pagina',
     'claim_strip_not_me' => 'Dit ben ik niet',
     'claim_strip_no_contact' => 'Deze pagina bevat geen contactgegevens, dus er is niets om een claim mee te controleren. Vraag het schema dat je heeft vermeld om een uitnodiging te sturen.',
@@ -5081,7 +5082,7 @@ return [
     'claim_strip_listed_by' => 'Vermeld door :schedule',
     'claim_done' => 'Dit schema is nu van jou.',
     'claim_wrong_account_heading' => 'Claim dit schema',
-    'claim_wrong_account' => ':name is geregistreerd op :contact. Log in met dat adres om het te claimen.',
+    'claim_wrong_account' => ':name is geregistreerd op :contact. Log in met een account daarop om de pagina te claimen.',
     'claim_confirm_body' => ':name is geregistreerd op het adres van jouw account, dus je kunt hem overnemen. Door hem te claimen word je eigenaar en kun je alles op de pagina bewerken.',
     'claim_not_me_heading' => 'Dit ben ik niet',
     'claim_not_me_body' => 'Als :name niet jij bent, laat het ons weten. Als het contactadres op deze pagina van jou is, wordt de pagina meteen verwijderd. Zo niet, dan wordt je verzoek vastgelegd voor beoordeling.',

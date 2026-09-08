@@ -5072,7 +5072,8 @@ return [
     // Claiming a schedule the app created while somebody entered an event.
     'claim_strip_title' => 'Questa pagina è stata creata da :schedule',
     'claim_strip_title_generic' => 'Questa pagina è stata creata automaticamente',
-    'claim_strip_body' => ':name non l\'ha ancora rivendicata. Le date qui sotto sono state aggiunte da altri programmi su :app.',
+    'claim_strip_body' => ':name non l\'ha ancora rivendicata.',
+    'claim_strip_body_dates' => ':name non l\'ha ancora rivendicata. Ogni data qui sotto è attribuita al programma che l\'ha aggiunta.',
     'claim_strip_cta' => 'Rivendica questa pagina',
     'claim_strip_not_me' => 'Non sono io',
     'claim_strip_no_contact' => 'Questa pagina non riporta recapiti, quindi non c\'è nulla con cui verificare una rivendicazione. Chiedi al programma che ti ha inserito di inviarti un invito.',
@@ -5081,7 +5082,7 @@ return [
     'claim_strip_listed_by' => 'Inserito da :schedule',
     'claim_done' => 'Questo programma ora è tuo.',
     'claim_wrong_account_heading' => 'Rivendica questo programma',
-    'claim_wrong_account' => ':name è registrato su :contact. Accedi con quell\'indirizzo per rivendicarlo.',
+    'claim_wrong_account' => ':name è registrato su :contact. Accedi con un account associato per rivendicare la pagina.',
     'claim_confirm_body' => ':name è registrato sull\'indirizzo del tuo account, quindi puoi prenderlo. Rivendicandolo ne diventi il proprietario e puoi modificare tutto ciò che c\'è nella pagina.',
     'claim_not_me_heading' => 'Non sono io',
     'claim_not_me_body' => 'Se :name non sei tu, faccelo sapere. Se l\'indirizzo di contatto su questa pagina è tuo, viene rimossa subito. Altrimenti la tua richiesta viene registrata per essere esaminata.',

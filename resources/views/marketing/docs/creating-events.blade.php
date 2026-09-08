@@ -311,24 +311,24 @@
         <p class="text-gray-600 dark:text-gray-300 mb-6">Naming a performer or a venue who is not yet on Event Schedule creates a schedule for them there and then. It carries the name you typed, any contact details you added, and every date you list them on. This happens whether or not you send them an invitation, because it is what lets their name appear on your event page at all.</p>
 
         <h3 class="doc-subheading">What the page shows</h3>
-        <p class="text-gray-600 dark:text-gray-300 mb-6">Until it is claimed, the page opens by saying who created it and that the act has not claimed it yet, so nobody mistakes it for a page they built themselves. Below that it lists the upcoming dates other schedules have added them to, each one credited to the schedule that added it. It carries no contact details, no follow button and no tickets, and it stays out of search engines until it is claimed.</p>
+        <p class="text-gray-600 dark:text-gray-300 mb-6">Until it is claimed, the page opens by naming the schedule that first listed them - or, when that cannot be worked out, by saying the page was created automatically - and by saying the act has not claimed it yet, so nobody mistakes it for a page they built themselves. Below that it lists up to twenty upcoming public dates other schedules have added them to, each credited to the schedule that added it. Draft, internal, unlisted and cancelled dates are not shown, and a page whose dates have all passed says so. It carries no contact details, no follow button and no tickets, and it stays out of search engines until it is claimed.</p>
 
         <div class="doc-fields">
             <div class="doc-field">
                 <h3 class="font-semibold text-gray-900 dark:text-white mb-2">Inviting them</h3>
-                <p class="text-sm text-gray-500 dark:text-gray-400">Ticking <strong class="text-gray-900 dark:text-white">"Send an email to notify them"</strong> on the participant or venue sends a one-off email telling them you added them to the event, with a link to their page. Replies go to you, not to us. If they would rather not hear from you again, the email carries an unsubscribe link that stops any further invitation to that address.</p>
+                <p class="text-sm text-gray-500 dark:text-gray-400">On the hosted platform, ticking <strong class="text-gray-900 dark:text-white">"Send an email to notify them"</strong> on the participant or venue sends a single email telling them you added them to the event, with a link to their page. It sends once each time you tick the box, and replies go to whoever created the event. Nothing is sent for a draft event, or to someone whose address already has an account, because in that case the page is already theirs.</p>
             </div>
             <div class="doc-field">
                 <h4 class="font-semibold text-gray-900 dark:text-white mb-2">How they claim it</h4>
-                <p class="text-sm text-gray-500 dark:text-gray-400">They press <strong class="text-gray-900 dark:text-white">Claim this page</strong> and sign in with the email address on the page. That is the whole check, so the address you enter decides who can claim it: a booking agent's address means the agent claims the page, not the act. Once claimed, the page is an ordinary schedule and they can edit everything on it.</p>
+                <p class="text-sm text-gray-500 dark:text-gray-400">They press <strong class="text-gray-900 dark:text-white">Claim this page</strong> and sign in with a verified account on the contact the page carries - the email address if it has one, otherwise the phone number. That is the whole check, so the contact you enter decides who can claim it: a booking agent's address means the agent claims the page, not the act. Once claimed, the page is an ordinary schedule and they can edit everything on it.</p>
             </div>
             <div class="doc-field">
                 <h4 class="font-semibold text-gray-900 dark:text-white mb-2">If it is not them</h4>
-                <p class="text-sm text-gray-500 dark:text-gray-400"><strong class="text-gray-900 dark:text-white">This is not me</strong> is the other answer. Somebody who holds the address on the page can take it down immediately; anyone else has their request recorded for review, so the button cannot be aimed at a competitor.</p>
+                <p class="text-sm text-gray-500 dark:text-gray-400"><strong class="text-gray-900 dark:text-white">This is not me</strong> is the other answer, and it asks them to sign in first so we know who is reporting. Somebody who holds the contact on the page can take it down immediately; anyone else has their request recorded for review, so the button cannot be aimed at a competitor.</p>
             </div>
             <div class="doc-field">
                 <h4 class="font-semibold text-gray-900 dark:text-white mb-2">After they claim it</h4>
-                <p class="text-sm text-gray-500 dark:text-gray-400">Dates you have already listed them on stay exactly where they are, and your future dates keep appearing on their page without waiting for approval, because you were already listing them. Any schedule that starts listing them afterwards has to ask first.</p>
+                <p class="text-sm text-gray-500 dark:text-gray-400">Dates you have already listed them on stay exactly where they are. If they claim by email, or by pressing Claim this page, your future dates keep appearing without waiting for approval, because you were already listing them; a claim made by verifying a phone number does not carry that across. Any schedule that starts listing them afterwards has to ask first, unless they turn Require approval off.</p>
             </div>
         </div>
 

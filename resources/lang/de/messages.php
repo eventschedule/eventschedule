@@ -5076,7 +5076,8 @@ return [
     // Claiming a schedule the app created while somebody entered an event.
     'claim_strip_title' => 'Diese Seite wurde von :schedule erstellt',
     'claim_strip_title_generic' => 'Diese Seite wurde automatisch erstellt',
-    'claim_strip_body' => ':name hat sie noch nicht beansprucht. Die Termine unten wurden von anderen Zeitplänen auf :app hinzugefügt.',
+    'claim_strip_body' => ':name hat sie noch nicht beansprucht.',
+    'claim_strip_body_dates' => ':name hat sie noch nicht beansprucht. Jeder Termin unten ist dem Zeitplan zugeordnet, der ihn hinzugefügt hat.',
     'claim_strip_cta' => 'Diese Seite beanspruchen',
     'claim_strip_not_me' => 'Das bin ich nicht',
     'claim_strip_no_contact' => 'Diese Seite enthält keine Kontaktdaten, daher lässt sich ein Anspruch nicht prüfen. Bitten Sie den Zeitplan, der Sie eingetragen hat, um eine Einladung.',
@@ -5085,7 +5086,7 @@ return [
     'claim_strip_listed_by' => 'Eingetragen von :schedule',
     'claim_done' => 'Dieser Zeitplan gehört jetzt Ihnen.',
     'claim_wrong_account_heading' => 'Diesen Zeitplan beanspruchen',
-    'claim_wrong_account' => ':name ist auf :contact registriert. Melden Sie sich mit dieser Adresse an, um ihn zu beanspruchen.',
+    'claim_wrong_account' => ':name ist auf :contact registriert. Melden Sie sich mit einem Konto darauf an, um die Seite zu beanspruchen.',
     'claim_confirm_body' => ':name ist auf die Adresse Ihres Kontos registriert, Sie können sie also übernehmen. Mit dem Beanspruchen werden Sie Eigentümer und können alles auf der Seite bearbeiten.',
     'claim_not_me_heading' => 'Das bin ich nicht',
     'claim_not_me_body' => 'Wenn :name nicht Sie sind, sagen Sie uns Bescheid. Wenn Ihnen die Kontaktadresse auf dieser Seite gehört, wird sie sofort entfernt. Andernfalls wird Ihre Anfrage zur Prüfung festgehalten.',

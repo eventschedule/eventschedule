@@ -5186,7 +5186,8 @@ return [
     // Claiming a schedule the app created while somebody entered an event.
     'claim_strip_title' => 'This page was created by :schedule',
     'claim_strip_title_generic' => 'This page was created automatically',
-    'claim_strip_body' => ':name has not claimed it yet. The dates below were added by other schedules on :app.',
+    'claim_strip_body' => ':name has not claimed it yet.',
+    'claim_strip_body_dates' => ':name has not claimed it yet. Each date below is credited to the schedule that added it.',
     'claim_strip_cta' => 'Claim this page',
     'claim_strip_not_me' => 'This is not me',
     'claim_strip_no_contact' => 'This page carries no contact details, so there is nothing to check a claim against. Ask the schedule that listed you to send an invitation.',
@@ -5195,7 +5196,7 @@ return [
     'claim_strip_listed_by' => 'Listed by :schedule',
     'claim_done' => 'This schedule is yours now.',
     'claim_wrong_account_heading' => 'Claim this schedule',
-    'claim_wrong_account' => ':name is registered to :contact. Sign in with that address to claim it.',
+    'claim_wrong_account' => ':name is registered to :contact. Sign in with an account on it to claim the page.',
     'claim_confirm_body' => ':name is registered to the address on your account, so it is yours to take. Claiming it makes you the owner and lets you edit everything on the page.',
     'claim_not_me_heading' => 'This is not me',
     'claim_not_me_body' => 'If :name is not you, tell us. If you hold the contact address on this page, it comes down straight away. If not, your request is recorded for review.',

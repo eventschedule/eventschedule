@@ -43,13 +43,17 @@
         <p class="mt-6 text-sm text-gray-600 dark:text-gray-400">
             {{ __('messages.claim_not_me_sign_in') }}
         </p>
-        <div class="mt-4">
-            <a href="{{ app_url(route('sign_up', [], false)) }}"
-               class="inline-flex items-center justify-center rounded-md px-4 py-2.5 text-sm font-semibold text-white shadow-sm transition-all duration-200 hover:opacity-90"
-               style="background-color: #2563eb;">
+        {{-- Posts to the same action rather than linking straight at sign-up: claimNotMeSubmit()
+             parks a pending_claim for a signed-out visitor, which is what brings them back to the
+             page afterwards. A bare sign-up link left them on the dashboard with no way back. --}}
+        <form method="POST" action="{{ route('role.claim.not_me.submit', ['subdomain' => $role->subdomain]) }}" class="mt-4">
+            @csrf
+            <button type="submit"
+                class="inline-flex items-center justify-center rounded-md px-4 py-2.5 text-sm font-semibold text-white shadow-sm transition-all duration-200 hover:opacity-90"
+                style="background-color: #2563eb;">
                 {{ __('messages.sign_up') }}
-            </a>
-        </div>
+            </button>
+        </form>
         @endauth
     </div>
 </div>

@@ -5072,7 +5072,8 @@ return [
     // Claiming a schedule the app created while somebody entered an event.
     'claim_strip_title' => 'Esta página foi criada por :schedule',
     'claim_strip_title_generic' => 'Esta página foi criada automaticamente',
-    'claim_strip_body' => ':name ainda não a reivindicou. As datas abaixo foram adicionadas por outras agendas em :app.',
+    'claim_strip_body' => ':name ainda não a reivindicou.',
+    'claim_strip_body_dates' => ':name ainda não a reivindicou. Cada data abaixo é atribuída à agenda que a acrescentou.',
     'claim_strip_cta' => 'Reivindicar esta página',
     'claim_strip_not_me' => 'Não sou eu',
     'claim_strip_no_contact' => 'Esta página não tem dados de contacto, por isso não há nada com que verificar uma reivindicação. Peça à agenda que o listou para enviar um convite.',
@@ -5081,7 +5082,7 @@ return [
     'claim_strip_listed_by' => 'Listado por :schedule',
     'claim_done' => 'Esta agenda é agora sua.',
     'claim_wrong_account_heading' => 'Reivindicar esta agenda',
-    'claim_wrong_account' => ':name está registada em :contact. Inicie sessão com esse endereço para a reivindicar.',
+    'claim_wrong_account' => ':name está registado em :contact. Inicie sessão com uma conta associada para reivindicar a página.',
     'claim_confirm_body' => ':name está registado no endereço da sua conta, por isso pode ficar com ele. Ao reivindicá-lo torna-se o proprietário e pode editar tudo o que está na página.',
     'claim_not_me_heading' => 'Não sou eu',
     'claim_not_me_body' => 'Se :name não é você, diga-nos. Se o endereço de contacto desta página for seu, ela é removida de imediato. Caso contrário, o seu pedido fica registado para análise.',

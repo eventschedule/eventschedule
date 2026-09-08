@@ -5067,7 +5067,8 @@ return [
     // Claiming a schedule the app created while somebody entered an event.
     'claim_strip_title' => 'הדף הזה נוצר על ידי :schedule',
     'claim_strip_title_generic' => 'הדף הזה נוצר אוטומטית',
-    'claim_strip_body' => ':name עדיין לא תבע אותו לבעלותו. התאריכים למטה נוספו על ידי לוחות זמנים אחרים ב:app.',
+    'claim_strip_body' => ':name עדיין לא תבע אותו לבעלותו.',
+    'claim_strip_body_dates' => ':name עדיין לא תבע אותו לבעלותו. כל תאריך למטה מיוחס ללוח הזמנים שהוסיף אותו.',
     'claim_strip_cta' => 'תביעת בעלות על הדף',
     'claim_strip_not_me' => 'זה לא אני',
     'claim_strip_no_contact' => 'בדף הזה אין פרטי קשר, ולכן אין מול מה לאמת תביעת בעלות. בקשו מלוח הזמנים שרשם אתכם לשלוח הזמנה.',
@@ -5076,7 +5077,7 @@ return [
     'claim_strip_listed_by' => 'נרשם על ידי :schedule',
     'claim_done' => 'לוח הזמנים הזה שלכם עכשיו.',
     'claim_wrong_account_heading' => 'תביעת בעלות על לוח הזמנים',
-    'claim_wrong_account' => ':name רשום לכתובת :contact. היכנסו עם הכתובת הזאת כדי לתבוע עליו בעלות.',
+    'claim_wrong_account' => ':name רשום ל-:contact. היכנסו עם חשבון המשויך אליו כדי לתבוע בעלות על הדף.',
     'claim_confirm_body' => ':name רשום לכתובת שבחשבון שלכם, ולכן אתם יכולים לקחת אותו. תביעת בעלות הופכת אתכם לבעלים ומאפשרת לערוך כל מה שבדף.',
     'claim_not_me_heading' => 'זה לא אני',
     'claim_not_me_body' => 'אם :name הוא לא אתם, ספרו לנו. אם כתובת הקשר בדף הזה שייכת לכם, הדף יוסר מיד. אם לא, הפנייה שלכם תירשם לבדיקה.',

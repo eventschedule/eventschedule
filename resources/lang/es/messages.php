@@ -5072,7 +5072,8 @@ return [
     // Claiming a schedule the app created while somebody entered an event.
     'claim_strip_title' => 'Esta página fue creada por :schedule',
     'claim_strip_title_generic' => 'Esta página se creó automáticamente',
-    'claim_strip_body' => ':name aún no la ha reclamado. Las fechas siguientes las añadieron otros horarios en :app.',
+    'claim_strip_body' => ':name aún no la ha reclamado.',
+    'claim_strip_body_dates' => ':name aún no la ha reclamado. Cada fecha de abajo se atribuye al horario que la añadió.',
     'claim_strip_cta' => 'Reclamar esta página',
     'claim_strip_not_me' => 'No soy yo',
     'claim_strip_no_contact' => 'Esta página no tiene datos de contacto, así que no hay nada con lo que comprobar una reclamación. Pide al horario que te incluyó que te envíe una invitación.',
@@ -5081,7 +5082,7 @@ return [
     'claim_strip_listed_by' => 'Incluido por :schedule',
     'claim_done' => 'Este horario ya es tuyo.',
     'claim_wrong_account_heading' => 'Reclamar este horario',
-    'claim_wrong_account' => ':name está registrado con :contact. Inicia sesión con esa dirección para reclamarlo.',
+    'claim_wrong_account' => ':name está registrado con :contact. Inicia sesión con una cuenta en ese dato para reclamar la página.',
     'claim_confirm_body' => ':name está registrado con la dirección de tu cuenta, así que puedes quedártelo. Al reclamarlo pasas a ser el propietario y puedes editar todo lo que hay en la página.',
     'claim_not_me_heading' => 'No soy yo',
     'claim_not_me_body' => 'Si :name no eres tú, dínoslo. Si la dirección de contacto de esta página es tuya, se retirará de inmediato. Si no, tu solicitud queda registrada para su revisión.',

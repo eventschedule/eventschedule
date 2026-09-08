@@ -87,6 +87,77 @@ class UnclaimedSchedulePageTest extends TestCase
             ->assertSee(__('messages.claim_strip_no_events'));
     }
 
+    public function test_the_in_memory_and_query_claimable_predicates_agree(): void
+    {
+        // They did not. isClaimable() asked is_demo_role() - the demo ACCOUNT, false outright on
+        // selfhost - while the scope excludes the demo SUBDOMAIN shapes, and generateSubdomain()
+        // hands out demo-2, demo-3 once "demo" is taken. Such a row rendered a page whose two
+        // buttons then bounced off claimTarget() to the marketing home: the exact bug the shared
+        // predicate exists to prevent, in mirror image.
+        $owner = $this->createOwner();
+        $rows = [
+            $this->placeholder(['subdomain' => 'demo-4']),
+            $this->placeholder(['subdomain' => 'thewanderingfew']),
+            $this->placeholder(['is_deleted' => true]),
+            $this->createRole($owner, 'venue'),
+            $this->createRole($owner, 'venue', ['email_verified_at' => null]),
+        ];
+
+        $byScope = Role::claimable()->pluck('id')->sort()->values()->all();
+        $byMemory = collect($rows)->filter(fn ($r) => $r->fresh()->isClaimable())->pluck('id')->sort()->values()->all();
+
+        $this->assertSame($byScope, $byMemory);
+        $this->assertContains($rows[1]->id, $byScope, 'an ordinary placeholder is claimable, or this proves nothing');
+    }
+
+    public function test_the_page_does_not_advertise_a_manifest_that_does_not_exist(): void
+    {
+        // AppController::scheduleManifest() gates on claimed() and abort(404)s, so the claim page
+        // was asking every browser for a document that is not there.
+        $placeholder = $this->placeholder(['email' => 'band@gmail.com']);
+        $this->listedOn($placeholder);
+
+        $this->get($this->url($placeholder))
+            ->assertOk()
+            ->assertDontSee('rel="manifest"', false);
+    }
+
+    public function test_viewing_a_claim_page_is_recorded(): void
+    {
+        // Otherwise the feature emits no signal at all: noindex, nofollow, and a schedule.claim
+        // audit row that fires only on success - so "nobody sees it" and "people see it and do not
+        // claim" would be indistinguishable.
+        $placeholder = $this->placeholder(['email' => 'band@gmail.com']);
+        $this->listedOn($placeholder);
+
+        // Real browser headers: recordView() drops bots and anything that does not look like one.
+        $this->withHeaders([
+            'User-Agent' => 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0 Safari/537.36',
+            'Accept-Language' => 'en-US,en;q=0.9',
+            'Accept' => 'text/html,application/xhtml+xml',
+        ])->get($this->url($placeholder))->assertOk();
+
+        $this->assertDatabaseHas('analytics_daily', ['role_id' => $placeholder->id]);
+    }
+
+    public function test_a_signed_out_report_comes_back_to_the_page_after_signing_up(): void
+    {
+        $placeholder = $this->placeholder(['email' => 'band@gmail.com']);
+
+        $this->post(route('role.claim.not_me.submit', ['subdomain' => $placeholder->subdomain]))
+            ->assertRedirect();
+        $this->assertSame($placeholder->subdomain, session('pending_claim'));
+
+        $this->post('/sign_up', [
+            'name' => 'Someone',
+            'email' => 'someone@gmail.com',
+            'password' => 'password',
+        ])->assertSessionHasNoErrors();
+
+        $this->get(route('home'))
+            ->assertRedirect(route('role.claim.start', ['subdomain' => $placeholder->subdomain]));
+    }
+
     public function test_the_page_is_never_indexable(): void
     {
         // Two independent mechanisms hold this up and EITHER ONE is sufficient: the view passes
@@ -260,7 +331,10 @@ class UnclaimedSchedulePageTest extends TestCase
         $this->actingAs($claimant)
             ->get(route('role.claim.start', ['subdomain' => $placeholder->subdomain]))
             ->assertOk()
-            ->assertSee(__('messages.claim_strip_cta'));
+            // The form's ACTION, not the button label: role/claim.blade.php passes
+            // claim_strip_cta as its page-title too, so assertSee on the label matches the
+            // <title> whether or not the confirm branch rendered.
+            ->assertSee(route('role.claim.confirm', ['subdomain' => $placeholder->subdomain]), false);
         $this->assertNull($placeholder->fresh()->user_id, 'a GET must not transfer ownership');
 
         $this->actingAs($claimant)
@@ -312,11 +386,16 @@ class UnclaimedSchedulePageTest extends TestCase
         $this->assertSame($placeholder->subdomain, session('pending_claim'));
         $this->assertSame('claim', signup_intent_from_session());
 
+        // Follow the ACTUAL redirect chain. Substituting a hand-rolled GET / here is what let
+        // post_signup_redirect_url() go untaught about pending_claim: this address does not match,
+        // so the new account has no schedule tie and would otherwise land on /getting-started.
         $this->post('/sign_up', [
             'name' => 'Someone Else',
             'email' => 'nottheband@gmail.com',
             'password' => 'password',
-        ])->assertSessionHasNoErrors();
+        ])
+            ->assertSessionHasNoErrors()
+            ->assertRedirect(route('home', absolute: false));
 
         $this->get(route('home'))
             ->assertRedirect(route('role.claim.start', ['subdomain' => $placeholder->subdomain]));

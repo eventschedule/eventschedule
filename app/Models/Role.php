@@ -1392,6 +1392,20 @@ class Role extends Model implements MustVerifyEmail
      * link. Anything deciding whether a schedule is a placeholder wants THIS, not that; the
      * AdminSchedulesUnverifiedCountTest population is exactly the set the two disagree on.
      */
+    /**
+     * Drop the ownership memo when the row is re-read.
+     *
+     * refresh() replaces $attributes in place and never touches declared properties, so without
+     * this the memo outlives the data it was computed from. ScheduleDeletionService::markDeleted()
+     * ends with setRawAttributes() on the caller's instance, which is the same shape.
+     */
+    public function refresh()
+    {
+        $this->hasRealOwnerMemo = null;
+
+        return parent::refresh();
+    }
+
     public function hasRealOwner(): bool
     {
         // Memoised per instance. Two calls per act on the event page, times every act on the bill,
@@ -1449,7 +1463,16 @@ class Role extends Model implements MustVerifyEmail
         return ! $this->is_deleted
             && ! $this->email_verified_at
             && ! $this->phone_verified_at
-            && ! is_demo_role($this)
+            // The SCOPE's demo predicate, not is_demo_role(). They are different questions:
+            // is_demo_role() asks about the demo ACCOUNT (and answers false outright on selfhost),
+            // while notDemoSchedule() excludes the subdomain shapes. generateSubdomain() hands out
+            // demo-2, demo-3 and so on once "demo" is taken, so an ordinary placeholder could pass
+            // this and fail the scope - rendering a page whose two buttons then bounced off
+            // claimTarget() to the marketing home, which is the exact bug this predicate exists to
+            // prevent, in mirror image.
+            && $this->subdomain !== \App\Services\DemoService::DEMO_ROLE_SUBDOMAIN
+            && ! str_starts_with((string) $this->subdomain, 'demo-')
+            // Last, because it is the only clause that can cost a query.
             && ! $this->hasRealOwner();
     }
 

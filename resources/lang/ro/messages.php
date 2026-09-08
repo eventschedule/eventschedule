@@ -5111,7 +5111,8 @@ return [
     // Claiming a schedule the app created while somebody entered an event.
     'claim_strip_title' => 'Această pagină a fost creată de :schedule',
     'claim_strip_title_generic' => 'Această pagină a fost creată automat',
-    'claim_strip_body' => ':name nu a revendicat-o încă. Datele de mai jos au fost adăugate de alte programe pe :app.',
+    'claim_strip_body' => ':name nu a revendicat-o încă.',
+    'claim_strip_body_dates' => ':name nu a revendicat-o încă. Fiecare dată de mai jos este atribuită programului care a adăugat-o.',
     'claim_strip_cta' => 'Revendică această pagină',
     'claim_strip_not_me' => 'Nu sunt eu',
     'claim_strip_no_contact' => 'Această pagină nu are date de contact, așa că nu există nimic cu care să verificăm o revendicare. Cere programului care te-a listat să îți trimită o invitație.',
@@ -5120,7 +5121,7 @@ return [
     'claim_strip_listed_by' => 'Listat de :schedule',
     'claim_done' => 'Acest program îți aparține acum.',
     'claim_wrong_account_heading' => 'Revendică acest program',
-    'claim_wrong_account' => ':name este înregistrat pe :contact. Autentifică-te cu acea adresă pentru a-l revendica.',
+    'claim_wrong_account' => ':name este înregistrat pe :contact. Autentifică-te cu un cont asociat pentru a revendica pagina.',
     'claim_confirm_body' => ':name este înregistrat pe adresa contului tău, așa că îl poți prelua. Revendicându-l devii proprietar și poți edita tot ce se află pe pagină.',
     'claim_not_me_heading' => 'Nu sunt eu',
     'claim_not_me_body' => 'Dacă :name nu ești tu, spune-ne. Dacă adresa de contact de pe această pagină îți aparține, pagina este eliminată imediat. Dacă nu, cererea ta este înregistrată pentru verificare.',

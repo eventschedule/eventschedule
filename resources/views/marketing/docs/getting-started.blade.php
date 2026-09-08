@@ -253,7 +253,7 @@
             </div>
             <div class="doc-field">
                 <h4 class="font-semibold text-gray-900 dark:text-white mb-2">Someone has already made a page for my venue. How do I claim it?</h4>
-                <p class="text-sm text-gray-500 dark:text-gray-400">If a promoter or venue listed you on their event before you signed up, Event Schedule created a page for you at that moment. Open it and press <strong class="text-gray-900 dark:text-white">Claim this page</strong>, then sign in with the email address shown on the page. That address is the whole check, so if it is not one you can reach, ask whoever listed you to correct it. If the page is not about you at all, press <strong class="text-gray-900 dark:text-white">This is not me</strong> instead. See <a href="{{ route('marketing.docs.creating_events') }}#claim" class="doc-link">Pages Created for Others</a>.</p>
+                <p class="text-sm text-gray-500 dark:text-gray-400">If a promoter or venue listed you on their event before you signed up, Event Schedule created a page for you at that moment. Open it and press <strong class="text-gray-900 dark:text-white">Claim this page</strong>. You will be asked to sign in, and the page then tells you in masked form which contact it answers to. Sign in with a verified account on that contact and the page is yours. If it is not one you can reach, ask whoever listed you to correct it. If the page is not about you at all, press <strong class="text-gray-900 dark:text-white">This is not me</strong> instead. See <a href="{{ route('marketing.docs.creating_events') }}#claim" class="doc-link">Pages Created for Others</a>.</p>
             </div>
             <div class="doc-field">
                 <h4 class="font-semibold text-gray-900 dark:text-white mb-2">My schedule page will not open. What is wrong?</h4>
@@ -334,7 +334,7 @@
                     "name": "Someone has already made a page for my venue. How do I claim it?",
                     "acceptedAnswer": {
                         "@type": "Answer",
-                        "text": "If a promoter or venue listed you on their event before you signed up, Event Schedule created a page for you at that moment. Open it and press Claim this page, then sign in with the email address shown on the page. That address is the whole check, so if it is not one you can reach, ask whoever listed you to correct it. If the page is not about you at all, press This is not me instead."
+                        "text": "If a promoter or venue listed you on their event before you signed up, Event Schedule created a page for you at that moment. Open it and press Claim this page. You will be asked to sign in, and the page then tells you in masked form which contact it answers to. Sign in with a verified account on that contact and the page is yours. If it is not one you can reach, ask whoever listed you to correct it. If the page is not about you at all, press This is not me instead."
                     }
                 },
                 {

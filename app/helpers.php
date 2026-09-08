@@ -811,6 +811,11 @@ if (! function_exists('post_signup_redirect_url')) {
             // accept - so this marker is what keeps them out of the "create your first
             // schedule" chooser. home() consumes it and returns them to the offer.
             || session()->has('pending_transfer')
+            // Same reasoning as pending_transfer: someone who pressed "Claim this page" and then
+            // registered with an address that did NOT match has no schedule tie at all, so without
+            // this they fall through to the chooser below and HomeController::home() - which is
+            // what reads the marker - never runs.
+            || session()->has('pending_claim')
             || $user->roles()->exists()) {
             return route('home', absolute: false);
         }

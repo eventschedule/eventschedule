@@ -92,7 +92,7 @@ class EventSaveMembersCharacterizationTest extends TestCase
         ]);
     }
 
-    public function test_an_existing_unclaimed_member_is_updated_in_place_by_someone_who_can_edit_it(): void
+    public function test_existing_unclaimed_member_is_updated_in_place(): void
     {
         $owner = $this->createOwner();
         $role = $this->createRole($owner, 'venue');
@@ -102,9 +102,6 @@ class EventSaveMembersCharacterizationTest extends TestCase
         $unclaimed->subdomain = 'member'.strtolower(Str::random(6));
         $unclaimed->type = 'talent';
         $unclaimed->save();
-        // The pivot EventRepo attaches to whoever creates a placeholder, and the thing
-        // Role::isEditableBy() reads.
-        $unclaimed->users()->attach($owner->id, ['level' => 'follower']);
 
         $this->postCreateEvent($owner, $role, [
             'members' => [
@@ -124,13 +121,18 @@ class EventSaveMembersCharacterizationTest extends TestCase
         ]);
     }
 
-    public function test_a_stranger_cannot_rewrite_an_unclaimed_members_contact(): void
+    public function test_a_stranger_can_rewrite_an_unclaimed_members_contact(): void
     {
-        // members[] is keyed by an encoded role id straight off the request and nothing here ties
-        // the sender to the row. That was survivable while a typed address granted nothing, but
-        // /{subdomain}/claim now hands a placeholder to whoever holds the address on it - so
-        // writing your own address onto somebody else's page and then claiming it would have been
-        // two requests. The act is still ATTACHED to the event; only its details are read-only.
+        // CHARACTERIZES A KNOWN WEAKNESS, bug-for-bug, so it is not rediscovered as news.
+        //
+        // members[] is keyed by an encoded role id straight off the request and nothing ties the
+        // sender to the row, so anyone who can edit any schedule can rewrite an unclaimed act's
+        // contact - and /{subdomain}/claim then hands the page to whoever holds that address. An
+        // isEditableBy() guard was tried and reverted: the legitimate action and the attack are the
+        // same request, and the guard silently no-opped for teammates and killed the invitation.
+        //
+        // If this ever tightens, this test is the one to invert, and the venue side
+        // (claimVenueOwnership, which grants ownership with no proof at all) must move with it.
         $stranger = $this->createOwner();
         $role = $this->createRole($stranger, 'venue');
 
@@ -151,9 +153,9 @@ class EventSaveMembersCharacterizationTest extends TestCase
         ])->assertRedirect();
 
         $unclaimed->refresh();
-        $this->assertSame('Taylor Swift', $unclaimed->name);
-        $this->assertSame('booking@gmail.com', $unclaimed->email);
-        $this->assertFalse($unclaimed->isEditableBy($stranger));
+        $this->assertSame('Hijacked', $unclaimed->name);
+        $this->assertSame('attacker@gmail.com', $unclaimed->email);
+        $this->assertFalse($unclaimed->isEditableBy($stranger), 'and they have no relationship to the row');
         $this->assertDatabaseHas('event_role', [
             'event_id' => $this->latestEvent()->id,
             'role_id' => $unclaimed->id,
