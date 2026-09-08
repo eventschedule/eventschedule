@@ -164,6 +164,40 @@ class PayPalClient
     }
 
     /**
+     * Refund a capture, in full when $amount is null.
+     *
+     * The one method here that THROWS rather than answering null. Everything else is on the checkout
+     * path, where a PayPal outage must not become a 500; this is on the refund path, where
+     * SaleRefundService needs to know whether PayPal answered and refused (release the claim) or
+     * whether the request might have arrived (park it). Collapsing both into null would make every
+     * failure look identical, and the conservative reading - park - permanently locks the sale out
+     * of the refund path.
+     *
+     * @param  array<string, mixed>|null  $amount
+     */
+    public function refundCapture(string $captureId, ?array $amount, string $requestId): string
+    {
+        $token = $this->accessToken();
+
+        if (! $token) {
+            // Nothing was sent, and nothing can be. A LogicException is the one bucket that both
+            // fails the claim and tells the owner it is a configuration fault rather than sending
+            // them to a dashboard we never called.
+            throw new \LogicException('PayPal credentials are not usable for a refund.');
+        }
+
+        $response = Http::withToken($token)
+            ->timeout(15)
+            ->acceptJson()
+            ->withHeaders(['PayPal-Request-Id' => $requestId])
+            ->post($this->baseUrl().'/v2/payments/captures/'.urlencode($captureId).'/refund',
+                $amount ? ['amount' => $amount] : [])
+            ->throw();
+
+        return (string) $response->json('id');
+    }
+
+    /**
      * Ask PayPal whether it sent this webhook.
      *
      * @param  array<string, mixed>  $headers  the inbound request's headers, however cased

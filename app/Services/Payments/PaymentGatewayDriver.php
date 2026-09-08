@@ -200,6 +200,28 @@ abstract class PaymentGatewayDriver
     }
 
     /**
+     * Was a failed refund a definite refusal, or an outcome we cannot rule out?
+     *
+     * SaleRefundService asks this BEFORE its own catch ladder, which names Stripe's exception
+     * classes literally. Any driver built on Laravel's Http client throws RequestException or
+     * ConnectionException - both plain \Exception subclasses - so without this hook every one of
+     * its failures, definite refusals included, would fall through to the conservative
+     * \Throwable arm and be parked. A parked claim holds its amount forever: refundableRemaining()
+     * is permanently reduced and the sale can never be refunded through the app again, though
+     * nothing moved.
+     *
+     * Return 'fail' only when the gateway ANSWERED and refused. Return 'park' whenever the request
+     * might have arrived. Getting it wrong in the 'fail' direction is how one refund becomes two,
+     * which is why the default is to decide nothing and leave the existing ladder in charge.
+     *
+     * @return string|null 'fail', 'park', or null to defer
+     */
+    public function classifyRefundFailure(\Throwable $e): ?string
+    {
+        return null;
+    }
+
+    /**
      * Does the owner write their own instructions for how to pay, rather than the gateway collecting
      * the money? Cash only.
      */

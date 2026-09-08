@@ -324,6 +324,91 @@ class PayPalGateway extends PaymentGatewayDriver
         $owner->save();
     }
 
+    public function supportsRefunds(): bool
+    {
+        return true;
+    }
+
+    public function supportsPartialRefunds(): bool
+    {
+        return true;
+    }
+
+    /**
+     * The CAPTURE id a refund would be issued against.
+     *
+     * Shape is the only signal available. Stripe can test for a `pi_` prefix; PayPal ids are bare
+     * 17-character alphanumerics with nothing to match on, and transaction_reference also holds the
+     * TRANSLATED manual_payment sentinel for a sale somebody marked paid by hand - which is exactly
+     * what DemoService writes. Anything that is not capture-shaped gets Mark as Refunded instead,
+     * which is the honest answer.
+     *
+     * $leg is always null here: installments are Stripe-only.
+     */
+    public function refundReferenceFor(Sale $sale, ?\App\Models\SaleInstallment $leg = null): ?string
+    {
+        $reference = trim((string) $sale->transaction_reference);
+
+        return preg_match('/^[A-Z0-9]{17}$/', $reference) ? $reference : null;
+    }
+
+    public function refund(Sale $sale, ?float $amount, string $idempotencyKey, ?\App\Models\SaleInstallment $leg = null): string
+    {
+        $reference = $this->refundReferenceFor($sale, $leg);
+
+        if (! $reference) {
+            // Between the pre-check and here. \LogicException is the bucket that releases the claim
+            // AND reports a configuration fault rather than blaming PayPal.
+            throw new \LogicException('PayPal capture reference is missing for sale '.$sale->id.'.');
+        }
+
+        $credentials = $this->credentialsFor($sale->event?->user);
+
+        if (! $credentials) {
+            throw new \LogicException('PayPal credentials are unavailable for sale '.$sale->id.'.');
+        }
+
+        $currency = strtoupper((string) ($sale->event?->ticket_currency_code ?: 'USD'));
+
+        // A null amount means "everything PayPal still holds", which is NOT the same as the sale's
+        // expected total - an amount_mismatch sale is parked precisely because what arrived was not
+        // what we asked for. Sending no amount lets PayPal answer that question itself.
+        $body = $amount === null ? null : [
+            'value' => PayPalMoney::value($amount, $currency),
+            'currency_code' => $currency,
+        ];
+
+        return (new PayPalClient($credentials))->refundCapture($reference, $body, $idempotencyKey);
+    }
+
+    /**
+     * Did PayPal answer and refuse, or might the request have arrived?
+     *
+     * SaleRefundService's own ladder names Stripe's exception classes, and this driver throws
+     * Laravel's - so without this every failure, definite refusals included, would reach its
+     * conservative \Throwable arm and be parked. A parked claim holds its amount forever.
+     */
+    public function classifyRefundFailure(\Throwable $e): ?string
+    {
+        // No response at all: DNS, TLS, timeout. The request may well have been received.
+        if ($e instanceof \Illuminate\Http\Client\ConnectionException) {
+            return 'park';
+        }
+
+        if ($e instanceof \Illuminate\Http\Client\RequestException) {
+            $status = $e->response->status();
+
+            // 5xx means PayPal took the call and we do not know what it did with it. Never fail
+            // these: the owner would be told nothing moved, click again, and the buyer would be
+            // paid twice.
+            return $status >= 500 ? 'park' : 'fail';
+        }
+
+        // Unknown shape, so unknown outcome. Defer rather than guess - the existing ladder's
+        // \Throwable arm parks, which is the conservative answer.
+        return null;
+    }
+
     /**
      * PayPal does have a stable per-transaction page, unlike Payfast.
      *

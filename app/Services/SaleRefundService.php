@@ -127,6 +127,42 @@ class SaleRefundService
         // so no API-layer exception is ever caught by the first arm.
         try {
             $refundId = $driver->refund($sale, $fullCharge ? null : (float) $claim->amount, $claim->idempotency_key, $leg);
+        } catch (\Throwable $e) {
+            // Ask the driver first. The arms below name Stripe's exception classes literally, and a
+            // driver on Laravel's Http client throws RequestException / ConnectionException, which
+            // are plain \Exception subclasses - so without this every one of its failures, definite
+            // refusals included, would reach the conservative \Throwable arm and be parked forever.
+            //
+            // A driver that returns null (all of them but PayPal) leaves the ladder exactly as it
+            // was; \LogicException still wins outright, because "nothing left this machine" is a
+            // stronger statement than anything a driver can classify.
+            if (! $e instanceof \LogicException) {
+                $verdict = $driver->classifyRefundFailure($e);
+
+                if ($verdict === 'fail') {
+                    return $this->fail($claim, $e, 'gateway_refused');
+                }
+
+                if ($verdict === 'park') {
+                    return $this->park($claim, $e);
+                }
+            }
+
+            return $this->rethrowIntoLadder($e, $claim);
+        }
+
+        return $this->record($sale, $claim, $refundId);
+    }
+
+    /**
+     * The original Stripe-shaped ladder, unchanged in behaviour.
+     *
+     * Split out only so the driver hook above can run first without duplicating it.
+     */
+    private function rethrowIntoLadder(\Throwable $e, SaleRefund $claim): SaleRefundResult
+    {
+        try {
+            throw $e;
         } catch (\LogicException $e) {
             // Nothing left this machine. StripeClient's constructor throws Stripe's
             // InvalidArgumentException when the key is unset or malformed, and the driver throws
@@ -147,8 +183,6 @@ class SaleRefundService
             // person one manual check; wrongly failing costs the buyer a second refund.
             return $this->park($claim, $e);
         }
-
-        return $this->record($sale, $claim, $refundId);
     }
 
     /**
