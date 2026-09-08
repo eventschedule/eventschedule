@@ -16,12 +16,31 @@ class ClaimRole extends Mailable
 
     protected $event;
 
+    protected $role;
+
     /**
      * Create a new message instance.
+     *
+     * $role is WHO this invitation is for, and it has to be passed in. EventRepo dispatches one of
+     * these per invited performer, but every one of them used to recompute its own recipient as
+     * $event->role(), which is `roles->first(fn ($r) => $r->isTalent())` - the first act on the
+     * bill. On a three-act night that put act A's name in all three subjects, act A's email
+     * address into the sign-up link mailed to acts B and C, and act A's schedule behind their
+     * unsubscribe links, so B opting out silenced A.
+     *
+     * Nullable, with the old behaviour as the fallback, only because SendQueuedEmail serialises
+     * the whole Mailable onto the queue: a job written before this deploy has to deserialise.
      */
-    public function __construct($event)
+    public function __construct($event, $role = null)
     {
         $this->event = $event;
+        $this->role = $role;
+    }
+
+    /** The invited performer, falling back to the pre-deploy behaviour for a queued job. */
+    protected function invitedRole()
+    {
+        return $this->role ?: $this->event->role();
     }
 
     /**
@@ -30,7 +49,7 @@ class ClaimRole extends Mailable
     public function envelope(): Envelope
     {
         $event = $this->event;
-        $role = $event->role();
+        $role = $this->invitedRole();
         $user = $event->user;
         $curator = $event->curator();
 
@@ -57,7 +76,7 @@ class ClaimRole extends Mailable
     public function content(): Content
     {
         $event = $this->event;
-        $role = $event->role();
+        $role = $this->invitedRole();
         $user = $event->user;
         $curator = $event->curator();
 
@@ -95,7 +114,7 @@ class ClaimRole extends Mailable
 
     public function headers(): Headers
     {
-        $role = $this->event->role();
+        $role = $this->invitedRole();
 
         return new Headers(
             text: [

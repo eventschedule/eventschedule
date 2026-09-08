@@ -4,8 +4,8 @@
 
 {{ $event->name }}
 {{ $event->localStartsAt(true) }}
-@if($role)
-{{ $role->name }}
+@if($schedulerName)
+{{ $schedulerName }}
 @endif
 
 {{ __('messages.view_event') }}: {{ $event->getGuestUrl() }}

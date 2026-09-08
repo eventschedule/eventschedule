@@ -4,6 +4,7 @@ namespace App\Models;
 
 use App\Casts\EncryptedString;
 use App\Notifications\VerifyEmail as CustomVerifyEmail;
+use App\Services\AuditService;
 use App\Services\DemoService;
 use Illuminate\Contracts\Auth\MustVerifyEmail;
 use Illuminate\Database\Eloquent\Collection as EloquentCollection;
@@ -453,6 +454,116 @@ class User extends Authenticatable implements MustVerifyEmail
     public function webhooks()
     {
         return $this->hasMany(Webhook::class);
+    }
+
+    /**
+     * Adopt every ownerless schedule carrying this account's verified email address.
+     *
+     * This logic is not new - VerifyEmailController has run it since schedules could be
+     * auto-created - but it was only ever reachable from the email-verification LINK, and
+     * RegisteredUserController marks a new account verified inline the moment the six-digit code
+     * checks out. That guard condition is `(hosted && !testing) || !hosted || testing`, which is
+     * true for every combination, so every signup takes the inline path and the link is never
+     * sent. The claim therefore never ran for the one person it was written for: the act clicking
+     * the ClaimRole invitation we mailed them. The phone twin below IS wired into registration,
+     * which is why the SMS invitation works and the email one does not.
+     *
+     * Deliberately NOT bounded to schedules created in the last year, unlike claimRolesByPhone().
+     * The backlog of placeholders is years deep and reaching it is the point; a stale row here is
+     * a page nobody has ever been able to see, not a stale credential.
+     *
+     * Callers do not pass an address. The only address this may ever act on is the account's own,
+     * already-verified one - a parameter would be a way to get that wrong.
+     */
+    public function claimRolesByEmail(): bool
+    {
+        if (! $this->email || ! $this->hasVerifiedEmail()) {
+            return false;
+        }
+
+        $claimedIds = [];
+
+        DB::transaction(function () use (&$claimedIds) {
+            // ownerless(), not whereNull('user_id'): ConvertsLocationToVenue stamps the curator's
+            // id onto the venues it invents, so the placeholders likeliest to carry a real venue's
+            // address are exactly the ones a null check misses. notDemoSchedule() and is_deleted
+            // are new here too - unfollow() soft-deletes an ownerless row when its last follower
+            // leaves, and inheriting one of those would resurrect a page somebody removed.
+            // The two whereNulls are load-bearing, not belt and braces. ownerless() is "nobody
+            // holds an owner or admin pivot", and a REAL schedule can be in that state: it is the
+            // exact drift CheckData::checkRoleOwnership() exists to detect and repair. Such a row
+            // belongs to a paying customer, carries a verified address, and would otherwise be
+            // handed to anyone who registered with the address in roles.email - with user_id
+            // overwritten, so the owner would simply lose it. A placeholder never has either stamp
+            // (nothing verifies a contact nobody has claimed); a real schedule always has one,
+            // because that is half of what isClaimed() means.
+            //
+            // Full SELECT, deliberately: Role::saving recomputes description_html and its three
+            // siblings from in-memory attributes on every save, so narrowing the columns here to
+            // the three this loop touches would write NULL over the placeholder's description.
+            $roles = Role::whereEmail($this->email)
+                ->ownerless()
+                ->whereNull('email_verified_at')
+                ->whereNull('phone_verified_at')
+                ->notDemoSchedule()
+                ->where('is_deleted', false)
+                ->lockForUpdate()
+                ->get();
+
+            foreach ($roles as $role) {
+                $role->user_id = $this->id;
+                $role->save();
+
+                if ($role->markEmailAsVerified()) {
+                    event(new \Illuminate\Auth\Events\Verified($role));
+                }
+
+                // syncWithoutDetaching, not attach: the claimant may already follow this schedule
+                // (EventRepo attaches the creating user as a follower, and the follow-to-edit path
+                // puts strangers there too) and role_user is unique on (user_id, role_id).
+                $this->roles()->syncWithoutDetaching([$role->id => ['level' => 'owner', 'created_at' => now()]]);
+
+                $claimedIds[] = $role->id;
+            }
+        });
+
+        // users is written AFTER the roles transaction commits, never inside it. claimRolesByPhone()
+        // locks users first and roles second; doing the reverse here would give the pair a deadlock
+        // cycle, which is the failure ScheduleTransferService's docblock records as a live 1213.
+        if ($claimedIds && ! $this->default_role_id) {
+            $this->default_role_id = $claimedIds[0];
+            $this->saveQuietly();
+        }
+
+        foreach ($claimedIds as $roleId) {
+            AuditService::log(AuditService::SCHEDULE_CLAIM, $this->id, 'Role', $roleId);
+        }
+
+        return $claimedIds !== [];
+    }
+
+    /**
+     * Link past guest purchases made with this account's verified address.
+     *
+     * Extracted from VerifyEmailController alongside claimRolesByEmail() and for the same reason:
+     * it sat in the same unreachable block, so somebody who bought a ticket as a guest and later
+     * created an account never saw that ticket under Tickets.
+     */
+    public function claimSalesByEmail(): bool
+    {
+        if (! $this->email || ! $this->hasVerifiedEmail()) {
+            return false;
+        }
+
+        $claimed = false;
+
+        foreach (Sale::whereEmail($this->email)->whereNull('user_id')->get() as $sale) {
+            $sale->user_id = $this->id;
+            $sale->save();
+            $claimed = true;
+        }
+
+        return $claimed;
     }
 
     public function claimRolesByPhone(string $phone): bool

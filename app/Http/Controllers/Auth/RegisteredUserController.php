@@ -503,6 +503,14 @@ class RegisteredUserController extends Controller
             $user->save();
         }
 
+        // The email counterpart of the SMS claim below, and the reason the ClaimRole invitation
+        // we already mail has never worked: this controller verifies the address inline a few
+        // lines up, so VerifyEmailController - where this used to live - short-circuits on its own
+        // hasVerifiedEmail() guard and never runs. Placed before the SMS branch so a signup that
+        // carries both settles the email side first; both are idempotent.
+        $user->claimRolesByEmail();
+        $user->claimSalesByEmail();
+
         // Process SMS signup token - auto-verify phone and claim matching roles
         $smsToken = $request->sms_token ?? session('sms_token');
         if ($smsToken) {

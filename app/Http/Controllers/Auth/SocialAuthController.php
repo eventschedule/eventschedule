@@ -50,7 +50,7 @@ class SocialAuthController extends Controller
                 $user->update(['follow_consent_dismissed' => true]);
             }
             Auth::login($user, true);
-            $this->processSmsClaim($user);
+            $this->processPendingClaims($user);
             AuditService::log(AuditService::AUTH_GOOGLE_LOGIN, $user->id);
 
             return redirect()->intended(route('home', absolute: false));
@@ -91,7 +91,7 @@ class SocialAuthController extends Controller
                 $user->update(['follow_consent_dismissed' => true]);
             }
             Auth::login($user, true);
-            $this->processSmsClaim($user);
+            $this->processPendingClaims($user);
             AuditService::log(AuditService::AUTH_GOOGLE_LOGIN, $user->id);
 
             return redirect()->intended(route('home', absolute: false));
@@ -175,14 +175,26 @@ class SocialAuthController extends Controller
         session()->forget(['utm_params', 'utm_referrer_url', 'utm_landing_page', 'guest_language', 'referral_code']);
 
         Auth::login($user, true);
-        $this->processSmsClaim($user);
+        $this->processPendingClaims($user);
         AuditService::log(AuditService::AUTH_GOOGLE_LOGIN, $user->id, 'User', $user->id, null, null, 'new_account');
 
         return redirect()->intended(post_signup_redirect_url($user));
     }
 
-    private function processSmsClaim(User $user): void
+    /**
+     * Hand over anything already waiting for this person.
+     *
+     * Reached from all three Google branches, which is why the email half belongs here rather than
+     * only in RegisteredUserController: an OAuth signup issues no six-digit code, so without this
+     * every act who accepted our invitation with "Continue with Google" got an account and left
+     * their schedule behind. Google's assertion is stronger evidence than the code path anyway -
+     * :136 already stamps email_verified_at on the strength of it.
+     */
+    private function processPendingClaims(User $user): void
     {
+        $user->claimRolesByEmail();
+        $user->claimSalesByEmail();
+
         $smsToken = session()->pull('sms_token');
         if ($smsToken) {
             $smsPhone = Cache::get('sms_signup_'.$smsToken);

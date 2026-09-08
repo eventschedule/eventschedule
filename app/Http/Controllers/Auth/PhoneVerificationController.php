@@ -121,7 +121,11 @@ class PhoneVerificationController extends Controller
             $role->phone_verified_at = now();
             $role->save();
 
-            $user->roles()->attach($role->id, ['level' => 'owner', 'created_at' => now()]);
+            // syncWithoutDetaching, not attach: role_user is unique on (user_id, role_id) and
+            // EventRepo attaches the creating owner to every placeholder it mints as a follower,
+            // so the likeliest claimant already has a row here. attach() threw a raw 1062 - after
+            // $role->save() above had already committed the ownership half.
+            $user->roles()->syncWithoutDetaching([$role->id => ['level' => 'owner', 'created_at' => now()]]);
 
             if (! $user->default_role_id) {
                 $user->default_role_id = $role->id;

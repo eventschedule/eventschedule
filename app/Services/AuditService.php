@@ -67,6 +67,10 @@ class AuditService
 
     const SCHEDULE_TRANSFER_CANCEL = 'schedule.transfer_cancel';
 
+    // An ownerless placeholder gaining a real owner. Separate from the transfer family: nobody
+    // handed this over, so there is no counterparty and no invitation to correlate it with.
+    const SCHEDULE_CLAIM = 'schedule.claim';
+
     // Event actions
     const EVENT_CREATE = 'event.create';
 

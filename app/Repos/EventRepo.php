@@ -1577,15 +1577,30 @@ class EventRepo
                     }
 
                     if ($shouldSendEmail) {
+                        // $role->language_code, not the request locale: this is the fourth
+                        // argument SendQueuedEmail has always taken and this call has never
+                        // passed, so an invitation rendered in whatever language the CURATOR
+                        // happened to be using. The third stays null on purpose - a null roleId
+                        // is what keeps this on the platform mailer instead of metering it
+                        // against a schedule's own allowance and dropping it inside their SMTP
+                        // failure window.
                         if ($role->isVenue()) {
                             SendQueuedEmail::dispatch(
                                 new ClaimVenue($event),
-                                $role->email
+                                $role->email,
+                                null,
+                                $role->language_code
                             );
                         } elseif ($role->isTalent()) {
+                            // $role, explicitly: ClaimRole used to resolve its own recipient as
+                            // $event->role(), the FIRST talent on the bill, so every act after the
+                            // first was mailed about someone else and handed that someone's email
+                            // address and unsubscribe link.
                             SendQueuedEmail::dispatch(
-                                new ClaimRole($event),
-                                $role->email
+                                new ClaimRole($event, $role),
+                                $role->email,
+                                null,
+                                $role->language_code
                             );
                         }
                     } elseif ($shouldSendSms) {

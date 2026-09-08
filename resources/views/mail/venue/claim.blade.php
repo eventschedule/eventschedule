@@ -20,9 +20,9 @@
             <p style="margin: 10px 0; color: #666;">
                 {{ $event->localStartsAt(true) }}
             </p>
-            @if($role)
+            @if($schedulerName)
             <p style="margin: 10px 0; color: #666;">
-                {{ $role->name }}
+                {{ $schedulerName }}
             </p>
             @endif
         </div>

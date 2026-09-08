@@ -25,13 +25,29 @@ class ClaimVenue extends Mailable
     }
 
     /**
+     * The name that fills the subject's :role placeholder ("X scheduled an event at your venue").
+     *
+     * Event::role() is talent-only and returns null for a curator- or venue-created event with no
+     * performers on it, and both subject builders dereferenced ->name straight off it - so that
+     * event's venue invitation died inside the queued job, sending nothing and telling nobody. The
+     * organizer is the honest answer anyway: they are who scheduled it, and replyTo already points
+     * at them.
+     */
+    protected function schedulerName(): string
+    {
+        $event = $this->event;
+
+        return $event->role()?->name
+            ?: ($event->creatorRole?->name ?: ($event->user?->name ?: ''));
+    }
+
+    /**
      * Get the message envelope.
      */
     public function envelope(): Envelope
     {
         $event = $this->event;
         $venue = $event->venue;
-        $role = $event->role();
         $user = $event->user;
         $curator = $event->curator();
 
@@ -44,7 +60,7 @@ class ClaimVenue extends Mailable
         return new Envelope(
             subject: str_replace(
                 [':role', ':venue', ':event', ':curator'],
-                [$role->name, $venue->name, $event->name, $curator ? $curator->name : ''],
+                [$this->schedulerName(), $venue->name, $event->name, $curator ? $curator->name : ''],
                 $subject),
             replyTo: [
                 new Address($user->email, $user->name),
@@ -58,7 +74,6 @@ class ClaimVenue extends Mailable
     public function content(): Content
     {
         $event = $this->event;
-        $role = $event->role();
         $venue = $event->venue;
         $user = $event->user;
         $curator = $event->curator();
@@ -74,12 +89,12 @@ class ClaimVenue extends Mailable
             text: 'mail.venue.claim_text',
             with: [
                 'event' => $event,
-                'role' => $role,
+                'schedulerName' => $this->schedulerName(),
                 'venue' => $venue,
                 'user' => $user,
                 'subject' => str_replace(
                     [':role', ':venue', ':event', ':curator'],
-                    [$role->name, $venue->name, $event->name, $curator ? $curator->name : ''],
+                    [$this->schedulerName(), $venue->name, $event->name, $curator ? $curator->name : ''],
                     $subject),
                 'unsubscribe_url' => route('role.unsubscribe', ['subdomain' => $venue->subdomain]),
             ]
@@ -98,11 +113,14 @@ class ClaimVenue extends Mailable
 
     public function headers(): Headers
     {
-        $role = $this->event->role();
+        // The VENUE, not $event->role(): this mail is addressed to the venue, and unsubscribing
+        // the first performer on the bill instead is both useless to the recipient and a way to
+        // silence somebody else's invitations.
+        $venue = $this->event->venue;
 
         return new Headers(
             text: [
-                'List-Unsubscribe' => '<'.route('role.unsubscribe', ['subdomain' => $role->subdomain]).'>',
+                'List-Unsubscribe' => '<'.route('role.unsubscribe', ['subdomain' => $venue->subdomain]).'>',
                 'List-Unsubscribe-Post' => 'List-Unsubscribe=One-Click',
             ],
         );

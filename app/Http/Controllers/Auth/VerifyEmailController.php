@@ -4,8 +4,6 @@ namespace App\Http\Controllers\Auth;
 
 use App\Http\Controllers\Controller;
 use App\Http\Requests\UserEmailVerificationRequest;
-use App\Models\Role;
-use App\Models\Sale;
 use Illuminate\Auth\Events\Verified;
 use Illuminate\Http\RedirectResponse;
 
@@ -24,34 +22,12 @@ class VerifyEmailController extends Controller
         }
 
         if ($user->markEmailAsVerified()) {
-            $roles = Role::whereEmail($user->email)
-                ->whereNull('user_id')
-                ->get();
-
-            foreach ($roles as $role) {
-                $role->user_id = $user->id;
-                $role->save();
-
-                if ($role->markEmailAsVerified()) {
-                    event(new Verified($role));
-                }
-
-                $user->roles()->attach($role->id, ['level' => 'owner', 'created_at' => now()]);
-
-                if (! $user->default_role_id) {
-                    $user->default_role_id = $role->id;
-                    $user->save();
-                }
-            }
-
-            $tickets = Sale::whereEmail($user->email)
-                ->whereNull('user_id')
-                ->get();
-
-            foreach ($tickets as $ticket) {
-                $ticket->user_id = $user->id;
-                $ticket->save();
-            }
+            // Moved onto the model so RegisteredUserController can run it too. It never could
+            // before: that controller marks a new account verified inline once the six-digit code
+            // checks out, so this controller's own hasVerifiedEmail() guard above short-circuits
+            // and a schedule waiting for the person we invited was never handed over.
+            $user->claimRolesByEmail();
+            $user->claimSalesByEmail();
 
             event(new Verified($request->user()));
         }

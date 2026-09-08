@@ -1682,12 +1682,14 @@ class AdminController extends Controller
         // top row adds up. Mirrors the list query below plus its verification=unverified
         // filter exactly, so the card and the page it links to can never disagree - which is
         // why the is_deleted filter below has to track the list's own default.
-        $unverifiedCount = Role::whereNotNull('user_id')
+        // adminListable(), not a hand-copied whereNotNull('user_id') + demo pair: that copy said
+        // "has a user_id" while the list says "has a real owner", and the two stopped agreeing the
+        // moment ownership grew a definition. A venue ConvertsLocationToVenue invented carries the
+        // curator's user_id with only a follower pivot, so it counted here and was absent there.
+        $unverifiedCount = Role::adminListable()
             ->where('is_deleted', false)
             ->whereNull('email_verified_at')
             ->whereNull('phone_verified_at')
-            ->where('subdomain', '!=', DemoService::DEMO_ROLE_SUBDOMAIN)
-            ->where('subdomain', 'not like', 'demo-%')
             ->count();
 
         // Build query for role list (excluding demo roles). The adminListable* scopes are the

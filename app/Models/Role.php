@@ -13,6 +13,7 @@ use Illuminate\Auth\MustVerifyEmail as MustVerifyEmailTrait;
 use Illuminate\Contracts\Auth\MustVerifyEmail;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Notifications\Notifiable;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
 
 class Role extends Model implements MustVerifyEmail
@@ -1374,19 +1375,86 @@ class Role extends Model implements MustVerifyEmail
      * ownerless auto-created rows are also the long tail, so defaulting to them would bury the
      * paying customers this page exists to manage. The admin opts into them with ?owner=.
      */
+    /**
+     * Whether the schedule's nominal owner actually runs it.
+     *
+     * `user_id IS NOT NULL` is NOT the same question, and reading it as such is a live bug:
+     * ConvertsLocationToVenue::152 stamps the CURATOR's user_id onto every venue it invents while
+     * attaching that user only as a `follower`, so an auto-created placeholder can carry somebody
+     * else's id and still have nobody running it. RoleController::performMerge() has had this test
+     * inline since the merge paths were written; this is that test, lifted so the rest of the app
+     * can ask the same question the same way.
+     *
+     * The inverse, isClaimed(), is a THIRD thing again - it also demands a verified contact
+     * channel, so it answers false for a real owner who simply never clicked the confirmation
+     * link. Anything deciding whether a schedule is a placeholder wants THIS, not that; the
+     * AdminSchedulesUnverifiedCountTest population is exactly the set the two disagree on.
+     */
+    public function hasRealOwner(): bool
+    {
+        return (bool) $this->user_id && DB::table('role_user')
+            ->where('role_id', $this->id)
+            ->where('user_id', $this->user_id)
+            ->whereIn('level', ['owner', 'admin'])
+            ->exists();
+    }
+
+    /**
+     * Query-level mirror of hasRealOwner(). The exact complement of ownerless(), which is what
+     * lets adminListable() and adminListableUnclaimed() stay a partition: a row that satisfies
+     * neither, or both, would be missing from the admin schedules page or counted twice by it.
+     */
+    public function scopeOwned($query)
+    {
+        return $query->whereNotNull('roles.user_id')
+            ->whereExists(function ($sub) {
+                $sub->selectRaw('1')
+                    ->from('role_user')
+                    ->whereColumn('role_user.role_id', 'roles.id')
+                    ->whereColumn('role_user.user_id', 'roles.user_id')
+                    ->whereIn('role_user.level', ['owner', 'admin']);
+            });
+    }
+
+    /**
+     * Query-level mirror of hasRealOwner(), negated: the placeholder rows.
+     * Keep in sync with hasRealOwner().
+     *
+     * The whereNull arm is redundant against the NOT EXISTS (a null roles.user_id makes the
+     * whereColumn comparison null, so the subquery matches nothing and NOT EXISTS is true) and is
+     * kept because it states the common case and lets MySQL answer it without the subquery.
+     */
+    public function scopeOwnerless($query)
+    {
+        return $query->where(function ($q) {
+            $q->whereNull('roles.user_id')
+                ->orWhereNotExists(function ($sub) {
+                    $sub->selectRaw('1')
+                        ->from('role_user')
+                        ->whereColumn('role_user.role_id', 'roles.id')
+                        ->whereColumn('role_user.user_id', 'roles.user_id')
+                        ->whereIn('role_user.level', ['owner', 'admin']);
+                });
+        });
+    }
+
     public function scopeAdminListable($query)
     {
-        return $query->notDemoSchedule()->whereNotNull('user_id');
+        return $query->notDemoSchedule()->owned();
     }
 
     /**
      * The ownerless rows: venues and talent EventRepo::saveEvent() auto-creates while importing an
      * event. They take a subdomain via generateSubdomain() like any other schedule, which makes
      * them the likeliest squatter of a good name - and adminListable() hides every one of them.
+     *
+     * ownerless(), not whereNull('user_id'): the venues ConvertsLocationToVenue invents carry the
+     * curator's id and were invisible to this list, which is where an admin goes to find exactly
+     * that kind of row.
      */
     public function scopeAdminListableUnclaimed($query)
     {
-        return $query->notDemoSchedule()->whereNull('user_id');
+        return $query->notDemoSchedule()->ownerless();
     }
 
     /** Both of the above. */
