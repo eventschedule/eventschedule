@@ -5082,10 +5082,11 @@ return [
     'claim_done' => 'Este horario ya es tuyo.',
     'claim_wrong_account_heading' => 'Reclamar este horario',
     'claim_wrong_account' => ':name está registrado con :contact. Inicia sesión con esa dirección para reclamarlo.',
+    'claim_confirm_body' => ':name está registrado con la dirección de tu cuenta, así que puedes quedártelo. Al reclamarlo pasas a ser el propietario y puedes editar todo lo que hay en la página.',
     'claim_not_me_heading' => 'No soy yo',
-    'claim_not_me_body' => 'Si :name no eres tú, dínoslo. Si la dirección de contacto de esta página es tuya, se retirará de inmediato. Si no, pasaremos la solicitud al horario que la creó.',
+    'claim_not_me_body' => 'Si :name no eres tú, dínoslo. Si la dirección de contacto de esta página es tuya, se retirará de inmediato. Si no, tu solicitud queda registrada para su revisión.',
     'claim_not_me_confirm' => 'Informar sobre esta página',
     'claim_not_me_sign_in' => 'Inicia sesión o crea una cuenta primero, para que sepamos quién lo pide.',
     'claim_not_me_removed' => 'Esa página se ha retirado.',
-    'claim_not_me_reported' => 'Gracias. Hemos trasladado tu solicitud al horario que creó la página.',
+    'claim_not_me_reported' => 'Gracias. Lo hemos registrado y alguien lo revisará.',
 ];

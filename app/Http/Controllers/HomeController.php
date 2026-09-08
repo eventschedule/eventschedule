@@ -102,6 +102,16 @@ class HomeController extends Controller
             return redirect()->route('role.transfer.show', ['token' => $pendingTransfer]);
         }
 
+        // Somebody who followed "Claim this page" from a schedule the app created for them. Beside
+        // the handover above and for the same reason: their only tie to the app is the page they
+        // were offered, so the new-user bounce to /getting-started further down would strand them.
+        // Sending them back to the claim page settles it either way - the address matched and
+        // registration already handed the schedule over, or it did not and the page is where the
+        // masked hint saying which address does is rendered.
+        if ($pendingClaim = session()->pull('pending_claim')) {
+            return redirect()->route('role.claim.start', ['subdomain' => $pendingClaim]);
+        }
+
         $subdomain = session('pending_follow');
 
         if (! $subdomain) {

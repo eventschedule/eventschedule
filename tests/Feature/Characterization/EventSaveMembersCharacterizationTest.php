@@ -92,7 +92,7 @@ class EventSaveMembersCharacterizationTest extends TestCase
         ]);
     }
 
-    public function test_existing_unclaimed_member_is_updated_in_place(): void
+    public function test_an_existing_unclaimed_member_is_updated_in_place_by_someone_who_can_edit_it(): void
     {
         $owner = $this->createOwner();
         $role = $this->createRole($owner, 'venue');
@@ -102,6 +102,9 @@ class EventSaveMembersCharacterizationTest extends TestCase
         $unclaimed->subdomain = 'member'.strtolower(Str::random(6));
         $unclaimed->type = 'talent';
         $unclaimed->save();
+        // The pivot EventRepo attaches to whoever creates a placeholder, and the thing
+        // Role::isEditableBy() reads.
+        $unclaimed->users()->attach($owner->id, ['level' => 'follower']);
 
         $this->postCreateEvent($owner, $role, [
             'members' => [
@@ -115,6 +118,42 @@ class EventSaveMembersCharacterizationTest extends TestCase
         $unclaimed->refresh();
         $this->assertSame('New Name', $unclaimed->name);
         $this->assertSame('member@gmail.com', $unclaimed->email);
+        $this->assertDatabaseHas('event_role', [
+            'event_id' => $this->latestEvent()->id,
+            'role_id' => $unclaimed->id,
+        ]);
+    }
+
+    public function test_a_stranger_cannot_rewrite_an_unclaimed_members_contact(): void
+    {
+        // members[] is keyed by an encoded role id straight off the request and nothing here ties
+        // the sender to the row. That was survivable while a typed address granted nothing, but
+        // /{subdomain}/claim now hands a placeholder to whoever holds the address on it - so
+        // writing your own address onto somebody else's page and then claiming it would have been
+        // two requests. The act is still ATTACHED to the event; only its details are read-only.
+        $stranger = $this->createOwner();
+        $role = $this->createRole($stranger, 'venue');
+
+        $unclaimed = new Role;
+        $unclaimed->name = 'Taylor Swift';
+        $unclaimed->email = 'booking@gmail.com';
+        $unclaimed->subdomain = 'member'.strtolower(Str::random(6));
+        $unclaimed->type = 'talent';
+        $unclaimed->save();
+
+        $this->postCreateEvent($stranger, $role, [
+            'members' => [
+                UrlUtils::encodeId($unclaimed->id) => [
+                    'name' => 'Hijacked',
+                    'email' => 'attacker@gmail.com',
+                ],
+            ],
+        ])->assertRedirect();
+
+        $unclaimed->refresh();
+        $this->assertSame('Taylor Swift', $unclaimed->name);
+        $this->assertSame('booking@gmail.com', $unclaimed->email);
+        $this->assertFalse($unclaimed->isEditableBy($stranger));
         $this->assertDatabaseHas('event_role', [
             'event_id' => $this->latestEvent()->id,
             'role_id' => $unclaimed->id,

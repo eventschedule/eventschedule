@@ -5196,10 +5196,11 @@ return [
     'claim_done' => 'This schedule is yours now.',
     'claim_wrong_account_heading' => 'Claim this schedule',
     'claim_wrong_account' => ':name is registered to :contact. Sign in with that address to claim it.',
+    'claim_confirm_body' => ':name is registered to the address on your account, so it is yours to take. Claiming it makes you the owner and lets you edit everything on the page.',
     'claim_not_me_heading' => 'This is not me',
-    'claim_not_me_body' => 'If :name is not you, tell us. If you hold the contact address on this page, it comes down straight away. If not, we pass the request to the schedule that created it.',
+    'claim_not_me_body' => 'If :name is not you, tell us. If you hold the contact address on this page, it comes down straight away. If not, your request is recorded for review.',
     'claim_not_me_confirm' => 'Report this page',
     'claim_not_me_sign_in' => 'Sign in or create an account first, so we know who is asking.',
     'claim_not_me_removed' => 'That page has been removed.',
-    'claim_not_me_reported' => 'Thank you. We have passed that on to the schedule that created the page.',
+    'claim_not_me_reported' => 'Thank you. We have recorded that, and someone will look at it.',
 ];

@@ -174,6 +174,37 @@ class ScheduleClaimByEmailTest extends TestCase
         $this->assertFalse($act->autoAcceptsEventFrom(null, $stranger), 'and nobody else is granted anything');
     }
 
+    public function test_the_new_owners_first_settings_save_does_not_throw_the_pre_approval_away(): void
+    {
+        // role/edit.blade.php renders the approved-schedules list only for a NON-talent schedule,
+        // and RoleController::update() used to write the column unconditionally from request input.
+        // So a claimed talent's first save nulled it, silently undoing the pre-approval and
+        // producing the exact failure it exists to prevent - one save later instead of at once.
+        $organizer = $this->createOwner();
+        $curator = $this->createRole($organizer, 'venue', ['name' => 'Ba-Be Bar']);
+
+        $act = $this->placeholder(['email' => 'band@gmail.com', 'type' => 'talent']);
+        $event = $this->createEvent($curator, ['name' => 'Double Bill', 'creator_role_id' => $curator->id]);
+        $event->roles()->attach($act->id, ['is_accepted' => true]);
+
+        $this->register('band@gmail.com');
+        $act = $act->fresh();
+        $this->assertTrue($act->autoAcceptsEventFrom(null, $curator));
+
+        $newOwner = User::whereEmail('band@gmail.com')->firstOrFail();
+        $this->actingAs($newOwner)->put(route('role.update', ['subdomain' => $act->subdomain]), [
+            'name' => $act->name,
+            'email' => $act->email,
+            'new_subdomain' => $act->subdomain,
+            'timezone' => $act->timezone,
+        ])->assertRedirect();
+
+        $this->assertTrue(
+            $act->fresh()->autoAcceptsEventFrom(null, $curator),
+            'the promoter who invited them still does not need approval'
+        );
+    }
+
     public function test_a_pending_listing_does_not_earn_a_pre_approval(): void
     {
         // Only what the page was ALREADY doing is preserved. A declined or never-accepted pivot is

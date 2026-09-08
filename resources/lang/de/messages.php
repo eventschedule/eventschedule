@@ -5086,10 +5086,11 @@ return [
     'claim_done' => 'Dieser Zeitplan gehört jetzt Ihnen.',
     'claim_wrong_account_heading' => 'Diesen Zeitplan beanspruchen',
     'claim_wrong_account' => ':name ist auf :contact registriert. Melden Sie sich mit dieser Adresse an, um ihn zu beanspruchen.',
+    'claim_confirm_body' => ':name ist auf die Adresse Ihres Kontos registriert, Sie können sie also übernehmen. Mit dem Beanspruchen werden Sie Eigentümer und können alles auf der Seite bearbeiten.',
     'claim_not_me_heading' => 'Das bin ich nicht',
-    'claim_not_me_body' => 'Wenn :name nicht Sie sind, sagen Sie uns Bescheid. Wenn Ihnen die Kontaktadresse auf dieser Seite gehört, wird sie sofort entfernt. Andernfalls leiten wir die Anfrage an den Zeitplan weiter, der sie erstellt hat.',
+    'claim_not_me_body' => 'Wenn :name nicht Sie sind, sagen Sie uns Bescheid. Wenn Ihnen die Kontaktadresse auf dieser Seite gehört, wird sie sofort entfernt. Andernfalls wird Ihre Anfrage zur Prüfung festgehalten.',
     'claim_not_me_confirm' => 'Diese Seite melden',
     'claim_not_me_sign_in' => 'Melden Sie sich zuerst an oder erstellen Sie ein Konto, damit wir wissen, wer die Anfrage stellt.',
     'claim_not_me_removed' => 'Diese Seite wurde entfernt.',
-    'claim_not_me_reported' => 'Vielen Dank. Wir haben das an den Zeitplan weitergeleitet, der die Seite erstellt hat.',
+    'claim_not_me_reported' => 'Vielen Dank. Wir haben das festgehalten, und jemand wird es sich ansehen.',
 ];

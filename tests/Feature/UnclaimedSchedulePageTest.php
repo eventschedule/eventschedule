@@ -89,22 +89,36 @@ class UnclaimedSchedulePageTest extends TestCase
 
     public function test_the_page_is_never_indexable(): void
     {
-        // Even after an admin verifies the address by hand, which is one click away from the
-        // ?owner=unclaimed list and used to flip the whole population to "index, follow".
-        //
         // Two independent mechanisms hold this up and EITHER ONE is sufficient: the view passes
-        // :no-index explicitly, and app-guest's own rule now asks about user_id as well as the
-        // contact columns. Reverting one and finding this test still green does NOT mean it pins
-        // nothing - verified by removing each alone (still passes) and both together (fails).
-        // Keep both: the explicit prop states the intent, the layout rule catches a view that
-        // forgets it.
-        $placeholder = $this->placeholder(['email' => 'band@gmail.com', 'email_verified_at' => now()]);
+        // :no-index explicitly, and app-guest's own rule asks about user_id as well as the contact
+        // columns. Reverting one and finding this test still green does NOT mean it pins nothing -
+        // verified by removing each alone (still passes) and both together (fails). Keep both: the
+        // explicit prop states the intent, the layout rule catches a view that forgets it.
+        $placeholder = $this->placeholder(['email' => 'band@gmail.com']);
         $this->listedOn($placeholder);
 
         $this->get($this->url($placeholder))
             ->assertOk()
             ->assertSee('noindex, nofollow', false)
             ->assertDontSee('index, follow"', false);
+    }
+
+    public function test_a_verified_contact_on_an_ownerless_row_withdraws_the_page_entirely(): void
+    {
+        // AdminController::verifyScheduleEmail() stamps a verified address on whatever row it is
+        // handed, one click from the ?owner=unclaimed list, and RoleController::verify() does the
+        // same for anyone holding the link. isClaimable() is what the page, getClaimUrl() and the
+        // two buttons all now agree on, so such a row simply stops offering a claim page rather
+        // than rendering one whose buttons bounce to the marketing home page.
+        $placeholder = $this->placeholder(['email' => 'band@gmail.com']);
+        $this->listedOn($placeholder);
+        $this->get($this->url($placeholder))->assertOk();
+
+        $placeholder->email_verified_at = now();
+        $placeholder->saveQuietly();
+
+        $this->get($this->url($placeholder))->assertRedirect();
+        $this->assertSame('', $placeholder->fresh()->getClaimUrl());
     }
 
     public function test_the_page_carries_nothing_that_belongs_to_an_owner(): void
@@ -241,8 +255,16 @@ class UnclaimedSchedulePageTest extends TestCase
         // holding the address is the entire proof this door accepts.
         $claimant = \App\Models\User::factory()->create(['email' => 'band@gmail.com', 'email_verified_at' => now()]);
 
+        // The GET only renders: ownership must not move because something fetched a URL, and the
+        // act should be able to read the page before deciding.
         $this->actingAs($claimant)
             ->get(route('role.claim.start', ['subdomain' => $placeholder->subdomain]))
+            ->assertOk()
+            ->assertSee(__('messages.claim_strip_cta'));
+        $this->assertNull($placeholder->fresh()->user_id, 'a GET must not transfer ownership');
+
+        $this->actingAs($claimant)
+            ->post(route('role.claim.confirm', ['subdomain' => $placeholder->subdomain]))
             ->assertRedirect();
 
         $placeholder->refresh();
@@ -266,17 +288,75 @@ class UnclaimedSchedulePageTest extends TestCase
         $this->assertNull($placeholder->fresh()->user_id);
     }
 
+    public function test_a_page_with_nothing_to_verify_against_offers_no_claim_screen(): void
+    {
+        // role/claim.blade.php's entire content is the masked address, so rendering it for a row
+        // that carries none produces "... is registered to . Sign in with that address to claim
+        // it." The strip already hides the button here, but the URL is public and guessable.
+        $placeholder = $this->placeholder();
+        $visitor = $this->createOwner();
+
+        $this->actingAs($visitor)
+            ->get(route('role.claim.start', ['subdomain' => $placeholder->subdomain]))
+            ->assertRedirect($placeholder->getClaimUrl());
+    }
+
+    public function test_a_signed_out_claim_comes_back_to_the_page_after_signing_up(): void
+    {
+        // Without this the journey ends on the dashboard: if the address matched, the schedule was
+        // handed over at registration and nothing said so; if it did not, it was a dead end.
+        $placeholder = $this->placeholder(['email' => 'band@gmail.com']);
+
+        $this->get(route('role.claim.start', ['subdomain' => $placeholder->subdomain]))
+            ->assertRedirect();
+        $this->assertSame($placeholder->subdomain, session('pending_claim'));
+        $this->assertSame('claim', signup_intent_from_session());
+
+        $this->post('/sign_up', [
+            'name' => 'Someone Else',
+            'email' => 'nottheband@gmail.com',
+            'password' => 'password',
+        ])->assertSessionHasNoErrors();
+
+        $this->get(route('home'))
+            ->assertRedirect(route('role.claim.start', ['subdomain' => $placeholder->subdomain]));
+    }
+
+    public function test_a_name_in_another_script_is_not_rendered_backwards(): void
+    {
+        // Page direction follows the SCHEDULE's language, and a name does not have to be in it: an
+        // English-language promoter listing a Hebrew act is the ordinary case for this feature.
+        $placeholder = $this->placeholder(['name' => 'להקת הנודדים']);
+        $this->listedOn($placeholder);
+
+        $html = $this->get($this->url($placeholder))->assertOk()->getContent();
+
+        $this->assertMatchesRegularExpression(
+            '/<h1[^>]*dir="rtl"/',
+            $html,
+            'the schedule name carries its own direction'
+        );
+    }
+
     public function test_holding_the_address_takes_the_page_down(): void
     {
         $placeholder = $this->placeholder(['email' => 'band@gmail.com']);
         $holder = \App\Models\User::factory()->create(['email' => 'band@gmail.com', 'email_verified_at' => now()]);
+        $subdomain = $placeholder->subdomain;
 
         $this->actingAs($holder)
             ->post(route('role.claim.not_me.submit', ['subdomain' => $placeholder->subdomain]))
             ->assertRedirect();
 
-        $this->assertTrue((bool) $placeholder->fresh()->is_deleted);
+        $placeholder->refresh();
+        $this->assertTrue((bool) $placeholder->is_deleted);
         $this->assertDatabaseHas('audit_logs', ['action' => AuditService::SCHEDULE_TAKEDOWN, 'model_id' => $placeholder->id]);
+
+        // Through ScheduleDeletionService, not a bare is_deleted write: it is the only thing that
+        // releases the name. Otherwise the tombstone held the act's own subdomain forever, so the
+        // person who had just asked us to take their page down could never register it.
+        $this->assertNotSame($subdomain, $placeholder->subdomain, 'the name is released');
+        $this->assertSame($subdomain, $placeholder->subdomain_before_delete);
     }
 
     public function test_anyone_else_reporting_a_page_records_it_without_removing_it(): void

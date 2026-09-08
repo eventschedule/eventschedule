@@ -1375,6 +1375,8 @@ class Role extends Model implements MustVerifyEmail
      * ownerless auto-created rows are also the long tail, so defaulting to them would bury the
      * paying customers this page exists to manage. The admin opts into them with ?owner=.
      */
+    private ?bool $hasRealOwnerMemo = null;
+
     /**
      * Whether the schedule's nominal owner actually runs it.
      *
@@ -1392,7 +1394,14 @@ class Role extends Model implements MustVerifyEmail
      */
     public function hasRealOwner(): bool
     {
-        return (bool) $this->user_id && DB::table('role_user')
+        // Memoised per instance. Two calls per act on the event page, times every act on the bill,
+        // on the highest-traffic page type in the app. An instance property, never a static: a
+        // static would survive RefreshDatabase and answer for the wrong row in the next test.
+        if ($this->hasRealOwnerMemo !== null) {
+            return $this->hasRealOwnerMemo;
+        }
+
+        return $this->hasRealOwnerMemo = (bool) $this->user_id && DB::table('role_user')
             ->where('role_id', $this->id)
             ->where('user_id', $this->user_id)
             ->whereIn('level', ['owner', 'admin'])
@@ -1427,6 +1436,23 @@ class Role extends Model implements MustVerifyEmail
      * verified stamp, because nothing verifies a contact nobody has claimed; a real schedule
      * always carries one, because that is half of what isClaimed() means.
      */
+    /**
+     * In-memory mirror of scopeClaimable(). Keep in sync with it.
+     *
+     * The two used to disagree, and the gap was reachable: AdminController::verifyScheduleEmail()
+     * stamps a verified address on whatever row it is handed, including an ownerless one, one
+     * click from the ?owner=unclaimed list. getClaimUrl() only asked about ownership, so it kept
+     * handing out a URL whose buttons then bounced off claimTarget() to the marketing home page.
+     */
+    public function isClaimable(): bool
+    {
+        return ! $this->is_deleted
+            && ! $this->email_verified_at
+            && ! $this->phone_verified_at
+            && ! is_demo_role($this)
+            && ! $this->hasRealOwner();
+    }
+
     public function scopeClaimable($query)
     {
         return $query->ownerless()
@@ -2072,7 +2098,7 @@ class Role extends Model implements MustVerifyEmail
      */
     public function getClaimUrl(): string
     {
-        if ($this->is_deleted || $this->hasRealOwner() || is_demo_role($this)) {
+        if (! $this->isClaimable()) {
             return '';
         }
 

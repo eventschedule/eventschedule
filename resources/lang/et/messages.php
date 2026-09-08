@@ -5101,10 +5101,11 @@ return [
     'claim_done' => 'See ajakava kuulub nüüd sulle.',
     'claim_wrong_account_heading' => 'Võta see ajakava enda omaks',
     'claim_wrong_account' => ':name on registreeritud aadressile :contact. Logi sisse selle aadressiga, et see enda omaks võtta.',
+    'claim_confirm_body' => ':name on registreeritud sinu konto aadressile, seega saad selle enda omaks võtta. Omaksvõtmisega saad omanikuks ja võid muuta kõike, mis lehel on.',
     'claim_not_me_heading' => 'See ei ole mina',
-    'claim_not_me_body' => 'Kui :name ei ole sina, anna meile teada. Kui sellel lehel olev kontaktaadress kuulub sulle, eemaldatakse leht kohe. Kui mitte, edastame taotluse ajakavale, kes selle lõi.',
+    'claim_not_me_body' => 'Kui :name ei ole sina, anna meile teada. Kui sellel lehel olev kontaktaadress kuulub sulle, eemaldatakse leht kohe. Kui mitte, märgitakse sinu taotlus ülevaatamiseks üles.',
     'claim_not_me_confirm' => 'Teata sellest lehest',
     'claim_not_me_sign_in' => 'Logi esmalt sisse või loo konto, et teaksime, kes küsib.',
     'claim_not_me_removed' => 'See leht on eemaldatud.',
-    'claim_not_me_reported' => 'Aitäh. Edastasime selle ajakavale, kes lehe lõi.',
+    'claim_not_me_reported' => 'Aitäh. Oleme selle üles märkinud ja keegi vaatab selle üle.',
 ];

@@ -41,6 +41,7 @@ use App\Services\DigitalOceanService;
 use App\Services\EmailService;
 use App\Services\MetaAdsService;
 use App\Services\OneSignalService;
+use App\Services\ScheduleDeletionService;
 use App\Services\ScheduleTransferService;
 use App\Services\SmsService;
 use App\Services\UsageTrackingService;
@@ -1753,7 +1754,11 @@ class RoleController extends Controller
                 .(str_contains($domain, '.') ? mb_substr($domain, mb_strrpos($domain, '.')) : '');
         }
 
-        return str_repeat('*', max(0, mb_strlen($value) - 3)).mb_substr($value, -3);
+        // The tail is capped at a third of the value, so a short one cannot come back unmasked:
+        // without this, anything three characters or fewer was returned verbatim.
+        $keep = min(3, (int) floor(mb_strlen($value) / 3));
+
+        return str_repeat('*', max(0, mb_strlen($value) - $keep)).($keep > 0 ? mb_substr($value, -$keep) : '');
     }
 
     /**
@@ -1783,20 +1788,45 @@ class RoleController extends Controller
             );
         }
 
-        if ($this->userHoldsContactFor($user, $role)) {
-            if ($user->claimSchedule($role, $role->email && strcasecmp((string) $role->email, (string) $user->email) === 0 ? 'email' : 'phone')) {
-                return redirect(app_url(route('role.view_admin', ['subdomain' => $role->subdomain, 'tab' => 'schedule'], false)))
-                    ->with('message', __('messages.claim_done'));
-            }
-
-            return redirect(app_url())->with('error', __('messages.invalid_request'));
+        // Nothing on the row to prove control of, so there is no claim to offer and no address to
+        // name. The strip already hides the button in this case, but the URL is public and
+        // guessable, and role/claim.blade.php's whole content is the masked address - rendering it
+        // with an empty one produces "... is registered to . Sign in with that address".
+        if (! $role->email && ! $role->phone) {
+            return redirect($role->getClaimUrl() ?: app_url());
         }
 
+        // This GET only ever RENDERS. Taking ownership moves user_id, mints an owner pivot, stamps
+        // a verified contact, sets default_role_id and rewrites approved_subdomains, and none of
+        // that may happen because something fetched a URL: a link prefetcher, a mail scanner or an
+        // <img src> on any third-party page would otherwise have done it. It also means the act can
+        // read the page before deciding. claimConfirm() below is the POST that acts.
         return response()->view('role.claim', [
             'role' => $role,
             'fonts' => array_values(array_filter([$role->font_family])),
+            'holdsContact' => $this->userHoldsContactFor($user, $role),
             'maskedContact' => $this->maskContact((string) ($role->email ?: $role->phone)),
         ]);
+    }
+
+    /** Take ownership. The POST half of claimStart(). */
+    public function claimConfirm(Request $request, $subdomain)
+    {
+        $role = $this->claimTarget($subdomain);
+        $user = $request->user();
+
+        if (! $role || ! $user || ! $this->userHoldsContactFor($user, $role)) {
+            return redirect(app_url())->with('error', __('messages.invalid_request'));
+        }
+
+        $channel = $role->email && strcasecmp((string) $role->email, (string) $user->email) === 0 ? 'email' : 'phone';
+
+        if (! $user->claimSchedule($role, $channel)) {
+            return redirect(app_url())->with('error', __('messages.invalid_request'));
+        }
+
+        return redirect(app_url(route('role.view_admin', ['subdomain' => $role->subdomain, 'tab' => 'schedule'], false)))
+            ->with('message', __('messages.claim_done'));
     }
 
     /** Whether this account already proves control of the contact on the row. */
@@ -1854,14 +1884,18 @@ class RoleController extends Controller
         }
 
         if ($this->userHoldsContactFor($user, $role)) {
-            $role->is_deleted = true;
-            $role->save();
-
-            AuditService::log(AuditService::SCHEDULE_TAKEDOWN, $user->id, 'Role', $role->id, null, null, 'verified');
+            // Through the service, not a bare is_deleted write. Role.php keeps subdomain,
+            // is_deleted and subdomain_before_delete out of $fillable precisely so this is the only
+            // thing that moves them as a set, and only it releases the name. Setting the flag by
+            // hand left the tombstone holding the act's own subdomain forever, so the person who
+            // had just asked us to take their page down could never register that name.
+            app(ScheduleDeletionService::class)->markDeleted($role, $user->id, AuditService::SCHEDULE_TAKEDOWN);
 
             return redirect(app_url())->with('message', __('messages.claim_not_me_removed'));
         }
 
+        // Recorded, and that is all - deliberately. There is no notification behind this yet, so
+        // the copy says "recorded" and not "passed on"; an admin reads it in the audit log.
         AuditService::log(AuditService::SCHEDULE_TAKEDOWN_REQUESTED, $user->id, 'Role', $role->id);
 
         return redirect(app_url())->with('message', __('messages.claim_not_me_reported'));
@@ -1981,7 +2015,7 @@ class RoleController extends Controller
         // somebody really runs but never verified a contact on is NOT claimed, and printing "is
         // this you?" on it would be offering a stranger a page its owner is sitting in. That
         // population keeps the redirect it has always had, immediately below.
-        if (! $role->hasRealOwner()) {
+        if ($role->isClaimable()) {
             return $this->viewGuestUnclaimed($request, $role, $slug, $id, $date);
         }
 
@@ -5169,8 +5203,14 @@ class RoleController extends Controller
             $role->custom_labels = ! empty($customLabels) ? $customLabels : null;
         }
 
-        $approvedSubdomains = array_filter(array_map('trim', $request->input('approved_subdomains', [])));
-        $role->approved_subdomains = ! empty($approvedSubdomains) ? array_values($approvedSubdomains) : null;
+        // Gated on the sentinel, not on the values: role/edit.blade.php renders this list only for
+        // a non-talent schedule, so an unconditional write nulled the column on every talent save.
+        // A claim pre-approves the schedules already listing the act (User::preserveExistingListers)
+        // and the act's first visit to their own settings page used to throw that away silently.
+        if ($request->boolean('approved_subdomains_submitted')) {
+            $approvedSubdomains = array_filter(array_map('trim', $request->input('approved_subdomains', [])));
+            $role->approved_subdomains = ! empty($approvedSubdomains) ? array_values($approvedSubdomains) : null;
+        }
 
         // Handle default curator schedules
         if ($request->has('default_curator_ids') && ! $role->isCurator()) {

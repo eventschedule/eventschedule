@@ -695,7 +695,26 @@ class EventRepo
                     $roleId = UrlUtils::decodeId($memberId);
                     $role = Role::findOrFail($roleId);
 
-                    if (! $role->isClaimed()) {
+                    // NOTE the venue branch above deliberately carries no such guard. Venues
+                    // already have a sanctioned takeover with no proof at all - the "I manage this
+                    // venue" checkbox, EventRepo::claimVenueOwnership(), reachable from the AI
+                    // import by any signed-in user - so guarding the contact write there would
+                    // break that flow while closing nothing. Talent has no equivalent, which is
+                    // why the escalation this guard fixes was newly reachable and venues' is not.
+                    //
+                    // isEditableBy, not just "unclaimed". $memberId is an arbitrary encoded role id
+                    // off the request and nothing here checks that the sender has anything to do
+                    // with the row, so overwriting the contact on any placeholder used to be open
+                    // to anyone who could edit any schedule. That was survivable while a typed
+                    // address granted nothing, but /{subdomain}/claim now hands a placeholder to
+                    // whoever holds the address on it - so writing my own address onto somebody
+                    // else's page and then claiming it would have been two requests.
+                    //
+                    // The organizer who created the row is unaffected: EventRepo attaches them as a
+                    // follower at creation, which is exactly what isEditableBy() reads. Strangers
+                    // cannot acquire that pivot either, because follow() refuses an ownerless
+                    // schedule.
+                    if (! $role->isClaimed() && $role->isEditableBy($user)) {
                         if (! empty($member['name'])) {
                             $role->name = $member['name'];
                         }

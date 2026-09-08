@@ -30,6 +30,11 @@
                          // does not - the same reasoning components/needs-attention.blade.php uses.
     $appName = config('app.name');
     $canClaim = (bool) ($role->email || $role->phone);
+    // Page direction follows the schedule's language, but a name does not have to be in it: an
+    // English-language promoter listing a Hebrew act is the ordinary case here, and without a per
+    // element dir that name renders left to right. Same treatment every other guest surface gives
+    // user text - see role/show-guest.blade.php and event/show-guest.blade.php.
+    $lang = $role->displayLanguageCode();
 @endphp
 
 <div class="container mx-auto max-w-3xl px-0 sm:px-5 pt-4 pb-20 sm:pb-8">
@@ -44,13 +49,13 @@
             <div class="min-w-0">
                 <h2 id="claim-strip-heading" class="text-base font-semibold text-gray-900 dark:text-gray-100">
                     @if ($createdBy)
-                        <x-user-text>{{ __('messages.claim_strip_title', ['schedule' => $createdBy->translatedName()]) }}</x-user-text>
+                        <x-user-text dir="{{ content_dir_for_language($createdBy->translatedName(), $lang) }}">{{ __('messages.claim_strip_title', ['schedule' => $createdBy->translatedName()]) }}</x-user-text>
                     @else
                         {{ __('messages.claim_strip_title_generic') }}
                     @endif
                 </h2>
                 <p class="mt-1 text-sm text-gray-600 dark:text-gray-400">
-                    <x-user-text>{{ __('messages.claim_strip_body', ['name' => $role->translatedName(), 'app' => $appName]) }}</x-user-text>
+                    <x-user-text dir="{{ content_dir_for_language($role->translatedName(), $lang) }}">{{ __('messages.claim_strip_body', ['name' => $role->translatedName(), 'app' => $appName]) }}</x-user-text>
                 </p>
 
                 <div class="mt-4 flex flex-wrap items-center gap-x-5 gap-y-3">
@@ -82,11 +87,12 @@
 
     <div class="bg-white/95 dark:bg-gray-900/95 backdrop-blur-sm sm:rounded-2xl p-6 sm:p-8">
         <h1 class="text-2xl font-bold text-gray-900 dark:text-gray-100"
+            dir="{{ content_dir_for_language($role->translatedName(), $lang) }}"
             style="font-family: '{{ str_replace('_', ' ', $role->font_family) }}', sans-serif;">
             <x-user-text>{{ $role->translatedName() }}</x-user-text>
         </h1>
         <p class="mt-1 text-sm text-gray-500 dark:text-gray-400">
-            {{ __('messages.' . $role->type) }}@if ($role->city), <x-user-text>{{ $role->city }}</x-user-text>@endif
+            {{ __('messages.' . $role->type) }}@if ($role->city), <x-user-text dir="{{ content_dir_for_language($role->city, $lang) }}">{{ $role->city }}</x-user-text>@endif
         </p>
 
         <h2 class="mt-8 text-sm font-semibold uppercase tracking-wide text-gray-500 dark:text-gray-400">
@@ -101,14 +107,15 @@
         <ul class="mt-3 divide-y divide-gray-200 dark:divide-gray-700">
             @foreach ($events as $event)
             <li class="py-3 flex flex-col gap-1">
-                <a href="{{ $event->getCanonicalUrl() }}" class="text-sm font-medium text-gray-900 dark:text-gray-100 hover:underline">
+                <a href="{{ $event->getCanonicalUrl() }}" class="text-sm font-medium text-gray-900 dark:text-gray-100 hover:underline"
+                   dir="{{ content_dir_for_language($event->translatedName(), $lang) }}">
                     <x-user-text>{{ $event->translatedName() }}</x-user-text>
                 </a>
                 <span class="text-sm text-gray-600 dark:text-gray-400">
-                    {{ $event->localStartsAt(true) }}@if ($event->venue), <x-user-text>{{ $event->venue->translatedName() }}</x-user-text>@endif
+                    {{ $event->localStartsAt(true) }}@if ($event->venue), <x-user-text dir="{{ content_dir_for_language($event->venue->translatedName(), $lang) }}">{{ $event->venue->translatedName() }}</x-user-text>@endif
                 </span>
                 @if ($event->creatorRole)
-                <span class="text-xs text-gray-500 dark:text-gray-400">
+                <span class="text-xs text-gray-500 dark:text-gray-400" dir="{{ content_dir_for_language($event->creatorRole->translatedName(), $lang) }}">
                     <x-user-text>{{ __('messages.claim_strip_listed_by', ['schedule' => $event->creatorRole->translatedName()]) }}</x-user-text>
                 </span>
                 @endif

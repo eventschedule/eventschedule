@@ -777,7 +777,9 @@ if (! function_exists('signup_intent_from_session')) {
             return 'team';
         }
 
-        if (session()->has('sms_token')) {
+        // Both claim doors report the same intent. The SMS one is a phone number carried through
+        // sign-up; this one is somebody who pressed Claim on a page the app made for them.
+        if (session()->has('pending_claim') || session()->has('sms_token')) {
             return 'claim';
         }
 

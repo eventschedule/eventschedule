@@ -16,9 +16,27 @@
         </h1>
 
         <p class="mt-3 text-sm text-gray-600 dark:text-gray-400">
-            <x-user-text>{{ __('messages.claim_wrong_account', ['name' => $role->translatedName(), 'contact' => $maskedContact]) }}</x-user-text>
+            <x-user-text dir="{{ content_dir_for_language($role->translatedName(), $role->displayLanguageCode()) }}">{{ $holdsContact
+                ? __('messages.claim_confirm_body', ['name' => $role->translatedName()])
+                : __('messages.claim_wrong_account', ['name' => $role->translatedName(), 'contact' => $maskedContact]) }}</x-user-text>
         </p>
 
+        @if ($holdsContact)
+        {{-- A POST, because this is where ownership actually moves. No honeypot: the form is
+             authenticated, and the rule exempts those. Forward action last. --}}
+        <form method="POST" action="{{ route('role.claim.confirm', ['subdomain' => $role->subdomain]) }}"
+              class="mt-6 flex flex-wrap items-center gap-x-5 gap-y-3">
+            @csrf
+            <a href="{{ $role->getClaimUrl() }}" class="text-sm font-medium text-gray-600 dark:text-gray-400 hover:underline">
+                {{ __('messages.back') }}
+            </a>
+            <button type="submit"
+                style="background-color: #2563eb;"
+                class="inline-flex items-center justify-center rounded-md px-4 py-2.5 text-sm font-semibold text-white shadow-sm transition-all duration-200 hover:opacity-90 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-600 dark:focus:ring-offset-gray-900">
+                {{ __('messages.claim_strip_cta') }}
+            </button>
+        </form>
+        @else
         {{-- No "switch account" button: logout is a POST, so an anchor to it 405s, and a form
              that signs somebody out as a side effect of reading a hint is worse than a sentence. --}}
         <div class="mt-6">
@@ -26,6 +44,7 @@
                 {{ __('messages.back') }}
             </a>
         </div>
+        @endif
     </div>
 </div>
 

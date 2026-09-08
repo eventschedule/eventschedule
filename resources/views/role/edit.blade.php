@@ -3716,6 +3716,14 @@
                             <x-input-error class="mt-2" :messages="$errors->get('require_approval')" />
                         </div>
                         <div class="mb-6" id="approved_subdomains_section">
+                            {{-- Same sentinel as event_categories_submitted, and for the same
+                                 reason: the list below is hidden entirely on a talent schedule, so
+                                 without this the controller could not tell "the operator emptied
+                                 the list" from "this form never showed it" and every talent save
+                                 silently nulled the column. That matters now because claiming a
+                                 page pre-approves the schedules already listing the act, and a
+                                 talent's first settings save would have thrown that away. --}}
+                            <input type="hidden" name="approved_subdomains_submitted" value="1">
                             <x-input-label :value="__('messages.approved_schedules')" />
                             <p class="text-xs text-gray-500 dark:text-gray-400 mt-1 mb-3">{{ __('messages.approved_schedules_help') }}</p>
                             <div id="approved-subdomains-items">

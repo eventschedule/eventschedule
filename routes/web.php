@@ -92,10 +92,14 @@ if (config('app.hosted') && ! config('app.is_testing')) {
         Route::get('/follow', [RoleController::class, 'follow'])->name('role.follow');
         // Claiming a schedule the app created while somebody entered an event, and the other
         // answer to the same page: this is not me. Registered ahead of the /{slug} catch-alls, and
-        // throttled because both send a signed-out visitor into sign-up.
-        Route::get('/claim', [RoleController::class, 'claimStart'])->name('role.claim.start')->middleware('throttle:20,1');
-        Route::get('/not-me', [RoleController::class, 'claimNotMe'])->name('role.claim.not_me')->middleware('throttle:20,1');
-        Route::post('/not-me', [RoleController::class, 'claimNotMeSubmit'])->name('role.claim.not_me.submit')->middleware('throttle:5,1');
+        // throttled because both send a signed-out visitor into sign-up. The limiters are NAMED for
+        // the reason spelled out above /audience/join: an unprefixed throttle shares one bucket
+        // with every other throttled route on the host, so a visitor who had just used the seat
+        // picker would arrive here pre-blocked.
+        Route::get('/claim', [RoleController::class, 'claimStart'])->name('role.claim.start')->middleware('throttle:20,1,schedule_claim');
+        Route::post('/claim', [RoleController::class, 'claimConfirm'])->name('role.claim.confirm')->middleware('throttle:5,1,schedule_claim');
+        Route::get('/not-me', [RoleController::class, 'claimNotMe'])->name('role.claim.not_me')->middleware('throttle:20,1,schedule_claim');
+        Route::post('/not-me', [RoleController::class, 'claimNotMeSubmit'])->name('role.claim.not_me.submit')->middleware('throttle:5,1,schedule_takedown');
         // Account-less audience capture. The path segment is NOT "subscribe": that URI is
         // already taken by the authenticated plan checkout (SubscriptionController@store, below),
         // whose group is registered first and would shadow this on selfhost.
@@ -1897,9 +1901,10 @@ if (! config('app.hosted') || config('app.is_testing')) {
     Route::get('/{subdomain}/api/calendar-events', [RoleController::class, 'calendarEvents'])->name('role.calendar_events');
     Route::get('/{subdomain}/request', [RoleController::class, 'request'])->name('role.request');
     Route::get('/{subdomain}/follow', [RoleController::class, 'follow'])->name('role.follow');
-    Route::get('/{subdomain}/claim', [RoleController::class, 'claimStart'])->name('role.claim.start')->middleware('throttle:20,1');
-    Route::get('/{subdomain}/not-me', [RoleController::class, 'claimNotMe'])->name('role.claim.not_me')->middleware('throttle:20,1');
-    Route::post('/{subdomain}/not-me', [RoleController::class, 'claimNotMeSubmit'])->name('role.claim.not_me.submit')->middleware('throttle:5,1');
+    Route::get('/{subdomain}/claim', [RoleController::class, 'claimStart'])->name('role.claim.start')->middleware('throttle:20,1,schedule_claim');
+    Route::post('/{subdomain}/claim', [RoleController::class, 'claimConfirm'])->name('role.claim.confirm')->middleware('throttle:5,1,schedule_claim');
+    Route::get('/{subdomain}/not-me', [RoleController::class, 'claimNotMe'])->name('role.claim.not_me')->middleware('throttle:20,1,schedule_claim');
+    Route::post('/{subdomain}/not-me', [RoleController::class, 'claimNotMeSubmit'])->name('role.claim.not_me.submit')->middleware('throttle:5,1,schedule_takedown');
     // Selfhost twin. See the hosted route for why this is not /{subdomain}/subscribe.
     Route::post('/{subdomain}/audience/join', [RoleSubscriberController::class, 'store'])
         ->name('role.audience.join')->middleware('throttle:5,1,audience_join');

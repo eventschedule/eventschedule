@@ -95,8 +95,9 @@ class RoleGuestSurfaceCharacterizationTest extends TestCase
 
     public function test_unknown_subdomain_redirects_home_not_404(): void
     {
-        // viewGuest bails with redirect(app_url()) for unknown or unclaimed
-        // schedules - there is no 404 on this path.
+        // viewGuest bails with redirect(app_url()) for an unknown schedule - there is no 404 on
+        // this path. It no longer does so for an UNCLAIMED one: those render a claim page now, and
+        // UnclaimedSchedulePageTest owns that half.
         $this->get('/nosuchschedule12345')->assertRedirect(app_url());
     }
 

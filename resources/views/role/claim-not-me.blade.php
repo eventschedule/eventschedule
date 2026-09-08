@@ -15,12 +15,19 @@
         </h1>
 
         <p class="mt-3 text-sm text-gray-600 dark:text-gray-400">
-            <x-user-text>{{ __('messages.claim_not_me_body', ['name' => $role->translatedName()]) }}</x-user-text>
+            <x-user-text dir="{{ content_dir_for_language($role->translatedName(), $role->displayLanguageCode()) }}">{{ __('messages.claim_not_me_body', ['name' => $role->translatedName()]) }}</x-user-text>
         </p>
 
         @auth
         {{-- No honeypot: authenticated forms never get one, because a password manager fills it. --}}
-        <form method="POST" action="{{ app_url(route('role.claim.not_me.submit', ['subdomain' => $role->subdomain], false)) }}"
+        {{-- Bare route(), NOT app_url(route(..., false)). On hosted this route lives in the tenant
+             domain group, so route() already yields the absolute tenant URL, while app_url() would
+             point it at https://app.<domain>/not-me - a host the tenant group explicitly excludes
+             and where no such route exists. app_url() belongs on the app-domain /{subdomain}/...
+             routes, which this is not. Invisible to the suite: routes/web.php gates the hosted
+             block on `hosted && ! is_testing`, so only the path copies exist under PHPUnit and
+             app_url() degrades to url(). --}}
+        <form method="POST" action="{{ route('role.claim.not_me.submit', ['subdomain' => $role->subdomain]) }}"
               class="mt-6 flex flex-wrap items-center gap-x-5 gap-y-3">
             @csrf
             <a href="{{ $role->getClaimUrl() }}" class="text-sm font-medium text-gray-600 dark:text-gray-400 hover:underline">

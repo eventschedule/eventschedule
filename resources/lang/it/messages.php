@@ -5082,10 +5082,11 @@ return [
     'claim_done' => 'Questo programma ora è tuo.',
     'claim_wrong_account_heading' => 'Rivendica questo programma',
     'claim_wrong_account' => ':name è registrato su :contact. Accedi con quell\'indirizzo per rivendicarlo.',
+    'claim_confirm_body' => ':name è registrato sull\'indirizzo del tuo account, quindi puoi prenderlo. Rivendicandolo ne diventi il proprietario e puoi modificare tutto ciò che c\'è nella pagina.',
     'claim_not_me_heading' => 'Non sono io',
-    'claim_not_me_body' => 'Se :name non sei tu, faccelo sapere. Se l\'indirizzo di contatto su questa pagina è tuo, viene rimossa subito. Altrimenti passiamo la richiesta al programma che l\'ha creata.',
+    'claim_not_me_body' => 'Se :name non sei tu, faccelo sapere. Se l\'indirizzo di contatto su questa pagina è tuo, viene rimossa subito. Altrimenti la tua richiesta viene registrata per essere esaminata.',
     'claim_not_me_confirm' => 'Segnala questa pagina',
     'claim_not_me_sign_in' => 'Accedi o crea un account prima, così sappiamo chi sta chiedendo.',
     'claim_not_me_removed' => 'Quella pagina è stata rimossa.',
-    'claim_not_me_reported' => 'Grazie. Abbiamo inoltrato la richiesta al programma che ha creato la pagina.',
+    'claim_not_me_reported' => 'Grazie. Lo abbiamo registrato e qualcuno lo esaminerà.',
 ];

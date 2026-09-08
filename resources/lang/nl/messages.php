@@ -5082,10 +5082,11 @@ return [
     'claim_done' => 'Dit schema is nu van jou.',
     'claim_wrong_account_heading' => 'Claim dit schema',
     'claim_wrong_account' => ':name is geregistreerd op :contact. Log in met dat adres om het te claimen.',
+    'claim_confirm_body' => ':name is geregistreerd op het adres van jouw account, dus je kunt hem overnemen. Door hem te claimen word je eigenaar en kun je alles op de pagina bewerken.',
     'claim_not_me_heading' => 'Dit ben ik niet',
-    'claim_not_me_body' => 'Als :name niet jij bent, laat het ons weten. Als het contactadres op deze pagina van jou is, wordt de pagina meteen verwijderd. Zo niet, dan geven we het verzoek door aan het schema dat de pagina heeft aangemaakt.',
+    'claim_not_me_body' => 'Als :name niet jij bent, laat het ons weten. Als het contactadres op deze pagina van jou is, wordt de pagina meteen verwijderd. Zo niet, dan wordt je verzoek vastgelegd voor beoordeling.',
     'claim_not_me_confirm' => 'Deze pagina melden',
     'claim_not_me_sign_in' => 'Log eerst in of maak een account aan, zodat we weten wie het vraagt.',
     'claim_not_me_removed' => 'Die pagina is verwijderd.',
-    'claim_not_me_reported' => 'Bedankt. We hebben dat doorgegeven aan het schema dat de pagina heeft aangemaakt.',
+    'claim_not_me_reported' => 'Bedankt. We hebben het vastgelegd en iemand kijkt ernaar.',
 ];

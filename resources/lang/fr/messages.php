@@ -5089,10 +5089,11 @@ return [
     'claim_done' => 'Ce planning est désormais le vôtre.',
     'claim_wrong_account_heading' => 'Revendiquer ce planning',
     'claim_wrong_account' => ':name est enregistré sur :contact. Connectez-vous avec cette adresse pour le revendiquer.',
+    'claim_confirm_body' => ':name est enregistré sur l\'adresse de votre compte, vous pouvez donc le reprendre. En le revendiquant vous en devenez le propriétaire et pouvez modifier tout ce qui figure sur la page.',
     'claim_not_me_heading' => 'Ce n\'est pas moi',
-    'claim_not_me_body' => 'Si :name n\'est pas vous, dites-le-nous. Si l\'adresse de contact de cette page est la vôtre, elle est retirée immédiatement. Sinon, nous transmettons la demande au planning qui l\'a créée.',
+    'claim_not_me_body' => 'Si :name n\'est pas vous, dites-le-nous. Si l\'adresse de contact de cette page est la vôtre, elle est retirée immédiatement. Sinon, votre demande est enregistrée pour examen.',
     'claim_not_me_confirm' => 'Signaler cette page',
     'claim_not_me_sign_in' => 'Connectez-vous ou créez un compte d\'abord, afin que nous sachions qui le demande.',
     'claim_not_me_removed' => 'Cette page a été retirée.',
-    'claim_not_me_reported' => 'Merci. Nous avons transmis votre demande au planning qui a créé la page.',
+    'claim_not_me_reported' => 'Merci. Nous l\'avons enregistré et quelqu\'un va l\'examiner.',
 ];

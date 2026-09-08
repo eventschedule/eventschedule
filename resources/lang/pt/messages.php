@@ -5082,10 +5082,11 @@ return [
     'claim_done' => 'Esta agenda é agora sua.',
     'claim_wrong_account_heading' => 'Reivindicar esta agenda',
     'claim_wrong_account' => ':name está registada em :contact. Inicie sessão com esse endereço para a reivindicar.',
+    'claim_confirm_body' => ':name está registado no endereço da sua conta, por isso pode ficar com ele. Ao reivindicá-lo torna-se o proprietário e pode editar tudo o que está na página.',
     'claim_not_me_heading' => 'Não sou eu',
-    'claim_not_me_body' => 'Se :name não é você, diga-nos. Se o endereço de contacto desta página for seu, ela é removida de imediato. Caso contrário, encaminhamos o pedido para a agenda que a criou.',
+    'claim_not_me_body' => 'Se :name não é você, diga-nos. Se o endereço de contacto desta página for seu, ela é removida de imediato. Caso contrário, o seu pedido fica registado para análise.',
     'claim_not_me_confirm' => 'Denunciar esta página',
     'claim_not_me_sign_in' => 'Inicie sessão ou crie uma conta primeiro, para sabermos quem está a pedir.',
     'claim_not_me_removed' => 'Essa página foi removida.',
-    'claim_not_me_reported' => 'Obrigado. Encaminhámos o seu pedido para a agenda que criou a página.',
+    'claim_not_me_reported' => 'Obrigado. Registámos o seu pedido e alguém irá analisá-lo.',
 ];

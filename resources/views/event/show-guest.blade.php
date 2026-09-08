@@ -336,10 +336,12 @@
                           </svg>
                         </span>
                       </a>
-                    @elseif ($each->getClaimUrl())
+                    @elseif ($eachClaimUrl = $each->getClaimUrl())
                       {{-- The act has a page of its own now, unclaimed but real, and this link is
-                           the only way anybody reaches one without an invitation in hand. --}}
-                      <a href="{{ $each->getClaimUrl() }}" rel="nofollow" class="group inline {{ $role->isRtl() ? 'rtl' : '' }}" dir="{{ content_dir_for_language($each->nameInLanguage($displayLang), $displayLang) }}">
+                           the only way anybody reaches one without an invitation in hand. Assigned
+                           in the condition so the value is computed once: getClaimUrl() reaches
+                           hasRealOwner(), and this runs for every act on every event page. --}}
+                      <a href="{{ $eachClaimUrl }}" rel="nofollow" class="group inline {{ $role->isRtl() ? 'rtl' : '' }}" dir="{{ content_dir_for_language($each->nameInLanguage($displayLang), $displayLang) }}">
                         <span class="inline text-lg font-semibold text-gray-900 dark:text-gray-100 group-hover:underline" style="font-family: '{{ str_replace('_', ' ', $each->font_family) }}', sans-serif;">
                           {!! str_replace(' , ', '<br>', e($each->nameInLanguage($displayLang))) !!}
                         </span>
@@ -465,8 +467,8 @@
           <ul class="mt-2 flex flex-col gap-1">
             @foreach ($bareTalent as $bare)
             <li dir="{{ content_dir_for_language($bare->nameInLanguage($displayLang), $displayLang) }}">
-              @if ($bare->getClaimUrl())
-                <a href="{{ $bare->getClaimUrl() }}" rel="nofollow" class="text-base text-gray-900 dark:text-gray-100 hover:underline">
+              @if ($bareClaimUrl = $bare->getClaimUrl())
+                <a href="{{ $bareClaimUrl }}" rel="nofollow" class="text-base text-gray-900 dark:text-gray-100 hover:underline">
                   {!! str_replace(' , ', '<br>', e($bare->nameInLanguage($displayLang))) !!}
                 </a>
               @else
