@@ -71,7 +71,16 @@ class CartTest extends DuskTestCase
             $browser->visit('/talent/venue')->waitForText('Buy Tickets', 15)->pause(500);
             $browser->script("window.dispatchEvent(new CustomEvent('show-event-form'))");
             $browser->pause(1200);
-            $browser->type('name', 'Guest Buyer')->type('email', 'guest@example.com')->pause(400);
+            // Scoped to the ticket form, and it has to be. Dusk's resolveForTyping() has no
+            // "#{$field}" step, so a bare field name is an input[name=...] lookup that takes the
+            // FIRST match in document order - and event/partials/interest-capture.blade.php now
+            // renders its own one-field name="email" form at show-guest.blade.php:1270, above the
+            // ticket form at :1309. Unscoped, the address landed in the interest box, the ticket
+            // app's email stayed empty, addToCart() sent a buyer with no address, and the panel
+            // asked again: the exact regression below, arriving from a page this test never names.
+            $browser->within('#ticket-selector', function (Browser $form) {
+                $form->type('name', 'Guest Buyer')->type('email', 'guest@example.com');
+            })->pause(400);
             $this->pickOneTicketAndAddToCart($browser);
 
             $browser->waitFor('@cart-checkout', 10);
