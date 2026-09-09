@@ -5103,6 +5103,9 @@ return [
     'claim_not_me_removed' => 'Die pagina is verwijderd.',
     'claim_not_me_reported' => 'Bedankt. We hebben het vastgelegd en iemand kijkt ernaar.',
 
+    'notify_also_interested' => 'Hij gaat ook naar :count mensen die op de hoogte wilden blijven van dit evenement.',
+    'notify_interested_only' => 'Een e-mail sturen naar de :count mensen die op de hoogte wilden blijven van dit evenement?',
+    'event_interest_not_ready' => 'Vandaag niet kopen? Laat het me weten als er iets verandert',
     'event_interest_cta' => 'Laat het me weten als er kaarten zijn',
     'event_interest_cta_changes' => 'Laat het me weten als er iets verandert',
     'event_interest_placeholder' => 'jij@voorbeeld.nl',

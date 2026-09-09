@@ -5103,6 +5103,9 @@ return [
     'claim_not_me_removed' => 'Esa página se ha retirado.',
     'claim_not_me_reported' => 'Gracias. Lo hemos registrado y alguien lo revisará.',
 
+    'notify_also_interested' => 'También se enviará a :count personas que pidieron información sobre este evento.',
+    'notify_interested_only' => '¿Enviar un correo a las :count personas que pidieron información sobre este evento?',
+    'event_interest_not_ready' => '¿No compras hoy? Avísame si algo cambia',
     'event_interest_cta' => 'Avísame cuando haya entradas',
     'event_interest_cta_changes' => 'Avísame si algo cambia',
     'event_interest_placeholder' => 'tu@ejemplo.com',

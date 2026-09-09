@@ -113,13 +113,23 @@ class EventInterestController extends Controller
 
         // Nothing to be told about. A cancelled event still has an interest list - those people are
         // exactly who wants to hear - but there is no reason to take NEW sign-ups for one.
-        if ($event->is_cancelled) {
+        //
+        // is_hidden_from_discovery matches the view's gate: guestVisibilityFailure() does not cover
+        // it, so without this a direct POST could create a row on an event whose page never offers
+        // the form.
+        if ($event->is_cancelled || $event->is_hidden_from_discovery) {
             return $this->respond($request, __('messages.invalid_request'), false);
         }
 
         $eventDate = $this->resolveDate($event, $request->input('event_date'));
 
         if ($eventDate === false) {
+            return $this->respond($request, __('messages.invalid_request'), false);
+        }
+
+        // A past occurrence would sit in the organizer's demand count for ever and can never
+        // produce a send, so it is not a thing to collect an address against.
+        if ($this->hasPassed($event, $eventDate)) {
             return $this->respond($request, __('messages.invalid_request'), false);
         }
 
@@ -142,7 +152,7 @@ class EventInterestController extends Controller
                 'event_date' => $eventDate,
                 'email' => $email,
                 'locale' => app()->getLocale(),
-                'source' => $request->input('source') === 'calendar' ? 'calendar' : 'event_page',
+                'source' => 'event_page',
                 // Single opt-in: see the class docblock.
                 'confirmed_at' => now(),
                 'token' => EventInterest::newToken(),
@@ -158,6 +168,13 @@ class EventInterestController extends Controller
             // Lost a race with a concurrent identical submit, or the same person asking twice.
             // Indistinguishable from success, and it genuinely is one.
             if (($e->errorInfo[1] ?? null) == 1062) {
+                // Charged for, like any other accepted submission. Skipping the hit here let a
+                // repeat submitter probe indefinitely without ever consuming their per-email
+                // budget - which is the limit that bounds a distributed attempt to sign one victim
+                // up everywhere.
+                RateLimiter::hit($rateKey, 3600);
+                RateLimiter::hit($eventKey, 86400);
+
                 return $this->respond($request, __('messages.event_interest_confirmed'), true);
             }
 
@@ -191,13 +208,36 @@ class EventInterestController extends Controller
 
         if (! is_string($submitted) || $submitted === '') {
             // Non-recurring: the event's own day is the only answer, so accept an omitted date
-            // rather than making every caller compute it.
+            // rather than making every caller compute it. Recurring: the next real occurrence.
+            //
+            // saleEventDateFromStartsAt(), not getStartDateTime()->format(): the canonical helper
+            // special-cases a date-only starts_at and returns it verbatim, precisely because
+            // midnight-UTC-then-convert slides the day back for any negative-offset schedule. It is
+            // also what event/rsvp.blade.php:341 uses for exactly this default, so the two agree.
             return $event->days_of_week
-                ? false
-                : $event->getStartDateTime(null, true, $event->scheduleTimezone())->format('Y-m-d');
+                ? ($event->nextOccurrenceFrom() ?: false)
+                : ($event->saleEventDateFromStartsAt() ?: false);
         }
 
         return $event->matchesDate($submitted, $event->scheduleTimezone()) ? $submitted : false;
+    }
+
+    /**
+     * Whether this occurrence is already over, in the SCHEDULE's timezone.
+     *
+     * Mirrors canAcceptRsvp()'s check rather than inventing one: end of the occurrence's day AT THE
+     * VENUE, because Carbon::parse() without the zone uses the app timezone and would call a 9pm
+     * New York show over an hour before doors. A dateless event is never past.
+     */
+    private function hasPassed(Event $event, string $eventDate): bool
+    {
+        if (Event::isOccurrenceDate($eventDate)) {
+            return \Carbon\Carbon::parse($eventDate, $event->scheduleTimezone())->endOfDay()->isPast();
+        }
+
+        return $event->starts_at
+            ? $event->getEndDateTime(null, true)->endOfDay()->isPast()
+            : false;
     }
 
     /**

@@ -1944,6 +1944,40 @@ class Event extends Model
         }
     }
 
+    /**
+     * The next calendar day this event actually occurs on, at or after $from, or null if none.
+     *
+     * Scans forward with matchesDate() rather than reading days_of_week directly, and that is the
+     * whole point. EventRepo::saveEvent() writes days_of_week = '1111111' for daily, monthly_date,
+     * monthly_weekday and yearly "for query compatibility" (:1066), so a weekday-only scan answers
+     * TODAY for a monthly event - a day it does not occur on. matchesDate() consults the frequency,
+     * the exclude and include lists and the end conditions, so it answers the real question.
+     *
+     * Bounded, and the bound is load-bearing: a yearly event's next occurrence is up to a year out,
+     * and an event whose recurrence has already ended has none at all. The guest backfill this
+     * replaces was an unbounded `while (true)` over days_of_week, which spins forever on
+     * '0000000' - reachable by unchecking every day on a weekly event.
+     */
+    public function nextOccurrenceFrom($from = null, int $withinDays = 366): ?string
+    {
+        if (! $this->starts_at) {
+            return null;
+        }
+
+        $timezone = $this->scheduleTimezone();
+        $cursor = ($from ? Carbon::parse($from) : Carbon::now($timezone))->startOfDay();
+
+        for ($i = 0; $i <= $withinDays; $i++) {
+            if ($this->matchesDate($cursor, $timezone)) {
+                return $cursor->format('Y-m-d');
+            }
+
+            $cursor->addDay();
+        }
+
+        return null;
+    }
+
     protected function matchesFrequency(string $frequency, Carbon $date, Carbon $startDate): bool
     {
         switch ($frequency) {

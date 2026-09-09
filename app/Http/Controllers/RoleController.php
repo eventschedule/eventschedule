@@ -2182,15 +2182,25 @@ class RoleController extends Controller
                 }
 
                 if (! $date && $event->days_of_week) {
-                    $nextDate = now();
-                    $daysOfWeek = str_split($event->days_of_week);
-                    while (true) {
-                        if ($daysOfWeek[$nextDate->dayOfWeek] == '1' && $nextDate >= now()->format('Y-m-d')) {
-                            break;
-                        }
-                        $nextDate->addDay();
-                    }
-                    $date = $nextDate->format('Y-m-d');
+                    // The next REAL occurrence, not merely the next matching weekday.
+                    //
+                    // This used to scan days_of_week alone, and EventRepo::saveEvent() writes
+                    // '1111111' for daily, monthly_date, monthly_weekday and yearly "for query
+                    // compatibility" (:1066) - so for a monthly or yearly event it answered TODAY,
+                    // a day the event does not occur on. Nothing then re-checked it: the
+                    // matchesDate() guard above runs on the URL-SUPPLIED date and this backfill
+                    // runs after it.
+                    //
+                    // That date is not cosmetic. It is what event/tickets.blade.php:1180 and
+                    // event/rsvp.blade.php:341 post as event_date, and guest checkout does not
+                    // validate it - so a monthly event booked sales against a non-occurrence, and
+                    // the buyer's ticket URL, the door scanner's QR and the calendar entry all
+                    // inherited it.
+                    //
+                    // Null when there is no occurrence within a year (a recurrence that has already
+                    // ended), which is the honest answer and what the rest of this method already
+                    // handles. The old loop had no bound at all and spun forever on '0000000'.
+                    $date = $event->nextOccurrenceFrom();
                 }
             } elseif (! $selectedGroup) {
                 // Last rung: a link whose domain we do not recognise answers to its brand name.

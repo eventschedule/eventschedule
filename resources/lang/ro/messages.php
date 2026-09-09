@@ -5142,6 +5142,9 @@ return [
     'claim_not_me_removed' => 'Acea pagină a fost eliminată.',
     'claim_not_me_reported' => 'Mulțumim. Am înregistrat cererea și cineva o va analiza.',
 
+    'notify_also_interested' => 'Va ajunge și la :count persoane care au cerut să fie la curent cu acest eveniment.',
+    'notify_interested_only' => 'Trimitem e-mail celor :count persoane care au cerut să fie la curent cu acest eveniment?',
+    'event_interest_not_ready' => 'Nu cumperi azi? Anunță-mă dacă se schimbă ceva',
     'event_interest_cta' => 'Anunță-mă când apar biletele',
     'event_interest_cta_changes' => 'Anunță-mă dacă se schimbă ceva',
     'event_interest_placeholder' => 'tu@exemplu.ro',

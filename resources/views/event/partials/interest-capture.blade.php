@@ -21,34 +21,11 @@
     $interestEvent = $event;
     $interestRole = $role;
 
-    // Mirrors the noindex conditions in layouts/app-guest.blade.php:71 plus the guards the checkout
-    // opt-in already carries. Anything not publicly and durably visible has no business collecting
-    // an address against it: an embed is somebody else's page, a draft or unlisted event may never
-    // become public, and a password-gated one has already decided who may see it.
-    $interestEligible = ! request()->embed
-        && ! request('graphic')
-        && $interestEvent->exists
-        && ! $interestEvent->is_draft
-        && ! $interestEvent->is_private
-        && ! $interestEvent->is_cancelled
-        && ! $interestEvent->is_hidden_from_discovery
-        && ! $interestEvent->isPasswordProtected()
-        && $interestEvent->creatorRole
-        && ! is_demo_role($interestRole);
-
-    // Nothing to promise about a date that has already gone. Mirrors canAcceptRsvp()'s check
-    // rather than inventing one: end of the occurrence's day AT THE VENUE, because Carbon::parse()
-    // without the zone would use the app timezone and call a 9pm New York show over an hour before
-    // doors. A dateless event (a "Subscriptions" container) is never past.
-    if ($interestEligible) {
-        $interestOccurrence = $date ?? null;
-
-        if (\App\Models\Event::isOccurrenceDate($interestOccurrence)) {
-            $interestEligible = ! \Carbon\Carbon::parse($interestOccurrence, $interestEvent->scheduleTimezone())->endOfDay()->isPast();
-        } elseif ($interestEvent->starts_at) {
-            $interestEligible = ! $interestEvent->getEndDateTime(null, true)->endOfDay()->isPast();
-        }
-    }
+    // Computed ONCE in event/show-guest.blade.php and passed down, so this card and every link that
+    // points at it cannot disagree. They used to be gated separately, and on a cancelled event the
+    // Add-to-Calendar menu offered "Tell me when tickets go on sale" while this card refused to
+    // render, so the link did nothing at all.
+    $interestEligible = $showInterestCapture ?? false;
 
     $interestMessage = session('interest_message');
     $interestError = session('interest_error');

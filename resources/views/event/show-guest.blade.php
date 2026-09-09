@@ -756,6 +756,41 @@
         </div>
       </div>
 
+      @php
+          // ONE eligibility decision for the interest capture, shared by the card and by every
+          // link that points at it. It used to live only inside the partial, so the two
+          // Add-to-Calendar rows were gated on $showCalendarPopup while the card they pointed at
+          // ALSO refused on unlisted, cancelled, hidden, password-protected, demo and past events -
+          // and on a cancelled event, where the mobile sheet definitely renders, the menu offered
+          // "Tell me when tickets go on sale" and clicking it did nothing.
+          //
+          // Mirrors the noindex conditions in layouts/app-guest.blade.php:71 plus the guards the
+          // checkout opt-in already carries. Anything not publicly and durably visible has no
+          // business collecting an address against it.
+          $showInterestCapture = ! request()->embed
+              && ! request('graphic')
+              && $event->exists
+              && ! $event->is_draft
+              && ! $event->is_private
+              && ! $event->is_cancelled
+              && ! $event->is_hidden_from_discovery
+              && ! $event->isPasswordProtected()
+              && $event->creatorRole
+              && ! is_demo_role($role);
+
+          if ($showInterestCapture) {
+              // Nothing to promise about a date that has already gone. Mirrors canAcceptRsvp()'s
+              // check: end of the occurrence's day AT THE VENUE, because Carbon::parse() without
+              // the zone would use the app timezone and call a 9pm New York show over an hour
+              // before doors. A dateless event is never past.
+              if (\App\Models\Event::isOccurrenceDate($date ?? null)) {
+                  $showInterestCapture = ! \Carbon\Carbon::parse($date, $event->scheduleTimezone())->endOfDay()->isPast();
+              } elseif ($event->starts_at) {
+                  $showInterestCapture = ! $event->getEndDateTime(null, true)->endOfDay()->isPast();
+              }
+          }
+      @endphp
+
       {{-- RIGHT COLUMN --}}
       <div class="order-1 lg:order-2 flex flex-col gap-4 lg:gap-6">
         <div class="bg-white/95 dark:bg-gray-900/95 backdrop-blur-sm sm:rounded-2xl p-6 sm:p-8 flex flex-col gap-6 z-10">
@@ -995,6 +1030,20 @@
         </div>
         @endif
 
+        {{-- Moment B: the exit ramp for somebody who is interested but not buying today.
+             Deliberately a quiet text link rather than a second button - it sits beside the primary
+             conversion action, and the point is to catch the visitor who was going to leave, not to
+             compete for the one who was going to buy.
+
+             Placed ABOVE #event-form-section on purpose: hidePanelsBelow() display:none's every
+             sibling after that element while the buy form is open, which is why the subscribe panel
+             at the foot of the page vanishes during checkout. --}}
+        @if ($showInterestCapture && ($event->canSellTickets($date) || $event->canAcceptRsvp($date)))
+        <a href="#event-interest" class="self-start text-sm text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-200 hover:underline">
+            {{ __('messages.event_interest_not_ready') }}
+        </a>
+        @endif
+
         {{-- CTA buttons --}}
         <div id="desktop-cta-buttons" style="font-family: sans-serif" x-data="{ shareState: 'idle' }" class="relative items-center gap-3 text-left hidden sm:inline-flex self-start {{ $role->isRtl() ? 'rtl' : '' }}">
         @if ($event->is_cancelled)
@@ -1085,12 +1134,14 @@
                          cannot do. Plain anchors, so nothing is added to the Alpine scope this
                          dropdown lives in. --}}
                     <div class="my-1 border-t border-gray-100 dark:border-gray-700"></div>
+                    @if ($showInterestCapture)
                     <a href="#event-interest" class="group flex items-center px-4 py-3 text-sm text-gray-700 dark:text-gray-200 rounded-lg transition-all duration-200 gp-dropdown-item" role="menuitem" tabindex="-1" id="menu-item-3">
                         <svg class="me-3 h-5 w-5 text-gray-400 group-hover:text-gray-500" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
                             <path stroke-linecap="round" stroke-linejoin="round" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
                         </svg>
                         {{ $event->canSellTickets($date) ? __('messages.event_interest_cta_changes') : __('messages.event_interest_cta') }}
                     </a>
+                    @endif
                     <a href="{{ route('feed.ical', ['subdomain' => $role->subdomain]) }}" class="group flex items-center px-4 py-3 text-sm text-gray-700 dark:text-gray-200 rounded-lg transition-all duration-200 gp-dropdown-item" role="menuitem" tabindex="-1" id="menu-item-4">
                         <svg class="me-3 h-5 w-5 text-gray-400 group-hover:text-gray-500" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
                             <path stroke-linecap="round" stroke-linejoin="round" d="M8 7V3m8 4V3M3 11h18M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
@@ -1193,12 +1244,14 @@
                    event sells nothing, which is exactly where most of the platform's guest traffic
                    lands and where the page is otherwise a dead end. --}}
               <div class="my-1 border-t border-gray-200 dark:border-gray-700"></div>
+              @if ($showInterestCapture)
               <a href="#event-interest" class="gp-bottom-sheet-item flex items-center gap-3 px-4 py-3 rounded-xl text-gray-700 transition-all duration-200">
                 <svg class="h-5 w-5 text-gray-400" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
                   <path stroke-linecap="round" stroke-linejoin="round" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
                 </svg>
                 {{ __('messages.event_interest_cta') }}
               </a>
+              @endif
               <a href="{{ route('feed.ical', ['subdomain' => $role->subdomain]) }}" class="gp-bottom-sheet-item flex items-center gap-3 px-4 py-3 rounded-xl text-gray-700 transition-all duration-200">
                 <svg class="h-5 w-5 text-gray-400" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
                   <path stroke-linecap="round" stroke-linejoin="round" d="M8 7V3m8 4V3M3 11h18M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />

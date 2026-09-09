@@ -7,6 +7,7 @@ use App\Mail\EventInterestNotification;
 use App\Models\Event;
 use App\Models\EventInterest;
 use App\Models\Role;
+use App\Models\User;
 use App\Utils\UrlUtils;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Queue;
@@ -239,5 +240,113 @@ class EventInterestSendTest extends TestCase
         \App\Services\EventChangeNotifier::notifyCancellation($this->event->fresh(), $this->role);
 
         $this->assertSame(0, $this->queuedCount());
+    }
+
+    public function test_cancelling_through_the_controller_reaches_the_interest_list(): void
+    {
+        // THE test the original suite was missing. The three tests above call EventChangeNotifier
+        // directly and pass whether or not anything ever reaches it - and nothing did: both
+        // dispatch sites gated on hasRecipients(), which counts SALES, and the cancel route also
+        // required the schedule's own SMTP. An event with an interest list and no sales, on a
+        // schedule using the platform mailer, failed every one of those gates.
+        //
+        // Driven through the HTTP route so the gate, the job dispatch and the notifier are all in
+        // the path.
+        $this->capture();
+        $this->assertFalse($this->role->hasEmailSettings(), 'the fixture must use the platform mailer');
+        $this->assertSame(0, $this->event->sales()->count(), 'and must have no sales');
+
+        $this->actingAs(User::find($this->role->user_id))
+            ->post(route('event.cancel', [
+                'subdomain' => $this->role->subdomain,
+                'hash' => UrlUtils::encodeId($this->event->id),
+            ]), ['notify_attendees' => 1])
+            ->assertRedirect();
+
+        // Assert the JOB, not a SendQueuedEmail: Queue::fake() intercepts NotifyEventCancelled
+        // itself, so the notifier never runs inside this test. The gate is what is under test, and
+        // the notifier's own behaviour is covered by the direct-call tests above.
+        Queue::assertPushed(\App\Jobs\NotifyEventCancelled::class);
+    }
+
+    public function test_the_editor_is_told_someone_is_waiting_even_with_no_sales(): void
+    {
+        // The other half: the dispatch gate is useless if the UI never offers the option.
+        // cancelWillNotify() and shouldPromptNotify() both read registrantCount, which is
+        // sales-only, so the organizer was never asked in the first place.
+        $this->capture();
+
+        $html = $this->actingAs(User::find($this->role->user_id))
+            ->get(route('event.edit', [
+                'subdomain' => $this->role->subdomain,
+                'hash' => UrlUtils::encodeId($this->event->id),
+            ]))
+            ->assertOk()
+            ->getContent();
+
+        $this->assertStringContainsString('interestedCount: 1', $html);
+    }
+
+    public function test_a_dateless_event_does_not_poison_the_mail(): void
+    {
+        // Dateless events are a supported capture target - resolveDate() returns '' for them and
+        // the migration documents the sentinel - and canSellTickets() skips all its date checks for
+        // one, so the tickets pass could reach it. Both mail views then called getStartDateTime(),
+        // which has NO null guard: it reaches Carbon::createFromFormat('Y-m-d H:i:s', null) and
+        // throws, so the ?-> never runs. The job died with the claim column already stamped.
+        $this->event->forceFill(['starts_at' => null, 'tickets_enabled' => true])->save();
+        $this->createTicket($this->event, ['price' => 10]);
+        $this->event->refresh();
+
+        \App\Models\EventInterest::create([
+            'event_id' => $this->event->id,
+            'event_date' => '',
+            'email' => 'fan@fans.test',
+            'confirmed_at' => now(),
+            'token' => \App\Models\EventInterest::newToken(),
+        ]);
+
+        // The change path has no starts_at guard of its own, so this is the one that must not throw.
+        \App\Services\EventChangeNotifier::notifyCancellation($this->event->fresh(), $this->role);
+
+        $this->assertSame(1, $this->queuedCount());
+
+        // And the rendered body is the real assertion - a throw here is the defect.
+        $interest = \App\Models\EventInterest::firstOrFail();
+        $html = (new EventInterestNotification(
+            $this->role,
+            $this->event->fresh(),
+            $interest,
+            EventInterestNotification::KIND_CANCELLED,
+            'https://example.test/event',
+            'https://example.test/int/u/'.$interest->token,
+        ))->render();
+
+        $this->assertStringContainsString($this->event->name, $html);
+    }
+
+    public function test_a_past_occurrence_leaves_the_tickets_window(): void
+    {
+        // The starvation guard. isDue() skips without stamping, which is right for "not yet" but
+        // wrong for "never": a passed occurrence can never become due again and nothing removes it,
+        // so those rows keep the lowest ids and ORDER BY id LIMIT n eventually returns nothing but
+        // corpses. They are excluded in SQL instead.
+        $this->capture();
+        $this->event->forceFill([
+            'starts_at' => now()->subMonths(2)->format('Y-m-d H:i:s'),
+        ])->save();
+        \App\Models\EventInterest::query()->update([
+            'event_date' => now()->subMonths(2)->format('Y-m-d'),
+        ]);
+
+        $reflection = new \ReflectionMethod(\App\Console\Commands\SendEventInterestMail::class, 'candidates');
+        $reflection->setAccessible(true);
+        $rows = iterator_to_array($reflection->invoke(
+            app(\App\Console\Commands\SendEventInterestMail::class),
+            EventInterestNotification::KIND_TICKETS,
+            10
+        ));
+
+        $this->assertCount(0, $rows, 'a passed occurrence must not occupy the candidate window');
     }
 }

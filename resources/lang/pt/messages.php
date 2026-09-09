@@ -5103,6 +5103,9 @@ return [
     'claim_not_me_removed' => 'Essa página foi removida.',
     'claim_not_me_reported' => 'Obrigado. Registámos o seu pedido e alguém irá analisá-lo.',
 
+    'notify_also_interested' => 'Também será enviado a :count pessoas que pediram para acompanhar este evento.',
+    'notify_interested_only' => 'Enviar e-mail às :count pessoas que pediram para acompanhar este evento?',
+    'event_interest_not_ready' => 'Não compra hoje? Avise-me se algo mudar',
     'event_interest_cta' => 'Avise-me quando houver bilhetes',
     'event_interest_cta_changes' => 'Avise-me se algo mudar',
     'event_interest_placeholder' => 'voce@exemplo.pt',

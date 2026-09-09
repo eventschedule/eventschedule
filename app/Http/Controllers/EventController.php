@@ -269,11 +269,18 @@ class EventController extends Controller
             WebhookService::dispatch('event.cancelled', $event);
         }
 
-        // Notify registered attendees (email + push), gated on the schedule having email settings
+        // Notify whoever there is to tell - buyers AND the interest list.
+        //
+        // No hasEmailSettings() here any more. notifyCancellation() already applies that gate to
+        // the SALES half internally, where it belongs: a buyer got their receipt from the
+        // schedule's own address and a platform-branded follow-up would be a surprise. Applying it
+        // at the dispatch site instead killed the interest half as well - and those people asked
+        // US, on this schedule's public page, and were told they would hear if anything changed.
+        // Most schedules have no SMTP of their own, so that promise was false for nearly all of
+        // them.
         if ($request->boolean('notify_attendees')
             && ! $event->is_draft
-            && optional($event->getRoleWithEmailSettings())->hasEmailSettings()
-            && EventChangeNotifier::hasRecipients($event)) {
+            && EventChangeNotifier::hasAnyoneToTell($event)) {
             $note = $request->input('notify_message');
             NotifyEventCancelled::dispatch($event->id, $note ? Str::limit($note, 280, '') : null);
             $event->forceFill(['attendees_notified_at' => now()])->saveQuietly();
@@ -1003,6 +1010,11 @@ class EventController extends Controller
             // Attendee change-notification UX (issue #94): the confirm dialog only appears when the
             // event has registrants and the schedule can actually send email.
             'registrantCount' => EventChangeNotifier::recipientCount($event),
+            // Counted separately, never folded into registrantCount: that number is labelled
+            // "registered attendees" in the confirm dialog, and somebody who left an address on a
+            // public page is not one. It gates the prompt so an event with an interest list and no
+            // sales is still offered the notification - which, before this, it never was.
+            'interestedCount' => EventChangeNotifier::interestedCount($event),
             'scheduleHasEmailSettings' => (bool) optional($event->getRoleWithEmailSettings())->hasEmailSettings(),
             'attendeesNotifiedAt' => optional($event->attendees_notified_at)->toIso8601String(),
         ]);

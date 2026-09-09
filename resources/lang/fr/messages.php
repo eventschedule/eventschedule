@@ -5110,6 +5110,9 @@ return [
     'claim_not_me_removed' => 'Cette page a été retirée.',
     'claim_not_me_reported' => 'Merci. Nous l\'avons enregistré et quelqu\'un va l\'examiner.',
 
+    'notify_also_interested' => 'Il sera aussi envoyé à :count personnes qui voulaient être tenues au courant de cet événement.',
+    'notify_interested_only' => 'Envoyer un e-mail aux :count personnes qui voulaient être tenues au courant de cet événement ?',
+    'event_interest_not_ready' => 'Pas d\'achat aujourd\'hui ? Prévenez-moi en cas de changement',
     'event_interest_cta' => 'Prévenez-moi de la mise en vente',
     'event_interest_cta_changes' => 'Prévenez-moi en cas de changement',
     'event_interest_placeholder' => 'vous@exemple.fr',

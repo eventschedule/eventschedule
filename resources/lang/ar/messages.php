@@ -5104,6 +5104,9 @@ return [
     'claim_not_me_removed' => 'تمت إزالة تلك الصفحة.',
     'claim_not_me_reported' => 'شكرًا لك. سجّلنا ذلك وسيطّلع عليه أحد المسؤولين.',
 
+    'notify_also_interested' => 'ستصل أيضًا إلى :count أشخاص طلبوا متابعة أخبار هذه الفعالية.',
+    'notify_interested_only' => 'إرسال رسالة إلى :count أشخاص طلبوا متابعة أخبار هذه الفعالية؟',
+    'event_interest_not_ready' => 'لن تحجز اليوم؟ أبلغوني عند حدوث أي تغيير',
     'event_interest_cta' => 'أبلغوني عند طرح التذاكر',
     'event_interest_cta_changes' => 'أبلغوني عند حدوث أي تغيير',
     'event_interest_placeholder' => 'you@example.com',

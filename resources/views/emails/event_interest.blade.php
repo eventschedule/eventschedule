@@ -18,9 +18,16 @@
              timezone. An occurrence falls on a given day because of where it happens, not because
              of where the reader is sitting. --}}
         <div style="font-size: 14px; color: #666;">
-            {{ $event->is_multi_day
-                ? $event->getDateRangeDisplay()
-                : $event->getStartDateTime($interest->event_date ?: null, true)?->translatedFormat('F j, Y') }}
+            {{-- starts_at guarded, not just ?->. getStartDateTime() has no null guard: it reaches
+                 Carbon::createFromFormat('Y-m-d H:i:s', null) and THROWS, so the ?-> never runs and
+                 the whole message dies. Dateless events are a supported capture target (a
+                 "Subscriptions" container), and EventChangeNotifier reaches them with no date
+                 check of its own. --}}
+            @if ($event->starts_at)
+                {{ $event->is_multi_day
+                    ? $event->getDateRangeDisplay()
+                    : $event->getStartDateTime($interest->event_date ?: null, true)?->translatedFormat('F j, Y') }}
+            @endif
             @if ($event->venue && $event->venue->name)
                 &middot; {{ $event->venue->name }}
             @endif

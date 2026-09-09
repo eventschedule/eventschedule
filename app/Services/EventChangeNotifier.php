@@ -102,6 +102,32 @@ class EventChangeNotifier
         });
     }
 
+    /**
+     * Distinct count of people who asked to hear about this event, on the same occurrence rule the
+     * sales side uses.
+     *
+     * Separate from recipientCount() and deliberately not folded into it: that number is labelled
+     * "registered attendees" in the confirm dialog, and somebody who left an address on a public
+     * page is not an attendee.
+     */
+    public static function interestedCount(Event $event): int
+    {
+        return self::interestQuery($event)->distinct()->count('email');
+    }
+
+    /**
+     * Whether there is anyone at all to tell - buyers or the interest list.
+     *
+     * The gate the two dispatch sites need. They used to ask hasRecipients(), which is sales-only,
+     * so an event with an interest list and no sales never dispatched the job at all and the
+     * interest half of notifyChange()/notifyCancellation() was unreachable in production - while
+     * event_interest_help promised "one if the date or venue changes".
+     */
+    public static function hasAnyoneToTell(Event $event): bool
+    {
+        return self::hasRecipients($event) || self::interestQuery($event)->exists();
+    }
+
     /** Distinct count of attendees that would be notified (drives the confirm dialog count). */
     public static function recipientCount(Event $event): int
     {
@@ -128,6 +154,27 @@ class EventChangeNotifier
                 $callback($sale);
             }
         });
+    }
+
+    /**
+     * The confirmed interest rows for this event's live occurrences.
+     *
+     * Shared by the count and the send so the confirm dialog cannot promise a number the send does
+     * not deliver.
+     */
+    protected static function interestQuery(Event $event)
+    {
+        $isRecurring = (bool) $event->days_of_week;
+
+        return EventInterest::query()
+            ->confirmed()
+            ->where('event_id', $event->id)
+            // Same reasoning as baseQuery(): event_date is the VENUE's calendar date, so a past
+            // occurrence of a recurring event owes nobody a change notice. scheduleToday() rather
+            // than now()->toDateString(), which west of UTC has already rolled over in the evening.
+            ->when($isRecurring, fn ($q) => $q->where(function ($w) use ($event) {
+                $w->where('event_date', '')->orWhere('event_date', '>=', $event->scheduleToday());
+            }));
     }
 
     protected static function baseQuery(Event $event)
@@ -161,24 +208,34 @@ class EventChangeNotifier
             return;
         }
 
-        $isRecurring = (bool) $event->days_of_week;
+        // Re-checked at send time, not just at capture: an owner who moved the event to Draft,
+        // Internal, Unlisted or password-protected after somebody asked about it must not have
+        // strangers mailed a link to a page that will 404 or password-gate for them. A cancellation
+        // is the one case that still goes out - that is the whole point of telling them.
+        if ($kind !== EventInterestNotification::KIND_CANCELLED
+            && $event->guestVisibilityFailure($role, false)) {
+            return;
+        }
 
-        EventInterest::query()
-            ->confirmed()
-            ->where('event_id', $event->id)
-            // Same reasoning as baseQuery(): event_date is the VENUE's calendar date, so a past
-            // occurrence of a recurring event owes nobody a change notice. scheduleToday() rather
-            // than now()->toDateString(), which west of UTC has already rolled over in the evening.
-            ->when($isRecurring, fn ($q) => $q->where(function ($w) use ($event) {
-                $w->where('event_date', '')->orWhere('event_date', '>=', $event->scheduleToday());
-            }))
+        $recipients = self::interestedCount($event);
+
+        if ($recipients === 0) {
+            return;
+        }
+
+        // Hoisted out of the loop, and counting the REAL recipients. Called per row with a
+        // hardcoded 1 this gate was inert: Role::canSendAudienceMail() ends in
+        // `$recipients > 0 && $recipients <= $limit` with a limit of 50, so 1 always passed and an
+        // unverified schedule could push its whole list through the shared platform mailer one
+        // message at a time. Every other caller passes the real count.
+        if (! $role->canSendAudienceMail($recipients, $role->user)) {
+            return;
+        }
+
+        self::interestQuery($event)
             ->orderBy('id')
             ->chunkById(200, function ($interests) use ($event, $role, $kind) {
                 foreach ($interests as $interest) {
-                    if (! $role->canSendAudienceMail(1, $role->user)) {
-                        return false;
-                    }
-
                     SendQueuedEmail::dispatch(
                         new EventInterestNotification(
                             $role,

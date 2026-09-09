@@ -5124,6 +5124,9 @@ return [
     'claim_not_me_removed' => 'Эта страница удалена.',
     'claim_not_me_reported' => 'Спасибо. Мы это записали, и кто-нибудь это рассмотрит.',
 
+    'notify_also_interested' => 'Оно также придёт :count людям, которые просили держать их в курсе этого события.',
+    'notify_interested_only' => 'Отправить письмо :count людям, которые просили держать их в курсе этого события?',
+    'event_interest_not_ready' => 'Не покупаете сегодня? Сообщите, если что-то изменится',
     'event_interest_cta' => 'Сообщите, когда появятся билеты',
     'event_interest_cta_changes' => 'Сообщите, если что-то изменится',
     'event_interest_placeholder' => 'vy@primer.ru',

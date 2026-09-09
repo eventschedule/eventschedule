@@ -106,4 +106,10 @@ return [
     // (int) '' is 0, which would turn the reminder into "send at the moment the event starts".
     'event_interest_reminder_hours' => (int) (env('EVENT_INTEREST_REMINDER_HOURS') ?: 48),
     'event_interest_recipient_batch' => (int) (env('EVENT_INTEREST_RECIPIENT_BATCH') ?: 2000),
+
+    // How long a "tickets are on sale" row stays live. An occurrence that has passed is excluded
+    // from the window by date, but a DATELESS event never ages out that way, and a row nothing can
+    // ever satisfy must not occupy the window for ever - see the starvation guard in
+    // SendEventInterestMail::candidates().
+    'event_interest_tickets_max_age_days' => (int) (env('EVENT_INTEREST_TICKETS_MAX_AGE_DAYS') ?: 180),
 ];

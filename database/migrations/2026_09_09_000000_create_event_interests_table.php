@@ -40,7 +40,7 @@ return new class extends Migration
             $table->string('name')->nullable();
             $table->string('locale', 10)->nullable();
 
-            // event_page | calendar | checkout
+            // event_page | checkout
             $table->string('source', 20)->default('event_page');
 
             // Single opt-in, stamped on create - the same split docs/FEATURES.md already draws

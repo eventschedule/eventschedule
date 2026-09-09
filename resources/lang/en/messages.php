@@ -5221,6 +5221,9 @@ return [
     // who has just added the event to their calendar already has a reminder. What a calendar
     // entry cannot do is tell them tickets went on sale, or that the date moved - a downloaded
     // .ics is a snapshot and never updates - so that is what the copy promises.
+    'notify_also_interested' => 'It will also go to :count people who asked to hear about this event.',
+    'notify_interested_only' => 'Email the :count people who asked to hear about this event?',
+    'event_interest_not_ready' => 'Not buying today? Tell me if anything changes',
     'event_interest_cta' => 'Tell me when tickets go on sale',
     'event_interest_cta_changes' => 'Tell me if anything changes',
     'event_interest_placeholder' => 'you@example.com',

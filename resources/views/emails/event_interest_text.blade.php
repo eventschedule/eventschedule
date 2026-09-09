@@ -3,7 +3,7 @@
 
 {{ $body }}
 
-{{ $event->is_multi_day ? $event->getDateRangeDisplay() : $event->getStartDateTime($interest->event_date ?: null, true)?->translatedFormat('F j, Y') }}@if ($event->venue && $event->venue->name) - {{ $event->venue->name }}@endif
+@if ($event->starts_at){{ $event->is_multi_day ? $event->getDateRangeDisplay() : $event->getStartDateTime($interest->event_date ?: null, true)?->translatedFormat('F j, Y') }}@endif@if ($event->venue && $event->venue->name) - {{ $event->venue->name }}@endif
 
 {{ $button }}: {{ $eventUrl }}
 

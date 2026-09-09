@@ -5122,6 +5122,9 @@ return [
     'claim_not_me_removed' => 'See leht on eemaldatud.',
     'claim_not_me_reported' => 'Aitäh. Oleme selle üles märkinud ja keegi vaatab selle üle.',
 
+    'notify_also_interested' => 'See läheb ka :count inimesele, kes soovisid selle sündmusega kursis olla.',
+    'notify_interested_only' => 'Kas saadame kirja :count inimesele, kes soovisid selle sündmusega kursis olla?',
+    'event_interest_not_ready' => 'Täna ei osta? Anna teada, kui midagi muutub',
     'event_interest_cta' => 'Anna teada, kui piletid müügile tulevad',
     'event_interest_cta_changes' => 'Anna teada, kui midagi muutub',
     'event_interest_placeholder' => 'sina@näidis.ee',

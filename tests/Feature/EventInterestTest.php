@@ -273,4 +273,101 @@ class EventInterestTest extends TestCase
         $this->assertStringNotContainsString('is waiting to buy', $html);
         $this->assertStringNotContainsString('are waiting to buy', $html);
     }
+
+    public function test_capture_works_on_a_monthly_recurring_event(): void
+    {
+        // Every fixture in this file was non-recurring, which is why the monthly case shipped
+        // broken. The guest page backfills $date for a recurring event; that backfill used to read
+        // days_of_week alone, and EventRepo writes '1111111' for monthly_date, so it handed back
+        // TODAY - which resolveDate()'s matchesDate() check then rejected. The visitor got
+        // "invalid request", the same string a honeypot trip produces, every single time.
+        $anchorDay = now()->day === 15 ? 20 : 15;
+        $event = $this->createRecurringEvent($this->role, [
+            'creator_role_id' => $this->role->id,
+            'starts_at' => now()->subMonths(3)->day($anchorDay)->setTime(19, 0)->format('Y-m-d H:i:s'),
+            'recurring_frequency' => 'monthly_date',
+        ]);
+
+        // Exactly what the rendered form posts.
+        $html = $this->get($this->guestEventUrl($this->role, $event))->assertOk()->getContent();
+        preg_match('/name="event_date" value="([^"]*)"/', $html, $m);
+        $submitted = $m[1] ?? '';
+        $this->assertNotEmpty($submitted);
+
+        $this->postJson(route('event.interest.join', ['subdomain' => $this->role->subdomain]), [
+            'email' => 'fan@fans.test',
+            'event_id' => UrlUtils::encodeId($event->id),
+            'event_date' => $submitted,
+        ])->assertOk()->assertJson(['success' => true]);
+
+        $interest = EventInterest::firstOrFail();
+        $this->assertSame($submitted, $interest->event_date);
+        $this->assertSame($anchorDay, (int) date('j', strtotime($interest->event_date)));
+    }
+
+    public function test_a_ticketed_event_offers_the_quiet_link_beside_the_buy_button(): void
+    {
+        // Moment B. The plan called for it, the commit message claimed it, and it did not exist -
+        // so on a ticketed event there was no entry point to the card at all, because the
+        // Add-to-Calendar menu that carries the other two links only renders when there is NO
+        // primary CTA.
+        $this->event->forceFill(['tickets_enabled' => true])->save();
+        $this->createTicket($this->event, ['price' => 10]);
+
+        $html = $this->get($this->event->getGuestUrl($this->role->subdomain))->assertOk()->getContent();
+
+        $this->assertStringContainsString('href="#event-interest"', $html);
+        $this->assertStringContainsString(__('messages.event_interest_not_ready'), $html);
+        // And the thing it points at is actually on the page.
+        $this->assertStringContainsString('id="event-interest"', $html);
+    }
+
+    public function test_a_cancelled_event_offers_no_dead_interest_links(): void
+    {
+        // The anchors and the card used to be gated separately: the mobile Add-to-Calendar sheet
+        // renders on a cancelled event (canSellTickets/canAcceptRsvp are false), while the card
+        // refused - so the menu offered "Tell me when tickets go on sale" and clicking did nothing.
+        $this->event->forceFill(['is_cancelled' => true])->save();
+
+        $html = $this->get($this->event->getGuestUrl($this->role->subdomain))->assertOk()->getContent();
+
+        $this->assertStringNotContainsString('id="event-interest"', $html, 'the card must not render');
+        $this->assertStringNotContainsString('href="#event-interest"', $html, 'and nothing may link to it');
+    }
+
+    public function test_a_past_event_offers_no_dead_interest_links(): void
+    {
+        $this->event->forceFill([
+            'starts_at' => now()->subMonth()->format('Y-m-d H:i:s'),
+        ])->save();
+
+        $html = $this->get($this->event->getGuestUrl($this->role->subdomain))->assertOk()->getContent();
+
+        $this->assertStringNotContainsString('id="event-interest"', $html);
+        $this->assertStringNotContainsString('href="#event-interest"', $html);
+    }
+
+    public function test_a_past_occurrence_cannot_be_captured_by_a_direct_post(): void
+    {
+        // The view refuses to render the form on a past event; the controller used to accept one
+        // anyway. Such a row can never produce a send and would sit in the organizer's demand count
+        // for ever.
+        $this->event->forceFill(['starts_at' => now()->subMonth()->format('Y-m-d H:i:s')])->save();
+        $this->event->refresh();
+
+        $this->postJson($this->joinUrl(), $this->payload([
+            'event_date' => $this->event->getStartDateTime(null, true, $this->event->scheduleTimezone())->format('Y-m-d'),
+        ]))->assertOk()->assertJson(['success' => false]);
+
+        $this->assertSame(0, EventInterest::count());
+    }
+
+    public function test_an_event_hidden_from_discovery_cannot_be_captured(): void
+    {
+        $this->event->forceFill(['is_hidden_from_discovery' => true])->save();
+
+        $this->postJson($this->joinUrl(), $this->payload())->assertOk()->assertJson(['success' => false]);
+
+        $this->assertSame(0, EventInterest::count());
+    }
 }

@@ -2293,7 +2293,11 @@ class EventRepo
                     && $event->starts_at
                     && Carbon::createFromFormat('Y-m-d H:i:s', $event->starts_at, 'UTC')->isPast();
 
-                if ($notifyRequested && ! $isPast && EventChangeNotifier::hasRecipients($event)) {
+                // hasAnyoneToTell(), not hasRecipients(): the latter counts SALES only, so an
+                // event with an interest list and no sales never dispatched at all and the
+                // interest half of notifyChange() was unreachable - while event_interest_help
+                // promised "one if the date or venue changes".
+                if ($notifyRequested && ! $isPast && EventChangeNotifier::hasAnyoneToTell($event)) {
                     $note = $request->input('notify_message');
                     NotifyEventChange::dispatch($event->id, $changes, $note ? Str::limit($note, 280, '') : null);
                     $this->lastNotifiedCount = EventChangeNotifier::recipientCount($event);

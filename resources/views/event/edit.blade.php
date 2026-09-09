@@ -5597,6 +5597,7 @@
         isRecurring: @json($event->days_of_week ? true : false),
         // Attendee change-notification UX (issue #94): confirm dialog on save when a key detail changed.
         registrantCount: @json($registrantCount ?? 0),
+        interestedCount: @json($interestedCount ?? 0),
         scheduleHasEmailSettings: @json($scheduleHasEmailSettings ?? false),
         attendeesNotifiedAt: @json($attendeesNotifiedAt ?? null),
         notifyAttendees: false,
@@ -6620,11 +6621,18 @@
         return false;
       },
       shouldPromptNotify() {
-        return this.registrantCount > 0
-          && this.scheduleHasEmailSettings
+        // Either audience is reason to ask. The interest list is deliberately NOT behind
+        // scheduleHasEmailSettings: EventChangeNotifier applies that gate to the sales half
+        // internally, where it belongs, and applying it here as well is what made the interest
+        // half unreachable for every schedule on the platform mailer - which is most of them.
+        return this.someoneToNotify()
           && !this.event.is_cancelled
           && !this.event.is_draft
           && this.hasKeyChange();
+      },
+      someoneToNotify() {
+        return (this.registrantCount > 0 && this.scheduleHasEmailSettings)
+          || this.interestedCount > 0;
       },
       recentlyNotifiedMinutes() {
         if (!this.attendeesNotifiedAt) return null;
@@ -6654,7 +6662,7 @@
         this.showCancelModal = false;
       },
       cancelWillNotify() {
-        return this.registrantCount > 0 && this.scheduleHasEmailSettings;
+        return this.someoneToNotify();
       },
       submitCancel() {
         if (this.isSubmittingCancel) return;
@@ -6691,10 +6699,29 @@
         form.submit();
       },
       notifyBody() {
-        return @json(__('messages.notify_attendees_body')).replace(':count', this.registrantCount);
+        return this.notifyAudienceBody(@json(__('messages.notify_attendees_body')));
       },
       cancelBody() {
-        return @json(__('messages.cancel_event_body')).replace(':count', this.registrantCount);
+        return this.notifyAudienceBody(@json(__('messages.cancel_event_body')));
+      },
+      /**
+       * Both bodies name ":count registered attendees". With an interest list and no sales that
+       * reads "the 0 registered attendees", so the two audiences are named separately and only
+       * when they exist.
+       */
+      notifyAudienceBody(template) {
+        const attendees = this.scheduleHasEmailSettings ? this.registrantCount : 0;
+
+        if (attendees > 0 && this.interestedCount > 0) {
+          return template.replace(':count', attendees) + ' '
+            + @json(__('messages.notify_also_interested')).replace(':count', this.interestedCount);
+        }
+
+        if (attendees === 0 && this.interestedCount > 0) {
+          return @json(__('messages.notify_interested_only')).replace(':count', this.interestedCount);
+        }
+
+        return template.replace(':count', attendees);
       },
       changeSummary() {
         const out = [];

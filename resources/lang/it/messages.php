@@ -5103,6 +5103,9 @@ return [
     'claim_not_me_removed' => 'Quella pagina è stata rimossa.',
     'claim_not_me_reported' => 'Grazie. Lo abbiamo registrato e qualcuno lo esaminerà.',
 
+    'notify_also_interested' => 'Sarà inviata anche a :count persone che avevano chiesto di essere aggiornate su questo evento.',
+    'notify_interested_only' => 'Inviare un\'email alle :count persone che avevano chiesto di essere aggiornate su questo evento?',
+    'event_interest_not_ready' => 'Non compri oggi? Avvisami se qualcosa cambia',
     'event_interest_cta' => 'Avvisami quando ci saranno i biglietti',
     'event_interest_cta_changes' => 'Avvisami se qualcosa cambia',
     'event_interest_placeholder' => 'tu@esempio.it',

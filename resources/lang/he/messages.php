@@ -5098,6 +5098,9 @@ return [
     'claim_not_me_removed' => 'הדף הוסר.',
     'claim_not_me_reported' => 'תודה. רשמנו את הפנייה ומישהו יבדוק אותה.',
 
+    'notify_also_interested' => 'הוא יישלח גם ל-:count אנשים שביקשו להתעדכן על האירוע הזה.',
+    'notify_interested_only' => 'לשלוח מייל ל-:count אנשים שביקשו להתעדכן על האירוע הזה?',
+    'event_interest_not_ready' => 'לא קונים היום? עדכנו אותי אם משהו משתנה',
     'event_interest_cta' => 'עדכנו אותי כשיהיו כרטיסים',
     'event_interest_cta_changes' => 'עדכנו אותי אם משהו משתנה',
     'event_interest_placeholder' => 'you@example.com',

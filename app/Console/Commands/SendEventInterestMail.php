@@ -63,6 +63,12 @@ class SendEventInterestMail extends Command
 
     private int $queued = 0;
 
+    /** Per-event memo of the transport gate's answer, which cannot change within a run. */
+    private array $mailable = [];
+
+    /** Per-event memo of the guest-visibility check, for the same reason. */
+    private array $visible = [];
+
     public function handle(): int
     {
         $apply = (bool) $this->option('apply');
@@ -113,9 +119,38 @@ class SendEventInterestMail extends Command
                 continue;
             }
 
-            // The transport gate. Returns true on selfhost and in tests, so a test asserting a
-            // refusal has to turn app.is_testing off - see EventAnnouncementTest.
-            if (! $role->canSendAudienceMail(1, $role->user)) {
+            // Visibility is re-checked at SEND time, not just at capture. An owner who moves an
+            // event to Draft, Internal, Unlisted or password-protected after somebody asked about
+            // it would otherwise still have "tickets are on sale" mailed to strangers, with a
+            // primary button pointing at a page that 404s or password-gates for them.
+            //
+            // Memoised per event: it costs a pivot query, and this loop streams.
+            if (! isset($this->visible[$event->id])) {
+                $this->visible[$event->id] = ! $event->guestVisibilityFailure($role, false);
+            }
+
+            if (! $this->visible[$event->id]) {
+                continue;
+            }
+
+            // The transport gate, given the REAL number of people this event would reach.
+            //
+            // It used to pass a hardcoded 1, which made it inert: canSendAudienceMail() ends in
+            // `$recipients > 0 && $recipients <= $limit` with a limit of 50, so 1 always passed and
+            // an unverified schedule could push its whole list through the shared platform mailer
+            // one message at a time. Every other caller passes the real count.
+            //
+            // Memoised per event: the answer cannot change within a run, and this loop streams.
+            // Returns true on selfhost and in tests, so a test asserting a refusal has to turn
+            // app.is_testing off - see EventAnnouncementTest.
+            if (! isset($this->mailable[$event->id])) {
+                $this->mailable[$event->id] = $role->canSendAudienceMail(
+                    EventInterest::confirmed()->where('event_id', $event->id)->distinct()->count('email'),
+                    $role->user
+                );
+            }
+
+            if (! $this->mailable[$event->id]) {
                 continue;
             }
 
@@ -142,7 +177,11 @@ class SendEventInterestMail extends Command
                 $this->queued++;
             } catch (\Throwable $e) {
                 // Hand the claim back so the next run retries, rather than swallowing a failure
-                // behind a stamped column. Conditional again, so a concurrent claim is not undone.
+                // behind a stamped column.
+                //
+                // whereNotNull matches ANY non-null value, so this is not the conditional the
+                // forward claim is. It does not need to be: the claim above is whereNull, so only
+                // one runner can ever hold a row, and the only stamp this can find is its own.
                 DB::table('event_interests')
                     ->where('id', $interest->id)
                     ->whereNotNull($column)
@@ -168,6 +207,10 @@ class SendEventInterestMail extends Command
         $query = EventInterest::confirmed()
             ->whereNull($column)
             ->with(['event.creatorRole', 'event.venue'])
+            // A cancelled event owes its list a cancellation notice, which EventChangeNotifier
+            // sends. It will never owe them either of these, so its rows must not sit in the window
+            // for ever - see the starvation note below.
+            ->whereHas('event', fn ($q) => $q->where('is_cancelled', false))
             ->orderBy('id');
 
         if ($kind === EventInterestNotification::KIND_REMINDER) {
@@ -180,11 +223,39 @@ class SendEventInterestMail extends Command
                         now()->addHours($hours)->addDay()->format('Y-m-d'),
                     ]);
             });
+        } else {
+            // THE STARVATION GUARD, and it is load-bearing.
+            //
+            // isDue() skips a row without stamping it, which is correct - an upcoming event with no
+            // ticket type yet is "not yet", not "never". But a row whose occurrence has PASSED can
+            // never become due again, and nothing removes it. Those rows keep the lowest ids, so
+            // ORDER BY id LIMIT n eventually returns nothing but corpses and the feature stops
+            // sending, silently, with no error and no log. Only ~33% of schedules ever create a
+            // ticket type, so dead rows are the majority case by construction.
+            //
+            // Excluded in SQL rather than stamped: stamping would permanently silence anyone whose
+            // event is later rescheduled or un-cancelled. A day of slack absorbs the timezone skew
+            // between this UTC-ish comparison and isDue()'s per-schedule one.
+            $maxAge = max(1, (int) config('usage.event_interest_tickets_max_age_days'));
+
+            $query->where(function ($q) {
+                $q->where('event_date', '')
+                    ->orWhere('event_date', '>=', now()->subDay()->format('Y-m-d'));
+            });
+
+            // The dateless case has no occurrence to age out, so it is bounded by the age of the
+            // ASK instead: an event that has not started selling within six months of somebody
+            // asking is not going to produce a welcome email.
+            $query->where('event_interests.created_at', '>=', now()->subDays($maxAge));
         }
 
         // Twice the budget: isDue() rejects some of what SQL let through, so a limit of exactly
         // the budget would under-fill a run.
-        return $query->limit($budget * 2)->cursor();
+        //
+        // lazyById(), not cursor(): Builder::cursor() maps raw records through newFromBuilder() and
+        // never calls eagerLoadRelations(), so the ->with() above is silently discarded and every
+        // row re-queries its event, creator role, venue and ticket set.
+        return $query->limit($budget * 2)->lazyById(200);
     }
 
     private function isDue(string $kind, EventInterest $interest): bool
@@ -199,7 +270,11 @@ class SendEventInterestMail extends Command
         }
 
         if ($kind === EventInterestNotification::KIND_TICKETS) {
-            return (bool) $event->canSellTickets($date);
+            // starts_at guarded here as well as on the reminder branch below. canSellTickets()
+            // skips all its date checks for a dateless event and can return true, and both mail
+            // views then call getStartDateTime(), which has no null guard and THROWS - poisoning
+            // the job with the claim column already stamped, so that person never hears.
+            return $event->starts_at && $event->canSellTickets($date);
         }
 
         if (! $event->starts_at) {
