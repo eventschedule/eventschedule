@@ -3938,6 +3938,7 @@ return [
     'preview_email' => 'Предпросмотр письма',
     'change_notifies_attendees_hint' => 'Зарегистрированным участникам можно отправлять письма об изменениях этого события.',
     'notify_requires_email_settings' => 'Настройте собственную почту, чтобы уведомлять участников об изменениях.',
+    'people_notified' => 'Уведомлено людей: :count',
     'attendees_notified' => ':count участник(ов) уведомлено',
     'saved_without_notifying' => 'Сохранено без уведомления участников',
     'cancel_event' => 'Отменить событие',

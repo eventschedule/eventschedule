@@ -4342,6 +4342,7 @@ return [
     'preview_email' => 'Preview email',
     'change_notifies_attendees_hint' => 'Registered attendees can be emailed about changes to this event.',
     'notify_requires_email_settings' => 'Set up your own email to notify attendees of changes.',
+    'people_notified' => ':count person/people notified',
     'attendees_notified' => ':count attendee(s) notified',
     'saved_without_notifying' => 'Saved without notifying attendees',
     'cancel_event' => 'Cancel event',

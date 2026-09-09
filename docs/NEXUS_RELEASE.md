@@ -21,7 +21,7 @@ the cutover.
 
 ## What is shipping
 
-`main` is **12 migrations** ahead of what is live (`git log v1.0.128..HEAD` for the commits - a
+`main` is **21 migrations** ahead of what is live (`git log v1.0.128..HEAD` for the commits - a
 number written here goes stale the next time anyone commits, including commits to this file). Deploys are manual
 (`deploy_on_push` is unset on the app spec), so nothing in this release has reached production.
 
@@ -216,7 +216,7 @@ verification.
 | # | Step | Where | Notes |
 |---|---|---|---|
 | 1 | Create the backups bucket | DO infra | one-time |
-| 2 | Deploy `main` | DO deploy | 12 migrations; two irreversible, two more with a no-op `down()` |
+| 2 | Deploy `main` | DO deploy | 21 migrations; two irreversible, two more with a no-op `down()` |
 | 3 | Backfill the flyer thumbnails | console command | one-time; must precede step 4 |
 | 4 | Cloudflare cache rule | Cloudflare dashboard | one-time; the edge cache is inert until this exists |
 | 5 | Set `BACKUP_*` and `CACHE_STORE` | DO app spec | one-time; one save, one redeploy |
@@ -269,9 +269,9 @@ and phone number. `BACKUP_SPACES_BUCKET` deliberately has no fallback, and
 
 ### 2. Deploy `main` on its own - [DO deploy]
 
-Console, then Deploy. This runs `migrate --force` (12 migrations) and ships all the code.
+Console, then Deploy. This runs `migrate --force` (21 migrations) and ships all the code.
 
-**Verify:** the deploy log shows all 12 migrations completing (this is where a slow `events`
+**Verify:** the deploy log shows all 21 migrations completing (this is where a slow `events`
 rebuild would surface); deployment `ACTIVE`; `/admin/queue` shows no failed-job spike; spot-check
 the homepage, a schedule page and checkout; `/admin` shows no new alerts. The per-task list on
 `/admin/queue` names every scheduled entry - `SchedulerHealthTest` already fails the build if one
@@ -763,7 +763,7 @@ The version is already bumped in `config/self-update.php` and `.github/workflows
 does not re-run the suite.
 
 Before publishing, note that `AppUpdateService::performUpdate()` runs `migrate --force` **inline
-in the web request**, and this release's 12 migrations include the irreversible
+in the web request**, and this release's 21 migrations include the irreversible
 `federated_events.event_url` drop. Release notes follow the process in `CLAUDE.md`.
 
 ## Deferred

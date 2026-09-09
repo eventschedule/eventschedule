@@ -3918,6 +3918,7 @@ return [
     'preview_email' => 'معاينة البريد الإلكتروني',
     'change_notifies_attendees_hint' => 'يمكن إرسال بريد إلكتروني إلى الحضور المسجَّلين بشأن التغييرات على هذه الفعالية.',
     'notify_requires_email_settings' => 'قم بإعداد بريدك الإلكتروني الخاص لإشعار الحضور بالتغييرات.',
+    'people_notified' => 'تم إبلاغ :count شخصًا',
     'attendees_notified' => 'تم إشعار :count من الحضور',
     'saved_without_notifying' => 'تم الحفظ دون إشعار الحضور',
     'cancel_event' => 'إلغاء الفعالية',

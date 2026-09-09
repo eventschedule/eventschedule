@@ -116,16 +116,45 @@ class EventChangeNotifier
     }
 
     /**
-     * Whether there is anyone at all to tell - buyers or the interest list.
+     * Buyers this event could actually reach, which is zero without the schedule's own SMTP.
+     *
+     * recipientCount() counts buyers who EXIST; this counts buyers who can be MAILED. The
+     * difference is the whole reason the confirm dialog used to promise "1 attendee notified" and
+     * then send nothing: notifyChange() applies the SMTP gate to the sales half internally, so a
+     * schedule on the platform mailer has buyers it can never write to.
+     */
+    public static function notifiableBuyerCount(Event $event): int
+    {
+        return optional($event->getRoleWithEmailSettings())->hasEmailSettings()
+            ? self::recipientCount($event)
+            : 0;
+    }
+
+    /**
+     * Everyone this event can actually reach about a change: mailable buyers plus the interest list.
+     *
+     * The single number the dispatch gate, the confirm dialog and the saved-event flash all read,
+     * so they cannot disagree about who is being told.
+     */
+    public static function notifiableCount(Event $event): int
+    {
+        return self::notifiableBuyerCount($event) + self::interestedCount($event);
+    }
+
+    /**
+     * Whether there is anyone at all to tell.
      *
      * The gate the two dispatch sites need. They used to ask hasRecipients(), which is sales-only,
-     * so an event with an interest list and no sales never dispatched the job at all and the
-     * interest half of notifyChange()/notifyCancellation() was unreachable in production - while
+     * so an event with an interest list and no sales never dispatched the job at all - while
      * event_interest_help promised "one if the date or venue changes".
+     *
+     * Counting MAILABLE buyers rather than all of them also stops the opposite error: dispatching a
+     * job that will send nothing, and stamping attendees_notified_at on the way, which drove a
+     * "recently notified" warning for an owner who had notified nobody.
      */
     public static function hasAnyoneToTell(Event $event): bool
     {
-        return self::hasRecipients($event) || self::interestQuery($event)->exists();
+        return self::notifiableCount($event) > 0;
     }
 
     /** Distinct count of attendees that would be notified (drives the confirm dialog count). */

@@ -3917,6 +3917,7 @@ return [
     'preview_email' => 'E-mailvoorbeeld',
     'change_notifies_attendees_hint' => 'Ingeschreven deelnemers kunnen per e-mail worden geïnformeerd over wijzigingen aan dit evenement.',
     'notify_requires_email_settings' => 'Stel je eigen e-mail in om deelnemers te informeren over wijzigingen.',
+    'people_notified' => ':count persoon/personen op de hoogte gebracht',
     'attendees_notified' => ':count deelnemer(s) geïnformeerd',
     'saved_without_notifying' => 'Opgeslagen zonder deelnemers te informeren',
     'cancel_event' => 'Evenement annuleren',

@@ -32,6 +32,7 @@
             <x-doc-nav-link href="#wallet-passes">Wallet Passes</x-doc-nav-link>
         </x-doc-nav-group>
         <x-doc-nav-link href="#waitlist">Waitlist</x-doc-nav-link>
+        <x-doc-nav-link href="#interest-list">Interest List</x-doc-nav-link>
         <x-doc-nav-link href="#feedback">Post-Event Feedback</x-doc-nav-link>
         <x-doc-nav-link href="#financial">Financial Information</x-doc-nav-link>
         <x-doc-nav-link href="#embed-widget">Embed Widget</x-doc-nav-link>
@@ -1168,6 +1169,38 @@
         <div class="doc-callout doc-callout-info">
             <div class="doc-callout-title">One at a Time</div>
             <p>Only one person is notified at a time to prevent overselling. The next person is notified only after the current person's 24-hour window expires or they complete their purchase.</p>
+        </div>
+    </section>
+
+    <!-- Interest List -->
+    <section id="interest-list" class="doc-section">
+        <h2 class="doc-heading">
+            <svg aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-5 h-5 text-gray-500 dark:text-gray-400 flex-shrink-0">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
+            </svg>
+            Interest List
+        </h2>
+        <p class="text-gray-600 dark:text-gray-300 mb-6">Most people who look at an event page are not ready to buy that minute, and until now there was nothing for them to do but leave. The interest list lets them hand over an email address instead, with no account and no sign-up.</p>
+
+        <h3 class="doc-subheading">How It Works</h3>
+        <ol class="doc-list doc-list-numbered mb-6">
+            <li>On any public event page, a visitor can ask to hear about that event - from the <strong class="text-gray-900 dark:text-white">Add to Calendar</strong> menu, or from a link beside the buy button on an event that is already selling</li>
+            <li>They give an email address and nothing else. No name, no account</li>
+            <li>They hear when that event's <strong class="text-gray-900 dark:text-white">tickets go on sale</strong>, if its <strong class="text-gray-900 dark:text-white">date or venue changes</strong>, if it is <strong class="text-gray-900 dark:text-white">cancelled</strong>, and once shortly before it starts</li>
+            <li>Every message carries a one-click unsubscribe, and unsubscribing deletes the address rather than keeping it on a suppression list</li>
+        </ol>
+
+        <div class="doc-callout doc-callout-info mb-6">
+            <div class="doc-callout-title">Free on every plan</div>
+            <p>The interest list is not a paid feature and is not counted against your <a href="{{ marketing_url('/docs/newsletters') }}" class="doc-link">newsletter allowance</a>. It exists to help you find out whether anyone wants tickets before you go to the trouble of selling them.</p>
+        </div>
+
+        <h3 class="doc-subheading">Seeing Who Is Waiting</h3>
+        <p class="text-gray-600 dark:text-gray-300 mb-6">The number of people waiting shows on the <strong class="text-gray-900 dark:text-white">Tickets</strong> panel when you edit the event, and on your dashboard next to the suggestion to add a ticket type. It is never shown publicly.</p>
+
+        <div class="doc-callout doc-callout-info">
+            <div class="doc-callout-title">Not the same as followers</div>
+            <p>Asking about one event is not subscribing to your schedule. Those people hear about that event and nothing else. Someone who wants everything you publish can <a href="{{ marketing_url('/docs/newsletters') }}" class="doc-link">sign up to your schedule</a> or subscribe to its calendar feed.</p>
         </div>
     </section>
 

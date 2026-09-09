@@ -3924,6 +3924,7 @@ return [
     'preview_email' => 'Aperçu de l\'e-mail',
     'change_notifies_attendees_hint' => 'Les participants inscrits peuvent être informés par e-mail des modifications de cet événement.',
     'notify_requires_email_settings' => 'Configurez votre propre messagerie pour notifier les participants des changements.',
+    'people_notified' => ':count personne(s) prévenue(s)',
     'attendees_notified' => ':count participant(s) notifié(s)',
     'saved_without_notifying' => 'Enregistré sans notifier les participants',
     'cancel_event' => 'Annuler l\'événement',

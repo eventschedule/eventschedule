@@ -3912,6 +3912,7 @@ return [
     'preview_email' => 'תצוגה מקדימה של האימייל',
     'change_notifies_attendees_hint' => 'ניתן לשלוח למשתתפים הרשומים אימייל על שינויים באירוע זה.',
     'notify_requires_email_settings' => 'הגדר אימייל משלך כדי להודיע למשתתפים על שינויים.',
+    'people_notified' => ':count אנשים עודכנו',
     'attendees_notified' => ':count משתתפים קיבלו הודעה',
     'saved_without_notifying' => 'נשמר ללא הודעה למשתתפים',
     'cancel_event' => 'בטל אירוע',

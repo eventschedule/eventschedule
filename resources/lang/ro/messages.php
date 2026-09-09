@@ -3956,6 +3956,7 @@ return [
     'preview_email' => 'Previzualizează e-mailul',
     'change_notifies_attendees_hint' => 'Participanții înscriși pot fi notificați prin e-mail despre modificările acestui eveniment.',
     'notify_requires_email_settings' => 'Configurează-ți propriul e-mail pentru a notifica participanții despre modificări.',
+    'people_notified' => ':count persoană/persoane anunțate',
     'attendees_notified' => ':count participant(i) notificat(i)',
     'saved_without_notifying' => 'Salvat fără a notifica participanții',
     'cancel_event' => 'Anulează evenimentul',

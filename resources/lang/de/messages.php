@@ -3921,6 +3921,7 @@ return [
     'preview_email' => 'E-Mail-Vorschau',
     'change_notifies_attendees_hint' => 'Angemeldete Teilnehmer können per E-Mail über Änderungen an dieser Veranstaltung informiert werden.',
     'notify_requires_email_settings' => 'Richten Sie Ihre eigene E-Mail ein, um Teilnehmer über Änderungen zu benachrichtigen.',
+    'people_notified' => ':count Person(en) benachrichtigt',
     'attendees_notified' => ':count Teilnehmer benachrichtigt',
     'saved_without_notifying' => 'Gespeichert, ohne Teilnehmer zu benachrichtigen',
     'cancel_event' => 'Veranstaltung absagen',

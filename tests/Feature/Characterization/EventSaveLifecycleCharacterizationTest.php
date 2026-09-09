@@ -78,7 +78,19 @@ class EventSaveLifecycleCharacterizationTest extends TestCase
         Queue::fake();
 
         $owner = $this->createOwner();
-        $role = $this->createRole($owner, 'talent');
+        // The schedule now needs its own SMTP for this to notify anyone, and that is a DELIBERATE
+        // change to what this test pinned.
+        //
+        // It used to use a schedule with no email settings and assert "1 attendee(s) notified" plus
+        // a dispatched job. Both were true and both were a lie: NotifyEventChange::handle() bailed
+        // on hasEmailSettings() before sending anything, so the organizer was told an attendee had
+        // been emailed when none had. The gate now counts people who can actually be MAILED
+        // (EventChangeNotifier::notifiableCount()), so the no-SMTP case reports honestly - pinned
+        // by the sibling test below - and this one keeps the behaviour the test was written for.
+        $role = $this->createRole($owner, 'talent', ['email_settings' => [
+            'host' => 'smtp.test', 'username' => 'u', 'password' => 'p',
+            'port' => 587, 'from_address' => 'sched@gmail.com', 'from_name' => 'Sched',
+        ]]);
         $event = $this->createEvent($role, ['starts_at' => '2026-08-16 00:00:00', 'timezone' => 'America/New_York']);
         // Paid attendee with a REAL domain - example.com is excluded by
         // Sale::excludeTestEmails and would make hasRecipients() false.
@@ -115,6 +127,33 @@ class EventSaveLifecycleCharacterizationTest extends TestCase
 
         // Subscribed calendars still need the change -> sequence advances,
         // but no attendee notification is dispatched.
+        $this->assertDatabaseHas('events', ['id' => $event->id, 'ical_sequence' => 1]);
+        Queue::assertNotPushed(NotifyEventChange::class);
+    }
+
+    public function test_a_schedule_with_no_smtp_and_no_interest_list_notifies_nobody(): void
+    {
+        Queue::fake();
+
+        // The other half of the change above. A schedule on the shared platform mailer cannot write
+        // to its ticket holders at all - notifyChange() applies that gate to the sales half - so
+        // there is nobody to tell, nothing is dispatched, and the organizer is told so rather than
+        // being shown a count of people who were never emailed.
+        $owner = $this->createOwner();
+        $role = $this->createRole($owner, 'talent');
+        $event = $this->createEvent($role, ['starts_at' => '2026-08-16 00:00:00', 'timezone' => 'America/New_York']);
+        $this->createSale($event, $role, ['email' => 'attendee@gmail.com', 'status' => 'paid']);
+
+        $response = $this->putUpdateEvent($owner, $role, $event, [
+            'starts_at' => '2026-08-20 21:00:00',
+            'notify_attendees' => '1',
+            'notify_message' => 'Moved to Thursday!',
+        ]);
+
+        $response->assertRedirect();
+        $response->assertSessionHas('message', __('messages.saved_without_notifying'));
+
+        // The calendar correction still goes out; only the email does not.
         $this->assertDatabaseHas('events', ['id' => $event->id, 'ical_sequence' => 1]);
         Queue::assertNotPushed(NotifyEventChange::class);
     }

@@ -3936,6 +3936,7 @@ return [
     'preview_email' => 'E-kirja eelvaade',
     'change_notifies_attendees_hint' => 'Registreerunud osalejatele saab saata e-kirju selle ürituse muudatuste kohta.',
     'notify_requires_email_settings' => 'Osalejate muudatustest teavitamiseks seadistage oma e-post.',
+    'people_notified' => ':count inimest teavitatud',
     'attendees_notified' => ':count osalejat teavitatud',
     'saved_without_notifying' => 'Salvestatud osalejaid teavitamata',
     'cancel_event' => 'Tühista üritus',

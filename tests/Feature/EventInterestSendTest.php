@@ -349,4 +349,46 @@ class EventInterestSendTest extends TestCase
 
         $this->assertCount(0, $rows, 'a passed occurrence must not occupy the candidate window');
     }
+
+    public function test_running_the_cancellation_job_actually_reaches_the_interest_list(): void
+    {
+        // Queue::assertPushed() proves a job was QUEUED. It does not prove that running it does
+        // anything - and for three commits it did not: NotifyEventCancelled::handle() bailed on
+        // hasEmailSettings() before ever calling the notifier, so the interest list heard nothing
+        // while event_interest_help promised "one if the date or venue changes". The dispatch-level
+        // test above passed throughout.
+        //
+        // This runs the job BODY, which is the only thing that could have caught it.
+        $this->capture();
+        $this->assertFalse($this->role->hasEmailSettings(), 'the fixture must use the platform mailer');
+
+        (new \App\Jobs\NotifyEventCancelled($this->event->id))->handle();
+
+        $this->assertSame(1, $this->queuedCount(), 'the interest list must actually be mailed');
+    }
+
+    public function test_running_the_change_job_actually_reaches_the_interest_list(): void
+    {
+        $this->capture();
+
+        (new \App\Jobs\NotifyEventChange($this->event->id, ['starts_at' => 'x']))->handle();
+
+        $this->assertSame(1, $this->queuedCount());
+    }
+
+    public function test_the_change_job_still_mails_buyers_on_a_schedule_with_its_own_smtp(): void
+    {
+        // The other side of removing that bail: the sales half must be untouched. It keeps the SMTP
+        // gate, applied inside the notifier where it belongs.
+        $this->role->email_settings = [
+            'host' => 'smtp.test', 'username' => 'u', 'password' => 'p',
+            'port' => 587, 'from_address' => 'sched@gmail.com', 'from_name' => 'Sched',
+        ];
+        $this->role->save();
+        $this->createSale($this->event, $this->role, ['email' => 'buyer@gmail.com', 'status' => 'paid']);
+
+        (new \App\Jobs\NotifyEventChange($this->event->fresh()->id, ['starts_at' => 'x']))->handle();
+
+        $this->assertSame(1, $this->queuedCount(), 'the buyer must still be mailed');
+    }
 }

@@ -3917,6 +3917,7 @@ return [
     'preview_email' => 'Vista previa del correo',
     'change_notifies_attendees_hint' => 'Se puede enviar un correo a los asistentes inscritos sobre los cambios en este evento.',
     'notify_requires_email_settings' => 'Configura tu propio correo para notificar los cambios a los asistentes.',
+    'people_notified' => ':count persona(s) notificada(s)',
     'attendees_notified' => ':count asistente(s) notificado(s)',
     'saved_without_notifying' => 'Guardado sin notificar a los asistentes',
     'cancel_event' => 'Cancelar evento',

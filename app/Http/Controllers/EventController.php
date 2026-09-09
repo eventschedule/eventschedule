@@ -1161,9 +1161,19 @@ class EventController extends Controller
             'year' => $date->year,
         ];
 
-        // Tell the organizer whether attendees were emailed about the change.
-        $message = $this->eventRepo->lastNotifiedCount
-            ? __('messages.attendees_notified', ['count' => $this->eventRepo->lastNotifiedCount])
+        // Tell the organizer who was emailed about the change.
+        //
+        // "attendees" only holds when the recipients really are ticket holders. Somebody who left an
+        // address on the public page is not an attendee, so a count including them uses the neutral
+        // string - otherwise an event with an interest list and no sales reported "saved without
+        // notifying" while the mail went out.
+        $notified = $this->eventRepo->lastNotifiedCount;
+        $interested = $this->eventRepo->lastNotifiedInterestCount ?? 0;
+
+        $message = $notified
+            ? ($interested > 0
+                ? __('messages.people_notified', ['count' => $notified])
+                : __('messages.attendees_notified', ['count' => $notified]))
             : ($request->boolean('notify_attendees')
                 ? __('messages.saved_without_notifying')
                 : __('messages.event_updated'));

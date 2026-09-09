@@ -36,6 +36,9 @@ class EventRepo
     /** Number of attendees notified by the most recent saveEvent() call (drives the AP toast); null if none. */
     public ?int $lastNotifiedCount = null;
 
+    /** How many of lastNotifiedCount are interest-list rows rather than ticket holders. */
+    public ?int $lastNotifiedInterestCount = null;
+
     /**
      * Resolve the default category id to apply to a new event on this schedule.
      * Returns the role's default_category_id only if it's still in the schedule's
@@ -2300,7 +2303,13 @@ class EventRepo
                 if ($notifyRequested && ! $isPast && EventChangeNotifier::hasAnyoneToTell($event)) {
                     $note = $request->input('notify_message');
                     NotifyEventChange::dispatch($event->id, $changes, $note ? Str::limit($note, 280, '') : null);
-                    $this->lastNotifiedCount = EventChangeNotifier::recipientCount($event);
+                    // notifiableCount(), not recipientCount(): the latter counts buyers who
+                    // EXIST, and this number is used to tell the organizer who was told. A
+                    // schedule on the platform mailer cannot write to its buyers at all, and an
+                    // event with an interest list and no sales was reporting 0 - so the app showed
+                    // "saved without notifying" while the mail went out.
+                    $this->lastNotifiedCount = EventChangeNotifier::notifiableCount($event);
+                    $this->lastNotifiedInterestCount = EventChangeNotifier::interestedCount($event);
                 }
             }
         }
