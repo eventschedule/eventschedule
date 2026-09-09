@@ -5,23 +5,44 @@ namespace App\Services;
 use App\Jobs\SendQueuedEmail;
 use App\Mail\EventCancelled;
 use App\Mail\EventChanged;
+use App\Mail\EventInterestNotification;
 use App\Models\Event;
+use App\Models\EventInterest;
 use App\Models\Role;
 
 /**
  * Sends change / cancellation notifications to an event's registered attendees (paid sales, including
  * free RSVPs). Shared by the queued jobs and reusable by any future caller (e.g. the API). Email is the
  * channel that requires the schedule's own SMTP settings; push mirrors it additively.
+ *
+ * TWO AUDIENCES ON TWO DIFFERENT TRANSPORT GATES, and the split is deliberate.
+ *
+ * Buyers keep the gate they have always had: hasEmailSettings(), i.e. the schedule's own SMTP. A
+ * buyer got their receipt from that address, and a platform-branded message about a purchase they
+ * made elsewhere is the surprise that gate exists to prevent.
+ *
+ * The event-interest list does NOT sit behind it, and must not. Those people asked US, by name, on
+ * that schedule's public page, and were told in so many words that they would hear if anything
+ * changed - resources/lang/en/messages.php event_interest_help. Putting them behind
+ * hasEmailSettings() would make that promise false for every schedule on the platform mailer, which
+ * is most of them. They are bounded by Role::canSendAudienceMail() instead, the same gate
+ * SendEventAnnouncements uses for exactly the same reason.
  */
 class EventChangeNotifier
 {
     public static function notifyChange(Event $event, ?Role $role, array $changes, ?string $note = null): void
     {
-        if (! $role || ! $role->hasEmailSettings()) {
+        if (! $role) {
             return;
         }
 
         $locale = $role->language_code ?: app()->getLocale();
+
+        self::notifyInterested($event, $role, EventInterestNotification::KIND_CHANGE);
+
+        if (! $role->hasEmailSettings()) {
+            return;
+        }
 
         self::eachRecipient($event, function ($sale) use ($event, $role, $changes, $note, $locale) {
             $eventUrl = $event->getGuestUrl(false, $sale->event_date, true);
@@ -47,11 +68,17 @@ class EventChangeNotifier
 
     public static function notifyCancellation(Event $event, ?Role $role, ?string $note = null): void
     {
-        if (! $role || ! $role->hasEmailSettings()) {
+        if (! $role) {
             return;
         }
 
         $locale = $role->language_code ?: app()->getLocale();
+
+        self::notifyInterested($event, $role, EventInterestNotification::KIND_CANCELLED);
+
+        if (! $role->hasEmailSettings()) {
+            return;
+        }
 
         self::eachRecipient($event, function ($sale) use ($event, $role, $note, $locale) {
             $eventUrl = $event->getGuestUrl(false, $sale->event_date, true);
@@ -114,5 +141,58 @@ class EventChangeNotifier
             ->where('status', 'paid')
             ->excludeTestEmails()
             ->when($isRecurring, fn ($q) => $q->whereDate('event_date', '>=', $event->scheduleToday()));
+    }
+
+    /**
+     * Tell the people who asked about this event, on its own transport gate.
+     *
+     * Not chunked through eachRecipient(): that iterates SALES. This list is usually small (it is
+     * bounded per event by EventInterestController's per-event daily ceiling) and is read straight
+     * off event_interests, deduped by the (event_id, event_date, email) unique index rather than in
+     * PHP.
+     *
+     * No OneSignal mirror. Push is subscribed per browser by a guest who opted in there; somebody
+     * who left an address on an event page has not done that, and pushToGuestEmail() would find
+     * nothing to send to.
+     */
+    protected static function notifyInterested(Event $event, Role $role, string $kind): void
+    {
+        if (! $role->subdomain || $role->is_deleted || is_demo_role($role)) {
+            return;
+        }
+
+        $isRecurring = (bool) $event->days_of_week;
+
+        EventInterest::query()
+            ->confirmed()
+            ->where('event_id', $event->id)
+            // Same reasoning as baseQuery(): event_date is the VENUE's calendar date, so a past
+            // occurrence of a recurring event owes nobody a change notice. scheduleToday() rather
+            // than now()->toDateString(), which west of UTC has already rolled over in the evening.
+            ->when($isRecurring, fn ($q) => $q->where(function ($w) use ($event) {
+                $w->where('event_date', '')->orWhere('event_date', '>=', $event->scheduleToday());
+            }))
+            ->orderBy('id')
+            ->chunkById(200, function ($interests) use ($event, $role, $kind) {
+                foreach ($interests as $interest) {
+                    if (! $role->canSendAudienceMail(1, $role->user)) {
+                        return false;
+                    }
+
+                    SendQueuedEmail::dispatch(
+                        new EventInterestNotification(
+                            $role,
+                            $event,
+                            $interest,
+                            $kind,
+                            $event->getGuestUrl($role->subdomain, $interest->event_date ?: null, true),
+                            route('event.interest.show_unsubscribe', ['token' => $interest->token]),
+                        ),
+                        $interest->email,
+                        $role->id,
+                        $interest->locale ?: ($role->language_code ?: config('app.locale')),
+                    );
+                }
+            });
     }
 }

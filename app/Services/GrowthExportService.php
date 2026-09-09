@@ -429,7 +429,7 @@ class GrowthExportService
                 'is_hosted' => (bool) config('app.hosted'),
                 'is_nexus' => (bool) config('app.is_nexus'),
                 'app_version' => config('self-update.version_installed'),
-                'schema_version' => 3,
+                'schema_version' => 4,
                 'free_ticket_cap' => config('usage.ticket_sale_monthly_limit_free'),
                 'row_cap' => $this->rowCap(),
                 'truncated' => [
@@ -634,6 +634,38 @@ class GrowthExportService
             ->selectRaw('role_id, COUNT(*) as c')->groupBy('role_id')
             ->get()->keyBy('role_id');
 
+        // Per-event interest capture, WINDOWED to 90 days so it divides cleanly by views_90d.
+        //
+        // `followers` above is deliberately left as it is - all-time, and the only capture number
+        // the export has ever carried - but that is exactly why it cannot measure this feature.
+        // Dividing an all-time count by a 90-day view count is a stock over a flow: it rises with
+        // platform age whatever ships. Worse, it would not move at all here: checkout capture
+        // writes role_subscribers and never calls linkAccount(), so no role_user pivot appears.
+        //
+        // Two columns, because they answer different questions: how many addresses arrived in the
+        // window (the rate, against views_90d), and how many the schedule holds now (the asset).
+        $interestRecent = DB::table('event_interests')
+            ->join('event_role', 'event_role.event_id', '=', 'event_interests.event_id')
+            ->whereNotNull('event_interests.confirmed_at')
+            ->where('event_interests.created_at', '>=', now()->copy()->subDays(90))
+            ->selectRaw('event_role.role_id as role_id, COUNT(DISTINCT event_interests.email) as c')
+            ->groupBy('event_role.role_id')
+            ->get()->keyBy('role_id');
+
+        $interestTotal = DB::table('event_interests')
+            ->join('event_role', 'event_role.event_id', '=', 'event_interests.event_id')
+            ->whereNotNull('event_interests.confirmed_at')
+            ->selectRaw('event_role.role_id as role_id, COUNT(DISTINCT event_interests.email) as c')
+            ->groupBy('event_role.role_id')
+            ->get()->keyBy('role_id');
+
+        // Account-less audience rows, which the export has never carried either - so a fully
+        // successful checkout-capture change would have shown up as a flat line.
+        $subscribers = DB::table('role_subscribers')
+            ->whereNotNull('confirmed_at')
+            ->selectRaw('role_id, COUNT(*) as c')->groupBy('role_id')
+            ->get()->keyBy('role_id');
+
         $firstSub = DB::table('subscriptions')
             ->selectRaw('role_id, MIN(created_at) as first_at')->groupBy('role_id')
             ->get()->keyBy('role_id');
@@ -700,6 +732,9 @@ class GrowthExportService
                 $gmvPerMonth,
                 (int) ($views[$r->id]->v ?? 0),
                 (int) ($followers[$r->id]->c ?? 0),
+                (int) ($subscribers[$r->id]->c ?? 0),
+                (int) ($interestRecent[$r->id]->c ?? 0),
+                (int) ($interestTotal[$r->id]->c ?? 0),
                 (int) ($apptTypes[$r->id]->c ?? 0),
                 (int) ($photos[$r->id]->c ?? 0),
                 (int) ($newsletterEmails[$r->id]->c ?? 0),
@@ -713,7 +748,8 @@ class GrowthExportService
                 'events_total', 'events_public', 'events_recent_90d', 'ticket_types',
                 'paid_ticket_types', 'paid_tickets_total',
                 'paid_tickets_recent', 'first_paid_sale_month', 'gmv_currency', 'gmv_recent',
-                'views_90d', 'followers', 'appointment_types',
+                'views_90d', 'followers', 'subscribers', 'interests_90d', 'interests_total',
+                'appointment_types',
                 'photos', 'newsletter_emails_this_month', 'features', 'days_to_upgrade'],
             'rows' => $rows,
             'total' => $total,

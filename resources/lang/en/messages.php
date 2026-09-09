@@ -5216,4 +5216,43 @@ return [
     'claim_not_me_sign_in' => 'Sign in or create an account first, so we know who is asking.',
     'claim_not_me_removed' => 'That page has been removed.',
     'claim_not_me_reported' => 'Thank you. We have recorded that, and someone will look at it.',
+    // Per-event interest capture: "tell me when tickets go on sale, and if anything changes".
+    // Deliberately NOT worded as a reminder: this control hangs off Add to Calendar, and somebody
+    // who has just added the event to their calendar already has a reminder. What a calendar
+    // entry cannot do is tell them tickets went on sale, or that the date moved - a downloaded
+    // .ics is a snapshot and never updates - so that is what the copy promises.
+    'event_interest_cta' => 'Tell me when tickets go on sale',
+    'event_interest_cta_changes' => 'Tell me if anything changes',
+    'event_interest_placeholder' => 'you@example.com',
+    'event_interest_submit' => 'Notify me',
+    'event_interest_help' => 'One email when tickets go on sale, and one if the date or venue changes. Nothing else.',
+    'event_interest_confirmed' => "You're on the list. We'll email you about this event.",
+    'event_interest_subscribe_feed' => 'Subscribe to all events from :schedule',
+    'event_interest_subscribe_feed_help' => 'Adds a live calendar that updates itself when dates change.',
+    'event_interest_unsubscribe_heading' => 'Stop emails about :event?',
+    'event_interest_unsubscribe_body' => 'You will not hear from us about this event again.',
+    'event_interest_unsubscribe_confirm' => 'Unsubscribe',
+    'event_interest_unsubscribed_heading' => 'Unsubscribed',
+    'event_interest_unsubscribed_body' => 'We removed your address, so you will not get any more emails about :event.',
+
+    // The two sends.
+    'event_interest_tickets_subject' => 'Tickets are now on sale for :event',
+    'event_interest_tickets_heading' => 'Tickets are on sale',
+    'event_interest_tickets_body' => 'You asked to hear when tickets went on sale for :event. They are available now.',
+    'event_interest_tickets_button' => 'Get tickets',
+    'event_interest_reminder_subject' => ':event is coming up',
+    'event_interest_reminder_heading' => 'Coming up soon',
+    'event_interest_reminder_body' => 'You asked to hear about :event. Here are the details again.',
+    'event_interest_reminder_button' => 'View event',
+    'event_interest_change_subject' => ':event has changed',
+    'event_interest_change_heading' => 'Something changed',
+    'event_interest_change_body' => 'You asked to hear about :event. Some of its details have changed, so here they are again.',
+    'event_interest_change_button' => 'View event',
+    'event_interest_cancelled_subject' => ':event has been cancelled',
+    'event_interest_cancelled_heading' => 'This event was cancelled',
+    'event_interest_cancelled_body' => 'You asked to hear about :event. It has been cancelled, so it will not be going ahead.',
+    'event_interest_cancelled_button' => 'View schedule',
+    'next_step_add_ticket_type_waiting' => '{1} 1 person is waiting to buy - add a ticket type|[2,*] :count people are waiting to buy - add a ticket type',
+    'event_interest_waiting_count' => '{1} 1 person asked to be told when tickets go on sale.|[2,*] :count people asked to be told when tickets go on sale.',
+    'event_interest_why_receiving' => 'You are getting this because you asked to hear about :event. This is not a subscription to the schedule.',
 ];

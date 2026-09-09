@@ -439,7 +439,16 @@
 
                  No v-model: this form submits natively, and a plain named checkbox is submitted
                  by the browser without Vue needing to know about it. --}}
-            @if (! auth()->check() && ! request()->embed && $event->creatorRole)
+            {{-- Rendered for signed-in buyers too. captureAudienceOptIn()'s own docblock counts
+                 "every signed-in buyer" among the uncaptured, and holding an account is not the
+                 same as having asked this schedule for anything - most signed-in buyers on the
+                 platform have never followed the schedule they are buying from.
+
+                 STILL UNCHECKED. Showing the box to more people is a visibility fix; pre-ticking it
+                 would be a consent change, and GDPR Art. 4(11) wants an affirmative act. See the
+                 comment above for why a pre-ticked box on the shared platform mailer would also
+                 damage deliverability for every other schedule. --}}
+            @if (! request()->embed && $event->creatorRole)
                 <div class="mt-6 flex items-start">
                     <input id="audience_opt_in" name="audience_opt_in" type="checkbox" value="1"
                         class="mt-1 h-4 w-4 text-[var(--brand-blue)] focus:ring-[var(--brand-blue)] border-gray-300 dark:border-gray-600 rounded">

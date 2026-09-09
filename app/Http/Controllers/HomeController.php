@@ -728,6 +728,26 @@ class HomeController extends Controller
         $withTicketType = $ticketTypes(false);
         $withPaidTicketType = $ticketTypes(true);
 
+        // How many DISTINCT people have asked to be told when each schedule's events go on sale.
+        // One query, like the four above: the dashboard renders on every page load.
+        //
+        // This enriches the copy on branch 1 rather than adding a step type of its own, and that is
+        // deliberate. Branch 1 already fires on exactly this population - something upcoming, no way
+        // to buy - and then continues, so a new type could never reach them. Saying that real people
+        // are waiting is something a generic nudge cannot do; the count is the whole point.
+        $interestCounts = $owned(DB::table('event_interests')
+            ->join('event_role', 'event_role.event_id', '=', 'event_interests.event_id')
+            ->join('events', 'events.id', '=', 'event_interests.event_id')
+            ->whereIn('event_role.role_id', $ids)
+            ->whereNotNull('event_interests.confirmed_at')
+            ->where('events.starts_at', '>=', now()))
+            ->groupBy('event_role.role_id')
+            // selectRaw + an alias, NOT pluck(DB::raw(...)): pluck treats its first argument as a
+            // column NAME, so the raw expression is looked up as a property on the result row and
+            // throws "Undefined property: stdClass::$email".
+            ->selectRaw('event_role.role_id as role_id, COUNT(DISTINCT event_interests.email) as waiting')
+            ->pluck('waiting', 'role_id');
+
         $user = auth()->user();
         // The canonical check, and what the event form keys the same nudge off. Testing the
         // credential columns by hand missed users.payment_url and read stripe_account_id, which
@@ -757,10 +777,14 @@ class HomeController extends Controller
                 // below still runs. Falling through would replace a dismissed suggestion with
                 // the next-best one on the same schedule, which reads as the button not working.
                 if (! isset($dismissed[$role->id.':next_step_tickets'])) {
+                    $waiting = (int) ($interestCounts[$role->id] ?? 0);
+
                     $items->push([
                         'type' => 'next_step_tickets',
                         'count' => 1,
-                        'title' => __('messages.next_step_add_ticket_type'),
+                        'title' => $waiting > 0
+                            ? trans_choice('messages.next_step_add_ticket_type_waiting', $waiting, ['count' => $waiting])
+                            : __('messages.next_step_add_ticket_type'),
                         'subtitle' => $role->name,
                         'url' => route('role.view_admin', ['subdomain' => $role->subdomain, 'tab' => 'schedule']),
                         'color' => 'blue',

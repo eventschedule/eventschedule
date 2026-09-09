@@ -82,7 +82,7 @@ class GrowthExportTest extends TestCase
         $this->assertArrayHasKey('schedules', $decoded);
         // 3 since the claims section landed. Bumping this is deliberate: a reader diffing two
         // pulls needs to know the shape moved.
-        $this->assertSame(3, $decoded['meta']['schema_version']);
+        $this->assertSame(4, $decoded['meta']['schema_version']);
     }
 
     public function test_claims_reports_untracked_months_as_null_not_zero(): void
@@ -766,5 +766,43 @@ class GrowthExportTest extends TestCase
         $this->assertNull($row[$i['gmv_recent']]);
         // The ticket COUNT is still currency-free, so it keeps working.
         $this->assertSame(2, $row[$i['paid_tickets_total']]);
+    }
+
+    public function test_schedule_rows_carry_capture_counts(): void
+    {
+        // Without these the feature is invisible to measurement, and worse than invisible: a fully
+        // successful capture change moves `followers` by exactly zero, because checkout capture
+        // writes role_subscribers and never calls linkAccount(). `followers` is also all-time while
+        // views_90d is a 90-day window, so the two cannot be divided into a rate at all.
+        $owner = $this->createOwner();
+        $role = $this->createRole($owner);
+        $event = $this->createEvent($role, ['creator_role_id' => $role->id]);
+
+        \App\Models\EventInterest::create([
+            'event_id' => $event->id,
+            'event_date' => $event->getStartDateTime(null, true, $event->scheduleTimezone())->format('Y-m-d'),
+            'email' => 'fan@fans.test',
+            'confirmed_at' => now(),
+            'token' => \App\Models\EventInterest::newToken(),
+        ]);
+
+        \App\Models\RoleSubscriber::create([
+            'role_id' => $role->id,
+            'email' => 'reader@fans.test',
+            'name' => 'A Reader',
+            'confirmed_at' => now(),
+            'token' => \App\Models\RoleSubscriber::newToken(),
+        ]);
+
+        $data = $this->build();
+        $columns = $data['schedules']['columns'];
+
+        // The only schedule in the fixture. `sid` is hashId('s', ...), not the raw id, so it cannot
+        // be looked up by $role->id.
+        $this->assertCount(1, $data['schedules']['rows']);
+        $row = $data['schedules']['rows'][0];
+        $this->assertSame(1, $row[array_search('subscribers', $columns)]);
+        $this->assertSame(1, $row[array_search('interests_90d', $columns)]);
+        $this->assertSame(1, $row[array_search('interests_total', $columns)]);
     }
 }

@@ -169,6 +169,21 @@ Schedule::call(function () {
     Artisan::call('app:send-event-announcements', ['--apply' => true]);
 })->hourly()->name('send-event-announcements')->withoutOverlapping(30)->appendOutputTo(storage_path('logs/scheduler.log'));
 
+// Keep in sync with AppController::translateData(). Ungated on config('app.hosted') for the same
+// reason as its neighbour above: this keeps a promise made to a GUEST, who was told on a public
+// event page that they would hear when tickets went on sale and if anything changed. On selfhost
+// that promise is just as binding.
+//
+// Hourly because both sends are time-sensitive in opposite directions: "tickets are on sale" is
+// worth least the longer it waits, and the reminder has a window it must land inside. What bounds
+// the volume is usage.event_interest_recipient_batch, counted in recipients, not this frequency.
+//
+// Safe on both rails at once: each row is claimed with a conditional UPDATE before its message is
+// dispatched, so exactly one runner transitions it.
+Schedule::call(function () {
+    Artisan::call('app:send-event-interest-mail', ['--apply' => true]);
+})->hourly()->name('send-event-interest-mail')->withoutOverlapping(30)->appendOutputTo(storage_path('logs/scheduler.log'));
+
 // withoutOverlapping() is not decoration here: this command initiates card charges, so two
 // concurrent runs would attempt the same installment. The Stripe idempotency key is the second
 // line of defence; this is the first.

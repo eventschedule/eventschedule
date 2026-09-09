@@ -103,4 +103,44 @@ class AudienceTemplateInjectionTest extends TestCase
 
         $this->assertGuarded(substr($html, $panel - 200), self::PAYLOAD, 'subscribe panel schedule name');
     }
+
+    public function test_the_calendar_feed_links_are_not_compiled_by_vue(): void
+    {
+        // Two rows added to the Add to Calendar menus interpolate the schedule name. They sit
+        // outside every Vue mount on the page today, but that is a property of where the markup
+        // happens to be rather than a guarantee, and the cost of being wrong is arbitrary JS - so
+        // they carry v-pre and this pins it.
+        $role = $this->hostileSchedule();
+        $event = $this->createEvent($role);
+        $event->forceFill(['creator_role_id' => $role->id])->save();
+
+        $html = $this->get($this->guestEventUrl($role, $event))->assertOk()->getContent();
+
+        $this->assertStringContainsString('/feed/ical', $html, 'the subscribe row should render');
+
+        // Scoped to the rows themselves, not the whole page: the schedule name legitimately appears
+        // in <title> and the meta tags, which are in <head> and can never be inside a Vue mount.
+        // assertGuarded() checks EVERY occurrence of the payload it is given, so handing it the
+        // whole document fails on markup this feature does not own.
+        $offset = 0;
+        $checked = 0;
+
+        while (($pos = strpos($html, '/feed/ical', $offset)) !== false) {
+            // Backed up past the opening <a: the match lands mid-attribute, and assertGuarded()
+            // walks BACKWARDS to the enclosing tag, so a window starting at the href finds no '<'
+            // and fails on "no enclosing tag" rather than on anything real.
+            $row = substr($html, max(0, $pos - 400), 1400);
+
+            // e(), not the raw payload: assertGuarded() searches for the HTML-escaped form, because
+            // that is what Blade actually renders - the payload's quotes come out as &quot;.
+            if (str_contains($row, e(self::PAYLOAD))) {
+                $this->assertGuarded($row, self::PAYLOAD, 'calendar feed row schedule name');
+                $checked++;
+            }
+
+            $offset = $pos + 10;
+        }
+
+        $this->assertGreaterThan(0, $checked, 'at least one feed row should name the schedule');
+    }
 }

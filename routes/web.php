@@ -20,6 +20,7 @@ use App\Http\Controllers\CarpoolController;
 use App\Http\Controllers\CheckInController;
 use App\Http\Controllers\EventbriteController;
 use App\Http\Controllers\EventController;
+use App\Http\Controllers\EventInterestController;
 use App\Http\Controllers\EventTemplateController;
 use App\Http\Controllers\FeedbackController;
 use App\Http\Controllers\FeedController;
@@ -109,6 +110,16 @@ if (config('app.hosted') && ! config('app.is_testing')) {
         // pre-blocked. The real limit is the per-email one in the controller.
         Route::post('/audience/join', [RoleSubscriberController::class, 'store'])
             ->name('role.audience.join')->middleware('throttle:5,1,audience_join');
+        // Per-EVENT interest capture: "tell me when tickets go on sale, and if anything changes".
+        // Separate from /audience/join above because the two consents are different asks - one
+        // event versus a standing subscription - and the rows live in different tables.
+        //
+        // Prefixed throttle for the same reason as its neighbour: an unprefixed one shares a bucket
+        // with every other throttled route on this host, so a visitor who had just used the cart
+        // would arrive pre-blocked. The real limits are the per-email and per-event ones in the
+        // controller, which an IP throttle cannot see.
+        Route::post('/interest/join', [EventInterestController::class, 'store'])
+            ->name('event.interest.join')->middleware('throttle:5,1,event_interest_join');
         // Promotion click-through. Counted and billed here, then redirected, so the
         // advertiser only pays for clicks that actually left this page.
         //
@@ -342,6 +353,11 @@ Route::get('/sub/done', [RoleSubscriberController::class, 'confirmed'])->name('s
 Route::post('/sub/account', [RoleSubscriberController::class, 'claimAccount'])->name('subscriber.claim_account')->middleware('throttle:5,1,audience_claim');
 Route::get('/sub/u/{token}', [RoleSubscriberController::class, 'showUnsubscribe'])->name('subscriber.show_unsubscribe');
 Route::post('/sub/u/{token}', [RoleSubscriberController::class, 'unsubscribe'])->name('subscriber.unsubscribe')->middleware('throttle:audience_unsubscribe');
+// Event-interest unsubscribe. Same GET-shows / POST-acts split as /sub/u above: a mutating GET is
+// fetched by corporate mail scanners, which would unsubscribe people who never clicked. The POST is
+// CSRF-exempt in bootstrap/app.php so a mail client's RFC 8058 one-click works.
+Route::get('/int/u/{token}', [EventInterestController::class, 'showUnsubscribe'])->name('event.interest.show_unsubscribe')->middleware('app_subdomain');
+Route::post('/int/u/{token}', [EventInterestController::class, 'unsubscribe'])->name('event.interest.unsubscribe')->middleware('throttle:audience_unsubscribe');
 
 // Schedule ownership handover, recipient side (discussion #119).
 //
@@ -1908,6 +1924,9 @@ if (! config('app.hosted') || config('app.is_testing')) {
     // Selfhost twin. See the hosted route for why this is not /{subdomain}/subscribe.
     Route::post('/{subdomain}/audience/join', [RoleSubscriberController::class, 'store'])
         ->name('role.audience.join')->middleware('throttle:5,1,audience_join');
+    // Selfhost twin. See the hosted route for why the throttle is prefixed.
+    Route::post('/{subdomain}/interest/join', [EventInterestController::class, 'store'])
+        ->name('event.interest.join')->middleware('throttle:5,1,event_interest_join');
     // Nested under the tenant path so it cannot collide with a schedule whose subdomain
     // happens to be "promo" - selfhost serves every tenant from this same path space.
     // {hash} constrained for the same reason as the hosted twin above.

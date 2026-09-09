@@ -185,22 +185,24 @@
                      TicketController::captureAudienceOptIn() captures every distinct one in the
                      basket rather than arbitrarily picking the first leg.
 
-                     Signed-out only, like the honeypot above: a signed-in buyer already has an
-                     account to follow with. Unchecked by default, per GDPR Art. 4(11).
+                     Shown to signed-in buyers too. It used to be signed-out only, on the reasoning
+                     that a signed-in buyer "already has an account to follow with" - but holding an
+                     account is not having followed anything, and captureAudienceOptIn()'s docblock
+                     counts every signed-in buyer as captured at zero. Unchecked either way, per
+                     GDPR Art. 4(11): who SEES the box is a visibility question, whether it is
+                     pre-ticked is a consent one.
 
                      Ink matches the two single-event forms (gray-900/gray-100), which this did not.
 
                      No schedule name is interpolated here, so no v-pre is needed - unlike the
                      single-event forms, which name the schedule inside a Vue mount. --}}
-                @guest
-                    <div class="mb-4 flex items-start">
-                        <input id="es-cart-audience-opt-in" name="audience_opt_in" type="checkbox" value="1"
-                            class="mt-1 h-4 w-4 text-[var(--brand-blue)] focus:ring-[var(--brand-blue)] border-gray-300 dark:border-gray-600 rounded">
-                        <label for="es-cart-audience-opt-in" class="ms-3 block text-sm text-gray-900 dark:text-gray-100">
-                            {{ __('messages.audience_opt_in_label_cart') }}
-                        </label>
-                    </div>
-                @endguest
+                <div class="mb-4 flex items-start">
+                    <input id="es-cart-audience-opt-in" name="audience_opt_in" type="checkbox" value="1"
+                        class="mt-1 h-4 w-4 text-[var(--brand-blue)] focus:ring-[var(--brand-blue)] border-gray-300 dark:border-gray-600 rounded">
+                    <label for="es-cart-audience-opt-in" class="ms-3 block text-sm text-gray-900 dark:text-gray-100">
+                        {{ __('messages.audience_opt_in_label_cart') }}
+                    </label>
+                </div>
 
                 {{-- Shown when ANY leg asks for a phone and required when ANY leg requires one -
                      the same union TicketCheckoutRequest applies across legs. Without the field the

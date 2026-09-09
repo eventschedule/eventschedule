@@ -68,6 +68,7 @@ return Application::configure(basePath: dirname(__DIR__))
             'nl/u/*',
             // RFC 8058 one-click unsubscribe: a mail client's POST carries no session and no token.
             'sub/u/*',
+            'int/u/*',
             'webhooks/meta',
             'api/whatsapp/webhook',
         ]);

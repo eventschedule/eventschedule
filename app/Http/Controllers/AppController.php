@@ -319,6 +319,16 @@ class AppController extends Controller
                     \Log::error('Scheduled command app:send-event-announcements failed: '.$e->getMessage());
                     report($e);
                 }
+                // Keep in sync with routes/console.php. Ungated for the same reason as the
+                // announcement above: it keeps a promise made to a guest on a public event page,
+                // and selfhost is where an unkept one is most visible. Volume is bounded by
+                // usage.event_interest_recipient_batch, not by this tier's frequency.
+                try {
+                    \Artisan::call('app:send-event-interest-mail', ['--apply' => true]);
+                } catch (\Throwable $e) {
+                    \Log::error('Scheduled command app:send-event-interest-mail failed: '.$e->getMessage());
+                    report($e);
+                }
                 try {
                     \Artisan::call('app:send-carpool-reminders');
                 } catch (\Throwable $e) {

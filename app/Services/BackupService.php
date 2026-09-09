@@ -7,6 +7,7 @@ use App\Models\BackupJob;
 use App\Models\Event;
 use App\Models\EventComment;
 use App\Models\EventFeedback;
+use App\Models\EventInterest;
 use App\Models\EventPart;
 use App\Models\EventPhoto;
 use App\Models\EventPoll;
@@ -609,6 +610,7 @@ class BackupService
         $eventData['videos'] = $this->exportVideos($event);
         $eventData['feedbacks'] = $this->exportFeedbacks($event);
         $eventData['waitlists'] = $this->exportWaitlists($event);
+        $eventData['interests'] = $this->exportInterests($event);
         // Carried as a _ref, never as the raw id: EVENT_EXPORT_EXCLUDE drops seating_plan_id
         // precisely because a raw id means a dangling FK on another install and, on the same
         // install, a silent link to another schedule's seat map.
@@ -866,6 +868,30 @@ class BackupService
                 'locale' => $wl->locale,
                 'notified_at' => $wl->notified_at,
                 'expires_at' => $wl->expires_at,
+            ];
+        })->toArray();
+    }
+
+    /**
+     * The people who asked to hear about this event. Exported for the same reason waitlists are:
+     * without it an owner who exports and reimports silently loses a list they cannot rebuild.
+     *
+     * The unsubscribe token is deliberately NOT carried across. A token is a capability, and a
+     * restored copy must not hand out live unsubscribe links minted for a different row; importing
+     * mints a fresh one, exactly as a new capture does.
+     */
+    private function exportInterests(Event $event): array
+    {
+        return EventInterest::where('event_id', $event->id)->get()->map(function ($interest) {
+            return [
+                'event_date' => $interest->event_date,
+                'email' => $interest->email,
+                'name' => $interest->name,
+                'locale' => $interest->locale,
+                'source' => $interest->source,
+                'confirmed_at' => $interest->confirmed_at,
+                'tickets_notified_at' => $interest->tickets_notified_at,
+                'reminder_sent_at' => $interest->reminder_sent_at,
             ];
         })->toArray();
     }
@@ -1377,6 +1403,15 @@ class BackupService
                         }
                     }
 
+                    // Import event-interest rows
+                    foreach ($eventData['interests'] ?? [] as $interestData) {
+                        try {
+                            $this->importInterest($interestData, $event);
+                        } catch (\Exception $e) {
+                            report($e);
+                        }
+                    }
+
                     // Seating snapshots LAST: every seat resolves a ticket, a sale and a sale line,
                     // so all three have to be in the map already.
                     foreach ($eventData['seating_maps'] ?? [] as $mapData) {
@@ -1738,7 +1773,7 @@ class BackupService
         $excludeFields = array_merge(self::EVENT_EXPORT_EXCLUDE, [
             '_ref_id', '_group_ref_id', '_order_ref_id', '_is_accepted', '_flyer_image',
             'tickets', 'promo_codes', 'sales', 'parts', 'polls',
-            'comments', 'videos', 'feedbacks', 'waitlists', 'photos',
+            'comments', 'videos', 'feedbacks', 'waitlists', 'interests', 'photos',
             'days_of_week', 'recurring_include_dates', 'recurring_exclude_dates',
         ]);
 
@@ -2617,6 +2652,40 @@ class BackupService
                 'locale' => $data['locale'] ?? null,
                 'notified_at' => $data['notified_at'] ?? null,
                 'expires_at' => $data['expires_at'] ?? null,
+            ]);
+        });
+    }
+
+    /**
+     * withoutEvents() and a fresh token, matching importWaitlist().
+     *
+     * The two send-claim columns are carried across so a restore does not re-announce tickets that
+     * went on sale months ago, or re-remind people about an event that has already happened - the
+     * mailshot the pre-claim in EventInterestController exists to prevent, arriving by another
+     * route.
+     */
+    private function importInterest(array $data, Event $event): void
+    {
+        $validator = Validator::make($data, [
+            'email' => 'required|email|max:255',
+        ]);
+
+        if ($validator->fails()) {
+            return;
+        }
+
+        EventInterest::withoutEvents(function () use ($event, $data) {
+            EventInterest::create([
+                'event_id' => $event->id,
+                'event_date' => $data['event_date'] ?? '',
+                'email' => $data['email'],
+                'name' => $data['name'] ?? null,
+                'locale' => $data['locale'] ?? null,
+                'source' => $data['source'] ?? 'event_page',
+                'confirmed_at' => $data['confirmed_at'] ?? null,
+                'tickets_notified_at' => $data['tickets_notified_at'] ?? null,
+                'reminder_sent_at' => $data['reminder_sent_at'] ?? null,
+                'token' => EventInterest::newToken(),
             ]);
         });
     }

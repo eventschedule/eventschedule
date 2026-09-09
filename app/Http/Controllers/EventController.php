@@ -968,7 +968,17 @@ class EventController extends Controller
         $approvedPhotos = $event->exists ? $event->approvedPhotos()->with(['eventPart', 'user'])->get() : collect();
         $polls = $event->exists ? $event->polls()->withCount('votes')->get() : collect();
 
+        // How many people asked to be told when this event sells tickets. Shown on the Tickets
+        // panel, where it is an argument for adding a ticket type rather than a statistic: a
+        // generic "add a ticket type" nudge cannot say that anyone is waiting, and this can.
+        // Distinct on email, so somebody who asked about three occurrences of a recurring event
+        // counts once.
+        $interestCount = $event->exists
+            ? \App\Models\EventInterest::where('event_id', $event->id)->confirmed()->distinct()->count('email')
+            : 0;
+
         return view('event/edit', [
+            'interestCount' => $interestCount,
             'role' => $role,
             'effectiveRole' => $effectiveRole,
             'user' => $user,

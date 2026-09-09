@@ -181,6 +181,29 @@
         {{ __('messages.subscribe_account_note') }}
     </p>
     @endif
+
+    {{-- The no-address alternative, and for a lot of people the better one.
+         FeedController::icalFeed has always been public and unauthenticated, but it was linked only
+         from a signed-in user's following list and the owner's own settings - so a guest had no way
+         to subscribe to a schedule's calendar and could only take a one-off .ics snapshot, which
+         never updates when a date moves.
+
+         It costs no email address, no consent and nothing against the platform's sending
+         reputation, which makes it the one half of "stay in touch" that cannot fail on
+         deliverability. The feed itself already restricts to accepted, upcoming, non-private,
+         non-draft, non-cancelled, password-free events, so surfacing it exposes nothing new. --}}
+    {{-- v-pre: the schedule name is user-controlled and this panel sits inside a Vue mount, so
+         without it a name like "{{constructor.constructor('...')()}}" is compiled as a template and
+         runs. Blade's {{ }} escaping does NOT stop Vue compiling a mustache in the VALUE. Same
+         guard the audience opt-in labels carry, and AudienceTemplateInjectionTest fails the build
+         if it goes missing. --}}
+    <p v-pre class="mt-4 border-t border-gray-200 pt-4 text-xs text-gray-500 dark:border-gray-700 dark:text-gray-400">
+        <a href="{{ route('feed.ical', ['subdomain' => $subscribePanelRole->subdomain]) }}"
+           class="font-medium text-[var(--brand-blue)] hover:underline">
+            {{ __('messages.event_interest_subscribe_feed', ['schedule' => $subscribePanelRole->translatedName()]) }}
+        </a>
+        <span class="ms-1">{{ __('messages.event_interest_subscribe_feed_help') }}</span>
+    </p>
 </div>
 
 @if (request()->boolean('subscribe'))

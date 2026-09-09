@@ -96,4 +96,14 @@ return [
     // and the remainder is picked up by the next run rather than dropped.
     'curator_source_limit' => (int) env('CURATOR_SOURCE_LIMIT', 100),
     'curator_source_batch' => (int) env('CURATOR_SOURCE_BATCH', 50000),
+
+    // Event-interest sends. How many hours before an occurrence the reminder goes out, and the
+    // ceiling on messages one run may queue - counted in RECIPIENTS, for the same reason
+    // audience_announcement_recipient_batch is: an event-shaped ceiling would let one event with a
+    // large interest list spend the platform's whole sending reputation as a single tick.
+    //
+    // `?:` not a default argument, matching its neighbours: an EMPTY value in .env yields '' and
+    // (int) '' is 0, which would turn the reminder into "send at the moment the event starts".
+    'event_interest_reminder_hours' => (int) (env('EVENT_INTEREST_REMINDER_HOURS') ?: 48),
+    'event_interest_recipient_batch' => (int) (env('EVENT_INTEREST_RECIPIENT_BATCH') ?: 2000),
 ];

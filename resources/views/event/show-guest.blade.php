@@ -1060,7 +1060,7 @@
               </button>
 
             {{-- Desktop calendar dropdown --}}
-            <div id="calendar-pop-up-menu" class="pop-up-menu gp-dropdown hidden absolute top-full end-0 z-50 mt-2 w-56 {{ $role->isRtl() ? 'origin-top-left' : 'origin-top-right' }} rounded-xl bg-white shadow-lg focus:outline-none" role="menu" aria-orientation="vertical" aria-labelledby="menu-button" tabindex="-1">
+            <div id="calendar-pop-up-menu" class="pop-up-menu gp-dropdown hidden absolute top-full end-0 z-50 mt-2 w-72 {{ $role->isRtl() ? 'origin-top-left' : 'origin-top-right' }} rounded-xl bg-white shadow-lg focus:outline-none" role="menu" aria-orientation="vertical" aria-labelledby="menu-button" tabindex="-1">
                 <div class="py-1 stop-propagation" role="none">
                     <a href="{{ $event->getGoogleCalendarUrl($date) }}" target="_blank" rel="noopener noreferrer" class="group flex items-center px-4 py-3 text-sm text-gray-700 dark:text-gray-200 rounded-lg transition-all duration-200 gp-dropdown-item" role="menuitem" tabindex="-1" id="menu-item-0">
                         <svg class="me-3 h-5 w-5 text-gray-400 group-hover:text-gray-500" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
@@ -1079,6 +1079,30 @@
                         <path d="M2,3H11V12H2V3M11,22H2V13H11V22M21,3V12H12V3H21M21,22H12V13H21V22Z" />
                         </svg>
                         Microsoft Outlook
+                    </a>
+                    {{-- Everything above hands over a SNAPSHOT: a .ics never updates, and the
+                         Google/Outlook links are one-shot too. These two are what a calendar entry
+                         cannot do. Plain anchors, so nothing is added to the Alpine scope this
+                         dropdown lives in. --}}
+                    <div class="my-1 border-t border-gray-100 dark:border-gray-700"></div>
+                    <a href="#event-interest" class="group flex items-center px-4 py-3 text-sm text-gray-700 dark:text-gray-200 rounded-lg transition-all duration-200 gp-dropdown-item" role="menuitem" tabindex="-1" id="menu-item-3">
+                        <svg class="me-3 h-5 w-5 text-gray-400 group-hover:text-gray-500" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
+                        </svg>
+                        {{ $event->canSellTickets($date) ? __('messages.event_interest_cta_changes') : __('messages.event_interest_cta') }}
+                    </a>
+                    <a href="{{ route('feed.ical', ['subdomain' => $role->subdomain]) }}" class="group flex items-center px-4 py-3 text-sm text-gray-700 dark:text-gray-200 rounded-lg transition-all duration-200 gp-dropdown-item" role="menuitem" tabindex="-1" id="menu-item-4">
+                        <svg class="me-3 h-5 w-5 text-gray-400 group-hover:text-gray-500" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M8 7V3m8 4V3M3 11h18M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                        </svg>
+                        {{-- v-pre: the schedule name is user-controlled, and Blade's {{ }} escaping
+                             does NOT stop Vue compiling a mustache in the VALUE. This row currently
+                             sits outside every Vue mount on the page (#ticket-selector, #rsvp-form,
+                             #es-cart-app, #calendar-app), but that is a property of where the markup
+                             happens to be, not a guarantee - and the cost of being wrong is
+                             arbitrary JS. The element carries no Vue bindings, so v-pre costs
+                             nothing. --}}
+                        <span v-pre>{{ __('messages.event_interest_subscribe_feed', ['schedule' => $role->translatedName()]) }}</span>
                     </a>
                 </div>
             </div>
@@ -1165,10 +1189,32 @@
                 </svg>
                 Microsoft Outlook
               </a>
+              {{-- The same two rows as the desktop dropdown. This sheet only renders when the
+                   event sells nothing, which is exactly where most of the platform's guest traffic
+                   lands and where the page is otherwise a dead end. --}}
+              <div class="my-1 border-t border-gray-200 dark:border-gray-700"></div>
+              <a href="#event-interest" class="gp-bottom-sheet-item flex items-center gap-3 px-4 py-3 rounded-xl text-gray-700 transition-all duration-200">
+                <svg class="h-5 w-5 text-gray-400" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+                  <path stroke-linecap="round" stroke-linejoin="round" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
+                </svg>
+                {{ __('messages.event_interest_cta') }}
+              </a>
+              <a href="{{ route('feed.ical', ['subdomain' => $role->subdomain]) }}" class="gp-bottom-sheet-item flex items-center gap-3 px-4 py-3 rounded-xl text-gray-700 transition-all duration-200">
+                <svg class="h-5 w-5 text-gray-400" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+                  <path stroke-linecap="round" stroke-linejoin="round" d="M8 7V3m8 4V3M3 11h18M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                </svg>
+                {{-- v-pre for the same reason as the desktop row above. --}}
+                <span v-pre>{{ __('messages.event_interest_subscribe_feed', ['schedule' => $role->translatedName()]) }}</span>
+              </a>
             </div>
           </div>
         </div>
         @endif
+
+        {{-- Interest capture. Placed ABOVE #event-form-section deliberately: hidePanelsBelow()
+             display:none's every sibling AFTER that element while the buy/RSVP form is open, which
+             is why the subscribe panel at the foot of the page vanishes during checkout. --}}
+        @include('event.partials.interest-capture')
 
         {{-- RSVP form section (hidden by default, shown on CTA click) --}}
         @if ($event->canAcceptRsvp($date))
