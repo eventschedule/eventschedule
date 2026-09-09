@@ -8,6 +8,7 @@ use App\Models\Event;
 use App\Models\EventInterest;
 use App\Models\Role;
 use App\Models\User;
+use App\Services\EventChangeNotifier;
 use App\Utils\UrlUtils;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Queue;
@@ -51,6 +52,19 @@ class EventInterestSendTest extends TestCase
         )->assertOk()->assertJson(['success' => true]);
 
         return EventInterest::firstOrFail();
+    }
+
+    /** capture() against a schedule and event other than the ones setUp() built. */
+    private function captureFor(Role $role, Event $event): void
+    {
+        $this->postJson(
+            route('event.interest.join', ['subdomain' => $role->subdomain]),
+            [
+                'email' => 'fan@fans.test',
+                'event_id' => UrlUtils::encodeId($event->id),
+                'event_date' => $event->getStartDateTime(null, true, $event->scheduleTimezone())->format('Y-m-d'),
+            ]
+        )->assertOk()->assertJson(['success' => true]);
     }
 
     private function enableTickets(): void
@@ -390,5 +404,96 @@ class EventInterestSendTest extends TestCase
         (new \App\Jobs\NotifyEventChange($this->event->fresh()->id, ['starts_at' => 'x']))->handle();
 
         $this->assertSame(1, $this->queuedCount(), 'the buyer must still be mailed');
+    }
+
+    public function test_the_interest_mail_speaks_for_the_creator_schedule_not_the_venue(): void
+    {
+        // The jobs resolve their role with getRoleWithEmailSettings(), which prefers a VENUE and
+        // falls back to `$venue ?: $firstRole`. That is right for a buyer, who got their receipt
+        // from whichever schedule holds the SMTP, and wrong for this list: somebody who left an
+        // address on the talent's page must hear from the talent. Otherwise the mail carries the
+        // venue's sender and Reply-To, links to the venue's storefront, is metered against the
+        // venue, and is gated by the venue's verification status.
+        // The creator must be a TALENT. createRole() defaults to type 'venue', and
+        // Event::getVenueAttribute() returns the FIRST venue among the event's roles - so a
+        // venue-typed creator IS the venue, both branches resolve to the same role, and the test
+        // passes whichever way the code goes. That is how the first version of this test pinned
+        // nothing.
+        $talent = $this->createRole($this->createOwner(), 'talent');
+        $event = $this->createEvent($talent, ['creator_role_id' => $talent->id]);
+
+        // No events.venue_id column: the venue is the event_role pivot row whose role is a venue.
+        $venue = $this->createRole($this->createOwner(), 'venue');
+        $event->roles()->attach($venue->id, ['is_accepted' => true]);
+
+        $this->captureFor($talent, $event);
+        $this->assertSame($venue->id, $event->fresh()->getRoleWithEmailSettings()->id,
+            'the fixture must actually resolve the venue as the sales-side role');
+
+        (new \App\Jobs\NotifyEventCancelled($event->id))->handle();
+
+        $job = Queue::pushed(SendQueuedEmail::class)->first();
+        $this->assertNotNull($job);
+
+        // The role id the mail is attributed to, read off the queued job.
+        $roleId = (new \ReflectionProperty(SendQueuedEmail::class, 'roleId'));
+        $roleId->setAccessible(true);
+
+        $this->assertSame(
+            $talent->id,
+            $roleId->getValue($job),
+            'the interest mail must be attributed to the creator schedule, not the venue'
+        );
+    }
+
+    public function test_an_ownerless_venue_does_not_silently_swallow_the_whole_send(): void
+    {
+        // canSendAudienceMail() fails CLOSED for an ownerless schedule, and auto-created venues are
+        // ownerless by design. With the venue's role driving the interest half, a talent event at
+        // an imported venue dropped the entire change/cancellation send and still reported it as
+        // delivered.
+        //
+        // app.is_testing OFF is load-bearing: canSendAudienceMail() short-circuits to true on it
+        // before any of its real rules run, so without this the test passes for the wrong reason.
+        config(['app.hosted' => true, 'app.is_testing' => false]);
+
+        // Talent-created, for the same reason as the test above.
+        $talent = $this->createRole($this->createOwner(), 'talent');
+        $event = $this->createEvent($talent, ['creator_role_id' => $talent->id]);
+
+        $venue = $this->createRole($this->createOwner(), 'venue');
+        $venue->forceFill(['user_id' => null])->save();
+        $event->roles()->attach($venue->id, ['is_accepted' => true]);
+
+        $this->captureFor($talent, $event);
+        $this->assertSame($venue->id, $event->fresh()->getRoleWithEmailSettings()->id);
+
+        (new \App\Jobs\NotifyEventCancelled($event->id))->handle();
+
+        $this->assertSame(1, $this->queuedCount(), 'an ownerless venue must not swallow the send');
+    }
+
+    public function test_a_refused_send_is_not_reported_as_delivered(): void
+    {
+        // The count used to model one of the four gates notifyInterested() applies, so the job
+        // stamped attendees_notified_at and the flash reported "N people notified" for a send that
+        // never happened. The most reachable case is the unverified ceiling: over it, the gate
+        // refuses outright.
+        config(['app.hosted' => true, 'app.is_testing' => false]);
+        config(['usage.audience_mail_unverified_max_recipients' => 1]);
+
+        $this->capture();
+        $this->capture(['email' => 'second@fans.test']);
+
+        $this->assertSame(0, EventChangeNotifier::interestedNotifiableCount($this->event->fresh()),
+            'a refused send must count as nobody');
+        $this->assertFalse(EventChangeNotifier::hasAnyoneToTell($this->event->fresh()),
+            'and must not dispatch a job that sends nothing');
+
+        (new \App\Jobs\NotifyEventCancelled($this->event->id))->handle();
+
+        $this->assertSame(0, $this->queuedCount());
+        $this->assertNull($this->event->fresh()->attendees_notified_at,
+            'nothing was sent, so nothing may be stamped');
     }
 }

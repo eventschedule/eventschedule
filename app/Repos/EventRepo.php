@@ -2309,7 +2309,9 @@ class EventRepo
                     // event with an interest list and no sales was reporting 0 - so the app showed
                     // "saved without notifying" while the mail went out.
                     $this->lastNotifiedCount = EventChangeNotifier::notifiableCount($event);
-                    $this->lastNotifiedInterestCount = EventChangeNotifier::interestedCount($event);
+                    // The GATED count, matching what notifyInterested() will actually send. The raw
+                    // interestedCount() would report people the 50-recipient ceiling refuses.
+                    $this->lastNotifiedInterestCount = EventChangeNotifier::interestedNotifiableCount($event);
                 }
             }
         }

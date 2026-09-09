@@ -30,21 +30,24 @@ use App\Models\Role;
  */
 class EventChangeNotifier
 {
-    public static function notifyChange(Event $event, ?Role $role, array $changes, ?string $note = null): void
+    public static function notifyChange(Event $event, ?Role $role, array $changes, ?string $note = null): int
     {
         if (! $role) {
-            return;
+            return 0;
         }
 
         $locale = $role->language_code ?: app()->getLocale();
 
-        self::notifyInterested($event, $role, EventInterestNotification::KIND_CHANGE);
+        // Returned so the caller can stamp attendees_notified_at only when something really went
+        // out. Both jobs used to stamp unconditionally, which is how an owner who notified nobody
+        // still got the "recently notified" warning.
+        $queued = self::notifyInterested($event, $role, EventInterestNotification::KIND_CHANGE);
 
         if (! $role->hasEmailSettings()) {
-            return;
+            return $queued;
         }
 
-        self::eachRecipient($event, function ($sale) use ($event, $role, $changes, $note, $locale) {
+        self::eachRecipient($event, function ($sale) use ($event, $role, $changes, $note, $locale, &$queued) {
             $eventUrl = $event->getGuestUrl(false, $sale->event_date, true);
             $icalUrl = $event->getAppleCalendarUrl($sale->event_date);
 
@@ -63,24 +66,31 @@ class EventChangeNotifier
                 'url' => $eventUrl,
                 'options' => ['icon' => $role->profile_image_url],
             ], $role);
+
+            $queued++;
         });
+
+        return $queued;
     }
 
-    public static function notifyCancellation(Event $event, ?Role $role, ?string $note = null): void
+    public static function notifyCancellation(Event $event, ?Role $role, ?string $note = null): int
     {
         if (! $role) {
-            return;
+            return 0;
         }
 
         $locale = $role->language_code ?: app()->getLocale();
 
-        self::notifyInterested($event, $role, EventInterestNotification::KIND_CANCELLED);
+        // Returned so the caller can stamp attendees_notified_at only when something really went
+        // out. Both jobs used to stamp unconditionally, which is how an owner who notified nobody
+        // still got the "recently notified" warning.
+        $queued = self::notifyInterested($event, $role, EventInterestNotification::KIND_CANCELLED);
 
         if (! $role->hasEmailSettings()) {
-            return;
+            return $queued;
         }
 
-        self::eachRecipient($event, function ($sale) use ($event, $role, $note, $locale) {
+        self::eachRecipient($event, function ($sale) use ($event, $role, $note, $locale, &$queued) {
             $eventUrl = $event->getGuestUrl(false, $sale->event_date, true);
 
             SendQueuedEmail::dispatch(
@@ -99,7 +109,11 @@ class EventChangeNotifier
                 'url' => $eventUrl,
                 'options' => ['icon' => $role->profile_image_url],
             ], $role);
+
+            $queued++;
         });
+
+        return $queued;
     }
 
     /**
@@ -116,29 +130,87 @@ class EventChangeNotifier
     }
 
     /**
-     * Buyers this event could actually reach, which is zero without the schedule's own SMTP.
+     * Whether any BUYER can actually be reached, which needs the schedule's own SMTP.
      *
-     * recipientCount() counts buyers who EXIST; this counts buyers who can be MAILED. The
-     * difference is the whole reason the confirm dialog used to promise "1 attendee notified" and
-     * then send nothing: notifyChange() applies the SMTP gate to the sales half internally, so a
-     * schedule on the platform mailer has buyers it can never write to.
+     * hasRecipients() asks whether buyers EXIST; this asks whether they can be MAILED. The
+     * difference is why the confirm dialog used to promise "1 attendee notified" and then send
+     * nothing: notifyChange() applies the SMTP gate to the sales half internally, so a schedule on
+     * the platform mailer has buyers it can never write to.
+     *
+     * exists(), not a count: baseQuery() applies Sale::scopeExcludeTestEmails(), which is seven
+     * non-sargable `NOT LIKE '%@domain'` predicates. EXISTS stops at the first row that passes
+     * them; COUNT(DISTINCT email) evaluates all seven against every paid sale on the event, and
+     * this runs synchronously on save.
      */
-    public static function notifiableBuyerCount(Event $event): int
+    public static function hasNotifiableBuyers(Event $event): bool
     {
         return optional($event->getRoleWithEmailSettings())->hasEmailSettings()
-            ? self::recipientCount($event)
-            : 0;
+            && self::hasRecipients($event);
+    }
+
+    public static function notifiableBuyerCount(Event $event): int
+    {
+        return self::hasNotifiableBuyers($event) ? self::recipientCount($event) : 0;
     }
 
     /**
-     * Everyone this event can actually reach about a change: mailable buyers plus the interest list.
+     * The schedule the INTEREST list belongs to, which is not the one the sales half speaks for.
      *
-     * The single number the dispatch gate, the confirm dialog and the saved-event flash all read,
-     * so they cannot disagree about who is being told.
+     * The jobs resolve their role with Event::getRoleWithEmailSettings(), which prefers a venue and
+     * falls back to `$venue ?: $firstRole` - correct for a buyer, who got their receipt from
+     * whichever schedule holds the SMTP. It is wrong for this list. Somebody who left an address on
+     * a talent's event page should hear from the TALENT, not from the venue: otherwise the mail
+     * carries the venue's sender name and Reply-To, links to the venue's storefront, is metered
+     * against the venue, and - worst - is gated by the venue's verification status. An auto-created
+     * ownerless venue fails canSendAudienceMail() CLOSED, which silently dropped the entire send.
+     *
+     * SendEventInterestMail uses creatorRole for the same four things, so this is also what stops
+     * the two rails mailing the same person under two different identities.
+     */
+    protected static function interestRole(Event $event, ?Role $fallback = null): ?Role
+    {
+        return $event->creatorRole ?: $fallback;
+    }
+
+    /**
+     * Interest recipients that would ACTUALLY be mailed, applying every gate the send applies.
+     *
+     * The count and the send share this so they cannot drift. The previous version counted rows and
+     * modelled one of the four gates, so the jobs stamped attendees_notified_at and the flash
+     * reported "N people notified" for sends that were refused - most reachably by the 50-recipient
+     * ceiling in canSendAudienceMail(), which turns 51 interested people into zero mail.
+     */
+    public static function interestedNotifiableCount(Event $event, string $kind = EventInterestNotification::KIND_CHANGE): int
+    {
+        $role = self::interestRole($event);
+
+        if (! $role || ! $role->subdomain || $role->is_deleted || is_demo_role($role)) {
+            return 0;
+        }
+
+        // A cancellation still goes out to an event that has since been hidden - that is the whole
+        // point of telling them - so only the other kinds check visibility.
+        if ($kind !== EventInterestNotification::KIND_CANCELLED
+            && $event->guestVisibilityFailure($role, false)) {
+            return 0;
+        }
+
+        $recipients = self::interestQuery($event)->distinct()->count('email');
+
+        if ($recipients === 0 || ! $role->canSendAudienceMail($recipients, $role->user)) {
+            return 0;
+        }
+
+        return $recipients;
+    }
+
+    /**
+     * Everyone this event can actually reach about a change: mailable buyers plus mailable
+     * interest rows. What the dispatch gate and the saved-event flash both read.
      */
     public static function notifiableCount(Event $event): int
     {
-        return self::notifiableBuyerCount($event) + self::interestedCount($event);
+        return self::notifiableBuyerCount($event) + self::interestedNotifiableCount($event);
     }
 
     /**
@@ -146,15 +218,15 @@ class EventChangeNotifier
      *
      * The gate the two dispatch sites need. They used to ask hasRecipients(), which is sales-only,
      * so an event with an interest list and no sales never dispatched the job at all - while
-     * event_interest_help promised "one if the date or venue changes".
+     * event_interest_help promised "one if the date or venue changes". Asking about MAILABLE people
+     * rather than existing ones also stops the opposite error: dispatching a job that sends nothing
+     * and stamps attendees_notified_at on the way.
      *
-     * Counting MAILABLE buyers rather than all of them also stops the opposite error: dispatching a
-     * job that will send nothing, and stamping attendees_notified_at on the way, which drove a
-     * "recently notified" warning for an owner who had notified nobody.
+     * Buyer half first: it is an exists() and the interest half is a count.
      */
     public static function hasAnyoneToTell(Event $event): bool
     {
-        return self::notifiableCount($event) > 0;
+        return self::hasNotifiableBuyers($event) || self::interestedNotifiableCount($event) > 0;
     }
 
     /** Distinct count of attendees that would be notified (drives the confirm dialog count). */
@@ -231,34 +303,18 @@ class EventChangeNotifier
      * who left an address on an event page has not done that, and pushToGuestEmail() would find
      * nothing to send to.
      */
-    protected static function notifyInterested(Event $event, Role $role, string $kind): void
+    protected static function notifyInterested(Event $event, Role $fallbackRole, string $kind): int
     {
-        if (! $role->subdomain || $role->is_deleted || is_demo_role($role)) {
-            return;
-        }
+        // Its OWN role, not the one the sales half was handed - see interestRole().
+        $role = self::interestRole($event, $fallbackRole);
 
-        // Re-checked at send time, not just at capture: an owner who moved the event to Draft,
-        // Internal, Unlisted or password-protected after somebody asked about it must not have
-        // strangers mailed a link to a page that will 404 or password-gate for them. A cancellation
-        // is the one case that still goes out - that is the whole point of telling them.
-        if ($kind !== EventInterestNotification::KIND_CANCELLED
-            && $event->guestVisibilityFailure($role, false)) {
-            return;
-        }
-
-        $recipients = self::interestedCount($event);
+        // Every gate lives in interestedNotifiableCount(), so the number the flash promises and the
+        // number this sends cannot drift. A refusal there means nobody is mailed and nothing is
+        // stamped.
+        $recipients = $role ? self::interestedNotifiableCount($event, $kind) : 0;
 
         if ($recipients === 0) {
-            return;
-        }
-
-        // Hoisted out of the loop, and counting the REAL recipients. Called per row with a
-        // hardcoded 1 this gate was inert: Role::canSendAudienceMail() ends in
-        // `$recipients > 0 && $recipients <= $limit` with a limit of 50, so 1 always passed and an
-        // unverified schedule could push its whole list through the shared platform mailer one
-        // message at a time. Every other caller passes the real count.
-        if (! $role->canSendAudienceMail($recipients, $role->user)) {
-            return;
+            return 0;
         }
 
         self::interestQuery($event)
@@ -280,5 +336,7 @@ class EventChangeNotifier
                     );
                 }
             });
+
+        return $recipients;
     }
 }

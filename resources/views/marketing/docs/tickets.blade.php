@@ -1192,7 +1192,7 @@
 
         <div class="doc-callout doc-callout-info mb-6">
             <div class="doc-callout-title">Free on every plan</div>
-            <p>The interest list is not a paid feature and is not counted against your <a href="{{ marketing_url('/docs/newsletters') }}" class="doc-link">newsletter allowance</a>. It exists to help you find out whether anyone wants tickets before you go to the trouble of selling them.</p>
+            <p>The interest list is not a paid feature and is not counted against your <a href="{{ route('marketing.docs.newsletters') }}" class="doc-link">newsletter allowance</a>. It exists to help you find out whether anyone wants tickets before you go to the trouble of selling them.</p>
         </div>
 
         <h3 class="doc-subheading">Seeing Who Is Waiting</h3>
@@ -1200,7 +1200,7 @@
 
         <div class="doc-callout doc-callout-info">
             <div class="doc-callout-title">Not the same as followers</div>
-            <p>Asking about one event is not subscribing to your schedule. Those people hear about that event and nothing else. Someone who wants everything you publish can <a href="{{ marketing_url('/docs/newsletters') }}" class="doc-link">sign up to your schedule</a> or subscribe to its calendar feed.</p>
+            <p>Asking about one event is not subscribing to your schedule. Those people hear about that event and nothing else. Someone who wants everything you publish can <a href="{{ route('marketing.docs.newsletters') }}" class="doc-link">sign up to your schedule</a> or subscribe to its calendar feed.</p>
         </div>
     </section>
 

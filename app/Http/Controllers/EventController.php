@@ -1172,7 +1172,9 @@ class EventController extends Controller
 
         $message = $notified
             ? ($interested > 0
-                ? __('messages.people_notified', ['count' => $notified])
+                // trans_choice, not __(): __() does not pluralise, so the string rendered
+                // literally as "5 person/people notified".
+                ? trans_choice('messages.people_notified', $notified, ['count' => $notified])
                 : __('messages.attendees_notified', ['count' => $notified]))
             : ($request->boolean('notify_attendees')
                 ? __('messages.saved_without_notifying')

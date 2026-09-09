@@ -57,8 +57,15 @@ class NotifyEventChange implements ShouldQueue
         // Nothing is dispatched at all unless EventChangeNotifier::hasAnyoneToTell() found someone
         // mailable, so reaching this line means at least one message is going out and the stamp
         // below is honest.
-        EventChangeNotifier::notifyChange($event, $role, $this->changes, $this->note);
+        $queued = EventChangeNotifier::notifyChange($event, $role, $this->changes, $this->note);
 
-        $event->forceFill(['attendees_notified_at' => now()])->saveQuietly();
+        // Stamped on the RESULT, not unconditionally. attendees_notified_at drives the "recently
+        // notified" caption in the editor, and the notifier can decline for reasons the dispatch
+        // gate cannot see - the 50-recipient ceiling in canSendAudienceMail(), a schedule that lost
+        // its subdomain, an event hidden since capture. Stamping regardless told an owner who had
+        // notified nobody that they had.
+        if ($queued > 0) {
+            $event->forceFill(['attendees_notified_at' => now()])->saveQuietly();
+        }
     }
 }
