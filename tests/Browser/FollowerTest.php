@@ -36,7 +36,21 @@ class FollowerTest extends DuskTestCase
             $otherRole->type = 'talent';
             $otherRole->user_id = $otherUser->id;
             $otherRole->timezone = 'America/New_York';
+            // A verified contact, plus the owner pivot below, is what makes this a real schedule
+            // rather than a placeholder. Without the verified address isEditableBy() ends with
+            // "! isClaimed() && isFollowing()", so following it would hand the test account edit
+            // rights on a stranger's page - not what a follow test should be simulating.
+            $otherRole->email = 'otherschedule@gmail.com';
+            $otherRole->email_verified_at = now();
             $otherRole->save();
+
+            // Load-bearing. follow() refuses anything failing Role::hasRealOwner(), which asks for
+            // BOTH roles.user_id and a matching owner/admin pivot: ConvertsLocationToVenue stamps a
+            // curator's user_id onto every placeholder venue it invents while attaching that user
+            // only as a follower, so user_id alone does not mean anybody runs the schedule. Both
+            // branches of follow() redirect to /following, so without this the waits below pass and
+            // only the text assertion fails, on a page carrying an "Invalid request" toast.
+            $otherRole->users()->attach($otherUser->id, ['level' => 'owner']);
 
             // -----------------------------------------------
             // 2. Follow the schedule
