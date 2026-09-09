@@ -2689,6 +2689,17 @@
                                          the controller always seeds one blank Ticket row
                                          (EventController::create/edit), so there is no zero-ticket state to
                                          write an empty state for. This says what the row is instead. --}}
+                                    @if (($interestCount ?? 0) > 0)
+                                        {{-- Real demand, stated where the decision is made. Rendered
+                                             server-side and never from a Vue expression, and it is a
+                                             plain integer, so there is no user-controlled text inside
+                                             this mount to guard with v-pre. --}}
+                                        <div class="mb-4 rounded-lg border border-blue-200 bg-blue-50 p-3 dark:border-blue-700 dark:bg-blue-900/20">
+                                            <p class="text-sm font-medium text-blue-800 dark:text-blue-300">
+                                                {{ trans_choice('messages.event_interest_waiting_count', $interestCount, ['count' => $interestCount]) }}
+                                            </p>
+                                        </div>
+                                    @endif
                                     <div v-if="tickets.length === 1 && !tickets[0].id" class="mt-4">
                                         <h4 class="text-sm font-semibold text-gray-900 dark:text-white">{{ __('messages.your_first_ticket_type') }}</h4>
                                         <p class="mt-1 text-sm text-gray-500 dark:text-gray-400">{{ __('messages.your_first_ticket_type_help') }}</p>
@@ -6459,38 +6470,42 @@
         this.savePreferences();
       },
       savePreferences() {
+        // The two selling flags are no longer written: nothing reads them (see loadPreferences),
+        // and leaving a stale ticketsEnabled in localStorage is what a future `?? false` would pick
+        // up again. The per-schedule carry-over in EventController::create() owns that decision.
         localStorage.setItem('eventPreferences', JSON.stringify({
           isInPerson: this.isInPerson,
-          isOnline: this.isOnline,
-          ticketsEnabled: this.event.tickets_enabled,
-          rsvpEnabled: this.event.rsvp_enabled
+          isOnline: this.isOnline
         }));
       },
       loadPreferences() {
         const preferences = JSON.parse(localStorage.getItem('eventPreferences'));
+        // Only the in-person / online toggles. This used to set tickets_enabled, rsvp_enabled and
+        // ticketMode too, and doing so was wrong three separate ways:
+        //
+        //   1. It CLOBBERED the server-side carry-over. EventController::create() reads the
+        //      schedule's own last event and seeds both flags from it; this then overwrote them on
+        //      every new event, so the fix meant to lift the ticket-type rate never applied past
+        //      the first event created in a given browser.
+        //   2. `?? false` meant stale localStorage - written before ticketsEnabled existed as a key
+        //      - actively turned selling OFF rather than leaving the server value alone. That hit
+        //      every tier, not just free.
+        //   3. The non-Pro arm hard-forced `tickets_enabled = false`, which contradicts
+        //      Role::ticketSaleLimit(): the free plan sells 25 paid tickets a month, and the panel's
+        //      own copy says so.
+        //
+        // These two toggles stay because they have no server-side equivalent. The mode does: the
+        // carry-over is per SCHEDULE, while localStorage is per BROWSER across every schedule an
+        // account manages, so the server value is strictly the better answer.
         @if (! $event->exists && $selectedVenue)
         this.isInPerson = true;
         if (preferences) {
           this.isOnline = preferences.isOnline;
-          @if ($role->isPro())
-            this.event.tickets_enabled = preferences.ticketsEnabled ?? false;
-          @else
-            this.event.tickets_enabled = false;
-          @endif
-          this.event.rsvp_enabled = preferences.rsvpEnabled ?? false;
-          this.ticketMode = this.event.tickets_enabled ? 'tickets' : (this.event.rsvp_enabled ? 'rsvp' : 'external');
         }
         @else
         if (preferences) {
           this.isInPerson = preferences.isInPerson;
           this.isOnline = preferences.isOnline;
-          @if ($role->isPro())
-            this.event.tickets_enabled = preferences.ticketsEnabled ?? false;
-          @else
-            this.event.tickets_enabled = false;
-          @endif
-          this.event.rsvp_enabled = preferences.rsvpEnabled ?? false;
-          this.ticketMode = this.event.tickets_enabled ? 'tickets' : (this.event.rsvp_enabled ? 'rsvp' : 'external');
         }
         @endif
       },

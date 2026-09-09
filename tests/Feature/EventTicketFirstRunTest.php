@@ -152,4 +152,29 @@ class EventTicketFirstRunTest extends TestCase
 
         $this->assertStringContainsString('ticketMode: "external"', $html);
     }
+
+    public function test_the_browser_preference_no_longer_overrides_the_carried_over_mode(): void
+    {
+        // loadPreferences() runs on EVERY new event and used to reassign tickets_enabled,
+        // rsvp_enabled and ticketMode from localStorage, so the per-schedule carry-over the tests
+        // above assert was overwritten the moment the browser had ever saved a preference. Its
+        // `?? false` also turned selling OFF for stale entries written before that key existed, on
+        // every tier - and its non-Pro arm hard-forced false, contradicting Role::ticketSaleLimit(),
+        // under which the free plan sells 25 paid tickets a month.
+        //
+        // A render assertion, because the clobber is client-side and no server-rendered value can
+        // show it: what is pinned is that the handler no longer contains the assignments.
+        $owner = $this->createOwner();
+        $role = $this->createRole($owner);
+
+        $html = $this->actingAs($owner)
+            ->get(route('event.create', ['subdomain' => $role->subdomain]))
+            ->assertOk()
+            ->getContent();
+
+        $this->assertStringNotContainsString('preferences.ticketsEnabled', $html);
+        $this->assertStringNotContainsString('preferences.rsvpEnabled', $html);
+        // And nothing writes the stale key back, so a future reader cannot resurrect it.
+        $this->assertStringNotContainsString('ticketsEnabled:', $html);
+    }
 }
