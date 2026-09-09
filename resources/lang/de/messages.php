@@ -2426,6 +2426,8 @@ return [
     'growth_signups' => 'Anmeldungen',
     'growth_saved_schedule' => 'Zeitplan gespeichert',
     'growth_saved_event' => 'Veranstaltung gespeichert',
+    'growth_saved_ticket' => 'Ticketart hinzugefügt',
+    'growth_saved_paid_ticket' => 'Bezahltes Ticket hinzugefügt',
     'growth_no_data' => 'Für diesen Zeitraum liegen noch keine Daten vor.',
     'audit_log' => 'Audit-Log',
     'queue' => 'Warteschlange',

@@ -104,13 +104,23 @@
             @endforeach
         </div>
 
-        <p class="mt-8 text-center" data-reveal>
+        {{-- This band is the only plan content on most of the 60-odd pages that render it, and
+             for a long time its only link was /pricing - so a page whose whole job was to sell a
+             feature ended by sending the reader to another marketing page. The forward action
+             goes last (CLAUDE.md), which under dir=rtl puts it on the left without a modifier. --}}
+        <div class="mt-8 flex flex-col items-center justify-center gap-5 sm:flex-row sm:gap-7" data-reveal>
             <a href="{{ marketing_url('/pricing') }}" class="group inline-flex items-center gap-1.5 font-medium text-blue-600 transition-all hover:gap-2.5 dark:text-blue-400">
                 Compare the plans in full
                 <svg aria-hidden="true" class="h-4 w-4 rtl:rotate-180" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6" />
                 </svg>
             </a>
-        </p>
+            <a href="{{ app_url('/sign_up') }}" class="group inline-flex items-center justify-center gap-2 rounded-2xl bg-gradient-to-r from-blue-600 to-sky-600 px-7 py-3.5 font-semibold text-white shadow-lg shadow-blue-500/25 transition-all duration-200 hover:-translate-y-0.5 hover:scale-[1.02] hover:shadow-2xl hover:shadow-blue-500/40">
+                Start for free
+                <svg aria-hidden="true" class="h-4 w-4 rtl:rotate-180" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6" />
+                </svg>
+            </a>
+        </div>
     </div>
 </section>

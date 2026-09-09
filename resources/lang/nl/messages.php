@@ -2420,6 +2420,8 @@ return [
     'growth_signups' => 'Aanmeldingen',
     'growth_saved_schedule' => 'Schema opgeslagen',
     'growth_saved_event' => 'Evenement opgeslagen',
+    'growth_saved_ticket' => 'Ticketsoort toegevoegd',
+    'growth_saved_paid_ticket' => 'Betaald ticket toegevoegd',
     'growth_no_data' => 'Nog geen gegevens voor deze periode.',
     'audit_log' => 'Auditlog',
     'queue' => 'Wachtrij',

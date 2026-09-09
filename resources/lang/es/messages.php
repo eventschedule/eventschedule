@@ -2422,6 +2422,8 @@ return [
     'growth_signups' => 'Registros',
     'growth_saved_schedule' => 'Guardó un horario',
     'growth_saved_event' => 'Guardó un evento',
+    'growth_saved_ticket' => 'Añadió un tipo de entrada',
+    'growth_saved_paid_ticket' => 'Añadió una entrada de pago',
     'growth_no_data' => 'Aún no hay datos para este periodo.',
     'audit_log' => 'Registro de auditoría',
     'queue' => 'Cola',

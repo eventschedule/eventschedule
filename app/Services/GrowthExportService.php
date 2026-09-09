@@ -521,9 +521,24 @@ class GrowthExportService
             ->groupBy('user_id')
             ->get()->keyBy('user_id');
 
+        // The ticket stages, per user, in one pass. The two ticket clauses reproduce
+        // Event::tickets(), which is what funnelData()'s saved_ticket / saved_paid_ticket go
+        // through - without them a deleted type or an add-on row would read as "this user made
+        // a ticket type" here while not counting there, and the two rails would disagree about
+        // the same person. MAX() over the price test yields both stages from one query.
+        $ticketsByUser = DB::table('events')
+            ->join('tickets', 'tickets.event_id', '=', 'events.id')
+            ->whereNotIn('events.id', $this->demoEventIds())
+            ->where('tickets.is_deleted', false)
+            ->where('tickets.is_addon', false)
+            ->selectRaw('events.user_id, MAX(tickets.price > 0) as paid')
+            ->groupBy('events.user_id')
+            ->get()->keyBy('user_id');
+
         $rows = [];
         foreach ((clone $base)->orderByDesc('id')->limit($this->rowCap())->cursor() as $u) {
             $roleAgg = $rolesByUser[$u->id] ?? null;
+            $ticketAgg = $ticketsByUser[$u->id] ?? null;
             $firstAt = $roleAgg?->first_at ? Carbon::parse($roleAgg->first_at) : null;
 
             $rows[] = [
@@ -545,6 +560,8 @@ class GrowthExportService
                 $u->schedule_form_viewed_at !== null || (int) ($roleAgg->c ?? 0) > 0,
                 (int) ($roleAgg->c ?? 0) > 0,
                 (int) ($eventsByUser[$u->id]->c ?? 0) > 0,
+                $ticketAgg !== null,
+                (int) ($ticketAgg->paid ?? 0) > 0,
                 (int) ($roleAgg->c ?? 0),
                 ($firstAt && $u->created_at) ? max(0, $u->created_at->diffInDays($firstAt)) : null,
             ];
@@ -553,7 +570,8 @@ class GrowthExportService
         return [
             'columns' => ['uid', 'created_month', 'signup_intent', 'utm_source', 'utm_medium',
                 'referrer_domain', 'landing_path', 'auth', 'reached_schedule_form', 'saved_schedule',
-                'saved_event', 'schedules_count', 'days_to_first_schedule'],
+                'saved_event', 'saved_ticket', 'saved_paid_ticket', 'schedules_count',
+                'days_to_first_schedule'],
             'rows' => $rows,
             'total' => $total,
             'truncated' => $total > $this->rowCap(),
@@ -935,7 +953,14 @@ class GrowthExportService
         ];
     }
 
-    /** Count + activation rates for one signup column, biggest group first. */
+    /**
+     * Count + activation rates for one signup column, biggest group first.
+     *
+     * The ticket stages are here rather than only in funnelData() because activation stopping at
+     * saved_event cannot answer the question the export exists to answer: selling is what
+     * produces a payer, so a breakdown that ends at "made an event" ranks channels and landing
+     * pages by an outcome that does not predict revenue.
+     */
     private function groupActivation(array $signups, string $column): array
     {
         $i = array_flip($signups['columns']);
@@ -943,10 +968,13 @@ class GrowthExportService
         foreach ($signups['rows'] as $row) {
             $k = $row[$i[$column]];
             $k = ($k === null || $k === '') ? '(none)' : (string) $k;
-            $by[$k] ??= ['key' => $k, 'signups' => 0, 'saved_schedule' => 0, 'saved_event' => 0];
+            $by[$k] ??= ['key' => $k, 'signups' => 0, 'saved_schedule' => 0, 'saved_event' => 0,
+                'saved_ticket' => 0, 'saved_paid_ticket' => 0];
             $by[$k]['signups']++;
             $by[$k]['saved_schedule'] += $row[$i['saved_schedule']] ? 1 : 0;
             $by[$k]['saved_event'] += $row[$i['saved_event']] ? 1 : 0;
+            $by[$k]['saved_ticket'] += $row[$i['saved_ticket']] ? 1 : 0;
+            $by[$k]['saved_paid_ticket'] += $row[$i['saved_paid_ticket']] ? 1 : 0;
         }
         $out = array_values($by);
         usort($out, fn ($a, $b) => $b['signups'] <=> $a['signups']);

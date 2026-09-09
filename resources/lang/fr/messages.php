@@ -2425,6 +2425,8 @@ return [
     'growth_signups' => 'Inscriptions',
     'growth_saved_schedule' => 'A enregistré un planning',
     'growth_saved_event' => 'A enregistré un événement',
+    'growth_saved_ticket' => 'A ajouté un type de billet',
+    'growth_saved_paid_ticket' => 'A ajouté un billet payant',
     'growth_no_data' => 'Aucune donnée pour cette période pour le moment.',
     'audit_log' => 'Journal d\'audit',
     'queue' => 'File d\'attente',

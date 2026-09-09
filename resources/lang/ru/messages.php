@@ -2501,6 +2501,8 @@ return [
     'growth_signups' => 'Регистрации',
     'growth_saved_schedule' => 'Сохранил расписание',
     'growth_saved_event' => 'Сохранил событие',
+    'growth_saved_ticket' => 'Добавил тип билета',
+    'growth_saved_paid_ticket' => 'Добавил платный билет',
     'growth_no_data' => 'Пока нет данных за этот период.',
     'audit_log' => 'Журнал аудита',
     'queue' => 'Очередь',

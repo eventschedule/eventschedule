@@ -2437,6 +2437,8 @@ return [
     'growth_signups' => 'Registreerumised',
     'growth_saved_schedule' => 'Salvestas ajakava',
     'growth_saved_event' => 'Salvestas sündmuse',
+    'growth_saved_ticket' => 'Lisas pileti tüübi',
+    'growth_saved_paid_ticket' => 'Lisas tasulise pileti',
     'growth_no_data' => 'Selle ajavahemiku kohta pole veel andmeid.',
     'audit_log' => 'Auditilogi',
     'queue' => 'Järjekord',

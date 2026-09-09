@@ -1176,7 +1176,7 @@
                 'icon' => '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M9.568 3H5.25A2.25 2.25 0 0 0 3 5.25v4.318c0 .597.237 1.17.659 1.591l9.581 9.581c.699.699 1.78.872 2.607.33a18.095 18.095 0 0 0 5.223-5.223c.542-.827.369-1.908-.33-2.607L11.16 3.66A2.25 2.25 0 0 0 9.568 3Z" /><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M6 6h.008v.008H6V6Z" />',
             ],
             [
-                'href' => marketing_url('/docs/subscriptions#overview'),
+                'href' => route('marketing.passes'),
                 'aria' => 'Learn more about passes and subscriptions',
                 'title' => 'Passes & Subscriptions',
                 'desc' => 'Sell multi-visit passes, memberships, festival and season tickets with usage tracking.',
@@ -1185,7 +1185,7 @@
                 'icon' => '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M16.5 6v.75m0 3v.75m0 3v.75m0 3V18m-9-5.25h5.25M7.5 15h3M3.375 5.25c-.621 0-1.125.504-1.125 1.125v3.026a2.999 2.999 0 0 1 0 5.198v3.026c0 .621.504 1.125 1.125 1.125h17.25c.621 0 1.125-.504 1.125-1.125v-3.026a2.999 2.999 0 0 1 0-5.198V6.375c0-.621-.504-1.125-1.125-1.125H3.375Z" />',
             ],
             [
-                'href' => marketing_url('/docs/tickets#checkin-dashboard'),
+                'href' => route('marketing.check_in'),
                 'aria' => 'Learn more about the check-in dashboard',
                 'title' => 'Check-in Dashboard',
                 'desc' => 'Scan tickets at the door and watch arrivals update live across every device.',
@@ -1249,10 +1249,10 @@
          goes stale the moment a tier moves. --}}
     @php
         $alsoIncluded = [
-            ['Installment payments', 'Split a ticket over monthly charges, taken off the saved card', 'Pro'],
-            ['Ticket add-ons', 'Parking, merchandise or a workshop, each with its own stock', 'Pro'],
-            ['Promo codes', 'Percentage or fixed, with usage limits and an expiry date', 'Pro'],
-            ['Ticket waitlist', 'Notify people automatically when a sold-out type frees up', 'Pro'],
+            ['Installment payments', 'Split a ticket over monthly charges, taken off the saved card', 'Pro', '/features/installments'],
+            ['Ticket add-ons', 'Parking, merchandise or a workshop, each with its own stock', 'Pro', '/features/promo-codes#addons'],
+            ['Promo codes', 'Percentage or fixed, with usage limits and an expiry date', 'Pro', '/features/promo-codes'],
+            ['Ticket waitlist', 'Notify people automatically when a sold-out type frees up', 'Pro', '/features/waitlist'],
             ['Multi-event cart', 'One checkout across several of your events, paid as a single amount', 'Free'],
             ['Bulk attendee import', 'Up to 5,000 rows from a CSV, for a list you already hold', 'Pro'],
             ['Eventbrite import', 'Bring an existing run of events across in one go', 'Pro'],
@@ -1283,10 +1283,15 @@
                 </p>
             </div>
             <dl class="grid grid-cols-1 gap-x-8 gap-y-5 sm:grid-cols-2 lg:grid-cols-4" data-reveal-group="35">
-                @foreach ($alsoIncluded as [$alsoName, $alsoDesc, $alsoTier])
+                @foreach ($alsoIncluded as $alsoRow)
+                    @php [$alsoName, $alsoDesc, $alsoTier] = $alsoRow; $alsoPath = $alsoRow[3] ?? null; @endphp
                     <div class="border-gray-200 ltr:border-l ltr:pl-4 rtl:border-r rtl:pr-4 dark:border-white/10" data-reveal>
                         <dt class="flex flex-wrap items-center gap-2">
-                            <span class="text-sm font-semibold text-gray-900 dark:text-white">{{ $alsoName }}</span>
+                            @if ($alsoPath)
+                                <a href="{{ marketing_url($alsoPath) }}" class="text-sm font-semibold text-blue-700 underline decoration-blue-300 underline-offset-4 transition-colors hover:text-blue-600 dark:text-blue-400 dark:decoration-blue-500/50">{{ $alsoName }}</a>
+                            @else
+                                <span class="text-sm font-semibold text-gray-900 dark:text-white">{{ $alsoName }}</span>
+                            @endif
                             <span class="rounded-full px-2 py-0.5 text-[10px] font-bold uppercase tracking-wide {{ $alsoBadge[$alsoTier] }}">{{ $alsoTier }}</span>
                         </dt>
                         <dd class="mt-1 text-sm text-gray-600 dark:text-gray-400">{{ $alsoDesc }}</dd>

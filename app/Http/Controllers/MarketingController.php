@@ -221,6 +221,62 @@ class MarketingController extends Controller
     }
 
     /**
+     * Passes & Subscriptions page
+     */
+    public function passes()
+    {
+        return view('marketing.passes');
+    }
+
+    /**
+     * Check-in Dashboard page
+     */
+    public function checkIn()
+    {
+        return view('marketing.check-in');
+    }
+
+    /**
+     * PayPal page
+     */
+    public function paypal()
+    {
+        return view('marketing.paypal');
+    }
+
+    /**
+     * Promo Codes & Add-ons page
+     */
+    public function promoCodes()
+    {
+        return view('marketing.promo-codes');
+    }
+
+    /**
+     * Ticket Waitlist page
+     */
+    public function waitlist()
+    {
+        return view('marketing.waitlist');
+    }
+
+    /**
+     * Installment Payments page
+     */
+    public function installments()
+    {
+        return view('marketing.installments');
+    }
+
+    /**
+     * Move from Eventbrite page
+     */
+    public function switchFromEventbrite()
+    {
+        return view('marketing.switch-from-eventbrite');
+    }
+
+    /**
      * CalDAV page
      */
     public function caldav()

@@ -2485,6 +2485,8 @@ return [
     'growth_signups' => 'التسجيلات',
     'growth_saved_schedule' => 'حفظ جدولًا',
     'growth_saved_event' => 'حفظ حدثًا',
+    'growth_saved_ticket' => 'أضاف نوع تذكرة',
+    'growth_saved_paid_ticket' => 'أضاف تذكرة مدفوعة',
     'growth_no_data' => 'لا توجد بيانات بعد لهذه الفترة.',
     'audit_log' => 'سجل التدقيق',
     'queue' => 'قائمة الانتظار',

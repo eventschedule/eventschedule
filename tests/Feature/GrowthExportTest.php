@@ -805,4 +805,96 @@ class GrowthExportTest extends TestCase
         $this->assertSame(1, $row[array_search('interests_90d', $columns)]);
         $this->assertSame(1, $row[array_search('interests_total', $columns)]);
     }
+
+    /**
+     * The acquisition breakdowns used to stop at saved_event, which ranked landing pages by an
+     * outcome that does not predict revenue: on this install a schedule that has sold recently
+     * pays at 55.6% against 0.38% for one with no ticket type, so "which page produces sellers"
+     * is the only version of the question worth asking of ~156 marketing pages.
+     */
+    public function test_the_landing_page_rollup_carries_the_ticket_stages(): void
+    {
+        $seller = $this->createOwner();
+        $seller->update(['landing_page' => 'https://eventschedule.com/features/ticketing?utm_source=x']);
+        $this->createTicket($this->createEvent($this->freeRole($seller)), ['price' => 20]);
+
+        $browser = $this->createOwner();
+        $browser->update(['landing_page' => 'https://eventschedule.com/for-musicians']);
+        $this->createEvent($this->freeRole($browser));
+
+        $byPath = collect($this->build()['acquisition']['by_landing_path']);
+
+        // pathOf() strips the query string, so the two arrivals on one page group together
+        // rather than splitting per campaign.
+        $ticketing = $byPath->firstWhere('key', '/features/ticketing');
+        $this->assertNotNull($ticketing, 'the landing path is not being recorded');
+        $this->assertSame(1, $ticketing['signups']);
+        $this->assertSame(1, $ticketing['saved_event']);
+        $this->assertSame(1, $ticketing['saved_ticket']);
+        $this->assertSame(1, $ticketing['saved_paid_ticket']);
+
+        $musicians = $byPath->firstWhere('key', '/for-musicians');
+        $this->assertSame(1, $musicians['saved_event']);
+        $this->assertSame(0, $musicians['saved_ticket'], 'an event is not a ticket type');
+        $this->assertSame(0, $musicians['saved_paid_ticket']);
+    }
+
+    /**
+     * The per-user ticket map has to reproduce Event::tickets() - is_deleted = false AND
+     * is_addon = false - because that is what the funnel's own saved_ticket stage goes through.
+     * Without both clauses a schedule that only ever sold parking, or one whose ticket type was
+     * deleted, would read here as a seller and not there, and the two rails would disagree about
+     * the same person while both looked plausible.
+     */
+    public function test_the_rollup_applies_the_event_tickets_contract(): void
+    {
+        $owner = $this->createOwner();
+        $owner->update(['landing_page' => 'https://eventschedule.com/pricing']);
+        $event = $this->createEvent($this->freeRole($owner));
+
+        $path = fn () => collect($this->build()['acquisition']['by_landing_path'])
+            ->firstWhere('key', '/pricing');
+
+        // A deleted type and a paid ADD-ON are both rows in `tickets`, and neither is a ticket type.
+        $this->createTicket($event, ['type' => 'Gone', 'price' => 25, 'is_deleted' => true]);
+        $this->createTicket($event, ['type' => 'Parking', 'price' => 30, 'is_addon' => true]);
+        $this->assertSame(0, $path()['saved_ticket'], 'a deleted type or an add-on is not a ticket type');
+        $this->assertSame(0, $path()['saved_paid_ticket']);
+
+        // A free type advances saved_ticket alone - it carries no intent to take money.
+        $this->createTicket($event, ['type' => 'RSVP', 'price' => 0]);
+        $this->assertSame(1, $path()['saved_ticket']);
+        $this->assertSame(0, $path()['saved_paid_ticket']);
+
+        // A priced type advances both, and counts the USER once however many types they made.
+        $this->createTicket($event, ['type' => 'Paid', 'price' => 20]);
+        $this->createTicket($event, ['type' => 'Also paid', 'price' => 40]);
+        $this->assertSame(1, $path()['saved_ticket'], 'one user, not one ticket type');
+        $this->assertSame(1, $path()['saved_paid_ticket']);
+    }
+
+    /**
+     * acquisition and funnel deliberately count DIFFERENT populations, and the ticket stages now
+     * appear in both - so the tempting cross-check "the rollup should sum to the funnel stage"
+     * is false on real data and must not be "fixed". cohort() keeps only organizer-intent
+     * signups inside the selected window; signupRows() takes the most recent rowCap() verified
+     * users whatever their intent or age.
+     */
+    public function test_acquisition_and_the_funnel_count_different_populations(): void
+    {
+        $follower = $this->createOwner();
+        $follower->update([
+            'signup_intent' => 'follow',
+            'landing_page' => 'https://eventschedule.com/features/ticketing',
+        ]);
+        $this->createTicket($this->createEvent($this->freeRole($follower)), ['price' => 20]);
+
+        $data = $this->build();
+
+        $ticketing = collect($data['acquisition']['by_landing_path'])->firstWhere('key', '/features/ticketing');
+        $this->assertSame(1, $ticketing['saved_paid_ticket'], 'acquisition counts every verified account');
+
+        $stages = array_column($data['funnel']['stages'], 'count', 'key');
+        $this->assertSame(0, $stages['saved_paid_ticket'], 'the funnel is the organizer cohort only');
+    }
 }

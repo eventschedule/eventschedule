@@ -2458,6 +2458,8 @@ return [
     'growth_signups' => 'Înregistrări',
     'growth_saved_schedule' => 'A salvat un program',
     'growth_saved_event' => 'A salvat un eveniment',
+    'growth_saved_ticket' => 'A adăugat un tip de bilet',
+    'growth_saved_paid_ticket' => 'A adăugat un bilet plătit',
     'growth_no_data' => 'Încă nu există date pentru această perioadă.',
     'audit_log' => 'Jurnal de Audit',
     'queue' => 'Coadă',

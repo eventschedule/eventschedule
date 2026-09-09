@@ -1115,6 +1115,32 @@
 
             <div class="es-wire-card mx-auto mt-6 max-w-4xl p-7" data-reveal="panel">
                 <div class="mb-4 flex flex-wrap items-center gap-2">
+                    {{-- Two chips, not one reading "06 · 07": .es-wire-port is a fixed 1.45rem
+                         circle with no overflow, sized for the two characters every other row
+                         uses, so a seven-glyph label spills out of it and into this heading. --}}
+                    <span class="es-wire-port" aria-hidden="true">06</span>
+                    <span class="es-wire-port" aria-hidden="true">07</span>
+                    <h3 class="es-wire-ink text-lg font-bold">PayPal and Payfast</h3>
+                    <span class="es-wire-dir">both</span>
+                    <span class="es-wire-plan">Free</span>
+                </div>
+                <p class="es-wire-muted mb-5 text-sm">
+                    Two more ports out to a buyer and back again, on every plan. Both let a selfhost operator supply one account for the whole install, which an owner who connects their own keeps overriding.
+                </p>
+                <div class="es-wire-spec mb-5">
+                    <span class="es-wire-spec-k">PayPal</span>
+                    <span class="es-wire-spec-v es-wire-muted">The buyer approves at PayPal and the payment is taken by a call we make on their return, so the ticket is issued there rather than waiting for a callback. It can join the multi-event cart; it cannot be used for installments.</span>
+                    <span class="es-wire-spec-k">Payfast</span>
+                    <span class="es-wire-spec-v es-wire-muted">South African rand only, so it is offered on ZAR events and nowhere else, confirmed by an ITN callback. It can join neither the cart nor installments.</span>
+                </div>
+                <a href="{{ marketing_url('/paypal') }}" class="es-wire-link inline-flex items-center gap-1 text-sm font-semibold hover:underline">
+                    PayPal payments
+                    <svg aria-hidden="true" class="h-4 w-4 rtl:rotate-180" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M13 7l5 5m0 0l-5 5m5-5H6" /></svg>
+                </a>
+            </div>
+
+            <div class="es-wire-card mx-auto mt-6 max-w-4xl p-7" data-reveal="panel">
+                <div class="mb-4 flex flex-wrap items-center gap-2">
                     <span class="es-wire-port" aria-hidden="true">08</span>
                     <h3 class="es-wire-ink text-lg font-bold">If the money currently lands at Eventbrite</h3>
                     <span class="es-wire-dir">in</span>

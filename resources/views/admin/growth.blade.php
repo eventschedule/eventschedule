@@ -112,10 +112,13 @@
             </div>
         </div>
 
-        {{-- Acquisition: which landing pages produce signups that activate --}}
+        {{-- Acquisition: which landing pages produce signups that go on to SELL. The two ticket
+             columns are the point of this table: activation stopping at "saved an event" ranked
+             pages by an outcome that does not predict revenue, and the marketing site has ~156
+             of them, so 12 rows could never rank it either. --}}
         <div class="ap-card rounded-xl shadow p-6">
             <h3 class="text-lg font-medium text-gray-900 dark:text-white mb-4">@lang('messages.growth_acquisition')</h3>
-            @php $landing = array_slice($data['acquisition']['by_landing_path'], 0, 12); @endphp
+            @php $landing = array_slice($data['acquisition']['by_landing_path'], 0, 25); @endphp
             @if (empty($landing))
                 <p class="text-sm text-gray-500 dark:text-gray-400">@lang('messages.growth_no_data')</p>
             @else
@@ -126,7 +129,9 @@
                                 <th class="py-2 pe-4 text-start font-medium">@lang('messages.growth_acquisition')</th>
                                 <th class="py-2 pe-4 text-end font-medium">@lang('messages.growth_signups')</th>
                                 <th class="py-2 pe-4 text-end font-medium">@lang('messages.growth_saved_schedule')</th>
-                                <th class="py-2 text-end font-medium">@lang('messages.growth_saved_event')</th>
+                                <th class="py-2 pe-4 text-end font-medium">@lang('messages.growth_saved_event')</th>
+                                <th class="py-2 pe-4 text-end font-medium">@lang('messages.growth_saved_ticket')</th>
+                                <th class="py-2 text-end font-medium">@lang('messages.growth_saved_paid_ticket')</th>
                             </tr>
                         </thead>
                         <tbody class="divide-y divide-gray-100 dark:divide-gray-700">
@@ -137,8 +142,14 @@
                                     <td class="py-2 pe-4 text-end text-gray-600 dark:text-gray-400">
                                         {{ $row['signups'] > 0 ? round($row['saved_schedule'] / $row['signups'] * 100, 1) : 0 }}%
                                     </td>
-                                    <td class="py-2 text-end text-gray-600 dark:text-gray-400">
+                                    <td class="py-2 pe-4 text-end text-gray-600 dark:text-gray-400">
                                         {{ $row['signups'] > 0 ? round($row['saved_event'] / $row['signups'] * 100, 1) : 0 }}%
+                                    </td>
+                                    <td class="py-2 pe-4 text-end text-gray-600 dark:text-gray-400">
+                                        {{ $row['signups'] > 0 ? round($row['saved_ticket'] / $row['signups'] * 100, 1) : 0 }}%
+                                    </td>
+                                    <td class="py-2 text-end text-gray-600 dark:text-gray-400">
+                                        {{ $row['signups'] > 0 ? round($row['saved_paid_ticket'] / $row['signups'] * 100, 1) : 0 }}%
                                     </td>
                                 </tr>
                             @endforeach

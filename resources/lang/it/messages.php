@@ -2422,6 +2422,8 @@ return [
     'growth_signups' => 'Iscrizioni',
     'growth_saved_schedule' => 'Ha salvato un programma',
     'growth_saved_event' => 'Ha salvato un evento',
+    'growth_saved_ticket' => 'Ha aggiunto un tipo di biglietto',
+    'growth_saved_paid_ticket' => 'Ha aggiunto un biglietto a pagamento',
     'growth_no_data' => 'Nessun dato per questo periodo al momento.',
     'audit_log' => 'Registro audit',
     'queue' => 'Coda',

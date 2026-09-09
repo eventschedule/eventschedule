@@ -2475,6 +2475,8 @@ return [
     'growth_signups' => 'הרשמות',
     'growth_saved_schedule' => 'שמר לוח זמנים',
     'growth_saved_event' => 'שמר אירוע',
+    'growth_saved_ticket' => 'הוסיף סוג כרטיס',
+    'growth_saved_paid_ticket' => 'הוסיף כרטיס בתשלום',
     'growth_no_data' => 'אין עדיין נתונים לטווח זה.',
     'audit_log' => 'יומן ביקורת',
     'queue' => 'תור',

@@ -53,6 +53,10 @@ echo '<?xml version="1.0" encoding="UTF-8"?>'; ?>
         {!! $lastmodTag('/eventbrite-alternative') !!}
     </url>
     <url>
+        <loc>{{ url('/switch-from-eventbrite') }}</loc>
+        {!! $lastmodTag('/switch-from-eventbrite') !!}
+    </url>
+    <url>
         <loc>{{ url('/luma-alternative') }}</loc>
         {!! $lastmodTag('/luma-alternative') !!}
     </url>
@@ -201,6 +205,26 @@ echo '<?xml version="1.0" encoding="UTF-8"?>'; ?>
         {!! $lastmodTag('/features/allocated-seating') !!}
     </url>
     <url>
+        <loc>{{ url('/features/passes') }}</loc>
+        {!! $lastmodTag('/features/passes') !!}
+    </url>
+    <url>
+        <loc>{{ url('/features/check-in') }}</loc>
+        {!! $lastmodTag('/features/check-in') !!}
+    </url>
+    <url>
+        <loc>{{ url('/features/promo-codes') }}</loc>
+        {!! $lastmodTag('/features/promo-codes') !!}
+    </url>
+    <url>
+        <loc>{{ url('/features/waitlist') }}</loc>
+        {!! $lastmodTag('/features/waitlist') !!}
+    </url>
+    <url>
+        <loc>{{ url('/features/installments') }}</loc>
+        {!! $lastmodTag('/features/installments') !!}
+    </url>
+    <url>
         <loc>{{ url('/features/calendar-sync') }}</loc>
         {!! $lastmodTag('/features/calendar-sync') !!}
     </url>
@@ -219,6 +243,10 @@ echo '<?xml version="1.0" encoding="UTF-8"?>'; ?>
     <url>
         <loc>{{ url('/stripe') }}</loc>
         {!! $lastmodTag('/stripe') !!}
+    </url>
+    <url>
+        <loc>{{ url('/paypal') }}</loc>
+        {!! $lastmodTag('/paypal') !!}
     </url>
     <url>
         <loc>{{ url('/invoiceninja') }}</loc>

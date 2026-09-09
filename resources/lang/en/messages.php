@@ -2795,6 +2795,8 @@ return [
     'growth_signups' => 'Signups',
     'growth_saved_schedule' => 'Saved a schedule',
     'growth_saved_event' => 'Saved an event',
+    'growth_saved_ticket' => 'Added a ticket type',
+    'growth_saved_paid_ticket' => 'Added a paid ticket',
     'growth_no_data' => 'No data yet for this range.',
     'audit_log' => 'Audit Log',
     'queue' => 'Queue',

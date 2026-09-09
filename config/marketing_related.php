@@ -19,12 +19,67 @@
  */
 
 return [
+    // The parent page for everything ticketing, and it linked to none of the five pages that break
+    // out one part of it. FOUR entries, like 111 of the 112 keys here: MarketingRelatedPagesTest
+    // caps a strip at 6, and four is the only size that also fills every row at both
+    // sm:grid-cols-2 and the lg:grid-cols-{min(count, 4)} the component derives.
+    // Four cannot hold all five, so the three chosen are the ones that make the other two
+    // REACHABLE: promo-codes carries installments and waitlist in its own strip, so every new page
+    // is within two hops of here. Allocated seating moved one hop out (check-in links it) and the
+    // Eventbrite comparison is still reached from /compare and from its sixteen siblings.
     'features/ticketing' => [
+        ['title' => 'Passes & Subscriptions', 'path' => '/features/passes', 'blurb' => 'One pass, many events, counted down on a single QR code.'],
+        ['title' => 'Check-in Dashboard', 'path' => '/features/check-in', 'blurb' => 'Watch the room fill up while you are standing at the door.'],
+        ['title' => 'Promo Codes & Add-ons', 'path' => '/features/promo-codes', 'blurb' => 'Discounts that expire and cap themselves, and extras with their own stock.'],
+        ['title' => 'Pricing', 'path' => '/pricing', 'blurb' => 'See what is included on Free, Pro, and Enterprise plans.'],
+    ],
+
+    'paypal' => [
+        ['title' => 'Selling Tickets', 'path' => '/features/ticketing', 'blurb' => 'Ticket types, QR check-in and a live door dashboard, with zero platform fees.'],
+        ['title' => 'Stripe', 'path' => '/stripe', 'blurb' => 'Card payments straight into your own Stripe account.'],
+        ['title' => 'Integrations', 'path' => '/features/integrations', 'blurb' => 'Every port in and out of Event Schedule, with the plan each one needs.'],
+        ['title' => 'Pricing', 'path' => '/pricing', 'blurb' => 'See what is included on Free, Pro, and Enterprise plans.'],
+    ],
+
+    'switch-from-eventbrite' => [
+        ['title' => 'Eventbrite Alternative', 'path' => '/eventbrite-alternative', 'blurb' => 'The head-to-head, with a calculator that works out what the fees cost you.'],
+        ['title' => 'Selling Tickets', 'path' => '/features/ticketing', 'blurb' => 'Ticket types, QR check-in and a live door dashboard, with zero platform fees.'],
+        ['title' => 'Stripe', 'path' => '/stripe', 'blurb' => 'Card payments straight into your own Stripe account.'],
+        ['title' => 'Pricing', 'path' => '/pricing', 'blurb' => 'See what is included on Free, Pro, and Enterprise plans.'],
+    ],
+
+    'features/promo-codes' => [
+        ['title' => 'Selling Tickets', 'path' => '/features/ticketing', 'blurb' => 'Ticket types, QR check-in and a live door dashboard, with zero platform fees.'],
+        ['title' => 'Ticket Waitlist', 'path' => '/features/waitlist', 'blurb' => 'A sold-out date offers a returned seat to one person at a time.'],
+        ['title' => 'Installment Payments', 'path' => '/features/installments', 'blurb' => 'Let buyers spread an expensive ticket over monthly payments.'],
+        ['title' => 'Pricing', 'path' => '/pricing', 'blurb' => 'See what is included on Free, Pro, and Enterprise plans.'],
+    ],
+
+    'features/waitlist' => [
+        ['title' => 'Selling Tickets', 'path' => '/features/ticketing', 'blurb' => 'Ticket types, QR check-in and a live door dashboard, with zero platform fees.'],
+        ['title' => 'Check-in Dashboard', 'path' => '/features/check-in', 'blurb' => 'Watch the room fill up while you are standing at the door.'],
+        ['title' => 'Passes & Subscriptions', 'path' => '/features/passes', 'blurb' => 'One pass, many events, counted down on a single QR code.'],
+        ['title' => 'Pricing', 'path' => '/pricing', 'blurb' => 'See what is included on Free, Pro, and Enterprise plans.'],
+    ],
+
+    'features/installments' => [
+        ['title' => 'Selling Tickets', 'path' => '/features/ticketing', 'blurb' => 'Ticket types, QR check-in and a live door dashboard, with zero platform fees.'],
+        ['title' => 'Stripe', 'path' => '/stripe', 'blurb' => 'Card payments straight into your own Stripe account.'],
+        ['title' => 'Promo Codes & Add-ons', 'path' => '/features/promo-codes', 'blurb' => 'Discounts that expire and cap themselves, and extras with their own stock.'],
+        ['title' => 'Pricing', 'path' => '/pricing', 'blurb' => 'See what is included on Free, Pro, and Enterprise plans.'],
+    ],
+
+    'features/check-in' => [
+        ['title' => 'Selling Tickets', 'path' => '/features/ticketing', 'blurb' => 'Ticket types, QR check-in and a live door dashboard, with zero platform fees.'],
+        ['title' => 'Passes & Subscriptions', 'path' => '/features/passes', 'blurb' => 'One pass, many events, counted down on a single QR code.'],
         ['title' => 'Allocated Seating', 'path' => '/features/allocated-seating', 'blurb' => 'Draw your room once and let buyers pick their own seats from a map of it.'],
-        ['title' => 'AI Features', 'path' => '/features/ai', 'blurb' => 'Parse events from text, generate flyers, and translate content with AI.'],
-        ['title' => 'Calendar Sync', 'path' => '/features/calendar-sync', 'blurb' => 'Two-way sync with Google Calendar and any CalDAV server.'],
-        ['title' => 'For Music Venues', 'path' => '/for-music-venues', 'blurb' => 'Run every show from one schedule with QR check-in built in.'],
-        ['title' => 'Eventbrite Alternative', 'path' => '/eventbrite-alternative', 'blurb' => 'Sell tickets without 3.7% + $1.79 per-ticket platform fees.'],
+        ['title' => 'Pricing', 'path' => '/pricing', 'blurb' => 'See what is included on Free, Pro, and Enterprise plans.'],
+    ],
+
+    'features/passes' => [
+        ['title' => 'Selling Tickets', 'path' => '/features/ticketing', 'blurb' => 'Ticket types, QR check-in and a live door dashboard, with zero platform fees.'],
+        ['title' => 'Subscriptions & Passes Guide', 'path' => '/docs/subscriptions', 'blurb' => 'Create a pass, choose what it covers, and watch the visits come off it.'],
+        ['title' => 'For Fitness & Yoga', 'path' => '/for-fitness-and-yoga', 'blurb' => 'Class packs and memberships for a studio that runs most days.'],
         ['title' => 'Pricing', 'path' => '/pricing', 'blurb' => 'See what is included on Free, Pro, and Enterprise plans.'],
     ],
 
@@ -608,8 +663,12 @@ return [
         ['title' => 'Pricing', 'path' => '/pricing', 'blurb' => 'See what is included on Free, Pro, and Enterprise plans.'],
     ],
 
+    // A reader who has finished comparing wants the logistics, so the migration page leads here
+    // and replaces the Luma row rather than being appended: related-pages.blade.php sizes the grid
+    // as lg:grid-cols-{min(count, 4)}, so a fifth entry would leave one card alone on the last row.
+    // /luma-alternative stays reachable from /compare and from its sibling comparison pages.
     'eventbrite-alternative' => [
-        ['title' => 'Luma Alternative', 'path' => '/luma-alternative', 'blurb' => 'Custom domains, zero platform fees, and open source flexibility.'],
+        ['title' => 'Move from Eventbrite', 'path' => '/switch-from-eventbrite', 'blurb' => 'What comes across in the import, what does not, and what to do on the first day.'],
         ['title' => 'Ticket Tailor Alternative', 'path' => '/ticket-tailor-alternative', 'blurb' => 'Zero platform fees, open source flexibility, and AI features.'],
         ['title' => 'Compare Alternatives', 'path' => '/compare', 'blurb' => 'See how Event Schedule stacks up against other platforms.'],
         ['title' => 'Pricing', 'path' => '/pricing', 'blurb' => 'See what is included on Free, Pro, and Enterprise plans.'],
