@@ -496,6 +496,44 @@ class PayPalCaptureTest extends TestCase
         ]))->assertOk()->assertSee(__('messages.complete_payment'), escape: false);
     }
 
+    /**
+     * The other half of what PENDING has to protect: the expiry sweeps.
+     *
+     * A PENDING capture means PayPal has ALREADY TAKEN the buyer's money and is reviewing it -
+     * routine on a new merchant account. The sale correctly stays `unpaid` until the review clears,
+     * which puts it squarely in the window app:release-tickets sweeps. Expiring it fires
+     * Sale::booted's released branch (seats back to inventory, gift card credited, promo redemption
+     * returned), and when PAYMENT.CAPTURE.COMPLETED finally lands settle() finds the sale expired
+     * and can only log it. The buyer is out the money, holds no ticket, and the seat has been sold
+     * to somebody else.
+     *
+     * Both sweeps are pinned. The per-event one has no payment_method filter at all, and the 48h
+     * gift-card-hold one excludes only nonExpiringKeys() - which is CashGateway alone, so PayPal is
+     * in scope there too.
+     */
+    public function test_a_capture_under_review_is_not_expired_by_the_release_sweep(): void
+    {
+        $this->event->forceFill(['expire_unpaid_tickets' => 1])->save();
+
+        $this->captureResponse = fn () => Http::response($this->orderWithCapture(['status' => 'PENDING']));
+        $this->returnFromPayPal();
+
+        $sale = $this->sale->fresh();
+        $this->assertSame('unpaid', $sale->status, 'fixture: a reviewed capture stays unpaid');
+        $this->assertNotNull($sale->paypal_pending_at, 'fixture: the review flag must be set');
+
+        // Push it well past the event's own expiry window.
+        Sale::whereKey($sale->id)->update(['created_at' => now()->subDays(5)]);
+
+        $this->artisan('app:release-tickets')->assertSuccessful();
+
+        $this->assertSame(
+            'unpaid',
+            $this->sale->fresh()->status,
+            'a capture PayPal is still holding must never be expired - the money has already left the buyer'
+        );
+    }
+
     public function test_settling_clears_the_pending_flag(): void
     {
         $this->captureResponse = fn () => Http::response($this->orderWithCapture(['status' => 'PENDING']));

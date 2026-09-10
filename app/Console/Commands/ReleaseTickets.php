@@ -41,7 +41,21 @@ class ReleaseTickets extends Command
         // with expire_unpaid_tickets set IS auto-expired here once past that window (a single,
         // correct restore; the gift-hold loop below excludes cash to avoid double-processing).
         // The "cash is never auto-expired" rule holds only for the default (opt-out) window.
+        //
+        // A capture the gateway is still holding is NOT an unpaid sale. PayPal answers a capture
+        // with PENDING when it puts the payment through review (routine on a new merchant account),
+        // and PayPalGateway::settleCapture() records that as paypal_pending_at and leaves the sale
+        // unpaid for this command. The money has already left the buyer. Expiring the sale here
+        // fires Sale::booted's released branch - seats back into inventory, gift card credited,
+        // promo redemption returned - and when PAYMENT.CAPTURE.COMPLETED finally arrives settle()
+        // finds the sale expired and can only log. The buyer is out the money, holds no ticket, and
+        // their seat has been sold to somebody else.
+        //
+        // Both sweeps below need this. The gateway-agnostic version of the rule is "a sale under
+        // review at the gateway does not expire"; if a second gateway grows the same state, widen
+        // this into a shared column rather than adding a third literal check.
         $expiredSales = Sale::where('status', 'unpaid')
+            ->whereNull('paypal_pending_at')
             ->where(function ($q) {
                 $q->whereNull('group_id')->orWhereColumn('group_id', 'id');
             })
@@ -138,6 +152,9 @@ class ReleaseTickets extends Command
         // Cash sales are excluded: like the card loop above, cash orders are never auto-expired -
         // a partial cash redemption's remainder is settled in person and the owner cancels it.
         $heldSales = Sale::where('sales.status', 'unpaid')
+            // See the note on $expiredSales above: a capture under review at the gateway has
+            // already taken the buyer's money and must not be expired out from under them.
+            ->whereNull('sales.paypal_pending_at')
             ->whereNotIn('sales.payment_method', $nonExpiring)
             ->where(function ($q) {
                 $q->whereNull('sales.group_id')->orWhereColumn('sales.group_id', 'sales.id');
