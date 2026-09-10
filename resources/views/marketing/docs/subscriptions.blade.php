@@ -370,8 +370,8 @@
                         <td>Check the <strong class="text-gray-900 dark:text-white">Scanning at event</strong> selector; otherwise sell a ticket.</td>
                     </tr>
                     <tr>
-                        <td><span class="font-semibold text-red-700 dark:text-red-400">This ticket is not paid</span><br><span class="font-semibold text-red-700 dark:text-red-400">This ticket is cancelled</span><br><span class="font-semibold text-red-700 dark:text-red-400">This ticket is refunded</span></td>
-                        <td>The order behind the pass is unpaid, cancelled or fully refunded. A partial refund leaves the order paid, so the pass keeps scanning.</td>
+                        <td><span class="font-semibold text-red-700 dark:text-red-400">This ticket is not paid</span><br><span class="font-semibold text-red-700 dark:text-red-400">This ticket is cancelled</span><br><span class="font-semibold text-red-700 dark:text-red-400">This ticket is refunded</span><br><span class="font-semibold text-red-700 dark:text-red-400">This ticket has expired</span><br><span class="font-semibold text-red-700 dark:text-red-400">This ticket is awaiting payment review</span></td>
+                        <td>The order behind the pass is unpaid, cancelled or fully refunded, or it expired before it was paid. That is a checkout that ran out of time, not the pass passing its valid-until date. Awaiting payment review means the payment came in for a different amount than the order, so it is held until a site admin approves it. A partial refund leaves the order paid, so the pass keeps scanning.</td>
                         <td>Settle the payment or sell a ticket. A payment problem is the only thing the scanner treats as a hard error - every other outcome above is a neutral status, so a good pass never reads as fraud.</td>
                     </tr>
                 </tbody>

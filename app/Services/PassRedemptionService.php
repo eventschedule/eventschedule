@@ -38,17 +38,16 @@ class PassRedemptionService
         $data->event = $scanningEvent->name;
 
         // Payment problems are the only hard errors (red); a valid pass must
-        // never read as fraud.
-        if ($sale->status === 'unpaid') {
-            $data->error = __('messages.this_ticket_is_not_paid');
-
-            return $data;
-        } elseif ($sale->status === 'cancelled') {
-            $data->error = __('messages.this_ticket_is_cancelled');
-
-            return $data;
-        } elseif ($sale->status === 'refunded') {
-            $data->error = __('messages.this_ticket_is_refunded');
+        // never read as fraud. The same allowlist as a single ticket: this used to refuse only
+        // unpaid, cancelled and refunded, so an expired sale (a checkout that lapsed unpaid - not
+        // the pass's own validity window, which is the neutral `expired` pass_status below) and
+        // an amount_mismatch one awaiting review were redeemed like paid passes.
+        //
+        // No installment-arrears check, unlike the single-ticket scanner: a pass sale cannot
+        // carry an installment plan. TicketController's checkout, the only createPlan() caller,
+        // refuses installments when any ticket in the order is a pass.
+        if ($error = $sale->scanRefusalMessage()) {
+            $data->error = $error;
 
             return $data;
         }

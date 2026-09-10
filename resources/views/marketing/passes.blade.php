@@ -463,7 +463,7 @@
                             // GoogleWalletService::classPayload() leaves a pass's class undated, so the
                             // wallet holds ONE pass for everything it covers. The visit count is not on it.
                             ['One wallet pass, not one per date', 'The pass page and the confirmation email carry an Add to Google Wallet button. It saves as a single Google Wallet pass for every date it is good for, with the same QR code, how many it admits and its valid-until date. The visit count stays on the pass page.'],
-                            ['A bad pass is a status, not an alarm', 'Out of visits, expired, wrong event, too early, event finished - each comes back as a plain statement of what is true, with what to do next. Only an unpaid or refunded order is treated as an error.'],
+                            ['A bad pass is a status, not an alarm', 'Out of visits, expired, wrong event, too early, event finished - each comes back as a plain statement of what is true, with what to do next. Only a problem with the order behind it is an error: unpaid, cancelled, refunded, timed out before it was paid, or held for a payment review.'],
                             ['The visit log', 'The Subscriptions tab lists every paid pass with its holder, its count and its expiry, and opens out into the dates behind it: attended, booked, or forfeited.'],
                         ];
                     @endphp

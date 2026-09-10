@@ -339,6 +339,36 @@ class Sale extends Model
         return $this->installmentPlan?->isDelinquent() ?? false;
     }
 
+    /**
+     * Why the door must turn this sale away, or null when it may come in.
+     *
+     * An allowlist, not a list of known-bad statuses: only `paid` admits. The scanner used to name
+     * unpaid/cancelled/refunded and let everything else through, so an EXPIRED sale scanned in -
+     * and expiry releases the seats for resale (Sale::booted decrements updateSold) while leaving
+     * is_deleted false and the secret working, so the original buyer's QR still opened a seat
+     * somebody else had since bought. The pass scanner kept its own copy of that old list, and
+     * redeemed expired and amount_mismatch passes, until both callers shared this one.
+     *
+     * amount_mismatch gets its own message on purpose: the money really was captured, it is a
+     * site admin who has not reconciled it yet, and telling the door "not paid" would turn an
+     * internal backlog into a guest being turned away.
+     *
+     * Installment arrears are not decided here: the sale is still `paid`, and the single-ticket
+     * scanner handles them after this check (isInstallmentDelinquent()).
+     */
+    public function scanRefusalMessage(): ?string
+    {
+        return match ($this->status) {
+            'paid' => null,
+            'unpaid' => __('messages.this_ticket_is_not_paid'),
+            'cancelled' => __('messages.this_ticket_is_cancelled'),
+            'refunded' => __('messages.this_ticket_is_refunded'),
+            'expired' => __('messages.this_ticket_is_expired'),
+            'amount_mismatch' => __('messages.this_ticket_is_pending_review'),
+            default => __('messages.this_ticket_is_not_valid'),
+        };
+    }
+
     public function groupedSales()
     {
         return $this->hasMany(Sale::class, 'group_id', 'group_id');
