@@ -876,7 +876,7 @@
             <div class="grid items-center gap-12 lg:grid-cols-[1.05fr_1fr]">
                 <div>
                     <div class="es-fade-up es-d-1 mb-6">
-                        <a href="{{ route('marketing.compare') }}" class="es-score-link text-sm font-medium">
+                        <a href="{{ route('marketing.compare') }}" class="es-score-link inline-flex min-h-[24px] items-center text-sm font-medium">
                             &larr; Compare all platforms
                         </a>
                     </div>

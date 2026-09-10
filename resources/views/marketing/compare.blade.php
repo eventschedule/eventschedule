@@ -585,7 +585,7 @@
                                                         </svg>
                                                         <span class="sr-only">Yes.</span>
                                                         @if (strlen($row[$i]) > 3)
-                                                            <span class="text-xs text-gray-500 dark:text-gray-400">{{ substr($row[$i], 4) }}</span>
+                                                            <span class="text-xs text-gray-600 dark:text-gray-400">{{ substr($row[$i], 4) }}</span>
                                                         @endif
                                                     </span>
                                                 @elseif (str_starts_with($row[$i], 'No'))
@@ -595,7 +595,7 @@
                                                         </svg>
                                                         <span class="sr-only">No.</span>
                                                         @if (strlen($row[$i]) > 2)
-                                                            <span class="text-xs text-gray-500 dark:text-gray-400">{{ trim(substr($row[$i], 2)) }}</span>
+                                                            <span class="text-xs text-gray-600 dark:text-gray-400">{{ trim(substr($row[$i], 2)) }}</span>
                                                         @endif
                                                     </span>
                                                 @else

@@ -426,7 +426,7 @@
                     <div class="flex items-center gap-3">
                         <label for="pf-price" class="whitespace-nowrap text-sm font-medium text-gray-700 dark:text-gray-300">Ticket price</label>
                         <div class="relative">
-                            <span class="absolute top-1/2 -translate-y-1/2 text-sm text-gray-400 ltr:left-3 rtl:right-3">$</span>
+                            <span class="absolute top-1/2 -translate-y-1/2 text-sm text-gray-500 dark:text-gray-400 ltr:left-3 rtl:right-3">$</span>
                             <input id="pf-price" type="number" value="{{ $calcPrice }}" min="1" max="10000" class="w-28 rounded-xl border border-gray-200 bg-white py-2.5 text-sm text-gray-900 focus:border-transparent focus:ring-2 focus:ring-[var(--brand-blue)] dark:border-white/10 dark:bg-white/5 dark:text-white ltr:pl-7 ltr:pr-3 rtl:pr-7 rtl:pl-3">
                         </div>
                     </div>

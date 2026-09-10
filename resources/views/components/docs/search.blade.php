@@ -40,7 +40,7 @@
            class="{{ $inputClasses }} text-gray-900 placeholder:text-gray-400 focus:border-[var(--brand-blue)] focus:outline-none focus:ring-2 focus:ring-[var(--brand-blue)]/25 dark:text-white">
 
     <kbd data-role="hint"
-         class="pointer-events-none absolute inset-y-0 {{ $hero ? 'end-4' : 'end-2.5' }} my-auto flex {{ $hero ? 'h-6' : 'h-5' }} items-center rounded border border-gray-200 px-1.5 font-mono text-[10px] text-gray-400 dark:border-white/15">/</kbd>
+         class="pointer-events-none absolute inset-y-0 {{ $hero ? 'end-4' : 'end-2.5' }} my-auto flex {{ $hero ? 'h-6' : 'h-5' }} items-center rounded border border-gray-200 px-1.5 font-mono text-[10px] text-gray-600 dark:text-gray-400 dark:border-white/15">/</kbd>
 
     <button type="button"
             data-role="clear"

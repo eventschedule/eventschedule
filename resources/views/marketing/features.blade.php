@@ -1288,7 +1288,7 @@
                     <div class="border-gray-200 ltr:border-l ltr:pl-4 rtl:border-r rtl:pr-4 dark:border-white/10" data-reveal>
                         <dt class="flex flex-wrap items-center gap-2">
                             @if ($alsoPath)
-                                <a href="{{ marketing_url($alsoPath) }}" class="text-sm font-semibold text-blue-700 underline decoration-blue-300 underline-offset-4 transition-colors hover:text-blue-600 dark:text-blue-400 dark:decoration-blue-500/50">{{ $alsoName }}</a>
+                                <a href="{{ marketing_url($alsoPath) }}" class="inline-flex min-h-[24px] items-center text-sm font-semibold text-blue-700 underline decoration-blue-300 underline-offset-4 transition-colors hover:text-blue-600 dark:text-blue-400 dark:decoration-blue-500/50">{{ $alsoName }}</a>
                             @else
                                 <span class="text-sm font-semibold text-gray-900 dark:text-white">{{ $alsoName }}</span>
                             @endif
