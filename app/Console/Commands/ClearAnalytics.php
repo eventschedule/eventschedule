@@ -6,6 +6,7 @@ use App\Models\AnalyticsAppearancesDaily;
 use App\Models\AnalyticsDaily;
 use App\Models\AnalyticsEventsDaily;
 use App\Models\AnalyticsLocationsDaily;
+use App\Models\AnalyticsMissingDaily;
 use App\Models\AnalyticsPromotionsDaily;
 use App\Models\AnalyticsReferrersDaily;
 use App\Models\AnalyticsSocialClicksDaily;
@@ -80,7 +81,16 @@ class ClearAnalytics extends Command
         PromotionLocationsDaily::truncate();
         $this->line("Deleted {$promoLocationsCount} promotion location records.");
 
-        $total = $dailyCount + $eventsCount + $appearancesCount + $referrersCount + $utmCount + $socialClicksCount + $locationsCount + $promotionsCount + $promoLocationsCount;
+        // The missed-address log. Easy to forget because a hard role delete already cleans it up
+        // (its role_id is a cascading FK, which the older analytics tables above do not have), but
+        // this command promises to delete ALL analytics data - and this is the one table whose
+        // contents a visitor controls: AnalyticsMissingDaily::record() stores whatever slug was
+        // typed. It is therefore the table an operator is most likely to want emptied.
+        $missingCount = AnalyticsMissingDaily::count();
+        AnalyticsMissingDaily::truncate();
+        $this->line("Deleted {$missingCount} missing address records.");
+
+        $total = $dailyCount + $eventsCount + $appearancesCount + $referrersCount + $utmCount + $socialClicksCount + $locationsCount + $promotionsCount + $promoLocationsCount + $missingCount;
         $this->info("All analytics data cleared. Total records deleted: {$total}");
 
         return 0;

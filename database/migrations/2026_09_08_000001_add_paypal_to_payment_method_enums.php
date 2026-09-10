@@ -10,8 +10,15 @@ return new class extends Migration
      *
      * MODIFY replaces the whole column definition, so each statement restates its own enum in full -
      * and the two are NOT the same list. `sales` carries 'rsvp', 'import' and 'box_office' that
-     * `events` has no use for, and it is nullable where `events` is not. Copying one line onto the
-     * other silently drops those members and orphans every RSVP, imported and box-office row.
+     * `events` has no use for. Copying one line onto the other silently drops those members and
+     * orphans every RSVP, imported and box-office row.
+     *
+     * NEITHER column is NOT NULL, despite both starting that way in 2025_01_05_113546_add_stripe.
+     * MODIFY replaces the whole definition, and 2025_06_24_075408_add_payment_url_to_users_table
+     * re-declared both with `DEFAULT 'cash'` and no `NOT NULL` - which dropped the constraint on
+     * every install that ran it. 2026_08_17_000001 repeated that shape, and so does this file. Do
+     * not "correct" the SQL by adding NOT NULL: that ALTER would fail, or zero-fill, on any install
+     * holding a NULL payment_method.
      *
      * Appended at the END of each list: that keeps every existing 1-based ordinal where it was, so
      * MySQL performs the change INPLACE as metadata only and the payment_method index survives.

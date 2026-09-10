@@ -35,7 +35,12 @@ trait RendersGuestNotFound
 
         return response()->view('role.not-found', [
             'role' => $role,
-            'homeUrl' => $role->getCanonicalUrl(),
+            // getCanonicalUrl() -> getGuestUrl(), which returns '' for a schedule failing
+            // isClaimed() - and role/not-found.blade.php renders it straight into href="", which
+            // just reloads the 404. That is not a corner case any more: this release gives
+            // auto-created, unclaimed schedules real public pages, and photoGallery() reaches here
+            // for exactly those. app_url() at least lands the visitor somewhere real.
+            'homeUrl' => $role->getCanonicalUrl() ?: app_url(),
         ], 404);
     }
 

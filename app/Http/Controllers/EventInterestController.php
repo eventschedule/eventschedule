@@ -60,7 +60,7 @@ class EventInterestController extends Controller
         // rather than an error status: the caller throws a generic failure on !response.ok and only
         // renders data.message on a 200.
         if (HoneypotUtils::isTripped($request)) {
-            return $this->respond($request, __('messages.invalid_request'), false);
+            return $this->respond($request, __('messages.invalid_request'), false, $subdomain);
         }
 
         // Validated by hand rather than $request->validate(). A ValidationException redirects back
@@ -88,7 +88,7 @@ class EventInterestController extends Controller
 
         if ($validator->fails()) {
             return $this->respond($request, $validator->errors()->first('email')
-                ?: __('messages.invalid_request'), false);
+                ?: __('messages.invalid_request'), false, $subdomain);
         }
 
         $role = Role::subdomain($subdomain)->firstOrFail();
@@ -118,19 +118,19 @@ class EventInterestController extends Controller
         // it, so without this a direct POST could create a row on an event whose page never offers
         // the form.
         if ($event->is_cancelled || $event->is_hidden_from_discovery) {
-            return $this->respond($request, __('messages.invalid_request'), false);
+            return $this->respond($request, __('messages.invalid_request'), false, $subdomain);
         }
 
         $eventDate = $this->resolveDate($event, $request->input('event_date'));
 
         if ($eventDate === false) {
-            return $this->respond($request, __('messages.invalid_request'), false);
+            return $this->respond($request, __('messages.invalid_request'), false, $subdomain);
         }
 
         // A past occurrence would sit in the organizer's demand count for ever and can never
         // produce a send, so it is not a thing to collect an address against.
         if ($this->hasPassed($event, $eventDate)) {
-            return $this->respond($request, __('messages.invalid_request'), false);
+            return $this->respond($request, __('messages.invalid_request'), false, $subdomain);
         }
 
         $email = strtolower(trim($request->email));
@@ -143,7 +143,7 @@ class EventInterestController extends Controller
 
         if (RateLimiter::tooManyAttempts($rateKey, self::PER_EMAIL_HOURLY_LIMIT)
             || RateLimiter::tooManyAttempts($eventKey, self::PER_EVENT_DAILY_LIMIT)) {
-            return $this->respond($request, __('messages.event_interest_confirmed'), true);
+            return $this->respond($request, __('messages.event_interest_confirmed'), true, $subdomain);
         }
 
         try {
@@ -175,18 +175,18 @@ class EventInterestController extends Controller
                 RateLimiter::hit($rateKey, 3600);
                 RateLimiter::hit($eventKey, 86400);
 
-                return $this->respond($request, __('messages.event_interest_confirmed'), true);
+                return $this->respond($request, __('messages.event_interest_confirmed'), true, $subdomain);
             }
 
             report($e);
 
-            return $this->respond($request, __('messages.invalid_request'), false);
+            return $this->respond($request, __('messages.invalid_request'), false, $subdomain);
         }
 
         RateLimiter::hit($rateKey, 3600);
         RateLimiter::hit($eventKey, 86400);
 
-        return $this->respond($request, __('messages.event_interest_confirmed'), true);
+        return $this->respond($request, __('messages.event_interest_confirmed'), true, $subdomain);
     }
 
     /**
@@ -305,13 +305,21 @@ class EventInterestController extends Controller
      * at somebody who mistyped an address. RoleSubscriberController::respond() carries the same
      * guard and the same reasoning.
      */
-    private function respond(Request $request, string $message, bool $success)
+    private function respond(Request $request, string $message, bool $success, ?string $subdomain = null)
     {
         if ($request->expectsJson()) {
             return response()->json(['success' => $success, 'message' => $message]);
         }
 
-        $back = back(302)->withFragment('event-interest');
+        // An explicit fallback, matching RoleSubscriberController::store(). back() alone resolves
+        // to '/' wherever url()->previous() cannot - no Referer, an expired session, some in-app
+        // browsers - and on selfhost '/' is the login screen, so a submission that SUCCEEDED would
+        // land the visitor on a sign-in page with the success flash lost along with the fragment.
+        $fallback = $subdomain
+            ? custom_domain_url(route('role.view_guest', ['subdomain' => $subdomain]))
+            : app_url();
+
+        $back = back(302, [], $fallback)->withFragment('event-interest');
 
         if ($success) {
             return $back->with('interest_message', $message);
