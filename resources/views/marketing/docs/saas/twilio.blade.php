@@ -47,7 +47,7 @@
                     <tr>
                         <td><strong class="text-gray-900 dark:text-white">WhatsApp event creation</strong></td>
                         <td>An organizer sends a text message or a flyer photo to your Twilio number and AI turns it into an event on their default schedule</td>
-                        <td>Enterprise plan, a verified account phone (so hosted deployments), plus an AI key</td>
+                        <td>Enterprise plan, a verified phone number on the sender's account, plus an AI key. On a selfhosted install every schedule counts as Enterprise, and a saved profile phone number counts as verified straight away, with no SMS round trip</td>
                     </tr>
                 </tbody>
             </table>

@@ -64,6 +64,24 @@ class WhatsAppWebhookController extends Controller
             return response($twiml, 200)->header('Content-Type', 'text/xml');
         }
 
+        // Every page that describes this feature sells it as Enterprise, and this webhook is the
+        // only way in, so the plan is checked here. Selfhost is unaffected: isEnterprise() is
+        // always true there.
+        if (! $role->isEnterprise()) {
+            WhatsAppService::sendMessage($phone, __('messages.whatsapp_requires_enterprise'));
+
+            return response($twiml, 200)->header('Content-Type', 'text/xml');
+        }
+
+        // The same daily AI parse allowance the import screen checks in EventController. Usage is
+        // recorded inside GeminiUtils::parseEvent(), so a message sent here counts against it too.
+        // Checked before the image download so an exhausted allowance costs no Twilio fetch.
+        if (! $role->canMakeAiParseRequest()) {
+            WhatsAppService::sendMessage($phone, __('messages.ai_text_daily_limit_reached', ['limit' => $role->aiParseDailyLimit()]));
+
+            return response($twiml, 200)->header('Content-Type', 'text/xml');
+        }
+
         $body = trim($request->input('Body', ''));
         $numMedia = (int) $request->input('NumMedia', 0);
         $file = null;
