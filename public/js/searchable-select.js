@@ -666,11 +666,19 @@
         }
     });
 
-    if (document.body) {
-        bodyObserver.observe(document.body, { childList: true, subtree: true });
+    // Wait on readyState, like initAll above. This file is deferred, so parsing is already done:
+    // a null body means something removed <body> or moved it out from under <html>, and
+    // observe(null) throws (EVENTSCHEDULE-JS-39). Watch the root instead.
+    function observeDocument() {
+        var root = document.body || document.documentElement;
+        if (root) {
+            bodyObserver.observe(root, { childList: true, subtree: true });
+        }
+    }
+
+    if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', observeDocument);
     } else {
-        document.addEventListener('DOMContentLoaded', function() {
-            bodyObserver.observe(document.body, { childList: true, subtree: true });
-        });
+        observeDocument();
     }
 })();
