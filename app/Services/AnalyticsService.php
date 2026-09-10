@@ -556,7 +556,7 @@ class AnalyticsService
      * Get IDs of events whose private data (revenue, sales, check-ins) is
      * visible to this user, scoped to the given role set. Events attached
      * via a curator role are excluded unless the curator also created the
-     * event — curators that only list/promote an event don't own the
+     * event - curators that only list/promote an event don't own the
      * creator's private data.
      */
     protected function ownedEventIdsForRoles(User $user, Collection $roleIds): Collection
@@ -722,6 +722,7 @@ class AnalyticsService
         $emptyStats = [
             'total_views' => 0,
             'total_sales' => 0,
+            'conversion_sales' => 0,
             'conversion_rate' => 0,
             'total_revenue' => 0,
             'total_revenue_by_currency' => [],
@@ -751,12 +752,18 @@ class AnalyticsService
             return $emptyStats;
         }
 
+        // toBase(): read the sums off a plain row, not a model. AnalyticsEventsDaily has a
+        // getTotalViewsAttribute() accessor that adds up the four per-device columns, and on a
+        // model it shadowed the summed total_views alias. Those columns are not selected here, so
+        // the accessor returned 0: the conversion rate read 0% and revenue per view a dash on
+        // every schedule.
         $stats = AnalyticsEventsDaily::select(
             DB::raw('SUM(desktop_views + mobile_views + tablet_views + unknown_views) as total_views'),
             DB::raw('SUM(promo_sales_count) as promo_sales')
         )
             ->forEvents($eventIds)
             ->inDateRange($start, $end)
+            ->toBase()
             ->first();
 
         $revenueByCurrency = $this->salesByCurrency($eventIds, $start, $end, 'payment_amount');
@@ -771,12 +778,23 @@ class AnalyticsService
         // reason: one checkout writes a row per named guest and a row per event in a cart, so a
         // plain count reported a single purchase as four and inflated conversion_rate with it.
         // The two figures sit side by side on the analytics page and used to disagree.
-        $totalSales = (int) Sale::whereIn('event_id', $eventIds->toArray())
+        $paidSales = Sale::whereIn('event_id', $eventIds->toArray())
             ->where('status', 'paid')
             ->where('is_deleted', false)
-            ->whereBetween('created_at', [$start, $end])
+            ->whereBetween('created_at', [$start, $end]);
+        $purchases = DB::raw('COALESCE(sales.order_id, sales.group_id, sales.id)');
+
+        $totalSales = (int) (clone $paidSales)->distinct()->count($purchases);
+
+        // The conversion rate is event page views turning into purchases, and an appointment
+        // booking is not bought from an event page, so it is left out of the numerator (counted,
+        // it inflated the rate). It stays in total_sales, which gates the Revenue cards and sits
+        // beside the revenue figure on the dashboard, and in the revenue figures themselves.
+        // Same rule as the check-in dashboard (CheckInController::index).
+        $conversionSales = (int) (clone $paidSales)
+            ->whereHas('event', fn ($q) => $q->whereNull('events.appointment_type_id'))
             ->distinct()
-            ->count(DB::raw('COALESCE(sales.order_id, sales.group_id, sales.id)'));
+            ->count($purchases);
 
         $totalViews = (int) ($stats->total_views ?? 0);
         $totalRevenue = (float) array_sum(array_column($revenueByCurrency, 'amount'));
@@ -794,7 +812,8 @@ class AnalyticsService
         return [
             'total_views' => $totalViews,
             'total_sales' => $totalSales,
-            'conversion_rate' => $totalViews > 0 ? round(($totalSales / $totalViews) * 100, 2) : 0,
+            'conversion_sales' => $conversionSales,
+            'conversion_rate' => $totalViews > 0 ? round(($conversionSales / $totalViews) * 100, 2) : 0,
             'total_revenue' => $totalRevenue,
             'total_revenue_by_currency' => $revenueByCurrency,
             'currency_count' => $currencyCount,
@@ -1357,10 +1376,16 @@ class AnalyticsService
         //
         // is_deleted matches getConversionStats(): a deleted sale was still counting toward
         // total_sold and dragging the attendance rate down with it.
+        //
+        // Appointment bookings are left out, as on the check-in dashboard (CheckInController). A
+        // booking is a paid sale with a sale ticket, but nobody scans a booking at a door, so each
+        // one read as a no-show and a schedule that takes bookings showed a meaningless attendance
+        // rate. The filter is on the query, so the single-event path gets it too.
         $saleTickets = SaleTicket::whereHas('sale', function ($q) use ($eventIds, $start, $eventDateEnd) {
             $q->whereIn('event_id', $eventIds)
                 ->where('status', 'paid')
                 ->where('is_deleted', false)
+                ->whereHas('event', fn ($e) => $e->whereNull('events.appointment_type_id'))
                 ->where('event_date', '>=', $start->toDateString())
                 ->when($eventDateEnd, fn ($q2) => $q2->where('event_date', '<=', $eventDateEnd->toDateString()));
         })

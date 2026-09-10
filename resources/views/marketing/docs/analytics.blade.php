@@ -239,7 +239,7 @@
 
         <div class="doc-callout doc-callout-info">
             <div class="doc-callout-title">Note</div>
-            <p><a href="{{ route('marketing.docs.tickets') }}" class="doc-link">Selling tickets</a> is free up to 25 paid tickets per calendar month per schedule, so the Revenue tab works on the Free plan; Pro removes the monthly cap. The Boost Funnel below is the one part of this tab that needs Pro, because boost campaigns are a Pro feature. Paid <a href="{{ route('marketing.docs.appointments') }}" class="doc-link">appointment bookings</a> are sales too, so they count here alongside tickets.</p>
+            <p><a href="{{ route('marketing.docs.tickets') }}" class="doc-link">Selling tickets</a> is free up to 25 paid tickets per calendar month per schedule, so the Revenue tab works on the Free plan; Pro removes the monthly cap. The Boost Funnel below is the one part of this tab that needs Pro, because boost campaigns are a Pro feature. Paid <a href="{{ route('marketing.docs.appointments') }}" class="doc-link">appointment bookings</a> are sales too, so they count in the revenue figures here alongside tickets. They are left out of the conversion rate, because a booking is not made from an event page.</p>
         </div>
 
         <h3 id="revenue-stats" class="doc-subheading">Stats Cards</h3>
@@ -261,7 +261,7 @@
                     </tr>
                     <tr>
                         <td><span class="font-semibold text-gray-900 dark:text-white">Conversion Rate</span></td>
-                        <td>Completed sales as a percentage of event page views in the same period. Free registrations and zero-price tickets are completed sales, so they raise this rate without raising revenue.</td>
+                        <td>Completed sales as a percentage of event page views in the same period. Free registrations and zero-price tickets are completed sales, so they raise this rate without raising revenue. Appointment bookings are left out, because they are not made from an event page; their money still counts in Total Revenue.</td>
                     </tr>
                     <tr>
                         <td><span class="font-semibold text-gray-900 dark:text-white">Revenue per View</span></td>
@@ -304,12 +304,12 @@
             Check-Ins <x-doc-badge plan="free" />
         </h2>
         <p class="text-gray-600 dark:text-gray-300 mb-4">
-            The Check-Ins tab turns door scans into attendance analytics: how many ticket holders actually showed up, when they arrived, and which events and ticket types had the best turnout. It reads paid sales only, leaves out deleted ones, and groups them by the <strong>event date</strong> the ticket is for.
+            The Check-Ins tab turns door scans into attendance analytics: how many ticket holders actually showed up, when they arrived, and which events and ticket types had the best turnout. It reads paid sales only, leaves out deleted ones and appointment bookings, and groups them by the <strong>event date</strong> the ticket is for.
         </p>
 
         <div class="doc-callout doc-callout-info">
             <div class="doc-callout-title">Note</div>
-            <p>Attendance comes from scanning tickets with the <a href="{{ route('marketing.docs.tickets') }}#check-in" class="doc-link">check-in feature</a>, which is free on every plan. Without a scan a ticket counts as sold but never as attended, so an unscanned event reads as 100% no-shows rather than as missing data. Appointment bookings are sales too and are never scanned, so on a schedule that takes bookings they show here as no-shows; pick a single event for a clean attendance rate.</p>
+            <p>Attendance comes from scanning tickets with the <a href="{{ route('marketing.docs.tickets') }}#check-in" class="doc-link">check-in feature</a>, which is free on every plan. Without a scan a ticket counts as sold but never as attended, so an unscanned event reads as 100% no-shows rather than as missing data. Appointment bookings are left out of this tab, since nobody scans a booking at a door, so a schedule that takes bookings keeps a clean attendance rate.</p>
         </div>
 
         <h3 id="checkins-stats" class="doc-subheading">Stats Cards</h3>
@@ -377,7 +377,7 @@
             <li>You have only been checking the page yourself while signed in. Your own visits, and those of your team members and site administrators, are never counted.</li>
             <li>Your only traffic so far came through an embedded calendar, which is not counted, or from bots, which are filtered out.</li>
             <li>On the Revenue tab, no sale was completed in the range. If you see a conversion rate but no revenue, your sales were free registrations or zero-price tickets.</li>
-            <li>On the Check-Ins tab, no paid ticket or registration exists for an event dated in the range. Scans are not needed for the tab to fill in; remember it filters by event date.</li>
+            <li>On the Check-Ins tab, no paid ticket or registration exists for an event dated in the range. Appointment bookings do not count here, and scans are not needed for the tab to fill in; remember it filters by event date.</li>
             <li>You expected views on an event whose address is wrong. An address that matches no event opens a not-found page, and its visits appear under <a href="#web-broken-links" class="doc-link">Broken links</a> rather than on any event.</li>
         </ul>
         <p class="text-gray-600 dark:text-gray-300 mb-4">
