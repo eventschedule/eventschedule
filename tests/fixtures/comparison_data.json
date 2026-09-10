@@ -3,8 +3,9 @@
         "name": "Eventbrite",
         "key": "eventbrite",
         "slug": "eventbrite-alternative",
+        "meta_title": "Eventbrite Alternative With 0% Platform Fees | Event Schedule",
         "tagline": "A simpler, more affordable alternative to Eventbrite with zero platform fees.",
-        "description": "Compare Event Schedule with Eventbrite to keep 100% of your ticket revenue: zero platform fees vs 3.7% + $1.79 per ticket, plus open source and AI tools.",
+        "description": "Compare Event Schedule with Eventbrite: zero platform fees instead of 3.7% + $1.79 a ticket, payouts to your own Stripe or PayPal account, and an importer.",
         "keywords": "eventbrite alternative, eventbrite alternative free, free event platform, no platform fees ticketing, eventbrite competitor",
         "about": "Eventbrite is one of the largest event ticketing platforms, widely used for conferences, festivals, and community events. It offers a comprehensive suite of tools for event promotion and ticket sales.",
         "competitor_strengths": [
@@ -34,8 +35,8 @@
                 ],
                 [
                     "Payment processing",
-                    "Stripe (2.9% + $0.30)",
-                    "Built-in (included above)",
+                    "Stripe/PayPal/Payfast (processor rates apply)",
+                    "Built-in (2.9% per order, on top)",
                     false
                 ]
             ],
@@ -186,13 +187,13 @@
             "Unique Features": [
                 [
                     "AI suite (event parsing, flyer gen, style gen)",
-                    "Yes (Enterprise)",
+                    "Parsing on Free, flyer and style on Enterprise",
                     "No",
                     true
                 ],
                 [
                     "Event graphics gen",
-                    "Yes (Pro)",
+                    "Yes (Free)",
                     "No",
                     true
                 ],
@@ -267,8 +268,8 @@
                 [
                     "Webhooks",
                     "Yes (Pro)",
-                    "No",
-                    true
+                    "Yes",
+                    false
                 ],
                 [
                     "Open source",
@@ -287,7 +288,7 @@
         "key_advantages": [
             {
                 "title": "0% Platform Fees",
-                "description": "Eventbrite charges 3.7% + $1.79 per ticket. With Event Schedule, you keep 100% of your revenue minus standard Stripe processing.",
+                "description": "Eventbrite charges 3.7% + $1.79 per ticket, plus 2.9% payment processing per order. With Event Schedule, you keep your revenue minus Stripe or PayPal processing.",
                 "icon": "dollar",
                 "gradient": "from-emerald-50 to-teal-50 dark:from-emerald-900/30 dark:to-teal-900/30",
                 "border": "border-emerald-200 dark:border-emerald-500/20",
@@ -296,7 +297,7 @@
             },
             {
                 "title": "Custom Domain",
-                "description": "Use your own domain for your event pages. Eventbrite does not offer custom domain support at any price.",
+                "description": "Use your own domain for your event pages, on Enterprise. Eventbrite does not offer custom domain support at any price.",
                 "icon": "globe",
                 "gradient": "from-sky-50 to-cyan-50 dark:from-sky-900/30 dark:to-cyan-900/30",
                 "border": "border-sky-200 dark:border-sky-500/20",
@@ -305,7 +306,7 @@
             },
             {
                 "title": "AI Event Parsing",
-                "description": "Paste event details in any format and our AI extracts all the details automatically. Unique to Event Schedule.",
+                "description": "Paste event details in any format, or upload a flyer, and the parser fills in the event for you to check. Fifty a day on the free and Pro plans.",
                 "icon": "ai",
                 "gradient": "from-teal-50 to-emerald-50 dark:from-teal-900/30 dark:to-emerald-900/30",
                 "border": "border-teal-200 dark:border-teal-500/20",
@@ -323,7 +324,7 @@
             },
             {
                 "title": "Calendar Sync",
-                "description": "Two-way Google Calendar and CalDAV sync included free. Eventbrite lacks native two-way calendar sync.",
+                "description": "Two-way Google, Outlook and CalDAV sync included free. Eventbrite lacks native two-way calendar sync.",
                 "icon": "calendar",
                 "gradient": "from-amber-50 to-yellow-50 dark:from-amber-900/30 dark:to-yellow-900/30",
                 "border": "border-amber-200 dark:border-amber-500/20",
@@ -332,7 +333,7 @@
             },
             {
                 "title": "Eventbrite Auto-Import",
-                "description": "Connect your Eventbrite account and import all your events in one click. Event details, tickets, venues, and images are transferred automatically.",
+                "description": "Connect your Eventbrite account and import all your events in one click. Event details, tickets, venues, and images are transferred automatically. On Pro.",
                 "icon": "import",
                 "gradient": "from-cyan-50 to-sky-50 dark:from-cyan-900/30 dark:to-sky-900/30",
                 "border": "border-cyan-200 dark:border-cyan-500/20",
@@ -379,12 +380,14 @@
             ]
         },
         "why_choose": {
-            "summary": "Event Schedule gives you everything Eventbrite offers for ticketing, plus features Eventbrite lacks, all without platform fees eating into your revenue.",
+            "summary": "Event Schedule sells, scans and refunds tickets without taking a platform fee on any of them, and adds what Eventbrite does not have: your own domain, open source code and two-way calendar sync.",
             "points": [
                 "Zero platform fees vs Eventbrite's 3.7% + $1.79 per ticket",
-                "One-click Eventbrite import brings your events, tickets, and venues over automatically",
-                "Custom domains and full branding control that Eventbrite doesn't offer at any price",
-                "AI-powered event parsing, flyer generation, and two-way sync with Google, Outlook and CalDAV"
+                "The Eventbrite importer (Pro) brings your events across with their ticket types, venues and images",
+                "Your own domain (Enterprise) and no Event Schedule branding (Pro), which Eventbrite does not offer at any price",
+                "AI event parsing on every plan, and two-way sync with Google, Outlook and CalDAV",
+                "Stripe or PayPal checkout into your own account, one cart across several events, and refunds from the Sales page",
+                "Reserved seating with a seat map on Enterprise, and an interest list that emails people when tickets go on sale"
             ]
         },
         "switch_steps": [
@@ -401,8 +404,8 @@
                 "description": "Export your Eventbrite attendees and paste them in or upload a CSV, up to ten thousand rows, on any plan."
             },
             {
-                "title": "Connect Stripe and sell",
-                "description": "Payouts land in your own Stripe account, with zero platform fees instead of 3.7% + $1.79 a ticket."
+                "title": "Connect Stripe or PayPal and sell",
+                "description": "Payouts land in your own Stripe or PayPal account, with zero platform fees instead of 3.7% + $1.79 a ticket."
             }
         ],
         "faq": [
@@ -416,11 +419,19 @@
             },
             {
                 "question": "How does Event Schedule pricing compare to Eventbrite?",
-                "answer": "Eventbrite charges 3.7% + $1.79 per ticket on paid events. Event Schedule charges zero platform fees at every plan level. The Pro plan is a flat $5/mo regardless of how many tickets you sell."
+                "answer": "Eventbrite's US pricing is a 3.7% + $1.79 service fee per paid ticket, plus a 2.9% payment processing fee per order. Event Schedule charges zero platform fees at every plan level, so you pay only Stripe's or PayPal's own processing. The Pro plan is a flat $5/mo regardless of how many tickets you sell."
             },
             {
                 "question": "Does Event Schedule have an event marketplace like Eventbrite?",
-                "answer": "Event Schedule focuses on giving organizers their own branded schedule pages rather than a shared marketplace. You get a dedicated URL, custom domain support, and embeddable calendar widgets to drive discovery from your own channels."
+                "answer": "Event Schedule focuses on giving organizers their own branded schedule pages rather than a shared marketplace. You get a dedicated URL (or your own domain on Enterprise), embeddable calendar widgets, a live calendar feed people can subscribe to, and an interest list on each event that emails people when tickets go on sale."
+            },
+            {
+                "question": "Can I refund a ticket buyer?",
+                "answer": "Yes, from the Sales page, on every plan. A Stripe or PayPal sale can be refunded in full or in part, and the money goes back through the provider before the sale changes status. A partial refund keeps the tickets valid and shows how much has gone back so far; a full refund returns the tickets to sale. A sale paid another way, such as cash, is marked as refunded instead, because no money moves through us."
+            },
+            {
+                "question": "Does Event Schedule do reserved seating?",
+                "answer": "Yes, on the Enterprise plan. A venue schedule draws its room once, with sections, rows, tables, standing areas and wheelchair spaces, and buyers pick their seats from the map at checkout. A box office view handles holds, phone bookings and seat moves. On Free and Pro, ticket types have a name, a price and a quantity, without assigned seats."
             }
         ]
     },
@@ -428,8 +439,9 @@
         "name": "Luma",
         "key": "luma",
         "slug": "luma-alternative",
-        "tagline": "A powerful open source alternative to Luma at a fraction of the price.",
-        "description": "Compare Event Schedule with Luma. Get custom domains, zero platform fees, and open source flexibility for $5/mo instead of $59/mo.",
+        "meta_title": "Luma Alternative, Open Source With 0% Fees | Event Schedule",
+        "tagline": "An open source alternative to Luma with zero platform fees, on the free plan too.",
+        "description": "Compare Event Schedule with Luma: zero platform fees even on the free plan, where Luma takes 5%, open source code, and Pro at $5/mo, not $59/mo.",
         "keywords": "luma alternative, luma alternative open source, lu.ma alternative, event platform comparison, luma competitor",
         "about": "Luma (lu.ma) is a modern event platform popular with tech communities and creators. It offers sleek event pages, built-in video streaming, and community features.",
         "competitor_strengths": [
@@ -459,7 +471,7 @@
                 ],
                 [
                     "Payment processing",
-                    "Stripe (2.9% + $0.30)",
+                    "Stripe/PayPal/Payfast (processor rates apply)",
                     "Stripe (2.9% + $0.30)",
                     false
                 ]
@@ -510,8 +522,8 @@
                 [
                     "Recurring events",
                     "Yes (Free)",
-                    "Yes",
-                    false
+                    "Clone only, no repeating series",
+                    true
                 ],
                 [
                     "Online events",
@@ -534,8 +546,8 @@
                 [
                     "Promo/discount codes",
                     "Yes (Pro)",
-                    "No",
-                    true
+                    "Yes (coupons)",
+                    false
                 ],
                 [
                     "Post-event feedback",
@@ -605,13 +617,13 @@
             "Unique Features": [
                 [
                     "AI suite (event parsing, flyer gen, style gen)",
-                    "Yes (Enterprise)",
+                    "Parsing on Free, flyer and style on Enterprise",
                     "No",
                     true
                 ],
                 [
                     "Event graphics gen",
-                    "Yes (Pro)",
+                    "Yes (Free)",
                     "No",
                     true
                 ],
@@ -636,7 +648,7 @@
                 [
                     "Private/password-protected events",
                     "Yes (Enterprise)",
-                    "No",
+                    "Unlisted only, no password",
                     true
                 ],
                 [
@@ -686,8 +698,8 @@
                 [
                     "Webhooks",
                     "Yes (Pro)",
-                    "No",
-                    true
+                    "Yes (Plus)",
+                    false
                 ],
                 [
                     "Open source",
@@ -705,8 +717,8 @@
         },
         "key_advantages": [
             {
-                "title": "12x More Affordable",
-                "description": "Event Schedule Pro costs $5/mo with a 7-day free trial. Luma Plus costs $59/mo for comparable features.",
+                "title": "$5/mo vs $59/mo",
+                "description": "Event Schedule Pro costs $5/mo with a 7-day free trial. Luma Plus costs $59/mo, billed annually, for comparable features.",
                 "icon": "dollar",
                 "gradient": "from-emerald-50 to-teal-50 dark:from-emerald-900/30 dark:to-teal-900/30",
                 "border": "border-emerald-200 dark:border-emerald-500/20",
@@ -779,21 +791,27 @@
                 "$5/month vs Luma's $59/month for premium features",
                 "Zero platform fees vs Luma's 5% on the free plan",
                 "Fully open source with selfhosting option for complete data ownership",
-                "Two-way Google Calendar and CalDAV sync included free on every plan"
+                "Two-way Google, Outlook and CalDAV sync included free on every plan",
+                "A live calendar feed your community subscribes to once, and an interest list that emails people when tickets go on sale",
+                "Stripe or PayPal checkout, with refunds from the Sales page, on every plan"
             ]
         },
         "faq": [
             {
                 "question": "Is it easy to switch from Luma to Event Schedule?",
-                "answer": "Yes. Create a free schedule and add your events manually or via AI import. Your existing audience can follow your new schedule and subscribe to updates via newsletter or calendar sync."
+                "answer": "Yes. Create a free schedule and add your events manually or via AI import. Your audience can sign up by email for an occasional digest of the new events you create, or subscribe to the schedule's live calendar feed, which needs no email address."
             },
             {
                 "question": "How does Event Schedule pricing compare to Luma?",
-                "answer": "Luma charges $59/mo for its premium plan. Event Schedule Pro is $5/mo with zero platform fees. Even the free plan includes unlimited events, two-way calendar sync, 25 paid tickets a month and newsletters."
+                "answer": "Luma Plus is $59/mo billed annually, and Luma's free plan takes a 5% platform fee on paid events. Event Schedule Pro is $5/mo with zero platform fees. Even the free plan includes unlimited events, two-way calendar sync, 25 paid tickets a month and newsletters, with no platform fee."
             },
             {
                 "question": "Does Event Schedule support virtual events like Luma?",
                 "answer": "Yes. Event Schedule supports online events with video links, descriptions, and ticketing. While Luma has built-in video streaming, Event Schedule integrates with any video platform you already use."
+            },
+            {
+                "question": "Can people be told when tickets go on sale?",
+                "answer": "Yes, free on every plan. On an event page, visitors leave an email address, with no account, and get one email when tickets go on sale, a reminder shortly before the event, and a notice if you cancel it; a change notice reaches them too when you choose to send one. Each date of a recurring event keeps its own list, and every email has a one-click unsubscribe. The event editor shows you how many people are waiting."
             }
         ]
     },
@@ -801,14 +819,15 @@
         "name": "Ticket Tailor",
         "key": "ticket-tailor",
         "slug": "ticket-tailor-alternative",
+        "meta_title": "Ticket Tailor Alternative, No Per-Ticket Fees | Event Schedule",
         "tagline": "A flat-rate alternative to Ticket Tailor with zero per-ticket fees.",
-        "description": "Compare Event Schedule with Ticket Tailor. Get zero platform fees, open source flexibility, and AI features for a flat $5/mo.",
+        "description": "Compare Event Schedule with Ticket Tailor: no per-ticket fee, Stripe or PayPal checkout, refunds and a multi-event cart, with 25 paid tickets a month free.",
         "keywords": "ticket tailor alternative, ticket tailor alternative free, ticketing platform comparison, no per-ticket fees, ticket tailor competitor",
         "about": "Ticket Tailor is an independent ticketing platform focused on affordable event ticketing. It offers a straightforward per-ticket pricing model and supports various payment processors.",
         "competitor_strengths": [
             "Simple, transparent per-ticket pricing model",
             "Supports multiple payment processors (Stripe, PayPal, Square)",
-            "Strong focus on ticketing with robust box office features"
+            "Strong focus on ticketing, with box office features"
         ],
         "sections": {
             "Pricing & Fees": [
@@ -978,13 +997,13 @@
             "Unique Features": [
                 [
                     "AI suite (event parsing, flyer gen, style gen)",
-                    "Yes (Enterprise)",
+                    "Parsing on Free, flyer and style on Enterprise",
                     "No",
                     true
                 ],
                 [
                     "Event graphics gen",
-                    "Yes (Pro)",
+                    "Yes (Free)",
                     "No",
                     true
                 ],
@@ -1088,7 +1107,7 @@
             },
             {
                 "title": "Calendar Sync",
-                "description": "Two-way Google Calendar and CalDAV sync included free. Ticket Tailor does not offer calendar sync.",
+                "description": "Two-way Google, Outlook and CalDAV sync included free. Ticket Tailor does not offer calendar sync.",
                 "icon": "calendar",
                 "gradient": "from-sky-50 to-cyan-50 dark:from-sky-900/30 dark:to-cyan-900/30",
                 "border": "border-sky-200 dark:border-sky-500/20",
@@ -1150,15 +1169,17 @@
             "summary": "Event Schedule offers flat-rate pricing instead of per-ticket fees, plus a full suite of features that go beyond pure ticketing.",
             "points": [
                 "Flat $5/month vs Ticket Tailor's per-ticket fees that scale with volume",
-                "Built-in newsletters, Google Calendar sync, and CalDAV sync included free",
-                "AI event parsing and flyer generation that pure ticketing platforms lack",
-                "Fully open source with selfhosting option for complete data control"
+                "Built-in newsletters and two-way Google, Outlook and CalDAV sync, included free",
+                "AI event parsing on every plan, and AI flyer generation on Enterprise",
+                "Fully open source with selfhosting option for complete data control",
+                "Stripe or PayPal checkout, one cart across several events, and refunds from the Sales page, free on every plan",
+                "Gift cards, passes and installment payments on Pro, and allocated seating on Enterprise"
             ]
         },
         "faq": [
             {
                 "question": "Is it easy to switch from Ticket Tailor to Event Schedule?",
-                "answer": "Yes. If you are familiar with Ticket Tailor, Event Schedule will feel natural. Create a free schedule, set up your ticket types, and connect Stripe. The ticketing workflow is straightforward and you can be selling tickets within minutes."
+                "answer": "Yes. If you are familiar with Ticket Tailor, Event Schedule will feel natural. Create a free schedule, set up your ticket types, and connect Stripe or PayPal. The ticketing workflow is straightforward and you can be selling tickets within minutes."
             },
             {
                 "question": "How does Event Schedule pricing compare to Ticket Tailor?",
@@ -1167,6 +1188,10 @@
             {
                 "question": "What does Event Schedule offer that Ticket Tailor does not?",
                 "answer": "Event Schedule is open source and supports selfhosting, giving you full control over your data. It also includes AI event import, two-way Google Calendar sync, built-in newsletters, and fan engagement features that Ticket Tailor does not offer."
+            },
+            {
+                "question": "Does Event Schedule have gift cards, passes, payment plans and seating?",
+                "answer": "Yes, each on the plan named. Gift cards, passes (festival, season, visit and membership) and installment payments, which split a ticket into monthly charges on Stripe, are on Pro. Allocated seating, where buyers pick seats from a map of the room, is on Enterprise for venue schedules. Refunds, full or partial, through Stripe or PayPal, are free on every plan."
             }
         ]
     },
@@ -1174,8 +1199,9 @@
         "name": "Google Calendar",
         "key": "google-calendar",
         "slug": "google-calendar-alternative",
+        "meta_title": "Google Calendar Alternative for Public Events | Event Schedule",
         "tagline": "A purpose-built event platform vs a general scheduling tool.",
-        "description": "Compare Event Schedule with Google Calendar. Get public event pages, ticketing, AI features, and more - everything Google Calendar wasn't designed for.",
+        "description": "Compare Event Schedule with Google Calendar: public event pages, ticket sales, a live feed your audience can subscribe to, and two-way sync with Google.",
         "keywords": "google calendar alternative, google calendar for events, event calendar platform, public event calendar, google calendar vs event platform",
         "about": "Google Calendar is a popular personal scheduling tool used by billions worldwide. It excels at managing appointments, meetings, and personal reminders with deep Google ecosystem integration. The good news? You don't have to choose - Event Schedule syncs with Google Calendar, so you can use both together.",
         "competitor_strengths": [
@@ -1225,7 +1251,7 @@
                 ],
                 [
                     "Payment processing",
-                    "Stripe (2.9% + $0.30)",
+                    "Stripe/PayPal/Payfast (processor rates apply)",
                     "No",
                     true
                 ],
@@ -1287,13 +1313,13 @@
             "Event Features": [
                 [
                     "AI suite (event parsing, flyer gen, style gen)",
-                    "Yes (Enterprise)",
+                    "Parsing on Free, flyer and style on Enterprise",
                     "No",
                     true
                 ],
                 [
                     "Event graphics gen",
-                    "Yes (Pro)",
+                    "Yes (Free)",
                     "No",
                     true
                 ],
@@ -1461,7 +1487,7 @@
             },
             {
                 "title": "Ticketing & Payments",
-                "description": "Sell tickets directly with Stripe integration and QR code check-in. Google Calendar has no payment or ticketing capabilities whatsoever.",
+                "description": "Sell tickets through your own Stripe or PayPal account, with QR check-in at the door and refunds from the Sales page. Google Calendar has no payment or ticketing capabilities whatsoever.",
                 "icon": "dollar",
                 "gradient": "from-sky-50 to-cyan-50 dark:from-sky-900/30 dark:to-cyan-900/30",
                 "border": "border-sky-200 dark:border-sky-500/20",
@@ -1522,10 +1548,11 @@
         "why_choose": {
             "summary": "Event Schedule is purpose-built for sharing events publicly with ticketing, newsletters, and custom branding - things Google Calendar was never designed for.",
             "points": [
-                "Full ticketing with QR check-ins, waitlists, and a live sales dashboard",
+                "Ticketing through your own Stripe or PayPal account from the free plan, with QR check-in at the door and refunds from the Sales page",
                 "Two-way sync with Google, Outlook and CalDAV keeps both platforms in sync automatically",
-                "Public schedule pages with custom domains, branding, and embeddable widgets",
-                "Built-in newsletters, event graphics, and AI-powered event import"
+                "Public schedule pages with embeddable widgets, and your own domain on Enterprise",
+                "Built-in newsletters, event graphics, and AI-powered event import",
+                "A live calendar feed people subscribe to once, and an interest list that emails them when tickets go on sale"
             ]
         },
         "faq": [
@@ -1535,11 +1562,15 @@
             },
             {
                 "question": "Is Event Schedule free like Google Calendar?",
-                "answer": "Event Schedule has a generous free plan that includes unlimited events, Google Calendar sync, newsletters, and team collaboration. Selling is on the free plan as well, up to 25 paid tickets a month, scanned at the door. The Pro plan at $5/mo removes that ceiling and adds the live check-in dashboard and custom branding."
+                "answer": "Event Schedule has a free plan that includes unlimited events, two-way Google Calendar sync, newsletters and a live calendar feed your audience can subscribe to. Selling is on the free plan as well, up to 25 paid tickets a month, scanned at the door. The Pro plan at $5/mo removes that ceiling and adds the live check-in dashboard and branding removal."
             },
             {
                 "question": "Can Event Schedule handle ticketing that Google Calendar cannot?",
-                "answer": "Yes. Google Calendar has no ticketing features. Event Schedule Pro includes full ticketing with QR check-ins, a live dashboard, ticket waitlists, sale notifications, and sales CSV export. All with zero platform fees."
+                "answer": "Yes. Google Calendar has no ticketing features. Event Schedule sells tickets through your own Stripe or PayPal account on every plan, 25 paid tickets a month on the free plan, each scanned at the door, with refunds from the Sales page. Pro removes the cap and adds the live check-in dashboard, ticket waitlists, sale notifications and sales CSV export, all with zero platform fees."
+            },
+            {
+                "question": "Can people subscribe to all my events in their own calendar?",
+                "answer": "Yes, free. Every schedule has a live calendar feed, offered in the sign-up panel on your schedule and event pages and in the Add to Calendar menu. Their calendar app re-reads the feed, so an added or moved date shows up without anyone sending a new invite, which a one-off download cannot do. It costs them no email address."
             }
         ]
     },
@@ -1547,8 +1578,9 @@
         "name": "Meetup",
         "key": "meetup",
         "slug": "meetup-alternative",
+        "meta_title": "Meetup Alternative for Community Events | Event Schedule",
         "tagline": "A free, open source alternative to Meetup with zero fees and full customization.",
-        "description": "Compare Event Schedule with Meetup. Get zero platform fees, custom domains, and open source flexibility without Meetup's subscription costs.",
+        "description": "Compare Event Schedule with Meetup: free community event pages, email sign-ups, a live calendar feed and ticketing with zero platform fees.",
         "keywords": "meetup alternative, meetup alternative free, free event platform, meetup competitor, community events platform",
         "about": "Meetup is a social platform for organizing and discovering local community events and groups. It connects people with shared interests through in-person and online gatherings.",
         "competitor_strengths": [
@@ -1578,7 +1610,7 @@
                 ],
                 [
                     "Payment processing",
-                    "Stripe (2.9% + $0.30)",
+                    "Stripe/PayPal/Payfast (processor rates apply)",
                     "Built-in (for paid events)",
                     false
                 ]
@@ -1712,13 +1744,13 @@
             "Unique Features": [
                 [
                     "AI suite (event parsing, flyer gen, style gen)",
-                    "Yes (Enterprise)",
+                    "Parsing on Free, flyer and style on Enterprise",
                     "No",
                     true
                 ],
                 [
                     "Event graphics gen",
-                    "Yes (Pro)",
+                    "Yes (Free)",
                     "No",
                     true
                 ],
@@ -1822,7 +1854,7 @@
             },
             {
                 "title": "Own Your Community",
-                "description": "On Meetup, your members belong to Meetup - not you. With Event Schedule, your audience is yours. Use your own domain, branding, and newsletter list.",
+                "description": "On Meetup, your members belong to Meetup - not you. With Event Schedule, your audience is yours: your own branding and newsletter list, and your own domain on Enterprise.",
                 "icon": "globe",
                 "gradient": "from-sky-50 to-cyan-50 dark:from-sky-900/30 dark:to-cyan-900/30",
                 "border": "border-sky-200 dark:border-sky-500/20",
@@ -1883,7 +1915,7 @@
         "faq": [
             {
                 "question": "Is it easy to switch from Meetup to Event Schedule?",
-                "answer": "Yes. Create a free schedule and add your recurring or one-time events. Share your schedule URL with your community. Event Schedule supports recurring events and newsletters to keep your group engaged."
+                "answer": "Yes. Create a free schedule and add your recurring or one-time events, then share its URL with your community. Members can sign up by email for a digest of the new events you create or subscribe to your live calendar feed, and newsletters keep the group engaged between meetups."
             },
             {
                 "question": "How does Event Schedule pricing compare to Meetup?",
@@ -1892,6 +1924,10 @@
             {
                 "question": "Can Event Schedule handle community events and recurring meetups?",
                 "answer": "Yes. Event Schedule supports recurring events, fan engagement features like videos and comments, newsletters with A/B testing, and embeddable calendar widgets. All designed for building and maintaining community."
+            },
+            {
+                "question": "How will my members hear about new events?",
+                "answer": "People who sign up by email and confirm get an occasional digest of the new public events you create, at most one every 72 hours per schedule. Anyone can subscribe to your live calendar feed, which needs no email address and updates itself when a date moves. On a single event, the interest list emails people when tickets go on sale, reminds them before it starts and tells them if it is cancelled. Newsletters you write reach whoever you choose, within your plan's monthly recipient allowance."
             }
         ]
     },
@@ -1899,8 +1935,9 @@
         "name": "DICE",
         "key": "dice",
         "slug": "dice-alternative",
+        "meta_title": "DICE Alternative With Zero Platform Fees | Event Schedule",
         "tagline": "A transparent, fee-free alternative to DICE for event organizers.",
-        "description": "Compare Event Schedule with DICE. Get zero platform fees, open source flexibility, and full control over your event pages.",
+        "description": "Compare Event Schedule with DICE: tickets that open in any browser, payouts to your own Stripe or PayPal account, and zero platform fees.",
         "keywords": "dice alternative, dice fm alternative, dice ticketing alternative, dice competitor, event ticketing platform",
         "about": "DICE is a mobile-first ticketing platform focused on live music, nightlife, and entertainment events. It handles ticket distribution, fan engagement, and event discovery through its app.",
         "competitor_strengths": [
@@ -1930,7 +1967,7 @@
                 ],
                 [
                     "Payment processing",
-                    "Stripe (2.9% + $0.30)",
+                    "Stripe/PayPal/Payfast (processor rates apply)",
                     "Built-in",
                     false
                 ]
@@ -2076,13 +2113,13 @@
             "Unique Features": [
                 [
                     "AI suite (event parsing, flyer gen, style gen)",
-                    "Yes (Enterprise)",
+                    "Parsing on Free, flyer and style on Enterprise",
                     "No",
                     true
                 ],
                 [
                     "Event graphics gen",
-                    "Yes (Pro)",
+                    "Yes (Free)",
                     "No",
                     true
                 ],
@@ -2180,7 +2217,7 @@
             },
             {
                 "title": "Direct Payments",
-                "description": "With DICE, they control the money and pay you later. Event Schedule connects directly to your Stripe account - funds go straight to you.",
+                "description": "With DICE, they control the money and pay you later. Event Schedule connects directly to your own Stripe or PayPal account - funds go straight to you, and refunds go back the same way.",
                 "icon": "dollar",
                 "gradient": "from-sky-50 to-cyan-50 dark:from-sky-900/30 dark:to-cyan-900/30",
                 "border": "border-sky-200 dark:border-sky-500/20",
@@ -2189,7 +2226,7 @@
             },
             {
                 "title": "Calendar Sync",
-                "description": "Two-way Google Calendar and CalDAV sync keeps your schedule always up to date. DICE has no calendar integration whatsoever.",
+                "description": "Two-way Google, Outlook and CalDAV sync keeps your schedule always up to date. DICE has no calendar integration whatsoever.",
                 "icon": "calendar",
                 "gradient": "from-teal-50 to-emerald-50 dark:from-teal-900/30 dark:to-emerald-900/30",
                 "border": "border-teal-200 dark:border-teal-500/20",
@@ -2245,11 +2282,15 @@
             },
             {
                 "question": "How does Event Schedule pricing compare to DICE?",
-                "answer": "DICE absorbs its fees into ticket prices, meaning fans pay more than your listed price. Event Schedule charges zero platform fees and connects directly to your Stripe account, so you control exactly what attendees pay."
+                "answer": "DICE absorbs its fees into ticket prices, meaning fans pay more than your listed price. Event Schedule charges zero platform fees and connects directly to your own Stripe or PayPal account, so you control exactly what attendees pay."
             },
             {
                 "question": "Does Event Schedule support music and nightlife events like DICE?",
                 "answer": "Yes. Event Schedule handles any event type including concerts, festivals, and nightlife. You get ticketing with QR check-ins, event graphics generation, and a shareable schedule page, without being locked into a single event genre."
+            },
+            {
+                "question": "Do my fans need an app to get their tickets?",
+                "answer": "No. The ticket opens in any browser, from the confirmation email or the ticket page, each with its QR code, and buyers can also add it to Google Wallet where Wallet is switched on. The free scanner reads that same code at the door."
             }
         ]
     },
@@ -2257,10 +2298,11 @@
         "name": "Brown Paper Tickets",
         "key": "brown-paper-tickets",
         "slug": "brown-paper-tickets-alternative",
+        "meta_title": "Brown Paper Tickets Alternative, 0% Fees | Event Schedule",
         "tagline": "A modern, actively developed alternative to Brown Paper Tickets.",
-        "description": "Compare Event Schedule with Brown Paper Tickets. Get zero platform fees, modern design, and reliable support.",
+        "description": "Brown Paper Tickets is being retired. Compare Event Schedule: zero platform fees, Stripe or PayPal payouts, and 25 paid tickets a month free.",
         "keywords": "brown paper tickets alternative, brown paper tickets replacement, bpt alternative, event ticketing platform, brown paper tickets competitor",
-        "about": "Brown Paper Tickets was a ticketing platform known for its low fees and focus on independent events. The platform is being retired and migrated to Events.com, with no new events for 2026 onward. Many organizers are seeking modern alternatives.",
+        "about": "Brown Paper Tickets was a ticketing platform known for its low fees and focus on independent events. Its website now says it is being retired and sends organizers to Events.com for their next event, so many are looking for a new home.",
         "competitor_strengths": [
             "Historically low per-ticket fees for organizers",
             "Long track record in the independent event space",
@@ -2288,7 +2330,7 @@
                 ],
                 [
                     "Payment processing",
-                    "Stripe (2.9% + $0.30)",
+                    "Stripe/PayPal/Payfast (processor rates apply)",
                     "Built-in",
                     false
                 ]
@@ -2434,13 +2476,13 @@
             "Unique Features": [
                 [
                     "AI suite (event parsing, flyer gen, style gen)",
-                    "Yes (Enterprise)",
+                    "Parsing on Free, flyer and style on Enterprise",
                     "No",
                     true
                 ],
                 [
                     "Event graphics gen",
-                    "Yes (Pro)",
+                    "Yes (Free)",
                     "No",
                     true
                 ],
@@ -2546,8 +2588,8 @@
                 "icon_color": "text-sky-600 dark:text-sky-400"
             },
             {
-                "title": "Fast Stripe Payouts",
-                "description": "BPT has been known for delayed payouts to organizers. Event Schedule connects directly to your Stripe account - funds go straight to you on Stripe's standard schedule.",
+                "title": "Direct Payouts",
+                "description": "BPT has been known for delayed payouts to organizers. Event Schedule connects directly to your own Stripe or PayPal account - funds go straight to you on the provider's own schedule.",
                 "icon": "dollar",
                 "gradient": "from-sky-50 to-cyan-50 dark:from-sky-900/30 dark:to-cyan-900/30",
                 "border": "border-sky-200 dark:border-sky-500/20",
@@ -2556,7 +2598,7 @@
             },
             {
                 "title": "Calendar Sync",
-                "description": "Two-way Google Calendar and CalDAV sync keeps everything in sync automatically. Brown Paper Tickets has no calendar integration at all.",
+                "description": "Two-way Google, Outlook and CalDAV sync keeps everything in sync automatically. Brown Paper Tickets has no calendar integration at all.",
                 "icon": "calendar",
                 "gradient": "from-teal-50 to-emerald-50 dark:from-teal-900/30 dark:to-emerald-900/30",
                 "border": "border-teal-200 dark:border-teal-500/20",
@@ -2603,11 +2645,15 @@
             },
             {
                 "question": "How does Event Schedule pricing compare to Brown Paper Tickets?",
-                "answer": "Brown Paper Tickets charges $0.99 + 5% per ticket as a buyer-paid service fee. Event Schedule charges zero platform fees at any plan level. The Pro plan is a flat $5/mo for unlimited ticketing with direct Stripe payouts."
+                "answer": "Brown Paper Tickets charges $0.99 + 5% per ticket as a buyer-paid service fee. Event Schedule charges zero platform fees at any plan level, and the free plan sells 25 paid tickets a month. The Pro plan is a flat $5/mo for unlimited ticketing, with payouts straight into your own Stripe or PayPal account."
             },
             {
                 "question": "Is Event Schedule actively maintained?",
                 "answer": "Yes. Brown Paper Tickets is being retired and migrated to Events.com. Event Schedule is built with a modern tech stack and receives regular updates. It is fully open source, so you can inspect the code, track development activity, and even selfhost it for complete control over your platform."
+            },
+            {
+                "question": "Can a buyer get tickets to several shows in one order?",
+                "answer": "Yes, on every plan. Tickets for several of your events go into one cart and are paid once, through Stripe or PayPal, with one order page listing every ticket."
             }
         ]
     },
@@ -2615,8 +2661,9 @@
         "name": "Splash",
         "key": "splash",
         "slug": "splash-alternative",
+        "meta_title": "Splash Alternative Without Enterprise Pricing | Event Schedule",
         "tagline": "A simpler, more affordable alternative to Splash for event marketing.",
-        "description": "Compare Event Schedule with Splash. Get zero platform fees, open source flexibility, and powerful features without enterprise pricing.",
+        "description": "Compare Event Schedule with Splash: branded event pages, registration and ticketing with zero platform fees, and published pricing with no sales call.",
         "keywords": "splash alternative, splash event marketing alternative, splash competitor, event management platform, splash replacement",
         "about": "Splash is an enterprise event marketing platform focused on branded event experiences, registration, and attendee engagement. It targets mid-to-large organizations with custom event pages and marketing automation.",
         "competitor_strengths": [
@@ -2646,7 +2693,7 @@
                 ],
                 [
                     "Payment processing",
-                    "Stripe (2.9% + $0.30)",
+                    "Stripe/PayPal/Payfast (processor rates apply)",
                     "Built-in",
                     false
                 ]
@@ -2786,13 +2833,13 @@
             "Unique Features": [
                 [
                     "AI suite (event parsing, flyer gen, style gen)",
-                    "Yes (Enterprise)",
+                    "Parsing on Free, flyer and style on Enterprise",
                     "No",
                     true
                 ],
                 [
                     "Event graphics gen",
-                    "Yes (Pro)",
+                    "Yes (Free)",
                     "No",
                     true
                 ],
@@ -2965,7 +3012,11 @@
             },
             {
                 "question": "Can Event Schedule handle corporate events like Splash?",
-                "answer": "Yes. Event Schedule supports custom domains, custom branding, team collaboration, and embeddable widgets. Enterprise features include custom CSS and API access for integration with your existing tools."
+                "answer": "Yes. Event Schedule supports custom branding, embeddable widgets, custom CSS, and a REST API with webhooks on Pro for integration with your existing tools. Custom domains and multiple team members are on Enterprise."
+            },
+            {
+                "question": "Can my team work on the same schedule?",
+                "answer": "Yes, on Enterprise, capped at five members on the hosted platform. An admin runs the schedule day to day and sees its ticket sales, waitlist and check-in dashboard; a viewer is read-only and sees no sales, but can scan tickets at the door. The free and Pro plans are one person per schedule."
             }
         ]
     },
@@ -2973,6 +3024,7 @@
         "name": "Sched",
         "key": "sched",
         "slug": "sched-alternative",
+        "meta_title": "Sched Alternative for Conference Agendas | Event Schedule",
         "tagline": "A more affordable, full-featured alternative to Sched with zero platform fees.",
         "description": "Compare Event Schedule with Sched. Get zero platform fees, calendar sync, and open source flexibility for $5/mo instead of $50+/mo.",
         "keywords": "sched alternative, sched.com alternative, conference schedule platform, event agenda alternative, sched competitor",
@@ -3004,7 +3056,7 @@
                 ],
                 [
                     "Payment processing",
-                    "Stripe (2.9% + $0.30)",
+                    "Stripe/PayPal/Payfast (processor rates apply)",
                     "Stripe (separate)",
                     false
                 ]
@@ -3144,13 +3196,13 @@
             "Unique Features": [
                 [
                     "AI suite (event parsing, flyer gen, style gen)",
-                    "Yes (Enterprise)",
+                    "Parsing on Free, flyer and style on Enterprise",
                     "No",
                     true
                 ],
                 [
                     "Event graphics gen",
-                    "Yes (Pro)",
+                    "Yes (Free)",
                     "No",
                     true
                 ],
@@ -3238,7 +3290,7 @@
         },
         "key_advantages": [
             {
-                "title": "10x More Affordable",
+                "title": "Pro at $5/mo",
                 "description": "$5/mo vs $50+/mo starting price. Get more features for a fraction of the cost.",
                 "icon": "dollar",
                 "gradient": "from-emerald-50 to-teal-50 dark:from-emerald-900/30 dark:to-teal-900/30",
@@ -3248,7 +3300,7 @@
             },
             {
                 "title": "Two-Way Calendar Sync",
-                "description": "Google Calendar and CalDAV sync included free. Sched only offers one-way iCal export.",
+                "description": "Google, Outlook and CalDAV sync included free. Sched only offers one-way iCal export.",
                 "icon": "calendar",
                 "gradient": "from-sky-50 to-cyan-50 dark:from-sky-900/30 dark:to-cyan-900/30",
                 "border": "border-sky-200 dark:border-sky-500/20",
@@ -3318,6 +3370,10 @@
             {
                 "question": "Can Event Schedule handle conference agendas like Sched?",
                 "answer": "Yes. Event Schedule supports multi-day events, sub-schedules for organizing tracks or sessions, and embeddable calendar widgets. Attendees can browse your full conference agenda from a single schedule page."
+            },
+            {
+                "question": "Can attendees buy one pass for several sessions?",
+                "answer": "Yes, on Pro. A pass admits to several events: a festival pass covers each event once, a visit pass gives a set number of visits, a membership is unlimited until it expires, and a season pass covers a recurring event, with every use tracked on the Subscriptions tab. On every plan, buyers can also put tickets for several sessions in one cart and pay once."
             }
         ]
     },
@@ -3325,6 +3381,7 @@
         "name": "Whova",
         "key": "whova",
         "slug": "whova-alternative",
+        "meta_title": "Whova Alternative With Transparent Pricing | Event Schedule",
         "tagline": "A transparent, affordable alternative to Whova with zero platform fees.",
         "description": "Compare Event Schedule with Whova. Get transparent pricing, zero platform fees, and open source flexibility without custom quotes or sales calls.",
         "keywords": "whova alternative, whova alternative free, event app alternative, whova competitor, event management platform",
@@ -3356,7 +3413,7 @@
                 ],
                 [
                     "Payment processing",
-                    "Stripe (2.9% + $0.30)",
+                    "Stripe/PayPal/Payfast (processor rates apply)",
                     "Stripe (2.9% + $0.30)",
                     false
                 ]
@@ -3496,13 +3553,13 @@
             "Unique Features": [
                 [
                     "AI suite (event parsing, flyer gen, style gen)",
-                    "Yes (Enterprise)",
+                    "Parsing on Free, flyer and style on Enterprise",
                     "No",
                     true
                 ],
                 [
                     "Event graphics gen",
-                    "Yes (Pro)",
+                    "Yes (Free)",
                     "No",
                     true
                 ],
@@ -3615,7 +3672,7 @@
             },
             {
                 "title": "Calendar Sync",
-                "description": "Two-way Google Calendar and CalDAV sync included free. Whova requires a Zapier add-on for basic calendar connections.",
+                "description": "Two-way Google, Outlook and CalDAV sync included free. Whova requires a Zapier add-on for basic calendar connections.",
                 "icon": "calendar",
                 "gradient": "from-teal-50 to-emerald-50 dark:from-teal-900/30 dark:to-emerald-900/30",
                 "border": "border-teal-200 dark:border-teal-500/20",
@@ -3675,7 +3732,11 @@
             },
             {
                 "question": "Does Event Schedule offer attendee engagement features like Whova?",
-                "answer": "Yes. Event Schedule includes fan videos and comments, newsletters with A/B testing, event polls, and post-event feedback, all built into the platform without per-event pricing."
+                "answer": "Yes. Fan videos and comments and newsletters with A/B testing are on every plan, and event polls and post-event feedback are on Pro, all without per-event pricing."
+            },
+            {
+                "question": "Can I refund an attendee?",
+                "answer": "Yes, on every plan. From the Sales page, a Stripe or PayPal sale can be refunded in full or in part and the money goes back through the provider; a partial refund keeps the ticket valid. A sale taken another way, such as cash or a payment link, is marked as refunded instead."
             }
         ]
     },
@@ -3683,8 +3744,9 @@
         "name": "Accelevents",
         "key": "accelevents",
         "slug": "accelevents-alternative",
+        "meta_title": "Accelevents Alternative With Instant Setup | Event Schedule",
         "tagline": "A simpler, more affordable alternative to Accelevents without enterprise pricing.",
-        "description": "Compare Event Schedule with Accelevents. Get zero platform fees, instant setup, and open source flexibility for $5/mo instead of $7,500+/year.",
+        "description": "Compare Event Schedule with Accelevents: a free plan, Pro at $5/mo against paid plans from $7,500, setup in minutes, and open source code you can selfhost.",
         "keywords": "accelevents alternative, accelevents alternative free, event management platform, accelevents competitor, affordable event platform",
         "about": "Accelevents is an enterprise event management platform offering in-person, virtual, and hybrid event solutions. It targets mid-to-large organizations with badge printing, CRM integrations, and white-label capabilities.",
         "competitor_strengths": [
@@ -3697,25 +3759,25 @@
                 [
                     "Free plan",
                     "Yes (forever)",
-                    "Limited (high per-ticket fees)",
+                    "No (paid plans only)",
                     true
                 ],
                 [
                     "Paid plan price",
                     "$5/mo (7-day free trial)",
-                    "From $7,000/year",
+                    "From $7,500 (Professional)",
                     true
                 ],
                 [
                     "Platform fees",
                     "0%",
-                    "$1 + 1%/ticket (paid plans)",
-                    true
+                    "No transaction fees (paid plans)",
+                    false
                 ],
                 [
                     "Payment processing",
-                    "Stripe (2.9% + $0.30)",
-                    "2.9% + $0.30",
+                    "Stripe/PayPal/Payfast (processor rates apply)",
+                    "Stripe/Square/Payflow",
                     false
                 ]
             ],
@@ -3860,13 +3922,13 @@
             "Unique Features": [
                 [
                     "AI suite (event parsing, flyer gen, style gen)",
-                    "Yes (Enterprise)",
+                    "Parsing on Free, flyer and style on Enterprise",
                     "No",
                     true
                 ],
                 [
                     "Event graphics gen",
-                    "Yes (Pro)",
+                    "Yes (Free)",
                     "No",
                     true
                 ],
@@ -3960,8 +4022,8 @@
         },
         "key_advantages": [
             {
-                "title": "$5/mo vs $7,000+/year",
-                "description": "125x more affordable for core event management features. No enterprise contracts required.",
+                "title": "$5/mo vs $7,500+",
+                "description": "Accelevents plans start from $7,500. Event Schedule starts free and Pro is billed by the month, with no enterprise contract to sign.",
                 "icon": "dollar",
                 "gradient": "from-emerald-50 to-teal-50 dark:from-emerald-900/30 dark:to-teal-900/30",
                 "border": "border-emerald-200 dark:border-emerald-500/20",
@@ -3988,7 +4050,7 @@
             },
             {
                 "title": "Calendar Sync",
-                "description": "Two-way Google Calendar and CalDAV sync included free. Accelevents only offers add-to-calendar links.",
+                "description": "Two-way Google, Outlook and CalDAV sync included free. Accelevents only offers add-to-calendar links.",
                 "icon": "calendar",
                 "gradient": "from-blue-50 to-sky-50 dark:from-blue-900/30 dark:to-sky-900/30",
                 "border": "border-blue-200 dark:border-blue-500/20",
@@ -4035,11 +4097,15 @@
             },
             {
                 "question": "How does Event Schedule pricing compare to Accelevents?",
-                "answer": "Accelevents starts at $7,000/year with additional per-ticket fees ($1 + 1%) on paid plans. Event Schedule Pro is a flat $5/mo with unlimited events and zero platform fees."
+                "answer": "Accelevents' Professional plan starts from $7,500 and Business from $13,500, with no transaction fees on those plans. Event Schedule has a free plan that sells 25 paid tickets a month, and Pro is a flat $5/mo with unlimited events and zero platform fees."
             },
             {
                 "question": "Can Event Schedule handle virtual and hybrid events like Accelevents?",
                 "answer": "Yes. Event Schedule supports online events with video links and integrates with any streaming platform. Combined with ticketing, QR check-ins, and newsletters, it covers both virtual and in-person needs."
+            },
+            {
+                "question": "Does Event Schedule do reserved seating and payment plans?",
+                "answer": "Yes. Allocated seating is on Enterprise: a venue schedule draws its room once and buyers pick seats from the map, with a box office view for holds and phone bookings. Installment payments are on Pro and run on Stripe: the buyer pays the first part at checkout, the ticket is valid at once, and the rest is charged monthly to the saved card."
             }
         ]
     },
@@ -4047,6 +4113,7 @@
         "name": "Tito",
         "key": "tito",
         "slug": "tito-alternative",
+        "meta_title": "Tito Alternative With No Per-Ticket Fee | Event Schedule",
         "tagline": "A flat-rate alternative to Tito with calendar sync, newsletters, and zero per-ticket fees.",
         "description": "Compare Event Schedule with Tito. Get flat $5/mo pricing instead of 3% per ticket, plus calendar sync, newsletters, and selfhosting.",
         "keywords": "tito alternative, ti.to alternative, tito ticketing alternative, event ticketing platform, tito competitor",
@@ -4224,13 +4291,13 @@
             "Unique Features": [
                 [
                     "AI suite (event parsing, flyer gen, style gen)",
-                    "Yes (Enterprise)",
+                    "Parsing on Free, flyer and style on Enterprise",
                     "No",
                     true
                 ],
                 [
                     "Event graphics gen",
-                    "Yes (Pro)",
+                    "Yes (Free)",
                     "No",
                     true
                 ],
@@ -4325,7 +4392,7 @@
         "key_advantages": [
             {
                 "title": "Flat-Rate Pricing",
-                "description": "$5/mo flat vs 3% per ticket. Sell 200 x $25 tickets and save $145/mo.",
+                "description": "$5/mo flat vs 3% per ticket. Sell 200 tickets at $30 and Tito's 3% comes to $180 that month.",
                 "icon": "dollar",
                 "gradient": "from-emerald-50 to-teal-50 dark:from-emerald-900/30 dark:to-teal-900/30",
                 "border": "border-emerald-200 dark:border-emerald-500/20",
@@ -4334,7 +4401,7 @@
             },
             {
                 "title": "Calendar Sync",
-                "description": "Two-way Google Calendar and CalDAV sync included free. Tito has no calendar integration.",
+                "description": "Two-way Google, Outlook and CalDAV sync included free. Tito has no calendar integration.",
                 "icon": "calendar",
                 "gradient": "from-sky-50 to-cyan-50 dark:from-sky-900/30 dark:to-cyan-900/30",
                 "border": "border-sky-200 dark:border-sky-500/20",
@@ -4352,7 +4419,7 @@
             },
             {
                 "title": "Custom Domains",
-                "description": "Use your own domain for your event pages. Tito discontinued custom domain support.",
+                "description": "Use your own domain for your event pages, on Enterprise. Tito discontinued custom domain support.",
                 "icon": "globe",
                 "gradient": "from-blue-50 to-sky-50 dark:from-blue-900/30 dark:to-sky-900/30",
                 "border": "border-blue-200 dark:border-blue-500/20",
@@ -4404,6 +4471,10 @@
             {
                 "question": "Does Event Schedule support developer-friendly features like Tito?",
                 "answer": "Yes. Event Schedule offers a REST API, webhooks, custom CSS, and is fully open source. You can selfhost it, fork it, or integrate it with your own tools and workflows."
+            },
+            {
+                "question": "Can I take PayPal as well as Stripe?",
+                "answer": "Yes, on every plan. Connect your own PayPal account in Settings > Payment Methods, next to Stripe if you like, and choose the method per event; the credentials are checked with PayPal before they are saved. Refunds, full or partial, go back through PayPal or Stripe from the Sales page. Installment plans run on Stripe only."
             }
         ]
     },
@@ -4411,8 +4482,9 @@
         "name": "AddEvent",
         "key": "addevent",
         "slug": "addevent-alternative",
+        "meta_title": "AddEvent Alternative With Ticketing Built In | Event Schedule",
         "tagline": "A complete event platform that goes beyond \"Add to Calendar\" buttons.",
-        "description": "Compare Event Schedule with AddEvent. Get ticketing, public event pages, and a full event platform for $5/mo instead of just calendar buttons at $29/mo.",
+        "description": "Compare Event Schedule with AddEvent: ticketing, public event pages and a live calendar feed, free, with Pro at $5/mo against calendar buttons at $29/mo.",
         "keywords": "addevent alternative, add to calendar alternative, addevent competitor, event calendar platform, calendar button alternative",
         "about": "AddEvent is a calendar marketing tool focused on \"Add to Calendar\" buttons, subscription calendars, and RSVP collection. It helps drive event attendance through calendar engagement but does not offer ticketing or event management features.",
         "competitor_strengths": [
@@ -4431,7 +4503,7 @@
                 [
                     "Paid plan price",
                     "$5/mo (7-day free trial)",
-                    "From $36/mo",
+                    "From $36/mo (monthly billing)",
                     true
                 ],
                 [
@@ -4442,7 +4514,7 @@
                 ],
                 [
                     "Payment processing",
-                    "Stripe (2.9% + $0.30)",
+                    "Stripe/PayPal/Payfast (processor rates apply)",
                     "N/A (no ticketing)",
                     true
                 ]
@@ -4457,8 +4529,8 @@
                 [
                     "Unlimited ticket sales",
                     "Yes (Pro)",
-                    "Yes",
-                    false
+                    "N/A (no ticketing)",
+                    true
                 ],
                 [
                     "QR check-ins",
@@ -4504,13 +4576,13 @@
                 ],
                 [
                     "Add to calendar buttons",
-                    "Via embeds",
+                    "Yes (Free)",
                     "Yes (core feature)",
                     false
                 ],
                 [
                     "Subscription calendars",
-                    "Via CalDAV/embeds",
+                    "Yes (Free)",
                     "Yes (core feature)",
                     false
                 ]
@@ -4570,13 +4642,13 @@
             "Unique Features": [
                 [
                     "AI suite (event parsing, flyer gen, style gen)",
-                    "Yes (Enterprise)",
+                    "Parsing on Free, flyer and style on Enterprise",
                     "No",
                     true
                 ],
                 [
                     "Event graphics gen",
-                    "Yes (Pro)",
+                    "Yes (Free)",
                     "No",
                     true
                 ],
@@ -4676,8 +4748,8 @@
                 "icon_color": "text-sky-600 dark:text-sky-400"
             },
             {
-                "title": "7x More Affordable",
-                "description": "$5/mo vs $36/mo, with far more features included.",
+                "title": "$5/mo vs $36/mo",
+                "description": "AddEvent Small Business is $36/mo on monthly billing, less when paid yearly, and has no ticketing. Event Schedule sells tickets from the free plan.",
                 "icon": "percent",
                 "gradient": "from-teal-50 to-emerald-50 dark:from-teal-900/30 dark:to-emerald-900/30",
                 "border": "border-teal-200 dark:border-teal-500/20",
@@ -4695,7 +4767,7 @@
             },
             {
                 "title": "Two-Way Calendar Sync",
-                "description": "Bidirectional Google Calendar and CalDAV sync. AddEvent only imports one-way.",
+                "description": "Bidirectional Google, Outlook and CalDAV sync. AddEvent only imports one-way.",
                 "icon": "calendar",
                 "gradient": "from-amber-50 to-yellow-50 dark:from-amber-900/30 dark:to-yellow-900/30",
                 "border": "border-amber-200 dark:border-amber-500/20",
@@ -4733,11 +4805,15 @@
             },
             {
                 "question": "How does Event Schedule pricing compare to AddEvent?",
-                "answer": "AddEvent charges $36/mo for its premium plan. Event Schedule Pro is $5/mo with zero platform fees. Even the free plan includes unlimited events, two-way calendar sync, 25 paid tickets a month and newsletters."
+                "answer": "AddEvent's Small Business plan is $36/mo on monthly billing, and less when paid yearly. Event Schedule Pro is $5/mo with zero platform fees. Even the free plan includes unlimited events, two-way calendar sync, 25 paid tickets a month and newsletters."
             },
             {
                 "question": "How is Event Schedule different from AddEvent?",
                 "answer": "AddEvent focuses on calendar add-to-calendar buttons and embeds. Event Schedule is a complete event management platform with ticketing, QR check-ins, newsletters, AI import, and public schedule pages."
+            },
+            {
+                "question": "Can people subscribe to my calendar, like an AddEvent subscription calendar?",
+                "answer": "Yes, free. Every schedule has a live calendar feed that visitors subscribe to from the sign-up panel or an event's Add to Calendar menu, and every event page offers Add to Calendar for a single date. Their calendar re-reads the feed, so a moved date updates itself. AddEvent remains the specialist for calendar buttons placed on other sites and in email campaigns."
             }
         ]
     },
@@ -4745,6 +4821,7 @@
         "name": "Pretix",
         "key": "pretix",
         "slug": "pretix-alternative",
+        "meta_title": "Pretix Alternative: Open Source, Flat Pricing | Event Schedule",
         "tagline": "A broader open source event platform with flat pricing and more built-in features.",
         "description": "Compare Event Schedule with Pretix. Get flat $5/mo pricing instead of per-ticket fees, plus calendar sync, newsletters, AI features, and fan engagement.",
         "keywords": "pretix alternative, pretix alternative free, open source ticketing alternative, pretix competitor, event platform open source",
@@ -4922,13 +4999,13 @@
             "Unique Features": [
                 [
                     "AI suite (event parsing, flyer gen, style gen)",
-                    "Yes (Enterprise)",
+                    "Parsing on Free, flyer and style on Enterprise",
                     "No",
                     true
                 ],
                 [
                     "Event graphics gen",
-                    "Yes (Pro)",
+                    "Yes (Free)",
                     "No",
                     true
                 ],
@@ -5032,7 +5109,7 @@
             },
             {
                 "title": "Calendar Sync",
-                "description": "Two-way Google Calendar and CalDAV sync included free. Pretix has no calendar integration.",
+                "description": "Two-way Google, Outlook and CalDAV sync included free. Pretix has no calendar integration.",
                 "icon": "calendar",
                 "gradient": "from-sky-50 to-cyan-50 dark:from-sky-900/30 dark:to-cyan-900/30",
                 "border": "border-sky-200 dark:border-sky-500/20",
@@ -5102,6 +5179,10 @@
             {
                 "question": "Is Event Schedule easier to selfhost than Pretix?",
                 "answer": "Yes. Pretix selfhosting requires Docker, PostgreSQL, Redis, and significant server administration. Event Schedule runs on standard PHP hosting with MySQL, making it accessible to a much wider range of hosting environments."
+            },
+            {
+                "question": "Does Event Schedule have seating plans?",
+                "answer": "Yes, on Enterprise, and a selfhosted install resolves to Enterprise, so seating is included when you run it yourself. A venue schedule draws its room once, with sections, rows, tables, standing areas and wheelchair spaces, and buyers pick their seats from the map. On the hosted Free and Pro plans, ticket types have a name, a price and a quantity, without assigned seats."
             }
         ]
     },
@@ -5109,6 +5190,7 @@
         "name": "Humanitix",
         "key": "humanitix",
         "slug": "humanitix-alternative",
+        "meta_title": "Humanitix Alternative With No Booking Fees | Event Schedule",
         "tagline": "Keep 100% of your ticket revenue with flat $5/mo pricing and zero platform fees.",
         "description": "Compare Event Schedule with Humanitix. Get flat $5/mo pricing instead of per-ticket fees, plus calendar sync, newsletters, AI features, and selfhosting.",
         "keywords": "humanitix alternative, humanitix alternative free, event ticketing platform, humanitix competitor, affordable event platform",
@@ -5140,7 +5222,7 @@
                 ],
                 [
                     "Payment processing",
-                    "Stripe (2.9% + $0.30)",
+                    "Stripe/PayPal/Payfast (processor rates apply)",
                     "Included in platform fee",
                     false
                 ]
@@ -5286,13 +5368,13 @@
             "Unique Features": [
                 [
                     "AI suite (event parsing, flyer gen, style gen)",
-                    "Yes (Enterprise)",
+                    "Parsing on Free, flyer and style on Enterprise",
                     "No",
                     true
                 ],
                 [
                     "Event graphics gen",
-                    "Yes (Pro)",
+                    "Yes (Free)",
                     "No",
                     true
                 ],
@@ -5396,7 +5478,7 @@
             },
             {
                 "title": "Calendar Sync",
-                "description": "Two-way Google Calendar and CalDAV sync included free. Humanitix has no calendar integration.",
+                "description": "Two-way Google, Outlook and CalDAV sync included free. Humanitix has no calendar integration.",
                 "icon": "calendar",
                 "gradient": "from-sky-50 to-cyan-50 dark:from-sky-900/30 dark:to-cyan-900/30",
                 "border": "border-sky-200 dark:border-sky-500/20",
@@ -5465,7 +5547,11 @@
             },
             {
                 "question": "Does Humanitix donate to charity while Event Schedule does not?",
-                "answer": "Humanitix donates its profits to charity, which is funded by per-ticket fees on your sales. With Event Schedule, you keep 100% of your ticket revenue (minus Stripe processing) and can donate to causes you choose directly."
+                "answer": "Humanitix donates its profits to charity, which is funded by per-ticket fees on your sales. With Event Schedule, you keep 100% of your ticket revenue (minus Stripe or PayPal processing) and can donate to causes you choose directly."
+            },
+            {
+                "question": "Can buyers pay in installments?",
+                "answer": "Yes, on Pro, with Stripe. You switch it on per event; the buyer pays the first part at checkout, the ticket is valid at once, and the rest is charged monthly to the saved card. A plan that falls behind shows a hold at the door instead of admitting the ticket, and a refund is issued payment by payment, in full."
             }
         ]
     },
@@ -5473,6 +5559,7 @@
         "name": "Eventzilla",
         "key": "eventzilla",
         "slug": "eventzilla-alternative",
+        "meta_title": "Eventzilla Alternative With No Per-Ticket Fees | Event Schedule",
         "tagline": "A flat-rate open source alternative to Eventzilla with zero per-ticket fees.",
         "description": "Compare Event Schedule with Eventzilla. Get flat $5/mo pricing instead of per-ticket fees, plus calendar sync, newsletters, AI features, and open source.",
         "keywords": "eventzilla alternative, eventzilla alternative free, event registration platform, eventzilla competitor, affordable event platform",
@@ -5650,13 +5737,13 @@
             "Unique Features": [
                 [
                     "AI suite (event parsing, flyer gen, style gen)",
-                    "Yes (Enterprise)",
+                    "Parsing on Free, flyer and style on Enterprise",
                     "No",
                     true
                 ],
                 [
                     "Event graphics gen",
-                    "Yes (Pro)",
+                    "Yes (Free)",
                     "No",
                     true
                 ],
@@ -5760,7 +5847,7 @@
             },
             {
                 "title": "Calendar Sync",
-                "description": "Two-way Google Calendar and CalDAV sync included free. Eventzilla has no calendar integration.",
+                "description": "Two-way Google, Outlook and CalDAV sync included free. Eventzilla has no calendar integration.",
                 "icon": "calendar",
                 "gradient": "from-sky-50 to-cyan-50 dark:from-sky-900/30 dark:to-cyan-900/30",
                 "border": "border-sky-200 dark:border-sky-500/20",
@@ -5829,7 +5916,11 @@
             },
             {
                 "question": "Can Event Schedule handle registration features like Eventzilla?",
-                "answer": "Yes. Event Schedule includes ticketing with custom fields, QR check-ins, a live dashboard, ticket waitlists, and sales CSV export. It also adds features Eventzilla lacks, like Google Calendar sync, newsletters, and AI event import."
+                "answer": "Yes. Ticketing and QR check-in are on every plan. Custom fields, the live check-in dashboard, ticket waitlists and sales CSV export are on Pro. It also adds features Eventzilla lacks, like two-way Google Calendar sync, newsletters and AI event import."
+            },
+            {
+                "question": "Can someone buy tickets for several events in one order?",
+                "answer": "Yes, on every plan. A buyer adds tickets for several of your events to one cart and pays once, through Stripe or PayPal, and gets one order page with every ticket on it. Paid tickets in the cart count toward the free plan's monthly allowance like any other."
             }
         ]
     }

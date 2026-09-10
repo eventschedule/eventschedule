@@ -75,7 +75,7 @@
         ];
     @endphp
 
-    <x-slot name="title">Replace {{ $shortName }} for Events | Event Schedule</x-slot>
+    <x-slot name="title">{{ $meta_title ?? 'Replace '.$shortName.' for Events | Event Schedule' }}</x-slot>
     <x-slot name="description">{{ $description }}</x-slot>
     <x-slot name="keywords">{{ $keywords }}</x-slot>
     <x-slot name="breadcrumbTitle">{{ $shortName }} Replacement</x-slot>
@@ -101,7 +101,7 @@
                 "name": "Free",
                 "price": "0",
                 "priceCurrency": "{{ platform_currency() }}",
-                "description": "Unlimited events and schedules, public event pages, Google, Outlook and CalDAV calendar sync, free RSVP with capacity limits, embeddable calendar, built-in analytics, AI event parsing, and 10 newsletter emails a month. One team member.",
+                "description": "Unlimited events and schedules, public event pages, Google, Outlook and CalDAV calendar sync, free RSVP with capacity limits, 25 paid tickets a month with QR codes scanned at the door, payment by Stripe, PayPal, Payfast, Invoice Ninja, a payment link or cash, refunds from the Sales page, event graphics, embeddable calendar, built-in analytics, AI event parsing, and newsletters to 10 recipients a month. One team member.",
                 "availability": "https://schema.org/InStock"
             },
             {
@@ -109,7 +109,7 @@
                 "name": "Pro",
                 "price": "{{ number_format($proMonthly, 2) }}",
                 "priceCurrency": "{{ platform_currency() }}",
-                "description": "Everything in Free plus ticketing with QR check-in and a check-in dashboard, ticket waitlist, promo codes, custom fields, sale notifications, sales CSV export, Stripe payments, no Event Schedule branding, custom CSS, event graphics, the embeddable ticket widget, REST API and webhooks, and 100 newsletter emails a month.",
+                "description": "Everything in Free plus unlimited ticket sales, the live check-in dashboard, ticket waitlist, promo codes, custom fields, sale notifications, sales CSV export, no Event Schedule branding, custom CSS, the embeddable ticket widget, REST API and webhooks, and newsletters to 100 recipients a month.",
                 "availability": "https://schema.org/InStock"
             },
             {
@@ -117,12 +117,15 @@
                 "name": "Enterprise",
                 "price": "{{ number_format($entMonthly, 2) }}",
                 "priceCurrency": "{{ platform_currency() }}",
-                "description": "Everything in Pro plus your own custom domain, up to five team members, internal and unlisted events, AI flyer and style generation, AI agenda scanning, WhatsApp event creation, 1,000 newsletter emails a month, and priority support.",
+                "description": "Everything in Pro plus your own custom domain, up to five team members, internal and unlisted events, AI flyer and style generation, AI agenda scanning, WhatsApp event creation, newsletters to 1,000 recipients a month, and priority support.",
                 "availability": "https://schema.org/InStock"
             }
         ],
         "featureList": [
             "Zero platform fees on ticket sales",
+            "Stripe, PayPal, Payfast and Invoice Ninja payments",
+            "Full and partial refunds from the Sales page",
+            "Email when tickets go on sale, free on every plan",
             "AI event parsing from pasted text or images",
             "AI flyer generation",
             "AI style generation",
@@ -894,7 +897,7 @@
                             <span class="es-swap-plan">{{ plan_price(0) }}</span>
                         </div>
                         <p class="es-swap-band-muted text-sm leading-relaxed">
-                            Unlimited events and schedules. Public event pages and a shareable calendar. Two-way Google, Outlook and CalDAV sync. Free RSVP with a capacity limit. Embeddable calendar, built-in analytics, AI event parsing, and 10 newsletter emails a month.
+                            Unlimited events and schedules. Public event pages and a shareable calendar. Two-way Google, Outlook and CalDAV sync. Free RSVP with a capacity limit, and 25 paid tickets a month, scanned at the door. Event graphics, embeddable calendar, built-in analytics, AI event parsing, and newsletters to 10 recipients a month.
                         </p>
                     </div>
                     <div class="es-swap-card p-6" data-reveal="panel">
@@ -903,7 +906,7 @@
                             <span class="es-swap-plan es-swap-plan-pro">{{ plan_price($proMonthly) }} a month</span>
                         </div>
                         <p class="es-swap-band-muted text-sm leading-relaxed">
-                            Ticketing with QR check-in and the check-in dashboard. Custom fields on the form, waitlist, promo codes, sales export. Event graphics, the embeddable ticket widget, the REST API and webhooks. 100 newsletter emails a month.
+                            Unlimited ticket sales and the live check-in dashboard. Custom fields on the form, ticket waitlist, promo codes, sales export. The embeddable ticket widget, the REST API and webhooks. Newsletters to 100 recipients a month.
                         </p>
                     </div>
                     <div class="es-swap-card p-6" data-reveal="panel">
@@ -912,13 +915,13 @@
                             <span class="es-swap-plan es-swap-plan-pro">{{ plan_price($entMonthly) }} a month</span>
                         </div>
                         <p class="es-swap-band-muted text-sm leading-relaxed">
-                            Your own domain. Up to five team members. Internal and unlisted events. AI flyer and style generation, AI agenda scanning, WhatsApp event creation, and 1,000 newsletter emails a month.
+                            Your own domain. Up to five team members. Internal and unlisted events. AI flyer and style generation, AI agenda scanning, WhatsApp event creation, and newsletters to 1,000 recipients a month.
                         </p>
                     </div>
                 </div>
 
                 <p class="es-swap-band-muted mx-auto mt-8 max-w-3xl text-center text-sm" data-reveal>
-                    Two footnotes worth reading before you switch. Your follower list is never capped, but the monthly newsletter allowance counts recipients rather than sends, so one letter to 40 followers spends 40 of it. And Free is a single team member; extra members are Enterprise. What does not change with the plan is the fee on ticket sales, which is zero on all three. Past Stripe's own processing, the money is yours.
+                    Two footnotes worth reading before you switch. Your follower list is never capped, but the monthly newsletter allowance counts recipients rather than sends, so one letter to 40 followers spends 40 of it; the automatic digest of new events that confirmed subscribers get does not count against it. And Free is a single team member; extra members are Enterprise. What does not change with the plan is the fee on ticket sales, which is zero on all three, or the ways to get paid: Stripe, PayPal, Payfast for rand, Invoice Ninja, a payment link or cash. Past the processor's own fee, the money is yours, and a Stripe or PayPal sale can be refunded from the Sales page in full or in part.
                 </p>
             </div>
         </div>
@@ -936,7 +939,7 @@
                     How to switch from {{ $name }} in <span class="es-swap-accent">{{ count($steps) }} steps</span>
                 </h2>
                 <p class="es-swap-muted mt-5 text-lg" data-reveal style="--reveal-delay: 0.15s;">
-                    Nothing to migrate. Your next event is the first one you put here.
+                    No migration project. Your next event is the first one you put here.
                 </p>
             </div>
 

@@ -97,24 +97,28 @@
         // which is the one section on a comparison page a reader has actually
         // come for and the one that said the least. Every step below names a
         // real route out of the tool they are leaving: EventController::parse
-        // for the events (10 a day free, 50 on Pro, 100 on Enterprise),
+        // for the events (Role::aiParseDailyLimit(): 50 a day on Free and Pro
+        // alike, 10 during a Pro trial, 100 on Enterprise),
         // NewsletterController::importStore for the list (10,000 rows, no plan
         // gate), and Role::ticketSaleLimit() for what selling costs on day one.
         $switchSteps = $switch_steps ?? [
             ['title' => 'Create your schedule', 'description' => 'Free, no card, and it has its own address the moment it exists. Nothing has to move before it is useful.'],
-            ['title' => 'Bring the events across', 'description' => 'Paste a listing or upload the flyer and the parser fills in the name, date, time, venue and description for you to check. Ten a day on the free plan, fifty on Pro.'],
+            ['title' => 'Bring the events across', 'description' => 'Paste a listing or upload the flyer and the parser fills in the name, date, time, venue and description for you to check. Fifty a day on the free and Pro plans (ten during a Pro trial), a hundred on Enterprise.'],
             ['title' => 'Bring your list across', 'description' => 'Export the addresses you already have and paste them in or upload a CSV, up to ten thousand rows, on any plan. What the newsletter allowance counts is sending to them, not holding them.'],
-            ['title' => 'Connect Stripe and sell', 'description' => 'Your own Stripe account, so the money settles into it rather than into ours. Zero platform fees, and the first 25 paid tickets a month are on the free plan.'],
+            ['title' => 'Connect Stripe or PayPal and sell', 'description' => 'Your own Stripe or PayPal account, so the money settles into it rather than into ours. Zero platform fees, the first 25 paid tickets a month are on the free plan, and refunds go back through the same account.'],
         ];
         // Twelve of the sixteen competitors fall through to these, so they are
         // written as facts with their tier attached rather than as adjectives.
-        // AI flyer and style generation is Enterprise and event graphics is Pro,
-        // which the previous default ran together into one free-sounding line.
+        // AI flyer and style generation is Enterprise; event graphics are free
+        // (GraphicController gates only the AI text and scheduled emails).
         $whyChooseSummary = $why_choose['summary']
             ?? 'Three things decide it against '.$name.': the money is yours, the code is public, and the calendar keeps itself in step with the one you already use.';
         $whyChoosePoints = $why_choose['points'] ?? [
-            'Zero platform fees on ticket sales, at every plan level, into your own Stripe account',
+            'Zero platform fees on ticket sales, at every plan level, into your own Stripe or PayPal account',
             'Selling starts on the free plan, at 25 paid tickets a month, each one scanned at the door',
+            'Refunds from the Sales page, in full or in part, that send the money back through Stripe or PayPal',
+            'One checkout for tickets to several of your events, and an interest list that emails people when tickets go on sale',
+            'Passes, gift cards and installment payments on Pro, and allocated seating for venues on Enterprise',
             'Two-way Google, Outlook and CalDAV sync, free, so the public listing and your own diary cannot disagree',
             'Open source under the Attribution Assurance License, and selfhostable, which resolves to Enterprise',
         ];
@@ -156,7 +160,10 @@
         ]));
     @endphp
 
-    <x-slot name="title">{{ $name }} Alternative | Event Schedule</x-slot>
+    {{-- Each competitor carries its own meta_title (the "X alternative" phrase
+         plus the one difference that decides it), so sixteen titles are not one
+         pattern with a name swapped in. The fallback keeps a new entry safe. --}}
+    <x-slot name="title">{{ $meta_title ?? $name.' Alternative | Event Schedule' }}</x-slot>
     <x-slot name="description">{{ $description }}</x-slot>
     <x-slot name="keywords">{{ $keywords }}</x-slot>
     <x-slot name="breadcrumbTitle">{{ $name }} Alternative</x-slot>
@@ -177,7 +184,7 @@
                 "name": "Free",
                 "price": "0",
                 "priceCurrency": "{{ platform_currency() }}",
-                "description": "Unlimited events, two-way Google, Outlook and CalDAV sync, newsletters, RSVP with capacity, 25 paid tickets a month with QR scanning at the door, one bookable appointment type, the embeddable calendar, and fan engagement features.",
+                "description": "Unlimited events, two-way Google, Outlook and CalDAV sync, newsletters, RSVP with capacity, 25 paid tickets a month through Stripe or PayPal with QR scanning at the door, refunds, the multi-event cart, the interest list, a live calendar feed, one bookable appointment type, event graphics, the embeddable calendar, and fan engagement features.",
                 "availability": "https://schema.org/InStock"
             },
             {
@@ -185,7 +192,7 @@
                 "name": "Pro",
                 "price": "{{ number_format($proMonthly, 2) }}",
                 "priceCurrency": "{{ platform_currency() }}",
-                "description": "Everything in Free plus unlimited ticket sales, the live check-in dashboard, ticket waitlist, promo codes, add-ons, gift cards, sale notifications, sales CSV export, remove branding, custom CSS, event graphics, REST API, and webhooks.",
+                "description": "Everything in Free plus unlimited ticket sales, the live check-in dashboard, ticket waitlist, promo codes, add-ons, gift cards, passes, installment payments, sale notifications, sales CSV export, remove branding, custom CSS, REST API, and webhooks.",
                 "availability": "https://schema.org/InStock"
             },
             {
@@ -193,23 +200,33 @@
                 "name": "Enterprise",
                 "price": "{{ number_format($entMonthly, 2) }}",
                 "priceCurrency": "{{ platform_currency() }}",
-                "description": "Everything in Pro plus AI style generation, AI content generation, AI flyer generation, WhatsApp event creation, custom domains, multiple team members, and priority support.",
+                "description": "Everything in Pro plus allocated seating, AI style generation, AI content generation, AI flyer generation, WhatsApp event creation, custom domains, multiple team members, and priority support.",
                 "availability": "https://schema.org/InStock"
             }
         ],
         "featureList": [
             "Zero platform fees on ticket sales",
+            "Stripe and PayPal checkout",
+            "Refunds through Stripe and PayPal",
+            "Multi-event cart",
             "AI-powered event import",
             "AI flyer generation",
             "AI style generation",
             "Two-way Google Calendar sync",
+            "Two-way Outlook sync",
             "CalDAV sync",
             "iCal download",
+            "Live calendar feed",
             "Newsletter builder with A/B testing",
             "QR code ticketing and check-in",
+            "Ticket interest list",
             "Check-in dashboard",
             "Ticket waitlist",
             "Promo and discount codes",
+            "Passes",
+            "Gift cards",
+            "Installment payments",
+            "Allocated seating",
             "Sale notification emails",
             "Sales CSV export",
             "Open source with selfhosting option",
@@ -881,7 +898,7 @@
                         </a>
                     </div>
 
-                    <p class="es-fade-up es-d-1 es-score-tag mb-5">Scorecard</p>
+                    <p class="es-fade-up es-d-1 es-score-tag mb-5">{{ $name }} alternative scorecard</p>
 
                     <h1 class="es-balance es-score-ink mb-7 text-[2.6rem] font-black leading-[1.05] tracking-tight sm:text-6xl">
                         <span class="es-mask"><span class="es-mask-line">Event Schedule</span></span>
@@ -1161,7 +1178,7 @@
             </div>
 
             <p class="es-score-muted mx-auto mt-8 max-w-3xl text-center text-sm" data-reveal>
-                Selfhost Event Schedule and every one of those plan chips opens: a selfhosted install resolves to Enterprise, so no line on the card is held back by a plan. Either way, ticket sales run through your own Stripe account and Event Schedule takes 0%.
+                Selfhost Event Schedule and every one of those plan chips opens: a selfhosted install resolves to Enterprise, so no line on the card is held back by a plan. Either way, ticket sales run through your own Stripe or PayPal account and Event Schedule takes 0%.
             </p>
         </div>
     </section>
@@ -1191,12 +1208,12 @@
                     <div class="es-score-card flex flex-col p-6" data-reveal="panel">
                         <p class="es-score-tag mb-3">No marketplace</p>
                         <h3 class="es-score-band-ink mb-2 text-lg font-bold">You bring the audience</h3>
-                        <p class="es-score-band-muted text-sm">Your public events can be listed on the Event Schedule browse and search pages, but a listing is not a marketplace's built-in audience. What actually fills a room is your own schedule page, an embeddable calendar, a follower QR code and newsletters.</p>
+                        <p class="es-score-band-muted text-sm">Your public events can be listed on the Event Schedule browse and search pages, but a listing is not a marketplace's built-in audience. What actually fills a room is your own schedule page, an embeddable calendar, a follower QR code, newsletters, and an interest list that emails people when tickets go on sale.</p>
                     </div>
                     <div class="es-score-card flex flex-col p-6" data-reveal="panel">
                         <p class="es-score-tag mb-3">Seat maps are Enterprise</p>
                         <h3 class="es-score-band-ink mb-2 text-lg font-bold">Ticket types, then seats</h3>
-                        <p class="es-score-band-muted text-sm">On Free and Pro a ticket type has a name, a price and a quantity, and buyers are not choosing a specific seat. A reserved-seating house needs Enterprise, where you draw the room once and sell the seats in it.</p>
+                        <p class="es-score-band-muted text-sm">On Free and Pro a ticket type has a name, a price and a quantity, and buyers are not choosing a specific seat. A reserved-seating house needs Enterprise, where a venue schedule draws the room once and buyers pick their seats from the map.</p>
                     </div>
                     <div class="es-score-card flex flex-col p-6" data-reveal="panel">
                         <p class="es-score-tag mb-3">One team member on Free</p>

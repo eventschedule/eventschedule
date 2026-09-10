@@ -1,6 +1,6 @@
 <x-marketing-layout>
-    <x-slot name="title">Compare Event Schedule vs Eventbrite, Luma &amp; More</x-slot>
-    <x-slot name="description">Compare Event Schedule with Eventbrite, Luma, Meetup, and 13 more platforms. Feature-by-feature breakdowns, a fee calculator, and zero platform fees.</x-slot>
+    <x-slot name="title">Compare Event Schedule vs Eventbrite, Luma &amp; {{ count($headToHead) - 2 }} More</x-slot>
+    <x-slot name="description">Compare Event Schedule with Eventbrite, Luma, Meetup and {{ count($headToHead) - 3 }} more platforms: feature by feature, a fee calculator at published rates, and 0% platform fees.</x-slot>
     <x-slot name="breadcrumbTitle">Compare</x-slot>
 
     @php
@@ -10,7 +10,19 @@
         $compareFaqs = [
             [
                 'q' => 'Does Event Schedule really charge no platform fees?',
-                'a' => 'Correct. We never take a percentage of your ticket sales on any plan. You pay your payment processor directly, and on Stripe that is '.$rates['stripe']['label'].'. Money from ticket sales goes straight to your own Stripe account, not through us.',
+                'a' => 'Correct. We never take a percentage of your ticket sales on any plan. You pay your payment processor directly, and on Stripe that is '.$rates['stripe']['label'].'. Money from ticket sales goes straight to your own Stripe or PayPal account, not through us.',
+            ],
+            [
+                'q' => 'Can buyers pay with PayPal, and can I refund them from Event Schedule?',
+                'a' => 'Yes to both, on every plan. You connect your own Stripe or PayPal account and choose one for each event, and the money goes to that account. A Stripe or PayPal sale can be refunded from the Sales page in full or in part, with the money going back through the same provider, and a partial refund leaves the tickets valid. A sale taken another way, such as cash or a payment link, is marked as refunded instead, which records it without moving any money.',
+            ],
+            [
+                'q' => 'Does Event Schedule have reserved seating?',
+                'a' => 'Yes, on the Enterprise plan, for venue schedules. You draw a seating plan once, with sections, rows, tables and standing areas, and reuse it for every date. Buyers pick their seats from the map, and the box office can hold seats back, book seats for a phone order, move a buyer or release a seat.',
+            ],
+            [
+                'q' => 'Can someone buy tickets to several events at once, or pay in installments?',
+                'a' => 'Yes. A buyer can put tickets to several of your events in one cart and pay once, on every plan, and the cart works with Stripe and PayPal. Installments are a Pro feature that runs on Stripe: the first payment is taken at checkout, the ticket is valid straight away, and the rest are charged to the same card month by month.',
             ],
             [
                 'q' => 'How is this different from the pricing page?',
@@ -18,7 +30,7 @@
             ],
             [
                 'q' => 'Can I move my events over from another platform?',
-                'a' => 'Yes. Events can be imported from Eventbrite directly, attendees can be bulk imported from a CSV, and a full backup and restore is built in. Nothing has to be retyped.',
+                'a' => 'Yes. The Eventbrite import brings events across with their venues, tickets and images, and people who already bought can be imported from a CSV of up to 5,000 rows; both are Pro features. From anywhere else, paste the listing text or drop in a flyer image and the details are filled in for you.',
             ],
             [
                 'q' => 'Which of these platforms are open source?',
@@ -38,7 +50,8 @@
         $stripeCost = ($calcRevenue * $rates['stripe']['percent']) + ($calcTickets * $rates['stripe']['fixed']);
 
         $costOf = function (array $rate) use ($calcRevenue, $calcTickets, $stripeCost) {
-            $own = ($calcRevenue * $rate['percent']) + ($calcTickets * $rate['fixed']) + ($rate['monthly'] ?? 0);
+            // 'processing' is a platform's own card fee, charged instead of Stripe's (Eventbrite).
+            $own = ($calcRevenue * ($rate['percent'] + ($rate['processing'] ?? 0))) + ($calcTickets * $rate['fixed']) + ($rate['monthly'] ?? 0);
 
             return $own + (($rate['stripe'] ?? true) ? $stripeCost : 0);
         };
@@ -86,7 +99,7 @@
                     "name": "Free",
                     "price": "0",
                     "priceCurrency": "{{ platform_currency() }}",
-                    "description": "Unlimited events and schedules, free forever, with no platform fees"
+                    "description": "Unlimited events and schedules, up to 25 paid tickets a month and no platform fees, free forever"
                 },
                 {
                     "@type": "Offer",
@@ -515,7 +528,7 @@
                         <svg aria-hidden="true" class="h-5 w-5 transition-transform group-hover:translate-x-1 rtl:rotate-180" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6" /></svg>
                     </a>
                     <p class="mx-auto mt-5 max-w-2xl text-xs text-gray-500 dark:text-gray-400">
-                        Estimates from each platform's published rates. Stripe processing ({{ $rates['stripe']['label'] }}) is included for Event Schedule, Luma and Ticket Tailor; Eventbrite quotes its fee as inclusive of processing. Ticket Tailor publishes {{ $rates['ticket-tailor']['range'] }} depending on volume, so the midpoint is used here. Luma is shown at whichever of its free and Plus plans is cheaper for the event. Our free plan carries no monthly cost and covers up to 25 paid tickets a month.
+                        Estimates from each platform's published rates. Stripe processing ({{ $rates['stripe']['label'] }}) is included for Event Schedule, Luma and Ticket Tailor. Eventbrite is shown with the 2.9% payment processing fee per order that its pricing page adds on top of the service fee. Ticket Tailor publishes {{ $rates['ticket-tailor']['range'] }} depending on volume, so the midpoint is used here. Luma is shown at whichever of its free and Plus plans is cheaper for the event, with Plus at its annual-billing price. Our free plan carries no monthly cost and covers up to 25 paid tickets a month.
                     </p>
                 </div>
             </div>
@@ -527,6 +540,7 @@
     <!-- ============================================================ -->
     @php
         $matrixColumns = ['Event Schedule', 'Eventbrite', 'Luma', 'Ticket Tailor', 'Google Calendar'];
+
         // Feature rows only. COUNT_RECURSIVE was used here and counted every cell
         // as well as every row, so the button offered "294 rows" of a 42-row table.
         $matrixRowCount = array_sum(array_map('count', $sections));
@@ -752,7 +766,7 @@
                 <div class="es-bento group relative" data-tilt="3" data-reveal="panel">
                     <div class="es-tilt-inner relative flex h-full flex-col overflow-hidden rounded-3xl border border-gray-200 bg-white p-7 dark:border-white/10 dark:bg-white/[0.04]">
                         <h3 class="mb-2 text-xl font-bold text-gray-900 dark:text-white">Share graphics, generated</h3>
-                        <p class="mb-6 text-sm text-gray-600 dark:text-gray-400">The flyers on your next events, up to 20 of them, laid out as one ready-to-post image in your own colours.</p>
+                        <p class="mb-6 text-sm text-gray-600 dark:text-gray-400">The flyers on your next events, up to 20 of them, laid out as one ready-to-post image in your own colors.</p>
                         <div class="mt-auto flex justify-center" aria-hidden="true">
                             <div class="w-32 overflow-hidden rounded-xl border border-gray-200 shadow-md dark:border-white/10">
                                 <div class="bg-gradient-to-br from-blue-600 via-sky-600 to-cyan-500 px-3 py-3">
@@ -800,8 +814,8 @@
             <div class="grid gap-4 md:grid-cols-3" data-reveal-group="90">
                 @php
                     $switchSteps = [
-                        ['Import your events', 'Events come across from Eventbrite directly. Anywhere else, paste the listing text or drop in a flyer image and the AI reads the details out of it.'],
-                        ['Bring the attendees', 'Existing attendees import in bulk from a CSV, up to 5,000 rows at a time, so your lists arrive intact.'],
+                        ['Import your events', 'On Pro, events come across from Eventbrite directly, with their venues, ticket types and images. Anywhere else, paste the listing text or drop in a flyer image and the AI reads the details out of it.'],
+                        ['Bring the attendees', 'People who already bought import in bulk from a CSV on Pro, up to 5,000 rows at a time, and each one has a ticket with its own QR code here.'],
                         ['Keep your own copy', 'Backup and restore is built in, images included. Export whenever you like, selfhost it, or walk away with everything.'],
                     ];
                 @endphp
@@ -815,6 +829,12 @@
             </div>
 
             <p class="mt-8 text-sm" data-reveal>
+                <a href="{{ route('marketing.switch_from_eventbrite') }}" class="group inline-flex items-center gap-2 font-medium text-blue-300 transition-all hover:gap-3 hover:text-blue-200">
+                    Leaving Eventbrite? What the import brings across, and what it does not
+                    <svg aria-hidden="true" class="h-4 w-4 rtl:rotate-180" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M13 7l5 5m0 0l-5 5m5-5H6" /></svg>
+                </a>
+            </p>
+            <p class="mt-3 text-sm" data-reveal>
                 <a href="{{ route('marketing.replace') }}" class="group inline-flex items-center gap-2 font-medium text-blue-300 transition-all hover:gap-3 hover:text-blue-200">
                     Replacing a workaround rather than a platform?
                     <svg aria-hidden="true" class="h-4 w-4 rtl:rotate-180" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M13 7l5 5m0 0l-5 5m5-5H6" /></svg>
@@ -979,7 +999,7 @@
 
         (function () {
             // The full grid ships open so its boxes are measurable; collapse it
-            // on small screens where 42 rows is not a reasonable default.
+            // on small screens, where the whole grid is not a reasonable default.
             var disc = document.querySelector('details.matrix-disc');
             if (!disc || !window.matchMedia) return;
             var mq = window.matchMedia('(max-width: 767px)');
@@ -1019,7 +1039,7 @@
                 var stripe = (revenue * 0.029) + (tickets * 0.30);
 
                 var es = proMonthly + stripe;
-                var eb = (revenue * 0.037) + (tickets * 1.79);
+                var eb = (revenue * (0.037 + 0.029)) + (tickets * 1.79);
                 var luma = Math.min((revenue * 0.05) + stripe, 59 + stripe);
                 var tt = (tickets * 0.44) + stripe;
 

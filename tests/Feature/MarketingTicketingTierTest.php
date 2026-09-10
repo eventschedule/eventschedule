@@ -53,6 +53,14 @@ class MarketingTicketingTierTest extends TestCase
         // "$5 a month to start selling tickets".
         '/Event\s+Schedule\b[^.]{0,160}\bmonth\b[^.]{0,40}\bto\s+(?:start\s+)?sell(?:ing)?\s+(?:paid\s+)?tickets\b/i',
 
+        // Price-then-ticketing, which the two shapes above read straight past: "free for
+        // unlimited events and public pages, with ticketing at $5/month" and "the Pro plan at
+        // $5/month, which also covers ticketing, check-in, and a live dashboard". Both shipped
+        // on replacement pages in round 3's starting state. `\.\d` lets a price like $9.99
+        // through without letting the match cross a sentence end.
+        '/\bwith\s+(?:paid\s+)?ticketing\s+at\s+(?:[^.]|\.\d){0,60}?\bmonth\b/i',
+        '/\bPro\s+plan\s+at\s+(?:[^.]|\.\d){0,60}?\bmonth\b(?:[^.]|\.\d){0,30}?\b(?:covers|includes)\s+(?:(?!unlimited\b)[\w-]+\s+){0,2}ticketing\b/i',
+
         // Scanning at the door has no plan check. The DASHBOARD does, so the word
         // "dashboard" anywhere in the sentence exempts it.
         '/\b(?:QR\s+check-in|scan(?:ning)?\s+(?:the\s+)?(?:QR|tickets?))\b(?:(?!dashboard)[^.]){0,120}?\b(?:is|are)\s+(?:only\s+)?on\s+the\s+Pro\b/i',

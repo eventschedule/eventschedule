@@ -1,6 +1,6 @@
 <x-marketing-layout>
-    <x-slot name="title">Move from Eventbrite to Event Schedule</x-slot>
-    <x-slot name="description">Bring your Eventbrite events across with their venues, ticket types and images, then sell from your own page with no platform fee. A move you make once, not a sync.</x-slot>
+    <x-slot name="title">Switch from Eventbrite to Event Schedule: Migration Guide</x-slot>
+    <x-slot name="description">What the Eventbrite import brings across, what stays behind, and how payments and refunds work once you sell from your own page with no platform fee.</x-slot>
     <x-slot name="breadcrumbTitle">Switch from Eventbrite</x-slot>
 
     <x-slot name="structuredData">
@@ -12,8 +12,8 @@
         "description": "Import your existing Eventbrite events into Event Schedule with their venues, ticket types and images, then sell from your own page with no platform fee.",
         "step": [
             {"@type": "HowToStep", "name": "Create your schedule", "text": "Sign up and create a schedule. It gets its own address straight away, and nothing is charged for it."},
-            {"@type": "HowToStep", "name": "Paste an Eventbrite token", "text": "Open the import screen on your schedule and paste an Eventbrite private token. Event Schedule finds your organisation and lists the events on it."},
-            {"@type": "HowToStep", "name": "Pick what comes across", "text": "Choose the events you want. Each one arrives with its date and duration, its venue and address, its ticket types and its image."},
+            {"@type": "HowToStep", "name": "Paste an Eventbrite token", "text": "Open the import screen on your schedule and paste an Eventbrite private token. Event Schedule finds your organization and lists the events on it."},
+            {"@type": "HowToStep", "name": "Pick what comes across", "text": "Choose the events you want. Each one arrives with its date and duration, its description, its venue and address, its ticket types with their prices and quantities, and its image."},
             {"@type": "HowToStep", "name": "Connect how you get paid", "text": "Connect your own Stripe or PayPal account so ticket money goes straight to you, with no platform fee taken by Event Schedule."}
         ]
     }
@@ -217,7 +217,7 @@
                             </a>
                         </div>
                         <p class="es-move-muted mt-4 text-sm" data-reveal style="--reveal-delay: 0.2s;">
-                            The import is a Pro feature. Creating the schedule and selling from it are not.
+                            The import is a Pro feature. Creating the schedule and <a href="{{ marketing_url('/features/ticketing') }}" class="es-move-accent font-semibold hover:underline">selling up to 25 paid tickets a month</a> from it are not.
                         </p>
                     </div>
 
@@ -225,12 +225,13 @@
                         // Exactly what EventbriteController brings across, and what it does not.
                         // Fixed, never random, for the band-diff verifier.
                         $movePacked = [
-                            ['packed', 'Event name, start time and duration'],
+                            ['packed', 'Event name, description, start time and duration'],
                             ['packed', 'The venue, with its full address'],
-                            ['packed', 'Ticket types and their prices'],
+                            ['packed', 'Ticket types, prices and quantities'],
                             ['packed', 'The event image and its currency'],
-                            ['todo', 'Your payment account, connected once'],
+                            ['todo', 'Your Stripe or PayPal account, connected once'],
                             ['out', 'Past orders and attendee history'],
+                            ['out', 'Discount codes, checkout questions and seat maps'],
                         ];
                     @endphp
                     <div class="es-move-crate p-6 sm:p-8" data-reveal="panel" style="--reveal-delay: 0.1s;">
@@ -271,9 +272,9 @@
 
                 @php
                     $moveSteps = [
-                        ['Paste a token', 'Create a private token in your Eventbrite account and paste it into the import screen on your schedule. It finds your organisation and lists what is on it.'],
-                        ['Pick the events', 'Choose from what it found. You do not have to take everything, and you can come back and run it again for the ones you skipped.'],
-                        ['They arrive furnished', 'Each event lands with its date and duration, its venue and full address, its ticket types and prices, its image, its currency and a category. An online event keeps a link back to its Eventbrite page.'],
+                        ['Paste a token', 'Find the private token in your Eventbrite account, under Account Settings, Developer Links, API Keys, and paste it into the import screen on your schedule. It finds your organization and lists what is on it.'],
+                        ['Pick the events', 'Choose from what it found: it shows upcoming events, and past ones are one click away. You do not have to take everything, and you can come back and run it again for the ones you skipped.'],
+                        ['They arrive furnished', 'Each event lands with its date and duration, its description, its venue and full address, its ticket types with their prices and quantities, its image, its currency and a category. An online event keeps a link back to its Eventbrite page.'],
                     ];
                 @endphp
                 <div class="grid gap-4 md:grid-cols-3" data-reveal-group="90">
@@ -299,25 +300,35 @@
                         What you have to <span class="es-move-accent">carry yourself.</span>
                     </h2>
                     <p class="es-move-muted mt-5 text-lg" data-reveal style="--reveal-delay: 0.15s;">
-                        Two things do not come out of the import, and it is better to know that before you start than to go looking for them afterwards.
+                        Three things do not come out of the import, and it is better to know that before you start than to go looking for them afterwards.
                     </p>
                 </div>
 
-                <div class="grid gap-4 md:grid-cols-2" data-reveal-group="90">
+                <div class="grid gap-4 md:grid-cols-3" data-reveal-group="90">
                     <div class="es-move-panel flex flex-col p-6" data-reveal="panel">
                         <h3 class="es-move-ink text-base font-bold">People who already bought</h3>
                         <p class="es-move-muted mt-2 text-sm leading-relaxed">
-                            Past orders and attendee history stay where they are. If you have a date that is already selling and you want those buyers to have a ticket here, export them from Eventbrite and use the bulk attendee import, which takes a CSV of up to 5,000 rows.
+                            Past orders and attendee history stay where they are. If you have a date that is already selling and you want those buyers to have a ticket here, export them from Eventbrite and use the bulk attendee import, a Pro feature that takes a CSV of up to 5,000 rows. Their payments stay with Eventbrite too, so a refund on one of those orders is made there.
+                        </p>
+                        <a href="{{ marketing_url('/docs/tickets#importing-attendees') }}" class="es-move-accent mt-auto pt-4 text-sm font-semibold hover:underline">
+                            Importing attendees
+                        </a>
+                    </div>
+                    <div class="es-move-panel flex flex-col p-6" data-reveal="panel">
+                        <h3 class="es-move-ink text-base font-bold">Codes, questions and seat maps</h3>
+                        <p class="es-move-muted mt-2 text-sm leading-relaxed">
+                            The import reads the event, not the selling rules around it. Discount codes and checkout questions are set up again here, both on Pro, and a seat map is redrawn as a seating plan, on Enterprise for a venue schedule. Every event also arrives as a one-time date, so a series is worth setting up again as a recurring event, which is free.
                         </p>
                     </div>
                     <div class="es-move-panel flex flex-col p-6" data-reveal="panel">
                         <h3 class="es-move-ink text-base font-bold">How you get paid</h3>
                         <p class="es-move-muted mt-2 text-sm leading-relaxed">
-                            You connect your own Stripe or PayPal account once, in Settings, and pick which one an event uses. That is the change that matters: the money stops arriving as a payout from somebody else and starts arriving in an account that is already yours.
+                            You connect your own Stripe or PayPal account once, in Settings under Payment Methods, and pick which one an event uses. That is the change that matters: the money stops arriving as a payout from somebody else and starts arriving in an account that is already yours.
                         </p>
-                        <a href="{{ marketing_url('/stripe') }}" class="es-move-accent mt-auto pt-4 text-sm font-semibold hover:underline">
-                            How payments work
-                        </a>
+                        <div class="mt-auto flex flex-wrap gap-x-5 gap-y-1 pt-4">
+                            <a href="{{ marketing_url('/stripe') }}" class="es-move-accent text-sm font-semibold hover:underline">Payments with Stripe</a>
+                            <a href="{{ marketing_url('/paypal') }}" class="es-move-accent text-sm font-semibold hover:underline">Payments with PayPal</a>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -340,18 +351,24 @@
                 </div>
 
                 @php
+                    // The third field is an optional [href, label] link for the foot of the card.
                     $moveAfter = [
-                        ['No platform fee', 'Event Schedule takes nothing from a ticket sale on any plan. The only deduction is your payment processor\'s own, and it goes to them rather than through us.'],
-                        ['A page that is yours', 'Your own address, your own branding above the free tier, and a calendar people can subscribe to rather than a listing on somebody else\'s site.'],
-                        ['Your audience is yours', 'Followers and newsletter subscribers belong to the schedule, and you can email them yourself. Nothing sits between you and the people who came last time.'],
-                        ['You can leave again', 'It is open source, everything you make can be exported, and you can selfhost the whole thing at no cost. The next move, if there is one, is your decision rather than a negotiation.'],
+                        ['No platform fee', 'Event Schedule takes nothing from a ticket sale on any plan. The only deduction is your payment processor\'s own, and it goes to them rather than through us.', null],
+                        ['A page that is yours', 'Your own address, your own branding above the free tier, and a calendar people can subscribe to rather than a listing on somebody else\'s site.', null],
+                        ['Your audience is yours', 'Followers and newsletter subscribers belong to the schedule, and you can email them yourself. Nothing sits between you and the people who came last time.', null],
+                        ['You can leave again', 'It is open source, everything you make can be exported, and you can selfhost the whole thing at no cost. The next move, if there is one, is your decision rather than a negotiation.', null],
+                        ['Refunds leave your own account', 'A refund is a button on the Sales page. On a Stripe or PayPal sale the money goes back through them, in full or in part, and a partial refund keeps the tickets valid. Cash and other methods are marked as refunded, which moves no money. Event Schedule does not email the buyer about a refund, so tell them yourself.', [marketing_url('/docs/tickets#managing-sales'), 'Managing sales and refunds']],
+                        ['Demand you can count', 'An event with nothing on sale yet offers "Tell me when tickets go on sale". People leave an email address, with no account, and hear when tickets go on sale, if you cancel, and shortly before it starts. It is free on every plan, and the Tickets panel shows you how many are waiting.', [marketing_url('/docs/tickets#interest-list'), 'The interest list']],
                     ];
                 @endphp
                 <div class="grid gap-4 sm:grid-cols-2" data-reveal-group="80">
-                    @foreach ($moveAfter as [$maName, $maBody])
+                    @foreach ($moveAfter as [$maName, $maBody, $maLink])
                         <div class="es-move-panel flex flex-col p-6" data-reveal="panel">
                             <h3 class="es-move-ink text-base font-bold">{{ $maName }}</h3>
                             <p class="es-move-muted mt-2 text-sm leading-relaxed">{{ $maBody }}</p>
+                            @if ($maLink)
+                                <a href="{{ $maLink[0] }}" class="es-move-accent mt-auto pt-4 text-sm font-semibold hover:underline">{{ $maLink[1] }}</a>
+                            @endif
                         </div>
                     @endforeach
                 </div>
@@ -376,11 +393,14 @@
         @php
             $moveFaqs = [
                 ['q' => 'Does the import keep running in the background?', 'a' => 'No, and that is deliberate. It runs when you press the button. A background sync would keep an account you are leaving as the source of truth, which is the opposite of what a move is for.'],
-                ['q' => 'What exactly comes across with an event?', 'a' => 'Its name, its start time and duration, its venue with the full address, its ticket types and prices, its image, its currency and a mapped category. An online event also keeps a link back to its Eventbrite page.'],
-                ['q' => 'What about people who already bought a ticket?', 'a' => 'They do not come with the import. Export them from Eventbrite and use the bulk attendee import, which takes a CSV of up to 5,000 rows, so people who already paid end up with a ticket and a QR code here as well.'],
-                ['q' => 'Do I have to move everything at once?', 'a' => 'No. Pick the events you want, and run it again later for the ones you skipped. Plenty of organizers move the next season across and leave the current one where it is until it has finished.'],
+                ['q' => 'What exactly comes across with an event?', 'a' => 'Its name and description, its start time and duration, its venue with the full address, its ticket types with their prices and quantities, its image, its currency and a mapped category. An online event also keeps a link back to its Eventbrite page. Discount codes, checkout questions and seat maps do not come across, and every event arrives as a one-time date.'],
+                ['q' => 'What about people who already bought a ticket?', 'a' => 'They do not come with the import. Export them from Eventbrite and use the bulk attendee import, a Pro feature that takes a CSV of up to 5,000 rows, so people who already paid end up with a ticket and a QR code here as well. Their payments stay with Eventbrite, so a refund on one of those orders is made there.'],
+                ['q' => 'Do I have to move everything at once?', 'a' => 'No. Pick the events you want, and run it again later for the ones you skipped. One way is to move the next season across and leave the current one where it is until it has finished.'],
                 ['q' => 'Where does the ticket money go?', 'a' => 'Into your own Stripe or PayPal account, which you connect once. Event Schedule adds no fee of its own on any plan, so what you receive is the ticket price minus your processor\'s charge.'],
-                ['q' => 'Do I need a paid plan to move?', 'a' => 'The Eventbrite import itself is a Pro feature. Creating a schedule, publishing events and selling tickets are not: the free plan sells up to 25 paid tickets a calendar month with no platform fee, so you can put a date on sale before you decide about a plan.'],
+                ['q' => 'Can buyers pay with PayPal?', 'a' => 'Yes, on every plan. Connect your own PayPal account in Settings under Payment Methods and choose PayPal for the event, and the money goes to that account. Stripe is there for cards, and PayPal also works when a buyer takes tickets to several of your events in one checkout. Installment plans, a Pro feature, run on Stripe only.'],
+                ['q' => 'How do refunds work once I have moved?', 'a' => 'From the Sales page. A Stripe or PayPal sale can be refunded in full or in part: the money goes back through that provider first, and only then does the sale change, and a partial refund leaves it paid with its tickets valid. A sale taken another way, such as cash or a payment link, is marked as refunded instead, which records it without moving money. Event Schedule does not email the buyer about a refund, so let them know yourself.'],
+                ['q' => 'Can people be told when tickets go on sale?', 'a' => 'Yes. On an event with nothing on sale yet, a visitor can press "Tell me when tickets go on sale" and leave an email address, with no account. They get one email when tickets go on sale, one if you cancel the event and a reminder shortly before it starts, plus any notice you choose to send if the date or venue changes. It is free on every plan, it is not a subscription to your schedule, and the event\'s Tickets panel shows how many people are waiting.'],
+                ['q' => 'Do I need a paid plan to move?', 'a' => 'The Eventbrite import and the bulk attendee import are Pro features. Creating a schedule, publishing events and selling tickets are not: the free plan sells up to 25 paid tickets a calendar month with no platform fee, so you can put a date on sale before you decide about a plan.'],
                 ['q' => 'Can I take my data out again later?', 'a' => 'Yes. There is a backup and restore for everything you have created, the API and webhooks are there on Pro, and the whole application is open source and can be selfhosted at no cost. Being easy to leave is the point.'],
             ];
         @endphp
