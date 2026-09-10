@@ -136,6 +136,39 @@ class PayPalRefundTest extends TestCase
         $this->assertSame(50.0, (float) $this->sale->fresh()->refundableRemaining());
     }
 
+    /**
+     * A 2xx from the refund endpoint means PayPal ACCEPTED the instruction, not that money moved.
+     *
+     * The refund object carries its own status - COMPLETED | PENDING | FAILED | CANCELLED - and it
+     * used to be discarded, so a PENDING refund (a hold on the funding source, or too little
+     * balance in the merchant account) was banked as `succeeded` and the sale flipped to
+     * `refunded`: seats back, gift card credited, sale.refunded fired, owner told it worked.
+     *
+     * Nothing would ever correct it. WEBHOOK_EVENTS deliberately omits PAYMENT.CAPTURE.REFUNDED,
+     * so a refund that later went FAILED left the buyer unpaid with the ledger saying otherwise.
+     * Parking is the only safe answer: it holds the amount against refundableRemaining() and puts
+     * the sale in front of a human on /admin/revenue.
+     *
+     * Note the asymmetry this closes: the CAPTURE path has always insisted on status COMPLETED.
+     */
+    public function test_a_refund_paypal_reports_as_pending_is_parked_not_banked(): void
+    {
+        $this->refundResponse = fn () => Http::response(['id' => 'REFUND00000000009', 'status' => 'PENDING']);
+
+        $this->refund(20.0);
+
+        $claim = SaleRefund::where('sale_id', $this->sale->id)->firstOrFail();
+
+        $this->assertSame('awaiting_reconciliation', $claim->status,
+            'a refund PayPal has not completed must never be recorded as succeeded');
+        $this->assertStringContainsString('PENDING', (string) $claim->last_error);
+        $this->assertStringContainsString('REFUND00000000009', (string) $claim->last_error,
+            'the refund id has to survive so it can be chased at PayPal');
+
+        $this->assertSame('paid', $this->sale->fresh()->status,
+            'the sale must not flip to refunded on money that has not moved');
+    }
+
     public function test_a_paypal_server_error_parks_rather_than_failing(): void
     {
         $this->refundResponse = fn () => Http::response(['name' => 'INTERNAL_SERVER_ERROR'], 500);

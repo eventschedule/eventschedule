@@ -708,7 +708,12 @@ class PayPalGateway extends PaymentGatewayDriver
             // Advisory, exactly as Payfast demoted its source-IP check and for the same reason: it is
             // subsumed by the lookup below. An explicit FAILURE is still a refusal; not holding a
             // webhook id at all is not.
-            $webhookId = (string) ($credentials['paypal_webhook_id'] ?? $owner->paypal_webhook_id ?? '');
+            // `?:`, not `??`. platformCredentials() ALWAYS sets paypal_webhook_id, to '' when
+            // PAYPAL_WEBHOOK_ID is unset - and '' is not null, so `??` never reached the owner's
+            // stored id. On a selfhost install running the platform credentials that meant
+            // signature verification was skipped entirely even when the owner had a perfectly good
+            // webhook id registered against their account.
+            $webhookId = (string) (($credentials['paypal_webhook_id'] ?? '') ?: ($owner->paypal_webhook_id ?? ''));
 
             if ($webhookId !== '') {
                 $verified = $client->verifyWebhookSignature($request->headers->all(), $request->getContent(), $webhookId);

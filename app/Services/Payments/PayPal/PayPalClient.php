@@ -199,7 +199,32 @@ class PayPalClient
                 $amount ? ['amount' => $amount] : [])
             ->throw();
 
-        return (string) $response->json('id');
+        $refundId = (string) $response->json('id');
+        $status = strtoupper((string) $response->json('status'));
+
+        // A 2xx from this endpoint means PayPal ACCEPTED the instruction, not that the money moved.
+        // The refund object carries its own status - COMPLETED | PENDING | FAILED | CANCELLED - and
+        // reading it is the same discipline the capture path already applies (PayPalGateway only
+        // recognises a capture on status === 'COMPLETED'). Without this, a PENDING refund - a hold
+        // on the funding source, or too little balance in the merchant account - was written to the
+        // ledger as `succeeded` and the sale flipped to `refunded`: seats back, gift card credited,
+        // the sale.refunded webhook fired and the owner told it worked. Nothing would ever correct
+        // it, because WEBHOOK_EVENTS deliberately omits PAYMENT.CAPTURE.REFUNDED, so a refund that
+        // later went FAILED left the buyer unpaid and our ledger saying otherwise.
+        //
+        // RuntimeException, deliberately NOT LogicException: the money may well be moving, and
+        // LogicException is the one bucket SaleRefundService treats as "nothing left this machine"
+        // and fails outright. This shape returns null from classifyRefundFailure(), falls to the
+        // conservative \Throwable arm and PARKS the claim as awaiting_reconciliation - which holds
+        // the amount against refundableRemaining() and puts the sale on /admin/revenue for a human.
+        // The refund id travels in the message so it reaches last_error and can be chased at PayPal.
+        if ($status !== '' && $status !== 'COMPLETED') {
+            throw new \RuntimeException(
+                'PayPal accepted the refund but reported status '.$status.' (refund '.$refundId.')'
+            );
+        }
+
+        return $refundId;
     }
 
     /**

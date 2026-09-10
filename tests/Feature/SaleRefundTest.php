@@ -55,6 +55,83 @@ class SaleRefundTest extends TestCase
      *
      * @return array{0: Sale, 1: \App\Models\SaleInstallmentPlan, 2: \App\Models\Ticket, 3: \App\Models\User}
      */
+    /**
+     * A schedule merely INVITED to somebody else's event cannot refund that event's sales.
+     *
+     * The read gate both refund endpoints apply, User::canViewEventData(), skips unowned CURATOR
+     * roles but never consults event_role.is_accepted for a talent or venue role - it only asks
+     * whether the caller is owner or admin on some role attached to the event. The sales LIST uses
+     * Event::scopeManagedBy(), which does require the accepted pivot, so the invited schedule could
+     * not SEE the sale but could still act on it by id. Sale ids are Sqids over sequential
+     * integers, so finding one is not a barrier.
+     *
+     * That was survivable while `refund` was a status flip. It is not now that it calls
+     * SaleRefundService and moves real money out of the EVENT CREATOR's gateway account, releases
+     * the creator's seats and credits the buyer's gift card.
+     */
+    public function test_a_schedule_invited_to_an_event_cannot_refund_its_sales(): void
+    {
+        $this->fakeStripeRefunds();
+
+        [$sale, $event] = $this->paidStripeSale(100.0);
+
+        // A second schedule, attached to the event but never accepted - the shape
+        // EventRepo::saveEvent() leaves behind when a creator names a performer or venue.
+        $invitedOwner = $this->createOwner();
+        $invited = $this->createRole($invitedOwner, 'talent');
+        $event->roles()->attach($invited->id, ['is_accepted' => null]);
+
+        // It really is invisible on the list the AP renders, which is the rule the action must match.
+        $this->assertFalse(
+            \App\Models\Event::whereKey($event->id)->managedBy($invitedOwner)->exists(),
+            'fixture: an unaccepted schedule must not be able to see this event'
+        );
+
+        $this->actingAs($invitedOwner)
+            ->postJson(route('sales.action', ['sale_id' => UrlUtils::encodeId($sale->id)]), [
+                'action' => 'refund',
+            ])
+            ->assertStatus(403);
+
+        $this->assertSame('paid', $sale->fresh()->status, 'the sale must be untouched');
+        $this->assertSame(0, SaleRefund::count(), 'no refund row may be claimed');
+    }
+
+    /**
+     * A mismatched sale must be refunded as "everything the gateway still holds", whatever figure
+     * the caller named.
+     *
+     * `amount_mismatch` means the money that arrived is NOT the money we expected, so the expected
+     * total is the one number that must never be sent to the gateway - PayPalGateway::refund() and
+     * this service's own docblock both say so. The branch handling it nulls $amount to get that,
+     * but it used to leave $requestedFull false, and $requestedFull is what becomes $fullCharge:
+     * the flag deciding whether the gateway is sent no amount at all. With it false the driver was
+     * handed `(float) $claim->amount` instead, which create() sets to chargedTotal() when $amount
+     * is null - the expected total, precisely the forbidden number.
+     *
+     * Reachable from the API (ApiSaleController::update) and from POST /sales/action/{id}, both of
+     * which accept an explicit refund_amount. On a sale expecting 100 that captured 120, asking to
+     * refund 10 sent 100 and then marked the sale fully refunded, releasing every seat and the whole
+     * gift card. On one that captured 90 it asked for more than the capture held and reported a
+     * valid refund as failed.
+     */
+    public function test_a_mismatched_sale_refunds_the_whole_charge_even_when_an_amount_is_named(): void
+    {
+        $fake = $this->fakeStripeRefunds();
+
+        [$sale] = $this->paidStripeSale(100.0);
+        $sale->forceFill(['status' => 'amount_mismatch'])->save();
+
+        $result = app(SaleRefundService::class)->refund($sale->fresh(), 10.0, null, null);
+
+        $this->assertTrue($result->moved(), 'the refund must actually move money');
+        $this->assertCount(1, $fake->calls);
+        $this->assertNull(
+            $fake->calls[0]['amount'],
+            'a mismatched sale must send NO amount - naming one asks the gateway for the total we know is wrong'
+        );
+    }
+
     private function paidInstallmentSale(): array
     {
         $owner = $this->createOwner();

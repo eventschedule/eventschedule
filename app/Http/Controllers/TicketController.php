@@ -3139,6 +3139,13 @@ class TicketController extends Controller
                 break;
 
             case 'refund':
+                // Refunding moves real money out of the EVENT CREATOR's gateway account, so it
+                // needs a stricter gate than the read check above - which never looks at
+                // event_role.is_accepted for a talent or venue role. See userMayMoveMoneyOn().
+                if (! $this->userMayMoveMoneyOn($sale, $user)) {
+                    return response()->json(['error' => __('messages.unauthorized')], 403);
+                }
+
                 // Validated rather than cast. `(float)` on an array is 1.0 in PHP 8 with no error,
                 // so an unvalidated refund_amount[]=100 quietly refunds a dollar; the API path has
                 // always validated its equivalent and these two must not disagree on a money route.

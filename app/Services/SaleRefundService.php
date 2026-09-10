@@ -228,6 +228,21 @@ class SaleRefundService
                 }
 
                 $amount = null;
+
+                // $requestedFull moves WITH $amount, and forgetting it was a money bug rather than
+                // a tidiness one. It is captured from the caller's argument at the top of this
+                // method, so a caller who named a figure left it false - and it is what becomes
+                // $fullCharge, the flag that decides whether the gateway is sent no amount at all.
+                // With it false, refund() sends `(float) $claim->amount` instead, which the create()
+                // below sets to chargedTotal() whenever $amount is null: the EXPECTED total. That is
+                // exactly the number a mismatched sale is parked for not being, and the number
+                // PayPalGateway::refund() documents as the one thing it must never receive here.
+                //
+                // Concretely, on a sale expecting 100 that captured 120: a request to refund 10 sent
+                // PayPal 100, and record() then marked the sale fully refunded regardless of amount,
+                // handing back every seat and the whole gift card. On one that captured 90 it asked
+                // for more than the capture holds, and the owner was told a valid refund had failed.
+                $requestedFull = true;
             } else {
                 if ($leg) {
                     // A leg is its own charge, so it meters against itself rather than against the

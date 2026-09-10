@@ -3,7 +3,9 @@
 namespace App\Traits;
 
 use App\Models\AnalyticsEventsDaily;
+use App\Models\Event;
 use App\Models\Sale;
+use App\Models\User;
 use App\Services\WebhookService;
 use Illuminate\Support\Facades\DB;
 
@@ -30,6 +32,37 @@ use Illuminate\Support\Facades\DB;
  */
 trait HandlesSaleStatusActions
 {
+    /**
+     * May this user move money on this sale, as opposed to merely read it?
+     *
+     * The read gate the callers apply first - User::canViewEventData() - deliberately skips
+     * unowned CURATOR roles, but it never looks at `event_role.is_accepted` for a talent or venue
+     * role. It only asks whether the acting user is owner or admin on some role attached to the
+     * event. So a schedule that was merely INVITED to somebody else's event, and has not accepted
+     * (pivot null) or has actively declined (false), passes it.
+     *
+     * Event::scopeManagedBy() is the rule the sales LIST already uses
+     * (TicketController::sales -> whereHas('event', managedBy)), and it requires the role to be the
+     * event's creator role or to have accepted. Those two disagreeing was survivable while `refund`
+     * was a status flip. It is not now that it calls SaleRefundService and moves real money out of
+     * the EVENT CREATOR's Stripe or PayPal account, releases the creator's seats and credits the
+     * buyer's gift card - reachable by anyone who can guess a sale id, which are Sqids over
+     * sequential integers.
+     *
+     * This is a pure narrowing of the read gate, not a different rule: scopeManagedBy() builds on
+     * User::manageableRoles() -> editor() -> level in (owner, admin), the same two levels
+     * canViewEventData() checks, and it keeps the same events.user_id shortcut and the same
+     * skip-unowned-curators behaviour. All it adds is the accepted-pivot requirement.
+     */
+    protected function userMayMoveMoneyOn(Sale $sale, ?User $user): bool
+    {
+        if (! $user || ! $sale->event_id) {
+            return false;
+        }
+
+        return Event::whereKey($sale->event_id)->managedBy($user)->exists();
+    }
+
     /**
      * The per-event figures a status change on this sale is answerable for.
      *

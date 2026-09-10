@@ -170,6 +170,13 @@ class ApiSaleController extends Controller
                 break;
 
             case 'refund':
+                // Stricter than the read gate above, which never looks at event_role.is_accepted
+                // for a talent or venue role - and this moves money out of the event creator's
+                // gateway account. See HandlesSaleStatusActions::userMayMoveMoneyOn().
+                if (! $this->userMayMoveMoneyOn($sale, auth()->user())) {
+                    return response()->json(['error' => 'Unauthorized'], 403);
+                }
+
                 $refundResult = app(\App\Services\SaleRefundService::class)->refund(
                     $sale,
                     $request->filled('amount') ? (float) $request->input('amount') : null,
