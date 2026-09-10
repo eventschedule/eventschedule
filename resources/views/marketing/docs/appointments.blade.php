@@ -1,6 +1,7 @@
 <x-docs-page
     key="appointments"
-    description="Set up Calendly-style appointment booking: create appointment types with weekly hours and buffers, and take free or paid bookings."
+    title="Appointments: Booking, Payments, Refunds - Event Schedule"
+    description="Set up Calendly-style appointment booking: types with weekly hours and buffers, payment by Stripe, payment link or cash, and refunds from the Sales page."
     lede="Let guests book time with you on a public page, Calendly-style. You set the hours you are open, they pick an open slot, and everyone gets a confirmation."
     article-description="How to offer appointment booking: create appointment types with weekly hours, buffers, and optional payment, and let guests book a time on your public page."
 >
@@ -13,6 +14,7 @@
         <x-doc-nav-link href="#location">Where you meet</x-doc-nav-link>
         <x-doc-nav-link href="#guest-details">What you ask guests</x-doc-nav-link>
         <x-doc-nav-link href="#payments">Payments</x-doc-nav-link>
+        <x-doc-nav-link href="#refunds" sub>Refunds</x-doc-nav-link>
         <x-doc-nav-link href="#approval">Approval</x-doc-nav-link>
         <x-doc-nav-link href="#bookings">Managing bookings</x-doc-nav-link>
         <x-doc-nav-link href="#rescheduling">Rescheduling</x-doc-nav-link>
@@ -268,7 +270,7 @@
             </svg>
             Payments
         </h2>
-        <p class="text-gray-600 dark:text-gray-300 mb-4">Leave the <strong class="text-gray-900 dark:text-white">Price</strong> at zero for a free type. Enter an amount and the currency and payment method appear: paid types take payment by <strong class="text-gray-900 dark:text-white">cash</strong>, <strong class="text-gray-900 dark:text-white">Stripe</strong>, or a <strong class="text-gray-900 dark:text-white">payment link</strong>. Those three only - PayPal and Payfast cannot be used for appointments even when they are connected, so a schedule whose only payment method is one of those needs another before a paid type can be booked. A currency is required once there is a price.</p>
+        <p class="text-gray-600 dark:text-gray-300 mb-4">Leave the <strong class="text-gray-900 dark:text-white">Price</strong> at zero for a free type. Enter an amount and the currency and payment method appear: paid types take payment by <strong class="text-gray-900 dark:text-white">cash</strong>, <strong class="text-gray-900 dark:text-white">Stripe</strong>, or a <strong class="text-gray-900 dark:text-white">payment link</strong>. Those three only: PayPal, Payfast and Invoice Ninja cannot be used for appointments even when they are connected, so a schedule whose only payment method is one of those needs another before a paid type can be booked. A currency is required once there is a price.</p>
         <div class="doc-table-wrap mb-6">
             <table class="doc-table">
                 <thead>
@@ -305,11 +307,17 @@
         <p class="text-gray-600 dark:text-gray-300 mb-4">Stripe payments are created directly on your own connected Stripe account with no platform fee, exactly as ticket sales are.</p>
         <div class="doc-callout doc-callout-info mb-6">
             <div class="doc-callout-title">Paid types need a payment method</div>
-            <p>A paid type stays hidden from guests until a payment method it can use is connected, and the Appointments tab marks the type that is being held back. Connect Stripe or add a payment link under <a href="{{ route('marketing.docs.account_settings') }}#payments" class="doc-link">Account Settings</a> to make the type bookable. PayPal and Payfast do not count here, so a type can stay held back even though your Payment Methods tab shows a connected account.</p>
+            <p>A paid type stays hidden from guests until a payment method it can use is connected, and the Appointments tab marks the type that is being held back. Connect Stripe or add a payment link under <a href="{{ route('marketing.docs.account_settings') }}#payments" class="doc-link">Account Settings</a> to make the type bookable. PayPal, Payfast and Invoice Ninja do not count here, so a type can stay held back even though your Payment Methods tab shows a connected account.</p>
         </div>
-        <div class="doc-callout doc-callout-info mb-2">
-            <div class="doc-callout-title">How refunds work</div>
-            <p>Cancelling a paid booking does not move any money on its own. To return it, refund the sale on the Sales page: a Stripe booking is refunded through Stripe from there, and every other payment method is marked refunded here and returned in your provider's own dashboard. Refund only appears while the sale is still paid, so refund before you cancel - the cancellation email shows the amount and reference so you can return it in your provider's dashboard if you cancelled first.</p>
+        <h3 id="refunds" class="doc-subheading">Refunds</h3>
+        <p class="text-gray-600 dark:text-gray-300 mb-4">Cancelling a paid booking does not move any money on its own. Money goes back from the <a href="{{ route('marketing.docs.tickets') }}#refunds" class="doc-link">Sales page</a>: open the booking's sale and choose <strong class="text-gray-900 dark:text-white">Refund Ticket</strong> from its actions menu (<strong class="text-gray-900 dark:text-white">Refund</strong> on a phone). What happens next depends on how the guest paid:</p>
+        <ul class="doc-list mb-6">
+            <li><strong class="text-gray-900 dark:text-white">Stripe</strong> - the money goes back through Stripe first, and only then does the sale change. Refund the whole amount and the booking is cancelled: its time is freed and the guest is emailed that the appointment was cancelled. Enter less in <strong class="text-gray-900 dark:text-white">Refund Amount</strong> (the dialog shows what is <strong class="text-gray-900 dark:text-white">Available to refund</strong>) and it is a partial refund: the booking stays confirmed, nobody is emailed, and the sale shows <strong class="text-gray-900 dark:text-white">Refunded so far</strong>.</li>
+            <li><strong class="text-gray-900 dark:text-white">A payment link, or cash you have marked paid</strong> - the menu says <strong class="text-gray-900 dark:text-white">Mark as Refunded</strong> instead. It cancels the booking the same way, freeing the time and emailing the guest, but it moves no money, so return it through whatever took the payment.</li>
+        </ul>
+        <div class="doc-callout doc-callout-warning mb-2">
+            <div class="doc-callout-title">Refund first, then cancel</div>
+            <p>Refund is only offered while the sale is paid. Cancel a paid booking first and the money has to go back in Stripe or your payment provider's own dashboard; the email you get about the cancellation shows the amount and payment reference so you can find it. A refund made in Stripe's own dashboard is not reported back, though: the booking stays confirmed and its time stays blocked. Refund from the Sales page whenever you can.</p>
         </div>
     </section>
 
@@ -365,7 +373,7 @@
                     </tr>
                     <tr>
                         <td>Cancelled</td>
-                        <td>Cancelled, refunded, or an unpaid hold that expired. The slot has been released.</td>
+                        <td>Cancelled, fully refunded, or an unpaid hold that expired. The slot has been released. A partial refund leaves a booking Confirmed.</td>
                     </tr>
                     <tr>
                         <td>Moved</td>
@@ -378,9 +386,9 @@
         <ul class="doc-list mb-6">
             <li><strong class="text-gray-900 dark:text-white">Preview</strong> opens the guest's own booking page in a new tab, exactly as they see it.</li>
             <li><strong class="text-gray-900 dark:text-white">Reschedule</strong> moves a booking to another time without cancelling it. See <a href="#rescheduling" class="doc-link">Rescheduling</a>.</li>
-            <li><strong class="text-gray-900 dark:text-white">Cancel appointment</strong> emails the guest and releases the slot. It is not offered on a booking that has already happened.</li>
+            <li><strong class="text-gray-900 dark:text-white">Cancel appointment</strong> emails the guest and releases the slot. It is not offered on a booking that has already happened, and it moves no money, so <a href="#refunds" class="doc-link">refund</a> a paid booking first.</li>
             <li><strong class="text-gray-900 dark:text-white">New bookings email you too</strong>, whether they are confirmed or waiting for your approval. The notice goes to every team member whose <a href="{{ route('marketing.docs.creating_schedules') }}#settings-notifications" class="doc-link">notification settings</a> ask for it.</li>
-            <li><strong class="text-gray-900 dark:text-white">Paid bookings appear on the Sales page</strong>, where you mark them paid or refunded and see the revenue with the rest of your sales.</li>
+            <li><strong class="text-gray-900 dark:text-white">Paid bookings appear on the Sales page</strong>, where you mark them paid, <a href="#refunds" class="doc-link">refund them</a>, and see the revenue with the rest of your sales. They count on the Revenue tab of <a href="{{ route('marketing.docs.analytics') }}#revenue" class="doc-link">Analytics</a> too.</li>
         </ul>
     </section>
 
@@ -406,7 +414,7 @@
         </div>
         <p class="text-gray-600 dark:text-gray-300 mb-4">A booking cannot be moved when:</p>
         <ul class="doc-list mb-6">
-            <li>It has already started, or has been cancelled, refunded or expired.</li>
+            <li>It has already started, or has been cancelled, fully refunded or expired. A partial refund does not stop a move.</li>
             <li>It is a Stripe or payment link booking still waiting on payment. Those holds expire on their own clock, so the guest pays first and can then move it freely.</li>
             <li>Its appointment type has been turned off or deleted, since a move commits a brand new slot.</li>
             <li>It was moved within the last three minutes. That pause is the only limit: a booking can be moved as soon as it is made, and there is no cap on how many times.</li>
@@ -441,10 +449,12 @@
             Good to know
         </h2>
         <ul class="doc-list mb-6">
-            <li><strong class="text-gray-900 dark:text-white">Email has to work.</strong> On the hosted platform, guests get no confirmations or reminders until the schedule's <a href="{{ route('marketing.docs.creating_schedules') }}#integrations-email" class="doc-link">email settings</a> are configured, and the Appointments tab warns you about it.</li>
+            <li><strong class="text-gray-900 dark:text-white">Email has to work.</strong> On the hosted platform, guests get no confirmations or reminders, and you get no booking notices, until the schedule's <a href="{{ route('marketing.docs.creating_schedules') }}#integrations-email" class="doc-link">email settings</a> are configured, and the Appointments tab warns you about it.</li>
             <li><strong class="text-gray-900 dark:text-white">Reminders only go to confirmed bookings.</strong> A request still waiting on you, or a card booking still waiting on payment, does not get one.</li>
             <li><strong class="text-gray-900 dark:text-white">The same guest cannot double-book.</strong> One email address cannot hold two bookings that start at the same time on your schedule.</li>
             <li><strong class="text-gray-900 dark:text-white">Bookings do not use your ticket allowance.</strong> On the Free plan, appointment bookings never count towards the monthly paid-ticket cap, however many you take.</li>
+            <li><strong class="text-gray-900 dark:text-white">A booking is not a ticket.</strong> It carries no QR code and offers no Add to Google Wallet button. The confirmation email, its calendar invite and the private link are what the guest keeps.</li>
+            <li><strong class="text-gray-900 dark:text-white">You can email past guests.</strong> Everyone who books counts as a ticket buyer on your schedule, so a newsletter sent to the <a href="{{ route('marketing.docs.newsletters') }}#recipients" class="doc-link">Ticket Buyers</a> segment reaches them.</li>
             <li><strong class="text-gray-900 dark:text-white">Turn a type off rather than delete it.</strong> Switching it off hides it from guests and keeps everything already booked, and you can switch it back on later.</li>
             <li><strong class="text-gray-900 dark:text-white">Not the same as Availability.</strong> <a href="{{ route('marketing.docs.availability') }}" class="doc-link">Availability</a> <x-doc-badge plan="enterprise" /> is a tab on talent schedules that marks whole days your team members are unavailable to be booked for events. Appointments offer specific time slots on any schedule type, on any plan.</li>
             <li><strong class="text-gray-900 dark:text-white">Plan.</strong> Appointment booking is on every plan. Free covers one appointment type; Pro and Enterprise are unlimited, as is every selfhosted deployment.</li>
@@ -463,7 +473,7 @@
             <li><a href="{{ route('marketing.docs.managing_schedules') }}#appointments" class="doc-link">Managing Schedules</a> - the Appointments tab and the Requests tab in context</li>
             <li><a href="{{ route('marketing.docs.creating_schedules') }}#details-localization" class="doc-link">Creating Schedules</a> - set your timezone, email settings, and calendar sync</li>
             <li><a href="{{ route('marketing.docs.availability') }}" class="doc-link">Availability</a> - mark whole days your team members are unavailable</li>
-            <li><a href="{{ route('marketing.docs.tickets') }}" class="doc-link">Selling Tickets</a> - the Sales page, where paid bookings and refunds live</li>
+            <li><a href="{{ route('marketing.docs.tickets') }}#managing-sales" class="doc-link">Selling Tickets</a> - the Sales page, where paid bookings are marked paid and refunded</li>
             <li><a href="{{ route('marketing.docs.account_settings') }}#payments" class="doc-link">Account Settings</a> - connect Stripe so paid types can take payment</li>
         </ul>
     </section>

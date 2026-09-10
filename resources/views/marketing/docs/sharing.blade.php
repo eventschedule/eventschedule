@@ -1,7 +1,8 @@
 <x-docs-page
     key="sharing"
-    description="Learn how to share your Event Schedule with the world. Embed on your website, share on social media, and grow your audience."
-    lede="Reach your audience wherever they are. Embed your schedule on your website, share on social media, and let fans subscribe to your events."
+    title="Sharing Your Schedule: Links, Embeds, Feeds - Event Schedule"
+    description="Share your schedule: embed it on your site, post it on social media, print a QR code, and let people follow, sign up by email or subscribe to its calendar."
+    lede="Reach your audience wherever they are. Embed your schedule on your website, share it on social media, and let people follow you, sign up by email, or subscribe to your calendar."
 >
     <x-slot:toc>
         <x-doc-nav-link href="#schedule-url">Your Schedule URL</x-doc-nav-link>
@@ -185,7 +186,7 @@
         </div>
 
         <h3 class="doc-subheading">Event Graphics</h3>
-        <p class="text-gray-600 dark:text-gray-300 mb-4">Use the <a href="{{ route('marketing.docs.event_graphics') }}" class="doc-link">Event Graphics</a> feature to generate shareable images showing multiple upcoming events. Perfect for weekly social media posts. Open it from <strong class="text-gray-900 dark:text-white">Actions &rarr; Events Graphic</strong> in the admin portal. Generating graphics is a Pro feature.</p>
+        <p class="text-gray-600 dark:text-gray-300 mb-4">Use the <a href="{{ route('marketing.docs.event_graphics') }}" class="doc-link">Event Graphics</a> feature to generate shareable images showing multiple upcoming events, ready for a weekly social media post. Open it from <strong class="text-gray-900 dark:text-white">Actions &rarr; Events Graphic</strong> in the admin portal. Generating graphics is free on every plan; having AI write the text that goes with them, and emailing graphics on a schedule, are Enterprise features.</p>
     </section>
 
     <!-- Followers -->
@@ -196,35 +197,48 @@
             </svg>
             Building Followers
         </h2>
-        <p class="text-gray-600 dark:text-gray-300 mb-6">Following gives you a standing list of people who asked to hear from you. It is the audience your newsletters go to, and it builds up over time.</p>
+        <p class="text-gray-600 dark:text-gray-300 mb-6">Your audience is everyone who asked to hear from you: people who follow your schedule with an account, and people who signed up with their name and email address. Together they are who your newsletters go to, and the list builds up over time.</p>
 
         <div class="doc-callout doc-callout-warning">
             <div class="doc-callout-title">Following and Subscribing Are Different Lists</div>
-            <p>Somebody who leaves an email address on your page and confirms it is a <strong class="text-gray-900 dark:text-white">subscriber</strong>, and subscribers are sent a digest automatically when you publish new events, batched and no more often than once every few days. Somebody signed in who presses Follow is an <strong class="text-gray-900 dark:text-white">account follower</strong>, and pressing Follow on its own reaches them only when you write and send a <a href="{{ route('marketing.docs.newsletters') }}" class="doc-link">newsletter</a>. Confirming an email address does both: it starts the digest and creates an account, so they are listed once, under Email subscribers, with an Account badge. If someone wants your events on their own calendar with no email at all, point them at the <a href="#calendar-feeds" class="doc-link">iCal feed</a> instead.</p>
+            <p>Somebody who leaves their name and email address on your page and confirms it is a <strong class="text-gray-900 dark:text-white">subscriber</strong>, and subscribers are sent a digest automatically when you publish new public events, batched and no more often than once every few days. Somebody signed in who presses Follow is an <strong class="text-gray-900 dark:text-white">account follower</strong>, and pressing Follow on its own reaches them only when you write and send a <a href="{{ route('marketing.docs.newsletters') }}" class="doc-link">newsletter</a>. Confirming a sign-up does both: it starts the digest and sets up an account that follows your schedule, so they are listed once, under Email subscribers, with an Account badge. If someone wants your events on their own calendar with no email at all, point them at the <a href="#calendar-feeds" class="doc-link">calendar feed</a> instead.</p>
         </div>
 
         <h3 class="doc-subheading">How Following Works</h3>
-        <ol class="doc-list doc-list-numbered mb-6">
-            <li>A visitor clicks <strong class="text-gray-900 dark:text-white">Follow</strong> on your schedule</li>
-            <li>A short consent panel tells them the schedule will be able to see their name and email. They can tick "don't ask again" so they are not asked on the next schedule they follow</li>
-            <li>If they are not signed in, they are sent to sign up first. Following needs a free Event Schedule account, so an email address on its own is not enough</li>
-            <li>Your schedule then appears on their <strong class="text-gray-900 dark:text-white">Following</strong> page, where they can also copy your iCal or RSS feed, or sync the schedule into their own Google Calendar</li>
-            <li>They can unfollow at any time from that same page</li>
-        </ol>
+        <p class="text-gray-600 dark:text-gray-300 mb-4">The <strong class="text-gray-900 dark:text-white">Follow</strong> button on your schedule page, and beside each act on an event page that runs its own schedule, does one of two things:</p>
+        <ul class="doc-list mb-6">
+            <li><strong class="text-gray-900 dark:text-white">Signed in:</strong> a short dialog tells them the schedule will be able to see their name and email, and they can tick <strong class="text-gray-900 dark:text-white">Don't ask me again when I follow other schedules</strong>. Your schedule then appears on their <strong class="text-gray-900 dark:text-white">Following</strong> page, where they can copy your iCal or RSS feed, sync the schedule into their own Google Calendar, or unfollow at any time</li>
+            <li><strong class="text-gray-900 dark:text-white">Signed out:</strong> the same dialog asks for their email and name instead, and works exactly like the sign-up panel below. Nobody is sent away to create an account first</li>
+        </ul>
+        <p class="text-gray-600 dark:text-gray-300 mb-6">The Follow button is part of the hosted version at eventschedule.com. On a selfhosted install, the sign-up panel is how people join.</p>
+
+        <h3 class="doc-subheading">Email Sign-Ups</h3>
+        <p class="text-gray-600 dark:text-gray-300 mb-4">Signed-out visitors see a <strong class="text-gray-900 dark:text-white">Stay up to date</strong> panel on your schedule page and near the foot of each event page, though never inside an embed. It asks for their email and name, and its button reads <strong class="text-gray-900 dark:text-white">Keep me posted</strong> unless you have <a href="{{ route('marketing.docs.creating_schedules') }}#customize-custom-labels" class="doc-link">relabelled it</a>.</p>
+        <ul class="doc-list mb-6">
+            <li>They are emailed a confirmation link, and join your list only once they open it. Until then the Followers tab shows them as <strong class="text-gray-900 dark:text-white">Awaiting confirmation</strong></li>
+            <li>Confirming also sets up an account for them that follows your schedule. The page they land on offers <strong class="text-gray-900 dark:text-white">Set password and sign in</strong>, and they are on the list whether or not they finish it</li>
+            <li>The panel tells them to expect at most one email every few days, only when there is something new. That is the automatic digest of the new public events you publish</li>
+            <li>A tick box on the ticket and RSVP forms adds a buyer to your subscribers without a confirmation email, and does not set up an account for them by itself</li>
+            <li>Under the form, <strong class="text-gray-900 dark:text-white">Subscribe to all events from</strong> your schedule offers the <a href="#calendar-feeds" class="doc-link">calendar feed</a> to anyone who would rather not give an address</li>
+        </ul>
+        <p class="text-gray-600 dark:text-gray-300 mb-6">For the details of the checkout opt-in and the digest, see <a href="{{ route('marketing.docs.newsletters') }}#email-subscribers" class="doc-link">Email Subscribers</a>.</p>
 
         <h3 class="doc-subheading">Managing Followers</h3>
-        <p class="text-gray-600 dark:text-gray-300 mb-4">Open the <strong class="text-gray-900 dark:text-white">Followers</strong> tab in the admin portal. The tab label carries the running total, so you can see how many followers you have without opening it. Inside you get:</p>
+        <p class="text-gray-600 dark:text-gray-300 mb-4">Open the <strong class="text-gray-900 dark:text-white">Followers</strong> tab in the admin portal. The tab label carries the running total, so you can see how big your audience is without opening it. Inside you get:</p>
         <ul class="doc-list">
-            <li>A table of every follower: name, email, the schedule they followed and the date they followed it</li>
+            <li>Three panels counting your audience: <strong class="text-gray-900 dark:text-white">Can be emailed</strong>, <strong class="text-gray-900 dark:text-white">Get new-event emails</strong> and <strong class="text-gray-900 dark:text-white">Newsletter only</strong></li>
+            <li>Your email subscribers, each with a status, and an <strong class="text-gray-900 dark:text-white">Account</strong> badge on those who have an account</li>
+            <li>A table of account followers: name, email, their own schedule if they run one, and the date they followed you</li>
             <li>Sortable columns, newest first by default, and paging once the list grows</li>
             <li>A <strong class="text-gray-900 dark:text-white">QR Code</strong> button, covered in <a href="#qr-code" class="doc-link">QR Codes</a> below</li>
         </ul>
+        <p class="text-gray-600 dark:text-gray-300 mt-4 mb-4">Everything on the tab is covered in <a href="{{ route('marketing.docs.managing_schedules') }}#followers" class="doc-link">Managing Schedules: Followers</a>.</p>
 
         <p class="text-gray-600 dark:text-gray-300 mb-4">Send <a href="{{ route('marketing.docs.newsletters') }}" class="doc-link">newsletters</a> to your followers to keep them engaged and promote upcoming events. Newsletters are available on every plan, and the monthly allowance counts recipients rather than sends: a newsletter to 100 followers uses 100 of the allowance.</p>
 
         <div class="doc-callout doc-callout-info">
             <div class="doc-callout-title">Privacy</div>
-            <p>When users follow your schedule, you can see their name and email address in the followers tab so you can keep them informed. Their email is shared only with you, the schedule owner, and is never sold or shared with third parties.</p>
+            <p>Followers and subscribers are both told, before they join, that the schedule will see the name and email they give. You and your team see them on the Followers tab and the newsletter pages; they never appear on your public pages, your embeds or your public stats, and Event Schedule never sells or shares them.</p>
         </div>
     </section>
 
@@ -236,10 +250,16 @@
             </svg>
             Calendar Subscriptions
         </h2>
-        <p class="text-gray-600 dark:text-gray-300 mb-6">Let your audience subscribe to your events directly in their calendar apps or feed readers. Both feeds are public, need no account, and are available on every plan.</p>
+        <p class="text-gray-600 dark:text-gray-300 mb-6">Let your audience subscribe to your events in their calendar app or feed reader. A subscribed calendar re-reads the feed on its own, so a date you move reaches it with nobody doing anything, unlike the one-off file Add to Calendar hands over. Both feeds are public, need no account or email address, and are available on every plan.</p>
 
         <h3 class="doc-subheading">Finding Your Feed URLs</h3>
-        <p class="text-gray-600 dark:text-gray-300 mb-4">In the admin portal, edit your schedule and open <strong class="text-gray-900 dark:text-white">Integrations &rarr; Advanced</strong>. The <strong class="text-gray-900 dark:text-white">iCal Feed</strong> and <strong class="text-gray-900 dark:text-white">RSS Feed</strong> fields each have a copy button. Your followers can copy the same two URLs from their own <strong class="text-gray-900 dark:text-white">Following</strong> page.</p>
+        <p class="text-gray-600 dark:text-gray-300 mb-4">Your guests are offered the iCal feed on your own pages, with nothing for you to set up:</p>
+        <ul class="doc-list mb-4">
+            <li>On an event page, the <strong class="text-gray-900 dark:text-white">Add to Calendar</strong> menu ends with <strong class="text-gray-900 dark:text-white">Subscribe to all events from</strong> your schedule. The menu is there, on a phone as well as a computer, whenever the event is not selling tickets, taking registrations or sending buyers to an outside ticket link</li>
+            <li>The <strong class="text-gray-900 dark:text-white">Stay up to date</strong> sign-up panel, shown to signed-out visitors on your schedule page and your event pages, ends with the same link and the line "Adds a live calendar that updates itself when dates change."</li>
+            <li>Your followers can use <strong class="text-gray-900 dark:text-white">Copy iCal Feed</strong> and <strong class="text-gray-900 dark:text-white">Copy RSS Feed</strong> on their own <strong class="text-gray-900 dark:text-white">Following</strong> page</li>
+        </ul>
+        <p class="text-gray-600 dark:text-gray-300 mb-4">To copy the addresses yourself, edit your schedule in the admin portal and open <strong class="text-gray-900 dark:text-white">Integrations &rarr; Advanced</strong>. The <strong class="text-gray-900 dark:text-white">iCal Feed</strong> and <strong class="text-gray-900 dark:text-white">RSS Feed</strong> fields each have a copy button.</p>
 
         <div class="doc-fields">
             <div class="doc-field">
@@ -254,7 +274,7 @@
             </div>
             <div class="doc-field">
                 <h4 class="font-semibold text-gray-900 dark:text-white mb-2">Add to Calendar Buttons</h4>
-                <p class="text-sm text-gray-500 dark:text-gray-400">Each event page has an "Add to Calendar" button offering Google Calendar, Apple Calendar (which downloads an .ics file) and Microsoft Outlook. This copies one event across once; it is not a subscription.</p>
+                <p class="text-sm text-gray-500 dark:text-gray-400">Each event page has an <strong class="text-gray-900 dark:text-white">Add to Calendar</strong> button offering Google Calendar, Apple Calendar (which downloads an .ics file) and Microsoft Outlook. Each of those copies one event across once and never updates. The rows below them are the ones that keep someone up to date: on a public event that has not happened yet, <strong class="text-gray-900 dark:text-white">Tell me when tickets go on sale</strong> puts an email address on that event's <a href="{{ route('marketing.docs.tickets') }}#interest-list" class="doc-link">interest list</a>, and <strong class="text-gray-900 dark:text-white">Subscribe to all events from</strong> your schedule is the iCal feed above.</p>
             </div>
         </div>
 
@@ -262,7 +282,7 @@
         <ul class="doc-list">
             <li>Upcoming events only. An event that runs 24 hours or longer stays in the feed until it has actually ended</li>
             <li>Repeating events are expanded into individual dated entries for the next 90 days, so a weekly night shows up as a run of entries rather than one</li>
-            <li>Drafts, unlisted events, cancelled events and password-protected events are all left out</li>
+            <li>Only events accepted onto your schedule appear. Drafts, internal and unlisted events, cancelled events and password-protected events are all left out, so an event you cancel drops out of the feed</li>
             <li>Each entry carries the event title, description, venue address and a link back to the event page</li>
             <li>Start and end times are exported as absolute instants, so every subscriber's calendar app shows them in that subscriber's own local time</li>
         </ul>
@@ -290,7 +310,7 @@
             <li>Use it on flyers, posters, table tents, or anywhere else</li>
         </ol>
 
-        <p class="text-gray-600 dark:text-gray-300 mb-6">When scanned, the QR code takes people directly to your schedule where they can view events and follow you. If you have an Enterprise custom domain set up, the code points at that domain rather than the eventschedule.com address.</p>
+        <p class="text-gray-600 dark:text-gray-300 mb-6">When scanned, the QR code opens your schedule with the sign-up form ready: for anyone not signed in, the page scrolls straight to the <strong class="text-gray-900 dark:text-white">Stay up to date</strong> panel, so they can sign up on the spot. Until your first follower or subscriber arrives, the Followers tab also shows <strong class="text-gray-900 dark:text-white">Your follow link</strong>, which opens the same place. If you have an Enterprise custom domain set up, both point at that domain rather than the eventschedule.com address.</p>
 
         <div class="doc-callout doc-callout-info">
             <div class="doc-callout-title">A Different QR Code from Ticket Check-In</div>
@@ -404,8 +424,14 @@ frameborder="0"&gt;&lt;/iframe&gt;
                 {
                     "@type": "HowToStep",
                     "name": "Build Your Followers",
-                    "text": "Visitors with a free Event Schedule account can follow your schedule, which adds it to their Following page and adds them to the audience your newsletters go to. View and manage followers from the Followers tab in the admin portal.",
+                    "text": "Visitors can press Follow or sign up with their name and email address, and confirming a sign-up also sets up an account that follows your schedule. Everyone who joins is in the audience your newsletters go to, and confirmed subscribers get an automatic digest of your new public events. Manage them from the Followers tab in the admin portal.",
                     "url": "{{ url(route('marketing.docs.sharing')) }}#followers"
+                },
+                {
+                    "@type": "HowToStep",
+                    "name": "Offer a Calendar Feed",
+                    "text": "Guests can subscribe to all your events as a live calendar feed from the Add to Calendar menu on an event page or from the sign-up panel, and a date you move updates in their calendar on its own. Copy the iCal and RSS feed URLs from Integrations, Advanced in the admin portal.",
+                    "url": "{{ url(route('marketing.docs.sharing')) }}#calendar-feeds"
                 }
             ]
         }

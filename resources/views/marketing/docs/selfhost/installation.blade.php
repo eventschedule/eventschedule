@@ -1,6 +1,7 @@
 <x-docs-page
     key="selfhost/installation"
-    description="Set up Event Schedule on your own server with this step-by-step installation guide. Learn how to configure the database, environment, and cron jobs."
+    title="Selfhost Installation: PHP, MySQL and Cron - Event Schedule"
+    description="Install Event Schedule on your own server: PHP 8.2 and MySQL, the browser setup wizard, file permissions and the cron entry that runs the scheduler."
     lede="Set up Event Schedule on your own server with this step-by-step guide. For automated installation, consider using Softaculous or Docker."
 >
     <x-slot:toc>
@@ -43,7 +44,7 @@
 
         <div class="doc-callout doc-callout-info">
             <div class="doc-callout-title">Every feature is included</div>
-            <p>A selfhosted install is not a reduced edition. It resolves to the Enterprise feature set, so ticketing, check-in, custom fields, event graphics, webhooks, custom CSS, AI features and unlimited newsletters are all available with no plan to buy. A few controls only make sense on the hosted service (per-schedule email settings, subscription billing) and are hidden here.</p>
+            <p>A selfhosted install is not a reduced edition. It resolves to the Enterprise feature set, so everything the hosted service keeps for Pro and Enterprise comes with no plan to buy: unlimited paid ticket sales, the check-in dashboard, passes, gift cards, custom fields, webhooks, custom CSS, team members, unlimited newsletters, and the AI features once you add a key. A few controls only make sense on the hosted service (per-schedule email settings, subscription billing) and are hidden here.</p>
         </div>
     </section>
 
@@ -360,7 +361,7 @@
                         <td>Every minute</td>
                     </tr>
                     <tr>
-                        <td>Retry failed jobs</td>
+                        <td>Retry failed jobs, and link the events a curator's source schedules publish onto that curator</td>
                         <td>Every 5 minutes</td>
                     </tr>
                     <tr>
@@ -368,7 +369,7 @@
                         <td>Every 15 minutes</td>
                     </tr>
                     <tr>
-                        <td>Release unpaid ticket reservations, expire waitlist offers, send feedback requests, appointment and carpool reminders, event graphic emails</td>
+                        <td>Release unpaid ticket reservations, expire waitlist offers, charge installment payments, send feedback requests, appointment and carpool reminders, event graphic emails, the new-event digest to confirmed subscribers, and interest-list emails (tickets on sale, and the reminder before the event)</td>
                         <td>Hourly</td>
                     </tr>
                     <tr>
@@ -416,7 +417,7 @@
         <p class="text-gray-600 dark:text-gray-300 mb-4">Now that Event Schedule is installed, you may want to:</p>
         <ul class="doc-list">
             <li>Configure <a href="{{ route('marketing.docs.selfhost.email') }}" class="doc-link">email delivery</a>, which nothing else works properly without</li>
-            <li>Configure <a href="{{ route('marketing.docs.selfhost.stripe') }}" class="doc-link">Stripe payments</a> for ticket sales</li>
+            <li>Configure <a href="{{ route('marketing.docs.selfhost.stripe') }}" class="doc-link">Stripe, PayPal or Payfast</a> for ticket sales</li>
             <li>Add a <a href="{{ route('marketing.docs.selfhost.ai') }}" class="doc-link">Gemini or OpenAI key</a> to turn on AI event import, agenda scanning and translation</li>
             <li>Set up <a href="{{ route('marketing.docs.selfhost.google_calendar') }}" class="doc-link">Google Calendar integration</a></li>
             <li>Set up <a href="{{ route('marketing.docs.selfhost.microsoft_calendar') }}" class="doc-link">Outlook Calendar integration</a></li>
@@ -469,7 +470,7 @@ ONESIGNAL_REST_API_KEY=your-onesignal-rest-api-key</code></pre>
             </span>
             Spam Protection (Optional)
         </h2>
-        <p class="text-gray-600 dark:text-gray-300 mb-4">Event Schedule can put a <a href="https://www.cloudflare.com/products/turnstile/" target="_blank" rel="noopener noreferrer" class="doc-link">Cloudflare Turnstile</a> challenge in front of every form a stranger can reach. Turnstile is invisible to most visitors and needs no puzzle-solving.</p>
+        <p class="text-gray-600 dark:text-gray-300 mb-4">Event Schedule can put a <a href="https://www.cloudflare.com/products/turnstile/" target="_blank" rel="noopener noreferrer" class="doc-link">Cloudflare Turnstile</a> challenge in front of the forms a stranger uses to sign in, pay, book or post. Turnstile is invisible to most visitors and needs no puzzle-solving.</p>
         <p class="text-gray-600 dark:text-gray-300 mb-4">Once configured, the challenge is added to:</p>
         <ul class="doc-list mb-6">
             <li>Sign in, sign up and password reset</li>
@@ -478,6 +479,7 @@ ONESIGNAL_REST_API_KEY=your-onesignal-rest-api-key</code></pre>
             <li>Events submitted by guests through a schedule's submission page</li>
             <li>Fan photo, video and comment submissions</li>
         </ul>
+        <p class="text-gray-600 dark:text-gray-300 mb-4">The two forms that ask for an email address and nothing else never show the challenge: a schedule's sign-up panel and an event's <strong>Notify me</strong> list. Both are guarded by a hidden honeypot field and by rate limits on the visitor's IP address and on the email address instead.</p>
         <p class="text-gray-600 dark:text-gray-300 mb-4">Create a free Turnstile widget for your domain, then set both values in your <code class="doc-inline-code">.env</code>:</p>
         <div class="doc-code-block">
             <div class="doc-code-header">

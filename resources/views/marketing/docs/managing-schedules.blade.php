@@ -1,6 +1,7 @@
 <x-docs-page
     key="managing-schedules"
-    description="Learn how to run a schedule day to day in Event Schedule: the calendar, templates, videos, availability, appointments, event requests and followers."
+    title="Managing Schedules: Team, Requests, Followers - Event Schedule"
+    description="Run a schedule day to day: the calendar, templates, appointments, event requests, followers and email subscribers, team access levels and the audit log."
     lede="Everything on the day-to-day side of a schedule: the calendar and its Actions menu, event requests, followers, team access, your plan, and the audit log."
 >
     <x-slot:toc>
@@ -82,8 +83,8 @@
                     </tr>
                     <tr>
                         <td><a href="#followers" class="doc-link">Followers</a></td>
-                        <td>People who follow the schedule, and your QR follow code</td>
-                        <td>eventschedule.com only</td>
+                        <td>People who follow the schedule or signed up by email, and your QR follow code</td>
+                        <td>Always on eventschedule.com; on a selfhosted install, once someone has subscribed</td>
                     </tr>
                     <tr>
                         <td><a href="#team" class="doc-link">Team</a></td>
@@ -355,15 +356,15 @@
             Two different things land here:
         </p>
         <ul class="doc-list mb-6">
-            <li><strong class="text-gray-900 dark:text-white">Event requests.</strong> Anyone with your public request link can submit an event to your schedule, if you have turned <strong>Accept requests</strong> on. Each card shows the submitting schedule or venue with its picture, the date, the sub-schedule it was filed under, and the answers to any questions you added to your request form.</li>
+            <li><strong class="text-gray-900 dark:text-white">Event requests.</strong> Anyone with your public request link can submit an event to your schedule, if you have turned <strong>Accept requests</strong> on. A date another schedule adds you to lands here too when your schedule reviews it first, which a Talent schedule always does unless that schedule is already on its approved list. Each card shows the submitting schedule or venue with its picture, the date, the sub-schedule it was filed under, and the answers to any questions you added to your request form.</li>
             <li><strong class="text-gray-900 dark:text-white">Appointment bookings</strong>, when the appointment type has <strong>Require approval before confirming</strong> turned on. These cards are badged with the appointment type and show the guest's name, email, phone, chosen time, price and payment status, plus any note they left. A booking a guest has moved to a new time is badged as moved, so you can spot it in a long list.</li>
         </ul>
 
         <h3 class="doc-subheading">Working through the list</h3>
         <ol class="doc-list doc-list-numbered mb-6">
             <li><strong>View</strong> opens the public page for an event request so you can see the whole thing, and <strong>Edit</strong> opens it in the event form if you want to tidy it up before publishing.</li>
-            <li><strong>Accept</strong> publishes the event on your schedule, or confirms the booking. The person who submitted it is emailed, and a guest who booked an appointment gets their confirmation and calendar invite.</li>
-            <li><strong>Decline</strong> asks you to confirm, then removes it from your schedule and emails the submitter. Declining a booking also cancels it and frees the slot; if it was already paid you are reminded to refund it yourself.</li>
+            <li><strong>Accept</strong> publishes the event on your schedule, or confirms the booking. The person who submitted it is emailed, and a guest who booked an appointment gets their confirmation and calendar invite. On eventschedule.com every email about a booking, to the guest or to you, needs the schedule's own <a href="{{ route('marketing.docs.creating_schedules') }}#integrations-email" class="doc-link">email settings</a>.</li>
+            <li><strong>Decline</strong> asks you to confirm, then removes it from your schedule and emails the submitter. Declining a booking also cancels it and frees the slot, but it does not return a payment. If the booking was paid, the email telling you it was cancelled gives the amount and payment reference, so you can return the money in Stripe or your payment provider. To refund from Event Schedule instead, use <strong>Refund Ticket</strong> on the <a href="{{ route('marketing.docs.tickets') }}#managing-sales" class="doc-link">Sales page</a> before you decline: it is only offered while the sale is still paid.</li>
             <li><strong>Accept All</strong> at the top of the list takes everything in one go, after a confirmation that names the count. There is no bulk decline: declining is one at a time, on purpose.</li>
         </ol>
 
@@ -393,17 +394,20 @@
         </h2>
         @if(config('app.hosted'))
         <p class="text-gray-600 dark:text-gray-300 mb-4">
-            The <strong class="text-gray-900 dark:text-white">Followers</strong> tab lists your audience: three summary panels, then <a href="{{ route('marketing.docs.newsletters') }}#email-subscribers" class="doc-link">email subscribers</a>, then people who joined by pressing Follow. Nobody appears twice, because confirming an email address also creates an account, and those people are listed under Email subscribers with an <strong class="text-gray-900 dark:text-white">Account</strong> badge. Both lists are default recipients when you send a <a href="{{ route('marketing.docs.newsletters') }}#recipients" class="doc-link">newsletter</a>.
+            The <strong class="text-gray-900 dark:text-white">Followers</strong> tab lists your audience. Three panels at the top count it: <strong class="text-gray-900 dark:text-white">Get new-event emails</strong> is your confirmed email subscribers, <strong class="text-gray-900 dark:text-white">Newsletter only</strong> is people who pressed Follow while signed in, and <strong class="text-gray-900 dark:text-white">Can be emailed</strong> is the two added together. Below them come the two lists: <a href="{{ route('marketing.docs.newsletters') }}#email-subscribers" class="doc-link">email subscribers</a>, then account followers. Nobody appears twice, because confirming a sign-up also sets up an account that follows your schedule, and those people are listed under Email subscribers with an <strong class="text-gray-900 dark:text-white">Account</strong> badge. Both lists are default recipients when you send a <a href="{{ route('marketing.docs.newsletters') }}#recipients" class="doc-link">newsletter</a>.
         </p>
         <p class="text-gray-600 dark:text-gray-300 mb-4">
-            Pressing Follow on its own does not sign anybody up for automatic email. Confirmed email subscribers are different: they asked to hear from you, so publishing sends them <a href="{{ route('marketing.docs.newsletters') }}#email-subscribers" class="doc-link">an automatic digest</a>, at most one every few days. You can turn that off under Settings &rarr; Notifications.
+            People join in two ways. Somebody signed in who presses <strong class="text-gray-900 dark:text-white">Follow</strong> becomes an account follower. Somebody signed out gives their email and name, in the <strong class="text-gray-900 dark:text-white">Stay up to date</strong> panel on your schedule and event pages or in the dialog the Follow button opens for them, and becomes an email subscriber once they open the confirmation link.
+        </p>
+        <p class="text-gray-600 dark:text-gray-300 mb-4">
+            Pressing Follow on its own does not sign anybody up for automatic email. Confirmed email subscribers are different: they asked to hear from you, so publishing sends them <a href="{{ route('marketing.docs.newsletters') }}#email-subscribers" class="doc-link">an automatic digest</a> of the new public events your schedule creates, at most one every few days. You can turn that off under Settings &rarr; Notifications.
         </p>
 
         <ul class="doc-list mb-6">
             <li>The table gives each follower's <strong>name</strong>, <strong>email address</strong>, their own schedule if they run one, and the <strong>date</strong> they followed you</li>
             <li>Sort by name, email or date by clicking the column heading, and page through longer lists at the bottom</li>
-            <li><strong>QR Code</strong> at the top right downloads a PNG that points at your public schedule page, or at your custom domain if you have one, ready to print on a poster or a flyer</li>
-            <li>Before you have any followers, the tab shows your public link instead so you can copy and share it</li>
+            <li><strong>QR Code</strong> at the top right downloads a PNG ready to print on a poster or a flyer. Scanning it opens your public schedule page, or your custom domain if you have one, scrolled to the sign-up form</li>
+            <li>Before anyone has joined, the tab shows <strong>Your follow link</strong> with a <strong>Copy Link</strong> button. It opens the same place as the QR code</li>
             <li>The subscriber table adds a <strong>status</strong> for each address: Confirmed, Awaiting confirmation, or Unsubscribed. Only confirmed addresses are ever emailed</li>
             <li>An <strong>Account</strong> badge beside a name means that person also has an account here, so the schedule is on their Following page and they can manage it themselves</li>
             <li>Removing a subscriber removes them from both lists at once, so they stop receiving newsletters as well as the digest</li>
@@ -419,7 +423,7 @@
         </p>
         @else
         <p class="text-gray-600 dark:text-gray-300 mb-4">
-            Following a schedule with an account is part of the hosted version of Event Schedule (eventschedule.com). <a href="{{ route('marketing.docs.newsletters') }}#email-subscribers" class="doc-link">Email subscribers</a> work on every installation, though: the sign-up panel on your schedule and event pages is the capture surface here, and the <strong class="text-gray-900 dark:text-white">Followers</strong> tab appears as soon as you have your first subscriber, listing each address with its status and sign-up date.
+            The <strong class="text-gray-900 dark:text-white">Follow</strong> button is part of the hosted version of Event Schedule (eventschedule.com). <a href="{{ route('marketing.docs.newsletters') }}#email-subscribers" class="doc-link">Email subscribers</a> work on every installation, though: the sign-up panel on your schedule and event pages is the capture surface here, and the <strong class="text-gray-900 dark:text-white">Followers</strong> tab appears as soon as you have your first subscriber, listing each address with its status and sign-up date. If your install lets people create accounts, confirming a sign-up also sets up one that follows the schedule, marked with an <strong class="text-gray-900 dark:text-white">Account</strong> badge.
         </p>
         @endif
     </section>
@@ -456,18 +460,21 @@
                     </tr>
                     <tr>
                         <td><strong>Admin</strong></td>
-                        <td>Run the schedule day to day: add and edit events, accept and decline requests, edit the schedule settings, sell tickets, see the schedule's sales and run check-in, invite new members</td>
+                        <td>Run the schedule day to day: add and edit events, accept and decline requests, edit the schedule settings, sell tickets, see the schedule's sales, waitlist and check-in dashboard, refund a sale, scan tickets at the door, invite new members</td>
                         <td>Change anyone's level, remove another member, or delete the schedule</td>
                     </tr>
                     <tr>
                         <td><strong>Viewer</strong></td>
                         <td>Read the admin panel: browse the calendar, requests, followers, team and bookings, generate a graphic, grab the embed code, and scan tickets at the door</td>
-                        <td>Add or change anything, act on requests, see ticket sales, or open the schedule settings page at all</td>
+                        <td>Add or change anything, act on requests, see ticket sales, the waitlist or the check-in dashboard, or open the schedule settings page at all</td>
                     </tr>
                 </tbody>
             </table>
         </div>
         <p class="text-gray-600 dark:text-gray-300 mt-6 mb-4">
+            Sales, refunds, the waitlist and the check-in dashboard cover the events on your schedule, with one exception: the team of a Curator schedule does not see the sales of an event it only lists, because that money belongs to the schedule that created the event.
+        </p>
+        <p class="text-gray-600 dark:text-gray-300 mb-4">
             <strong class="text-gray-900 dark:text-white">Following is not an access level.</strong> Someone who follows your schedule from its public page is a member of your audience, not of your team, and gets no admin panel access at all.
         </p>
 

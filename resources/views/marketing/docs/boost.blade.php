@@ -1,5 +1,6 @@
 <x-docs-page
     key="boost"
+    title="Boost: Facebook and Instagram Event Ads - Event Schedule"
     plan="pro"
     description="Learn how to promote your events with Boost: Facebook and Instagram ad campaigns, and promoted cards on other schedules on the same site."
     lede="Promote your events two ways from one page: Facebook and Instagram ads bought through Meta, and promoted cards shown on other schedules on the same site."
@@ -367,7 +368,11 @@
                     </tr>
                     <tr>
                         <td><span class="font-semibold text-gray-900 dark:text-white">Call to action</span></td>
-                        <td>Get Tickets for a ticketed in-person event, Sign Up for a ticketed online event, otherwise Learn More</td>
+                        <td>Get Tickets for a ticketed event with a venue, Sign Up for a ticketed online-only event, and Learn More when the event has no tickets set up</td>
+                    </tr>
+                    <tr>
+                        <td><span class="font-semibold text-gray-900 dark:text-white">Destination</span></td>
+                        <td>The event's own page on your schedule, which is where every click on the ad lands</td>
                     </tr>
                 </tbody>
             </table>
@@ -377,7 +382,7 @@
             Anything Boost cannot work out well becomes a warning at the top of the form rather than a silent guess. You will be told when the event has no location, no image or no description, when it starts within 24 hours or is more than 90 days away, and when an online event has no tickets so there is nothing to track as a conversion.
         </p>
         <p class="text-gray-600 dark:text-gray-300">
-            Every default can be overridden in Advanced Mode, except the location, which comes from the event itself.
+            Every default can be overridden in Advanced Mode, except the location and the destination, which come from the event itself.
         </p>
     </section>
 
@@ -676,6 +681,7 @@
             <li><strong>Fill in the venue</strong> - the venue's coordinates are what produce a tight local audience. An event with neither a venue nor an online URL falls back to a very broad default.</li>
             <li><strong>Write your own headline for anything unusual</strong> - the generated copy is built from the event name, venue and city. If the appeal of your event is not in its name, say so yourself in Advanced Mode.</li>
             <li><strong>Boost 3 or more days before the event</strong> - campaigns run for between 3 and 14 days, and one that starts within 24 hours of the doors opening may not have time to deliver.</li>
+            <li><strong>Boosting before tickets are on sale</strong> - an event with no tickets set up can still be boosted, and its ad carries a Learn More button. Clicks land on the event page, where visitors can pick <strong class="text-gray-900 dark:text-white">Tell me when tickets go on sale</strong> from the Add to Calendar menu and leave an email address. They join the event's <a href="{{ route('marketing.docs.tickets') }}#interest-list" class="doc-link">interest list</a> and are emailed when tickets go on sale.</li>
             <li><strong>Start with a smaller budget</strong> - a new schedule is capped at $10 anyway, and completing that first campaign is what unlocks the next tier.</li>
             <li><strong>Pick the pricing model that matches your goal</strong> - for on-network promotions, per-click costs nothing until someone actually visits, while per-1,000-views buys reach whether or not anyone clicks.</li>
         </ul>

@@ -1,5 +1,6 @@
 <x-docs-page
     key="saas/custom-domains"
+    title="Custom Domains for Tenants: DNS and SSL - Event Schedule"
     description="Let the schedules on your SaaS deployment use their own domain names, with automatic SSL provisioning through DigitalOcean App Platform."
     lede="Let the schedules on your deployment use their own domain names, with automatic SSL provisioning via DigitalOcean App Platform."
 >
@@ -72,6 +73,8 @@
             <li><strong class="text-gray-900 dark:text-white">Ads are never served.</strong> If you run AdSense on free schedules, ad slots are suppressed on any custom domain, whatever the schedule's plan. Serving ads on a domain you do not own would breach AdSense policy.</li>
             <li><strong class="text-gray-900 dark:text-white">The accommodation map only runs on the owner's own affiliate ID.</strong> Your instance-wide Stay22 fallback ID is never used on a customer's custom domain, so the map simply does not render for a schedule that has not set its own ID.</li>
             <li><strong class="text-gray-900 dark:text-white">The embedded Google map is omitted</strong> on event pages served from a custom domain, so your Maps API key is never handed out on a host you do not control. The address and its link are still shown.</li>
+            <li><strong class="text-gray-900 dark:text-white">Emails send readers to it.</strong> Event links in newsletters, in the automatic new-event digest to confirmed subscribers, and in interest-list and waitlist emails land on the custom domain. Ticket links in purchase confirmations stay on your app subdomain.</li>
+            <li><strong class="text-gray-900 dark:text-white">The calendar feed and short links answer on it.</strong> The live calendar feed at <code class="doc-inline-code">/feed/ical</code> works on the custom domain and links its events there, and so does the short address each of the schedule's social and website links gets, such as <code class="doc-inline-code">/instagram</code>.</li>
             <li><strong class="text-gray-900 dark:text-white">Sign-in, admin and follow links stay on the app subdomain.</strong> Only the schedule's own URLs are rewritten to the custom domain, so the session cookie keeps working.</li>
         </ul>
     </section>
@@ -142,7 +145,7 @@ DO_APP_HOSTNAME=your-app.ondigitalocean.app</code></pre>
 
         <p class="text-gray-600 dark:text-gray-300 mb-4">The three values are read once into the <code class="doc-inline-code">digitalocean</code> block of <code class="doc-inline-code">config/services.php</code>, and they do different jobs:</p>
         <ul class="doc-list mb-6">
-            <li><code class="doc-inline-code">DO_API_TOKEN</code> and <code class="doc-inline-code">DO_APP_ID</code> together decide whether provisioning runs at all. If either is missing, saving a domain, re-provisioning and the status sync all quietly no-op, and the domain never leaves the pending state.</li>
+            <li><code class="doc-inline-code">DO_API_TOKEN</code> and <code class="doc-inline-code">DO_APP_ID</code> together decide whether provisioning runs at all. If either is missing, nothing is registered with DigitalOcean: a Direct domain is saved with no status and never goes live, re-provisioning refuses to run, and the status sync skips itself. Once you add them, the next sync marks such a domain <strong class="text-gray-900 dark:text-white">Setup failed</strong>, and <strong class="text-gray-900 dark:text-white">Re-provision</strong> registers it.</li>
             <li><code class="doc-inline-code">DO_APP_HOSTNAME</code> decides whether Direct mode is offered to owners, and is the value shown in the copy-to-clipboard CNAME instructions.</li>
         </ul>
 
@@ -168,7 +171,7 @@ DO_APP_HOSTNAME=your-app.ondigitalocean.app</code></pre>
         <h3 class="doc-subheading">Direct Mode</h3>
         <p class="text-gray-600 dark:text-gray-300 mb-4">When an owner saves their domain in Direct mode:</p>
         <ol class="doc-list doc-list-numbered mb-6">
-            <li>The domain is normalized to <code class="doc-inline-code">https://host</code>, its hostname is stored separately for fast lookup, and it is rejected if another schedule already claims it or if the hostname contains <code class="doc-inline-code">eventschedule.com</code>.</li>
+            <li>The domain is normalized to <code class="doc-inline-code">https://host</code>, its hostname is stored separately for fast lookup, and it is rejected if another schedule already claims it, if the hostname contains <code class="doc-inline-code">eventschedule.com</code>, or if it is your own base domain or one of its subdomains.</li>
             <li>The hostname is added to your DigitalOcean App Platform app spec over the API, and the schedule's domain status is set to <strong class="text-gray-900 dark:text-white">pending</strong> (or <strong class="text-gray-900 dark:text-white">failed</strong> if the API call did not succeed).</li>
             <li>The owner adds a CNAME record pointing at your app's hostname.</li>
             <li>DigitalOcean verifies the record and provisions an SSL certificate.</li>
@@ -217,7 +220,7 @@ DO_APP_HOSTNAME=your-app.ondigitalocean.app</code></pre>
 
         <pre class="doc-code-block"><code>php artisan app:sync-domain-statuses</code></pre>
 
-        <p class="text-gray-600 dark:text-gray-300 mt-6 mb-4">It reads every domain on your app from the DigitalOcean API and, for each schedule still pending, marks it active once DigitalOcean reports the domain as live, or failed if the domain is no longer on the app at all. If the API returns nothing at all it stops rather than marking everything failed, so an API outage cannot take working domains offline. It needs your cron entry (<code class="doc-inline-code">* * * * * php artisan schedule:run</code>) to be running.</p>
+        <p class="text-gray-600 dark:text-gray-300 mt-6 mb-4">It reads every domain on your app from the DigitalOcean API and, for each schedule still pending, marks it active once DigitalOcean reports the domain as live, or failed if the domain is no longer on the app at all. If the API returns nothing at all it stops rather than marking everything failed, so an API outage cannot take working domains offline. It needs the scheduler running, whichever way you drive it (see <a href="{{ route('marketing.docs.saas.setup') }}#scheduler" class="doc-link">Scheduler and queue</a>).</p>
 
         <div class="doc-callout doc-callout-tip">
             <div class="doc-callout-title">Technical Detail</div>
@@ -292,8 +295,8 @@ DO_APP_HOSTNAME=your-app.ondigitalocean.app</code></pre>
 
         <h3 class="doc-subheading">Actions</h3>
         <ul class="doc-list mb-6">
-            <li><strong class="text-gray-900 dark:text-white">Re-provision</strong> - removes and re-adds the domain to DigitalOcean and resets the status to pending. Use it when SSL provisioning gets stuck or after fixing a bad DNS record. Direct mode only.</li>
-            <li><strong class="text-gray-900 dark:text-white">Remove</strong> - removes the domain from DigitalOcean and clears the schedule's domain, mode, host and status, sending it back to its subdomain URL. This is also how you take a domain off a schedule that has dropped off Enterprise.</li>
+            <li><strong class="text-gray-900 dark:text-white">Re-provision</strong> - writes the domain into your DigitalOcean app spec if it is missing (one write, reported as already registered when there was nothing to add) and resets the status to pending. Use it when SSL provisioning gets stuck or after fixing a bad DNS record. Direct mode only.</li>
+            <li><strong class="text-gray-900 dark:text-white">Remove</strong> - removes the domain from DigitalOcean and clears the schedule's domain, mode, host and status, sending it back to its subdomain URL. This is also how you take a domain off a schedule that has dropped off Enterprise. If DigitalOcean refuses the removal, nothing is cleared: the domain is marked <strong class="text-gray-900 dark:text-white">Setup failed</strong> and the error is shown.</li>
         </ul>
 
         <p class="text-gray-600 dark:text-gray-300 mb-4">Both actions are written to the audit log, and both clear the middleware's cached lookup, so the change takes effect on the next request rather than after 10 minutes.</p>
@@ -329,11 +332,11 @@ DO_APP_HOSTNAME=your-app.ondigitalocean.app</code></pre>
             </div>
             <div class="doc-field">
                 <h4 class="font-semibold text-gray-900 dark:text-white mb-2">404 on the custom domain</h4>
-                <p class="text-sm text-gray-500 dark:text-gray-400">An unknown host is a 404 by design. The middleware only serves a schedule whose mode is direct <em>and</em> whose status is active, so a pending or redirect-mode domain 404s here. Lookups are cached for 10 minutes, so a status that has only just changed can take that long to take effect unless it was changed from the admin panel, which clears the cache.</p>
+                <p class="text-sm text-gray-500 dark:text-gray-400">An unknown host is a 404 by design. The middleware only serves a schedule whose mode is direct <em>and</em> whose status is active, so a pending or redirect-mode domain 404s here, and so does the domain of a schedule that has been deleted. Lookups are cached for 10 minutes, so a status that has only just changed can take that long to take effect unless it was changed from the admin panel, which clears the cache.</p>
             </div>
             <div class="doc-field">
-                <h4 class="font-semibold text-gray-900 dark:text-white mb-2">"Domain already taken" when saving</h4>
-                <p class="text-sm text-gray-500 dark:text-gray-400">A hostname can belong to one schedule only, and the comparison is on the hostname, so <code class="doc-inline-code">http://</code> and <code class="doc-inline-code">https://</code> forms of the same address collide. Find the other schedule in the admin domains list and remove the domain there first. Separately, any hostname containing <code class="doc-inline-code">eventschedule.com</code> is rejected outright.</p>
+                <h4 class="font-semibold text-gray-900 dark:text-white mb-2">"This custom domain is already in use by another schedule"</h4>
+                <p class="text-sm text-gray-500 dark:text-gray-400">A hostname can belong to one schedule only, and the comparison is on the hostname, so <code class="doc-inline-code">http://</code> and <code class="doc-inline-code">https://</code> forms of the same address collide. Find the other schedule in the admin domains list and remove the domain there first. Separately, any hostname containing <code class="doc-inline-code">eventschedule.com</code>, and your own base domain or any subdomain of it, is refused with "Cannot use an eventschedule.com domain as a custom domain". Your customers see that wording even when it is your own domain being refused, so reword it with <a href="{{ route('marketing.docs.saas.setup') }}#translations" class="doc-link">custom translations</a> if that matters to you.</p>
             </div>
             <div class="doc-field">
                 <h4 class="font-semibold text-gray-900 dark:text-white mb-2">Owner-only actions return 405</h4>

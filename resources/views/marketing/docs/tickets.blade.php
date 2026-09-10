@@ -1,8 +1,9 @@
 <x-docs-page
     key="tickets"
-    description="Learn how to sell tickets and manage free event registration. Configure payment methods, create ticket types, enable RSVP, and manage sales."
+    title="Selling Tickets: Payments, Refunds, Check-In - Event Schedule"
+    description="Sell tickets or run free registration: connect Stripe or PayPal, build ticket types, refund from the Sales page and scan QR codes at the door."
     lede="Selling is included on every plan, with zero platform fees. Connect payment processing, create ticket types, and keep 100% of your sales."
-    article-description="Learn how to set up and sell tickets for your events. Configure payment methods, create ticket types, and manage sales."
+    article-description="How to sell tickets and run free registration: payment methods, ticket types, refunds, check-in at the door and the interest list."
 >
     <x-slot:toc>
         <x-doc-nav-group label="General" href="#general" expanded>
@@ -23,6 +24,7 @@
         <x-doc-nav-link href="#add-ons">Add-ons</x-doc-nav-link>
         <x-doc-nav-link href="#allocated-seating">Allocated Seating</x-doc-nav-link>
         <x-doc-nav-group label="Managing Sales" href="#managing-sales">
+            <x-doc-nav-link href="#refunds">Refunds</x-doc-nav-link>
             <x-doc-nav-link href="#sale-notifications">Sale Notifications</x-doc-nav-link>
             <x-doc-nav-link href="#export">Exporting Sales Data</x-doc-nav-link>
             <x-doc-nav-link href="#importing-attendees">Importing Attendees</x-doc-nav-link>
@@ -119,6 +121,8 @@
             <li>Custom checkout fields, collected once per order or once per ticket <x-doc-badge plan="pro" /></li>
             <li>A QR code on every ticket and phone scanning at the door, on every plan, plus a live <a href="#checkin-dashboard" class="doc-link">check-in dashboard</a> <x-doc-badge plan="pro" /></li>
             <li>A <a href="#waitlist" class="doc-link">waitlist</a> that opens automatically when an event date sells out (free for registration, <x-doc-badge plan="pro" /> for tickets)</li>
+            <li>An <a href="#interest-list" class="doc-link">interest list</a> on public event pages, so visitors can ask to hear when tickets go on sale</li>
+            <li><a href="#refunds" class="doc-link">Refunds</a> from the Sales page, sent back through Stripe or PayPal in full or in part</li>
             <li>Sale notification emails, a <a href="#export" class="doc-link">CSV export</a> and a bulk <a href="#importing-attendees" class="doc-link">attendee import</a> <x-doc-badge plan="pro" /></li>
             <li><a href="#feedback" class="doc-link">Post-event feedback</a> requests with star ratings <x-doc-badge plan="pro" /></li>
         </ul>
@@ -216,6 +220,11 @@
                         <td>Yes</td>
                     </tr>
                     <tr>
+                        <td><a href="#refunds" class="doc-link">Refunds</a> from the Sales page, full or partial</td>
+                        <td>Yes</td>
+                        <td>Yes</td>
+                    </tr>
+                    <tr>
                         <td>Live <a href="#checkin-dashboard" class="doc-link">check-in dashboard</a></td>
                         <td>No</td>
                         <td>Yes</td>
@@ -283,7 +292,7 @@
         <p class="text-gray-600 dark:text-gray-300 mb-6">The Tickets mode has five sub-tabs:</p>
         <ul class="doc-list mb-6">
             <li><strong class="text-gray-900 dark:text-white">General:</strong> the ticket types themselves, plus passes and per-type sales dates</li>
-            <li><strong class="text-gray-900 dark:text-white"><a href="#payment" class="doc-link">Payment</a>:</strong> payment method (Cash, Stripe, PayPal, Invoice Ninja, Payfast or Payment URL) and the currency</li>
+            <li><strong class="text-gray-900 dark:text-white"><a href="#payment" class="doc-link">Payment</a>:</strong> payment method (Cash, Stripe, PayPal, Invoice Ninja, Payfast or Payment Link) and the currency</li>
             <li><strong class="text-gray-900 dark:text-white"><a href="#options" class="doc-link">Options</a>:</strong> checkout toggles, custom fields, ticket notes and a terms link</li>
             <li><strong class="text-gray-900 dark:text-white"><a href="#promo-codes" class="doc-link">Promo Codes</a>:</strong> discount codes <x-doc-badge plan="pro" /></li>
             <li><strong class="text-gray-900 dark:text-white"><a href="#add-ons" class="doc-link">Add-ons</a>:</strong> optional extras buyers can attach to an order <x-doc-badge plan="pro" /></li>
@@ -425,7 +434,7 @@
 
         <div class="doc-callout doc-callout-info mb-6">
             <div class="doc-callout-title">What can share a cart</div>
-            <p>A single payment cannot be split across payment accounts, currencies or payment rails, so a cart only holds events that agree on all three: the same owner, the same ticket currency, and the same payment method. The cart says so when an event cannot join. Stripe, PayPal and cash are supported; Invoice Ninja, Payfast and Payment URL are not, since each sends the buyer to a page built for one event.</p>
+            <p>A single payment cannot be split across payment accounts, currencies or payment rails, so a cart only holds events that agree on all three: the same owner, the same ticket currency, and the same payment method. The cart says so when an event cannot join. Stripe, PayPal and cash are supported; Invoice Ninja, Payfast and a payment link are not, since each sends the buyer to a page built for one event.</p>
             <p>Events using individual tickets keep their own checkout. The cart collects one name and email for the whole purchase and has nowhere to put a guest list, so carting one would lose exactly the attendee details that setting exists to collect.</p>
         </div>
 
@@ -484,8 +493,8 @@
                 <p class="text-sm text-gray-500 dark:text-gray-400">Connect your Invoice Ninja account for invoicing and payment tracking. Choose between <a href="#invoiceninja-modes" class="doc-link">two checkout modes</a>.</p>
             </div>
             <div class="doc-field">
-                <h4 class="font-semibold text-gray-900 dark:text-white mb-2">Payment URL</h4>
-                <p class="text-sm text-gray-500 dark:text-gray-400">Use any payment link (PayPal, Venmo, Square, etc.) by entering the URL.</p>
+                <h4 class="font-semibold text-gray-900 dark:text-white mb-2">Payment Link</h4>
+                <p class="text-sm text-gray-500 dark:text-gray-400">Send buyers to a link you already use, such as a Venmo, Cash App or bank transfer page. Event Schedule never hears from that provider, so any refund happens there too.</p>
             </div>
             <div class="doc-field">
                 <h4 class="font-semibold text-gray-900 dark:text-white mb-2">PayPal</h4>
@@ -534,7 +543,7 @@
 
         <p class="text-gray-600 dark:text-gray-300 mb-6">PayPal settles a fixed list of currencies, and an event priced in anything else simply will not offer it. Three currencies PayPal does support - the Hungarian forint, the Japanese yen and the New Taiwan dollar - are deliberately left out. PayPal will not accept an amount with decimals in any of them, and a percentage discount here can produce one, so an event priced that way would have money taken and the ticket withheld. Rather than let that happen, PayPal is not offered for those three at all.</p>
 
-        <p class="text-gray-600 dark:text-gray-300 mb-6">Payments that PayPal holds for review are the one case where a ticket is not issued at once. The sale stays unpaid and the buyer is told the payment is being reviewed rather than being asked to pay again - on every event of the order, so nobody can accidentally pay twice for the same basket. We also ask PayPal not to accept funding that takes days to settle, such as an eCheck, so this should be a short wait rather than an open-ended one.</p>
+        <p class="text-gray-600 dark:text-gray-300 mb-6">Payments that PayPal holds for review are the one case where a ticket is not issued at once. The sale stays unpaid, its seats stay held rather than expiring, and the buyer is told the payment is being reviewed rather than being asked to pay again - on every event of the order, so nobody can accidentally pay twice for the same basket. We also ask PayPal not to accept funding that takes days to settle, such as an eCheck, so this should be a short wait rather than an open-ended one.</p>
 
         <p class="text-gray-600 dark:text-gray-300 mb-6">Finishing a reviewed payment - issuing the ticket if PayPal clears it, or letting the buyer try again if PayPal declines it - depends on PayPal notifying us, which needs a webhook. We register one for you when you connect your own PayPal account, so there is nothing to do. If your site provides one PayPal account for everyone, that registration does not happen and the administrator has to add a listener themselves; without it a reviewed payment on such a site stays unresolved. Selfhost administrators: see the <a href="{{ route('marketing.docs.selfhost.stripe') }}#paypal" class="doc-link">Payments guide</a>.</p>
 
@@ -556,7 +565,7 @@
         <p class="text-gray-600 dark:text-gray-300 mb-6">Two more outcomes are worth recognising. A buyer who approves the payment, closes the tab and comes back much later may find the reservation has already expired - nothing is charged in that case. And if PayPal reports a total that does not match the order, the sale is held as an <strong class="text-gray-900 dark:text-white">amount mismatch</strong> for you to look at rather than being completed: the money is with PayPal and the ticket is not issued, so it needs a person.</p>
 
         <h4 class="font-semibold text-gray-900 dark:text-white mb-2">Refunds</h4>
-        <p class="text-gray-600 dark:text-gray-300 mb-6">PayPal is one of only two methods - Stripe is the other - where <strong class="text-gray-900 dark:text-white">Refund Ticket</strong> on the Sales page sends the money back for you. You can return the whole amount or part of it, and the sale's PayPal reference is shown there as a link into your PayPal activity. See <a href="#financial" class="doc-link">Financial information</a> for what happens when a refund cannot be confirmed.</p>
+        <p class="text-gray-600 dark:text-gray-300 mb-6">PayPal is one of only two methods - Stripe is the other - where <strong class="text-gray-900 dark:text-white">Refund Ticket</strong> on the Sales page sends the money back for you. You can return the whole amount or part of it, and the sale's PayPal reference is shown there as a link into your PayPal activity. Refund from the Sales page rather than from PayPal itself: a refund made in your PayPal account is not reported back, so the sale stays paid and its ticket keeps scanning. See <a href="#refunds" class="doc-link">Refunds</a> for partial refunds and for what happens when a refund cannot be confirmed.</p>
 
         <h4 class="font-semibold text-gray-900 dark:text-white mb-2">What PayPal does not do</h4>
         <p class="text-gray-600 dark:text-gray-300 mb-6">PayPal cannot offer monthly installments, which need a card the gateway can charge again later, and gift cards cannot be sold through it. It is also not offered on events priced in Hungarian forints, Japanese yen or New Taiwan dollars, or on appointment bookings. Everything else works normally - promo codes, add-ons, volume discounts, per-attendee tickets - and unlike Payfast a PayPal event <em>can</em> be combined with others in the multi-event cart, because the whole basket is taken as one payment.</p>
@@ -592,7 +601,7 @@
 
         <div class="doc-callout doc-callout-info mb-6">
             <div class="doc-callout-title">Refunds</div>
-            <p>Refunds are issued from your own Payfast dashboard. Marking a sale refunded here records it without moving money. Stripe and PayPal are the exceptions: those sales are refunded from this page and the money goes back automatically.</p>
+            <p>Refunds are issued from your own Payfast dashboard. On a Payfast sale the Sales page offers <strong class="text-gray-900 dark:text-white">Mark as Refunded</strong>, which records the refund without moving money. Stripe and PayPal are the exceptions: those sales are refunded from the Sales page and the money goes back automatically.</p>
         </div>
 
         <div class="doc-callout doc-callout-tip">
@@ -814,8 +823,8 @@
         <p class="text-gray-600 dark:text-gray-300 mb-4">If the balance is still unpaid after that, the ticket goes <strong class="text-gray-900 dark:text-white">on hold</strong>: it stops scanning at the door until they pay, and paying makes it valid again immediately. A week before the event everyone with an outstanding balance gets a final notice, and you get a list of them, so nobody is surprised at the door.</p>
         <p class="text-gray-600 dark:text-gray-300 mb-4">Running out of retries is the common route to a hold, but not the only one. A plan also goes on hold if a bank authentication request goes unanswered for a week, or if your own Stripe connection is disconnected so nothing can be collected at all. That second one is worth knowing: the buyer has done nothing wrong and cannot fix it, so you are the one we email, and reconnecting Stripe is what restarts collection. For the ordinary routes, the buyer replacing or re-confirming their card lifts the hold and puts the remaining payments back on schedule.</p>
         <p class="text-gray-600 dark:text-gray-300 mb-4">One state deliberately waits for a person: if a charge is interrupted and we cannot tell whether the money moved, we stop rather than retry, because retrying a payment that may already have succeeded is how a buyer gets charged twice. The same applies to a payment that arrives but does not match anything we can apply it to. Both show on the Installments tab as needing your attention, with the Stripe reference to check against your dashboard, and neither is resolved by the buyer changing their card.</p>
-        <p class="text-gray-600 dark:text-gray-300 mb-4">Scanning a ticket that is on hold shows your door staff the attendee's name and the amount outstanding rather than a flat rejection, so they can take payment or let the guest in at your discretion.</p>
-        <p class="text-gray-600 dark:text-gray-300 mb-6">Cancelling or refunding an order, cancelling the event, or deleting the schedule all stop the remaining payments immediately. Refunding an installment plan returns each payment that was already collected, one at a time, and the Installments tab still lists every payment reference so you can check them against your own Stripe dashboard.</p>
+        <p class="text-gray-600 dark:text-gray-300 mb-4">Scanning a ticket that is on hold shows your door staff an amber <strong class="text-gray-900 dark:text-white">Overdue balance</strong> screen with the attendee's name, the amount outstanding and how much of the total has been paid, rather than a red rejection. The scan does not check them in, so taking payment or letting the guest in is your call.</p>
+        <p class="text-gray-600 dark:text-gray-300 mb-6">Cancelling or refunding an order, cancelling the event, or deleting the schedule all stop the remaining payments immediately. A payment plan can only be refunded in full: <a href="#refunds" class="doc-link">Refund Ticket</a> returns each payment that was already collected, one at a time, and the Installments tab still lists every payment reference so you can check them against your own Stripe dashboard.</p>
 
         <div class="doc-callout doc-callout-info">
             <div class="doc-callout-title">Selfhosted installs</div>
@@ -934,7 +943,7 @@
         <ul class="doc-list mb-6">
             <li>Every purchase with the buyer's name, email and phone</li>
             <li>The event and the occurrence date the sale is for</li>
-            <li>Payment status: paid, unpaid, cancelled or refunded</li>
+            <li>Payment status: paid, unpaid, cancelled or refunded, plus <strong class="text-gray-900 dark:text-white">Refunded so far</strong> once any money has gone back</li>
             <li>The amount, any discount or gift card applied, and the transaction reference</li>
             <li>Check-in status, and the star rating if the buyer left <a href="#feedback" class="doc-link">feedback</a></li>
         </ul>
@@ -952,17 +961,34 @@
             <li><strong class="text-gray-900 dark:text-white">View Ticket:</strong> Open the attendee's ticket page, with its QR code</li>
             <li><strong class="text-gray-900 dark:text-white">Send Email:</strong> Send the confirmation email again</li>
             <li><strong class="text-gray-900 dark:text-white">Mark Paid:</strong> For cash or other payments taken outside the app</li>
-            <li><strong class="text-gray-900 dark:text-white">Refund Ticket:</strong> Mark a paid sale as refunded</li>
+            <li><strong class="text-gray-900 dark:text-white">Refund Ticket:</strong> Send money back on a Stripe or PayPal sale, all of it or part. See <a href="#refunds" class="doc-link">Refunds</a></li>
+            <li><strong class="text-gray-900 dark:text-white">Mark as Refunded:</strong> Shown instead of Refund Ticket on every other payment method. It records a refund you make yourself, and moves no money</li>
             <li><strong class="text-gray-900 dark:text-white">Cancel Ticket:</strong> Cancel a paid or unpaid sale without recording a refund</li>
-            <li><strong class="text-gray-900 dark:text-white">Delete:</strong> Permanently remove a sale record</li>
+            <li><strong class="text-gray-900 dark:text-white">Delete:</strong> Remove a sale from the list. A live sale is cancelled first, so its tickets go back on sale</li>
         </ul>
 
-        <p class="text-gray-600 dark:text-gray-300 mb-6">Refunding, cancelling or deleting a sale returns its tickets to stock, gives back any promo code use, credits any gift card balance the buyer spent, and notifies the next person on the <a href="#waitlist" class="doc-link">waitlist</a>.</p>
+        <p class="text-gray-600 dark:text-gray-300 mb-6">A full refund, a cancellation or a deletion returns the sale's tickets and any allocated seats to stock, gives back any promo code use, credits any gift card balance the buyer spent, stops any remaining installment payments, and notifies the next person on the <a href="#waitlist" class="doc-link">waitlist</a>. A partial refund does none of that: the sale stays paid and every ticket on it stays valid.</p>
+
+        <h3 id="refunds" class="doc-subheading">Refunds</h3>
+        <p class="text-gray-600 dark:text-gray-300 mb-4">Refunds work on every plan, and what the action does depends on how the sale was paid:</p>
+        <ul class="doc-list mb-6">
+            <li><strong class="text-gray-900 dark:text-white">Stripe and PayPal:</strong> <strong class="text-gray-900 dark:text-white">Refund Ticket</strong> sends the money back through the provider, and the status here changes only once it has gone. A dialog shows <strong class="text-gray-900 dark:text-white">Available to refund</strong> and asks for a <strong class="text-gray-900 dark:text-white">Refund Amount</strong>, so you can return all of it or part.</li>
+            <li><strong class="text-gray-900 dark:text-white">Every other method</strong> - Invoice Ninja, Payfast, a payment link, cash, or any sale you marked paid by hand - shows <strong class="text-gray-900 dark:text-white">Mark as Refunded</strong> instead. It records the refund and adjusts your revenue figures, and you return the money in your provider's own dashboard.</li>
+        </ul>
+        <p class="text-gray-600 dark:text-gray-300 mb-4">A partial refund leaves the sale paid and its tickets valid, and the row shows <strong class="text-gray-900 dark:text-white">Refunded so far</strong>. Refund the rest later and the sale becomes refunded, with its tickets and seats back on sale. Until then your <a href="{{ route('marketing.docs.analytics') }}" class="doc-link">Analytics</a> revenue still counts the sale in full.</p>
+        <p class="text-gray-600 dark:text-gray-300 mb-6">A payment plan on <a href="#installments" class="doc-link">installments</a> can only be refunded in full: Refund Ticket returns each payment already collected, one at a time, and stops the rest.</p>
+
+        <div class="doc-callout doc-callout-warning mb-6">
+            <div class="doc-callout-title">Refund here, not in your Stripe or PayPal dashboard</div>
+            <p>A refund you make in Stripe or PayPal directly is not reported back to Event Schedule. The sale stays paid, its revenue stays counted and its ticket keeps scanning at the door. Refund Stripe and PayPal sales from this page instead.</p>
+        </div>
 
         <div class="doc-callout doc-callout-info">
-            <div class="doc-callout-title">How refunds work</div>
-            <p>For a Stripe or PayPal sale, Refund Ticket sends the money back through the provider and then updates the status here. You can return the whole amount or part of it - a partial refund leaves the sale paid, keeps the tickets valid and shows how much has gone back so far. If the refund cannot be confirmed, nothing is retried automatically and the sale is left for you to check against your provider's dashboard, because retrying a refund that may already have gone through is how one refund becomes two. A refund the provider actively rejects is different: nothing moved, so the amount is released and you can try again.</p>
-            <p>Every other method - Invoice Ninja, Payfast, a payment link, cash, or any sale you marked paid by hand - shows Mark as Refunded instead. That records the refund and adjusts your revenue figures, and you return the money in your provider's own dashboard. Cancelling or deleting a paid sale also shows you a reminder to handle the money yourself. Refund only appears while a sale is still paid, so refund first and cancel after - once a sale is cancelled the money has to go back in your provider's own dashboard.</p>
+            <div class="doc-callout-title">Good to know</div>
+            <p>If a refund cannot be confirmed, nothing is retried automatically and the sale is left for you to check against your provider's dashboard, because retrying a refund that may already have gone through is how one refund becomes two. A refund the provider actively rejects is different: nothing moved, so the amount is released and you can try again.</p>
+            <p>Refund only appears while a sale is still paid, so refund first and cancel after. <strong class="text-gray-900 dark:text-white">Cancel Ticket</strong> and <strong class="text-gray-900 dark:text-white">Delete</strong> never move money, and once a sale is cancelled the money has to go back in your provider's own dashboard.</p>
+            <p>Event Schedule does not email the buyer about a refund, so tell them yourself if you want them to know.</p>
+            <p>Keep an event's currency once it has sold anything. A sale records no currency of its own, so changing the event's currency afterwards relabels its past sales, and a later refund is worked out in the new currency. The <x-link href="{{ route('marketing.docs.developer.api') }}">API</x-link> refuses the change once an event has taken money.</p>
             <p>These actions fire the matching <x-link href="{{ route('marketing.docs.developer.webhooks') }}">webhook</x-link>: <code class="doc-inline-code">sale.paid</code>, <code class="doc-inline-code">sale.refunded</code> or <code class="doc-inline-code">sale.cancelled</code>. A partial refund does not fire one, because the sale is still paid.</p>
         </div>
     </section>
@@ -990,7 +1016,7 @@
 
         <div class="doc-callout doc-callout-info">
             <div class="doc-callout-title">Sender &amp; Compliance</div>
-            <p>If you have a custom sender email configured for your schedule, sale notifications are sent from that address. All notification emails include an unsubscribe link for compliance.</p>
+            <p>On eventschedule.com, sale notification emails go out only once the schedule has its own <a href="{{ route('marketing.docs.creating_schedules') }}#integrations-email" class="doc-link">email settings</a>, and they are sent from that address. Until then the <strong class="text-gray-900 dark:text-white">New ticket sale</strong> toggle stays greyed out. A selfhosted install only needs a working mailer. All notification emails include an unsubscribe link for compliance.</p>
         </div>
     </section>
 
@@ -1059,7 +1085,7 @@
 
         <div class="doc-callout doc-callout-tip">
             <div class="doc-callout-title">Imports never spend the allowance</div>
-            <p>Imported attendees are recorded with their own payment method, so they never count toward the Free plan's <a href="#general" class="doc-link">paid-ticket allowance</a>. Sending the confirmation emails needs a working sender address for the schedule.</p>
+            <p>Imported attendees are recorded with their own payment method, so they never count toward the Free plan's <a href="#general" class="doc-link">paid-ticket allowance</a>. On eventschedule.com, sending the confirmation emails needs the schedule's own <a href="{{ route('marketing.docs.creating_schedules') }}#integrations-email" class="doc-link">email settings</a>: with <strong class="text-gray-900 dark:text-white">Send Email</strong> on and none saved, the save button stays disabled.</p>
         </div>
     </section>
 
@@ -1126,12 +1152,13 @@
             <li><strong class="text-gray-900 dark:text-white">Event details on the pass</strong> - name, venue, date and time, attendee name, ticket type and seat</li>
             <li><strong class="text-gray-900 dark:text-white">Arrival reminder</strong> - when the venue has map coordinates, Google can notify the attendee as they arrive nearby</li>
             <li><strong class="text-gray-900 dark:text-white">One pass per event</strong> - a multi-event order gets a separate pass for each event, since each is scanned with its own code. A single order for several people is one pass showing the number it admits, unless the event issues individual tickets</li>
-            <li><strong class="text-gray-900 dark:text-white">Passes and registrations too</strong> - a <a href="{{ route('marketing.docs.subscriptions') }}" class="doc-link">season pass</a> saves as a single pass covering the whole series rather than one per date, carrying the number it admits at each event and its "valid until" date. Free registrations get a wallet pass on the same terms as a paid ticket</li>
+            <li><strong class="text-gray-900 dark:text-white">Passes and registrations too</strong> - a <a href="{{ route('marketing.docs.subscriptions') }}" class="doc-link">pass or subscription</a> of any type saves as one undated pass rather than one per date, and shows how many people it admits at each event when that is more than one. If the pass has an expiry, Google Wallet archives it once that date passes. Free registrations get a wallet pass on the same terms as a paid ticket</li>
+            <li><strong class="text-gray-900 dark:text-white">Not for every order</strong> - there is no wallet button for an appointment booking, on an event you have cancelled, or while an <a href="#installments" class="doc-link">installment plan</a> is behind on its payments</li>
         </ul>
 
         <p class="text-gray-600 dark:text-gray-300 mb-6">At the door a wallet pass is scanned exactly like any other ticket: the attendee opens it and you scan it from <a href="#check-in" class="doc-link">Scan Ticket</a> as usual. On an <a href="{{ route('marketing.docs.allocated_seating') }}" class="doc-link">allocated</a> event the seat is printed on the pass.</p>
 
-        <p class="text-gray-600 dark:text-gray-300 mb-6">The pass is a snapshot taken when the attendee saves it. Cancelling or refunding an order does not remove a pass already on someone's phone, but the code stops working: the door scanner checks the order's live status, and a cancelled ticket is refused there just as it is on the ticket page.</p>
+        <p class="text-gray-600 dark:text-gray-300 mb-6">The pass is a snapshot taken when the attendee saves it. Cancelling or fully refunding an order does not remove a pass already on someone's phone, but the code stops working: the door scanner checks the order's live status, and a cancelled or refunded ticket is refused there just as it is on the ticket page. A partial refund leaves the order paid, so its pass keeps working.</p>
 
         <div class="doc-callout doc-callout-info">
             <div class="doc-callout-title">Turned on by the operator</div>
@@ -1153,7 +1180,7 @@
         <ol class="doc-list doc-list-numbered mb-6">
             <li>When all tickets sell out for an event date, a <strong class="text-gray-900 dark:text-white">Join Waitlist</strong> button appears on the event page</li>
             <li>Guests enter their name and email</li>
-            <li>When a spot opens up (a sale is cancelled, refunded, or expires unpaid), the next person in line is notified by email</li>
+            <li>When a spot opens up - a sale is cancelled, fully refunded or expires unpaid, a pass holder cancels a booked date, or your box office releases a seat - the next person in line is notified by email. A partial refund frees no spot</li>
             <li>They receive a link that is valid for 24 hours</li>
             <li>If they don't purchase in time, the next person in line is notified</li>
         </ol>
@@ -1180,27 +1207,31 @@
             </svg>
             Interest List
         </h2>
-        <p class="text-gray-600 dark:text-gray-300 mb-6">Most people who look at an event page are not ready to buy that minute, and until now there was nothing for them to do but leave. The interest list lets them hand over an email address instead, with no account and no sign-up.</p>
+        <p class="text-gray-600 dark:text-gray-300 mb-6">Most people who look at an event page are not ready to buy that minute. The interest list lets them leave an email address and hear from you when it matters, with no account and no sign-up.</p>
 
         <h3 class="doc-subheading">How It Works</h3>
         <ol class="doc-list doc-list-numbered mb-6">
-            <li>On any public event page, a visitor can ask to hear about that event - from the <strong class="text-gray-900 dark:text-white">Add to Calendar</strong> menu, or from a link beside the buy button on an event that is already selling</li>
-            <li>They give an email address and nothing else. No name, no account</li>
-            <li>They hear when that event's <strong class="text-gray-900 dark:text-white">tickets go on sale</strong>, if its <strong class="text-gray-900 dark:text-white">date or venue changes</strong>, if it is <strong class="text-gray-900 dark:text-white">cancelled</strong>, and once shortly before it starts</li>
+            <li>On a public event page, a visitor opens the <strong class="text-gray-900 dark:text-white">Add to Calendar</strong> menu and chooses <strong class="text-gray-900 dark:text-white">Tell me when tickets go on sale</strong>, or <strong class="text-gray-900 dark:text-white">Tell me if anything changes</strong> once tickets are on sale. An event that is already selling tickets or taking registrations also shows a <strong class="text-gray-900 dark:text-white">Not buying today? Tell me if anything changes</strong> link beside the buy button</li>
+            <li>They type an email address and press <strong class="text-gray-900 dark:text-white">Notify me</strong>. No name, no account and no confirmation email to click</li>
+            <li>Three emails go out automatically: one when that date's tickets go on sale, a reminder about 48 hours before it starts, and a cancellation notice if you cancel the event. Someone who asks once tickets are already on sale skips the first one</li>
+            <li>A change reaches them only if you send it. When you save a new date or time on a one-off event, or a new venue or online link on any event, the editor asks <strong class="text-gray-900 dark:text-white">Notify attendees of this change?</strong>, and the list is emailed only if you choose <strong class="text-gray-900 dark:text-white">Notify attendees</strong></li>
             <li>Every message carries a one-click unsubscribe, and unsubscribing deletes the address rather than keeping it on a suppression list</li>
         </ol>
+
+        <p class="text-gray-600 dark:text-gray-300 mb-6">Each date of a recurring event keeps its own list, so someone who asks about one Friday hears about that Friday's tickets and that Friday's reminder. Nothing else is sent: the list never receives your newsletters or news of your other events.</p>
 
         <div class="doc-callout doc-callout-info mb-6">
             <div class="doc-callout-title">Free on every plan</div>
             <p>The interest list is not a paid feature and is not counted against your <a href="{{ route('marketing.docs.newsletters') }}" class="doc-link">newsletter allowance</a>. It exists to help you find out whether anyone wants tickets before you go to the trouble of selling them.</p>
+            <p>On eventschedule.com, once more than 50 people are waiting, these emails go out only if the schedule has its own <a href="{{ route('marketing.docs.creating_schedules') }}#integrations-email" class="doc-link">email settings</a> or its owner has verified a phone number. A selfhosted install needs a working mailer.</p>
         </div>
 
         <h3 class="doc-subheading">Seeing Who Is Waiting</h3>
-        <p class="text-gray-600 dark:text-gray-300 mb-6">The number of people waiting shows on the <strong class="text-gray-900 dark:text-white">Tickets</strong> panel when you edit the event, and on your dashboard next to the suggestion to add a ticket type. It is never shown publicly.</p>
+        <p class="text-gray-600 dark:text-gray-300 mb-6">The <strong class="text-gray-900 dark:text-white">Tickets</strong> panel in the event editor says how many people asked, for example "12 people asked to be told when tickets go on sale", counting each address once across every date. While a schedule has upcoming events and no ticket type, the dashboard suggestion reads "12 people are waiting to buy - add a ticket type". You see how many, not who, and neither number is shown publicly.</p>
 
         <div class="doc-callout doc-callout-info">
-            <div class="doc-callout-title">Not the same as followers</div>
-            <p>Asking about one event is not subscribing to your schedule. Those people hear about that event and nothing else. Someone who wants everything you publish can <a href="{{ route('marketing.docs.newsletters') }}" class="doc-link">sign up to your schedule</a> or subscribe to its calendar feed.</p>
+            <div class="doc-callout-title">Not the same as followers or the waitlist</div>
+            <p>Asking about one event is not subscribing to your schedule. Those people hear about that event and nothing else. Someone who wants everything you publish can <a href="{{ route('marketing.docs.newsletters') }}" class="doc-link">sign up to your schedule</a> or subscribe to its <a href="{{ route('marketing.docs.sharing') }}#calendar-feeds" class="doc-link">calendar feed</a>. The interest list is also not the <a href="#waitlist" class="doc-link">waitlist</a>: it is for a date that is not on sale yet, or a visitor who is not ready to buy, while the waitlist is for a date that has sold out.</p>
         </div>
     </section>
 
@@ -1225,7 +1256,7 @@
 
         <div class="doc-callout doc-callout-info mb-6">
             <div class="doc-callout-title">Needs a sender address</div>
-            <p>On eventschedule.com the toggle stays disabled until the schedule has its own <a href="{{ route('marketing.docs.account_settings') }}" class="doc-link">email settings</a> configured, since feedback requests are sent from your address rather than ours. A selfhosted install only needs a working mailer.</p>
+            <p>On eventschedule.com the toggle stays disabled until the schedule has its own <a href="{{ route('marketing.docs.creating_schedules') }}#integrations-email" class="doc-link">email settings</a> configured, since feedback requests are sent from your address rather than ours. A selfhosted install only needs a working mailer.</p>
         </div>
 
         <div class="doc-callout doc-callout-info">
@@ -1269,7 +1300,7 @@
         <div class="doc-fields">
             <div class="doc-field">
                 <h3 class="font-semibold text-gray-900 dark:text-white mb-2">Refunds</h3>
-                <p class="text-sm text-gray-500 dark:text-gray-400">Refunding a Stripe or PayPal sale on the Sales page sends the money back through the provider and then marks the sale refunded here. Every other method - Invoice Ninja, Payfast, a payment link or cash - is recorded here only, and you process the money in that provider's own dashboard. A Payfast reference is shown as plain text rather than a link, so you will need to search for it in your Payfast dashboard. Stripe refunds appear on customer statements within 5-10 business days.</p>
+                <p class="text-sm text-gray-500 dark:text-gray-400">Refunding a Stripe or PayPal sale on the Sales page sends the money back through the provider, in full or in part, and then updates the sale here. Every other method - Invoice Ninja, Payfast, a payment link or cash - is recorded here with Mark as Refunded, and you process the money in that provider's own dashboard. A Payfast reference is shown as plain text rather than a link, so you will need to search for it in your Payfast dashboard. Stripe refunds appear on customer statements within 5-10 business days. See <a href="#refunds" class="doc-link">Refunds</a>.</p>
             </div>
             <div class="doc-field">
                 <h4 class="font-semibold text-gray-900 dark:text-white mb-2">Taxes</h4>
@@ -1281,7 +1312,7 @@
             </div>
             <div class="doc-field">
                 <h4 class="font-semibold text-gray-900 dark:text-white mb-2">Cancelled or Deleted Events</h4>
-                <p class="text-sm text-gray-500 dark:text-gray-400">If you delete an event with sold tickets, ticket holders are <strong class="text-gray-900 dark:text-white">not</strong> automatically notified or refunded. Before deleting, you should: (1) contact ticket holders about the cancellation, (2) process refunds through your payment provider, and (3) then delete the event. Sales data is preserved even after event deletion.</p>
+                <p class="text-sm text-gray-500 dark:text-gray-400">An event with any sales cannot be deleted: the app asks you to cancel it instead, so buyers keep their records. <strong class="text-gray-900 dark:text-white">Cancel event</strong> keeps every sale and refund record, stops any remaining installment payments, and emails the people there are to tell: ticket holders and registrants when the schedule has its own email settings, and anyone on the <a href="#interest-list" class="doc-link">interest list</a>. It does not refund anyone, and the sales stay paid, so refund them from the Sales page. A cancelled event can be restored later.</p>
             </div>
             <div class="doc-field">
                 <h4 class="font-semibold text-gray-900 dark:text-white mb-2">Payout Schedule</h4>
@@ -1366,7 +1397,7 @@
 
         <div class="doc-callout doc-callout-info mt-4">
             <div class="doc-callout-title">Payment Redirects</div>
-            <p>Stripe, Invoice Ninja, and custom payment URL checkouts will open in the parent window (outside the iframe) since external payment portals may not support being loaded inside iframes. Cash and free ticket checkouts complete inside the embed.</p>
+            <p>Every payment method except cash sends the buyer out of the iframe to pay: Stripe, PayPal, Payfast, Invoice Ninja and a payment link all open in the full browser window, since payment pages generally refuse to load inside another site's frame. Stripe, PayPal and Payfast bring the buyer back to their ticket page afterwards. Cash and free ticket checkouts complete inside the embed.</p>
         </div>
     </section>
 

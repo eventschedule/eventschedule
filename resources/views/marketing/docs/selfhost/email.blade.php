@@ -1,11 +1,13 @@
 <x-docs-page
     key="selfhost/email"
-    description="Configure email sending for selfhosted Event Schedule. Set up SMTP, Amazon SES, sendmail or another mail driver for ticket confirmations and newsletters."
-    lede="Configure email delivery so your Event Schedule instance can send ticket confirmations, newsletters, account emails and owner notifications."
-    article-description="Configure email sending for your selfhosted Event Schedule instance. Set up SMTP, Amazon SES or another mail driver for ticket confirmations, newsletters and notifications."
+    title="Email Setup for a Selfhosted Install - Event Schedule"
+    description="Set up SMTP, Amazon SES or sendmail for a selfhosted Event Schedule, and see which emails it sends on its own, from ticket confirmations to on-sale alerts."
+    lede="Configure email delivery so your Event Schedule install can send ticket confirmations, newsletters, subscriber digests, on-sale alerts, account emails and owner notifications."
+    article-description="Configure email sending for your selfhosted Event Schedule instance. Set up SMTP, Amazon SES or another mail driver, and see which emails go out automatically and what each one needs."
 >
     <x-slot:toc>
         <x-doc-nav-link href="#overview">Overview</x-doc-nav-link>
+        <x-doc-nav-link href="#what-is-sent">What Is Sent Automatically</x-doc-nav-link>
         <x-doc-nav-link href="#smtp">SMTP Setup</x-doc-nav-link>
         <x-doc-nav-link href="#drivers">Other Mail Drivers</x-doc-nav-link>
         <x-doc-nav-link href="#sender">Sender Configuration</x-doc-nav-link>
@@ -35,7 +37,7 @@
             </div>
             <div class="doc-field">
                 <h4 class="font-semibold text-gray-900 dark:text-white mb-2">Guest notifications</h4>
-                <p class="text-gray-600 dark:text-gray-400 text-sm">Waitlist openings when a spot frees up, post-event feedback requests, and carpool messages between attendees.</p>
+                <p class="text-gray-600 dark:text-gray-400 text-sm">Waitlist openings when a spot frees up, the emails to an event's interest list, the confirmation link a visitor gets after using a schedule's sign-up panel, post-event feedback requests, and carpool messages between attendees. See <a href="#what-is-sent" class="doc-link">What Is Sent Automatically</a>.</p>
             </div>
             <div class="doc-field">
                 <h4 class="font-semibold text-gray-900 dark:text-white mb-2">Account and owner emails</h4>
@@ -45,12 +47,103 @@
 
         <div class="doc-callout doc-callout-warning">
             <div class="doc-callout-title">The default is not a real mail transport</div>
-            <p>Out of the box <code class="doc-inline-code">MAIL_MAILER=log</code>. Event Schedule treats <code class="doc-inline-code">log</code> and <code class="doc-inline-code">array</code> as "no mail transport", so ticket and pass confirmations, appointment emails, gift card emails, sale alerts, feedback requests, carpool messages and poll suggestion notices are <strong class="text-gray-900 dark:text-white">skipped entirely</strong> rather than delivered. Mail that is not gated this way, such as password resets, verification emails, team invitations, waitlist openings and newsletters, is written into <code class="doc-inline-code">storage/logs/laravel.log</code> instead of being sent. Configure a real driver before you take a single booking.</p>
+            <p>Out of the box <code class="doc-inline-code">MAIL_MAILER=log</code>. Event Schedule treats <code class="doc-inline-code">log</code> and <code class="doc-inline-code">array</code> as "no mail transport", so ticket and pass confirmations, appointment emails, gift card emails, sale alerts, feedback requests, carpool messages, poll suggestion notices, the new-event digest and the interest list's on-sale and reminder emails are <strong class="text-gray-900 dark:text-white">skipped entirely</strong> rather than delivered. Mail that is not gated this way, such as password resets, verification emails, team invitations, waitlist openings, newsletters, sign-up confirmations and the interest list's cancellation and change notices, is written into <code class="doc-inline-code">storage/logs/laravel.log</code> instead of being sent. The sign-up panel and the <strong class="text-gray-900 dark:text-white">Tell me when tickets go on sale</strong> form keep collecting addresses on an install left like this, and nobody who uses them hears back. Configure a real driver before you take a single booking.</p>
         </div>
 
         <div class="doc-callout doc-callout-info mt-6">
             <div class="doc-callout-title">Install-wide, and never plan-gated</div>
             <p>A selfhosted install resolves to the Enterprise feature set, so no email feature here is held back by a plan. Note the difference from the hosted service: the per-schedule <strong class="text-gray-900 dark:text-white">Email Settings</strong> tab, found in a schedule's Settings under Integrations, is only rendered when the app runs in hosted mode, and the monthly newsletter allowance, which on the hosted service counts individual recipients rather than newsletters, does not apply to a selfhosted install at all. Your schedules send unlimited newsletters to unlimited recipients through the mail transport you configure below.</p>
+        </div>
+    </section>
+
+    <!-- What Is Sent Automatically -->
+    <section id="what-is-sent" class="doc-section">
+        <h2 class="doc-heading">
+            <svg aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-5 h-5 text-gray-500 dark:text-gray-400 flex-shrink-0">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M12 6v6h4.5m4.5 0a9 9 0 11-18 0 9 9 0 0118 0z" />
+            </svg>
+            What Is Sent Automatically
+        </h2>
+        <p class="text-gray-600 dark:text-gray-300 mb-6">Most mail answers something a person just did, such as a purchase, a booking or a password reset. The emails below go out on a timer or on someone else's action instead, so they are the ones an operator gets asked about. Every one of them needs a real mail transport; the table says what else each needs.</p>
+
+        <div class="doc-table-wrap">
+            <table class="doc-table">
+                <thead>
+                    <tr>
+                        <th>Email</th>
+                        <th>Who gets it</th>
+                        <th>When it goes out, and what it needs</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>New-event digest</td>
+                        <td>A schedule's confirmed email subscribers</td>
+                        <td>Checked every hour. While <strong class="text-gray-900 dark:text-white">Email subscribers about new events</strong> is on (the default), the schedule sends one digest of the public events it has created since the last one, at most one every 72 hours. Events another schedule lists on it are not included. See <a href="{{ route('marketing.docs.newsletters') }}#email-subscribers" class="doc-link">Email subscribers</a>.</td>
+                    </tr>
+                    <tr>
+                        <td>Tickets on sale, and a reminder</td>
+                        <td>People who used <strong class="text-gray-900 dark:text-white">Tell me when tickets go on sale</strong> on an event page</td>
+                        <td>Checked every hour. One email when tickets for that date go on sale, and a reminder 48 hours before it starts. Each date of a recurring event is separate. See <a href="{{ route('marketing.docs.tickets') }}#interest-list" class="doc-link">Interest list</a>.</td>
+                    </tr>
+                    <tr>
+                        <td>Cancellation or change notice to the interest list</td>
+                        <td>The same people</td>
+                        <td>Sent when the organizer cancels the event. A new date or time (one-off events only), venue or online link reaches them only when the organizer chooses to notify in the prompt that appears on save.</td>
+                    </tr>
+                    <tr>
+                        <td>Change or cancellation notice to ticket buyers</td>
+                        <td>Buyers and registered attendees</td>
+                        <td>Needs the schedule's own SMTP settings, which only the hosted service lets an owner enter, so a selfhosted install does not send these. The interest list is still told.</td>
+                    </tr>
+                    <tr>
+                        <td>Sign-up confirmation</td>
+                        <td>Anyone who gives their email address in a schedule's sign-up panel</td>
+                        <td>Sent when they sign up. Clicking the link confirms the subscription. With <code class="doc-inline-code">ALLOW_REGISTRATION=true</code> it also sets up a passwordless account that follows the schedule; with registration closed, the default on a selfhosted install, the address is confirmed and nothing more.</td>
+                    </tr>
+                    <tr>
+                        <td>Invitation to claim a page</td>
+                        <td>A performer or venue an organizer named who is not on the install</td>
+                        <td>Sent on the hosted service only. A selfhosted install creates the page but never emails an invitation to claim it.</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+
+        <p class="text-gray-600 dark:text-gray-300 mb-4 mt-6">The digest and the interest list's on-sale and reminder emails come from hourly scheduled tasks, so they need the <code class="doc-inline-code">schedule:run</code> cron entry from the <a href="{{ route('marketing.docs.selfhost.installation') }}#cron" class="doc-link">installation guide</a> even when <code class="doc-inline-code">QUEUE_CONNECTION=sync</code>. Four optional variables change their timing and their size:</p>
+
+        <div class="doc-table-wrap">
+            <table class="doc-table">
+                <thead>
+                    <tr>
+                        <th>Variable</th>
+                        <th>Default</th>
+                        <th>What it sets</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td><code class="doc-inline-code">AUDIENCE_ANNOUNCEMENT_MIN_HOURS</code></td>
+                        <td><code class="doc-inline-code">72</code></td>
+                        <td>The least time between two digests from one schedule. The sign-up confirmation promises "At most one email every few days", so keep it at a few days.</td>
+                    </tr>
+                    <tr>
+                        <td><code class="doc-inline-code">AUDIENCE_ANNOUNCEMENT_RECIPIENT_BATCH</code></td>
+                        <td><code class="doc-inline-code">2000</code></td>
+                        <td>The most digest emails one hourly run queues. Schedules past that point go out on the next run.</td>
+                    </tr>
+                    <tr>
+                        <td><code class="doc-inline-code">EVENT_INTEREST_REMINDER_HOURS</code></td>
+                        <td><code class="doc-inline-code">48</code></td>
+                        <td>How many hours before a date the interest list's reminder goes out.</td>
+                    </tr>
+                    <tr>
+                        <td><code class="doc-inline-code">EVENT_INTEREST_RECIPIENT_BATCH</code></td>
+                        <td><code class="doc-inline-code">2000</code></td>
+                        <td>The most interest-list emails one hourly run queues. The rest go out on the next run.</td>
+                    </tr>
+                </tbody>
+            </table>
         </div>
     </section>
 
@@ -294,7 +387,8 @@
         </div>
 
         <h3 class="doc-subheading">One sender for every schedule</h3>
-        <p class="text-gray-600 dark:text-gray-300 mb-6">On a selfhosted install this is the From identity for all outgoing mail, whichever schedule triggered it. There is no per-schedule sender to configure: the Email Settings tab that lets an owner supply their own SMTP credentials is part of the hosted service and is not rendered when the app runs selfhosted. Pick an address that reads sensibly for every schedule on the instance, and one you can actually receive replies at.</p>
+        <p class="text-gray-600 dark:text-gray-300 mb-6">On a selfhosted install this is the From address for all outgoing mail, whichever schedule triggered it. There is no per-schedule sender to configure: the Email Settings tab that lets an owner supply their own SMTP credentials is part of the hosted service and is not rendered when the app runs selfhosted, which is also why ticket buyers are not sent change and cancellation notices (see <a href="#what-is-sent" class="doc-link">What Is Sent Automatically</a>). Pick an address that reads sensibly for every schedule on the instance, and one you can actually receive replies at.</p>
+        <p class="text-gray-600 dark:text-gray-300 mb-6">Three emails also name the schedule. The sign-up confirmation, the new-event digest and the interest list's emails keep your address but put the schedule in the sender name, for example "The Blue Note via My Event Schedule" with the settings above, and send replies to the schedule's own email address when it has one.</p>
 
         <div class="doc-callout doc-callout-info">
             <div class="doc-callout-title">DNS Records</div>
@@ -348,6 +442,7 @@
             <li>With the default <code class="doc-inline-code">QUEUE_CONNECTION=sync</code> they run immediately, in the same request. Nothing extra is needed.</li>
             <li>With <code class="doc-inline-code">database</code> or <code class="doc-inline-code">redis</code> they wait for a worker. Event Schedule's scheduler runs <code class="doc-inline-code">queue:work --stop-when-empty</code> every minute and retries failed jobs every five minutes, so the <code class="doc-inline-code">schedule:run</code> cron job from the <a href="{{ route('marketing.docs.selfhost.installation') }}#cron" class="doc-link">installation guide</a> is what actually drains the mail queue. No cron, no email.</li>
             <li>Scheduled newsletters are also released by that same cron, once a minute.</li>
+            <li>The new-event digest and the interest list's on-sale and reminder emails are sent by hourly tasks on that same cron, whatever the queue connection.</li>
         </ul>
 
         <p class="text-gray-600 dark:text-gray-300">A real end-to-end check is a free RSVP or a test ticket purchase on one of your own schedules: it exercises the queue, the mailable and the sender address together.</p>
@@ -377,8 +472,17 @@
             <div class="doc-field">
                 <h4 class="font-semibold text-gray-900 dark:text-white mb-2">Nothing arrives and nothing is logged</h4>
                 <ul class="doc-list text-sm">
-                    <li>With <code class="doc-inline-code">MAIL_MAILER=log</code> the app treats itself as having no mail transport and skips ticket, appointment, gift card, sale-alert and feedback emails outright, so there is no error to find. Configure a real driver</li>
+                    <li>With <code class="doc-inline-code">MAIL_MAILER=log</code> the app treats itself as having no mail transport and skips ticket, appointment, gift card, sale-alert and feedback emails, the new-event digest and the interest list's on-sale and reminder emails outright, so there is no error to find. Configure a real driver</li>
                     <li>Confirmation emails are also skipped for addresses on the reserved test domains listed under <a href="#testing" class="doc-link">Testing</a>. Buy a test ticket with a real address</li>
+                </ul>
+            </div>
+
+            <div class="doc-field">
+                <h4 class="font-semibold text-gray-900 dark:text-white mb-2">Ticket buyers were not told about a change</h4>
+                <ul class="doc-list text-sm">
+                    <li>A selfhosted install does not email ticket buyers when an event changes or is cancelled. Those notices need a schedule's own SMTP settings, which only the hosted service offers</li>
+                    <li>People on the event's interest list are told. Cancelling tells them, and a new date or time (one-off events only), venue or online link tells them when you choose to notify in the prompt on save</li>
+                    <li>Those interest-list notices go through your mail transport, so with <code class="doc-inline-code">MAIL_MAILER=log</code> they end up in <code class="doc-inline-code">storage/logs/laravel.log</code></li>
                 </ul>
             </div>
 

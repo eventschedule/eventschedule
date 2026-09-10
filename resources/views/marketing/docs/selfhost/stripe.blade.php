@@ -1,7 +1,9 @@
 <x-docs-page
     key="selfhost/stripe"
-    description="Configure Stripe for ticket sales on a selfhosted Event Schedule install, or Stripe Connect plus Cashier billing if you run it as your own SaaS."
-    lede="A selfhosted install takes card payments with one set of platform keys. A SaaS operator needs two integrations: Connect for ticket sales and Cashier for plan subscriptions."
+    title="Stripe, PayPal and Payfast for Selfhost - Event Schedule"
+    heading="Stripe, PayPal and Payfast"
+    description="Set up Stripe, PayPal or Payfast to sell tickets on a selfhosted Event Schedule install, refund from the Sales page, and run Connect and Cashier as a SaaS."
+    lede="A selfhosted install takes card payments through Stripe with one set of platform keys, and can switch PayPal or Payfast on for everyone the same way. A SaaS operator needs two Stripe integrations: Connect for ticket sales and Cashier for plan subscriptions."
 >
     <x-slot:toc>
         <x-doc-nav-link href="#overview">Overview</x-doc-nav-link>
@@ -12,6 +14,7 @@
         <x-doc-nav-link href="#invoice-ninja">Invoice Ninja</x-doc-nav-link>
         <x-doc-nav-link href="#paypal">PayPal</x-doc-nav-link>
         <x-doc-nav-link href="#payfast">Payfast</x-doc-nav-link>
+        <x-doc-nav-link href="#refunds">Refunds</x-doc-nav-link>
         <x-doc-nav-link href="#testing">Testing</x-doc-nav-link>
         <x-doc-nav-link href="#troubleshooting">Troubleshooting</x-doc-nav-link>
         <x-doc-nav-link href="#security">Security</x-doc-nav-link>
@@ -27,7 +30,7 @@
             Overview
         </h2>
         <p class="text-gray-600 dark:text-gray-300 mb-4">Ticket payments in Event Schedule run through <strong class="text-gray-900 dark:text-white">Stripe Checkout</strong>: the buyer pays on Stripe's own hosted page, Stripe calls a webhook back, and the sale is marked paid. What you have to configure depends on who collects the money - one account for the whole install, or a separate account per event owner.</p>
-        <p class="text-gray-600 dark:text-gray-300 mb-6">The same keys and the same webhook endpoint also cover <a href="{{ route('marketing.docs.gift_cards') }}" class="doc-link">gift card</a> purchases and paid <a href="{{ route('marketing.docs.appointments') }}" class="doc-link">appointment bookings</a>, so you only set this up once.</p>
+        <p class="text-gray-600 dark:text-gray-300 mb-6">The same keys and the same webhook endpoint also cover <a href="{{ route('marketing.docs.gift_cards') }}" class="doc-link">gift card</a> purchases, paid <a href="{{ route('marketing.docs.appointments') }}" class="doc-link">appointment bookings</a> and <a href="{{ route('marketing.docs.tickets') }}#installments" class="doc-link">installment plans</a>, so you only set this up once. <a href="#paypal" class="doc-link">PayPal</a> and <a href="#payfast" class="doc-link">Payfast</a>, further down, take ticket orders only.</p>
 
         <div class="doc-callout doc-callout-success">
             <div class="doc-callout-title">No platform fees</div>
@@ -44,7 +47,7 @@
 
         <div class="doc-callout doc-callout-plan">
             <div class="doc-callout-title">Plan requirement</div>
-            <p>Selling tickets is included on the <strong>Free</strong> plan on eventschedule.com, capped at 25 paid tickets per schedule per calendar month; Pro and Enterprise lift the cap. Scanning tickets at the door is free too. A few extras around selling stay Pro there: the live check-in dashboard, the ticket widget embed, custom checkout fields and the ticket waitlist.</p>
+            <p>Selling tickets is included on the <strong>Free</strong> plan on eventschedule.com, capped at 25 paid tickets per schedule per calendar month; Pro and Enterprise lift the cap. Scanning tickets at the door is free too. A few extras around selling stay Pro there: the live check-in dashboard, promo codes, add-ons, the ticket waitlist, installment plans, passes, gift cards and the ticket widget embed.</p>
             <p class="mt-2">A selfhosted install has no monthly ticket allowance at all, and it resolves to the Enterprise tier, so nothing on this page is plan-gated on your own server.</p>
         </div>
     </section>
@@ -181,7 +184,7 @@
             <p>If the amount Stripe reports differs from the order total by more than one cent, the sale is <strong>not</strong> marked paid. It is flagged <code class="doc-inline-code">amount_mismatch</code> instead, and the mismatch is written to your application log for you to reconcile by hand.</p>
         </div>
 
-        <p class="text-gray-600 dark:text-gray-300 mb-6">Gift card purchases and paid appointment bookings use exactly the same keys and the same endpoint, so no extra configuration is needed for either.</p>
+        <p class="text-gray-600 dark:text-gray-300 mb-6">Gift card purchases, paid appointment bookings and installment plans use exactly the same keys and the same endpoint, so none of them needs extra configuration. An installment plan takes its first payment at checkout and charges the rest to the saved card from an hourly scheduled job, so it depends on the <a href="{{ route('marketing.docs.selfhost.installation') }}#cron" class="doc-link">cron entry</a>.</p>
     </section>
 
     <!-- SaaS Operators -->
@@ -475,7 +478,7 @@
         </div>
     </section>
 
-    <!-- Testing -->
+    <!-- PayPal -->
     <section id="paypal" class="doc-section">
         <h2 class="doc-heading">
             <svg aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-5 h-5 text-gray-500 dark:text-gray-400 flex-shrink-0">
@@ -483,7 +486,7 @@
             </svg>
             PayPal (Alternative Payment Method)
         </h2>
-        <p class="text-gray-600 dark:text-gray-300 mb-6"><a href="https://www.paypal.com" target="_blank" rel="noopener noreferrer" class="doc-link">PayPal</a> is useful where Stripe is not available, and where buyers would rather pay from a PayPal balance than enter a card. Setup is documented in the <a href="{{ route('marketing.docs.tickets') }}#paypal" class="doc-link">user guide</a>; the notes below are the parts specific to running your own install.</p>
+        <p class="text-gray-600 dark:text-gray-300 mb-6"><a href="https://www.paypal.com" target="_blank" rel="noopener noreferrer" class="doc-link">PayPal</a> is useful where Stripe is not available, and where buyers would rather pay from a PayPal balance than enter a card. It takes ticket orders, including a checkout that spans several events, but not gift cards, appointment bookings or installment plans. Setup is documented in the <a href="{{ route('marketing.docs.tickets') }}#paypal" class="doc-link">user guide</a>; the notes below are the parts specific to running your own install.</p>
 
         <h3 class="doc-subheading">Two ways to set it up</h3>
         <p class="text-gray-600 dark:text-gray-300 mb-4">The same two as Payfast, and you can mix them on one install:</p>
@@ -539,6 +542,7 @@
         </div>
     </section>
 
+    <!-- Payfast -->
     <section id="payfast" class="doc-section">
         <h2 class="doc-heading">
             <svg aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-5 h-5 text-gray-500 dark:text-gray-400 flex-shrink-0">
@@ -546,7 +550,7 @@
             </svg>
             Payfast (Alternative Payment Method)
         </h2>
-        <p class="text-gray-600 dark:text-gray-300 mb-6"><a href="https://payfast.io" target="_blank" rel="noopener noreferrer" class="doc-link">Payfast</a> is a South African gateway, useful where Stripe is not available. It settles in South African rand only. Setup is documented in the <a href="{{ route('marketing.docs.tickets') }}#payfast" class="doc-link">user guide</a>; the notes below are the parts specific to running your own install.</p>
+        <p class="text-gray-600 dark:text-gray-300 mb-6"><a href="https://payfast.io" target="_blank" rel="noopener noreferrer" class="doc-link">Payfast</a> is a South African gateway, useful where Stripe is not available. It settles in South African rand only, and like PayPal it takes ticket orders but not gift cards, appointment bookings or installment plans. Setup is documented in the <a href="{{ route('marketing.docs.tickets') }}#payfast" class="doc-link">user guide</a>; the notes below are the parts specific to running your own install.</p>
 
         <h3 class="doc-subheading">Two ways to set it up</h3>
         <p class="text-gray-600 dark:text-gray-300 mb-4">Payfast works either way round, and you can mix the two on one install:</p>
@@ -619,6 +623,33 @@
         </div>
     </section>
 
+    <!-- Refunds -->
+    <section id="refunds" class="doc-section">
+        <h2 class="doc-heading">
+            <svg aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-5 h-5 text-gray-500 dark:text-gray-400 flex-shrink-0">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M9 15L3 9m0 0l6-6M3 9h12a6 6 0 010 12h-3" />
+            </svg>
+            Refunds
+        </h2>
+        <p class="text-gray-600 dark:text-gray-300 mb-4">Refund a sale from the <strong class="text-gray-900 dark:text-white">Sales</strong> page rather than from your provider's dashboard. On a Stripe or PayPal sale, <strong class="text-gray-900 dark:text-white">Refund Ticket</strong> opens a dialog showing what is <strong class="text-gray-900 dark:text-white">Available to refund</strong>. Lower the <strong class="text-gray-900 dark:text-white">Refund Amount</strong> for a partial refund, then press <strong class="text-gray-900 dark:text-white">Refund</strong>. The money goes back through the provider first, and only then does the sale change. The screen itself is covered in the <a href="{{ route('marketing.docs.tickets') }}#refunds" class="doc-link">user guide</a>; these are the parts that depend on how you set up the install.</p>
+
+        <ul class="doc-list mb-6">
+            <li><strong class="text-gray-900 dark:text-white">Stripe</strong> refunds are issued with the keys in your <code class="doc-inline-code">.env</code> at the moment you refund, not the keys the sale was taken with. Keep <code class="doc-inline-code">STRIPE_PLATFORM_SECRET</code> on the account that took the money: after a move to a different Stripe account, older sales can no longer be refunded from the app.</li>
+            <li><strong class="text-gray-900 dark:text-white">PayPal</strong> refunds try the schedule owner's own PayPal account first and then the install-wide one, so a sale taken on the install-wide account before the owner connected their own can still be refunded.</li>
+            <li><strong class="text-gray-900 dark:text-white">A partial refund</strong> leaves the sale paid and its tickets valid, and the Sales page shows <strong class="text-gray-900 dark:text-white">Refunded so far</strong>. Once the whole charge is back, the sale is marked refunded, its tickets stop scanning, and its seats and stock are released.</li>
+            <li><strong class="text-gray-900 dark:text-white">An installment plan</strong> is refunded one payment at a time, and only in full.</li>
+            <li><strong class="text-gray-900 dark:text-white">Every other method</strong> (Payfast, Invoice Ninja, a payment link, cash, or a sale marked paid by hand) shows <strong class="text-gray-900 dark:text-white">Mark as Refunded</strong> instead. That records the refund and moves no money, so return it through the provider yourself.</li>
+        </ul>
+
+        <div class="doc-callout doc-callout-warning mb-6">
+            <div class="doc-callout-title">Refunds made in the Stripe or PayPal dashboard are not reported back</div>
+            <p>The app only listens for completed payments: <code class="doc-inline-code">checkout.session.completed</code> and <code class="doc-inline-code">payment_intent.succeeded</code> from Stripe, <code class="doc-inline-code">PAYMENT.CAPTURE.COMPLETED</code> and <code class="doc-inline-code">PAYMENT.CAPTURE.DENIED</code> from PayPal. A refund issued in either dashboard therefore leaves the sale paid and its tickets scanning at the door. Refund from the Sales page instead.</p>
+        </div>
+
+        <p class="text-gray-600 dark:text-gray-300 mb-6">A refund needs no webhook of its own, because the app calls the provider directly. The app sends no refund email, so tell the buyer yourself. The one message a refund can set off is for a paid appointment booking: refunding it in full cancels the booking, and the guest gets the usual cancellation email.</p>
+    </section>
+
+    <!-- Testing -->
     <section id="testing" class="doc-section">
         <h2 class="doc-heading">
             <svg aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-5 h-5 text-gray-500 dark:text-gray-400 flex-shrink-0">
@@ -779,6 +810,7 @@ stripe trigger customer.subscription.created</code></pre>
                     <li>Stripe reported a total more than a cent away from the order total, so the sale was deliberately not marked paid</li>
                     <li><code class="doc-inline-code">storage/logs/laravel.log</code> records the expected and received amounts side by side</li>
                     <li>Usual causes are a currency mismatch between the event and the Stripe account, or ticket prices edited after the buyer reached Stripe</li>
+                    <li>A site admin can send the whole charge back with <strong class="text-gray-900 dark:text-white">Refund</strong> on the admin panel's <a href="{{ route('marketing.docs.selfhost.admin') }}#insights-revenue" class="doc-link">Revenue</a> page, which refunds through the provider exactly as the Sales page does</li>
                 </ul>
             </div>
 

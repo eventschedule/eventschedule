@@ -1,7 +1,8 @@
 <x-docs-page
     key="selfhost/google-wallet"
-    description="Let ticket buyers save their ticket into Google Wallet. Set up a Google Wallet issuer account and service account for your selfhosted Event Schedule install."
-    lede="Add a wallet button to every paid ticket. The pass carries the same QR code the ticket page shows, so it scans at your door unchanged. Off until you configure it."
+    title="Google Wallet Ticket Passes for Selfhost - Event Schedule"
+    description="Let ticket buyers and free registrants save their ticket to Google Wallet: set up the issuer account and service account your selfhosted install needs."
+    lede="Put an Add to Google Wallet button on every ticket, free registrations included. The pass carries the same QR code the ticket page shows, so it scans at your door unchanged. Off until you configure it."
 >
     <x-slot:toc>
         <x-doc-nav-link href="#prerequisites">Prerequisites</x-doc-nav-link>
@@ -69,6 +70,7 @@
         </div>
 
         <h3 class="doc-subheading">4. Configure the app</h3>
+        <p class="text-gray-600 dark:text-gray-300 mb-4">Add these to your <code class="doc-inline-code">.env</code>. <code class="doc-inline-code">.env.example</code> carries the same three lines, commented out, in its "Google Wallet passes (optional)" block, with a note on what leaves the install.</p>
         <div class="doc-code-block">
             <div class="doc-code-header">
                 <span>.env</span>
@@ -99,7 +101,7 @@
                     </tr>
                     <tr>
                         <td><code class="doc-inline-code">GOOGLE_WALLET_ID_PREFIX</code></td>
-                        <td>Namespaces the passes this installation creates. Defaults to <code class="doc-inline-code">es</code></td>
+                        <td>Namespaces the passes this installation creates. Defaults to <code class="doc-inline-code">es</code>. Only letters, digits, dots, underscores and hyphens are kept</td>
                     </tr>
                 </tbody>
             </table>
@@ -136,15 +138,16 @@
         </h2>
         <p class="text-gray-600 dark:text-gray-300 mb-4">There is no health check for this, so confirm it by hand:</p>
         <ol class="doc-list doc-list-numbered mb-6">
-            <li>Open a <strong class="text-gray-900 dark:text-white">paid</strong> ticket's page. An "Add to Google Wallet" badge should appear below the QR code</li>
+            <li>Open the page of a ticket whose order is complete: a paid ticket, or a free registration. An <strong class="text-gray-900 dark:text-white">Add to Google Wallet</strong> badge should appear in its own row along the bottom of the ticket</li>
             <li>Tap it. You should be redirected to <code class="doc-inline-code">pay.google.com</code> with a pass ready to save</li>
             <li>Save it, then scan the pass's own QR from <strong class="text-gray-900 dark:text-white">Sales &rarr; Scan Ticket</strong>. It should check the attendee in exactly as the on-page QR does</li>
         </ol>
         <p class="text-gray-600 dark:text-gray-300 mb-4">While the issuer is in demo mode, step 2 only works for a Google account you registered as a test account.</p>
+        <p class="text-gray-600 dark:text-gray-300 mb-4">The same badge appears in the ticket confirmation email and, for a purchase that spans several events, on its order page, once for each event.</p>
 
         <div class="doc-callout doc-callout-info">
             <div class="doc-callout-title">When no button appears</div>
-            <p>A badge is only offered for an order that is paid, not deleted, not on a delinquent payment plan, whose event is not cancelled, and which is not an appointment booking. Appointment bookings have their own manage page and never enter the QR ticket flow.</p>
+            <p>A badge is only offered for an order that is complete (paid, or a free registration), not deleted, not on an installment plan that has fallen behind, whose event is not cancelled, and which is not an appointment booking. Appointment bookings have their own manage page and never enter the QR ticket flow.</p>
         </div>
     </section>
 
@@ -159,9 +162,9 @@
         <p class="text-gray-600 dark:text-gray-300 mb-4">Nothing is sent for a buyer who never taps the button. When one does, your install sends Google:</p>
         <ul class="doc-list mb-6">
             <li>The attendee name, the event name, the venue name and address, and the start time</li>
-            <li>The ticket type, any seat labels, and the number of admissions</li>
+            <li>The ticket type, any seat labels, and the number of guests when a ticket admits more than one</li>
             <li><strong class="text-gray-900 dark:text-white">The event's ticket notes</strong>, truncated to 200 characters. This is free text your organizers write, so it is worth knowing it leaves the install</li>
-            <li>The schedule's name and accent colour, the event's public URL, and your logo and event image URLs when <code class="doc-inline-code">APP_URL</code> is publicly reachable over HTTPS</li>
+            <li>The schedule's name and accent colour, the event's public URL and, when <code class="doc-inline-code">APP_URL</code> is publicly reachable over HTTPS, the URLs of the schedule's profile image (the Event Schedule logo when it has none) and the event's image</li>
             <li>The venue's coordinates, when it has them</li>
             <li><strong class="text-gray-900 dark:text-white">The ticket URL, which contains that sale's secret</strong></li>
         </ul>
@@ -185,23 +188,24 @@
             <li><strong class="text-gray-900 dark:text-white">The class</strong> describes one occurrence: branding, venue, date and time. It is created once over the Wallet API and then cached, because a token carrying both the class and the ticket exceeds the 1800 characters Google documents as the safe length</li>
             <li><strong class="text-gray-900 dark:text-white">The ticket</strong> rides inside the save link itself, so there is no extra API call per sale</li>
             <li><strong class="text-gray-900 dark:text-white">Identifiers are derived</strong> from the event and sale IDs, so a buyer who taps twice gets the same pass rather than a second one</li>
+            <li><strong class="text-gray-900 dark:text-white">One pass per event:</strong> an order that spans several events gets a pass for each. A season pass is a single pass for its whole run rather than one per date, so its class carries no date</li>
         </ul>
 
         <div class="doc-callout doc-callout-warning mb-6">
             <div class="doc-callout-title">Passes are never updated after they are created</div>
-            <p>Neither half is patched once written. A saved pass keeps the details it was saved with, so cancelling or refunding an order does not remove it from anyone's phone, and re-tapping the button returns the original rather than a corrected one. The QR still stops working: your door scanner checks the order's live status and refuses a cancelled ticket exactly as the ticket page does.</p>
+            <p>Neither half is patched once written. A saved pass keeps the details it was saved with, so cancelling or fully refunding an order does not remove it from anyone's phone, and re-tapping the button returns the original rather than a corrected one. The QR still stops working: your door scanner checks the order's live status and refuses a cancelled or fully refunded ticket exactly as the ticket page does. A partial refund leaves the order paid, so its pass keeps scanning.</p>
             <p class="mt-2">The class is written once per occurrence too. If you rename an event, move it or change its time <em>after</em> the first buyer has tapped, passes saved from then on still carry the original details.</p>
         </div>
 
         <h3 class="doc-subheading">When a pass stops showing</h3>
-        <p class="text-gray-600 dark:text-gray-300 mb-4">A normal ticket's pass expires a few hours after the event ends, and Google moves it out of the main list. Two cases never expire and stay in the wallet indefinitely:</p>
+        <p class="text-gray-600 dark:text-gray-300 mb-4">A normal ticket's pass expires three hours after the event ends (an event shorter than an hour, or with no length set, counts as an hour long), and Google moves it out of the main list. Two cases never expire and stay in the wallet indefinitely:</p>
         <ul class="doc-list mb-6">
-            <li>A season pass whose ticket has no <strong class="text-gray-900 dark:text-white">valid days</strong> set, because there is no expiry date to inherit</li>
+            <li>A season pass whose ticket leaves <strong class="text-gray-900 dark:text-white">Valid for (days)</strong> blank, because it has no expiry date to inherit</li>
             <li>An all-day event, or a recurring event with no start time, because there is no occurrence instant to measure from</li>
         </ul>
 
         <h3 class="doc-subheading">Very long passes drop optional details</h3>
-        <p class="text-gray-600 dark:text-gray-300 mb-4">Google caps the save link, so when a pass would not fit, the ticket notes go first, then the seat list, then the ticket type. The QR code and the attendee name are always kept. A long event name combined with long ticket notes and a large allocated party is the case that triggers it.</p>
+        <p class="text-gray-600 dark:text-gray-300 mb-4">Google caps the save link, so when a pass would not fit, the extra rows go first (the ticket notes and the guest count), then the seat list, then the ticket type. The QR code and the attendee name are always kept. The event name, venue and images never count against the cap, because they live on the class rather than in the link. Long ticket notes, a long seat list or a long ticket type are what trigger it, and text in Hebrew, Arabic, Cyrillic or Chinese takes two to three times the room of the same number of Latin letters.</p>
     </section>
 
     <!-- Troubleshooting -->
@@ -217,7 +221,7 @@
         <p class="text-gray-600 dark:text-gray-300 mb-4">Either the ticket is not eligible (see <a href="#verify" class="doc-link">When no button appears</a>), or your credentials did not load. A wrong path, a file the web user cannot read, a truncated or line-wrapped base64 paste, or JSON missing <code class="doc-inline-code">client_email</code> or <code class="doc-inline-code">private_key</code> all count as <em>unconfigured</em>: there is no error and nothing is logged, the button simply never renders. Check that the path resolves to a file and that the JSON decodes with both keys present. A stray space or newline in <code class="doc-inline-code">GOOGLE_WALLET_ISSUER_ID</code> is ignored.</p>
 
         <h3 class="doc-subheading">The buyer lands back on their ticket with an error</h3>
-        <p class="text-gray-600 dark:text-gray-300 mb-4">The call to Google failed. Check <code class="doc-inline-code">storage/logs</code> for one of:</p>
+        <p class="text-gray-600 dark:text-gray-300 mb-4">The error reads "The wallet pass could not be created. Please try again." It means the pass could not be built or the call to Google failed. Check <code class="doc-inline-code">storage/logs</code> for one of:</p>
         <div class="doc-table-wrap mb-6">
             <table class="doc-table">
                 <thead>
@@ -241,21 +245,24 @@
                     </tr>
                     <tr>
                         <td><code class="doc-inline-code">Google Wallet JWT exceeds the safe length</code></td>
-                        <td>A pass too large even after dropping its optional details. Shorten the event name or the ticket notes</td>
+                        <td>The pass is too long even with every optional detail dropped. All that is left by then is the ticket URL, the attendee name and the pass IDs, so look for an unusually long <code class="doc-inline-code">APP_URL</code> or <code class="doc-inline-code">GOOGLE_WALLET_ID_PREFIX</code></td>
                     </tr>
                 </tbody>
             </table>
         </div>
-        <p class="text-gray-600 dark:text-gray-300 mb-4">A failure is cached for five minutes, so fix the cause and wait a moment rather than retrying in a loop. A successful pass class is cached for a day, and the access token for just under an hour, which is also why a branding change can appear not to take effect immediately.</p>
+        <p class="text-gray-600 dark:text-gray-300 mb-4">A failure is cached for five minutes, so fix the cause and wait a moment rather than retrying in a loop. The access token is cached for just under an hour.</p>
 
         <h3 class="doc-subheading">The pass saves for you but not for anyone else</h3>
         <p class="text-gray-600 dark:text-gray-300 mb-4">The issuer is still in demo mode. See step 5.</p>
 
         <h3 class="doc-subheading">No arrival notification</h3>
-        <p class="text-gray-600 dark:text-gray-300 mb-4">The pass carries the venue's <strong class="text-gray-900 dark:text-white">coordinates</strong>, not its address, and coordinates are only filled in when the venue is geocoded. That needs <code class="doc-inline-code">BACKEND_GOOGLE_KEY</code> to be set. Without a Maps key a venue can have a complete address and still have no coordinates, and no notification will fire.</p>
+        <p class="text-gray-600 dark:text-gray-300 mb-4">The pass carries the venue's <strong class="text-gray-900 dark:text-white">coordinates</strong>, not its address, and coordinates are only filled in when the venue is geocoded. That needs <code class="doc-inline-code">BACKEND_GOOGLE_KEY</code> to be set. Without a Maps key a venue can have a complete address and still have no coordinates, and no notification will fire. Coordinates are looked up when a venue is saved, so after adding the key, save each venue once more. Like the rest of the class, they only reach occurrences whose first pass is saved after that.</p>
 
         <h3 class="doc-subheading">The pass has no logo or banner image</h3>
         <p class="text-gray-600 dark:text-gray-300 mb-4">Google fetches those from your installation, so they are only sent when <code class="doc-inline-code">APP_URL</code> is an HTTPS address Google could actually reach. A LAN or plain-HTTP install deliberately sends no image rather than shipping a broken one.</p>
+
+        <h3 class="doc-subheading">The pass shows the Event Schedule logo, or old branding</h3>
+        <p class="text-gray-600 dark:text-gray-300 mb-4">The pass logo is the schedule's profile image, and the Event Schedule logo stands in when the schedule has none, so give the schedule a profile image. Branding is written into an occurrence's pass class once, when its first buyer taps the button, and the class is never rewritten after that. A new profile image, accent colour or schedule name therefore shows only on occurrences whose first pass is saved after the change.</p>
 
         <div class="doc-callout doc-callout-info">
             <div class="doc-callout-title">Outbound access</div>

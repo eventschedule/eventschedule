@@ -1,9 +1,9 @@
 <x-docs-page
     key="developer/api"
-    title="API Reference - Event Schedule"
-    description="Programmatically manage schedules, events, sales and fan content with the Event Schedule REST API. Learn about authentication, endpoints, and rate limits."
+    title="REST API Reference: Schedules, Events, Sales - Event Schedule"
+    description="Manage schedules, events, sales and refunds with the Event Schedule REST API: authentication, rate limits, pagination and every endpoint, with examples."
     plan="pro"
-    lede="A JSON REST API for your schedules, events, sales and fan content. API access is a Pro feature: on the hosted service the schedules you read and write have to be on a Pro or Enterprise plan. A selfhosted install counts as Enterprise, so nothing here is held back by plan."
+    lede="A JSON REST API for your schedules, events, sales, refunds and fan content. API access is a Pro feature: on the hosted service the schedules you read and write have to be on a Pro or Enterprise plan, apart from the few endpoints listed under Authentication. A selfhosted install counts as Enterprise, so nothing here is held back by plan."
 >
     <x-slot:toc>
         <x-doc-nav-group label="Getting Started" expanded>
@@ -42,7 +42,7 @@
             <x-doc-nav-link href="#list-sales" search="list sales get /api/sales filter status email"><span class="api-method-dot api-method-get"></span>List Sales</x-doc-nav-link>
             <x-doc-nav-link href="#show-sale" search="show sale get /api/sales detail"><span class="api-method-dot api-method-get"></span>Show Sale</x-doc-nav-link>
             <x-doc-nav-link href="#create-sale" search="create sale post /api/sales tickets"><span class="api-method-dot api-method-post"></span>Create Sale</x-doc-nav-link>
-            <x-doc-nav-link href="#update-sale" search="update sale status put /api/sales mark_paid refund cancel"><span class="api-method-dot api-method-put"></span>Update Sale Status</x-doc-nav-link>
+            <x-doc-nav-link href="#update-sale" search="update sale status put /api/sales mark_paid refund partial refund cancel idempotency_key"><span class="api-method-dot api-method-put"></span>Update Sale Status</x-doc-nav-link>
             <x-doc-nav-link href="#delete-sale" search="delete sale /api/sales"><span class="api-method-dot api-method-delete"></span>Delete Sale</x-doc-nav-link>
         </x-doc-nav-group>
         <x-doc-nav-group label="Feedback">
@@ -111,7 +111,7 @@
                         </ul>
                         <p class="text-gray-600 dark:text-gray-300 mb-6">A key belongs to a <em>user account</em>, not to one schedule. It can reach every schedule where you are the owner or an admin, and nothing else. Followers and members cannot be used to authorise API calls.</p>
                         <h3 class="doc-subheading">Plan requirement</h3>
-                        <p class="text-gray-600 dark:text-gray-300 mb-6">On the hosted service, a schedule must be on a Pro or Enterprise plan for the API to see it. Free schedules are filtered out of the list endpoints and return <code class="doc-inline-code">403 API usage is limited to Pro accounts</code> on the single-record endpoints. There are two deliberate exceptions, so a new account can bootstrap and a free schedule can still take a door sale: <a href="#create-schedule" class="doc-link">Create Schedule</a> and <a href="#create-sale" class="doc-link">Create Sale</a>. Selfhosted installs resolve to Enterprise, so every endpoint is available there.</p>
+                        <p class="text-gray-600 dark:text-gray-300 mb-6">On the hosted service, a schedule must be on a Pro or Enterprise plan for the API to see it. The schedule, event, sale and feedback lists leave out anything that belongs only to free schedules, and single-record reads and writes on a free schedule return <code class="doc-inline-code">403 API usage is limited to Pro accounts</code>. A few endpoints carry no plan check at all: <a href="#create-schedule" class="doc-link">Create Schedule</a>, so a new account can bootstrap; <a href="#delete-schedule" class="doc-link">Delete Schedule</a>, so an owner can always retire one; <a href="#create-sale" class="doc-link">Create Sale</a>, so a free schedule can still record a sale within its ticket allowance; both <a href="#list-categories" class="doc-link">List Categories</a> routes; and <a href="#list-fan-content" class="doc-link">List Fan Content</a>. A new schedule starts on the Free plan with no trial. Selfhosted installs resolve to Enterprise, so every endpoint is available there.</p>
                         <h3 class="doc-subheading">Key lifetime and rotation</h3>
                         <ul class="doc-list mb-6">
                             <li>A key expires one year after it is issued. After that every request returns <code class="doc-inline-code">401 API key expired</code>.</li>
@@ -143,7 +143,7 @@
                             </svg>
                             Rate Limits
                         </h2>
-                        <p class="text-gray-600 dark:text-gray-300 mb-6">Authenticated requests are counted per IP address, in separate read and write buckets, over a rolling minute:</p>
+                        <p class="text-gray-600 dark:text-gray-300 mb-6">Authenticated requests are counted per IP address, in separate read and write buckets. Every key calling from the same address shares the same two buckets, and a request that fails authentication is not counted:</p>
                         <div class="doc-table-wrap">
                             <table class="doc-table">
                                 <thead><tr><th>Operation Type</th><th>Limit</th><th>HTTP Methods</th></tr></thead>
@@ -153,6 +153,7 @@
                                 </tbody>
                             </table>
                         </div>
+                        <p class="text-gray-600 dark:text-gray-300 mb-6">A bucket is not a rolling window. Its count clears only after a full minute with no counted request, and every request before then adds to it, so a client that never pauses for a minute reaches the limit however slowly it runs: one read every 30 seconds is refused after the 300th, about two and a half hours in. Leave a minute's gap between long runs.</p>
                         <p class="text-gray-600 dark:text-gray-300 mb-6"><a href="#create-event" class="doc-link">Create Event</a> carries a second throttle of 30 requests per minute on top of the write bucket, so a bulk import should pace itself well below that.</p>
                         <h3 class="doc-subheading">Unauthenticated endpoints</h3>
                         <p class="text-gray-600 dark:text-gray-300 mb-6">The auth endpoints are limited separately, because they run before any key exists:</p>
@@ -189,7 +190,7 @@
                             </svg>
                             Response Format
                         </h2>
-                        <p class="text-gray-600 dark:text-gray-300 mb-6">Every response is JSON. Successful responses wrap the result in a <code class="doc-inline-code">data</code> property: an object for single-record endpoints, an array for list endpoints. List endpoints add a <code class="doc-inline-code">meta</code> object with the pagination counters, and the write endpoints put their confirmation message in <code class="doc-inline-code">meta.message</code>.</p>
+                        <p class="text-gray-600 dark:text-gray-300 mb-6">Every response is JSON. Successful responses wrap the result in a <code class="doc-inline-code">data</code> property: an object for single-record endpoints, an array for list endpoints. List endpoints add a <code class="doc-inline-code">meta</code> object with the pagination counters. Event and sale writes and Upload Flyer put a confirmation in <code class="doc-inline-code">meta.message</code>, while the delete endpoints return theirs as <code class="doc-inline-code">data.message</code>.</p>
                         <p class="text-gray-600 dark:text-gray-300 mb-6">Failures return an <code class="doc-inline-code">error</code> string. A validation failure adds an <code class="doc-inline-code">errors</code> object keyed by field name, each holding an array of messages.</p>
                         <div class="doc-callout doc-callout-info">
                             <div class="doc-callout-title">Record IDs are opaque strings</div>
@@ -506,7 +507,7 @@
                             <span class="api-method-pill api-method-pill-post px-2 py-1 rounded text-sm font-medium">POST</span>
                             <code class="doc-inline-code">/api/schedules</code>
                         </div>
-                        <p class="text-gray-600 dark:text-gray-300 mb-6">Create a new schedule. This is the one write endpoint with no plan gate, so a new account can bootstrap itself. Every other endpoint then needs that schedule to be on a Pro or Enterprise plan, so on the hosted service subscribe before you start pushing events. You are attached to the new schedule as its owner, and it becomes your default schedule if you had none.</p>
+                        <p class="text-gray-600 dark:text-gray-300 mb-6">Create a new schedule. There is no plan gate here, so a new account can bootstrap itself, but the schedule starts on the Free plan with no trial and most other endpoints need it on Pro or Enterprise, so on the hosted service subscribe before you start pushing events. You are attached to the new schedule as its owner, and it becomes your default schedule if you had none.</p>
                         <div class="doc-table-wrap">
                             <table class="doc-table">
                                 <thead><tr><th>Parameter</th><th>Required</th><th>Description</th></tr></thead>
@@ -524,6 +525,7 @@
                             </table>
                         </div>
                         <p class="text-gray-600 dark:text-gray-300 mt-6">On the hosted service one account may own up to 50 schedules. Beyond that the endpoint returns a <code class="doc-inline-code">422</code>.</p>
+                        <p class="text-gray-600 dark:text-gray-300 mt-4">On the hosted service a schedule stays out of search engines until its contact email or phone number is verified. Send your account's own email address and the schedule shares your account's verification; any other address is sent a verification link.</p>
                     </div>
                     <div class="api-endpoint-code">
                         <div class="doc-code-block">
@@ -580,7 +582,7 @@
                             <span class="api-method-pill api-method-pill-delete px-2 py-1 rounded text-sm font-medium">DELETE</span>
                             <code class="doc-inline-code">/api/schedules/{subdomain}</code>
                         </div>
-                        <p class="text-gray-600 dark:text-gray-300 mb-6">Retire a schedule. Requires owner access: an admin gets a <code class="doc-inline-code">404</code>. There is no undo through the API.</p>
+                        <p class="text-gray-600 dark:text-gray-300 mb-6">Retire a schedule. Requires owner access but no plan: an admin gets a <code class="doc-inline-code">404</code>. There is no undo through the API.</p>
                         <p class="text-gray-600 dark:text-gray-300 mb-6">The schedule is flagged as deleted and stops appearing anywhere, and the call also:</p>
                         <ul class="doc-list mb-6">
                             <li>Deletes its profile, header and background images from storage</li>
@@ -588,6 +590,7 @@
                             <li>Tears down its Google Calendar and Outlook sync subscriptions</li>
                             <li>Cancels any running boost campaign and refunds it where money is owed</li>
                             <li>Emails the schedule's members to tell them it was deleted</li>
+                            <li>Frees its subdomain for anyone to register, keeping the old name on record so a platform admin can restore the schedule</li>
                         </ul>
                         <p class="text-gray-600 dark:text-gray-300 mb-6">Events are not swept up automatically. The exception is a talent schedule: an event whose only member was that schedule is deleted with it, so nothing is left orphaned.</p>
                     </div>
@@ -938,7 +941,7 @@
                                     <tr><td><code class="doc-inline-code">rsvp_enabled</code></td><td>No</td><td>Enable free registration, which collects a name and email without a payment step (boolean)</td></tr>
                                     <tr><td><code class="doc-inline-code">rsvp_limit</code></td><td>No</td><td>Cap on registrations per date (integer, minimum 1)</td></tr>
                                     <tr><td><code class="doc-inline-code">tickets_enabled</code></td><td>No</td><td>Enable ticketing (boolean)</td></tr>
-                                    <tr><td><code class="doc-inline-code">ticket_currency_code</code></td><td>No</td><td>Three-letter ISO currency code, for example USD</td></tr>
+                                    <tr><td><code class="doc-inline-code">ticket_currency_code</code></td><td>No</td><td>Three-letter ISO currency code, for example USD. Once the event has taken money, Update Event refuses to change it with a <code class="doc-inline-code">422</code>, because past sales and any later refund are denominated in it.</td></tr>
                                     <tr><td><code class="doc-inline-code">payment_method</code></td><td>No</td><td>cash, stripe, paypal, invoiceninja, payment_url or payfast. <code class="doc-inline-code">manual</code> is accepted as an alias for <code class="doc-inline-code">cash</code>. The method must be connected on the account; <code class="doc-inline-code">payfast</code> only settles events priced in ZAR, and <code class="doc-inline-code">paypal</code> only the currencies listed under <a href="{{ route('marketing.docs.tickets') }}#paypal" class="doc-link">Connecting PayPal</a> - PayPal's own list minus the Hungarian forint, Japanese yen and New Taiwan dollar. On create, omitting this field uses the installation's <code class="doc-inline-code">DEFAULT_PAYMENT_METHOD</code> if one is set and is usable for the event's currency, falling back to <code class="doc-inline-code">cash</code>; send <code class="doc-inline-code">null</code> to mean cash explicitly. On update, omitting it leaves the stored value alone</td></tr>
                                     <tr><td><code class="doc-inline-code">payment_instructions</code></td><td>No</td><td>Instructions shown for manual payment (max 5000 characters)</td></tr>
                                     <tr><td><code class="doc-inline-code">tickets</code></td><td>No</td><td>Array of ticket types. Each takes <code class="doc-inline-code">type</code> (required), <code class="doc-inline-code">quantity</code>, <code class="doc-inline-code">price</code>, <code class="doc-inline-code">description</code>, <code class="doc-inline-code">sales_start_at</code> and <code class="doc-inline-code">sales_end_at</code>. A <code class="doc-inline-code">quantity</code> of 0 means unlimited.</td></tr>
@@ -1222,7 +1225,7 @@
                             <span class="api-method-pill api-method-pill-get px-2 py-1 rounded text-sm font-medium">GET</span>
                             <code class="doc-inline-code">/api/sales/{id}</code>
                         </div>
-                        <p class="text-gray-600 dark:text-gray-300 mb-6">Returns a single sale by its encoded ID, including a row per ticket type and add-on with <code class="doc-inline-code">ticket_id</code>, <code class="doc-inline-code">type</code>, <code class="doc-inline-code">quantity</code>, <code class="doc-inline-code">price</code> and the <code class="doc-inline-code">is_addon</code> and <code class="doc-inline-code">is_pass</code> flags. Requires owner or admin access on the event's schedule and a Pro or Enterprise plan.</p>
+                        <p class="text-gray-600 dark:text-gray-300 mb-6">Returns a single sale by its encoded ID, including a row per ticket type and add-on with <code class="doc-inline-code">ticket_id</code>, <code class="doc-inline-code">type</code>, <code class="doc-inline-code">quantity</code>, <code class="doc-inline-code">price</code> and the <code class="doc-inline-code">is_addon</code> and <code class="doc-inline-code">is_pass</code> flags. On an event with allocated seating each row also carries <code class="doc-inline-code">seats</code>, the labels of the seats the sale holds. The sale's <code class="doc-inline-code">secret</code>, the token that opens the buyer's ticket page and QR code, is included only when the key belongs to the account that created the event or placed the sale. Requires owner or admin access on the event's schedule and a Pro or Enterprise plan.</p>
                         <p class="text-gray-600 dark:text-gray-300 mb-6">An order bought for several named guests is stored as one row per guest, all sharing a <code class="doc-inline-code">group_id</code>. The row with <code class="doc-inline-code">is_primary</code> set to true holds the totals for the whole order; the other rows report zero so you do not double-count when you add them up. Every row in a group belongs to the same event.</p>
                         <p class="text-gray-600 dark:text-gray-300 mb-6">A purchase that covered several events shares an <code class="doc-inline-code">order_id</code> instead, one row per event, with <code class="doc-inline-code">is_order_primary</code> on the anchoring row. The two nest: a leg of an order can itself be split across named guests, so a row may carry both.</p>
                         <p class="text-gray-600 dark:text-gray-300 mb-6"><code class="doc-inline-code">payment_amount</code> is what the buyer agreed to pay, not what has been collected. The two differ for a sale bought on an <a href="{{ route('marketing.docs.tickets') }}#installments" class="doc-link">installment plan</a>: the sale reads <code class="doc-inline-code">paid</code> with the full total from the first payment onwards, because the ticket is issued then, while the rest arrives over the following months. Reconcile against Stripe rather than against this field if you are counting money in the bank.</p>
@@ -1269,7 +1272,7 @@
                             <span class="api-method-pill api-method-pill-post px-2 py-1 rounded text-sm font-medium">POST</span>
                             <code class="doc-inline-code">/api/sales</code>
                         </div>
-                        <p class="text-gray-600 dark:text-gray-300 mb-6">Record a sale against an event, for example when someone paid you at the door or through a channel Event Schedule does not handle. The event must have ticketing enabled and still be selling. This is one of the two endpoints with no Pro gate, so a free schedule can use it within its monthly paid-ticket allowance; the resulting sale will not appear in <a href="#list-sales" class="doc-link">List Sales</a> until the schedule is on a paid plan.</p>
+                        <p class="text-gray-600 dark:text-gray-300 mb-6">Record a sale against an event, for example when someone paid you at the door or through a channel Event Schedule does not handle. The event must have ticketing enabled and still be selling. There is no Pro gate here: on a free schedule the sale is held to the same monthly paid-ticket allowance as checkout, which never refuses an event paid in cash or one starting within 48 hours. Until the schedule is on a paid plan, though, the sale does not appear in <a href="#list-sales" class="doc-link">List Sales</a>, and <a href="#show-sale" class="doc-link">Show Sale</a> and <a href="#update-sale" class="doc-link">Update Sale Status</a> return <code class="doc-inline-code">403</code> for it, so mark it paid from the Sales page instead.</p>
                         <div class="doc-table-wrap">
                             <table class="doc-table">
                                 <thead><tr><th>Parameter</th><th>Required</th><th>Description</th></tr></thead>
@@ -1288,6 +1291,7 @@
                             <li>The sale is created as <code class="doc-inline-code">unpaid</code>. You cannot set the status from the request; use <a href="#update-sale" class="doc-link">Update Sale Status</a> once you have the money.</li>
                             <li>A sale whose total comes to zero is marked <code class="doc-inline-code">paid</code> immediately.</li>
                             <li>Any volume discount configured on the ticket type is applied to the total.</li>
+                            <li>On an event with <a href="{{ route('marketing.docs.allocated_seating') }}" class="doc-link">allocated seating</a>, the best available seats are assigned, since this path has no seat picker.</li>
                             <li>A <code class="doc-inline-code">sale.created</code> <a href="{{ route('marketing.docs.developer.webhooks') }}" class="doc-link">webhook</a> fires, plus <code class="doc-inline-code">sale.paid</code> for a zero-total sale.</li>
                         </ul>
                         <p class="text-gray-600 dark:text-gray-300 mb-6">Inventory is checked under a lock, so you cannot oversell through this endpoint. Common <code class="doc-inline-code">422</code> replies are a past event or occurrence, a ticket whose sales window has not opened or has closed, and a quantity larger than the remaining stock, which reports how many are left.</p>
@@ -1323,7 +1327,7 @@
                             <span class="api-method-pill api-method-pill-put px-2 py-1 rounded text-sm font-medium">PUT</span>
                             <code class="doc-inline-code">/api/sales/{id}</code>
                         </div>
-                        <p class="text-gray-600 dark:text-gray-300 mb-6">Move a sale to a new status by sending an <code class="doc-inline-code">action</code>. Which actions are available depends on where the sale is now; an action the current status does not allow returns a <code class="doc-inline-code">422</code> naming both.</p>
+                        <p class="text-gray-600 dark:text-gray-300 mb-6">Move a sale to a new status by sending an <code class="doc-inline-code">action</code>. Requires owner or admin access on the event's schedule and a Pro or Enterprise plan. Which actions are available depends on where the sale is now; an action the current status does not allow returns a <code class="doc-inline-code">422</code> naming both. <code class="doc-inline-code">refund</code> asks one thing more, because the money leaves the event creator's account: the schedule you act through must have created the event or accepted its place on it, or the reply is <code class="doc-inline-code">403</code>.</p>
                         <div class="doc-table-wrap">
                             <table class="doc-table">
                                 <thead><tr><th>Action</th><th>From Status</th><th>To Status</th><th>Webhook</th></tr></thead>
@@ -1338,12 +1342,13 @@
                         <div class="doc-callout doc-callout-info">
                             <div class="doc-callout-title">refund moves money on Stripe and PayPal</div>
                             <p>For a Stripe or PayPal sale, <code class="doc-inline-code">refund</code> sends the money back through the provider and then updates the status. Send an optional <code class="doc-inline-code">amount</code> to return part of it; omit it and the whole remaining balance goes back. A partial refund leaves the sale <code class="doc-inline-code">paid</code>, fires no webhook, and returns <code class="doc-inline-code">200</code> with the message <code class="doc-inline-code">Partial refund sent</code>.</p>
-                            <p>Every other method - Invoice Ninja, Payfast, a payment link, cash, or a sale marked paid by hand - only records the refund and backs the amount out of your revenue figures. Issue the money in your payment provider, then call this to keep the two in step.</p>
+                            <p>Every other method - Invoice Ninja, Payfast, a payment link, cash, or a sale marked paid by hand - only records the refund and backs the amount out of your revenue figures, and it ignores <code class="doc-inline-code">amount</code>: the whole sale is recorded as refunded. Issue the money in your payment provider, then call this to keep the two in step.</p>
+                            <p>It does not work the other way round. A refund issued from the Stripe or PayPal dashboard is not reported back to Event Schedule, so the sale stays <code class="doc-inline-code">paid</code> and its tickets keep scanning. Refund through this endpoint or the Sales page instead.</p>
                             <p>A refund the gateway refuses returns <code class="doc-inline-code">422</code> and leaves the sale <code class="doc-inline-code">paid</code>. A refund whose outcome could not be confirmed returns <code class="doc-inline-code">409</code>: nothing is retried automatically, because retrying a refund that may already have gone through is how one refund becomes two. Check it against your provider before acting.</p>
-                            <p>Send an <code class="doc-inline-code">idempotency_key</code> of your own to make retrying safe. A repeat carrying the same key returns the first attempt's outcome instead of issuing a second refund, and a repeat sent while the first is still running returns <code class="doc-inline-code">409</code>. Without a key, a retried request is a second refund.</p>
+                            <p>Send an <code class="doc-inline-code">idempotency_key</code> of your own, up to 64 letters, digits, <code class="doc-inline-code">_</code>, <code class="doc-inline-code">.</code>, <code class="doc-inline-code">:</code> or <code class="doc-inline-code">-</code>, to make retrying safe. A repeat carrying the same key returns the first attempt's outcome instead of issuing a second refund, and a repeat sent while the first is still running returns <code class="doc-inline-code">409</code>. Without a key, a retried request is a second refund.</p>
                             <p>A payment plan is refunded in full only: sending <code class="doc-inline-code">amount</code> for one returns <code class="doc-inline-code">422</code>. Each collected payment goes back separately, and an attempt that stops partway can be repeated to return the rest.</p>
                         </div>
-                        <p class="text-gray-600 dark:text-gray-300 mb-6">Cancelling or refunding releases the seats back into stock and notifies anyone on the waitlist for that date. For a multi-event order, act on the primary sale: a non-primary row returns <code class="doc-inline-code">403</code>, and the change cascades to the rest of the order for you.</p>
+                        <p class="text-gray-600 dark:text-gray-300 mb-6">Cancelling or fully refunding releases the seats back into stock and notifies anyone on the waitlist for that date; a partial refund does neither. A named guest's row inside a <code class="doc-inline-code">group_id</code> returns <code class="doc-inline-code">403</code>: act on the group's primary row (<code class="doc-inline-code">is_primary</code>), which carries the change to every guest. On a multi-event order the row with <code class="doc-inline-code">is_order_primary</code> carries it to every leg, while acting on any other leg changes only that leg and its own guests.</p>
                     </div>
                     <div class="api-endpoint-code">
                         <div class="doc-code-block">
@@ -1352,6 +1357,13 @@
          -H <span class="code-string">"X-API-Key: your_api_key_here"</span> \
          -H <span class="code-string">"Content-Type: application/json"</span> \
          -d <span class="code-string">'{"action": "mark_paid"}'</span></code></pre>
+                        </div>
+                        <div class="doc-code-block">
+                            <div class="doc-code-header"><span>Partial refund</span><button class="doc-copy-btn">Copy</button></div>
+                            <pre><code><span class="code-keyword">curl</span> -X PUT <span class="code-string">"{{ config('app.url') }}/api/sales/sale123"</span> \
+         -H <span class="code-string">"X-API-Key: your_api_key_here"</span> \
+         -H <span class="code-string">"Content-Type: application/json"</span> \
+         -d <span class="code-string">'{"action": "refund", "amount": 10, "idempotency_key": "sale123-refund-1"}'</span></code></pre>
                         </div>
                     </div>
                 </div>
@@ -1372,7 +1384,7 @@
                             <code class="doc-inline-code">/api/sales/{id}</code>
                         </div>
                         <p class="text-gray-600 dark:text-gray-300 mb-6">Remove a sale from your records. It is cancelled first, so its seats return to stock, and then flagged as deleted: it stops appearing in <a href="#list-sales" class="doc-link">List Sales</a> and in the admin panel, and <a href="#show-sale" class="doc-link">Show Sale</a> returns <code class="doc-inline-code">404</code> for it. Requires owner or admin access on the event's schedule and a Pro or Enterprise plan.</p>
-                        <p class="text-gray-600 dark:text-gray-300 mb-6">Deleting the primary sale of a multi-event order deletes the whole order. A non-primary row returns <code class="doc-inline-code">403</code>.</p>
+                        <p class="text-gray-600 dark:text-gray-300 mb-6">Deleting the row with <code class="doc-inline-code">is_order_primary</code> deletes the whole multi-event order, and deleting a group's primary row deletes its guests with it. A named guest's row returns <code class="doc-inline-code">403</code>.</p>
                     </div>
                     <div class="api-endpoint-code">
                         <div class="doc-code-block">
@@ -1534,9 +1546,9 @@
                                     <tr><td><span class="text-green-700 dark:text-green-400 font-semibold">201</span></td><td>Created, returned by Register, Create Schedule, Create Sub-Schedule, Create Event and Create Sale</td></tr>
                                     <tr><td><span class="text-red-700 dark:text-red-400 font-semibold">400</span></td><td>Verification codes requested on a selfhosted install, where they do not apply</td></tr>
                                     <tr><td><span class="text-red-700 dark:text-red-400 font-semibold">401</span></td><td>API key missing, invalid, or past its one-year expiry. Also a wrong email or password on Login.</td></tr>
-                                    <tr><td><span class="text-red-700 dark:text-red-400 font-semibold">403</span></td><td>You are not an owner or admin of the record, the schedule is not on a Pro or Enterprise plan, the account uses two-factor authentication, or selfhosted registration is closed</td></tr>
+                                    <tr><td><span class="text-red-700 dark:text-red-400 font-semibold">403</span></td><td>You are not an owner or admin of the record, the schedule is not on a Pro or Enterprise plan, the sale row is a named guest's rather than its group's primary, the account uses two-factor authentication, or selfhosted registration is closed</td></tr>
                                     <tr><td><span class="text-red-700 dark:text-red-400 font-semibold">404</span></td><td>Not found, or found but outside the schedules your key can reach</td></tr>
-                                    <tr><td><span class="text-red-700 dark:text-red-400 font-semibold">409</span></td><td>Login when the account already has an unexpired API key</td></tr>
+                                    <tr><td><span class="text-red-700 dark:text-red-400 font-semibold">409</span></td><td>Login when the account already has an unexpired API key, or a refund whose outcome could not be confirmed or is still in progress</td></tr>
                                     <tr><td><span class="text-red-700 dark:text-red-400 font-semibold">422</span></td><td>Validation error, with field-level detail in <code class="doc-inline-code">errors</code>. Also business refusals such as an unmatched venue, a sold-out ticket or a past event.</td></tr>
                                     <tr><td><span class="text-red-700 dark:text-red-400 font-semibold">423</span></td><td>The API key is blocked for 15 minutes after 10 consecutive failed attempts</td></tr>
                                     <tr><td><span class="text-red-700 dark:text-red-400 font-semibold">429</span></td><td>Rate limit exceeded, see <a href="#rate-limits" class="doc-link">Rate Limits</a></td></tr>

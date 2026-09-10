@@ -126,7 +126,7 @@
             Environment variables
         </h2>
         <p class="text-gray-600 dark:text-gray-300 mb-6">
-            Five optional settings live in <code class="doc-inline-code">config/accessibility.php</code>. Each one reads an environment variable, so you can override it in <code class="doc-inline-code">.env</code> without editing the file.
+            Seven optional settings live in <code class="doc-inline-code">config/accessibility.php</code>. Each one reads an environment variable, so you can override it in <code class="doc-inline-code">.env</code> without editing the file.
         </p>
 
         <div class="doc-table-wrap">
@@ -161,16 +161,26 @@
                     </tr>
                     <tr>
                         <td><code class="doc-inline-code">ACCESSIBILITY_LAST_REVIEWED</code></td>
-                        <td><code class="doc-inline-code">2026-05-03</code></td>
+                        <td><code class="doc-inline-code">{{ config('accessibility.declaration_last_reviewed') }}</code></td>
                         <td>The "last reviewed" date, as <code class="doc-inline-code">YYYY-MM-DD</code>. Bump it whenever you re-check the deployment.</td>
+                    </tr>
+                    <tr>
+                        <td><code class="doc-inline-code">ACCESSIBILITY_PUBLIC_PAGES_MEASURED</code></td>
+                        <td><code class="doc-inline-code">{{ config('accessibility.public_pages_measured') }}</code></td>
+                        <td>How many public pages the conformance status says were measured. The shipped figure describes Event Schedule's own sweep of eventschedule.com, so change it only when you have measured your own pages and reuse that clause.</td>
+                    </tr>
+                    <tr>
+                        <td><code class="doc-inline-code">ACCESSIBILITY_PUBLIC_MEASUREMENT_DATE</code></td>
+                        <td><code class="doc-inline-code">{{ config('accessibility.public_measurement_date') }}</code></td>
+                        <td>When that measurement was taken, as <code class="doc-inline-code">YYYY-MM-DD</code>.</td>
                     </tr>
                 </tbody>
             </table>
         </div>
 
         <div class="doc-callout doc-callout-info">
-            <div class="doc-callout-title">These five keys feed one view</div>
-            <p>They are read by the shipped declaration page, which your install does not route. Keeping your values here is still worth doing, because the translated clauses take <code class="doc-inline-code">:email</code>, <code class="doc-inline-code">:sla</code>, <code class="doc-inline-code">:wcag_target</code> and <code class="doc-inline-code">:date</code> placeholders, so a statement page of your own can reuse both the strings and the settings instead of hard-coding them.</p>
+            <div class="doc-callout-title">These seven keys feed one view</div>
+            <p>They are read by the shipped declaration page, which your install does not route. Keeping your values here is still worth doing, because the translated clauses take <code class="doc-inline-code">:email</code>, <code class="doc-inline-code">:sla</code>, <code class="doc-inline-code">:wcag_target</code> and <code class="doc-inline-code">:date</code> placeholders, and the measured-coverage clause takes <code class="doc-inline-code">:pages</code> and <code class="doc-inline-code">:total</code> as well, so a statement page of your own can reuse both the strings and the settings instead of hard-coding them. <code class="doc-inline-code">:total</code> is not a setting: the declaration counts it from the list of dated public pages.</p>
         </div>
 
         <h3 class="doc-subheading">Point the panel's statement link at your site</h3>

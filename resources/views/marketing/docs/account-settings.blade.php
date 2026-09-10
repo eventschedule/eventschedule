@@ -1,6 +1,7 @@
 <x-docs-page
     key="account-settings"
-    description="Learn how to manage your profile, payment methods, API access, backups and connected calendars in Event Schedule."
+    title="Account Settings: Payments, API, Calendars - Event Schedule"
+    description="Manage your Event Schedule profile and theme, connect Stripe, PayPal, Payfast or Invoice Ninja, and set up API keys, webhooks, calendar sync and backups."
     lede="Everything on the Settings page: your profile, how the admin portal looks, the payment method your tickets are sold through, API and webhook access, connected calendars, backups and account security."
 >
     <x-slot:toc>
@@ -10,6 +11,8 @@
             <x-doc-nav-link href="#stripe">Stripe</x-doc-nav-link>
             <x-doc-nav-link href="#invoice-ninja">Invoice Ninja</x-doc-nav-link>
             <x-doc-nav-link href="#payment-url">Payment Link</x-doc-nav-link>
+            <x-doc-nav-link href="#payfast">Payfast</x-doc-nav-link>
+            <x-doc-nav-link href="#paypal">PayPal</x-doc-nav-link>
         </x-doc-nav-group>
         <x-doc-nav-link href="#api">API Settings</x-doc-nav-link>
         <x-doc-nav-link href="#webhooks">Webhooks</x-doc-nav-link>
@@ -32,7 +35,7 @@
             Profile Information
         </h2>
         <p class="text-gray-600 dark:text-gray-300 mb-4">
-            Open <strong class="text-gray-900 dark:text-white">Settings</strong> from the main navigation. Every settings section is listed down the left side of the page (an accordion on small screens), and this guide follows them in that order. These settings belong to <em>you</em>, not to a schedule: anything that differs per schedule, such as calendar sync or a schedule's own sending address, lives in <a href="{{ route('marketing.docs.creating_schedules') }}#integrations" class="doc-link">the schedule's settings</a> instead.
+            Open <strong class="text-gray-900 dark:text-white">Settings</strong> from the main navigation. Every settings section is listed down the left side of the page (an accordion on small screens), and this guide follows them in that order. These settings belong to <em>you</em>, not to a schedule: anything that differs per schedule, such as calendar sync or a schedule's own sending address, lives in <a href="{{ route('marketing.docs.creating_schedules') }}#integrations" class="doc-link">the schedule's settings</a> instead. That includes the notification emails you get about a schedule, such as a new ticket sale or a new event request, which are chosen on its <a href="{{ route('marketing.docs.creating_schedules') }}#settings-notifications" class="doc-link">Notifications</a> tab.
         </p>
         <p class="text-gray-600 dark:text-gray-300 mb-4">
             Profile Information itself is split into two tabs, <strong class="text-gray-900 dark:text-white">General</strong> and <strong class="text-gray-900 dark:text-white">Localization</strong>. A third tab, <strong class="text-gray-900 dark:text-white">Accessibility</strong>, appears only after you have hidden the accessibility widget, and its single button brings the widget back.
@@ -60,7 +63,7 @@
                     </tr>
                     <tr>
                         <td><span class="font-semibold text-gray-900 dark:text-white">Phone Number</span></td>
-                        <td>Optional, in international format. On the hosted platform you can verify it by SMS, and a verified number is what unlocks sending <a href="{{ route('marketing.docs.newsletters') }}" class="doc-link">newsletters</a> and running <a href="{{ route('marketing.docs.boost') }}" class="doc-link">ad campaigns</a> and on-network promotions. If one of your schedules uses the same number, that schedule's number counts as verified too.</td>
+                        <td>Optional, in international format. On the hosted platform you can verify it by SMS. A verified number is required before you can buy <a href="{{ route('marketing.docs.boost') }}" class="doc-link">ad campaigns</a> and on-network promotions, and it lets a schedule without its own email settings send <a href="{{ route('marketing.docs.newsletters') }}" class="doc-link">newsletters</a> and automatic new-event emails to more than 50 people at once. If one of your schedules uses the same number, that schedule's number counts as verified too.</td>
                     </tr>
                     <tr>
                         <td><span class="font-semibold text-gray-900 dark:text-white">Default Schedule</span></td>
@@ -164,12 +167,12 @@
             Payment Methods
         </h2>
         <p class="text-gray-600 dark:text-gray-300 mb-6">
-            To sell tickets you need at least one payment method on your account. Event Schedule supports five - Stripe, PayPal, Invoice Ninja, Payfast and a plain payment link - each on its own tab in this section. Which one an event uses is decided per event, on the event's <a href="{{ route('marketing.docs.tickets') }}#payment" class="doc-link">Payment</a> tab, so connecting more than one lets you route different events differently. Without any connected method the only option an event has is cash on the door.
+            Cash needs nothing set up. To take payment any other way, connect a method here: there are five, each on its own tab - Stripe, Invoice Ninja, Payment Link, Payfast and PayPal. Which one an event uses is decided per event, on the event's <a href="{{ route('marketing.docs.tickets') }}#payment" class="doc-link">Payment</a> tab, so connecting more than one lets you route different events differently. With nothing connected, an event can only take cash, unless the site you are on provides an account for everyone, as described below. Every method works on every plan.
         </p>
 
         <h3 id="stripe" class="doc-subheading">Stripe</h3>
         <p class="text-gray-600 dark:text-gray-300 mb-4">
-            Stripe gives the most integrated experience: the buyer pays without leaving the checkout, the sale is marked paid automatically and the ticket with its QR code is emailed straight away.
+            Stripe gives the most integrated experience: the buyer pays on Stripe's secure checkout page and comes straight back, the sale is marked paid automatically and the ticket with its QR code is emailed straight away. It is also the only method that can take <a href="{{ route('marketing.docs.tickets') }}#installments" class="doc-link">installment payments</a> <x-doc-badge plan="pro" />.
         </p>
         <div class="doc-fields">
             <div class="doc-field">
@@ -219,7 +222,7 @@
 
         <h3 id="payment-url" class="doc-subheading">Payment Link</h3>
         <p class="text-gray-600 dark:text-gray-300 mb-4">
-            The tab is labelled <strong class="text-gray-900 dark:text-white">Payment Link</strong>. It points buyers at any external payment page you already have: a PayPal.me link, a bank transfer page, your own checkout, anything with a URL.
+            The tab is labelled <strong class="text-gray-900 dark:text-white">Payment Link</strong>. It points buyers at any external payment page you already have: a bank transfer page, a donation page, your own shop's checkout, anything with a URL. To take PayPal payments that confirm themselves, connect <a href="#paypal" class="doc-link">PayPal</a> on its own tab instead.
         </p>
         <div class="doc-fields">
             <div class="doc-field">
@@ -294,7 +297,8 @@
 
         <div class="doc-callout doc-callout-info">
             <div class="doc-callout-title">Note</div>
-            <p>One payment method is enough. Stripe, PayPal and Payfast all confirm payment and deliver the ticket without any manual step, so pick whichever of them works where you are - Invoice Ninja and a payment link both need you to mark the sale paid yourself.</p>
+            <p>One payment method is enough. Stripe, PayPal and Payfast all confirm payment and deliver the ticket without any manual step, so pick whichever of them works where you are. Invoice Ninja marks the sale paid once the invoice is paid, through the webhook it registers when you connect. With a payment link, you mark each sale paid yourself.</p>
+            <p class="mt-3">Refunds differ too. A Stripe or PayPal sale can be refunded in full or in part from the Sales page, and the money goes back through the provider. For every other method, <strong class="text-gray-900 dark:text-white">Mark as Refunded</strong> records a refund you have made yourself. See <a href="{{ route('marketing.docs.tickets') }}#managing-sales" class="doc-link">Managing Sales</a>.</p>
         </div>
     </section>
 
@@ -340,7 +344,7 @@
             Webhooks
         </h2>
         <p class="text-gray-600 dark:text-gray-300 mb-4">
-            A webhook POSTs a JSON payload to a URL of yours whenever something happens in your schedules, such as a sale, an event change or a check-in. Webhooks are a <strong class="text-gray-900 dark:text-white">Pro</strong> feature: if none of your schedules are on Pro the section shows an upgrade notice, and activity on a schedule below Pro is never delivered. See the <a href="{{ route('marketing.docs.developer.webhooks') }}" class="doc-link">Webhook documentation</a> for payload formats and signature verification.
+            A webhook POSTs a JSON payload to a URL of yours whenever something happens in your schedules, such as a sale, a refund, an event change or a check-in. Webhooks are a <strong class="text-gray-900 dark:text-white">Pro</strong> feature: if none of your schedules are on Pro the section shows an upgrade notice, and activity on a schedule below Pro is never delivered. See the <a href="{{ route('marketing.docs.developer.webhooks') }}" class="doc-link">Webhook documentation</a> for payload formats and signature verification.
         </p>
 
         <h3 class="doc-subheading">Adding a webhook</h3>
@@ -391,7 +395,7 @@
 
         <div class="doc-callout doc-callout-info mb-6">
             <div class="doc-callout-title">Note</div>
-            <p>A synced calendar gets one entry per event date that Event Schedule pushes, not a repeating series: a recurring event arrives as a single entry on the date the series starts. Use the schedule's iCal subscription feed if you want every date of a recurring event in your calendar.</p>
+            <p>A synced calendar gets one entry per event date that Event Schedule pushes, not a repeating series: a recurring event arrives as a single entry on the date the series starts. Subscribe to the schedule's <a href="{{ route('marketing.docs.sharing') }}#calendar-feeds" class="doc-link">calendar feed</a> instead if you want each date of a recurring event in your calendar: it lists every date for the next 90 days and updates itself when dates change.</p>
         </div>
 
         <div class="doc-callout doc-callout-tip">
@@ -438,7 +442,7 @@
             Backup &amp; Restore
         </h2>
         <p class="text-gray-600 dark:text-gray-300 mb-6">
-            Export your schedules as a portable <code class="doc-inline-code">.zip</code> file, or restore one you exported earlier. A backup carries the schedule itself plus its sub-schedules, events, tickets, sales, promo codes and newsletters, and optionally the images. The section has two tabs, <strong class="text-gray-900 dark:text-white">Export</strong> and <strong class="text-gray-900 dark:text-white">Import</strong>.
+            Export your schedules as a portable <code class="doc-inline-code">.zip</code> file, or restore one you exported earlier. A backup carries the schedule itself and its sub-schedules, and every event with its ticket types, promo codes, sales (installment plans and refunds included), agenda, polls, fan content, feedback, waitlist and interest list. It also carries the schedule's gift cards, appointment types, seating plans and newsletters, and optionally the images. Curator event sources are not included: add them again on the restored schedule. The section has two tabs, <strong class="text-gray-900 dark:text-white">Export</strong> and <strong class="text-gray-900 dark:text-white">Import</strong>.
         </p>
 
         <h3 class="doc-subheading">Exporting</h3>
@@ -459,12 +463,12 @@
 
         <div class="doc-callout doc-callout-info mb-6">
             <div class="doc-callout-title">Note</div>
-            <p>On the hosted platform, newsletter recipient emails, segment contacts and unsubscribe lists are left out of exports. They come from followers who did not share their address with your schedule directly.</p>
+            <p>On the hosted platform, exports leave out your email subscribers, newsletter recipient addresses, segment contacts and unsubscribe lists.</p>
         </div>
 
         <div class="doc-callout doc-callout-warning">
             <div class="doc-callout-title">Important</div>
-            <p>On selfhosted installations, exports do contain personal data such as names and email addresses, so store the files securely. To move a whole installation to another server, <code class="doc-inline-code">mysqldump</code> is a better tool than export and import.</p>
+            <p>Every export contains personal data, such as your ticket buyers' names and email addresses and the addresses on each event's waitlist and interest list, so store the files securely. On a selfhosted installation it also carries your email subscribers and newsletter contacts. To move a whole installation to another server, <code class="doc-inline-code">mysqldump</code> is a better tool than export and import.</p>
         </div>
     </section>
 

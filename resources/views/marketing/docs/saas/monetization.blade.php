@@ -1,6 +1,7 @@
 <x-docs-page
     key="saas/monetization"
-    description="Show Google AdSense on free schedules' public pages and let paid schedules buy promotional placement there. Off by default."
+    title="SaaS Monetization: Ads, Promotions and Stay22 - Event Schedule"
+    description="Earn from your free tier: Google AdSense on free schedules' pages, prepaid promotions your paid schedules buy, and a Stay22 accommodation affiliate."
     lede="Cover your hosting costs by monetizing the free tier, and give your paying customers somewhere to advertise."
 >
     <x-slot:toc>
@@ -227,15 +228,21 @@
         </ul>
         <p>
             They then choose a headline and short description, a pricing model (per 1,000 views or
-            per click), and a budget between your configured minimum and maximum. Targeting is
+            per click), and a budget. The budget runs from <code class="doc-inline-code">PROMOTIONS_MIN_BUDGET</code>
+            to the lower of <code class="doc-inline-code">PROMOTIONS_MAX_BUDGET</code> and the schedule's own
+            boost spending limit, which starts at <code class="doc-inline-code">META_BOOST_DEFAULT_LIMIT</code>
+            (10 by default) and grows only as the schedule completes Facebook and Instagram boosts. So a
+            new advertiser's first promotion is capped at 10 unless you raise that schedule's limit with
+            <strong>Set Limit</strong> under <strong>Admin &rarr; Boost</strong>. Targeting is
             optional: a campaign can be limited to particular kinds of schedule (talent, venue or
             curator) and to visitors in particular countries. Leaving both untouched shows it
             everywhere.
         </p>
         <p>
             The advertiser pays up front. Their budget is drawn down as the promotion actually
-            delivers, and anything unspent is refunded once the campaign ends. Because there is no
-            outside ad network involved, the whole amount is yours.
+            delivers, and anything unspent is refunded a day after the campaign ends, once any late
+            delivery has been counted. Because there is no outside ad network involved, the whole
+            amount is yours.
         </p>
 
         <h3 class="doc-subheading">How a promotion is chosen</h3>
@@ -250,8 +257,9 @@
             <li>a schedule is never shown its own promotion, and neither is any other schedule belonging to the same owner;</li>
             <li>a promotion is never shown on the page for the very event it advertises;</li>
             <li>one visitor sees the same promotion at most a few times a day, set by <code class="doc-inline-code">PROMOTIONS_FREQUENCY_CAP</code>;</li>
-            <li>a promotion stops the moment its event is hidden, cancelled or over, even if budget remains;</li>
-            <li>a per-click campaign that nobody clicks is paused automatically once it has had enough impressions to judge, so weak creative cannot occupy your inventory for free.</li>
+            <li>one IP address is billed for at most 100 views of a campaign a day, set by <code class="doc-inline-code">PROMOTIONS_IP_IMPRESSION_CAP</code>, because the per-visitor cap alone can be reset by switching browsers;</li>
+            <li>a promotion stops within five minutes of its event being hidden, cancelled or over, even if budget remains, because the pool of live promotions is reused for <code class="doc-inline-code">PROMOTIONS_CACHE_TTL</code> seconds;</li>
+            <li>a per-click campaign whose click-through rate is still under 0.02% after 5,000 views is paused automatically, so weak creative cannot occupy your inventory for free.</li>
         </ul>
 
         <div class="doc-callout doc-callout-info">
@@ -284,8 +292,8 @@
             promptly.
         </p>
         <p>
-            Approving one starts it immediately. Rejecting it refunds the advertiser in full and
-            emails them the reason you give.
+            Approving one starts it immediately. Rejecting it refunds the advertiser in full, back
+            to promotion credit if that is how they paid, and emails them the reason you give.
         </p>
         <p>
             A schedule stops going through the queue once it has a track record: it needs
@@ -310,6 +318,7 @@
             <li>inside embedded calendars, or in generated share images;</li>
             <li>on password-protected pages;</li>
             <li>on a schedule's own custom domain;</li>
+            <li>on the demo schedule, or on a page the app created for an act or venue that has not <a href="{{ route('marketing.docs.creating_events') }}#claim" class="doc-link">claimed it</a>;</li>
             <li>to the schedule's own members and administrators;</li>
             <li>to bots and scripted requests, which are filtered out before anything is billed.</li>
         </ul>
@@ -435,6 +444,10 @@
                         <td>Admin &rarr; Settings &rarr; Accommodation affiliate, which wins over the variable</td>
                     </tr>
                     <tr>
+                        <td>One schedule's boost spending limit</td>
+                        <td>Admin &rarr; Boost, per schedule; <code class="doc-inline-code">META_BOOST_DEFAULT_LIMIT</code> is where every schedule starts</td>
+                    </tr>
+                    <tr>
                         <td>Budgets, caps, currency, auto-approval threshold</td>
                         <td><code class="doc-inline-code">.env</code> only; there is no admin control</td>
                     </tr>
@@ -464,6 +477,12 @@
 <span class="code-variable">PROMOTIONS_MAX_CONCURRENT</span>=<span class="code-value">2</span>         <span class="code-comment"># live campaigns per schedule</span>
 <span class="code-variable">PROMOTIONS_FREQUENCY_CAP</span>=<span class="code-value">3</span>          <span class="code-comment"># views of one promotion per visitor per day</span>
 <span class="code-variable">PROMOTIONS_AUTO_APPROVE_AFTER</span>=<span class="code-value">3</span>     <span class="code-comment"># clean campaigns before a schedule skips review</span>
+<span class="code-variable">PROMOTIONS_IP_IMPRESSION_CAP</span>=<span class="code-value">100</span>    <span class="code-comment"># billed views of one campaign per IP per day</span>
+<span class="code-variable">PROMOTIONS_MIN_CTR</span>=<span class="code-value">0.0002</span>          <span class="code-comment"># pause a per-click campaign below this CTR...</span>
+<span class="code-variable">PROMOTIONS_MIN_CTR_IMPRESSIONS</span>=<span class="code-value">5000</span>  <span class="code-comment"># ...once it has had this many views</span>
+<span class="code-variable">PROMOTIONS_CACHE_TTL</span>=<span class="code-value">300</span>            <span class="code-comment"># seconds a snapshot of live promotions is reused</span>
+<span class="code-variable">PROMOTIONS_STATS_RETENTION_DAYS</span>=<span class="code-value">400</span>
+<span class="code-variable">META_BOOST_DEFAULT_LIMIT</span>=<span class="code-value">10</span>          <span class="code-comment"># starting per-schedule budget ceiling</span>
 
 <span class="code-comment"># Accommodation affiliate. Independent of ADS_ENABLED; also a master switch that</span>
 <span class="code-comment"># cannot be overridden from the admin panel, because the Content-Security-Policy</span>

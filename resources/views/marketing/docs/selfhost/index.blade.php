@@ -1,8 +1,8 @@
 <x-docs-page
     key="selfhost/index"
-    title="Selfhost Documentation - Event Schedule"
+    title="Selfhost Guide: Run Event Schedule on Your Own Server"
     heading="Selfhost Event Schedule"
-    description="Technical documentation for selfhosting Event Schedule: installation, email, Stripe payments, AI, calendar sync, federation and the admin panel."
+    description="Selfhost Event Schedule: installation, email, Stripe, PayPal and Payfast payments, AI, calendar sync, Google Wallet, federation and the admin panel."
     lede="Run Event Schedule on your own server and your own database. A single-tenant install has no plan tiers, so every Pro and Enterprise feature is switched on."
     :with-toc="false"
 >
@@ -23,7 +23,7 @@
         <div class="doc-callout doc-callout-plan">
             <div class="doc-callout-title"><x-doc-badge plan="selfhost" /> No plan gates</div>
             <p>
-                Setting <code class="doc-inline-code">IS_HOSTED=false</code> makes every schedule resolve to the top tier, so the Pro and Enterprise badges you see elsewhere in these docs do not apply to your install: ticketing and QR check-in, unlimited paid ticket sales, custom fields, waitlists, event graphics, webhooks, custom CSS, internal and unlisted events, team members and unlimited newsletters are all available, and the AI features come with them once you add an AI key. The differences run the other way instead, and they are listed below.
+                Setting <code class="doc-inline-code">IS_HOSTED=false</code> makes every schedule resolve to the top tier, so the Pro and Enterprise badges you see elsewhere in these docs do not apply to your install: unlimited paid ticket sales, the check-in dashboard, passes, gift cards, installment plans, promo codes, add-ons, the ticket waitlist, custom fields, webhooks, custom CSS, internal and unlisted events, team members, scheduled graphic emails and unlimited newsletters are all available, and the AI features come with them once you add an AI key. The differences run the other way instead, and they are listed below.
             </p>
         </div>
 
@@ -40,8 +40,8 @@
                 <a href="{{ route('marketing.docs.selfhost.email') }}" class="doc-link">Email Setup</a>
             </li>
             <li>
-                <strong>Add Stripe</strong> if you sell tickets, passes, gift cards or paid appointments. One account can collect for the whole install, or, with Stripe Connect, each event owner can connect their own and be paid directly. No platform fee is ever added to a sale. Invoice Ninja is the alternative, and it needs no <code class="doc-inline-code">.env</code> configuration at all.
-                <a href="{{ route('marketing.docs.selfhost.stripe') }}" class="doc-link">Stripe Integration</a>
+                <strong>Add a way to take payment</strong> if you sell tickets, passes, gift cards or paid appointments. Stripe covers all four and collects into the one account whose keys you put in <code class="doc-inline-code">.env</code>; paying each event owner into their own Stripe account takes Stripe Connect, which only runs in SaaS mode. PayPal and Payfast (South African rand only) take ticket orders, through one account for the whole install or through each user's own, and Invoice Ninja needs no <code class="doc-inline-code">.env</code> configuration at all. No platform fee is ever added to a sale.
+                <a href="{{ route('marketing.docs.selfhost.stripe') }}" class="doc-link">Stripe, PayPal and Payfast</a>
             </li>
             <li>
                 <strong>Add an AI key</strong> (Google Gemini or OpenAI) if you want AI event import, agenda scanning, translation or auto import. Everything else works without one.
@@ -56,8 +56,8 @@
                 <strong>Then the optional pieces.</strong>
                 <a href="{{ route('marketing.docs.selfhost.federation') }}" class="doc-link">Federation</a> lists your public events on eventschedule.com and links each one back to your site, and stays off until you turn it on in the admin panel;
                 <a href="{{ route('marketing.docs.selfhost.boost') }}" class="doc-link">Boost</a> runs Meta ads from inside the app, billed to the one Meta ad account you configure, so every campaign spends your money;
-                <a href="{{ route('marketing.docs.selfhost.google_wallet') }}" class="doc-link">Google Wallet</a> puts an "Add to Google Wallet" button on every paid ticket, and needs a Google Wallet issuer account of your own;
-                the <a href="{{ route('marketing.docs.selfhost.admin') }}" class="doc-link">admin panel</a> at <code class="doc-inline-code">/admin</code> gives you instance-wide monitoring and settings, and the account the setup wizard created is already an instance admin; and the
+                <a href="{{ route('marketing.docs.selfhost.google_wallet') }}" class="doc-link">Google Wallet</a> puts an "Add to Google Wallet" button on every ticket, free registrations included, and needs a Google Wallet issuer account of your own;
+                the <a href="{{ route('marketing.docs.selfhost.admin') }}" class="doc-link">admin panel</a> at <code class="doc-inline-code">/admin</code> gives you instance-wide monitoring and settings, and lets you edit any schedule on the install down to its name, path and contact details (the account the setup wizard created is already an instance admin); and the
                 <a href="{{ route('marketing.docs.selfhost.accessibility') }}" class="doc-link">accessibility</a> guide covers what to put in your own accessibility statement.
             </li>
         </ol>
@@ -113,8 +113,13 @@
                         <td>25 paid tickets a month on Free, unlimited on Pro and Enterprise. Free tickets and RSVPs never count.</td>
                     </tr>
                     <tr>
+                        <td><span class="font-semibold text-gray-900 dark:text-white">Payments</span></td>
+                        <td>Stripe collects into the one account whose keys are in <code class="doc-inline-code">.env</code>. PayPal and Payfast can do the same for the whole install, or each user connects their own</td>
+                        <td>Each owner connects their own Stripe (through Stripe Connect), PayPal or Payfast account and is paid into it directly</td>
+                    </tr>
+                    <tr>
                         <td><span class="font-semibold text-gray-900 dark:text-white">Auto Import</span></td>
-                        <td>An <a href="{{ route('marketing.docs.creating_schedules') }}#auto-import" class="doc-link">Auto Import</a> section in a schedule's settings takes Import URLs and Import Cities, and runs once a day from the scheduler. Needs an AI key.</td>
+                        <td>An <a href="{{ route('marketing.docs.creating_schedules') }}#auto-import" class="doc-link">Auto Import</a> section in a schedule's settings imports the events found at its <strong>Import URLs</strong> once a day, from the scheduler. <strong>Import Cities</strong> is optional and only filters: an event held in a city that is not on the list is skipped. Needs an AI key.</td>
                         <td>Not available</td>
                     </tr>
                     <tr>

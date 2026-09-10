@@ -1,6 +1,7 @@
 <x-docs-page
     key="selfhost/microsoft-calendar"
-    description="Set up bidirectional Outlook Calendar sync with Event Schedule using Microsoft Graph. Automatically sync events between both platforms."
+    title="Outlook and Microsoft 365 Sync for Selfhost - Event Schedule"
+    description="Set up two-way Outlook and Microsoft 365 calendar sync on a selfhosted Event Schedule install through Microsoft Graph, with optional Teams meeting links."
     lede="Set up and use the Microsoft 365 / Outlook Calendar integration for bidirectional sync between Event Schedule and Outlook through Microsoft Graph."
 >
     <x-slot:toc>
@@ -35,8 +36,8 @@
         </div>
 
         <div class="doc-callout doc-callout-warning mt-6">
-            <div class="doc-callout-title">Queue worker required for webhooks</div>
-            <p>For near-real-time webhooks, run an asynchronous queue (set <code class="doc-inline-code">QUEUE_CONNECTION=database</code> and keep <code class="doc-inline-code">php artisan queue:work</code> running). Inbound sync is dispatched to the queue so Microsoft Graph gets a fast response. On the default <code class="doc-inline-code">sync</code> connection the sync runs inside the webhook request, which can be slow enough that Graph deprovisions the subscription. Without a worker, inbound changes still arrive via the 15-minute poll.</p>
+            <div class="doc-callout-title">A real queue for webhooks</div>
+            <p>For near-real-time webhooks, set <code class="doc-inline-code">QUEUE_CONNECTION=database</code>. Inbound sync is dispatched to the queue so Microsoft Graph gets a fast response, and the scheduler's minutely queue worker, driven by the cron entry from <a href="{{ route('marketing.docs.selfhost.installation') }}#cron" class="doc-link">Installation</a>, runs it within about a minute. Keep <code class="doc-inline-code">php artisan queue:work</code> running as well only if you want it sooner. On the shipped <code class="doc-inline-code">sync</code> connection the sync runs inside the webhook request, which can be slow enough that Graph deprovisions the subscription. Either way, the 15-minute poll catches anything a notification missed.</p>
         </div>
     </section>
 
@@ -87,7 +88,7 @@
         </ol>
 
         <h3 class="doc-subheading">4. Environment Configuration</h3>
-        <p class="text-gray-600 dark:text-gray-300 mb-4">Add the following environment variables to your <code class="doc-inline-code">.env</code> file:</p>
+        <p class="text-gray-600 dark:text-gray-300 mb-4">Add the following environment variables to your <code class="doc-inline-code">.env</code> file. <code class="doc-inline-code">.env.example</code> carries the same five, commented out, in its "Outlook / Microsoft 365 calendar sync (optional)" block:</p>
 
         <div class="doc-code-block">
             <div class="doc-code-header">
@@ -266,7 +267,7 @@
                 </tbody>
             </table>
         </div>
-        <p class="text-gray-600 dark:text-gray-300 mt-4">Only a real deletion in Outlook triggers this policy. An event that merely moves outside the sync window is left untouched.</p>
+        <p class="text-gray-600 dark:text-gray-300 mt-4">Only a real deletion in Outlook triggers this policy. An event that merely moves outside the sync window is left untouched. Marking an event cancelled this way does not notify anyone: the cancellation notice that <strong class="text-gray-900 dark:text-white">Cancel event</strong> in the event editor can send to ticket buyers and to the event's interest list only goes out from there.</p>
         <p class="text-gray-600 dark:text-gray-300 mt-4 mb-6">An event that belongs to more than one schedule is only detached from this schedule, never cancelled or deleted outright, unless this schedule is the one that owns it. The other schedules keep the event as it is.</p>
 
         <h3 class="doc-subheading">Real-Time Sync and Polling Fallback</h3>
@@ -508,7 +509,7 @@
                 <ul class="doc-list text-sm">
                     <li>The direction must be From Outlook Calendar or Bidirectional Sync, otherwise no subscription exists</li>
                     <li>Confirm the app has a public HTTPS URL so Graph can reach the webhook endpoint</li>
-                    <li>Inbound sync is queued, so a stopped queue worker looks exactly like a broken webhook</li>
+                    <li>Inbound sync is queued, so if the cron entry stops, taking the queue worker with it, a working webhook looks exactly like a broken one</li>
                     <li>Without a public URL, rely on the 15-minute <code class="doc-inline-code">microsoft:sync</code> poll and confirm the scheduler cron is running</li>
                     <li>Outlook changes outside the window of 30 days back to 365 days ahead are not imported</li>
                 </ul>

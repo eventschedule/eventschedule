@@ -1,7 +1,8 @@
 <x-docs-page
     key="newsletters"
-    description="Learn how to create, design, and send newsletters to your followers and ticket buyers with Event Schedule's built-in newsletter builder."
-    lede="Compose branded emails and send them to your followers and ticket buyers. Newsletters are included on every plan, and you decide what goes out and when."
+    title="Newsletters: Builder, Segments, A/B Tests - Event Schedule"
+    description="Build and send newsletters to followers, email subscribers and ticket buyers, with segments, CSV import, A/B tests and an allowance counted per recipient."
+    lede="Compose branded emails and send them to your followers, email subscribers and ticket buyers. Newsletters are included on every plan, and you decide what goes out and when."
 >
     <x-slot:toc>
         <x-doc-nav-link href="#overview">Overview</x-doc-nav-link>
@@ -42,7 +43,7 @@
         <x-doc-screenshot id="newsletters--list" alt="Newsletter list" loading="eager" />
 
         <p class="text-gray-600 dark:text-gray-300 mb-4">
-            The builder lays out your email as a stack of content blocks with a live preview beside it, and audience segments decide who receives it. A newsletter is always one you compose and send: the only mail that leaves on its own is the automatic new-event digest to confirmed subscribers, which is a separate rail and does not spend your allowance.
+            The builder lays out your email as a stack of content blocks with a live preview beside it, and audience segments decide who receives it. A newsletter never sends itself: you compose it and choose when it goes. Two other kinds of mail do leave on their own, and neither spends your allowance: the automatic new-event digest to confirmed email subscribers, and the emails people on an event's interest list signed up for. <a href="#recipients" class="doc-link">Recipients &amp; Segments</a> sets out who is on which list.
         </p>
 
         <div class="doc-callout doc-callout-info">
@@ -407,7 +408,7 @@
             Email Subscribers
         </h2>
         <p class="text-gray-600 dark:text-gray-300 mb-4">
-            Signing up asks for nothing but a name and an email address. A signed-out visitor can give your schedule an address directly, and those people become your <strong class="text-gray-900 dark:text-white">email subscribers</strong>. They appear in their own list on the <a href="{{ route('marketing.docs.managing_schedules') }}#followers" class="doc-link">Followers tab</a>, separately from people who joined by pressing Follow. Confirming an address given through the sign-up form also creates an account for them, so they are listed once, under Email subscribers, with an Account badge. An address collected at checkout is already confirmed and does not create one, unless the buyer asked for an account on the ticket form itself.
+            Signing up asks for nothing but a name and an email address. A signed-out visitor can give your schedule an address directly, and those people become your <strong class="text-gray-900 dark:text-white">email subscribers</strong>. They appear in their own list on the <a href="{{ route('marketing.docs.managing_schedules') }}#followers" class="doc-link">Followers tab</a>, separately from account holders who pressed Follow while signed in. Confirming an address given through the sign-up form also sets up an account for them that follows your schedule (they can add a password in one step), so they are listed once, under Email subscribers, with an Account badge. An address collected at checkout is already confirmed and does not create one, unless the buyer asked for an account on the ticket form itself.
         </p>
 
         <h3 class="doc-subheading">Where People Sign Up</h3>
@@ -421,6 +422,10 @@
                 <p class="text-sm text-gray-500 dark:text-gray-400">A tick box on the ticket and RSVP forms, off by default. Because the same address is already receiving a ticket, no confirmation email is needed and the person joins straight away.</p>
             </div>
             <div class="doc-field">
+                <h4 class="font-semibold text-gray-900 dark:text-white mb-2">The Follow button</h4>
+                <p class="text-sm text-gray-500 dark:text-gray-400">On eventschedule.com, a signed-out visitor who presses Follow gets the same short form in a pop-up, asking for a name and an email address. It sends the same confirmation email as the sign-up panel.</p>
+            </div>
+            <div class="doc-field">
                 <h4 class="font-semibold text-gray-900 dark:text-white mb-2">Your sign-up link</h4>
                 <p class="text-sm text-gray-500 dark:text-gray-400">The Followers tab gives you a shareable link and a QR code that open your schedule with the form ready. Useful on a poster, a flyer or a merch table.</p>
             </div>
@@ -431,14 +436,15 @@
             This is the promise made to people when they sign up, and it is kept for you. When you publish new events, your confirmed subscribers are sent a single short digest listing them.
         </p>
         <ul class="doc-list mb-6">
-            <li>One digest covering every event in the batch, never one email per event</li>
-            <li>At most one every few days, however often you publish</li>
-            <li>Only public events. Drafts, internal and unlisted events are never announced</li>
+            <li>One digest covering every event in the batch, never one email per event, listing up to 25 of them, soonest first</li>
+            <li>At most one every 72 hours per schedule, however often you publish</li>
+            <li>Only public events. Drafts, internal, unlisted and password-protected events are never announced</li>
+            <li>Only events your schedule created. An event another schedule created and lists on yours, such as a venue's show naming you as the act, is not included</li>
             <li>Only events still to come. Back-filling past dates sends nothing</li>
             <li>Every digest carries a one-click unsubscribe link</li>
         </ul>
         <p class="text-gray-600 dark:text-gray-300 mb-6">
-            You can turn this off per schedule under <strong class="text-gray-900 dark:text-white">Settings &rarr; Notifications</strong>. Account followers are not included: they are reached by a newsletter you compose and send.
+            Turn it off per schedule with <strong class="text-gray-900 dark:text-white">Email subscribers about new events</strong> under <strong class="text-gray-900 dark:text-white">Settings &rarr; Notifications</strong>. Account followers are not included: they are reached by a newsletter you compose and send. On eventschedule.com the digest follows the same <a href="#sending" class="doc-link">verification rule</a> as newsletters, so a schedule with more than 50 confirmed subscribers needs its own email settings or a verified phone number, or those events are not announced.
         </p>
 
         <div class="doc-callout doc-callout-info">
@@ -459,19 +465,59 @@
             The <strong class="text-gray-900 dark:text-white">Recipients</strong> panel on the Settings tab lists your saved segments with a live recipient count beside each one. Tick as many as you need and the lists are merged. If you tick nothing, the newsletter goes to everyone: your followers and your <a href="#email-subscribers" class="doc-link">email subscribers</a> together.
         </p>
 
+        <h3 class="doc-subheading">Three Lists, Three Kinds of Mail</h3>
+        <p class="text-gray-600 dark:text-gray-300 mb-4">
+            Three lists of people can hear from your schedule by email, and only two of them can be sent a newsletter:
+        </p>
+        <div class="doc-table-wrap mb-4">
+            <table class="doc-table">
+                <thead>
+                    <tr>
+                        <th>List</th>
+                        <th>How someone joins</th>
+                        <th>What reaches them automatically</th>
+                        <th>Newsletters</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td><span class="font-semibold text-gray-900 dark:text-white">Email subscribers</span></td>
+                        <td>Gives a name and email address on your schedule or event page and confirms it, or ticks the box at checkout</td>
+                        <td>The new-event digest, at most one every 72 hours</td>
+                        <td>Yes, through the Email subscribers segment or the default send</td>
+                    </tr>
+                    <tr>
+                        <td><span class="font-semibold text-gray-900 dark:text-white">Account followers</span></td>
+                        <td>Presses Follow while signed in on eventschedule.com, or is imported</td>
+                        <td>Nothing</td>
+                        <td>Yes, through the All Followers segment or the default send</td>
+                    </tr>
+                    <tr>
+                        <td><span class="font-semibold text-gray-900 dark:text-white">An event's interest list</span></td>
+                        <td>Leaves an email address on one event page, under "Tell me when tickets go on sale" or "Tell me if anything changes"</td>
+                        <td>That event's on-sale email, a reminder shortly before it starts, a cancellation notice, and any notice you choose to send if the date or venue changes</td>
+                        <td>No. No segment reaches it, and its emails do not count against your allowance</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+        <p class="text-gray-600 dark:text-gray-300 mb-6">
+            The interest list belongs to one event and ends with it. See <a href="{{ route('marketing.docs.tickets') }}#interest-list" class="doc-link">the interest list</a> in Selling Tickets.
+        </p>
+
         <h3 class="doc-subheading">Segment Types</h3>
         <div class="doc-fields">
             <div class="doc-field">
                 <h4 class="font-semibold text-gray-900 dark:text-white mb-2">All Followers</h4>
-                <p class="text-sm text-gray-500 dark:text-gray-400">Everyone who follows your schedule and has not opted out of emails. Best for general announcements and event digests. Learn how to <a href="{{ route('marketing.docs.sharing') }}#followers" class="doc-link">build your follower base</a>.</p>
+                <p class="text-sm text-gray-500 dark:text-gray-400">Account holders who follow your schedule, by pressing Follow or through an import, and have not opted out of emails. Confirmed email subscribers are left out even though confirming gives them an account, so add the Email subscribers segment, or tick nothing, to reach both. Learn how to <a href="{{ route('marketing.docs.sharing') }}#followers" class="doc-link">build your follower base</a>.</p>
             </div>
             <div class="doc-field">
-                <h4 class="font-semibold text-gray-900 dark:text-white mb-2">Email Subscribers</h4>
-                <p class="text-sm text-gray-500 dark:text-gray-400">People who gave you their email address on your schedule page or at checkout and then confirmed it. See <a href="#email-subscribers" class="doc-link">Email Subscribers</a>.</p>
+                <h4 class="font-semibold text-gray-900 dark:text-white mb-2">Email subscribers</h4>
+                <p class="text-sm text-gray-500 dark:text-gray-400">Everyone who confirmed the sign-up form, plus buyers who ticked the box at checkout. An address still awaiting confirmation is never included. See <a href="#email-subscribers" class="doc-link">Email Subscribers</a>.</p>
             </div>
             <div class="doc-field">
                 <h4 class="font-semibold text-gray-900 dark:text-white mb-2">Ticket Buyers</h4>
-                <p class="text-sm text-gray-500 dark:text-gray-400">Everyone who has bought a ticket or registered for one of your events, taken from the email on the order. Optionally narrow it to a single event. See <a href="{{ route('marketing.docs.tickets') }}" class="doc-link">Selling Tickets</a>.</p>
+                <p class="text-sm text-gray-500 dark:text-gray-400">Everyone who has bought a ticket or registered for one of your events, taken from the email on the order, including guests who booked an appointment and orders later cancelled or refunded. Optionally narrow it to a single event. See <a href="{{ route('marketing.docs.tickets') }}" class="doc-link">Selling Tickets</a>.</p>
             </div>
             <div class="doc-field">
                 <h4 class="font-semibold text-gray-900 dark:text-white mb-2">Manual</h4>
@@ -479,7 +525,7 @@
             </div>
             <div class="doc-field">
                 <h4 class="font-semibold text-gray-900 dark:text-white mb-2">Waitlist</h4>
-                <p class="text-sm text-gray-500 dark:text-gray-400">People currently on a <a href="{{ route('marketing.docs.tickets') }}#waitlist" class="doc-link">waitlist</a>, either waiting or already notified. Can also be narrowed to a single event.</p>
+                <p class="text-sm text-gray-500 dark:text-gray-400">People currently on a <a href="{{ route('marketing.docs.tickets') }}#waitlist" class="doc-link">waitlist</a>, either waiting or already notified, including the free RSVP waitlist. Available on every plan, and can be narrowed to a single event.</p>
             </div>
             <div class="doc-field">
                 <h4 class="font-semibold text-gray-900 dark:text-white mb-2">Sub-schedule</h4>
@@ -516,7 +562,7 @@
         <ol class="doc-list doc-list-numbered mb-6">
             <li>Click <strong class="text-gray-900 dark:text-white">Segments</strong> on the newsletter list page</li>
             <li>Under <strong class="text-gray-900 dark:text-white">Create Segment</strong>, enter a name</li>
-            <li>Choose the type: All Followers, Ticket Buyers, Manual, Waitlist or Sub-schedule</li>
+            <li>Choose the type: All Followers, Email subscribers, Ticket Buyers, Manual, Waitlist or Sub-schedule (listed once the schedule has a sub-schedule)</li>
             <li>Fill in whatever the type asks for next: an optional event filter for Ticket Buyers and Waitlist, the sub-schedule for Sub-schedule, or the address list for Manual (one per line, with an optional name after a comma)</li>
             <li>Click <strong class="text-gray-900 dark:text-white">Create Segment</strong></li>
         </ol>
@@ -539,7 +585,7 @@
             Importing Emails
         </h2>
         <p class="text-gray-600 dark:text-gray-300 mb-4">
-            Bring an existing mailing list across with the <strong class="text-gray-900 dark:text-white">Import Emails</strong> button on the newsletter list page. Up to 10,000 addresses can be imported at a time.
+            Bring an existing mailing list across with the <strong class="text-gray-900 dark:text-white">Import Emails</strong> button on the newsletter list page. Up to 10,000 addresses can be imported at a time, on every plan.
         </p>
 
         <h3 class="doc-subheading">Choosing a Segment</h3>
@@ -601,8 +647,8 @@
         </div>
 
         <div class="doc-callout doc-callout-warning">
-            <div class="doc-callout-title">Verification is required before the first send</div>
-            <p>On eventschedule.com you must either <a href="{{ route('marketing.docs.creating_schedules') }}#integrations" class="doc-link">set up your own email settings</a> for the schedule or verify your phone number in your profile before newsletters can go out. Until then the Newsletters page shows a warning and every send is refused. Selfhosted installs are not affected.</p>
+            <div class="doc-callout-title">Verification above 50 recipients</div>
+            <p>On eventschedule.com, a newsletter going to more than 50 recipients needs either <a href="{{ route('marketing.docs.creating_schedules') }}#integrations" class="doc-link">your own email settings</a> on the schedule or a verified phone number in your profile. Up to 50 recipients it goes out without either, and so does a test. Until you have one, the Newsletters page shows a warning, and a larger send, whether now or scheduled, is refused. The automatic new-event digest follows the same rule. Selfhosted installs are not affected.</p>
         </div>
 
         <div class="doc-callout doc-callout-tip">
@@ -788,7 +834,7 @@
             "@context": "https://schema.org",
             "@type": "HowTo",
             "name": "How to Send Newsletters with Event Schedule",
-            "description": "Create, design, and send newsletters to your followers and ticket buyers with Event Schedule's built-in newsletter builder.",
+            "description": "Create, design, and send newsletters to your followers, email subscribers and ticket buyers with Event Schedule's built-in newsletter builder.",
             "totalTime": "PT10M",
             "step": [
                 {
@@ -812,7 +858,7 @@
                 {
                     "@type": "HowToStep",
                     "name": "Select Recipients",
-                    "text": "On the Settings tab, tick the segments to send to: all followers, ticket buyers, a waitlist, a sub-schedule or a manual list. Selecting none sends to all followers.",
+                    "text": "On the Settings tab, tick the segments to send to: all followers, email subscribers, ticket buyers, a waitlist, a sub-schedule or a manual list. Selecting none sends to all followers and email subscribers together.",
                     "url": "{{ url(route('marketing.docs.newsletters')) }}#recipients"
                 },
                 {

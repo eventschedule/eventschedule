@@ -1,7 +1,8 @@
 <x-docs-page
     key="schedule-styling"
-    description="Customize your schedule's appearance with colors, fonts, backgrounds, and more. Make your schedule uniquely yours."
-    lede="Customize your schedule's visual appearance with colors, fonts, backgrounds, and more. All changes preview in real-time."
+    title="Schedule Styling: Colors, Fonts and Headers - Event Schedule"
+    description="Style your public schedule page: default layout, header style, profile and header images, backgrounds, accent color, fonts, custom CSS and branding."
+    lede="Customize your schedule's visual appearance with colors, fonts, backgrounds, and more. Most changes show in a live preview before you save."
 >
     <x-slot:toc>
         <x-doc-nav-link href="#overview">Overview</x-doc-nav-link>
@@ -137,7 +138,7 @@
             </div>
             <div class="doc-field">
                 <h4 class="font-semibold text-gray-900 dark:text-white mb-2">Your social preview</h4>
-                <p class="text-sm text-gray-500 dark:text-gray-400">It becomes the preview image when your schedule page is shared to a chat app or social network. Without it, the generic Event Schedule image is used instead.</p>
+                <p class="text-sm text-gray-500 dark:text-gray-400">It becomes the preview image when your schedule page is shared to a chat app or social network. Without one, the page offers no preview image, so most apps show the link without a picture (Facebook may pick one from the page itself). It is never an Event Schedule image.</p>
             </div>
             <div class="doc-field">
                 <h4 class="font-semibold text-gray-900 dark:text-white mb-2">Talent and venue logo walls</h4>
@@ -330,7 +331,7 @@
             </div>
             <div class="doc-field">
                 <h4 class="font-semibold text-gray-900 dark:text-white mb-2">White-label your schedule</h4>
-                <p class="text-sm text-gray-500 dark:text-gray-400">With those gone, a hosted schedule reads entirely as your own to visitors. Pair it with a <a href="{{ route('marketing.docs.creating_schedules') }}#custom-domain" class="doc-link">custom domain</a> on Enterprise and nothing on the page points back at Event Schedule.</p>
+                <p class="text-sm text-gray-500 dark:text-gray-400">With those gone, a hosted schedule reads entirely as your own to visitors. Pair it with a <a href="{{ route('marketing.docs.creating_schedules') }}#custom-domain" class="doc-link">custom domain</a> on Enterprise and nothing on the page points back at Event Schedule. <a href="{{ route('marketing.docs.event_graphics') }}" class="doc-link">Event graphics</a> are the exception: an image generated on the hosted platform carries a small eventschedule.com credit in its bottom-right corner on every plan.</p>
             </div>
         </div>
         <p class="text-gray-600 dark:text-gray-300 mb-4">A single-tenant <a href="{{ route('marketing.docs.selfhost') }}" class="doc-link">selfhosted</a> install has no plan tiers at all, so the strip, the event-page card, the embed and newsletter lines and ads are all absent by default, with nothing to buy. If instead you run your own multi-tenant platform on Event Schedule, those surfaces follow each tenant's tier exactly as they do on eventschedule.com, because the strip is the growth prompt of whoever runs the platform.</p>
@@ -347,9 +348,9 @@
         </h2>
         <div class="doc-callout doc-callout-plan">
             <div class="doc-callout-title">Pro feature</div>
-            <p><x-doc-badge plan="pro" /> The Custom CSS box is editable on <strong class="text-gray-900 dark:text-white">Pro</strong> and <strong class="text-gray-900 dark:text-white">Enterprise</strong>, and on <a href="{{ route('marketing.docs.selfhost') }}" class="doc-link">selfhosted</a> installs, which count as Enterprise. Below Pro the box is shown read-only: CSS you saved earlier is kept, not deleted, and becomes editable again when you upgrade.</p>
+            <p><x-doc-badge plan="pro" /> The Custom CSS box is editable on <strong class="text-gray-900 dark:text-white">Pro</strong> and <strong class="text-gray-900 dark:text-white">Enterprise</strong>, and on <a href="{{ route('marketing.docs.selfhost') }}" class="doc-link">selfhosted</a> installs, which count as Enterprise. Below Pro the box is shown read-only: CSS you saved earlier is kept, not deleted, but it is not applied to your pages until the schedule is back on Pro, when it also becomes editable again.</p>
         </div>
-        <p class="text-gray-600 dark:text-gray-300 mb-4">When the built-in controls do not reach far enough, write your own CSS under <strong class="text-gray-900 dark:text-white">Edit Schedule &rarr; Style &rarr; Advanced &rarr; Custom CSS</strong>. It is added to the stylesheet of your public pages, which means your schedule page, your event pages and embeds of them.</p>
+        <p class="text-gray-600 dark:text-gray-300 mb-4">When the built-in controls do not reach far enough, write your own CSS under <strong class="text-gray-900 dark:text-white">Edit Schedule &rarr; Style &rarr; Advanced &rarr; Custom CSS</strong>. It is added to every public page drawn in your schedule's own style: your schedule page, event pages, embeds, and the pages visitors reach from them such as booking, event requests and gift cards. Ticket, order and installment payment pages use the app's standard layout, so your CSS does not reach them.</p>
         <ul class="doc-list mb-6">
             <li>Override any of the built-in styles for complete control</li>
             <li>Fine-tune spacing, borders, radii and shadows</li>
@@ -402,7 +403,7 @@
             "@context": "https://schema.org",
             "@type": "HowTo",
             "name": "How to Style Your Event Schedule",
-            "description": "Customize your schedule's appearance with colors, fonts, backgrounds, and more. All changes preview in real-time.",
+            "description": "Customize your schedule's appearance with colors, fonts, backgrounds, and more. Most changes show in a live preview before you save.",
             "totalTime": "PT5M",
             "step": [
                 {

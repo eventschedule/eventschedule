@@ -1,7 +1,8 @@
 <x-docs-page
     key="scan-agenda"
+    title="Scan Agenda: Photograph an Agenda with AI - Event Schedule"
     plan="enterprise"
-    description="Learn how to photograph a printed agenda with your phone and let AI turn it into event parts in Event Schedule."
+    description="Photograph a printed agenda, program or setlist with your phone and let AI turn each line into an event part you review, reorder and save."
     lede="Photograph a printed agenda with your phone camera and let AI turn it into the event's agenda parts."
 >
     <x-slot:toc>
@@ -96,7 +97,7 @@
 
         <div class="doc-callout doc-callout-info">
             <div class="doc-callout-title">Daily limit</div>
-            <p>On the hosted service each schedule can run <strong class="text-gray-900 dark:text-white">10 agenda parses per day</strong>, and the allowance is shared with <strong class="text-gray-900 dark:text-white">Import from Image</strong> and <strong class="text-gray-900 dark:text-white">Import from Text</strong> in the event form, since all three call the same parser. Once the day's allowance is used the parse is refused until the next day. Selfhosted installs have no limit.</p>
+            <p>On the hosted service each schedule can run <strong class="text-gray-900 dark:text-white">10 agenda parses per day</strong>, and the allowance is shared with <strong class="text-gray-900 dark:text-white">Import from Image</strong> and <strong class="text-gray-900 dark:text-white">Import from Text</strong> in the event form, since all three call the same parser. It is counted separately from the <a href="{{ route('marketing.docs.ai_import') }}#ai-import" class="doc-link">AI import</a> allowance for whole events, so scanning an agenda never uses up an import, or the other way round. Once the day's allowance is used, a parse is refused with "You have reached your daily limit of 10 AI requests. Please try again tomorrow." Selfhosted installs have no limit.</p>
         </div>
     </section>
 
@@ -311,7 +312,7 @@
             "@context": "https://schema.org",
             "@type": "HowTo",
             "name": "How to Scan an Agenda in Event Schedule",
-            "description": "Learn how to photograph a printed agenda with your phone and let AI turn it into event parts in Event Schedule.",
+            "description": "Photograph a printed agenda, program or setlist with your phone and let AI turn each line into an event part you review, reorder and save.",
             "totalTime": "PT5M",
             "step": [
                 {

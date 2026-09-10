@@ -1,6 +1,7 @@
 <x-docs-page
     key="saas/setup"
-    description="Learn how to configure Event Schedule for SaaS deployment with subdomain-based multi-tenant routing, custom branding, and Stripe subscriptions."
+    title="White-Label SaaS Setup: Run Your Own Platform - Event Schedule"
+    description="Run Event Schedule as a white-label SaaS: wildcard subdomains, your branding, Stripe plan billing, and tenants selling through their own Stripe or PayPal."
     lede="Configure Event Schedule for SaaS (Software as a Service) deployment, where you host the platform for multiple customers using subdomains."
 >
     <x-slot:toc>
@@ -83,7 +84,7 @@
             <li>A domain name with DNS access</li>
             <li>Ability to configure wildcard SSL certificates</li>
             <li>Web server configured to handle wildcard subdomains (Apache or Nginx)</li>
-            <li>A working mail transport: tenant invitations, ticket confirmations, subscription receipts and support notifications all send from this install</li>
+            <li>A working mail transport: tenant invitations, ticket confirmations, subscription receipts and support notifications all send from this install. In hosted mode, sale notifications, appointment and gift card emails, pass booking confirmations and buyer change notices go only through a tenant schedule's own email settings, so a tenant without them gets none of those</li>
         </ol>
     </section>
 
@@ -291,6 +292,12 @@ ONESIGNAL_REST_API_KEY=your-onesignal-rest-api-key</code></pre>
         <p class="text-gray-600 dark:text-gray-300 mb-4">Once both values are set, a <strong>Push notifications</strong> panel appears on each schedule's <strong>Settings &rarr; Notifications</strong> tab, where the owner enables push per device and can send a test. Sending is gated on the schedule being Pro or Enterprise, and the demo schedule never receives push. One OneSignal app serves the whole platform; tenants are segmented automatically. Add <code class="doc-inline-code">ONESIGNAL_SAFARI_WEB_ID</code> only if you need legacy macOS Safari support.</p>
         <p class="text-gray-600 dark:text-gray-300 mb-4">Note that enabling push loads the OneSignal SDK from their CDN and sends notification data to OneSignal, and that Apple iOS only supports web push for sites added to the home screen (iOS 16.4+).</p>
 
+        <h3 id="google-wallet" class="doc-subheading">Google Wallet Passes (Optional)</h3>
+        <p class="text-gray-600 dark:text-gray-300 mb-4">Ticket buyers can keep their ticket in Google Wallet: an <strong>Add to Google Wallet</strong> button appears on the ticket page, the multi-event order page and the confirmation email, and the pass carries the same QR code, so it scans at the door like any other ticket. One Google Wallet issuer account of yours switches it on for every tenant at once, on every plan, and tenants have nothing to connect. Set:</p>
+        <pre class="doc-code-block"><code>GOOGLE_WALLET_ISSUER_ID=your-issuer-id
+GOOGLE_WALLET_SERVICE_ACCOUNT=/absolute/path/to/service-account.json</code></pre>
+        <p class="text-gray-600 dark:text-gray-300 mb-4">The service account setting also takes the key file's contents, base64-encoded, for a host with no writable file mount. Leave either value empty and no button renders and nothing is sent to Google. A new issuer account starts in Google's demo mode, where only the Google accounts you register as testers can save a pass. Give a staging install its own <code class="doc-inline-code">GOOGLE_WALLET_ID_PREFIX</code> (the default is <code class="doc-inline-code">es</code>): Google never deletes a pass class, so two installs sharing an issuer account and a prefix collide for good. The <a href="{{ route('marketing.docs.selfhost.google_wallet') }}" class="doc-link">Google Wallet guide</a> covers creating the issuer account.</p>
+
         <h3 id="reverse-proxy" class="doc-subheading">Running Behind a Reverse Proxy</h3>
         <p class="text-gray-600 dark:text-gray-300 mb-4">A multi-tenant install almost always sits behind a reverse proxy or CDN (Nginx, Apache, Cloudflare, or a control panel such as HestiaCP). Tell Event Schedule which proxies to trust so it reads the <code class="doc-inline-code">X-Forwarded-Proto</code> and <code class="doc-inline-code">X-Forwarded-For</code> headers those proxies set:</p>
         <pre class="doc-code-block"><code>TRUSTED_PROXIES=*</code></pre>
@@ -415,7 +422,7 @@ yourdomain.com.    CNAME    your-server.hosting.com.
             </svg>
             Stripe Subscription Setup
         </h2>
-        <p class="text-gray-600 dark:text-gray-300 mb-6">To sell paid plans to your customers, configure Stripe subscription billing. The subscription charges are made on your own Stripe account. This is separate from ticket payments, which are charged on each schedule owner's connected account with no platform fee.</p>
+        <p class="text-gray-600 dark:text-gray-300 mb-6">To sell paid plans to your customers, configure Stripe subscription billing. The subscription charges are made on your own Stripe account. This is separate from ticket payments, which settle into each schedule owner's own account with no platform fee: cards through Stripe Connect, or the owner's own <a href="{{ route('marketing.docs.tickets') }}#paypal" class="doc-link">PayPal</a>, Payfast or Invoice Ninja account, a payment link, or cash. In SaaS mode there is no install-wide PayPal or Payfast account for your platform to supply, so each tenant connects their own, and a refund from the Sales page goes back through the account that took the money.</p>
 
         <p class="text-gray-600 dark:text-gray-300 mb-6">See the <a href="{{ route('marketing.docs.selfhost.stripe') }}" class="doc-link">Stripe integration documentation</a> for step-by-step key, webhook and Connect instructions.</p>
 
@@ -651,7 +658,7 @@ yourdomain.com.    CNAME    your-server.hosting.com.
             <div class="doc-callout-title">Two things to check before you run it</div>
             <ul class="doc-list mt-2">
                 <li>The demo account is created with the fixed address <code class="doc-inline-code">contact@eventschedule.com</code>. If that address already belongs to a real account on your platform, that account becomes the demo account</li>
-                <li>The demo schedule is created on the Free plan like any other, so Pro-only screens stay locked and its public pages carry your free-tier footer. Grant it a plan from <span class="font-semibold text-gray-900 dark:text-white">/admin &rarr; Schedules</span> if you want to show off paid features</li>
+                <li>The demo schedule is created on the Free plan like any other, so Pro-only screens stay locked and its public pages carry your free-tier footer. To show off paid features, open it from <span class="font-semibold text-gray-900 dark:text-white">Manage &rarr; Schedules</span> in the admin panel and set its <span class="font-semibold text-gray-900 dark:text-white">Plan Type</span>. Whatever its plan, it never shows ads or the accommodation map</li>
             </ul>
         </div>
 
@@ -944,7 +951,8 @@ CUSTOM_LINK_3_URL=</code></pre>
             <li><x-link href="/docs/saas/custom-domains">Custom Domains</x-link> - Allow your customers to use their own domain names with their schedules, including DigitalOcean App Platform setup</li>
             <li><x-link href="/docs/saas/twilio">Twilio Integration</x-link> - Set up phone number verification and WhatsApp messaging</li>
             <li><x-link href="/docs/saas/federation">Federation</x-link> - Share your customers' public events with the eventschedule.com listings, with every listing linking back to your platform</li>
-            <li><x-link href="/docs/saas/monetization">Monetization</x-link> - Show ads on your free tier's public pages and sell promotional placement to your paid schedules</li>
+            <li><x-link href="/docs/saas/monetization">Monetization</x-link> - Show ads on your free tier's public pages, sell promotional placement to your paid schedules, and earn an accommodation affiliate commission</li>
+            <li><x-link href="/docs/selfhost/admin">Admin Panel</x-link> - Grant plans, edit any tenant's schedule name, subdomain and contact details, and release or restore a squatted subdomain</li>
             <li><x-link href="/docs/selfhost/stripe">Stripe Integration</x-link> - Keys, webhooks and Stripe Connect for both subscription billing and ticket payments</li>
         </ul>
     </section>

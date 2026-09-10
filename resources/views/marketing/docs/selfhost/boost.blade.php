@@ -1,6 +1,7 @@
 <x-docs-page
     key="selfhost/boost"
-    description="Learn how to configure Meta/Facebook ads integration for Event Schedule's boost feature, enabling users to promote events through paid social media campaigns."
+    title="Boost Setup with the Meta Marketing API - Event Schedule"
+    description="Set up Meta ads for boost on a selfhosted Event Schedule: Facebook app, ad account, Page, system user token, Pixel, webhooks and every META_ variable."
     lede="Configure Meta/Facebook ads integration to let users promote events through paid Facebook and Instagram campaigns."
 >
     <x-slot:toc>
@@ -228,7 +229,7 @@
             Step 5: Meta Pixel
         </h2>
         <p class="text-gray-600 dark:text-gray-300 mb-4">The pixel is <strong class="text-gray-900 dark:text-white">optional</strong>. Campaigns run without it; what you lose is conversion tracking, so ads can only be optimized and reported on by reach, impressions and clicks.</p>
-        <p class="text-gray-600 dark:text-gray-300 mb-6">When <code class="doc-inline-code">META_PIXEL_ID</code> is set, two things happen, both scoped to events with an <em>active</em> Meta campaign. The browser pixel is injected into that event's public page, tracking a page view and a content view. And when a ticket sale for that event completes through Stripe, the server sends a Purchase conversion to Meta's Conversions API using the system user token, with the buyer's email address SHA-256 hashed rather than sent in the clear.</p>
+        <p class="text-gray-600 dark:text-gray-300 mb-6">When <code class="doc-inline-code">META_PIXEL_ID</code> is set, two things happen, both scoped to events with an <em>active</em> Meta campaign. The browser pixel is injected into that event's public page, tracking a page view and a content view. And when a ticket sale for that event is paid online, through Stripe, PayPal, Payfast, Invoice Ninja or a payment link, including the first payment of an installment plan, the server sends a Purchase conversion to Meta's Conversions API using the system user token, with the buyer's email address SHA-256 hashed rather than sent in the clear. A free registration is reported the same way with a value of zero, and a sale you mark as paid by hand, such as cash at the door, sends nothing.</p>
 
         <ol class="doc-list doc-list-numbered mb-6">
             <li>In <strong class="text-gray-900 dark:text-white">Events Manager</strong> (<code class="doc-inline-code">business.facebook.com/events_manager</code>), click <strong class="text-gray-900 dark:text-white">Connect Data Sources</strong></li>

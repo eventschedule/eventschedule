@@ -3,17 +3,19 @@
 
     // Both the visible glossary and the DefinedTermSet JSON-LD below read this
     // one array. They used to be two hand-maintained copies of the same nine
-    // terms. Twelve keeps every row of the 3-up grid complete.
+    // terms. Fifteen keeps every row of the 3-up grid complete.
     $glossary = [
         ['term' => 'Schedule', 'def' => 'Your event calendar, with its own URL, branding and settings. One schedule holds as many events as you like, on every plan.'],
         ['term' => 'Schedule type', 'def' => 'Talent, Venue or Curator. The type decides what a schedule gets: a venue has a full address, a curator aggregates events from other schedules. Choose carefully, because the type is fixed once the schedule is saved.'],
         ['term' => 'Sub-schedule', 'def' => 'A category for events inside one schedule, such as Live Music, Comedy or Workshops. Each one has its own color and its own URL, and visitors can filter by it. It organizes and color-codes only: it cannot hide an event.'],
-        ['term' => 'Event', 'def' => 'A single occurrence with a date, time, location and details. An event belongs to a schedule and can repeat on a weekly pattern with date exceptions.'],
-        ['term' => 'Request', 'def' => 'An event someone else submits from your public request page. Requests wait on the Requests tab until you accept or decline them, and you can opt in to an email when new ones land.'],
-        ['term' => 'Ticket', 'def' => 'A ticket type on an event, such as General or VIP. Sales run through your own Stripe account with no platform fees on any plan. Free schedules sell up to 25 paid tickets a month; Pro removes the cap.'],
-        ['term' => 'RSVP', 'def' => 'Free sign-up for an event, with an optional capacity limit per date. Available on every plan, and no Stripe account is needed.'],
-        ['term' => 'Follower', 'def' => 'Someone signed in who follows your schedule so you can reach them later. Following shares their name and email with you, and following on its own reaches an account follower only through a newsletter you send. Asking for email updates is what adds the automatic digest, and confirming that request also creates an account.'],
-        ['term' => 'Subscriber', 'def' => 'Someone who left an email address on your public page and confirmed it. Confirming a sign-up form address also sets up an account for them, so they can see everything they follow in one place. Subscribers get a digest automatically when you publish new events, at most one every few days, and it does not draw on the newsletter allowance.'],
+        ['term' => 'Event', 'def' => 'A single occurrence with a date, time, location and details. An event belongs to a schedule and can repeat daily, weekly, every few weeks, monthly or yearly, with dates you add or skip.'],
+        ['term' => 'Request', 'def' => 'An event waiting for your approval: one a visitor submitted from your public request page, or one another schedule added you to. Requests sit on the Requests tab until you accept or decline them, and you can opt in to an email when new ones land.'],
+        ['term' => 'Unclaimed page', 'def' => 'A schedule page created for a performer or venue you name on an event before they are on Event Schedule. It says who created it, credits each date to the schedule that added it, and stays out of search engines. The person it names claims it with an account on the email address or phone number it lists, and becomes its owner.'],
+        ['term' => 'Ticket', 'def' => 'A ticket type on an event, such as General or VIP. Buyers pay through your own Stripe or PayPal account (or Payfast, Invoice Ninja, a payment link or cash), with no platform fees on any plan. Free schedules sell up to 25 paid tickets a month; Pro removes the cap.'],
+        ['term' => 'RSVP', 'def' => 'Free sign-up for an event, with an optional capacity limit per date. Available on every plan, and no payment account is needed.'],
+        ['term' => 'Follower', 'def' => 'Someone with an account who follows your schedule, which shares their name and email with you. Pressing Follow on its own reaches an account follower only through a newsletter you send; the automatic digest goes to people who asked for email updates (see Subscriber).'],
+        ['term' => 'Subscriber', 'def' => 'Someone who asked your schedule for email updates: from the sign-up panel on your page, with their name and email, confirmed from the link we send, or from a tick box when they buy a ticket or register. Confirming the sign-up panel also sets up an account for them wherever sign-up is open. Subscribers get a digest automatically when you publish events your schedule created, at most one every few days, and it does not draw on the newsletter allowance.'],
+        ['term' => 'Interest list', 'def' => 'The email addresses left on one event with "Tell me when tickets go on sale", or "Tell me if anything changes" once it is selling. No account and no name. They hear about that date only: when tickets go on sale, a reminder before it starts, a notice if it is cancelled, and any notice you choose to send if the date or venue changes. It is not a subscription to your schedule.'],
         ['term' => 'Newsletter', 'def' => 'An email you write and send to a segment. The monthly allowance counts recipients rather than sends: 10 free, 100 on Pro, 1,000 on Enterprise, and unlimited on selfhost or with your own mail server.'],
         ['term' => 'Segment', 'def' => 'A saved audience for newsletters: all followers, ticket buyers, a ticket waitlist, buyers from one sub-schedule, or a list you enter by hand.'],
         ['term' => 'Embed', 'def' => 'Your schedule shown on another website inside an iframe. The calendar embed and the RSVP form are free; embedding the ticket purchase widget needs Pro.'],
@@ -71,16 +73,16 @@
     ];
 
     $steps = [
-        ['icon' => 'cog', 'title' => 'Create a schedule', 'text' => 'Pick Talent, Venue or Curator, claim your URL, and add a logo and colors.', 'route' => 'marketing.docs.getting_started'],
-        ['icon' => 'plus', 'title' => 'Add your events', 'text' => 'Type them in, paste a listing for AI to parse, or scan a printed agenda on Enterprise.', 'route' => 'marketing.docs.creating_events'],
+        ['icon' => 'cog', 'title' => 'Create a schedule', 'text' => 'Pick Talent, Venue or Curator, name it to get your URL, and add a logo and colors.', 'route' => 'marketing.docs.getting_started'],
+        ['icon' => 'plus', 'title' => 'Add your events', 'text' => 'Type them in or paste a listing for AI to parse. Sell tickets through Stripe, PayPal or another payment method, free up to 25 paid tickets a month.', 'route' => 'marketing.docs.creating_events'],
         ['icon' => 'share', 'title' => 'Share it', 'text' => 'Embed the calendar on your site, post the link, and collect subscribers who hear about new events on their own.', 'route' => 'marketing.docs.sharing'],
     ];
 @endphp
 
 <x-marketing-layout :docs="true">
-    <x-slot name="title">Documentation - Event Schedule</x-slot>
+    <x-slot name="title">Event Schedule Documentation: User Guide, Selfhost, API</x-slot>
     <x-slot name="breadcrumbTitle">Documentation</x-slot>
-    <x-slot name="description">Complete documentation for Event Schedule. User guides, selfhost installation, and developer resources.</x-slot>
+    <x-slot name="description">Guides for running your schedule on Event Schedule: events, tickets, subscribers and sharing, plus selfhost installation, SaaS operations and the REST API.</x-slot>
 
     <x-slot name="structuredData">
         {{-- Every other doc page gets its TechArticle from <x-docs-page>. This
@@ -92,7 +94,7 @@
                 '@context' => 'https://schema.org',
                 '@type' => 'TechArticle',
                 'headline' => 'Event Schedule Documentation',
-                'description' => 'Complete documentation for Event Schedule. User guides, selfhost installation, and developer resources.',
+                'description' => 'Guides for running your schedule on Event Schedule: events, tickets, subscribers and sharing, plus selfhost installation, SaaS operations and the REST API.',
                 'author' => ['@type' => 'Organization', 'name' => 'Event Schedule'],
                 'publisher' => [
                     '@type' => 'Organization',

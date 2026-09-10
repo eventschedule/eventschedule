@@ -1,5 +1,6 @@
 <x-docs-page
     key="gift-cards"
+    title="Gift Cards: Sell and Redeem Balances - Event Schedule"
     description="Sell prepaid gift cards for your events: set the denominations and currency, let buyers email a card to someone else, and redeem it at checkout."
     lede="Let anyone buy a gift card for someone else. The recipient gets a code by email and redeems the balance toward tickets for your events."
     article-description="How to sell gift cards for your events: set denominations, let buyers send a card by email, and redeem the balance toward tickets at checkout."
@@ -222,7 +223,7 @@
                     </tr>
                     <tr>
                         <td><span class="font-semibold text-gray-900 dark:text-white">Refund</span></td>
-                        <td>Stops the card from being redeemed and records it as refunded.</td>
+                        <td>Stops the card from being redeemed and records it as refunded. No money moves: see the note below.</td>
                         <td>Active</td>
                     </tr>
                     <tr>
@@ -280,7 +281,8 @@
 
         <div class="doc-callout doc-callout-warning mb-2">
             <div class="doc-callout-title">Refunds move money manually</div>
-            <p>Marking a card refunded or cancelled stops it working, but it does not move any money in Stripe, Invoice Ninja or your bank. Do that yourself. And when an order that used a card is cancelled or refunded, the redeemed amount only goes back on the card while the card itself is still <strong class="text-gray-900 dark:text-white">Active</strong>: a card you have already cancelled or refunded is never credited back.</p>
+            <p>Marking a card refunded or cancelled stops it working, but it does not move any money in Stripe, Invoice Ninja or your bank. Do that yourself. Ticket sales are different: <a href="{{ route('marketing.docs.tickets') }}#refunds" class="doc-link">Refund Ticket</a> on a Stripe or PayPal sale does send the money back, but a gift card's own <strong class="text-gray-900 dark:text-white">Refund</strong> never contacts a payment provider.</p>
+            <p class="mt-2">When a ticket order that used a card is cancelled or refunded in full, the redeemed amount goes back on the card, but only while the card itself is still <strong class="text-gray-900 dark:text-white">Active</strong>: a card you have already cancelled or refunded is never credited back. A full refund through Stripe or PayPal returns only what the buyer paid on top of the card, and an order the card covered in full shows <strong class="text-gray-900 dark:text-white">Mark as Refunded</strong>, which puts the whole amount back on the card. A partial refund leaves the card's balance as it is.</p>
         </div>
     </section>
 

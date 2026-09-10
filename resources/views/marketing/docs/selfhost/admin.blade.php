@@ -1,7 +1,8 @@
 <x-docs-page
     key="selfhost/admin"
-    description="Learn how to use the Event Schedule admin panel to monitor users, revenue, analytics, and manage platform settings for your selfhosted installation."
-    lede="Monitor your platform's users, revenue, and analytics, and manage system settings from the admin panel."
+    title="Admin Panel for Selfhosted Installs - Event Schedule"
+    description="Run the admin panel of a selfhosted Event Schedule: the Needs attention list, revenue and refunds, and managing, releasing or restoring any schedule."
+    lede="Monitor your install's users, revenue and analytics, manage any schedule on it, and change the settings that apply to every page."
 >
     <x-slot:toc>
         <x-doc-nav-link href="#overview">Overview</x-doc-nav-link>
@@ -60,19 +61,29 @@
                         <td>Every install</td>
                     </tr>
                     <tr>
+                        <td>Insights</td>
+                        <td>Growth</td>
+                        <td>Only when <code class="doc-inline-code">IS_HOSTED=true</code></td>
+                    </tr>
+                    <tr>
                         <td>Manage</td>
-                        <td>Boost, Newsletters</td>
+                        <td>Boost, Schedules, Newsletters</td>
                         <td>Every install</td>
                     </tr>
                     <tr>
                         <td>Manage</td>
-                        <td>Schedules, Domains, Referrals, Blog</td>
+                        <td>Domains, Referrals, Blog</td>
                         <td>Only when <code class="doc-inline-code">IS_HOSTED=true</code></td>
                     </tr>
                     <tr>
                         <td>System</td>
-                        <td>Audit Log, Queue, Logs, Settings, Translations</td>
+                        <td>Audit Log, Queue, Logs, Settings, Translations, Legal Pages</td>
                         <td>Every install</td>
+                    </tr>
+                    <tr>
+                        <td>System</td>
+                        <td>App Update</td>
+                        <td>Every install except eventschedule.com</td>
                     </tr>
                     <tr>
                         <td>System</td>
@@ -187,9 +198,24 @@
                 </thead>
                 <tbody>
                     <tr>
+                        <td>Scheduled tasks are not running</td>
+                        <td>No scheduler run has been recorded within <code class="doc-inline-code">SCHEDULER_STALE_MINUTES</code> (20 by default), so reminders, queued mail and every other timed job have stopped. Links to Queue.</td>
+                        <td>Every install</td>
+                    </tr>
+                    <tr>
+                        <td>Queued jobs are not draining</td>
+                        <td>A job has been due for more than an hour and is still waiting, which normally means nothing is running the queue. It is held back while the row above is showing, because a stopped scheduler is the usual cause. Links to Queue.</td>
+                        <td>Every install</td>
+                    </tr>
+                    <tr>
                         <td>Failed jobs</td>
                         <td>Rows in the failed job table. Links to Queue.</td>
                         <td>Every install</td>
+                    </tr>
+                    <tr>
+                        <td>Subscriptions on an unrecognized price</td>
+                        <td>A live Stripe subscription whose price is none of the four plan prices this install sells, so the customer is charged for a plan the app cannot recognize. Links to a list on the Revenue page.</td>
+                        <td>Installs that sell plans through Stripe</td>
                     </tr>
                     <tr>
                         <td>Custom domains failed to provision</td>
@@ -209,6 +235,11 @@
                     <tr>
                         <td>Sales with an amount mismatch</td>
                         <td>A ticket sale where the amount actually paid does not match the amount expected. You approve or refund it on the Revenue page.</td>
+                        <td>Every install</td>
+                    </tr>
+                    <tr>
+                        <td>Refunds awaiting confirmation</td>
+                        <td>A refund sent to Stripe or PayPal whose outcome the provider still has not confirmed after 15 minutes. The money may already have moved, so nothing retries it: you settle it in the provider's own dashboard. Links to a list on the Revenue page.</td>
                         <td>Every install</td>
                     </tr>
                     <tr>
@@ -257,24 +288,19 @@
                         <td>Every install except eventschedule.com</td>
                     </tr>
                     <tr>
-                        <td>Unverified schedules</td>
-                        <td>A claimed schedule that has verified neither an email address nor a phone number.</td>
-                        <td>Hosted</td>
-                    </tr>
-                    <tr>
-                        <td>Referrals not converted yet</td>
-                        <td>A referral whose invited user has not subscribed.</td>
-                        <td>Hosted</td>
+                        <td>Update available</td>
+                        <td>A newer release is published on GitHub. Informational: it clears when you update, not by working through a queue. Links to App Update.</td>
+                        <td>Every install except eventschedule.com</td>
                     </tr>
                 </tbody>
             </table>
         </div>
 
-        <p class="text-gray-600 dark:text-gray-300 mb-4">The same counts drive the badges on the Insights, Manage and System menus and on the items inside them. A group's badge takes the colour of the most serious row it contains, so a failed queue is not softened by sitting next to a routine unverified schedule. Each count reuses the query the destination page runs, so a badge and the page it links to cannot disagree.</p>
+        <p class="text-gray-600 dark:text-gray-300 mb-4">The same counts drive the badges on the Insights, Manage and System menus and on the items inside them. A group's badge takes the colour of the most serious row it contains, so a failed job is not softened by sitting next to an informational row such as an available update. Each count reuses the query the destination page runs, so a badge and the page it links to cannot disagree.</p>
 
         <div class="doc-callout doc-callout-info">
             <div class="doc-callout-title">A plain selfhost sees fewer rows</div>
-            <p>Only rows that can apply to your install are counted. With <code class="doc-inline-code">IS_HOSTED=false</code> the domain, support, unverified-schedule and referral rows always read zero, and the federation and translation-review rows only ever appear on eventschedule.com itself.</p>
+            <p>Only rows that can apply to your install are counted. With <code class="doc-inline-code">IS_HOSTED=false</code> the domain and support rows always read zero, the subscription row stays empty unless you sell plans through Stripe, and the federation and translation-review rows only ever appear on eventschedule.com itself. Schedules that have not verified an email address or phone number are not a row at all, because they are waiting on their owner rather than on you: their count is the Unverified card on the <a href="#manage-plans" class="doc-link">Schedules</a> page.</p>
         </div>
     </section>
 
@@ -314,7 +340,7 @@
             </svg>
             Revenue (Insights)
         </h2>
-        <p class="text-gray-600 dark:text-gray-300 mb-6">The Revenue page reports on ticket sales across every schedule, plus subscription health where the install sells plans. Amounts are the payment amounts recorded on each sale.</p>
+        <p class="text-gray-600 dark:text-gray-300 mb-6">The Revenue page reports on ticket sales across every schedule, plus subscription health where the install sells plans. Amounts are the payment amounts recorded on each paid sale. A partially refunded sale stays paid, so it counts at its full amount, and only fully refunded sales count toward the refund rate.</p>
         <ul class="doc-list mb-6">
             <li><strong class="text-gray-900 dark:text-white">Total revenue</strong> and <strong class="text-gray-900 dark:text-white">total sales</strong> - all time, each with the figure for the selected period underneath</li>
             <li><strong class="text-gray-900 dark:text-white">Refund rate</strong> - refunded sales as a share of paid plus refunded, turning red above 5 percent</li>
@@ -322,6 +348,7 @@
             <li><strong class="text-gray-900 dark:text-white">Boost markup revenue</strong> - your all-time margin on boost spend, with the figure for the period underneath. This tile sums charges only; the equivalent figure on the <a href="#manage-boost" class="doc-link">Boost</a> page is net of refunds, so the two do not have to match.</li>
             <li><strong class="text-gray-900 dark:text-white">Subscription health</strong> - active, trialing, canceled and past-due subscriptions, schedules on trial, how many converted, and expired trials with no subscription. This whole panel is only rendered when <code class="doc-inline-code">IS_HOSTED=true</code>.</li>
             <li><strong class="text-gray-900 dark:text-white">Revenue trend</strong> - a chart over the selected range</li>
+            <li><strong class="text-gray-900 dark:text-white">Subscriptions on an Unrecognized Price</strong> - live Stripe subscriptions whose price is none of the plan prices this install sells, in a red panel that only appears when there are some</li>
             <li><strong class="text-gray-900 dark:text-white">Recent sales</strong> - the fifty most recent, excluding demo schedules</li>
         </ul>
         <x-doc-screenshot id="selfhost-admin--revenue" alt="Admin revenue dashboard with sales charts" />
@@ -329,10 +356,13 @@
         <h3 class="doc-subheading">Amount mismatches</h3>
         <p class="text-gray-600 dark:text-gray-300 mb-4">When the amount a payment provider reports does not match the amount the sale expected, the sale is parked as a mismatch rather than being treated as paid. Those sales, and any boost campaign in the same state, are listed in an amber panel on this page, which is only rendered when something is in it, with two actions each:</p>
         <ul class="doc-list mb-6">
-            <li><strong class="text-gray-900 dark:text-white">Approve</strong> - accept it and mark it paid</li>
-            <li><strong class="text-gray-900 dark:text-white">Refund</strong> - return the money through Stripe</li>
+            <li><strong class="text-gray-900 dark:text-white">Approve</strong> - accept it and mark it paid. For a ticket sale, the buyer is then sent their tickets</li>
+            <li><strong class="text-gray-900 dark:text-white">Refund</strong> - for a ticket sale, send the whole payment back through the provider that took it, Stripe or PayPal, which the confirmation names. The button only appears when that provider can refund, so a mismatch paid through Invoice Ninja or Payfast offers Approve alone. A boost campaign's charge is refunded through Stripe</li>
         </ul>
-        <p class="text-gray-600 dark:text-gray-300">Both actions are recorded in the audit log, and the row disappears from Needs attention once the queue is empty.</p>
+        <p class="text-gray-600 dark:text-gray-300 mb-6">Both actions are recorded in the audit log, and the row disappears from Needs attention once the queue is empty. Schedule owners refund their own sales, in full or in part, from their Sales page; see <a href="{{ route('marketing.docs.tickets') }}#managing-sales" class="doc-link">Managing sales</a>.</p>
+
+        <h3 class="doc-subheading">Refunds awaiting confirmation</h3>
+        <p class="text-gray-600 dark:text-gray-300">A refund that was sent to Stripe or PayPal and still has no confirmed outcome after 15 minutes is listed in a red <strong class="text-gray-900 dark:text-white">Refunds Awaiting Confirmation</strong> panel, with its date, event, amount, status, reference and last error. The money may or may not have moved, and nothing in the app retries it, because a retry after the provider's idempotency key has expired is how one refund becomes two. Look the reference up in the provider's own dashboard and settle it there. Until then the refund holds its amount against the sale, so the schedule owner cannot refund that money again.</p>
     </section>
 
     <!-- Insights: Analytics -->
@@ -425,7 +455,7 @@
         <x-doc-screenshot id="selfhost-admin--boost" alt="Admin boost management page" />
     </section>
 
-    <!-- Manage: Schedules and plans (hosted only) -->
+    <!-- Manage: Schedules and plans (every install; plan assignment is hosted only) -->
     <section id="manage-plans" class="doc-section">
         <h2 class="doc-heading">
             <svg aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-5 h-5 text-gray-500 dark:text-gray-400 flex-shrink-0">
@@ -433,35 +463,35 @@
             </svg>
             Schedules and plans (Manage)
         </h2>
-        <p class="text-gray-600 dark:text-gray-300 mb-6">This is the <strong class="text-gray-900 dark:text-white">Schedules</strong> item in the Manage menu, at <code class="doc-inline-code">/admin/schedules</code>; the older <code class="doc-inline-code">/admin/plans</code> address redirects to it. It is the one place in the admin panel where you change something about an individual schedule.</p>
+        <p class="text-gray-600 dark:text-gray-300 mb-6">This is the <strong class="text-gray-900 dark:text-white">Schedules</strong> item in the Manage menu, at <code class="doc-inline-code">/admin/schedules</code>, and it is there on every install. On a hosted install the older <code class="doc-inline-code">/admin/plans</code> address redirects to it. It is the one place in the admin panel where you change something about an individual schedule.</p>
         <ul class="doc-list mb-6">
-            <li><strong class="text-gray-900 dark:text-white">Plan counts</strong> - how many verified, non-demo schedules resolve to Free, Pro and Enterprise, plus how many pay through Stripe, how many were granted a plan by hand, how many are on trial, and how many expire in the next 30 days</li>
+            <li><strong class="text-gray-900 dark:text-white">Plan counts</strong> - how many verified, non-demo schedules resolve to Free, Pro and Enterprise, plus how many pay through Stripe, how many were granted a plan by hand, how many are on trial, and how many expire in the next 30 days. An <strong class="text-gray-900 dark:text-white">Unverified</strong> card beside them counts the schedules with an owner that have verified neither an email address nor a phone number</li>
             <li><strong class="text-gray-900 dark:text-white">Search</strong> - by schedule name, subdomain or email address</li>
             <li><strong class="text-gray-900 dark:text-white">Filters</strong> - plan type, status (active, expired, trial or deleted), source (Stripe, manual or trial), verification (verified or unverified) and owner</li>
-            <li><strong class="text-gray-900 dark:text-white">Owner filter</strong> - schedules with an owner are shown by default. Switch it to <strong class="text-gray-900 dark:text-white">Unclaimed</strong> to reach the venue and performer schedules that were created automatically while importing an event: they have no owner, and their page is a claim page kept out of search engines, but they do hold a subdomain, so they are the usual reason a good name is unavailable.</li>
-            <li><strong class="text-gray-900 dark:text-white">Listing</strong> - twenty schedules per page, newest first. Demo schedules are left out, deleted ones appear only under the Deleted status, and unverified ones are listed even though the counts above exclude them.</li>
+            <li><strong class="text-gray-900 dark:text-white">Owner filter</strong> - <strong class="text-gray-900 dark:text-white">Claimed</strong>, the default, shows schedules with an owner. Switch it to <strong class="text-gray-900 dark:text-white">Unclaimed</strong> to reach the venue and performer schedules the app created automatically when an event named them: they have no owner, and their page is a claim page kept out of search engines, but they do hold a subdomain, so they are the usual reason a good name is unavailable. <strong class="text-gray-900 dark:text-white">All owners</strong> shows both.</li>
+            <li><strong class="text-gray-900 dark:text-white">Listing</strong> - twenty schedules per page, newest first. Demo schedules are left out, deleted ones appear only under the Deleted status, and unverified ones are listed even though the plan counts exclude them. Each row has <strong class="text-gray-900 dark:text-white">Edit</strong> and one quick action: <strong class="text-gray-900 dark:text-white">Delete</strong>, or on a deleted schedule <strong class="text-gray-900 dark:text-white">Restore</strong>, or <strong class="text-gray-900 dark:text-white">Release</strong> when it was deleted without giving up its name.</li>
         </ul>
 
         <h3 class="doc-subheading">Editing one schedule</h3>
         <p class="text-gray-600 dark:text-gray-300 mb-4">Opening a schedule shows a read-only <strong class="text-gray-900 dark:text-white">Current Subscription Status</strong> panel (status, Stripe customer, trial end and whether a subscription is active), and gives you these actions:</p>
         <ol class="doc-list doc-list-numbered mb-6">
-            <li><strong class="text-gray-900 dark:text-white">Assign a plan</strong> - set <strong class="text-gray-900 dark:text-white">Plan Type</strong> to Free, Pro or Enterprise, set <strong class="text-gray-900 dark:text-white">Plan Term</strong> to monthly or yearly, and set <strong class="text-gray-900 dark:text-white">Plan Expires</strong>. The expiry field has <strong class="text-gray-900 dark:text-white">+30 days</strong>, <strong class="text-gray-900 dark:text-white">+90 days</strong>, <strong class="text-gray-900 dark:text-white">+1 year</strong> and <strong class="text-gray-900 dark:text-white">Clear</strong> shortcuts. A paid plan granted this way is tagged as an admin grant, which is what keeps the small Event Schedule credit on that schedule's public pages. Setting it back to Free, or editing a schedule that pays through Stripe, clears that tag.</li>
+            <li><strong class="text-gray-900 dark:text-white">Edit the schedule's details</strong> - in the <strong class="text-gray-900 dark:text-white">Schedule Details</strong> card, change its name, subdomain, email address and phone number, then choose <strong class="text-gray-900 dark:text-white">Save Changes</strong>. Changing the email address clears the verified badge and sends a fresh verification email, so the page warns you before you do. A subdomain that is reserved or already in use is refused with a message rather than quietly changed to something else, and a renamed subdomain is rewritten in every curator's approved list, so the trust a curator gave that schedule follows it to the new name.</li>
             <li><strong class="text-gray-900 dark:text-white">Mark Email as Verified</strong> - mark the schedule's email address as verified without the owner clicking the link.</li>
             <li><strong class="text-gray-900 dark:text-white">Mark Phone as Verified</strong> - the same for a phone number.</li>
-            <li><strong class="text-gray-900 dark:text-white">Edit the schedule's details</strong> - its name, subdomain, email address and phone number. Changing the email address clears the verified badge and sends a fresh verification email, so the page warns you before you do. A subdomain that is reserved or already in use is refused with a message rather than quietly changed to something else.</li>
-            <li><strong class="text-gray-900 dark:text-white">Mark as Deleted</strong> - takes the schedule's public page down and <strong class="text-gray-900 dark:text-white">releases its subdomain</strong>, so a newer schedule can use the name straight away. The schedule itself is kept, along with its events, ticket sales and statistics, and the action can be undone. For a schedule with no owner, this also takes down the claim page that invites the performer or venue to take it over.</li>
-            <li><strong class="text-gray-900 dark:text-white">Restore</strong> - brings a deleted schedule back. It takes its original subdomain back if nothing else has claimed it in the meantime; if something has, the schedule keeps the name it was given when it was deleted, and the page tells you which will happen before you click.</li>
+            <li><strong class="text-gray-900 dark:text-white">Assign a plan</strong> (hosted installs) - set <strong class="text-gray-900 dark:text-white">Plan Type</strong> to Free, Pro or Enterprise, set <strong class="text-gray-900 dark:text-white">Plan Term</strong> to monthly or yearly, and set <strong class="text-gray-900 dark:text-white">Plan Expires</strong>. The expiry field has <strong class="text-gray-900 dark:text-white">+30 days</strong>, <strong class="text-gray-900 dark:text-white">+90 days</strong>, <strong class="text-gray-900 dark:text-white">+1 year</strong> and <strong class="text-gray-900 dark:text-white">Clear</strong> shortcuts. A paid plan granted this way is tagged as an admin grant, which is what keeps the small Event Schedule credit on that schedule's public pages. Setting it back to Free, or editing a schedule that pays through Stripe, clears that tag. On a selfhosted install the form is there but changes nothing, because every schedule already has the Enterprise feature set.</li>
+            <li><strong class="text-gray-900 dark:text-white">Mark as Deleted</strong> - takes the schedule's public page down and <strong class="text-gray-900 dark:text-white">releases its subdomain</strong>, so a newer schedule can use the name straight away. The schedule itself is kept, along with its events, ticket sales and statistics, and the action can be undone. For a schedule with no owner, this also takes down the claim page that invites the performer or venue to take it over. Releasing a name also removes it from every curator's approved list, so the automatic approval a curator gave the old holder does not pass to whoever takes the name next. A deleted schedule that still holds its original name, which some other ways of deleting a schedule leave behind, offers <strong class="text-gray-900 dark:text-white">Release Subdomain</strong> here instead: it frees the name and changes nothing else.</li>
+            <li><strong class="text-gray-900 dark:text-white">Restore</strong> - brings a deleted schedule back. It takes its original subdomain back if nothing else has claimed it in the meantime; if something has, the schedule keeps the name it was given when it was deleted, and the page tells you which will happen before you click. Restore is also the undo for a takedown you did not start: the same release runs when someone who holds the contact address on an unclaimed page signs in and chooses <strong class="text-gray-900 dark:text-white">This is not me</strong>, and when a schedule is deleted through the API.</li>
         </ol>
         <p class="text-gray-600 dark:text-gray-300 mb-6">All of them are recorded in the audit log with the values before and after, including both subdomains, so a release can be traced later.</p>
 
         <div class="doc-callout doc-callout-info">
             <div class="doc-callout-title">Why deleting renames the schedule</div>
-            <p>Only one schedule can hold a subdomain at a time, so a schedule cannot keep its name and let another schedule use it. Marking one deleted therefore moves it to a name like <code class="doc-inline-code">tel-aviv-deleted-42</code> and remembers what it was called. Two things are not undone by a restore: an active subscription keeps billing (cancel it separately), and a connected custom domain stops resolving but stays attached to the schedule until you remove it on the Domains page.</p>
+            <p>Only one schedule can hold a subdomain at a time, so a schedule cannot keep its name and let another schedule use it. Marking one deleted therefore moves it to a name like <code class="doc-inline-code">tel-aviv-deleted-42</code> and remembers what it was called. Two things are left in place: an active subscription keeps billing (cancel it separately), and a connected custom domain stops resolving but stays attached to the schedule until you remove it on the Domains page.</p>
         </div>
 
         <div class="doc-callout doc-callout-info">
-            <div class="doc-callout-title">Hosted installs only</div>
-            <p>This page only exists when <code class="doc-inline-code">IS_HOSTED=true</code>. A selfhosted install resolves every schedule to the Enterprise feature set, so there is no plan to assign and nothing to gate. Prices, terms and the features in each tier come from your Stripe configuration and the application itself; they cannot be edited from the admin panel.</p>
+            <div class="doc-callout-title">Plans are the only hosted part</div>
+            <p>This page is on every install, because a schedule can be deleted and its name released on a selfhosted install too, and this is where you undo it. Only plans behave differently: a selfhosted install resolves every schedule to the Enterprise feature set, so assigning a plan changes nothing, and the plan counts and the Plan and Source filters only reflect what is stored on each schedule, which puts most of them under Free. Prices, terms and the features in each tier come from your Stripe configuration and the application itself; they cannot be edited from the admin panel.</p>
         </div>
     </section>
 
@@ -690,7 +720,7 @@
             </svg>
             Settings (System)
         </h2>
-        <p class="text-gray-600 dark:text-gray-300 mb-6">The Settings page holds the handful of settings that apply to the whole installation. It is built from separate cards, each with its own Save button, and a card is only rendered when it can do something on this install. Two of the five are gated on an <code class="doc-inline-code">.env</code> switch, so a plain selfhost usually sees the first three. None of these settings can be changed while the install is in demo mode.</p>
+        <p class="text-gray-600 dark:text-gray-300 mb-6">The Settings page holds the handful of settings that apply to the whole installation. It is built from separate cards, each with its own Save button, and a card is only rendered when it can do something on this install. There are six, and a plain selfhost sees three of them: Header / Footer Code, Event Schedule network and Platform currency. None of these settings can be changed while the install is in demo mode.</p>
 
         <div class="doc-table-wrap">
             <table class="doc-table">

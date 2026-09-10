@@ -1,8 +1,9 @@
 <x-docs-page
     key="selfhost/ai"
-    description="Configure Google Gemini or OpenAI for your selfhosted Event Schedule to enable AI event importing, agenda scanning, translations, and image generation."
+    title="AI Setup with Gemini or OpenAI (Selfhost) - Event Schedule"
+    description="Add a Google Gemini or OpenAI key to a selfhosted Event Schedule for AI import, a daily auto import from URLs, agenda scanning, translation and images."
     lede="Add one API key and every AI feature turns on: event importing, agenda scanning, translation, generated details, flyers and schedule styling."
-    article-description="Configure Google Gemini and OpenAI for your selfhosted Event Schedule instance. Enable AI-powered event importing, agenda scanning, automatic translations, AI-generated text on event graphics, and image generation."
+    article-description="Configure Google Gemini and OpenAI for your selfhosted Event Schedule instance. Enable AI event importing, a daily auto import from a list of URLs, agenda scanning, automatic translations, AI-generated text on event graphics, and image generation."
 >
     <x-slot:toc>
         <x-doc-nav-link href="#overview">Overview</x-doc-nav-link>
@@ -31,7 +32,7 @@
             </div>
             <div class="doc-field">
                 <h4 class="font-semibold text-gray-900 dark:text-white mb-2">No daily AI caps</h4>
-                <p class="text-gray-600 dark:text-gray-400 text-sm">The per-day request allowances that apply on eventschedule.com are switched off when the app is not hosted, so no schedule is ever told it has reached a daily limit. Your only ceilings are the quota and billing on your own provider account.</p>
+                <p class="text-gray-600 dark:text-gray-400 text-sm">The per-day allowances that apply on eventschedule.com, one on event parsing and one on generated images, are switched off when the app is not hosted, so no schedule is ever told it has reached a daily limit. Your only ceilings are the quota and billing on your own provider account.</p>
             </div>
             <div class="doc-field">
                 <h4 class="font-semibold text-gray-900 dark:text-white mb-2">Requests leave your server</h4>
@@ -101,7 +102,7 @@
             </div>
         </div>
 
-        <h3 class="doc-subheading">Auto Import from URLs and cities <x-doc-badge plan="selfhost" /></h3>
+        <h3 class="doc-subheading">Daily Auto Import from event URLs <x-doc-badge plan="selfhost" /></h3>
         <p class="text-gray-600 dark:text-gray-300 mb-4">An <strong class="text-gray-900 dark:text-white">Auto Import</strong> section appears in the schedule editor on selfhosted installs only, and it is the one AI feature that runs unattended. It is offered on every schedule type, but every event it creates is attached to the schedule as that event's <em>curator</em>, so it is really a curator tool. A scheduled task visits your sources once a day, so the cron entry has to be running and an AI key has to be set, otherwise the task reports that no key was found and stops without importing anything.</p>
 
         <div class="doc-fields">
@@ -119,7 +120,7 @@
             </div>
             <div class="doc-field">
                 <h4 class="font-semibold text-gray-900 dark:text-white mb-2">Reviewing what arrives</h4>
-                <p class="text-gray-600 dark:text-gray-400 text-sm">Imported events arrive the same way a submitted event does. They only appear on the schedule straight away when it has <strong class="text-gray-900 dark:text-white">Accept requests</strong> on and <strong class="text-gray-900 dark:text-white">Require Approval</strong> off; otherwise they wait on the <strong class="text-gray-900 dark:text-white">Requests</strong> tab for you to approve. See <a href="{{ route('marketing.docs.creating_schedules') }}#auto-import" class="doc-link">Auto Import</a> in the schedule guide.</p>
+                <p class="text-gray-600 dark:text-gray-400 text-sm">Imported events arrive the same way a submitted event does. They only appear on the schedule straight away when it has <strong class="text-gray-900 dark:text-white">Accept requests</strong> on and <strong class="text-gray-900 dark:text-white">Require Approval</strong> off; otherwise they wait on the <strong class="text-gray-900 dark:text-white">Requests</strong> tab for you to approve. A venue or performer an imported event names that is not already on your install becomes a schedule of its own, with no owner. Its public page says it has not been claimed and stays out of search engines, it is listed under <strong class="text-gray-900 dark:text-white">Unclaimed</strong> on the admin panel's <a href="{{ route('marketing.docs.selfhost.admin') }}#manage-plans" class="doc-link">Schedules</a> page, and a selfhosted install never emails anyone an invitation to claim it. See <a href="{{ route('marketing.docs.creating_schedules') }}#auto-import" class="doc-link">Auto Import</a> in the schedule guide.</p>
             </div>
         </div>
 

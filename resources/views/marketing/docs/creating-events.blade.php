@@ -1,6 +1,7 @@
 <x-docs-page
     key="creating-events"
-    description="Learn how to add events to your schedule and configure event settings like venue, participants, recurrence, visibility, and tickets."
+    title="Creating Events: Tickets, Recurring, Privacy - Event Schedule"
+    description="Add events to your schedule and set up each one: venue, lineup, recurrence, visibility, tickets and polls, plus how to tell attendees when plans change."
     lede="Add events to your schedule and configure event settings like venue, participants, recurrence, visibility, and tickets."
 >
     <x-slot:toc>
@@ -130,7 +131,7 @@
         <ul class="doc-list mb-6">
             <li><strong class="text-gray-900 dark:text-white">Clone Event</strong> - open a copy of the event as a new, unsaved event.</li>
             <li><strong class="text-gray-900 dark:text-white">Save as Template</strong> <x-doc-badge plan="pro" /> - store the event as a reusable template on the Templates tab.</li>
-            <li><strong class="text-gray-900 dark:text-white">Cancel Event</strong> and <strong class="text-gray-900 dark:text-white">Restore Event</strong> - mark the event cancelled without deleting it, then bring it back later. A cancelled event shows a red banner at the top of the form with its own Restore button.</li>
+            <li><strong class="text-gray-900 dark:text-white">Cancel event</strong> and <strong class="text-gray-900 dark:text-white">Restore event</strong> - mark the event cancelled without deleting it, then bring it back later. Cancelling can tell everyone who bought a ticket, registered or asked to hear about it; see <a href="#notify-attendees" class="doc-link">Notifying Attendees of Changes</a>. A cancelled event shows a red banner at the top of the form with its own Restore button.</li>
             <li><strong class="text-gray-900 dark:text-white">Delete Event</strong> - remove the event permanently.</li>
         </ul>
         <p class="text-gray-600 dark:text-gray-300 mb-6">Cancel, Restore, and Delete need permission to delete the event, so a viewer does not see them. On a wide screen <strong class="text-gray-900 dark:text-white">Boost Event</strong> <x-doc-badge plan="pro" /> sits beside the Actions button rather than inside the menu; on a narrow screen it moves into the menu. See <a href="{{ route('marketing.docs.boost') }}" class="doc-link">Boost</a>.</p>
@@ -145,10 +146,14 @@
             <p>If your schedule <a href="{{ route('marketing.docs.creating_schedules') }}#engagement-requests" class="doc-link">accepts event requests</a> with <strong class="text-gray-900 dark:text-white">Require Approval</strong> enabled, events submitted by other people wait for your review. Approve or reject them on the <strong class="text-gray-900 dark:text-white">Requests</strong> tab of your schedule's admin page, which only appears while there is something waiting.</p>
         </div>
 
-        <div class="doc-callout doc-callout-info">
-            <div class="doc-callout-title">Notifying attendees of changes</div>
-            <p>When you change a published event's date or time, its venue, or its online link, or when you cancel it, you can email everyone who bought a ticket or registered. A confirmation appears on save (and when you cancel) so you can send the notice, optionally with a short note. Date and time changes are only detected on one-time events; venue and online-link changes are detected on recurring events too. This needs your schedule's own <a href="{{ route('marketing.docs.creating_schedules') }}#integrations-email" class="doc-link">email settings</a>, and nothing is sent for a draft event or for a date that has already passed. Cancelling an event keeps its tickets and refund records and shows a cancelled notice to guests, and you can restore the event later.</p>
-        </div>
+        <h3 id="notify-attendees" class="doc-subheading">Notifying Attendees of Changes</h3>
+        <p class="text-gray-600 dark:text-gray-300 mb-4">Two groups can hear about a change to a published event: people who bought a ticket or registered, and people who asked to hear about it from the event page, who make up its <a href="{{ route('marketing.docs.tickets') }}#interest-list" class="doc-link">interest list</a>. Buyers and registrants are only emailed when your schedule has its own <a href="{{ route('marketing.docs.creating_schedules') }}#integrations-email" class="doc-link">email settings</a>. The interest list is emailed either way, although on eventschedule.com a schedule without its own email settings can only reach an interest list of more than 50 people once its owner has verified a phone number.</p>
+        <ul class="doc-list mb-6">
+            <li><strong class="text-gray-900 dark:text-white">When you save a change.</strong> Change the date or time of a one-time event, or the venue or online link of any event, and saving first asks <strong class="text-gray-900 dark:text-white">Notify attendees of this change?</strong>, as long as there is someone to tell. Add a note of up to 280 characters if you like, check it with <strong class="text-gray-900 dark:text-white">Preview email</strong>, then choose <strong class="text-gray-900 dark:text-white">Notify attendees</strong> or <strong class="text-gray-900 dark:text-white">Don't notify</strong>. Either button saves the change. A new date or time on a recurring event is not detected, so it never asks.</li>
+            <li><strong class="text-gray-900 dark:text-white">When you cancel.</strong> Choosing <strong class="text-gray-900 dark:text-white">Cancel event</strong> from the Actions menu asks <strong class="text-gray-900 dark:text-white">Cancel this event?</strong> first. When there is someone to tell, the button reads <strong class="text-gray-900 dark:text-white">Cancel and notify</strong> and the notice goes to all of them, with your note if you add one; otherwise it reads <strong class="text-gray-900 dark:text-white">Cancel event</strong>. <strong class="text-gray-900 dark:text-white">Keep event</strong> backs out.</li>
+            <li>Nothing is sent for a draft. A change to a one-time event whose start time has already passed notifies nobody, and on a recurring event only people with a date still to come are told.</li>
+        </ul>
+        <p class="text-gray-600 dark:text-gray-300 mb-6">Cancelling keeps the event's tickets and refund records, stops any boost campaign and any installment plan still charging for it, and shows guests a notice that it has been cancelled. You can restore the event later. It does not refund anyone: refund each sale from the <a href="{{ route('marketing.docs.tickets') }}#managing-sales" class="doc-link">Sales page</a>, where a Stripe or PayPal payment goes back through the provider and any other method is marked as refunded.</p>
     </section>
 
     <!-- Details -->
@@ -282,7 +287,7 @@
             </svg>
             Participants
         </h2>
-        <p class="text-gray-600 dark:text-gray-300 mb-6">The Participants section tags performers, speakers, or other participants on an event. They appear on the public event page, linked to their own schedule pages. Anyone you name who is not already on Event Schedule gets a page of their own at the same time, which they can claim later - see <a href="#claim" class="doc-link">Pages Created for Others</a>.</p>
+        <p class="text-gray-600 dark:text-gray-300 mb-6">The Participants section tags performers, speakers, or other participants on an event. Every one of them appears on the public event page, and anyone with a schedule of their own is linked to it. Anyone you name who is not already on Event Schedule gets a page of their own at the same time, which they can claim later - see <a href="#claim" class="doc-link">Pages Created for Others</a>.</p>
 
         <div class="doc-fields">
             <div class="doc-field">
@@ -311,7 +316,8 @@
         <p class="text-gray-600 dark:text-gray-300 mb-6">Naming a performer or a venue who is not yet on Event Schedule creates a schedule for them there and then. It carries the name you typed, any contact details you added, and every date you list them on. This happens whether or not you send them an invitation, because it is what lets their name appear on your event page at all.</p>
 
         <h3 class="doc-subheading">What the page shows</h3>
-        <p class="text-gray-600 dark:text-gray-300 mb-6">Until it is claimed, the page opens by naming the schedule that first listed them - or, when that cannot be worked out, by saying the page was created automatically - and by saying the act has not claimed it yet, so nobody mistakes it for a page they built themselves. Below that it lists up to twenty upcoming public dates other schedules have added them to, each credited to the schedule that added it. Draft, internal, unlisted and cancelled dates are not shown, and a page whose dates have all passed says so. It carries no contact details, no follow button and no tickets, and it stays out of search engines until it is claimed.</p>
+        <p class="text-gray-600 dark:text-gray-300 mb-4">Your event page shows the whole lineup. Every act you named appears there by name, and an act with a page of its own, claimed or not, is linked to it, so the act and anyone else can get from your event to the page made for them.</p>
+        <p class="text-gray-600 dark:text-gray-300 mb-6">Until it is claimed, the page opens with <strong class="text-gray-900 dark:text-white">This page was created by</strong> and the schedule that first listed them - or <strong class="text-gray-900 dark:text-white">This page was created automatically</strong>, when that cannot be worked out - and says the act has not claimed it yet, so nobody mistakes it for a page they built themselves. Below that it lists up to twenty upcoming public dates other schedules have added them to, each credited to the schedule that added it. Draft, internal, unlisted and cancelled dates are not shown, and a page whose dates have all passed says so. It carries no contact details, no follow button and no tickets, and it stays out of search engines until it is claimed.</p>
 
         <div class="doc-fields">
             <div class="doc-field">
@@ -328,7 +334,7 @@
             </div>
             <div class="doc-field">
                 <h4 class="font-semibold text-gray-900 dark:text-white mb-2">After they claim it</h4>
-                <p class="text-sm text-gray-500 dark:text-gray-400">Dates you have already listed them on stay exactly where they are. If they claim by email, or by pressing Claim this page, your future dates keep appearing without waiting for approval, because you were already listing them; a claim made by verifying a phone number does not carry that across. Any schedule that starts listing them afterwards has to ask first, unless they turn Require approval off.</p>
+                <p class="text-sm text-gray-500 dark:text-gray-400">Dates you have already listed them on stay exactly where they are. If they claim by email, or by pressing Claim this page, the schedules that already had dates on their page are carried onto their approved list, so your future dates keep appearing without waiting for approval; a claim made by verifying a phone number does not carry that across. Any other schedule that lists them from then on sends a request, which they accept or decline on their <a href="{{ route('marketing.docs.managing_schedules') }}#requests" class="doc-link">Requests</a> tab. A performer cannot switch that off, because a Talent schedule always requires approval; a claimed venue decides for itself in its <a href="{{ route('marketing.docs.creating_schedules') }}#engagement-requests" class="doc-link">request settings</a>.</p>
             </div>
         </div>
 
@@ -414,7 +420,7 @@
 
         <div class="doc-callout doc-callout-tip">
             <div class="doc-callout-title">Recurring events in calendars</div>
-            <p>A recurring event is pushed to a connected <a href="{{ route('marketing.docs.creating_schedules') }}#integrations" class="doc-link">Google, Outlook, or CalDAV calendar</a> as a single entry on the series start date, not as a repeating appointment. Guests who want every date should subscribe to your schedule's <a href="{{ route('marketing.docs.sharing') }}" class="doc-link">iCal feed</a>, which lists each upcoming occurrence individually.</p>
+            <p>A recurring event is pushed to a connected <a href="{{ route('marketing.docs.creating_schedules') }}#integrations" class="doc-link">Google, Outlook, or CalDAV calendar</a> as a single entry on the series start date, not as a repeating appointment. Guests who want every date can subscribe to your schedule's <a href="{{ route('marketing.docs.sharing') }}#calendar-feeds" class="doc-link">live calendar feed</a>, offered as <strong class="text-gray-900 dark:text-white">Subscribe to all events from</strong> your schedule on your event and schedule pages, which lists each occurrence in the next 90 days individually.</p>
         </div>
     </section>
 
@@ -573,10 +579,13 @@
         <ul class="doc-list mb-6">
             <li><strong class="text-gray-900 dark:text-white">External</strong> - link out to wherever you already sell.</li>
             <li><strong class="text-gray-900 dark:text-white">Registration</strong> - free sign-up on your own event page, with an optional capacity limit. Unlimited on every plan.</li>
-            <li><strong class="text-gray-900 dark:text-white">Tickets</strong> - sell tickets with built-in Stripe payments. Also available on every plan: a free schedule can sell up to 25 paid tickets a month, and Pro removes the cap and adds the QR check-in dashboard. Payouts go to your own Stripe account with no platform fee on any plan. See the full <a href="{{ route('marketing.docs.tickets') }}" class="doc-link">Selling Tickets</a> guide for setup, sales management, and check-in details.</li>
+            <li><strong class="text-gray-900 dark:text-white">Tickets</strong> - sell tickets from your own event page, taking payment through the <strong class="text-gray-900 dark:text-white">Payment Method</strong> you pick for the event: Stripe, PayPal, Payfast, Invoice Ninja, a payment link, or cash. The list offers what you have set up under <a href="{{ route('marketing.docs.account_settings') }}#payments" class="doc-link">Manage payment methods</a> that can take the event's <strong class="text-gray-900 dark:text-white">Currency</strong>. Also available on every plan: a free schedule can sell up to 25 paid tickets a month, and Pro removes the cap and adds the live check-in dashboard. Scanning tickets at the door is free on every plan, and the money goes to your own account with no platform fee. See the full <a href="{{ route('marketing.docs.tickets') }}" class="doc-link">Selling Tickets</a> guide for setup, sales management, refunds and check-in.</li>
         </ul>
         <p class="text-gray-600 dark:text-gray-300 mb-6">
             Free registrations and zero-price tickets never count toward the monthly allowance. While a schedule is on the free plan the Tickets section carries a one-line note about the allowance; the running total for the month lives on the schedule's Plan page.
+        </p>
+        <p class="text-gray-600 dark:text-gray-300 mb-6">
+            If visitors have asked to hear about the event, the Tickets section says how many above your ticket types, as in "3 people asked to be told when tickets go on sale." The number is never shown publicly. See <a href="{{ route('marketing.docs.tickets') }}#interest-list" class="doc-link">Interest List</a>.
         </p>
         <p class="text-gray-600 dark:text-gray-300 mb-6">
             In <strong class="text-gray-900 dark:text-white">External</strong> mode you get a <strong class="text-gray-900 dark:text-white">Registration URL</strong> (the link guests are sent to), a <strong class="text-gray-900 dark:text-white">Price</strong> with a currency selector (used in <a href="{{ route('marketing.docs.event_graphics') }}#text-template" class="doc-link">event graphics text templates</a>), an optional <strong class="text-gray-900 dark:text-white">Coupon Code</strong>, and a <strong class="text-gray-900 dark:text-white">Discount</strong> saying what that code is worth. These fields are hidden once registration or ticketing is switched on.
@@ -700,7 +709,8 @@
                         <th>Visibility</th>
                         <th>On your schedule page</th>
                         <th>By direct link</th>
-                        <th>Feeds, graphics, newsletters</th>
+                        <th>Calendar feed, digest, graphics, newsletters</th>
+                        <th>Interest sign-up</th>
                         <th>Connected calendar</th>
                     </tr>
                 </thead>
@@ -710,6 +720,7 @@
                         <td>Listed for everyone</td>
                         <td>Anyone</td>
                         <td>Included</td>
+                        <td>Offered</td>
                         <td>Synced</td>
                     </tr>
                     <tr>
@@ -717,6 +728,7 @@
                         <td>Members only</td>
                         <td>Members only</td>
                         <td>Excluded</td>
+                        <td>Not offered</td>
                         <td>Not synced</td>
                     </tr>
                     <tr>
@@ -724,6 +736,7 @@
                         <td>Members only</td>
                         <td>Members only</td>
                         <td>Excluded</td>
+                        <td>Not offered</td>
                         <td>Not synced</td>
                     </tr>
                     <tr>
@@ -731,14 +744,16 @@
                         <td>Hidden</td>
                         <td>Anyone with the link, and the password if you set one</td>
                         <td>Excluded</td>
+                        <td>Not offered</td>
                         <td>Synced, marked private</td>
                     </tr>
                 </tbody>
             </table>
         </div>
+        <p class="text-gray-600 dark:text-gray-300 mt-4 mb-6">The digest is the automatic email your confirmed <a href="{{ route('marketing.docs.newsletters') }}#email-subscribers" class="doc-link">email subscribers</a> get, and it only ever covers public events your schedule created itself, not ones it lists from other schedules. The interest sign-up is the <a href="{{ route('marketing.docs.tickets') }}#interest-list" class="doc-link">Tell me when tickets go on sale</a> form on the event page.</p>
 
         <h3 class="doc-subheading">Draft and Internal</h3>
-        <p class="text-gray-600 dark:text-gray-300 mb-6">Both keep an event to schedule members, and both are skipped by feeds, event graphics, newsletters, webhooks, and calendar sync. The difference is intent: a <strong class="text-gray-900 dark:text-white">Draft</strong> is on its way to being published, so it gets a green <strong class="text-gray-900 dark:text-white">Publish</strong> button next to Save. An <strong class="text-gray-900 dark:text-white">Internal</strong> event is never meant to go out, so it has no Publish button. Un-publishing an event that was already live also removes it from any connected calendar.</p>
+        <p class="text-gray-600 dark:text-gray-300 mb-6">Both keep an event to schedule members, and both are skipped by the calendar feed, the subscriber digest, event graphics, newsletters, webhooks, and calendar sync, and neither offers the interest sign-up. The difference is intent: a <strong class="text-gray-900 dark:text-white">Draft</strong> is on its way to being published, so it gets a green <strong class="text-gray-900 dark:text-white">Publish</strong> button next to Save. An <strong class="text-gray-900 dark:text-white">Internal</strong> event is never meant to go out, so it has no Publish button. Un-publishing an event that was already live also removes it from any connected calendar.</p>
 
         <h3 class="doc-subheading">Unlisted</h3>
         <ol class="doc-list doc-list-numbered mb-6">
@@ -747,7 +762,7 @@
             <li>Save the event</li>
         </ol>
 
-        <p class="text-gray-600 dark:text-gray-300 mb-4">Unlisted events are hidden from your schedule page and calendar views. Visitors reach them only by direct link, and where you set a password they have to enter it before they see the event.</p>
+        <p class="text-gray-600 dark:text-gray-300 mb-4">Unlisted events are hidden from your schedule page and calendar views. Visitors reach them only by direct link, and where you set a password they have to enter it before they see the event. An unlisted event is also left out of the calendar feed and the subscriber digest, and never offers the interest sign-up, with or without a password.</p>
 
         <div class="doc-fields">
             <div class="doc-field">
@@ -765,6 +780,10 @@
             <div class="doc-field">
                 <h4 class="font-semibold text-gray-900 dark:text-white mb-2">If a plan lapses</h4>
                 <p class="text-sm text-gray-500 dark:text-gray-400">Internal and Unlisted are Enterprise states. If a schedule drops off Enterprise, the next save of a hidden event turns it into a Draft rather than making it public, and clears any event password.</p>
+            </div>
+            <div class="doc-field">
+                <h4 class="font-semibold text-gray-900 dark:text-white mb-2">Hiding an event people asked about</h4>
+                <p class="text-sm text-gray-500 dark:text-gray-400">Moving a public event to Draft, Internal or Unlisted stops the tickets-on-sale email and the reminder going to the people who asked to hear about it, because visibility is checked again when each one is due.</p>
             </div>
         </div>
 
@@ -896,6 +915,7 @@
         <h3 class="doc-subheading">How Voting Works</h3>
         <ul class="doc-list mb-6">
             <li><strong class="text-gray-900 dark:text-white">Sign in required</strong> - guests must be signed in to vote, which is what keeps voting to one per person.</li>
+            <li><strong class="text-gray-900 dark:text-white">Members only on hidden events</strong> - on a Draft, Internal or Unlisted event, only members of your schedule can vote.</li>
             <li><strong class="text-gray-900 dark:text-white">One click to vote</strong> - guests click the option they want.</li>
             <li><strong class="text-gray-900 dark:text-white">One vote per poll</strong> - votes cannot be changed afterwards. On a recurring event, votes are counted per date, so a regular can vote again for the next occurrence.</li>
             <li><strong class="text-gray-900 dark:text-white">Instant results</strong> - the results come back as soon as the vote is cast, so guests immediately see how others voted.</li>

@@ -464,7 +464,7 @@ return [
             'path' => '/docs/selfhost/email',
             'title' => 'Email Setup',
             'nav_title' => 'Email',
-            'blurb' => 'Configure SMTP, Mailgun, Amazon SES or another mail driver.',
+            'blurb' => 'Set up SMTP, Amazon SES or another mail driver, and see which emails go out automatically.',
             'icon' => 'mail',
             'published' => '2024-01-01',
             'modified' => '2026-02-01',

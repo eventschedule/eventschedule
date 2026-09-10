@@ -1,6 +1,7 @@
 <x-docs-page
     key="getting-started"
-    description="Get started with Event Schedule. Learn how to create your account, set up your first schedule, and start sharing events."
+    title="Getting Started: Account and First Schedule - Event Schedule"
+    description="Create your Event Schedule account, set up your first schedule and choose its type, then share it and sell tickets. Free, no credit card, no time limit."
     lede="Go from zero to a live event calendar in a few minutes. No credit card required, and the free plan has no time limit."
 >
     <x-slot:toc>
@@ -31,6 +32,8 @@
         </ol>
 
         <p class="text-gray-600 dark:text-gray-300 mb-6">If the code does not arrive, click <strong class="text-gray-900 dark:text-white">"Send Code"</strong> again to get a fresh one. You can request up to five codes per hour for the same address. Your timezone and language are detected from your browser, so there is nothing to choose during sign-up.</p>
+
+        <p class="text-gray-600 dark:text-gray-300 mb-6">Already confirmed an email sign-up on someone's schedule? That set up an account on your address with no password yet. Sign up with the same address and the form completes that account, so the schedules you follow come with it. If you added a password back then, sign in instead.</p>
 
         <div class="doc-callout doc-callout-tip">
             <div class="doc-callout-title">Signing up with Google is quicker</div>
@@ -130,7 +133,7 @@
         <ul class="doc-list mb-6">
             <li><strong class="text-gray-900 dark:text-white">Talent</strong> schedules prefill the schedule name with your own name, and add an <a href="{{ route('marketing.docs.managing_schedules') }}#availability" class="doc-link">Availability</a> tab to the admin panel for marking the days you can be booked <x-doc-badge plan="enterprise" link /></li>
             <li><strong class="text-gray-900 dark:text-white">Venue</strong> schedules get an <strong class="text-gray-900 dark:text-white">Address</strong> section with address validation and a map, so visitors can find you and events inherit the location. Street Address is the one extra required field. They also get a <a href="{{ route('marketing.docs.allocated_seating') }}#build" class="doc-link">Seating</a> tab for drawing a reusable plan of the room and selling reserved seats from it <x-doc-badge plan="enterprise" link /></li>
-            <li><strong class="text-gray-900 dark:text-white">Curator</strong> schedules get a <a href="{{ route('marketing.docs.managing_schedules') }}#videos" class="doc-link">Videos</a> tab for matching YouTube videos to the talent you list, and they ask visitors to sign in before submitting an event. That is the <strong class="text-gray-900 dark:text-white">Require Account</strong> toggle under <strong class="text-gray-900 dark:text-white">Engagement &rarr; Requests</strong>, which starts on for curators and off for venues. Talent schedules do not have it.</li>
+            <li><strong class="text-gray-900 dark:text-white">Curator</strong> schedules get an <a href="{{ route('marketing.docs.creating_schedules') }}#event-sources" class="doc-link">Event Sources</a> section that pulls in every event published by the talent and venue schedules you pick, a <a href="{{ route('marketing.docs.managing_schedules') }}#videos" class="doc-link">Videos</a> tab for matching YouTube videos to the talent you list, and they ask visitors to sign in before submitting an event. That is the <strong class="text-gray-900 dark:text-white">Require Account</strong> toggle under <strong class="text-gray-900 dark:text-white">Engagement &rarr; Requests</strong>, which starts on for curators and off for venues. Talent schedules do not have it.</li>
         </ul>
 
         <div class="doc-callout doc-callout-warning">
@@ -176,7 +179,7 @@
                     </tr>
                     <tr>
                         <td><span class="font-semibold text-gray-900 dark:text-white">Videos &amp; Links</span></td>
-                        <td>Your social links and featured YouTube videos.</td>
+                        <td>Your featured YouTube videos and your social links. Each social link also answers at a short address on your schedule URL, which counts its clicks.</td>
                         <td>After the first save</td>
                     </tr>
                     <tr>
@@ -200,8 +203,13 @@
                         <td>After the first save</td>
                     </tr>
                     <tr>
+                        <td><span class="font-semibold text-gray-900 dark:text-white">Event Sources</span></td>
+                        <td>Pick talent and venue schedules, and every event they publish appears on yours automatically.</td>
+                        <td>Curator schedules, after the first save</td>
+                    </tr>
+                    <tr>
                         <td><span class="font-semibold text-gray-900 dark:text-white">Auto Import</span></td>
-                        <td>Pull events automatically from URLs or a city search.</td>
+                        <td>Read events from a list of web pages once a day. An optional list of cities keeps only the events held there.</td>
                         <td>Selfhosted installs</td>
                     </tr>
                     <tr>
@@ -217,7 +225,7 @@
 
         <div class="doc-callout doc-callout-plan">
             <div class="doc-callout-title">What the free plan leaves out</div>
-            <p>Almost nothing on this page needs a paid plan. The free plan runs unlimited events, syncs calendars, takes RSVPs, embeds your calendar and even sells tickets with no platform fee, up to 25 paid tickets a month. Pro removes that cap for unlimited ticket sales and adds the live check-in dashboard (scanning tickets at the door is free on every plan), event graphics, custom fields, custom CSS and removing the Event Schedule branding. Enterprise adds custom domains, extra team members, availability and the AI generation features. Compare them on the <a href="{{ route('marketing.pricing') }}" class="doc-link">pricing page</a>. A <a href="{{ route('marketing.docs.selfhost') }}" class="doc-link">selfhosted</a> install resolves to Enterprise, so nothing is held back there.</p>
+            <p>Almost nothing on this page needs a paid plan. The free plan runs unlimited events, syncs calendars, takes RSVPs, embeds your calendar, makes event graphics and even sells tickets through Stripe, PayPal or another payment method with no platform fee, up to 25 paid tickets a month. Pro removes that cap for unlimited ticket sales and adds the live check-in dashboard (scanning tickets at the door is free on every plan), custom fields, custom CSS and removing the Event Schedule branding. Enterprise adds custom domains, extra team members, availability and the AI generation features. Compare them on the <a href="{{ route('marketing.pricing') }}" class="doc-link">pricing page</a>. A <a href="{{ route('marketing.docs.selfhost') }}" class="doc-link">selfhosted</a> install resolves to Enterprise, so nothing is held back there.</p>
         </div>
     </section>
 
@@ -241,7 +249,7 @@
             </div>
             <div class="doc-field">
                 <h4 class="font-semibold text-gray-900 dark:text-white mb-2">What is the difference between the schedule types?</h4>
-                <p class="text-sm text-gray-500 dark:text-gray-400"><strong class="text-gray-900 dark:text-white">Talent</strong> is your events at various venues, and adds an Availability tab (Enterprise). <strong class="text-gray-900 dark:text-white">Venue</strong> is various events at your venue, and adds an Address section with a map. <strong class="text-gray-900 dark:text-white">Curator</strong> is various events at various venues, and adds a Videos tab. Pick carefully: the type is fixed once you save.</p>
+                <p class="text-sm text-gray-500 dark:text-gray-400"><strong class="text-gray-900 dark:text-white">Talent</strong> is your events at various venues, and adds an Availability tab (Enterprise). <strong class="text-gray-900 dark:text-white">Venue</strong> is various events at your venue, and adds an Address section with a map. <strong class="text-gray-900 dark:text-white">Curator</strong> is various events at various venues, and adds Event Sources and a Videos tab. Pick carefully: the type is fixed once you save.</p>
             </div>
             <div class="doc-field">
                 <h4 class="font-semibold text-gray-900 dark:text-white mb-2">Can I import events from my existing calendar?</h4>
@@ -249,11 +257,19 @@
             </div>
             <div class="doc-field">
                 <h4 class="font-semibold text-gray-900 dark:text-white mb-2">Is Event Schedule free?</h4>
-                <p class="text-sm text-gray-500 dark:text-gray-400">Yes, with no time limit and no credit card. The free plan covers unlimited events, your own schedule URL, calendar sync, analytics, RSVP with capacity limits, embedding your calendar, one appointment type, selling up to 25 paid tickets a month with no platform fee, and 10 newsletter emails a month (each recipient counts as one email, so one send to 100 followers uses 100). Pro is {{ plan_price($proMonthly) }} a month and removes the ticket cap, Enterprise is {{ plan_price($entMonthly) }} a month for custom domains and team features, and both start with a 7-day free trial.</p>
+                <p class="text-sm text-gray-500 dark:text-gray-400">Yes, with no time limit and no credit card. The free plan covers unlimited events, your own schedule URL, calendar sync, analytics, RSVP with capacity limits, embedding your calendar, one appointment type, selling up to 25 paid tickets a month through Stripe, PayPal or another payment method with no platform fee, and 10 newsletter emails a month (each recipient counts as one email, so one send to 100 followers uses 100). Pro is {{ plan_price($proMonthly) }} a month and removes the ticket cap, Enterprise is {{ plan_price($entMonthly) }} a month for custom domains and team features, and both start with a 7-day free trial.</p>
             </div>
             <div class="doc-field">
-                <h4 class="font-semibold text-gray-900 dark:text-white mb-2">Someone has already made a page for my venue. How do I claim it?</h4>
-                <p class="text-sm text-gray-500 dark:text-gray-400">If a promoter or venue listed you on their event before you signed up, Event Schedule created a page for you at that moment. Open it and press <strong class="text-gray-900 dark:text-white">Claim this page</strong>. You will be asked to sign in, and the page then tells you in masked form which contact it answers to. Sign in with a verified account on that contact and the page is yours. If it is not one you can reach, ask whoever listed you to correct it. If the page is not about you at all, press <strong class="text-gray-900 dark:text-white">This is not me</strong> instead. See <a href="{{ route('marketing.docs.creating_events') }}#claim" class="doc-link">Pages Created for Others</a>.</p>
+                <h4 class="font-semibold text-gray-900 dark:text-white mb-2">How do I get paid for tickets?</h4>
+                <p class="text-sm text-gray-500 dark:text-gray-400">Connect your own account under <strong class="text-gray-900 dark:text-white">Settings &rarr; Payment Methods</strong>: Stripe, PayPal, Payfast (South African rand only) or Invoice Ninja. A payment link, or cash at the door, works too. You pick the method on each event, and the money goes to your own account with no platform fee on any plan. A Stripe or PayPal sale can be refunded in full or in part from the Sales page, and the money goes back through the provider; any other sale can be marked as refunded there. See <a href="{{ route('marketing.docs.account_settings') }}#payments" class="doc-link">Payment Methods</a> and <a href="{{ route('marketing.docs.tickets') }}#managing-sales" class="doc-link">Managing Sales</a>.</p>
+            </div>
+            <div class="doc-field">
+                <h4 class="font-semibold text-gray-900 dark:text-white mb-2">How will people hear about my new events?</h4>
+                <p class="text-sm text-gray-500 dark:text-gray-400">Share your schedule link, or embed the calendar on your own site. Visitors can leave their name and email in the sign-up panel on your schedule page, and once they confirm they get a digest of the new events your schedule publishes, at most one every few days. Anyone can also subscribe to your calendar feed, which keeps your events current in their own calendar app, and on an event that is not on sale yet a visitor can press <strong class="text-gray-900 dark:text-white">Tell me when tickets go on sale</strong> to hear about that event alone. See <a href="{{ route('marketing.docs.sharing') }}" class="doc-link">Sharing Your Schedule</a>.</p>
+            </div>
+            <div class="doc-field">
+                <h4 class="font-semibold text-gray-900 dark:text-white mb-2">Someone already made a page for my act or venue. How do I claim it?</h4>
+                <p class="text-sm text-gray-500 dark:text-gray-400">If a promoter, venue or curator listed you on an event before you had an account, Event Schedule created a page for you at that moment. Open it and press <strong class="text-gray-900 dark:text-white">Claim this page</strong>. Signed out, you are taken to sign up, and signing up with the email address on the page hands it to you. Signed in with a verified account on that email address or phone number, you confirm and the page is yours; signed in with a different one, the page shows the contact it answers to in masked form, so you know which account to use. Claiming makes you the owner, and the schedules that already listed you keep listing you. If you cannot reach that contact, ask whoever listed you to correct it. If the page is not about you at all, press <strong class="text-gray-900 dark:text-white">This is not me</strong> instead. See <a href="{{ route('marketing.docs.creating_events') }}#claim" class="doc-link">Pages Created for Others</a>.</p>
             </div>
             <div class="doc-field">
                 <h4 class="font-semibold text-gray-900 dark:text-white mb-2">My schedule page will not open. What is wrong?</h4>
@@ -277,7 +293,7 @@
             <li><a href="{{ route('marketing.docs.creating_schedules') }}" class="doc-link">Configure your schedule</a> - Settings, sub-schedules, event requests, and calendar sync</li>
             <li><a href="{{ route('marketing.docs.schedule_styling') }}" class="doc-link">Style your schedule</a> - Colors, fonts, headers, and backgrounds</li>
             <li><a href="{{ route('marketing.docs.sharing') }}" class="doc-link">Share your schedule</a> - Embed it on your website and post it to social media</li>
-            <li><a href="{{ route('marketing.docs.tickets') }}" class="doc-link">Set up ticketing</a> - Sell tickets on your own Stripe account with no platform fee, free up to 25 paid tickets a month</li>
+            <li><a href="{{ route('marketing.docs.tickets') }}" class="doc-link">Set up ticketing</a> - Sell tickets through Stripe, PayPal or another payment method with no platform fee, free up to 25 paid tickets a month</li>
             <li><a href="{{ route('marketing.docs.account_settings') }}" class="doc-link">Account settings</a> - Your profile, password, payments, and API access</li>
         </ul>
     </section>
@@ -310,7 +326,7 @@
                     "name": "What is the difference between the schedule types?",
                     "acceptedAnswer": {
                         "@type": "Answer",
-                        "text": "Talent is your events at various venues, and adds an Availability tab (Enterprise). Venue is various events at your venue, and adds an Address section with a map. Curator is various events at various venues, and adds a Videos tab. Pick carefully: the type is fixed once you save."
+                        "text": "Talent is your events at various venues, and adds an Availability tab (Enterprise). Venue is various events at your venue, and adds an Address section with a map. Curator is various events at various venues, and adds Event Sources and a Videos tab. Pick carefully: the type is fixed once you save."
                     }
                 },
                 {
@@ -326,15 +342,31 @@
                     "name": "Is Event Schedule free?",
                     "acceptedAnswer": {
                         "@type": "Answer",
-                        "text": "Yes, with no time limit and no credit card. The free plan covers unlimited events, your own schedule URL, calendar sync, analytics, RSVP with capacity limits, embedding your calendar, one appointment type, selling up to 25 paid tickets a month with no platform fee, and 10 newsletter emails a month (each recipient counts as one email). Pro is {{ plan_price($proMonthly) }} a month and removes the ticket cap, Enterprise is {{ plan_price($entMonthly) }} a month for custom domains and team features, and both start with a 7-day free trial."
+                        "text": "Yes, with no time limit and no credit card. The free plan covers unlimited events, your own schedule URL, calendar sync, analytics, RSVP with capacity limits, embedding your calendar, one appointment type, selling up to 25 paid tickets a month through Stripe, PayPal or another payment method with no platform fee, and 10 newsletter emails a month (each recipient counts as one email). Pro is {{ plan_price($proMonthly) }} a month and removes the ticket cap, Enterprise is {{ plan_price($entMonthly) }} a month for custom domains and team features, and both start with a 7-day free trial."
                     }
                 },
                 {
                     "@type": "Question",
-                    "name": "Someone has already made a page for my venue. How do I claim it?",
+                    "name": "How do I get paid for tickets?",
                     "acceptedAnswer": {
                         "@type": "Answer",
-                        "text": "If a promoter or venue listed you on their event before you signed up, Event Schedule created a page for you at that moment. Open it and press Claim this page. You will be asked to sign in, and the page then tells you in masked form which contact it answers to. Sign in with a verified account on that contact and the page is yours. If it is not one you can reach, ask whoever listed you to correct it. If the page is not about you at all, press This is not me instead."
+                        "text": "Connect your own account under Settings and then Payment Methods: Stripe, PayPal, Payfast (South African rand only) or Invoice Ninja. A payment link, or cash at the door, works too. You pick the method on each event, and the money goes to your own account with no platform fee on any plan. A Stripe or PayPal sale can be refunded in full or in part from the Sales page, and the money goes back through the provider; any other sale can be marked as refunded there."
+                    }
+                },
+                {
+                    "@type": "Question",
+                    "name": "How will people hear about my new events?",
+                    "acceptedAnswer": {
+                        "@type": "Answer",
+                        "text": "Share your schedule link, or embed the calendar on your own site. Visitors can leave their name and email in the sign-up panel on your schedule page, and once they confirm they get a digest of the new events your schedule publishes, at most one every few days. Anyone can also subscribe to your calendar feed, which keeps your events current in their own calendar app, and on an event that is not on sale yet a visitor can press Tell me when tickets go on sale to hear about that event alone."
+                    }
+                },
+                {
+                    "@type": "Question",
+                    "name": "Someone already made a page for my act or venue. How do I claim it?",
+                    "acceptedAnswer": {
+                        "@type": "Answer",
+                        "text": "If a promoter, venue or curator listed you on an event before you had an account, Event Schedule created a page for you at that moment. Open it and press Claim this page. Signed out, you are taken to sign up, and signing up with the email address on the page hands it to you. Signed in with a verified account on that email address or phone number, you confirm and the page is yours; signed in with a different one, the page shows the contact it answers to in masked form, so you know which account to use. Claiming makes you the owner, and the schedules that already listed you keep listing you. If you cannot reach that contact, ask whoever listed you to correct it. If the page is not about you at all, press This is not me instead."
                     }
                 },
                 {

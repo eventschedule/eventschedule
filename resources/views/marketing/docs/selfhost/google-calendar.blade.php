@@ -1,6 +1,7 @@
 <x-docs-page
     key="selfhost/google-calendar"
-    description="Set up bidirectional Google Calendar sync with Event Schedule. Automatically sync events between both platforms."
+    title="Google Calendar Sync Setup for Selfhost - Event Schedule"
+    description="Set up two-way Google Calendar sync on a selfhosted Event Schedule install: OAuth credentials, the webhook secret, the scheduler cron and the queue."
     lede="Set up and use the Google Calendar integration for two-way sync between Event Schedule and Google Calendar."
 >
     <x-slot:toc>
@@ -92,7 +93,7 @@
         </div>
 
         <h3 class="doc-subheading">4. Environment Configuration</h3>
-        <p class="text-gray-600 dark:text-gray-300 mb-4">Add the following environment variables to your <code class="doc-inline-code">.env</code> file:</p>
+        <p class="text-gray-600 dark:text-gray-300 mb-4">Add the following environment variables to your <code class="doc-inline-code">.env</code> file. <code class="doc-inline-code">.env.example</code> carries the same four, commented out, in its "Google Calendar sync (optional)" block:</p>
 
         <div class="doc-code-block">
             <div class="doc-code-header">
@@ -288,7 +289,7 @@
                 </tbody>
             </table>
         </div>
-        <p class="text-gray-600 dark:text-gray-300 mt-4">Only a real deletion in Google Calendar triggers the policy, and only through the incremental sync, so the schedule needs at least one completed inbound sync first.</p>
+        <p class="text-gray-600 dark:text-gray-300 mt-4">Only a real deletion in Google Calendar triggers the policy, and only through the incremental sync, so the schedule needs at least one completed inbound sync first. Marking an event cancelled this way does not notify anyone: the cancellation notice that <strong class="text-gray-900 dark:text-white">Cancel event</strong> in the event editor can send to ticket buyers and to the event's interest list only goes out from there.</p>
         <p class="text-gray-600 dark:text-gray-300 mt-4 mb-6">If the deleted copy belonged to a schedule that shares the event with others, that schedule is simply detached and the event stays intact for everyone else.</p>
 
         <h3 class="doc-subheading">Personal Calendar Sync for Members</h3>
@@ -376,7 +377,7 @@
                     <li>On the schedule's Google Calendar tab, click "Resync to Google Calendar". Only the schedule owner sees this button, and the request is refused unless the direction includes To Google Calendar</li>
                     <li>Events already sitting on the saved calendar are left alone. An event whose copy is on a different calendar has that old copy deleted and a fresh one created, so switching calendars does not leave duplicates behind</li>
                     <li>It only ever pushes to Google and never imports, and it only covers published events</li>
-                    <li>The resync runs in the background in batches and can take a few minutes on a large schedule, so it needs a queue worker. Clicking it again is safe: it picks up only the work still outstanding</li>
+                    <li>The resync works through the schedule ten events at a time, each batch queuing the next, so it needs a real queue: with <code class="doc-inline-code">QUEUE_CONNECTION=database</code>, the scheduler's minutely queue worker carries it to the end, which can take a few minutes on a large schedule. On the shipped <code class="doc-inline-code">sync</code> setting it never gets past the first ten events. Clicking it again is safe: it only redoes work still outstanding</li>
                 </ol>
             </div>
 
@@ -425,13 +426,13 @@
         <p class="text-gray-600 dark:text-gray-300 mb-4">The mapping between an event and its Google copy lives in the <code class="doc-inline-code">calendar_syncs</code> table, one row per user, event and schedule, together with the calendar the copy was created on.</p>
         <ul class="doc-list mb-6">
             <li><code class="doc-inline-code">SyncEventToGoogleCalendar</code> performs one create, update or delete. Saving an event runs it inline, so the calendar is up to date by the time the save finishes and a queue worker is not required</li>
-            <li><code class="doc-inline-code">ForceResyncGoogleCalendar</code> backs the "Resync to Google Calendar" button and is queued. It handles a small batch of events per run and dispatches a follow-up while any remain, so a large schedule finishes across several runs instead of timing out</li>
+            <li><code class="doc-inline-code">ForceResyncGoogleCalendar</code> backs the "Resync to Google Calendar" button and is queued. It handles ten events per run and dispatches a follow-up while any remain, so a large schedule finishes across several runs instead of timing out. Its overlap lock drops a follow-up dispatched on the <code class="doc-inline-code">sync</code> connection, which is why it needs a real queue</li>
             <li>Inbound sync is serialized per schedule with a lock, so the webhook and the 15-minute poll cannot import the same event twice</li>
         </ul>
 
         <div class="doc-callout doc-callout-info">
             <div class="doc-callout-title">Queue worker</div>
-            <p>Everyday sync does not need a queue worker. Run one (<code class="doc-inline-code">php artisan queue:work</code>) if you want the bulk resync, since that job is queued and will otherwise sit unprocessed.</p>
+            <p>Everyday sync does not need a queue: saving an event pushes it inline, and a change notification from Google is handled inside the webhook request. The bulk resync does. Set <code class="doc-inline-code">QUEUE_CONNECTION=database</code> and the scheduler's minutely queue worker runs it, with no separate <code class="doc-inline-code">php artisan queue:work</code> needed. On the shipped <code class="doc-inline-code">sync</code> connection the resync only ever covers the first ten events, because each follow-up batch is skipped while the first still holds its lock.</p>
         </div>
     </section>
 
@@ -599,7 +600,7 @@
                 <ul class="doc-list text-sm">
                     <li>The button is disabled while the calendar dropdown differs from the saved calendar. Save the schedule first</li>
                     <li>Only the schedule owner sees the button, and the server refuses the request unless the direction includes To Google Calendar</li>
-                    <li>The job is queued, so it needs a queue worker to run</li>
+                    <li>The job runs on the queue in batches of ten, so it needs <code class="doc-inline-code">QUEUE_CONNECTION=database</code> and the scheduler cron. On the shipped <code class="doc-inline-code">sync</code> setting it stops after the first ten events</li>
                 </ul>
             </div>
 

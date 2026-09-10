@@ -1,6 +1,7 @@
 <x-docs-page
     key="saas/twilio"
-    description="Set up Twilio for SMS phone verification, SMS invitations and WhatsApp event creation in your SaaS Event Schedule deployment."
+    title="Twilio: SMS, WhatsApp and Phone Verification - Event Schedule"
+    description="Set up Twilio for SMS phone verification, texted invitations that let an act or venue claim its page, and WhatsApp event creation on your platform."
     lede="Set up Twilio to enable SMS phone verification, SMS invitations and WhatsApp event creation across your Event Schedule deployment."
 >
     <x-slot:toc>
@@ -40,13 +41,13 @@
                     </tr>
                     <tr>
                         <td><strong class="text-gray-900 dark:text-white">SMS invitations</strong></td>
-                        <td>When an invited team member, venue or talent has a phone number but no email address on file, the invitation goes out by SMS instead of email</td>
+                        <td>A team member you invite by phone number, with no verified email, gets a sign-up link by text instead of an email. When an organizer lists a venue or act that has no account and only a phone number, they can tick the SMS option to text it a link for claiming its page</td>
                         <td>Hosted deployments</td>
                     </tr>
                     <tr>
                         <td><strong class="text-gray-900 dark:text-white">WhatsApp event creation</strong></td>
                         <td>An organizer sends a text message or a flyer photo to your Twilio number and AI turns it into an event on their default schedule</td>
-                        <td>Enterprise plan, plus an AI key</td>
+                        <td>Enterprise plan, a verified account phone (so hosted deployments), plus an AI key</td>
                     </tr>
                 </tbody>
             </table>
@@ -59,7 +60,7 @@
 
         <div class="doc-callout doc-callout-info">
             <div class="doc-callout-title">Note</div>
-            <p>Twilio is entirely optional. If it is not configured, the app skips SMS and WhatsApp without errors: the verification controls are hidden, invitations fall back to email, and the WhatsApp webhook simply does nothing.</p>
+            <p>Twilio is entirely optional. If it is not configured, the app skips SMS and WhatsApp without errors: the verification links are hidden, team invitations go by email, texted claim invitations are not offered, and the WhatsApp webhook simply does nothing.</p>
         </div>
     </section>
 
@@ -154,9 +155,9 @@ TWILIO_FROM_NUMBER=+1234567890</code></pre>
         <h3 class="doc-subheading">What a verified number unlocks</h3>
         <ul class="doc-list mb-6">
             <li><strong class="text-gray-900 dark:text-white">A public phone number.</strong> A schedule's phone is only shown to visitors when it has been verified <em>and</em> the <strong class="text-gray-900 dark:text-white">Show phone number</strong> toggle is on. The same rule governs a venue's phone number on an event page.</li>
-            <li><strong class="text-gray-900 dark:text-white">Platform discovery.</strong> A schedule qualifies for the platform's public listings once either its email address or its phone number is verified.</li>
+            <li><strong class="text-gray-900 dark:text-white">Search and network listings.</strong> A schedule's public pages stay out of search engines until its email address or its phone number is verified, and if you run <a href="{{ route('marketing.docs.saas.federation') }}" class="doc-link">federation</a> its events are only shared from then on.</li>
             <li><strong class="text-gray-900 dark:text-white">WhatsApp.</strong> Incoming WhatsApp messages are matched to an account by verified phone number, so nobody can create events by WhatsApp until their account phone is verified.</li>
-            <li><strong class="text-gray-900 dark:text-white">Claiming.</strong> When a user verifies their account phone, any unclaimed schedule carrying the same number and created within the past year is attached to that account as owner, and becomes their default schedule if they do not already have one.</li>
+            <li><strong class="text-gray-900 dark:text-white">Claiming.</strong> When a user verifies their account phone, any unclaimed schedule carrying the same number and created within the past year is attached to that account as owner, and becomes their default schedule if they do not already have one. A verified phone is also what lets someone press <strong class="text-gray-900 dark:text-white">Claim this page</strong> on a <a href="{{ route('marketing.docs.creating_events') }}#claim" class="doc-link">page the app created for them</a> that carries only a phone number, so without Twilio such a page cannot be claimed.</li>
         </ul>
 
         <div class="doc-callout doc-callout-info">
@@ -204,12 +205,12 @@ TWILIO_FROM_NUMBER=+1234567890</code></pre>
         </div>
 
         <h3 class="doc-subheading">Creating events by WhatsApp <x-doc-badge plan="enterprise" /></h3>
-        <p class="text-gray-600 dark:text-gray-300 mb-4">Once the sender and the webhook are live, an organizer can send event details as text, or a photo of a flyer or poster, and AI parses the content into an event on their default schedule.</p>
+        <p class="text-gray-600 dark:text-gray-300 mb-4">Once the sender and the webhook are live, an organizer can send event details as text, or a photo of a flyer or poster, and AI parses the content into an event on their default schedule. Every message and reply goes through your Twilio account.</p>
 
         <p class="text-gray-600 dark:text-gray-300 mb-4">An incoming message has to satisfy all of the following, or the sender gets an explanatory reply instead of an event:</p>
         <ul class="doc-list mb-6">
             <li>The sending number belongs to a user account whose phone number has been <a href="#phone-verification" class="doc-link">verified</a>.</li>
-            <li>That user has a <strong class="text-gray-900 dark:text-white">Default schedule</strong> set in their account settings, or is an editor of exactly one schedule.</li>
+            <li>That user has a <strong class="text-gray-900 dark:text-white">Default schedule</strong> set in their account settings, or is an editor of exactly one schedule, and is still an editor of it.</li>
             <li>The message carries text, an image, or both. Only the first attachment is read, and only if it is an image.</li>
             <li>Your deployment has an AI key configured (<code class="doc-inline-code">GEMINI_API_KEY</code>, or <code class="doc-inline-code">OPENAI_API_KEY</code>). It is the same parser used by AI import in the admin portal.</li>
         </ul>
@@ -248,7 +249,7 @@ TWILIO_FROM_NUMBER=+1234567890</code></pre>
             <li><strong class="text-gray-900 dark:text-white">No reply at all.</strong> The signature check almost certainly failed, and by design that produces an empty response rather than an error. Compare the URL in Twilio's Console debugger with the URL the app builds, and confirm the auth token matches.</li>
             <li><strong class="text-gray-900 dark:text-white">"Your phone number is not linked to an account."</strong> The sending number does not match a user with a verified phone number. Verify it in account settings first.</li>
             <li><strong class="text-gray-900 dark:text-white">"No default schedule set."</strong> The user edits more than one schedule and has not chosen a <strong class="text-gray-900 dark:text-white">Default schedule</strong> in account settings.</li>
-            <li><strong class="text-gray-900 dark:text-white">"Could not create event."</strong> The AI parser returned nothing usable, or no AI key is configured. The log entry for the request has the detail.</li>
+            <li><strong class="text-gray-900 dark:text-white">"Could not create event."</strong> The AI parser returned nothing usable, no AI key is configured, or saving the event failed. The log entry for the request has the detail.</li>
         </ul>
 
         <div class="doc-callout doc-callout-info">

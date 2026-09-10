@@ -1,11 +1,13 @@
 <x-docs-page
     key="ai-import"
-    description="Learn how to import events using AI. Paste event text or add a flyer image and let AI extract the event details automatically."
+    title="AI Event Import from Text and Flyers - Event Schedule"
+    description="Paste event text or add a flyer image and AI fills in each event's name, date, venue, price and performers on a card you review before saving."
     lede="Save hours of manual data entry. Paste event text or add a flyer image and let AI extract the event details automatically."
 >
     <x-slot:toc>
         <x-doc-nav-group label="AI Import" href="#ai-import" expanded>
             <x-doc-nav-link href="#text-import">From Text</x-doc-nav-link>
+            <x-doc-nav-link href="#new-pages">New Pages and Requests</x-doc-nav-link>
             <x-doc-nav-link href="#image-import">From Images/Flyers</x-doc-nav-link>
             <x-doc-nav-link href="#custom-prompts">Custom AI Prompts</x-doc-nav-link>
         </x-doc-nav-group>
@@ -79,8 +81,8 @@
                 </tbody>
             </table>
         </div>
-        <p class="text-gray-600 dark:text-gray-300 mb-6">The trial row is checked first, so a schedule inside a paid-plan trial gets the trial allowance rather than its plan's. Separately from the daily count there is a short-term ceiling of 30 submissions a minute, which returns "Too many requests, please wait a minute and try again" and clears on its own.</p>
-        <p class="text-gray-600 dark:text-gray-300">A venue or curator schedule that accepts event requests without requiring visitors to have an account shows those visitors this same AI box instead of a structured form. See <a href="{{ route('marketing.docs.creating_schedules') }}#engagement-requests" class="doc-link">Requests</a> for the submission form options.</p>
+        <p class="text-gray-600 dark:text-gray-300 mb-6">The trial row is checked first, so a schedule inside a paid-plan trial gets the trial allowance rather than its plan's. Separately from the daily count there is a short-term ceiling of 30 submissions a minute, which shows "Too many requests. Please wait a minute and try again." and clears on its own.</p>
+        <p class="text-gray-600 dark:text-gray-300">A venue or curator schedule that accepts event requests without requiring visitors to have an account shows those visitors this same AI box instead of a structured form. Their submissions count against the schedule's daily allowance too. See <a href="{{ route('marketing.docs.creating_schedules') }}#engagement-requests" class="doc-link">Requests</a> for the submission form options.</p>
     </section>
 
     <!-- Text Import -->
@@ -191,6 +193,13 @@ Tickets: $20</code></pre>
 
         <h4 class="font-semibold text-gray-900 dark:text-white mb-2 mt-6">Duplicate Warning</h4>
         <p class="text-gray-600 dark:text-gray-300">A card shows <strong class="text-gray-900 dark:text-white">Similar event found</strong> when your schedule already has an upcoming event with the same registration URL, or with the same start time plus either the same venue address or the same performer name. <strong class="text-gray-900 dark:text-white">View</strong> opens the existing event so you can decide whether to save the new one. On a curator schedule, <strong class="text-gray-900 dark:text-white">Select</strong> adds that existing event to your schedule instead of creating a second copy.</p>
+
+        <h4 id="new-pages" class="font-semibold text-gray-900 dark:text-white mb-2 mt-6">New Pages and Requests</h4>
+        <p class="text-gray-600 dark:text-gray-300 mb-4">Saving a card also reaches the performers and the venue it names, in one of two ways:</p>
+        <ul class="doc-list">
+            <li><strong class="text-gray-900 dark:text-white">Not on Event Schedule yet</strong> - A performer or venue the import did not match gets a schedule page of its own when you save, so your event page can link to them. The page is public but stays out of search engines, says which schedule created it, and offers <strong class="text-gray-900 dark:text-white">Claim this page</strong>, which works for whoever signs in with the email address on it (or its phone number, when it has no email). If that address already belongs to an account, the page is theirs straight away and the event reaches it as a request, as below. Tick <strong class="text-gray-900 dark:text-white">I manage this venue, make me the owner</strong> to make a new venue yours instead. See <a href="{{ route('marketing.docs.creating_events') }}#claim" class="doc-link">Pages Created for Others</a> for claiming and invitations</li>
+            <li><strong class="text-gray-900 dark:text-white">Already running a schedule</strong> - The event is on your schedule straight away, but reaches theirs as a request they accept or decline, unless your schedule is on their approved list. A performer's schedule always works this way; a venue can choose to accept requests without approval</li>
+        </ul>
     </section>
 
     <!-- Image Import -->
@@ -283,7 +292,7 @@ Tickets: $20</code></pre>
             <li><a href="{{ route('marketing.docs.creating_events') }}" class="doc-link">Creating Events</a> - Add events by hand and configure event settings</li>
             <li><a href="{{ route('marketing.docs.creating_events') }}#whatsapp" class="doc-link">Creating Events via WhatsApp</a> - Send a message or flyer to a WhatsApp number and let AI create the event (Enterprise)</li>
             <li><a href="{{ route('marketing.docs.scan_agenda') }}" class="doc-link">Scan Agenda</a> - Use AI to read a printed agenda and create event parts (Enterprise)</li>
-            <li><a href="{{ route('marketing.docs.creating_schedules') }}#auto-import" class="doc-link">Auto Import</a> - Have a selfhosted install pull events from a list of URLs or cities on a schedule</li>
+            <li><a href="{{ route('marketing.docs.creating_schedules') }}#auto-import" class="doc-link">Auto Import</a> - Have a selfhosted install import events every day from a list of event URLs</li>
             <li><a href="{{ route('marketing.docs.creating_schedules') }}#customize-custom-fields" class="doc-link">Custom Fields</a> - Define your own event fields, with AI prompts for each (Pro)</li>
         </ul>
     </section>

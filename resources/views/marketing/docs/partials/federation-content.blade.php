@@ -26,9 +26,9 @@
     </p>
 
     <div class="doc-callout doc-callout-info">
-        <p><strong>What gets shared.</strong> Public, upcoming events, online and in person. Private,
-        draft, cancelled and password-protected events are never sent, and neither are events from
-        schedules that have opted out or have not opted in.</p>
+        <p><strong>What gets shared.</strong> Public, upcoming events, online and in person. Events set
+        to Draft, Internal or Unlisted are never sent, and neither are cancelled or password-protected
+        ones, or events from schedules that have opted out or have not opted in.</p>
     </div>
 </section>
 
@@ -56,7 +56,7 @@
         Saving registers your install with the network and puts it in a review queue. Nothing is
         published until an administrator at eventschedule.com approves it, which is a one-time step
         for the whole install. You will get an email either way, and the connection status on the
-        settings page shows where you stand: <em>Not connected</em>, <em>Pending review</em>,
+        settings page shows where you stand: <em>Not connected</em>, <em>Pending</em>,
         <em>Approved</em> or <em>Suspended</em>.
     </p>
 </section>
@@ -70,25 +70,34 @@
         Per-schedule control
     </h2>
     <p>
-        Once the network is on for the install, each schedule gets its own toggle under
-        <strong>Settings</strong> on the schedule edit page: <strong>List this schedule on the
-        network</strong>.
+        Once the network is on for the install, each schedule gets its own setting under
+        <strong>Settings</strong> on the schedule edit page, <strong>List this schedule on the
+        network</strong>, with three choices: <em>Not decided yet</em>, <em>Listed on the network</em>
+        and <em>Not listed</em>.
     </p>
     <p>
-        A schedule created since federation was added to your install starts out unlisted, and its
-        owner opts in with that toggle, so a new customer is never carried onto the network by your
-        decision alone. Schedules that predate the feature keep the listing they already had and can
-        be switched off individually. The settings page counts the schedules still waiting on that
-        decision, which is the usual reason the preview is shorter than you expected.
+        Every schedule starts at <em>Not decided yet</em>, which keeps its events off the network, and
+        its owner opts in by choosing <em>Listed on the network</em>, so a customer is never carried
+        onto the network by your decision alone. That includes schedules that existed before the
+        feature: an update reset them all to <em>Not decided yet</em> rather than enrolling them
+        silently. The settings page counts the schedules still waiting on that decision, which is the
+        usual reason the preview is shorter than you expected.
     </p>
     <p>
-        The toggle only appears after you have enabled the network for the whole install, so on a
+        The setting only appears after you have enabled the network for the whole install, so on a
         multi-tenant deployment your customers never see an option you have not opted into.
     </p>
     <p>
         On an event with more than one schedule attached, a talent and a venue for instance, any one
-        of them opting out is enough to keep the event off the network: a listing carries every
-        participant's name and the venue's address, so nobody is published on someone else's say-so.
+        of them choosing <em>Not listed</em> is enough to keep the event off the network: a listing names the venue,
+        carries its address and links to an event page that names everyone on the bill, so nobody
+        is published on someone else's say-so.
+    </p>
+    <p>
+        The pages the app creates for performers and venues that are not on your install take no
+        part in that decision. With no owner to opt in, they never list an event themselves, and
+        they do not count as opting out either, so naming an act that has not signed up does not
+        keep an event off the network.
     </p>
 </section>
 
@@ -104,7 +113,8 @@
         Listings appear in their own section on the eventschedule.com browse page, badged with your
         site's address and filterable by country and language. Clicking one goes straight to the
         event on your site: there is no copy of the event page on eventschedule.com, and the link is
-        a normal followable link rather than a tracking redirect.
+        a normal followable link rather than a tracking redirect. It points at the event's address on
+        your install itself, never at a custom domain a schedule may have.
     </p>
     <p>
         An event needs a picture to be listed, matching the bar applied to eventschedule.com's own
@@ -112,7 +122,7 @@
         attached to it.
     </p>
     <p>
-        Recurring events are listed with their next few dates, and times are shown in the event's own
+        Recurring events are listed with their next three dates within 120 days, and times are shown in the event's own
         timezone rather than the visitor's.
     </p>
 </section>
@@ -128,8 +138,8 @@
     <p>
         Sharing runs hourly on your existing scheduler, so it needs no extra setup beyond the cron
         entry Event Schedule already requires. Edits appear within the hour, and an event that stops
-        qualifying, because it was unpublished, cancelled, made private, or its schedule opted out,
-        is removed from the listings on the next run.
+        qualifying, because it went back to Draft, was made Internal or Unlisted, was cancelled, or
+        the schedule listing it opted out or was deleted, is removed from the listings on the next run.
     </p>
     <p>
         You can also run it by hand:

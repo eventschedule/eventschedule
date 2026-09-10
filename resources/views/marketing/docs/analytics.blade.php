@@ -1,7 +1,8 @@
 <x-docs-page
     key="analytics"
-    description="Learn how to track views, devices, traffic sources, revenue, and check-ins with Event Schedule's built-in analytics dashboard."
-    lede="Track how your audience discovers and interacts with your schedule. View trends, compare periods, and understand what drives engagement."
+    title="Analytics: Views, Revenue and Check-Ins - Event Schedule"
+    description="Read your schedule's built-in analytics: views, traffic sources, short-link clicks, broken links, revenue and check-ins, with no tracking script to add."
+    lede="See how people find your schedule, what they open and click, what they buy, and who turns up at the door."
 >
     <x-slot:toc>
         <x-doc-nav-link href="#overview">Overview</x-doc-nav-link>
@@ -41,7 +42,7 @@
             The dashboard is organized into three tabs, which appear in this order:
         </p>
         <ul class="doc-list mb-6">
-            <li><strong class="text-gray-900 dark:text-white">Web Analytics</strong> - Page views over time, device breakdown, traffic sources, referrers, UTM parameters, visitor locations, social link clicks, and top events. This is the default tab.</li>
+            <li><strong class="text-gray-900 dark:text-white">Web Analytics</strong> - Page views over time, device breakdown, top events, broken links, traffic sources, referrers, UTM parameters, visitor locations and social link clicks. This is the default tab.</li>
             <li><strong class="text-gray-900 dark:text-white">Revenue</strong> - Total revenue, conversion rate, revenue per view, promo code performance, boost and newsletter funnels, and top events by revenue.</li>
             <li><strong class="text-gray-900 dark:text-white">Check-Ins</strong> - Tickets sold, attendance rate, no-shows, arrival times, attendance by ticket type, and a per-event breakdown.</li>
         </ul>
@@ -90,7 +91,7 @@
 
         <div class="doc-callout doc-callout-info">
             <div class="doc-callout-title">The date range means something different on each tab</div>
-            <p>On Web Analytics it filters page views by the day of the visit. On Revenue it filters sales by the date the purchase was made. On Check-Ins it filters by the <em>event date</em> the ticket is for, not by the purchase or scan date, so a ticket bought in January for a March event lands in March.</p>
+            <p>On Web Analytics it filters page views by the day of the visit. On Revenue it filters sales by the date the purchase was made. On Check-Ins it filters by the <em>event date</em> the ticket is for, not by the purchase or scan date, so a ticket bought in January for a March event lands in March. There, only Last month has an end date: every other range also takes in events still to come, so an upcoming show appears as soon as it has sold a ticket.</p>
         </div>
     </section>
 
@@ -113,7 +114,8 @@
                 <li>The visitor is a known bot, crawler, preview generator or automated tool.</li>
                 <li>You or one of your team members is signed in to that schedule, or a site administrator is signed in.</li>
                 <li>The page was loaded inside an <a href="{{ route('marketing.docs.sharing') }}#embed" class="doc-link">embedded calendar</a>.</li>
-                <li>The same visitor has already had 10 views counted for that schedule that day. Views past the tenth are ignored until the count resets at midnight.</li>
+                <li>The same visitor has already been counted 10 times on that schedule that day. Their later visits stop adding to the schedule's totals, traffic sources, locations and UTM figures until midnight, though each event they open still counts for that event.</li>
+                <li>The same visitor has already viewed that event 3 times that day. Each event keeps this count separately.</li>
             </ul>
         </div>
 
@@ -184,6 +186,10 @@
                 <h4 class="font-semibold text-gray-900 dark:text-white mb-2">Top Events</h4>
                 <p class="text-sm text-gray-500 dark:text-gray-400">Your ten most-viewed events in the selected period. Hidden when you have filtered down to a single event.</p>
             </div>
+            <div id="web-broken-links" class="doc-field">
+                <h4 class="font-semibold text-gray-900 dark:text-white mb-2">Broken links</h4>
+                <p class="text-sm text-gray-500 dark:text-gray-400">Addresses on your schedule that visitors opened and that match no event or page, with how many times each was opened in the period, busiest first, up to ten. Such an address shows a not-found page instead of quietly landing on your schedule, so this is where a mistyped link on a flyer or an old event address in a post turns up. Shown only when a single schedule is selected and no event is. Bots are filtered out, and one visitor can add at most five new addresses a day, so a real broken link outranks one-off noise.</p>
+            </div>
             <div class="doc-field">
                 <h4 class="font-semibold text-gray-900 dark:text-white mb-2">Traffic Sources</h4>
                 <p class="text-sm text-gray-500 dark:text-gray-400">Where your visitors come from, in eight categories: Direct, Search, Social, Email, Newsletter, Boost, Promo Code and Other. A colour key under the chart explains each one. Links carrying <code class="doc-inline-code">utm_source=boost</code>, <code class="doc-inline-code">utm_source=newsletter</code> or a <code class="doc-inline-code">promo</code> parameter are classified by that marker instead of by the referring site.</p>
@@ -206,7 +212,7 @@
             </div>
             <div id="web-social-clicks" class="doc-field">
                 <h4 class="font-semibold text-gray-900 dark:text-white mb-2">Social Link Clicks</h4>
-                <p class="text-sm text-gray-500 dark:text-gray-400">Clicks on the social links configured in your <a href="{{ route('marketing.docs.creating_schedules') }}#videos-links" class="doc-link">schedule settings</a>, broken down by platform. It counts visitors leaving your schedule for Instagram, Facebook, TikTok and the rest, so it measures outbound interest rather than incoming traffic. The same bot filtering and daily per-visitor cap as page views applies.</p>
+                <p class="text-sm text-gray-500 dark:text-gray-400">Clicks on the links in your <a href="{{ route('marketing.docs.creating_schedules') }}#videos-links" class="doc-link">schedule settings</a>, one row per platform, or per site for a link to somewhere the app does not recognise. Every link has a short address on your schedule's own URL, such as <code class="doc-inline-code">/instagram</code>, or the site's name for other sites, and the icons on your schedule page go through it, so a click there or on a short link you printed is counted. A link left without a short address, because its name was already taken, is not counted until you give it one. This measures visitors leaving your schedule rather than arriving. Bots are filtered out, one visitor counts at most ten clicks a day per schedule, and clicks by you, your team members and site administrators are skipped.</p>
             </div>
             <div class="doc-field">
                 <h4 class="font-semibold text-gray-900 dark:text-white mb-2">Featured Talents &amp; Venues</h4>
@@ -233,7 +239,7 @@
 
         <div class="doc-callout doc-callout-info">
             <div class="doc-callout-title">Note</div>
-            <p><a href="{{ route('marketing.docs.tickets') }}" class="doc-link">Selling tickets</a> is free up to 25 paid tickets per calendar month per schedule, so the Revenue tab works on the Free plan; Pro removes the monthly cap. The Boost Funnel below is the one part of this tab that needs Pro, because boost campaigns are a Pro feature.</p>
+            <p><a href="{{ route('marketing.docs.tickets') }}" class="doc-link">Selling tickets</a> is free up to 25 paid tickets per calendar month per schedule, so the Revenue tab works on the Free plan; Pro removes the monthly cap. The Boost Funnel below is the one part of this tab that needs Pro, because boost campaigns are a Pro feature. Paid <a href="{{ route('marketing.docs.appointments') }}" class="doc-link">appointment bookings</a> are sales too, so they count here alongside tickets.</p>
         </div>
 
         <h3 id="revenue-stats" class="doc-subheading">Stats Cards</h3>
@@ -251,7 +257,7 @@
                 <tbody>
                     <tr>
                         <td><span class="font-semibold text-gray-900 dark:text-white">Total Revenue</span></td>
-                        <td>Ticket revenue taken during the period. If your sales span more than one currency, each currency is listed on its own line rather than added together.</td>
+                        <td>What the paid sales made during the period took, by purchase date. It is not net of refunds: a partially refunded sale stays paid and counts in full, and only a fully refunded sale drops out. If your sales span more than one currency, each currency is listed on its own line rather than added together.</td>
                     </tr>
                     <tr>
                         <td><span class="font-semibold text-gray-900 dark:text-white">Conversion Rate</span></td>
@@ -298,12 +304,12 @@
             Check-Ins <x-doc-badge plan="free" />
         </h2>
         <p class="text-gray-600 dark:text-gray-300 mb-4">
-            The Check-Ins tab turns door scans into attendance analytics: how many ticket holders actually showed up, when they arrived, and which events and ticket types had the best turnout. It reads completed sales only, and it groups them by the <strong>event date</strong> the ticket is for.
+            The Check-Ins tab turns door scans into attendance analytics: how many ticket holders actually showed up, when they arrived, and which events and ticket types had the best turnout. It reads paid sales only, leaves out deleted ones, and groups them by the <strong>event date</strong> the ticket is for.
         </p>
 
         <div class="doc-callout doc-callout-info">
             <div class="doc-callout-title">Note</div>
-            <p>This tab has data only for events where tickets were scanned with the <a href="{{ route('marketing.docs.tickets') }}#check-in" class="doc-link">check-in feature</a>, which is free on every plan. Without a scan a ticket counts as sold but never as attended, so an unscanned event reads as 100% no-shows rather than as missing data.</p>
+            <p>Attendance comes from scanning tickets with the <a href="{{ route('marketing.docs.tickets') }}#check-in" class="doc-link">check-in feature</a>, which is free on every plan. Without a scan a ticket counts as sold but never as attended, so an unscanned event reads as 100% no-shows rather than as missing data. Appointment bookings are sales too and are never scanned, so on a schedule that takes bookings they show here as no-shows; pick a single event for a clean attendance rate.</p>
         </div>
 
         <h3 id="checkins-stats" class="doc-subheading">Stats Cards</h3>
@@ -318,7 +324,7 @@
                 <tbody>
                     <tr>
                         <td><span class="font-semibold text-gray-900 dark:text-white">Tickets Sold</span></td>
-                        <td>Tickets from completed sales for events dated inside the selected range, including free registrations</td>
+                        <td>Tickets from paid sales for events dated in the selected range, including free registrations and events still to come</td>
                     </tr>
                     <tr>
                         <td><span class="font-semibold text-gray-900 dark:text-white">Checked In</span></td>
@@ -371,7 +377,8 @@
             <li>You have only been checking the page yourself while signed in. Your own visits, and those of your team members and site administrators, are never counted.</li>
             <li>Your only traffic so far came through an embedded calendar, which is not counted, or from bots, which are filtered out.</li>
             <li>On the Revenue tab, no sale was completed in the range. If you see a conversion rate but no revenue, your sales were free registrations or zero-price tickets.</li>
-            <li>On the Check-Ins tab, no tickets were scanned, or the events you scanned fall outside the selected range - remember this tab filters by event date.</li>
+            <li>On the Check-Ins tab, no paid ticket or registration exists for an event dated in the range. Scans are not needed for the tab to fill in; remember it filters by event date.</li>
+            <li>You expected views on an event whose address is wrong. An address that matches no event opens a not-found page, and its visits appear under <a href="#web-broken-links" class="doc-link">Broken links</a> rather than on any event.</li>
         </ul>
         <p class="text-gray-600 dark:text-gray-300 mb-4">
             If the dashboard still looks empty, work through these in order:
@@ -409,7 +416,7 @@
             "@context": "https://schema.org",
             "@type": "HowTo",
             "name": "How to Use Event Schedule Analytics",
-            "description": "Learn how to track views, devices, traffic sources, revenue, and check-ins with Event Schedule's built-in analytics dashboard.",
+            "description": "Track views, devices, traffic sources, social link clicks, broken links, revenue, and check-ins with Event Schedule's built-in analytics dashboard.",
             "totalTime": "PT5M",
             "step": [
                 {
@@ -427,7 +434,7 @@
                 {
                     "@type": "HowToStep",
                     "name": "Review Web Analytics",
-                    "text": "Check page views, device breakdown, traffic sources, visitor locations and top events on the Web Analytics tab.",
+                    "text": "Check page views, device breakdown, top events, broken links, traffic sources, visitor locations and social link clicks on the Web Analytics tab.",
                     "url": "{{ url(route('marketing.docs.analytics')) }}#web-analytics"
                 },
                 {

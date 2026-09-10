@@ -1,5 +1,6 @@
 <x-docs-page
     key="allocated-seating"
+    title="Allocated Seating: Seat Maps and Box Office - Event Schedule"
     description="Sell reserved seats from a plan of your venue: build a plan of levels, sections, rows and tables, and let buyers choose their own seat."
     lede="Draw your room once, attach it to an event, and sell the seats in it. Buyers pick where they sit; your box office holds seats back, books by phone and moves people around."
     article-description="How to sell allocated (reserved) seating: build a seating plan, price each band, let buyers choose their seats, and manage the room from the box office console."
@@ -121,7 +122,7 @@
     <section id="one-date" class="doc-section">
         <h2 class="doc-heading">Change a single date</h2>
 
-        <p class="text-gray-600 dark:text-gray-300 mb-4">On a recurring event, <strong class="text-gray-900 dark:text-white">Modify this date only</strong> opens the same designer pointed at one performance. An amber banner names the date you are editing. Changes there affect that date alone; the plan and every other date are untouched.</p>
+        <p class="text-gray-600 dark:text-gray-300 mb-4">On a recurring event, <strong class="text-gray-900 dark:text-white">Modify this date only</strong> opens the same designer pointed at one performance. An amber banner names the date you are editing, and its <strong class="text-gray-900 dark:text-white">Date</strong> picker moves you straight to another night of the run. Changes there affect that date alone; the plan and every other date are untouched.</p>
 
         <p class="text-gray-600 dark:text-gray-300 mb-6"><strong class="text-gray-900 dark:text-white">Revert this date</strong> throws the date's own layout away and puts it back on the plan. It is refused while any seat is sold or a customer is mid-checkout.</p>
 
@@ -135,7 +136,7 @@
     <section id="buying" class="doc-section">
         <h2 class="doc-heading">What the buyer sees</h2>
 
-        <p class="text-gray-600 dark:text-gray-300 mb-4">Buyers choose how many seats they want and, by default, get the best available together - the earliest section, the earliest row, closest to the middle of what is free. Most people never open a map. Those who want to choose select <strong class="text-gray-900 dark:text-white">Choose your own seats</strong>.</p>
+        <p class="text-gray-600 dark:text-gray-300 mb-4">Under <strong class="text-gray-900 dark:text-white">Choose your seats</strong>, a buyer enters <strong class="text-gray-900 dark:text-white">How many seats?</strong> and presses <strong class="text-gray-900 dark:text-white">Find best seats</strong> to get the best available together - the earliest section, then the earliest row, then as close to the centre of the row as it can. Most people never need the map. Those who want to choose click seats on the map instead, or use the <strong class="text-gray-900 dark:text-white">List</strong> view.</p>
 
         <x-doc-screenshot id="allocated-seating--picker" alt="A buyer choosing seats from the map" />
 
@@ -174,11 +175,11 @@
     <section id="box-office" class="doc-section">
         <h2 class="doc-heading">Run the door</h2>
 
-        <p class="text-gray-600 dark:text-gray-300 mb-4">The box office console is the same map with the names on. Open it from the event, and use the date picker in the header to move between nights of a run. Click a seat to see who has it, turn on <strong class="text-gray-900 dark:text-white">Pick several</strong> to add more by tapping (a tablet has no shift key), or take a whole section from the sidebar - and a whole row from the seat you have selected.</p>
+        <p class="text-gray-600 dark:text-gray-300 mb-4">The box office console is the same map with the names on. Open it from the event, and use the <strong class="text-gray-900 dark:text-white">Date</strong> picker in the header to move between nights of a run. Click a seat to see who has it, turn on <strong class="text-gray-900 dark:text-white">Pick several</strong> to add more by tapping (a tablet has no shift key), or take a whole section from the sidebar - and <strong class="text-gray-900 dark:text-white">Select the whole row</strong> takes the row of the seat you have selected.</p>
 
         <p class="text-gray-600 dark:text-gray-300 mb-4">The lookup box jumps to a seat typed as <code class="doc-inline-code">C14</code> or <code class="doc-inline-code">row C seat 14</code>, a range typed as <code class="doc-inline-code">C1-C12</code>, or a customer by name or email. It selects <strong class="text-gray-900 dark:text-white">every</strong> match, so searching a name finds the whole party rather than one seat of it, and the bulk actions then apply to all of them.</p>
 
-        <p class="text-gray-600 dark:text-gray-300 mb-4">A sold seat shows who holds it, what they bought, when they bought it, and whether they have come through the door yet - with their email and phone as links, and a way through to the order in Sales. Releasing takes seats off a booking and can do a whole party at once; it does not move any money, so refund the customer in your payment provider as usual. Every hold, release, exchange and counter booking is recorded in the schedule's audit log, with who did it.</p>
+        <p class="text-gray-600 dark:text-gray-300 mb-4">A sold seat shows who holds it, what they bought, when they bought it, and whether they have come through the door yet (<strong class="text-gray-900 dark:text-white">Arrived</strong>) - with their email and phone as links, and a way through to the order in Sales. Releasing takes seats off a booking and can do a whole party at once. It moves no money and the order stays paid: the note below says how to give the money back. Every hold, release, exchange and counter booking is recorded in the schedule's audit log, with who did it.</p>
 
         <x-doc-screenshot id="allocated-seating--box-office" alt="The box office console" />
 
@@ -186,12 +187,13 @@
             <li><strong class="text-gray-900 dark:text-white">Hold seats back</strong> with a reason - house seats, production, accessibility or box office - and an internal note only your team sees. A staff hold never expires on its own.</li>
             <li><strong class="text-gray-900 dark:text-white">Book by phone</strong> sells the selected seats to a caller, marked paid or awaiting payment. Leave the amount blank for the list price, or enter zero to comp them.</li>
             <li><strong class="text-gray-900 dark:text-white">Move to another seat</strong> takes one booking to a different seat without touching the rest of the order.</li>
-            <li><strong class="text-gray-900 dark:text-white">Release this seat</strong> puts one seat of a booking back on sale.</li>
+            <li><strong class="text-gray-900 dark:text-white">Release this seat</strong> puts one seat of a booking back on sale. With several seats selected the button reads <strong class="text-gray-900 dark:text-white">Release 3 seats</strong> (or however many) and frees them in one go.</li>
         </ul>
 
         <div class="doc-callout doc-callout-info mb-6">
             <div class="doc-callout-title">Releasing a seat does not move any money</div>
-            <p>Release frees the seat and takes it off the booking, and anyone on the waitlist is offered it. The sale itself stays as it was - refund the customer in your payment provider as usual.</p>
+            <p>Release frees the seat and takes it off the booking, and anyone on the waitlist is offered it. The order itself stays paid. To give the money back on a Stripe or PayPal order, open it on the <a href="{{ route('marketing.docs.tickets') }}#refunds" class="doc-link">Sales page</a>, choose <strong>Refund Ticket</strong> and enter the released seats' share as a partial refund. On any other payment method, return the money in your provider's own dashboard and leave the sale alone: <strong>Mark as Refunded</strong> marks the whole order refunded and puts every one of its seats back on sale.</p>
+            <p class="mt-2">If the whole party is leaving, you do not need to release anything first. Refunding the whole order from the Sales page puts all of its seats back on sale by itself.</p>
         </div>
     </section>
 
@@ -205,7 +207,7 @@
 
         <p class="text-gray-600 dark:text-gray-300 mb-4">Three views, because a full house and a door list are different sheets. <strong class="text-gray-900 dark:text-white">Taken seats</strong> lists only what is sold, held back or in a basket - on a half-sold room that is half the paper. <strong class="text-gray-900 dark:text-white">By name</strong> orders the same rows by surname, which is how you look up somebody standing in front of you. <strong class="text-gray-900 dark:text-white">Every seat</strong> is the whole house. The map always draws the whole room whichever you pick.</p>
 
-        <p class="text-gray-600 dark:text-gray-300 mb-4">Each sold seat carries a box you can tick, and it arrives already ticked for anybody the scanner has let in - so the sheet works whether or not you are scanning. The header shows <strong class="text-gray-900 dark:text-white">how full the house is</strong>, section by section, and on a run it lists every night beside it, so you can see which dates are soft without opening them one at a time.</p>
+        <p class="text-gray-600 dark:text-gray-300 mb-4">Each sold seat carries a box you can tick, and it arrives already ticked for anybody the scanner has let in - so the sheet works whether or not you are scanning. The header shows <strong class="text-gray-900 dark:text-white">how full the house is</strong>, section by section, and on a run a <strong class="text-gray-900 dark:text-white">How the run is selling</strong> panel lists every night beside it, so you can see which dates are soft without opening them one at a time. Click a night there, or use the <strong class="text-gray-900 dark:text-white">Date</strong> picker at the top, to switch the sheet to it.</p>
 
         <p class="text-gray-600 dark:text-gray-300 mb-6">The figures cover <strong class="text-gray-900 dark:text-white">one date</strong>; the run summary is the exception. <strong class="text-gray-900 dark:text-white">Download as CSV</strong> gives you the same rows for a spreadsheet, and the CSV additionally carries each booker's email, which the printed sheet leaves out.</p>
     </section>

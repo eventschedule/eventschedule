@@ -1,5 +1,6 @@
 <x-docs-page
     key="subscriptions"
+    title="Subscriptions & Passes: Multi-Visit Tickets - Event Schedule"
     description="Sell one pass a guest buys once and reuses across many events. Set up visit passes, memberships, festival passes, and season passes, then redeem and track them."
     lede="Sell one pass that a guest pays for once and reuses across many of your events - like a class pack, a membership, or a festival wristband."
     article-description="How to sell a multi-use pass or subscription: one purchase, one QR code, valid across many events. Includes setup, redeeming at the door, and usage tracking."
@@ -221,7 +222,7 @@
             <li><strong class="text-gray-900 dark:text-white">Valid until</strong> - the expiry date, if you set one.</li>
             <li><strong class="text-gray-900 dark:text-white">Covered events</strong> - the events the pass works at, so they know where to use it. Sub-schedule and specific-event passes list the events by name and date (up to 50); a pass covering the whole schedule shows "All events in this schedule" instead of a list, and a season pass lists nothing because it is simply every date of its own event.</li>
             <li>The QR code to show at the door, and the booking panel if advance booking is on.</li>
-            <li>An <a href="{{ route('marketing.docs.tickets') }}#wallet-passes" class="doc-link">Add to Google Wallet</a> button, where the operator has enabled wallet passes. A pass saves as a single wallet pass covering the whole series, showing how many it admits at each event and its valid-until date.</li>
+            <li>An <a href="{{ route('marketing.docs.tickets') }}#wallet-passes" class="doc-link">Add to Google Wallet</a> button, where the operator has enabled wallet passes. The pass saves as one undated wallet pass rather than one per date, and shows how many people it admits at each event when that is more than one. If you set <strong class="text-gray-900 dark:text-white">Valid for (days)</strong>, Google Wallet archives the pass once it expires.</li>
         </ul>
     </section>
 
@@ -253,7 +254,7 @@
             <li><strong class="text-gray-900 dark:text-white">Cancellation deadline</strong> - how long before the event starts a booking can still be cancelled with the visit credited back. The choices are "Any time - visit always credited" (the default), "Until the event starts", or 12, 24, 48, 72 or 168 hours before the start.</li>
             <li><strong class="text-gray-900 dark:text-white">After the deadline</strong> - what a late cancellation does. This second setting only appears once you pick a deadline. <strong class="text-gray-900 dark:text-white">"Allow cancelling, but do not credit the visit back"</strong> (the default, also called forfeit) still releases the seat to other guests and the waiting list, but the visit stays spent, so a no-show doesn't get a free credit. <strong class="text-gray-900 dark:text-white">"Do not allow cancelling"</strong> closes cancellation entirely and the booking stands.</li>
         </ul>
-        <p class="text-gray-600 dark:text-gray-300 mb-4">Holders always see the rules up front: the deadline appears on the ticket page before purchase, on their pass page next to each booked date, and in the booking confirmation email. A late "Cancel (no credit)" click asks for explicit confirmation before forfeiting the visit, and a mis-click is never fatal: any booking can be undone with full credit within 15 minutes of being made, even past the deadline. When a seat is freed before the event starts - credited or forfeited - anyone on the <a href="{{ route('marketing.docs.tickets') }}#waitlist" class="doc-link">waiting list</a> is notified automatically.</p>
+        <p class="text-gray-600 dark:text-gray-300 mb-4">Holders always see the rules up front: the deadline appears on the ticket page before purchase, on their pass page next to each booked date, and in the booking confirmation email, which on eventschedule.com is sent once the schedule has its own <a href="{{ route('marketing.docs.creating_schedules') }}#integrations-email" class="doc-link">email settings</a>. A late "Cancel (no credit)" click asks for explicit confirmation before forfeiting the visit, and a mis-click is never fatal: any booking can be undone with full credit within 15 minutes of being made, even past the deadline. When a seat is freed before the event starts - credited or forfeited - anyone on the <a href="{{ route('marketing.docs.tickets') }}#waitlist" class="doc-link">waiting list</a> is notified automatically.</p>
         <div class="doc-callout doc-callout-info mb-6">
             <div class="doc-callout-title">Forfeited but they turn up anyway?</div>
             <p>A forfeited booking never revives. If the holder shows up and scans in after forfeiting, that's a brand-new visit, subject to the pass's visit limits (on a festival pass, the one visit for that event is already spent). Changing the policy on the pass applies to existing bookings too.</p>
@@ -369,8 +370,8 @@
                         <td>Check the <strong class="text-gray-900 dark:text-white">Scanning at event</strong> selector; otherwise sell a ticket.</td>
                     </tr>
                     <tr>
-                        <td><span class="font-semibold text-red-700 dark:text-red-400">Not paid, cancelled or refunded</span></td>
-                        <td>The order behind the pass isn't a completed sale any more.</td>
+                        <td><span class="font-semibold text-red-700 dark:text-red-400">This ticket is not paid</span><br><span class="font-semibold text-red-700 dark:text-red-400">This ticket is cancelled</span><br><span class="font-semibold text-red-700 dark:text-red-400">This ticket is refunded</span></td>
+                        <td>The order behind the pass is unpaid, cancelled or fully refunded. A partial refund leaves the order paid, so the pass keeps scanning.</td>
                         <td>Settle the payment or sell a ticket. A payment problem is the only thing the scanner treats as a hard error - every other outcome above is a neutral status, so a good pass never reads as fraud.</td>
                     </tr>
                 </tbody>
@@ -397,7 +398,7 @@
         </ul>
         <div class="doc-callout doc-callout-info mb-6">
             <div class="doc-callout-title">Paid passes only</div>
-            <p>The tab lists passes whose order is a completed sale. An unpaid, cancelled or refunded order is not shown, so a pass you refund disappears from the list along with its visit log. If you need that history, export or note it before issuing the refund.</p>
+            <p>The tab lists passes whose order is a completed sale. An unpaid, cancelled or fully refunded order is not shown, so a pass you refund in full disappears from the list along with its visit log. If you need that history, export or note it before issuing the refund. A partial refund keeps the order paid, so the pass stays on the list and keeps working.</p>
         </div>
         <p class="text-gray-600 dark:text-gray-300">The real-time <a href="{{ route('marketing.docs.tickets') }}#checkin-dashboard" class="doc-link">check-in dashboard</a> also counts pass scans alongside regular tickets, and shows how many seats holders have reserved in advance.</p>
     </section>
@@ -415,7 +416,7 @@
             <li><strong class="text-gray-900 dark:text-white">Bring a guest.</strong> A pass can admit more than one person per event (set <strong class="text-gray-900 dark:text-white">Admissions per event</strong>) without using extra visits.</li>
             <li><strong class="text-gray-900 dark:text-white">Sold on its own.</strong> One order buys one pass, and a pass can't share an order with normal single-date tickets.</li>
             <li><strong class="text-gray-900 dark:text-white">Not auto-renewing.</strong> It's a one-time purchase; there's no recurring billing, and no card is kept on file for the holder.</li>
-            <li><strong class="text-gray-900 dark:text-white">Refunds.</strong> Cancelling or refunding the order stops the pass from being scanned (the scanner reports it as refunded), releases any seats it had reserved, and removes the pass from the Subscriptions tab together with its visit log.</li>
+            <li><strong class="text-gray-900 dark:text-white">Refunds.</strong> Refund a pass from the Sales page like any other sale: <a href="{{ route('marketing.docs.tickets') }}#refunds" class="doc-link">Refund Ticket</a> sends the money back on a Stripe or PayPal sale, and <strong class="text-gray-900 dark:text-white">Mark as Refunded</strong> records it on any other method. A full refund, or cancelling the order, stops the pass from being scanned (the scanner reports it as refunded or cancelled), releases every date it had booked, and removes it from the Subscriptions tab together with its visit log. A partial refund does none of that: the pass keeps working.</li>
             <li><strong class="text-gray-900 dark:text-white">Future events.</strong> "All events" and "sub-schedule" coverage automatically include events you create later; "Specific events" does not.</li>
             <li><strong class="text-gray-900 dark:text-white">Advance booking is checked when it is used, not at the till.</strong> Booking dates ahead needs the schedule to be on a paid plan at that moment, so a pass sold while you were on Pro stops taking bookings if the schedule has since lapsed to free. Scanning it in at the door carries on working.</li>
             <li><strong class="text-gray-900 dark:text-white">Webhooks.</strong> <x-doc-badge plan="pro" /> Pass scans and advance bookings fire <a href="{{ route('marketing.docs.developer.webhooks') }}" class="doc-link">webhooks</a> (<strong class="text-gray-900 dark:text-white">ticket.scanned</strong>, <strong class="text-gray-900 dark:text-white">ticket.booked</strong> and <strong class="text-gray-900 dark:text-white">ticket.booking_cancelled</strong>) if you want to feed another system.</li>

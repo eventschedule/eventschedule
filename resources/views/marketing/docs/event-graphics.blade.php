@@ -1,8 +1,9 @@
 <x-docs-page
     key="event-graphics"
-    description="Learn how to use the Event Graphics feature to generate a shareable image of your upcoming events plus ready-to-paste text, using your own template variables."
+    title="Event Graphics: Shareable Schedule Images - Event Schedule"
+    description="Turn your upcoming events into one shareable image and ready-to-paste text, free on every plan: layouts, social sizes and every template variable."
     lede="Compose your upcoming events into one image and one block of text you can paste anywhere: a social post, a WhatsApp group, or an email."
-    plan="pro"
+    plan="free"
 >
     <x-slot:toc>
         <x-doc-nav-link href="#overview">Overview</x-doc-nav-link>
@@ -35,8 +36,9 @@
         </ul>
 
         <div class="doc-callout doc-callout-plan mb-6">
-            <div class="doc-callout-title">Pro feature</div>
-            <p><x-doc-badge plan="pro" /> Generating event graphics is part of the <strong class="text-gray-900 dark:text-white">Pro</strong> plan. Uploading a flyer to an event is free on every plan. The AI text prompt and scheduled graphic emails are <strong class="text-gray-900 dark:text-white">Enterprise</strong>. A <a href="{{ route('marketing.docs.selfhost') }}" class="doc-link">selfhosted</a> install counts as Enterprise, so nothing on this page is held back by plan there.</p>
+            <div class="doc-callout-title">Free on every plan</div>
+            <p><x-doc-badge plan="free" /> Generating, downloading and copying event graphics is free on every plan, and so is uploading a flyer to an event. Two parts are <strong class="text-gray-900 dark:text-white">Enterprise</strong>: the <a href="#ai-prompt" class="doc-link">AI text prompt</a> and <a href="#email-scheduling" class="doc-link">scheduled graphic emails</a>. A <a href="{{ route('marketing.docs.selfhost') }}" class="doc-link">selfhosted</a> install counts as Enterprise, so nothing on this page is held back by plan there.</p>
+            <p class="mt-2">On eventschedule.com every graphic carries a small eventschedule.com credit in its bottom-right corner, whatever your plan, and upgrading does not remove it. A selfhosted install adds no credit.</p>
         </div>
 
         <p class="text-gray-600 dark:text-gray-300 mb-4">

@@ -1,8 +1,9 @@
 <x-docs-page
     key="developer/webhooks"
-    description="Receive real-time POST notifications for sales, events, and check-ins. HMAC-signed payloads, configurable event types, and delivery logs."
+    title="Webhooks: Signed Sale and Event Notifications - Event Schedule"
+    description="Signed POST notifications for sales, refunds, installments, events, check-ins and feedback: fourteen event types, HMAC-SHA256 signatures, a delivery log."
     lede="Receive real-time HTTP POST notifications when events happen in your schedules."
-    article-description="Receive real-time POST notifications for sales, events, and check-ins via webhooks."
+    article-description="Signed HTTP POST notifications for sales, refunds, installments, events, check-ins and feedback, with the payload format, signature checks and delivery rules."
     plan="pro"
 >
     <x-slot:toc>
@@ -27,10 +28,10 @@
             Overview <x-doc-badge plan="pro" />
         </h2>
         <p class="text-gray-600 dark:text-gray-300 mb-4">
-            Webhooks let you receive automatic POST notifications on your own server when something happens in your schedules: a ticket is sold, an event changes, a ticket is scanned at the door. Instead of polling the API, your application is notified as it happens.
+            Webhooks let you receive automatic POST notifications on your own server when something happens in your schedules: a ticket is sold or refunded, an event changes, a ticket is scanned at the door. Instead of polling the API, your application is notified as it happens.
         </p>
         <p class="text-gray-600 dark:text-gray-300 mb-4">
-            Each delivery carries an HMAC-SHA256 signature so you can verify the payload really came from Event Schedule, and every attempt is written to a delivery log you can open from your settings.
+            Each delivery carries an HMAC-SHA256 signature so you can verify the payload really came from Event Schedule, and every delivery is written to a delivery log you can open from your settings.
         </p>
 
         <div class="doc-callout doc-callout-plan">
@@ -39,7 +40,7 @@
         </div>
 
         <p class="text-gray-600 dark:text-gray-300 mb-4">
-            Webhooks belong to your <strong class="text-gray-900 dark:text-white">account</strong>, not to an individual schedule. One endpoint receives activity from every schedule you own, and the schedule is identifiable from the payload. Add more than one endpoint if you want to route different event types to different services.
+            Webhooks belong to your <strong class="text-gray-900 dark:text-white">account</strong>, not to an individual schedule, and each delivery goes to the account that created the event. Events you create, in the admin panel or through the API, reach your endpoints whichever schedule they sit on, along with every sale on them. An event a teammate created goes to their webhooks instead of yours, and a guest's submission counts as the schedule owner's. The schedule is identifiable from the payload. Add more than one endpoint if you want to route different event types to different services.
         </p>
 
         <h3 class="doc-subheading">How a delivery works</h3>
@@ -61,12 +62,16 @@
                         <td>5 seconds. A slower endpoint is recorded as a failed delivery.</td>
                     </tr>
                     <tr>
-                        <td>Retries</td>
-                        <td>Up to 3 attempts, waiting roughly 30 seconds and then 60 seconds between them.</td>
+                        <td>When it is sent</td>
+                        <td>After the request that caused it has finished and its changes are committed to the database.</td>
                     </tr>
                     <tr>
-                        <td>What is retried</td>
-                        <td>Timeouts, connection errors and <code class="doc-inline-code">5xx</code> responses. Any <code class="doc-inline-code">2xx</code> counts as delivered, and a <code class="doc-inline-code">4xx</code> is treated as a permanent rejection and is not retried.</td>
+                        <td>Retries</td>
+                        <td>None. Each delivery is attempted once, and a failed attempt is written to the delivery log and not sent again. Reconcile against the API for anything you cannot afford to miss.</td>
+                    </tr>
+                    <tr>
+                        <td>What counts as delivered</td>
+                        <td>Any <code class="doc-inline-code">2xx</code>. Anything else, a timeout, a connection error, a <code class="doc-inline-code">4xx</code> or a <code class="doc-inline-code">5xx</code>, is logged as a failed delivery.</td>
                     </tr>
                     <tr>
                         <td>Redirects</td>
@@ -78,7 +83,7 @@
                     </tr>
                     <tr>
                         <td>Delivery log</td>
-                        <td>Every attempt is logged with its status, duration and the first part of your response. The list shows the 20 most recent, and entries are pruned after 30 days.</td>
+                        <td>Every delivery is logged with its status, duration and the first 500 characters of your response. The list shows the 20 most recent, and entries are pruned after 30 days.</td>
                     </tr>
                 </tbody>
             </table>
@@ -96,11 +101,11 @@
         </h2>
         <ol class="doc-list doc-list-numbered mb-6">
             <li>Open <strong class="text-gray-900 dark:text-white">Settings</strong> in the admin panel and choose <strong class="text-gray-900 dark:text-white">Webhooks</strong>, then scroll to the <strong class="text-gray-900 dark:text-white">Add Webhook</strong> form.</li>
-            <li>Enter the <strong class="text-gray-900 dark:text-white">Webhook URL</strong>. It has to be a publicly reachable address, so <code class="doc-inline-code">localhost</code> and private network addresses are refused with "This URL is not allowed". Use HTTPS: the payload contains buyer names, email addresses and ticket links.</li>
+            <li>Enter the <strong class="text-gray-900 dark:text-white">Webhook URL</strong>. It has to be a publicly reachable address, so <code class="doc-inline-code">localhost</code> and private network addresses are refused with "This URL is not allowed." Use HTTPS: the payload contains buyer names, email addresses and ticket links.</li>
             <li>Optionally add a <strong class="text-gray-900 dark:text-white">Description</strong>, a label for your own reference that appears above the URL in the list.</li>
-            <li>Under <strong class="text-gray-900 dark:text-white">Event types</strong>, switch off anything you do not want. Every type is on by default, and leaving them all on subscribes the endpoint to everything, including any type added later.</li>
+            <li>Under <strong class="text-gray-900 dark:text-white">Event types</strong>, switch off anything you do not want. Every type is on by default, and leaving them all on subscribes the endpoint to everything, including any type added later. Switching every type off saves the same thing, a subscription to everything, so use <strong class="text-gray-900 dark:text-white">Disable</strong> to silence a webhook instead.</li>
             <li>Click <strong class="text-gray-900 dark:text-white">Add Webhook</strong>. The signing secret, a 64-character hex string, is shown once with a copy button. Store it before you leave the page: it cannot be displayed again.</li>
-            <li>Send a test ping with the <strong class="text-gray-900 dark:text-white">Test</strong> button on the saved webhook and confirm your endpoint answers with a 2xx status. The result is reported as "Test webhook sent successfully (HTTP 200)" or as a failure with the status it did get.</li>
+            <li>Send a test ping with the <strong class="text-gray-900 dark:text-white">Test</strong> button on the saved webhook and confirm your endpoint answers with a 2xx status. The result is reported as "Test webhook sent successfully (HTTP 200)." or, with the status it did get, "Test webhook failed (HTTP 500)."</li>
         </ol>
 
         <h3 class="doc-subheading">Managing a webhook</h3>
@@ -108,7 +113,7 @@
             Each saved webhook shows its description, URL, the event types it subscribes to (or an <strong class="text-gray-900 dark:text-white">All events</strong> badge) and when it was last triggered. The icon buttons on the right of the row do the following.
         </p>
         <ul class="doc-list">
-            <li><strong class="text-gray-900 dark:text-white">Enable / Disable</strong> - the tick icon pauses or resumes the webhook. A disabled webhook is dimmed in the list and receives nothing, but keeps its secret and its delivery history.</li>
+            <li><strong class="text-gray-900 dark:text-white">Enable / Disable</strong> - the check-circle icon, a crossed-out circle while the webhook is off, pauses or resumes it. A disabled webhook is dimmed in the list and receives nothing, but keeps its secret and its delivery history.</li>
             <li><strong class="text-gray-900 dark:text-white">Test</strong> - the lightning icon sends the test payload described under <a href="#testing" class="doc-link">Testing</a>.</li>
             <li><strong class="text-gray-900 dark:text-white">Edit</strong> - the pencil icon opens an inline form for the URL, description and event types. <strong class="text-gray-900 dark:text-white">Regenerate secret</strong> sits at the bottom of that form; it issues a new secret, shows it once, and immediately invalidates the old one, so update your endpoint in the same sitting.</li>
             <li><strong class="text-gray-900 dark:text-white">Delete</strong> - the trash icon removes the webhook and its delivery log after a confirmation.</li>
@@ -125,7 +130,7 @@
             Event Types
         </h2>
         <p class="text-gray-600 dark:text-gray-300 mb-4">
-            These are the twelve types you can subscribe to. They are the same list, in the same order, as the switches on the Add Webhook form.
+            These are the fourteen event types you can subscribe to. They are the same list, in the same order, as the switches on the Add Webhook form.
         </p>
         <div class="doc-table-wrap mb-6">
             <table class="doc-table">
@@ -137,13 +142,13 @@
                 </thead>
                 <tbody>
                     <tr><td class="font-mono text-sm">sale.created</td><td>An order is created: a checkout, an RSVP, an appointment booking, or a sale created through the API. At this point the sale is normally still unpaid.</td></tr>
-                    <tr><td class="font-mono text-sm">sale.paid</td><td>A sale is confirmed as paid, by Stripe, by Invoice Ninja, by being marked paid on the Sales page, or immediately after <code class="doc-inline-code">sale.created</code> for a free order or RSVP.</td></tr>
-                    <tr><td class="font-mono text-sm">sale.refunded</td><td>A sale is refunded from the Sales page or the API.</td></tr>
-                    <tr><td class="font-mono text-sm">sale.cancelled</td><td>A sale is cancelled, either by the owner or by the ticket holder from their ticket page.</td></tr>
+                    <tr><td class="font-mono text-sm">sale.paid</td><td>A sale becomes paid: Stripe, PayPal, Payfast or Invoice Ninja confirms the payment, the buyer comes back from a payment link, it is marked paid on the Sales page or through the API, an installment plan's first payment is collected, a platform admin approves a sale held for an amount mismatch, or straight after <code class="doc-inline-code">sale.created</code> for a free order or RSVP.</td></tr>
+                    <tr><td class="font-mono text-sm">sale.refunded</td><td>A sale is fully refunded from the Sales page or the API: Refund sends a Stripe or PayPal sale's money back first, and Mark as Refunded records it for any other method. A partial refund leaves the sale paid and sends nothing. Neither does a platform admin's refund of a sale held for an amount mismatch, nor a refund made in the Stripe or PayPal dashboard, which is never reported back.</td></tr>
+                    <tr><td class="font-mono text-sm">sale.cancelled</td><td>A sale is cancelled by the owner from the Sales page or the API, or a guest cancels their own free registration or free ticket from its ticket page. Deleting a sale, an abandoned checkout, an unpaid sale that expires and a cancelled appointment booking send nothing.</td></tr>
                     <tr><td class="font-mono text-sm">installment.paid</td><td>A payment of an installment plan is collected. Fires once per payment rather than once per installment, so a four-part plan paid monthly sends four of these, but a buyer who settles the balance in one go sends one that clears several rows. The payload is the sale, with an <code class="doc-inline-code">installment</code> object alongside it.</td></tr>
                     <tr><td class="font-mono text-sm">installment.failed</td><td>A scheduled payment could not be collected. Sent on each failed attempt, not only the final one. Read <code class="doc-inline-code">installment.outcome</code> to tell the two causes apart: <code class="doc-inline-code">declined</code> is a card the bank refused, while <code class="doc-inline-code">dead_plan</code>, <code class="doc-inline-code">duplicate</code>, <code class="doc-inline-code">amount_mismatch</code> and <code class="doc-inline-code">nothing_due</code> mean money arrived but could not be applied and is waiting on the organizer. A declined attempt also carries <code class="doc-inline-code">error</code>, <code class="doc-inline-code">attempt</code>, <code class="doc-inline-code">is_final</code> and <code class="doc-inline-code">next_attempt_at</code>. A payment parked for bank authentication is not a failure and sends nothing.</td></tr>
                     <tr><td class="font-mono text-sm">event.created</td><td>An event is published. Publishing an existing draft counts as a creation.</td></tr>
-                    <tr><td class="font-mono text-sm">event.updated</td><td>A published event is saved with changes, including an appointment being rescheduled.</td></tr>
+                    <tr><td class="font-mono text-sm">event.updated</td><td>A published event is saved, whether or not anything changed, an appointment is rescheduled, or a cancelled event is restored. Moving a published event back to draft sends nothing.</td></tr>
                     <tr><td class="font-mono text-sm">event.deleted</td><td>A published event is deleted. The payload is captured before the row is removed.</td></tr>
                     <tr><td class="font-mono text-sm">event.cancelled</td><td>An event is cancelled rather than deleted.</td></tr>
                     <tr><td class="font-mono text-sm">ticket.scanned</td><td>A ticket or pass QR code is scanned and accepted at check-in.</td></tr>
@@ -194,16 +199,17 @@
 }</code></pre>
         </div>
         <p class="text-gray-600 dark:text-gray-300 mt-4 mb-4">
-            For <code class="doc-inline-code">sale.*</code> and <code class="doc-inline-code">event.*</code> the <code class="doc-inline-code">data</code> object is the same record the <a href="{{ route('marketing.docs.developer.api') }}#list-sales" class="doc-link">Sales API</a> and <a href="{{ route('marketing.docs.developer.api') }}#list-events" class="doc-link">Events API</a> return, so one parser can handle both. The real object carries more than the sample above: a sale also includes <code class="doc-inline-code">subdomain</code>, <code class="doc-inline-code">phone</code>, <code class="doc-inline-code">event_date</code>, <code class="doc-inline-code">payment_method</code>, <code class="doc-inline-code">transaction_reference</code>, discount and gift-card totals, <code class="doc-inline-code">total_quantity</code>, <code class="doc-inline-code">group_id</code>, <code class="doc-inline-code">is_primary</code> and timestamps, and each ticket row carries <code class="doc-inline-code">is_addon</code>, <code class="doc-inline-code">is_pass</code> and, for a pass, its usage counters.
+            For <code class="doc-inline-code">sale.*</code> and <code class="doc-inline-code">event.*</code> the <code class="doc-inline-code">data</code> object is the same record the <a href="{{ route('marketing.docs.developer.api') }}#list-sales" class="doc-link">Sales API</a> and <a href="{{ route('marketing.docs.developer.api') }}#list-events" class="doc-link">Events API</a> return, so one parser can handle both. The real object carries more than the sample above: a sale also includes <code class="doc-inline-code">subdomain</code>, <code class="doc-inline-code">phone</code>, <code class="doc-inline-code">event_date</code>, <code class="doc-inline-code">payment_method</code>, <code class="doc-inline-code">transaction_reference</code>, discount and gift-card totals, <code class="doc-inline-code">total_quantity</code>, <code class="doc-inline-code">group_id</code>, <code class="doc-inline-code">is_primary</code> and timestamps, and each ticket row carries <code class="doc-inline-code">is_addon</code>, <code class="doc-inline-code">is_pass</code>, for a pass its usage counters, and on an event with allocated seating the <code class="doc-inline-code">seats</code> it holds. There is no currency field: read the event's <code class="doc-inline-code">ticket_currency_code</code> from the Events API.
         </p>
 
         <div class="doc-callout doc-callout-warning">
             <div class="doc-callout-title">Sale payloads contain the ticket secret</div>
-            <p>Unlike an API response, a <code class="doc-inline-code">sale.*</code> webhook always includes the sale's <code class="doc-inline-code">secret</code>, the token that opens the ticket page and its QR code. Treat the whole payload as sensitive: use HTTPS, and do not log it or forward it somewhere public.</p>
+            <p>A <code class="doc-inline-code">sale.*</code> webhook always includes the sale's <code class="doc-inline-code">secret</code>, the token that opens the ticket page and its QR code, where the API returns it only to the account that created the event or placed the sale. Treat the whole payload as sensitive: use HTTPS, and do not log it or forward it somewhere public.</p>
         </div>
 
         <h3 class="doc-subheading">Types with extra fields</h3>
         <ul class="doc-list">
+            <li><code class="doc-inline-code">installment.paid</code> and <code class="doc-inline-code">installment.failed</code> add an <code class="doc-inline-code">installment</code> object with <code class="doc-inline-code">sequence</code>, <code class="doc-inline-code">amount</code>, <code class="doc-inline-code">outcome</code>, <code class="doc-inline-code">reference</code> and a <code class="doc-inline-code">plan</code> summary: <code class="doc-inline-code">status</code>, <code class="doc-inline-code">currency</code>, <code class="doc-inline-code">total_amount</code>, <code class="doc-inline-code">amount_paid</code>, <code class="doc-inline-code">amount_remaining</code>, <code class="doc-inline-code">installment_count</code>, <code class="doc-inline-code">installments_paid</code>, <code class="doc-inline-code">next_due_at</code> and <code class="doc-inline-code">next_amount</code>.</li>
             <li><code class="doc-inline-code">ticket.scanned</code> from a pass adds <code class="doc-inline-code">scanned_event_id</code> and <code class="doc-inline-code">scanned_event_date</code>, so you can tell which occurrence the pass was used on.</li>
             <li><code class="doc-inline-code">ticket.booked</code> adds <code class="doc-inline-code">booked_event_id</code> and <code class="doc-inline-code">booked_event_date</code>.</li>
             <li><code class="doc-inline-code">ticket.booking_cancelled</code> adds the same two fields plus <code class="doc-inline-code">forfeited</code>, which is <code class="doc-inline-code">true</code> when the release happened after the cancellation cutoff and the visit was used up.</li>
@@ -230,7 +236,7 @@
                 <tbody>
                     <tr><td class="font-mono text-sm">X-Webhook-Signature</td><td>HMAC-SHA256 signature: <code class="doc-inline-code">sha256=&lt;hex&gt;</code></td></tr>
                     <tr><td class="font-mono text-sm">X-Webhook-Event</td><td>The event type (e.g. <code class="doc-inline-code">sale.paid</code>), matching <code class="doc-inline-code">event</code> in the body</td></tr>
-                    <tr><td class="font-mono text-sm">X-Webhook-Timestamp</td><td>ISO 8601 timestamp of when this attempt was sent. On a retry it is newer than the <code class="doc-inline-code">timestamp</code> in the body, which is fixed when the payload is built.</td></tr>
+                    <tr><td class="font-mono text-sm">X-Webhook-Timestamp</td><td>ISO 8601 time the request was sent. It can be a moment later than the <code class="doc-inline-code">timestamp</code> in the body, which is fixed when the payload is built.</td></tr>
                     <tr><td class="font-mono text-sm">Content-Type</td><td><code class="doc-inline-code">application/json</code></td></tr>
                     <tr><td class="font-mono text-sm">User-Agent</td><td><code class="doc-inline-code">EventSchedule-Webhook/1.0</code></td></tr>
                 </tbody>
@@ -273,11 +279,12 @@ $data = json_decode($payload, true);</code></pre>
             <pre><code>const crypto = require('crypto');
 
 function verifyWebhook(body, signature, secret) {
-const expected = 'sha256=' +
-crypto.createHmac('sha256', secret).update(body).digest('hex');
-return crypto.timingSafeEqual(
-Buffer.from(expected), Buffer.from(signature)
-);
+const expected = Buffer.from('sha256=' +
+crypto.createHmac('sha256', secret).update(body).digest('hex'));
+const received = Buffer.from(signature || '');
+// timingSafeEqual throws when the lengths differ
+return expected.length === received.length &&
+crypto.timingSafeEqual(expected, received);
 }</code></pre>
         </div>
 
@@ -302,13 +309,13 @@ return hmac.compare_digest(expected, signature)</code></pre>
             Best Practices
         </h2>
         <ul class="doc-list">
-            <li><strong class="text-gray-900 dark:text-white">Respond quickly.</strong> Return a 2xx status within 5 seconds. Queue the real work and acknowledge receipt first, or a slow database write will be recorded as a failed delivery and retried.</li>
+            <li><strong class="text-gray-900 dark:text-white">Respond quickly.</strong> Return a 2xx status within 5 seconds. Queue the real work and acknowledge receipt first, or a slow database write will be recorded as a failed delivery, and a failed delivery is not sent again.</li>
             <li><strong class="text-gray-900 dark:text-white">Verify signatures.</strong> Always validate the <code class="doc-inline-code">X-Webhook-Signature</code> header before processing any payload, and reject anything that does not match.</li>
-            <li><strong class="text-gray-900 dark:text-white">Expect duplicates.</strong> A timeout on your side still counts as a failure, so a delivery you did process can arrive again. Use <code class="doc-inline-code">data.id</code> together with <code class="doc-inline-code">event</code> as an idempotency key, and fall back to the event and attendee for <code class="doc-inline-code">feedback.submitted</code>, which has no id.</li>
+            <li><strong class="text-gray-900 dark:text-white">Treat each delivery as the latest state.</strong> One record can be reported many times in ordinary use: <code class="doc-inline-code">event.updated</code> fires on every save of a published event. Key on <code class="doc-inline-code">data.id</code> together with <code class="doc-inline-code">event</code>, and fall back to the event and attendee for <code class="doc-inline-code">feedback.submitted</code>, which has no id.</li>
             <li><strong class="text-gray-900 dark:text-white">Answer at the registered URL.</strong> Redirects are not followed, so a 301 from <code class="doc-inline-code">http</code> to <code class="doc-inline-code">https</code> or from a bare domain to <code class="doc-inline-code">www</code> is recorded as a failure. Register the final URL.</li>
             <li><strong class="text-gray-900 dark:text-white">Use HTTPS.</strong> Payloads carry buyer names, email addresses and ticket secrets, so they should never cross the network in the clear.</li>
-            <li><strong class="text-gray-900 dark:text-white">Return a 4xx only when you mean it.</strong> A 4xx is treated as a permanent rejection and stops the retries; use a 5xx when you want the delivery attempted again.</li>
-            <li><strong class="text-gray-900 dark:text-white">Monitor deliveries.</strong> Open <strong class="text-gray-900 dark:text-white">View recent deliveries</strong> in your webhook settings to debug failures. The response body you return is stored with the log, so a descriptive error message there pays for itself.</li>
+            <li><strong class="text-gray-900 dark:text-white">Reconcile what you cannot miss.</strong> No response earns a second attempt: a 4xx, a 5xx and a timeout all end as one failed log entry. After an outage on your side, catch up from the <a href="{{ route('marketing.docs.developer.api') }}#list-sales" class="doc-link">Sales API</a>, for example with <code class="doc-inline-code">GET /api/sales?status=refunded</code>.</li>
+            <li><strong class="text-gray-900 dark:text-white">Monitor deliveries.</strong> Open <strong class="text-gray-900 dark:text-white">View recent deliveries</strong> in your webhook settings to debug failures. The first 500 characters of the response body you return are stored with the log, so a descriptive error message there pays for itself.</li>
         </ul>
     </section>
 
@@ -331,7 +338,7 @@ return hmac.compare_digest(expected, signature)</code></pre>
 }</code></pre>
         </div>
         <p class="text-gray-600 dark:text-gray-300 mt-4">
-            The test is signed and sent exactly like a real delivery, with the same headers and the same 5 second timeout, so it verifies your signature check as well as your URL. It is not retried, it ignores the event types you subscribed to, and it works whatever plan your schedules are on, which makes it the quickest way to prove the endpoint itself before you wait for real activity. The result is written to the delivery log alongside everything else.
+            The test is signed and sent exactly like a real delivery, with the same headers and the same 5 second timeout, so it verifies your signature check as well as your URL. It ignores the event types you subscribed to, it is sent even to a disabled webhook, and it works whatever plan your schedules are on, which makes it the quickest way to prove the endpoint itself before you wait for real activity. The result is written to the delivery log alongside everything else.
         </p>
     </section>
 

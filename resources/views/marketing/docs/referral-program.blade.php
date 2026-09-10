@@ -1,6 +1,7 @@
 <x-docs-page
     key="referral-program"
-    description="Learn how to earn free months of Event Schedule by referring other event organizers through the referral program."
+    title="Referral Program: Earn Free Months - Event Schedule"
+    description="Refer other organizers to Event Schedule and earn a free month of Pro or Enterprise for each one who subscribes and stays subscribed for 30 days."
     lede="Earn free months of Event Schedule by sharing your referral link with other event organizers."
 >
     <x-slot:toc>
@@ -57,7 +58,8 @@
 
         <h3 class="doc-subheading">What counts as a referral</h3>
         <ul class="doc-list mb-6">
-            <li>The visitor has to reach Event Schedule through your link and sign up in the same browsing session. The code is held in their session, not in a long-lived cookie, so a visit today and a signup next week will not be linked.</li>
+            <li>The visitor has to reach Event Schedule through your link and sign up in the same browsing session. The code is held only for that session, not in a long-lived cookie, so a visit today and a signup next week will not be linked.</li>
+            <li>The first referral link counts. If they followed another organizer's link earlier in the same session, that organizer gets the referral, not you.</li>
             <li>Each person can be referred once. If someone already has an Event Schedule account, or was already referred by another organizer, a new referral is not created for them.</li>
             <li>You cannot refer yourself. A signup that matches your own account is ignored.</li>
             <li>The 30-day clock starts when the subscription starts, and the 7-day free trial counts towards it.</li>
@@ -277,7 +279,7 @@
                     </tr>
                     <tr>
                         <td><span class="font-semibold text-gray-900 dark:text-white">Expired</span></td>
-                        <td>The referral can no longer earn anything. This happens two ways: they subscribed but cancelled before the 30 days were up, or they never subscribed at all and 90 days have passed since they signed up</td>
+                        <td>The referral can no longer earn anything. This happens two ways: their subscription ended before the 30 days were up, or they never subscribed at all and 90 days have passed since they signed up. Cancelling alone does not expire it: a cancelled subscription still counts until its paid time runs out</td>
                     </tr>
                 </tbody>
             </table>
