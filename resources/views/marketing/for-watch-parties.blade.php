@@ -1366,7 +1366,7 @@
                                         </div>
                                     </div>
                                 @endforeach
-                                <p class="es-scr-muted mt-3 es-scr-xxs">Viewer suggestions wait for your approval, and you get an email when some are pending.</p>
+                                <p class="es-scr-muted mt-3 es-scr-xxs">Viewer suggestions wait for your approval. On eventschedule.com, an opt-in email flags pending ones once your schedule has its own email settings.</p>
                             </div>
                         </div>
                         <div class="es-glare" aria-hidden="true"></div>

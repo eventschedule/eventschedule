@@ -640,9 +640,9 @@
         $doorSide = [
             ['A QR code per ticket', 'It is on the buyer\'s ticket page, which checkout lands them on, and it goes out with the confirmation email.'],
             ['Add to Google Wallet', 'The ticket page, the order page and the confirmation email carry an Add to Google Wallet button, free registrations included. The pass holds the same QR code, so it scans like any other ticket.'],
-            ['Your own email sender', 'Connect one once under Schedule Settings, Integrations, Email. Until you do, the sale and the ticket page work but no confirmation email leaves.'],
+            ['Your own email sender', 'Optional. Add one once in the schedule\'s settings, under Integrations, Email Settings, and confirmations leave from your own address. Until you do, they leave from ours.'],
             ['Individual tickets', 'Turn it on and every guest on the order gets their own email and their own code.'],
-            ['If the plans change', 'Change the date, the time or the venue and the editor asks whether to email everyone holding a ticket, with a note from you; cancelling offers the same. Buyers hear from your own email sender, and the interest list hears too.'],
+            ['If the plans change', 'Change the date, the time or the venue and the editor asks whether to email everyone holding a ticket, with a note from you; cancelling offers the same. Buyers hear once your own email sender is added, and the interest list hears either way.'],
             ['Scan from a phone', 'Sales, then Scan Tickets, then point the camera. No hardware to buy or rent.'],
             ['One admission per ticket', 'A second scan comes back as an orange warning over the holder details, and no second admission is recorded.'],
             ['It refuses for a reason', 'Unpaid, cancelled, refunded, too early, too late: each one names itself.'],
@@ -651,7 +651,7 @@
         ];
 
         $afterSale = [
-            ['Sale notification emails', 'An email each time a ticket sells, with the buyer, the ticket type, the amount, the status and any code used. The first paid sale on an event always notifies you, whatever plan you are on.', 'Pro'],
+            ['Sale notification emails', 'An email each time a ticket sells, with the buyer, the ticket type, the amount, the status and any code used. The first paid sale on an event notifies you, whatever plan you are on.', 'Pro'],
             ['Sales CSV export', 'Buyer, ticket type, amount, promo code, payment method, check-in status and every custom answer.', 'Pro'],
             ['Ticket waitlist', 'When a date sells out, guests can join. One person is notified at a time, with a 24 hour link to buy.', 'Pro'],
             ['Bulk attendee import', 'Paste rows or upload a CSV for people who paid out of band. Up to 5,000 in one go.', 'Pro'],
@@ -678,7 +678,7 @@
             ],
             [
                 'q' => 'How does QR code check-in work?',
-                'a' => 'Every ticket carries its own QR code, shown on the buyer\'s ticket page and sent with the confirmation email once you have connected an email sender under Schedule Settings, Integrations, Email. At the door you open Sales on your phone, tap Scan Tickets and point the camera. Each ticket admits once: scan it again and you get a warning instead of an entry. The check-in dashboard refreshes every 10 seconds with the running count and a per-ticket-type breakdown.',
+                'a' => 'Every ticket carries its own QR code, shown on the buyer\'s ticket page and sent with the confirmation email. At the door you open Sales on your phone, tap Scan Tickets and point the camera. Each ticket admits once: scan it again and you get a warning instead of an entry. The check-in dashboard refreshes every 10 seconds with the running count and a per-ticket-type breakdown.',
             ],
             [
                 'q' => 'Can buyers save their tickets to Google Wallet?',
@@ -714,7 +714,7 @@
             ],
             [
                 'q' => 'Can I get notified when tickets sell, and export the data?',
-                'a' => 'Both. Turn on sale notification emails under Schedule, Settings, Notifications to get an email whenever a ticket sells, with the buyer, the ticket type, the amount, the payment status and any code applied. And the Sales list exports to CSV with buyer details, amounts, promo codes, payment method, check-in status and every custom field answer, ready for a spreadsheet.',
+                'a' => 'Both. Turn on New ticket sale under Schedule, Settings, Notifications to get an email when a ticket sells, with the buyer, the ticket type, the amount, the payment status and any code applied: the first paid sale on each event on any plan, every sale on Pro. On eventschedule.com that email goes out once your schedule has its own email settings. And the Sales list exports to CSV with buyer details, amounts, promo codes, payment method, check-in status and every custom field answer, ready for a spreadsheet.',
             ],
         ];
 
@@ -1243,6 +1243,9 @@
                     </div>
                 @endforeach
             </div>
+            <p class="es-turn-muted mx-auto mt-8 max-w-3xl text-center text-sm" data-reveal>
+                On eventschedule.com, sale notification emails and feedback requests go out, and gift cards go on sale, once your schedule has its own email settings.
+            </p>
         </div>
     </section>
 

@@ -470,7 +470,7 @@
                 // EventInterestController::store: one field, single opt-in, and no user is created.
                 // Unsubscribing deletes the row rather than suppressing it.
                 'Hear when tickets go on sale',
-                'On an event page, "Tell me when tickets go on sale" (or "Tell me if anything changes", once they are on sale) takes an email address and nothing else, not even a name. You get one email when tickets go on sale, one if the date or venue changes, one if it is cancelled, and a reminder shortly before it starts. It covers that one date, creates no account, and unsubscribing deletes the address.',
+                'On an event page, "Tell me when tickets go on sale" (or "Tell me if anything changes", once they are on sale) takes an email address and nothing else, not even a name. You get one email when tickets go on sale, one if it is cancelled and a reminder shortly before it starts, plus any notice the organizer chooses to send if the date or venue changes. It covers that one date, creates no account, and unsubscribing deletes the address.',
             ],
             [
                 // RoleSubscriberController::store is on the guest routes, not behind auth:

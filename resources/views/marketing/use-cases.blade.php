@@ -396,7 +396,7 @@
                     blurb="Get a signed POST the moment a ticket sells, an event changes, or someone scans in at the door."
                     accent="slate"
                     :external="false"
-                    :tags="['HMAC-SHA256 signed', 'Automatic retries', 'Delivery log']">
+                    :tags="['HMAC-SHA256 signed', 'Fourteen event types', 'Delivery log']">
                     <x-slot name="icon"><path stroke-linecap="round" stroke-linejoin="round" d="M13 10V3L4 14h7v7l9-11h-7z" /></x-slot>
                 </x-marketing.audience-card>
                 <x-marketing.audience-card

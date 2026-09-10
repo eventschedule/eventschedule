@@ -1690,8 +1690,8 @@ Included in `meta` for paginated responses.
 
 | Endpoint Type | Limit | Window |
 |--------------|-------|--------|
-| GET requests | 300 requests | Per minute |
-| POST/PUT/DELETE requests | 30 requests | Per minute |
+| GET requests | 300 requests | Per minute, per IP address |
+| POST/PUT/DELETE requests | 30 requests | Per minute, per IP address |
 | Registration (POST /register) | 3 attempts | Per IP per hour |
 | Login (POST /login) | 5 attempts | Per IP per 15 minutes |
 | Verification codes (POST /register/send-code) | 5 codes | Per email per hour |

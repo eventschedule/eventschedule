@@ -421,7 +421,7 @@
                     <div class="es-punch-panel p-6" data-reveal="panel">
                         <h3 class="es-punch-ink text-base font-bold">Nobody is caught out by it</h3>
                         <p class="es-punch-muted mt-2 text-sm leading-relaxed">
-                            The rule shows on the ticket before purchase, beside every booked date on the pass page, and in the booking confirmation. A late cancellation asks for explicit confirmation before it spends the visit, and any booking can be undone with full credit within fifteen minutes of being made, even past the deadline. When a seat comes free before the event, the waiting list hears about it.
+                            The rule shows on the ticket before purchase, beside every booked date on the pass page, and in the booking confirmation email, which on eventschedule.com goes out once your schedule has its own email settings. A late cancellation asks for explicit confirmation before it spends the visit, and any booking can be undone with full credit within fifteen minutes of being made, even past the deadline. When a seat comes free before the event, the waiting list hears about it.
                         </p>
                     </div>
                 </div>

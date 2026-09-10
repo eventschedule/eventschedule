@@ -85,7 +85,7 @@
                 "@type": "HowToStep",
                 "position": 3,
                 "name": "Go on air",
-                "text": "Everyone who registered gets their own registration page carrying the join link. Swap the link and Event Schedule offers to email them all before it saves."
+                "text": "Everyone who registered gets their own registration page carrying the join link. Swap the link and Event Schedule offers to email them all before it saves (on eventschedule.com, once your schedule has its own email settings)."
             }
         ]
     }
@@ -913,7 +913,7 @@
                 </div>
 
                 <p class="es-air-rack-lede mt-10 text-center" data-reveal>
-                    On the hosted service, attendee email leaves through your own SMTP details, added once in the integrations tab on any plan.
+                    On the hosted service the confirmation goes out either way, but change and cancellation notices reach registrants only once your own SMTP details are in the integrations tab, which any plan can do.
                     <a href="#platform" class="es-air-lit inline-flex items-center gap-1 font-semibold transition-all hover:gap-2">
                         Next, the patch bay
                         <svg aria-hidden="true" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 14l-7 7m0 0l-7-7m7 7V3" /></svg>
@@ -1452,7 +1452,7 @@
                 @foreach ([
                     ['03', 'Paste the link', 'Create the session, paste your meeting or streaming link into the Event URL field, and type the running order if it has segments.'],
                     ['02', 'Open registration', 'Free registration with a capacity limit, or named ticket types through your own Stripe or PayPal account. Either way the platform fee is zero.'],
-                    ['01', 'Go on air', 'Everyone who registered has their own page with the join link. Swap the link and you are asked whether to email them all.'],
+                    ['01', 'Go on air', 'Everyone who registered has their own page with the join link. Swap the link and you are asked whether to email them all, which on eventschedule.com needs your schedule to have its own email settings.'],
                 ] as [$stepNum, $stepTitle, $stepBody])
                     <div class="es-air-card p-7" data-reveal="panel">
                         <div class="es-air-accent es-air-num mb-3 text-3xl font-black">{{ $stepNum }}</div>
