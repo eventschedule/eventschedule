@@ -326,7 +326,7 @@ class NewsletterController extends Controller
         // Trust gate, scaled to the size of the send. Checked here rather than before the
         // newsletter is loaded, because the recipient count is what decides it.
         if ($this->requiresNewsletterVerification($role, $estimatedCount)) {
-            return back()->with('error', __('messages.newsletter_requires_verification'));
+            return back()->with('error', __('messages.newsletter_requires_verification', ['limit' => (int) config('usage.audience_mail_unverified_max_recipients', 50)]));
         }
 
         // On sync queue, large sends would timeout the HTTP request - advise scheduling instead
@@ -345,7 +345,7 @@ class NewsletterController extends Controller
         }
 
         if (is_array($result) && $result[0] === 'requires_verification') {
-            return back()->with('error', __('messages.newsletter_requires_verification'));
+            return back()->with('error', __('messages.newsletter_requires_verification', ['limit' => (int) config('usage.audience_mail_unverified_max_recipients', 50)]));
         }
 
         if (is_array($result) && $result[0] === 'limit_exceeded') {
@@ -379,7 +379,7 @@ class NewsletterController extends Controller
             ->resolveRecipients($role, $newsletter->segment_ids ?? [])->count();
 
         if ($this->requiresNewsletterVerification($role, $estimatedCount)) {
-            return back()->with('error', __('messages.newsletter_requires_verification'));
+            return back()->with('error', __('messages.newsletter_requires_verification', ['limit' => (int) config('usage.audience_mail_unverified_max_recipients', 50)]));
         }
 
         if (! in_array($newsletter->status, ['draft', 'scheduled'])) {
@@ -509,7 +509,7 @@ class NewsletterController extends Controller
         $role = $this->getRole($request);
 
         if ($this->requiresNewsletterVerification($role, 1)) {
-            return back()->with('error', __('messages.newsletter_requires_verification'));
+            return back()->with('error', __('messages.newsletter_requires_verification', ['limit' => (int) config('usage.audience_mail_unverified_max_recipients', 50)]));
         }
 
         if (empty($role->email)) {
@@ -1028,7 +1028,7 @@ class NewsletterController extends Controller
         if ($this->requiresNewsletterVerification($role, $allRecipients->count())) {
             $abTest->update(['status' => 'pending']);
 
-            return back()->with('error', __('messages.newsletter_requires_verification'));
+            return back()->with('error', __('messages.newsletter_requires_verification', ['limit' => (int) config('usage.audience_mail_unverified_max_recipients', 50)]));
         }
 
         // Check if total recipients would exceed the email limit

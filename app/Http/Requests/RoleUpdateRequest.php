@@ -133,7 +133,7 @@ class RoleUpdateRequest extends FormRequest
                     }
 
                     if (Role::isReservedCustomDomainHost($host)) {
-                        $fail(__('messages.invalid_custom_domain'));
+                        $fail(__('messages.invalid_custom_domain', ['domain' => $host]));
                     }
                 },
                 function ($attribute, $value, $fail) use ($role) {

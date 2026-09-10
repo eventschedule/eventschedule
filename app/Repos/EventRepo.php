@@ -2299,7 +2299,7 @@ class EventRepo
                 // hasAnyoneToTell(), not hasRecipients(): the latter counts SALES only, so an
                 // event with an interest list and no sales never dispatched at all and the
                 // interest half of notifyChange() was unreachable - while event_interest_help
-                // promised "one if the date or venue changes".
+                // promised a note "if the date or venue changes and the organizer sends one".
                 if ($notifyRequested && ! $isPast && EventChangeNotifier::hasAnyoneToTell($event)) {
                     $note = $request->input('notify_message');
                     NotifyEventChange::dispatch($event->id, $changes, $note ? Str::limit($note, 280, '') : null);

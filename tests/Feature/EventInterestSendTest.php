@@ -317,7 +317,7 @@ class EventInterestSendTest extends TestCase
 
     public function test_a_cancellation_reaches_the_interest_list_without_the_schedules_own_smtp(): void
     {
-        // The promise in event_interest_help is "one if the date or venue changes". Buyers keep the
+        // The promise in event_interest_help includes "one if it is cancelled". Buyers keep the
         // hasEmailSettings() gate they have always had - a receipt came from that address, so a
         // platform-branded follow-up would be a surprise - but the interest list cannot sit behind
         // it, or the promise is false for every schedule on the platform mailer, which is most of
@@ -462,7 +462,7 @@ class EventInterestSendTest extends TestCase
         // Queue::assertPushed() proves a job was QUEUED. It does not prove that running it does
         // anything - and for three commits it did not: NotifyEventCancelled::handle() bailed on
         // hasEmailSettings() before ever calling the notifier, so the interest list heard nothing
-        // while event_interest_help promised "one if the date or venue changes". The dispatch-level
+        // while event_interest_help promised "one if it is cancelled". The dispatch-level
         // test above passed throughout.
         //
         // This runs the job BODY, which is the only thing that could have caught it.
