@@ -998,7 +998,9 @@ class Event extends Model
             }
         }
 
-        // Fallback to original logic (so downstream "not configured" error still fires)
+        // No schedule on the event has its own email settings. Return the venue or the first schedule
+        // anyway: transactional mail (ticket confirmations) then goes out through the platform
+        // mailer, and the strict gates (sale notifications, gift cards) still refuse on their own.
         return $venue ?: $firstRole;
     }
 

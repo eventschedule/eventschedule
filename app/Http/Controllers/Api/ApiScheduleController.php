@@ -149,10 +149,12 @@ class ApiScheduleController extends Controller
 
         $role->save();
 
-        // Mirrors RoleController::store(). Role::boot() has no created hook, so without
-        // this an API-created schedule sits unverified with no email ever sent, and an
-        // unverified schedule never gets a public page. The guard skips the rows the
-        // block above already verified (selfhost, or the owner's own address).
+        // Mirrors the email half of RoleController::store(). Role::boot() has no created
+        // hook, so without this an API-created schedule sits unverified with no email ever
+        // sent, and a schedule with neither a verified email nor a verified phone is not
+        // claimed, so its public page redirects away (RoleController::viewGuest). The guard
+        // skips the rows the block above already verified: selfhost, or the owner's own
+        // address when the owner has verified it.
         if (! $role->email_verified_at) {
             $role->sendEmailVerificationNotification();
         }

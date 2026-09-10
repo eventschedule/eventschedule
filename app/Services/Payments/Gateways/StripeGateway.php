@@ -89,10 +89,10 @@ class StripeGateway extends PaymentGatewayDriver
      * Issue the refund and return Stripe's own refund id.
      *
      * Deliberately mirrors createStripeSession()'s rail choice rather than trying one key and then
-     * the other. AdminController::refundSale() does try both, and it is wrong twice over: it never
-     * passes `stripe_account`, so on a hosted Connect charge the first call fails resource_missing,
-     * and the fallback then reaches for a different account's credentials entirely. Refunding from
-     * the wrong account is worse than failing to refund.
+     * the other. The admin Revenue page's refund used to try both, without `stripe_account`, so on
+     * a hosted Connect charge the first call failed resource_missing and the fallback reached for a
+     * different account's credentials; it now goes through SaleRefundService like every other
+     * refund. Refunding from the wrong account is worse than failing to refund.
      */
     public function refund(Sale $sale, ?float $amount, string $idempotencyKey, ?SaleInstallment $leg = null, ?string $currency = null): string
     {

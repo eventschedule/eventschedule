@@ -751,10 +751,11 @@ class MetaAdsService
     /**
      * Report one paid sale leg as a Purchase conversion.
      *
-     * The single implementation, because there are now TWO ways a sale reaches `paid`: the ordinary
-     * Stripe webhook, and InstallmentService::settle() when the first installment lands. The
-     * installment path breaks out of the webhook before its conversion call, so an event running a
-     * boost campaign silently lost attribution for every payment-plan purchase.
+     * The single implementation, because a sale reaches `paid` two ways: SaleSettlementService::settle(),
+     * which every payment method settles through (Stripe, PayPal, Payfast, Invoice Ninja, payment
+     * links, free checkouts), and InstallmentService::settle() when the first installment lands.
+     * The installment path used to have no conversion call at all, so an event running a boost
+     * campaign silently lost attribution for every payment-plan purchase.
      *
      * Best effort by construction: the money is already collected by the time this runs, so a Meta
      * outage must never unwind it. Everything is inside the try, and a sale on an event with no

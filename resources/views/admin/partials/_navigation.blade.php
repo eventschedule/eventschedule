@@ -3,9 +3,11 @@
 
 @php
     $insightsActive = in_array($active, ['users', 'revenue', 'analytics', 'usage', 'growth']);
-    $manageKeys = ['boost', 'newsletters'];
+    // Schedules is on every install (it is the only way back from a takedown), so it lights the
+    // Manage tab everywhere; domains, referrals and blog are hosted-only.
+    $manageKeys = ['boost', 'schedules', 'newsletters'];
     if (config('app.hosted')) {
-        $manageKeys = array_merge($manageKeys, ['schedules', 'domains', 'referrals', 'blog']);
+        $manageKeys = array_merge($manageKeys, ['domains', 'referrals', 'blog']);
     }
     $manageActive = in_array($active, $manageKeys);
     $systemActive = in_array($active, ['audit-log', 'queue', 'logs', 'app-update', 'support', 'settings', 'translations', 'legal', 'federation']);
