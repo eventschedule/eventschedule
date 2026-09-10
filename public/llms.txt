@@ -6,9 +6,9 @@ Key details:
 
 - **Schedule types**: Venue (physical locations), Talent (performers), Curator (event organizers)
 - **Authentication**: API key via `X-API-Key` header, obtained through registration or login
-- **Plans**: Read operations (GET) are free but require a Pro schedule. Write operations (POST/PUT/DELETE) require a Pro plan.
+- **Plans**: The API is part of the Pro plan: reads return only Pro schedules' data, and writes (POST/PUT/DELETE) need a Pro schedule. Recording a sale with `POST /api/sales` also works on the free plan, within its 25 paid tickets a month.
 - **Rate limits**: 300 GET requests/min, 30 POST/PUT/DELETE requests/min
-- **Languages**: Auto-translation to 11 languages
+- **Languages**: 12 supported languages, with automatic translation of event content
 - **Deployment**: Hosted SaaS at eventschedule.com or selfhosted
 
 ## API Documentation
@@ -27,8 +27,8 @@ Key details:
 
 ## Platform Information
 
-- [Features](https://eventschedule.com/features): Full feature overview including ticketing, calendar sync, analytics, and more
-- [Pricing](https://eventschedule.com/pricing): Pro plan required for API access (first year free), zero platform fees on tickets
+- [Features](https://eventschedule.com/features): Full feature overview: ticketing, refunds, PayPal and Stripe payments, Google/Outlook/CalDAV calendar sync, newsletters, analytics, and more
+- [Pricing](https://eventschedule.com/pricing): Pro plan required for API access (7-day free trial). The free plan sells up to 25 paid tickets a month, and every plan has zero platform fees on tickets
 - [For AI Agents](https://eventschedule.com/for-ai-agents): Overview of API capabilities for AI agents and developers
 - [Documentation](https://eventschedule.com/docs): User guides for schedules, events, tickets, and integrations
 

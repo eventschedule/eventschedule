@@ -4,7 +4,7 @@
 
 ## Platform Overview
 
-Event Schedule is an open-source event management platform available as hosted SaaS at eventschedule.com or as a selfhosted deployment. It provides a full REST API with OpenAPI 3.0 spec for programmatic event management, ticketing with zero platform fees, Google Calendar sync, AI-powered event parsing, auto-generated event graphics, newsletters, analytics, and more.
+Event Schedule is an open-source event management platform available as hosted SaaS at eventschedule.com or as a selfhosted deployment. It provides public schedule pages, ticketing with zero platform fees (the free plan sells up to 25 paid tickets a month), refunds through Stripe and PayPal, two-way Google, Outlook and CalDAV calendar sync, AI-powered event parsing, newsletters and automatic new-event digests, analytics, and a full REST API with an OpenAPI 3.0 spec.
 
 ### Schedule Types
 
@@ -16,14 +16,15 @@ Every account organizes events under one or more **schedules**. There are three 
 
 ### Deployment Modes
 
-- **Hosted** (eventschedule.com): Multi-tenant SaaS using subdomains (e.g., `my-venue.eventschedule.com`). Email verification required for registration. Payments via Stripe Connect.
-- **Selfhosted**: Single-tenant deployment using path-based routing (e.g., `yourdomain.com/my-venue`). No email verification needed. Direct Stripe integration or Invoice Ninja for payments.
+- **Hosted** (eventschedule.com): Multi-tenant SaaS using subdomains (e.g., `my-venue.eventschedule.com`). Email verification required for registration. Each schedule owner connects their own payment account: Stripe (through Stripe Connect), PayPal, Payfast (South African rand only) or Invoice Ninja, or takes payment through a payment link or in cash.
+- **Selfhosted**: Single-tenant deployment using path-based routing (e.g., `yourdomain.com/my-venue`). No email verification needed. Stripe runs on the install's own API keys; PayPal and Payfast can be supplied for the whole install or connected per owner; Invoice Ninja, payment links and cash work as on the hosted service. Every Pro and Enterprise feature is included.
 
 ### Key Differentiators
 
 - **Zero platform fees**: Event Schedule charges no percentage on ticket sales. You only pay standard payment processor fees.
+- **A free plan that sells**: Up to 25 paid tickets a month per schedule, with QR scanning at the door and refunds on every plan.
 - **Open source**: Full source code available. Selfhost on your own infrastructure.
-- **AI-powered**: Gemini-powered event parsing from text/images, auto-translation to 11 languages.
+- **AI-powered**: Gemini-powered event parsing from text/images, auto-translation across the 12 supported languages.
 - **API-first**: Complete REST API with OpenAPI 3.0 spec and agents.json for AI agent integration.
 
 ---
@@ -1315,7 +1316,7 @@ curl https://eventschedule.com/api/categories \
 
 #### POST /sales
 
-Create a ticket sale for an event. The event must have tickets enabled and belong to a Pro schedule.
+Record a ticket sale against an event, for example when someone paid at the door or through a channel Event Schedule does not handle. The event must have ticketing enabled and still be selling. This endpoint has no Pro gate: a free schedule can use it within its monthly paid-ticket allowance, although the sale will not appear in `GET /sales` until the schedule is on a paid plan.
 
 **Authentication**: Required
 
@@ -1326,7 +1327,8 @@ Create a ticket sale for an event. The event must have tickets enabled and belon
 | name | string | Yes | Buyer name (max 255 chars) |
 | email | string | Yes | Buyer email (max 255 chars) |
 | tickets | object | Yes | Map of ticket identifier to quantity (see below) |
-| event_date | date | No | Specific date for recurring events (Y-m-d). Defaults to event start date. |
+| addons | object | No | Map of encoded add-on IDs to quantities |
+| event_date | date | No | Which date of the event the sale is for (Y-m-d). Defaults to the event's start date; required for a recurring event. |
 
 The `tickets` field is an object where keys are either ticket type names (e.g., "General Admission") or encoded ticket IDs, and values are the quantity to purchase.
 
@@ -1425,6 +1427,113 @@ curl -X POST https://eventschedule.com/api/sales \
 - Sales for free tickets (total = $0) are automatically marked as "paid".
 - Sales for paid tickets are created with "unpaid" status and must be settled through the configured payment method.
 - The `secret` field is a unique key that can be used to access the ticket/QR code.
+- Any volume discount configured on the ticket type is applied to the total.
+- Inventory is checked under a lock, so this endpoint cannot oversell. Common `422` replies: a past event or occurrence, a ticket outside its sales window, or a quantity larger than the remaining stock.
+- A `sale.created` webhook fires, plus `sale.paid` for a zero-total sale.
+
+#### GET /sales
+
+List sales on events you own or administer, newest order first. Deleted sales are excluded, and on the hosted service so are sales on schedules that are not Pro or Enterprise. Free RSVP registrations appear as zero-value paid sales.
+
+**Authentication**: Required
+
+**Plan**: Pro required (sales on non-Pro schedules are filtered out)
+
+**Query parameters**:
+| Parameter | Type | Description |
+|-----------|------|-------------|
+| event_id | string | Filter by event (encoded ID) |
+| subdomain | string | Filter by schedule subdomain |
+| status | string | unpaid, paid, cancelled, refunded or expired |
+| email | string | Filter by buyer email (exact match) |
+| event_date | date | Filter by event date (Y-m-d) |
+| per_page | integer | Results per page (1-500) |
+
+```bash
+curl -X GET "https://eventschedule.com/api/sales?status=paid&subdomain=my-venue" \
+  -H "X-API-Key: es_abc123..."
+```
+
+#### GET /sales/{id}
+
+Get one sale by its encoded ID, with a row per ticket type and add-on (`ticket_id`, `type`, `quantity`, `price`, `is_addon`, `is_pass`).
+
+**Authentication**: Required
+
+**Plan**: Pro required
+
+- An order bought for several named guests is stored as one row per guest sharing a `group_id`. The row with `is_primary: true` holds the totals for the whole order; the other rows report zero.
+- A purchase covering several events (the multi-event cart) shares an `order_id`, one row per event, with `is_order_primary` on the anchoring row.
+- `payment_amount` is what the buyer agreed to pay, not what has been collected: a sale on an installment plan reads `paid` with the full total from the first payment onward.
+
+#### PUT /sales/{id}
+
+Move a sale to a new status by sending an `action`.
+
+**Authentication**: Required
+
+**Plan**: Pro required
+
+**Request body**:
+| Field | Type | Required | Description |
+|-------|------|----------|-------------|
+| action | string | Yes | `mark_paid`, `refund` or `cancel` |
+| amount | number | No | With `refund`: the amount to return. Omit it to refund the whole remaining balance |
+| idempotency_key | string | No | With `refund`: up to 64 characters (letters, digits and `_ . : -`). A repeat carrying the same key returns the first attempt's outcome instead of refunding twice |
+
+| Action | From status | To status | Webhook |
+|--------|-------------|-----------|---------|
+| mark_paid | unpaid | paid | sale.paid |
+| refund | paid | refunded | sale.refunded |
+| refund with amount | paid | paid (partial refund) | none |
+| cancel | unpaid, paid | cancelled | sale.cancelled |
+
+```bash
+curl -X PUT https://eventschedule.com/api/sales/sA9bC1 \
+  -H "Content-Type: application/json" \
+  -H "X-API-Key: es_abc123..." \
+  -d '{"action": "refund", "amount": 25.00, "idempotency_key": "refund-sA9bC1-1"}'
+```
+
+**Notes**:
+- For a Stripe or PayPal sale, `refund` sends the money back through the provider and then updates the status. Every other method (Invoice Ninja, Payfast, a payment link, cash, or a sale marked paid by hand) only records the refund: return the money in that provider yourself.
+- A refund the gateway refuses returns `422` and leaves the sale `paid`. A refund whose outcome could not be confirmed returns `409` and is not retried automatically; check your provider before acting.
+- A payment plan is refunded in full only; sending `amount` for one returns `422`.
+- Cancelling or refunding releases the seats back into stock and notifies anyone on the waitlist for that date. For a multi-event order, act on the primary sale: a non-primary row returns `403`, and the change cascades to the rest of the order.
+
+#### DELETE /sales/{id}
+
+Remove a sale from your records. It is cancelled first, so its seats return to stock, then flagged as deleted: it no longer appears in `GET /sales` or the admin panel, and `GET /sales/{id}` returns `404`. Deleting the primary sale of a multi-event order deletes the whole order; a non-primary row returns `403`.
+
+**Authentication**: Required
+
+**Plan**: Pro required
+
+---
+
+### Feedback and Fan Content Endpoints
+
+Both are read only.
+
+#### GET /feedback
+
+Post-event star ratings and comments for schedules you own or administer, newest first. Only feedback attached to a paid, undeleted sale is returned, so a cancelled or refunded order's rating never appears.
+
+**Authentication**: Required
+
+**Plan**: Pro required (feedback on non-Pro schedules is filtered out)
+
+**Query parameters**: `event_id`, `subdomain`, `event_date` (Y-m-d), `min_rating` (1-5), `from` and `to` (submission dates, Y-m-d), `per_page` (1-500).
+
+Each record includes `attendee_name` and `attendee_email`; strip both before showing feedback publicly.
+
+#### GET /fan-content
+
+Fan comments, photos and videos submitted on events for schedules you own or administer, merged into one feed, newest first. Approved items only by default; pass `is_approved=0` to read the pending moderation queue. Submitter email addresses are never included. Each kind has its own id sequence, so key stored rows on `type` and `id` together.
+
+**Authentication**: Required
+
+**Query parameters**: `type` (comment, photo or video), `event_id`, `subdomain`, `event_date` (Y-m-d), `is_approved`, `per_page` (1-500).
 
 ---
 
@@ -1524,13 +1633,17 @@ Returned within the `members` field of an Event. The `members` field is an objec
 | name | string | No | Buyer name |
 | email | string | No | Buyer email |
 | event_date | date | No | Date of the event occurrence |
-| status | string | No | Payment status: "unpaid" or "paid" |
+| status | string | No | unpaid, paid, cancelled, refunded or expired |
 | payment_method | string | Yes | Payment method used |
 | payment_amount | number | No | Total payment amount |
 | transaction_reference | string | Yes | External transaction reference |
 | secret | string | No | Secret key for ticket access (owner only) |
 | tickets | array | No | Tickets in this sale (ticket_id, quantity, price, type) |
 | total_quantity | integer | No | Total tickets in sale |
+| group_id | string | Yes | Shared by the rows of an order bought for several named guests |
+| is_primary | boolean | No | True on the row that holds a group's totals |
+| order_id | string | Yes | Shared by the rows of a multi-event order |
+| is_order_primary | boolean | No | True on a multi-event order's anchoring row |
 | created_at | datetime | Yes | ISO 8601 creation timestamp |
 | updated_at | datetime | Yes | ISO 8601 last update timestamp |
 
@@ -1752,18 +1865,24 @@ List, view, update, or delete schedules.
 
 Beyond the API endpoints documented above, Event Schedule includes these platform features:
 
-- **Ticketing**: Multiple ticket types, QR code tickets, check-in, free or paid events. Payment via Stripe, Invoice Ninja, custom URL, or manual. Zero platform fees. Per-occurrence sales for recurring events.
-- **Calendar sync**: Bidirectional Google Calendar sync (OAuth 2.0 + webhooks), CalDAV support, and iCal feed URLs.
-- **Analytics**: Privacy-first (no cookies) page view tracking, device/browser breakdown, traffic sources, and conversion funnels.
-- **Newsletters**: Drag-and-drop email builder with templates, subscriber management, A/B testing, and automatic event digests.
-- **Event graphics**: Auto-generated promotional images in multiple layouts, sized for social media sharing.
+- **Ticketing**: Ticket types with their own price, quantity and sales window, free RSVPs, QR tickets scanned at the door on every plan, per-occurrence inventory for recurring events, and a multi-event cart. The free plan sells up to 25 paid tickets a month per schedule; Pro removes the cap. Zero platform fees.
+- **Payments and refunds**: Stripe, PayPal, Payfast (South African rand only), Invoice Ninja, a payment link or cash, chosen per event, on every plan. Stripe and PayPal sales can be refunded in full or in part from the Sales page or the API; other methods record the refund without moving money.
+- **Pro ticketing extras**: Promo codes, add-ons, passes and subscriptions, gift cards, the ticket waitlist, installment payments (Stripe), the live check-in dashboard, sales CSV export and bulk attendee import.
+- **Allocated seating** (Enterprise, venue schedules): Reusable seating plans, a guest seat picker with best-available selection, and a box office console.
+- **Interest list**: On a public event page, a visitor leaves an email address to hear when tickets go on sale, if the event is cancelled and shortly before it starts, plus any notice the organizer chooses to send when the date or venue changes. Free, and no account is needed.
+- **Calendar sync and feeds**: Two-way sync with Google Calendar (OAuth 2.0 + webhooks), Outlook / Microsoft 365 (with optional Teams links) and CalDAV. Guests can subscribe to a schedule's live iCal feed or download a single event.
+- **Appointments**: Bookable appointment types with weekly hours, per-date overrides, buffers, approvals and payment. One type on the free plan, unlimited on Pro.
+- **Newsletters and audience**: Email sign-up with double opt-in, an automatic digest of new events to confirmed subscribers, and a drag-and-drop newsletter builder with templates, segments and A/B testing (10 / 100 / 1,000 recipients a month on Free / Pro / Enterprise).
+- **Analytics**: Privacy-first (no cookies) page view tracking, device/browser breakdown, traffic sources, social link clicks, and conversion funnels.
+- **Event graphics** (Pro): Auto-generated promotional images in multiple layouts, sized for social media sharing.
 - **Sub-schedules**: Color-coded event categories within a schedule, with filtering and separate URLs. Manageable via API.
-- **Custom fields**: Text, number, date, dropdown, and checkbox fields for events and ticket purchases.
-- **Fan videos and comments**: YouTube video submissions and comments on events, with approval workflow.
-- **Embedding**: Responsive iframe embed for any website, with light/dark mode support.
-- **AI features**: Gemini-powered event parsing from text/images, auto-translation to 11 languages, and bulk import.
-- **Recurring events**: Six frequency patterns (daily, weekly, every N weeks, monthly by date/weekday, yearly) with flexible end conditions.
-- **Team collaboration**: Multiple admins per schedule with role-based access.
+- **Custom fields** (Pro): Custom data fields on events, each of which can also be asked on the public event request form.
+- **Fan content**: YouTube videos, photos and comments on events, with an approval workflow.
+- **Embedding**: Responsive iframe calendar embed for any website, with light/dark mode support; an embeddable ticket widget on Pro.
+- **AI features**: Gemini-powered event parsing from text/images (50 a day, 100 on Enterprise, 10 while a schedule is on its trial), auto-translation across the 12 supported languages, and bulk import.
+- **Recurring events**: Six frequency patterns (daily, weekly, every N weeks, monthly by date/weekday, yearly) with flexible end conditions and date exceptions.
+- **Pages for acts and venues**: Naming a performer or venue who is not on Event Schedule creates a public page for them, kept out of search engines until they claim it by signing in with the email address on it.
+- **Team collaboration**: One team member per schedule on every plan; multiple members with admin and viewer access on Enterprise.
 
 ---
 
@@ -1774,17 +1893,20 @@ its own prices and currency.
 
 ### Free Plan
 
-All core features are available for free:
-- Unlimited events
-- Unlimited schedules
-- Calendar sync
-- Event graphics
+Everything needed to publish events and start selling:
+- Unlimited events and schedules
+- Up to 25 paid tickets per month per schedule, with zero platform fees (free RSVPs are unlimited)
+- QR ticket scanning at the door
+- Every payment method: Stripe, PayPal, Payfast, Invoice Ninja, a payment link or cash
+- Full and partial refunds (Stripe and PayPal refund through the provider)
+- Google Calendar, Outlook and CalDAV sync
 - Analytics
-- API access (read)
-- iCal feed
-- Embedding
-- Up to 25 paid tickets per month
+- Embeddable calendar and iCal feeds
+- Recurring events, sub-schedules and online events
+- One appointment type
+- Interest list, email subscribers and automatic new-event digests
 - Up to 10 newsletter recipients per month
+- AI event parsing (50 a day, 10 during the trial)
 
 ### Pro Plan
 
@@ -1792,11 +1914,15 @@ $5/month or $50/year.
 
 Pro adds:
 - Unlimited paid ticket sales
-- Up to 100 newsletter recipients per month
-- API write operations (POST/PUT/DELETE)
+- Promo codes, add-ons, passes and subscriptions, gift cards, the ticket waitlist and installment payments
+- Live check-in dashboard, sales CSV export and bulk attendee import
+- REST API and webhooks
+- Event graphics
+- Unlimited appointment types
+- Custom fields, custom CSS, event polls, post-event feedback and carpool matching
+- Embeddable ticket widget
 - Remove Event Schedule branding
-- Custom fields
-- Priority support
+- Up to 100 newsletter recipients per month
 
 ### Enterprise Plan
 
@@ -1805,12 +1931,14 @@ $15/month or $150/year.
 Enterprise adds everything in Pro, plus:
 - Custom domains
 - Allocated (reserved) seating with a guest seat picker and box office console
-- Multiple team members, with admin and viewer roles
+- Multiple team members, with admin and viewer access
 - Internal and unlisted event visibility
 - AI features: flyer generation, schedule and event detail generation, agenda scanning
 - WhatsApp event creation
 - Availability management
 - Up to 1,000 newsletter recipients per month
+- 100 AI event parses a day
+- Priority support
 
 Selfhosted deployments get all Enterprise features.
 
@@ -1827,12 +1955,25 @@ Event Schedule charges no percentage-based fees on ticket sales. You only pay th
 - **Hosted mode**: Uses Stripe Connect. Event Schedule acts as the platform, schedule owners connect their Stripe accounts to receive payments directly.
 - **Selfhosted mode**: Direct Stripe integration using your own Stripe API keys configured in .env.
 - **Automatic settlement**: Payments are processed and settled automatically.
+- **Refunds**: Full or partial refunds from the Sales page or `PUT /api/sales/{id}` send the money back through Stripe. An installment plan is refunded in full, payment by payment.
+
+### PayPal
+
+- Each schedule owner connects their own PayPal account; the credentials are verified with PayPal before they are saved. A selfhosted install can also supply one account for everyone in `.env`.
+- Works with the multi-event cart (one order, one capture). Not available for installments, gift cards or appointments.
+- Full or partial refunds go back through PayPal.
+
+### Payfast
+
+- For events priced in South African rand (ZAR) only. Cannot join the multi-event cart, use installments, sell gift cards or take appointment payments.
+- Refunds are recorded in Event Schedule; return the money in Payfast.
 
 ### Invoice Ninja
 
 - For B2B and invoicing use cases.
 - Configure Invoice Ninja API credentials in schedule settings.
 - Sales create invoices in Invoice Ninja that can be sent to buyers.
+- Refunds are recorded in Event Schedule; return the money in Invoice Ninja.
 
 ### Google Calendar
 
@@ -1841,10 +1982,18 @@ Event Schedule charges no percentage-based fees on ticket sales. You only pay th
 - **Webhook support**: Real-time updates via Google Calendar push notifications.
 - **Multiple calendars**: Sync with specific Google Calendar calendars.
 
+### Outlook / Microsoft 365
+
+- Two-way sync through Microsoft Graph change notifications, with an optional Teams meeting link written into the event.
+
 ### CalDAV
 
 - Connect to any CalDAV-compatible server (Nextcloud, Radicale, etc.).
 - Sync events between Event Schedule and your CalDAV calendar.
+
+### Google Wallet
+
+- When the install has Google Wallet credentials configured, ticket buyers can add their ticket to Google Wallet from the ticket page, the multi-event order page and the confirmation email. The pass carries the same QR code as the ticket, so it scans at the door unchanged.
 
 ### Google Gemini
 
@@ -1856,7 +2005,7 @@ Event Schedule charges no percentage-based fees on ticket sales. You only pay th
 
 ## Localization
 
-Event Schedule supports 11 languages:
+Event Schedule supports 12 languages:
 
 | Code | Language | Direction |
 |------|----------|-----------|
@@ -1870,6 +2019,7 @@ Event Schedule supports 11 languages:
 | it | Italian | LTR |
 | nl | Dutch | LTR |
 | pt | Portuguese | LTR |
+| ro | Romanian | LTR |
 | ru | Russian | LTR |
 
 - **RTL support**: Full right-to-left layout support for Arabic and Hebrew.
@@ -1882,9 +2032,9 @@ Event Schedule supports 11 languages:
 
 ## Selfhosted Deployment
 
-Event Schedule can be selfhosted on your own infrastructure. Requires PHP 8.1+, MySQL/PostgreSQL, and a web server. Install via Softaculous (one-click), Docker, or manual setup.
+Event Schedule can be selfhosted on your own infrastructure. Requires PHP 8.2+, MySQL, and a web server. Install via Softaculous (one-click), Docker, or manual setup.
 
-Key differences from hosted mode: path-based routing instead of subdomains, no email verification, direct Stripe or Invoice Ninja for payments.
+Key differences from hosted mode: path-based routing instead of subdomains, no email verification, every Pro and Enterprise feature included, Stripe on the install's own API keys (PayPal and Payfast can also be supplied for the whole install), one-click updates, and importing events from a URL or by city.
 
 For full installation instructions, see the [Selfhost Guide](https://eventschedule.com/docs/selfhost/installation).
 
