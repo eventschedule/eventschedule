@@ -286,8 +286,8 @@ curl -H "X-API-Key: es_abc123..." https://eventschedule.com/api/schedules
 
 ### Permissions
 
-- **Read operations** (GET requests): Require authentication. Schedule and event list/detail endpoints only return data for Pro schedules (non-Pro schedules are filtered out or return 403).
-- **Write operations** (POST/PUT/DELETE): Require a Pro plan. New accounts get a trial period.
+- **Read operations** (GET requests): Require authentication. Schedule, event, sub-schedule, sale and feedback endpoints only return data for Pro schedules (list endpoints filter the others out; single reads return 403). The category list and fan content have no plan check.
+- **Write operations** (POST/PUT/DELETE): Most require a Pro schedule. Creating or deleting a schedule has no plan check, and recording a sale draws on the free plan's 25 paid tickets a month. Subscribing to Pro starts with a free trial (seven days by default), once per schedule.
 
 ---
 
@@ -565,7 +565,7 @@ curl -X POST https://eventschedule.com/api/schedules \
 
 **Notes**:
 - The `subdomain` is automatically generated from the schedule name.
-- In hosted mode, new schedules receive a Pro trial period.
+- A new schedule starts on the free plan; a Pro trial begins only when the owner subscribes.
 
 ---
 

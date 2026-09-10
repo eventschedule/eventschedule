@@ -6,7 +6,7 @@ Key details:
 
 - **Schedule types**: Venue (physical locations), Talent (performers), Curator (event organizers)
 - **Authentication**: API key via `X-API-Key` header, obtained through registration or login
-- **Plans**: The API is part of the Pro plan: reads return only Pro schedules' data, and writes (POST/PUT/DELETE) need a Pro schedule. Recording a sale with `POST /api/sales` also works on the free plan, within its 25 paid tickets a month.
+- **Plans**: Most of the API is on the Pro plan: schedule, event, sub-schedule and sale endpoints return only Pro schedules' data, or a 403. Creating or deleting a schedule, the category list, fan content and recording a sale (`POST /api/sales`, within the free plan's 25 paid tickets a month) have no Pro check.
 - **Rate limits**: 300 GET requests/min, 30 POST/PUT/DELETE requests/min
 - **Languages**: 12 supported languages, with automatic translation of event content
 - **Deployment**: Hosted SaaS at eventschedule.com or selfhosted
