@@ -101,10 +101,14 @@
                             Boost
                             <x-nav-badge :badge="$tabBadges['boost'] ?? null" />
                         </a>
-                        @if (config('app.hosted'))
+                        {{-- Schedules is NOT hosted-gated: it is the only way back from a schedule
+                             takedown, and the takedown itself (role.claim.not_me.submit, and the
+                             API delete) is registered on selfhost too. Domains and Referrals stay
+                             hosted - both are platform-only machinery. --}}
                         <a href="{{ route('admin.schedules') }}" class="{{ $active === 'schedules' ? $dropdownItemActive : $dropdownItem }}">
                             @lang('messages.schedules')
                         </a>
+                        @if (config('app.hosted'))
                         <a href="{{ route('admin.domains') }}" class="{{ $active === 'domains' ? $dropdownItemActive : $dropdownItem }}">
                             @lang('messages.domains')
                             <x-nav-badge :badge="$tabBadges['domains'] ?? null" />

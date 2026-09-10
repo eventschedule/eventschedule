@@ -947,19 +947,32 @@ Route::middleware(['auth', 'verified', 'app_subdomain'])->group(function () {
             Route::post('/admin/domains/{role}/reprovision', [AdminController::class, 'domainReprovision'])->name('admin.domains.reprovision');
             Route::post('/admin/domains/{role}/remove', [AdminController::class, 'domainRemove'])->name('admin.domains.remove');
             Route::redirect('/admin/plans', '/admin/schedules');
-            Route::get('/admin/schedules', [AdminController::class, 'schedules'])->name('admin.schedules');
-            Route::get('/admin/schedules/{role}/edit', [AdminController::class, 'editSchedule'])->name('admin.schedules.edit');
-            Route::put('/admin/schedules/{role}', [AdminController::class, 'updateSchedule'])->name('admin.schedules.update');
-            Route::post('/admin/schedules/{role}/verify-email', [AdminController::class, 'verifyScheduleEmail'])->name('admin.schedules.verify_email');
-            Route::post('/admin/schedules/{role}/verify-phone', [AdminController::class, 'verifySchedulePhone'])->name('admin.schedules.verify_phone');
-            // Taking a squatted subdomain back. mark-deleted also RELEASES the name (roles.subdomain
-            // is UNIQUE, so the row has to be renamed for anyone else to have it), and it tolerates
-            // an already-deleted row so the backlog the API/unfollow/merge paths left behind -
-            // deleted but still holding their names - is reachable too.
-            Route::post('/admin/schedules/{role}/mark-deleted', [AdminController::class, 'markScheduleDeleted'])->name('admin.schedules.mark_deleted');
-            Route::post('/admin/schedules/{role}/restore', [AdminController::class, 'restoreSchedule'])->name('admin.schedules.restore');
-            Route::put('/admin/schedules/{role}/details', [AdminController::class, 'updateScheduleDetails'])->name('admin.schedules.update_details');
         }
+
+        // NOT hosted-gated, unlike the domain routes above, because the DESTRUCTIVE half of this
+        // pair is not either. `role.claim.not_me.submit` is registered in both routing branches and
+        // calls ScheduleDeletionService::markDeleted(), which renames the row and releases its
+        // subdomain; ApiScheduleController::destroy() now goes through the same service. Restore is
+        // the only caller of the matching undo, so while these sat behind the hosted flag a
+        // selfhost operator could take a schedule down - or have a visitor do it - and had no way
+        // back short of hand-written SQL. Reclaiming a squatted subdomain is arguably worth more to
+        // a single-operator install than to the platform anyway.
+        //
+        // Same shape as admin.app_update and admin.federation above: registered everywhere, with
+        // the controller owning the authorization. AdminController::schedules() counts Stripe
+        // subscriptions and granted plans, which simply read zero off-platform.
+        Route::get('/admin/schedules', [AdminController::class, 'schedules'])->name('admin.schedules');
+        Route::get('/admin/schedules/{role}/edit', [AdminController::class, 'editSchedule'])->name('admin.schedules.edit');
+        Route::put('/admin/schedules/{role}', [AdminController::class, 'updateSchedule'])->name('admin.schedules.update');
+        Route::post('/admin/schedules/{role}/verify-email', [AdminController::class, 'verifyScheduleEmail'])->name('admin.schedules.verify_email');
+        Route::post('/admin/schedules/{role}/verify-phone', [AdminController::class, 'verifySchedulePhone'])->name('admin.schedules.verify_phone');
+        // Taking a squatted subdomain back. mark-deleted also RELEASES the name (roles.subdomain
+        // is UNIQUE, so the row has to be renamed for anyone else to have it), and it tolerates
+        // an already-deleted row so the backlog the API/unfollow/merge paths left behind -
+        // deleted but still holding their names - is reachable too.
+        Route::post('/admin/schedules/{role}/mark-deleted', [AdminController::class, 'markScheduleDeleted'])->name('admin.schedules.mark_deleted');
+        Route::post('/admin/schedules/{role}/restore', [AdminController::class, 'restoreSchedule'])->name('admin.schedules.restore');
+        Route::put('/admin/schedules/{role}/details', [AdminController::class, 'updateScheduleDetails'])->name('admin.schedules.update_details');
 
         if (config('app.hosted')) {
             Route::get('/admin/referrals', [AdminController::class, 'referrals'])->name('admin.referrals');

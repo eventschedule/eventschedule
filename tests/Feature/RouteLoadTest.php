@@ -6,6 +6,7 @@ use App\Models\Role;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Process;
 use Tests\TestCase;
 
 class RouteLoadTest extends TestCase
@@ -358,6 +359,52 @@ class RouteLoadTest extends TestCase
             '/admin/newsletter-segments',
             '/admin/legal',
         ], $user, $session);
+    }
+
+    /**
+     * The schedule-admin pages must exist on SELFHOST, not only on the platform.
+     *
+     * They are the only caller of ScheduleDeletionService::restore(), and the destructive half of
+     * that pair is registered in both routing branches: role.claim.not_me.submit ("this is not
+     * me") calls markDeleted(), which renames the row and releases its subdomain, and
+     * ApiScheduleController::destroy() goes through the same service. While these routes sat
+     * behind config('app.hosted') a selfhost operator could have a schedule taken down - by a
+     * visitor, or by a mistaken API call - with no way back except hand-written SQL.
+     *
+     * WHY A SUBPROCESS, and not forceEnv() + refreshApplication() like the hosted test below.
+     * That pattern cannot flip IS_HOSTED. refreshApplication() re-runs LoadEnvironmentVariables,
+     * which re-reads .env and puts IS_HOSTED back to whatever the file says - so an in-process
+     * assertion here passes whether or not the gate exists, which is exactly the inert test this
+     * replaces. It works for APP_TESTING below only because that test forces IS_HOSTED to the
+     * value .env already holds. An exported variable on a child process does win, so the honest
+     * way to ask "what does a selfhost install register" is to boot one.
+     */
+    public function test_the_schedule_takedown_has_an_undo_on_selfhost(): void
+    {
+        $result = Process::path(base_path())
+            ->env(['IS_HOSTED' => 'false', 'IS_NEXUS' => 'false', 'APP_TESTING' => 'false'])
+            ->run('php artisan route:list --json');
+
+        $this->assertTrue($result->successful(), 'route:list failed: '.$result->errorOutput());
+
+        $names = array_filter(array_column(json_decode($result->output(), true) ?: [], 'name'));
+
+        $this->assertContains('role.claim.not_me.submit', $names,
+            'fixture: the takedown is registered on selfhost, which is what makes the undo necessary');
+
+        foreach ([
+            'admin.schedules',
+            'admin.schedules.edit',
+            'admin.schedules.mark_deleted',
+            'admin.schedules.restore',
+        ] as $name) {
+            $this->assertContains($name, $names,
+                "$name must be registered on selfhost - it is the only way back from a takedown");
+        }
+
+        // The other half of the split, so this also pins what stays platform-only.
+        $this->assertNotContains('admin.domains', $names, 'custom domains remain hosted-only');
+        $this->assertNotContains('admin.referrals', $names, 'referrals remain hosted-only');
     }
 
     public function test_hosted_gp_routes_load(): void
