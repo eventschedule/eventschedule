@@ -29,6 +29,55 @@ class MarketingCountedClaimsTest extends TestCase
         return file_get_contents($path);
     }
 
+    /**
+     * The accessibility page's conformance record must not claim more coverage than it has.
+     *
+     * config/accessibility.php pins how many public pages were swept and when; its own docblock
+     * says the number is "the same 153 config/sitemap_lastmod.php dates". That invariant broke
+     * silently: the manifest grew to 161 as this release added seven marketing pages and a docs
+     * page, while the sentence went on saying "every one of the 153" - a legally-toned claim of
+     * complete coverage over a set that no longer included two of the flagship new pages.
+     *
+     * Nothing caught it, because nothing connected the pinned number to the manifest. This does.
+     * The sentence now renders ":pages of the :total" with :total derived from the manifest at
+     * render time, so adding a page widens the stated gap instead of falsifying the claim - and
+     * the placeholder assertion below stops anyone reinstating an unqualified "every one of".
+     */
+    public function test_the_accessibility_conformance_claim_does_not_overstate_its_coverage(): void
+    {
+        $measured = (int) config('accessibility.public_pages_measured');
+        $total = count(config('sitemap_lastmod', []));
+
+        $this->assertGreaterThan(0, $measured);
+        $this->assertGreaterThan(0, $total, 'the lastmod manifest is the denominator; it must not be empty');
+
+        $this->assertLessThanOrEqual(
+            $total,
+            $measured,
+            "the page claims $measured pages were swept but the manifest only lists $total - ".
+            'either the manifest shrank or the measured count was raised without a sweep'
+        );
+
+        // Every locale must keep BOTH numbers. Dropping :total is how the claim silently becomes
+        // "we measured all of them" again, which is the exact regression this pins.
+        foreach (config('app.supported_languages') as $locale => $_label) {
+            $file = resource_path("lang/{$locale}/accessibility.php");
+
+            if (! file_exists($file)) {
+                continue;
+            }
+
+            $line = (include $file)['section_status_measured'] ?? null;
+
+            if ($line === null) {
+                continue;
+            }
+
+            $this->assertStringContainsString(':pages', $line, "[$locale] must state how many were measured");
+            $this->assertStringContainsString(':total', $line, "[$locale] must state how many pages exist");
+        }
+    }
+
     public function test_the_crawler_signature_count_matches_the_filter(): void
     {
         // PageView::isBot() holds the list inline, so read it off the method body.
@@ -139,7 +188,7 @@ class MarketingCountedClaimsTest extends TestCase
         foreach ($rows as [, $verb, $path]) {
             // routes/api.php declares them without the /api prefix, and {id}
             // placeholders are named there too, so compare on the literal path.
-            $needle = "Route::".strtolower($verb)."('".substr($path, 4)."'";
+            $needle = 'Route::'.strtolower($verb)."('".substr($path, 4)."'";
             if (! str_contains($routes, $needle)) {
                 $absent[] = "{$verb} {$path}";
             }

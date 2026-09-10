@@ -716,9 +716,18 @@
                          rather than from adjectives. Scope is the PUBLIC site: the
                          clause says so, and clause 06 still carries what is not
                          covered. --}}
+                    {{-- :total is DERIVED, never pinned, and that is the point. The sweep covered
+                         every public page that existed on the measurement date; pages added since
+                         are not in it. Reading the denominator from config/sitemap_lastmod.php -
+                         the manifest of every marketing and docs page, which the sitemap:lastmod
+                         command keeps current - means a page added tomorrow widens the gap in this
+                         sentence instead of silently making it a false claim of full coverage.
+                         That is exactly what happened: the claim said "every one of the 153" while
+                         the manifest had grown to 161, and nothing caught it. --}}
                     <p class="es-fine-muted es-fine-measure mt-4">{{ __('accessibility.section_status_measured', [
                         'date' => \Carbon\Carbon::parse(config('accessibility.public_measurement_date'))->translatedFormat('j F Y'),
                         'pages' => number_format((int) config('accessibility.public_pages_measured')),
+                        'total' => number_format(count(config('sitemap_lastmod', []))),
                     ]) }}</p>
                     {{-- Refer to clauses by LINK, never by their numeral: the hanging
                          numerals are decorative and aria-hidden, so "see clause 06"

@@ -789,7 +789,15 @@
             ['Cloudflare', 'Content delivery and security'],
             ['Google Apps', 'Email and productivity services'],
             ['Stripe', 'Payment processing'],
+            ['PayPal', 'Payment processing, on schedules whose owner has connected a PayPal account'],
+            ['Payfast', 'Payment processing, on schedules whose owner has connected a Payfast account'],
             ['SendGrid/Twilio', 'Email delivery'],
+            // Listed only when the install can actually issue a pass, so the register describes
+            // what this deployment does rather than what the software supports. The same predicate
+            // gates every button, the route handler and the confirmation email.
+            ...(\App\Services\Wallet\GoogleWalletService::isConfigured()
+                ? [['Google Wallet', 'Ticket passes, and only when a buyer chooses to add a ticket to their wallet. The pass carries the attendee name, the event, the venue and its address, the start time, the ticket type, any seat labels and the ticket link. Google keeps a saved pass; it can be expired but not deleted']]
+                : []),
             ['Stay22', 'Accommodation search, on event pages where the schedule has enabled the accommodation map, and only once the map has been loaded'],
         ];
 
