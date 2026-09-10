@@ -1543,6 +1543,25 @@ class Event extends Model
      * Curators are the third rule, inherited from the check: a curator that only LISTS an event
      * does not own the creator's private data, so it qualifies only for what it created.
      */
+    /**
+     * Has this event ever taken money, in any state that still counts as history?
+     *
+     * `paid` and `amount_mismatch` are live money; `refunded` is money that was taken and given
+     * back, which reporting still denominates. `unpaid`, `cancelled` and `expired` never moved
+     * anything, so they leave the event free to be re-denominated.
+     *
+     * Used to freeze events.ticket_currency_code once it means something. That column is the ONLY
+     * record of what a sale was charged in - `sales` carries no currency of its own - so an edit
+     * after the fact silently re-denominates every past row and misscales any later refund.
+     */
+    public function hasSettledMoney(): bool
+    {
+        return $this->sales()
+            ->whereIn('status', ['paid', 'amount_mismatch', 'refunded'])
+            ->where('is_deleted', false)
+            ->exists();
+    }
+
     public function scopeManagedBy(Builder $query, User $user): Builder
     {
         $roles = $user->manageableRoles();

@@ -501,6 +501,57 @@ class PayPalCheckoutTest extends TestCase
         $this->assertStringContainsString('/payments/paypal/webhook', $registered['body']['url']);
     }
 
+    /**
+     * Repointing the credentials at a DIFFERENT PayPal app re-registers the listener.
+     *
+     * A webhook id belongs to the app that issued it, so it is worthless the moment the client id
+     * changes. ensureWebhookRegistered() returns early when the field is non-empty, so without
+     * clearing it first an owner who switched accounts kept the old id for ever: no listener was
+     * ever created on the new account, so the two cases only the webhook can finish - a capture
+     * PayPal held for review, and one whose response we lost - went quietly dark. Worse, the stale
+     * id was still handed to verify-webhook-signature, which answers FAILURE for deliveries that
+     * are perfectly genuine.
+     */
+    public function test_changing_the_client_id_registers_a_listener_on_the_new_account(): void
+    {
+        $owner = $this->connectedOwner(['paypal_webhook_id' => 'WH-OLD-ACCOUNT']);
+
+        $this->actingAs($owner)->post(route('payments.connect', ['gateway' => 'paypal']), [
+            'paypal_client_id' => 'A-DIFFERENT-client-id',
+            'paypal_client_secret' => 'another-secret',
+        ])->assertSessionHasNoErrors();
+
+        $fresh = $owner->fresh();
+
+        $this->assertSame('A-DIFFERENT-client-id', $fresh->paypal_client_id);
+        $this->assertNotSame('WH-OLD-ACCOUNT', $fresh->paypal_webhook_id,
+            'the old account\'s listener id cannot be kept against new credentials');
+        $this->assertSame('WH-TEST-1', $fresh->paypal_webhook_id, 'a listener is registered on the new account');
+    }
+
+    /**
+     * The other half: re-saving the SAME client id must not churn the listener.
+     *
+     * An owner correcting only their secret, or re-saving the form unchanged, should keep the
+     * working registration rather than create a duplicate on every save.
+     */
+    public function test_resaving_the_same_client_id_keeps_the_existing_listener(): void
+    {
+        $owner = $this->connectedOwner(['paypal_webhook_id' => 'WH-KEEP-ME']);
+        $before = count($this->sent);
+
+        $this->actingAs($owner)->post(route('payments.connect', ['gateway' => 'paypal']), [
+            'paypal_client_id' => $owner->paypal_client_id,
+            'paypal_client_secret' => 'rotated-secret',
+        ])->assertSessionHasNoErrors();
+
+        $this->assertSame('WH-KEEP-ME', $owner->fresh()->paypal_webhook_id);
+
+        $registrations = collect(array_slice($this->sent, $before))
+            ->filter(fn ($c) => str_contains($c['url'], '/v1/notifications/webhooks'));
+        $this->assertCount(0, $registrations, 'no second listener may be created');
+    }
+
     public function test_disconnecting_removes_the_listener_and_clears_every_field(): void
     {
         $owner = $this->connectedOwner(['paypal_webhook_id' => 'WH-TEST-1']);

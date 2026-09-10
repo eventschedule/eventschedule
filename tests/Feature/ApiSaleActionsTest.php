@@ -208,4 +208,53 @@ class ApiSaleActionsTest extends TestCase
             ->putJson('/api/sales/'.UrlUtils::encodeId($primary->id), ['action' => 'refund'])
             ->assertStatus(422);
     }
+
+    /**
+     * A denominated event's currency is frozen: the API must refuse to re-denominate it.
+     *
+     * events.ticket_currency_code is the ONLY record of what a sale was charged in - `sales` has no
+     * currency column of its own, unlike sale_installment_plans - so every downstream reader
+     * resolves it through the event, live. Changing it after money has been taken rewrites history
+     * AND misscales the future: Stripe refunds are sent in minor units, so a $10.00 refund on a USD
+     * sale whose event now says JPY computes round(10 * 1) = 10 minor units. $0.10 goes back, the
+     * ledger records $10.00, refundableRemaining() drops by $10, and the buyer is short $9.90 with
+     * nothing on the row to show it.
+     *
+     * Refused rather than patched downstream because there is nowhere correct to patch: with no
+     * per-sale snapshot the old currency is genuinely gone the moment the write lands. The web form
+     * never offered this field after creation; only the API did.
+     */
+    public function test_a_denominated_events_currency_cannot_be_changed_through_the_api(): void
+    {
+        [$primary, $event, $key] = $this->createGroupedPaidOrder();
+
+        $this->assertSame('paid', $primary->fresh()->status, 'fixture: money has been taken');
+
+        $this->withHeaders(['X-API-Key' => $key])
+            ->putJson('/api/events/'.UrlUtils::encodeId($event->id), ['ticket_currency_code' => 'JPY'])
+            ->assertStatus(422)
+            ->assertJsonPath('errors.ticket_currency_code.0',
+                fn ($m) => str_contains((string) $m, 'already taken money'));
+
+        $this->assertSame($event->ticket_currency_code, $event->fresh()->ticket_currency_code,
+            'the currency must be untouched');
+    }
+
+    /**
+     * The other side of it: an event that has taken nothing is still free to be re-denominated,
+     * which is the ordinary case of fixing a currency picked wrongly at creation.
+     */
+    public function test_an_event_with_no_money_taken_may_still_change_currency(): void
+    {
+        [$primary, $event, $key] = $this->createGroupedPaidOrder();
+
+        // Wipe the money. Nothing was ever collected, so nothing is denominated.
+        \App\Models\Sale::where('event_id', $event->id)->update(['status' => 'unpaid']);
+
+        $this->withHeaders(['X-API-Key' => $key])
+            ->putJson('/api/events/'.UrlUtils::encodeId($event->id), ['ticket_currency_code' => 'JPY'])
+            ->assertSuccessful();
+
+        $this->assertSame('JPY', $event->fresh()->ticket_currency_code);
+    }
 }

@@ -3152,7 +3152,14 @@ class TicketController extends Controller
                 try {
                     $request->validate([
                         'refund_amount' => 'sometimes|numeric|min:0.01',
-                        'idempotency_key' => 'sometimes|string|max:64',
+                        // Charset-constrained, not just length-capped. This value is concatenated into the
+                        // key sent as PayPal's PayPal-Request-Id header and Stripe's idempotency_key.
+                        // Guzzle rejects CR/LF outright, so this is not header injection - but the
+                        // InvalidArgumentException it throws is a plain \Throwable, which
+                        // SaleRefundService's conservative arm PARKS. A parked claim holds its amount
+                        // against refundableRemaining() for ever and is never retried, so one malformed
+                        // call would take a sale out of the refund path permanently.
+                        'idempotency_key' => ['sometimes', 'string', 'max:64', 'regex:/^[A-Za-z0-9_.:-]+$/'],
                     ]);
                 } catch (\Illuminate\Validation\ValidationException $e) {
                     return response()->json(['error' => __('messages.refund_amount_invalid')], 422);

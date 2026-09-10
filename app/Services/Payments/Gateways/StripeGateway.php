@@ -94,7 +94,7 @@ class StripeGateway extends PaymentGatewayDriver
      * and the fallback then reaches for a different account's credentials entirely. Refunding from
      * the wrong account is worse than failing to refund.
      */
-    public function refund(Sale $sale, ?float $amount, string $idempotencyKey, ?SaleInstallment $leg = null): string
+    public function refund(Sale $sale, ?float $amount, string $idempotencyKey, ?SaleInstallment $leg = null, ?string $currency = null): string
     {
         $reference = $this->refundReferenceFor($sale, $leg);
 
@@ -104,7 +104,10 @@ class StripeGateway extends PaymentGatewayDriver
 
         [$stripe, $options] = $this->stripeContextFor($sale, $leg);
 
-        $currency = $sale->event?->ticket_currency_code ?: 'USD';
+        // The claim's snapshot wins over the event, which is editable after the sale. See the
+        // note on PaymentGatewayDriver::refund(): this value scales the minor units, so reading a
+        // currency the money was never taken in silently refunds the wrong amount.
+        $currency = $currency ?: ($sale->event?->ticket_currency_code ?: 'USD');
 
         $params = [
             'payment_intent' => $reference,

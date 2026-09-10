@@ -184,6 +184,12 @@ abstract class PaymentGatewayDriver
     /**
      * Send $amount back, returning the gateway's own refund id.
      *
+     * $currency is the code the money was TAKEN in, snapshotted onto the sale_refunds row at claim
+     * time. Always prefer it over $sale->event->ticket_currency_code: an owner may edit the event's
+     * currency after a sale, and that field is what scales the minor units. Editing USD to JPY made
+     * a $10.00 Stripe refund compute round(10 * 1) = 10 minor units, so $0.10 went back and the
+     * ledger recorded $10. Null falls back to the event, for any caller that has no claim in hand.
+     *
      * A null $amount means the WHOLE charge, which is not the same as passing the sale's expected
      * total: an `amount_mismatch` sale is parked precisely because what arrived was not what we
      * asked for, so only the gateway knows what there is to give back.
@@ -194,7 +200,7 @@ abstract class PaymentGatewayDriver
      *
      * Throws on failure; SaleRefundService decides whether the failure was definite or unknown.
      */
-    public function refund(Sale $sale, ?float $amount, string $idempotencyKey, ?SaleInstallment $leg = null): string
+    public function refund(Sale $sale, ?float $amount, string $idempotencyKey, ?SaleInstallment $leg = null, ?string $currency = null): string
     {
         throw new \LogicException(static::class.' does not support refunds.');
     }
@@ -238,6 +244,27 @@ abstract class PaymentGatewayDriver
      * ReleaseTickets, which used to spell this out as `payment_method != 'cash'` in two queries.
      */
     public function expiresUnpaidSales(): bool
+    {
+        return true;
+    }
+
+    /**
+     * When refund() is given a null amount, does this gateway send back what is LEFT of the
+     * capture, or the WHOLE original capture?
+     *
+     * Stripe reads an omitted amount as the unrefunded balance, so omitting it after a partial is
+     * both safe and preferable: it is the only way to refund the remainder of a charge whose
+     * earlier claim we PARKED, where we genuinely do not know whether the money moved and naming
+     * our own figure would under-refund the buyer.
+     *
+     * PayPal reads it as the whole capture and refuses one that has already been partly refunded,
+     * so on that rail the same omission turns "refund the remaining 70" into a request for the
+     * original 100 and a 422 - leaving a sale that can never reach `refunded` through the UI.
+     *
+     * True here because it is the older behaviour and the one every gateway but PayPal wants;
+     * SaleRefundService names the figure explicitly for anything that answers false.
+     */
+    public function omittedRefundAmountMeansRemainder(): bool
     {
         return true;
     }

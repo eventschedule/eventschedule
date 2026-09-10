@@ -98,6 +98,99 @@ class SaleRefundTest extends TestCase
     }
 
     /**
+     * An installment leg is scaled by the PLAN's currency, which is a real snapshot.
+     *
+     * sale_installment_plans.currency is fixed when the plan is created, so unlike the event's
+     * ticket_currency_code it cannot be re-denominated afterwards. The drivers used to re-derive
+     * the currency from the event at call time, and that value scales Stripe's minor units: a $10
+     * refund against an event since switched from USD to JPY computes round(10 * 1) = 10 minor
+     * units, so $0.10 goes back while the ledger records $10.00.
+     *
+     * Ordinary sales have no equivalent snapshot - `sales` carries no currency column - so their
+     * protection lives upstream instead, in ApiEventController.
+     */
+    public function test_an_installment_leg_is_scaled_by_the_plans_own_currency(): void
+    {
+        $fake = $this->fakeStripeRefunds();
+
+        [$sale, $plan] = $this->paidInstallmentSale();
+        $this->assertSame('USD', $plan->currency, 'fixture: the plan is denominated in USD');
+
+        // The event is re-denominated afterwards. The plan is not, and the plan is what was charged.
+        $sale->event->forceFill(['ticket_currency_code' => 'JPY'])->save();
+
+        app(SaleRefundService::class)->refund($sale->fresh(), null, null, null);
+
+        $this->assertNotEmpty($fake->calls, 'the plan walk must reach the gateway');
+
+        foreach ($fake->calls as $call) {
+            $this->assertSame('USD', $call['currency'],
+                'a leg must be scaled by the plan it belongs to, not by an event edited since');
+        }
+    }
+
+    /**
+     * A malformed idempotency key is rejected up front, not parked.
+     *
+     * The value is concatenated into the key handed to PayPal's PayPal-Request-Id header and
+     * Stripe's idempotency_key. Guzzle refuses CR/LF in a header value, so this was never header
+     * injection - but the InvalidArgumentException it raises is a plain \Throwable, and
+     * SaleRefundService's conservative arm PARKS anything it cannot classify. A parked claim holds
+     * its amount against refundableRemaining() for ever and is never retried, so a single
+     * malformed call would take the sale out of the refund path permanently.
+     *
+     * 422 with nothing banked is the only acceptable answer.
+     */
+    public function test_a_malformed_idempotency_key_is_refused_before_any_money_moves(): void
+    {
+        $fake = $this->fakeStripeRefunds();
+
+        [$sale, $event, $ticket, $owner] = $this->paidStripeSale(100.0);
+
+        $this->actingAs($owner)
+            ->postJson(route('sales.action', ['sale_id' => UrlUtils::encodeId($sale->id)]), [
+                'action' => 'refund',
+                'idempotency_key' => "abc\r\nX-Injected: 1",
+            ])
+            ->assertStatus(422);
+
+        $this->assertCount(0, $fake->calls, 'nothing may reach the gateway');
+        $this->assertSame(0, SaleRefund::count(), 'and no claim may be banked or parked');
+        $this->assertSame('paid', $sale->fresh()->status);
+    }
+
+    /**
+     * A leg of an installment plan is REFUSED on an `amount_mismatch` sale, never metered.
+     *
+     * This state cannot happen today, and the guard exists anyway. A sale only reaches
+     * `amount_mismatch` through SaleSettlementService::settle(), and a plan sale never goes near
+     * it - InstallmentService::settle() takes one from `unpaid` straight to `paid` itself. The
+     * combination has to be built by hand, as it is here.
+     *
+     * It is guarded because the fall-through was silently WRONG rather than merely unhandled.
+     * $fullCharge is `... && ! $leg`, so a leg reaching the mismatch branch would have been sent
+     * $claim->amount - which create() sets to the whole sale's chargedTotal() when $amount is null.
+     * One leg's capture would be asked to refund every leg's money: on this fixture, $1,000 against
+     * a $250 charge. Failing closed costs nothing while the state is unreachable, and refuses
+     * loudly rather than overpaying if some future settlement change makes it possible.
+     */
+    public function test_an_installment_leg_is_refused_on_a_mismatched_sale(): void
+    {
+        $fake = $this->fakeStripeRefunds();
+
+        [$sale, $plan] = $this->paidInstallmentSale();
+        $sale->forceFill(['status' => 'amount_mismatch'])->save();
+
+        $leg = $plan->installments->firstWhere('sequence', 1);
+
+        $result = app(SaleRefundService::class)->refund($sale->fresh(), (float) $leg->amount, null, null, $leg);
+
+        $this->assertSame(SaleRefundResult::INVALID_AMOUNT, $result->status);
+        $this->assertCount(0, $fake->calls, 'nothing may be sent to the gateway');
+        $this->assertSame(0, SaleRefund::count(), 'and no claim may be banked');
+    }
+
+    /**
      * A mismatched sale must be refunded as "everything the gateway still holds", whatever figure
      * the caller named.
      *

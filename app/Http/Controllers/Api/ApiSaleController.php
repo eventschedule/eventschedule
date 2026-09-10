@@ -147,7 +147,14 @@ class ApiSaleController extends Controller
                 // Send one to make a retry safe: a repeat carrying the same key returns the first
                 // attempt's outcome instead of issuing a second refund. Without it a retried
                 // request is a second refund, because the fallback key is generated per attempt.
-                'idempotency_key' => 'sometimes|string|max:64',
+                // Charset-constrained, not just length-capped. This value is concatenated into the
+                // key sent as PayPal's PayPal-Request-Id header and Stripe's idempotency_key.
+                // Guzzle rejects CR/LF outright, so this is not header injection - but the
+                // InvalidArgumentException it throws is a plain \Throwable, which
+                // SaleRefundService's conservative arm PARKS. A parked claim holds its amount
+                // against refundableRemaining() for ever and is never retried, so one malformed
+                // call would take a sale out of the refund path permanently.
+                'idempotency_key' => ['sometimes', 'string', 'max:64', 'regex:/^[A-Za-z0-9_.:-]+$/'],
             ]);
         } catch (ValidationException $e) {
             return response()->json([

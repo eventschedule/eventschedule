@@ -102,7 +102,10 @@ class SaleRefundService
             );
         }
 
-        [$claim, $fullCharge, $isReplay] = $this->claim($sale, $amount, $userId, $reason, $leg, $driver->key(), $requestKey);
+        [$claim, $fullCharge, $isReplay] = $this->claim(
+            $sale, $amount, $userId, $reason, $leg, $driver->key(), $requestKey,
+            $driver->omittedRefundAmountMeansRemainder(),
+        );
 
         if (is_string($claim)) {
             return new SaleRefundResult($claim, null, $this->messageFor($claim));
@@ -126,7 +129,21 @@ class SaleRefundService
         // classify), and everything it declines to judge falls through to rethrowIntoLadder(), where
         // the Stripe-shaped arms live and where that hierarchy argument now belongs.
         try {
-            $refundId = $driver->refund($sale, $fullCharge ? null : (float) $claim->amount, $claim->idempotency_key, $leg);
+            $refundId = $driver->refund(
+                $sale,
+                $fullCharge ? null : (float) $claim->amount,
+                $claim->idempotency_key,
+                $leg,
+                // The currency to scale by. A LEG has a true snapshot to offer - plans carry
+                // sale_installment_plans.currency, fixed when the plan was created - so it wins.
+                // Everything else falls back to the claim's own copy of the event's code.
+                //
+                // For an ordinary sale that copy is only as good as the event, because `sales` has
+                // no currency column: the claim snapshots whatever the event says at claim time. The
+                // real protection is upstream, where ApiEventController now refuses to change a
+                // denominated event's currency at all - see Event::hasSettledMoney().
+                $leg?->plan?->currency ?: $claim->currency_code,
+            );
         } catch (\Throwable $e) {
             // Ask the driver first. The arms below name Stripe's exception classes literally, and a
             // driver on Laravel's Http client throws RequestException / ConnectionException, which
@@ -196,6 +213,7 @@ class SaleRefundService
         ?SaleInstallment $leg,
         string $gateway,
         ?string $requestKey = null,
+        bool $omissionMeansRemainder = true,
     ): array {
         // Whether the CALLER asked for everything, as opposed to a figure we computed for them.
         $requestedFull = $amount === null;
@@ -207,7 +225,7 @@ class SaleRefundService
             ? 'sale_refund_'.$sale->id.'_'.$requestKey
             : 'sale_refund_'.$sale->id.'_'.Str::uuid();
 
-        return DB::transaction(function () use ($sale, $amount, $requestedFull, $userId, $reason, $leg, $gateway, $key, $requestKey) {
+        return DB::transaction(function () use ($sale, $amount, $requestedFull, $userId, $reason, $leg, $gateway, $key, $requestKey, $omissionMeansRemainder) {
             $locked = Sale::lockForUpdate()->find($sale->id);
 
             if (! $locked || ! in_array($locked->status, self::REFUNDABLE_STATUSES, true)) {
@@ -220,10 +238,35 @@ class SaleRefundService
                 return [$existing, false, true];
             }
 
+            // Has anything already gone back on this sale? Read HERE, before any row is created:
+            // the create() at the end of this method is evaluated before the $fullCharge expression
+            // beside it, so asking later would count the very claim this call is making.
+            //
+            // An exists() rather than refundedTotal() > 0 on purpose - no float comparison, and it
+            // is the same question both readers below are actually asking.
+            $hasPriorRefund = $locked->refunds()->whereIn('status', SaleRefund::CLAIMING_STATUSES)->exists();
+
             if ($locked->status === 'amount_mismatch') {
+                // A leg is refused outright rather than metered.
+                //
+                // UNREACHABLE TODAY, and checked rather than assumed: a sale only reaches
+                // `amount_mismatch` through SaleSettlementService::settle(), and an installment
+                // plan never goes near it - InstallmentService::settle() takes a plan sale from
+                // `unpaid` straight to `paid` itself. So there is no live path here.
+                //
+                // It is guarded anyway because the fall-through was silently wrong rather than
+                // merely unhandled: $fullCharge is `... && ! $leg`, so a leg landing in this branch
+                // would have sent the gateway $claim->amount, which the create() below sets to the
+                // WHOLE SALE's chargedTotal() when $amount is null - one leg's capture asked to
+                // refund every leg's money. Failing closed costs nothing while this cannot happen
+                // and refuses loudly if a future change makes it possible.
+                if ($leg) {
+                    return [SaleRefundResult::INVALID_AMOUNT, false, false];
+                }
+
                 // No reliable expected total to meter against, so this is all-or-nothing and only
                 // once. A second claim would ask the gateway for a second full refund.
-                if ($locked->refunds()->whereIn('status', SaleRefund::CLAIMING_STATUSES)->exists()) {
+                if ($hasPriorRefund) {
                     return [SaleRefundResult::INVALID_AMOUNT, false, false];
                 }
 
@@ -309,7 +352,21 @@ class SaleRefundService
                 // settlement only reconciled to within a cent, so naming it can strand a cent on a
                 // grouped order forever. An installment leg stays explicit: it is one charge among
                 // several and should never be told to refund "the rest".
-            ]), $requestedFull && ! $leg, false];
+                //
+                // ...but "no amount" does not mean the same thing to both gateways, which is what
+                // $omissionMeansRemainder carries in from the driver.
+                //
+                // Stripe reads it as the UNREFUNDED balance. There, omitting after a partial is not
+                // just safe but necessary: when the earlier claim was PARKED we do not know whether
+                // its money moved, and naming our own remainder would under-refund the buyer if it
+                // never did. That rail keeps the old behaviour unconditionally.
+                //
+                // PayPal reads it as the WHOLE capture and refuses one already partly refunded, so
+                // there the same omission turned "give back the remaining 70" into a request for the
+                // original 100 and a 422 - a sale that could never reach `refunded` through the UI.
+                // On that rail the figure is named once anything has gone back; the cent-stranding
+                // argument above still applies to the first, untouched refund, which still omits it.
+            ]), $requestedFull && ! $leg && ($omissionMeansRemainder || ! $hasPriorRefund), false];
         });
     }
 

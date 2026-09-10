@@ -169,6 +169,141 @@ class PayPalRefundTest extends TestCase
             'the sale must not flip to refunded on money that has not moved');
     }
 
+    /**
+     * Refunding the remainder after a partial must NAME the figure on PayPal.
+     *
+     * "Omit the amount and let the gateway give back what it holds" is right for Stripe, which
+     * reads an omitted amount as the unrefunded balance. PayPal reads it as the WHOLE capture and
+     * refuses one that has already been partly refunded - so the shared "asking for the whole
+     * remainder IS a full refund" shortcut turned "give back the remaining 30" into a request for
+     * the original 50. PayPal answers 422, classifyRefundFailure() calls that a definite refusal,
+     * the claim is released and the owner is told a perfectly valid refund failed. The sale can
+     * then never reach `refunded` through the UI, because the dialog prefills the remainder every
+     * time and every attempt takes the same path.
+     *
+     * The split lives on the driver (omittedRefundAmountMeansRemainder), not in a name check, so
+     * the next gateway declares its own semantics instead of inheriting Stripe's by accident.
+     */
+    public function test_refunding_the_remainder_after_a_partial_names_the_amount(): void
+    {
+        $sent = [];
+        $this->refundResponse = function ($request) use (&$sent) {
+            $sent[] = $request->data();
+
+            return Http::response(['id' => 'REFUND'.count($sent), 'status' => 'COMPLETED']);
+        };
+
+        // $20 of the $50 sale goes back, leaving $30.
+        $this->refund(20.0);
+        $this->assertSame('paid', $this->sale->fresh()->status, 'a partial refund leaves the sale paid');
+
+        // Now the remainder. The tolerance check inside claim() marks this "full"; on PayPal that
+        // must still send an explicit amount.
+        app(SaleRefundService::class)->refund(
+            $this->sale->fresh(), 30.0, $this->owner->id, null, null, 'req-key-2'
+        );
+
+        $this->assertCount(2, $sent);
+        $this->assertArrayHasKey('amount', $sent[1],
+            'PayPal must be told the remainder - an omitted amount asks it for the whole capture');
+        $this->assertSame('30.00', $sent[1]['amount']['value']);
+        $this->assertSame('refunded', $this->sale->fresh()->status);
+    }
+
+    /**
+     * The other half of the same rule: the FIRST refund still omits the amount.
+     *
+     * That omission is what stops a grouped order stranding a cent - our own total is a sum of
+     * per-seat decimals that settlement only reconciled to within one - so the fix above must not
+     * quietly start naming a figure on every refund.
+     */
+    public function test_a_first_full_refund_still_omits_the_amount(): void
+    {
+        $sent = [];
+        $this->refundResponse = function ($request) use (&$sent) {
+            $sent[] = $request->data();
+
+            return Http::response(['id' => 'REFUND00000000001', 'status' => 'COMPLETED']);
+        };
+
+        $this->refund();
+
+        $this->assertCount(1, $sent);
+        $this->assertArrayNotHasKey('amount', $sent[0],
+            'nothing has gone back yet, so PayPal should give back exactly what it holds');
+    }
+
+    /**
+     * A capture taken with the INSTALL's credentials is still refundable after the owner connects
+     * their own PayPal account.
+     *
+     * The capture path already walks candidateCredentials() for exactly this: an owner may connect
+     * between checkout and settlement. The refund path asked credentialsFor() only, which resolves
+     * to the owner's new account - and PayPal answers 404 RESOURCE_NOT_FOUND for a capture that
+     * lives in a different merchant account. classifyRefundFailure() reads a 4xx as a definite
+     * refusal, so the claim was released and the owner told the refund failed, permanently.
+     *
+     * Only a 404 may step to the next set. A 422 or a 5xx might mean the money moved, and retrying
+     * those against a second account is how one refund becomes two - see the assertion below.
+     */
+    public function test_a_refund_falls_through_to_the_install_account_when_the_owner_has_moved_on(): void
+    {
+        // platformCredentials() returns [] when hosted - each owner connects their own account
+        // there - so the install-wide set only exists off-platform, which is where this matters.
+        config([
+            'app.hosted' => false,
+            'payments.paypal.client_id' => 'platform-client-id',
+            'payments.paypal.client_secret' => 'platform-secret',
+            'payments.paypal.sandbox' => true,
+        ]);
+
+        $seen = [];
+        $this->refundResponse = function ($request) use (&$seen) {
+            $seen[] = $request->header('Authorization')[0] ?? '';
+
+            // The owner's own account does not hold this capture; the install's does.
+            return count($seen) === 1
+                ? Http::response(['name' => 'RESOURCE_NOT_FOUND'], 404)
+                : Http::response(['id' => 'REFUND00000000007', 'status' => 'COMPLETED']);
+        };
+
+        $result = $this->refund();
+
+        $this->assertTrue($result->moved(), 'the refund must succeed against the second account');
+        $this->assertCount(2, $seen, 'both credential sets have to be tried');
+        $this->assertSame('succeeded', SaleRefund::where('sale_id', $this->sale->id)->firstOrFail()->status);
+    }
+
+    /**
+     * The guard rail on the fall-through above: anything that is NOT a definite 404 stops there.
+     *
+     * A 422 could mean PayPal took the instruction and refused it for a reason that still moved
+     * money, and a second attempt against another account is how one refund becomes two. Exactly
+     * one call may leave the machine.
+     */
+    public function test_a_refund_refusal_is_never_retried_against_a_second_account(): void
+    {
+        // platformCredentials() returns [] when hosted - each owner connects their own account
+        // there - so the install-wide set only exists off-platform, which is where this matters.
+        config([
+            'app.hosted' => false,
+            'payments.paypal.client_id' => 'platform-client-id',
+            'payments.paypal.client_secret' => 'platform-secret',
+            'payments.paypal.sandbox' => true,
+        ]);
+
+        $calls = 0;
+        $this->refundResponse = function () use (&$calls) {
+            $calls++;
+
+            return Http::response(['name' => 'REFUND_AMOUNT_EXCEEDED'], 422);
+        };
+
+        $this->refund(20.0);
+
+        $this->assertSame(1, $calls, 'a refusal must not be replayed against another account');
+    }
+
     public function test_a_paypal_server_error_parks_rather_than_failing(): void
     {
         $this->refundResponse = fn () => Http::response(['name' => 'INTERNAL_SERVER_ERROR'], 500);

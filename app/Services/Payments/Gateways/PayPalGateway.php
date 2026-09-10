@@ -268,6 +268,18 @@ class PayPalGateway extends PaymentGatewayDriver
             }
         }
 
+        // A webhook id belongs to the PayPal APP that issued it, so it is worthless the moment the
+        // client id changes. Cleared BEFORE the save, so ensureWebhookRegistered() below sees an
+        // empty field and registers a listener on the new account. Without this, an owner who
+        // repointed their credentials kept the old id for ever: no listener was ever created on the
+        // new account, the late-settlement path went quietly dark, and the stale id was still being
+        // handed to verify-webhook-signature - which then answers FAILURE for genuine deliveries.
+        $previousClientId = (string) $owner->getRawOriginal('paypal_client_id');
+
+        if ($clientId !== '' && $previousClientId !== '' && $clientId !== $previousClientId) {
+            $owner->forceFill(['paypal_webhook_id' => null])->saveQuietly();
+        }
+
         parent::saveCredentials($owner, $input);
 
         $this->ensureWebhookRegistered($owner->refresh());
@@ -352,7 +364,7 @@ class PayPalGateway extends PaymentGatewayDriver
         return preg_match('/^[A-Z0-9]{17}$/', $reference) ? $reference : null;
     }
 
-    public function refund(Sale $sale, ?float $amount, string $idempotencyKey, ?\App\Models\SaleInstallment $leg = null): string
+    public function refund(Sale $sale, ?float $amount, string $idempotencyKey, ?\App\Models\SaleInstallment $leg = null, ?string $currency = null): string
     {
         $reference = $this->refundReferenceFor($sale, $leg);
 
@@ -362,13 +374,21 @@ class PayPalGateway extends PaymentGatewayDriver
             throw new \LogicException('PayPal capture reference is missing for sale '.$sale->id.'.');
         }
 
-        $credentials = $this->credentialsFor($sale->event?->user);
+        // Every set that could hold this capture, newest first - the SAME list the capture path
+        // walks, and for the same reason. An owner who connects their own PayPal between checkout
+        // and the refund leaves a capture sitting in the INSTALLATION's account; asking only
+        // credentialsFor() then answers 404 RESOURCE_NOT_FOUND for ever and the sale becomes
+        // permanently unrefundable through the app.
+        $candidates = $this->candidateCredentials($sale->event?->user);
 
-        if (! $credentials) {
+        if (! $candidates) {
             throw new \LogicException('PayPal credentials are unavailable for sale '.$sale->id.'.');
         }
 
-        $currency = strtoupper((string) ($sale->event?->ticket_currency_code ?: 'USD'));
+        // The claim's snapshot wins over the event, which the owner can edit after the sale.
+        // PayPal rejects a refund whose currency_code differs from the capture, so reading the
+        // wrong one here fails the refund outright rather than quietly misscaling it.
+        $currency = strtoupper((string) ($currency ?: ($sale->event?->ticket_currency_code ?: 'USD')));
 
         // A null amount means "everything PayPal still holds", which is NOT the same as the sale's
         // expected total - an amount_mismatch sale is parked precisely because what arrived was not
@@ -378,7 +398,42 @@ class PayPalGateway extends PaymentGatewayDriver
             'currency_code' => $currency,
         ];
 
-        return (new PayPalClient($credentials))->refundCapture($reference, $body, $idempotencyKey);
+        // Stepping to the next set is allowed for ONE answer only: 404, which is PayPal saying this
+        // merchant account has no such capture. That is a definite "nothing happened", so retrying
+        // elsewhere cannot double-refund. Every other outcome - a 422 refusal, a 5xx, a timeout -
+        // is rethrown immediately and judged by classifyRefundFailure(): a refund that might have
+        // been taken must never be attempted a second time against another account.
+        $lastNotFound = null;
+
+        foreach ($candidates as $credentials) {
+            try {
+                return (new PayPalClient($credentials))->refundCapture($reference, $body, $idempotencyKey);
+            } catch (\Illuminate\Http\Client\RequestException $e) {
+                if ($e->response->status() !== 404) {
+                    throw $e;
+                }
+
+                $lastNotFound = $e;
+            }
+        }
+
+        // No account we hold credentials for owns this capture. Definite, and not PayPal's fault,
+        // so it fails the claim rather than parking it.
+        throw new \LogicException(
+            'No PayPal account available to this install holds capture '.$reference.' for sale '.$sale->id.'.',
+            0,
+            $lastNotFound,
+        );
+    }
+
+    /**
+     * PayPal's omitted refund amount means the WHOLE capture, not what is left of it - and it
+     * refuses a whole-capture refund once part has already gone back. So once anything has been
+     * refunded on a sale, SaleRefundService must name the figure rather than omit it.
+     */
+    public function omittedRefundAmountMeansRemainder(): bool
+    {
+        return false;
     }
 
     /**

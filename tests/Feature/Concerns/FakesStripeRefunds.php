@@ -23,7 +23,7 @@ trait FakesStripeRefunds
     {
         $fake = new class extends StripeGateway
         {
-            /** @var list<array{sale_id:int, amount:float|null, key:string}> */
+            /** @var list<array{sale_id:int, amount:float|null, key:string, currency:string|null}> */
             public array $calls = [];
 
             /** DB::transactionLevel() at the moment of each call, for the no-IO-in-a-transaction check. */
@@ -31,9 +31,9 @@ trait FakesStripeRefunds
 
             public ?\Throwable $throw = null;
 
-            public function refund(Sale $sale, ?float $amount, string $idempotencyKey, ?SaleInstallment $leg = null): string
+            public function refund(Sale $sale, ?float $amount, string $idempotencyKey, ?SaleInstallment $leg = null, ?string $currency = null): string
             {
-                $this->calls[] = ['sale_id' => $sale->id, 'amount' => $amount, 'key' => $idempotencyKey];
+                $this->calls[] = ['sale_id' => $sale->id, 'amount' => $amount, 'key' => $idempotencyKey, 'currency' => $currency];
                 $this->transactionLevels[] = DB::transactionLevel();
 
                 if ($this->throw) {

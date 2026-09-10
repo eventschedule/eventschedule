@@ -440,6 +440,33 @@ class ApiEventController extends Controller
             ], 422);
         }
 
+        // An event that has taken money is DENOMINATED, and its currency stops being editable.
+        //
+        // events.ticket_currency_code is the only record of what a sale was taken in - `sales` has
+        // no currency column of its own, unlike sale_installment_plans - so every reader downstream
+        // resolves it through the event, live. Editing it re-denominates history: past sales are
+        // reported in a currency nobody was ever charged, and a later refund is SCALED by it.
+        // Stripe amounts are minor units, so a $10.00 refund on a USD sale whose event now says JPY
+        // computes round(10 * 1) = 10 minor units - $0.10 goes back, the ledger records $10.00, and
+        // the buyer is short $9.90 with nothing on the row to show it.
+        //
+        // Refused rather than fixed downstream because there is nowhere correct to fix it: with no
+        // per-sale snapshot, the old currency is genuinely gone the moment this write lands. The
+        // web form never offered this field after creation; only the API did.
+        if ($request->filled('ticket_currency_code')) {
+            $requested = strtoupper((string) $request->input('ticket_currency_code'));
+            $current = strtoupper((string) $event->ticket_currency_code);
+
+            if ($current !== '' && $requested !== $current && $event->hasSettledMoney()) {
+                return response()->json([
+                    'error' => 'Validation failed',
+                    'errors' => ['ticket_currency_code' => [
+                        'This event has already taken money in '.$current.', so its currency can no longer be changed.',
+                    ]],
+                ], 422);
+            }
+        }
+
         // 'manual' is a documented alias the API has always accepted, but events.payment_method is a
         // MySQL enum that has never contained it, so it could only ever fail on write. Normalise it
         // to the value it plainly means rather than leaving a rule that accepts an unstorable input.
