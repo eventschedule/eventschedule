@@ -1,6 +1,6 @@
 <x-marketing-layout>
     <x-slot name="title">Custom Domain | Use Your Own Domain - Event Schedule</x-slot>
-    <x-slot name="description">Serve your whole schedule from events.yourdomain.com. HTTPS is issued for you once the CNAME resolves, and the links you send out carry your domain, not ours.</x-slot>
+    <x-slot name="description">Serve your schedule from events.yourdomain.com. HTTPS is issued once the CNAME resolves, and event links in emails and feeds carry your domain.</x-slot>
     <x-slot name="breadcrumbTitle">Custom Domain</x-slot>
 
     <x-slot name="structuredData">
@@ -19,6 +19,7 @@
             "One CNAME record at your registrar",
             "Domain status shown as setting up, active or failed",
             "Canonical URL and sitemap on your domain in Direct mode",
+            "Event links in schedule emails, the calendar feed and social short links on your domain",
             "No ads on a custom domain"
         ],
         "offers": {
@@ -583,6 +584,10 @@
                 'a' => 'In Direct mode, yes, and that is the point: once the status reads Active, your domain is the canonical URL for the schedule and its event pages, and the sitemap is generated on your host. Redirect mode is different. It sends a 301 to your eventschedule.com URL, so that URL stays the address of record and the custom domain is a doorway to it.',
             ],
             [
+                'q' => 'Do emails, calendar feeds and social links use my custom domain?',
+                'a' => 'Yes. Newsletters, the automatic new-event announcements and the notices to people waiting for tickets to go on sale all link to your schedule and its events on your domain. In Direct mode that starts once the status reads Active, and from then the calendar feed guests subscribe to is served on your domain too. Your social and website links also answer at short addresses on it, such as events.yourdomain.com/instagram, and visitor clicks on them are counted in your analytics.',
+            ],
+            [
                 'q' => 'Are ads ever shown on my custom domain?',
                 'a' => 'No. Paid plans never carry ads at all, and requests that arrive on a custom domain are excluded from ads regardless of plan, so a lapsed subscription cannot put someone else\'s advert on a domain you own.',
             ],
@@ -685,7 +690,7 @@
                             Behind the door, <span class="es-plate-lit">nothing moves</span>
                         </h2>
                         <p class="mx-auto max-w-2xl text-lg text-gray-300" data-reveal style="--reveal-delay: 0.15s;">
-                            A custom domain is not a migration and not a second copy of anything. A request arriving on your domain is matched to your schedule and served by the same routes as before. What changes is the address on the way back out: links, feeds, the JSON the calendar loads, and the page a card payment returns to are all rewritten to your domain.
+                            A custom domain is not a migration and not a second copy of anything. A request arriving on your domain is matched to your schedule and served by the same routes as before. What changes is the address on the way back out: links, feeds, the JSON the calendar loads, and the page a card or PayPal payment returns to are all rewritten to your domain, and the event links in emails sent for your schedule point at it too.
                         </p>
                     </div>
 
@@ -693,7 +698,7 @@
                         <div class="es-plate-card p-6" data-reveal="panel">
                             <p class="es-plate-tag mb-3">Your links</p>
                             <p class="es-plate-mono mb-3">events.yourdomain.com/summer-social</p>
-                            <p class="text-sm leading-relaxed text-gray-400">Event pages keep the slug you set on the event. Only the host in front of it is different.</p>
+                            <p class="text-sm leading-relaxed text-gray-400">Event pages keep the slug you set on the event, and your social and website links answer at <a href="{{ route('marketing.docs.creating_schedules') }}#videos-links" class="es-plate-lit font-medium hover:underline">short addresses</a> there too, like /instagram. Only the host in front is different.</p>
                         </div>
                         <div class="es-plate-card p-6" data-reveal="panel">
                             <p class="es-plate-tag mb-3">Your feeds</p>
@@ -994,7 +999,7 @@
                     <div class="es-tilt-inner es-plate-card relative flex h-full flex-col overflow-hidden p-7">
                         <p class="es-plate-tag mb-4">Subscriptions</p>
                         <h3 class="es-plate-ink mb-3 text-xl font-bold">Feeds on your host</h3>
-                        <p class="es-plate-muted mb-6 leading-relaxed">The iCal and RSS feeds are served from your domain, and each event they carry links back to your domain too.</p>
+                        <p class="es-plate-muted mb-6 leading-relaxed">Guests subscribe from the Add to Calendar menu, and the live iCal feed they get is served from your domain, as is the RSS feed. Each event inside links back to your domain too.</p>
                         <div class="mt-auto flex flex-wrap gap-2">
                             <span class="es-plate-chip">/feed/ical</span>
                             <span class="es-plate-chip">/feed/rss</span>
@@ -1008,7 +1013,7 @@
                     <div class="es-tilt-inner es-plate-card relative flex h-full flex-col overflow-hidden p-7">
                         <p class="es-plate-tag mb-4">Payments</p>
                         <h3 class="es-plate-ink mb-3 text-xl font-bold">Checkout comes home</h3>
-                        <p class="es-plate-muted mb-6 leading-relaxed">Card payment finishes and the buyer is returned to your domain, so the receipt page is on the address they trusted.</p>
+                        <p class="es-plate-muted mb-6 leading-relaxed">A card or PayPal payment finishes and the buyer is returned to your domain, so the receipt page is on the address they trusted.</p>
                         <div class="mt-auto flex flex-wrap gap-2">
                             <span class="es-plate-chip">Success page</span>
                             <span class="es-plate-chip">Cancelled page</span>

@@ -1,6 +1,6 @@
 <x-marketing-layout>
-    <x-slot name="title">Event Carpool Matching - Event Schedule</x-slot>
-    <x-slot name="description">Attendees offer and request lifts on the event page itself. The driver approves each rider before any contact details are shared, and reviews follow after.</x-slot>
+    <x-slot name="title">Event Carpool Matching | The Driver Approves Every Rider</x-slot>
+    <x-slot name="description">Attendees offer and request lifts on the event page. The driver approves each rider before any email or phone number is shared. Ratings follow the ride.</x-slot>
     <x-slot name="breadcrumbTitle">Carpool</x-slot>
 
     <x-slot name="structuredData">
@@ -13,7 +13,7 @@
         "applicationCategory": "BusinessApplication",
         "applicationSubCategory": "Ride Sharing Coordination Software",
         "operatingSystem": "Web",
-        "description": "Attendees offer and request lifts on the event page itself. The driver approves each rider before any contact details are shared, and reviews follow after.",
+        "description": "Attendees offer and request lifts on the event page. The driver approves each rider before any email or phone number is shared. Ratings follow the ride.",
         "offers": {
             "@type": "Offer",
             "price": "0",
@@ -557,7 +557,7 @@
             ],
             [
                 'q' => 'Who can offer or request rides?',
-                'a' => 'Anyone with an Event Schedule account, once they are signed in. The carpool list is not public: a visitor who is not signed in is asked to log in first. Before their first offer or request each person accepts a one-time carpool notice confirming they are 18 or older and that Event Schedule is not responsible for what happens on the ride.',
+                'a' => 'Anyone with an Event Schedule account, once they are signed in. They do not need a ticket or an RSVP for the event. The carpool list is not public: a visitor who is not signed in is asked to log in first. Before their first offer or request each person accepts a one-time carpool notice confirming they are 18 or older and that Event Schedule is not responsible for what happens on the ride.',
             ],
             [
                 'q' => 'When does anyone see my email address or phone number?',
@@ -566,6 +566,10 @@
             [
                 'q' => 'What does carpool matching cost and where is it switched on?',
                 'a' => 'It is on the Pro plan. There is one switch, on the schedule rather than on each event: Engagement, then Carpool, then Carpool matching. Turn it on and a Carpool link appears on the event pages for that schedule, with a count beside it once there are rides on offer.',
+            ],
+            [
+                'q' => 'Can drivers charge riders for fuel?',
+                'a' => 'Not through Event Schedule. A ride offer has no price and no payment step, so nothing is charged, collected or split in the app. Anything a driver and their riders agree between themselves happens outside it.',
             ],
             [
                 'q' => 'Does it work on a weekly or repeating event?',
@@ -606,7 +610,7 @@
         <div class="relative z-10 mx-auto w-full max-w-6xl px-4 sm:px-6 lg:px-8">
             <div class="grid items-center gap-12 lg:grid-cols-2 lg:gap-16">
                 <div>
-                    <p class="es-seat-tag es-fade-up es-d-1 mb-5">Carpool matching</p>
+                    <p class="es-seat-tag es-fade-up es-d-1 mb-5">Event carpool matching</p>
 
                     <h1 class="es-balance mb-7 text-[2.6rem] font-black leading-[1.05] tracking-tight sm:text-6xl">
                         <span class="es-mask"><span class="es-mask-line">Somebody is driving</span></span>
@@ -817,7 +821,8 @@
                 </h2>
                 <p class="es-seat-muted text-lg" data-reveal style="--reveal-delay: 0.15s;">
                     Getting into a stranger's car is a decision, and so is telling a stranger how to
-                    reach you. Both belong to the driver, in that order. Here is the same offer twice.
+                    reach you. Both belong to the driver, in that order. Here is the same ride offer
+                    twice, before and after the driver approves a rider.
                 </p>
             </div>
 
@@ -989,7 +994,7 @@
             <div class="relative z-10 mx-auto max-w-5xl">
                 <div class="mx-auto mb-14 max-w-3xl text-center">
                     <div class="es-seat-mark mb-6" data-reveal aria-hidden="true"><span>05</span></div>
-                    <p class="es-seat-tag mb-4" data-reveal style="--reveal-delay: 0.05s;">Trust</p>
+                    <p class="es-seat-tag mb-4" data-reveal style="--reveal-delay: 0.05s;">Trust and safety</p>
                     <h2 class="es-balance mb-5 text-3xl font-black tracking-tight text-white md:text-5xl" data-reveal style="--reveal-delay: 0.1s;">
                         You are not <span class="es-seat-grad">vouching for anyone</span>.
                     </h2>

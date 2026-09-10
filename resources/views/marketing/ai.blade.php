@@ -41,6 +41,7 @@
             "Category matched against your own category list",
             "Venue resolution against venues you already have, before a new one is created",
             "Performer matching against talent already on the schedule",
+            "A new performer or venue gets a page of its own, kept out of search engines until claimed",
             "Duplicate detection against events already on the schedule",
             "Agenda and setlist scanning into event parts (Enterprise)",
             "Custom agenda prompts per event or as a schedule default (Enterprise)",
@@ -642,7 +643,7 @@
             ['02', 'Same city, and the same name or the same street', 'Plus the country when there is one. Both sides are normalised first, so curly quotes, long dashes, stray spaces and capitals cannot break a match that should have worked.', 1],
             ['03', 'A venue already connected to this schedule', 'Anywhere this schedule already shares an event with, including venues another admin or a calendar sync added. Name or street, no city required.', 2],
             ['04', 'One more look when you press save', 'The normalised name, plus the city and country when they are there, is looked up again at save time. That check does not care which screen the event came from: AI import, the ordinary event form or a guest submission all get it.', 3],
-            ['05', 'Nothing matched', 'Only now is a venue created, from the address you just checked in the preview. Nothing is quietly merged into the wrong room.', 4],
+            ['05', 'Nothing matched', 'Only now is a venue created, from the address you just checked in the preview. Nothing is quietly merged into the wrong room. The new venue gets a page of its own, credited to your schedule for the date and kept out of search engines until the venue claims it.', 4],
         ];
 
         // Enterprise generation set. Every row is a separate controller action.
@@ -725,6 +726,12 @@
                 'a' => 'It tries hard not to. Before making anything, it looks for a venue you already own with that name, then for a venue in the same city with the same name or street, then among the venues this schedule already shares an event with. When you press save the normalised name, city and country are looked up one more time, whatever screen the event came from. Only when all of that misses is a venue created, from the address you checked in the preview. Performers get a shorter version of the same treatment: the parsed name plus your country first, then the talent this schedule already works with.',
             ],
             [
+                // EventRepo::saveEvent creates the schedule, RoleController::viewGuestUnclaimed renders
+                // it noindex, User::claimSchedule hands it over and claimNotMeSubmit takes it down.
+                'q' => 'What happens to a performer or venue that is not on Event Schedule?',
+                'a' => 'Saving the event creates a schedule for them, carrying the name and any contact details in the row you saved. Its page is public but kept out of search engines: it says which schedule created it and that it has not been claimed, and credits each date to the schedule that added it. On your event page, a performer\'s name links to it. Whoever signs in with the email address or phone number on it can claim the page and run it from then on, and the dates you already listed stay where they are. Somebody holding that address who says it is not them takes the page down at once; anyone else\'s request is recorded for review. If the address already belongs to an account, the page is theirs from the start.',
+            ],
+            [
                 'q' => 'What if the event is already on my schedule?',
                 'a' => 'The preview tells you. If an upcoming event on this schedule already has the same registration link, or the same start time plus the same venue address or the same performer, the row links to the event that exists instead of quietly making a second copy of it.',
             ],
@@ -778,7 +785,7 @@
                         <svg aria-hidden="true" class="es-spark-accent h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8">
                             <path stroke-linecap="round" stroke-linejoin="round" d="M13 3L5 14h5l-1 7 8-11h-5l1-7z" />
                         </svg>
-                        <span class="es-spark-muted text-sm font-medium tracking-wide">AI features, described exactly</span>
+                        <span class="es-spark-muted text-sm font-medium tracking-wide">AI event import, described exactly</span>
                     </div>
 
                     <h1 class="es-balance es-spark-ink mb-8 text-[2.4rem] font-black leading-[1.05] tracking-tight sm:text-6xl">
@@ -1023,9 +1030,12 @@
             </div>
 
             <div class="mt-4 grid gap-4 md:grid-cols-3" data-reveal-group="90">
-                <div class="es-spark-card p-7" data-reveal="panel">
+                <div class="es-spark-card flex flex-col p-7" data-reveal="panel">
                     <h3 class="es-spark-ink mb-3 text-lg font-bold">Performers, two rungs of their own</h3>
-                    <p class="es-spark-muted text-sm">The parsed name as written, plus your schedule's country, preferring a record that already has an email. Then the talent this schedule has worked with before, on name alone. A match links the event to the performer who exists instead of making a second one.</p>
+                    <p class="es-spark-muted text-sm">The parsed name as written, plus your schedule's country, preferring a record that already has an email. Then the talent this schedule has worked with before, on name alone. A match links the event to the performer who exists instead of making a second one. No match, and saving creates the performer: a page in their name that lists your date, credits your schedule for it and waits for them to claim it.</p>
+                    <p class="mt-auto pt-4">
+                        <x-link href="{{ route('marketing.docs.creating_events') }}#claim">How claiming works</x-link>
+                    </p>
                 </div>
                 <div class="es-spark-card p-7" data-reveal="panel">
                     <h3 class="es-spark-ink mb-3 text-lg font-bold">Your own schedule is assumed</h3>

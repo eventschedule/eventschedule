@@ -116,6 +116,10 @@
                 'a' => 'Yes. Upload a header image and it runs across the top of every graphic at full width. Add header text for a headline and footer text for a sign-off of up to two lines, both of which accept variables like {schedule_name}, {month_name} and {first_event_date}. You can also switch on the date strip over each flyer and give it your own short template instead of the date. The background, the accent colour on the numbered badges and the colour of your header and footer wording all come from your schedule\'s appearance settings, so the graphic already looks like you.',
             ],
             [
+                'q' => 'Does the graphic carry Event Schedule branding?',
+                'a' => 'One small mark. On eventschedule.com every graphic carries an eventschedule.com credit in its bottom right corner, whatever the plan: white label takes our name off your pages, not off this image. A graphic made on a selfhosted install carries no credit at all.',
+            ],
+            [
                 'q' => 'Can it post to Instagram for me?',
                 'a' => 'No, and it does not pretend to. There is no social account connection here. What you get is an image file and a block of text, which is why it works everywhere: Instagram, WhatsApp, Telegram, Facebook, a newsletter, a printed sheet on the door. Asterisks around a word render as bold in WhatsApp and Telegram, which is why the default template uses them.',
             ],
@@ -144,7 +148,7 @@
         ];
     @endphp
 
-    <x-slot name="title">Event Graphics | Auto-Generated Images - Event Schedule</x-slot>
+    <x-slot name="title">Event Graphics | Social Posts From Flyers - Event Schedule</x-slot>
     <x-slot name="description">Turn an event into a poster and a caption without opening a design tool: pick a size and a template, and the date, venue and price fill themselves in.</x-slot>
     <x-slot name="breadcrumbTitle">Event Graphics</x-slot>
 
@@ -815,12 +819,12 @@
                     </div>
 
                     <h1 class="es-balance es-gal-ink mb-8 text-[2.4rem] font-black leading-[1.05] tracking-tight sm:text-6xl">
-                        <span class="es-mask"><span class="es-mask-line">You already have</span></span>
-                        <span class="es-mask es-mask-2"><span class="es-mask-line">the <span class="es-gal-accent">artwork.</span></span></span>
+                        <span class="es-mask"><span class="es-mask-line">Event graphics</span></span>
+                        <span class="es-mask es-mask-2"><span class="es-mask-line">from <span class="es-gal-accent">your flyers.</span></span></span>
                     </h1>
 
                     <p class="es-fade-up es-d-2 es-gal-muted mb-8 max-w-xl text-lg sm:text-xl">
-                        Event Schedule hangs the flyers already sitting on your upcoming events into one image, and writes the caption to go with it. There is no editor to open, no template to fill in and no canvas to drag things around on. You decide how the work is hung, and press generate.
+                        You already have the artwork. Event Schedule hangs the flyers sitting on your upcoming events into one image, and writes the caption to go with it. There is no editor to open, no template to fill in and no canvas to drag things around on. You decide how the work is hung, and press generate.
                     </p>
 
                     <div class="es-fade-up es-d-3 mb-9 flex flex-wrap gap-2">
@@ -1304,7 +1308,7 @@
                                 <h3 class="es-gal-ink text-xl font-bold">A code in every corner</h3>
                                 <span class="es-gal-plan">Pro</span>
                             </div>
-                            <p class="es-gal-muted mb-4">Each flyer carries a QR code that opens that event's own page, so a phone pointed at the image lands on the right event rather than on your calendar in general. Print the graphic and it still works.</p>
+                            <p class="es-gal-muted mb-4">Each flyer carries a QR code that opens that event's own page, so a phone pointed at the image lands on the right event rather than on your calendar in general. Print the graphic and it still works. If that event's tickets are not on sale yet, its page lets them <a href="{{ route('marketing.docs.tickets') }}#interest-list" class="es-gal-link font-semibold hover:underline">leave an email address</a> and hear when they are.</p>
                             <p class="es-gal-muted text-sm">Number the flyers as well and the wall becomes a numbered list that the caption underneath can refer to.</p>
                         </div>
                         <div class="es-glare" aria-hidden="true"></div>

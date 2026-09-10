@@ -1,6 +1,6 @@
 <x-marketing-layout>
-    <x-slot name="title">Google Calendar Sync & Integration - Event Schedule</x-slot>
-    <x-slot name="description">Real-time two-way sync with Google Calendar. OAuth authentication, webhook updates, and multi-calendar support for smooth event management.</x-slot>
+    <x-slot name="title">Free Two-Way Google Calendar Sync - Event Schedule</x-slot>
+    <x-slot name="description">Two-way Google Calendar sync, free on every plan. Each schedule picks its own calendar, and edits made in Google come back within seconds.</x-slot>
     <x-slot name="breadcrumbTitle">Google Calendar</x-slot>
 
     <x-slot name="structuredData">
@@ -12,7 +12,7 @@
         "applicationCategory": "BusinessApplication",
         "applicationSubCategory": "Calendar Synchronization Software",
         "operatingSystem": "Web",
-        "description": "Real-time two-way sync with Google Calendar. OAuth authentication, webhook updates, and multi-calendar support for smooth event management.",
+        "description": "Two-way Google Calendar sync, free on every plan. Each schedule picks its own calendar, and edits made in Google come back within seconds.",
         "featureList": [
             "Two-way Google Calendar sync, free on every plan",
             "Google OAuth connection with automatic token refresh",
@@ -23,7 +23,8 @@
             "Calendar description template for the text of the Google entry",
             "An address typed into Google Calendar becomes a venue on your schedule",
             "Followers and team members can sync a schedule to a Google Calendar of their own",
-            "Add to Google Calendar links on public event pages"
+            "Add to Google Calendar links on public event pages",
+            "A live calendar feed guests can subscribe to in Google Calendar, separate from sync"
         ],
         "offers": {
             "@type": "Offer",
@@ -631,7 +632,7 @@
             ],
             [
                 'q' => 'If I delete an entry in Google Calendar, what happens here?',
-                'a' => 'Whatever you told it to do. Each schedule has a policy for events deleted in the connected calendar: keep the event here, mark it cancelled so guests stop seeing it, or delete it here as well. It defaults to keeping the event, because that is the choice you can undo.',
+                'a' => 'Whatever you told it to do. Each schedule has a policy for events deleted in the connected calendar: keep the event here, mark it cancelled so guests stop seeing it, or delete it here as well. It defaults to keeping the event, because that is the choice you can undo. Delete has one brake: an event with ticket sales on it is hidden instead, so its sales records survive.',
             ],
             [
                 'q' => 'I connected after I had already added events. Do the old ones go across?',
@@ -640,6 +641,10 @@
             [
                 'q' => 'What happens to the entries in Google if I disconnect?',
                 'a' => 'They stay. Disconnecting closes the notification channels, clears each schedule\'s direction and calendar choice, and drops the tokens, so nothing further is written or read. It deliberately does not go back through Google deleting what it wrote, because that is not a decision worth making on your behalf. If you reconnect later, use the re-send button to bring the two back into step.',
+            ],
+            [
+                'q' => 'Can guests subscribe to my whole schedule in Google Calendar?',
+                'a' => 'Yes, and that is a separate thing from sync, with nothing to connect on your side. Your pages offer Subscribe to all events from your schedule, in the Add to Calendar menu and beside the email sign-up. It is the schedule\'s live iCal feed, so Google Calendar adds it as a calendar of its own and keeps re-reading it: a date you move moves for them too, though Google can take several hours to notice. It carries your public events, with each date of a recurring event for the next ninety days, and it asks for no email address and no account.',
             ],
             [
                 'q' => 'Does Google Calendar sync work with selfhosted Event Schedule?',
@@ -689,7 +694,7 @@
 
                     <h1 class="es-balance es-invite-ink mb-8 text-4xl font-black leading-[1.05] tracking-tight sm:text-6xl">
                         <span class="es-mask"><span class="es-mask-line">Save the event once.</span></span>
-                        <span class="es-mask es-mask-2"><span class="es-mask-line">The <span class="es-invite-accent">invitation</span> writes itself.</span></span>
+                        <span class="es-mask es-mask-2"><span class="es-mask-line">The Google Calendar <span class="es-invite-accent">invitation</span> writes itself.</span></span>
                     </h1>
 
                     <p class="es-fade-up es-d-2 es-invite-muted mb-10 max-w-xl text-lg sm:text-xl">
@@ -958,14 +963,14 @@
                         <h3 class="es-invite-ink text-lg font-bold">The backstop</h3>
                         <span class="es-invite-plan">Free</span>
                     </div>
-                    <p class="es-invite-muted text-sm">A channel can lapse and a single notification can go missing, so an incremental sweep runs every fifteen minutes as well, and the channel is renewed daily.</p>
+                    <p class="es-invite-muted text-sm">A channel can lapse and a single notification can go missing, so an incremental sweep runs every fifteen minutes as well, and a daily check renews the channel before it expires.</p>
                 </div>
                 <div class="es-invite-card p-7" data-reveal="panel">
                     <div class="mb-3 flex flex-wrap items-center gap-2">
                         <h3 class="es-invite-ink text-lg font-bold">If it is deleted there</h3>
                         <span class="es-invite-plan">Free</span>
                     </div>
-                    <p class="es-invite-muted text-sm">Your call, per schedule: keep the event here, mark it cancelled so guests stop seeing it, or delete it here too. It defaults to keeping it, which is the choice you can undo.</p>
+                    <p class="es-invite-muted text-sm">Your call, per schedule: keep the event here, mark it cancelled so guests stop seeing it, or delete it here too. It defaults to keeping it, which is the choice you can undo. An event with ticket sales on it is hidden rather than deleted.</p>
                 </div>
             </div>
 
@@ -1076,9 +1081,9 @@
                         <span class="es-invite-plan">Free</span>
                     </div>
                     <p class="es-invite-muted mb-5">Nobody signs up to take a copy, and nothing is tracked back to them. Being straight about it: a copy is a copy. If you move the start time afterwards, their entry does not hear about it.</p>
-                    <p class="es-invite-muted mb-5 text-sm">Anybody who wants to stay current wants the schedule's iCal feed instead, which their calendar re-reads on its own.</p>
-                    <a href="{{ marketing_url('/features/calendar-sync') }}" class="es-invite-link mt-auto inline-flex items-center gap-1 font-semibold transition-all hover:gap-2">
-                        How the feed works
+                    <p class="es-invite-muted mb-5 text-sm">Anybody who wants to stay current can take the live version instead: Subscribe to all events from your schedule, offered in the Add to Calendar menu and beside the email sign-up. It is the schedule's iCal feed, and Google Calendar keeps re-reading it, so a date you move moves on their calendar too.</p>
+                    <a href="{{ marketing_url('/docs/sharing#calendar-feeds') }}" class="es-invite-link mt-auto inline-flex items-center gap-1 font-semibold transition-all hover:gap-2">
+                        How calendar subscriptions work
                         <svg aria-hidden="true" class="h-4 w-4 rtl:rotate-180" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6" /></svg>
                     </a>
                 </div>

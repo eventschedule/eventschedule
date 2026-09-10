@@ -1,6 +1,6 @@
 <x-marketing-layout>
-    <x-slot name="title">Appointment Booking - Event Schedule</x-slot>
-    <x-slot name="description">Appointment booking built into your schedule. Write your hours down once, share one link, and guests pick an open time in their own timezone.</x-slot>
+    <x-slot name="title">Free Appointment Booking | Paid Slots, No Double Booking</x-slot>
+    <x-slot name="description">Share one booking link and guests book an open time in their own timezone. Free with one appointment type, Stripe for paid slots, and no double booking.</x-slot>
     <x-slot name="breadcrumbTitle">Appointments</x-slot>
 
     @php
@@ -200,7 +200,7 @@
         ];
 
         $facts = [
-            ['Bookings stay out of the shop window', 'Every booking is created as a private event, so it never shows on your public schedule, your iCal feed, your RSS feed or your event graphics. It still holds the time.'],
+            ['Bookings stay out of the shop window', 'Every booking is created as a private event, so it never shows on your public schedule, the calendar feed guests can subscribe to, your RSS feed or your event graphics. It still holds the time.'],
             ['Email has to be working', 'On the hosted platform appointment mail goes out through your own email settings, so confirmations come from your address. Until those are set up nothing is sent, and the Appointments tab says so.'],
             ['Not the same as Availability', 'Availability is a separate tab, on Enterprise talent schedules, where members cross out whole dates they cannot be booked for events. Appointments hand out one specific slot at a time, free with one type on any schedule type, and uncapped on Pro.'],
             ['Turn a type off, do not delete it', 'Untick Active and the type leaves your booking page. Bookings already on it keep their time, their emails and their reminders, though nothing can be moved onto a type that is switched off.'],
@@ -214,12 +214,20 @@
                 'a' => 'Create an appointment type with a duration and the weekly hours you take bookings for. Guests open your booking page, pick an open time, and book it. You can confirm bookings automatically or approve each request yourself.',
             ],
             [
+                'q' => 'Can I use it instead of Calendly?',
+                'a' => 'For one-to-one bookings it covers the core: weekly hours, date overrides, buffers, minimum notice, a booking window, approvals, payment, a calendar invite, a reminder, and a private link to reschedule or cancel. The difference is where the bookings live. They go into the same schedule as your events, so a gig or a synced Google Calendar entry takes its time off the booking page, and the same account runs your public event pages and ticket sales. Each time goes to one guest, so a class with several places belongs on an event with tickets or free RSVPs.',
+            ],
+            [
                 'q' => 'Can I be booked twice at the same time?',
                 'a' => 'No. Open times respect your weekly hours, your buffers and your minimum notice, and any time already taken on your schedule is removed. That includes events synced in from Google Calendar, Outlook or CalDAV, bookings for your other appointment types, and requests still waiting on your approval.',
             ],
             [
                 'q' => 'Can I charge for appointments?',
-                'a' => 'Yes. A type can be free or priced, and paid types take payment by Stripe, a payment link, or cash. Free bookings are confirmed at once, a paid type stays hidden from guests until a working payment method is connected, and Event Schedule takes no cut of what you charge.',
+                'a' => 'Yes. A type can be free or priced, and paid types take payment by Stripe, a payment link, or cash. PayPal, Payfast and Invoice Ninja are not offered for appointments, even when they are connected. Free bookings are confirmed at once, a paid type stays hidden from guests until a payment method it can use is connected, and Event Schedule takes no cut of what you charge.',
+            ],
+            [
+                'q' => 'How do I refund a paid booking?',
+                'a' => 'Refund it on the Sales page rather than cancelling it. A Stripe booking goes back through Stripe, in full or in part: a partial refund leaves the booking in place, and a full one cancels it, puts the time back on offer and tells the guest it is cancelled. A payment-link or cash booking is marked refunded instead, which cancels it the same way but moves no money. Refund only appears while the sale is paid, so if you cancel first, return the money in Stripe or your provider using the amount and reference in your cancellation email.',
             ],
             [
                 'q' => 'Can I approve bookings before they are confirmed?',
@@ -228,6 +236,10 @@
             [
                 'q' => 'What do guests get after booking?',
                 'a' => 'A confirmation email with a calendar invite, and a private link that lets them move the booking to another time or cancel it while the appointment is still ahead of them. A reminder email follows about a day before it starts.',
+            ],
+            [
+                'q' => 'Do guests need an account to book?',
+                'a' => 'No. A guest picks a time and gives a name and an email address, a phone number if the type asks for one, and any notes for you. Everything after that runs from a private link in their email, not a login.',
             ],
             [
                 'q' => 'Can a booking be moved instead of cancelled?',
@@ -239,7 +251,7 @@
             ],
             [
                 'q' => 'Which plan includes appointment booking?',
-                'a' => 'Booking is on the free plan, with one appointment type. Everything about that type is fully featured: weekly hours, per-date overrides, buffers, approvals and payment. Pro is what lets you run several types side by side, and a selfhosted deployment has no cap at all. If a hosted Pro plan lapses you keep every type you created and the oldest bookable one stays bookable, so nothing already booked is ever lost and every guest\'s private link still opens.',
+                'a' => 'Booking is on the free plan, with one appointment type. Everything about that type is fully featured: weekly hours, per-date overrides, buffers, approvals and payment. Paid bookings never count against the 25 paid tickets a month the free plan can sell. Pro is what lets you run several types side by side, and a selfhosted deployment has no cap at all. If a hosted Pro plan lapses you keep every type you created and the oldest bookable one stays bookable, so nothing already booked is ever lost and every guest\'s private link still opens.',
             ],
         ];
 
@@ -275,7 +287,9 @@
             "Open times exclude anything already on your schedule, including synced calendar events",
             "Approval or instant confirmation",
             "Confirmation email with a calendar invite, a reminder, and timezone-aware times",
-            "Guests can move or cancel a booking from a private link"
+            "Guests can move or cancel a booking from a private link",
+            "Guests book without an account, and a type can ask for a phone number",
+            "Stripe bookings refunded in full or in part from the Sales page"
         ],
         "offers": {
             "@type": "Offer",
@@ -1097,9 +1111,9 @@
                 </h2>
                 <p class="es-book-muted text-lg" data-reveal style="--reveal-delay: 0.1s;">
                     The left page is yours: the hours you keep, and the handful of rules that turn them
-                    into slots. The right page is the only thing a guest ever sees, worked out from the
-                    left one and converted to their clock. Both pages here are rendered from the same
-                    figures.
+                    into slots. The right page is your booking page, the only thing a guest ever sees,
+                    worked out from the left one and converted to their clock. Both pages here are
+                    rendered from the same figures.
                 </p>
             </div>
 
@@ -1385,10 +1399,10 @@
                 <div class="es-book-card es-book-hover flex h-full flex-col p-6" data-reveal>
                     <h3 class="es-book-ink mb-2 text-base font-bold">Cancel releases the line</h3>
                     <p class="es-book-muted text-sm">
-                        Cancel a booking and the guest is emailed and the time goes back on offer.
-                        Money does not move on its own: refunding is its own action on the Sales page,
-                        where a Stripe booking goes back through Stripe. The cancellation email to you
-                        carries the amount and the reference so you have both to hand.
+                        Cancel a booking and the guest is emailed and the time goes back on offer, but
+                        no money moves. To send a card payment back, refund it on the Sales page
+                        instead: a full refund cancels the booking for you. Cancel first and the email
+                        to you carries the amount and the reference, so you can return it in Stripe.
                     </p>
                 </div>
             </div>
@@ -1406,8 +1420,9 @@
                     The guest walks off <span class="es-book-grad">with the card</span>
                 </h2>
                 <p class="es-book-muted text-lg" data-reveal style="--reveal-delay: 0.1s;">
-                    You keep the book. They get one line copied out, and everything they need to change
-                    their mind without emailing you about it.
+                    You keep the book. They get one line copied out: a confirmation with a calendar
+                    invite, a reminder, and a private link to reschedule or cancel without emailing you
+                    about it.
                 </p>
             </div>
 
@@ -1532,14 +1547,18 @@
                             Priced types stay off your booking page until a working payment method is
                             connected, and the Appointments tab tells you which one is being held back.
                             Connect Stripe or add a payment link under Account Settings and it appears.
+                            PayPal, Payfast and Invoice Ninja do not count here, even when connected.
                         </p>
                     </div>
                     <div>
                         <h3 class="es-book-ink mb-2 text-base font-bold">Refunds are a decision, not a side effect</h3>
                         <p class="es-book-muted text-sm">
-                            Cancelling a paid booking never moves money. Refunding is a separate,
-                            deliberate action on the Sales page, so the money and the record only ever
-                            change because you said so.
+                            Cancelling a paid booking never moves money. Refunding it on the
+                            <x-link href="{{ route('marketing.docs.tickets') }}#managing-sales">Sales page</x-link>
+                            does: a Stripe booking goes back through Stripe, in full or in part, and only a
+                            full refund cancels it. A payment-link or cash booking is marked refunded
+                            instead, which cancels it without moving any money. Either way, it happens
+                            because you said so.
                         </p>
                     </div>
                 </div>
@@ -1614,6 +1633,13 @@
                     <x-feature-link-card name="Ticketing" description="Sell tickets to your events with zero platform fees." :url="marketing_url('/features/ticketing')" iconColor="emerald">
                         <x-slot:icon>
                             <svg aria-hidden="true" class="h-5 w-5 text-emerald-600 dark:text-emerald-400" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M15 5v2m0 4v2m0 4v2M5 5a2 2 0 00-2 2v3a2 2 0 110 4v3a2 2 0 002 2h14a2 2 0 002-2v-3a2 2 0 110-4V7a2 2 0 00-2-2H5z" /></svg>
+                        </x-slot:icon>
+                    </x-feature-link-card>
+                </div>
+                <div data-reveal>
+                    <x-feature-link-card name="Switching from Calendly" description="One-to-one bookings, public events and ticket sales in the same account." :url="route('marketing.replace_calendly')" iconColor="teal">
+                        <x-slot:icon>
+                            <svg aria-hidden="true" class="h-5 w-5 text-teal-600 dark:text-teal-400" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M7.5 21 3 16.5m0 0L7.5 12M3 16.5h13.5m0-13.5L21 7.5m0 0L16.5 12M21 7.5H7.5" /></svg>
                         </x-slot:icon>
                     </x-feature-link-card>
                 </div>

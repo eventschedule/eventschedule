@@ -30,7 +30,7 @@
             "@type": "Offer",
             "price": "0",
             "priceCurrency": "{{ platform_currency() }}",
-            "description": "Free plan available. Custom fields are included on the Pro plan."
+            "description": "Free plan available. Questions on a ticket type work on every plan; schedule and event custom fields are on the Pro plan."
         },
         "url": "{{ url()->current() }}",
         "keywords": "custom fields, event registration form, attendee questions, checkout questions, event request form, dietary requirements, form validation",
@@ -590,7 +590,10 @@
 
         // The three places a field can be defined, named by the cadence of the
         // answer, because that is what choosing between them actually decides.
-        // Every one of them is Pro.
+        // Schedule and event fields are Pro (the isPro() gate in RoleController and
+        // the isPro template in event/edit.blade.php). Ticket-type fields carry no
+        // plan gate in the edit form, in EventRepo or at checkout, so they work on
+        // every plan; asking them per guest needs Individual tickets, which is Pro.
         $homes = [
             [
                 'Once per event',
@@ -598,6 +601,7 @@
                 'Ten per schedule, answered once for each event. They appear on your own event form, and each one can also be asked of visitors on your public event request form. This is the set that carries the extra switches.',
                 'All four switches',
                 'You, or a visitor submitting an event to you',
+                'Pro',
             ],
             [
                 'Once per order',
@@ -605,13 +609,15 @@
                 'Ten per event, asked once for the whole order. The same set appears on your ticket form and on your registration form, so the question does not change with the way you are taking sign-ups.',
                 'Required only',
                 'Whoever is buying or registering, once',
+                'Pro',
             ],
             [
                 'Once per ticket',
                 'Defined on each ticket type',
-                'Ten per ticket type, shown only while that ticket is in the basket. Turn on per guest fields and everyone in the party answers for themselves instead of one person answering for six.',
+                'Ten per ticket type, shown only while that ticket is in the basket, on every plan. On Pro, turn on per guest fields and everyone in the party answers for themselves instead of one person answering for six.',
                 'Required only',
                 'The buyer, or each guest in the party',
+                'Free',
             ],
         ];
 
@@ -642,11 +648,15 @@
             ],
             [
                 'q' => 'Are custom fields free?',
-                'a' => 'The registration list itself is free forever, including a capacity limit and the count of places left on each date. The custom questions on that form are part of the Pro plan at '.plan_price($proMonthly).' a month, which comes with a 7 day free trial. Event Schedule charges zero platform fees on ticket sales.',
+                'a' => 'The registration list itself is free forever, including a capacity limit and the count of places left on each date. The custom questions on that form, and the fields on your schedule, are part of the Pro plan at '.plan_price($proMonthly).' a month, which comes with a 7 day free trial. A question attached to a single ticket type is the exception: that works on every plan. Event Schedule charges zero platform fees on ticket sales.',
             ],
             [
                 'q' => 'How many fields can I have?',
                 'a' => 'Ten on the schedule, ten on an event and ten on each ticket type. Drag them to change the order they are asked in.',
+            ],
+            [
+                'q' => 'Can every guest in a group answer for themselves?',
+                'a' => 'Yes, for the questions you define on a ticket type. Turn on Individual tickets for the event and then Collect ticket fields per guest, and each person in the party gets their own confirmation, their own QR code and their own answers, instead of the buyer answering once for six. Questions defined on the event are still asked once per order.',
             ],
             [
                 'q' => 'Can I export the answers?',
@@ -803,16 +813,16 @@
                     A field belongs to a schedule, an event, or <span class="es-form-fill">a ticket.</span>
                 </h2>
                 <p class="es-form-muted mt-5 text-lg" data-reveal style="--reveal-delay: 0.15s;">
-                    Which one you pick decides who is asked and when. All three are on the Pro plan, and all three take up to ten fields.
+                    Which one you pick decides who is asked and when. Schedule and event fields are on the Pro plan, questions on a ticket type work on every plan, and each takes up to ten fields.
                 </p>
             </div>
 
             <div class="grid gap-6 md:grid-cols-3" data-reveal-group="100">
-                @foreach ($homes as [$homeName, $homeWhere, $homeBody, $homeSwitches, $homeWho])
+                @foreach ($homes as [$homeName, $homeWhere, $homeBody, $homeSwitches, $homeWho, $homePlan])
                     <div class="es-form-card flex h-full flex-col p-7" data-reveal="panel">
                         <div class="mb-3 flex flex-wrap items-center gap-2">
                             <h3 class="es-form-ink text-lg font-bold">{{ $homeName }}</h3>
-                            <span class="es-form-plan es-form-plan-pro">Pro</span>
+                            <span class="es-form-plan @if ($homePlan === 'Pro') es-form-plan-pro @endif">{{ $homePlan }}</span>
                         </div>
                         <p class="es-form-key mb-4">{{ $homeWhere }}</p>
                         <p class="es-form-muted mb-6 text-sm">{{ $homeBody }}</p>
@@ -1045,7 +1055,7 @@
                             <h3 class="es-form-ink text-lg font-bold">Taking money</h3>
                             <span class="es-form-plan">Free</span>
                         </div>
-                        <p class="es-form-muted text-sm leading-relaxed">Selling starts free: 25 paid tickets a month, through your own Stripe account, and scanning those tickets at the door is free too. Pro lifts that ceiling and adds the live check-in dashboard. Event Schedule charges zero platform fees on every plan, so past Stripe's own processing the money is yours.</p>
+                        <p class="es-form-muted text-sm leading-relaxed">Selling starts free: 25 paid tickets a month, through your own Stripe or <a href="{{ route('marketing.paypal') }}" class="es-form-link font-medium hover:underline">PayPal</a> account, and scanning those tickets at the door is free too. Pro lifts that ceiling and adds the live check-in dashboard. Event Schedule charges zero platform fees on every plan, so past the processor's own fee the money is yours.</p>
                     </div>
                 </div>
 
@@ -1289,7 +1299,7 @@
                                 <span class="es-form-plan es-form-plan-pro">Pro</span>
                             </div>
                             <p class="es-form-muted mb-4">Every schedule field can carry an instruction for the importer: what this field means and where to look for it. Paste a flyer or a listing and the value arrives already in the box.</p>
-                            <p class="es-form-muted mt-auto text-sm">Event import runs on every plan with a daily allowance, 10 a day on Free and 50 on Pro. The custom fields it fills are Pro.</p>
+                            <p class="es-form-muted mt-auto text-sm">Event import runs on every plan, with a daily allowance on eventschedule.com and none on a selfhosted install. The custom fields it fills are Pro.</p>
                         </div>
                         <div class="es-glare" aria-hidden="true"></div>
                         <div class="es-ring-glow" aria-hidden="true"></div>

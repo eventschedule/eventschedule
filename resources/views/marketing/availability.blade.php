@@ -1,5 +1,5 @@
 <x-marketing-layout>
-    <x-slot name="title">Availability | Cross Out the Dates You Cannot Work</x-slot>
+    <x-slot name="title">Availability Calendar: Cross Out the Dates You Cannot Work</x-slot>
     <x-slot name="description">On a talent schedule, mark whole dates as unavailable and your team sees who is out on the shared calendar. Private to signed-in members, never published.</x-slot>
     <x-slot name="breadcrumbTitle">Availability</x-slot>
 
@@ -25,7 +25,7 @@
             "Whole dates only, with no times or reasons stored",
             "One set of dates per team member, editable only by that member",
             "Crossed dates surface on the shared Schedule tab with the names of who is out",
-            "Never shown on the public schedule page",
+            "Never shown on the public schedule page, the embed or the calendar feed",
             "Talent schedules on the Enterprise plan"
         ],
         "url": "{{ url()->current() }}",
@@ -612,7 +612,7 @@
             ['Who can read it', 'Signed-in members of the schedule', 'Anyone with your booking page'],
             ['What a guest can do with it', 'Nothing. It is never published', 'Pick an open time and book it'],
             ['Where it lives', 'The Availability tab', 'The Appointments tab, plus a public booking page'],
-            ['Plan and schedule type', 'Enterprise, talent schedules', 'Pro, any schedule type'],
+            ['Plan and schedule type', 'Enterprise, talent schedules', 'One type free on any schedule, unlimited on Pro'],
         ];
 
         $faqs = [
@@ -622,15 +622,19 @@
             ],
             [
                 'q' => 'Who can set availability?',
-                'a' => 'Every member of the schedule sets their own dates, and a member can only edit their own. Viewers can read the calendar without changing it. Availability management is an Enterprise plan feature on eventschedule.com and is included on selfhosted deployments.',
+                'a' => 'The owner and every admin of the schedule mark their own dates, and nobody can edit anyone else\'s. A viewer can read the calendar but cannot mark dates on it. Availability management is an Enterprise plan feature on eventschedule.com and is included on selfhosted deployments.',
             ],
             [
                 'q' => 'Can I set different availability for different days?',
                 'a' => 'You can mark any date you like, in any month, but a mark is a whole date rather than a set of hours. There are no half days, no time ranges and no reason field: a crossed day stores the date and nothing else. If you want guests to pick a time inside a day, that is appointment booking rather than availability.',
             ],
             [
+                'q' => 'What is the difference between availability and appointment booking?',
+                'a' => 'Availability is a private diary: whole dates your team reads on the shared calendar, never published, on talent schedules with the Enterprise plan. Appointment booking is the public side: you publish open times on a booking page, and a guest picks one and books it. The free plan includes one appointment type on any schedule type, and Pro removes the limit. Plenty of performers use both.',
+            ],
+            [
                 'q' => 'Can guests see the dates I have crossed out?',
-                'a' => 'No. Availability is not published anywhere. Your public schedule page, the embedded calendar and the feeds show your events and say nothing about which dates you marked. Only members of the schedule who are signed in can see the marks.',
+                'a' => 'No. Availability is not published anywhere. Your public schedule page, the embedded calendar, and the iCal and RSS feeds guests can subscribe to show your events and say nothing about which dates you marked. Only members of the schedule who are signed in can see the marks.',
             ],
             [
                 'q' => 'Does marking a date stop somebody booking me on it?',
@@ -1196,9 +1200,9 @@
                         <div class="relative z-10">
                             <div class="mb-4 flex flex-wrap items-center gap-2">
                                 <h3 class="es-hours-ink text-xl font-bold">Bookable time instead</h3>
-                                <span class="es-hours-plan es-hours-plan-alt">Pro</span>
+                                <span class="es-hours-plan es-hours-plan-alt">Free</span>
                             </div>
-                            <p class="es-hours-muted">Want a guest to take a slot rather than read a diary? Appointment types publish open times on a booking page and take the booking there.</p>
+                            <p class="es-hours-muted">Want a guest to take a slot rather than read a diary? Appointment types publish open times on a booking page and take the booking there. The free plan includes one type, and Pro removes the limit.</p>
                         </div>
                         <p class="es-hours-muted relative z-10 mt-auto pt-4 text-sm">
                             <a href="{{ route('marketing.appointments') }}" class="es-hours-link font-medium hover:underline">Appointment booking</a>
@@ -1216,7 +1220,7 @@
                                 <h3 class="es-hours-ink text-xl font-bold">The part guests do see</h3>
                                 <span class="es-hours-plan es-hours-plan-alt">Free</span>
                             </div>
-                            <p class="es-hours-muted mb-4">While the card stays inside, your dates that are public work hard: a schedule page of your own, an embeddable calendar for the site you already have, and a follow button that lets you email the people who pressed it.</p>
+                            <p class="es-hours-muted mb-4">While the card stays inside, your dates that are public work hard: a schedule page of your own, an embeddable calendar for the site you already have, a live calendar feed fans can subscribe to, and a follow button that lets you email the people who pressed it.</p>
                             <p class="es-hours-muted text-sm">
                                 Newsletters are free at 10 emails a month, counted per recipient, and rise to 100 on Pro and 1,000 on Enterprise.
                                 <a href="{{ marketing_url('/features/newsletters') }}" class="es-hours-link font-medium hover:underline">What following does</a>

@@ -1,27 +1,27 @@
 <?php
 
 return [
-    'home_title' => 'Event Schedule - Veranstaltungskalender planen, bewerben und teilen',
-    'home_description' => 'Erstelle professionelle Veranstaltungskalender, verkaufe Tickets ohne Plattformgebühren und checke Gäste mit QR-Codes ein. Kostenlos für Venues, Künstler und Gemeinschaften.',
+    'home_title' => 'Event Schedule - Kostenloser Veranstaltungskalender & Ticketing',
+    'home_description' => 'Veröffentliche deine Veranstaltungen auf einer Kalenderseite, verkaufe Tickets ohne Plattformgebühren und scanne sie am Einlass. Der kostenlose Plan verkauft 25 bezahlte Tickets im Monat.',
 
-    'pricing_title' => 'Preispläne für Veranstaltungsplanung - Event Schedule',
-    'pricing_description' => 'Starte kostenlos mit unbegrenzten Veranstaltungen. Upgrade auf Pro für Ticketverkauf, Boosting und White-Label, oder Enterprise für KI-Funktionen. Keine versteckten Kosten.',
+    'pricing_title' => 'Event Schedule Preise: Gratis-Plan, keine Plattformgebühren',
+    'pricing_description' => 'Kostenlos starten: unbegrenzte Events und 25 bezahlte Tickets im Monat. Pro hebt das Limit auf, Enterprise bringt nummerierte Plätze. Keine Plattformgebühr.',
 
-    'features_title' => 'Funktionen für das Veranstaltungsmanagement - Event Schedule',
-    'features_description' => 'Entdecke alle Funktionen, die Event Schedule zu einer einfachen und leistungsstarken Lösung zum Verwalten von Veranstaltungen, Verkaufen von Tickets und Einbinden deines Publikums machen.',
+    'features_title' => 'Funktionen für das Veranstaltungsmanagement, ohne Plattformgebühren - Event Schedule',
+    'features_description' => 'Alle Funktionen in fünf Kapiteln: Tickets über Stripe oder PayPal ohne Plattformgebühr, Kalendersynchronisierung in beide Richtungen, Newsletter, KI-Import und Analysen.',
 
     'about_title' => 'Über Event Schedule | Open-Source-Plattform für Veranstaltungsmanagement',
-    'about_description' => 'Event Schedule hilft Künstlern, Venues und Organisatoren, Veranstaltungen zu teilen und Tickets zu verkaufen. Open Source, datenschutzfreundlich und von der Community getragen.',
+    'about_description' => 'Wer Event Schedule entwickelt, unter welcher Lizenz es erscheint, wo der Quellcode liegt und eine Liste dessen, was es nicht kann. Open Source und ohne Plattformgebühren.',
 
     'selfhost_title' => 'Event Schedule selbst hosten - alle Funktionen kostenlos auf deinem Server',
     'selfhost_description' => 'Hoste Event Schedule auf deinem eigenen Server und alle Pro- und Enterprise-Funktionen sind kostenlos enthalten. Open Source, Installation mit einem Klick, keine Plattformgebühren, und deine Daten verlassen nie deine Infrastruktur.',
 
-    'ticketing_title' => 'Ticketverkauf ohne Gebühren - Event Schedule',
-    'ticketing_description' => 'Verkaufe Tickets direkt über deinen Veranstaltungskalender mit QR-Codes, mehreren Ticketarten und sicherer Zahlungsabwicklung.',
+    'ticketing_title' => 'Ticketverkauf ohne Plattformgebühren - Event Schedule',
+    'ticketing_description' => 'Verkaufe Tickets über deine Veranstaltungsseite ohne Plattformgebühren. Zahlung per Stripe oder PayPal, volle oder teilweise Erstattungen und QR-Check-in per Handy.',
 
-    'ai_title' => 'KI-gestützte Veranstaltungsfunktionen - Event Schedule',
-    'ai_description' => 'KI-gestütztes Veranstaltungsmanagement. Erstelle Flyer, schreibe Beschreibungen, scanne Agenden, übersetze in 11 Sprachen und automatisiere mit einer vollständigen API für KI-Agenten.',
+    'ai_title' => 'KI-Veranstaltungsimport: vom Flyer zur Veranstaltung | Event Schedule',
+    'ai_description' => 'Text einfügen oder Flyer ablegen, und die KI füllt die Veranstaltungsdaten aus: Datum, Ort, Künstler, Preis. In jedem Tarif kostenlos, mit Übersetzung in 12 Sprachen.',
 
-    'calendar_sync_title' => 'Google Calendar-Sync - Event Schedule',
-    'calendar_sync_description' => 'Zweiwege-Synchronisation mit Google Calendar und CalDAV. Webhook-Updates in Echtzeit. Gäste fügen Veranstaltungen direkt in Apple, Google oder Outlook hinzu.',
+    'calendar_sync_title' => 'Kalender-Sync mit Google, Outlook und CalDAV | Event Schedule',
+    'calendar_sync_description' => 'Zweiwege-Synchronisation mit Google Calendar, Outlook und jedem CalDAV-Server, in jedem Tarif kostenlos. Gäste fügen eine Veranstaltung hinzu oder abonnieren deinen Live-Kalender-Feed.',
 ];

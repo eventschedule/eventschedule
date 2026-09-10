@@ -633,7 +633,15 @@
             ],
             [
                 'q' => 'Can I use Stripe and Invoice Ninja at the same time?',
-                'a' => 'Yes. Both connect once under payment methods on your profile, and then each event chooses how it takes money: cash, Stripe, Invoice Ninja or a plain payment URL. A corporate booking that needs an invoice and a public show that wants a card payment can run side by side.',
+                'a' => 'Yes. Each connects once under Settings, Payment Methods, and then each event chooses how it takes money: Stripe, PayPal, Payfast for events priced in rand, Invoice Ninja, a plain payment URL or cash. A corporate booking that needs an invoice and a public show that wants a card payment can run side by side.',
+            ],
+            [
+                'q' => 'Can I refund an Invoice Ninja sale from Event Schedule?',
+                'a' => 'You can record the refund, not send it. An Invoice Ninja sale shows Mark as Refunded on the Sales page, which marks the sale refunded here and puts its seats back on sale, but moves no money and changes nothing in Invoice Ninja, so return the payment there yourself. Stripe and PayPal are the only methods where a refund from the Sales page sends the money back for you.',
+            ],
+            [
+                'q' => 'Can one invoice cover tickets to several events?',
+                'a' => 'No. The multi-event cart takes one payment for the whole basket, so it runs on Stripe, PayPal and cash only. An Invoice Ninja event is bought on its own, one purchase at a time.',
             ],
             [
                 'q' => 'What happens if a payment link cannot be created?',

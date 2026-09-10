@@ -2244,8 +2244,8 @@ return [
     'editor_text_direction' => 'כיוון טקסט',
 
     // Why create account page
-    'why_create_account_title' => 'למה ליצור חשבון?',
-    'why_create_account_description' => 'גלו את היתרונות של יצירת חשבון Event Schedule בחינם.',
+    'why_create_account_title' => 'צריכים חשבון? מה חשבון חינמי מוסיף',
+    'why_create_account_description' => 'רוב מה שיש ב-Event Schedule עובד בלי חשבון. גלו מה חשבון חינמי מוסיף: כל הכרטיסים שלכם ברשימה אחת, לוחות הזמנים שאתם עוקבים אחריהם ועמוד משלכם.',
     'why_create_account_hero_badge' => 'חשבון חינם',
     'why_create_account_hero_headline' => 'שחררו תכונות עוצמתיות',
     'why_create_account_hero_subtitle' => 'צרו חשבון לניהול האירועים שלכם, התאמה אישית של הפרופיל וגישה לכל הכלים שאתם צריכים - בחינם לחלוטין.',

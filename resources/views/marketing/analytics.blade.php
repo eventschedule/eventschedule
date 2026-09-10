@@ -1,6 +1,6 @@
 <x-marketing-layout>
-    <x-slot name="title">Privacy-First Event Analytics - Event Schedule</x-slot>
-    <x-slot name="description">Track page views, device breakdown, traffic sources, and conversion rates. Privacy-first analytics with no external services required.</x-slot>
+    <x-slot name="title">Privacy-First Event Analytics, Built In | Event Schedule</x-slot>
+    <x-slot name="description">Free built-in event analytics: views, devices, traffic sources, UTM tags, countries and clicks on every link. No third-party analytics and no visitor log.</x-slot>
     <x-slot name="breadcrumbTitle">Analytics</x-slot>
 
     <x-slot name="structuredData">
@@ -9,7 +9,7 @@
         "@context": "https://schema.org",
         "@type": "Service",
         "name": "Event Schedule Analytics",
-        "description": "Track page views, device breakdown, traffic sources, and conversion rates. Privacy-first analytics with no external services required.",
+        "description": "Free built-in event analytics: page views, devices, traffic sources, UTM tags, countries and clicks on every link on a schedule. No third-party analytics service and no visitor log.",
         "provider": {
             "@type": "Organization",
             "name": "Event Schedule",
@@ -26,7 +26,7 @@
         "applicationCategory": "BusinessApplication",
         "applicationSubCategory": "Event Analytics Software",
         "operatingSystem": "Web",
-        "description": "Privacy-first event analytics. Page views by day, week or month, device breakdown, eight traffic-source buckets, referrer domains, UTM parameters, country-level visitor locations and social link clicks, with no external services required.",
+        "description": "Privacy-first event analytics. Page views by day, week or month, device breakdown, eight traffic-source buckets, referrer domains, UTM parameters, country-level visitor locations and clicks on every link on a schedule, with no external services required.",
         "offers": {
             "@type": "Offer",
             "price": "0",
@@ -39,7 +39,7 @@
             "Eight traffic-source buckets including newsletter, boost and promo",
             "Top referrer domains and top UTM source, medium and campaign values",
             "Country-level visitor locations from a local lookup file",
-            "Social link clicks by platform",
+            "Clicks on every link on a schedule, counted through its short address, including sites the app does not recognise",
             "Top events by views, and views split by schedule",
             "Appearance views for talent and venue schedules",
             "Conversion rate, revenue per view and promo code performance with ticketing",
@@ -532,7 +532,7 @@
         $faqs = [
             [
                 'q' => 'Is analytics included on the free plan?',
-                'a' => 'Yes. Built-in analytics is free on every plan, including selfhosted. Views by day, week or month, the device split, all eight traffic-source buckets, referrer domains, UTM values, country-level locations, social link clicks, top events and the per-schedule split are all on the free plan. The Revenue and Check-ins tabs only need ticket sales, not a plan: selling is free up to 25 paid tickets a month per schedule and scanning them at the door is free too, so both tabs fill in on the free plan. Pro at '.plan_price($proMonthly).' a month takes that cap off. Zero platform fees on every plan, free included.',
+                'a' => 'Yes. Built-in analytics is free on every plan, including selfhosted. Views by day, week or month, the device split, all eight traffic-source buckets, referrer domains, UTM values, country-level locations, link clicks, top events and the per-schedule split are all on the free plan. The Revenue and Check-ins tabs only need ticket sales, not a plan: selling is free up to 25 paid tickets a month per schedule and scanning them at the door is free too, so both tabs fill in on the free plan. Pro at '.plan_price($proMonthly).' a month takes that cap off. Zero platform fees on every plan, free included.',
             ],
             [
                 'q' => 'Do you send my visitors to Google Analytics or any other tracker?',
@@ -549,6 +549,11 @@
             [
                 'q' => 'How precise are visitor locations?',
                 'a' => 'Country only. The lookup file the app ships with resolves an IP to a country, and that is the whole of what gets stored: a schedule, a date, a two-letter country code and a count. There is no city, no region and no map pin.',
+            ],
+            [
+                // RoleController::handleSocialRedirect / recordSocialClick; UrlUtils::shortLinkSlugs.
+                'q' => 'Can I see which links people click on my schedule?',
+                'a' => 'Yes. Every link on your schedule answers at a short address on your own schedule URL: /instagram for Instagram, and the site\'s own name for one the app does not recognise, so a link to merchtable.example answers at /merchtable. A click through that address is counted before the visitor is sent on, behind the same crawler filter and ten-a-day cap as a view, and the Analytics page lists the clicks by platform or site. Your schedule\'s links list also shows the all-time clicks beside each short address. Clicks by you as the owner, or by a team member, are not counted.',
             ],
             [
                 'q' => 'Can I look at one schedule, or one event, on its own?',
@@ -676,7 +681,7 @@
                     <div class="es-marquee" data-marquee="1">
                         <div class="es-marquee-track">
                             @for ($chipCopy = 0; $chipCopy < 2; $chipCopy++)
-                                @foreach (['Page views', 'Devices', 'Traffic sources', 'Referrer domains', 'UTM tags', 'Countries', 'Top events', 'Social clicks', 'Per schedule', 'Appearances'] as $chip)
+                                @foreach (['Page views', 'Devices', 'Traffic sources', 'Referrer domains', 'UTM tags', 'Countries', 'Top events', 'Link clicks', 'Per schedule', 'Appearances'] as $chip)
                                     <span @if ($chipCopy === 1) aria-hidden="true" @endif class="es-dash-chip">{{ $chip }}</span>
                                 @endforeach
                             @endfor
@@ -780,7 +785,7 @@
                     ['Visitor countries', 'A country-level split of where the views came from, resolved from a lookup file the app ships with. Country only, never a city.'],
                     ['Top events', 'Your ten most-viewed events for the range. This is the reading that tells you which show the interest is actually landing on.'],
                     ['Views per schedule', 'Run more than one schedule and each gets its own bar with its total for the range, so you can see which one is carrying the other.'],
-                    ['Social link clicks', 'Clicks on the social links in your schedule settings, split by platform. Clicks leaving your page, counted the same careful way as views arriving.'],
+                    ['Social link clicks', 'Every link on your schedule has a short address on your own URL: /instagram, or the name of a site we do not recognise. Clicks through it are counted per platform or site: traffic leaving your page, counted the same careful way as views arriving.'],
                 ] as [$iName, $iBody])
                     <div class="es-dash-card flex h-full flex-col p-6" data-reveal="panel">
                         <h3 class="es-dash-ink mb-3 text-lg font-bold">{{ $iName }}</h3>
@@ -1033,7 +1038,7 @@
                         @endforeach
                     </div>
                     <p class="es-dash-dim mt-4 es-dash-fine">
-                        Sample send. Newsletters themselves are free, at ten emails a month; the sales row at the bottom needs tickets on sale, and selling starts free too.
+                        Sample send. Newsletters themselves are free, at ten recipients a month; the sales row at the bottom needs tickets on sale, and selling starts free too.
                     </p>
                 </div>
 
@@ -1150,8 +1155,8 @@
                                 <h3 class="es-dash-ink text-xl font-bold">Where they went next</h3>
                                 <span class="es-dash-plan">Free</span>
                             </div>
-                            <p class="es-dash-muted mb-4">Every social link in your schedule settings is counted when somebody follows it out, split by platform, and behind the same crawler filter and daily cap as a page view. It is the one reading that tells you which channel your audience actually uses.</p>
-                            <p class="es-dash-muted text-sm">What it is not: there is no share counter, and no way to see what somebody did after they left. Follow-outs, not footsteps.</p>
+                            <p class="es-dash-muted mb-4">Every link on your schedule has a short address on your own URL: /instagram for Instagram, and the site's own name for one we do not recognise, so merchtable.example answers at /merchtable, or at a name you type if that one is taken. A click through it is counted behind the same crawler filter and daily cap as a page view. It is the one reading that tells you which channel your audience actually uses.</p>
+                            <p class="es-dash-muted text-sm">Your schedule's links list shows each short address with its all-time clicks, and warns you before you change one people have already used. What it is not: there is no share counter, and no way to see what somebody did after they left. Follow-outs, not footsteps.</p>
                         </div>
                         <div class="es-glare" aria-hidden="true"></div>
                         <div class="es-ring-glow" aria-hidden="true"></div>

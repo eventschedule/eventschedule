@@ -1,6 +1,6 @@
 <x-marketing-layout>
-    <x-slot name="title">Contact Event Schedule | Get in Touch</x-slot>
-    <x-slot name="description">Contact Event Schedule by email for support, report issues on GitHub, or connect with us on social media. We're here to help with setup, features, and more.</x-slot>
+    <x-slot name="title">Contact Event Schedule | Support Email and Bug Reports</x-slot>
+    <x-slot name="description">One support address, no portal to log into. Where to send a bug, a security report or an idea, and who to ask about a refund for a ticket you bought.</x-slot>
     <x-slot name="breadcrumbTitle">Contact</x-slot>
 
     <x-slot name="structuredData">
@@ -9,7 +9,7 @@
         "@context": "https://schema.org",
         "@type": "ContactPage",
         "name": "Contact Event Schedule",
-        "description": "Get in touch with Event Schedule. Reach out via email, social media, or report issues on GitHub.",
+        "description": "One support address for Event Schedule, GitHub Issues for bugs and Discussions for ideas. Refunds and questions about an event go to the organizer who sold the ticket.",
         "url": "{{ url()->current() }}",
         "mainEntity": {
             "@type": "Organization",
@@ -481,6 +481,16 @@
                 'why' => 'What is on the free plan, what Pro adds at '.plan_price($proMonthly).' a month, and why there are zero platform fees on ticket sales.',
             ],
             [
+                // No link: the organizer is reached on their own pages, not ours. Ticket money
+                // settles into the organizer's own Stripe or PayPal account (Connect on hosted), so a
+                // refund is theirs to issue, through SaleRefundService from their Sales page.
+                'what' => 'A refund, or a question about an event',
+                'label' => 'The organizer',
+                'href' => null,
+                'external' => false,
+                'why' => 'Ticket money goes straight to the organizer\'s own account, not through us, so the refund has to come from them: they can send a Stripe or PayPal sale back in full or in part from their Sales page. They are also the ones who can answer for the event itself.',
+            ],
+            [
                 'what' => 'Something is broken',
                 'label' => 'GitHub Issues',
                 'href' => 'https://github.com/eventschedule/eventschedule/issues',
@@ -502,6 +512,15 @@
                 'why' => 'Ideas are worth arguing out in the open, next to everyone else who wants a version of the same thing.',
             ],
             [
+                // No link: the answer is on the page itself. role/show-guest-unclaimed.blade.php
+                // carries "Claim this page" and "This is not me" (RoleController::claimNotMeSubmit).
+                'what' => 'A page in your name that you did not make',
+                'label' => 'The page itself',
+                'href' => null,
+                'external' => false,
+                'why' => 'A page made for an act or venue that an organizer listed carries two buttons. Signed in with the address on that page, Claim this page makes it yours and This is not me takes it down; from any other account, This is not me is recorded for review.',
+            ],
+            [
                 'what' => 'Anything private, or anything else',
                 'label' => $supportEmail,
                 'href' => 'mailto:'.$supportEmail,
@@ -509,6 +528,10 @@
                 'why' => 'Your account, billing, or something you would rather not post in public. If none of the others fit, this address takes it.',
             ],
         ];
+
+        // The heading counts distinct destinations, so the support address listed twice counts
+        // once. Derived rather than typed: the number drifted once already when a row was added.
+        $addressCount = count(array_unique(array_column($routes, 'label')));
 
         // What actually helps us answer. None of this is a form field: it is
         // the four things that turn a report into a reproduction.
@@ -577,8 +600,16 @@
                 'a' => 'No. Pricing is published on the pricing page, the free plan needs no card, and you can create a schedule and start adding events without speaking to anybody. Selling is free too, up to 25 paid tickets a month per schedule, scanned at the door; Pro at '.plan_price($proMonthly).' a month is what takes that ceiling off. Event Schedule charges zero platform fees on ticket sales either way.',
             ],
             [
+                'q' => 'Can Event Schedule refund my ticket?',
+                'a' => 'No, because the money never passed through us. Ticket sales settle into the organizer\'s own Stripe or PayPal account, so ask the schedule you bought from: they can refund a Stripe or PayPal sale in full or in part from their Sales page, and it goes back through the same provider. A ticket paid any other way, in cash or through a payment link for example, is settled between you and them. Event Schedule does not email you when a refund goes through, so their reply is your confirmation.',
+            ],
+            [
+                'q' => 'Someone made a page with my name on it. Who do I tell?',
+                'a' => 'Usually nobody: the page itself has the buttons. When an organizer lists a performer or venue who is not on Event Schedule, the app makes a page to credit the date to, and it stays out of search engines until it is claimed. Sign in with the email address on it and Claim this page makes it yours, or This is not me takes it down at once. From any other account, This is not me is recorded for review. If the page carries no contact details at all, ask the schedule that listed you to send an invitation, or write to '.$supportEmail.'.',
+            ],
+            [
                 'q' => 'I selfhost. Where do I get help?',
-                'a' => 'The selfhost section of the user guide covers installation, email, Stripe, calendar sync, AI and the rest of the environment settings. For anything the guide does not answer, GitHub Issues is the right address, and it helps to say which version you are running.',
+                'a' => 'The selfhost section of the user guide covers installation, email, Stripe and PayPal, calendar sync, AI, the admin tools and the rest of the environment settings. For anything the guide does not answer, GitHub Issues is the right address, and it helps to say which version you are running.',
             ],
         ];
 
@@ -712,10 +743,10 @@
                 <div class="es-post-num mb-6" data-reveal aria-hidden="true"><span>02</span></div>
                 <p class="es-post-tag mb-4" data-reveal style="--reveal-delay: 0.05s;">Routing</p>
                 <h2 class="es-balance es-post-ink text-3xl font-black tracking-tight md:text-5xl" data-reveal style="--reveal-delay: 0.1s;">
-                    Five addresses. <span class="es-post-accent">Pick the nearest one.</span>
+                    {{ ucfirst(\Illuminate\Support\Number::spell($addressCount)) }} addresses. <span class="es-post-accent">Pick the nearest one.</span>
                 </h2>
                 <p class="es-post-muted mt-5 text-lg" data-reveal style="--reveal-delay: 0.15s;">
-                    Two of them answer you faster than we can, because the answer is already written.
+                    Two of them answer you faster than we can, because the answer is already written. Two more are not us at all: the organizer who sold you a ticket, and a page that was made in your name.
                 </p>
             </div>
 
@@ -734,6 +765,7 @@
                             <tr>
                                 <th scope="row" class="es-post-ink text-sm font-bold">{{ $route['what'] }}</th>
                                 <td class="text-sm">
+                                    @if ($route['href'])
                                     <a href="{{ $route['href'] }}"
                                         @if ($route['external']) target="_blank" rel="noopener noreferrer" @endif
                                         class="es-post-link inline-flex items-center gap-1.5 font-semibold hover:underline @if (str_contains($route['label'], '@')) break-all @endif">
@@ -742,6 +774,10 @@
                                             <svg aria-hidden="true" class="h-3.5 w-3.5 flex-none" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" /></svg>
                                         @endif
                                     </a>
+                                    @else
+                                    {{-- A destination that is not ours to link to: the organizer, or the page itself. --}}
+                                    <span class="es-post-ink font-semibold">{{ $route['label'] }}</span>
+                                    @endif
                                     <span class="es-post-muted mt-1.5 block text-xs md:hidden">{{ $route['why'] }}</span>
                                 </td>
                                 <td class="es-post-muted hidden text-sm md:table-cell">{{ $route['why'] }}</td>

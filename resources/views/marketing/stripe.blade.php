@@ -23,6 +23,8 @@
             "Signed webhooks confirm payment before a ticket is issued",
             "The charged amount is checked against the ticket total before the sale is marked paid",
             "Promo codes, volume discounts and gift cards priced into the same charge",
+            "Installment payment plans on the Pro plan, charged to the buyer's saved card",
+            "Refunds from the Sales page, in full or in part, sent back through Stripe",
             "PayPal, Payfast, Invoice Ninja, a payment link, or cash at the door as alternatives",
             "Sales exportable as CSV for your records"
         ],
@@ -737,14 +739,14 @@
         ];
 
         // Everything else that gets priced into the same charge or rides
-        // the same webhook. Each traced in the report.
+        // the same Stripe account. Each traced in the report.
         $sameRail = [
             ['Promo codes', 'A percentage or a fixed discount, with usage limits and an expiry, priced into the line items before the charge is created.', 'Pro'],
             ['Volume discounts', 'Buy more of one ticket type and the per-unit price drops. The reconciliation spreads the rounding a cent at a time so the charge matches the total exactly.', 'Free'],
             ['Gift cards', 'Sold through the same Stripe account and redeemed against a later ticket. A gift-card payment is checked harder still: the connected account that paid has to be the one selling the card, and the currency has to match.', 'Pro'],
             ['Add-ons', 'A drink, a programme, a workshop place. Priced as its own line on the same charge rather than a second checkout.', 'Pro'],
             ['Appointments', 'A bookable slot can take payment through the same connected account, or a payment link, or cash. One appointment type on the free plan, as many as you like on Pro.', 'Free'],
-            ['Outgoing webhooks', 'When a sale is marked paid, Event Schedule can POST it to an endpoint you own, so your own systems hear about it too.', 'Pro'],
+            ['Installments', 'Split a ticket into monthly payments. The first is taken at checkout on the same Stripe account and the ticket is valid at once; the rest are charged to the saved card on schedule. No other route can do it.', 'Pro'],
         ];
 
         $faqs = [
@@ -769,12 +771,20 @@
                 'a' => 'You pick a currency per event from a list of 28, including USD, EUR, GBP, CAD, AUD, JPY, INR, BRL, ILS, ZAR and SGD. Stripe is charged in that currency, and zero-decimal currencies such as JPY and KRW are handled in whole units rather than cents.',
             ],
             [
+                'q' => 'Can buyers pay in installments?',
+                'a' => 'Yes, on the Pro plan, and only through Stripe, because it is the one route that can charge a saved card again later. The buyer pays the first installment at checkout and the ticket is valid straight away; the rest are charged to the same card on schedule. If a payment is missed, the ticket is held at the door until the plan is settled.',
+            ],
+            [
                 'q' => 'What happens if the buyer closes the tab on the way back?',
                 'a' => 'Nothing is lost. The redirect back from Stripe only records the payment reference; it is the signed webhook that marks the sale paid and sends the ticket. If Stripe delivers more than one event for the same payment, the row lock means the sale still transitions exactly once.',
             ],
             [
                 'q' => 'How do refunds work?',
-                'a' => 'From the Sales page. Refunding a Stripe sale sends the money back through Stripe, invalidates the ticket and takes the amount back out of your revenue figures. You can return the whole amount or part of it, and a partial refund leaves the sale paid with the tickets still valid. Refunds still show in your Stripe Dashboard, and you can issue one there instead if you prefer.',
+                'a' => 'From the Sales page, in full or in part, on every plan. The money goes back through Stripe first, and only then does the sale change here. A full refund invalidates the tickets, puts the seats back on sale and takes the sale out of your revenue figures. A partial refund leaves the sale paid and its tickets valid, and the Sales page shows how much has gone back so far. An installment plan is refunded payment by payment, and only in full.',
+            ],
+            [
+                'q' => 'Can I refund from the Stripe Dashboard instead?',
+                'a' => 'You can, but Event Schedule will not hear about it: no refund event comes back from Stripe, so the sale here would still read as paid and its tickets would still scan. Refunding from the Sales page keeps the two in step, and the refund still shows in your Stripe Dashboard. Outside installment plans, which remember the account that took each payment, it is issued on the Stripe account you are connected to now, so if you have switched accounts since the sale it fails rather than coming out of the wrong one.',
             ],
             [
                 'q' => 'Can a selfhosted install take Stripe payments?',
@@ -1143,7 +1153,7 @@
                 </p>
             </div>
 
-            <div class="grid gap-4 md:grid-cols-2 lg:grid-cols-4" data-reveal-group="90">
+            <div class="grid gap-4 md:grid-cols-2 lg:grid-cols-3" data-reveal-group="90">
                 @foreach ($routes as $route)
                     <div class="es-payout-card es-payout-hover flex flex-col p-6" data-reveal>
                         <p class="es-payout-tag mb-3">{{ $route['micro'] }}</p>
@@ -1227,6 +1237,11 @@
                     </x-feature-link-card>
                 </div>
                 <div data-reveal>
+                    <x-feature-link-card name="Installments" description="Split a ticket into monthly payments, charged through Stripe" :url="marketing_url('/features/installments')" icon-color="teal">
+                        <x-slot:icon><svg aria-hidden="true" class="h-5 w-5 text-teal-600 dark:text-teal-400" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" /></svg></x-slot:icon>
+                    </x-feature-link-card>
+                </div>
+                <div data-reveal>
                     <x-feature-link-card name="Analytics" description="Revenue, sales and views without a third-party tracker" :url="marketing_url('/features/analytics')" icon-color="amber">
                         <x-slot:icon><svg aria-hidden="true" class="h-5 w-5 text-amber-600 dark:text-amber-400" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" /></svg></x-slot:icon>
                     </x-feature-link-card>
@@ -1270,8 +1285,8 @@
                     <p class="es-payout-tag mb-3">Payments and beyond</p>
                     <h3 class="es-payout-ink mb-2 text-xl font-bold">Explore more integrations</h3>
                     <p class="es-payout-muted mb-5 text-sm">
-                        Invoice Ninja, Google and Outlook calendars, CalDAV, outgoing webhooks and the read
-                        API. Everything Event Schedule connects to.
+                        PayPal, Invoice Ninja, Google and Outlook calendars, CalDAV, outgoing webhooks and
+                        the REST API. Everything Event Schedule connects to.
                     </p>
                     <span class="es-payout-accent mt-auto inline-flex items-center gap-2 text-sm font-semibold">
                         View all integrations

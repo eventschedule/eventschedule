@@ -1,6 +1,6 @@
 <x-marketing-layout>
     <x-slot name="title">Event Scheduling for Every Industry | Event Schedule</x-slot>
-    <x-slot name="description">Event scheduling software for musicians, venues, restaurants, and theaters. Share events, sell tickets, send newsletters. Free forever with zero platform fees.</x-slot>
+    <x-slot name="description">Event scheduling software for musicians, venues, curators, theaters and online events. Sell tickets with zero platform fees. Free forever, open source.</x-slot>
     <x-slot name="breadcrumbTitle">Use Cases</x-slot>
 
     @php
@@ -30,9 +30,12 @@
             ['url' => '/for-live-concerts', 'name' => 'Live Concerts', 'blurb' => 'List a hybrid show once, with the room and the join link on one event, and email fans directly.', 'tags' => ['Acoustic Sets', 'Rock Shows', 'Jazz Nights', 'Festival Streams', 'Album Release Shows', 'DJ Sets'], 'icon' => '<path stroke-linecap="round" stroke-linejoin="round" d="M8.111 16.404a5.5 5.5 0 017.778 0M12 20h.01m-7.08-7.071c3.904-3.905 10.236-3.905 14.141 0M1.394 9.393c5.857-5.857 15.355-5.857 21.213 0" />'],
         ];
         $faqs = [
-            ['q' => 'Is Event Schedule free?', 'a' => 'Yes. Event Schedule is free forever for creating and sharing your event calendar, and the free plan also sells up to 25 paid tickets a month and scans them at the door. Pro lifts that to unlimited ticket sales and adds event graphics, the API and the live check-in dashboard; Enterprise adds custom domains and extra team members. There are no platform fees on ticket sales - you only pay Stripe\'s standard processing fees.'],
+            ['q' => 'Is Event Schedule free?', 'a' => 'Yes. Event Schedule is free forever for creating and sharing your event calendar, and the free plan also sells up to 25 paid tickets a month per schedule and scans them at the door. Pro lifts that to unlimited ticket sales and adds event graphics, the API and the live check-in dashboard; Enterprise adds custom domains and extra team members. There are no platform fees on ticket sales, so the only fee is your payment provider\'s own, such as Stripe\'s or PayPal\'s.'],
             ['q' => 'What types of events can I manage?', 'a' => 'Any kind. Musicians share gig schedules, bars list their weekly lineups, theaters manage their season calendars, fitness instructors schedule classes, and conference organizers run multi-day programs. Event Schedule works for in-person events, online events, and hybrid events across every industry.'],
-            ['q' => 'Can I sell tickets with Event Schedule?', 'a' => 'Yes. Sell tickets directly through your event page with Stripe integration. Buyers get QR code tickets for easy check-in at the door. There are no platform fees - you only pay Stripe\'s standard processing fees, so you keep more of your revenue.'],
+            // Every gateway is on every plan: no isPro() anywhere in app/Services/Payments/.
+            // Payfast settles in rand only (PayfastGateway), so it is offered on ZAR events only.
+            ['q' => 'Can I sell tickets with Event Schedule?', 'a' => 'Yes, on every plan. Sell tickets on your event page and take payment through Stripe, PayPal, Invoice Ninja, Payfast (South African rand only), a payment link or cash. The free plan sells up to 25 paid tickets a month per schedule and Pro removes the cap. Buyers get a QR code ticket, and scanning it at the door is free on every plan; the live check-in dashboard is part of Pro. There are no platform fees, so you pay only your payment provider\'s own processing fee.'],
+            ['q' => 'What if a performer or venue I list is not on Event Schedule?', 'a' => 'Their name still shows on your event, and Event Schedule creates a page for them that says which schedule listed them and that they have not claimed it yet. The page stays out of search engines until it is claimed. They claim it by signing in with the email address you entered for them, which makes the page theirs, and the dates you already listed them on stay where they are.'],
             ['q' => 'Does Event Schedule work for online events?', 'a' => 'Yes. Paste the link people join on into any event and the whole link is printed on their ticket, while the public listing shows only the domain. It is a link and not an integration, so Zoom, Google Meet, YouTube Live, Twitch or a page on your own site all work the same way. You can sell tickets for virtual events, run webinars, schedule online classes, and manage virtual conferences.'],
             ['q' => 'Is Event Schedule open source?', 'a' => 'Yes. Event Schedule is fully open source. You can use the hosted version at eventschedule.com or selfhost it on your own server for complete control over your data and branding. The selfhosted version includes all features with no limits.'],
         ];
@@ -134,7 +137,7 @@
                     <span class="absolute inline-flex h-full w-full animate-ping rounded-full bg-blue-400 opacity-75"></span>
                     <span class="relative inline-flex h-2 w-2 rounded-full bg-blue-500"></span>
                 </span>
-                <span class="text-sm font-medium tracking-wide text-gray-600 dark:text-gray-300">Whatever you run</span>
+                <span class="text-sm font-medium tracking-wide text-gray-600 dark:text-gray-300">Event Schedule use cases</span>
             </div>
 
             <h1 class="es-balance mb-5 text-[2.6rem] font-black leading-[1.05] tracking-tight text-gray-900 dark:text-white sm:text-6xl lg:text-7xl">
@@ -170,7 +173,7 @@
                     </span>
                     <h2 class="es-balance text-3xl font-black tracking-tight text-gray-900 dark:text-white md:text-4xl">For Performers &amp; Artists</h2>
                 </div>
-                <p class="text-lg text-gray-600 dark:text-gray-400">Musicians, DJs, performers, and artists who want to share their upcoming shows and build their audience. Sync with Google Calendar, let venues add you to their lineup through booking requests, and email your fans directly whenever you announce new dates.</p>
+                <p class="text-lg text-gray-600 dark:text-gray-400">Musicians, DJs, performers, and artists who want to share their upcoming shows and build their audience. Sync with Google Calendar, Outlook or CalDAV, let venues add you to their lineup through booking requests, and email your fans directly whenever you announce new dates. If a venue or promoter has already listed you, a page with your name on it may be waiting: <a href="{{ marketing_url('/docs/creating-events#claim') }}" class="font-medium text-blue-600 hover:underline dark:text-blue-400">claim it</a> with the email address they entered.</p>
 
                 <a href="{{ marketing_url('/for-talent') }}"
                    class="group mt-5 inline-flex items-center gap-2 rounded-2xl px-4 py-2.5 text-sm font-semibold ring-1 transition-all text-blue-700 ring-blue-200 hover:bg-blue-50 dark:text-blue-300 dark:ring-blue-400/30 dark:hover:bg-blue-500/10">
@@ -268,10 +271,17 @@
                             // checkout opt-in. Account followers (role_user at level 'follower')
                             // are reached only by a newsletter the owner composes and sends. So
                             // "subscribers", never "followers", in any sentence about automatic mail.
-                            ['Build Your Audience', 'Subscribers hear when you publish, with no algorithm in between', 'M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0z'],
+                            ['Build Your Audience', 'Confirmed email subscribers get a digest of what you publish, with no algorithm in between', 'M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0z'],
+                            // A name typed into a lineup becomes a schedule of its own (EventRepo),
+                            // rendered publicly by role/show-guest-unclaimed.blade.php and noindex
+                            // until User::claimSchedule() hands it to whoever holds the address on it.
+                            ['Pages for Your Acts', 'A performer or venue you list who is not here yet gets a page crediting you, which they can claim', 'M18 9v3m0 0v3m0-3h3m-3 0h-3m-2-5a4 4 0 11-8 0 4 4 0 018 0zM3 20a6 6 0 0112 0v1H3v-1z'],
+                            // FeedController::icalFeed, offered to guests in the Add to Calendar menu.
+                            ['Live Calendar Feed', 'Anyone can add your whole calendar to theirs as a feed that updates itself', 'M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z'],
                         ];
                     @endphp
-                    <div class="mb-8 grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
+                    {{-- Six tiles, three across, so the grid closes with no lone tile at any width. --}}
+                    <div class="mb-8 grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
                         @foreach ($curatorTiles as [$tileTitle, $tileBody, $tilePath])
                             <div class="rounded-2xl border border-gray-200 bg-gray-50 p-5 dark:border-white/10 dark:bg-white/5">
                                 <span class="mb-3 flex h-9 w-9 items-center justify-center rounded-lg bg-emerald-100 dark:bg-emerald-500/20">

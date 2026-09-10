@@ -1,7 +1,7 @@
 <x-marketing-layout>
     {{-- SEO Slots --}}
     <x-slot name="title">Event Schedule Examples | Live Demo Schedules to Explore</x-slot>
-    <x-slot name="description">Explore {{ $scheduleCount }} live demo schedules showcasing Event Schedule. See real examples for fitness studios, music venues, yoga retreats, community groups, and more.</x-slot>
+    <x-slot name="description">Open {{ $scheduleCount }} live Event Schedule demos, from a yoga retreat and a pub lineup to woodworking classes and a model town, and see what visitors can do on each.</x-slot>
     <x-slot name="breadcrumbTitle">Examples</x-slot>
 
     {{-- Structured Data for Rich Results. Built with SeoUtils::jsonLd so the payload
@@ -568,10 +568,12 @@
             ['A month grid, or a plain list of what is coming up', 'The calendar or list layout, set once per schedule', 'Free'],
             ['A class every Tuesday that nobody retyped fifty times', 'Recurring dates, with exceptions for the days you skip', 'Free'],
             ['Color-coded strands inside one schedule', 'Sub-schedules', 'Free'],
-            ['Add to Google, Outlook or Apple Calendar', 'An iCal download per date, plus two-way Google, Outlook and CalDAV sync', 'Free'],
-            ['The Follow button under the schedule name', 'An audience you can reach. Anyone who leaves an email address gets a digest automatically when you publish new events, plus any newsletter you write: 10 emails a month on Free, counted per recipient', 'Free'],
+            ['Every act on the bill, including the ones with no account', 'The lineup on each event. A performer or venue you name who is not on Event Schedule gets a page of its own that says you listed them, and they can claim it with the email address on it', 'Free'],
+            ['Add to Google, Apple or Outlook, or subscribe to every event on the schedule', 'A calendar file per date, plus a live calendar feed of the whole schedule that updates itself when a date moves', 'Free'],
+            ['Tell me when tickets go on sale, on a date that is not selling yet', 'The interest list: an email address and nothing else, then a message when tickets go on sale, if it is cancelled and shortly before it starts, plus any notice you choose to send if the date or venue changes. It does not use your newsletter allowance', 'Free'],
+            ['The Follow button under the schedule name', 'An audience you can reach. A visitor who signs up with a name and email address and confirms it gets a digest of your new events automatically, plus any newsletter you write: 10 emails a month on Free, counted per recipient', 'Free'],
             ['Save me a place, and the count of places left', 'Free registration with an optional capacity, per date', 'Free'],
-            ['Buy a ticket without leaving the page', 'Ticket types and card checkout, with zero platform fees. Free sells 25 paid tickets a month per schedule', 'Free'],
+            ['Buy a ticket without leaving the page', 'Ticket types and checkout through Stripe or PayPal, with zero platform fees. Free sells 25 paid tickets a month per schedule', 'Free'],
             ['Photos and comments from the people who came', 'Fan photos, video and comments, held in an approval queue. Free covers 25 photos per schedule', 'Free'],
             ['The line at the foot of a free schedule inviting you to make one of your own', 'The free-plan credit, which reads "Create your free schedule at eventschedule.com". Removing it is part of Pro', 'Pro'],
             ['A code shown at the door, and scanned on the way in', 'QR scanning, on every plan. The live check-in dashboard is the Pro half, and Pro also lifts the 25-a-month ceiling on what you sell', 'Free'],
@@ -590,7 +592,7 @@
             // true of a free schedule. It is capped, and that is all the
             // page claims.
             ['02', 'Put the events in', 'Add them by hand, sync a Google, Outlook or CalDAV calendar both ways, or paste the details and let AI pull out the date, time and venue. AI parsing is on the free plan too, with a daily cap.'],
-            ['03', 'Open the doors', 'Share the link, embed the calendar on the site you already have, or print the QR code. People follow, and you email them when something is on.'],
+            ['03', 'Open the doors', 'Share the link, embed the calendar on the site you already have, or print the QR code. People follow, and the ones who confirm an email address get your new dates in a digest automatically.'],
         ];
 
         $faqs = [
@@ -669,7 +671,7 @@
                             <path stroke-linecap="round" stroke-linejoin="round" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
                         </svg>
                         <span class="es-show-muted text-sm font-medium tracking-wide">
-                            <span data-count-to="{{ $scheduleCount }}">{{ $scheduleCount }}</span> live schedules, open to walk through
+                            <span data-count-to="{{ $scheduleCount }}">{{ $scheduleCount }}</span> live demo schedules, open to walk through
                         </span>
                     </div>
 

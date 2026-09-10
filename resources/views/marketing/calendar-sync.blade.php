@@ -26,7 +26,7 @@
         "applicationCategory": "BusinessApplication",
         "applicationSubCategory": "Calendar Synchronization Software",
         "operatingSystem": "Web",
-        "description": "Two-way calendar sync with Google Calendar, Outlook and Microsoft 365, or any CalDAV server. Push events out, pull events in, or both. Free on every plan.",
+        "description": "Two-way calendar sync with Google Calendar, Outlook and Microsoft 365, or any CalDAV server. Push events out, pull events in, or both. Guests get Add to Calendar links and a live iCal feed they can subscribe to. Free on every plan.",
         "offers": {
             "@type": "Offer",
             "price": "0",
@@ -42,7 +42,7 @@
             "Per-schedule policy for events deleted in the connected calendar",
             "Calendar description template for outbound entries",
             "Add to Calendar buttons for Google Calendar, Apple Calendar and Outlook on event pages",
-            "Subscribe-able iCal feed for a whole schedule"
+            "Live iCal feed of a whole schedule, offered to guests in the Add to Calendar menu"
         ],
         "url": "{{ url()->current() }}",
         "provider": {
@@ -613,7 +613,7 @@
             ],
             [
                 'there' => 'You deleted it',
-                'here' => 'Whatever you told the schedule to do: keep it here, mark it cancelled, or delete it. Events with ticket sales or live ad spend are hidden rather than destroyed.',
+                'here' => 'Whatever you told the schedule to do: keep it here, mark it cancelled, or delete it. Events with ticket sales or ad spend are hidden rather than destroyed, and an event another schedule owns is only taken off yours.',
             ],
         ];
 
@@ -632,11 +632,15 @@
             ],
             [
                 'q' => 'Can attendees add events to their personal calendars?',
-                'a' => 'Yes. Event pages carry an Add to Calendar menu for Google Calendar, Apple Calendar and Microsoft Outlook, and no account is needed. The exception is a page already leading with a Register or Buy tickets button, which takes that spot. Either way it is a one-way copy of one event. For somebody who wants everything you do, the schedule also has an iCal feed URL they can subscribe to, which keeps updating as you add and edit events.',
+                'a' => 'Yes, in two ways, and neither needs an account. The Add to Calendar menu on an event page copies that one event into Google Calendar, Apple Calendar or Microsoft Outlook, as a one-way copy that a later change does not reach. The same menu ends with Subscribe to all events from your schedule: a live iCal feed that keeps updating as you add and edit events. A page already leading with a Register or Buy tickets button shows that button instead of the menu, and the sign-up panel on your schedule and event pages carries the feed link either way.',
+            ],
+            [
+                'q' => 'What is the difference between calendar sync and a calendar feed?',
+                'a' => 'Sync is for you: it connects your own Google, Outlook or CalDAV calendar to your schedule, in one direction or both. The feed is for your audience: a read-only iCal address anybody can subscribe to without an account or an email address. It carries your public upcoming events, with a weekly night expanded into one entry per date for the next ninety days, and nothing ever comes back from it. It is not instant either. The feed is cached for an hour, and a subscribed calendar re-reads it on its own timetable, which for Google Calendar can take several hours.',
             ],
             [
                 'q' => 'What happens if I delete an event in my calendar app?',
-                'a' => 'That is a per-schedule setting with three options: keep it here, mark it cancelled here, or delete it here. Cancelling is the reversible one and is the right choice once tickets are sold. If you choose delete, events that have ticket sales or live ad spend are hidden instead of destroyed, so the sales records survive.',
+                'a' => 'That is a per-schedule setting with three options: keep it here, mark it cancelled here, or delete it here. Cancelling is the reversible one and is the right choice once tickets are sold. If you choose delete, events that have ticket sales or ad spend are hidden instead of destroyed, so the sales records survive. An event that belongs to another schedule is never cancelled or deleted for everyone: it is only taken off yours.',
             ],
             [
                 'q' => 'Does calendar sync cost anything?',
@@ -1009,7 +1013,7 @@
                         Get on their calendar, <span class="es-trip-lit-out">not just yours.</span>
                     </h2>
                     <p class="mt-5 text-lg text-gray-300" data-reveal style="--reveal-delay: 0.15s;">
-                        Two ways in, depending on whether somebody wants one night or everything you do.
+                        Add to Calendar for one night, or a calendar feed they subscribe to for everything you do. Neither needs an account.
                     </p>
                 </div>
 
@@ -1025,15 +1029,15 @@
                             <span class="es-trip-chip">Apple Calendar</span>
                             <span class="es-trip-chip">Outlook</span>
                         </div>
-                        <p class="es-trip-muted text-sm">Being straight about it: this leg is one way, and it should be. It hands over a copy of one event, so if you later move the start time, their entry does not hear about it. Anybody who wants to stay current wants the feed instead.</p>
+                        <p class="es-trip-muted text-sm">Being straight about it: this leg is one way, and it should be. It hands over a copy of one event, so if you later move the start time, their entry does not hear about it. Anybody who wants to stay current wants the feed instead, which is the last line of the same menu.</p>
                     </div>
 
-                    <div class="es-trip-card p-7" data-reveal="panel">
+                    <div class="es-trip-card flex flex-col p-7" data-reveal="panel">
                         <div class="mb-3 flex flex-wrap items-center gap-2">
-                            <h3 class="text-xl font-bold text-white">Everything: the feed</h3>
+                            <h3 class="text-xl font-bold text-white">Everything: subscribe to the feed</h3>
                             <span class="es-trip-plan">Free</span>
                         </div>
-                        <p class="es-trip-muted mb-5">Your schedule has an iCal feed URL, sitting on the Integrations tab next to an RSS one. Anybody can subscribe to it in Google Calendar, Apple Calendar or Outlook, and their calendar re-reads it on its own.</p>
+                        <p class="es-trip-muted mb-5">Guests find it as Subscribe to all events from your schedule, the last line of every Add to Calendar menu, and as a link in the sign-up panel on your schedule page. It is a live iCal feed that asks for no account and no email address. Google Calendar, Apple Calendar and Outlook all subscribe to it and keep it current. You can copy the same URL from the Integrations tab, next to an RSS one.</p>
                         <ul class="es-trip-muted space-y-3 text-sm">
                             <li class="flex gap-3">
                                 <svg aria-hidden="true" class="es-trip-lit-back mt-0.5 h-4 w-4 flex-none" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7" /></svg>
@@ -1045,9 +1049,19 @@
                             </li>
                             <li class="flex gap-3">
                                 <svg aria-hidden="true" class="es-trip-lit-back mt-0.5 h-4 w-4 flex-none" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7" /></svg>
-                                <span>Only what is actually public travels. Drafts, private events, cancelled events and password-protected events stay off the feed.</span>
+                                <span>Only what is actually public travels. Drafts, unlisted events, cancelled events and password-protected events stay off the feed.</span>
+                            </li>
+                            <li class="flex gap-3">
+                                <svg aria-hidden="true" class="es-trip-lit-back mt-0.5 h-4 w-4 flex-none" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7" /></svg>
+                                <span>Live, not instant. The feed is cached for an hour, and Google Calendar can take several hours to re-read a subscription.</span>
                             </li>
                         </ul>
+                        <p class="mt-auto pt-5">
+                            <a href="{{ route('marketing.docs.sharing') }}#calendar-feeds" class="es-trip-lit-out inline-flex items-center gap-1 text-sm font-semibold transition-all hover:gap-2">
+                                How calendar feeds work
+                                <svg aria-hidden="true" class="h-4 w-4 rtl:rotate-180" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6" /></svg>
+                            </a>
+                        </p>
                     </div>
                 </div>
 
@@ -1098,7 +1112,7 @@
                                 </div>
                                 <div class="es-trip-hair rounded-lg p-3">
                                     <p class="es-trip-ink text-sm font-bold">Delete it here</p>
-                                    <p class="es-trip-muted mt-1 text-xs">Gone. Except where money is involved: events with sales or live ad spend are hidden instead.</p>
+                                    <p class="es-trip-muted mt-1 text-xs">Gone. Except where money is involved: events with sales or ad spend are hidden instead.</p>
                                 </div>
                             </div>
                         </div>

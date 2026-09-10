@@ -1,5 +1,5 @@
 <x-marketing-layout>
-    <x-slot name="title">Sell Gift Cards for Your Events - Event Schedule</x-slot>
+    <x-slot name="title">Sell Gift Cards for Your Events | A Balance, Not a Coupon</x-slot>
     <x-slot name="description">Sell balance-tracked gift cards your customers buy for someone else and redeem toward tickets for any event on your schedule. Set your own denominations.</x-slot>
     <x-slot name="breadcrumbTitle">Gift Cards</x-slot>
 
@@ -19,11 +19,11 @@
             "A twelve character code redeemed toward tickets at checkout",
             "A running balance that carries over between orders",
             "Applied after the volume discount and the promo code",
-            "A cancelled order returns the redeemed amount to the card",
+            "A cancelled or fully refunded order returns the redeemed amount to the card",
             "Every card tracked with its balance, status and redemptions",
             "Mark paid, resend, cancel or refund from the Gift cards tab",
             "Optional validity period, counted from the day payment clears",
-            "Stripe, Invoice Ninja, a payment link, or cash"
+            "Paid for through Stripe, Invoice Ninja, a payment link or cash"
         ],
         "offers": {
             "@type": "Offer",
@@ -679,14 +679,18 @@
             ['Amounts', 'The denominations buyers can pick, up to twelve of them. There is no free-entry box: an amount that is not on your list is refused.'],
             ['Currency', 'One currency per schedule. A card can only be spent at events priced in it, and the checkout says so plainly if they do not match.'],
             ['Valid for', 'A number of days, or empty for no expiry at all. The clock starts when the payment clears, so a card waiting on cash does not quietly burn its validity.'],
-            ['How they pay', 'Stripe, Invoice Ninja, a payment link, or cash. Cash cards stay pending until you mark them paid, and only then is the recipient emailed.'],
+            // RoleUpdateRequest accepts cash, stripe, invoiceninja and payment_url only: the gift card
+            // controller never adopted the gateway seam, so PayPal and Payfast cannot sell a card.
+            ['How they pay', 'Stripe, Invoice Ninja, a payment link, or cash. PayPal and Payfast cannot take gift card payments, even when they are connected for tickets. Cash cards stay pending until you mark them paid, and only then is the recipient emailed.'],
         ];
 
         $actions = [
             ['Mark paid', 'Activate a cash card once the money is in your hand. That is the moment the recipient is emailed the code.'],
             ['Resend email', 'Send the card to the recipient again when it is lost in a mailbox somewhere.'],
             ['Cancel', 'Stop a card being redeemed, whether it was ever paid for or not. Once cancelled it cannot be spent again.'],
-            ['Refund', 'Stop a paid card. Past redemptions stay as they are, and you move the money in your own payment provider.'],
+            // Status only (GiftCardController::handleAction). Ticket sales now refund through Stripe
+            // and PayPal, so the difference is said rather than left to be assumed.
+            ['Refund', 'Stop a paid card. Past redemptions stay as they are. Unlike a Stripe or PayPal ticket refund, this moves no money: you return it in your own payment provider.'],
         ];
 
         $faqs = [
@@ -700,11 +704,21 @@
             ],
             [
                 'q' => 'What if the order costs more or less than the balance?',
-                'a' => 'If the order costs less, the remainder stays on the card for next time. If it costs more, the card covers what it can and the customer pays the difference with any normal payment method. If they later cancel that order, the amount the card paid goes back on to it.',
+                'a' => 'If the order costs less, the remainder stays on the card for next time. If it costs more, the card covers what it can and the customer pays the difference with any normal payment method. If that order is later cancelled or refunded in full, the amount the card paid goes back on to it.',
+            ],
+            // Sale::chargedTotal() is net of the card and Sale::booted credits the card back on its
+            // own, so a refund can never hand the buyer the card's share as cash.
+            [
+                'q' => 'What happens to the card when a ticket order is refunded?',
+                'a' => 'A full refund works like a cancellation: the amount the card paid goes back on to it, as long as the card is still active, and only the part that was actually charged goes back through Stripe or PayPal. On the Sunday Matinee order above, the card paid $60 and the buyer paid $21, so a full refund sends $21 back to the buyer and puts $60 back on the card. A partial refund leaves the order paid, so the card keeps its deduction and the money comes out of the charged part.',
             ],
             [
                 'q' => 'Which plan includes gift cards?',
                 'a' => 'Selling gift cards is a Pro feature, at '.plan_price($proMonthly).' a month. Redeeming a card that has already been bought always works, even if you later turn selling off, because a sold card is an outstanding liability rather than a feature.',
+            ],
+            [
+                'q' => 'Can a gift card be paid for with PayPal?',
+                'a' => 'No. A gift card is paid for through Stripe, Invoice Ninja, a payment link or cash, whichever you pick in the gift card settings. PayPal and Payfast take ticket payments but not gift card payments, even when they are connected. A card bought another way can still be spent on an event that takes PayPal: the code pays what it can and PayPal takes the rest.',
             ],
             [
                 'q' => 'Do gift cards expire?',
@@ -893,8 +907,8 @@
                 </h2>
                 <p class="es-gift-muted text-lg" data-reveal style="--reveal-delay: 0.15s;">
                     Every code carries its own running total. Spend less than it holds and the rest
-                    waits for next time. Spend more and it pays what it can. Cancel the order and the
-                    money goes back on.
+                    waits for next time. Spend more and it pays what it can. Cancel the order, or
+                    refund it in full, and the money goes back on.
                 </p>
             </div>
 

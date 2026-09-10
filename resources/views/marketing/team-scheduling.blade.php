@@ -1,6 +1,6 @@
 <x-marketing-layout>
     <x-slot name="title">Team Scheduling | Invite Members and Set Permissions</x-slot>
-    <x-slot name="description">Put other people on your schedule with a named position. Admins run the calendar, and viewers read it and scan tickets at the door.</x-slot>
+    <x-slot name="description">Invite your team onto one schedule. Admins run events and see ticket sales, viewers scan tickets at the door, and only the owner changes who does what.</x-slot>
     <x-slot name="breadcrumbTitle">Team Scheduling</x-slot>
 
     <x-slot name="structuredData">
@@ -11,12 +11,14 @@
         "name": "Event Schedule - Team Scheduling",
         "applicationCategory": "BusinessApplication",
         "operatingSystem": "Web",
-        "description": "Invite colleagues onto one schedule with a named position. Admins create and edit events and open the settings page, viewers get read-only access to the schedule and can still scan tickets, and the owner alone changes levels, removes members and holds billing.",
+        "description": "Invite colleagues onto one schedule with a named position. Admins create and edit events, open the settings page and see the schedule's ticket sales, viewers get read-only access to the schedule and can still scan tickets, and the owner alone changes levels, removes members, holds billing and can hand the schedule to another account.",
         "featureList": [
             "Invite a member by name and email, with an optional phone number",
             "Three access levels: owner, admin and viewer",
-            "Viewers get read-only access to the admin panel and can still scan tickets",
+            "Admins see the schedule's ticket sales, waitlist and check-in dashboard, and can refund a sale",
+            "Viewers get read-only access to the admin panel, see no ticket sales, and can still scan tickets",
             "Only the owner changes a member's level, removes a member or holds billing",
+            "Ownership transfer to another account on every plan, including Free",
             "Pending invitations can be resent from the team tab",
             "Per-member notification settings on the same schedule",
             "Each member syncs the schedule to their own Google Calendar",
@@ -628,6 +630,8 @@
             ['Accept or decline event requests', true, true, false],
             ['Open the settings page, and change branding', true, true, false],
             ['Scan tickets at the door', true, true, true],
+            ['See ticket sales, the waitlist and the check-in dashboard', true, true, false],
+            ['Refund a sale', true, true, false],
             ['Read the audit log', true, true, false],
             ['Invite a new member', true, true, false],
             ['Change a member\'s level, or remove somebody', true, false, false],
@@ -654,7 +658,7 @@
             ],
             [
                 'q' => 'What are the access levels?',
-                'a' => 'Three: owner, admin and viewer. The owner is whoever created the schedule. An admin can create and edit events, change settings and invite other members. A viewer reads the schedule, the requests, the bookings and the team, and can still scan tickets at the door, but cannot open the settings page at all. Billing, deleting the schedule, and changing or removing another member are controls the Team tab shows to the owner only.',
+                'a' => 'Three: owner, admin and viewer. The owner is whoever created the schedule. An admin can create and edit events, change settings, invite other members, and see the schedule\'s ticket sales, waitlist and check-in dashboard, including refunding a sale. A viewer reads the schedule, the requests, the bookings and the team, and can still scan tickets at the door, but sees none of the sales and cannot open the settings page at all. Billing, deleting the schedule, and changing or removing another member are controls the app shows to the owner only.',
             ],
             [
                 'q' => 'How do I invite somebody?',
@@ -675,6 +679,10 @@
             [
                 'q' => 'Can somebody leave the team?',
                 'a' => 'Yes. A member can remove themselves from a schedule at any time, and the owner can remove anybody else. The owner cannot be removed, which is deliberate: a schedule is never left without one.',
+            ],
+            [
+                'q' => 'Can I hand the whole schedule to somebody else?',
+                'a' => 'Yes, on every plan, Free included. The owner chooses Transfer ownership on the Team tab and enters an email address, and the schedule moves once that person signs in and accepts. The events the previous owner created go with it, so their ticket revenue settles into the new owner\'s account from then on. On the Enterprise plan the previous owner can stay on the card as an admin; otherwise they come off it.',
             ],
         ];
 
@@ -721,7 +729,7 @@
                     </h1>
 
                     <p class="es-fade-up es-d-2 es-line-muted mb-8 max-w-xl text-lg sm:text-xl">
-                        Put other people on the same schedule and write a position beside each name. Admins run the calendar, viewers read it and still scan tickets at the door, and the owner keeps billing and the last word on positions.
+                        Put other people on the same schedule and write a position beside each name. Admins run the calendar and see what it sells, viewers read it and still scan tickets at the door, and the owner keeps billing and the last word on positions.
                     </p>
 
                     <p class="es-fade-up es-d-2 es-line-muted mb-10 max-w-xl text-base">
@@ -890,6 +898,7 @@
                         <li class="flex gap-2"><span class="es-line-accent flex-none font-bold" aria-hidden="true">+</span><span>Accepts or declines event requests</span></li>
                         <li class="flex gap-2"><span class="es-line-accent flex-none font-bold" aria-hidden="true">+</span><span>Changes settings, branding and sub-schedules</span></li>
                         <li class="flex gap-2"><span class="es-line-accent flex-none font-bold" aria-hidden="true">+</span><span>Invites another member</span></li>
+                        <li class="flex gap-2"><span class="es-line-accent flex-none font-bold" aria-hidden="true">+</span><span>Sees ticket sales, the waitlist and the check-in dashboard, and can refund a sale</span></li>
                         <li class="flex gap-2"><span class="es-line-accent flex-none font-bold" aria-hidden="true">+</span><span>Reads the audit log</span></li>
                     </ul>
                 </div>
@@ -903,6 +912,7 @@
                     <ul class="es-line-muted space-y-2 text-sm">
                         <li class="flex gap-2"><span class="es-line-accent flex-none font-bold" aria-hidden="true">+</span><span>Sees the schedule, requests, bookings and the team</span></li>
                         <li class="flex gap-2"><span class="es-line-accent flex-none font-bold" aria-hidden="true">+</span><span>Scans tickets and checks people in</span></li>
+                        <li class="flex gap-2"><span class="es-line-muted flex-none font-bold" aria-hidden="true">&minus;</span><span>Sees none of the schedule's ticket sales</span></li>
                         <li class="flex gap-2"><span class="es-line-muted flex-none font-bold" aria-hidden="true">&minus;</span><span>Cannot add or change an event</span></li>
                         <li class="flex gap-2"><span class="es-line-muted flex-none font-bold" aria-hidden="true">&minus;</span><span>Cannot open the settings page at all, or answer requests</span></li>
                         <li class="flex gap-2"><span class="es-line-muted flex-none font-bold" aria-hidden="true">&minus;</span><span>Cannot mark availability dates</span></li>
@@ -913,6 +923,10 @@
             <p class="es-line-muted mx-auto mt-8 max-w-3xl text-center text-sm" data-reveal>
                 A follower is not one of these. Following a schedule is a public action anybody can take on the guest page, and it gives no access to the admin panel at all.
                 <a href="{{ marketing_url('/features/newsletters') }}" class="es-line-link font-medium hover:underline">What following actually does</a>
+            </p>
+            <p class="es-line-muted mx-auto mt-3 max-w-3xl text-center text-sm" data-reveal>
+                Nor is an act you list. Name a performer or venue who is not on Event Schedule and they get a page of their own, which they can claim by signing in with the email address on it. It is then theirs to run, and the dates you already listed stay on it.
+                <a href="{{ route('marketing.docs.creating_events') }}#claim" class="es-line-link font-medium hover:underline">How claiming works</a>
             </p>
         </div>
     </section>
@@ -929,7 +943,7 @@
                     What each position <span class="es-line-accent">actually opens</span>
                 </h2>
                 <p class="es-line-muted mt-5 text-lg" data-reveal style="--reveal-delay: 0.15s;">
-                    Ten surfaces, three columns, and the rows that say no are the useful ones.
+                    Twelve surfaces, three columns, and the rows that say no are the useful ones.
                 </p>
             </div>
 
@@ -966,7 +980,7 @@
                     </table>
                 </div>
                 <p class="es-line-muted es-line-rule mt-5 pt-4 text-xs">
-                    A filled dot is yes, a hollow ring is no. The controls for the last three rows only appear on the Team tab for the owner. One row is missing because it needs no column: every name but the owner's can be taken off the card by the person it belongs to, at any time.
+                    A filled dot is yes, a hollow ring is no. The last three rows are the owner's alone, and the app shows their controls to nobody else. The ticket <a href="{{ route('marketing.waitlist') }}" class="es-line-link font-medium hover:underline">waitlist</a> and the <a href="{{ route('marketing.check_in') }}" class="es-line-link font-medium hover:underline">check-in dashboard</a> are Pro features whoever opens them. One row is missing because it needs no column: every name but the owner's can be taken off the card by the person it belongs to, at any time.
                 </p>
             </div>
 
@@ -1093,6 +1107,7 @@
                                     ['A ticket sells', 'Pro'],
                                     ['Post-event feedback arrives', 'Pro'],
                                     ['Somebody adds a poll option', 'Pro'],
+                                    ['Installments come due, or one fails', 'Pro, on by default'],
                                 ] as [$alertName, $alertNote])
                                     <div class="es-line-rule flex items-baseline justify-between gap-3 py-2">
                                         <span class="es-line-ink text-sm font-semibold">{{ $alertName }}</span>
@@ -1101,7 +1116,7 @@
                                 @endforeach
                             </div>
                             <p class="es-line-muted es-line-rule mt-4 pt-3 text-xs">
-                                The bottom three report on Pro features, and on eventschedule.com their toggles stay greyed out until the schedule fills in its own email settings, which any plan can do. The top two need neither.
+                                The bottom four report on Pro features, and on eventschedule.com their toggles stay greyed out until the schedule fills in its own email settings, which any plan can do. The top two need neither.
                             </p>
                         </div>
                         <div class="es-glare" aria-hidden="true"></div>
@@ -1263,7 +1278,7 @@
             <div class="grid gap-6 md:grid-cols-2" data-reveal-group="90">
                 @foreach ([
                     ['The other programmer', 'AD', 'es-line-code-ad', 'The person who also books the room. Give them Admin and stop being the bottleneck between a confirmed date and a published one.'],
-                    ['Whoever works the door', 'VW', 'es-line-code-vw', 'A viewer can scan tickets and check people in without being able to move a date or edit a price. It is the one thing a read-only position deliberately keeps.'],
+                    ['Whoever works the door', 'VW', 'es-line-code-vw', 'A viewer can scan tickets and check people in without being able to move a date, edit a price or read the sales. It is the one thing a read-only position deliberately keeps.'],
                     ['The one who answers the requests', 'AD', 'es-line-code-ad', 'Admins can accept or decline event requests, and each member chooses their own alerts, so the request emails can go to them and only them.'],
                     ['Your cover while you are away', 'AD', 'es-line-code-ad', 'Write them in before the trip, take them off after it. Removing a member revokes their access and leaves everything they added on the schedule.'],
                 ] as [$whoName, $whoCode, $whoCodeClass, $whoBody])

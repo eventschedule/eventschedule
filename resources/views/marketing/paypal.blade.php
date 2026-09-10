@@ -1,6 +1,6 @@
 <x-marketing-layout>
-    <x-slot name="title">PayPal for Event Tickets | Free on Every Plan</x-slot>
-    <x-slot name="description">Sell tickets through your own PayPal account on every plan, with no platform fee. Keys are checked before they are saved and every payment is read back from PayPal.</x-slot>
+    <x-slot name="title">Sell Event Tickets with PayPal | Free on Every Plan</x-slot>
+    <x-slot name="description">Sell tickets through your own PayPal account on any plan, with no platform fee. Every payment is read back from PayPal, and refunds can be full or partial.</x-slot>
     <x-slot name="breadcrumbTitle">PayPal</x-slot>
 
     <x-slot name="structuredData">
@@ -19,6 +19,7 @@
             "Credentials verified with PayPal before they are stored",
             "The seats are re-checked before the money is taken",
             "Payment confirmed by reading the capture back from PayPal",
+            "Seats held, not resold, while PayPal reviews a payment",
             "Refunds, full or partial, issued against the real capture",
             "One order and one capture across a multi-event cart",
             "Works alongside Stripe, Payfast, Invoice Ninja, a payment link or cash"
@@ -220,7 +221,7 @@
                             <a href="{{ app_url('/sign_up') }}" class="inline-flex items-center gap-2 rounded-xl bg-[#854d0e] px-6 py-3 font-semibold text-white transition-colors hover:bg-[#6f4009]">
                                 Start for free
                             </a>
-                            <a href="{{ marketing_url('/docs/tickets') }}" class="es-pp-ink inline-flex items-center gap-2 rounded-xl border border-gray-300 px-6 py-3 font-semibold transition-colors hover:border-[#854d0e] dark:border-white/15">
+                            <a href="{{ marketing_url('/docs/tickets') }}#paypal" class="es-pp-ink inline-flex items-center gap-2 rounded-xl border border-gray-300 px-6 py-3 font-semibold transition-colors hover:border-[#854d0e] dark:border-white/15">
                                 Read the guide
                             </a>
                         </div>
@@ -313,9 +314,9 @@
                 @php
                     $ppFacts = [
                         ['Free on every plan', 'There is no plan check anywhere in the payments code. PayPal is available on Free exactly as it is on Enterprise, and Event Schedule adds no fee of its own to any of them.'],
-                        ['Refunds move real money', 'A full or partial refund is issued against the capture PayPal actually took, and the sale only changes once the money has gone back. A partial refund leaves the sale paid and its tickets valid.'],
+                        ['Refunds move real money', 'From the Sales page, a full or partial refund is issued against the capture PayPal actually took, and the sale only changes once the money has gone back. A partial refund leaves the sale paid and its tickets valid.'],
                         ['One order, one capture', 'A multi-event cart pays as a single amount, so a buyer taking tickets for three of your nights approves once and is charged once.'],
-                        ['What it does not do', 'Installment plans are Stripe-only, and PayPal cannot be used for them. HUF, JPY and TWD are excluded deliberately, because PayPal rejects a decimal amount in all three and our pricing path can produce one.'],
+                        ['What it does not do', 'Installment plans are Stripe-only, and gift cards and appointment bookings cannot be paid through PayPal either. HUF, JPY and TWD are excluded deliberately, because PayPal rejects a decimal amount in all three and our pricing path can produce one.'],
                     ];
                 @endphp
                 <div class="grid gap-4 sm:grid-cols-2" data-reveal-group="80">
@@ -330,7 +331,7 @@
                 <div class="es-pp-panel mt-8 p-6" data-reveal="panel">
                     <h3 class="es-pp-ink text-base font-bold">Selfhosting? One account for the whole install</h3>
                     <p class="es-pp-muted mt-2 text-sm leading-relaxed">
-                        An operator can supply PayPal credentials in the environment and every schedule on the install uses them by default. It is a default rather than an override: a schedule owner who connects their own account keeps using theirs. The webhook id is optional, because a payment is confirmed by reading the capture back rather than by trusting a signature.
+                        An operator can supply PayPal credentials in the environment and every schedule on the install uses them by default. It is a default rather than an override: a schedule owner who connects their own account keeps using theirs. The webhook id is optional, because a payment is confirmed by reading the capture back rather than by trusting a signature. The listener itself is not: it is registered for owners who connect their own account, but with install-wide credentials the operator adds it, and without one a payment PayPal holds for review stays unresolved.
                     </p>
                 </div>
             </div>
@@ -345,12 +346,13 @@
             $ppFaqs = [
                 ['q' => 'Does Event Schedule take a cut of my ticket sales?', 'a' => 'No. There is no platform fee on any plan. The only deduction is PayPal\'s own processing fee, which is between you and PayPal, and the money goes into your own PayPal account rather than through ours.'],
                 ['q' => 'Do I need a paid plan to use PayPal?', 'a' => 'No. Every payment gateway is available on every tier - there is no plan check anywhere in the payments code. The free plan sells up to 25 paid tickets a calendar month; Pro removes that ceiling. The gateway itself is never what you are paying for.'],
-                ['q' => 'Can one event take both PayPal and card payments?', 'a' => 'No. An event uses one payment method at a time, chosen on the event itself, so you pick per event rather than showing a row of buttons at checkout. You can connect several accounts and use different ones on different events.'],
+                ['q' => 'Can one event offer both PayPal and Stripe?', 'a' => 'No. An event uses one payment method at a time, chosen on the event itself, so you pick per event rather than showing a row of buttons at checkout. You can connect several accounts and use different ones on different events.'],
                 ['q' => 'What happens if I paste the wrong secret?', 'a' => 'The settings form refuses it. Your client ID and secret are tried against PayPal before they are stored, so a typo is caught by you rather than by the first person who tries to buy a ticket. If the check cannot be run at all, the keys are saved and you are told that we could not verify them.'],
                 ['q' => 'What if a buyer approves the payment and then disappears?', 'a' => 'Nothing is captured. The sale is re-checked when they come back, and if it has expired or been released in the meantime, the payment is not taken. This matters more on PayPal than on other gateways, because the capture is the moment the money moves rather than something that already happened.'],
+                ['q' => 'What if PayPal holds a payment for review?', 'a' => 'The sale waits instead of expiring. PayPal sometimes reviews a payment before completing it, which is routine on a new merchant account, and by then the money has left the buyer, so their seats stay held rather than going back on sale. The buyer is told the payment is under review, and their ticket page stops offering to take it again. When PayPal completes it, the sale settles and the ticket is emailed, which is the one step that arrives by webhook.'],
                 ['q' => 'Do I have to set up webhooks?', 'a' => 'No. A listener is registered for you where it can be, but the ordinary return path settles the sale on its own by reading the capture back from PayPal. The webhook only earns its keep in the late cases - a capture that completes later, or one whose response was lost.'],
-                ['q' => 'Which currencies work?', 'a' => 'PayPal\'s own list, minus HUF, JPY and TWD. Those three are excluded on purpose: PayPal rejects a decimal amount in all of them, and a discounted ticket can produce one, which would leave money captured and a ticket withheld.'],
-                ['q' => 'Can I refund through it?', 'a' => 'Yes, in full or in part. The refund is issued against the capture PayPal took and the sale changes only once the money has actually gone back. A partial refund leaves the sale paid with its tickets valid, and the sales page shows how much has been returned so far.'],
+                ['q' => 'Which currencies work?', 'a' => 'PayPal\'s own list, minus HUF, JPY and TWD. Those three are excluded on purpose: PayPal rejects a decimal amount in all of them, and a discounted ticket can produce one, which would leave money captured and a ticket withheld. PayPal does not settle South African rand at all, so an event priced in rand can use Payfast instead.'],
+                ['q' => 'Can I refund through it?', 'a' => 'Yes, in full or in part, from the Sales page. The refund is issued against the capture PayPal took and the sale changes only once the money has actually gone back. A partial refund leaves the sale paid with its tickets valid, and the Sales page shows how much has been returned so far. A PayPal sale that was marked paid by hand has no capture to refund against, so it offers Mark as Refunded instead, which records the refund without moving money. Refund here rather than in PayPal: a refund raised in PayPal\'s own dashboard is not reported back.'],
             ];
         @endphp
         <section id="faq" class="es-pp-rule scroll-mt-24 py-20 lg:py-28">

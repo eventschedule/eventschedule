@@ -1,6 +1,6 @@
 <x-marketing-layout>
     <x-slot name="title">Custom CSS | Advanced Schedule Styling - Event Schedule</x-slot>
-    <x-slot name="description">Write your own CSS to customize every pixel of your schedule. Override defaults, add animations, and create a look that's uniquely yours.</x-slot>
+    <x-slot name="description">Add your own CSS to your schedule page, event pages and embeds. It loads right after the built-in styles, so a tie goes to you. 10,000 characters on Pro.</x-slot>
     <x-slot name="breadcrumbTitle">Custom CSS</x-slot>
 
     <x-slot name="structuredData">
@@ -9,7 +9,7 @@
         "@context": "https://schema.org",
         "@type": "SoftwareApplication",
         "name": "Event Schedule - Custom CSS",
-        "description": "Write your own CSS to customize every pixel of your schedule. Your rules are written into the same stylesheet as the built-in styles, immediately after them, so a tie in the cascade goes to you.",
+        "description": "Add your own CSS to your schedule page, event pages and embeds. Your rules are written into the same stylesheet as the built-in styles, immediately after them, so a tie in the cascade goes to you.",
         "applicationCategory": "BusinessApplication",
         "operatingSystem": ["Web", "Android", "iOS"],
         "featureList": [
@@ -650,7 +650,10 @@
         ];
 
         // Guest-facing surfaces rendered by layouts/app-guest.blade.php, which is
-        // where custom_css is emitted, so one sheet covers all of them.
+        // where custom_css is emitted, so one sheet covers all of them. The pages a
+        // buyer reaches after paying (ticket/view, ticket/order, installment/pay) are
+        // <x-app-layout> pages and never get it, which is why section 05 no longer
+        // says "every guest page" and says where the sheet stops instead.
         $surfaces = [
             ['Your schedule page', 'The calendar or list your visitors land on.'],
             ['Every event page', 'One page per event, per date.'],
@@ -685,6 +688,10 @@
             [
                 'q' => 'Where does my CSS land in the cascade?',
                 'a' => 'In the same style block as the rules your styling settings generate, immediately after them. Specificity is equal, so a tie goes to the later rule, and the later rule is yours. Three things need more than source order from you: the body colour and font family, which the guest layout declares with !important, the guest language switcher, whose rules are written just after your block, and the calendar panel frame, which is declared further down the page and also needs a more specific selector.',
+            ],
+            [
+                'q' => 'Which pages does Custom CSS reach?',
+                'a' => 'Every page the guest layout draws: your schedule page, each event page with its ticket form and its "Notify me" card, both embeds, the event request form, and the booking, gift card, gallery and feedback pages. It does not reach the ticket and order pages a buyer lands on after paying, which use the app\'s own layout, or any email.',
             ],
             [
                 'q' => 'Is Custom CSS secure?',
@@ -750,7 +757,7 @@
 
                     <h1 class="es-balance es-sheet2-ink mb-8 text-[2.4rem] font-black leading-[1.05] tracking-tight sm:text-6xl">
                         <span class="es-mask"><span class="es-mask-line">The built-in styles go first.</span></span>
-                        <span class="es-mask es-mask-2"><span class="es-mask-line"><span class="es-sheet2-accent">Yours go last.</span></span></span>
+                        <span class="es-mask es-mask-2"><span class="es-mask-line"><span class="es-sheet2-accent">Custom CSS goes last.</span></span></span>
                     </h1>
 
                     <p class="es-fade-up es-d-2 es-sheet2-muted mb-10 max-w-xl text-lg sm:text-xl">
@@ -776,7 +783,7 @@
                     <div class="es-sheet2-sheet">
                         <div class="es-sheet2-sheet-head">
                             <span class="es-sheet2-code es-sheet2-ink font-bold">&lt;style&gt;</span>
-                            <span class="es-sheet2-muted text-xs">one block, on every page of your schedule</span>
+                            <span class="es-sheet2-muted text-xs">one block, on your schedule and event pages</span>
                         </div>
                         <div class="es-sheet2-rail" aria-hidden="true">
                             @foreach ($sheetTop as [$ind, $html, $win])
@@ -984,10 +991,10 @@
             <div class="mx-auto mb-12 max-w-3xl text-center">
                 <p class="es-sheet2-mark mb-5" data-reveal><span class="es-sheet2-num">05</span> where it lands</p>
                 <h2 class="es-balance es-sheet2-ink text-3xl font-black tracking-tight md:text-5xl" data-reveal style="--reveal-delay: 0.1s;">
-                    One sheet. <span class="es-sheet2-accent">Every guest page.</span>
+                    One sheet. <span class="es-sheet2-accent">Every page in the guest layout.</span>
                 </h2>
                 <p class="es-sheet2-muted mt-5 text-lg" data-reveal style="--reveal-delay: 0.15s;">
-                    Custom CSS is emitted by the layout every guest-facing page shares, so you write it once and it is already on all of them.
+                    Custom CSS is emitted by the guest layout, which draws your schedule page, every event page, both embeds and the forms and pages around them, so you write it once and it is already on all of them.
                 </p>
             </div>
 
@@ -999,6 +1006,10 @@
                     </div>
                 @endforeach
             </div>
+
+            <p class="es-sheet2-muted mx-auto mt-6 max-w-3xl text-center text-sm" data-reveal>
+                Where it stops: the pages a buyer reaches after paying, their tickets, the order summary and an installment plan's payment page, are drawn by the app's own layout rather than the guest one, so your sheet is not on them. No email carries it either.
+            </p>
 
             <div class="es-sheet2-duo mt-8 grid gap-6 lg:grid-cols-2">
                 <!-- What you select -->
@@ -1167,14 +1178,14 @@
                             <h3 class="es-sheet2-ink text-lg font-bold">On Free</h3>
                             <span class="es-sheet2-plan">Free</span>
                         </div>
-                        <p class="es-sheet2-muted text-sm">The whole visual styling suite. Accent colour, typeface, background, header style, layout, and the schedule itself with calendar sync, followers and newsletters.</p>
+                        <p class="es-sheet2-muted text-sm">The whole visual styling suite. Accent colour, typeface, background, header style, layout, and the schedule itself with calendar sync, followers, newsletters and up to 25 paid tickets a month.</p>
                     </div>
                     <div class="es-sheet2-card p-6" data-reveal="panel">
                         <div class="mb-2 flex flex-wrap items-center gap-2">
                             <h3 class="es-sheet2-ink text-lg font-bold">On Pro</h3>
                             <span class="es-sheet2-plan es-sheet2-plan-pro">Pro</span>
                         </div>
-                        <p class="es-sheet2-muted text-sm">Custom CSS, alongside ticketing with QR check-in, event graphics, the ticket widget and the removal of our footer line. One price for all of it.</p>
+                        <p class="es-sheet2-muted text-sm">Custom CSS, alongside unlimited paid tickets, event graphics, the ticket widget and the removal of our footer line. One price for all of it.</p>
                     </div>
                     <div class="es-sheet2-card p-6" data-reveal="panel">
                         <h3 class="es-sheet2-ink mb-2 text-lg font-bold">Selfhosted</h3>

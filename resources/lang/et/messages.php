@@ -2197,8 +2197,8 @@ return [
     'editor_text_direction' => 'Teksti suund',
 
     // Why Create Account page
-    'why_create_account_title' => 'Miks luua konto?',
-    'why_create_account_description' => 'Avasta tasuta Event Schedule konto eelised.',
+    'why_create_account_title' => 'Kas sul on kontot vaja? Mida tasuta konto juurde annab',
+    'why_create_account_description' => 'Suurem osa Event Schedule\'ist töötab ilma kontota. Vaata, mida tasuta konto juurde annab: kõik su piletid ühes loendis, ajakavad, mida jälgid, ja oma leht.',
     'why_create_account_hero_badge' => 'Tasuta konto',
     'why_create_account_hero_headline' => 'Ava võimsad funktsioonid',
     'why_create_account_hero_subtitle' => 'Loo konto, et hallata oma sündmusi, kohandada profiili ja pääseda ligi kõigile vajalikele tööriistadele - täiesti tasuta.',

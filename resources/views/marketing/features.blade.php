@@ -9,16 +9,20 @@
         "@context": "https://schema.org",
         "@type": "SoftwareApplication",
         "name": "Event Schedule Features",
-        "description": "Discover all the features that make Event Schedule a simple, powerful way to manage events, sell tickets, and engage your audience.",
+        "description": "Every Event Schedule feature: ticketing through Stripe or PayPal with no platform fee, two-way calendar sync, newsletters, AI event import, analytics, and an open-source codebase you can selfhost.",
         "applicationCategory": "BusinessApplication",
         "operatingSystem": ["Web", "Android", "iOS"],
         "featureList": [
             "Event Ticketing with QR Check-in",
+            "Stripe and PayPal Checkout",
+            "Full and Partial Refunds",
+            "Reserved Seating",
             "Passes and Subscriptions",
             "Gift Cards",
             "Appointment Booking",
             "Promo/Discount Codes",
             "Ticket Waitlist",
+            "Event Interest List",
             "Check-in Dashboard",
             "Free Event Registration",
             "Sales CSV Export",
@@ -31,11 +35,13 @@
             "Outlook and Microsoft 365 Sync",
             "CalDAV Sync",
             "iCal Download",
+            "Live Calendar Subscription Feed",
             "Recurring Events",
             "Sub-schedules",
             "Online Events",
             "Availability Management",
             "Team Scheduling",
+            "Claimable Pages for Listed Acts and Venues",
             "Email Newsletters",
             "Event Graphics",
             "Event Boost Ad Campaigns",
@@ -46,6 +52,7 @@
             "Post-Event Feedback",
             "Carpool Matching",
             "Analytics Dashboard",
+            "Short Links with Click Counts",
             "Private Events",
             "Custom Domains",
             "White Label Branding",
@@ -127,7 +134,7 @@
                     <span class="absolute inline-flex h-full w-full animate-ping rounded-full bg-emerald-400 opacity-75"></span>
                     <span class="relative inline-flex h-2 w-2 rounded-full bg-emerald-500"></span>
                 </span>
-                <span class="text-sm font-medium tracking-wide text-gray-600 dark:text-gray-300">Everything you need</span>
+                <span class="text-sm font-medium tracking-wide text-gray-600 dark:text-gray-300">Event management features</span>
             </div>
 
             <h1 class="es-balance mb-6 text-[2.6rem] font-black leading-[1.05] tracking-tight text-gray-900 dark:text-white sm:text-6xl lg:text-7xl">
@@ -220,8 +227,8 @@
         accent="sky"
         badge="Ticketing"
         heading="Sell tickets online"
-        lede="Multiple ticket types, waitlist, and a live check-in dashboard. Accept payments with Stripe. Zero platform fees."
-        :chips="['Zero fees', 'QR check-ins', 'Stripe payments', 'Check-in dashboard', 'Waitlist', 'Promo codes', 'Sales export', 'Free event RSVP', 'Reserved seating']"
+        lede="Sell 25 paid tickets a month free, or unlimited on Pro, with zero platform fees. Buyers pay through Stripe, PayPal or four other methods, and Stripe and PayPal sales refund in full or in part. The ticket waitlist and live check-in dashboard are Pro."
+        :chips="['Zero platform fees', 'QR check-ins', 'Stripe and PayPal', 'Check-in dashboard', 'Waitlist', 'Promo codes', 'Sales export', 'Free event RSVP', 'Reserved seating']"
         :lead="true"
         frame="browser"
         frame-url="yourvenue.eventschedule.com/tickets"
@@ -1188,7 +1195,7 @@
                 'href' => route('marketing.check_in'),
                 'aria' => 'Learn more about the check-in dashboard',
                 'title' => 'Check-in Dashboard',
-                'desc' => 'Scan tickets at the door and watch arrivals update live across every device.',
+                'desc' => 'Scanning at the door is free on every plan; Pro adds a live count of who is in.',
                 'chip' => 'bg-teal-100 dark:bg-teal-500/20',
                 'text' => 'text-teal-600 dark:text-teal-400',
                 'icon' => '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M3.75 4.875c0-.621.504-1.125 1.125-1.125h4.5c.621 0 1.125.504 1.125 1.125v4.5c0 .621-.504 1.125-1.125 1.125h-4.5A1.125 1.125 0 0 1 3.75 9.375v-4.5ZM3.75 14.625c0-.621.504-1.125 1.125-1.125h4.5c.621 0 1.125.504 1.125 1.125v4.5c0 .621-.504 1.125-1.125 1.125h-4.5a1.125 1.125 0 0 1-1.125-1.125v-4.5ZM13.5 4.875c0-.621.504-1.125 1.125-1.125h4.5c.621 0 1.125.504 1.125 1.125v4.5c0 .621-.504 1.125-1.125 1.125h-4.5A1.125 1.125 0 0 1 13.5 9.375v-4.5ZM13.5 14.625h2.25v2.25H13.5v-2.25ZM18 18.75h2.25V21H18v-2.25Z" />',
@@ -1243,10 +1250,12 @@
         </div>
     </section>
 
-    {{-- The 12 cards above each have a page behind them. These do not, and were
-         simply missing from the site's most complete page. Every row cites the
-         gate it is really behind (docs/FEATURES.md), because a list like this
-         goes stale the moment a tier moves. --}}
+    {{-- The 12 cards above each have a page behind them. These rows are the rest:
+         most have only a docs section, and a few link to the smaller pages built
+         since. Every row cites the gate it is really behind (docs/FEATURES.md),
+         because a list like this goes stale the moment a tier moves. Keep the
+         count a multiple of four so the lg:grid-cols-4 grid ends on a full row,
+         and keep the "N more things" sentence below in step with it. --}}
     @php
         $alsoIncluded = [
             ['Installment payments', 'Split a ticket over monthly charges, taken off the saved card', 'Pro', '/features/installments'],
@@ -1254,6 +1263,10 @@
             ['Promo codes', 'Percentage or fixed, with usage limits and an expiry date', 'Pro', '/features/promo-codes'],
             ['Ticket waitlist', 'Notify people automatically when a sold-out type frees up', 'Pro', '/features/waitlist'],
             ['Multi-event cart', 'One checkout across several of your events, paid as a single amount', 'Free'],
+            ['PayPal checkout', 'Buyers pay into your own PayPal account, multi-event cart included', 'Free', '/paypal'],
+            ['Refunds, full or partial', 'Money goes back through Stripe or PayPal, straight from the Sales page', 'Free', '/docs/tickets#managing-sales'],
+            ['Interest list', 'A "tell me when tickets go on sale" option that asks only for an email', 'Free', '/docs/tickets#interest-list'],
+            ['Add to Google Wallet', 'Buyers save the ticket, QR and all, once the site operator switches it on', 'Free', '/docs/tickets#wallet-passes'],
             ['Bulk attendee import', 'Up to 5,000 rows from a CSV, for a list you already hold', 'Pro'],
             ['Eventbrite import', 'Bring an existing run of events across in one go', 'Pro'],
             ['Event templates', 'Save an event you repeat and start the next one from it', 'Pro'],
@@ -1262,8 +1275,12 @@
             ['Agenda scanning', 'Photograph a running order and get the parts back as event parts', 'Enterprise'],
             ['WhatsApp event creation', 'Message or photograph an event and it lands on the schedule', 'Enterprise'],
             ['Event cloning', 'Duplicate any event as the starting point for the next one', 'Free'],
-            ['iCal and RSS feeds', 'Every schedule publishes both, and every date downloads as .ics', 'Free'],
+            ['Live calendar and RSS feeds', 'Guests subscribe from Add to Calendar, and a moved date updates itself', 'Free', '/docs/sharing#calendar-feeds'],
+            ['Email sign-up', 'One field; a confirmed address gets your new-event digest and an account', 'Free', '/docs/newsletters#email-subscribers'],
+            ['Short links', 'Each schedule link gets a short address like /instagram, with clicks counted', 'Free', '/docs/creating-schedules#videos-links'],
             ['Schedule transfer', 'Hand a schedule and its ticket revenue to another account', 'Free'],
+            ['Pages for the acts you list', 'Name an act or venue who is not here yet and they get a page to claim', 'Free', '/docs/creating-events#claim'],
+            ['The whole lineup', 'Every act you list shows on the event page, linked where it has a page', 'Free'],
             ['Sponsor and partner logos', 'A tiered logo wall on your schedule page, for the people funding it', 'Pro'],
         ];
         $alsoBadge = [
@@ -1279,7 +1296,7 @@
                     And the small print, which is mostly good news
                 </h2>
                 <p class="mt-3 text-gray-500 dark:text-gray-400" data-reveal style="--reveal-delay: 0.08s;">
-                    Sixteen more things the app does, and the plan each one sits on.
+                    Twenty-four more things the app does, and the plan each one sits on.
                 </p>
             </div>
             <dl class="grid grid-cols-1 gap-x-8 gap-y-5 sm:grid-cols-2 lg:grid-cols-4" data-reveal-group="35">
@@ -1312,15 +1329,27 @@
         $faqs = [
             [
                 'q' => 'Is Event Schedule really free?',
-                'a' => 'Yes. Unlimited events, unlimited schedules, calendar sync, free registration with capacity limits, analytics and QR check-in at the door are all included on the free plan, with no time limit and no credit card required. Two things are metered rather than unlimited: newsletters reach 10 recipients a month, and you can sell up to 25 paid tickets a month.',
+                'a' => 'Yes. Unlimited events, unlimited schedules, calendar sync, free registration with capacity limits, analytics and QR check-in at the door are all included on the free plan, with no time limit and no credit card required. Two things are metered rather than unlimited: newsletters reach 10 recipients a month, and you can sell up to 25 paid tickets a month. A free schedule is also a team of one, with one bookable appointment type.',
             ],
             [
                 'q' => 'Do you take a cut of ticket sales?',
-                'a' => 'No. Event Schedule charges zero platform fees on tickets, on every plan including free. You connect your own Stripe account and payouts go straight to you, so the only deduction is Stripe processing. The free plan caps volume at 25 paid tickets a month rather than taking a cut; Pro removes the cap.',
+                'a' => 'No. Event Schedule charges zero platform fees on tickets, on every plan including free. You connect your own Stripe or PayPal account and payouts go straight to you, so the only deduction is what Stripe or PayPal charges to process the payment. The free plan caps volume at 25 paid tickets a month rather than taking a cut; Pro removes the cap.',
+            ],
+            [
+                'q' => 'Which payment methods can I accept?',
+                'a' => 'Stripe and PayPal, each paying into your own account, plus Payfast for events priced in South African rand, an Invoice Ninja invoice, a payment link of your own, or cash. Every method is available on every plan, and you choose one per event. Installment plans, which are a Pro feature, run on Stripe only.',
+            ],
+            [
+                'q' => 'Can I refund a ticket?',
+                'a' => 'Yes, on every plan. From the Sales page, a Stripe or PayPal sale can be refunded in full or in part, and the status only changes once the money has gone back through the provider. A partial refund keeps the tickets valid; a full one puts them back on sale. An installment plan is refunded in full, one payment at a time. Any other method, such as cash, a payment link, Payfast or Invoice Ninja, shows Mark as Refunded instead, which records the refund without moving money.',
+            ],
+            [
+                'q' => 'Can visitors ask to be told when tickets go on sale?',
+                'a' => 'Yes, on every plan. From Add to Calendar on the event page, a visitor leaves just an email address, with no account, and gets one email when tickets go on sale, one if it is cancelled, a reminder shortly before it starts, and any notice you choose to send if the date or venue changes. Each date of a recurring event is separate, every email has a one-click unsubscribe, and the list does not count against your newsletter allowance. You can see how many people are waiting on the Tickets panel of the event editor.',
             ],
             [
                 'q' => 'Can buyers choose their own seat?',
-                'a' => 'Yes, on the Enterprise plan. Draw your room once as a reusable seating plan - levels, sections, rows, tables, standing areas and wheelchair spaces - attach it to an event, and buyers pick their seats off the map. One plan covers every date of a run, and a single date can be changed on its own. Your box office gets the same map to hold seats back, take a booking over the phone, move somebody or release one seat.',
+                'a' => 'Yes, on the Enterprise plan. Draw your room once on a venue schedule as a reusable seating plan - levels, sections, rows, tables, standing areas and wheelchair spaces - attach it to an event, and buyers pick their seats off the map. One plan covers every date of a run, and a single date can be changed on its own. Your box office gets the same map to hold seats back, take a booking over the phone, move somebody or release one seat.',
             ],
             [
                 'q' => 'Can I use my own domain?',

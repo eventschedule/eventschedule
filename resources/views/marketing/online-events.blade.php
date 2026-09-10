@@ -1,6 +1,6 @@
 <x-marketing-layout>
-    <x-slot name="title">Virtual & Online Event Hosting - Event Schedule</x-slot>
-    <x-slot name="description">Host virtual events from one link field: tick Online, paste the URL people join on, and the listing, the ticket and the search-engine markup all follow.</x-slot>
+    <x-slot name="title">Online & Hybrid Event Hosting, Any Platform - Event Schedule</x-slot>
+    <x-slot name="description">Host virtual and hybrid events on Zoom, Google Meet or any link: paste it once and the ticket, the listing and the search markup follow. Free plan.</x-slot>
     <x-slot name="breadcrumbTitle">Online Events</x-slot>
 
     <x-slot name="structuredData">
@@ -20,7 +20,9 @@
             "The full join link printed on every ticket",
             "An Online filter that appears on your public schedule",
             "Free registration with a capacity limit counted per date",
-            "Ticket sales through your own Stripe account with zero platform fees"
+            "Ticket sales through your own Stripe or PayPal account with zero platform fees",
+            "A per-event email list that hears when tickets go on sale and gets any change notice you send",
+            "A live calendar feed visitors can subscribe to, stamped in UTC"
         ],
         "offers": {
             "@type": "Offer",
@@ -493,7 +495,7 @@
         $steps = [
             ['01', 'Tick Online', 'On the event, In person and Online are two separate boxes. Tick Online. Tick In person as well if the room is happening too.'],
             ['02', 'Paste the link', 'One field, any URL: a meeting room, a stream, a page on your own site. There is no account to connect first.'],
-            ['03', 'Publish it', 'The listing, the ticket, the calendar file and the search-engine markup all take their cue from that one field.'],
+            ['03', 'Publish it', 'The listing, the ticket, the Online filter and the search-engine markup all take their cue from that one field.'],
         ];
 
         $useCases = [
@@ -520,19 +522,23 @@
             ],
             [
                 'q' => 'Can I sell tickets to an online event?',
-                'a' => 'Yes, and it works exactly the same for an online event as for a room: named ticket types with their own prices and quantities, and payment through your own Stripe account. Selling starts on the free plan, at 25 paid tickets a month. Pro is '.plan_price($proMonthly).' a month and takes the ceiling off, and adds per-attendee tickets, QR check-in and the waitlist. Event Schedule charges zero platform fees on every plan, so past Stripe\'s own processing the money is yours. Free registration with a capacity limit is on the free plan, and the cap is counted per date.',
+                'a' => 'Yes, and it works exactly the same for an online event as for a room: named ticket types with their own prices and quantities, and payment through your own Stripe or PayPal account. Selling starts on the free plan, at 25 paid tickets a month. Pro is '.plan_price($proMonthly).' a month and takes the ceiling off, and adds per-attendee tickets and the ticket waitlist. Event Schedule charges zero platform fees on every plan, so past the payment provider\'s own processing the money is yours. Free registration with a capacity limit is on the free plan, and the cap is counted per date.',
             ],
             [
                 'q' => 'What time will people in other countries see?',
-                'a' => 'The time you enter is anchored to your schedule\'s timezone rather than to whichever device typed it, and the public page shows it in that timezone for everybody. It does not rewrite itself per visitor, so if your audience is spread out it is worth naming the timezone in the event title or description. Add to calendar is the part that converts: the calendar file is stamped in UTC, so an attendee\'s own calendar shows the hour they should turn up.',
+                'a' => 'The time you enter is anchored to your schedule\'s timezone rather than to whichever device typed it, and the public page shows it in that timezone for everybody. It does not rewrite itself per visitor, so if your audience is spread out it is worth naming the timezone in the event title or description. Add to calendar is the part that converts: the calendar file is stamped in UTC, so an attendee\'s own calendar shows the hour they should turn up, and so does the live feed they can subscribe to.',
             ],
             [
                 'q' => 'Does the join link go into the calendar file?',
-                'a' => 'No. The .ics that Add to calendar downloads puts the venue address in the location field, and an online event has no address to put there, so the entry lands without a link. Tell people the link is on their ticket, or paste it into the event description where it will be part of the calendar entry\'s notes.',
+                'a' => 'No. The .ics that Add to calendar downloads, the Google and Outlook links beside it and the live feed a visitor can subscribe to all put the venue address in the location field. An online event has no address to put there, so the entry lands without a join link, although the feed\'s entry does link back to the event page. Tell people the link is on their ticket, or paste it into the event description, which travels into the calendar entry\'s notes but is public on your event page as well.',
+            ],
+            [
+                'q' => 'What happens if a session moves or is cancelled?',
+                'a' => 'When you save a new date for a one-off session, a new join link or a cancellation, Event Schedule offers to send a notice, and it goes only if you confirm it. It reaches anyone who left an email address on the event page under "Tell me if anything changes" or "Tell me when tickets go on sale", and, if your schedule sends through its own SMTP server, everyone registered. The ticket shows the new link as soon as you save, and a calendar subscribed to your live feed picks up a new time on its next refresh. A Stripe or PayPal sale can be refunded in full or in part from the Sales page, with the money going back through the provider. The app does not email the buyer about a refund, so tell them yourself.',
             ],
             [
                 'q' => 'Do I need a paid plan to run online events?',
-                'a' => 'No. Online events are on the free plan, along with recurring dates, sub-schedules, the embeddable calendar, two-way calendar sync, built-in analytics, free registration and selling up to 25 paid tickets a month. Pro is '.plan_price($proMonthly).' a month for unlimited ticket sales, QR check-in and the waitlist.',
+                'a' => 'No. Online events are on the free plan, along with recurring dates, sub-schedules, the embeddable calendar, two-way calendar sync, built-in analytics, free registration and selling up to 25 paid tickets a month. Pro is '.plan_price($proMonthly).' a month for unlimited paid tickets, per-attendee tickets and the ticket waitlist.',
             ],
         ];
 
@@ -837,13 +843,13 @@
                          scheme, and the full URL stays behind it as the href. --}}
                     <p class="es-golive-url mb-5">meet.google.com/kfr-hxbz-qde</p>
                     <p class="es-golive-muted text-xs">
-                        This is the ticket, not the listing. A paid ticket and a free registration both produce one, and both carry the link.
+                        This is the ticket, not the listing. A paid ticket and a free registration both produce one, and both carry the link. Change the link later and the same ticket shows the new one, because it is read from the event each time the ticket opens.
                     </p>
                 </div>
             </div>
 
             <p class="es-golive-muted mx-auto mt-8 max-w-2xl text-center text-sm" data-reveal>
-                One honest gap: Add to calendar writes the venue address into the calendar entry, so an online event lands there without a link. Put it in the description if you want it in their calendar notes as well.
+                One honest gap: Add to calendar, and the live feed a visitor can subscribe to, write the venue address into the calendar entry, so an online event lands there without a join link. The description travels into the entry's notes, so the link can go there, but the description is public too.
             </p>
         </div>
     </section>
@@ -947,7 +953,7 @@
                             <h3 class="text-lg font-bold es-golive-onink">Sell seats to a stream</h3>
                             <span class="es-golive-plan">Free</span>
                         </div>
-                        <p class="text-sm es-golive-onmuted">Named ticket types with their own prices and quantities, paid through your own Stripe account. 25 paid tickets a month on the free plan, no ceiling on Pro, and Event Schedule takes nothing from the sale on either.</p>
+                        <p class="text-sm es-golive-onmuted">Named ticket types with their own prices and quantities, paid through your own Stripe or PayPal account. 25 paid tickets a month on the free plan, no ceiling on Pro, and Event Schedule takes nothing from the sale on either.</p>
                     </div>
                     <div class="es-golive-card p-6" data-reveal="panel">
                         <div class="mb-2 flex flex-wrap items-center gap-2">
@@ -1006,7 +1012,7 @@
                 </div>
                 <div class="es-golive-card p-7" data-reveal="panel">
                     <h3 class="es-golive-ink mb-2 text-lg font-bold">Add to calendar converts</h3>
-                    <p class="es-golive-muted text-sm leading-relaxed">The calendar file is stamped in UTC, so when somebody saves the event their own calendar shows it in their own hours. The same is true of the subscribable feed.</p>
+                    <p class="es-golive-muted text-sm leading-relaxed">The calendar file is stamped in UTC, so when somebody saves the event their own calendar shows it in their own hours. The same goes for "Subscribe to all events" in that menu: a live feed, stamped the same way, that also follows a session you move.</p>
                 </div>
                 <div class="es-golive-card p-7" data-reveal="panel">
                     <h3 class="es-golive-ink mb-2 text-lg font-bold">The part that is on you</h3>
@@ -1089,8 +1095,8 @@
                                 <h3 class="es-golive-ink text-xl font-bold">Tell the people who follow you</h3>
                                 <span class="es-golive-plan">Free</span>
                             </div>
-                            <p class="es-golive-muted mb-4">People follow your schedule and you write to them when the next session goes up. Newsletters are on the free plan, with open and click rates afterwards.</p>
-                            <p class="es-golive-muted text-sm">The allowance counts recipients rather than sends: 10 a month on Free, 100 on Pro, 1,000 on Enterprise.</p>
+                            <p class="es-golive-muted mb-4">People who subscribe by email get a digest when you publish new sessions, at most one every three days, without you writing a word. Anything more is a newsletter you send to them and to your followers, on the free plan, with open and click rates afterwards.</p>
+                            <p class="es-golive-muted text-sm">The newsletter allowance counts recipients rather than sends: 10 a month on Free, 100 on Pro, 1,000 on Enterprise. <a href="{{ marketing_url('/features/newsletters') }}" class="es-golive-link font-medium hover:underline">How newsletters work</a></p>
                         </div>
                         <div class="es-glare" aria-hidden="true"></div>
                         <div class="es-ring-glow" aria-hidden="true"></div>

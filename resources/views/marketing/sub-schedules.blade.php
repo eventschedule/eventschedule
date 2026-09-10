@@ -1,6 +1,6 @@
 <x-marketing-layout>
-    <x-slot name="title">Sub-Schedules | Sort One Schedule Into Sections</x-slot>
-    <x-slot name="description">A sub-schedule is a tabbed divider in one drawer: it gives a run of events a name, a colour and a URL. It sorts and it points. It never hides anything.</x-slot>
+    <x-slot name="title">Sub-Schedules | Sort One Event Calendar Into Sections</x-slot>
+    <x-slot name="description">Sort one event calendar into sections like Live Music or Workshops, each with a colour, its own link and a place in the filter. Free, with no limit.</x-slot>
     <x-slot name="breadcrumbTitle">Sub-Schedules</x-slot>
 
     <x-slot name="structuredData">
@@ -18,6 +18,8 @@
             "A name, an English name, a URL slug and a colour per sub-schedule",
             "A colour from a fixed palette of fourteen, shown as a dot beside the event",
             "Its own URL, so you can link straight to one section of your schedule",
+            "An embed that opens already filtered to one sub-schedule",
+            "Curator event sources filed under a chosen sub-schedule as they arrive",
             "A schedule filter for visitors, with an event count beside each name scoped to the view",
             "A shareable schedule query parameter that survives a click into an event",
             "One sub-schedule per event, per schedule",
@@ -598,6 +600,14 @@
                 'a' => 'Yes. Each one gets its own address at your-schedule.eventschedule.com/its-slug, and the page loads already filtered to that section. There is also a schedule query parameter, which is what the filter adds to event links so a visitor who clicks through and comes back is still looking at the section they chose.',
             ],
             [
+                'q' => 'Can visitors subscribe to one sub-schedule in their calendar app?',
+                'a' => 'No. The live calendar feed a visitor can subscribe to, from an event\'s Add to Calendar menu or the sign-up panel, covers every public event on your schedule, whichever section they were looking at. To send somebody to one section, give them its link, which opens the calendar already filtered to it. An embed can do the same.',
+            ],
+            [
+                'q' => 'Can events from other schedules be filed into a sub-schedule automatically?',
+                'a' => 'Yes, on a curator schedule. List the talent and venue schedules you follow as event sources and choose one of your sub-schedules for each: everything a source publishes lands behind that divider as it arrives, and changing the sub-schedule later moves the events already filed from that source too. Event sources are free on every plan.',
+            ],
+            [
                 'q' => 'Can I nest sub-schedules?',
                 'a' => 'No. Sub-schedules are a single level of sorting inside a schedule. If you need a genuinely separate public page, create a second schedule rather than nesting.',
             ],
@@ -1051,7 +1061,7 @@
                                 <span class="es-sort-band-muted flex-1">Events you pick by hand</span>
                             </div>
                         </div>
-                        <p class="es-sort-band-muted mt-4 text-xs">Passes are sold alongside single tickets, and Event Schedule charges zero platform fees on either.</p>
+                        <p class="es-sort-band-muted mt-4 text-xs">Passes are sold alongside single tickets, and Event Schedule charges zero platform fees on either. <a href="{{ route('marketing.passes') }}" class="es-sort-lit font-semibold hover:underline">How passes work</a></p>
                     </div>
 
                     <div class="es-sort-card p-6 sm:p-7" data-reveal="panel">
@@ -1142,7 +1152,7 @@
                                 <h3 class="es-sort-ink text-xl font-bold">It travels with the embed</h3>
                                 <span class="es-sort-plan">Free</span>
                             </div>
-                            <p class="es-sort-muted mb-4">Embed your calendar on the site you already run and the same filter comes with it, dividers, counts and colour dots included. The embed renders the same calendar as your public page, so the sorting is never set up twice.</p>
+                            <p class="es-sort-muted mb-4">Embed your calendar on the site you already run and the same filter comes with it, dividers, counts and colour dots included. The embed renders the same calendar as your public page, so the sorting is never set up twice. Point it at a sub-schedule's address instead and it opens already filtered to that section, so the workshops page on your site leads with workshops.</p>
                             <p class="es-sort-muted text-sm">
                                 The embed, the built-in analytics and two-way sync with Google, Outlook and CalDAV are all free.
                                 <a href="{{ marketing_url('/features/embed-calendar') }}" class="es-sort-link font-medium hover:underline">How the embed works</a>
@@ -1208,7 +1218,7 @@
                     ['Conferences and festivals', 'Tracks, workshops and the keynote strand each get a tab, so a delegate can pull up one track and leave the rest alone.'],
                     ['Community and arts centres', 'Classes, film club, family matinees and the hall hire calendar sit together on one link and still read separately.'],
                     ['Recurring series', 'The weekly quiz, the monthly market and the seasonal fair are three strands of the same year, not three schedules to maintain.'],
-                    ['Curators of other people\'s events', 'Sort what arrives into the sections of your guide, then send each section to the readers who asked for it.'],
+                    ['Curators of other people\'s events', 'Add a venue or an act as an event source and choose a divider for it: whatever they publish is filed there as it arrives, and each section has a link to send readers.'],
                     ['Teachers and studios', 'Beginner, intermediate and drop-in are the three questions every new student asks. Answer them with three tabs.'],
                 ] as $uIndex => [$uTitle, $uBody])
                     <div class="es-sort-card flex flex-col p-6" data-reveal>
@@ -1247,7 +1257,7 @@
 
             <p class="es-sort-muted mx-auto mt-8 max-w-2xl text-center text-sm" data-reveal>
                 The whole thing is described step by step in the
-                <a href="{{ route('marketing.docs.creating_schedules') }}" class="es-sort-link font-medium hover:underline">schedule setup guide</a>.
+                <a href="{{ route('marketing.docs.creating_schedules') }}#customize-subschedules" class="es-sort-link font-medium hover:underline">schedule setup guide</a>.
             </p>
         </div>
     </section>

@@ -1,5 +1,5 @@
 <x-marketing-layout>
-    <x-slot name="title">Event Polls & Voting - Event Schedule</x-slot>
+    <x-slot name="title">Event Polls: Let Your Audience Vote on the Event Page</x-slot>
     <x-slot name="description">Add a poll to any event: a question, two to ten choices, one vote per signed-in guest. Guests read no count until they have voted. A Pro feature.</x-slot>
     <x-slot name="breadcrumbTitle">Event Polls</x-slot>
 
@@ -27,7 +27,8 @@
             "Close a poll to publish the count to everyone",
             "Guest write-in options with an optional approval queue",
             "A separate count for every date of a recurring event",
-            "Full-width voting buttons on phones"
+            "Full-width voting buttons on phones",
+            "Counts and shares only, never a list of who voted for what"
         ],
         "url": "{{ url()->current() }}",
         "provider": {
@@ -531,7 +532,11 @@
             ],
             [
                 'q' => 'Do guests need an account to vote?',
-                'a' => 'Yes. A vote is tied to an account, which is what stops one person voting twice. Guests who are not signed in see the choices with a sign-in link in place of the buttons. Votes cannot be changed once they are cast.',
+                'a' => 'Yes. A vote is tied to an account, which is what stops one person voting twice. Guests who are not signed in see the choices with a sign-in link in place of the buttons. Votes cannot be changed once they are cast. On an event that is not public, voting is limited to signed-in members of your schedule.',
+            ],
+            [
+                'q' => 'Can I see who voted for what?',
+                'a' => 'No. You see what your guests see once they have voted, a count and a share against every choice, and the Polls tab in the event editor shows it at any time. Each vote is stored against the voter\'s account, because that is what keeps it to one per person, but no screen lists who picked what, and a schedule backup carries the counts without the names.',
             ],
             [
                 'q' => 'Can guests add a choice of their own?',
@@ -592,7 +597,7 @@
 
                     <h1 class="es-balance es-vote-ink mb-8 text-[2.4rem] font-black leading-[1.05] tracking-tight sm:text-6xl">
                         <span class="es-mask"><span class="es-mask-line">You have a question.</span></span>
-                        <span class="es-mask es-mask-2"><span class="es-mask-line">Print the <span class="es-vote-accent">ballot.</span></span></span>
+                        <span class="es-mask es-mask-2"><span class="es-mask-line">Poll your <span class="es-vote-accent">audience.</span></span></span>
                     </h1>
 
                     <p class="es-fade-up es-d-2 es-vote-muted mb-10 max-w-xl text-lg sm:text-xl">
@@ -1053,7 +1058,7 @@
                                 <span class="es-vote-plan">Pro</span>
                             </div>
                             <p class="es-vote-muted mb-4">The poll sits with the event's photos, videos and comments, under the details somebody came to read. No second link to send, no separate survey to chase.</p>
-                            <p class="es-vote-muted text-sm">If the event is a draft, the poll is only reachable by the people who can already see the event. The same holds for the Internal and Unlisted visibilities, which are Enterprise.</p>
+                            <p class="es-vote-muted text-sm">If the event is not public, only signed-in members of your schedule can vote. That covers a draft, and the Internal and Unlisted visibilities, which are Enterprise: a guest who opens an Unlisted event from its link can read the poll but cannot vote on it.</p>
                         </div>
                         <div class="es-glare" aria-hidden="true"></div>
                         <div class="es-ring-glow" aria-hidden="true"></div>
@@ -1131,7 +1136,7 @@
                             </div>
                             <p class="es-vote-muted mb-4">Voting needs an account, and an account is also how somebody follows your schedule. Following is free on every plan, and it is what lets you email them later about the thing they just voted on.</p>
                             <p class="es-vote-muted text-sm">
-                                To be exact about it: following does not send anybody an automatic alert when you add an event. It builds the list you write to.
+                                To be exact about it: pressing Follow does not sign anybody up for automatic email when you add an event. The automatic digest of new events goes to people who gave you their email address on your schedule page and confirmed it. Following builds the list you write to.
                                 <a href="{{ marketing_url('/features/newsletters') }}" class="es-vote-link font-medium hover:underline">How newsletters work</a>
                             </p>
                         </div>

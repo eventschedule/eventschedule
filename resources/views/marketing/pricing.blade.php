@@ -77,16 +77,26 @@
 
         $faqs = [
             ['q' => 'Is there really a free plan?', 'a' => 'Yes! The free plan includes unlimited events, all core features, appointment booking with one appointment type, and selling up to 25 paid tickets a month with no platform fee. You only need to upgrade if you want to remove branding, sell more than 25 tickets a month, or access advanced features.'],
-            ['q' => 'How does the free trial work?', 'a' => 'When you sign up for Pro or Enterprise, you get a 7-day free trial. Enter your card to start, and you won\'t be charged until the trial ends. After that, Pro is ' . plan_price($proMonthly) . '/month or ' . plan_price($proYearly) . '/year, and Enterprise is ' . plan_price($entMonthly) . '/month or ' . plan_price($entYearly) . '/year. You can cancel anytime.'],
-            ['q' => 'What is the difference between Pro and Enterprise?', 'a' => 'The free plan already sells up to 25 paid tickets a month, scans tickets at the door and carries one appointment type. Pro removes both limits and adds the rest of the ticketing suite: the live check-in dashboard, passes and subscriptions, individual tickets, promo/discount codes, add-ons, waitlists and sales CSV export. It also adds white-label branding, event graphics, event boosting with ads, custom fields, custom CSS styling, REST API & webhooks, and 100 newsletter emails per month. Enterprise adds allocated (reserved) seating, custom domains, private and password-protected events, up to five team members, WhatsApp event creation, email scheduling, agenda scanning, availability management, 1,000 newsletter emails per month, and priority support.'],
+            ['q' => 'How does the free trial work?', 'a' => 'When you sign up for Pro or Enterprise, you get a 7-day free trial, once per schedule. Enter your card to start, and you won\'t be charged until the trial ends; cancel before then and nothing is charged. After that, Pro is ' . plan_price($proMonthly) . '/month or ' . plan_price($proYearly) . '/year, and Enterprise is ' . plan_price($entMonthly) . '/month or ' . plan_price($entYearly) . '/year. You can cancel anytime.'],
+            ['q' => 'What is the difference between Pro and Enterprise?', 'a' => 'The free plan already sells up to 25 paid tickets a month, scans tickets at the door and carries one appointment type. Pro removes both limits and adds the rest of the ticketing suite: the live check-in dashboard, passes and subscriptions, individual tickets, promo/discount codes, add-ons, gift cards, installment payments through Stripe, the ticket waitlist and sales CSV export. It also adds white-label branding, event graphics, event boosting with ads, custom fields, custom CSS styling, REST API & webhooks, and 100 newsletter emails per month, each recipient counting as one. Enterprise adds allocated (reserved) seating for venue schedules, custom domains, private and password-protected events, up to five team members, WhatsApp event creation, email scheduling, agenda scanning, availability management, 1,000 newsletter emails per month, and priority support.'],
             // Behaviour at the cap is Role::ticketSaleLimit() + Event::paidTicketAllowanceAvailable():
             // cash counted but never blocked, events inside TICKET_ALLOWANCE_GRACE_HOURS exempt,
             // zero-price rows always sellable, and the window starts at the later of the month and
             // Role::freeSince(). This question gets asked before anyone signs up, so it belongs here.
             ['q' => 'What happens when I reach 25 paid tickets in a month?', 'a' => 'Paid tickets stop selling for the rest of that calendar month, and everything else keeps working. Free registrations and any zero-price ticket tier carry on without limit, so an event that mixes a free tier with paid ones keeps its buy button. Cash and other offline sales are recorded but never refused, and an event starting within 48 hours is exempt entirely, so the allowance can never stop sales for a show that is about to happen. The count resets on the first of the month, and upgrading to Pro removes it immediately.'],
-            ['q' => 'What happens if I cancel or downgrade?', 'a' => 'You keep the plan until the end of the period you have already paid for, and nothing you created is deleted. A seating plan already attached to an event stays attached and keeps selling. Every appointment type you made is kept, though only the oldest bookable one takes new bookings until you upgrade again. Events set to Internal or Unlisted become hidden Drafts rather than becoming public by accident, and your data stays exportable from Backup and Restore at any time.'],
+            // Downgrade: Cashier's cancel() keeps the paid period (SubscriptionController::cancel()),
+            // Role::ticketAllowanceStart() windows the cap from Role::freeSince(), and below Enterprise
+            // EventRepo::saveEvent() turns Internal and Unlisted into a Draft on the next save.
+            ['q' => 'What happens if I cancel or downgrade?', 'a' => 'You keep the plan until the end of the period you have already paid for, and nothing you created is deleted. Selling drops back to 25 paid tickets a month, and in the month the plan ends only sales made after it ended count toward that. A seating plan already attached to an event stays attached and keeps selling. Every appointment type you made is kept, though only the oldest bookable one takes new bookings until you upgrade again. Internal and Unlisted events stay hidden and become Drafts the next time they are saved, rather than going public by accident, and your data stays exportable from Backup and Restore at any time.'],
             ['q' => 'Can I cancel anytime?', 'a' => 'Absolutely. You can cancel your subscription at any time and you\'ll keep access until the end of your billing period.'],
-            ['q' => 'Do you take a cut of ticket sales?', 'a' => 'No. There is no platform fee on any plan, including free. Buyers pay your Stripe account directly, so the only deduction is Stripe\'s own processing (2.9% + $0.30 per transaction in the US, and Stripe sets that, not us). We never hold your money, so there is nothing for us to take a cut of.'],
+            ['q' => 'Do you take a cut of ticket sales?', 'a' => 'No. There is no platform fee on any plan, including free. Buyers pay your own Stripe or PayPal account directly, so the only deduction is the processor\'s own fee (Stripe\'s is 2.9% + $0.30 per transaction in the US, and the processor sets it, not us). We never hold your money, so there is nothing for us to take a cut of.'],
+            // Every gateway in config/payments.php is untiered: there is no isPro() anywhere under
+            // app/Services/Payments/. Refunds are SaleRefundService: Stripe and PayPal answer
+            // supportsRefunds(), every other rail gets Mark as Refunded. The interest list is
+            // EventInterestController, ungated, bounded by canSendAudienceMail() and not newsletterLimit().
+            ['q' => 'Which payment methods can I use on the free plan?', 'a' => 'All of them. Stripe, PayPal, Payfast (South African rand only) and Invoice Ninja connect to your own account under Settings, Payment Methods, and you can also send buyers to a payment link of your own or take cash at the door. You pick the method per event, and none of them carries a platform fee on any plan.'],
+            ['q' => 'Can I refund a ticket?', 'a' => 'Yes, on every plan, and we charge nothing for it. From the Sales page, a Stripe or PayPal sale can be refunded in full or in part (an installment plan in full only), and the money goes back through the provider before the sale is marked refunded. A partial refund leaves the tickets valid; a full refund puts the tickets, and any seats, back on sale. A sale taken any other way, such as cash, a payment link, Invoice Ninja or Payfast, is marked as refunded instead, which records it while you return the money yourself.'],
+            ['q' => 'Does the “tell me when tickets go on sale” list cost anything?', 'a' => 'No, it is free on every plan. A visitor leaves just an email address on the event page and gets one email when tickets go on sale, one if the event is cancelled, a reminder shortly before it starts, and any notice you choose to send if the date or venue changes. It does not use your newsletter allowance, and the event\'s Tickets panel shows you how many people are waiting.'],
         ];
     @endphp
 
@@ -105,14 +115,14 @@
                 "name": "Free",
                 "price": "0",
                 "priceCurrency": "{{ platform_currency() }}",
-                "description": "Unlimited events and schedules, calendar sync, analytics, free event registration, and up to 25 paid tickets a month."
+                "description": "Unlimited events and schedules, calendar sync, analytics, free event registration, and up to 25 paid tickets a month through Stripe, PayPal or cash, with refunds and no platform fee."
             },
             {
                 "@type": "Offer",
                 "name": "Pro",
                 "price": "{{ number_format($proMonthly, 2, '.', '') }}",
                 "priceCurrency": "{{ platform_currency() }}",
-                "description": "Unlimited ticket sales, live check-in dashboard, event graphics, API and webhooks. Also available at {{ plan_price($proYearly) }}/year.",
+                "description": "Unlimited ticket sales, live check-in dashboard, passes, gift cards, installment payments, event graphics, API and webhooks. Also available at {{ plan_price($proYearly) }}/year.",
                 "priceSpecification": {
                     "@type": "UnitPriceSpecification",
                     "price": "{{ number_format($proMonthly, 2, '.', '') }}",
@@ -466,7 +476,7 @@
                         <svg aria-hidden="true" class="h-5 w-5 transition-transform group-hover:translate-x-1 rtl:rotate-180" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6" /></svg>
                     </a>
                     <p class="mt-5 text-xs text-gray-500 dark:text-gray-400">
-                        Stripe processing (2.9% + $0.30 per ticket) is included on the Event Schedule side. The comparison platform bundles processing into its own rate. Payouts go straight to your own Stripe account.
+                        Stripe processing (2.9% + $0.30 per ticket) is included on the Event Schedule side. The comparison platform bundles processing into its own rate. Payouts go straight to your own Stripe account; connect PayPal instead and the money lands in your PayPal account the same way, at PayPal's own rate.
                     </p>
                 </div>
             </div>

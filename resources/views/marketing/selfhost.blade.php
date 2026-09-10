@@ -27,6 +27,7 @@
             "Browser-based setup wizard",
             "One-click application updates",
             "Every Pro and Enterprise feature included",
+            "Stripe and PayPal checkout with no platform fees",
             "AI-powered auto import from URLs",
             "Full data ownership",
             "White-label SaaS capability"
@@ -415,6 +416,7 @@
                 ['Calendar sync', 'bg-emerald-500', route('marketing.calendar_sync')],
                 ['Event graphics', 'bg-teal-500', route('marketing.event_graphics')],
                 ['Analytics', 'bg-cyan-400', route('marketing.analytics')],
+                ['PayPal checkout', 'bg-teal-400', route('marketing.paypal')],
             ],
             [
                 ['Appointments', 'bg-teal-500', route('marketing.appointments')],
@@ -425,6 +427,7 @@
                 ['Recurring events', 'bg-emerald-500', route('marketing.recurring_events')],
                 ['Sub-schedules', 'bg-cyan-500', route('marketing.sub_schedules')],
                 ['Fan videos', 'bg-teal-500', route('marketing.fan_videos')],
+                ['Allocated seating', 'bg-emerald-400', route('marketing.allocated_seating')],
             ],
         ];
     @endphp
@@ -818,8 +821,10 @@
                 'items' => [
                     ['Ticketing with QR check-in', 'ticket'],
                     // NOT Connect: Connect is only used when IS_HOSTED=true. A single-tenant
-                    // install charges with the platform keys in your own .env.
-                    ['Stripe Checkout, no platform fees', 'card'],
+                    // install charges with the platform keys in your own .env. PayPal is either
+                    // one install-wide account from .env or each owner's own
+                    // (PayPalGateway::platformCredentials()); neither takes a fee.
+                    ['Stripe or PayPal checkout, no platform fees', 'card'],
                     ['Passes and subscriptions', 'badge'],
                     ['Promo codes and gift cards', 'gift'],
                     ['Waitlists and a check-in dashboard', 'list'],
@@ -1009,7 +1014,7 @@
                     <h3 class="mb-4 text-2xl font-bold text-white">It never leaves your server</h3>
                     <p class="mb-6 text-gray-300">Your events, attendees, ticket sales and follower emails live in your database. Event Schedule cannot access, modify or remove selfhosted data, because there is no connection back to us to do it with.</p>
                     <ul class="space-y-3">
-                        @foreach (['Your database, your backups, your retention rules', 'Stripe payouts go straight to your own account', 'Your own Gemini or OpenAI key for the AI features', 'No telemetry, no phone-home, no usage reporting'] as $dItem)
+                        @foreach (['Your database, your backups, your retention rules', 'Stripe and PayPal payments land in your own accounts', 'Your own Gemini or OpenAI key for the AI features', 'No telemetry, no phone-home, no usage reporting'] as $dItem)
                             <li class="flex items-start gap-3 text-gray-200">
                                 <svg aria-hidden="true" class="mt-0.5 h-5 w-5 shrink-0 text-emerald-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
@@ -1027,7 +1032,7 @@
                 <div data-reveal="panel" class="flex flex-col rounded-3xl border border-white/10 bg-white/[0.04] p-8">
                     <div class="mb-3 inline-flex items-center gap-2 self-start rounded-full border border-emerald-400/30 bg-emerald-500/10 px-3 py-1 text-xs font-semibold uppercase tracking-wider text-emerald-300">Opt in, off by default</div>
                     <h3 class="mb-4 text-2xl font-bold text-white">Or share out, on your terms</h3>
-                    <p class="mb-7 text-gray-300">Federation is the one bridge back to eventschedule.com, and it only exists if an admin switches it on. Your public events appear in the main listings, and every listing links back to the event on your own site.</p>
+                    <p class="mb-7 text-gray-300">Federation is the one bridge that carries your events to eventschedule.com, and it only exists if an admin switches it on. Your public events appear in the main listings, and every listing links back to the event on your own site.</p>
 
                     <div class="es-fed relative mb-6 rounded-2xl border border-white/10 bg-black/25 p-5" aria-hidden="true">
                         <div class="relative flex items-center justify-between gap-2">
@@ -1361,6 +1366,7 @@
                     ['Stripe', 'marketing.docs.selfhost.stripe'],
                     ['Google Calendar', 'marketing.docs.selfhost.google_calendar'],
                     ['Outlook and Microsoft 365', 'marketing.docs.selfhost.microsoft_calendar'],
+                    ['Google Wallet passes', 'marketing.docs.selfhost.google_wallet'],
                     ['Boost ads', 'marketing.docs.selfhost.boost'],
                 ],
             ],
@@ -1448,13 +1454,15 @@
     <!-- ============================================================ -->
     @php
         $selfhostFaqs = [
-            ['q' => 'Is Event Schedule really free to selfhost?', 'a' => 'Yes. Event Schedule is open source under the Attribution Assurance License. There is no licence fee, no per-event charge and no platform fee on ticket sales. Your only costs are the server and Stripe\'s own processing fees.'],
+            ['q' => 'Is Event Schedule really free to selfhost?', 'a' => 'Yes. Event Schedule is open source under the Attribution Assurance License. There is no licence fee, no per-event charge and no platform fee on ticket sales. Your only costs are the server and the processing fees your payment provider charges.'],
             ['q' => 'Do I get the paid features when I selfhost?', 'a' => 'A selfhosted install is treated as Enterprise throughout the code, so ticketing, team members, the API, AI generation and everything else are included at no cost. Two features, auto import from URLs and one-click app updates, exist only on selfhosted installs. Per-schedule custom domains are the one thing that does not carry over, because they belong to hosted mode and your install already runs on a domain you chose.'],
             ['q' => 'What do I need on the server?', 'a' => 'PHP 8.2 or newer with the usual extensions, MySQL 5.7+ or MariaDB 10.3+, Apache or Nginx with rewrites enabled, and an SSL certificate. Most shared hosts already meet this.'],
             ['q' => 'Can I install it on shared hosting?', 'a' => 'Yes. If your host offers Softaculous, Event Schedule installs in one click with the database and configuration set up for you. Otherwise upload the release zip and point your document root at the public directory.'],
             ['q' => 'How do updates work?', 'a' => 'When a new version is released, a notice appears in your admin panel. One click applies the update in seconds, database migrations included. No terminal access is required.'],
             ['q' => 'Do I have to set up a cron job?', 'a' => 'Yes, one line: "* * * * * php /path/to/eventschedule/artisan schedule:run". It drives reminder emails, calendar sync and the release of expired ticket reservations. Without it those stop running.'],
-            ['q' => 'Does a selfhosted install send anything back to Event Schedule?', 'a' => 'No. There is no telemetry and no phone-home. The one optional exception is Federation, which is off by default and shares only your public events into the eventschedule.com listings, with every listing linking back to your own site. An admin has to switch it on, and each schedule can opt out.'],
+            ['q' => 'Which payment methods work on a selfhosted install?', 'a' => 'Stripe, PayPal, Payfast (for rand), Invoice Ninja, a payment link and cash, with no platform fee on any of them. Stripe runs on the platform keys in your .env, which is the only Stripe rail a selfhost has. PayPal can be one account for the whole install, set with PAYPAL_CLIENT_ID and PAYPAL_CLIENT_SECRET, or each schedule owner can connect their own in Settings > Payment Methods. PayPal never has to call your server for an ordinary sale, so only its optional webhook needs a public address. A Stripe or PayPal sale can be refunded from the Sales page, in full or in part, and the money goes back through the provider.'],
+            ['q' => 'Which features need my own accounts or keys?', 'a' => 'Anything that talks to another service needs your own account with it, and that part does nothing until you add the credentials: an SMTP service for email, Stripe or PayPal for payments, a Google or Microsoft app for calendar sync, a Gemini or OpenAI key for the AI features, a Google Wallet issuer account for the Add to Google Wallet button on tickets, and a OneSignal app for push notifications.'],
+            ['q' => 'Does a selfhosted install send anything back to Event Schedule?', 'a' => 'Not unless an admin switches something on. There is no telemetry and no phone-home. Two optional features do send data to eventschedule.com, and both start off. Federation shares only your public events into the eventschedule.com listings, with every listing linking back to your own site, and each schedule can opt out. Translation sharing sends wording you corrected in the translation manager, when an admin presses Share or, with automatic sharing on, as it is saved.'],
             ['q' => 'Can I run it as a white-label SaaS for my own customers?', 'a' => 'Yes. Set IS_HOSTED=true and the same install runs multi-tenant, with a subdomain per customer, Stripe subscription billing and your own prices on the Pro and Enterprise tiers. You set the prices and keep the revenue. One thing to know before you price it: the licence credit stays on the public pages of every customer you charge. It is a small chip in the corner, a free schedule carries your own footer strip in its place, and it is the whole of what the software costs you.'],
             ['q' => 'Can I move from the hosted version to selfhosted?', 'a' => 'Yes. Backup and restore is built in, so you can export your schedule data, with images if you want them, and import it into your own install.'],
         ];

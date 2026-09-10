@@ -1,6 +1,6 @@
 <x-marketing-layout>
-    <x-slot name="title">Boost Events with Ad Campaigns - Event Schedule</x-slot>
-    <x-slot name="description">Turn your event details into live Facebook and Instagram ads. Automated targeting, budget control, and real-time analytics, no ad manager experience needed.</x-slot>
+    <x-slot name="title">Promote Events with Facebook and Instagram Ads | Boost</x-slot>
+    <x-slot name="description">Promote a published event with Facebook and Instagram ads built from its details. Prepaid from $10, no Ads Manager needed, and unspent budget is refunded.</x-slot>
     <x-slot name="breadcrumbTitle">Boost</x-slot>
 
     <x-slot name="structuredData">
@@ -9,7 +9,7 @@
         "@context": "https://schema.org",
         "@type": "Service",
         "name": "Event Schedule Boost",
-        "description": "Turn your event details into live Facebook and Instagram ads. Automated targeting, budget control, and real-time analytics with no ad manager experience required.",
+        "description": "Turn your event details into live Facebook and Instagram ads. Automated targeting, a prepaid budget, and campaign numbers while it runs, with no ad manager experience required.",
         "provider": {
             "@type": "Organization",
             "name": "Event Schedule",
@@ -26,7 +26,7 @@
         "applicationCategory": "BusinessApplication",
         "applicationSubCategory": "Event Advertising Software",
         "operatingSystem": "Web",
-        "description": "Turn your event details into live Facebook and Instagram ads. Automated targeting, budget control, and real-time analytics with no ad manager experience required.",
+        "description": "Turn your event details into live Facebook and Instagram ads. Automated targeting, a prepaid budget, and campaign numbers while it runs, with no ad manager experience required.",
         "offers": {
             "@type": "Offer",
             "price": "0",
@@ -566,6 +566,10 @@
                 'a' => 'Boost reads the event. Anything with a venue, hybrid included, targets a 25-mile radius around it, or the venue\'s country if the address has no coordinates. An online-only event targets countries instead. Age starts at 18 to 65 and interests are inferred from the event\'s category. Advanced mode lets you search Meta interests, change the age range, restrict the platform and set the objective.',
             ],
             [
+                'q' => 'Can I boost an event before tickets are on sale?',
+                'a' => 'Yes. Boost needs a published event, not one that is already selling. If the event has no tickets set up, the ad\'s button defaults to Learn more instead of Get tickets. On a public event, a visitor who clicks through before they can buy can leave just an email address to be told when tickets go on sale, and the number of people waiting shows on the event\'s Tickets panel when you edit it.',
+            ],
+            [
                 'q' => 'Can I pause or cancel a campaign?',
                 'a' => 'Yes, at any time, from the campaign page. Pausing stops delivery and keeps the campaign; resuming picks it back up. Cancelling ends it and returns the part of the budget that was never delivered, plus that part\'s share of the service fee.',
             ],
@@ -722,7 +726,7 @@
                         Followers, ticket buyers and anyone you have shared the link with. You reach them with a newsletter you write and send: 10 emails a month on Free, 100 on Pro and 1,000 on Enterprise, counted per recipient.
                     </p>
                     <p class="es-launch-muted mb-4 text-sm">
-                        Worth being precise about: people who gave you their email on your schedule page are sent a short digest automatically when you publish new events, at most one every few days. Everything beyond that is a newsletter you compose and hit send on, and account followers who never left an address are only ever reached that way.
+                        Worth being precise about: people who gave you their email on your schedule page and confirmed it are sent a short digest automatically when you publish new events, at most one every 72 hours. Everything beyond that is a newsletter you compose and hit send on, and account followers who never left an address are only ever reached that way.
                     </p>
                     <a href="{{ marketing_url('/features/newsletters') }}" class="es-launch-link mt-auto inline-flex items-center gap-1 text-sm font-semibold">
                         How newsletters work
@@ -1129,7 +1133,7 @@
                                 <span class="es-launch-plan">Pro</span>
                             </div>
                             <p class="es-launch-muted mb-4">Title, date, venue and image become the ad. The format is worked out from what the event actually is: a venue and no link makes it in-person, a link and no venue makes it online, both makes it hybrid, and the targeting and the copy follow from there.</p>
-                            <p class="es-launch-muted text-sm">The button on the ad follows too. An event with tickets on sale gets Get tickets, or Sign up when it is online only; an event without them gets Learn more.</p>
+                            <p class="es-launch-muted text-sm">The button on the ad follows too. An event with tickets set up gets Get tickets, or Sign up when it is online only; an event without them gets Learn more.</p>
                         </div>
                         <div class="es-glare" aria-hidden="true"></div>
                         <div class="es-ring-glow" aria-hidden="true"></div>
@@ -1209,7 +1213,7 @@
                                 <h3 class="es-launch-ink text-xl font-bold">It lands on your own page</h3>
                                 <span class="es-launch-plan es-launch-plan-free">Free</span>
                             </div>
-                            <p class="es-launch-muted mb-4">Every click goes to your event page on your schedule, not to a rented landing page and not to a third-party listing. The people who arrive can follow you, RSVP or buy a ticket, and the ones who follow are yours to email long after the campaign has finished.</p>
+                            <p class="es-launch-muted mb-4">Every click goes to your event page on your schedule, not to a rented landing page and not to a third-party listing. The people who arrive can follow you, RSVP or buy a ticket, and the ones who follow are yours to email long after the campaign has finished. On a public event, anyone not ready to buy can join its <a href="{{ route('marketing.docs.tickets') }}#interest-list" class="es-launch-link font-semibold">interest list</a> with just an email address, and hear when tickets go on sale or if anything changes.</p>
                             <p class="es-launch-muted text-sm">
                                 That is the part worth planning for. A campaign is a fortnight; a follower is not.
                                 <a href="{{ marketing_url('/features/newsletters') }}" class="es-launch-link font-semibold">Newsletters take it from there</a>

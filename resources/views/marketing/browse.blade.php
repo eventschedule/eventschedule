@@ -1,6 +1,6 @@
 <x-marketing-layout>
     {{-- SEO Slots --}}
-    <x-slot name="title">Browse Upcoming Events | Event Schedule</x-slot>
+    <x-slot name="title">Upcoming Events: Music, Comedy, Classes | Event Schedule</x-slot>
     <x-slot name="description">Upcoming live music, comedy, classes, markets and meetups, soonest first. Free to browse, no account needed. Search by event, city or schedule.</x-slot>
     <x-slot name="breadcrumbTitle">Browse</x-slot>
 
@@ -552,12 +552,19 @@
         // not the federated section renders. Hardcoding them left a gap.
         $browseSectionNo = 0;
 
-        // Three questions a visitor actually asks. Anything about how the page is
-        // built belongs here or nowhere - see the note in the style block.
+        // Questions a visitor actually asks, then the one an organizer asks. Anything about
+        // how the page is built belongs here or nowhere - see the note in the style block.
         $faqs = [
             [
                 'q' => 'Do I need an account to browse?',
-                'a' => 'No. Everything here is free to read without signing in. You only need an account to follow a schedule or publish events of your own.',
+                'a' => 'No. Everything here is free to read without signing in. Adding an event to your calendar, subscribing to a schedule\'s calendar feed and asking to be told when tickets go on sale need no account either. You only need one to follow a schedule or publish events of your own.',
+            ],
+            [
+                // EventInterestController + event/partials/interest-capture.blade.php, also
+                // linked from the event page's Add to Calendar menu. Per occurrence, single
+                // opt-in, deleted on unsubscribe, never a subscription to the schedule.
+                'q' => 'What if an event\'s tickets are not on sale yet?',
+                'a' => 'Open the event and use Tell me when tickets go on sale, on the page or in its Add to Calendar menu. You leave an email address and nothing else, and you hear when tickets go on sale, if it is cancelled and shortly before it starts, and you get any notice the organizer sends if the date or venue changes. It covers that one date, not the whole schedule, and every email has a one-click unsubscribe.',
             ],
             [
                 'q' => 'Why are some listings from other websites?',
@@ -568,10 +575,12 @@
                 'a' => 'Not with a filter, but search will do it. Type in a city and you get the schedules based there.',
             ],
             [
-                // MarketingController::browse(): flyer_image_url, OR a talent/venue schedule
-                // with a profile_image_url, AND is_hidden_from_discovery = false. 24 shown.
+                // MarketingController::browse(): publicUpcomingEventsQuery() (public, upcoming,
+                // accepted by a listed schedule - a verified email or phone, an owner, not
+                // deleted or unlisted), AND flyer_image_url OR a talent/venue schedule with a
+                // profile_image_url, AND is_hidden_from_discovery = false. 24 shown.
                 'q' => 'How does an event end up on this page?',
-                'a' => 'By being public and having a picture. That is either the event\'s own flyer, or the profile photo on a talent or venue schedule, which covers every event on it at once. Nothing else is required: no application, no fee and no waiting. The page shows the next 24, soonest first.',
+                'a' => 'By being public, on a schedule whose owner has confirmed an email address or phone number, and by having a picture. That is either the event\'s own flyer, or the profile photo on a talent or venue schedule, which covers every event on it at once. Nothing else is required: no application, no fee and no waiting. The page shows the next 24, soonest first.',
             ],
         ];
 

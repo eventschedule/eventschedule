@@ -1,6 +1,6 @@
 <x-marketing-layout>
-    <x-slot name="title">Custom Labels for Schedules - Event Schedule</x-slot>
-    <x-slot name="description">Rename the words on your public schedule. Events can become Classes, Services, Openings or Sessions, across 36 labels, plus a form for your translation.</x-slot>
+    <x-slot name="title">Custom Labels | Rename Events to Classes or Sessions</x-slot>
+    <x-slot name="description">Rename the words on your public schedule, so Events reads Classes and Register reads Book a mat. 36 labels, each with a translated form, on the Pro plan.</x-slot>
     <x-slot name="breadcrumbTitle">Custom Labels</x-slot>
 
     <x-slot name="structuredData">
@@ -564,7 +564,7 @@
             [
                 'who' => 'A congregation',
                 'note' => 'A service is not an event, and the hall is not a venue.',
-                'pairs' => [['Events', 'Services'], ['Venue', 'Hall'], ['Follow', 'Get the bulletin']],
+                'pairs' => [['Events', 'Services'], ['Venue', 'Hall'], ['Keep me posted', 'Get the bulletin']],
             ],
         ];
 
@@ -590,7 +590,7 @@
                 'role/partials/headers/banner.blade.php, compact.blade.php and action-buttons.blade.php',
                 [
                     ['Follow', 'Join the list'],
-                    ['Keep me posted', 'Tell me when a class opens'],
+                    ['Keep me posted', 'Send me studio news'],
                     ['Submit Event', 'Suggest a class'],
                     ['Request to Book', 'Enquire'],
                     ['Book a Time', 'Book a slot'],
@@ -658,11 +658,19 @@
         $faqs = [
             [
                 'q' => 'What are custom labels?',
-                'a' => 'Custom labels let you rename the built-in words on your public schedule. There are ' . $sheetCount . ' of them, and each one is a string Event Schedule prints for you rather than something you typed: "Events", "Venue", "Follow", "Free entry", "Back to Schedule" and so on. Override "Events" with "Classes" and every place that word appears reads "Classes" instead.',
+                'a' => 'Custom labels let you rename the built-in words on your public schedule. There are ' . $sheetCount . ' of them, and each one is a string Event Schedule prints for you rather than something you typed: "Events", "Venue", "Follow", "Free entry", "Back to Schedule" and so on. Override "Events" with "Classes" and every place that label prints reads "Classes" instead.',
             ],
             [
                 'q' => 'Which labels can I rename?',
                 'a' => 'Exactly ' . $sheetCount . ', all of them listed on this page: seven on the header and its buttons, fourteen on the calendar and its filters, ten on an event page, and five across fan content and the sponsors panel. Schedule types, plan names and the rest of the admin portal are not on the list.',
+            ],
+            [
+                'q' => 'If I rename Events, does Filter Events change too?',
+                'a' => 'No. "Filter Events", "Past Events", "Show Past Events" and "No scheduled events" are labels of their own, so rename each one you want to match. A line that is not on the list keeps the shipped wording, translated, whatever you call your events: the Add to Calendar menu now carries "Subscribe to all events from" your schedule, a live calendar feed, and on an upcoming public event "Tell me when tickets go on sale" or "Tell me if anything changes".',
+            ],
+            [
+                'q' => 'Can I rename the ticket and registration buttons?',
+                'a' => 'Yes. "Register", "Get Tickets", "Buy Tickets" and "Add to Calendar" are four of the ' . $sheetCount . ', so a class page can read "Book a mat" and a gig "Reserve a place". The ticket checkout page and the emails a buyer receives keep their own wording, and the questions on your forms were always yours to write, with custom fields.',
             ],
             [
                 'q' => 'Do custom labels work with translations?',

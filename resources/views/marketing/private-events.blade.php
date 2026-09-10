@@ -1,6 +1,6 @@
 <x-marketing-layout>
-    <x-slot name="title">Private Events | Internal and Unlisted Events</x-slot>
-    <x-slot name="description">Keep events members-only with Internal visibility, or hide them from your public schedule as Unlisted with an optional password.</x-slot>
+    <x-slot name="title">Private Events: Members-Only, Unlisted or Password-Protected</x-slot>
+    <x-slot name="description">Keep an event members-only, or unlisted with an optional password. Hidden events stay out of your schedule page, calendar feeds, search and email digests.</x-slot>
     <x-slot name="breadcrumbTitle">Private Events</x-slot>
 
     <x-slot name="structuredData">
@@ -18,8 +18,9 @@
             "Internal events visible only to signed-in schedule members",
             "Unlisted events reachable by direct link only",
             "Optional password on an unlisted event",
-            "Hidden events excluded from the public iCal and RSS feeds, the sitemap and discovery search",
-            "Hidden events excluded from newsletter round-ups, generated graphics and promotions",
+            "Hidden events excluded from the live iCal feed guests subscribe to, the RSS feed, the sitemap and discovery search",
+            "Hidden events excluded from the automatic subscriber digest, newsletter round-ups, generated graphics and promotions",
+            "Interest-list sign-ups taken on public events only, with visibility checked again before each email",
             "A schedule-wide default visibility for new events",
             "Draft and Internal events never pushed to a connected calendar; Unlisted events synced as private",
             "Losing Enterprise keeps hidden events hidden rather than publishing them"
@@ -525,7 +526,11 @@
             ],
             [
                 'q' => 'Where exactly does a hidden event disappear from?',
-                'a' => 'Your public schedule page and its calendar, the public iCal and RSS feeds, the XML sitemap, the discovery search on eventschedule.com, the upcoming-events block in a newsletter, and the generated event graphics. A hidden event also cannot be put behind an on-network promotion. The one door left open is the direct link, and only for Unlisted.',
+                'a' => 'Your public schedule page and its calendar, the public iCal feed (the live calendar guests can subscribe to from an event\'s Add to Calendar menu) and the RSS feed, the XML sitemap, the discovery search on eventschedule.com, the automatic digest of new events your email subscribers get, the upcoming-events block in a newsletter, and the generated event graphics. A hidden event also cannot be put behind an on-network promotion, and the "Tell me when tickets go on sale" sign-up is not offered on it. The one door left open is the direct link, and only for Unlisted.',
+            ],
+            [
+                'q' => 'Who can see an unlisted event?',
+                'a' => 'Anyone holding its link can open it, and if you set a password they see only the title until they enter it. Guests will not find it on your schedule page, in your iCal or RSS feed, the sitemap or search, or in the digest your email subscribers get, and the "Tell me when tickets go on sale" sign-up is not offered on it. Signed-in members of your schedule still see it on the calendar. A guest can buy a ticket or register only after entering the password, so an unlisted event that should sell needs one.',
             ],
             [
                 'q' => 'Does a private event still sync to my own calendar?',
@@ -534,6 +539,10 @@
             [
                 'q' => 'Can I sell tickets to an unlisted event?',
                 'a' => 'Yes, and this is the one thing worth knowing before you set it up. Ticket checkout and registration on an Unlisted event are accepted from signed-in members of the schedule, or from a guest who has entered the event password. If you want an unlisted event to sell to the people you sent the link to, give it a password.',
+            ],
+            [
+                'q' => 'What if people asked to hear about an event I then hide?',
+                'a' => 'They stop hearing about it. The "Tell me when tickets go on sale" list checks the event\'s visibility again each time an email is due, so once the event is Draft, Internal or Unlisted, the tickets-on-sale email, the reminder and any change notice stop, like every other public surface on this page. A cancellation notice is the exception and still goes out, because that is the news they most need.',
             ],
             [
                 'q' => 'Can a sub-schedule be private?',
@@ -587,7 +596,7 @@
                     </div>
 
                     <h1 class="es-balance es-vault-ink mb-8 text-[2.4rem] font-black leading-[1.05] tracking-tight sm:text-6xl">
-                        <span class="es-mask"><span class="es-mask-line">A vault is not one door.</span></span>
+                        <span class="es-mask"><span class="es-mask-line">A private event is not one door.</span></span>
                         <span class="es-mask es-mask-2"><span class="es-mask-line">It is <span class="es-vault-accent">four</span> of them.</span></span>
                     </h1>
 
@@ -887,7 +896,7 @@
                     </div>
                     <h3 class="es-vault-ink mb-3 text-xl font-bold">A published event that has not been published yet</h3>
                     <p class="es-vault-muted mb-4 text-sm">
-                        Build the event, hold the date, get the copy right. Your members see it on the calendar with a Draft badge, and one Publish action turns it into a normal public event and starts its calendar sync.
+                        Build the event, hold the date, get the copy right. Your members see it on the calendar with a Draft badge, and one Publish action turns it into a normal public event and starts its calendar sync. Publishing is also what puts it in the next new-event digest your email subscribers get, however long ago you wrote it.
                     </p>
                     <p class="es-vault-muted mt-auto text-sm">Free on every plan, on any schedule type.</p>
                 </div>
@@ -995,7 +1004,7 @@
                                 <h3 class="es-vault-ink text-xl font-bold">Feeds, sitemap and discovery</h3>
                                 <span class="es-vault-plan es-vault-plan-free">Free</span>
                             </div>
-                            <p class="es-vault-muted mb-4">The public iCal feed, the RSS feed, the XML sitemap and the search on eventschedule.com are all built from one filter: not a draft, not unlisted, not cancelled, and accepted by the schedule. The feeds and the sitemap turn away anything still holding a password as well.</p>
+                            <p class="es-vault-muted mb-4">The public iCal feed, the RSS feed, the XML sitemap and the search on eventschedule.com are all built from one filter: not a draft, not unlisted, not cancelled, and accepted by the schedule. The feeds and the sitemap turn away anything still holding a password as well. That iCal feed is also the live calendar a guest can subscribe to from an event's Add to Calendar menu, so a hidden event cannot reach anybody's calendar through it.</p>
                             <p class="es-vault-muted text-sm">Four separate surfaces, one rule. That is deliberate: a privacy setting that each surface interprets for itself is a privacy setting that eventually gets one of them wrong.</p>
                         </div>
                         <div class="es-glare" aria-hidden="true"></div>
@@ -1008,10 +1017,10 @@
                     <div class="es-tilt-inner es-vault-card relative flex h-full flex-col overflow-hidden p-7">
                         <div class="relative z-10">
                             <div class="mb-4 flex flex-wrap items-center gap-2">
-                                <h3 class="es-vault-ink text-xl font-bold">Newsletters</h3>
+                                <h3 class="es-vault-ink text-xl font-bold">Newsletters and digests</h3>
                                 <span class="es-vault-plan es-vault-plan-free">Free</span>
                             </div>
-                            <p class="es-vault-muted">The upcoming-events block a newsletter builds for you skips drafts, unlisted, cancelled and password-protected events, so a round-up cannot carry one out to your whole list.</p>
+                            <p class="es-vault-muted">The upcoming-events block a newsletter builds for you skips drafts, unlisted, cancelled and password-protected events, so a round-up cannot carry one out to your whole list. The automatic digest of new events your email subscribers get takes public events only.</p>
                         </div>
                         <div class="es-glare" aria-hidden="true"></div>
                         <div class="es-ring-glow" aria-hidden="true"></div>

@@ -1,7 +1,7 @@
 <x-marketing-layout>
     {{-- SEO Slots --}}
-    <x-slot name="title">Search Schedules & Events | Event Schedule</x-slot>
-    <x-slot name="description">Look up a schedule by name, web address, city or a word from its blurb, and upcoming events by name. Two characters is the minimum; past dates never come back.</x-slot>
+    <x-slot name="title">Search Schedules & Upcoming Events | Event Schedule</x-slot>
+    <x-slot name="description">Look up a schedule by name, web address, city or blurb, and an upcoming event by name or blurb. Free, no account needed, and past dates never come back.</x-slot>
     <x-slot name="breadcrumbTitle">{{ __('messages.search') }}</x-slot>
 
     @if($query)
@@ -501,7 +501,7 @@
         $faqs = [
             [
                 'q' => 'Why can I not find a schedule I know exists?',
-                'a' => 'A schedule joins this index once its owner has confirmed an email address or a phone number, and it stays in until the schedule is deleted. Demo schedules are filtered out. So a brand new schedule whose owner has not confirmed their contact details yet will not be here, and neither will its events, because an event only reaches the index through a schedule that is already in it.',
+                'a' => 'A schedule joins this index once its owner has confirmed an email address or a phone number, and it stays in until the schedule is deleted. Demo schedules are filtered out. So a brand new schedule whose owner has not confirmed their contact details yet will not be here, and neither will its events, because an event only reaches the index through a schedule that is already in it. The same goes for a page an organizer created for a performer or venue who is not on Event Schedule yet: the name shows on their event, but the page stays out of this index, and out of search engines, until the act claims it.',
             ],
             [
                 'q' => 'What does a search actually match?',
@@ -1038,8 +1038,9 @@
                                 <h3 class="es-look-ink text-xl font-bold">The people who found you once</h3>
                                 <span class="es-look-plan">Free</span>
                             </div>
-                            <p class="es-look-muted mb-4">Visitors leave a name and an email address, and get a digest automatically the next time you publish events. Anything more than that is a newsletter you write yourself, with open and click rates back afterwards.</p>
+                            <p class="es-look-muted mb-4">Visitors leave a name and an email address, and once they confirm it they get a digest automatically the next time you publish events. Anything more than that is a newsletter you write yourself, with open and click rates back afterwards.</p>
                             <p class="es-look-muted text-sm">The number worth knowing first: 10 emails a month on Free, 100 on Pro, 1,000 on Enterprise, counted per recipient rather than per send.</p>
+                            <p class="es-look-muted mt-4 text-sm">Two lighter ways use none of that allowance. On an event that is not selling yet, a visitor can leave just an email address and hear when tickets go on sale, and anyone can subscribe to your whole schedule as a live calendar feed, with no address at all.</p>
                         </div>
                         <div class="es-glare" aria-hidden="true"></div>
                         <div class="es-ring-glow" aria-hidden="true"></div>
@@ -1069,7 +1070,7 @@
                                 <h3 class="es-look-ink text-xl font-bold">And when you sell a ticket</h3>
                                 <span class="es-look-plan">Free</span>
                             </div>
-                            <p class="es-look-muted mb-4">Named ticket types with their own prices, quantities and sales windows, QR check-in at the door, and Stripe connected to your own account. Zero platform fees on every plan, including this one: Free sells 25 paid tickets a month per schedule and Pro lifts the ceiling.</p>
+                            <p class="es-look-muted mb-4">Named ticket types with their own prices, quantities and sales windows, QR check-in at the door, and <a href="{{ marketing_url('/stripe') }}" class="es-look-link font-semibold hover:underline">Stripe</a> or <a href="{{ marketing_url('/paypal') }}" class="es-look-link font-semibold hover:underline">PayPal</a> connected to your own account. Zero platform fees on every plan, including this one: Free sells 25 paid tickets a month per schedule and Pro lifts the ceiling.</p>
                             <p class="es-look-muted text-sm">
                                 Built-in analytics are free: page views, devices and where the traffic came from.
                                 <a href="{{ marketing_url('/features') }}" class="es-look-link font-semibold hover:underline">See all features</a>

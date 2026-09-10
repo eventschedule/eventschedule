@@ -1,6 +1,6 @@
 <x-marketing-layout>
-    <x-slot name="title">Recurring Events | Flexible Scheduling - Event Schedule</x-slot>
-    <x-slot name="description">Repeat events daily, weekly, biweekly, monthly or yearly, with three end conditions, date exceptions, per-occurrence tickets and two-way calendar sync.</x-slot>
+    <x-slot name="title">Recurring Events | Weekly, Monthly & Yearly - Event Schedule</x-slot>
+    <x-slot name="description">Repeat events daily, weekly, biweekly, monthly or yearly. Skip or add dates, count tickets per date, and give guests a calendar feed that updates itself.</x-slot>
     <x-slot name="breadcrumbTitle">Recurring Events</x-slot>
 
     <x-slot name="structuredData">
@@ -9,7 +9,7 @@
         "@context": "https://schema.org",
         "@type": "Service",
         "name": "Event Schedule Recurring Events",
-        "description": "Repeat events daily, weekly, biweekly, monthly or yearly, with three end conditions, date exceptions, per-occurrence tickets and two-way calendar sync.",
+        "description": "Repeat events daily, weekly, biweekly, monthly or yearly. Skip or add dates, count tickets per date, and give guests a calendar feed that updates itself.",
         "provider": {
             "@type": "Organization",
             "name": "Event Schedule",
@@ -26,7 +26,7 @@
         "applicationCategory": "BusinessApplication",
         "applicationSubCategory": "Event Scheduling Software",
         "operatingSystem": "Web",
-        "description": "One event record with a day-of-week pattern, an end condition and date exceptions produces every date on your calendar. Ticket inventory, registration capacity and check-in count per date.",
+        "description": "One event record with a day-of-week pattern, an end condition and date exceptions produces every date on your calendar. Ticket inventory, registration capacity and check-in count per date, and guests can subscribe to the series as a live calendar feed or ask to hear about a single date.",
         "offers": {
             "@type": "Offer",
             "price": "0",
@@ -47,7 +47,8 @@
             "Registration capacity counted per date",
             "Check-in counted per date",
             "A page and an .ics download for every date",
-            "Subscribe-able iCal feed with one entry per date for the next 90 days",
+            "Live iCal feed guests subscribe to from your schedule and event pages, one entry per date for the next 90 days",
+            "Per-date interest list: a guest leaves an email address to hear when that date's tickets go on sale",
             "Two-way Google, Outlook and CalDAV calendar sync"
         ],
         "url": "{{ url()->current() }}",
@@ -664,7 +665,7 @@
             ],
             [
                 'q' => 'Can I change a single date without changing the rest?',
-                'a' => 'Not from inside the series, and it is worth knowing exactly where the line falls. A recurring event is one record: the name, the start time, the length, the description and the ticket types belong to the whole loop, so editing the start time moves every date. What is genuinely per date is the part that has to be: ticket inventory, registration capacity, check-in, and each date\'s own page. If one date is really a different event, take it out with an Exclude Date and add it back as its own event.',
+                'a' => 'Not from inside the series, and it is worth knowing exactly where the line falls. A recurring event is one record: the name, the start time, the length, the description and the ticket types belong to the whole loop, so editing the start time moves every date. What is genuinely per date is the part that has to be: ticket inventory, registration capacity, check-in, each date\'s own page, and the list of people who asked to hear about that date. If one date is really a different event, take it out with an Exclude Date and add it back as its own event.',
             ],
             [
                 'q' => 'Can I add or skip specific dates in a recurring series?',
@@ -681,6 +682,14 @@
             [
                 'q' => 'How do recurring events reach other calendars?',
                 'a' => 'Two-way sync with Google Calendar, Outlook and Microsoft 365, or any CalDAV server is free on every plan, and it carries the event record itself across. What it does not do is hand the connected calendar a repeat rule, so do not expect the series to appear there as a repeating entry. The place a loop is expanded date by date is your schedule\'s iCal feed: it writes one entry per date for the next 90 days, each linking to that date\'s own page. Every event page also offers a download for the single date somebody is looking at, sharing its identifier with the feed so a calendar app updates the entry it already has.',
+            ],
+            [
+                'q' => 'Can guests subscribe to a recurring event in their own calendar?',
+                'a' => 'Yes, through your schedule\'s calendar feed, which carries every date of the loop for the next 90 days alongside everything else you publish. Your schedule and event pages offer it as "Subscribe to all events from" followed by your schedule\'s name, and it costs a guest no email address. Their calendar app keeps checking the feed, so when you change the time or take a date out, their calendar follows at its next refresh. The one-date download is different: it is a snapshot of the moment they took it.',
+            ],
+            [
+                'q' => 'Can someone ask to hear about just one date?',
+                'a' => 'Yes. On that date\'s page a guest can leave an email address, with no account and no name, under "Tell me when tickets go on sale", or "Tell me if anything changes" once the date is already selling. They hear about that date and no other: one email when its tickets go on sale, if they were not on sale already, and a reminder shortly before it starts. If you save a venue change or cancel the event and choose to notify people, that reaches them too. Every email carries a one-click unsubscribe, and it is free on every plan.',
             ],
             [
                 'q' => 'Can one ticket cover every date of the loop?',
@@ -1183,6 +1192,10 @@
                                 <svg aria-hidden="true" class="mt-0.5 h-4 w-4 flex-none text-[#046b4f] dark:text-[#34d399]" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.4"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7" /></svg>
                                 <span>A page of its own, so you can send somebody the link to one date rather than to the series.</span>
                             </li>
+                            <li class="flex gap-2.5">
+                                <svg aria-hidden="true" class="mt-0.5 h-4 w-4 flex-none text-[#046b4f] dark:text-[#34d399]" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.4"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7" /></svg>
+                                <span>Its own interest list: someone who asks about one Thursday is told when tickets go on sale and reminded before it, and hears nothing about the other Thursdays.</span>
+                            </li>
                         </ul>
                     </div>
 
@@ -1200,7 +1213,7 @@
             </div>
 
             <p class="es-loop-muted mx-auto mt-8 max-w-2xl text-center text-sm" data-reveal>
-                Registration with a capacity limit is free on every plan, and so is selling: 25 paid tickets a month per schedule, counted across the loop's dates rather than reset by each one. {{ plan_price($proMonthly) }} a month takes that ceiling off and adds check-in and the waitlist, and Event Schedule takes zero platform fees on ticket sales on every plan.
+                Registration with a capacity limit is free on every plan, and so is selling: 25 paid tickets a month per schedule, counted across the loop's dates rather than reset by each one. Scanning them at the door is free too. {{ plan_price($proMonthly) }} a month takes that ceiling off and adds the live check-in dashboard and the ticket waitlist, and Event Schedule takes zero platform fees on ticket sales on every plan.
             </p>
         </div>
     </section>
@@ -1222,7 +1235,7 @@
                         One record here. <span class="es-loop-lit">Ninety days out there.</span>
                     </h2>
                     <p class="mx-auto mt-5 max-w-2xl text-lg text-gray-300" data-reveal style="--reveal-delay: 0.15s;">
-                        Your schedule publishes a calendar feed anyone can subscribe to, and that is where the loop is unrolled date by date.
+                        Your schedule publishes a calendar feed anyone can subscribe to, offered to guests right on your event pages, and that is where the loop is unrolled date by date.
                     </p>
                 </div>
 
@@ -1232,7 +1245,7 @@
                             <h3 class="es-loop-ink text-lg font-bold">The subscribe feed</h3>
                             <span class="es-loop-plan">Free</span>
                         </div>
-                        <p class="es-loop-muted text-sm">The iCal feed writes one entry per date for the next 90 days, each one linking to that date's own page. Subscribe once and the dates keep arriving.</p>
+                        <p class="es-loop-muted text-sm">The iCal feed writes one entry per date for the next 90 days, each one linking to that date's own page. Guests find it as "Subscribe to all events from" your schedule and give no email address for it. Change the time or take a date out, and their calendar follows at its next refresh.</p>
                     </div>
                     <div class="es-loop-card p-6" data-reveal="panel">
                         <div class="mb-2 flex flex-wrap items-center gap-2">
@@ -1315,7 +1328,10 @@
                                 <span class="es-loop-plan es-loop-plan-pro">Pro</span>
                             </div>
                             <p class="es-loop-muted mb-4">Because the loop is one record, a season pass can be tied to it: valid for every date of that loop, once per date. Sold next to single-date tickets rather than instead of them. If you would rather sell a fixed number of visits, a pass can carry a use count instead, so ten classes on one code works too.</p>
-                            <p class="es-loop-muted text-sm">Each redemption is stored against the date it happened on, so you can see which weeks the pass holders actually turned up to. Advance booking is a separate switch, off until you turn it on, and it is the one that lets you cap how many seats pass holders may reserve on any one date.</p>
+                            <p class="es-loop-muted text-sm">
+                                Each redemption is stored against the date it happened on, so you can see which weeks the pass holders actually turned up to. Advance booking is a separate switch, off until you turn it on, and it is the one that lets you cap how many seats pass holders may reserve on any one date.
+                                <a href="{{ marketing_url('/features/passes') }}" class="es-loop-link font-medium hover:underline">How passes work</a>
+                            </p>
                         </div>
                         <div class="es-glare" aria-hidden="true"></div>
                         <div class="es-ring-glow" aria-hidden="true"></div>
@@ -1330,7 +1346,10 @@
                                 <h3 class="es-loop-ink text-xl font-bold">When one date fills</h3>
                                 <span class="es-loop-plan es-loop-plan-pro">Pro</span>
                             </div>
-                            <p class="es-loop-muted">Turn the waitlist on and people join once that date is gone. If a place comes back, they hear about it automatically.</p>
+                            <p class="es-loop-muted">
+                                Turn the waitlist on and people join once that date is gone. If a place comes back, they hear about it automatically. On paid tickets the waitlist is the Pro part; on free registration it is free on every plan.
+                                <a href="{{ marketing_url('/features/waitlist') }}" class="es-loop-link font-medium hover:underline">How the waitlist works</a>
+                            </p>
                         </div>
                         <div class="es-glare" aria-hidden="true"></div>
                         <div class="es-ring-glow" aria-hidden="true"></div>
@@ -1360,8 +1379,11 @@
                                 <h3 class="es-loop-ink text-xl font-bold">Tell the regulars</h3>
                                 <span class="es-loop-plan">Free</span>
                             </div>
-                            <p class="es-loop-muted mb-4">People follow your schedule, and you write to them when the pattern changes or a new season of the class opens. Open and click rates afterwards tell you whether it landed.</p>
-                            <p class="es-loop-muted text-sm">The number worth knowing: 10 emails a month on Free, 100 on Pro and 1,000 on Enterprise, counted per recipient rather than per send. Nothing is sent on your behalf, so a new date never mails anybody without you writing it.</p>
+                            <p class="es-loop-muted mb-4">People follow your schedule, and you write them a newsletter when the pattern changes or a new season of the class opens. Open and click rates afterwards tell you whether it landed.</p>
+                            <p class="es-loop-muted text-sm">
+                                The newsletter allowance counts recipients, not sends: 10 a month on Free, 100 on Pro and 1,000 on Enterprise. Not everything waits for you, though: people who confirmed an email sign-up get a digest of your newly published events, at most one every 72 hours, so next term's loop reaches them on its own.
+                                <a href="{{ marketing_url('/features/newsletters') }}" class="es-loop-link font-medium hover:underline">How newsletters work</a>
+                            </p>
                         </div>
                         <div class="es-glare" aria-hidden="true"></div>
                         <div class="es-ring-glow" aria-hidden="true"></div>
@@ -1376,7 +1398,10 @@
                                 <h3 class="es-loop-ink text-xl font-bold">On the site you have</h3>
                                 <span class="es-loop-plan">Free</span>
                             </div>
-                            <p class="es-loop-muted">Embed the calendar on your own site and the loop's dates show up there too, without a second place to keep them right.</p>
+                            <p class="es-loop-muted">
+                                Embed the calendar on your own site and the loop's dates show up there too, without a second place to keep them right.
+                                <a href="{{ marketing_url('/features/embed-calendar') }}" class="es-loop-link font-medium hover:underline">How the embed works</a>
+                            </p>
                         </div>
                         <div class="es-glare" aria-hidden="true"></div>
                         <div class="es-ring-glow" aria-hidden="true"></div>
@@ -1606,7 +1631,7 @@
                         Set the loop once. <span class="es-loop-lit">Stop retyping Tuesdays.</span>
                     </h2>
                     <p class="mx-auto mb-10 max-w-2xl text-lg text-gray-300">
-                        Patterns, end conditions and date exceptions are free forever, and the free plan sells 25 paid tickets a month. {{ plan_price($proMonthly) }} a month takes the ceiling off and opens check-in, and nothing is taken from the door on either.
+                        Patterns, end conditions and date exceptions are free forever, and the free plan sells 25 paid tickets a month and scans them at the door. {{ plan_price($proMonthly) }} a month takes the ceiling off and adds the live check-in dashboard, and nothing is taken from the door on either.
                     </p>
 
                     <div class="mx-auto flex max-w-2xl flex-col items-stretch justify-center gap-3 sm:flex-row">

@@ -1,6 +1,6 @@
 <x-marketing-layout>
     <x-slot name="title">Allocated Seating | Reserved Seat Maps for Venues</x-slot>
-    <x-slot name="description">Draw your venue once and sell the seats in it. A reusable seating plan, a buyer-facing seat picker, and a box office console for single seats.</x-slot>
+    <x-slot name="description">Draw your venue once and sell the seats in it: a reusable seating plan, a live seat map with best-available picking, and a box office console.</x-slot>
     <x-slot name="breadcrumbTitle">Allocated Seating</x-slot>
 
     <x-slot name="structuredData">
@@ -20,10 +20,15 @@
             "One reusable plan across every date of a run",
             "Edit a single date without touching the others",
             "Buyers choose their own seats from the map",
-            "Best available seats chosen automatically",
-            "Box office console to hold back, move and release single seats",
+            "Best available seats chosen automatically for a party size",
+            "Stage markers and text labels drawn on the map",
+            "Single-seat rule set per room, lifted as the house fills",
+            "Box office console to hold back, move and release seats",
+            "Select a whole row or section to hold or release at once",
             "Take a booking over the phone against the map",
-            "Printable seating plan report and CSV"
+            "Arrivals shown on the box office map as tickets are scanned",
+            "Printable seating plan report and CSV",
+            "Run summary of how full each date is"
         ],
         "offers": {
             "@type": "Offer",
@@ -349,7 +354,7 @@
                     </div>
                 </div>
 
-                <div class="mt-8 grid gap-4 md:grid-cols-2" data-reveal-group="90">
+                <div class="mt-8 grid gap-4 md:grid-cols-3" data-reveal-group="90">
                     <div class="es-house-card p-6" data-reveal="panel">
                         <h3 class="es-house-ink mb-2 text-base font-bold">A gangway is not decoration</h3>
                         <p class="es-house-muted text-sm leading-relaxed">Mark an aisle after a seat and the two seats either side of it stop being neighbours. The picker will not offer them as a pair, and best-available will not seat a couple across the aisle from each other.</p>
@@ -357,6 +362,10 @@
                     <div class="es-house-card p-6" data-reveal="panel">
                         <h3 class="es-house-ink mb-2 text-base font-bold">Wheelchair spaces are held properly</h3>
                         <p class="es-house-muted text-sm leading-relaxed">A wheelchair space only sells from a section marked accessibility only, so it is never handed out as the next free seat. The companion seat beside it is held too, and unlocks with the space it belongs to.</p>
+                    </div>
+                    <div class="es-house-card p-6" data-reveal="panel">
+                        <h3 class="es-house-ink mb-2 text-base font-bold">The stage is on the plan</h3>
+                        <p class="es-house-muted text-sm leading-relaxed">Draw the stage in, so a buyer can see which way they will face before they choose, and add text labels for the bar or the entrances. Both show on the seat picker, the box office map and the printed sheet, and neither can ever be sold.</p>
                     </div>
                 </div>
             </div>
@@ -389,7 +398,7 @@
                     </div>
                     <div class="es-house-card p-6" data-reveal="panel">
                         <h3 class="es-house-ink mb-2 text-base font-bold">No stranded singles</h3>
-                        <p class="es-house-muted text-sm leading-relaxed">A selection that would leave one seat alone between two bookings is refused, because a lone seat mid-row rarely sells. The rule lifts itself once the house is nearly full.</p>
+                        <p class="es-house-muted text-sm leading-relaxed">A selection that would leave one seat alone between two bookings is refused, because a lone seat mid-row rarely sells. The rule lifts itself once the house is 90% sold, and a room that sells single seats all night, a bar or a comedy club, can switch it off.</p>
                     </div>
                 </div>
 
@@ -481,7 +490,7 @@
                 <div class="grid gap-4 sm:grid-cols-2" data-reveal-group="80">
                     <div class="es-house-card p-6" data-reveal="panel">
                         <h3 class="es-house-ink mb-2 text-base font-bold">Hold seats back</h3>
-                        <p class="es-house-muted text-sm leading-relaxed">House seats, production, accessibility or box office, each with an internal note only your team sees. A staff hold never lapses on its own.</p>
+                        <p class="es-house-muted text-sm leading-relaxed">Pick a seat, a row or a whole section and hold it as house seats, production, accessibility or box office, with an internal note only your team sees. A staff hold never lapses on its own.</p>
                     </div>
                     <div class="es-house-card p-6" data-reveal="panel">
                         <h3 class="es-house-ink mb-2 text-base font-bold">Take it over the phone</h3>
@@ -492,14 +501,22 @@
                         <p class="es-house-muted text-sm leading-relaxed">Somebody wants the aisle. Move that booking to a different seat without touching the rest of their order or reissuing anything.</p>
                     </div>
                     <div class="es-house-card p-6" data-reveal="panel">
-                        <h3 class="es-house-ink mb-2 text-base font-bold">Release one seat</h3>
-                        <p class="es-house-muted text-sm leading-relaxed">Three of four are coming. Put the fourth back on sale by clicking it; the rest of the booking stands. Refund in your payment provider as usual.</p>
+                        <h3 class="es-house-ink mb-2 text-base font-bold">Release a seat, or a party</h3>
+                        <p class="es-house-muted text-sm leading-relaxed">Three of four are coming: click the fourth and it goes back on sale while the rest of the booking stands. A party cancelling together goes back in one action. Releasing moves no money, so send that share of a Stripe or PayPal sale back as a partial refund from the Sales page, or return it yourself for any other payment method.</p>
+                    </div>
+                    <div class="es-house-card p-6" data-reveal="panel">
+                        <h3 class="es-house-ink mb-2 text-base font-bold">Who is already inside</h3>
+                        <p class="es-house-muted text-sm leading-relaxed">A scan at the door marks the seats on that ticket as arrived, so the console and the printed sheet show who is in and which booked seats are still empty.</p>
+                    </div>
+                    <div class="es-house-card p-6" data-reveal="panel">
+                        <h3 class="es-house-ink mb-2 text-base font-bold">Every night of the run</h3>
+                        <p class="es-house-muted text-sm leading-relaxed">The console, the designer and the report each carry a date picker, and the report lists how full every date of the run is, so a soft night stands out while there is still time to sell it.</p>
                     </div>
                 </div>
 
                 <div class="es-house-card mt-8 p-6" data-reveal="panel">
                     <h3 class="es-house-ink mb-2 text-base font-bold">A sheet for the night</h3>
-                    <p class="es-house-muted text-sm leading-relaxed">The seating plan report prints every seat, its status and who holds it, section by section. Status is drawn as a shape and not only a colour, so it survives the black and white printer front of house actually has. There is a CSV if you would rather have a spreadsheet.</p>
+                    <p class="es-house-muted text-sm leading-relaxed">The seating plan report prints every seat, its status, who holds it and whether they have arrived, section by section. Status is drawn as a shape and not only a colour, so it survives the black and white printer front of house actually has. There is a CSV if you would rather have a spreadsheet.</p>
                 </div>
             </div>
         </section>
@@ -535,7 +552,12 @@
                 ['q' => 'Can one plan cover every date of a run?', 'a' => 'Yes, and that is the point of it. A plan is a drawing of the room, so a recurring event uses the same one for every performance. Each date keeps its own bookings, and a single date can be changed on its own without touching the others.'],
                 ['q' => 'Can I mix seated and standing?', 'a' => 'Yes. A seated section carries individual seats the buyer chooses; a standing section carries a capacity and sells by the number, like an ordinary ticket type. Rows at the front and a standing floor at the back is one plan with two price bands.'],
                 ['q' => 'How do wheelchair spaces work?', 'a' => 'Mark a section accessibility only and the wheelchair spaces in it are never handed out as the next available seat. The companion seat beside a space is held back too, and becomes bookable together with the space, so a wheelchair user and their companion are not seated three rows apart.'],
-                ['q' => 'Can my box office still sell over the phone?', 'a' => 'Yes. The box office console is the same map with the names on. Select the seats the caller wants and book them, marked paid or awaiting payment, at the list price or comped. Staff can also hold seats back with an internal note, move a booking to another seat, and release a single seat from an order.'],
+                ['q' => 'Can my box office still sell over the phone?', 'a' => 'Yes. The box office console is the same map with the names on. Select the seats the caller wants and book them, marked paid or awaiting payment, at the list price or comped. Staff can also hold seats back with an internal note, move a booking to another seat, and release one seat or a whole party from an order.'],
+                // A full refund flips Sale.status and Sale::booted hands the seats back through
+                // SeatHoldService::releaseForSale(). A box office release leaves the order paid and
+                // moves no money (BoxOfficeSeatingService::releaseSeat's docblock).
+                ['q' => 'What happens to the seats when I refund an order?', 'a' => 'A full refund puts every seat on the order back on sale, whether the money went back through Stripe or PayPal or you marked the sale refunded by hand. A partial refund leaves the seats booked. To take one seat back from a party, release it in the box office, then send that seat\'s share back as a partial refund of a Stripe or PayPal sale from the Sales page. Releasing a seat never moves money on its own.'],
+                ['q' => 'Can I switch off the single-seat rule?', 'a' => 'Yes, room by room. The rule refuses a selection that would strand one seat between two bookings, and by default it lifts once the house is 90% sold. A bar or a comedy club that sells single seats all night can turn it off in the plan, and a stricter room can refuse gaps of up to four seats, not just one.'],
                 ['q' => 'What happens if I edit a plan that is already selling?', 'a' => 'You can keep editing. A seat somebody has bought will not be removed, and neither will one a customer is choosing at that moment. Everything else moves freely around them.'],
                 ['q' => 'Do buyers have to pick their own seats?', 'a' => 'No. They choose how many they want and can take the best available together, which keeps a party seated as a block. Choosing from the map is the other option, not the only one.'],
                 ['q' => 'Does it work with tables?', 'a' => 'Yes. Give a section round or rectangular tables and say how many sit at each. A table can sell as single seats, as a whole table only, or either way, which is the difference between a cabaret night and a fundraising dinner.'],

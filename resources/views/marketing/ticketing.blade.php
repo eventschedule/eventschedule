@@ -9,7 +9,7 @@
         "@context": "https://schema.org",
         "@type": "Service",
         "name": "Event Schedule Ticketing",
-        "description": "Sell tickets from your own event page with named ticket types, promo codes, add-ons and passes, then scan the QR code at the door. Zero platform fees on ticket sales.",
+        "description": "Sell tickets from your own event page with named ticket types, promo codes, add-ons and passes, take payment through your own Stripe or PayPal account, then scan the QR code at the door. Zero platform fees on ticket sales.",
         "provider": {
             "@type": "Organization",
             "name": "Event Schedule",
@@ -26,7 +26,7 @@
         "applicationCategory": "BusinessApplication",
         "applicationSubCategory": "Event Ticketing Software",
         "operatingSystem": "Web",
-        "description": "Sell tickets from your own event page and check them in at the door with a phone. Ticket types with their own price, quantity and sales window, promo codes, add-ons, passes, waitlist and QR check-in. Zero platform fees on ticket sales.",
+        "description": "Sell tickets from your own event page and check them in at the door with a phone. Ticket types with their own price, quantity and sales window, promo codes, add-ons, passes, waitlist and QR check-in, with Stripe or PayPal checkout and full or partial refunds. Zero platform fees on ticket sales.",
         "offers": {
             "@type": "Offer",
             "price": "{{ $proMonthly }}",
@@ -35,6 +35,7 @@
         },
         "featureList": [
             "Zero platform fees on ticket sales",
+            "Stripe or PayPal checkout into your own account",
             "Ticket types with their own price, quantity and sales window",
             "Ticket inventory counted per occurrence date on recurring events",
             "Combined inventory across every ticket type",
@@ -43,11 +44,16 @@
             "Promo codes with percentage or fixed discounts, usage limits and per-ticket targeting",
             "Passes and season subscriptions valid across many events",
             "Custom questions collected at checkout",
+            "One checkout across several events",
+            "Monthly installment plans on Stripe",
+            "An interest list that emails people when tickets go on sale",
             "Individual tickets, so each guest gets their own confirmation and QR code",
             "QR code on every ticket, scanned from a phone at the door",
+            "Add to Google Wallet from the ticket page and the confirmation email",
             "One admission per ticket, with a warning on a second scan",
             "Live check-in dashboard with a per-ticket-type breakdown",
             "Ticket waitlist that notifies one person at a time",
+            "Full or partial refunds sent back through Stripe or PayPal",
             "Sale notification emails",
             "Sales CSV export including custom field answers",
             "Free registration and RSVP with optional capacity limits"
@@ -614,23 +620,29 @@
             ['stop', 'REFUSE', 'This ticket is refunded'],
         ];
 
+        // Ten and ten, deliberately. The two halves are one turnstile, so a ragged column reads as a
+        // broken machine. When a feature is added, fold it into a sibling rather than let one side
+        // run long: that is why ticket types carry the zero price and the cap per order, and promo
+        // codes carry the volume discount.
         $saleSide = [
-            ['Ticket types', 'Each one has its own name, price, quantity and optional sales start and end date.'],
-            ['Free ticket types', 'A price of zero is a valid ticket. It still gets a QR code and it still counts against the quantity.'],
-            ['Promo codes', 'Percentage or fixed amount, with usage limits, an expiry date and per-ticket targeting.'],
-            ['Volume discount', 'A minimum quantity unlocks a rate on that ticket line. A group of four gets it; one buyer does not.'],
-            ['A cap per order', 'Set a maximum per order on any ticket type, so one buyer cannot take the whole allocation in one go.'],
+            ['Tell me when tickets go on sale', 'Before anything is on sale, a visitor can leave an email address, no account needed, and hear once when tickets go on sale and again shortly before it starts. You see how many are waiting. Free on every plan.'],
+            ['Ticket types', 'Each one has its own name, price, quantity, optional sales window and optional cap per order, so one buyer cannot take the whole allocation. Zero is a valid price, and that ticket still gets a QR code.'],
+            ['Promo codes and group rates', 'A code takes a percentage or a fixed amount off, with usage limits, an expiry date and per-ticket targeting. A volume discount unlocks a lower rate once one ticket line reaches a set quantity.'],
             ['Add-ons', 'Parking, merchandise, a meal package. Priced separately and never discounted by a promo code.'],
             ['Custom questions', 'Up to ten per order, plus up to ten more on any one ticket type when each guest has to answer.'],
             ['Passes and subscriptions', 'One purchase a guest reuses across many events, with its own usage rules.'],
+            ['Your own Stripe or PayPal', 'Buyers pay by card, Apple Pay or Google Pay through Stripe, or from a PayPal balance or card, straight into your account. You choose the method per event.'],
             ['Installments', 'A buyer splits the price over monthly charges. The first is taken at checkout and the ticket is valid straight away; the rest come off the saved card on their own.'],
             ['One cart, several events', 'Somebody buying into three of your nights pays once, as a single amount, instead of running checkout three times.'],
+            ['Refunds that move the money', 'Refund a Stripe or PayPal sale in full or in part from the Sales list, and the money goes back through the provider. A partial refund keeps the tickets valid; a full one puts them back on sale. Free on every plan.'],
         ];
 
         $doorSide = [
             ['A QR code per ticket', 'It is on the buyer\'s ticket page, which checkout lands them on, and it goes out with the confirmation email.'],
+            ['Add to Google Wallet', 'The ticket page, the order page and the confirmation email carry an Add to Google Wallet button, free registrations included. The pass holds the same QR code, so it scans like any other ticket.'],
             ['Your own email sender', 'Connect one once under Schedule Settings, Integrations, Email. Until you do, the sale and the ticket page work but no confirmation email leaves.'],
             ['Individual tickets', 'Turn it on and every guest on the order gets their own email and their own code.'],
+            ['If the plans change', 'Change the date, the time or the venue and the editor asks whether to email everyone holding a ticket, with a note from you; cancelling offers the same. Buyers hear from your own email sender, and the interest list hears too.'],
             ['Scan from a phone', 'Sales, then Scan Tickets, then point the camera. No hardware to buy or rent.'],
             ['One admission per ticket', 'A second scan comes back as an orange warning over the holder details, and no second admission is recorded.'],
             ['It refuses for a reason', 'Unpaid, cancelled, refunded, too early, too late: each one names itself.'],
@@ -658,15 +670,19 @@
         $faqs = [
             [
                 'q' => 'What are the fees for selling tickets?',
-                'a' => 'Event Schedule charges zero platform fees on ticket sales. Card payments run through your own connected Stripe account, so Stripe charges you its standard processing rate directly and the rest of the ticket price is yours. Nothing is deducted by us, on any plan, at any volume.',
+                'a' => 'Event Schedule charges zero platform fees on ticket sales. Card payments run through your own connected Stripe or PayPal account, so the provider charges you its standard processing rate directly and the rest of the ticket price is yours. Nothing is deducted by us, on any plan, at any volume.',
             ],
             [
                 'q' => 'Do I need a paid plan to sell tickets?',
-                'a' => 'No. The Free plan sells up to 25 paid tickets a month through Stripe, scans every one of them at the door, and we take no platform fee on any tier. Pro removes the monthly cap and adds the live check-in dashboard, waitlists, promo codes, passes and the sales export, for '.plan_price($proMonthly).' a month with a 7 day free trial. Free registration is separate and unlimited on every plan: turn on RSVP for a free event, set a capacity limit, and attendees still get a confirmation email.',
+                'a' => 'No. The Free plan sells up to 25 paid tickets a month with any payment method, scans every one of them at the door, and we take no platform fee on any tier. Pro removes the monthly cap and adds the live check-in dashboard, waitlists, promo codes, passes and the sales export, for '.plan_price($proMonthly).' a month with a 7 day free trial. Free registration is separate and unlimited on every plan: turn on RSVP for a free event, set a capacity limit, and attendees still get a confirmation email.',
             ],
             [
                 'q' => 'How does QR code check-in work?',
                 'a' => 'Every ticket carries its own QR code, shown on the buyer\'s ticket page and sent with the confirmation email once you have connected an email sender under Schedule Settings, Integrations, Email. At the door you open Sales on your phone, tap Scan Tickets and point the camera. Each ticket admits once: scan it again and you get a warning instead of an entry. The check-in dashboard refreshes every 10 seconds with the running count and a per-ticket-type breakdown.',
+            ],
+            [
+                'q' => 'Can buyers save their tickets to Google Wallet?',
+                'a' => 'Yes, on every plan. The ticket page, the order page and the confirmation email carry an Add to Google Wallet button, and free registrations get one too. The pass holds the same QR code as the ticket page, so it scans with the same free scanner. It is a snapshot that is not updated afterwards, but the door checks the order live, so a cancelled or refunded ticket is still refused. There is no Apple Wallet pass. On a selfhosted install the button appears once the operator adds Google Wallet credentials.',
             ],
             [
                 'q' => 'Is there a seat map or assigned seating?',
@@ -678,7 +694,7 @@
             ],
             [
                 'q' => 'How are refunds handled?',
-                'a' => 'You refund the sale from the Sales list. For a Stripe or PayPal sale the money goes back through the provider from there, in full or in part - a partial refund leaves the sale paid and the tickets valid. Every other method records the refund here and you return the money in your own provider dashboard, so your refund policy stays yours either way. Cancelling a sale instead returns its tickets to the pool for that date, which is also what can trigger the next waitlist notification.',
+                'a' => 'From the Sales list, free on every plan. For a Stripe or PayPal sale the money goes back through the provider, in full or in part, and the list shows how much has been refunded so far. A partial refund leaves the sale paid and its tickets valid; a full refund, like a cancellation, returns the tickets to the pool for that date, which can trigger the next waitlist notification. An installment plan is refunded in full only, one charge at a time. Every other method shows Mark as Refunded, which records the refund while you return the money yourself. Either way, the refund policy stays yours.',
             ],
             [
                 'q' => 'Can I offer promo codes or discounts?',
@@ -687,6 +703,10 @@
             [
                 'q' => 'What happens when tickets sell out?',
                 'a' => 'A Join Waitlist button appears on the event page for that date. Guests leave a name and email, and when tickets come back into the pool because a sale was cancelled, refunded or expired, the next person in line is emailed a 24 hour link to buy. Only one person is notified at a time, so a single returned ticket is not blasted at the whole list; if that link expires unused, the next person is emailed instead. The waitlist is a Pro feature.',
+            ],
+            [
+                'q' => 'Can people sign up to hear when tickets go on sale?',
+                'a' => 'Yes, free on every plan. Until an event sells, its page offers Tell me when tickets go on sale; once it sells, a quieter Tell me if anything changes sits beside the buy button. A visitor leaves only an email address, without an account, and gets one email when tickets go on sale, a reminder shortly before the event (48 hours by default), and any change or cancellation notice you send. Each date of a recurring event keeps its own list, every email has a one-click unsubscribe, and the event editor shows how many people are waiting. It is not the waitlist, which is for a date that has sold out.',
             ],
             [
                 'q' => 'How does inventory work on a recurring event?',
@@ -1054,7 +1074,7 @@
                     Nothing is taken <span class="es-turn-accent">at the gate.</span>
                 </h2>
                 <p class="es-turn-muted mt-5 text-lg" data-reveal style="--reveal-delay: 0.15s;">
-                    Card sales run through your own connected Stripe account. Stripe charges you its standard processing rate directly, and the platform fee line is the one that stays at zero.
+                    Card sales run through your own connected Stripe or PayPal account. The provider charges you its standard processing rate directly, and the platform fee line is the one that stays at zero.
                 </p>
             </div>
 
@@ -1072,13 +1092,13 @@
                         </div>
                         <div class="es-turn-reg">
                             <dt class="es-turn-muted">Payment processing</dt>
-                            <dd class="es-turn-muted es-turn-read text-xs">Stripe's own rate, billed by Stripe</dd>
+                            <dd class="es-turn-muted es-turn-read text-xs">Stripe's or PayPal's rate, billed by them</dd>
                         </div>
                     </dl>
                     <div class="my-5" aria-hidden="true">
                         <hr class="es-turn-perf">
                     </div>
-                    <p class="es-turn-ink text-sm font-semibold">The rest lands in your Stripe account.</p>
+                    <p class="es-turn-ink text-sm font-semibold">The rest lands in your own Stripe or PayPal account.</p>
                     <p class="es-turn-muted mt-2 text-sm leading-relaxed">
                         Not in ours, and not on a payout schedule we control. Take cash at the door instead and there is nothing to process at all: add payment instructions to the confirmation email and mark the sale paid when you are handed the money.
                     </p>
@@ -1098,6 +1118,16 @@
                         </span>
                     </a>
 
+                    <a href="{{ route('marketing.paypal') }}" data-reveal class="es-turn-card es-turn-hover group flex flex-col p-6 transition-all duration-200 hover:shadow-md">
+                        <svg aria-hidden="true" class="es-turn-accent mb-4 h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8"><path stroke-linecap="round" stroke-linejoin="round" d="M17 9V7a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2m2 4h10a2 2 0 002-2v-6a2 2 0 00-2-2H9a2 2 0 00-2 2v6a2 2 0 002 2zm7-5a2 2 0 11-4 0 2 2 0 014 0z" /></svg>
+                        <h3 class="es-turn-hover-title es-turn-ink mb-2 text-base font-bold transition-colors">PayPal</h3>
+                        <p class="es-turn-muted mb-4 text-sm leading-relaxed">A PayPal balance or a card, into your own PayPal account, and one payment for a multi-event cart.</p>
+                        <span class="es-turn-hover-arrow es-turn-muted mt-auto inline-flex items-center gap-1 text-xs font-semibold transition-colors">
+                            Learn more
+                            <svg aria-hidden="true" class="h-3.5 w-3.5 transition-transform group-hover:translate-x-0.5 rtl:rotate-180" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7" /></svg>
+                        </span>
+                    </a>
+
                     <a href="{{ marketing_url('/invoiceninja') }}" data-reveal class="es-turn-card es-turn-hover group flex flex-col p-6 transition-all duration-200 hover:shadow-md">
                         <svg aria-hidden="true" class="es-turn-accent mb-4 h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" /></svg>
                         <h3 class="es-turn-hover-title es-turn-ink mb-2 text-base font-bold transition-colors">Invoice Ninja</h3>
@@ -1107,6 +1137,12 @@
                             <svg aria-hidden="true" class="h-3.5 w-3.5 transition-transform group-hover:translate-x-0.5 rtl:rotate-180" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7" /></svg>
                         </span>
                     </a>
+
+                    <div data-reveal class="es-turn-card flex flex-col p-6">
+                        <svg aria-hidden="true" class="es-turn-accent mb-4 h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8"><path stroke-linecap="round" stroke-linejoin="round" d="M3.055 11H5a2 2 0 012 2v1a2 2 0 002 2 2 2 0 012 2v2.945M8 3.935V5.5A2.5 2.5 0 0010.5 8h.5a2 2 0 012 2 2 2 0 104 0 2 2 0 012-2h1.064M15 20.488V18a2 2 0 012-2h3.064M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
+                        <h3 class="es-turn-ink mb-2 text-base font-bold">Payfast</h3>
+                        <p class="es-turn-muted text-sm leading-relaxed">For events priced in South African rand, paid into your own Payfast account.</p>
+                    </div>
 
                     <div data-reveal class="es-turn-card flex flex-col p-6">
                         <svg aria-hidden="true" class="es-turn-accent mb-4 h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8"><path stroke-linecap="round" stroke-linejoin="round" d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1" /></svg>
@@ -1157,7 +1193,7 @@
                             </li>
                         @endforeach
                     </ul>
-                    <p class="es-turn-muted mt-auto pt-5 text-xs leading-relaxed">Free on every plan. Newsletters are free too, at 10 emails a month, so you can email the people who came.</p>
+                    <p class="es-turn-muted mt-auto pt-5 text-xs leading-relaxed">Free on every plan. Newsletters are free too, up to 10 recipients a month, so you can email the people who came.</p>
                 </div>
 
                 <div class="es-turn-card flex flex-col p-7" data-reveal="panel">
@@ -1167,7 +1203,7 @@
                     </div>
                     <p class="es-turn-muted mb-5 text-sm leading-relaxed">Selling itself starts free, at 25 paid tickets a month. Pro takes the counter's ceiling off and adds the rest of this page: {{ plan_price($proMonthly) }} a month with a 7 day free trial, and still zero platform fees.</p>
                     <ul class="es-turn-muted space-y-2.5 text-sm">
-                        @foreach (['No monthly cap on the paid tickets you sell', 'Promo codes, add-ons and gift cards', 'Passes and season subscriptions across many events', 'Custom questions at checkout, and individual tickets per guest', 'The check-in dashboard and the sold-out waitlist', 'The ticket form embedded on the website you already have'] as $proItem)
+                        @foreach (['No monthly cap on the paid tickets you sell', 'Promo codes, add-ons, gift cards and installment plans', 'Passes and season subscriptions across many events', 'Custom questions at checkout, and individual tickets per guest', 'The check-in dashboard and the sold-out waitlist', 'The ticket form embedded on the website you already have'] as $proItem)
                             <li class="flex gap-2.5">
                                 <svg aria-hidden="true" class="es-turn-accent mt-0.5 h-4 w-4 flex-none" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.4"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7" /></svg>
                                 <span>{{ $proItem }}</span>
@@ -1250,6 +1286,11 @@
                     </x-feature-link-card>
                 </div>
                 <div data-reveal>
+                    <x-feature-link-card name="PayPal Checkout" description="Let buyers pay from a PayPal balance or card, with zero platform fees" :url="route('marketing.paypal')" icon-color="blue">
+                        <x-slot:icon><svg aria-hidden="true" class="w-5 h-5 text-blue-600 dark:text-blue-400" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 9V7a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2m2 4h10a2 2 0 002-2v-6a2 2 0 00-2-2H9a2 2 0 00-2 2v6a2 2 0 002 2zm7-5a2 2 0 11-4 0 2 2 0 014 0z" /></svg></x-slot:icon>
+                    </x-feature-link-card>
+                </div>
+                <div data-reveal>
                     <x-feature-link-card name="Custom Fields" description="Collect additional info from ticket buyers with custom form fields" :url="marketing_url('/features/custom-fields')" icon-color="amber">
                         <x-slot:icon><svg aria-hidden="true" class="w-5 h-5 text-amber-600 dark:text-amber-400" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01" /></svg></x-slot:icon>
                     </x-feature-link-card>
@@ -1293,8 +1334,8 @@
                 @php
                     $keepReading = [
                         [route('marketing.docs.tickets'), 'Ticketing guide', 'Every tab, field and setting, written out.'],
-                        [route('marketing.docs.subscriptions'), 'Passes and subscriptions', 'One purchase, reused across many events.'],
-                        [marketing_url('/features/ai'), 'AI-powered import', 'Paste text or drop an image and get an event.'],
+                        [route('marketing.passes'), 'Passes and subscriptions', 'Class packs, memberships and season tickets on one QR code.'],
+                        [route('marketing.check_in'), 'Check-in', 'The door scanner and the live dashboard, in detail.'],
                         [marketing_url('/for-musicians'), 'For musicians', 'Selling to a room you booked yourself.'],
                         [marketing_url('/for-venues'), 'For venues', 'A door count for somebody else\'s show.'],
                         [marketing_url('/for-comedy-clubs'), 'For comedy clubs', 'Several shows a night, each with its own count.'],

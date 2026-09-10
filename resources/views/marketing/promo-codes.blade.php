@@ -1,6 +1,6 @@
 <x-marketing-layout>
-    <x-slot name="title">Promo Codes &amp; Ticket Add-ons | Event Schedule</x-slot>
-    <x-slot name="description">Discount codes that expire, cap their own use and target one ticket type, plus add-ons with their own stock. Both land on the same order line, in a defined order.</x-slot>
+    <x-slot name="title">Ticket Promo Codes and Add-ons | Discounts With a Deadline</x-slot>
+    <x-slot name="description">Discount codes that expire, cap their own use and cover chosen ticket types, plus add-ons with their own stock. A code never comes off an add-on.</x-slot>
     <x-slot name="breadcrumbTitle">Promo Codes</x-slot>
 
     <x-slot name="structuredData">
@@ -18,6 +18,7 @@
             "Expiry date and time on any code",
             "Switch a code off without deleting it",
             "Target a code at specific ticket types",
+            "Codes are set per event, and the same code can be added to several",
             "A share link that fills the code in at checkout",
             "Add-ons with their own stock and per-order maximum",
             "Promo codes never discount add-ons",
@@ -200,7 +201,7 @@
                     <div>
                         <p class="es-line-tag mb-4" data-reveal>Promo codes &amp; add-ons &middot; Pro</p>
                         <h1 class="es-balance es-line-ink text-4xl font-black tracking-tight md:text-6xl" data-reveal style="--reveal-delay: 0.05s;">
-                            Money off, <span class="es-line-accent">and money on.</span>
+                            Promo codes and add-ons: money off, <span class="es-line-accent">and money on.</span>
                         </h1>
                         <p class="es-line-muted mt-6 text-lg" data-reveal style="--reveal-delay: 0.1s;">
                             A discount code takes something off the order. An add-on puts something on it. They are the same decision from two directions, they meet on the same receipt, and the order they are applied in is fixed so nothing is ever counted twice.
@@ -209,7 +210,7 @@
                             <a href="{{ app_url('/sign_up') }}" class="inline-flex items-center gap-2 rounded-xl bg-[#991b1b] px-6 py-3 font-semibold text-white transition-colors hover:bg-[#7f1717]">
                                 Start for free
                             </a>
-                            <a href="{{ marketing_url('/docs/tickets') }}" class="es-line-ink inline-flex items-center gap-2 rounded-xl border border-gray-300 px-6 py-3 font-semibold transition-colors hover:border-[#991b1b] dark:border-white/15">
+                            <a href="{{ marketing_url('/docs/tickets') }}#promo-codes" class="es-line-ink inline-flex items-center gap-2 rounded-xl border border-gray-300 px-6 py-3 font-semibold transition-colors hover:border-[#991b1b] dark:border-white/15">
                                 Read the guide
                             </a>
                         </div>
@@ -265,7 +266,7 @@
             <div class="mx-auto max-w-5xl px-4 sm:px-6 lg:px-8">
                 <div class="mx-auto mb-12 max-w-3xl text-center">
                     <div class="es-line-mark mb-6" data-reveal aria-hidden="true"><span>01</span></div>
-                    <p class="es-line-tag mb-4" data-reveal style="--reveal-delay: 0.05s;">The code</p>
+                    <p class="es-line-tag mb-4" data-reveal style="--reveal-delay: 0.05s;">The promo code</p>
                     <h2 class="es-balance es-line-ink text-3xl font-black tracking-tight md:text-5xl" data-reveal style="--reveal-delay: 0.1s;">
                         A discount with <span class="es-line-accent">an end in sight.</span>
                     </h2>
@@ -302,7 +303,7 @@
             <div class="mx-auto max-w-5xl px-4 sm:px-6 lg:px-8">
                 <div class="mx-auto mb-12 max-w-3xl text-center">
                     <div class="es-line-mark mb-6" data-reveal aria-hidden="true"><span>02</span></div>
-                    <p class="es-line-tag mb-4" data-reveal style="--reveal-delay: 0.05s;">The add-on</p>
+                    <p class="es-line-tag mb-4" data-reveal style="--reveal-delay: 0.05s;">Ticket add-ons</p>
                     <h2 class="es-balance es-line-ink text-3xl font-black tracking-tight md:text-5xl" data-reveal style="--reveal-delay: 0.1s;">
                         The things people <span class="es-line-accent">would have bought anyway.</span>
                     </h2>
@@ -372,6 +373,7 @@
         @php
             $promoFaqs = [
                 ['q' => 'Can a code apply to only one ticket type?', 'a' => 'Yes. Point it at all tickets, or tick the specific types it covers. That is how you run a discount on the standing floor while the seated tickets stay at full price.'],
+                ['q' => 'Can one code cover all my events?', 'a' => 'Not on its own. A code belongs to the event it was made on and keeps its own count, limit and expiry there, so to run one offer across several events you add the same code to each of them. In the multi-event cart each event\'s code discounts that event\'s tickets and nothing else in the basket.'],
                 ['q' => 'Does a promo code discount add-ons too?', 'a' => 'No, never. A code applies to the eligible ticket lines only, so the parking, the programme and the meal stay at their own price. That is deliberate: an add-on is usually something you had to buy in, and discounting it costs you real money rather than margin.'],
                 ['q' => 'What happens if a volume discount and a promo code both apply?', 'a' => 'A volume discount is the price break you can set on a ticket type for people buying several at once, so it is decided by the size of the order rather than by anything the buyer types. The two are applied in a fixed order - the volume discount first, then the code against what is left - so the same money is never discounted twice. A percentage code is capped at 100% and a fixed code can never take more than the eligible subtotal.'],
                 ['q' => 'How do I get the code to people?', 'a' => 'Every code has a copy-link button that produces a URL with the code already applied at checkout. Put that in a newsletter or a story and nobody has to type anything or remember the spelling.'],
@@ -383,7 +385,7 @@
         @endphp
         <section id="faq" class="es-line-rule scroll-mt-24 py-20 lg:py-28">
             <div class="mx-auto max-w-3xl px-4 sm:px-6 lg:px-8">
-                <h2 class="es-line-ink mb-10 text-center text-3xl font-black tracking-tight md:text-4xl" data-reveal>Questions</h2>
+                <h2 class="es-line-ink mb-10 text-center text-3xl font-black tracking-tight md:text-4xl" data-reveal>Promo code questions</h2>
                 <div class="space-y-3" data-reveal-group="60">
                     @foreach ($promoFaqs as $faq)
                         <details class="es-line-panel group p-5" data-reveal="panel">

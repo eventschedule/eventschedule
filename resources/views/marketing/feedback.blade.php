@@ -1,5 +1,5 @@
 <x-marketing-layout>
-    <x-slot name="title">Event Feedback & Reviews - Event Schedule</x-slot>
+    <x-slot name="title">Post-Event Feedback and Attendee Reviews - Event Schedule</x-slot>
     <x-slot name="description">Post-event feedback for ticket holders: a day after the event ends, everyone who booked gets a card with a one-to-five rating and an optional comment.</x-slot>
     <x-slot name="breadcrumbTitle">Event Feedback</x-slot>
 
@@ -23,6 +23,7 @@
         "featureList": [
             "A required rating from 1 to 5 and an optional comment up to 2,000 characters",
             "Requests emailed to everyone who held a booking, paid tickets and free RSVP registrations alike",
+            "Bookings cancelled or refunded in full are not asked and drop out of the published reviews",
             "One card per booking, enforced in the database",
             "A delay of 1, 2, 6, 12, 24 or 48 hours after each occurrence ends",
             "No request goes out more than 30 days after the event ended",
@@ -538,6 +539,8 @@
             ['Cards per booking', 'One, enforced by the database'],
             ['Editing a card', 'Not possible once it is submitted'],
             ['Who is asked', 'Everyone who holds a paid booking, RSVP registrations included'],
+            ['Refunded in full', 'Not asked; a card already returned leaves the public reviews and the average'],
+            ['Partly refunded', 'Still a paid booking, so it is asked and its card counts'],
             ['Request delay', '1, 2, 6, 12, 24 or 48 hours after that occurrence ends'],
             ['Default delay', '24 hours'],
             ['Queue', 'Checked hourly, so the times shown are approximate'],
@@ -574,7 +577,11 @@
             ],
             [
                 'q' => 'How many cards does one booking get?',
-                'a' => 'One. Somebody who bought six tickets in a single booking is asked once, not six times, and the database holds a unique constraint on the booking so a second card cannot be created. Open the link again after submitting and you get a thank-you page instead of a blank card. Passes and subscriptions are skipped, because they are not tied to a single date.',
+                'a' => 'One. Somebody who bought six tickets in a single booking is asked once, not six times, and the database holds a unique constraint on the booking so a second card cannot be created. Open the link again after submitting and you get a thank-you page instead of a blank card. Passes and subscriptions are skipped, because they are not tied to a single date. A checkout that covers several events is one booking per event, so each event asks once it is over.',
+            ],
+            [
+                'q' => 'What happens to feedback when I refund a booking?',
+                'a' => 'A refund in full takes the booking out of the asking: it is not sent a request, and a link already sent stops opening. If the attendee had already returned a card, it drops out of the public reviews, the Feedback tab\'s average and response rate, and GET /api/feedback, but it stays in the Feedback tab\'s list and the CSV export, so what they said is not lost. A partial refund leaves the booking paid, so its card stands.',
             ],
             [
                 'q' => 'Do I need the Pro plan?',
@@ -625,8 +632,8 @@
                     </div>
 
                     <h1 class="es-balance es-comment-ink mb-8 text-[2.4rem] font-black leading-[1.05] tracking-tight sm:text-6xl">
-                        <span class="es-mask"><span class="es-mask-line">A comment card</span></span>
-                        <span class="es-mask es-mask-2"><span class="es-mask-line">per <span class="es-comment-accent">ticket.</span></span></span>
+                        <span class="es-mask"><span class="es-mask-line">A feedback card</span></span>
+                        <span class="es-mask es-mask-2"><span class="es-mask-line">per <span class="es-comment-accent">booking.</span></span></span>
                     </h1>
 
                     <p class="es-fade-up es-d-2 es-comment-muted mb-10 max-w-xl text-lg sm:text-xl">
@@ -738,7 +745,7 @@
                     <div class="es-comment-card p-6" data-reveal="panel">
                         <p class="es-comment-tag mb-3">Per booking</p>
                         <h3 class="es-comment-band-ink mb-2 text-lg font-bold">One card, not six</h3>
-                        <p class="es-comment-band-muted text-sm">Somebody who booked six seats is asked once. Passes and subscriptions are skipped, since they are not tied to a single date, and so are test and blank addresses.</p>
+                        <p class="es-comment-band-muted text-sm">Somebody who booked six seats is asked once. Passes and subscriptions are skipped, since they are not tied to a single date, and so are test and blank addresses and any booking cancelled or refunded in full.</p>
                     </div>
                 </div>
 
@@ -988,7 +995,7 @@
                         @endforeach
                     </div>
 
-                    <p class="es-comment-muted mb-4 text-sm">An average, a count, and the twenty most recent cards, worked out for that event and, on a recurring one, for that date. Each card shows the attendee's first name and nothing more, and cancelled or deleted bookings drop out of the list.</p>
+                    <p class="es-comment-muted mb-4 text-sm">An average, a count, and the twenty most recent cards, worked out for that event and, on a recurring one, for that date. Each card shows the attendee's first name and nothing more, and cancelled, refunded or deleted bookings drop out of the list and the average.</p>
                     <p class="es-comment-muted mt-auto text-sm">
                         Attendees are told before they write: the card carries a notice saying their words may appear on the event page and their first name will be shown.
                     </p>

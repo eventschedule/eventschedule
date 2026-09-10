@@ -528,7 +528,7 @@
             [
                 'ref' => 'routes/api.php',
                 'subject' => 'Twenty-four authenticated endpoints',
-                'body' => 'Schedules, sub-schedules, events, categories, sales, and read access to attendee feedback.',
+                'body' => 'Schedules, sub-schedules, events, categories, sales and refunds, and read access to attendee feedback.',
             ],
             [
                 'ref' => 'composer.json',
@@ -540,14 +540,14 @@
         // The diff: what actually changes when the install stops being ours.
         // Every row is backed by a gate that tests config('app.hosted').
         $diffRows = [
-            ['Selling tickets with Stripe payouts', 'Free, up to 25 paid tickets a month', 'Included, no cap'],
+            ['Selling paid tickets', 'Free, up to 25 paid tickets a month', 'Included, no cap'],
             ['Check-in dashboard, waitlists, promo codes and passes', 'Pro, '.plan_price($proMonthly).' a month', 'Included'],
             ['REST API and webhooks', 'Pro', 'Included'],
             ['Custom domain', 'Enterprise', 'The install is your domain'],
             ['Team members on one schedule', 'Up to five, on Enterprise', 'No cap'],
             ['Newsletter sends', '10, 100 or 1,000 recipients a month', 'No monthly cap'],
-            ['The "Powered by" credit', 'Removed on Pro', 'Already gone'],
-            ['Import from a URL or a city search', 'Not available', 'Selfhost only'],
+            ['The "Powered by" credit', 'Removed on Pro', 'Gone, but one small licence credit stays on public pages'],
+            ['Daily import from a list of event URLs', 'Not available', 'Selfhost only'],
             ['AI parsing and translation', 'Our key, with a daily cap per plan', 'Your own Gemini or OpenAI key, no daily cap'],
         ];
 
@@ -573,7 +573,7 @@
             ['GET', '/api/sales', 'Sales', 'List ticket sales'],
             ['GET', '/api/sales/{id}', 'Sales', 'One sale'],
             ['POST', '/api/sales', 'Sales', 'Record a sale'],
-            ['PUT', '/api/sales/{id}', 'Sales', 'Update it'],
+            ['PUT', '/api/sales/{id}', 'Sales', 'Mark it paid, cancel it or refund it'],
             ['DELETE', '/api/sales/{id}', 'Sales', 'Delete it'],
             ['GET', '/api/feedback', 'Feedback', 'Post-event ratings and comments'],
             ['GET', '/api/fan-content', 'Feedback', 'Fan photos, video and comments'],
@@ -602,7 +602,7 @@
             ],
             [
                 'q' => 'Do I get every feature if I selfhost?',
-                'a' => 'Yes. Role::isPro() and Role::isEnterprise() both return true the moment config(\'app.hosted\') is false, so ticketing, the REST API, webhooks, custom fields, event graphics, custom domains, unlimited team members and uncapped newsletter sends are simply on. Two things you supply yourself: an AI key if you want the parsing and translation features, and your own Stripe account for payouts.',
+                'a' => 'All but one. Role::isPro() and Role::isEnterprise() both return true the moment config(\'app.hosted\') is false, so uncapped ticket sales, the REST API, webhooks, custom fields, event graphics, unlimited team members and uncapped newsletter sends are simply on. The exception is a custom domain per schedule: ResolveCustomDomain only runs in hosted mode, and on a selfhost the whole install already sits on a domain you chose. Two things you supply yourself: an AI key if you want the parsing and translation features, and a Stripe or PayPal account for payouts.',
             ],
             [
                 'q' => 'Is the REST API free on eventschedule.com?',
@@ -664,7 +664,7 @@
                     </div>
 
                     <h1 class="es-balance es-commit-ink mb-8 text-[2.4rem] font-black leading-[1.05] tracking-tight sm:text-6xl">
-                        <span class="es-mask"><span class="es-mask-line">Every claim on this page</span></span>
+                        <span class="es-mask"><span class="es-mask-line">Open source. Every claim here</span></span>
                         <span class="es-mask es-mask-2"><span class="es-mask-line">has a <span class="es-commit-grad">file path.</span></span></span>
                     </h1>
 
@@ -1194,7 +1194,7 @@
                             </div>
                             <h3 class="es-commit-ink mb-4 text-xl font-bold">Bring your own everything</h3>
                             <p class="es-commit-muted">
-                                SMTP, Stripe, Google or Microsoft calendar credentials, an AI key, a push app id. Each one is an environment variable you set, or leave unset, and the feature that needs it stays out of the way until you do.
+                                SMTP, Stripe or PayPal, Google or Microsoft calendar credentials, an AI key, a push app id. Each one is an environment variable you set, or leave unset, and the feature that needs it stays out of the way until you do.
                             </p>
                         </div>
                         <div class="es-glare" aria-hidden="true"></div>

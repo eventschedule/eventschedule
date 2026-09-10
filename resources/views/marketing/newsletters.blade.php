@@ -1,6 +1,6 @@
 <x-marketing-layout>
-    <x-slot name="title">Newsletter Builder for Events - Event Schedule</x-slot>
-    <x-slot name="description">Send branded newsletters to followers and ticket buyers. Drag-and-drop editor, professional templates, audience segments, and delivery analytics.</x-slot>
+    <x-slot name="title">Event Newsletter Builder, Free to Start - Event Schedule</x-slot>
+    <x-slot name="description">Write newsletters to email subscribers, followers and ticket buyers, and let new events reach subscribers as a digest. Free for 10 recipients a month.</x-slot>
     <x-slot name="breadcrumbTitle">Newsletters</x-slot>
 
     <x-slot name="structuredData">
@@ -9,7 +9,7 @@
         "@context": "https://schema.org",
         "@type": "Service",
         "name": "Event Schedule Newsletters",
-        "description": "Send branded newsletters to followers and ticket buyers. Drag-and-drop editor, professional templates, audience segments, A/B testing, and delivery analytics.",
+        "description": "Send newsletters to email subscribers, followers and ticket buyers, while new public events reach confirmed subscribers as an automatic digest. Drag-and-drop editor, templates, audience segments, A/B testing and delivery analytics.",
         "provider": {
             "@type": "Organization",
             "name": "Event Schedule",
@@ -26,7 +26,7 @@
         "applicationCategory": "BusinessApplication",
         "applicationSubCategory": "Email Marketing Software",
         "operatingSystem": "Web",
-        "description": "Compose a newsletter from fourteen block types, choose who receives it, and send it yourself. A newsletter never sends itself; the separate new-event digest to confirmed subscribers is the only mail that goes on its own. Monthly allowances count recipients rather than sends.",
+        "description": "Compose a newsletter from fourteen block types, choose who receives it, and send it yourself. A newsletter never sends itself; the separate new-event digest to confirmed subscribers goes out on its own and outside the allowance. Monthly allowances count recipients rather than sends.",
         "offers": {
             "@type": "Offer",
             "price": "0",
@@ -34,14 +34,15 @@
             "description": "The newsletter builder is included on the free plan, with 10 recipients per month"
         },
         "featureList": [
-            "Every newsletter is one you compose and send; the separate new-event digest to confirmed subscribers is the only automatic mail",
+            "Every newsletter is one you compose and send; the new-event digest to confirmed subscribers goes out on its own, outside the allowance",
+            "An email sign-up form on your schedule and event pages; confirming also sets up an account that follows the schedule",
             "Fourteen block types, dragged into order, cloned or deleted",
             "An events block that pulls your upcoming events into the email",
             "Five built-in templates, plus templates you save yourself",
             "Colours, five email-safe fonts, button shape and event layout",
-            "Segments: all followers, ticket buyers, a manual list, sub-schedule buyers, waitlist",
+            "Segments: email subscribers, account followers, ticket buyers, a manual list, sub-schedule buyers, waitlist",
             "Combined segments merged and deduplicated by email address",
-            "Import addresses by form, paste, or CSV upload",
+            "Import addresses by form, paste, or a CSV upload of up to 10,000 rows",
             "Preview in the browser and send a test to yourself",
             "Send now or schedule a date and time",
             "Open and click tracking per recipient, with top links",
@@ -88,10 +89,16 @@
                 followers (role_user level 'follower') are NOT on it - they
                 are reached only by NewsletterEmail, which still runs from
                 a button a human pressed. The page's spine is now that
-                split, not the absence of automatic mail. (The two other
-                automatic emails still run the other way: EventChangeNotifier
-                tells TICKET BUYERS when their event changes, and
-                NotifyRequestChanges emails the OWNER when a request lands.)
+                split, not the absence of automatic mail. A THIRD list sits
+                beside it (2026-09): event_interests, one event and one date
+                at a time, email only, never a segment and never in the
+                allowance, which section 01's tint panel spells out. The
+                other mail runs the other way: EventChangeNotifier tells that
+                list, and TICKET BUYERS when the schedule has its own SMTP,
+                only once the owner confirms the notice on a change or a
+                cancellation; only the on-sale email and the reminder go to
+                that list without asking. NotifyRequestChanges emails the
+                OWNER when a request lands.
 
              2. Role::newsletterLimit() caps RECIPIENTS, not sends.
                 NewsletterService::send() rejects the send when
@@ -635,11 +642,15 @@
         $faqs = [
             [
                 'q' => 'How do subscribers join my newsletter?',
-                'a' => 'Visitors can follow your schedule directly from your public schedule page, and you can print or display the follower QR code, which is free on every plan. You can also target ticket buyers and manually add email addresses, one at a time, pasted in bulk, or uploaded as a CSV. All subscribers can unsubscribe with one click.',
+                'a' => 'Mostly from your public pages. A signed-out visitor leaves a name and an email address in the sign-up form on your schedule page or any event page, and joins once they click the confirmation link, which also sets up an account for them that follows your schedule. A buyer can tick the box at checkout and joins straight away, because the ticket already goes to that address. People with an account can press Follow, and the follower QR code, free on every plan, opens the sign-up form from a poster or a flyer. You can also write to ticket buyers without them joining anything, and add addresses one at a time, pasted in bulk, or uploaded as a CSV. All subscribers can unsubscribe with one click.',
             ],
             [
                 'q' => 'Does adding an event email my followers?',
-                'a' => 'It depends which list you mean, and the two behave differently. Somebody who left an email address on your schedule and confirmed it is a SUBSCRIBER, and publishing new public events does send them a short digest on its own, batched and never more than one every three days per schedule, outside the allowance this page counts. Somebody signed in who pressed Follow is an ACCOUNT FOLLOWER, and nothing reaches them except a newsletter you compose and send. The other automatic email in this area goes to ticket buyers, who are told when an event they bought for changes or is cancelled.',
+                'a' => 'It depends which list you mean, and the two behave differently. Somebody who left an email address on your schedule and confirmed it, or ticked the box at checkout, is a SUBSCRIBER, and publishing new public events does send them a short digest on its own, batched and never more than one every three days per schedule, outside the allowance this page counts. It is never one email per event. Somebody signed in who pressed Follow is an ACCOUNT FOLLOWER, and nothing reaches them except a newsletter you compose and send. Confirming a sign-up also sets up an account that follows you, but it is the confirmed address that puts somebody on the digest, not the Follow.',
+            ],
+            [
+                'q' => 'What is the difference between subscribers, followers and the interest list?',
+                'a' => 'Three lists, and a newsletter can reach only two of them. Subscribers gave your schedule an email address and confirmed it, or ticked the box at checkout: they get the automatic digest of new events, at most one every three days, and any newsletter you send them. Account followers pressed Follow while signed in, and hear from you only through a newsletter. The interest list belongs to one event, one date at a time: an address left under "Tell me when tickets go on sale" gets an email when tickets go on sale and a reminder shortly before it starts, plus any change or cancellation notice you send. It is not a subscription to your schedule, it never counts against your allowance, and no newsletter segment can reach it.',
             ],
             [
                 'q' => 'How many newsletters can I send?',
@@ -776,8 +787,9 @@
                     One rail runs itself. <span class="es-send-grad">The other is yours</span>.
                 </h2>
                 <p class="es-send-muted text-lg" data-reveal style="--reveal-delay: 0.15s;">
-                    Exactly one thing leaves without you: a digest of the events you just published,
-                    to the people who asked for it. Everything else is a letter you wrote.
+                    Your list hears from you in two ways. A digest of the events you just published
+                    leaves without you, for the people who subscribed. Every newsletter is a letter
+                    you wrote.
                 </p>
             </div>
 
@@ -788,7 +800,7 @@
                     <div class="es-send-split">
                         @foreach ([
                             ['A digest of what you published', 'One message covering the batch. Announce a whole season in an afternoon and it is still one message, never one per event.'],
-                            ['To people who confirmed an address', 'Only subscribers who gave your schedule an email and clicked the link in the confirmation. Somebody who followed with an account is not on this rail.'],
+                            ['To people who confirmed an address', 'Subscribers who clicked the link in the confirmation email, or ticked the box at checkout. Somebody who only pressed Follow is not on this rail.'],
                             ['At most once every three days', 'A cadence floor per schedule, so a busy week cannot turn into a run of mail in your name.'],
                             ['Outside the allowance entirely', 'It does not spend a single envelope, because the promise was made to the reader rather than to you.'],
                         ] as [$t, $d])
@@ -800,7 +812,7 @@
                     </div>
                     <p class="es-send-muted mt-5 text-sm">
                         One toggle under Settings, Notifications turns it off for a schedule. It is on
-                        by default, because six places on your public pages promise it.
+                        by default, because the sign-up form and the checkout box both promise updates.
                     </p>
                 </div>
 
@@ -809,7 +821,7 @@
                     <div class="es-send-split">
                         @foreach ([
                             ['A newsletter you composed', 'Your words, your blocks, your subject line.'],
-                            ['To a list you chose', 'All followers, ticket buyers, one sub-schedule, or addresses you brought with you.'],
+                            ['To a list you chose', 'Your subscribers, your followers, ticket buyers, one sub-schedule, or addresses you brought with you.'],
                             ['At a moment you picked', 'Send it now, or set a date and time and let it go out on its own.'],
                             ['With your address to reply to', 'Replies land with the schedule, not with us.'],
                         ] as [$t, $d])
@@ -827,12 +839,30 @@
             </div>
 
             <div class="es-send-tint mt-4 p-6 sm:p-7" data-reveal>
-                <p class="es-send-ink text-sm font-bold">Two more automatic emails, and they run the other way</p>
+                <p class="es-send-ink text-sm font-bold">A third list, kept per event, and not one you write to</p>
                 <p class="es-send-muted mt-2 text-sm">
-                    People who bought a ticket are told when that event changes or is cancelled, and
-                    you are emailed when a booking request lands on your schedule. Neither is a
-                    newsletter, and neither spends an envelope.
+                    An upcoming public event page offers "Tell me when tickets go on sale", or "Tell
+                    me if anything changes" once it is selling. A visitor leaves an email address and
+                    nothing else, and hears about that one event only: an email when tickets go on
+                    sale, a reminder shortly before it starts, and any change or cancellation notice
+                    you send. It is not a subscription to your schedule, no segment can reach it,
+                    and it never
+                    spends an envelope. The event's Tickets panel shows how many people are waiting.
                 </p>
+                <p class="es-send-muted mt-3 text-sm">
+                    Two more emails run the other way. When you move a one-off event's date, change
+                    its venue or join link, or cancel it, Event Schedule offers to send a notice,
+                    and it goes only if you confirm: to that list, and to the event's ticket holders
+                    if the schedule sends through its own SMTP server. And you are emailed when a
+                    booking request lands on your schedule. None of it is a newsletter, and none of
+                    it spends an envelope.
+                </p>
+                <a href="{{ route('marketing.docs.tickets') }}#interest-list" class="es-send-accent mt-4 inline-flex items-center text-sm font-semibold hover:underline">
+                    How the interest list works
+                    <svg aria-hidden="true" class="ml-1 h-4 w-4 rtl:ml-0 rtl:mr-1 rtl:rotate-180" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6" />
+                    </svg>
+                </a>
             </div>
         </div>
     </section>
@@ -961,13 +991,15 @@
                         Addressed to <span class="es-send-grad">people who asked</span>.
                     </h2>
                     <p class="es-send-muted mb-8 max-w-xl text-lg leading-relaxed" data-reveal style="--reveal-delay: 0.15s;">
-                        Somebody follows your schedule from your public page, or scans the follower QR
-                        code you printed, or you bring a list you already had. Ticket buyers are
-                        reachable without doing anything at all.
+                        Somebody leaves a name and an email address in the sign-up form on your schedule
+                        or event pages, ticks the box at checkout, or presses Follow with an account. The
+                        QR code you print opens the same form, and a list you already had can come with
+                        you. Ticket buyers are reachable without doing anything at all.
                     </p>
 
                     <ul class="space-y-4" data-reveal-group="90">
                         @foreach ([
+                            ['Confirming sets up an account', 'Somebody who confirms from the sign-up form also gets an account that follows your schedule, with no password until they add one. They are still listed once, as a subscriber.'],
                             ['Combine and it deduplicates', 'Pick more than one segment and they are merged by lowercase email address, so nobody receives two copies of the same newsletter.'],
                             ['Unsubscribes are removed', 'Every message carries a one-click unsubscribe link. Anyone who uses it drops out of every later send for that schedule.'],
                             ['Your team is added too', 'Owners, admins and viewers on the schedule are added to the recipients whichever segment you choose, unless they have unsubscribed, so nobody on the inside is surprised by it.'],
@@ -998,11 +1030,12 @@
 
                         <div class="space-y-2.5">
                             @foreach ([
-                                ['All followers', 'Everyone following the schedule who has not opted out.', null],
+                                ['Email subscribers', 'Everyone who confirmed an address on your sign-up form or ticked the box at checkout.', null],
+                                ['All followers', 'People who pressed Follow with an account. Subscribers are their own segment, so nobody lands in both.', null],
                                 ['Ticket buyers', 'Narrow to one event, or to a range of order dates.', null],
                                 ['A manual list', 'Typed in, pasted in bulk, or uploaded as a CSV of up to ten thousand rows.', null],
                                 ['Sub-schedule buyers', 'People who bought into one strand of your schedule.', null],
-                                ['Waitlist', 'People waiting on a sold-out ticket.', 'Pro'],
+                                ['Waitlist', 'People waiting on a full registration or a sold-out ticket. The ticket waitlist itself is a Pro feature.', null],
                             ] as [$segName, $segWhat, $segPlan])
                                 <div class="es-send-sub p-3.5">
                                     <div class="flex flex-wrap items-center gap-2">
@@ -1253,11 +1286,12 @@
                 </div>
 
                 <div class="mx-auto mt-10 max-w-3xl rounded-lg border border-white/10 bg-white/[0.05] p-6 text-center" data-reveal>
-                    <p class="text-sm font-bold text-white">One thing before your first send</p>
+                    <p class="text-sm font-bold text-white">One thing before your first large send</p>
                     <p class="es-send-dim mt-2 text-sm">
-                        On the hosted service, a schedule needs either its own SMTP settings or a
-                        verified phone number on the account before it can send to a list. It is an
-                        anti-spam gate, it happens once, and a selfhosted install does not have it.
+                        On the hosted service, a send to more than fifty people needs either the
+                        schedule's own SMTP settings or a verified phone number on the account that
+                        sends it. Smaller sends go out without either. It is an anti-spam gate, it
+                        happens once, and a selfhosted install does not have it.
                     </p>
                 </div>
             </div>
@@ -1425,7 +1459,7 @@
                     </h2>
                     <p class="es-send-dim mx-auto mb-10 max-w-xl text-lg sm:text-xl">
                         The builder, the segments and the tracking are free. Ten envelopes a month
-                        before you pay for anything, and nothing goes out that you did not write.
+                        before you pay for anything, and no newsletter goes out until you send it.
                     </p>
 
                     <div class="mx-auto flex max-w-2xl flex-col items-stretch justify-center gap-3 sm:flex-row">

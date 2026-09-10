@@ -1,5 +1,5 @@
 <x-marketing-layout>
-    <x-slot name="title">Fan Videos & Comments for Events - Event Schedule</x-slot>
+    <x-slot name="title">Fan Photos, Videos & Comments for Events - Event Schedule</x-slot>
     <x-slot name="description">Let fans add YouTube videos, photos, and comments to your event pages for free, with organizer approval before anything goes live.</x-slot>
     <x-slot name="breadcrumbTitle">Fan Videos, Photos & Comments</x-slot>
 
@@ -28,6 +28,7 @@
             "Guest submissions with a name, an email and a bot check",
             "Per-schedule switches for comments, photos and videos",
             "Photo gallery page per event with a lightbox",
+            "Approved fan videos, photos and comments previewed on event cards in the schedule's list view",
             "Per-event override of the fan content switches on the Pro plan",
             "Bulk photo download as a zip on the Pro plan"
         ],
@@ -677,7 +678,7 @@
             ],
             [
                 'q' => 'What happens to the people who post?',
-                'a' => 'A fan who is signed in when they submit is added to your schedule as a follower, which puts them on the list the next time you write a newsletter. Newsletters are free and the monthly allowance counts recipients: 10 on the free plan, 100 on Pro and 1,000 on Enterprise. Following on its own does not sign anybody up for automatic email: an account follower hears from you only through one of those. The list that hears about new dates on its own is the other one, the people who left an email address on your page and confirmed it.',
+                'a' => 'A fan who is signed in when they submit is added to your schedule as a follower, which puts them on the list the next time you write a newsletter. Newsletters are free and the monthly allowance counts recipients: 10 on the free plan, 100 on Pro and 1,000 on Enterprise. Following on its own does not sign anybody up for automatic email: a fan who only followed, or only posted while signed in, hears from you only through one of those. The list that hears on its own is the other one: the people who left an email address on your page and confirmed it get a digest of your newly published events, at most one every 72 hours.',
             ],
         ];
 
@@ -1083,6 +1084,9 @@
                 <h2 class="es-balance es-reel-ink text-3xl font-black tracking-tight md:text-5xl" data-reveal style="--reveal-delay: 0.1s;">
                     Once it is on the reel, it <span class="es-reel-grad">plays everywhere.</span>
                 </h2>
+                <p class="es-reel-muted mt-5 text-lg" data-reveal style="--reveal-delay: 0.15s;">
+                    On the event page, in its own photo gallery, and on a wider screen in your schedule's list view, where each event's card shows up to three fan videos, four photos and two comments.
+                </p>
             </div>
 
             <div class="grid gap-4 md:grid-cols-2 lg:grid-cols-3" data-reveal-group="80">

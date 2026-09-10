@@ -1,6 +1,6 @@
 <x-marketing-layout>
     <x-slot name="title">Installment Payments | Spread a Ticket Over Months</x-slot>
-    <x-slot name="description">Let buyers pay for an expensive ticket monthly. They see every date and amount before committing, pay the first at checkout, and get their ticket straight away.</x-slot>
+    <x-slot name="description">Let buyers pay for an expensive ticket monthly, with no interest. They see every date and amount first, and the ticket is theirs from the first payment.</x-slot>
     <x-slot name="breadcrumbTitle">Installments</x-slot>
 
     <x-slot name="structuredData">
@@ -21,7 +21,8 @@
             "Only offered above an order value you choose",
             "A reminder two days before each payment, naming the card and the amount",
             "A payment-plan page where the buyer can pay early or change their card",
-            "Progress, balances and a cash-flow forecast on the Sales page"
+            "Progress, balances and a cash-flow forecast on the Sales page",
+            "Refunded leg by leg through Stripe, with the payments still to come cancelled"
         ],
         "offers": {
             "@type": "Offer",
@@ -214,7 +215,7 @@
                     <div>
                         <p class="es-inst-tag mb-4" data-reveal>Installments &middot; Pro &middot; Stripe</p>
                         <h1 class="es-balance es-inst-ink text-4xl font-black tracking-tight md:text-6xl" data-reveal style="--reveal-delay: 0.05s;">
-                            The price stops being <span class="es-inst-accent">the reason not to.</span>
+                            Pay in installments, and the price stops being <span class="es-inst-accent">the reason not to.</span>
                         </h1>
                         <p class="es-inst-muted mt-6 text-lg" data-reveal style="--reveal-delay: 0.1s;">
                             A course, a retreat, a weekend announced eight months out. Let the buyer pay for it monthly: the first payment at checkout, the ticket valid straight away, and the rest charged to the same card on dates they agreed to before they agreed to anything.
@@ -223,7 +224,7 @@
                             <a href="{{ app_url('/sign_up') }}" class="inline-flex items-center gap-2 rounded-xl bg-[#1e3a8a] px-6 py-3 font-semibold text-white transition-colors hover:bg-[#182f70]">
                                 Start for free
                             </a>
-                            <a href="{{ marketing_url('/docs/tickets') }}" class="es-inst-ink inline-flex items-center gap-2 rounded-xl border border-gray-300 px-6 py-3 font-semibold transition-colors hover:border-[#1e3a8a] dark:border-white/15">
+                            <a href="{{ marketing_url('/docs/tickets') }}#installments" class="es-inst-ink inline-flex items-center gap-2 rounded-xl border border-gray-300 px-6 py-3 font-semibold transition-colors hover:border-[#1e3a8a] dark:border-white/15">
                                 Read the guide
                             </a>
                         </div>
@@ -350,7 +351,7 @@
                     <div class="es-inst-panel p-6" data-reveal="panel">
                         <h3 class="es-inst-ink text-base font-bold">If a payment fails</h3>
                         <p class="es-inst-muted mt-2 text-sm leading-relaxed">
-                            A plan that falls into arrears puts the ticket on hold at the door until it is settled - which is what the runway setting is for. The editor warns you while you are setting it up if the schedule you picked would not finish in time, and the checkout is the backstop: an order whose last payment would land too late is simply not offered monthly payments.
+                            A declined card is retried, and a plan that still falls into arrears puts the ticket on hold. At the door the scanner shows the name and the balance still owed rather than a flat refusal, and paying, or giving a new card, lifts the hold. The runway setting exists to leave time for all of that: the editor warns you while you are setting it up if the schedule you picked would not finish in time, and the checkout is the backstop, where an order whose last payment would land too late is simply not offered monthly payments.
                         </p>
                     </div>
                     <div class="es-inst-panel p-6" data-reveal="panel">
@@ -372,17 +373,17 @@
             $instFaqs = [
                 ['q' => 'Does the buyer pay more for spreading it out?', 'a' => 'No. There is no interest and no fee - the total is exactly the same whether they pay once or monthly. What you are giving up is the cash today, not a margin.'],
                 ['q' => 'Do they get the ticket straight away?', 'a' => 'Yes. The ticket is valid from the first payment, which is taken at checkout. Waiting until the plan finished would make the option useless for anything announced far in advance, which is the only kind of event this is for.'],
-                ['q' => 'Can I use it with PayPal or another gateway?', 'a' => 'No. Installments need a card that can be charged automatically later, and Stripe is the only method here that can do that. The option appears only on events paid through Stripe.'],
-                ['q' => 'What happens if a monthly payment fails?', 'a' => 'The plan falls into arrears and the ticket is held at the door until it is settled. That is what the runway setting is for: it makes you leave enough time before the event to notice and chase it, and the editor warns you if the schedule you picked would not finish in time.'],
+                ['q' => 'Can I use it with PayPal or another gateway?', 'a' => 'No. Installments need a card that can be charged automatically later, and Stripe is the only method here that can do that. The option appears only on events paid through Stripe. PayPal, Payfast and the other methods still sell the same tickets, paid in one go.'],
+                ['q' => 'What happens if a monthly payment fails?', 'a' => 'The card is retried, and if the plan still falls into arrears the ticket goes on hold: at the door the scanner shows the name and the balance still owed rather than a flat refusal, and paying, or giving a new card, lifts the hold. That is what the runway setting is for: it makes you leave enough time before the event to notice and chase it, and the editor warns you if the schedule you picked would not finish in time.'],
                 ['q' => 'Why is the option missing on some orders?', 'a' => 'Because the plan could not actually be carried out. Each individual payment has to clear Stripe\'s minimum charge, so a small order split several ways is not offered it - and a promo code or a gift card can take an order under that line, or under the minimum you set. It is also not offered on a basket spanning several events or one containing a pass.'],
                 ['q' => 'Can a buyer clear the balance early?', 'a' => 'Yes. Their payment-plan page, linked from every reminder, lets them pay a single installment early, clear the whole balance, or change the card the rest will be charged to.'],
-                ['q' => 'How does a refund work on a plan?', 'a' => 'Leg by leg, and in full only. Each payment that was taken is refunded through the same account it was charged to - installment plans are the one case that records which account that was, so a seller who has since reconnected Stripe is not refunding from the wrong place.'],
+                ['q' => 'How does a refund work on a plan?', 'a' => 'Leg by leg, and in full only, from the Sales page. Every payment that was actually taken goes back through Stripe, each through the account it was charged to - installment plans are the one case that records which account that was, so a seller who has since reconnected Stripe is not refunding from the wrong place. The payments not yet taken are cancelled rather than refunded, so the card is never charged again, and the seats go back on sale.'],
                 ['q' => 'Which plan do I need?', 'a' => 'Installments are on the Pro plan, and on every selfhosted install at no cost. Selling tickets at all is free, within the free plan\'s 25 paid tickets a calendar month, and there is no platform fee on any tier.'],
             ];
         @endphp
         <section id="faq" class="es-inst-rule scroll-mt-24 py-20 lg:py-28">
             <div class="mx-auto max-w-3xl px-4 sm:px-6 lg:px-8">
-                <h2 class="es-inst-ink mb-10 text-center text-3xl font-black tracking-tight md:text-4xl" data-reveal>Questions</h2>
+                <h2 class="es-inst-ink mb-10 text-center text-3xl font-black tracking-tight md:text-4xl" data-reveal>Installment questions</h2>
                 <div class="space-y-3" data-reveal-group="60">
                     @foreach ($instFaqs as $faq)
                         <details class="es-inst-panel group p-5" data-reveal="panel">

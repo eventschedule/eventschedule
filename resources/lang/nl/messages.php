@@ -2189,8 +2189,8 @@ return [
     'editor_text_direction' => 'Tekstrichting',
 
     // Why create account page
-    'why_create_account_title' => 'Waarom een account aanmaken?',
-    'why_create_account_description' => 'Ontdek de voordelen van een gratis Event Schedule account.',
+    'why_create_account_title' => 'Heb je een account nodig? Wat een gratis account toevoegt',
+    'why_create_account_description' => 'Het meeste van Event Schedule werkt zonder account. Bekijk wat een gratis account toevoegt: al je tickets in één lijst, de schema\'s die je volgt en een eigen pagina.',
     'why_create_account_hero_badge' => 'Gratis account',
     'why_create_account_hero_headline' => 'Ontgrendel krachtige functies',
     'why_create_account_hero_subtitle' => 'Maak een account om je evenementen te beheren, je profiel aan te passen en toegang te krijgen tot alle tools die je nodig hebt - volledig gratis.',

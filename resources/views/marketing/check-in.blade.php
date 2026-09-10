@@ -1,6 +1,6 @@
 <x-marketing-layout>
-    <x-slot name="title">Check-in Dashboard | Watch the Room Fill Up</x-slot>
-    <x-slot name="description">Scan tickets at the door on any plan, and watch a live count of who has arrived: overall progress, a per-ticket-type breakdown and the last ten through the door.</x-slot>
+    <x-slot name="title">QR Ticket Check-in | Free at the Door, Live Count on Pro</x-slot>
+    <x-slot name="description">Scan ticket QR codes at the door free on every plan. On Pro, watch the room fill live: overall progress, each ticket type and the last ten arrivals.</x-slot>
     <x-slot name="breadcrumbTitle">Check-in</x-slot>
 
     <x-slot name="structuredData">
@@ -14,6 +14,7 @@
         "operatingSystem": ["Web", "Android", "iOS"],
         "featureList": [
             "QR code scanning at the door on every plan",
+            "Unpaid, cancelled, fully refunded and expired orders refused at the scan",
             "Live overall progress with the percentage checked in",
             "Per-ticket-type breakdown of who has arrived",
             "Recent activity feed of the last ten arrivals with times",
@@ -230,7 +231,7 @@
                     <div>
                         <p class="es-head-tag mb-4" data-reveal>Check-in &middot; scanning is free, the dashboard is Pro</p>
                         <h1 class="es-balance es-head-ink text-4xl font-black tracking-tight md:text-6xl" data-reveal style="--reveal-delay: 0.05s;">
-                            How many are <span class="es-head-accent">actually in?</span>
+                            Check-in: how many are <span class="es-head-accent">actually in?</span>
                         </h1>
                         <p class="es-head-muted mt-6 text-lg" data-reveal style="--reveal-delay: 0.1s;">
                             Every other report in Event Schedule is something you read afterwards. This is the one you watch while it happens: a single figure going up against a total you already know, refreshing itself every ten seconds while you stand at the door.
@@ -239,7 +240,7 @@
                             <a href="{{ app_url('/sign_up') }}" class="inline-flex items-center gap-2 rounded-xl bg-[#1e40af] px-6 py-3 font-semibold text-white transition-colors hover:bg-[#1b3894]">
                                 Start for free
                             </a>
-                            <a href="{{ marketing_url('/docs/tickets') }}" class="es-head-ink inline-flex items-center gap-2 rounded-xl border border-gray-300 px-6 py-3 font-semibold transition-colors hover:border-[#1e40af] dark:border-white/15">
+                            <a href="{{ marketing_url('/docs/tickets') }}#check-in" class="es-head-ink inline-flex items-center gap-2 rounded-xl border border-gray-300 px-6 py-3 font-semibold transition-colors hover:border-[#1e40af] dark:border-white/15">
                                 Read the guide
                             </a>
                         </div>
@@ -296,7 +297,7 @@
             <div class="mx-auto max-w-5xl px-4 sm:px-6 lg:px-8">
                 <div class="mx-auto mb-12 max-w-3xl text-center">
                     <div class="es-head-mark mb-6" data-reveal aria-hidden="true"><span>01</span></div>
-                    <p class="es-head-tag mb-4" data-reveal style="--reveal-delay: 0.05s;">What costs what</p>
+                    <p class="es-head-tag mb-4" data-reveal style="--reveal-delay: 0.05s;">What check-in costs</p>
                     <h2 class="es-balance es-head-ink text-3xl font-black tracking-tight md:text-5xl" data-reveal style="--reveal-delay: 0.1s;">
                         The door is free. <span class="es-head-accent">The view is Pro.</span>
                     </h2>
@@ -333,7 +334,7 @@
             <div class="mx-auto max-w-5xl px-4 sm:px-6 lg:px-8">
                 <div class="mx-auto mb-12 max-w-3xl text-center">
                     <div class="es-head-mark mb-6" data-reveal aria-hidden="true"><span>02</span></div>
-                    <p class="es-head-tag mb-4" data-reveal style="--reveal-delay: 0.05s;">On the screen</p>
+                    <p class="es-head-tag mb-4" data-reveal style="--reveal-delay: 0.05s;">On the check-in dashboard</p>
                     <h2 class="es-balance es-head-ink text-3xl font-black tracking-tight md:text-5xl" data-reveal style="--reveal-delay: 0.1s;">
                         Everything the desk <span class="es-head-accent">needs, and nothing else.</span>
                     </h2>
@@ -388,16 +389,17 @@
                 ['q' => 'Do I need the Pro plan to scan tickets at the door?', 'a' => 'No. Scanning is free on every plan and the Scan Ticket button is always there. It is gated on permission, not on price: owners, admins and viewers can all scan. The Pro half is the live dashboard - the running count, the per-type breakdown and the arrivals feed.'],
                 ['q' => 'What device does it need?', 'a' => 'Whatever you already have. Both the scanner and the dashboard are web pages, so a phone works at the door and a tablet or laptop works on the desk. There is nothing to install and nothing to buy.'],
                 ['q' => 'What happens if the same ticket is scanned twice?', 'a' => 'It warns rather than refuses. Each ticket admits once, and a second read tells you it has already been used and when - which is the right answer at a door, where the person in front of you is usually holding a phone that a friend already scanned.'],
+                ['q' => 'Which tickets does the scanner turn away?', 'a' => 'An order that is unpaid, cancelled, fully refunded or expired, and a ticket scanned more than a day before its event starts or after it has ended. A partial refund leaves the order paid and its tickets valid, so they still scan. A ticket on an installment plan that has fallen behind is flagged rather than refused: the scanner shows the name and the balance still owed, and whether they come in is your call.'],
                 ['q' => 'Does it work for free registrations as well as paid tickets?', 'a' => 'Yes. A free registration gets a QR code in its confirmation email on exactly the same terms as a paid ticket, so an RSVP event checks in the same way a ticketed one does.'],
                 ['q' => 'Can somebody work the door without seeing our sales?', 'a' => 'Yes, on Enterprise. A team member set to viewer is read-only and sees no sales at all, but may still scan tickets at the door. An admin runs the schedule day to day and does see the sales and the check-in dashboard.'],
                 ['q' => 'How do subscription passes appear on it?', 'a' => 'As people, not as passes. Where a pass admits more than one person the dashboard shows a headcount including guests beside the check-in count, and holders who booked a seat ahead are listed as reserved until they actually turn up.'],
-                ['q' => 'Does a wallet pass scan differently?', 'a' => 'No. A pass saved into Google Wallet carries the same QR code as the ticket page, so it scans exactly like any other ticket and it works offline once saved. The scanner checks the order\'s live status either way, so a cancelled or refunded order is refused at the door even if the pass is still on the phone.'],
+                ['q' => 'Does a wallet pass scan differently?', 'a' => 'No. A pass saved into Google Wallet carries the same QR code as the ticket page, so it scans exactly like any other ticket and it works offline once saved. The scanner checks the order\'s live status either way, so a cancelled or fully refunded order is refused at the door even if the pass is still on the phone.'],
                 ['q' => 'Which plan do I need?', 'a' => 'The check-in dashboard is on the Pro plan, and on every selfhosted install at no cost. Scanning at the door, free registrations and selling up to 25 paid tickets a calendar month with no platform fee are all on the Free plan.'],
             ];
         @endphp
         <section id="faq" class="es-head-rule scroll-mt-24 py-20 lg:py-28">
             <div class="mx-auto max-w-3xl px-4 sm:px-6 lg:px-8">
-                <h2 class="es-head-ink mb-10 text-center text-3xl font-black tracking-tight md:text-4xl" data-reveal>Questions</h2>
+                <h2 class="es-head-ink mb-10 text-center text-3xl font-black tracking-tight md:text-4xl" data-reveal>Check-in questions</h2>
                 <div class="space-y-3" data-reveal-group="60">
                     @foreach ($checkinFaqs as $faq)
                         <details class="es-head-panel group p-5" data-reveal="panel">

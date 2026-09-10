@@ -2182,8 +2182,8 @@ return [
     'editor_text_direction' => 'Dirección del texto',
 
     // Why create account page
-    'why_create_account_title' => '¿Por qué crear una cuenta?',
-    'why_create_account_description' => 'Descubre los beneficios de crear una cuenta gratuita en Event Schedule.',
+    'why_create_account_title' => '¿Necesitas una cuenta? Lo que aporta una cuenta gratuita',
+    'why_create_account_description' => 'Casi todo Event Schedule funciona sin cuenta. Descubre lo que aporta una cuenta gratuita: todas tus entradas en una lista, los horarios que sigues y una página propia.',
     'why_create_account_hero_badge' => 'Cuenta gratuita',
     'why_create_account_hero_headline' => 'Desbloquea funciones potentes',
     'why_create_account_hero_subtitle' => 'Crea una cuenta para gestionar tus eventos, personalizar tu perfil y acceder a todas las herramientas que necesitas, completamente gratis.',

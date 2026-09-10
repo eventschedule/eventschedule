@@ -1,6 +1,6 @@
 <x-marketing-layout>
-    <x-slot name="title">CalDAV Calendar Sync - Event Schedule</x-slot>
-    <x-slot name="description">Sync with any CalDAV-compatible calendar server. Works with Nextcloud, Radicale, Fastmail, iCloud, and more. Open standard, selfhosted friendly.</x-slot>
+    <x-slot name="title">CalDAV Calendar Sync for iCloud, Nextcloud & Fastmail</x-slot>
+    <x-slot name="description">Two-way CalDAV sync with iCloud, Nextcloud, Fastmail or any conformant server. Free on every plan, HTTPS only, and selfhost friendly at both ends.</x-slot>
     <x-slot name="breadcrumbTitle">CalDAV</x-slot>
 
     <x-slot name="structuredData">
@@ -11,7 +11,7 @@
         "name": "Event Schedule - CalDAV Sync",
         "applicationCategory": "BusinessApplication",
         "operatingSystem": "Web",
-        "description": "Sync with any CalDAV-compatible calendar server. Works with Nextcloud, Radicale, Fastmail, iCloud, and more. Open standard, selfhosted friendly.",
+        "description": "Two-way CalDAV sync with iCloud, Nextcloud, Fastmail or any conformant server. Free on every plan, HTTPS only, and selfhost friendly at both ends.",
         "featureList": [
             "CalDAV sync over the published RFC 4791 protocol, free on every plan",
             "Automatic calendar discovery from a single server URL",
@@ -20,6 +20,7 @@
             "Works with Apple Calendar and iCloud, Nextcloud, Fastmail and any conformant server",
             "HTTPS required, credentials stored encrypted",
             "Collection and resource tags so an unchanged calendar costs one request",
+            "Outbound on every save, inbound read every fifteen minutes",
             "Selfhost friendly: both ends can run on your own infrastructure"
         ],
         "offers": {
@@ -636,7 +637,7 @@
             ['DESCRIPTION', 'The event description, or your own calendar description template if you set one', 'Converted from HTML back to Markdown, and only when the calendar actually sent one'],
             ['DTSTART', 'The start, as an absolute instant in UTC', 'Becomes the start, stored in UTC'],
             ['DTEND', 'Start plus the event duration, or two hours if none is set', 'The length becomes the duration, but only when an end was actually sent'],
-            ['LOCATION', 'The address of the venue on the event', 'Matched against the venues on your schedule, and added as one if it is new'],
+            ['LOCATION', 'The address of the venue on the event', 'Matched against the venues you already have, and added as one if it is new'],
             ['URL', 'The public page for the event', 'Not read back'],
             ['CLASS', 'PRIVATE, when the event is unlisted', 'Not read back'],
             ['DTSTAMP, CREATED, LAST-MODIFIED', 'Stamped on every write', 'Not read back'],
@@ -712,6 +713,10 @@
                 'a' => 'No. Sync works at the event level, so a recurring event crosses as one entry rather than one per date. If you want every individual date in a calendar, use the published iCal feed for your schedule, which expands recurring events into one entry per date for the next ninety days, or the per-date iCal download on the event itself.',
             ],
             [
+                'q' => 'Can people subscribe to my schedule without CalDAV?',
+                'a' => 'Yes. CalDAV is for your own calendar, the one you sync in both directions. Everybody else gets a read-only subscription: your pages offer Subscribe to all events from your schedule, in the Add to Calendar menu and beside the email sign-up. It is the schedule\'s live iCal feed, which Apple Calendar, Google Calendar, Outlook or any app that subscribes to a URL keeps re-reading, so a date you move moves for them too. It carries your public events, with each date of a recurring event for the next ninety days, and it asks for no email address, no account and no password.',
+            ],
+            [
                 'q' => 'Can I use CalDAV and Google Calendar at the same time?',
                 'a' => 'Yes. They are separate connections with separate directions on the same schedule, so you can push to one and read from the other, or run both ways on both. Each schedule you own is configured on its own, so two schedules can point at two entirely different calendars.',
             ],
@@ -757,7 +762,7 @@
                     </div>
 
                     <h1 class="es-balance es-proto-ink mb-8 text-[2.4rem] font-black leading-[1.05] tracking-tight sm:text-6xl">
-                        <span class="es-mask"><span class="es-mask-line">The calendar protocol</span></span>
+                        <span class="es-mask"><span class="es-mask-line">CalDAV is the calendar protocol</span></span>
                         <span class="es-mask es-mask-2"><span class="es-mask-line"><span class="es-proto-accent">nobody owns.</span></span></span>
                     </h1>
 
@@ -1154,7 +1159,7 @@
 
             <ul class="es-proto-list es-proto-muted mx-auto mt-8 max-w-3xl space-y-2 text-sm" data-reveal>
                 <li>Everything on this page is on the free plan. Zero platform fees on ticket sales is a separate promise, and also true.</li>
-                <li>Your audience does not need CalDAV or an account: every schedule publishes an iCal feed, and every event has its own iCal download, per date.</li>
+                <li>Your audience does not need CalDAV or an account: your pages offer Subscribe to all events from your schedule, a live iCal feed Apple Calendar or any other calendar app can subscribe to, and every event has its own iCal download, per date. <a href="{{ marketing_url('/docs/sharing#calendar-feeds') }}" class="es-proto-link font-medium hover:underline">How calendar subscriptions work</a></li>
                 <li>CalDAV, Google Calendar and Outlook are independent connections. Running one does not rule out the others.</li>
             </ul>
         </div>

@@ -40,6 +40,7 @@
             "12 interface languages, including right-to-left layout",
             "Filter the frame down to a single sub-schedule",
             "Header, footer, banner and branding stripped inside the frame",
+            "Clicks open the full event page in a new tab, so the host page stays put",
             "Served noindex so your own page is the one search engines read"
         ],
         "url": "{{ url()->current() }}",
@@ -542,6 +543,7 @@
             ['The "Powered by Event Schedule" footer', 'Never inside the frame. Free schedules get it as a small credit line in the copied code, under the frame, and white-label on Pro removes it.'],
             ['Ads', 'A free schedule\'s own public pages can carry them. An embed never does, by design.'],
             ['The language switcher', 'Hidden inside a frame, which is why the language is set in the URL instead.'],
+            ['Sign-up and Add to Calendar', 'No email sign-up, no Add to Calendar menu and no "tell me when tickets go on sale" box inside the frame. They are on the event page a click opens in a new tab, along with the link to subscribe to your whole calendar.'],
             ['Search engines', 'The embed URL is served noindex, nofollow, so the page that ranks is yours, not the frame inside it.'],
             ['Your view count', 'Loads inside a frame are deliberately not recorded as schedule views, so analytics stay a measure of your own schedule page.'],
         ];
@@ -574,6 +576,10 @@
             [
                 'q' => 'Do embed views show up in my analytics?',
                 'a' => 'No. Loads inside a frame are deliberately not recorded as schedule views. Clicks through from the frame open your event page in a new tab, and those are ordinary views, so they are counted.',
+            ],
+            [
+                'q' => 'Can visitors add events to their calendar or subscribe from the embed?',
+                'a' => 'Not inside the frame, which is the calendar on its own. A click on an event opens its page in a new tab, and that page has the rest: Add to Calendar for that date, a link to subscribe to your whole schedule as a live calendar feed that updates itself when a date moves, and on an upcoming event, a box to leave an email address and hear when tickets go on sale or if anything changes. To put the feed link on your own page as well, copy its address from your schedule\'s settings under Integrations, then Advanced.',
             ],
         ];
 
@@ -748,7 +754,7 @@
                     You are giving it <span class="es-paste-sel">a rectangle,</span> not a script.
                 </h2>
                 <p class="es-paste-muted mt-5 text-lg" data-reveal style="--reveal-delay: 0.15s;">
-                    Which means everything you can change lives in the tag and its URL. There is no settings screen on your side of the fence, and nothing to keep in sync.
+                    Which means everything you can change about the embedded calendar lives in the iframe tag and its URL. There is no settings screen on your side of the fence, and nothing to keep in sync.
                 </p>
             </div>
 

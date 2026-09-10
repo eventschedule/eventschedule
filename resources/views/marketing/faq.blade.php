@@ -1,6 +1,6 @@
 <x-marketing-layout>
-    <x-slot name="title">FAQ | Event Schedule - Common Questions Answered</x-slot>
-    <x-slot name="description">Find answers to frequently asked questions about Event Schedule. Learn about pricing, features, ticketing, Google Calendar sync, selfhosting, and more.</x-slot>
+    <x-slot name="title">Event Schedule FAQ: Free Plan, Ticketing, Payments and Sync</x-slot>
+    <x-slot name="description">Straight answers before you sign up: what the free plan includes, 25 paid tickets a month with zero platform fees, PayPal, refunds and calendar sync.</x-slot>
     <x-slot name="breadcrumbTitle">FAQ</x-slot>
 
     {{-- Motion gate: hidden pre-reveal states only apply when this class is present,
@@ -48,7 +48,7 @@
 
            And because the question people actually arrive with is "what
            do I get for nothing", the counter carries a RATE CARD: a real
-           <table>, three plans across, eleven rows down, including the
+           <table>, three plans across, a row per question, including the
            rows that say no. The metaphor and the product argument are
            the same sentence - the free plan is not a trial, so the desk
            can answer without taking your card.
@@ -506,10 +506,11 @@
         // ------------------------------------------------------------------
         // Every answer on this page is a factual claim, so each one is
         // traceable to docs/FEATURES.md or to code. Plan tiers in particular:
-        // newsletters are FREE (10/month), analytics is FREE, SELLING TICKETS
-        // is free up to 25 paid tickets a month with no platform fee (the
-        // ticketing extras - QR check-in, waitlist, promo codes, passes,
-        // add-ons, CSV export - are Pro), APPOINTMENT BOOKING is free with one
+        // newsletters are FREE (10 recipients/month), analytics is FREE, SELLING
+        // TICKETS is free up to 25 paid tickets a month with no platform fee, on
+        // every gateway and with refunds, and SCANNING at the door is free (the
+        // live check-in dashboard, ticket waitlist, promo codes, passes, add-ons
+        // and CSV export are Pro), APPOINTMENT BOOKING is free with one
         // appointment type, custom domains and multiple team members are
         // Enterprise, and the free plan has exactly ONE team member.
         // ------------------------------------------------------------------
@@ -538,7 +539,7 @@
                     ],
                     [
                         'q' => 'Is Event Schedule really free?',
-                        'a' => 'Yes, and the free plan is not a trial that quietly expires. Unlimited events, a mobile-friendly public page at your own address, two-way Google, Outlook and CalDAV sync, sub-schedules, recurring events, free registration with a capacity limit, built-in analytics, the embeddable calendar, backup and restore, and newsletters at 10 emails a month all cost nothing, permanently. Selling tickets is on the free plan too, capped at 25 paid ones a month rather than charged for. The paid plans lift that ceiling and add a short list of other things, and the rate card above sets out exactly which.',
+                        'a' => 'Yes, and the free plan is not a trial that quietly expires. Unlimited events, a mobile-friendly public page at your own address, two-way Google, Outlook and CalDAV sync, sub-schedules, recurring events, free registration with a capacity limit, built-in analytics, the embeddable calendar, backup and restore, and newsletters to 10 recipients a month all cost nothing, permanently. Selling tickets is on the free plan too, through Stripe, PayPal or cash, capped at 25 paid ones a month rather than charged for. The paid plans lift that ceiling and add a short list of other things, and the rate card above sets out exactly which.',
                         'links' => [['Pricing', marketing_url('/pricing')]],
                     ],
                     [
@@ -556,18 +557,18 @@
                 'items' => [
                     [
                         'q' => "What's the difference between Free and Pro?",
-                        'a' => 'Free gives you the calendar: unlimited events, two-way calendar sync, sub-schedules, recurring events, built-in analytics, the embed, and newsletters at 10 emails a month. Free also sells: 25 paid tickets a month, scanned at the door, and one bookable appointment type. Pro is ' . plan_price($proMonthly) . ' a month and takes both ceilings off, then adds the rest of the selling kit: the live check-in dashboard, passes, promo codes, gift cards, add-ons, unlimited appointment types, the sold-out waitlist, custom fields, generated event graphics, webhooks, the REST API, custom CSS, and taking the Event Schedule branding off your public pages. It also raises newsletters to 100 emails a month.',
+                        'a' => 'Free gives you the calendar: unlimited events, two-way calendar sync, sub-schedules, recurring events, built-in analytics, the embed, and newsletters to 10 recipients a month. Free also sells: 25 paid tickets a month through Stripe, PayPal or any other payment method, scanned at the door, and one bookable appointment type. Pro is ' . plan_price($proMonthly) . ' a month and takes both ceilings off, then adds the rest of the selling kit: the live check-in dashboard, passes, promo codes, gift cards, add-ons, installment payments, unlimited appointment types, the ticket waitlist, custom fields, generated event graphics, webhooks, the REST API, custom CSS, and taking the Event Schedule branding off your public pages. It also raises newsletters to 100 recipients a month.',
                         'links' => [['Compare the plans', marketing_url('/pricing')]],
                     ],
                     [
                         'q' => 'What does Enterprise add?',
-                        'a' => 'Enterprise is ' . plan_price($entMonthly) . ' a month and adds a custom domain for your schedule, Internal and Unlisted event visibility with an optional password, up to five team members with availability tracking, scheduled graphic emails, event creation over WhatsApp, the AI generators for schedule and event copy, agenda scanning, and newsletters at 1,000 emails a month. Priority support comes with it.',
-                        'links' => [['Pricing', marketing_url('/pricing')]],
+                        'a' => 'Enterprise is ' . plan_price($entMonthly) . ' a month and adds reserved seating for venue schedules (a seating plan drawn once and reused on every date), a custom domain for your schedule, Internal and Unlisted event visibility with an optional password, up to five team members with availability tracking, scheduled graphic emails, event creation over WhatsApp, the AI generators for schedule and event copy, agenda scanning, and newsletters to 1,000 recipients a month. Priority support comes with it.',
+                        'links' => [['Pricing', marketing_url('/pricing')], ['Reserved seating', marketing_url('/features/allocated-seating')]],
                     ],
                     [
                         'q' => 'Do you take a percentage of my ticket sales?',
-                        'a' => 'No. Event Schedule takes no cut of ticket revenue at all. Money moves through your own Stripe account, so the only thing off the top is Stripe\'s own processing fee, currently around 2.9% plus 30 cents a transaction in the United States. The rest is yours, and it lands in your account rather than in ours.',
-                        'links' => [['How Stripe connects', marketing_url('/stripe')]],
+                        'a' => 'No. Event Schedule takes no cut of ticket revenue at all. Money moves through your own Stripe or PayPal account, so the only thing off the top is the processor\'s own fee: Stripe\'s is currently around 2.9% plus 30 cents a transaction in the United States. The rest is yours, and it lands in your account rather than in ours.',
+                        'links' => [['How Stripe connects', marketing_url('/stripe')], ['PayPal checkout', marketing_url('/paypal')]],
                     ],
                     [
                         'q' => 'What happens when my free trial ends?',
@@ -579,7 +580,7 @@
                     ],
                     [
                         'q' => 'Can I add my team?',
-                        'a' => 'Free and Pro include one team member, which is you. Multiple team members are an Enterprise feature, capped at five, and Enterprise adds an availability tab for tracking who is around on which day. Being blunt about it, do not sign up for the free plan expecting to invite your whole staff.',
+                        'a' => 'Free and Pro include one team member, which is you. Multiple team members are an Enterprise feature, capped at five, and Enterprise adds an availability tab for tracking who is around on which day. An admin runs the schedule day to day, ticket sales and the door included; a viewer is read-only and sees no sales, but can scan tickets at the door. Being blunt about it, do not sign up for the free plan expecting to invite your whole staff.',
                         'links' => [['Team members', marketing_url('/docs/managing-schedules#team')]],
                     ],
                 ],
@@ -592,8 +593,24 @@
                 'items' => [
                     [
                         'q' => 'How do I start selling tickets?',
-                        'a' => 'Connect your Stripe account, which takes a couple of minutes, then add ticket types to an event with a name, a price and a quantity. Buyers pay on the event page and get an emailed ticket carrying a QR code. The first 25 paid tickets a month are on the free plan; Pro removes the ceiling.',
-                        'links' => [['Ticketing', marketing_url('/features/ticketing')], ['Connect Stripe', marketing_url('/stripe')]],
+                        'a' => 'Connect Stripe or PayPal, which takes a couple of minutes, then add ticket types to an event with a name, a price and a quantity. Buyers check out from the event page and get an emailed ticket carrying a QR code. The first 25 paid tickets a month are on the free plan; Pro removes the ceiling.',
+                        'links' => [['Ticketing', marketing_url('/features/ticketing')], ['Connect Stripe', marketing_url('/stripe')], ['Connect PayPal', marketing_url('/paypal')]],
+                    ],
+                    [
+                        // No isPro() anywhere under app/Services/Payments/. PayPalGateway::saveCredentials()
+                        // verifies before storing, supportsCart() is true, and InstallmentService,
+                        // GiftCardController and AppointmentController offer no PayPal branch.
+                        'q' => 'Can I take payment with PayPal?',
+                        'a' => 'Yes, on every plan, including free. Connect your own PayPal account under Settings, Payment Methods, where the credentials are checked with PayPal before they are saved, then choose PayPal as the event\'s payment method. The buyer approves the payment on PayPal\'s own page and the money lands in your PayPal account, with no platform fee. A buyer can pay for tickets to several of your events in one PayPal checkout. Installment plans need Stripe, and gift cards and paid appointments do not offer PayPal. The other ways to take money are Stripe, Payfast for South African rand, Invoice Ninja, a payment link of your own, and cash.',
+                        'links' => [['PayPal checkout', marketing_url('/paypal')]],
+                    ],
+                    [
+                        // SaleRefundService: the provider is called before the status moves, a partial
+                        // leaves the sale paid, and only the full amount releases seats and stock.
+                        // Rails whose driver answers supportsRefunds() false get Mark as Refunded.
+                        'q' => 'Can I refund a ticket?',
+                        'a' => 'Yes, on every plan. From the Sales page, a Stripe or PayPal sale can be refunded in full or in part, and the money goes back through the provider before the sale is marked refunded, so the page never says money moved when it did not. A partial refund leaves the sale paid and its tickets valid, and the page shows how much has gone back so far. A full refund puts the tickets, and any seats, back on sale. An installment plan is refunded leg by leg, in full only. A sale taken any other way, such as cash, a payment link, Invoice Ninja or Payfast, shows a Mark as Refunded button instead, which records the refund while you return the money yourself.',
+                        'links' => [['Managing sales', marketing_url('/docs/tickets#managing-sales')]],
                     ],
                     [
                         'q' => 'Can I create different ticket types for one event?',
@@ -601,8 +618,8 @@
                     ],
                     [
                         'q' => 'How do QR check-ins work?',
-                        'a' => 'Each ticket email carries a QR code. Open the scan screen on any phone or tablet, point it at the code, and the ticket is verified and marked as used. A second scan of the same code is caught rather than argued about at the door. No dedicated hardware.',
-                        'links' => [['Check-in', marketing_url('/docs/tickets')]],
+                        'a' => 'Each ticket email carries a QR code, and buyers can also save the ticket to Google Wallet from the ticket page or that email (on a selfhosted install, once Google Wallet is set up); the pass carries the same code. Open the scan screen on any phone or tablet, point it at the code, and the ticket is verified and marked as used. A second scan of the same code is caught rather than argued about at the door. Scanning is on every plan, and it needs no dedicated hardware.',
+                        'links' => [['Check-in', marketing_url('/features/check-in')], ['Wallet passes', marketing_url('/docs/tickets#wallet-passes')]],
                     ],
                     [
                         'q' => 'Can I track check-ins in real time?',
@@ -620,13 +637,21 @@
                     ],
                     [
                         'q' => 'Can I take sign-ups for a free event without paying for Pro?',
-                        'a' => 'Yes. Free registration is on the free plan, with an optional capacity limit counted per date, so a weekly session can hold twenty people this Thursday and twenty more next Thursday. Priced ticket types, card payment through your own Stripe account and scanning the QR at the door are all on the free plan as well, capped at 25 paid tickets a month. Pro is what removes the cap and adds the live check-in dashboard.',
+                        'a' => 'Yes. Free registration is on the free plan, with an optional capacity limit counted per date, so a weekly session can hold twenty people this Thursday and twenty more next Thursday, and a waitlist for when it fills up is free too. Priced ticket types, payment through your own Stripe or PayPal account and scanning the QR at the door are all on the free plan as well, capped at 25 paid tickets a month. Pro is what removes the cap and adds the live check-in dashboard.',
                         'links' => [['Registration', marketing_url('/docs/tickets#registration')]],
                     ],
                     [
                         'q' => 'What happens when tickets sell out?',
-                        'a' => 'A waitlist button appears in place of the sold-out ticket and people join with a name and an email. If stock comes back from a cancellation or a refund, the next person in line is emailed and has a 24-hour window to buy before the offer passes to the person behind them. Waitlists are on Pro.',
-                        'links' => [['Waitlist', marketing_url('/docs/tickets#waitlist')]],
+                        'a' => 'A waitlist button appears in place of the sold-out ticket and people join with a name and an email. If stock comes back from a cancellation or a refund, the next person in line is emailed and has a 24-hour window to buy before the offer passes to the person behind them. The ticket waitlist is on Pro; the waitlist on a free registration is on every plan.',
+                        'links' => [['Waitlist', marketing_url('/features/waitlist')]],
+                    ],
+                    [
+                        // EventInterestController: one email field, single opt-in, per occurrence date,
+                        // ungated. Unsubscribe deletes the row. SendEventInterestMail is bounded by
+                        // Role::canSendAudienceMail(), never by the newsletter allowance.
+                        'q' => 'Can people ask to hear when tickets go on sale?',
+                        'a' => 'Yes, on every plan, and it is a different list from the waitlist. The waitlist is for a sold-out event; this is for an event whose tickets are not on sale yet, or a visitor who is not ready to buy. They leave just an email address, from the Add to Calendar menu or a quiet link beside the buy button, and get one email when tickets go on sale, one if it is cancelled, a reminder shortly before it starts, and any notice you choose to send if the date or venue changes. Each date of a recurring event is its own list, every email has a one-click unsubscribe that deletes the address, and the event\'s Tickets panel shows you how many people are waiting. It does not sign them up to your schedule or touch your newsletter allowance.',
+                        'links' => [['The interest list', marketing_url('/docs/tickets#interest-list')]],
                     ],
                 ],
             ],
@@ -643,7 +668,8 @@
                     ],
                     [
                         'q' => 'Can my audience add events to their personal calendars?',
-                        'a' => 'Yes. Every event page carries add-to-calendar buttons for Google, Apple and Outlook, and the Apple one is the .ics download, so anything that reads a calendar file is covered by the same button. On a recurring event each date gets its own set rather than one link for the whole series.',
+                        'a' => 'Yes. Every event page carries add-to-calendar buttons for Google, Apple and Outlook, and the Apple one is the .ics download, so anything that reads a calendar file is covered by the same button. On a recurring event each date gets its own set rather than one link for the whole series. The same menu also offers to subscribe to every event on your schedule: a live feed their calendar app keeps re-reading, so a moved date updates itself, where a downloaded .ics file is a one-off snapshot. It costs them no email address, and it is a different thing from the two-way sync you set up for your own calendar.',
+                        'links' => [['Calendar feeds', marketing_url('/docs/sharing#calendar-feeds')]],
                     ],
                     [
                         'q' => 'Can I create recurring events?',
@@ -683,8 +709,17 @@
                         'links' => [['Followers', marketing_url('/docs/managing-schedules#followers')]],
                     ],
                     [
+                        // RoleSubscriberController::confirm() -> linkAccount(): a passwordless account
+                        // plus the follower pivot, on CONFIRM only. The checkout tick box
+                        // (TicketController) writes role_subscribers and never calls linkAccount().
+                        // The panel requires a name as well as the address (subscribe-panel.blade.php).
+                        'q' => 'Does signing up for a schedule\'s emails create an account?',
+                        'a' => 'Yes, once the address is confirmed. The sign-up panel on a schedule asks for a name and an email address, and confirming the link we send also sets up a passwordless account that follows the schedule; adding a password takes one step. What the panel promises is occasional email updates: a digest when the schedule publishes new events, at most one every three days. Ticking the box at checkout joins the same list without creating an account.',
+                        'links' => [['Followers', marketing_url('/docs/managing-schedules#followers')]],
+                    ],
+                    [
                         'q' => 'Can others submit events to my schedule?',
-                        'a' => 'Yes. Turn on event requests and your schedule gets a public submission form. On venue and curator schedules you can also require approval, so nothing appears until you have looked at it. Submissions land in a pending queue and you are emailed when one arrives.',
+                        'a' => 'Yes. Turn on event requests and your schedule gets a public submission form. On venue and curator schedules you can also require approval, so nothing appears until you have looked at it. Submissions land in a pending queue and you are emailed when one arrives, and if you decline one, the person who sent it is told.',
                         'links' => [['Event requests', marketing_url('/docs/creating-schedules#engagement-requests')]],
                     ],
                 ],
@@ -707,13 +742,23 @@
                     ],
                     [
                         'q' => 'Is payment processing secure?',
-                        'a' => 'Card details never reach us. Checkout runs through Stripe, which is PCI-DSS compliant, and the money lands in your own Stripe account. We hold the sale record, not the card number.',
-                        'links' => [['Stripe', marketing_url('/stripe')]],
+                        // Every gateway hands the buyer off: Stripe to its Checkout session, PayPal to its
+                        // approval page, Payfast to its process URL, Invoice Ninja to its invoice link,
+                        // a payment link to the owner's own URL. None of them posts a card to us.
+                        'a' => 'Card details never reach us. Buyers pay on the provider\'s own page: Stripe\'s checkout, PayPal\'s or Payfast\'s, or the Invoice Ninja invoice or payment link you set up. The money lands in your own account with that provider, and Stripe and PayPal are both PCI-DSS compliant. We hold the sale record, not the card number.',
+                        'links' => [['Stripe', marketing_url('/stripe')], ['PayPal', marketing_url('/paypal')]],
                     ],
                     [
                         'q' => 'Do you sell my data?',
                         'a' => 'No. Your data is not sold, shared or used for advertising. The built-in analytics are first-party and count page views without loading a third-party tracker. If that is still not close enough to the bone, selfhost it and nothing leaves your own server.',
                         'links' => [['Selfhosting', marketing_url('/selfhost')]],
+                    ],
+                    [
+                        // show-guest-unclaimed.blade.php (noindex), Role::isClaimable(),
+                        // User::claimSchedule() + preserveExistingListers(), RoleController::claimNotMeSubmit().
+                        'q' => 'Somebody created a page for me. How do I claim it?',
+                        'a' => 'When an organizer lists a performer or venue who is not on Event Schedule yet, a page is made for them so the dates have somewhere to point. That page says which schedule created it and that it has not been claimed, credits each date to the schedule that added it, and stays out of search engines until it is claimed. To claim it, press “Claim this page” and sign in with the email address it was made with: you become the owner, and the schedules that already list you keep listing you. If the page carries no contact details, ask the schedule that listed you to send an invitation. And if it is not you at all, “This is not me” takes the page down at once for whoever holds that address, and is recorded for review for anyone else.',
+                        'links' => [['Claiming a page', marketing_url('/docs/creating-events#claim')]],
                     ],
                 ],
             ],
@@ -816,27 +861,29 @@
             ['Two-way Google, Outlook and CalDAV sync', 'Yes', 'Yes', 'Yes'],
             ['Built-in analytics', 'Yes', 'Yes', 'Yes'],
             ['Free registration with a capacity limit', 'Yes', 'Yes', 'Yes'],
-            ['Newsletter emails a month', '10', '100', '1,000'],
+            ['Newsletter recipients a month', '10', '100', '1,000'],
             ['Paid tickets you can sell a month', 'Up to 25', 'Unlimited', 'Unlimited'],
             ['Platform fee on ticket sales', 'Zero', 'Zero', 'Zero'],
+            ['Stripe and PayPal checkout, with refunds', 'Yes', 'Yes', 'Yes'],
             ['Scan tickets at the door', 'Yes', 'Yes', 'Yes'],
             ['Live check-in dashboard, waitlist, promo codes and passes', 'No', 'Yes', 'Yes'],
             ['Appointment booking', '1 type', 'Unlimited types', 'Unlimited types'],
             ['Remove Event Schedule branding', 'No', 'Yes', 'Yes'],
             ['Team members', '1', '1', 'Up to 5'],
+            ['Reserved seating for venue schedules', 'No', 'No', 'Yes'],
             ['Custom domain, Internal and Unlisted events', 'No', 'No', 'Yes'],
         ];
 
         $quickAnswers = [
             [
                 'q' => 'Is it free?',
-                'a' => 'Yes, and permanently. The calendar, the public page, calendar sync, analytics and 10 newsletter emails a month cost nothing and always did.',
+                'a' => 'Yes, and permanently. The calendar, the public page, calendar sync, analytics and newsletters to 10 recipients a month cost nothing and always did.',
                 'ref' => '01.03',
                 'href' => '#start',
             ],
             [
                 'q' => 'Do you take a cut?',
-                'a' => 'No. Zero platform fees on ticket sales. The money goes through your own Stripe account, so the only deduction is Stripe\'s.',
+                'a' => 'No. Zero platform fees on ticket sales. The money goes through your own Stripe or PayPal account, so the only deduction is the processor\'s own fee.',
                 'ref' => '02.03',
                 'href' => '#cost',
             ],
@@ -888,7 +935,7 @@
                         <svg aria-hidden="true" class="h-5 w-5 es-desk-accent" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8">
                             <path stroke-linecap="round" stroke-linejoin="round" d="M8.228 9c.549-1.165 2.03-2 3.772-2 2.21 0 4 1.343 4 3 0 1.4-1.278 2.575-3.006 2.907-.542.104-.994.54-.994 1.093m0 3h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
                         </svg>
-                        <span class="es-desk-muted text-sm font-medium tracking-wide">{{ $faqCount }} answers, filed and numbered</span>
+                        <span class="es-desk-muted text-sm font-medium tracking-wide">{{ $faqCount }} frequently asked questions, filed and numbered</span>
                     </div>
 
                     <h1 class="es-balance es-desk-ink mb-8 text-[2.5rem] font-black leading-[1.05] tracking-tight sm:text-6xl">
@@ -994,7 +1041,8 @@
                     The rate card, <span class="text-gradient-desk">including the rows that say no.</span>
                 </h2>
                 <p class="es-desk-muted mt-5 text-lg" data-reveal style="--reveal-delay: 0.1s;">
-                    Thirteen rows, three plans. If a page ever tells you newsletters, analytics or scanning a ticket at the door are paid features here, that page is out of date.
+                    {{-- Counted, not written: this said "Thirteen" while the card had fifteen rows. --}}
+                    {{ ucfirst(\Illuminate\Support\Number::spell(count($rateRows))) }} rows, three plans. If a page ever tells you newsletters, analytics, PayPal, refunds or scanning a ticket at the door are paid features here, that page is out of date.
                 </p>
             </div>
 

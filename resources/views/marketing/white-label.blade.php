@@ -1,6 +1,6 @@
 <x-marketing-layout>
-    <x-slot name="title">White Label | Remove Branding - Event Schedule</x-slot>
-    <x-slot name="description">Remove Event Schedule branding from your schedule for a fully white-labeled experience. Your brand, your schedule, no distractions.</x-slot>
+    <x-slot name="title">White Label | Remove Event Schedule Branding on Pro</x-slot>
+    <x-slot name="description">On Pro, Event Schedule branding comes off seven surfaces at once, from the foot of your page to both embeds and your newsletters. Here is what stays, too.</x-slot>
     <x-slot name="breadcrumbTitle">White Label</x-slot>
 
     <x-slot name="structuredData">
@@ -9,7 +9,7 @@
         "@context": "https://schema.org",
         "@type": "SoftwareApplication",
         "name": "Event Schedule - White Label",
-        "description": "Remove Event Schedule branding from your schedule for a fully white-labeled experience.",
+        "description": "On Pro, Event Schedule branding comes off seven surfaces at once, from the foot of your page to both embeds and your newsletters, with nothing to switch on.",
         "applicationCategory": "BusinessApplication",
         "operatingSystem": ["Web", "Android", "iOS"],
         "featureList": [
@@ -112,6 +112,15 @@
            the selfhost FAQ and the operator FAQ have to keep saying so -
            a page selling white-label that overclaims gets found out on
            day one.
+           TWO MORE STAY OFF THE PAGE, and section 03 has a card for
+           each: AbstractEventDesign::renderBranding() stamps
+           "eventschedule.com" in the bottom-right corner of every
+           hosted event graphic, gated on config('app.hosted') alone,
+           so no plan removes it; and GoogleWalletService::classPayload()
+           falls back to images/logo.png, our ES mark, as the pass logo
+           for a schedule with no profile image, on every plan. The
+           "Is anything left?" FAQ says both. If either gate changes,
+           change those two places with it.
 
            NOT USED HERE: a "before / after" toggle or a struck-through
            line. The removal is not an animation and there is no state
@@ -626,7 +635,7 @@
             ],
             [
                 'q' => 'Is anything left?',
-                'a' => 'On a schedule hosted here, nothing in the body of the page and two things outside it. First, one line of metadata in the page head: the breadcrumb data still names eventschedule.com as the site root. The title in the browser tab and the site name in a shared link preview both read your schedule\'s name on every plan, free included, the picture on that preview is your own artwork or, failing that, whatever your page already shows - never one of ours, and the tab icon becomes your logo on Pro. Point a custom domain at the schedule and the breadcrumb roots at your own domain too, which leaves the head with nothing of ours in it. Second, if an admin granted your Enterprise plan by hand rather than you buying it, a small Event Schedule credit chip stays below the footer; customers who pay through Stripe never carry that chip, and neither do plans earned through the referral programme. On any install that is not eventschedule.com the chip is the normal case rather than an exception, on every plan except a free one that is already carrying the operator\'s own strip - see the two questions below.',
+                'a' => 'On a schedule hosted here, nothing in the body of the page and two things outside it. First, one line of metadata in the page head: the breadcrumb data still names eventschedule.com as the site root. The title in the browser tab and the site name in a shared link preview both read your schedule\'s name on every plan, free included, the picture on that preview is your own artwork or, failing that, whatever your page already shows - never one of ours, and the tab icon becomes your logo on Pro. Point a custom domain at the schedule and the breadcrumb roots at your own domain too, which leaves the head with nothing of ours in it. Second, if an admin granted your Enterprise plan by hand rather than you buying it, a small Event Schedule credit chip stays below the footer; customers who pay through Stripe never carry that chip, and neither do plans earned through the referral programme. Two more things are not on your page at all: every event graphic made here carries a small eventschedule.com credit in its corner, whatever the plan, and a Google Wallet pass shows our logo if you have not uploaded one of your own. On any install that is not eventschedule.com the chip is the normal case rather than an exception, on every plan except a free one that is already carrying the operator\'s own strip - see the two questions below.',
             ],
             [
                 'q' => 'Do I need to change my embed after upgrading?',
@@ -678,17 +687,18 @@
 
         <div class="relative z-10 mx-auto w-full max-w-6xl px-4 sm:px-6 lg:px-8">
             <div class="mx-auto max-w-3xl text-center">
-                <p class="es-slate2-tag es-fade-up es-d-1 mb-5">White label</p>
+                <p class="es-slate2-tag es-fade-up es-d-1 mb-5">Remove Event Schedule branding</p>
 
                 <h1 class="es-balance mb-7 text-[2.6rem] font-black leading-[1.05] tracking-tight sm:text-6xl">
-                    <span class="es-mask"><span class="es-mask-line">The only thing we add</span></span>
-                    <span class="es-mask es-mask-2"><span class="es-mask-line">is <span class="es-slate2-grad">one strip</span> at the foot.</span></span>
+                    <span class="es-mask"><span class="es-mask-line">White label takes off</span></span>
+                    <span class="es-mask es-mask-2"><span class="es-mask-line">the <span class="es-slate2-grad">one strip</span> at the foot.</span></span>
                 </h1>
 
                 <p class="es-slate2-muted es-fade-up es-d-2 mx-auto mb-9 max-w-2xl text-lg sm:text-xl">
                     Everything above it is already yours. That strip carries our address and a credit
-                    to the project's sponsor, and white-label takes the whole thing off: every surface
-                    we render, the moment the plan is active, with nothing to switch on.
+                    to the project's sponsor, and white-label takes the whole thing off, along with the
+                    six other surfaces in the register below, the moment the plan is active. There is
+                    nothing to switch on.
                 </p>
 
                 <div class="es-fade-up es-d-3 flex flex-col items-center justify-center gap-3 sm:flex-row">
@@ -768,10 +778,10 @@
                     Seven surfaces, <span class="es-slate2-grad">one decision</span>.
                 </h2>
                 <p class="es-slate2-muted text-lg" data-reveal style="--reveal-delay: 0.15s;">
-                    Every place the Event Schedule name lands on something of yours, what it says
-                    while you are on the free plan, and what happens to it after that. All seven
-                    read the same fact, your plan tier. What white-label does not remove is two
-                    sections down, on the same page.
+                    Every place the Event Schedule name comes off your pages, your embeds and your
+                    newsletters: what it says while you are on the free plan, and what happens to it
+                    after that. All seven read the same fact, your plan tier. What white-label does
+                    not remove, on your pages and off them, is two sections down.
                 </p>
             </div>
 
@@ -817,7 +827,10 @@
                     <span class="es-slate2-ink font-semibold">One decision, seven rows:</span> all
                     seven key off one fact, whether this schedule's plan tier is free. There is no
                     row that reads something else, and none that reads a second schedule - a curator
-                    page answers for itself, whoever else is on the bill. Event Schedule is
+                    page answers for itself, whoever else is on the bill. So does the page the app
+                    makes for an act or venue you list who is not on Event Schedule yet: it is a free
+                    schedule of its own, so it carries the strip until the person it names claims it
+                    and upgrades. Event Schedule is
                     <a href="{{ marketing_url('/open-source') }}" class="es-slate2-accent font-medium underline">open source</a>,
                     so you can go and read the checks rather than take our word for them.
                 </p>
@@ -934,8 +947,9 @@
                     <p class="es-slate2-muted text-lg" data-reveal style="--reveal-delay: 0.15s;">
                         A page selling white-label that promises "no trace anywhere" gets found out on
                         the first afternoon. On a schedule you run here, nothing is left in the body of
-                        your page and two things sit outside it. Here they are, and then what changes
-                        if you run the software yourself instead, or point a domain of your own at it.
+                        your page and two things sit outside it. Two more are not on your page at all.
+                        Here are all four, and then what changes if you run the software yourself
+                        instead, or point a domain of your own at it.
                     </p>
                 </div>
 
@@ -988,6 +1002,51 @@
                             Here on eventschedule.com that is the only way to end up with it: customers
                             paying through Stripe never carry it, and neither do plans earned through the
                             referral programme. A gift keeps its label.
+                        </p>
+                    </div>
+
+                    <!-- The graphic credit: not on your page, on your post. -->
+                    <div class="es-slate2-card flex flex-col p-6 sm:p-7" data-reveal>
+                        <div class="mb-4 flex flex-wrap items-baseline justify-between gap-2">
+                            <h3 class="text-lg font-bold text-white">The graphics you generate</h3>
+                            <span class="es-slate2-pill es-slate2-pill-keep">One mark</span>
+                        </div>
+
+                        <div class="es-slate2-code mb-5 p-4" aria-hidden="true">
+                            <div class="flex gap-2">
+                                @foreach (['#b45309', '#0f766e', '#7f1d1d'] as $sw)
+                                    <span class="es-slate2-swatch" style="background-color: {{ $sw }};"></span>
+                                @endforeach
+                            </div>
+                            <div class="mt-3 flex justify-end">
+                                <span class="es-slate2-etch es-slate2-num text-[0.65rem]">eventschedule.com</span>
+                            </div>
+                        </div>
+
+                        <p class="es-slate2-muted mt-auto text-sm">
+                            <a href="{{ marketing_url('/features/event-graphics') }}" class="es-slate2-lit font-medium underline">Event graphics</a>
+                            made on this service carry a small eventschedule.com credit in the bottom
+                            right corner, whatever the plan. White-label takes our name off your pages,
+                            not off that image. A selfhosted install draws no credit on its graphics.
+                        </p>
+                    </div>
+
+                    <!-- The Wallet pass: your name and logo, ours only as a fallback. -->
+                    <div class="es-slate2-card flex flex-col p-6 sm:p-7" data-reveal>
+                        <div class="mb-4 flex flex-wrap items-baseline justify-between gap-2">
+                            <h3 class="text-lg font-bold text-white">A ticket in Google Wallet</h3>
+                            <span class="es-slate2-pill es-slate2-pill-keep">A fallback</span>
+                        </div>
+
+                        <div class="es-slate2-code mb-5 flex items-center gap-3 p-4" aria-hidden="true">
+                            <span class="es-slate2-tabicon"></span>
+                            <span class="es-slate2-engraved truncate text-sm font-bold">{{ $plateName }}</span>
+                        </div>
+
+                        <p class="es-slate2-muted mt-auto text-sm">
+                            A pass a buyer adds to Google Wallet is issued in your schedule's name, with
+                            your uploaded logo on it, on every plan. If you have not uploaded a logo it
+                            falls back to ours, so upload one before you sell.
                         </p>
                     </div>
                 </div>
@@ -1238,7 +1297,7 @@
 
             <div class="grid gap-5 md:grid-cols-3" data-reveal-group="110">
                 @foreach ([
-                    ['01', 'Upgrade the schedule', 'Pro at {{ plan_price($proMonthly) }} a month, or Enterprise. The strip is gone on the next page load, with nothing else to do.'],
+                    ['01', 'Upgrade the schedule', 'Pro at '.plan_price($proMonthly).' a month, or Enterprise. The strip is gone on the next page load, with nothing else to do.'],
                     ['02', 'Re-copy your embed snippets', 'Only if you had already pasted one. Both snippets carry that line in your HTML, not ours. The widget footer inside the frame goes on its own.'],
                     ['03', 'Fill the space', 'Logo, colour, font and background are free. Custom labels, a banner and Custom CSS come with the same plan.'],
                 ] as [$n, $t, $d])

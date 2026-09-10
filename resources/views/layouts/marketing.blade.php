@@ -48,7 +48,7 @@
         $basePath = $path === '/' ? config('app.url') : config('app.url') . '/' . ltrim(rtrim($path, '/'), '/');
     @endphp
     <link rel="canonical" href="{{ $canonical ?? $basePath }}">
-    <meta name="description" content="{{ $description ?? 'The simple and free way to share your event schedule. Perfect for musicians, venues, event organizers, and vendors.' }}">
+    <meta name="description" content="{{ $description ?? 'Free, open-source event calendar and ticketing platform. Publish your events on one page, sell tickets with zero platform fees and grow your audience.' }}">
     <meta name="robots" content="{{ $robots ?? 'index, follow, max-image-preview:large, max-snippet:-1, max-video-preview:-1' }}">
     <meta name="author" content="Event Schedule">
 
@@ -56,7 +56,7 @@
     <meta property="og:type" content="{{ $ogType ?? 'website' }}">
     <meta property="og:url" content="{{ $canonical ?? $basePath }}">
     <meta property="og:title" content="{{ $title ?? 'Event Schedule' }}">
-    <meta property="og:description" content="{{ $description ?? 'The simple and free way to share your event schedule' }}">
+    <meta property="og:description" content="{{ $description ?? 'Free, open-source event calendar and ticketing platform. Publish your events on one page, sell tickets with zero platform fees and grow your audience.' }}">
     @php
         if (isset($socialImage) && str_starts_with($socialImage, 'http')) {
             $ogImage = $socialImage;
@@ -119,7 +119,7 @@
     <meta name="twitter:card" content="summary_large_image">
     <meta name="twitter:url" content="{{ $canonical ?? $basePath }}">
     <meta name="twitter:title" content="{{ $title ?? 'Event Schedule' }}">
-    <meta name="twitter:description" content="{{ $description ?? 'The simple and free way to share your event schedule' }}">
+    <meta name="twitter:description" content="{{ $description ?? 'Free, open-source event calendar and ticketing platform. Publish your events on one page, sell tickets with zero platform fees and grow your audience.' }}">
     <meta name="twitter:image" content="{{ $ogImage }}">
     <meta name="twitter:image:alt" content="{{ $title ?? 'Event Schedule' }}">
     <meta name="twitter:site" content="@ScheduleEvent">
@@ -132,7 +132,7 @@
         "@id": "{{ config('app.url') }}/#website",
         "name": "Event Schedule",
         "url": "{{ config('app.url') }}",
-        "description": "The simple and free way to share your event schedule. Perfect for musicians, venues, event organizers, and vendors.",
+        "description": "A free, open-source event calendar and ticketing platform for performers, venues and curators: one page for every event, tickets with zero platform fees, and newsletters to the people who follow you.",
         "publisher": {
             "@id": "{{ config('app.url') }}/#organization"
         },

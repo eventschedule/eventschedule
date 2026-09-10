@@ -9,7 +9,7 @@
         "@context": "https://schema.org",
         "@type": "WebPage",
         "name": "Why Create an Account - Event Schedule",
-        "description": "Most of Event Schedule works without signing in. An account is what puts your name on the record: follow schedules, keep every ticket in one place, own the events you submit, and publish a schedule of your own. Free, no card.",
+        "description": "Most of Event Schedule works without signing in. An account is what puts your name on the record: follow schedules, keep every ticket in one place, own the events you submit, claim a page an organizer made for you, and publish a schedule of your own. Free, no card.",
         "url": "{{ url()->current() }}",
         "isPartOf": {
             "@type": "WebSite",
@@ -22,15 +22,16 @@
         },
         "mainEntity": {
             "@type": "ItemList",
-            "name": "What an Event Schedule account unlocks",
+            "name": "What an Event Schedule account adds",
             "itemListElement": [
-                { "@type": "ListItem", "position": 1, "name": "Follow a schedule, which has no signed-out equivalent" },
+                { "@type": "ListItem", "position": 1, "name": "Every schedule you follow, on one Following page" },
                 { "@type": "ListItem", "position": 2, "name": "Every ticket and registration you bought, on one page" },
                 { "@type": "ListItem", "position": 3, "name": "Events you submit are saved on a schedule of your own" },
                 { "@type": "ListItem", "position": 4, "name": "An email when a schedule accepts or declines your event" },
                 { "@type": "ListItem", "position": 5, "name": "A schedule of your own with its own address" },
-                { "@type": "ListItem", "position": 6, "name": "A team seat on somebody else's schedule" },
-                { "@type": "ListItem", "position": 7, "name": "Two-factor sign-in, backup and restore, and account deletion" }
+                { "@type": "ListItem", "position": 6, "name": "A page an organizer created for you, claimed with the address on it" },
+                { "@type": "ListItem", "position": 7, "name": "A team seat on somebody else's schedule" },
+                { "@type": "ListItem", "position": 8, "name": "Two-factor sign-in, backup and restore, and account deletion" }
             ]
         }
     }
@@ -55,6 +56,7 @@
             "Email when a schedule accepts or declines your submission",
             "Edit your own events after they are submitted",
             "A Talent, Venue or Curator schedule with its own address",
+            "Claim a page an organizer created for you by signing in with the address on it",
             "Two-way Google, Outlook and CalDAV calendar sync on the free plan",
             "Built-in analytics, embeddable calendar and sub-schedules on the free plan",
             "Newsletters to the people who follow you",
@@ -455,26 +457,31 @@
         // Doors that are already open: no account, no key.
         $openDoors = [
             [
+                // FeedController::icalFeed is public and unauthenticated; the Add to Calendar menu
+                // offers it as "Subscribe to all events from {schedule}".
                 'Read anything public',
-                'Every public schedule page, event page and calendar is open to anyone. Any event can be added to your own calendar as an .ics download without signing in to anything.',
+                'Every public schedule page, event page and calendar is open to anyone. Add any event to your own calendar as an .ics download, or subscribe to a whole schedule as a live calendar feed that updates itself when dates change. Neither asks you to sign in or to give an address.',
             ],
             [
-                'Buy a ticket',
-                'Checkout asks for a name and an email. The confirmation and the QR code arrive by email, and the order is stored with no owner on it. Creating an account at checkout is an optional tick box, not a step.',
+                'Buy a ticket, or register',
+                'Checkout asks for a name and an email, whether the ticket is paid or a free registration with a capacity limit. The confirmation and the QR code arrive by email, and the order is stored with no owner on it. Creating an account at checkout is an optional tick box, not a step.',
             ],
             [
-                'Register for a free event',
-                'Free registration works the same way, capacity limits included. A name and an email address, and the schedule sees the sign-up straight away.',
-            ],
-            [
-                'Add photos and comments',
-                'Photos, video and comments on an event take a name and an email, and they go through the schedule\'s approval queue before anyone else sees them. A schedule can choose to require an account here instead, and some do.',
+                // EventInterestController::store: one field, single opt-in, and no user is created.
+                // Unsubscribing deletes the row rather than suppressing it.
+                'Hear when tickets go on sale',
+                'On an event page, "Tell me when tickets go on sale" (or "Tell me if anything changes", once they are on sale) takes an email address and nothing else, not even a name. You get one email when tickets go on sale, one if the date or venue changes, one if it is cancelled, and a reminder shortly before it starts. It covers that one date, creates no account, and unsubscribing deletes the address.',
             ],
             [
                 // RoleSubscriberController::store is on the guest routes, not behind auth:
                 // the sign-up panel renders on both the schedule page and every event page.
+                // confirm() then runs linkAccount(): a passwordless account following the schedule.
                 'Hear about new events',
-                'Leave an email address in the panel on any schedule page and confirm it from the message that follows. From then on you get a digest when that schedule publishes new events, at most one every few days. One link in the footer of any of them takes you back off the list.',
+                'Leave your name and email address in the panel on any schedule page (signed out, the Follow button opens the same form) and confirm it from the message that follows. From then on you get a digest when that schedule publishes new events, at most one every three days. Confirming also sets up an account that follows the schedule, with no password until you add one, so this door cuts you a key on the way through.',
+            ],
+            [
+                'Add photos and comments',
+                'Photos, video and comments on an event take a name and an email, and they go through the schedule\'s approval queue before anyone else sees them. A schedule can choose to require an account here instead, and some do.',
             ],
             [
                 'Submit an event',
@@ -515,9 +522,19 @@
                 'Counted once, against your account. Polls are a Pro feature for the schedule running them.',
             ],
             [
+                // Hosted: a signed-out Follow opens the subscribe form (action-buttons.blade.php), and
+                // confirming it runs RoleSubscriberController::linkAccount(). A signed-in Follow
+                // (RoleController::follow) writes the pivot only, with no subscriber row.
                 'Follow a schedule',
-                'The Follow button asks you to sign in first, because the record IS the link between you and them. Leaving an email address in the sign-up panel is the guest version, and it gets you the announcements without the ring.',
-                'On your ring, listed on your Following page, and one click to unfollow.',
+                'Follow opens a short form for your name and email address instead. Confirm the link it sends and you are following, on an account set up for you, and on the new-event digest as well.',
+                'Following at once: on your ring, listed on your Following page, and one click to unfollow. The digest is a separate choice, made in the sign-up panel.',
+            ],
+            [
+                // role/show-guest-unclaimed.blade.php (noindex), RoleController::claimStart/claimConfirm,
+                // User::claimSchedule() + preserveExistingListers(), RoleController::claimNotMeSubmit().
+                'Claim a page made for you',
+                'The page says who created it and that it has not been claimed, and it stays out of search engines. Claim this page asks you to sign in or sign up first.',
+                'Signed in with the address on it, confirming makes the page yours, and the schedules that listed you keep listing you. This is not me takes it down instead.',
             ],
         ];
 
@@ -546,8 +563,12 @@
                 'a' => 'No. Checkout asks for a name and an email, and the ticket and its QR code arrive by email. What signing in first changes is where the order lives afterwards: it appears on your Tickets page along with everything else you have bought, upcoming and past, rather than only in that one email.',
             ],
             [
+                'q' => 'Do I need an account to hear when tickets go on sale?',
+                'a' => 'No. On the event page, "Tell me when tickets go on sale" takes an email address and nothing else. You hear once when tickets go on sale, once if it is cancelled and once shortly before it starts, and you get any notice the organizer sends if the date or venue changes. It is about that one date, it creates no account and it is not a subscription to the schedule, and the unsubscribe link in any of those emails deletes the address.',
+            ],
+            [
                 'q' => 'Does an account cost anything?',
-                'a' => 'No. The account is free and asks for no card. What costs money is a schedule you run, once you want more than the free plan: the free plan sells up to 25 paid tickets a month and scans the QR code on every one of them at the door, Pro at '.plan_price($proMonthly).' a month makes ticket sales unlimited and adds the live check-in dashboard, custom fields and a waitlist, and Enterprise at '.plan_price($entMonthly).' a month adds multiple team members and custom domains. Event Schedule charges zero platform fees on ticket sales on every plan, the free one included, so past the payment processor the money is yours.',
+                'a' => 'No. The account is free and asks for no card. What costs money is a schedule you run, once you want more than the free plan: the free plan sells up to 25 paid tickets a month and scans the QR code on every one of them at the door, Pro at '.plan_price($proMonthly).' a month makes ticket sales unlimited and adds the live check-in dashboard, custom fields and a ticket waitlist, and Enterprise at '.plan_price($entMonthly).' a month adds multiple team members and custom domains. Event Schedule charges zero platform fees on ticket sales on every plan, the free one included, so past the payment processor the money is yours.',
             ],
             [
                 'q' => 'What actually changes when I submit an event signed in?',
@@ -555,11 +576,15 @@
             ],
             [
                 'q' => 'Will following a schedule fill my inbox?',
-                'a' => 'No, and it is worth knowing why, because the two lists on this page behave differently. Pressing Follow makes you an ACCOUNT FOLLOWER: it puts the schedule on your Following page and lets that schedule include you when somebody there writes a newsletter, capped at 10 recipients a month on the free plan, 100 on Pro and 1,000 on Enterprise. Leaving an email address in the sign-up panel on a schedule page is the other thing, and that one does send you a short digest when new events are published, at most one every three days. Nothing fires at an account follower who has not also left an address there. You can do either, or both, or neither.',
+                'a' => 'No, and it is worth knowing why, because the two ways to follow land you on different lists. Pressing Follow while signed in makes you an ACCOUNT FOLLOWER: it puts the schedule on your Following page and lets that schedule include you when somebody there writes a newsletter, capped at 10 recipients a month on the free plan, 100 on Pro and 1,000 on Enterprise. The sign-up panel on a schedule page, which is also what Follow opens when you are signed out, asks for a name and an email address, and confirming it does two things: it sets up an account that follows the schedule, and it adds a short digest when new events are published, at most one every three days. Nothing fires at an account follower who has not also confirmed an address there.',
             ],
             [
                 'q' => 'Can I have an account without creating a schedule?',
                 'a' => 'Yes. Following schedules and keeping your tickets in one place need nothing else. A schedule is what you add when you want a page of your own to publish from, and you can add it months later.',
+            ],
+            [
+                'q' => 'Somebody already made a page with my name on it. How do I claim it?',
+                'a' => 'Sign in with the email address on the page, or sign up with it, and press Claim this page. Pages like that are made when an organizer lists a performer or venue who is not on Event Schedule yet: the page says who created it and that you have not claimed it, and it stays out of search engines until you do. Claiming makes you the owner, and the schedules that already listed you keep listing you. If the page is not you, This is not me takes it down at once when you are signed in with that address, and is recorded for review from any other account.',
             ],
             [
                 'q' => 'Can one account run more than one schedule?',
@@ -612,7 +637,7 @@
                     </h1>
 
                     <p class="es-fade-up es-d-2 es-key-muted mb-10 max-w-xl text-lg sm:text-xl">
-                        You can read a schedule, buy a ticket, register for a free night and often submit an event without signing in to anything. What an account adds is ownership: your name on the record, the record in one place, and the right to change it later.
+                        You can read a schedule, buy a ticket, register for a free night, ask to hear when tickets go on sale and often submit an event without signing in to anything. What an account adds is ownership: your name on the record, the record in one place, and the right to change it later.
                     </p>
 
                     <div class="es-fade-up es-d-3 flex flex-col items-start gap-4 sm:flex-row">
@@ -690,7 +715,7 @@
                         An account is <span class="es-key-lit">not a turnstile.</span>
                     </h2>
                     <p class="es-key-dim mt-5 text-lg" data-reveal style="--reveal-delay: 0.15s;">
-                        These plates are blank on purpose. Six things people routinely assume sit behind a sign-up are not gated at all, and pretending otherwise would be a poor argument for making one.
+                        These plates are blank on purpose. {{ ucfirst(\Illuminate\Support\Number::spell(count($openDoors))) }} things people routinely assume sit behind a sign-up are not gated at all, and pretending otherwise would be a poor argument for making one.
                     </p>
                 </div>
 
@@ -738,7 +763,7 @@
 
             <div class="es-key-card overflow-x-auto p-4 sm:p-6" data-reveal="panel">
                 <table class="es-key-table text-left">
-                    <caption class="sr-only">The same seven actions performed signed out and signed in, and the record each one leaves</caption>
+                    <caption class="sr-only">The same {{ \Illuminate\Support\Number::spell(count($ledger)) }} actions performed signed out and signed in, and the record each one leaves</caption>
                     <thead>
                         <tr>
                             <th scope="col" class="es-key-tagline pb-3 pe-3 font-bold">Action</th>
@@ -816,9 +841,9 @@
                                 </span>
                                 <span class="es-key-plan">Free</span>
                             </div>
-                            <h3 class="es-key-ink mb-3 text-xl font-bold">There is no guest version of this</h3>
-                            <p class="es-key-muted mb-4">Following collects the schedules you care about on one page you can sort, search and prune in bulk. It also lets them write to you: 10 recipients a month on the free plan, 100 on Pro, 1,000 on Enterprise.</p>
-                            <p class="es-key-muted text-sm">Worth saying plainly: nothing is automatic. A newsletter is written and sent by a person, so following is permission, not an alert feed.</p>
+                            <h3 class="es-key-ink mb-3 text-xl font-bold">The guest version cuts the key for you</h3>
+                            <p class="es-key-muted mb-4">Following collects the schedules you care about on one page you can sort, search and prune in bulk. Signed out, Follow asks for a name and an email address instead, and confirming it sets up the account, already following. Either way it lets the schedule write to you: 10 recipients a month on the free plan, 100 on Pro, 1,000 on Enterprise.</p>
+                            <p class="es-key-muted text-sm">Worth saying plainly: following is permission, not an alert feed. A newsletter is written and sent by a person, and the automatic new-event digest reaches only an address somebody confirmed.</p>
                         </div>
                         <div class="es-glare" aria-hidden="true"></div>
                         <div class="es-ring-glow" aria-hidden="true"></div>
@@ -927,7 +952,7 @@
                      same baseline even though the paragraphs above them differ in length. --}}
                 <div class="es-key-card flex flex-col p-7" data-reveal="panel">
                     <h3 class="es-key-ink mb-3 text-lg font-bold">It is not a paywall</h3>
-                    <p class="es-key-muted mb-4 text-sm leading-relaxed">Every key on this page is on the free plan, and the account asks for no card at sign-up or afterwards. What the paid plans buy is capability for a schedule you run: the free plan already sells up to 25 paid tickets a month and scans them at the door, Pro at {{ plan_price($proMonthly) }} a month takes that ceiling off and adds the live check-in dashboard, custom fields and a waitlist, and Enterprise at {{ plan_price($entMonthly) }} a month adds multiple team members, custom domains and AI agenda scanning.</p>
+                    <p class="es-key-muted mb-4 text-sm leading-relaxed">Every key on this page is on the free plan, and the account asks for no card at sign-up or afterwards. What the paid plans buy is capability for a schedule you run: the free plan already sells up to 25 paid tickets a month and scans them at the door, Pro at {{ plan_price($proMonthly) }} a month takes that ceiling off and adds the live check-in dashboard, custom fields and a ticket waitlist, and Enterprise at {{ plan_price($entMonthly) }} a month adds multiple team members, custom domains and AI agenda scanning.</p>
                     <div class="es-key-inset mt-auto p-4">
                         <p class="es-key-muted text-xs leading-relaxed">Newsletters, two-way calendar sync, analytics, the embeddable calendar and free registration with a capacity limit are all on the free plan. That is unusual enough to be worth stating outright rather than implying.</p>
                     </div>
@@ -935,9 +960,9 @@
 
                 <div class="es-key-card flex flex-col p-7" data-reveal="panel">
                     <h3 class="es-key-ink mb-3 text-lg font-bold">It is not a notification subscription</h3>
-                    <p class="es-key-muted mb-4 text-sm leading-relaxed">Following a schedule does not sign you up for automatic alerts, because no such alert exists. Nothing emails followers when a schedule adds an event.</p>
+                    <p class="es-key-muted mb-4 text-sm leading-relaxed">An account does not sign you up for alerts. Pressing Follow while signed in puts the schedule where you can find it again and lets somebody there include you the next time they write to their audience, and that is all it does.</p>
                     <div class="es-key-inset mt-auto p-4">
-                        <p class="es-key-muted text-xs leading-relaxed">What following does is put the schedule where you can find it again, and let somebody there include you the next time they write to their audience. The traffic that is automatic runs the other way: a schedule is emailed when a submission lands in its queue.</p>
+                        <p class="es-key-muted text-xs leading-relaxed">The emails that do arrive on their own are ones you asked for separately: the new-event digest after you confirm an address in the sign-up panel, at most one every three days, and a few notices about a single event when you ask to hear about its tickets. The other automatic traffic runs the other way: a schedule is emailed when a submission lands in its queue.</p>
                     </div>
                 </div>
             </div>

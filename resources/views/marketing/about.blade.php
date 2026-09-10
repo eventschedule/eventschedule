@@ -535,7 +535,7 @@
             ],
             [
                 'Platform fee',
-                'None, on any plan. Tickets are sold through your own Stripe account and settle into it directly, so past Stripe\'s own processing charge the money is yours.',
+                'None, on any plan. Tickets are sold through your own Stripe or PayPal account and settle into it directly, so past the processor\'s own charge the money is yours.',
                 marketing_url('/features/ticketing'), 'How ticketing works', false,
             ],
             [
@@ -560,11 +560,23 @@
         $errata = [
             [
                 'Seat maps are Enterprise only.',
-                'On every other plan a ticket type carries a name, a price, a quantity and a sales window, and buyers are not choosing a specific seat. Drawing a room and selling the seats in it is the one part of ticketing that sits behind the top plan.',
+                'On every other plan a ticket type carries a name, a price, a quantity and a sales window, and buyers are not choosing a specific seat. Drawing a room and selling the seats in it is the one part of ticketing that sits behind the top plan, and the room is drawn on a venue schedule, because only a venue has one.',
+            ],
+            [
+                // SaleRefundService moves money only where the driver says supportsRefunds(); the
+                // others get "Mark as Refunded". TicketController's refund action mails no ticket buyer.
+                'Refunds move money on Stripe and PayPal only.',
+                'From the Sales page a Stripe or PayPal sale can be refunded in full or in part, and the money goes back through the provider before the status changes. Payfast, Invoice Ninja, a payment link and cash can only be marked as refunded, which records it without moving anything. Either way the ticket buyer gets no email about it from us, so that message is yours to send.',
+            ],
+            [
+                // InstallmentService refuses any event not on Stripe; GiftCardController and
+                // AppointmentController have no PayPal branch.
+                'PayPal takes ticket orders, not every payment.',
+                'Installment plans are Stripe only, and gift cards and paid appointment bookings cannot be paid through PayPal either. A ticket order can, including a multi-event cart, which PayPal charges as one payment.',
             ],
             [
                 'Only subscribers get the automatic digest.',
-                'Publishing new events emails the people who left you an email address and confirmed it, at most one digest every three days. Somebody who followed you with an account is on a different list, and that one is reached only by a newsletter you write yourself.',
+                'Publishing new events emails the people who left you an email address and confirmed it, at most one digest every three days. Somebody who only pressed Follow while signed in is on a different list, and that one is reached only by a newsletter you write yourself.',
             ],
             [
                 'Nothing warns you about a clash on the calendar.',
@@ -572,7 +584,7 @@
             ],
             [
                 'Newsletter allowances count recipients.',
-                'Not sends. One newsletter to a hundred followers uses a hundred of the allowance: 10 a month on Free, 100 on Pro, 1,000 on Enterprise. The automatic new-event digest is the one thing outside that count, because the promise there was made to the reader rather than to you.',
+                'Not sends. One newsletter to a hundred followers uses a hundred of the allowance: 10 a month on Free, 100 on Pro, 1,000 on Enterprise. The automatic new-event digest and the notices sent to people waiting on a single event sit outside that count, because the promise there was made to the reader rather than to you.',
             ],
             [
                 'The free plan is one team member.',
@@ -599,7 +611,7 @@
             ],
             [
                 'q' => 'Do you take a cut of ticket sales?',
-                'a' => 'No. Event Schedule charges zero platform fees. You connect your own Stripe or PayPal account and the money settles into it directly, so past the processor\'s own charge nothing is taken. Payfast, an external payment link, cash at the door and Invoice Ninja are the other routes, and none of them is plan gated either.',
+                'a' => 'No. Event Schedule charges zero platform fees. You connect your own Stripe or PayPal account and the money settles into it directly, so past the processor\'s own charge nothing is taken. Payfast, an external payment link, cash at the door and Invoice Ninja are the other routes, and none of them is plan gated either. A refund comes out of the same account: from the Sales page a Stripe or PayPal sale goes back in full or in part through the provider, on every plan.',
             ],
             [
                 'q' => 'Who is behind it?',
@@ -747,7 +759,7 @@
                     <div class="es-colo-leaf flex flex-col p-7" data-reveal="panel">
                         <p class="es-colo-tag mb-3">Question three</p>
                         <h3 class="es-colo-title es-colo-ink mb-3 text-xl">What you may do with it</h3>
-                        <p class="es-colo-muted text-sm leading-relaxed">Run it on your own server, where a selfhosted install is treated as Enterprise. Sell tickets through your own Stripe account, where the platform fee is <span class="es-colo-lit font-semibold">zero</span>.</p>
+                        <p class="es-colo-muted text-sm leading-relaxed">Run it on your own server, where a selfhosted install is treated as Enterprise. Sell tickets through your own Stripe or PayPal account, where the platform fee is <span class="es-colo-lit font-semibold">zero</span>.</p>
                         <a href="#imprint" class="es-colo-link mt-auto inline-flex items-center gap-1 pt-4 text-sm font-semibold">
                             See the terms in the imprint
                             <svg aria-hidden="true" class="h-4 w-4 rtl:rotate-180" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7" /></svg>
@@ -916,7 +928,7 @@
                         </li>
                         <li class="flex gap-3">
                             <svg aria-hidden="true" class="es-colo-second mt-1 h-4 w-4 flex-none" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7" /></svg>
-                            <span class="es-colo-muted text-sm">Zero platform fees on ticket sales, settling into your own Stripe account</span>
+                            <span class="es-colo-muted text-sm">Zero platform fees on ticket sales, settling into your own Stripe or PayPal account</span>
                         </li>
                     </ul>
                     <a href="{{ marketing_url('/pricing') }}" class="es-colo-link mt-6 inline-flex items-center gap-1 font-semibold">

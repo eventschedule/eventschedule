@@ -1,6 +1,6 @@
 <x-marketing-layout>
-    <x-slot name="title">Ticket Waitlist | Sell the Seat That Comes Back</x-slot>
-    <x-slot name="description">When a date sells out, guests join a waitlist. A returned seat is offered to one person at a time, with a 24-hour window, so it is never promised to two people.</x-slot>
+    <x-slot name="title">Ticket Waitlist for Sold-Out Events | One Offer at a Time</x-slot>
+    <x-slot name="description">When a date sells out, guests join a waitlist. A returned seat goes to one person at a time, with 24 hours to buy, so it is never promised to two people.</x-slot>
     <x-slot name="breadcrumbTitle">Waitlist</x-slot>
 
     <x-slot name="structuredData">
@@ -15,7 +15,7 @@
         "featureList": [
             "A Join Waitlist button appears automatically when a date sells out",
             "Guests join with a name and an email address",
-            "A cancelled, refunded or expired sale frees a place",
+            "A cancelled, fully refunded or expired sale frees a place",
             "Only one person is notified at a time",
             "The offer holds for 24 hours, then passes on",
             "A pass holder cancelling a booked date frees a place too",
@@ -226,7 +226,7 @@
                             <a href="{{ app_url('/sign_up') }}" class="inline-flex items-center gap-2 rounded-xl bg-[#166534] px-6 py-3 font-semibold text-white transition-colors hover:bg-[#12522a]">
                                 Start for free
                             </a>
-                            <a href="{{ marketing_url('/docs/tickets') }}" class="es-queue-ink inline-flex items-center gap-2 rounded-xl border border-gray-300 px-6 py-3 font-semibold transition-colors hover:border-[#166534] dark:border-white/15">
+                            <a href="{{ marketing_url('/docs/tickets') }}#waitlist" class="es-queue-ink inline-flex items-center gap-2 rounded-xl border border-gray-300 px-6 py-3 font-semibold transition-colors hover:border-[#166534] dark:border-white/15">
                                 Read the guide
                             </a>
                         </div>
@@ -292,7 +292,7 @@
                 @php
                     $queueReturns = [
                         ['A sale is cancelled', 'Somebody changes their mind, or you cancel an order yourself. The place goes straight back into the count.'],
-                        ['A sale is refunded', 'A refund releases what it was holding, so the seat is available again the moment the money goes back.'],
+                        ['A sale is refunded in full', 'A full refund releases what the order was holding, so the seat is back on sale as soon as the refund goes through. A partial refund leaves the ticket valid, so it frees nothing.'],
                         ['An unpaid order expires', 'A checkout begun and abandoned holds its seats only for as long as your release window allows. When it lapses, the seats return.'],
                         ['A pass holder cancels a date', 'Where a pass books dates in advance, cancelling one hands the place back - and that includes a late cancellation that forfeits the visit, because the seat is more useful to somebody else than the credit is to them.'],
                     ];
@@ -315,7 +315,7 @@
             <div class="mx-auto max-w-5xl px-4 sm:px-6 lg:px-8">
                 <div class="mx-auto mb-12 max-w-3xl text-center">
                     <div class="es-queue-mark mb-6" data-reveal aria-hidden="true"><span>02</span></div>
-                    <p class="es-queue-tag mb-4" data-reveal style="--reveal-delay: 0.05s;">The rule</p>
+                    <p class="es-queue-tag mb-4" data-reveal style="--reveal-delay: 0.05s;">How the waitlist works</p>
                     <h2 class="es-balance es-queue-ink text-3xl font-black tracking-tight md:text-5xl" data-reveal style="--reveal-delay: 0.1s;">
                         One person, <span class="es-queue-accent">one seat, one day.</span>
                     </h2>
@@ -362,17 +362,18 @@
         @php
             $waitlistFaqs = [
                 ['q' => 'Do I have to switch the waitlist on?', 'a' => 'No. Once a date has sold out, the Join Waitlist button takes the place of the buy button on that event page by itself. Guests give a name and an email, and that is the whole sign-up.'],
+                ['q' => 'How is this different from "Tell me when tickets go on sale"?', 'a' => 'That is the interest list, and it does a different job. The waitlist is for a date that has sold out: it queues people for a seat that comes back and offers it to one of them at a time, free on registration events and Pro on ticketed ones. The interest list is for an event whose tickets are not on sale yet, or for someone who only wants to hear if it changes. It takes an email address and nothing else, then sends one email when tickets go on sale, one if the event is cancelled and a reminder before it starts, plus any notice you choose to send if the date or venue changes. It is free on every plan, and it never offers anyone a seat.', 'link' => [marketing_url('/docs/tickets').'#interest-list', 'How the interest list works']],
                 ['q' => 'Is it per event or per date?', 'a' => 'Per date. A recurring night that is full on Friday and half empty on Saturday offers the waitlist on Friday only, because Friday is the thing that sold out.'],
                 ['q' => 'What stops two people buying the same returned seat?', 'a' => 'Only one person is ever notified at a time. The next in line is told only after the current offer is either taken or expires, which is the whole reason the feature works this way rather than emailing everyone at once.'],
                 ['q' => 'How long does someone have?', 'a' => 'Twenty-four hours from the email. If they have not bought by then the offer passes to the next person automatically - there is nothing for you to chase or re-send.'],
-                ['q' => 'Does a refunded ticket wake the list?', 'a' => 'Yes. A cancelled sale, a refunded sale and an unpaid order that expires all put the place back and offer it on. So does a pass holder cancelling a date they had booked in advance.'],
+                ['q' => 'Does a refunded ticket wake the list?', 'a' => 'A full refund does. A cancelled sale, a fully refunded sale and an unpaid order that expires all put the place back and offer it on, and so does a pass holder cancelling a date they had booked in advance. A partial refund leaves the ticket valid, so the seat is still taken and nobody is offered it.'],
                 ['q' => 'Can I see who is waiting?', 'a' => 'Yes, on the Waitlist tab of the Sales page, which appears as soon as there is one entry. It shows each person with their event, date and status, so you know how much demand you turned away.'],
                 ['q' => 'Which plan do I need?', 'a' => 'On a free registration event the waitlist works on every plan, including Free. On a ticketed event it is on the Pro plan, and on every selfhosted install at no cost.'],
             ];
         @endphp
         <section id="faq" class="es-queue-rule scroll-mt-24 py-20 lg:py-28">
             <div class="mx-auto max-w-3xl px-4 sm:px-6 lg:px-8">
-                <h2 class="es-queue-ink mb-10 text-center text-3xl font-black tracking-tight md:text-4xl" data-reveal>Questions</h2>
+                <h2 class="es-queue-ink mb-10 text-center text-3xl font-black tracking-tight md:text-4xl" data-reveal>Waitlist questions</h2>
                 <div class="space-y-3" data-reveal-group="60">
                     @foreach ($waitlistFaqs as $faq)
                         <details class="es-queue-panel group p-5" data-reveal="panel">
@@ -383,6 +384,9 @@
                                 </svg>
                             </summary>
                             <p class="es-queue-muted mt-3 text-sm leading-relaxed">{{ $faq['a'] }}</p>
+                            @if (! empty($faq['link']))
+                                <a href="{{ $faq['link'][0] }}" class="es-queue-accent mt-3 inline-block text-sm font-semibold hover:underline">{{ $faq['link'][1] }}</a>
+                            @endif
                         </details>
                     @endforeach
                 </div>

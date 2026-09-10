@@ -1,6 +1,6 @@
 <x-marketing-layout>
-    <x-slot name="title">Embed Tickets on Any Website - Event Schedule</x-slot>
-    <x-slot name="description">Put the ticket checkout on your own website with one iframe tag. Ticket types, custom questions, promo codes and the total, all inside the frame.</x-slot>
+    <x-slot name="title">Embed Tickets on Your Website | Full Checkout in One iframe</x-slot>
+    <x-slot name="description">Put the whole ticket checkout on your own website with one iframe tag: ticket types, custom questions, promo codes and payment by Stripe, PayPal or cash.</x-slot>
     <x-slot name="breadcrumbTitle">Embed Tickets</x-slot>
 
     <x-slot name="structuredData">
@@ -29,9 +29,9 @@
         "description": "Put the whole ticket checkout on your own website with one iframe tag: ticket types, buyer details, custom questions, promo codes, gift cards and payment.",
         "offers": {
             "@type": "Offer",
-            "price": "0",
+            "price": "{{ $proMonthly }}",
             "priceCurrency": "{{ platform_currency() }}",
-            "description": "Included with the Pro plan"
+            "description": "The ticket widget is on the Pro plan; the RSVP widget is free on every plan"
         },
         "featureList": [
             "One iframe tag, no script and no dependency",
@@ -664,10 +664,10 @@
         $layers = [
             ['01', 'The header bar', 'Your schedule\'s accent colour, the event name, and the date and start time of the occurrence being sold. The name is a link out to the full event page, and it opens in the parent window rather than inside the frame.'],
             ['02', 'The ticket rows', 'Every ticket type on sale for that date, each with its own price and its own remaining count for that date. A multi-use pass is simply another type, add-ons appear once a ticket is chosen, and a type that has run out reads sold out. When every type has gone, the frame turns into a waitlist form instead of a dead end.'],
-            ['03', 'Buyer details', 'A name and an email address. Switch on individual tickets and each attendee gets their own row, their own confirmation email and their own QR code.'],
+            ['03', 'Buyer details', 'A name and an email address. Switch on individual tickets and each attendee gets their own row, their own confirmation email and their own QR code, with an Add to Google Wallet button wherever wallet passes are switched on.'],
             ['04', 'Your own questions', 'Custom fields you attached to the event or to a single ticket type, answered here at checkout instead of in a follow-up email thread.'],
             ['05', 'Codes', 'A promo code box, once the event has a live code, and a gift card box on schedules that sell them. A code can also arrive pre-filled from the embed URL, so a link in a newsletter carries its own discount.'],
-            ['06', 'Total and pay', 'The running total, any discount applied, and the button that starts checkout on whichever payment method the event uses.'],
+            ['06', 'Total and pay', 'The running total, any discount applied, the choice to pay monthly on an event that offers installments, and the button that starts checkout on whichever payment method the event uses.'],
             ['07', 'The foot', 'A "Powered by Event Schedule" line, and the one layer most readers of this page will never meet: the widget needs Pro on the hosted platform, and a Pro schedule does not carry branding. A selfhosted install behaves like a paid plan throughout, so it does not carry it either. In practice the line shows on an operator who runs their own free tier, and nowhere else.'],
         ];
 
@@ -719,7 +719,11 @@
             ],
             [
                 'q' => 'Which payment methods work inside the widget?',
-                'a' => 'All of them: Stripe, PayPal, Payfast, Invoice Ninja, a custom payment URL, and cash or at the door. Which window the checkout finishes in is decided by the event\'s payment method rather than by the amount. On cash it completes inside the frame. Stripe, Invoice Ninja and custom payment URL open in the parent window instead, because payment portals frequently refuse to be framed, and the buyer lands back on your page afterwards.',
+                'a' => 'All of them: Stripe, PayPal, Payfast, Invoice Ninja, a custom payment URL, and cash or at the door. Which window the checkout finishes in is decided by the event\'s payment method rather than by the amount. On cash it completes inside the frame. Every other method opens in the parent window instead, because payment portals frequently refuse to be framed, and the buyer finishes on their ticket page rather than back inside the frame.',
+            ],
+            [
+                'q' => 'Does the widget do everything my event page does?',
+                'a' => 'Everything that sells the ticket. Three things stay on the full event page, on purpose. The multi-event cart: the widget sells the one event it was copied from, because a cart held inside someone else\'s page would be out of reach of the rest of your schedule. The quiet "Tell me if anything changes" link beside the buy button, which takes an email address for news about the event rather than an order. And the tick-box that lets a buyer sign up to hear from your schedule. The event name in the header bar opens that full page, in the parent window.',
             ],
             [
                 'q' => 'Can I use it for free events and registrations?',
@@ -731,7 +735,7 @@
             ],
             [
                 'q' => 'What does it cost, and what do you take from a sale?',
-                'a' => 'The ticket widget is on the Pro plan. Event Schedule charges no platform fee on ticket sales at all: card processing runs through your own Stripe account, so what it charges is between you and Stripe. On a selfhosted install the widget is included at no extra cost.',
+                'a' => 'The ticket widget is on the Pro plan. Event Schedule charges no platform fee on ticket sales at all: payment runs through your own Stripe, PayPal, Payfast or Invoice Ninja account, so what processing costs is between you and that provider. On a selfhosted install the widget is included at no extra cost.',
             ],
             [
                 'q' => 'Will the framed page compete with my own page in search?',
@@ -773,7 +777,7 @@
                     <p class="es-widg-eyebrow es-fade-up es-d-1 mb-5">Embed tickets &middot; Pro plan</p>
 
                     <h1 class="es-balance mb-7 text-[2.6rem] font-black leading-[1.05] tracking-tight sm:text-6xl">
-                        <span class="es-mask"><span class="es-mask-line">The whole checkout,</span></span>
+                        <span class="es-mask"><span class="es-mask-line">Embed the whole checkout,</span></span>
                         <span class="es-mask es-mask-2"><span class="es-mask-line">as <span class="es-widg-accent">one part</span>.</span></span>
                     </h1>
 
@@ -1173,16 +1177,17 @@
                     <div class="es-widg-measure"></div>
                 </div>
                 <p class="es-widg-muted text-lg" data-reveal style="--reveal-delay: 0.1s;">
-                    Event Schedule charges no platform fee on ticket sales. Card processing runs
-                    through your own Stripe account, so what it costs is between you and Stripe.
+                    Event Schedule charges no platform fee on ticket sales. Payment runs through
+                    your own Stripe, PayPal, Payfast or Invoice Ninja account, so what processing
+                    costs is between you and that provider.
                 </p>
             </div>
 
             <div class="grid gap-4 md:grid-cols-2 lg:grid-cols-4" data-reveal-group="100">
                 @foreach ([
-                    ['Stripe', 'Opens in the parent window', 'Your own connected account. The buyer leaves the frame for the payment page and comes back to your site when it is done.'],
-                    ['PayPal', 'Opens in the parent window', 'Your own connected account. The buyer approves on PayPal and returns to your site, and the ticket is issued as soon as they land.'],
-                    ['Payfast', 'Opens in the parent window', 'South African rand only. The buyer pays on Payfast and returns to your site.'],
+                    ['Stripe', 'Opens in the parent window', 'Your own connected account. The buyer leaves the frame for the payment page and lands on their ticket when it is done.'],
+                    ['PayPal', 'Opens in the parent window', 'Your own connected account. The buyer approves on PayPal and lands on their ticket, issued the moment they return.'],
+                    ['Payfast', 'Opens in the parent window', 'South African rand only. The buyer pays on Payfast and lands on their ticket afterwards.'],
                     ['Invoice Ninja', 'Opens in the parent window', 'For anyone already invoicing through Invoice Ninja, including the payment-link mode.'],
                     ['Custom payment URL', 'Opens in the parent window', 'Point the event at any payment page you already run, and it is used instead.'],
                     ['Cash or at the door', 'Finishes in the frame', 'No processor involved. The order is recorded, confirmed and emailed without the buyer leaving your page, and a free ticket on a cash event finishes here too.'],
@@ -1196,10 +1201,10 @@
             </div>
 
             <p class="es-widg-muted mx-auto mt-8 max-w-3xl text-center text-sm" data-reveal>
-                Payment portals frequently refuse to be loaded inside an iframe, so the three that use
-                one break out to the parent window rather than failing quietly in a box on your page.
-                It is decided by the event's payment method, not by the amount, and it is the one
-                thing the widget deliberately does outside the frame.
+                Payment portals frequently refuse to be loaded inside an iframe, so every method
+                except cash breaks out to the parent window rather than failing quietly in a box on
+                your page. It is decided by the event's payment method, not by the amount, and it is
+                the one step of checkout that happens outside the frame.
             </p>
         </div>
     </section>
@@ -1317,7 +1322,7 @@
                         <span class="es-widg-muted es-widg-mono text-[0.65rem] uppercase tracking-widest">this page</span>
                     </div>
                     <h3 class="es-widg-ink mb-2 text-lg font-bold">The ticket widget</h3>
-                    <p class="es-widg-muted text-sm leading-relaxed">The purchase or registration form itself, on your page. Comes with the rest of ticketing: promo codes, custom fields, waitlist and QR check-in.</p>
+                    <p class="es-widg-muted text-sm leading-relaxed">The ticket purchase form itself, on your page, with the rest of Pro ticketing: promo codes, custom fields and the ticket waitlist. An RSVP event's registration form embeds free on every plan.</p>
                 </div>
 
                 <div class="es-widg-card flex flex-col p-7" data-reveal="panel">
@@ -1429,6 +1434,34 @@
                         <x-slot:icon>
                             <svg aria-hidden="true" class="w-5 h-5 text-green-600 dark:text-green-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v13m0-13V6a2 2 0 112 2h-2zm0 0V5.5A2.5 2.5 0 109.5 8H12zm-7 4h14M5 12a2 2 0 110-4h14a2 2 0 110 4M5 12v7a2 2 0 002 2h10a2 2 0 002-2v-7" />
+                            </svg>
+                        </x-slot:icon>
+                    </x-feature-link-card>
+                </div>
+                <div data-reveal>
+                    <x-feature-link-card
+                        name="Promo Codes & Add-ons"
+                        description="Discount codes with limits and an expiry, pre-filled from the embed URL, and extras with their own stock"
+                        :url="marketing_url('/features/promo-codes')"
+                        icon-color="orange"
+                    >
+                        <x-slot:icon>
+                            <svg aria-hidden="true" class="w-5 h-5 text-orange-600 dark:text-orange-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A1.994 1.994 0 013 12V7a4 4 0 014-4z" />
+                            </svg>
+                        </x-slot:icon>
+                    </x-feature-link-card>
+                </div>
+                <div data-reveal>
+                    <x-feature-link-card
+                        name="PayPal"
+                        description="Take ticket payments into your own PayPal account, on every plan"
+                        :url="marketing_url('/paypal')"
+                        icon-color="sky"
+                    >
+                        <x-slot:icon>
+                            <svg aria-hidden="true" class="w-5 h-5 text-sky-600 dark:text-sky-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z" />
                             </svg>
                         </x-slot:icon>
                     </x-feature-link-card>

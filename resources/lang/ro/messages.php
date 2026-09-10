@@ -2212,8 +2212,8 @@ return [
     'editor_text_direction' => 'Direcția textului',
 
     // Why create account page
-    'why_create_account_title' => 'De Ce Să Creezi un Cont?',
-    'why_create_account_description' => 'Descoperă beneficiile creării unui cont gratuit Event Schedule.',
+    'why_create_account_title' => 'Ai Nevoie de un Cont? Ce Aduce un Cont Gratuit',
+    'why_create_account_description' => 'Aproape tot ce oferă Event Schedule funcționează fără cont. Vezi ce aduce un cont gratuit: toate biletele tale într-o listă, programele pe care le urmărești și o pagină a ta.',
     'why_create_account_hero_badge' => 'Cont Gratuit',
     'why_create_account_hero_headline' => 'Deblochează funcționalități puternice',
     'why_create_account_hero_subtitle' => 'Creează un cont pentru a-ți administra evenimentele, personaliza profilul și accesa toate instrumentele de care ai nevoie - complet gratuit.',

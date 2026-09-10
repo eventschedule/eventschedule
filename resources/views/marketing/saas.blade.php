@@ -29,6 +29,8 @@
             "Configurable trial length",
             "White-label branding, bar one small attribution link",
             "Ticketing with QR check-in",
+            "Ticket checkout through Stripe Connect or each customer's own PayPal account, with refunds",
+            "Optional operator revenue from ads, network promotions and an accommodation affiliate",
             "REST API and webhooks"
         ],
         "provider": {
@@ -1356,7 +1358,7 @@
                             </div>
                         </div>
                         <h3 class="mb-2 text-xl font-bold text-gray-900 dark:text-white">The admin portal</h3>
-                        <p class="mb-6 flex-grow text-sm text-gray-500 dark:text-gray-400">Where your customers create events, sell tickets through Stripe Connect, track sales, send newsletters, and check attendees in.</p>
+                        <p class="mb-6 flex-grow text-sm text-gray-500 dark:text-gray-400">Where your customers create events, sell tickets through Stripe Connect or their own PayPal account, track and refund sales, send newsletters, and check attendees in.</p>
                         <a href="{{ demo_url() }}" target="_blank" rel="noopener noreferrer" class="inline-flex items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-blue-600 to-sky-600 px-6 py-3 font-medium text-white transition-colors hover:from-blue-500 hover:to-sky-500">
                             Open the Admin Demo
                             <svg aria-hidden="true" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" /></svg>
@@ -1417,7 +1419,7 @@
                         @for ($copy = 0; $copy < 2; $copy++)
                             <div class="flex gap-3.5" @if ($copy === 1) aria-hidden="true" @endif>
                                 @foreach ([
-                                    ['Ticketing via Stripe Connect', 'M15 5v2m0 4v2m0 4v2M5 5a2 2 0 00-2 2v3a2 2 0 110 4v3a2 2 0 002 2h14a2 2 0 002-2v-3a2 2 0 110-4V7a2 2 0 00-2-2H5z'],
+                                    ['Ticketing via Stripe or PayPal', 'M15 5v2m0 4v2m0 4v2M5 5a2 2 0 00-2 2v3a2 2 0 110 4v3a2 2 0 002 2h14a2 2 0 002-2v-3a2 2 0 110-4V7a2 2 0 00-2-2H5z'],
                                     ['QR check-in', 'M12 4v1m6 11h2m-6 0h-2v4m0-11v3m0 0h.01M12 12h4.01M16 20h4M4 12h4m12 0h.01M5 8h2a1 1 0 001-1V5a1 1 0 00-1-1H5a1 1 0 00-1 1v2a1 1 0 001 1zm12 0h2a1 1 0 001-1V5a1 1 0 00-1-1h-2a1 1 0 00-1 1v2a1 1 0 001 1zM5 20h2a1 1 0 001-1v-2a1 1 0 00-1-1H5a1 1 0 00-1 1v2a1 1 0 001 1z'],
                                     ['Calendar sync', 'M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z'],
                                     ['Newsletters', 'M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z'],
@@ -1562,12 +1564,18 @@
                 'a' => 'There is no cap on the number of customers or schedules, and nobody takes a cut of a ticket sale. The built-in Free tier does have allowances your customers upgrade past: 25 paid tickets a month per schedule, 10 newsletter recipients a month, 25 fan photos. Free RSVPs never count, the ticket figure is an environment variable you can raise, and Pro and Enterprise are unlimited on ticket sales.',
             ],
             [
+                'q' => 'How do my customers get paid for their tickets?',
+                'a' => 'Straight into their own accounts. A customer connects Stripe through your platform\'s Stripe Connect, or connects their own PayPal account, which needs nothing set up on your side. Payfast (for rand), Invoice Ninja, a payment link and cash are there too, each connected by the customer. Nothing in the checkout takes a cut, so your revenue comes from subscriptions and the operator rails (ads, promotions, the accommodation map), not from your customers\' ticket sales. A Stripe or PayPal sale can be refunded from the Sales page, in full or in part, and the money goes back through the provider.',
+                'more' => ['label' => 'How PayPal checkout works', 'href' => 'marketing.paypal'],
+            ],
+            [
                 'q' => 'How is this different from a reseller or partner program?',
                 'a' => 'Reseller programs rent you a brand skin on someone else\'s platform: typically a revenue share, per-ticket fees, and no code access. With Event Schedule you run the actual software on your own servers. Nobody can raise your rates, change your terms, or switch your platform off.',
             ],
             [
                 'q' => 'What do I need to host it?',
-                'a' => 'A server you control (a small VPS is enough to start), a domain with wildcard DNS for customer subdomains, and a Stripe account for billing. Install with Docker or the one-click Softaculous installer. The setup guide covers everything from environment variables to going live.',
+                'a' => 'A server you control (a small VPS is enough to start), a domain with wildcard DNS for customer subdomains, and a Stripe account for billing. Install with Docker or the one-click Softaculous installer. The setup guide covers everything from environment variables to going live. One optional extra is worth knowing about: add Google Wallet issuer credentials once, and every customer\'s buyers get an Add to Google Wallet button with their tickets.',
+                'more' => ['label' => 'Set up Google Wallet passes', 'href' => 'marketing.docs.selfhost.google_wallet'],
             ],
             [
                 'q' => 'Who handles GDPR and data protection?',
@@ -1581,6 +1589,11 @@
             [
                 'q' => 'Do I get all features, or is there a paid tier for operators?',
                 'a' => 'There is no paid tier for operators: you get the whole codebase and we never bill you. A single-tenant install runs with every Enterprise feature unlocked. In SaaS mode the tiers apply to every schedule on the platform, including your own, so grant yourself a plan from /admin to unlock Pro and Enterprise screens. The feature split ships with the platform; the prices are yours to set.',
+            ],
+            [
+                'q' => 'What can I do from the admin panel?',
+                'a' => 'Run the platform. See users, revenue, analytics and usage across every customer, grant any schedule a plan by hand, approve paid promotions before they serve, and manage your customers\' custom domains. You can also edit any schedule\'s name, subdomain and contact details, release a subdomain someone is sitting on, and restore that schedule later. Each of those schedule changes is written to the audit log.',
+                'more' => ['label' => 'Read the admin panel guide', 'href' => 'marketing.docs.selfhost.admin'],
             ],
         ];
     @endphp

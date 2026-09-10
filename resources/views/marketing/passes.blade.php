@@ -18,6 +18,7 @@
             "Festival pass good for each covered event once",
             "Season pass covering every date of a recurring event",
             "One QR code for the whole series",
+            "Saves to Google Wallet as one pass, not one per date",
             "Cover the whole schedule, a sub-schedule, or hand-picked events",
             "Optional advance booking from the holder's own pass page",
             "Cancellation deadline with a forfeit or block policy",
@@ -459,6 +460,9 @@
                         $doorPoints = [
                             ['A visit is an event-day, not a scan', 'Double-scanning is harmless. The second read at the same event on the same day is recognised as the same visit, and the counter does not move.'],
                             ['Bring a guest without spending a visit', 'Set how many people the pass admits at each event, holder included. Party size and the visit count are separate, so a ten-visit pass that admits two is ten events for two people, not five.'],
+                            // GoogleWalletService::classPayload() leaves a pass's class undated, so the
+                            // wallet holds ONE pass for everything it covers. The visit count is not on it.
+                            ['One wallet pass, not one per date', 'The pass page and the confirmation email carry an Add to Google Wallet button. It saves as a single Google Wallet pass for every date it is good for, with the same QR code, how many it admits and its valid-until date. The visit count stays on the pass page.'],
                             ['A bad pass is a status, not an alarm', 'Out of visits, expired, wrong event, too early, event finished - each comes back as a plain statement of what is true, with what to do next. Only an unpaid or refunded order is treated as an error.'],
                             ['The visit log', 'The Subscriptions tab lists every paid pass with its holder, its count and its expiry, and opens out into the dates behind it: attended, booked, or forfeited.'],
                         ];
@@ -483,13 +487,17 @@
         @php
             $passFaqs = [
                 ['q' => 'Is a pass an auto-renewing subscription?', 'a' => 'No. The buyer pays once and Event Schedule never bills them again. A pass here is a multi-use ticket, not a card kept on file, so when it runs out of visits or reaches its expiry the holder simply buys another. The word subscription is also used for your own Pro or Enterprise plan, which is a different thing entirely and is managed on the Plan tab.'],
-                ['q' => 'How many QR codes does a holder get?', 'a' => 'One. A pass is a single redeemable unit - one code with one visit counter - which is why the maximum per order is fixed at one and you never have to set that yourself. Buying passes as gifts means a separate order for each, and a pass cannot share an order with ordinary single-date tickets.'],
+                ['q' => 'How many QR codes does a holder get?', 'a' => 'One. A pass is a single redeemable unit - one code with one visit counter - which is why the maximum per order is fixed at one and you never have to set that yourself. Saved to Google Wallet it is still one pass, not one per date; on a selfhosted install that button appears once the operator has set up Google Wallet. Buying passes as gifts means a separate order for each, and a pass cannot share an order with ordinary single-date tickets.'],
                 ['q' => 'Does a guest use up one of the visits?', 'a' => 'No. Admissions per event is the number of people who may enter at each event, the holder included, and it is counted separately from the visits. A ten-visit pass that admits two is still ten visits, each of which lets two people in. Extra people do count against the event capacity, so an extra admission is only granted while the date still has a free seat.'],
                 ['q' => 'What happens if my schedule drops back to the free plan?', 'a' => 'Passes you already sold keep every setting and the scanner still checks holders in, because taking a sold pass away from the person holding it would be indefensible. What stops is booking dates in advance. The plan is checked when the pass is used, not only when it was sold.'],
                 ['q' => 'Can a pass be used at another schedule?', 'a' => 'No. Coverage always resolves inside the schedule the selling event belongs to, so a pass sold by one schedule can never be redeemed at another one\'s events.'],
                 ['q' => 'Does it work on an event with allocated seating?', 'a' => 'Yes. Booking ahead gives the holder a real seat, chosen as the best available rather than picked from the map, and it is shown beside the date on their pass page. Cancelling gives that exact seat back. The pool is per price band, and a pass may take a seat in any band.'],
                 ['q' => 'Someone forfeited a booking and turned up anyway. What then?', 'a' => 'A forfeited booking never revives. If they scan in, that is a new visit and it is subject to the same limits as any other - on a festival pass, where the one visit for that event is already spent, there is nothing left to spend.'],
-                ['q' => 'What do I see about how the passes are being used?', 'a' => 'The Subscriptions tab on the Sales page covers every schedule you own and counts the passes and the visits redeemed across them. Each paid pass is a row with the holder, the type, the count and the expiry, marked Active, Used up or Expired, and it expands into the visit log. Refunding a pass removes it and its log, so export first if you need the history.'],
+                ['q' => 'What do I see about how the passes are being used?', 'a' => 'The Subscriptions tab on the Sales page covers every schedule you own and counts the passes and the visits redeemed across them. Each paid pass is a row with the holder, the type, the count and the expiry, marked Active, Used up or Expired, and it expands into the visit log.'],
+                // A partial refund leaves Sale.status paid, so the pass keeps working. A full refund
+                // releases its bookings (PassBookingService) and drops it off the paid-only
+                // Subscriptions tab (TicketController::getSubscriptionsData).
+                ['q' => 'Can I refund a pass?', 'a' => 'Yes, from the Sales page. A pass bought through Stripe or PayPal is refunded through the provider, in full or in part, and a partial refund leaves the pass working. A full refund ends it: the scanner reports it as refunded, any dates it had booked are released, and it drops off the Subscriptions tab with its visit log, so export first if you need the history. For any other payment method, Mark as Refunded records it and you return the money yourself.'],
                 ['q' => 'Which plan do I need?', 'a' => 'Passes are on the Pro plan, and on every selfhosted install at no cost. Selling tickets itself is not gated: the free plan sells up to 25 paid tickets a calendar month with no platform fee, and scanning a QR code at the door is free on every plan.'],
             ];
         @endphp

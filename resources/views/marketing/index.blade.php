@@ -386,7 +386,18 @@
         "@id": "{{ config('app.url') }}/#software",
         "name": "Event Schedule",
         "url": "{{ config('app.url') }}",
-        "description": "The simple and free way to share your event schedule. Perfect for musicians, venues, event organizers, and vendors.",
+        "description": "Event calendar and ticketing platform. Publish your events on one page, sell tickets with zero platform fees through Stripe or PayPal, email the people who follow you and scan tickets at the door. Free plan, open source and selfhostable.",
+        "featureList": [
+            "Event calendar pages with a custom link and a website embed",
+            "Ticket sales with zero platform fees through Stripe or PayPal",
+            "QR ticket scanning at the door on every plan",
+            "Full and partial refunds through Stripe and PayPal",
+            "Email sign-up for when an event's tickets go on sale",
+            "Newsletters, and automatic new-event digests for confirmed subscribers",
+            "Two-way calendar sync with Google Calendar, Microsoft 365 and CalDAV",
+            "A live calendar feed guests can subscribe to",
+            "Appointment booking"
+        ],
         "applicationCategory": "BusinessApplication",
         "operatingSystem": ["Web", "Android", "iOS"],
         "screenshot": "{{ config('app.url') }}/images/social/home.jpg",
@@ -404,9 +415,9 @@
         name="How to share your event schedule"
         description="Get your event schedule live and shared with your audience in three simple steps."
         :steps="[
-            ['name' => 'Create your schedule', 'text' => 'Sign up free. Add your events manually or import from Google Calendar.'],
-            ['name' => 'Share your link', 'text' => 'Get your custom URL. Put it in your bio, website, or anywhere you want.'],
-            ['name' => 'Grow your audience', 'text' => 'Fans follow your schedule, which gives you permission to email them. Write a newsletter and send it whenever you have news.'],
+            ['name' => 'Create your schedule', 'text' => 'Sign up free, then fill it however suits you: type an event in, connect a calendar, or paste a poster and let the AI read the details off it.'],
+            ['name' => 'Share your link', 'text' => 'You get yourname.eventschedule.com. Put it in your bio, print the QR code on a poster, embed the calendar in your own site, or let guests subscribe to it from their own calendar app.'],
+            ['name' => 'Grow your audience', 'text' => 'Visitors leave an email address and get a digest automatically when you publish new events. Write a newsletter yourself whenever there is more to say.'],
         ]"
     />
     {{-- FAQ JSON-LD is emitted alongside the visible FAQ section near the end of the page, driven by one $homeFaqs array so the markup always matches the rendered content. --}}
@@ -695,7 +706,7 @@
                             </span>
                             <h3 class="text-xl font-bold text-gray-900 transition-colors group-hover:text-sky-600 dark:text-white dark:group-hover:text-sky-400">Ticketing & QR Check-ins</h3>
                         </div>
-                        <p class="mb-2 text-gray-600 dark:text-gray-400">Multiple ticket types, add-ons, promo codes and reserved seating. Every ticket carries a QR code you scan at the door, on any plan, with zero platform fees.</p>
+                        <p class="mb-2 text-gray-600 dark:text-gray-400">Multiple ticket types, add-ons, promo codes and reserved seating. Every ticket carries a QR code you scan at the door, on any plan, with zero platform fees. Before tickets go on sale, visitors can ask to be told when they do.</p>
 
                         <!-- Ticket mockup -->
                         <div class="relative my-4 flex min-h-[260px] flex-1 items-center justify-center" aria-hidden="true">
@@ -735,7 +746,7 @@
                         <div class="mt-auto flex flex-wrap items-center justify-between gap-3">
                             <span class="inline-flex items-center gap-1.5 text-xs text-gray-500 dark:text-gray-400">
                                 <svg class="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" /></svg>
-                                Secure payments by Stripe
+                                Get paid by Stripe, PayPal, Payfast, Invoice Ninja, a payment link or cash
                             </span>
                             <span class="inline-flex items-center gap-1 text-sm font-medium text-sky-700 transition-all group-hover:gap-2 dark:text-sky-400">
                                 Learn more
@@ -928,7 +939,7 @@
                             </span>
                             <h3 class="text-xl font-bold text-gray-900 transition-colors group-hover:text-blue-600 dark:text-white dark:group-hover:text-blue-400">Calendar Sync</h3>
                         </div>
-                        <p class="text-sm text-gray-600 dark:text-gray-400">Two-way sync with Google Calendar, Microsoft 365 and any CalDAV server. Edit an event in either place and the other follows, deletions included.</p>
+                        <p class="text-sm text-gray-600 dark:text-gray-400">Two-way sync with Google Calendar, Microsoft 365 and any CalDAV server. Edit an event in either place and the other follows.</p>
 
                         <!-- Sync mockup -->
                         <div class="relative mt-5 h-24 px-2" aria-hidden="true">
@@ -984,7 +995,7 @@
                         Share a link, get <span class="text-gradient">booked</span>
                     </h2>
                     <p class="mb-8 text-lg text-gray-500 dark:text-gray-400 sm:text-xl" data-reveal>
-                        Share one link. Guests pick an open time in their own timezone, and the booking lands on your schedule.
+                        Appointment booking, built in. Guests pick an open time in their own timezone, and the booking lands on your schedule.
                     </p>
                     <ul class="mb-10 space-y-3" data-reveal>
                         <li class="flex items-start gap-3">
@@ -1188,7 +1199,10 @@
                 'href' => marketing_url('/features/recurring-events'),
                 'aria' => 'Learn more about recurring events',
                 'title' => 'Recurring Events',
-                'desc' => 'Set events to repeat weekly on chosen days with flexible end conditions and per-occurrence tickets.',
+                // Event::matchesFrequency() cases: daily, weekly, every_n_weeks, monthly_date,
+                // monthly_weekday, yearly; recurring_include/exclude_dates add or skip one date;
+                // Ticket::soldCountFor($date) counts per occurrence date.
+                'desc' => 'Repeat daily, weekly, every few weeks, monthly or yearly. Skip or add single dates, and each date sells its own tickets.',
                 'chip' => 'bg-lime-100 dark:bg-lime-500/20',
                 'text' => 'text-lime-700 dark:text-lime-400',
                 'icon' => '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />',
@@ -1362,8 +1376,11 @@
                     The tools you already use
                 </h2>
                 <p class="mt-4 text-lg text-gray-500 dark:text-gray-400" data-reveal style="--reveal-delay: 0.14s;">
-                    Calendars sync both ways. Card payments go straight to your own account. Existing events come
-                    across from Eventbrite, and a
+                    Calendars sync both ways. Payments go straight to your own Stripe or
+                    <a href="{{ route('marketing.paypal') }}" class="font-semibold text-blue-600 underline decoration-blue-300 underline-offset-4 transition-colors hover:text-blue-500 dark:text-blue-400 dark:decoration-blue-500/50">PayPal</a>
+                    account. Existing events come across from
+                    <a href="{{ route('marketing.switch_from_eventbrite') }}" class="font-semibold text-blue-600 underline decoration-blue-300 underline-offset-4 transition-colors hover:text-blue-500 dark:text-blue-400 dark:decoration-blue-500/50">Eventbrite</a>,
+                    and a
                     <a href="{{ marketing_url('/docs/developer/api') }}" class="font-semibold text-blue-600 underline decoration-blue-300 underline-offset-4 transition-colors hover:text-blue-500 dark:text-blue-400 dark:decoration-blue-500/50">REST API and webhooks</a>
                     handle whatever is left.
                 </p>
@@ -1503,7 +1520,7 @@
                     Free and open source. <span class="text-gradient">Forever.</span>
                 </h2>
                 <p class="text-lg text-gray-500 dark:text-gray-400 sm:text-xl" data-reveal style="--reveal-delay: 0.1s;">
-                    No hidden fees. No per-ticket charges. Keep 100% of your ticket sales.
+                    No hidden fees. No per-ticket charges. Past your payment provider's own fee, every sale is yours.
                 </p>
             </div>
 
@@ -1511,7 +1528,7 @@
                 <div class="rounded-3xl border border-blue-200 bg-gradient-to-br from-blue-50 to-sky-50 p-8 text-center dark:border-blue-500/20 dark:from-blue-900/25 dark:to-sky-900/25" data-reveal="panel">
                     <div class="es-od text-gradient mb-4 justify-center text-6xl font-black lg:text-7xl" data-odometer="0%">0%</div>
                     <div class="mb-1 text-xl font-bold text-gray-900 dark:text-white">No platform fees</div>
-                    <p class="text-sm text-gray-500 dark:text-gray-400">Card payments land in your own Stripe account, not ours</p>
+                    <p class="text-sm text-gray-500 dark:text-gray-400">Payments land in your own Stripe or PayPal account, not ours</p>
                 </div>
                 <div class="rounded-3xl border border-emerald-200 bg-gradient-to-br from-emerald-50 to-teal-50 p-8 text-center dark:border-emerald-500/20 dark:from-emerald-900/25 dark:to-teal-900/25" data-reveal="panel">
                     <div class="es-od text-gradient mb-4 justify-center text-6xl font-black lg:text-7xl" data-odometer="{{ plan_price(0) }}">{{ plan_price(0) }}</div>
@@ -1572,7 +1589,7 @@
                             <div class="es-step es-step-1 relative ltr:pl-20 rtl:pr-20">
                                 <span class="absolute top-0 flex h-12 w-12 items-center justify-center rounded-2xl bg-gradient-to-br from-sky-500 to-cyan-500 text-xl font-bold text-white shadow-lg shadow-sky-500/30 ltr:left-0 rtl:right-0">2</span>
                                 <h3 class="mb-2 text-xl font-bold text-gray-900 dark:text-white">Share your link</h3>
-                                <p class="text-gray-600 dark:text-gray-400">You get yourname.eventschedule.com. Put it in your bio, print the QR code on a poster, or embed the calendar in your own site.</p>
+                                <p class="text-gray-600 dark:text-gray-400">You get yourname.eventschedule.com. Put it in your bio, print the QR code on a poster, embed the calendar in your own site, or let guests subscribe to it from their own calendar app.</p>
                             </div>
                             <div class="es-step es-step-2 relative ltr:pl-20 rtl:pr-20">
                                 <span class="absolute top-0 flex h-12 w-12 items-center justify-center rounded-2xl bg-gradient-to-br from-emerald-500 to-teal-500 text-xl font-bold text-white shadow-lg shadow-emerald-500/30 ltr:left-0 rtl:right-0">3</span>
@@ -1684,15 +1701,29 @@
             // Tiers verified in code, not in FEATURES.md: Role::ticketSaleLimit() makes selling
             // free up to 25 paid tickets a month, so "ticketing" is no longer a Pro feature;
             // Pro is what removes the cap. TicketController::scan()/scanned() have no plan
-            // check, so scanning at the door is free too. Promo codes are Pro, so they are not
-            // listed in an answer about what selling includes.
+            // check, so scanning at the door is free too. Add-ons, promo codes and the ticket
+            // waitlist ARE Pro (EventRepo::saveEvent() $ticketExtrasAllowed scrub, and the
+            // ticket branch of WaitlistController::join()), so they are named as what Pro adds,
+            // never as part of what selling includes. No gateway is plan-gated: there is no
+            // isPro() under app/Services/Payments/, Invoice Ninja included. Refunds
+            // (SaleRefundService via TicketController::handleAction) and the interest list
+            // (EventInterestController) carry no plan check either. CalDAV has no inbound
+            // delete sync - applyInboundDeletion() is called only by the Google and Microsoft
+            // services - so the deletion choice is stated for those two only.
             ['q' => 'Is Event Schedule free?', 'a' => 'Yes, Event Schedule is free to use with unlimited events and schedules, and the free plan sells up to 25 paid tickets a month. Pro and Enterprise plans add unlimited ticket sales, event boosting, custom branding, and AI image generation.'],
-            ['q' => 'Can I sell tickets with Event Schedule?', 'a' => 'Yes, with zero platform fees. The free plan covers 25 paid tickets a month per schedule and Pro removes the cap. Create as many ticket types as you need, add extras like parking or merchandise, and scan the QR code on every ticket at the door.'],
-            ['q' => 'How do I get paid?', 'a' => 'Straight into your own account. You connect your Stripe or PayPal account and payments land there directly, so we never hold your money and never take a cut. Payfast, an external payment link and cash at the door are supported too, and Pro schedules can bill through Invoice Ninja.'],
-            ['q' => 'Does Event Schedule sync with my calendar?', 'a' => 'Yes. Google Calendar and Microsoft 365 both sync two ways, with webhook updates so a change made in either place shows up in the other, deletions included. Any CalDAV server works as well, and guests can add a single event to Apple, Google or Outlook from the event page.'],
+            ['q' => 'Can I sell tickets with Event Schedule?', 'a' => 'Yes, with zero platform fees. The free plan covers 25 paid tickets a month per schedule and Pro removes the cap. Create as many ticket types as you need and scan the QR code on every ticket at the door. Pro also adds extras like parking or merchandise, promo codes and a waitlist for sold-out tickets.'],
+            ['q' => 'Can people get notified when tickets go on sale?', 'a' => 'Yes, on every plan. Until tickets go on sale, an event page offers "Tell me when tickets go on sale". A visitor leaves an email address, with no account, and gets one email when tickets go on sale, one if it is cancelled, a reminder shortly before it starts, and any notice you choose to send if the date or venue changes. Every email has a one-click unsubscribe, and the event editor shows you how many people are waiting.'],
+            ['q' => 'How do I get paid?', 'a' => 'Straight into your own account. You connect your Stripe or PayPal account and payments land there directly, so we never hold your money and never take a cut. Payfast (for events priced in South African rand), Invoice Ninja, a payment link of your own and cash at the door work too, on every plan.'],
+            ['q' => 'Can I refund a ticket?', 'a' => 'Yes, in full or in part, from the Sales page, on every plan. Refund a Stripe or PayPal sale and the money goes back to the buyer through that provider. A partial refund leaves the tickets valid, and a full refund puts them back on sale. A sale paid any other way, cash included, can be marked as refunded so your records match.'],
+            ['q' => 'Does Event Schedule sync with my calendar?', 'a' => 'Yes. Google Calendar and Microsoft 365 both sync two ways, with webhook updates so a change made in either place shows up in the other, and you choose whether an event deleted there is kept, marked cancelled or deleted here. Any CalDAV server works as well. Guests can add a single event to Apple, Google or Outlook from the event page, or subscribe to your whole schedule as a live calendar feed that updates itself when a date changes.'],
             ['q' => 'Can I use my own domain?', 'a' => 'Yes. Every schedule gets a free subdomain such as yourname.eventschedule.com, and Enterprise schedules can serve the whole guest portal from a domain you own, with the certificate issued automatically. Selfhosted installs run on your own domain from day one.'],
             ['q' => 'Can I selfhost Event Schedule?', 'a' => 'Yes, Event Schedule is 100% open source. Selfhost it on your own server for full control over your data and every paid feature is included, or use the hosted platform at eventschedule.com.'],
             ['q' => 'Who is Event Schedule for?', 'a' => 'Anyone who keeps a schedule other people need to see: musicians, DJs, comedians, venues, bars, theaters, galleries, studios, markets, libraries and the curators who list them all in one place.'],
+            // EventRepo::saveEvent() creates a Role for a typed-in act or venue; RoleController
+            // renders it through role/show-guest-unclaimed (noindex) until User::claimSchedule(),
+            // which needs a verified email or phone matching the row (userHoldsContactFor()), and
+            // preserveExistingListers() keeps the schedules that listed them.
+            ['q' => 'Do the performers and venues I list need an account?', 'a' => 'No. Name a performer or venue who is not on Event Schedule and the event page still shows them, and they get a page of their own that says who created it and that they have not claimed it yet. It stays out of search engines until they claim it by signing in with the email address or phone number you entered for them, and the schedules that already list them keep listing them.'],
         ];
     @endphp
     <x-seo.faq-schema :items="$homeFaqs" />
@@ -1703,7 +1734,7 @@
                     Frequently asked <span class="text-gradient es-gradient-anim">questions</span>
                 </h2>
                 <p class="text-lg text-gray-500 dark:text-gray-400 sm:text-xl" data-reveal style="--reveal-delay: 0.1s;">
-                    Everything you need to know about sharing your events with Event Schedule.
+                    Everything you need to know about sharing your events and selling tickets with Event Schedule.
                 </p>
             </div>
             <div class="space-y-4" data-reveal-group="80">

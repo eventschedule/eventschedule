@@ -1,6 +1,6 @@
 <x-marketing-layout>
-    <x-slot name="title">Outlook Calendar Sync & Integration - Event Schedule</x-slot>
-    <x-slot name="description">Real-time two-way sync with Outlook and Microsoft 365. OAuth authentication, Microsoft Graph change notifications, and Teams meeting links.</x-slot>
+    <x-slot name="title">Free Two-Way Outlook & Microsoft 365 Calendar Sync</x-slot>
+    <x-slot name="description">Two-way Outlook and Microsoft 365 calendar sync, free on every plan, with Graph change notifications, a delete policy and optional Teams meetings.</x-slot>
     <x-slot name="breadcrumbTitle">Outlook Calendar</x-slot>
 
     <x-slot name="structuredData">
@@ -11,7 +11,7 @@
         "name": "Event Schedule - Outlook Calendar Sync",
         "applicationCategory": "BusinessApplication",
         "operatingSystem": "Web",
-        "description": "Real-time two-way sync with Outlook and Microsoft 365. OAuth authentication, Microsoft Graph change notifications, and Teams meeting links for smooth event management.",
+        "description": "Two-way Outlook and Microsoft 365 calendar sync, free on every plan, with Graph change notifications, a delete policy and optional Teams meetings.",
         "featureList": [
             "Two-way Outlook Calendar sync",
             "Microsoft 365 and personal Microsoft account support",
@@ -20,7 +20,7 @@
             "Per-schedule sync direction: to Outlook, from Outlook, both ways or off",
             "Optional Microsoft Teams meetings for online events",
             "Per-schedule policy for events deleted in Outlook",
-            "Published iCal feed anyone can subscribe to from Outlook"
+            "A live iCal feed guests can subscribe to from Outlook, offered on your event pages"
         ],
         "offers": {
             "@type": "Offer",
@@ -594,7 +594,7 @@
         $inbound = [
             ['Subject', 'Sound check with Marla', 'Becomes the event name.'],
             ['When', 'Wed 21 Oct 2026, 4:00 PM to 6:00 PM', 'Start becomes the start, and the length of the item becomes the duration in whole hours.'],
-            ['Where', 'The Blue Room', 'Matched against the venues on your schedule, and added as one if it is new.'],
+            ['Where', 'The Blue Room', 'Matched against the venues you already have, and added as one if it is new.'],
             ['Body', 'Bring the spare cable.', "Outlook's HTML body is converted back to Markdown, and only rewritten when it actually changed."],
         ];
 
@@ -635,11 +635,14 @@
             ['1 request', 'And the poll is cheap', 'Each schedule keeps a delta token, so the poll asks only for what changed since last time. A calendar with nothing new costs a single request.', false],
         ];
 
-        // roles.calendar_delete_action, shared with the Google and CalDAV tabs.
+        // roles.calendar_delete_action, shared with the Google tab only: the partial
+        // role/partials/calendar-delete-action is included on the Google and Outlook tabs, and
+        // CalDAVService::syncFromCalDAV() never applies a deletion. Event::applyInboundDeletion()
+        // hides rather than deletes an event that has sales.
         $deletions = [
             ['Keep it', 'ignore', 'The event stays exactly as it is. Outlook was tidied, your public calendar was not.'],
             ['Mark it cancelled', 'cancel', 'The event is flagged cancelled, which takes the date off your public calendar but keeps the record.'],
-            ['Delete it', 'delete', 'The event is removed from Event Schedule as well.'],
+            ['Delete it', 'delete', 'The event is removed from Event Schedule as well. One with ticket sales on it is hidden instead, so the sales records survive.'],
         ];
 
         $steps = [
@@ -666,7 +669,7 @@
             ],
             [
                 'q' => 'How quickly do changes sync?',
-                'a' => 'Near real time. Event Schedule holds a Microsoft Graph change-notification subscription on your calendar, so Outlook pushes the news as it happens. Behind that sits a poll every fifteen minutes, so a notification that goes missing does not cost you the change. The subscription itself lasts about sixty hours and is renewed nightly.',
+                'a' => 'Outbound, the Outlook item is written when you save the event. Inbound, usually within a minute or two: Event Schedule holds a Microsoft Graph change-notification subscription on your calendar, so Outlook reports a change as it happens and the change is read in the background. Behind that sits a poll every fifteen minutes, so a notification that goes missing does not cost you the change. The subscription itself lasts about sixty hours and is renewed nightly.',
             ],
             [
                 'q' => 'Does it work with personal Microsoft accounts and work accounts?',
@@ -674,7 +677,7 @@
             ],
             [
                 'q' => 'What happens if I delete an event in Outlook?',
-                'a' => 'That is your call, set once per schedule: keep the event, mark it cancelled so the date leaves your public calendar, or delete it here too. The setting is shared with Google and CalDAV inbound sync. Event Schedule also checks why Graph reported the event as gone, and only applies the policy to a real deletion, so an event that merely moved out of the sync window is left alone.',
+                'a' => 'That is your call, set once per schedule: keep the event, mark it cancelled so the date leaves your public calendar, or delete it here too. Delete has one brake: an event with ticket sales on it is hidden instead, so its sales records survive. The same setting governs Google Calendar inbound sync. Event Schedule also checks why Graph reported the event as gone, and only applies the policy to a real deletion, so an event that merely moved out of the sync window is left alone.',
             ],
             [
                 'q' => 'Can I sync a single event rather than the whole schedule?',
@@ -683,6 +686,10 @@
             [
                 'q' => 'Do recurring events send every date to Outlook?',
                 'a' => 'No. Outlook sync works at the event level, so a recurring event goes across as one Outlook item rather than one per date. If you want every date in a calendar, use the published iCal feed or the per-date iCal download, which do expand recurring events.',
+            ],
+            [
+                'q' => 'Can guests subscribe to my schedule in Outlook without an account?',
+                'a' => 'Yes, and that is a separate thing from sync, with nothing to connect on your side. Your pages offer Subscribe to all events from your schedule, in the Add to Calendar menu and beside the email sign-up. It is the schedule\'s live iCal feed, which Outlook adds as a calendar subscribed from the web and keeps re-reading, so a date you move moves for them too. It carries your public events, with each date of a recurring event for the next ninety days, and it asks for no email address and no account.',
             ],
             [
                 'q' => 'Does Outlook Calendar sync work with selfhosted Event Schedule?',
@@ -735,7 +742,7 @@
 
                     <h1 class="es-balance es-req-ink mb-8 text-[2.4rem] font-black leading-[1.05] tracking-tight sm:text-6xl">
                         <span class="es-mask"><span class="es-mask-line">Every event you publish</span></span>
-                        <span class="es-mask es-mask-2"><span class="es-mask-line">is a <span class="es-req-accent">meeting request.</span></span></span>
+                        <span class="es-mask es-mask-2"><span class="es-mask-line">is an Outlook <span class="es-req-accent">meeting request.</span></span></span>
                     </h1>
 
                     <p class="es-fade-up es-d-2 es-req-muted mb-8 max-w-xl text-lg sm:text-xl">
@@ -1056,7 +1063,8 @@
             </div>
 
             <p class="es-req-muted mx-auto mt-8 max-w-2xl text-center text-sm" data-reveal>
-                One setting, shared with Google and CalDAV inbound sync, because it is a decision about your calendar rather than about a provider.
+                One setting, shared with Google Calendar inbound sync, because it is a decision about your calendar rather than about a provider.
+                <a href="{{ marketing_url('/docs/creating-schedules#delete-sync') }}" class="es-req-link font-medium hover:underline">The setting, in the guide</a>
             </p>
         </div>
     </section>
@@ -1126,7 +1134,8 @@
                         A standing invitation, for <span class="es-req-accent">everyone else.</span>
                     </h2>
                     <p class="es-req-muted mb-6 text-lg leading-relaxed" data-reveal style="--reveal-delay: 0.15s;">
-                        Graph sync connects your own account. Your audience does not need an account at all: every schedule publishes an iCal feed, and Outlook can subscribe to it from the web like any published internet calendar.
+                        Graph sync connects your own account. Your audience does not need an account at all: every schedule publishes a live iCal feed, your pages offer it to guests as Subscribe to all events from your schedule, and Outlook can subscribe to it from the web like any published internet calendar.
+                        <a href="{{ marketing_url('/docs/sharing#calendar-feeds') }}" class="es-req-link font-medium hover:underline">How calendar subscriptions work</a>
                     </p>
                     <ul class="es-req-list es-req-muted space-y-3 text-sm" data-reveal style="--reveal-delay: 0.2s;">
                         <li>Public events only. Drafts, unlisted events, cancelled events and password-protected events stay out of it.</li>
@@ -1144,7 +1153,7 @@
                         <div class="es-req-row">
                             <dt class="es-req-label">Feed URL</dt>
                             <dd class="es-req-value">your-schedule.eventschedule.com/feed/ical
-                                <p class="es-req-note">Copyable from your schedule settings, alongside an RSS version of the same listing.</p>
+                                <p class="es-req-note">Offered to guests in the Add to Calendar menu and beside the email sign-up, and copyable from your schedule settings alongside an RSS version.</p>
                             </dd>
                         </div>
                         <div class="es-req-row">
