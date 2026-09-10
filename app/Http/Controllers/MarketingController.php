@@ -6021,7 +6021,7 @@ class MarketingController extends Controller
 
             // API Reference
             ['page' => 'API Reference', 'section' => 'Authentication', 'description' => 'API key authentication for REST endpoints.', 'url' => $r['developer_api'].'#authentication', 'category' => 'Developer', 'keywords' => 'api key auth token bearer'],
-            ['page' => 'API Reference', 'section' => 'Rate Limits', 'description' => 'API rate limiting and quotas.', 'url' => $r['developer_api'].'#rate-limits', 'category' => 'Developer', 'keywords' => 'rate limit throttle quota'],
+            ['page' => 'API Reference', 'section' => 'Rate Limits', 'description' => 'API rate limiting and quotas.', 'url' => $r['developer_api'].'#rate-limits', 'category' => 'Developer', 'keywords' => 'rate limit throttle quota retry-after 429 window'],
             ['page' => 'API Reference', 'section' => 'Response Format', 'description' => 'JSON response structure and conventions.', 'url' => $r['developer_api'].'#response-format', 'category' => 'Developer', 'keywords' => 'json response format structure'],
             ['page' => 'API Reference', 'section' => 'Pagination', 'description' => 'Paginate through list endpoints.', 'url' => $r['developer_api'].'#pagination', 'category' => 'Developer', 'keywords' => 'pagination page per_page cursor'],
             ['page' => 'API Reference', 'section' => 'Register', 'description' => 'User registration endpoint.', 'url' => $r['developer_api'].'#register', 'category' => 'Developer', 'keywords' => 'register user create account'],

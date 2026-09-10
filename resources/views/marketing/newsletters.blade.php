@@ -94,7 +94,7 @@
                 at a time, email only, never a segment and never in the
                 allowance, which section 01's tint panel spells out. The
                 other mail runs the other way: EventChangeNotifier tells that
-                list, and TICKET BUYERS when the schedule has its own SMTP,
+                list, and TICKET BUYERS when the schedule can mail them (its own SMTP on hosted, a working mailer on selfhost),
                 only once the owner confirms the notice on a change or a
                 cancellation; only the on-sale email and the reminder go to
                 that list without asking. NotifyRequestChanges emails the
