@@ -79,6 +79,99 @@ class EventInterestSendTest extends TestCase
         return count(Queue::pushed(SendQueuedEmail::class) ?: []);
     }
 
+    /**
+     * Actually SEND the mailable, so both bodies are rendered.
+     *
+     * Mailable::render() returns the HTML view only - Mailer::render() resolves the view half of
+     * the pair and never touches $plain - so every existing assertion about this mail exercised
+     * one of its two templates. The plain-text half shipped with adjacent Blade directives
+     * (`@endif@if`), which compile to PHP with an unmatched `endif`, and threw a ParseError on
+     * every real send while ->render() stayed green.
+     *
+     * The array transport still builds the whole Symfony message, so this renders both bodies
+     * without anything leaving the machine. Keep it a real send, not a render.
+     */
+    public function test_sending_the_interest_mail_renders_both_bodies(): void
+    {
+        $interest = $this->capture();
+
+        foreach ([
+            EventInterestNotification::KIND_TICKETS,
+            EventInterestNotification::KIND_REMINDER,
+            EventInterestNotification::KIND_CHANGE,
+            EventInterestNotification::KIND_CANCELLED,
+        ] as $kind) {
+            \Illuminate\Support\Facades\Mail::to('fan@fans.test')->send(new EventInterestNotification(
+                $this->role,
+                $this->event->fresh(),
+                $interest,
+                $kind,
+                'https://example.test/event',
+                'https://example.test/int/u/'.$interest->token,
+            ));
+        }
+
+        $messages = app('mailer')->getSymfonyTransport()->messages();
+        $this->assertCount(4, $messages, 'every kind must render and send');
+
+        foreach ($messages as $sent) {
+            $body = $sent->getOriginalMessage();
+
+            $text = (string) $body->getTextBody();
+            $this->assertNotSame('', $text, 'the plain-text part must not be empty');
+            $this->assertStringContainsString($this->event->name, $text);
+            $this->assertStringContainsString('https://example.test/int/u/', $text,
+                'every message carries its own unsubscribe link');
+
+            // Blade source surviving into a rendered body is the signature of a block closed early
+            // - an @endphp followed by an echo, or a comment containing its own terminator. Both
+            // render as valid PHP, so only the output shows them.
+            foreach (['@if', '@endif', '@php', '@__raw_block_', '{{'] as $marker) {
+                $this->assertStringNotContainsString($marker, $text,
+                    "unrendered Blade [$marker] leaked into the plain-text body");
+            }
+
+            $this->assertStringContainsString($this->event->name, (string) $body->getHtmlBody());
+        }
+    }
+
+    public function test_a_selfhost_install_with_no_mail_transport_sends_nothing_and_claims_nothing(): void
+    {
+        // The claim is a one-shot conditional UPDATE taken BEFORE the dispatch and handed back only
+        // when the dispatch THROWS - and the log/array mailer never throws. Without the transport
+        // guard this run stamps tickets_notified_at on every candidate, and candidates() filters on
+        // whereNull($column), so the row is unreachable for ever: the person who asked to hear about
+        // this event never can be told, even after SMTP is configured.
+        //
+        // Reachable by default rather than exotic: .env.example ships MAIL_MAILER=log, capture is
+        // single opt-in so rows are live at once, and canSendAudienceMail() - the command's only
+        // other gate - returns true unconditionally off-platform.
+        //
+        // Both config keys are set by hand because the test env disagrees with a real selfhost
+        // install on both: phpunit.xml forces MAIL_MAILER=array, and app.hosted is true here.
+        $interest = $this->capture();
+        $this->enableTickets();
+
+        config(['app.hosted' => false, 'mail.default' => 'array']);
+
+        $this->artisan('app:send-event-interest-mail', ['--kind' => 'tickets', '--apply' => true])
+            ->expectsOutput('Skipping: no mail transport configured.')
+            ->assertSuccessful();
+
+        $this->assertSame(0, $this->queuedCount(), 'nothing may be queued into a log mailer');
+        $this->assertNull(
+            $interest->fresh()->tickets_notified_at,
+            'the claim must NOT be stamped - a stamped row can never be sent again'
+        );
+
+        // And the row is still live once a real transport arrives, which is the whole point.
+        config(['mail.default' => 'smtp']);
+        $this->artisan('app:send-event-interest-mail', ['--kind' => 'tickets', '--apply' => true])->assertSuccessful();
+
+        $this->assertSame(1, $this->queuedCount());
+        $this->assertNotNull($interest->fresh()->tickets_notified_at);
+    }
+
     public function test_tickets_going_on_sale_after_the_ask_sends_one_email(): void
     {
         $interest = $this->capture();

@@ -80,6 +80,26 @@ class SendEventInterestMail extends Command
             return self::FAILURE;
         }
 
+        // NO MAIL TRANSPORT, NO SEND - and on this command that is a data-integrity rule, not a
+        // politeness. SendEventAnnouncements and SendFeedbackRequests both bail on the same
+        // condition because queueing bulk mail into the log driver helps nobody. Here it is worse:
+        // the claim at sendPass() is a one-shot conditional UPDATE taken BEFORE the dispatch, and
+        // it is handed back only when the dispatch THROWS. The log mailer never throws. So a run
+        // against `log` stamps tickets_notified_at / reminder_sent_at on every candidate, writes
+        // the message to storage/logs, and candidates() - which filters on whereNull($column) -
+        // can never return those rows again. The people who asked to hear about an event are
+        // silently and permanently unreachable.
+        //
+        // That is reachable by default: .env.example ships MAIL_MAILER=log, capture is single
+        // opt-in (EventInterestController stamps confirmed_at at capture, so rows are live
+        // immediately), and Role::canSendAudienceMail() - this command's only other gate -
+        // short-circuits to true off-platform.
+        if (! config('app.hosted') && in_array(config('mail.default'), ['log', 'array'], true)) {
+            $this->info('Skipping: no mail transport configured.');
+
+            return self::SUCCESS;
+        }
+
         if (! $only || $only === EventInterestNotification::KIND_TICKETS) {
             $this->sendPass(EventInterestNotification::KIND_TICKETS, $apply);
         }
