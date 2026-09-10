@@ -377,7 +377,7 @@
                     <li>On the schedule's Google Calendar tab, click "Resync to Google Calendar". Only the schedule owner sees this button, and the request is refused unless the direction includes To Google Calendar</li>
                     <li>Events already sitting on the saved calendar are left alone. An event whose copy is on a different calendar has that old copy deleted and a fresh one created, so switching calendars does not leave duplicates behind</li>
                     <li>It only ever pushes to Google and never imports, and it only covers published events</li>
-                    <li>The resync works through the schedule ten events at a time, each batch queuing the next, so it needs a real queue: with <code class="doc-inline-code">QUEUE_CONNECTION=database</code>, the scheduler's minutely queue worker carries it to the end, which can take a few minutes on a large schedule. On the shipped <code class="doc-inline-code">sync</code> setting it never gets past the first ten events. Clicking it again is safe: it only redoes work still outstanding</li>
+                    <li>The resync works through the schedule ten events at a time, each batch queuing the next. With <code class="doc-inline-code">QUEUE_CONNECTION=database</code>, the scheduler's minutely queue worker carries it to the end, which can take a few minutes on a large schedule. On the shipped <code class="doc-inline-code">sync</code> setting the batches run one after another once the page has responded, in the same PHP process, so a very large schedule is better served by <code class="doc-inline-code">database</code>. Clicking it again is safe: it only redoes work still outstanding</li>
                 </ol>
             </div>
 
@@ -426,13 +426,13 @@
         <p class="text-gray-600 dark:text-gray-300 mb-4">The mapping between an event and its Google copy lives in the <code class="doc-inline-code">calendar_syncs</code> table, one row per user, event and schedule, together with the calendar the copy was created on.</p>
         <ul class="doc-list mb-6">
             <li><code class="doc-inline-code">SyncEventToGoogleCalendar</code> performs one create, update or delete. Saving an event runs it inline, so the calendar is up to date by the time the save finishes and a queue worker is not required</li>
-            <li><code class="doc-inline-code">ForceResyncGoogleCalendar</code> backs the "Resync to Google Calendar" button and is queued. It handles ten events per run and dispatches a follow-up while any remain, so a large schedule finishes across several runs instead of timing out. Its overlap lock drops a follow-up dispatched on the <code class="doc-inline-code">sync</code> connection, which is why it needs a real queue</li>
+            <li><code class="doc-inline-code">ForceResyncGoogleCalendar</code> backs the "Resync to Google Calendar" button and is queued. It handles ten events per run and dispatches a follow-up while any remain, so a large schedule finishes across several runs instead of timing out. On the <code class="doc-inline-code">sync</code> connection each follow-up waits until the page has responded, by which point the batch before it has released its overlap lock, so the batches run back to back in the same PHP process</li>
             <li>Inbound sync is serialized per schedule with a lock, so the webhook and the 15-minute poll cannot import the same event twice</li>
         </ul>
 
         <div class="doc-callout doc-callout-info">
             <div class="doc-callout-title">Queue worker</div>
-            <p>Everyday sync does not need a queue: saving an event pushes it inline, and a change notification from Google is handled inside the webhook request. The bulk resync does. Set <code class="doc-inline-code">QUEUE_CONNECTION=database</code> and the scheduler's minutely queue worker runs it, with no separate <code class="doc-inline-code">php artisan queue:work</code> needed. On the shipped <code class="doc-inline-code">sync</code> connection the resync only ever covers the first ten events, because each follow-up batch is skipped while the first still holds its lock.</p>
+            <p>Everyday sync does not need a queue: saving an event pushes it inline, and a change notification from Google is handled inside the webhook request. The bulk resync runs without one too: on the shipped <code class="doc-inline-code">sync</code> connection its batches run one after another once the page has responded, in the same PHP process. A very large schedule is better served by <code class="doc-inline-code">QUEUE_CONNECTION=database</code>, where the scheduler's minutely queue worker runs the batches, with no separate <code class="doc-inline-code">php artisan queue:work</code> needed.</p>
         </div>
     </section>
 
@@ -600,7 +600,7 @@
                 <ul class="doc-list text-sm">
                     <li>The button is disabled while the calendar dropdown differs from the saved calendar. Save the schedule first</li>
                     <li>Only the schedule owner sees the button, and the server refuses the request unless the direction includes To Google Calendar</li>
-                    <li>The job runs on the queue in batches of ten, so it needs <code class="doc-inline-code">QUEUE_CONNECTION=database</code> and the scheduler cron. On the shipped <code class="doc-inline-code">sync</code> setting it stops after the first ten events</li>
+                    <li>The job runs in batches of ten. On the shipped <code class="doc-inline-code">sync</code> setting they run one after another once the page has responded, in the same PHP process, so a very large schedule is better served by <code class="doc-inline-code">QUEUE_CONNECTION=database</code> and the scheduler cron</li>
                 </ul>
             </div>
 
