@@ -591,6 +591,9 @@
             In <strong class="text-gray-900 dark:text-white">External</strong> mode you get a <strong class="text-gray-900 dark:text-white">Registration URL</strong> (the link guests are sent to), a <strong class="text-gray-900 dark:text-white">Price</strong> with a currency selector (used in <a href="{{ route('marketing.docs.event_graphics') }}#text-template" class="doc-link">event graphics text templates</a>), an optional <strong class="text-gray-900 dark:text-white">Coupon Code</strong>, and a <strong class="text-gray-900 dark:text-white">Discount</strong> saying what that code is worth. These fields are hidden once registration or ticketing is switched on.
         </p>
         <p class="text-gray-600 dark:text-gray-300 mb-6">
+            Once an event has taken money, its <strong class="text-gray-900 dark:text-white">Currency</strong> is locked in both modes and the selector is greyed out, because a sale records no currency of its own. See <a href="{{ route('marketing.docs.tickets') }}#refunds" class="doc-link">Refunds</a>.
+        </p>
+        <p class="text-gray-600 dark:text-gray-300 mb-6">
             The section appears only for the account that created the event. Once tickets or registration are on, a Pro schedule can also embed the purchase or sign-up form on another website from the <strong class="text-gray-900 dark:text-white">Embed tickets</strong> link (it reads <strong class="text-gray-900 dark:text-white">Embed registration</strong> when the event is registration-only). Unlisted events do not offer the embed.
         </p>
     </section>
@@ -915,7 +918,7 @@
         <h3 class="doc-subheading">How Voting Works</h3>
         <ul class="doc-list mb-6">
             <li><strong class="text-gray-900 dark:text-white">Sign in required</strong> - guests must be signed in to vote, which is what keeps voting to one per person.</li>
-            <li><strong class="text-gray-900 dark:text-white">Members only on hidden events</strong> - on a Draft, Internal or Unlisted event, only members of your schedule can vote.</li>
+            <li><strong class="text-gray-900 dark:text-white">Members only on Draft and Internal events</strong> - only members of your schedule can vote on those. On an Unlisted event, anyone signed in who has the link can vote, after entering the event's password if it has one.</li>
             <li><strong class="text-gray-900 dark:text-white">One click to vote</strong> - guests click the option they want.</li>
             <li><strong class="text-gray-900 dark:text-white">One vote per poll</strong> - votes cannot be changed afterwards. On a recurring event, votes are counted per date, so a regular can vote again for the next occurrence.</li>
             <li><strong class="text-gray-900 dark:text-white">Instant results</strong> - the results come back as soon as the vote is cast, so guests immediately see how others voted.</li>

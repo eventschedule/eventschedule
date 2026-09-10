@@ -1994,7 +1994,7 @@
                             <div class="mb-6" v-show="!event.tickets_enabled && !event.rsvp_enabled">
                                 <x-input-label :value="__('messages.price')" />
                                 <div class="mt-1 flex flex-col sm:flex-row gap-3">
-                                    <select name="ticket_currency_code" v-model="event.ticket_currency_code" data-searchable
+                                    <select name="ticket_currency_code" v-model="event.ticket_currency_code" data-searchable @disabled($currencyLocked ?? false)
                                         class="w-full sm:w-28 border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-[var(--brand-blue)] focus:ring-[var(--brand-blue)] rounded-lg shadow-sm">
                                         @foreach ($currencies as $currency)
                                         @if ($loop->index == 2)
@@ -2006,6 +2006,12 @@
                                     <x-text-input type="number" name="ticket_price" step="0.01" min="0"
                                         class="flex-1" v-model="event.ticket_price" />
                                 </div>
+                                {{-- Locked once the event has taken money (EventController::edit()). A disabled select
+                                     posts nothing, so the save keeps the stored currency. --}}
+                                @if (($currencyLocked ?? false) && ! $errors->has('ticket_currency_code'))
+                                <p class="mt-1 text-sm text-gray-500 dark:text-gray-400">{{ __('messages.currency_locked_after_sales') }}</p>
+                                @endif
+                                <x-input-error class="mt-2" :messages="$errors->get('ticket_currency_code')" />
                                 <p class="mt-1 text-sm text-gray-500 dark:text-gray-400">{{ __('messages.external_price_help') }}</p>
                             </div>
 
@@ -2226,7 +2232,7 @@
 
                                 <div class="mb-6">
                                     <x-input-label for="ticket_currency_code" :value="__('messages.currency')"/>
-                                    <select id="ticket_currency_code" name="ticket_currency_code" v-model="event.ticket_currency_code" :required="event.tickets_enabled" data-searchable
+                                    <select id="ticket_currency_code" name="ticket_currency_code" v-model="event.ticket_currency_code" :required="event.tickets_enabled" data-searchable @disabled($currencyLocked ?? false)
                                         class="mt-1 block w-full border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-[var(--brand-blue)] focus:ring-[var(--brand-blue)] rounded-lg shadow-sm">
                                         @foreach ($currencies as $currency)
                                         @if ($loop->index == 2)
@@ -2237,6 +2243,10 @@
                                         </option>
                                         @endforeach
                                     </select>
+                                    @if (($currencyLocked ?? false) && ! $errors->has('ticket_currency_code'))
+                                    <p class="mt-1 text-sm text-gray-500 dark:text-gray-400">{{ __('messages.currency_locked_after_sales') }}</p>
+                                    @endif
+                                    <x-input-error class="mt-2" :messages="$errors->get('ticket_currency_code')" />
                                     @if (! $connectedGateways)
                                     <div class="text-xs pt-1">
                                         <x-link href="{{ route('profile.edit') }}#section-payment-methods" target="_blank">

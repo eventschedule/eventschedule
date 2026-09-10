@@ -532,7 +532,7 @@
             ],
             [
                 'q' => 'Do guests need an account to vote?',
-                'a' => 'Yes. A vote is tied to an account, which is what stops one person voting twice. Guests who are not signed in see the choices with a sign-in link in place of the buttons. Votes cannot be changed once they are cast. On an event that is not public, voting is limited to signed-in members of your schedule.',
+                'a' => 'Yes. A vote is tied to an account, which is what stops one person voting twice. Guests who are not signed in see the choices with a sign-in link in place of the buttons. Votes cannot be changed once they are cast. On a draft or an Internal event, only signed-in members of your schedule can vote. On an Unlisted event, anyone signed in who has the link can vote, after entering the password if the event has one.',
             ],
             [
                 'q' => 'Can I see who voted for what?',
@@ -1058,7 +1058,7 @@
                                 <span class="es-vote-plan">Pro</span>
                             </div>
                             <p class="es-vote-muted mb-4">The poll sits with the event's photos, videos and comments, under the details somebody came to read. No second link to send, no separate survey to chase.</p>
-                            <p class="es-vote-muted text-sm">If the event is not public, only signed-in members of your schedule can vote. That covers a draft, and the Internal and Unlisted visibilities, which are Enterprise: a guest who opens an Unlisted event from its link can read the poll but cannot vote on it.</p>
+                            <p class="es-vote-muted text-sm">On a draft, or an event set to Internal, only signed-in members of your schedule can vote. On an Unlisted event, anyone signed in who opens it from its link can vote, once they have entered its password if it has one. Internal and Unlisted are Enterprise visibilities.</p>
                         </div>
                         <div class="es-glare" aria-hidden="true"></div>
                         <div class="es-ring-glow" aria-hidden="true"></div>

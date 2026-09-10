@@ -452,7 +452,8 @@ class ApiEventController extends Controller
         //
         // Refused rather than fixed downstream because there is nowhere correct to fix it: with no
         // per-sale snapshot, the old currency is genuinely gone the moment this write lands. The
-        // web form never offered this field after creation; only the API did.
+        // web editor holds the same line: EventController::update() refuses the change, and
+        // edit() renders both Currency selects disabled once the event has taken money.
         if ($request->filled('ticket_currency_code')) {
             $requested = strtoupper((string) $request->input('ticket_currency_code'));
             $current = strtoupper((string) $event->ticket_currency_code);

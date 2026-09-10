@@ -984,8 +984,14 @@ class EventController extends Controller
             ? \App\Models\EventInterest::where('event_id', $event->id)->confirmed()->distinct()->count('email')
             : 0;
 
+        // Once the event has taken money its currency is locked (see update()). Both Currency
+        // selects render disabled with a note, and a disabled select posts nothing, so the save
+        // keeps the stored value.
+        $currencyLocked = $event->exists && $event->hasSettledMoney();
+
         return view('event/edit', [
             'interestCount' => $interestCount,
+            'currencyLocked' => $currencyLocked,
             'role' => $role,
             'effectiveRole' => $effectiveRole,
             'user' => $user,
@@ -1034,6 +1040,23 @@ class EventController extends Controller
         }
 
         $role = Role::subdomain($subdomain)->firstOrFail();
+
+        // An event that has taken money keeps its currency: `sales` has no currency column, so a
+        // new events.ticket_currency_code relabels every past sale and scales a later refund by
+        // the wrong currency (the full reasoning sits at the same check in ApiEventController).
+        // edit() disables both Currency selects in that state, so this catches a form opened
+        // before the first sale landed, or a hand-built request. Same comparison as the API:
+        // re-posting the stored code is not a change.
+        if ($request->filled('ticket_currency_code')) {
+            $requested = strtoupper((string) $request->input('ticket_currency_code'));
+            $current = strtoupper((string) $event->ticket_currency_code);
+
+            if ($current !== '' && $requested !== $current && $event->hasSettledMoney()) {
+                return back()
+                    ->withErrors(['ticket_currency_code' => __('messages.currency_locked_after_sales')])
+                    ->withInput();
+            }
+        }
 
         $this->eventRepo->saveEvent($role, $request, $event);
 
@@ -4654,6 +4677,49 @@ class EventController extends Controller
         return redirect()->to(url()->previous().'#section-polls')->with('message', $message);
     }
 
+    /**
+     * Whether the caller may vote on, or suggest a choice for, a poll on this event: null to go
+     * ahead, or the JSON refusal to return. Shared by votePoll() and suggestPollOption() so the
+     * two cannot drift, and ordered on purpose:
+     *
+     * 1. The event must be on the schedule in the URL, and accepted there.
+     * 2. Draft and Internal (both is_draft) are members-only. A 404 rather than a 401, so an
+     *    anonymous caller cannot tell a draft from an event that does not exist.
+     * 3. A password gates everyone but members until it has been entered this session, on any
+     *    event that has one: isPasswordProtected() does not read is_private. Also a 404.
+     * 4. Unlisted (is_private) without a password is open to anyone holding the link, as its
+     *    guest page is. It used to be gated like a draft, so a signed-in guest saw the poll and
+     *    every vote came back 404.
+     * 5. Only then is an anonymous caller told that voting needs an account.
+     *
+     * Membership is checked the way photoGallery() and the guest page check it: a member of the
+     * schedule in the URL, or a site admin.
+     */
+    private function pollParticipationRefusal(Role $role, Event $event, string $subdomain): ?\Illuminate\Http\JsonResponse
+    {
+        if (! $event->roles()->wherePivot('role_id', $role->id)->wherePivot('is_accepted', true)->exists()) {
+            return response()->json(['error' => __('messages.not_authorized')], 404);
+        }
+
+        $user = auth()->user();
+        $isMemberOrAdmin = $user && ($user->isMember($subdomain) || $user->isAdmin());
+
+        if ($event->is_draft && ! $isMemberOrAdmin) {
+            return response()->json(['error' => __('messages.not_authorized')], 404);
+        }
+
+        if ($event->isPasswordProtected() && ! $isMemberOrAdmin
+            && ! session()->has('event_password_'.$event->id)) {
+            return response()->json(['error' => __('messages.not_authorized')], 404);
+        }
+
+        if (! $user) {
+            return response()->json(['error' => __('messages.sign_in_to_vote')], 401);
+        }
+
+        return null;
+    }
+
     public function votePoll(EventPollVoteRequest $request, $subdomain, $eventHash, $pollHash)
     {
         $role = Role::where('subdomain', $subdomain)->firstOrFail();
@@ -4667,20 +4733,8 @@ class EventController extends Controller
 
         $event = Event::findOrFail(UrlUtils::decodeId($eventHash));
 
-        if (! $event->roles()->wherePivot('role_id', $role->id)->wherePivot('is_accepted', true)->exists()) {
-            return response()->json(['error' => __('messages.not_authorized')], 404);
-        }
-
-        if ($event->is_draft || $event->is_private) {
-            $user = auth()->user();
-            $isMemberOrAdmin = $user && ($user->isMember($subdomain) || $user->isAdmin());
-            if (! $isMemberOrAdmin) {
-                return response()->json(['error' => __('messages.not_authorized')], 404);
-            }
-        }
-
-        if (! auth()->check()) {
-            return response()->json(['error' => __('messages.sign_in_to_vote')], 401);
+        if ($refusal = $this->pollParticipationRefusal($role, $event, $subdomain)) {
+            return $refusal;
         }
 
         $poll = EventPoll::where('event_id', $event->id)
@@ -4746,35 +4800,17 @@ class EventController extends Controller
             return response()->json(['error' => __('messages.not_authorized')], 403);
         }
 
-        if (! auth()->check()) {
-            return response()->json(['error' => __('messages.sign_in_to_vote')], 401);
+        $event = Event::findOrFail(UrlUtils::decodeId($eventHash));
+
+        // The same gate as votePoll(), run before the label is validated so an anonymous caller
+        // hears "sign in", or nothing at all about a hidden event, whatever it posted.
+        if ($refusal = $this->pollParticipationRefusal($role, $event, $subdomain)) {
+            return $refusal;
         }
 
         $request->validate([
             'label' => ['required', 'string', 'max:200'],
         ]);
-
-        $event = Event::findOrFail(UrlUtils::decodeId($eventHash));
-
-        if (! $event->roles()->wherePivot('role_id', $role->id)->wherePivot('is_accepted', true)->exists()) {
-            return response()->json(['error' => __('messages.not_authorized')], 404);
-        }
-
-        if ($event->is_draft) {
-            $user = auth()->user();
-            $isMemberOrAdmin = $user && ($user->isMember($subdomain) || $user->isAdmin());
-            if (! $isMemberOrAdmin) {
-                return response()->json(['error' => __('messages.not_authorized')], 404);
-            }
-        }
-
-        if ($event->is_private) {
-            $user = auth()->user();
-            $isMemberOrAdmin = $user && ($user->isMember($subdomain) || $user->isAdmin());
-            if (! $isMemberOrAdmin) {
-                return response()->json(['error' => __('messages.not_authorized')], 404);
-            }
-        }
 
         $poll = EventPoll::where('event_id', $event->id)
             ->where('is_active', true)
