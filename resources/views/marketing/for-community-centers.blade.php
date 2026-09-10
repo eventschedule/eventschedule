@@ -1,6 +1,6 @@
 <x-marketing-layout>
-    <x-slot name="title">Free Event Schedule for Community Centers | Manage Programs</x-slot>
-    <x-slot name="description">Keep your community connected. Manage programs, classes, hall-hire requests, and events. Email members directly - no algorithm. Free forever.</x-slot>
+    <x-slot name="title">Free Community Center Calendar | Programs, RSVPs, Hall Hire</x-slot>
+    <x-slot name="description">The lobby timetable, online: weekly programs set once, free sign-ups with a cap, hall-hire requests you approve and a calendar members subscribe to.</x-slot>
     <x-slot name="breadcrumbTitle">For Community Centers</x-slot>
 
     <x-slot name="structuredData">
@@ -9,7 +9,7 @@
         "@context": "https://schema.org",
         "@type": "Service",
         "name": "Event Schedule for Community Centers",
-        "description": "Keep your community connected. Manage programs, classes, hall-hire requests, and events. Email members directly. Free forever.",
+        "description": "The lobby timetable, online: recurring programs, free sign-ups with a capacity, hall-hire requests you approve, a live calendar feed and email to members who sign up. Free forever.",
         "provider": {
             "@type": "Organization",
             "name": "Event Schedule",
@@ -31,7 +31,7 @@
         "applicationCategory": "BusinessApplication",
         "applicationSubCategory": "Community Center Event Management Software",
         "operatingSystem": "Web",
-        "description": "Every program the center runs, on one calendar with its own link. Embed it, sync it, print its QR code, and email the people who follow it. Free forever.",
+        "description": "Every program the center runs, on one calendar with its own link. Embed it, sync it, print its QR code, let members subscribe to it, and email the people who follow it. Free forever.",
         "offers": {
             "@type": "Offer",
             "price": "0",
@@ -44,10 +44,13 @@
             "Free RSVP sign-up with an optional capacity, counted afresh for every date",
             "Hall-hire requests that stay pending until you accept them",
             "Public program calendar with an embeddable iframe",
-            "Two-way Google, Outlook and CalDAV calendar sync, plus a subscribable iCal feed that unrolls every date",
+            "Two-way Google, Outlook and CalDAV calendar sync, plus a live calendar feed members subscribe to from any event page or the sign-up panel",
             "A downloadable QR code that opens your calendar",
+            "A short digest of the center's own new dates to confirmed email subscribers, at most one every 72 hours",
             "Direct newsletters to the people who follow the center",
-            "Ticketed classes through your own Stripe account with zero platform fees, 25 paid tickets a month on the free plan",
+            "Ticketed classes paid through Stripe, PayPal, Invoice Ninja, a payment link or cash, with zero platform fees and 25 paid tickets a month on the free plan",
+            "Refunds from the Sales page, sent back through Stripe or PayPal in full or in part",
+            "An interest list for a class announced before booking opens",
             "QR ticket scanning at the door on every plan",
             "Member photos and comments on events, held in an approval queue (25 photos on the free plan)",
             "Online events with the link people join on"
@@ -603,12 +606,12 @@
             ],
             [
                 'On the calendar they already check',
-                'Two-way sync with Google, Outlook and CalDAV puts an event on the calendar you already keep, one entry each, so a weekly program lands once. The iCal feed anyone can subscribe to is the one that unrolls every date.',
+                'Every event page\'s Add to Calendar menu, and the sign-up panel, offer the center\'s live calendar feed. Subscribe once and the next ninety days of every weekly program land in the phone\'s own calendar, and move when you move them. Two-way Google, Outlook and CalDAV sync is for your own calendar, one entry per program.',
                 'M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z',
             ],
             [
-                'In their inbox, when you say so',
-                'People follow the center and you write to them. You compose it and you send it, so nothing goes out behind your back. Ten emails a month free, counted per recipient, 100 on Pro and 1,000 on Enterprise.',
+                'In the inboxes that asked',
+                'Anyone who leaves an email address and confirms it gets a short digest of the new dates you put up yourself, never more than one every 72 hours. A newsletter is the letter you write and send yourself: ten emails a month free, counted per recipient, 100 on Pro and 1,000 on Enterprise.',
                 'M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z',
             ],
             [
@@ -626,7 +629,7 @@
         $faqs = [
             [
                 'q' => 'Is Event Schedule free for community centers?',
-                'a' => 'Yes, and most of what a center needs is on the free plan: the public program calendar and its own link, recurring programs with date exceptions, sub-schedules, free RSVP sign-up with an optional capacity, the embeddable calendar, two-way Google, Outlook and CalDAV sync, iCal downloads, the downloadable QR code, built-in analytics, member photos and comments with an approval queue (25 photos on the free plan), and 10 newsletter emails a month. Newsletter allowances count each recipient as one email, so ten emails means ten people; Pro raises it to 100 a month and Enterprise to 1,000. Even selling a paid class is free, up to 25 paid tickets a month per schedule, and Event Schedule charges zero platform fees on the sale whatever plan you are on. Pro at '.plan_price($proMonthly).' a month lifts that ceiling.',
+                'a' => 'Yes, and most of what a center needs is on the free plan: the public program calendar and its own link, recurring programs with date exceptions, sub-schedules, free RSVP sign-up with an optional capacity, the embeddable calendar, two-way Google, Outlook and CalDAV sync, a live calendar feed, iCal downloads, the downloadable QR code, built-in analytics, member photos and comments with an approval queue (25 photos on the free plan), and 10 newsletter emails a month. Newsletter allowances count each recipient as one email, so ten emails means ten people; Pro raises it to 100 a month and Enterprise to 1,000. Even selling a paid class is free, up to 25 paid tickets a month per schedule, and Event Schedule charges zero platform fees on the sale whatever plan you are on. Pro at '.plan_price($proMonthly).' a month lifts that ceiling.',
             ],
             [
                 'q' => 'Can I organize classes, meetings, and events by category?',
@@ -634,11 +637,19 @@
             ],
             [
                 'q' => 'How do community members stay informed about programs?',
-                'a' => 'Through as many doors as you care to open, and all of them are yours to trigger. People leave an email address and hear about new dates on their own, as one digest rather than a message per program; the newsletter is the one you compose and press send on, for when there is something to say beyond the listing. The calendar embeds into the website you already have. It syncs both ways with Google, Outlook and CalDAV, one entry per event, and the schedule also publishes an iCal feed that unrolls every date of a weekly program for anyone who subscribes to it. And your schedule has a QR code you can download and print for the board in the lobby.',
+                'a' => 'Through as many doors as you care to open. People who leave an email address and confirm it hear about the new dates you put up, on their own, as one digest rather than a message per program; the newsletter is the one you compose and press send on, for when there is something to say beyond the listing. The calendar embeds into the website you already have. Anyone can subscribe to the center\'s live calendar feed from an event page\'s Add to Calendar menu or the sign-up panel, and it carries the next ninety days of every weekly program, moving a date when you move it. Your own calendar syncs both ways with Google, Outlook and CalDAV, one entry per event. And your schedule has a QR code you can download and print for the board in the lobby.',
             ],
             [
                 'q' => 'Can we handle event registration and payments?',
-                'a' => 'Yes. Free sign-up with an optional capacity is on the free plan, and the capacity is counted per date, so a full Monday session does not stop the following Monday filling up. For a paid class, connect your own Stripe account: the money goes to you, Event Schedule takes no cut, and every ticket carries a QR code you can scan at the door on any plan. The free plan sells 25 paid tickets a month per schedule, and free sign-ups are never counted against that. Pro lifts the ceiling and adds the extras: asking your own questions at checkout, and selling one pass that covers a whole term of a class.',
+                'a' => 'Yes. Free sign-up with an optional capacity is on the free plan, and the capacity is counted per date, so a full Monday session does not stop the following Monday filling up. For a paid class, take payment through your own Stripe or PayPal account, an Invoice Ninja invoice, a payment link or cash at the desk: the money goes to you, Event Schedule takes no cut, and every ticket carries a QR code you can scan at the door on any plan. The free plan sells 25 paid tickets a month per schedule, and free sign-ups are never counted against that. Pro lifts the ceiling and adds the extras: asking your own questions at checkout, and selling one pass that covers a whole term of a class.',
+            ],
+            [
+                'q' => 'Can we refund a class?',
+                'a' => 'Yes, from the Sales page, on every plan. A Stripe or PayPal sale is refunded through the provider, in full or in part, and its status only changes once the money has gone back; a partial refund leaves the ticket valid. Every other method (cash, a payment link, Invoice Ninja or Payfast) shows Mark as Refunded instead, which records the refund without moving money, so you hand that one back yourself. Event Schedule does not email the buyer about a refund, so let them know.',
+            ],
+            [
+                'q' => 'Can people ask to hear when a class opens for booking?',
+                'a' => 'Yes. Put the class or the summer camp up before it sells and its event page offers "Tell me when tickets go on sale". A parent leaves only an email address, and hears once when booking opens, once if it is cancelled and again shortly before it starts, plus any change notice you choose to send. It is free on every plan and it is not a sign-up to the center\'s emails, so it never touches the newsletter allowance. The Tickets panel in the event editor shows how many people are waiting.',
             ],
             [
                 'q' => 'Can outside groups request the hall?',
@@ -864,8 +875,10 @@
                 </div>
 
                 <p class="mx-auto mt-10 max-w-2xl text-center text-sm text-gray-400" data-reveal>
-                    Worth saying plainly, because software often implies otherwise: followers are never
-                    emailed automatically. A newsletter goes out when you write one and send it.
+                    Worth saying plainly, because software often implies otherwise: a newsletter goes out
+                    only when you write one and send it, and the digest reaches only people who confirmed
+                    their email address. Pressing Follow on its own signs nobody up for the digest, and
+                    you can switch it off in your settings.
                 </p>
             </div>
         </div>
@@ -1025,10 +1038,11 @@
                         <span class="es-gather-plan es-gather-plan-free">Free to 25 a month</span>
                     </div>
                     <p class="es-gather-muted mb-6">
-                        Pottery costs money to run, so it costs money to join. Connect your own Stripe
-                        account and the money lands in it. Event Schedule charges zero platform fees, so
-                        past what Stripe takes for processing, the fee is yours. The free plan sells 25
-                        paid tickets a month per schedule, and Pro lifts the ceiling.
+                        Pottery costs money to run, so it costs money to join. Take it through your own
+                        Stripe or PayPal account, an Invoice Ninja invoice, a payment link or cash at the
+                        desk, and the money lands with you. Event Schedule charges zero platform fees, so
+                        past what the processor takes, the fee is yours. The free plan sells 25 paid
+                        tickets a month per schedule, and Pro lifts the ceiling.
                     </p>
 
                     <div class="es-gather-sub mb-6 p-5" aria-hidden="true">
@@ -1087,7 +1101,7 @@
             <div class="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3" data-reveal-group="70">
                 <x-sub-audience-card
                     name="Recreation Centers"
-                    description="Sports leagues, fitness classes, camps, and recreational programs. Keep your community active and engaged."
+                    description="Leagues, fitness classes and holiday camps, each one entry on the week with its own sign-up and a capacity per date."
                     icon-color="teal"
                     blog-slug="for-recreation-centers"
                 >
@@ -1100,7 +1114,7 @@
 
                 <x-sub-audience-card
                     name="Senior Centers"
-                    description="Programs, social events, wellness activities, and meals. Keep seniors connected and supported."
+                    description="Lunch clubs, chair exercise and trips out, on the board by the door and on a printed QR code that opens the week on a phone."
                     icon-color="cyan"
                     blog-slug="for-senior-centers"
                 >
@@ -1113,7 +1127,7 @@
 
                 <x-sub-audience-card
                     name="Youth Centers"
-                    description="After-school programs, summer camps, teen activities. Give young people a safe place to grow."
+                    description="After-school clubs and summer camps on a youth strand, with a link for parents that shows only those programs."
                     icon-color="emerald"
                     blog-slug="for-youth-centers"
                 >
@@ -1126,7 +1140,7 @@
 
                 <x-sub-audience-card
                     name="Cultural Centers"
-                    description="Heritage events, language classes, cultural celebrations. Preserve and share traditions with your community."
+                    description="Language classes every week and a festival night once a year, the free programs and the ticketed ones on one board."
                     icon-color="amber"
                     blog-slug="for-cultural-centers"
                 >
@@ -1139,7 +1153,7 @@
 
                 <x-sub-audience-card
                     name="Neighborhood Centers"
-                    description="Local meetings, block parties, civic events, and community gatherings. Strengthen local bonds."
+                    description="Residents' meetings, block parties and outside groups asking for the hall, every request waiting for your yes."
                     icon-color="orange"
                     blog-slug="for-neighborhood-centers"
                 >
@@ -1152,7 +1166,7 @@
 
                 <x-sub-audience-card
                     name="Faith-Based Centers"
-                    description="Congregation events, community outreach, classes, and fellowship gatherings. Bring people together."
+                    description="Weekly gatherings, study groups and outreach, with requests from the groups you already trust posted without a review."
                     icon-color="sky"
                     blog-slug="for-faith-based-centers"
                 >
@@ -1223,13 +1237,18 @@
                     </x-feature-link-card>
                 </div>
                 <div data-reveal>
-                    <x-feature-link-card name="Event Graphics" description="Generate a shareable image for a program to post or print (Pro)" :url="marketing_url('/features/event-graphics')" icon-color="amber">
+                    <x-feature-link-card name="Event Graphics" description="Generate a shareable image for a program to post or print, free on every plan" :url="marketing_url('/features/event-graphics')" icon-color="amber">
                         <x-slot:icon><svg aria-hidden="true" class="h-5 w-5 text-amber-600 dark:text-amber-400" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" /></svg></x-slot:icon>
                     </x-feature-link-card>
                 </div>
                 <div data-reveal>
-                    <x-feature-link-card name="Newsletters" description="Write to the people who follow the center, ten emails a month free" :url="marketing_url('/features/newsletters')" icon-color="green">
+                    <x-feature-link-card name="Newsletters" description="Write to the people who follow the center, ten emails a month free, counted per recipient" :url="marketing_url('/features/newsletters')" icon-color="green">
                         <x-slot:icon><svg aria-hidden="true" class="h-5 w-5 text-green-600 dark:text-green-400" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" /></svg></x-slot:icon>
+                    </x-feature-link-card>
+                </div>
+                <div data-reveal>
+                    <x-feature-link-card name="PayPal" description="Take class fees through the center's own PayPal account, on every plan" :url="marketing_url('/paypal')" icon-color="blue">
+                        <x-slot:icon><svg aria-hidden="true" class="h-5 w-5 text-blue-600 dark:text-blue-400" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z" /></svg></x-slot:icon>
                     </x-feature-link-card>
                 </div>
             </div>

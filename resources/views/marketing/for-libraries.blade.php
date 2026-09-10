@@ -1,5 +1,5 @@
 <x-marketing-layout>
-    <x-slot name="title">Library Program Calendars | Recurring Sessions</x-slot>
+    <x-slot name="title">Library Program Calendar | Story Time and Free Registration</x-slot>
     <x-slot name="description">Set story time up once as a recurring program, take out the weeks the branch is closed, and give every single date its own place count. Free forever.</x-slot>
     <x-slot name="breadcrumbTitle">For Libraries</x-slot>
 
@@ -42,14 +42,15 @@
             "Recurring programs by day of week, every few weeks, or the same weekday each month",
             "Date exceptions that take out closed days and add extra sessions",
             "A recurrence that ends on a date or after a set number of sessions",
-            "Free registration with a place limit counted separately for every date",
+            "Free registration with a place limit counted separately for every date, and a free waitlist once a date is full",
             "Sub-schedules that keep children, teen, adult and senior programming apart",
             "A public request form so community groups can ask for the meeting room",
             "Newsletters you write and send to the patrons who follow you",
             "A downloadable QR code that points at your program calendar",
             "Embeddable calendar for the library website you already have",
             "Two-way Google, Outlook and CalDAV calendar sync",
-            "Zero platform fees on ticket sales through your own Stripe account"
+            "Zero platform fees on ticket sales through Stripe, PayPal, a payment link or cash",
+            "A live calendar feed patrons subscribe to once, which follows when a date moves or comes out"
         ],
         "url": "{{ url()->current() }}",
         "keywords": "library program calendar, library event schedule, story time scheduling, author event management, free library scheduling",
@@ -638,11 +639,19 @@
             ],
             [
                 'q' => 'How do patrons find out about library programs?',
-                'a' => 'Four ways, and none of them is an algorithm. Patrons follow your schedule and you email them a newsletter when you have something to say. Your calendar embeds on the library website you already have. Every schedule has a downloadable QR code you can print on a bookmark, a poster or a shelf label. And each date has an iCal download so it lands in the patron\'s own calendar. Being exact about the two kinds of email: newly published programs reach the list on their own, as one digest covering the batch, while a newsletter with anything else in it is written and sent by you.',
+                'a' => 'Four ways, and none of them is an algorithm. Patrons follow your schedule and you email them a newsletter when you have something to say. Your calendar embeds on the library website you already have. Every schedule has a downloadable QR code you can print on a bookmark, a poster or a shelf label. And each date has an iCal download so it lands in the patron\'s own calendar, or a patron can subscribe to the whole calendar as a live feed that follows when a date moves or comes out. Being exact about the two kinds of email: programs you publish reach the list on their own, as one digest covering the batch, while a newsletter with anything else in it is written and sent by you. A community group\'s accepted request stays the group\'s own event, so it is not in your digest.',
             ],
             [
                 'q' => 'Can patrons register for programs?',
-                'a' => 'Yes, on the free plan. Turn on registration and set a place limit, and the limit is counted separately for every date, so this Tuesday filling up does not close next Tuesday. Patrons get a confirmation email with their own link. For a paid program, connect Stripe and sell named ticket types on the free plan too, up to 25 paid tickets a month, with zero platform fees past Stripe\'s own processing. Pro at '.plan_price($proMonthly).' a month takes the 25 off.',
+                'a' => 'Yes, on the free plan. Turn on registration and set a place limit, and the limit is counted separately for every date, so this Tuesday filling up does not close next Tuesday. Patrons get a confirmation email with their own link. For a paid program, take payment through Stripe or PayPal, a payment link or cash at the desk, and sell named ticket types on the free plan too, up to 25 paid tickets a month, with zero platform fees past the provider\'s own processing. Pro at '.plan_price($proMonthly).' a month takes the 25 off.',
+            ],
+            [
+                'q' => 'What happens when a story time fills up?',
+                'a' => 'The Register button on that date becomes Join Waitlist, on the free plan. When a registration is cancelled and a place comes back, whoever joined the waitlist first is emailed. Each date keeps its own list, so a full Tuesday has a waitlist while next Tuesday is still open. The waitlist for a sold-out paid ticket is the Pro version of the same thing.',
+            ],
+            [
+                'q' => 'Can patrons hear when tickets for an author event go on sale?',
+                'a' => 'Yes, on every plan. Publish the author evening before tickets are on sale and its page offers "Tell me when tickets go on sale". A patron leaves just an email address and gets one email when tickets go on sale, one if you cancel, and a reminder shortly before it starts, plus a change notice if you choose to send one when you move it. It is not a subscription to your schedule, it does not count against the newsletter allowance, and every email has a one-click unsubscribe. The on-sale email is about tickets: opening free registration on a program does not send one.',
             ],
             [
                 'q' => 'What happens on the weeks the branch is closed?',
@@ -654,7 +663,7 @@
             ],
             [
                 'q' => 'Can the whole staff have logins?',
-                'a' => 'Not on the free plan, which is one team member. Multiple team members, up to five, are an Enterprise feature at '.plan_price($entMonthly).' a month, along with custom domains. Plenty of branches run the whole calendar from one shared account, so it is worth knowing which you need before you pay for it.',
+                'a' => 'Not on the free plan, which is one team member. Multiple team members, up to five, are an Enterprise feature at '.plan_price($entMonthly).' a month, along with custom domains. Plenty of branches run the whole calendar from one shared account, so it is worth knowing which you need before you pay for it. On Enterprise, a viewer login is read-only and sees no sales, but can scan tickets at the door. And before whoever set the schedule up moves on, they can hand it to a colleague, on any plan.',
             ],
         ];
 
@@ -831,7 +840,7 @@
                 <div class="es-cat-panel p-7" data-reveal="panel">
                     <p class="es-cat-eyebrow mb-3">Tracings</p>
                     <h3 class="es-cat-ink mb-2 text-lg font-bold">Where else it appears</h3>
-                    <p class="es-cat-muted text-sm">Attach the visiting author's own schedule and the program appears on their calendar as well as yours, the way one card generated a subject card and an author card.</p>
+                    <p class="es-cat-muted text-sm">Attach the visiting author's own schedule and, once they accept the request (or straight away, if they pre-approved your library), the program appears on their calendar as well as yours, the way one card generated a subject card and an author card.</p>
                 </div>
                 <div class="es-cat-panel p-7" data-reveal="panel">
                     <p class="es-cat-eyebrow mb-3">Not yet catalogued</p>
@@ -940,7 +949,7 @@
                                 <h3 class="text-lg font-bold es-cat-band-ink">The places</h3>
                                 <span class="es-cat-plan">Free</span>
                             </div>
-                            <p class="text-sm es-cat-band-muted">Registration with a limit, counted per date, and the remaining count is shown to the patron as they sign up. Leave the limit off for a drop-in.</p>
+                            <p class="text-sm es-cat-band-muted">Registration with a limit, counted per date, and the remaining count is shown to the patron as they sign up. When a date fills, its button becomes a waitlist. Leave the limit off for a drop-in.</p>
                         </div>
                     </div>
                 </div>
@@ -1139,7 +1148,7 @@
                                 <h3 class="text-lg font-bold es-cat-band-ink">You write to them</h3>
                                 <span class="es-cat-plan">Free</span>
                             </div>
-                            <p class="text-sm es-cat-band-muted">New programs reach the list on their own, as one digest rather than one email per session. A newsletter is the other kind, written by you: the autumn program, a cancelled session, a note about the building. 10 emails a month free, 100 on Pro, 1,000 on Enterprise, counted per recipient, and the automatic digest is outside that count.</p>
+                            <p class="text-sm es-cat-band-muted">New programs you publish reach the list on their own, as one digest rather than one email per session. A newsletter is the other kind, written by you: the autumn program, a cancelled session, a note about the building. 10 emails a month free, 100 on Pro, 1,000 on Enterprise, counted per recipient, and the automatic digest is outside that count.</p>
                         </div>
                         <div class="es-cat-panel p-6" data-reveal="panel">
                             <div class="mb-2 flex flex-wrap items-center gap-2">
@@ -1153,7 +1162,7 @@
                                 <h3 class="text-lg font-bold es-cat-band-ink">Into their own calendar</h3>
                                 <span class="es-cat-plan">Free</span>
                             </div>
-                            <p class="text-sm es-cat-band-muted">Every date has an iCal download, so a parent puts Tuesday 10:00 in the phone they actually check.</p>
+                            <p class="text-sm es-cat-band-muted">Every date has an iCal download, so a parent puts Tuesday 10:00 in the phone they actually check. Or they subscribe to the library's calendar once, and the next three months of programs sit there, following when a date moves or a closed day comes out.</p>
                         </div>
                     </div>
 
@@ -1262,7 +1271,7 @@
                                 <h3 class="es-cat-ink text-xl font-bold">When a program costs money</h3>
                                 <span class="es-cat-plan">Free</span>
                             </div>
-                            <p class="es-cat-muted mb-4">An author evening, a paid workshop, a Friends of the Library fundraiser. Named ticket types with their own prices and quantities, sold through your own Stripe account on the free plan, up to 25 paid tickets a month, and Event Schedule takes zero platform fees: past Stripe's own processing, the money is yours.</p>
+                            <p class="es-cat-muted mb-4">An author evening, a paid workshop, a Friends of the Library fundraiser. Named ticket types with their own prices and quantities, sold on the free plan up to 25 paid tickets a month, through your own Stripe or <a href="{{ marketing_url('/paypal') }}" class="es-cat-link font-medium hover:underline">PayPal</a> account, a payment link or cash at the desk, and Event Schedule takes zero platform fees: past the provider's own processing, the money is yours. Announce it before tickets open and patrons can leave an email address to hear when they do. If it is called off, Stripe and PayPal sales can be refunded from the Sales page, in full or in part, and the money goes back to the patron.</p>
                             <p class="es-cat-muted text-sm">Pro at {{ plan_price($proMonthly) }} a month takes the 25 off and adds the desk work: extra questions at checkout for access needs or a child's age, a waitlist once a ticket type sells out, and a live count as patrons check in. Scanning the QR on a ticket is free on every plan; it is the running total that is Pro. Free registration for free programs needs none of it.</p>
                         </div>
                         <div class="es-glare" aria-hidden="true"></div>
@@ -1276,7 +1285,7 @@
                         <div class="relative z-10">
                             <div class="mb-4 flex flex-wrap items-center gap-2">
                                 <h3 class="es-cat-ink text-xl font-bold">The poster for the noticeboard</h3>
-                                <span class="es-cat-plan es-cat-plan-pro">Pro</span>
+                                <span class="es-cat-plan">Free</span>
                             </div>
                             <p class="es-cat-muted">Generate one graphic from your upcoming programs, up to twenty of them, in a story, square, portrait or landscape crop. Only programs carrying their own flyer image appear, and printing the date on each is a setting, off until you turn it on.</p>
                         </div>
@@ -1459,6 +1468,11 @@
                 <div data-reveal>
                     <x-feature-link-card name="Newsletters" description="Write to the patrons who follow you, with open and click rates" :url="marketing_url('/features/newsletters')" icon-color="green">
                         <x-slot:icon><svg aria-hidden="true" class="w-5 h-5 text-green-600 dark:text-green-400" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" /></svg></x-slot:icon>
+                    </x-feature-link-card>
+                </div>
+                <div data-reveal>
+                    <x-feature-link-card name="Waitlist" description="A full story time queues patrons for the next place, free on registration" :url="marketing_url('/features/waitlist')" icon-color="amber">
+                        <x-slot:icon><svg aria-hidden="true" class="w-5 h-5 text-amber-600 dark:text-amber-400" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 10h16M4 14h10M4 18h7" /></svg></x-slot:icon>
                     </x-feature-link-card>
                 </div>
             </div>

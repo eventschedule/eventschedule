@@ -1,6 +1,6 @@
 <x-marketing-layout>
-    <x-slot name="title">Free Event Schedule for Circus & Acrobatics | Shows</x-slot>
-    <x-slot name="description">One link for every circus show, aerial class, and festival stop. Sell tickets with zero fees, share rigging specs, and email fans directly. Free forever.</x-slot>
+    <x-slot name="title">Free Event Schedule for Circus & Acrobatics | Tours, Tickets</x-slot>
+    <x-slot name="description">Every circus show, aerial class and festival stop on one link. Zero platform fees on tickets, rigging specs for bookers, and a calendar fans subscribe to.</x-slot>
     <x-slot name="breadcrumbTitle">For Circus & Acrobatics</x-slot>
 
     <x-slot name="structuredData">
@@ -9,7 +9,7 @@
         "@context": "https://schema.org",
         "@type": "Service",
         "name": "Event Schedule for Circus & Acrobatics",
-        "description": "One link for every circus show, aerial class, and festival stop. Sell tickets with zero fees, share rigging specs, and email fans directly. Free forever.",
+        "description": "Every circus show, aerial class and festival stop on one link. Zero platform fees on tickets, rigging specs for bookers, and a calendar fans subscribe to.",
         "provider": {
             "@type": "Organization",
             "name": "Event Schedule",
@@ -40,15 +40,18 @@
         },
         "featureList": [
             "Festival circuit tracking for summer tours",
+            "A live calendar feed fans subscribe to, so a moved date updates itself",
             "Technical rigging specs on your schedule page",
             "Workshop scheduling with multi-class passes on Pro",
             "Crew members and availability on Enterprise",
-            "Zero-fee ticket sales with QR door check-in",
+            "Ticket sales through Stripe, PayPal or cash, with zero platform fees and QR door check-in",
+            "An email-only list for fans waiting on a show's tickets",
             "Booking request form for event planners",
             "Sub-schedules for shows, classes, and corporate gigs",
-            "Newsletters you write and send to your followers",
+            "A digest of the dates you add, for email subscribers, and newsletters you write",
+            "Claimable pages for acts a festival lists by name",
             "Online events carried by one link field",
-            "Auto-generated show posters on Pro"
+            "Auto-generated show posters on every plan"
         ],
         "url": "{{ url()->current() }}",
         "keywords": "circus schedule, acrobat show calendar, circus performer booking, circus event management, free circus scheduling, aerial class passes, circus troupe schedule",
@@ -82,7 +85,7 @@
                 "@type": "HowToStep",
                 "position": 3,
                 "name": "Build your following",
-                "text": "Fans follow your schedule, which gives you permission to email them. You write the newsletter and choose when it goes out."
+                "text": "Fans who sign up with their email get a digest of the dates you add, automatically. You write the newsletter and choose when it goes out."
             }
         ]
     }
@@ -369,7 +372,7 @@
             </h1>
 
             <p class="es-fade-up es-d-2 mx-auto mb-10 max-w-3xl text-lg text-gray-600 dark:text-gray-400 sm:text-xl">
-                From the training studio to the big top. One link for all your shows. Venues book you, fans follow you, no algorithm decides who sees it.
+                From the training studio to the big top, one link for every circus and acrobatics show. Venues book you, fans follow you, no algorithm decides who sees it.
             </p>
 
             <div class="es-fade-up es-d-3 flex flex-col items-center justify-center gap-4 sm:flex-row">
@@ -445,7 +448,7 @@
                             <div>
                                 <h3 class="mb-4 text-2xl font-black tracking-tight text-gray-900 dark:text-white lg:text-3xl">{{ $circusActs[0]['title'] }}</h3>
                                 <p class="mb-4 text-lg text-gray-600 dark:text-gray-400">{{ $circusActs[0]['desc'] }}</p>
-                                <p class="text-gray-600 dark:text-gray-400">Split the run into sub-schedules by tour leg, import dates from Google Calendar, and fans follow the whole circuit from one link.</p>
+                                <p class="text-gray-600 dark:text-gray-400">Split the run into sub-schedules by tour leg, import dates from Google Calendar, and fans follow the whole circuit from one link, or subscribe to it from their own calendar app, which picks up a moved date on its own.</p>
                             </div>
                             <div aria-hidden="true">
                                 <div class="rounded-2xl border border-gray-200 bg-gray-50 p-5 dark:border-white/10 dark:bg-black/40">
@@ -532,7 +535,7 @@
                             <div>
                                 <h3 class="mb-4 text-2xl font-black tracking-tight text-gray-900 dark:text-white lg:text-3xl">{{ $circusActs[2]['title'] }}</h3>
                                 <p class="mb-4 text-lg text-gray-600 dark:text-gray-400">{{ $circusActs[2]['desc'] }}</p>
-                                <p class="text-gray-600 dark:text-gray-400">Weekly classes repeat themselves with <a href="{{ marketing_url('/features/recurring-events') }}" class="es-circus-link font-medium hover:underline">recurring events</a>, and on Pro you can sell multi-class <a href="{{ marketing_url('/features/ticketing') }}" class="es-circus-link font-medium hover:underline">passes</a> your students redeem across the term.</p>
+                                <p class="text-gray-600 dark:text-gray-400">Weekly classes repeat themselves with <a href="{{ marketing_url('/features/recurring-events') }}" class="es-circus-link font-medium hover:underline">recurring events</a>, and on Pro you can sell multi-class <a href="{{ marketing_url('/features/passes') }}" class="es-circus-link font-medium hover:underline">passes</a> your students redeem across the term.</p>
                             </div>
                             <div aria-hidden="true">
                                 <div class="rounded-2xl border border-gray-200 bg-gray-50 p-5 dark:border-white/10 dark:bg-black/40">
@@ -615,7 +618,7 @@
                             <div>
                                 <h3 class="mb-4 text-2xl font-black tracking-tight text-gray-900 dark:text-white lg:text-3xl">{{ $circusActs[4]['title'] }}</h3>
                                 <p class="mb-4 text-lg text-gray-600 dark:text-gray-400">{{ $circusActs[4]['desc'] }}</p>
-                                <p class="text-gray-600 dark:text-gray-400">Stripe pays you directly. The free plan covers 25 paid tickets a month per schedule; Pro lifts the cap and adds promo codes for your regulars and waitlists for the sold-out nights.</p>
+                                <p class="text-gray-600 dark:text-gray-400"><a href="{{ marketing_url('/stripe') }}" class="es-circus-link font-medium hover:underline">Stripe</a> or <a href="{{ marketing_url('/paypal') }}" class="es-circus-link font-medium hover:underline">PayPal</a> pays you directly, or take a payment link or cash at the gate. The free plan covers 25 paid tickets a month per schedule; Pro lifts the cap and adds promo codes for your regulars and waitlists for the sold-out nights. Announce a show before it goes on sale and fans can leave just an email address to hear when it does.</p>
                             </div>
                             <div aria-hidden="true">
                                 <div class="rounded-2xl border border-gray-200 bg-gray-50 p-5 dark:border-white/10 dark:bg-black/40">
@@ -1035,7 +1038,7 @@
                     <div class="rounded-2xl border border-white/10 bg-white/[0.05] p-7 text-center backdrop-blur-sm" data-reveal="panel">
                         <div class="es-circus-medal mx-auto mb-5"><span class="es-circus-medal-core"><span class="es-circus-numeral">III</span></span></div>
                         <h3 class="mb-2 text-lg font-semibold text-white">Build your following</h3>
-                        <p class="text-sm text-gray-400">Following gives you permission to email them. You write the newsletter and pick the moment it goes out.</p>
+                        <p class="text-sm text-gray-400">Fans who sign up with their email get a digest of the dates you add. You write the newsletter and pick the moment it goes out.</p>
                     </div>
                 </div>
             </div>
@@ -1055,7 +1058,7 @@
                     </x-feature-link-card>
                 </div>
                 <div data-reveal>
-                    <x-feature-link-card name="Event Graphics" description="Show posters generated from your events, on Pro" :url="marketing_url('/features/event-graphics')" icon-color="amber">
+                    <x-feature-link-card name="Event Graphics" description="Show posters generated from your events, on every plan" :url="marketing_url('/features/event-graphics')" icon-color="amber">
                         <x-slot:icon><svg aria-hidden="true" class="w-5 h-5 text-amber-600 dark:text-amber-400" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" /></svg></x-slot:icon>
                     </x-feature-link-card>
                 </div>
@@ -1131,7 +1134,7 @@
                 $faqs = [
                     [
                         'q' => 'Is Event Schedule free for circus performers?',
-                        'a' => 'Yes, for most of it. Sharing your performance schedule, sub-schedules, two-way calendar sync, an embeddable calendar, free registration with a capacity, the booking request form and appointment booking are all free forever. Selling paid tickets is free up to 25 a month per schedule, and Pro lifts that cap. Newsletters are free up to 10 recipients a month, counted per recipient rather than per send, with 100 on Pro and 1,000 on Enterprise.',
+                        'a' => 'Yes, for most of it. Sharing your performance schedule, sub-schedules, two-way calendar sync, an embeddable calendar, free registration with a capacity, a calendar feed fans subscribe to, the booking request form and one bookable appointment type are all free forever. Selling paid tickets is free up to 25 a month per schedule, and Pro lifts that cap. Newsletters are free up to 10 recipients a month, counted per recipient rather than per send, with 100 on Pro and 1,000 on Enterprise.',
                     ],
                     [
                         'q' => 'Can I manage tour dates and local shows in one schedule?',
@@ -1139,11 +1142,11 @@
                     ],
                     [
                         'q' => 'How do audiences discover my performances?',
-                        'a' => 'Share your schedule link on social media, on your booking page, or embed the calendar on your website. Fans who leave an email address get a digest automatically when you add dates, at most one every few days. Beyond that you write the newsletter and choose when it goes out, and somebody who followed you from their own account only ever hears from you that way.',
+                        'a' => 'Share your schedule link on social media, on your booking page, or embed the calendar on your website. Fans who leave an email address get a digest automatically when you add dates, at most one every few days. Beyond that you write the newsletter and choose when it goes out, and somebody who followed you from their own account only ever hears from you that way. Fans who would rather not give an email can subscribe to your calendar from your page instead. And on a single show, anyone can leave just an email address to hear when its tickets go on sale, if it is cancelled, and shortly before it starts, plus any change notice you send.',
                     ],
                     [
                         'q' => 'Can I sell tickets to my shows?',
-                        'a' => 'Yes, and the first 25 paid tickets a month are on the free plan. Connect your Stripe account and sell directly from your schedule, with as many ticket types as the night needs, each at its own fixed price and its own inventory per date. Pro lifts that ceiling. Zero platform fees on every plan - you only pay Stripe\'s standard processing fees. A tier like Ringside is a ticket type sold by the number; if you seat the ring properly, Enterprise adds a real seating plan the audience picks from.',
+                        'a' => 'Yes, and the first 25 paid tickets a month are on the free plan; Pro lifts that ceiling. Take payment through Stripe or PayPal straight to your own account, or through Payfast (rand only), Invoice Ninja, a payment link or cash, with as many ticket types as the night needs, each at its own fixed price and its own inventory per date. Zero platform fees on every plan, so the only deduction is your payment provider\'s own. If a show is rained off, a Stripe or PayPal sale can be refunded in full or in part from the Sales page, and the money goes back through the provider. A tier like Ringside is a ticket type sold by the number; a seat map the audience picks from is drawn on a venue schedule on Enterprise, so a troupe with its own big top would set that up as a venue.',
                     ],
                     [
                         'q' => 'Can I sell class passes for my aerial or acro classes?',
@@ -1152,6 +1155,10 @@
                     [
                         'q' => 'Can my whole troupe manage one schedule?',
                         'a' => 'On Enterprise, yes. A free schedule is a single account. Enterprise adds team members, up to five on the hosted plans, so your rigger, stage manager, and performers can all update the calendar. Enterprise also turns on availability for talent schedules, where each member marks the days they cannot work and you see it against the calendar.',
+                    ],
+                    [
+                        'q' => 'A festival listed my act before I joined. Is there already a page for me?',
+                        'a' => 'There may be. When a festival or venue names an act that is not on Event Schedule, its event page still shows that act in the lineup by name, and the app creates a page for the act. That page says which schedule created it and that you have not claimed it, credits each date to the schedule that added it, and stays out of search engines until it is claimed. If it carries your email address, create an account or sign in with that address and press Claim this page: it becomes your schedule, and the festivals that already listed you keep listing you without asking again, while anyone new sends a request you accept. If it is not you, This is not me takes it down.',
                     ],
                 ];
             @endphp

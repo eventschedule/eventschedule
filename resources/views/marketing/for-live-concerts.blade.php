@@ -1,6 +1,6 @@
 <x-marketing-layout>
-    <x-slot name="title">Free Event Schedule for Live Concerts | Promote Your Shows</x-slot>
-    <x-slot name="description">Put a whole tour routing online at once: a room, a door time and an on-sale in every city. Sell livestream tickets beside room tickets. Zero platform fees.</x-slot>
+    <x-slot name="title">Free Event Schedule for Live Concerts | Tours & Livestreams</x-slot>
+    <x-slot name="description">Put a whole tour online at once: a room, a door time and an on-sale in every city, livestream tickets beside room tickets, and zero platform fees.</x-slot>
     <x-slot name="breadcrumbTitle">For Live Concerts</x-slot>
 
     <x-slot name="structuredData">
@@ -44,7 +44,8 @@
             "A running order on the event page built from event parts",
             "Named ticket types with their own price, quantity and sales window",
             "Ticket inventory counted per occurrence date",
-            "Zero platform fees on ticket sales through your own Stripe account",
+            "Fans can leave an email address to hear when a date goes on sale",
+            "Zero platform fees on ticket sales through your own Stripe or PayPal account",
             "Free registration with a capacity limit for free shows",
             "Recurring residencies with day-of-week patterns and date exceptions",
             "Direct newsletters to your followers, with open and click rates",
@@ -624,11 +625,15 @@
             ],
             [
                 'q' => 'Is Event Schedule really free for streaming concerts?',
-                'a' => 'Yes. Unlimited dates, the whole routing on one address, recurring residencies with date exceptions, sub-schedules, two-way Google, Outlook and CalDAV sync, the embeddable calendar, free registration with a capacity limit, built-in analytics, ten newsletter recipients a month, selling up to 25 paid tickets a month and scanning them at the door are all free forever. Unlimited ticket sales, passes and the live check-in dashboard are '.plan_price($proMonthly).' a month on Pro. There are zero platform fees on ticket sales at every tier, and past your own Stripe account the money is yours.',
+                'a' => 'Yes. Unlimited dates, the whole routing on one address, recurring residencies with date exceptions, sub-schedules, two-way Google, Outlook and CalDAV sync, the embeddable calendar, free registration with a capacity limit, built-in analytics, ten newsletter recipients a month, selling up to 25 paid tickets a month and scanning them at the door are all free forever. Unlimited ticket sales, passes and the live check-in dashboard are '.plan_price($proMonthly).' a month on Pro. There are zero platform fees on ticket sales at every tier, whether a date sells through your own Stripe or PayPal account, Invoice Ninja, a payment link or cash, so past the provider\'s own fee the money is yours.',
             ],
             [
                 'q' => 'What happens when a date moves or gets pulled?',
-                'a' => 'On a residency, a date exception takes that single night out of the pattern, and guests simply see the day absent rather than crossed out. On a one-off date you change the date on the event. Being straight with you: there is no conflict detection anywhere in Event Schedule, so nothing will warn you that you have booked two shows on the same night. The routing table is where you catch that, which is why it is the first thing on this page.',
+                'a' => 'On a one-off date you change the date on the event, and saving asks whether to email its ticket buyers and anyone who asked to hear about that date; the buyers get it when your schedule sends through its own email settings. Cancelling a one-off date sends that email as part of cancelling. On a residency, a date exception takes a single night out of the pattern and guests simply see the day absent rather than crossed out, but it emails nobody, so tell that night\'s buyers yourself. Refunds go out from the Sales page: a Stripe or PayPal sale goes back through the provider, in full or in part, and only a full refund returns the ticket to stock. Being straight with you: there is no conflict detection anywhere in Event Schedule, so nothing will warn you that you have booked two shows on the same night. The routing table is where you catch that, which is why it is the first thing on this page.',
+            ],
+            [
+                'q' => 'Can fans get an email when tickets go on sale?',
+                'a' => 'Yes, on every plan. Put a date up before its tickets are on sale and its page offers "Tell me when tickets go on sale": a fan leaves an email address, with no account and no name, and gets one email when tickets for that date open, a reminder 48 hours before it starts, word if it is cancelled, and any change notice you choose to send. Once the date is selling, the same list sits beside the buy button as "Tell me if anything changes". Each night of a residency keeps its own list, it is not a subscription to your schedule, it never counts against your newsletter allowance, and the event editor\'s Tickets panel shows how many people are waiting.',
             ],
             [
                 'q' => 'Can the room show my date on its own calendar?',
@@ -814,7 +819,7 @@
                     </div>
                     <div>
                         <p class="es-stage-tag mb-2">The window</p>
-                        <p class="es-stage-muted text-sm">A ticket type's sales window is one start and one end, which is exactly right for a single dated show.</p>
+                        <p class="es-stage-muted text-sm">A ticket type's sales window is one start and one end, which is exactly right for a single dated show. Until it opens, fans can leave an email address on that date and get one email when it does.</p>
                     </div>
                 </div>
             </div>
@@ -822,7 +827,7 @@
             <div class="mt-8 grid gap-4 sm:grid-cols-3" data-reveal-group="90">
                 <div class="es-stage-card p-6 text-center" data-reveal="panel">
                     <div class="es-stage-accent es-stage-num mb-1 text-3xl font-black">{{ plan_price(0) }}</div>
-                    <p class="es-stage-muted text-sm">Platform fees on every ticket you sell, on every plan. Your own Stripe account, your money.</p>
+                    <p class="es-stage-muted text-sm">Platform fees on every ticket you sell, on every plan. Your own Stripe or PayPal account, your money.</p>
                 </div>
                 <div class="es-stage-card p-6 text-center" data-reveal="panel">
                     <div class="es-stage-accent es-stage-num mb-1 text-3xl font-black">{{ plan_price($proMonthly) }}</div>
@@ -924,7 +929,7 @@
                     Name the tickets. <span class="es-stage-accent">Keep the door.</span>
                 </h2>
                 <p class="es-stage-muted mt-5 text-lg" data-reveal style="--reveal-delay: 0.15s;">
-                    Sales run through your own Stripe account and Event Schedule takes nothing from them. Being clear about the shape of it: these are named ticket types with prices and quantities, sold by the number. A reserved-seating room is an Enterprise thing, where you draw the venue once and the buyer picks their own seat off it.
+                    Sales run through your own <a href="{{ marketing_url('/stripe') }}" class="es-stage-link font-semibold hover:underline">Stripe</a> or <a href="{{ marketing_url('/paypal') }}" class="es-stage-link font-semibold hover:underline">PayPal</a> account, or Invoice Ninja, a payment link or cash, and Event Schedule takes nothing from them. Being clear about the shape of it: these are named ticket types with prices and quantities, sold by the number. A reserved-seating room is an Enterprise thing, where you draw the venue once and the buyer picks their own seat off it.
                 </p>
             </div>
 
@@ -942,7 +947,7 @@
                             <h3 class="es-stage-ink text-lg font-bold">Scanned on the way in</h3>
                             <span class="es-stage-plan">Free</span>
                         </div>
-                        <p class="es-stage-muted text-sm">Every ticket carries a QR code, scanned from any phone on any plan. Pro adds the check-in dashboard that breaks the running count down by ticket type.</p>
+                        <p class="es-stage-muted text-sm">Every ticket carries a QR code, scanned from any phone on any plan, and buyers can save it to Google Wallet, where it scans the same way. Pro adds the check-in dashboard that breaks the running count down by ticket type.</p>
                     </div>
                     <div class="es-stage-card p-6" data-reveal="panel">
                         <div class="mb-3 flex flex-wrap items-center gap-2">
@@ -1061,7 +1066,7 @@
                             <h3 class="es-stage-onink text-lg font-bold">What sends itself, and what does not</h3>
                             <span class="es-stage-plan">Free</span>
                         </div>
-                        <p class="es-stage-onmuted text-sm">Worth knowing before you plan around it: fans who gave you their email on your schedule page get an automatic digest when you add dates, at most one every few days. Account followers are not auto-notified, so reaching them means writing the email and pressing send. Ticket buyers are told separately when a date they bought into changes or is cancelled.</p>
+                        <p class="es-stage-onmuted text-sm">Worth knowing before you plan around it: fans who gave you their email on your schedule page get an automatic digest when you add dates, at most one every few days, and a fan who asked about one date hears when it goes on sale and again two days before. Account followers are not auto-notified, so reaching them means writing the email and pressing send. A moved date reaches its ticket buyers only if you send the notice offered on saving, a cancelled one as part of cancelling, and either way only when your schedule sends through its own email settings.</p>
                     </div>
                 </div>
 
@@ -1105,7 +1110,7 @@
                                 <span class="es-stage-plan">Free</span>
                             </div>
                             <p class="es-stage-muted mb-4">Embed the calendar in your own site so the routing lives where people look you up, and sync two ways with Google, Outlook and CalDAV so the dates land in the calendar the crew actually reads.</p>
-                            <p class="es-stage-muted text-sm">Any single date downloads as an .ics file, and a residency's individual dates do too, which is what a promoter forwards to a room's production manager. A residency syncs across as one entry, though: the subscribe feed is what unrolls every night of it.</p>
+                            <p class="es-stage-muted text-sm">Any single date downloads as an .ics file, and a residency's individual dates do too, which is what a promoter forwards to a room's production manager. A residency syncs across as one entry, though: the subscribe feed is what unrolls every night of it, and fans can subscribe to it from your schedule page, with no email address, so a date that moves updates itself in their calendar.</p>
                         </div>
                         <div class="es-glare" aria-hidden="true"></div>
                         <div class="es-ring-glow" aria-hidden="true"></div>
@@ -1164,7 +1169,7 @@
                         <div class="relative z-10">
                             <div class="mb-4 flex flex-wrap items-center gap-2">
                                 <h3 class="es-stage-ink text-xl font-bold">The announce graphic</h3>
-                                <span class="es-stage-plan es-stage-plan-pro">Pro</span>
+                                <span class="es-stage-plan">Free</span>
                             </div>
                             <p class="es-stage-muted">Generate one share image of the dates coming up, in a story, square, portrait or landscape crop. It is built from the flyers already on those events, up to twenty of them, so a date with no flyer of its own sits this one out.</p>
                         </div>
@@ -1321,7 +1326,7 @@
                 @foreach ([
                     ['01', 'Put the routing up', 'Add each date with its room and its door time. A weekly residency is one recurring event with a day-of-week pattern and date exceptions for the weeks you are out.'],
                     ['02', 'Set the running order', 'Doors, opener, changeover, headline. Named parts with start and end times, published on the event page in the order the night runs.'],
-                    ['03', 'Open the sale', 'Connect Stripe, name your ticket types, give each one a price, a quantity and a window. Zero platform fees on what sells.'],
+                    ['03', 'Open the sale', 'Connect Stripe or PayPal, name your ticket types, and give each one a price, a quantity and a window. Zero platform fees on what sells.'],
                 ] as [$stepNum, $stepTitle, $stepBody])
                     <div class="es-stage-card p-7" data-reveal="panel">
                         <div class="es-stage-accent es-stage-num mb-3 text-2xl font-black">{{ $stepNum }}</div>
@@ -1457,7 +1462,7 @@
                         Put the routing up. <span class="es-stage-lit">Keep the door.</span>
                     </h2>
                     <p class="es-stage-onmuted mx-auto mb-10 max-w-2xl text-lg sm:text-xl">
-                        Publishing the whole run is free forever, and so are your first 25 ticket sales a month and scanning them at the door. {{ plan_price($proMonthly) }} a month takes the ceiling off and adds passes and the check-in dashboard, and nothing is taken from the sale.
+                        Publishing the whole run is free forever, and so are your first 25 paid tickets a month and scanning them at the door. {{ plan_price($proMonthly) }} a month takes the ceiling off and adds passes and the check-in dashboard, and nothing is taken from the sale.
                     </p>
 
                     <div class="mx-auto flex max-w-2xl flex-col items-stretch justify-center gap-3 sm:flex-row">

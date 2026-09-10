@@ -1,6 +1,6 @@
 <x-marketing-layout>
-    <x-slot name="title">Free Event Schedule for Performers & Artists</x-slot>
-    <x-slot name="description">Free event scheduling for performers and artists. Share your shows, sell tickets with zero platform fees, and let venues add you to their own schedules.</x-slot>
+    <x-slot name="title">Free Event Schedule for Performers & Artists | Gig Calendar</x-slot>
+    <x-slot name="description">Free event schedule for performers and artists. Share your shows, sell tickets with zero platform fees, and claim the page a venue made in your name.</x-slot>
     <x-slot name="breadcrumbTitle">For Talent</x-slot>
 
     @php
@@ -32,11 +32,12 @@
         $performerTypes = ['Musicians', 'DJs', 'Comedians', 'Dancers', 'Magicians', 'Poets', 'Acrobats', 'Actors', 'Bands', 'Instructors', 'Artists', 'Vendors'];
 
         $faqs = [
-            ['q' => 'Is Event Schedule free for performers?', 'a' => 'Yes. Sharing your show schedule, syncing your calendar, taking booking requests from venues, letting fans follow you and selling up to 25 paid tickets a month are all free forever, and so is a newsletter allowance of 10 emails each month, counted per recipient rather than per send. Unlimited ticket sales, schedule graphics and a larger newsletter allowance are on the Pro plan at ' . plan_price($proMonthly) . '/month, and there are still no platform fees on ticket sales.'],
+            ['q' => 'Is Event Schedule free for performers?', 'a' => 'Yes. Sharing your show schedule, syncing your calendar, taking booking requests from venues, letting fans follow you and selling up to 25 paid tickets a month are all free forever, and so is a newsletter allowance of 10 emails each month, counted per recipient rather than per send. Unlimited ticket sales and a larger newsletter allowance are on the Pro plan at ' . plan_price($proMonthly) . '/month, and there are still no platform fees on ticket sales.'],
             ['q' => 'What happens when a venue books me for a show?', 'a' => 'The venue adds you to their event and you get a request. Accept it and the gig appears on your schedule automatically, with the venue listed on it. You never type the same date into two calendars, and both schedules stay in sync from then on.'],
+            ['q' => 'A venue or curator made a page for me. How do I claim it?', 'a' => 'When a schedule lists you on an event before you are on Event Schedule, a page is created in your name so their lineup can show you. It says who created it and that you have not claimed it yet, credits each date to the schedule that added it, and stays out of search engines until it is claimed. To take it over, press Claim this page and sign in with the email address on it, the one that schedule entered for you. It becomes your schedule, and the schedules already listing you keep listing you without asking again. If the page is not about you, press This is not me: when you hold the address on it the page comes down at once, and otherwise your report is recorded for review.'],
             ['q' => 'I already have a Linktree. Why would I need this?', 'a' => 'A link page shows buttons. A schedule shows dates. Your Event Schedule page lists your actual upcoming shows with venues, times and ticket links, updates itself as you add dates, and lets fans follow you so you can email them when a new show lands. You can keep your link page and point it here, or replace it entirely.'],
             ['q' => 'Can I put my dates on my own website and social profiles?', 'a' => 'Yes. Embed your schedule on any website with a single iframe, or share your schedule URL on social profiles, EPKs and booking platforms. There are also iCal and RSS feeds, so your dates can flow into other calendars and sites automatically. Everything updates the moment you add a show.'],
-            ['q' => 'How do fans find out about my upcoming shows?', 'a' => 'Your dates are public the moment you add them, on your schedule page and in your iCal and RSS feeds. A fan who leaves an email address and confirms it gets a digest automatically when you announce new shows, at most one every few days, and it does not draw on your newsletter allowance. Beyond that you write the newsletter yourself: 10 recipients a month free, 100 on Pro. Pro also generates a shareable graphic of your upcoming shows and lets you boost events with Meta Ads.'],
+            ['q' => 'How do fans find out about my upcoming shows?', 'a' => 'Your dates are public the moment you add them, on your schedule page and in your iCal and RSS feeds, and a fan can subscribe to your calendar from the sign-up panel on your page so a moved date updates itself. On a show that is not on sale yet, a fan can leave an email address to hear when tickets go on sale. A fan who signs up on your page and confirms their address gets a digest automatically when you announce new shows, at most one every few days, and it does not draw on your newsletter allowance. Beyond that you write the newsletter yourself: 10 recipients a month free, 100 on Pro. Pro also generates a shareable graphic of your upcoming shows and lets you boost events with Meta Ads.'],
         ];
     @endphp
 
@@ -46,7 +47,7 @@
         "@context": "https://schema.org",
         "@type": "Service",
         "name": "Event Schedule for Performers & Artists",
-        "description": "Free event scheduling for performers and artists of every kind. Share your shows, sell tickets, sync with Google Calendar, and let venues add you to their schedule. Zero platform fees.",
+        "description": "Free event scheduling for performers and artists of every kind. Share your shows, sell tickets through Stripe or PayPal, sync with Google Calendar, let venues add you to their schedule, and claim the page a venue or curator made in your name. Zero platform fees.",
         "provider": {
             "@type": "Organization",
             "name": "Event Schedule",
@@ -67,7 +68,7 @@
         "applicationCategory": "BusinessApplication",
         "applicationSubCategory": "Performer Scheduling Software",
         "operatingSystem": "Web",
-        "description": "Free event scheduling for performers and artists. Share your shows, sell tickets, sync with Google Calendar, and let venues add you to their schedule.",
+        "description": "Free event scheduling for performers and artists. Share your shows, sell tickets through Stripe or PayPal, sync with Google Calendar, let venues add you to their schedule, and claim the page a venue or curator made in your name.",
         "offers": {
             "@type": "Offer",
             "price": "0",
@@ -78,6 +79,9 @@
             "Custom schedule URL",
             "Google Calendar, Outlook and CalDAV sync",
             "Venue booking requests",
+            "Claim the page a venue or curator created for you",
+            "Ticket sales through Stripe or PayPal with zero platform fees",
+            "Interest list for shows not yet on sale",
             "Embeddable calendar",
             "iCal and RSS feeds",
             "Fan photos, videos and comments on events"
@@ -278,8 +282,8 @@
         accent="blue"
         badge="Get booked"
         heading="Venues add you. You just say yes."
-        lede="A venue building their lineup adds you to the bill and you get a request. Accept it and the gig lands on your schedule with the venue attached. No double entry, no chasing anyone for the details."
-        :chips="['Booking requests, free', 'Both schedules stay in sync', 'Custom request fields, Pro']"
+        lede="A venue building their lineup adds you to the bill and you get a request. Accept it and the gig lands on your schedule with the venue attached. No double entry, no chasing anyone for the details. Not on Event Schedule yet? The listing still creates a page in your name, and it is yours once you claim it with the email address they entered."
+        :chips="['Booking requests, free', 'Both schedules stay in sync', 'Claim a page made for you', 'Custom request fields, Pro']"
         :lead="true"
         ground="white"
         frame="panel">
@@ -313,7 +317,7 @@
         accent="sky"
         badge="Announce it once"
         heading="Add the date once. It shows up everywhere."
-        lede="Your schedule page, your own website, and any calendar app subscribed to your feed. Add a show in one place and every one of them updates, including the calendar you already live in."
+        lede="Your schedule page, your own website, and the calendar of every fan who subscribes from your page. Add a show in one place and every one of them updates, including the calendar you already live in."
         :chips="['Website embed', 'Google, Outlook, CalDAV', 'iCal and RSS feeds', 'Free']"
         :flip="true"
         ground="gray"
@@ -347,7 +351,7 @@
         accent="cyan"
         badge="Sell the tickets"
         heading="Take the door yourself. Keep all of it."
-        lede="Sell straight from your event page through your own Stripe account. Buyers get a QR ticket, you scan them in at the door, and the money lands with you. We never take a cut of a ticket, on any plan."
+        lede="Sell straight from your event page through your own Stripe or PayPal account, or take cash at the door. Buyers get a QR ticket, you scan them in, and the money lands with you. We never take a cut of a ticket on any plan, and a Stripe or PayPal sale can be refunded from the Sales page, in full or in part."
         :chips="['Zero platform fees', '25 paid tickets a month, free', 'QR scanning, free', 'Unlimited sales and passes, Pro']"
         ground="white"
         frame="phone">
@@ -380,8 +384,8 @@
         accent="emerald"
         badge="Fill the room"
         heading="Tell the people who already said yes."
-        lede="A fan who leaves an email address gets a digest automatically the next time you announce dates. Write a newsletter yourself when there is more to say, and Event Schedule builds a graphic of your upcoming shows so you have something to post the same afternoon."
-        :chips="['Followers, free', '10 recipients a month free', '100 on Pro', 'Schedule graphics, Pro']"
+        lede="A fan who signs up on your page gets a digest automatically the next time you announce dates. On a show that is not on sale yet, fans can leave an email address to hear when tickets go on sale. Write a newsletter yourself when there is more to say, and Event Schedule builds a graphic of your upcoming shows so you have something to post the same afternoon."
+        :chips="['Followers, free', '10 recipients a month free', '100 on Pro', 'Schedule graphics, free', 'Interest list, free']"
         :flip="true"
         ground="gray"
         frame="panel">
@@ -527,7 +531,7 @@
                             '<a href="' . marketing_url('/features/calendar-sync') . '" class="font-medium text-blue-600 hover:underline dark:text-blue-400">Google Calendar, Outlook and CalDAV sync</a>',
                             'Website embed, iCal and RSS feeds',
                             '<a href="' . marketing_url('/features/online-events') . '" class="font-medium text-blue-600 hover:underline dark:text-blue-400">Online and hybrid shows</a> with a link to wherever it happens',
-                            'Up to 25 paid tickets a month, with QR scanning at the door',
+                            'Up to 25 paid tickets a month through <a href="' . marketing_url('/stripe') . '" class="font-medium text-blue-600 hover:underline dark:text-blue-400">Stripe</a> or <a href="' . marketing_url('/paypal') . '" class="font-medium text-blue-600 hover:underline dark:text-blue-400">PayPal</a>, with QR scanning at the door',
                             'Subscribers who hear automatically when you announce dates, plus 10 newsletter recipients a month',
                             'Fan photos, videos and comments, all approved by you',
                         ] as $freeItem)

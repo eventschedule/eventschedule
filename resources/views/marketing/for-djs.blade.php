@@ -1,6 +1,6 @@
 <x-marketing-layout>
     <x-slot name="title">Free Event Schedule for DJs | Set Times & Residencies</x-slot>
-    <x-slot name="description">Put your DJ set times, residencies, and guest spots on one link. Reach fans direct, no promoter middleman. Sell tickets with zero platform fees. Free forever.</x-slot>
+    <x-slot name="description">Put your DJ set times, residencies and guest spots on one link. Reach fans direct, no promoter middleman, and sell tickets with zero platform fees.</x-slot>
     <x-slot name="breadcrumbTitle">For DJs</x-slot>
 
     <x-slot name="structuredData">
@@ -9,7 +9,7 @@
         "@context": "https://schema.org",
         "@type": "Service",
         "name": "Event Schedule for DJs",
-        "description": "Put your DJ set times, residencies, and guest spots on one link. Reach fans direct, no promoter middleman. Sell tickets with zero platform fees. Free forever.",
+        "description": "Put your DJ set times, residencies and guest spots on one link. Reach fans direct, no promoter middleman, and sell tickets with zero platform fees.",
         "provider": {
             "@type": "Organization",
             "name": "Event Schedule",
@@ -41,14 +41,17 @@
         "featureList": [
             "Residency tracking with free recurring events",
             "Late-night sets that cross midnight",
-            "Club calendar sync with venue auto-linking",
+            "Club lineups that land on your schedule once you accept",
+            "A page to claim when a promoter lists you before you join",
             "One schedule link for every bio",
+            "A live calendar feed that updates when a set time moves",
             "Auto-generated set-time flyers and promo graphics",
-            "Zero-fee ticketing with QR door check-in",
+            "Zero-fee ticketing through Stripe, PayPal or cash, with QR door check-in",
+            "Ticket alerts for fans before tickets go on sale",
             "Sub-schedules for multiple club nights and brands",
-            "Direct fan newsletters and nearby-show alerts",
-            "Draft, internal, and unlisted events for private gigs",
-            "Manager and agency team access"
+            "Direct fan newsletters and an automatic new-date digest",
+            "Draft events, plus internal and unlisted events on Enterprise",
+            "Manager and agency team access on Enterprise"
         ],
         "url": "{{ url()->current() }}",
         "keywords": "DJ schedule, DJ set times, DJ residency schedule, DJ booking platform, DJ event calendar, DJ gig management, club DJ calendar, DJ link in bio, free DJ scheduling",
@@ -690,8 +693,8 @@
                             </svg>
                             Club Sync
                         </div>
-                        <h3 class="mb-3 text-2xl font-bold text-gray-900 dark:text-white">Clubs book you, fans know instantly</h3>
-                        <p class="mb-6 text-gray-500 dark:text-gray-400">When a promoter adds you to a lineup, it appears on your schedule. No double entry, ever.</p>
+                        <h3 class="mb-3 text-2xl font-bold text-gray-900 dark:text-white">Clubs book you, one tap lists it</h3>
+                        <p class="mb-6 text-gray-500 dark:text-gray-400">When a promoter adds you to a lineup, it lands in your requests. Accept it and the set is on your schedule too. No double entry, ever.</p>
 
                         <div class="relative mt-auto flex items-center justify-center gap-8 py-2" aria-hidden="true">
                             <div class="w-20 rounded-lg border border-cyan-400/40 bg-cyan-500/10 p-2 dark:border-cyan-400/30 dark:bg-cyan-400/10">
@@ -724,7 +727,7 @@
                                     Share Link
                                 </div>
                                 <h3 class="mb-4 text-3xl font-black tracking-tight text-gray-900 dark:text-white">One link for RA, Linktree, SoundCloud</h3>
-                                <p class="text-lg text-gray-500 dark:text-gray-400">Drop it in every bio. Fans see every upcoming set: residencies, guest spots, festivals.</p>
+                                <p class="text-lg text-gray-500 dark:text-gray-400">Drop it in every bio. Fans see every upcoming set: residencies, guest spots, festivals. Or they <a href="{{ marketing_url('/docs/sharing#calendar-feeds') }}" class="es-dj-link font-medium hover:underline">subscribe to your calendar</a>, and a moved set time updates itself.</p>
                             </div>
                             <div class="rounded-2xl border border-gray-200 bg-gray-50 p-5 dark:border-white/10 dark:bg-[#0f0f14]" aria-hidden="true">
                                 <div class="mb-2 text-xs text-gray-500 dark:text-gray-400">Your schedule link</div>
@@ -803,7 +806,7 @@
                                         <svg aria-hidden="true" class="h-4 w-4 text-emerald-500 dark:text-emerald-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
                                         </svg>
-                                        <span class="text-xs text-emerald-700 dark:text-emerald-300">Direct to your Stripe</span>
+                                        <span class="text-xs text-emerald-700 dark:text-emerald-300">Direct to your Stripe or PayPal</span>
                                     </div>
                                 </div>
                             </div>
@@ -848,7 +851,7 @@
                         <div dir="ltr" class="es-dj-slot-time pt-0.5 text-lg font-bold sm:text-xl">00:00</div>
                         <div>
                             <div class="es-dj-display mb-1 text-lg text-white sm:text-xl">Resident</div>
-                            <p class="text-sm text-gray-500 dark:text-gray-400">Set your night to repeat weekly or monthly. Templates clone it in one tap, and sub-schedules keep each club night or brand separate.</p>
+                            <p class="text-sm text-gray-500 dark:text-gray-400">Set your night to repeat weekly or monthly, clone a one-off in one tap, and let sub-schedules keep each club night or brand separate.</p>
                         </div>
                     </div>
                     <div class="es-dj-slot es-dj-slot-live -mx-3 grid grid-cols-[5.5rem_1fr] gap-x-4 rounded-xl px-3 py-5 sm:grid-cols-[6.5rem_1fr] sm:gap-x-6" data-reveal>
@@ -865,7 +868,7 @@
                         <div dir="ltr" class="es-dj-slot-time pt-0.5 text-lg font-bold sm:text-xl">04:00</div>
                         <div>
                             <div class="es-dj-display mb-1 text-lg text-white sm:text-xl">Festival closer</div>
-                            <p class="text-sm text-gray-500 dark:text-gray-400">Your manager or agency gets team access. Venues sync you into their lineups automatically. You just play.</p>
+                            <p class="text-sm text-gray-500 dark:text-gray-400">On Enterprise, your manager or agency gets their own login. Venues add you to their lineups and you accept with one tap. You just play.</p>
                         </div>
                     </div>
                 </div>
@@ -932,7 +935,7 @@
                 <div data-reveal>
                     <x-sub-audience-card
                         name="B2B Partners"
-                        description="Show joint sets and collaborations. Both schedules stay synced automatically."
+                        description="Show joint sets and collaborations. One event, on both schedules once your partner accepts."
                         icon-color="fuchsia"
                         blog-slug="for-b2b-djs"
                     >
@@ -1170,8 +1173,10 @@
                     $faqs = [
                         ['q' => 'Can I track both residencies and one-off bookings?', 'a' => 'Yes. Set up recurring events for your weekly or monthly residencies and they auto-repeat on your schedule. Add guest spots and festival bookings as one-off events. Everything shows up in one clean calendar that fans can follow.'],
                         ['q' => 'Does it handle late-night sets that cross midnight?', 'a' => 'Yes. Event Schedule handles overnight events correctly. A set that starts at 11 PM Saturday and ends at 4 AM Sunday displays properly on the Saturday listing, so fans know when to show up.'],
-                        ['q' => 'What happens when a club adds me to their lineup?', 'a' => 'When a club or promoter adds you to their event on Event Schedule, it automatically appears on your schedule. No double-entry needed. Both calendars stay in sync so your fans always see your latest bookings.'],
-                        ['q' => 'Can I sell advance tickets to my sets?', 'a' => 'Yes. Connect Stripe and sell tickets directly from your schedule with zero platform fees. Each ticket includes a unique QR code for check-in at the door. You keep 100% of the sale minus Stripe\'s standard processing fees.'],
+                        ['q' => 'What happens when a club adds me to their lineup?', 'a' => 'It arrives as a request on your schedule. Accept it and the set shows on your link too, with no double entry, and because both schedules share one event, a changed set time shows on both. The event page lists the whole lineup, whether or not every DJ on it has signed up.'],
+                        ['q' => 'A promoter listed me before I joined. Is that page mine?', 'a' => 'It can be. Naming a DJ who is not on Event Schedule creates a page for them, so the name can appear on the lineup. The page says who created it and that you have not claimed it yet, credits each date to the club or promoter that added it, and stays out of search engines. Press Claim this page, sign in with the email address it carries, and it becomes your schedule, with those promoters still listing you. If it is not you, press This is not me.'],
+                        ['q' => 'Can I sell advance tickets to my sets?', 'a' => 'Yes. Connect your own Stripe or PayPal account, or take cash at the door, and sell tickets directly from your schedule with zero platform fees. Each ticket includes a unique QR code for check-in at the door, and you keep 100% of the sale minus your payment provider\'s fee. A Stripe or PayPal sale can be refunded in full or in part from the Sales page, and the money goes back through the provider. Not on sale yet? Fans can leave just an email address on the event page to hear when tickets go on sale.'],
+                        ['q' => 'Can fans add my set times to their own calendar?', 'a' => 'Yes. Your page offers a live calendar feed that fans can subscribe to in Google Calendar, Apple Calendar or Outlook, with no email address needed. Unlike a one-off download, it updates itself when a set time moves. Each event page also has its own Add to Calendar button.'],
                         ['q' => 'Can I keep private gigs and secret parties off my public schedule?', 'a' => 'Yes. Draft events are free and stay hidden until you publish them. On the Enterprise plan you can also mark events internal for your team only, or unlisted with an optional password, so a wedding, corporate booking, or secret location party is reachable only by direct link.'],
                         ['q' => 'Can I run separate club nights or brands on one schedule?', 'a' => 'Yes. Sub-schedules are free and let you group events by club night or brand, so your weekly techno night and your open format bookings stay organized under one account. Your link still shows everything in one place, and you can embed the calendar on any website.'],
                     ];

@@ -43,8 +43,11 @@
             "Season passes valid for every performance of a run, once each",
             "Named ticket types with their own prices, quantities and sales windows",
             "Custom questions collected at checkout",
-            "QR check-in with a real-time check-in dashboard",
-            "Zero platform fees on ticket sales through your own Stripe account",
+            "QR check-in at the door on every plan, with a live check-in dashboard on Pro",
+            "Zero platform fees on ticket sales, paid through Stripe, PayPal, Invoice Ninja, Payfast, a payment link or cash",
+            "Reserved seating on Enterprise, with best-available seats and a box office console",
+            "A 'Tell me when tickets go on sale' list on every performance",
+            "Full and partial refunds through Stripe and PayPal from the Sales page",
             "Sub-schedules that keep mainstage, studio and family programming apart",
             "Direct newsletters with open and click rates",
             "Two-way Google, Outlook and CalDAV calendar sync",
@@ -397,7 +400,7 @@
         $faqs = [
             [
                 'q' => 'Is Event Schedule free for theaters?',
-                'a' => 'Yes. Setting a production up as a run, marking dark days, splitting your spaces into sub-schedules, publishing your season and syncing two ways with Google, Outlook or CalDAV are all free forever, and so is selling: the free plan takes payment for up to 25 paid tickets a month per schedule, with free registration uncapped (a zero-price ticket never counts). The Pro plan at '.plan_price($proMonthly).' a month lifts that ceiling and adds QR check-in, the check-in dashboard, season passes and custom checkout questions. Event Schedule charges zero platform fees on ticket sales on every plan, the free one included.',
+                'a' => 'Yes. Setting a production up as a run, marking dark days, splitting your spaces into sub-schedules, publishing your season and syncing two ways with Google, Outlook or CalDAV are all free forever, and so is selling: the free plan takes payment for up to 25 paid tickets a month per schedule, with free registration uncapped (a zero-price ticket never counts), and scanning tickets at the door is free on every plan. The Pro plan at '.plan_price($proMonthly).' a month lifts that ceiling and adds the live check-in dashboard, season passes and custom checkout questions. Event Schedule charges zero platform fees on ticket sales on every plan, the free one included.',
             ],
             [
                 'q' => 'How do I set up a multi-week run?',
@@ -413,11 +416,19 @@
             ],
             [
                 'q' => 'Can I price different parts of the house differently?',
-                'a' => 'Yes, two ways. Named ticket types price parts of the house by the number: create as many as the production needs, each with its own price, quantity and sales window, plus add-ons and a rate that applies when somebody buys several at once. On Enterprise you can price the house by its actual seats instead: draw the auditorium once as a seating plan, give each section a price band, and the buyer picks their own seat off the map.',
+                'a' => 'Yes, two ways. Named ticket types price parts of the house by the number: create as many as the production needs, each with its own price, quantity and sales window, and a group rate that applies when somebody buys several at once (add-ons are on Pro). On Enterprise you can price the house by its actual seats instead: draw the auditorium once as a seating plan on your venue schedule and give each section a price band. Buyers get the best seats left together or pick their own off the map, and the box office console can pick several seats at once to hold back, book for a caller or release, and move a booking to another seat.',
             ],
             [
                 'q' => 'Can I run more than one space?',
                 'a' => 'Yes, on every plan. Sub-schedules keep the mainstage, the studio and the family programme apart on one link, so somebody looking for the studio season is not reading through the whole year to find it.',
+            ],
+            [
+                'q' => 'Can people ask to be told when tickets go on sale?',
+                'a' => 'Yes, free on every plan. Announce a production before tickets are ready and each performance page offers "Tell me when tickets go on sale". A visitor leaves an email address, with no account, and hears when tickets go on sale, if the performance is cancelled, and again shortly before it starts, plus any change notice you choose to send. Each date of a run keeps its own list, the event editor shows how many people are waiting, and it is not a subscription to your schedule.',
+            ],
+            [
+                'q' => 'Can I refund a ticket if a performance is cancelled?',
+                'a' => 'Yes, from the Sales page, on every plan. A Stripe or PayPal sale goes back through the provider, in full or in part, and the sale only changes once the money has moved. A partial refund leaves the ticket valid; a full refund puts the seats back on sale, and on a reserved-seating date the seat returns to the map. A sale taken another way, such as cash at the box office or a payment link, is marked as refunded and you return the money yourself.',
             ],
         ];
 
@@ -679,7 +690,7 @@
                         @endforeach
                     </tbody>
                 </table>
-                <p class="es-bill-muted mt-4 text-xs">Each bar is one production's run. Sub-schedules keep the studio season on its own strand of the same link.</p>
+                <p class="es-bill-muted mt-4 text-xs">Each bar is one production's run. Sub-schedules keep the studio season on its own strand of the same link, and somebody booking three productions pays for them in one checkout.</p>
             </div>
         </div>
     </section>
@@ -756,7 +767,8 @@
                     Name your prices. <span class="es-bill-accent">Or your seats.</span>
                 </h2>
                 <p class="es-bill-muted mt-5 text-lg" data-reveal style="--reveal-delay: 0.15s;">
-                    Create as many ticket types as the production needs, each with its own price, quantity and sales window. That sells the house by the number. On Enterprise you can sell it by the seat instead: draw the auditorium once, and the buyer takes row C seat 14 off a real chart.
+                    Create as many ticket types as the production needs, each with its own price, quantity and sales window. That sells the house by the number. On Enterprise you can sell it by the seat instead: draw the auditorium once, and the buyer gets the best seats left together or takes row C seat 14 off a real chart.
+                    <a href="{{ marketing_url('/features/allocated-seating') }}" class="es-bill-link font-medium hover:underline">How reserved seating works</a>
                 </p>
             </div>
 
@@ -766,7 +778,7 @@
                         <h3 class="es-bill-ink text-lg font-bold">Tiers that close on time</h3>
                         <span class="es-bill-plan">Free</span>
                     </div>
-                    <p class="es-bill-muted text-sm">Give each type a sales window so preview pricing stops when previews do, and concessions can open later without you editing anything.</p>
+                    <p class="es-bill-muted text-sm">Give each type a sales window so preview pricing stops when previews do, and concessions can open later without you editing anything. A group rate can kick in once somebody buys several.</p>
                 </div>
                 <div class="es-bill-card p-7" data-reveal="panel">
                     <div class="mb-3 flex flex-wrap items-center gap-2">
@@ -777,15 +789,15 @@
                 </div>
                 <div class="es-bill-card p-7" data-reveal="panel">
                     <div class="mb-3 flex flex-wrap items-center gap-2">
-                        <h3 class="es-bill-ink text-lg font-bold">Groups and add-ons</h3>
+                        <h3 class="es-bill-ink text-lg font-bold">Add-ons and codes</h3>
                         <span class="es-bill-plan es-bill-plan-pro">Pro</span>
                     </div>
-                    <p class="es-bill-muted text-sm">A rate that applies once somebody buys several at once, plus add-ons that attach to a booking. Discount codes for the people you want to bring back.</p>
+                    <p class="es-bill-muted text-sm">Add-ons that attach to a booking, each with its own stock, and discount codes for the people you want to bring back.</p>
                 </div>
             </div>
 
             <p class="es-bill-muted mx-auto mt-8 max-w-2xl text-center text-sm" data-reveal>
-                Connect Stripe and sell straight from the run. Event Schedule charges zero platform fees, so past Stripe's own processing the money is yours.
+                Take payment through Stripe, PayPal, Invoice Ninja, Payfast (in rand), a payment link or cash at the box office, on every plan. Event Schedule charges zero platform fees, so past the provider's own processing the money is yours. On Pro, a big booking can be split into <a href="{{ marketing_url('/features/installments') }}" class="es-bill-link font-medium hover:underline">monthly installments</a> by card through Stripe.
             </p>
         </div>
     </section>
@@ -813,9 +825,9 @@
                     <div class="es-bill-card p-6" data-reveal="panel">
                         <div class="mb-2 flex flex-wrap items-center gap-2">
                             <h3 class="text-lg font-bold text-[#e8ece9]">On the door</h3>
-                            <span class="es-bill-plan es-bill-plan-pro">Pro</span>
+                            <span class="es-bill-plan">Free</span>
                         </div>
-                        <p class="text-sm text-[#9aa8a1]">Scan on the way in from any phone. No extra hardware, and duplicates are caught rather than argued about.</p>
+                        <p class="text-sm text-[#9aa8a1]">Scan on the way in from any phone, on every plan. No extra hardware, and duplicates are caught rather than argued about. Buyers can also add the ticket to Google Wallet, with the same code on it.</p>
                     </div>
                     <div class="es-bill-card p-6" data-reveal="panel">
                         <div class="mb-2 flex flex-wrap items-center gap-2">
@@ -834,7 +846,7 @@
                 </div>
 
                 <p class="mt-10 text-center text-gray-300" data-reveal>
-                    For a free performance, registration with a capacity limit works on every plan.
+                    For a free performance, registration with a capacity limit works on every plan. On a reserved-seating date, each scan also marks that seat as arrived on the box office map.
                 </p>
             </div>
         </div>
@@ -894,7 +906,7 @@
                                 <span class="es-bill-plan">Free</span>
                             </div>
                             <p class="es-bill-muted mb-4">Embed the calendar on your own site so the season lives where people look you up, and sync two ways with Google, Outlook and CalDAV.</p>
-                            <p class="es-bill-muted text-sm">Built-in analytics show page views, the devices people are on, and where the traffic came from. That is what they measure, and nothing more.</p>
+                            <p class="es-bill-muted text-sm">Built-in analytics show page views, the devices people are on and where the traffic came from, and for each production how many tickets sold and how many people came through the door.</p>
                         </div>
                         <div class="es-glare" aria-hidden="true"></div>
                         <div class="es-ring-glow" aria-hidden="true"></div>
@@ -909,7 +921,7 @@
                                 <h3 class="es-bill-ink text-xl font-bold">Announce when you are ready</h3>
                                 <span class="es-bill-plan">Free</span>
                             </div>
-                            <p class="es-bill-muted">A production you have not announced sits on the calendar as a draft, visible to you and never published until you say so.</p>
+                            <p class="es-bill-muted">A production you have not announced sits on the calendar as a draft, visible to you and never published until you say so. Once it is public, every performance offers "Tell me when tickets go on sale", so the people who saw the season announcement hear when you open sales. <a href="{{ marketing_url('/docs/tickets#interest-list') }}" class="es-bill-link font-medium hover:underline">How the interest list works</a></p>
                         </div>
                         <div class="es-glare" aria-hidden="true"></div>
                         <div class="es-ring-glow" aria-hidden="true"></div>
@@ -922,7 +934,7 @@
                         <div class="relative z-10">
                             <div class="mb-4 flex flex-wrap items-center gap-2">
                                 <h3 class="es-bill-ink text-xl font-bold">The announcement image</h3>
-                                <span class="es-bill-plan es-bill-plan-pro">Pro</span>
+                                <span class="es-bill-plan">Free</span>
                             </div>
                             <p class="es-bill-muted mb-4">Generate a graphic from a production in a story, square, portrait or landscape crop. It is built from the event, so the title and the dates are already right.</p>
                             <p class="es-bill-muted text-sm">
@@ -1091,6 +1103,16 @@
                     </x-feature-link-card>
                 </div>
                 <div data-reveal>
+                    <x-feature-link-card name="Allocated Seating" description="Draw the auditorium once and sell by the seat, on Enterprise" :url="marketing_url('/features/allocated-seating')" icon-color="emerald">
+                        <x-slot:icon><svg aria-hidden="true" class="w-5 h-5 text-emerald-600 dark:text-emerald-400" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zM14 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z" /></svg></x-slot:icon>
+                    </x-feature-link-card>
+                </div>
+                <div data-reveal>
+                    <x-feature-link-card name="Passes" description="Season passes valid for every performance of a run, on Pro" :url="marketing_url('/features/passes')" icon-color="teal">
+                        <x-slot:icon><svg aria-hidden="true" class="w-5 h-5 text-teal-600 dark:text-teal-400" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z" /></svg></x-slot:icon>
+                    </x-feature-link-card>
+                </div>
+                <div data-reveal>
                     <x-feature-link-card name="Sub-schedules" description="Keep mainstage, studio and family programming apart" :url="marketing_url('/features/sub-schedules')" icon-color="teal">
                         <x-slot:icon><svg aria-hidden="true" class="w-5 h-5 text-teal-600 dark:text-teal-400" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h7" /></svg></x-slot:icon>
                     </x-feature-link-card>
@@ -1189,7 +1211,7 @@
                         Set the run once. <span class="es-bill-lit">Sell all fourteen.</span>
                     </h2>
                     <p class="mx-auto mb-10 max-w-2xl text-lg text-gray-400">
-                        Publishing your season and its dates is free forever, and so is selling your first twenty-five tickets a month. {{ plan_price($proMonthly) }} a month lifts the ceiling and adds season passes and check-in, and nothing is taken from the door.
+                        Publishing your season and its dates is free forever, and so is selling your first 25 paid tickets a month and scanning them at the door. {{ plan_price($proMonthly) }} a month lifts the ceiling and adds season passes and the live check-in dashboard, and nothing is taken from the door.
                     </p>
 
                     <div class="mx-auto flex max-w-2xl flex-col items-stretch justify-center gap-3 sm:flex-row">

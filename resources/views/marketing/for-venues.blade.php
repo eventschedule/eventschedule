@@ -1,6 +1,6 @@
 <x-marketing-layout>
-    <x-slot name="title">Free Event Schedule for Venues | Manage Your Event Calendar</x-slot>
-    <x-slot name="description">Run your venue calendar front to back. Accept booking requests, sell tickets with QR check-in, and give every room and stage its own sub-schedule. Free forever.</x-slot>
+    <x-slot name="title">Free Event Schedule for Venues | Calendar, Bookings, Tickets</x-slot>
+    <x-slot name="description">Run your venue calendar front to back: a booking inbox for acts, tickets via Stripe or PayPal with zero platform fees, and a sub-schedule for every room.</x-slot>
     <x-slot name="breadcrumbTitle">For Venues</x-slot>
 
     <x-slot name="structuredData">
@@ -9,7 +9,7 @@
         "@context": "https://schema.org",
         "@type": "Service",
         "name": "Event Schedule for Venues",
-        "description": "Run your venue calendar front to back. Accept booking requests, sell tickets with QR check-in, take private hire bookings, and give every room and stage its own sub-schedule. Zero platform fees.",
+        "description": "Run your venue calendar front to back. Accept booking requests, sell tickets through Stripe or PayPal with QR check-in, take private hire bookings, and give every room and stage its own sub-schedule. Zero platform fees.",
         "provider": {
             "@type": "Organization",
             "name": "Event Schedule",
@@ -31,7 +31,7 @@
         "applicationCategory": "BusinessApplication",
         "applicationSubCategory": "Venue Management Software",
         "operatingSystem": "Web",
-        "description": "Run your venue calendar front to back. Accept booking requests, sell tickets with QR check-in, take private hire bookings, and give every room and stage its own sub-schedule.",
+        "description": "Run your venue calendar front to back. Accept booking requests, sell tickets through Stripe or PayPal with QR check-in, take private hire bookings, and give every room and stage its own sub-schedule.",
         "offers": {
             "@type": "Offer",
             "price": "0",
@@ -42,6 +42,10 @@
             "Public event calendar",
             "Booking request inbox",
             "QR code ticketing and check-in dashboard",
+            "Stripe and PayPal checkout with zero platform fees",
+            "Full and partial refunds from the Sales page",
+            "Interest list for events not yet on sale",
+            "Pages for acts who are not on Event Schedule yet",
             "Reserved seating",
             "Promo codes and gift cards",
             "Private hire booking",
@@ -215,7 +219,7 @@
                 'price' => plan_price($entMonthly),
                 'note' => 'per month',
                 'lede' => 'For rooms with a real team and a brand of their own.',
-                'items' => ['Everything in Pro', 'Your own domain', 'Up to five team members', 'Internal and unlisted events', '1,000 newsletter recipients a month', 'Priority support'],
+                'items' => ['Everything in Pro', 'Your own domain', 'Up to five team members', 'Allocated seating with a seat picker', 'Internal and unlisted events', '1,000 newsletter recipients a month', 'Priority support'],
                 'featured' => false,
             ],
         ];
@@ -236,16 +240,20 @@
                 'a' => 'Enable the booking inbox on your schedule, and musicians, DJs, and other performers can submit requests to play at your venue. You review each request and approve or decline from your dashboard. Approved events are automatically added to your calendar.',
             ],
             [
+                'q' => 'What if an act I book is not on Event Schedule?',
+                'a' => 'List them by name anyway. The event page shows the whole lineup, and every act you name gets a page of its own that says who created it, credits the date to you and stays out of search engines until they claim it. On eventschedule.com you can tick a box to email them an invitation. They claim the page by signing in with the email address you entered for them, and from then on your dates keep appearing on it without waiting for their approval.',
+            ],
+            [
                 'q' => 'Can I embed the calendar on my venue\'s website?',
                 'a' => 'Yes. Copy a simple embed code and paste it into your website. The calendar updates automatically whenever you add or change events. It works with any website builder including WordPress, Squarespace, and Wix.',
             ],
             [
                 'q' => 'Can multiple staff members manage the calendar?',
-                'a' => 'Your schedule includes one team member on the free plan, and the Enterprise plan adds up to five. Each member is either an admin, who can add and edit events, or a viewer, who can see the schedule without changing it. Anyone with access to the schedule can scan tickets at the door from their own phone.',
+                'a' => 'Your schedule includes one team member on the free plan, and the Enterprise plan adds up to five. Each member is either an admin, who can add and edit events and sees the schedule\'s ticket sales, or a viewer, who can see the schedule without changing it. Anyone with access to the schedule can scan tickets at the door from their own phone.',
             ],
             [
                 'q' => 'Can people book our function room or studio time?',
-                'a' => 'Yes. Create a bookable type for the space you rent out, set the hours you are available, add per-date overrides for holidays, and charge for it through Stripe if you want to. The free plan carries one bookable type and Pro removes the cap. Guests pick a time on your public booking page, and you can require approval before anything is confirmed.',
+                'a' => 'Yes. Create a bookable type for the space you rent out, set the hours you are available, add per-date overrides for holidays, and charge for it through Stripe, a payment link or cash if you want to. The free plan carries one bookable type and Pro removes the cap. Guests pick a time on your public booking page, and you can require approval before anything is confirmed.',
             ],
             [
                 'q' => 'Can we use our own domain and remove Event Schedule branding?',
@@ -253,7 +261,15 @@
             ],
             [
                 'q' => 'What does it cost to sell tickets?',
-                'a' => 'Selling is included on every plan, with the Free plan capped at 25 paid tickets a month and Pro removing the cap. Event Schedule charges no platform fee on ticket sales at any tier, so the only deduction is Stripe\'s standard processing fee, and payouts go straight to your own Stripe account.',
+                'a' => 'Selling is included on every plan, with the Free plan capped at 25 paid tickets a month and Pro removing the cap. Event Schedule charges no platform fee on ticket sales at any tier, so the only deduction is your payment processor\'s standard fee. Connect your own Stripe or PayPal account and payouts go straight to you, or take cash at the door.',
+            ],
+            [
+                'q' => 'Can I refund a ticket?',
+                'a' => 'Yes, from the Sales page, on every plan. A Stripe or PayPal sale can be refunded in full or in part, and the money goes back through the provider before the sale changes status. A partial refund keeps the tickets valid, and a full refund frees the tickets and seats to sell again. A sale taken in cash, by payment link, through Payfast or through Invoice Ninja is marked as refunded instead, which records it without moving any money.',
+            ],
+            [
+                'q' => 'Can people ask to hear when tickets go on sale?',
+                'a' => 'Yes, on every plan. On the event page a visitor can leave an email address, and nothing else, under Tell me when tickets go on sale. They get one email when tickets go on sale, one if you cancel, and a reminder shortly before the night, plus any change notice you choose to send. You see how many people are waiting on the event\'s Tickets panel, and the count is never shown publicly.',
             ],
             [
                 'q' => 'Can buyers pick their own seat?',
@@ -412,8 +428,8 @@
         accent="sky"
         badge="Public calendar"
         heading="A calendar your regulars actually follow"
-        lede="One page with everything you have on. Share the link, embed it on your own website, or let people subscribe so your nights land in the calendar app they already use."
-        :chips="['Mobile-friendly', 'One link', 'Follow button', 'iCal and RSS feeds', 'Embed anywhere']"
+        lede="One page with everything you have on. Share the link, embed it on your own website, or let people subscribe so your nights land in the calendar app they already use and move when you move them. For a night that is not on sale yet, a visitor can leave an email address to hear when tickets go on sale."
+        :chips="['Mobile-friendly', 'One link', 'Follow button', 'iCal and RSS feeds', 'Embed anywhere', 'Interest list']"
         :lead="true"
         frame="browser"
         frame-url="thebluenote.eventschedule.com"
@@ -450,8 +466,8 @@
         accent="cyan"
         badge="Box office"
         heading="Sell tickets without giving away the door"
-        lede="Set your ticket types, connect your own Stripe account and keep every cent of the face value. Event Schedule takes no platform fee, so the only deduction is Stripe's processing charge."
-        :chips="['Zero platform fees', 'Stripe payouts', 'Reserved seating', 'Promo codes', 'Gift cards', 'Waitlists', 'Free RSVPs']"
+        lede="Set your ticket types, connect your own Stripe or PayPal account, and keep every cent of the face value. Event Schedule takes no platform fee, so the only deduction is the processor's charge. Refund a Stripe or PayPal sale from the Sales page, in full or in part, and the money goes back the way it came."
+        :chips="['Zero platform fees', 'Stripe or PayPal', 'Full or partial refunds', 'Reserved seating', 'Promo codes', 'Gift cards', 'Waitlists', 'Free RSVPs']"
         :flip="true"
         frame="phone"
         ground="gray">
@@ -524,7 +540,7 @@
         badge="Private hire"
         heading="Let people book the room"
         lede="The function room, the studio, the back bar, a venue tour. Publish the hours each space is free and let people pick a time themselves, with the price paid up front if you want it."
-        :chips="['Bookable spaces', 'Weekly hours', 'Holiday overrides', 'Paid by Stripe', 'Approval required', 'Reschedule links']"
+        :chips="['Bookable spaces', 'Weekly hours', 'Holiday overrides', 'Stripe, payment link or cash', 'Approval required', 'Reschedule links']"
         :flip="true"
         frame="panel"
         ground="gray">
@@ -560,7 +576,7 @@
         $alsoOutFront = [
             [
                 'title' => 'Followers and newsletters',
-                'desc' => 'People follow your page, you email them when new dates land.',
+                'desc' => 'Email subscribers get the dates you add in an automatic digest, and you write the newsletter.',
                 'href' => marketing_url('/features/newsletters'),
                 'chip' => 'bg-sky-100 dark:bg-sky-500/15', 'text' => 'text-sky-600 dark:text-sky-400',
                 'icon' => '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />',
@@ -728,7 +744,7 @@
         accent="sky"
         badge="The door"
         heading="Scan them in with the phone in your pocket"
-        lede="Open the scanner, point it at the QR code, done. The check-in dashboard shows who is inside and how many are still to come, updating live as the queue moves."
+        lede="Open the scanner on any phone, point it at the QR code, done. Scanning is free on every plan, and on Pro the check-in dashboard shows who is inside and how many are still to come, updating live as the queue moves."
         :chips="['QR check-in', 'Live check-in dashboard', 'Individual tickets', 'Bulk attendee import', 'No extra hardware']"
         :flip="true"
         frame="phone"
@@ -1011,7 +1027,7 @@
                 <h2 class="es-balance mb-3 text-2xl font-black tracking-tight text-gray-900 dark:text-white md:text-4xl">
                     Free forever. <span class="text-gradient-house">Upgrade when the room does.</span>
                 </h2>
-                <p class="text-lg text-gray-500 dark:text-gray-400">Zero platform fees on ticket sales at every tier. You only ever pay Stripe's processing fee.</p>
+                <p class="text-lg text-gray-500 dark:text-gray-400">Zero platform fees on ticket sales at every tier. You only ever pay Stripe's or PayPal's processing fee, and nothing at all on cash.</p>
             </div>
 
             <div class="grid grid-cols-1 gap-4 md:grid-cols-3" data-reveal-group="90">

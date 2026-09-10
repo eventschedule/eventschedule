@@ -475,7 +475,7 @@
         $boundary = [
             ['The database', 'Schedules, events, sales, followers, all on your MySQL server', 'No access'],
             ['Uploaded files', 'Flyers, logos and event graphics on your disk or object store', 'No access'],
-            ['Payments', 'Your own Stripe account and your own payouts', 'No platform fee, no access'],
+            ['Payments', 'Your own Stripe or PayPal account, and your own payouts', 'No platform fee, no access'],
             ['Outgoing email', 'Your mail server, configured in your .env', 'Not routed through us'],
             ['AI features', 'Your own provider API key, read from your .env', 'Not proxied by us'],
             ['Crash reports', 'Off unless you set REPORT_ERRORS=true', 'Received only if you opt in'],
@@ -499,7 +499,7 @@
             [
                 'label' => 'Your keys',
                 'title' => 'Anything you connect',
-                'body' => 'Stripe, Google and Microsoft calendars, CalDAV, AI parsing: each one runs on credentials you add yourself, and each one talks to that provider directly rather than through Event Schedule.',
+                'body' => 'Stripe, PayPal, Google and Microsoft calendars, CalDAV, Google Wallet passes, AI parsing: each one runs on credentials you add yourself, and each one talks to that provider directly rather than through Event Schedule.',
             ],
             [
                 'label' => 'Read only',
@@ -655,7 +655,7 @@
                             @endforeach
                         </dl>
                         <p class="es-fine-muted mt-4 text-xs leading-relaxed">
-                            Every Pro and Enterprise feature is included when you run it yourself: with hosting turned off, the app's plan checks pass for every schedule. Two things exist only here, on the far side of that switch: one-click updates from inside the admin panel, and importing events from a URL or by city. The license asks only that the original attribution stays in place.
+                            Every Pro and Enterprise feature is included when you run it yourself: with hosting turned off, the app's plan checks pass for every schedule. Two things exist only here, on the far side of that switch: one-click updates from inside the admin panel, and Auto Import, which reads a list of web pages you choose once a day and imports the events it finds there, optionally keeping only those in cities you name. The license asks only that the original attribution stays in place.
                         </p>
                     </div>
                 </div>
@@ -729,7 +729,7 @@
                     </table>
                 </div>
                 <p class="es-fine-muted mt-4 px-1 text-xs">
-                    The rule between the last two columns is the whole argument of this page. Nothing on the left of it is reachable from eventschedule.com. Only the last three rows leave your server at all, and the two that carry any of your own data are off until you turn them on.
+                    The rule between the last two columns is the whole argument of this page. Nothing on the left of it is reachable from eventschedule.com. Only the last three rows reach anyone other than you and the providers whose keys you add, and the two that carry any of your own data are off until you turn them on.
                 </p>
             </div>
         </div>
@@ -879,7 +879,7 @@
                         Run it yourself. <span class="es-fine-lit">Own the whole of it.</span>
                     </h2>
                     <p class="mx-auto mb-8 max-w-2xl text-lg text-gray-400">
-                        No license fee, no per-event charge, no platform fee on ticket sales, and no plan gates once hosting is turned off. What you pay for is the server, Stripe's own processing, and whatever the keys you add yourself cost.
+                        No license fee, no per-event charge, no platform fee on ticket sales, and no plan gates once hosting is turned off. What you pay for is the server, the processing fees Stripe or PayPal charge, and whatever the keys you add yourself cost.
                     </p>
 
                     <div class="mx-auto mb-10 flex flex-col items-stretch justify-center gap-3 sm:flex-row sm:items-center">

@@ -1,6 +1,6 @@
 <x-marketing-layout>
-    <x-slot name="title">Free Event Schedule for Online Classes | Virtual Teaching</x-slot>
-    <x-slot name="description">Schedule and sell online classes with built-in registration, recurring sessions, and newsletters you send your students. Works with any platform. Free forever.</x-slot>
+    <x-slot name="title">Free Event Schedule for Online Classes | Terms & Class Cards</x-slot>
+    <x-slot name="description">Set an online course up once as a term, cap the seats per session, and sell single classes or class cards at zero platform fees. Any video platform works.</x-slot>
     <x-slot name="breadcrumbTitle">For Online Classes</x-slot>
 
     <x-slot name="structuredData">
@@ -45,8 +45,9 @@
             "Passes scoped to one sub-schedule, so a beginner card does not open the advanced track",
             "One link for the whole schedule, embeddable on the site you already have",
             "Any video platform: one class link on the course, joined from your schedule",
-            "Zero platform fees on payments through your own Stripe account",
+            "Zero platform fees on payments through your own Stripe or PayPal account",
             "Two-way Google, Outlook and CalDAV calendar sync",
+            "A live calendar feed students can subscribe to, updated when a date changes",
             "Newsletters to the students who follow you, with open and click rates",
             "Built-in analytics on views, devices and traffic sources"
         ],
@@ -536,11 +537,19 @@
             ],
             [
                 'q' => 'Can I charge for individual sessions?',
-                'a' => 'Yes, and selling is on the free plan: 25 paid tickets a month per schedule, unlimited on Pro. Create as many named ticket types as the course needs, each with its own price and quantity: a drop-in seat, a concession rate, a free trial session. Payments run through your own Stripe account, so you keep everything except Stripe\'s standard processing fee. Event Schedule takes nothing.',
+                'a' => 'Yes, and selling is on the free plan: 25 paid tickets a month per schedule, unlimited on Pro. Create as many named ticket types as the course needs, each with its own price and quantity: a drop-in seat, a concession rate, a free trial session. Payments run through your own Stripe or PayPal account, or through Invoice Ninja, a payment link or cash, so you keep everything except the provider\'s own processing fee. Event Schedule takes nothing.',
             ],
             [
                 'q' => 'Do my students get an email when I add a class?',
-                'a' => 'Not automatically, and no page here will tell you otherwise. Students follow your schedule so that you can email them, and you write and send that newsletter yourself: ten recipients a month on the free plan, a hundred on Pro, a thousand on Enterprise. There is one email that is not a newsletter: if your schedule sends through its own email settings, then when you change the course time or cancel it you are asked at the point of saving whether to tell the people already registered, and because a term is one recurring event that goes to everybody holding a seat on an upcoming session, not to one week only.',
+                'a' => 'Some do. A student who left an email address in the sign-up panel on your schedule page and confirmed it gets a digest of the new classes you publish, at most one every 72 hours, outside your newsletter allowance. Pressing Follow on its own sends nothing to an account follower automatically, so a student who did only that hears about a new class through a newsletter you write and send yourself: ten recipients a month on the free plan, a hundred on Pro, a thousand on Enterprise. Changes are a separate email. Change the class link and saving asks whether to tell everyone holding a seat on an upcoming session, and cancelling the course tells them as part of cancelling; those reach anyone who left an address on a session\'s page to hear about it, and registered students too when your schedule sends through its own email settings. A new start time on a term does not trigger that question, because a term is one recurring event, so say it in a newsletter.',
+            ],
+            [
+                'q' => 'Can students ask to hear when a course goes on sale?',
+                'a' => 'Yes, on every plan. Publish the course before you add its tickets and its page offers "Tell me when tickets go on sale": a student leaves an email address, with no account and no name, and gets one email when seats for that session date go on sale, a reminder 48 hours before it, word if it is cancelled, and any change notice you choose to send. Each session date keeps its own list, unsubscribing deletes the address, and the Tickets panel on the course shows how many people are waiting. To hear about every new course instead, a student signs up in the panel on your schedule page and gets the digest.',
+            ],
+            [
+                'q' => 'Can I refund a student who drops out?',
+                'a' => 'Yes, from the Sales page, on every plan. A payment taken through Stripe or PayPal goes back through the provider, in full or in part. A partial refund leaves their seat or class card valid, and only a full refund cancels it and puts the seat back on sale. Payments taken by Invoice Ninja, a payment link or cash are marked as refunded instead, which records the refund without moving any money.',
             ],
         ];
 
@@ -590,7 +599,7 @@
                         Write the term once - the night it meets, the weeks you are off, the session it finishes on - and take every registration for it from a single link, with zero platform fees.
                     </p>
                     <p class="es-fade-up es-d-2 es-syl-muted mb-10 max-w-xl text-base">
-                        Online class scheduling with free registration and a seat cap counted per session date, multi-session class cards, recurring terms that end themselves, and payments through your own Stripe account.
+                        Online class scheduling with free registration and a seat cap counted per session date, multi-session class cards, recurring terms that end themselves, and payments through your own Stripe or PayPal account.
                     </p>
 
                     <div class="es-fade-up es-d-3 flex flex-col items-start gap-4 sm:flex-row sm:flex-wrap">
@@ -969,7 +978,7 @@
                             @endforeach
                         </div>
                         <p class="es-syl-muted mt-4 border-t pt-3 text-xs es-syl-hair">
-                            Cards are sold next to single seats, not instead of them. Seats sell on the free plan up to 25 paid tickets a month, and Pro removes the cap. Payments run through your own Stripe account and Event Schedule takes <span class="es-syl-accent font-semibold">zero platform fees</span> at every plan level.
+                            Cards are sold next to single seats, not instead of them. Seats sell on the free plan up to 25 paid tickets a month, and Pro removes the cap. Payments run through your own Stripe or PayPal account, or Invoice Ninja, a payment link or cash, and Event Schedule takes <span class="es-syl-accent font-semibold">zero platform fees</span> at every plan level.
                         </p>
                     </div>
                 </div>
@@ -1033,7 +1042,7 @@
     @php
         $rest = [
             ['Newsletters to your students', 'Free', 'Students follow your schedule so you can write to them. Materials before, a recording link after, next term when it opens. Ten recipients a month free, a hundred on Pro, a thousand on Enterprise, with open and click rates.'],
-            ['Two-way calendar sync', 'Free', 'Google, Outlook and CalDAV, both directions, so your teaching hours and the rest of your week sit in one calendar. A recurring term syncs across as its next session rather than as a repeating series; to see all twelve dates in a calendar app, subscribe to your schedule\'s calendar feed instead.'],
+            ['Two-way calendar sync', 'Free', 'Google, Outlook and CalDAV, both directions, so your teaching hours and the rest of your week sit in one calendar. A recurring term syncs across as its next session rather than as a repeating series; to see all twelve dates in a calendar app, subscribe to your schedule\'s calendar feed instead. Students can subscribe to the same live feed from your schedule page, with no email address, and it updates itself when a date changes.'],
             ['Analytics that are already on', 'Free', 'Views, devices and where the traffic came from, per schedule. Enough to know whether the term filled from your newsletter or from somebody else linking you.'],
             ['A session agenda', 'Free', 'Break a class into named parts with their own times: warm-up, teaching, questions. It is the running order of a session, and on a term every session runs it.'],
             ['Sub-schedules for levels', 'Free', 'Beginner, intermediate and advanced as separate strands of the same link, each with its own colour. They organise and filter; they do not hide anything, and a pass can be scoped to one of them.'],
@@ -1068,7 +1077,7 @@
             </div>
 
             <p class="es-syl-muted mx-auto mt-8 max-w-2xl text-center text-sm" data-reveal>
-                Worth being precise about which list is which. Somebody who left an email address and confirmed it hears when you add sessions, as one digest rather than a message per week. Somebody who pressed Follow from their own account is on the other list, and that one is reached only by a newsletter you write. There is no automation builder here either way: no branching sequence, no drip.
+                Worth being precise about which list is which. Somebody who left an email address and confirmed it hears when you publish new classes, as one digest rather than a message per class. Somebody who pressed Follow from their own account is on the other list, and that one is reached only by a newsletter you write. There is no automation builder here either way: no branching sequence, no drip.
             </p>
         </div>
     </section>

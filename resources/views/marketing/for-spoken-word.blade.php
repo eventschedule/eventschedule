@@ -38,13 +38,15 @@
             "description": "Free forever"
         },
         "featureList": [
-            "Free registration with an optional capacity limit for open mic slots",
+            "Free registration with an optional per-date capacity limit for open mic slots",
+            "A free waitlist for a full night that emails the next poet when a spot opens",
             "Recurring weekly and monthly mics with date exceptions for holidays",
             "Sub-schedules that keep the mic, the reading series, and workshops apart",
             "A public submission form so performers can put themselves forward",
             "Custom questions on the registration form for what is being read",
-            "Zero-fee ticket sales with QR check-in for featured readings",
-            "Direct newsletters to the people who follow your schedule",
+            "Ticket sales through Stripe, PayPal or cash, with zero platform fees and QR check-in for featured readings",
+            "A digest of the nights you add, for email subscribers, and newsletters you write",
+            "A live calendar feed that updates itself when a night moves",
             "Fan photos, videos, and comments from the night with an approval queue",
             "Two-way Google, Outlook, and CalDAV calendar sync",
             "Auto-generated flyers and social graphics for each night",
@@ -480,15 +482,15 @@
         $faqs = [
             [
                 'q' => 'Is Event Schedule free for open mics and readings?',
-                'a' => 'Yes. Sharing your schedule, running recurring nights, taking free registrations with a capacity limit, and syncing with Google, Outlook, or CalDAV are all free forever. Selling is free too, up to 25 paid tickets a month per schedule, which covers a monthly night comfortably. Pro at '.plan_price($proMonthly).' a month lifts that ceiling and adds event graphics and custom questions on the sign-up form. Event Schedule charges zero platform fees on tickets either way.',
+                'a' => 'Yes. Sharing your schedule, running recurring nights, taking free registrations with a capacity limit, generating a flyer for each night, and syncing with Google, Outlook, or CalDAV are all free forever. Selling is free too, up to 25 paid tickets a month per schedule, which covers a monthly night comfortably. Pro at '.plan_price($proMonthly).' a month lifts that ceiling and adds custom questions on the sign-up form. Event Schedule charges zero platform fees on tickets either way.',
             ],
             [
                 'q' => 'Can poets sign up for a slot themselves?',
-                'a' => 'Yes. Turn on registration for the night and set how many spots there are. Performers claim a spot from the event page, the page shows how many are left, and it stops taking names once they are gone. Registration is free on every plan.',
+                'a' => 'Yes. Turn on registration for the night and set how many spots there are; on a recurring mic the count is per date. Performers claim a spot from the event page, the page shows how many are left, and it stops taking names once they are gone. A poet who cannot make it cancels from the link in their confirmation email, which frees the spot, and once a night is full the next poet can join its waitlist and is emailed when a spot opens. Registration and its waitlist are free on every plan.',
             ],
             [
                 'q' => "Can I ask performers what they're reading?",
-                'a' => 'Yes, on the Pro plan. Custom fields let you add your own questions to the sign-up form, so a poet answers "what are you reading", "how long is it", or a content note when they take a spot. Text answers can be checked against a pattern with a hint you write. You can also let people submit a whole event for your schedule, and their answers land on your Requests tab.',
+                'a' => 'Yes, on the Pro plan. Custom fields let you add your own questions to the sign-up form, so a poet answers "what are you reading", "how long is it", or a content note when they take a spot, and each answer is stored with their registration. You can also let people submit a whole event for your schedule, on any plan, and it lands on your Requests tab. On Pro your own fields can appear on that form too, where a text answer can be checked against a pattern with a hint you write.',
             ],
             [
                 'q' => 'How do I run a mic that happens every second Tuesday?',
@@ -500,7 +502,15 @@
             ],
             [
                 'q' => 'Can I sell tickets to a featured reading?',
-                'a' => 'Yes, and a monthly reading night rarely needs a paid plan to do it. The free plan sells 25 paid tickets a month per schedule, through your own Stripe account, with the QR code scanned at the door like any other. Pro at '.plan_price($proMonthly).' a month lifts the ceiling and adds the live check-in dashboard, and it is also what a season pass across the whole series needs. Event Schedule takes zero platform fees on any of it, so you only pay Stripe processing.',
+                'a' => 'Yes, and a monthly reading night rarely needs a paid plan to do it. The free plan sells 25 paid tickets a month per schedule, paid through your own Stripe or PayPal account, or by payment link or cash, with the QR code scanned at the door like any other. Pro at '.plan_price($proMonthly).' a month lifts the ceiling and adds the live check-in dashboard, and it is also what a season pass across the whole series needs. Event Schedule takes zero platform fees on any of it, so the only deduction is your payment provider\'s own, and a Stripe or PayPal sale can be refunded in full or in part from the Sales page.',
+            ],
+            [
+                'q' => 'Can people ask to hear about a night before sign-up opens?',
+                'a' => 'Yes. Anyone can leave just an email address on the night\'s page, with no account and no subscription to your schedule. They get a reminder shortly before it starts, word if it is cancelled, and any change notice you send, and if the night sells tickets, one email when they go on sale. Registration takes names from the moment you switch it on, so there is no opening email for it.',
+            ],
+            [
+                'q' => 'A bookstore listed me as its feature. Is there a page for me already?',
+                'a' => 'There may be. When a bookstore, venue or series names a reader who is not on Event Schedule, its event page still shows that reader by name, and the app creates a page for them. That page says which schedule created it and that you have not claimed it, credits each date to the schedule that added it, and stays out of search engines until it is claimed. If it carries your email address, create an account or sign in with that address and press Claim this page: it becomes your schedule, and the series that already listed you keep listing you without asking again, while anyone new sends a request you accept. If it is not you, This is not me takes it down.',
             ],
         ];
 
@@ -748,7 +758,7 @@
                     </div>
 
                     <p class="mt-5 border-t border-[rgba(28,61,110,0.16)] pt-4 text-sm text-[#6b6459]">
-                        Free also covers unlimited events, two-way Google, Outlook, and CalDAV sync, an embeddable calendar, online and hybrid readings, and an .ics download for anyone who wants the date in their own calendar.
+                        Free also covers unlimited events, two-way Google, Outlook, and CalDAV sync, an embeddable calendar, online and hybrid readings, a waitlist for a full night, and a calendar feed anyone can subscribe to, so a moved night updates itself.
                     </p>
                 </div>
             </div>
@@ -768,7 +778,7 @@
                         Stop asking &ldquo;what are you reading&rdquo; <span class="text-gradient-signup">at the door.</span>
                     </h2>
                     <p class="mb-6 text-lg leading-relaxed text-gray-600 dark:text-gray-400" data-reveal style="--reveal-delay: 0.15s;">
-                        You can let people put an event forward for your schedule at all, on any plan, and their answers land on your Requests tab. On Pro you add your own questions to the sign-up form, so the things you would otherwise shout across a loud room arrive written down.
+                        Anyone can put an event forward for your schedule, on any plan, and it lands on your Requests tab. On Pro you add your own questions to the sign-up form, so the things you would otherwise shout across a loud room arrive written down.
                     </p>
                     <ul class="space-y-3 text-gray-600 dark:text-gray-400" data-reveal-group="70">
                         <li class="flex gap-3" data-reveal>
@@ -777,7 +787,7 @@
                         </li>
                         <li class="flex gap-3" data-reveal>
                             <svg aria-hidden="true" class="mt-0.5 h-5 w-5 flex-none text-[#1c3d6e] dark:text-[#93c5fd]" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7" /></svg>
-                            <span>Text answers can be checked against a pattern, with a hint you write, in the browser and again on the server.</span>
+                            <span>Your own fields can go on the form for putting an event forward too, where a text answer can be checked against a pattern you set, with a hint you write, in the browser and again on the server.</span>
                         </li>
                         <li class="flex gap-3" data-reveal>
                             <svg aria-hidden="true" class="mt-0.5 h-5 w-5 flex-none text-[#1c3d6e] dark:text-[#93c5fd]" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7" /></svg>
@@ -868,11 +878,11 @@
                     <div class="space-y-5" data-reveal-group="80">
                         <div class="rounded-2xl border border-white/10 bg-white/[0.05] p-6 backdrop-blur-sm" data-reveal>
                             <h3 class="mb-2 text-lg font-semibold text-white">The night promotes itself</h3>
-                            <p class="text-sm text-gray-400">Generate a flyer from the event and post it, instead of rebuilding the same graphic in a design tool every second Tuesday. <span class="es-sheet-plan es-sheet-plan-pro ms-1 align-middle" style="border-color: rgba(248,113,113,0.5); color: #fca5a5;">Pro</span></p>
+                            <p class="text-sm text-gray-400">Generate a flyer from the event and post it, instead of rebuilding the same graphic in a design tool every second Tuesday. <span class="es-sheet-plan ms-1 align-middle" style="border-color: rgba(147,197,253,0.5); color: #93c5fd;">Free</span></p>
                         </div>
                         <div class="rounded-2xl border border-white/10 bg-white/[0.05] p-6 backdrop-blur-sm" data-reveal>
                             <h3 class="mb-2 text-lg font-semibold text-white">It is in their calendar, not just yours</h3>
-                            <p class="text-sm text-gray-400">Two-way sync with Google, Outlook, and CalDAV, and an .ics download on every event and every recurring date.</p>
+                            <p class="text-sm text-gray-400">Two-way sync with Google, Outlook, and CalDAV on your side. On theirs, an .ics download for any one date, or a live feed of the whole series that updates itself when a night moves.</p>
                         </div>
                         <div class="rounded-2xl border border-white/10 bg-white/[0.05] p-6 backdrop-blur-sm" data-reveal>
                             <h3 class="mb-2 text-lg font-semibold text-white">It lives on the venue's site too</h3>
@@ -907,10 +917,10 @@
                                 <span class="es-sheet-plan dark:border-[rgba(147,197,253,0.4)] dark:text-[#93c5fd]">Free</span>
                             </div>
                             <p class="mb-4 text-gray-600 dark:text-gray-400">
-                                People follow your schedule and you email them directly when the next night is up. No algorithm deciding which regulars find out.
+                                Regulars who sign up with their email and confirm it get a digest of the nights you add, automatically and at most one every three days, and you write to the whole list directly when you have news. No algorithm deciding which regulars find out.
                             </p>
                             <p class="text-sm text-gray-600 dark:text-gray-400">
-                                Free covers 10 newsletter emails a month and Pro raises it to 100, counted per recipient. For a room of regulars that is real, and it is worth knowing the number before you plan around it.
+                                The digest sits outside your newsletter allowance, which is 10 emails a month on Free and 100 on Pro, counted per recipient. For a room of regulars that is real, and it is worth knowing the number before you plan around it.
                             </p>
                         </div>
                         <div class="es-glare" aria-hidden="true"></div>
@@ -941,13 +951,13 @@
                         <div class="relative z-10">
                             <div class="mb-4 flex flex-wrap items-center gap-2">
                                 <h3 class="text-xl font-bold text-gray-900 dark:text-white">When the feature is ticketed</h3>
-                                <span class="es-sheet-plan es-sheet-plan-pro dark:border-[rgba(248,113,113,0.5)] dark:text-[#fca5a5]">Pro</span>
+                                <span class="es-sheet-plan dark:border-[rgba(147,197,253,0.4)] dark:text-[#93c5fd]">Free</span>
                             </div>
                             <p class="mb-4 text-gray-600 dark:text-gray-400">
-                                Connect Stripe and sell straight from the schedule, with QR check-in at the door. Event Schedule takes zero platform fees, so what is left after Stripe's processing is yours.
+                                Take payment through Stripe or PayPal, or cash on the night, and sell straight from the schedule with QR check-in at the door. The free plan covers 25 paid tickets a month, and Event Schedule takes zero platform fees, so what is left after processing is yours.
                             </p>
                             <p class="text-sm text-gray-600 dark:text-gray-400">
-                                Discount codes for the regulars, and a pass that covers a whole season of the series rather than one night at a time.
+                                Announce the feature before tickets are on sale and people can leave just an email address to hear when they go on sale. Pro adds discount codes for the regulars and a pass that covers a whole season of the series.
                             </p>
                         </div>
                         <div class="es-glare" aria-hidden="true"></div>

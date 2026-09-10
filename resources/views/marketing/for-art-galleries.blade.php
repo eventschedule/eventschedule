@@ -1,6 +1,6 @@
 <x-marketing-layout>
-    <x-slot name="title">Gallery Calendars | The Show Runs, the Evenings Do Not</x-slot>
-    <x-slot name="description">A six-week hang is one recurring event that stops itself on the closing date, not thirty entries. The private view and the artist talk go on top.</x-slot>
+    <x-slot name="title">Art Gallery Calendars | The Show Runs, the Evenings Do Not</x-slot>
+    <x-slot name="description">A six-week exhibition is one recurring event that stops itself on the closing date, not thirty entries. The private view and artist talk go on top.</x-slot>
     <x-slot name="breadcrumbTitle">For Art Galleries</x-slot>
 
     <x-slot name="structuredData">
@@ -42,12 +42,15 @@
             "Opening days set by day of week, with date exceptions that add or remove single dates",
             "Separate evening events for the private view, artist talk, curator tour and closing",
             "Free registration with a capacity, counted separately for each date",
-            "Ticketed collector dinners and previews with QR check-in",
-            "Zero platform fees on ticket sales through your own Stripe account",
+            "Ticketed collector dinners and previews with QR check-in, 25 paid tickets a month on the free plan",
+            "Zero platform fees on ticket sales, paid through Stripe, PayPal, Invoice Ninja, a payment link or cash",
+            "Refunds from the Sales page, sent back through Stripe or PayPal in full or in part",
+            "An interest list for a ticketed evening before it goes on sale",
+            "A live calendar feed collectors subscribe to once, which picks up every new show",
             "Followers you can email directly, within a monthly allowance counted per recipient",
             "Exhibition proposals submitted through your own page, pasted in or uploaded as a flyer",
             "Custom fields on the request form, so every proposal arrives with a portfolio link",
-            "Participants, so a showing artist gets the dates on their own schedule",
+            "Participants, so a showing artist is offered the dates for their own schedule, or gets a page they can claim if they are not on Event Schedule yet",
             "Sub-schedules for exhibitions, talks and hire, each with its own shareable link",
             "Two-way Google, Outlook and CalDAV calendar sync",
             "Embeddable calendar for your own website",
@@ -354,7 +357,7 @@
             ],
             [
                 'q' => 'Is Event Schedule free for a gallery?',
-                'a' => 'The parts you use for every show are free forever: the run as a recurring event, date exceptions, separate evening events, free registration with a capacity for a private view, sub-schedules, exhibition proposals from artists, two-way calendar sync and an embeddable calendar. Selling a ticket to a collector dinner or a paid preview is free as well, up to 25 paid tickets a month per schedule, which is more than most galleries charge for in a year; Pro at '.plan_price($proMonthly).' a month is what lifts that ceiling. Zero platform fees on sales either way.',
+                'a' => 'The parts you use for every show are free forever: the run as a recurring event, date exceptions, separate evening events, free registration with a capacity for a private view, sub-schedules, exhibition proposals from artists, two-way calendar sync, a live calendar feed and an embeddable calendar. Selling a ticket to a collector dinner or a paid preview is free as well, up to 25 paid tickets a month per schedule, and Pro at '.plan_price($proMonthly).' a month is what lifts that ceiling. Zero platform fees on sales either way.',
             ],
             [
                 'q' => 'Can I cap the private view without charging for it?',
@@ -362,11 +365,19 @@
             ],
             [
                 'q' => 'How do artists propose a show?',
-                'a' => 'Through your page rather than your inbox. The default submission form takes a pasted proposal or an uploaded flyer and turns it into a request for you to review, which is free and covers ten submissions a day. If you would rather have fixed fields, switch the setting to the booking form and every proposal arrives with a date, a time and a description. On Pro you can add custom fields to either form, so nothing reaches you without a portfolio link.',
+                'a' => 'Through your page rather than your inbox. The default submission form takes a pasted proposal or an uploaded flyer and reads it into a request for you to review. That is free, and it reads up to 50 a day on the free plan and Pro alike (10 while a schedule is on a trial, 100 on Enterprise), from the same daily allowance as any events you import that way yourself. If you would rather have fixed fields, switch the setting to the booking form and every proposal arrives with a date, a time and a description. On Pro you can add custom fields to either form, so nothing reaches you without a portfolio link.',
             ],
             [
                 'q' => 'Will my collectors be told when a new show goes up?',
-                'a' => 'Anyone who leaves an email address on your gallery page is sent a short digest when a new show goes up, at most one every few days, and it does not touch your newsletter allowance. Anything with more in it than the dates is a newsletter you write: the free plan covers 10 emails a month and Pro raises it to 100, counted per recipient rather than per send, so one message to a hundred collectors uses a hundred of them.',
+                'a' => 'Anyone who leaves an email address on your gallery page and confirms it is sent a short digest when you put a new show up, at most one every few days, and it does not touch your newsletter allowance. Collectors who would rather not give an address can subscribe to the gallery\'s live calendar feed instead, and each new show appears in their own calendar. Anything with more in it than the dates is a newsletter you write: the free plan covers 10 emails a month and Pro raises it to 100, counted per recipient rather than per send, so one message to a hundred collectors uses a hundred of them.',
+            ],
+            [
+                'q' => 'What if an exhibiting artist is not on Event Schedule?',
+                'a' => 'Add them by name anyway. The show\'s page lists every artist, and one without an account gets a page of their own that shows the dates you added, says your gallery listed them and that they have not claimed it yet, and stays out of search engines until they do. Add their email address and they can claim the page by signing in with it; the dates you listed stay on it once it is theirs.',
+            ],
+            [
+                'q' => 'How do collectors pay for a ticketed dinner?',
+                'a' => 'Through your own Stripe or PayPal account, an Invoice Ninja invoice, a payment link or cash, chosen per event, and Event Schedule takes no platform fee on any of them. If a guest cannot come, refund them from the Sales page: a Stripe or PayPal sale goes back through the provider, in full or in part, and any other method is marked as refunded, which records it without moving money. Refunds are free on every plan, and so is selling, up to 25 paid tickets a month per schedule.',
             ],
         ];
 
@@ -622,14 +633,15 @@
                 <div class="es-hang-card p-6 sm:p-7" data-reveal="panel">
                     <div class="mb-1 flex flex-wrap items-baseline justify-between gap-2">
                         <h3 class="es-hang-ink text-lg font-bold">The collector dinner</h3>
-                        <span class="es-hang-plan es-hang-plan-pro">Pro plan</span>
+                        <span class="es-hang-plan es-hang-plan-free">Free to 25 a month</span>
                     </div>
                     <p class="es-hang-muted mb-5 text-sm">The evening that is worth charging for.</p>
                     <ul class="space-y-3">
                         @foreach ([
                             'A price and a quantity, counted per date the same way.',
                             'QR check-in, so the person on the door is not holding a printout.',
-                            'Payment through your own Stripe account, with no platform fee on top.',
+                            'Paid into your own Stripe or PayPal account, or by Invoice Ninja, a payment link or cash, with no platform fee on top.',
+                            'Announce it before it sells, and collectors can ask to be told when tickets go on sale.',
                         ] as $point)
                             <li class="flex items-start gap-3">
                                 <svg aria-hidden="true" class="es-hang-accent mt-0.5 h-4 w-4 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7" /></svg>
@@ -695,8 +707,9 @@
                     <div class="space-y-3" data-reveal-group="90">
                         @foreach ([
                             ['A list that is yours', 'Followers arrive from your own page, and you can see who they are on the followers tab.'],
-                            ['Written and sent by you', 'No trigger, no automation. The announcement goes when you decide the hang is ready to be seen.'],
-                            ['Know the unit before you plan', 'The allowance counts each recipient, so a list of two hundred is two sends on Pro, not two hundred.'],
+                            ['Written and sent by you', 'A newsletter never sends itself. The announcement goes when you decide the hang is ready to be seen.'],
+                            ['Know the unit before you plan', 'The allowance counts each recipient, so one letter to a list of two hundred uses two hundred: more than a month on Pro, a fifth of a month on Enterprise.'],
+                            ['Or no address at all', 'Collectors can subscribe to the gallery\'s live calendar feed from the sign-up panel or any event\'s Add to Calendar menu, and every new show and evening appears in their own calendar.'],
                         ] as [$t, $d])
                             <div class="es-hang-card es-hang-hover p-4" data-reveal>
                                 <p class="es-hang-ink text-sm font-bold">{{ $t }}</p>
@@ -737,7 +750,7 @@
                         @foreach ([
                             'An artist pastes their proposal text or uploads a flyer.',
                             'It is read into a request for you to review, not published.',
-                            'Ten submissions a day on the free plan, fifty on Pro.',
+                            'Fifty read a day on the free plan and Pro alike (ten during a trial), a hundred on Enterprise.',
                         ] as $point)
                             <li class="flex items-start gap-3">
                                 <svg aria-hidden="true" class="es-hang-accent mt-0.5 h-4 w-4 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7" /></svg>
@@ -752,12 +765,12 @@
                         <h3 class="es-hang-ink text-lg font-bold">Or ask for exactly what you need</h3>
                         <span class="es-hang-plan es-hang-plan-pro">Pro plan</span>
                     </div>
-                    <p class="es-hang-muted mb-5 text-sm">Switch the form, then add your own fields.</p>
+                    <p class="es-hang-muted mb-5 text-sm">Switch the form on any plan; your own fields are Pro.</p>
                     <ul class="space-y-3">
                         @foreach ([
                             'The booking form asks for a date, a time and a description.',
                             'Custom fields sit on either form, so nothing arrives without a portfolio link.',
-                            'Accept, and adding the artist as a participant puts the dates on their schedule too.',
+                            'Accept, and adding the artist as a participant offers the dates to their own schedule too.',
                         ] as $point)
                             <li class="flex items-start gap-3">
                                 <svg aria-hidden="true" class="es-hang-accent mt-0.5 h-4 w-4 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7" /></svg>
@@ -838,7 +851,7 @@
 
                 <x-sub-audience-card
                     name="Artist Cooperatives"
-                    description="Members take the wall in turn, and each of them can be added to their own show so the dates land on their schedule."
+                    description="Members take the wall in turn, and each can be added to their own show, which offers the dates to their schedule to accept."
                     icon-color="emerald"
                     blog-slug="for-artist-cooperatives"
                 >
@@ -887,7 +900,7 @@
                     @foreach ([
                         ['01', 'Put the run up', 'One recurring event on the days you open, ending on the day the show comes down.'],
                         ['02', 'Add the evenings', 'The private view, the talk, the closing. A capacity on each, and a price only where there is one.'],
-                        ['03', 'Send it once', 'Followers get the announcement when you write it. Artists send the next proposal through the same page.'],
+                        ['03', 'Send it once', 'Subscribers get a short digest of the new show on their own, and the announcement you write goes when you send it. Artists send the next proposal through the same page.'],
                     ] as [$n, $t, $d])
                         <div class="rounded-lg border border-white/10 bg-white/[0.05] p-7 backdrop-blur-sm" data-reveal="panel">
                             <p class="es-hang-lit es-hang-num mb-3 text-sm font-bold">{{ $n }}</p>
@@ -915,6 +928,11 @@
                 <div data-reveal>
                     <x-feature-link-card name="Sub-schedules" description="Exhibitions, talks and hire on their own strands and links" :url="marketing_url('/features/sub-schedules')" icon-color="teal">
                         <x-slot:icon><svg aria-hidden="true" class="h-5 w-5 text-teal-600 dark:text-teal-400" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h10" /></svg></x-slot:icon>
+                    </x-feature-link-card>
+                </div>
+                <div data-reveal>
+                    <x-feature-link-card name="Ticketing" description="For the collector dinner: a price, QR check-in and zero platform fees, free to 25 a month" :url="marketing_url('/features/ticketing')" icon-color="amber">
+                        <x-slot:icon><svg aria-hidden="true" class="h-5 w-5 text-amber-600 dark:text-amber-400" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 5v2m0 4v2m0 4v2M5 5a2 2 0 00-2 2v3a2 2 0 110 4v3a2 2 0 002 2h14a2 2 0 002-2v-3a2 2 0 110-4V7a2 2 0 00-2-2H5z" /></svg></x-slot:icon>
                     </x-feature-link-card>
                 </div>
                 <div data-reveal>
@@ -1025,8 +1043,8 @@
                         Put the show up <span class="es-hang-grad">and leave it there</span>.
                     </h2>
                     <p class="mx-auto mb-10 max-w-xl text-lg text-gray-300 sm:text-xl">
-                        The run, the evenings and the proposals cost nothing. Pay only when an
-                        evening is worth a ticket.
+                        The run, the evenings and the proposals cost nothing, and a ticketed dinner
+                        is free up to 25 paid tickets a month.
                     </p>
 
                     <div class="mx-auto flex max-w-2xl flex-col items-stretch justify-center gap-3 sm:flex-row">

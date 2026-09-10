@@ -1,6 +1,6 @@
 <x-marketing-layout>
-    <x-slot name="title">Free Event Schedule for Visual Artists | Exhibitions</x-slot>
-    <x-slot name="description">Build your collector base directly. Announce exhibitions, sell tickets to openings, and email collectors. Zero platform fees. Free forever.</x-slot>
+    <x-slot name="title">Free Artist Exhibition Calendar | Openings and Studio Visits</x-slot>
+    <x-slot name="description">One page for your exhibitions, open studio days and workshops. Sell workshop places with zero platform fees, and let collectors subscribe to your calendar.</x-slot>
     <x-slot name="breadcrumbTitle">For Visual Artists</x-slot>
 
     <x-slot name="structuredData">
@@ -31,7 +31,7 @@
         "applicationCategory": "BusinessApplication",
         "applicationSubCategory": "Artist Exhibition and Event Scheduling Software",
         "operatingSystem": "Web",
-        "description": "Build your collector base directly. Announce exhibitions, sell tickets to openings, and email collectors. Zero platform fees. Free forever.",
+        "description": "One page for your exhibitions, open studio days and workshops, with a link of its own. Sell workshop places through Stripe or PayPal with zero platform fees, and let collectors subscribe to your calendar.",
         "offers": {
             "@type": "Offer",
             "price": "0",
@@ -48,12 +48,14 @@
             "Named ticket types with quantities counted per occurrence date",
             "Custom questions answered at checkout",
             "QR check-in at the door on every plan",
-            "Zero platform fees on ticket sales through your own Stripe account",
+            "Zero platform fees on ticket sales through your own Stripe or PayPal account",
             "Bookable studio visits with weekly hours and per-date overrides",
             "Direct newsletters to the people who follow your schedule",
             "A downloadable QR code for your schedule",
             "Two-way Google, Outlook and CalDAV calendar sync",
+            "A live calendar feed collectors subscribe to once",
             "Embeddable calendar for your own portfolio site",
+            "A page made for you when a gallery lists you, which you claim with the email address on it",
             "Shareable graphics built from the flyer images of your upcoming events"
         ],
         "url": "{{ url()->current() }}",
@@ -605,16 +607,16 @@
         $plates = [
             ['Bell Street Gallery', 'Links to their page'],
             ['Kiln Room', 'Links to their page'],
-            ['Riverside Fair', 'No page to link to'],
+            ['Riverside Fair', 'Logo only, until claimed'],
             ['The Annexe', 'Links to their page'],
             ['Harbour Print Room', 'Links to their page'],
-            ['Fold Projects', 'No page to link to'],
+            ['Fold Projects', 'Logo only, until claimed'],
         ];
 
         $faqs = [
             [
                 'q' => 'Is Event Schedule free for visual artists?',
-                'a' => 'Yes. The wall itself costs nothing: your public page and its permanent link, recurring open studio dates with individual dates taken out, sub-schedules with their own colour and their own link, Drafts that stay off the page until you announce, the header wall of the venues you have shown with, two-way Google, Outlook and CalDAV calendar sync, an embeddable calendar, built-in analytics, a downloadable QR code for your schedule, free RSVP with a capacity, one bookable appointment type, QR check-in at the door, and up to 10 newsletter emails a month, counted per recipient rather than per send. Selling paid places is free too, up to 25 a month. The Pro plan at '.plan_price($proMonthly).' a month lifts that cap and adds event graphics, your own questions at checkout and more appointment types. Event Schedule charges zero platform fees on ticket sales on every plan.',
+                'a' => 'Yes. The wall itself costs nothing: your public page and its permanent link, recurring open studio dates with individual dates taken out, sub-schedules with their own colour and their own link, Drafts that stay off the page until you announce, the header wall of the venues you have shown with, two-way Google, Outlook and CalDAV calendar sync, an embeddable calendar, built-in analytics, a downloadable QR code for your schedule, shareable graphics of your upcoming shows, free RSVP with a capacity, one bookable appointment type, QR check-in at the door, and up to 10 newsletter emails a month, counted per recipient rather than per send. Selling paid places is free too, up to 25 a month. The Pro plan at '.plan_price($proMonthly).' a month lifts that cap and adds your own questions at checkout and more appointment types. Event Schedule charges zero platform fees on ticket sales on every plan.',
             ],
             [
                 'q' => 'Can I list exhibitions, open studios and art fairs together?',
@@ -622,7 +624,7 @@
             ],
             [
                 'q' => 'How do collectors and art lovers find out about a new show?',
-                'a' => 'Two ways, and you control both. Anyone can leave their email on your schedule, and once they confirm it they hear when you put new dates up, as one digest rather than a message per show. Anything you want to say in your own words is a newsletter you write and send. The other way is the link: your schedule has one permanent address you can put in a bio, print on a show card, hand out as a QR code, or embed in the portfolio site you already have.',
+                'a' => 'By email, by calendar and by link. Anyone can leave their email on your schedule, and once they confirm it they hear about the dates you add yourself, as one digest rather than a message per show. A show a gallery lists for you is not in that digest, so that is the one worth a newsletter, which you write and send in your own words. A collector who would rather not give an address can subscribe to your schedule as a live calendar from its page, so every show on it, the galleries\' included, turns up in their own calendar. On a ticketed opening that is not on sale yet, the event page also offers "Tell me when tickets go on sale": one email when they do, one if you cancel, and a reminder 48 hours before, plus any change notice you send. And there is the link: your schedule has one permanent address you can put in a bio, print on a show card, hand out as a QR code, or embed in the portfolio site you already have.',
             ],
             [
                 'q' => 'Do my open studio Saturdays have to be entered one at a time?',
@@ -630,7 +632,7 @@
             ],
             [
                 'q' => 'Can I sell places at a workshop or a ticketed opening?',
-                'a' => 'Yes, and the free plan sells the first 25 paid places each month. Create as many named ticket types as the event needs, each with its own price and quantity. The quantity is counted per occurrence date, so a full March does not stop April selling. Check people in with a QR code at the door on any plan, and take the money through your own Stripe account. Pro at '.plan_price($proMonthly).' a month removes the 25-a-month cap and adds your own questions at checkout. Event Schedule charges zero platform fees either way, so what you keep is the price less what Stripe charges.',
+                'a' => 'Yes, and the free plan sells the first 25 paid places each month. Create as many named ticket types as the event needs, each with its own price and quantity. The quantity is counted per occurrence date, so a full March does not stop April selling. Check people in with a QR code at the door on any plan, and take the money through your own Stripe or PayPal account, or as cash, a payment link or Invoice Ninja. Pro at '.plan_price($proMonthly).' a month removes the 25-a-month cap and adds your own questions at checkout. Event Schedule charges zero platform fees either way, so what you keep is the price less the processor\'s fee, and a Stripe or PayPal sale can be refunded in full or in part from the Sales page on every plan.',
             ],
             [
                 'q' => 'What happens to the photographs people take at the opening?',
@@ -638,7 +640,11 @@
             ],
             [
                 'q' => 'Can I show a gallery\'s exhibition without retyping it?',
-                'a' => 'Yes. When a gallery lists you on their event, it arrives on your schedule and waits for you to accept it. Accept it and the same entry appears on both pages, so the dates cannot end up saying two different things. Nothing shows on your page that you have not agreed to.',
+                'a' => 'Yes. When a gallery lists you on their event, it arrives on your schedule and waits for you to accept it, unless you have added that gallery to your Approved Schedules, in which case it goes straight on. Accept it and the same entry appears on both pages, so the dates cannot end up saying two different things. Nothing shows on your page that you have not agreed to.',
+            ],
+            [
+                'q' => 'A gallery listed me, but I am not on Event Schedule. What happens?',
+                'a' => 'The listing creates a page in your name. It says which schedule created it and that you have not claimed it, each date on it is credited to the schedule that added it, and it stays out of search engines until you claim it. Claim it by signing in with the email address on it: the page becomes your schedule, and the galleries that already list you stay approved, so their dates keep appearing. If the page carries no email address or phone number, there is nothing to check a claim against, so ask the gallery to send you an invitation. If the page is not you at all, "This is not me" asks for it to come down.',
             ],
         ];
 
@@ -685,7 +691,7 @@
                         readable by people standing in the room.
                     </p>
                     <p class="es-brush-muted es-fade-up es-d-2 mb-9 max-w-xl text-base">
-                        Event Schedule is that wall with an address on it.
+                        Event Schedule is that wall with an address on it: one page for your exhibitions, open studios and workshops.
                     </p>
 
                     <div class="es-fade-up es-d-3 flex flex-col gap-3 sm:flex-row">
@@ -844,7 +850,7 @@
                     ['studio', 'The Saturdays repeat', 'One recurring event covers the whole run: pick the pattern, every week or the same weekday each month, set the hours, and give it an end, either a closing date or a number of dates. Date exceptions take out the two weekends you are away, so a change to the pattern is not a rebuild.'],
                     ['exhibitions', 'The show nobody has announced', 'Keep the event as a Draft and it stays off your public page until the gallery has sent the invitations. Then publish it. A sub-schedule cannot do this, because a sub-schedule has no visibility of its own; hiding is what Draft is for.'],
                     ['teaching', 'Prints, paintings and teaching, sorted', 'Sub-schedules split one page into strands, each with its own colour and its own link. Send a school the workshops and a gallery the exhibitions, from a page you only maintain once.'],
-                    ['exhibitions', 'The gallery already typed it', 'When a gallery lists you on their event it arrives on your schedule and waits for you to accept it. Accept it and the same entry shows on both pages, so the dates cannot end up saying two different things.'],
+                    ['exhibitions', 'The gallery already typed it', 'When a gallery lists you on their event it arrives on your schedule and waits for you to accept it, unless you have already approved that gallery. Accept it and the same entry shows on both pages, so the dates cannot end up saying two different things. Not on Event Schedule yet? The listing makes a page in your name, and signing in with the email address on it makes that page yours.'],
                 ] as $pi => [$pStrand, $pTitle, $pBody])
                     @php [$sName, $sEdge, $sInk] = $strands[$pStrand]; @endphp
                     <div data-reveal class="es-brush-pinned relative pt-2" style="--tilt: {{ $pi % 2 === 0 ? '-0.7deg' : '0.7deg' }};">
@@ -915,9 +921,11 @@
                     </div>
                     <p class="es-brush-muted mt-5 text-xs">
                         A venue needs a picture on its own schedule to appear, and the wall holds up
-                        to thirty-six of them. A venue that runs a claimed schedule links through to
-                        it; one you entered yourself is just the logo. Names here are illustrative,
-                        and the real wall shows the logos rather than the names.
+                        to thirty-six of them. A venue that has claimed its schedule links through to
+                        it. One you typed in yourself gets a page of its own, marked as unclaimed, and
+                        its tile stays a plain logo until the venue claims that page with the email
+                        address or phone number you entered for it. Names here are illustrative, and
+                        the real wall shows the logos rather than the names.
                     </p>
                 </div>
             </div>
@@ -1053,8 +1061,8 @@
                     <p class="es-brush-muted mb-5 text-sm">
                         Named ticket types with their own price and quantity, counted per occurrence
                         date. Scan a QR code at the door and take the money through your own Stripe
-                        account. Free sells twenty-five paid places a month; Pro lifts the cap and
-                        adds your own questions at checkout.
+                        or PayPal account, or in cash. Free sells twenty-five paid places a month;
+                        Pro lifts the cap and adds your own questions at checkout.
                     </p>
                     <div class="es-brush-sub mt-auto p-4" aria-hidden="true">
                         <p class="es-brush-muted text-[0.6rem] font-extrabold uppercase tracking-[0.18em]">Platform fee</p>
@@ -1071,7 +1079,8 @@
                     <p class="es-brush-muted mb-5 text-sm">
                         Publish bookable slots instead of a fixed date. Set your weekly hours, how
                         far apart slots start, a buffer between them, and per-date overrides for the
-                        days you are away or installing. One bookable type is free; Pro adds more.
+                        days you are away or installing. Charge by Stripe, a payment link or cash,
+                        or keep it free. One bookable type is free; Pro adds more.
                     </p>
                     <div class="es-brush-sub mt-auto p-4" aria-hidden="true">
                         <p class="es-brush-muted text-[0.6rem] font-extrabold uppercase tracking-[0.18em]">Thursdays</p>
@@ -1083,9 +1092,10 @@
             <div class="mt-8 text-center" data-reveal>
                 <p class="es-brush-muted mx-auto max-w-2xl text-sm">
                     Event Schedule takes nothing out of a ticket price on any plan. You pay Stripe
-                    what Stripe charges, and the rest arrives in your own account. There is no seat
-                    map and no numbered seats anywhere in the product, so a workshop is places, not
-                    positions.
+                    or PayPal what they charge, the rest arrives in your own account, and a sale
+                    through either can be refunded in full or in part from the Sales page. A
+                    workshop here is places, not positions: numbered seats on a seat map belong to
+                    venue schedules on the Enterprise plan.
                 </p>
             </div>
         </div>
@@ -1103,19 +1113,20 @@
                     One address, and a way <span class="es-brush-grad">to write to it</span>.
                 </h2>
                 <p class="es-brush-muted text-lg" data-reveal style="--reveal-delay: 0.15s;">
-                    Nothing here posts on your behalf. Somebody follows you, and then you decide
-                    when there is something worth an email.
+                    A confirmed email address hears about the dates you add yourself as a short
+                    digest. Anything in your own words is a newsletter, and you decide when it is
+                    worth sending.
                 </p>
             </div>
 
             <div class="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-3" data-reveal-group="90">
                 @foreach ([
-                    ['Free', 'Followers and newsletters', 'An email address on your list hears about new dates on its own, as a digest that costs nothing from the allowance. A newsletter you write is what the allowance counts: 10 emails a month free, 100 on Pro and 1,000 on Enterprise, per recipient rather than per send.'],
+                    ['Free', 'Followers and newsletters', 'An email address on your list is told about the dates you add yourself, as a digest that goes out on its own and costs nothing from the allowance. A newsletter you write is what the allowance counts: 10 emails a month free, 100 on Pro and 1,000 on Enterprise, per recipient rather than per send.'],
                     ['Free', 'A QR code for the door', 'Download a QR code that opens your schedule and put it on the show card, the price list, or a card by the door of the studio. On every plan.'],
-                    ['Free', 'Embedded in your own site', 'Drop the calendar into the portfolio site you already have. The dates on your site and the dates on your schedule are then the same dates.'],
+                    ['Free', 'On your site and in their calendar', 'Drop the calendar into the portfolio site you already have, so the dates there are your schedule\'s dates. Collectors can subscribe to the same schedule as a live calendar, and a new show turns up in theirs.'],
                     ['Free', 'Google, Outlook and CalDAV', 'Two-way sync, so the install week, the opening and the fair sit in the calendar you actually look at, and a change in either place reaches the other.'],
                     ['Free', 'Who is reading', 'Built-in analytics on your schedule: which shows people opened, and how the page is being found.'],
-                    ['Pro', 'A picture to post', 'Generate one shareable image out of the flyers of your upcoming events, up to twenty at a time, with your own header and footer text and the date on each if you want it. An event without a flyer image is not in it.'],
+                    ['Free', 'A picture to post', 'Generate one shareable image out of the flyers of your upcoming events, up to twenty at a time, with your own header and footer text and the date on each if you want it. An event without a flyer image is not in it.'],
                 ] as $ti => [$tPlan, $tTitle, $tBody])
                     <div data-reveal class="es-brush-pinned relative pt-2" style="--tilt: {{ $ti % 3 === 1 ? '0.6deg' : '-0.6deg' }};">
                         <span class="es-brush-pin" aria-hidden="true"></span>

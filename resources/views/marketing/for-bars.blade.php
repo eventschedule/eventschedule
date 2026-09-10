@@ -1,6 +1,6 @@
 <x-marketing-layout>
     <x-slot name="title">Event Calendars for Bars and Pubs | Fill Every Night</x-slot>
-    <x-slot name="description">Put your whole week on one link - quiz nights, live music, karaoke, the match. Recurring dates that skip the holidays, and free registration.</x-slot>
+    <x-slot name="description">Put your bar's week on one link: quiz nights, live music, karaoke, the match. Recurring nights that skip holidays, and tickets with zero platform fees.</x-slot>
     <x-slot name="breadcrumbTitle">For Bars</x-slot>
 
     <x-slot name="structuredData">
@@ -42,8 +42,10 @@
             "Sub-schedules that keep live music, quiz and sports nights apart",
             "A public submission form so performers can ask to play",
             "Direct newsletters to the regulars who follow your schedule",
+            "Email sign-up with an automatic round-up of new nights for confirmed subscribers",
+            "A live calendar feed regulars can subscribe to, which updates itself",
             "Free registration with an optional capacity limit",
-            "Zero-fee ticket sales with QR check-in at the door",
+            "Ticket sales with zero platform fees through Stripe or PayPal, and free QR scanning at the door",
             "A logo wall of the acts that have played your room",
             "Fan photos, video and comments with an approval queue",
             "Two-way Google, Outlook and CalDAV calendar sync",
@@ -514,7 +516,7 @@
         $faqs = [
             [
                 'q' => 'Is Event Schedule free for bars and pubs?',
-                'a' => 'Yes. Sharing your calendar, running recurring weekly nights, splitting them into sub-schedules, taking free registrations, and syncing with Google, Outlook or CalDAV are all free forever. Newsletters are free too, at 10 emails a month, counted per recipient rather than per send. Selling tickets is free as well, up to 25 paid ones a month, scanned at the door on any plan. Unlimited sales, the live check-in dashboard, event graphics and the higher 100-a-month newsletter limit are on the Pro plan at '.plan_price($proMonthly).' a month.',
+                'a' => 'Yes. Sharing your calendar, running recurring weekly nights, splitting them into sub-schedules, taking free registrations, and syncing with Google, Outlook or CalDAV are all free forever. Newsletters are free too, at 10 emails a month, counted per recipient rather than per send. Selling tickets is free as well, up to 25 paid ones a month, scanned at the door on any plan. Unlimited sales, the live check-in dashboard and the higher 100-a-month newsletter limit are on the Pro plan at '.plan_price($proMonthly).' a month.',
             ],
             [
                 'q' => 'Can I set up a night that repeats every week?',
@@ -530,11 +532,15 @@
             ],
             [
                 'q' => 'How do I tell my regulars what is on this week?',
-                'a' => 'People follow your schedule and you email them directly, so nothing decides who sees it except you. The free plan covers 10 newsletter emails a month and Pro raises it to 100, counted per recipient rather than per send, so it is worth knowing the number before you plan around it.',
+                'a' => 'People follow your schedule and you email them directly, so nothing decides who sees it except you. The free plan covers 10 newsletter emails a month and Pro raises it to 100, counted per recipient rather than per send, so it is worth knowing the number before you plan around it. Regulars can also sign up on your page with their name and email address, and once they confirm it they get a round-up of your new nights on their own, at most one every 72 hours. That round-up does not come out of the newsletter allowance.',
             ],
             [
                 'q' => 'Can I sell tickets to a ticketed night?',
-                'a' => 'Yes, and the first 25 paid tickets a month are on the free plan. Connect your Stripe account, sell straight from your calendar, and scan the QR code at the door - none of that is gated. What Pro buys at '.plan_price($proMonthly).' a month is the ceiling coming off, plus the live check-in dashboard for a busy door, promo codes and add-ons. Event Schedule charges zero platform fees either way, so beyond Stripe processing the money is yours, and free registration with a capacity limit is there for the nights you do not charge for.',
+                'a' => 'Yes, and the first 25 paid tickets a month are on the free plan. Take the money through your own Stripe or PayPal account, or a payment link or cash at the bar, sell straight from your calendar, and scan the QR code at the door - none of that is gated. What Pro buys at '.plan_price($proMonthly).' a month is the ceiling coming off, plus the live check-in dashboard for a busy door, promo codes and add-ons. Event Schedule charges zero platform fees either way, so beyond the processor\'s own fee the money is yours. If a night is called off, refund it from the Sales page: a Stripe or PayPal sale goes back through the provider, in full or in part. Free registration with a capacity limit is there for the nights you do not charge for.',
+            ],
+            [
+                'q' => 'Can regulars put our whole week in their own calendar?',
+                'a' => 'Yes, on every plan. The Add to Calendar menu on any of your events, and the sign-up panel on your schedule page, offer a subscription to all your events: a live calendar feed that updates itself when a night moves or a new one goes up, and it needs no email address. A single night can still be downloaded as an .ics file, which is a one-off copy that never updates.',
             ],
         ];
 
@@ -759,7 +765,7 @@
                         </div>
 
                         <p class="es-slate-chalk-dim mt-5 border-t border-[rgba(244,239,230,0.12)] pt-4 text-sm">
-                            Free also covers unlimited events, two-way Google, Outlook and CalDAV sync, an embeddable calendar for the site you already have, and an .ics download for anyone who wants the date in their own phone.
+                            Free also covers unlimited events, two-way Google, Outlook and CalDAV sync, an embeddable calendar for the site you already have, and a calendar feed regulars can subscribe to, so the week sits in their own phone and a moved night updates itself.
                         </p>
                     </div>
                 </div>
@@ -794,6 +800,10 @@
                         <li class="flex gap-3" data-reveal>
                             <svg aria-hidden="true" class="mt-0.5 h-5 w-5 flex-none text-[#3f6212] dark:text-[#bef264]" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7" /></svg>
                             <span>Accepting a request is not a paid feature. It works on the free plan.</span>
+                        </li>
+                        <li class="flex gap-3" data-reveal>
+                            <svg aria-hidden="true" class="mt-0.5 h-5 w-5 flex-none text-[#3f6212] dark:text-[#bef264]" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7" /></svg>
+                            <span>Booked a band who is not on Event Schedule? Name them on the night anyway. The event page lists them, and they get a page of their own that stays out of search engines until they claim it.</span>
                         </li>
                     </ul>
                 </div>
@@ -914,13 +924,13 @@
                         <div class="relative z-10">
                             <div class="mb-4 flex flex-wrap items-center gap-2">
                                 <h3 class="text-xl font-bold text-gray-900 dark:text-white">When the night is ticketed</h3>
-                                <span class="es-slate-plan es-slate-plan-pro">Pro</span>
+                                <span class="es-slate-plan">Free</span>
                             </div>
                             <p class="mb-4 text-gray-600 dark:text-gray-400">
-                                Connect Stripe and sell straight from your calendar, with QR check-in on the door. Event Schedule takes zero platform fees, so past Stripe's processing the money is yours.
+                                Sell straight from your calendar and scan the QR code at the door, free up to 25 paid tickets a month. Take the money through your own Stripe or <a href="{{ marketing_url('/paypal') }}" class="es-slate-link font-medium hover:underline">PayPal</a> account, or a payment link or cash at the bar, and Event Schedule takes zero platform fees on any of it.
                             </p>
                             <p class="text-sm text-gray-600 dark:text-gray-400">
-                                Discount codes for the regulars, and a pass that covers a whole season of a night rather than one at a time.
+                                Before it goes on sale, people can leave an email address on the event page and hear when it does. On Pro: discount codes for the regulars, and a pass that covers a whole season of a night rather than one at a time.
                             </p>
                         </div>
                         <div class="es-glare" aria-hidden="true"></div>
@@ -957,7 +967,7 @@
                                 Built-in analytics show page views, the devices people are on, and where the traffic came from. Enough to tell whether the quiz post did anything, without installing a thing.
                             </p>
                             <p class="text-sm text-gray-600 dark:text-gray-400">
-                                Pair it with a poll on the event and let the room vote on the theme or which night to move to.
+                                On Pro, add a poll to the event and let the room vote on the theme or which night to move to.
                             </p>
                         </div>
                         <div class="es-glare" aria-hidden="true"></div>

@@ -1,6 +1,6 @@
 <x-marketing-layout>
-    <x-slot name="title">Free Event Schedule for Virtual Conferences</x-slot>
-    <x-slot name="description">Schedule and sell virtual conferences with multi-day agendas, tiered ticketing, and attendee email notifications. Works with any platform. Free forever.</x-slot>
+    <x-slot name="title">Free Virtual Conference Agenda & Ticketing Software</x-slot>
+    <x-slot name="description">Put a virtual conference online: one event per day with a timed agenda inside it, one join link, free registration or tickets, and zero platform fees.</x-slot>
     <x-slot name="breadcrumbTitle">For Virtual Conferences</x-slot>
 
     <x-slot name="structuredData">
@@ -44,9 +44,11 @@
             "Agenda scanning that reads a programme from a photo or text and fills in the parts (Enterprise)",
             "One join link per event for Zoom, Microsoft Teams, Google Meet, YouTube Live or any platform",
             "Named ticket types with their own prices, quantities and sales windows, free up to 25 paid tickets a month (unlimited on Pro)",
-            "Zero platform fees on ticket sales through your own Stripe account",
+            "Zero platform fees on ticket sales through your own Stripe or PayPal account",
+            "Refunds in full or in part from the Sales page, sent back through Stripe or PayPal",
+            "A free Tell me when tickets go on sale list on each event, with a count of who is waiting",
             "Free registration with a capacity limit, counted per date",
-            "Two-way Google, Outlook and CalDAV calendar sync, plus iCal download",
+            "Two-way Google, Outlook and CalDAV calendar sync, plus an iCal download and a live calendar feed of the whole schedule",
             "Photos, video and comments that attach to the session they are about, behind an approval queue",
             "Newsletters you write and send to the people who follow your schedule",
             "Embeddable calendar for the website you already have",
@@ -573,11 +575,19 @@
             ],
             [
                 'q' => 'Can I sell different ticket types for my conference?',
-                'a' => 'Yes, and selling starts on the free plan. Create as many named ticket types as the conference needs, each with its own price, quantity and sales window, and sell up to 25 paid tickets a month. Pro at '.plan_price($proMonthly).' a month takes that ceiling off and adds discount codes, add-ons and individual tickets, which give every attendee their own confirmation email and QR code; custom questions collect what you need at checkout. Event Schedule charges zero platform fees at every plan level: you connect your own Stripe account and Stripe\'s processing fee is the only cut. For a free conference, registration with a capacity limit is unlimited on the free plan.',
+                'a' => 'Yes, and selling starts on the free plan. Create as many named ticket types as the conference needs, each with its own price, quantity and sales window, and sell up to 25 paid tickets a month. Pro at '.plan_price($proMonthly).' a month takes that ceiling off and adds discount codes, add-ons and individual tickets, which give every attendee their own confirmation email and QR code; custom questions collect what you need at checkout. Event Schedule charges zero platform fees at every plan level: attendees pay through your own Stripe or PayPal account, or through Invoice Ninja, a payment link or cash, and your processor\'s fee is the only cut. For a free conference, registration with a capacity limit is unlimited on the free plan.',
+            ],
+            [
+                'q' => 'Can I announce the conference before tickets go on sale?',
+                'a' => 'Yes. Publish the day with its running order and open ticket sales later. Until they open, the event page offers "Tell me when tickets go on sale": a visitor leaves an email address, nothing else, and gets one email the moment tickets are on sale, a reminder shortly before the day starts, a notice if it is cancelled, and any change notice you choose to send. The event editor shows you how many people are waiting. It is free on every plan, it is not a subscription to your schedule, and it does not draw on your newsletter allowance.',
+            ],
+            [
+                'q' => 'Can I refund an attendee who cannot make it?',
+                'a' => 'Yes, from the Sales page, on every plan. A Stripe or PayPal payment goes back through the provider, in full or for part of the amount, and the sale only changes once the money has moved. A partial refund leaves the ticket valid; a full refund puts the place back on sale for somebody else. A sale taken through Invoice Ninja, Payfast, a payment link or cash is marked as refunded for your records, and you return that money yourself.',
             ],
             [
                 'q' => 'How do attendees hear about the next edition?',
-                'a' => 'Two ways. Somebody who left an email address on your page and confirmed it is sent a digest on its own when the sessions go up, batched rather than one message per talk. Somebody who pressed Follow from their own account is reached only by a newsletter you write, which is what you want when the programme is set and there is something to say about it: 10 emails a month on the free plan, 100 on Pro and 1,000 on Enterprise, counted one per recipient. Followers also show up with their name and email on your followers tab, so the audience is yours rather than a platform\'s.',
+                'a' => 'Two ways. Somebody who left an email address on your page and confirmed it is sent a digest on its own when you post the sessions, batched rather than one message per talk. Somebody who pressed Follow from their own account is reached only by a newsletter you write, which is what you want when the programme is set and there is something to say about it: 10 emails a month on the free plan, 100 on Pro and 1,000 on Enterprise, counted one per recipient. Followers also show up with their name and email on your followers tab, so the audience is yours rather than a platform\'s.',
             ],
         ];
 
@@ -941,7 +951,7 @@
                             <h3 class="es-agenda-ink text-lg font-bold">It lands in their calendar</h3>
                             <span class="es-agenda-plan">Free</span>
                         </div>
-                        <p class="es-agenda-muted text-sm">Attendees download an .ics for the day, and your own side syncs two ways with Google, Outlook and CalDAV, so the conference sits next to the rest of your week.</p>
+                        <p class="es-agenda-muted text-sm">Attendees download an .ics for the day, or subscribe to your schedule's live calendar feed, which updates itself when a date moves. Your own side syncs two ways with Google, Outlook and CalDAV.</p>
                     </div>
                     <div class="es-agenda-card p-6" data-reveal="panel">
                         <div class="mb-2 flex flex-wrap items-center gap-2">
@@ -989,7 +999,7 @@
                     <ul class="es-agenda-muted space-y-3" data-reveal-group="70">
                         <li class="flex gap-3" data-reveal>
                             <svg aria-hidden="true" class="es-agenda-accent mt-0.5 h-5 w-5 flex-none" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7" /></svg>
-                            <span>Zero platform fees at every plan level. You connect your own Stripe account, and Stripe's own processing fee is the only cut anybody takes.</span>
+                            <span>Zero platform fees at every plan level. Attendees pay through your own Stripe or PayPal account, or you take payment through Invoice Ninja, a payment link or cash, and the processor's own fee is the only cut anybody takes.</span>
                         </li>
                         <li class="flex gap-3" data-reveal>
                             <svg aria-hidden="true" class="es-agenda-accent mt-0.5 h-5 w-5 flex-none" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7" /></svg>
@@ -1002,6 +1012,14 @@
                         <li class="flex gap-3" data-reveal>
                             <svg aria-hidden="true" class="es-agenda-accent mt-0.5 h-5 w-5 flex-none" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7" /></svg>
                             <span>Quantities are counted for each date on its own, and on Pro a waitlist catches the people who arrive after a day has sold out.</span>
+                        </li>
+                        <li class="flex gap-3" data-reveal>
+                            <svg aria-hidden="true" class="es-agenda-accent mt-0.5 h-5 w-5 flex-none" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7" /></svg>
+                            <span>Announce before you sell. Until tickets open, the event page offers "Tell me when tickets go on sale": a visitor leaves an email address and hears the moment sales start, and the event editor shows you how many are waiting.</span>
+                        </li>
+                        <li class="flex gap-3" data-reveal>
+                            <svg aria-hidden="true" class="es-agenda-accent mt-0.5 h-5 w-5 flex-none" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7" /></svg>
+                            <span>Refunds come off the Sales page. A Stripe or PayPal payment goes back through the provider, in full or in part, and a full refund puts the place back on sale.</span>
                         </li>
                     </ul>
                     <p class="es-agenda-muted mt-6 text-sm" data-reveal>
@@ -1079,7 +1097,7 @@
                                 <h3 class="es-agenda-ink text-xl font-bold">Write to the people who came</h3>
                                 <span class="es-agenda-plan">Free</span>
                             </div>
-                            <p class="es-agenda-muted">A confirmed email subscriber hears when sessions go up without you doing anything. The newsletter is the one you write when next year's programme is set: 10 emails a month on Free, 100 on Pro and 1,000 on Enterprise, counted one per recipient.</p>
+                            <p class="es-agenda-muted">A confirmed email subscriber hears about the sessions you add without you doing anything. The newsletter is the one you write when next year's programme is set: 10 emails a month on Free, 100 on Pro and 1,000 on Enterprise, counted one per recipient.</p>
                         </div>
                         <div class="es-glare" aria-hidden="true"></div>
                         <div class="es-ring-glow" aria-hidden="true"></div>
@@ -1140,7 +1158,7 @@
                                 <h3 class="es-agenda-ink text-xl font-bold">Next year, from this year</h3>
                                 <span class="es-agenda-plan">Free</span>
                             </div>
-                            <p class="es-agenda-muted mb-4">Clone a day and you get its running order with it, which is most of the work of the next edition already done. On Pro you can save a day as a reusable template, and generate a share graphic that lays your next dates out from their flyer images, with the date printed on each if you switch that on.</p>
+                            <p class="es-agenda-muted mb-4">Clone a day and you get its running order with it, which is most of the work of the next edition already done. On Pro you can also save a day as a reusable template. On any plan you can generate a share graphic that lays your next dates out from their flyer images, with the date printed on each if you switch that on.</p>
                             <p class="es-agenda-muted text-sm">A programme committee that needs more than one login is on Enterprise, which allows up to five team members. The free plan is a single member, so plan the handover if a colleague has to post the schedule.</p>
                         </div>
                         <div class="es-glare" aria-hidden="true"></div>
@@ -1426,7 +1444,7 @@
                         One event. <span class="es-agenda-lit">The whole day inside it.</span>
                     </h2>
                     <p class="es-agenda-muted mx-auto mb-10 max-w-2xl text-lg">
-                        Publishing the running order, the join link and the calendar sync is free forever. So is selling, for the first 25 tickets a month; {{ plan_price($proMonthly) }} lifts the ceiling. Event Schedule takes nothing out of what you sell either way.
+                        Publishing the running order, the join link and the calendar sync is free forever. So is selling, for the first 25 paid tickets a month; {{ plan_price($proMonthly) }} lifts the ceiling. Event Schedule takes nothing out of what you sell either way.
                     </p>
 
                     <div class="mx-auto flex max-w-2xl flex-col items-stretch justify-center gap-3 sm:flex-row">

@@ -46,8 +46,10 @@
             "Season passes valid for every occurrence of a recurring event",
             "Per-pass cancellation deadline and late-cancel policy",
             "Named ticket types with their own prices, quantities and sales windows",
-            "QR check-in for shows and classes",
-            "Zero platform fees on ticket sales through your own Stripe account",
+            "QR check-in for shows and classes, free on every plan",
+            "Zero platform fees on ticket sales, paid through Stripe, PayPal, Invoice Ninja, Payfast, a payment link or cash",
+            "A 'Tell me when tickets go on sale' list on every show date",
+            "A live calendar feed dancers can subscribe to, which updates itself when a class moves",
             "Sub-schedules that keep classes, rehearsals and performances apart",
             "Direct newsletters to the people who follow your schedule",
             "Two-way Google, Outlook and CalDAV calendar sync",
@@ -473,7 +475,7 @@
             ],
             [
                 'q' => 'Can I sell a 10-class card instead of single classes?',
-                'a' => 'Yes. A visit pass covers a set number of visits across the classes you attach it to, so a 10-visit card is one purchase that the dancer uses ten times. A membership gives unlimited visits until it expires, and a season pass covers every occurrence of one recurring event. Usage is tracked per visit, and each pass can carry its own cancellation deadline and late-cancel policy.',
+                'a' => 'Yes, on the Pro plan. A visit pass covers a set number of visits across the classes you attach it to, so a 10-visit card is one purchase that the dancer uses ten times. A membership gives unlimited visits until it expires, and a season pass covers every occurrence of one recurring event. Usage is tracked per visit, and each pass can carry its own cancellation deadline and late-cancel policy.',
             ],
             [
                 'q' => 'Can I keep rehearsal calls off the public page?',
@@ -482,6 +484,14 @@
             [
                 'q' => 'Can my choreographers and company manager edit the schedule?',
                 'a' => 'A schedule includes one team member on the free plan. The Enterprise plan raises that to multiple team members and adds availability tracking, so you can record who is available before you set a rehearsal call.',
+            ],
+            [
+                'q' => 'Can parents be told when recital tickets go on sale?',
+                'a' => 'Yes, free on every plan. Put the show on the schedule before tickets are ready and its page offers "Tell me when tickets go on sale". A parent leaves an email address, with no account, and hears when tickets go on sale, if the show is cancelled, and again shortly before it starts, plus any change notice you choose to send. The event\'s Tickets panel shows how many people are waiting, and it is not a subscription to your schedule.',
+            ],
+            [
+                'q' => 'Can dancers add the class timetable to their own calendar?',
+                'a' => 'Yes. Your schedule page offers a live calendar feed that Google Calendar, Apple Calendar, Outlook or any other calendar app can subscribe to. It carries the next 90 days of classes and the app re-reads it, so a moved class or a closure turns up without anyone downloading a new file. It needs no account and no email address.',
             ],
         ];
 
@@ -553,7 +563,7 @@
                         @foreach ([
                             ['Class', 'Ballet I', 'Tue &amp; Thu &middot; 6:00pm', '3 spots left', false],
                             ['Rehearsal', 'Spring Gala, act two', 'Sat &middot; 10:00am', 'Draft &middot; members only', true],
-                            ['Show', 'Spring Gala', 'Sat 30 May &middot; 7:30pm', 'Tickets from $22', false],
+                            ['Show', 'Spring Gala', 'Sat 30 May &middot; 7:30pm', 'Tickets from $12', false],
                         ] as [$strand, $name, $when, $note, $isDraft])
                             <div class="es-barre-card es-barre-hover p-4 sm:p-5">
                                 <div class="mb-1.5 flex items-center justify-between gap-3">
@@ -849,7 +859,8 @@
                 </h2>
                 <p class="es-barre-muted text-lg" data-reveal style="--reveal-delay: 0.15s;">
                     Named ticket types, each with its own price, quantity and sales window - so the family
-                    rate closes when you want it to and the door price does not open early.
+                    rate closes when you want it to and the door price does not open early. Announce the
+                    show before tickets are ready and parents can ask to hear when they go on sale.
                 </p>
             </div>
 
@@ -878,20 +889,20 @@
                     </div>
 
                     <p class="es-barre-muted mt-5 border-t border-[rgba(15,26,24,0.1)] pt-4 text-xs dark:border-[rgba(230,237,235,0.12)]">
-                        Payment goes through your own Stripe account. Event Schedule takes no cut of it.
+                        Payment goes through your own Stripe or PayPal account, Invoice Ninja, Payfast (in rand), a payment link or cash at the door. Event Schedule takes no cut of it.
                     </p>
                 </div>
 
                 <div class="grid gap-4" data-reveal-group="100">
                     @foreach ([
-                        ['Zero platform fees', 'You keep the whole ticket price minus what Stripe charges to process the card. There is no per-ticket cut on top.', 'pro'],
+                        ['Zero platform fees', 'You keep the whole ticket price minus what your payment provider charges to process it. There is no per-ticket cut on top, on any plan.', 'free'],
                         ['Live check-in view', 'Scanning tickets from a phone is free on every plan. Pro adds the running count and the per-ticket breakdown, so two people can work the queue and both see the same total.', 'pro'],
                         ['Questions at checkout', 'Ask for the dancer\'s name, the class they are in, or a photo consent - collected with the sale instead of chased afterwards.', 'pro'],
                     ] as [$t, $d, $tier])
                         <div class="es-barre-card es-barre-hover p-6" data-reveal>
                             <div class="mb-2 flex items-center gap-2">
                                 <h3 class="es-barre-ink text-base font-bold">{{ $t }}</h3>
-                                <span class="es-barre-plan es-barre-plan-pro">Pro</span>
+                                <span class="es-barre-plan {{ $tier === 'pro' ? 'es-barre-plan-pro' : 'es-barre-plan-free' }}">{{ $tier === 'pro' ? 'Pro' : 'Free' }}</span>
                             </div>
                             <p class="es-barre-muted text-sm">{{ $d }}</p>
                         </div>
@@ -928,7 +939,8 @@
                         <p class="es-barre-muted text-sm">
                             Drop the calendar into your existing website in an iframe. It keeps itself current,
                             so the term timetable on your homepage stops being a screenshot somebody has to
-                            remember to replace.
+                            remember to replace. Dancers can also subscribe to it in their own calendar app,
+                            as a live feed that picks up a moved class or a closure by itself.
                         </p>
                         <div class="es-glare" aria-hidden="true"></div>
                         <div class="es-ring-glow" aria-hidden="true"></div>
@@ -1145,6 +1157,11 @@
                 <div data-reveal>
                     <x-feature-link-card name="Ticketing" description="Class cards, memberships and show tickets with zero platform fees" :url="marketing_url('/features/ticketing')" icon-color="sky">
                         <x-slot:icon><svg aria-hidden="true" class="h-5 w-5 text-sky-600 dark:text-sky-400" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 5v2m0 4v2m0 4v2M5 5a2 2 0 00-2 2v3a2 2 0 110 4v3a2 2 0 002 2h14a2 2 0 002-2v-3a2 2 0 110-4V7a2 2 0 00-2-2H5z" /></svg></x-slot:icon>
+                    </x-feature-link-card>
+                </div>
+                <div data-reveal>
+                    <x-feature-link-card name="Passes" description="Ten-class cards, unlimited memberships and season passes, on Pro" :url="marketing_url('/features/passes')" icon-color="teal">
+                        <x-slot:icon><svg aria-hidden="true" class="h-5 w-5 text-teal-600 dark:text-teal-400" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z" /></svg></x-slot:icon>
                     </x-feature-link-card>
                 </div>
                 <div data-reveal>

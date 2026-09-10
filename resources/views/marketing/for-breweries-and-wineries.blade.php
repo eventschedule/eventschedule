@@ -1,6 +1,6 @@
 <x-marketing-layout>
-    <x-slot name="title">Taproom Calendars | Most of What You Run Is Free</x-slot>
-    <x-slot name="description">Nobody buys a ticket to trivia night. A taproom calendar exists to get people through the door, so almost all of it sits on the free plan.</x-slot>
+    <x-slot name="title">Brewery and Winery Event Calendar | Most Nights Are Free</x-slot>
+    <x-slot name="description">Nobody buys a ticket to trivia night. Set the taproom week once, take requests from bands and food trucks, and sell up to 25 tour tickets a month free.</x-slot>
     <x-slot name="breadcrumbTitle">For Breweries and Wineries</x-slot>
 
     <x-slot name="structuredData">
@@ -43,9 +43,12 @@
             "Free registration with a capacity, for tours that are limited but not paid",
             "Sub-schedules for music, tours and private hire, each with its own shareable link",
             "Booking requests from bands and food trucks that want a date",
-            "Participants, so a visiting act gets the date on their own schedule",
-            "Ticketed tours and tastings with QR check-in",
-            "Zero platform fees on ticket sales through your own Stripe account",
+            "Participants, so a visiting act is offered the date for their own schedule, or gets a page they can claim if they are not on Event Schedule yet",
+            "Ticketed tours and tastings with QR check-in, 25 paid tickets a month on the free plan",
+            "Zero platform fees on ticket sales, paid through Stripe, PayPal, Invoice Ninja, a payment link or cash",
+            "Refunds from the Sales page, sent back through Stripe or PayPal in full or in part",
+            "An interest list for a tour or tasting before its tickets go on sale",
+            "A live calendar feed regulars subscribe to once, which picks up every new night",
             "Followers you can email directly, within a monthly allowance counted per recipient",
             "Two-way Google, Outlook and CalDAV calendar sync",
             "Embeddable calendar for your own website",
@@ -344,7 +347,7 @@
             ],
             [
                 'q' => 'Most of our events are free. Is that a problem?',
-                'a' => 'It is the normal case here, and nothing about it is second class. A free event still takes registrations up to a capacity, still appears on your public calendar, and still syncs to the calendars people keep on their phones. The events are how you fill the room on a Tuesday, not a revenue line in their own right.',
+                'a' => 'It is the normal case here, and nothing about it is second class. A free event still takes registrations up to a capacity, still appears on your public calendar, and still lands in the live calendar feed your regulars subscribe to on their phones. The events are how you fill the room on a Tuesday, not a revenue line in their own right.',
             ],
             [
                 'q' => 'How do I run a tour that is free but limited?',
@@ -352,11 +355,19 @@
             ],
             [
                 'q' => 'Can bands and food trucks book themselves in?',
-                'a' => 'Turn on booking requests and they can ask for a date through your page rather than a direct message you lose. Every request waits for you to accept it, and you are emailed when new ones are pending. Once you accept, adding them to the event as a participant puts the date on their own schedule too, so you are not both keeping the same listing up to date.',
+                'a' => 'Turn on booking requests and they can ask for a date through your page rather than a direct message you lose. Every request waits for you to accept it, and you are emailed when new ones are pending. Once you accept, adding them to the event as a participant offers the date to their own schedule, where it appears when they accept it (or straight away if they have approved you), so you are not both keeping the same listing up to date.',
             ],
             [
                 'q' => 'Can we email people about a release?',
-                'a' => 'Two ways. Somebody who leaves an email address on your page gets a short digest automatically when you put new dates up, at most one every few days, and it costs nothing from the allowance. A release you want to write properly about is a newsletter you send yourself, and that is what the allowance counts: 10 emails a month free, 100 on Pro, counted per recipient rather than per send, so a single newsletter to a hundred followers uses a hundred of them.',
+                'a' => 'Two ways. Somebody who leaves an email address on your page and confirms it gets a short digest automatically when you put new dates up, at most one every few days, and it costs nothing from the allowance. A release you want to write properly about is a newsletter you send yourself, and that is what the allowance counts: 10 emails a month free, 100 on Pro, counted per recipient rather than per send, so a single newsletter to a hundred followers uses a hundred of them.',
+            ],
+            [
+                'q' => 'Can people ask to hear when tour tickets go on sale?',
+                'a' => 'Yes, and it costs them only an email address. Put the tour or a release tasting up before it sells and its page offers "Tell me when tickets go on sale". They hear once when you open sales, once if it is cancelled and again shortly before it starts, plus any change notice you choose to send. It is free on every plan, it is not a subscription to your schedule, and it does not touch the newsletter allowance. The Tickets panel in the event editor shows how many are waiting, which is a fair guide to whether a second tour would fill.',
+            ],
+            [
+                'q' => 'How do people pay for a tour, and can I refund one?',
+                'a' => 'Through your own Stripe or PayPal account, an Invoice Ninja invoice, a payment link or cash on the day, or Payfast if you sell in rand, chosen per event. Event Schedule takes no platform fee on any of them. If a tour does not run, refund it from the Sales page: a Stripe or PayPal sale goes back through the provider, in full or in part, and a partial refund leaves the ticket valid. Every other method is marked as refunded instead, which records it without moving money, so you return that one yourself.',
             ],
         ];
 
@@ -510,6 +521,7 @@
                             ['One night, one event', 'Choose the day and the time. Move the quiz to eight and every future Wednesday moves with it.'],
                             ['Take the shut weeks out', 'A date exception drops the week you are closed for the holidays without disturbing the pattern.'],
                             ['Strands, not one long list', 'Music on one sub-schedule, tours on another. Each one has a link you can send on its own.'],
+                            ['On the regulars\' phones', 'Every night\'s Add to Calendar menu offers the whole taproom calendar as a live feed. Subscribe once, and new nights and moved ones turn up without anyone checking the page.'],
                         ] as [$t, $d])
                             <li class="flex items-start gap-3" data-reveal>
                                 <svg aria-hidden="true" class="es-pour-accent mt-0.5 h-5 w-5 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7" /></svg>
@@ -520,7 +532,7 @@
 
                     <p class="mt-7" data-reveal>
                         <span class="es-pour-plan es-pour-plan-free">Free plan</span>
-                        <span class="es-pour-muted ml-2 text-sm">Recurring events, date exceptions and sub-schedules are all on the free plan.</span>
+                        <span class="es-pour-muted ml-2 text-sm">Recurring events, date exceptions, sub-schedules and the calendar feed are all on the free plan.</span>
                     </p>
                 </div>
 
@@ -572,8 +584,8 @@
                     The tour is the <span class="es-pour-grad">exception</span>.
                 </h2>
                 <p class="es-pour-muted text-lg" data-reveal style="--reveal-delay: 0.15s;">
-                    Twelve people, a glass at each tank, somebody has to be paid to run it. That one
-                    is worth charging for - and it is the only row on the board that is.
+                    Twelve people, a glass at each tank, somebody has to be paid to run it. A brewery
+                    tour is worth charging for - and it is the only row on the board that is.
                 </p>
             </div>
 
@@ -601,14 +613,14 @@
                 <div class="es-pour-card p-6 sm:p-7" data-reveal="panel">
                     <div class="mb-1 flex flex-wrap items-baseline justify-between gap-2">
                         <h3 class="es-pour-ink text-lg font-bold">Paid, with a door to scan</h3>
-                        <span class="es-pour-plan es-pour-plan-pro">Pro plan</span>
+                        <span class="es-pour-plan es-pour-plan-free">Free to 25 a month</span>
                     </div>
                     <p class="es-pour-muted mb-5 text-sm">The same event, with a price on it.</p>
                     <ul class="space-y-3">
                         @foreach ([
                             'A price and a quantity, counted per date the same way.',
                             'QR check-in, so the person on the door is not holding a printout.',
-                            'Payment through your own Stripe account, with no platform fee on top.',
+                            'Paid into your own Stripe or PayPal account, or by Invoice Ninja, a payment link or cash, with no platform fee on top.',
                         ] as $point)
                             <li class="flex items-start gap-3">
                                 <svg aria-hidden="true" class="es-pour-accent mt-0.5 h-4 w-4 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7" /></svg>
@@ -620,8 +632,9 @@
             </div>
 
             <p class="es-pour-muted mx-auto mt-8 max-w-2xl text-center text-sm" data-reveal>
-                Selling that one tour is the only thing on this page that needs Pro. Everything
-                above it on the board stays free.
+                Selling it is free too, up to 25 paid tickets a month per schedule. A sold-out tour
+                every Saturday is about fifty, and that is where Pro at {{ plan_price($proMonthly) }}
+                a month takes the ceiling off. Everything above it on the board stays free.
             </p>
         </div>
     </section>
@@ -683,7 +696,7 @@
                         @foreach ([
                             ['They ask through the page', 'Turn on booking requests and the asks arrive attached to the date they are for, instead of a message you scroll past.'],
                             ['Nothing posts without you', 'Every request waits for you to accept it, so the public calendar only shows what you agreed to.'],
-                            ['One entry, two calendars', 'Add them to the event as a participant and the date lands on their own schedule too, if they run one here.'],
+                            ['One entry, two calendars', 'Add them to the event as a participant and the date is offered to their own schedule, for them to accept. A duo who is not on Event Schedule yet gets a page with your dates on it, credited to you, and can claim it with the email address you added.'],
                         ] as [$t, $d])
                             <div class="es-pour-card es-pour-hover p-4" data-reveal>
                                 <p class="es-pour-ink text-sm font-bold">{{ $t }}</p>
@@ -818,7 +831,7 @@
                     @foreach ([
                         ['01', 'Put the repeating nights up', 'One recurring event per night, with the weeks you are shut taken out. Most of them are free and stay free.'],
                         ['02', 'Open the requests', 'Bands and vans ask for dates through the page. You accept the ones you want and nothing else appears.'],
-                        ['03', 'Charge for the one that needs it', 'The tour gets a price, a quantity and a QR code on the door. That is the only part on Pro.'],
+                        ['03', 'Charge for the one that needs it', 'The tour gets a price, a quantity and a QR code on the door. Free up to 25 paid tickets a month; Pro takes the ceiling off.'],
                     ] as [$n, $t, $d])
                         <div class="rounded-lg border border-white/10 bg-white/[0.05] p-7 backdrop-blur-sm" data-reveal="panel">
                             <p class="es-pour-lit es-pour-num mb-3 text-sm font-bold">{{ $n }}</p>
@@ -851,6 +864,11 @@
                 <div data-reveal>
                     <x-feature-link-card name="Ticketing" description="For the paid tour: a quantity, QR check-in and zero platform fees" :url="marketing_url('/features/ticketing')" icon-color="amber">
                         <x-slot:icon><svg aria-hidden="true" class="h-5 w-5 text-amber-600 dark:text-amber-400" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 5v2m0 4v2m0 4v2M5 5a2 2 0 00-2 2v3a2 2 0 110 4v3a2 2 0 002 2h14a2 2 0 002-2v-3a2 2 0 110-4V7a2 2 0 00-2-2H5z" /></svg></x-slot:icon>
+                    </x-feature-link-card>
+                </div>
+                <div data-reveal>
+                    <x-feature-link-card name="PayPal" description="Take tour and tasting tickets through your own PayPal account, on every plan" :url="marketing_url('/paypal')" icon-color="blue">
+                        <x-slot:icon><svg aria-hidden="true" class="h-5 w-5 text-blue-600 dark:text-blue-400" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z" /></svg></x-slot:icon>
                     </x-feature-link-card>
                 </div>
                 <div data-reveal>
@@ -956,8 +974,8 @@
                         Put the week up and <span class="es-pour-grad">leave it there</span>.
                     </h2>
                     <p class="mx-auto mb-10 max-w-xl text-lg text-gray-300 sm:text-xl">
-                        The nights, the strands and the requests cost nothing. Pay only when you
-                        actually sell a ticket.
+                        The nights, the strands and the requests cost nothing, and neither do the
+                        first 25 paid tickets a month. Pay only when the tours outgrow that.
                     </p>
 
                     <div class="mx-auto flex max-w-2xl flex-col items-stretch justify-center gap-3 sm:flex-row">

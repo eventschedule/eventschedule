@@ -1,6 +1,6 @@
 <x-marketing-layout>
-    <x-slot name="title">Free Event Schedule for Workshop Instructors | Share Classes</x-slot>
-    <x-slot name="description">Fill every workshop seat. Announce classes, sell spots with zero platform fees, and email your students directly. Build multi-session series. Free forever.</x-slot>
+    <x-slot name="title">Free Workshop Registration and Class Series for Instructors</x-slot>
+    <x-slot name="description">Set a workshop up once as a weekly series, cap the seats per session, and sell spots through Stripe or PayPal with zero platform fees. Free to start.</x-slot>
     <x-slot name="breadcrumbTitle">For Workshop Instructors</x-slot>
 
     <x-slot name="structuredData">
@@ -31,7 +31,7 @@
         "applicationCategory": "BusinessApplication",
         "applicationSubCategory": "Workshop and Class Scheduling Software",
         "operatingSystem": "Web",
-        "description": "One class, set up once as a weekly series that ends after a set number of sessions, with the seat count kept per session date. Sell spots through your own Stripe account with zero platform fees, or run free registration with a seat limit.",
+        "description": "One class, set up once as a weekly series that ends after a set number of sessions, with the seat count kept per session date. Sell spots through your own Stripe or PayPal account with zero platform fees, or run free registration with a seat limit.",
         "offers": {
             "@type": "Offer",
             "price": "0",
@@ -46,10 +46,13 @@
             "Multi-class cards valid across the series, with a cancellation cutoff in hours before each session",
             "A waitlist when a session fills, offering a freed seat to the next person waiting for that date",
             "QR check-in, plus a downloadable QR code for your schedule",
-            "Zero platform fees on ticket sales through your own Stripe account",
+            "Zero platform fees on ticket sales through your own Stripe or PayPal account",
+            "Full or partial refunds of Stripe and PayPal sales from the Sales page",
+            "Tell me when tickets go on sale, kept per session date, with no account needed",
             "Sub-schedules that keep beginner and advanced strands apart on one link",
             "Direct newsletters to the students who follow your schedule",
             "Two-way Google, Outlook and CalDAV calendar sync, a recurring class syncing as one entry",
+            "A live calendar feed of your classes that students subscribe to once",
             "Embeddable calendar for the studio site you already have"
         ],
         "url": "{{ url()->current() }}",
@@ -84,7 +87,7 @@
                 "@type": "HowToStep",
                 "position": 3,
                 "name": "Open the sheet",
-                "text": "Share one link. Take free registrations, or connect Stripe and sell spots and multi-class cards with zero platform fees."
+                "text": "Share one link. Take free registrations, or connect Stripe or PayPal and sell spots and multi-class cards with zero platform fees."
             }
         ]
     }
@@ -560,11 +563,19 @@
             ],
             [
                 'q' => 'How do students find out about a new class?',
-                'a' => 'Two ways, and they are not the same list. Somebody who leaves an email address on your page and confirms it is sent a short digest on its own when you put new classes up, batched so a whole term posted in one sitting is one message, and it costs nothing from your allowance. Somebody signed in who pressed Follow is on the other list, and that one only ever hears from a newsletter you write and send, with open and click rates afterwards. The allowance counts recipients rather than sends, at 10 a month on Free, 100 on Pro and 1,000 on Enterprise. Alongside that, share your one link, embed the calendar on the studio site you already have, and download your schedule\'s QR code to tape to the bench.',
+                'a' => 'Two ways, and they are not the same list. Somebody who leaves an email address on your page and confirms it is sent a short digest on its own when you put new classes up, batched so a whole term posted in one sitting is one message, and it costs nothing from your allowance. Somebody signed in who pressed Follow is on the other list, and that one only ever hears from a newsletter you write and send, with open and click rates afterwards. The allowance counts recipients rather than sends, at 10 a month on Free, 100 on Pro and 1,000 on Enterprise. A student who would rather not give an address at all can subscribe to your schedule as a live calendar from its page, and it keeps up as you add and move sessions. Alongside that, share your one link, embed the calendar on the studio site you already have, and download your schedule\'s QR code to tape to the bench.',
+            ],
+            [
+                'q' => 'Can students hear when next term goes on sale?',
+                'a' => 'Yes, free on every plan. On a session that is not on sale yet, a student can press "Tell me when tickets go on sale" and leave just an email address, with no account. They get one email when spots go on sale, one if you cancel, and a reminder 48 hours before the session, plus any change notice you choose to send. On a session that is already selling, the same list sits beside the buy button as "Tell me if anything changes". Each date keeps its own list, you see how many people are waiting on the event\'s Tickets panel, and it does not touch your newsletter allowance. It is not the waitlist, which is for a session that has already filled.',
             ],
             [
                 'q' => 'Can I sell spots and cap the class?',
-                'a' => 'Yes. Connect your own Stripe account and sell spots with named ticket types, each with its own price, quantity and sales window. The free plan sells 25 paid spots a month and Pro lifts the ceiling; free classes can use registration with a seat limit instead, unlimited on every plan. Either way the count is kept per session date, so a full Saturday does not close the next one, and students see the number of spots left rather than who is on the sheet.',
+                'a' => 'Yes. Sell spots with named ticket types, each with its own price, quantity and sales window, and take the money through your own Stripe or PayPal account, or as cash, a payment link, Invoice Ninja, or Payfast if you charge in rand, on every plan. The free plan sells 25 paid spots a month and Pro lifts the ceiling; free classes can use registration with a seat limit instead, unlimited on every plan. Either way the count is kept per session date, so a full Saturday does not close the next one, and students see the number of spots left rather than who is on the sheet.',
+            ],
+            [
+                'q' => 'Can I refund a student?',
+                'a' => 'Yes, on every plan, from the Sales page, for a student who drops out or a class you call off. A Stripe or PayPal payment goes back through the provider, in full or in part, and a partial refund leaves the spot booked. A spot paid in cash, through a payment link, Payfast or Invoice Ninja is marked as refunded instead, which records it without moving any money. Event Schedule does not email the student about a refund, so that message is yours to send.',
             ],
             [
                 'q' => 'How does a multi-class card work?',
@@ -620,7 +631,7 @@
                     </h1>
 
                     <p class="es-fade-up es-d-2 es-shop-muted mb-10 max-w-xl text-lg sm:text-xl">
-                        Set the class up once as a series, cap the bench, and let the sheet fill itself. The seat count is kept per session, so a full Saturday never closes the next one.
+                        Set the workshop up once as a series, cap the bench, and let the sheet fill itself. The seat count is kept per session, so a full Saturday never closes the next one.
                     </p>
 
                     <div class="es-fade-up es-d-3 flex flex-col items-start gap-4 sm:flex-row">
@@ -727,7 +738,7 @@
                     <div class="es-shop-card p-6" data-reveal="panel">
                         <p class="es-shop-tag mb-3">The link</p>
                         <h3 class="mb-2 text-lg font-bold es-shop-wall-ink">1 address</h3>
-                        <p class="text-sm es-shop-wall-muted">Students see the whole term at one link, book the week that suits them, and download that date to their own calendar.</p>
+                        <p class="text-sm es-shop-wall-muted">Students see the whole term at one link and book the week that suits them. They can download that date, or subscribe once to a live calendar that keeps up with the term.</p>
                     </div>
                 </div>
 
@@ -878,6 +889,10 @@
                                 <svg aria-hidden="true" class="es-shop-accent mt-0.5 h-5 w-5 flex-none" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7" /></svg>
                                 <span class="es-shop-muted text-sm">Free registration with a seat limit is unlimited on every plan, and the free plan sells 25 paid spots a month on top of that.</span>
                             </li>
+                            <li class="flex gap-3" data-reveal>
+                                <svg aria-hidden="true" class="es-shop-accent mt-0.5 h-5 w-5 flex-none" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7" /></svg>
+                                <span class="es-shop-muted text-sm">Not on sale yet, or not ready to book? A student can leave just an email address for that date and hear when spots go on sale, if you cancel, and 48 hours before it starts, plus any change notice you send. Free on every plan.</span>
+                            </li>
                         </ul>
                     </div>
                 </div>
@@ -964,6 +979,7 @@
 
             <p class="es-shop-muted mx-auto mt-8 max-w-2xl text-center text-sm" data-reveal>
                 Cards are sold alongside single spots, not instead of them. Somebody who wants one Saturday can still just buy one Saturday.
+                <a href="{{ marketing_url('/features/passes') }}" class="es-shop-link font-medium hover:underline">How class cards work</a>
             </p>
         </div>
     </section>
@@ -980,7 +996,7 @@
                     What the bench earns is <span class="es-shop-accent">what you keep.</span>
                 </h2>
                 <p class="es-shop-muted mt-5 text-lg" data-reveal style="--reveal-delay: 0.15s;">
-                    Spots are sold through your own Stripe account. Event Schedule charges zero platform fees on every plan, so past Stripe's own processing the money is yours. The free plan sells 25 paid spots a month; Pro takes the ceiling off.
+                    Spots are sold through your own Stripe or <a href="{{ marketing_url('/paypal') }}" class="es-shop-link font-medium hover:underline">PayPal</a> account, or paid in cash on the day. Event Schedule charges zero platform fees on every plan, so past the processor's own fee the money is yours. The free plan sells 25 paid spots a month; Pro takes the ceiling off.
                 </p>
             </div>
 
@@ -1058,7 +1074,7 @@
                 </div>
 
                 <p class="mt-10 text-center es-shop-wall-muted" data-reveal>
-                    Being straight about following: it is a mailing list, not a notification robot. Nobody is told automatically when you add a class. You write the newsletter and you send it, and the allowance counts recipients: 10 a month on Free, 100 on Pro, 1,000 on Enterprise.
+                    Being straight about following: there are two lists. Somebody who confirmed an email address on your page gets a short digest when you add classes, and it costs nothing from your allowance. Somebody who only pressed Follow hears from you through a newsletter you write and send, and that allowance counts recipients: 10 a month on Free, 100 on Pro, 1,000 on Enterprise.
                 </p>
             </div>
         </div>
@@ -1288,7 +1304,7 @@
             </div>
 
             <div class="grid grid-cols-1 gap-6 md:grid-cols-3" data-reveal-group="120">
-                @foreach ([['01', 'Set the class up as a series', 'Create the class once as a recurring event, pick the day it runs, and give it an end: a last date, or a number of sessions.'], ['02', 'Cap the bench', 'Set the seat limit. It is counted per session date, so a full Saturday does not close the next one. Skip the weeks the studio is closed.'], ['03', 'Open the sheet', 'Share one link. Take free registrations, or connect Stripe and sell spots and class cards with zero platform fees.']] as [$stepNum, $stepTitle, $stepBody])
+                @foreach ([['01', 'Set the class up as a series', 'Create the class once as a recurring event, pick the day it runs, and give it an end: a last date, or a number of sessions.'], ['02', 'Cap the bench', 'Set the seat limit. It is counted per session date, so a full Saturday does not close the next one. Skip the weeks the studio is closed.'], ['03', 'Open the sheet', 'Share one link. Take free registrations, or connect Stripe or PayPal and sell spots and class cards with zero platform fees.']] as [$stepNum, $stepTitle, $stepBody])
                     <div class="es-shop-card p-7" data-reveal="panel">
                         <div class="es-shop-accent es-shop-fig mb-3 text-2xl font-black">{{ $stepNum }}</div>
                         <h3 class="es-shop-ink mb-2 text-lg font-bold">{{ $stepTitle }}</h3>

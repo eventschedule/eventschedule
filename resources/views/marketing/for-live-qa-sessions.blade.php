@@ -1,6 +1,6 @@
 <x-marketing-layout>
     <x-slot name="title">Free Event Schedule for Live Q&A Sessions | Hosting Software</x-slot>
-    <x-slot name="description">Free live Q&A scheduling software with registration, ticketing, and email notifications. Works with Zoom, YouTube Live, and any platform. Zero platform fees.</x-slot>
+    <x-slot name="description">Schedule live Q&As and office hours for free: registration with a place limit per date, one join link for Zoom or YouTube Live, and zero platform fees.</x-slot>
     <x-slot name="breadcrumbTitle">For Live Q&A Sessions</x-slot>
 
     <x-slot name="structuredData">
@@ -9,7 +9,7 @@
         "@context": "https://schema.org",
         "@type": "Service",
         "name": "Event Schedule for Live Q&A Sessions",
-        "description": "Free live Q&A scheduling software with registration, ticketing, and email notifications. Works with Zoom, YouTube Live, and any platform. Zero platform fees.",
+        "description": "Schedule live Q&A sessions and office hours for free: registration with a place limit per date, one join link for Zoom, YouTube Live or any platform, and zero platform fees.",
         "provider": {
             "@type": "Organization",
             "name": "Event Schedule",
@@ -46,7 +46,8 @@
             "Comments on a session or on a single agenda segment, held for approval",
             "One join link for Zoom, Google Meet, Microsoft Teams or YouTube Live",
             "Recurring office hours with date exceptions and an end",
-            "Zero platform fees on ticket sales through your own Stripe account",
+            "Zero platform fees on ticket sales through your own Stripe or PayPal account",
+            "A Tell me if anything changes link for visitors not ready to register: an email address only, then a reminder before the session",
             "Two-way Google, Outlook and CalDAV calendar sync",
             "Embeddable calendar for the website you already have",
             "Newsletters you write and send yourself",
@@ -600,7 +601,7 @@
             ['Can you ask this one for me?', 'A poll your audience can suggest options for', 'Engagement, then Polls, on the session', 'Pro'],
             ['Can I say it in advance?', 'Comments, held until you approve them', 'The session page, or one agenda segment', 'Free'],
             ['Tell me when the next one is', 'Follow, then a newsletter you write', 'Followers, then Newsletters', 'Free'],
-            ['Can I pay for the deep dive?', 'Named ticket types through your Stripe', "The session's ticket section, Tickets mode", 'Free'],
+            ['Can I pay for the deep dive?', 'Named ticket types, paid through your Stripe or PayPal', "The session's ticket section, Tickets mode", 'Free'],
         ];
 
         $steps = [
@@ -620,7 +621,7 @@
             ],
             [
                 'q' => 'Can I charge for live Q&A sessions?',
-                'a' => 'Yes, and you do not have to pay us before you start. Connect your own Stripe account and sell named ticket types for a premium AMA or a paid deep dive, each with its own price, quantity and sales window. The free plan sells up to 25 paid tickets a month per schedule, and scanning a ticket\'s QR code at the door is free on every plan; Pro, at '.plan_price($proMonthly).' a month, removes that ceiling and adds the rest of the door tooling, including the live check-in dashboard, discount codes, add-ons and a waitlist on a sold-out ticket type. Event Schedule charges zero platform fees at every plan level, free included, so past Stripe\'s own processing fee the money is yours. Free sessions do not need any of this: registration with a place limit is free.',
+                'a' => 'Yes, and you do not have to pay us before you start. Connect your own Stripe or PayPal account and sell named ticket types for a premium AMA or a paid deep dive, each with its own price, quantity and sales window. The free plan sells up to 25 paid tickets a month per schedule, and scanning a ticket\'s QR code at the door is free on every plan; Pro, at '.plan_price($proMonthly).' a month, removes that ceiling and adds the rest of the door tooling, including the live check-in dashboard, discount codes, add-ons and a waitlist on a sold-out ticket type. Event Schedule charges zero platform fees at every plan level, free included, so past your processor\'s own fee the money is yours. Free sessions do not need any of this: registration with a place limit is free.',
             ],
             [
                 'q' => 'Is Event Schedule free for hosting Q&A sessions?',
@@ -633,6 +634,10 @@
             [
                 'q' => 'Can I cap how many people join?',
                 'a' => 'Yes, and the count is per session date. Set a number of places on the session and every occurrence of a weekly office hour counts its own registrations, so this Thursday filling up does not close next Thursday. The page shows how many places are left, and once a date is full it stops taking registrations for that date. A waitlist for a full registration date is free as well; it is the waitlist on a sold-out paid ticket type that is a Pro feature.',
+            ],
+            [
+                'q' => 'Can people get a reminder without registering?',
+                'a' => 'Yes. Beside the register button, "Tell me if anything changes" takes an email address and nothing else, no account and no name. That person gets a reminder shortly before the session, a notice if it is cancelled, and any change notice you choose to send, say when the join link moves. Every one of those emails unsubscribes in one click. Each date of a weekly office hour is its own list, it is not a subscription to your schedule, and it is free on every plan. For every date at once, your schedule\'s live calendar feed updates itself and costs no email address at all.',
             ],
         ];
 
@@ -778,7 +783,7 @@
                 <div data-reveal class="px-4">
                     <div class="es-conv-accent mb-2 text-4xl font-black">{{ plan_price(0) }}</div>
                     <div class="es-conv-ink text-sm font-semibold">platform fees on ticket sales</div>
-                    <div class="es-conv-muted mt-1 text-xs">Every plan, including free. Stripe still charges its own processing fee.</div>
+                    <div class="es-conv-muted mt-1 text-xs">Every plan, including free. Stripe or PayPal still take their own processing fee.</div>
                 </div>
                 <div data-reveal class="es-conv-statmid">
                     <div class="es-conv-accent mb-2 text-4xl font-black"><span data-count-to="5">5</span></div>
@@ -1003,7 +1008,7 @@
                                     <h3 class="es-conv-ink text-lg font-bold">The link lands where they will look for it</h3>
                                     <span class="es-conv-plan">Free</span>
                                 </div>
-                                <p class="es-conv-muted text-sm">Registering gives somebody their own page for that date, and the join link is on it. The confirmation email links straight there, so nobody has to search their inbox for a link you sent in March.</p>
+                                <p class="es-conv-muted text-sm">Registering gives somebody their own page for that date, and the join link is on it. The confirmation email links straight there, so nobody has to search their inbox for a link you sent in March. Somebody not ready to register can press "Tell me if anything changes" instead: an email address, a reminder before the hour, and the notice you send if the link moves.</p>
                             </div>
                         </div>
 
@@ -1184,7 +1189,7 @@
                                 <span class="es-conv-plan">Free</span>
                             </div>
                             <p class="es-conv-muted mb-4">Your audience follows the schedule, and you see who they are. When there is something worth saying, you write a newsletter and send it, to everyone or to a segment, and you get open and click rates back.</p>
-                            <p class="es-conv-muted text-sm">New sessions reach confirmed email subscribers on their own, as a digest, without touching this. The allowance is for the newsletters you write: 10 recipients a month on free, 100 on Pro and 1,000 on Enterprise, counted per recipient rather than per send. Read more about <a href="{{ marketing_url('/features/newsletters') }}" class="es-conv-link font-medium hover:underline">newsletters</a>.</p>
+                            <p class="es-conv-muted text-sm">New sessions you schedule reach confirmed email subscribers on their own, as a digest, without touching this. The allowance is for the newsletters you write: 10 recipients a month on free, 100 on Pro and 1,000 on Enterprise, counted per recipient rather than per send. Read more about <a href="{{ marketing_url('/features/newsletters') }}" class="es-conv-link font-medium hover:underline">newsletters</a>.</p>
                         </div>
                         <div class="es-glare" aria-hidden="true"></div>
                         <div class="es-ring-glow" aria-hidden="true"></div>
@@ -1245,8 +1250,8 @@
                                 <h3 class="es-conv-ink text-xl font-bold">When the session is worth paying for</h3>
                                 <span class="es-conv-plan">Free</span>
                             </div>
-                            <p class="es-conv-muted mb-4">Connect your own Stripe and sell named ticket types for a paid AMA or a small-group deep dive, each with its own price, quantity and sales window. Selling starts on the free plan, at 25 paid tickets a month.</p>
-                            <p class="es-conv-muted text-sm">Scanning a ticket's QR code at the door is free too. Pro takes that ceiling off and adds the rest of the door tooling: the live check-in dashboard, discount codes for the people you want back, add-ons and a waitlist on a sold-out ticket type. Quantities count per date, the same way places do. Event Schedule takes zero platform fees on every plan, so past Stripe's own processing the money is yours. See all <a href="{{ marketing_url('/features/ticketing') }}" class="es-conv-link font-medium hover:underline">ticketing features</a>.</p>
+                            <p class="es-conv-muted mb-4">Connect your own Stripe or PayPal account and sell named ticket types for a paid AMA or a small-group deep dive, each with its own price, quantity and sales window. Selling starts on the free plan, at 25 paid tickets a month.</p>
+                            <p class="es-conv-muted text-sm">Scanning a ticket's QR code at the door is free too. Pro takes that ceiling off and adds the rest of the door tooling: the live check-in dashboard, discount codes for the people you want back, add-ons and a waitlist on a sold-out ticket type. Quantities count per date, the same way places do. Event Schedule takes zero platform fees on every plan, so past your processor's own fee the money is yours, and a refund from the Sales page sends a Stripe or PayPal payment back, in full or in part. See all <a href="{{ marketing_url('/features/ticketing') }}" class="es-conv-link font-medium hover:underline">ticketing features</a>.</p>
                         </div>
                         <div class="es-glare" aria-hidden="true"></div>
                         <div class="es-ring-glow" aria-hidden="true"></div>

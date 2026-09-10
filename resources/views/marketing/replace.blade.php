@@ -1,6 +1,6 @@
 <x-marketing-layout>
-    <x-slot name="title">Replace Google Forms, Canva & More | Event Schedule</x-slot>
-    <x-slot name="description">Replace Google Forms, Mailchimp, Canva, Notion, and Trello with Event Schedule: purpose-built event management with ticketing, event pages, and AI.</x-slot>
+    <x-slot name="title">Replace Google Forms, Canva & 10 More Tools | Event Schedule</x-slot>
+    <x-slot name="description">Replace twelve tools with one event record: Google Forms, Mailchimp, Canva, Linktree, Sheets, Calendly and more. Free to publish, zero platform fees.</x-slot>
     <x-slot name="breadcrumbTitle">Replace</x-slot>
 
     <x-slot name="structuredData">
@@ -529,27 +529,27 @@
         $loops = [
             ['L01', 'Google Forms', 'marketing.replace_google_forms', 'Registration and forms',
                 'A form to collect sign-ups',
-                'Free RSVP with a capacity kept per date, or named ticket types with your own questions at checkout.',
+                'Free RSVP with a capacity kept per date, named ticket types with your own questions at checkout, and a "Tell me when tickets go on sale" list in place of the notify-me form.',
                 ['Free', 'Pro']],
             ['L02', 'Mailchimp', 'marketing.replace_mailchimp', 'Marketing and communication',
                 'Emailing everyone who came last time',
-                'Newsletters to your followers and ticket buyers, with open and click rates and an optional subject-line A/B test.',
+                'Newsletters to your followers and ticket buyers, with open and click rates and an optional subject-line A/B test, and a sign-up form whose confirmed subscribers get a digest of your new events.',
                 ['Free']],
             ['L03', 'Canva', 'marketing.replace_canva', 'Marketing and communication',
                 'Making the flyer, again',
                 'Event graphics generated from the event\'s own fields, so a changed time redraws instead of being retyped.',
-                ['Pro']],
+                ['Free']],
             ['L04', 'Linktree', 'marketing.replace_linktree', 'Marketing and communication',
                 'The one link in the bio',
-                'The schedule page itself: your actual dates, a follow button, and every event page one tap off the same link.',
+                'The schedule page itself: your actual dates, a follow button, every event page one tap off the same link, and a short address for each link you list, with its clicks counted.',
                 ['Free']],
             ['L05', 'Google Sheets', 'marketing.replace_google_sheets', 'Scheduling and tracking',
                 'The attendee list and the takings',
-                'An attendee list per event, a sales dashboard, built-in analytics, and a CSV export when you do want a spreadsheet.',
+                'An attendee list per event, a Sales page that refunds Stripe and PayPal payments in full or in part, built-in analytics, and a CSV export when you do want a spreadsheet.',
                 ['Free', 'Pro']],
             ['L06', 'Calendly', 'marketing.replace_calendly', 'Scheduling and tracking',
                 'One-to-one bookings',
-                'Appointment types with weekly hours, per-date overrides, buffers and optional payment, booked on a public page.',
+                'One appointment type free and more on Pro, each with weekly hours, per-date overrides, buffers and optional payment by Stripe, a payment link or cash, booked on a public page.',
                 ['Free', 'Pro']],
             ['L07', 'SurveyMonkey', 'marketing.replace_surveymonkey', 'Registration and forms',
                 'A survey doing registration duty',
@@ -561,7 +561,7 @@
                 ['Pro']],
             ['L09', 'QR Code Generators', 'marketing.replace_qr_code_generators', 'Scheduling and tracking',
                 'A code for the door',
-                'A QR code on every ticket with a check-in dashboard behind it, and an ungated QR for the schedule page itself.',
+                'A QR code on every ticket, scanned at the door on any plan, with a live check-in dashboard on Pro, and a QR code for the schedule page itself.',
                 ['Free', 'Pro']],
             ['L10', 'Squarespace', 'marketing.replace_squarespace', 'Planning and websites',
                 'The public website',
@@ -604,7 +604,15 @@
             ],
             [
                 'q' => 'Is one platform really cheaper than five?',
-                'a' => 'Publishing a schedule is free forever, and that free plan already covers the page, unlimited events, two-way Google, Outlook and CalDAV sync, RSVP with a capacity per date, selling up to 25 paid tickets a month, one appointment type, built-in analytics, the embeddable calendar and newsletters at ten emails a month. Pro is '.plan_price($proMonthly).' a month and takes the ceiling off the selling, then adds QR check-in, event graphics, more appointment types and the API. Enterprise is '.plan_price($entMonthly).'. Event Schedule charges zero platform fees on ticket sales on every plan, free included, so the door money is yours minus Stripe\'s processing fee.',
+                'a' => 'Publishing a schedule is free forever, and that free plan already covers the page, unlimited events, two-way Google, Outlook and CalDAV sync, RSVP with a capacity per date, selling up to 25 paid tickets a month through Stripe or PayPal with scanning at the door, one appointment type, event graphics, built-in analytics, the embeddable calendar and newsletters to ten recipients a month. Pro is '.plan_price($proMonthly).' a month and takes the ceiling off the selling, then adds the live check-in dashboard, polls, post-event feedback, more appointment types and the API. Enterprise is '.plan_price($entMonthly).'. Event Schedule charges zero platform fees on ticket sales on every plan, free included, so the door money is yours minus your payment provider\'s processing fee.',
+            ],
+            [
+                'q' => 'Can it take PayPal, and refund a buyer from the same place?',
+                'a' => 'Yes, on every plan. Connect your own Stripe or PayPal account and choose per event; Payfast (rand only), Invoice Ninja, a payment link and cash are there too. A Stripe or PayPal sale is refunded from the Sales page, in full or in part, and the money goes back through the provider before the sale changes status. A full refund puts the places back on sale, while a partial one leaves the tickets valid. A sale paid any other way is marked as refunded instead, because there is no money for the app to move. A ticket buyer is not emailed about a refund, so tell them yourself.',
+            ],
+            [
+                'q' => 'What replaces the "notify me" form and the mailing-list sign-up?',
+                'a' => 'Two free things on your public pages. On an event page, a visitor can leave just an email address under "Tell me when tickets go on sale", or "Tell me if anything changes" once you are selling. They hear when tickets go on sale, if the event is cancelled, and once shortly before it starts, plus any notice you choose to send if the date or venue changes. On the schedule page, the sign-up panel takes an email address, and confirming it sets up an account that follows the schedule. Confirmed subscribers get a digest of the new events you publish, at most one every 72 hours. Neither list counts against the newsletter allowance, which is only spent on newsletters you write.',
             ],
             [
                 'q' => 'What does Event Schedule not replace?',
@@ -612,7 +620,7 @@
             ],
             [
                 'q' => 'Do I have to move everything at once?',
-                'a' => 'No, and most people should not. Two-way calendar sync means the dates keep flowing to the calendar your team already reads, and the embeddable calendar drops the same schedule into the site you already have, so the old page can stay up while you move. Then you can retire one loop at a time.',
+                'a' => 'No, and most people should not. Two-way calendar sync means the dates keep flowing to the calendar your team already reads, and the embeddable calendar drops the same schedule into the site you already have, so the old page can stay up while you move. Your mailing list comes across by paste or CSV, up to ten thousand addresses per import. Then you can retire one loop at a time.',
             ],
             [
                 'q' => 'Can I keep using my own domain and my own look?',
@@ -697,7 +705,7 @@
                         </div>
                     </div>
                     <p class="es-belt-on-muted es-belt-xs mt-3 text-center">
-                        Twelve loops on one strap. Free to publish and to sell your first 25 tickets a month, {{ plan_price($proMonthly) }} a month for the paid half, and zero platform fees on every plan.
+                        Twelve loops on one strap. Free to publish and to sell your first 25 paid tickets a month, {{ plan_price($proMonthly) }} a month for the paid half, and zero platform fees on every plan.
                     </p>
                 </div>
             </div>
@@ -763,7 +771,7 @@
                             </div>
                         </div>
                         <p class="es-belt-on-muted es-belt-xs mt-4">
-                            Move the start time and the page, the ticket, the graphic and the synced calendar entry all move with it.
+                            Move the start time and the page, the ticket, the graphic, the synced calendar entry and the feed your guests subscribed to all move with it.
                         </p>
                     </div>
                 </div>
@@ -816,13 +824,13 @@
                     <p class="es-belt-mono es-belt-xs es-belt-accent mb-2 font-bold">L01 &middot; L02 &middot; L05</p>
                     <h3 class="es-belt-ink mb-2 text-lg font-bold">The list splits</h3>
                     <p class="es-belt-muted es-belt-small mb-4">Sign-ups in the form, subscribers in the email tool, and the people who actually turned up in a third file nobody exports.</p>
-                    <p class="es-belt-accent es-belt-small mt-auto font-semibold">On the belt: followers and ticket buyers are one audience, and the newsletter is written against it.</p>
+                    <p class="es-belt-accent es-belt-small mt-auto font-semibold">On the belt: followers, email subscribers and ticket buyers are one audience, and the newsletter is written against it. Confirmed subscribers also get a digest of the events you publish, on their own.</p>
                 </div>
                 <div class="es-belt-card flex flex-col p-7" data-reveal="panel">
                     <p class="es-belt-mono es-belt-xs es-belt-accent mb-2 font-bold">L01 &middot; L05 &middot; L09</p>
                     <h3 class="es-belt-ink mb-2 text-lg font-bold">Nothing knows about the ticket</h3>
                     <p class="es-belt-muted es-belt-small mb-4">A form cannot stop the sixty-first sign-up, a spreadsheet does not know the date sold out, and a code generator cannot tell you whether that code has already come through the door.</p>
-                    <p class="es-belt-accent es-belt-small mt-auto font-semibold">On the belt: inventory and RSVP capacity are counted per date, and the door scans the ticket that was sold.</p>
+                    <p class="es-belt-accent es-belt-small mt-auto font-semibold">On the belt: inventory and RSVP capacity are counted per date, the door scans the ticket that was sold, and a full refund puts the place back on sale.</p>
                 </div>
             </div>
 
@@ -844,7 +852,7 @@
                     What is <span class="es-belt-accent">on the belt.</span>
                 </h2>
                 <p class="es-belt-muted es-belt-lead mt-5" data-reveal style="--reveal-delay: 0.15s;">
-                    Twelve tools, the job each one was doing, and what does that job here. Every row links to the detail.
+                    The twelve tools Event Schedule replaces, the job each one was doing, and what does that job here. Every row links to the detail.
                 </p>
             </div>
 
@@ -915,14 +923,14 @@
                     Four things that <span class="es-belt-accent">stay on the bench.</span>
                 </h2>
                 <p class="es-belt-muted es-belt-lead mt-5" data-reveal style="--reveal-delay: 0.15s;">
-                    A consolidation page that claims everything is not worth reading. These are the places where you should keep the specialist.
+                    A consolidation page that claims everything is not worth reading. These are the jobs Event Schedule does not replace, where you should keep the specialist.
                 </p>
             </div>
 
             <div class="grid gap-6 md:grid-cols-2" data-reveal-group="90">
                 <div class="es-belt-card p-7" data-reveal="panel">
                     <h3 class="es-belt-ink mb-2 text-lg font-bold">Automations and drip sequences</h3>
-                    <p class="es-belt-muted es-belt-small">Newsletters here are written and sent by you, with open and click rates and an optional subject-line A/B test. There is no automation builder, no branching sequence and no drip. The one thing that does send itself is a digest of newly published events to people who left an email address and confirmed it, which is a fact about the calendar rather than a campaign you build. If you run nurture flows, keep the email platform.</p>
+                    <p class="es-belt-muted es-belt-small">Newsletters here are written and sent by you, with open and click rates and an optional subject-line A/B test. There is no automation builder, no branching sequence and no drip. The event news that sends itself is fixed, and it is a fact about the calendar rather than a campaign you build: a digest of the new events you publish, for people who left an email address and confirmed it, and the few emails an event's interest list asked for, when tickets go on sale, if it is cancelled and shortly before it starts. If you run nurture flows, keep the email platform.</p>
                 </div>
                 <div class="es-belt-card p-7" data-reveal="panel">
                     <h3 class="es-belt-ink mb-2 text-lg font-bold">A blank design canvas</h3>
@@ -968,15 +976,17 @@
                         <li>The schedule page and unlimited events</li>
                         <li>Two-way Google, Outlook and CalDAV sync</li>
                         <li>Free RSVP with a capacity per date</li>
-                        <li>Selling, up to 25 paid tickets a month, no platform fee</li>
+                        <li>Selling, up to 25 paid tickets a month, no platform fee, with refunds from the Sales page</li>
+                        <li>Scanning tickets at the door, and a QR code for the schedule page</li>
                         <li>One appointment type on a public booking page</li>
+                        <li>Event graphics generated from the event</li>
                         <li>Newsletters, ten emails a month, counting each recipient as one</li>
+                        <li>Email sign-ups, with an automatic digest of your new events</li>
                         <li>Built-in analytics and the embeddable calendar</li>
-                        <li>A QR code for the schedule page</li>
                         <li>Sub-schedules, agenda parts, recurring dates</li>
                         <li>Backup and restore, images included</li>
                     </ul>
-                    <p class="es-belt-muted es-belt-xs mt-auto pt-5">Covers all of L02, L04 and L12, and the unpaid half of L01, L05, L06, L07, L09, L10 and L11.</p>
+                    <p class="es-belt-muted es-belt-xs mt-auto pt-5">Covers all of L02, L03, L04 and L12, and the unpaid half of L01, L05, L06, L07, L09, L10 and L11.</p>
                 </div>
 
                 <div class="es-belt-card flex flex-col p-7" data-reveal="panel">
@@ -986,16 +996,15 @@
                     </div>
                     <h3 class="es-belt-ink mb-3 text-lg font-bold">Sell without a ceiling</h3>
                     <ul class="es-belt-muted es-belt-small space-y-2">
-                        <li>Unlimited ticket sales, QR check-in and a check-in dashboard</li>
+                        <li>Unlimited ticket sales and the live check-in dashboard</li>
                         <li>Passes, subscriptions and individual tickets</li>
-                        <li>Event graphics generated from the event</li>
                         <li>As many appointment types as you need</li>
-                        <li>Your own questions at checkout, promo codes, waitlist</li>
+                        <li>Your own questions at checkout, promo codes, the ticket waitlist</li>
                         <li>Polls, post-event feedback, sales CSV export</li>
                         <li>REST API, webhooks, custom CSS, ticket widget embed</li>
-                        <li>One hundred newsletter emails a month</li>
+                        <li>One hundred newsletter recipients a month</li>
                     </ul>
-                    <p class="es-belt-muted es-belt-xs mt-auto pt-5">Covers all of L03 and L08, and the paid half of L01, L05, L06, L07, L09, L10 and L11.</p>
+                    <p class="es-belt-muted es-belt-xs mt-auto pt-5">Covers all of L08, and the paid half of L01, L05, L06, L07, L09, L10 and L11.</p>
                 </div>
 
                 <div class="es-belt-card flex flex-col p-7" data-reveal="panel">
@@ -1009,7 +1018,7 @@
                         <li>Up to five team members</li>
                         <li>Internal and unlisted event visibility</li>
                         <li>AI agenda scanning into event parts</li>
-                        <li>One thousand newsletter emails a month</li>
+                        <li>One thousand newsletter recipients a month</li>
                     </ul>
                     <p class="es-belt-muted es-belt-xs mt-auto pt-5">Finishes L10, and adds the parts a staffed organisation needs.</p>
                 </div>
@@ -1050,7 +1059,7 @@
                         <div class="relative z-10">
                             <span class="es-belt-tier es-belt-tier-free mb-3 inline-flex">Free</span>
                             <h3 class="es-belt-ink mb-2 text-xl font-bold">Zero platform fees on ticket sales</h3>
-                            <p class="es-belt-muted es-belt-small">Money moves through your own Stripe account and Event Schedule takes none of it, on every plan including the free one. The only cut is Stripe's processing fee, which is the same cut it would take anywhere else. This is usually the line that pays for the whole switch.</p>
+                            <p class="es-belt-muted es-belt-small">Money moves through your own <a href="{{ route('marketing.stripe') }}" class="es-belt-link font-medium underline hover:no-underline">Stripe</a> or <a href="{{ route('marketing.paypal') }}" class="es-belt-link font-medium underline hover:no-underline">PayPal</a> account and Event Schedule takes none of it, on every plan including the free one. The only cut is the processor's own fee, the same cut it would take anywhere else, and a refund goes back the same way from the Sales page. This is usually the line that pays for the whole switch.</p>
                         </div>
                         <div class="es-glare" aria-hidden="true"></div>
                         <div class="es-ring-glow" aria-hidden="true"></div>
@@ -1105,7 +1114,19 @@
                     </div>
                 </div>
                 <!-- 6 -->
-                <div class="es-bento group relative lg:col-span-2" data-reveal="panel" data-tilt="3.5">
+                <div class="es-bento group relative" data-reveal="panel" data-tilt="5">
+                    <div class="es-tilt-inner es-belt-card relative flex h-full flex-col overflow-hidden p-7">
+                        <div class="relative z-10">
+                            <span class="es-belt-tier es-belt-tier-free mb-3 inline-flex">Free</span>
+                            <h3 class="es-belt-ink mb-2 text-xl font-bold">A calendar feed guests subscribe to</h3>
+                            <p class="es-belt-muted es-belt-small">Anyone can subscribe to your public dates as a <a href="{{ route('marketing.docs.sharing') }}#calendar-feeds" class="es-belt-link font-medium underline hover:no-underline">live calendar feed</a>, without giving an email address. Their calendar keeps re-reading it, so a moved date moves there too, which a shared calendar only does when somebody remembers to edit it.</p>
+                        </div>
+                        <div class="es-glare" aria-hidden="true"></div>
+                        <div class="es-ring-glow" aria-hidden="true"></div>
+                    </div>
+                </div>
+                <!-- 7 -->
+                <div class="es-bento group relative md:col-span-2 lg:col-span-1" data-reveal="panel" data-tilt="3.5">
                     <div class="es-tilt-inner es-belt-card relative flex h-full flex-col overflow-hidden p-7">
                         <div class="relative z-10">
                             <span class="es-belt-tier es-belt-tier-pro mb-3 inline-flex">Pro</span>
@@ -1193,7 +1214,7 @@
                         </div>
                     </div>
 
-                    <p class="es-belt-on-muted es-belt-xs mt-6">Zero platform fees on ticket sales. You only pay Stripe's processing fee.</p>
+                    <p class="es-belt-on-muted es-belt-xs mt-6">Zero platform fees on ticket sales. You only pay your payment provider's processing fee.</p>
                 </div>
             </div>
         </div>

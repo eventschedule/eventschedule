@@ -1,6 +1,6 @@
 <x-marketing-layout>
-    <x-slot name="title">Free Event Schedule for Fitness & Yoga | Class Schedule</x-slot>
-    <x-slot name="description">Share your class schedule, sell drop-ins and class passes, and reach students directly with newsletters. No algorithm. Zero platform fees. Free forever.</x-slot>
+    <x-slot name="title">Free Yoga & Fitness Class Schedule, Drop-ins and Passes</x-slot>
+    <x-slot name="description">Set each yoga or fitness class up once as a recurring event, sell drop-ins through Stripe or PayPal with zero platform fees, and add class passes on Pro.</x-slot>
     <x-slot name="breadcrumbTitle">For Fitness & Yoga</x-slot>
 
     <x-slot name="structuredData">
@@ -45,10 +45,13 @@
             "A cap on how many advance seats pass holders may take per date",
             "Free registration with a capacity limit per class date",
             "QR check-in with a real-time check-in dashboard",
-            "Zero platform fees on class payments through your own Stripe account",
+            "Zero platform fees on class payments through your own Stripe or PayPal account, or cash at the desk",
+            "Full or partial refunds of Stripe and PayPal payments from the Sales page",
             "Bookable one-to-one appointment types on a public booking page",
             "Newsletters to the students who follow you, with open and click rates",
             "Two-way Google, Outlook and CalDAV calendar sync",
+            "A live calendar feed of the timetable that students subscribe to once",
+            "Tell me when tickets go on sale, per class date, with no account needed",
             "Embeddable timetable for the website you already have"
         ],
         "url": "{{ url()->current() }}",
@@ -629,19 +632,27 @@
             ],
             [
                 'q' => 'How do students find and follow my classes?',
-                'a' => 'You get one link for the whole timetable, so it works in a bio, on a flyer, and as a QR code you can print for the studio door. Students who leave an email address are yours: you see their name and address, and when you add classes they get one digest covering the batch, never one message per class and never more than one every few days. Anything else you want to say is a newsletter you write and send.',
+                'a' => 'You get one link for the whole timetable, so it works in a bio, on a flyer, and as a QR code you can print for the studio door. Students who leave an email address are yours: you see their name and address, and when you add classes they get one digest covering the batch, never one message per class and never more than one every few days. Anything else you want to say is a newsletter you write and send. A student who would rather not give an address can subscribe to your timetable as a live calendar from your schedule page: the next 90 days of classes appear in their own calendar app, and a class you move moves there too.',
+            ],
+            [
+                'q' => 'Can students be told when a workshop goes on sale?',
+                'a' => 'Yes, free on every plan. On the page for a class date that is not on sale yet, a student can press "Tell me when tickets go on sale" and leave just an email address, with no account. They get one email when tickets go on sale, one if you cancel it, and a reminder 48 hours before it starts, plus any change notice you choose to send. On a date that is already selling, the same list sits beside the buy button as "Tell me if anything changes". Each date of a recurring class keeps its own list, you see how many people are waiting on the event\'s Tickets panel, and it does not count against your newsletter allowance.',
             ],
             [
                 'q' => 'Can I sell class passes and drop-ins?',
-                'a' => 'Yes, through your own Stripe account. Single drop-ins sell on the free plan, up to 25 paid tickets a month, and the Pro plan at '.plan_price($proMonthly).' a month takes that ceiling off. Passes are the Pro half: alongside a single drop-in you can sell a visit pass with a set number of visits, a membership that is unlimited until it expires, a festival pass good for each covered class once, or a season pass covering every occurrence of one recurring class. Set how long the pass lasts, whether it covers the whole schedule, one sub-schedule or named classes, and how many people it admits at each class. Event Schedule charges zero platform fees on either plan, so past Stripe\'s own processing the money is yours.',
+                'a' => 'Yes. Take the money through your own Stripe or PayPal account, or as cash at the desk, a payment link, Invoice Ninja, or Payfast if you charge in rand, on every plan. Single drop-ins sell on the free plan, up to 25 paid tickets a month, and the Pro plan at '.plan_price($proMonthly).' a month takes that ceiling off. Passes are the Pro half: alongside a single drop-in you can sell a visit pass with a set number of visits, a membership that is unlimited until it expires, a festival pass good for each covered class once, or a season pass covering every occurrence of one recurring class. Set how long the pass lasts, whether it covers the whole schedule, one sub-schedule or named classes, and how many people it admits at each class. Event Schedule charges zero platform fees on either plan, so past the processor\'s own fee the money is yours.',
             ],
             [
                 'q' => 'What happens when somebody cancels at the last minute?',
                 'a' => 'You set a cancellation deadline on the pass, measured in hours before the class starts. Cancel before it and the visit goes back on the pass. After it, your choice applies: either the booking can still be cancelled but the visit stays spent, which releases the mat without giving a no-show a free credit, or cancelling is not allowed at all. You can also cap how many mats pass holders may reserve in advance per date, so a walk-up can still get in.',
             ],
             [
+                'q' => 'Can I refund a drop-in or a class pass?',
+                'a' => 'Yes, on every plan, from the Sales page, whether you called a class off or a student is moving away. A Stripe or PayPal payment goes back through the provider, in full or in part, and a partial refund leaves the booking or the pass valid. One paid in cash, through a payment link, Payfast or Invoice Ninja is marked as refunded instead, which records it without moving any money. Event Schedule does not email the student about a refund, so that message is yours to send.',
+            ],
+            [
                 'q' => 'Can students book a one-to-one with me?',
-                'a' => 'Yes, and one appointment type is free. Appointment types are separate from classes: give one a length, a start-time interval, the hours you are open each week, buffers before and after, how much notice you need and how far ahead people may book, then students pick a slot on your public booking page. Each type says whether it happens in the studio, online or by phone, can require your approval before it is confirmed, and can be free or paid. Pro lifts the one-type limit, so a private session, an assessment and a beginners consultation can sit side by side. Your classes already count as busy time, so nobody books a session on top of one.',
+                'a' => 'Yes, and one appointment type is free. Appointment types are separate from classes: give one a length, a start-time interval, the hours you are open each week, buffers before and after, how much notice you need and how far ahead people may book, then students pick a slot on your public booking page. Each type says whether it happens in the studio, online or by phone, can require your approval before it is confirmed, and can be free or paid by Stripe, a payment link or cash. Pro lifts the one-type limit, so a private session, an assessment and a beginners consultation can sit side by side. Your classes already count as busy time, so nobody books a session on top of one.',
             ],
             [
                 'q' => 'Can my other teachers log in?',
@@ -695,7 +706,7 @@
                     </h1>
 
                     <p class="es-fade-up es-d-2 es-flow-muted mb-10 max-w-xl text-lg sm:text-xl">
-                        Set each class up once with the days it runs and one start time, then sell drop-ins, ten-class cards and memberships from a single link. Reach your students directly, with zero platform fees.
+                        Set each yoga or fitness class up once with the days it runs and one start time, then sell drop-ins, ten-class cards and memberships from a single link. Reach your students directly, with zero platform fees.
                     </p>
 
                     <div class="es-fade-up es-d-3 flex flex-col items-start gap-4 sm:flex-row">
@@ -807,7 +818,7 @@
                     <div class="es-flow-card p-6" data-reveal="panel">
                         <p class="es-flow-eyebrow mb-3">the money</p>
                         <h3 class="es-flow-ink mb-2 text-lg font-bold">{{ plan_price(0) }} taken</h3>
-                        <p class="es-flow-muted text-sm">Payments land in your own Stripe account. Event Schedule takes no cut of a drop-in, a pass or a membership, on any plan.</p>
+                        <p class="es-flow-muted text-sm">Payments land in your own Stripe or PayPal account, or in the till as cash. Event Schedule takes no cut of a drop-in, a pass or a membership, on any plan.</p>
                     </div>
                 </div>
 
@@ -1059,8 +1070,8 @@
             </div>
 
             <p class="es-flow-muted mx-auto mt-8 max-w-2xl text-center text-sm" data-reveal>
-                Connect Stripe and sell straight from the timetable. Event Schedule charges zero platform fees, so past Stripe's own processing the money is yours.
-                <a href="{{ marketing_url('/features/ticketing') }}" class="es-flow-link font-medium hover:underline">How ticketing works</a>
+                Connect Stripe or PayPal and sell straight from the timetable, or take cash at the desk. Event Schedule charges zero platform fees, so past the processor's own fee the money is yours.
+                <a href="{{ marketing_url('/features/passes') }}" class="es-flow-link font-medium hover:underline">How passes work</a>
             </p>
         </div>
     </section>
@@ -1253,7 +1264,7 @@
                                 <h3 class="es-flow-ink text-xl font-bold">On the site you already have, and the calendar you already use</h3>
                                 <span class="es-flow-plan">Free</span>
                             </div>
-                            <p class="es-flow-muted mb-4">Embed the timetable on your own site so the week lives where people look you up, and sync two ways with Google, Outlook or CalDAV so your teaching hours and your life are one calendar. Worth knowing: a recurring class syncs across as a single entry, not as a repeating one. To see every class date in your calendar app, subscribe to the schedule's feed instead, which unrolls the next 90 days one date at a time. Any single class date also downloads as an .ics file.</p>
+                            <p class="es-flow-muted mb-4">Embed the timetable on your own site so the week lives where people look you up, and sync two ways with Google, Outlook or CalDAV so your teaching hours and your life are one calendar. Worth knowing: a recurring class syncs across as a single entry, not as a repeating one. To see every class date in your calendar app, subscribe to the schedule's feed instead, which unrolls the next 90 days one date at a time. Students can take the same feed from your schedule page, so the timetable sits in their calendar and keeps up when a class moves. Any single class date also downloads as an .ics file.</p>
                             <p class="es-flow-muted text-sm">
                                 Teaching online as well? Mark the class as an online event and paste the link to wherever you are streaming it.
                                 <a href="{{ marketing_url('/features/online-events') }}" class="es-flow-link font-medium hover:underline">How online events work</a>

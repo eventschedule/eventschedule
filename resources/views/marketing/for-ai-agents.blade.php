@@ -5,7 +5,7 @@
     @endphp
 
     <x-slot name="title">REST API for AI Agents & Developers - Event Schedule</x-slot>
-    <x-slot name="description">27 REST endpoints, an OpenAPI 3.0 spec, llms.txt and agents.json. One POST creates the event, its ticket types and its public page.</x-slot>
+    <x-slot name="description">27 REST endpoints, an OpenAPI 3.0 spec, llms.txt and agents.json. One POST creates an event with its tickets; one PUT refunds a sale.</x-slot>
     <x-slot name="breadcrumbTitle">For AI Agents</x-slot>
 
     <x-slot name="structuredData">
@@ -16,7 +16,7 @@
         "name": "Event Schedule API",
         "applicationCategory": "DeveloperApplication",
         "operatingSystem": "Web",
-        "description": "A REST API over the whole of Event Schedule: schedules, sub-schedules, events, recurrences, ticket types, sales, post-event feedback and fan content, with an OpenAPI 3.0 spec, llms.txt and agents.json so an agent can discover it and drive it without a human in the loop.",
+        "description": "A REST API over the whole of Event Schedule: schedules, sub-schedules, events, recurrences, ticket types, sales and refunds, post-event feedback and fan content, with an OpenAPI 3.0 spec, llms.txt and agents.json so an agent can discover it and drive it without a human in the loop.",
         "offers": {
             "@type": "Offer",
             "price": "{{ $proMonthly }}",
@@ -31,6 +31,7 @@
             "API key authentication through the X-API-Key header",
             "Recurring events with a seven-bit day-of-week mask and three ways to end",
             "Ticket types, agenda parts, members and a venue in the same create call",
+            "Full and partial refunds through Stripe or PayPal, with an idempotency key for safe retries",
             "HMAC-SHA256 signed webhooks for fourteen event types",
             "300 GET and 30 write requests per minute, per IP",
             "Encoded string IDs rather than sequential integers",
@@ -484,7 +485,7 @@
                 ['GET', '/api/sales', 'Filter by event, subdomain, status, buyer email or occurrence date.'],
                 ['GET', '/api/sales/{id}', 'One sale with its ticket lines.'],
                 ['POST', '/api/sales', 'Book a sale by hand. Created unpaid; free tickets are marked paid straight away.'],
-                ['PUT', '/api/sales/{id}', 'Apply an action: mark_paid, refund or cancel.'],
+                ['PUT', '/api/sales/{id}', 'mark_paid, cancel or refund. A refund sends Stripe or PayPal money back, in full or an amount you name; an idempotency_key makes a retry safe.'],
                 ['DELETE', '/api/sales/{id}', 'Soft delete. It stops appearing in listings.'],
             ]],
             ['Feeds', 'Read-only, for pulling audience content onto a site you already run.', [
@@ -506,10 +507,10 @@
         $discovery = [
             [
                 'llms.txt', '/llms.txt', '39 lines',
-                'The short one. Schedule types, the auth header, the rate limits, the deployment modes and a four-step getting-started list, so an agent can decide in one fetch whether this API is relevant at all.',
+                'The short one. Schedule types, the auth header, which plan the API needs, the rate limits, the deployment modes and a four-step getting-started list, so an agent can decide in one fetch whether this API is relevant at all.',
             ],
             [
-                'llms-full.txt', '/llms-full.txt', '1,906 lines',
+                'llms-full.txt', '/llms-full.txt', '2,077 lines',
                 'The whole reference in one file, so an agent never has to follow a link to finish a task. Every endpoint, every parameter, every error shape.',
             ],
             [
@@ -525,8 +526,8 @@
         // The heading below counts these, so the two have to be changed together.
         $webhookEvents = [
             ['sale.created', 'A sale is created, still unpaid.'],
-            ['sale.paid', 'Confirmed paid, whether by Stripe, PayPal, Invoice Ninja, by hand or free.'],
-            ['sale.refunded', 'A paid sale is refunded.'],
+            ['sale.paid', 'Confirmed paid, whether by Stripe, PayPal, Payfast, Invoice Ninja, by hand or free.'],
+            ['sale.refunded', 'A paid sale is refunded in full. A partial refund leaves it paid and fires nothing.'],
             ['sale.cancelled', 'A sale is cancelled.'],
             ['installment.paid', 'A payment of an installment plan is collected.'],
             ['installment.failed', 'A scheduled payment could not be collected. Read outcome for why.'],
@@ -548,7 +549,7 @@
              '<span class="es-cons-mono es-cons-key">POST /api/schedules</span> with a name and a type. The subdomain is generated from the name and the public page exists immediately.',
              '{"name": "Synth Lab", "type": "venue"}'],
             ['03', 'Create events',
-             '<span class="es-cons-mono es-cons-key">POST /api/events/{subdomain}</span>. Ticket types, agenda parts and recurrence go in the same body, so there is no second round trip.',
+             '<span class="es-cons-mono es-cons-key">POST /api/events/{subdomain}</span>. Ticket types, agenda parts and recurrence go in the same body, so there is no second round trip. On eventschedule.com this one needs the schedule on Pro.',
              '{"name": "Analog Night", "duration": 3}'],
         ];
 
@@ -558,12 +559,20 @@
                 'a' => 'The REST API is part of the Pro plan at '.plan_price($proMonthly).' a month, with a seven-day trial when you subscribe. Selfhosted installations are Pro by definition, so running your own copy unlocks every endpoint at no cost. Ticket sales carry zero platform fees on every plan and in both modes: you keep everything except your payment processor\'s cut.',
             ],
             [
+                'q' => 'Which endpoints need the Pro plan, and what happens without it?',
+                'a' => 'On eventschedule.com the list endpoints for schedules, events, sales and feedback return only rows from schedules on Pro, so a free schedule\'s data is missing rather than refused: check the plan before you read an empty list as nothing there. Reading one schedule, event or sale, updating a schedule, and writing to its events, sub-schedules or sales return 403 with "API usage is limited to Pro accounts". The exception worth planning around is POST /api/sales, which records a sale on the free plan too, within its 25 paid tickets a month. On a selfhosted install every one of these checks passes.',
+            ],
+            [
                 'q' => 'How does authentication work?',
                 'a' => 'One header, X-API-Key. Get a key from POST /api/register or POST /api/login, or generate one in your account settings. Keys are valid for a year. Login only mints a key when the account has none, and returns 409 while one is still live, so store the key rather than calling login on every run. Accounts with two-factor authentication have to generate keys from the web UI. Every endpoint except register, send-code and login requires the header.',
             ],
             [
                 'q' => 'What can I actually do with it?',
                 'a' => $endpointCount.' endpoints across registration, schedules, sub-schedules, events, categories and sales, plus two read-only feeds for post-event feedback and fan-submitted content. Schedules, sub-schedules, events and sales have full create, read, update and delete; categories are read-only lookups. A single create call can carry ticket types, agenda parts, performing members, a venue and a recurrence pattern, so publishing a run of shows is one request rather than six.',
+            ],
+            [
+                'q' => 'Can the API refund a sale?',
+                'a' => 'Yes: PUT /api/sales/{id} with the action refund. On a Stripe or PayPal sale the money goes back through the provider before the status changes. Send an amount to return part of it, and the sale stays paid with its tickets valid; leave it out and the whole remaining balance goes back, the sale becomes refunded, its places return to stock and sale.refunded fires. Send an idempotency_key of your own so a retry returns the first attempt\'s outcome instead of refunding twice. A refund whose outcome could not be confirmed returns 409 and is never retried for you. Invoice Ninja, Payfast, payment-link and cash sales are only recorded as refunded, so return that money yourself, and a payment plan is refunded in full only.',
             ],
             [
                 'q' => 'What is llms.txt, and why are there two of them?',
@@ -631,7 +640,7 @@
                     </h1>
 
                     <p class="es-fade-up es-d-2 es-cons-muted mb-6 max-w-xl text-lg sm:text-xl">
-                        {{ $endpointCount }} REST endpoints over the whole product: three to get a key, then twenty-four behind it covering schedules, sub-schedules, events, recurrences, ticket types, sales, feedback and fan content. JSON in, JSON out, one header.
+                        {{ $endpointCount }} REST endpoints over the whole product: three to get a key, then twenty-four behind it covering schedules, sub-schedules, events, recurrences, ticket types, sales and refunds, feedback and fan content. JSON in, JSON out, one header.
                     </p>
                     <p class="es-fade-up es-d-2 es-cons-muted mb-10 max-w-xl text-base">
                         An OpenAPI 3.0 spec, <span class="es-cons-mono es-cons-key">llms.txt</span> and <span class="es-cons-mono es-cons-key">agents.json</span> ship with it, so an agent can discover this API and drive it without a human reading the docs first.
@@ -771,7 +780,7 @@
                 </div>
             </div>
             <p class="es-cons-muted mt-4 text-sm" data-reveal>
-                401 for a bad key, 403 when the plan or the permission is missing, 404, 422 with the offending fields named, 429 when throttled. A model can branch on that without guessing.
+                401 for a bad key, 403 when the plan or the permission is missing, 404, 409 when a key is already live or a refund's outcome is not yet confirmed, 422 with the offending fields named, 429 when throttled. A model can branch on that without guessing.
             </p>
         </div>
     </section>
@@ -953,7 +962,7 @@
 <span class="es-cons-t-key">"tickets"</span><span class="es-cons-t-pun">: [{</span> <span class="es-cons-t-key">"type"</span><span class="es-cons-t-pun">:</span> <span class="es-cons-t-str">"Advance"</span> <span class="es-cons-t-pun">}]</span></pre>
                     </div>
                     <p class="es-cons-muted mt-4 text-sm">
-                        Three actions, and which ones are legal depends on where the sale is: <span class="es-cons-mono es-cons-key">mark_paid</span> from unpaid, <span class="es-cons-mono es-cons-key">refund</span> from paid, <span class="es-cons-mono es-cons-key">cancel</span> from either. You can also create a sale outright for a buyer who paid you off-platform.
+                        Three actions, and which ones are legal depends on where the sale is: <span class="es-cons-mono es-cons-key">mark_paid</span> from unpaid, <span class="es-cons-mono es-cons-key">refund</span> from paid, <span class="es-cons-mono es-cons-key">cancel</span> from either. On a Stripe or PayPal sale, <span class="es-cons-mono es-cons-key">refund</span> sends the money back before the status moves, and an <span class="es-cons-mono es-cons-key">amount</span> makes it partial, which leaves the sale paid. You can also create a sale outright for a buyer who paid you off-platform.
                     </p>
                 </div>
             </div>
@@ -1119,13 +1128,15 @@
                         <span class="es-cons-plan es-cons-plan-pro mb-4 self-start">pro</span>
                         <h3 class="es-cons-ink mb-3 text-2xl font-bold tracking-tight lg:text-3xl">Money, without a middleman</h3>
                         <p class="es-cons-muted mb-6 text-base leading-relaxed lg:text-lg">
-                            Ticket types created through the API sell through your own Stripe or PayPal account, or through Invoice Ninja, Payfast, a payment URL, or by hand. Event Schedule takes zero platform fees on ticket sales: the only deduction is your processor's. Sales come back through the sales endpoints and through <span class="es-cons-mono es-cons-key">sale.paid</span> webhooks, with the ticket lines attached.
+                            Ticket types created through the API sell through your own Stripe or PayPal account, or through Invoice Ninja, Payfast for rand prices, a payment URL, or by hand. Event Schedule takes zero platform fees on ticket sales: the only deduction is your processor's. Sales come back through the sales endpoints and through <span class="es-cons-mono es-cons-key">sale.paid</span> webhooks, with the ticket lines attached, and a Stripe or PayPal refund goes back through the provider.
                         </p>
                         <div class="mt-auto flex flex-wrap gap-2">
                             <span class="es-cons-chip">stripe</span>
+                            <span class="es-cons-chip">paypal</span>
+                            <span class="es-cons-chip">payfast</span>
                             <span class="es-cons-chip">invoiceninja</span>
                             <span class="es-cons-chip">payment_url</span>
-                            <span class="es-cons-chip">manual</span>
+                            <span class="es-cons-chip">cash</span>
                         </div>
                         <div class="es-glare" aria-hidden="true"></div>
                         <div class="es-ring-glow" aria-hidden="true"></div>

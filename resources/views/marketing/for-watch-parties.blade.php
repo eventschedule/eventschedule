@@ -1,6 +1,6 @@
 <x-marketing-layout>
     <x-slot name="title">Free Event Schedule for Watch Parties | Movie Nights</x-slot>
-    <x-slot name="description">Free, open-source watch party scheduling software with registration, ticketing, and email notifications. Works with any streaming platform. Zero platform fees.</x-slot>
+    <x-slot name="description">Free, open-source watch party scheduling: one join link for any stream, registration with a cap per date, a running order and zero platform fees.</x-slot>
     <x-slot name="breadcrumbTitle">For Watch Parties</x-slot>
 
     <x-slot name="structuredData">
@@ -47,7 +47,9 @@
             "An .ics file for every event and every date of a series, stamped in UTC so a viewer's own calendar shows their local time",
             "Newsletters to your followers, to everyone who registered for one screening, or to a sub-schedule",
             "Named ticket types with their own prices, quantities and sales windows for paid screenings",
-            "Zero platform fees on ticket sales through your own Stripe account",
+            "Zero platform fees on ticket sales through your own Stripe or PayPal account",
+            "Refunds in full or in part from the Sales page, sent back through Stripe or PayPal",
+            "An email-only Tell me if anything changes list on each date, with a reminder before it starts",
             "Two-way Google, Outlook and CalDAV calendar sync",
             "Embeddable calendar for the site you already have",
             "Open source, with a selfhosted option"
@@ -610,7 +612,7 @@
             ],
             [
                 'q' => 'Can I charge for watch party access?',
-                'a' => 'Yes, and you can start charging on the free plan: 25 paid tickets a month per schedule, with free registration never counted against that. Create named ticket types with their own prices, quantities and sales windows, sell through your own Stripe account, and keep everything: Event Schedule takes zero platform fees on ticket sales at every plan level. Scanning tickets in at the door is free on every plan, and Pro at '.plan_price($proMonthly).' a month removes the monthly cap and adds the live check-in dashboard, passes, promo codes and the ticket waitlist. Stripe charges its own processing fee (typically 2.9% + $0.30).',
+                'a' => 'Yes, and you can start charging on the free plan: 25 paid tickets a month per schedule, with free registration never counted against that. Create named ticket types with their own prices, quantities and sales windows, sell through your own Stripe or PayPal account, and keep everything: Event Schedule takes zero platform fees on ticket sales at every plan level. Scanning tickets in at the door is free on every plan, and Pro at '.plan_price($proMonthly).' a month removes the monthly cap and adds the live check-in dashboard, passes, promo codes and the ticket waitlist. Your processor charges its own fee (Stripe\'s is typically 2.9% + $0.30).',
             ],
             [
                 'q' => 'Can I schedule recurring watch parties?',
@@ -618,11 +620,15 @@
             ],
             [
                 'q' => 'Do my followers get emailed when I add a screening?',
-                'a' => 'If they left you an email address, yes: a new screening reaches them as a digest on its own, batched and never more than one every few days. A newsletter is the other kind and you write that one, with the targeting to go with it, free: everyone who follows the schedule, everyone who registered for one particular screening, or one sub-schedule. The free plan covers 10 recipients a month, Pro 100 and Enterprise 1,000.',
+                'a' => 'If they left you an email address and confirmed it, yes: a screening you add reaches them as a digest on its own, batched and never more than one every few days. A newsletter is the other kind and you write that one, with the targeting to go with it, free: everyone who follows the schedule, everyone who registered for one particular screening, or one sub-schedule. The free plan covers 10 recipients a month, Pro 100 and Enterprise 1,000.',
             ],
             [
                 'q' => 'Is Event Schedule free for hosting watch parties?',
                 'a' => 'Yes. Unlimited events and screening series, one join link per event, free registration with per-date caps, the published running order, built-in analytics, the embeddable calendar and two-way calendar sync are all free forever, and so are selling up to 25 paid tickets a month and scanning them in at the door. Pro at '.plan_price($proMonthly).' a month lifts that cap and adds the live check-in dashboard and the rest of the door tooling, and there are zero platform fees on ticket sales at any level. You can also selfhost Event Schedule on your own server, where every Enterprise feature is included.',
+            ],
+            [
+                'q' => 'Can people get a reminder without registering?',
+                'a' => 'Yes. Somebody not ready to take a place can press "Tell me if anything changes" on the event page and leave an email address, nothing else. They get a reminder shortly before the night, a notice if it is cancelled, and any change notice you choose to send, such as a new stream link, and every one of those emails unsubscribes in one click. Each Friday of a weekly series is its own list, it does not sign them up to your schedule, and it is free on every plan. Anyone who wants every date can subscribe to your schedule\'s live calendar feed instead, which updates itself and costs no email address.',
             ],
         ];
 
@@ -671,7 +677,7 @@
                     </h1>
 
                     <p class="es-fade-up es-d-2 es-scr-muted mb-10 max-w-xl text-lg sm:text-xl">
-                        A screening has a start time, a shape, a door that only fits so many, and a list of who said they were coming. Event Schedule holds all four, free, and takes nothing at the door.
+                        A watch party has a start time, a shape, a door that only fits so many, and a list of who said they were coming. Event Schedule holds all four, free, and takes nothing at the door.
                     </p>
 
                     <div class="es-fade-up es-d-3 flex flex-col items-start gap-4 sm:flex-row">
@@ -770,7 +776,7 @@
                         <h3 class="mb-2 text-lg font-bold es-scr-booth-ink">
                             <span class="es-scr-fig">{{ plan_price(0) }}</span> platform fees
                         </h3>
-                        <p class="text-sm es-scr-booth-muted">When you charge, you charge through your own Stripe account and keep the lot. That is true on every plan, including free.</p>
+                        <p class="text-sm es-scr-booth-muted">When you charge, you charge through your own Stripe or PayPal account and keep the lot. That is true on every plan, including free.</p>
                     </div>
                 </div>
 
@@ -1081,10 +1087,10 @@
                     <div>
                         <h3 class="es-scr-ink mb-3 text-xl font-bold">The newsletter is the one you write</h3>
                         <p class="es-scr-muted text-sm leading-relaxed">
-                            A new screening does reach confirmed email subscribers on its own, as a batched digest. What never sends itself is the newsletter: no automation builder, no branching sequence, no drip. You write that one and you send it, which is slower and also the reason your list does not quietly rot. Open and click rates come back afterwards so you can tell whether Friday's note actually landed.
+                            A screening you add does reach confirmed email subscribers on its own, as a batched digest. What never sends itself is the newsletter: no automation builder, no branching sequence, no drip. You write that one and you send it, which is slower and also the reason your list does not quietly rot. Open and click rates come back afterwards so you can tell whether Friday's note actually landed.
                         </p>
                         <p class="es-scr-muted mt-4 text-sm leading-relaxed">
-                            Automatic mail is kept for the things a person asked for: the confirmation every registrant gets the moment they take a place, and the note to the waitlist when a full night frees up. And notifications run the other way too: when somebody asks you to add their screening to your calendar, you are the one who gets the email.
+                            Automatic mail is kept for the things a person asked for: the confirmation every registrant gets the moment they take a place, the note to the waitlist when a full night frees up, and a reminder before the night for anybody who left an address with "Tell me if anything changes" instead of registering. And notifications run the other way too: when somebody asks you to add their screening to your calendar, you are the one who gets the email.
                         </p>
                     </div>
                     <div class="es-scr-inset p-5">
@@ -1123,7 +1129,7 @@
                         Nothing is taken at the <span class="es-scr-accent">door.</span>
                     </h2>
                     <p class="es-scr-muted mb-6 text-lg leading-relaxed" data-reveal style="--reveal-delay: 0.15s;">
-                        A paid premiere, a benefit screening, a festival day pass. Selling starts on the free plan, twenty-five paid tickets a month, and {{ plan_price($proMonthly) }} a month takes the ceiling off and opens the door tooling. Payments run through your own Stripe account, and Event Schedule takes zero platform fees on every plan.
+                        A paid premiere, a benefit screening, a festival day pass. Selling starts on the free plan, twenty-five paid tickets a month, and {{ plan_price($proMonthly) }} a month takes the ceiling off and opens the door tooling. Payments run through your own Stripe or PayPal account, and Event Schedule takes zero platform fees on every plan.
                     </p>
                     <ul class="es-scr-muted space-y-3" data-reveal-group="70">
                         <li class="flex gap-3" data-reveal>
@@ -1141,6 +1147,10 @@
                         <li class="flex gap-3" data-reveal>
                             <svg aria-hidden="true" class="mt-0.5 h-5 w-5 flex-none es-scr-accent" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7" /></svg>
                             <span>A waitlist that tells people when a full screening frees up, free while the door is free registration and Pro once you are selling tickets. Promo codes and gift cards are Pro if you want them.</span>
+                        </li>
+                        <li class="flex gap-3" data-reveal>
+                            <svg aria-hidden="true" class="mt-0.5 h-5 w-5 flex-none es-scr-accent" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7" /></svg>
+                            <span>Refunds come off the Sales page. A Stripe or PayPal payment goes back through the provider, in full or in part, and a full refund frees the place for somebody else.</span>
                         </li>
                     </ul>
                     <p class="es-scr-muted mt-6 text-sm">
@@ -1181,7 +1191,7 @@
                                 <span class="es-scr-accent es-scr-fig text-2xl font-black">{{ plan_price(0) }}</span>
                             </div>
                             <p class="es-scr-muted mt-3 text-xs leading-relaxed">
-                                Stripe charges its own standard processing fee on each payment, the same as it would anywhere. Event Schedule adds nothing on top, on any plan.
+                                Stripe or PayPal charges its own standard processing fee on each payment, the same as it would anywhere. Event Schedule adds nothing on top, on any plan.
                             </p>
                         </div>
 

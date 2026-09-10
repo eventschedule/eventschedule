@@ -1,6 +1,6 @@
 <x-marketing-layout>
-    <x-slot name="title">Free Event Schedule for Hotels & Resorts | Guest Activities</x-slot>
-    <x-slot name="description">Elevate the guest experience. Share your activity calendar, sell tickets to special events, and keep guests engaged. Zero platform fees. Free forever.</x-slot>
+    <x-slot name="title">Hotel & Resort Guest Activity Calendar | Free Sign-Ups</x-slot>
+    <x-slot name="description">Put your guest activities on one page: the standing week entered once, a QR code for the key-card sleeve, free sign-ups and tickets with no platform fee.</x-slot>
     <x-slot name="breadcrumbTitle">For Hotels & Resorts</x-slot>
 
     <x-slot name="structuredData">
@@ -43,14 +43,17 @@
             "Date exceptions for the weeks an activity does not run",
             "A printable QR code and a short link for the key-card sleeve",
             "Embeddable calendar for the hotel website you already have",
-            "Free sign-ups with a capacity, counted separately for each date",
-            "Ticket sales for paid experiences through your own Stripe account, with no platform fee",
+            "Free sign-ups with a capacity, counted separately for each date, with a free waitlist when a date fills",
+            "Ticket sales for paid experiences through Stripe, PayPal, a payment link or cash at the desk, with no platform fee",
+            "Refunds in full or in part from the Sales page, returned through Stripe or PayPal",
             "QR ticket scanning at the door on every plan",
             "Promo codes for a resident rate",
             "Sub-schedules with a name, a colour and their own link",
             "Draft activities that stay members-only until you publish them",
             "Booking requests that wait for you to accept them",
             "Two-way Google, Outlook and CalDAV calendar sync",
+            "A live calendar feed guests can subscribe to from the page",
+            "An email when tickets go on sale, for guests who asked on a special event's page",
             "Newsletters to the guests who followed the schedule",
             "Built-in analytics per activity"
         ],
@@ -111,8 +114,9 @@
            capacity: a sub-schedule is fillable on name, slug, colour
            only, so it organises and colour-codes and nothing more. No
            overlap or double-booking warning: no such check exists. No
-           automatic guest alerts: the only follower-facing mail is a
-           newsletter the owner writes and sends.
+           mail a guest did not ask for: confirmed subscribers get a digest
+           of new activities, a guest who asked about one event hears about
+           that event, and anything else is a newsletter the owner writes.
 
            NO ARBITRARY TAILWIND VALUES. The marketing bundle is compiled
            ahead of time, so a class like `lg:grid-cols-[1.05fr_0.95fr]`
@@ -668,18 +672,18 @@
         // The book. Two lines, two mechanisms, and the meters are
         // computed from the same figures the text prints.
         $book = [
-            ['Sunrise yoga',  'Thursday',  9,  12, 'Sign-ups', 'free', 'No money changes hands. A capacity, counted for this date only.'],
-            ['Cellar dinner', 'Saturday',  22, 30, 'Tickets',  'free', '$95 a head, through your own Stripe account. Zero platform fees, and the free plan sells 25 paid tickets a month.'],
+            ['Sunrise yoga',  'Thursday',  9,  12, 'Sign-ups', 'free', 'No money changes hands. A capacity, counted for this date only, and a free waitlist once the mats are gone.'],
+            ['Cellar dinner', 'Saturday',  22, 30, 'Tickets',  'free', '$95 a head, through your own Stripe or PayPal account, or paid at the desk. Zero platform fees, and the free plan sells 25 paid tickets a month.'],
         ];
 
         $faqs = [
             [
                 'q' => 'Is Event Schedule free for hotels and resorts?',
-                'a' => 'Yes. The activity page and its link, the QR code, standing activities that repeat on chosen days of the week, date exceptions, sub-schedules, free sign-ups with a capacity, the embeddable calendar, two-way Google, Outlook and CalDAV sync and built-in analytics are all free forever. Newsletters are on the free plan too, at 10 emails a month counted per recipient, which Pro raises to 100 and Enterprise to 1,000. Selling the paid experiences is free as well, up to 25 paid tickets a month per schedule, and Event Schedule charges zero platform fees on sales. Pro, at '.plan_price($proMonthly).' a month, takes the cap off and adds the extras: promo codes, passes, waitlists, add-ons and the live check-in dashboard.',
+                'a' => 'Yes. The activity page and its link, the QR code, standing activities that repeat on chosen days of the week, date exceptions, sub-schedules, free sign-ups with a capacity and a waitlist when they fill, the embeddable calendar, two-way Google, Outlook and CalDAV sync and built-in analytics are all free forever. Newsletters are on the free plan too, at 10 emails a month counted per recipient, which Pro raises to 100 and Enterprise to 1,000. Selling the paid experiences is free as well, up to 25 paid tickets a month per schedule, and Event Schedule charges zero platform fees on sales. Pro, at '.plan_price($proMonthly).' a month, takes the cap off and adds the extras: promo codes, passes, a waitlist for sold-out tickets, add-ons and the live check-in dashboard.',
             ],
             [
                 'q' => 'How do guests find out what is on during their stay?',
-                'a' => 'Your schedule has its own address and a QR code you can download and print, so the link can go on the key-card sleeve, the room folder, a sign by the pool or the pre-arrival email. You can also embed the same calendar in the website you already have. Nothing is installed and no account is needed to read it. A guest who leaves an email address gets next week\'s additions as one digest without you lifting a finger, and anything more considered than that is a newsletter you write.',
+                'a' => 'Your schedule has its own address and a QR code you can download and print, so the link can go on the key-card sleeve, the room folder, a sign by the pool or the pre-arrival email. You can also embed the same calendar in the website you already have. Nothing is installed and no account is needed to read it. A guest who wants the week in their own phone can subscribe to the schedule\'s calendar from the page, and a session you move follows them there. A guest who leaves an email address gets next week\'s additions as one digest without you lifting a finger, and anything more considered than that is a newsletter you write.',
             ],
             [
                 'q' => 'Can I set up the activities that run every week?',
@@ -687,7 +691,15 @@
             ],
             [
                 'q' => 'Can guests reserve a place, and can I sell the paid experiences?',
-                'a' => 'Both, and both start free. A free activity can take sign-ups with a capacity, and the count is kept for each date separately, so a full Tuesday does not close Thursday. Paid experiences use ticketing: named ticket types with their own prices and quantities, QR scanning at the door, your own Stripe account and no platform fee from us. The free plan sells 25 paid tickets a month per schedule and Pro removes that ceiling. Promo codes, which is how you would carry a resident rate for the people staying with you, are a Pro feature.',
+                'a' => 'Both, and both start free. A free activity can take sign-ups with a capacity, and the count is kept for each date separately, so a full Tuesday does not close Thursday, and a full date offers a free waitlist instead. Paid experiences use ticketing: named ticket types with their own prices and quantities, QR scanning at the door, payment through your own Stripe or PayPal account, a payment link or cash at the desk, and no platform fee from us. The free plan sells 25 paid tickets a month per schedule and Pro removes that ceiling. Promo codes, which is how you would carry a resident rate for the people staying with you, are a Pro feature.',
+            ],
+            [
+                'q' => 'Can I refund a guest who cancels a paid experience?',
+                'a' => 'Yes, on every plan, from the Sales page, in full or in part. A Stripe or PayPal payment goes back to the guest through that provider before the sale is marked refunded, and a partial refund leaves the booking valid. A full refund returns the place, so a seat at the cellar dinner can be sold again. A payment taken at the desk, by payment link or any other way shows Mark as Refunded, which records it without moving money. Event Schedule does not email the guest about a refund, so the desk should.',
+            ],
+            [
+                'q' => 'Can guests ask to hear when tickets for a special dinner go on sale?',
+                'a' => 'Yes, on every plan. Publish the New Year dinner before tickets are on sale and its page offers "Tell me when tickets go on sale". A guest leaves just an email address and gets one email when tickets go on sale, one if you cancel the dinner, and a reminder shortly before it starts, plus a change notice if you choose to send one when you move it. It is not a subscription to your schedule, every email has a one-click unsubscribe, and how many people are waiting shows in the event editor, never on the public page.',
             ],
             [
                 'q' => 'Can I keep the pool, the spa, the kids club and the conference programme apart?',
@@ -695,7 +707,7 @@
             ],
             [
                 'q' => 'Can more than one person keep the card up to date?',
-                'a' => 'The free plan is one team member, and multiple team members are an Enterprise feature capped at five. In between, calendar sync does a lot of the work: the schedule syncs two ways with Google, Outlook or CalDAV, so whoever runs the programme can work in the calendar they already have and the public page follows. Booking requests are free as well, so an act or a planner can ask about a date and it waits for you to accept it before it appears anywhere.',
+                'a' => 'The free plan is one team member, and multiple team members are an Enterprise feature capped at five. In between, calendar sync does a lot of the work: the schedule syncs two ways with Google, Outlook or CalDAV, so whoever runs the programme can work in the calendar they already have and the public page follows. Booking requests are free as well, so an act or a planner can ask about a date and it waits for you to accept it before it appears anywhere. On Enterprise, a viewer login is read-only and sees no sales, but can scan tickets at the door. And before whoever set the schedule up moves on, they can hand it to a colleague, on any plan.',
             ],
         ];
 
@@ -982,6 +994,7 @@
                             ['A QR code you can print', 'Free', 'Download your schedule\'s code and put it where guests already look: the key-card sleeve, the room folder, the lift, a sign by the pool, the pre-arrival email. It opens the page in a browser, with nothing to install and no account needed to read it.'],
                             ['The calendar, inside your own site', 'Free', 'Embed the same calendar in the page your website already has, so the "What\'s on" tab stops being a PDF from last season.'],
                             ['A list that hears about new dates', 'Free', 'Guests who leave an email address get a digest when you add activities, batched and no more than one every few days, and it does not draw on the allowance. A newsletter you write does: 10 recipients a month free, 100 on Pro and 1,000 on Enterprise.'],
+                            ['A calendar that keeps up', 'Free', 'From the page, a guest can subscribe to the whole card as a live calendar on their phone. Move a session or take a date out and it follows there too, and it costs them no email address.'],
                         ] as [$sTitle, $sPlan, $sDesc])
                             <li class="flex items-start gap-3" data-reveal>
                                 <svg aria-hidden="true" class="es-conc-accent mt-0.5 h-5 w-5 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7" /></svg>
@@ -1086,7 +1099,7 @@
             <div class="mt-4 grid gap-4 md:grid-cols-3" data-reveal-group="90">
                 @foreach ([
                     ['Counted for each date', 'Free', 'A full Tuesday does not close Thursday. Every date keeps its own count, which is the only way a standing activity with a limit can work at all.'],
-                    ['A ticket for the paid ones', 'Free', 'Named ticket types with their own prices and quantities, QR scanning at the door, and your own Stripe account. Event Schedule takes nothing from the ticket price. Free covers 25 paid tickets a month per schedule; Pro sells without a cap.'],
+                    ['A ticket for the paid ones', 'Free', 'Named ticket types with their own prices and quantities, QR scanning at the door, and payment through your own Stripe or PayPal account, a payment link or cash at the desk. Event Schedule takes nothing from the ticket price. Free covers 25 paid tickets a month per schedule; Pro sells without a cap.'],
                     ['A rate for people staying with you', 'Pro', 'A promo code carries a resident rate that the desk can hand out. Nothing is verifying who is a guest, so the code is what does it.'],
                 ] as [$kTitle, $kPlan, $kDesc])
                     <div class="es-conc-card es-conc-hover p-6" data-reveal>
@@ -1196,6 +1209,7 @@
                             @foreach ([
                                 ['A Draft nobody can see', 'Free', 'The New Year dinner exists, with its price and its date, and stays members-only until you publish it.'],
                                 ['An enquiry waiting on you', 'Free', 'Booking requests arrive through the page and wait until you accept one, and the schedule can email you when a new one is sitting there. Nothing appears publicly first.'],
+                                ['Who is waiting for the dinner', 'Free', 'Publish the New Year dinner before tickets open and guests can ask to be told when they do. How many asked shows on the event\'s Tickets panel, and nowhere public.'],
                                 ['A date taken out', 'Free', 'The exception for the Wednesday the pool is drained. It removes the date rather than annotating it.'],
                                 ['Your own calendar', 'Free', 'Two-way sync with Google, Outlook or CalDAV, so whoever runs the programme works where they already work.'],
                                 ['Tonight\'s running count', 'Pro', 'A scan at the door reads the ticket and marks it used on every plan. The live count and the breakdown by ticket type are the Pro half, and staff-side only.'],
@@ -1220,6 +1234,7 @@
                                 ['Times in the property\'s own zone', 'Free', 'The schedule holds a time zone, so a guest reading the page in another one still sees seven in the morning here.'],
                                 ['A day that is simply not offered', 'Free', 'An excepted date does not appear as cancelled. It is not there, which is what a guest actually needs to know.'],
                                 ['One tap to their own phone', 'Free', 'A date on the card adds itself to Google, Apple or Outlook as a single calendar entry, so Thursday\'s sunset sail is in their own week.'],
+                                ['Told when the dinner goes on sale', 'Free', 'A guest leaves an email address on the dinner\'s page and hears when tickets go on sale, if you cancel, and shortly before it starts. It asks for no account and no name.'],
                                 ['Nothing they did not ask for', 'Free', 'The card does not say who else signed up. A guest hears about new activities only if they left an email address and confirmed it, and then it is one digest every few days rather than a message per activity.'],
                             ] as [$cTitle, $cPlan, $cDesc])
                                 <li class="flex gap-3">
@@ -1396,6 +1411,11 @@
                 <div data-reveal>
                     <x-feature-link-card name="Sub-schedules" description="Give the pool, the spa and the kids club a colour and a link" :url="marketing_url('/features/sub-schedules')" icon-color="teal">
                         <x-slot:icon><svg aria-hidden="true" class="h-5 w-5 text-teal-600 dark:text-teal-400" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h10" /></svg></x-slot:icon>
+                    </x-feature-link-card>
+                </div>
+                <div data-reveal>
+                    <x-feature-link-card name="Promo Codes" description="A resident rate the desk can hand to the people staying with you" :url="marketing_url('/features/promo-codes')" icon-color="amber">
+                        <x-slot:icon><svg aria-hidden="true" class="h-5 w-5 text-amber-600 dark:text-amber-400" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A1.994 1.994 0 013 12V7a4 4 0 014-4z" /></svg></x-slot:icon>
                     </x-feature-link-card>
                 </div>
             </div>

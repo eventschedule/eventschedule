@@ -1,6 +1,6 @@
 <x-marketing-layout>
     <x-slot name="title">Music Venue Calendars | Set Times, Tickets, and the Door</x-slot>
-    <x-slot name="description">Put the whole show day on one link: set times for every band on the bill, and tickets with zero platform fees and QR check-in.</x-slot>
+    <x-slot name="description">Put the whole show day on one link: set times and a page for every act on the bill, tickets with zero platform fees, and free QR scanning at the door.</x-slot>
     <x-slot name="breadcrumbTitle">For Music Venues</x-slot>
 
     <x-slot name="structuredData">
@@ -39,12 +39,15 @@
         },
         "featureList": [
             "Set times for every act on a bill, published on the public event page",
+            "The whole lineup on the event page, and a page for any act who is not on Event Schedule yet",
             "Photos, video and comments attached to the act that played, not just the show",
             "Sub-schedules that keep each room's listings apart on one link",
             "A public submission form so bands can ask to play",
-            "Ticket types with their own sales windows, add-ons and group rates",
-            "QR check-in on the door with a real-time check-in dashboard",
-            "Zero platform fees on ticket sales, with payouts through your own Stripe account",
+            "Ticket types with their own sales windows and group rates, plus add-ons on Pro",
+            "Free QR scanning on the door, with a live check-in dashboard on Pro",
+            "Zero platform fees on ticket sales, paid into your own Stripe or PayPal account",
+            "An interest list for fans waiting for tickets to go on sale",
+            "Refunds from the Sales page, in full or in part",
             "Recurring residencies with date exceptions",
             "Direct newsletters with open and click rates",
             "Two-way Google, Outlook and CalDAV calendar sync",
@@ -82,7 +85,7 @@
                 "@type": "HowToStep",
                 "position": 3,
                 "name": "Open the door",
-                "text": "Add ticket types with their own sales windows, then scan QR codes on the night and watch the check-in dashboard against your capacity."
+                "text": "Add ticket types with their own sales windows, then scan QR codes on the night, free on every plan, and on Pro watch the check-in dashboard against your capacity."
             }
         ]
     }
@@ -436,11 +439,15 @@
         $faqs = [
             [
                 'q' => 'Is Event Schedule free for music venues?',
-                'a' => 'Yes. Publishing your listings, adding set times for every act on a bill, running recurring residencies, splitting rooms into sub-schedules, accepting booking requests, and two-way sync with Google, Outlook or CalDAV are all free forever. Selling is free too, up to 25 paid tickets a month per schedule, with the QR on each one scanned at the door for nothing. A room doing four shows a week passes that in a fortnight, and Pro at '.plan_price($proMonthly).' a month is what removes it - along with the live check-in dashboard for a busy door, event graphics and passes.',
+                'a' => 'Yes. Publishing your listings, adding set times for every act on a bill, running recurring residencies, splitting rooms into sub-schedules, accepting booking requests, and two-way sync with Google, Outlook or CalDAV are all free forever. Selling is free too, up to 25 paid tickets a month per schedule, with the QR on each one scanned at the door for nothing. A room doing four shows a week passes that in a fortnight, and Pro at '.plan_price($proMonthly).' a month is what removes it - along with the live check-in dashboard for a busy door and passes.',
             ],
             [
                 'q' => 'Can I publish set times for each band on the bill?',
                 'a' => 'Yes, on every plan. Give a show its parts, and each act gets a name, an optional description and a start and end time. They appear in order on the public event page, so the bill answers the question instead of you answering it fourteen times on the day.',
+            ],
+            [
+                'q' => 'Do the bands on the bill need their own account?',
+                'a' => 'No. Name them on the show and the event page lists the whole lineup, with a link to each act that has a page. An act who is not on Event Schedule gets a page of its own, which says which schedule created it and that the act has not claimed it, and it stays out of search engines until they do. If you add their email address, they can claim it by signing in with that address, and the shows you listed stay on it.',
             ],
             [
                 'q' => 'Can photos and video be attached to the band that played?',
@@ -456,7 +463,15 @@
             ],
             [
                 'q' => 'What do you charge on ticket sales?',
-                'a' => 'Nothing. Event Schedule takes zero platform fees. You connect your own Stripe account, the money lands there, and the only deduction is Stripe\'s own processing. There is no per-ticket cut and no booking fee added on top of your price.',
+                'a' => 'Nothing. Event Schedule takes zero platform fees. You connect your own Stripe or PayPal account, the money lands there, and the only deduction is the provider\'s own processing. A payment link or cash on the door works too. There is no per-ticket cut and no booking fee added on top of your price.',
+            ],
+            [
+                'q' => 'Can fans ask to hear when tickets go on sale?',
+                'a' => 'Yes, on every plan. Announce a show before tickets are ready and the event page offers "Tell me when tickets go on sale". Fans leave an email address, with no account, and hear when tickets go on sale, if the show is cancelled, and again shortly before it starts, plus any change notice you choose to send. You see how many are waiting on the event\'s Tickets panel before you open sales, and it never counts against your newsletter allowance.',
+            ],
+            [
+                'q' => 'Can I refund tickets if a show is cancelled?',
+                'a' => 'Yes, from the Sales page, on every plan. A Stripe or PayPal sale goes back through the provider, in full or in part, and the sale only changes once the money has moved. A full refund puts those tickets back on sale, and a partial one leaves the ticket valid. A sale taken another way, like cash on the door or a payment link, is marked as refunded and you return the money yourself.',
             ],
         ];
 
@@ -651,7 +666,10 @@
                             <h3 class="es-run-ink text-lg font-bold">One link for the band too</h3>
                             <span class="es-run-plan">Free</span>
                         </div>
-                        <p class="es-run-muted text-sm">Add a performer to the show and it can surface on their schedule as well, so their followers find your room through them.</p>
+                        <p class="es-run-muted text-sm">
+                            Name every act on the show, including ones who are not on Event Schedule. The event page lists the whole lineup and links each act that has a page, and an act new here gets a page of its own that stays out of search engines until they claim it. The show can surface on their schedule too, so their followers find your room through them.
+                            <a href="{{ marketing_url('/docs/creating-events#claim') }}" class="es-run-link font-medium hover:underline">How act pages work</a>
+                        </p>
                     </div>
                 </div>
 
@@ -846,7 +864,7 @@
                     You keep <span class="es-run-mark">all of it.</span>
                 </h2>
                 <p class="es-run-muted mt-5 text-lg" data-reveal style="--reveal-delay: 0.15s;">
-                    Event Schedule charges zero platform fees on ticket sales. You connect your own Stripe account, the money lands in it, and the only deduction is Stripe's own processing.
+                    Event Schedule charges zero platform fees on ticket sales. You connect your own <a href="{{ marketing_url('/stripe') }}" class="es-run-link font-medium hover:underline">Stripe</a> or <a href="{{ marketing_url('/paypal') }}" class="es-run-link font-medium hover:underline">PayPal</a> account, the money lands in it, and the only deduction is the provider's own processing. A payment link or cash on the door works too.
                 </p>
             </div>
 
@@ -854,16 +872,16 @@
                 <div class="es-run-card p-7" data-reveal="panel">
                     <div class="mb-3 flex flex-wrap items-center gap-2">
                         <h3 class="es-run-ink text-lg font-bold">Tiers that move on the clock</h3>
-                        <span class="es-run-plan es-run-plan-pro">Pro</span>
+                        <span class="es-run-plan">Free</span>
                     </div>
-                    <p class="es-run-muted text-sm">Give a show more than one ticket type, each with its own sales window, plus add-ons and a rate that kicks in when someone buys several at once.</p>
+                    <p class="es-run-muted text-sm">Give a show more than one ticket type, each with its own sales window, and a rate that kicks in when someone buys several at once. Add-ons that attach to a ticket are on Pro.</p>
                 </div>
                 <div class="es-run-card p-7" data-reveal="panel">
                     <div class="mb-3 flex flex-wrap items-center gap-2">
                         <h3 class="es-run-ink text-lg font-bold">A QR on every ticket</h3>
-                        <span class="es-run-plan es-run-plan-pro">Pro</span>
+                        <span class="es-run-plan">Free</span>
                     </div>
-                    <p class="es-run-muted text-sm">Scan on the way in and the check-in dashboard counts who is actually inside, with a per-ticket breakdown so you can see which tier turned up.</p>
+                    <p class="es-run-muted text-sm">Scanning each code on the way in is free on every plan. On Pro the check-in dashboard counts who is actually inside, with a per-ticket breakdown so you can see which tier turned up.</p>
                 </div>
                 <div class="es-run-card p-7" data-reveal="panel">
                     <div class="mb-3 flex flex-wrap items-center gap-2">
@@ -875,7 +893,8 @@
             </div>
 
             <p class="es-run-muted mx-auto mt-8 max-w-2xl text-center text-sm" data-reveal>
-                For a free show, registration with a capacity limit works on every plan, so the room still has a real number attached to it.
+                For a free show, registration with a capacity limit works on every plan, so the room still has a real number attached to it. Announced before tickets are ready? Fans can leave an email address on the event page and hear when they go on sale, also on every plan.
+                <a href="{{ marketing_url('/docs/tickets#interest-list') }}" class="es-run-link font-medium hover:underline">How the interest list works</a>
             </p>
         </div>
     </section>
@@ -934,7 +953,7 @@
                                 <span class="es-run-plan">Free</span>
                             </div>
                             <p class="es-run-muted mb-4">Built-in analytics show page views, the devices people are on, and where the traffic came from. Enough to tell whether the announcement did anything, without installing a thing.</p>
-                            <p class="es-run-muted text-sm">Add a poll to a show and let the room vote on the support slot or which night a residency should move to.</p>
+                            <p class="es-run-muted text-sm">On Pro, add a poll to a show and let the room vote on the support slot or which night a residency should move to.</p>
                         </div>
                         <div class="es-glare" aria-hidden="true"></div>
                         <div class="es-ring-glow" aria-hidden="true"></div>
@@ -1102,7 +1121,7 @@
             </div>
 
             <div class="grid grid-cols-1 gap-6 md:grid-cols-3" data-reveal-group="120">
-                @foreach ([['01', 'Add the show', 'Create the event once, and use sub-schedules to keep the main room and the back room apart on the same link.'], ['02', 'Add the running order', 'Give the show its parts. Each act gets a name and a start time, and they publish in order on the event page.'], ['03', 'Open the door', 'Ticket types with their own sales windows, then scan QR codes on the night and watch the dashboard against your capacity.']] as [$stepNum, $stepTitle, $stepBody])
+                @foreach ([['01', 'Add the show', 'Create the event once, and use sub-schedules to keep the main room and the back room apart on the same link.'], ['02', 'Add the running order', 'Give the show its parts. Each act gets a name and a start time, and they publish in order on the event page.'], ['03', 'Open the door', 'Ticket types with their own sales windows, then scan QR codes on the night, free on every plan, and on Pro watch the dashboard against your capacity.']] as [$stepNum, $stepTitle, $stepBody])
                     <div class="es-run-card p-7" data-reveal="panel">
                         <div class="mb-3 font-mono text-2xl font-black text-[#a16207] dark:text-[#facc15]">{{ $stepNum }}</div>
                         <h3 class="es-run-ink mb-2 text-lg font-bold">{{ $stepTitle }}</h3>

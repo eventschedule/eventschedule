@@ -41,13 +41,14 @@
             "A list layout that shows every production, with past work kept under its own divider",
             "Past productions stay public and dated, or can be hidden with one toggle",
             "Booking requests from companies that want to cast you",
-            "Every booking waits for the performer to accept it before it is public",
+            "Booking requests wait for the performer to accept them before they go on their schedule",
+            "A page a company creates when it lists a performer by name, which the performer can claim with its credits attached",
             "Sub-schedules that keep productions, workshops and auditions apart",
             "Draft events that stay members-only, so auditions are not public",
             "Runs set up once as a recurring event with a closing performance",
             "Named ticket types with their own prices, quantities and sales windows",
-            "QR check-in for work you produce yourself",
-            "Zero platform fees on ticket sales through your own Stripe account",
+            "QR check-in for work you produce yourself, free on every plan",
+            "Zero platform fees on ticket sales, paid through Stripe, PayPal, Invoice Ninja, Payfast, a payment link or cash",
             "Direct newsletters to the people who follow you",
             "Two-way Google, Outlook and CalDAV calendar sync",
             "Embeddable calendar for your own website"
@@ -368,7 +369,7 @@
         $faqs = [
             [
                 'q' => 'Is Event Schedule free for theater performers?',
-                'a' => 'The parts you use every day are free forever: your public schedule and its list layout, past productions kept and dated, sub-schedules, booking requests from companies that want to cast you, Drafts that keep auditions off the public page, two-way calendar sync, an embeddable calendar and up to 10 newsletter emails a month, counted per recipient rather than per send. Selling tickets to work you produce yourself is free as well, up to 25 paid ones a month per schedule, which is a short run in a small room; Pro at '.plan_price($proMonthly).' a month is what removes the ceiling. Event Schedule charges zero platform fees on sales either way.',
+                'a' => 'The parts you use every day are free forever: your public schedule and its list layout, past productions kept and dated, sub-schedules, booking requests from companies that want to cast you, Drafts that keep auditions off the public page, two-way calendar sync, an embeddable calendar and up to 10 newsletter emails a month, counted per recipient rather than per send. Selling tickets to work you produce yourself is free as well, up to 25 paid ones a month per schedule, and that ceiling never stops a sale in the 48 hours before a performance; Pro at '.plan_price($proMonthly).' a month is what removes it. Event Schedule charges zero platform fees on sales either way.',
             ],
             [
                 'q' => 'How does my schedule become a credits list?',
@@ -376,7 +377,11 @@
             ],
             [
                 'q' => 'What happens when a theater casts me in a production?',
-                'a' => 'If the company also uses Event Schedule, they can add you to the production and it arrives on your schedule as a request. Nothing is public until you accept it. What you accept carries their own dates and details rather than a second copy you have to keep in step, and you can decline anything you would rather not list.',
+                'a' => 'If the company also uses Event Schedule, they can add you to the production and it arrives on your schedule as a request. It goes on your schedule only once you accept it, though their own event page lists the cast either way. What you accept carries their own dates and details rather than a second copy you have to keep in step, and you can decline anything you would rather not list.',
+            ],
+            [
+                'q' => 'A company listed me before I joined. Is that page mine?',
+                'a' => 'It can be. When a company names a performer who is not on Event Schedule, a page is created for them. It says which company made it and that you have not claimed it, credits each date to the schedule that added it, and stays out of search engines. Sign in with the email address the company entered for you and press "Claim this page": it becomes your schedule with those credits already on it, and the companies that were listing you keep listing you without a request each time. If it is not you, "This is not me" takes it down.',
             ],
             [
                 'q' => 'Can I keep auditions and rehearsals off my public page?',
@@ -384,7 +389,7 @@
             ],
             [
                 'q' => 'Can I sell tickets to my own show?',
-                'a' => 'Yes, and a short run usually fits inside the free plan. Named ticket types with their own prices, quantities and sales windows, payment through your own Stripe account, and scanning the QR code at the door are all free, up to 25 paid tickets a month per schedule. Pro at '.plan_price($proMonthly).' a month removes that ceiling and adds the live check-in dashboard, promo codes, add-ons and per-attendee tickets. Event Schedule charges no platform fee on either plan.',
+                'a' => 'Yes. Named ticket types with their own prices, quantities and sales windows, payment through Stripe, PayPal, Invoice Ninja, Payfast (in rand), a payment link or cash, and scanning the QR code at the door are all free, up to 25 paid tickets a month per schedule, and the ceiling never stops a sale in the 48 hours before a performance. Pro at '.plan_price($proMonthly).' a month removes that ceiling and adds the live check-in dashboard, promo codes, add-ons and per-attendee tickets. Event Schedule charges no platform fee on either plan.',
             ],
         ];
 
@@ -599,7 +604,7 @@
             <div class="grid gap-4 md:grid-cols-3" data-reveal-group="100">
                 @foreach ([
                     ['They request', 'Turn on booking requests and a company can ask to put a production on your schedule, with their own dates, venue and details attached.'],
-                    ['Nothing appears until you say yes', 'A booking sits as a request until you accept it. There is no setting that lets it skip you, so nothing goes under your name that you did not agree to.'],
+                    ['Nothing appears until you say yes', 'A booking sits as a request until you accept it, and no company can switch that step off for you, so nothing lands on your page that you did not agree to.'],
                     ['Accept it, or turn it down', 'Requests collect in one place for you to take or decline. What you accept keeps the company\'s own dates and details, so there is no second copy to keep in step.'],
                 ] as [$t, $d])
                     <div class="es-cred-card es-cred-hover p-6" data-reveal>
@@ -607,6 +612,18 @@
                         <p class="es-cred-muted text-sm">{{ $d }}</p>
                     </div>
                 @endforeach
+            </div>
+
+            <div class="es-cred-card es-cred-hover mt-4 p-6" data-reveal>
+                <h3 class="es-cred-ink mb-2 text-lg font-bold">The credit can get there before you do</h3>
+                <p class="es-cred-muted text-sm">
+                    A company that names you before you are on Event Schedule creates a page for you as it
+                    does. The page says who made it and that you have not claimed it, credits each date to
+                    the company that added it, and stays out of search engines. Sign in with the email
+                    address they entered and claim it: the credits become yours, and the companies already
+                    listing you keep doing so without a request each time. If it is not you, "This is not me"
+                    takes it down. <x-link href="{{ marketing_url('/docs/creating-events#claim') }}">How claiming works</x-link>
+                </p>
             </div>
 
             <div class="mt-8 text-center" data-reveal>
@@ -629,7 +646,7 @@
                         <div class="es-tilt-inner es-cred-card overflow-hidden p-6 sm:p-7">
                             <div class="mb-1 flex flex-wrap items-baseline justify-between gap-2">
                                 <h3 class="es-cred-ink text-lg font-bold">Solo show, Fringe</h3>
-                                <span class="es-cred-plan es-cred-plan-pro">Pro</span>
+                                <span class="es-cred-plan es-cred-plan-free">Free</span>
                             </div>
                             <p class="es-cred-muted mb-5 text-sm">One recurring event, twelve nights, closing on the last.</p>
 
@@ -649,7 +666,7 @@
                             </div>
 
                             <p class="es-cred-muted mt-5 border-t border-[rgba(28,26,21,0.1)] pt-4 text-xs dark:border-[rgba(236,232,221,0.1)]">
-                                Payment goes through your own Stripe account. Event Schedule takes none of it.
+                                Payment goes through your own Stripe or PayPal account, Invoice Ninja, Payfast (in rand), a payment link or cash at the door. Event Schedule takes none of it.
                             </p>
 
                             <div class="es-glare" aria-hidden="true"></div>
@@ -671,14 +688,14 @@
 
                     <div class="space-y-3" data-reveal-group="90">
                         @foreach ([
-                            ['Named ticket types', 'Full price, concession, preview - each with its own price, quantity and sales window.', true],
-                            ['QR check-in', 'Scan tickets at the door from a phone, with a live view so two people can work the queue.', true],
-                            ['Zero platform fees', 'You keep the ticket price minus what Stripe charges to process the card. There is no cut on top.', true],
+                            ['Named ticket types', 'Full price, concession, preview - each with its own price, quantity and sales window.', false],
+                            ['QR check-in', 'Scan tickets at the door from any phone, on every plan. Pro adds the live check-in dashboard, so two people can work the queue and see the same count.', false],
+                            ['Zero platform fees', 'You keep the ticket price minus what your payment provider charges, on every plan. There is no cut on top.', false],
                         ] as [$t, $d, $isPro])
                             <div class="es-cred-card es-cred-hover p-4" data-reveal>
                                 <div class="mb-1 flex items-center gap-2">
                                     <p class="es-cred-ink text-sm font-bold">{{ $t }}</p>
-                                    @if ($isPro)<span class="es-cred-plan es-cred-plan-pro">Pro</span>@endif
+                                    @if ($isPro) <span class="es-cred-plan es-cred-plan-pro">Pro</span> @else <span class="es-cred-plan es-cred-plan-free">Free</span> @endif
                                 </div>
                                 <p class="es-cred-muted text-sm">{{ $d }}</p>
                             </div>
@@ -686,7 +703,7 @@
                     </div>
 
                     <p class="es-cred-muted mt-6 text-sm" data-reveal>
-                        Setting the run up is free. <x-link href="{{ marketing_url('/for-theaters') }}">How a run is built</x-link>.
+                        Setting the run up is free, and so is selling up to 25 paid tickets a month. <x-link href="{{ marketing_url('/for-theaters') }}">How a run is built</x-link>.
                     </p>
                 </div>
             </div>
@@ -903,7 +920,7 @@
                     @foreach ([
                         ['01', 'Claim the address', 'One link that goes in your profile, your programme biography and every email you send.'],
                         ['02', 'Switch the layout to List', 'The schedule reads as credits, with past productions under their own heading.'],
-                        ['03', 'Let the work arrive', 'Companies request, you accept, and the ones you trust post straight to the page.'],
+                        ['03', 'Let the work arrive', 'Companies send requests and you accept the ones you want. If one listed you before you joined, it already made you a page: claim it and those credits come with you.'],
                     ] as [$n, $t, $d])
                         <div class="rounded-lg border border-white/10 bg-white/[0.05] p-7 backdrop-blur-sm" data-reveal="panel">
                             <p class="es-cred-lit es-cred-mono mb-3 text-sm font-bold">{{ $n }}</p>

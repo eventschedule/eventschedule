@@ -39,12 +39,15 @@
             "description": "Free forever"
         },
         "featureList": [
-            "Weekly mic and set tracking with stage time totals",
+            "Weekly mic and set tracking on one calendar",
             "One schedule link for every bio",
-            "Zero-fee ticketing with QR door check-in",
-            "Comedy club lineup sync",
+            "Zero-fee ticketing through Stripe, PayPal or cash, with QR door check-in",
+            "Refunds, full or partial, back through Stripe or PayPal",
+            "Ticket alerts for fans before tickets go on sale",
+            "Comedy club bookings that land on your schedule once you accept",
+            "A page to claim when a club lists you before you join",
             "Recurring weekly open mics",
-            "Direct fan newsletters and nearby-show alerts",
+            "Direct fan newsletters and an automatic new-show digest",
             "Auto-generated show flyers",
             "Draft events for unannounced sets",
             "Sub-schedules for stand-up, improv, and podcasts",
@@ -566,7 +569,7 @@
                                 <p class="text-sm font-medium uppercase tracking-[0.14em] text-gray-500 dark:text-gray-400" data-reveal>You do seven mics a week. Your bio fits one link.</p>
                                 <span class="es-comic-beat my-3" data-reveal style="--reveal-delay: 0.15s;" aria-hidden="true"><i></i><i></i><i></i></span>
                                 <h3 class="mb-5 text-3xl font-black tracking-tight text-gray-900 dark:text-white lg:text-4xl" data-reveal style="--reveal-delay: 0.3s;">Good thing one link <span class="es-comic-neon">is all it takes.</span></h3>
-                                <p class="mb-6 text-lg text-gray-500 dark:text-gray-400" data-reveal style="--reveal-delay: 0.45s;">Running between clubs? Texting yourself set times? One calendar shows every mic, every guest set, every headline - plus your total stage time for the week.</p>
+                                <p class="mb-6 text-lg text-gray-500 dark:text-gray-400" data-reveal style="--reveal-delay: 0.45s;">Running between clubs? Texting yourself set times? One calendar shows every mic, every guest set, every headline, each with its start time and set length.</p>
                                 <ul class="space-y-3 text-gray-600 dark:text-gray-300" data-reveal style="--reveal-delay: 0.55s;">
                                     <li class="flex items-center gap-3">
                                         <svg aria-hidden="true" class="h-5 w-5 shrink-0 text-amber-500 dark:text-amber-400" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" /></svg>
@@ -574,7 +577,7 @@
                                     </li>
                                     <li class="flex items-center gap-3">
                                         <svg aria-hidden="true" class="h-5 w-5 shrink-0 text-amber-500 dark:text-amber-400" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" /></svg>
-                                        See your weekly stage time at a glance
+                                        See the whole week of spots at a glance
                                     </li>
                                     <li class="flex items-center gap-3">
                                         <svg aria-hidden="true" class="h-5 w-5 shrink-0 text-amber-500 dark:text-amber-400" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" /></svg>
@@ -590,7 +593,7 @@
                             <div class="es-comic-paper rounded-2xl border border-gray-200 bg-gray-50 p-5 dark:border-white/10 dark:bg-black/40" aria-hidden="true">
                                 <div class="mb-4 flex items-center justify-between">
                                     <span class="text-sm font-medium text-gray-500 dark:text-gray-400">This Week</span>
-                                    <span class="es-comic-mono text-xs font-semibold text-amber-700 dark:text-amber-400"><span data-count-to="47">47</span> min stage time</span>
+                                    <span class="es-comic-mono text-xs font-semibold text-amber-700 dark:text-amber-400"><span data-count-to="5">5</span> sets</span>
                                 </div>
                                 <div class="space-y-3">
                                     <div class="es-ai-field flex items-center gap-4 rounded-xl border border-red-200 bg-red-100 p-3 dark:border-red-800/30 dark:bg-red-900/20" style="--i: 0;">
@@ -645,8 +648,8 @@
                                 <p class="text-sm font-medium uppercase tracking-[0.14em] text-gray-500 dark:text-gray-400" data-reveal>Ticket platforms take a cut of every seat you fill.</p>
                                 <span class="es-comic-beat my-3" data-reveal style="--reveal-delay: 0.15s;" aria-hidden="true"><i></i><i></i><i></i></span>
                                 <h3 class="mb-5 text-3xl font-black tracking-tight text-gray-900 dark:text-white lg:text-4xl" data-reveal style="--reveal-delay: 0.3s;">We take <span class="es-comic-neon">{{ plan_price(0) }}.</span> That's the whole bit.</h3>
-                                <p class="mb-4 text-lg text-gray-500 dark:text-gray-400" data-reveal style="--reveal-delay: 0.45s;">Producing your own show? Sell tickets directly. Money goes straight to your Stripe - we don't take a cut. Your hustle, your earnings.</p>
-                                <p class="text-gray-500 dark:text-gray-400" data-reveal style="--reveal-delay: 0.55s;">General admission, VIP, early bird - every ticket gets a QR code for the door. Promo codes for your regulars, waitlists for the sellouts.</p>
+                                <p class="mb-4 text-lg text-gray-500 dark:text-gray-400" data-reveal style="--reveal-delay: 0.45s;">Producing your own show? Sell tickets directly. Money goes straight to your own Stripe or <a href="{{ marketing_url('/paypal') }}" class="es-comic-link font-medium hover:underline">PayPal</a> account, or you take cash at the door - we don't take a cut. Your hustle, your earnings.</p>
+                                <p class="text-gray-500 dark:text-gray-400" data-reveal style="--reveal-delay: 0.55s;">General admission, VIP, early bird - every ticket gets a QR code for the door. Pro adds promo codes for your regulars and waitlists for the sellouts.</p>
                             </div>
                         </div>
                         <div class="es-glare" aria-hidden="true"></div>
@@ -666,8 +669,8 @@
                                 <p class="text-sm font-medium uppercase tracking-[0.14em] text-gray-500 dark:text-gray-400" data-reveal>A club books you. You forget to post it. Nobody comes.</p>
                                 <span class="es-comic-beat my-3" data-reveal style="--reveal-delay: 0.15s;" aria-hidden="true"><i></i><i></i><i></i></span>
                                 <h3 class="mb-5 text-3xl font-black tracking-tight text-gray-900 dark:text-white lg:text-4xl" data-reveal style="--reveal-delay: 0.3s;">Now the club <span class="es-comic-neon">posts it for you.</span></h3>
-                                <p class="mb-4 text-lg text-gray-500 dark:text-gray-400" data-reveal style="--reveal-delay: 0.45s;">When a club adds you to their lineup, your schedule updates. No copy-paste. No 'wait, what time did they say?'</p>
-                                <p class="text-gray-500 dark:text-gray-400" data-reveal style="--reveal-delay: 0.55s;">Both calendars stay in sync, so your fans always see your latest bookings.</p>
+                                <p class="mb-4 text-lg text-gray-500 dark:text-gray-400" data-reveal style="--reveal-delay: 0.45s;">When a club adds you to their lineup, it lands in your requests. Accept it and the set is on your schedule, with the club's time and address. No copy-paste. No 'wait, what time did they say?'</p>
+                                <p class="text-gray-500 dark:text-gray-400" data-reveal style="--reveal-delay: 0.55s;">Not on Event Schedule yet? The club's listing makes a page with your name on it, credited to the club and kept out of search engines until you <a href="{{ marketing_url('/docs/creating-events#claim') }}" class="es-comic-link font-medium hover:underline">claim it</a> with the email address they entered. The event page lists the whole lineup either way.</p>
                             </div>
 
                             <div class="flex flex-col items-center gap-4" aria-hidden="true">
@@ -755,7 +758,7 @@
                                         </div>
                                         <div>
                                             <div class="text-sm font-medium text-gray-900 dark:text-white">Headlining Saturday!</div>
-                                            <div class="text-xs text-gray-600 dark:text-gray-400">Sent to <span data-count-to="1,247">1,247</span> fans</div>
+                                            <div class="text-xs text-gray-600 dark:text-gray-400">Sent to <span data-count-to="96">96</span> fans</div>
                                         </div>
                                     </div>
                                     <div class="flex gap-4 text-xs">
@@ -823,7 +826,7 @@
                 <div class="es-bento group relative" data-tilt="5" data-reveal="panel">
                     <div class="es-tilt-inner relative flex h-full flex-col overflow-hidden rounded-3xl border border-gray-200 bg-white p-6 dark:border-white/10 dark:bg-white/[0.04]">
                         <h3 class="mb-2 text-lg font-bold text-gray-900 dark:text-white">Polls</h3>
-                        <p class="mb-5 text-sm text-gray-600 dark:text-gray-400">Let the crowd pick the poster, the theme, or the next city. <a href="{{ marketing_url('/features/polls') }}" class="es-comic-link font-medium hover:underline">Polls</a> live right on the event.</p>
+                        <p class="mb-5 text-sm text-gray-600 dark:text-gray-400">On Pro, let the crowd pick the poster, the theme, or the next city. <a href="{{ marketing_url('/features/polls') }}" class="es-comic-link font-medium hover:underline">Polls</a> live right on the event.</p>
                         <div class="mt-auto space-y-2" aria-hidden="true">
                             <div class="text-xs font-medium text-gray-900 dark:text-white">Which poster for Friday?</div>
                             <div class="relative overflow-hidden rounded-lg bg-gray-100 dark:bg-white/5">
@@ -843,7 +846,7 @@
                 <div class="es-bento group relative" data-tilt="5" data-reveal="panel">
                     <div class="es-tilt-inner relative flex h-full flex-col overflow-hidden rounded-3xl border border-gray-200 bg-white p-6 dark:border-white/10 dark:bg-white/[0.04]">
                         <h3 class="mb-2 text-lg font-bold text-gray-900 dark:text-white">Post-show feedback</h3>
-                        <p class="mb-5 text-sm text-gray-600 dark:text-gray-400">Star ratings and comments after the show. Find out which closer actually closed.</p>
+                        <p class="mb-5 text-sm text-gray-600 dark:text-gray-400">On Pro, fans leave star ratings and comments after the show. Find out which closer actually closed.</p>
                         <div class="mt-auto rounded-xl border border-gray-200 bg-gray-50 p-3 dark:border-white/10 dark:bg-black/40" aria-hidden="true">
                             <div class="mb-2 flex items-center gap-1">
                                 @for ($i = 0; $i < 5; $i++)
@@ -945,7 +948,7 @@
                     </x-sub-audience-card>
                 </div>
                 <div data-reveal>
-                    <x-sub-audience-card name="Open Mic Regulars" description="Track spots across multiple venues. Never double-book a mic night again." icon-color="purple" blog-slug="for-open-mic-comics">
+                    <x-sub-audience-card name="Open Mic Regulars" description="Track spots across multiple venues, with every mic night on one calendar." icon-color="purple" blog-slug="for-open-mic-comics">
                         <x-slot:icon><svg aria-hidden="true" class="w-6 h-6 text-blue-600" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" /></svg></x-slot:icon>
                     </x-sub-audience-card>
                 </div>
@@ -1083,9 +1086,10 @@
                 @php
                     $faqs = [
                         ['q' => 'Is Event Schedule free for comedians?', 'a' => 'Yes. Event Schedule is free forever for sharing your show dates and building a fan following. Selling is free too, up to 25 paid tickets a month per schedule, and so are newsletters, at 10 a month counted per recipient. Pro lifts both ceilings. Zero platform fees on any ticket sale, on any plan.'],
-                        ['q' => 'Can I sell tickets to my comedy shows?', 'a' => 'Yes. Connect your Stripe account and sell tickets directly from your schedule. Create multiple ticket types like general admission, VIP, and early bird. Every ticket includes a QR code for check-in at the door. Zero platform fees - you only pay Stripe\'s standard processing.'],
-                        ['q' => 'How do fans know when I have a show near them?', 'a' => 'Fans sign up with their email and hear automatically when you add new shows. You can also send newsletters directly to your audience with upcoming dates. Share your schedule link in your social bios, on podcasts, or anywhere fans find you.'],
-                        ['q' => 'Can comedy clubs add me to their lineup?', 'a' => 'Yes. When a comedy club adds you to their event on Event Schedule, the show automatically appears on your schedule too. No need to add the same gig in two places. Both calendars stay in sync so your fans always see your latest bookings.'],
+                        ['q' => 'Can I sell tickets to my comedy shows?', 'a' => 'Yes. Connect your own Stripe or PayPal account, or take cash at the door, and sell tickets directly from your schedule. Create multiple ticket types like general admission, VIP, and early bird. Every ticket includes a QR code for check-in at the door. Zero platform fees - you only pay your payment provider\'s own processing fee. Refunds work on every plan: from the Sales page, a Stripe or PayPal sale can be refunded in full or in part, and the money goes back through the provider.'],
+                        ['q' => 'Can fans get told when tickets for my show go on sale?', 'a' => 'Yes, on every plan. Announce the show before tickets exist and a fan can leave just an email address on the event page, no account needed. They get one email when tickets go on sale, one if the show is cancelled, and a reminder shortly before it starts, plus any change notice you choose to send. Nothing else. The event\'s Tickets panel shows you how many people are waiting.'],
+                        ['q' => 'How do fans hear about my new shows?', 'a' => 'Fans who sign up with their email get an automatic digest when you add new shows, batched so a run of new dates arrives as one email. You can also send newsletters with upcoming dates yourself. Fans who would rather not give an address can subscribe to your calendar feed, which updates itself when a show moves. And your schedule link goes in your social bios, on podcasts, or anywhere fans find you.'],
+                        ['q' => 'Can comedy clubs add me to their lineup?', 'a' => 'Yes. When a comedy club adds you to their event on Event Schedule, it arrives as a request on your schedule. Accept it and the show appears there too, so you never add the same gig in two places, and because both schedules share one event, a changed start time shows on both. Not on Event Schedule yet? The club\'s listing creates a page with your name on it, kept out of search engines until you claim it by signing in with the email address it carries.'],
                         ['q' => 'Can I track open mics and bringer shows without announcing them?', 'a' => 'Yes. Save any set as a draft and it stays off your public schedule until you publish it. Drafts are free and unlimited, so you can plan a whole week of mics privately. On the Enterprise plan you can also make events internal or unlisted with an optional password for corporate and private gigs.'],
                         ['q' => 'Can I run stand-up, improv, and a podcast on one schedule?', 'a' => 'Yes. Sub-schedules let you split your calendar into separate lineups like stand-up sets, improv nights, and podcast tapings. Fans can see everything in one place, or you can share each lineup with its own link. Sub-schedules are included on the free plan.'],
                     ];
@@ -1130,7 +1134,7 @@
                         Your fans want to see you. <span class="es-comic-neon-lit">Give them one link.</span>
                     </h2>
                     <p class="mx-auto mb-10 max-w-2xl text-lg text-gray-300 sm:text-xl">
-                        No catch. No 'premium tier.' Free forever.
+                        No catch. Free forever. Pro waits in the wings for the night you outgrow it.
                     </p>
 
                     <div class="mx-auto flex max-w-2xl flex-col items-stretch justify-center gap-3 sm:flex-row">

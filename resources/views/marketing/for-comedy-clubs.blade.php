@@ -1,6 +1,6 @@
 <x-marketing-layout>
     <x-slot name="title">Comedy Club Schedules | Sell the Night, Add the Lineup Later</x-slot>
-    <x-slot name="description">Friday at eight sells before anyone knows who is on. Set the night up once as a recurring show, put the tickets on sale, and add the participants later.</x-slot>
+    <x-slot name="description">Friday at eight sells before anyone knows who is on. Set the night up once, sell tickets with zero platform fees, and add the comics when they are booked.</x-slot>
     <x-slot name="breadcrumbTitle">For Comedy Clubs</x-slot>
 
     <x-slot name="structuredData">
@@ -41,14 +41,17 @@
             "Weekly nights set up once as recurring events with their own end",
             "Date exceptions for the weeks the room is dark",
             "Participants added to a show, so the date reaches comics who run their own schedule",
+            "A public page for each new comic you add, which stays out of search engines until they claim it",
             "Booking requests from comics, each waiting for the club to accept it",
             "An approved list so regulars you book often post without a queue",
             "An email to the club when new requests are waiting",
             "Named ticket types with their own prices, quantities and sales windows",
             "Advance and door pricing on the same show",
-            "QR check-in at the door",
-            "Free registration with a capacity for open mics",
-            "Zero platform fees on ticket sales through your own Stripe account",
+            "QR ticket scanning at the door on every plan, with a live check-in dashboard on Pro",
+            "Free registration with a capacity for open mics, and a free waitlist when it fills",
+            "Zero platform fees on ticket sales, paid through your own Stripe or PayPal account, a payment link or cash",
+            "Refunds in full or in part from the Sales page, sent back through Stripe or PayPal",
+            "An interest list that emails people once when a show's tickets go on sale",
             "Sub-schedules that keep the open mic, the showcase and the weekend apart",
             "Direct newsletters to the people who follow the room",
             "Two-way Google, Outlook and CalDAV calendar sync",
@@ -338,7 +341,7 @@
             ],
             [
                 'q' => 'What happens to the comics I add to a show?',
-                'a' => 'Adding someone as a participant attaches them to the event. If they already run their own schedule on Event Schedule, the date turns up there for them to accept, or straight away if they have added your club to their approved list. If they do not have one yet, you are creating a page for them and you can tick a box to email them an invitation to claim it. Until they claim it, that page stays out of search engines.',
+                'a' => 'Adding someone as a participant attaches them to the show, and the night\'s page lists the whole bill, whether or not they have an account. If they already run their own schedule on Event Schedule, the date turns up there for them to accept, or straight away if they have added your club to their approved list. If they do not, adding them creates a public page that says your club made it and that they have not claimed it yet, and you can tick a box to email them a link to it. They claim it by signing in with the email address on it. Until then it stays out of search engines, and once they do, your dates stay on it and your future ones post without waiting for approval.',
             ],
             [
                 'q' => 'How do comics ask for a spot?',
@@ -346,7 +349,15 @@
             ],
             [
                 'q' => 'Can I charge different prices for advance and at the door?',
-                'a' => 'Yes. Set up two ticket types at different prices and sell both from the same night. Each type carries its own count, and the count is kept per occurrence, so a sold-out Friday does not stop next Friday selling. A type can also be given a single date to go on sale or come off it, which applies once to the whole run rather than repeating each week. Check people in by scanning a QR code, and take payment through your own Stripe account with no platform fee on top.',
+                'a' => 'Yes. Set up two ticket types at different prices and sell both from the same night. Each type carries its own count, and the count is kept per occurrence, so a sold-out Friday does not stop next Friday selling. A type can also be given a single date to go on sale or come off it, which applies once to the whole run rather than repeating each week. Check people in by scanning the QR code on each ticket, and take payment through your own Stripe or PayPal account, a payment link or cash, with no platform fee on top.',
+            ],
+            [
+                'q' => 'Can people ask to hear when a show goes on sale?',
+                'a' => 'Yes, with nothing but an email address. Announce the show, give its tickets a date to go on sale, and anyone who wants in can leave their address on the event page without an account. They get one email when tickets go on sale, one if the show is cancelled, a reminder shortly before it starts, and any change notice you send, and nothing else. It is kept per date, so asking about one Friday is not a sign-up for every Friday. You can see how many people are waiting on the event\'s Tickets panel, and it is free on every plan.',
+            ],
+            [
+                'q' => 'Can I refund a ticket, or part of one?',
+                'a' => 'Yes, from the Sales page, on every plan. A ticket paid through Stripe or PayPal can be refunded in full or in part, and the money goes back through the provider before the sale is marked refunded. A full refund puts that ticket back on sale for its night, and on Pro the waitlist for that night is told. A partial refund leaves the ticket valid. A sale taken in cash or through a payment link is recorded with Mark as Refunded, which moves no money. The buyer is not emailed about a refund, so let them know yourself.',
             ],
         ];
 
@@ -520,15 +531,15 @@
                 </h2>
                 <p class="es-night-muted text-lg" data-reveal style="--reveal-delay: 0.15s;">
                     Add the comics to the show as participants. For everyone who already runs a
-                    schedule here, your Friday turns up on their page too.
+                    schedule here, your Friday reaches their page too, for them to accept.
                 </p>
             </div>
 
             <div class="grid gap-4 md:grid-cols-3" data-reveal-group="100">
                 @foreach ([
                     ['They already have a schedule', 'The date arrives on their own page for them to accept, or immediately if they have put your club on their approved list. Nobody is retyping your booking.'],
-                    ['They do not have one yet', 'You are creating a page for them, and you can tick a box to email an invitation to claim it. Until they claim it, that page stays out of search engines.'],
-                    ['You enter it once', 'The bill lives on the show. Change it on Wednesday and every place it appears changes with it.'],
+                    ['They do not have one yet', 'Adding them creates a public page that says your club made it. They claim it by signing in with the email you entered, it stays out of search engines until they do, and your dates stay on it.'],
+                    ['You enter it once', 'The bill lives on the show, and the night\'s page lists every comic on it, account or not. Change it on Wednesday and every place it appears changes with it.'],
                 ] as [$t, $d])
                     <div class="es-night-card es-night-hover p-6" data-reveal>
                         <h3 class="es-night-ink mb-2 text-lg font-bold">{{ $t }}</h3>
@@ -539,7 +550,7 @@
 
             <div class="mt-8 text-center" data-reveal>
                 <span class="es-night-plan es-night-plan-free">Free</span>
-                <span class="es-night-muted ml-2 text-sm">Participants are on the free plan, and the comics do not pay for anything either.</span>
+                <span class="es-night-muted ml-2 text-sm">Participants and the pages they <x-link href="{{ marketing_url('/docs/creating-events#claim') }}">claim</x-link> are on the free plan, and the comics do not pay for anything either.</span>
             </div>
         </div>
     </section>
@@ -637,7 +648,7 @@
                 <div class="es-night-card p-6 sm:p-7" data-reveal="panel">
                     <div class="mb-1 flex flex-wrap items-baseline justify-between gap-2">
                         <h3 class="es-night-ink text-lg font-bold">Friday, 8:00pm</h3>
-                        <span class="es-night-plan es-night-plan-pro">Pro</span>
+                        <span class="es-night-plan es-night-plan-free">Free</span>
                     </div>
                     <p class="es-night-muted mb-5 text-sm">Three ticket types on one recurring night.</p>
 
@@ -656,15 +667,15 @@
                     </div>
 
                     <p class="es-night-muted mt-5 border-t border-[rgba(18,20,26,0.1)] pt-4 text-xs dark:border-[rgba(233,235,242,0.12)]">
-                        A ticket type can also be given a date to go on sale or come off it, once, for the whole run.
+                        A ticket type can also be given a date to go on sale or come off it, once, for the whole run. Anyone who joins the <x-link href="{{ marketing_url('/docs/tickets#interest-list') }}">interest list</x-link> on the event page before sales open gets one email when they do.
                     </p>
                 </div>
 
                 <div class="grid gap-4" data-reveal-group="100">
                     @foreach ([
-                        ['QR check-in', 'Scan tickets at the door from a phone, with a live view so two people can work a queue that all turns up at once.', true],
-                        ['Zero platform fees', 'You keep the ticket price minus what Stripe charges to process the card. Nothing is taken on top of that.', true],
-                        ['The open mic stays free', 'A free night takes registrations up to a capacity instead of tickets, so you know the count without charging anybody.', false],
+                        ['QR check-in', 'Scan the QR on each ticket at the door from a phone, on every plan. Each ticket admits once, and a second scan warns. The live check-in dashboard, with a running count, is the Pro part.', false],
+                        ['Zero platform fees', 'You keep the ticket price minus what Stripe or PayPal charges to process the payment, on every plan. Nothing is taken on top of that.', false],
+                        ['The open mic stays free', 'A free night takes registrations up to a capacity instead of tickets, so you know the count without charging anybody, and its waitlist is free as well.', false],
                     ] as [$t, $d, $isPro])
                         <div class="es-night-card es-night-hover p-6" data-reveal>
                             <div class="mb-2 flex items-center gap-2">
@@ -675,6 +686,11 @@
                         </div>
                     @endforeach
                 </div>
+            </div>
+
+            <div class="mt-8 text-center" data-reveal>
+                <span class="es-night-plan es-night-plan-free">Free</span>
+                <span class="es-night-muted ml-2 text-sm">Selling is free up to 25 paid tickets a month, taken through your own Stripe or <x-link href="{{ marketing_url('/paypal') }}">PayPal</x-link> account, a payment link or cash. A room that sells out twice a weekend passes that on its first Friday, and Pro at {{ plan_price($proMonthly) }} a month takes the ceiling off.</span>
             </div>
         </div>
     </section>

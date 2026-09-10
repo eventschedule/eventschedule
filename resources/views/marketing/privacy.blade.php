@@ -795,8 +795,10 @@
             // Listed only when the install can actually issue a pass, so the register describes
             // what this deployment does rather than what the software supports. The same predicate
             // gates every button, the route handler and the confirmation email.
+            // The field list is GoogleWalletService::classPayload() plus objectPayload() and
+            // textModules(), read field by field: re-check it whenever a field is added there.
             ...(\App\Services\Wallet\GoogleWalletService::isConfigured()
-                ? [['Google Wallet', 'Ticket passes, and only when a buyer chooses to add a ticket to their wallet. The pass carries the attendee name, the event, the venue and its address, the start time, the ticket type, any seat labels and the ticket link. Google keeps a saved pass; it can be expired but not deleted']]
+                ? [['Google Wallet', 'Ticket passes, and only when a buyer chooses to add a ticket to their wallet. The pass carries the attendee name, the ticket type and number, how many it admits, any seat labels, the event name and a link to its page, the venue with its address and map coordinates, the start and end time, up to 200 characters of the ticket notes the organizer wrote for the event, the schedule name, color and logo, the event image, and the ticket link, which includes the secret code of that ticket because that is what the door scanner reads. Google keeps a saved pass; it can be expired but not deleted']]
                 : []),
             ['Stay22', 'Accommodation search, on event pages where the schedule has enabled the accommodation map, and only once the map has been loaded'],
         ];
@@ -964,7 +966,24 @@
                                                     <li>Optional company information (name, website, ID, VAT, phone, address, industry)</li>
                                                     <li>Geolocation based on IP address</li>
                                                     <li>For paid accounts: billing information including the last four digits of your card, expiration date, and billing address</li>
+                                                    <li>For updates about a single event, asked for without an account: the email address you enter, the IP address it came from, and the language of the page</li>
+                                                    <li>For a performer or venue page an organizer creates while listing an event: the name, and any email address or phone number the organizer enters, which is never shown in full</li>
                                                 </ul>
+
+                                                {{-- Round 3 (2026-09-10): two capture points that shipped after this clause was
+                                                     written, neither of them an account. EventInterestController::store() writes the
+                                                     email, ip_address and locale; EventRepo::saveEvent() stores a named act's or
+                                                     venue's email and phone, which role/show-guest-unclaimed.blade.php never prints
+                                                     and the claim page masks (RoleController::maskContact()). Who can SEE an
+                                                     interest-list address is left unsaid on purpose: the event editor shows only a
+                                                     count, but BackupService::exportInterests() puts the addresses in the backup any
+                                                     editor of the schedule can export. That is the owner's call, not this page's. --}}
+                                                <p>
+                                                    An address left for event updates ("Tell me when tickets go on sale" or "Tell me if anything changes") belongs to that one event and date. It does not create an account and is not a subscription to the schedule. It is used to email you about that event: when its tickets go on sale, a reminder shortly before it starts, a notice if it is cancelled, and any notice the organizer chooses to send if its date or venue changes. Every one of those emails has an unsubscribe link, and unsubscribing deletes the address. It is also deleted along with the event.
+                                                </p>
+                                                <p>
+                                                    A page an organizer creates for a performer or venue that is not on Event Schedule shows the name and the dates listed for it, says that it has not been claimed, and stays out of search engines until it is. If the organizer asks us to, we send the email address or phone number they entered an invitation to claim the page. Claiming it means signing in with that same address or number.
+                                                </p>
                                                 @break
 
                                             @case('third-party-access')
@@ -998,12 +1017,24 @@
                                                 </p>
                                                 <ol class="es-fine-steps">
                                                     <li>Log in to your account</li>
-                                                    <li>Click "Profile" from the top right menu</li>
+                                                    <li>Click "Settings" in the main menu</li>
                                                     <li>Scroll down to find the "Delete Account" option</li>
                                                     <li>Click "Delete Account" to permanently remove your data</li>
                                                 </ol>
                                                 <p>
                                                     The above method of data purge is final, total, and irreversible.
+                                                </p>
+                                                {{-- Round 3 (2026-09-10). Step 2 said "Profile" in a top right menu: the only link
+                                                     to this screen is the main-menu entry labelled "Settings"
+                                                     (layouts/navigation.blade.php), and the top right menu holds only Log out.
+                                                     The paragraph below covers the two new routes out for people without an
+                                                     account. EventInterestController::unsubscribe() deletes the row;
+                                                     RoleController::claimNotMeSubmit() takes a page down for a verified matching
+                                                     contact (userHoldsContactFor()) and only audits anyone else. A takedown is
+                                                     ScheduleDeletionService::markDeleted(), a soft delete, which is why this says
+                                                     "comes down" and never "erased". --}}
+                                                <p>
+                                                    If you left your email address to hear about an event, unsubscribing from any email about it deletes the address. If an organizer created a page in your name, choose "This is not me" on it. You sign in or create an account first, so we know who is asking: if the verified email address or phone number on that account matches the one on the page, the page comes down straight away, and otherwise your request is recorded for review.
                                                 </p>
                                                 @break
 
@@ -1086,6 +1117,15 @@
                                             @case('follower-data')
                                                 <p>
                                                     When you follow a schedule, purchase a ticket from a schedule, or submit content (such as a comment, photo, or video) to an event, the schedule owner can see your name and email address so they can keep you informed and reach out if needed. This data is shared only with the specific schedule owner you interact with; it is never sold or shared with third parties. You can stop following a schedule at any time from your "Following" page.
+                                                </p>
+                                                {{-- Round 3 (2026-09-10): RoleSubscriberController::confirm() now calls linkAccount(),
+                                                     so confirming a schedule's sign-up panel creates a passwordless account that
+                                                     follows the schedule wherever Role::willCreateAccountOnConfirm() allows it (on
+                                                     this hosted install, any claimed schedule that is not a demo). The address is
+                                                     listed on the owner's Followers tab as an account-less subscriber from the
+                                                     moment it is entered (role/show-admin-followers.blade.php). --}}
+                                                <p>
+                                                    The same goes for signing up for a schedule's email updates: the schedule owner sees the address you enter, and confirming the link we send also sets up an account for you that follows the schedule.
                                                 </p>
                                                 @break
 

@@ -1,6 +1,6 @@
 <x-marketing-layout>
     <x-slot name="title">Food Truck Schedules | One Link That Always Has Today's Stop</x-slot>
-    <x-slot name="description">Your address changes every week. Put the whole route on one link that never goes stale, and set the regular pitches up once. Free forever.</x-slot>
+    <x-slot name="description">Your address changes every week. Put the route on one link that never goes stale, and let customers subscribe to it in their own calendar. Free forever.</x-slot>
     <x-slot name="breadcrumbTitle">For Food Trucks and Vendors</x-slot>
 
     <x-slot name="structuredData">
@@ -9,7 +9,7 @@
         "@context": "https://schema.org",
         "@type": "Service",
         "name": "Event Schedule for Food Trucks & Vendors",
-        "description": "A public schedule that always carries today's stop, with the regular pitches set up once as recurring events and a QR code for the serving window.",
+        "description": "A public schedule that always carries today's stop, with the regular pitches set up once as recurring events, a QR code for the serving window and a live calendar feed customers subscribe to once.",
         "provider": {
             "@type": "Organization",
             "name": "Event Schedule",
@@ -45,6 +45,8 @@
             "A street address and map on every stop",
             "A downloadable QR code for the serving window that takes people to your schedule",
             "Followers you can email directly, with newsletters on the free plan",
+            "An automatic digest of new stops to confirmed email subscribers, at most one every three days",
+            "A live calendar feed customers subscribe to once, so every new stop appears in their own calendar",
             "Booking requests for catering and private hire, each waiting for your approval",
             "An email to you when a new booking request lands",
             "Sub-schedules that keep markets, festivals and private hire apart",
@@ -353,7 +355,7 @@
         $faqs = [
             [
                 'q' => 'Is Event Schedule free for food trucks?',
-                'a' => 'The parts you use every week are free forever: your public schedule and its list layout, the regular pitches as recurring events, date exceptions for the weeks you lose a spot, an address and map on every stop, a QR code for the serving window, booking requests for catering, sub-schedules, two-way calendar sync, an embeddable calendar and up to 10 newsletter emails a month, counted per recipient rather than per send. Selling tickets to a ticketed event - a supper club, a collaboration night - is free as well, up to 25 paid ones a month per schedule; Pro at '.plan_price($proMonthly).' a month removes that ceiling. Zero platform fees on sales either way.',
+                'a' => 'The parts you use every week are free forever: your public schedule and its list layout, the regular pitches as recurring events, date exceptions for the weeks you lose a spot, an address and map on every stop, a QR code for the serving window, booking requests for catering, sub-schedules, two-way calendar sync, a calendar feed your customers can subscribe to, an embeddable calendar and up to 10 newsletter emails a month, counted per recipient rather than per send. Selling tickets to a ticketed event - a supper club, a collaboration night - is free as well, up to 25 paid ones a month per schedule; Pro at '.plan_price($proMonthly).' a month removes that ceiling. Zero platform fees on sales either way.',
             ],
             [
                 'q' => 'How do customers know where I am today?',
@@ -362,6 +364,10 @@
             [
                 'q' => 'Do my followers get an alert when I add a stop?',
                 'a' => 'If they left you an email address, yes. New stops reach them as one digest covering the batch, so a week of pitches posted on a Sunday is one message rather than five, and it never comes more than once every few days. Somebody who followed you from their own account is a separate list, and that one only hears from a newsletter you write: ten emails a month on the free plan and a hundred on Pro, counted per recipient rather than per send. Either way it is a list you own rather than a feed that decides who sees you.',
+            ],
+            [
+                'q' => 'Can customers put my stops in their own calendar?',
+                'a' => 'Yes, without giving you an email address. Your page offers a subscription to your calendar in its sign-up panel, and every stop offers the same thing in its Add to Calendar menu. Subscribe once and each new stop turns up in their calendar, the regular pitches included, and a stop you move, cancel or take out with a date exception changes there too. It is a live feed rather than a one-off download, and it is free on every plan.',
             ],
             [
                 'q' => 'What happens the week I lose a pitch?',
@@ -612,6 +618,7 @@
                             ['They leave an email, you get the address', 'With their consent, confirmed by a link, and they can leave whenever they like. It is your list, not a platform\'s.'],
                             ['New stops go out on their own', 'Put next week up and a short digest reaches everyone who confirmed, at most one every three days, and it does not touch your newsletter allowance.'],
                             ['You write the week when there is more to say', 'A newsletter is the one you send yourself, for the specials and the closures a list of dates cannot carry. Ten a month free and a hundred on Pro, counted per recipient rather than per send.'],
+                            ['Or they put you in their calendar', 'The same page offers a subscription to your calendar, and it asks for no email. Every new stop appears in their own calendar, and one you move or take out changes there too.'],
                         ] as [$t, $d])
                             <div class="es-stop-card es-stop-hover p-4" data-reveal>
                                 <p class="es-stop-ink text-sm font-bold">{{ $t }}</p>
@@ -622,7 +629,7 @@
 
                     <p class="mt-6" data-reveal>
                         <span class="es-stop-plan es-stop-plan-free">Free</span>
-                        <span class="es-stop-muted ml-2 text-sm">The QR and the followers cost nothing; the free newsletter allowance is ten emails a month, counted per recipient.</span>
+                        <span class="es-stop-muted ml-2 text-sm">The QR, the followers and the <x-link href="{{ marketing_url('/docs/sharing#calendar-feeds') }}">calendar feed</x-link> cost nothing; the free newsletter allowance is ten emails a month, counted per recipient.</span>
                     </p>
                 </div>
             </div>

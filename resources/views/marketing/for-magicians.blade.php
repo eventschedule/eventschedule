@@ -1,6 +1,6 @@
 <x-marketing-layout>
     <x-slot name="title">Free Event Schedule for Magicians | Gigs, Residencies</x-slot>
-    <x-slot name="description">One link for every show, residency, and private booking. Sell tickets with zero platform fees and keep corporate gigs off your public schedule. Free forever.</x-slot>
+    <x-slot name="description">Every show, residency and private booking on one link. Sell tickets with zero platform fees and keep corporate gigs off your public schedule. Free forever.</x-slot>
     <x-slot name="breadcrumbTitle">For Magicians</x-slot>
 
     <x-slot name="structuredData">
@@ -9,7 +9,7 @@
         "@context": "https://schema.org",
         "@type": "Service",
         "name": "Event Schedule for Magicians",
-        "description": "One link for every show, residency, and private booking. Sell tickets with zero platform fees and keep corporate gigs off your public schedule. Free forever.",
+        "description": "Every show, residency and private booking on one link. Sell tickets with zero platform fees and keep corporate gigs off your public schedule. Free forever.",
         "provider": {
             "@type": "Organization",
             "name": "Event Schedule",
@@ -31,7 +31,7 @@
         "applicationCategory": "BusinessApplication",
         "applicationSubCategory": "Magician Scheduling Software",
         "operatingSystem": "Web",
-        "description": "One link for every show, residency, and private booking. Sell tickets with zero platform fees and keep corporate gigs off your public schedule. Free forever.",
+        "description": "Every show, residency and private booking on one link. Sell tickets with zero platform fees and keep corporate gigs off your public schedule. Free forever.",
         "offers": {
             "@type": "Offer",
             "price": "0",
@@ -40,17 +40,21 @@
         },
         "featureList": [
             "One link where planners and fans find every show",
-            "Zero-fee ticketing with QR check-in and general admission, VIP, and meet-and-greet tiers",
+            "A booking request form planners fill in from that link",
+            "Ticketing through Stripe, PayPal or cash, with zero platform fees, QR check-in, and general admission, VIP, and meet-and-greet tiers",
             "Internal and unlisted events for private and corporate bookings",
             "Recurring weekly residencies with date exceptions",
             "Season passes and balance-tracked gift cards",
             "Ticket waitlists for sold-out shows",
+            "An email-only list for fans waiting on a show's tickets",
             "Embeddable ticket widget and calendar for any website",
+            "A live calendar feed fans subscribe to",
             "Auto-generated show posters and social graphics",
             "AI event parsing that turns a booking email into a draft event",
             "Two-way Google, Outlook, and CalDAV calendar sync",
-            "Availability management so bookers see open dates",
-            "Direct fan newsletters and new-show alerts"
+            "Team availability marked against your calendar",
+            "Direct fan newsletters and automatic new-show digests",
+            "Claimable pages for acts a venue lists by name"
         ],
         "url": "{{ url()->current() }}",
         "keywords": "magician schedule, magic show calendar, magician booking platform, magic event management, free magician scheduling, private event magician booking, close-up magic schedule, corporate magician calendar, mentalist show scheduling",
@@ -78,13 +82,13 @@
                 "@type": "HowToStep",
                 "position": 2,
                 "name": "Share one link",
-                "text": "Add your schedule link to your bio, EPK, and booking website, or embed the calendar on any page. Planners see your availability instantly."
+                "text": "Add your schedule link to your bio, EPK, and booking website, or embed the calendar on any page. Planners see your dates and send a booking request from the same link."
             },
             {
                 "@type": "HowToStep",
                 "position": 3,
                 "name": "Fill the room",
-                "text": "Fans sign up with their email and hear from you automatically when you add a show. Newsletters and new-show digests reach their inboxes directly."
+                "text": "Fans who sign up with their email get a digest automatically when you add shows, at most one every three days. The newsletters you write reach their inboxes directly."
             }
         ]
     }
@@ -455,7 +459,7 @@
             </h1>
 
             <p class="es-fade-up es-d-2 mx-auto mb-10 max-w-3xl text-lg text-gray-600 dark:text-gray-400 sm:text-xl">
-                Every show, residency, and private booking on one schedule link. Planners see your availability. Fans never miss the reveal.
+                Every magic show, residency, and private booking on one schedule link. Planners request a booking from it. Fans never miss the reveal.
             </p>
 
             <div class="es-fade-up es-d-3 flex flex-col items-center justify-center gap-4 sm:flex-row">
@@ -577,7 +581,7 @@
                         'rank' => 'A', 'suit' => 'spade', 'pip' => 'es-pick-pip-black', 'delay' => '0s',
                         'icon' => '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 5v2m0 4v2m0 4v2M5 5a2 2 0 00-2 2v3a2 2 0 110 4v3a2 2 0 002 2h14a2 2 0 002-2v-3a2 2 0 110-4V7a2 2 0 00-2-2H5z" />',
                         'title' => 'Zero-fee ticketing',
-                        'copy' => 'Connect Stripe and sell general admission, VIP, and meet-and-greet seats. Every ticket carries a QR code for the door, and you keep every fee.',
+                        'copy' => 'Take payment through Stripe or PayPal, or cash at the door, for general admission, VIP, and meet-and-greet tickets. Every ticket carries a QR code for the door, and Event Schedule takes no platform fee.',
                         'url' => '/features/ticketing', 'link' => 'Sell tickets',
                     ],
                     [
@@ -605,14 +609,14 @@
                         'rank' => '10', 'suit' => 'heart', 'pip' => 'es-pick-pip-red', 'delay' => '0.32s',
                         'icon' => '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v13m0-13V6a2 2 0 112 2h-2zm0 0V5.5A2.5 2.5 0 109.5 8H12zm-7 4h14M5 12a2 2 0 110-4h14a2 2 0 110 4M5 12v7a2 2 0 002 2h10a2 2 0 002-2v-7" />',
                         'title' => 'Passes and gift cards',
-                        'copy' => 'Sell a season pass for the parlor run, and balance-tracked gift cards fans send by email. Zero platform fees on both.',
+                        'copy' => 'On Pro, sell a season pass for the parlor run, and balance-tracked gift cards fans send by email. Zero platform fees on both.',
                         'url' => '/features/gift-cards', 'link' => 'Sell gift cards',
                     ],
                     [
                         'rank' => '9', 'suit' => 'spade', 'pip' => 'es-pick-pip-black', 'delay' => '0.4s',
                         'icon' => '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />',
                         'title' => 'Calendars that agree',
-                        'copy' => 'Two-way Google, Outlook, and CalDAV sync. Bookers see open dates, and you never double-book a Saturday.',
+                        'copy' => 'Two-way Google, Outlook, and CalDAV sync. Every gig lands in the calendar you already check, so a booked Saturday looks booked before you say yes.',
                         'url' => '/features/calendar-sync', 'link' => 'Sync your calendar',
                     ],
                 ];
@@ -679,7 +683,7 @@
                                     <div class="es-pick-index es-pick-pip-black" aria-hidden="true"><span>J</span>{!! $suitClub !!}</div>
                                     <div class="es-pick-index-flip es-pick-pip-black" aria-hidden="true"><span>J</span>{!! $suitClub !!}</div>
                                     <h3 class="mb-2 text-lg font-bold">The corporate gala</h3>
-                                    <p class="text-sm text-gray-600">Internal and unlisted events, password-protected pages, availability the planner can check. The gig nobody hears about until the invoice clears.</p>
+                                    <p class="text-sm text-gray-600">Internal and unlisted events, password-protected pages, and the days your team marks as unavailable. The gig nobody hears about until the invoice clears.</p>
                                     <span class="es-pick-link mt-auto inline-flex items-center justify-center gap-1 text-sm font-semibold">See Enterprise
                                         <svg aria-hidden="true" class="h-4 w-4 rtl:rotate-180" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6" /></svg>
                                     </span>
@@ -717,7 +721,7 @@
                                     <div class="es-pick-index es-pick-pip-red" aria-hidden="true"><span>A</span>{!! $suitHeart !!}</div>
                                     <div class="es-pick-index-flip es-pick-pip-red" aria-hidden="true"><span>A</span>{!! $suitHeart !!}</div>
                                     <h3 class="mb-2 text-lg font-bold">The parlor show</h3>
-                                    <p class="text-sm text-gray-600">Twenty seats, sold through your own link. QR check-in at the door, and a waitlist for when the room is full.</p>
+                                    <p class="text-sm text-gray-600">Twenty seats, sold through your own link. QR check-in at the door, and on Pro a waitlist for when the room is full.</p>
                                     <span class="es-pick-link mt-auto inline-flex items-center justify-center gap-1 text-sm font-semibold">Sell the room
                                         <svg aria-hidden="true" class="h-4 w-4 rtl:rotate-180" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6" /></svg>
                                     </span>
@@ -764,13 +768,13 @@
                     <div class="es-pick-index es-pick-pip-red" aria-hidden="true"><span>2</span>{!! $suitDiamond !!}</div>
                     <div class="es-pick-index-flip es-pick-pip-red" aria-hidden="true"><span>2</span>{!! $suitDiamond !!}</div>
                     <h3 class="mb-3 text-center text-xl font-bold">Share one link</h3>
-                    <p class="text-center text-sm text-gray-600">Add your schedule link to your bio, EPK, and booking website, or embed the calendar on any page. Planners see your availability instantly.</p>
+                    <p class="text-center text-sm text-gray-600">Add your schedule link to your bio, EPK, and booking website, or embed the calendar on any page. Planners see your dates and send a booking request from the same link.</p>
                 </div>
                 <div class="es-pick-card p-7 pt-10" data-reveal="panel">
                     <div class="es-pick-index es-pick-pip-red" aria-hidden="true"><span>3</span>{!! $suitDiamond !!}</div>
                     <div class="es-pick-index-flip es-pick-pip-red" aria-hidden="true"><span>3</span>{!! $suitDiamond !!}</div>
                     <h3 class="mb-3 text-center text-xl font-bold">Fill the room</h3>
-                    <p class="text-center text-sm text-gray-600">Fans sign up with their email and hear from you automatically when you add a show. Newsletters and new-show digests reach their inboxes directly.</p>
+                    <p class="text-center text-sm text-gray-600">Fans who sign up with their email get a digest automatically when you add shows, at most one every three days. The newsletters you write reach their inboxes directly.</p>
                 </div>
             </div>
         </div>
@@ -800,18 +804,18 @@
                     The moves the audience <span class="es-pick-red">never sees.</span>
                 </h2>
                 <p class="text-lg text-gray-600 dark:text-gray-400 sm:text-xl" data-reveal style="--reveal-delay: 0.15s;">
-                    Small utilities that make the whole act look effortless.
+                    Small utilities that handle the prep, so the audience only sees the act.
                 </p>
             </div>
 
             <div class="grid gap-4 md:grid-cols-2 lg:grid-cols-3" data-reveal-group="90">
                 @foreach ([
-                    ['Event templates', 'Load the trick once. Save any show as a template and produce the next one in two clicks.', '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z" />'],
-                    ['Custom fields', 'Track what only you need: stage size, mic setup, table count, load-in time.', '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4" />'],
-                    ['AI event parsing', 'Paste a booking email and a draft event appears, date and venue filled in.', '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.813 15.904L9 18.75l-.813-2.846a4.5 4.5 0 00-3.09-3.09L2.25 12l2.846-.813a4.5 4.5 0 003.09-3.09L9 5.25l.813 2.846a4.5 4.5 0 003.09 3.09L15.75 12l-2.846.813a4.5 4.5 0 00-3.09 3.09zM18.259 8.715L18 9.75l-.259-1.035a3.375 3.375 0 00-2.455-2.456L14.25 6l1.036-.259a3.375 3.375 0 002.455-2.456L18 2.25l.259 1.035a3.375 3.375 0 002.456 2.456L21.75 6l-1.035.259a3.375 3.375 0 00-2.456 2.456z" />'],
-                    ['Ticket waitlist', 'Sold-out parlor show? The waitlist tells fans the moment a seat frees up.', '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />'],
-                    ['Embed ticket widget', 'Sell tickets from your own website with an embedded checkout.', '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 20l4-16m4 4l4 4-4 4M6 16l-4-4 4-4" />'],
-                    ['Availability management', 'Track availability for you and your team, so bookers only ever see real open dates.', '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0z" />'],
+                    ['Event templates', 'Load the trick once. On Pro, save any show as a template and produce the next one in two clicks.', '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z" />'],
+                    ['Custom fields', 'On Pro, track what only you need: stage size, mic setup, table count, load-in time.', '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4" />'],
+                    ['AI event parsing', 'Paste a booking email and a draft event appears, date and venue filled in. Included on every plan.', '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.813 15.904L9 18.75l-.813-2.846a4.5 4.5 0 00-3.09-3.09L2.25 12l2.846-.813a4.5 4.5 0 003.09-3.09L9 5.25l.813 2.846a4.5 4.5 0 003.09 3.09L15.75 12l-2.846.813a4.5 4.5 0 00-3.09 3.09zM18.259 8.715L18 9.75l-.259-1.035a3.375 3.375 0 00-2.455-2.456L14.25 6l1.036-.259a3.375 3.375 0 002.455-2.456L18 2.25l.259 1.035a3.375 3.375 0 002.456 2.456L21.75 6l-1.035.259a3.375 3.375 0 00-2.456 2.456z" />'],
+                    ['Ticket waitlist', 'Sold-out parlor show? On Pro, the waitlist tells the next fan in line when a seat frees up.', '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />'],
+                    ['Embed ticket widget', 'On Pro, sell tickets from your own website with an embedded checkout.', '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 20l4-16m4 4l4 4-4 4M6 16l-4-4 4-4" />'],
+                    ['Availability management', 'On Enterprise, you and your team mark the days you cannot work, and see them on the calendar before you accept a date.', '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0z" />'],
                 ] as [$moveTitle, $moveCopy, $moveIcon])
                     <div class="es-bento group relative" data-tilt="5" data-reveal="panel">
                         <div class="es-tilt-inner relative flex h-full flex-col overflow-hidden rounded-3xl border border-gray-200 bg-white p-7 dark:border-white/10 dark:bg-white/[0.04]">
@@ -1023,9 +1027,10 @@
                         ['q' => 'Is Event Schedule free for magicians?', 'a' => 'Yes. Event Schedule is free forever for sharing your show schedule, building a following, and syncing with Google Calendar. Selling is free too, up to 25 paid tickets a month per schedule, with the QR on each one scanned at the door; Pro lifts that ceiling. Newsletters are free at 10 a month, counted per recipient rather than per send. Zero platform fees on ticket sales, on any plan.'],
                         ['q' => 'Can I keep private and corporate bookings off my public schedule?', 'a' => 'Yes. Save any booking as a draft and it stays off your public schedule until you publish it. Drafts are free and unlimited, so you can hold close-up gigs and corporate dates privately. On the Enterprise plan you can also make events internal or unlisted with an optional password for private and corporate clients.'],
                         ['q' => 'Can I sell gift cards or season passes for my shows?', 'a' => 'Yes. On the Pro plan you can sell balance-tracked gift cards that buyers send to a recipient by email, redeemable toward tickets for any show on your schedule. You can also sell multi-use passes like a parlor-show season pass, with usage tracked automatically. Zero platform fees apply to both.'],
-                        ['q' => 'Can I sell tickets to my magic shows?', 'a' => 'Yes. Connect your Stripe account and sell tickets directly from your schedule. Create ticket types for general admission, VIP, and meet-and-greet packages, each with a QR code for check-in at the door. When a show sells out, a waitlist notifies fans if seats open up. Zero platform fees, you only pay Stripe\'s processing.'],
+                        ['q' => 'Can I sell tickets to my magic shows?', 'a' => 'Yes, and the first 25 paid tickets a month per schedule are on the free plan; Pro lifts that ceiling. Take payment through Stripe or PayPal straight to your own account, or through Payfast (rand only), Invoice Ninja, a payment link or cash. Create ticket types for general admission, VIP, and meet-and-greet packages, each with a QR code for check-in at the door. On Pro, a waitlist tells fans when a sold-out show frees a seat. If a show is called off, a Stripe or PayPal sale can be refunded in full or in part from the Sales page, and the money goes back through the provider. Zero platform fees, so the only deduction is your payment provider\'s own.'],
                         ['q' => 'Can I run a weekly residency without re-entering the same show?', 'a' => 'Yes. Set up your show once as a recurring event with a day-of-week pattern, and add date exceptions for the weeks you are away. On the Pro plan you can also save any event as a template, so repeat corporate formats take two clicks instead of a blank form.'],
-                        ['q' => 'How do planners and fans find my shows?', 'a' => 'Share one schedule link in your bio, EPK, and booking website, or embed the calendar on any page. Fans who sign up for email get a digest automatically when you add a show, and newsletters reach their inboxes directly. Two-way Google, Outlook, and CalDAV sync keeps every calendar current.'],
+                        ['q' => 'How do planners and fans find my shows?', 'a' => 'Share one schedule link in your bio, EPK, and booking website, or embed the calendar on any page, and planners send a booking request from the same link. Fans who sign up for email get a digest automatically when you add a show, and newsletters reach their inboxes directly. Fans who would rather not give an email can subscribe to your calendar feed instead. On a single show, anyone can leave just an email address to hear when its tickets go on sale, if it is cancelled, and shortly before it starts, plus any change notice you send. Two-way Google, Outlook, and CalDAV sync keeps your own calendar current.'],
+                        ['q' => 'A venue listed my show before I signed up. Is there a page for me already?', 'a' => 'There may be. When a venue or promoter names an act that is not on Event Schedule, its event page still shows that act on the bill by name, and the app creates a page for the act. That page says which schedule created it and that you have not claimed it, credits each date to the schedule that added it, and stays out of search engines until it is claimed. If it carries your email address, create an account or sign in with that address and press Claim this page: it becomes your schedule, and the venues that already listed you keep listing you without asking again, while anyone new sends a request you accept. If it is not you, This is not me takes it down.'],
                     ];
                 @endphp
                 @foreach ($faqs as ['q' => $q, 'a' => $a])

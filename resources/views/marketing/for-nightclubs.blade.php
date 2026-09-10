@@ -1,6 +1,6 @@
 <x-marketing-layout>
     <x-slot name="title">Nightclub Event Calendars | Entry, Capacity and Tickets</x-slot>
-    <x-slot name="description">Run the entry side of your club from one link: capacity, cover, timed ticket tiers and QR check-in at the door. Plus recurring themed nights.</x-slot>
+    <x-slot name="description">Run your club's door from one link: capacity limits, ticket tiers that change price on the clock, free QR scanning and zero platform fees.</x-slot>
     <x-slot name="breadcrumbTitle">For Nightclubs</x-slot>
 
     <x-slot name="structuredData">
@@ -40,9 +40,12 @@
         "featureList": [
             "Free registration with an optional capacity limit for each night",
             "Ticket types with their own sales windows, so cover can change at a set time",
-            "QR check-in on the door with a real-time check-in dashboard",
+            "Free QR scanning on the door, with a live check-in dashboard on Pro",
+            "Ticket payments through Stripe, PayPal, a payment link or cash, with zero platform fees",
             "Per-attendee tickets, each with its own confirmation email and QR code",
+            "An interest list for people waiting for tickets to go on sale",
             "Automatic waitlist notifications when a sold-out night frees up",
+            "Refunds from the Sales page, in full or in part",
             "Multi-use passes and memberships for regulars",
             "Recurring themed nights with date exceptions",
             "Sub-schedules that keep each night apart on one link",
@@ -83,7 +86,7 @@
                 "@type": "HowToStep",
                 "position": 3,
                 "name": "Scan them in",
-                "text": "Every ticket carries a QR code. Scan on the door and the check-in dashboard shows who is actually inside against the capacity you set."
+                "text": "Every ticket carries a QR code. Scan it on the door, free on every plan, and on Pro the live check-in dashboard shows who is inside against the capacity you set."
             }
         ]
     }
@@ -512,7 +515,7 @@
         $faqs = [
             [
                 'q' => 'Is Event Schedule free for nightclubs?',
-                'a' => 'Yes. Sharing your nights, running recurring residencies, splitting them into sub-schedules, taking free registrations with a capacity limit, and two-way sync with Google, Outlook or CalDAV are all free forever. Selling is free too, up to 25 paid tickets a month per schedule, with the QR on each one scanned at the door for nothing - which is a soft launch, not a season. Pro at '.plan_price($proMonthly).' a month removes the ceiling and adds the live check-in dashboard for the door, event graphics and passes. Event Schedule charges zero platform fees on tickets either way.',
+                'a' => 'Yes. Sharing your nights, running recurring residencies, splitting them into sub-schedules, taking free registrations with a capacity limit, and two-way sync with Google, Outlook or CalDAV are all free forever. Selling is free too, up to 25 paid tickets a month per schedule, with the QR on each one scanned at the door for nothing - which is a soft launch, not a season. Pro at '.plan_price($proMonthly).' a month removes the ceiling and adds the live check-in dashboard for the door and passes. Event Schedule charges zero platform fees on tickets either way.',
             ],
             [
                 'q' => 'Can people sign up for a free night without paying?',
@@ -524,7 +527,7 @@
             ],
             [
                 'q' => 'Can I sell different ticket types for one night?',
-                'a' => 'Yes, and the ticket types themselves are free: early bird, advance, on the door, table, as many as the night needs, each with its own price, quantity and sales window. The free plan sells 25 paid tickets a month per schedule, which a club night passes quickly, and Pro at '.plan_price($proMonthly).' a month is what takes the ceiling off. Pro is also where the extras live - add-ons that attach to a ticket, promo codes, and the live check-in dashboard for the door. Connect Stripe either way and there are zero platform fees.'
+                'a' => 'Yes, and the ticket types themselves are free: early bird, advance, on the door, table, as many as the night needs, each with its own price, quantity and sales window. The free plan sells 25 paid tickets a month per schedule, which a club night passes quickly, and Pro at '.plan_price($proMonthly).' a month is what takes the ceiling off. Pro is also where the extras live - add-ons that attach to a ticket, promo codes, and the live check-in dashboard for the door. Take payment through your own Stripe or PayPal account, or a payment link or cash on the door, and there are zero platform fees either way.'
             ],
             [
                 'q' => 'Can DJs ask to play at my club?',
@@ -533,6 +536,14 @@
             [
                 'q' => 'What happens when a night sells out?',
                 'a' => 'Turn on the waitlist for that event and people can join it once tickets are gone. If a ticket is released, the waitlist is notified automatically instead of you working through replies. The waitlist is a Pro feature.',
+            ],
+            [
+                'q' => 'Can people ask to hear when tickets go on sale?',
+                'a' => 'Yes, on every plan. Put a night up before tickets are ready and the event page offers "Tell me when tickets go on sale". People leave an email address, with no account, and hear when tickets go on sale, if the night is cancelled, and again shortly before it starts, plus any change notice you choose to send. Each date of a weekly night keeps its own list, you see how many are waiting on the event\'s Tickets panel, and none of it counts against your newsletter allowance. It is not the waitlist, which is for a night that has already sold out.',
+            ],
+            [
+                'q' => 'Can I refund a ticket if a night is cancelled?',
+                'a' => 'Yes, from the Sales page, on every plan. A Stripe or PayPal sale goes back through the provider, in full or in part, and the sale only changes once the money has moved. A full refund puts those tickets back on sale, and a partial one leaves the ticket valid. A sale taken another way, like cash on the door or a payment link, is marked as refunded and you hand the money back yourself.',
             ],
         ];
 
@@ -731,7 +742,7 @@
                             <div class="es-door-plate p-5">
                                 <div class="mb-2 flex flex-wrap items-center gap-2">
                                     <h3 class="text-lg font-bold text-[#e5e9ee]">Cover that changes on the clock</h3>
-                                    <span class="es-door-plan es-door-plan-pro">Pro</span>
+                                    <span class="es-door-plan">Free</span>
                                 </div>
                                 <p class="text-sm leading-relaxed text-[#9aa4b2]">
                                     Give a night more than one ticket type and put a sales window on each. The cheap tier stops selling at 11pm, the full-price tier takes over, and nobody has to remember to change anything at the door.
@@ -749,11 +760,11 @@
 
                             <div class="es-door-plate p-5">
                                 <div class="mb-2 flex flex-wrap items-center gap-2">
-                                    <h3 class="text-lg font-bold text-[#e5e9ee]">Tables, add-ons and groups</h3>
-                                    <span class="es-door-plan es-door-plan-pro">Pro</span>
+                                    <h3 class="text-lg font-bold text-[#e5e9ee]">Tables and group rates</h3>
+                                    <span class="es-door-plan">Free</span>
                                 </div>
                                 <p class="text-sm leading-relaxed text-[#9aa4b2]">
-                                    A table is a ticket type with a price and a quantity. Anything that comes with it is an add-on that attaches to the booking, and a group rate can kick in automatically once someone buys several at once.
+                                    A table is a ticket type with a price and a quantity, and a group rate can kick in automatically once someone buys several at once. Anything that comes with the table can be an add-on that attaches to the booking, which is the one part of this that needs Pro.
                                 </p>
                             </div>
                         </div>
@@ -776,7 +787,7 @@
                         Know who is inside, <span class="text-gradient-steel">not who bought.</span>
                     </h2>
                     <p class="mb-6 text-lg leading-relaxed text-gray-600 dark:text-gray-400" data-reveal style="--reveal-delay: 0.15s;">
-                        Every ticket carries a QR code. Scan on the way in and the check-in dashboard counts against the capacity you set, so the number on the clicker is the number in the room.
+                        Every ticket carries a QR code, and scanning it on the way in is free on every plan. On Pro the check-in dashboard counts against the capacity you set, so the number on the clicker is the number in the room.
                     </p>
                     <ul class="space-y-3 text-gray-600 dark:text-gray-400" data-reveal-group="70">
                         <li class="flex gap-3" data-reveal>
@@ -789,7 +800,11 @@
                         </li>
                         <li class="flex gap-3" data-reveal>
                             <svg aria-hidden="true" class="mt-0.5 h-5 w-5 flex-none text-[#166534] dark:text-[#4ade80]" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7" /></svg>
-                            <span>Check-in and the dashboard are Pro. The capacity limit on a free night is not.</span>
+                            <span><a href="{{ marketing_url('/features/check-in') }}" class="es-door-link font-medium hover:underline">Scanning at the door</a> is free on every plan, and so is the capacity limit on a free night. The live dashboard and per-attendee tickets are Pro.</span>
+                        </li>
+                        <li class="flex gap-3" data-reveal>
+                            <svg aria-hidden="true" class="mt-0.5 h-5 w-5 flex-none text-[#166534] dark:text-[#4ade80]" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7" /></svg>
+                            <span>Buyers can save a ticket to Google Wallet with the same QR on it, so nobody in the queue is digging through their email at the rope.</span>
                         </li>
                     </ul>
                 </div>
@@ -1170,7 +1185,7 @@
             </div>
 
             <div class="grid grid-cols-1 gap-6 md:grid-cols-3" data-reveal-group="120">
-                @foreach ([['01', 'Add your nights', 'Each regular night once as a recurring event, with sub-schedules keeping the house night, the hip-hop night and the headline shows apart.'], ['02', 'Set the door', 'Registration with a capacity limit for free nights, or ticket types with their own sales windows so cover changes on the clock.'], ['03', 'Scan them in', 'Every ticket carries a QR code. Scan on the door and the dashboard counts who is inside against the capacity you set.']] as [$stepNum, $stepTitle, $stepBody])
+                @foreach ([['01', 'Add your nights', 'Each regular night once as a recurring event, with sub-schedules keeping the house night, the hip-hop night and the headline shows apart.'], ['02', 'Set the door', 'Registration with a capacity limit for free nights, or ticket types with their own sales windows so cover changes on the clock.'], ['03', 'Scan them in', 'Every ticket carries a QR code. Scan it on the door, free on every plan, and on Pro the dashboard counts who is inside against the capacity you set.']] as [$stepNum, $stepTitle, $stepBody])
                     <div class="es-door-jamb p-3" data-reveal="panel">
                         <div class="es-door-face px-5 py-6">
                             <div class="mb-3 font-mono text-2xl font-black text-[#4ade80]">{{ $stepNum }}</div>

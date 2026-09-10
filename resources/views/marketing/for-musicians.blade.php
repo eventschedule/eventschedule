@@ -1,6 +1,6 @@
 <x-marketing-layout>
     <x-slot name="title">Free Event Schedule for Musicians | Tour Dates & Tickets</x-slot>
-    <x-slot name="description">Put every gig on one link. Sell tickets with zero platform fees, email fans directly, and sync with venues and Google Calendar. Free forever for musicians.</x-slot>
+    <x-slot name="description">Put every gig and tour date on one link. Sell tickets with zero platform fees, email fans directly, and let venues add you to their bills. Free forever.</x-slot>
     <x-slot name="breadcrumbTitle">For Musicians</x-slot>
 
     <x-slot name="structuredData">
@@ -9,7 +9,7 @@
         "@context": "https://schema.org",
         "@type": "Service",
         "name": "Event Schedule for Musicians",
-        "description": "Put every gig on one link. Sell tickets with zero platform fees, email fans directly, and sync with venues and Google Calendar. Free forever for musicians.",
+        "description": "Put every gig and tour date on one link. Sell tickets with zero platform fees, email fans directly, and let venues add you to their bills. Free forever.",
         "provider": {
             "@type": "Organization",
             "name": "Event Schedule",
@@ -40,14 +40,18 @@
         },
         "featureList": [
             "Tour date page with a custom link",
-            "Zero-fee ticket sales with QR door check-in",
+            "Zero-fee ticket sales through Stripe, PayPal or cash, with QR door check-in",
+            "Refunds, full or partial, back through Stripe or PayPal",
             "Direct fan newsletters with open and click stats",
+            "Fan email sign-ups with an automatic new-date digest",
+            "Ticket alerts for fans before tickets go on sale",
+            "A live calendar feed fans can subscribe to",
             "Recurring events for weekly residencies",
-            "Two-way Google Calendar sync for gigs, rehearsals, and sessions",
-            "Venue auto-linking when clubs book you",
-            "Band, manager, and agent team access",
-            "Fan follows with nearby-show notifications",
-            "Waitlists for sold-out shows",
+            "Two-way Google Calendar, Outlook and CalDAV sync for gigs, rehearsals, and sessions",
+            "Venue bookings that land on your schedule once you accept",
+            "A page to claim when a venue lists you before you join",
+            "Band, manager, and agent team access on Enterprise",
+            "Waitlists for sold-out shows on Pro",
             "AI parsing of booking emails into events",
             "Auto-generated show graphics"
         ],
@@ -83,7 +87,7 @@
                 "@type": "HowToStep",
                 "position": 3,
                 "name": "Grow your fanbase",
-                "text": "Fans follow your schedule, hear when you announce new dates, and share videos and comments after your gigs."
+                "text": "Fans leave an email address, hear when you announce new dates, and share videos and comments after your gigs, all approved by you before they go live."
             }
         ]
     }
@@ -596,7 +600,7 @@
                             <div class="flex-1">
                                 <div class="mb-4 text-[10px] font-bold uppercase tracking-[0.3em] text-[#0e7490] dark:text-[#22d3ee]">Newsletters</div>
                                 <h3 class="es-poster-display mb-4 text-3xl text-[color:var(--esp-ink)] lg:text-4xl">Direct to the fans</h3>
-                                <p class="mb-6 text-lg text-[color:var(--esp-ink-soft)]">New tour on sale? Say it straight to the inbox. Followers get your dates the moment you post them, and Pro auto-generates social-ready show art for every gig.</p>
+                                <p class="mb-6 text-lg text-[color:var(--esp-ink-soft)]">New tour on sale? Say it straight to the inbox. Fans who sign up by email also get a digest of your new dates, batched so a run of shows arrives as one message, and every plan can generate social-ready show art from your upcoming gigs.</p>
                                 <div class="flex flex-wrap gap-3">
                                     <span class="inline-flex items-center rounded-md border-2 border-[color:var(--esp-line)] px-3 py-1 text-xs font-bold uppercase tracking-[0.12em] text-[color:var(--esp-ink-soft)]">Tour announcements</span>
                                     <span class="inline-flex items-center rounded-md border-2 border-[color:var(--esp-line)] px-3 py-1 text-xs font-bold uppercase tracking-[0.12em] text-[color:var(--esp-ink-soft)]">Album releases</span>
@@ -634,7 +638,7 @@
                     <div class="es-tilt-inner es-poster-block relative flex h-full flex-col overflow-hidden p-7">
                         <div class="mb-4 text-[10px] font-bold uppercase tracking-[0.3em] text-[#0e7490] dark:text-[#22d3ee]">Ticketing</div>
                         <h3 class="es-poster-display mb-3 text-2xl text-[color:var(--esp-ink)]">Zero-fee tickets</h3>
-                        <p class="mb-6 text-[color:var(--esp-ink-soft)]">Connect Stripe and sell pre-sales or door tickets with QR check-in. Promo codes for the fan club, waitlists for the sellouts.</p>
+                        <p class="mb-6 text-[color:var(--esp-ink-soft)]">Connect Stripe or <a href="{{ marketing_url('/paypal') }}" class="es-accent-link font-medium hover:underline">PayPal</a>, or take cash on the night, and sell pre-sales or door tickets with QR check-in. Pro adds promo codes for the fan club and waitlists for the sellouts.</p>
 
                         <div class="es-poster-od relative mt-auto rounded-xl border-2 border-[color:var(--esp-line)] bg-[#fdfcf8] p-4 font-mono text-xs dark:bg-[#171c26]" dir="ltr" aria-hidden="true">
                             <div class="mb-1 flex justify-between text-[color:var(--esp-ink)]"><span>GA TICKET x2</span><span>$50.00</span></div>
@@ -688,10 +692,11 @@
                     <div class="es-tilt-inner es-poster-block relative flex h-full flex-col overflow-hidden p-7 lg:p-9">
                         <div class="grid items-center gap-8 md:grid-cols-2">
                             <div>
-                                <div class="mb-4 text-[10px] font-bold uppercase tracking-[0.3em] text-[#0e7490] dark:text-[#22d3ee]">Venue sync &middot; Team</div>
+                                <div class="mb-4 text-[10px] font-bold uppercase tracking-[0.3em] text-[#0e7490] dark:text-[#22d3ee]">Venue bookings &middot; Team</div>
                                 <h3 class="es-poster-display mb-4 text-3xl text-[color:var(--esp-ink)]">Booked once. Printed twice.</h3>
-                                <p class="mb-5 text-lg text-[color:var(--esp-ink-soft)]">When a venue books you on Event Schedule, the gig lands on your poster automatically. One booking, both schedules.</p>
-                                <p class="mb-5 text-[color:var(--esp-ink-soft)]">Give your band, manager, and booking agent access. And when a booking email lands, forward it and AI turns it into a listed gig.</p>
+                                <p class="mb-5 text-lg text-[color:var(--esp-ink-soft)]">When a venue puts you on its bill on Event Schedule, the gig comes to you as a request. Accept it and it lands on your poster too. One booking, both schedules.</p>
+                                <p class="mb-5 text-[color:var(--esp-ink-soft)]">Not signed up yet? The venue's listing makes a page with your name on it, each date credited to whoever added it, and kept out of search engines until you <a href="{{ marketing_url('/docs/creating-events#claim') }}" class="es-accent-link font-medium hover:underline">claim it</a> with the email address they entered.</p>
+                                <p class="mb-5 text-[color:var(--esp-ink-soft)]">On Enterprise, your band, manager, and booking agent get their own logins. And when a booking email lands, paste it in and AI turns it into a listed gig.</p>
                                 <div class="flex flex-wrap gap-3" aria-hidden="true">
                                     <span class="es-ai-field es-poster-stamp es-poster-stamp-amber" style="--i: 0; --stamp-rot: -2deg;">Lead</span>
                                     <span class="es-ai-field es-poster-stamp es-poster-stamp-cyan" style="--i: 1; --stamp-rot: 1.5deg;">Manager</span>
@@ -771,7 +776,7 @@
                             <div class="flex-1">
                                 <div class="mb-4 text-[10px] font-bold uppercase tracking-[0.3em] text-[#0e7490] dark:text-[#22d3ee]">Followers</div>
                                 <h3 class="es-poster-display mb-4 text-3xl text-[color:var(--esp-ink)]">The street team</h3>
-                                <p class="text-lg text-[color:var(--esp-ink-soft)]">Fans sign up with their email and hear automatically when you add a date. After the show they post clips, photos, and comments, and nothing goes live until you approve it.</p>
+                                <p class="text-lg text-[color:var(--esp-ink-soft)]">Fans sign up with their email and hear automatically when you add a date. Rather not hand over an address? They can <a href="{{ marketing_url('/docs/sharing#calendar-feeds') }}" class="es-accent-link font-medium hover:underline">subscribe to your calendar</a> instead, and a moved date updates itself. After the show they post clips, photos, and comments, and nothing goes live until you approve it.</p>
                             </div>
                             <div class="w-full shrink-0 lg:w-64" aria-hidden="true">
                                 <div class="rounded-xl border-2 border-[color:var(--esp-line)] bg-[#fdfcf8] p-4 text-center dark:bg-[#171c26]">
@@ -784,7 +789,7 @@
                                         </div>
                                     </div>
                                     <div class="es-poster-display mt-3 text-sm text-[#0f766e] dark:text-[#2dd4bf]"><span data-count-to="130">130</span> fans following</div>
-                                    <div class="mt-1 text-[10px] uppercase tracking-[0.12em] text-[color:var(--esp-ink-soft)]">Notified when you play nearby</div>
+                                    <div class="mt-1 text-[10px] uppercase tracking-[0.12em] text-[color:var(--esp-ink-soft)]">Emailed when you add dates</div>
                                 </div>
                             </div>
                         </div>
@@ -1183,12 +1188,14 @@
             <div class="space-y-4" data-reveal-group="80">
                 @php
                     $faqs = [
-                        ['q' => 'Is Event Schedule free for musicians?', 'a' => 'Yes. Event Schedule is free forever for sharing your gig schedule, building a fan following, and syncing with Google Calendar. The free plan also sells up to 25 paid tickets a month and sends 10 newsletter emails a month. Scanning tickets at the door is free too. Pro lifts the ticket ceiling and adds the rest of the door kit: live check-in dashboard, promo codes, waitlists. Platform fees are zero on every plan.'],
-                        ['q' => 'How do fans find out about my upcoming shows?', 'a' => 'A fan who leaves an email address on your page and confirms it gets a digest when you announce new shows, batched so a run of dates is one message rather than six, and never more than once every few days. Beyond that you write the newsletter yourself. Your schedule link also goes anywhere a link goes: Spotify, Bandcamp, your EPK, any social profile.'],
-                        ['q' => 'Can I sell tickets to my own shows?', 'a' => 'Yes. Connect your Stripe account and sell tickets directly from your schedule. Every ticket includes a QR code for check-in at the door. Event Schedule charges zero platform fees - you only pay Stripe\'s standard processing fees.'],
-                        ['q' => 'What happens when a venue books me for a show?', 'a' => 'When a venue adds you to their event on Event Schedule, it automatically appears on your schedule too. No need to manually add the same gig in two places. Both calendars stay in sync.'],
+                        ['q' => 'Is Event Schedule free for musicians?', 'a' => 'Yes. Event Schedule is free forever for sharing your gig schedule, building a fan following, and syncing with Google Calendar. The free plan also sells up to 25 paid tickets a month and sends 10 newsletter emails a month, counted per recipient. Scanning tickets at the door is free too. Pro lifts the ticket ceiling and adds the rest of the door kit: live check-in dashboard, promo codes, waitlists. Platform fees are zero on every plan.'],
+                        ['q' => 'How do fans find out about my upcoming shows?', 'a' => 'A fan who leaves an email address on your page and confirms it gets a digest when you announce new shows, batched so a run of dates is one message rather than six, and never more than once every few days. Beyond that you write the newsletter yourself. Fans who would rather not give an address can subscribe to your calendar feed instead, which updates itself when a date moves. Your schedule link also goes anywhere a link goes: Spotify, Bandcamp, your EPK, any social profile.'],
+                        ['q' => 'Can I sell tickets to my own shows?', 'a' => 'Yes. Connect your own Stripe or PayPal account, or take cash or a payment link, and sell tickets directly from your schedule. Every ticket includes a QR code for check-in at the door. Event Schedule charges zero platform fees - you only pay your payment provider\'s own processing fee. Refunds are built in too: from the Sales page, a Stripe or PayPal sale can be refunded in full or in part, and the money goes back through the provider.'],
+                        ['q' => 'Can fans get told when tickets go on sale?', 'a' => 'Yes, on every plan. On a public event page a fan can leave just an email address, with no account, and get one email when tickets go on sale, one if the show is cancelled, and a reminder shortly before it starts, plus any change notice you choose to send. Nothing else, and every one of those emails has a one-click unsubscribe. The event\'s Tickets panel shows you how many people are waiting.'],
+                        ['q' => 'What happens when a venue books me for a show?', 'a' => 'When a venue adds you to its event on Event Schedule, the date arrives as a request on your schedule. Accept it and the gig shows on your page too, so you never enter the same show twice, and because both schedules share one event, a changed time shows on both. The event page lists the whole bill, whether or not every act on it has signed up.'],
+                        ['q' => 'A venue listed me before I joined. Is that page mine?', 'a' => 'It can be. When a venue or promoter names an act who is not on Event Schedule, a page is created for them so the name can appear on the event. It says who created it and that the act has not claimed it, credits each date to the schedule that added it, and stays out of search engines. Press Claim this page and sign in with the email address it carries, and it becomes your schedule, with the venues that already list you still listing you. If it is not you, press This is not me.'],
                         ['q' => 'Can I list a weekly residency or recurring gigs?', 'a' => 'Yes. Recurring events are free. Set the day-of-week pattern once, like every Thursday at the same club, and Event Schedule fills in the dates. You can exclude the weeks you skip, and fans always see the next upcoming show.'],
-                        ['q' => 'Can I use Event Schedule as my band website?', 'a' => 'Many musicians do. Your schedule lives at your own link, like your-band.eventschedule.com, with your bio, photos, and streaming links. You can also embed the calendar on an existing website, and the Enterprise plan supports a fully custom domain.'],
+                        ['q' => 'Can I use Event Schedule as my band website?', 'a' => 'Many musicians do. Your schedule lives at your own link, like your-band.eventschedule.com, with your bio, photos, and streaming links, and each of those links also answers at a short address of its own, like your-band.eventschedule.com/instagram, with every click counted in your analytics. You can also embed the calendar on an existing website, and the Enterprise plan supports a fully custom domain.'],
                     ];
                 @endphp
                 @foreach ($faqs as ['q' => $q, 'a' => $a])

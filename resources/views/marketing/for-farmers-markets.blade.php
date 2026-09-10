@@ -1,6 +1,6 @@
 <x-marketing-layout>
-    <x-slot name="title">Free Event Schedule for Farmers Markets | Vendor Calendar</x-slot>
-    <x-slot name="description">Grow your market. Share market days, vendor lineups, and seasonal events. Email your community directly - no algorithm. Free forever.</x-slot>
+    <x-slot name="title">Free Farmers Market Calendar | Vendor Applications & Fees</x-slot>
+    <x-slot name="description">Put a whole farmers market season online as one recurring market day, let traders apply for a pitch, and take pitch fees with no platform fee. Free.</x-slot>
     <x-slot name="breadcrumbTitle">For Farmers Markets</x-slot>
 
     <x-slot name="structuredData">
@@ -31,7 +31,7 @@
         "applicationCategory": "BusinessApplication",
         "applicationSubCategory": "Farmers Market Event Management Software",
         "operatingSystem": "Web",
-        "description": "Grow your market. Share market days, vendor lineups, and seasonal events. Email your community directly. No algorithm. Free forever.",
+        "description": "Put a whole farmers market season online as one recurring market day, let traders apply for a pitch, and take pitch fees with no platform fee. Free forever.",
         "offers": {
             "@type": "Offer",
             "price": "0",
@@ -48,9 +48,12 @@
             "An agenda on each market day for demos, music and workshops",
             "Free RSVP with a places limit, counted per market date",
             "Pitch fees sold as ticket types, with stock counted per market date and free QR scanning at the gate",
-            "Zero platform fees on sales through your own Stripe account, on every plan",
+            "Zero platform fees on every plan, whether traders pay through Stripe, PayPal, a payment link or cash",
+            "Refunds from the Sales page, in full or in part, with Stripe and PayPal payments returned through the provider",
             "A downloadable QR code that puts your market page in a shopper's hand, one tap from following",
+            "A digest of the new events you add, to confirmed email subscribers, at most one every few days",
             "Newsletters you write and send to the people who follow the market",
+            "A live calendar feed shoppers subscribe to once, with the next three months of market days in their own calendar",
             "Two-way Google, Outlook and CalDAV calendar sync",
             "An embeddable calendar for the website you already have"
         ],
@@ -539,11 +542,15 @@
             ],
             [
                 'q' => 'Can I charge for pitches and take the money online?',
-                'a' => 'Yes, and the first '.$freeTicketCap.' paid tickets a month are on the free plan. A pitch fee is a named ticket type with its own price and stock, and the stock is counted per market date, so a full Saturday does not stop the following Saturday selling. Scanning the QR code at the gate on market morning is free too. Pro at '.plan_price($proMonthly).' a month lifts the monthly ceiling and adds the live check-in dashboard and your own questions at checkout, such as whether they need power or how long the van is. Sales go through your own Stripe account and Event Schedule charges no platform fee on top.',
+                'a' => 'Yes, and the first '.$freeTicketCap.' paid tickets a month are on the free plan. A pitch fee is a named ticket type with its own price and stock, and the stock is counted per market date, so a full Saturday does not stop the following Saturday selling. Scanning the QR code at the gate on market morning is free too. Pro at '.plan_price($proMonthly).' a month lifts the monthly ceiling and adds the live check-in dashboard and your own questions at checkout, such as whether they need power or how long the van is. Traders pay through your own Stripe or PayPal account, or by a payment link or cash, and Event Schedule charges no platform fee on top.',
+            ],
+            [
+                'q' => 'Can I refund a pitch fee if a trader pulls out or the day is rained off?',
+                'a' => 'Yes, on every plan, from the Sales page, in full or in part. A fee paid through Stripe or PayPal goes back to the trader through that provider, and only then is the sale marked refunded. A fee paid by cash, a payment link or any other way shows Mark as Refunded instead, which records the refund without moving money. A partial refund keeps the pitch booked, and a full one frees it for somebody else. Event Schedule does not email the trader about a refund, so a word from you is still worth sending.',
             ],
             [
                 'q' => 'How do shoppers hear about the market?',
-                'a' => 'They follow the market, and you email them. Your schedule has a QR code you can download and print on the A-board, the pitch sign or the tote bags, so somebody standing in front of you is one scan and one tap from being on the list. Once they confirm the address, new market dates reach them on their own, batched so a season posted in one sitting is one message. When there is something worth saying beyond the dates, a new trader or the first strawberries, that is a newsletter you write. You can also embed the calendar on the website you already have, and shoppers can add market days to their own Google, Outlook or Apple calendar.',
+                'a' => 'They follow the market, and you email them. Your schedule has a QR code you can download and print on the A-board, the pitch sign or the tote bags, so somebody standing in front of you is one scan and one tap from being on the list. Once they confirm the address, new events you post reach them on their own, batched so a season posted in one sitting is one message. When there is something worth saying beyond the dates, a new trader or the first strawberries, that is a newsletter you write. You can also embed the calendar on the website you already have, and shoppers can subscribe to the market\'s calendar feed without giving an email address: the next three months of market days appear in their own Google, Outlook or Apple calendar and keep rolling forward, and a date you move or take out follows.',
             ],
             [
                 'q' => 'Can I run a separate winter or evening market?',
@@ -733,6 +740,7 @@
                             ['One date, not the season', 'A date exception removes a single occurrence. You are not rebuilding the recurrence and you are not deleting the market.'],
                             ['Dates can go back in, too', 'Next to it is an include list that adds a one-off date that is not on the usual day, for a bank holiday Monday market or a late-night in December.'],
                             ['What shoppers actually see', 'That Saturday is simply absent. There is no cancelled banner and no strike-through, so if the reason matters, send a newsletter or say it on the market page.'],
+                            ['Their calendars follow', 'A shopper who subscribed to the market\'s calendar loses that Saturday from their own the next time it checks the feed. A single date they downloaded is a copy, so that one stays.'],
                         ] as [$rT, $rD])
                             <li class="flex items-start gap-3" data-reveal>
                                 <svg aria-hidden="true" class="es-mkt-accent mt-0.5 h-5 w-5 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7" /></svg>
@@ -912,7 +920,8 @@
                         @foreach ([
                             ['The day has a shape', 'Add parts to a market day for the chef demo, the fiddle band and the kids table. Shoppers read the morning rather than guessing when to turn up.'],
                             ['Places on the demo', 'A free event can take RSVPs with a limit, and the places are counted per market date, so a full demo in July leaves August alone.'],
-                            ['One link, all season', 'Embed the calendar on the website you already have, and shoppers can put a market day straight into their own Google, Outlook or Apple calendar.'],
+                            ['One link, all season', 'Embed the calendar on the website you already have. A shopper can put one market day into their own Google, Outlook or Apple calendar, or subscribe to the market\'s calendar once and see the next three months of market days there, rolling forward.'],
+                            ['The band gets its own page', 'Add the fiddle band to a market day and, if they are not on Event Schedule yet, they get a page listing the dates you gave them. It stays out of search until they claim it by signing in with the email address you entered for them. A band already on Event Schedule gets the date as a request to accept.'],
                         ] as [$mT, $mD])
                             <div class="es-mkt-card p-6" data-reveal="panel">
                                 <div class="mb-2 flex flex-wrap items-center gap-2">
@@ -977,9 +986,10 @@
                         Take the pitch fee online. <span class="es-mkt-grad">We take none of it</span>.
                     </h2>
                     <p class="es-mkt-muted mb-8 max-w-xl text-lg leading-relaxed" data-reveal style="--reveal-delay: 0.15s;">
-                        No envelope of notes and no chasing anybody in the car park. Sales run through
-                        your own Stripe account, and Event Schedule takes no platform fee on top of what
-                        Stripe charges.
+                        No envelope of notes and no chasing anybody in the car park. Traders pay through
+                        your own Stripe or <a href="{{ marketing_url('/paypal') }}" class="es-mkt-link font-semibold">PayPal</a>
+                        account, and Event Schedule takes no platform fee on top of what they charge. A
+                        payment link or cash on the morning still works for the traders who want it.
                     </p>
 
                     <div class="space-y-3" data-reveal-group="90">
@@ -987,7 +997,8 @@
                             ['Counted per market date', false, 'Thirty pitches means thirty on that date. Sell out on a Saturday in June and the rest of the season is unaffected.'],
                             ['Ask while they pay', true, 'Attach your own questions to the pitch fee: power, van length, insurance number. The answers arrive with the payment instead of in a separate thread.'],
                             ['Scan them in', false, 'Every buyer gets a QR code, and scanning it at the entrance to the square costs nothing. The live check-in dashboard, counting who is in as the morning goes on, is the Pro half.'],
-                            ['Sell tickets too, if you need to', false, 'A ticketed cooking class or a harvest supper works the same way, out of the same monthly allowance and with the same zero platform fee.'],
+                            ['Money back when it rains', false, 'Refund a pitch fee from the Sales page, in full or in part. On Stripe or PayPal the money goes back to the trader through the provider; a cash or payment-link fee is marked as refunded for your records.'],
+                            ['Sell tickets too, if you need to', false, 'A ticketed cooking class or a harvest supper works the same way, out of the same monthly allowance and with the same zero platform fee. Post it before tickets open and shoppers can leave an email address to hear when they do.'],
                         ] as [$pT, $pIsPro, $pD])
                             <div class="es-mkt-card es-mkt-hover p-4" data-reveal>
                                 <div class="flex flex-wrap items-center gap-2">
@@ -1077,7 +1088,7 @@
                     <div class="space-y-3" data-reveal-group="90">
                         @foreach ([
                             ['Print the code once', 'Every schedule has a QR code you can download as an image and put on the A-board, the pitch signs or the tote bags. One scan opens your market page, and Follow is a tap from there.'],
-                            ['The dates go on their own', 'New market days reach the list without you doing anything, batched and no more than one message every few days. A new cheesemaker or the first strawberries is a newsletter you write.'],
+                            ['New events go out on their own', 'Add the winter market or a harvest supper and the list hears about it without you doing anything, batched and no more than one message every few days. A new cheesemaker or the first strawberries is a newsletter you write.'],
                             ['Ten a month, free', 'The free plan covers ten newsletter emails a month, counted one per recipient. Pro is a hundred and Enterprise is a thousand.'],
                             ['No algorithm in the middle', 'A market page and an email list are yours. Nobody decides how many of your shoppers get to see that you are open this week.'],
                         ] as [$bT, $bD])
@@ -1092,10 +1103,12 @@
                     </div>
 
                     <p class="es-mkt-muted mt-6 text-sm" data-reveal>
-                        Being exact about it: new market days reach the list on their own, batched into
-                        one digest rather than a message per date, and never more than one every few days.
-                        Anything you want to say in your own words is a newsletter, written when you have
-                        something to say.
+                        Being exact about it: new events you add reach the list on their own, batched into
+                        one digest rather than a message each, and never more than one every few days. The
+                        Saturdays of one recurring season are one event, so the season goes out once, not
+                        every week, and a trader's accepted submission belongs to the trader's schedule, so
+                        it is not in your digest. Anything you want to say in your own words is a
+                        newsletter, written when you have something to say.
                         <a href="{{ marketing_url('/features/newsletters') }}" class="es-mkt-link font-semibold">How newsletters work</a>
                     </p>
                 </div>

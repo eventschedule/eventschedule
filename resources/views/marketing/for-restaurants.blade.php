@@ -42,8 +42,11 @@
             "A sales cutoff set on the event, so the count is final before you shop",
             "Questions attached to the ticket and answered at checkout, for allergies and courses",
             "Named ticket types with their own prices and quantities",
-            "QR check-in at the door",
-            "Zero platform fees on ticket sales through your own Stripe account",
+            "A date for sales to open, and an interest list that emails people once when they do",
+            "Free registration with a capacity per date, for evenings that take no payment",
+            "QR ticket scanning at the door on every plan",
+            "Zero platform fees on ticket sales, paid through your own Stripe or PayPal account, a payment link or cash",
+            "Refunds in full or in part from the Sales page, sent back through Stripe or PayPal",
             "Private hire enquiries that wait for you to accept them",
             "Sub-schedules with their own shareable link, for private dining or a supper club",
             "Draft events that stay members-only until you are ready to announce",
@@ -98,11 +101,16 @@
                feature. The page says plainly that it is one date, not a
                weekly rule.
              - Allergies at checkout are Ticket.custom_fields, rendered by
-               the purchase view (event/tickets.blade.php) and gated isPro.
+               the purchase view (event/tickets.blade.php). A question on a
+               ticket type carries no plan gate (EventRepo saves it on every
+               plan); asking each guest separately needs Individual tickets,
+               which is Pro.
 
-           TIER HONESTY: the covers story is genuinely PRO. The page says
-           so rather than dressing paid features as free; the schedule
-           itself and private-hire enquiries are the free part.
+           TIER HONESTY: the free plan sells a monthly allowance of paid
+           tickets (Role::ticketSaleLimit()) and Pro takes the ceiling off.
+           Covers, the cutoff and the questions are all free; per-guest
+           answers and the CSV export are the Pro parts, and the badges
+           say exactly that.
 
            COLOUR: wine, and the trade-off is named. The audit leaves green
            120-139 (squeezed against food-trucks at 113, which IS a food
@@ -356,7 +364,7 @@
         $faqs = [
             [
                 'q' => 'Is Event Schedule free for restaurants?',
-                'a' => 'The schedule itself is free forever: your public page and its link, sub-schedules for private dining or a supper club, enquiries for private hire, Drafts that keep an event off the public page until you announce it, two-way calendar sync, an embeddable calendar and up to 10 newsletter emails a month, counted per recipient rather than per send. Selling covers is free up to 25 paid tickets a month per schedule, which is one supper club a month with room to spare; Pro at '.plan_price($proMonthly).' a month takes the ceiling off and is also where questions on the ticket live. Event Schedule charges zero platform fees on sales either way.',
+                'a' => 'The schedule itself is free forever: your public page and its link, sub-schedules for private dining or a supper club, enquiries for private hire, Drafts that keep an event off the public page until you announce it, two-way calendar sync, an embeddable calendar and up to 10 newsletter emails a month, counted per recipient rather than per send. Selling covers is free up to 25 paid tickets a month per schedule, which is one supper club a month with room to spare, and the cutoff and the questions on the ticket come with it. A free evening, a quiz or a tasting on the house, can take registrations up to a capacity per date instead, and those never count toward the 25. Pro at '.plan_price($proMonthly).' a month takes the ceiling off, and Event Schedule charges zero platform fees on sales either way.',
             ],
             [
                 'q' => 'How do I stop selling more covers than the kitchen can cook?',
@@ -367,12 +375,20 @@
                 'a' => 'Yes. A ticket type takes a date and time to come off sale, so you can close Thursday at midnight and do the ordering on Friday against a final number. It is a single date set on that event rather than a rule that repeats, which is exactly what a one-off dinner wants.',
             ],
             [
+                'q' => 'Can I announce a dinner before bookings open?',
+                'a' => 'Yes. Put the dinner up with a date for its tickets to go on sale, and anyone who wants a seat can leave an email address on the event page without an account. They get one email when bookings open, one if the dinner is cancelled, a reminder shortly before it, and any change notice you send, and nothing else. You can see how many people are waiting on the event\'s Tickets panel, it is never shown publicly, and it is free on every plan.',
+            ],
+            [
                 'q' => 'Can I collect allergies and dietary requirements?',
-                'a' => 'Yes, on the Pro plan. Questions can be attached to the ticket and answered at checkout, so the answers arrive with the sale rather than in a separate email thread you have to reconcile against the list. Ask for allergies, a course choice, or a wine pairing.',
+                'a' => 'Yes, on every plan. Put the question on the ticket and it is asked at checkout, so the answers arrive with the sale rather than in a separate email thread you have to reconcile against the list. Ask for allergies, a course choice, or a wine pairing. On the free plan the person booking answers once for their party; on Pro, each guest can answer for themselves, and the sales CSV export carries every answer.',
             ],
             [
                 'q' => 'What about private hire enquiries?',
                 'a' => 'Turn on booking requests and people can ask about a date through your page. Every enquiry waits for you to accept it, so nothing appears publicly that you have not agreed to, and you are emailed when new ones are waiting. Keep private dining on its own sub-schedule and you can share a link that shows only those events.',
+            ],
+            [
+                'q' => 'Can I refund a booking if a guest cancels?',
+                'a' => 'Yes, from the Sales page, on every plan. A booking paid through Stripe or PayPal can be refunded in full or in part, and the money goes back through the provider before the sale is marked refunded. A full refund puts the cover back on sale for that date. A partial refund, if you keep a cancellation charge, leaves the booking and its cover in place. A booking paid in cash or through a payment link is recorded with Mark as Refunded, which moves no money. The guest is not emailed about a refund, so let them know yourself.',
             ],
         ];
 
@@ -505,9 +521,9 @@
             </div>
 
             <div class="mt-8 text-center" data-reveal>
-                <span class="es-cover-plan es-cover-plan-pro">Pro</span>
+                <span class="es-cover-plan es-cover-plan-free">Free</span>
                 <span class="es-cover-muted ml-2 text-sm">
-                    Selling covers is free up to 25 a month, and Pro at {{ plan_price($proMonthly) }} a month takes the ceiling off. No platform fee on top of what Stripe charges, on either.
+                    Selling covers is free up to 25 paid tickets a month, and Pro at {{ plan_price($proMonthly) }} a month takes the ceiling off. The money goes through your own Stripe or <x-link href="{{ marketing_url('/paypal') }}">PayPal</x-link> account, with no platform fee on top of theirs on either plan.
                 </span>
             </div>
         </div>
@@ -536,6 +552,7 @@
                             ['One date, set on the event', 'It is a single moment you choose for that sitting, not a rule that repeats each week. For a dinner that runs once, that is exactly right.'],
                             ['Sales stop on their own', 'You do not have to remember to switch anything off on Thursday night while you are on the pass.'],
                             ['The list is final', 'Whatever the total says on Friday morning is what you are cooking. Nothing can be added behind you.'],
+                            ['It can open on a date, too', 'Announce the dinner before bookings open and give the ticket a date to go on sale. Anyone who leaves an email on the event page is told when it does.'],
                         ] as [$t, $d])
                             <li class="flex items-start gap-3" data-reveal>
                                 <svg aria-hidden="true" class="es-cover-accent mt-0.5 h-5 w-5 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7" /></svg>
@@ -545,8 +562,8 @@
                     </ul>
 
                     <p class="mt-7" data-reveal>
-                        <span class="es-cover-plan es-cover-plan-pro">Pro</span>
-                        <span class="es-cover-muted ml-2 text-sm">Part of ticketing.</span>
+                        <span class="es-cover-plan es-cover-plan-free">Free</span>
+                        <span class="es-cover-muted ml-2 text-sm">Opening and closing dates are part of selling tickets, and the <x-link href="{{ marketing_url('/docs/tickets#interest-list') }}">interest list</x-link> costs nothing on any plan.</span>
                     </p>
                 </div>
 
@@ -596,7 +613,7 @@
                         <div class="es-tilt-inner es-cover-card overflow-hidden p-6 sm:p-7">
                             <div class="mb-1 flex flex-wrap items-baseline justify-between gap-2">
                                 <h3 class="es-cover-ink text-lg font-bold">At checkout</h3>
-                                <span class="es-cover-plan es-cover-plan-pro">Pro</span>
+                                <span class="es-cover-plan es-cover-plan-free">Free</span>
                             </div>
                             <p class="es-cover-muted mb-5 text-sm">Attached to the ticket, so the answer arrives with the sale.</p>
 
@@ -637,19 +654,24 @@
 
                     <div class="space-y-3" data-reveal-group="90">
                         @foreach ([
-                            ['One list, not two', 'The answers are attached to the sale, so you are not reconciling an email thread against a booking list at four in the afternoon.'],
-                            ['Ask what you actually need', 'Allergies as free text, a course choice from a set of options, a yes or no on the pairing. It is your question, not a fixed field.'],
-                            ['Export it', 'Take the sales out as a CSV with the answers included, and hand the kitchen something it can read.'],
-                        ] as [$t, $d])
+                            ['One list, not two', 'The answers are attached to the sale, so you are not reconciling an email thread against a booking list at four in the afternoon.', false],
+                            ['Ask what you actually need', 'Allergies as free text, a course choice from a set of options, a yes or no on the pairing. It is your question, not a fixed field.', false],
+                            ['Export it', 'Take the sales out as a CSV with the answers included, and hand the kitchen something it can read.', true],
+                        ] as [$t, $d, $qPro])
                             <div class="es-cover-card es-cover-hover p-4" data-reveal>
                                 <div class="flex items-center gap-2">
                                     <p class="es-cover-ink text-sm font-bold">{{ $t }}</p>
-                                    <span class="es-cover-plan es-cover-plan-pro">Pro</span>
+                                    <span class="es-cover-plan {{ $qPro ? 'es-cover-plan-pro' : 'es-cover-plan-free' }}">{{ $qPro ? 'Pro' : 'Free' }}</span>
                                 </div>
                                 <p class="es-cover-muted mt-1 text-sm">{{ $d }}</p>
                             </div>
                         @endforeach
                     </div>
+
+                    <p class="mt-6" data-reveal>
+                        <span class="es-cover-plan es-cover-plan-free">Free</span>
+                        <span class="es-cover-muted ml-2 text-sm">A question on the ticket works on every plan, with the person booking answering once for their party. On Pro, each guest can answer for themselves.</span>
+                    </p>
                 </div>
             </div>
         </div>
@@ -949,8 +971,8 @@
                         Cook for the number <span class="es-cover-grad">that actually sold</span>.
                     </h2>
                     <p class="mx-auto mb-10 max-w-xl text-lg text-gray-300 sm:text-xl">
-                        The schedule is free. Selling the covers is {{ plan_price($proMonthly) }} a month, and none of
-                        the ticket price comes to us.
+                        The schedule is free, and so are the first 25 paid covers each month. Pro at
+                        {{ plan_price($proMonthly) }} a month takes the ceiling off, and none of the ticket price comes to us.
                     </p>
 
                     <div class="mx-auto flex max-w-2xl flex-col items-stretch justify-center gap-3 sm:flex-row">
