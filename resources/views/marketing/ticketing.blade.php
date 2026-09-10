@@ -1,4 +1,12 @@
 <x-marketing-layout>
+    @php
+        // Every Google Wallet claim on this page reads the same predicate the button itself does
+        // (GoogleWalletService::isConfigured()), so an install without an issuer account never
+        // promises a button no buyer can find. Set here, above the structured-data slot, because
+        // the featureList in that slot is the first place it is read.
+        $walletLive = \App\Services\Wallet\GoogleWalletService::isConfigured();
+    @endphp
+
     <x-slot name="title">{{ __('marketing.ticketing_title') }}</x-slot>
     <x-slot name="description">{{ __('marketing.ticketing_description') }}</x-slot>
     <x-slot name="breadcrumbTitle">Ticketing</x-slot>
@@ -49,7 +57,9 @@
             "An interest list that emails people when tickets go on sale",
             "Individual tickets, so each guest gets their own confirmation and QR code",
             "QR code on every ticket, scanned from a phone at the door",
+            @if ($walletLive)
             "Add to Google Wallet from the ticket page and the confirmation email",
+            @endif
             "One admission per ticket, with a warning on a second scan",
             "Live check-in dashboard with a per-ticket-type breakdown",
             "Ticket waitlist that notifies one person at a time",
@@ -623,7 +633,9 @@
         // Ten and ten, deliberately. The two halves are one turnstile, so a ragged column reads as a
         // broken machine. When a feature is added, fold it into a sibling rather than let one side
         // run long: that is why ticket types carry the zero price and the cap per order, and promo
-        // codes carry the volume discount.
+        // codes carry the volume discount. It holds in the other direction too: the Google Wallet
+        // row exists only where the install can issue a pass ($walletLive), so without one it is
+        // swapped for the free-registration row rather than dropped, and the door side stays at ten.
         $saleSide = [
             ['Tell me when tickets go on sale', 'Before anything is on sale, a visitor can leave an email address, no account needed, and hear once when tickets go on sale and again shortly before it starts. You see how many are waiting. Free on every plan.'],
             ['Ticket types', 'Each one has its own name, price, quantity, optional sales window and optional cap per order, so one buyer cannot take the whole allocation. Zero is a valid price, and that ticket still gets a QR code.'],
@@ -639,7 +651,9 @@
 
         $doorSide = [
             ['A QR code per ticket', 'It is on the buyer\'s ticket page, which checkout lands them on, and it goes out with the confirmation email.'],
-            ['Add to Google Wallet', 'The ticket page, the order page and the confirmation email carry an Add to Google Wallet button, free registrations included. The pass holds the same QR code, so it scans like any other ticket.'],
+            $walletLive
+                ? ['Add to Google Wallet', 'The ticket page, the order page and the confirmation email carry an Add to Google Wallet button, free registrations included. The pass holds the same QR code, so it scans like any other ticket.']
+                : ['Free registrations too', 'A free registration gets a QR code in its confirmation email on the same terms as a paid ticket, and checks in the same way.'],
             ['Your own email sender', 'Optional. Add one once in the schedule\'s settings, under Integrations, Email Settings, and confirmations leave from your own address. Until you do, they leave from ours.'],
             ['Individual tickets', 'Turn it on and every guest on the order gets their own email and their own code.'],
             ['If the plans change', 'Change the date, the time or the venue and the editor asks whether to email everyone holding a ticket, with a note from you; cancelling offers the same. Buyers hear once your own email sender is added, and the interest list hears either way.'],
@@ -680,10 +694,11 @@
                 'q' => 'How does QR code check-in work?',
                 'a' => 'Every ticket carries its own QR code, shown on the buyer\'s ticket page and sent with the confirmation email. At the door you open Sales on your phone, tap Scan Tickets and point the camera. Each ticket admits once: scan it again and you get a warning instead of an entry. The check-in dashboard refreshes every 10 seconds with the running count and a per-ticket-type breakdown.',
             ],
-            [
+            // Only where the install can issue a pass; see $walletLive.
+            ...($walletLive ? [[
                 'q' => 'Can buyers save their tickets to Google Wallet?',
                 'a' => 'Yes, on every plan. The ticket page, the order page and the confirmation email carry an Add to Google Wallet button, and free registrations get one too. The pass holds the same QR code as the ticket page, so it scans with the same free scanner. It is a snapshot that is not updated afterwards, but the door checks the order live, so a cancelled or refunded ticket is still refused. There is no Apple Wallet pass. On a selfhosted install the button appears once the operator adds Google Wallet credentials.',
-            ],
+            ]] : []),
             [
                 'q' => 'Is there a seat map or assigned seating?',
                 'a' => 'Yes, on Enterprise. Draw your room once as a reusable seating plan - levels, sections, rows, tables, standing areas and wheelchair spaces - attach it to an event, and buyers pick their own seats off the map. Your box office gets the same map to hold seats back, take a booking over the phone, move somebody or release a single seat. On every other plan a ticket type is a name, a price and a quantity, and the buyer is not choosing a specific seat.',

@@ -133,18 +133,17 @@ Listed so the omission reads as a decision. Each has a working default.
 | `EVENT_INTEREST_RECIPIENT_BATCH` | `2000`, the cap that bounds outbound interest mail |
 | `EVENT_INTEREST_TICKETS_MAX_AGE_DAYS` | `180` |
 | `PAYPAL_CLIENT_ID` / `PAYPAL_CLIENT_SECRET` / `PAYPAL_SANDBOX` / `PAYPAL_WEBHOOK_ID` | unset. `PayPalGateway::platformCredentials()` returns `[]` when hosted, so these are selfhost-only by construction - each owner connects their own account |
+| `GOOGLE_WALLET_ISSUER_ID` / `GOOGLE_WALLET_SERVICE_ACCOUNT` | unset. Wallet passes are opt-in **per install**, and `GoogleWalletService::isConfigured()` gates everything about them: every button, the route handler, the confirmation email, the privacy page's processor row and every marketing claim about the button. Unset, eventschedule.com neither offers passes nor says it does; `GoogleWalletMarketingClaimTest` pins the claims |
+| `GOOGLE_WALLET_ID_PREFIX` | `es`. Irrelevant until the two above are set |
 
-### New this release, and NOT correct to leave unset
-
-| Variable | Why it cannot be skipped |
-|---|---|
-| `GOOGLE_WALLET_ISSUER_ID` | Wallet passes are opt-in **per install**, not per owner: `GoogleWalletService::isConfigured()` gates every button, the route handler and the confirmation email off this one value. Leave it unset and `/features/passes` - a public marketing page shipped in this release - advertises a feature that renders no button anywhere on eventschedule.com. |
-| `GOOGLE_WALLET_SERVICE_ACCOUNT` | The signing key. Takes either an absolute path to the service-account JSON or its base64 contents; App Platform has no writable file mount, so use base64. |
-| `GOOGLE_WALLET_ID_PREFIX` | Namespaces the pass classes this install creates. Google can neither delete nor rename a class once made, so production and any staging install MUST differ or they collide permanently. Defaults to `es`. |
-
-Setup is `docs/GOOGLE_WALLET_SETUP.md`. A new issuer account starts in demo mode, where only
-registered test accounts can save a pass - so confirm the issuer is out of demo before treating
-the marketing page as truthful.
+Switching wallet passes on later takes only those env vars; setup is `docs/GOOGLE_WALLET_SETUP.md`.
+Set them only once the issuer account is out of demo mode: from that moment the button renders
+for every buyer and the marketing pages describe it, but in demo only registered test accounts can
+save a pass. App Platform has no writable file mount, so `GOOGLE_WALLET_SERVICE_ACCOUNT` takes the
+base64 contents of the key. Google can neither delete nor rename a pass class once made, so
+production and any staging install sharing the issuer account MUST use different
+`GOOGLE_WALLET_ID_PREFIX` values or they collide permanently. The marketing copy returns within
+the edge cache's 10 minutes, or purge.
 
 ### Nothing to remove
 

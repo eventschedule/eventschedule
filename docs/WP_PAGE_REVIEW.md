@@ -74,8 +74,13 @@ A checklist of every WP (marketing) site page, used to track review progress as 
 >   pages.
 > - /pricing, which now lists event graphics under Free.
 >
-> Still open, and only the owner can close it: the production app spec has no `GOOGLE_WALLET_*`
-> keys, so the Add to Google Wallet button renders nowhere on eventschedule.com.
+> Closed 2026-09-10: the production app spec still has no `GOOGLE_WALLET_*` keys, so the Add to
+> Google Wallet button renders nowhere on eventschedule.com, and now nothing claims it does. The
+> eight pages that described it as a plain fact (passes, ticketing, the nightclub, live-concert and
+> theater pages, white-label, FAQ and check-in) gate that copy on
+> `GoogleWalletService::isConfigured()`, the predicate the button itself uses, and
+> `GoogleWalletMarketingClaimTest` fails if one is left ungated or deleted. Set the keys and the
+> copy comes back on its own.
 
 > **Pass 2 - COMPLETE 2026-09-04.** The second sweep went page by page with the whole site in
 > view. What it actually found, in order of how much it mattered:

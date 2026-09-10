@@ -34,6 +34,8 @@ class MarketingStructuredDataTest extends TestCase
         '/',
         '/about',
         '/features/allocated-seating',
+        '/features/passes',
+        '/features/ticketing',
         '/for-musicians',
     ];
 

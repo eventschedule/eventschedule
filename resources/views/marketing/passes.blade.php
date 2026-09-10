@@ -1,4 +1,12 @@
 <x-marketing-layout>
+    @php
+        // Every Google Wallet claim on this page reads the same predicate the button itself does
+        // (GoogleWalletService::isConfigured()), so an install without an issuer account never
+        // promises a button no buyer can find. Set here, above the structured-data slot, because
+        // the featureList in that slot is the first place it is read.
+        $walletLive = \App\Services\Wallet\GoogleWalletService::isConfigured();
+    @endphp
+
     <x-slot name="title">Passes &amp; Subscriptions | Class Packs and Memberships</x-slot>
     <x-slot name="description">Sell one pass a guest pays for once and reuses across many events. Class packs, memberships, festival passes and season tickets, all on one QR code.</x-slot>
     <x-slot name="breadcrumbTitle">Passes</x-slot>
@@ -18,7 +26,9 @@
             "Festival pass good for each covered event once",
             "Season pass covering every date of a recurring event",
             "One QR code for the whole series",
+            @if ($walletLive)
             "Saves to Google Wallet as one pass, not one per date",
+            @endif
             "Cover the whole schedule, a sub-schedule, or hand-picked events",
             "Optional advance booking from the holder's own pass page",
             "Cancellation deadline with a forfeit or block policy",
@@ -462,7 +472,10 @@
                             ['Bring a guest without spending a visit', 'Set how many people the pass admits at each event, holder included. Party size and the visit count are separate, so a ten-visit pass that admits two is ten events for two people, not five.'],
                             // GoogleWalletService::classPayload() leaves a pass's class undated, so the
                             // wallet holds ONE pass for everything it covers. The visit count is not on it.
-                            ['One wallet pass, not one per date', 'The pass page and the confirmation email carry an Add to Google Wallet button. It saves as a single Google Wallet pass for every date it is good for, with the same QR code, how many it admits and its valid-until date. The visit count stays on the pass page.'],
+                            // Only where the install can issue a pass at all; see $walletLive.
+                            ...($walletLive ? [
+                                ['One wallet pass, not one per date', 'The pass page and the confirmation email carry an Add to Google Wallet button. It saves as a single Google Wallet pass for every date it is good for, with the same QR code, how many it admits and its valid-until date. The visit count stays on the pass page.'],
+                            ] : []),
                             ['A bad pass is a status, not an alarm', 'Out of visits, expired, wrong event, too early, event finished - each comes back as a plain statement of what is true, with what to do next. Only a problem with the order behind it is an error: unpaid, cancelled, refunded, timed out before it was paid, or held for a payment review.'],
                             ['The visit log', 'The Subscriptions tab lists every paid pass with its holder, its count and its expiry, and opens out into the dates behind it: attended, booked, or forfeited.'],
                         ];
@@ -487,7 +500,7 @@
         @php
             $passFaqs = [
                 ['q' => 'Is a pass an auto-renewing subscription?', 'a' => 'No. The buyer pays once and Event Schedule never bills them again. A pass here is a multi-use ticket, not a card kept on file, so when it runs out of visits or reaches its expiry the holder simply buys another. The word subscription is also used for your own Pro or Enterprise plan, which is a different thing entirely and is managed on the Plan tab.'],
-                ['q' => 'How many QR codes does a holder get?', 'a' => 'One. A pass is a single redeemable unit - one code with one visit counter - which is why the maximum per order is fixed at one and you never have to set that yourself. Saved to Google Wallet it is still one pass, not one per date; on a selfhosted install that button appears once the operator has set up Google Wallet. Buying passes as gifts means a separate order for each, and a pass cannot share an order with ordinary single-date tickets.'],
+                ['q' => 'How many QR codes does a holder get?', 'a' => 'One. A pass is a single redeemable unit - one code with one visit counter - which is why the maximum per order is fixed at one and you never have to set that yourself.'.($walletLive ? ' Saved to Google Wallet it is still one pass, not one per date; on a selfhosted install that button appears once the operator has set up Google Wallet.' : '').' Buying passes as gifts means a separate order for each, and a pass cannot share an order with ordinary single-date tickets.'],
                 ['q' => 'Does a guest use up one of the visits?', 'a' => 'No. Admissions per event is the number of people who may enter at each event, the holder included, and it is counted separately from the visits. A ten-visit pass that admits two is still ten visits, each of which lets two people in. Extra people do count against the event capacity, so an extra admission is only granted while the date still has a free seat.'],
                 ['q' => 'What happens if my schedule drops back to the free plan?', 'a' => 'Passes you already sold keep every setting and the scanner still checks holders in, because taking a sold pass away from the person holding it would be indefensible. What stops is booking dates in advance. The plan is checked when the pass is used, not only when it was sold.'],
                 ['q' => 'Can a pass be used at another schedule?', 'a' => 'No. Coverage always resolves inside the schedule the selling event belongs to, so a pass sold by one schedule can never be redeemed at another one\'s events.'],

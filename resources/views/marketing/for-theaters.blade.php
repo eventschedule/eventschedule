@@ -827,7 +827,8 @@
                             <h3 class="text-lg font-bold text-[#e8ece9]">On the door</h3>
                             <span class="es-bill-plan">Free</span>
                         </div>
-                        <p class="text-sm text-[#9aa8a1]">Scan on the way in from any phone, on every plan. No extra hardware, and duplicates are caught rather than argued about. Buyers can also add the ticket to Google Wallet, with the same code on it.</p>
+                        {{-- The wallet sentence only where the install can issue a pass: GoogleWalletService::isConfigured() gates the button itself. --}}
+                        <p class="text-sm text-[#9aa8a1]">Scan on the way in from any phone, on every plan. No extra hardware, and duplicates are caught rather than argued about.{{ \App\Services\Wallet\GoogleWalletService::isConfigured() ? ' Buyers can also add the ticket to Google Wallet, with the same code on it.' : '' }}</p>
                     </div>
                     <div class="es-bill-card p-6" data-reveal="panel">
                         <div class="mb-2 flex flex-wrap items-center gap-2">

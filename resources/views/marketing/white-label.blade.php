@@ -120,7 +120,13 @@
            falls back to images/logo.png, our ES mark, as the pass logo
            for a schedule with no profile image, on every plan. The
            "Is anything left?" FAQ says both. If either gate changes,
-           change those two places with it.
+           change those two places with it. The pass half is itself
+           gated on GoogleWalletService::isConfigured() ($walletLive):
+           an install with no issuer account issues no pass, so there
+           is no fallback logo to own up to, and the card, the count
+           in the section 03 intro and the FAQ sentence drop out
+           together. The graphics card then spans both columns, so the
+           grid still closes its bottom row.
 
            NOT USED HERE: a "before / after" toggle or a struck-through
            line. The removal is not an animation and there is no state
@@ -548,6 +554,12 @@
     </style>
 
     @php
+        // Whether this install can issue a Google Wallet pass at all. The
+        // pass-logo fallback is one of the things that stay only when it
+        // can, so section 03's card, its count and the "Is anything left?"
+        // answer all read this. Same predicate as the button itself.
+        $walletLive = \App\Services\Wallet\GoogleWalletService::isConfigured();
+
         // One mock schedule, used by both plates so the only difference
         // between them is the foot.
         $plateName = 'Northgate Hall';
@@ -635,7 +647,7 @@
             ],
             [
                 'q' => 'Is anything left?',
-                'a' => 'On a schedule hosted here, nothing in the body of the page and two things outside it. First, one line of metadata in the page head: the breadcrumb data still names eventschedule.com as the site root. The title in the browser tab and the site name in a shared link preview both read your schedule\'s name on every plan, free included, the picture on that preview is your own artwork or, failing that, whatever your page already shows - never one of ours, and the tab icon becomes your logo on Pro. Point a custom domain at the schedule and the breadcrumb roots at your own domain too, which leaves the head with nothing of ours in it. Second, if an admin granted your Enterprise plan by hand rather than you buying it, a small Event Schedule credit chip stays below the footer; customers who pay through Stripe never carry that chip, and neither do plans earned through the referral programme. Two more things are not on your page at all: every event graphic made here carries a small eventschedule.com credit in its corner, whatever the plan, and a Google Wallet pass shows our logo if you have not uploaded one of your own. On any install that is not eventschedule.com the chip is the normal case rather than an exception, on every plan except a free one that is already carrying the operator\'s own strip - see the two questions below.',
+                'a' => 'On a schedule hosted here, nothing in the body of the page and two things outside it. First, one line of metadata in the page head: the breadcrumb data still names eventschedule.com as the site root. The title in the browser tab and the site name in a shared link preview both read your schedule\'s name on every plan, free included, the picture on that preview is your own artwork or, failing that, whatever your page already shows - never one of ours, and the tab icon becomes your logo on Pro. Point a custom domain at the schedule and the breadcrumb roots at your own domain too, which leaves the head with nothing of ours in it. Second, if an admin granted your Enterprise plan by hand rather than you buying it, a small Event Schedule credit chip stays below the footer; customers who pay through Stripe never carry that chip, and neither do plans earned through the referral programme. '.($walletLive ? 'Two more things are not on your page at all: every event graphic made here carries a small eventschedule.com credit in its corner, whatever the plan, and a Google Wallet pass shows our logo if you have not uploaded one of your own.' : 'One more thing is not on your page at all: every event graphic made here carries a small eventschedule.com credit in its corner, whatever the plan.').' On any install that is not eventschedule.com the chip is the normal case rather than an exception, on every plan except a free one that is already carrying the operator\'s own strip - see the two questions below.',
             ],
             [
                 'q' => 'Do I need to change my embed after upgrading?',
@@ -947,8 +959,8 @@
                     <p class="es-slate2-muted text-lg" data-reveal style="--reveal-delay: 0.15s;">
                         A page selling white-label that promises "no trace anywhere" gets found out on
                         the first afternoon. On a schedule you run here, nothing is left in the body of
-                        your page and two things sit outside it. Two more are not on your page at all.
-                        Here are all four, and then what changes if you run the software yourself
+                        your page and two things sit outside it. {{ $walletLive ? 'Two more are' : 'One more is' }} not on your page at all.
+                        Here are all {{ $walletLive ? 'four' : 'three' }}, and then what changes if you run the software yourself
                         instead, or point a domain of your own at it.
                     </p>
                 </div>
@@ -1006,7 +1018,8 @@
                     </div>
 
                     <!-- The graphic credit: not on your page, on your post. -->
-                    <div class="es-slate2-card flex flex-col p-6 sm:p-7" data-reveal>
+                    {{-- Spans both columns when the wallet card below is gated off ($walletLive), so the 2-column grid still closes its bottom row. --}}
+                    <div class="es-slate2-card flex flex-col p-6 sm:p-7{{ $walletLive ? '' : ' md:col-span-2' }}" data-reveal>
                         <div class="mb-4 flex flex-wrap items-baseline justify-between gap-2">
                             <h3 class="text-lg font-bold text-white">The graphics you generate</h3>
                             <span class="es-slate2-pill es-slate2-pill-keep">One mark</span>
@@ -1031,6 +1044,7 @@
                         </p>
                     </div>
 
+                    @if ($walletLive)
                     <!-- The Wallet pass: your name and logo, ours only as a fallback. -->
                     <div class="es-slate2-card flex flex-col p-6 sm:p-7" data-reveal>
                         <div class="mb-4 flex flex-wrap items-baseline justify-between gap-2">
@@ -1049,6 +1063,7 @@
                             falls back to ours, so upload one before you sell.
                         </p>
                     </div>
+                    @endif
                 </div>
 
                 <p class="es-slate2-muted mx-auto mt-8 max-w-2xl text-center text-sm" data-reveal>

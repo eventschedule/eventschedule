@@ -516,6 +516,11 @@
         // ------------------------------------------------------------------
         $github = 'https://github.com/eventschedule/eventschedule';
 
+        // The Google Wallet clause in the check-in answer reads the same predicate the button
+        // itself does (GoogleWalletService::isConfigured()), so an install without an issuer
+        // account never promises a button no buyer can find.
+        $walletLive = \App\Services\Wallet\GoogleWalletService::isConfigured();
+
         // Prices come from the marketing.* view composer, the same values /pricing renders,
         // so the rate card cannot quietly disagree with it.
         $trialDays = (int) config('app.trial_days', 7);
@@ -618,8 +623,8 @@
                     ],
                     [
                         'q' => 'How do QR check-ins work?',
-                        'a' => 'Each ticket email carries a QR code, and buyers can also save the ticket to Google Wallet from the ticket page or that email (on a selfhosted install, once Google Wallet is set up); the pass carries the same code. Open the scan screen on any phone or tablet, point it at the code, and the ticket is verified and marked as used. A second scan of the same code is caught rather than argued about at the door. Scanning is on every plan, and it needs no dedicated hardware.',
-                        'links' => [['Check-in', marketing_url('/features/check-in')], ['Wallet passes', marketing_url('/docs/tickets#wallet-passes')]],
+                        'a' => 'Each ticket email carries a QR code'.($walletLive ? ', and buyers can also save the ticket to Google Wallet from the ticket page or that email (on a selfhosted install, once Google Wallet is set up); the pass carries the same code' : '').'. Open the scan screen on any phone or tablet, point it at the code, and the ticket is verified and marked as used. A second scan of the same code is caught rather than argued about at the door. Scanning is on every plan, and it needs no dedicated hardware.',
+                        'links' => [['Check-in', marketing_url('/features/check-in')], ...($walletLive ? [['Wallet passes', marketing_url('/docs/tickets#wallet-passes')]] : [])],
                     ],
                     [
                         'q' => 'Can I track check-ins in real time?',

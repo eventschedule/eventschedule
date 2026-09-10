@@ -393,7 +393,11 @@
                 ['q' => 'Does it work for free registrations as well as paid tickets?', 'a' => 'Yes. A free registration gets a QR code in its confirmation email on exactly the same terms as a paid ticket, so an RSVP event checks in the same way a ticketed one does.'],
                 ['q' => 'Can somebody work the door without seeing our sales?', 'a' => 'Yes, on Enterprise. A team member set to viewer is read-only and sees no sales at all, but may still scan tickets at the door. An admin runs the schedule day to day and does see the sales and the check-in dashboard.'],
                 ['q' => 'How do subscription passes appear on it?', 'a' => 'As people, not as passes. Where a pass admits more than one person the dashboard shows a headcount including guests beside the check-in count, and holders who booked a seat ahead are listed as reserved until they actually turn up.'],
-                ['q' => 'Does a wallet pass scan differently?', 'a' => 'No. A pass saved into Google Wallet carries the same QR code as the ticket page, so it scans exactly like any other ticket and it works offline once saved. The scanner checks the order\'s live status either way, so a cancelled or fully refunded order is refused at the door even if the pass is still on the phone.'],
+                // Only where the install can issue a pass: GoogleWalletService::isConfigured() gates
+                // the button itself, so without an issuer account there is no wallet pass to ask about.
+                ...(\App\Services\Wallet\GoogleWalletService::isConfigured() ? [
+                    ['q' => 'Does a wallet pass scan differently?', 'a' => 'No. A pass saved into Google Wallet carries the same QR code as the ticket page, so it scans exactly like any other ticket and it works offline once saved. The scanner checks the order\'s live status either way, so a cancelled or fully refunded order is refused at the door even if the pass is still on the phone.'],
+                ] : []),
                 ['q' => 'Which plan do I need?', 'a' => 'The check-in dashboard is on the Pro plan, and on every selfhosted install at no cost. Scanning at the door, free registrations and selling up to 25 paid tickets a calendar month with no platform fee are all on the Free plan.'],
             ];
         @endphp

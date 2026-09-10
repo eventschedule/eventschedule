@@ -802,10 +802,13 @@
                             <svg aria-hidden="true" class="mt-0.5 h-5 w-5 flex-none text-[#166534] dark:text-[#4ade80]" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7" /></svg>
                             <span><a href="{{ marketing_url('/features/check-in') }}" class="es-door-link font-medium hover:underline">Scanning at the door</a> is free on every plan, and so is the capacity limit on a free night. The live dashboard and per-attendee tickets are Pro.</span>
                         </li>
+                        {{-- Only where the install can issue a pass: GoogleWalletService::isConfigured() gates the button itself. --}}
+                        @if (\App\Services\Wallet\GoogleWalletService::isConfigured())
                         <li class="flex gap-3" data-reveal>
                             <svg aria-hidden="true" class="mt-0.5 h-5 w-5 flex-none text-[#166534] dark:text-[#4ade80]" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7" /></svg>
                             <span>Buyers can save a ticket to Google Wallet with the same QR on it, so nobody in the queue is digging through their email at the rope.</span>
                         </li>
+                        @endif
                     </ul>
                 </div>
 

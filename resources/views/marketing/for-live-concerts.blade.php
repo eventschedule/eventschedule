@@ -947,7 +947,8 @@
                             <h3 class="es-stage-ink text-lg font-bold">Scanned on the way in</h3>
                             <span class="es-stage-plan">Free</span>
                         </div>
-                        <p class="es-stage-muted text-sm">Every ticket carries a QR code, scanned from any phone on any plan, and buyers can save it to Google Wallet, where it scans the same way. Pro adds the check-in dashboard that breaks the running count down by ticket type.</p>
+                        {{-- The wallet clause only where the install can issue a pass: GoogleWalletService::isConfigured() gates the button itself. --}}
+                        <p class="es-stage-muted text-sm">Every ticket carries a QR code, scanned from any phone on any plan{{ \App\Services\Wallet\GoogleWalletService::isConfigured() ? ', and buyers can save it to Google Wallet, where it scans the same way' : '' }}. Pro adds the check-in dashboard that breaks the running count down by ticket type.</p>
                     </div>
                     <div class="es-stage-card p-6" data-reveal="panel">
                         <div class="mb-3 flex flex-wrap items-center gap-2">
