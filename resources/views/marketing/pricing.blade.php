@@ -29,6 +29,7 @@
             'Sell up to 25 tickets a month',
             'Appointment booking (1 type)',
             'Built-in analytics',
+            'Generate event graphics',
             'Sub-schedules',
             '10 ' . __('messages.newsletters_per_month'),
         ];
@@ -41,7 +42,6 @@
             __('messages.feature_boost'),
             'Custom fields',
             'Custom CSS styling',
-            'Generate event graphics',
             'REST API & webhooks',
             'Event polls',
             'Post-event feedback',

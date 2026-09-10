@@ -2298,8 +2298,8 @@
         "keywords": "Trello alternative for events, Trello replacement, Trello event planning, event management board",
         "audience_hint": "For organizers managing events with task boards and project tools",
         "about": "Trello is a kanban-style project management tool that some event organizers use to track event planning tasks. While Trello is great for organizing workflows with boards and cards, it has no attendee-facing features, no registration or ticketing, and task boards do not map well to the event lifecycle of creating, promoting, and managing events.",
-        "pricing_note": "Trello Standard costs $6/month per user. Event Schedule is free for unlimited events and public pages, and selling starts free too, at 25 paid tickets a month. $5/month lifts that ceiling and nothing here is charged per user; a team of five is the Enterprise plan rather than five subscriptions.",
-        "competitor_price": "From $6/mo per user",
+        "pricing_note": "Trello Standard costs $5 per user a month billed annually ($6 monthly). Event Schedule is free for unlimited events and public pages, and selling starts free too, at 25 paid tickets a month. $5/month lifts that ceiling and nothing here is charged per user; a team of five is the Enterprise plan rather than five subscriptions.",
+        "competitor_price": "From $5/mo per user",
         "es_price": "From $0/mo (Pro $5/mo)",
         "comparison_rows": [
             {
@@ -2339,7 +2339,7 @@
             },
             {
                 "feature": "Per-user pricing",
-                "competitor": "$6/user/mo",
+                "competitor": "$5-$6/user/mo",
                 "es": "No per-user fees"
             }
         ],

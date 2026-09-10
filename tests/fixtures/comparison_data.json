@@ -218,8 +218,8 @@
                 [
                     "Private/password-protected events",
                     "Yes (Enterprise)",
-                    "No",
-                    true
+                    "Yes (password)",
+                    false
                 ],
                 [
                     "Availability management",
@@ -878,8 +878,8 @@
                 [
                     "Ticket waitlist",
                     "Yes (Pro)",
-                    "No",
-                    true
+                    "Yes (email sign-ups)",
+                    false
                 ],
                 [
                     "Check-in dashboard",
@@ -902,8 +902,8 @@
                 [
                     "Recurring events",
                     "Yes (Free)",
-                    "No",
-                    true
+                    "Yes",
+                    false
                 ],
                 [
                     "Online events",
@@ -926,8 +926,8 @@
                 [
                     "Promo/discount codes",
                     "Yes (Pro)",
-                    "No",
-                    true
+                    "Yes",
+                    false
                 ],
                 [
                     "Post-event feedback",
@@ -1028,8 +1028,8 @@
                 [
                     "Private/password-protected events",
                     "Yes (Enterprise)",
-                    "No",
-                    true
+                    "Yes (access code)",
+                    false
                 ],
                 [
                     "Availability management",
@@ -1078,8 +1078,8 @@
                 [
                     "Webhooks",
                     "Yes (Pro)",
-                    "No",
-                    true
+                    "Yes",
+                    false
                 ],
                 [
                     "Open source",

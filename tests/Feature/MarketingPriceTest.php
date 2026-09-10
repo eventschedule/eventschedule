@@ -406,6 +406,9 @@ class MarketingPriceTest extends TestCase
             // the number, so an actual hardcoded $9 or $29 of our own still fails.
             'Linktree Pro costs $9/month', 'From $9/mo (Pro)',
             'calendar buttons at $29/mo',
+            // Trello Standard is $5 a user a month billed annually, $6 monthly (trello.com/pricing),
+            // the same figure as our retired Pro price, so it is exempted by phrase too.
+            'Trello Standard costs $5 per user a month', 'From $5/mo per user', '$5-$6/user/mo',
         ];
 
         foreach (explode("\n", File::get($path)) as $index => $line) {
