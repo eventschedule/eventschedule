@@ -602,7 +602,7 @@
             ],
             [
                 'q' => 'Do I get every feature if I selfhost?',
-                'a' => 'All but one. Role::isPro() and Role::isEnterprise() both return true the moment config(\'app.hosted\') is false, so uncapped ticket sales, the REST API, webhooks, custom fields, event graphics, unlimited team members and uncapped newsletter sends are simply on. The exception is a custom domain per schedule: ResolveCustomDomain only runs in hosted mode, and on a selfhost the whole install already sits on a domain you chose. Two things you supply yourself: an AI key if you want the parsing and translation features, and a Stripe or PayPal account for payouts.',
+                'a' => 'All but one. Role::isPro() and Role::isEnterprise() both return true the moment config(\'app.hosted\') is false, so uncapped ticket sales, the REST API, webhooks, custom fields, unlimited team members and uncapped newsletter sends are simply on. The exception is a custom domain per schedule: ResolveCustomDomain only runs in hosted mode, and on a selfhost the whole install already sits on a domain you chose. Two things you supply yourself: an AI key if you want the parsing and translation features, and a Stripe or PayPal account for payouts.',
             ],
             [
                 'q' => 'Is the REST API free on eventschedule.com?',

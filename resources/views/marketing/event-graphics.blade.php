@@ -1,8 +1,5 @@
 <x-marketing-layout>
     @php
-        // $proMonthly comes from the marketing.* view composer.
-        $trialDays = (int) config('app.trial_days', 7);
-
         // The wall in the hero: six upcoming events, each with its own flyer.
         // Two OPTIONAL settings are switched on in this drawing, and the caption
         // under the print says so, because neither is the default: the date
@@ -129,7 +126,7 @@
             ],
             [
                 'q' => 'Is the event graphics feature free?',
-                'a' => 'Generating event graphics is on the Pro plan, which is ' . plan_price($proMonthly) . ' a month with a ' . $trialDays . '-day free trial. Uploading a flyer to an event is free on every plan. The AI text prompt and the scheduled graphic emails are Enterprise.',
+                'a' => 'Yes, on every plan. Composing the graphic and its text, the header image and the header and footer text, every format and custom fields in the template are all free, and so is uploading a flyer to an event. The AI rewrite of the generated text and the scheduled graphic emails are Enterprise.',
             ],
         ];
 
@@ -178,9 +175,9 @@
         "description": "Turn an event into a poster and a caption without opening a design tool: pick a size and a template, and the date, venue and price fill themselves in.",
         "offers": {
             "@type": "Offer",
-            "price": "{{ $proMonthly }}",
+            "price": "0",
             "priceCurrency": "{{ platform_currency() }}",
-            "description": "Pro plan with {{ config('app.trial_days', 7) }}-day free trial"
+            "description": "Free on every plan. The AI rewrite of the generated text and scheduled graphic emails are on the Enterprise plan."
         },
         "featureList": [
             "One PNG built from the flyer images of your upcoming events",
@@ -815,7 +812,7 @@
                         <svg aria-hidden="true" class="es-gal-accent h-5 w-5" fill="none" viewBox="0 0 24 24" stroke-width="1.8" stroke="currentColor">
                             <path stroke-linecap="round" stroke-linejoin="round" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
                         </svg>
-                        <span class="es-gal-muted text-sm font-medium tracking-wide">Event graphics &middot; Pro plan</span>
+                        <span class="es-gal-muted text-sm font-medium tracking-wide">Event graphics &middot; free on every plan</span>
                     </div>
 
                     <h1 class="es-balance es-gal-ink mb-8 text-[2.4rem] font-black leading-[1.05] tracking-tight sm:text-6xl">
@@ -916,7 +913,7 @@
                     <div class="es-gal-card p-6 sm:p-7" data-reveal="panel">
                         <div class="mb-4 flex flex-wrap items-center gap-2">
                             <h3 class="es-gal-bright text-lg font-bold">The picture</h3>
-                            <span class="es-gal-plan">Pro</span>
+                            <span class="es-gal-plan">Free</span>
                         </div>
                         {{-- Nothing switched on: three flyers, their QR codes and, on
                              the hosted service, the credit. This is the graphic before
@@ -942,7 +939,7 @@
                     <div class="es-gal-card p-6 sm:p-7" data-reveal="panel">
                         <div class="mb-4 flex flex-wrap items-center gap-2">
                             <h3 class="es-gal-bright text-lg font-bold">The plate</h3>
-                            <span class="es-gal-plan">Pro</span>
+                            <span class="es-gal-plan">Free</span>
                         </div>
                         <div class="es-gal-code p-4">
                             <p class="es-gal-code-head mb-2">Generated text</p>
@@ -1260,7 +1257,7 @@
                         <div class="relative z-10">
                             <div class="mb-4 flex flex-wrap items-center gap-2">
                                 <h3 class="es-gal-ink text-xl font-bold">Your banner across the top</h3>
-                                <span class="es-gal-plan">Pro</span>
+                                <span class="es-gal-plan">Free</span>
                             </div>
                             <p class="es-gal-muted mb-4">Upload a header image and it runs the full width of every graphic, above the wall, in a band up to 200 pixels tall. A JPG, PNG, GIF or WebP; one upload, and every graphic from then on carries it.</p>
                             <p class="es-gal-muted text-sm">Leave it off and the graphic starts straight in on the events, over your schedule's own background.</p>
@@ -1276,7 +1273,7 @@
                         <div class="relative z-10">
                             <div class="mb-4 flex flex-wrap items-center gap-2">
                                 <h3 class="es-gal-ink text-xl font-bold">A headline and a sign-off</h3>
-                                <span class="es-gal-plan">Pro</span>
+                                <span class="es-gal-plan">Free</span>
                             </div>
                             <p class="es-gal-muted">Header text is bold and shrinks itself to fit the width. Footer text is quieter and can run to two lines. Both take schedule variables, so <span class="es-gal-mono es-gal-accent">{month_name} {year}</span> or <span class="es-gal-mono es-gal-accent">{first_event_date}</span> writes itself every time.</p>
                         </div>
@@ -1291,7 +1288,7 @@
                         <div class="relative z-10">
                             <div class="mb-4 flex flex-wrap items-center gap-2">
                                 <h3 class="es-gal-ink text-xl font-bold">What the tile says</h3>
-                                <span class="es-gal-plan">Pro</span>
+                                <span class="es-gal-plan">Free</span>
                             </div>
                             <p class="es-gal-muted">Nothing is written on the artwork unless you ask for it. Switch the strip on and it carries the event's date; give it a short template of its own and it says whatever you need instead, using the same event variables as the plate.</p>
                         </div>
@@ -1306,7 +1303,7 @@
                         <div class="relative z-10">
                             <div class="mb-4 flex flex-wrap items-center gap-2">
                                 <h3 class="es-gal-ink text-xl font-bold">A code in every corner</h3>
-                                <span class="es-gal-plan">Pro</span>
+                                <span class="es-gal-plan">Free</span>
                             </div>
                             <p class="es-gal-muted mb-4">Each flyer carries a QR code that opens that event's own page, so a phone pointed at the image lands on the right event rather than on your calendar in general. Print the graphic and it still works. If that event's tickets are not on sale yet, its page lets them <a href="{{ route('marketing.docs.tickets') }}#interest-list" class="es-gal-link font-semibold hover:underline">leave an email address</a> and hear when they are.</p>
                             <p class="es-gal-muted text-sm">Number the flyers as well and the wall becomes a numbered list that the caption underneath can refer to.</p>
@@ -1386,10 +1383,10 @@
             <div class="mx-auto mb-12 max-w-3xl text-center">
                 <p class="es-gal-mark mb-5" data-reveal>What it costs</p>
                 <h2 class="es-balance es-gal-ink text-3xl font-black tracking-tight md:text-4xl" data-reveal style="--reveal-delay: 0.1s;">
-                    Free to have the artwork. <span class="es-gal-accent">Pro to hang it.</span>
+                    Every plan hangs the show. <span class="es-gal-accent">Enterprise writes the captions.</span>
                 </h2>
                 <p class="es-gal-muted mt-5 text-lg" data-reveal style="--reveal-delay: 0.15s;">
-                    Pro is {{ plan_price($proMonthly) }} a month with a {{ $trialDays }}-day free trial. Nothing on this page is charged per graphic.
+                    Composing a graphic, its text and every format is free on every plan. Enterprise, at {{ plan_price($entMonthly) }} a month, adds the AI rewrite of the text and the emails that send a graphic on a schedule. Nothing on this page is charged per graphic.
                 </p>
             </div>
 
@@ -1407,10 +1404,10 @@
                             @foreach ([
                                 ['Upload a flyer image to an event', 'Free', 'plan'],
                                 ['A public page and its own link for every event', 'Free', 'plan'],
-                                ['Compose the graphic and its text', 'Pro', 'plan'],
-                                ['Header image, header and footer text, tile text', 'Pro', 'plan'],
-                                ['Square, portrait, story and landscape formats', 'Pro', 'plan'],
-                                ['Custom fields in the template', 'Pro', 'plan'],
+                                ['Compose the graphic and its text', 'Free', 'plan'],
+                                ['Header image, header and footer text, tile text', 'Free', 'plan'],
+                                ['Square, portrait, story and landscape formats', 'Free', 'plan'],
+                                ['Custom fields in the template', 'Free', 'plan'],
                                 ['AI rewrite of the generated text', 'Enterprise', 'plan-enterprise'],
                                 ['Scheduled graphic emails', 'Enterprise', 'plan-enterprise'],
                             ] as [$pLabel, $pPlan, $pClass])
@@ -1571,7 +1568,7 @@
                         Your next six shows, <span class="es-gal-lit">in one image.</span>
                     </h2>
                     <p class="es-gal-dim mx-auto mb-10 max-w-2xl text-lg sm:text-xl">
-                        Publishing your schedule is free forever. Event graphics are {{ plan_price($proMonthly) }} a month with a {{ $trialDays }}-day free trial, and no design work either way.
+                        Publishing your schedule is free forever, and so are the graphics made from it, with no design work either way.
                     </p>
 
                     <div class="mx-auto flex max-w-2xl flex-col items-stretch justify-center gap-3 sm:flex-row">

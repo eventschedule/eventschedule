@@ -644,7 +644,7 @@
             ],
             [
                 'q' => 'Does calendar sync cost anything?',
-                'a' => 'No. Google Calendar, Outlook and CalDAV sync are all on the free plan, in both directions, and selfhosted installs get them too. The paid plans are about ticketing, graphics and branding, not about your calendar.',
+                'a' => 'No. Google Calendar, Outlook and CalDAV sync are all on the free plan, in both directions, and selfhosted installs get them too. The paid plans are about selling without a monthly cap, the extras around a ticket and your branding, not about your calendar.',
             ],
         ];
 

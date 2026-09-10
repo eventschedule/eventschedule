@@ -44,7 +44,7 @@
                     [
                         'Unlimited ticket sales and the live check-in dashboard',
                         'Promo codes, add-ons, passes and gift cards',
-                        'Event graphics, the REST API, and no Event Schedule branding',
+                        'The REST API, webhooks, and no Event Schedule branding',
                     ],
                     true,
                 ],

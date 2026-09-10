@@ -1874,7 +1874,7 @@ Beyond the API endpoints documented above, Event Schedule includes these platfor
 - **Appointments**: Bookable appointment types with weekly hours, per-date overrides, buffers, approvals and payment. One type on the free plan, unlimited on Pro.
 - **Newsletters and audience**: Email sign-up with double opt-in, an automatic digest of new events to confirmed subscribers, and a drag-and-drop newsletter builder with templates, segments and A/B testing (10 / 100 / 1,000 recipients a month on Free / Pro / Enterprise).
 - **Analytics**: Privacy-first (no cookies) page view tracking, device/browser breakdown, traffic sources, social link clicks, and conversion funnels.
-- **Event graphics** (Pro): Auto-generated promotional images in multiple layouts, sized for social media sharing.
+- **Event graphics**: Auto-generated promotional images in multiple layouts, sized for social media sharing, on every plan (AI-written graphic text and scheduled graphic emails are Enterprise).
 - **Sub-schedules**: Color-coded event categories within a schedule, with filtering and separate URLs. Manageable via API.
 - **Custom fields** (Pro): Custom data fields on events, each of which can also be asked on the public event request form.
 - **Fan content**: YouTube videos, photos and comments on events, with an approval workflow.
@@ -1901,6 +1901,7 @@ Everything needed to publish events and start selling:
 - Full and partial refunds (Stripe and PayPal refund through the provider)
 - Google Calendar, Outlook and CalDAV sync
 - Analytics
+- Event graphics for social media
 - Embeddable calendar and iCal feeds
 - Recurring events, sub-schedules and online events
 - One appointment type
@@ -1917,7 +1918,6 @@ Pro adds:
 - Promo codes, add-ons, passes and subscriptions, gift cards, the ticket waitlist and installment payments
 - Live check-in dashboard, sales CSV export and bulk attendee import
 - REST API and webhooks
-- Event graphics
 - Unlimited appointment types
 - Custom fields, custom CSS, event polls, post-event feedback and carpool matching
 - Embeddable ticket widget

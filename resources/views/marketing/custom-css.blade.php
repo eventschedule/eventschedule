@@ -1185,7 +1185,7 @@
                             <h3 class="es-sheet2-ink text-lg font-bold">On Pro</h3>
                             <span class="es-sheet2-plan es-sheet2-plan-pro">Pro</span>
                         </div>
-                        <p class="es-sheet2-muted text-sm">Custom CSS, alongside unlimited paid tickets, event graphics, the ticket widget and the removal of our footer line. One price for all of it.</p>
+                        <p class="es-sheet2-muted text-sm">Custom CSS, alongside unlimited paid tickets, the ticket widget and the removal of our footer line. One price for all of it.</p>
                     </div>
                     <div class="es-sheet2-card p-6" data-reveal="panel">
                         <h3 class="es-sheet2-ink mb-2 text-lg font-bold">Selfhosted</h3>
