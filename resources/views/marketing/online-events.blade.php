@@ -534,7 +534,7 @@
             ],
             [
                 'q' => 'What happens if a session moves or is cancelled?',
-                'a' => 'When you save a new date for a one-off session, a new join link or a cancellation, Event Schedule offers to send a notice, and it goes only if you confirm it. It reaches anyone who left an email address on the event page under "Tell me if anything changes" or "Tell me when tickets go on sale", and, if your schedule sends through its own SMTP server, everyone registered. The ticket shows the new link as soon as you save, and a calendar subscribed to your live feed picks up a new time on its next refresh. A Stripe or PayPal sale can be refunded in full or in part from the Sales page, with the money going back through the provider. The app does not email the buyer about a refund, so tell them yourself.',
+                'a' => 'When you save a new date for a one-off session, a new join link or a cancellation, Event Schedule offers to send a notice, and it goes only if you confirm it. It reaches anyone who left an email address on the event page under "Tell me if anything changes" or "Tell me when tickets go on sale", and everyone registered too, which on eventschedule.com needs your schedule to send through its own SMTP server. The ticket shows the new link as soon as you save, and a calendar subscribed to your live feed picks up a new time on its next refresh. A Stripe or PayPal sale can be refunded in full or in part from the Sales page, with the money going back through the provider. The app does not email the buyer about a refund, so tell them yourself.',
             ],
             [
                 'q' => 'Do I need a paid plan to run online events?',

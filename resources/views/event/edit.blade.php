@@ -1765,12 +1765,18 @@
                                     <p class="text-sm text-amber-700 dark:text-amber-300">{{ __('messages.schedule_timezone_missing') }}</p>
                                 </div>
                             @endif
-                            {{-- Attendee change-notification hint (issue #94): shown only when the event has registrants. --}}
+                            {{-- Attendee change-notification hint (issue #94): shown only when the event has registrants.
+                                 The set-up-your-own-email link goes to the Email Settings tab, which only the hosted
+                                 service has, so a selfhosted install without a working mailer shows nothing. --}}
                             @if ($event->exists)
+                            @if (config('app.hosted'))
                             <p v-if="registrantCount > 0" v-cloak class="mt-2 text-sm text-gray-500 dark:text-gray-400">
                                 <span v-if="scheduleHasEmailSettings">{{ __('messages.change_notifies_attendees_hint') }}</span>
                                 <a v-else href="{{ route('role.edit', ['subdomain' => $subdomain]) }}" class="text-[var(--brand-blue)] hover:underline">{{ __('messages.notify_requires_email_settings') }}</a>
                             </p>
+                            @else
+                            <p v-if="registrantCount > 0 && scheduleHasEmailSettings" v-cloak class="mt-2 text-sm text-gray-500 dark:text-gray-400">{{ __('messages.change_notifies_attendees_hint') }}</p>
+                            @endif
                             @endif
                             <div v-if="!isRecurring" class="mt-6 flex justify-end">
                                 <x-toggle name="is_multi_day" id="is_multi_day" :label="__('messages.multi_day_event')" :checked="$isMultiDay" />

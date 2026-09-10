@@ -5424,17 +5424,24 @@ class RoleController extends Controller
             }
         }
 
-        // Save notification preferences for the current user
-        $notificationSettings = [
-            'new_sale' => (bool) $request->input('notification_new_sale'),
-            'new_request' => (bool) $request->input('notification_new_request'),
-            'new_fan_content' => (bool) $request->input('notification_new_fan_content'),
-            'new_feedback' => (bool) $request->input('notification_new_feedback'),
-            'new_poll_option' => (bool) $request->input('notification_new_poll_option'),
-            'installment_due' => (bool) $request->input('notification_installment_due'),
-        ];
+        // Save notification preferences for the current user.
+        //
+        // Only the keys the request carries. A greyed-out toggle posts nothing at all (<x-toggle>
+        // disables its hidden "0" along with the checkbox), so writing all six keys stored every
+        // greyed-out preference as OFF on each save, including installment_due, which defaults ON.
+        // A key the form did not post keeps its stored value, or stays absent so its default holds.
+        $notificationPivot = $role->users()->where('user_id', auth()->id())->first()?->pivot;
+        $notificationSettings = json_decode($notificationPivot?->notification_settings ?? '{}', true);
+        if (! is_array($notificationSettings)) {
+            $notificationSettings = [];
+        }
+        foreach (['new_sale', 'new_request', 'new_fan_content', 'new_feedback', 'new_poll_option', 'installment_due'] as $notificationKey) {
+            if ($request->has('notification_'.$notificationKey)) {
+                $notificationSettings[$notificationKey] = $request->boolean('notification_'.$notificationKey);
+            }
+        }
         $role->users()->updateExistingPivot(auth()->id(), [
-            'notification_settings' => json_encode($notificationSettings),
+            'notification_settings' => json_encode((object) $notificationSettings),
         ]);
 
         // Handle DigitalOcean custom domain provisioning
@@ -8014,6 +8021,13 @@ class RoleController extends Controller
 
         if (! $role->isPro() || ! $role->feedback_enabled) {
             return response()->json(['error' => __('messages.not_authorized')], 403);
+        }
+
+        // The rule the real feedback requests go out on (see resendFeedbackEmail): the schedule's own
+        // SMTP on hosted, a real mailer on selfhost. Without it the test went out through the platform
+        // mailer and reported success for mail the schedule could never actually send.
+        if (! EmailService::canSendScheduleMail($role)) {
+            return response()->json(['error' => __('messages.email_not_configured')], 422);
         }
 
         if (empty($user->email)) {

@@ -957,6 +957,14 @@
 
     @php $scheduleUrl = $role->custom_domain ?: $role->getGuestUrl(); @endphp
 
+    @if (! $role->isClaimed() && isset($mergeCandidates) && $mergeCandidates->count() > 0)
+    {{-- The merge section's form, kept outside #edit-form (see that section) and placed before it so
+         the section's inline script finds it while the page is still parsing. --}}
+    <form id="merge-venue-form" action="{{ route('role.merge', ['subdomain' => $role->subdomain]) }}" method="POST">
+        @csrf
+    </form>
+    @endif
+
     <form method="post"
         action="{{ $role->exists ? route('role.update', ['subdomain' => $role->subdomain]) : route('role.store') }}"
         enctype="multipart/form-data"
@@ -1540,12 +1548,16 @@
                         </div>
                         @endif
 
-                        <form id="merge-venue-form" action="{{ route('role.merge', ['subdomain' => $role->subdomain]) }}" method="POST">
-                            @csrf
+                        {{-- The <form> itself sits above #edit-form. Nested inside it, the browser dropped
+                             its start tag and its end tag closed #edit-form early, so every field after
+                             this section fell out of the schedule's save and the merge button had no
+                             form to submit. These controls reach it through form="merge-venue-form". --}}
+                        <div>
                             <div class="mb-6">
                                 <x-input-label for="merge_target_subdomain" :value="__('messages.merge_into')" />
                                 <select id="merge_target_subdomain"
                                         name="target_subdomain"
+                                        form="merge-venue-form"
                                         data-searchable
                                         class="mt-1 block w-full border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-[var(--brand-blue)] focus:ring-[var(--brand-blue)] rounded-lg shadow-sm">
                                     <option value="">{{ __('messages.please_select') }}</option>
@@ -1558,9 +1570,9 @@
                             </div>
 
                             <div>
-                                <x-danger-button id="merge-venue-button" type="button">{{ __('messages.merge_venue') }}</x-danger-button>
+                                <x-danger-button id="merge-venue-button" type="button" form="merge-venue-form">{{ __('messages.merge_venue') }}</x-danger-button>
                             </div>
-                        </form>
+                        </div>
                     </div>
                 </div>
 
@@ -3326,7 +3338,13 @@
                                 help="{{ __('messages.announce_new_events_help') }}" />
                         </div>
 
-                        @php $emailDisabled = config('app.hosted') && ! $role->hasEmailSettings(); @endphp
+                        @php
+                            $emailDisabled = config('app.hosted') && ! $role->hasEmailSettings();
+                            // Sale and feedback alerts push before they look for a mail transport, so
+                            // where push can reach this schedule (configured, and on Pro) those two
+                            // toggles still do something without email settings.
+                            $notifyPushEnabled = \App\Services\OneSignalService::isEnabled($role);
+                        @endphp
 
                         @if ($emailDisabled)
                             <hr class="my-6 border-gray-200 dark:border-gray-700">
@@ -3348,7 +3366,7 @@
                                 label="{{ __('messages.notify_new_sale') }}"
                                 checked="{{ old('notification_new_sale', $notificationSettings['new_sale'] ?? false) }}"
                                 help="{{ __('messages.notify_new_sale_help') }}"
-                                :disabled="$emailDisabled" />
+                                :disabled="$emailDisabled && ! $notifyPushEnabled" />
                         </div>
 
                         <div class="mb-6">
@@ -3356,7 +3374,7 @@
                                 label="{{ __('messages.notify_new_feedback') }}"
                                 checked="{{ old('notification_new_feedback', $notificationSettings['new_feedback'] ?? false) }}"
                                 help="{{ __('messages.notify_new_feedback_help') }}"
-                                :disabled="$emailDisabled" />
+                                :disabled="$emailDisabled && ! $notifyPushEnabled" />
                         </div>
 
                         <div class="mb-6">
@@ -3370,13 +3388,14 @@
                         {{-- Defaults ON, unlike the others. A failed installment is money that did
                              not arrive; an organizer who never opened this page still needs to
                              hear about it. Routine upcoming-payment notices are aggregated into one
-                             daily digest, so this cannot flood them. --}}
+                             daily digest, so this cannot flood them. Never greyed out: the digest
+                             falls back to the platform mailer when the schedule has no email settings
+                             of its own (ChargeInstallments::sendDigest). --}}
                         <div class="mb-6">
                             <x-toggle name="notification_installment_due"
                                 label="{{ __('messages.notification_installment_due') }}"
                                 checked="{{ old('notification_installment_due', $notificationSettings['installment_due'] ?? true) }}"
-                                help="{{ __('messages.notification_installment_due_help') }}"
-                                :disabled="$emailDisabled" />
+                                help="{{ __('messages.notification_installment_due_help') }}" />
                         </div>
 
                         </div>

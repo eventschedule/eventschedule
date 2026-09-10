@@ -270,8 +270,9 @@
                                                         <div>
                                                             {{-- Honest label. A rail that cannot send money back gets "Mark as
                                                                  Refunded", because the old wording promised a refund and only
-                                                                 ever changed a status. --}}
-                                                            {{ $refundViaGateway ? __('messages.refund_ticket') : __('messages.mark_as_refunded') }}
+                                                                 ever changed a status. An appointment booking is not a ticket, so
+                                                                 it gets the plain "Refund" the phone menu uses. --}}
+                                                            {{ $refundViaGateway ? ($sale->event?->appointment_type_id ? __('messages.refund') : __('messages.refund_ticket')) : __('messages.mark_as_refunded') }}
                                                         </div>
                                                     </button>
                                                     @endif

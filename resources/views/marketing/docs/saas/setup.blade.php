@@ -84,7 +84,7 @@
             <li>A domain name with DNS access</li>
             <li>Ability to configure wildcard SSL certificates</li>
             <li>Web server configured to handle wildcard subdomains (Apache or Nginx)</li>
-            <li>A working mail transport: tenant invitations, ticket confirmations, subscription receipts and support notifications all send from this install. In hosted mode, sale notifications, appointment and gift card emails, pass booking confirmations and buyer change notices go only through a tenant schedule's own email settings, so a tenant without them gets none of those</li>
+            <li>A working mail transport: tenant invitations, ticket confirmations, subscription receipts and support notifications all send from this install. In hosted mode, sale notifications, appointment and gift card emails and buyer change notices go only through a tenant schedule's own email settings, so a tenant without them gets none of those</li>
         </ol>
     </section>
 

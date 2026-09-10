@@ -1016,7 +1016,7 @@
 
         <div class="doc-callout doc-callout-info">
             <div class="doc-callout-title">Sender &amp; Compliance</div>
-            <p>On eventschedule.com, sale notification emails go out only once the schedule has its own <a href="{{ route('marketing.docs.creating_schedules') }}#integrations-email" class="doc-link">email settings</a>, and they are sent from that address. Until then the <strong class="text-gray-900 dark:text-white">New ticket sale</strong> toggle stays greyed out. A selfhosted install only needs a working mailer. All notification emails include an unsubscribe link for compliance.</p>
+            <p>On eventschedule.com, sale notification emails go out only once the schedule has its own <a href="{{ route('marketing.docs.creating_schedules') }}#integrations-email" class="doc-link">email settings</a>, and they are sent from that address. Until then the <strong class="text-gray-900 dark:text-white">New ticket sale</strong> toggle stays greyed out, unless the schedule is on Pro and push notifications are set up: the push goes out without email settings, so the toggle stays usable for it. A selfhosted install only needs a working mailer. All notification emails include an unsubscribe link for compliance.</p>
         </div>
     </section>
 
@@ -1085,7 +1085,7 @@
 
         <div class="doc-callout doc-callout-tip">
             <div class="doc-callout-title">Imports never spend the allowance</div>
-            <p>Imported attendees are recorded with their own payment method, so they never count toward the Free plan's <a href="#general" class="doc-link">paid-ticket allowance</a>. On eventschedule.com, sending the confirmation emails needs the schedule's own <a href="{{ route('marketing.docs.creating_schedules') }}#integrations-email" class="doc-link">email settings</a>: with <strong class="text-gray-900 dark:text-white">Send Email</strong> on and none saved, the save button stays disabled.</p>
+            <p>Imported attendees are recorded with their own payment method, so they never count toward the Free plan's <a href="#general" class="doc-link">paid-ticket allowance</a>. With <strong class="text-gray-900 dark:text-white">Send Email</strong> on, each imported attendee gets the same confirmation email a checkout sends. On eventschedule.com it comes from our address until the schedule has its own <a href="{{ route('marketing.docs.creating_schedules') }}#integrations-email" class="doc-link">email settings</a>, then from yours. A selfhosted install needs a working mailer, and without one the save button stays disabled while Send Email is on.</p>
         </div>
     </section>
 
@@ -1312,7 +1312,7 @@
             </div>
             <div class="doc-field">
                 <h4 class="font-semibold text-gray-900 dark:text-white mb-2">Cancelled or Deleted Events</h4>
-                <p class="text-sm text-gray-500 dark:text-gray-400">An event with any sales cannot be deleted: the app asks you to cancel it instead, so buyers keep their records. <strong class="text-gray-900 dark:text-white">Cancel event</strong> keeps every sale and refund record, stops any remaining installment payments, and emails the people there are to tell: ticket holders and registrants when the schedule has its own email settings, and anyone on the <a href="#interest-list" class="doc-link">interest list</a>. It does not refund anyone, and the sales stay paid, so refund them from the Sales page. A cancelled event can be restored later.</p>
+                <p class="text-sm text-gray-500 dark:text-gray-400">An event with any sales cannot be deleted: the app asks you to cancel it instead, so buyers keep their records. <strong class="text-gray-900 dark:text-white">Cancel event</strong> keeps every sale and refund record, stops any remaining installment payments, and emails the people there are to tell: ticket holders and registrants (on eventschedule.com, only when the schedule has its own email settings) and anyone on the <a href="#interest-list" class="doc-link">interest list</a>. It does not refund anyone, and the sales stay paid, so refund them from the Sales page. A cancelled event can be restored later.</p>
             </div>
             <div class="doc-field">
                 <h4 class="font-semibold text-gray-900 dark:text-white mb-2">Payout Schedule</h4>

@@ -1116,7 +1116,7 @@
                                 @endforeach
                             </div>
                             <p class="es-line-muted es-line-rule mt-4 pt-3 text-xs">
-                                The bottom four report on Pro features, and on eventschedule.com their toggles stay greyed out until the schedule fills in its own email settings, which any plan can do. The top two need neither.
+                                The bottom four report on Pro features. On eventschedule.com the ticket, feedback and poll alerts email only once the schedule fills in its own email settings, which any plan can do, and their toggles stay greyed out until then, unless push notifications are set up, which keeps the ticket and feedback ones usable as a push. Installment alerts need no email settings, and the top two need neither.
                             </p>
                         </div>
                         <div class="es-glare" aria-hidden="true"></div>

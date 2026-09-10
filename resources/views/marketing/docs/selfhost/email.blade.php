@@ -37,7 +37,7 @@
             </div>
             <div class="doc-field">
                 <h4 class="font-semibold text-gray-900 dark:text-white mb-2">Guest notifications</h4>
-                <p class="text-gray-600 dark:text-gray-400 text-sm">Waitlist openings when a spot frees up, the emails to an event's interest list, the confirmation link a visitor gets after using a schedule's sign-up panel, post-event feedback requests, and carpool messages between attendees. See <a href="#what-is-sent" class="doc-link">What Is Sent Automatically</a>.</p>
+                <p class="text-gray-600 dark:text-gray-400 text-sm">Waitlist openings when a spot frees up, the emails to an event's interest list, change and cancellation notices to ticket buyers, the confirmation link a visitor gets after using a schedule's sign-up panel, post-event feedback requests, and carpool messages between attendees. See <a href="#what-is-sent" class="doc-link">What Is Sent Automatically</a>.</p>
             </div>
             <div class="doc-field">
                 <h4 class="font-semibold text-gray-900 dark:text-white mb-2">Account and owner emails</h4>
@@ -94,7 +94,7 @@
                     <tr>
                         <td>Change or cancellation notice to ticket buyers</td>
                         <td>Buyers and registered attendees</td>
-                        <td>Needs the schedule's own SMTP settings, which only the hosted service lets an owner enter, so a selfhosted install does not send these. The interest list is still told.</td>
+                        <td>Sent through your install's mailer, on the same terms as the interest list: when the organizer cancels the event, and for a new date or time (one-off events only), venue or online link only when they choose to notify in the prompt that appears on save. There is no per-schedule SMTP to set up first.</td>
                     </tr>
                     <tr>
                         <td>Sign-up confirmation</td>
@@ -387,7 +387,7 @@
         </div>
 
         <h3 class="doc-subheading">One sender for every schedule</h3>
-        <p class="text-gray-600 dark:text-gray-300 mb-6">On a selfhosted install this is the From address for all outgoing mail, whichever schedule triggered it. There is no per-schedule sender to configure: the Email Settings tab that lets an owner supply their own SMTP credentials is part of the hosted service and is not rendered when the app runs selfhosted, which is also why ticket buyers are not sent change and cancellation notices (see <a href="#what-is-sent" class="doc-link">What Is Sent Automatically</a>). Pick an address that reads sensibly for every schedule on the instance, and one you can actually receive replies at.</p>
+        <p class="text-gray-600 dark:text-gray-300 mb-6">On a selfhosted install this is the From address for all outgoing mail, whichever schedule triggered it. There is no per-schedule sender to configure: the Email Settings tab that lets an owner supply their own SMTP credentials is part of the hosted service and is not rendered when the app runs selfhosted, so mail that a hosted schedule may only send from its own address, such as change and cancellation notices to ticket buyers, goes out from this one (see <a href="#what-is-sent" class="doc-link">What Is Sent Automatically</a>). Pick an address that reads sensibly for every schedule on the instance, and one you can actually receive replies at.</p>
         <p class="text-gray-600 dark:text-gray-300 mb-6">Three emails also name the schedule. The sign-up confirmation, the new-event digest and the interest list's emails keep your address but put the schedule in the sender name, for example "The Blue Note via My Event Schedule" with the settings above, and send replies to the schedule's own email address when it has one.</p>
 
         <div class="doc-callout doc-callout-info">
@@ -472,7 +472,7 @@
             <div class="doc-field">
                 <h4 class="font-semibold text-gray-900 dark:text-white mb-2">Nothing arrives and nothing is logged</h4>
                 <ul class="doc-list text-sm">
-                    <li>With <code class="doc-inline-code">MAIL_MAILER=log</code> the app treats itself as having no mail transport and skips ticket, appointment, gift card, sale-alert and feedback emails, the new-event digest and the interest list's on-sale and reminder emails outright, so there is no error to find. Configure a real driver</li>
+                    <li>With <code class="doc-inline-code">MAIL_MAILER=log</code> the app treats itself as having no mail transport and skips ticket, appointment, gift card, sale-alert and feedback emails, change and cancellation notices to ticket buyers, the new-event digest and the interest list's on-sale and reminder emails outright, so there is no error to find. Configure a real driver</li>
                     <li>Confirmation emails are also skipped for addresses on the reserved test domains listed under <a href="#testing" class="doc-link">Testing</a>. Buy a test ticket with a real address</li>
                 </ul>
             </div>
@@ -480,9 +480,9 @@
             <div class="doc-field">
                 <h4 class="font-semibold text-gray-900 dark:text-white mb-2">Ticket buyers were not told about a change</h4>
                 <ul class="doc-list text-sm">
-                    <li>A selfhosted install does not email ticket buyers when an event changes or is cancelled. Those notices need a schedule's own SMTP settings, which only the hosted service offers</li>
-                    <li>People on the event's interest list are told. Cancelling tells them, and a new date or time (one-off events only), venue or online link tells them when you choose to notify in the prompt on save</li>
-                    <li>Those interest-list notices go through your mail transport, so with <code class="doc-inline-code">MAIL_MAILER=log</code> they end up in <code class="doc-inline-code">storage/logs/laravel.log</code></li>
+                    <li>Buyers and registrants hear about a change only when you choose <strong class="text-gray-900 dark:text-white">Notify attendees</strong> in the prompt on save, and only for a new date or time (one-off events only), venue or online link. Cancelling tells them as part of cancelling</li>
+                    <li>Those notices go through your mail transport, so with <code class="doc-inline-code">MAIL_MAILER=log</code> or <code class="doc-inline-code">array</code> they are skipped outright, with nothing logged. A buyer on one of the reserved test domains listed under <a href="#testing" class="doc-link">Testing</a> is never mailed either</li>
+                    <li>People on the event's interest list are told on the same terms, but their notices are not skipped: with <code class="doc-inline-code">MAIL_MAILER=log</code> they end up in <code class="doc-inline-code">storage/logs/laravel.log</code></li>
                 </ul>
             </div>
 

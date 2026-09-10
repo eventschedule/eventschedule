@@ -26,6 +26,28 @@ class EmailService
     const ERROR_SKIPPED = 'skipped';
 
     /**
+     * Whether mail can go out on a schedule's behalf, under the one transport rule the sends share.
+     *
+     * Hosted: TRANSACTIONAL mail (something the recipient bought or booked) needs only a schedule to
+     * speak for, because it falls back to the platform mailer when that schedule has no SMTP of its
+     * own. Everything else needs the schedule's own email settings.
+     *
+     * Selfhost: there is no per-schedule sender at all. The Email Settings tab is hosted-only, so
+     * hasEmailSettings() is always false there, and every mail goes through the install's one
+     * mailer. The only question is whether MAIL_MAILER is a real transport rather than log/array.
+     */
+    public static function canSendScheduleMail(?Role $role, bool $transactional = false): bool
+    {
+        if (config('app.hosted')) {
+            return $transactional
+                ? $role !== null
+                : ($role !== null && $role->hasEmailSettings());
+        }
+
+        return ! in_array(config('mail.default'), ['log', 'array'], true);
+    }
+
+    /**
      * Send ticket purchase email
      */
     public function sendTicketEmail(Sale $sale, ?Role $role = null, bool $queue = true): string|true
@@ -67,8 +89,8 @@ class EmailService
             // almost never configure SMTP, and which can now sell up to its monthly allowance -
             // without the fallback the tier would take money and deliver nothing, silently, because
             // this failure is a swallowed return value. The per-schedule sender remains the branded
-            // upgrade, and every non-transactional mail (newsletters, sale notifications) keeps the
-            // stricter gate.
+            // upgrade. Sale notifications to editors keep the stricter gate; newsletters do not, they
+            // fall back to the platform mailer as well, bounded by Role::canSendAudienceMail().
             if (config('app.hosted')) {
                 if (! $role) {
                     return self::ERROR_NOT_CONFIGURED;
@@ -112,7 +134,11 @@ class EmailService
 
     /**
      * Confirm a single advance booking (pass holder reserved an occurrence).
-     * Mirrors sendTicketEmail's transport guards.
+     *
+     * Transactional, so it mirrors sendTicketEmail's transport guards: on hosted it needs only a
+     * schedule to speak for and falls back to the platform mailer when that schedule has no SMTP of
+     * its own; on selfhost it needs a real mail transport. It used to demand the schedule's own
+     * email settings on hosted, so a holder on the platform mailer booked a date and heard nothing.
      */
     public function sendPassBookingConfirmation(Sale $sale, Event $bookedEvent, string $date, ?Role $role = null, bool $queue = true): string|true
     {
@@ -130,7 +156,7 @@ class EmailService
             }
 
             if (config('app.hosted')) {
-                if (! $role || ! $role->hasEmailSettings()) {
+                if (! $role) {
                     return self::ERROR_NOT_CONFIGURED;
                 }
             } else {

@@ -3730,7 +3730,9 @@ class TicketController extends Controller
             $event = Event::with(['tickets', 'creatorRole', 'roles'])->find($selectedEventId);
             if ($event) {
                 $emailSettingsRole = $event->getRoleWithEmailSettings();
-                $hasEmailSettings = $emailSettingsRole && $emailSettingsRole->hasEmailSettings();
+                // Transactional, like the checkout confirmation it sends: on hosted it falls back to
+                // the platform mailer, so only a selfhost install without a real mailer is refused.
+                $hasEmailSettings = EmailService::canSendScheduleMail($emailSettingsRole, true);
                 $tickets = $event->tickets->where('is_addon', false)->values();
 
                 // Offer venue-local occurrence dates: these land in sales.event_date, and the
@@ -3803,7 +3805,8 @@ class TicketController extends Controller
         }
 
         $emailSettingsRole = $event->getRoleWithEmailSettings();
-        $hasEmailSettings = $emailSettingsRole && $emailSettingsRole->hasEmailSettings();
+        // The same transactional rule importAttendees() shows the form, so the two cannot disagree.
+        $hasEmailSettings = EmailService::canSendScheduleMail($emailSettingsRole, true);
 
         $eventCustomFieldIndices = $this->customFieldIndicesFor($event->custom_fields ?? []);
         $ticketCustomFieldIndices = [];

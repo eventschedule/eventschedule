@@ -1015,7 +1015,7 @@ class EventController extends Controller
             // public page is not one. It gates the prompt so an event with an interest list and no
             // sales is still offered the notification - which, before this, it never was.
             'interestedCount' => EventChangeNotifier::interestedCount($event),
-            'scheduleHasEmailSettings' => (bool) optional($event->getRoleWithEmailSettings())->hasEmailSettings(),
+            'scheduleHasEmailSettings' => EventChangeNotifier::canMailBuyers($event),
             'attendeesNotifiedAt' => optional($event->attendees_notified_at)->toIso8601String(),
         ]);
     }

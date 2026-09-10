@@ -13,20 +13,24 @@ use App\Models\Role;
 /**
  * Sends change / cancellation notifications to an event's registered attendees (paid sales, including
  * free RSVPs). Shared by the queued jobs and reusable by any future caller (e.g. the API). Email is the
- * channel that requires the schedule's own SMTP settings; push mirrors it additively.
+ * gated channel; push mirrors it additively.
  *
  * TWO AUDIENCES ON TWO DIFFERENT TRANSPORT GATES, and the split is deliberate.
  *
- * Buyers keep the gate they have always had: hasEmailSettings(), i.e. the schedule's own SMTP. A
- * buyer got their receipt from that address, and a platform-branded message about a purchase they
- * made elsewhere is the surprise that gate exists to prevent.
+ * Buyers sit behind EmailService::canSendScheduleMail() in its strict form. On hosted that is the
+ * schedule's own SMTP, the branded sender: a platform-branded message about a purchase the buyer made
+ * from somebody else is the surprise that gate exists to prevent. On selfhost it is a real
+ * MAIL_MAILER. There is no per-schedule sender there at all (the Email Settings tab is hosted-only)
+ * and every mail already goes through the install's one mailer, so the old hasEmailSettings() gate,
+ * always false on selfhost, meant no selfhosted buyer was ever told about a change.
  *
- * The event-interest list does NOT sit behind it, and must not. Those people asked US, by name, on
- * that schedule's public page, and were told in so many words that they would hear if anything
- * changed - resources/lang/en/messages.php event_interest_help. Putting them behind
- * hasEmailSettings() would make that promise false for every schedule on the platform mailer, which
- * is most of them. They are bounded by Role::canSendAudienceMail() instead, the same gate
- * SendEventAnnouncements uses for exactly the same reason.
+ * The event-interest list does NOT sit behind the hosted SMTP gate, and must not. Those people asked
+ * US, by name, on that schedule's public page, and were told they would hear if it is cancelled, and
+ * about a new date or venue when the organizer sends a note - resources/lang/en/messages.php
+ * event_interest_help. Putting them behind hasEmailSettings() would make that promise false for
+ * every schedule on the platform mailer, which is most of them. They are bounded by
+ * Role::canSendAudienceMail() instead, the same gate SendEventAnnouncements uses for exactly the
+ * same reason.
  */
 class EventChangeNotifier
 {
@@ -43,7 +47,7 @@ class EventChangeNotifier
         // still got the "recently notified" warning.
         $queued = self::notifyInterested($event, $role, EventInterestNotification::KIND_CHANGE);
 
-        if (! $role->hasEmailSettings()) {
+        if (! EmailService::canSendScheduleMail($role)) {
             return $queued;
         }
 
@@ -86,7 +90,7 @@ class EventChangeNotifier
         // still got the "recently notified" warning.
         $queued = self::notifyInterested($event, $role, EventInterestNotification::KIND_CANCELLED);
 
-        if (! $role->hasEmailSettings()) {
+        if (! EmailService::canSendScheduleMail($role)) {
             return $queued;
         }
 
@@ -130,12 +134,27 @@ class EventChangeNotifier
     }
 
     /**
-     * Whether any BUYER can actually be reached, which needs the schedule's own SMTP.
+     * Whether this event's buyers can be mailed at all: EmailService::canSendScheduleMail() in its
+     * strict form (the schedule's own SMTP on hosted, a real MAIL_MAILER on selfhost), asked of the
+     * role the jobs hand notifyChange(), which sends nothing without one.
+     *
+     * The editor's notify dialog reads this too (EventController::edit), so the dialog and the send
+     * cannot disagree about whether buyers will hear.
+     */
+    public static function canMailBuyers(Event $event): bool
+    {
+        $role = $event->getRoleWithEmailSettings();
+
+        return $role !== null && EmailService::canSendScheduleMail($role);
+    }
+
+    /**
+     * Whether any BUYER can actually be reached, on the gate canMailBuyers() describes.
      *
      * hasRecipients() asks whether buyers EXIST; this asks whether they can be MAILED. The
      * difference is why the confirm dialog used to promise "1 attendee notified" and then send
-     * nothing: notifyChange() applies the SMTP gate to the sales half internally, so a schedule on
-     * the platform mailer has buyers it can never write to.
+     * nothing: notifyChange() applies that gate to the sales half internally, so a hosted schedule
+     * on the platform mailer has buyers it can never write to.
      *
      * exists(), not a count: baseQuery() applies Sale::scopeExcludeTestEmails(), which is seven
      * non-sargable `NOT LIKE '%@domain'` predicates. EXISTS stops at the first row that passes
@@ -144,8 +163,7 @@ class EventChangeNotifier
      */
     public static function hasNotifiableBuyers(Event $event): bool
     {
-        return optional($event->getRoleWithEmailSettings())->hasEmailSettings()
-            && self::hasRecipients($event);
+        return self::canMailBuyers($event) && self::hasRecipients($event);
     }
 
     public static function notifiableBuyerCount(Event $event): int
@@ -218,9 +236,10 @@ class EventChangeNotifier
      *
      * The gate the two dispatch sites need. They used to ask hasRecipients(), which is sales-only,
      * so an event with an interest list and no sales never dispatched the job at all - while
-     * event_interest_help promised "one if the date or venue changes". Asking about MAILABLE people
-     * rather than existing ones also stops the opposite error: dispatching a job that sends nothing
-     * and stamps attendees_notified_at on the way.
+     * event_interest_help promises that list a note when the date or venue changes and the
+     * organizer sends one. Asking about MAILABLE people rather than existing ones also stops the
+     * opposite error: dispatching a job that sends nothing and stamps attendees_notified_at on the
+     * way.
      *
      * Buyer half first: it is an exists() and the interest half is a count.
      */
