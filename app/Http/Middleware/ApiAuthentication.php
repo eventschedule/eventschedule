@@ -8,6 +8,7 @@ use Closure;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\RateLimiter;
 
 class ApiAuthentication
 {
@@ -22,18 +23,22 @@ class ApiAuthentication
             return response()->json(['error' => 'API key is required'], 401);
         }
 
-        // Tiered rate limiting per IP based on HTTP method
+        // Tiered rate limiting per IP based on HTTP method.
+        //
+        // Each bucket is a fixed one-minute window opened by its first counted request:
+        // RateLimiter::hit() sets the expiry once, with Cache::add(), and increments inside it.
+        // This used to be a Cache::put() of count + 1 with a fresh one-minute expiry on every
+        // request, which pushed the expiry out each time. A bucket then emptied only after a full
+        // idle minute, so a client reading every 30 seconds was refused on its 300th request, two
+        // and a half hours in.
         $isWriteOperation = in_array($request->method(), ['POST', 'PUT', 'DELETE']);
         $rateLimitKey = $isWriteOperation
             ? 'api_rate_limit_write:'.$clientIp
             : 'api_rate_limit_read:'.$clientIp;
         $rateLimit = $isWriteOperation ? 30 : 300;
-        $attempts = Cache::get($rateLimitKey, 0);
 
-        if ($attempts >= $rateLimit) {
-            $this->logFailedAttempt($clientIp, 'rate_limit_exceeded');
-
-            return response()->json(['error' => 'Rate limit exceeded'], 429);
+        if (RateLimiter::tooManyAttempts($rateLimitKey, $rateLimit)) {
+            return $this->rateLimitExceeded($clientIp, $rateLimitKey);
         }
 
         // Brute force protection per API key
@@ -83,12 +88,26 @@ class ApiAuthentication
         // Reset failed attempts on successful authentication
         Cache::forget($bruteForceKey);
 
-        // Increment rate limit counter
-        Cache::put($rateLimitKey, $attempts + 1, now()->addMinute());
+        // Count the request only now, so a key that fails never spends the address's allowance.
+        // The increment is atomic on the array, database and redis stores, so this also refuses
+        // requests that passed the check above together, in a burst; the file store can
+        // undercount such a burst.
+        if (RateLimiter::hit($rateLimitKey, 60) > $rateLimit) {
+            return $this->rateLimitExceeded($clientIp, $rateLimitKey);
+        }
 
         auth()->login($user);
 
         return $next($request);
+    }
+
+    private function rateLimitExceeded($clientIp, string $rateLimitKey)
+    {
+        $this->logFailedAttempt($clientIp, 'rate_limit_exceeded');
+
+        // Seconds until this bucket's window closes and its count starts again from zero.
+        return response()->json(['error' => 'Rate limit exceeded'], 429)
+            ->header('Retry-After', (string) max(1, RateLimiter::availableIn($rateLimitKey)));
     }
 
     private function logFailedAttempt($ip, $reason, $apiKey = null)

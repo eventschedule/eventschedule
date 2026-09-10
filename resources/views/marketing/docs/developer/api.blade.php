@@ -153,7 +153,7 @@
                                 </tbody>
                             </table>
                         </div>
-                        <p class="text-gray-600 dark:text-gray-300 mb-6">A bucket is not a rolling window. Its count clears only after a full minute with no counted request, and every request before then adds to it, so a client that never pauses for a minute reaches the limit however slowly it runs: one read every 30 seconds is refused after the 300th, about two and a half hours in. Leave a minute's gap between long runs.</p>
+                        <p class="text-gray-600 dark:text-gray-300 mb-6">Each bucket counts in a fixed one-minute window that opens with its first counted request. When that minute is up the count starts again from zero, so a client that makes no more than 300 reads and 30 writes in any one window is never refused, however long it runs.</p>
                         <p class="text-gray-600 dark:text-gray-300 mb-6"><a href="#create-event" class="doc-link">Create Event</a> carries a second throttle of 30 requests per minute on top of the write bucket, so a bulk import should pace itself well below that.</p>
                         <h3 class="doc-subheading">Unauthenticated endpoints</h3>
                         <p class="text-gray-600 dark:text-gray-300 mb-6">The auth endpoints are limited separately, because they run before any key exists:</p>
@@ -167,7 +167,7 @@
                                 </tbody>
                             </table>
                         </div>
-                        <p class="text-gray-600 dark:text-gray-300">Every one of these returns <code class="doc-inline-code">429</code> with an <code class="doc-inline-code">error</code> message when the limit is hit. There are no rate limit headers on the response, so back off on the status code.</p>
+                        <p class="text-gray-600 dark:text-gray-300">The read and write buckets and the three endpoints above all answer <code class="doc-inline-code">429</code> with an <code class="doc-inline-code">error</code> message when the limit is hit. A <code class="doc-inline-code">429</code> from a read or write bucket also carries a <code class="doc-inline-code">Retry-After</code> header with the number of seconds until that bucket's window resets. The three auth endpoints send no rate limit headers, so back off on the status code there.</p>
                     </div>
                     <div class="api-endpoint-code">
                         <div class="doc-code-block">

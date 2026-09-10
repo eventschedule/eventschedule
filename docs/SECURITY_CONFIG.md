@@ -40,7 +40,7 @@ GEMINI_API_KEY=your_api_key_here
 4. **Content Security Policy**: Environment-aware with nonce support
 5. **Input Validation**: Comprehensive validation throughout the application
 6. **File Upload Security**: MIME type and file signature validation
-7. **API Rate Limiting**: 60 requests per minute with brute force protection
+7. **API Rate Limiting**: 300 reads and 30 writes a minute per IP, each counted in a fixed one-minute window, with brute force protection
 8. **CSRF Protection**: Enabled for all routes except webhooks
 9. **SQL Injection Prevention**: Using Eloquent ORM with parameterized queries
 10. **XSS Prevention**: HTML Purifier for markdown content
