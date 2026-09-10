@@ -63,15 +63,15 @@
                     </tr>
                     <tr>
                         <td>When it is sent</td>
-                        <td>After the request that caused it has finished and its changes are committed to the database.</td>
+                        <td>The first attempt goes out right after the request that caused it has finished and its changes are committed to the database. Any retry follows from the queue.</td>
                     </tr>
                     <tr>
                         <td>Retries</td>
-                        <td>None. Each delivery is attempted once, and a failed attempt is written to the delivery log and not sent again. Reconcile against the API for anything you cannot afford to miss.</td>
+                        <td>Up to three attempts in all. A timeout, a connection error or a <code class="doc-inline-code">5xx</code> is sent again about 30 seconds later, and once more about a minute after that. A <code class="doc-inline-code">3xx</code> or <code class="doc-inline-code">4xx</code> is not retried, and neither is an address refused at send time. An install on <code class="doc-inline-code">QUEUE_CONNECTION=sync</code>, the selfhost default, has no queue to retry from, so it makes one attempt. Reconcile against the API for anything you cannot afford to miss.</td>
                     </tr>
                     <tr>
                         <td>What counts as delivered</td>
-                        <td>Any <code class="doc-inline-code">2xx</code>. Anything else, a timeout, a connection error, a <code class="doc-inline-code">4xx</code> or a <code class="doc-inline-code">5xx</code>, is logged as a failed delivery.</td>
+                        <td>Any <code class="doc-inline-code">2xx</code>, on any attempt. Anything else, a timeout, a connection error, a <code class="doc-inline-code">3xx</code>, a <code class="doc-inline-code">4xx</code> or a <code class="doc-inline-code">5xx</code>, is logged as a failed attempt, and the retry rules above decide whether another one follows.</td>
                     </tr>
                     <tr>
                         <td>Redirects</td>
@@ -83,7 +83,7 @@
                     </tr>
                     <tr>
                         <td>Delivery log</td>
-                        <td>Every delivery is logged with its status, duration and the first 500 characters of your response. The list shows the 20 most recent, and entries are pruned after 30 days.</td>
+                        <td>Every attempt is logged with its status, duration and the first 500 characters of your response, so a retried delivery appears once per attempt. The list shows the 20 most recent, and entries are pruned after 30 days.</td>
                     </tr>
                 </tbody>
             </table>
@@ -236,7 +236,7 @@
                 <tbody>
                     <tr><td class="font-mono text-sm">X-Webhook-Signature</td><td>HMAC-SHA256 signature: <code class="doc-inline-code">sha256=&lt;hex&gt;</code></td></tr>
                     <tr><td class="font-mono text-sm">X-Webhook-Event</td><td>The event type (e.g. <code class="doc-inline-code">sale.paid</code>), matching <code class="doc-inline-code">event</code> in the body</td></tr>
-                    <tr><td class="font-mono text-sm">X-Webhook-Timestamp</td><td>ISO 8601 time the request was sent. It can be a moment later than the <code class="doc-inline-code">timestamp</code> in the body, which is fixed when the payload is built.</td></tr>
+                    <tr><td class="font-mono text-sm">X-Webhook-Timestamp</td><td>ISO 8601 time this attempt was sent. The <code class="doc-inline-code">timestamp</code> in the body is fixed when the payload is built and stays the same on every attempt, so this header can be a moment later than it, and on a retry a minute or more later.</td></tr>
                     <tr><td class="font-mono text-sm">Content-Type</td><td><code class="doc-inline-code">application/json</code></td></tr>
                     <tr><td class="font-mono text-sm">User-Agent</td><td><code class="doc-inline-code">EventSchedule-Webhook/1.0</code></td></tr>
                 </tbody>
@@ -309,12 +309,12 @@ return hmac.compare_digest(expected, signature)</code></pre>
             Best Practices
         </h2>
         <ul class="doc-list">
-            <li><strong class="text-gray-900 dark:text-white">Respond quickly.</strong> Return a 2xx status within 5 seconds. Queue the real work and acknowledge receipt first, or a slow database write will be recorded as a failed delivery, and a failed delivery is not sent again.</li>
+            <li><strong class="text-gray-900 dark:text-white">Respond quickly.</strong> Return a 2xx status within 5 seconds. Queue the real work and acknowledge receipt first: a slower reply is recorded as a timeout and retried, so work that finished after the deadline can reach you twice.</li>
             <li><strong class="text-gray-900 dark:text-white">Verify signatures.</strong> Always validate the <code class="doc-inline-code">X-Webhook-Signature</code> header before processing any payload, and reject anything that does not match.</li>
-            <li><strong class="text-gray-900 dark:text-white">Treat each delivery as the latest state.</strong> One record can be reported many times in ordinary use: <code class="doc-inline-code">event.updated</code> fires on every save of a published event. Key on <code class="doc-inline-code">data.id</code> together with <code class="doc-inline-code">event</code>, and fall back to the event and attendee for <code class="doc-inline-code">feedback.submitted</code>, which has no id.</li>
-            <li><strong class="text-gray-900 dark:text-white">Answer at the registered URL.</strong> Redirects are not followed, so a 301 from <code class="doc-inline-code">http</code> to <code class="doc-inline-code">https</code> or from a bare domain to <code class="doc-inline-code">www</code> is recorded as a failure. Register the final URL.</li>
+            <li><strong class="text-gray-900 dark:text-white">Treat each delivery as the latest state.</strong> One record can be reported many times in ordinary use: <code class="doc-inline-code">event.updated</code> fires on every save of a published event, and a retry repeats the same body when your endpoint handled it but answered late or with a <code class="doc-inline-code">5xx</code>. Key on <code class="doc-inline-code">data.id</code> together with <code class="doc-inline-code">event</code>, and fall back to the event and attendee for <code class="doc-inline-code">feedback.submitted</code>, which has no id.</li>
+            <li><strong class="text-gray-900 dark:text-white">Answer at the registered URL.</strong> Redirects are not followed, so a 301 from <code class="doc-inline-code">http</code> to <code class="doc-inline-code">https</code> or from a bare domain to <code class="doc-inline-code">www</code> is recorded as a failure, and a <code class="doc-inline-code">3xx</code> is not retried. Register the final URL.</li>
             <li><strong class="text-gray-900 dark:text-white">Use HTTPS.</strong> Payloads carry buyer names, email addresses and ticket secrets, so they should never cross the network in the clear.</li>
-            <li><strong class="text-gray-900 dark:text-white">Reconcile what you cannot miss.</strong> No response earns a second attempt: a 4xx, a 5xx and a timeout all end as one failed log entry. After an outage on your side, catch up from the <a href="{{ route('marketing.docs.developer.api') }}#list-sales" class="doc-link">Sales API</a>, for example with <code class="doc-inline-code">GET /api/sales?status=refunded</code>.</li>
+            <li><strong class="text-gray-900 dark:text-white">Reconcile what you cannot miss.</strong> Retries cover a blip of a minute or two, not an outage: after the third attempt, or after a <code class="doc-inline-code">3xx</code> or <code class="doc-inline-code">4xx</code>, a delivery is not tried again, and an install on the sync queue makes only the one attempt. After an outage on your side, catch up from the <a href="{{ route('marketing.docs.developer.api') }}#list-sales" class="doc-link">Sales API</a>, for example with <code class="doc-inline-code">GET /api/sales?status=refunded</code>.</li>
             <li><strong class="text-gray-900 dark:text-white">Monitor deliveries.</strong> Open <strong class="text-gray-900 dark:text-white">View recent deliveries</strong> in your webhook settings to debug failures. The first 500 characters of the response body you return are stored with the log, so a descriptive error message there pays for itself.</li>
         </ul>
     </section>
@@ -338,7 +338,7 @@ return hmac.compare_digest(expected, signature)</code></pre>
 }</code></pre>
         </div>
         <p class="text-gray-600 dark:text-gray-300 mt-4">
-            The test is signed and sent exactly like a real delivery, with the same headers and the same 5 second timeout, so it verifies your signature check as well as your URL. It ignores the event types you subscribed to, it is sent even to a disabled webhook, and it works whatever plan your schedules are on, which makes it the quickest way to prove the endpoint itself before you wait for real activity. The result is written to the delivery log alongside everything else.
+            The test is signed and sent exactly like a real delivery, with the same headers and the same 5 second timeout, so it verifies your signature check as well as your URL. It ignores the event types you subscribed to, it is sent even to a disabled webhook, and it works whatever plan your schedules are on, which makes it the quickest way to prove the endpoint itself before you wait for real activity. It is sent once, so a failed test is not retried, and the result is written to the delivery log alongside everything else.
         </p>
     </section>
 

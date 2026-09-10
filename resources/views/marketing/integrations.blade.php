@@ -649,7 +649,7 @@
             ],
             [
                 'Webhooks', 'out', 'Pro',
-                'Fourteen event types, POSTed as JSON to your URL with an HMAC-SHA256 signature. Five-second timeout, three tries, and every attempt logged.',
+                'Fourteen event types, POSTed as JSON to your URL with an HMAC-SHA256 signature. Five-second timeout, up to three tries, and every attempt logged. A selfhost left on the sync queue tries once.',
             ],
             [
                 'REST API', 'in', 'Pro',
@@ -1227,7 +1227,7 @@
                             <span class="es-wire-spec-k">Signature</span>
                             <span class="es-wire-spec-v es-wire-onband-muted">HMAC-SHA256 of the body in an <span class="es-wire-mono">X-Webhook-Signature</span> header, keyed on a secret you can regenerate.</span>
                             <span class="es-wire-spec-k">Retries</span>
-                            <span class="es-wire-spec-v es-wire-onband-muted">Five-second timeout, three attempts, backing off thirty seconds then sixty.</span>
+                            <span class="es-wire-spec-v es-wire-onband-muted">Five-second timeout, up to three attempts, backing off about thirty seconds then about sixty. A selfhost left on the sync queue sends once.</span>
                             <span class="es-wire-spec-k">Log</span>
                             <span class="es-wire-spec-v es-wire-onband-muted">Every attempt kept with its status, response and duration, and a test button to fire one on demand.</span>
                             <span class="es-wire-spec-k">Safety</span>

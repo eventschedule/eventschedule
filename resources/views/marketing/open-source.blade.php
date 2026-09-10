@@ -1118,7 +1118,7 @@
                                 Fourteen event types, from <span class="es-commit-mono es-commit-accent">sale.created</span> through <span class="es-commit-mono es-commit-accent">ticket.scanned</span> to <span class="es-commit-mono es-commit-accent">feedback.submitted</span>. Each delivery carries an HMAC-SHA256 signature computed over the exact body, so you can verify it came from your install and not from somebody who guessed your endpoint.
                             </p>
                             <p class="es-commit-muted text-sm">
-                                Three attempts, backing off thirty then sixty seconds. The secret is stored encrypted.
+                                Up to three attempts, about thirty then sixty seconds apart, on a real queue; the default sync queue sends once. The secret is stored encrypted.
                                 <a href="{{ marketing_url('/docs/developer/webhooks') }}" class="es-commit-link font-medium hover:underline">Webhook reference</a>
                             </p>
                         </div>
