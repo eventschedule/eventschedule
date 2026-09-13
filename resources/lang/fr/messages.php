@@ -234,7 +234,6 @@ return [
     'delete_image' => 'Supprimer l\'image',
     'deleted_image' => 'Image supprimée avec succès',
     'try_event_schedule' => 'Créez votre planning gratuitement sur :link',
-    'supported_by' => 'Soutenu par :link',
     'unfollowed_role' => 'Désabonné de :name',
     'unfollow' => 'Se désabonner',
     'merge_venue' => 'Fusionner le lieu',
@@ -1812,7 +1811,7 @@ return [
     'close_modal' => 'Fermer',
 
     // Chaînes de mise en page
-    'powered_by_event_schedule' => 'Créé par thierrylaval.dev',
+    'powered_by_event_schedule' => 'Créé par Event Schedule',
     'view_notifications' => 'Voir les notifications',
     'search_placeholder' => 'Rechercher...',
 

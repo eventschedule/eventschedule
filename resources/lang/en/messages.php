@@ -253,7 +253,6 @@ return [
     'delete_image' => 'Delete Image',
     'deleted_image' => 'Successfully deleted image',
     'try_event_schedule' => 'Create your free schedule at :link',
-    'supported_by' => 'Supported by :link',
     'unfollowed_role' => 'Successfully unfollowed :name',
     'unfollowed_roles_count' => 'Successfully unfollowed :count schedules',
     'unfollow' => 'Unfollow',

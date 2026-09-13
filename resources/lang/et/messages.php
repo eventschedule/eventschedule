@@ -253,7 +253,6 @@ return [
     'delete_image' => 'Kustuta pilt',
     'deleted_image' => 'Pilt on edukalt kustutatud',
     'try_event_schedule' => 'Looge oma tasuta ajakava aadressil :link',
-    'supported_by' => 'Toetab :link',
     'unfollowed_role' => ':name jälgimine on edukalt lõpetatud',
     'unfollowed_roles_count' => ':count ajakavade jälgimine on edukalt lõpetatud',
     'unfollow' => 'Lõpeta jälgimine',
@@ -1821,7 +1820,7 @@ return [
     'close_modal' => 'Sule',
 
     // Layout strings
-    'powered_by_event_schedule' => 'Toetab sündmuste ajakava',
+    'powered_by_event_schedule' => 'Toetab Event Schedule',
     'view_notifications' => 'Kuva teated',
     'search_placeholder' => 'Otsi...',
 

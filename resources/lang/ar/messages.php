@@ -207,7 +207,6 @@ return [
     'delete_image' => 'حذف الصورة',
     'deleted_image' => 'تم حذف الصورة بنجاح',
     'try_event_schedule' => 'قم بإنشاء جدولك مجانًا على :link',
-    'supported_by' => 'مدعوم من :link',
     'unfollowed_role' => 'تم إلغاء متابعة :name بنجاح',
     'unfollow' => 'إلغاء المتابعة',
     'merge_venue' => 'دمج المكان',

@@ -666,21 +666,16 @@
         @include('partials.promo-slot')
     @endif
 
-    @if (! request()->embed && config('app.hosted') && $role->showBranding())
+    {{-- The dark footer strip: an operator's free-tier growth CTA, linking their own
+         marketing_url(). eventschedule.com has none - its free tier carries the corner chip
+         below instead - so Role::showFooterStrip() is false on the nexus whatever the plan. --}}
+    @if (! request()->embed && $role->showFooterStrip())
     <footer class="bg-gray-800">
       <div class="container mx-auto relative flex flex-row justify-center items-center py-5 px-5">
         <!-- Per the AAL license, please do not remove the link to Event Schedule -->
-        @if (config('app.is_nexus'))
-            <p class="text-[#F5F9FE] text-base text-center flex items-center justify-center gap-2 {{ $isRtl ? 'flex-row-reverse' : '' }}" dir="{{ $isRtl ? 'rtl' : 'ltr' }}">
-                <span>{!! str_replace(':link', '<bdi dir="ltr"><a href="' . marketing_url() . '" target="_blank" rel="noopener" class="text-white hover:underline">' . marketing_domain() . '</a></bdi>',  __('messages.try_event_schedule')) !!}</span>
-                <span>•</span>
-                <span>{!! __('messages.supported_by', ['link' => '<a href="https://invoiceninja.com" target="_blank" rel="noopener noreferrer nofollow" class="text-white hover:underline" title="Leading small-business platform to manage invoices, expenses & tasks">Invoice Ninja</a>']) !!}</span>
-            </p>
-        @else
-            <p class="text-[#F5F9FE] text-base text-center" dir="{{ $isRtl ? 'rtl' : 'ltr' }}">
-                {!! str_replace(':link', '<bdi dir="ltr"><a href="' . marketing_url() . '" target="_blank" rel="noopener" class="text-white hover:underline">' . marketing_domain() . '</a></bdi>',  __('messages.try_event_schedule')) !!}
-            </p>
-        @endif
+        <p class="text-[#F5F9FE] text-base text-center" dir="{{ $isRtl ? 'rtl' : 'ltr' }}">
+            {!! str_replace(':link', '<bdi dir="ltr"><a href="' . marketing_url() . '" target="_blank" rel="noopener" class="text-white hover:underline">' . marketing_domain() . '</a></bdi>',  __('messages.try_event_schedule')) !!}
+        </p>
       </div>
     </footer>
     @endif
@@ -688,26 +683,29 @@
     @php
         // Which of the chip's jobs applies here, or null for none - see
         // Role::creditChipReason(). Off the nexus it is unconditional, whatever the tenant's
-        // plan; hosted and is_nexus are independent env vars, so the reasons are ordered
-        // there rather than unpicked here.
+        // plan, bar a free tier already carrying the operator's strip; on the nexus it is the
+        // free tier's credit and an admin-granted plan's. hosted and is_nexus are independent
+        // env vars, so the reasons are ordered there rather than unpicked here.
         $creditReason = $role->creditChipReason();
 
         // Tagged per reason so the /admin traffic sources report can tell an operator's own
-        // platform apart from a selfhost install apart from a granted plan. The marketing
-        // layout builds its canonical from request()->path(), so the query string
-        // self-canonicalizes away. The chip always points at eventschedule.com rather than
-        // marketing_url(): it is the license attribution, and that is not the operator's to
-        // rebrand.
+        // platform apart from a selfhost install apart from our own free tier apart from a
+        // granted plan. The marketing layout builds its canonical from request()->path(), so the
+        // query string self-canonicalizes away. The chip always points at eventschedule.com
+        // rather than marketing_url(): it is the license attribution, and that is not the
+        // operator's to rebrand.
         $creditUtm = [
             'selfhost' => '?utm_source=selfhost&utm_medium=footer',
             'saas' => '?utm_source=saas&utm_medium=footer',
+            'free_plan' => '?utm_source=free-plan&utm_medium=footer',
             'granted_plan' => '?utm_source=granted-plan&utm_medium=footer',
         ];
         $creditUrl = 'https://eventschedule.com'.($creditUtm[$creditReason] ?? '');
     @endphp
 
+    {{-- es-credit-chip: lifted clear of the mobile CTA bar by accessibility-widget.css. --}}
     @if (! request()->embed && $creditReason)
-    <div class="flex justify-{{ $isRtl ? 'start' : 'end' }} p-4 {{ $role->show_accessibility_widget ? 'es-a11y-credit-clear' : '' }}">
+    <div class="es-credit-chip flex justify-{{ $isRtl ? 'start' : 'end' }} p-4 {{ $role->show_accessibility_widget ? 'es-a11y-credit-clear' : '' }}">
         {{-- Per the AAL license, please do not remove the link to Event Schedule --}}
         <a href="{{ $creditUrl }}" target="_blank" rel="noopener" title="{{ __('messages.powered_by_event_schedule') }}"
            class="inline-flex items-center gap-1.5 rounded-full bg-white/80 px-3 py-1.5 text-xs font-medium text-gray-600 shadow-sm ring-1 ring-black/5 backdrop-blur transition-colors hover:bg-white hover:text-gray-900">

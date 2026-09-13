@@ -656,7 +656,6 @@ return [
     'delete_image' => 'Afbeelding verwijderen',
     'deleted_image' => 'Afbeelding succesvol verwijderd',
     'try_event_schedule' => 'Maak je gratis schema op :link',
-    'supported_by' => 'Ondersteund door :link',
     'unfollowed_role' => 'Succesvol gestopt met volgen van :name',
     'unfollow' => 'Stop met volgen',
     'merge_venue' => 'Locatie samenvoegen',

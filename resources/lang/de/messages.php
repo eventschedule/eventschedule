@@ -209,7 +209,6 @@ return [
     'delete_image' => 'Bild löschen',
     'deleted_image' => 'Bild erfolgreich gelöscht',
     'try_event_schedule' => 'Erstellen Sie Ihren kostenlosen Zeitplan unter :link',
-    'supported_by' => 'Unterstützt von :link',
     'unfollowed_role' => ':name erfolgreich entfolgt',
     'unfollow' => 'Entfolgen',
     'merge_venue' => 'Veranstaltungsort zusammenführen',

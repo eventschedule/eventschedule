@@ -664,7 +664,6 @@ return [
     'delete_image' => 'Elimina immagine',
     'deleted_image' => 'Immagine eliminata con successo',
     'try_event_schedule' => 'Crea il tuo programma eventi gratuito su :link',
-    'supported_by' => 'Supportato da :link',
     'unfollowed_role' => 'Smesso di seguire con successo :name',
     'unfollow' => 'Smetti di seguire',
     'merge_venue' => 'Unisci Sede',

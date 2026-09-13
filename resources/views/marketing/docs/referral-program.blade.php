@@ -235,8 +235,8 @@
         </div>
 
         <div class="doc-callout doc-callout-info">
-            <div class="doc-callout-title">Earned plans stay unbranded</div>
-            <p>A month of Pro or Enterprise you earned through a referral counts as a plan you earned, not one handed to you, so it does not add the Event Schedule credit chip to your public pages the way an admin-granted plan does.</p>
+            <div class="doc-callout-title">Earned plans are unbranded</div>
+            <p>A month of Pro or Enterprise you earned through a referral counts as a plan you earned, not one handed to you, so it takes the Event Schedule credit chip off your public pages like a plan you pay for, rather than keeping it the way an admin-granted plan does.</p>
         </div>
     </section>
 

@@ -14,7 +14,8 @@ use Tests\TestCase;
 /**
  * A schedule whose Enterprise plan an admin handed out carries a small "Event Schedule" credit in
  * the guest footer. Customers paying through Stripe do not - they buy white-label, and the
- * marketing pages promise it without qualification.
+ * marketing pages promise it without qualification. A free schedule carries the same chip, tagged
+ * as the free tier's so the traffic report keeps the two apart.
  *
  * roles.plan_type cannot make this call on its own: every Stripe path writes it too. The
  * distinguishing column is plan_source, and the layout re-checks Stripe on top of it.
@@ -27,8 +28,17 @@ class GrantedPlanCreditTest extends TestCase
     /** The credit's tagged URL, which no other footer emits. */
     private const CREDIT = 'utm_source=granted-plan';
 
-    /** Unique to the free-tier black bar's nexus variant. */
-    private const BLACK_BAR = 'Invoice Ninja';
+    /** The same chip on a free schedule, tagged as the free tier's. */
+    private const FREE_CHIP = 'href="https://eventschedule.com?utm_source=free-plan&amp;utm_medium=footer"';
+
+    /** Present on every chip, whatever its reason. */
+    private const ANY_CHIP = 'utm_medium=footer';
+
+    /**
+     * The dark footer strip. The nexus renders it on no tier, so here it is only ever asserted
+     * absent: a guard against it coming back.
+     */
+    private const STRIP = 'Create your free schedule at';
 
     private const ENTERPRISE_PRICE = 'price_enterprise_monthly_test';
 
@@ -93,8 +103,9 @@ class GrantedPlanCreditTest extends TestCase
             'href="https://eventschedule.com?utm_source=granted-plan&amp;utm_medium=footer"',
             $content
         );
-        // The credit stands in for the black bar rather than joining it.
-        $this->assertStringNotContainsString(self::BLACK_BAR, $content);
+        // One credit a page: tagged as the grant rather than the free tier, and no strip beside it.
+        $this->assertStringNotContainsString(self::FREE_CHIP, $content);
+        $this->assertStringNotContainsString(self::STRIP, $content);
     }
 
     public function test_paying_enterprise_never_carries_the_credit(): void
@@ -109,8 +120,9 @@ class GrantedPlanCreditTest extends TestCase
 
         $content = $this->get('/'.$role->subdomain)->assertOk()->getContent();
 
-        $this->assertStringNotContainsString(self::CREDIT, $content);
-        $this->assertStringNotContainsString(self::BLACK_BAR, $content);
+        // No chip of any kind: not the grant's, and not the free tier's either.
+        $this->assertStringNotContainsString(self::ANY_CHIP, $content);
+        $this->assertStringNotContainsString(self::STRIP, $content);
     }
 
     public function test_referral_earned_enterprise_carries_no_credit(): void
@@ -120,7 +132,7 @@ class GrantedPlanCreditTest extends TestCase
 
         $content = $this->get('/'.$role->subdomain)->assertOk()->getContent();
 
-        $this->assertStringNotContainsString(self::CREDIT, $content);
+        $this->assertStringNotContainsString(self::ANY_CHIP, $content);
     }
 
     public function test_untagged_enterprise_carries_no_credit(): void
@@ -130,10 +142,10 @@ class GrantedPlanCreditTest extends TestCase
 
         $content = $this->get('/'.$role->subdomain)->assertOk()->getContent();
 
-        $this->assertStringNotContainsString(self::CREDIT, $content);
+        $this->assertStringNotContainsString(self::ANY_CHIP, $content);
     }
 
-    public function test_free_tier_keeps_the_black_bar_and_no_credit(): void
+    public function test_free_tier_carries_the_free_plan_chip_not_the_granted_one(): void
     {
         $role = $this->createEnterpriseRole([
             'plan_type' => 'free',
@@ -143,7 +155,26 @@ class GrantedPlanCreditTest extends TestCase
 
         $content = $this->get('/'.$role->subdomain)->assertOk()->getContent();
 
-        $this->assertStringContainsString(self::BLACK_BAR, $content);
+        $this->assertStringContainsString(self::FREE_CHIP, $content);
+        $this->assertStringNotContainsString(self::CREDIT, $content);
+        $this->assertStringNotContainsString(self::STRIP, $content);
+    }
+
+    public function test_a_lapsed_grant_is_tagged_as_the_free_plan(): void
+    {
+        // A grant that runs out without an admin clearing it keeps plan_source = 'admin' while its
+        // tier falls to free. From then on it is a free schedule like any other: it carries the
+        // chip, but tagged as the free tier's, so the traffic report stops counting it as a grant.
+        $role = $this->createEnterpriseRole([
+            'plan_expires' => now()->subDay()->format('Y-m-d'),
+        ]);
+
+        $this->assertSame('admin', $role->plan_source);
+        $this->assertSame('free_plan', $role->creditChipReason());
+
+        $content = $this->get('/'.$role->subdomain)->assertOk()->getContent();
+
+        $this->assertStringContainsString(self::FREE_CHIP, $content);
         $this->assertStringNotContainsString(self::CREDIT, $content);
     }
 

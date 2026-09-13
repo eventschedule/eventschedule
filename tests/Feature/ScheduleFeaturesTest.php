@@ -798,6 +798,10 @@ class ScheduleFeaturesTest extends TestCase
 
     public function test_white_label_hides_branding_for_pro(): void
     {
+        // Plan tiers only exist on a hosted platform, and the free tier's credit chip is the
+        // nexus's. Pinned rather than read from the environment.
+        config(['app.hosted' => true, 'app.is_nexus' => true]);
+
         $owner = $this->createOwner();
         $freeRole = $this->createRole($owner, 'venue', [
             'plan_type' => 'free',
@@ -809,11 +813,11 @@ class ScheduleFeaturesTest extends TestCase
         $this->assertTrue($freeRole->showBranding());
         $this->assertFalse($proRole->showBranding());
 
-        // The guest event page footer shows branding only for the free schedule.
+        // The guest event page carries the free tier's credit chip only for the free schedule.
         $freeEvent = $this->createEvent($freeRole);
         $proEvent = $this->createEvent($proRole);
-        $this->get($this->guestEventUrl($freeRole, $freeEvent))->assertOk()->assertSee('Invoice Ninja');
-        $this->get($this->guestEventUrl($proRole, $proEvent))->assertOk()->assertDontSee('Invoice Ninja');
+        $this->get($this->guestEventUrl($freeRole, $freeEvent))->assertOk()->assertSee('utm_source=free-plan', false);
+        $this->get($this->guestEventUrl($proRole, $proEvent))->assertOk()->assertDontSee('utm_medium=footer', false);
     }
 
     public function test_guest_event_submission(): void

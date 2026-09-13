@@ -759,7 +759,6 @@ return [
     'delete_image' => 'מחק תמונה',
     'deleted_image' => 'התמונה נמחקה בהצלחה',
     'try_event_schedule' => 'צור את לוח הזמנים החינמי שלך ב:link',
-    'supported_by' => 'נתמך על ידי :link',
     'unfollowed_role' => 'הפסקת מעקב אחר :name',
     'unfollow' => 'הפסק מעקב',
     'merge_venue' => 'מזג מקום',

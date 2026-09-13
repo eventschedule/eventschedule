@@ -2365,20 +2365,40 @@ class Role extends Model implements MustVerifyEmail
 
     public function showBranding()
     {
+        // The free-tier fact every free-tier surface reads: the event-page card, both embed
+        // snippet lines, the ticket-embed frame and the newsletter footer. Which credit the page
+        // itself carries is split between showFooterStrip() and creditChipReason().
+        //
         // A single-tenant install has no tiers - actualPlanTier() short-circuits to
-        // 'enterprise' - and the footer strip is a hosted-platform growth CTA, so it has
+        // 'enterprise' - and those surfaces are a hosted platform's growth CTAs, so they have
         // nothing to say there. Selfhost attribution is the credit chip instead; see
         // creditChipReason(). This branch used to read `! $this->isWhiteLabeled()`, which
         // was unconditionally false when unhosted, so the behaviour is unchanged.
         //
-        // creditChipReason() calls this now, so the strip wins wherever it renders and the chip
-        // fills in elsewhere. Keep this branch answering false: it is what stops a selfhost from
-        // being read as a strip-bearing install and losing its attribution.
+        // showFooterStrip() builds on this, and creditChipReason() stands down on that, so the
+        // strip wins wherever it renders and the chip fills in elsewhere. Keep this branch
+        // answering false: it is what stops a selfhost from being read as a strip-bearing
+        // install and losing its attribution.
         if (! config('app.hosted')) {
             return false;
         }
 
         return $this->actualPlanTier() === 'free';
+    }
+
+    /**
+     * Whether this schedule's guest pages end with the dark footer strip, "Create your free
+     * schedule at ..." linking marketing_url().
+     *
+     * The strip is the growth CTA of whoever runs the platform, so it is a free-tier thing on an
+     * operator's own platform and nowhere else. eventschedule.com credits its free tier with the
+     * small corner chip instead (creditChipReason() answers 'free_plan'), which is why this is
+     * false on the nexus whatever the plan. It is the strip's one predicate: the layout gates on
+     * it and creditChipReason() stands down on it, so a page never carries both credits.
+     */
+    public function showFooterStrip(): bool
+    {
+        return ! config('app.is_nexus') && $this->showBranding();
     }
 
     /**
@@ -2388,25 +2408,28 @@ class Role extends Model implements MustVerifyEmail
      *
      *  - 'selfhost'     the Attribution Assurance License credit on a single-tenant install.
      *  - 'saas'         the same credit on an operator's own multi-tenant platform.
+     *  - 'free_plan'    a free schedule on eventschedule.com. The nexus runs no footer strip, so
+     *                   the chip is its free tier's page credit, and a paid plan takes it off.
      *  - 'granted_plan' an Enterprise plan a nexus admin handed out by hand. Customers paying
      *                   through Stripe buy white-label and never carry it, and neither do
      *                   plans earned through the referral programme.
      *
-     * Keyed on the deployment rather than the plan, then stood down wherever the footer strip
-     * already renders. The two predicates start from different questions: the strip is a growth
-     * CTA that belongs to whoever runs the platform, so it turns on the tenant's tier; this chip
-     * is the license credit, owed by whoever redistributes the software, so it turns on the
-     * deployment. An operator's paying tenant is as much a part of that redistribution as their
-     * free one, and the tenant's subscription is between them and the operator. What the two
-     * share is a page, and a page carries one credit: where showBranding() has already put the
-     * strip there, this answers null.
+     * Off the nexus it is keyed on the deployment rather than the plan, then stood down wherever
+     * the footer strip already renders. The two predicates start from different questions: the
+     * strip is a growth CTA that belongs to whoever runs the platform, so it turns on the
+     * tenant's tier; this chip is the license credit, owed by whoever redistributes the software,
+     * so it turns on the deployment. An operator's paying tenant is as much a part of that
+     * redistribution as their free one, and the tenant's subscription is between them and the
+     * operator. What the two share is a page, and a page carries one credit: where
+     * showFooterStrip() has already put the strip there, this answers null.
      *
      * On an operator's platform that lands the chip on the tiers they charge for and leaves their
      * free tier showing their own strip alone. Two consequences that read like bugs and are not:
      * upgrading a tenant there ADDS the chip rather than removing it, and an operator's free tier
      * carries no Event Schedule attribution at all, because their strip links marketing_url().
      * eventschedule.com is still the one install that sells white-label, so it is the one install
-     * where the chip turns on the plan for any reason other than the strip.
+     * where the chip turns on the plan: its free tier carries it, a paid plan takes it off, and an
+     * admin-granted one keeps it.
      *
      * Both halves of the granted-plan test are load-bearing. plan_source alone would keep
      * branding someone who was granted a plan and later subscribed, if any Stripe path ever
@@ -2426,15 +2449,23 @@ class Role extends Model implements MustVerifyEmail
 
         // The strip is already crediting this page, and the two are alternatives rather than a
         // pair - see docs/BRANDING_MATRIX.md rule 2. Deliberately below the selfhost branch:
-        // showBranding() is hardcoded false when unhosted, so today either order behaves the same
-        // and no test can tell them apart, but if that branch ever changes, this order is what
-        // keeps the attribution on an install that is meant to always carry it.
-        if ($this->showBranding()) {
+        // showFooterStrip() is false when unhosted, so today either order behaves the same and
+        // no test can tell them apart, but if that ever changes, this order is what keeps the
+        // attribution on an install that is meant to always carry it.
+        if ($this->showFooterStrip()) {
             return null;
         }
 
         if (! config('app.is_nexus')) {
             return 'saas';
+        }
+
+        // The nexus's free tier. There is no strip here to defer to, so the chip takes the
+        // strip's place. Ahead of the granted-plan test, though the order is not load-bearing:
+        // that one needs the Enterprise tier, so a lapsed grant - plan_source still 'admin', tier
+        // now free - lands here either way.
+        if ($this->showBranding()) {
+            return 'free_plan';
         }
 
         $isGrantedPlan = $this->plan_source === 'admin'

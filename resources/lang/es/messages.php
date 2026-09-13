@@ -229,7 +229,6 @@ return [
     'delete_image' => 'Eliminar Imagen',
     'deleted_image' => 'Imagen eliminada con éxito',
     'try_event_schedule' => 'Crea tu agenda gratis en :link',
-    'supported_by' => 'Soportado por :link',
     'unfollowed_role' => 'Dejaste de seguir a :name',
     'unfollow' => 'Dejar de seguir',
     'merge_venue' => 'Fusionar Lugar',

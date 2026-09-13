@@ -13,7 +13,7 @@
         "applicationCategory": "BusinessApplication",
         "operatingSystem": ["Web", "Android", "iOS"],
         "featureList": [
-            "Removes the Event Schedule strip from the foot of your public schedule",
+            "Removes the small Event Schedule chip from the corner of your public schedule",
             "Removes the Create your own event schedule card from your public event pages",
             "Embed snippets ship without a Powered by line",
             "The embedded ticket widget loses its Powered by footer",
@@ -46,26 +46,29 @@
            For white-label "The Blank Slate" styles.
 
            CONCEPT: an engraved slate plate. Everything on your public
-           page is yours except one strip at the foot, which carries our
-           name. White-label is not a decoration you add, it is a
-           SUBTRACTION - the maker's mark comes off the plate and the
-           space is left blank. The blank is the product, so the page
-           renders the blank at full size rather than hiding it.
+           page is yours except one small chip in its bottom corner,
+           which carries our name. White-label is not a decoration you
+           add, it is a SUBTRACTION - the maker's mark comes off the
+           plate and the space is left blank. The blank is the product,
+           so the page renders the blank at full size rather than
+           hiding it.
 
            THE DEVICE IS THE PLATE PAIR plus THE REGISTER. Two identical
-           slate plates sit in the hero: the free one carries the strip,
-           the white-labeled one carries an empty recess of exactly the
-           same height. Then a real <table> audits every surface where
+           slate plates sit in the hero: the free one carries our chip in
+           the corner of its foot, the white-labeled one carries the same
+           recess, empty. Then a real <table> audits every surface where
            our name can appear on something of yours, and what happens
            to each. That table is the argument: the feature is a finite,
            enumerable list, not a vibe.
 
            EVERY ROW IS CODE-CHECKED:
-             - The foot strip: layouts/app-guest.blade.php gated on
-               $role->showBranding(), text messages.try_event_schedule.
-               On the nexus branch the same <p> also carries
-               messages.supported_by (Invoice Ninja), so the strip holds
-               TWO credits and the plate mock shows both.
+             - The corner chip: layouts/app-guest.blade.php, gated on
+               Role::creditChipReason(), which answers 'free_plan' on
+               the nexus wherever $role->showBranding() is true. The
+               nexus has run no footer strip since 2026-09-11
+               (Role::showFooterStrip() is false there), and the strip's
+               "Supported by Invoice Ninja" credit went with it. An
+               operator's free tier still carries their own strip.
              - The embed snippet's line: $embedBrandingLine in
                components/embed-modal.blade.php - baked into the HTML
                you paste, which is why the page tells you to re-copy it.
@@ -78,8 +81,9 @@
                draft of this page claimed only the calendar one did.
              - The event-page card: event/show-guest.blade.php renders
                messages.create_your_own_event_schedule when
-               $role->showBranding() - the same fact as the strip, so
-               all seven rows now key off one tier. It used to read
+               $role->showBranding() - the same fact as the chip, so
+               all seven rows now key off one tier (row 1 adds one
+               exception, the granted plan). It used to read
                `! $event->isPro()`, which asked about every schedule on
                the bill; if you find a footnote here claiming this row
                is the odd one out, the footnote is stale.
@@ -96,22 +100,24 @@
            <title> and og:site_name both carry the schedule's own name
            on every plan and every install; see
            AppGuestLayout::guestTitle(). Then the credit chip, whose
-           cases live in Role::creditChipReason(). Off the nexus it is
-           the normal case rather than an exception, whether the install
-           is a plain selfhost ('selfhost') or an operator's own platform
-           ('saas'), because the Attribution Assurance License credit is
-           owed by whoever redistributes the software, not by the tenant
-           who happens to be paying. ONE QUALIFICATION, added when the
-           double credit came out: the chip stands down wherever
-           showBranding() puts the footer strip on the page, so an
-           operator's free tier shows their strip and no chip, and the
-           chip lands on the tiers they charge for. On the nexus the one
-           case is an admin-granted Enterprise plan ('granted_plan'),
-           which is the same shape - not free tier, so no strip, so the
-           chip fills in. Section 03's closing line, section 05, and BOTH
-           the selfhost FAQ and the operator FAQ have to keep saying so -
-           a page selling white-label that overclaims gets found out on
-           day one.
+           cases live in Role::creditChipReason(). On the nexus it is
+           register row 1 ('free_plan'), and the one plan above free
+           that keeps it is an admin-granted Enterprise plan
+           ('granted_plan'); row 1's after cell, section 03's granted
+           card and the "Is anything left?" FAQ must say so. Off the
+           nexus it is the normal case rather than an exception, whether
+           the install is a plain selfhost ('selfhost') or an operator's
+           own platform ('saas'), because the Attribution Assurance
+           License credit is owed by whoever redistributes the software,
+           not by the tenant who happens to be paying. ONE
+           QUALIFICATION, added when the double credit came out: the
+           chip stands down wherever Role::showFooterStrip() puts an
+           operator's footer strip on the page, so an operator's free
+           tier shows their strip and no chip, and the chip lands on the
+           tiers they charge for. Section 03's closing line, section 05,
+           and BOTH the selfhost FAQ and the operator FAQ have to keep
+           saying so - a page selling white-label that overclaims gets
+           found out on day one.
            TWO MORE STAY OFF THE PAGE, and section 03 has a card for
            each: AbstractEventDesign::renderBranding() stamps
            "eventschedule.com" in the bottom-right corner of every
@@ -341,9 +347,9 @@
         }
         .es-slate2-etch { color: #b0b8bf; text-shadow: 0 1px 0 rgba(0, 0, 0, 0.6); }
 
-        /* The foot: a recess cut into the plate. On a free schedule it
-           holds our strip; with white-label on it holds nothing, at the
-           same height, which is the whole point of the page. */
+        /* The foot: a recess cut into the plate. On a free schedule our
+           chip sits in its corner; with white-label on it holds nothing,
+           at the same height, which is the whole point of the page. */
         .es-slate2-foot {
             display: flex;
             align-items: center;
@@ -361,17 +367,6 @@
                 inset 0 -1px 0 rgba(255, 255, 255, 0.04),
                 0 0 0 1px rgba(255, 255, 255, 0.06);
         }
-        .es-slate2-strip {
-            width: 100%;
-            background-color: #2c3136;
-            color: #f5f9fe;
-            text-align: center;
-            font-size: 0.72rem;
-        }
-        /* The bullet between the two credits, and a wrapper that keeps the
-           second credit whole when the strip wraps on a narrow plate. */
-        .es-slate2-strip-sep { padding: 0 0.35rem; opacity: 0.6; }
-        .es-slate2-strip-wrap { white-space: nowrap; }
         /* The date column in the plate rows. Set here rather than as an
            arbitrary Tailwind width, which is not in the built bundle. */
         .es-slate2-when { width: 5.5rem; }
@@ -390,8 +385,9 @@
             text-overflow: ellipsis;
         }
 
-        /* The real credit chip, reproduced. The mark keeps its true
-           brand gradient; it is a logo, not a page accent. */
+        /* The real credit chip, reproduced - on the hero's free plate and
+           in section 03. The mark keeps its true brand gradient; it is a
+           logo, not a page accent. */
         .es-slate2-chip {
             display: inline-flex;
             align-items: center;
@@ -578,14 +574,14 @@
                 'label'     => 'Free plan',
                 'plan'      => 'Free',
                 'planClass' => 'es-slate2-plan es-slate2-plan-free',
-                'note'      => 'The strip at the foot is ours. Everything above it is already yours.',
+                'note'      => 'The chip in the corner is ours. The schedule above it is already yours.',
             ],
             [
                 'branded'   => false,
                 'label'     => 'White-label on',
                 'plan'      => 'Pro',
                 'planClass' => 'es-slate2-plan es-slate2-plan-pro',
-                'note'      => 'The same recess, left blank. Nothing replaces it and nothing takes its place.',
+                'note'      => 'The same corner, left blank. Nothing replaces it and nothing takes its place.',
             ],
         ];
 
@@ -593,10 +589,10 @@
         // see the header comment for the file each one lives in.
         $register = [
             [
-                'surface' => 'The foot of your public schedule',
-                'free'    => 'A dark strip holding two credits in one line: "Create your free schedule at eventschedule.com" and a credit to the project\'s sponsor.',
+                'surface' => 'The corner of your public schedule',
+                'free'    => 'A small "Event Schedule" chip in the bottom corner of your public pages, linking to eventschedule.com.',
                 'pill'    => 'Removed',
-                'after'   => 'The whole strip goes. The page ends where your last event ends.',
+                'after'   => 'The chip goes, and the page ends where your last event ends. Only a plan an admin granted by hand keeps it; see What stays.',
             ],
             [
                 'surface' => 'The card on your public event pages',
@@ -639,15 +635,15 @@
         $faqs = [
             [
                 'q' => 'How do I remove Event Schedule branding?',
-                'a' => 'Upgrade the schedule to Pro or Enterprise. There is no switch to find afterwards: the check reads the plan itself, so the strip at the foot of your page is gone as soon as the plan is active, on every surface at once.',
+                'a' => 'Upgrade the schedule to Pro or Enterprise. There is no switch to find afterwards: the check reads the plan itself, so the chip in the corner of your page is gone as soon as the plan is active, on every surface at once.',
             ],
             [
                 'q' => 'What exactly is removed?',
-                'a' => 'Seven surfaces: the strip at the foot of your public schedule, which carries both our address and our sponsor credit; the "Create your own event schedule!" card beside your event details; the "Powered by Event Schedule" line in the calendar embed snippet; the same line on the embedded ticket widget, which carries it twice, once inside the widget and once in the snippet; the line in the footer of the newsletters you send; the Event Schedule tab icon, which your own logo replaces; and ads or promotions, which never appear above the free tier.',
+                'a' => 'Seven surfaces: the small "Event Schedule" chip in the corner of your public schedule; the "Create your own event schedule!" card beside your event details; the "Powered by Event Schedule" line in the calendar embed snippet; the same line on the embedded ticket widget, which carries it twice, once inside the widget and once in the snippet; the line in the footer of the newsletters you send; the Event Schedule tab icon, which your own logo replaces; and ads or promotions, which never appear above the free tier.',
             ],
             [
                 'q' => 'Is anything left?',
-                'a' => 'On a schedule hosted here, nothing in the body of the page and two things outside it. First, one line of metadata in the page head: the breadcrumb data still names eventschedule.com as the site root. The title in the browser tab and the site name in a shared link preview both read your schedule\'s name on every plan, free included, the picture on that preview is your own artwork or, failing that, whatever your page already shows - never one of ours, and the tab icon becomes your logo on Pro. Point a custom domain at the schedule and the breadcrumb roots at your own domain too, which leaves the head with nothing of ours in it. Second, if an admin granted your Enterprise plan by hand rather than you buying it, a small Event Schedule credit chip stays below the footer; customers who pay through Stripe never carry that chip, and neither do plans earned through the referral programme. '.($walletLive ? 'Two more things are not on your page at all: every event graphic made here carries a small eventschedule.com credit in its corner, whatever the plan, and a Google Wallet pass shows our logo if you have not uploaded one of your own.' : 'One more thing is not on your page at all: every event graphic made here carries a small eventschedule.com credit in its corner, whatever the plan.').' On any install that is not eventschedule.com the chip is the normal case rather than an exception, on every plan except a free one that is already carrying the operator\'s own strip - see the two questions below.',
+                'a' => 'On a schedule hosted here, one line in the page head, and on one kind of plan the chip in the corner. First, the head: the breadcrumb data still names eventschedule.com as the site root. The title in the browser tab and the site name in a shared link preview both read your schedule\'s name on every plan, free included, the picture on that preview is your own artwork or, failing that, whatever your page already shows - never one of ours, and the tab icon becomes your logo on Pro. Point a custom domain at the schedule and the breadcrumb roots at your own domain too, which leaves the head with nothing of ours in it. Second, if an admin granted your Enterprise plan by hand rather than you buying it, the small Event Schedule chip a free schedule carries stays in the corner of your public pages; customers who pay through Stripe lose it, and so do plans earned through the referral programme. '.($walletLive ? 'Two more things are not on your page at all: every event graphic made here carries a small eventschedule.com credit in its corner, whatever the plan, and a Google Wallet pass shows our logo if you have not uploaded one of your own.' : 'One more thing is not on your page at all: every event graphic made here carries a small eventschedule.com credit in its corner, whatever the plan.').' On any install that is not eventschedule.com the chip is the normal case rather than an exception, on every plan except a free one that is already carrying the operator\'s own strip - see the two questions below.',
             ],
             [
                 'q' => 'Do I need to change my embed after upgrading?',
@@ -655,11 +651,11 @@
             ],
             [
                 'q' => 'Is white labeling available on selfhosted installations?',
-                'a' => 'Yes, with one exception, and it is a small one. Every schedule on a selfhosted install behaves like a paid one, so there is nothing to buy: no strip at the foot of your pages, no card beside your events, no line in either embed snippet or in your newsletters, and no ads. What stays is a small "Event Schedule" credit in the corner of your public pages. Event Schedule is given away under the Attribution Assurance License, which asks for the credit in return, so that one is not a plan you can upgrade past.',
+                'a' => 'Yes, with one exception, and it is a small one. Every schedule on a selfhosted install behaves like a paid one, so there is nothing to buy: no card beside your events, no line in either embed snippet or in your newsletters, and no ads. What stays is the small "Event Schedule" chip in the corner of your public pages, the same one a free schedule carries here. Event Schedule is given away under the Attribution Assurance License, which asks for the credit in return, so that one is not a plan you can upgrade past.',
             ],
             [
                 'q' => 'I run my own platform on this software. Are my customers white-labeled?',
-                'a' => 'Nearly. Everything that carries our name on a free schedule here comes off yours the same way, and the strip at the foot of your free tier points at your marketing site rather than ours, because it is your growth CTA rather than ours. The one thing that does not come off is the small corner credit, and it sits on the tiers you charge for. The licence asks for the attribution from whoever redistributes the software, and your customer\'s subscription is an arrangement between the two of you, so upgrading them is not ours to be paid by. Your free tier is the exception, and only because it is already carrying your strip: a page shows one credit or the other, never both. It is a single small chip in the corner, it links to us rather than to anything of yours, and it is the whole of what running the platform for free costs you.',
+                'a' => 'Nearly. Your paid tiers lose everything a paid schedule here loses except one thing: the small corner credit, which sits on the tiers you charge for. The licence asks for the attribution from whoever redistributes the software, and your customer\'s subscription is an arrangement between the two of you, so upgrading them is not ours to be paid by. Your free tier differs from ours: where a free schedule here carries that chip, yours carries a footer strip pointing at your marketing site, because it is your growth CTA rather than ours, and a page shows one credit or the other, never both. The chip itself is small, it links to us rather than to anything of yours, and it is the whole of what running the platform for free costs you.',
             ],
             [
                 'q' => 'Can I put my own branding in the space?',
@@ -703,14 +699,13 @@
 
                 <h1 class="es-balance mb-7 text-[2.6rem] font-black leading-[1.05] tracking-tight sm:text-6xl">
                     <span class="es-mask"><span class="es-mask-line">White label takes off</span></span>
-                    <span class="es-mask es-mask-2"><span class="es-mask-line">the <span class="es-slate2-grad">one strip</span> at the foot.</span></span>
+                    <span class="es-mask es-mask-2"><span class="es-mask-line">the <span class="es-slate2-grad">one chip</span> in the corner.</span></span>
                 </h1>
 
                 <p class="es-slate2-muted es-fade-up es-d-2 mx-auto mb-9 max-w-2xl text-lg sm:text-xl">
-                    Everything above it is already yours. That strip carries our address and a credit
-                    to the project's sponsor, and white-label takes the whole thing off, along with the
-                    six other surfaces in the register below, the moment the plan is active. There is
-                    nothing to switch on.
+                    On the free plan, a small "Event Schedule" chip sits in the corner of your public
+                    pages. White-label takes it off, along with the six other surfaces in the register
+                    below, the moment the plan is active. There is nothing to switch on.
                 </p>
 
                 <div class="es-fade-up es-d-3 flex flex-col items-center justify-center gap-3 sm:flex-row">
@@ -726,8 +721,8 @@
             </div>
 
             <!-- The plate pair. Identical slate, identical content,
-                 identical foot height. One foot carries our strip and
-                 one carries nothing. -->
+                 identical foot height. One foot carries our chip in its
+                 corner and one carries nothing. -->
             <div class="es-fade-up es-d-4 mt-14 grid gap-5 sm:grid-cols-2" data-reveal>
                 @foreach ($plates as $plate)
                     @php $branded = $plate['branded']; @endphp
@@ -759,14 +754,14 @@
 
                             <div @class(['es-slate2-foot', 'relative', 'es-slate2-blank' => ! $branded])>
                                 @if ($branded)
-                                    {{-- The real strip on eventschedule.com carries two credits in
-                                         one paragraph: messages.try_event_schedule and
-                                         messages.supported_by. Both come off together. --}}
-                                    <p class="es-slate2-strip px-4 py-4 leading-snug">
-                                        Create your free schedule at <span class="underline">eventschedule.com</span>
-                                        <span class="es-slate2-strip-sep" aria-hidden="true">&bull;</span>
-                                        <span class="es-slate2-strip-wrap">Supported by <span class="underline">Invoice Ninja</span></span>
-                                    </p>
+                                    {{-- The real chip as layouts/app-guest.blade.php renders it on a
+                                         free schedule here ('free_plan'), in the page's end corner. --}}
+                                    <div class="flex w-full justify-end px-4">
+                                        <span class="es-slate2-chip">
+                                            <span class="es-slate2-chip-mark" aria-hidden="true"></span>
+                                            <span>Event Schedule</span>
+                                        </span>
+                                    </div>
                                 @endif
                             </div>
                         </div>
@@ -792,7 +787,7 @@
                 <p class="es-slate2-muted text-lg" data-reveal style="--reveal-delay: 0.15s;">
                     Every place the Event Schedule name comes off your pages, your embeds and your
                     newsletters: what it says while you are on the free plan, and what happens to it
-                    after that. All seven read the same fact, your plan tier. What white-label does
+                    after that. All seven read the same fact, your plan. What white-label does
                     not remove, on your pages and off them, is two sections down.
                 </p>
             </div>
@@ -837,11 +832,12 @@
                 </p>
                 <p class="es-slate2-muted text-sm" data-reveal>
                     <span class="es-slate2-ink font-semibold">One decision, seven rows:</span> all
-                    seven key off one fact, whether this schedule's plan tier is free. There is no
-                    row that reads something else, and none that reads a second schedule - a curator
+                    seven key off one fact, whether this schedule's plan tier is free. The one
+                    refinement is on the first row: a plan an admin granted by hand keeps the chip.
+                    No row reads a second schedule - a curator
                     page answers for itself, whoever else is on the bill. So does the page the app
                     makes for an act or venue you list who is not on Event Schedule yet: it is a free
-                    schedule of its own, so it carries the strip until the person it names claims it
+                    schedule of its own, so it carries the chip until the person it names claims it
                     and upgrades. Event Schedule is
                     <a href="{{ marketing_url('/open-source') }}" class="es-slate2-accent font-medium underline">open source</a>,
                     so you can go and read the checks rather than take our word for them.
@@ -871,8 +867,8 @@
                     <ul class="space-y-4" data-reveal-group="90">
                         @foreach ([
                             ['It is the plan, not a checkbox', 'Nothing to find, nothing to save, nothing to get wrong on one page and right on another.'],
-                            ['The surfaces move together', 'The footer strip, the event-page card, both embeds, the newsletter, the tab icon and the ad slot all read the plan rather than a saved preference.'],
-                            ['It follows the plan both ways', 'Let a plan lapse and the strip comes back. Renew and it goes again. We would rather say so than have you find out.'],
+                            ['The surfaces move together', 'The corner chip, the event-page card, both embeds, the newsletter, the tab icon and the ad slot all read the plan rather than a saved preference.'],
+                            ['It follows the plan both ways', 'Let a plan lapse and the chip comes back. Renew and it goes again. We would rather say so than have you find out.'],
                         ] as [$t, $d])
                             <li class="flex items-start gap-3" data-reveal>
                                 <svg aria-hidden="true" class="es-slate2-accent mt-0.5 h-5 w-5 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7" /></svg>
@@ -958,8 +954,8 @@
                     </h2>
                     <p class="es-slate2-muted text-lg" data-reveal style="--reveal-delay: 0.15s;">
                         A page selling white-label that promises "no trace anywhere" gets found out on
-                        the first afternoon. On a schedule you run here, nothing is left in the body of
-                        your page and two things sit outside it. {{ $walletLive ? 'Two more are' : 'One more is' }} not on your page at all.
+                        the first afternoon. On a schedule you run here, one line of metadata stays in
+                        the page head, and one kind of plan keeps the chip in the corner. {{ $walletLive ? 'Two more are' : 'One more is' }} not on your page at all.
                         Here are all {{ $walletLive ? 'four' : 'three' }}, and then what changes if you run the software yourself
                         instead, or point a domain of your own at it.
                     </p>
@@ -1010,9 +1006,9 @@
 
                         <p class="es-slate2-muted mt-auto text-sm">
                             If an admin granted your Enterprise plan by hand rather than you buying it,
-                            a small credit chip like this one stays at the foot of your public pages.
-                            Here on eventschedule.com that is the only way to end up with it: customers
-                            paying through Stripe never carry it, and neither do plans earned through the
+                            the chip from the first row of the register stays in the corner of your
+                            public pages. Above the free plan that is the only way to keep it here:
+                            customers paying through Stripe lose it, and so do plans earned through the
                             referral programme. A gift keeps its label.
                         </p>
                     </div>
@@ -1154,8 +1150,8 @@
                         </div>
                         <h3 class="es-slate2-ink mb-3 text-xl font-bold">A banner of your own</h3>
                         <p class="es-slate2-muted text-sm">
-                            Put your own announcement across the top of your guest pages. The strip at
-                            the top is yours in the same way the strip at the foot stops being ours.
+                            Put your own announcement across the top of your guest pages. The top of
+                            the page becomes yours in the same way the corner stops being ours.
                         </p>
                         <div class="es-slate2-sub mt-auto p-3">
                             <p class="es-slate2-ink text-xs font-semibold">Doors at 7. Bar cash only tonight.</p>
@@ -1222,7 +1218,7 @@
                             Taking our name off the page is Pro. Serving the page from your own domain
                             is Enterprise, and the two are independent: a white-labeled schedule can
                             still sit on a subdomain, and a custom domain on its own would not remove
-                            the strip at the foot.
+                            the chip in the corner.
                         </p>
 
                         <div class="mt-auto grid gap-3 sm:grid-cols-2">
@@ -1260,10 +1256,10 @@
                 </h2>
                 <p class="es-slate2-muted text-lg" data-reveal style="--reveal-delay: 0.15s;">
                     A selfhosted installation is white-labeled by default. There is no plan to buy,
-                    no strip to remove, and every schedule on it behaves like a paid one. One credit
-                    stays, in the corner, because the licence asks for it. Turn the install into a
-                    platform for other people and it stays on every schedule you charge for, while a
-                    free one carries your own footer strip in its place.
+                    and every schedule on it behaves like a paid one, bar one thing: the corner chip
+                    a free schedule carries here stays, because the licence asks for it. Turn the
+                    install into a platform for other people and it stays on every schedule you
+                    charge for, while a free one carries your own footer strip in its place.
                 </p>
             </div>
 
@@ -1271,8 +1267,8 @@
                  empty. Third element is that span class. --}}
             <div class="grid gap-4 md:grid-cols-2" data-reveal-group="100">
                 @foreach ([
-                    ['Six of the seven, gone','The branding check answers no on a single-tenant install, so the footer strip, the event-page card, both embed lines, the newsletter line and ads are never rendered in the first place.', ''],
-                    ['The seventh: one credit, one corner', 'A small "Event Schedule" chip sits in the corner of your public pages. It is the Attribution Assurance License credit - the licence gives you the whole application and asks for the mention in return - so it is not gated on a plan and there is no setting that removes it. Nothing else on the page, and nothing in your email or your embeds, carries our name.', ''],
+                    ['Six of the seven, gone','The branding check answers no on a single-tenant install, so the event-page card, both embed lines, the newsletter line and ads are never rendered in the first place, and an uploaded logo takes over the tab icon.', ''],
+                    ['The seventh: one credit, one corner', 'The first row of the register is the one that stays: the same small "Event Schedule" chip a free schedule carries here sits in the corner of your public pages. It is the Attribution Assurance License credit - the licence gives you the whole application and asks for the mention in return - so it is not gated on a plan and there is no setting that removes it. Nothing else on the page, and nothing in your email or your embeds, carries our name.', ''],
                     ['Running it for other people, one credit a page', 'Switch the same install into multi-tenant mode and every schedule you charge for carries that one corner chip. The credit is owed by whoever redistributes the software, and what your customers pay you is between you and them. Your free tier keeps a footer strip instead, pointed at your marketing site rather than ours: a page shows one credit or the other, never both.', ''],
                     ['Every feature, not just this one', 'A selfhosted install resolves to the Enterprise tier throughout, so Custom CSS, custom labels and the banner come with it. The AI style generator is there too, but it calls an AI provider, so it stays hidden until you put your own API key in the environment file.', ''],
                     ['Your servers, your data', 'Run it on your own hardware for a client, a festival or a chain of rooms. The source is open, so the branding check and everything around it is there to read.', 'md:col-span-2'],
@@ -1312,7 +1308,7 @@
 
             <div class="grid gap-5 md:grid-cols-3" data-reveal-group="110">
                 @foreach ([
-                    ['01', 'Upgrade the schedule', 'Pro at '.plan_price($proMonthly).' a month, or Enterprise. The strip is gone on the next page load, with nothing else to do.'],
+                    ['01', 'Upgrade the schedule', 'Pro at '.plan_price($proMonthly).' a month, or Enterprise. The chip is gone on the next page load, with nothing else to do.'],
                     ['02', 'Re-copy your embed snippets', 'Only if you had already pasted one. Both snippets carry that line in your HTML, not ours. The widget footer inside the frame goes on its own.'],
                     ['03', 'Fill the space', 'Logo, colour, font and background are free. Custom labels, a banner and Custom CSS come with the same plan.'],
                 ] as [$n, $t, $d])
@@ -1465,7 +1461,7 @@
                     </h2>
                     <p class="es-slate2-muted mx-auto mb-10 max-w-xl text-lg sm:text-xl">
                         Claim the schedule for nothing, style it for nothing, and pay {{ plan_price($proMonthly) }} a
-                        month when you want the last strip gone.
+                        month when you want the chip in the corner gone.
                     </p>
 
                     <div class="mx-auto flex max-w-2xl flex-col items-stretch justify-center gap-3 sm:flex-row">

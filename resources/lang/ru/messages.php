@@ -253,7 +253,6 @@ return [
     'delete_image' => 'Удалить изображение',
     'deleted_image' => 'Изображение успешно удалено',
     'try_event_schedule' => 'Создайте расписание по ссылке :link',
-    'supported_by' => 'Поддерживается :link',
     'unfollowed_role' => 'Успешно отписан от :name',
     'unfollowed_roles_count' => 'Успешно отписано от :count расписаний',
     'unfollow' => 'Отписаться',
@@ -1884,7 +1883,7 @@ return [
     'close_modal' => 'Закрывать',
 
     // Layout strings
-    'powered_by_event_schedule' => 'На основе расписания событий',
+    'powered_by_event_schedule' => 'Создано Event Schedule',
     'view_notifications' => 'Просмотр уведомлений',
     'search_placeholder' => 'Поиск...',
 

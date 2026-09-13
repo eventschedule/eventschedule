@@ -253,7 +253,6 @@ return [
     'delete_image' => 'Șterge Imaginea',
     'deleted_image' => 'Imagine ștearsă cu succes',
     'try_event_schedule' => 'Creează-ți programul gratuit la :link',
-    'supported_by' => 'Susținut de :link',
     'unfollowed_role' => 'Nu mai urmărești :name',
     'unfollowed_roles_count' => ':count programe nu mai sunt urmărite',
     'unfollow' => 'Nu mai urmări',

@@ -714,9 +714,10 @@
         @endif
 
         {{-- Create your own card. Keyed off THIS schedule's tier, the same fact that decides
-             the footer strip, so the two cannot disagree. It used to read
+             the page's free-tier credit (the corner chip on eventschedule.com, an operator's
+             footer strip on their own platform), so the two cannot disagree. It used to read
              `! $event->isPro()`, which is true when any schedule on the bill is paid - so a
-             free curator's page dropped this card while still carrying the strip. --}}
+             free curator's page dropped this card while still carrying the free-tier credit. --}}
         @if ($role->showBranding())
         <div class="bg-white/95 dark:bg-gray-900/95 backdrop-blur-sm sm:rounded-2xl p-5 flex flex-col gap-6 {{ $role->isRtl() ? 'rtl' : '' }}">
           <p class="text-base leading-snug font-semibold text-gray-900 dark:text-gray-100">

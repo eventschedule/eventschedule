@@ -51,6 +51,17 @@ html.es-a11y-cta-offset .es-a11y-root {
     bottom: calc(var(--es-a11y-cta-clearance, 4.5rem) + 0.75rem);
 }
 
+/* Keep the credit chip clear of the mobile CTA bar on the guest event page, widget or not. The
+   chip is the last in-flow element on a guest page (layouts/app-guest.blade.php), and the bar is
+   fixed to the viewport bottom and taller than the chip's own p-4 wrapper, so at full scroll it
+   would cover the chip entirely. show-guest.blade.php sets .es-a11y-cta-offset whenever the bar is
+   showing, whether or not the widget is on. Gated on the class for the stale-variable reason given
+   below, and deliberately ABOVE the .es-a11y-credit-clear rules: with the widget on, their larger
+   reservation has to win, and at equal specificity the later rule does. */
+html.es-a11y-cta-offset .es-credit-chip {
+    padding-bottom: calc(var(--es-a11y-cta-clearance, 0px) + 1rem);
+}
+
 /* Keep the "Powered by Event Schedule" credit chip clear of the widget. The chip is the last
    in-flow element on a guest page (layouts/app-guest.blade.php), so at full scroll the fixed
    widget lands on top of it. Reserve room underneath: 1.5rem for the widget's own bottom

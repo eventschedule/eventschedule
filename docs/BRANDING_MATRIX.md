@@ -15,38 +15,50 @@ they are written down together. Keep it in sync when any of those sites change.
 
 The three deployment modes those combine into:
 
-- **nexus** - `IS_HOSTED=true`, `IS_NEXUS=true`. eventschedule.com itself. Ad-free.
+- **nexus** - `IS_HOSTED=true`, `IS_NEXUS=true`. eventschedule.com itself. Ad-free, and no footer
+  strip: its free tier carries the chip.
 - **selfhosted SaaS** - `IS_HOSTED=true`, `IS_NEXUS=false`. An operator running their own
   multi-tenant platform, with their own tiers, Stripe and `APP_MARKETING_URL`.
 - **selfhost** - `IS_HOSTED=false`. Single-tenant. Every schedule resolves to `'enterprise'`.
 
-## The two predicates
+## The three predicates
 
 ```php
 Role::showBranding()      // false on selfhost; else actualPlanTier() === 'free'
-Role::creditChipReason()  // 'selfhost' | 'saas' | 'granted_plan' | null
+Role::showFooterStrip()   // ! is_nexus && showBranding(): an operator's free tier only
+Role::creditChipReason()  // 'selfhost' | 'saas' | 'free_plan' | 'granted_plan' | null
 ```
 
-They start from different questions, and `creditChipReason()` calls `showBranding()` only to stand
-down where the strip already renders:
+`showBranding()` is the free-tier fact. Every free-tier surface other than the page credit reads it
+directly: the event-page card, both embed lines, the ticket frame and the newsletter footer. The
+page credit itself is split between the other two predicates. They start from different questions,
+and `creditChipReason()` calls `showFooterStrip()` only to stand down where the strip already
+renders:
 
-- **The strip turns on the tenant's tier.** It is a growth CTA belonging to whoever runs the
-  platform, so it is a free-tier thing and a paid tenant loses it.
+- **The strip turns on the tenant's tier, and only on an operator's platform.** It is a growth CTA
+  belonging to whoever runs the platform, so it is a free-tier thing and a paid tenant loses it.
+  eventschedule.com does not run one: its free tier carries the chip instead, so
+  `showFooterStrip()` is false on the nexus whatever the plan.
 - **The chip turns on the deployment.** It is the license credit, owed by whoever redistributes the
   software, so off the nexus every schedule is owed it whatever its plan. An operator's paying
   tenant is as much a part of that redistribution as their free one, and that tenant's subscription
   is between them and the operator. eventschedule.com is the only install that sells white-label,
-  so it is the only install where the chip depends on a plan for any other reason.
+  so it is the only install where the chip depends on a plan: its free tier carries it, a paid
+  plan takes it off, and an Enterprise plan an admin granted by hand keeps it.
 - **The strip wins where the two would meet.** A page carries one credit, so `creditChipReason()`
-  answers null wherever `showBranding()` is true. The deployment argument therefore decides an
-  operator's paid tiers, and their free tier shows the strip alone.
+  answers null wherever `showFooterStrip()` is true. The deployment argument therefore decides an
+  operator's paid tiers, and their free tier shows the strip alone. On the nexus the two never
+  meet, because there is no strip.
 
 `showBranding()` is also **not** the inverse of `isWhiteLabeled()` - `isWhiteLabeled()` returns
 `true` unconditionally when not hosted, which is what left the old selfhost branch permanently
 `false`.
 
-`granted_plan` requires all of: `is_nexus`, `plan_source === 'admin'`,
-`actualPlanTier() === 'enterprise'`, and no active Enterprise Stripe subscription.
+`free_plan` requires `is_nexus` and `showBranding()`. It is tested before `granted_plan`, but the
+order is not load-bearing: `granted_plan` needs the Enterprise tier, so a lapsed grant, still
+tagged `plan_source = 'admin'`, lands on `free_plan` either way. `granted_plan` requires all of:
+`is_nexus`, `plan_source === 'admin'`, `actualPlanTier() === 'enterprise'`, and no active
+Enterprise Stripe subscription.
 
 ## The matrix
 
@@ -54,8 +66,8 @@ down where the strip already renders:
 
 | Surface | nexus free | nexus paid | nexus Ent *admin-granted* | SaaS free | SaaS paid | selfhost (any tier) |
 |---|---|---|---|---|---|---|
-| Dark footer strip | yes, + "Supported by Invoice Ninja" | -- | -- | yes, links the operator's domain | -- | -- |
-| Corner credit chip | -- | -- | yes, `utm_source=granted-plan` | -- (the strip has it) | yes, `utm_source=saas` | yes, `utm_source=selfhost` |
+| Dark footer strip | -- (the chip took its place) | -- | -- | yes, links the operator's domain | -- | -- |
+| Corner credit chip | yes, `utm_source=free-plan` | -- | yes, `utm_source=granted-plan` | -- (the strip has it) | yes, `utm_source=saas` | yes, `utm_source=selfhost` |
 | Event-page "Create your own" card | yes | -- | -- | yes | -- | -- |
 | Ads / promo slot | -- (nexus is ad-free) | -- | -- | yes, if the operator enabled ads | -- | -- |
 | Calendar embed, inside the iframe | -- | -- | -- | -- | -- | -- |
@@ -71,7 +83,9 @@ down where the strip already renders:
 
 The first two rows are mutually exclusive column by column, and that is the invariant a reader
 should be able to check by eye: no cell has a `yes` in both. `GuestBrandingTest::test_no_guest_page_ever_carries_both_credits`
-asserts it over all six deployment-by-tier cells.
+asserts it over all six deployment-by-tier cells. The other half holds on every free column:
+exactly one of the two is `yes`, which `GuestBrandingTest::test_every_free_guest_page_carries_exactly_one_credit`
+asserts, so retiring one credit for a tier without switching the other on fails the build.
 
 The two head-metadata rows do **not** turn on the plan - they turn on the domain, which is why they
 are flat across every column. `<title>` and `og:site_name` carry the schedule's own name
@@ -82,7 +96,7 @@ the head, and `servesOnCustomDomain()` removes that one too.
 
 | Surface | File | Gate |
 |---|---|---|
-| Dark footer strip | `resources/views/layouts/app-guest.blade.php` | `! request()->embed && config('app.hosted') && $role->showBranding()`; the `is_nexus` branch inside adds the Invoice Ninja credit |
+| Dark footer strip | `resources/views/layouts/app-guest.blade.php` | `! request()->embed && $role->showFooterStrip()` (never on the nexus) |
 | Corner credit chip | `resources/views/layouts/app-guest.blade.php` | `! request()->embed && $role->creditChipReason()` (the predicate itself stands down where the strip renders) |
 | Event-page card | `resources/views/event/show-guest.blade.php` | `$role->showBranding()` |
 | Ads / promo slot | `resources/views/partials/promo-slot.blade.php` via `AppGuestLayout::$adSlot` | `Role::showAds()` + `AdsService::isEligible()` |
@@ -105,20 +119,23 @@ the head, and `servesOnCustomDomain()` removes that one too.
    `https://eventschedule.com` link is the license attribution and is not the operator's to
    rebrand. Do not "fix" the chip to use `marketing_url()`.
 2. **The strip and the chip are alternatives, and the strip wins.** `creditChipReason()` answers
-   null wherever `showBranding()` is true, so no guest page carries both. What survives is the
+   null wherever `showFooterStrip()` is true, so no guest page carries both. The strip exists only
+   on an operator's platform, so this rule only ever decides their free tier. What survives is the
    asymmetry underneath: off the nexus the chip is owed by the deployment rather than the tier, so
    an operator's *paid* tenants carry it and only their free tier is covered by the strip instead.
    Two consequences that read like bugs and are not. Upgrading a tenant on an operator's platform
    *adds* the chip rather than removing it. And an operator's free tier carries no Event Schedule
    attribution at all, because their strip links `marketing_url()`, which is their own site: the
-   credit on that page is theirs, not ours.
+   credit on that page is theirs, not ours. On eventschedule.com the opposite holds: a free
+   schedule carries the chip, and upgrading *removes* it.
 3. **`request()->embed` suppresses both layout blocks.** Embeds carry attribution through the
    snippet line and the ticket-frame footer instead, never inside the calendar iframe.
    `?embed=1` never renders `event/show-guest.blade.php` (see `RoleController::viewGuest`), so the
    event-page card needs no embed guard.
 4. **Custom domains keep their body branding.** A lapsed Enterprise schedule keeps its custom domain
-   and drops to free, so the strip renders there. Deliberate: it is the only genuine external
-   backlink the hosted platform earns. Ads *are* suppressed on custom domains (AdSense policy),
+   and drops to free, so the free tier's credit renders there: the chip on the nexus, the strip on
+   an operator's platform. Deliberate: it is the only genuine external backlink the hosted
+   platform earns. Ads *are* suppressed on custom domains (AdSense policy),
    branding is not - the asymmetry is intentional. The one thing a custom domain *does* change is
    the `BreadcrumbList` root, and that is a correctness fix rather than a concession: a breadcrumb
    whose first item sits on another domain is discarded by Google, so the old `marketing_url()` root
@@ -169,18 +186,23 @@ the head, and `servesOnCustomDomain()` removes that one too.
    way: it tints the page, which is theirs regardless. Coverage:
    `tests/Feature/GuestManifestTest.php`.
 8. **The WP documents this matrix publicly** and is written to not overclaim. Any change here needs
-   `resources/views/marketing/white-label.blade.php` (the seven-row register, section 05, the
-   selfhost and operator FAQs which also feed the FAQ JSON-LD, and the file's own design comment),
-   the operator-facing `marketing/saas.blade.php` and `marketing/selfhost.blade.php`, and
-   `marketing/docs/schedule-styling.blade.php#remove-branding` to move with it.
+   `resources/views/marketing/white-label.blade.php` (the hero plates and H1, the seven-row
+   register, sections 02 to 06, the closing call to action, the branding FAQs which also feed the
+   FAQ JSON-LD, and the file's own design comment), the operator-facing `marketing/saas.blade.php`
+   and `marketing/selfhost.blade.php`, `marketing/docs/schedule-styling.blade.php#remove-branding`,
+   the "Earned plans" callout in `marketing/docs/referral-program.blade.php`, and the free-plan
+   credit row of the spec sheet in `marketing/demos.blade.php` (`/examples`) plus the sentence
+   under it, to move with it.
 
 ## SEO note
 
-Nexus tenant pages live on `*.eventschedule.com`, so the strip's link is an *internal* link - a
-conversion CTA, worth nothing as a backlink. Genuine external dofollow links come from three
-places only: embed snippets pasted on third-party sites, custom-domain guest pages, and selfhost
-installs. That is why the selfhost chip exists and why it is dofollow (`rel="noopener"`, no
-`nofollow`). The Invoice Ninja link is deliberately `nofollow`.
+Nexus tenant pages live on `*.eventschedule.com`, so the free-tier chip's link is an *internal*
+link - a conversion path, worth nothing as a backlink. Its `utm_source=free-plan` tag is what lets
+the /admin traffic sources report count it; the strip it replaced carried no tag. Genuine external
+dofollow links come from three places only: embed snippets pasted on third-party sites,
+custom-domain guest pages, and selfhost installs. That is why the selfhost chip exists and why
+every chip is dofollow (`rel="noopener"`, no `nofollow`). The nexus strip also carried a `nofollow`
+"Supported by Invoice Ninja" link; it went with the strip on 2026-09-11.
 
 An operator's own platform is a fourth, and a partial one: the chip is on their paid tiers only, so
 a free schedule there sends us nothing. Its strip is an outbound link to the operator instead.

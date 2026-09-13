@@ -575,7 +575,7 @@
             ['Save me a place, and the count of places left', 'Free registration with an optional capacity, per date', 'Free'],
             ['Buy a ticket without leaving the page', 'Ticket types and checkout through Stripe or PayPal, with zero platform fees. Free sells 25 paid tickets a month per schedule', 'Free'],
             ['Photos and comments from the people who came', 'Fan photos, video and comments, held in an approval queue. Free covers 25 photos per schedule', 'Free'],
-            ['The line at the foot of a free schedule inviting you to make one of your own', 'The free-plan credit, which reads "Create your free schedule at eventschedule.com". Removing it is part of Pro', 'Pro'],
+            ['The small "Event Schedule" chip in the corner of a free schedule', 'The free-plan credit, a small link back to eventschedule.com. Removing it is part of Pro', 'Pro'],
             ['A code shown at the door, and scanned on the way in', 'QR scanning, on every plan. The live check-in dashboard is the Pro half, and Pro also lifts the 25-a-month ceiling on what you sell', 'Free'],
             ['A schedule on its own domain rather than a subdomain', 'Custom domains', 'Enterprise'],
         ];
@@ -977,7 +977,7 @@
                 </div>
 
                 <p class="es-show-muted mt-10 text-center" data-reveal>
-                    {{ $specFree }} of those {{ count($spec) }} parts cost nothing. The {{ count($spec) - $specFree }} that cost something are dropping the credit line and a domain of your own. Selling starts free and so does scanning at the door, and Event Schedule takes nothing from the door on any plan.
+                    {{ $specFree }} of those {{ count($spec) }} parts cost nothing. The {{ count($spec) - $specFree }} that cost something are dropping the credit chip and a domain of your own. Selling starts free and so does scanning at the door, and Event Schedule takes nothing from the door on any plan.
                     <a href="{{ marketing_url('/pricing') }}" class="es-show-lit inline-flex items-center gap-1 font-semibold transition-all hover:gap-2">
                         See the plans
                         <svg aria-hidden="true" class="h-4 w-4 rtl:rotate-180" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6" /></svg>
