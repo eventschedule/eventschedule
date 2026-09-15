@@ -1058,7 +1058,7 @@ class EventController extends Controller
             }
         }
 
-        $this->eventRepo->saveEvent($role, $request, $event);
+        $this->eventRepo->saveEvent($role, $request, $event, true, $role->captureTimezone());
 
         // Sync polls from form data
         if ($role->isPro() && $request->has('polls')) {
@@ -1594,7 +1594,7 @@ class EventController extends Controller
         }
 
         $role = Role::subdomain($subdomain)->firstOrFail();
-        $event = $this->eventRepo->saveEvent($role, $request, null);
+        $event = $this->eventRepo->saveEvent($role, $request, null, true, $role->captureTimezone());
 
         // Create polls from form data
         if ($role->isPro() && $request->has('polls')) {
@@ -2607,7 +2607,7 @@ class EventController extends Controller
         //
         // This is the only endpoint whose UI offers "I manage this venue" for a venue that
         // already exists, and the isEditor() check above is what earns it that capability.
-        $event = $this->eventRepo->saveEvent($role, $request, null, true, allowExistingVenueClaim: true);
+        $event = $this->eventRepo->saveEvent($role, $request, null, true, $role->captureTimezone(), allowExistingVenueClaim: true);
 
         if ($request->social_image) {
             $tempDir = storage_path('app/temp');
@@ -2737,7 +2737,7 @@ class EventController extends Controller
             $this->createAndLoginUser($request);
         }
 
-        $event = $this->eventRepo->saveEvent($role, $request, null, false);
+        $event = $this->eventRepo->saveEvent($role, $request, null, false, $role->captureTimezone());
 
         $this->attachGuestFlyerImage($request, $event);
 
@@ -2920,7 +2920,10 @@ class EventController extends Controller
             // The event saves onto the submitter's talent schedule, but the time they typed is the
             // event's local time on the curator's page, so anchor the capture to the curator. Without
             // the override an existing talent schedule in another timezone shifts the published time.
-            $event = $this->eventRepo->saveEvent($talent, $request, null, false, $role->timezone);
+            // captureTimezone() rather than ->timezone: a curator with no timezone of its own used
+            // to pass null here, which fell through to saveEvent()'s venue-first chain and shifted
+            // the time it was meant to pin.
+            $event = $this->eventRepo->saveEvent($talent, $request, null, false, $role->captureTimezone());
 
             if (! empty($curatorCustomFieldValues)) {
                 $event->custom_field_values = $curatorCustomFieldValues;

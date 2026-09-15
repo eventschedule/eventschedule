@@ -1154,6 +1154,25 @@ class Role extends Model implements MustVerifyEmail
     }
 
     /**
+     * The zone a wall-clock entered for this schedule is anchored to.
+     *
+     * Deliberately the SAME expression as Event::scheduleTimezone(), which is what every DISPLAY
+     * path resolves: capture and display must agree, or an event is entered at one time and shown
+     * at another. In particular this does NOT consult the venue, which EventRepo::saveEvent()'s own
+     * fallback chain does - passing this to saveEvent() as $timezoneOverride is what keeps that
+     * chain out of the way. Without it, a schedule with no timezone of its own captures against the
+     * venue's zone while the form that collected the time was labelled with the app's, so every
+     * re-save shifts the event by the difference (the API had the same bug, issue #123).
+     *
+     * ?: not ??: roles.timezone is a nullable string, and an empty one is a DateTimeZone error
+     * rather than a fallback.
+     */
+    public function captureTimezone(): string
+    {
+        return $this->timezone ?: config('app.timezone');
+    }
+
+    /**
      * Returns the schedule's effective ordered category list.
      *
      * Each entry: ['id' => int, 'name' => string, 'is_custom' => bool].

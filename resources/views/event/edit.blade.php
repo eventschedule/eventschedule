@@ -38,10 +38,13 @@
 
   $use24hr = get_use_24_hour_time($role ?? null);
   // Prefill the time in the SCHEDULE's timezone so the form round-trips with the schedule-anchored
-  // capture in EventRepo::saveEvent(). An existing event stored under a different timezone will
-  // visibly show its real (possibly wrong) schedule-local time here, which is intended: it surfaces
-  // the problem so a single re-save corrects it.
-  $scheduleTz = (isset($role) && $role && $role->timezone) ? $role->timezone : config('app.timezone');
+  // capture in EventRepo::saveEvent(). Role::captureTimezone() rather than the expression spelled
+  // out here, because EventController hands the SAME call to saveEvent() as its $timezoneOverride -
+  // one source of truth is what makes the round trip an identity, rather than two chains that have
+  // to be kept in step. An existing event stored under a different timezone will visibly show its
+  // real (possibly wrong) schedule-local time here, which is intended: it surfaces the problem so a
+  // single re-save corrects it.
+  $scheduleTz = (isset($role) && $role) ? $role->captureTimezone() : config('app.timezone');
   $prefillStartsAt = $event->starts_at
       ? $event->getStartDateTime(null, true, $scheduleTz)->format('Y-m-d H:i:s')
       : '';
