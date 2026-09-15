@@ -11,7 +11,7 @@
 {{-- relative z-20 puts the bar on the same layer as the announcement bar (guest-banner), above
      the content container's z-10 stacking context - otherwise the container paints over the bar's
      shadow, and any negative offset inside it paints over the bar itself. --}}
-<div class="relative z-20 bg-white/95 dark:bg-gray-900/95 backdrop-blur-sm w-full border-b border-gray-200 dark:border-gray-700 shadow-md {{ $isRtl ? 'rtl' : '' }}"
+<div id="gp-header" class="relative z-20 bg-white/95 dark:bg-gray-900/95 backdrop-blur-sm w-full border-b border-gray-200 dark:border-gray-700 shadow-md {{ $isRtl ? 'rtl' : '' }}"
      dir="{{ $isRtl ? 'rtl' : 'ltr' }}">
     <div class="container mx-auto px-5">
     <header id="schedule-header" class="relative z-10 flex flex-col gap-3 py-4 lg:flex-row lg:items-center lg:justify-between">

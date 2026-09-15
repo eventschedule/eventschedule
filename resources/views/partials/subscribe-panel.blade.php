@@ -7,7 +7,7 @@
     only capture surface a signed-out visitor ever sees.
 
     Plain <form method="POST">, so it works with JavaScript off: RoleSubscriberController::store()'s
-    non-JSON branch redirects back to #subscribe-panel with a flash that this file renders INLINE.
+    non-JSON branch redirects back to #gp-subscribe with a flash that this file renders INLINE.
     It used to rely on the layout's Toastify toast, which is invisible without JavaScript and, with
     it, is a three-second bar at the top of a page whose panel is two thousand pixels further down
     and still showing an empty form.
@@ -41,9 +41,9 @@
      conflicting utilities whose winner is decided by stylesheet order. scroll-mt-24 is outside it
      so neither include site has to know about the fragment redirect, and tabindex="-1" is what
      makes that fragment actually move FOCUS rather than dumping a keyboard user back at <body>. --}}
-<div v-pre id="subscribe-panel" tabindex="-1" role="region" aria-labelledby="subscribe-panel-heading"
+<div v-pre id="gp-subscribe" tabindex="-1" role="region" aria-labelledby="gp-subscribe-heading"
     class="scroll-mt-24 {{ $panelClass ?? 'bg-white/95 dark:bg-gray-900/95 backdrop-blur-sm sm:rounded-2xl p-6 sm:p-8' }}">
-    <h2 id="subscribe-panel-heading" class="text-lg font-semibold text-gray-900 dark:text-gray-100">
+    <h2 id="gp-subscribe-heading" class="text-lg font-semibold text-gray-900 dark:text-gray-100">
         {{ __('messages.subscribe_panel_heading') }}
     </h2>
     {{-- v-pre again, on the element that actually carries the name. The wrapper's v-pre already
@@ -211,7 +211,7 @@
      heading is not pinned under the sticky header. --}}
 <script {!! nonce_attr() !!}>
 document.addEventListener('DOMContentLoaded', function () {
-    var panel = document.getElementById('subscribe-panel');
+    var panel = document.getElementById('gp-subscribe');
     if (!panel) return;
     // Nobody asked for this scroll, so honour the OS preference. The focus move still happens;
     // only the animation is the part that is disorienting under magnification.

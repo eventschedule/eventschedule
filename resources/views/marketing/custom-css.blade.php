@@ -632,7 +632,7 @@
                 'rule' => '.calendar-panel-border { background: rgba(255,255,255,0.95) !important; }',
                 'from' => 'The schedule page, in a later block',
                 'order' => 'below',
-                'beat' => 'The hardest one. Needs !important AND a more specific selector, such as #calendar-panel-wrapper.calendar-panel-border.',
+                'beat' => 'The hardest one. Needs !important AND a more specific selector, such as #gp-calendar.calendar-panel-border.',
             ],
         ];
 
@@ -663,15 +663,18 @@
             ['Booking, gallery and feedback pages', 'Appointments, fan photos, post-event feedback.'],
         ];
 
-        // Real ids and classes in the guest markup today. Deliberately framed as
-        // "look these up", not as a versioned API, because they are not one.
+        // Every panel on the schedule page and the event pages carries a gp- id. These are the
+        // ones people reach for first; the full table is in the user guide, which is also where
+        // the hide-a-section recipe lives.
         $hooks = [
-            ['#calendar-app', 'The calendar itself'],
-            ['#calendar-panel-wrapper', 'The panel the calendar sits in'],
-            ['#events-carousel', 'The upcoming-events strip'],
-            ['#month-year-title', 'The month heading'],
-            ['#event-popup', 'The day popup'],
-            ['.gp-banner a', 'Links inside your banner message'],
+            ['#gp-header', 'The header card or bar'],
+            ['#gp-calendar', 'The panel the calendar sits in'],
+            ['#gp-subscribe', 'The follow and subscribe panel'],
+            ['#gp-event-details', 'The main card on an event page'],
+            ['#gp-event-interest', 'The "notify me when tickets go on sale" card'],
+            ['#gp-talent-list', 'The compact list of performer names'],
+            ['#gp-venue', 'The venue card, map included'],
+            ['#gp-about', 'The event description panel'],
         ];
 
         $budget = [
@@ -688,6 +691,10 @@
             [
                 'q' => 'Where does my CSS land in the cascade?',
                 'a' => 'In the same style block as the rules your styling settings generate, immediately after them. Specificity is equal, so a tie goes to the later rule, and the later rule is yours. Three things need more than source order from you: the body colour and font family, which the guest layout declares with !important, the guest language switcher, whose rules are written just after your block, and the calendar panel frame, which is declared further down the page and also needs a more specific selector.',
+            ],
+            [
+                'q' => 'Can I hide a section of my page?',
+                'a' => 'Yes. Every panel on your schedule page and your event pages carries an id that begins with gp-, and one rule removes one panel: #gp-talent-list { display: none; }. The two most often asked for are the "notify me when tickets go on sale" card (#gp-event-interest) and the compact list of performer names (#gp-talent-list). Hiding a panel hides it and nothing more: the feature behind it still works, so where a real on/off setting exists, such as videos, fan photos, feedback or sponsors, use that instead.',
             ],
             [
                 'q' => 'Which pages does Custom CSS reach?',
@@ -1015,7 +1022,7 @@
                 <!-- What you select -->
                 <div class="es-sheet2-card p-7" data-reveal="panel">
                     <h3 class="es-sheet2-ink mb-2 text-xl font-bold">What you are selecting</h3>
-                    <p class="es-sheet2-muted mb-5 text-sm">A few of the ids and classes in the guest markup. Treat these as a starting point rather than a published interface: the fastest way to find the right selector is your browser's element inspector on your own page.</p>
+                    <p class="es-sheet2-muted mb-5 text-sm">Every panel on your schedule page and your event pages carries an id beginning <span class="es-sheet2-code">gp-</span>, so one line removes one panel: <span class="es-sheet2-code">#gp-talent-list &#123; display: none; &#125;</span>. A few of them are below; the <a href="{{ route('marketing.docs.schedule_styling') }}#hiding-sections" class="es-sheet2-link underline">full list is in the user guide</a>.</p>
                     <dl class="space-y-2">
                         @foreach ($hooks as [$hSel, $hWhat])
                             <div class="es-sheet2-hair flex flex-wrap items-baseline gap-x-3 gap-y-1 pt-2">

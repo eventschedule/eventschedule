@@ -3783,7 +3783,7 @@ class EventController extends Controller
         // The pending list on the guest page is keyed on the signed-in user, so a guest has
         // nothing to scroll to - the flash message is their confirmation.
         if ($isApproved) {
-            $redirect = $redirect->with('scroll_to', 'event-media-section');
+            $redirect = $redirect->with('scroll_to', 'gp-fan-content');
         } elseif ($request->user()) {
             $redirect = $redirect->with('scroll_to', 'pending-video-'.$video->id);
         }
@@ -3877,7 +3877,7 @@ class EventController extends Controller
         // The pending list on the guest page is keyed on the signed-in user, so a guest has
         // nothing to scroll to - the flash message is their confirmation.
         if ($isApproved) {
-            $redirect = $redirect->with('scroll_to', 'event-media-section');
+            $redirect = $redirect->with('scroll_to', 'gp-fan-content');
         } elseif ($request->user()) {
             $redirect = $redirect->with('scroll_to', 'pending-comment-'.$eventComment->id);
         }
@@ -4062,7 +4062,7 @@ class EventController extends Controller
             // The pending list on the guest page is keyed on the signed-in user, so a guest has
             // nothing to scroll to - the flash message is their confirmation.
             if ($isApproved) {
-                $redirect = $redirect->with('scroll_to', 'event-media-section');
+                $redirect = $redirect->with('scroll_to', 'gp-fan-content');
             } elseif ($request->user()) {
                 $redirect = $redirect->with('scroll_to', 'pending-photo-'.$photo->id);
             }

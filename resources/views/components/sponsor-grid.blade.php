@@ -37,6 +37,7 @@
 @endonce
 
 <div
+    id="gp-sponsors"
     class="w-full {{ $panelClasses }} sm:rounded-2xl px-6 py-6 mx-auto es-sponsors-pending"
     data-sponsor-grid
     data-view-width

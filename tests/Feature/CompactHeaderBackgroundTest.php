@@ -58,8 +58,10 @@ class CompactHeaderBackgroundTest extends TestCase
         $response = $this->getGuestPage($role);
 
         $response->assertOk();
-        // Same layer as the announcement bar, above the container's `relative z-10`.
-        $response->assertSee('<div class="relative z-20 bg-white/95', false);
+        // Same layer as the announcement bar, above the container's `relative z-10`. Matched from
+        // the id rather than from `<div class=` so that adding another attribute to the bar does
+        // not read as a z-index regression.
+        $response->assertSee('id="gp-header" class="relative z-20 bg-white/95', false);
     }
 
     public function test_banner_header_keeps_the_upward_bleed(): void

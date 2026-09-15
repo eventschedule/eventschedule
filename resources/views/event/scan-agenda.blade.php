@@ -347,7 +347,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 if (parts.value.length === 0) {
                     const ev = events.value.find(e => e.id === selectedEventId.value);
                     if (ev && ev.view_url) {
-                        window.location.href = ev.view_url + '#agenda';
+                        window.location.href = ev.view_url + '#gp-agenda';
                     }
                     return;
                 }
@@ -385,7 +385,7 @@ document.addEventListener('DOMContentLoaded', function() {
                         return;
                     }
                     if (data.view_url) {
-                        window.location.href = data.view_url + '#agenda';
+                        window.location.href = data.view_url + '#gp-agenda';
                     } else {
                         window.location.href = data.edit_url;
                     }

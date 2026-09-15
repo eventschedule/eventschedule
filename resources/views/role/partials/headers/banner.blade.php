@@ -1,8 +1,9 @@
-        <div class="bg-white/95 dark:bg-gray-900/95 backdrop-blur-sm rounded-2xl mb-0 {{ !$hasHeaderImage && $role->profile_image_url ? 'pt-16' : '' }} transition-[max-width] duration-300 ease-in-out mx-auto"
+        <div id="gp-header" class="bg-white/95 dark:bg-gray-900/95 backdrop-blur-sm rounded-2xl mb-0 {{ !$hasHeaderImage && $role->profile_image_url ? 'pt-16' : '' }} transition-[max-width] duration-300 ease-in-out mx-auto"
           data-view-width
           style="max-width: {{ $role->activeEventLayout() === 'list' ? '56rem' : '200rem' }}"
         >
           <div
+            id="gp-header-image"
             class="relative rounded-t-xl {{ $role->header_image === 'logos' ? '' : 'overflow-hidden before:block before:absolute before:bg-[#00000033] before:-inset-0 before:rounded-t-xl' }}"
           >
 
@@ -10,7 +11,7 @@
             @if (($logoWallRoles ?? collect())->isNotEmpty())
             {{-- Extra bottom padding when a profile image exists: it overlaps the
                  header area by 100px (-mt-[100px] below) and must not cover the last row --}}
-            <div data-logo-wall role="group" aria-label="{{ $role->isVenue() ? __('messages.talents') : __('messages.venues') }}"
+            <div id="gp-logo-wall" data-logo-wall role="group" aria-label="{{ $role->isVenue() ? __('messages.talents') : __('messages.venues') }}"
                  class="px-4 pt-4 sm:px-6 sm:pt-6 {{ $role->profile_image_url ? 'pb-28' : 'pb-4 sm:pb-6' }} {{ $isRtl ? 'rtl' : '' }}">
               <div class="mx-auto max-w-5xl flex flex-wrap justify-center gap-2 sm:gap-3">
                 @foreach ($logoWallRoles as $wallRole)
@@ -58,7 +59,7 @@
           </div>
           <header id="schedule-header" class="px-6 lg:px-16 pb-1 md:pb-4 relative z-10 {{ $isRtl ? 'rtl' : '' }}">
             @if ($role->profile_image_url)
-            <div class="rounded-lg w-[130px] h-[130px] -mt-[100px] mx-auto {{ $isRtl ? 'sm:mr-0 sm:ml-auto' : 'sm:mx-0 sm:-ml-2' }} mb-3 sm:mb-6 bg-white dark:bg-gray-900 flex items-center justify-center">
+            <div id="gp-profile-image" class="rounded-lg w-[130px] h-[130px] -mt-[100px] mx-auto {{ $isRtl ? 'sm:mr-0 sm:ml-auto' : 'sm:mx-0 sm:-ml-2' }} mb-3 sm:mb-6 bg-white dark:bg-gray-900 flex items-center justify-center">
               <img
                 class="rounded-md w-[120px] h-[120px] object-cover"
                 src="{{ $role->profile_image_url }}"
@@ -76,7 +77,7 @@
                 $hasPayment = $role->payment_links && $role->payment_links != '[]';
             @endphp
             {{-- Mobile layout (< sm): stacked, centered --}}
-            <div class="flex sm:hidden flex-col items-center gap-3 mb-5">
+            <div id="gp-header-body-mobile" class="flex sm:hidden flex-col items-center gap-3 mb-5">
               {{-- Name/Location (centered) --}}
               <div class="text-center mb-1">
                 <h1 class="text-[32px] font-semibold leading-10 text-[#151B26] dark:text-gray-100 mb-2" style="font-family: '{{ str_replace('_', ' ', $role->font_family) }}', sans-serif;">
@@ -270,7 +271,7 @@
             </div>
 
             {{-- Desktop layout (>= sm): horizontal with spacer --}}
-            <div class="hidden sm:flex flex-col gap-3 mb-3">
+            <div id="gp-header-body-desktop" class="hidden sm:flex flex-col gap-3 mb-3">
               {{-- Row 1: Name (full width) --}}
               <h1 class="text-[32px] font-semibold leading-10 text-[#151B26] dark:text-gray-100" style="font-family: '{{ str_replace('_', ' ', $role->font_family) }}', sans-serif;">
                 {!! str_replace(' , ', '<br>', e($role->translatedName())) !!}

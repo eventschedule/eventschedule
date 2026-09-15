@@ -98,7 +98,7 @@ class AudienceTemplateInjectionTest extends TestCase
 
         $html = $this->get($role->getGuestUrl())->assertOk()->getContent();
 
-        $panel = strpos($html, 'id="subscribe-panel"');
+        $panel = strpos($html, 'id="gp-subscribe"');
         $this->assertNotFalse($panel, 'the subscribe panel should render for a signed-out visitor');
 
         $this->assertGuarded(substr($html, $panel - 200), self::PAYLOAD, 'subscribe panel schedule name');

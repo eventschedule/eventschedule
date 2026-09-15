@@ -1199,6 +1199,7 @@ return [
     'variant_carbon' => 'Carbono',
     'custom_css' => 'CSS Personalizado',
     'custom_css_help' => 'Adicione CSS personalizado para estilizar sua página pública de agenda.',
+    'custom_css_sections_link' => 'Veja a lista de IDs de seções que você pode ocultar',
     'event_custom_fields' => 'Campos personalizados de eventos',
     'event_custom_fields_help' => 'Defina campos personalizados que aparecerão ao criar ou editar eventos.',
     'event_custom_fields_graphic_help' => 'Use {custom_1}, {custom_2}, etc. em modelos de gráficos para exibir esses valores.',

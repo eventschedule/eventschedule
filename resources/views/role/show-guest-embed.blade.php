@@ -26,7 +26,7 @@
         </style>
 
         <div class="pt-4 px-4">
-            <div class="calendar-panel-border px-4 pb-6 max-w-5xl mx-auto" id="calendar-panel-wrapper">
+            <div class="calendar-panel-border px-4 pb-6 max-w-5xl mx-auto" id="gp-calendar">
 
                 @include('role/partials/calendar', ['route' => 'guest', 'tab' => '', 'calendarHeadingTag' => 'h1', 'category' => request('category'), 'schedule' => request('schedule'), 'eventLayout' => $role->activeEventLayout(), 'pastEvents' => $pastEvents ?? collect()])
 

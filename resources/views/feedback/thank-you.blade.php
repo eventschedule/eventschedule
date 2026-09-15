@@ -63,7 +63,7 @@
             <div class="bg-white dark:bg-gray-700 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 p-6 mt-6">
                 <p class="text-sm font-semibold text-gray-900 dark:text-white mb-1">{{ __('messages.feedback_share_content') }}</p>
                 <p class="text-sm text-gray-500 dark:text-gray-400 mb-4">{{ __('messages.feedback_share_content_description', ['types' => implode(', ', $types)]) }}</p>
-                <a href="{{ $event->getGuestUrl() }}#event-media-section"
+                <a href="{{ $event->getGuestUrl() }}#gp-fan-content"
                     class="inline-flex items-center gap-2 px-4 py-2.5 text-sm font-medium rounded-lg transition-all duration-200 hover:opacity-90"
                     style="background-color: {{ $accentColor }}; color: {{ $contrastColor }};">
                     <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2">

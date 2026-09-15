@@ -9,7 +9,7 @@
 
     Plain <form method="POST">, matching partials/subscribe-panel.blade.php on this same page rather
     than the Vue/Alpine components around it: it works with JavaScript off, and
-    EventInterestController::store()'s non-JSON branch redirects back to #event-interest with a
+    EventInterestController::store()'s non-JSON branch redirects back to #gp-event-interest with a
     flash this file renders INLINE.
 
     The flash keys are interest_message / interest_error and NOT session('error'), because
@@ -32,7 +32,7 @@
 @endphp
 
 @if ($interestEligible)
-<div id="event-interest" class="scroll-mt-4 bg-white/95 dark:bg-gray-900/95 backdrop-blur-sm sm:rounded-2xl border border-gray-200 dark:border-gray-700 px-5 py-5 sm:px-8 sm:py-6">
+<div id="gp-event-interest" class="scroll-mt-4 bg-white/95 dark:bg-gray-900/95 backdrop-blur-sm sm:rounded-2xl border border-gray-200 dark:border-gray-700 px-5 py-5 sm:px-8 sm:py-6">
     @if ($interestMessage)
         <p class="text-sm font-medium text-green-700 dark:text-green-400">{{ $interestMessage }}</p>
     @else
@@ -52,7 +52,7 @@
         </p>
 
         @if ($interestError)
-            <p id="event-interest-error" class="mt-3 text-sm text-red-600 dark:text-red-400">{{ $interestError }}</p>
+            <p id="gp-event-interest-error" class="mt-3 text-sm text-red-600 dark:text-red-400">{{ $interestError }}</p>
         @endif
 
         <form method="POST"
@@ -81,7 +81,7 @@
                     autocomplete="email"
                     placeholder="{{ __('messages.event_interest_placeholder') }}"
                     value="{{ session('interest_email') }}"
-                    @if ($interestError) aria-invalid="true" aria-describedby="event-interest-error" @endif
+                    @if ($interestError) aria-invalid="true" aria-describedby="gp-event-interest-error" @endif
                     class="block w-full rounded-md border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 shadow-sm focus:border-[var(--brand-blue)] focus:ring-[var(--brand-blue)]" />
             </div>
 

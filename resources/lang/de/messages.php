@@ -1202,6 +1202,7 @@ return [
     'variant_carbon' => 'Karbon',
     'custom_css' => 'Benutzerdefiniertes CSS',
     'custom_css_help' => 'Fügen Sie benutzerdefiniertes CSS hinzu, um Ihre öffentliche Zeitplanseite zu gestalten.',
+    'custom_css_sections_link' => 'Liste der Abschnitts-IDs ansehen, die Sie ausblenden können',
     'event_custom_fields' => 'Benutzerdefinierte Veranstaltungsfelder',
     'event_custom_fields_help' => 'Definieren Sie benutzerdefinierte Felder, die beim Erstellen oder Bearbeiten von Veranstaltungen erscheinen.',
     'event_custom_fields_graphic_help' => 'Verwenden Sie {custom_1}, {custom_2}, usw. in Grafikvorlagen, um diese Werte anzuzeigen.',

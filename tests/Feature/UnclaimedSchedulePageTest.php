@@ -202,7 +202,7 @@ class UnclaimedSchedulePageTest extends TestCase
         $this->assertStringNotContainsString('band@gmail.com', $html, 'a third party typed that address about another third party');
         $this->assertStringNotContainsString('+15551234567', $html);
         $this->assertStringNotContainsString('adsbygoogle', $html);
-        $this->assertStringNotContainsString('subscribe-panel', $html);
+        $this->assertStringNotContainsString('gp-subscribe', $html);
         $this->assertStringNotContainsString(route('role.follow', ['subdomain' => $placeholder->subdomain]), $html);
     }
 

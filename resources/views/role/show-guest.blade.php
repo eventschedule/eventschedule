@@ -58,7 +58,7 @@
   html.dark[data-es-view="calendar"] #toggle-calendar-btn { color: #ffffff !important; }
   html[data-es-view="list"] #month-year-title { display: none !important; }
 html[data-es-view="list"] #month-nav-controls { display: none !important; }
-html[data-es-view="list"] #calendar-panel-wrapper {
+html[data-es-view="list"] #gp-calendar {
       background: transparent !important;
       backdrop-filter: none !important;
       border-radius: 0 !important;
@@ -150,7 +150,7 @@ html[data-es-view="list"] #calendar-panel-wrapper {
         @endphp
         @foreach($upcomingEventsWithVideos as $eventData)
         @endforeach
-        <div class="bg-white/95 dark:bg-gray-900/95 backdrop-blur-sm rounded-2xl px-6 lg:px-16 py-6 flex flex-col gap-6 mt-6 transition-[max-width] duration-300 ease-in-out mx-auto" data-view-width style="max-width: {{ $role->activeEventLayout() === 'list' ? '56rem' : '200rem' }}">
+        <div id="gp-video-carousel" class="bg-white/95 dark:bg-gray-900/95 backdrop-blur-sm rounded-2xl px-6 lg:px-16 py-6 flex flex-col gap-6 mt-6 transition-[max-width] duration-300 ease-in-out mx-auto" data-view-width style="max-width: {{ $role->activeEventLayout() === 'list' ? '56rem' : '200rem' }}">
           <!-- Carousel Container -->
           <div class="relative group">
             <!-- Carousel Track -->
@@ -380,10 +380,10 @@ html[data-es-view="list"] #calendar-panel-wrapper {
       </div>
       @endif
 
-      <section aria-label="{{ $role->customLabel('events') }}">
+      <section id="gp-events" aria-label="{{ $role->customLabel('events') }}">
       <div
         class="calendar-panel-border {{ empty($sponsorLogos) ? 'mt-2 md:mt-6' : '' }} mb-6 px-0 md:px-6 lg:px-16 pt-0 md:pt-4 pb-0 md:pb-6 transition-[max-width] duration-300 ease-in-out mx-auto"
-        id="calendar-panel-wrapper"
+        id="gp-calendar"
         data-view-width
         style="max-width: {{ $role->activeEventLayout() === 'list' ? '56rem' : '200rem' }}"
       >
@@ -391,7 +391,7 @@ html[data-es-view="list"] #calendar-panel-wrapper {
       </div>
       </section>
 
-      {{-- Outside the section and outside #calendar-panel-wrapper, but opted into the same
+      {{-- Outside the section and outside #gp-calendar, but opted into the same
            data-view-width system as every other panel in this column (the carousel, the sponsor
            grid, the calendar, the video grid): 56rem in list view, the full container in calendar
            view. The CSS at the top of this file and updateOuterContainers() in
@@ -431,6 +431,7 @@ html[data-es-view="list"] #calendar-panel-wrapper {
         @endphp
         @if ($videoCount > 0)
           <div
+              id="gp-videos"
               class="bg-white/95 dark:bg-gray-900/95 backdrop-blur-sm rounded-2xl px-6 lg:px-16 py-6 flex flex-col gap-6 mb-6 transition-[max-width] duration-300 ease-in-out mx-auto" data-view-width style="max-width: {{ $role->activeEventLayout() === 'list' ? '56rem' : '200rem' }}"
             >
               <div class="grid grid-cols-1 md:grid-cols-{{ $gridCols }} gap-8">

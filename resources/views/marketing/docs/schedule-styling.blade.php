@@ -16,6 +16,7 @@
         <x-doc-nav-link href="#ai-style-generator">AI Style Generator</x-doc-nav-link>
         <x-doc-nav-link href="#remove-branding">Remove Branding</x-doc-nav-link>
         <x-doc-nav-link href="#custom-css">Custom CSS</x-doc-nav-link>
+        <x-doc-nav-link href="#hiding-sections">Hiding Sections</x-doc-nav-link>
         <x-doc-nav-link href="#live-preview">Live Preview</x-doc-nav-link>
         <x-doc-nav-link href="#see-also">See Also</x-doc-nav-link>
     </x-slot:toc>
@@ -360,6 +361,147 @@
         <div class="doc-callout doc-callout-warning">
             <div class="doc-callout-title">What the sanitizer strips</div>
             <p>Saved CSS is cleaned before it is stored, so a few constructs are silently removed rather than rejected with an error. Do not rely on <code class="doc-inline-code">@import</code>, <code class="doc-inline-code">@font-face</code>, <code class="doc-inline-code">@charset</code>, <code class="doc-inline-code">expression()</code>, <code class="doc-inline-code">javascript:</code> URLs, <code class="doc-inline-code">behavior</code> or <code class="doc-inline-code">binding</code>, or any <code class="doc-inline-code">url()</code> pointing at an <code class="doc-inline-code">http:</code>, <code class="doc-inline-code">https:</code> or <code class="doc-inline-code">data:</code> address. Everything else, including modern layout and animation properties, is kept as written. If a rule seems to vanish after saving, check it against that list first.</p>
+        </div>
+    </section>
+
+    <!-- Hiding Sections -->
+    <section id="hiding-sections" class="doc-section">
+        <h2 class="doc-heading">
+            <svg aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-5 h-5 text-gray-500 dark:text-gray-400 flex-shrink-0">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M3.98 8.223A10.477 10.477 0 001.934 12C3.226 16.338 7.244 19.5 12 19.5c.993 0 1.953-.138 2.863-.395M6.228 6.228A10.45 10.45 0 0112 4.5c4.756 0 8.773 3.162 10.065 7.498a10.523 10.523 0 01-4.293 5.774M6.228 6.228L3 3m3.228 3.228l3.65 3.65m7.894 7.894L21 21m-3.228-3.228l-3.65-3.65m0 0a3 3 0 10-4.243-4.243m4.242 4.242L9.88 9.88" />
+            </svg>
+            Hiding Sections <x-doc-badge plan="pro" />
+        </h2>
+        <p class="text-gray-600 dark:text-gray-300 mb-4">Every panel on your schedule page and on your event pages carries a stable <code class="doc-inline-code">id</code> that starts with <code class="doc-inline-code">gp-</code>. To remove one from the public page, add a <code class="doc-inline-code">display: none</code> rule for that id in <strong class="text-gray-900 dark:text-white">Edit Schedule &rarr; Style &rarr; Advanced &rarr; Custom CSS</strong>. Nothing else has to change, and you can put back what you hid by deleting the line.</p>
+
+        <div class="doc-code-block">
+            <div class="doc-code-header">
+                <span>Hide one panel</span>
+            </div>
+            <pre><code>#gp-talent-list { display: none; }</code></pre>
+        </div>
+
+        <h3 class="doc-subheading">Two common examples</h3>
+        <p class="text-gray-600 dark:text-gray-300 mb-4">The <strong class="text-gray-900 dark:text-white">&ldquo;Notify me when tickets go on sale&rdquo;</strong> card invites visitors to leave an address so you can tell them when tickets open or when a date moves. On an event that is free to walk into, there may be nothing to notify anyone about, and the card can read as though a ticket is coming.</p>
+
+        <div class="doc-code-block">
+            <div class="doc-code-header">
+                <span>Hide the &ldquo;Notify me&rdquo; card on event pages</span>
+            </div>
+            <pre><code>#gp-event-interest { display: none; }</code></pre>
+        </div>
+
+        <p class="text-gray-600 dark:text-gray-300 mt-6 mb-4">The <strong class="text-gray-900 dark:text-white">performer list</strong> is the compact list of names under the <em>Talent</em> heading, for acts that were typed in or picked up by AI import and have no page of their own. If the names on your events are often wrong or incomplete, hide the list and let the event description carry the lineup instead.</p>
+
+        <div class="doc-code-block">
+            <div class="doc-code-header">
+                <span>Hide the performer name list on event pages</span>
+            </div>
+            <pre><code>#gp-talent-list { display: none; }</code></pre>
+        </div>
+
+        <p class="text-gray-600 dark:text-gray-300 mt-6 mb-4">Rules can be combined, and one rule can hide several panels at once:</p>
+
+        <div class="doc-code-block">
+            <div class="doc-code-header">
+                <span>Hide several at once</span>
+            </div>
+            <pre><code>#gp-event-interest,
+#gp-talent-list,
+#gp-reviews {
+    display: none;
+}</code></pre>
+        </div>
+
+        <div class="doc-callout doc-callout-warning">
+            <div class="doc-callout-title">Hiding a panel is not the same as turning a feature off</div>
+            <p>A <code class="doc-inline-code">display: none</code> rule removes a panel from the page. It does not disable what sits behind it. People who already signed up to be notified are still notified, a hidden subscribe panel still accepts a submission posted to its address, and a hidden reviews panel does not delete the reviews. Where a real on/off setting exists, use that instead: videos, fan photos, fan comments, feedback, carpooling and accommodation each have their own switch on the schedule edit page, and the sponsor grid disappears on its own once you remove the logos.</p>
+        </div>
+
+        <h3 class="doc-subheading">Schedule page sections</h3>
+        <div class="doc-table-wrap">
+            <table class="doc-table">
+                <thead>
+                    <tr>
+                        <th>ID</th>
+                        <th>Section</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr><td><code class="doc-inline-code">#gp-announcement</code></td><td>Your announcement bar</td></tr>
+                    <tr><td><code class="doc-inline-code">#gp-language-switcher</code></td><td>The language switcher row</td></tr>
+                    <tr><td><code class="doc-inline-code">#gp-header</code></td><td>The whole header card or bar</td></tr>
+                    <tr><td><code class="doc-inline-code">#gp-header-image</code></td><td>The header image behind the name</td></tr>
+                    <tr><td><code class="doc-inline-code">#gp-logo-wall</code></td><td>The logo wall header</td></tr>
+                    <tr><td><code class="doc-inline-code">#gp-profile-image</code></td><td>The profile picture tile</td></tr>
+                    <tr><td><code class="doc-inline-code">#gp-header-body-mobile</code>, <code class="doc-inline-code">#gp-header-body-desktop</code></td><td>Name, description, social links and buttons inside the header. Two ids because the header is laid out separately for narrow and wide screens, so hide both.</td></tr>
+                    <tr><td><code class="doc-inline-code">#gp-below-bar</code></td><td>The description and contact strip under the compact header</td></tr>
+                    <tr><td><code class="doc-inline-code">#gp-video-carousel</code></td><td>The strip of videos from upcoming events</td></tr>
+                    <tr><td><code class="doc-inline-code">#gp-sponsors</code></td><td>The sponsor logo grid (also on event pages)</td></tr>
+                    <tr><td><code class="doc-inline-code">#gp-events</code></td><td>Everything from the events heading down, including the calendar</td></tr>
+                    <tr><td><code class="doc-inline-code">#gp-calendar</code></td><td>The calendar or event list panel on its own</td></tr>
+                    <tr><td><code class="doc-inline-code">#gp-subscribe</code></td><td>The follow and subscribe panel (also on event pages)</td></tr>
+                    <tr><td><code class="doc-inline-code">#gp-videos</code></td><td>Your own video grid</td></tr>
+                </tbody>
+            </table>
+        </div>
+
+        <h3 class="doc-subheading">Event page sections</h3>
+        <div class="doc-table-wrap">
+            <table class="doc-table">
+                <thead>
+                    <tr>
+                        <th>ID</th>
+                        <th>Section</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr><td><code class="doc-inline-code">#gp-status-bar</code></td><td>The bar that says an event is cancelled, draft, internal or awaiting review</td></tr>
+                    <tr><td><code class="doc-inline-code">#gp-event-hero-image</code></td><td>The large square image at the top of the sidebar</td></tr>
+                    <tr><td><code class="doc-inline-code">#gp-talent</code></td><td>All performer cards</td></tr>
+                    <tr><td><code class="doc-inline-code">#gp-talent-list</code></td><td>The compact list of performer names</td></tr>
+                    <tr><td><code class="doc-inline-code">#gp-venue</code></td><td>The venue card</td></tr>
+                    <tr><td><code class="doc-inline-code">#gp-venue-socials</code></td><td>The venue's social links</td></tr>
+                    <tr><td><code class="doc-inline-code">#gp-venue-map</code></td><td>The map at the foot of the venue card</td></tr>
+                    <tr><td><code class="doc-inline-code">#gp-accommodation</code></td><td>The places-to-stay map</td></tr>
+                    <tr><td><code class="doc-inline-code">#gp-create-your-own</code></td><td>The &ldquo;create your own schedule&rdquo; card</td></tr>
+                    <tr><td><code class="doc-inline-code">#gp-upcoming-events</code></td><td>The list of other events in the sidebar</td></tr>
+                    <tr><td><code class="doc-inline-code">#gp-event-details</code></td><td>The main card: title, date, venue, price and buttons</td></tr>
+                    <tr><td><code class="doc-inline-code">#gp-back-link</code></td><td>The &ldquo;back to schedule&rdquo; link</td></tr>
+                    <tr><td><code class="doc-inline-code">#gp-event-title</code></td><td>The event title</td></tr>
+                    <tr><td><code class="doc-inline-code">#gp-event-short-description</code></td><td>The one-line summary under the title</td></tr>
+                    <tr><td><code class="doc-inline-code">#gp-event-date</code></td><td>The date and time row</td></tr>
+                    <tr><td><code class="doc-inline-code">#gp-event-location</code></td><td>The venue row</td></tr>
+                    <tr><td><code class="doc-inline-code">#gp-event-price</code></td><td>The price or free-entry row</td></tr>
+                    <tr><td><code class="doc-inline-code">#gp-event-cta</code></td><td>The main buttons on wide screens</td></tr>
+                    <tr><td><code class="doc-inline-code">#gp-mobile-cta</code></td><td>The button bar pinned to the bottom on phones</td></tr>
+                    <tr><td><code class="doc-inline-code">#gp-event-carpool</code></td><td>The carpool button</td></tr>
+                    <tr><td><code class="doc-inline-code">#gp-event-share</code></td><td>The share button</td></tr>
+                    <tr><td><code class="doc-inline-code">#gp-event-interest</code></td><td>The &ldquo;notify me when tickets go on sale&rdquo; card</td></tr>
+                    <tr><td><code class="doc-inline-code">#gp-event-form</code></td><td>The ticket or RSVP form</td></tr>
+                    <tr><td><code class="doc-inline-code">#gp-flyer</code></td><td>The flyer image</td></tr>
+                    <tr><td><code class="doc-inline-code">#gp-about</code></td><td>The event description panel</td></tr>
+                    <tr><td><code class="doc-inline-code">#gp-agenda-image</code></td><td>The agenda image</td></tr>
+                    <tr><td><code class="doc-inline-code">#gp-agenda</code></td><td>The agenda or setlist</td></tr>
+                    <tr><td><code class="doc-inline-code">#gp-fan-content</code></td><td>Polls, fan photos, videos and comments</td></tr>
+                    <tr><td><code class="doc-inline-code">#gp-reviews</code></td><td>Public reviews</td></tr>
+                </tbody>
+            </table>
+        </div>
+
+        <div class="doc-callout doc-callout-tip">
+            <div class="doc-callout-title">Styling, not just hiding</div>
+            <p>The same ids work for any rule, not only <code class="doc-inline-code">display: none</code>. <code class="doc-inline-code">#gp-about { padding: 3rem; }</code> gives the description panel more room, and <code class="doc-inline-code">#gp-venue { order: -1; }</code> moves the venue card to the top of the sidebar. See <a href="#custom-css" class="doc-link">Custom CSS</a> for what the sanitizer removes and where your rules land in the cascade.</p>
+        </div>
+
+        <div class="doc-callout doc-callout-info">
+            <div class="doc-callout-title">Why a text size sometimes seems to be ignored</div>
+            <p>A rule on the panel itself always wins, because an id outranks the styling the page already puts on that element. Text is the exception: headings and body copy carry their own size on an inner element, and a size inherited from the panel never beats one set directly. So <code class="doc-inline-code">#gp-about { font-size: 1.125rem; }</code> changes nothing, while <code class="doc-inline-code">#gp-about p { font-size: 1.125rem; }</code> does. If a rule seems to be ignored, check whether you are styling the panel when you meant to style what is inside it.</p>
+        </div>
+
+        <div class="doc-callout doc-callout-info">
+            <div class="doc-callout-title">Smaller hooks inside the calendar</div>
+            <p>A few elements inside the calendar carry older names that do not start with <code class="doc-inline-code">gp-</code>: <code class="doc-inline-code">#calendar-app</code>, <code class="doc-inline-code">#month-year-title</code>, <code class="doc-inline-code">#events-carousel</code> and <code class="doc-inline-code">#event-popup</code>. They are useful for small adjustments, but they are internals rather than sections, and unlike the <code class="doc-inline-code">gp-</code> ids above they may change. Prefer a <code class="doc-inline-code">gp-</code> id whenever one covers what you want.</p>
         </div>
     </section>
 

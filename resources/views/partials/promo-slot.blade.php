@@ -38,7 +38,7 @@
     @once
     <style {!! nonce_attr() !!}>
         /* The event page pins a CTA bar to the bottom of the viewport on small screens
-           (#mobile-cta-bar, sm:hidden fixed bottom-0). The branding footer below absorbs most
+           (#gp-mobile-cta, sm:hidden fixed bottom-0). The branding footer below absorbs most
            of the overlap, but on a short page the slot can still end up underneath it, so
            reserve room. --es-a11y-cta-clearance is set to the bar's measured height by
            show-guest.blade.php (not by the accessibility widget, which only consumes it), so

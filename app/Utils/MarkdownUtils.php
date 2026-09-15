@@ -71,8 +71,8 @@ class MarkdownUtils
         // clobbering app element ids that page JavaScript looks up. Keep this list
         // in sync if those element ids change.
         $config->set('Attr.IDBlacklist', [
-            'app', 'ticket-selector', 'event-form-section',
-            'desktop-cta-buttons', 'mobile-cta-bar', 'name', 'agenda',
+            'app', 'ticket-selector', 'gp-event-form',
+            'gp-event-cta', 'gp-mobile-cta', 'name', 'gp-agenda',
             'calendar-pop-up-menu', 'calendar-card-dropdown',
             'calendar-mobile-sheet', 'calendar-mobile-overlay', 'mobile-calendar-cta',
         ]);

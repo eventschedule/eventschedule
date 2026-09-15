@@ -321,6 +321,7 @@
                 { key: 'customizeActiveTab', prefix: 'customize-tab-' },
                 { key: 'settingsActiveTab', prefix: 'settings-tab-' },
                 { key: 'engagementActiveTab', prefix: 'engagement-tab-' },
+                { key: 'styleActiveTab', prefix: 'style-tab-' },
                 { key: 'integrationActiveTab', prefix: 'integration-tab-' },
                 { key: 'paymentActiveTab', prefix: 'payment-tab-' },
             ];

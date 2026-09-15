@@ -55,7 +55,9 @@
 {{-- JSON_HEX_TAG is load-bearing: without it a "</script>" inside a translated string
      closes this tag early. Same flag set as partials/accessibility-widget.blade.php. --}}
 <script type="application/json" id="es-stay22-json" {!! nonce_attr() !!}>{!! json_encode($stay22Payload, JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_AMP | JSON_HEX_QUOT | JSON_UNESCAPED_UNICODE) !!}</script>
-<div id="es-stay22-host"></div>
+{{-- The wrapper, not #es-stay22-host, carries the documented id: stay22-boot.js mounts on
+     that host by id and renaming it would break the mount. --}}
+<div id="gp-accommodation"><div id="es-stay22-host"></div></div>
 
 @once
 <style {!! nonce_attr() !!}>

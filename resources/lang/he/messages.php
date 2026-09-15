@@ -1253,6 +1253,7 @@ return [
     'variant_carbon' => 'פחמן',
     'custom_css' => 'CSS מותאם אישית',
     'custom_css_help' => 'הוסף CSS מותאם אישית לעיצוב דף לוח הזמנים הציבורי שלך.',
+    'custom_css_sections_link' => 'ראה את רשימת מזהי המקטעים שניתן להסתיר',
     'event_custom_fields' => 'שדות מותאמים אישית לאירועים',
     'event_custom_fields_help' => 'הגדר שדות מותאמים אישית שיופיעו בעת יצירה או עריכה של אירועים.',
     'event_custom_fields_graphic_help' => 'השתמש ב-{custom_1}, {custom_2} וכו\' בתבניות גרפיקה כדי להציג ערכים אלה.',

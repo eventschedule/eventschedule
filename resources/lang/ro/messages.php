@@ -1227,6 +1227,7 @@ return [
     'variant_carbon' => 'Carbon',
     'custom_css' => 'CSS Personalizat',
     'custom_css_help' => 'Adaugă CSS personalizat pentru a stiliza pagina publică a programului.',
+    'custom_css_sections_link' => 'Vezi lista de ID-uri de secțiuni pe care le poți ascunde',
     'event_custom_fields' => 'Câmpuri Personalizate Eveniment',
     'event_custom_fields_help' => 'Definește câmpuri personalizate care vor apărea la crearea sau editarea evenimentelor.',
     'event_custom_fields_graphic_help' => 'Folosește {custom_1}, {custom_2}, etc. în șabloanele grafice pentru a afișa aceste valori.',

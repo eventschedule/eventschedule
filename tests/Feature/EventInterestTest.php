@@ -316,10 +316,10 @@ class EventInterestTest extends TestCase
 
         $html = $this->get($this->event->getGuestUrl($this->role->subdomain))->assertOk()->getContent();
 
-        $this->assertStringContainsString('href="#event-interest"', $html);
+        $this->assertStringContainsString('href="#gp-event-interest"', $html);
         $this->assertStringContainsString(__('messages.event_interest_not_ready'), $html);
         // And the thing it points at is actually on the page.
-        $this->assertStringContainsString('id="event-interest"', $html);
+        $this->assertStringContainsString('id="gp-event-interest"', $html);
     }
 
     public function test_a_cancelled_event_offers_no_dead_interest_links(): void
@@ -331,8 +331,8 @@ class EventInterestTest extends TestCase
 
         $html = $this->get($this->event->getGuestUrl($this->role->subdomain))->assertOk()->getContent();
 
-        $this->assertStringNotContainsString('id="event-interest"', $html, 'the card must not render');
-        $this->assertStringNotContainsString('href="#event-interest"', $html, 'and nothing may link to it');
+        $this->assertStringNotContainsString('id="gp-event-interest"', $html, 'the card must not render');
+        $this->assertStringNotContainsString('href="#gp-event-interest"', $html, 'and nothing may link to it');
     }
 
     public function test_a_past_event_offers_no_dead_interest_links(): void
@@ -343,8 +343,8 @@ class EventInterestTest extends TestCase
 
         $html = $this->get($this->event->getGuestUrl($this->role->subdomain))->assertOk()->getContent();
 
-        $this->assertStringNotContainsString('id="event-interest"', $html);
-        $this->assertStringNotContainsString('href="#event-interest"', $html);
+        $this->assertStringNotContainsString('id="gp-event-interest"', $html);
+        $this->assertStringNotContainsString('href="#gp-event-interest"', $html);
     }
 
     public function test_a_past_occurrence_cannot_be_captured_by_a_direct_post(): void

@@ -443,19 +443,19 @@ class GroupsTest extends DuskTestCase
 
             // The event page, not the sub-schedule listing
             $browser->visit($eventUrl)
-                ->waitFor('#desktop-cta-buttons', 15)
+                ->waitFor('#gp-event-cta', 15)
                 ->assertPathIs('/talent/the-sip-society/'.$encodedId)
-                ->assertNotPresent('#calendar-panel-wrapper');
+                ->assertNotPresent('#gp-calendar');
 
             // Carrying the sub-schedule filter over must not flip it back
             $browser->visit($eventUrl.'?schedule=the-sip-society')
-                ->waitFor('#desktop-cta-buttons', 15)
-                ->assertNotPresent('#calendar-panel-wrapper');
+                ->waitFor('#gp-event-cta', 15)
+                ->assertNotPresent('#gp-calendar');
 
             // Without an event id the slug still resolves to the sub-schedule listing
             $browser->visit('/talent/the-sip-society')
-                ->waitFor('#calendar-panel-wrapper', 15)
-                ->assertNotPresent('#desktop-cta-buttons');
+                ->waitFor('#gp-calendar', 15)
+                ->assertNotPresent('#gp-event-cta');
         });
     }
 

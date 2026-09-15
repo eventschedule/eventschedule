@@ -2145,6 +2145,9 @@
                                     class="mt-1 block w-full border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-[var(--brand-blue)] focus:ring-[var(--brand-blue)] rounded-lg shadow-sm font-mono text-sm"
                                     rows="6">{{ old('custom_css', $role->custom_css) }}</textarea>
                                 <p class="text-xs text-gray-500 dark:text-gray-400 mt-1">{{ __('messages.custom_css_help') }}</p>
+                                <x-link href="{{ marketing_url('/docs/schedule-styling#hiding-sections') }}" target="_blank" class="text-xs">
+                                    {{ __('messages.custom_css_sections_link') }}
+                                </x-link>
                                 <x-input-error class="mt-2" :messages="$errors->get('custom_css')" />
                                 @elseif ($role->custom_css)
                                 <textarea disabled

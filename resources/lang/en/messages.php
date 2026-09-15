@@ -1564,6 +1564,7 @@ return [
     'variant_carbon' => 'Carbon',
     'custom_css' => 'Custom CSS',
     'custom_css_help' => 'Add custom CSS to style your public schedule page.',
+    'custom_css_sections_link' => 'See the list of section IDs you can hide',
     'event_custom_fields' => 'Event Custom Fields',
     'event_custom_fields_help' => 'Define custom fields that will appear when creating or editing events.',
     'event_custom_fields_graphic_help' => 'Use {custom_1}, {custom_2}, etc. in graphic templates to display these values.',

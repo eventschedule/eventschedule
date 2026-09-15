@@ -1201,6 +1201,7 @@ return [
     'variant_carbon' => 'Carbonio',
     'custom_css' => 'CSS Personalizzato',
     'custom_css_help' => 'Aggiungi CSS personalizzato per personalizzare lo stile della pagina pubblica del tuo calendario.',
+    'custom_css_sections_link' => 'Vedi l\'elenco degli ID delle sezioni che puoi nascondere',
     'event_custom_fields' => 'Campi personalizzati evento',
     'event_custom_fields_help' => 'Definisci campi personalizzati che appariranno durante la creazione o modifica degli eventi.',
     'event_custom_fields_graphic_help' => 'Usa {custom_1}, {custom_2}, ecc. nei modelli grafici per mostrare questi valori.',

@@ -1219,6 +1219,7 @@ return [
     'variant_carbon' => 'Süsinik',
     'custom_css' => 'Kohandatud CSS',
     'custom_css_help' => 'Lisage kohandatud CSS oma avaliku ajakava lehe kujundamiseks.',
+    'custom_css_sections_link' => 'Vaadake jaotiste ID-de loendit, mida saate peita',
     'event_custom_fields' => 'Sündmuse kohandatud väljad',
     'event_custom_fields_help' => 'Määrake kohandatud väljad, mis kuvatakse sündmuste loomisel või muutmisel.',
     'event_custom_fields_graphic_help' => 'Kasutage nende väärtuste kuvamiseks graafilistes mallides {custom_1}, {custom_2} jne.',

@@ -1206,6 +1206,7 @@ return [
     'variant_carbon' => 'Carbone',
     'custom_css' => 'CSS personnalisé',
     'custom_css_help' => 'Ajoutez du CSS personnalisé pour styliser votre page de planning publique.',
+    'custom_css_sections_link' => 'Voir la liste des identifiants de sections que vous pouvez masquer',
     'event_custom_fields' => 'Champs personnalisés d\'événement',
     'event_custom_fields_help' => 'Définissez des champs personnalisés qui apparaîtront lors de la création ou de la modification d\'événements.',
     'event_custom_fields_graphic_help' => 'Utilisez {custom_1}, {custom_2}, etc. dans les modèles graphiques pour afficher ces valeurs.',

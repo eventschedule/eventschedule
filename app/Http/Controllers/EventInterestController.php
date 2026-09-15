@@ -319,7 +319,7 @@ class EventInterestController extends Controller
             ? custom_domain_url(route('role.view_guest', ['subdomain' => $subdomain]))
             : app_url();
 
-        $back = back(302, [], $fallback)->withFragment('event-interest');
+        $back = back(302, [], $fallback)->withFragment('gp-event-interest');
 
         if ($success) {
             return $back->with('interest_message', $message);

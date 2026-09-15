@@ -817,7 +817,7 @@ class RoleSubscriberController extends Controller
         }
 
         $back = back(302, [], custom_domain_url(route('role.view_guest', ['subdomain' => $subdomain])))
-            ->withFragment('subscribe-panel');
+            ->withFragment('gp-subscribe');
 
         if (! $success) {
             // NOT session('error'), and not withInput().

@@ -1198,6 +1198,7 @@ return [
     'variant_carbon' => 'Koolstof',
     'custom_css' => 'Aangepaste CSS',
     'custom_css_help' => 'Voeg aangepaste CSS toe om uw openbare agendapagina op te maken.',
+    'custom_css_sections_link' => 'Bekijk de lijst met sectie-ID\'s die u kunt verbergen',
     'event_custom_fields' => 'Aangepaste evenementvelden',
     'event_custom_fields_help' => 'Definieer aangepaste velden die verschijnen bij het maken of bewerken van evenementen.',
     'event_custom_fields_graphic_help' => 'Gebruik {custom_1}, {custom_2}, enz. in grafische sjablonen om deze waarden weer te geven.',

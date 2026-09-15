@@ -2958,7 +2958,7 @@ const calendarApp = createApp({
             }
         },
         updatePanelWrapper(view) {
-            const wrapper = document.getElementById('calendar-panel-wrapper');
+            const wrapper = document.getElementById('gp-calendar');
             if (wrapper) {
                 if (view === 'list') {
                     wrapper.classList.add('calendar-panel-border-transparent');
@@ -3170,7 +3170,7 @@ const calendarApp = createApp({
             // do nothing than to bounce them off a form that always fails.
             if (!event.guest_url) return true;
 
-            const url = event.guest_url + '#event-media-section';
+            const url = event.guest_url + '#gp-fan-content';
 
             // This partial is also rendered inside the embed widget. Navigating there would
             // replace the embed with a full event page inside someone else's site, so open a

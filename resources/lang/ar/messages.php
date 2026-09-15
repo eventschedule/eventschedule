@@ -1261,6 +1261,7 @@ return [
     'variant_carbon' => 'كربون',
     'custom_css' => 'CSS مخصص',
     'custom_css_help' => 'أضف CSS مخصص لتنسيق صفحة جدولك العامة.',
+    'custom_css_sections_link' => 'اطلع على قائمة معرّفات الأقسام التي يمكنك إخفاؤها',
     'event_custom_fields' => 'حقول الأحداث المخصصة',
     'event_custom_fields_help' => 'حدد الحقول المخصصة التي ستظهر عند إنشاء أو تحرير الأحداث.',
     'event_custom_fields_graphic_help' => 'استخدم {custom_1}، {custom_2}، إلخ. في قوالب الرسومات لعرض هذه القيم.',

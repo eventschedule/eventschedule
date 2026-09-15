@@ -519,7 +519,7 @@ class RoleSubscriberTest extends TestCase
 
         $html = $this->get($this->guestEventUrl($this->role, $event))->assertOk()->getContent();
 
-        preg_match('/id="subscribe-panel"[^>]*class="([^"]*)"/', $html, $m);
+        preg_match('/id="gp-subscribe"[^>]*class="([^"]*)"/', $html, $m);
         $this->assertNotEmpty($m, 'the panel did not render on the event page');
 
         $this->assertStringContainsString('bg-white/95', $m[1],
@@ -540,7 +540,7 @@ class RoleSubscriberTest extends TestCase
         // px-6 lg:px-16 now (see the test below) and neither px-6 nor py-6 contains 'p-6'.
         $html = $this->get($this->role->getGuestUrl())->assertOk()->getContent();
 
-        preg_match('/id="subscribe-panel"[^>]*class="([^"]*)"/', $html, $m);
+        preg_match('/id="gp-subscribe"[^>]*class="([^"]*)"/', $html, $m);
         $this->assertNotEmpty($m, 'the panel did not render on the schedule page');
 
         $this->assertStringContainsString('rounded-2xl', $m[1]);
@@ -562,7 +562,7 @@ class RoleSubscriberTest extends TestCase
         //
         // Only the lg step is compared. Below it the calendar is deliberately px-0 md:px-6 - it
         // runs edge to edge once .calendar-panel-border drops its background under 768px - and in
-        // LIST view #calendar-panel-wrapper is zeroed outright by the CSS in show-guest.blade.php
+        // LIST view #gp-calendar is zeroed outright by the CSS in show-guest.blade.php
         // (padding: 0 !important, transparent background), because a list has no card of its own.
         // That override is CSS-only, so the rendered class attribute still carries lg:px-16 in
         // both views and this assertion holds; in list view the panel's inset is matching the
@@ -573,12 +573,12 @@ class RoleSubscriberTest extends TestCase
         // so the tag match is anchored to one element, and pulling class separately means neither
         // side depends on the attribute ORDER. The calendar wrapper writes class before id and the
         // panel writes it after, which is exactly the trap a single combined pattern falls into.
-        preg_match('/<[^>]*id="calendar-panel-wrapper"[^>]*>/', $html, $calendarTag);
+        preg_match('/<[^>]*id="gp-calendar"[^>]*>/', $html, $calendarTag);
         $this->assertNotEmpty($calendarTag, 'the calendar wrapper did not render');
         preg_match('/class="([^"]*)"/', $calendarTag[0], $calendar);
         $this->assertNotEmpty($calendar, 'the calendar wrapper rendered no class attribute');
 
-        preg_match('/<[^>]*id="subscribe-panel"[^>]*>/', $html, $panelTag);
+        preg_match('/<[^>]*id="gp-subscribe"[^>]*>/', $html, $panelTag);
         $this->assertNotEmpty($panelTag, 'the panel did not render on the schedule page');
         preg_match('/class="([^"]*)"/', $panelTag[0], $panel);
         $this->assertNotEmpty($panel, 'the panel rendered no class attribute');
@@ -607,14 +607,14 @@ class RoleSubscriberTest extends TestCase
         $html = $this->get($this->role->getGuestUrl())->assertOk()->getContent();
 
         // [^>]* keeps each match inside its own opening tag.
-        preg_match('/id="calendar-panel-wrapper"[^>]*style="max-width:\s*([^"]+)"/', $html, $calendar);
+        preg_match('/id="gp-calendar"[^>]*style="max-width:\s*([^"]+)"/', $html, $calendar);
         $this->assertNotEmpty($calendar, 'the calendar wrapper did not render');
 
         // The wrapper is the element that opens immediately before the panel, so look back through
         // a window for it - the same shape AudienceTemplateInjectionTest uses. Safe against false
         // positives: transition-[max-width] in the class list cannot match style="max-width:, and
         // the calendar wrapper is thousands of characters earlier in the output.
-        $panelPos = strpos($html, 'id="subscribe-panel"');
+        $panelPos = strpos($html, 'id="gp-subscribe"');
         $this->assertNotFalse($panelPos, 'the panel did not render on the schedule page');
         $wrapper = substr($html, max(0, $panelPos - 400), 400);
 
@@ -1433,7 +1433,7 @@ class RoleSubscriberTest extends TestCase
             ->post($this->joinUrl(), $this->joinPayload(['email' => 'not-an-email']));
 
         // The rejection has to be VISIBLE. It no longer toasts - the panel renders it inline and
-        // respond() redirects to #subscribe-panel, so a toast at the top of the viewport would be a
+        // respond() redirects to #gp-subscribe, so a toast at the top of the viewport would be a
         // second notification for something already on screen - which is why the scoping key below
         // matters: without it the panel cannot tell whose error it is.
         $response->assertSessionHas('subscribe_error');

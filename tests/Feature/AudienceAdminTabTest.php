@@ -333,7 +333,7 @@ class AudienceAdminTabTest extends TestCase
 
         $this->get($role->getGuestUrl().'?subscribe=1')
             ->assertOk()
-            ->assertSee('subscribe-panel', false);
+            ->assertSee('gp-subscribe', false);
     }
 
     public function test_the_empty_state_gives_way_to_the_table_when_only_subscribers_exist(): void

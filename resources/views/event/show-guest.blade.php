@@ -77,7 +77,7 @@
 
   {{-- Status alerts (full width, fixed at top) --}}
   @if ($event->is_cancelled)
-  <div class="fixed top-0 left-0 w-full bg-red-50 dark:bg-red-950 border-b border-red-200 dark:border-red-800 py-6 z-[60]">
+  <div id="gp-status-bar" class="fixed top-0 left-0 w-full bg-red-50 dark:bg-red-950 border-b border-red-200 dark:border-red-800 py-6 z-[60]">
     <div class="container mx-auto px-5">
       <div class="flex items-center justify-center text-red-800 dark:text-red-200">
         <span class="text-xl font-medium">{{ __('messages.event_cancelled_banner') }}</span>
@@ -85,7 +85,7 @@
     </div>
   </div>
   @elseif ($event->is_internal)
-  <div class="fixed top-0 left-0 w-full bg-amber-50 dark:bg-amber-950 border-b border-amber-200 dark:border-amber-800 py-6 z-[60]">
+  <div id="gp-status-bar" class="fixed top-0 left-0 w-full bg-amber-50 dark:bg-amber-950 border-b border-amber-200 dark:border-amber-800 py-6 z-[60]">
     <div class="container mx-auto px-5">
       <div class="flex items-center justify-center text-amber-800 dark:text-amber-200">
         <span class="text-xl font-medium">{{ __('messages.event_is_internal') }}</span>
@@ -93,7 +93,7 @@
     </div>
   </div>
   @elseif ($event->is_draft)
-  <div class="fixed top-0 left-0 w-full bg-blue-50 dark:bg-blue-950 border-b border-blue-200 dark:border-blue-800 py-6 z-[60]">
+  <div id="gp-status-bar" class="fixed top-0 left-0 w-full bg-blue-50 dark:bg-blue-950 border-b border-blue-200 dark:border-blue-800 py-6 z-[60]">
     <div class="container mx-auto px-5">
       <div class="flex items-center justify-center gap-3 text-blue-800 dark:text-blue-200">
         <span class="text-xl font-medium">{{ __('messages.event_is_draft') }}</span>
@@ -109,7 +109,7 @@
     </div>
   </div>
   @elseif ($eventIsAccepted === null)
-  <div class="fixed top-0 left-0 w-full bg-amber-50 dark:bg-amber-950 border-b border-amber-200 dark:border-amber-800 py-6 z-[60]">
+  <div id="gp-status-bar" class="fixed top-0 left-0 w-full bg-amber-50 dark:bg-amber-950 border-b border-amber-200 dark:border-amber-800 py-6 z-[60]">
     <div class="container mx-auto px-5">
       <div class="flex items-center justify-center text-amber-800 dark:text-amber-200">
         <span class="text-xl font-medium">{{ __('messages.event_pending_review') }}</span>
@@ -117,7 +117,7 @@
     </div>
   </div>
   @elseif (! $eventIsAccepted)
-  <div class="fixed top-0 left-0 w-full bg-red-50 dark:bg-red-950 border-b border-red-200 dark:border-red-800 py-6 z-[60]">
+  <div id="gp-status-bar" class="fixed top-0 left-0 w-full bg-red-50 dark:bg-red-950 border-b border-red-200 dark:border-red-800 py-6 z-[60]">
     <div class="container mx-auto px-5">
       <div class="flex items-center justify-center text-red-800 dark:text-red-200">
         <span class="text-xl font-medium">{{ __('messages.event_rejected') }}</span>
@@ -202,7 +202,7 @@
           }
         @endphp
         @if ($fallbackImage)
-        <div class="bg-white/95 dark:bg-gray-900/95 backdrop-blur-sm sm:rounded-2xl overflow-hidden">
+        <div id="gp-event-hero-image" class="bg-white/95 dark:bg-gray-900/95 backdrop-blur-sm sm:rounded-2xl overflow-hidden">
             <img src="{{ $fallbackImage }}"
                  alt="{{ $eventName }}"
                  class="w-full aspect-square object-cover"
@@ -217,6 +217,10 @@
           // calls it and remains the authority - so this can only ever be more restrictive.
           $canRemoveVideos = auth()->check() && ! is_demo_mode() && auth()->user()->isEditor($role->subdomain);
         @endphp
+        {{-- class="contents" so each card stays a direct flex item of the column above and the
+             gap-4 spacing is unchanged; the wrapper exists only to give the whole set one id.
+             display:none on a display:contents box still removes the subtree. --}}
+        <div id="gp-talent" class="contents">
         @foreach ($talentMembers as $talentIndex => $each)
         @php
           $hasTalentHeader = ($each->header_image && ! in_array($each->header_image, ['none', 'logos'], true)) || $each->header_image_url;
@@ -454,13 +458,14 @@
         </div>
         @php unset($talentUrl); @endphp
         @endforeach
+        </div>{{-- /#gp-talent --}}
 
         {{-- The rest of the bill: acts somebody typed in by name and nothing more. One card and a
              list, not one card each - see the note where $bareTalent is built. Each name links to
              its own claim page where it has one, which is how an act finds out a page exists for
              them without an invitation in hand. --}}
         @if ($bareTalent->isNotEmpty())
-        <div class="bg-white/95 dark:bg-gray-900/95 backdrop-blur-sm sm:rounded-2xl p-5">
+        <div id="gp-talent-list" class="bg-white/95 dark:bg-gray-900/95 backdrop-blur-sm sm:rounded-2xl p-5">
           <h2 class="text-sm font-semibold uppercase tracking-wide text-gray-500 dark:text-gray-400">
             {{ __('messages.talent') }}
           </h2>
@@ -487,7 +492,7 @@
         @php
           $hasVenueHeader = ($event->venue->header_image && ! in_array($event->venue->header_image, ['none', 'logos'], true)) || $event->venue->header_image_url;
         @endphp
-        <div class="bg-white/95 dark:bg-gray-900/95 backdrop-blur-sm sm:rounded-2xl z-20 relative {{ $role->isRtl() ? 'rtl' : '' }}">
+        <div id="gp-venue" class="bg-white/95 dark:bg-gray-900/95 backdrop-blur-sm sm:rounded-2xl z-20 relative {{ $role->isRtl() ? 'rtl' : '' }}">
           @if ($hasVenueHeader)
             <div class="overflow-hidden rounded-t-2xl">
               @if ($event->venue->header_image && ! in_array($event->venue->header_image, ['none', 'logos'], true))
@@ -583,7 +588,7 @@
               </div>
 
               @if ($event->venue->social_links)
-              <div class="flex flex-row gap-3 items-center mt-2 {{ $role->isRtl() ? 'rtl' : '' }}">
+              <div id="gp-venue-socials" class="flex flex-row gap-3 items-center mt-2 {{ $role->isRtl() ? 'rtl' : '' }}">
                 @foreach ($event->venue->decodeLinks('social_links') as $link)
                   @php $venueLinkSlug = $event->venue->shortLinkSlugs()[$loop->index] ?? ''; @endphp
                   <a
@@ -643,7 +648,7 @@
             </div>
           </div>
           @if ($event->venue->formatted_address && config('services.google.maps') && !request()->attributes->get('custom_domain_host'))
-          <div class="overflow-hidden sm:rounded-b-2xl" style="height: 200px;">
+          <div id="gp-venue-map" class="overflow-hidden sm:rounded-b-2xl" style="height: 200px;">
             <iframe
                 width="100%" height="200" style="border:0"
                 loading="lazy" allowfullscreen
@@ -653,7 +658,7 @@
             </iframe>
           </div>
           @elseif ($event->venue->formatted_address && config('services.google.backend') && $event->venue->geo_lat)
-          <div class="overflow-hidden sm:rounded-b-2xl" style="height: 200px;">
+          <div id="gp-venue-map" class="overflow-hidden sm:rounded-b-2xl" style="height: 200px;">
             <a href="https://www.google.com/maps/search/?api=1&query={{ $event->venue->geo_lat }},{{ $event->venue->geo_lon }}" target="_blank" rel="noopener noreferrer">
               <img src="{{ route('map.image', ['id' => \App\Utils\UrlUtils::encodeId($event->venue->id)]) }}"
                    alt="{{ $event->venue->bestAddress() }}"
@@ -719,7 +724,7 @@
              `! $event->isPro()`, which is true when any schedule on the bill is paid - so a
              free curator's page dropped this card while still carrying the free-tier credit. --}}
         @if ($role->showBranding())
-        <div class="bg-white/95 dark:bg-gray-900/95 backdrop-blur-sm sm:rounded-2xl p-5 flex flex-col gap-6 {{ $role->isRtl() ? 'rtl' : '' }}">
+        <div id="gp-create-your-own" class="bg-white/95 dark:bg-gray-900/95 backdrop-blur-sm sm:rounded-2xl p-5 flex flex-col gap-6 {{ $role->isRtl() ? 'rtl' : '' }}">
           <p class="text-base leading-snug font-semibold text-gray-900 dark:text-gray-100">
             {{ __('messages.create_your_own_event_schedule') }}
           </p>
@@ -741,7 +746,7 @@
              event's month, so it is a partial view of the schedule twice over - hence the heading
              naming what the list is, and view_all_url giving it a way out. --}}
         @if(count($events) > 0)
-        <div class="bg-white/95 dark:bg-gray-900/95 backdrop-blur-sm sm:rounded-2xl p-5 flex flex-col gap-6 {{ $role->isRtl() ? 'rtl' : '' }}">
+        <div id="gp-upcoming-events" class="bg-white/95 dark:bg-gray-900/95 backdrop-blur-sm sm:rounded-2xl p-5 flex flex-col gap-6 {{ $role->isRtl() ? 'rtl' : '' }}">
           {{-- A real heading, not the <p> the neighbouring cards use for a venue or talent NAME:
                this titles a section, and the partial's own <h2 id="month-year-title"> is hidden by
                force_mobile, so without one the list has no accessible label at all. The tighter gap
@@ -794,10 +799,10 @@
 
       {{-- RIGHT COLUMN --}}
       <div class="order-1 lg:order-2 flex flex-col gap-4 lg:gap-6">
-        <div class="bg-white/95 dark:bg-gray-900/95 backdrop-blur-sm sm:rounded-2xl p-6 sm:p-8 flex flex-col gap-6 z-10">
+        <div id="gp-event-details" class="bg-white/95 dark:bg-gray-900/95 backdrop-blur-sm sm:rounded-2xl p-6 sm:p-8 flex flex-col gap-6 z-10">
 
         {{-- Breadcrumb --}}
-        <nav aria-label="Breadcrumb" class="flex items-center gap-3 text-sm text-gray-500 dark:text-gray-400 {{ $role->isRtl() ? 'rtl' : '' }}">
+        <nav id="gp-back-link" aria-label="Breadcrumb" class="flex items-center gap-3 text-sm text-gray-500 dark:text-gray-400 {{ $role->isRtl() ? 'rtl' : '' }}">
           <a href="{{ $backUrl }}" class="px-3 py-2 -mx-3 hover:underline hover:text-gray-700 dark:hover:text-gray-200">
             {{ $role->isRtl() ? '→' : '←' }} {{ $role->customLabel('back_to_schedule') }}
           </a>
@@ -815,6 +820,7 @@
 
         {{-- Event title --}}
         <h1
+          id="gp-event-title"
           class="text-gray-900 dark:text-gray-100 text-[28px] sm:text-[36px] lg:text-[44px] leading-snug font-bold {{ $role->isRtl() ? 'rtl text-right' : '' }}"
           dir="{{ content_dir_for_language($eventName, $displayLang) }}"
         >
@@ -826,7 +832,7 @@
 
         {{-- Short description --}}
         @if ($eventShortDescription)
-        <p class="text-gray-600 dark:text-gray-400 text-lg mt-2 {{ $role->isRtl() ? 'rtl text-right' : '' }}"
+        <p id="gp-event-short-description" class="text-gray-600 dark:text-gray-400 text-lg mt-2 {{ $role->isRtl() ? 'rtl text-right' : '' }}"
           dir="{{ content_dir_for_language($eventShortDescription, $displayLang) }}">
           {{ $eventShortDescription }}
         </p>
@@ -838,7 +844,7 @@
           $startDt = $event->getStartDateTime($date, true, $event->scheduleTimezone());
           $endDt = $event->isMultiDay() ? (clone $startDt)->addMinutes($event->durationInMinutes()) : null;
         @endphp
-        <div class="flex items-center gap-4 {{ $role->isRtl() ? 'rtl' : '' }}">
+        <div id="gp-event-date" class="flex items-center gap-4 {{ $role->isRtl() ? 'rtl' : '' }}">
           @if ($event->isMultiDay() && $endDt && $startDt->format('m') === $endDt->format('m'))
           <div class="flex-shrink-0 w-16 h-16 rounded-xl border border-gray-200 dark:border-gray-700
                       bg-white dark:bg-gray-900 flex flex-col items-center justify-center shadow-sm">
@@ -897,7 +903,7 @@
 
         {{-- Location icon badge --}}
         @if (($event->venue && ($event->venue->name || $event->venue->shortAddress())) || $event->getEventUrlDomain())
-        <div>
+        <div id="gp-event-location">
           <div class="flex items-center gap-4 {{ $role->isRtl() ? 'rtl' : '' }}">
             <div class="flex-shrink-0 w-16 h-16 rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900
                         flex items-center justify-center shadow-sm">
@@ -961,7 +967,7 @@
 
         {{-- RSVP Free badge --}}
         @if ($event->rsvp_enabled)
-        <div class="flex items-center gap-4 {{ $role->isRtl() ? 'rtl' : '' }}">
+        <div id="gp-event-price" class="flex items-center gap-4 {{ $role->isRtl() ? 'rtl' : '' }}">
           <div class="flex-shrink-0 w-16 h-16 rounded-xl border border-gray-200 dark:border-gray-700
                       bg-white dark:bg-gray-900 flex items-center justify-center shadow-sm">
             <svg width="24" height="24" viewBox="0 0 20 20" fill="{{ $accentColor }}" aria-hidden="true">
@@ -978,7 +984,7 @@
 
         {{-- Ticket price --}}
         @if ($event->registration_url && $event->ticket_price !== null && !$event->tickets_enabled && !$event->rsvp_enabled)
-        <div class="flex items-center gap-4 {{ $role->isRtl() ? 'rtl' : '' }}">
+        <div id="gp-event-price" class="flex items-center gap-4 {{ $role->isRtl() ? 'rtl' : '' }}">
           <div class="flex-shrink-0 w-16 h-16 rounded-xl border border-gray-200 dark:border-gray-700
                       bg-white dark:bg-gray-900 flex items-center justify-center shadow-sm">
             <svg width="24" height="24" viewBox="0 0 20 20" fill="{{ $accentColor }}" aria-hidden="true">
@@ -1036,17 +1042,17 @@
              conversion action, and the point is to catch the visitor who was going to leave, not to
              compete for the one who was going to buy.
 
-             Placed ABOVE #event-form-section on purpose: hidePanelsBelow() display:none's every
+             Placed ABOVE #gp-event-form on purpose: hidePanelsBelow() display:none's every
              sibling after that element while the buy form is open, which is why the subscribe panel
              at the foot of the page vanishes during checkout. --}}
         @if ($showInterestCapture && ($event->canSellTickets($date) || $event->canAcceptRsvp($date)))
-        <a href="#event-interest" class="self-start text-sm text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-200 hover:underline">
+        <a href="#gp-event-interest" class="self-start text-sm text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-200 hover:underline">
             {{ __('messages.event_interest_not_ready') }}
         </a>
         @endif
 
         {{-- CTA buttons --}}
-        <div id="desktop-cta-buttons" style="font-family: sans-serif" x-data="{ shareState: 'idle' }" class="relative items-center gap-3 text-left hidden sm:inline-flex self-start {{ $role->isRtl() ? 'rtl' : '' }}">
+        <div id="gp-event-cta" style="font-family: sans-serif" x-data="{ shareState: 'idle' }" class="relative items-center gap-3 text-left hidden sm:inline-flex self-start {{ $role->isRtl() ? 'rtl' : '' }}">
         @if ($event->is_cancelled)
             <span class="text-base text-red-600 dark:text-red-400 font-medium">{{ __('messages.event_cancelled_guest_notice') }}</span>
         @elseif ($event->canAcceptRsvp($date))
@@ -1136,7 +1142,7 @@
                          dropdown lives in. --}}
                     <div class="my-1 border-t border-gray-100 dark:border-gray-700"></div>
                     @if ($showInterestCapture)
-                    <a href="#event-interest" class="group flex items-center px-4 py-3 text-sm text-gray-700 dark:text-gray-200 rounded-lg transition-all duration-200 gp-dropdown-item" role="menuitem" tabindex="-1" id="menu-item-3">
+                    <a href="#gp-event-interest" class="group flex items-center px-4 py-3 text-sm text-gray-700 dark:text-gray-200 rounded-lg transition-all duration-200 gp-dropdown-item" role="menuitem" tabindex="-1" id="menu-item-3">
                         <svg class="me-3 h-5 w-5 text-gray-400 group-hover:text-gray-500" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
                             <path stroke-linecap="round" stroke-linejoin="round" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
                         </svg>
@@ -1177,6 +1183,7 @@
                 ->count();
         @endphp
         <a href="{{ $carpoolUrl }}"
+           id="gp-event-carpool"
            class="flex-shrink-0 h-[42px] inline-flex items-center justify-center gap-1.5 rounded-xl border border-gray-300 dark:border-gray-600 text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors px-3"
            title="{{ __('messages.carpool') }}">
             <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -1188,6 +1195,7 @@
         {{-- Share button --}}
         @if (!$event->is_draft)
         <button type="button"
+                id="gp-event-share"
                 data-share-title="{{ $eventName }}"
                 @click="
                   if (shareState !== 'idle') return;
@@ -1246,7 +1254,7 @@
                    lands and where the page is otherwise a dead end. --}}
               <div class="my-1 border-t border-gray-200 dark:border-gray-700"></div>
               @if ($showInterestCapture)
-              <a href="#event-interest" class="gp-bottom-sheet-item flex items-center gap-3 px-4 py-3 rounded-xl text-gray-700 transition-all duration-200">
+              <a href="#gp-event-interest" class="gp-bottom-sheet-item flex items-center gap-3 px-4 py-3 rounded-xl text-gray-700 transition-all duration-200">
                 <svg class="h-5 w-5 text-gray-400" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
                   <path stroke-linecap="round" stroke-linejoin="round" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
                 </svg>
@@ -1265,14 +1273,14 @@
         </div>
         @endif
 
-        {{-- Interest capture. Placed ABOVE #event-form-section deliberately: hidePanelsBelow()
+        {{-- Interest capture. Placed ABOVE #gp-event-form deliberately: hidePanelsBelow()
              display:none's every sibling AFTER that element while the buy/RSVP form is open, which
              is why the subscribe panel at the foot of the page vanishes during checkout. --}}
         @include('event.partials.interest-capture')
 
         {{-- RSVP form section (hidden by default, shown on CTA click) --}}
         @if ($event->canAcceptRsvp($date))
-        <div id="event-form-section" class="scroll-mt-4"
+        <div id="gp-event-form" class="scroll-mt-4"
              style="display: none; transition: opacity 0.2s ease, transform 0.2s ease;"
              @if (request()->get('rsvp') === 'true' || session('error') || $errors->any())
              data-show-initial="true"
@@ -1299,8 +1307,8 @@
              The redundant `&& $event->isPro()` that used to sit here was the difference between a
              working buy button and a dead one: the CTA above is gated on canSellTickets() alone, so
              any event that could sell but was not Pro rendered a button whose click target
-             (#event-form-section) had never been rendered. Keep these two conditions identical. --}}
-        <div id="event-form-section" class="scroll-mt-4"
+             (#gp-event-form) had never been rendered. Keep these two conditions identical. --}}
+        <div id="gp-event-form" class="scroll-mt-4"
              style="display: none; transition: opacity 0.2s ease, transform 0.2s ease;"
              @if (request()->get('tickets') === 'true' || session('error') || $errors->any())
              data-show-initial="true"
@@ -1315,12 +1323,12 @@
 
         <script {!! nonce_attr() !!}>
         (function() {
-            var form = document.getElementById('event-form-section');
+            var form = document.getElementById('gp-event-form');
             if (!form) return;
 
             var paramKey = form.querySelector('#ticket-selector') ? 'tickets' : 'rsvp';
-            var desktopCta = document.getElementById('desktop-cta-buttons');
-            var mobileCta = document.getElementById('mobile-cta-bar');
+            var desktopCta = document.getElementById('gp-event-cta');
+            var mobileCta = document.getElementById('gp-mobile-cta');
 
             function hideCta() {
                 if (desktopCta) { desktopCta.style.display = 'none'; }
@@ -1419,7 +1427,7 @@
 
         {{-- Flyer image --}}
         @if ($event->flyer_image_url)
-        <div class="bg-white/95 dark:bg-gray-900/95 backdrop-blur-sm sm:rounded-2xl overflow-hidden"
+        <div id="gp-flyer" class="bg-white/95 dark:bg-gray-900/95 backdrop-blur-sm sm:rounded-2xl overflow-hidden"
              x-data="{ flyerOpen: false }"
              @keydown.escape.window="if (flyerOpen) { flyerOpen = false; document.body.style.overflow = ''; }">
           <img src="{{ $event->flyer_image_url }}" alt="{{ $eventName }} - {{ __('messages.flyer') }}" class="w-full cursor-pointer" loading="lazy" decoding="async" @click="flyerOpen = true; document.body.style.overflow = 'hidden'"/>
@@ -1441,7 +1449,7 @@
           $descriptionHtml = $eventDescriptionHtml;
           $descriptionDir = content_dir_for_language($descriptionHtml, $displayLang);
         @endphp
-        <article class="bg-white/95 dark:bg-gray-900/95 backdrop-blur-sm sm:rounded-2xl p-6 sm:p-8">
+        <article id="gp-about" class="bg-white/95 dark:bg-gray-900/95 backdrop-blur-sm sm:rounded-2xl p-6 sm:p-8">
           <h2 class="text-xs font-semibold uppercase tracking-wider text-gray-500 dark:text-gray-400 mb-4">
             {{ $role->customLabel('about') }}
           </h2>
@@ -1455,7 +1463,7 @@
 
         {{-- Agenda image --}}
         @if ($event->agenda_image_url)
-        <div class="bg-white/95 dark:bg-gray-900/95 backdrop-blur-sm sm:rounded-2xl overflow-hidden">
+        <div id="gp-agenda-image" class="bg-white/95 dark:bg-gray-900/95 backdrop-blur-sm sm:rounded-2xl overflow-hidden">
           <img src="{{ $event->agenda_image_url }}"
             alt="{{ $eventName }} - {{ $role->customLabel('agenda') }}"
             class="w-full" loading="lazy" decoding="async"/>
@@ -1464,7 +1472,7 @@
 
         {{-- Event parts --}}
         @if ($event->parts->count() > 0)
-        <div id="agenda" class="bg-white/95 dark:bg-gray-900/95 backdrop-blur-sm sm:rounded-2xl p-6 sm:p-8 {{ $role->isRtl() ? 'rtl' : '' }}">
+        <div id="gp-agenda" class="bg-white/95 dark:bg-gray-900/95 backdrop-blur-sm sm:rounded-2xl p-6 sm:p-8 {{ $role->isRtl() ? 'rtl' : '' }}">
           @php
             $hasTimes = $event->parts->contains(fn($part) => !empty($part->start_time));
           @endphp
@@ -1884,7 +1892,7 @@
           }
         @endphp
         @if (!is_demo_role($role) && ($eventLevelVideos->count() > 0 || $eventLevelComments->count() > 0 || $eventLevelPhotos->count() > 0 || $myEventLevelPendingVideos->count() > 0 || $myEventLevelPendingComments->count() > 0 || $myEventLevelPendingPhotos->count() > 0 || ($role->isPro() && $event->polls->count() > 0) || $allPhotoData->count() > 0 || ($event->parts->count() == 0 && $event->isFanContentEnabled())))
-        <div id="event-media-section" class="bg-white/95 dark:bg-gray-900/95 backdrop-blur-sm sm:rounded-2xl p-6 sm:p-8 {{ $role->isRtl() ? 'rtl' : '' }}">
+        <div id="gp-fan-content" class="bg-white/95 dark:bg-gray-900/95 backdrop-blur-sm sm:rounded-2xl p-6 sm:p-8 {{ $role->isRtl() ? 'rtl' : '' }}">
 
           {{-- Polls --}}
           @if ($role->isPro() && $event->polls->count() > 0)
@@ -2206,7 +2214,7 @@
 
         {{-- Public feedback / reviews --}}
         @if ($publicFeedbacks->count() > 0)
-        <div class="bg-white/95 dark:bg-gray-900/95 backdrop-blur-sm sm:rounded-2xl p-6 sm:p-8 {{ $role->isRtl() ? 'rtl' : '' }}">
+        <div id="gp-reviews" class="bg-white/95 dark:bg-gray-900/95 backdrop-blur-sm sm:rounded-2xl p-6 sm:p-8 {{ $role->isRtl() ? 'rtl' : '' }}">
           <h3 class="text-lg font-semibold text-gray-900 dark:text-white mb-4">{{ __('messages.feedback_reviews') }}</h3>
 
           {{-- Average rating summary --}}
@@ -2354,7 +2362,7 @@
   </main>
 
   {{-- Sticky mobile CTA --}}
-  <div id="mobile-cta-bar" x-data="{ shareState: 'idle' }"
+  <div id="gp-mobile-cta" x-data="{ shareState: 'idle' }"
        class="sm:hidden fixed bottom-0 inset-x-0 z-40 bg-white dark:bg-gray-800 border-t border-gray-200 dark:border-gray-700 px-5 py-3 shadow-lg" style="font-family: sans-serif; padding-bottom: max(0.75rem, env(safe-area-inset-bottom));">
     <div class="flex items-center gap-3 {{ $role->isRtl() ? 'rtl' : '' }}">
       {{-- Mobile share button --}}
@@ -2456,7 +2464,7 @@
        Harmless when the widget is off - .es-a11y-cta-offset then matches no a11y element. --}}
   <script {!! nonce_attr() !!}>
   (function() {
-      var bar = document.getElementById('mobile-cta-bar');
+      var bar = document.getElementById('gp-mobile-cta');
       if (!bar) return;
       var root = document.documentElement;
       function update() {
@@ -2664,8 +2672,8 @@
       }
     });
 
-    if (window.location.hash === '#agenda') {
-        const el = document.getElementById('agenda');
+    if (window.location.hash === '#gp-agenda') {
+        const el = document.getElementById('gp-agenda');
         if (el) {
             setTimeout(() => el.scrollIntoView({ behavior: 'smooth', block: 'start' }), 300);
         }
