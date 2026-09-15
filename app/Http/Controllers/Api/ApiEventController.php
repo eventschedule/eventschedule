@@ -310,8 +310,10 @@ class ApiEventController extends Controller
 
         // Convert the incoming UTC starts_at to the SCHEDULE's local time, because saveEvent()
         // interprets the submitted wall-clock in the schedule's timezone (not the user's account tz).
+        // The same zone is handed to saveEvent() below as its $timezoneOverride, so the wall-clock
+        // built here is read back in the zone it was written in.
+        $scheduleTz = $this->scheduleTimezoneFor($role);
         if ($request->has('starts_at')) {
-            $scheduleTz = $role->timezone ?? auth()->user()->timezone ?? config('app.timezone');
             $utcTime = Carbon::createFromFormat('Y-m-d H:i:s', $request->starts_at, 'UTC');
             $localTime = $utcTime->setTimezone($scheduleTz)->format('Y-m-d H:i:s');
             $request->merge(['starts_at' => $localTime]);
@@ -344,7 +346,7 @@ class ApiEventController extends Controller
             return $errorResponse;
         }
 
-        $event = $this->eventRepo->saveEvent($role, $request, null);
+        $event = $this->eventRepo->saveEvent($role, $request, null, true, $scheduleTz);
 
         $event->load(['roles', 'tickets', 'addons', 'parts']);
 
@@ -526,7 +528,14 @@ class ApiEventController extends Controller
         // submitted wall-clock in the schedule's timezone (not the user's account tz). Using the
         // schedule tz here makes the round-trip identity, so an update that doesn't change the time
         // doesn't shift it.
-        $scheduleTz = $currentRole->timezone ?? auth()->user()->timezone ?? config('app.timezone');
+        //
+        // The omitted-starts_at branch is not optional: saveEvent() does fill($request->all()) and
+        // then re-reads whatever $event->starts_at holds as a schedule-local wall-clock, so leaving
+        // the stored UTC value in place would shift it by the schedule's offset on every PATCH.
+        // The zone is also passed to saveEvent() as $timezoneOverride so both halves of the round
+        // trip resolve it identically - saveEvent()'s own fallback chain consults the venue, which
+        // this controller cannot know before the save.
+        $scheduleTz = $this->scheduleTimezoneFor($currentRole);
         if (! $request->has('starts_at')) {
             $request->merge(['starts_at' => $event->starts_at
                 ? $event->getStartDateTime(null, true, $scheduleTz)->format('Y-m-d H:i:s')
@@ -603,7 +612,7 @@ class ApiEventController extends Controller
             return $errorResponse;
         }
 
-        $event = $this->eventRepo->saveEvent($currentRole, $request, $event);
+        $event = $this->eventRepo->saveEvent($currentRole, $request, $event, true, $scheduleTz);
 
         $event->load(['roles', 'tickets', 'addons', 'parts']);
 
@@ -921,6 +930,17 @@ class ApiEventController extends Controller
 
             $request->merge(['members' => $processedMembers]);
         }
+    }
+
+    /**
+     * The zone a starts_at wall-clock is expressed in for this schedule.
+     *
+     * ?: rather than ??: roles.timezone and users.timezone are nullable strings, and an empty one
+     * is a DateTimeZone error rather than a fallback (same reasoning as Event::scheduleTimezone()).
+     */
+    private function scheduleTimezoneFor(Role $role): string
+    {
+        return $role->timezone ?: auth()->user()->timezone ?: config('app.timezone');
     }
 
     /**
