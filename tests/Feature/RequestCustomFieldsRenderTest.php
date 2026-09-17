@@ -106,6 +106,30 @@ class RequestCustomFieldsRenderTest extends TestCase
     }
 
     /**
+     * Same sink, older text: the owner's Request Terms panel on that page also sits inside the Vue
+     * mount, and escaping does not touch a mustache.
+     */
+    public function test_the_public_import_page_marks_the_request_terms_v_pre(): void
+    {
+        config(['services.google.gemini_key' => 'test-key']);
+
+        $role = $this->createRole($this->createOwner(), 'venue', [
+            'accept_requests' => true,
+            'require_account' => false,
+            'request_terms' => "No refunds {{ 7*7 }}\nBring cables",
+        ]);
+
+        $html = $this->get(route('event.guest_import', ['subdomain' => $role->subdomain]))
+            ->assertOk()
+            ->getContent();
+
+        $this->assertMatchesRegularExpression(
+            '/<div v-pre[^>]*>\s*<p>No refunds \{\{ 7\*7 \}\}<br \/>\s*Bring cables<\/p>/',
+            $html
+        );
+    }
+
+    /**
      * The admin event form's custom-fields panel was replaced by <x-custom-field-input>. The rest of
      * the suite only renders that page for schedules with no custom fields, so without this the
      * swapped-in component is never exercised in a real page render.

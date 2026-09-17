@@ -439,7 +439,7 @@ class RoleController extends Controller
 
             $pendingData = [
                 'pending_request' => $subdomain,
-                'pending_request_allow_guest' => session('pending_request_allow_guest', $pendingRole ? ! $pendingRole->require_account : false),
+                'pending_request_allow_guest' => session('pending_request_allow_guest', $pendingRole ? ! $pendingRole->bookingFormRequiresAccount() : false),
                 'pending_request_form' => session('pending_request_form', 'import'),
             ];
 
@@ -4408,6 +4408,11 @@ class RoleController extends Controller
             $role->import_config = $importConfig;
         }
 
+        // The new-schedule page renders both of these sections too, so saving has to read them
+        // here as well as in update() - the import toggles used to be dropped on create.
+        $this->applyImportFormFields($request, $role);
+        $this->applyBookingFormConfig($request, $role);
+
         if (config('app.is_testing')) {
             $role->plan_type = 'enterprise';
             $role->plan_expires = '2099-01-01';
@@ -5040,28 +5045,8 @@ class RoleController extends Controller
             $role->import_config = $importConfig;
         }
 
-        if ($request->has('import_fields')) {
-            $importConfig = $role->import_config;
-            $importConfig['fields'] = [
-                'short_description' => (bool) $request->input('import_fields.short_description'),
-                'description' => (bool) $request->input('import_fields.description'),
-                'ticket_price' => (bool) $request->input('import_fields.ticket_price'),
-                'coupon_code' => (bool) $request->input('import_fields.coupon_code'),
-                'registration_url' => (bool) $request->input('import_fields.registration_url'),
-                'category_id' => (bool) $request->input('import_fields.category_id'),
-                'group_id' => (bool) $request->input('import_fields.group_id'),
-            ];
-            $importConfig['required_fields'] = [
-                'short_description' => (bool) $request->input('required_fields.short_description'),
-                'description' => (bool) $request->input('required_fields.description'),
-                'ticket_price' => (bool) $request->input('required_fields.ticket_price'),
-                'coupon_code' => (bool) $request->input('required_fields.coupon_code'),
-                'registration_url' => (bool) $request->input('required_fields.registration_url'),
-                'category_id' => (bool) $request->input('required_fields.category_id'),
-                'group_id' => (bool) $request->input('required_fields.group_id'),
-            ];
-            $role->import_config = $importConfig;
-        }
+        $this->applyImportFormFields($request, $role);
+        $this->applyBookingFormConfig($request, $role);
 
         // Handle event custom fields (Pro feature)
         if ($request->has('event_custom_fields_submitted') && $role->isPro()) {
@@ -6474,6 +6459,66 @@ class RoleController extends Controller
 
             return response()->json(['error' => __('messages.ai_details_generation_failed')], 500);
         }
+    }
+
+    /**
+     * The AI import form's optional fields (Settings > Advanced): which ones it shows, and which of
+     * those a submitter must fill in. Only when the section was on the page.
+     */
+    private function applyImportFormFields(Request $request, Role $role): void
+    {
+        if (! $request->has('import_fields')) {
+            return;
+        }
+
+        $fields = [];
+        $required = [];
+        foreach (['short_description', 'description', 'ticket_price', 'coupon_code', 'registration_url', 'category_id', 'group_id'] as $field) {
+            $fields[$field] = (bool) $request->input('import_fields.'.$field);
+            $required[$field] = (bool) $request->input('required_fields.'.$field);
+        }
+
+        $importConfig = $role->import_config;
+        $importConfig['fields'] = $fields;
+        $importConfig['required_fields'] = $required;
+        $role->import_config = $importConfig;
+    }
+
+    /**
+     * The booking form options (Engagement > Requests): which default fields a visitor must fill in,
+     * and whether the form offers Online.
+     *
+     * Gated on the section's sentinel, so a save from anywhere that does not render it leaves the
+     * stored options alone. A key that was not posted keeps its stored value - the Location row is
+     * not rendered on a venue, where it can never apply.
+     */
+    private function applyBookingFormConfig(Request $request, Role $role): void
+    {
+        if (! $request->boolean('booking_form_submitted')) {
+            return;
+        }
+
+        $current = $role->bookingFormConfig();
+        $submitted = $request->input('booking_required_fields');
+        $submitted = is_array($submitted) ? $submitted : [];
+
+        $required = [];
+        foreach (Role::BOOKING_FORM_REQUIRABLE_FIELDS as $field) {
+            $required[$field] = array_key_exists($field, $submitted)
+                ? filter_var($submitted[$field], FILTER_VALIDATE_BOOLEAN)
+                : $current['required_fields'][$field];
+        }
+
+        if ($role->isVenue()) {
+            $required['location'] = false;
+        }
+
+        $role->booking_form_config = [
+            'required_fields' => $required,
+            'allow_online' => $request->has('booking_allow_online')
+                ? $request->boolean('booking_allow_online')
+                : $current['allow_online'],
+        ];
     }
 
     /**

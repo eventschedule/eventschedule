@@ -380,6 +380,37 @@ class HoneypotTest extends TestCase
         $this->assertStringContainsString('name="website"', $html);
     }
 
+    /**
+     * The booking form posts over fetch and reads a JSON body, so the bail has to be JSON: a redirect
+     * is followed to an HTML page the page script cannot parse.
+     */
+    public function test_a_tripped_booking_request_is_refused_in_the_shape_its_caller_reads(): void
+    {
+        $role = $this->createRole($this->createOwner(), 'talent', ['accept_requests' => true]);
+        $url = route('event.booking_request.store', ['subdomain' => $role->subdomain]);
+        $payload = [
+            'event_name' => 'Spam Show',
+            'contact_name' => 'Bot',
+            'contact_email' => 'bot.visitor@gmail.com',
+            'create_account' => '1',
+            'password' => 'long-enough-password',
+            'terms' => 'on',
+            'website' => 'https://spam.example',
+        ];
+
+        $this->postJson($url, $payload)
+            ->assertStatus(422)
+            ->assertExactJson(['message' => __('messages.invalid_request')]);
+
+        $this->post($url, $payload)
+            ->assertRedirect()
+            ->assertSessionHas('error', __('messages.invalid_request'));
+
+        $this->assertSame(0, Event::where('name', 'Spam Show')->count());
+        $this->assertNull(User::where('email', 'bot.visitor@gmail.com')->first());
+        $this->assertGuest();
+    }
+
     public function test_public_auth_forms_render_a_honeypot(): void
     {
         foreach (['/login', '/sign_up', '/reset-password'] as $path) {

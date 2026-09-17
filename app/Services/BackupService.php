@@ -36,9 +36,11 @@ use App\Models\Ticket;
 use App\Models\TicketWaitlist;
 use App\Utils\CountryUtils;
 use App\Utils\CssUtils;
+use App\Utils\JsonUtils;
 use App\Utils\MarkdownUtils;
 use App\Utils\TextUtils;
 use App\Utils\UrlUtils;
+use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\QueryException;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
@@ -86,6 +88,9 @@ class BackupService
         'profile_image_url', 'header_image_url', 'background_image_url',
         'gift_cards_enabled', 'gift_card_amounts', 'gift_card_currency_code',
         'gift_card_valid_days', 'gift_card_payment_method',
+        // The booking form's required fields and Online option. Without this a restore silently
+        // puts the form back to "nothing required, Online offered".
+        'booking_form_config',
     ];
 
     private const EVENT_EXPORT_EXCLUDE = [
@@ -1618,6 +1623,24 @@ class BackupService
         });
     }
 
+    /**
+     * The value to assign when restoring an exported column onto a model.
+     *
+     * The exporters copy raw attributes, so a column with an `array` cast arrives as its JSON text.
+     * Assigning that text as-is double-encodes it (Eloquent JSON-encodes any non-null value for a
+     * JSON-cast attribute), and the restored row then reads back a string - which is what broke
+     * restored custom fields and gift card amounts. Decode it first. Text that is not valid JSON
+     * restores as null rather than failing the whole import.
+     */
+    private function restorableValue(Model $model, string $field, mixed $value): mixed
+    {
+        if (is_string($value) && $model->hasCast($field, ['array', 'json', 'object', 'collection'])) {
+            return JsonUtils::decodeToArray($value);
+        }
+
+        return $value;
+    }
+
     private function importRole(array $data, int $userId): Role
     {
         $validator = Validator::make($data, [
@@ -1657,7 +1680,7 @@ class BackupService
         $role = new Role;
         foreach (self::ROLE_EXPORT_FIELDS as $field) {
             if (array_key_exists($field, $data)) {
-                $role->$field = $data[$field];
+                $role->$field = $this->restorableValue($role, $field, $data[$field]);
             }
         }
         // Pre-feature backups have no header_style key; force null (resolves to the
@@ -1786,7 +1809,7 @@ class BackupService
                 continue;
             }
             if (in_array($field, $fillable)) {
-                $event->$field = $value;
+                $event->$field = $this->restorableValue($event, $field, $value);
             }
         }
 

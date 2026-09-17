@@ -966,7 +966,7 @@
 
         <!-- Requests Tab -->
         <h3 id="engagement-requests" class="doc-subheading">Requests</h3>
-        <p class="text-gray-600 dark:text-gray-300 mb-4">Let other people put events on your schedule. A <strong class="text-gray-900 dark:text-white">Talent</strong> schedule gets a shorter version of this tab, with only <strong class="text-gray-900 dark:text-white">Accept requests</strong>, <strong class="text-gray-900 dark:text-white">Request Terms</strong> and your own questions, because a request to book a performer is always read by hand. The same goes for events other schedules add you to: once your talent schedule has an owner, a venue or curator that lists you sends a request you accept under <strong class="text-gray-900 dark:text-white">Admin Panel &rarr; Requests</strong>, unless it had already listed you before you claimed your page.</p>
+        <p class="text-gray-600 dark:text-gray-300 mb-4">Let other people put events on your schedule. A <strong class="text-gray-900 dark:text-white">Talent</strong> schedule gets a shorter version of this tab, with only <strong class="text-gray-900 dark:text-white">Accept requests</strong>, the Booking Form options, <strong class="text-gray-900 dark:text-white">Request Terms</strong> and your own questions, because a request to book a performer is always read by hand. The same goes for events other schedules add you to: once your talent schedule has an owner, a venue or curator that lists you sends a request you accept under <strong class="text-gray-900 dark:text-white">Admin Panel &rarr; Requests</strong>, unless it had already listed you before you claimed your page. Requests to a talent always come in through the Booking Form, where creating an account is left to the visitor.</p>
         <div class="doc-fields">
             <div class="doc-field">
                 <h4 class="font-semibold text-gray-900 dark:text-white mb-2">Accept requests</h4>
@@ -979,11 +979,19 @@
             </div>
             <div class="doc-field">
                 <h4 class="font-semibold text-gray-900 dark:text-white mb-2">Require Account</h4>
-                <p class="text-sm text-gray-500 dark:text-gray-400">Make submitters sign in first, so every request has a name behind it. On by default for Curator schedules, off for Venue schedules. With the AI Import form, a first-time submitter completes everything on one page - their account, their own schedule, and the event - with their email confirmed by a code. Not offered on Talent schedules.</p>
+                <p class="text-sm text-gray-500 dark:text-gray-400">Make submitters sign in first, so every request has a name behind it. On by default for Curator schedules, off for Venue schedules. With the AI Import form, a first-time submitter completes everything on one page - their account, their own schedule, and the event - with their email confirmed by a code. With it off, visitors can send a request as a guest, and on the Booking Form they can also choose to create an account, wherever the site accepts new accounts. Not offered on Talent schedules, whose Booking Form always leaves the account up to the visitor.</p>
             </div>
             <div class="doc-field">
                 <h4 class="font-semibold text-gray-900 dark:text-white mb-2">Event Request Form</h4>
-                <p class="text-sm text-gray-500 dark:text-gray-400">Which form visitors see: <strong class="text-gray-900 dark:text-white">AI Import</strong>, where they paste the event text or upload a flyer and the details are read out of it, or <strong class="text-gray-900 dark:text-white">Booking Form</strong>, a plain form with set fields. AI Import unless you change it. Offered on Venue and Curator schedules.</p>
+                <p class="text-sm text-gray-500 dark:text-gray-400">Which form visitors see: <strong class="text-gray-900 dark:text-white">AI Import</strong>, where they paste the event text or upload a flyer and the details are read out of it, or <strong class="text-gray-900 dark:text-white">Booking Form</strong>, a plain form with set fields. AI Import unless you change it. Offered on Venue and Curator schedules while <strong class="text-gray-900 dark:text-white">Require Account</strong> is off; a Talent schedule always uses the Booking Form.</p>
+            </div>
+            <div class="doc-field">
+                <h4 class="font-semibold text-gray-900 dark:text-white mb-2">Required Fields</h4>
+                <p class="text-sm text-gray-500 dark:text-gray-400">Choose which of the Booking Form's own fields a visitor has to fill in before sending a request: <strong class="text-gray-900 dark:text-white">Event Name</strong>, <strong class="text-gray-900 dark:text-white">Date &amp; Time</strong>, <strong class="text-gray-900 dark:text-white">Description</strong> and <strong class="text-gray-900 dark:text-white">Location</strong>. Nothing is required until you tick it. Location is satisfied by a venue name, address or city, or by ticking Online, and is not offered on Venue schedules, where your venue is the location. To insist on an answer to one of your own questions, use that question's <strong class="text-gray-900 dark:text-white">Required</strong> option. Shown while the Booking Form is in use.</p>
+            </div>
+            <div class="doc-field">
+                <h4 class="font-semibold text-gray-900 dark:text-white mb-2">Offer Online Events</h4>
+                <p class="text-sm text-gray-500 dark:text-gray-400">On by default. Turn it off and the Booking Form no longer offers the <strong class="text-gray-900 dark:text-white">Online</strong> option, so every request is for an in-person event. The AI Import form is not affected.</p>
             </div>
             <div class="doc-field">
                 <h4 class="font-semibold text-gray-900 dark:text-white mb-2">Require Approval</h4>
@@ -995,7 +1003,7 @@
             </div>
             <div class="doc-field">
                 <h4 class="font-semibold text-gray-900 dark:text-white mb-2">Request Terms</h4>
-                <p class="text-sm text-gray-500 dark:text-gray-400">Terms or guidelines a submitter has to agree to before sending a request. Use it for booking policy, technical requirements, or what you will and will not take.</p>
+                <p class="text-sm text-gray-500 dark:text-gray-400">Terms or guidelines for people sending you requests. Use it for booking policy, technical requirements, or what you will and will not take. They are shown above the Submit button on the Booking Form, and on the AI Import form when Require Account is off.</p>
             </div>
             <div class="doc-field">
                 <h4 class="font-semibold text-gray-900 dark:text-white mb-2">Your own questions <x-doc-badge plan="pro" /></h4>

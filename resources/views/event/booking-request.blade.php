@@ -5,6 +5,28 @@
   $use24hr = get_use_24_hour_time($role);
   $accentColor = $role->accent_color ?? '#4E81FA';
   $contrastColor = accent_contrast_color($accentColor);
+
+  // Supplied by EventController::showBookingRequest(); the fallbacks keep the view renderable alone.
+  $requiredFields ??= $role->bookingFormRequiredFields();
+  $allowOnline ??= $role->bookingFormAllowsOnline();
+  $offerAccount ??= ! auth()->check() && public_registration_enabled();
+
+  // Built here rather than inline: @json() splits its argument on commas.
+  $bookingFormScript = [
+    'required' => $requiredFields,
+    'allowOnline' => (bool) $allowOnline,
+    'isVenue' => $role->isVenue(),
+  ];
+  $bookingFormText = [
+    'required' => __('messages.field_is_required'),
+    'dateRequired' => __('messages.date_required'),
+    'timeInvalid' => __('messages.booking_time_invalid'),
+    'location' => __($allowOnline ? 'messages.booking_location_required' : 'messages.booking_venue_required'),
+    'description' => __('messages.description'),
+    'error' => __('messages.error_occurred'),
+    'submit' => __('messages.submit'),
+  ];
+  $errorAnchorClass = 'mt-2 text-sm text-red-600 dark:text-red-400 hidden';
 @endphp
 
   <style {!! nonce_attr() !!}>
@@ -129,41 +151,80 @@
 
         {{-- Booking Request Form --}}
         <div class="bg-white/95 dark:bg-gray-900/95 backdrop-blur-sm rounded-2xl p-6 sm:p-8 lg:p-16 pt-6 lg:pt-8 max-w-4xl mx-auto">
-          <form id="booking-request-form" method="POST" action="{{ route('event.booking_request.store', ['subdomain' => $role->subdomain]) }}">
+          {{-- novalidate: the submit handler below checks the form itself and reports only controls
+               the visitor can see. With native validation, one required control inside a hidden
+               section blocked every submit without a word (issue #124). --}}
+          <form id="booking-request-form" method="POST" action="{{ route('event.booking_request.store', ['subdomain' => $role->subdomain]) }}" novalidate>
             @csrf
             <x-honeypot />
 
             {{-- Event Details Section --}}
             <h3 class="text-lg font-semibold text-gray-900 dark:text-gray-100 mb-4">{{ __('messages.event_details') }}</h3>
 
+            {{-- Owner-required default fields are marked with aria-required and checked by
+                 defaultFieldErrors(), never with a native required attribute: the date input is
+                 swapped for Flatpickr's readonly one and the description is hidden behind EasyMDE. --}}
             <div class="mb-4">
-              <x-input-label for="event_name" :value="__('messages.event_name')" />
-              <x-text-input id="event_name" name="event_name" type="text" class="mt-1 block w-full" />
+              <x-input-label for="event_name">
+                {{ __('messages.event_name') }}
+                @if ($requiredFields['event_name'])
+                <span aria-hidden="true"> *</span>
+                @endif
+              </x-input-label>
+              <x-text-input id="event_name" name="event_name" type="text" class="mt-1 block w-full"
+                aria-describedby="error-event_name"
+                :aria-required="$requiredFields['event_name'] ? 'true' : null" />
+              <div id="error-event_name" data-error-for="event_name" class="{{ $errorAnchorClass }}"></div>
             </div>
 
             <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-4">
               <div>
-                <x-input-label for="event_date" :value="__('messages.date')" />
+                <x-input-label for="event_date">
+                  {{ __('messages.date') }}
+                  @if ($requiredFields['date_time'])
+                  <span aria-hidden="true"> *</span>
+                  @endif
+                </x-input-label>
                 <input type="text" id="event_date"
                   class="datepicker-date mt-1 block w-full border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-[var(--brand-blue)] focus:ring-[var(--brand-blue)] rounded-lg shadow-sm {{ rtl_class($role, 'rtl', '', true) }}"
-                  autocomplete="off" aria-label="{{ __('messages.date') }}" />
+                  autocomplete="off" aria-label="{{ __('messages.date') }}" aria-describedby="error-date"
+                  @if ($requiredFields['date_time']) aria-required="true" @endif />
                 <input type="hidden" name="date" id="hidden_date" />
+                <div id="error-date" data-error-for="date" class="{{ $errorAnchorClass }}"></div>
               </div>
               <div>
-                <x-input-label for="event_start_time" :value="__('messages.start_time')" />
+                <x-input-label for="event_start_time">
+                  {{ __('messages.start_time') }}
+                  @if ($requiredFields['date_time'])
+                  <span aria-hidden="true"> *</span>
+                  @endif
+                </x-input-label>
                 <div class="relative">
                   <input type="text" id="event_start_time"
                     class="mt-1 block w-full border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-[var(--brand-blue)] focus:ring-[var(--brand-blue)] rounded-lg shadow-sm {{ rtl_class($role, 'rtl', '', true) }}"
-                    autocomplete="off" aria-label="{{ __('messages.start_time') }}" />
+                    autocomplete="off" aria-label="{{ __('messages.start_time') }}" aria-describedby="error-start_time"
+                    @if ($requiredFields['date_time']) aria-required="true" @endif />
                   <div class="time-dropdown" id="start_time_dropdown"></div>
                 </div>
                 <input type="hidden" name="start_time" id="hidden_start_time" />
+                <div id="error-start_time" data-error-for="start_time" class="{{ $errorAnchorClass }}"></div>
               </div>
             </div>
 
             <div class="mb-6">
-              <x-input-label for="event_description" :value="__('messages.description')" />
-              <textarea id="event_description" name="description" rows="4" class="html-editor mt-1 block w-full"></textarea>
+              <x-input-label for="event_description">
+                {{ __('messages.description') }}
+                @if ($requiredFields['description'])
+                <span aria-hidden="true"> *</span>
+                @endif
+              </x-input-label>
+              {{-- The error ring goes on this wrapper: EasyMDE hides the textarea itself. --}}
+              <div class="mt-1 rounded-lg" data-error-ring="description">
+                <textarea id="event_description" name="description" rows="4" class="html-editor block w-full"
+                  aria-describedby="error-description"
+                  @if ($requiredFields['description']) aria-required="true" @endif></textarea>
+              </div>
+              <div id="error-description" data-error-for="description" class="{{ $errorAnchorClass }}"></div>
             </div>
 
             {{-- Custom fields the schedule chose to ask on the request form --}}
@@ -177,11 +238,18 @@
             @endif
 
             {{-- Location Section --}}
-            <h3 class="text-lg font-semibold text-gray-900 dark:text-gray-100 mb-4">{{ __('messages.location') }}</h3>
+            <h3 class="text-lg font-semibold text-gray-900 dark:text-gray-100 mb-4">
+              {{ __('messages.location') }}
+              @if ($requiredFields['location'])
+              <span aria-hidden="true"> *</span>
+              @endif
+            </h3>
 
+            @if ($allowOnline)
             <div class="mb-4">
-              <fieldset>
-                <div class="flex items-center space-x-6">
+              <fieldset @if ($requiredFields['location']) aria-describedby="error-location" @endif>
+                <legend class="sr-only">{{ __('messages.location') }}</legend>
+                <div class="flex flex-wrap items-center gap-6">
                   @if ($role->isVenue())
                     <input type="hidden" id="in_person" value="1">
                   @else
@@ -194,7 +262,7 @@
                       </label>
                     </div>
                   @endif
-                  <div class="flex items-center {{ $role->isVenue() ? '' : 'ps-3' }}">
+                  <div class="flex items-center">
                     <input id="is_online" name="is_online" value="1" type="checkbox"
                       class="h-4 w-4 border-gray-300 rounded"
                       style="accent-color: {{ $accentColor }}">
@@ -205,12 +273,23 @@
                 </div>
               </fieldset>
             </div>
+            @else
+            {{-- The owner switched Online off, so every request is in person. --}}
+            <input type="hidden" id="in_person" value="1">
+            @endif
 
+            @unless ($role->isVenue())
+            <div id="error-location" data-error-for="location" class="mb-4 text-sm text-red-600 dark:text-red-400 hidden"></div>
+            @endunless
+
+            @if ($allowOnline)
             <div id="online-url-field" class="mb-4 hidden">
               <x-input-label for="event_url" :value="__('messages.event_url')" />
-              <x-text-input id="event_url" name="event_url" type="url" class="mt-1 block w-full" autocomplete="off" />
+              <x-text-input id="event_url" name="event_url" type="url" class="mt-1 block w-full" autocomplete="off" aria-describedby="error-event_url" />
               <p class="text-xs text-gray-500 dark:text-gray-400 mt-1">{{ __('messages.event_url_help') }}</p>
+              <div id="error-event_url" data-error-for="event_url" class="{{ $errorAnchorClass }}"></div>
             </div>
+            @endif
 
             <div id="location-fields">
               @if ($role->isVenue())
@@ -224,7 +303,8 @@
               @else
                 <div class="mb-4">
                   <x-input-label for="venue_name" :value="__('messages.venue_name')" />
-                  <x-text-input id="venue_name" name="venue_name" type="text" class="mt-1 block w-full" />
+                  <x-text-input id="venue_name" name="venue_name" type="text" class="mt-1 block w-full"
+                    :aria-describedby="$requiredFields['location'] ? 'error-location' : null" />
                 </div>
 
                 <div class="mb-4">
@@ -264,31 +344,46 @@
             @else
               <div class="mb-4">
                 <x-input-label for="contact_name" :value="__('messages.name')" />
-                <x-text-input id="contact_name" name="contact_name" type="text" class="mt-1 block w-full" required />
+                <x-text-input id="contact_name" name="contact_name" type="text" class="mt-1 block w-full" required
+                  aria-describedby="error-contact_name error-account_name" />
+                <div id="error-contact_name" data-error-for="contact_name" class="{{ $errorAnchorClass }}"></div>
+                <div id="error-account_name" data-error-for="account_name" class="{{ $errorAnchorClass }}"></div>
               </div>
 
               <div class="mb-4">
                 <x-input-label for="contact_email" :value="__('messages.email')" />
-                <x-text-input id="contact_email" name="contact_email" type="email" class="mt-1 block w-full" required />
+                <x-text-input id="contact_email" name="contact_email" type="email" class="mt-1 block w-full" required
+                  aria-describedby="error-contact_email error-account_email" />
+                <div id="error-contact_email" data-error-for="contact_email" class="{{ $errorAnchorClass }}"></div>
+                {{-- createAndLoginUser() reports a taken address, or an install that does not take new
+                     accounts, under account_email. --}}
+                <div id="error-account_email" data-error-for="account_email" class="{{ $errorAnchorClass }}"></div>
               </div>
 
-              {{-- Create Account Option --}}
+              {{-- Create Account Option. Only where an account can actually be created: a selfhost
+                   that has not opened registration refuses it on the server. A schedule that requires
+                   an account never gets here - showBookingRequest() sends those guests to sign up. --}}
+              @if ($offerAccount)
               <div class="mb-4 mt-6 p-4 bg-gray-50 dark:bg-gray-700/50 rounded-lg border border-gray-200 dark:border-gray-600">
                 <label class="inline-flex items-center cursor-pointer">
-                  <input type="checkbox" id="create_account" name="create_account" value="1" class="rounded border-gray-300 dark:border-gray-600 shadow-sm" style="accent-color: {{ $accentColor }}" {{ $role->require_account ? 'checked disabled' : '' }}>
+                  <input type="checkbox" id="create_account" name="create_account" value="1" class="rounded border-gray-300 dark:border-gray-600 shadow-sm" style="accent-color: {{ $accentColor }}">
                   <span class="ms-2 text-sm font-medium text-gray-700 dark:text-gray-300">{{ __('messages.create_an_account') }}</span>
                 </label>
-                <p class="mt-1 text-xs text-gray-500 dark:text-gray-400 {{ is_rtl() ? 'me-6' : 'ms-6' }}">{{ __('messages.create_account_benefits') }}</p>
+                <p class="mt-1 text-xs text-gray-500 dark:text-gray-400 ms-6">{{ __('messages.create_account_benefits') }}</p>
 
-                <div id="account-fields" class="{{ $role->require_account ? '' : 'hidden' }} mt-4">
+                {{-- Rendered hidden and NOT required. toggleAccountFields() makes the two controls
+                     required only while the box is ticked and the section is showing. --}}
+                <div id="account-fields" class="hidden mt-4">
                   <div>
                     <x-input-label for="account_password" :value="__('messages.password')" />
-                    <x-text-input id="account_password" name="password" type="password" class="mt-1 block w-full" required />
+                    <x-text-input id="account_password" name="password" type="password" class="mt-1 block w-full"
+                      autocomplete="new-password" minlength="8" aria-describedby="error-password" />
+                    <div id="error-password" data-error-for="password" class="{{ $errorAnchorClass }}"></div>
                   </div>
                   <div class="mt-3">
                     <div class="relative flex items-start">
                       <div class="flex h-6 items-center">
-                        <input id="account_terms" name="terms" type="checkbox" required
+                        <input id="account_terms" name="terms" type="checkbox" aria-describedby="error-terms"
                           class="h-4 w-4 rounded border-gray-300 dark:border-gray-600 dark:bg-gray-700 shadow-sm" style="accent-color: {{ $accentColor }}">
                       </div>
                       <div class="ms-3 text-sm leading-6">
@@ -306,13 +401,24 @@
                         </label>
                       </div>
                     </div>
+                    <div id="error-terms" data-error-for="terms" class="{{ $errorAnchorClass }}"></div>
                   </div>
                 </div>
               </div>
-
-              @if ($role->require_account)
-                <input type="hidden" name="create_account" value="1">
               @endif
+
+              {{-- The server's answer when the owner switched Require Account on after this page loaded. --}}
+              <div id="error-create_account" data-error-for="create_account" class="mb-4 text-sm text-red-600 dark:text-red-400 hidden"></div>
+            @endif
+
+            {{-- The owner's terms for requests, shown before the visitor sends one. --}}
+            @if (filled($role->request_terms))
+            @php $requestTermsText = $role->translatedRequestTerms(); @endphp
+            <div class="mt-6 p-4 rounded-lg bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700">
+              <h3 class="text-sm font-semibold text-gray-900 dark:text-gray-100 mb-2">{{ __('messages.request_terms') }}</h3>
+              <div class="text-sm text-gray-700 dark:text-gray-300 text-start break-words"
+                dir="{{ content_dir($role, showing_translation($role) && filled($role->request_terms_en), $requestTermsText) }}">{!! nl2br(e($requestTermsText)) !!}</div>
+            </div>
             @endif
 
             {{-- Submit Button --}}
@@ -326,7 +432,7 @@
             </div>
 
             {{-- Success/Error Messages --}}
-            <div id="form-message" class="hidden mt-4 p-4 rounded-lg text-sm"></div>
+            <div id="form-message" class="hidden mt-4 p-4 rounded-lg text-sm" aria-live="polite"></div>
           </form>
         </div>
       </div>
@@ -335,6 +441,17 @@
 
   <script {!! nonce_attr() !!}>
     var use24hr = {{ $use24hr ? 'true' : 'false' }};
+    var bookingForm = @json($bookingFormScript);
+    var bookingText = @json($bookingFormText);
+    var ERROR_RING = ['ring-1', 'ring-red-500', 'border-red-500', 'dark:ring-red-400', 'dark:border-red-400'];
+
+    function byId(id) {
+        return document.getElementById(id);
+    }
+
+    function isCheckbox(el) {
+        return !!el && el.type === 'checkbox';
+    }
 
     function parseTimeToMinutes(timeStr) {
         if (!timeStr) return null;
@@ -505,98 +622,112 @@
         });
     }
 
+    // The three section toggles run on load as well as on change: a browser can restore a box's
+    // checked state on reload while the section it controls renders hidden. Each one returns quietly
+    // when its controls are not on the page - a venue has no In person box, and a signed-in visitor
+    // or a closed install has no account section - because a throw here would abort the rest of the
+    // DOMContentLoaded handler, date and time pickers included.
     function toggleLocationFields() {
-      var isInPerson = document.getElementById('in_person').checked;
-      var locationFields = document.getElementById('location-fields');
-      locationFields.style.display = isInPerson ? 'block' : 'none';
-      if (!isInPerson) {
-        locationFields.querySelectorAll('input, select').forEach(function(el) { el.value = ''; });
+      var inPerson = byId('in_person');
+      var locationFields = byId('location-fields');
+      if (!isCheckbox(inPerson) || !locationFields) return;
+
+      locationFields.style.display = inPerson.checked ? 'block' : 'none';
+      if (!inPerson.checked) {
+        // Text inputs only: the country picker keeps its own hidden value in step with its display.
+        locationFields.querySelectorAll('input[type="text"]').forEach(function(el) { el.value = ''; });
       }
     }
 
     function toggleOnlineUrl() {
-      var isOnline = document.getElementById('is_online').checked;
-      var urlField = document.getElementById('online-url-field');
-      urlField.classList.toggle('hidden', !isOnline);
-      if (!isOnline) {
-        document.getElementById('event_url').value = '';
+      var isOnline = byId('is_online');
+      var urlField = byId('online-url-field');
+      if (!isOnline || !urlField) return;
+
+      urlField.classList.toggle('hidden', !isOnline.checked);
+      if (!isOnline.checked && byId('event_url')) {
+        byId('event_url').value = '';
       }
     }
 
     function toggleAccountFields() {
-      var createAccount = document.getElementById('create_account').checked;
-      var accountFields = document.getElementById('account-fields');
-      accountFields.classList.toggle('hidden', !createAccount);
-      document.getElementById('account_password').required = createAccount;
-      document.getElementById('account_terms').required = createAccount;
-    }
+      var createAccount = byId('create_account');
+      var accountFields = byId('account-fields');
+      if (!createAccount || !accountFields) return;
 
-    document.addEventListener('DOMContentLoaded', function() {
-      // Bind checkbox handlers
-      var inPersonEl = document.getElementById('in_person');
-      if (inPersonEl.type === 'checkbox') {
-        inPersonEl.addEventListener('change', toggleLocationFields);
-      }
-      document.getElementById('is_online').addEventListener('change', toggleOnlineUrl);
-      var createAccountEl = document.getElementById('create_account');
-      if (createAccountEl) {
-        createAccountEl.addEventListener('change', toggleAccountFields);
-      }
-
-      // Init Flatpickr date picker
-      var dateInput = document.getElementById('event_date');
-      var hiddenDate = document.getElementById('hidden_date');
-      flatpickr(dateInput, {
-        altInput: true,
-        altFormat: 'M j, Y',
-        dateFormat: 'Y-m-d',
-        onChange: function(selectedDates, dateStr) {
-          hiddenDate.value = dateStr;
-        }
-      });
-
-      // Init custom time picker
-      var timeInput = document.getElementById('event_start_time');
-      var timeDropdown = document.getElementById('start_time_dropdown');
-      var hiddenTime = document.getElementById('hidden_start_time');
-      initPartTimePicker(timeInput, timeDropdown);
-
-      timeInput.addEventListener('change', function() {
-        var minutes = parseTimeToMinutes(timeInput.value);
-        if (minutes !== null) {
-          var h = Math.floor(minutes / 60);
-          var m = minutes % 60;
-          hiddenTime.value = (h < 10 ? '0' : '') + h + ':' + (m < 10 ? '0' : '') + m;
-        }
-      });
-    });
-
-    // Validation errors come back as JSON (this form posts over fetch), so the per-field messages
-    // have to be written into the [data-error-for] anchors by hand.
-    function clearFieldErrors() {
-      document.querySelectorAll('[data-error-for]').forEach(function(el) {
-        el.textContent = '';
-        el.classList.add('hidden');
+      accountFields.classList.toggle('hidden', !createAccount.checked);
+      ['account_password', 'account_terms'].forEach(function(id) {
+        if (byId(id)) byId(id).required = createAccount.checked;
       });
     }
 
-    function showFieldErrors(errors) {
-      if (!errors) return null;
+    // Rebuild the posted date and time from what the visitor can see. The hidden inputs are only as
+    // fresh as the last change event, and pressing Enter can submit without one. Returns false when
+    // the typed time does not parse.
+    function syncHiddenDateTime() {
+      var picker = byId('event_date')._flatpickr;
+      byId('hidden_date').value = picker && picker.selectedDates.length
+        ? picker.formatDate(picker.selectedDates[0], 'Y-m-d')
+        : '';
 
-      var firstEl = null;
-      Object.keys(errors).forEach(function(key) {
-        // Laravel reports a multiselect member as custom_field_values.key.2; the anchor is on the
-        // field itself, so drop a trailing numeric segment before looking it up.
-        var anchorKey = key.replace(/\.\d+$/, '');
-        var el = document.querySelector('[data-error-for="' + CSS.escape(anchorKey) + '"]');
-        if (!el) return;
+      var typed = byId('event_start_time').value.trim();
+      var minutes = parseTimeToMinutes(typed);
+      byId('hidden_start_time').value = minutes === null
+        ? ''
+        : ('0' + Math.floor(minutes / 60)).slice(-2) + ':' + ('0' + (minutes % 60)).slice(-2);
 
-        el.textContent = Array.isArray(errors[key]) ? errors[key][0] : errors[key];
-        el.classList.remove('hidden');
-        if (!firstEl) firstEl = el;
+      return typed === '' || minutes !== null;
+    }
+
+    // Sent as typed; only the emptiness check ignores surrounding whitespace.
+    function descriptionValue() {
+      var textarea = byId('event_description');
+      return textarea._easyMDE ? textarea._easyMDE.value() : textarea.value;
+    }
+
+    function locationGiven() {
+      var inPerson = byId('in_person');
+      var isOnline = byId('is_online');
+      var hasVenue = ['venue_name', 'venue_address1', 'venue_city'].some(function(id) {
+        return byId(id) && byId(id).value.trim() !== '';
       });
 
-      return firstEl;
+      return ((!isCheckbox(inPerson) || inPerson.checked) && hasVenue)
+        || (bookingForm.allowOnline && isCheckbox(isOnline) && isOnline.checked);
+    }
+
+    // The owner-required default fields, plus the date/time pairing the server enforces anyway: a
+    // date is only saved together with a time.
+    function defaultFieldErrors() {
+      var required = bookingForm.required;
+      var errors = {};
+      var timeParses = syncHiddenDateTime();
+      var hasDate = byId('hidden_date').value !== '';
+      var hasTime = byId('hidden_start_time').value !== '';
+
+      if (required.event_name && byId('event_name').value.trim() === '') {
+        errors.event_name = [bookingText.required];
+      }
+
+      if (!timeParses) {
+        errors.start_time = [bookingText.timeInvalid];
+      } else if ((required.date_time || hasDate) && !hasTime) {
+        errors.start_time = [bookingText.required];
+      }
+
+      if ((required.date_time || hasTime) && !hasDate) {
+        errors.date = [bookingText.dateRequired];
+      }
+
+      if (required.description && descriptionValue().trim() === '') {
+        errors.description = [bookingText.required];
+      }
+
+      if (required.location && !bookingForm.isVenue && !locationGiven()) {
+        errors.location = [bookingText.location];
+      }
+
+      return errors;
     }
 
     // A required multiselect cannot carry the `required` attribute (any one box satisfies it), so
@@ -606,28 +737,181 @@
       var errors = {};
       form.querySelectorAll('[data-required-group]').forEach(function(group) {
         if (!group.querySelector('input[type="checkbox"]:checked')) {
-          errors[group.dataset.requiredGroup] = ['{{ __('messages.field_is_required') }}'];
+          errors[group.dataset.requiredGroup] = [bookingText.required];
         }
       });
 
-      return Object.keys(errors).length ? errors : null;
+      return errors;
     }
+
+    // The form is novalidate, so the browser's own checks (required contact details, email and URL
+    // formats, custom field patterns) run here - but only for controls the visitor can see. Anything
+    // hidden is the server's job.
+    function firstVisibleInvalidControl(form) {
+      return Array.prototype.find.call(form.elements, function(control) {
+        return control.willValidate && control.getClientRects().length > 0 && !control.checkValidity();
+      }) || null;
+    }
+
+    function controlsFor(key) {
+      return Array.from(document.querySelectorAll('[aria-describedby]')).filter(function(el) {
+        return el.getAttribute('aria-describedby').split(/\s+/).indexOf('error-' + key) !== -1;
+      });
+    }
+
+    function markInvalid(key, invalid) {
+      var ring = document.querySelector('[data-error-ring="' + CSS.escape(key) + '"]');
+      controlsFor(key).forEach(function(el) {
+        if (invalid) {
+          el.setAttribute('aria-invalid', 'true');
+        } else {
+          el.removeAttribute('aria-invalid');
+        }
+        if (!ring && el.tagName !== 'FIELDSET') {
+          ERROR_RING.forEach(function(cls) { el.classList.toggle(cls, invalid); });
+        }
+      });
+      if (ring) {
+        ERROR_RING.forEach(function(cls) { ring.classList.toggle(cls, invalid); });
+      }
+    }
+
+    // Validation errors come back as JSON (this form posts over fetch), so the per-field messages
+    // have to be written into the [data-error-for] anchors by hand.
+    function clearFieldErrors() {
+      document.querySelectorAll('[data-error-for]').forEach(function(el) {
+        el.textContent = '';
+        el.classList.add('hidden');
+        markInvalid(el.dataset.errorFor, false);
+      });
+    }
+
+    function showFieldErrors(errors) {
+      if (!errors) return;
+
+      Object.keys(errors).forEach(function(key) {
+        // Laravel reports a multiselect member as custom_field_values.key.2; the anchor is on the
+        // field itself, so drop a trailing numeric segment before looking it up.
+        var anchorKey = key.replace(/\.\d+$/, '');
+        var el = document.querySelector('[data-error-for="' + CSS.escape(anchorKey) + '"]');
+        if (!el) return;
+
+        el.textContent = Array.isArray(errors[key]) ? errors[key][0] : errors[key];
+        el.classList.remove('hidden');
+        markInvalid(anchorKey, true);
+      });
+    }
+
+    // Scroll to the first message in page order (the server lists custom fields last although they
+    // render above the location) and put the cursor in the field it belongs to.
+    function focusFirstError(form) {
+      var anchor = form.querySelector('[data-error-for]:not(.hidden)');
+      if (!anchor) return false;
+
+      anchor.scrollIntoView({ behavior: 'smooth', block: 'center' });
+
+      var key = anchor.dataset.errorFor;
+      var textarea = byId('event_description');
+      if (key === 'description' && textarea._easyMDE) {
+        textarea._easyMDE.codemirror.focus();
+        return true;
+      }
+
+      var target = controlsFor(key).filter(function(el) {
+        return el.tagName !== 'FIELDSET' && el.getClientRects().length > 0;
+      })[0];
+      if (!target && key === 'location') {
+        target = [byId('venue_name'), byId('in_person'), byId('is_online')].filter(function(el) {
+          return el && el.type !== 'hidden' && el.getClientRects().length > 0;
+        })[0];
+      }
+      if (target) {
+        target.focus({ preventScroll: true });
+      }
+
+      return true;
+    }
+
+    // Flatpickr swaps the date input for its own display input (or a native one on mobile), which
+    // carries none of the original's label or aria wiring. Hand it over.
+    function wireDatePickerAccessibility(picker) {
+      var display = picker.mobileInput || picker.altInput;
+      var original = byId('event_date');
+      if (!display || display === original) return;
+
+      display.id = 'event_date_display';
+      ['aria-label', 'aria-describedby', 'aria-required'].forEach(function(name) {
+        if (original.hasAttribute(name)) display.setAttribute(name, original.getAttribute(name));
+      });
+      var label = document.querySelector('label[for="event_date"]');
+      if (label) label.setAttribute('for', display.id);
+    }
+
+    document.addEventListener('DOMContentLoaded', function() {
+      var inPersonEl = byId('in_person');
+      if (isCheckbox(inPersonEl)) {
+        inPersonEl.addEventListener('change', toggleLocationFields);
+      }
+      if (byId('is_online')) {
+        byId('is_online').addEventListener('change', toggleOnlineUrl);
+      }
+      if (byId('create_account')) {
+        byId('create_account').addEventListener('change', toggleAccountFields);
+      }
+
+      // Init Flatpickr date picker
+      var picker = flatpickr(byId('event_date'), {
+        altInput: true,
+        altFormat: 'M j, Y',
+        dateFormat: 'Y-m-d',
+        onChange: function() {
+          syncHiddenDateTime();
+        }
+      });
+      wireDatePickerAccessibility(picker);
+
+      // Init custom time picker
+      initPartTimePicker(byId('event_start_time'), byId('start_time_dropdown'));
+      byId('event_start_time').addEventListener('change', syncHiddenDateTime);
+
+      // app.js creates the description editor in its own DOMContentLoaded listener, which runs after
+      // this one, so its input only exists on the next tick.
+      setTimeout(function() {
+        var textarea = byId('event_description');
+        if (!textarea._easyMDE) return;
+        var input = textarea._easyMDE.codemirror.getInputField();
+        ['aria-describedby', 'aria-required'].forEach(function(name) {
+          if (textarea.hasAttribute(name)) input.setAttribute(name, textarea.getAttribute(name));
+        });
+        input.setAttribute('aria-label', bookingText.description);
+      }, 0);
+
+      toggleLocationFields();
+      toggleOnlineUrl();
+      toggleAccountFields();
+      syncHiddenDateTime();
+    });
 
     document.getElementById('booking-request-form').addEventListener('submit', function(e) {
       e.preventDefault();
 
       var form = this;
-      var submitBtn = document.getElementById('submit-btn');
-      var messageDiv = document.getElementById('form-message');
+      var submitBtn = byId('submit-btn');
+      var messageDiv = byId('form-message');
 
       messageDiv.classList.add('hidden');
       clearFieldErrors();
 
-      var groupErrors = requiredGroupErrors(form);
-      if (groupErrors) {
-        var firstGroupError = showFieldErrors(groupErrors);
-        if (firstGroupError) {
-          firstGroupError.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      var errors = Object.assign(defaultFieldErrors(), requiredGroupErrors(form));
+      var invalidControl = firstVisibleInvalidControl(form);
+
+      if (Object.keys(errors).length || invalidControl) {
+        showFieldErrors(errors);
+        // The browser's own message for a visible control, otherwise the first of ours.
+        if (invalidControl) {
+          invalidControl.reportValidity();
+        } else {
+          focusFirstError(form);
         }
         return;
       }
@@ -636,11 +920,7 @@
       submitBtn.textContent = '...';
 
       var formData = new FormData(form);
-
-      var descEl = document.getElementById('event_description');
-      if (descEl._easyMDE) {
-        formData.set('description', descEl._easyMDE.value());
-      }
+      formData.set('description', descriptionValue());
 
       fetch(form.action, {
         method: 'POST',
@@ -665,36 +945,34 @@
             window.location.href = result.data.redirect_url;
           }, 1500);
         } else {
-          var errorMessage = result.data.message || result.data.error || '{{ __("messages.error_occurred") }}';
+          var errorMessage = result.data.message || result.data.error || bookingText.error;
 
           if (result.data.errors) {
-            var errors = Object.values(result.data.errors);
-            errorMessage = errors.map(function(e) { return e[0]; }).join('\n');
+            var errorList = Object.values(result.data.errors);
+            errorMessage = errorList.map(function(e) { return e[0]; }).join('\n');
           }
 
           // Also place each message next to its own field, so a failed custom-field pattern points
           // at the input that has to change instead of only landing in the summary below.
           clearFieldErrors();
-          var firstErrorEl = showFieldErrors(result.data.errors);
+          showFieldErrors(result.data.errors);
 
           messageDiv.className = 'mt-4 p-4 rounded-lg text-sm bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-700 text-red-800 dark:text-red-200';
           messageDiv.style.whiteSpace = 'pre-line';
           messageDiv.textContent = errorMessage;
           messageDiv.classList.remove('hidden');
           submitBtn.disabled = false;
-          submitBtn.textContent = '{{ __("messages.submit") }}';
+          submitBtn.textContent = bookingText.submit;
 
-          if (firstErrorEl) {
-            firstErrorEl.scrollIntoView({ behavior: 'smooth', block: 'center' });
-          }
+          focusFirstError(form);
         }
       })
       .catch(function() {
         messageDiv.className = 'mt-4 p-4 rounded-lg text-sm bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-700 text-red-800 dark:text-red-200';
-        messageDiv.textContent = '{{ __("messages.error_occurred") }}';
+        messageDiv.textContent = bookingText.error;
         messageDiv.classList.remove('hidden');
         submitBtn.disabled = false;
-        submitBtn.textContent = '{{ __("messages.submit") }}';
+        submitBtn.textContent = bookingText.submit;
       });
     });
   </script>

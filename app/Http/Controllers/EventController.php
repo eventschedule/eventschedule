@@ -3166,9 +3166,11 @@ class EventController extends Controller
 
         $request->merge(['account_name' => $name, 'account_email' => $email, 'account_password' => $password]);
 
-        // Selfhost does not allow public self-registration after the first user (mirrors
-        // RegisteredUserController::store). Block this optional-account path too.
-        if (! config('app.hosted') && ! config('app.is_testing') && User::count() > 0) {
+        // Selfhost does not allow public self-registration after the first user unless the operator
+        // sets ALLOW_REGISTRATION - the same gate as RegisteredUserController::store() and
+        // createAccountWithCode(). This one used to test config('app.hosted') alone, so an install
+        // that had opened registration still refused every booking-form account.
+        if (! public_registration_enabled() && ! config('app.is_testing') && User::count() > 0) {
             throw ValidationException::withMessages([
                 'account_email' => [__('messages.account_creation_disabled')],
             ]);
@@ -3232,6 +3234,19 @@ class EventController extends Controller
             abort(404);
         }
 
+        // A venue or curator that requires an account never shows guests this form -
+        // RoleController::request() sends them through sign-up instead - so a typed or stale link
+        // takes the same route. Before the session writes below, which would label the pending
+        // request as a booking-form one. ?lang= can arrive as an array, so narrow it first.
+        if (! auth()->check() && $role->bookingFormRequiresAccount()) {
+            $lang = is_string($request->lang) && is_valid_language_code($request->lang) ? $request->lang : null;
+
+            return redirect(route('role.request', array_filter([
+                'subdomain' => $role->subdomain,
+                'lang' => $lang,
+            ])));
+        }
+
         if (! auth()->check()) {
             session()->put('pending_request', $subdomain);
             session()->put('pending_request_form', 'booking');
@@ -3266,14 +3281,27 @@ class EventController extends Controller
             }
         }
 
-        return view('event.booking-request', ['role' => $role]);
+        return view('event.booking-request', [
+            'role' => $role,
+            // Offer an account only where creating one can succeed: createAndLoginUser() refuses on
+            // a selfhost that has not opened registration.
+            'offerAccount' => ! auth()->check() && public_registration_enabled(),
+            'requiredFields' => $role->bookingFormRequiredFields(),
+            'allowOnline' => $role->bookingFormAllowsOnline(),
+        ]);
     }
 
     public function bookingRequest(Request $request, $subdomain)
     {
         // Honeypot. Before the cap check and before createAndLoginUser() below, so a bot
-        // can neither burn the schedule's daily allowance nor mint an account.
+        // can neither burn the schedule's daily allowance nor mint an account. The form posts
+        // over fetch and reads a JSON body: a redirect would be followed to an HTML page it cannot
+        // parse, leaving only the generic error, so answer in kind (as guestImport() does).
         if (HoneypotUtils::isTripped($request)) {
+            if ($request->expectsJson()) {
+                return response()->json(['message' => __('messages.invalid_request')], 422);
+            }
+
             return back()->withInput()->with('error', __('messages.invalid_request'));
         }
 
@@ -3289,12 +3317,21 @@ class EventController extends Controller
             throw new \App\Exceptions\EventCreationLimitException;
         }
 
-        // Validate form input
+        $isGuest = ! auth()->check();
+        $creatingAccount = $isGuest && $request->boolean('create_account');
+        $allowOnline = $role->bookingFormAllowsOnline();
+
+        // The default fields are optional unless the owner required them (Engagement > Requests).
+        $presence = fn (string $field) => $role->bookingFormRequires($field) ? 'required' : 'nullable';
+
         $rules = [
-            'event_name' => ['nullable', 'string', 'max:255'],
-            'date' => ['nullable', 'date'],
-            'start_time' => ['nullable', 'date_format:H:i'],
-            'description' => ['nullable', 'string', 'max:5000'],
+            'event_name' => [$presence('event_name'), 'string', 'max:255'],
+            // starts_at is only built from a date AND a time (below), so each needs the other or the
+            // date is silently dropped. date_format rather than date: the date rule also passes
+            // "15-09-2026", which createFromFormat('Y-m-d H:i') then throws on.
+            'date' => [$presence('date_time'), 'required_with:start_time', 'date_format:Y-m-d'],
+            'start_time' => [$presence('date_time'), 'required_with:date', 'date_format:H:i'],
+            'description' => [$presence('description'), 'string', 'max:5000'],
             'is_online' => ['nullable'],
             'venue_name' => ['nullable', 'string', 'max:255'],
             'venue_country_code' => ['nullable', 'string', 'max:2'],
@@ -3302,12 +3339,29 @@ class EventController extends Controller
             'venue_city' => ['nullable', 'string', 'max:255'],
             'venue_state' => ['nullable', 'string', 'max:255'],
             'venue_postal_code' => ['nullable', 'string', 'max:20'],
-            'event_url' => ['nullable', 'url', 'max:500'],
         ];
 
-        if (! auth()->check()) {
+        // With Online switched off the form has no URL field and nothing posted here is used.
+        if ($allowOnline) {
+            $rules['event_url'] = ['nullable', 'url', 'max:500'];
+        }
+
+        if ($isGuest) {
             $rules['contact_name'] = ['required', 'string', 'max:255'];
             $rules['contact_email'] = ['required', 'string', 'email', 'max:255'];
+
+            // showBookingRequest() already sends these guests to sign up. This catches a page that
+            // was open when the owner switched Require Account on, and a direct post.
+            if ($role->bookingFormRequiresAccount()) {
+                $rules['create_account'] = ['accepted'];
+            }
+
+            // In the same pass as the event fields, so a request that fails validation never leaves
+            // an account behind. createAndLoginUser() re-checks the password and the email.
+            if ($creatingAccount) {
+                $rules['password'] = ['required', 'string', 'min:8'];
+                $rules['terms'] = ['accepted'];
+            }
         }
 
         // Custom fields the schedule opted to ask here. This form posts as FormData, so a
@@ -3319,11 +3373,39 @@ class EventController extends Controller
             $customFieldAttributes = $role->getEventCustomFieldValidationAttributes($requestCustomFields, forGuest: true);
         }
 
-        $request->validate($rules, [], $customFieldAttributes);
+        $validator = validator($request->all(), $rules, [
+            'create_account.accepted' => __('messages.booking_request_account_required'),
+        ], array_merge([
+            'event_name' => __('messages.event_name'),
+            'date' => __('messages.date'),
+            'start_time' => __('messages.start_time'),
+            'description' => __('messages.description'),
+            'venue_name' => __('messages.venue_name'),
+            'event_url' => __('messages.event_url'),
+            'contact_name' => __('messages.name'),
+            'contact_email' => __('messages.email'),
+            'password' => __('messages.password'),
+            'terms' => __('messages.terms_of_service'),
+        ], $customFieldAttributes));
+
+        // Satisfied by any venue detail, or by the Online box where the form offers it. The page
+        // clears the venue fields when In person is unticked, so a venue detail means in person.
+        // Never asked on a venue schedule, which is its own location (see bookingFormRequires()).
+        if ($role->bookingFormRequires('location')) {
+            $validator->after(function ($validator) use ($request, $allowOnline) {
+                $hasVenue = $request->filled('venue_name') || $request->filled('venue_address1') || $request->filled('venue_city');
+
+                if (! $hasVenue && ! ($allowOnline && $request->boolean('is_online'))) {
+                    $validator->errors()->add('location', __($allowOnline ? 'messages.booking_location_required' : 'messages.booking_venue_required'));
+                }
+            });
+        }
+
+        $validator->validate();
 
         // Handle user creation if requested
         // Map contact fields to account fields for createAndLoginUser
-        if ($request->input('create_account') && ! auth()->check()) {
+        if ($creatingAccount) {
             if (! $request->has('name') || ! $request->input('name')) {
                 $request->merge(['name' => $request->input('contact_name')]);
             }
@@ -3337,7 +3419,8 @@ class EventController extends Controller
 
         // Create venue Role with location info
         $venue = null;
-        $isOnline = $request->input('is_online');
+        // A schedule that switched Online off never gets an online event from this form.
+        $isOnline = $allowOnline && $request->boolean('is_online');
 
         if ($role->isVenue()) {
             // Venue schedule: use the schedule itself as the venue

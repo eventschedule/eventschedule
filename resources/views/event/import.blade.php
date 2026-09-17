@@ -227,7 +227,10 @@
                 <div class="flex justify-center">
                     <div class="w-full max-w-2xl md:max-w-xl lg:max-w-2xl">
                         <div class="flex items-start">
-                            <div class="text-sm text-gray-700 dark:text-gray-300"
+                            {{-- v-pre: this panel is inside the #event-import-app Vue mount, which compiles
+                                 its HTML as a template. e() does not escape mustaches, so owner-written
+                                 terms containing a template expression would run in every visitor's browser. --}}
+                            <div v-pre class="text-sm text-gray-700 dark:text-gray-300"
                                  dir="{{ is_rtl() ? 'rtl' : 'ltr' }}"
                                  style="{{ is_rtl() ? 'text-align: right;' : 'text-align: left;' }}">
                                 <p>{!! nl2br(e($role->translatedRequestTerms())) !!}</p>

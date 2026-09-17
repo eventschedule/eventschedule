@@ -195,6 +195,9 @@ class Role extends Model implements MustVerifyEmail
         'email_settings_failed_at' => 'datetime',
         'email_settings_failure_notified_at' => 'datetime',
         'event_categories' => 'array',
+        // Deliberately not fillable: RoleController::applyBookingFormConfig() is the only writer,
+        // and it whitelists the keys. Read it through bookingFormConfig().
+        'booking_form_config' => 'array',
     ];
 
     /**
@@ -1319,6 +1322,86 @@ class Role extends Model implements MustVerifyEmail
         }
 
         return $this->event_request_form === 'booking';
+    }
+
+    /**
+     * The booking form's default fields an owner can make required. `date_time` covers the date and
+     * the start time together: a date without a time cannot be saved, so neither is asked alone.
+     */
+    public const BOOKING_FORM_REQUIRABLE_FIELDS = ['event_name', 'date_time', 'description', 'location'];
+
+    /**
+     * Whether a guest has to create an account to send a booking-form request.
+     *
+     * Never on a talent schedule. roles.require_account defaults to true and the settings page has
+     * no toggle for it on a talent, so every talent carries a true it never chose - and a request to
+     * book a performer is read by hand anyway (see RoleController::request()).
+     */
+    public function bookingFormRequiresAccount(): bool
+    {
+        return ! $this->isTalent() && (bool) $this->require_account;
+    }
+
+    /**
+     * The booking form options with every key present and typed, whatever is stored.
+     *
+     * @return array{required_fields: array<string, bool>, allow_online: bool}
+     */
+    public function bookingFormConfig(): array
+    {
+        return self::normalizeBookingFormConfig($this->booking_form_config);
+    }
+
+    /**
+     * Null (never saved) and anything malformed resolve to the defaults: nothing required and the
+     * Online option offered, which is how the form behaved before these options existed.
+     *
+     * @return array{required_fields: array<string, bool>, allow_online: bool}
+     */
+    public static function normalizeBookingFormConfig(mixed $config): array
+    {
+        $config = is_array($config) ? $config : [];
+        $stored = is_array($config['required_fields'] ?? null) ? $config['required_fields'] : [];
+
+        $required = [];
+        foreach (self::BOOKING_FORM_REQUIRABLE_FIELDS as $field) {
+            $required[$field] = filter_var($stored[$field] ?? false, FILTER_VALIDATE_BOOLEAN);
+        }
+
+        return [
+            'required_fields' => $required,
+            'allow_online' => array_key_exists('allow_online', $config)
+                ? filter_var($config['allow_online'], FILTER_VALIDATE_BOOLEAN)
+                : true,
+        ];
+    }
+
+    public function bookingFormRequires(string $field): bool
+    {
+        // A venue schedule's booking form has no location to fill in: the venue is the location.
+        if ($field === 'location' && $this->isVenue()) {
+            return false;
+        }
+
+        return $this->bookingFormConfig()['required_fields'][$field] ?? false;
+    }
+
+    /**
+     * @return array<string, bool> requirable field => whether this schedule requires it
+     */
+    public function bookingFormRequiredFields(): array
+    {
+        $required = [];
+        foreach (self::BOOKING_FORM_REQUIRABLE_FIELDS as $field) {
+            $required[$field] = $this->bookingFormRequires($field);
+        }
+
+        return $required;
+    }
+
+    public function bookingFormAllowsOnline(): bool
+    {
+        return $this->bookingFormConfig()['allow_online'];
     }
 
     public function getRequireApprovalAttribute($value)

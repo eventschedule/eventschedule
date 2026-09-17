@@ -242,6 +242,27 @@
                 }
             }
 
+            // The booking form options only matter while guests get the booking form: always on a
+            // talent, otherwise with Require Account off and Booking Form picked (RoleController::request()).
+            // Hidden, the section still posts its values, so they are saved back unchanged.
+            const bookingFormSection = document.getElementById('booking_form_section');
+            if (acceptRequestsCheckbox && bookingFormSection) {
+                const bookingRadio = document.querySelector('input[name="event_request_form"][value="booking"]');
+                function toggleBookingFormSection() {
+                    const usesBookingForm = bookingFormSection.dataset.alwaysBooking === '1'
+                        || (!(requireAccountCheckbox && requireAccountCheckbox.checked) && !!(bookingRadio && bookingRadio.checked));
+                    bookingFormSection.style.display = acceptRequestsCheckbox.checked && usesBookingForm ? 'block' : 'none';
+                }
+                toggleBookingFormSection();
+                acceptRequestsCheckbox.addEventListener('change', toggleBookingFormSection);
+                if (requireAccountCheckbox) {
+                    requireAccountCheckbox.addEventListener('change', toggleBookingFormSection);
+                }
+                document.querySelectorAll('input[name="event_request_form"]').forEach(function (radio) {
+                    radio.addEventListener('change', toggleBookingFormSection);
+                });
+            }
+
             const requireApprovalCheckbox = document.querySelector('input[name="require_approval"][type="checkbox"]');
             const approvedSubdomainsSection = document.getElementById('approved_subdomains_section');
 
@@ -3729,6 +3750,42 @@
                             </div>
                         </div>
                         @endif
+                        {{-- Booking form options, saved by RoleController::applyBookingFormConfig(). Rendered for
+                             every type, since a talent always uses the booking form; the script at the top of
+                             the page shows it only while the booking form is the one guests get. --}}
+                        @php
+                            $bookingFormOptions = $role->bookingFormConfig();
+                            $bookingFieldLabels = [
+                                'event_name' => __('messages.event_name'),
+                                'date_time' => __('messages.date_and_time'),
+                                'description' => __('messages.description'),
+                                'location' => __('messages.location'),
+                            ];
+                            // A venue is its own location, so that requirement never applies there.
+                            if ($role->isVenue()) {
+                                unset($bookingFieldLabels['location']);
+                            }
+                        @endphp
+                        <div class="mb-6" id="booking_form_section" data-always-booking="{{ $role->isTalent() ? '1' : '0' }}">
+                            <input type="hidden" name="booking_form_submitted" value="1">
+                            <x-input-label :value="__('messages.booking_form_required_fields')" />
+                            <p class="text-xs text-gray-500 dark:text-gray-400 mt-1 mb-3">{{ __('messages.booking_form_required_fields_help') }}</p>
+                            <div class="space-y-2 mb-6">
+                                @foreach ($bookingFieldLabels as $bookingFieldKey => $bookingFieldLabel)
+                                <label class="flex items-center cursor-pointer">
+                                    <input type="hidden" name="booking_required_fields[{{ $bookingFieldKey }}]" value="0">
+                                    <input type="checkbox" id="booking_required_{{ $bookingFieldKey }}" name="booking_required_fields[{{ $bookingFieldKey }}]" value="1"
+                                        {{ old('booking_required_fields.'.$bookingFieldKey, $bookingFormOptions['required_fields'][$bookingFieldKey]) ? 'checked' : '' }}
+                                        class="rounded border-gray-300 dark:border-gray-700 text-[var(--brand-blue)] shadow-sm focus:ring-[var(--brand-blue)] dark:bg-gray-900" />
+                                    <span class="ms-2 text-sm text-gray-700 dark:text-gray-300">{{ $bookingFieldLabel }}</span>
+                                </label>
+                                @endforeach
+                            </div>
+                            <x-toggle name="booking_allow_online"
+                                label="{{ __('messages.booking_allow_online') }}"
+                                checked="{{ old('booking_allow_online', $bookingFormOptions['allow_online']) }}"
+                                help="{{ __('messages.booking_allow_online_help') }}" />
+                        </div>
                         @if (! $role->isTalent())
                         <div class="mb-6" id="require_approval_section">
                             <x-toggle name="require_approval"
