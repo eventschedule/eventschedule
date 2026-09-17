@@ -20,6 +20,13 @@ trait SavesEventsOverHttp
     /**
      * Minimal AP event-form payload. starts_at is schedule-local wall clock
      * ('Y-m-d H:i:s'); saveEvent converts it to UTC using the schedule timezone.
+     *
+     * That starts_at is an ABSOLUTE date, and every caller that does not override it has its
+     * event MOVED onto that date by the save. A test measuring a now()-relative surface - the
+     * /analytics 30-day picker window, an isPast() guard - must therefore override it or freeze
+     * the clock, or it rots into a false alarm on a date nobody chose. See the comment in
+     * CuratorPivotSurvivesVenueSaveTest, which spent 2026-09-16 onwards reporting a curator-pivot
+     * defect that did not exist.
      */
     protected function eventPayload(array $overrides = []): array
     {

@@ -43,8 +43,17 @@ class CuratorPivotSurvivesVenueSaveTest extends TestCase
         $event->roles()->attach($curator->id, ['is_accepted' => true]);
 
         // No curators[] and no curators_submitted, exactly as the venue's own form posts.
-        $this->putUpdateEvent($venueOwner, $venue, $event, ['name' => 'Renamed By The Venue'])
-            ->assertRedirect();
+        //
+        // starts_at is overridden because eventPayload()'s default is the absolute 2026-08-15,
+        // and this save MOVES the event onto it. The picker's window is now()->subDays(30), so
+        // that date rotted out of the window on 2026-09-16 and failed this test for a reason
+        // with nothing to do with the pivot. Keeping the event in the future means a red here
+        // can only ever mean the pivot. Noon, not 20:00: the schedule is America/New_York and
+        // 20:00 local lands on the NEXT UTC day, which is what made the rot a day early.
+        $this->putUpdateEvent($venueOwner, $venue, $event, [
+            'name' => 'Renamed By The Venue',
+            'starts_at' => now()->addDays(7)->setTime(12, 0)->format('Y-m-d H:i:s'),
+        ])->assertRedirect();
 
         $this->assertDatabaseHas('event_role', [
             'event_id' => $event->id,
