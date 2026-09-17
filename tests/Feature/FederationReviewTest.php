@@ -255,7 +255,10 @@ class FederationReviewTest extends TestCase
         $this->assertDatabaseHas('audit_logs', ['action' => 'admin.federation_suspend']);
     }
 
-    /** Mail is tied to the admin decision, never to the unauthenticated registration. */
+    /**
+     * Mail is tied to the admin decision, never to the unauthenticated registration. The first
+     * approval is the welcome (FederationWelcomeTest covers it); a suspension is the short note.
+     */
     public function test_the_operator_is_emailed_on_a_decision(): void
     {
         Mail::fake();
@@ -263,6 +266,10 @@ class FederationReviewTest extends TestCase
         $instance = $this->makeInstance();
 
         $this->post(route('admin.federation.approve', UrlUtils::encodeId($instance->id)));
+
+        Mail::assertSent(\App\Mail\FederationInstanceWelcome::class, fn ($mail) => $mail->hasTo('ops@operator.test'));
+
+        $this->post(route('admin.federation.suspend', UrlUtils::encodeId($instance->id)));
 
         Mail::assertSent(FederationInstanceReviewed::class, fn ($mail) => $mail->hasTo('ops@operator.test'));
     }
@@ -297,7 +304,9 @@ class FederationReviewTest extends TestCase
 
         $this->post(route('admin.federation.approve', UrlUtils::encodeId($instance->id)));
 
-        \Illuminate\Support\Facades\Queue::assertPushed(\App\Jobs\SendQueuedEmail::class);
+        // The first approval's mail is the welcome, queued on its own job so a final failure can
+        // hand the claim back.
+        \Illuminate\Support\Facades\Queue::assertPushed(\App\Jobs\SendFederationWelcome::class);
     }
 
     public function test_bulk_approval_covers_several_instances_at_once(): void

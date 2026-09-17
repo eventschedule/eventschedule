@@ -63,8 +63,9 @@ class BackupService
         'event_custom_fields', 'graphic_settings', 'agenda_ai_prompt', 'agenda_show_times',
         'agenda_show_description', 'agenda_save_image', 'slug_pattern', 'direct_registration',
         'default_event_visibility',
-        // Per-schedule federation opt-out. ROLE_EXPORT_FIELDS is an explicit allowlist,
-        // so a new column silently vanishes on export and returns as its default.
+        // Per-schedule federation choice (opt-in; null is undecided, false vetoes co-listed
+        // events). ROLE_EXPORT_FIELDS is an explicit allowlist, so a new column silently
+        // vanishes on export and returns as its default.
         'federation_enabled',
         // Same reasoning: a schedule that declined to host paid promotions must not
         // silently start hosting them again after a restore.

@@ -2,7 +2,7 @@
 
 Tracks which app features have automated **integration-test** coverage and which are gaps to fill.
 
-_Last updated: 2026-09-08_
+_Last updated: 2026-09-17_
 
 > **Refactor-campaign characterization suites** (2026-07-10, `tests/Feature/Characterization/`): `EventSave*CharacterizationTest` (saveEvent matrix, 43 tests), `RoleGuestSurfaceCharacterizationTest`, `CheckoutBranchCharacterizationTest`, `EventCurationModerationCharacterizationTest`, `ViewGuestDeepCharacterizationTest`, `RoleUpdateCharacterizationTest`, `ModelBootClosureCharacterizationTest`, `NewsletterValidationCharacterizationTest`, `MarketingDataCharacterizationTest`, `EventGraphicStructuralTest`, `EncodedIdRoutingCharacterizationTest`, `NoFakeEmailCharacterizationTest`. These pin CURRENT behavior (bug-for-bug) ahead of REFACTOR_PLAN.md; several also add first-time feature coverage (rows flipped below).
 
@@ -28,28 +28,28 @@ New Feature-test suites added this session (all use `tests/Feature/Concerns/Crea
 
 ## Summary
 
-**113 of 154 features covered (~73%).** (Up from 53 / ~37% at the start of this session.)
+**128 of 166 features covered (~77%).** (Up from 53 / ~37% at the start of this session.)
 
 | Area | Covered |
 |------|---------|
 | Authentication & Account | 8 / 11 |
 | User Profile & Settings | 7 / 7 |
-| Schedules (Roles) | 14 / 18 |
+| Schedules (Roles) | 19 / 22 |
 | Sub-schedules (Groups) | 4 / 4 |
 | Events | 14 / 14 |
-| Ticketing & Payments | 23 / 29 |
+| Ticketing & Payments | 22 / 28 |
 | Community & Engagement | 7 / 9 |
 | Newsletters | 10 / 11 |
 | Integrations | 0 / 8 |
-| AI Features | 0 / 8 |
-| Graphics, Analytics & Promotion | 2 / 4 |
+| AI Features | 1 / 8 |
+| Graphics, Analytics & Promotion | 5 / 6 |
 | Customization & Branding | 7 / 8 |
 | Backup & Data | 2 / 2 |
 | Developer / API | 7 / 9 |
 | Billing & Plans | 1 / 3 |
 | Guest Portal | 7 / 8 |
-| Platform Admin | 6 / 7 |
-| **Total** | **113 / 154** |
+| Platform Admin | 7 / 8 |
+| **Total** | **128 / 166** |
 
 ## Coverage by feature
 
@@ -103,6 +103,7 @@ New Feature-test suites added this session (all use `tests/Feature/Concerns/Crea
 | Schedule / venue merge | ✓ | `ScheduleFeaturesTest` |
 | Schedule audit log (owner) | ✓ | `ScheduleFeaturesTest` |
 | YouTube video matching (Talent) | ✓ | `ScheduleFeaturesTest` |
+| List a schedule on the Event Schedule network (selfhost) | ✓ | `FederationListingPromptTest` (dashboard + schedule prompt, owned-only offer, dismissal), `FederationSettingsCardTest` (settings checklist, contact-email re-register, withdraw) |
 
 ### Sub-schedules (Groups)
 | Feature | Tested | Test |
@@ -284,6 +285,7 @@ New Feature-test suites added this session (all use `tests/Feature/Concerns/Crea
 | Support chat | ✓ | `AdminFeaturesTest` |
 | Audit logs | ✓ | `AdminFeaturesTest` |
 | Admin newsletter broadcast | ✓ | `AdminFeaturesTest` |
+| Federation moderation and welcome email (nexus) | ✓ | `FederationReviewTest`, `FederationWelcomeTest` (first-approval welcome, one-send claim, resend, bulk, locale) |
 
 ## Notes (findings, blockers, and pre-existing issues)
 

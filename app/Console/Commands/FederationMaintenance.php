@@ -22,10 +22,21 @@ class FederationMaintenance extends Command
     public const STALE_INSTANCE_DAYS = 60;
 
     /**
-     * An unapproved registration that never pushed a single event is dropped this
-     * quickly, so junk cannot hold a place in the review queue for two months.
+     * A pending registration that never pushed a single event is dropped this quickly, so junk
+     * cannot hold a place in the review queue for two months - provided it has ALSO gone quiet
+     * (see ABANDONED_REGISTRATION_QUIET_DAYS).
      */
     public const ABANDONED_REGISTRATION_DAYS = 7;
+
+    /**
+     * How long a never-pushed registration must have been silent before that rule applies.
+     *
+     * Every schedule on an install starts undecided, so a real operator can easily go a week
+     * without sending anything while still checking in every hour (the hourly reconcile always
+     * makes a request). Deleting that install used to leave it with a 403 on every sync. A junk
+     * registration never calls again, so its last_seen_at - stamped at registration - ages out.
+     */
+    public const ABANDONED_REGISTRATION_QUIET_DAYS = 3;
 
     /** Blocked rows are kept as tombstones, but not forever. */
     public const TOMBSTONE_DAYS = 180;
@@ -50,6 +61,7 @@ class FederationMaintenance extends Command
         $this->info('Pruned '.$this->pruneExpired().' expired listing(s).');
         $this->info('Pruned '.$this->pruneTombstones().' tombstone(s).');
         $this->info('Pruned '.$this->pruneStaleInstances().' stale instance(s).');
+        $this->info('Purged '.$this->purgeQuietSuspendedListings().' listing(s) of quiet suspended instance(s).');
 
         return self::SUCCESS;
     }
@@ -174,9 +186,18 @@ class FederationMaintenance extends Command
         return $this->deleteWithImages($rows);
     }
 
+    /**
+     * Drop pending registrations nobody is behind any more.
+     *
+     * Pending only. A suspended row is kept as a tombstone: a re-registration against it cannot
+     * move it out of suspension (ApiFederationController::register()), whereas deleting it would
+     * let the install come straight back as a fresh pending row on its next hourly reconnect.
+     * What a quiet suspended install still holds is purged instead, so it costs no storage - see
+     * purgeQuietSuspendedListings().
+     */
     public function pruneStaleInstances(): int
     {
-        $instances = FederatedInstance::where('status', '!=', FederatedInstance::STATUS_APPROVED)
+        $instances = FederatedInstance::where('status', FederatedInstance::STATUS_PENDING)
             ->where(function ($q) {
                 // Registered a while ago and has gone quiet.
                 $q->where(function ($stale) {
@@ -185,13 +206,15 @@ class FederationMaintenance extends Command
                             ->orWhere('last_seen_at', '<', now()->subDays(self::STALE_INSTANCE_DAYS));
                     })->where('created_at', '<', now()->subDays(self::STALE_INSTANCE_DAYS));
                 })
-                    // Or registered and never sent a single event. A real operator
-                    // enables federation and pushes within the hour, so this clears
-                    // junk registrations out of the review queue in days rather than
-                    // letting them hold a slot for two months.
+                    // Or registered, never sent a single event, and stopped checking in. The
+                    // quiet clause sits in its own closure so its OR cannot widen the age test.
                     ->orWhere(function ($never) {
                         $never->where('created_at', '<', now()->subDays(self::ABANDONED_REGISTRATION_DAYS))
-                            ->whereDoesntHave('events');
+                            ->whereDoesntHave('events')
+                            ->where(function ($quiet) {
+                                $quiet->whereNull('last_seen_at')
+                                    ->orWhere('last_seen_at', '<', now()->subDays(self::ABANDONED_REGISTRATION_QUIET_DAYS));
+                            });
                     });
             })
             ->limit(self::PRUNE_LIMIT)
@@ -206,6 +229,37 @@ class FederationMaintenance extends Command
         }
 
         return $instances->count();
+    }
+
+    /**
+     * Listings held by suspended installs that have not checked in for STALE_INSTANCE_DAYS.
+     * Nothing renders them (listable() needs an approved instance), so only their stored images
+     * would be left taking up space. The instance row itself stays, and so do blocked rows:
+     * they are what keeps a blocked listing blocked if the install is ever approved again.
+     *
+     * Bounded like pruneExpired(), for the same reason.
+     */
+    public function purgeQuietSuspendedListings(): int
+    {
+        // The instances first: a handful of rows, where a whereHas would test every listing on
+        // the site against them on every hourly run.
+        $instanceIds = FederatedInstance::where('status', FederatedInstance::STATUS_SUSPENDED)
+            ->where(function ($seen) {
+                $seen->whereNull('last_seen_at')
+                    ->orWhere('last_seen_at', '<', now()->subDays(self::STALE_INSTANCE_DAYS));
+            })
+            ->pluck('id');
+
+        if ($instanceIds->isEmpty()) {
+            return 0;
+        }
+
+        $rows = FederatedEvent::whereIn('federated_instance_id', $instanceIds)
+            ->whereNull('blocked_at')
+            ->limit(self::PRUNE_LIMIT)
+            ->get();
+
+        return $this->deleteWithImages($rows);
     }
 
     /**

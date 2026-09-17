@@ -373,6 +373,103 @@ class FederationReviewFixesTest extends TestCase
     }
 
     /**
+     * Every schedule on an install starts undecided, so a real operator can go well past a week
+     * without sending anything while their install checks in every hour. Deleting it left the
+     * install with a 403 on every sync.
+     */
+    public function test_a_registration_that_has_not_pushed_yet_but_still_checks_in_is_kept(): void
+    {
+        $alive = FederatedInstance::create([
+            'instance_id' => (string) Str::uuid(),
+            'site_url' => 'https://alive.test',
+            'secret' => str_repeat('a', 40),
+            'status' => FederatedInstance::STATUS_PENDING,
+        ]);
+        $alive->forceFill(['created_at' => now()->subDays(30), 'last_seen_at' => now()->subHour()])->saveQuietly();
+
+        $quiet = FederatedInstance::create([
+            'instance_id' => (string) Str::uuid(),
+            'site_url' => 'https://quiet.test',
+            'secret' => str_repeat('a', 40),
+            'status' => FederatedInstance::STATUS_PENDING,
+        ]);
+        $quiet->forceFill([
+            'created_at' => now()->subDays(30),
+            'last_seen_at' => now()->subDays(\App\Console\Commands\FederationMaintenance::ABANDONED_REGISTRATION_QUIET_DAYS + 1),
+        ])->saveQuietly();
+
+        (new \App\Console\Commands\FederationMaintenance)->pruneStaleInstances();
+
+        $this->assertDatabaseHas('federated_instances', ['id' => $alive->id]);
+        $this->assertDatabaseMissing('federated_instances', ['id' => $quiet->id]);
+    }
+
+    /**
+     * A suspension has to stick. Deleting a quiet suspended install would let it come straight
+     * back as a fresh pending row the next time its hourly run reconnects, so the row stays and
+     * only what it holds is cleared.
+     */
+    public function test_a_quiet_suspended_install_is_kept_and_its_listings_purged(): void
+    {
+        $suspended = FederatedInstance::create([
+            'instance_id' => (string) Str::uuid(),
+            'site_url' => 'https://suspended.test',
+            'secret' => str_repeat('a', 40),
+            'status' => FederatedInstance::STATUS_SUSPENDED,
+        ]);
+        $suspended->forceFill([
+            'created_at' => now()->subDays(200),
+            'last_seen_at' => now()->subDays(\App\Console\Commands\FederationMaintenance::STALE_INSTANCE_DAYS + 1),
+        ])->saveQuietly();
+
+        $listing = FederatedEvent::create([
+            'federated_instance_id' => $suspended->id,
+            'external_id' => 'gone',
+            'url' => 'https://suspended.test/e/1',
+            'name' => 'Held Listing',
+            'next_occurrence_at' => now()->addWeek(),
+        ]);
+        // A blocked row is a tombstone: it keeps the block in place if the install is ever
+        // approved again, so it survives the purge.
+        $tombstone = FederatedEvent::create([
+            'federated_instance_id' => $suspended->id,
+            'external_id' => 'blocked',
+            'url' => 'https://suspended.test/e/2',
+            'name' => 'Blocked Listing',
+            'next_occurrence_at' => now()->addWeek(),
+        ]);
+        // block(), not a blocked_at attribute: it is not fillable, so create() would drop it.
+        $tombstone->block();
+        $this->assertTrue($tombstone->fresh()->isBlocked());
+
+        // Still checking in: suspended, but its listings are kept, so a reversal restores them.
+        $active = FederatedInstance::create([
+            'instance_id' => (string) Str::uuid(),
+            'site_url' => 'https://active-suspended.test',
+            'secret' => str_repeat('a', 40),
+            'status' => FederatedInstance::STATUS_SUSPENDED,
+        ]);
+        $active->forceFill(['created_at' => now()->subDays(200), 'last_seen_at' => now()->subHour()])->saveQuietly();
+        $kept = FederatedEvent::create([
+            'federated_instance_id' => $active->id,
+            'external_id' => 'kept',
+            'url' => 'https://active-suspended.test/e/1',
+            'name' => 'Kept Listing',
+            'next_occurrence_at' => now()->addWeek(),
+        ]);
+
+        $maintenance = new \App\Console\Commands\FederationMaintenance;
+        $maintenance->pruneStaleInstances();
+        $this->assertSame(1, $maintenance->purgeQuietSuspendedListings());
+
+        $this->assertDatabaseHas('federated_instances', ['id' => $suspended->id]);
+        $this->assertDatabaseHas('federated_instances', ['id' => $active->id]);
+        $this->assertDatabaseMissing('federated_events', ['id' => $listing->id]);
+        $this->assertDatabaseHas('federated_events', ['id' => $tombstone->id]);
+        $this->assertDatabaseHas('federated_events', ['id' => $kept->id]);
+    }
+
+    /**
      * The re-push loop. push() used to stamp federated_at for events it could not build
      * or that the nexus refused; reconcile then asked about every stamped id, the nexus
      * answered "missing", the watermark was cleared, and the same event was retried

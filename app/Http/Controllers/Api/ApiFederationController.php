@@ -7,6 +7,7 @@ use App\Models\Event;
 use App\Models\FederatedEvent;
 use App\Models\FederatedInstance;
 use App\Services\FederationService;
+use App\Services\FederationWelcomeService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Str;
@@ -63,10 +64,16 @@ class ApiFederationController extends Controller
                 'contact_email' => ['nullable', 'email', 'max:191'],
                 'secret' => ['required', 'string', 'min:32', 'max:255'],
                 'app_version' => ['nullable', 'string', 'max:32'],
+                // Deliberately unvalidated beyond presence: an install on a language this app
+                // does not ship, or sending something odd, must still be able to register.
+                // supportedLocale() keeps only a language this app has and drops the rest.
+                'locale' => ['nullable'],
             ]);
         } catch (ValidationException $e) {
             return response()->json(['error' => 'Validation failed', 'errors' => $e->errors()], 422);
         }
+
+        $locale = $this->supportedLocale($validated['locale'] ?? null);
 
         $host = strtolower((string) parse_url($validated['site_url'], PHP_URL_HOST));
         if (! $host) {
@@ -96,6 +103,9 @@ class ApiFederationController extends Controller
                 'contact_email' => $validated['contact_email'] ?? $instance->contact_email,
                 'secret' => $validated['secret'],
                 'app_version' => $validated['app_version'] ?? $instance->app_version,
+                // Only sent from an admin's request on the install, so the hourly
+                // reconnect (which runs in the console) never resets it to a default.
+                'locale' => $locale ?? $instance->locale,
             ]);
             $instance->last_seen_at = now();
 
@@ -113,7 +123,19 @@ class ApiFederationController extends Controller
 
             $instance->save();
 
-            return response()->json(['status' => $instance->status, 'registered' => true]);
+            // An approved install that was never welcomed, now telling us where to write.
+            // Unlike first contact this request is signed with the secret of an install an
+            // admin already approved, so it is not the open relay the note below guards
+            // against. The welcome service claims the send, so this happens at most once.
+            if ($instance->isApproved() && ! $instance->welcomed_at && $instance->wasChanged('contact_email')) {
+                app(FederationWelcomeService::class)->send($instance);
+            }
+
+            return response()->json([
+                'status' => $instance->status,
+                'registered' => true,
+                'listings_url' => $instance->listingsUrl(),
+            ]);
         }
 
         // Ceiling on unreviewed registrations. Existing instances are unaffected - the
@@ -130,15 +152,31 @@ class ApiFederationController extends Controller
             'contact_email' => $validated['contact_email'] ?? null,
             'secret' => $validated['secret'],
             'app_version' => $validated['app_version'] ?? null,
+            'locale' => $locale,
             'status' => FederatedInstance::STATUS_PENDING,
             'last_seen_at' => now(),
         ]);
 
         // Deliberately no email here: contact_email is attacker-supplied on an
         // unauthenticated endpoint, so mailing it on registration would turn this
-        // into a spam relay. Notifications are tied to admin actions instead.
+        // into a spam relay. Notifications are tied to admin actions instead, plus
+        // the signed re-registration of an already approved install above.
 
-        return response()->json(['status' => $instance->status, 'registered' => true], 201);
+        return response()->json([
+            'status' => $instance->status,
+            'registered' => true,
+            'listings_url' => $instance->listingsUrl(),
+        ], 201);
+    }
+
+    /**
+     * A language the welcome can be written in, or null.
+     */
+    protected function supportedLocale(mixed $locale): ?string
+    {
+        $locale = is_string($locale) ? strtolower(trim($locale)) : null;
+
+        return is_valid_language_code($locale) ? $locale : null;
     }
 
     /**
@@ -216,6 +254,7 @@ class ApiFederationController extends Controller
                     'accepted' => $accepted,
                     'skipped' => $skipped,
                     'status' => $instance->status,
+                    'listings_url' => $instance->listingsUrl(),
                 ], 422);
             }
 
@@ -240,6 +279,8 @@ class ApiFederationController extends Controller
             'skipped' => $skipped,
             'skipped_ids' => $skippedIds,
             'status' => $instance->status,
+            // The id in it is encoded with this app's key, so the install cannot build it.
+            'listings_url' => $instance->listingsUrl(),
         ]);
     }
 
@@ -322,6 +363,7 @@ class ApiFederationController extends Controller
             'removed' => $removed,
             'missing' => array_values(array_diff($checkIds, $present)),
             'status' => $instance->status,
+            'listings_url' => $instance->listingsUrl(),
         ]);
     }
 
@@ -351,6 +393,15 @@ class ApiFederationController extends Controller
             // the data but surface it: silently trusting the new host would let a
             // clone inherit an approved instance's standing.
             $instance->flagged_at = now();
+        }
+
+        // The version this install is running now. It used to arrive only with a registration,
+        // so an install that updated afterwards kept its old version here - and the welcome
+        // email, which picks its instructions by version, told an updated install to update.
+        // Signed like everything else in the body; anything that is not a short string is ignored.
+        $version = $request->json('app_version');
+        if (is_string($version) && trim($version) !== '' && strlen($version) <= 32) {
+            $instance->app_version = trim($version);
         }
 
         $instance->last_seen_at = now();

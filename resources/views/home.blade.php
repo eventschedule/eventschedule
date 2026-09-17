@@ -93,7 +93,8 @@
         @endif
 
         @if(!empty($showFederationPrompt))
-            @include('partials.federation-prompt')
+            {{-- No bottom padding of its own here: space-y-4 already spaces it. --}}
+            @include('partials.federation-prompt', ['padded' => false])
         @endif
 
         @php
@@ -132,6 +133,12 @@
                         :dismiss-all-route="route('home.next_steps_dismiss_all')" />
                 @endif
             </div>
+        @endif
+
+        {{-- Below the task lists on purpose: listing on the network is a suggestion, and the
+             queues above are things that are owed. --}}
+        @if (! empty($federationListingSchedules) && $federationListingSchedules->isNotEmpty())
+            @include('partials.federation-listing-prompt', ['listingSchedules' => $federationListingSchedules, 'padded' => false])
         @endif
 
         {{-- Configurable Dashboard Panels. sm:grid-cols-2 so the 640-1024 band is not the single

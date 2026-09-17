@@ -3090,15 +3090,35 @@ class AdminController extends Controller
             return redirect()->back()->with('error', __('messages.not_authorized'));
         }
 
+        // Links that have to survive the admin password confirm (the adoption prompt, the
+        // docs) ask for the network card with a query string: intended() keeps it, where it
+        // drops a #fragment. Browsers do keep a fragment from a Location header, so turn it
+        // back into the anchor here.
+        if ($request->query('card') === 'federation') {
+            return redirect()->to(route('admin.settings').'#federation');
+        }
+
         // The nexus never renders the federation card, so skip the queries that feed
         // it - federatableQuery() is two EXISTS subqueries plus three REGEXP predicates
         // over the whole events table, and it was running on every load for nothing.
         $federationAvailable = ! config('app.is_nexus');
         $federation = app(\App\Services\FederationService::class);
+        $admin = auth()->user();
 
         // Resolved ahead of the view array so the "and N more" line below can decide
         // whether the extra count query is worth running at all.
         $federationPreviewSchedules = $federationAvailable ? $federation->previewSchedules(12) : collect();
+        $federationPreview = $federationAvailable ? $federation->previewEvents(12) : collect();
+        $federationTotals = $federationAvailable ? $federation->previewTotals() : ['total' => 0, 'sent' => 0];
+
+        // The operator's own undecided schedules, offered as a checklist on the card so that
+        // switching sharing on and choosing what to share are one save. Owned only: the card
+        // lists several at once, and a schedule someone else owns is theirs to decide.
+        $federationMySchedules = $federationAvailable && ! is_demo_mode()
+            ? $federation->ownedUndecidedSchedules($admin)
+            : collect();
+        $federationMyCounts = $federation->shareableCounts($federationMySchedules->pluck('id')->all());
+        $federationMyHeldBack = $federation->heldBack($federationMySchedules)->pluck('id')->flip();
 
         return view('admin.settings', [
             'custom_header_code' => Setting::get('custom_header_code'),
@@ -3132,27 +3152,41 @@ class AdminController extends Controller
             // queue instead.
             'federationAvailable' => $federationAvailable,
             'federationEnabled' => (bool) Setting::get('federation_enabled'),
-            'federationContactEmail' => Setting::get('federation_contact_email'),
+            // Prefilled with the operator's own address until the install first connects:
+            // with no contact email the network cannot tell them they were approved, or send
+            // the setup steps that come with it.
+            'federationContactEmail' => Setting::get('federation_contact_email')
+                ?? (Setting::get('federation_instance_id') ? null : $admin->email),
             'federationStatus' => $federation->status(),
+            // Connected at least once. Before that there is no status worth a panel.
+            'federationConnected' => (bool) Setting::get('federation_instance_id'),
             'federationLastSyncedAt' => Setting::get('federation_last_synced_at'),
             'federationLastError' => Setting::get('federation_last_error'),
+            'federationListingsUrl' => Setting::get('federation_listings_url'),
             // The whole point of enabling this is knowing exactly what leaves your
-            // install, so show it rather than describing it.
-            'federationPreview' => $federationAvailable ? $federation->previewEvents(12) : collect(),
-            'federationPreviewTotal' => $federationAvailable ? $federation->federatableQuery()->count() : 0,
+            // install, so show it rather than describing it - including why a listed
+            // event has not gone yet.
+            'federationPreview' => $federationPreview,
+            'federationPreviewStates' => $federationPreview->mapWithKeys(fn ($event) => [$event->id => $federation->previewState($event)]),
+            'federationPreviewTotal' => $federationTotals['total'],
+            'federationSentTotal' => $federationTotals['sent'],
+            'federationMySchedules' => $federationMySchedules,
+            'federationMyCounts' => $federationMyCounts,
+            'federationMyHeldBack' => $federationMyHeldBack,
             // A listing carries the schedule's name and the address of its public page,
             // both of which the reviewing administrator sees, so name the schedules and
             // not only the event titles.
             'federationPreviewSchedules' => $federationPreviewSchedules,
             // Counted only when the capped list came back full: the count repeats
-            // federatableQuery(), the expensive shape this page already runs twice, and
-            // an install with 12 or fewer listed schedules never needs it.
+            // federatableQuery(), the expensive shape this page already runs several times,
+            // and an install with 12 or fewer listed schedules never needs it.
             'federationPreviewSchedulesTotal' => $federationPreviewSchedules->count() >= 12
                 ? $federation->previewScheduleCount()
                 : $federationPreviewSchedules->count(),
             'federationUnverified' => $federationAvailable ? $federation->unverifiedScheduleCount() : 0,
-            // The other reason the preview is shorter than the operator expects.
-            'federationUndecided' => $federationAvailable ? $federation->undecidedScheduleCount() : 0,
+            // The other reason the preview is shorter than the operator expects. Everyone
+            // else's: the operator's own are the checklist above.
+            'federationUndecided' => $federationAvailable ? $federation->undecidedScheduleCount($admin->id) : 0,
 
             // Monetization is off unless the deploy opted in via ADS_ENABLED, so the card
             // stays hidden entirely rather than offering a switch that does nothing.
@@ -3432,10 +3466,126 @@ class AdminController extends Controller
             'federation_settings_submitted' => ['nullable', 'boolean'],
             'federation_enabled' => ['nullable', 'boolean'],
             'federation_contact_email' => ['nullable', 'email', 'max:191'],
+            'list_schedules' => ['nullable', 'array', 'max:1000'],
+            'list_schedules.*' => ['string'],
         ]);
 
         if (is_demo_mode()) {
             return redirect()->route('admin.settings')->with('error', __('messages.demo_mode_settings_disabled'));
+        }
+
+        // Only when the federation form was the one submitted. Both cards on this page
+        // post to this endpoint, and an unchecked toggle is indistinguishable from an
+        // absent field - so without this marker, saving the header/footer card would
+        // silently disable federation and wipe the contact email. Same guard idea as
+        // event_categories_submitted in RoleController::update(). And the reverse: the
+        // network card does not carry the header/footer code, so it leaves that alone
+        // rather than writing back whatever an older copy of the page held.
+        if (! config('app.is_nexus') && $request->boolean('federation_settings_submitted')) {
+            $federation = app(\App\Services\FederationService::class);
+            $wasEnabled = (bool) Setting::get('federation_enabled');
+            $nowEnabled = $request->boolean('federation_enabled');
+            $newEmail = trim((string) $request->input('federation_contact_email'));
+            $statusBefore = $federation->status();
+
+            Setting::set('federation_enabled', $nowEnabled ? '1' : null);
+            Setting::set('federation_contact_email', $request->input('federation_contact_email'));
+
+            if ($nowEnabled && ! $wasEnabled) {
+                // A withdrawal still queued from an earlier "off" is moot now, and left in
+                // place the next run would take every listing down and send it all again.
+                Setting::set('federation_withdraw_pending', null);
+
+                // Introduce this install the moment the operator opts in, so the
+                // registration is already queued for review before the first push runs.
+                try {
+                    $federation->register();
+                } catch (\Throwable $e) {
+                    report($e);
+                }
+            } elseif ($nowEnabled && $federation->registrationIsStale()) {
+                // The address otherwise only travels when sharing is switched on, so an
+                // operator who adds one later could never hear that they were approved.
+                // Compared against what the network last accepted, not the value saved here,
+                // so an earlier attempt that never arrived is sent again too (and the hourly
+                // run keeps trying). register() is safe to repeat: it is signed, and the
+                // network only fills in what it is sent.
+                try {
+                    $federation->register();
+                } catch (\Throwable $e) {
+                    report($e);
+                }
+            }
+
+            // The operator's own schedules, ticked on this card. Listed after the switch is
+            // on, which listSchedulesFor() checks, and only from the set the card offered.
+            $listed = collect();
+            if ($nowEnabled && ! is_demo_mode()) {
+                $offered = $federation->ownedUndecidedSchedules(auth()->user())->pluck('id')->flip();
+                $ticked = collect($request->input('list_schedules', []))
+                    ->map(fn ($hash) => (int) UrlUtils::decodeId($hash))
+                    ->filter(fn ($id) => $id && isset($offered[$id]))
+                    ->values()
+                    ->all();
+
+                $listed = $federation->listSchedulesFor(auth()->user(), $ticked);
+            }
+
+            // And take everything down the moment they opt out. Turning the switch off
+            // stops the hourly run, which is also what would have told the nexus to
+            // drop the listings - so without this they stay published until each event
+            // expires on its own. The setting is already cleared above whatever
+            // happens here: the operator's decision does not wait on the network.
+            if ($wasEnabled && ! $nowEnabled) {
+                try {
+                    $federation->withdraw();
+                } catch (\Throwable $e) {
+                    report($e);
+                }
+            }
+
+            AuditService::log(
+                AuditService::ADMIN_SETTINGS_UPDATE,
+                auth()->id(),
+                null,
+                null,
+                ['federation_enabled' => $wasEnabled],
+                ['federation_enabled' => $nowEnabled, 'listed_schedules' => $listed->count()],
+                'Updated network sharing settings',
+            );
+
+            // Back to the card, not the top of the page, with a toast: `success` is not a
+            // toast key, and the header/footer card sits above this one.
+            $redirect = redirect()->to(route('admin.settings').'#federation');
+
+            $listedClause = $listed->isEmpty() ? '' : ' '.trans_choice('messages.federation_saved_listed', $listed->count(), [
+                'count' => $listed->count(),
+                'name' => $listed->first()->name,
+            ]);
+
+            // A re-registration from a different address sends an approved install back for
+            // review. That is the one outcome here the operator must not miss.
+            if ($statusBefore === 'approved' && $federation->status() !== 'approved') {
+                return $redirect->with('warning', __('messages.federation_rereview_warning').$listedClause);
+            }
+
+            if ($nowEnabled && ! $wasEnabled) {
+                // Decided after register(), which reports where the install stands: switching an
+                // approved install back on is not a new review, and nothing is emailed for it.
+                $message = match ($federation->status()) {
+                    'approved' => __('messages.federation_saved_enabled_approved'),
+                    'suspended' => __('messages.federation_state_suspended'),
+                    default => $newEmail !== ''
+                        ? __('messages.federation_saved_enabled', ['email' => $newEmail])
+                        : __('messages.federation_saved_enabled_no_email'),
+                };
+            } elseif ($wasEnabled && ! $nowEnabled) {
+                $message = __('messages.federation_saved_disabled');
+            } else {
+                $message = __('messages.settings_saved');
+            }
+
+            return $redirect->with('message', $message.$listedClause);
         }
 
         $old = [
@@ -3449,42 +3599,6 @@ class AdminController extends Controller
 
         Setting::set('custom_header_code', $new['custom_header_code']);
         Setting::set('custom_footer_code', $new['custom_footer_code']);
-
-        // Only when the federation form was the one submitted. Both cards on this page
-        // post to this endpoint, and an unchecked toggle is indistinguishable from an
-        // absent field - so without this marker, saving the header/footer card would
-        // silently disable federation and wipe the contact email. Same guard idea as
-        // event_categories_submitted in RoleController::update().
-        if (! config('app.is_nexus') && $request->boolean('federation_settings_submitted')) {
-            $wasEnabled = (bool) Setting::get('federation_enabled');
-            $nowEnabled = $request->boolean('federation_enabled');
-
-            Setting::set('federation_enabled', $nowEnabled ? '1' : null);
-            Setting::set('federation_contact_email', $request->input('federation_contact_email'));
-
-            // Introduce this install the moment the operator opts in, so the
-            // registration is already queued for review before the first push runs.
-            if ($nowEnabled && ! $wasEnabled) {
-                try {
-                    app(\App\Services\FederationService::class)->register();
-                } catch (\Throwable $e) {
-                    report($e);
-                }
-            }
-
-            // And take everything down the moment they opt out. Turning the switch off
-            // stops the hourly run, which is also what would have told the nexus to
-            // drop the listings - so without this they stay published until each event
-            // expires on its own. The setting is already cleared above whatever
-            // happens here: the operator's decision does not wait on the network.
-            if ($wasEnabled && ! $nowEnabled) {
-                try {
-                    app(\App\Services\FederationService::class)->withdraw();
-                } catch (\Throwable $e) {
-                    report($e);
-                }
-            }
-        }
 
         AuditService::log(
             AuditService::ADMIN_SETTINGS_UPDATE,

@@ -7,8 +7,11 @@
      would never appear at the moment the trigger fires.
 
      Informational blue rather than the amber warning panel: this is an invitation, not
-     a problem, and on curator schedules it deliberately sits below the real warnings. --}}
-<div class="pb-4">
+     a problem, and on curator schedules it deliberately sits below the real warnings.
+
+     $padded (default true): bottom spacing, which the dashboard's space-y stack supplies
+     itself. --}}
+<div class="{{ ($padded ?? true) ? 'pb-4' : '' }}">
     <div class="bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-700 rounded-lg p-3" v-pre>
         <div class="flex items-start gap-3">
             {{-- Same globe as the settings card and the docs page, so the three surfaces
@@ -46,15 +49,19 @@
                          exist on the nexus, while marketing_url is what a white-labeled
                          operator points at their own site - so marketing_url would 404
                          for exactly the installs this feature is aimed at. --}}
-                    <a href="{{ rtrim(config('app.nexus_url'), '/') }}/docs/selfhost/federation" target="_blank" rel="noopener"
-                       class="text-xs font-medium text-blue-700 dark:text-blue-300 underline hover:no-underline">
+                    <x-link href="{{ rtrim(config('app.nexus_url'), '/') }}/docs/selfhost/federation" target="_blank"
+                            class="text-xs font-medium">
                         {{ __('messages.learn_more') }}
-                    </a>
+                    </x-link>
 
                     {{-- Not "Enable": the admin middleware requires a password confirm, so
                          this opens the settings page - where the preview of exactly what
-                         would be shared is shown before anything is turned on. --}}
-                    <x-brand-link href="{{ route('admin.settings') }}#federation">
+                         would be shared is shown before anything is turned on.
+
+                         ?card= rather than a bare #federation: that confirm redirects through
+                         intended(), which keeps a query string but drops a fragment, and
+                         settings() turns the query back into the anchor. --}}
+                    <x-brand-link href="{{ route('admin.settings', ['card' => 'federation']) }}">
                         {{ __('messages.federation_prompt_open_settings') }}
                     </x-brand-link>
                 </div>

@@ -14,6 +14,7 @@ use App\Models\Newsletter;
 use App\Models\Role;
 use App\Models\Sale;
 use App\Services\AnalyticsService;
+use App\Services\FederationService;
 use App\Utils\DateUtils;
 use App\Utils\LegacyRedirects;
 use App\Utils\UrlUtils;
@@ -350,8 +351,14 @@ class HomeController extends Controller
         $nextStepItems = $this->getNextStepItems($roleIds);
 
         // Nudge admins to turn federation on once there is something worth sharing.
-        $showFederationPrompt = app(\App\Services\FederationService::class)
-            ->shouldPromptAdoption($user);
+        $federation = app(FederationService::class);
+        $showFederationPrompt = $federation->shouldPromptAdoption($user);
+
+        // Once the install HAS joined: offer the owner their undecided schedules. Never both
+        // prompts at once - one asks the operator to join, the other assumes they have.
+        $federationListingSchedules = $showFederationPrompt
+            ? collect()
+            : $federation->listingPromptSchedules($user);
 
         return view('home', compact(
             'events',
@@ -382,7 +389,7 @@ class HomeController extends Controller
             'venues',
             'curators',
             'defaultCurrency',
-            'pendingActionItems', 'nextStepItems', 'showFederationPrompt',
+            'pendingActionItems', 'nextStepItems', 'showFederationPrompt', 'federationListingSchedules',
         ));
     }
 
@@ -1318,6 +1325,128 @@ class HomeController extends Controller
         $user->saveQuietly();
 
         return redirect()->back();
+    }
+
+    /**
+     * List schedules on the Event Schedule network, from the "List on the network" prompt.
+     *
+     * Only the schedules posted, each of which must be undecided and editable by this user.
+     * The prompt names every schedule it would list, and a hash that does not resolve is an
+     * error rather than a quiet "all of them": decodeId() returns null for a malformed one.
+     *
+     * redirect()->back(), like the dismissals: the prompt is on the dashboard and on the
+     * schedule page, and one action serves both.
+     */
+    public function listOnFederation(Request $request, FederationService $federation): RedirectResponse
+    {
+        if (is_demo_mode() || ! $federation->listingAvailable()) {
+            return redirect()->back();
+        }
+
+        // Every box unticked: say so, rather than bouncing off validation with nothing on screen.
+        if (empty($request->input('schedules'))) {
+            return redirect()->back()->with('warning', __('messages.federation_listing_none_ticked'));
+        }
+
+        $roleIds = $this->federationScheduleIds($request);
+
+        if ($roleIds === null) {
+            return redirect()->back()->with('error', __('messages.not_authorized'));
+        }
+
+        $listed = $federation->listSchedulesFor($request->user(), $roleIds);
+
+        // A double click, or a form left open while the schedule was answered somewhere else,
+        // lists nothing and says nothing: there is no success to report, and no failure either.
+        if ($listed->isEmpty()) {
+            return redirect()->back();
+        }
+
+        $count = $listed->count();
+        $replace = ['count' => $count, 'name' => $listed->first()->name];
+        $heldBack = $federation->heldBack($listed);
+
+        if ($heldBack->isNotEmpty()) {
+            $heldCount = $heldBack->count();
+
+            return redirect()->back()->with('warning', trans_choice(
+                'messages.federation_listed_held_back',
+                $heldCount,
+                ['count' => $heldCount, 'name' => $heldBack->first()->name]
+            ));
+        }
+
+        $key = $federation->status() === 'approved'
+            ? 'messages.federation_listed_approved'
+            : 'messages.federation_listed_pending';
+
+        return redirect()->back()->with('message', trans_choice($key, $count, $replace));
+    }
+
+    /**
+     * "Not now" on the listing prompt: one dismissal row per schedule shown, so a schedule
+     * created later is still asked. The schedules stay undecided - an explicit "Not listed"
+     * would veto co-listed events, which a dismissed banner must not do.
+     */
+    public function dismissFederationListing(Request $request, FederationService $federation): RedirectResponse
+    {
+        if (is_demo_mode()) {
+            return redirect()->back();
+        }
+
+        $roleIds = $this->federationScheduleIds($request);
+
+        if ($roleIds === null) {
+            return redirect()->back()->with('error', __('messages.not_authorized'));
+        }
+
+        // One statement, and a second submit of the same form is a no-op rather than a
+        // unique-index error.
+        DB::table('dismissed_next_steps')->insertOrIgnore(array_map(fn ($roleId) => [
+            'user_id' => $request->user()->id,
+            'role_id' => $roleId,
+            'step_type' => DismissedNextStep::FEDERATION_LISTING,
+            'created_at' => now(),
+            'updated_at' => now(),
+        ], $roleIds));
+
+        return redirect()->back();
+    }
+
+    /**
+     * The schedule ids a listing form posted, or null when any of them is not a schedule this
+     * user can edit. All or nothing: a form is never half-applied.
+     *
+     * Editable, not "editable and still undecided": a schedule answered a moment ago - a double
+     * click, a second tab - is still one this user may act on. listSchedulesFor() skips it
+     * quietly, which is the right answer to a repeat, where an authorization error is not.
+     */
+    private function federationScheduleIds(Request $request): ?array
+    {
+        $validated = $request->validate([
+            'schedules' => ['required', 'array', 'min:1', 'max:500'],
+            'schedules.*' => ['required', 'string'],
+        ]);
+
+        // editor() is owner and admin; roles() already leaves out deleted schedules.
+        $allowed = $request->user()->editor()
+            ->pluck('roles.id')
+            ->map(fn ($id) => (int) $id)
+            ->flip();
+
+        $roleIds = [];
+
+        foreach ($validated['schedules'] as $hash) {
+            $roleId = (int) UrlUtils::decodeId($hash);
+
+            if (! $roleId || ! isset($allowed[$roleId])) {
+                return null;
+            }
+
+            $roleIds[$roleId] = $roleId;
+        }
+
+        return array_values($roleIds);
     }
 
     /**

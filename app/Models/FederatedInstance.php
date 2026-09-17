@@ -17,6 +17,16 @@ class FederatedInstance extends Model
 
     public const STATUS_SUSPENDED = 'suspended';
 
+    /**
+     * The first selfhost release with one-click schedule listing (the dashboard prompt and the
+     * checklist on the network settings card). The welcome email tells an install on this
+     * version or later to use it, and an older one how to do it by hand.
+     *
+     * MUST match the release that ships the feature. If that release goes out under a different
+     * number, change this with it - the email keys its step-one copy and its update tip off it.
+     */
+    public const ONE_CLICK_LISTING_VERSION = 'v1.0.132';
+
     protected $hidden = ['secret'];
 
     protected $fillable = [
@@ -31,6 +41,9 @@ class FederatedInstance extends Model
         'approved_at',
         'last_seen_at',
         'flagged_at',
+        'welcomed_at',
+        'welcomed_email',
+        'locale',
     ];
 
     protected $casts = [
@@ -39,6 +52,7 @@ class FederatedInstance extends Model
         'approved_at' => 'datetime',
         'last_seen_at' => 'datetime',
         'flagged_at' => 'datetime',
+        'welcomed_at' => 'datetime',
     ];
 
     public function events()
@@ -59,6 +73,78 @@ class FederatedInstance extends Model
     public function isApproved(): bool
     {
         return $this->status === self::STATUS_APPROVED;
+    }
+
+    /**
+     * Does this install's reported version have one-click schedule listing?
+     *
+     * An empty or unparseable version counts as older: saying "click the button on your
+     * dashboard" to an install that has no such button is the worse mistake.
+     */
+    public function supportsOneClickListing(): bool
+    {
+        return self::versionAtLeast($this->app_version, self::ONE_CLICK_LISTING_VERSION);
+    }
+
+    /**
+     * version_compare() over "v1.0.132"-style strings. False for anything that is not a plain
+     * dotted number once the leading "v" is gone, so "dev" or "" never compares as newer.
+     */
+    public static function versionAtLeast(?string $version, string $minimum): bool
+    {
+        if (! self::isVersionString($version)) {
+            return false;
+        }
+
+        return version_compare(ltrim(trim((string) $version), 'vV'), ltrim($minimum, 'vV'), '>=');
+    }
+
+    /** "v1.0.132" or "1.0.132": an optional v, then dotted numbers, and nothing else. */
+    public static function isVersionString(?string $version): bool
+    {
+        return (bool) preg_match('/^[vV]?\d+(\.\d+)*$/', trim((string) $version));
+    }
+
+    /**
+     * The reported version, or null when it is not a plain version number. app_version is
+     * whatever the registrant sent, so anything else is never printed in mail this site sends.
+     */
+    public function displayVersion(): ?string
+    {
+        return self::isVersionString($this->app_version) ? trim($this->app_version) : null;
+    }
+
+    /**
+     * The install's host for printing in mail: a zero-width space after every dot, so mail
+     * clients do not turn it into a link. site_url comes from an unauthenticated registration,
+     * so the only links in mail this site sends are the ones it chose. Plain text - escape it
+     * like any other value in HTML.
+     */
+    public function displayHost(): string
+    {
+        return str_replace('.', ".\u{200B}", (string) ($this->host() ?? $this->site_url));
+    }
+
+    /**
+     * The language to email this operator in: theirs when the install reported one, the app's
+     * fallback otherwise. Never config('app.locale') - SetUserLanguage rewrites that to the
+     * language of whichever admin is making the request.
+     */
+    public function mailLocale(): string
+    {
+        return is_valid_language_code($this->locale)
+            ? $this->locale
+            : (string) config('app.fallback_locale', 'en');
+    }
+
+    /**
+     * Where this install's listings can be seen on this site. Built here, on the nexus, because
+     * the id in it is encoded with this app's key - an install cannot work it out for itself, so
+     * the API hands it over in every response.
+     */
+    public function listingsUrl(): string
+    {
+        return marketing_url('/browse').'?instance='.\App\Utils\UrlUtils::encodeId($this->id).'#network';
     }
 
     /**

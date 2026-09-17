@@ -4,6 +4,15 @@
         {{-- Navigation --}}
         @include('admin.partials._navigation', ['active' => 'settings'])
 
+        {{-- Every card on this page flashes `success`, which the layout's toasts do not show -
+             the same banner the other admin pages use (admin/legal.blade.php). The network card
+             flashes a toast instead, because its save lands on the card, not the top. --}}
+        @if (session('success'))
+        <div class="bg-green-50 dark:bg-green-900/30 border border-green-200 dark:border-green-800 rounded-lg p-4">
+            <p class="text-sm text-green-800 dark:text-green-200">{{ session('success') }}</p>
+        </div>
+        @endif
+
         <div class="ap-card rounded-xl p-6">
             <div class="mb-4">
                 <h2 class="text-lg font-semibold text-gray-900 dark:text-gray-100">@lang('messages.header_footer_code')</h2>
@@ -67,15 +76,72 @@
 
             {{-- A failed sync is otherwise completely silent, and a silent sync failure
                  is the most likely long-run failure mode. Mapped to a small set of
-                 states rather than echoing the raw response back to the screen. --}}
+                 states rather than echoing the raw response back to the screen.
+                 "rejected" has its own wording now that the hourly run reconnects. --}}
             @if ($federationLastError)
+                @php
+                    $federationErrorKey = $federationLastError === 'rejected' ? 'rejected_reconnecting' : $federationLastError;
+                @endphp
                 <div class="mb-6 bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-700 rounded-lg p-3">
                     <p class="text-sm text-amber-800 dark:text-amber-200 flex items-start gap-2">
                         <svg class="w-5 h-5 text-amber-600 dark:text-amber-400 flex-shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
                         </svg>
-                        <span>@lang('messages.federation_error_'.$federationLastError)</span>
+                        <span>@lang('messages.federation_error_'.$federationErrorKey)</span>
                     </p>
+                </div>
+            @endif
+
+            {{-- Where the install stands, first, once there is anything to say - before the
+                 first connection "Not connected, not synced" is only noise. Echoed back by the
+                 network on every call, so there is nothing to poll. --}}
+            @if ($federationConnected)
+                @php
+                    $federationStateKey = match (true) {
+                        ! $federationEnabled => 'off',
+                        $federationStatus === 'approved' => 'approved',
+                        $federationStatus === 'pending' => 'pending',
+                        $federationStatus === 'suspended' => 'suspended',
+                        default => 'retrying',
+                    };
+                    $federationPill = match ($federationStateKey) {
+                        'approved' => ['bg-green-50 text-green-700 dark:bg-green-500/10 dark:text-green-400', __('messages.federation_status_approved')],
+                        'pending' => ['bg-amber-50 text-amber-700 dark:bg-amber-500/10 dark:text-amber-400', __('messages.federation_status_pending')],
+                        'suspended' => ['bg-red-50 text-red-700 dark:bg-red-500/10 dark:text-red-400', __('messages.federation_status_suspended')],
+                        default => ['bg-gray-100 text-gray-600 dark:bg-gray-700 dark:text-gray-300', __('messages.federation_not_connected')],
+                    };
+                @endphp
+                <div class="mb-6 rounded-lg bg-gray-50 dark:bg-gray-800 p-4">
+                    <div class="flex flex-wrap items-center justify-between gap-3">
+                        <div class="flex flex-wrap items-center gap-2">
+                            <p class="text-sm font-medium text-gray-700 dark:text-gray-300">@lang('messages.federation_connection')</p>
+                            <span class="rounded-full px-2.5 py-0.5 text-xs font-medium {{ $federationPill[0] }}">{{ $federationPill[1] }}</span>
+                        </div>
+                        <p class="text-sm text-gray-500 dark:text-gray-400">
+                            @if ($federationLastSyncedAt)
+                                @lang('messages.federation_last_synced', ['time' => \Carbon\Carbon::parse($federationLastSyncedAt)->diffForHumans()])
+                            @else
+                                @lang('messages.federation_never_synced')
+                            @endif
+                        </p>
+                    </div>
+
+                    <p class="mt-2 text-sm text-gray-600 dark:text-gray-300">
+                        @if ($federationStateKey === 'approved')
+                            {{ trans_choice('messages.federation_state_approved', $federationSentTotal, ['count' => number_format($federationSentTotal)]) }}
+                        @else
+                            @lang('messages.federation_state_'.$federationStateKey)
+                        @endif
+                    </p>
+
+                    {{-- Only the network can build this link (the id in it is encoded with its
+                         key), so it arrives with every sync; FederationService only keeps one
+                         that points at the configured network. --}}
+                    @if ($federationStateKey === 'approved' && $federationListingsUrl && $federationSentTotal > 0)
+                        <p class="mt-2 text-sm">
+                            <x-link href="{{ $federationListingsUrl }}" target="_blank">@lang('messages.federation_see_listings')</x-link>
+                        </p>
+                    @endif
                 </div>
             @endif
 
@@ -83,12 +149,11 @@
                 @csrf
 
                 {{-- Both cards post to the same endpoint, so each has to be explicit
-                     about what it owns. This form carries the other card's values
-                     through, and marks itself so the controller knows the federation
-                     settings were actually submitted rather than merely absent. --}}
+                     about what it owns. This one marks itself, so the controller saves the
+                     federation settings and leaves the header/footer code alone - carrying
+                     that code through as hidden inputs would write back whatever this copy
+                     of the page held, over a newer save from another tab. --}}
                 <input type="hidden" name="federation_settings_submitted" value="1">
-                <input type="hidden" name="custom_header_code" value="{{ $custom_header_code }}">
-                <input type="hidden" name="custom_footer_code" value="{{ $custom_footer_code }}">
 
                 <div class="mb-6">
                     <x-toggle
@@ -104,37 +169,61 @@
                     <x-text-input id="federation_contact_email" name="federation_contact_email" type="email"
                         class="mt-1 block w-full" :value="old('federation_contact_email', $federationContactEmail)"
                         :disabled="is_demo_mode()" />
-                    <p class="mt-1 text-xs text-gray-500 dark:text-gray-400">@lang('messages.federation_contact_email_help')</p>
+                    <p class="mt-1 text-xs text-gray-500 dark:text-gray-400">@lang('messages.federation_contact_email_note')</p>
                     <x-input-error class="mt-2" :messages="$errors->get('federation_contact_email')" />
                 </div>
 
-                {{-- Connection state, echoed back by the network on every call so there
-                     is nothing to poll. --}}
-                <div class="mb-6 rounded-lg bg-gray-50 dark:bg-gray-800 p-4">
-                    <div class="flex flex-wrap items-center justify-between gap-3">
-                        <div>
-                            <p class="text-sm font-medium text-gray-700 dark:text-gray-300">@lang('messages.federation_connection')</p>
-                            <p class="mt-1 text-sm text-gray-500 dark:text-gray-400">
-                                @if ($federationStatus === 'approved')
-                                    @lang('messages.federation_status_approved')
-                                @elseif ($federationStatus === 'pending')
-                                    @lang('messages.federation_status_pending')
-                                @elseif ($federationStatus === 'suspended')
-                                    @lang('messages.federation_status_suspended')
-                                @else
-                                    @lang('messages.federation_not_connected')
-                                @endif
-                            </p>
-                        </div>
-                        <p class="text-sm text-gray-500 dark:text-gray-400">
-                            @if ($federationLastSyncedAt)
-                                @lang('messages.federation_last_synced', ['time' => \Carbon\Carbon::parse($federationLastSyncedAt)->diffForHumans()])
-                            @else
-                                @lang('messages.federation_never_synced')
-                            @endif
-                        </p>
-                    </div>
-                </div>
+                {{-- The operator's own undecided schedules. Switching sharing on publishes
+                     nothing by itself - every schedule starts undecided - so choosing what to
+                     share belongs in the same save. Ticked while sharing is OFF, so the enabling
+                     save carries them; unticked once it is on, so an unrelated save (a new
+                     contact email) never lists anything. Schedules somebody else owns are not
+                     here: those owners are asked on their own dashboards. --}}
+                @if ($federationMySchedules->isNotEmpty())
+                    @php
+                        $federationResubmitted = old('federation_settings_submitted') !== null;
+                        $federationOldTicked = collect(old('list_schedules', []));
+                    @endphp
+                    <fieldset class="mb-6">
+                        <legend class="text-sm font-medium text-gray-700 dark:text-gray-300">@lang('messages.federation_list_these_title')</legend>
+                        <p class="mt-1 text-xs text-gray-500 dark:text-gray-400">{{ __('messages.federation_list_these_help', [
+                            'edit' => __('messages.edit_schedule'),
+                            'schedule_settings' => __('messages.schedule_settings'),
+                            'advanced' => __('messages.advanced'),
+                        ]) }}</p>
+
+                        {{-- No max-height: every row is ticked on the enabling save, so every row
+                             has to be in view. --}}
+                        <ul class="mt-3 space-y-3" v-pre>
+                            @foreach ($federationMySchedules as $mySchedule)
+                                @php
+                                    $myHash = \App\Utils\UrlUtils::encodeId($mySchedule->id);
+                                    $myCount = (int) ($federationMyCounts[$mySchedule->id] ?? 0);
+                                    $myTicked = $federationResubmitted ? $federationOldTicked->contains($myHash) : ! $federationEnabled;
+                                @endphp
+                                <li>
+                                    <label class="flex items-start gap-3 cursor-pointer">
+                                        <input type="checkbox" name="list_schedules[]" value="{{ $myHash }}" @checked($myTicked) @disabled(is_demo_mode())
+                                               class="mt-1 rounded border-gray-300 dark:border-gray-600 text-[var(--brand-blue)] focus:ring-[var(--brand-blue)]">
+                                        <span class="min-w-0 text-sm">
+                                            <span class="block font-medium text-gray-900 dark:text-gray-100 break-words">{{ $mySchedule->name }}</span>
+                                            {{-- getGuestUrl() is empty until a schedule is verified. --}}
+                                            @if ($myGuestUrl = $mySchedule->getGuestUrl())
+                                                <span class="block text-gray-500 dark:text-gray-400 break-all">{{ $myGuestUrl }}</span>
+                                            @endif
+                                            <span class="block text-xs text-gray-500 dark:text-gray-400">
+                                                {{ trans_choice('messages.federation_would_share_count', $myCount, ['count' => number_format($myCount)]) }}
+                                                @if (isset($federationMyHeldBack[$mySchedule->id]))
+                                                    &middot; @lang('messages.federation_needs_verification')
+                                                @endif
+                                            </span>
+                                        </span>
+                                    </label>
+                                </li>
+                            @endforeach
+                        </ul>
+                    </fieldset>
+                @endif
 
                 {{-- Schedules before events: a listing carries the schedule's name and
                      the address of its public page, and the reviewing administrator at
@@ -144,7 +233,7 @@
                 @if ($federationPreviewSchedules->isNotEmpty())
                     <div class="mb-6">
                         <p class="mb-2 text-sm font-medium text-gray-700 dark:text-gray-300">@lang('messages.federation_preview_schedules_title')</p>
-                        <ul class="space-y-1.5">
+                        <ul class="space-y-1.5" v-pre>
                             @foreach ($federationPreviewSchedules as $previewSchedule)
                                 <li class="flex flex-wrap items-baseline gap-x-2 text-sm">
                                     <span class="font-medium text-gray-900 dark:text-gray-100">{{ $previewSchedule->name }}</span>
@@ -162,19 +251,41 @@
                 @endif
 
                 {{-- Publishing customers' events to a third-party site sight-unseen is
-                     the real anxiety here, so show exactly what would go out. --}}
+                     the real anxiety here, so show exactly what would go out - and, per
+                     event, whether it has gone, and why not if it cannot. --}}
                 <div class="mb-6">
                     <p class="mb-2 text-sm font-medium text-gray-700 dark:text-gray-300">@lang('messages.federation_preview_title')</p>
 
                     @if ($federationPreview->isEmpty())
-                        <p class="text-sm text-gray-500 dark:text-gray-400">@lang('messages.federation_preview_empty')</p>
+                        <p class="text-sm text-gray-500 dark:text-gray-400">
+                            @if ($federationMySchedules->isNotEmpty())
+                                @lang('messages.federation_preview_empty_tick')
+                            @else
+                                @lang('messages.federation_preview_empty_rules')
+                                <x-link href="{{ rtrim(config('app.nexus_url'), '/') }}/docs/selfhost/federation#listings" target="_blank">@lang('messages.learn_more')</x-link>
+                            @endif
+                        </p>
                     @else
-                        <ul class="space-y-1.5">
+                        <ul class="space-y-1.5" v-pre>
                             @foreach ($federationPreview as $previewEvent)
-                                <li class="flex flex-wrap items-baseline gap-x-2 text-sm">
+                                @php
+                                    $previewState = $federationPreviewStates[$previewEvent->id] ?? 'next_sync';
+                                    $previewPill = match ($previewState) {
+                                        'sent' => 'bg-green-50 text-green-700 dark:bg-green-500/10 dark:text-green-400',
+                                        'needs_image' => 'bg-amber-50 text-amber-700 dark:bg-amber-500/10 dark:text-amber-400',
+                                        'skipped' => 'bg-red-50 text-red-700 dark:bg-red-500/10 dark:text-red-400',
+                                        default => 'bg-blue-50 text-blue-700 dark:bg-blue-500/10 dark:text-blue-400',
+                                    };
+                                @endphp
+                                <li class="flex flex-wrap items-center gap-x-2 gap-y-1 text-sm">
                                     <span class="font-medium text-gray-900 dark:text-gray-100">{{ $previewEvent->name }}</span>
                                     @if ($previewEvent->starts_at)
                                         <span class="text-gray-500 dark:text-gray-400">{{ \Carbon\Carbon::parse($previewEvent->starts_at)->format('M j, Y') }}</span>
+                                    @endif
+                                    {{-- Sync state only means something while sharing is on; a missing
+                                         image is worth knowing either way. --}}
+                                    @if ($federationEnabled || $previewState === 'needs_image')
+                                        <span class="rounded-full px-2 py-0.5 text-xs font-medium {{ $previewPill }}">@lang('messages.federation_pill_'.$previewState)</span>
                                     @endif
                                 </li>
                             @endforeach
@@ -198,7 +309,7 @@
                             @endif
 
                             @if ($federationUndecided > 0)
-                                <p>{{ trans_choice('messages.federation_undecided_count', $federationUndecided, ['count' => $federationUndecided]) }}</p>
+                                <p>{{ trans_choice('messages.federation_undecided_others_count', $federationUndecided, ['count' => $federationUndecided]) }}</p>
                             @endif
                         </div>
                     @endif

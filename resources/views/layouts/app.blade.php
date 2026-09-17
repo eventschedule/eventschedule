@@ -696,13 +696,15 @@
             });
 
 
+            {{-- JSON_HEX_TAG: these messages can carry a schedule's name, and a "<!--<script"
+                 inside a script block would otherwise swallow the rest of it. --}}
             @if (session('message'))
             (function() {
                 var key = '{{ uniqid("toast_") }}';
                 if (!sessionStorage.getItem(key)) {
                     sessionStorage.setItem(key, '1');
                     Toastify({
-                        text: @json(session('message'), JSON_UNESCAPED_UNICODE),
+                        text: @json(session('message'), JSON_UNESCAPED_UNICODE | JSON_HEX_TAG),
                         duration: 3000,
                         position: 'center',
                         stopOnFocus: true,
@@ -724,7 +726,7 @@
                 if (!sessionStorage.getItem(key)) {
                     sessionStorage.setItem(key, '1');
                     Toastify({
-                        text: @json(session('error'), JSON_UNESCAPED_UNICODE),
+                        text: @json(session('error'), JSON_UNESCAPED_UNICODE | JSON_HEX_TAG),
                         close: true,
                         duration: 10000,
                         position: 'center',
@@ -741,7 +743,7 @@
                 if (!sessionStorage.getItem(key)) {
                     sessionStorage.setItem(key, '1');
                     Toastify({
-                        text: @json(session('warning'), JSON_UNESCAPED_UNICODE),
+                        text: @json(session('warning'), JSON_UNESCAPED_UNICODE | JSON_HEX_TAG),
                         close: true,
                         duration: 8000,
                         position: 'center',

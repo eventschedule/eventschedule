@@ -6745,6 +6745,14 @@ window.addEventListener('load', function() {
         window.scrollTo(0, 0);
         setTimeout(function() {
             window.removeEventListener('scroll', _scrollGuard);
+
+            // A deep link to one setting (see the settings-tab initializer): now that the page
+            // may scroll, bring it into view.
+            var focusTarget = window.__settingsFocusId ? document.getElementById(window.__settingsFocusId) : null;
+            if (focusTarget) {
+                focusTarget.scrollIntoView({ block: 'center' });
+                focusTarget.focus({ preventScroll: true });
+            }
         }, 300);
     });
 });
@@ -6971,8 +6979,15 @@ document.addEventListener('DOMContentLoaded', function() {
     const settingsTabs = document.querySelectorAll('.settings-tab');
     const settingsTabContents = document.querySelectorAll('.settings-tab-content');
 
-    // Restore active tab from localStorage
-    if (!isNewSchedule) {
+    // A link can ask for a tab, and that beats whichever tab was open last time: the
+    // "Listed on the network" badge on the schedule page opens Advanced this way.
+    const settingsParams = new URLSearchParams(window.location.search);
+    const requestedSettingsTab = settingsParams.get('settings_tab');
+
+    if (requestedSettingsTab && document.getElementById('settings-tab-' + requestedSettingsTab)) {
+        switchSettingsTab(requestedSettingsTab);
+    } else if (!isNewSchedule) {
+        // Restore active tab from localStorage
         const savedSettingsTab = localStorage.getItem('settingsActiveTab');
         if (savedSettingsTab) {
             // Migrate old tab name
@@ -6985,6 +7000,14 @@ document.addEventListener('DOMContentLoaded', function() {
                 switchSettingsTab('general');
             }
         }
+    }
+
+    // ...and a field to land on. Allow-listed rather than any id from the URL. Only recorded
+    // here: the page holds its scroll at the top until shortly after load (_scrollGuard), so
+    // the load handler scrolls to it once that guard is gone.
+    const settingsFocus = settingsParams.get('focus');
+    if (['federation_enabled'].includes(settingsFocus)) {
+        window.__settingsFocusId = settingsFocus;
     }
 
     settingsTabs.forEach(tab => {

@@ -2,12 +2,16 @@
 
 namespace App\Services;
 
+use App\Models\DismissedNextStep;
 use App\Models\Event;
 use App\Models\Role;
 use App\Models\Setting;
+use App\Models\User;
 use App\Utils\UrlUtils;
 use Carbon\Carbon;
+use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Cache;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
@@ -46,6 +50,9 @@ class FederationService
     /** How long the "is there anything to share yet?" answer is cached. */
     public const ADOPTION_PROMPT_CACHE_MINUTES = 10;
 
+    /** Schedules one "List on the network" prompt offers at once. */
+    public const LISTING_PROMPT_LIMIT = 20;
+
     /**
      * Is this install configured to federate at all? The system-level switch is the
      * operator's, and is deliberately separate from any individual schedule's.
@@ -81,9 +88,10 @@ class FederationService
         }
 
         // Never re-prompt an install that already tried federation. This key is only
-        // written by instanceId() during register(), which only runs on the off->on
-        // transition - so its presence means "connected at least once". Checking the
-        // toggle alone would nag someone who deliberately turned it back off.
+        // written by instanceId() during register(), which only ever runs with the
+        // switch on (turning it on, a contact email change, the hourly reconnect) - so
+        // its presence means "connected at least once". Checking the toggle alone would
+        // nag someone who deliberately turned it back off.
         if (Setting::get('federation_instance_id')) {
             return false;
         }
@@ -163,7 +171,40 @@ class FederationService
             'app_version' => config('self-update.version_installed'),
         ];
 
-        return $this->send('/api/federation/register', $payload);
+        // The language of the admin switching sharing on, so the nexus writes to them in it.
+        // Only from a signed-in request: the hourly reconnect runs from the scheduler or the
+        // /translate_data cron request, where the locale is just the app default and would
+        // overwrite the admin's. The nexus keeps what it has when the field is absent.
+        if (auth()->check()) {
+            $payload['locale'] = app()->getLocale();
+        }
+
+        $result = $this->send('/api/federation/register', $payload);
+
+        // What the network now holds, so a later change - or one that failed to arrive - can be
+        // told apart from the value this install merely has saved. See registrationIsStale().
+        if ($result['ok']) {
+            Setting::set('federation_registered_email', (string) ($payload['contact_email'] ?? ''));
+        }
+
+        return $result;
+    }
+
+    /**
+     * Does the network hold an older contact address than this install has?
+     *
+     * The address only travels in register(). When that call fails - the network was down the
+     * moment the operator saved a new address - nothing else would send it, and the network
+     * could never tell them they were approved. FederateEvents re-registers while this holds.
+     * An install that registered before this was recorded has no stored value, and re-registers
+     * once; the network only mails a welcome when the address actually changed.
+     */
+    public function registrationIsStale(): bool
+    {
+        $current = strtolower(trim((string) Setting::get('federation_contact_email')));
+
+        return $current !== ''
+            && $current !== strtolower(trim((string) Setting::get('federation_registered_email')));
     }
 
     /**
@@ -383,6 +424,16 @@ class FederationService
         // opted out would keep their events published indefinitely. Record the intent
         // instead, and let FederateEvents carry it out on a later run.
         Setting::set('federation_withdraw_pending', $result['ok'] ? null : '1');
+
+        // The network no longer holds anything from this install, so nothing here is "sent" any
+        // more. Left set, switching back on would show every withdrawn event as Sent, skip it on
+        // the first push and only resend it a run later, via reconcile. toBase(): no
+        // updated_at churn on every event of the install.
+        if ($result['ok']) {
+            Event::whereNotNull('federated_at')
+                ->toBase()
+                ->update(['federated_at' => null, 'federated_hash' => null]);
+        }
 
         return ['ok' => $result['ok'], 'removed' => (int) ($result['body']['removed'] ?? 0)];
     }
@@ -724,6 +775,9 @@ class FederationService
 
         $payload['instance_id'] ??= $this->instanceId();
         $payload['site_url'] ??= rtrim((string) config('app.url'), '/');
+        // On every call, not only at registration: the network picks the instructions in its
+        // welcome email by version, and an install updates long after it registered.
+        $payload['app_version'] ??= config('self-update.version_installed');
 
         $url = rtrim((string) config('app.nexus_url'), '/').$path;
         $body = json_encode($payload);
@@ -752,7 +806,7 @@ class FederationService
             return ['ok' => false, 'body' => $json, 'status' => $response->status()];
         }
 
-        $this->recordSuccess($json['status'] ?? null);
+        $this->recordSuccess($json['status'] ?? null, $json['listings_url'] ?? null);
 
         return ['ok' => true, 'body' => $json];
     }
@@ -792,7 +846,7 @@ class FederationService
         Setting::set('federation_last_error_at', (string) now());
     }
 
-    protected function recordSuccess(?string $status): void
+    protected function recordSuccess(?string $status, $listingsUrl = null): void
     {
         Setting::set('federation_last_error', null);
         Setting::set('federation_last_error_at', null);
@@ -801,6 +855,26 @@ class FederationService
         if ($status) {
             Setting::set('federation_status', $status);
         }
+
+        // Where this install's listings can be seen. Only the nexus can build it (the id in it is
+        // encoded with the nexus's key), and it is rendered as a link on the settings page, so
+        // it is only kept when it really points at the network this install is configured for.
+        // Every response carries it, so only a change is written - each write clears the whole
+        // settings cache.
+        if (is_string($listingsUrl) && $listingsUrl !== Setting::get('federation_listings_url')
+            && $this->isNexusUrl($listingsUrl)) {
+            Setting::set('federation_listings_url', $listingsUrl);
+        }
+    }
+
+    protected function isNexusUrl(string $url): bool
+    {
+        $nexus = parse_url((string) config('app.nexus_url')) ?: [];
+        $parts = parse_url($url) ?: [];
+
+        return in_array(strtolower($parts['scheme'] ?? ''), ['http', 'https'], true)
+            && ! empty($parts['host'])
+            && strtolower($parts['host']) === strtolower($nexus['host'] ?? '');
     }
 
     /**
@@ -809,7 +883,44 @@ class FederationService
      */
     public function previewEvents(int $limit = 25)
     {
-        return $this->federatableQuery()->orderBy('starts_at')->limit($limit)->get();
+        // roles for previewState(): an event's image can come from its talent or venue.
+        return $this->federatableQuery()->with('roles')->orderBy('starts_at')->limit($limit)->get();
+    }
+
+    /**
+     * Where one previewed event stands, so the preview says why a listed event is not on the
+     * network yet instead of implying everything on it will be.
+     *
+     *   sent        - delivered to the network
+     *   needs_image - buildPayload() will refuse it: nothing to show on a listing card
+     *   skipped     - sent before and refused, and not changed since
+     *   next_sync   - goes out on the next hourly run
+     */
+    public function previewState(Event $event): string
+    {
+        if ($event->federated_at) {
+            return 'sent';
+        }
+
+        if (! $this->absoluteImageUrl($event->getImageUrl())) {
+            return 'needs_image';
+        }
+
+        return $event->federated_skipped_at ? 'skipped' : 'next_sync';
+    }
+
+    /**
+     * How much of what the preview lists has been delivered, in one pass over the query the
+     * page already runs: ['total' => ..., 'sent' => ...].
+     */
+    public function previewTotals(): array
+    {
+        $row = $this->federatableQuery()
+            ->toBase()
+            ->selectRaw('COUNT(*) as total, COALESCE(SUM(events.federated_at IS NOT NULL), 0) as sent')
+            ->first();
+
+        return ['total' => (int) ($row->total ?? 0), 'sent' => (int) ($row->sent ?? 0)];
     }
 
     /**
@@ -881,12 +992,264 @@ class FederationService
      * the unverified count it is not a problem to fix - it is just how a schedule
      * created after the install joined the network starts out. Stated because an
      * empty preview with no explanation reads as a broken feature.
+     *
+     * $exceptUserId leaves out one owner's schedules: the settings card lists the
+     * operator's own with a checkbox each, so the footnote counts everyone else's.
+     * Unlisted and demo schedules are not counted - listing them would publish nothing.
      */
-    public function undecidedScheduleCount(): int
+    public function undecidedScheduleCount(?int $exceptUserId = null): int
     {
-        return Role::where('is_deleted', false)
-            ->whereNull('federation_enabled')
-            ->whereNotNull('user_id')
+        return $this->undecidedFilters(Role::query())
+            ->when($exceptUserId, fn ($q) => $q->where('roles.user_id', '!=', $exceptUserId))
             ->count();
+    }
+
+    /**
+     * Schedules this user OWNS that nobody has answered the network question for.
+     *
+     * The set every multi-schedule surface offers (the settings checklist, the dashboard
+     * prompt). Owned rather than editable: those surfaces list several schedules at once, and a
+     * team admin should not be carrying a customer's schedule onto the network in a batch. One
+     * schedule at a time, from its own page, anyone who can edit it may - see
+     * editableUndecidedSchedules().
+     */
+    public function ownedUndecidedSchedules(User $user): Collection
+    {
+        return $this->undecidedFilters(Role::query()->where('roles.user_id', $user->id))
+            ->orderBy('roles.name')
+            ->get();
+    }
+
+    /**
+     * Undecided schedules this user may list: the ones they can edit, which is who can change
+     * the select on the schedule's settings page. roles() already drops deleted schedules.
+     */
+    public function editableUndecidedSchedules(User $user): Collection
+    {
+        return $this->undecidedFilters($user->editor())
+            ->orderBy('roles.name')
+            ->get();
+    }
+
+    /**
+     * Undecided, and something a listing could actually go out for: an owner (placeholders
+     * never list anything), not unlisted (listing it would publish nothing), not a demo.
+     */
+    protected function undecidedFilters($query)
+    {
+        return $query
+            ->where('roles.is_deleted', false)
+            ->whereNotNull('roles.user_id')
+            ->whereNull('roles.federation_enabled')
+            ->where('roles.is_unlisted', false)
+            ->where('roles.subdomain', '!=', DemoService::DEMO_ROLE_SUBDOMAIN)
+            ->where('roles.subdomain', 'not like', 'demo-%');
+    }
+
+    /**
+     * For each schedule, how many of its events would be shared once it is listed.
+     *
+     * Undecided co-participants count as willing, like the adoption prompt: that is the
+     * question being asked. Not cached, so a prompt can appear the moment the first qualifying
+     * event is saved - which is when the schedule page it shows on is opened.
+     *
+     * @return array<int, int> role id => event count, only for schedules with at least one
+     */
+    public function shareableCounts(array $roleIds): array
+    {
+        $roleIds = array_values(array_unique(array_map('intval', $roleIds)));
+
+        if ($roleIds === []) {
+            return [];
+        }
+
+        // Only schedules that would publish on their own once listed. federatableQuery()'s role
+        // clause is an ANY-match, so without this an ineligible schedule - an unverified one -
+        // would be credited with events that qualify through a co-participant, and offered a
+        // listing that publishes nothing. The same trap federatableSchedulesQuery() guards.
+        $eligible = Role::whereIn('roles.id', $roleIds)
+            ->federationEligible(true)
+            ->pluck('roles.id')
+            ->all();
+
+        if ($eligible === []) {
+            return [];
+        }
+
+        $pivots = fn () => DB::table('event_role')
+            ->whereIn('event_role.role_id', $eligible)
+            ->where('event_role.is_accepted', true);
+
+        // Narrowed to the candidates' own events first (event_role is indexed role first), so
+        // the expensive federation predicates only ever run on those rows.
+        $qualifying = $this->federatableQuery(true)
+            ->whereIn('events.id', $pivots()->select('event_role.event_id'))
+            ->where(fn ($q) => $this->whereHasImage($q))
+            ->select('events.id');
+
+        return $pivots()
+            ->whereIn('event_role.event_id', $qualifying)
+            ->groupBy('event_role.role_id')
+            ->selectRaw('event_role.role_id as role_id, COUNT(DISTINCT event_role.event_id) as shareable')
+            ->pluck('shareable', 'role_id')
+            ->map(fn ($count) => (int) $count)
+            ->all();
+    }
+
+    /**
+     * An SQL stand-in for the image rule buildPayload() enforces through Event::getImageUrl():
+     * a flyer, or a talent or venue schedule on the event with a profile image. Close rather than
+     * exact - getImageUrl() only looks at the first talent, and absoluteImageUrl() can still
+     * refuse a stored value - which is fine for deciding whether to ask.
+     */
+    protected function whereHasImage($query)
+    {
+        return $query
+            ->where(fn ($flyer) => $flyer->whereNotNull('events.flyer_image_url')
+                ->where('events.flyer_image_url', '!=', ''))
+            ->orWhereHas('roles', fn ($role) => $role->whereIn('roles.type', ['talent', 'venue'])
+                ->whereNotNull('roles.profile_image_url')
+                ->where('roles.profile_image_url', '!=', ''));
+    }
+
+    /**
+     * Can anyone list a schedule right now? Not before the operator has joined a network, not
+     * on a demo, and not while the network has this install suspended - asking owners to list
+     * onto a network that is hiding everything would be a promise nobody can keep.
+     */
+    public function listingAvailable(): bool
+    {
+        return $this->isEnabled() && ! is_demo_mode() && $this->status() !== 'suspended';
+    }
+
+    /**
+     * The schedules a "List on the network" prompt should offer this user.
+     *
+     * Without $only: their own undecided schedules (the dashboard). With it: that one schedule,
+     * if they can edit it (its own page). Either way minus the ones this user turned down, and
+     * only those with at least one event that would be shared - a prompt on an empty schedule
+     * gets dismissed before it could matter, and a dismissal is permanent.
+     *
+     * @return Collection<int, Role> each with a `shareable_count` attribute set
+     */
+    public function listingPromptSchedules(?User $user, ?Role $only = null): Collection
+    {
+        if (! $user || ! $this->listingAvailable()) {
+            return collect();
+        }
+
+        // The schedule page asks about one schedule, which is usually already answered - settle
+        // that from the loaded row before any query.
+        if ($only && ($only->federation_enabled !== null || $only->is_unlisted || $only->is_deleted)) {
+            return collect();
+        }
+
+        $candidates = $only
+            ? $this->undecidedFilters($user->editor()->where('roles.id', $only->id))->get()
+            : $this->ownedUndecidedSchedules($user);
+
+        if ($candidates->isEmpty()) {
+            return $candidates;
+        }
+
+        $dismissed = DismissedNextStep::where('user_id', $user->id)
+            ->where('step_type', DismissedNextStep::FEDERATION_LISTING)
+            ->whereIn('role_id', $candidates->pluck('id'))
+            ->pluck('role_id')
+            ->flip();
+
+        $candidates = $candidates->reject(fn ($role) => isset($dismissed[$role->id]))->values();
+
+        $counts = $this->shareableCounts($candidates->pluck('id')->all());
+
+        return $candidates
+            ->filter(fn ($role) => ($counts[$role->id] ?? 0) > 0)
+            // A batch at a time: every name is shown with a ticked box, and a list too long to
+            // read is not one to approve in one click. The next batch appears once these are
+            // answered.
+            ->take(self::LISTING_PROMPT_LIMIT)
+            ->each(fn ($role) => $role->setAttribute('shareable_count', $counts[$role->id]))
+            ->values();
+    }
+
+    /**
+     * List these schedules on the network, on this user's say-so.
+     *
+     * Only schedules still undecided and editable by the user; anything else in $roleIds is
+     * ignored. The whereNull keeps an explicit "Not listed" - a veto on co-listed events - from
+     * being overridden by a stale form.
+     *
+     * A query update: nothing in Role's saving hooks applies (the install switch is checked
+     * here, which is all the federation guard there does), and toBase() leaves updated_at alone,
+     * which is the schedule page's sitemap lastmod - its page has not changed. No re-queue is
+     * needed: federation_enabled is not in Role::FEDERATION_FIELDS, exactly as for the select.
+     *
+     * @return Collection<int, Role> the schedules that were listed
+     */
+    public function listSchedulesFor(User $user, array $roleIds): Collection
+    {
+        if (! $this->isEnabled()) {
+            return collect();
+        }
+
+        $roleIds = array_map('intval', $roleIds);
+
+        $roles = $this->editableUndecidedSchedules($user)
+            ->filter(fn ($role) => in_array((int) $role->id, $roleIds, true))
+            ->values();
+
+        if ($roles->isEmpty()) {
+            return $roles;
+        }
+
+        $listedIds = [];
+
+        foreach ($roles as $role) {
+            $updated = Role::whereKey($role->id)
+                ->whereNull('federation_enabled')
+                ->toBase()
+                ->update(['federation_enabled' => true]);
+
+            if ($updated !== 1) {
+                continue;
+            }
+
+            $listedIds[] = $role->id;
+
+            AuditService::log(
+                AuditService::SCHEDULE_UPDATE,
+                $user->id,
+                'Role',
+                $role->id,
+                ['federation_enabled' => null],
+                ['federation_enabled' => true],
+                'Listed on the Event Schedule network',
+            );
+        }
+
+        return $roles->filter(fn ($role) => in_array($role->id, $listedIds, true))
+            ->each(function ($role) {
+                $role->federation_enabled = true;
+                $role->syncOriginalAttribute('federation_enabled');
+            })
+            ->values();
+    }
+
+    /**
+     * Which of these schedules will still publish nothing once listed, because they are not
+     * verified - the scopeFederationEligible() rule, not a column check of its own.
+     */
+    public function heldBack(Collection $roles): Collection
+    {
+        if ($roles->isEmpty()) {
+            return $roles;
+        }
+
+        $eligible = Role::whereIn('id', $roles->pluck('id'))
+            ->federationEligible(true)
+            ->pluck('id')
+            ->flip();
+
+        return $roles->reject(fn ($role) => isset($eligible[$role->id]))->values();
     }
 }

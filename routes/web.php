@@ -498,6 +498,8 @@ Route::middleware(['auth', 'verified', 'app_subdomain'])->group(function () {
     Route::get('/dashboard/api/calendar-events', [HomeController::class, 'calendarEvents'])->name('home.calendar_events');
     Route::post('/dashboard/config', [HomeController::class, 'saveDashboardConfig'])->name('home.save_config');
     Route::post('/dashboard/federation-prompt/dismiss', [HomeController::class, 'dismissFederationPrompt'])->name('home.federation_prompt_dismiss');
+    Route::post('/dashboard/federation/list', [HomeController::class, 'listOnFederation'])->name('home.federation_list');
+    Route::post('/dashboard/federation/list/dismiss', [HomeController::class, 'dismissFederationListing'])->name('home.federation_list_dismiss');
     Route::post('/dashboard/next-steps/dismiss', [HomeController::class, 'dismissNextStep'])->name('home.next_steps_dismiss');
     Route::post('/dashboard/next-steps/dismiss-all', [HomeController::class, 'dismissAllNextSteps'])->name('home.next_steps_dismiss_all');
     Route::get('/getting-started', [HomeController::class, 'gettingStarted'])->name('getting-started');
@@ -940,6 +942,8 @@ Route::middleware(['auth', 'verified', 'app_subdomain'])->group(function () {
         Route::post('/admin/federation/bulk', [AdminFederationController::class, 'bulk'])->name('admin.federation.bulk');
         Route::post('/admin/federation/{hash}/approve', [AdminFederationController::class, 'approve'])->name('admin.federation.approve');
         Route::post('/admin/federation/{hash}/suspend', [AdminFederationController::class, 'suspend'])->name('admin.federation.suspend');
+        Route::post('/admin/federation/{hash}/welcome', [AdminFederationController::class, 'welcome'])->name('admin.federation.welcome');
+        Route::get('/admin/federation/{hash}/welcome-preview', [AdminFederationController::class, 'welcomePreview'])->name('admin.federation.welcome_preview');
         Route::post('/admin/federation/{hash}/delete', [AdminFederationController::class, 'destroy'])->name('admin.federation.delete');
         Route::post('/admin/federation/event/{hash}/block', [AdminFederationController::class, 'blockEvent'])->name('admin.federation.block_event');
         if (config('app.hosted')) {

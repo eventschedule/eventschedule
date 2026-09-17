@@ -42,22 +42,38 @@
         Turning it on
     </h2>
     <ol>
-        <li>Sign in as an administrator and open <strong>Admin &rarr; Settings</strong>.</li>
+        <li>Sign in as an administrator and open <strong>Admin &rarr; System &rarr; Settings</strong>.</li>
         <li>Switch on <strong>Share events with the network</strong>.</li>
-        <li>Add a contact email. It is shown to the administrator who reviews your install, and used
-        to email you their decision. It is never published.</li>
+        <li>Add a contact email. It is shown to the team at eventschedule.com who review your
+        install, and used to email you their decision and the steps to get listed. It is never
+        published. It starts filled in with your own address.</li>
+        <li>Under <strong>Also list these schedules</strong>, untick any of your own schedules that
+        should stay off the network. It lists the schedules you own that are still <em>Not decided
+        yet</em>, already ticked, each with the number of its upcoming public events that would be
+        shared.</li>
         <li>Save.</li>
     </ol>
     <p>
-        Before you save, the page lists exactly which events would be shared on the next run, so
-        you can see what leaves your install rather than having to trust a description of it.
+        The page lists exactly which events would be shared, so you can see what leaves your install
+        rather than having to trust a description of it. Once sharing is on, each event is marked
+        <em>Sent</em>, <em>Next sync</em>, <em>Needs an image</em> or <em>Not accepted</em>, so an
+        event that is not on the network yet says why.
     </p>
     <p>
         Saving registers your install with the network and puts it in a review queue. Nothing is
-        published until an administrator at eventschedule.com approves it, which is a one-time step
-        for the whole install. You will get an email either way, and the connection status on the
-        settings page shows where you stand: <em>Not connected</em>, <em>Pending</em>,
-        <em>Approved</em> or <em>Suspended</em>.
+        published until the team at eventschedule.com approves it, which is a one-time step for the
+        whole install. Events from the schedules you listed are sent ahead of that, so the reviewer
+        can see them, and go live as soon as you are approved. The connection status at the top of
+        the card shows where you stand: <em>Pending</em>, <em>Approved</em> (with how many of your
+        events are on the network, and a link to see them), <em>Suspended</em>, or <em>Not
+        connected</em> while a retry is due.
+    </p>
+    <p>
+        Once your install is approved you get a welcome email with the steps to get your events
+        listed. A suspension, or approval again after one, gets a short email instead. If you add or
+        change the contact email later, saving the card sends the new address to the network, so it
+        can still reach you; if the network cannot be reached at that moment, the next hourly sync
+        sends it.
     </p>
 </section>
 
@@ -77,15 +93,30 @@
     </p>
     <p>
         Every schedule starts at <em>Not decided yet</em>, which keeps its events off the network, and
-        its owner opts in by choosing <em>Listed on the network</em>, so a customer is never carried
-        onto the network by your decision alone. That includes schedules that existed before the
+        it is opted in when its owner, or anyone who can edit it, chooses <em>Listed on the
+        network</em>, so a customer is never carried onto the network by your decision alone. That includes schedules that existed before the
         feature: an update reset them all to <em>Not decided yet</em> rather than enrolling them
-        silently. The settings page counts the schedules still waiting on that decision, which is the
-        usual reason the preview is shorter than you expected.
+        silently. The settings page lists your own schedules still waiting on that decision, with a
+        checkbox each, and counts everyone else's, which is the usual reason the preview is shorter
+        than you expected.
     </p>
     <p>
         The setting only appears after you have enabled the network for the whole install, so on a
         multi-tenant deployment your customers never see an option you have not opted into.
+    </p>
+    <p>
+        Nobody has to go looking for it. Once the network is on, a schedule owner is asked on their
+        dashboard, as soon as one of their schedules has an upcoming public event with an image:
+        <strong>List on the network</strong> lists the schedules they tick, a few at a time, and
+        every schedule it would list is named first. The same prompt appears on a schedule's own page for anyone who can edit that
+        schedule. Dismissing it leaves the schedules at <em>Not decided yet</em> and is remembered
+        per schedule, so a schedule created later is still asked. A schedule that is listed shows
+        <strong>Listed on the network</strong> on its page, which links straight to the setting.
+    </p>
+    <p>
+        The checklist on the settings page and the dashboard prompt only ever offer schedules you
+        own, and a schedule is only listed after someone who can edit it chooses to, so switching the
+        network on for your install never lists a customer's schedule on its own.
     </p>
     <p>
         On an event with more than one schedule attached, a talent and a venue for instance, any one
@@ -119,7 +150,8 @@
     <p>
         An event needs a picture to be listed, matching the bar applied to eventschedule.com's own
         events. That can be the event flyer or the profile image of a talent or venue schedule
-        attached to it.
+        attached to it. An event without one is marked <em>Needs an image</em> in the settings
+        preview, and goes out on the next run once it has one.
     </p>
     <p>
         Recurring events are listed with their next three dates within 120 days, and times are shown in the event's own
@@ -149,7 +181,9 @@
     </div>
     <p>
         The settings page records the last successful sync, and shows a warning if the most recent
-        attempt did not complete. Failures retry automatically.
+        attempt did not complete. Failures retry automatically. If the network stops recognising
+        your install, for example because it was removed while it was waiting for review, the next
+        run registers it again, and it goes back into review before its events are listed.
     </p>
 
     <div class="doc-callout doc-callout-warning">
@@ -239,9 +273,19 @@
                     <td>The source badge on every card</td>
                 </tr>
                 <tr>
-                    <td>Install name, contact email, version number</td>
-                    <td>Once, when you join</td>
+                    <td>Install name and contact email</td>
+                    <td>When you join, when you change the contact email, and when the install reconnects</td>
                     <td>Shown to the reviewing administrator only. Never published</td>
+                </tr>
+                <tr>
+                    <td>Version number</td>
+                    <td>Every request</td>
+                    <td>Shown to the reviewing administrator only, and used to pick the setup steps the network emails you. Never published</td>
+                </tr>
+                <tr>
+                    <td>Your admin language</td>
+                    <td>When you join, and when you change the contact email</td>
+                    <td>Not shown. Decides the language of the emails the network sends you</td>
                 </tr>
             </tbody>
         </table>
@@ -260,6 +304,6 @@
         Turning the setting off stops sharing immediately and takes your existing listings down with
         it: switching off tells the network to drop everything it holds from your install, there and
         then. If it cannot be reached at that moment, the request is retried on the next hourly run
-        until it lands.
+        until it lands, unless you switch sharing back on first.
     </p>
 </section>

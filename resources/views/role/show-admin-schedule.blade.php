@@ -57,7 +57,11 @@
 {{-- Below the two banners above on purpose: those warn about real problems, this is an
      optional invitation and must not outrank them. --}}
 @if(!empty($showFederationPrompt))
-    @include('partials.federation-prompt')
+    @include('partials.federation-prompt', ['padded' => true])
+@endif
+
+@if (! empty($federationListingSchedules) && $federationListingSchedules->isNotEmpty())
+    @include('partials.federation-listing-prompt', ['listingSchedules' => $federationListingSchedules, 'padded' => true])
 @endif
 
 @include('role/partials/calendar', ['route' => 'admin', 'tab' => 'schedule'])

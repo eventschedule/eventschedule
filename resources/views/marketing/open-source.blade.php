@@ -1173,7 +1173,7 @@
                             </div>
                             <h3 class="es-commit-ink mb-4 text-xl font-bold">Federation, off by default</h3>
                             <p class="es-commit-muted mb-4">
-                                A selfhosted install can share its public events with the eventschedule.com listings, and every listing links back to the event on your own site. It is off until an administrator turns it on, and any individual schedule can opt out again.
+                                A selfhosted install can share its public events with the eventschedule.com listings, and every listing links back to the event on your own site. It is off until an administrator turns it on, and a schedule is only listed once someone who manages it chooses to list it.
                             </p>
                             <p class="es-commit-muted text-sm">
                                 It is a setting on the instance, not a plan tier. eventschedule.com is the receiving end and runs a moderation queue instead.

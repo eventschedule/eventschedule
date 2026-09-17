@@ -13,6 +13,16 @@ use Illuminate\Database\Eloquent\Model;
  */
 class DismissedNextStep extends Model
 {
+    /**
+     * The "List on the network" prompt's dismissals (the dashboard and the schedule page, once an
+     * install has joined the network). They share this table because the answer has the same
+     * shape - per user, per schedule, permanent - so a schedule created after a "no thanks" is
+     * still asked. Deliberately NOT in STEP_TYPES: that is the Next steps panel's vocabulary and
+     * the allow-list its dismiss route validates against, and this prompt has its own route
+     * (HomeController::dismissFederationListing()). It silences no email.
+     */
+    public const FEDERATION_LISTING = 'federation_listing';
+
     protected $fillable = [
         'user_id',
         'role_id',

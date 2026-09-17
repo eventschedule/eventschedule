@@ -3546,6 +3546,14 @@ class RoleController extends Controller
         $showFederationPrompt = $tab === 'schedule'
             && app(\App\Services\FederationService::class)->shouldPromptAdoption(auth()->user());
 
+        // And once the install has joined, the same moment is when to ask about THIS schedule.
+        // Defined on every tab: compact() below throws on a name that was never set.
+        $federationListingSchedules = collect();
+        if ($tab === 'schedule' && ! $showFederationPrompt) {
+            $federationListingSchedules = app(\App\Services\FederationService::class)
+                ->listingPromptSchedules(auth()->user(), $role);
+        }
+
         return view('role/show-admin', compact(
             'subdomain',
             'role',
@@ -3569,6 +3577,7 @@ class RoleController extends Controller
             'sortDir',
             'venueDuplicateGroupCount',
             'showFederationPrompt',
+            'federationListingSchedules',
             'timezoneMismatchEvents',
             'appointmentTypes',
             'seatingPlans',

@@ -391,6 +391,86 @@ class FederationShareTest extends TestCase
         $this->assertSame(2, $attempts);
     }
 
+    /**
+     * A 403 means the network does not know this install - most likely it deleted it - and
+     * nothing else would ever introduce it again, so every later run failed the same way.
+     */
+    public function test_a_rejected_install_registers_again_before_it_pushes(): void
+    {
+        $this->fakeNexus();
+        $this->shareableEvent();
+        Setting::set('federation_last_error', 'rejected');
+
+        $this->artisan('federation:push')->assertSuccessful();
+
+        $recorded = Http::recorded();
+        $this->assertNotEmpty($recorded);
+        $this->assertSame(self::REGISTER_ENDPOINT, $recorded[0][0]->url(), 'the reconnect has to come first');
+        $this->assertNull(Setting::get('federation_last_error'));
+    }
+
+    public function test_a_failed_reconnect_stops_the_run(): void
+    {
+        Http::fake([
+            self::REGISTER_ENDPOINT => Http::response(['error' => 'Signature verification failed'], 403),
+            '*' => Http::response(['accepted' => 1, 'status' => 'approved']),
+        ]);
+        $this->shareableEvent();
+        Setting::set('federation_last_error', 'rejected');
+
+        $this->artisan('federation:push')->assertFailed();
+
+        $this->assertCount(1, Http::recorded());
+        $this->assertSame('rejected', Setting::get('federation_last_error'));
+    }
+
+    /**
+     * The network picks the setup steps in its welcome email by version, and an install updates
+     * long after it registered - so every signed request says what it is running.
+     */
+    public function test_every_signed_request_carries_the_installed_version(): void
+    {
+        $this->fakeNexus();
+        $this->shareableEvent();
+        config(['self-update.version_installed' => 'v9.9.9']);
+
+        $this->artisan('federation:push')->assertSuccessful();
+
+        $this->assertNotEmpty(Http::recorded());
+        foreach (Http::recorded() as [$request]) {
+            $this->assertSame('v9.9.9', json_decode($request->body(), true)['app_version'] ?? null, $request->url());
+        }
+    }
+
+    public function test_a_healthy_install_does_not_register_every_hour(): void
+    {
+        $this->fakeNexus();
+        $this->shareableEvent();
+
+        $this->artisan('federation:push')->assertSuccessful();
+
+        Http::assertNotSent(fn ($request) => $request->url() === self::REGISTER_ENDPOINT);
+    }
+
+    /** The console reconnect has no admin behind it, so it must not overwrite their language. */
+    public function test_only_a_signed_in_registration_sends_a_language(): void
+    {
+        $this->fakeNexus();
+
+        $this->service()->register();
+        Http::assertSent(fn ($request) => $request->url() === self::REGISTER_ENDPOINT
+            && ! array_key_exists('locale', json_decode($request->body(), true)));
+
+        $admin = $this->createOwner(true);
+        $admin->forceFill(['language_code' => 'fr'])->save();
+        $this->actingAs($admin);
+        app()->setLocale('fr');
+
+        $this->service()->register();
+        Http::assertSent(fn ($request) => $request->url() === self::REGISTER_ENDPOINT
+            && (json_decode($request->body(), true)['locale'] ?? null) === 'fr');
+    }
+
     public function test_the_preview_lists_exactly_what_would_be_shared(): void
     {
         $this->shareableEvent(['name' => 'Will Share']);

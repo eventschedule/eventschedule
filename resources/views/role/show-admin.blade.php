@@ -207,6 +207,26 @@
                     </div>
                     @endif
 
+                    {{-- Whether this schedule is on the Event Schedule network. Only once the install
+                         has joined one, and only for an explicit yes - undecided is the default and
+                         says nothing. Links editors straight to the setting (Settings, Advanced). --}}
+                    @if (! config('app.is_nexus') && \App\Models\Setting::get('federation_enabled') && $role->federation_enabled === true)
+                    <div class="mt-2 flex items-center text-sm text-gray-500 dark:text-gray-400">
+                        <svg class="me-1.5 h-5 w-5 flex-shrink-0 text-gray-400 dark:text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M21 12a9 9 0 01-9 9m9-9a9 9 0 00-9-9m9 9H3m9 9a9 9 0 01-9-9m9 9c1.657 0 3-4.03 3-9s-1.343-9-3-9m0 18c-1.657 0-3-4.03-3-9s1.343-9 3-9m-9 9a9 9 0 019-9" />
+                        </svg>
+                        <div class="mt-1">
+                            @if (auth()->user()->isEditor($role->subdomain))
+                                <a href="{{ route('role.edit', ['subdomain' => $role->subdomain, 'settings_tab' => 'advanced', 'focus' => 'federation_enabled']) }}#section-settings" class="hover:underline">
+                                    @lang('messages.federation_listed_on')
+                                </a>
+                            @else
+                                @lang('messages.federation_listed_on')
+                            @endif
+                        </div>
+                    </div>
+                    @endif
+
                 </div>
             </div>
 

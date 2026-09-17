@@ -187,6 +187,8 @@ class AuditService
 
     const ADMIN_FEDERATION_BLOCK_EVENT = 'admin.federation_block_event';
 
+    const ADMIN_FEDERATION_WELCOME = 'admin.federation_welcome';
+
     const ADMIN_DOMAIN_REPROVISION = 'admin.domain_reprovision';
 
     const ADMIN_DOMAIN_REMOVE = 'admin.domain_remove';

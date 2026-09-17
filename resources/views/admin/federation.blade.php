@@ -34,11 +34,21 @@
             <form method="POST" action="{{ route('admin.federation.bulk') }}" class="space-y-4">
                 @csrf
 
+                {{-- The form's default button, disabled on purpose. Pressing Enter in a form clicks
+                     its first submit button, and in this one that is a row action - a Suspend, or
+                     a Resend that mails the operator again. A disabled default button makes Enter
+                     do nothing. --}}
+                <button type="submit" disabled hidden aria-hidden="true" tabindex="-1"></button>
+
                 @foreach ($instances as $instance)
                     @php $hash = \App\Utils\UrlUtils::encodeId($instance->id); @endphp
                     <div class="ap-card rounded-xl p-6">
+                        {{-- flex-1 with a minimum width: the details wrap beside the actions, and the
+                             actions only drop below them when even that minimum does not fit. Sized by
+                             their content, a long meta line pushed the actions down on some rows and
+                             not others. --}}
                         <div class="flex flex-wrap items-start justify-between gap-4">
-                            <div class="flex items-start gap-3 min-w-0">
+                            <div class="flex flex-1 items-start gap-3 min-w-[16rem]">
                                 <input type="checkbox" name="hashes[]" value="{{ $hash }}"
                                        class="mt-1 rounded border-gray-300 dark:border-gray-600 text-[var(--brand-blue)] focus:ring-[var(--brand-blue)]">
                                 <div class="min-w-0">
@@ -64,7 +74,40 @@
                                         @if ($instance->last_seen_at)
                                             &middot; {{ $instance->last_seen_at->diffForHumans() }}
                                         @endif
+                                        @if ($instance->isApproved() && $instance->approved_at)
+                                            &middot; @lang('messages.federation_approved_on', ['date' => $instance->approved_at->format('M j, Y')])
+                                        @endif
                                     </p>
+
+                                    {{-- The welcome's state. Installs approved before the welcome existed
+                                         have never had one, and the button below is how they get it.
+                                         "Queued" rather than "sent": delivery happens later, on the worker,
+                                         and a send that fails every retry hands the claim back. The preview
+                                         is on pending rows too - approving is what sends it. --}}
+                                    @if ($instance->status !== 'suspended')
+                                        @php
+                                            $welcomeService = app(\App\Services\FederationWelcomeService::class);
+                                        @endphp
+                                        <p class="mt-1 text-xs text-gray-500 dark:text-gray-400">
+                                            @if ($instance->isApproved() && $instance->welcomed_at)
+                                                @lang('messages.federation_welcome_queued_at', ['time' => $instance->welcomed_at->diffForHumans()])
+                                                @if ($welcomeService->addressChangedSinceWelcome($instance))
+                                                    &middot; <span class="text-amber-700 dark:text-amber-400">@lang('messages.federation_welcome_email_changed')</span>
+                                                @endif
+                                                @if ($instance->contact_email && $welcomeService->canResend($instance))
+                                                    &middot;
+                                                    <button type="submit" formaction="{{ route('admin.federation.welcome', $hash) }}"
+                                                            class="font-medium text-[var(--brand-blue)] hover:underline focus:outline-none focus:ring-2 focus:ring-[var(--brand-blue)] rounded">
+                                                        @lang('messages.federation_resend_welcome')
+                                                    </button>
+                                                @endif
+                                                &middot;
+                                            @endif
+                                            <x-link href="{{ route('admin.federation.welcome_preview', $hash) }}" target="_blank">
+                                                @lang('messages.federation_welcome_preview')
+                                            </x-link>
+                                        </p>
+                                    @endif
                                 </div>
                             </div>
 
@@ -76,6 +119,17 @@
                                     @lang('messages.federation_status_'.$instance->status)
                                 </span>
 
+                                {{-- Approved rows sort by listing count, so the ones that have sent
+                                     nothing sink to the bottom. This is how they stand out: an
+                                     approved install with nothing live is one to nudge. Live, not
+                                     received: rows that are all blocked or expired publish nothing
+                                     either. --}}
+                                @if ($instance->isApproved() && $instance->live_events_count === 0)
+                                    <span class="rounded-full px-2.5 py-1 text-xs font-medium bg-amber-50 text-amber-700 dark:bg-amber-500/10 dark:text-amber-400">
+                                        @lang('messages.federation_no_listings_pill')
+                                    </span>
+                                @endif
+
                                 {{-- Destructive first, forward action last. --}}
                                 @if ($instance->status !== 'suspended')
                                     <button type="submit" formaction="{{ route('admin.federation.suspend', $hash) }}"
@@ -83,8 +137,18 @@
                                         @lang('messages.federation_suspend')
                                     </button>
                                 @endif
+                                @if ($instance->isApproved() && $instance->contact_email && ! $instance->welcomed_at)
+                                    <button type="submit" formaction="{{ route('admin.federation.welcome', $hash) }}"
+                                            class="ap-secondary-btn inline-flex items-center justify-center px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-lg font-semibold text-base text-gray-900 dark:text-gray-100 transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-[var(--brand-blue)] focus:ring-offset-2 dark:focus:ring-offset-gray-800">
+                                        @lang('messages.federation_send_welcome')
+                                    </button>
+                                @endif
                                 @if ($instance->status !== 'approved')
+                                    {{-- Says what approving does beyond the status: the FIRST approval
+                                         emails the operator their setup steps. Approving again sends the
+                                         short note instead, so it gets no hint. --}}
                                     <button type="submit" formaction="{{ route('admin.federation.approve', $hash) }}"
+                                            @if ($instance->contact_email && ! $instance->welcomed_at) title="{{ __('messages.federation_approve_hint', ['email' => $instance->contact_email]) }}" @endif
                                             class="px-4 py-3 text-base rounded-lg font-medium text-white bg-[var(--brand-button-bg)] hover:bg-[var(--brand-button-bg-hover)] transition-all duration-200">
                                         @lang('messages.federation_approve')
                                     </button>
@@ -100,6 +164,19 @@
                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
                                     </svg>
                                     <p class="text-sm text-amber-800 dark:text-amber-200">@lang('messages.federation_flagged_warning')</p>
+                                </div>
+                            </div>
+                        @endif
+
+                        {{-- A pending install on the same site as a suspended one: most likely the
+                             same operator under a new identity. --}}
+                        @if ($instance->status === 'pending' && $instance->host() && isset($suspendedHosts[$instance->host()]))
+                            <div class="mt-4 bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-700 rounded-lg p-3">
+                                <div class="flex items-start gap-2">
+                                    <svg class="w-5 h-5 text-amber-600 dark:text-amber-400 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+                                    </svg>
+                                    <p class="text-sm text-amber-800 dark:text-amber-200">@lang('messages.federation_same_host_suspended_warning')</p>
                                 </div>
                             </div>
                         @endif
@@ -170,9 +247,12 @@
                             </div>
                         @elseif ($instance->events_count === 0)
                             {{-- Says so rather than rendering an empty card. Nothing has been
-                                 received, so there is genuinely nothing to preview, and an
-                                 instance that pushes nothing for a week is dropped by
-                                 FederationMaintenance::pruneStaleInstances() anyway. --}}
+                                 received, so there is genuinely nothing to preview. That is
+                                 normal for a new install - every schedule starts undecided - so
+                                 the rule is to approve it, which emails the operator the steps
+                                 to list their schedules, or suspend it. Pending rows are only
+                                 pruned once they also stop checking in, and the queue caps at
+                                 ApiFederationController::MAX_PENDING_INSTANCES. --}}
                             <p class="mt-4 text-sm text-gray-500 dark:text-gray-400">@lang('messages.federation_no_listings_yet')</p>
                         @endif
 
@@ -202,11 +282,20 @@
 
                 <div class="ap-card rounded-xl p-4 flex flex-wrap items-center justify-between gap-3">
                     <p class="text-sm text-gray-500 dark:text-gray-400">@lang('messages.federation_bulk_hint')</p>
-                    <div class="flex items-center gap-2">
+                    <div class="flex flex-wrap items-center gap-2">
                         <button type="submit" name="action" value="suspend"
                                 class="px-4 py-3 text-base rounded-lg font-medium text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-500/10 transition-all duration-200">
                             @lang('messages.federation_suspend_selected')
                         </button>
+                        {{-- Only reaches approved installs that were never welcomed; the
+                             service skips everything else rather than mailing it twice. So it is
+                             only offered where approved rows are listed. --}}
+                        @if (in_array($status, ['approved', 'all'], true))
+                            <button type="submit" name="action" value="welcome"
+                                    class="ap-secondary-btn inline-flex items-center justify-center px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-lg font-semibold text-base text-gray-900 dark:text-gray-100 transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-[var(--brand-blue)] focus:ring-offset-2 dark:focus:ring-offset-gray-800">
+                                @lang('messages.federation_bulk_welcome')
+                            </button>
+                        @endif
                         <button type="submit" name="action" value="approve"
                                 class="px-4 py-3 text-base rounded-lg font-medium text-white bg-[var(--brand-button-bg)] hover:bg-[var(--brand-button-bg-hover)] transition-all duration-200">
                             @lang('messages.federation_approve_selected')

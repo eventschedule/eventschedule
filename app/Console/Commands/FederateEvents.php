@@ -38,16 +38,27 @@ class FederateEvents extends Command
             return self::SUCCESS;
         }
 
-        if ($this->option('register')) {
+        // The network answers 403 for an install it does not know - most likely one it deleted
+        // - and nothing else would ever re-introduce it, so every later run failed the same
+        // way. Register again first. A suspended install is never deleted and gets a 200, so
+        // this cannot lift a suspension; a genuine signature mismatch just fails again.
+        //
+        // Also when the network holds an older contact address than this install: the address
+        // only travels in register(), so one saved while the network was unreachable would
+        // otherwise never arrive.
+        $reconnect = Setting::get('federation_last_error') === 'rejected'
+            || $federation->registrationIsStale();
+
+        if ($this->option('register') || $reconnect) {
             $result = $federation->register();
 
             if (! $result['ok']) {
-                $this->error('Registration failed.');
+                $this->error($reconnect ? 'Reconnect failed; it will be retried next run.' : 'Registration failed.');
 
                 return self::FAILURE;
             }
 
-            $this->info('Registered. Status: '.($result['body']['status'] ?? 'unknown'));
+            $this->info(($reconnect ? 'Reconnected' : 'Registered').'. Status: '.($result['body']['status'] ?? 'unknown'));
         }
 
         // Push before reconcile: reconciling first would report every newly-eligible

@@ -768,6 +768,48 @@ The per-task list on `/admin/queue` is the only place it shows, and it ages from
   payment configuration and sales for that schedule's events. Intended, but it is a data-visibility
   change that takes effect the moment the code ships.
 
+## Federation onboarding (ships with v1.0.132)
+
+Approving a federated install now emails its operator a welcome with the steps to list their
+schedules (`FederationWelcomeService`), and selfhost installs get one-click listing. The order
+matters:
+
+1. **Deploy the nexus.** Approvals from then on send the welcome. Migration
+   `2026_09_17_000004` adds `federated_instances.welcomed_at` and `locale`; existing rows stay
+   null, which is what makes the admin screen offer them the welcome.
+2. **Publish the selfhost release** with `config/self-update.php` at the version in
+   `FederatedInstance::ONE_CLICK_LISTING_VERSION` (`v1.0.132`). If the release goes out under a
+   different number, change the constant with it: the email picks its step-one copy and its
+   update tip from it. The tip never names a version newer than the nexus's own
+   `version_installed`, so it stays hidden until step 2's version bump is deployed.
+3. **Redeploy the nexus with that version bump**, or the welcomes below go out without the update
+   tip (it only names a version the nexus itself has reached).
+4. **Only then welcome the installs approved before this shipped**: `/admin/federation?status=approved`,
+   "Preview welcome email" first, then "Send welcome email" on each row, or tick them and use the
+   bulk button, which skips anyone already welcomed. Approved rows with nothing live carry a
+   "No listings yet" pill. Give updated installs an hour first: they report their version on
+   their next sync, and the welcome picks its step one from it.
+
+Watch for:
+
+- **Pending installs are no longer pruned while they still check in.** A registration that never
+  sent an event is only dropped once it has also been quiet for three days. Approve an empty
+  install (it gets the setup steps) or suspend it; the pending queue caps at 500.
+- **Suspended installs are never deleted any more**, only their listings, once quiet for 60 days,
+  so a suspension cannot be undone by the automatic reconnect below.
+- **Deleted installs come back.** An install that gets a 403 re-registers on its next hourly run
+  and reappears as a fresh pending row. Suspend, rather than delete, to keep one out. Suspended
+  rows the old pruning deleted can return the same way; a pending row on the host of a suspended
+  one carries a warning panel.
+- **Installs re-register once after updating.** Each updated install sends its contact address
+  again on its first hourly run (it now remembers what the network last accepted). An unchanged
+  address mails nothing, but an install whose site address has changed since it joined goes back
+  to review at that point - by design, a moved host is a new review.
+- **Versions now arrive on every sync.** The admin rows show what each install is actually
+  running, not what it ran when it registered.
+- **Suspending an unreviewed registration sends no email.** Junk registrations carry
+  attacker-chosen names and addresses, so only installs that were welcomed are told.
+
 ## Selfhost release
 
 Cutting v1.0.130 for selfhosters is deliberately **not** part of the hosted deploy. Do it after

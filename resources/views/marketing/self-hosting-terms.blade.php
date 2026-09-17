@@ -494,7 +494,7 @@
             [
                 'label' => 'Off by default',
                 'title' => 'Public listings',
-                'body' => 'Federation shares your public events with the eventschedule.com listings, and every listing links back to the event on your own site. An admin has to turn it on, and any schedule can decline on its own.',
+                'body' => 'Federation shares your public events with the eventschedule.com listings, and every listing links back to the event on your own site. An admin has to turn it on, and a schedule is only listed once someone who manages it chooses to list it.',
             ],
             [
                 'label' => 'Your keys',

@@ -1382,7 +1382,7 @@
             <div class="es-wire-card mx-auto mt-6 max-w-4xl p-7" data-reveal="panel">
                 <p class="es-wire-tag mb-4">Or hold the keys yourself</p>
                 <h3 class="es-wire-ink mb-3 text-lg font-bold">Selfhosting? You are the operator</h3>
-                <p class="es-wire-muted mb-4 text-sm">Run your own install and all five of those keys are yours to add, alongside your own Google, Microsoft and Stripe credentials. Every port in the register is on, because a selfhosted install resolves to the top tier. An install that is not eventschedule.com can also share its public events with the eventschedule.com listings, which an admin switches on and each schedule can opt out of.</p>
+                <p class="es-wire-muted mb-4 text-sm">Run your own install and all five of those keys are yours to add, alongside your own Google, Microsoft and Stripe credentials. Every port in the register is on, because a selfhosted install resolves to the top tier. An install that is not eventschedule.com can also share its public events with the eventschedule.com listings, which an admin switches on and each schedule's team then chooses to join.</p>
                 <p class="es-wire-muted text-sm">
                     <a href="{{ route('marketing.docs.selfhost.installation') }}" class="es-wire-link font-semibold hover:underline">Selfhost installation guide</a>
                 </p>
