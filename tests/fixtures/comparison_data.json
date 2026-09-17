@@ -423,7 +423,7 @@
             },
             {
                 "question": "Does Event Schedule have an event marketplace like Eventbrite?",
-                "answer": "Event Schedule focuses on giving organizers their own branded schedule pages rather than a shared marketplace. You get a dedicated URL (or your own domain on Enterprise), embeddable calendar widgets, a live calendar feed people can subscribe to, and an interest list on each event that emails people when tickets go on sale."
+                "answer": "Event Schedule focuses on giving organizers their own branded schedule pages rather than a shared marketplace. You get a dedicated URL (or your own domain on Enterprise), embeddable calendar widgets, a live calendar feed people can subscribe to, and an optional interest list on each event that emails people when tickets go on sale."
             },
             {
                 "question": "Can I refund a ticket buyer?",
@@ -811,7 +811,7 @@
             },
             {
                 "question": "Can people be told when tickets go on sale?",
-                "answer": "Yes, free on every plan. On an event page, visitors leave an email address, with no account, and get one email when tickets go on sale, a reminder shortly before the event, and a notice if you cancel it; a change notice reaches them too when you choose to send one. Each date of a recurring event keeps its own list, and every email has a one-click unsubscribe. The event editor shows you how many people are waiting."
+                "answer": "Yes, free on every plan. Switch on the \"Notify me\" card and, on an event page, visitors leave an email address, with no account, and get one email when tickets go on sale, a reminder shortly before the event, and a notice if you cancel it; a change notice reaches them too when you choose to send one. Each date of a recurring event keeps its own list, and every email has a one-click unsubscribe. The event editor shows you how many people are waiting."
             }
         ]
     },

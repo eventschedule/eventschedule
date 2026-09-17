@@ -2168,6 +2168,40 @@ class Event extends Model
         return null;
     }
 
+    /**
+     * Whether this event offers the "Notify me" card ("Tell me when tickets go on sale") at all.
+     *
+     * The one rule for the card, its Add to Calendar and buy-button links
+     * (event/show-guest.blade.php) and EventInterestController::store(). Those used to keep
+     * separate copies that had already drifted: the page refused every private and every
+     * password-protected event while a direct POST did not, so rows were created for events whose
+     * page never offered the form - and some of them were then mailed.
+     *
+     * The switch that counts is the CREATOR's (roles.show_event_interest, off by default), not the
+     * switch of whichever schedule's page is showing the event. An interest row belongs to the
+     * event, and SendEventInterestMail and EventChangeNotifier write to the list as
+     * $event->creatorRole - so a curator or talent that turned the card on must not be able to
+     * start a list the creator will then email. The reverse matters as much: an event's canonical,
+     * share and Boost URLs resolve to a claimed talent's subdomain (getGuestUrlData()), so a
+     * page-schedule rule would hide the card from a venue that switched it on.
+     *
+     * Visitor-side conditions (embeds, the graphic render, the page schedule being a demo) and the
+     * date check stay with the callers, which know the request and the occurrence.
+     */
+    public function offersInterestCapture(): bool
+    {
+        $creator = $this->creatorRole;
+
+        return ! $this->is_draft
+            && ! $this->is_private
+            && ! $this->is_cancelled
+            && ! $this->is_hidden_from_discovery
+            && ! $this->isPasswordProtected()
+            && $creator
+            && $creator->show_event_interest
+            && ! is_demo_role($creator);
+    }
+
     public function canSellTickets($date = null)
     {
         // A cancelled event never sells tickets or accepts RSVPs (covers the guest checkout/RSVP

@@ -628,7 +628,7 @@
             ],
             [
                 'q' => 'Can people get a reminder without registering?',
-                'a' => 'Yes. Somebody not ready to take a place can press "Tell me if anything changes" on the event page and leave an email address, nothing else. They get a reminder shortly before the night, a notice if it is cancelled, and any change notice you choose to send, such as a new stream link, and every one of those emails unsubscribes in one click. Each Friday of a weekly series is its own list, it does not sign them up to your schedule, and it is free on every plan. Anyone who wants every date can subscribe to your schedule\'s live calendar feed instead, which updates itself and costs no email address.',
+                'a' => 'Yes, once you switch on the free "Notify me" card. Somebody not ready to take a place can then press "Tell me if anything changes" on the event page and leave an email address, nothing else. They get a reminder shortly before the night, a notice if it is cancelled, and any change notice you choose to send, such as a new stream link, and every one of those emails unsubscribes in one click. Each Friday of a weekly series is its own list, it does not sign them up to your schedule, and it is free on every plan. Anyone who wants every date can subscribe to your schedule\'s live calendar feed instead, which updates itself and costs no email address.',
             ],
         ];
 

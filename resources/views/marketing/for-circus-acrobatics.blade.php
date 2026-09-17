@@ -618,7 +618,7 @@
                             <div>
                                 <h3 class="mb-4 text-2xl font-black tracking-tight text-gray-900 dark:text-white lg:text-3xl">{{ $circusActs[4]['title'] }}</h3>
                                 <p class="mb-4 text-lg text-gray-600 dark:text-gray-400">{{ $circusActs[4]['desc'] }}</p>
-                                <p class="text-gray-600 dark:text-gray-400"><a href="{{ marketing_url('/stripe') }}" class="es-circus-link font-medium hover:underline">Stripe</a> or <a href="{{ marketing_url('/paypal') }}" class="es-circus-link font-medium hover:underline">PayPal</a> pays you directly, or take a payment link or cash at the gate. The free plan covers 25 paid tickets a month per schedule; Pro lifts the cap and adds promo codes for your regulars and waitlists for the sold-out nights. Announce a show before it goes on sale and fans can leave just an email address to hear when it does.</p>
+                                <p class="text-gray-600 dark:text-gray-400"><a href="{{ marketing_url('/stripe') }}" class="es-circus-link font-medium hover:underline">Stripe</a> or <a href="{{ marketing_url('/paypal') }}" class="es-circus-link font-medium hover:underline">PayPal</a> pays you directly, or take a payment link or cash at the gate. The free plan covers 25 paid tickets a month per schedule; Pro lifts the cap and adds promo codes for your regulars and waitlists for the sold-out nights. Announce a show before it goes on sale, switch on the "Notify me" card, and fans can leave just an email address to hear when it does.</p>
                             </div>
                             <div aria-hidden="true">
                                 <div class="rounded-2xl border border-gray-200 bg-gray-50 p-5 dark:border-white/10 dark:bg-black/40">
@@ -1142,7 +1142,7 @@
                     ],
                     [
                         'q' => 'How do audiences discover my performances?',
-                        'a' => 'Share your schedule link on social media, on your booking page, or embed the calendar on your website. Fans who leave an email address get a digest automatically when you add dates, at most one every few days. Beyond that you write the newsletter and choose when it goes out, and somebody who followed you from their own account only ever hears from you that way. Fans who would rather not give an email can subscribe to your calendar from your page instead. And on a single show, anyone can leave just an email address to hear when its tickets go on sale, if it is cancelled, and shortly before it starts, plus any change notice you send.',
+                        'a' => 'Share your schedule link on social media, on your booking page, or embed the calendar on your website. Fans who leave an email address get a digest automatically when you add dates, at most one every few days. Beyond that you write the newsletter and choose when it goes out, and somebody who followed you from their own account only ever hears from you that way. Fans who would rather not give an email can subscribe to your calendar from your page instead. And on a single show, once you switch on the "Notify me" card, anyone can leave just an email address to hear when its tickets go on sale, if it is cancelled, and shortly before it starts, plus any change notice you send.',
                     ],
                     [
                         'q' => 'Can I sell tickets to my shows?',

@@ -265,7 +265,7 @@
             </div>
             <div class="doc-field">
                 <h4 class="font-semibold text-gray-900 dark:text-white mb-2">How will people hear about my new events?</h4>
-                <p class="text-sm text-gray-500 dark:text-gray-400">Share your schedule link, or embed the calendar on your own site. Visitors can leave their name and email in the sign-up panel on your schedule page, and once they confirm they get a digest of the new events your schedule publishes, at most one every few days. Anyone can also subscribe to your calendar feed, which keeps your events current in their own calendar app, and on an event that is not on sale yet a visitor can press <strong class="text-gray-900 dark:text-white">Tell me when tickets go on sale</strong> to hear about that event alone. See <a href="{{ route('marketing.docs.sharing') }}" class="doc-link">Sharing Your Schedule</a>.</p>
+                <p class="text-sm text-gray-500 dark:text-gray-400">Share your schedule link, or embed the calendar on your own site. Visitors can leave their name and email in the sign-up panel on your schedule page, and once they confirm they get a digest of the new events your schedule publishes, at most one every few days. Anyone can also subscribe to your calendar feed, which keeps your events current in their own calendar app, and if you switch on the &ldquo;Notify me&rdquo; card, a visitor can press <strong class="text-gray-900 dark:text-white">Tell me when tickets go on sale</strong> on an event that is not on sale yet to hear about that event alone. See <a href="{{ route('marketing.docs.sharing') }}" class="doc-link">Sharing Your Schedule</a>.</p>
             </div>
             <div class="doc-field">
                 <h4 class="font-semibold text-gray-900 dark:text-white mb-2">Someone already made a page for my act or venue. How do I claim it?</h4>
@@ -358,7 +358,7 @@
                     "name": "How will people hear about my new events?",
                     "acceptedAnswer": {
                         "@type": "Answer",
-                        "text": "Share your schedule link, or embed the calendar on your own site. Visitors can leave their name and email in the sign-up panel on your schedule page, and once they confirm they get a digest of the new events your schedule publishes, at most one every few days. Anyone can also subscribe to your calendar feed, which keeps your events current in their own calendar app, and on an event that is not on sale yet a visitor can press Tell me when tickets go on sale to hear about that event alone."
+                        "text": "Share your schedule link, or embed the calendar on your own site. Visitors can leave their name and email in the sign-up panel on your schedule page, and once they confirm they get a digest of the new events your schedule publishes, at most one every few days. Anyone can also subscribe to your calendar feed, which keeps your events current in their own calendar app, and if you switch on the “Notify me” card, a visitor can press Tell me when tickets go on sale on an event that is not on sale yet to hear about that event alone."
                     }
                 },
                 {

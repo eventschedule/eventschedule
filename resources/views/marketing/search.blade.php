@@ -1040,7 +1040,7 @@
                             </div>
                             <p class="es-look-muted mb-4">Visitors leave a name and an email address, and once they confirm it they get a digest automatically the next time you publish events. Anything more than that is a newsletter you write yourself, with open and click rates back afterwards.</p>
                             <p class="es-look-muted text-sm">The number worth knowing first: 10 emails a month on Free, 100 on Pro, 1,000 on Enterprise, counted per recipient rather than per send.</p>
-                            <p class="es-look-muted mt-4 text-sm">Two lighter ways use none of that allowance. On an event that is not selling yet, a visitor can leave just an email address and hear when tickets go on sale, and anyone can subscribe to your whole schedule as a live calendar feed, with no address at all.</p>
+                            <p class="es-look-muted mt-4 text-sm">Two lighter ways use none of that allowance. On an event that is not selling yet, and with the "Notify me" card switched on, a visitor can leave just an email address and hear when tickets go on sale, and anyone can subscribe to your whole schedule as a live calendar feed, with no address at all.</p>
                         </div>
                         <div class="es-glare" aria-hidden="true"></div>
                         <div class="es-ring-glow" aria-hidden="true"></div>

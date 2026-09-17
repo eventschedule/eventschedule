@@ -121,7 +121,7 @@
             <li>Custom checkout fields, collected once per order or once per ticket <x-doc-badge plan="pro" /></li>
             <li>A QR code on every ticket and phone scanning at the door, on every plan, plus a live <a href="#checkin-dashboard" class="doc-link">check-in dashboard</a> <x-doc-badge plan="pro" /></li>
             <li>A <a href="#waitlist" class="doc-link">waitlist</a> that opens automatically when an event date sells out (free for registration, <x-doc-badge plan="pro" /> for tickets)</li>
-            <li>An <a href="#interest-list" class="doc-link">interest list</a> on public event pages, so visitors can ask to hear when tickets go on sale</li>
+            <li>An <a href="#interest-list" class="doc-link">interest list</a> you can switch on for public event pages, so visitors can ask to hear when tickets go on sale</li>
             <li><a href="#refunds" class="doc-link">Refunds</a> from the Sales page, sent back through Stripe or PayPal in full or in part</li>
             <li>Sale notification emails, a <a href="#export" class="doc-link">CSV export</a> and a bulk <a href="#importing-attendees" class="doc-link">attendee import</a> <x-doc-badge plan="pro" /></li>
             <li><a href="#feedback" class="doc-link">Post-event feedback</a> requests with star ratings <x-doc-badge plan="pro" /></li>
@@ -1211,6 +1211,7 @@
 
         <h3 class="doc-subheading">How It Works</h3>
         <ol class="doc-list doc-list-numbered mb-6">
+            <li>Turn on <strong class="text-gray-900 dark:text-white">Show &ldquo;Notify Me&rdquo; Card</strong> under <a href="{{ route('marketing.docs.creating_schedules') }}#settings-advanced" class="doc-link">Settings &rarr; Advanced</a>. It is off until you do. The switch that counts is the one on the schedule that created the event, and it applies wherever that event is listed</li>
             <li>On a public event page, a visitor opens the <strong class="text-gray-900 dark:text-white">Add to Calendar</strong> menu and chooses <strong class="text-gray-900 dark:text-white">Tell me when tickets go on sale</strong>, or <strong class="text-gray-900 dark:text-white">Tell me if anything changes</strong> once tickets are on sale. An event that is already selling tickets or taking registrations also shows a <strong class="text-gray-900 dark:text-white">Not buying today? Tell me if anything changes</strong> link beside the buy button</li>
             <li>They type an email address and press <strong class="text-gray-900 dark:text-white">Notify me</strong>. No name, no account and no confirmation email to click</li>
             <li>Three emails go out automatically: one when that date's tickets go on sale, a reminder about 48 hours before it starts, and a cancellation notice if you cancel the event. Someone who asks once tickets are already on sale skips the first one</li>
@@ -1219,6 +1220,8 @@
         </ol>
 
         <p class="text-gray-600 dark:text-gray-300 mb-6">Each date of a recurring event keeps its own list, so someone who asks about one Friday hears about that Friday's tickets and that Friday's reminder. Nothing else is sent: the list never receives your newsletters or news of your other events.</p>
+
+        <p class="text-gray-600 dark:text-gray-300 mb-6">Turning the card off again removes it and every link to it, and stops new sign-ups. Anyone already on a list still gets the emails they asked for.</p>
 
         <div class="doc-callout doc-callout-info mb-6">
             <div class="doc-callout-title">Free on every plan</div>

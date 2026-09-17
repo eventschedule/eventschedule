@@ -205,6 +205,10 @@ class RoleUpdateRequest extends FormRequest
             'default_event_visibility' => ['nullable', 'string', 'in:public,draft,internal,unlisted'],
             'hide_videos' => ['nullable', 'boolean'],
             'show_accessibility_widget' => ['nullable', 'boolean'],
+            // sometimes, not nullable: both columns are NOT NULL, and the toggle always posts 0 or
+            // 1. An empty value used to pass as null and 500 on the UPDATE.
+            'show_subscribe_panel' => ['sometimes', 'boolean'],
+            'show_event_interest' => ['sometimes', 'boolean'],
             'default_category_id' => ['nullable', 'integer', $allowedDefaultIds ? 'in:'.implode(',', $allowedDefaultIds) : 'in:'.implode(',', array_keys(config('app.event_categories', [])))],
             'event_categories' => ['nullable', 'array', 'max:32'],
             'event_categories.*.id' => ['required_with:event_categories', 'integer', 'min:1'],

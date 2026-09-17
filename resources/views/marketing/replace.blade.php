@@ -612,7 +612,7 @@
             ],
             [
                 'q' => 'What replaces the "notify me" form and the mailing-list sign-up?',
-                'a' => 'Two free things on your public pages. On an event page, a visitor can leave just an email address under "Tell me when tickets go on sale", or "Tell me if anything changes" once you are selling. They hear when tickets go on sale, if the event is cancelled, and once shortly before it starts, plus any notice you choose to send if the date or venue changes. On the schedule page, the sign-up panel takes an email address, and confirming it sets up an account that follows the schedule. Confirmed subscribers get a digest of the new events you publish, at most one every 72 hours. Neither list counts against the newsletter allowance, which is only spent on newsletters you write.',
+                'a' => 'Two free things on your public pages. On an event page, once you switch on the "Notify me" card, a visitor can leave just an email address under "Tell me when tickets go on sale", or "Tell me if anything changes" once you are selling. They hear when tickets go on sale, if the event is cancelled, and once shortly before it starts, plus any notice you choose to send if the date or venue changes. On the schedule page, the sign-up panel takes an email address, and confirming it sets up an account that follows the schedule. Confirmed subscribers get a digest of the new events you publish, at most one every 72 hours. Neither list counts against the newsletter allowance, which is only spent on newsletters you write.',
             ],
             [
                 'q' => 'What does Event Schedule not replace?',

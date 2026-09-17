@@ -641,7 +641,7 @@
                             'A price and a quantity, counted per date the same way.',
                             'QR check-in, so the person on the door is not holding a printout.',
                             'Paid into your own Stripe or PayPal account, or by Invoice Ninja, a payment link or cash, with no platform fee on top.',
-                            'Announce it before it sells, and collectors can ask to be told when tickets go on sale.',
+                            'Announce it before it sells, switch on the "Notify me" card, and collectors can ask to be told when tickets go on sale.',
                         ] as $point)
                             <li class="flex items-start gap-3">
                                 <svg aria-hidden="true" class="es-hang-accent mt-0.5 h-4 w-4 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7" /></svg>

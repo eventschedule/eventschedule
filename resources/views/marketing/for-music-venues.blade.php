@@ -467,7 +467,7 @@
             ],
             [
                 'q' => 'Can fans ask to hear when tickets go on sale?',
-                'a' => 'Yes, on every plan. Announce a show before tickets are ready and the event page offers "Tell me when tickets go on sale". Fans leave an email address, with no account, and hear when tickets go on sale, if the show is cancelled, and again shortly before it starts, plus any change notice you choose to send. You see how many are waiting on the event\'s Tickets panel before you open sales, and it never counts against your newsletter allowance.',
+                'a' => 'Yes, on every plan. Switch on the "Notify me" card, announce a show before tickets are ready, and the event page offers "Tell me when tickets go on sale". Fans leave an email address, with no account, and hear when tickets go on sale, if the show is cancelled, and again shortly before it starts, plus any change notice you choose to send. You see how many are waiting on the event\'s Tickets panel before you open sales, and it never counts against your newsletter allowance.',
             ],
             [
                 'q' => 'Can I refund tickets if a show is cancelled?',
@@ -893,7 +893,7 @@
             </div>
 
             <p class="es-run-muted mx-auto mt-8 max-w-2xl text-center text-sm" data-reveal>
-                For a free show, registration with a capacity limit works on every plan, so the room still has a real number attached to it. Announced before tickets are ready? Fans can leave an email address on the event page and hear when they go on sale, also on every plan.
+                For a free show, registration with a capacity limit works on every plan, so the room still has a real number attached to it. Announced before tickets are ready? Switch on the "Notify me" card and fans can leave an email address on the event page and hear when they go on sale, also on every plan.
                 <a href="{{ marketing_url('/docs/tickets#interest-list') }}" class="es-run-link font-medium hover:underline">How the interest list works</a>
             </p>
         </div>

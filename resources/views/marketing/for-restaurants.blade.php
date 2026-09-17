@@ -376,7 +376,7 @@
             ],
             [
                 'q' => 'Can I announce a dinner before bookings open?',
-                'a' => 'Yes. Put the dinner up with a date for its tickets to go on sale, and anyone who wants a seat can leave an email address on the event page without an account. They get one email when bookings open, one if the dinner is cancelled, a reminder shortly before it, and any change notice you send, and nothing else. You can see how many people are waiting on the event\'s Tickets panel, it is never shown publicly, and it is free on every plan.',
+                'a' => 'Yes. Switch on the free "Notify me" card, put the dinner up with a date for its tickets to go on sale, and anyone who wants a seat can leave an email address on the event page without an account. They get one email when bookings open, one if the dinner is cancelled, a reminder shortly before it, and any change notice you send, and nothing else. You can see how many people are waiting on the event\'s Tickets panel, it is never shown publicly, and it is free on every plan.',
             ],
             [
                 'q' => 'Can I collect allergies and dietary requirements?',
@@ -552,7 +552,7 @@
                             ['One date, set on the event', 'It is a single moment you choose for that sitting, not a rule that repeats each week. For a dinner that runs once, that is exactly right.'],
                             ['Sales stop on their own', 'You do not have to remember to switch anything off on Thursday night while you are on the pass.'],
                             ['The list is final', 'Whatever the total says on Friday morning is what you are cooking. Nothing can be added behind you.'],
-                            ['It can open on a date, too', 'Announce the dinner before bookings open and give the ticket a date to go on sale. Anyone who leaves an email on the event page is told when it does.'],
+                            ['It can open on a date, too', 'Announce the dinner before bookings open and give the ticket a date to go on sale. With the "Notify me" card switched on, anyone who leaves an email on the event page is told when it does.'],
                         ] as [$t, $d])
                             <li class="flex items-start gap-3" data-reveal>
                                 <svg aria-hidden="true" class="es-cover-accent mt-0.5 h-5 w-5 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7" /></svg>

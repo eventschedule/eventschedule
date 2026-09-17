@@ -46,7 +46,7 @@
             "Named ticket types with their own prices, quantities and sales windows, free up to 25 paid tickets a month (unlimited on Pro)",
             "Zero platform fees on ticket sales through your own Stripe or PayPal account",
             "Refunds in full or in part from the Sales page, sent back through Stripe or PayPal",
-            "A free Tell me when tickets go on sale list on each event, with a count of who is waiting",
+            "An optional, free Tell me when tickets go on sale list on each event, with a count of who is waiting",
             "Free registration with a capacity limit, counted per date",
             "Two-way Google, Outlook and CalDAV calendar sync, plus an iCal download and a live calendar feed of the whole schedule",
             "Photos, video and comments that attach to the session they are about, behind an approval queue",
@@ -579,7 +579,7 @@
             ],
             [
                 'q' => 'Can I announce the conference before tickets go on sale?',
-                'a' => 'Yes. Publish the day with its running order and open ticket sales later. Until they open, the event page offers "Tell me when tickets go on sale": a visitor leaves an email address, nothing else, and gets one email the moment tickets are on sale, a reminder shortly before the day starts, a notice if it is cancelled, and any change notice you choose to send. The event editor shows you how many people are waiting. It is free on every plan, it is not a subscription to your schedule, and it does not draw on your newsletter allowance.',
+                'a' => 'Yes. Publish the day with its running order and open ticket sales later. Until they open, and with the free "Notify me" card switched on, the event page offers "Tell me when tickets go on sale": a visitor leaves an email address, nothing else, and gets one email the moment tickets are on sale, a reminder shortly before the day starts, a notice if it is cancelled, and any change notice you choose to send. The event editor shows you how many people are waiting. It is free on every plan, it is not a subscription to your schedule, and it does not draw on your newsletter allowance.',
             ],
             [
                 'q' => 'Can I refund an attendee who cannot make it?',
@@ -1015,7 +1015,7 @@
                         </li>
                         <li class="flex gap-3" data-reveal>
                             <svg aria-hidden="true" class="es-agenda-accent mt-0.5 h-5 w-5 flex-none" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7" /></svg>
-                            <span>Announce before you sell. Until tickets open, the event page offers "Tell me when tickets go on sale": a visitor leaves an email address and hears the moment sales start, and the event editor shows you how many are waiting.</span>
+                            <span>Announce before you sell. Switch on the "Notify me" card and, until tickets open, the event page offers "Tell me when tickets go on sale": a visitor leaves an email address and hears the moment sales start, and the event editor shows you how many are waiting.</span>
                         </li>
                         <li class="flex gap-3" data-reveal>
                             <svg aria-hidden="true" class="es-agenda-accent mt-0.5 h-5 w-5 flex-none" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7" /></svg>

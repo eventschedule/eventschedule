@@ -1305,7 +1305,7 @@
                                 <h3 class="es-gal-ink text-xl font-bold">A code in every corner</h3>
                                 <span class="es-gal-plan">Free</span>
                             </div>
-                            <p class="es-gal-muted mb-4">Each flyer carries a QR code that opens that event's own page, so a phone pointed at the image lands on the right event rather than on your calendar in general. Print the graphic and it still works. If that event's tickets are not on sale yet, its page lets them <a href="{{ route('marketing.docs.tickets') }}#interest-list" class="es-gal-link font-semibold hover:underline">leave an email address</a> and hear when they are.</p>
+                            <p class="es-gal-muted mb-4">Each flyer carries a QR code that opens that event's own page, so a phone pointed at the image lands on the right event rather than on your calendar in general. Print the graphic and it still works. If that event's tickets are not on sale yet and you have switched on the "Notify me" card, its page lets them <a href="{{ route('marketing.docs.tickets') }}#interest-list" class="es-gal-link font-semibold hover:underline">leave an email address</a> and hear when they are.</p>
                             <p class="es-gal-muted text-sm">Number the flyers as well and the wall becomes a numbered list that the caption underneath can refer to.</p>
                         </div>
                         <div class="es-glare" aria-hidden="true"></div>

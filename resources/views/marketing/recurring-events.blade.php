@@ -689,7 +689,7 @@
             ],
             [
                 'q' => 'Can someone ask to hear about just one date?',
-                'a' => 'Yes. On that date\'s page a guest can leave an email address, with no account and no name, under "Tell me when tickets go on sale", or "Tell me if anything changes" once the date is already selling. They hear about that date and no other: one email when its tickets go on sale, if they were not on sale already, and a reminder shortly before it starts. If you save a venue change or cancel the event and choose to notify people, that reaches them too. Every email carries a one-click unsubscribe, and it is free on every plan.',
+                'a' => 'Yes, once you switch on the "Notify me" card. On that date\'s page a guest can then leave an email address, with no account and no name, under "Tell me when tickets go on sale", or "Tell me if anything changes" once the date is already selling. They hear about that date and no other: one email when its tickets go on sale, if they were not on sale already, and a reminder shortly before it starts. If you save a venue change or cancel the event and choose to notify people, that reaches them too. Every email carries a one-click unsubscribe, and it is free on every plan.',
             ],
             [
                 'q' => 'Can one ticket cover every date of the loop?',

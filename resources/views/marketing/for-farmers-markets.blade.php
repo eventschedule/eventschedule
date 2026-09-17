@@ -998,7 +998,7 @@
                             ['Ask while they pay', true, 'Attach your own questions to the pitch fee: power, van length, insurance number. The answers arrive with the payment instead of in a separate thread.'],
                             ['Scan them in', false, 'Every buyer gets a QR code, and scanning it at the entrance to the square costs nothing. The live check-in dashboard, counting who is in as the morning goes on, is the Pro half.'],
                             ['Money back when it rains', false, 'Refund a pitch fee from the Sales page, in full or in part. On Stripe or PayPal the money goes back to the trader through the provider; a cash or payment-link fee is marked as refunded for your records.'],
-                            ['Sell tickets too, if you need to', false, 'A ticketed cooking class or a harvest supper works the same way, out of the same monthly allowance and with the same zero platform fee. Post it before tickets open and shoppers can leave an email address to hear when they do.'],
+                            ['Sell tickets too, if you need to', false, 'A ticketed cooking class or a harvest supper works the same way, out of the same monthly allowance and with the same zero platform fee. Post it before tickets open, switch on the "Notify me" card, and shoppers can leave an email address to hear when they do.'],
                         ] as [$pT, $pIsPro, $pD])
                             <div class="es-mkt-card es-mkt-hover p-4" data-reveal>
                                 <div class="flex flex-wrap items-center gap-2">

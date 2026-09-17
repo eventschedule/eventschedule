@@ -773,15 +773,15 @@
           // Mirrors the noindex conditions in layouts/app-guest.blade.php:71 plus the guards the
           // checkout opt-in already carries. Anything not publicly and durably visible has no
           // business collecting an address against it.
+          //
+          // The event-level half, including the owner's switch, is Event::offersInterestCapture(),
+          // which EventInterestController::store() calls too. The switch it reads is the event
+          // CREATOR's, not $role's: the list and its emails belong to the creator, and this page
+          // is often not the creator's (a claimed talent's subdomain is the canonical URL).
           $showInterestCapture = ! request()->embed
               && ! request('graphic')
               && $event->exists
-              && ! $event->is_draft
-              && ! $event->is_private
-              && ! $event->is_cancelled
-              && ! $event->is_hidden_from_discovery
-              && ! $event->isPasswordProtected()
-              && $event->creatorRole
+              && $event->offersInterestCapture()
               && ! is_demo_role($role);
 
           if ($showInterestCapture) {

@@ -415,7 +415,7 @@
         <div class="doc-fields">
             <div class="doc-field">
                 <h4 class="font-semibold text-gray-900 dark:text-white mb-2">The sign-up panel</h4>
-                <p class="text-sm text-gray-500 dark:text-gray-400">A short form on your schedule page and on each event page. Signing up here sends a confirmation email, and the address joins your audience only once that link is clicked.</p>
+                <p class="text-sm text-gray-500 dark:text-gray-400">A short form on your schedule page and on each event page. Signing up here sends a confirmation email, and the address joins your audience only once that link is clicked. It is on unless you turn it off under <a href="{{ route('marketing.docs.creating_schedules') }}#settings-advanced" class="doc-link">Settings &rarr; Advanced</a>, and your sign-up link opens it either way.</p>
             </div>
             <div class="doc-field">
                 <h4 class="font-semibold text-gray-900 dark:text-white mb-2">At checkout</h4>
@@ -494,7 +494,7 @@
                     </tr>
                     <tr>
                         <td><span class="font-semibold text-gray-900 dark:text-white">An event's interest list</span></td>
-                        <td>Leaves an email address on one event page, under "Tell me when tickets go on sale" or "Tell me if anything changes"</td>
+                        <td>Leaves an email address on one event page, under "Tell me when tickets go on sale" or "Tell me if anything changes" (the &ldquo;Notify me&rdquo; card, where the schedule has switched it on)</td>
                         <td>That event's on-sale email, a reminder shortly before it starts, a cancellation notice, and any notice you choose to send if the date or venue changes</td>
                         <td>No. No segment reaches it, and its emails do not count against your allowance</td>
                     </tr>

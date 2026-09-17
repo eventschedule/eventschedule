@@ -33,7 +33,10 @@ class EventInterestTest extends TestCase
     {
         parent::setUp();
 
-        $this->role = $this->createRole($this->createOwner());
+        // The card is opt-in (roles.show_event_interest defaults to false) and store() refuses
+        // while it is off, so every test here would otherwise fail - or, for the "no dead links"
+        // tests, pass without proving anything.
+        $this->role = $this->createRole($this->createOwner(), 'venue', ['show_event_interest' => true]);
 
         // creator_role_id is NOT set by createEvent(), and without it Event::scheduleTimezone()
         // short-circuits on the null BelongsTo key and silently falls back to the app timezone -
@@ -120,6 +123,38 @@ class EventInterestTest extends TestCase
         $this->event->forceFill(['is_cancelled' => true])->save();
 
         $this->postJson($this->joinUrl(), $this->payload())->assertOk()->assertJson(['success' => false]);
+        $this->assertSame(0, EventInterest::count());
+    }
+
+    public function test_a_public_event_with_a_password_takes_no_signups(): void
+    {
+        // The page refuses every password-protected event, private or not, and store() now asks
+        // the same question (Event::offersInterestCapture()) instead of keeping its own copy.
+        $this->event->forceFill(['event_password' => 'secret'])->save();
+
+        $this->postJson($this->joinUrl(), $this->payload())->assertOk()->assertJson(['success' => false]);
+        $this->assertSame(0, EventInterest::count());
+    }
+
+    public function test_an_event_with_no_creator_takes_no_signups(): void
+    {
+        // Nothing could ever be mailed for it: SendEventInterestMail sends as the creator.
+        $this->event->forceFill(['creator_role_id' => null])->save();
+
+        $this->postJson($this->joinUrl(), $this->payload())->assertOk()->assertJson(['success' => false]);
+        $this->assertSame(0, EventInterest::count());
+    }
+
+    public function test_a_pending_listing_takes_no_signups(): void
+    {
+        // guestVisibilityFailure() only asks whether the event is attached. A listing that is not
+        // accepted never renders the page (EventRepo::getEvent()), so it takes no direct POST.
+        $other = $this->createCurator($this->createOwner());
+        $this->event->roles()->attach($other->id, ['is_accepted' => null]);
+        $this->assertNull($this->event->roles()->where('roles.id', $other->id)->first()->pivot->is_accepted);
+
+        $this->postJson(route('event.interest.join', ['subdomain' => $other->subdomain]), $this->payload())
+            ->assertNotFound();
         $this->assertSame(0, EventInterest::count());
     }
 

@@ -107,7 +107,7 @@
             },
             {
                 "title": "Tell Me When Tickets Go on Sale",
-                "description": "The notify-me form, built into the event page. Visitors leave just an email address and hear when tickets go on sale, if the event is cancelled, and shortly before it starts. Free on every plan.",
+                "description": "The notify-me form, built into the event page and switched on with one setting. Visitors leave just an email address and hear when tickets go on sale, if the event is cancelled, and shortly before it starts. Free on every plan.",
                 "icon": "mail",
                 "gradient": "from-cyan-50 to-sky-50 dark:from-cyan-900/30 dark:to-sky-900/30",
                 "border": "border-cyan-200 dark:border-cyan-500/20",
@@ -162,7 +162,7 @@
             },
             {
                 "question": "Can I replace a notify-me form for an event that is not on sale yet?",
-                "answer": "Yes, and it is free on every plan. On an event with nothing on sale yet, visitors click Tell me when tickets go on sale and leave just an email address, with no account. They get one email when tickets go on sale, one if the event is cancelled, a reminder shortly before it starts, and any notice you choose to send if the date or venue changes. It does not add them to your newsletter, every email has a one-click unsubscribe, and the event editor shows you how many people are waiting."
+                "answer": "Yes, and it is free on every plan. Switch on the \"Notify me\" card and, on an event with nothing on sale yet, visitors click Tell me when tickets go on sale and leave just an email address, with no account. They get one email when tickets go on sale, one if the event is cancelled, a reminder shortly before it starts, and any notice you choose to send if the date or venue changes. It does not add them to your newsletter, every email has a one-click unsubscribe, and the event editor shows you how many people are waiting."
             },
             {
                 "question": "Can I collect RSVPs for free events without Google Forms?",
@@ -1417,7 +1417,7 @@
             },
             {
                 "question": "Does Event Schedule support attendee limits and waitlists?",
-                "answer": "Yes. Set capacity limits per ticket type, and when an event sells out, people can join a waitlist and get notified if spots open up. The RSVP waitlist is free; the ticket waitlist is on the Pro plan. For an event that is not on sale yet, the free interest list takes just an email address and says when tickets go on sale."
+                "answer": "Yes. Set capacity limits per ticket type, and when an event sells out, people can join a waitlist and get notified if spots open up. The RSVP waitlist is free; the ticket waitlist is on the Pro plan. For an event that is not on sale yet, the free interest list, once you switch it on, takes just an email address and says when tickets go on sale."
             },
             {
                 "question": "Can I collect custom information from attendees?",
@@ -1425,7 +1425,7 @@
             },
             {
                 "question": "Can people register interest before tickets go on sale?",
-                "answer": "Yes, free on every plan. On an event that is not selling yet, visitors leave just an email address, with no account and no survey. They hear when tickets go on sale, if the event is cancelled, and shortly before it starts, plus any notice you choose to send if the date or venue changes, and every email has a one-click unsubscribe. The event editor shows you how many people are waiting."
+                "answer": "Yes, free on every plan. Switch on the \"Notify me\" card and, on an event that is not selling yet, visitors leave just an email address, with no account and no survey. They hear when tickets go on sale, if the event is cancelled, and shortly before it starts, plus any notice you choose to send if the date or venue changes, and every email has a one-click unsubscribe. The event editor shows you how many people are waiting."
             }
         ],
         "cross_links": [

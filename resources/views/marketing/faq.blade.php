@@ -652,10 +652,12 @@
                     ],
                     [
                         // EventInterestController: one email field, single opt-in, per occurrence date,
-                        // ungated. Unsubscribe deletes the row. SendEventInterestMail is bounded by
-                        // Role::canSendAudienceMail(), never by the newsletter allowance.
+                        // on no plan gate, but offered only where the schedule has switched on
+                        // show_event_interest (off by default). Unsubscribe deletes the row.
+                        // SendEventInterestMail is bounded by Role::canSendAudienceMail(), never by
+                        // the newsletter allowance.
                         'q' => 'Can people ask to hear when tickets go on sale?',
-                        'a' => 'Yes, on every plan, and it is a different list from the waitlist. The waitlist is for a sold-out event; this is for an event whose tickets are not on sale yet, or a visitor who is not ready to buy. They leave just an email address, from the Add to Calendar menu or a quiet link beside the buy button, and get one email when tickets go on sale, one if it is cancelled, a reminder shortly before it starts, and any notice you choose to send if the date or venue changes. Each date of a recurring event is its own list, every email has a one-click unsubscribe that deletes the address, and the event\'s Tickets panel shows you how many people are waiting. It does not sign them up to your schedule or touch your newsletter allowance.',
+                        'a' => 'Yes, on every plan, and it is a different list from the waitlist. The waitlist is for a sold-out event; this is for an event whose tickets are not on sale yet, or a visitor who is not ready to buy. Once you switch on the "Notify me" card, they leave just an email address, from the Add to Calendar menu or a quiet link beside the buy button, and get one email when tickets go on sale, one if it is cancelled, a reminder shortly before it starts, and any notice you choose to send if the date or venue changes. Each date of a recurring event is its own list, every email has a one-click unsubscribe that deletes the address, and the event\'s Tickets panel shows you how many people are waiting. It does not sign them up to your schedule or touch your newsletter allowance.',
                         'links' => [['The interest list', marketing_url('/docs/tickets#interest-list')]],
                     ],
                 ],

@@ -83,7 +83,7 @@
                     </tr>
                     <tr>
                         <td>Tickets on sale, and a reminder</td>
-                        <td>People who used <strong class="text-gray-900 dark:text-white">Tell me when tickets go on sale</strong> on an event page</td>
+                        <td>People who used <strong class="text-gray-900 dark:text-white">Tell me when tickets go on sale</strong> on an event page, the &ldquo;Notify me&rdquo; card a schedule can switch on</td>
                         <td>Checked every hour. One email when tickets for that date go on sale, and a reminder 48 hours before it starts. Each date of a recurring event is separate. See <a href="{{ route('marketing.docs.tickets') }}#interest-list" class="doc-link">Interest list</a>.</td>
                     </tr>
                     <tr>

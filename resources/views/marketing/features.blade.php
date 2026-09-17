@@ -1345,7 +1345,7 @@
             ],
             [
                 'q' => 'Can visitors ask to be told when tickets go on sale?',
-                'a' => 'Yes, on every plan. From Add to Calendar on the event page, a visitor leaves just an email address, with no account, and gets one email when tickets go on sale, one if it is cancelled, a reminder shortly before it starts, and any notice you choose to send if the date or venue changes. Each date of a recurring event is separate, every email has a one-click unsubscribe, and the list does not count against your newsletter allowance. You can see how many people are waiting on the Tickets panel of the event editor.',
+                'a' => 'Yes, on every plan. Switch on the "Notify me" card and, from Add to Calendar on the event page, a visitor leaves just an email address, with no account, and gets one email when tickets go on sale, one if it is cancelled, a reminder shortly before it starts, and any notice you choose to send if the date or venue changes. Each date of a recurring event is separate, every email has a one-click unsubscribe, and the list does not count against your newsletter allowance. You can see how many people are waiting on the Tickets panel of the event editor.',
             ],
             [
                 'q' => 'Can buyers choose their own seat?',

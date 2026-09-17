@@ -545,7 +545,7 @@
             ],
             [
                 'q' => 'Can students ask to hear when a course goes on sale?',
-                'a' => 'Yes, on every plan. Publish the course before you add its tickets and its page offers "Tell me when tickets go on sale": a student leaves an email address, with no account and no name, and gets one email when seats for that session date go on sale, a reminder 48 hours before it, word if it is cancelled, and any change notice you choose to send. Each session date keeps its own list, unsubscribing deletes the address, and the Tickets panel on the course shows how many people are waiting. To hear about every new course instead, a student signs up in the panel on your schedule page and gets the digest.',
+                'a' => 'Yes, on every plan. Switch on the "Notify me" card, publish the course before you add its tickets, and its page offers "Tell me when tickets go on sale": a student leaves an email address, with no account and no name, and gets one email when seats for that session date go on sale, a reminder 48 hours before it, word if it is cancelled, and any change notice you choose to send. Each session date keeps its own list, unsubscribing deletes the address, and the Tickets panel on the course shows how many people are waiting. To hear about every new course instead, a student signs up in the panel on your schedule page and gets the digest.',
             ],
             [
                 'q' => 'Can I refund a student who drops out?',

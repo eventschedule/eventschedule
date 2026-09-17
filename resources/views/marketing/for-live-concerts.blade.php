@@ -633,7 +633,7 @@
             ],
             [
                 'q' => 'Can fans get an email when tickets go on sale?',
-                'a' => 'Yes, on every plan. Put a date up before its tickets are on sale and its page offers "Tell me when tickets go on sale": a fan leaves an email address, with no account and no name, and gets one email when tickets for that date open, a reminder 48 hours before it starts, word if it is cancelled, and any change notice you choose to send. Once the date is selling, the same list sits beside the buy button as "Tell me if anything changes". Each night of a residency keeps its own list, it is not a subscription to your schedule, it never counts against your newsletter allowance, and the event editor\'s Tickets panel shows how many people are waiting.',
+                'a' => 'Yes, on every plan. Switch on the "Notify me" card, put a date up before its tickets are on sale, and its page offers "Tell me when tickets go on sale": a fan leaves an email address, with no account and no name, and gets one email when tickets for that date open, a reminder 48 hours before it starts, word if it is cancelled, and any change notice you choose to send. Once the date is selling, the same list sits beside the buy button as "Tell me if anything changes". Each night of a residency keeps its own list, it is not a subscription to your schedule, it never counts against your newsletter allowance, and the event editor\'s Tickets panel shows how many people are waiting.',
             ],
             [
                 'q' => 'Can the room show my date on its own calendar?',
@@ -819,7 +819,7 @@
                     </div>
                     <div>
                         <p class="es-stage-tag mb-2">The window</p>
-                        <p class="es-stage-muted text-sm">A ticket type's sales window is one start and one end, which is exactly right for a single dated show. Until it opens, fans can leave an email address on that date and get one email when it does.</p>
+                        <p class="es-stage-muted text-sm">A ticket type's sales window is one start and one end, which is exactly right for a single dated show. Until it opens, and with the "Notify me" card switched on, fans can leave an email address on that date and get one email when it does.</p>
                     </div>
                 </div>
             </div>

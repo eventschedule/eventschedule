@@ -862,6 +862,11 @@ class GrowthExportService
             'accept_requests' => $r->accept_requests,
             'sponsors' => $r->sponsor_logos,
             'own_smtp' => $r->email_settings,
+            // The "Notify me" card is opt-in, so without this a zero interest rate cannot tell
+            // "switched off" from "on and not converting". The sign-up panel is on by default,
+            // so it is the owners who turned it OFF that are worth a flag.
+            'event_interest' => $r->show_event_interest,
+            'no_subscribe_panel' => $r->show_subscribe_panel === false,
         ] as $key => $value) {
             if (! empty($value)) {
                 $flags[] = $key;

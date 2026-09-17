@@ -666,7 +666,7 @@
             ],
             [
                 'q' => 'If I rename Events, does Filter Events change too?',
-                'a' => 'No. "Filter Events", "Past Events", "Show Past Events" and "No scheduled events" are labels of their own, so rename each one you want to match. A line that is not on the list keeps the shipped wording, translated, whatever you call your events: the Add to Calendar menu now carries "Subscribe to all events from" your schedule, a live calendar feed, and on an upcoming public event "Tell me when tickets go on sale" or "Tell me if anything changes".',
+                'a' => 'No. "Filter Events", "Past Events", "Show Past Events" and "No scheduled events" are labels of their own, so rename each one you want to match. A line that is not on the list keeps the shipped wording, translated, whatever you call your events: the Add to Calendar menu now carries "Subscribe to all events from" your schedule, a live calendar feed, and on an upcoming public event, where the "Notify me" card is switched on, "Tell me when tickets go on sale" or "Tell me if anything changes".',
             ],
             [
                 'q' => 'Can I rename the ticket and registration buttons?',

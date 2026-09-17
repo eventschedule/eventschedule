@@ -695,7 +695,7 @@
             ],
             [
                 'q' => 'Can people get a reminder without registering?',
-                'a' => 'Yes, on every plan. A public session\'s page carries a short form: somebody leaves an email address, with no account and no name, and gets a reminder 48 hours before the session starts, word if it is cancelled, and any change notice you choose to send. On a paid session that is not on sale yet the form reads "Tell me when tickets go on sale", and they also get one email when it is. None of those emails carries the join link; each one points at the public page, so registering is still the way into the room. The list is not a subscription to your schedule, unsubscribing deletes the address, and the event editor\'s Tickets panel shows how many people are waiting.',
+                'a' => 'Yes, on every plan, once you switch on the "Notify me" card. A public session\'s page then carries a short form: somebody leaves an email address, with no account and no name, and gets a reminder 48 hours before the session starts, word if it is cancelled, and any change notice you choose to send. On a paid session that is not on sale yet the form reads "Tell me when tickets go on sale", and they also get one email when it is. None of those emails carries the join link; each one points at the public page, so registering is still the way into the room. The list is not a subscription to your schedule, unsubscribing deletes the address, and the event editor\'s Tickets panel shows how many people are waiting.',
             ],
             [
                 'q' => 'Can I refund a webinar ticket?',

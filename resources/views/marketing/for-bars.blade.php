@@ -930,7 +930,7 @@
                                 Sell straight from your calendar and scan the QR code at the door, free up to 25 paid tickets a month. Take the money through your own Stripe or <a href="{{ marketing_url('/paypal') }}" class="es-slate-link font-medium hover:underline">PayPal</a> account, or a payment link or cash at the bar, and Event Schedule takes zero platform fees on any of it.
                             </p>
                             <p class="text-sm text-gray-600 dark:text-gray-400">
-                                Before it goes on sale, people can leave an email address on the event page and hear when it does. On Pro: discount codes for the regulars, and a pass that covers a whole season of a night rather than one at a time.
+                                Before it goes on sale, and with the "Notify me" card switched on, people can leave an email address on the event page and hear when it does. On Pro: discount codes for the regulars, and a pass that covers a whole season of a night rather than one at a time.
                             </p>
                         </div>
                         <div class="es-glare" aria-hidden="true"></div>

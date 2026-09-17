@@ -46,7 +46,7 @@
             "QR check-in at the door on every plan, with a live check-in dashboard on Pro",
             "Zero platform fees on ticket sales, paid through Stripe, PayPal, Invoice Ninja, Payfast, a payment link or cash",
             "Reserved seating on Enterprise, with best-available seats and a box office console",
-            "A 'Tell me when tickets go on sale' list on every performance",
+            "An optional 'Tell me when tickets go on sale' list on every performance",
             "Full and partial refunds through Stripe and PayPal from the Sales page",
             "Sub-schedules that keep mainstage, studio and family programming apart",
             "Direct newsletters with open and click rates",
@@ -424,7 +424,7 @@
             ],
             [
                 'q' => 'Can people ask to be told when tickets go on sale?',
-                'a' => 'Yes, free on every plan. Announce a production before tickets are ready and each performance page offers "Tell me when tickets go on sale". A visitor leaves an email address, with no account, and hears when tickets go on sale, if the performance is cancelled, and again shortly before it starts, plus any change notice you choose to send. Each date of a run keeps its own list, the event editor shows how many people are waiting, and it is not a subscription to your schedule.',
+                'a' => 'Yes, free on every plan. Switch on the "Notify me" card, announce a production before tickets are ready, and each performance page offers "Tell me when tickets go on sale". A visitor leaves an email address, with no account, and hears when tickets go on sale, if the performance is cancelled, and again shortly before it starts, plus any change notice you choose to send. Each date of a run keeps its own list, the event editor shows how many people are waiting, and it is not a subscription to your schedule.',
             ],
             [
                 'q' => 'Can I refund a ticket if a performance is cancelled?',
@@ -922,7 +922,7 @@
                                 <h3 class="es-bill-ink text-xl font-bold">Announce when you are ready</h3>
                                 <span class="es-bill-plan">Free</span>
                             </div>
-                            <p class="es-bill-muted">A production you have not announced sits on the calendar as a draft, visible to you and never published until you say so. Once it is public, every performance offers "Tell me when tickets go on sale", so the people who saw the season announcement hear when you open sales. <a href="{{ marketing_url('/docs/tickets#interest-list') }}" class="es-bill-link font-medium hover:underline">How the interest list works</a></p>
+                            <p class="es-bill-muted">A production you have not announced sits on the calendar as a draft, visible to you and never published until you say so. Once it is public, and with the free "Notify me" card switched on, every performance offers "Tell me when tickets go on sale", so the people who saw the season announcement hear when you open sales. <a href="{{ marketing_url('/docs/tickets#interest-list') }}" class="es-bill-link font-medium hover:underline">How the interest list works</a></p>
                         </div>
                         <div class="es-glare" aria-hidden="true"></div>
                         <div class="es-ring-glow" aria-hidden="true"></div>

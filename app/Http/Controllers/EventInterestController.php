@@ -111,14 +111,25 @@ class EventInterestController extends Controller
             abort(404);
         }
 
-        // Nothing to be told about. A cancelled event still has an interest list - those people are
-        // exactly who wants to hear - but there is no reason to take NEW sign-ups for one.
+        // guestVisibilityFailure() only asks whether the event is ATTACHED to this schedule. The
+        // page that carries the form is stricter - EventRepo::getEvent() renders an event on a
+        // schedule only once that listing is accepted - so a pending or declined listing must not
+        // take sign-ups by direct POST either.
+        if (! $event->roles()->wherePivot('role_id', $role->id)->wherePivot('is_accepted', true)->exists()) {
+            abort(404);
+        }
+
+        // The same rule the page uses to decide whether to offer the card at all: not private,
+        // draft, cancelled, hidden from discovery or password protected, and the event CREATOR's
+        // switch is on. A cancelled event still has a list - those people are exactly who wants
+        // to hear - but it takes no NEW sign-ups.
         //
-        // is_hidden_from_discovery matches the view's gate: guestVisibilityFailure() does not cover
-        // it, so without this a direct POST could create a row on an event whose page never offers
-        // the form.
-        if ($event->is_cancelled || $event->is_hidden_from_discovery) {
-            return $this->respond($request, __('messages.invalid_request'), false, $subdomain);
+        // The switch is the commonest refusal: it is off by default, so most event pages never
+        // offer the form, and without this a direct POST would still build a list that the
+        // creator then emails. Only new sign-ups stop - addresses already on a list keep getting
+        // what they asked for, because app:send-event-interest-mail does not read the switch.
+        if (! $event->offersInterestCapture()) {
+            return $this->respond($request, __('messages.event_interest_unavailable'), false, $subdomain);
         }
 
         $eventDate = $this->resolveDate($event, $request->input('event_date'));

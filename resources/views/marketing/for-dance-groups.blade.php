@@ -48,7 +48,7 @@
             "Named ticket types with their own prices, quantities and sales windows",
             "QR check-in for shows and classes, free on every plan",
             "Zero platform fees on ticket sales, paid through Stripe, PayPal, Invoice Ninja, Payfast, a payment link or cash",
-            "A 'Tell me when tickets go on sale' list on every show date",
+            "An optional 'Tell me when tickets go on sale' list on every show date",
             "A live calendar feed dancers can subscribe to, which updates itself when a class moves",
             "Sub-schedules that keep classes, rehearsals and performances apart",
             "Direct newsletters to the people who follow your schedule",
@@ -487,7 +487,7 @@
             ],
             [
                 'q' => 'Can parents be told when recital tickets go on sale?',
-                'a' => 'Yes, free on every plan. Put the show on the schedule before tickets are ready and its page offers "Tell me when tickets go on sale". A parent leaves an email address, with no account, and hears when tickets go on sale, if the show is cancelled, and again shortly before it starts, plus any change notice you choose to send. The event\'s Tickets panel shows how many people are waiting, and it is not a subscription to your schedule.',
+                'a' => 'Yes, free on every plan. Switch on the "Notify me" card, put the show on the schedule before tickets are ready, and its page offers "Tell me when tickets go on sale". A parent leaves an email address, with no account, and hears when tickets go on sale, if the show is cancelled, and again shortly before it starts, plus any change notice you choose to send. The event\'s Tickets panel shows how many people are waiting, and it is not a subscription to your schedule.',
             ],
             [
                 'q' => 'Can dancers add the class timetable to their own calendar?',
@@ -860,7 +860,7 @@
                 <p class="es-barre-muted text-lg" data-reveal style="--reveal-delay: 0.15s;">
                     Named ticket types, each with its own price, quantity and sales window - so the family
                     rate closes when you want it to and the door price does not open early. Announce the
-                    show before tickets are ready and parents can ask to hear when they go on sale.
+                    show before tickets are ready, switch on the "Notify me" card, and parents can ask to hear when they go on sale.
                 </p>
             </div>
 

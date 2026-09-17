@@ -506,7 +506,7 @@
             ],
             [
                 'q' => 'Can people ask to hear about a night before sign-up opens?',
-                'a' => 'Yes. Anyone can leave just an email address on the night\'s page, with no account and no subscription to your schedule. They get a reminder shortly before it starts, word if it is cancelled, and any change notice you send, and if the night sells tickets, one email when they go on sale. Registration takes names from the moment you switch it on, so there is no opening email for it.',
+                'a' => 'Yes, once you switch on the "Notify me" card. Anyone can then leave just an email address on the night\'s page, with no account and no subscription to your schedule. They get a reminder shortly before it starts, word if it is cancelled, and any change notice you send, and if the night sells tickets, one email when they go on sale. Registration takes names from the moment you switch it on, so there is no opening email for it.',
             ],
             [
                 'q' => 'A bookstore listed me as its feature. Is there a page for me already?',
@@ -957,7 +957,7 @@
                                 Take payment through Stripe or PayPal, or cash on the night, and sell straight from the schedule with QR check-in at the door. The free plan covers 25 paid tickets a month, and Event Schedule takes zero platform fees, so what is left after processing is yours.
                             </p>
                             <p class="text-sm text-gray-600 dark:text-gray-400">
-                                Announce the feature before tickets are on sale and people can leave just an email address to hear when they go on sale. Pro adds discount codes for the regulars and a pass that covers a whole season of the series.
+                                Announce the feature before tickets are on sale, switch on the "Notify me" card, and people can leave just an email address to hear when they go on sale. Pro adds discount codes for the regulars and a pass that covers a whole season of the series.
                             </p>
                         </div>
                         <div class="es-glare" aria-hidden="true"></div>

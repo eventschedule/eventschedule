@@ -381,17 +381,13 @@
             <pre><code>#gp-talent-list { display: none; }</code></pre>
         </div>
 
-        <h3 class="doc-subheading">Two common examples</h3>
-        <p class="text-gray-600 dark:text-gray-300 mb-4">The <strong class="text-gray-900 dark:text-white">&ldquo;Notify me when tickets go on sale&rdquo;</strong> card invites visitors to leave an address so you can tell them when tickets open or when a date moves. On an event that is free to walk into, there may be nothing to notify anyone about, and the card can read as though a ticket is coming.</p>
-
-        <div class="doc-code-block">
-            <div class="doc-code-header">
-                <span>Hide the &ldquo;Notify me&rdquo; card on event pages</span>
-            </div>
-            <pre><code>#gp-event-interest { display: none; }</code></pre>
+        <div class="doc-callout doc-callout-tip">
+            <div class="doc-callout-title">Two panels have their own switch</div>
+            <p>The <strong>&ldquo;Notify me when tickets go on sale&rdquo;</strong> card is off unless you turn it on, and the <strong>Stay up to date</strong> sign-up panel can be turned off. Both switches are under <a href="{{ route('marketing.docs.creating_schedules') }}#settings-advanced" class="doc-link">Settings &rarr; Advanced</a> and work on every plan, so neither needs CSS.</p>
         </div>
 
-        <p class="text-gray-600 dark:text-gray-300 mt-6 mb-4">The <strong class="text-gray-900 dark:text-white">performer list</strong> is the compact list of names under the <em>Talent</em> heading, for acts that were typed in or picked up by AI import and have no page of their own. If the names on your events are often wrong or incomplete, hide the list and let the event description carry the lineup instead.</p>
+        <h3 class="doc-subheading">A common example</h3>
+        <p class="text-gray-600 dark:text-gray-300 mb-4">The <strong class="text-gray-900 dark:text-white">performer list</strong> is the compact list of names under the <em>Talent</em> heading, for acts that were typed in or picked up by AI import and have no page of their own. If the names on your events are often wrong or incomplete, hide the list and let the event description carry the lineup instead.</p>
 
         <div class="doc-code-block">
             <div class="doc-code-header">
@@ -406,7 +402,7 @@
             <div class="doc-code-header">
                 <span>Hide several at once</span>
             </div>
-            <pre><code>#gp-event-interest,
+            <pre><code>#gp-upcoming-events,
 #gp-talent-list,
 #gp-reviews {
     display: none;
@@ -415,7 +411,7 @@
 
         <div class="doc-callout doc-callout-warning">
             <div class="doc-callout-title">Hiding a panel is not the same as turning a feature off</div>
-            <p>A <code class="doc-inline-code">display: none</code> rule removes a panel from the page. It does not disable what sits behind it. People who already signed up to be notified are still notified, a hidden subscribe panel still accepts a submission posted to its address, and a hidden reviews panel does not delete the reviews. Where a real on/off setting exists, use that instead: videos, fan photos, fan comments, feedback, carpooling and accommodation each have their own switch on the schedule edit page, and the sponsor grid disappears on its own once you remove the logos.</p>
+            <p>A <code class="doc-inline-code">display: none</code> rule removes a panel from the page. It does not disable what sits behind it. People who already signed up to be notified are still notified, a hidden subscribe panel still accepts a submission posted to its address, and a hidden reviews panel does not delete the reviews. Where a real on/off setting exists, use that instead: videos, fan photos, fan comments, feedback, carpooling, accommodation and the &ldquo;Notify me&rdquo; card each have their own switch on the schedule edit page, and the sponsor grid disappears on its own once you remove the logos. The <strong>Show Sign-Up Panel</strong> switch is the exception: like this rule, it only hides the panel, and sign-ups through your follow link, and on eventschedule.com the Follow button, still arrive.</p>
         </div>
 
         <h3 class="doc-subheading">Schedule page sections</h3>

@@ -95,4 +95,18 @@
         </form>
     @endif
 </div>
+@elseif ($interestMessage || $interestError)
+{{-- The page no longer offers the form, but a submission from it is waiting to be answered: a
+     tab opened before the owner switched the card off (every schedule without sign-ups was
+     switched off when the setting shipped), a past occurrence, a restored back/forward-cache page.
+     EventInterestController::respond() redirects to #gp-event-interest and nothing else on the page
+     renders interest_message or interest_error, so without this the address is dropped silently.
+     The message only - no heading and no form, because there is nothing left to retry. --}}
+<div id="gp-event-interest" class="scroll-mt-4 bg-white/95 dark:bg-gray-900/95 backdrop-blur-sm sm:rounded-2xl border border-gray-200 dark:border-gray-700 px-5 py-5 sm:px-8 sm:py-6">
+    @if ($interestMessage)
+        <p class="text-sm font-medium text-green-700 dark:text-green-400">{{ $interestMessage }}</p>
+    @else
+        <p id="gp-event-interest-error" class="text-sm text-red-600 dark:text-red-400">{{ $interestError }}</p>
+    @endif
+</div>
 @endif

@@ -637,7 +637,7 @@
         // row exists only where the install can issue a pass ($walletLive), so without one it is
         // swapped for the free-registration row rather than dropped, and the door side stays at ten.
         $saleSide = [
-            ['Tell me when tickets go on sale', 'Before anything is on sale, a visitor can leave an email address, no account needed, and hear once when tickets go on sale and again shortly before it starts. You see how many are waiting. Free on every plan.'],
+            ['Tell me when tickets go on sale', 'Switch on the "Notify me" card and, before anything is on sale, a visitor can leave an email address, no account needed, and hear once when tickets go on sale and again shortly before it starts. You see how many are waiting. Free on every plan.'],
             ['Ticket types', 'Each one has its own name, price, quantity, optional sales window and optional cap per order, so one buyer cannot take the whole allocation. Zero is a valid price, and that ticket still gets a QR code.'],
             ['Promo codes and group rates', 'A code takes a percentage or a fixed amount off, with usage limits, an expiry date and per-ticket targeting. A volume discount unlocks a lower rate once one ticket line reaches a set quantity.'],
             ['Add-ons', 'Parking, merchandise, a meal package. Priced separately and never discounted by a promo code.'],
@@ -721,7 +721,7 @@
             ],
             [
                 'q' => 'Can people sign up to hear when tickets go on sale?',
-                'a' => 'Yes, free on every plan. Until an event sells, its page offers Tell me when tickets go on sale; once it sells, a quieter Tell me if anything changes sits beside the buy button. A visitor leaves only an email address, without an account, and gets one email when tickets go on sale, a reminder shortly before the event (48 hours by default), and any change or cancellation notice you send. Each date of a recurring event keeps its own list, every email has a one-click unsubscribe, and the event editor shows how many people are waiting. It is not the waitlist, which is for a date that has sold out.',
+                'a' => 'Yes, free on every plan. Switch on the "Notify me" card and, until an event sells, its page offers Tell me when tickets go on sale; once it sells, a quieter Tell me if anything changes sits beside the buy button. A visitor leaves only an email address, without an account, and gets one email when tickets go on sale, a reminder shortly before the event (48 hours by default), and any change or cancellation notice you send. Each date of a recurring event keeps its own list, every email has a one-click unsubscribe, and the event editor shows how many people are waiting. It is not the waitlist, which is for a date that has sold out.',
             ],
             [
                 'q' => 'How does inventory work on a recurring event?',

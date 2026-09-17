@@ -637,7 +637,7 @@
             ],
             [
                 'q' => 'Can people get a reminder without registering?',
-                'a' => 'Yes. Beside the register button, "Tell me if anything changes" takes an email address and nothing else, no account and no name. That person gets a reminder shortly before the session, a notice if it is cancelled, and any change notice you choose to send, say when the join link moves. Every one of those emails unsubscribes in one click. Each date of a weekly office hour is its own list, it is not a subscription to your schedule, and it is free on every plan. For every date at once, your schedule\'s live calendar feed updates itself and costs no email address at all.',
+                'a' => 'Yes. Switch on the free "Notify me" card and, beside the register button, "Tell me if anything changes" takes an email address and nothing else, no account and no name. That person gets a reminder shortly before the session, a notice if it is cancelled, and any change notice you choose to send, say when the join link moves. Every one of those emails unsubscribes in one click. Each date of a weekly office hour is its own list, it is not a subscription to your schedule, and it is free on every plan. For every date at once, your schedule\'s live calendar feed updates itself and costs no email address at all.',
             ],
         ];
 
@@ -1008,7 +1008,7 @@
                                     <h3 class="es-conv-ink text-lg font-bold">The link lands where they will look for it</h3>
                                     <span class="es-conv-plan">Free</span>
                                 </div>
-                                <p class="es-conv-muted text-sm">Registering gives somebody their own page for that date, and the join link is on it. The confirmation email links straight there, so nobody has to search their inbox for a link you sent in March. Somebody not ready to register can press "Tell me if anything changes" instead: an email address, a reminder before the hour, and the notice you send if the link moves.</p>
+                                <p class="es-conv-muted text-sm">Registering gives somebody their own page for that date, and the join link is on it. The confirmation email links straight there, so nobody has to search their inbox for a link you sent in March. With the "Notify me" card switched on, somebody not ready to register can press "Tell me if anything changes" instead: an email address, a reminder before the hour, and the notice you send if the link moves.</p>
                             </div>
                         </div>
 

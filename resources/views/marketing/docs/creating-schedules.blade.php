@@ -934,6 +934,14 @@
                 <p class="text-sm text-gray-500 dark:text-gray-400">Add an accessibility panel to your public schedule so visitors can adjust font size, contrast, and motion for themselves. Useful if you are publishing on behalf of an organization with an accessibility commitment to meet.</p>
             </div>
             <div class="doc-field">
+                <h4 class="font-semibold text-gray-900 dark:text-white mb-2">Show Sign-Up Panel</h4>
+                <p class="text-sm text-gray-500 dark:text-gray-400">On unless you turn it off. Signed-out visitors see the <strong class="text-gray-900 dark:text-white">Stay up to date</strong> panel on your schedule page and near the foot of each event page, where they can sign up for <a href="{{ route('marketing.docs.sharing') }}#followers" class="doc-link">email updates</a>. Turning it off also removes the calendar feed link under the form. A link made to open the form, like the QR code on the Followers tab, still shows the panel. The switch only hides it: sign-ups through such a link, and on eventschedule.com through the <strong class="text-gray-900 dark:text-white">Follow</strong> button, still arrive. Free on every plan.</p>
+            </div>
+            <div class="doc-field">
+                <h4 class="font-semibold text-gray-900 dark:text-white mb-2">Show &ldquo;Notify Me&rdquo; Card</h4>
+                <p class="text-sm text-gray-500 dark:text-gray-400">Off unless you turn it on. When it is on, the public events this schedule creates offer a <strong class="text-gray-900 dark:text-white">Tell me when tickets go on sale</strong> card, plus links to it in the Add to Calendar menu and beside the buy button, so visitors can join that event's <a href="{{ route('marketing.docs.tickets') }}#interest-list" class="doc-link">interest list</a>. It follows the event wherever it is listed, including a performer's or curator's page, because the list and its emails belong to the schedule that created the event. Turning it off again stops new sign-ups, and anyone already on a list still gets the emails they asked for. Free on every plan.</p>
+            </div>
+            <div class="doc-field">
                 <h4 class="font-semibold text-gray-900 dark:text-white mb-2">First Day of Week</h4>
                 <p class="text-sm text-gray-500 dark:text-gray-400">Which day your calendar week starts on. All seven days are available; Sunday unless you change it.</p>
             </div>

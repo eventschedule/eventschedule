@@ -557,14 +557,15 @@
         $faqs = [
             [
                 'q' => 'Do I need an account to browse?',
-                'a' => 'No. Everything here is free to read without signing in. Adding an event to your calendar, subscribing to a schedule\'s calendar feed and asking to be told when tickets go on sale need no account either. You only need one to follow a schedule or publish events of your own.',
+                'a' => 'No. Everything here is free to read without signing in. Adding an event to your calendar, subscribing to a schedule\'s calendar feed and, where the organizer offers it, asking to be told when tickets go on sale need no account either. You only need one to follow a schedule or publish events of your own.',
             ],
             [
                 // EventInterestController + event/partials/interest-capture.blade.php, also
                 // linked from the event page's Add to Calendar menu. Per occurrence, single
-                // opt-in, deleted on unsubscribe, never a subscription to the schedule.
+                // opt-in, deleted on unsubscribe, never a subscription to the schedule. Offered only
+                // where the schedule has switched on show_event_interest, which is off by default.
                 'q' => 'What if an event\'s tickets are not on sale yet?',
-                'a' => 'Open the event and use Tell me when tickets go on sale, on the page or in its Add to Calendar menu. You leave an email address and nothing else, and you hear when tickets go on sale, if it is cancelled and shortly before it starts, and you get any notice the organizer sends if the date or venue changes. It covers that one date, not the whole schedule, and every email has a one-click unsubscribe.',
+                'a' => 'Open the event and, where the organizer offers it, use Tell me when tickets go on sale, on the page or in its Add to Calendar menu. You leave an email address and nothing else, and you hear when tickets go on sale, if it is cancelled and shortly before it starts, and you get any notice the organizer sends if the date or venue changes. It covers that one date, not the whole schedule, and every email has a one-click unsubscribe.',
             ],
             [
                 'q' => 'Why are some listings from other websites?',

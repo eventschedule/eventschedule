@@ -36,7 +36,8 @@ class EventInterestSendTest extends TestCase
         parent::setUp();
         Queue::fake();
 
-        $this->role = $this->createRole($this->createOwner());
+        // The card is opt-in, and EventInterestController::store() refuses while it is off.
+        $this->role = $this->createRole($this->createOwner(), 'venue', ['show_event_interest' => true]);
         $this->event = $this->createEvent($this->role, ['creator_role_id' => $this->role->id]);
     }
 
@@ -57,6 +58,10 @@ class EventInterestSendTest extends TestCase
     /** capture() against a schedule and event other than the ones setUp() built. */
     private function captureFor(Role $role, Event $event): void
     {
+        // Same reason as setUp(): the card is opt-in, and it is the event CREATOR's switch that
+        // counts (Event::offersInterestCapture()). Every caller posts to that creator.
+        $role->forceFill(['show_event_interest' => true])->save();
+
         $this->postJson(
             route('event.interest.join', ['subdomain' => $role->subdomain]),
             [

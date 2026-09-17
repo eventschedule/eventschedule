@@ -567,7 +567,7 @@
             ],
             [
                 'q' => 'Can students hear when next term goes on sale?',
-                'a' => 'Yes, free on every plan. On a session that is not on sale yet, a student can press "Tell me when tickets go on sale" and leave just an email address, with no account. They get one email when spots go on sale, one if you cancel, and a reminder 48 hours before the session, plus any change notice you choose to send. On a session that is already selling, the same list sits beside the buy button as "Tell me if anything changes". Each date keeps its own list, you see how many people are waiting on the event\'s Tickets panel, and it does not touch your newsletter allowance. It is not the waitlist, which is for a session that has already filled.',
+                'a' => 'Yes, free on every plan. Switch on the "Notify me" card and, on a session that is not on sale yet, a student can press "Tell me when tickets go on sale" and leave just an email address, with no account. They get one email when spots go on sale, one if you cancel, and a reminder 48 hours before the session, plus any change notice you choose to send. On a session that is already selling, the same list sits beside the buy button as "Tell me if anything changes". Each date keeps its own list, you see how many people are waiting on the event\'s Tickets panel, and it does not touch your newsletter allowance. It is not the waitlist, which is for a session that has already filled.',
             ],
             [
                 'q' => 'Can I sell spots and cap the class?',
@@ -891,7 +891,7 @@
                             </li>
                             <li class="flex gap-3" data-reveal>
                                 <svg aria-hidden="true" class="es-shop-accent mt-0.5 h-5 w-5 flex-none" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7" /></svg>
-                                <span class="es-shop-muted text-sm">Not on sale yet, or not ready to book? A student can leave just an email address for that date and hear when spots go on sale, if you cancel, and 48 hours before it starts, plus any change notice you send. Free on every plan.</span>
+                                <span class="es-shop-muted text-sm">Not on sale yet, or a student not ready to book? With the "Notify me" card switched on, they can leave just an email address for that date and hear when spots go on sale, if you cancel, and 48 hours before it starts, plus any change notice you send. Free on every plan.</span>
                             </li>
                         </ul>
                     </div>

@@ -649,7 +649,7 @@
             ],
             [
                 'q' => 'Can people ask to hear when a class opens for booking?',
-                'a' => 'Yes. Put the class or the summer camp up before it sells and its event page offers "Tell me when tickets go on sale". A parent leaves only an email address, and hears once when booking opens, once if it is cancelled and again shortly before it starts, plus any change notice you choose to send. It is free on every plan and it is not a sign-up to the center\'s emails, so it never touches the newsletter allowance. The Tickets panel in the event editor shows how many people are waiting.',
+                'a' => 'Yes. Switch on the free "Notify me" card, put the class or the summer camp up before it sells, and its event page offers "Tell me when tickets go on sale". A parent leaves only an email address, and hears once when booking opens, once if it is cancelled and again shortly before it starts, plus any change notice you choose to send. It is free on every plan and it is not a sign-up to the center\'s emails, so it never touches the newsletter allowance. The Tickets panel in the event editor shows how many people are waiting.',
             ],
             [
                 'q' => 'Can outside groups request the hall?',

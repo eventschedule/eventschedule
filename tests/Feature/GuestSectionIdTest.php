@@ -207,6 +207,8 @@ class GuestSectionIdTest extends TestCase
             'header_image_url' => 'https://images.test/header.jpg',
             'banner_enabled' => true,
             'banner_on_event_pages' => true,
+            // Off by default; on here so #gp-event-interest renders with the rest.
+            'show_event_interest' => true,
             'banner_message' => 'Doors at seven.',
             'youtube_links' => json_encode([['url' => 'https://www.youtube.com/watch?v=dQw4w9WgXcQ']]),
             'sponsor_logos' => json_encode([['name' => 'A Sponsor', 'logo' => 'demo_sponsor.png', 'url' => 'https://sponsor.test']]),

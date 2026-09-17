@@ -567,7 +567,7 @@
             ],
             [
                 'q' => 'Can I boost an event before tickets are on sale?',
-                'a' => 'Yes. Boost needs a published event, not one that is already selling. If the event has no tickets set up, the ad\'s button defaults to Learn more instead of Get tickets. On a public event, a visitor who clicks through before they can buy can leave just an email address to be told when tickets go on sale, and the number of people waiting shows on the event\'s Tickets panel when you edit it.',
+                'a' => 'Yes. Boost needs a published event, not one that is already selling. If the event has no tickets set up, the ad\'s button defaults to Learn more instead of Get tickets. Switch on the "Notify me" card and, on a public event, a visitor who clicks through before they can buy can leave just an email address to be told when tickets go on sale, and the number of people waiting shows on the event\'s Tickets panel when you edit it.',
             ],
             [
                 'q' => 'Can I pause or cancel a campaign?',
@@ -1213,7 +1213,7 @@
                                 <h3 class="es-launch-ink text-xl font-bold">It lands on your own page</h3>
                                 <span class="es-launch-plan es-launch-plan-free">Free</span>
                             </div>
-                            <p class="es-launch-muted mb-4">Every click goes to your event page on your schedule, not to a rented landing page and not to a third-party listing. The people who arrive can follow you, RSVP or buy a ticket, and the ones who follow are yours to email long after the campaign has finished. On a public event, anyone not ready to buy can join its <a href="{{ route('marketing.docs.tickets') }}#interest-list" class="es-launch-link font-semibold">interest list</a> with just an email address, and hear when tickets go on sale or if anything changes.</p>
+                            <p class="es-launch-muted mb-4">Every click goes to your event page on your schedule, not to a rented landing page and not to a third-party listing. The people who arrive can follow you, RSVP or buy a ticket, and the ones who follow are yours to email long after the campaign has finished. Switch on the free "Notify me" card and, on a public event, anyone not ready to buy can join its <a href="{{ route('marketing.docs.tickets') }}#interest-list" class="es-launch-link font-semibold">interest list</a> with just an email address, and hear when tickets go on sale or if anything changes.</p>
                             <p class="es-launch-muted text-sm">
                                 That is the part worth planning for. A campaign is a fortnight; a follower is not.
                                 <a href="{{ marketing_url('/features/newsletters') }}" class="es-launch-link font-semibold">Newsletters take it from there</a>

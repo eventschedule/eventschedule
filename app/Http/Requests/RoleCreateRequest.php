@@ -52,6 +52,10 @@ class RoleCreateRequest extends FormRequest
             'header_style' => ['nullable', 'string', 'in:banner,compact'],
             'translation_enabled' => ['nullable', 'boolean'],
             'translation_language_code' => ['nullable', 'string', 'in:'.implode(',', array_keys(config('app.supported_languages')))],
+            // store() fills from $request->all(), so these need rules here too: the create page
+            // renders both toggles, and a junk value would otherwise reach a NOT NULL column.
+            'show_subscribe_panel' => ['sometimes', 'boolean'],
+            'show_event_interest' => ['sometimes', 'boolean'],
         ];
     }
 }

@@ -353,7 +353,7 @@
             ],
             [
                 'q' => 'Can people ask to hear when a show goes on sale?',
-                'a' => 'Yes, with nothing but an email address. Announce the show, give its tickets a date to go on sale, and anyone who wants in can leave their address on the event page without an account. They get one email when tickets go on sale, one if the show is cancelled, a reminder shortly before it starts, and any change notice you send, and nothing else. It is kept per date, so asking about one Friday is not a sign-up for every Friday. You can see how many people are waiting on the event\'s Tickets panel, and it is free on every plan.',
+                'a' => 'Yes, with nothing but an email address. Switch on the free "Notify me" card, announce the show, give its tickets a date to go on sale, and anyone who wants in can leave their address on the event page without an account. They get one email when tickets go on sale, one if the show is cancelled, a reminder shortly before it starts, and any change notice you send, and nothing else. It is kept per date, so asking about one Friday is not a sign-up for every Friday. You can see how many people are waiting on the event\'s Tickets panel, and it is free on every plan.',
             ],
             [
                 'q' => 'Can I refund a ticket, or part of one?',
@@ -667,7 +667,7 @@
                     </div>
 
                     <p class="es-night-muted mt-5 border-t border-[rgba(18,20,26,0.1)] pt-4 text-xs dark:border-[rgba(233,235,242,0.12)]">
-                        A ticket type can also be given a date to go on sale or come off it, once, for the whole run. Anyone who joins the <x-link href="{{ marketing_url('/docs/tickets#interest-list') }}">interest list</x-link> on the event page before sales open gets one email when they do.
+                        A ticket type can also be given a date to go on sale or come off it, once, for the whole run. With the "Notify me" card switched on, anyone who joins the <x-link href="{{ marketing_url('/docs/tickets#interest-list') }}">interest list</x-link> on the event page before sales open gets one email when they do.
                     </p>
                 </div>
 

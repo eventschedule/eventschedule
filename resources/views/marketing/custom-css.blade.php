@@ -694,11 +694,11 @@
             ],
             [
                 'q' => 'Can I hide a section of my page?',
-                'a' => 'Yes. Every panel on your schedule page and your event pages carries an id that begins with gp-, and one rule removes one panel: #gp-talent-list { display: none; }. The two most often asked for are the "notify me when tickets go on sale" card (#gp-event-interest) and the compact list of performer names (#gp-talent-list). Hiding a panel hides it and nothing more: the feature behind it still works, so where a real on/off setting exists, such as videos, fan photos, feedback or sponsors, use that instead.',
+                'a' => 'Yes. Every panel on your schedule page and your event pages carries an id that begins with gp-, and one rule removes one panel: #gp-talent-list { display: none; }, which hides the compact list of performer names and is the rule most often asked for. Hiding a panel hides it and nothing more: the feature behind it still works, so where a real on/off setting exists, such as videos, fan photos, feedback, sponsors or the "notify me when tickets go on sale" card, use that instead. That card is off unless you switch it on in your schedule settings.',
             ],
             [
                 'q' => 'Which pages does Custom CSS reach?',
-                'a' => 'Every page the guest layout draws: your schedule page, each event page with its ticket form and its "Notify me" card, both embeds, the event request form, and the booking, gift card, gallery and feedback pages. It does not reach the ticket and order pages a buyer lands on after paying, which use the app\'s own layout, or any email.',
+                'a' => 'Every page the guest layout draws: your schedule page, each event page with its ticket form and, where you have switched it on, its "Notify me" card, both embeds, the event request form, and the booking, gift card, gallery and feedback pages. It does not reach the ticket and order pages a buyer lands on after paying, which use the app\'s own layout, or any email.',
             ],
             [
                 'q' => 'Is Custom CSS secure?',

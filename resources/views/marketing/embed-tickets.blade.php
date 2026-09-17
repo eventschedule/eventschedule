@@ -723,7 +723,7 @@
             ],
             [
                 'q' => 'Does the widget do everything my event page does?',
-                'a' => 'Everything that sells the ticket. Three things stay on the full event page, on purpose. The multi-event cart: the widget sells the one event it was copied from, because a cart held inside someone else\'s page would be out of reach of the rest of your schedule. The quiet "Tell me if anything changes" link beside the buy button, which takes an email address for news about the event rather than an order. And the tick-box that lets a buyer sign up to hear from your schedule. The event name in the header bar opens that full page, in the parent window.',
+                'a' => 'Everything that sells the ticket. Three things stay on the full event page, on purpose. The multi-event cart: the widget sells the one event it was copied from, because a cart held inside someone else\'s page would be out of reach of the rest of your schedule. The quiet "Tell me if anything changes" link beside the buy button, there when you have switched on the "Notify me" card, which takes an email address for news about the event rather than an order. And the tick-box that lets a buyer sign up to hear from your schedule. The event name in the header bar opens that full page, in the parent window.',
             ],
             [
                 'q' => 'Can I use it for free events and registrations?',

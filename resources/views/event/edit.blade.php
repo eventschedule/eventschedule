@@ -2717,6 +2717,22 @@
                                             <p class="text-sm font-medium text-blue-800 dark:text-blue-300">
                                                 {{ trans_choice('messages.event_interest_waiting_count', $interestCount, ['count' => $interestCount]) }}
                                             </p>
+                                            {{-- The count keeps reporting people who asked before the card
+                                                 was switched off, so say that nobody new can join, and
+                                                 where the switch is. It is the CREATOR's switch
+                                                 (Event::offersInterestCapture()), which may not be the
+                                                 schedule this editor was opened from; link only when
+                                                 this user can edit that one. The text is a translation
+                                                 and the subdomain a slug, so nothing user-controlled
+                                                 enters this Vue mount. --}}
+                                            @if (! $event->creatorRole?->show_event_interest)
+                                                <p class="mt-1 text-sm text-blue-700 dark:text-blue-300">
+                                                    {{ __('messages.event_interest_signups_off') }}
+                                                    @if ($event->creatorRole && auth()->user()->isEditor($event->creatorRole->subdomain))
+                                                        <x-link href="{{ route('role.edit', ['subdomain' => $event->creatorRole->subdomain]) }}#section-settings">{{ __('messages.settings') }}</x-link>
+                                                    @endif
+                                                </p>
+                                            @endif
                                         </div>
                                     @endif
                                     <div v-if="tickets.length === 1 && !tickets[0].id" class="mt-4">

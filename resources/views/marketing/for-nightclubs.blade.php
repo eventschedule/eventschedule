@@ -539,7 +539,7 @@
             ],
             [
                 'q' => 'Can people ask to hear when tickets go on sale?',
-                'a' => 'Yes, on every plan. Put a night up before tickets are ready and the event page offers "Tell me when tickets go on sale". People leave an email address, with no account, and hear when tickets go on sale, if the night is cancelled, and again shortly before it starts, plus any change notice you choose to send. Each date of a weekly night keeps its own list, you see how many are waiting on the event\'s Tickets panel, and none of it counts against your newsletter allowance. It is not the waitlist, which is for a night that has already sold out.',
+                'a' => 'Yes, on every plan. Switch on the "Notify me" card, put a night up before tickets are ready, and the event page offers "Tell me when tickets go on sale". People leave an email address, with no account, and hear when tickets go on sale, if the night is cancelled, and again shortly before it starts, plus any change notice you choose to send. Each date of a weekly night keeps its own list, you see how many are waiting on the event\'s Tickets panel, and none of it counts against your newsletter allowance. It is not the waitlist, which is for a night that has already sold out.',
             ],
             [
                 'q' => 'Can I refund a ticket if a night is cancelled?',

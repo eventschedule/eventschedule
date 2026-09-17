@@ -841,7 +841,7 @@
             <div class="es-send-tint mt-4 p-6 sm:p-7" data-reveal>
                 <p class="es-send-ink text-sm font-bold">A third list, kept per event, and not one you write to</p>
                 <p class="es-send-muted mt-2 text-sm">
-                    An upcoming public event page offers "Tell me when tickets go on sale", or "Tell
+                    Switch on the "Notify me" card and an upcoming public event page offers "Tell me when tickets go on sale", or "Tell
                     me if anything changes" once it is selling. A visitor leaves an email address and
                     nothing else, and hears about that one event only: an email when tickets go on
                     sale, a reminder shortly before it starts, and any change or cancellation notice

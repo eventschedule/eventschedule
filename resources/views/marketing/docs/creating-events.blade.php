@@ -723,7 +723,7 @@
                         <td>Listed for everyone</td>
                         <td>Anyone</td>
                         <td>Included</td>
-                        <td>Offered</td>
+                        <td>Offered once the <a href="{{ route('marketing.docs.creating_schedules') }}#settings-advanced" class="doc-link">&ldquo;Notify me&rdquo; card</a> is switched on</td>
                         <td>Synced</td>
                     </tr>
                     <tr>

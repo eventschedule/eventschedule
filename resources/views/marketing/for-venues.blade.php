@@ -269,7 +269,7 @@
             ],
             [
                 'q' => 'Can people ask to hear when tickets go on sale?',
-                'a' => 'Yes, on every plan. On the event page a visitor can leave an email address, and nothing else, under Tell me when tickets go on sale. They get one email when tickets go on sale, one if you cancel, and a reminder shortly before the night, plus any change notice you choose to send. You see how many people are waiting on the event\'s Tickets panel, and the count is never shown publicly.',
+                'a' => 'Yes, on every plan. Switch on the "Notify me" card and, on the event page, a visitor can leave an email address, and nothing else, under Tell me when tickets go on sale. They get one email when tickets go on sale, one if you cancel, and a reminder shortly before the night, plus any change notice you choose to send. You see how many people are waiting on the event\'s Tickets panel, and the count is never shown publicly.',
             ],
             [
                 'q' => 'Can buyers pick their own seat?',
@@ -428,7 +428,7 @@
         accent="sky"
         badge="Public calendar"
         heading="A calendar your regulars actually follow"
-        lede="One page with everything you have on. Share the link, embed it on your own website, or let people subscribe so your nights land in the calendar app they already use and move when you move them. For a night that is not on sale yet, a visitor can leave an email address to hear when tickets go on sale."
+        lede="One page with everything you have on. Share the link, embed it on your own website, or let people subscribe so your nights land in the calendar app they already use and move when you move them. Switch on the “Notify me” card and, for a night that is not on sale yet, a visitor can leave an email address to hear when tickets go on sale."
         :chips="['Mobile-friendly', 'One link', 'Follow button', 'iCal and RSS feeds', 'Embed anywhere', 'Interest list']"
         :lead="true"
         frame="browser"

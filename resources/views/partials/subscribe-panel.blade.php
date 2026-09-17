@@ -24,12 +24,30 @@
     $subscribeError = $subscribePanelRole && session('subscribe_error_for') === $subscribePanelRole->subdomain
         ? session('subscribe_error')
         : null;
+
+    // The owner's switch (Settings > Advanced, on by default), with two exceptions that both
+    // outrank it:
+    //  - ?subscribe=1 is what the Followers tab's QR code and "Your follow link" open. The owner
+    //    printed or shared that on purpose, so it keeps working with the panel otherwise hidden.
+    //  - A result waiting to be shown. role.audience.join stays open whatever this says (the
+    //    Follow modal posts to it too), so a submission from a tab opened before the switch, or
+    //    from a custom domain whose cross-origin referer drops ?subscribe=1, still succeeds - and
+    //    this panel is the only thing that renders its outcome.
+    //
+    // !== false, not a truthy test: only an explicit off hides the panel. A Role that was never
+    // read from the table (or was read before the column existed, between a deploy and its
+    // migration) has no value at all, and the column's default is on.
+    $subscribePanelOn = $subscribePanelRole
+        && ($subscribePanelRole->show_subscribe_panel !== false
+            || request()->boolean('subscribe')
+            || $subscribeDone
+            || $subscribeError);
 @endphp
 
 {{-- Signed-out only. Two reasons, and the second is a repo rule: an account holder should be
      following with their account rather than creating a parallel account-less row, and a honeypot
      must never be rendered into an authenticated page where a password manager could fill it. --}}
-@if ($subscribePanelRole && ! auth()->user() && ! request()->embed && ! is_demo_mode() && ! is_demo_role($subscribePanelRole))
+@if ($subscribePanelOn && ! auth()->user() && ! request()->embed && ! is_demo_mode() && ! is_demo_role($subscribePanelRole))
 {{-- v-pre: the schedule name is user-controlled text rendered server-side, and the app runs Vue's
      full build, so anything Vue mounts has its markup compiled as a template. On the schedule page
      this panel currently sits 244 characters after #calendar-app closes - one careless move inside

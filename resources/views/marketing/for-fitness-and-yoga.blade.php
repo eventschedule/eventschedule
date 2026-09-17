@@ -636,7 +636,7 @@
             ],
             [
                 'q' => 'Can students be told when a workshop goes on sale?',
-                'a' => 'Yes, free on every plan. On the page for a class date that is not on sale yet, a student can press "Tell me when tickets go on sale" and leave just an email address, with no account. They get one email when tickets go on sale, one if you cancel it, and a reminder 48 hours before it starts, plus any change notice you choose to send. On a date that is already selling, the same list sits beside the buy button as "Tell me if anything changes". Each date of a recurring class keeps its own list, you see how many people are waiting on the event\'s Tickets panel, and it does not count against your newsletter allowance.',
+                'a' => 'Yes, free on every plan. Switch on the "Notify me" card and, on the page for a class date that is not on sale yet, a student can press "Tell me when tickets go on sale" and leave just an email address, with no account. They get one email when tickets go on sale, one if you cancel it, and a reminder 48 hours before it starts, plus any change notice you choose to send. On a date that is already selling, the same list sits beside the buy button as "Tell me if anything changes". Each date of a recurring class keeps its own list, you see how many people are waiting on the event\'s Tickets panel, and it does not count against your newsletter allowance.',
             ],
             [
                 'q' => 'Can I sell class passes and drop-ins?',

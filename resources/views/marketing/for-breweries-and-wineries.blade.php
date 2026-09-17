@@ -363,7 +363,7 @@
             ],
             [
                 'q' => 'Can people ask to hear when tour tickets go on sale?',
-                'a' => 'Yes, and it costs them only an email address. Put the tour or a release tasting up before it sells and its page offers "Tell me when tickets go on sale". They hear once when you open sales, once if it is cancelled and again shortly before it starts, plus any change notice you choose to send. It is free on every plan, it is not a subscription to your schedule, and it does not touch the newsletter allowance. The Tickets panel in the event editor shows how many are waiting, which is a fair guide to whether a second tour would fill.',
+                'a' => 'Yes, and it costs them only an email address. Switch on the "Notify me" card, put the tour or a release tasting up before it sells, and its page offers "Tell me when tickets go on sale". They hear once when you open sales, once if it is cancelled and again shortly before it starts, plus any change notice you choose to send. It is free on every plan, it is not a subscription to your schedule, and it does not touch the newsletter allowance. The Tickets panel in the event editor shows how many are waiting, which is a fair guide to whether a second tour would fill.',
             ],
             [
                 'q' => 'How do people pay for a tour, and can I refund one?',

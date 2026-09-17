@@ -470,7 +470,7 @@
                 // EventInterestController::store: one field, single opt-in, and no user is created.
                 // Unsubscribing deletes the row rather than suppressing it.
                 'Hear when tickets go on sale',
-                'On an event page, "Tell me when tickets go on sale" (or "Tell me if anything changes", once they are on sale) takes an email address and nothing else, not even a name. You get one email when tickets go on sale, one if it is cancelled and a reminder shortly before it starts, plus any notice the organizer chooses to send if the date or venue changes. It covers that one date, creates no account, and unsubscribing deletes the address.',
+                'Where the organizer offers it on an event page, "Tell me when tickets go on sale" (or "Tell me if anything changes", once they are on sale) takes an email address and nothing else, not even a name. You get one email when tickets go on sale, one if it is cancelled and a reminder shortly before it starts, plus any notice the organizer chooses to send if the date or venue changes. It covers that one date, creates no account, and unsubscribing deletes the address.',
             ],
             [
                 // RoleSubscriberController::store is on the guest routes, not behind auth:
@@ -564,7 +564,7 @@
             ],
             [
                 'q' => 'Do I need an account to hear when tickets go on sale?',
-                'a' => 'No. On the event page, "Tell me when tickets go on sale" takes an email address and nothing else. You hear once when tickets go on sale, once if it is cancelled and once shortly before it starts, and you get any notice the organizer sends if the date or venue changes. It is about that one date, it creates no account and it is not a subscription to the schedule, and the unsubscribe link in any of those emails deletes the address.',
+                'a' => 'No. Where the organizer offers it on the event page, "Tell me when tickets go on sale" takes an email address and nothing else. You hear once when tickets go on sale, once if it is cancelled and once shortly before it starts, and you get any notice the organizer sends if the date or venue changes. It is about that one date, it creates no account and it is not a subscription to the schedule, and the unsubscribe link in any of those emails deletes the address.',
             ],
             [
                 'q' => 'Does an account cost anything?',
@@ -637,7 +637,7 @@
                     </h1>
 
                     <p class="es-fade-up es-d-2 es-key-muted mb-10 max-w-xl text-lg sm:text-xl">
-                        You can read a schedule, buy a ticket, register for a free night, ask to hear when tickets go on sale and often submit an event without signing in to anything. What an account adds is ownership: your name on the record, the record in one place, and the right to change it later.
+                        You can read a schedule, buy a ticket, register for a free night, ask to hear when tickets go on sale where the organizer offers it, and often submit an event without signing in to anything. What an account adds is ownership: your name on the record, the record in one place, and the right to change it later.
                     </p>
 
                     <div class="es-fade-up es-d-3 flex flex-col items-start gap-4 sm:flex-row">

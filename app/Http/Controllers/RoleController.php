@@ -4263,6 +4263,10 @@ class RoleController extends Controller
         // default(true), so no schedule created through the UI would ever announce a new event,
         // silently breaking the promise the subscribe panel makes to every guest who signs up.
         $role->announce_new_events = true;
+        // Same again for roles.show_subscribe_panel (Settings > Advanced, also rendered here), or
+        // every schedule made through the UI would start with its sign-up panel hidden. Its
+        // sibling show_event_interest defaults to false, which is what a missing attribute paints.
+        $role->show_subscribe_panel = true;
         $role->font_family = 'Roboto';
         $role->font_color = '#ffffff';
         $role->accent_color = '#007BFF';

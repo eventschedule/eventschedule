@@ -3522,6 +3522,28 @@
                                 <x-input-error class="mt-2" :messages="$errors->get('show_accessibility_widget')" />
                             </div>
 
+                            {{-- The two guest-page email sign-up surfaces. Free on every plan: turning a
+                                 capture surface off is a choice about the page, not a paid feature.
+                                 The panel defaults on and the "Notify me" card defaults off;
+                                 RoleController::create() sets the panel's default so this create page
+                                 paints it. The card follows the switch of the schedule that CREATED
+                                 an event, wherever the event is listed. --}}
+                            <div class="mb-6">
+                                <x-toggle name="show_subscribe_panel"
+                                    label="{{ __('messages.show_subscribe_panel') }}"
+                                    checked="{{ old('show_subscribe_panel', $role->show_subscribe_panel) }}"
+                                    help="{{ __('messages.show_subscribe_panel_help') }}" />
+                                <x-input-error class="mt-2" :messages="$errors->get('show_subscribe_panel')" />
+                            </div>
+
+                            <div class="mb-6">
+                                <x-toggle name="show_event_interest"
+                                    label="{{ __('messages.show_event_interest') }}"
+                                    checked="{{ old('show_event_interest', $role->show_event_interest) }}"
+                                    help="{{ __('messages.show_event_interest_help') }}" />
+                                <x-input-error class="mt-2" :messages="$errors->get('show_event_interest')" />
+                            </div>
+
                             <div class="mb-6">
                                 <x-input-label for="first_day_of_week" :value="__('messages.first_day_of_week')" />
                                 <select name="first_day_of_week" id="first_day_of_week"

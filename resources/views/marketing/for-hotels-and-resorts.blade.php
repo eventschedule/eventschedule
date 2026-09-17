@@ -699,7 +699,7 @@
             ],
             [
                 'q' => 'Can guests ask to hear when tickets for a special dinner go on sale?',
-                'a' => 'Yes, on every plan. Publish the New Year dinner before tickets are on sale and its page offers "Tell me when tickets go on sale". A guest leaves just an email address and gets one email when tickets go on sale, one if you cancel the dinner, and a reminder shortly before it starts, plus a change notice if you choose to send one when you move it. It is not a subscription to your schedule, every email has a one-click unsubscribe, and how many people are waiting shows in the event editor, never on the public page.',
+                'a' => 'Yes, on every plan. Switch on the "Notify me" card, publish the New Year dinner before tickets are on sale, and its page offers "Tell me when tickets go on sale". A guest leaves just an email address and gets one email when tickets go on sale, one if you cancel the dinner, and a reminder shortly before it starts, plus a change notice if you choose to send one when you move it. It is not a subscription to your schedule, every email has a one-click unsubscribe, and how many people are waiting shows in the event editor, never on the public page.',
             ],
             [
                 'q' => 'Can I keep the pool, the spa, the kids club and the conference programme apart?',
@@ -1209,7 +1209,7 @@
                             @foreach ([
                                 ['A Draft nobody can see', 'Free', 'The New Year dinner exists, with its price and its date, and stays members-only until you publish it.'],
                                 ['An enquiry waiting on you', 'Free', 'Booking requests arrive through the page and wait until you accept one, and the schedule can email you when a new one is sitting there. Nothing appears publicly first.'],
-                                ['Who is waiting for the dinner', 'Free', 'Publish the New Year dinner before tickets open and guests can ask to be told when they do. How many asked shows on the event\'s Tickets panel, and nowhere public.'],
+                                ['Who is waiting for the dinner', 'Free', 'Publish the New Year dinner before tickets open, switch on the "Notify me" card, and guests can ask to be told when they do. How many asked shows on the event\'s Tickets panel, and nowhere public.'],
                                 ['A date taken out', 'Free', 'The exception for the Wednesday the pool is drained. It removes the date rather than annotating it.'],
                                 ['Your own calendar', 'Free', 'Two-way sync with Google, Outlook or CalDAV, so whoever runs the programme works where they already work.'],
                                 ['Tonight\'s running count', 'Pro', 'A scan at the door reads the ticket and marks it used on every plan. The live count and the breakdown by ticket type are the Pro half, and staff-side only.'],
@@ -1234,7 +1234,7 @@
                                 ['Times in the property\'s own zone', 'Free', 'The schedule holds a time zone, so a guest reading the page in another one still sees seven in the morning here.'],
                                 ['A day that is simply not offered', 'Free', 'An excepted date does not appear as cancelled. It is not there, which is what a guest actually needs to know.'],
                                 ['One tap to their own phone', 'Free', 'A date on the card adds itself to Google, Apple or Outlook as a single calendar entry, so Thursday\'s sunset sail is in their own week.'],
-                                ['Told when the dinner goes on sale', 'Free', 'A guest leaves an email address on the dinner\'s page and hears when tickets go on sale, if you cancel, and shortly before it starts. It asks for no account and no name.'],
+                                ['Told when the dinner goes on sale', 'Free', 'With the "Notify me" card switched on, a guest leaves an email address on the dinner\'s page and hears when tickets go on sale, if you cancel, and shortly before it starts. It asks for no account and no name.'],
                                 ['Nothing they did not ask for', 'Free', 'The card does not say who else signed up. A guest hears about new activities only if they left an email address and confirmed it, and then it is one digest every few days rather than a message per activity.'],
                             ] as [$cTitle, $cPlan, $cDesc])
                                 <li class="flex gap-3">
