@@ -842,7 +842,7 @@
                                 <span class="es-key-plan">Free</span>
                             </div>
                             <h3 class="es-key-ink mb-3 text-xl font-bold">The guest version cuts the key for you</h3>
-                            <p class="es-key-muted mb-4">Following collects the schedules you care about on one page you can sort, search and prune in bulk. Signed out, Follow asks for a name and an email address instead, and confirming it sets up the account, already following. Either way it lets the schedule write to you: 10 recipients a month on the free plan, 100 on Pro, 1,000 on Enterprise.</p>
+                            <p class="es-key-muted mb-4">Following collects the schedules you care about on one page you can sort, search and prune in bulk. Signed out, Follow asks for a name and an email address instead, and confirming it sets up the account, already following. You choose a password on that confirmation page, or any time later from the link at the foot of anything the schedule sends you. Either way it lets the schedule write to you: 10 recipients a month on the free plan, 100 on Pro, 1,000 on Enterprise.</p>
                             <p class="es-key-muted text-sm">Worth saying plainly: following is permission, not an alert feed. A newsletter is written and sent by a person, and the automatic new-event digest reaches only an address somebody confirmed.</p>
                         </div>
                         <div class="es-glare" aria-hidden="true"></div>

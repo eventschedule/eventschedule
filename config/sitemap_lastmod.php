@@ -48,7 +48,7 @@ return [
     '/docs/getting-started' => '2026-09-17',
     '/docs/gift-cards' => '2026-09-10',
     '/docs/managing-schedules' => '2026-09-10',
-    '/docs/newsletters' => '2026-09-17',
+    '/docs/newsletters' => '2026-09-18',
     '/docs/referral-program' => '2026-09-13',
     '/docs/saas' => '2026-09-10',
     '/docs/saas/custom-domains' => '2026-09-10',
@@ -180,5 +180,5 @@ return [
     '/trello-replacement' => '2026-09-10',
     '/use-cases' => '2026-09-10',
     '/whova-alternative' => '2026-09-10',
-    '/why-create-account' => '2026-09-17',
+    '/why-create-account' => '2026-09-18',
 ];
