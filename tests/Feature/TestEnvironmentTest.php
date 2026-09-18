@@ -104,4 +104,32 @@ class TestEnvironmentTest extends TestCase
             'refreshApplication() dropped the withoutVite() stub, so every @vite page 500s on CI.'
         );
     }
+
+    /**
+     * The third harness split only CI could disprove, and the one that hid longest.
+     *
+     * preg_match() returns FALSE - not 0 - when PCRE runs out of JIT stack, and
+     * `if (! preg_match(...))` at the call site reads that as "no match". So one unsound pattern
+     * over a rendered page reports the PAGE as wrong, for every value the caller was checking at
+     * once. assertMatchesRegularExpression() is equally blind.
+     *
+     * Which limit trips depends on pcre.jit - an ini setting neither this repo nor .env controls.
+     * CI runs PHP's default of 1, whose JIT stack is 32KB; a developer machine may ship 0, which
+     * tolerates a scan span roughly three times larger. FederationSettingsCardTest was green on
+     * every local configuration anyone tried and red on every CI run for exactly that reason, twice.
+     *
+     * Pinned to CI's value, not to 0: 0 would turn the build green by hiding such a pattern rather
+     * than failing it, and would leave the same cliff for the next page that grows. The full suite
+     * passes with it on, so nothing else depends on the looser limit.
+     */
+    public function test_pcre_runs_with_the_build_machines_limits(): void
+    {
+        $this->assertSame(
+            '1',
+            (string) ini_get('pcre.jit'),
+            'phpunit.xml must pin pcre.jit=1: without it a regex that exhausts PCRE passes here and '
+            .'fails only on CI, reporting the page as wrong rather than the pattern. '
+            .'See TestCase::pregMatchOrFail().'
+        );
+    }
 }

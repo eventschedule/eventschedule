@@ -420,12 +420,28 @@ class FederationSettingsCardTest extends TestCase
     /**
      * "Listed" is not "sent": an event with no picture is refused, and the preview says so.
      *
-     * Asserted outward-in on purpose. previewState() can only answer needs_image for a flyer-less
-     * event on an image-less venue, so the only way the pill assertion can fail is that the row
-     * is not on the page at all - and one regex over the whole document cannot tell "wrong pill"
-     * from "row missing", "card hidden" or "schedule ineligible". It reported all four as
-     * "should be marked federation_pill_needs_image", which is how a green-everywhere test
-     * produced a CI failure that read as a defect in the pill.
+     * Asserted outward-in on purpose - schedule eligible, row in previewEvents(), card rendered,
+     * preview not on an empty branch, and only then the badge - so a red build names its own cause
+     * instead of blaming the badge for something upstream of it.
+     *
+     * The badge check itself parses, and deliberately runs no regex over the document. The version
+     * that did cost two rounds of debugging: `<li[^>]*>` also matches `<link ...>`, of which
+     * layouts/app.blade.php alone renders five in <head>, and the first real `</li>` is in the nav
+     * beyond tens of KB of inline <style>. Each false start scanned that span with a `(?!<\/li>)`
+     * lookahead per character, which exhausts PCRE - and preg_match() answers the error with FALSE,
+     * which `if (! preg_match(...))` reads as "no match". So all three events were reported as carrying
+     * the wrong badge at once, including "Already Out", whose state is one `if ($event->federated_at)`
+     * and cannot be wrong.
+     *
+     * It reproduced nowhere locally because the limit that trips is pcre.jit's 32KB stack: CI runs
+     * PHP's default of 1, this machine shipped 0, and 0 tolerates roughly three times the span.
+     * `php -d pcre.jit=1 vendor/bin/phpunit --filter=...` reproduced the CI failure byte for byte;
+     * phpunit.xml now pins the setting so the two agree. See TestCase::pregMatchOrFail().
+     *
+     * The same pattern could also pass for the wrong reason - a match could start at a <link> in
+     * <head> and pair one event's name with another's badge - which is why this slices the list out
+     * by id and compares within one item. The schedules list above renders identical markup, and
+     * one of its rows carries the venue name.
      */
     public function test_the_preview_says_where_each_event_stands(): void
     {
@@ -480,8 +496,14 @@ class FederationSettingsCardTest extends TestCase
             );
         }
 
-        // Collected, not asserted in the loop: the old version aborted on the first mismatch, so
-        // a run never said where the other two events stood.
+        $items = $this->previewItems($content);
+
+        // Before any per-event check, so "a row is missing" says that rather than arriving as three
+        // events with the wrong badge.
+        $this->assertCount(3, $items, "The preview did not list three events. It listed:\n".implode("\n", $items));
+
+        // Collected, not asserted in the loop: asserting inside it aborts on the first mismatch, so
+        // a run never says where the other two events stand.
         $wrong = [];
 
         foreach ([
@@ -489,15 +511,55 @@ class FederationSettingsCardTest extends TestCase
             'Already Out' => 'federation_pill_sent',
             'Next In Line' => 'federation_pill_next_sync',
         ] as $name => $pill) {
-            // Tempered: name and pill inside the SAME list item, never the next one's pill.
-            $inItem = '(?:(?!<\/li>).)*';
+            $matching = array_values(array_filter($items, fn ($item) => str_contains($item, $name)));
 
-            if (! preg_match('/<li[^>]*>'.$inItem.preg_quote($name, '/').$inItem.preg_quote(__('messages.'.$pill), '/').$inItem.'<\/li>/s', $content)) {
-                $wrong[] = "{$name} should be marked {$pill}";
+            if (count($matching) !== 1) {
+                $wrong[] = "{$name}: expected one row, found ".count($matching);
+
+                continue;
+            }
+
+            // Within the one row, so this can never pick up the next event's badge.
+            if (! str_contains($matching[0], __('messages.'.$pill))) {
+                $wrong[] = "{$name}: expected \"".__('messages.'.$pill)."\" ({$pill}), row reads \"{$matching[0]}\"";
             }
         }
 
+        // The row's own text in the message: a future red build then names the state the page
+        // actually rendered instead of restating what this test wanted.
         $this->assertSame([], $wrong, "The preview listed these events with the wrong state:\n".implode("\n", $wrong));
+    }
+
+    /**
+     * The event preview's rows, as their rendered text.
+     *
+     * strpos/substr rather than a regex: the subject is a whole admin page, and the point of this
+     * helper is that nothing here can blow a PCRE limit and report the page as wrong. See the
+     * docblock on test_the_preview_says_where_each_event_stands().
+     */
+    private function previewItems(string $content): array
+    {
+        $anchor = strpos($content, 'id="federation-preview"');
+        $this->assertNotFalse($anchor, 'the event preview list did not render - no id="federation-preview" on the page');
+
+        // Past the end of the <ul> tag itself: the anchor lands mid-tag, and the remainder would
+        // otherwise survive strip_tags() and ride along on the first row's text.
+        $open = strpos($content, '>', $anchor);
+        $this->assertNotFalse($open, 'the event preview list opening tag was never closed');
+
+        $end = strpos($content, '</ul>', $open);
+        $this->assertNotFalse($end, 'the event preview list was never closed');
+
+        $block = substr($content, $open + 1, $end - $open - 1);
+
+        // Everything after the last </li> is the list's own tail, not a row.
+        $rows = explode('</li>', $block);
+        array_pop($rows);
+
+        return array_values(array_filter(array_map(
+            fn ($row) => trim(preg_replace('/\s+/', ' ', strip_tags($row))),
+            $rows
+        ), fn ($row) => $row !== ''));
     }
 
     public function test_the_empty_preview_says_what_to_do(): void

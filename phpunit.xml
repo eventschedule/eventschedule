@@ -19,6 +19,20 @@
     </source>
     <php>
         <ini name="memory_limit" value="1G"/>
+        <!--
+            CI runs a stock php.ini, where pcre.jit is PHP's default of 1 and the JIT stack is 32KB.
+            A developer machine may ship 0, which tolerates a scan span roughly three times larger
+            before preg_match() gives up - and it does not give up by returning 0, it returns FALSE,
+            which `if (! preg_match(...))` reads as "no match". So an unsound pattern over a rendered
+            page reports the PAGE as wrong, only on CI, for every value the caller was checking.
+            FederationSettingsCardTest lost two rounds of debugging to exactly that gap. Pinning the
+            setting is what makes such a pattern fail on the machine that wrote it.
+
+            Deliberately pinned to CI's value and not to 0: 0 would turn the build green by hiding
+            the pattern instead of failing it, and would leave the same cliff for the next page that
+            grows. See tests/TestCase.php::pregMatchOrFail().
+        -->
+        <ini name="pcre.jit" value="1"/>
         <env name="APP_ENV" value="testing"/>
         <!--
             .env.example ships APP_URL empty and CI copies it verbatim, so config('app.url') was ''

@@ -79,4 +79,36 @@ abstract class TestCase extends BaseTestCase
         config(['app.url' => $url]);
         URL::forceRootUrl($url);
     }
+
+    /**
+     * preg_match(), with a PCRE error reported as a PCRE error.
+     *
+     * preg_match() returns FALSE - not 0 - when it runs out of JIT stack, backtracks or recursion,
+     * and `if (! preg_match(...))` at the call site cannot tell the two apart. So an unsound
+     * pattern over a rendered page does not report itself: it reports the PAGE as wrong, for every
+     * value the caller was checking at once.
+     *
+     * That is not hypothetical here. FederationSettingsCardTest matched `<li[^>]*>` against a whole
+     * admin page; `<li[^>]*>` also matches `<link ...>`, of which layouts/app.blade.php alone
+     * renders five in <head>, and the first real `</li>` is in the nav on the far side of tens of
+     * KB of inline <style>. The scan blew the limit, preg_match() returned false, and all three
+     * reported as carrying the wrong badge - including one whose state is a single
+     * `if ($event->federated_at)` and could not have been wrong.
+     *
+     * It survived two rounds of debugging because the limit that trips is pcre.jit's 32KB stack,
+     * and pcre.jit is an ini setting, not anything the repo or .env controls: CI runs PHP's default
+     * of 1, a dev machine may ship 0, and 0 tolerates a span roughly three times larger. phpunit.xml
+     * now pins it so both agree - but prefer parsing over a big regex, and use this when a regex is
+     * genuinely the right tool.
+     */
+    protected function pregMatchOrFail(string $pattern, string $subject, string $context = ''): bool
+    {
+        $result = preg_match($pattern, $subject);
+
+        $this->assertNotFalse($result, trim($context.' PCRE error: '.preg_last_error_msg()
+            .' - the pattern is unsound for a subject this size ('.strlen($subject)
+            .' bytes). The subject is not necessarily wrong.'));
+
+        return (bool) $result;
+    }
 }

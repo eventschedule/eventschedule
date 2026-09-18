@@ -266,7 +266,10 @@
                             @endif
                         </p>
                     @else
-                        <ul class="space-y-1.5" v-pre>
+                        {{-- The id styles nothing: it is a hook, so a test can slice THIS list out
+                             of the page. The schedules list above renders identical markup, and one
+                             of its rows carries the same schedule name an event row does. --}}
+                        <ul class="space-y-1.5" v-pre id="federation-preview">
                             @foreach ($federationPreview as $previewEvent)
                                 @php
                                     $previewState = $federationPreviewStates[$previewEvent->id] ?? 'next_sync';
