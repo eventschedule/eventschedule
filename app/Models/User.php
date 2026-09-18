@@ -3,6 +3,8 @@
 namespace App\Models;
 
 use App\Casts\EncryptedString;
+use App\Jobs\SendQueuedEmail;
+use App\Mail\SetPassword;
 use App\Notifications\VerifyEmail as CustomVerifyEmail;
 use App\Services\AuditService;
 use App\Services\DemoService;
@@ -168,6 +170,44 @@ class User extends Authenticatable implements MustVerifyEmail
         if ($this->is_subscribed !== false) {
             $this->notify(new CustomVerifyEmail('user'));
         }
+    }
+
+    /**
+     * Reword the reset mail for an account that has never had a password.
+     *
+     * Several paths mint a passwordless stub - a confirmed newsletter subscription, an owner's
+     * newsletter import, a team invite - and every one leaves somebody with an account and no
+     * credential. Telling that person to "reset" a password they never set reads like phishing, and
+     * it is the copy all three later doors (login, forgot-password, the subscriber manage page)
+     * would otherwise send.
+     *
+     * Same token and same route('password.reset') URL either way, so NewPasswordController handles
+     * both and no second token type exists.
+     */
+    public function sendPasswordResetNotification($token)
+    {
+        if (! $this->isStub()) {
+            parent::sendPasswordResetNotification($token);
+
+            return;
+        }
+
+        $url = app_url(route('password.reset', [
+            'token' => $token,
+            'email' => $this->email,
+        ], false));
+
+        // Dispatched through SendQueuedEmail rather than notify(): it takes an explicit locale, and
+        // the account's own language_code is the only locale signal here - the request that
+        // triggered this may be a signed-out stranger typing an address into the login form.
+        SendQueuedEmail::dispatch(
+            new SetPassword($url, $this->email),
+            $this->email,
+            // No roleId: this is a platform credential mail, not a schedule's, so it must not be
+            // sent through a schedule's custom SMTP or counted against its allowance.
+            null,
+            is_valid_language_code($this->language_code) ? $this->language_code : 'en',
+        );
     }
 
     /**
@@ -894,6 +934,35 @@ class User extends Authenticatable implements MustVerifyEmail
             && is_null($this->google_id)
             && is_null($this->google_oauth_id)
             && is_null($this->facebook_id);
+    }
+
+    /**
+     * Whether an emailed set-password link may also verify this address and sign the person in.
+     *
+     * The link is proof of mailbox possession, the same proof RoleSubscriberController::claimAccount()
+     * already accepts on /sub/done, and without it a converted subscriber lands on the verification
+     * wall needing a second email - EnsureEmailIsVerified is appended to the whole web middleware
+     * group in bootstrap/app.php, not merely aliased, so it is every authenticated page.
+     *
+     * The pivot test is what keeps that narrow. PasswordResetLinkController has no stub filter, so
+     * anyone can have a token minted for any stub - including a TEAM INVITE sitting at admin level.
+     * For a privileged account "proved the mailbox twice" is worth keeping, so those keep today's
+     * behaviour: password set, then sign in, then verify. A subscriber stub has exactly one pivot,
+     * at follower, so it always qualifies.
+     */
+    public function mayClaimByEmailLink(): bool
+    {
+        if (! $this->isStub()) {
+            return false;
+        }
+
+        // The raw pivot, not roles(): that relation filters is_deleted and sorts by name, and this
+        // is a privilege question. Erring towards "does not qualify" is the safe direction, so a
+        // pivot on a deleted schedule still counts.
+        return ! DB::table('role_user')
+            ->where('user_id', $this->id)
+            ->where('level', '!=', 'follower')
+            ->exists();
     }
 
     /**

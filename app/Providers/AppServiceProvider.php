@@ -2,20 +2,20 @@
 
 namespace App\Providers;
 
+use App\Listeners\VerifyApplicationHealth;
 use App\Models\Event;
 use App\Models\Role;
 use App\Policies\EventPolicy;
 use App\Policies\RolePolicy;
-use App\Listeners\VerifyApplicationHealth;
 use App\Services\ScheduledTaskRecorder;
 use App\Support\SafeTranslationLoader;
 use Illuminate\Cache\RateLimiting\Limit;
 use Illuminate\Console\Events\CommandFinished;
-use Illuminate\Foundation\Events\DiagnosingHealth;
 use Illuminate\Console\Events\ScheduledTaskFailed;
 use Illuminate\Console\Events\ScheduledTaskFinished;
 use Illuminate\Console\Events\ScheduledTaskSkipped;
 use Illuminate\Console\Events\ScheduledTaskStarting;
+use Illuminate\Foundation\Events\DiagnosingHealth;
 use Illuminate\Support\Facades\Artisan;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\DB;
@@ -195,6 +195,18 @@ class AppServiceProvider extends ServiceProvider
                 return Limit::perMinutes(2, 10)->by((string) $request->route('token'));
             });
         }
+
+        // The subscriber manage page, keyed on its token for the same reason as the pair above: it
+        // ships in an email footer, so a per-IP budget would be shared by everyone behind one
+        // corporate gateway. Tighter than unsubscribe because the POST sends mail - and mail is
+        // separately bounded by StubAccountUtils' per-address bucket, which this only fronts.
+        RateLimiter::for('audience_manage', function ($request) {
+            return Limit::perMinute(10)->by((string) $request->route('token'));
+        });
+
+        RateLimiter::for('audience_set_password', function ($request) {
+            return Limit::perMinutes(10, 5)->by((string) $request->route('token'));
+        });
 
         // Scheduler heartbeat, read by AdminAlertService's scheduler_stalled row.
         //

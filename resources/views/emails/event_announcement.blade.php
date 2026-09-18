@@ -43,6 +43,15 @@
              rendered nowhere. It is the line that turns "who is this?" into an unsubscribe rather
              than a spam complaint. --}}
         <p style="margin: 0 0 8px;">{{ __('messages.subscription_why_receiving', ['schedule' => $role->name]) }}</p>
+        {{-- The one durable way back to the account this subscription created. The offer on
+             /sub/done is one-shot, so without this nothing ever mentions it again. Deliberately
+             "Manage your account" and not "Set a password": one footer reaches recipients with a
+             passwordless account, a real account and no account, and the page is what can tell
+             them apart. --}}
+        @if (! empty($manageUrl))
+        <a href="{{ $manageUrl }}" style="color: #999;">{{ __('messages.subscription_manage_account') }}</a>
+        <span style="color: #ccc;">&middot;</span>
+        @endif
         <a href="{{ $unsubscribeUrl }}" style="color: #999;">{{ __('messages.unsubscribe') }}</a>
     </div>
 </body>

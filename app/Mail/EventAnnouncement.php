@@ -86,6 +86,16 @@ class EventAnnouncement extends Mailable
             text: 'emails.event_announcement_text',
             with: [
                 'isRtl' => in_array(app()->getLocale(), ['ar', 'he']),
+                // Derived here rather than added to the constructor: the subscriber is already in
+                // hand, and every queued EventAnnouncement payload written before this shipped
+                // would otherwise fail to unserialize with a missing argument.
+                //
+                // The SAME token as the unsubscribe link, which is safe only because /sub/m is not
+                // a credential: the most it can do is have a 60-minute link mailed to the address
+                // already on the row. It must never grow the power to set a password directly -
+                // this token ships in the List-Unsubscribe header above and mail gateways
+                // dereference it.
+                'manageUrl' => route('subscriber.show_manage', ['token' => $this->subscriber->token]),
             ],
         );
     }

@@ -12,4 +12,7 @@
 
 --
 {{ __('messages.subscription_why_receiving', ['schedule' => $role->name]) }}
+@if (! empty($manageUrl))
+{{ __('messages.subscription_manage_account') }}: {{ $manageUrl }}
+@endif
 {{ __('messages.unsubscribe') }}: {{ $unsubscribeUrl }}

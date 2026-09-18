@@ -84,4 +84,7 @@
 @endforeach
 --
 {{ !empty($style['footerText']) ? $style['footerText'] : ($role?->name ?? config('app.name')) }}
+@if (! empty($manageUrl))
+{{ __('messages.subscription_manage_account') }}: {{ $manageUrl }}
+@endif
 {{ __('messages.unsubscribe') }}: {{ $unsubscribeUrl }}

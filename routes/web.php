@@ -351,6 +351,18 @@ Route::post('/sub/c/{token}', [RoleSubscriberController::class, 'confirm'])->nam
 // the claim credential from the session, never from the request - see claimState().
 Route::get('/sub/done', [RoleSubscriberController::class, 'confirmed'])->name('subscriber.confirmed')->middleware('app_subdomain');
 Route::post('/sub/account', [RoleSubscriberController::class, 'claimAccount'])->name('subscriber.claim_account')->middleware('throttle:5,1,audience_claim');
+// "Manage your account", the durable link in every announcement and newsletter footer. Same
+// GET-shows / POST-acts split as the pair above and below, for the same mail-gateway reason.
+//
+// The POST is deliberately NOT in bootstrap/app.php's CSRF exemption list, unlike /sub/u below:
+// that one is exempt so a mail client's RFC 8058 one-click works, and nothing posts to this except
+// the form the GET rendered. Exempting it would make it a blind cross-site mail trigger.
+//
+// No app_subdomain: nothing here signs anybody in, so the tenant-host cookie problem that forced it
+// onto /sub/c does not arise. Throttles keyed on the token, like audience_unsubscribe - a link that
+// ships in an email footer must not share a budget with everyone behind one corporate gateway.
+Route::get('/sub/m/{token}', [RoleSubscriberController::class, 'showManage'])->name('subscriber.show_manage')->middleware('throttle:audience_manage');
+Route::post('/sub/m/{token}', [RoleSubscriberController::class, 'sendSetPassword'])->name('subscriber.send_set_password')->middleware('throttle:audience_set_password');
 Route::get('/sub/u/{token}', [RoleSubscriberController::class, 'showUnsubscribe'])->name('subscriber.show_unsubscribe');
 Route::post('/sub/u/{token}', [RoleSubscriberController::class, 'unsubscribe'])->name('subscriber.unsubscribe')->middleware('throttle:audience_unsubscribe');
 // Event-interest unsubscribe. Same GET-shows / POST-acts split as /sub/u above: a mutating GET is

@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Jobs\SendQueuedEmail;
 use App\Mail\SubscriptionConfirmation;
+use App\Models\NewsletterRecipient;
 use App\Models\NewsletterUnsubscribe;
 use App\Models\Role;
 use App\Models\RoleSubscriber;
@@ -12,6 +13,7 @@ use App\Models\User;
 use App\Rules\NoFakeEmail;
 use App\Services\AuditService;
 use App\Utils\HoneypotUtils;
+use App\Utils\StubAccountUtils;
 use Illuminate\Database\QueryException;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -608,6 +610,120 @@ class RoleSubscriberController extends Controller
             ->with('message', __('messages.subscription_account_created', [
                 'schedule' => $role?->name ?: '',
             ]));
+    }
+
+    /**
+     * "Manage your account" - the durable link in every announcement and newsletter footer.
+     *
+     * The gap this closes: the password offer on /sub/done is one-shot (its credential lives in the
+     * session and is spent), so closing that tab used to mean nothing ever mentioned the dormant
+     * account again. Re-subscribing is not a way back either - store() returns early for a
+     * confirmed, unsuppressed address so it is not a membership oracle.
+     *
+     * A GET that renders and mutates nothing, like every other page in this block: Safe Links,
+     * Proofpoint and Barracuda dereference footer links before a human sees them.
+     *
+     * Note what this page is NOT. The token identifies a mailbox; it is not a credential for
+     * setting a password, because the subscriber token ships in every List-Unsubscribe header. The
+     * most it can do is have a 60-minute link mailed to the address already on the row.
+     */
+    public function showManage(Request $request, string $token)
+    {
+        [$email, $role, $source] = $this->resolveManageToken($token);
+
+        if (! $email) {
+            return $this->linkExpired();
+        }
+
+        // Same refusal store() makes. Without it a demo schedule's subscriber row is a live
+        // account-conversion surface.
+        if ($role && is_demo_role($role)) {
+            abort(404);
+        }
+
+        $this->applyLocale(null, $role);
+
+        $user = User::where('email', $email)->first();
+
+        return view('subscriber.manage', [
+            'role' => $role,
+            'email' => $email,
+            'token' => $token,
+            // Four states, and only this page can tell them apart - which is why the footer link
+            // says "Manage your account" rather than "Set a password".
+            'isStub' => $user && $user->isStub(),
+            'hasAccount' => (bool) $user,
+            'fromCheckout' => $source === 'checkout',
+        ]);
+    }
+
+    /**
+     * Mail a set-password link to the address on the token's row.
+     *
+     * Never to an address the form posts: the page shows the address as static text for exactly
+     * this reason, because a field whose value is discarded is a lie.
+     */
+    public function sendSetPassword(Request $request, string $token)
+    {
+        // Public form, so a honeypot. This page renders session('status') through
+        // x-auth-session-status and no flash error, so the bail is a ValidationException.
+        if (HoneypotUtils::isTripped($request)) {
+            throw ValidationException::withMessages(['email' => __('messages.invalid_request')]);
+        }
+
+        [$email, $role] = $this->resolveManageToken($token);
+
+        if (! $email) {
+            return $this->linkExpired();
+        }
+
+        if ($role && is_demo_role($role)) {
+            abort(404);
+        }
+
+        $stub = StubAccountUtils::find($email);
+
+        // No stub: either a real account, or no account at all. Both are states the GET already
+        // renders honestly, so send them back to it rather than inventing a second answer here.
+        if (! $stub) {
+            return redirect()->route('subscriber.show_manage', ['token' => $token]);
+        }
+
+        // Branching on the return value, never assuming a send - see StubAccountUtils::send() for
+        // the two throttles, one of which fires for a minute after every confirm.
+        $status = StubAccountUtils::send($stub);
+
+        return redirect()->route('subscriber.show_manage', ['token' => $token])
+            ->with('status', $status === StubAccountUtils::SENT
+                ? __('messages.subscription_manage_sent')
+                : __('messages.login_password_link_already_sent'));
+    }
+
+    /**
+     * Resolve a manage token to [email, role, source].
+     *
+     * Two token namespaces reach this page and both mean the same thing here, so one route serves
+     * both rather than duplicating the page's four-state copy:
+     *
+     * - role_subscribers.token, permanent, the one announcement footers carry.
+     * - newsletter_recipients.token, minted per send. Rows survive - both delete paths are soft
+     *   updates to status = 'cancelled' - but it is the weaker of the two, so it is tried second.
+     */
+    private function resolveManageToken(string $token): array
+    {
+        $subscriber = RoleSubscriber::where('token', $token)->with('role')->first();
+
+        if ($subscriber) {
+            return [$subscriber->email, $subscriber->role, $subscriber->source];
+        }
+
+        $recipient = NewsletterRecipient::where('token', $token)->with('newsletter.role')->first();
+
+        if ($recipient) {
+            return [$recipient->email, $recipient->newsletter?->role, 'newsletter'];
+        }
+
+        return [null, null, null];
     }
 
     /**

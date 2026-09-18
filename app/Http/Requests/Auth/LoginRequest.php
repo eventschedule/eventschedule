@@ -4,6 +4,7 @@ namespace App\Http\Requests\Auth;
 
 use App\Rules\ValidTurnstile;
 use App\Services\AuditService;
+use App\Utils\StubAccountUtils;
 use Illuminate\Auth\Events\Lockout;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Support\Facades\Auth;
@@ -47,14 +48,48 @@ class LoginRequest extends FormRequest
         if (! Auth::attempt($this->only('email', 'password'), $this->boolean('remember'))) {
             RateLimiter::hit($this->throttleKey());
 
+            // Before the stub branch on purpose: this IS a failed login and belongs in the record
+            // as one, whatever we go on to tell the person.
             AuditService::log(AuditService::AUTH_LOGIN_FAILED, null, null, null, null, null, $this->string('email'));
 
             throw ValidationException::withMessages([
-                'email' => trans('auth.failed'),
+                'email' => $this->passwordlessAccountMessage(),
             ]);
         }
 
         RateLimiter::clear($this->throttleKey());
+    }
+
+    /**
+     * What to say about a failed attempt, once we know whether the account has a password at all.
+     *
+     * A stub is a dead end at this form and always was: validateCredentials() returns false on a
+     * null hash, so "these credentials do not match" was the only thing we could say, and it is not
+     * what happened. This is the door people actually try after subscribing to a newsletter.
+     *
+     * Not gated on public_registration_enabled(). That matters most on a selfhost install with
+     * registration closed, where RegisteredUserController::create() and store() both bounce to
+     * /login before ever reaching their stub-upgrade branch - so for an invited admin this door and
+     * the reset link are the ONLY way in, and gating them would lock them out of their own install.
+     *
+     * Yes, this confirms the address exists. Accepted deliberately: /sign_up already answers
+     * "email_already_registered" for a real account, so the app enumerates there today, and the
+     * alternative is leaving somebody staring at a message that is untrue.
+     */
+    private function passwordlessAccountMessage(): string
+    {
+        $stub = StubAccountUtils::find($this->input('email'));
+
+        if (! $stub) {
+            return trans('auth.failed');
+        }
+
+        return match (StubAccountUtils::send($stub)) {
+            StubAccountUtils::SENT => __('messages.login_no_password_yet'),
+            // Never claims a fresh send - see StubAccountUtils::send() for the two throttles.
+            StubAccountUtils::THROTTLED => __('messages.login_password_link_already_sent'),
+            default => trans('auth.failed'),
+        };
     }
 
     /**

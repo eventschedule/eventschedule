@@ -76,6 +76,10 @@ class NewsletterEmail extends Mailable
                 'role' => $role,
                 'style' => $style,
                 'unsubscribeUrl' => $unsubscribeUrl,
+                // The HTML half gets this from NewsletterService::renderHtml(); the text half is
+                // rendered from here, so it needs its own copy. Same token as the unsubscribe link,
+                // which is safe only because /sub/m is not a credential - see the route comment.
+                'manageUrl' => url('/sub/m/'.$this->recipient->token),
                 'blocks' => $this->processedBlocks,
             ],
         );

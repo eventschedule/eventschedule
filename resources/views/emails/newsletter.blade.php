@@ -62,6 +62,14 @@
                                     {{ !empty($style['footerText']) ? $style['footerText'] : ($role ? $role->name : config('app.name')) }}
                                 </p>
                                 <p style="margin: 0; font-size: {{ $template === 'compact' ? '11px' : '12px' }}; color: {{ $footerTextColor }}; font-family: '{{ $style['fontFamily'] }}', sans-serif;">
+                                    {{-- OUTSIDE the $showBranding gate below on purpose: this is a
+                                         recipient service link, not branding, so a Pro schedule
+                                         must not lose it. Null in the composer preview, where
+                                         there is no recipient to identify. --}}
+                                    @if (! empty($manageUrl))
+                                    <a href="{{ $manageUrl }}" style="color: {{ $footerLinkColor }}; text-decoration: underline;">{{ __('messages.subscription_manage_account') }}</a>
+                                    <span style="color: {{ $footerTextColor }};">&middot;</span>
+                                    @endif
                                     <a href="{{ $unsubscribeUrl }}" style="color: {{ $footerLinkColor }}; text-decoration: underline;">{{ __('messages.unsubscribe') }}</a>
                                 </p>
                                 @if (!empty($showBranding))

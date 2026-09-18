@@ -487,6 +487,12 @@ class NewsletterService
             ? url('/nl/u/'.$recipient->token)
             : '#';
 
+        // Null in renderPreview(), where there is no recipient and so no token to identify anybody -
+        // the footer drops the line rather than rendering a dead link into the composer preview.
+        $manageUrl = $recipient
+            ? url('/sub/m/'.$recipient->token)
+            : null;
+
         $role = $newsletter->role;
         $isRtl = $role ? $role->isRtl() : false;
 
@@ -505,6 +511,7 @@ class NewsletterService
                 'blocks' => $blocks,
                 'role' => $role,
                 'unsubscribeUrl' => $unsubscribeUrl,
+                'manageUrl' => $manageUrl,
                 'recipient' => $recipient,
                 'showBranding' => $role ? $role->showBranding() : false,
                 'isRtl' => $isRtl,
@@ -530,8 +537,14 @@ class NewsletterService
             '/<a\s([^>]*?)href=["\']([^"\']+)["\']/i',
             function ($matches) use ($recipient) {
                 $url = $matches[2];
-                // Don't rewrite unsubscribe links or mailto links
-                if (str_contains($url, '/nl/u/') || str_starts_with($url, 'mailto:') || str_starts_with($url, 'tel:') || $url === '#') {
+                // Don't rewrite unsubscribe links or mailto links.
+                //
+                // /sub/m/ is exempt for a different reason than /nl/u/: a mail gateway that
+                // prefetches footer links would otherwise record a phantom CLICK through
+                // NewsletterTrackingController, inflating click-through for every schedule that
+                // sends one. The page itself is prefetch-safe - it mutates nothing - but the
+                // tracking hop in front of it is not.
+                if (str_contains($url, '/nl/u/') || str_contains($url, '/sub/m/') || str_starts_with($url, 'mailto:') || str_starts_with($url, 'tel:') || $url === '#') {
                     return $matches[0];
                 }
                 $encodedUrl = rtrim(strtr(base64_encode($url), '+/', '-_'), '=');
