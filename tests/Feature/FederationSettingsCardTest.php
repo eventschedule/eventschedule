@@ -6,9 +6,11 @@ use App\Models\Event;
 use App\Models\Role;
 use App\Models\Setting;
 use App\Models\User;
+use App\Services\FederationService;
 use App\Utils\UrlUtils;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Http;
+use Illuminate\Support\Str;
 use Tests\Feature\Concerns\CreatesScheduleData;
 use Tests\TestCase;
 
@@ -415,19 +417,72 @@ class FederationSettingsCardTest extends TestCase
             ->assertSee(__('messages.federation_state_pending'));
     }
 
-    /** "Listed" is not "sent": an event with no picture is refused, and the preview says so. */
+    /**
+     * "Listed" is not "sent": an event with no picture is refused, and the preview says so.
+     *
+     * Asserted outward-in on purpose. previewState() can only answer needs_image for a flyer-less
+     * event on an image-less venue, so the only way the pill assertion can fail is that the row
+     * is not on the page at all - and one regex over the whole document cannot tell "wrong pill"
+     * from "row missing", "card hidden" or "schedule ineligible". It reported all four as
+     * "should be marked federation_pill_needs_image", which is how a green-everywhere test
+     * produced a CI failure that read as a defect in the pill.
+     */
     public function test_the_preview_says_where_each_event_stands(): void
     {
         $admin = $this->adminActing();
         Setting::set('federation_enabled', '1');
 
         $role = $this->createRole($admin, 'venue', ['name' => 'Harbour Hall', 'federation_enabled' => true]);
-        $this->createEvent($role, ['name' => 'Pictureless Gig', 'creator_role_id' => $role->id]);
+
+        // Role::saving() resets federation_enabled to its ORIGINAL - null on a create - unless
+        // is_nexus is off AND Setting('federation_enabled') is already on. Both are arranged
+        // above, but that is an unstated ordering dependency: move the Setting::set() below this
+        // line and the schedule quietly becomes ineligible, federatableQuery() returns nothing,
+        // and every assertion below blames the pill. saveQuietly() skips the hook, which is right
+        // for a fixture - the hook is FederationSettingsTest's subject, not this test's.
+        $role->forceFill(['federation_enabled' => true])->saveQuietly();
+        $this->assertTrue(
+            (bool) $role->fresh()->federation_enabled,
+            'the schedule must be federation-eligible or nothing can reach the preview'
+        );
+
+        $pictureless = $this->createEvent($role, ['name' => 'Pictureless Gig', 'creator_role_id' => $role->id]);
         $sent = $this->createEvent($role, ['name' => 'Already Out', 'flyer_image_url' => 'f.jpg', 'creator_role_id' => $role->id]);
         Event::whereKey($sent->id)->update(['federated_at' => now()]);
-        $this->createEvent($role, ['name' => 'Next In Line', 'flyer_image_url' => 'g.jpg', 'creator_role_id' => $role->id]);
+        $next = $this->createEvent($role, ['name' => 'Next In Line', 'flyer_image_url' => 'g.jpg', 'creator_role_id' => $role->id]);
+
+        // The model layer, before the view: separates "federatableQuery() dropped it" from
+        // "the page did not render it".
+        $previewed = app(FederationService::class)->previewEvents(12)->pluck('id');
+        foreach ([$pictureless, $sent, $next] as $event) {
+            $this->assertTrue(
+                $previewed->contains($event->id),
+                "{$event->name} never reached the preview query - federatableQuery() dropped it"
+            );
+        }
 
         $content = $this->get(route('admin.settings'))->assertOk()->getContent();
+
+        $this->assertStringContainsString(
+            'id="federation"',
+            $content,
+            'the network card did not render at all - $federationAvailable was false (app.is_nexus)'
+        );
+
+        // Both empty branches, so a blank preview is never reported as a wrong pill. Sentences
+        // rather than the whole string: @lang does not escape, and the rules copy quotes "Test
+        // event", so a raw compare would depend on that escaping either way.
+        foreach (['federation_preview_empty_rules', 'federation_preview_empty_tick'] as $empty) {
+            $this->assertStringNotContainsString(
+                Str::before(__('messages.'.$empty), '.'),
+                $content,
+                'the preview rendered its empty branch ('.$empty.') instead of listing the events'
+            );
+        }
+
+        // Collected, not asserted in the loop: the old version aborted on the first mismatch, so
+        // a run never said where the other two events stood.
+        $wrong = [];
 
         foreach ([
             'Pictureless Gig' => 'federation_pill_needs_image',
@@ -436,12 +491,13 @@ class FederationSettingsCardTest extends TestCase
         ] as $name => $pill) {
             // Tempered: name and pill inside the SAME list item, never the next one's pill.
             $inItem = '(?:(?!<\/li>).)*';
-            $this->assertMatchesRegularExpression(
-                '/<li[^>]*>'.$inItem.preg_quote($name, '/').$inItem.preg_quote(__('messages.'.$pill), '/').$inItem.'<\/li>/s',
-                $content,
-                "{$name} should be marked {$pill}"
-            );
+
+            if (! preg_match('/<li[^>]*>'.$inItem.preg_quote($name, '/').$inItem.preg_quote(__('messages.'.$pill), '/').$inItem.'<\/li>/s', $content)) {
+                $wrong[] = "{$name} should be marked {$pill}";
+            }
         }
+
+        $this->assertSame([], $wrong, "The preview listed these events with the wrong state:\n".implode("\n", $wrong));
     }
 
     public function test_the_empty_preview_says_what_to_do(): void
