@@ -195,7 +195,13 @@
 
                 searchTimer = setTimeout(async function() {
                     try {
-                        const res = await fetch('{{ route("admin.users.search") }}?q=' + encodeURIComponent(q));
+                        // X-Requested-With makes expectsJson() true, so a lapsed admin re-auth
+                        // window answers 423 instead of a 302 that fetch follows into HTML -
+                        // which res.json() would then choke on inside the silent catch below,
+                        // leaving the autocomplete permanently and inexplicably dead.
+                        const res = await fetch('{{ route("admin.users.search") }}?q=' + encodeURIComponent(q), {
+                            headers: { 'X-Requested-With': 'XMLHttpRequest', 'Accept': 'application/json' }
+                        });
                         if (!res.ok) throw new Error('Request failed');
                         const data = await res.json();
 

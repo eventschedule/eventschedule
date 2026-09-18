@@ -61,6 +61,15 @@
         <env name="QUEUE_CONNECTION" value="sync"/>
         <env name="SESSION_DRIVER" value="array"/>
         <!--
+            Pinned because ArraySessionHandler::read() expires entries against session.lifetime
+            using Carbon::now(), so travel() can expire the session ITSELF. A test that travels
+            past this would pass because the session vanished rather than because the thing it
+            asserts fired. Left at the old 120 so the window stays generous relative to the
+            seconds-scale travel in AdminReauthTimeoutTest, and so the test env does not inherit
+            whatever a developer's .env says.
+        -->
+        <env name="SESSION_LIFETIME" value="120" force="true"/>
+        <!--
             Placeholder keys, never real ones. .env.example ships STRIPE_PLATFORM_SECRET blank and
             omits STRIPE_KEY entirely, so on CI they resolve to '' and null - and the Stripe SDK
             validates the key in its constructor, so every `new StripeClient(config(...))` in the

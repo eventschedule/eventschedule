@@ -97,8 +97,8 @@ class CaptureUtmParameters
         // seedSessionFromClientAttribution() deliberately does NOT seed the session while this
         // cookie exists (so the cookie can win at the read sites), which means
         // session()->has('utm_params') is GUARANTEED false in exactly the case the cookie is the
-        // sole carrier. Without the cookie check, a consented visitor whose 2-hour session had
-        // lapsed had their 30-day utm_source overwritten by whatever link they clicked next -
+        // sole carrier. Without the cookie check, a consented visitor whose session had lapsed
+        // (SESSION_LIFETIME) had their 30-day utm_source overwritten by whatever link they clicked next -
         // while landing_page and referrer_url kept their day-one values, so the row that
         // eventually reached users was internally inconsistent. It also let any plain
         // ?utm_source= do what the $isPaidPlacement signed token exists to prevent.
@@ -141,7 +141,7 @@ class CaptureUtmParameters
         // These two run on EVERY plain GET, so the cookie has to count as first-touch evidence
         // alongside the session, for two reasons that arrived together with edge caching:
         //
-        //  - Correctness. A consented visitor whose session has expired (2 hours) would
+        //  - Correctness. A consented visitor whose session has expired (SESSION_LIFETIME) would
         //    otherwise have the cookie rewritten with whatever page they are on now, quietly
         //    turning 30-day first-touch attribution into last-touch.
         //  - Cacheability. An anonymous marketing GET runs against an in-memory session

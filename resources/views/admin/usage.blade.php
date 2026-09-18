@@ -381,6 +381,12 @@
                         method: 'POST',
                         headers: {
                             'Content-Type': 'application/json',
+                            // Accept, not just Content-Type: Content-Type describes the REQUEST
+                            // body and has no bearing on expectsJson(), so without this a lapsed
+                            // admin re-auth window 302s to HTML and the button reports a
+                            // meaningless error instead of a password prompt.
+                            'Accept': 'application/json',
+                            'X-Requested-With': 'XMLHttpRequest',
                             'X-CSRF-TOKEN': '{{ csrf_token() }}'
                         },
                         body: JSON.stringify({ type: type, id: id })

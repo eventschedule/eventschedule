@@ -149,6 +149,7 @@
         <h3 class="doc-subheading">Session protections</h3>
         <ul class="doc-list mb-6">
             <li><strong class="text-gray-900 dark:text-white">Password confirmation</strong> - stored per session, so a rejoined session asks again. Failed and successful confirmations are both recorded in the audit log.</li>
+            <li><strong class="text-gray-900 dark:text-white">Re-authentication window</strong> - a confirmation lasts 24 hours of inactivity, and loading any admin page restarts that clock, so an admin at work is not interrupted. Separately, a confirmation is never good for more than 30 days no matter how continuously the panel is used - only entering the password again resets that ceiling. Set <code class="doc-inline-code">ADMIN_REAUTH_TIMEOUT</code> and <code class="doc-inline-code">ADMIN_REAUTH_MAX_LIFETIME</code> (both in seconds) to change them. Neither can outlast <code class="doc-inline-code">SESSION_LIFETIME</code> (minutes), because both are stored in the session.</li>
             <li><strong class="text-gray-900 dark:text-white">Browser binding</strong> - the confirmed session is tied to the browser that confirmed it. If the user agent changes, the confirmation is dropped, an <code class="doc-inline-code">admin.session_changed</code> entry is written, and you are asked to confirm again.</li>
             <li><strong class="text-gray-900 dark:text-white">Rate limits</strong> - admin pages allow 30 requests per minute per user, and the password confirmation form allows 5 attempts per minute.</li>
         </ul>

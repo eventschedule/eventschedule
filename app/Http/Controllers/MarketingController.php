@@ -7,6 +7,7 @@ use App\Models\Event;
 use App\Models\Role;
 use App\Services\AuditService;
 use App\Services\DemoService;
+use App\Utils\AdminReauthUtils;
 use App\Utils\DocsUtils;
 use App\Utils\PlatformPricing;
 use App\Utils\UrlUtils;
@@ -5384,13 +5385,23 @@ class MarketingController extends Controller
      * Lives here rather than on AdminFederationController because /browse is served
      * from the base domain, while the admin routes sit behind the app-subdomain group:
      * posting there gets 302'd by RedirectToAppSubdomain, which browsers replay as GET
-     * (405), and the admin password-confirm gate would drop the body anyway. Same shape
-     * as toggleEventDiscovery below, which solves this for local events.
+     * (405). Same shape as toggleEventDiscovery below, which solves this for local events.
+     *
+     * Being outside the admin route group means EnsureUserIsAdmin never runs, and isAdmin()
+     * alone knows nothing about the password re-confirmation window - so this action, a
+     * verbatim duplicate of the in-gate AdminFederationController::blockEvent(), would
+     * otherwise be the one way to moderate the platform without a current confirmation.
+     * Ask AdminReauthUtils directly instead. The session reaches here because
+     * AppServiceProvider::defaultHostedSessionDomain() scopes the cookie to the base domain.
      */
     public function toggleFederatedBlock(string $hash)
     {
         abort_unless(config('app.is_nexus'), 404);
         abort_unless(auth()->check() && auth()->user()->isAdmin(), 403);
+
+        if (! AdminReauthUtils::isCurrent(request()->session())) {
+            return back()->with('error', __('messages.admin_confirm_password'));
+        }
 
         $listing = \App\Models\FederatedEvent::findOrFail(UrlUtils::decodeIdOrFail($hash));
         $listing->isBlocked() ? $listing->unblock() : $listing->block();
@@ -5408,9 +5419,19 @@ class MarketingController extends Controller
         return back()->with('message', __('messages.saved'));
     }
 
+    /**
+     * Hide or unhide a local event from the browse wall.
+     *
+     * Same gate reasoning as toggleFederatedBlock above: served from the base domain, outside the
+     * admin route group, so the re-confirmation window has to be checked by hand.
+     */
     public function toggleEventDiscovery(string $hash)
     {
         abort_unless(auth()->check() && auth()->user()->isAdmin(), 403);
+
+        if (! AdminReauthUtils::isCurrent(request()->session())) {
+            return back()->with('error', __('messages.admin_confirm_password'));
+        }
 
         $event = Event::findOrFail(UrlUtils::decodeIdOrFail($hash));
         $event->is_hidden_from_discovery = ! $event->is_hidden_from_discovery;
@@ -5923,7 +5944,7 @@ class MarketingController extends Controller
 
             // Admin Panel (Selfhost)
             ['page' => 'Admin Panel', 'section' => 'Overview', 'description' => 'Admin panel organization and sections.', 'url' => $r['selfhost_admin'].'#overview', 'category' => 'Selfhost', 'keywords' => 'admin panel dashboard'],
-            ['page' => 'Admin Panel', 'section' => 'Accessing /admin', 'description' => 'How to access the admin panel.', 'url' => $r['selfhost_admin'].'#accessing', 'category' => 'Selfhost', 'keywords' => 'access login admin url'],
+            ['page' => 'Admin Panel', 'section' => 'Accessing /admin', 'description' => 'How to access the admin panel.', 'url' => $r['selfhost_admin'].'#accessing', 'category' => 'Selfhost', 'keywords' => 'access login admin url session timeout re-auth reauth password confirmation ADMIN_REAUTH_TIMEOUT ADMIN_REAUTH_MAX_LIFETIME SESSION_LIFETIME'],
             ['page' => 'Admin Panel', 'section' => 'Dashboard', 'description' => 'Key metrics and overview dashboard.', 'url' => $r['selfhost_admin'].'#dashboard', 'category' => 'Selfhost', 'keywords' => 'dashboard metrics overview'],
             ['page' => 'Admin Panel', 'section' => 'Needs Attention', 'description' => 'Everything waiting on an admin, collected into one list on the dashboard with matching nav badges.', 'url' => $r['selfhost_admin'].'#dashboard', 'category' => 'Selfhost', 'keywords' => 'needs attention alerts badges scheduler stalled not running jobs not draining failed jobs queue unrecognized subscriptions refunds awaiting confirmation unconfirmed pending domains stuck boosts promotions review federation flagged support unread update available'],
             ['page' => 'Admin Panel', 'section' => 'Accommodation Affiliate', 'description' => 'Enable the nearby-lodging map with STAY22_ENABLED and set the fallback affiliate ID.', 'url' => $r['selfhost_admin'].'#system-settings', 'category' => 'Selfhost', 'keywords' => 'accommodation stay22 affiliate commission hotels lodging STAY22_ENABLED STAY22_AID config cache'],

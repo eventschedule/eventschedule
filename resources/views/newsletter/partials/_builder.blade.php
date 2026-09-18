@@ -129,6 +129,7 @@ $builderProps = [
         'recipients' => __('messages.recipients'),
         'ab_testing' => __('messages.ab_testing'),
         'preview' => __('messages.preview'),
+        'preview_session_expired' => __('messages.admin_confirm_password'),
         'edit_blocks' => __('messages.edit_blocks'),
         'test_send' => __('messages.test_send'),
         'test_email_sent_to' => __('messages.test_email_sent_to', ['email' => ':email']),

@@ -1383,7 +1383,9 @@ class ImageVariantsTest extends TestCase
         $role = $this->createRole($admin, 'talent', ['name' => 'Blue Room']);
         $event = $this->createEvent($role, ['name' => 'Toggle Session', 'flyer_image_url' => 'flyer_abc123.png']);
 
-        $this->actingAs($admin);
+        // The toggle is an admin moderation action, so it needs a current password confirmation
+        // even though it is served from the base domain rather than the admin route group.
+        $this->withSession(['admin_password_confirmed_at' => now()->timestamp])->actingAs($admin);
 
         $html = $this->get('/')->assertOk()->getContent();
         $this->assertStringContainsString('flyer_abc123.png', $html);

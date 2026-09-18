@@ -10,6 +10,15 @@ SESSION_ENCRYPT=true
 SESSION_SECURE_COOKIE=true
 SESSION_HTTP_ONLY=true
 SESSION_SAME_SITE=lax
+SESSION_LIFETIME=1440   # minutes of inactivity; any request restarts it
+
+# Admin Re-Authentication (seconds)
+# Idle time before /admin asks for the password again. Sliding: any admin page load
+# restarts it. Cannot exceed SESSION_LIFETIME * 60, because it lives in the session.
+ADMIN_REAUTH_TIMEOUT=86400
+# Ceiling since the password was last entered. Only entering it again resets this, so a
+# permanently open admin tab still re-confirms. Blank or 0 falls back to the default.
+ADMIN_REAUTH_MAX_LIFETIME=2592000
 
 # Application Security
 APP_DEBUG=false
@@ -44,6 +53,7 @@ GEMINI_API_KEY=your_api_key_here
 8. **CSRF Protection**: Enabled for all routes except webhooks
 9. **SQL Injection Prevention**: Using Eloquent ORM with parameterized queries
 10. **XSS Prevention**: HTML Purifier for markdown content
+11. **Admin Re-Authentication**: `/admin` needs a password confirmation on top of being signed in. It lapses after `ADMIN_REAUTH_TIMEOUT` of idle (sliding - any admin page load restarts it) and after `ADMIN_REAUTH_MAX_LIFETIME` in total regardless of activity, and is bound to the browser that confirmed it. Confirming regenerates the session id, which also rotates the CSRF token, so another tab left open may need a reload before its next submit.
 
 ## Content Security Policy (CSP)
 

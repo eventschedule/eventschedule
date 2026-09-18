@@ -59,7 +59,7 @@ return [
     '/docs/schedule-styling' => '2026-09-17',
     '/docs/selfhost' => '2026-09-10',
     '/docs/selfhost/accessibility' => '2026-09-10',
-    '/docs/selfhost/admin' => '2026-09-17',
+    '/docs/selfhost/admin' => '2026-09-18',
     '/docs/selfhost/ai' => '2026-09-10',
     '/docs/selfhost/boost' => '2026-09-10',
     '/docs/selfhost/email' => '2026-09-17',

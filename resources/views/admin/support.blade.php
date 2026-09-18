@@ -184,8 +184,30 @@
                         if (this.pollInterval) clearInterval(this.pollInterval);
                         if (this.msgPollInterval) clearInterval(this.msgPollInterval);
                     },
+                    adminFetch(url, options) {
+                        options = options || {};
+                        // Without these the request is a plain fetch with Accept: */*, so
+                        // Request::expectsJson() is false and EnsureUserIsAdmin answers a lapsed
+                        // re-auth window with a 302 to HTML. fetch follows it, r.json() throws, and
+                        // every catch below is silent - the page would just freeze mid-poll.
+                        options.headers = Object.assign({
+                            'X-Requested-With': 'XMLHttpRequest',
+                            'Accept': 'application/json',
+                        }, options.headers || {});
+
+                        return fetch(url, options).then(r => {
+                            if (r.status === 423) {
+                                // The re-auth window lapsed. Stop polling first, or the reload
+                                // races another 5-second tick.
+                                this.stopPolling();
+                                window.location.reload();
+                                throw r;
+                            }
+                            return r;
+                        });
+                    },
                     fetchConversations() {
-                        fetch('/admin/support/conversations')
+                        this.adminFetch('/admin/support/conversations')
                             .then(r => r.json())
                             .then(data => {
                                 this.conversations = data.conversations;
@@ -204,7 +226,7 @@
                         this.markRead(conv.id);
                     },
                     fetchMessages(convId, silent) {
-                        fetch('/admin/support/' + convId + '/messages')
+                        this.adminFetch('/admin/support/' + convId + '/messages')
                             .then(r => r.json())
                             .then(data => {
                                 var hadMessages = this.conversationMessages.length;
@@ -225,7 +247,7 @@
                         if (!text || !this.selectedConversation || this.adminSending) return;
                         this.adminSending = true;
                         this.adminReplyText = '';
-                        fetch('/admin/support/' + this.selectedConversation.id + '/reply', {
+                        this.adminFetch('/admin/support/' + this.selectedConversation.id + '/reply', {
                             method: 'POST',
                             headers: { 'Content-Type': 'application/json', 'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content },
                             body: JSON.stringify({ body: text })
@@ -244,7 +266,7 @@
                         });
                     },
                     markRead(convId) {
-                        fetch('/admin/support/' + convId + '/mark-read', {
+                        this.adminFetch('/admin/support/' + convId + '/mark-read', {
                             method: 'POST',
                             headers: { 'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content }
                         }).then(() => {
@@ -253,7 +275,7 @@
                         }).catch(() => {});
                     },
                     toggleAvailability() {
-                        fetch('/admin/support/toggle-availability', {
+                        this.adminFetch('/admin/support/toggle-availability', {
                             method: 'POST',
                             headers: { 'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content }
                         })
@@ -263,7 +285,7 @@
                     },
                     closeConversation() {
                         if (!this.selectedConversation) return;
-                        fetch('/admin/support/' + this.selectedConversation.id + '/close', {
+                        this.adminFetch('/admin/support/' + this.selectedConversation.id + '/close', {
                             method: 'POST',
                             headers: { 'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content }
                         })

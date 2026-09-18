@@ -44,6 +44,12 @@ class ConfigEmptyEnvDefaultTest extends TestCase
             // before", hourly, on the shared mailer.
             'event interest reminder hours' => ['usage.php', 'EVENT_INTEREST_REMINDER_HOURS'],
             'event interest tickets max age' => ['usage.php', 'EVENT_INTEREST_TICKETS_MAX_AGE_DAYS'],
+            // A blank value here resolves to 0, and EnsureUserIsAdmin treats a 0 window as
+            // "everything is expired" - so the whole admin panel becomes an unbreakable redirect
+            // loop to the password form. The max() floors catch it; the elvis keeps it from
+            // arising at all.
+            'admin re-auth idle window' => ['auth.php', 'ADMIN_REAUTH_TIMEOUT'],
+            'admin re-auth ceiling' => ['auth.php', 'ADMIN_REAUTH_MAX_LIFETIME'],
         ];
     }
 

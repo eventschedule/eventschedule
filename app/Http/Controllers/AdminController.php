@@ -36,6 +36,7 @@ use App\Services\SubdomainUnavailableException;
 use App\Services\TranslationQueue;
 use App\Services\WebhookService;
 use App\Services\WorkBacklog;
+use App\Utils\AdminReauthUtils;
 use App\Utils\MoneyUtils;
 use App\Utils\PlanPriceUtils;
 use App\Utils\PlatformCurrency;
@@ -99,7 +100,13 @@ class AdminController extends Controller
             ]);
         }
 
-        $request->session()->put('admin_password_confirmed_at', time());
+        // Regenerate on the privilege step: this request raises a plain session to an admin one.
+        // regenerate() migrates the session data, so url.intended - written by the
+        // redirect()->guest() that sent the user here - survives for the intended() below.
+        $request->session()->regenerate();
+
+        // Resets BOTH clocks: entering the password is the one thing that moves the ceiling.
+        AdminReauthUtils::markConfirmed($request->session());
 
         AuditService::log(
             AuditService::ADMIN_PASSWORD_CONFIRMED,

@@ -759,6 +759,19 @@
                     <div class="flex items-center justify-between px-4 py-3 border-b border-gray-200 dark:border-gray-700">
                         <h3 class="text-sm font-medium text-gray-900 dark:text-gray-100">{{ t.preview }}</h3>
                     </div>
+                    <!--
+                        Deliberately a banner and not a reload: the builder holds an unsaved draft,
+                        so bouncing to the confirm-password page would throw the work away. Say what
+                        happened and let them re-confirm in another tab.
+                    -->
+                    <div v-if="previewNeedsReauth" class="bg-amber-50 dark:bg-amber-900/20 border-b border-amber-200 dark:border-amber-700 p-3">
+                        <p class="text-sm text-amber-800 dark:text-amber-200 flex items-start gap-2">
+                            <svg class="w-5 h-5 text-amber-600 dark:text-amber-400 flex-shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+                            </svg>
+                            <span>{{ t.preview_session_expired }}</span>
+                        </p>
+                    </div>
                     <div class="relative">
                         <div v-show="previewLoading" class="absolute inset-0 bg-white/80 dark:bg-gray-800/80 flex items-center justify-center z-10">
                             <div class="flex flex-col items-center gap-2">
@@ -898,6 +911,7 @@ const showTestSend = ref(false);
 const showSchedule = ref(false);
 const showSaveAsTemplate = ref(false);
 const previewLoading = ref(false);
+const previewNeedsReauth = ref(false);
 
 const activeSection = ref('content');
 const imageUploading = ref({});
@@ -1182,7 +1196,14 @@ function uploadImageItem(blockId, imgId, file) {
 
     fetch(props.routes.upload_image, {
         method: 'POST',
-        headers: { 'X-CSRF-TOKEN': props.csrfToken },
+        headers: {
+            'X-CSRF-TOKEN': props.csrfToken,
+            // Without these a lapsed admin re-auth window 302s to the confirm-password page,
+            // fetch follows it, r.ok is true, and r.json() throws a parser error straight into
+            // the alert below: "Unexpected token '<' ... is not valid JSON".
+            'X-Requested-With': 'XMLHttpRequest',
+            'Accept': 'application/json',
+        },
         body: formData,
     })
     .then(r => {
@@ -1266,9 +1287,18 @@ function fetchPreview() {
         method: 'POST',
         body: formData,
         signal: previewAbortController.signal,
+        headers: { 'X-Requested-With': 'XMLHttpRequest', 'Accept': 'application/json' },
     })
     .then(r => {
+        // 423 is EnsureUserIsAdmin saying the re-auth window lapsed. This runs on a keystroke-rate
+        // debounce, so without the headers above it would 302 into HTML and r.json() would throw
+        // into the silent catch below - the preview silently freezing while the admin keeps typing.
+        if (r.status === 423) {
+            previewNeedsReauth.value = true;
+            throw new Error('Re-authentication required');
+        }
         if (!r.ok) throw new Error('Preview failed');
+        previewNeedsReauth.value = false;
         return r.json();
     })
     .then(data => {
@@ -1284,8 +1314,16 @@ function openPreviewInNewTab() {
     const formData = new FormData(form);
     formData.delete('_method');
     formData.append('_token', props.csrfToken);
-    fetch(props.previewUrl, { method: 'POST', body: formData })
+    fetch(props.previewUrl, {
+        method: 'POST',
+        body: formData,
+        headers: { 'X-Requested-With': 'XMLHttpRequest', 'Accept': 'application/json' },
+    })
         .then(r => {
+            if (r.status === 423) {
+                previewNeedsReauth.value = true;
+                throw new Error('Re-authentication required');
+            }
             if (!r.ok) throw new Error('Preview failed');
             return r.json();
         })

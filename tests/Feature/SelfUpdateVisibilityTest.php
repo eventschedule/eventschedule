@@ -192,4 +192,31 @@ class SelfUpdateVisibilityTest extends TestCase
             ->post(route('app.update'))
             ->assertNotFound();
     }
+
+    /**
+     * /update must not answer a GET.
+     *
+     * It was Route::match(['get', 'post'], ...), and AppController::update() downloads a release,
+     * overwrites application files and runs migrate --force. A state-changing GET is reachable by
+     * an <img src="/update">, a link prefetch or a crawler riding an authenticated session, and
+     * CSRF does not apply to GET at all. The in-gate counterpart admin.app_update.run has always
+     * been POST-only.
+     */
+    public function test_the_updater_refuses_a_get(): void
+    {
+        $route = app('router')->getRoutes()->getByName('app.update');
+
+        $this->assertNotNull($route, 'app.update must stay registered.');
+
+        // Asserted on the route's verbs rather than on a response status. A GET /update now falls
+        // through to the {subdomain} guest-portal catch-all, which reads "update" as a schedule
+        // slug and answers 302 - so a status assertion would pass for a reason that has nothing
+        // to do with this route and would keep passing if the GET verb came back.
+        $this->assertSame(
+            ['POST'],
+            array_values(array_diff($route->methods(), ['HEAD'])),
+            'app.update must be POST-only: AppController::update() overwrites application files '
+            .'and runs migrate --force, and CSRF does not apply to a GET.'
+        );
+    }
 }

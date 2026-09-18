@@ -249,7 +249,11 @@ $updateMiddleware = ['auth', 'verified'];
 if (config('app.hosted')) {
     $updateMiddleware[] = 'admin';
 }
-Route::match(['get', 'post'], '/update', [AppController::class, 'update'])
+// POST only. AppController::update() downloads a release, overwrites application files and runs
+// migrate --force, so a GET made it reachable by an <img src="/update">, a link prefetch or a
+// crawler riding an authenticated session, with CSRF not applying to GET at all. Nothing links to
+// route('app.update'), and the in-gate counterpart admin.app_update.run is already POST-only.
+Route::post('/update', [AppController::class, 'update'])
     ->name('app.update')
     ->middleware($updateMiddleware);
 

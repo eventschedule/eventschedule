@@ -129,4 +129,34 @@ return [
 
     'password_timeout' => env('AUTH_PASSWORD_TIMEOUT', 10800),
 
+    /*
+    |--------------------------------------------------------------------------
+    | Admin Re-Authentication Window
+    |--------------------------------------------------------------------------
+    |
+    | How long an admin may sit idle before /admin asks for the password again
+    | (SLIDING: every admin page load resets it), and the hard ceiling since the
+    | password was last entered, which nothing but re-entering it resets. The
+    | ceiling exists because /admin/support polls every 5 seconds, so an open tab
+    | would otherwise renew the sliding window forever.
+    |
+    | SECONDS, unlike session.lifetime, which is MINUTES. Neither can outlast the
+    | session that carries them, so keep SESSION_LIFETIME * 60 >= the idle window
+    | or the session expires first and these knobs look like they do nothing.
+    |
+    | ?: not a second arg to env(): .env.example ships keys present-but-empty and
+    | env() returns '' for that, so a default argument would never fire - the same
+    | trap config/app.php documents for platform_currency. The max() floor stops a
+    | stray 0 or negative value from disabling the gate or locking admins out for
+    | good.
+    |
+    | Not password_timeout above: that is Laravel's own key for the RequirePassword
+    | middleware, which this app does not use.
+    |
+    */
+
+    'admin_reauth_timeout' => max(60, (int) (env('ADMIN_REAUTH_TIMEOUT') ?: 86400)),
+
+    'admin_reauth_max_lifetime' => max(3600, (int) (env('ADMIN_REAUTH_MAX_LIFETIME') ?: 2592000)),
+
 ];

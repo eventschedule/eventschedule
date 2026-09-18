@@ -23,6 +23,7 @@ foreach ([
     'PAYPAL_WEBHOOK_ID',
     'DEFAULT_PAYMENT_METHOD',
     'MARKETING_WALL_CACHE_SECONDS',
+    'SESSION_LIFETIME',
 ] as $pinned) {
     if (array_key_exists($pinned, $_ENV)) {
         $_SERVER[$pinned] = $_ENV[$pinned];

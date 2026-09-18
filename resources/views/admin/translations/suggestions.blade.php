@@ -568,8 +568,15 @@
                         // avoiding the group-mixing and stale-value pitfalls of
                         // rebuilding the lines client-side.
                         var url = URLS.export + '?locale=' + encodeURIComponent(this.localeFilter) + '&group=' + encodeURIComponent(this.groupFilter);
+                        // r.redirected, not just r.ok: this asks for text/plain, so expectsJson()
+                        // is false and a lapsed admin re-auth window answers with a 302 to the
+                        // confirm-password page. fetch follows it and hands back a 200 full of
+                        // HTML, which .blob() happily accepts - so without this guard the login
+                        // page lands in the clipboard under a green "Copied", and gets pasted
+                        // into a lang file. Adding X-Requested-With would NOT help: Accept is
+                        // text/plain, so acceptsAnyContentType() and wantsJson() are both false.
                         var fetched = fetch(url, { headers: { 'Accept': 'text/plain' } })
-                            .then(function (r) { if (!r.ok) throw r; return r.blob(); });
+                            .then(function (r) { if (!r.ok || r.redirected) throw r; return r.blob(); });
                         // Pass the fetch promise INTO the clipboard write (ClipboardItem
                         // deferred promise) so the write stays tied to the click gesture -
                         // a plain writeText after an awaited fetch is rejected on Safari.
@@ -583,7 +590,11 @@
                         write.then(function () {
                             self.copiedPhp = true;
                             setTimeout(function () { self.copiedPhp = false; }, 1500);
-                        }).catch(function () {});
+                        }).catch(function () {
+                            // Was an empty catch, which is how a lapsed re-auth window managed to
+                            // look like a successful copy. Same alert the other actions use.
+                            alert(self.msg.actionFailed);
+                        });
                     },
                 },
             }).mount('#suggestions-app');
