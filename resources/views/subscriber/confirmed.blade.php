@@ -159,6 +159,11 @@
                     if (config('app.hosted')) {
                         $benefits[] = __('messages.subscription_account_benefit_tickets');
                     }
+
+                    // The one that is fully true for somebody following a single schedule, which
+                    // is everybody reading this page. The other two describe a collection they do
+                    // not have yet.
+                    $benefits[] = __('messages.subscription_account_benefit_control');
                 @endphp
                 <ul class="mt-3 space-y-1.5 text-sm text-gray-600 dark:text-gray-400">
                     @foreach ($benefits as $benefit)

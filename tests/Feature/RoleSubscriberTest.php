@@ -1374,6 +1374,25 @@ class RoleSubscriberTest extends TestCase
             // was copied from English, which is what this test is for.
             'subscription_account_body',
             'subscribers_help',
+            // The account-conversion doors. This list is HARDCODED, so a new key is invisible to
+            // this test until it is added here - which is the whole reason the "always translate"
+            // rule goes unenforced for exactly the newest copy if nobody remembers.
+            'subscription_account_expired_body',
+            'subscription_account_ready_body',
+            'subscription_confirm_password_hint',
+            'subscription_manage_body',
+            'subscription_manage_set_password_body',
+            'subscription_manage_has_account_body',
+            'subscription_manage_no_account_body',
+            'subscription_manage_no_account_checkout_body',
+            'subscription_manage_registration_closed_body',
+            'subscription_manage_sent',
+            'login_no_password_yet',
+            'login_password_link_already_sent',
+            'set_password_body',
+            'set_password_expires',
+            'set_password_ignore',
+            'reset_password_body',
         ];
 
         $english = require resource_path('lang/en/messages.php');

@@ -228,3 +228,35 @@ if (document.readyState === 'loading') {
 } else {
     mountVueWidgets();
 }
+/**
+ * Reveal toggle for <x-password-input>.
+ *
+ * Delegated from the document and registered once, rather than a script beside each field: the app
+ * uses Vue's full build with the runtime template compiler, so several of the ten password fields
+ * sit inside an element Vue mounts and compiles - and an inline <script> in a Vue template is not
+ * a script, it is markup Vue tries to compile. Delegation also covers a field rendered into a
+ * modal after this runs.
+ *
+ * No inline on* handler anywhere, which the CSP forbids.
+ */
+document.addEventListener('click', (event) => {
+    const button = event.target.closest('[data-password-toggle]');
+
+    if (! button) {
+        return;
+    }
+
+    const field = button.parentElement.querySelector('[data-password-field]');
+
+    if (! field) {
+        return;
+    }
+
+    const reveal = field.type === 'password';
+    field.type = reveal ? 'text' : 'password';
+    button.setAttribute('aria-label', reveal ? button.dataset.labelHide : button.dataset.labelShow);
+
+    button.querySelectorAll('[data-password-icon]').forEach((icon) => {
+        icon.classList.toggle('hidden', (icon.dataset.passwordIcon === 'show') === reveal);
+    });
+});

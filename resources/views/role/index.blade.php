@@ -1,5 +1,29 @@
 <x-app-admin-layout>
 
+    {{-- Somebody who wanted a newsletter has just been handed the admin portal, and the only
+         sentence explaining why used to be a three-second toast. A persistent panel instead, with
+         the way back to the schedule they actually came for.
+
+         Its own session key rather than the shared 'message': that one is toasted by
+         layouts/app.blade.php for the whole app, and this needs to stay on the page. --}}
+    @if (session('subscriber_welcome'))
+    <div class="mb-4 bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-700 rounded-lg p-4">
+        <div class="flex items-start gap-3">
+            <svg class="w-5 h-5 text-green-600 dark:text-green-400 shrink-0 mt-0.5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" aria-hidden="true">
+                <path stroke-linecap="round" stroke-linejoin="round" d="m4.5 12.75 6 6 9-13.5" />
+            </svg>
+            <div class="flex-1 text-sm text-gray-800 dark:text-gray-200">
+                {{ session('subscriber_welcome') }}
+                @if (session('subscriber_welcome_url'))
+                <div class="mt-2">
+                    <x-link href="{{ session('subscriber_welcome_url') }}">{{ __('messages.back_to_schedule') }}</x-link>
+                </div>
+                @endif
+            </div>
+        </div>
+    </div>
+    @endif
+
     @if (! empty($duplicateVenueCount) && $duplicateVenueCount > 0 && ! request()->filter)
     <div class="mb-4">
         <a href="{{ route('following.merge_venues') }}"

@@ -606,10 +606,15 @@ class RoleSubscriberController extends Controller
 
         Auth::login($user->fresh(), true);
 
+        // A dedicated key rather than the shared 'message': layouts/app.blade.php toasts that one
+        // for three seconds, and somebody who wanted a newsletter has just landed in the admin
+        // portal with that sentence as the only explanation of why. role/index.blade.php renders
+        // this as a panel that stays, with the way back to the schedule beside it.
         return redirect(app_url(route('following', [], false)))
-            ->with('message', __('messages.subscription_account_created', [
+            ->with('subscriber_welcome', __('messages.subscription_account_created', [
                 'schedule' => $role?->name ?: '',
-            ]));
+            ]))
+            ->with('subscriber_welcome_url', $role?->getGuestUrl() ?: null);
     }
 
     /**
