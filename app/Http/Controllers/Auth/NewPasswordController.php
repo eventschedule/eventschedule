@@ -123,17 +123,31 @@ class NewPasswordController extends Controller
         // today it would be inert - and a landmine the day somebody registers
         // SendEmailVerificationNotification, which would mail a verification link for an account
         // this request has just verified.
+        // Second factor first, exactly as AuthenticatedSessionController::store() does. Unreachable
+        // today - enabling 2FA needs an authenticated session, so a stub cannot have one, and
+        // nothing in the app demotes a real account back to a stub - but signing somebody in past
+        // their own second factor is not a thing to leave depending on that.
+        if ($claimed && $resetUser?->fresh()?->hasTwoFactorEnabled()) {
+            $claimed = false;
+        }
+
         if ($claimed && $resetUser) {
             // fresh(): the closure wrote a new remember_token, and a stale instance would have
             // Auth::login() mint a recaller cookie that AuthenticateSession later rejects. The
             // session wipe above does not catch this request - it arrived as a guest, so its row
             // carries user_id null until DatabaseSessionHandler writes it at end of request.
-            Auth::login($resetUser->fresh(), true);
+            $resetUser = $resetUser->fresh();
+
+            Auth::login($resetUser, true);
 
             // Auth::login() already migrates the session id (SessionGuard::updateSession); this is
             // for the CSRF token, which migrate() does not rotate. Matches
             // AuthenticatedSessionController::store().
             $request->session()->regenerate();
+
+            // A session was opened, so the audit trail needs to say so. Without it the record shows
+            // AUTH_REGISTER and then an authenticated session that nothing accounts for.
+            AuditService::log(AuditService::AUTH_LOGIN, $resetUser->id);
 
             return redirect(app_url(route('following', [], false)));
         }

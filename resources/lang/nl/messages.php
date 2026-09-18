@@ -1312,6 +1312,7 @@ return [
     'subscription_manage_registration_closed_body' => 'Je bent geabonneerd op deze e-mails. Gebruik de afmeldlink in een ervan om ze te stoppen.',
     'reset_password_heading' => 'Kies je wachtwoord',
     'reset_password_body' => 'Deze link is voor :email. Kies een wachtwoord en je kunt daarmee inloggen.',
+    'reset_password_body_generic' => 'Kies een wachtwoord en je kunt daarmee inloggen.',
     'reset_password_button' => 'Wachtwoord opslaan',
     'or_continue_with_email' => 'of ga verder met e-mail',
     'google_auth_failed' => 'Google-authenticatie mislukt. Probeer het opnieuw.',

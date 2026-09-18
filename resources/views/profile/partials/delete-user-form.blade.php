@@ -52,10 +52,13 @@
             <div class="mt-6">
                 <x-input-label for="password" value="{{ __('messages.password') }}" class="sr-only" />
 
+                {{-- w-full, not the w-3/4 this used to carry: x-password-input wraps the field in a
+                     full-width relative div and pins its reveal toggle to the wrapper's end edge, so
+                     a narrower input left the icon floating in the empty quarter beside it. --}}
                 <x-password-input
                     id="password"
                     name="password"
-                    class="mt-1 block w-3/4"
+                    class="mt-1 block w-full"
                     placeholder="{{ __('messages.password') }}"
                 />
 

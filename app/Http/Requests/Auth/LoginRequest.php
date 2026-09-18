@@ -15,6 +15,14 @@ use Illuminate\Validation\ValidationException;
 class LoginRequest extends FormRequest
 {
     /**
+     * How many passwordless-account hints one IP may be given per minute.
+     *
+     * Matches /reset-password's own route throttle, which is the door this branch mirrors. See
+     * passwordlessAccountMessage() for why the route's throttle:30,1 is not a substitute.
+     */
+    private const STUB_HINT_PER_IP = 5;
+
+    /**
      * Determine if the user is authorized to make this request.
      */
     public function authorize(): bool
@@ -75,6 +83,14 @@ class LoginRequest extends FormRequest
      * Yes, this confirms the address exists. Accepted deliberately: /sign_up already answers
      * "email_already_registered" for a real account, so the app enumerates there today, and the
      * alternative is leaving somebody staring at a message that is untrue.
+     *
+     * Accepting the disclosure is not the same as accepting it at any RATE, hence the per-IP ceiling
+     * below. This route carries throttle:30,1 while /reset-password - the door this mirrors - carries
+     * throttle:5,1, and ensureIsNotRateLimited()'s own bucket is keyed on email|ip, so it bounds
+     * repeat attempts against ONE address and does nothing about breadth. Without this, one IP could
+     * probe and mail thirty distinct addresses a minute here against five there. Turnstile is not a
+     * backstop: ValidTurnstile passes on custom domains, under testing, and on any selfhost with no
+     * keys configured.
      */
     private function passwordlessAccountMessage(): string
     {
@@ -83,6 +99,16 @@ class LoginRequest extends FormRequest
         if (! $stub) {
             return trans('auth.failed');
         }
+
+        // Spent on the DISCLOSURE, not just on a mail, because knowing which addresses are
+        // passwordless is the half an attacker gets even when every send is throttled.
+        $ipKey = 'stub-hint-ip:'.$this->ip();
+
+        if (RateLimiter::tooManyAttempts($ipKey, self::STUB_HINT_PER_IP)) {
+            return trans('auth.failed');
+        }
+
+        RateLimiter::hit($ipKey, 60);
 
         return match (StubAccountUtils::send($stub)) {
             StubAccountUtils::SENT => __('messages.login_no_password_yet'),

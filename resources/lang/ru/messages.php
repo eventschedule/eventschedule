@@ -1397,6 +1397,7 @@ return [
     'subscription_manage_registration_closed_body' => 'Вы подписаны на эти письма. Чтобы прекратить, воспользуйтесь ссылкой отписки в любом из них.',
     'reset_password_heading' => 'Выберите пароль',
     'reset_password_body' => 'Эта ссылка для :email. Выберите пароль, и вы сможете входить с ним.',
+    'reset_password_body_generic' => 'Выберите пароль, и вы сможете входить с ним.',
     'reset_password_button' => 'Сохранить пароль',
     'or_continue_with_email' => 'или продолжить по электронной почте',
     'google_auth_failed' => 'Аутентификация Google не удалась. Пожалуйста, попробуйте еще раз.',

@@ -1312,6 +1312,7 @@ return [
     'subscription_manage_registration_closed_body' => 'Estás suscrito a estos correos. Para dejar de recibirlos, usa el enlace de baja en cualquiera de ellos.',
     'reset_password_heading' => 'Elige tu contraseña',
     'reset_password_body' => 'Este enlace es para :email. Elige una contraseña y podrás iniciar sesión con ella.',
+    'reset_password_body_generic' => 'Elige una contraseña y podrás iniciar sesión con ella.',
     'reset_password_button' => 'Guardar contraseña',
     'or_continue_with_email' => 'o continuar con correo electrónico',
     'google_auth_failed' => 'La autenticación de Google falló. Por favor, inténtalo de nuevo.',

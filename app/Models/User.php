@@ -944,15 +944,26 @@ class User extends Authenticatable implements MustVerifyEmail
      * wall needing a second email - EnsureEmailIsVerified is appended to the whole web middleware
      * group in bootstrap/app.php, not merely aliased, so it is every authenticated page.
      *
-     * The pivot test is what keeps that narrow. PasswordResetLinkController has no stub filter, so
-     * anyone can have a token minted for any stub - including a TEAM INVITE sitting at admin level.
-     * For a privileged account "proved the mailbox twice" is worth keeping, so those keep today's
-     * behaviour: password set, then sign in, then verify. A subscriber stub has exactly one pivot,
-     * at follower, so it always qualifies.
+     * The privilege tests are what keep that narrow. PasswordResetLinkController has no stub filter,
+     * so anyone can have a token minted for any stub - including a TEAM INVITE sitting at admin
+     * level. For a privileged account "proved the mailbox twice" is worth keeping, so those keep
+     * today's behaviour: password set, then sign in, then verify. A subscriber stub has exactly one
+     * pivot, at follower, and is not an instance admin, so it always qualifies.
+     *
+     * There are TWO privilege axes and they are unrelated. Checking only the pivot was wrong:
+     * users.is_admin is set on an existing account, by email, with no password requirement at all -
+     * app:make-admin does it (and warns when the account has no password, so this is an anticipated
+     * state, not a hypothetical), and 2026_07_01_000008_ensure_selfhost_admin promotes the lowest-id
+     * user whenever a selfhost install has no admin, whoever that turns out to be. Such a user has
+     * no pivot above follower, so the pivot test alone handed whoever could read that mailbox a
+     * verified, signed-in INSTANCE ADMIN session in one click.
+     *
+     * roles.user_id is not a third axis: every writer (User::claimSchedule(), ScheduleTransferService)
+     * sets the owner pivot alongside it, so the pivot test already covers it.
      */
     public function mayClaimByEmailLink(): bool
     {
-        if (! $this->isStub()) {
+        if (! $this->isStub() || $this->isAdmin()) {
             return false;
         }
 

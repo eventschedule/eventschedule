@@ -1315,6 +1315,7 @@ return [
     'subscription_manage_registration_closed_body' => 'Sei iscritto a queste email. Per interromperle, usa il link di disiscrizione presente in ognuna.',
     'reset_password_heading' => 'Scegli la tua password',
     'reset_password_body' => 'Questo link è per :email. Scegli una password e potrai accedere con quella.',
+    'reset_password_body_generic' => 'Scegli una password e potrai accedere con quella.',
     'reset_password_button' => 'Salva password',
     'or_continue_with_email' => 'o continua con l\'email',
     'google_auth_failed' => 'Autenticazione Google fallita. Riprova.',

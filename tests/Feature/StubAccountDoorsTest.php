@@ -97,6 +97,28 @@ class StubAccountDoorsTest extends TestCase
         Mail::assertNothingSent();
     }
 
+    public function test_a_throttled_broker_does_not_spend_the_budget(): void
+    {
+        // The window is the 60 seconds after every confirm, because claimState() mints a token on
+        // each one - i.e. exactly when people try these doors. Hitting the bucket before the broker
+        // call meant three attempts there burned the whole ten-minute allowance while delivering
+        // nothing, leaving the address locked out with no mail and a message insisting one was sent.
+        $stub = $this->stub();
+        Password::createToken($stub);
+
+        for ($i = 0; $i < 3; $i++) {
+            $this->assertSame(StubAccountUtils::THROTTLED, StubAccountUtils::send($stub->fresh()));
+        }
+
+        Mail::assertNothingSent();
+
+        // Budget intact: once the broker's own window passes, a link still goes.
+        $this->travel(61)->seconds();
+
+        $this->assertSame(StubAccountUtils::SENT, StubAccountUtils::send($stub->fresh()));
+        Mail::assertSent(SetPassword::class, 1);
+    }
+
     public function test_a_throttled_broker_never_claims_a_fresh_send(): void
     {
         // PasswordBroker refuses with RESET_THROTTLED while recentlyCreatedToken() is true, which
@@ -196,6 +218,34 @@ class StubAccountDoorsTest extends TestCase
         $role->users()->attach($stub->id, ['level' => 'admin', 'created_at' => now()]);
 
         $this->assertFalse($stub->mayClaimByEmailLink());
+
+        $token = Password::createToken($stub);
+
+        $this->post(route('password.store'), [
+            'token' => $token,
+            'email' => $stub->email,
+            'password' => 'sup3rsecret',
+        ])->assertRedirect(route('login'));
+
+        $stub->refresh();
+        $this->assertNotNull($stub->password, 'the password is still set');
+        $this->assertNull($stub->email_verified_at, 'but the address is not verified off the link');
+        $this->assertGuest();
+    }
+
+    public function test_an_instance_admin_stub_is_not_verified_or_signed_in(): void
+    {
+        // users.is_admin is a SECOND privilege axis, unrelated to role_user. app:make-admin sets it
+        // on an existing account by email with no password requirement (and warns when there is no
+        // password, so this is an anticipated state), and the ensure_selfhost_admin migration
+        // promotes the lowest-id user whenever a selfhost install has no admin - which can be an
+        // imported newsletter stub. Checking only the pivot handed whoever could read that mailbox
+        // a verified, signed-in instance admin in one click.
+        $stub = $this->stub('ops@fans.test');
+        $stub->is_admin = true;
+        $stub->save();
+
+        $this->assertFalse($stub->fresh()->mayClaimByEmailLink());
 
         $token = Password::createToken($stub);
 

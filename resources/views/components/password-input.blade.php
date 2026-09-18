@@ -29,9 +29,12 @@
          Hidden from assistive tech and from the tab order by default is the wrong trade - somebody
          using a screen reader benefits from this most - so it is a real focusable button with an
          aria-label that flips with the state. --}}
+    {{-- Focusable, deliberately. It carried tabindex="-1" at first, which contradicted the sentence
+         above it and took the toggle away from exactly the people it helps most: a keyboard-only
+         user could not reveal what they had typed, and the focus: classes and the flipping
+         aria-label below were both dead. --}}
     <button type="button"
         data-password-toggle
-        tabindex="-1"
         aria-label="{{ __('messages.show_password') }}"
         data-label-show="{{ __('messages.show_password') }}"
         data-label-hide="{{ __('messages.hide_password') }}"

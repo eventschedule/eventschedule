@@ -1316,6 +1316,7 @@ return [
     'subscription_manage_registration_closed_body' => 'Du bist für diese E-Mails angemeldet. Zum Beenden nutze den Abmeldelink in einer davon.',
     'reset_password_heading' => 'Wähl dein Passwort',
     'reset_password_body' => 'Dieser Link gilt für :email. Wähl ein Passwort, und du kannst dich damit anmelden.',
+    'reset_password_body_generic' => 'Wähl ein Passwort, und du kannst dich damit anmelden.',
     'reset_password_button' => 'Passwort speichern',
     'or_continue_with_email' => 'oder mit E-Mail fortfahren',
     'google_auth_failed' => 'Google-Authentifizierung fehlgeschlagen. Bitte versuchen Sie es erneut.',

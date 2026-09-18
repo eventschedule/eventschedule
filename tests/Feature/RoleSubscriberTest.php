@@ -1046,6 +1046,41 @@ class RoleSubscriberTest extends TestCase
             ->assertDontSee('name="password"', false);
     }
 
+    public function test_a_confirm_page_with_no_password_field_carries_no_honeypot(): void
+    {
+        // The decoy and the only thing that can report it have to ship together. x-auth-layout
+        // renders no $errors block, so the per-field error inside the password block is the single
+        // surface a trip has - and offersPasswordOnConfirm() is false for a real account, an
+        // unclaimed or demo schedule, and every selfhost install with registration closed. Rendered
+        // outside that block, a trip made the Confirm button a silent no-op for ever and the
+        // subscription could never complete.
+        User::factory()->create(['email' => 'fan@fans.test', 'password' => bcrypt('already-set')]);
+
+        $sub = $this->subscribeOnly('fan@fans.test');
+
+        $this->get(route('subscriber.show_confirm', ['token' => $sub->confirm_token]))
+            ->assertOk()
+            ->assertDontSee('name="'.\App\Utils\HoneypotUtils::FIELD.'"', false);
+    }
+
+    public function test_a_confirm_page_offering_a_password_reports_a_tripped_honeypot(): void
+    {
+        $sub = $this->subscribeOnly('fan@fans.test');
+
+        $page = $this->get(route('subscriber.show_confirm', ['token' => $sub->confirm_token]));
+        $page->assertOk()->assertSee('name="'.\App\Utils\HoneypotUtils::FIELD.'"', false);
+
+        $this->from(route('subscriber.show_confirm', ['token' => $sub->confirm_token]))
+            ->post(route('subscriber.confirm', ['token' => $sub->confirm_token]), [
+                \App\Utils\HoneypotUtils::FIELD => 'https://example.com',
+            ])->assertSessionHasErrors('password');
+
+        // And the surface that renders that error is still on the page it lands back on.
+        $this->get(route('subscriber.show_confirm', ['token' => $sub->confirm_token]))
+            ->assertOk()
+            ->assertSee('name="password"', false);
+    }
+
     public function test_a_confirm_link_never_overwrites_an_existing_password(): void
     {
         $existing = User::factory()->create([
@@ -1074,11 +1109,11 @@ class RoleSubscriberTest extends TestCase
             ->assertSee(__('messages.continue_with_google'), false)
             ->assertSee(route('auth.google'), false);
 
-        // And the callback has somewhere to land.
-        $this->assertSame(
-            app_url(route('following', [], false)),
-            session('url.intended')
-        );
+        // And it does NOT steer the session to get there. Writing url.intended here to give the
+        // Google callback a destination was a hijack: nothing consumes it on any other path, so it
+        // survived and sent the next unrelated sign-in in this browser - possibly by a different
+        // account - to /following, and clobbered one Authenticate had legitimately set.
+        $this->assertNull(session('url.intended'));
     }
 
     public function test_the_confirmed_page_hides_google_when_it_is_not_configured(): void
@@ -1393,6 +1428,8 @@ class RoleSubscriberTest extends TestCase
             'set_password_expires',
             'set_password_ignore',
             'reset_password_body',
+            'reset_password_body_generic',
+            'subscription_account_benefit_control',
         ];
 
         $english = require resource_path('lang/en/messages.php');

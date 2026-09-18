@@ -1343,6 +1343,7 @@ return [
     'subscription_manage_registration_closed_body' => 'Ești abonat la aceste e-mailuri. Ca să le oprești, folosește linkul de dezabonare din oricare dintre ele.',
     'reset_password_heading' => 'Alege-ți parola',
     'reset_password_body' => 'Acest link este pentru :email. Alege o parolă și te vei putea autentifica cu ea.',
+    'reset_password_body_generic' => 'Alege o parolă și te vei putea autentifica cu ea.',
     'reset_password_button' => 'Salvează parola',
     'or_continue_with_email' => 'sau continuă cu email',
     'google_auth_failed' => 'Autentificarea Google a eșuat. Vă rugăm încercați din nou.',

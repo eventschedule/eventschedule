@@ -372,12 +372,14 @@ class RoleSubscriberController extends Controller
 
         $this->applyLocale($state['locale'] ?? null, $role);
 
-        // Only while there is a stub to adopt, so this never hijacks an unrelated later sign-in.
-        // handleGoogleCallback() ends in redirect()->intended(route('home')), and for somebody who
-        // came here to follow one schedule, /following is the page worth landing on.
-        if (! empty($state['claim_token']) && config('services.google.client_id')) {
-            $request->session()->put('url.intended', app_url(route('following', [], false)));
-        }
+        // No url.intended here, deliberately. Writing it to steer the Google button was a hijack:
+        // nothing consumes it on any other path - claimAccount() redirects explicitly rather than
+        // through intended() - so it survived the session and sent the NEXT unrelated sign-in in
+        // that browser to /following, including one by a different account, and it clobbered an
+        // url.intended that Authenticate had legitimately set for a guest bounced off a protected
+        // page. handleGoogleCallback() falls back to route('home'), which for signup_intent
+        // 'subscriber' is the dashboard - a slightly worse landing, and no side effect on shared
+        // session state.
 
         return view('subscriber.confirmed', [
             'role' => $role,
@@ -634,19 +636,25 @@ class RoleSubscriberController extends Controller
      */
     public function showManage(Request $request, string $token)
     {
-        [$email, $role, $source] = $this->resolveManageToken($token);
+        [$email, $role, $source, $locale] = $this->resolveManageToken($token);
 
         if (! $email) {
             return $this->linkExpired();
         }
 
-        // Same refusal store() makes. Without it a demo schedule's subscriber row is a live
-        // account-conversion surface.
-        if ($role && is_demo_role($role)) {
+        // Same refusals store(), confirmed() and resolveConfirmToken() make. Without the demo one a
+        // demo schedule's subscriber row is a live account-conversion surface; without the deleted
+        // one this page outlives the schedule it belongs to, and its "back to schedule" link points
+        // at a page that no longer exists.
+        if ($role && (is_demo_role($role) || $role->is_deleted)) {
             abort(404);
         }
 
-        $this->applyLocale(null, $role);
+        // The SUBSCRIBER's locale first, as SendEventAnnouncements uses when it queues the mail this
+        // link arrives in. Reading only the schedule's meant a French subscriber of an English
+        // schedule got a French announcement and an English page - this was the one surface in the
+        // feature not honouring it.
+        $this->applyLocale($locale, $role);
 
         $user = User::where('email', $email)->first();
 
@@ -682,7 +690,8 @@ class RoleSubscriberController extends Controller
             return $this->linkExpired();
         }
 
-        if ($role && is_demo_role($role)) {
+        // Matching showManage(), or the POST outlives the refusal the GET makes.
+        if ($role && (is_demo_role($role) || $role->is_deleted)) {
             abort(404);
         }
 
@@ -705,7 +714,7 @@ class RoleSubscriberController extends Controller
     }
 
     /**
-     * Resolve a manage token to [email, role, source].
+     * Resolve a manage token to [email, role, source, locale].
      *
      * Two token namespaces reach this page and both mean the same thing here, so one route serves
      * both rather than duplicating the page's four-state copy:
@@ -713,22 +722,34 @@ class RoleSubscriberController extends Controller
      * - role_subscribers.token, permanent, the one announcement footers carry.
      * - newsletter_recipients.token, minted per send. Rows survive - both delete paths are soft
      *   updates to status = 'cancelled' - but it is the weaker of the two, so it is tried second.
+     *
+     * The address is normalised here rather than at each call site. RoleSubscriber lowercases on
+     * write but newsletter_recipients has no such mutator, so without this the GET could look the
+     * account up under one spelling while StubAccountUtils::find() - which lowercases and trims -
+     * found it under another, and the page would contradict its own button.
      */
     private function resolveManageToken(string $token): array
     {
         $subscriber = RoleSubscriber::where('token', $token)->with('role')->first();
 
         if ($subscriber) {
-            return [$subscriber->email, $subscriber->role, $subscriber->source];
+            return [
+                strtolower(trim($subscriber->email)),
+                $subscriber->role,
+                $subscriber->source,
+                $subscriber->locale,
+            ];
         }
 
         $recipient = NewsletterRecipient::where('token', $token)->with('newsletter.role')->first();
 
         if ($recipient) {
-            return [$recipient->email, $recipient->newsletter?->role, 'newsletter'];
+            // No locale on this row - a newsletter is composed in one language - so the schedule's
+            // is the best available signal, which applyLocale() falls back to anyway.
+            return [strtolower(trim((string) $recipient->email)), $recipient->newsletter?->role, 'newsletter', null];
         }
 
-        return [null, null, null];
+        return [null, null, null, null];
     }
 
     /**
@@ -779,6 +800,12 @@ class RoleSubscriberController extends Controller
      * itself rather than by redeeming a reset token.
      *
      * claimAccount() does the same work through Password::reset() because it IS redeeming one.
+     *
+     * No second-factor branch here, unlike NewPasswordController's: enabling 2FA requires an
+     * authenticated session, so a stub cannot have one, and the caller has already established
+     * isStub() on this very row. That controller guards it anyway because a reset token can be
+     * minted for ANY stub by a stranger; here the visitor holds a single-use token mailed to this
+     * address, so there is no wider population to protect.
      */
     private function applyFirstPassword(Request $request, User $user, string $password, ?string $fallbackName): void
     {
@@ -790,11 +817,17 @@ class RoleSubscriberController extends Controller
 
         // fresh(): the write above minted a new remember_token, and a stale instance would have
         // Auth::login() write a recaller cookie that AuthenticateSession later rejects.
-        Auth::login($user->fresh(), true);
+        $user = $user->fresh();
+
+        Auth::login($user, true);
 
         // Auth::login() already migrates the session id (SessionGuard::updateSession); this is for
         // the CSRF token, which migrate() does not rotate. Matches AuthenticatedSessionController.
         $request->session()->regenerate();
+
+        // A session was opened, so say so - otherwise the trail shows AUTH_REGISTER and then an
+        // authenticated session nothing accounts for.
+        AuditService::log(AuditService::AUTH_LOGIN, $user->id);
     }
 
     /** Spend the one-shot claim credential, keeping the rest of the page's state. */

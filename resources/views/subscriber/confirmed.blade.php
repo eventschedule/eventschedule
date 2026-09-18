@@ -63,9 +63,24 @@
                  token is already in hand. --}}
             <form method="POST" action="{{ url('/sub/c/' . $subscriber->confirm_token) }}" class="mt-6">
                 @csrf
-                <x-honeypot />
 
                 @if ($offerPassword ?? false)
+                    {{-- The honeypot lives INSIDE this block, with the only thing that can report
+                         it. x-auth-layout renders no $errors block, so the per-field error at the
+                         foot of this block is the single surface a tripped honeypot has - and
+                         offersPasswordOnConfirm() is false for a real account, an unclaimed or demo
+                         schedule, and every selfhost install with registration closed. Rendered
+                         outside, the decoy shipped to all of those while its error did not, so a
+                         trip made the Confirm button a silent no-op for ever and the subscription
+                         could never be completed.
+
+                         It also keeps the decoy away from a signed-in visitor, who can reach this
+                         page and whose password manager is the thing most likely to fill it.
+
+                         confirm()'s server-side check stays unconditional: with no field rendered
+                         filled() is false, so a real visitor never trips it, and a bot that posts
+                         the field anyway is still refused. --}}
+                    <x-honeypot />
                     {{-- Optional, and it has to stay that way. A required field here would turn a
                          working confirmation into a signup form, and everyone it bounced would be
                          somebody who was about to become a confirmed subscriber - the schedule
@@ -87,7 +102,7 @@
                         <div class="mt-4">
                             <x-input-label for="confirm_email" :value="__('messages.email')" />
                             <x-text-input id="confirm_email" name="email" type="email" readonly
-                                class="block mt-1 w-full bg-gray-50 dark:bg-gray-800 text-gray-700 dark:text-gray-300"
+                                class="block mt-1 w-full bg-gray-50 dark:!bg-gray-800 text-gray-700 dark:text-gray-300"
                                 autocomplete="username" :value="$subscriber->email" />
                         </div>
 
@@ -188,7 +203,7 @@
                     <div>
                         <x-input-label for="claim_email" :value="__('messages.email')" />
                         <x-text-input id="claim_email" name="email" type="email" readonly
-                            class="block mt-1 w-full bg-gray-50 dark:bg-gray-800 text-gray-700 dark:text-gray-300"
+                            class="block mt-1 w-full bg-gray-50 dark:!bg-gray-800 text-gray-700 dark:text-gray-300"
                             autocomplete="username" :value="$claimEmail" />
                     </div>
 

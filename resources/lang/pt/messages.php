@@ -1313,6 +1313,7 @@ return [
     'subscription_manage_registration_closed_body' => 'Está subscrito destes e-mails. Para os parar, use a ligação de cancelamento em qualquer um deles.',
     'reset_password_heading' => 'Escolha a sua palavra-passe',
     'reset_password_body' => 'Esta ligação é para :email. Escolha uma palavra-passe e poderá iniciar sessão com ela.',
+    'reset_password_body_generic' => 'Escolha uma palavra-passe e poderá iniciar sessão com ela.',
     'reset_password_button' => 'Guardar palavra-passe',
     'or_continue_with_email' => 'ou continue com email',
     'google_auth_failed' => 'Falha na autenticação do Google. Por favor, tente novamente.',

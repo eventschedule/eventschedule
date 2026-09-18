@@ -1375,6 +1375,7 @@ return [
     'subscription_manage_registration_closed_body' => 'أنت مشترك في هذه الرسائل. لإيقافها، استخدم رابط إلغاء الاشتراك في أي منها.',
     'reset_password_heading' => 'اختر كلمة المرور',
     'reset_password_body' => 'هذا الرابط خاص بـ :email. اختر كلمة مرور وستتمكن من تسجيل الدخول بها.',
+    'reset_password_body_generic' => 'اختر كلمة مرور وستتمكن من تسجيل الدخول بها.',
     'reset_password_button' => 'حفظ كلمة المرور',
     'or_continue_with_email' => 'أو المتابعة بالبريد الإلكتروني',
     'google_auth_failed' => 'فشلت مصادقة Google. يرجى المحاولة مرة أخرى.',

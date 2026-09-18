@@ -1680,6 +1680,7 @@ return [
     'subscription_manage_registration_closed_body' => 'You are subscribed to these emails. To stop them, use the unsubscribe link in any of them.',
     'reset_password_heading' => 'Choose your password',
     'reset_password_body' => 'This link is for :email. Choose a password and you can sign in with it.',
+    'reset_password_body_generic' => 'Choose a password and you can sign in with it.',
     'reset_password_button' => 'Save password',
     'or_continue_with_email' => 'or continue with email',
     'google_auth_failed' => 'Google authentication failed. Please try again.',

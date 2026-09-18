@@ -12,11 +12,24 @@
         <h2 class="text-lg font-medium text-gray-900 dark:text-gray-100">
             {{ __('messages.reset_password_heading') }}
         </h2>
+        @php
+            // Only when it really is an address. This GET validates no token and carries no
+            // throttle (routes/auth.php), so ?email= is attacker-controlled - and naming it in
+            // bold prose, rather than inside an <input value> as this page used to, would turn a
+            // genuine first-party URL into a vehicle for an arbitrary convincing sentence
+            // ("...?email=Your+account+is+locked.+Call+1-800-..."). Escaped either way, so this is
+            // about plausibility, not injection.
+            $resetEmail = filter_var((string) $request->email, FILTER_VALIDATE_EMAIL) ?: null;
+        @endphp
         {{-- bdi: an LTR address inside RTL prose reorders around punctuation in ar/he. --}}
         <p class="mt-2 text-sm text-gray-600 dark:text-gray-400">
-            {!! __('messages.reset_password_body', [
-                'email' => '<bdi dir="ltr" class="font-medium text-gray-900 dark:text-gray-100">'.e($request->email).'</bdi>',
-            ]) !!}
+            @if ($resetEmail)
+                {!! __('messages.reset_password_body', [
+                    'email' => '<bdi dir="ltr" class="font-medium text-gray-900 dark:text-gray-100">'.e($resetEmail).'</bdi>',
+                ]) !!}
+            @else
+                {{ __('messages.reset_password_body_generic') }}
+            @endif
         </p>
     </div>
 
@@ -36,7 +49,7 @@
         <div>
             <x-input-label for="email" :value="__('messages.email')" />
             <x-text-input id="email" name="email" type="email" readonly
-                class="block mt-1 w-full bg-gray-50 dark:bg-gray-800 text-gray-700 dark:text-gray-300"
+                class="block mt-1 w-full bg-gray-50 dark:!bg-gray-800 text-gray-700 dark:text-gray-300"
                 autocomplete="username" :value="old('email', $request->email)" />
             <x-input-error :messages="$errors->get('email')" class="mt-2" />
         </div>

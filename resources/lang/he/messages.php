@@ -1367,6 +1367,7 @@ return [
     'subscription_manage_registration_closed_body' => 'אתם רשומים למיילים האלה. כדי להפסיק, השתמשו בקישור ההסרה שמופיע בכל אחד מהם.',
     'reset_password_heading' => 'בחרו סיסמה',
     'reset_password_body' => 'הקישור הזה שייך ל־:email. בחרו סיסמה ותוכלו להתחבר איתה.',
+    'reset_password_body_generic' => 'בחרו סיסמה ותוכלו להתחבר איתה.',
     'reset_password_button' => 'שמירת סיסמה',
     'or_continue_with_email' => 'או המשך עם אימייל',
     'google_auth_failed' => 'האימות עם Google נכשל. אנא נסה שוב.',

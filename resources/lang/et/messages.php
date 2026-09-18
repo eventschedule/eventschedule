@@ -1335,6 +1335,7 @@ return [
     'subscription_manage_registration_closed_body' => 'Oled nende kirjade tellija. Lõpetamiseks kasuta mõne kirja loobumislinki.',
     'reset_password_heading' => 'Vali oma parool',
     'reset_password_body' => 'See link on aadressile :email. Vali parool ja saad sellega sisse logida.',
+    'reset_password_body_generic' => 'Vali parool ja saad sellega sisse logida.',
     'reset_password_button' => 'Salvesta parool',
     'or_continue_with_email' => 'või jätka e-kirjaga',
     'google_auth_failed' => 'Google\'i autentimine ebaõnnestus. Palun proovi uuesti.',

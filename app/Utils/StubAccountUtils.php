@@ -81,15 +81,22 @@ class StubAccountUtils
             return self::THROTTLED;
         }
 
-        RateLimiter::hit($key, self::PER_EMAIL_DECAY);
-
         // User::sendPasswordResetNotification() rewords this for a stub - see the override there.
         $status = Password::sendResetLink(['email' => $user->email]);
 
-        return match ($status) {
-            Password::RESET_LINK_SENT => self::SENT,
-            Password::RESET_THROTTLED => self::THROTTLED,
-            default => self::NONE,
-        };
+        // Spend the budget only on a mail that actually went. Hitting first - which is what
+        // PasswordResetLinkController does - means the broker's own 60-second refusal costs a slot
+        // and delivers nothing, and that window is not exotic: claimState() mints a token on EVERY
+        // confirm, so it is the minute right after somebody subscribes, which is exactly when they
+        // try these doors. Three attempts there used to burn the whole ten-minute allowance with
+        // zero mail sent, leaving the address locked out and the copy insisting a link was on its
+        // way.
+        if ($status === Password::RESET_LINK_SENT) {
+            RateLimiter::hit($key, self::PER_EMAIL_DECAY);
+
+            return self::SENT;
+        }
+
+        return $status === Password::RESET_THROTTLED ? self::THROTTLED : self::NONE;
     }
 }

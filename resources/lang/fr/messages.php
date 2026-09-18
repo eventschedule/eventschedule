@@ -1320,6 +1320,7 @@ return [
     'subscription_manage_registration_closed_body' => 'Vous êtes abonné à ces e-mails. Pour les arrêter, utilisez le lien de désabonnement présent dans chacun.',
     'reset_password_heading' => 'Choisissez votre mot de passe',
     'reset_password_body' => 'Ce lien concerne :email. Choisissez un mot de passe et vous pourrez vous connecter avec.',
+    'reset_password_body_generic' => 'Choisissez un mot de passe et vous pourrez vous connecter avec.',
     'reset_password_button' => 'Enregistrer le mot de passe',
     'or_continue_with_email' => 'ou continuer avec l\'email',
     'google_auth_failed' => 'L\'authentification Google a échoué. Veuillez réessayer.',

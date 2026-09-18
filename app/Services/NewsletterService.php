@@ -487,11 +487,14 @@ class NewsletterService
             ? url('/nl/u/'.$recipient->token)
             : '#';
 
-        // Null in renderPreview(), where there is no recipient and so no token to identify anybody -
-        // the footer drops the line rather than rendering a dead link into the composer preview.
+        // '#' rather than null in renderPreview(), matching $unsubscribeUrl above: dropping the line
+        // entirely made the owner's preview disagree with what recipients actually receive, showing
+        // "Unsubscribe" where the sent mail says "Manage your account - Unsubscribe". renderPreview()
+        // already neutralises every link with `a { pointer-events: none !important }`, so a '#' here
+        // is as inert as the one the unsubscribe link has always used.
         $manageUrl = $recipient
             ? url('/sub/m/'.$recipient->token)
-            : null;
+            : '#';
 
         $role = $newsletter->role;
         $isRtl = $role ? $role->isRtl() : false;
