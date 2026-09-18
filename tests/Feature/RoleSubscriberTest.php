@@ -732,6 +732,19 @@ class RoleSubscriberTest extends TestCase
         $this->post(route('subscriber.confirm', ['token' => $sub->confirm_token]));
     }
 
+    /** Subscribe without confirming, and hand back the row so the caller owns the confirm step. */
+    private function subscribeOnly(string $email, ?string $name = null, ?Role $role = null): RoleSubscriber
+    {
+        $role = $role ?: $this->role;
+
+        $this->post(route('role.audience.join', ['subdomain' => $role->subdomain]), [
+            'email' => $email,
+            'name' => $name ?: 'A Fan',
+        ]);
+
+        return RoleSubscriber::where('role_id', $role->id)->where('email', $email)->firstOrFail();
+    }
+
     private function followerPivots(Role $role, ?User $user = null): int
     {
         $query = \DB::table('role_user')->where('role_id', $role->id)->where('level', 'follower');
@@ -931,6 +944,255 @@ class RoleSubscriberTest extends TestCase
         $this->post(route('subscriber.claim_account'), ['password' => 'sup3rsecret'])->assertRedirect();
         $this->post(route('subscriber.claim_account'), ['password' => 'anotherone1'])
             ->assertRedirect(route('subscriber.confirmed'));
+    }
+
+    // ---------------------------------------------------------------------------------------
+    // The optional password on the confirm page.
+    // ---------------------------------------------------------------------------------------
+
+    public function test_the_confirm_page_offers_an_optional_password(): void
+    {
+        $sub = $this->subscribeOnly('fan@fans.test');
+
+        $this->get(route('subscriber.show_confirm', ['token' => $sub->confirm_token]))
+            ->assertOk()
+            ->assertSee('name="password"', false)
+            ->assertSee(__('messages.subscription_confirm_password_heading'), false)
+            // The button must not change: it is true whether the field is filled or not.
+            ->assertSee(__('messages.subscription_confirm_button'), false);
+    }
+
+    public function test_confirming_with_a_password_signs_them_in_without_a_second_form(): void
+    {
+        $sub = $this->subscribeOnly('fan@fans.test', 'A Fan');
+
+        $this->post(route('subscriber.confirm', ['token' => $sub->confirm_token]), [
+            'password' => 'sup3rsecret',
+        ])->assertRedirect(route('subscriber.confirmed'));
+
+        $user = User::where('email', 'fan@fans.test')->first();
+        $this->assertNotNull($user->password);
+        $this->assertFalse($user->isStub());
+        $this->assertNotNull($user->email_verified_at, 'EnsureEmailIsVerified is global, so this is load-bearing');
+        $this->assertSame('A Fan', $user->name);
+        $this->assertAuthenticatedAs($user);
+        $this->assertSame(1, $this->followerPivots($this->role, $user));
+
+        // Lands on the confirmation, not past it, and offers nothing more to set.
+        $this->get(route('subscriber.confirmed'))
+            ->assertOk()
+            ->assertSee(__('messages.subscription_account_ready_heading'), false)
+            ->assertDontSee(route('subscriber.claim_account'), false);
+    }
+
+    public function test_confirming_without_a_password_still_offers_the_one_shot_form(): void
+    {
+        $sub = $this->subscribeOnly('fan@fans.test');
+
+        $this->post(route('subscriber.confirm', ['token' => $sub->confirm_token]), ['password' => '']);
+
+        $this->assertGuest();
+        $this->get(route('subscriber.confirmed'))
+            ->assertOk()
+            ->assertSee(route('subscriber.claim_account'), false);
+    }
+
+    public function test_a_rejected_password_leaves_the_confirm_link_usable(): void
+    {
+        // The whole reason confirm() validates before it burns the token: a password one character
+        // short must not cost the visitor their subscription as well as their account.
+        $sub = $this->subscribeOnly('fan@fans.test');
+
+        $this->from(route('subscriber.show_confirm', ['token' => $sub->confirm_token]))
+            ->post(route('subscriber.confirm', ['token' => $sub->confirm_token]), ['password' => 'short'])
+            ->assertSessionHasErrors('password');
+
+        $sub->refresh();
+        $this->assertNull($sub->confirmed_at, 'a rejected password must not confirm');
+        $this->assertNotNull($sub->confirm_token, 'the token must still work');
+        $this->assertNull(User::where('email', 'fan@fans.test')->first());
+
+        // And the same link still confirms.
+        $this->post(route('subscriber.confirm', ['token' => $sub->confirm_token]), [
+            'password' => 'sup3rsecret',
+        ])->assertRedirect(route('subscriber.confirmed'));
+
+        $this->assertNotNull($sub->fresh()->confirmed_at);
+    }
+
+    public function test_a_tripped_honeypot_on_the_confirm_form_confirms_nothing(): void
+    {
+        $sub = $this->subscribeOnly('fan@fans.test');
+
+        $this->post(route('subscriber.confirm', ['token' => $sub->confirm_token]), [
+            'password' => 'sup3rsecret',
+            \App\Utils\HoneypotUtils::FIELD => 'https://example.com',
+        ])->assertSessionHasErrors('password');
+
+        $sub->refresh();
+        $this->assertNull($sub->confirmed_at);
+        $this->assertNotNull($sub->confirm_token);
+        $this->assertGuest();
+    }
+
+    public function test_the_confirm_page_offers_no_password_to_a_real_account(): void
+    {
+        User::factory()->create(['email' => 'fan@fans.test', 'password' => bcrypt('already-set')]);
+
+        $sub = $this->subscribeOnly('fan@fans.test');
+
+        $this->get(route('subscriber.show_confirm', ['token' => $sub->confirm_token]))
+            ->assertOk()
+            ->assertDontSee('name="password"', false);
+    }
+
+    public function test_a_confirm_link_never_overwrites_an_existing_password(): void
+    {
+        $existing = User::factory()->create([
+            'email' => 'fan@fans.test',
+            'password' => bcrypt('already-set'),
+        ]);
+
+        $sub = $this->subscribeOnly('fan@fans.test');
+
+        $this->post(route('subscriber.confirm', ['token' => $sub->confirm_token]), [
+            'password' => 'sup3rsecret',
+        ])->assertRedirect(route('subscriber.confirmed'));
+
+        $this->assertTrue(\Hash::check('already-set', $existing->fresh()->password));
+        $this->assertGuest();
+    }
+
+    public function test_the_confirmed_page_offers_google_when_it_is_configured(): void
+    {
+        config(['services.google.client_id' => 'test-client-id']);
+
+        $this->subscribeAndConfirm('fan@fans.test');
+
+        $this->get(route('subscriber.confirmed'))
+            ->assertOk()
+            ->assertSee(__('messages.continue_with_google'), false)
+            ->assertSee(route('auth.google'), false);
+
+        // And the callback has somewhere to land.
+        $this->assertSame(
+            app_url(route('following', [], false)),
+            session('url.intended')
+        );
+    }
+
+    public function test_the_confirmed_page_hides_google_when_it_is_not_configured(): void
+    {
+        config(['services.google.client_id' => null]);
+
+        $this->subscribeAndConfirm('fan@fans.test');
+
+        $this->get(route('subscriber.confirmed'))
+            ->assertOk()
+            ->assertDontSee(__('messages.continue_with_google'), false);
+    }
+
+    public function test_google_adopts_a_subscriber_stub_and_keeps_its_follow(): void
+    {
+        // This already worked before any of this change - SocialAuthController only refuses to
+        // auto-link an account that hasPassword(), and a stub has none - and it is the easiest of
+        // the four doors, so the subscriber surfaces now point at it. Pinning it here because
+        // nothing else did: tightening that guard to "any existing account" would silently turn
+        // the one-click path into "Google account already linked" with no test to catch it.
+        $this->subscribeAndConfirm('fan@fans.test', null, 'A Fan');
+
+        $stub = User::where('email', 'fan@fans.test')->firstOrFail();
+        $this->assertTrue($stub->isStub());
+
+        $socialUser = \Mockery::mock(\Laravel\Socialite\Two\User::class);
+        $socialUser->shouldReceive('getId')->andReturn('google-sub-1');
+        $socialUser->shouldReceive('getEmail')->andReturn('fan@fans.test');
+        $socialUser->shouldReceive('getName')->andReturn('A Fan');
+        $socialUser->shouldReceive('getAvatar')->andReturn(null);
+        $socialUser->user = ['locale' => 'en'];
+
+        $provider = \Mockery::mock(\Laravel\Socialite\Contracts\Provider::class);
+        $provider->shouldReceive('redirectUrl')->andReturnSelf();
+        $provider->shouldReceive('user')->andReturn($socialUser);
+
+        \Laravel\Socialite\Facades\Socialite::shouldReceive('driver')->with('google')->andReturn($provider);
+
+        $this->get(route('auth.google.callback'))->assertRedirect();
+
+        $stub->refresh();
+        $this->assertSame('google-sub-1', $stub->google_oauth_id);
+        $this->assertNotNull($stub->email_verified_at);
+        $this->assertFalse($stub->isStub());
+        $this->assertAuthenticatedAs($stub);
+        // The whole point: the follow they came for survives the adoption.
+        $this->assertSame(1, $this->followerPivots($this->role, $stub));
+        $this->assertSame('subscriber', $stub->signup_intent);
+    }
+
+    public function test_an_expired_claim_token_explains_itself_instead_of_500ing(): void
+    {
+        // The claim token lasts 60 minutes (config/auth.php), so leaving /sub/done open over lunch
+        // is ordinary behaviour, not an edge case. Every existing claim test reaches claimAccount()
+        // either on the happy path or via the session guard's early return, so the whole
+        // $status !== PASSWORD_RESET branch was unexercised - which is how a reference to
+        // Password::INVALID_PASSWORD, a constant the broker does not define, survived in it. In PHP
+        // 8 that is an Error, so the reward for coming back late was a 500.
+        $this->subscribeAndConfirm('fan@fans.test');
+
+        \DB::table('password_reset_tokens')
+            ->where('email', 'fan@fans.test')
+            ->update(['created_at' => now()->subMinutes(90)]);
+
+        // from() so back() resolves to /sub/done rather than '/', which is where a real browser
+        // posting this form lands.
+        $this->from(route('subscriber.confirmed'))
+            ->post(route('subscriber.claim_account'), ['password' => 'sup3rsecret'])
+            ->assertRedirect(route('subscriber.confirmed'));
+
+        $user = User::where('email', 'fan@fans.test')->first();
+        $this->assertTrue($user->isStub(), 'an expired token must not set a password');
+        $this->assertGuest();
+    }
+
+    public function test_a_failed_claim_says_so_on_the_page_it_lands_on(): void
+    {
+        // forgetClaim() nulls claim_token/claim_email but keeps role_id, so /sub/done re-renders
+        // with the whole @if ($claimToken && $claimEmail) block skipped - taking its x-input-error
+        // with it. Without an explanation outside that block the page silently degrades to "You are
+        // on the list" with the form simply gone.
+        $this->subscribeAndConfirm('fan@fans.test');
+
+        \DB::table('password_reset_tokens')
+            ->where('email', 'fan@fans.test')
+            ->update(['created_at' => now()->subMinutes(90)]);
+
+        $this->from(route('subscriber.confirmed'))
+            ->post(route('subscriber.claim_account'), ['password' => 'sup3rsecret']);
+
+        $this->get(route('subscriber.confirmed'))
+            ->assertOk()
+            ->assertSee(__('messages.subscription_account_expired_body'), false);
+    }
+
+    public function test_a_claim_takes_its_name_from_the_subscription_when_the_account_has_none(): void
+    {
+        // linkAccount() reuses an existing account when one matches the address, and the newsletter
+        // import writes name => '' (NewsletterController), so the stub a subscriber claims is often
+        // not the one their sign-up created. claimAccount() set every other preference and left
+        // name alone, which renders as a bare caret in the admin header.
+        $stub = User::factory()->create([
+            'email' => 'fan@fans.test',
+            'name' => '',
+            'password' => null,
+            'email_verified_at' => null,
+        ]);
+
+        $this->subscribeAndConfirm('fan@fans.test', null, 'A Fan');
+
+        $this->post(route('subscriber.claim_account'), ['password' => 'sup3rsecret'])
+            ->assertRedirect();
+
+        $this->assertSame('A Fan', $stub->fresh()->name);
     }
 
     // ---------------------------------------------------------------------------------------

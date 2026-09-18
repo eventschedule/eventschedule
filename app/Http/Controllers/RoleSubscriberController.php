@@ -221,7 +221,43 @@ class RoleSubscriberController extends Controller
             'role' => $role,
             'subscriber' => $subscriber,
             'done' => false,
+            'offerPassword' => $this->offersPasswordOnConfirm($role, $subscriber),
         ]);
+    }
+
+    /**
+     * Whether the confirm page carries its optional password field.
+     *
+     * The page has to be loaded and its button has to be pressed either way, so a field here costs
+     * nothing and saves the whole /sub/done round trip - and it puts the account offer ALONGSIDE
+     * the thing the visitor came for rather than after it, where the heading already says the work
+     * is done.
+     *
+     * OPTIONAL, always. A required field would turn a working confirmation into a signup form, and
+     * everyone it bounced would be somebody who was about to become a confirmed subscriber - the
+     * owner's actual product traded away for account conversion.
+     *
+     * Decidable at GET time even though linkAccount() has not run: the subscriber row carries the
+     * address, so the account that confirm() would reuse or create can be looked up now. The three
+     * refusals mirror claimState(), which answers the same question one step later.
+     */
+    private function offersPasswordOnConfirm(Role $role, RoleSubscriber $subscriber): bool
+    {
+        if (! $role->willCreateAccountOnConfirm()) {
+            return false;
+        }
+
+        $user = User::where('email', $subscriber->email)->first();
+
+        // Signed in as somebody else, looking at a stub belonging to another mailbox. Offering the
+        // field would be offering them that person's account.
+        if (Auth::check() && (! $user || Auth::id() !== $user->id)) {
+            return false;
+        }
+
+        // A real account has nothing to set. /sub/done says "sign in and you will see this on your
+        // Following list", which is the useful thing, and it can say it after the pivot exists.
+        return ! $user || $user->isStub();
     }
 
     /**
@@ -237,6 +273,23 @@ class RoleSubscriberController extends Controller
         if (! $subscriber) {
             return $this->linkExpired();
         }
+
+        // Public form, so a honeypot - matching POST /sub/account, which carries one beside its own
+        // password field. x-auth-layout renders only per-field errors, so the bail is a
+        // ValidationException rather than a flash. Thrown before anything is written, so the token
+        // stays live and a real person who trips it can simply press the button again.
+        if (HoneypotUtils::isTripped($request)) {
+            throw ValidationException::withMessages(['password' => __('messages.invalid_request')]);
+        }
+
+        // BEFORE the write below, not after. validate() throws, and back() has to land on a confirm
+        // page whose token still works - burning it first would mean a password one character too
+        // short cost the visitor their subscription as well as their account.
+        //
+        // nullable: the field is optional, and most people will press the button without touching
+        // it. An absent field and an empty one both mean "not now".
+        $request->validate(['password' => ['nullable', 'string', 'min:8']]);
+        $password = (string) $request->input('password', '');
 
         // Burn the token in the same write that confirms. Everything below is now unreachable by
         // a replay of this URL.
@@ -254,6 +307,32 @@ class RoleSubscriberController extends Controller
             ->delete();
 
         $user = $this->linkAccount($role, $subscriber);
+
+        // The optional password, applied inline. Deliberately NOT routed through Password::reset():
+        // no reset token is needed or wanted here, because this request already spent a single-use
+        // emailed token via a CSRF-protected POST that a human pressed, which is the same proof of
+        // mailbox possession claimAccount() accepts one step later. Going through the broker would
+        // also drag in its 60-second per-user throttle and its English passwords.* strings for no
+        // gain.
+        //
+        // isStub() is the guard that matters: never overwrite a real password from a confirm link.
+        if ($password !== '' && $user && $user->isStub()) {
+            $this->applyFirstPassword($request, $user, $password, $subscriber->name);
+
+            $request->session()->put('subscriber_confirmed', [
+                'role_id' => $role->id,
+                'locale' => $subscriber->locale,
+                'claim_token' => null,
+                'claim_email' => null,
+                'existing_email' => null,
+                // Lands on /sub/done anyway rather than straight on /following: the subscription
+                // confirmation is what they came for, and redirecting past it would demote "you are
+                // on the list" to a three-second toast. It costs no extra click.
+                'claimed_email' => $user->email,
+            ]);
+
+            return redirect()->route('subscriber.confirmed');
+        }
 
         // Post/redirect/get. This method has just burned confirm_token, so rendering the view
         // straight from the POST meant the reward for pressing F5 on "you are on the list" was a
@@ -291,9 +370,20 @@ class RoleSubscriberController extends Controller
 
         $this->applyLocale($state['locale'] ?? null, $role);
 
+        // Only while there is a stub to adopt, so this never hijacks an unrelated later sign-in.
+        // handleGoogleCallback() ends in redirect()->intended(route('home')), and for somebody who
+        // came here to follow one schedule, /following is the page worth landing on.
+        if (! empty($state['claim_token']) && config('services.google.client_id')) {
+            $request->session()->put('url.intended', app_url(route('following', [], false)));
+        }
+
         return view('subscriber.confirmed', [
             'role' => $role,
             'done' => true,
+            // Set only by the confirm page's optional password field, which signs them in on the
+            // spot. Nothing is left to offer, so the page says so rather than falling through to a
+            // bare "back to schedule".
+            'claimedEmail' => $state['claimed_email'] ?? null,
             'claimToken' => $state['claim_token'] ?? null,
             'claimEmail' => $state['claim_email'] ?? null,
             'existingEmail' => $state['existing_email'] ?? null,
@@ -423,6 +513,11 @@ class RoleSubscriberController extends Controller
 
         $state['claim_token'] = Password::createToken($user);
         $state['claim_email'] = $user->email;
+        // Carried so claimAccount() can fill a blank account name without a second query.
+        // linkAccount() REUSES an account that already matches the address, and the newsletter
+        // import writes name => '', so the stub being claimed is often not the one this sign-up
+        // created and the subscription is the only place a real name exists.
+        $state['claim_name'] = $subscriber->name;
 
         return $state;
     }
@@ -471,40 +566,36 @@ class RoleSubscriberController extends Controller
             return redirect()->route('password.request');
         }
 
-        // Resolved once: deriving use_24_hour_time from a different expression than the one stored
-        // meant a claim with JavaScript off saved America/New_York while detect_24_hour_time() saw
-        // null and left the preference unset.
-        $resolvedTimezone = $user->timezone ?: ($request->input('timezone') ?: 'America/New_York');
-        $languageCode = is_valid_language_code($user->language_code) ? $user->language_code : 'en';
+        $claimName = $state['claim_name'] ?? null;
+        $requestTimezone = $request->input('timezone');
 
         $status = Password::reset(
             ['email' => $email, 'password' => $request->password, 'token' => $token],
-            function (User $user) use ($request, $resolvedTimezone, $languageCode) {
-                $user->forceFill([
-                    'password' => Hash::make($request->password),
-                    // The confirm link proved the mailbox, so this is verified in the same sense a
-                    // registration verification code makes it verified. It is also load-bearing:
-                    // /following sits behind the `verified` middleware, so without it the redirect
-                    // below lands on the verification wall.
-                    'email_verified_at' => $user->email_verified_at ?: now(),
-                    'remember_token' => Str::random(60),
-                    'timezone' => $resolvedTimezone,
-                    'use_24_hour_time' => detect_24_hour_time($resolvedTimezone, $languageCode),
-                ])->save();
+            function (User $user) use ($request, $requestTimezone, $claimName) {
+                $user->forceFill(
+                    $this->firstPasswordAttributes($user, $request->password, $requestTimezone, $claimName)
+                )->save();
 
                 AuditService::log(AuditService::AUTH_REGISTER, $user->id);
             }
         );
 
         if ($status !== Password::PASSWORD_RESET) {
-            // Spend the credential on anything but a rejected password. The token lasts 60 minutes
-            // (config/auth.php), and leaving an expired one in the session re-rendered the same
-            // form with the same dead token, so every retry failed identically for ever.
-            if ($status !== Password::INVALID_PASSWORD) {
-                $this->forgetClaim($request);
-            }
+            // Always spend the credential. The token lasts 60 minutes (config/auth.php), and leaving
+            // an expired one in the session re-rendered the same form with the same dead token, so
+            // every retry failed identically for ever.
+            //
+            // This used to keep the credential when $status was Password::INVALID_PASSWORD, to
+            // survive a rejected password. There is no such constant - the broker defines only
+            // RESET_LINK_SENT, PASSWORD_RESET, INVALID_USER, INVALID_TOKEN and RESET_THROTTLED - so
+            // in PHP 8 the comparison was an Error, and the reward for returning to /sub/done after
+            // the token expired was a 500. Nothing is lost by dropping it: password length is
+            // validated by $request->validate() above, BEFORE Password::reset() is reached, so the
+            // broker has no rejected-password status to return in the first place.
+            $this->forgetClaim($request);
 
-            // back() lands on GET /sub/done, which re-renders from the session.
+            // back() lands on GET /sub/done. The claim block there is now gone with the token, so
+            // confirmed() renders subscription_account_expired_* instead - see the flag it sets.
             throw ValidationException::withMessages(['password' => __($status)]);
         }
 
@@ -517,6 +608,72 @@ class RoleSubscriberController extends Controller
             ->with('message', __('messages.subscription_account_created', [
                 'schedule' => $role?->name ?: '',
             ]));
+    }
+
+    /**
+     * The attributes that turn a passwordless stub into a real account.
+     *
+     * Shared by the two doors that do it - the optional field on the confirm page and the one-shot
+     * form on /sub/done - so a preference added to one can never go missing from the other.
+     *
+     * Timezone and language are resolved from the USER row in one place: deriving use_24_hour_time
+     * from a different expression than the one stored meant a claim with JavaScript off saved
+     * America/New_York while detect_24_hour_time() saw null and left the preference unset.
+     */
+    private function firstPasswordAttributes(User $user, string $password, mixed $requestTimezone, ?string $fallbackName): array
+    {
+        // is_string(): input() hands back `timezone[]=x` as an array untouched, and this feeds a
+        // string column and detect_24_hour_time().
+        $timezone = $user->timezone ?: (is_string($requestTimezone) && $requestTimezone !== ''
+            ? $requestTimezone
+            : 'America/New_York');
+        $languageCode = is_valid_language_code($user->language_code) ? $user->language_code : 'en';
+
+        $attributes = [
+            'password' => Hash::make($password),
+            // The confirm link proved the mailbox, so this is verified in the same sense a
+            // registration verification code makes it verified. It is also load-bearing:
+            // EnsureEmailIsVerified is appended to the whole web middleware group in
+            // bootstrap/app.php, not merely aliased, so without this every authenticated page
+            // bounces to verification.notice.
+            'email_verified_at' => $user->email_verified_at ?: now(),
+            'remember_token' => Str::random(60),
+            'timezone' => $timezone,
+            'use_24_hour_time' => detect_24_hour_time($timezone, $languageCode),
+        ];
+
+        // Never overwrite a name the account already has - an imported stub can carry a real one
+        // while the subscription row is blank, and the reverse.
+        $fallbackName = is_string($fallbackName) ? trim($fallbackName) : '';
+
+        if ($fallbackName !== '' && trim((string) $user->name) === '') {
+            $attributes['name'] = $fallbackName;
+        }
+
+        return $attributes;
+    }
+
+    /**
+     * Set a first password on a stub and sign them in, from a surface that has proved the mailbox
+     * itself rather than by redeeming a reset token.
+     *
+     * claimAccount() does the same work through Password::reset() because it IS redeeming one.
+     */
+    private function applyFirstPassword(Request $request, User $user, string $password, ?string $fallbackName): void
+    {
+        $user->forceFill(
+            $this->firstPasswordAttributes($user, $password, $request->input('timezone'), $fallbackName)
+        )->save();
+
+        AuditService::log(AuditService::AUTH_REGISTER, $user->id);
+
+        // fresh(): the write above minted a new remember_token, and a stale instance would have
+        // Auth::login() write a recaller cookie that AuthenticateSession later rejects.
+        Auth::login($user->fresh(), true);
+
+        // Auth::login() already migrates the session id (SessionGuard::updateSession); this is for
+        // the CSRF token, which migrate() does not rotate. Matches AuthenticatedSessionController.
+        $request->session()->regenerate();
     }
 
     /** Spend the one-shot claim credential, keeping the rest of the page's state. */
