@@ -1,8 +1,8 @@
 <?php
 
 return [
-    'home_title' => 'Event Schedule - Calendário de eventos e venda de ingressos, grátis',
-    'home_description' => 'Publique seus eventos em uma única página de calendário, venda ingressos sem taxas de plataforma e escaneie-os na entrada. O plano gratuito vende 25 ingressos pagos por mês.',
+    'home_title' => 'Event Schedule - Calendário de eventos, ingressos e agendamentos, grátis',
+    'home_description' => 'Publique seus eventos em uma única página de calendário, venda ingressos sem taxas de plataforma e receba agendamentos. O plano gratuito vende 25 ingressos pagos por mês.',
 
     'pricing_title' => 'Preços do Event Schedule: plano grátis, sem taxas de plataforma',
     'pricing_description' => 'Comece grátis: eventos ilimitados e 25 ingressos pagos por mês. O Pro remove o limite e o Enterprise adiciona lugares marcados. Sem taxa de plataforma.',

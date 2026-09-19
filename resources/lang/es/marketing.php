@@ -1,8 +1,8 @@
 <?php
 
 return [
-    'home_title' => 'Event Schedule - Calendario de eventos y venta de entradas, gratis',
-    'home_description' => 'Publica tus eventos en una sola página de calendario, vende entradas sin comisiones de plataforma y escanéalas en la puerta. El plan gratuito vende 25 entradas de pago al mes.',
+    'home_title' => 'Event Schedule - Calendario de eventos, entradas y reservas, gratis',
+    'home_description' => 'Publica tus eventos en una sola página de calendario, vende entradas sin comisiones de plataforma y acepta reservas de citas. El plan gratuito vende 25 entradas de pago al mes.',
 
     'pricing_title' => 'Precios de Event Schedule: gratis y sin comisión de plataforma',
     'pricing_description' => 'Empieza gratis con eventos ilimitados y 25 entradas de pago al mes. Pro quita el límite y Enterprise añade asientos numerados. Sin comisión de plataforma.',

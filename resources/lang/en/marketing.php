@@ -8,8 +8,8 @@
  */
 
 return [
-    'home_title' => 'Event Schedule - Free Event Calendar & Ticketing Platform',
-    'home_description' => 'Publish your events on one calendar page, sell tickets with zero platform fees and scan them at the door. The free plan sells 25 paid tickets a month.',
+    'home_title' => 'Event Schedule - Free Event Calendar, Ticketing & Booking',
+    'home_description' => 'Publish your events on one calendar page, sell tickets with zero platform fees and take appointment bookings. The free plan sells 25 paid tickets a month.',
 
     'pricing_title' => 'Event Schedule Pricing: Free Plan, Zero Platform Fees',
     'pricing_description' => 'Start free with unlimited events and 25 paid tickets a month. Pro lifts the ticket cap, Enterprise adds reserved seating. Zero platform fees on every plan.',

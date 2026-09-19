@@ -1,8 +1,8 @@
 <?php
 
 return [
-    'home_title' => 'Event Schedule - calendar de evenimente și vânzare de bilete, gratuit',
-    'home_description' => 'Publică-ți evenimentele pe o singură pagină de calendar, vinde bilete fără taxe de platformă și scanează-le la intrare. Planul gratuit vinde 25 de bilete plătite pe lună.',
+    'home_title' => 'Event Schedule - calendar de evenimente, bilete și programări, gratuit',
+    'home_description' => 'Publică-ți evenimentele pe o singură pagină de calendar, vinde bilete fără taxe de platformă și primește programări. Planul gratuit vinde 25 de bilete plătite pe lună.',
 
     'pricing_title' => 'Prețuri Event Schedule: gratuit, fără comision de platformă',
     'pricing_description' => 'Începe gratuit: evenimente nelimitate și 25 de bilete plătite pe lună. Pro elimină limita, Enterprise adaugă locuri numerotate. Fără comision de platformă.',

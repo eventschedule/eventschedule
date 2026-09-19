@@ -1,8 +1,8 @@
 <?php
 
 return [
-    'home_title' => 'Event Schedule - tasuta sündmuste kalender ja piletimüük',
-    'home_description' => 'Avalda oma sündmused ühel kalendrilehel, müü pileteid ilma platvormitasudeta ja skanni need ukse juures. Tasuta plaan müüb 25 tasulist piletit kuus.',
+    'home_title' => 'Event Schedule - tasuta sündmuste kalender, piletimüük ja broneeringud',
+    'home_description' => 'Avalda oma sündmused ühel kalendrilehel, müü pileteid ilma platvormitasudeta ja võta vastu broneeringuid. Tasuta plaan müüb 25 tasulist piletit kuus.',
 
     'pricing_title' => 'Event Schedule\'i hinnad: tasuta plaan, ilma platvormitasudeta',
     'pricing_description' => 'Alusta tasuta: piiramatud sündmused ja 25 tasulist piletit kuus. Pro kaotab piirangu, Enterprise lisab nummerdatud kohad. Platvormitasu pole üheski plaanis.',

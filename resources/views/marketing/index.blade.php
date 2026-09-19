@@ -386,7 +386,7 @@
         "@id": "{{ config('app.url') }}/#software",
         "name": "Event Schedule",
         "url": "{{ config('app.url') }}",
-        "description": "Event calendar and ticketing platform. Publish your events on one page, sell tickets with zero platform fees through Stripe or PayPal, email the people who follow you and scan tickets at the door. Free plan, open source and selfhostable.",
+        "description": "Event calendar and booking platform. Publish your events and your open hours on one page, sell tickets with zero platform fees through Stripe or PayPal, email the people who follow you and scan tickets at the door. Free plan, open source and selfhostable.",
         "featureList": [
             "Event calendar pages with a custom link and a website embed",
             "Ticket sales with zero platform fees through Stripe or PayPal",
@@ -396,7 +396,9 @@
             "Newsletters, and automatic new-event digests for confirmed subscribers",
             "Two-way calendar sync with Google Calendar, Microsoft 365 and CalDAV",
             "A live calendar feed guests can subscribe to",
-            "Appointment booking"
+            "Appointment booking, free with one appointment type",
+            "Passes and gift cards (Pro)",
+            "Reserved seating with a box office console (Enterprise)"
         ],
         "applicationCategory": "BusinessApplication",
         "operatingSystem": ["Web", "Android", "iOS"],
@@ -474,12 +476,12 @@
 
             <h1 class="es-balance mb-6 text-[2.7rem] font-black leading-[1.04] tracking-tight text-gray-900 dark:text-white sm:text-6xl lg:text-7xl">
                 <span class="es-mask"><span class="es-mask-line">Plan, promote, and share</span></span>
-                <span class="es-mask es-mask-2"><span class="es-mask-line"><span class="text-gradient es-gradient-anim">event calendars</span></span></span>
+                <span class="es-mask es-mask-2"><span class="es-mask-line"><span class="text-gradient es-gradient-anim">your event calendar</span></span></span>
             </h1>
 
             <p class="es-fade-up es-d-2 mx-auto mb-10 max-w-2xl text-lg text-gray-500 dark:text-gray-400 sm:text-xl">
-                One page for everything you have on. Sell tickets with zero platform fees, email the people who
-                follow it, and scan them in at the door.
+                One page for your events and your open hours. Sell tickets with zero platform fees, email the
+                people who follow it, and scan them in at the door.
             </p>
 
             <div class="es-fade-up es-d-3 flex flex-col items-center justify-center gap-4 sm:flex-row">
@@ -498,10 +500,49 @@
                 </a>
             </div>
 
+            {{-- The fold's capability row. Free first, so it reads as generosity before
+                 restriction, and the two tier qualifiers are muted so they read as a spec
+                 rather than as a price tag interrupting the promise above.
+
+                 Deliberately NOT links: four tab stops between "Start for free" and the
+                 poster strip cost more than the internal linking is worth, and all four
+                 are already linked further down this page (appointments, reserved seating,
+                 gift cards and passes). Being non-interactive is also what keeps the
+                 focus-order comment on the wall below true, and lets them inherit
+                 pointer-events-none from the wrapper so they never swallow a poster click.
+
+                 No check glyph, unlike the chips on /saas: a tick reads as "included",
+                 which is a lie next to "on Enterprise". --}}
+            @php
+                $heroChips = [
+                    ['label' => 'Appointment booking, free', 'tier' => null],
+                    ['label' => 'Stripe, PayPal or cash', 'tier' => null],
+                    ['label' => 'Gift cards and passes', 'tier' => 'on Pro'],
+                    ['label' => 'Reserved seating', 'tier' => 'on Enterprise'],
+                ];
+            @endphp
+            <ul class="es-fade-up es-d-4 mt-8 flex flex-wrap items-center justify-center gap-2">
+                @foreach ($heroChips as $heroChip)
+                    <li class="inline-flex items-center gap-1.5 rounded-full glass px-3 py-1.5 text-xs font-medium text-gray-600 dark:text-gray-300">
+                        <span class="h-1.5 w-1.5 shrink-0 rounded-full bg-gradient-to-r from-[#4E81FA] to-[#22D3EE]" aria-hidden="true"></span>
+                        {{ $heroChip['label'] }}
+                        @if ($heroChip['tier'])
+                            {{-- Muted by WEIGHT in light mode, not colour. Measured on the glass
+                                 (rgb(242,242,242) light, rgb(22,22,27) dark): gray-500 is 4.33:1
+                                 in light and gray-400 is 2.27:1, both under the 4.5 this 12px text
+                                 needs, and the site holds a measured zero-failure AA baseline in
+                                 both modes. gray-600 is 9.53:1 in light and gray-400 is 7.09:1 in
+                                 dark, so the tier steps down in colour only where it can afford to. --}}
+                            <span class="font-normal text-gray-600 dark:text-gray-400">{{ $heroChip['tier'] }}</span>
+                        @endif
+                    </li>
+                @endforeach
+            </ul>
+
             <p class="es-fade-up es-d-4 mt-6 text-sm text-gray-500 dark:text-gray-400">Set up in under 2 minutes. Open source, and yours to selfhost.</p>
 
             {{-- Compact clickable poster strip (mobile and tablets) --}}
-            <div class="es-fade-up es-d-5 pointer-events-auto mt-12 lg:hidden">
+            <div class="es-fade-up es-d-5 pointer-events-auto mt-8 lg:hidden">
                 <div class="es-marquee-mask">
                     <div class="es-marquee" data-marquee="1">
                         <div class="es-marquee-track">

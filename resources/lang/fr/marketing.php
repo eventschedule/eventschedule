@@ -1,8 +1,8 @@
 <?php
 
 return [
-    'home_title' => 'Event Schedule - Calendrier d\'événements et billetterie gratuits',
-    'home_description' => 'Publiez vos événements sur une seule page de calendrier, vendez des billets sans frais de plateforme et scannez-les à l\'entrée. Le plan gratuit vend 25 billets payants par mois.',
+    'home_title' => 'Event Schedule - Calendrier d\'événements, billetterie et réservations',
+    'home_description' => 'Publiez vos événements sur une seule page de calendrier, vendez des billets sans frais de plateforme et acceptez des réservations de rendez-vous. Le plan gratuit vend 25 billets payants par mois.',
 
     'pricing_title' => 'Tarifs Event Schedule : plan gratuit, zéro frais de plateforme',
     'pricing_description' => 'Gratuit : événements illimités et 25 billets payants par mois. Pro lève la limite, Enterprise ajoute le placement numéroté. Zéro frais de plateforme.',

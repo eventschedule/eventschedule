@@ -1,8 +1,8 @@
 <?php
 
 return [
-    'home_title' => 'Event Schedule - Calendario eventi e biglietteria gratuiti',
-    'home_description' => 'Pubblica i tuoi eventi su un\'unica pagina di calendario, vendi biglietti senza commissioni di piattaforma e scansionali all\'ingresso. Il piano gratuito vende 25 biglietti a pagamento al mese.',
+    'home_title' => 'Event Schedule - Calendario eventi, biglietteria e prenotazioni',
+    'home_description' => 'Pubblica i tuoi eventi su un\'unica pagina di calendario, vendi biglietti senza commissioni di piattaforma e accetta prenotazioni di appuntamenti. Il piano gratuito vende 25 biglietti a pagamento al mese.',
 
     'pricing_title' => 'Prezzi di Event Schedule: piano gratuito, zero commissioni',
     'pricing_description' => 'Inizia gratis: eventi illimitati e 25 biglietti a pagamento al mese. Pro toglie il limite, Enterprise aggiunge posti numerati. Zero commissioni di piattaforma.',

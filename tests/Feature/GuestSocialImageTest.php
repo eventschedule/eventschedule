@@ -12,7 +12,8 @@ use Tests\TestCase;
  * The picture a guest page offers to WhatsApp, Facebook and X must be the owner's or none.
  *
  * Five sites in layouts/app-guest.blade.php used to fall back to /images/social/home.png - our
- * 1200x630 marketing card reading "Plan, promote, and share event calendars" - whenever the event
+ * 1200x630 marketing card, which renders whatever the homepage hero currently says (at the time of
+ * writing "Plan, promote, and share your event calendar") - whenever the event
  * and the schedule had no image between them. None of the five was plan-gated, so a free
  * schedule's own link preview was an Event Schedule advert, on the surface a visitor sees BEFORE
  * they decide whether to tap. og:site_name already named the schedule, which made it worse: the
