@@ -185,6 +185,8 @@ class AuditService
 
     const ADMIN_FEDERATION_DELETE = 'admin.federation_delete';
 
+    const ADMIN_FEDERATION_ACCEPT_ADDRESS = 'admin.federation_accept_address';
+
     const ADMIN_FEDERATION_BLOCK_EVENT = 'admin.federation_block_event';
 
     const ADMIN_FEDERATION_WELCOME = 'admin.federation_welcome';

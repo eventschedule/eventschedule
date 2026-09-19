@@ -429,10 +429,12 @@ class AdminAlertsTest extends TestCase
             'flagged_at' => now(),
         ]);
 
+        // ?status=flagged, whose filter repeats this row's own count query, so the link
+        // lands on exactly the instances counted instead of on every approved install.
         $this->adminActing($admin)->get(route('admin.dashboard'))
             ->assertOk()
             ->assertSee(trans_choice('messages.admin_alert_federation_flagged', 1, ['count' => 1]))
-            ->assertSee(route('admin.federation', ['status' => 'approved']));
+            ->assertSee(route('admin.federation', ['status' => 'flagged']));
 
         $badge = AdminAlertService::badges()['tab']['federation'];
         $this->assertSame(1, $badge['count']);

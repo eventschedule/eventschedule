@@ -11,6 +11,7 @@ use App\Services\AuditService;
 use App\Services\FederationWelcomeService;
 use App\Utils\UrlUtils;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Validator;
 
 /**
  * Nexus-side moderation of the federation network. Approving an instance is the
@@ -45,6 +46,11 @@ class AdminFederationController extends Controller
             // isApproved() before offering the link that uses it.
             ->withCount(['events', 'events as live_events_count' => fn ($q) => $q->live()])
             ->when(in_array($status, ['pending', 'approved', 'suspended'], true), fn ($q) => $q->where('status', $status))
+            // Where the dashboard alert points. Matched to AdminAlertService's own
+            // federation_flagged query exactly, so the badge and the page it links to
+            // cannot disagree. Not in the in_array() above, or the two would fight.
+            ->when($status === 'flagged', fn ($q) => $q->whereNotNull('flagged_at')
+                ->where('status', FederatedInstance::STATUS_APPROVED))
             // Flagged instances first (a site_url that stopped matching), then the ones
             // carrying the most content, so attention lands where it matters.
             ->orderByRaw('flagged_at IS NULL')
@@ -92,6 +98,11 @@ class AdminFederationController extends Controller
             'scheduleLinks' => FederatedEvent::schedulesForInstances($instances->pluck('id')->all()),
             'status' => $status,
             'pendingCount' => FederatedInstance::pending()->count(),
+            // Drives whether the Flagged tab is offered at all. A tab that is empty on
+            // every healthy install is noise, so it appears only when it has something.
+            'flaggedCount' => FederatedInstance::whereNotNull('flagged_at')
+                ->where('status', FederatedInstance::STATUS_APPROVED)
+                ->count(),
         ]);
     }
 
@@ -137,6 +148,64 @@ class AdminFederationController extends Controller
         );
 
         return back()->with('message', __('messages.federation_instance_removed'));
+    }
+
+    /**
+     * Adopt the address an approved install now reports, settling the flag it raised.
+     *
+     * The push path flags a mismatch and leaves the instance approved, where applyStatus()
+     * - the only other thing that clears flagged_at - early-returns because the status is
+     * not changing. So this was previously unresolvable except by suspending the install
+     * and approving it again, which drops it out of the network and mails the operator
+     * twice. Suspend remains the way to REJECT the change.
+     *
+     * Not offered in bulk(): site_url is the authority every backlink host check runs
+     * against, so adopting one is a per-instance judgement, not a sweep.
+     */
+    public function acceptAddress(Request $request, string $hash)
+    {
+        abort_unless(config('app.is_nexus'), 404);
+
+        $instance = FederatedInstance::findOrFail(UrlUtils::decodeId($hash));
+        $reported = $instance->reported_site_url;
+
+        // Nothing to adopt: a flag raised by register() (which moves site_url itself), a
+        // second submit, or a row flagged before this column existed - those carry the
+        // mismatch but not the address, and only the next push can supply it.
+        if (! $reported) {
+            return back()->with('error', __('messages.federation_address_none_reported'));
+        }
+
+        // It arrived signed, but this is the moment it becomes the authority for
+        // ownsUrl() and every backlink check, so assert its shape here too - the same
+        // rule registration is held to.
+        $validator = Validator::make(
+            ['site_url' => $reported],
+            ['site_url' => ['required', 'url', 'max:255']]
+        );
+
+        if ($validator->fails() || ! parse_url($reported, PHP_URL_HOST)) {
+            return back()->with('error', __('messages.federation_address_invalid'));
+        }
+
+        $previous = $instance->site_url;
+
+        $instance->site_url = $reported;
+        $instance->reported_site_url = null;
+        $instance->flagged_at = null;
+        $instance->save();
+
+        AuditService::log(
+            AuditService::ADMIN_FEDERATION_ACCEPT_ADDRESS,
+            auth()->id(),
+            'FederatedInstance',
+            $instance->id,
+            ['site_url' => $previous],
+            ['site_url' => $reported],
+            'Accepted federated instance address change',
+        );
+
+        return back()->with('message', __('messages.federation_address_accepted'));
     }
 
     /**

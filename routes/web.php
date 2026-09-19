@@ -960,6 +960,7 @@ Route::middleware(['auth', 'verified', 'app_subdomain'])->group(function () {
         Route::post('/admin/federation/{hash}/suspend', [AdminFederationController::class, 'suspend'])->name('admin.federation.suspend');
         Route::post('/admin/federation/{hash}/welcome', [AdminFederationController::class, 'welcome'])->name('admin.federation.welcome');
         Route::get('/admin/federation/{hash}/welcome-preview', [AdminFederationController::class, 'welcomePreview'])->name('admin.federation.welcome_preview');
+        Route::post('/admin/federation/{hash}/accept-address', [AdminFederationController::class, 'acceptAddress'])->name('admin.federation.accept_address');
         Route::post('/admin/federation/{hash}/delete', [AdminFederationController::class, 'destroy'])->name('admin.federation.delete');
         Route::post('/admin/federation/event/{hash}/block', [AdminFederationController::class, 'blockEvent'])->name('admin.federation.block_event');
         if (config('app.hosted')) {

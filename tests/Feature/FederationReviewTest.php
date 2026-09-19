@@ -6,6 +6,7 @@ use App\Mail\FederationInstanceReviewed;
 use App\Models\FederatedEvent;
 use App\Models\FederatedInstance;
 use App\Models\User;
+use App\Services\AuditService;
 use App\Utils\UrlUtils;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Mail;
@@ -323,6 +324,151 @@ class FederationReviewTest extends TestCase
 
         $this->assertSame('approved', $a->fresh()->status);
         $this->assertSame('approved', $b->fresh()->status);
+    }
+
+    // ------------------------------------------------- resolving an address change
+
+    /**
+     * The push path flags a mismatch and leaves the instance APPROVED, where
+     * applyStatus() - the only other thing that clears flagged_at - early-returns
+     * because the status is not changing, and the queue hides the Approve button. So
+     * this row offered nothing but Suspend, and the dashboard alert counting it could
+     * never drain.
+     */
+    public function test_accepting_a_reported_address_adopts_it_and_settles_the_flag(): void
+    {
+        $this->adminActing();
+        $instance = $this->makeInstance([
+            'status' => FederatedInstance::STATUS_APPROVED,
+            'flagged_at' => now(),
+            'reported_site_url' => 'https://moved.test',
+        ]);
+
+        $this->post(route('admin.federation.accept_address', UrlUtils::encodeId($instance->id)))
+            ->assertRedirect();
+
+        $instance->refresh();
+        $this->assertSame('https://moved.test', $instance->site_url);
+        $this->assertNull($instance->reported_site_url);
+        $this->assertNull($instance->flagged_at);
+        // Still approved: accepting settles the mismatch, it does not re-review the install.
+        $this->assertSame(FederatedInstance::STATUS_APPROVED, $instance->status);
+    }
+
+    /** site_url is the authority every backlink check runs against, so the move is logged. */
+    public function test_accepting_an_address_is_audited(): void
+    {
+        $admin = $this->adminActing();
+        $instance = $this->makeInstance([
+            'status' => FederatedInstance::STATUS_APPROVED,
+            'flagged_at' => now(),
+            'reported_site_url' => 'https://moved.test',
+        ]);
+
+        $this->post(route('admin.federation.accept_address', UrlUtils::encodeId($instance->id)));
+
+        $this->assertDatabaseHas('audit_logs', [
+            'action' => AuditService::ADMIN_FEDERATION_ACCEPT_ADDRESS,
+            'user_id' => $admin->id,
+            'model_type' => 'FederatedInstance',
+            'model_id' => $instance->id,
+        ]);
+    }
+
+    /**
+     * Rows flagged before reported_site_url existed carry the mismatch but not the
+     * address, and so does a second submit. Neither may rewrite site_url to null.
+     */
+    public function test_accepting_with_nothing_reported_changes_nothing(): void
+    {
+        $this->adminActing();
+        $instance = $this->makeInstance([
+            'status' => FederatedInstance::STATUS_APPROVED,
+            'flagged_at' => now(),
+        ]);
+
+        // The exact message, not just "an error": "no address reported yet" is the normal
+        // state of a row flagged before the column existed, while "not a valid URL" is a
+        // fault. Asserting only that something failed lets either guard cover for the
+        // other, and this test then pins neither.
+        $this->post(route('admin.federation.accept_address', UrlUtils::encodeId($instance->id)))
+            ->assertRedirect()
+            ->assertSessionHas('error', __('messages.federation_address_none_reported'));
+
+        $instance->refresh();
+        $this->assertSame('https://operator.test', $instance->site_url);
+        $this->assertNotNull($instance->flagged_at);
+    }
+
+    /**
+     * It arrived signed, but this is the moment it becomes the authority for ownsUrl()
+     * and every backlink check, so it is held to registration's own rule.
+     */
+    public function test_a_reported_address_that_is_not_a_url_is_refused(): void
+    {
+        $this->adminActing();
+        $instance = $this->makeInstance([
+            'status' => FederatedInstance::STATUS_APPROVED,
+            'flagged_at' => now(),
+            'reported_site_url' => 'not-a-url',
+        ]);
+
+        $this->post(route('admin.federation.accept_address', UrlUtils::encodeId($instance->id)))
+            ->assertRedirect()
+            ->assertSessionHas('error', __('messages.federation_address_invalid'));
+
+        $this->assertSame('https://operator.test', $instance->fresh()->site_url);
+    }
+
+    /** The queue filter the dashboard alert links to, matched to the alert's own query. */
+    public function test_the_flagged_filter_lists_only_flagged_approved_instances(): void
+    {
+        $this->adminActing();
+        $flagged = $this->makeInstance([
+            'name' => 'Moved Install',
+            'status' => FederatedInstance::STATUS_APPROVED,
+            'flagged_at' => now(),
+            'reported_site_url' => 'https://moved.test',
+        ]);
+        $this->makeInstance([
+            'instance_id' => (string) Str::uuid(),
+            'name' => 'Settled Install',
+            'status' => FederatedInstance::STATUS_APPROVED,
+        ]);
+
+        $this->get(route('admin.federation', ['status' => 'flagged']))
+            ->assertOk()
+            ->assertSeeText($flagged->name)
+            ->assertDontSeeText('Settled Install')
+            // Both addresses, so the reviewer can see what is actually being claimed.
+            ->assertSeeText('https://moved.test')
+            ->assertSeeText(__('messages.federation_accept_address'));
+    }
+
+    /** A tab that is empty on every healthy install is noise, so it is opt-in on content. */
+    public function test_the_flagged_tab_is_absent_when_nothing_is_flagged(): void
+    {
+        $this->adminActing();
+        $this->makeInstance(['status' => FederatedInstance::STATUS_APPROVED]);
+
+        $this->get(route('admin.federation'))
+            ->assertOk()
+            ->assertDontSee(route('admin.federation', ['status' => 'flagged']))
+            ->assertDontSeeText(__('messages.federation_status_flagged'));
+    }
+
+    public function test_accepting_an_address_is_absent_off_the_nexus(): void
+    {
+        $this->adminActing();
+        $instance = $this->makeInstance([
+            'status' => FederatedInstance::STATUS_APPROVED,
+            'flagged_at' => now(),
+            'reported_site_url' => 'https://moved.test',
+        ]);
+        config(['app.is_nexus' => false]);
+
+        $this->post(route('admin.federation.accept_address', UrlUtils::encodeId($instance->id)))
+            ->assertNotFound();
     }
 
     public function test_moderation_requires_an_admin(): void

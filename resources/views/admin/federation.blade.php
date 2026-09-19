@@ -12,13 +12,18 @@
 
                 {{-- Status filter --}}
                 <div class="flex items-center gap-1 rounded-xl bg-gray-100 dark:bg-gray-800 p-1">
-                    @foreach (['pending', 'approved', 'suspended', 'all'] as $key)
+                    {{-- Flagged only while something is flagged: it is where the dashboard
+                         alert points, and a tab that is empty on every healthy install is
+                         noise the rest of the time. --}}
+                    @foreach (array_filter(['pending', 'approved', 'flagged', 'suspended', 'all'], fn ($k) => $k !== 'flagged' || $flaggedCount > 0) as $key)
                         <a href="{{ route('admin.federation', ['status' => $key]) }}"
                            class="rounded-lg px-3 py-1.5 text-sm font-medium transition-all duration-200 {{ $status === $key ? 'bg-white dark:bg-gray-900 text-gray-900 dark:text-white shadow-sm' : 'text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300' }}"
                            @if ($status === $key) style="box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.08);" @endif>
                             @lang('messages.federation_status_'.$key)
                             @if ($key === 'pending' && $pendingCount > 0)
                                 <span class="ms-1 inline-flex items-center justify-center min-w-[1.25rem] h-5 px-1 text-xs font-bold text-white bg-red-500 rounded-full">{{ $pendingCount }}</span>
+                            @elseif ($key === 'flagged')
+                                <span class="ms-1 inline-flex items-center justify-center min-w-[1.25rem] h-5 px-1 text-xs font-bold text-white bg-red-500 rounded-full">{{ $flaggedCount }}</span>
                             @endif
                         </a>
                     @endforeach
@@ -163,7 +168,39 @@
                                     <svg class="w-5 h-5 text-amber-600 dark:text-amber-400 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
                                     </svg>
-                                    <p class="text-sm text-amber-800 dark:text-amber-200">@lang('messages.federation_flagged_warning')</p>
+                                    <div class="min-w-0">
+                                        {{-- Two flag sources, and only one of them is resolvable here.
+                                             reported_site_url set means a PUSH claimed a different
+                                             address: the instance stays approved, so there is no
+                                             Approve button to settle it and the copy must not talk
+                                             about approving. Null means register() raised it, which
+                                             already moved site_url and sent the row back to pending,
+                                             where Approve and Suspend do settle it. --}}
+                                        @if ($instance->reported_site_url)
+                                            <p class="text-sm text-amber-800 dark:text-amber-200">@lang('messages.federation_address_changed_warning')</p>
+                                            <dl class="mt-2 space-y-1 text-sm">
+                                                <div class="flex flex-wrap gap-x-2">
+                                                    <dt class="text-amber-700 dark:text-amber-300">@lang('messages.federation_address_on_record'):</dt>
+                                                    <dd class="font-medium text-amber-900 dark:text-amber-100 break-all">{{ $instance->site_url }}</dd>
+                                                </div>
+                                                <div class="flex flex-wrap gap-x-2">
+                                                    {{-- Plain text, never a link: this address is unverified by
+                                                         definition, which is the whole point of the warning. --}}
+                                                    <dt class="text-amber-700 dark:text-amber-300">@lang('messages.federation_address_reported'):</dt>
+                                                    <dd class="font-medium text-amber-900 dark:text-amber-100 break-all">{{ $instance->reported_site_url }}</dd>
+                                                </div>
+                                            </dl>
+                                            <div class="mt-3">
+                                                <button type="submit" formaction="{{ route('admin.federation.accept_address', $hash) }}"
+                                                        data-confirm="{{ __('messages.federation_accept_address_confirm', ['url' => $instance->reported_site_url]) }}"
+                                                        class="ap-secondary-btn inline-flex items-center justify-center px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-lg font-semibold text-base text-gray-900 dark:text-gray-100 transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-[var(--brand-blue)] focus:ring-offset-2 dark:focus:ring-offset-gray-800">
+                                                    @lang('messages.federation_accept_address')
+                                                </button>
+                                            </div>
+                                        @else
+                                            <p class="text-sm text-amber-800 dark:text-amber-200">@lang('messages.federation_flagged_warning')</p>
+                                        @endif
+                                    </div>
                                 </div>
                             </div>
                         @endif

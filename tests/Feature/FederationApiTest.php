@@ -465,7 +465,189 @@ class FederationApiTest extends TestCase
             'items' => [$this->item()],
         ])->assertOk();
 
+        $fresh = $instance->fresh();
+        $this->assertNotNull($fresh->flagged_at);
+        // Kept, not discarded: the admin screen has to be able to show WHICH address is
+        // being claimed, and "Accept new address" has to have something to adopt.
+        $this->assertSame('https://a-clone.test', $fresh->reported_site_url);
+    }
+
+    /**
+     * The reported address is stored now, in a varchar(255), where it used to be
+     * compared and discarded. An unbounded one would fail the insert and 500 a push
+     * that is otherwise valid - and site_url is never length-checked on this path.
+     */
+    public function test_an_over_long_reported_address_does_not_break_the_push(): void
+    {
+        $instance = $this->makeInstance();
+        $long = 'https://'.str_repeat('a', 300).'.test';
+
+        $this->signed(self::EVENTS, [
+            'instance_id' => $instance->instance_id,
+            'site_url' => $long,
+            'items' => [$this->item()],
+        ])->assertOk();
+
+        $fresh = $instance->fresh();
+        $this->assertNotNull($fresh->flagged_at);
+        $this->assertSame(255, mb_strlen($fresh->reported_site_url));
+
+        // And the truncated value is stable, so the same sender does not re-flag hourly.
+        $flaggedAt = $fresh->flagged_at;
+        $this->signed(self::EVENTS, [
+            'instance_id' => $instance->instance_id,
+            'site_url' => $long,
+            'items' => [$this->item()],
+        ])->assertOk();
+
+        $this->assertSame(
+            $flaggedAt->toDateTimeString(),
+            $instance->fresh()->flagged_at->toDateTimeString()
+        );
+    }
+
+    /**
+     * flagged_at marks when the mismatch STARTED, not when it last pushed.
+     *
+     * This runs on every push. Re-stamping it would mean an admin who has already
+     * reviewed this exact address gets re-alerted within the hour, which is what made
+     * the dashboard row impossible to drain.
+     */
+    public function test_a_second_push_of_the_same_address_does_not_re_raise_the_flag(): void
+    {
+        $flaggedAt = now()->subDays(2);
+        $instance = $this->makeInstance([
+            'flagged_at' => $flaggedAt,
+            'reported_site_url' => 'https://a-clone.test',
+        ]);
+
+        $this->signed(self::EVENTS, [
+            'instance_id' => $instance->instance_id,
+            'site_url' => 'https://a-clone.test',
+            'items' => [$this->item()],
+        ])->assertOk();
+
+        $this->assertSame(
+            $flaggedAt->toDateTimeString(),
+            $instance->fresh()->flagged_at->toDateTimeString()
+        );
+    }
+
+    /** A different address again is a new claim, so it does re-raise. */
+    public function test_a_push_from_a_third_address_raises_the_flag_again(): void
+    {
+        $instance = $this->makeInstance([
+            'flagged_at' => now()->subDays(2),
+            'reported_site_url' => 'https://a-clone.test',
+        ]);
+
+        $this->signed(self::EVENTS, [
+            'instance_id' => $instance->instance_id,
+            'site_url' => 'https://another-clone.test',
+            'items' => [$this->item()],
+        ])->assertOk();
+
+        $fresh = $instance->fresh();
+        $this->assertSame('https://another-clone.test', $fresh->reported_site_url);
+        $this->assertTrue($fresh->flagged_at->isToday());
+    }
+
+    /**
+     * The operator fixed their APP_URL: the mismatch is over, so the flag goes with it
+     * and the dashboard alert drains without anyone clicking anything.
+     */
+    public function test_a_matching_push_clears_the_flag_on_an_approved_instance(): void
+    {
+        $instance = $this->makeInstance([
+            'flagged_at' => now()->subDay(),
+            'reported_site_url' => 'https://a-clone.test',
+        ]);
+
+        $this->signed(self::EVENTS, [
+            'instance_id' => $instance->instance_id,
+            'site_url' => 'https://operator.test',
+            'items' => [$this->item()],
+        ])->assertOk();
+
+        $fresh = $instance->fresh();
+        $this->assertNull($fresh->flagged_at);
+        $this->assertNull($fresh->reported_site_url);
+    }
+
+    /**
+     * Self-healing is scoped to approved instances whose flag came from the push path.
+     * A pending instance's flag is part of its review context: clearing it here would
+     * let a remote push its own way out of the moderation queue.
+     */
+    public function test_a_matching_push_does_not_clear_a_pending_instances_flag(): void
+    {
+        $instance = $this->makeInstance([
+            'status' => FederatedInstance::STATUS_PENDING,
+            'flagged_at' => now()->subDay(),
+            'reported_site_url' => 'https://a-clone.test',
+        ]);
+
+        $this->signed(self::EVENTS, [
+            'instance_id' => $instance->instance_id,
+            'site_url' => 'https://operator.test',
+            'items' => [$this->item()],
+        ])->assertOk();
+
         $this->assertNotNull($instance->fresh()->flagged_at);
+    }
+
+    /**
+     * A register-path flag survives the matching pushes that follow it.
+     *
+     * Driven through the real endpoint rather than by hand-setting columns: register()
+     * de-approves as it flags, and that de-approval is precisely what protects the flag
+     * here. A fixture that set flagged_at on an approved row would be asserting against a
+     * state register() cannot produce, and would pin the wrong guard.
+     */
+    public function test_a_matching_push_does_not_clear_a_register_path_flag(): void
+    {
+        $instance = $this->makeInstance();
+
+        $this->signed(self::REGISTER, [
+            'instance_id' => $instance->instance_id,
+            'site_url' => 'https://moved.test',
+            'secret' => $this->secret,
+        ])->assertOk();
+
+        $instance->refresh();
+        $this->assertSame(FederatedInstance::STATUS_PENDING, $instance->status);
+        $this->assertNotNull($instance->flagged_at);
+
+        // The moved install now pushes, reporting the address register() just recorded.
+        $this->signed(self::EVENTS, [
+            'instance_id' => $instance->instance_id,
+            'site_url' => 'https://moved.test',
+            'items' => [$this->item()],
+        ])->assertOk();
+
+        // Still flagged and still pending: the reviewer's signal that it moved survives.
+        $this->assertNotNull($instance->fresh()->flagged_at);
+    }
+
+    /**
+     * Rows flagged before reported_site_url existed carry no reported address, so
+     * accepting one is impossible - a matching push is the only thing that can drain
+     * them. This is the state the live nexus alert was stuck in.
+     */
+    public function test_a_matching_push_clears_a_legacy_flag_with_no_reported_address(): void
+    {
+        $instance = $this->makeInstance([
+            'flagged_at' => now()->subDay(),
+            'reported_site_url' => null,
+        ]);
+
+        $this->signed(self::EVENTS, [
+            'instance_id' => $instance->instance_id,
+            'site_url' => 'https://operator.test',
+            'items' => [$this->item()],
+        ])->assertOk();
+
+        $this->assertNull($instance->fresh()->flagged_at);
     }
 
     public function test_intake_is_absent_off_the_nexus(): void

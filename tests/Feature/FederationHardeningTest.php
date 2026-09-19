@@ -311,6 +311,28 @@ class FederationHardeningTest extends TestCase
         $this->assertNull($instance->approved_at);
     }
 
+    /**
+     * A re-registration moves site_url itself, so a claim standing against the OLD
+     * address is stale. Left set, the admin screen would offer to "accept" an address
+     * this install has already stopped reporting, reverting the record.
+     */
+    public function test_re_registering_drops_a_pending_address_claim(): void
+    {
+        $instance = $this->makeInstance([
+            'approved_at' => now(),
+            'flagged_at' => now()->subDay(),
+            'reported_site_url' => 'https://a-clone.test',
+        ]);
+
+        $this->signed(self::REGISTER, [
+            'instance_id' => $instance->instance_id,
+            'site_url' => 'https://operator.test',
+            'secret' => $this->secret,
+        ])->assertOk();
+
+        $this->assertNull($instance->fresh()->reported_site_url);
+    }
+
     /** Rotating a secret without moving host is routine and must not disturb approval. */
     public function test_rotating_a_secret_on_the_same_host_keeps_approval(): void
     {

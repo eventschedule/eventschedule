@@ -32,6 +32,7 @@ class FederatedInstance extends Model
     protected $fillable = [
         'instance_id',
         'site_url',
+        'reported_site_url',
         'name',
         'contact_email',
         'secret',

@@ -99,6 +99,10 @@ class ApiFederationController extends Controller
 
             $instance->fill([
                 'site_url' => $validated['site_url'],
+                // The record has just moved, so a pending claim against the old one is
+                // stale. Left set, it would offer the admin an "accept" that reverts
+                // site_url to an address this install no longer reports.
+                'reported_site_url' => null,
                 'name' => $validated['name'] ?? $instance->name,
                 'contact_email' => $validated['contact_email'] ?? $instance->contact_email,
                 'secret' => $validated['secret'],
@@ -387,12 +391,57 @@ class ApiFederationController extends Controller
             return response()->json(['error' => 'Signature verification failed'], 403);
         }
 
+        // Derived from the CURRENT mismatch, not stamped blindly. This runs on every push,
+        // so a flag that only ever went on could never be cleared by an admin: the next
+        // push an hour later put it straight back.
         $siteUrl = $request->json('site_url');
-        if ($siteUrl && rtrim((string) $siteUrl, '/') !== rtrim((string) $instance->site_url, '/')) {
-            // Two hosts sharing one identity, most likely a restored backup. Accept
-            // the data but surface it: silently trusting the new host would let a
-            // clone inherit an approved instance's standing.
-            $instance->flagged_at = now();
+        if (is_string($siteUrl) && $siteUrl !== '') {
+            // Bounded before it reaches the column. This value is STORED now, where it
+            // used to be compared and thrown away, so an over-long site_url would fail
+            // the insert and 500 a push that is otherwise fine. Truncating rather than
+            // dropping keeps the stored value identical to the compared one, so the
+            // same junk address stays "already seen" instead of re-flagging every hour.
+            $reported = rtrim($siteUrl, '/');
+            if (mb_strlen($reported) > 255) {
+                $reported = mb_substr($reported, 0, 255);
+            }
+
+            $onRecord = rtrim((string) $instance->site_url, '/');
+
+            if ($reported !== $onRecord) {
+                // Two hosts sharing one identity, most likely a restored backup. Accept
+                // the data but surface it: silently trusting the new host would let a
+                // clone inherit an approved instance's standing.
+                //
+                // Kept, so the admin screen can show WHICH address is being claimed and
+                // offer to adopt it. A full-URL compare on purpose, unlike register()'s
+                // host compare: a scheme or path change is exactly what this catches.
+                $isNewAddress = $instance->flagged_at === null
+                    || rtrim((string) $instance->reported_site_url, '/') !== $reported;
+
+                $instance->reported_site_url = $reported;
+
+                // Only for an address not already seen, so flagged_at reads as when the
+                // mismatch STARTED rather than when it last pushed - and so an admin who
+                // has reviewed this exact address is not re-alerted every hour.
+                if ($isNewAddress) {
+                    $instance->flagged_at = now();
+                }
+            } elseif ($instance->flagged_at !== null && $instance->isApproved()) {
+                // The install is reporting the address on record again: the mismatch is
+                // over, so the flag goes with it.
+                //
+                // isApproved() is the whole guard, and it is sufficient. register() - the
+                // only other thing that raises this flag - de-approves as it does so, so
+                // a register-path flag is never sitting on an approved instance; a
+                // pending or suspended one keeps its flag for a human. Gating on
+                // reported_site_url instead would strand exactly the rows that most need
+                // this: those flagged before that column existed carry no reported
+                // address, so an operator who has since fixed their APP_URL could never
+                // drain the alert at all.
+                $instance->reported_site_url = null;
+                $instance->flagged_at = null;
+            }
         }
 
         // The version this install is running now. It used to arrive only with a registration,

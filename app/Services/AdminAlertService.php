@@ -448,7 +448,10 @@ class AdminAlertService
             // no new Route::has failure mode and the badge lands where the operator already
             // manages campaigns.
             'promos_pending' => ['manage', 'boost', 'admin.boost', [], '#promo-queue', 'amber', 'Boost'],
-            'federation_flagged' => ['system', 'federation', 'admin.federation', ['status' => 'approved'], '', 'red', __('messages.federation')],
+            // ?status=flagged, not approved: the filter behind it repeats this row's own
+            // count query, so the link lands on exactly the instances it counted rather
+            // than on every approved install with those merely sorted to the top.
+            'federation_flagged' => ['system', 'federation', 'admin.federation', ['status' => 'flagged'], '', 'red', __('messages.federation')],
             'federation' => ['system', 'federation', 'admin.federation', [], '', 'amber', __('messages.federation')],
             'translation_suggestions' => ['system', 'translations', 'admin.translations.suggestions', [], '', 'blue', __('messages.translations')],
             'support_unread' => ['system', 'support', 'admin.support', [], '', 'blue', 'Support'],
