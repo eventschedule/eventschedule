@@ -630,9 +630,11 @@ class FederationApiTest extends TestCase
     }
 
     /**
-     * Rows flagged before reported_site_url existed carry no reported address, so
-     * accepting one is impossible - a matching push is the only thing that can drain
-     * them. This is the state the live nexus alert was stuck in.
+     * Rows flagged with no reported address carry nothing to accept, so acceptAddress()
+     * refuses them. Two things drain one: a matching push, as here, or an admin approving
+     * an install that is already approved, which AdminFederationController::settleFlag()
+     * reads as confirming the address on record. Before that existed this was the state
+     * the live nexus alert was stuck in, with Suspend the only way out.
      */
     public function test_a_matching_push_clears_a_legacy_flag_with_no_reported_address(): void
     {

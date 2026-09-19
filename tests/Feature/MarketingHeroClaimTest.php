@@ -13,9 +13,10 @@ use Tests\TestCase;
  * Two things have to survive an edit here.
  *
  * The first is that the fold says the product takes bookings at all. That is the whole reason it
- * was reworked, and it is two words of one sentence: "One event calendar that takes the bookings,
- * sells the tickets, ...". A rewrite that tightens the subhead can drop it without anyone noticing,
- * and a visitor who does not scroll then never learns the product does bookings.
+ * was reworked, and it is four words of one sentence: "Put the date up on your event calendar.
+ * People buy a ticket or book a time, and the money lands in your own Stripe or PayPal." A rewrite
+ * that tightens the subhead can drop "or book a time" without anyone noticing, and a visitor who
+ * does not scroll then never learns the product does bookings.
  *
  * The second is that the fold makes no tier claim. Appointment booking is free with one type and
  * selling tickets is free to 25 paid tickets a month, so a plan name appearing up here is either

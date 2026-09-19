@@ -187,6 +187,8 @@ class AuditService
 
     const ADMIN_FEDERATION_ACCEPT_ADDRESS = 'admin.federation_accept_address';
 
+    const ADMIN_FEDERATION_CLEAR_FLAG = 'admin.federation_clear_flag';
+
     const ADMIN_FEDERATION_BLOCK_EVENT = 'admin.federation_block_event';
 
     const ADMIN_FEDERATION_WELCOME = 'admin.federation_welcome';

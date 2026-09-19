@@ -445,6 +445,217 @@ class FederationReviewTest extends TestCase
             ->assertSeeText(__('messages.federation_accept_address'));
     }
 
+    // ------------------------------------------------- settling a flag with nothing to adopt
+
+    /**
+     * The flagged tab lists approved instances only, so its Approve button always ran
+     * against a row whose status was not changing - and applyStatus() returned before the
+     * line that nulls flagged_at. Ticking the box and pressing Approve did nothing at all
+     * while still flashing a success, and AdminAlertService's federation_flagged row had
+     * no way to drain, against that service's own rule.
+     */
+    public function test_approving_an_already_approved_instance_settles_its_flag(): void
+    {
+        $admin = $this->adminActing();
+        $instance = $this->makeInstance([
+            'status' => FederatedInstance::STATUS_APPROVED,
+            'flagged_at' => now(),
+        ]);
+
+        $this->post(route('admin.federation.bulk'), [
+            'action' => 'approve',
+            'hashes' => [UrlUtils::encodeId($instance->id)],
+        ])->assertRedirect();
+
+        $instance->refresh();
+        $this->assertNull($instance->flagged_at);
+        $this->assertSame(FederatedInstance::STATUS_APPROVED, $instance->status);
+
+        $this->assertDatabaseHas('audit_logs', [
+            'action' => AuditService::ADMIN_FEDERATION_CLEAR_FLAG,
+            'user_id' => $admin->id,
+            'model_type' => 'FederatedInstance',
+            'model_id' => $instance->id,
+        ]);
+    }
+
+    /** The same review through the per-row button, which posts to the approve route. */
+    public function test_marking_a_flagged_instance_reviewed_clears_the_flag(): void
+    {
+        $this->adminActing();
+        $instance = $this->makeInstance([
+            'status' => FederatedInstance::STATUS_APPROVED,
+            'flagged_at' => now(),
+        ]);
+
+        $this->post(route('admin.federation.approve', UrlUtils::encodeId($instance->id)))
+            ->assertRedirect();
+
+        $this->assertNull($instance->fresh()->flagged_at);
+    }
+
+    /**
+     * Nothing about the install's standing changed, so its operator has nothing to be told.
+     * Mailing here would make draining the alert a reason to bother every flagged install.
+     */
+    public function test_settling_a_flag_notifies_nobody(): void
+    {
+        Mail::fake();
+        \Illuminate\Support\Facades\Queue::fake();
+        $this->adminActing();
+        $instance = $this->makeInstance([
+            'status' => FederatedInstance::STATUS_APPROVED,
+            'flagged_at' => now(),
+            // Welcomed already, so the welcome is not what is being suppressed here.
+            'welcomed_at' => now()->subDay(),
+        ]);
+
+        $this->post(route('admin.federation.approve', UrlUtils::encodeId($instance->id)));
+
+        $this->assertNull($instance->fresh()->flagged_at);
+        \Illuminate\Support\Facades\Queue::assertNothingPushed();
+        Mail::assertNothingSent();
+    }
+
+    /**
+     * A flag carrying a reported address is a LIVE mismatch. Clearing it without adopting
+     * the address or suspending the install is a dismiss that the next push re-raises
+     * within the hour, so the dashboard alert would flap instead of settling.
+     */
+    public function test_approving_does_not_settle_a_reported_address_change(): void
+    {
+        $this->adminActing();
+        $instance = $this->makeInstance([
+            'status' => FederatedInstance::STATUS_APPROVED,
+            'flagged_at' => now(),
+            'reported_site_url' => 'https://moved.test',
+        ]);
+
+        $this->post(route('admin.federation.bulk'), [
+            'action' => 'approve',
+            'hashes' => [UrlUtils::encodeId($instance->id)],
+        ])->assertRedirect();
+
+        $instance->refresh();
+        $this->assertNotNull($instance->flagged_at);
+        $this->assertSame('https://moved.test', $instance->reported_site_url);
+        $this->assertSame('https://operator.test', $instance->site_url);
+    }
+
+    /**
+     * The count, not a flat "Instances updated". Reporting a success on a selection it
+     * left untouched is what made the no-op above invisible for as long as it was.
+     */
+    public function test_bulk_reports_what_actually_changed(): void
+    {
+        Mail::fake();
+        $this->adminActing();
+        $settled = $this->makeInstance(['status' => FederatedInstance::STATUS_APPROVED]);
+
+        $this->post(route('admin.federation.bulk'), [
+            'action' => 'approve',
+            'hashes' => [UrlUtils::encodeId($settled->id)],
+        ])->assertSessionHas('message', trans_choice('messages.federation_instances_bulk_updated', 0, ['count' => 0]));
+
+        $pending = $this->makeInstance(['instance_id' => (string) Str::uuid()]);
+
+        $this->post(route('admin.federation.bulk'), [
+            'action' => 'approve',
+            'hashes' => [UrlUtils::encodeId($pending->id), UrlUtils::encodeId($settled->id)],
+        ])->assertSessionHas('message', trans_choice('messages.federation_instances_bulk_updated', 1, ['count' => 1]));
+    }
+
+    /**
+     * The row this whole path exists for: approved, flagged, and carrying no address to
+     * adopt. Per-row Approve is hidden on an approved row and acceptAddress() has nothing
+     * to accept, so without this button the only way out was Suspend.
+     */
+    public function test_a_flagged_row_with_no_reported_address_offers_a_way_out(): void
+    {
+        $this->adminActing();
+        $this->makeInstance([
+            'status' => FederatedInstance::STATUS_APPROVED,
+            'flagged_at' => now(),
+        ]);
+
+        $this->get(route('admin.federation', ['status' => 'flagged']))
+            ->assertOk()
+            ->assertSeeText(__('messages.federation_mark_reviewed'))
+            // Nothing was reported, so there is no address to offer adopting.
+            ->assertDontSeeText(__('messages.federation_accept_address'));
+    }
+
+    /** And the other way round: a reported address is adopted, not waved through. */
+    public function test_a_row_reporting_an_address_is_not_offered_the_review_button(): void
+    {
+        $this->adminActing();
+        $this->makeInstance([
+            'status' => FederatedInstance::STATUS_APPROVED,
+            'flagged_at' => now(),
+            'reported_site_url' => 'https://moved.test',
+        ]);
+
+        $this->get(route('admin.federation', ['status' => 'flagged']))
+            ->assertOk()
+            ->assertSeeText(__('messages.federation_accept_address'))
+            ->assertDontSeeText(__('messages.federation_mark_reviewed'));
+    }
+
+    /**
+     * authenticateInstance() leaves a pending or suspended flag standing for a human, and
+     * AdminAlertService deliberately does not count one - re-surfacing a suspended instance
+     * would hand it an escape from moderation. So clearing a flag here would drain nothing
+     * and destroy the only column saying the install once moved host. Hence settleFlag() is
+     * reached on an approve and never on a suspend.
+     */
+    public function test_suspending_an_already_suspended_instance_leaves_its_flag(): void
+    {
+        $this->adminActing();
+        $instance = $this->makeInstance([
+            'status' => FederatedInstance::STATUS_SUSPENDED,
+            'flagged_at' => now(),
+        ]);
+
+        $this->post(route('admin.federation.suspend', UrlUtils::encodeId($instance->id)));
+
+        $this->assertNotNull($instance->fresh()->flagged_at);
+        $this->assertDatabaseMissing('audit_logs', ['action' => AuditService::ADMIN_FEDERATION_CLEAR_FLAG]);
+    }
+
+    /**
+     * The regression risk in splitting the warning panel on isApproved(): a register-path
+     * flag sits on a PENDING row, where Approve is rendered and settles it by changing the
+     * status. That row must keep the copy about approving and must not be offered a review
+     * button that would duplicate the Approve already beside it.
+     */
+    public function test_a_flagged_pending_instance_keeps_the_approve_copy(): void
+    {
+        $this->adminActing();
+        $this->makeInstance(['flagged_at' => now()]);
+
+        $this->get(route('admin.federation', ['status' => 'pending']))
+            ->assertOk()
+            ->assertSeeText(__('messages.federation_flagged_warning'))
+            ->assertDontSeeText(__('messages.federation_flagged_unknown_warning'))
+            ->assertDontSeeText(__('messages.federation_mark_reviewed'));
+    }
+
+    /**
+     * The per-row half of the same lie: a stale page, or a second submit of the review
+     * button, reached applyStatus() with nothing to do and still flashed "Saved".
+     */
+    public function test_a_review_that_changes_nothing_says_so(): void
+    {
+        $this->adminActing();
+        $instance = $this->makeInstance(['status' => FederatedInstance::STATUS_APPROVED]);
+
+        $this->post(route('admin.federation.approve', UrlUtils::encodeId($instance->id)))
+            ->assertRedirect()
+            ->assertSessionHas('error', __('messages.federation_nothing_changed'));
+
+        $this->assertDatabaseMissing('audit_logs', ['action' => AuditService::ADMIN_FEDERATION_CLEAR_FLAG]);
+    }
+
     /** A tab that is empty on every healthy install is noise, so it is opt-in on content. */
     public function test_the_flagged_tab_is_absent_when_nothing_is_flagged(): void
     {

@@ -197,7 +197,40 @@
                                                     @lang('messages.federation_accept_address')
                                                 </button>
                                             </div>
+                                        @elseif ($instance->isApproved())
+                                            {{-- Flagged with nothing to adopt: either raised before
+                                                 reported_site_url existed, or raised by a push over a
+                                                 full-URL mismatch and then outliving its claim, which
+                                                 register() drops on any re-registration while only
+                                                 flagging a HOST change. The per-row Approve button is
+                                                 hidden on an approved row and acceptAddress() has nothing
+                                                 to accept, so without this the only way out was Suspend -
+                                                 which drops the install off the network and mails its
+                                                 operator twice to get back. Posts to approve: approving an
+                                                 already-approved instance IS this review, and one route
+                                                 keeps the two from drifting. --}}
+                                            <p class="text-sm text-amber-800 dark:text-amber-200">@lang('messages.federation_flagged_unknown_warning')</p>
+                                            {{-- The subject of the warning, beside the button that settles
+                                                 it. Otherwise "the address above" means the meta line,
+                                                 which only prints site_url when the instance sent a name. --}}
+                                            <dl class="mt-2 space-y-1 text-sm">
+                                                <div class="flex flex-wrap gap-x-2">
+                                                    <dt class="text-amber-700 dark:text-amber-300">@lang('messages.federation_address_on_record'):</dt>
+                                                    <dd class="font-medium text-amber-900 dark:text-amber-100 break-all">{{ $instance->site_url }}</dd>
+                                                </div>
+                                            </dl>
+                                            <div class="mt-3">
+                                                <button type="submit" formaction="{{ route('admin.federation.approve', $hash) }}"
+                                                        data-confirm="{{ __('messages.federation_mark_reviewed_confirm', ['url' => $instance->site_url]) }}"
+                                                        class="ap-secondary-btn inline-flex items-center justify-center px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-lg font-semibold text-base text-gray-900 dark:text-gray-100 transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-[var(--brand-blue)] focus:ring-offset-2 dark:focus:ring-offset-gray-800">
+                                                    @lang('messages.federation_mark_reviewed')
+                                                </button>
+                                            </div>
                                         @else
+                                            {{-- Not approved, so the register path sent it back for review
+                                                 and the row already carries the buttons that settle it:
+                                                 Approve on a pending row, and on a suspended one an Approve
+                                                 that changes status. This only has to say so. --}}
                                             <p class="text-sm text-amber-800 dark:text-amber-200">@lang('messages.federation_flagged_warning')</p>
                                         @endif
                                     </div>

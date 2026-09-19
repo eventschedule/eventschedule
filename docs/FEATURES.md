@@ -161,7 +161,7 @@ operator, not per schedule.
 | Feature | Gate location | Notes |
 |---------|--------------|-------|
 | Federation | `FederationService::isEnabled()` - `! config('app.is_nexus') && Setting::get('federation_enabled')` | Shares public events with the eventschedule.com listings; every listing links back to the event on the origin site. Off by default, enabled by an admin at `/admin/settings`. Each schedule is opt-in via `roles.federation_enabled` (null = undecided, the default, and shares nothing; false vetoes co-listed events). Owners are offered one-click listing on the dashboard, admins on the settings card (for schedules they own), and anyone who can edit a schedule on its page |
-| Federation moderation | `AdminFederationController`, `config('app.is_nexus')` | Nexus-only. Approve, suspend or delist instances, and block individual listings, at `/admin/federation`. The first approval emails the operator a welcome with setup steps (`FederationWelcomeService`); installs approved before that can be sent it from the same screen |
+| Federation moderation | `AdminFederationController`, `config('app.is_nexus')` | Nexus-only. Approve, suspend or delist instances, and block individual listings, at `/admin/federation`. The first approval emails the operator a welcome with setup steps (`FederationWelcomeService`); installs approved before that can be sent it from the same screen. An install whose reported address stops matching the record is flagged: accept the new address, confirm the one on record, or suspend the install |
 
 ## Monetization (operator-enabled)
 

@@ -481,24 +481,30 @@
                 <span class="es-mask es-mask-2"><span class="es-mask-line"><span class="text-gradient es-gradient-anim">Booked solid.</span></span></span>
             </h1>
 
-            {{-- "One event calendar" recovers the keyword from an H1 that no longer carries it, and
-                 the <title> says "Free Event Calendar": an H1 that does not confirm the title's
-                 subject is the usual trigger for Google rewriting it.
+            {{-- A SCENARIO, not a feature list. Four earlier drafts of this line were all the same
+                 sentence - "One page/calendar ..." plus a three-verb list - and a list of verbs is a
+                 spec sheet, which is not what an aspirational headline needs under it.
 
-                 The CALENDAR is the subject, not the reader. "Booked solid" is a state that happens
-                 to you, so the line under it has to say what does the work; an imperative here
-                 ("Take the bookings") makes the fold two arguments instead of one. Same shape as
-                 the best sentence on the site, on /features/ticketing.
+                 The arc is what makes it work: the reader does exactly ONE thing, "Put the date up",
+                 and everything after that happens to them. That is the mechanism behind "Booked
+                 solid" directly above, which is why an imperative opening reads right here when it
+                 would have fought the headline in a capability list.
 
-                 Deliberately does NOT enumerate what you put on. The H1 already said "everything",
-                 and any list shorter than everything is narrower than the promise above it.
+                 "buy a ticket or book a time" carries both revenue modes in six words. Both are
+                 free-tier capabilities (25 paid tickets a calendar month, one appointment type), so
+                 the sentence needs no tier qualifier.
 
-                 Clause ORDER is load-bearing. "them" has to land on "the tickets", so the bookings
-                 clause goes first; put it second and "scans them in at the door" points at the
-                 people who booked an appointment, which is not a thing that happens. --}}
+                 "event calendar" is here because the <title> says "Free Event Calendar" and an H1
+                 that does not confirm the title's subject is the usual trigger for Google rewriting
+                 it; the H1 no longer carries the phrase, so this line has to.
+
+                 It ends on the reader's own account, in the same words as the 0% card further down
+                 this page, so the fold and the proof below it say the same thing. The explicit
+                 "No platform fee" is deliberately NOT here: the badge above carries free, and the
+                 JSON-LD description carries the fee claim for search snippets. --}}
             <p class="es-fade-up es-d-2 mx-auto mb-10 max-w-2xl text-lg text-gray-500 dark:text-gray-400 sm:text-xl">
-                One event calendar that takes the bookings, sells the tickets, and scans them in at
-                the door. No platform fee, on any plan.
+                Put the date up on your event calendar. People buy a ticket or book a time, and the
+                money lands in your own Stripe or PayPal.
             </p>
 
             <div class="es-fade-up es-d-3 flex flex-col items-center justify-center gap-4 sm:flex-row">

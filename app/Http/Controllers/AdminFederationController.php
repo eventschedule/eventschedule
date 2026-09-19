@@ -153,11 +153,12 @@ class AdminFederationController extends Controller
     /**
      * Adopt the address an approved install now reports, settling the flag it raised.
      *
-     * The push path flags a mismatch and leaves the instance approved, where applyStatus()
-     * - the only other thing that clears flagged_at - early-returns because the status is
-     * not changing. So this was previously unresolvable except by suspending the install
-     * and approving it again, which drops it out of the network and mails the operator
-     * twice. Suspend remains the way to REJECT the change.
+     * The push path flags a mismatch and leaves the instance approved, so the queue hides
+     * the Approve button and there is no status change to settle it with. Approving an
+     * already-approved instance now settles a flag through settleFlag(), but settleFlag()
+     * deliberately REFUSES this case: an address is on the table, and waving it through
+     * without adopting or rejecting it is a dismiss the next push re-raises. So this stays
+     * the only way to say yes to a reported address, and Suspend the only way to say no.
      *
      * Not offered in bulk(): site_url is the authority every backlink host check runs
      * against, so adopting one is a per-instance judgement, not a sweep.
@@ -294,14 +295,19 @@ class AdminFederationController extends Controller
             ? AuditService::ADMIN_FEDERATION_APPROVE
             : AuditService::ADMIN_FEDERATION_SUSPEND;
 
+        // Counted, not assumed. Approving a selection that is already approved changes
+        // nothing at all on the flagged tab, where every row is approved by definition -
+        // and a flat "Instances updated" there reported a success that never happened.
+        $changed = 0;
+
         foreach ($validated['hashes'] as $hash) {
             $instance = FederatedInstance::find(UrlUtils::decodeId($hash));
-            if ($instance) {
-                $this->applyStatus($instance, $status, $auditAction);
+            if ($instance && $this->applyStatus($instance, $status, $auditAction)) {
+                $changed++;
             }
         }
 
-        return back()->with('message', __('messages.federation_instances_updated'));
+        return back()->with('message', trans_choice('messages.federation_instances_bulk_updated', $changed, ['count' => $changed]));
     }
 
     /**
@@ -334,15 +340,32 @@ class AdminFederationController extends Controller
         abort_unless(config('app.is_nexus'), 404);
 
         $instance = FederatedInstance::findOrFail(UrlUtils::decodeId($hash));
-        $this->applyStatus($instance, $status, $auditAction);
+
+        // Reported, not assumed. The review button under the amber panel posts here, and on
+        // a second submit - or from a page rendered before another admin settled the same
+        // row - there is nothing left to do. Flashing "Saved" there is the same lie bulk()
+        // used to tell on the flagged tab. Both per-row buttons are hidden in the state that
+        // produces this, so it only ever surfaces on a genuinely stale submit.
+        if (! $this->applyStatus($instance, $status, $auditAction)) {
+            return back()->with('error', __('messages.federation_nothing_changed'));
+        }
 
         return back()->with('message', __('messages.saved'));
     }
 
-    protected function applyStatus(FederatedInstance $instance, string $status, string $auditAction): void
+    /**
+     * Returns whether anything actually changed, so bulk() can report a real count
+     * instead of claiming a success on a selection it left untouched.
+     */
+    protected function applyStatus(FederatedInstance $instance, string $status, string $auditAction): bool
     {
         if ($instance->status === $status) {
-            return;
+            // A redundant approve is not nothing: on a flagged row it is the admin saying
+            // they looked and the install is genuine. That is the only way to settle a flag
+            // on the flagged tab, where every row is approved already and the per-row
+            // Approve button is therefore hidden. A redundant SUSPEND stays a no-op -
+            // authenticateInstance() leaves a pending or suspended flag standing for a human.
+            return $status === FederatedInstance::STATUS_APPROVED && $this->settleFlag($instance);
         }
 
         $previous = $instance->status;
@@ -369,7 +392,7 @@ class AdminFederationController extends Controller
         // Mail only on an admin decision, never on registration: contact_email arrives
         // unauthenticated, so mailing it earlier would make this a spam relay.
         if (! $instance->contact_email) {
-            return;
+            return true;
         }
 
         // And not when suspending a registration nobody ever approved. That is how junk is
@@ -379,7 +402,7 @@ class AdminFederationController extends Controller
         if ($status === FederatedInstance::STATUS_SUSPENDED
             && $previous === FederatedInstance::STATUS_PENDING
             && ! $instance->welcomed_at) {
-            return;
+            return true;
         }
 
         // The first approval gets the welcome, which walks the operator through listing their
@@ -389,7 +412,7 @@ class AdminFederationController extends Controller
         if ($status === FederatedInstance::STATUS_APPROVED && ! $instance->welcomed_at) {
             app(FederationWelcomeService::class)->send($instance);
 
-            return;
+            return true;
         }
 
         // Queued rather than sent inline, following the SendQueuedEmail convention used
@@ -408,6 +431,59 @@ class AdminFederationController extends Controller
         } catch (\Throwable $e) {
             report($e);
         }
+
+        return true;
+    }
+
+    /**
+     * Settle the address flag on an instance whose status is not changing.
+     *
+     * This is the "I looked, it is genuine" review. It is reached by approving an
+     * instance that is already approved - which applyStatus() used to swallow whole,
+     * leaving the flagged tab's Approve button a guaranteed no-op and AdminAlertService's
+     * federation_flagged row with no way to drain, against that service's own rule.
+     *
+     * Deliberately refuses a flag that carries a reported address. That one is a LIVE
+     * mismatch: clearing it without adopting the address (acceptAddress) or rejecting the
+     * install (suspend) is a dismiss the next push re-raises within the hour - it
+     * recomputes $isNewAddress against a null flagged_at - so the dashboard alert would
+     * flap instead of settling.
+     *
+     * What is left is a flag with nothing to adopt, where site_url on record is all there
+     * is to judge. Two ways to get there, and neither is only historical:
+     *  - flagged before reported_site_url existed, which is the live nexus row;
+     *  - a push flagged a full-URL mismatch (a path or scheme change on the same host),
+     *    then the install re-registered on that same host. register() nulls the stale
+     *    claim but only stamps flagged_at on a HOST change, so the flag outlives the
+     *    address that raised it. See FederationHardeningTest::
+     *    test_re_registering_drops_a_pending_address_claim.
+     *
+     * Not covered: a reported address that fails acceptAddress()'s url validation. Suspend
+     * is the right answer to an install reporting junk, and widening this to cover it would
+     * mean duplicating that validator in the view to keep the button and the guard aligned.
+     */
+    protected function settleFlag(FederatedInstance $instance): bool
+    {
+        if (! $instance->flagged_at || ! $instance->isApproved() || $instance->reported_site_url) {
+            return false;
+        }
+
+        $instance->flagged_at = null;
+        $instance->save();
+
+        AuditService::log(
+            AuditService::ADMIN_FEDERATION_CLEAR_FLAG,
+            auth()->id(),
+            'FederatedInstance',
+            $instance->id,
+            ['flagged' => true],
+            ['flagged' => false],
+            'Marked federated instance reviewed',
+        );
+
+        // No mail on purpose: nothing about the instance's standing changed, so there is
+        // nothing to tell its operator.
+        return true;
     }
 
     protected function logWelcome(FederatedInstance $instance): void

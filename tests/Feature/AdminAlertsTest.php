@@ -441,6 +441,36 @@ class AdminAlertsTest extends TestCase
         $this->assertSame('red', $badge['color']);
     }
 
+    /**
+     * This service's own rule: a row that can never drain inflates the panel total and
+     * pins a permanent nav badge. federation_flagged was breaking it - the flagged tab
+     * lists approved instances only, applyStatus() returned early on a status that was
+     * not changing, and so its Approve button cleared nothing. Suspending the install was
+     * the only way out, which drops it off the network and mails its operator twice.
+     */
+    public function test_a_flagged_instance_can_be_reviewed_and_the_alert_drains(): void
+    {
+        $admin = $this->createOwner(true);
+
+        $instance = $this->makeInstance([
+            'status' => FederatedInstance::STATUS_APPROVED,
+            'flagged_at' => now(),
+        ]);
+
+        $this->assertContains('federation_flagged', AdminAlertService::items()->pluck('type')->all());
+
+        $this->adminActing($admin)
+            ->post(route('admin.federation.approve', \App\Utils\UrlUtils::encodeId($instance->id)))
+            ->assertRedirect();
+
+        $this->assertSame(FederatedInstance::STATUS_APPROVED, $instance->fresh()->status);
+
+        // items() memoises per process; a real second visit is a new request.
+        AdminAlertService::flush();
+
+        $this->assertNotContains('federation_flagged', AdminAlertService::items()->pluck('type')->all());
+    }
+
     public function test_a_flagged_suspended_instance_is_not_resurfaced(): void
     {
         $this->createOwner(true);

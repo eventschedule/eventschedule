@@ -809,6 +809,13 @@ Watch for:
   running, not what it ran when it registered.
 - **Suspending an unreviewed registration sends no email.** Junk registrations carry
   attacker-chosen names and addresses, so only installs that were welcomed are told.
+- **The Flagged tab now has two shapes, and they drain differently.** A row showing two
+  addresses is a live claim: press Accept new address to adopt it, or Suspend to reject it.
+  A row showing only the address on record has nothing to adopt - check that address is
+  genuine and press Mark as reviewed (or tick it and press Approve selected, which is the
+  same operation). Before this, that second shape offered nothing but Suspend, so the
+  dashboard's "changed its address" alert could not be cleared without dropping the install
+  off the network and mailing its operator twice to put it back.
 
 ## Selfhost release
 
