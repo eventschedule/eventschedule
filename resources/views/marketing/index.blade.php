@@ -386,7 +386,7 @@
         "@id": "{{ config('app.url') }}/#software",
         "name": "Event Schedule",
         "url": "{{ config('app.url') }}",
-        "description": "Event calendar and booking platform. Publish your events and your open hours on one page, sell tickets with zero platform fees through Stripe or PayPal, email the people who follow you and scan tickets at the door. Free plan, open source and selfhostable.",
+        "description": "Event calendar and booking platform. One calendar that takes the bookings, sells the tickets with zero platform fees through Stripe or PayPal, emails the people who follow you and scans tickets at the door. Free plan, open source and selfhostable.",
         "featureList": [
             "Event calendar pages with a custom link and a website embed",
             "Ticket sales with zero platform fees through Stripe or PayPal",
@@ -475,13 +475,30 @@
             </div>
 
             <h1 class="es-balance mb-6 text-[2.7rem] font-black leading-[1.04] tracking-tight text-gray-900 dark:text-white sm:text-6xl lg:text-7xl">
-                <span class="es-mask"><span class="es-mask-line">Plan, promote, and share</span></span>
-                <span class="es-mask es-mask-2"><span class="es-mask-line"><span class="text-gradient es-gradient-anim">your event calendar</span></span></span>
+                {{-- 24 characters is the budget per line: .es-mask animates the whole line block,
+                     so a line that wraps rises as a two-line slab instead of a crisp single line. --}}
+                <span class="es-mask"><span class="es-mask-line">Everything you have on.</span></span>
+                <span class="es-mask es-mask-2"><span class="es-mask-line"><span class="text-gradient es-gradient-anim">Booked solid.</span></span></span>
             </h1>
 
+            {{-- "One event calendar" recovers the keyword from an H1 that no longer carries it, and
+                 the <title> says "Free Event Calendar": an H1 that does not confirm the title's
+                 subject is the usual trigger for Google rewriting it.
+
+                 The CALENDAR is the subject, not the reader. "Booked solid" is a state that happens
+                 to you, so the line under it has to say what does the work; an imperative here
+                 ("Take the bookings") makes the fold two arguments instead of one. Same shape as
+                 the best sentence on the site, on /features/ticketing.
+
+                 Deliberately does NOT enumerate what you put on. The H1 already said "everything",
+                 and any list shorter than everything is narrower than the promise above it.
+
+                 Clause ORDER is load-bearing. "them" has to land on "the tickets", so the bookings
+                 clause goes first; put it second and "scans them in at the door" points at the
+                 people who booked an appointment, which is not a thing that happens. --}}
             <p class="es-fade-up es-d-2 mx-auto mb-10 max-w-2xl text-lg text-gray-500 dark:text-gray-400 sm:text-xl">
-                One page for your events and your open hours. Sell tickets with zero platform fees, email the
-                people who follow it, and scan them in at the door.
+                One event calendar that takes the bookings, sells the tickets, and scans them in at
+                the door. No platform fee, on any plan.
             </p>
 
             <div class="es-fade-up es-d-3 flex flex-col items-center justify-center gap-4 sm:flex-row">
@@ -500,49 +517,15 @@
                 </a>
             </div>
 
-            {{-- The fold's capability row. Free first, so it reads as generosity before
-                 restriction, and the two tier qualifiers are muted so they read as a spec
-                 rather than as a price tag interrupting the promise above.
-
-                 Deliberately NOT links: four tab stops between "Start for free" and the
-                 poster strip cost more than the internal linking is worth, and all four
-                 are already linked further down this page (appointments, reserved seating,
-                 gift cards and passes). Being non-interactive is also what keeps the
-                 focus-order comment on the wall below true, and lets them inherit
-                 pointer-events-none from the wrapper so they never swallow a poster click.
-
-                 No check glyph, unlike the chips on /saas: a tick reads as "included",
-                 which is a lie next to "on Enterprise". --}}
-            @php
-                $heroChips = [
-                    ['label' => 'Appointment booking, free', 'tier' => null],
-                    ['label' => 'Stripe, PayPal or cash', 'tier' => null],
-                    ['label' => 'Gift cards and passes', 'tier' => 'on Pro'],
-                    ['label' => 'Reserved seating', 'tier' => 'on Enterprise'],
-                ];
-            @endphp
-            <ul class="es-fade-up es-d-4 mt-8 flex flex-wrap items-center justify-center gap-2">
-                @foreach ($heroChips as $heroChip)
-                    <li class="inline-flex items-center gap-1.5 rounded-full glass px-3 py-1.5 text-xs font-medium text-gray-600 dark:text-gray-300">
-                        <span class="h-1.5 w-1.5 shrink-0 rounded-full bg-gradient-to-r from-[#4E81FA] to-[#22D3EE]" aria-hidden="true"></span>
-                        {{ $heroChip['label'] }}
-                        @if ($heroChip['tier'])
-                            {{-- Muted by WEIGHT in light mode, not colour. Measured on the glass
-                                 (rgb(242,242,242) light, rgb(22,22,27) dark): gray-500 is 4.33:1
-                                 in light and gray-400 is 2.27:1, both under the 4.5 this 12px text
-                                 needs, and the site holds a measured zero-failure AA baseline in
-                                 both modes. gray-600 is 9.53:1 in light and gray-400 is 7.09:1 in
-                                 dark, so the tier steps down in colour only where it can afford to. --}}
-                            <span class="font-normal text-gray-600 dark:text-gray-400">{{ $heroChip['tier'] }}</span>
-                        @endif
-                    </li>
-                @endforeach
-            </ul>
-
+            {{-- No capability chip row here. A row of four named features under the CTAs turns the
+                 fold back into a table of contents, and two of the four (passes and gift cards on
+                 Pro, reserved seating on Enterprise) are expansion features that belong to a reader
+                 who has already decided and is scrolling. Both are still on this page, in the
+                 ticketing card and the "everything else" grid. --}}
             <p class="es-fade-up es-d-4 mt-6 text-sm text-gray-500 dark:text-gray-400">Set up in under 2 minutes. Open source, and yours to selfhost.</p>
 
             {{-- Compact clickable poster strip (mobile and tablets) --}}
-            <div class="es-fade-up es-d-5 pointer-events-auto mt-8 lg:hidden">
+            <div class="es-fade-up es-d-5 pointer-events-auto mt-12 lg:hidden">
                 <div class="es-marquee-mask">
                     <div class="es-marquee" data-marquee="1">
                         <div class="es-marquee-track">
@@ -1032,8 +1015,13 @@
                         <span class="h-1.5 w-1.5 rounded-full bg-gradient-to-r from-[#4E81FA] to-[#22D3EE]" aria-hidden="true"></span>
                         <span class="text-xs font-semibold uppercase tracking-[0.18em] text-gray-600 dark:text-gray-300">New · Appointments</span>
                     </div>
+                    {{-- Not "get booked": that is the hero's gradient payoff now, and it was
+                         Calendly's own pitch besides. The claim here is bigger than a booking link,
+                         and it is the one thing no competitor in either category can make: the same
+                         calendar holds the shows and the open hours, and will not let one be booked
+                         over the other. --}}
                     <h2 class="es-balance mb-4 text-3xl font-black tracking-tight text-gray-900 dark:text-white md:text-5xl" data-reveal>
-                        Share a link, get <span class="text-gradient">booked</span>
+                        Your open hours, on <span class="text-gradient">the same page</span>
                     </h2>
                     <p class="mb-8 text-lg text-gray-500 dark:text-gray-400 sm:text-xl" data-reveal>
                         Appointment booking, built in. Guests pick an open time in their own timezone, and the booking lands on your schedule.

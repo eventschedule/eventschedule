@@ -10,115 +10,92 @@ use Tests\TestCase;
  * likely to go stale: it sat unchanged for a year while appointments, reserved seating, gift cards
  * and passes all shipped into the sections below it.
  *
- * The capability chip row is where the fold names tier-gated features, and the reason it can name
- * them at all is that each one carries its own tier. Drop the tier word and the row becomes four
- * capabilities sitting directly under a badge reading "Free forever. No credit card." and a button
- * reading "Start for free", which is the most expensive place on the site to imply that an
- * Enterprise feature is free.
+ * Two things have to survive an edit here.
  *
- * SeatingClaimTest guards the pages a seated buyer lands on; this guards the page everybody lands
- * on. It asserts the chips, not the whole page, because "Enterprise" appears elsewhere in the
- * document (the pricing band, the FAQ) and a page-wide match would pass on a chip whose tier had
- * been deleted.
+ * The first is that the fold says the product takes bookings at all. That is the whole reason it
+ * was reworked, and it is two words of one sentence: "One event calendar that takes the bookings,
+ * sells the tickets, ...". A rewrite that tightens the subhead can drop it without anyone noticing,
+ * and a visitor who does not scroll then never learns the product does bookings.
+ *
+ * The second is that the fold makes no tier claim. Appointment booking is free with one type and
+ * selling tickets is free to 25 paid tickets a month, so a plan name appearing up here is either
+ * wrong or is a paid feature being advertised beside a badge reading "Free forever. No credit card."
+ * and a button reading "Start for free". An earlier version of this fold carried a chip row that
+ * named Pro and Enterprise; it was removed deliberately, and this is what stops it drifting back in
+ * unqualified.
+ *
+ * Scoped to the hero section, not the page, because "Pro" and "Enterprise" appear legitimately
+ * further down (the pricing band, the feature grid, the FAQ) and a page-wide match would be noise.
  */
 class MarketingHeroClaimTest extends TestCase
 {
     use RefreshDatabase;
 
     /**
-     * The chip row's rendered text, one entry per chip.
+     * The hero's rendered text: everything from <section id="top"> to the poster wall that closes it.
      *
-     * Keyed off the `es-fade-up` list inside the hero rather than a test-only hook, so a rewrite
-     * that drops the row fails here rather than silently asserting over an empty array.
-     *
-     * @return array<int, string>
+     * Stops at the wall rather than the section end so the event names on the poster cards, which
+     * are live database rows and could contain anything, cannot satisfy or trip an assertion.
      */
-    private function heroChips(): array
+    private function heroText(): string
     {
         $body = $this->get('/')->assertOk()->getContent();
 
-        $hero = strstr($body, 'id="top"');
-        $this->assertNotFalse($hero, 'the hero section is gone from the homepage');
+        $start = strpos($body, 'id="top"');
+        $this->assertNotFalse($start, 'the hero section is gone from the homepage');
 
-        preg_match('/<ul class="es-fade-up[^"]*"[^>]*>(.*?)<\/ul>/s', $hero, $list);
-        $this->assertNotEmpty($list, 'the hero capability chip row is gone from the homepage');
+        $end = strpos($body, 'es-wall absolute', $start);
+        $this->assertNotFalse($end, 'the hero poster wall has moved; this test needs a new end anchor');
 
-        preg_match_all('/<li\b[^>]*>(.*?)<\/li>/s', $list[1], $items);
+        $hero = substr($body, $start, $end - $start);
 
-        return array_map(
-            fn ($chip) => trim(preg_replace('/\s+/', ' ', strip_tags($chip))),
-            $items[1]
-        );
+        return trim(preg_replace('/\s+/', ' ', strip_tags($hero)));
     }
 
     /**
-     * Appointment booking is free on every plan and is the capability that changed what the
-     * product is, which is the whole reason the fold was reworked. If it falls out of the fold
-     * again, a visitor who does not scroll never learns the product takes bookings at all.
+     * Appointment booking is free on every plan and is the capability that changed what the product
+     * is. If it falls out of the fold, the fold is back to describing last year's product.
      */
     public function test_the_fold_says_the_product_takes_bookings(): void
     {
-        $chips = $this->heroChips();
-        $this->assertNotEmpty($chips, 'the hero chip row rendered no chips');
+        $hero = $this->heroText();
 
-        $booking = array_filter($chips, fn ($c) => stripos($c, 'booking') !== false);
-
-        $this->assertNotEmpty($booking,
-            "the fold no longer mentions booking. Chips were:\n- ".implode("\n- ", $chips));
+        $this->assertMatchesRegularExpression('/\bbook(ing|ings|ed)?\b/i', $hero,
+            "the fold no longer mentions booking anywhere. Hero text was:\n".$hero);
     }
 
     /**
-     * Each tier-gated capability names its tier, in its own chip.
-     *
-     * Reserved seating is Enterprise and passes and gift cards are Pro (docs/FEATURES.md). A chip
-     * that names one without its tier is the claim this test exists to stop.
+     * The headline and subhead both have to survive, because between them they carry the argument:
+     * the H1 is the promise and the subhead is the only place the product category and the three
+     * audiences are named.
      */
-    public function test_every_tier_gated_chip_names_its_tier(): void
+    public function test_the_fold_still_names_the_product_category(): void
     {
-        $chips = $this->heroChips();
+        $hero = $this->heroText();
 
-        $gated = [
-            'seating' => 'Enterprise',
-            'gift card' => 'Pro',
-            'passes' => 'Pro',
-        ];
-
-        foreach ($gated as $needle => $tier) {
-            foreach ($chips as $chip) {
-                if (stripos($chip, $needle) === false) {
-                    continue;
-                }
-
-                $this->assertStringContainsStringIgnoringCase($tier, $chip,
-                    "the hero chip \"{$chip}\" names a {$tier}-only feature without saying so. ".
-                    'Beside "Free forever" and "Start for free", that reads as included.');
-            }
-        }
+        // The <title> says "Free Event Calendar". An H1 and subhead that never confirm the title's
+        // subject is the usual trigger for Google rewriting the title in the SERP.
+        $this->assertStringContainsStringIgnoringCase('event calendar', $hero,
+            'the fold no longer says what the product is, so the title has nothing on the page to confirm it');
     }
 
     /**
-     * Nothing free-tier in the fold may pick up a tier word it does not have.
+     * No plan name in the fold.
      *
-     * The mirror of the test above: appointment booking is free with one type, and selling tickets
-     * is free to 25 paid tickets a month, so a chip that puts either behind a plan is as wrong as
-     * an unqualified Enterprise claim, and is the shape MarketingTicketingTierTest cannot see here
-     * because a chip is not a sentence.
+     * Everything the fold claims is free, so a tier word up here is either a mistake or a paid
+     * feature being sold inside the free promise. Selling tickets and taking bookings are both free
+     * (Role::ticketSaleLimit, Role::appointmentTypeLimit), which is exactly why this can be a flat
+     * ban rather than a per-feature qualifier check.
      */
-    public function test_no_free_capability_is_labelled_as_paid(): void
+    public function test_the_fold_advertises_no_paid_plan(): void
     {
-        foreach ($this->heroChips() as $chip) {
-            if (stripos($chip, 'booking') === false && stripos($chip, 'ticket') === false) {
-                continue;
-            }
+        $hero = $this->heroText();
 
-            // "Gift cards and passes on Pro" is correct and must keep working, so only chips that
-            // are ABOUT booking or ticketing are checked.
-            if (stripos($chip, 'gift card') !== false || stripos($chip, 'passes') !== false) {
-                continue;
-            }
-
-            $this->assertDoesNotMatchRegularExpression('/\b(on|with)\s+(Pro|Enterprise)\b/i', $chip,
-                "the hero chip \"{$chip}\" puts a free capability behind a paid plan");
+        foreach (['Pro', 'Enterprise'] as $tier) {
+            $this->assertDoesNotMatchRegularExpression('/\b'.$tier.'\b/', $hero,
+                "the fold names the {$tier} plan. Everything above the fold is free, and a plan name ".
+                'beside "Free forever" and "Start for free" reads as a catch. Put tier-gated '.
+                "features in the sections below.\n\nHero text was:\n".$hero);
         }
     }
 }
