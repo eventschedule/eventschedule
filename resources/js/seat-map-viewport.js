@@ -175,10 +175,12 @@ export function useMapViewport({ svgEl, contentBounds, canPan = () => true, panF
 
         // A press that landed on something DRAWN is that thing's press, not the canvas's.
         //
-        // `canPan` alone cannot cover this: the designer's draggable elements stop `mousedown`,
-        // but `pointerdown` is a separate event that fires FIRST, so the flag it checks
-        // (`drag.mode`) is still null when this runs. Dragging a section therefore started a pan
-        // as well, and the whole view slid under the section being moved.
+        // `canPan` alone cannot cover this. The designer's draggable elements were on `mousedown`
+        // when this was written, so `pointerdown` was a separate event that fired FIRST and the
+        // flag it checks (`drag.mode`) was still null when this ran: dragging a section started a
+        // pan as well, and the whole view slid under the section being moved. They are all
+        // `@pointerdown.stop` now, so propagation usually dies at the child - but `.stop` is the
+        // CHILD's choice, and this must hold for any press that does reach the canvas.
         if (!panFromChildren && evt.target !== evt.currentTarget) return;
 
         pointers.set(evt.pointerId, { x: evt.clientX, y: evt.clientY });

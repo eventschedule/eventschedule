@@ -38,8 +38,12 @@ class SeatingTest extends DuskTestCase
      *
      * Building it through the designer is test one's job; the other two need a house to sell, not
      * another pass over the same screen.
+     *
+     * `$withCircle` adds a SECOND section, which only the removal journey wants. The designer
+     * auto-selects `sections[0]` on load, so a plan with one section cannot tell "the press
+     * selected it" from "it was already selected" - see that test.
      */
-    private function makePlan(Role $role, int $rows = 1): SeatingPlan
+    private function makePlan(Role $role, int $rows = 1, bool $withCircle = false): SeatingPlan
     {
         $plan = SeatingPlan::create(['role_id' => $role->id, 'name' => 'Main House']);
         $level = SeatingLevel::create(['seating_plan_id' => $plan->id, 'name' => 'Ground', 'position' => 0]);
@@ -49,6 +53,32 @@ class SeatingTest extends DuskTestCase
             'color' => '#4E81FA', 'x' => 40, 'y' => 40,
         ]);
 
+        $this->fillSection($plan, $section, $rows);
+
+        if ($withCircle) {
+            // TWO rows, and six seats to a row. Even x even is what puts the section box's CENTRE
+            // in the gap between four seats rather than on top of one, which is what lets a real
+            // press land on section background - the same geometry the drag journey above relies
+            // on. At 26 x 30 spacing the centre sits 13 units clear horizontally and 15
+            // vertically, against a seat radius of 8. Make either number odd and the press hits a
+            // seat, `onSeatDown` wins, and the failure reads as "the wrong section was selected".
+            //
+            // `y` 200 keeps it well clear of the stalls, so neither box overlaps the other.
+            $circle = SeatingSection::create([
+                'seating_plan_id' => $plan->id, 'seating_level_id' => $level->id,
+                'name' => 'Circle', 'band' => 'Circle', 'kind' => 'seated', 'position' => 1,
+                'color' => '#22D3EE', 'x' => 40, 'y' => 200,
+            ]);
+
+            $this->fillSection($plan, $circle, 2);
+        }
+
+        return $plan->fresh();
+    }
+
+    /** Six seats to a row, `$rows` rows, spaced the way the designer's own presets space them. */
+    private function fillSection(SeatingPlan $plan, SeatingSection $section, int $rows): void
+    {
         for ($rp = 1; $rp <= $rows; $rp++) {
             for ($n = 1; $n <= 6; $n++) {
                 SeatingSeat::create([
@@ -58,8 +88,6 @@ class SeatingTest extends DuskTestCase
                 ]);
             }
         }
-
-        return $plan->fresh();
     }
 
     /**
@@ -70,7 +98,7 @@ class SeatingTest extends DuskTestCase
      *
      * @return array{0: \App\Models\Event, 1: SeatingPlan}
      */
-    private function makeSeated(string $slug = 'talent', int $rows = 1): array
+    private function makeSeated(string $slug = 'talent', int $rows = 1, bool $withCircle = false): array
     {
         $role = Role::subdomain($slug)->firstOrFail();
 
@@ -79,7 +107,7 @@ class SeatingTest extends DuskTestCase
         $venue = Role::subdomain('venue')->firstOrFail();
         $this->upgradeToEnterprise('venue');
         $this->upgradeToEnterprise($slug);
-        $plan = $this->makePlan($venue->fresh(), $rows);
+        $plan = $this->makePlan($venue->fresh(), $rows, $withCircle);
 
         $event = $role->events()->latest('events.id')->firstOrFail();
         $event->seating_plan_id = $plan->id;
@@ -160,11 +188,13 @@ class SeatingTest extends DuskTestCase
     /**
      * Dragging a section moves the section, and ONLY the section.
      *
-     * The shared viewport pans on `pointerdown` on the <svg>; the draggable elements stop
-     * `mousedown`. Those are different events and pointerdown fires first, so for one commit a
-     * press on a section started a pan as well and the whole view slid out from under the thing
-     * being dragged. Nothing else can catch this: a Feature test cannot reach a drag, and the
-     * journey above drives the screen through script() clicks.
+     * The shared viewport pans on `pointerdown` on the <svg>, and the draggable elements stop
+     * `pointerdown` of their own. They were on `mousedown` once, which is a DIFFERENT event that
+     * fired second, so for one commit a press on a section started a pan as well and the whole view
+     * slid out from under the thing being dragged. What separates them now is the child's `.stop`
+     * plus `if (! panFromChildren && evt.target !== evt.currentTarget) return;` in
+     * seat-map-viewport.js - not the event type. Nothing else can catch this: a Feature test cannot
+     * reach a drag, and the journey above drives the screen through script() clicks.
      *
      * Reads the two `transform` attributes rather than component state, because a <script setup>
      * SFC exposes nothing on the proxy in a production build.
@@ -214,7 +244,7 @@ class SeatingTest extends DuskTestCase
             // the order it really would - which is the whole point.
             //
             // clickAndHold($el) presses the element's CENTRE, and that has to be section
-            // background rather than a seat, or the seat's own @mousedown.stop wins and the
+            // background rather than a seat, or the seat's own @pointerdown.stop wins and the
             // section never moves. It is, by construction: sectionBox() is the seat extent plus
             // 16 units of padding, so a preset with an EVEN number of rows and an even number of
             // seats per row centres in the gap between four seats. `rows` is 8 x 10, spaced 26 x
@@ -741,12 +771,25 @@ class SeatingTest extends DuskTestCase
     }
 
     /**
-     * A section holding a sold seat cannot be removed, and says so straight away.
+     * A section holding a sold seat cannot be removed, and says so straight away - while a section
+     * beside it that holds nothing sold still can be.
      *
      * The server has always refused - but only at Save, after the room had been restructured. The
      * seat-by-seat path refused immediately, so deleting the section AROUND those seats being the
      * lenient one was exactly backwards. Only reachable on the occurrence editor, because a
      * template seat is never sold.
+     *
+     * TWO sections, and the sold seat in the SECOND one, because `load()` auto-selects
+     * `sections[0]`: with a single section the Remove button is on screen from page load and the
+     * selection step proves nothing. This test spent a month in exactly that state - it selected
+     * the section with `new MouseEvent("mousedown")` after the rect had moved to
+     * `@pointerdown.stop`, so the dispatch was a no-op and deleting the line entirely would not
+     * have failed it. Hence a real WebDriver press: it emits whatever the browser really emits, so
+     * renaming the event in the component cannot quietly turn this back into a no-op.
+     *
+     * The second section also buys the half that matters most - that the refusal is keyed to the
+     * SECTION rather than refusing everything, which is what `hasSoldSeats([s])` actually
+     * implements.
      */
     public function test_a_section_with_a_sold_seat_cannot_be_removed(): void
     {
@@ -756,30 +799,74 @@ class SeatingTest extends DuskTestCase
             $this->createTestTalent($browser);
             $this->createTestEventWithTickets($browser);
 
-            [$event] = $this->makeSeated();
+            [$event] = $this->makeSeated('talent', 1, true);
             $map = app(SeatingMapService::class)->materialize($event);
-            $seat = SeatingSeat::where('event_seating_map_id', $map->id)->orderBy('position')->firstOrFail();
+
+            // materialize() DEEP-COPIES levels, sections, tables and seats onto the snapshot, so
+            // the ids the designer renders are the map's, never the template's.
+            $sections = SeatingSection::where('event_seating_map_id', $map->id)->get()->keyBy('name');
+            $circle = $sections['Circle'];
+            $stalls = $sections['Stalls'];
+
+            $seat = SeatingSeat::where('event_seating_map_id', $map->id)
+                ->where('seating_section_id', $circle->id)->orderBy('position')->firstOrFail();
             $seat->update(['status' => 'sold']);
 
             $browser->visit('/venue/seating/occurrence/'.UrlUtils::encodeId($event->id).'/design?date='.$map->event_date)
                 ->waitUntilMissing('#seating-loading', 20)
                 ->waitFor('#seating-designer', 20)
-                ->waitFor('#seating-designer svg > g > g', 20)
+                ->waitFor('[data-section-id="'.$circle->id.'"]', 20)
                 ->pause(700);
 
-            // Select the section, which is what reveals its Remove button.
-            $browser->script('document.querySelector("#seating-designer svg > g > g > rect").dispatchEvent(new MouseEvent("mousedown", { bubbles: true }));');
+            // Record what the designer asks rather than answering a real dialog, and answer NO, so
+            // a section this test did not mean to touch cannot actually be destroyed. The sold-seat
+            // guard returns BEFORE confirmRemoval, so a recorded question is itself the signal that
+            // the guard did not fire.
+            $browser->script('
+                window.__confirms = [];
+                window.confirm = function (message) { window.__confirms.push(String(message)); return false; };
+            ');
+
+            // THE PRESS. A real one, on the section background - the centre of the box is in the
+            // gap between four seats by construction (see makePlan), so no seat intercepts it.
+            $circleRect = '#seating-designer [data-section-id="'.$circle->id.'"] > rect';
+            $browser->scrollIntoView($circleRect)->click($circleRect)->pause(500);
+
+            // Prove the press did the selecting, which is the whole reason there are two sections.
+            // This is the earliest readable failure: a no-op press leaves the auto-selected Stalls
+            // here, and the test says so instead of timing out further down.
             $browser->waitFor('#seating-remove-section', 15)->pause(300);
 
-            $before = $browser->script('return document.querySelectorAll("#seating-designer svg > g > g circle, #seating-designer svg > g > g rect").length')[0];
+            // Read through script(), not value(): `v-model` assigns the DOM value PROPERTY and never
+            // writes the attribute, and Dusk's value() goes through getAttribute.
+            $selected = 'return document.getElementById("seating-section-name").value';
+            $this->assertSame('Circle', $browser->script($selected)[0], 'the press did not select the section it aimed at');
+
+            $count = 'return document.querySelectorAll("#seating-designer svg > g > g circle, #seating-designer svg > g > g rect").length';
+            $before = $browser->script($count)[0];
 
             $browser->script('document.getElementById("seating-remove-section").click();');
             $browser->waitFor('#seating-error', 10);
 
-            $after = $browser->script('return document.querySelectorAll("#seating-designer svg > g > g circle, #seating-designer svg > g > g rect").length')[0];
+            // The TEXT, not merely the element: save() writes #seating-error too, so its presence
+            // alone cannot tell a refused removal from a failed save.
+            $browser->assertSeeIn('#seating-error', __('messages.seating_cannot_remove_sold_here'));
+            $this->assertSame([], $browser->script('return window.__confirms;')[0], 'the sold-seat guard must refuse before the console asks to confirm');
 
-            $this->assertSame($before, $after, 'the section was removed despite holding a sold seat');
+            $this->assertSame($before, $browser->script($count)[0], 'the section was removed despite holding a sold seat');
             $this->assertSame('sold', $seat->fresh()->status);
+
+            // ...and the section NEXT to it, holding nothing sold, gets as far as the confirm. A
+            // guard that refused every section would pass every assertion above and still be wrong.
+            $stallsRect = '#seating-designer [data-section-id="'.$stalls->id.'"] > rect';
+            $browser->scrollIntoView($stallsRect)->click($stallsRect)->pause(500);
+            $this->assertSame('Stalls', $browser->script($selected)[0]);
+
+            $browser->script('document.getElementById("seating-remove-section").click();');
+            $browser->waitUntil('window.__confirms.length === 1', 10);
+
+            $this->assertStringContainsString('Stalls', $browser->script('return window.__confirms[0];')[0], 'the confirm must name the section being removed');
+            $this->assertSame($before, $browser->script($count)[0], 'answering no to the confirm still removed the section');
         });
     }
 }

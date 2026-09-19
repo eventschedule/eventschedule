@@ -209,7 +209,8 @@
                                     : 'fill-gray-500 dark:fill-gray-400'">{{ d.label }}</text>
                         </g>
 
-                        <g v-for="s in level.sections" :key="s.id" :transform="`translate(${s.x} ${s.y}) rotate(${s.rotation})`">
+                        <g v-for="s in level.sections" :key="s.id" :data-section-id="s.id"
+                            :transform="`translate(${s.x} ${s.y}) rotate(${s.rotation})`">
                             <rect :x="sectionBox(s).x" :y="sectionBox(s).y" :width="sectionBox(s).w" :height="sectionBox(s).h" rx="8"
                                 :fill="s.color" fill-opacity="0.10" :stroke="s.color" stroke-opacity="0.5"
                                 style="cursor: move" @pointerdown.stop="startSectionDrag($event, s)" />
