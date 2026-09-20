@@ -169,14 +169,25 @@
                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
                                     </svg>
                                     <div class="min-w-0">
-                                        {{-- Two flag sources, and only one of them is resolvable here.
-                                             reported_site_url set means a PUSH claimed a different
-                                             address: the instance stays approved, so there is no
-                                             Approve button to settle it and the copy must not talk
-                                             about approving. Null means register() raised it, which
-                                             already moved site_url and sent the row back to pending,
-                                             where Approve and Suspend do settle it. --}}
-                                        @if ($instance->reported_site_url)
+                                        {{-- Branch on whether there is an address an admin could
+                                             actually adopt, NOT on the column being non-null. The
+                                             push path stores whatever an install reports without
+                                             validating it, so a misconfigured APP_URL put junk in
+                                             that column - and branching on the column alone drew an
+                                             Accept button whose action then refused it, on a row
+                                             that had no other exit. hasAdoptableAddress() is the
+                                             same predicate acceptAddress() and settleFlag() use.
+
+                                             Adoptable means a push is claiming a different address.
+                                             That leaves the instance at whatever status it had, so
+                                             on an approved row there is no Approve button and the
+                                             copy must not talk about approving. Not adoptable means
+                                             either register() raised the flag - it moves site_url
+                                             itself and sends an approved row back to pending, where
+                                             Approve and Suspend settle it - or the claim is gone or
+                                             was never usable, and confirming the address on record
+                                             is what settles it. --}}
+                                        @if ($instance->hasAdoptableAddress())
                                             <p class="text-sm text-amber-800 dark:text-amber-200">@lang('messages.federation_address_changed_warning')</p>
                                             <dl class="mt-2 space-y-1 text-sm">
                                                 <div class="flex flex-wrap gap-x-2">
@@ -198,11 +209,12 @@
                                                 </button>
                                             </div>
                                         @elseif ($instance->isApproved())
-                                            {{-- Flagged with nothing to adopt: either raised before
-                                                 reported_site_url existed, or raised by a push over a
+                                            {{-- Flagged with nothing to adopt: raised before
+                                                 reported_site_url existed; or raised by a push over a
                                                  full-URL mismatch and then outliving its claim, which
                                                  register() drops on any re-registration while only
-                                                 flagging a HOST change. The per-row Approve button is
+                                                 flagging a HOST change; or the reported address is
+                                                 junk the push path never validated. The per-row Approve button is
                                                  hidden on an approved row and acceptAddress() has nothing
                                                  to accept, so without this the only way out was Suspend -
                                                  which drops the install off the network and mails its

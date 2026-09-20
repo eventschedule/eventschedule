@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Support\Facades\Validator;
 
 /**
  * An EventSchedule install that federates its public events to this one.
@@ -184,5 +185,42 @@ class FederatedInstance extends Model
 
         return $host !== '' && $expected !== null
             && ($host === $expected || str_ends_with($host, '.'.$expected));
+    }
+
+    /**
+     * Is this row claiming an address an admin could actually adopt?
+     *
+     * The single predicate behind BOTH the "Accept new address" button in the review
+     * screen and AdminFederationController::settleFlag()'s refusal to settle a live
+     * claim, so those two cannot drift.
+     *
+     * They did drift, and it stranded rows. The push path stores whatever an install
+     * reports with no URL validation at all (ApiFederationController only checks it is a
+     * non-empty string, then truncates to 255), while acceptAddress() holds the value to
+     * registration's own rule. So an install with a misconfigured APP_URL could report
+     * junk: the view offered Accept, acceptAddress() refused it as invalid, and the flag
+     * could not be settled either because the column was merely non-null. Suspend was the
+     * only exit, and since the stored value never changed, flagged_at never re-stamped -
+     * a dashboard alert pinned open forever, which is exactly what AdminAlertService
+     * forbids. Reading junk as "nothing to adopt" sends those rows to the review branch,
+     * where confirming the address on record settles them.
+     *
+     * The empty string is the same story: a push of "/" rtrims to '', which differs from
+     * the record, so it flags - and would re-flag hourly once cleared.
+     */
+    public function hasAdoptableAddress(): bool
+    {
+        $reported = $this->reported_site_url;
+
+        if (! is_string($reported) || $reported === '') {
+            return false;
+        }
+
+        $fails = Validator::make(
+            ['site_url' => $reported],
+            ['site_url' => ['required', 'url', 'max:255']]
+        )->fails();
+
+        return ! $fails && (bool) parse_url($reported, PHP_URL_HOST);
     }
 }

@@ -2,6 +2,7 @@
 
 namespace Tests\Feature;
 
+use App\Http\Controllers\AdminFederationController;
 use App\Mail\FederationInstanceReviewed;
 use App\Models\FederatedEvent;
 use App\Models\FederatedInstance;
@@ -552,17 +553,46 @@ class FederationReviewTest extends TestCase
         $this->adminActing();
         $settled = $this->makeInstance(['status' => FederatedInstance::STATUS_APPROVED]);
 
+        // Literals, not trans_choice() - computing the expected value with the same call
+        // the controller makes would pass even if the plural string lost its {0} branch
+        // and every count rendered identically. This is the only place {0} is exercised.
+        // Amber, not a green success: nothing moved.
         $this->post(route('admin.federation.bulk'), [
             'action' => 'approve',
             'hashes' => [UrlUtils::encodeId($settled->id)],
-        ])->assertSessionHas('message', trans_choice('messages.federation_instances_bulk_updated', 0, ['count' => 0]));
+        ])->assertSessionHas('warning', 'No instances needed changing.')
+            ->assertSessionMissing('message');
 
         $pending = $this->makeInstance(['instance_id' => (string) Str::uuid()]);
 
         $this->post(route('admin.federation.bulk'), [
             'action' => 'approve',
             'hashes' => [UrlUtils::encodeId($pending->id), UrlUtils::encodeId($settled->id)],
-        ])->assertSessionHas('message', trans_choice('messages.federation_instances_bulk_updated', 1, ['count' => 1]));
+        ])->assertSessionHas('message', '1 instance updated.');
+    }
+
+    /**
+     * "No instances needed changing" was the same lie in a quieter voice: a row still
+     * claiming an address DOES need changing, just not by this button. Saying so, and in
+     * amber, is the difference between a report and a shrug.
+     */
+    public function test_bulk_names_the_rows_it_refused_to_settle(): void
+    {
+        $this->adminActing();
+        $claiming = $this->makeInstance([
+            'status' => FederatedInstance::STATUS_APPROVED,
+            'flagged_at' => now(),
+            'reported_site_url' => 'https://moved.test',
+        ]);
+
+        $this->post(route('admin.federation.bulk'), [
+            'action' => 'approve',
+            'hashes' => [UrlUtils::encodeId($claiming->id)],
+        ])->assertSessionHas('warning', trans_choice('messages.federation_instances_bulk_address_pending', 1, ['count' => 1]))
+            // Never the "nothing needed changing" branch: this one did.
+            ->assertSessionMissing('message');
+
+        $this->assertNotNull($claiming->fresh()->flagged_at);
     }
 
     /**
@@ -573,7 +603,7 @@ class FederationReviewTest extends TestCase
     public function test_a_flagged_row_with_no_reported_address_offers_a_way_out(): void
     {
         $this->adminActing();
-        $this->makeInstance([
+        $instance = $this->makeInstance([
             'status' => FederatedInstance::STATUS_APPROVED,
             'flagged_at' => now(),
         ]);
@@ -581,8 +611,83 @@ class FederationReviewTest extends TestCase
         $this->get(route('admin.federation', ['status' => 'flagged']))
             ->assertOk()
             ->assertSeeText(__('messages.federation_mark_reviewed'))
+            // The route, not just the label. Asserting the text alone let the button's
+            // formaction be pointed anywhere - at suspend, at accept-address - with the
+            // whole suite still green, because every behavioural test posts to the approve
+            // route directly rather than through the markup.
+            ->assertSee(route('admin.federation.approve', UrlUtils::encodeId($instance->id)), false)
             // Nothing was reported, so there is no address to offer adopting.
             ->assertDontSeeText(__('messages.federation_accept_address'));
+    }
+
+    /**
+     * The push path stores what an install reports without validating it, so a
+     * misconfigured APP_URL lands junk in reported_site_url. Branching the panel on the
+     * column being non-null drew an Accept button that acceptAddress() then refused,
+     * while settleFlag() refused too - a row whose only exit was Suspend, and whose
+     * flagged_at never re-stamped because the stored value never changed. That is a
+     * dashboard alert pinned open forever, which is the thing this whole change exists to
+     * stop. hasAdoptableAddress() reads junk as nothing to adopt.
+     */
+    public function test_a_junk_reported_address_is_reviewable_not_stranded(): void
+    {
+        $this->adminActing();
+        $instance = $this->makeInstance([
+            'status' => FederatedInstance::STATUS_APPROVED,
+            'flagged_at' => now(),
+            'reported_site_url' => 'wp-content',
+        ]);
+
+        $this->get(route('admin.federation', ['status' => 'flagged']))
+            ->assertOk()
+            ->assertSeeText(__('messages.federation_mark_reviewed'))
+            // No button whose action would refuse.
+            ->assertDontSeeText(__('messages.federation_accept_address'));
+
+        $this->post(route('admin.federation.approve', UrlUtils::encodeId($instance->id)))
+            ->assertRedirect();
+
+        $instance->refresh();
+        $this->assertNull($instance->flagged_at);
+        // The unusable claim goes with the flag rather than sitting there unexplained.
+        $this->assertNull($instance->reported_site_url);
+    }
+
+    /**
+     * An install pushes hourly, and settleFlag() used to read its guard and then save().
+     * A push landing between the two wrote a brand-new claim that save() would then
+     * silently swallow - only flagged_at was dirty - leaving an approved install claiming
+     * a different host with no flag, no panel and nothing on screen to say so. Simulated
+     * here by writing the claim underneath the model the way the push does.
+     */
+    public function test_a_claim_arriving_mid_review_is_not_swallowed(): void
+    {
+        $this->adminActing();
+        $instance = $this->makeInstance([
+            'status' => FederatedInstance::STATUS_APPROVED,
+            'flagged_at' => now(),
+        ]);
+
+        FederatedInstance::whereKey($instance->id)->update([
+            'reported_site_url' => 'https://clone.test',
+            'flagged_at' => now(),
+        ]);
+
+        // $instance still holds what the admin looked at, which is the point: the guard
+        // passes on that stale read, and only the conditional UPDATE can catch it.
+        $controller = new class extends AdminFederationController
+        {
+            public function settle(FederatedInstance $instance): bool
+            {
+                return $this->settleFlag($instance);
+            }
+        };
+
+        $this->assertFalse($controller->settle($instance));
+
+        $fresh = $instance->fresh();
+        $this->assertNotNull($fresh->flagged_at);
+        $this->assertSame('https://clone.test', $fresh->reported_site_url);
     }
 
     /** And the other way round: a reported address is adopted, not waved through. */
@@ -623,6 +728,63 @@ class FederationReviewTest extends TestCase
     }
 
     /**
+     * A claim with no flag to explain it. The old applyStatus() settled a flag without
+     * clearing the address that came with it, so the nexus database still holds rows
+     * carrying an address their install stopped reporting. Nothing in the app creates
+     * that state any more, which is why this fixture has to build it directly - and why
+     * the guard needs its own test or it reads as dead code and gets deleted.
+     *
+     * Adopting one rewrites site_url, the authority every backlink host check runs
+     * against, from a page that renders no warning panel at all (it is gated on
+     * flagged_at) and therefore shows nothing of what is being adopted.
+     */
+    public function test_a_claim_with_no_flag_cannot_be_adopted(): void
+    {
+        $this->adminActing();
+        $instance = $this->makeInstance([
+            'status' => FederatedInstance::STATUS_APPROVED,
+            'reported_site_url' => 'https://stale.test',
+        ]);
+
+        $this->post(route('admin.federation.accept_address', UrlUtils::encodeId($instance->id)))
+            ->assertRedirect()
+            ->assertSessionHas('error', __('messages.federation_address_none_reported'));
+
+        $this->assertSame('https://operator.test', $instance->fresh()->site_url);
+    }
+
+    /**
+     * Suspend is documented as the way to REJECT a reported address, and a rejection has
+     * to take the claim with it. Left behind, it outlives the flag that explained it: the
+     * panel is gated on flagged_at so it goes invisible, while acceptAddress() would
+     * still adopt an address the install stopped reporting - rewriting site_url, which is
+     * the authority every backlink host check runs against.
+     */
+    public function test_rejecting_a_reported_address_takes_the_claim_with_it(): void
+    {
+        Mail::fake();
+        $this->adminActing();
+        $instance = $this->makeInstance([
+            'status' => FederatedInstance::STATUS_APPROVED,
+            'flagged_at' => now(),
+            'reported_site_url' => 'https://moved.test',
+        ]);
+
+        $this->post(route('admin.federation.suspend', UrlUtils::encodeId($instance->id)));
+
+        $instance->refresh();
+        $this->assertNull($instance->flagged_at);
+        $this->assertNull($instance->reported_site_url);
+        $this->assertSame('https://operator.test', $instance->site_url);
+
+        // And with the claim gone, a stale tab cannot resurrect it.
+        $this->post(route('admin.federation.accept_address', UrlUtils::encodeId($instance->id)))
+            ->assertSessionHas('error', __('messages.federation_address_none_reported'));
+
+        $this->assertSame('https://operator.test', $instance->fresh()->site_url);
+    }
+
+    /**
      * The regression risk in splitting the warning panel on isApproved(): a register-path
      * flag sits on a PENDING row, where Approve is rendered and settles it by changing the
      * status. That row must keep the copy about approving and must not be offered a review
@@ -649,9 +811,11 @@ class FederationReviewTest extends TestCase
         $this->adminActing();
         $instance = $this->makeInstance(['status' => FederatedInstance::STATUS_APPROVED]);
 
+        // Amber, not red: nothing failed, it simply had no effect.
         $this->post(route('admin.federation.approve', UrlUtils::encodeId($instance->id)))
             ->assertRedirect()
-            ->assertSessionHas('error', __('messages.federation_nothing_changed'));
+            ->assertSessionHas('warning', __('messages.federation_nothing_changed'))
+            ->assertSessionMissing('message');
 
         $this->assertDatabaseMissing('audit_logs', ['action' => AuditService::ADMIN_FEDERATION_CLEAR_FLAG]);
     }

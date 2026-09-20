@@ -7,6 +7,7 @@ use App\Models\ScheduledTaskRun;
 use App\Models\TranslationSuggestion;
 use App\Models\User;
 use App\Services\AdminAlertService;
+use App\Utils\UrlUtils;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
@@ -460,7 +461,7 @@ class AdminAlertsTest extends TestCase
         $this->assertContains('federation_flagged', AdminAlertService::items()->pluck('type')->all());
 
         $this->adminActing($admin)
-            ->post(route('admin.federation.approve', \App\Utils\UrlUtils::encodeId($instance->id)))
+            ->post(route('admin.federation.approve', UrlUtils::encodeId($instance->id)))
             ->assertRedirect();
 
         $this->assertSame(FederatedInstance::STATUS_APPROVED, $instance->fresh()->status);

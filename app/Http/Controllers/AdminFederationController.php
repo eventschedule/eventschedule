@@ -11,7 +11,6 @@ use App\Services\AuditService;
 use App\Services\FederationWelcomeService;
 use App\Utils\UrlUtils;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Validator;
 
 /**
  * Nexus-side moderation of the federation network. Approving an instance is the
@@ -173,19 +172,23 @@ class AdminFederationController extends Controller
         // Nothing to adopt: a flag raised by register() (which moves site_url itself), a
         // second submit, or a row flagged before this column existed - those carry the
         // mismatch but not the address, and only the next push can supply it.
-        if (! $reported) {
+        //
+        // The flag has to be standing too. applyStatus() used to settle a flag without
+        // touching the claim that came with it, so a suspended-then-reapproved row could
+        // hold an address it had stopped reporting weeks ago - and adopting one rewrites
+        // site_url, the authority every backlink host check runs against. It now clears
+        // both, but rows the old code already stranded are still in the nexus database,
+        // and this is what keeps them harmless. An address is adoptable only while it is
+        // actually being claimed.
+        if (! $reported || ! $instance->flagged_at) {
             return back()->with('error', __('messages.federation_address_none_reported'));
         }
 
         // It arrived signed, but this is the moment it becomes the authority for
         // ownsUrl() and every backlink check, so assert its shape here too - the same
-        // rule registration is held to.
-        $validator = Validator::make(
-            ['site_url' => $reported],
-            ['site_url' => ['required', 'url', 'max:255']]
-        );
-
-        if ($validator->fails() || ! parse_url($reported, PHP_URL_HOST)) {
+        // rule registration is held to. hasAdoptableAddress() is that rule, shared with
+        // the view and with settleFlag() so a button and its action cannot disagree.
+        if (! $instance->hasAdoptableAddress()) {
             return back()->with('error', __('messages.federation_address_invalid'));
         }
 
@@ -300,14 +303,39 @@ class AdminFederationController extends Controller
         // and a flat "Instances updated" there reported a success that never happened.
         $changed = 0;
 
+        // Counted separately, because "nothing changed" and "I refused to change this"
+        // are different things to be told. A row still claiming an adoptable address is
+        // the one case a bulk approve deliberately will not settle, and reporting that as
+        // "no instances needed changing" repeats the same lie in a quieter voice: those
+        // rows need changing, just not by this button.
+        $needsAddress = 0;
+
         foreach ($validated['hashes'] as $hash) {
             $instance = FederatedInstance::find(UrlUtils::decodeId($hash));
-            if ($instance && $this->applyStatus($instance, $status, $auditAction)) {
+
+            if (! $instance) {
+                continue;
+            }
+
+            if ($this->applyStatus($instance, $status, $auditAction)) {
                 $changed++;
+            } elseif ($instance->flagged_at && $instance->hasAdoptableAddress()) {
+                $needsAddress++;
             }
         }
 
-        return back()->with('message', trans_choice('messages.federation_instances_bulk_updated', $changed, ['count' => $changed]));
+        $updated = trans_choice('messages.federation_instances_bulk_updated', $changed, ['count' => $changed]);
+
+        if ($needsAddress > 0) {
+            $pending = trans_choice('messages.federation_instances_bulk_address_pending', $needsAddress, ['count' => $needsAddress]);
+
+            return back()->with('warning', $changed > 0 ? $updated.' '.$pending : $pending);
+        }
+
+        // Amber, not green, when nothing moved: a success toast over an unchanged screen
+        // is what sent this bug unnoticed for as long as it was. HomeController's
+        // federation paths grade the same way - message on effect, warning without one.
+        return back()->with($changed === 0 ? 'warning' : 'message', $updated);
     }
 
     /**
@@ -346,8 +374,10 @@ class AdminFederationController extends Controller
         // row - there is nothing left to do. Flashing "Saved" there is the same lie bulk()
         // used to tell on the flagged tab. Both per-row buttons are hidden in the state that
         // produces this, so it only ever surfaces on a genuinely stale submit.
+        // Amber, not red: nothing failed, it just had no effect. Red overstates it and
+        // green would repeat the false success this whole change is about.
         if (! $this->applyStatus($instance, $status, $auditAction)) {
-            return back()->with('error', __('messages.federation_nothing_changed'));
+            return back()->with('warning', __('messages.federation_nothing_changed'));
         }
 
         return back()->with('message', __('messages.saved'));
@@ -375,8 +405,14 @@ class AdminFederationController extends Controller
             $instance->approved_by = auth()->id();
             $instance->approved_at = now();
         }
-        // Reviewing the instance settles the mismatch that raised the flag.
+        // Reviewing the instance settles the mismatch that raised the flag - and the
+        // address claim that came with it. Left set, that claim outlives the flag that
+        // explained it: the review panel is gated on flagged_at, so it becomes invisible
+        // and unclearable, while acceptAddress() would still adopt an address the install
+        // stopped reporting - rewriting site_url, the authority every backlink host check
+        // runs against. register() nulls a stale claim for exactly this reason.
         $instance->flagged_at = null;
+        $instance->reported_site_url = null;
         $instance->save();
 
         AuditService::log(
@@ -443,33 +479,57 @@ class AdminFederationController extends Controller
      * leaving the flagged tab's Approve button a guaranteed no-op and AdminAlertService's
      * federation_flagged row with no way to drain, against that service's own rule.
      *
-     * Deliberately refuses a flag that carries a reported address. That one is a LIVE
+     * Deliberately refuses a flag that carries an ADOPTABLE address. That one is a LIVE
      * mismatch: clearing it without adopting the address (acceptAddress) or rejecting the
      * install (suspend) is a dismiss the next push re-raises within the hour - it
      * recomputes $isNewAddress against a null flagged_at - so the dashboard alert would
-     * flap instead of settling.
+     * flap instead of settling. hasAdoptableAddress() is the same predicate the view uses
+     * to decide which button to show, so the button and this guard cannot disagree.
      *
      * What is left is a flag with nothing to adopt, where site_url on record is all there
-     * is to judge. Two ways to get there, and neither is only historical:
+     * is to judge. Several ways to get there, none of them only historical:
      *  - flagged before reported_site_url existed, which is the live nexus row;
      *  - a push flagged a full-URL mismatch (a path or scheme change on the same host),
      *    then the install re-registered on that same host. register() nulls the stale
      *    claim but only stamps flagged_at on a HOST change, so the flag outlives the
      *    address that raised it. See FederationHardeningTest::
-     *    test_re_registering_drops_a_pending_address_claim.
+     *    test_re_registering_drops_a_pending_address_claim;
+     *  - the install reported junk, which the push path never validates.
      *
-     * Not covered: a reported address that fails acceptAddress()'s url validation. Suspend
-     * is the right answer to an install reporting junk, and widening this to cover it would
-     * mean duplicating that validator in the view to keep the button and the guard aligned.
+     * Written as a conditional UPDATE rather than a read-then-save, because the guard has
+     * to be atomic with the write. An install pushes hourly, and a push landing between
+     * the two would have its brand-new claim silently swallowed: only flagged_at is dirty
+     * on the model, so save() would null the flag and leave the address, giving an
+     * approved install claiming a different host with no flag and no panel to say so.
+     * Matching on the exact value read means such a push loses the race and the admin is
+     * told nothing changed. Same reasoning as FederationWelcomeService::send()'s claim.
      */
     protected function settleFlag(FederatedInstance $instance): bool
     {
-        if (! $instance->flagged_at || ! $instance->isApproved() || $instance->reported_site_url) {
+        if (! $instance->flagged_at || ! $instance->isApproved() || $instance->hasAdoptableAddress()) {
+            return false;
+        }
+
+        $reported = $instance->reported_site_url;
+
+        $claimed = FederatedInstance::whereKey($instance->id)
+            ->whereNotNull('flagged_at')
+            ->where('status', FederatedInstance::STATUS_APPROVED)
+            ->when(
+                $reported === null,
+                fn ($q) => $q->whereNull('reported_site_url'),
+                fn ($q) => $q->where('reported_site_url', $reported),
+            )
+            // The claim goes with the flag. Left behind it is an address nothing explains
+            // and nothing can clear, and acceptAddress() would still adopt it.
+            ->update(['flagged_at' => null, 'reported_site_url' => null]);
+
+        if ($claimed !== 1) {
             return false;
         }
 
         $instance->flagged_at = null;
-        $instance->save();
+        $instance->reported_site_url = null;
 
         AuditService::log(
             AuditService::ADMIN_FEDERATION_CLEAR_FLAG,
