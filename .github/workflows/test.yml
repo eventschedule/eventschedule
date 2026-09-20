@@ -219,9 +219,14 @@ jobs:
             sleep 1
           done
 
+      # Every file runs, and the step fails at the end with the list. The step runs under `bash -e`,
+      # so a bare `php artisan dusk "$test"` aborted it on the FIRST failing file and every later
+      # one silently never ran - one flaky journey hid thirteen suites. `|| failed=...` is a handled
+      # failure, which is what keeps -e out of it.
       - name: Run Laravel Dusk tests
         run: |
           cp .env .env.dusk.local
+          failed=""
           for test in tests/Browser/*Test.php; do
             # dusk:install scaffolds a placeholder ExampleTest.php (asserts "Laravel"); skip it.
             if [ "$(basename "$test")" = "ExampleTest.php" ]; then
@@ -229,9 +234,13 @@ jobs:
               continue
             fi
             echo "Running $test"
-            php artisan dusk "$test"
+            php artisan dusk "$test" || failed="$failed $test"
             php artisan cache:clear
           done
+          if [ -n "$failed" ]; then
+            echo "Failing Dusk files:$failed"
+            exit 1
+          fi
         env:
           APP_ENV: local
           APP_URL: http://127.0.0.1:8000

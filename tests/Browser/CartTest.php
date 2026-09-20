@@ -34,7 +34,7 @@ class CartTest extends DuskTestCase
             $this->createTestTalent($browser);
             $this->createTestEventWithTickets($browser);
 
-            $this->openCartWithOneTicket($browser);
+            $this->openCartWithTickets($browser);
 
             // Signed in: the account answers both questions, so the panel posts them silently.
             $browser->waitFor('@cart-checkout', 10);
@@ -44,6 +44,11 @@ class CartTest extends DuskTestCase
                 ['Talent', 'test@gmail.com'],
                 $this->cartBuyerInputs($browser),
                 'the signed-in account must reach checkout without being retyped',
+            );
+            $this->assertSame(
+                ['2'],
+                $this->cartPostedQuantities($browser),
+                'the quantity picked in the ticket form must travel with the leg',
             );
 
             // Signed out with nothing remembered, the fields have to come back - hiding them
@@ -63,7 +68,7 @@ class CartTest extends DuskTestCase
             }, 30);
             $browser->waitUntil('document.readyState === "complete"', 15);
 
-            $this->openCartWithOneTicket($browser);
+            $this->openCartWithTickets($browser);
             $browser->waitFor('#es-cart-name', 10)->assertVisible('#es-cart-email');
 
             // ...and once they have typed them into the ticket form, the panel stops asking again.
@@ -81,7 +86,7 @@ class CartTest extends DuskTestCase
             $browser->within('#ticket-selector', function (Browser $form) {
                 $form->type('name', 'Guest Buyer')->type('email', 'guest@example.com');
             })->pause(400);
-            $this->pickOneTicketAndAddToCart($browser);
+            $this->pickTwoTicketsAndAddToCart($browser);
 
             $browser->waitFor('@cart-checkout', 10);
             $browser->assertMissing('#es-cart-name');
@@ -93,23 +98,57 @@ class CartTest extends DuskTestCase
         });
     }
 
-    private function openCartWithOneTicket(Browser $browser): void
+    private function openCartWithTickets(Browser $browser): void
     {
-        $browser->visit('/talent/venue')->waitForText('Buy Tickets', 15)->pause(500);
+        $browser->visit('/talent/venue')->waitForText('Buy Tickets', 15);
         $browser->script("window.dispatchEvent(new CustomEvent('show-event-form'))");
-        $browser->pause(1200);
-        $this->pickOneTicketAndAddToCart($browser);
+        // #ticket-0 is the quantity select, and the ticket app's own v-for renders it - so one wait
+        // proves both that showForm() ran and that Vue mounted. The blind pause(1200) this replaces
+        // proved neither, which on a page where the button below is on screen from the start (see
+        // the auto-select note) left nothing to tell "not ready yet" from "broken".
+        $browser->waitFor('#ticket-0', 10);
+        $this->pickTwoTicketsAndAddToCart($browser);
     }
 
-    private function pickOneTicketAndAddToCart(Browser $browser): void
+    /**
+     * Put two tickets in the cart, and name the link that broke when the panel does not open.
+     *
+     * TWO, not one: tickets.blade.php auto-selects a quantity of 1 for any event with a single
+     * ticket, so the Add to cart button is already on screen before this helper touches anything.
+     * "Pick one ticket" therefore could not tell a real selection from the default - the old
+     * synthetic `selectedIndex = 1` + `change` dispatch would have kept passing with the whole step
+     * deleted - and nothing downstream pinned the quantity that reached the leg.
+     */
+    private function pickTwoTicketsAndAddToCart(Browser $browser): void
     {
-        $browser->script('
-            document.querySelectorAll("#ticket-selector select").forEach(function (s) {
-                if (s.options.length > 1) { s.selectedIndex = 1; s.dispatchEvent(new Event("change")); }
-            });
-        ');
-        $browser->pause(1000);
-        $browser->scrollIntoView('@add-to-cart')->click('@add-to-cart')->pause(1500);
+        // waitFor, not assertPresent: it resolves on isDisplayed(), so this is also the assertion
+        // that the button is genuinely on screen and usable, which is the half of a WebDriver click
+        // worth keeping.
+        $browser->select('#ticket-0', '2')->waitFor('@add-to-cart', 10);
+
+        // Records every es-cart-add for the first probe below. The button's own "ADDED TO CART"
+        // label would answer the same question, but it clears itself 2500ms after the press.
+        $browser->script('window.__esCartAddSeen = 0;
+            window.addEventListener("es-cart-add", function () { window.__esCartAddSeen++; });');
+
+        // Pressed through the element's own click(), the way TicketTest submits this same form and
+        // the way every other journey here presses a decisive button ("avoids click-targeting
+        // issues in headless Chrome", AccountSetupTrait:64). This was a real WebDriver click, the
+        // one in the suite left on that path: a dropped click raises nothing at all, so it could
+        // only ever arrive as the bare 10-second timeout on the panel that the probes below now
+        // break down. A missing button still fails loudly - querySelector returns null and the
+        // script throws.
+        $browser->script('document.querySelector(\'[dusk="add-to-cart"]\').click();');
+
+        // One probe per link, each naming a different half. The panel lives in a SECOND Vue app
+        // (#es-cart-app, mounted by the guest layout) that the ticket form can reach only through a
+        // window CustomEvent, so a bare wait on @cart-checkout cannot say which of these failed.
+        $browser->waitUntil('window.__esCartAddSeen === 1', 10,
+            'the Add to cart press never reached addToCart(), or it returned early');
+        $browser->waitUntil('!! (document.querySelector("#es-cart-app") || {}).__vue_app__', 10,
+            "the cart panel's own Vue app never mounted on #es-cart-app");
+        $browser->waitUntil('JSON.parse(localStorage.getItem("es_cart_talent") || "[]").length === 1', 10,
+            'the cart stored no leg, so es-cart-add never crossed between the two Vue apps');
     }
 
     /** @return array{0: ?string, 1: ?string} the name and email the panel would actually post */
@@ -119,6 +158,18 @@ class CartTest extends DuskTestCase
             (document.querySelector("#es-cart-panel input[type=hidden][name=name]") || {}).value || null,
             (document.querySelector("#es-cart-panel input[type=hidden][name=email]") || {}).value || null,
         ]);');
+
+        return json_decode($raw[0], true);
+    }
+
+    /** @return string[] the ticket quantities the panel would actually post for the first leg */
+    private function cartPostedQuantities(Browser $browser): array
+    {
+        $raw = $browser->script('return JSON.stringify(
+            Array.from(document.querySelectorAll("#es-cart-panel input[type=hidden]"))
+                .filter(function (i) { return i.name.indexOf("legs[0][tickets]") === 0; })
+                .map(function (i) { return i.value; })
+        );');
 
         return json_decode($raw[0], true);
     }
