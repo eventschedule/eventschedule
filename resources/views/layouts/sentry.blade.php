@@ -5,8 +5,18 @@ window.sentryOnLoad = function () {
         // and a full stack rather than the opaque 'Script error.' the list below already drops.
         // Meta's in-app browser injects its own telemetry under iabjs://, which throws on teardown
         // because it postMessages across an Android bridge that native has already torn down.
+        // macOS Safari APP extensions arrive as bare filesystem paths rather than a URL scheme,
+        // which is the .appex family below.
+        //
         // denyUrls matches only the throwing frame, so our own errors are still reported when a
-        // third party merely triggers them.
+        // third party merely triggers them. Reach verified against @sentry/browser 8.55.2, the
+        // bundle the loader in config/app.php actually serves: InboundFilters._getEventFilterUrl
+        // reads exception.values[0].stacktrace.frames, walks BACKWARDS to the innermost frame,
+        // skips only '<anonymous>' and '[native code]', and reads filename and never abs_path. A
+        // frameless event, or an innermost frame with no filename, yields no URL and nothing here
+        // can fire - which is what EVENTSCHEDULE-JS-35 and -36 turned out to be. That version is
+        // chosen in Sentry's UI rather than pinned in this repo, so SentryJsFilterTest restates
+        // those two functions to pin this list; the version named there has to match this one.
         denyUrls: [
             /\/beacon\.min\.js/i,        // Cloudflare Web Analytics
             /\/cdn-cgi\//i,              // Cloudflare Rocket Loader, email decode, RUM
@@ -14,6 +24,18 @@ window.sentryOnLoad = function () {
             /^chrome-extension:\/\//i,
             /^moz-extension:\/\//i,
             /^safari-(web-)?extension:\/\//i,
+            // macOS Safari APP extensions - PayPal Honey, EVENTSCHEDULE-JS-3A. These are native
+            // .appex bundles, not web extensions: WebKit reports their injected scripts by bare
+            // FILESYSTEM path with no URL scheme at all, so the entry above cannot see them.
+            //   /Applications/PayPal%20Honey.app/Contents/PlugIns/Extension.appex/Contents/
+            //   Resources/Honey.safariextension/h0.js
+            // Keyed on the two Apple bundle suffixes and never on the vendor's name: the path is
+            // percent-encoded wherever the app name has a space in it. Both entries are needed -
+            // a modern .appex need not carry a .safariextension/ folder (Honey keeps one out of
+            // habit), and the legacy ~/Library/Safari/Extensions/ layout has no .appex above it.
+            // Neither suffix can occur in a script URL of ours; both are bundle directories.
+            /\.appex\//i,
+            /\.safariextension\//i,
             /^chrome:\/\//i,
             /^iabjs:\/\//i,              // Meta in-app browser (Instagram, Facebook, Messenger, Threads)
         ],

@@ -8,6 +8,12 @@
 //
 // SentryJsFilterTest runs a payload through both this and the current filter, so the
 // behaviour change is asserted rather than merely described. It is meant to drift.
+//
+// One exception to that: the denyUrls array below is load-bearing. It is the control for
+// the .appex entries added for EVENTSCHEDULE-JS-3A - the PayPal Honey payload has to be
+// KEPT here and denied by the live list, which is what proves the drop comes from those
+// two entries and not from safari-(web-)?extension:// having covered it all along. Adding
+// anything to it would make that test pass for the wrong reason.
 window.sentryOnLoad = function () {
     Sentry.init({
         // Third-party scripts we neither ship nor control. Cloudflare injects its Web Analytics

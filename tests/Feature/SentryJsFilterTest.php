@@ -26,13 +26,30 @@ use Tests\TestCase;
 class SentryJsFilterTest extends TestCase
 {
     /**
-     * Run each payload through the rendered partial's beforeSend.
+     * The frame EVENTSCHEDULE-JS-3A arrived with, verbatim.
      *
+     * PayPal Honey is a macOS Safari APP extension, a native .appex bundle, so WebKit reports its
+     * injected script by absolute filesystem path with no URL scheme. Kept whole, percent-encoded
+     * space and all, because the encoding is exactly what stops a vendor-name regex working.
+     */
+    private const HONEY_FRAME = '/Applications/PayPal%20Honey.app/Contents/PlugIns/Extension.appex'
+        .'/Contents/Resources/Honey.safariextension/h0.js';
+
+    /** A frame in our own Vite output, for the stacks that mix ours with a third party's. */
+    private const OUR_FRAME = 'https://app.eventschedule.com/build/assets/app-abc123.js';
+
+    /**
+     * Run each payload through one stage of the rendered partial, in Node.
+     *
+     * $verdictBody defines `function verdict(event)` and has `captured` in scope - the options
+     * object the partial handed to Sentry.init, so a stage can read beforeSend or denyUrls.
+     *
+     * @param  string  $verdictBody  JS defining function verdict(event): string.
      * @param  array  $events  Sentry event payloads.
      * @param  string|null  $partial  Overrides the rendered partial, for A/B against an older copy.
-     * @return array<int, string> 'dropped' or 'kept', positionally.
+     * @return array<int, string> One verdict per payload, positionally.
      */
-    private function verdicts(array $events, ?string $partial = null): array
+    private function runInNode(string $verdictBody, array $events, ?string $partial = null): array
     {
         $partial ??= view('layouts.sentry')->render();
 
@@ -45,9 +62,11 @@ class SentryJsFilterTest extends TestCase
 
         window.sentryOnLoad();
 
+        {$verdictBody}
+
         var payloads = JSON.parse(require('fs').readFileSync(process.argv[2], 'utf8'));
         process.stdout.write(JSON.stringify(payloads.map(function (event) {
-            return captured.beforeSend(event) === null ? 'dropped' : 'kept';
+            return verdict(event);
         })));
         JS;
 
@@ -79,10 +98,84 @@ class SentryJsFilterTest extends TestCase
         }
     }
 
+    /**
+     * Run each payload through the rendered partial's beforeSend.
+     *
+     * @param  array  $events  Sentry event payloads.
+     * @param  string|null  $partial  Overrides the rendered partial, for A/B against an older copy.
+     * @return array<int, string> 'dropped' or 'kept', positionally.
+     */
+    private function verdicts(array $events, ?string $partial = null): array
+    {
+        return $this->runInNode(
+            'function verdict(event) { return captured.beforeSend(event) === null ? "dropped" : "kept"; }',
+            $events,
+            $partial
+        );
+    }
+
     /** The one verdict for a single payload. */
     private function verdict(array $event, ?string $partial = null): string
     {
         return $this->verdicts([$event], $partial)[0];
+    }
+
+    /**
+     * Run each payload through the partial's denyUrls, the stage that runs BEFORE beforeSend.
+     *
+     * Unlike verdicts() this restates SDK internals, because denyUrls is data and the code that
+     * reads it is Sentry's: @sentry/browser 8.55.2, InboundFilters._getEventFilterUrl ->
+     * _getLastValidUrl -> stringMatchesSomePattern, transcribed below. Our regex list is still
+     * the thing under test; what is restated is only which single string it gets matched against.
+     *
+     * It is restated rather than imported because @sentry/browser is not an npm dependency here -
+     * the loader in config('app.sentry_js_dsn') fetches the bundle at runtime and its version is
+     * chosen in Sentry's UI, so a test that fetched it would be a network call whose subject can
+     * change without a commit. Keep the version named here and in the partial's comment in step.
+     *
+     * @param  array  $events  Sentry event payloads.
+     * @param  string|null  $partial  Overrides the rendered partial, for A/B against an older copy.
+     * @return array<int, string> 'denied' or 'kept', positionally.
+     */
+    private function denyVerdicts(array $events, ?string $partial = null): array
+    {
+        $stage = <<<'JS'
+        function verdict(event) {
+            // Frames are ordered oldest first, so this walks BACKWARDS to the innermost one -
+            // the frame that actually threw. It skips only '<anonymous>' and '[native code]',
+            // reads filename and never abs_path, and stops at the first frame it accepts: an
+            // innermost frame with no filename yields no URL rather than falling through to the
+            // frame below it. A frameless event yields no URL either, which is why nothing in
+            // denyUrls could ever have caught EVENTSCHEDULE-JS-35.
+            var frames;
+            try { frames = event.exception.values[0].stacktrace.frames; } catch (e) {}
+
+            var url = null;
+            for (var i = (frames || []).length - 1; i >= 0; i--) {
+                var frame = frames[i];
+                if (frame && frame.filename !== '<anonymous>' && frame.filename !== '[native code]') {
+                    url = frame.filename || null;
+                    break;
+                }
+            }
+
+            if (! url) {
+                return 'kept';
+            }
+
+            return (captured.denyUrls || []).some(function (pattern) {
+                return pattern instanceof RegExp ? pattern.test(url) : url.indexOf(pattern) !== -1;
+            }) ? 'denied' : 'kept';
+        }
+        JS;
+
+        return $this->runInNode($stage, $events, $partial);
+    }
+
+    /** The one deny verdict for a single payload. */
+    private function denyVerdict(array $event, ?string $partial = null): string
+    {
+        return $this->denyVerdicts([$event], $partial)[0];
     }
 
     /** An error of ours, with a frame in our own bundle. */
@@ -98,6 +191,52 @@ class SentryJsFilterTest extends TestCase
             ]]],
             'request' => ['url' => 'https://house-show.eventschedule.com/a-very-star-shaped-back-to-school-bash'],
         ], $overrides);
+    }
+
+    /**
+     * EVENTSCHEDULE-JS-3A's shape: PayPal Honey's Safari App Extension, Safari 27 on macOS.
+     *
+     * @param  array<int, array<string, mixed>>|null  $frames  Oldest first, as Sentry orders them.
+     *                                                         Defaults to the one reported frame.
+     */
+    private function honeyError(?array $frames = null): array
+    {
+        return [
+            'exception' => ['values' => [[
+                'type' => 'UnavailableError',
+                'value' => 'UnavailableError',
+                'mechanism' => ['type' => 'onunhandledrejection', 'handled' => false],
+                'stacktrace' => ['frames' => $frames ?? [[
+                    'function' => 'v',
+                    'filename' => self::HONEY_FRAME,
+                    'lineno' => 135,
+                    'colno' => 859082,
+                ]]],
+            ]]],
+            'contexts' => ['browser' => ['name' => 'Safari', 'version' => '27.0']],
+            'request' => ['url' => 'https://app.eventschedule.com/loom/schedule?year=2026&month=9'],
+        ];
+    }
+
+    /**
+     * An event whose stack is exactly these filenames, oldest first.
+     *
+     * For the deny stage, which reads nothing but the innermost frame's filename, so the type and
+     * message are deliberately ordinary - anything that denies one of these denied it on the URL.
+     *
+     * @param  array<int, string>  $filenames
+     */
+    private function frameEvent(array $filenames): array
+    {
+        return [
+            'exception' => ['values' => [[
+                'type' => 'TypeError',
+                'value' => "Cannot read properties of null (reading 'dataset')",
+                'stacktrace' => ['frames' => array_map(fn ($filename) => [
+                    'filename' => $filename,
+                ], $filenames)],
+            ]]],
+        ];
     }
 
     /**
@@ -201,7 +340,7 @@ class SentryJsFilterTest extends TestCase
     /** ignoreAnywhere still has to reach a frame path, which is the whole reason it stayed. */
     public function test_a_third_party_frame_path_is_still_matched_anywhere(): void
     {
-        $this->assertSame('dropped', $this->verdict($this->ourError([
+        $event = $this->ourError([
             'exception' => ['values' => [[
                 'type' => 'TypeError',
                 'value' => "Cannot read properties of undefined (reading 'push')",
@@ -210,7 +349,15 @@ class SentryJsFilterTest extends TestCase
                         .'7d0fa10a/cloudflare-static/rocket-loader.min.js',
                 ]]],
             ]]],
-        ])));
+        ]);
+
+        $this->assertSame('dropped', $this->verdict($event));
+
+        // With the caveat that in production beforeSend never sees this one: denyUrls runs first
+        // and /cdn-cgi/ already denies it. ignoreAnywhere earns 'cloudflare-static' on the shapes
+        // the deny stage cannot reach - a breadcrumb, a request URL, a frame that is not the
+        // innermost one - not on this payload.
+        $this->assertSame('denied', $this->denyVerdict($event));
     }
 
     /**
@@ -357,5 +504,137 @@ class SentryJsFilterTest extends TestCase
             'message' => 'Checkout started',
             'level' => 'info',
         ]));
+    }
+
+    /**
+     * EVENTSCHEDULE-JS-3A: PayPal Honey's macOS Safari App Extension.
+     *
+     * The second assertion is the point of the test. The frozen pre-split copy carries the same
+     * eight denyUrls entries this had before Honey, safari-(web-)?extension:// among them, so a
+     * 'kept' there and a 'denied' here proves the drop comes from the two .appex entries and not
+     * from the scheme regex having covered a filesystem path all along.
+     */
+    public function test_a_macos_safari_app_extension_is_denied(): void
+    {
+        $this->assertSame('denied', $this->denyVerdict($this->honeyError()));
+
+        $before = file_get_contents(base_path('tests/fixtures/sentry-filter-before-split.js'));
+        $this->assertSame('kept', $this->denyVerdict($this->honeyError(), $before));
+    }
+
+    /**
+     * And beforeSend must KEEP it, so the deny stage is provably the only thing catching it.
+     *
+     * This is also what locks 'UnavailableError' out of ignoreMessages. Every term in that list
+     * passes 'a document cannot produce this string' - browser.storage, __gCrWeb,
+     * webkit.messageHandlers. UnavailableError is a bare name with no API surface behind it, and
+     * ignoreMessages matches the exception TYPE, so adding it would drop every UnavailableError
+     * from anywhere, ours included. This test fails the day someone tries.
+     */
+    public function test_the_honey_payload_is_not_caught_by_before_send(): void
+    {
+        $this->assertSame('kept', $this->verdict($this->honeyError()));
+    }
+
+    /**
+     * denyUrls reads the INNERMOST frame, which is the whole reason it is safe to deny on a path.
+     *
+     * A third party merely triggering our bug leaves our own frame innermost, and that report is
+     * still ours to fix. A harness that walked frames forwards, or matched any frame in the
+     * stack, passes the test above and fails the middle case here.
+     */
+    public function test_only_the_innermost_frame_decides_the_deny(): void
+    {
+        $stacks = [
+            // The extension threw: ours called into it, it blew up.
+            [self::OUR_FRAME, self::HONEY_FRAME],
+            // We threw: the extension called into us. Not theirs to answer for.
+            [self::HONEY_FRAME, self::OUR_FRAME],
+            // '[native code]' is skipped rather than treated as the frame that threw.
+            [self::OUR_FRAME, self::HONEY_FRAME, '[native code]'],
+            // As is '<anonymous>'.
+            [self::OUR_FRAME, self::HONEY_FRAME, '<anonymous>'],
+        ];
+
+        $this->assertSame(
+            ['denied', 'kept', 'denied', 'denied'],
+            $this->denyVerdicts(array_map(fn ($stack) => $this->frameEvent($stack), $stacks))
+        );
+    }
+
+    /**
+     * Every denyUrls entry, pinned. Until this test the whole list was asserted by nothing.
+     *
+     * The kept rows matter as much as the denied ones: /beacon\.min\.js/ and /\.appex\//
+     * are unanchored substrings, so a near miss is the way one of them starts eating our own
+     * reports quietly.
+     */
+    public function test_every_deny_url_entry_matches_what_it_claims_to(): void
+    {
+        $denied = [
+            'https://static.cloudflareinsights.com/beacon.min.js/vcd15cbe7772f49c399c6a5babf22c1241717689176015',
+            'https://house-show.eventschedule.com/cdn-cgi/scripts/7d0fa10a/cloudflare-static/rocket-loader.min.js',
+            'https://static.cloudflareinsights.com/rum.js',
+            'chrome-extension://gighmmpiobklfepjocnamgkkbiglidom/content.js',
+            'moz-extension://a1b2c3d4-e5f6-4789-abcd-ef0123456789/content.js',
+            'safari-web-extension://A1B2C3D4-E5F6-4789-ABCD-EF0123456789/content.js',
+            // The optional (web-)? group, which nothing else here exercises.
+            'safari-extension://com.example.helper-ABCDE12345/injected.js',
+            'chrome://global/content/elements/browser-custom-element.js',
+            'iabjs://bridge/inject.js',
+            // EVENTSCHEDULE-JS-3A, then the two shapes that make each .appex entry load-bearing
+            // on its own: an app extension with no .safariextension/ folder inside it, and the
+            // legacy ~/Library layout with no .appex above it. Drop either entry and one of
+            // these rows starts being reported.
+            self::HONEY_FRAME,
+            '/Applications/Some%20Helper.app/Contents/PlugIns/Extension.appex/Contents/Resources/injected.js',
+            '/Users/someone/Library/Safari/Extensions/Legacy.safariextension/inject.js',
+        ];
+
+        $kept = [
+            self::OUR_FRAME,
+            'https://app.eventschedule.com/loom/schedule?year=2026&month=9',
+            // Near misses on the unanchored entries above.
+            'https://app.eventschedule.com/js/vendor/beacon-loader.js',
+            'https://app.eventschedule.com/build/assets/appex-calendar-abc123.js',
+        ];
+
+        $this->assertSame(
+            array_merge(
+                array_fill(0, count($denied), 'denied'),
+                array_fill(0, count($kept), 'kept')
+            ),
+            $this->denyVerdicts(array_map(
+                fn ($filename) => $this->frameEvent([$filename]),
+                array_merge($denied, $kept)
+            ))
+        );
+    }
+
+    /**
+     * Why the two historical misses were misses, so the reach stays documented by assertion.
+     *
+     * Both of these are dropped in production - by ignoreMessages and ignoreFrameFunctions
+     * respectively - and the point here is only that the deny stage could never have done it.
+     */
+    public function test_the_deny_stage_cannot_reach_an_event_with_no_usable_frame(): void
+    {
+        // EVENTSCHEDULE-JS-35: a browser extension rejection with no stacktrace at all.
+        $frameless = [
+            'exception' => ['values' => [[
+                'type' => 'Error',
+                'value' => 'Invalid call to browser.storage.local.set().',
+                'mechanism' => ['type' => 'onunhandledrejection', 'handled' => false],
+            ]]],
+        ];
+
+        // And an innermost frame carrying a function but no filename: the walk stops there and
+        // returns nothing rather than falling through to the Honey frame below it.
+        $filenameless = $this->honeyError([
+            ['function' => 'v', 'filename' => self::HONEY_FRAME],
+            ['function' => 'promiseReactionJob'],
+        ]);
+
+        $this->assertSame(['kept', 'kept'], $this->denyVerdicts([$frameless, $filenameless]));
     }
 }
