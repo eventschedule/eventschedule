@@ -134,8 +134,11 @@ class BookingRequestFormTest extends TestCase
             'venue with an optional account' => ['venue', [], null],
             'curator with an optional account' => ['curator', [], null],
             'selfhost with registration closed' => ['venue', [], 'closed'],
-            'talent requiring every field, online off' => ['talent', ['booking_form_config' => ['required_fields' => array_fill_keys(Role::BOOKING_FORM_REQUIRABLE_FIELDS, true), 'allow_online' => false]], null],
-            'venue requiring every field, online off' => ['venue', ['booking_form_config' => ['required_fields' => array_fill_keys(Role::BOOKING_FORM_REQUIRABLE_FIELDS, true), 'allow_online' => false]], null],
+            // ask_phone alongside the required_fields: `phone` is requirable but only reaches the
+            // page when the schedule asks for it, so without this the scenario would quietly stop
+            // covering the field it claims to require.
+            'talent requiring every field, online off' => ['talent', ['booking_form_config' => ['required_fields' => array_fill_keys(Role::BOOKING_FORM_REQUIRABLE_FIELDS, true), 'allow_online' => false, 'ask_phone' => true]], null],
+            'venue requiring every field, online off' => ['venue', ['booking_form_config' => ['required_fields' => array_fill_keys(Role::BOOKING_FORM_REQUIRABLE_FIELDS, true), 'allow_online' => false, 'ask_phone' => true]], null],
             'signed-in visitor' => ['venue', [], 'signed-in'],
         ];
     }
@@ -253,9 +256,17 @@ class BookingRequestFormTest extends TestCase
 
     public function test_only_the_required_default_fields_are_marked(): void
     {
+        // Scoped past the contact labels: name and email are required of every guest whatever the
+        // owner configured, so they carry an unconditional marker. This test is about the fields the
+        // owner CAN configure, and counting every label on the page would conflate the two.
+        $configurable = "//label[not(@for='contact_name' or @for='contact_email' or @for='contact_phone')]//span[@aria-hidden='true'][normalize-space()='*']";
+
         $plain = $this->page($this->bookingSchedule('talent'));
         $this->assertSame(0, $plain->query('//*[@aria-required="true"]')->length);
-        $this->assertSame(0, $plain->query("//label//span[@aria-hidden='true'][normalize-space()='*']")->length);
+        $this->assertSame(0, $plain->query($configurable)->length);
+
+        // ... and the two constants really are marked.
+        $this->assertSame(2, $plain->query("//label[@for='contact_name' or @for='contact_email']//span[@aria-hidden='true'][normalize-space()='*']")->length);
 
         $role = $this->bookingSchedule('talent', [
             'booking_form_config' => $this->requiring(['event_name', 'description']),
@@ -265,11 +276,25 @@ class BookingRequestFormTest extends TestCase
         $this->assertSame('true', $this->node($xpath, "//input[@id='event_name']")->getAttribute('aria-required'));
         $this->assertSame('true', $this->node($xpath, "//textarea[@id='event_description']")->getAttribute('aria-required'));
         $this->assertFalse($this->node($xpath, "//input[@id='event_date']")->hasAttribute('aria-required'));
-        $this->assertSame(2, $xpath->query("//label//span[@aria-hidden='true'][normalize-space()='*']")->length);
+        $this->assertSame(2, $xpath->query($configurable)->length);
 
         // Checked by the page script, never by a native required attribute.
         $this->assertFalse($this->node($xpath, "//input[@id='event_name']")->hasAttribute('required'));
         $this->assertFalse($this->node($xpath, "//textarea[@id='event_description']")->hasAttribute('required'));
+
+        // Phone follows the same contract once the schedule asks for it.
+        $asked = $this->page($this->bookingSchedule('talent', [
+            'booking_form_config' => $this->requiring([], ['ask_phone' => true]),
+        ]));
+        $this->assertFalse($this->node($asked, "//input[@id='contact_phone']")->hasAttribute('aria-required'));
+        $this->assertSame(0, $asked->query("//label[@for='contact_phone']//span[@aria-hidden='true'][normalize-space()='*']")->length);
+
+        $required = $this->page($this->bookingSchedule('talent', [
+            'booking_form_config' => $this->requiring(['phone'], ['ask_phone' => true]),
+        ]));
+        $this->assertSame('true', $this->node($required, "//input[@id='contact_phone']")->getAttribute('aria-required'));
+        $this->assertFalse($this->node($required, "//input[@id='contact_phone']")->hasAttribute('required'));
+        $this->assertSame(1, $required->query("//label[@for='contact_phone']//span[@aria-hidden='true'][normalize-space()='*']")->length);
     }
 
     public function test_every_field_has_an_error_anchor_even_when_optional(): void
@@ -281,6 +306,17 @@ class BookingRequestFormTest extends TestCase
             $this->assertNotNull($anchor, "missing the $key error anchor");
             $this->assertSame('error-'.$key, $anchor->getAttribute('id'));
         }
+
+        // contact_phone needs its own page: the schedule above does not ask for a phone, so its
+        // anchor is legitimately absent there.
+        $this->assertNull($this->node($xpath, "//*[@data-error-for='contact_phone']"));
+
+        $withPhone = $this->page($this->bookingSchedule('talent', [
+            'booking_form_config' => $this->requiring([], ['ask_phone' => true]),
+        ]));
+        $anchor = $this->node($withPhone, "//*[@data-error-for='contact_phone']");
+        $this->assertNotNull($anchor, 'missing the contact_phone error anchor');
+        $this->assertSame('error-contact_phone', $anchor->getAttribute('id'));
     }
 
     public function test_turning_online_off_removes_the_online_controls(): void
@@ -554,5 +590,192 @@ class BookingRequestFormTest extends TestCase
 
         $this->assertGuest();
         $this->assertSame(1, User::count());
+    }
+
+    // -- The submitter's contact details -----------------------------------------------------
+
+    public function test_a_guest_request_keeps_the_contact_details_it_asked_for(): void
+    {
+        $role = $this->bookingSchedule('venue');
+
+        $this->postJson($this->storeUrl($role), $this->complete())->assertOk();
+
+        $event = Event::latest('id')->first();
+        $this->assertSame('Sam Guest', $event->contact_name);
+        $this->assertSame('sam.guest@gmail.com', $event->contact_email);
+        $this->assertNull($event->contact_phone);
+
+        // The row itself still borrows the owner, which is exactly why the columns have to exist.
+        $this->assertTrue($event->is_guest_submission);
+        $this->assertSame($role->user->id, $event->user_id);
+    }
+
+    public function test_a_signed_in_request_records_that_account(): void
+    {
+        $role = $this->bookingSchedule('venue');
+        $visitor = User::factory()->create(['name' => 'Dana Member', 'email' => 'dana.member@gmail.com']);
+
+        $this->actingAs($visitor)
+            ->postJson($this->storeUrl($role), $this->complete())
+            ->assertOk();
+
+        $event = Event::latest('id')->first();
+        $this->assertSame('Dana Member', $event->contact_name);
+        $this->assertSame('dana.member@gmail.com', $event->contact_email);
+        $this->assertFalse($event->is_guest_submission);
+    }
+
+    public function test_a_phone_is_only_stored_when_the_schedule_asks_for_one(): void
+    {
+        $silent = $this->bookingSchedule('venue');
+        $this->postJson($this->storeUrl($silent), $this->complete(['contact_phone' => '+49 170 1234567']))->assertOk();
+        $this->assertNull(Event::latest('id')->first()->contact_phone);
+
+        $asking = $this->bookingSchedule('venue', [
+            'booking_form_config' => $this->requiring([], ['ask_phone' => true]),
+        ]);
+        $this->postJson($this->storeUrl($asking), $this->complete(['contact_phone' => '+49 170 1234567']))->assertOk();
+        $this->assertSame('+49 170 1234567', Event::latest('id')->first()->contact_phone);
+    }
+
+    public function test_a_phone_is_scrubbed_of_markup(): void
+    {
+        $role = $this->bookingSchedule('venue', [
+            'booking_form_config' => $this->requiring([], ['ask_phone' => true]),
+        ]);
+
+        $this->postJson($this->storeUrl($role), $this->complete([
+            'contact_phone' => '  <b>555 1234</b>  ',
+        ]))->assertOk();
+
+        $this->assertSame('555 1234', Event::latest('id')->first()->contact_phone);
+    }
+
+    public function test_a_phone_is_required_only_where_the_owner_required_it(): void
+    {
+        $optional = $this->bookingSchedule('venue', [
+            'booking_form_config' => $this->requiring([], ['ask_phone' => true]),
+        ]);
+        $this->postJson($this->storeUrl($optional), $this->complete())->assertOk();
+
+        $required = $this->bookingSchedule('venue', [
+            'booking_form_config' => $this->requiring(['phone'], ['ask_phone' => true]),
+        ]);
+        $this->postJson($this->storeUrl($required), $this->complete())
+            ->assertStatus(422)
+            ->assertJsonValidationErrors(['contact_phone']);
+    }
+
+    /**
+     * A stored `phone => true` is inert while the field is switched off, so an owner who required a
+     * phone and then stopped asking for one does not lock every visitor out of the form.
+     */
+    public function test_a_required_phone_is_inert_while_the_schedule_does_not_ask_for_one(): void
+    {
+        $role = $this->bookingSchedule('venue', [
+            'booking_form_config' => $this->requiring(['phone'], ['ask_phone' => false]),
+        ]);
+
+        $this->assertFalse($role->bookingFormRequires('phone'));
+        $this->postJson($this->storeUrl($role), $this->complete())->assertOk();
+    }
+
+    /**
+     * The phone field sits outside the signed-out-only contact block, because an account supplies a
+     * name and an email but never a phone number.
+     */
+    public function test_the_phone_field_renders_for_a_signed_in_visitor_too(): void
+    {
+        $role = $this->bookingSchedule('venue', [
+            'booking_form_config' => $this->requiring([], ['ask_phone' => true]),
+        ]);
+        $visitor = User::factory()->create();
+
+        $xpath = $this->page($role, $visitor);
+
+        $this->assertNotNull($this->node($xpath, "//input[@id='contact_phone']"));
+        $this->assertNull($this->node($xpath, "//input[@id='contact_name']"));
+        $this->assertNull($this->node($xpath, "//input[@id='contact_email']"));
+    }
+
+    public function test_the_phone_field_is_absent_unless_the_schedule_asks_for_it(): void
+    {
+        $this->assertNull($this->node($this->page($this->bookingSchedule('venue')), "//input[@id='contact_phone']"));
+    }
+
+    /**
+     * The form takes a name, an email and possibly a phone from somebody with no account, so it has
+     * to say who sees them - the same disclosure the Follow flow already makes.
+     */
+    public function test_the_form_discloses_who_sees_the_contact_details(): void
+    {
+        $role = $this->bookingSchedule('venue');
+
+        $this->get($this->pageUrl($role))
+            ->assertOk()
+            ->assertSee(__('messages.booking_contact_privacy_note'), false)
+            ->assertSee(policy_url('privacy'), false);
+    }
+
+    /**
+     * Not in $fillable, deliberately: EventRepo::saveEvent() does a blanket fill($request->all())
+     * that an anonymous guest reaches through guestImport(), so a fillable contact block could be
+     * forged, and buildClonePayload() walks getFillable() and would copy a stranger's address onto
+     * every clone.
+     */
+    public function test_the_contact_columns_are_not_mass_assignable(): void
+    {
+        $fillable = (new Event)->getFillable();
+
+        foreach (['contact_name', 'contact_email', 'contact_phone'] as $column) {
+            $this->assertNotContains($column, $fillable, "$column must not be mass assignable");
+        }
+    }
+
+    public function test_a_clone_does_not_carry_the_submitters_details(): void
+    {
+        $role = $this->bookingSchedule('venue');
+        $this->postJson($this->storeUrl($role), $this->complete())->assertOk();
+
+        $payload = \App\Repos\EventRepo::buildClonePayload(Event::latest('id')->first());
+
+        $this->assertArrayNotHasKey('contact_name', $payload);
+        $this->assertArrayNotHasKey('contact_email', $payload);
+        $this->assertArrayNotHasKey('contact_phone', $payload);
+    }
+
+    /**
+     * Owner-facing only. Every Event serializer in the app is field-explicit, and this fails if one
+     * is ever refactored into something generic.
+     */
+    public function test_the_contact_details_stay_out_of_the_public_api_payload(): void
+    {
+        $role = $this->bookingSchedule('venue');
+        $this->postJson($this->storeUrl($role), $this->complete())->assertOk();
+
+        $data = json_decode(json_encode(Event::latest('id')->first()->toApiData()), true);
+
+        foreach (['contact_name', 'contact_email', 'contact_phone'] as $column) {
+            $this->assertArrayNotHasKey($column, $data);
+        }
+    }
+
+    /**
+     * The CSP carries a nonce, which disables the 'unsafe-inline' fallback, so one inline script
+     * without a nonce is a hard block. Reported against this page more than once.
+     */
+    public function test_every_inline_script_on_the_page_carries_a_nonce(): void
+    {
+        $html = $this->get($this->pageUrl($this->bookingSchedule('venue')))->assertOk()->getContent();
+
+        preg_match_all('#<script\b([^>]*)>#i', $html, $matches);
+
+        foreach ($matches[1] as $attributes) {
+            if (stripos($attributes, 'src=') !== false) {
+                continue;
+            }
+
+            $this->assertStringContainsStringIgnoringCase('nonce=', $attributes, 'inline <script'.$attributes.'> has no CSP nonce');
+        }
     }
 }

@@ -6537,6 +6537,9 @@ class RoleController extends Controller
             'allow_online' => $request->has('booking_allow_online')
                 ? $request->boolean('booking_allow_online')
                 : $current['allow_online'],
+            'ask_phone' => $request->has('booking_ask_phone')
+                ? $request->boolean('booking_ask_phone')
+                : $current['ask_phone'],
         ];
     }
 

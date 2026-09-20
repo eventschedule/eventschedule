@@ -3370,6 +3370,8 @@ return [
     'booking_form_required_fields_help' => 'Os visitantes precisam preencher os campos marcados antes de enviar o formulário de reserva.',
     'booking_allow_online' => 'Oferecer eventos online',
     'booking_allow_online_help' => 'Mostra a opção "Online" no formulário de reserva. Desative-a se você só aceita reservas presenciais.',
+    'booking_ask_phone_help' => 'Adiciona um campo de número de telefone ao formulário de reserva. O número é mostrado com o pedido no separador Pedidos.',
+    'booking_contact_privacy_note' => 'A agenda verá os dados de contacto que introduzir aqui para poder responder ao seu pedido. Nunca os vendemos nem partilhamos.',
     'booking_location_required' => 'Informe um local ou escolha "Online".',
     'booking_venue_required' => 'Informe um local.',
     'booking_time_invalid' => 'Informe um horário válido.',

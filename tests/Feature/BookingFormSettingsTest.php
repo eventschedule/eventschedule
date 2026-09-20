@@ -34,7 +34,7 @@ class BookingFormSettingsTest extends TestCase
      * What the section posts: a sentinel, a hidden 0 per row (overridden by the ticked box) and the
      * toggle's value.
      */
-    private function section(array $ticked, bool $allowOnline = true, array $rows = Role::BOOKING_FORM_REQUIRABLE_FIELDS): array
+    private function section(array $ticked, bool $allowOnline = true, array $rows = Role::BOOKING_FORM_REQUIRABLE_FIELDS, bool $askPhone = false): array
     {
         $fields = [];
         foreach ($rows as $field) {
@@ -45,6 +45,7 @@ class BookingFormSettingsTest extends TestCase
             'booking_form_submitted' => '1',
             'booking_required_fields' => $fields,
             'booking_allow_online' => $allowOnline ? '1' : '0',
+            'booking_ask_phone' => $askPhone ? '1' : '0',
         ];
     }
 
@@ -114,7 +115,7 @@ class BookingFormSettingsTest extends TestCase
 
         // Canonicalized: MySQL reorders the keys of a stored JSON object.
         $stored = json_decode($role->fresh()->getRawOriginal('booking_form_config'), true);
-        $this->assertEqualsCanonicalizing(['required_fields', 'allow_online'], array_keys($stored));
+        $this->assertEqualsCanonicalizing(['required_fields', 'allow_online', 'ask_phone'], array_keys($stored));
         $this->assertEqualsCanonicalizing(Role::BOOKING_FORM_REQUIRABLE_FIELDS, array_keys($stored['required_fields']));
         $this->assertTrue($stored['required_fields']['description']);
     }
@@ -267,5 +268,84 @@ class BookingFormSettingsTest extends TestCase
             ->getContent();
 
         $this->assertMatchesRegularExpression('~name="booking_allow_online"[^>]*value="1"[^>]*\bchecked\b~s', $html);
+    }
+
+    // -- The phone field ------------------------------------------------------------------------
+
+    public function test_a_new_schedule_does_not_ask_for_a_phone(): void
+    {
+        $role = $this->createRole($this->createOwner(), 'talent');
+
+        $this->assertFalse($role->bookingFormAsksPhone());
+        $this->assertFalse($role->bookingFormRequires('phone'));
+    }
+
+    public function test_the_ask_and_require_toggles_round_trip(): void
+    {
+        $role = $this->createRole($this->createOwner(), 'talent');
+
+        $this->save($role, $this->section(['phone'], askPhone: true));
+
+        $role = $role->fresh();
+        $this->assertTrue($role->bookingFormAsksPhone());
+        $this->assertTrue($role->bookingFormRequires('phone'));
+
+        $this->save($role, $this->section([], askPhone: false));
+
+        $role = $role->fresh();
+        $this->assertFalse($role->bookingFormAsksPhone());
+        $this->assertFalse($role->bookingFormRequires('phone'));
+    }
+
+    /**
+     * The nested row is hidden, not removed, while the ask toggle is off, so a stored requirement
+     * survives being switched off and on again. bookingFormRequires() keeps it inert meanwhile.
+     */
+    public function test_a_stored_phone_requirement_survives_the_ask_toggle(): void
+    {
+        $role = $this->createRole($this->createOwner(), 'talent');
+
+        $this->save($role, $this->section(['phone'], askPhone: true));
+        $this->save($role->fresh(), $this->section(['phone'], askPhone: false));
+
+        $role = $role->fresh();
+        $stored = json_decode($role->getRawOriginal('booking_form_config'), true);
+        $this->assertTrue($stored['required_fields']['phone']);
+        $this->assertFalse($role->bookingFormRequires('phone'));
+
+        $this->save($role, $this->section(['phone'], askPhone: true));
+        $this->assertTrue($role->fresh()->bookingFormRequires('phone'));
+    }
+
+    public function test_a_save_without_the_section_leaves_the_phone_options_alone(): void
+    {
+        $role = $this->createRole($this->createOwner(), 'talent');
+        $this->save($role, $this->section(['phone'], askPhone: true));
+
+        $this->save($role->fresh(), []);
+
+        $role = $role->fresh();
+        $this->assertTrue($role->bookingFormAsksPhone());
+        $this->assertTrue($role->bookingFormRequires('phone'));
+    }
+
+    public function test_a_malformed_stored_value_does_not_ask_for_a_phone(): void
+    {
+        $role = $this->createRole($this->createOwner(), 'talent');
+        DB::table('roles')->where('id', $role->id)->update(['booking_form_config' => '"nonsense"']);
+
+        $this->assertFalse($role->fresh()->bookingFormAsksPhone());
+    }
+
+    public function test_the_settings_page_renders_the_phone_block(): void
+    {
+        $role = $this->createRole($this->createOwner(), 'talent');
+
+        $this->actingAs($role->user)
+            ->get(route('role.edit', ['subdomain' => $role->subdomain]))
+            ->assertOk()
+            ->assertSee('booking_ask_phone', false)
+            ->assertSee('booking_required_fields[phone]', false)
+            ->assertSee('booking-require-phone-row', false);
     }
 }

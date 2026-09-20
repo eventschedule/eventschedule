@@ -610,6 +610,12 @@ class BackupService
         // Losing it on restore makes EventController::decline() mail that person about a request
         // they never made - the exact bug the column exists to prevent.
         $eventData['is_guest_submission'] = (bool) $event->is_guest_submission;
+        // Also not fillable (deliberately - see the migration): the details of whoever sent a guest
+        // booking request. They are the owner's own record of their own requests, so a restore that
+        // dropped them would leave every pending request unanswerable all over again.
+        $eventData['contact_name'] = $event->contact_name;
+        $eventData['contact_email'] = $event->contact_email;
+        $eventData['contact_phone'] = $event->contact_phone;
 
         if ($includeImages) {
             $this->collectEventImages($event, $eventData, $imageFiles);
@@ -1859,6 +1865,13 @@ class BackupService
         $event->rescheduled_at = $data['rescheduled_at'] ?? null;
         // ?? false keeps archives written before the column existed importable.
         $event->is_guest_submission = (bool) ($data['is_guest_submission'] ?? false);
+
+        // Clamped by hand: importEvent() persists with saveQuietly(), so the model's clamping hook
+        // never runs, and the loop above only walks CLAMPED_COLUMNS. A hand-edited archive with an
+        // over-long value would otherwise be a MySQL 1406 that fails the whole restore.
+        $event->contact_name = TextUtils::clamp($data['contact_name'] ?? null, 255);
+        $event->contact_email = TextUtils::clamp($data['contact_email'] ?? null, 255);
+        $event->contact_phone = TextUtils::clamp($data['contact_phone'] ?? null, 255);
 
         // Remap the appointment type (not fillable). Drop the link if the type didn't import.
         $apptRefId = $data['_appointment_type_ref_id'] ?? null;

@@ -242,6 +242,17 @@
                 }
             }
 
+            // The nested "required" row only makes sense while the phone field is asked for at all.
+            // Its own listener, not toggleBookingFormSection() below: that one governs the whole
+            // section and is bound to accept_requests / require_account / the form radios.
+            const bookingAskPhone = document.getElementById('booking_ask_phone');
+            const bookingRequirePhoneRow = document.getElementById('booking-require-phone-row');
+            if (bookingAskPhone && bookingRequirePhoneRow) {
+                bookingAskPhone.addEventListener('change', function () {
+                    bookingRequirePhoneRow.classList.toggle('hidden', !bookingAskPhone.checked);
+                });
+            }
+
             // The booking form options only matter while guests get the booking form: always on a
             // talent, otherwise with Require Account off and Booking Form picked (RoleController::request()).
             // Hidden, the section still posts its values, so they are saved back unchanged.
@@ -3787,6 +3798,10 @@
                             if ($role->isVenue()) {
                                 unset($bookingFieldLabels['location']);
                             }
+                            // `phone` is requirable but deliberately absent from this list: every row
+                            // here is a field that is always on the form, so the checkbox answers one
+                            // question. Phone answers two (ask at all, then require), so it gets its
+                            // own nested block below instead.
                         @endphp
                         <div class="mb-6" id="booking_form_section" data-always-booking="{{ $role->isTalent() ? '1' : '0' }}">
                             <input type="hidden" name="booking_form_submitted" value="1">
@@ -3807,6 +3822,26 @@
                                 label="{{ __('messages.booking_allow_online') }}"
                                 checked="{{ old('booking_allow_online', $bookingFormOptions['allow_online']) }}"
                                 help="{{ __('messages.booking_allow_online_help') }}" />
+
+                            {{-- The phone field, in the same shape as the appointment editor's
+                                 (role/partials/appointment-editor.blade.php) and the ticket-buyer
+                                 phone on the event form: ask first, then require. --}}
+                            <div class="mt-6">
+                                <x-toggle name="booking_ask_phone"
+                                    label="{{ __('messages.ask_for_phone_number') }}"
+                                    checked="{{ old('booking_ask_phone', $bookingFormOptions['ask_phone']) }}"
+                                    help="{{ __('messages.booking_ask_phone_help') }}" />
+                                {{-- Nested: "required" only means anything while the field is asked
+                                     for at all, and Role::bookingFormRequires() normalises the
+                                     stored value the same way. Hiding the row does not lose it: a
+                                     hidden checked box still posts, and applyBookingFormConfig()
+                                     only falls back to the stored value on an ABSENT key. --}}
+                                <div id="booking-require-phone-row" class="ms-14 mt-2 {{ old('booking_ask_phone', $bookingFormOptions['ask_phone']) ? '' : 'hidden' }}">
+                                    <x-toggle name="booking_required_fields[phone]" id="booking_required_phone"
+                                        label="{{ __('messages.field_required') }}"
+                                        checked="{{ old('booking_required_fields.phone', $bookingFormOptions['required_fields']['phone']) }}" />
+                                </div>
+                            </div>
                         </div>
                         @if (! $role->isTalent())
                         <div class="mb-6" id="require_approval_section">

@@ -55,13 +55,17 @@
                 </div>
                 <div class="text-lg font-bold text-gray-900 dark:text-gray-100 mb-1" dir="auto">{{ $bookingSale?->name }}</div>
                 @if ($bookingSale?->email)
-                    <div class="text-sm text-gray-500 dark:text-gray-400 mb-1">{{ $bookingSale->email }}</div>
+                    {{-- A link, like the same booking on Appointments > Bookings: this used to be
+                         dead text the owner had to retype. break-all because the card is ~200px at
+                         lg, dir=ltr because the card is text-center and an address must not be
+                         reordered in an RTL locale. --}}
+                    <div class="text-sm mb-1 break-all"><a href="mailto:{{ $bookingSale->email }}" class="text-[var(--brand-blue)] hover:underline" dir="ltr">{{ $bookingSale->email }}</a></div>
                 @endif
                 @if ($event->starts_at)
                     <div class="text-sm text-gray-500 dark:text-gray-400 mb-1">{{ $event->localStartsAt(true) }}</div>
                 @endif
                 @if ($bookingSale?->phone)
-                    <div class="text-sm mb-1"><a href="tel:{{ $bookingSale->phone }}" class="text-[var(--brand-blue)] hover:underline">{{ $bookingSale->phone }}</a></div>
+                    <div class="text-sm mb-1"><a href="tel:{{ $bookingSale->phone }}" class="text-[var(--brand-blue)] hover:underline" dir="ltr">{{ $bookingSale->phone }}</a></div>
                 @endif
                 @if ($bookingSale && $bookingSale->payment_amount > 0)
                     <div class="text-sm text-gray-500 dark:text-gray-400 mb-2">{{ \App\Utils\MoneyUtils::format((float) $bookingSale->payment_amount, $event->ticket_currency_code) }} &middot; {{ $bookingSale->status === 'paid' ? __('messages.paid') : __('messages.unpaid') }}</div>
@@ -73,6 +77,44 @@
                 {{-- No "View" button: it used to link to Appointments > Bookings > Pending, which is
                      where the owner usually arrived FROM, and Accept/Decline already sit in the card
                      footer below. --}}
+            @else
+            @php
+                // Who asked. A booking-form request has no submitting schedule - bookingRequest()
+                // re-attributes the row to this schedule's owner - so the venue and the event name
+                // below are never the requester; on a talent the headline used to be a stub venue
+                // row the guest invented seconds earlier, linked and all.
+                //
+                // Keyed on contact_name, not is_guest_submission: a SIGNED-IN visitor's booking-form
+                // request is not a guest submission but still has nobody else's schedule to show,
+                // and a request from before these columns existed has nothing to show and must fall
+                // through to the markup below.
+                $submitter = $event->contact_name;
+            @endphp
+            @if ($submitter)
+                <span class="inline-block bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-300 text-xs font-semibold px-3 py-1 rounded-full mb-2">
+                    {{ __($role->isTalent() ? 'messages.booking_request' : 'messages.submit_event') }}
+                </span>
+                <div class="text-lg font-bold text-gray-900 dark:text-gray-100 mb-1" dir="auto">{{ $submitter }}</div>
+                <div class="text-sm text-gray-500 dark:text-gray-400 mb-1" dir="auto">{{ $event->translatedName() }}</div>
+                @if ($event->contact_email || $event->contact_phone)
+                    {{-- The same sunken contact block as role/partials/appointment-bookings.blade.php.
+                         text-start because the card itself is text-center. --}}
+                    <div data-request-contact class="mt-2 w-full rounded-lg bg-gray-50 dark:bg-gray-800 px-3 py-2 space-y-1 text-start">
+                        @if ($event->contact_email)
+                            <div class="text-xs break-all"><a href="mailto:{{ $event->contact_email }}" class="text-[var(--brand-blue)] hover:underline" dir="ltr">{{ $event->contact_email }}</a></div>
+                        @endif
+                        @if ($event->contact_phone)
+                            <div class="text-xs"><a href="tel:{{ $event->contact_phone }}" class="text-[var(--brand-blue)] hover:underline" dir="ltr">{{ $event->contact_phone }}</a></div>
+                        @endif
+                    </div>
+                @endif
+                {{-- The guest's own message, as the appointment branch shows a booking's notes. The
+                     "Description" block further down reads the VENUE's or the talent's description,
+                     which is structurally empty for these rows, so without this the owner cannot
+                     triage a request without opening it. --}}
+                @if ($event->description)
+                    <div class="text-xs text-gray-600 dark:text-gray-400 mt-2 line-clamp-4 text-start" dir="auto">{{ $event->description }}</div>
+                @endif
             @else
             {{-- Profile Image --}}
             @if ($role->isVenue() || $role->isCurator())
@@ -93,6 +135,7 @@
                 @else
                     <span class="text-lg font-bold text-gray-900 dark:text-gray-100 mb-1" dir="auto">{{ $event->venue ? $event->venue->name : $event->translatedName() }}</span>
                 @endif
+            @endif
             @endif
 
             {{-- Date/Time --}}

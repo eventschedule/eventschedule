@@ -3369,6 +3369,8 @@ return [
     'booking_form_required_fields_help' => 'Bezoekers moeten de velden die je aanvinkt invullen voordat ze het boekingsformulier kunnen versturen.',
     'booking_allow_online' => 'Online evenementen aanbieden',
     'booking_allow_online_help' => 'Toont de optie "Online" op het boekingsformulier. Zet dit uit als je alleen boekingen op locatie aanneemt.',
+    'booking_ask_phone_help' => 'Voegt een veld voor het telefoonnummer toe aan het boekingsformulier. Het nummer wordt bij de aanvraag getoond op het tabblad Aanvragen.',
+    'booking_contact_privacy_note' => 'De agenda ziet de contactgegevens die u hier invult, zodat er op uw aanvraag gereageerd kan worden. Wij verkopen of delen deze nooit.',
     'booking_location_required' => 'Vul een locatie in of kies "Online".',
     'booking_venue_required' => 'Vul een locatie in.',
     'booking_time_invalid' => 'Vul een geldige tijd in.',

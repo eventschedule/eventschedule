@@ -3371,6 +3371,8 @@ return [
     'booking_form_required_fields_help' => 'I visitatori devono compilare i campi che selezioni prima di poter inviare il modulo di prenotazione.',
     'booking_allow_online' => 'Offri eventi online',
     'booking_allow_online_help' => 'Mostra l\'opzione «Online» nel modulo di prenotazione. Disattivala se accetti solo prenotazioni in presenza.',
+    'booking_ask_phone_help' => 'Aggiunge un campo per il numero di telefono al modulo di prenotazione. Il numero viene mostrato con la richiesta nella scheda Richieste.',
+    'booking_contact_privacy_note' => 'Il calendario vedrà i recapiti che inserisci qui per poter rispondere alla tua richiesta. Non li vendiamo né li condividiamo mai.',
     'booking_location_required' => 'Inserisci un luogo o scegli «Online».',
     'booking_venue_required' => 'Inserisci un luogo.',
     'booking_time_invalid' => 'Inserisci un orario valido.',

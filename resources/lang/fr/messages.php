@@ -3374,6 +3374,8 @@ return [
     'booking_form_required_fields_help' => 'Les visiteurs doivent remplir les champs cochés avant de pouvoir envoyer le formulaire de réservation.',
     'booking_allow_online' => 'Proposer des événements en ligne',
     'booking_allow_online_help' => 'Affiche l\'option « En ligne » dans le formulaire de réservation. Désactivez-la si vous n\'acceptez que les réservations en personne.',
+    'booking_ask_phone_help' => 'Ajoute un champ de numéro de téléphone au formulaire de réservation. Le numéro s\'affiche avec la demande dans l\'onglet Demandes.',
+    'booking_contact_privacy_note' => 'Le calendrier verra les coordonnées que vous saisissez ici afin de pouvoir répondre à votre demande. Nous ne les vendons ni ne les partageons jamais.',
     'booking_location_required' => 'Veuillez indiquer un lieu ou choisir « En ligne ».',
     'booking_venue_required' => 'Veuillez indiquer un lieu.',
     'booking_time_invalid' => 'Veuillez indiquer une heure valide.',

@@ -1331,8 +1331,10 @@ class Role extends Model implements MustVerifyEmail
     /**
      * The booking form's default fields an owner can make required. `date_time` covers the date and
      * the start time together: a date without a time cannot be saved, so neither is asked alone.
+     * `phone` is the odd one out: the others are always on the form, so it is only requirable while
+     * ask_phone puts it there at all (see bookingFormRequires()).
      */
-    public const BOOKING_FORM_REQUIRABLE_FIELDS = ['event_name', 'date_time', 'description', 'location'];
+    public const BOOKING_FORM_REQUIRABLE_FIELDS = ['event_name', 'date_time', 'description', 'location', 'phone'];
 
     /**
      * Whether a guest has to create an account to send a booking-form request.
@@ -1349,7 +1351,7 @@ class Role extends Model implements MustVerifyEmail
     /**
      * The booking form options with every key present and typed, whatever is stored.
      *
-     * @return array{required_fields: array<string, bool>, allow_online: bool}
+     * @return array{required_fields: array<string, bool>, allow_online: bool, ask_phone: bool}
      */
     public function bookingFormConfig(): array
     {
@@ -1360,7 +1362,7 @@ class Role extends Model implements MustVerifyEmail
      * Null (never saved) and anything malformed resolve to the defaults: nothing required and the
      * Online option offered, which is how the form behaved before these options existed.
      *
-     * @return array{required_fields: array<string, bool>, allow_online: bool}
+     * @return array{required_fields: array<string, bool>, allow_online: bool, ask_phone: bool}
      */
     public static function normalizeBookingFormConfig(mixed $config): array
     {
@@ -1377,6 +1379,9 @@ class Role extends Model implements MustVerifyEmail
             'allow_online' => array_key_exists('allow_online', $config)
                 ? filter_var($config['allow_online'], FILTER_VALIDATE_BOOLEAN)
                 : true,
+            // Defaults to FALSE, unlike allow_online: an existing schedule's form must not sprout a
+            // field its owner never asked for.
+            'ask_phone' => filter_var($config['ask_phone'] ?? false, FILTER_VALIDATE_BOOLEAN),
         ];
     }
 
@@ -1384,6 +1389,13 @@ class Role extends Model implements MustVerifyEmail
     {
         // A venue schedule's booking form has no location to fill in: the venue is the location.
         if ($field === 'location' && $this->isVenue()) {
+            return false;
+        }
+
+        // A field the form does not ask for cannot be required. Keeps a stored `phone => true` inert
+        // while the owner has the phone field switched off, so an out-of-sync page or a stale config
+        // can never produce a requirement the visitor has no way to satisfy.
+        if ($field === 'phone' && ! $this->bookingFormAsksPhone()) {
             return false;
         }
 
@@ -1406,6 +1418,17 @@ class Role extends Model implements MustVerifyEmail
     public function bookingFormAllowsOnline(): bool
     {
         return $this->bookingFormConfig()['allow_online'];
+    }
+
+    /**
+     * Whether the booking form asks the visitor for a phone number at all.
+     *
+     * Asked of signed-in visitors too, unlike the name and email: the account supplies those, and a
+     * phone number is the one contact detail it does not have.
+     */
+    public function bookingFormAsksPhone(): bool
+    {
+        return $this->bookingFormConfig()['ask_phone'];
     }
 
     public function getRequireApprovalAttribute($value)

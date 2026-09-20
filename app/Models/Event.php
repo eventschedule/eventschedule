@@ -125,7 +125,11 @@ class Event extends Model
         'sponsor_logos',
     ];
 
-    protected $hidden = ['event_password'];
+    // contact_* are the booking-request submitter's own details and are owner-facing only. Defence
+    // in depth, not the guard: $hidden only reaches toArray()/toJson(), so it does NOT cover
+    // BackupService::exportEvent() or EventRepo::buildClonePayload(), which read attributes
+    // directly. Keeping the three columns out of $fillable is what actually protects them.
+    protected $hidden = ['event_password', 'contact_name', 'contact_email', 'contact_phone'];
 
     protected $casts = [
         'tickets_grandfathered_at' => 'datetime',

@@ -3888,6 +3888,8 @@ return [
     'booking_form_required_fields_help' => 'Visitors have to fill in the fields you tick before they can send the booking form.',
     'booking_allow_online' => 'Offer online events',
     'booking_allow_online_help' => 'Shows the Online option on the booking form. Turn it off if you only take in-person bookings.',
+    'booking_ask_phone_help' => 'Adds a phone number field to the booking form. The number is shown with the request on the Requests tab.',
+    'booking_contact_privacy_note' => 'The schedule will see the contact details you enter here so it can reply to your request. We never sell or share them.',
     'booking_location_required' => 'Please enter a venue or choose Online.',
     'booking_venue_required' => 'Please enter a venue.',
     'booking_time_invalid' => 'Please enter a valid time.',

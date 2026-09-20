@@ -3386,6 +3386,8 @@ return [
     'booking_form_required_fields_help' => 'Külastajad peavad märgitud väljad täitma, enne kui saavad broneerimise vormi saata.',
     'booking_allow_online' => 'Paku veebisündmusi',
     'booking_allow_online_help' => 'Näitab broneerimise vormil valikut „Internetis“. Lülitage see välja, kui võtate vastu ainult kohapealseid broneeringuid.',
+    'booking_ask_phone_help' => 'Lisab broneerimise vormile telefoninumbri välja. Number kuvatakse koos taotlusega vahekaardil „Taotlused“.',
+    'booking_contact_privacy_note' => 'Ajakava näeb siia sisestatud kontaktandmeid, et saaks teie taotlusele vastata. Me ei müü ega jaga neid kunagi.',
     'booking_location_required' => 'Sisestage toimumiskoht või valige „Internetis“.',
     'booking_venue_required' => 'Sisestage toimumiskoht.',
     'booking_time_invalid' => 'Sisestage kehtiv kellaaeg.',

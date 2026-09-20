@@ -3410,6 +3410,8 @@ return [
     'booking_form_required_fields_help' => 'Vizitatorii trebuie să completeze câmpurile bifate înainte de a putea trimite formularul de rezervare.',
     'booking_allow_online' => 'Permite evenimente online',
     'booking_allow_online_help' => 'Afișează opțiunea „Online” în formularul de rezervare. Dezactivați-o dacă acceptați doar rezervări fizice.',
+    'booking_ask_phone_help' => 'Adaugă un câmp pentru numărul de telefon în formularul de rezervare. Numărul este afișat împreună cu cererea în fila Cereri.',
+    'booking_contact_privacy_note' => 'Programul va vedea datele de contact pe care le introduci aici pentru a putea răspunde cererii tale. Nu le vindem și nu le partajăm niciodată.',
     'booking_location_required' => 'Introduceți o locație sau alegeți „Online”.',
     'booking_venue_required' => 'Introduceți o locație.',
     'booking_time_invalid' => 'Introduceți o oră validă.',

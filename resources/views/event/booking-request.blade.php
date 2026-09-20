@@ -9,6 +9,7 @@
   // Supplied by EventController::showBookingRequest(); the fallbacks keep the view renderable alone.
   $requiredFields ??= $role->bookingFormRequiredFields();
   $allowOnline ??= $role->bookingFormAllowsOnline();
+  $askPhone ??= $role->bookingFormAsksPhone();
   $offerAccount ??= ! auth()->check() && public_registration_enabled();
 
   // Built here rather than inline: @json() splits its argument on commas.
@@ -343,7 +344,12 @@
               </div>
             @else
               <div class="mb-4">
-                <x-input-label for="contact_name" :value="__('messages.name')" />
+                {{-- Starred like every other required control on this page. These two are always
+                     required of a guest, so the marker is unconditional. --}}
+                <x-input-label for="contact_name">
+                  {{ __('messages.name') }}
+                  <span aria-hidden="true"> *</span>
+                </x-input-label>
                 <x-text-input id="contact_name" name="contact_name" type="text" class="mt-1 block w-full" required
                   aria-describedby="error-contact_name error-account_name" />
                 <div id="error-contact_name" data-error-for="contact_name" class="{{ $errorAnchorClass }}"></div>
@@ -351,7 +357,10 @@
               </div>
 
               <div class="mb-4">
-                <x-input-label for="contact_email" :value="__('messages.email')" />
+                <x-input-label for="contact_email">
+                  {{ __('messages.email') }}
+                  <span aria-hidden="true"> *</span>
+                </x-input-label>
                 <x-text-input id="contact_email" name="contact_email" type="email" class="mt-1 block w-full" required
                   aria-describedby="error-contact_email error-account_email" />
                 <div id="error-contact_email" data-error-for="contact_email" class="{{ $errorAnchorClass }}"></div>
@@ -410,6 +419,38 @@
               {{-- The server's answer when the owner switched Require Account on after this page loaded. --}}
               <div id="error-create_account" data-error-for="create_account" class="mb-4 text-sm text-red-600 dark:text-red-400 hidden"></div>
             @endif
+
+            {{-- Asked of a signed-in visitor too, which is why it sits outside the block above: the
+                 account supplies a name and an email but never a phone number. aria-required and a
+                 starred label rather than a native required attribute, the contract every
+                 owner-configurable field on this page follows (see the note above event_name);
+                 defaultFieldErrors() has the matching check. --}}
+            @if ($askPhone)
+            <div class="mb-4">
+              <x-input-label for="contact_phone">
+                {{ __('messages.phone') }}
+                @if ($requiredFields['phone'])
+                <span aria-hidden="true"> *</span>
+                @endif
+              </x-input-label>
+              <x-text-input id="contact_phone" name="contact_phone" type="tel" class="mt-1 block w-full"
+                autocomplete="tel" maxlength="255" aria-describedby="error-contact_phone"
+                :aria-required="$requiredFields['phone'] ? 'true' : null" />
+              <div id="error-contact_phone" data-error-for="contact_phone" class="{{ $errorAnchorClass }}"></div>
+            </div>
+            @endif
+
+            {{-- This form takes a name, an email and possibly a phone from somebody with no account
+                 and hands them to the schedule, and said nothing about it. The Follow flow already
+                 discloses exactly this (partials/follow-consent-modal.blade.php). Rendered for
+                 signed-in visitors too: their account name and email are what gets stored.
+                 policy_url(), never marketing_url() - a selfhoster's visitors must not be pointed at
+                 our privacy policy. --}}
+            <p class="mb-4 text-xs text-gray-500 dark:text-gray-400">
+              {{ __('messages.booking_contact_privacy_note') }}
+              <a href="{{ policy_url('privacy') }}" target="_blank" rel="noopener"
+                 class="text-[var(--brand-blue)] hover:underline">{{ __('messages.privacy_policy') }}</a>
+            </p>
 
             {{-- The owner's terms for requests, shown before the visitor sends one. --}}
             @if (filled($role->request_terms))
@@ -725,6 +766,12 @@
 
       if (required.location && !bookingForm.isVenue && !locationGiven()) {
         errors.location = [bookingText.location];
+      }
+
+      // Element-guarded: a page cached while the owner still asked for a phone can carry
+      // required.phone in its payload without the input being on the page.
+      if (required.phone && byId('contact_phone') && byId('contact_phone').value.trim() === '') {
+        errors.contact_phone = [bookingText.required];
       }
 
       return errors;

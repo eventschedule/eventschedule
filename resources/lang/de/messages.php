@@ -3375,6 +3375,8 @@ return [
     'booking_form_required_fields_help' => 'Besucher müssen die angehakten Felder ausfüllen, bevor sie das Buchungsformular absenden können.',
     'booking_allow_online' => 'Online-Veranstaltungen anbieten',
     'booking_allow_online_help' => 'Zeigt die Option „Online“ im Buchungsformular an. Deaktivieren Sie sie, wenn Sie nur Buchungen vor Ort annehmen.',
+    'booking_ask_phone_help' => 'Fügt dem Buchungsformular ein Feld für die Telefonnummer hinzu. Die Nummer wird beim Antrag auf dem Tab „Anfragen“ angezeigt.',
+    'booking_contact_privacy_note' => 'Der Zeitplan sieht die Kontaktdaten, die Sie hier eingeben, um auf Ihre Anfrage antworten zu können. Wir verkaufen oder teilen sie niemals.',
     'booking_location_required' => 'Bitte geben Sie einen Veranstaltungsort ein oder wählen Sie „Online“.',
     'booking_venue_required' => 'Bitte geben Sie einen Veranstaltungsort ein.',
     'booking_time_invalid' => 'Bitte geben Sie eine gültige Uhrzeit ein.',

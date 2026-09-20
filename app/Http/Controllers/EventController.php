@@ -3288,6 +3288,7 @@ class EventController extends Controller
             'offerAccount' => ! auth()->check() && public_registration_enabled(),
             'requiredFields' => $role->bookingFormRequiredFields(),
             'allowOnline' => $role->bookingFormAllowsOnline(),
+            'askPhone' => $role->bookingFormAsksPhone(),
         ]);
     }
 
@@ -3320,6 +3321,7 @@ class EventController extends Controller
         $isGuest = ! auth()->check();
         $creatingAccount = $isGuest && $request->boolean('create_account');
         $allowOnline = $role->bookingFormAllowsOnline();
+        $askPhone = $role->bookingFormAsksPhone();
 
         // The default fields are optional unless the owner required them (Engagement > Requests).
         $presence = fn (string $field) => $role->bookingFormRequires($field) ? 'required' : 'nullable';
@@ -3344,6 +3346,13 @@ class EventController extends Controller
         // With Online switched off the form has no URL field and nothing posted here is used.
         if ($allowOnline) {
             $rules['event_url'] = ['nullable', 'url', 'max:500'];
+        }
+
+        // Outside the $isGuest branch below, deliberately: the form asks a signed-in visitor for a
+        // phone too, because their account supplies a name and an email but never this. A
+        // requirement the form cannot ask for is a requirement that cannot be met.
+        if ($askPhone) {
+            $rules['contact_phone'] = [$presence('phone'), 'string', 'max:255'];
         }
 
         if ($isGuest) {
@@ -3384,6 +3393,7 @@ class EventController extends Controller
             'event_url' => __('messages.event_url'),
             'contact_name' => __('messages.name'),
             'contact_email' => __('messages.email'),
+            'contact_phone' => __('messages.phone'),
             'password' => __('messages.password'),
             'terms' => __('messages.terms_of_service'),
         ], $customFieldAttributes));
@@ -3505,6 +3515,20 @@ class EventController extends Controller
         // request a stranger made. Ticking "create an account" logs the submitter in further up, so
         // they stay false: they really are the submitter.
         $isGuestSubmission = ! $user;
+
+        // The submitter's own details. Collected and then dropped before now, which left the owner a
+        // request they had no way to answer (issue #124). Written HERE, above the owner fallback
+        // below, because that line replaces $user with the schedule owner. A signed-in submitter is
+        // recorded the same way so the Requests card has one place to read from - the same reason an
+        // appointment booking copies name/email/phone onto its sale even for a signed-in guest.
+        // strip_tags on the phone only, matching AppointmentService::book(): it is the one value
+        // rendered inside an href (tel:), and the other two are echoed as text.
+        $event->contact_name = $isGuestSubmission ? $request->input('contact_name') : $user->name;
+        $event->contact_email = $isGuestSubmission ? $request->input('contact_email') : $user->email;
+        $event->contact_phone = $askPhone && $request->filled('contact_phone')
+            ? strip_tags(trim($request->input('contact_phone')))
+            : null;
+
         $user = $user ?: $role->user;
         $event->user_id = $user->id;
         $event->is_guest_submission = $isGuestSubmission;
