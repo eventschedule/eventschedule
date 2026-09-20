@@ -51,7 +51,8 @@
         </div>
 
         <div class="grid grid-cols-1 lg:grid-cols-2 gap-4">
-            {{-- Free-plan pressure: does the ticket allowance ever actually bind? --}}
+            {{-- Free schedules by peak monthly paid tickets. Paid selling is Pro/Enterprise now,
+                 so this reads as a conversion list: who has sold before and is sitting on free. --}}
             <div class="ap-card rounded-xl shadow p-6 flex flex-col">
                 <h3 class="text-lg font-medium text-gray-900 dark:text-white mb-1">@lang('messages.growth_free_pressure')</h3>
                 <p class="text-xs text-gray-500 dark:text-gray-400 mb-4">@lang('messages.growth_free_pressure_help')</p>
@@ -61,16 +62,16 @@
                 @endphp
                 <div class="space-y-2 mt-auto">
                     @foreach ($pressure['peak_month_paid_tickets'] as $bucket => $count)
-                        @php $atCap = $bucket === 'at_or_over_cap'; @endphp
+                        @php $sold = $bucket !== '0'; @endphp
                         <div>
                             <div class="flex items-center justify-between text-sm mb-1">
-                                <span class="font-medium {{ $atCap ? 'text-amber-600 dark:text-amber-400' : 'text-gray-800 dark:text-gray-200' }}">
-                                    {{ $atCap ? $pressure['ticket_cap'] . '+' : $bucket }}
+                                <span class="font-medium {{ $sold ? 'text-amber-600 dark:text-amber-400' : 'text-gray-800 dark:text-gray-200' }}">
+                                    {{ $bucket }}
                                 </span>
                                 <span class="text-gray-500 dark:text-gray-400">{{ number_format($count) }}</span>
                             </div>
                             <div class="h-2 rounded-full bg-gray-100 dark:bg-gray-700 overflow-hidden">
-                                <div class="h-full rounded-full {{ $atCap ? 'bg-amber-500' : 'bg-[var(--brand-button-bg)]' }}"
+                                <div class="h-full rounded-full {{ $sold ? 'bg-amber-500' : 'bg-[var(--brand-button-bg)]' }}"
                                      style="width: {{ $count > 0 ? max(2, round($count / $bucketMax * 100, 1)) : 0 }}%"></div>
                             </div>
                         </div>
@@ -78,7 +79,7 @@
                 </div>
 
                 <p class="text-xs text-gray-500 dark:text-gray-400 mt-4">
-                    {{ number_format($pressure['ever_hit_ticket_cap']) }} /
+                    {{ number_format($pressure['ever_sold_paid']) }} /
                     {{ number_format($pressure['free_schedules']) }}
                     &middot; @lang('messages.growth_free_pressure')
                 </p>

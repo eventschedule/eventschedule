@@ -624,7 +624,7 @@
         $faqs = [
             [
                 'q' => 'Is Event Schedule free for fitness and yoga instructors?',
-                'a' => 'Yes. Publishing your timetable, setting classes up as recurring events, free registration with a capacity limit per date, two-way Google, Outlook and CalDAV sync, the embeddable timetable, built-in analytics and newsletters to 10 recipients a month are all free forever, and so is selling up to 25 paid drop-ins a month. Scanning a QR code at the door is free on every plan too. Class passes, an unlimited number of paid visits and the live check-in dashboard are on the Pro plan at '.plan_price($proMonthly).' a month, and Event Schedule charges zero platform fees on what you sell, free plan included.',
+                'a' => 'Yes. Publishing your timetable, setting classes up as recurring events, free registration with a capacity limit per date, two-way Google, Outlook and CalDAV sync, the embeddable timetable, built-in analytics and newsletters to 10 recipients a month are all free forever, however many students sign up. Scanning a QR code at the door is free on every plan too. Charging for a drop-in is the Pro half, along with class passes and the live check-in dashboard, on the Pro plan at '.plan_price($proMonthly).' a month, and Event Schedule charges zero platform fees on what you sell, free plan included.',
             ],
             [
                 'q' => 'Can I schedule recurring weekly classes?',
@@ -640,7 +640,7 @@
             ],
             [
                 'q' => 'Can I sell class passes and drop-ins?',
-                'a' => 'Yes. Take the money through your own Stripe or PayPal account, or as cash at the desk, a payment link, Invoice Ninja, or Payfast if you charge in rand, on every plan. Single drop-ins sell on the free plan, up to 25 paid tickets a month, and the Pro plan at '.plan_price($proMonthly).' a month takes that ceiling off. Passes are the Pro half: alongside a single drop-in you can sell a visit pass with a set number of visits, a membership that is unlimited until it expires, a festival pass good for each covered class once, or a season pass covering every occurrence of one recurring class. Set how long the pass lasts, whether it covers the whole schedule, one sub-schedule or named classes, and how many people it admits at each class. Event Schedule charges zero platform fees on either plan, so past the processor\'s own fee the money is yours.',
+                'a' => 'Yes. Take the money through your own Stripe or PayPal account, or as cash at the desk, a payment link, Invoice Ninja, or Payfast if you charge in rand. Putting a price on a drop-in needs the Pro plan at '.plan_price($proMonthly).' a month, and so do passes: alongside a single drop-in you can sell a visit pass with a set number of visits, a membership that is unlimited until it expires, a festival pass good for each covered class once, or a season pass covering every occurrence of one recurring class. Set how long the pass lasts, whether it covers the whole schedule, one sub-schedule or named classes, and how many people it admits at each class. Event Schedule charges zero platform fees whatever the plan, so past the processor\'s own fee the money is yours.',
             ],
             [
                 'q' => 'What happens when somebody cancels at the last minute?',
@@ -963,7 +963,7 @@
                             </li>
                             <li class="flex gap-3" data-reveal>
                                 <svg aria-hidden="true" class="es-flow-lit mt-0.5 h-5 w-5 flex-none" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7" /></svg>
-                                <span>Passes are a Pro feature. The timetable they run against, and your first 25 paid drop-ins a month, are not.</span>
+                                <span>Passes are a Pro feature, as is charging for a drop-in. The timetable they run against, and free registration on it, are not.</span>
                             </li>
                         </ul>
                     </div>

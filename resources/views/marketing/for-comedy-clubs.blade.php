@@ -333,7 +333,7 @@
         $faqs = [
             [
                 'q' => 'Is Event Schedule free for comedy clubs?',
-                'a' => 'Running the room is free forever: the weekly nights as recurring events, date exceptions for the weeks you are dark, free registration with a capacity for open mics, booking requests from comics with an approved list for your regulars, sub-schedules, two-way calendar sync, an embeddable calendar and up to 10 newsletter emails a month, counted per recipient rather than per send. Selling is free too, up to 25 paid tickets a month, with the QR on each one scanned at the door for nothing. Pro at '.plan_price($proMonthly).' a month removes that ceiling and adds the live check-in dashboard, and Event Schedule charges zero platform fees on sales at any tier.',
+                'a' => 'Running the room is free forever: the weekly nights as recurring events, date exceptions for the weeks you are dark, free registration with a capacity for open mics, booking requests from comics with an approved list for your regulars, sub-schedules, two-way calendar sync, an embeddable calendar and up to 10 newsletter emails a month, counted per recipient rather than per send. Scanning the QR on a ticket at the door costs nothing either. Charging for a seat is Pro at '.plan_price($proMonthly).' a month, which also adds the live check-in dashboard, and Event Schedule charges zero platform fees on sales at any tier.',
             ],
             [
                 'q' => 'Can I put tickets on sale before I have booked the lineup?',
@@ -689,8 +689,8 @@
             </div>
 
             <div class="mt-8 text-center" data-reveal>
-                <span class="es-night-plan es-night-plan-free">Free</span>
-                <span class="es-night-muted ml-2 text-sm">Selling is free up to 25 paid tickets a month, taken through your own Stripe or <x-link href="{{ marketing_url('/paypal') }}">PayPal</x-link> account, a payment link or cash. A room that sells out twice a weekend passes that on its first Friday, and Pro at {{ plan_price($proMonthly) }} a month takes the ceiling off.</span>
+                <span class="es-night-plan es-night-plan-pro">Pro</span>
+                <span class="es-night-muted ml-2 text-sm">A ticket with a price on it is the Pro plan, at {{ plan_price($proMonthly) }} a month, taken through your own Stripe or <x-link href="{{ marketing_url('/paypal') }}">PayPal</x-link> account, a payment link or cash. A free open mic needs none of it: registration with a capacity is on every plan.</span>
             </div>
         </div>
     </section>

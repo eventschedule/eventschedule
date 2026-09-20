@@ -517,7 +517,7 @@
         $faqs = [
             [
                 'q' => 'Is Event Schedule free for teaching online classes?',
-                'a' => 'Yes. Setting a course up as a term, skipping holiday weeks, ending the recurrence after a set number of sessions, taking free registrations with a seat cap per session date, publishing one link, embedding your schedule, syncing two ways with Google, Outlook or CalDAV, sending newsletters to the students who follow you and reading your analytics are all on the free plan. Selling seats is free too, up to 25 paid tickets a month per schedule. Lifting that cap, plus class cards and custom checkout questions, is the Pro plan at '.plan_price($proMonthly).' a month, and Event Schedule charges zero platform fees on payments at any plan level.',
+                'a' => 'Yes. Setting a course up as a term, skipping holiday weeks, ending the recurrence after a set number of sessions, taking free registrations with a seat cap per session date, publishing one link, embedding your schedule, syncing two ways with Google, Outlook or CalDAV, sending newsletters to the students who follow you and reading your analytics are all on the free plan. Charging for a seat is not: paid ticket types, plus class cards and custom checkout questions, are the Pro plan at '.plan_price($proMonthly).' a month, and Event Schedule charges zero platform fees on payments at any plan level.',
             ],
             [
                 'q' => 'How do I set up a twelve-week term?',
@@ -537,7 +537,7 @@
             ],
             [
                 'q' => 'Can I charge for individual sessions?',
-                'a' => 'Yes, and selling is on the free plan: 25 paid tickets a month per schedule, unlimited on Pro. Create as many named ticket types as the course needs, each with its own price and quantity: a drop-in seat, a concession rate, a free trial session. Payments run through your own Stripe or PayPal account, or through Invoice Ninja, a payment link or cash, so you keep everything except the provider\'s own processing fee. Event Schedule takes nothing.',
+                'a' => 'Yes, on the Pro plan, which is what lets a seat carry a price. Create as many named ticket types as the course needs, each with its own price and quantity: a drop-in seat, a concession rate, a free trial session that stays free on any plan. Payments run through your own Stripe or PayPal account, or through Invoice Ninja, a payment link or cash, so you keep everything except the provider\'s own processing fee. Event Schedule takes nothing.',
             ],
             [
                 'q' => 'Do my students get an email when I add a class?',
@@ -922,7 +922,7 @@
                         </li>
                     </ul>
                     <p class="es-syl-muted mt-6 text-sm">
-                        Class cards are Pro, at {{ plan_price($proMonthly) }} a month. Publishing the term, taking free registrations and selling your first 25 paid tickets a month are not.
+                        Class cards are Pro, at {{ plan_price($proMonthly) }} a month, along with anything that carries a price. Publishing the term and taking free registrations are not.
                         <a href="{{ marketing_url('/features/ticketing') }}" class="es-syl-link font-semibold underline hover:no-underline">See what ticketing includes</a>.
                     </p>
                 </div>
@@ -978,7 +978,7 @@
                             @endforeach
                         </div>
                         <p class="es-syl-muted mt-4 border-t pt-3 text-xs es-syl-hair">
-                            Cards are sold next to single seats, not instead of them. Seats sell on the free plan up to 25 paid tickets a month, and Pro removes the cap. Payments run through your own Stripe or PayPal account, or Invoice Ninja, a payment link or cash, and Event Schedule takes <span class="es-syl-accent font-semibold">zero platform fees</span> at every plan level.
+                            Cards are sold next to single seats, not instead of them. Both need the Pro plan, because both carry a price; a free trial session does not. Payments run through your own Stripe or PayPal account, or Invoice Ninja, a payment link or cash, and Event Schedule takes <span class="es-syl-accent font-semibold">zero platform fees</span> at every plan level.
                         </p>
                     </div>
                 </div>
@@ -1324,7 +1324,7 @@
                         Write the term once. <span class="es-syl-lit">Teach all twelve.</span>
                     </h2>
                     <p class="mx-auto mb-10 max-w-2xl text-lg es-syl-dim">
-                        Publishing your term, capping the seats, taking free registrations and selling your first 25 paid tickets a month are free forever. Unlimited sales and class cards are {{ plan_price($proMonthly) }} a month, and nothing is taken off what you charge.
+                        Publishing your term, capping the seats and taking free registrations are free forever, with no monthly ceiling on any of them. Charging for a seat, and class cards, are {{ plan_price($proMonthly) }} a month, and nothing is taken off what you charge.
                     </p>
 
                     <div class="mx-auto mb-10 max-w-md" aria-hidden="true">

@@ -36,14 +36,14 @@
 
         // What the one tab does natively, with the tier that carries it. Each line
         // is checked against the code rather than a summary: RSVP with a capacity
-        // limit is free, selling paid tickets is free to Role::ticketSaleLimit()
-        // (25 a month), scanning them has no plan check at all, and the LIVE
-        // check-in dashboard is the Pro half.
+        // limit is free and uncapped, selling a ticket that carries a PRICE is
+        // Pro (Event::canSellPaidTickets()), scanning one has no plan check at
+        // all, and the LIVE check-in dashboard is the Pro half.
         $inRows = [
             ['A public page for every event, and a calendar of all of them', 'Free'],
             ['Free RSVP with a capacity limit per date', 'Free'],
-            ['Paid tickets, 25 a month, each one scanned at the door', 'Free'],
-            ['Unlimited ticket sales and the live check-in dashboard', 'Pro'],
+            ['A QR code on every ticket, scanned at the door', 'Free'],
+            ['Tickets that carry a price, and the live check-in dashboard', 'Pro'],
             ['Newsletters to the people who follow your schedule', 'Free'],
         ];
 
@@ -101,7 +101,7 @@
                 "name": "Free",
                 "price": "0",
                 "priceCurrency": "{{ platform_currency() }}",
-                "description": "Unlimited events and schedules, public event pages, Google, Outlook and CalDAV calendar sync, free RSVP with capacity limits, 25 paid tickets a month with QR codes scanned at the door, payment by Stripe, PayPal, Payfast, Invoice Ninja, a payment link or cash, refunds from the Sales page, event graphics, embeddable calendar, built-in analytics, AI event parsing, and newsletters to 10 recipients a month. One team member.",
+                "description": "Unlimited events and schedules, public event pages, Google, Outlook and CalDAV calendar sync, unlimited free RSVP with capacity limits, QR codes scanned at the door, every payment method (Stripe, PayPal, Payfast, Invoice Ninja, a payment link or cash), refunds from the Sales page, event graphics, embeddable calendar, built-in analytics, AI event parsing, and newsletters to 10 recipients a month. One team member.",
                 "availability": "https://schema.org/InStock"
             },
             {
@@ -109,7 +109,7 @@
                 "name": "Pro",
                 "price": "{{ number_format($proMonthly, 2) }}",
                 "priceCurrency": "{{ platform_currency() }}",
-                "description": "Everything in Free plus unlimited ticket sales, the live check-in dashboard, ticket waitlist, promo codes, custom fields, sale notifications, sales CSV export, no Event Schedule branding, custom CSS, the embeddable ticket widget, REST API and webhooks, and newsletters to 100 recipients a month.",
+                "description": "Everything in Free plus tickets that carry a price, the live check-in dashboard, ticket waitlist, promo codes, custom fields, sale notifications, sales CSV export, no Event Schedule branding, custom CSS, the embeddable ticket widget, REST API and webhooks, and newsletters to 100 recipients a month.",
                 "availability": "https://schema.org/InStock"
             },
             {
@@ -897,7 +897,7 @@
                             <span class="es-swap-plan">{{ plan_price(0) }}</span>
                         </div>
                         <p class="es-swap-band-muted text-sm leading-relaxed">
-                            Unlimited events and schedules. Public event pages and a shareable calendar. Two-way Google, Outlook and CalDAV sync. Free RSVP with a capacity limit, and 25 paid tickets a month, scanned at the door. Event graphics, embeddable calendar, built-in analytics, AI event parsing, and newsletters to 10 recipients a month.
+                            Unlimited events and schedules. Public event pages and a shareable calendar. Two-way Google, Outlook and CalDAV sync. Free RSVP with a capacity limit and no monthly ceiling, scanned at the door. Event graphics, embeddable calendar, built-in analytics, AI event parsing, and newsletters to 10 recipients a month.
                         </p>
                     </div>
                     <div class="es-swap-card p-6" data-reveal="panel">
@@ -906,7 +906,7 @@
                             <span class="es-swap-plan es-swap-plan-pro">{{ plan_price($proMonthly) }} a month</span>
                         </div>
                         <p class="es-swap-band-muted text-sm leading-relaxed">
-                            Unlimited ticket sales and the live check-in dashboard. Custom fields on the form, ticket waitlist, promo codes, sales export. The embeddable ticket widget, the REST API and webhooks. Newsletters to 100 recipients a month.
+                            Tickets that carry a price, and the live check-in dashboard. Custom fields on the form, ticket waitlist, promo codes, sales export. The embeddable ticket widget, the REST API and webhooks. Newsletters to 100 recipients a month.
                         </p>
                     </div>
                     <div class="es-swap-card p-6" data-reveal="panel">

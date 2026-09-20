@@ -49,7 +49,7 @@
 
         <div class="doc-callout doc-callout-info">
             <div class="doc-callout-title">What each tab needs</div>
-            <p>Web Analytics is available on every plan and starts collecting as soon as someone visits a schedule page. The Revenue tab fills in once you have a completed sale, a boost campaign or a newsletter send in the range, and selling tickets is free up to 25 paid tickets per calendar month per schedule (Pro removes that cap). The Check-Ins tab fills in once you have sold tickets for an event in the range, but its attendance figures only become meaningful once you scan tickets at the door. Scanning itself is free on every plan; the live check-in dashboard with its running count is the Pro half.</p>
+            <p>Web Analytics is available on every plan and starts collecting as soon as someone visits a schedule page. The Revenue tab fills in once you have a completed sale, a boost campaign or a newsletter send in the range, and selling a ticket that carries a price is a Pro feature (free registration and ticket types priced at zero are unlimited on every plan, but neither brings in revenue to report). The Check-Ins tab fills in once you have sold tickets for an event in the range, but its attendance figures only become meaningful once you scan tickets at the door. Scanning itself is free on every plan; the live check-in dashboard with its running count is the Pro half.</p>
         </div>
 
         <div class="doc-callout doc-callout-tip">
@@ -239,7 +239,7 @@
 
         <div class="doc-callout doc-callout-info">
             <div class="doc-callout-title">Note</div>
-            <p><a href="{{ route('marketing.docs.tickets') }}" class="doc-link">Selling tickets</a> is free up to 25 paid tickets per calendar month per schedule, so the Revenue tab works on the Free plan; Pro removes the monthly cap. The Boost Funnel below is the one part of this tab that needs Pro, because boost campaigns are a Pro feature. Paid <a href="{{ route('marketing.docs.appointments') }}" class="doc-link">appointment bookings</a> are sales too, so they count in the revenue figures here alongside tickets. They are left out of the conversion rate, because a booking is not made from an event page.</p>
+            <p><a href="{{ route('marketing.docs.tickets') }}" class="doc-link">Selling a ticket</a> that carries a price is a Pro feature, so ticket revenue appears once you are on Pro or Enterprise. The tab itself is on every plan and is not empty on Free: a paid appointment booking is a sale and counts here. Free registration and ticket types priced at zero stay unlimited on the Free plan, and neither produces revenue to report. The Boost Funnel below also needs Pro, because boost campaigns are a Pro feature. Paid <a href="{{ route('marketing.docs.appointments') }}" class="doc-link">appointment bookings</a> are sales too, so they count in the revenue figures here alongside tickets. They are left out of the conversion rate, because a booking is not made from an event page.</p>
         </div>
 
         <h3 id="revenue-stats" class="doc-subheading">Stats Cards</h3>

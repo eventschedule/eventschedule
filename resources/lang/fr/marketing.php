@@ -2,10 +2,10 @@
 
 return [
     'home_title' => 'Event Schedule - Calendrier d\'événements, billetterie et réservations',
-    'home_description' => 'Publiez vos événements sur une seule page de calendrier, vendez des billets sans frais de plateforme et acceptez des réservations de rendez-vous. Le plan gratuit vend 25 billets payants par mois.',
+    'home_description' => 'Publiez vos événements sur une page de calendrier, acceptez des inscriptions gratuites sans limite et des rendez-vous. Les billets payants sont sur Pro.',
 
     'pricing_title' => 'Tarifs Event Schedule : plan gratuit, zéro frais de plateforme',
-    'pricing_description' => 'Gratuit : événements illimités et 25 billets payants par mois. Pro lève la limite, Enterprise ajoute le placement numéroté. Zéro frais de plateforme.',
+    'pricing_description' => 'Gratuit : événements et inscriptions illimités. Pro ajoute la vente de billets payants, Enterprise le placement numéroté. Zéro frais de plateforme.',
 
     'features_title' => 'Fonctionnalités de gestion d\'événements, sans frais de plateforme - Event Schedule',
     'features_description' => 'Toutes les fonctionnalités en cinq chapitres : billets via Stripe ou PayPal sans frais de plateforme, synchronisation bidirectionnelle du calendrier, newsletters, import par IA et statistiques.',

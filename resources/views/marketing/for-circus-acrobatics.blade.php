@@ -618,7 +618,7 @@
                             <div>
                                 <h3 class="mb-4 text-2xl font-black tracking-tight text-gray-900 dark:text-white lg:text-3xl">{{ $circusActs[4]['title'] }}</h3>
                                 <p class="mb-4 text-lg text-gray-600 dark:text-gray-400">{{ $circusActs[4]['desc'] }}</p>
-                                <p class="text-gray-600 dark:text-gray-400"><a href="{{ marketing_url('/stripe') }}" class="es-circus-link font-medium hover:underline">Stripe</a> or <a href="{{ marketing_url('/paypal') }}" class="es-circus-link font-medium hover:underline">PayPal</a> pays you directly, or take a payment link or cash at the gate. The free plan covers 25 paid tickets a month per schedule; Pro lifts the cap and adds promo codes for your regulars and waitlists for the sold-out nights. Announce a show before it goes on sale, switch on the "Notify me" card, and fans can leave just an email address to hear when it does.</p>
+                                <p class="text-gray-600 dark:text-gray-400"><a href="{{ marketing_url('/stripe') }}" class="es-circus-link font-medium hover:underline">Stripe</a> or <a href="{{ marketing_url('/paypal') }}" class="es-circus-link font-medium hover:underline">PayPal</a> pays you directly, or take a payment link or cash at the gate. Charging for a seat is a Pro feature, which also brings promo codes for your regulars and waitlists for the sold-out nights. Announce a show before it goes on sale, switch on the "Notify me" card, and fans can leave just an email address to hear when it does.</p>
                             </div>
                             <div aria-hidden="true">
                                 <div class="rounded-2xl border border-gray-200 bg-gray-50 p-5 dark:border-white/10 dark:bg-black/40">
@@ -1134,7 +1134,7 @@
                 $faqs = [
                     [
                         'q' => 'Is Event Schedule free for circus performers?',
-                        'a' => 'Yes, for most of it. Sharing your performance schedule, sub-schedules, two-way calendar sync, an embeddable calendar, free registration with a capacity, a calendar feed fans subscribe to, the booking request form and one bookable appointment type are all free forever. Selling paid tickets is free up to 25 a month per schedule, and Pro lifts that cap. Newsletters are free up to 10 recipients a month, counted per recipient rather than per send, with 100 on Pro and 1,000 on Enterprise.',
+                        'a' => 'Yes, for most of it. Sharing your performance schedule, sub-schedules, two-way calendar sync, an embeddable calendar, free registration with a capacity, a calendar feed fans subscribe to, the booking request form and one bookable appointment type are all free forever, with no ceiling on how many people register. Putting a price on a ticket is the part that needs Pro. Newsletters are free up to 10 recipients a month, counted per recipient rather than per send, with 100 on Pro and 1,000 on Enterprise.',
                     ],
                     [
                         'q' => 'Can I manage tour dates and local shows in one schedule?',
@@ -1146,7 +1146,7 @@
                     ],
                     [
                         'q' => 'Can I sell tickets to my shows?',
-                        'a' => 'Yes, and the first 25 paid tickets a month are on the free plan; Pro lifts that ceiling. Take payment through Stripe or PayPal straight to your own account, or through Payfast (rand only), Invoice Ninja, a payment link or cash, with as many ticket types as the night needs, each at its own fixed price and its own inventory per date. Zero platform fees on every plan, so the only deduction is your payment provider\'s own. If a show is rained off, a Stripe or PayPal sale can be refunded in full or in part from the Sales page, and the money goes back through the provider. A tier like Ringside is a ticket type sold by the number; a seat map the audience picks from is drawn on a venue schedule on Enterprise, so a troupe with its own big top would set that up as a venue.',
+                        'a' => 'Yes, on Pro, which is what opens paid checkout. Take payment through Stripe or PayPal straight to your own account, or through Payfast (rand only), Invoice Ninja, a payment link or cash, with as many ticket types as the night needs, each at its own fixed price and its own inventory per date. Zero platform fees on every plan, so the only deduction is your payment provider\'s own. If a show is rained off, a Stripe or PayPal sale can be refunded in full or in part from the Sales page, and the money goes back through the provider. A tier like Ringside is a ticket type sold by the number; a seat map the audience picks from is drawn on a venue schedule on Enterprise, so a troupe with its own big top would set that up as a venue.',
                     ],
                     [
                         'q' => 'Can I sell class passes for my aerial or acro classes?',

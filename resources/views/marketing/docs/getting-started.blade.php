@@ -225,7 +225,7 @@
 
         <div class="doc-callout doc-callout-plan">
             <div class="doc-callout-title">What the free plan leaves out</div>
-            <p>Almost nothing on this page needs a paid plan. The free plan runs unlimited events, syncs calendars, takes RSVPs, embeds your calendar, makes event graphics and even sells tickets through Stripe, PayPal or another payment method with no platform fee, up to 25 paid tickets a month. Pro removes that cap for unlimited ticket sales and adds the live check-in dashboard (scanning tickets at the door is free on every plan), custom fields, custom CSS and removing the Event Schedule branding. Enterprise adds custom domains, extra team members, availability and the AI generation features. Compare them on the <a href="{{ route('marketing.pricing') }}" class="doc-link">pricing page</a>. A <a href="{{ route('marketing.docs.selfhost') }}" class="doc-link">selfhosted</a> install resolves to Enterprise, so nothing is held back there.</p>
+            <p>Almost nothing on this page needs a paid plan. The free plan runs unlimited events, syncs calendars, takes unlimited RSVPs and free registrations, embeds your calendar and makes event graphics. Putting a price on a ticket is what needs Pro, and Pro also adds the live check-in dashboard (scanning tickets at the door is free on every plan), custom fields, custom CSS and removing the Event Schedule branding. There is no platform fee on any plan, and money always goes to your own Stripe, PayPal or other account. Enterprise adds custom domains, extra team members, availability and the AI generation features. Compare them on the <a href="{{ route('marketing.pricing') }}" class="doc-link">pricing page</a>. A <a href="{{ route('marketing.docs.selfhost') }}" class="doc-link">selfhosted</a> install resolves to Enterprise, so nothing is held back there.</p>
         </div>
     </section>
 
@@ -257,7 +257,7 @@
             </div>
             <div class="doc-field">
                 <h4 class="font-semibold text-gray-900 dark:text-white mb-2">Is Event Schedule free?</h4>
-                <p class="text-sm text-gray-500 dark:text-gray-400">Yes, with no time limit and no credit card. The free plan covers unlimited events, your own schedule URL, calendar sync, analytics, RSVP with capacity limits, embedding your calendar, one appointment type, selling up to 25 paid tickets a month through Stripe, PayPal or another payment method with no platform fee, and 10 newsletter emails a month (each recipient counts as one email, so one send to 100 followers uses 100). Pro is {{ plan_price($proMonthly) }} a month and removes the ticket cap, Enterprise is {{ plan_price($entMonthly) }} a month for custom domains and team features, and both start with a 7-day free trial.</p>
+                <p class="text-sm text-gray-500 dark:text-gray-400">Yes, with no time limit and no credit card. The free plan covers unlimited events, your own schedule URL, calendar sync, analytics, unlimited RSVP with capacity limits, embedding your calendar, one appointment type, and 10 newsletter emails a month (each recipient counts as one email, so one send to 100 followers uses 100). Selling a ticket that carries a price is a Pro feature: Pro is {{ plan_price($proMonthly) }} a month, Enterprise is {{ plan_price($entMonthly) }} a month for custom domains and team features, and both start with a 7-day free trial. There is no platform fee on any plan.</p>
             </div>
             <div class="doc-field">
                 <h4 class="font-semibold text-gray-900 dark:text-white mb-2">How do I get paid for tickets?</h4>
@@ -293,7 +293,7 @@
             <li><a href="{{ route('marketing.docs.creating_schedules') }}" class="doc-link">Configure your schedule</a> - Settings, sub-schedules, event requests, and calendar sync</li>
             <li><a href="{{ route('marketing.docs.schedule_styling') }}" class="doc-link">Style your schedule</a> - Colors, fonts, headers, and backgrounds</li>
             <li><a href="{{ route('marketing.docs.sharing') }}" class="doc-link">Share your schedule</a> - Embed it on your website and post it to social media</li>
-            <li><a href="{{ route('marketing.docs.tickets') }}" class="doc-link">Set up ticketing</a> - Sell tickets through Stripe, PayPal or another payment method with no platform fee, free up to 25 paid tickets a month</li>
+            <li><a href="{{ route('marketing.docs.tickets') }}" class="doc-link">Set up ticketing</a> - Sell tickets through Stripe, PayPal or another payment method with no platform fee; a ticket that carries a price needs Pro</li>
             <li><a href="{{ route('marketing.docs.account_settings') }}" class="doc-link">Account settings</a> - Your profile, password, payments, and API access</li>
         </ul>
     </section>
@@ -342,7 +342,7 @@
                     "name": "Is Event Schedule free?",
                     "acceptedAnswer": {
                         "@type": "Answer",
-                        "text": "Yes, with no time limit and no credit card. The free plan covers unlimited events, your own schedule URL, calendar sync, analytics, RSVP with capacity limits, embedding your calendar, one appointment type, selling up to 25 paid tickets a month through Stripe, PayPal or another payment method with no platform fee, and 10 newsletter emails a month (each recipient counts as one email). Pro is {{ plan_price($proMonthly) }} a month and removes the ticket cap, Enterprise is {{ plan_price($entMonthly) }} a month for custom domains and team features, and both start with a 7-day free trial."
+                        "text": "Yes, with no time limit and no credit card. The free plan covers unlimited events, your own schedule URL, calendar sync, analytics, unlimited RSVP with capacity limits, embedding your calendar, one appointment type, and 10 newsletter emails a month (each recipient counts as one email). Selling a ticket that carries a price is a Pro feature: Pro is {{ plan_price($proMonthly) }} a month, Enterprise is {{ plan_price($entMonthly) }} a month for custom domains and team features, and both start with a 7-day free trial. There is no platform fee on any plan."
                     }
                 },
                 {

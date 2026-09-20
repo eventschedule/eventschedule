@@ -187,18 +187,19 @@ class Ticket extends Model
     }
 
     /**
-     * Whether this specific ticket may be sold right now, given the schedule's plan allowance.
+     * Whether this specific ticket may be sold right now, given the schedule's plan.
      *
      * Event::canSellTickets() answers "is this event selling at all"; this answers it per row, which
-     * an event mixing free and paid tiers needs: at the cap the $0 tier keeps selling while the
+     * an event mixing free and paid tiers needs: on a free plan the $0 tier keeps selling while the
      * paid ones stop, instead of the guest being shown a paid tier that only fails at submit.
      *
-     * Add-ons are a Pro feature in their own right, so they follow the plan rather than the
-     * allowance - a lapsed Pro schedule keeps its add-on rows but stops selling them.
-     *
-     * Pass $date for a recurring event, or the grace window resolves against the recurrence anchor.
+     * Add-ons are a Pro feature in their own right, but they resolve through the SAME schedule the
+     * paid-ticket gate uses. Event::isPro() ORs over every attached role without filtering the
+     * is_accepted pivot, so keying add-ons on it let a free creator attach any Pro venue and sell an
+     * arbitrarily priced add-on beside a $0 admission row - the exact hole canSellPaidTickets()
+     * exists to close.
      */
-    public function isSellable(?string $date = null): bool
+    public function isSellable(): bool
     {
         $event = $this->event;
 
@@ -207,15 +208,15 @@ class Ticket extends Model
         }
 
         if ($this->is_addon) {
-            return $event->isPro();
+            return $event->canSellAddons();
         }
 
-        // Free registration is unlimited on every plan and never consumes the paid allowance.
+        // Free registration is unlimited on every plan and never consults the paid-ticket gate.
         if ((float) $this->price <= 0) {
             return true;
         }
 
-        return $event->paidTicketAllowanceAvailable($date);
+        return $event->canSellPaidTickets();
     }
 
     /**

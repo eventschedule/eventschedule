@@ -390,14 +390,25 @@ class ApiSaleController extends Controller
             }
         }
 
-        // Verify event has tickets enabled and is Pro
-        if (! $event->canSellTickets()) {
-            return response()->json(['error' => 'Event does not have tickets enabled or is not a Pro account'], 422);
-        }
-
         // Require event_date for recurring events
         if ($event->days_of_week && ! $request->event_date) {
             return response()->json(['error' => 'The event_date parameter is required for recurring events'], 422);
+        }
+
+        // Determine event_date. Resolved BEFORE the gate below rather than after the ticket loop,
+        // because canSellTickets() resolves the past-occurrence check against it; without it a
+        // recurring event answers for its recurrence anchor, which is in the past.
+        $eventDate = $request->event_date;
+        if (! $eventDate) {
+            if (! $event->starts_at) {
+                return response()->json(['error' => 'Event has no start date. Please provide event_date parameter.'], 422);
+            }
+            $eventDate = $event->saleEventDateFromStartsAt();
+        }
+
+        // Verify event has tickets enabled and may sell
+        if (! $event->canSellTickets($eventDate)) {
+            return response()->json(['error' => 'Event does not have tickets enabled or is not a Pro account'], 422);
         }
 
         // Validate tickets - support both ticket ID and ticket type
@@ -430,16 +441,40 @@ class ApiSaleController extends Controller
                 return response()->json(['error' => 'Ticket sales have not started'], 422);
             }
 
+            // Per-row plan gate. canSellTickets() above answers "is this event selling at all",
+            // which stays true while a $0 row survives; this refuses the PAID rows a free schedule
+            // may not sell. The web path does the same at TicketController::checkout(). Without it
+            // a free schedule adds one $0 row and sells priced tickets through the API unchecked.
+            if (! $ticket->isSellable()) {
+                return response()->json(['error' => 'Ticket is not available for sale'], 422);
+            }
+
             $ticketIds[$ticket->id] = $quantity;
         }
 
-        // Determine event_date
-        $eventDate = $request->event_date;
-        if (! $eventDate) {
-            if (! $event->starts_at) {
-                return response()->json(['error' => 'Event has no start date. Please provide event_date parameter.'], 422);
+        // ADD-ONS ARE A SEPARATE PASS, and must be: $event->tickets is scoped
+        // where('is_addon', false), so an add-on never appears in the loop above. Add-ons are a Pro
+        // feature resolved through the creator schedule (Event::canSellAddons()), and the persist
+        // loop further down does not gate them, so without this a free schedule could sell an
+        // arbitrarily priced add-on beside a $0 admission row. Mirrors TicketController::checkout().
+        foreach ((array) $request->input('addons', []) as $addonId => $addonQty) {
+            if ((int) $addonQty < 1) {
+                continue;
             }
-            $eventDate = $event->saleEventDateFromStartsAt();
+
+            try {
+                $addon = $event->addons->firstWhere('id', UrlUtils::decodeId($addonId));
+            } catch (\Exception $e) {
+                $addon = null;
+            }
+
+            if (! $addon) {
+                return response()->json(['error' => 'Add-on not found: '.$addonId], 422);
+            }
+
+            if (! $addon->setRelation('event', $event)->isSellable()) {
+                return response()->json(['error' => 'Add-on is not available for sale'], 422);
+            }
         }
 
         // Check if recurring event occurrence is in the past. Resolve it in the venue's

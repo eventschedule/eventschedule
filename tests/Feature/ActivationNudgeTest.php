@@ -128,6 +128,38 @@ class ActivationNudgeTest extends TestCase
         $this->assertNothingSent();
     }
 
+    /**
+     * Both selling nudges are Pro-gated now that paid selling is.
+     *
+     * Every other fixture in this file comes from createRole(), which defaults to enterprise, so
+     * without these two cases the gate is never evaluated in the deny direction and the whole file
+     * would stay green with the gate removed. Mailing a free schedule "you can sell from this page"
+     * is an upsell wearing an activation email's clothes: the thing it asks them to set up will not
+     * sell until they pay.
+     */
+    public function test_it_does_not_nudge_a_free_schedule_to_add_a_ticket_type(): void
+    {
+        $role = $this->createFreeRole($this->owner());
+        $this->createEvent($role, ['starts_at' => now()->addDays(10)->format('Y-m-d H:i:s')]);
+
+        $this->assertFalse($role->fresh()->isPro(), 'sanity check: the fixture is not Pro');
+
+        $this->nudge('no_ticket_type');
+
+        $this->assertNothingSent();
+    }
+
+    public function test_it_does_not_nudge_a_free_schedule_to_connect_a_gateway(): void
+    {
+        $role = $this->createFreeRole($this->owner());
+        $event = $this->createEvent($role, ['starts_at' => now()->addDays(10)->format('Y-m-d H:i:s')]);
+        $this->createTicket($event, ['price' => 20, 'quantity' => 50]);
+
+        $this->nudge('no_gateway');
+
+        $this->assertNothingSent();
+    }
+
     public function test_it_nudges_a_schedule_with_paid_tickets_and_no_gateway(): void
     {
         $role = $this->createRole($this->owner(['stripe_account_id' => null]));

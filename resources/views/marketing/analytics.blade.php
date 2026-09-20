@@ -532,7 +532,7 @@
         $faqs = [
             [
                 'q' => 'Is analytics included on the free plan?',
-                'a' => 'Yes. Built-in analytics is free on every plan, including selfhosted. Views by day, week or month, the device split, all eight traffic-source buckets, referrer domains, UTM values, country-level locations, link clicks, top events and the per-schedule split are all on the free plan. The Revenue and Check-ins tabs only need ticket sales, not a plan: selling is free up to 25 paid tickets a month per schedule and scanning them at the door is free too, so both tabs fill in on the free plan. Pro at '.plan_price($proMonthly).' a month takes that cap off. Zero platform fees on every plan, free included.',
+                'a' => 'Yes. Built-in analytics is free on every plan, including selfhosted. Views by day, week or month, the device split, all eight traffic-source buckets, referrer domains, UTM values, country-level locations, link clicks, top events and the per-schedule split are all on the free plan. The Revenue and Check-ins tabs are there on the free plan too, and scanning at the door is free on every plan, so the Check-ins tab fills in whatever you pay. Revenue needs money to have changed hands, and putting a price on a ticket is a Pro feature at '.plan_price($proMonthly).' a month. Zero platform fees on every plan, free included.',
             ],
             [
                 'q' => 'Do you send my visitors to Google Analytics or any other tracker?',
@@ -985,7 +985,7 @@
                         Two more tabs, once you are <span class="es-dash-lit">selling tickets.</span>
                     </h2>
                     <p class="es-dash-fmuted mt-5 text-lg" data-reveal style="--reveal-delay: 0.15s;">
-                        Views are the free half of the story. Sales and arrivals are the other half. Both tabs are there on every plan, and both start counting on the free plan, which sells 25 paid tickets a month per schedule and scans them at the door for nothing. Pro at {{ plan_price($proMonthly) }} a month takes the cap off and adds the promo codes and boosts two of the rows below come from.
+                        Views are the free half of the story. Sales and arrivals are the other half. Both tabs are there on every plan, and door scanning fills the Check-ins one for nothing. Revenue needs money to have moved. A paid appointment booking counts on any plan; ticket revenue starts once you are on Pro at {{ plan_price($proMonthly) }} a month, which is what opens paid ticketing and brings the promo codes and boosts two of the rows below come from.
                     </p>
                 </div>
 
@@ -1038,7 +1038,7 @@
                         @endforeach
                     </div>
                     <p class="es-dash-dim mt-4 es-dash-fine">
-                        Sample send. Newsletters themselves are free, at ten recipients a month; the sales row at the bottom needs tickets on sale, and selling starts free too.
+                        Sample send. Newsletters themselves are free, at ten recipients a month; the sales row at the bottom needs priced tickets on sale, which is the Pro part.
                     </p>
                 </div>
 

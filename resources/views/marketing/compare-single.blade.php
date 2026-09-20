@@ -100,12 +100,13 @@
         // for the events (Role::aiParseDailyLimit(): 50 a day on Free and Pro
         // alike, 10 during a Pro trial, 100 on Enterprise),
         // NewsletterController::importStore for the list (10,000 rows, no plan
-        // gate), and Role::ticketSaleLimit() for what selling costs on day one.
+        // gate), and Event::canSellPaidTickets() for what selling costs: a
+        // ticket that carries a price is Pro, free registration never is.
         $switchSteps = $switch_steps ?? [
             ['title' => 'Create your schedule', 'description' => 'Free, no card, and it has its own address the moment it exists. Nothing has to move before it is useful.'],
             ['title' => 'Bring the events across', 'description' => 'Paste a listing or upload the flyer and the parser fills in the name, date, time, venue and description for you to check. Fifty a day on the free and Pro plans (ten during a Pro trial), a hundred on Enterprise.'],
             ['title' => 'Bring your list across', 'description' => 'Export the addresses you already have and paste them in or upload a CSV, up to ten thousand rows, on any plan. What the newsletter allowance counts is sending to them, not holding them.'],
-            ['title' => 'Connect Stripe or PayPal and sell', 'description' => 'Your own Stripe or PayPal account, so the money settles into it rather than into ours. Zero platform fees, the first 25 paid tickets a month are on the free plan, and refunds go back through the same account.'],
+            ['title' => 'Connect Stripe or PayPal and sell', 'description' => 'Your own Stripe or PayPal account, so the money settles into it rather than into ours. Zero platform fees on every plan, a ticket with a price on it is Pro, and refunds go back through the same account.'],
         ];
         // Twelve of the sixteen competitors fall through to these, so they are
         // written as facts with their tier attached rather than as adjectives.
@@ -115,7 +116,7 @@
             ?? 'Three things decide it against '.$name.': the money is yours, the code is public, and the calendar keeps itself in step with the one you already use.';
         $whyChoosePoints = $why_choose['points'] ?? [
             'Zero platform fees on ticket sales, at every plan level, into your own Stripe or PayPal account',
-            'Selling starts on the free plan, at 25 paid tickets a month, each one scanned at the door',
+            'Free registration with no monthly ceiling, and a ticket scanned at the door on every plan',
             'Refunds from the Sales page, in full or in part, that send the money back through Stripe or PayPal',
             'One checkout for tickets to several of your events, and an interest list that emails people when tickets go on sale',
             'Passes, gift cards and installment payments on Pro, and allocated seating for venues on Enterprise',
@@ -184,7 +185,7 @@
                 "name": "Free",
                 "price": "0",
                 "priceCurrency": "{{ platform_currency() }}",
-                "description": "Unlimited events, two-way Google, Outlook and CalDAV sync, newsletters, RSVP with capacity, 25 paid tickets a month through Stripe or PayPal with QR scanning at the door, refunds, the multi-event cart, the interest list, a live calendar feed, one bookable appointment type, event graphics, the embeddable calendar, and fan engagement features.",
+                "description": "Unlimited events, two-way Google, Outlook and CalDAV sync, newsletters, unlimited free registration and RSVP with capacity, QR scanning at the door, refunds, the multi-event cart, the interest list, a live calendar feed, one bookable appointment type, event graphics, the embeddable calendar, and fan engagement features.",
                 "availability": "https://schema.org/InStock"
             },
             {
@@ -192,7 +193,7 @@
                 "name": "Pro",
                 "price": "{{ number_format($proMonthly, 2) }}",
                 "priceCurrency": "{{ platform_currency() }}",
-                "description": "Everything in Free plus unlimited ticket sales, the live check-in dashboard, ticket waitlist, promo codes, add-ons, gift cards, passes, installment payments, sale notifications, sales CSV export, remove branding, custom CSS, REST API, and webhooks.",
+                "description": "Everything in Free plus selling tickets that carry a price, the live check-in dashboard, ticket waitlist, promo codes, add-ons, gift cards, passes, installment payments, sale notifications, sales CSV export, remove branding, custom CSS, REST API, and webhooks.",
                 "availability": "https://schema.org/InStock"
             },
             {

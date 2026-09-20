@@ -311,7 +311,7 @@
                         <p class="es-head-tag mb-3">Every plan, including Free</p>
                         <h3 class="es-head-ink text-lg font-bold">Scan the ticket</h3>
                         <p class="es-head-muted mt-2 text-sm leading-relaxed">
-                            Open Sales on a phone and tap Scan Ticket. It reads the QR on any ticket, any free registration, a wallet pass and a subscription pass alike. Each ticket admits once, a second read warns you rather than refusing anyone, and there is no plan check anywhere in it - including on the 25 paid tickets a month the free plan sells.
+                            Open Sales on a phone and tap Scan Ticket. It reads the QR on any ticket, any free registration, a wallet pass and a subscription pass alike. Each ticket admits once, a second read warns you rather than refusing anyone, and there is no plan check anywhere in it - a Free schedule scans its registrations at the door exactly as a Pro one scans its ticket holders.
                         </p>
                         <p class="es-head-muted mt-4 text-xs uppercase tracking-widest">No cap, no gate, no extra app</p>
                     </div>
@@ -398,7 +398,7 @@
                 ...(\App\Services\Wallet\GoogleWalletService::isConfigured() ? [
                     ['q' => 'Does a wallet pass scan differently?', 'a' => 'No. A pass saved into Google Wallet carries the same QR code as the ticket page, so it scans exactly like any other ticket and it works offline once saved. The scanner checks the order\'s live status either way, so a cancelled or fully refunded order is refused at the door even if the pass is still on the phone.'],
                 ] : []),
-                ['q' => 'Which plan do I need?', 'a' => 'The check-in dashboard is on the Pro plan, and on every selfhosted install at no cost. Scanning at the door, free registrations and selling up to 25 paid tickets a calendar month with no platform fee are all on the Free plan.'],
+                ['q' => 'Which plan do I need?', 'a' => 'The check-in dashboard is on the Pro plan, and on every selfhosted install at no cost. Scanning at the door and unlimited free registration are on the Free plan. Charging for a ticket is the other Pro part, and there is no platform fee on it whatever you pay.'],
             ];
         @endphp
         <section id="faq" class="es-head-rule scroll-mt-24 py-20 lg:py-28">

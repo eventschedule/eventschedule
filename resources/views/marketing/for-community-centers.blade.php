@@ -48,7 +48,7 @@
             "A downloadable QR code that opens your calendar",
             "A short digest of the center's own new dates to confirmed email subscribers, at most one every 72 hours",
             "Direct newsletters to the people who follow the center",
-            "Ticketed classes paid through Stripe, PayPal, Invoice Ninja, a payment link or cash, with zero platform fees and 25 paid tickets a month on the free plan",
+            "Ticketed classes paid through Stripe, PayPal, Invoice Ninja, a payment link or cash, with zero platform fees on every plan (charging for a place needs Pro)",
             "Refunds from the Sales page, sent back through Stripe or PayPal in full or in part",
             "An interest list for a class announced before booking opens",
             "QR ticket scanning at the door on every plan",
@@ -130,11 +130,13 @@
            field, so nothing here may render one. And the 25-photo free-tier
            cap on fan photos is now stated wherever the photos claim is.
 
-           SECOND-WAVE CORRECTIONS. Selling tickets is NOT Pro: the free plan
-           sells 25 paid tickets a month per schedule (Role::ticketSaleLimit,
-           config/usage.php), with zero platform fees on every plan, so the
-           "paid class" panel, its closing line and two FAQ answers said the
-           wrong tier. Pro removes the ceiling and adds the extras that ARE
+           SECOND-WAVE CORRECTIONS. Where the tier line falls: free RSVP
+           sign-up and zero-price ticket types are unlimited on every plan,
+           and charging for a place needs Pro or Enterprise
+           (Event::canSellPaidTickets). Zero platform fees apply whatever
+           the plan, so the "paid class" panel, its closing line and two FAQ
+           answers must name Pro for the money and Free for the sign-up, and
+           never conflate the two. Pro also adds the extras that ARE
            gated (passes and promo codes are scrubbed in EventRepo::saveEvent,
            the waitlist and the sales CSV export and custom fields each carry
            their own isPro check). Door-scanning is free on every plan
@@ -629,7 +631,7 @@
         $faqs = [
             [
                 'q' => 'Is Event Schedule free for community centers?',
-                'a' => 'Yes, and most of what a center needs is on the free plan: the public program calendar and its own link, recurring programs with date exceptions, sub-schedules, free RSVP sign-up with an optional capacity, the embeddable calendar, two-way Google, Outlook and CalDAV sync, a live calendar feed, iCal downloads, the downloadable QR code, built-in analytics, member photos and comments with an approval queue (25 photos on the free plan), and 10 newsletter emails a month. Newsletter allowances count each recipient as one email, so ten emails means ten people; Pro raises it to 100 a month and Enterprise to 1,000. Even selling a paid class is free, up to 25 paid tickets a month per schedule, and Event Schedule charges zero platform fees on the sale whatever plan you are on. Pro at '.plan_price($proMonthly).' a month lifts that ceiling.',
+                'a' => 'Yes, and most of what a center needs is on the free plan: the public program calendar and its own link, recurring programs with date exceptions, sub-schedules, free RSVP sign-up with an optional capacity, the embeddable calendar, two-way Google, Outlook and CalDAV sync, a live calendar feed, iCal downloads, the downloadable QR code, built-in analytics, member photos and comments with an approval queue (25 photos on the free plan), and 10 newsletter emails a month. Newsletter allowances count each recipient as one email, so ten emails means ten people; Pro raises it to 100 a month and Enterprise to 1,000. Charging for a class is the part that needs Pro at '.plan_price($proMonthly).' a month, and Event Schedule charges zero platform fees on the sale whatever plan you are on.',
             ],
             [
                 'q' => 'Can I organize classes, meetings, and events by category?',
@@ -641,7 +643,7 @@
             ],
             [
                 'q' => 'Can we handle event registration and payments?',
-                'a' => 'Yes. Free sign-up with an optional capacity is on the free plan, and the capacity is counted per date, so a full Monday session does not stop the following Monday filling up. For a paid class, take payment through your own Stripe or PayPal account, an Invoice Ninja invoice, a payment link or cash at the desk: the money goes to you, Event Schedule takes no cut, and every ticket carries a QR code you can scan at the door on any plan. The free plan sells 25 paid tickets a month per schedule, and free sign-ups are never counted against that. Pro lifts the ceiling and adds the extras: asking your own questions at checkout, and selling one pass that covers a whole term of a class.',
+                'a' => 'Yes. Free sign-up with an optional capacity is on the free plan, and the capacity is counted per date, so a full Monday session does not stop the following Monday filling up. For a paid class, take payment through your own Stripe or PayPal account, an Invoice Ninja invoice, a payment link or cash at the desk: the money goes to you, Event Schedule takes no cut, and every ticket carries a QR code you can scan at the door on any plan. Charging for a place is a Pro feature; free sign-up stays free however many people come. Pro adds the rest of the paid-class kit too: asking your own questions at checkout, and selling one pass that covers a whole term of a class.',
             ],
             [
                 'q' => 'Can we refund a class?',
@@ -1035,14 +1037,14 @@
                 <div class="es-gather-card es-gather-hover flex h-full flex-col p-7" data-reveal="panel">
                     <div class="mb-4 flex flex-wrap items-center gap-2">
                         <h3 class="es-gather-ink text-xl font-bold">The paid class</h3>
-                        <span class="es-gather-plan es-gather-plan-free">Free to 25 a month</span>
+                        <span class="es-gather-plan es-gather-plan-pro">Pro</span>
                     </div>
                     <p class="es-gather-muted mb-6">
                         Pottery costs money to run, so it costs money to join. Take it through your own
                         Stripe or PayPal account, an Invoice Ninja invoice, a payment link or cash at the
                         desk, and the money lands with you. Event Schedule charges zero platform fees, so
-                        past what the processor takes, the fee is yours. The free plan sells 25 paid
-                        tickets a month per schedule, and Pro lifts the ceiling.
+                        past what the processor takes, the fee is yours. Charging for a place is the one
+                        part that needs Pro; free sign-up never does.
                     </p>
 
                     <div class="es-gather-sub mb-6 p-5" aria-hidden="true">
@@ -1075,9 +1077,9 @@
 
             <p class="es-gather-muted mx-auto mt-8 max-w-2xl text-center text-sm" data-reveal>
                 <span class="es-gather-plan es-gather-plan-pro">Pro</span>
-                <span class="ms-2">At {{ plan_price($proMonthly) }} a month Pro lifts the 25-a-month ceiling on paid tickets and adds
-                passes, discount codes, the waitlist and the sales CSV. Free sign-up with a capacity is
-                never counted against that number, and for a lot of centers that is the whole requirement.</span>
+                <span class="ms-2">At {{ plan_price($proMonthly) }} a month Pro opens paid tickets and adds
+                passes, discount codes, the waitlist and the sales CSV. Free sign-up with a capacity never
+                needs it, and for a lot of centers that is the whole requirement.</span>
             </p>
         </div>
     </section>

@@ -2,7 +2,7 @@
     key="tickets"
     title="Selling Tickets: Payments, Refunds, Check-In - Event Schedule"
     description="Sell tickets or run free registration: connect Stripe or PayPal, build ticket types, refund from the Sales page and scan QR codes at the door."
-    lede="Selling is included on every plan, with zero platform fees. Connect payment processing, create ticket types, and keep 100% of your sales."
+    lede="Free registration on every plan, paid ticketing on Pro, and zero platform fees either way. Connect payment processing, create ticket types, and keep 100% of your sales."
     article-description="How to sell tickets and run free registration: payment methods, ticket types, refunds, check-in at the door and the interest list."
 >
     <x-slot:toc>
@@ -49,13 +49,13 @@
             </svg>
             General
         </h2>
-        <p class="text-gray-600 dark:text-gray-300 mb-6">Sell tickets directly from your event pages with secure payment processing, automatic confirmation emails, and a QR code on every ticket. <strong class="text-gray-900 dark:text-white">Selling is included on every plan, including Free, and Event Schedule takes no cut of a ticket sale.</strong></p>
+        <p class="text-gray-600 dark:text-gray-300 mb-6">Sell tickets directly from your event pages with secure payment processing, automatic confirmation emails, and a QR code on every ticket. <strong class="text-gray-900 dark:text-white">Free registration is unlimited on every plan, charging for a ticket is a Pro feature, and Event Schedule takes no cut of a sale on any plan.</strong></p>
 
         <x-doc-screenshot id="tickets--sales" alt="Sales management page" loading="eager" />
 
         <div class="doc-callout doc-callout-tip mb-6">
             <div class="doc-callout-title">Zero platform fees, on every plan</div>
-            <p>The checkout charge is created on <em>your own</em> connected Stripe account, with no application fee attached, so nothing is skimmed on the way through. This is the same on Free as it is on Pro: you pay only your payment processor's own fees. A selfhosted install charges through its own Stripe keys, which works the same way.</p>
+            <p>The checkout charge is created on <em>your own</em> connected Stripe account, with no application fee attached, so nothing is skimmed on the way through. This is the same on Free as it is on Pro and Enterprise: you pay only your payment processor's own fees. A selfhosted install charges through its own Stripe keys, which works the same way.</p>
         </div>
 
         <p class="text-gray-600 dark:text-gray-300 mb-4">When you edit an event, the <strong class="text-gray-900 dark:text-white">Tickets</strong> section offers three mutually exclusive modes. Pick the one that fits the event:</p>
@@ -82,35 +82,28 @@
                     </tr>
                     <tr>
                         <td><a href="#ticketing" class="doc-link">Tickets</a></td>
-                        <td>Ticket types with prices, quantities and checkout. Free tickets are unlimited; paid tickets have a monthly allowance on the Free plan.</td>
-                        <td>Free, capped</td>
+                        <td>Ticket types with prices, quantities and checkout. A ticket type priced at zero is unlimited on every plan; charging for one needs Pro.</td>
+                        <td>Free, Pro to charge</td>
                     </tr>
                 </tbody>
             </table>
         </div>
 
-        <h3 class="doc-subheading">The Free plan's paid-ticket allowance</h3>
-        <p class="text-gray-600 dark:text-gray-300 mb-4">A Free schedule can sell paid tickets, up to <strong class="text-gray-900 dark:text-white">25 paid tickets per calendar month</strong>. There is also a backstop of 50 paid tickets a month across every schedule one account owns, so the per-schedule allowance cannot be multiplied by spreading events over several schedules. <a href="{{ marketing_url('/pricing') }}" class="doc-link">Pro</a> and Enterprise remove both limits, and a <a href="{{ route('marketing.docs.selfhost') }}" class="doc-link">selfhosted</a> install is unlimited.</p>
+        <h3 class="doc-subheading">Which plan you need</h3>
+        <p class="text-gray-600 dark:text-gray-300 mb-4">The line runs between giving a ticket away and charging for one. <strong class="text-gray-900 dark:text-white">A ticket type with a price needs <a href="{{ marketing_url('/pricing') }}" class="doc-link">Pro</a> or Enterprise</strong>, and a <a href="{{ route('marketing.docs.selfhost') }}" class="doc-link">selfhosted</a> install resolves to Enterprise, so paid selling is open there from the day you install it.</p>
 
-        <p class="text-gray-600 dark:text-gray-300 mb-4">The allowance counts individual paid tickets, not orders, and several things never count against it:</p>
+        <p class="text-gray-600 dark:text-gray-300 mb-4">Everything that does not charge money is on every plan, with no monthly count to watch:</p>
         <ul class="doc-list mb-6">
-            <li><strong class="text-gray-900 dark:text-white">Free registration and RSVP</strong> - unlimited on every plan</li>
-            <li><strong class="text-gray-900 dark:text-white">Zero-price ticket types</strong> - a $0 tier sells without limit, even on an event that also has paid tiers</li>
-            <li><strong class="text-gray-900 dark:text-white"><a href="#add-ons" class="doc-link">Add-ons</a></strong> - extras, not admissions</li>
+            <li><strong class="text-gray-900 dark:text-white">Free registration and RSVP</strong> - unlimited, with an optional capacity limit per date</li>
+            <li><strong class="text-gray-900 dark:text-white">Zero-price ticket types</strong> - a $0 tier sells without limit, and goes on selling on a Free schedule even where the event also carries paid tiers</li>
+            <li><strong class="text-gray-900 dark:text-white">QR codes and scanning at the door</strong> - on every ticket, on every plan, with the live <a href="#checkin-dashboard" class="doc-link">check-in dashboard</a> the Pro part</li>
             <li><strong class="text-gray-900 dark:text-white"><a href="{{ route('marketing.docs.appointments') }}" class="doc-link">Appointment bookings</a></strong> - they have their own separate allowance</li>
-            <li><strong class="text-gray-900 dark:text-white">Bulk <a href="#importing-attendees" class="doc-link">attendee imports</a></strong></li>
         </ul>
 
-        <p class="text-gray-600 dark:text-gray-300 mb-4">Two rules keep the allowance from landing at the worst possible moment:</p>
-        <ul class="doc-list mb-6">
-            <li><strong class="text-gray-900 dark:text-white">Cash and other offline payments are counted but never blocked.</strong> Money taken at the door is always recordable, whatever the count says.</li>
-            <li><strong class="text-gray-900 dark:text-white">An event starting within 48 hours is exempt.</strong> The allowance never stops sales for an event that is about to happen.</li>
-        </ul>
-
-        <p class="text-gray-600 dark:text-gray-300 mb-6">The count resets on the first of each month. If a paid plan lapsed part-way through a month, the window starts from the moment it lapsed, so tickets you sold while paying are not charged to the Free allowance. When the allowance is spent, online paid checkout pauses for that schedule until the reset: free registration, free ticket tiers and payment at the door all keep working, and the event page falls back to an <strong class="text-gray-900 dark:text-white">Add to Calendar</strong> button instead of a dead buy button. The event editor shows the running count and the reset date in the Tickets section.</p>
+        <p class="text-gray-600 dark:text-gray-300 mb-6">On a Free schedule the paid rows of an event simply do not go on sale, whichever payment method they are set to: free registration and free ticket tiers keep working, and an event with nothing left to sell falls back to an <strong class="text-gray-900 dark:text-white">Add to Calendar</strong> button rather than a dead buy button. Subscribing opens the paid rows immediately, with no re-publishing and no change to the event.</p>
 
         <h3 class="doc-subheading">What ticketing includes</h3>
-        <p class="text-gray-600 dark:text-gray-300 mb-4">Everything below works on the Free plan except where a Pro badge says otherwise.</p>
+        <p class="text-gray-600 dark:text-gray-300 mb-4">Charging for a ticket needs Pro. Everything below works on the Free plan for free tickets and registration, except where a Pro badge says otherwise.</p>
         <ul class="doc-list">
             <li>Any number of ticket types per event, each with its own price, quantity and description</li>
             <li>Per-type sales start and end times, and an optional cap on how many one order may hold</li>
@@ -170,7 +163,7 @@
 
         <div class="doc-callout doc-callout-tip">
             <div class="doc-callout-title">Tip</div>
-            <p>Registration is unlimited on every plan, including Free, and never counts toward the <a href="#general" class="doc-link">paid-ticket allowance</a>. So are the <a href="#waitlist" class="doc-link">waitlist</a> on a full registration date, per-guest individual registration, and the <a href="#embed-widget" class="doc-link">RSVP embed widget</a>. Registration suits meetups, community events and open gatherings where you want to know who is coming without the formality of tickets. Custom checkout fields are the one part that needs Pro.</p>
+            <p>Registration is unlimited on every plan, including Free, and never asks <a href="#general" class="doc-link">which plan you are on</a>. So are the <a href="#waitlist" class="doc-link">waitlist</a> on a full registration date, per-guest individual registration, and the <a href="#embed-widget" class="doc-link">RSVP embed widget</a>. Registration suits meetups, community events and open gatherings where you want to know who is coming without the formality of tickets. Custom checkout fields are the one part that needs Pro.</p>
         </div>
     </section>
 
@@ -181,7 +174,7 @@
 
         <div class="doc-callout doc-callout-info mb-6">
             <div class="doc-callout-title">What Free includes, and what Pro adds</div>
-            <p>Creating ticket types, taking payment, scanning tickets at the door and keeping 100% of the money all work on the Free plan, within the <a href="#general" class="doc-link">25 paid tickets a month</a> allowance. Pro removes that ceiling and unlocks the surrounding toolkit: the live check-in dashboard, promo codes, add-ons, passes, individual tickets, the ticket waitlist, the CSV export, the bulk import, gift cards and post-event feedback. A <a href="{{ route('marketing.docs.selfhost') }}" class="doc-link">selfhosted</a> install resolves to Enterprise, so nothing here is held back there.</p>
+            <p>Creating ticket types, handing out free tickets and scanning them at the door all work on the Free plan. <a href="#general" class="doc-link">Charging for a ticket</a> is what needs Pro, and Pro brings the surrounding toolkit with it: the live check-in dashboard, promo codes, add-ons, passes, individual tickets, the ticket waitlist, the CSV export, the bulk import, gift cards and post-event feedback. You keep 100% of the money on every plan that can take it. A <a href="{{ route('marketing.docs.selfhost') }}" class="doc-link">selfhosted</a> install resolves to Enterprise, so nothing here is held back there.</p>
         </div>
 
         <div class="doc-table-wrap">
@@ -196,7 +189,7 @@
                 <tbody>
                     <tr>
                         <td>Paid ticket sales</td>
-                        <td>25 per month, per schedule</td>
+                        <td>Not included</td>
                         <td>Unlimited</td>
                     </tr>
                     <tr>
@@ -459,7 +452,7 @@
 
         <div class="doc-callout doc-callout-tip mb-6">
             <div class="doc-callout-title">Zero-price tickets are always sellable</div>
-            <p>A ticket type priced at zero never counts toward the Free plan's <a href="#general" class="doc-link">paid-ticket allowance</a>, and it keeps selling even when that allowance is spent. On an event that mixes a $0 tier with paid ones, the free tier stays on sale and only the paid rows pause.</p>
+            <p>A ticket type priced at zero sells on <a href="#general" class="doc-link">every plan</a>, Free included. On a Free schedule whose event mixes a $0 tier with paid ones, the free tier stays on sale and only the paid rows sit out until you subscribe.</p>
         </div>
 
         <div class="doc-callout doc-callout-tip mb-6">
@@ -918,7 +911,7 @@
             <li>Add-on totals are added to the ticket total at checkout</li>
             <li>Promo codes and volume discounts do not apply to add-ons</li>
             <li>Add-ons are tracked separately in sales records, the CSV export and confirmation emails</li>
-            <li>Add-ons never count toward the Free plan's <a href="#general" class="doc-link">paid-ticket allowance</a></li>
+            <li>Add-ons are a Pro feature, as are the <a href="#general" class="doc-link">priced tickets</a> they ride alongside</li>
         </ul>
     </section>
 
@@ -1084,8 +1077,8 @@
         </div>
 
         <div class="doc-callout doc-callout-tip">
-            <div class="doc-callout-title">Imports never spend the allowance</div>
-            <p>Imported attendees are recorded with their own payment method, so they never count toward the Free plan's <a href="#general" class="doc-link">paid-ticket allowance</a>. With <strong class="text-gray-900 dark:text-white">Send Email</strong> on, each imported attendee gets the same confirmation email a checkout sends. On eventschedule.com it comes from our address until the schedule has its own <a href="{{ route('marketing.docs.creating_schedules') }}#integrations-email" class="doc-link">email settings</a>, then from yours. A selfhosted install needs a working mailer, and without one the save button stays disabled while Send Email is on.</p>
+            <div class="doc-callout-title">Imports never take money</div>
+            <p>Imported attendees are recorded with their own payment method, so nothing is charged through Stripe or PayPal on the way in - the row is a record of a sale that already happened somewhere else. With <strong class="text-gray-900 dark:text-white">Send Email</strong> on, each imported attendee gets the same confirmation email a checkout sends. On eventschedule.com it comes from our address until the schedule has its own <a href="{{ route('marketing.docs.creating_schedules') }}#integrations-email" class="doc-link">email settings</a>, then from yours. A selfhosted install needs a working mailer, and without one the save button stays disabled while Send Email is on.</p>
         </div>
     </section>
 

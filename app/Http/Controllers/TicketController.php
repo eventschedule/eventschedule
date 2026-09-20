@@ -204,54 +204,14 @@ class TicketController extends Controller
             $giftCards = $this->getGiftCardsData();
             $giftCardsCount = $giftCards->count();
 
-            $ticketQuotas = $this->getTicketQuotas();
-
             $installmentData = $this->getInstallmentsData();
             $installments = $installmentData['installments'];
             $installmentsCount = $installments->count();
             $installmentTotals = $installmentData['installmentTotals'];
             $installmentForecast = $installmentData['installmentForecast'];
 
-            return view('ticket.sales', compact('sales', 'count', 'waitlistCount', 'waitlistEntries', 'hasPro', 'planBlockedRoles', 'groupCounts', 'sortBy', 'sortDir', 'subscriptions', 'subscriptionsCount', 'giftCards', 'giftCardsCount', 'ticketQuotas', 'installments', 'installmentsCount', 'installmentTotals', 'installmentForecast'));
+            return view('ticket.sales', compact('sales', 'count', 'waitlistCount', 'waitlistEntries', 'hasPro', 'planBlockedRoles', 'groupCounts', 'sortBy', 'sortDir', 'subscriptions', 'subscriptionsCount', 'giftCards', 'giftCardsCount', 'installments', 'installmentsCount', 'installmentTotals', 'installmentForecast'));
         }
-    }
-
-    /**
-     * Free-plan ticket allowances for the schedules this user OWNS, for the banner on the Sales page.
-     *
-     * This page aggregates across every schedule, so there is no single $role to read. Returned for
-     * any free schedule that has sold at least one paid ticket this month, at any percentage:
-     * staying quiet below some threshold would mean the first time an organizer ever sees the meter
-     * is when half of it is already gone, on the one page whose whole subject is sales.
-     *
-     * @return \Illuminate\Support\Collection<int, array{role: Role, used: int, limit: int}>
-     */
-    private function getTicketQuotas()
-    {
-        if (! config('app.hosted')) {
-            return collect();
-        }
-
-        return auth()->user()->roles()
-            ->wherePivot('level', 'owner')
-            // isPro() reads the subscriptions relation; without this each role lazy-loads its own.
-            ->with('subscriptions')
-            ->get()
-            ->map(function ($role) {
-                $limit = $role->ticketSaleLimit();
-
-                // Null limit short-circuits before any counting, so paid schedules cost nothing here.
-                if (is_null($limit)) {
-                    return null;
-                }
-
-                $used = $role->ticketsSoldThisMonth();
-
-                return $used > 0 ? ['role' => $role, 'used' => $used, 'limit' => $limit] : null;
-            })
-            ->filter()
-            ->sortByDesc(fn ($row) => $row['used'] / max(1, $row['limit']))
-            ->values();
     }
 
     /**
@@ -1151,9 +1111,9 @@ class TicketController extends Controller
         }
 
         foreach ($legs as $index => $leg) {
-            // canSellTickets() below reads both relations; without this they lazy-load on the
-            // checkout POST.
-            $event = Event::with(['tickets', 'roles'])->find(UrlUtils::decodeId($leg['event_id']));
+            // canSellTickets() and the per-row gate below read these; without this they
+            // lazy-load on the checkout POST. addons is here because the add-on pass needs it.
+            $event = Event::with(['tickets', 'roles', 'addons'])->find(UrlUtils::decodeId($leg['event_id']));
 
             // Shared with the seat-map endpoints so the two cannot drift - see
             // Event::guestVisibilityFailure().
@@ -1179,33 +1139,39 @@ class TicketController extends Controller
                 return $this->refuseCartLeg($leg, $event->translatedName(), 'messages.cart_event_needs_own_checkout');
             }
 
-            // Verify event can sell tickets (checks past dates, tickets_enabled, and plan allowance)
+            // Verify event can sell tickets (checks past dates, tickets_enabled, and the plan gate)
             if (! $event->canSellTickets($leg['event_date'])) {
                 return $isCart
                     ? $this->refuseCartLeg($leg, $event->translatedName())
                     : back()->withInput()->with('error', __('messages.tickets_not_available'));
             }
 
-            // Per-row allowance check. canSellTickets() above answers "is this event selling at all",
-            // which stays true while a free tier remains; this refuses the individual PAID rows the
-            // schedule's monthly allowance can no longer cover, so a cart of free tiers still goes
-            // through on a capped schedule.
+            // Per-row plan gate. canSellTickets() above answers "is this event selling at all",
+            // which stays true while a $0 row remains; this refuses the individual PAID rows a
+            // free schedule may not sell, so a cart of free tiers still goes through.
             //
-            // Whose allowance, whether offline payment is exempt and whether the 48-hour grace applies
-            // are all decided inside Ticket::isSellable() -> Event::hasTicketAllowance(), which is the
-            // same code the guest form filters on. Keeping one definition is what stops the buy button
-            // and the write path disagreeing.
+            // Whose plan decides, and whether the grandfather stamp applies, are settled inside
+            // Ticket::isSellable() -> Event::canSellPaidTickets(), which is the same code the guest
+            // form filters on. Keeping one definition is what stops the buy button and the write
+            // path disagreeing.
             //
-            // Checked once, up front, then the whole cart is allowed through - the same way
-            // canSendNewsletter() lets an entire newsletter overshoot. Refusing a guest mid-cart
-            // because the organizer is one short is worse than a small, bounded overage. Across a
-            // multi-event order that bound widens once per leg, which is accepted for the same reason.
+            // ADD-ONS ARE CHECKED SEPARATELY, and must be: $event->tickets is scoped
+            // where('is_addon', false), so an add-on never appears in the loop below. Without the
+            // second pass a free schedule could sell an arbitrarily priced add-on beside a $0
+            // admission row.
             $unsellable = collect($leg['tickets'])
                 ->filter(fn ($quantity) => (int) $quantity > 0)
                 ->keys()
                 ->map(fn ($hash) => $event->tickets->firstWhere('id', UrlUtils::decodeId($hash)))
                 ->filter()
-                ->contains(fn ($ticket) => ! $ticket->isSellable($leg['event_date']));
+                ->contains(fn ($ticket) => ! $ticket->isSellable());
+
+            $unsellable = $unsellable || collect($leg['addons'] ?? [])
+                ->filter(fn ($quantity) => (int) $quantity > 0)
+                ->keys()
+                ->map(fn ($hash) => $event->addons->firstWhere('id', UrlUtils::decodeId($hash)))
+                ->filter()
+                ->contains(fn ($addon) => ! $addon->setRelation('event', $event)->isSellable());
 
             if ($unsellable) {
                 return $isCart
@@ -1662,7 +1628,7 @@ class TicketController extends Controller
             // Check add-on availability. Add-ons are Pro, and a lapsed schedule keeps its
             // rows (they are made dormant, never deleted), so the sell path needs its own
             // check rather than relying on the row's absence.
-            $addonSelections = $event->isPro() ? $leg['addons'] : [];
+            $addonSelections = $event->canSellAddons() ? $leg['addons'] : [];
             foreach ($addonSelections as $addonId => $addonQty) {
                 $addonQty = (int) $addonQty;
                 if ($addonQty > 0) {
@@ -1918,7 +1884,7 @@ class TicketController extends Controller
 
             // Create SaleTickets for add-ons (attach to primary sale only). Pro-gated, same
             // as the availability check above.
-            $addonSelections = $event->isPro() ? $leg['addons'] : [];
+            $addonSelections = $event->canSellAddons() ? $leg['addons'] : [];
             $hasAddons = false;
             $addonTotal = 0;
             foreach ($addonSelections as $addonId => $addonQty) {
@@ -2658,6 +2624,12 @@ class TicketController extends Controller
         $event = $sale->event;
         $cancelRedirectUrl = $event->getGuestUrl($subdomain, $sale->event_date).'?tickets=true';
 
+        // Unconditional ?tickets=true, matching PaymentGatewayDriver::handleCancel(): every
+        // ticket surface handles a closed gate itself - the embed shows its not-available state
+        // and show-guest falls through to Add to Calendar - so the anchor param is inert rather
+        // than broken. No flash message: show-guest reads session('error') only as a
+        // data-show-initial flag and never displays it, and on an RSVP-enabled event the flash
+        // force-opens the RSVP form with no explanation.
         return redirect($cancelRedirectUrl);
     }
 
@@ -2738,6 +2710,12 @@ class TicketController extends Controller
 
         $cancelUrl = $event->getGuestUrl($sale->subdomain, $sale->event_date).'?tickets=true';
 
+        // Unconditional ?tickets=true, matching PaymentGatewayDriver::handleCancel(): every
+        // ticket surface handles a closed gate itself - the embed shows its not-available state
+        // and show-guest falls through to Add to Calendar - so the anchor param is inert rather
+        // than broken. No flash message: show-guest reads session('error') only as a
+        // data-show-initial flag and never displays it, and on an RSVP-enabled event the flash
+        // force-opens the RSVP form with no explanation.
         return redirect($cancelUrl);
     }
 

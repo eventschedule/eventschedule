@@ -2521,13 +2521,19 @@ class RoleController extends Controller
                 abort(404);
             }
 
-            // The TICKET embed widget is Pro. The editor only ever hid the "Embed tickets" link, so
-            // this was reachable by anyone who knew the URL shape; that was harmless while free
-            // schedules could not sell, and is not any more. ?rsvp=true stays open on every plan:
-            // it has always worked that way and free schedules may already rely on it.
-            if (request()->get('tickets') === 'true' && ! $event->isPro()) {
-                abort(404);
-            }
+            // The TICKET embed widget follows the same gate as the event's own page, NOT
+            // Event::isPro(). Keying it on the plan alone meant a grandfathered event, or one
+            // selling a $0 row, sold on its own page while the organizer's embedded widget 404'd.
+            // ?rsvp=true stays open on every plan: it has always worked that way and free
+            // schedules may already rely on it.
+            //
+            // Deliberately NOT abort(404): show-guest-ticket-embed already renders a
+            // "tickets not available" state with a link out to the event, and a 404 inside an
+            // iframe on someone's own website is a worse answer than that. It is also what
+            // PaymentGatewayDriver::handleCancel() returns an abandoned buyer to.
+            // The view decides what to render: it asks hasProTicketingPlan() as well as
+            // canSellTickets(), because the latter short-circuits true on any surviving $0 row and
+            // would let a free schedule publish a working ticket iframe on its own website.
 
             $view = 'event/show-guest-ticket-embed';
             $event->loadMissing(['tickets']);

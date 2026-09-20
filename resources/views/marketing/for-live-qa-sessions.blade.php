@@ -601,7 +601,7 @@
             ['Can you ask this one for me?', 'A poll your audience can suggest options for', 'Engagement, then Polls, on the session', 'Pro'],
             ['Can I say it in advance?', 'Comments, held until you approve them', 'The session page, or one agenda segment', 'Free'],
             ['Tell me when the next one is', 'Follow, then a newsletter you write', 'Followers, then Newsletters', 'Free'],
-            ['Can I pay for the deep dive?', 'Named ticket types, paid through your Stripe or PayPal', "The session's ticket section, Tickets mode", 'Free'],
+            ['Can I pay for the deep dive?', 'Named ticket types, paid through your Stripe or PayPal', "The session's ticket section, Tickets mode", 'Pro'],
         ];
 
         $steps = [
@@ -621,11 +621,11 @@
             ],
             [
                 'q' => 'Can I charge for live Q&A sessions?',
-                'a' => 'Yes, and you do not have to pay us before you start. Connect your own Stripe or PayPal account and sell named ticket types for a premium AMA or a paid deep dive, each with its own price, quantity and sales window. The free plan sells up to 25 paid tickets a month per schedule, and scanning a ticket\'s QR code at the door is free on every plan; Pro, at '.plan_price($proMonthly).' a month, removes that ceiling and adds the rest of the door tooling, including the live check-in dashboard, discount codes, add-ons and a waitlist on a sold-out ticket type. Event Schedule charges zero platform fees at every plan level, free included, so past your processor\'s own fee the money is yours. Free sessions do not need any of this: registration with a place limit is free.',
+                'a' => 'Yes, on the Pro plan at '.plan_price($proMonthly).' a month. Connect your own Stripe or PayPal account and sell named ticket types for a premium AMA or a paid deep dive, each with its own price, quantity and sales window. Pro is what puts a price on a ticket, and it brings the rest of the door tooling with it: the live check-in dashboard, discount codes, add-ons and a waitlist on a sold-out ticket type. Scanning a ticket\'s QR code at the door is free on every plan. Event Schedule charges zero platform fees at every plan level, free included, so past your processor\'s own fee the money is yours. Free sessions do not need any of this: registration with a place limit is free and unlimited.',
             ],
             [
                 'q' => 'Is Event Schedule free for hosting Q&A sessions?',
-                'a' => 'Yes. Unlimited sessions, registration with a capacity limit, the agenda, recurring office hours, the embeddable calendar, the embeddable registration widget, two-way Google, Outlook and CalDAV sync, built-in analytics and newsletters are all free forever. Selling is free to start too, at 25 paid tickets a month. Polls, custom questions on the registration form and unlimited ticket sales are on the Pro plan at '.plan_price($proMonthly).' a month. There are zero platform fees on ticket sales on every plan.',
+                'a' => 'Yes. Unlimited sessions, registration with a capacity limit, the agenda, recurring office hours, the embeddable calendar, the embeddable registration widget, two-way Google, Outlook and CalDAV sync, built-in analytics and newsletters are all free forever, and there is no ceiling on how many people register. Polls, custom questions on the registration form and charging for a seat are on the Pro plan at '.plan_price($proMonthly).' a month. There are zero platform fees on ticket sales on every plan.',
             ],
             [
                 'q' => 'Do my followers get an email when I schedule a new session?',
@@ -1159,7 +1159,7 @@
                             </table>
                         </div>
                         <p class="es-conv-muted mt-5 text-xs">
-                            Pro is {{ plan_price($proMonthly) }} a month, and on the ticketing row it is what lifts the free plan's ceiling of 25 paid tickets a month. Zero platform fees on ticket sales applies on every plan, including the free one.
+                            Pro is {{ plan_price($proMonthly) }} a month, and on the ticketing row it is what lets a ticket carry a price at all. Free registration has no ceiling on any plan, and zero platform fees on ticket sales applies on every plan, including the free one.
                         </p>
                     </div>
                 </div>
@@ -1248,10 +1248,10 @@
                         <div class="relative z-10">
                             <div class="mb-4 flex flex-wrap items-center gap-2">
                                 <h3 class="es-conv-ink text-xl font-bold">When the session is worth paying for</h3>
-                                <span class="es-conv-plan">Free</span>
+                                <span class="es-conv-plan es-conv-plan-pro">Pro</span>
                             </div>
-                            <p class="es-conv-muted mb-4">Connect your own Stripe or PayPal account and sell named ticket types for a paid AMA or a small-group deep dive, each with its own price, quantity and sales window. Selling starts on the free plan, at 25 paid tickets a month.</p>
-                            <p class="es-conv-muted text-sm">Scanning a ticket's QR code at the door is free too. Pro takes that ceiling off and adds the rest of the door tooling: the live check-in dashboard, discount codes for the people you want back, add-ons and a waitlist on a sold-out ticket type. Quantities count per date, the same way places do. Event Schedule takes zero platform fees on every plan, so past your processor's own fee the money is yours, and a refund from the Sales page sends a Stripe or PayPal payment back, in full or in part. See all <a href="{{ marketing_url('/features/ticketing') }}" class="es-conv-link font-medium hover:underline">ticketing features</a>.</p>
+                            <p class="es-conv-muted mb-4">Connect your own Stripe or PayPal account and sell named ticket types for a paid AMA or a small-group deep dive, each with its own price, quantity and sales window. Putting a price on a ticket is the Pro plan.</p>
+                            <p class="es-conv-muted text-sm">Scanning a ticket's QR code at the door is free on every plan. Pro brings the rest of the door tooling with it: the live check-in dashboard, discount codes for the people you want back, add-ons and a waitlist on a sold-out ticket type. Quantities count per date, the same way places do. Event Schedule takes zero platform fees on every plan, so past your processor's own fee the money is yours, and a refund from the Sales page sends a Stripe or PayPal payment back, in full or in part. See all <a href="{{ marketing_url('/features/ticketing') }}" class="es-conv-link font-medium hover:underline">ticketing features</a>.</p>
                         </div>
                         <div class="es-glare" aria-hidden="true"></div>
                         <div class="es-ring-glow" aria-hidden="true"></div>
@@ -1530,7 +1530,7 @@
                         You already have the answers. <span class="es-conv-lit">Give them somewhere to ask.</span>
                     </h2>
                     <p class="mx-auto mb-10 max-w-2xl text-lg es-conv-onband">
-                        Publishing your sessions, the agenda and registration with a place limit are free forever, and so are your first 25 paid tickets a month. {{ plan_price($proMonthly) }} a month buys polls and no ceiling on what you sell. Nothing is ever taken from the door.
+                        Publishing your sessions, the agenda and registration with a place limit are free forever, however many people sign up. {{ plan_price($proMonthly) }} a month buys polls and the right to charge for a seat. Nothing is ever taken from the door.
                     </p>
 
                     <div class="mx-auto flex max-w-2xl flex-col items-stretch justify-center gap-3 sm:flex-row">

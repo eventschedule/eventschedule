@@ -612,7 +612,7 @@
             ],
             [
                 'q' => 'Can I charge for watch party access?',
-                'a' => 'Yes, and you can start charging on the free plan: 25 paid tickets a month per schedule, with free registration never counted against that. Create named ticket types with their own prices, quantities and sales windows, sell through your own Stripe or PayPal account, and keep everything: Event Schedule takes zero platform fees on ticket sales at every plan level. Scanning tickets in at the door is free on every plan, and Pro at '.plan_price($proMonthly).' a month removes the monthly cap and adds the live check-in dashboard, passes, promo codes and the ticket waitlist. Your processor charges its own fee (Stripe\'s is typically 2.9% + $0.30).',
+                'a' => 'Yes, on Pro at '.plan_price($proMonthly).' a month, which is what a ticket with a price on it needs. Free registration is a different thing and stays unlimited on every plan. Create named ticket types with their own prices, quantities and sales windows, sell through your own Stripe or PayPal account, and keep everything: Event Schedule takes zero platform fees on ticket sales at every plan level. Scanning tickets in at the door is free on every plan, and Pro brings the live check-in dashboard, passes, promo codes and the ticket waitlist with it. Your processor charges its own fee (Stripe\'s is typically 2.9% + $0.30).',
             ],
             [
                 'q' => 'Can I schedule recurring watch parties?',
@@ -624,7 +624,7 @@
             ],
             [
                 'q' => 'Is Event Schedule free for hosting watch parties?',
-                'a' => 'Yes. Unlimited events and screening series, one join link per event, free registration with per-date caps, the published running order, built-in analytics, the embeddable calendar and two-way calendar sync are all free forever, and so are selling up to 25 paid tickets a month and scanning them in at the door. Pro at '.plan_price($proMonthly).' a month lifts that cap and adds the live check-in dashboard and the rest of the door tooling, and there are zero platform fees on ticket sales at any level. You can also selfhost Event Schedule on your own server, where every Enterprise feature is included.',
+                'a' => 'Yes. Unlimited events and screening series, one join link per event, free registration with per-date caps and no monthly ceiling, the published running order, built-in analytics, the embeddable calendar, two-way calendar sync and scanning people in at the door are all free forever. Pro at '.plan_price($proMonthly).' a month is what lets a ticket carry a price, and it adds the live check-in dashboard and the rest of the door tooling, and there are zero platform fees on ticket sales at any level. You can also selfhost Event Schedule on your own server, where every Enterprise feature is included.',
             ],
             [
                 'q' => 'Can people get a reminder without registering?',
@@ -1129,7 +1129,7 @@
                         Nothing is taken at the <span class="es-scr-accent">door.</span>
                     </h2>
                     <p class="es-scr-muted mb-6 text-lg leading-relaxed" data-reveal style="--reveal-delay: 0.15s;">
-                        A paid premiere, a benefit screening, a festival day pass. Selling starts on the free plan, twenty-five paid tickets a month, and {{ plan_price($proMonthly) }} a month takes the ceiling off and opens the door tooling. Payments run through your own Stripe or PayPal account, and Event Schedule takes zero platform fees on every plan.
+                        A paid premiere, a benefit screening, a festival day pass. A ticket that carries a price is Pro, at {{ plan_price($proMonthly) }} a month, which opens the door tooling with it; free registration is unlimited without it. Payments run through your own Stripe or PayPal account, and Event Schedule takes zero platform fees on every plan.
                     </p>
                     <ul class="es-scr-muted space-y-3" data-reveal-group="70">
                         <li class="flex gap-3" data-reveal>
@@ -1618,7 +1618,7 @@
                         House lights down. <span class="es-scr-lit">Roll it.</span>
                     </h2>
                     <p class="mx-auto mb-10 max-w-2xl text-lg es-scr-booth-muted">
-                        The running order, the door and the list are free forever, and so are your first twenty-five paid tickets a month. {{ plan_price($proMonthly) }} a month takes the ceiling off, and nothing is taken at the door.
+                        The running order, the door and the list are free forever, and the list has no ceiling on it. {{ plan_price($proMonthly) }} a month is what puts a price on a seat, and nothing is taken at the door.
                     </p>
 
                     <div class="mx-auto flex max-w-2xl flex-col items-stretch justify-center gap-3 sm:flex-row">

@@ -369,7 +369,7 @@ class ScheduleTransferService
      * member carries THAT admin's user_id and settles into their gateway account today
      * (EventRepo::saveEvent); the handover must not redirect their money either.
      *
-     * The creator_role_id branch mirrors Event::ticketAllowanceRole(), including its
+     * The creator_role_id branch mirrors Event::ticketingRole(), including its
      * fallback for rows predating the column - except that the fallback additionally
      * requires this schedule to be the event's ONLY listing, so a legacy event shown on
      * two of the previous owner's schedules is not claimed by whichever transfers first.

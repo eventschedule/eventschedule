@@ -439,7 +439,7 @@
         $faqs = [
             [
                 'q' => 'Is Event Schedule free for music venues?',
-                'a' => 'Yes. Publishing your listings, adding set times for every act on a bill, running recurring residencies, splitting rooms into sub-schedules, accepting booking requests, and two-way sync with Google, Outlook or CalDAV are all free forever. Selling is free too, up to 25 paid tickets a month per schedule, with the QR on each one scanned at the door for nothing. A room doing four shows a week passes that in a fortnight, and Pro at '.plan_price($proMonthly).' a month is what removes it - along with the live check-in dashboard for a busy door and passes.',
+                'a' => 'Yes. Publishing your listings, adding set times for every act on a bill, running recurring residencies, splitting rooms into sub-schedules, accepting booking requests, and two-way sync with Google, Outlook or CalDAV are all free forever, and so is free registration for a door that charges nothing. Scanning the QR on a ticket costs nothing on any plan either. Putting a price on a ticket is Pro at '.plan_price($proMonthly).' a month, which brings the live check-in dashboard for a busy door and passes with it.',
             ],
             [
                 'q' => 'Can I publish set times for each band on the bill?',

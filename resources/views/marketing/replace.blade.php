@@ -604,7 +604,7 @@
             ],
             [
                 'q' => 'Is one platform really cheaper than five?',
-                'a' => 'Publishing a schedule is free forever, and that free plan already covers the page, unlimited events, two-way Google, Outlook and CalDAV sync, RSVP with a capacity per date, selling up to 25 paid tickets a month through Stripe or PayPal with scanning at the door, one appointment type, event graphics, built-in analytics, the embeddable calendar and newsletters to ten recipients a month. Pro is '.plan_price($proMonthly).' a month and takes the ceiling off the selling, then adds the live check-in dashboard, polls, post-event feedback, more appointment types and the API. Enterprise is '.plan_price($entMonthly).'. Event Schedule charges zero platform fees on ticket sales on every plan, free included, so the door money is yours minus your payment provider\'s processing fee.',
+                'a' => 'Publishing a schedule is free forever, and that free plan already covers the page, unlimited events, two-way Google, Outlook and CalDAV sync, RSVP with a capacity per date and no monthly ceiling on it, scanning at the door, one appointment type, event graphics, built-in analytics, the embeddable calendar and newsletters to ten recipients a month. Pro is '.plan_price($proMonthly).' a month and is what lets a ticket carry a price, then adds the live check-in dashboard, polls, post-event feedback, more appointment types and the API. Enterprise is '.plan_price($entMonthly).'. Event Schedule charges zero platform fees on ticket sales on every plan, free included, so the door money is yours minus your payment provider\'s processing fee.',
             ],
             [
                 'q' => 'Can it take PayPal, and refund a buyer from the same place?',
@@ -705,7 +705,7 @@
                         </div>
                     </div>
                     <p class="es-belt-on-muted es-belt-xs mt-3 text-center">
-                        Twelve loops on one strap. Free to publish and to sell your first 25 paid tickets a month, {{ plan_price($proMonthly) }} a month for the paid half, and zero platform fees on every plan.
+                        Twelve loops on one strap. Free to publish and to take names for nothing, {{ plan_price($proMonthly) }} a month for the paid half, and zero platform fees on every plan.
                     </p>
                 </div>
             </div>
@@ -971,12 +971,12 @@
                         <span class="es-belt-ink text-3xl font-black">{{ plan_price(0) }}</span>
                         <span class="es-belt-tier es-belt-tier-free">Free</span>
                     </div>
-                    <h3 class="es-belt-ink mb-3 text-lg font-bold">Publish, sell, be found</h3>
+                    <h3 class="es-belt-ink mb-3 text-lg font-bold">Publish, fill the room, be found</h3>
                     <ul class="es-belt-muted es-belt-small space-y-2">
                         <li>The schedule page and unlimited events</li>
                         <li>Two-way Google, Outlook and CalDAV sync</li>
-                        <li>Free RSVP with a capacity per date</li>
-                        <li>Selling, up to 25 paid tickets a month, no platform fee, with refunds from the Sales page</li>
+                        <li>Free RSVP with a capacity per date, and no monthly ceiling</li>
+                        <li>Refunds from the Sales page, and no platform fee on any plan</li>
                         <li>Scanning tickets at the door, and a QR code for the schedule page</li>
                         <li>One appointment type on a public booking page</li>
                         <li>Event graphics generated from the event</li>
@@ -994,9 +994,9 @@
                         <span class="es-belt-ink text-3xl font-black">{{ plan_price($proMonthly) }}</span>
                         <span class="es-belt-tier es-belt-tier-pro">Pro</span>
                     </div>
-                    <h3 class="es-belt-ink mb-3 text-lg font-bold">Sell without a ceiling</h3>
+                    <h3 class="es-belt-ink mb-3 text-lg font-bold">Put a price on it</h3>
                     <ul class="es-belt-muted es-belt-small space-y-2">
-                        <li>Unlimited ticket sales and the live check-in dashboard</li>
+                        <li>Selling tickets that carry a price, and the live check-in dashboard</li>
                         <li>Passes, subscriptions and individual tickets</li>
                         <li>As many appointment types as you need</li>
                         <li>Your own questions at checkout, promo codes, the ticket waitlist</li>

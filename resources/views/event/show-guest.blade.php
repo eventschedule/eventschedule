@@ -1066,13 +1066,13 @@
                 {{ $role->customLabel('register') }}
               @endif
             </button>
-        @elseif ($event->canSellTickets($date) || ($event->registration_url && !$event->tickets_enabled && !$event->rsvp_enabled))
+        @elseif ($event->canSellTickets($date) || ($event->registration_url && (!$event->tickets_enabled || $event->blockedByPlanOnly($date)) && !$event->rsvp_enabled))
           @if ($event->canSellTickets($date))
             <button type="button"
                   @click="$dispatch('show-event-form')"
                   class="min-w-[180px] inline-flex justify-center gap-x-1.5 rounded-md px-6 py-3 text-lg font-semibold shadow-sm transition-all duration-200 hover:scale-105 hover:shadow-lg"
                   style="background-color: {{ $accentColor }}; color: {{ $contrastColor }};">
-              @if ($event->allTicketsSoldOut($date) && $event->isPro())
+              @if ($event->allTicketsSoldOut($date) && $event->canOfferWaitlist())
                 {{-- The waitlist is Pro, so only offer it where it actually leads somewhere.
                      A free schedule's sold-out event keeps its normal label rather than promising a
                      waitlist that WaitlistController would refuse. --}}
@@ -2412,13 +2412,13 @@
               {{ $role->customLabel('register') }}
             @endif
           </button>
-      @elseif ($event->canSellTickets($date) || ($event->registration_url && !$event->tickets_enabled && !$event->rsvp_enabled))
+      @elseif ($event->canSellTickets($date) || ($event->registration_url && (!$event->tickets_enabled || $event->blockedByPlanOnly($date)) && !$event->rsvp_enabled))
         @if ($event->canSellTickets($date))
           <button type="button"
                 @click="$dispatch('show-event-form')"
                 class="flex-1 justify-center rounded-md px-6 py-3 text-lg font-semibold shadow-sm transition-all duration-200 hover:scale-105 hover:shadow-lg"
                 style="background-color: {{ $accentColor }}; color: {{ $contrastColor }};">
-            @if ($event->allTicketsSoldOut($date) && $event->isPro())
+            @if ($event->allTicketsSoldOut($date) && $event->canOfferWaitlist())
               {{-- Must match the desktop CTA's condition exactly; the waitlist is Pro, so offering
                    it here on a free schedule would send the guest to a form that 404s. --}}
               {{ __('messages.join_waitlist') }}

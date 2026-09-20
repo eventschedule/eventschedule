@@ -421,7 +421,7 @@ return [
 
     'activation_nudge_subject_no_ticket_type' => 'Selling tickets for :schedule?',
     'activation_nudge_heading_no_ticket_type' => 'You can sell from this page',
-    'activation_nudge_body_no_ticket_type' => ':schedule has events published but no ticket types, so the page can be read but not bought from. Adding one takes a name, a price and a quantity. The free plan sells up to 25 paid tickets a month, you scan the QR code on every one of them at the door, and Event Schedule takes no platform fee on any plan.',
+    'activation_nudge_body_no_ticket_type' => ':schedule has events published but no ticket types, so the page can be read but not bought from. Adding one takes a name, a price and a quantity. You scan the QR code on every ticket at the door, and Event Schedule takes no platform fee on any plan.',
     'activation_nudge_cta_no_ticket_type' => 'Set up tickets',
 
     'activation_nudge_subject_no_gateway' => 'One step left before :schedule can take payment',
@@ -614,7 +614,7 @@ return [
     'localization' => 'Localization',
     'payment' => 'Payment',
     'options' => 'Options',
-    'requires_pro_plan' => 'Upgrade to Pro for unlimited ticket sales.',
+    'requires_pro_plan' => 'Upgrade to Pro to sell tickets for your events.',
     'requires_enterprise_plan' => 'Requires an Enterprise plan',
     'upgrade_enterprise_custom_domain' => 'Upgrade to Enterprise to use a custom domain.',
     'upgrade_enterprise_privacy' => 'Upgrade to Enterprise for private and password-protected events.',
@@ -2822,7 +2822,7 @@ return [
     'growth_download' => 'Download JSON',
     'growth_download_help' => 'Aggregated and pseudonymous: every id is hashed and no names, emails, addresses or payment identifiers are included.',
     'growth_free_pressure' => 'Free plan pressure',
-    'growth_free_pressure_help' => 'Peak paid tickets in a single month per free schedule. If this piles up on zero, the ticket allowance never becomes a reason to upgrade.',
+    'growth_free_pressure_help' => 'Peak paid tickets in a single month per free schedule, from before paid selling became a Pro feature. Anything above zero is a schedule that has sold before and is now sitting on Free.',
     'growth_acquisition' => 'Acquisition',
     'growth_signups' => 'Signups',
     'growth_saved_schedule' => 'Saved a schedule',
@@ -2884,8 +2884,8 @@ return [
     'upgrade_feature_description_members' => 'Add team members to help manage your schedule.',
     'upgrade_feature_description_scan_agenda' => 'Use AI to scan event agendas and automatically create event details.',
     'upgrade_feature_description_boost' => 'Promote your event to reach a larger audience.',
-    'upgrade_feature_description_tickets' => 'Your Free plan sells up to :limit paid tickets a month. Pro removes the limit and adds the rest of the ticketing suite.',
-    'upgrade_feature_title_tickets' => 'Sell more than your monthly allowance',
+    'upgrade_feature_description_tickets' => 'Selling tickets with a price is a Pro feature. Free registration, RSVP and $0 tickets are unlimited on every plan.',
+    'upgrade_feature_title_tickets' => 'Sell tickets for your events',
     'upgrade_feature_description_availability' => 'Mark your available and unavailable dates so organizers know when to book you.',
     'upgrade_feature_description_ai_prompt' => 'Use AI to automatically transform and enhance the text in your event graphics.',
     'upgrade_feature_description_email_scheduling' => 'Automatically send event graphic emails to your audience on a recurring schedule.',
@@ -3704,25 +3704,18 @@ return [
     'plan_price_line' => ':monthly per month or :yearly per year. Cancel anytime.',
     'plan_trial_note' => 'Includes a :days day free trial.',
 
-    // Free-plan ticket allowance. The wording is deliberately "included" rather than "limit":
-    // 25 paid tickets a month with no platform fee is something the plan gives, not withholds.
-    'ticket_allowance_usage' => 'Paid tickets included this month',
-    'tickets_sold_of' => ':used of :limit sold',
-    'ticket_allowance_note' => 'Resets on :date. Free registration and RSVP are unlimited and never count. You keep 100% of every ticket you sell; we never take a cut.',
-    'ticket_allowance_included_title' => 'Your Free plan includes ticket sales',
-    'ticket_allowance_included_body' => 'You can sell :limit paid tickets a month on this schedule. Payouts go to your own Stripe account and we take no platform fee, the same as Pro. Free registration and RSVP do not count toward the :limit.',
-    'ticket_allowance_radio_hint' => 'Included on your Free plan: :limit paid tickets a month, with Stripe payouts and no platform fee. Free registration and RSVP are unlimited.',
-    'ticket_allowance_reached_title' => 'You have sold all :limit free tickets for :month',
-    'ticket_allowance_reached_body' => 'Online paid checkout is paused for this schedule until :date. Free registration and RSVP still work, and you can still take payment at the door.',
-    'ticket_allowance_upgrade' => 'Upgrade to Pro for unlimited ticket sales',
-    'ticket_allowance_pro_bullet_unlimited' => 'Unlimited paid ticket sales',
-    'ticket_allowance_pro_bullet_checkin' => 'QR code check-in dashboard',
-    'ticket_allowance_pro_bullet_promo' => 'Promo and discount codes',
-    'ticket_allowance_pro_bullet_waitlist' => 'Automatic sold-out waitlist',
-    'ticket_allowance_pro_bullet_passes' => 'Passes, subscriptions and individual tickets',
-    'ticket_allowance_pro_bullet_export' => 'Sales CSV export and webhooks',
-    'ticket_allowance_unlimited' => 'Unlimited ticket sales. No platform fee, ever.',
-    'ticket_allowance_see_pro' => 'See what Pro adds',
+    // Paid ticket selling is Pro/Enterprise. Free registration, RSVP and $0 ticket rows stay
+    // unlimited on every tier, so the wording separates "selling" from "registration" throughout.
+    'ticket_mode_free_hint' => 'Free registration and $0 tickets are unlimited on every plan. Selling tickets with a price is a Pro feature.',
+    'tickets_need_pro_title' => 'Selling paid tickets is a Pro feature',
+    'tickets_need_pro_body' => 'This event has ticket types with a price, so they cannot be sold on the Free plan. Free registration, RSVP and $0 tickets keep working, and upgrading starts sales again immediately.',
+    'ticket_pro_bullet_selling' => 'Sell paid tickets with no platform fee',
+    'ticket_pro_bullet_checkin' => 'QR code check-in dashboard',
+    'ticket_pro_bullet_promo' => 'Promo and discount codes',
+    'ticket_pro_bullet_waitlist' => 'Automatic sold-out waitlist',
+    'ticket_pro_bullet_passes' => 'Passes, subscriptions and individual tickets',
+    'ticket_pro_bullet_export' => 'Sales CSV export and webhooks',
+    'ticket_see_pro' => 'See what Pro adds',
 
     // Getting paid. Shown in the tickets panel when nothing is configured yet, which is the state
     // most new free organizers will be in.
@@ -3745,7 +3738,7 @@ return [
 
     // The Plan tab explainer: what this plan carries, next to what the paid one adds.
     'plan_overview_title' => 'Your plan',
-    'plan_overview_body' => 'Free includes :tickets paid tickets a month with Stripe payouts and no platform fee, :types appointment type, and unlimited free registration and RSVP. Pro adds:',
+    'plan_overview_body' => 'Free includes :types appointment type, unlimited events and schedules, and unlimited free registration and RSVP. Pro adds:',
 
     // Free-plan appointment allowance.
     'appointment_type_limit_reached' => 'Your plan includes :limit appointment type. Upgrade to Pro to offer more.',
@@ -4235,8 +4228,7 @@ return [
     'ask_before_following' => 'Ask me before I follow a new schedule',
     'needs_attention' => 'Needs attention',
     'pending_action_requests' => '{1} :count event request|[2,*] :count event requests',
-    'pending_action_ticket_quota_low' => '{1} :count paid ticket left this month|[2,*] :count paid tickets left this month',
-    'pending_action_ticket_quota_spent' => 'Paid ticket allowance used up',
+    'pending_action_tickets_need_pro' => '{1} :count event has paid tickets that cannot be sold|[2,*] :count events have paid tickets that cannot be sold',
     'pending_action_fan_content' => '{1} :count submission to review|[2,*] :count submissions to review',
     'pending_action_poll_options' => '{1} :count poll suggestion|[2,*] :count poll suggestions',
     'pending_action_carpool_reports' => '{1} :count carpool report to review|[2,*] :count carpool reports to review',

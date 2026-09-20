@@ -560,7 +560,7 @@
             ],
             [
                 'q' => 'Which endpoints need the Pro plan, and what happens without it?',
-                'a' => 'On eventschedule.com the list endpoints for schedules, events, sales and feedback return only rows from schedules on Pro, so a free schedule\'s data is missing rather than refused: check the plan before you read an empty list as nothing there. Reading one schedule, event or sale, updating a schedule, and writing to its events, sub-schedules or sales return 403 with "API usage is limited to Pro accounts". The exception worth planning around is POST /api/sales, which records a sale on the free plan too, within its 25 paid tickets a month. On a selfhosted install every one of these checks passes.',
+                'a' => 'On eventschedule.com the list endpoints for schedules, events, sales and feedback return only rows from schedules on Pro, so a free schedule\'s data is missing rather than refused: check the plan before you read an empty list as nothing there. Reading one schedule, event or sale, updating a schedule, and writing to its events, sub-schedules or sales return 403 with "API usage is limited to Pro accounts". The exception worth planning around is POST /api/sales, which has no plan check of its own: a free schedule can record a sale against a zero-price ticket, while any row with a price on it needs the schedule to be Pro and answers 422 otherwise. On a selfhosted install every one of these checks passes.',
             ],
             [
                 'q' => 'How does authentication work?',
@@ -1431,7 +1431,7 @@
                             The last call is the <span class="es-cons-lit">first one.</span>
                         </h2>
                         <p class="es-cons-dim mb-10 max-w-xl text-lg">
-                            Pick a name and start, or register straight from your code. Publishing a schedule and its dates is free forever, and so are the first 25 paid tickets a month; the API and unlimited ticket sales are {{ plan_price($proMonthly) }} a month, and Event Schedule takes nothing from the door.
+                            Pick a name and start, or register straight from your code. Publishing a schedule and its dates is free forever, and so is free registration; the API and any ticket with a price on it are {{ plan_price($proMonthly) }} a month, and Event Schedule takes nothing from the door.
                         </p>
 
                         <div class="flex max-w-2xl flex-col items-stretch gap-3 sm:flex-row">

@@ -47,8 +47,8 @@
 
         <div class="doc-callout doc-callout-plan">
             <div class="doc-callout-title">Plan requirement</div>
-            <p>Selling tickets is included on the <strong>Free</strong> plan on eventschedule.com, capped at 25 paid tickets per schedule per calendar month; Pro and Enterprise lift the cap. Scanning tickets at the door is free too. A few extras around selling stay Pro there: the live check-in dashboard, promo codes, add-ons, the ticket waitlist, installment plans, passes, gift cards and the ticket widget embed.</p>
-            <p class="mt-2">A selfhosted install has no monthly ticket allowance at all, and it resolves to the Enterprise tier, so nothing on this page is plan-gated on your own server.</p>
+            <p>On eventschedule.com, a ticket that carries a price needs <strong>Pro</strong> or <strong>Enterprise</strong>. Free registration and a ticket type at no charge are unlimited on the <strong>Free</strong> plan, and scanning any ticket at the door is free there too. The rest of the selling kit is Pro as well: the live check-in dashboard, promo codes, add-ons, the ticket waitlist, installment plans, passes, gift cards and the ticket widget embed.</p>
+            <p class="mt-2">A selfhosted install resolves to the Enterprise tier, so nothing on this page is plan-gated on your own server.</p>
         </div>
     </section>
 

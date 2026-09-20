@@ -521,7 +521,7 @@
             ],
             [
                 'q' => 'Does it cost anything to be listed?',
-                'a' => 'No. Publishing a schedule and its events is free forever, and that is all being findable takes. Selling tickets is also included, up to 25 paid tickets a month on the Free plan, and Event Schedule charges zero platform fees on ticket sales at any tier, so past your payment processor\'s own fee the money is yours.',
+                'a' => 'No. Publishing a schedule and its events is free forever, and that is all being findable takes. So is free registration, with no ceiling on it. Charging for a ticket is the Pro plan, and Event Schedule charges zero platform fees on ticket sales at any tier, so past your payment processor\'s own fee the money is yours.',
             ],
         ];
 
@@ -1068,9 +1068,9 @@
                         <div class="relative z-10">
                             <div class="mb-4 flex flex-wrap items-center gap-2">
                                 <h3 class="es-look-ink text-xl font-bold">And when you sell a ticket</h3>
-                                <span class="es-look-plan">Free</span>
+                                <span class="es-look-plan">Pro</span>
                             </div>
-                            <p class="es-look-muted mb-4">Named ticket types with their own prices, quantities and sales windows, QR check-in at the door, and <a href="{{ marketing_url('/stripe') }}" class="es-look-link font-semibold hover:underline">Stripe</a> or <a href="{{ marketing_url('/paypal') }}" class="es-look-link font-semibold hover:underline">PayPal</a> connected to your own account. Zero platform fees on every plan, including this one: Free sells 25 paid tickets a month per schedule and Pro lifts the ceiling.</p>
+                            <p class="es-look-muted mb-4">Named ticket types with their own prices, quantities and sales windows, QR check-in at the door, and <a href="{{ marketing_url('/stripe') }}" class="es-look-link font-semibold hover:underline">Stripe</a> or <a href="{{ marketing_url('/paypal') }}" class="es-look-link font-semibold hover:underline">PayPal</a> connected to your own account. A ticket that carries a price is Pro; free registration is not, on any plan. Zero platform fees either way.</p>
                             <p class="es-look-muted text-sm">
                                 Built-in analytics are free: page views, devices and where the traffic came from.
                                 <a href="{{ marketing_url('/features') }}" class="es-look-link font-semibold hover:underline">See all features</a>

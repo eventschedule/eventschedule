@@ -128,6 +128,7 @@ class Event extends Model
     protected $hidden = ['event_password'];
 
     protected $casts = [
+        'tickets_grandfathered_at' => 'datetime',
         'duration' => 'float',
         'is_private' => 'boolean',
         'is_draft' => 'boolean',
@@ -2204,20 +2205,41 @@ class Event extends Model
 
     public function canSellTickets($date = null)
     {
-        // A cancelled event never sells tickets or accepts RSVPs (covers the guest checkout/RSVP
-        // flows and the API, which all gate on this method).
+        // Two questions, deliberately separated. passesSellingWindow() is the date, window and
+        // cancellation half and carries no plan logic; canOfferTickets() is the plan half and
+        // carries no date logic. blockedByPlanOnly() is the complement of this method built from
+        // the same two pieces, so the guest page cannot disagree with the write path about why an
+        // event is not selling.
+        return $this->passesSellingWindow($date)
+            && $this->tickets_enabled
+            && $this->canOfferTickets();
+    }
+
+    /**
+     * Whether the PLAN is the only thing stopping this event from selling.
+     *
+     * Same date, window and cancellation checks as canSellTickets(), with canOfferTickets()
+     * inverted. Exists so the guest page can offer an external registration_url to an event that
+     * would be selling on Pro, WITHOUT also offering it for an event that has simply finished -
+     * canOfferTickets() deliberately carries no date logic, so asking it alone cannot tell those
+     * two apart.
+     */
+    public function blockedByPlanOnly($date = null): bool
+    {
+        return $this->tickets_enabled
+            && ! $this->canOfferTickets()
+            && $this->passesSellingWindow($date);
+    }
+
+    /** The date, window and cancellation half of canSellTickets(), with no plan question. */
+    public function passesSellingWindow($date = null): bool
+    {
         if ($this->is_cancelled) {
             return false;
         }
 
-        // Pass / subscription tickets are not tied to the container event's own
-        // date (a "Subscriptions" event may be dateless or in the past); their
-        // validity is governed by pass expiry, so don't block their sale on date.
         $hasPassTicket = $this->tickets->contains(fn ($t) => $t->is_pass);
 
-        // For recurring events, check if the specific occurrence is in the past. Resolved in the
-        // venue's timezone: whether a ticket may be sold is a property of the event, not of who
-        // is asking.
         if ($this->days_of_week && $date) {
             $tz = $this->scheduleTimezone();
             if ($this->sell_after_start) {
@@ -2229,7 +2251,6 @@ class Event extends Model
             }
         }
 
-        // For non-recurring events, check if the event start time is in the past
         if (! $this->days_of_week && $this->starts_at && ! $hasPassTicket) {
             if ($this->sell_after_start) {
                 if ($this->getEndDateTime(null, true)->isPast()) {
@@ -2248,90 +2269,87 @@ class Event extends Model
             return false;
         }
 
-        if ($this->tickets->isNotEmpty() && $this->allTicketSalesNotStarted() && ! $this->show_unavailable_tickets) {
-            return false;
-        }
-
-        return $this->tickets_enabled && $this->hasTicketAllowance($date);
+        return ! ($this->tickets->isNotEmpty() && $this->allTicketSalesNotStarted() && ! $this->show_unavailable_tickets);
     }
 
     /**
-     * Whether the schedules behind this event may still sell a ticket for it.
+     * Whether this event may sell ANYTHING right now.
      *
-     * Selling is no longer Pro-only: the free plan sells up to a monthly allowance of PAID tickets.
-     * Three ways this is true:
-     *   - Any attached schedule is Pro. Unchanged from when this was a bare isPro() check, so a free
-     *     schedule co-listing on a Pro schedule's event behaves exactly as it did before.
-     *   - A free schedule still has allowance left.
+     * Two ways this is true:
      *   - The event still has a sellable FREE ticket. Load-bearing: show-guest.blade.php gates the
      *     whole buy CTA on canSellTickets(), so without this an event mixing a $0 tier with paid
-     *     ones would lose its buy button at the cap and take its free tier down with it - breaking
-     *     the promise that free registration is unlimited.
+     *     ones would lose its buy button and take its free tier down with it - breaking the promise
+     *     that free registration is unlimited on every plan.
+     *   - Its paid rows may be sold, per canSellPaidTickets().
      */
-    public function hasTicketAllowance(?string $date = null): bool
+    public function canOfferTickets(): bool
     {
-        // Event-level question: may this event sell ANYTHING? A surviving free tier is enough, so
-        // the buy button and the ticket form keep rendering at the cap and free registration stays
-        // unlimited. It deliberately does NOT imply the paid rows are sellable - that is
-        // paidTicketAllowanceAvailable(), which Ticket::isSellable() asks per row.
+        // A surviving free tier is enough, so the buy button and the ticket form keep rendering
+        // even where every paid row is gated. It deliberately does NOT imply the paid rows are
+        // sellable - that is canSellPaidTickets(), which Ticket::isSellable() asks per row.
         if ($this->tickets->contains(fn ($ticket) => ! $ticket->is_addon && (float) $ticket->price <= 0)) {
             return true;
         }
 
-        return $this->paidTicketAllowanceAvailable($date);
+        return $this->canSellPaidTickets();
     }
 
     /**
-     * Whether a PAID ticket on this event may be sold right now.
+     * Whether a PAID ticket on this event may be sold right now. Pro/Enterprise only.
      *
-     * Separate from hasTicketAllowance() on purpose: an event that keeps selling because it has a
-     * free tier must not carry its paid tiers through with it, which would have been unlimited
-     * paid sales on a capped schedule.
+     * Separate from canOfferTickets() on purpose: an event that keeps selling because it has a free
+     * tier must not carry its paid tiers through with it.
+     *
+     * Whose plan decides is ticketingRole() - the event's CREATOR schedule - NOT Event::isPro(),
+     * which ORs over every attached role and does not filter the is_accepted pivot. Using that
+     * would mean a free organizer could attach any Pro venue or talent and open paid selling on
+     * their own subdomain, and a Pro curator auto-sourcing events would silently grant it to every
+     * free schedule it sources from. It would also disagree with the grandfather arm below, which
+     * is stamped per creator. Money already works this way: Stripe Connect routes by events.user_id.
      */
-    public function paidTicketAllowanceAvailable(?string $date = null): bool
+    public function canSellPaidTickets(): bool
     {
-        if ($this->isPro()) {
+        // Selfhost resolves to the top tier, so it short-circuits before anything can deny it.
+        // Every other gate in the codebase opens this way; without it an event with no pivot rows
+        // would be refused on a selfhosted install, where there is no plan to sell.
+        if (! config('app.hosted')) {
             return true;
         }
 
-        // Offline money is counted but never refused: there is no processing cost to us, and an
-        // organizer taking cash at the door must never find the app refusing to record it. This
-        // lives HERE rather than in the checkout controller so the guest render and the write path
-        // cannot disagree - when it sat only in the controller, canSellTickets() had already
-        // refused the sale one gate earlier and the carve-out was unreachable.
-        if (! $this->takesOnlinePayment()) {
+        $role = $this->ticketingRole();
+
+        // Column reads, no query - canSellTickets() runs about seven times per guest render and
+        // Ticket::isSellable() calls it once per row. The grandfather is a one-time stamp (see the
+        // 2026_09_20 migration) rather than a live "has this event sold?" lookup, because a
+        // restored backup carries paid sales.
+        if ($role?->isPro() || $this->tickets_grandfathered_at !== null) {
             return true;
         }
 
-        // An event starting imminently is exempt, so a monthly cap can never kill sales during the
-        // final push for an event that is actually happening. $date matters: for a recurring event
-        // the base starts_at is the recurrence anchor, which is in the past, so without the
-        // occurrence date the grace would never fire for exactly the events that need it.
-        if ($this->withinTicketAllowanceGrace($date)) {
-            return true;
-        }
-
-        return $this->ticketAllowanceRole()?->canSellPaidTickets() ?? true;
+        // The demo schedule sits on the FREE plan and is seeded with paid sales precisely to show
+        // ticketing working. Live rather than stamped, because reseeding the demo creates new
+        // events. Checked last: is_demo_role() short-circuits on a subdomain compare for the demo
+        // itself but lazy-loads $role->user for everyone else.
+        return is_demo_role($role);
     }
 
     /**
-     * The schedule whose monthly allowance a sale of this event spends.
+     * The schedule whose plan decides whether a sale of this event may happen.
      *
      * The event's OWNING schedule, not whichever subdomain the guest happened to buy through.
      * Attributing to the storefront let a free account create events on one schedule, list them on
-     * a curator schedule, and sell through the curator - whose own count was permanently zero. It
-     * also let the guest page and the checkout guard disagree, rendering a buy button that the
-     * write path then refused.
+     * a curator schedule, and sell through the curator. It also let the guest page and the checkout
+     * guard disagree, rendering a buy button that the write path then refused.
      *
      * Money already works this way: Stripe Connect routes by events.user_id, not by subdomain.
      */
-    public function ticketAllowanceRole(): ?Role
+    public function ticketingRole(): ?Role
     {
-        // Memoized: hasTicketAllowance() runs several times per guest page render, and
+        // Memoized: canOfferTickets() runs several times per guest page render, and
         // Ticket::isSellable() calls it once per ticket row, so an unmemoized lookup here is a
         // query per row.
-        if ($this->ticketAllowanceRoleCache !== false) {
-            return $this->ticketAllowanceRoleCache;
+        if ($this->ticketingRoleCache !== false) {
+            return $this->ticketingRoleCache;
         }
 
         if ($this->creator_role_id) {
@@ -2339,42 +2357,66 @@ class Event extends Model
                 ? $this->creatorRole
                 : $this->creatorRole()->first();
 
-            return $this->ticketAllowanceRoleCache = $role;
+            return $this->ticketingRoleCache = $role;
         }
 
-        // creator_role_id is backfilled but nullable on older rows; CheckData repairs it. Fall back
-        // the same way PassBookingService does.
-        return $this->ticketAllowanceRoleCache = $this->roles->first();
+        // creator_role_id is backfilled but still nullable on older rows. CheckData REPORTS those
+        // (CheckData::225-233 collects them and continues, with "Do not add a heuristic here") - it
+        // does not repair them - so this fallback is load-bearing rather than transitional.
+        //
+        // Ordered, because roles() carries no orderBy: for a legacy event listed on both a Pro and a
+        // free schedule an unordered first() can return either, and the gate would flip between
+        // requests. Lowest id is the earliest attachment, which is the closest thing to "whose
+        // event this is" available once creator_role_id is gone.
+        return $this->ticketingRoleCache = $this->roles->sortBy('id')->first();
     }
 
     /** false = not resolved yet (null is a legitimate resolved value). */
-    protected $ticketAllowanceRoleCache = false;
+    protected $ticketingRoleCache = false;
 
-    /** Whether buying this event moves money through us, as opposed to being settled offline. */
-    public function takesOnlinePayment(): bool
+    /**
+     * Whether an ADD-ON on this event may be sold. Add-ons are a Pro feature in their own right.
+     *
+     * Resolved through ticketingRole(), the same schedule canSellPaidTickets() uses, and NOT
+     * Event::isPro(): that ORs over every attached role without filtering the is_accepted pivot, so
+     * keying add-ons on it let a free creator attach any Pro venue and sell an arbitrarily priced
+     * add-on beside a $0 admission row.
+     *
+     * Deliberately does NOT honour tickets_grandfathered_at. That stamp restores paid TICKET
+     * selling to events that were already doing it; add-ons have been Pro throughout, including
+     * during the free-allowance era, so there is nothing to restore. The consequence is real and
+     * intended: a grandfathered event on a lapsed schedule keeps selling its tickets while its
+     * add-on rows stop, which reads as a partial outage from the organizer's seat.
+     */
+    /**
+     * The plan question the Pro ticketing EXTRAS share: add-ons, the waitlist, the ticket embed.
+     *
+     * One definition on purpose. Each of these was separately keyed on something looser at some
+     * point - Event::isPro() (which ORs over every attached role) or canSellTickets() (which
+     * short-circuits true on any surviving $0 row) - and each time that handed a Pro feature to a
+     * free schedule. Resolved through ticketingRole(), the same schedule canSellPaidTickets() uses.
+     *
+     * Deliberately does NOT honour tickets_grandfathered_at: that stamp restores paid TICKET
+     * selling to events that were already doing it, and these extras have been Pro throughout.
+     */
+    public function hasProTicketingPlan(): bool
     {
-        return ! in_array($this->payment_method, ['cash', null], true);
+        if (! config('app.hosted')) {
+            return true;
+        }
+
+        return (bool) $this->ticketingRole()?->isPro();
     }
 
-    /** Hours before an event starts during which the monthly allowance stops applying. */
-    public const TICKET_ALLOWANCE_GRACE_HOURS = 48;
-
-    public function withinTicketAllowanceGrace(?string $date = null): bool
+    /** Whether the ticket WAITLIST may be offered. Pair with canSellTickets() at call sites. */
+    public function canOfferWaitlist(): bool
     {
-        try {
-            $start = $this->days_of_week && $date
-                ? $this->getStartDateTime($date, true, $this->scheduleTimezone())
-                : $this->getStartDateTime();
-        } catch (\Throwable $e) {
-            return false;
-        }
+        return $this->hasProTicketingPlan();
+    }
 
-        if (! $start) {
-            return false;
-        }
-
-        return $start->isFuture()
-            && $start->lessThanOrEqualTo(now()->addHours(self::TICKET_ALLOWANCE_GRACE_HOURS));
+    public function canSellAddons(): bool
+    {
+        return $this->hasProTicketingPlan();
     }
 
     public function allTicketSalesEnded()
@@ -4304,7 +4346,7 @@ class Event extends Model
             // search results would show prices that lead to no buy button. So when the event is
             // ticketed but not currently selling, publish no offers at all. Deliberately not
             // SoldOut: that would contradict the guest-facing rule never to claim a sell-out.
-            if (! $this->hasTicketAllowance()) {
+            if (! $this->canOfferTickets()) {
                 return [];
             }
 

@@ -803,7 +803,7 @@
             },
             {
                 "question": "How does Event Schedule pricing compare to Luma?",
-                "answer": "Luma Plus is $59/mo billed annually, and Luma's free plan takes a 5% platform fee on paid events. Event Schedule Pro is $5/mo with zero platform fees. Even the free plan includes unlimited events, two-way calendar sync, 25 paid tickets a month and newsletters, with no platform fee."
+                "answer": "Luma Plus is $59/mo billed annually, and Luma's free plan takes a 5% platform fee on paid events. Event Schedule Pro is $5/mo with zero platform fees. Even the free plan includes unlimited events, two-way calendar sync, unlimited free registration and newsletters, with no platform fee on anything you sell."
             },
             {
                 "question": "Does Event Schedule support virtual events like Luma?",
@@ -821,7 +821,7 @@
         "slug": "ticket-tailor-alternative",
         "meta_title": "Ticket Tailor Alternative, No Per-Ticket Fees | Event Schedule",
         "tagline": "A flat-rate alternative to Ticket Tailor with zero per-ticket fees.",
-        "description": "Compare Event Schedule with Ticket Tailor: no per-ticket fee, Stripe or PayPal checkout, refunds and a multi-event cart, with 25 paid tickets a month free.",
+        "description": "Compare Event Schedule with Ticket Tailor: no per-ticket fee, Stripe or PayPal checkout, refunds and a multi-event cart.",
         "keywords": "ticket tailor alternative, ticket tailor alternative free, ticketing platform comparison, no per-ticket fees, ticket tailor competitor",
         "about": "Ticket Tailor is an independent ticketing platform focused on affordable event ticketing. It offers a straightforward per-ticket pricing model and supports various payment processors.",
         "competitor_strengths": [
@@ -1562,11 +1562,11 @@
             },
             {
                 "question": "Is Event Schedule free like Google Calendar?",
-                "answer": "Event Schedule has a free plan that includes unlimited events, two-way Google Calendar sync, newsletters and a live calendar feed your audience can subscribe to. Selling is on the free plan as well, up to 25 paid tickets a month, scanned at the door. The Pro plan at $5/mo removes that ceiling and adds the live check-in dashboard and branding removal."
+                "answer": "Event Schedule has a free plan that includes unlimited events, two-way Google Calendar sync, newsletters and a live calendar feed your audience can subscribe to. Free registration is unlimited and every ticket scans at the door. Selling paid tickets is on the Pro plan at $5/mo, which also adds the live check-in dashboard and branding removal."
             },
             {
                 "question": "Can Event Schedule handle ticketing that Google Calendar cannot?",
-                "answer": "Yes. Google Calendar has no ticketing features. Event Schedule sells tickets through your own Stripe or PayPal account on every plan, 25 paid tickets a month on the free plan, each scanned at the door, with refunds from the Sales page. Pro removes the cap and adds the live check-in dashboard, ticket waitlists, sale notifications and sales CSV export, all with zero platform fees."
+                "answer": "Yes. Google Calendar has no ticketing features. Event Schedule sells tickets through your own Stripe or PayPal account on the Pro plan, each one scanned at the door, with refunds from the Sales page. Free registration is unlimited on every plan. Pro also adds the live check-in dashboard, ticket waitlists, sale notifications and sales CSV export, all with zero platform fees."
             },
             {
                 "question": "Can people subscribe to all my events in their own calendar?",
@@ -2300,7 +2300,7 @@
         "slug": "brown-paper-tickets-alternative",
         "meta_title": "Brown Paper Tickets Alternative, 0% Fees | Event Schedule",
         "tagline": "A modern, actively developed alternative to Brown Paper Tickets.",
-        "description": "Brown Paper Tickets is being retired. Compare Event Schedule: zero platform fees, Stripe or PayPal payouts, and 25 paid tickets a month free.",
+        "description": "Brown Paper Tickets is being retired. Compare Event Schedule: zero platform fees, Stripe or PayPal payouts, and unlimited free registration.",
         "keywords": "brown paper tickets alternative, brown paper tickets replacement, bpt alternative, event ticketing platform, brown paper tickets competitor",
         "about": "Brown Paper Tickets was a ticketing platform known for its low fees and focus on independent events. Its website now says it is being retired and sends organizers to Events.com for their next event, so many are looking for a new home.",
         "competitor_strengths": [
@@ -2645,7 +2645,7 @@
             },
             {
                 "question": "How does Event Schedule pricing compare to Brown Paper Tickets?",
-                "answer": "Brown Paper Tickets charges $0.99 + 5% per ticket as a buyer-paid service fee. Event Schedule charges zero platform fees at any plan level, and the free plan sells 25 paid tickets a month. The Pro plan is a flat $5/mo for unlimited ticketing, with payouts straight into your own Stripe or PayPal account."
+                "answer": "Brown Paper Tickets charges $0.99 + 5% per ticket as a buyer-paid service fee. Event Schedule charges zero platform fees at any plan level. Free registration is unlimited, and selling paid tickets is on Pro. The Pro plan is a flat $5/mo for unlimited ticketing, with payouts straight into your own Stripe or PayPal account."
             },
             {
                 "question": "Is Event Schedule actively maintained?",
@@ -4097,7 +4097,7 @@
             },
             {
                 "question": "How does Event Schedule pricing compare to Accelevents?",
-                "answer": "Accelevents' Professional plan starts from $7,500 and Business from $13,500, with no transaction fees on those plans. Event Schedule has a free plan that sells 25 paid tickets a month, and Pro is a flat $5/mo with unlimited events and zero platform fees."
+                "answer": "Accelevents' Professional plan starts from $7,500 and Business from $13,500, with no transaction fees on those plans. Event Schedule has a free plan with unlimited events and free registration; paid ticket sales come with Pro, a flat $5/mo with unlimited events and zero platform fees."
             },
             {
                 "question": "Can Event Schedule handle virtual and hybrid events like Accelevents?",
@@ -4805,7 +4805,7 @@
             },
             {
                 "question": "How does Event Schedule pricing compare to AddEvent?",
-                "answer": "AddEvent's Small Business plan is $36/mo on monthly billing, and less when paid yearly. Event Schedule Pro is $5/mo with zero platform fees. Even the free plan includes unlimited events, two-way calendar sync, 25 paid tickets a month and newsletters."
+                "answer": "AddEvent's Small Business plan is $36/mo on monthly billing, and less when paid yearly. Event Schedule Pro is $5/mo with zero platform fees. Even the free plan includes unlimited events, two-way calendar sync, unlimited free registration and newsletters."
             },
             {
                 "question": "How is Event Schedule different from AddEvent?",
@@ -5920,7 +5920,7 @@
             },
             {
                 "question": "Can someone buy tickets for several events in one order?",
-                "answer": "Yes, on every plan. A buyer adds tickets for several of your events to one cart and pays once, through Stripe or PayPal, and gets one order page with every ticket on it. Paid tickets in the cart count toward the free plan's monthly allowance like any other."
+                "answer": "Yes, on every plan. A buyer adds tickets for several of your events to one cart and pays once, through Stripe or PayPal, and gets one order page with every ticket on it. Each event in the cart is checked on its own, so a priced ticket needs that schedule to be on Pro."
             }
         ]
     }

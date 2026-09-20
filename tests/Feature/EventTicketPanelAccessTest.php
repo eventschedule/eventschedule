@@ -145,4 +145,83 @@ class EventTicketPanelAccessTest extends TestCase
         $this->assertSame('section-details', $m[1][0]);
         $this->assertSame('section-tickets', $m[1][1], 'Tickets must sit directly under Details');
     }
+
+    /**
+     * A FREE schedule still gets the Tickets panel - it sells $0 rows and takes free registration -
+     * but a priced row cannot sell, so the panel explains that rather than silently doing nothing.
+     *
+     * Every other test in this file builds an enterprise role (createRole()'s default), so without
+     * this one the whole file would keep passing while nothing exercised the plan gate's UI at all.
+     */
+    public function test_a_free_schedule_sees_the_tickets_panel_with_the_pro_explanation(): void
+    {
+        $owner = $this->createOwner();
+        $role = $this->createFreeRole($owner);
+        $event = $this->createEvent($role, ['tickets_enabled' => true, 'payment_method' => 'stripe']);
+        $this->createTicket($event, ['price' => 20, 'quantity' => 100]);
+
+        $this->assertFalse($role->fresh()->isPro(), 'sanity check: the fixture is not Pro');
+
+        $html = $this->actingAs($owner)
+            ->get($this->editUrl($role, $event))
+            ->assertOk()
+            ->assertSee('id="section-tickets"', false)
+            ->getContent();
+
+        $this->assertStringContainsString(__('messages.tickets_need_pro_title'), $html,
+            'the editor has to say why a priced row will not sell');
+
+        // A missing key renders as the key itself, which is the failure this catches.
+        $this->assertStringNotContainsString('messages.tickets_need_pro', $html);
+        $this->assertStringNotContainsString('messages.ticket_mode_free_hint', $html);
+    }
+
+    /**
+     * The banner's own copy says "This event has ticket types with a price", so it must not appear
+     * for an event that has none. It used to, because the flag asked the EVENT whether it could
+     * sell rather than asking whether there was anything priced to sell.
+     */
+    public function test_a_free_schedule_with_only_free_rows_sees_no_pro_banner(): void
+    {
+        $owner = $this->createOwner();
+        $role = $this->createFreeRole($owner);
+        $event = $this->createEvent($role, ['tickets_enabled' => true]);
+        $this->createTicket($event, ['price' => 0, 'quantity' => 100]);
+
+        $this->actingAs($owner)
+            ->get($this->editUrl($role, $event))
+            ->assertOk()
+            ->assertSee('id="section-tickets"', false)
+            ->assertDontSee(__('messages.tickets_need_pro_title'));
+    }
+
+    /**
+     * The create page builds an unsaved Event whose creator_role_id is null, so an event-level
+     * gate answered "cannot sell" for EVERY schedule - a paying Pro customer was shown an upgrade
+     * banner on the Add event form. Keyed on the schedule instead.
+     */
+    public function test_a_pro_schedule_never_sees_the_upgrade_banner_on_a_new_event(): void
+    {
+        $owner = $this->createOwner();
+        $role = $this->createRole($owner);
+
+        $this->assertTrue($role->fresh()->isPro(), 'sanity check: the fixture really is Pro');
+
+        $this->actingAs($owner)
+            ->get(route('event.create', ['subdomain' => $role->subdomain]))
+            ->assertOk()
+            ->assertDontSee(__('messages.tickets_need_pro_title'));
+    }
+
+    public function test_a_free_schedule_sees_no_banner_on_a_new_event_either(): void
+    {
+        $owner = $this->createOwner();
+        $role = $this->createFreeRole($owner);
+
+        // Nothing priced exists yet, so there is nothing to warn about.
+        $this->actingAs($owner)
+            ->get(route('event.create', ['subdomain' => $role->subdomain]))
+            ->assertOk()
+            ->assertDontSee(__('messages.tickets_need_pro_title'));
+    }
 }

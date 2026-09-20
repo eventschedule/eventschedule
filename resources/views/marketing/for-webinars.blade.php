@@ -683,7 +683,7 @@
             ],
             [
                 'q' => 'Can I charge for webinars?',
-                'a' => 'Yes, and you can start on the free plan: 25 paid tickets a month, per schedule. Take payment through your own Stripe or PayPal account, or through Invoice Ninja, a payment link or cash, add as many named ticket types as the session needs, each with its own price, quantity and sales window, and Event Schedule charges zero platform fees on every plan. The provider charges its own processing fee; Stripe\'s standard rate is approximately 2.9% plus $0.30 a transaction. Scanning a ticket\'s QR code is free on every plan, for the sessions you also run in a room. Pro at '.plan_price($proMonthly).' a month takes the monthly ceiling off and adds the rest of the door tooling: the live check-in dashboard, the sold-out ticket waitlist, promo codes and add-ons. Free registration with a capacity limit is unlimited and never counts against the 25.',
+                'a' => 'Yes, on the Pro plan at '.plan_price($proMonthly).' a month, which is what lets a ticket carry a price. Take payment through your own Stripe or PayPal account, or through Invoice Ninja, a payment link or cash, add as many named ticket types as the session needs, each with its own price, quantity and sales window, and Event Schedule charges zero platform fees on every plan. The provider charges its own processing fee; Stripe\'s standard rate is approximately 2.9% plus $0.30 a transaction. Scanning a ticket\'s QR code is free on every plan, for the sessions you also run in a room. Pro brings the rest of the door tooling with it: the live check-in dashboard, the sold-out ticket waitlist, promo codes and add-ons. Free registration with a capacity limit is unlimited on every plan, including free.',
             ],
             [
                 'q' => 'Can I schedule a recurring webinar series?',
@@ -703,7 +703,7 @@
             ],
             [
                 'q' => 'Is Event Schedule free for hosting webinars?',
-                'a' => 'Yes. Unlimited webinars, the running order on each one, recurring series, free registration with a capacity limit, two-way calendar sync, the embeddable calendar and built-in analytics are all free forever, and so is selling your first 25 paid tickets a month and scanning those tickets in. Pro at '.plan_price($proMonthly).' a month removes that ceiling and adds the live check-in dashboard, custom questions on the registration form and the sold-out ticket waitlist, extra team members are on Enterprise, and there are zero platform fees on ticket sales at every plan level. On the hosted service, attendee email goes out through your own SMTP details, which you add once in the integrations tab on any plan.',
+                'a' => 'Yes. Unlimited webinars, the running order on each one, recurring series, free registration with a capacity limit, two-way calendar sync, the embeddable calendar and built-in analytics are all free forever, with no monthly ceiling, and so is scanning a ticket in at the door. Charging for a seat is Pro at '.plan_price($proMonthly).' a month, which also adds the live check-in dashboard, custom questions on the registration form and the sold-out ticket waitlist, extra team members are on Enterprise, and there are zero platform fees on ticket sales at every plan level. On the hosted service, attendee email goes out through your own SMTP details, which you add once in the integrations tab on any plan.',
             ],
         ];
 
@@ -1202,10 +1202,9 @@
                     <div class="es-air-card p-6" data-reveal="panel">
                         <div class="mb-2 flex flex-wrap items-center gap-2">
                             <h3 class="es-air-ink text-lg font-bold">Charging for the session</h3>
-                            <span class="es-air-plan">Free</span>
                             <span class="es-air-plan es-air-plan-pro">Pro</span>
                         </div>
-                        <p class="es-air-muted text-sm">Take payment through your own <a href="{{ marketing_url('/stripe') }}" class="es-air-link font-medium hover:underline">Stripe</a> or <a href="{{ marketing_url('/paypal') }}" class="es-air-link font-medium hover:underline">PayPal</a> account, or Invoice Ninja, a payment link or cash, and add named ticket types, each with its own price, quantity and sales window. The first 25 paid tickets a month are on the free plan, and scanning their QR codes is free too if the session also has a room; Pro takes the ceiling off and adds the live check-in dashboard. Event Schedule takes zero platform fees either way, so past the provider's own processing the money is yours. See <a href="{{ marketing_url('/features/ticketing') }}" class="es-air-link font-medium hover:underline">how ticketing works</a>.</p>
+                        <p class="es-air-muted text-sm">Take payment through your own <a href="{{ marketing_url('/stripe') }}" class="es-air-link font-medium hover:underline">Stripe</a> or <a href="{{ marketing_url('/paypal') }}" class="es-air-link font-medium hover:underline">PayPal</a> account, or Invoice Ninja, a payment link or cash, and add named ticket types, each with its own price, quantity and sales window. A ticket with a price on it is Pro; scanning its QR code is free on any plan if the session also has a room, and Pro adds the live check-in dashboard. Event Schedule takes zero platform fees either way, so past the provider's own processing the money is yours. See <a href="{{ marketing_url('/features/ticketing') }}" class="es-air-link font-medium hover:underline">how ticketing works</a>.</p>
                     </div>
                     <div class="es-air-card p-6" data-reveal="panel">
                         <div class="mb-2 flex flex-wrap items-center gap-2">
@@ -1584,7 +1583,7 @@
                         Publish the session. <span class="es-air-lit">Keep the room.</span>
                     </h2>
                     <p class="es-air-rack-note mx-auto mb-10 max-w-2xl text-lg">
-                        Unlimited webinars, the running order, recurring series and free registration are free forever, and so are the first twenty-five paid tickets a month. {{ plan_price($proMonthly) }} a month takes the ceiling off, and nothing is ever taken off the top.
+                        Unlimited webinars, the running order, recurring series and free registration are free forever, with no monthly ceiling on any of them. {{ plan_price($proMonthly) }} a month is what puts a price on a seat, and nothing is ever taken off the top.
                     </p>
 
                     <div class="mx-auto flex max-w-2xl flex-col items-stretch justify-center gap-3 sm:flex-row">

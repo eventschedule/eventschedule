@@ -555,7 +555,7 @@
         $faqs = [
             [
                 'q' => 'Is Event Schedule free for workshop instructors?',
-                'a' => 'Yes. Publishing your classes, running one as a weekly series, capping the seats with free registration, sorting strands into sub-schedules, emailing the students who follow you and syncing two ways with Google, Outlook or CalDAV are all free forever. So is selling, up to 25 paid spots a month, and so is scanning the QR at the door on every plan. Lifting that ceiling, plus multi-class cards, custom questions at checkout and the live check-in screen, is the Pro plan at '.plan_price($proMonthly).' a month, and Event Schedule charges zero platform fees on what you sell.',
+                'a' => 'Yes. Publishing your classes, running one as a weekly series, capping the seats with free registration, sorting strands into sub-schedules, emailing the students who follow you and syncing two ways with Google, Outlook or CalDAV are all free forever, with no limit on how many students sign up. So is scanning the QR at the door, on every plan. Putting a price on a spot is the Pro plan at '.plan_price($proMonthly).' a month, along with multi-class cards, custom questions at checkout and the live check-in screen, and Event Schedule charges zero platform fees on what you sell.',
             ],
             [
                 'q' => 'Can I run different kinds of workshops on one schedule?',
@@ -571,7 +571,7 @@
             ],
             [
                 'q' => 'Can I sell spots and cap the class?',
-                'a' => 'Yes. Sell spots with named ticket types, each with its own price, quantity and sales window, and take the money through your own Stripe or PayPal account, or as cash, a payment link, Invoice Ninja, or Payfast if you charge in rand, on every plan. The free plan sells 25 paid spots a month and Pro lifts the ceiling; free classes can use registration with a seat limit instead, unlimited on every plan. Either way the count is kept per session date, so a full Saturday does not close the next one, and students see the number of spots left rather than who is on the sheet.',
+                'a' => 'Yes. Sell spots with named ticket types, each with its own price, quantity and sales window, and take the money through your own Stripe or PayPal account, or as cash, a payment link, Invoice Ninja, or Payfast if you charge in rand. Charging for a spot is a Pro feature; classes you run for nothing can use registration with a seat limit instead, unlimited on every plan. Either way the count is kept per session date, so a full Saturday does not close the next one, and students see the number of spots left rather than who is on the sheet.',
             ],
             [
                 'q' => 'Can I refund a student?',
@@ -887,7 +887,7 @@
                             </li>
                             <li class="flex gap-3" data-reveal>
                                 <svg aria-hidden="true" class="es-shop-accent mt-0.5 h-5 w-5 flex-none" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7" /></svg>
-                                <span class="es-shop-muted text-sm">Free registration with a seat limit is unlimited on every plan, and the free plan sells 25 paid spots a month on top of that.</span>
+                                <span class="es-shop-muted text-sm">Free registration with a seat limit is unlimited on every plan; putting a price on the spots is Pro.</span>
                             </li>
                             <li class="flex gap-3" data-reveal>
                                 <svg aria-hidden="true" class="es-shop-accent mt-0.5 h-5 w-5 flex-none" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7" /></svg>
@@ -996,7 +996,7 @@
                     What the bench earns is <span class="es-shop-accent">what you keep.</span>
                 </h2>
                 <p class="es-shop-muted mt-5 text-lg" data-reveal style="--reveal-delay: 0.15s;">
-                    Spots are sold through your own Stripe or <a href="{{ marketing_url('/paypal') }}" class="es-shop-link font-medium hover:underline">PayPal</a> account, or paid in cash on the day. Event Schedule charges zero platform fees on every plan, so past the processor's own fee the money is yours. The free plan sells 25 paid spots a month; Pro takes the ceiling off.
+                    Spots are sold through your own Stripe or <a href="{{ marketing_url('/paypal') }}" class="es-shop-link font-medium hover:underline">PayPal</a> account, or paid in cash on the day. Event Schedule charges zero platform fees on every plan, so past the processor's own fee the money is yours. Putting a price on a spot is the Pro plan; a class you run for nothing takes registrations on any plan.
                 </p>
             </div>
 
@@ -1432,7 +1432,7 @@
                         Pin up the sheet. <span class="es-shop-lit">Fill the bench.</span>
                     </h2>
                     <p class="mx-auto mb-10 max-w-2xl text-lg es-shop-wall-muted">
-                        Publishing your classes, capping the seats and emailing the students who follow you are free forever, and so are the first 25 paid spots a month. Unlimited sales and class cards are {{ plan_price($proMonthly) }} a month, and nothing is taken off the top.
+                        Publishing your classes, capping the seats with free registration and emailing the students who follow you are free forever, with no limit on sign-ups. Charging for a spot, and multi-class cards, are {{ plan_price($proMonthly) }} a month, and nothing is taken off the top.
                     </p>
 
                     <div class="mx-auto flex max-w-2xl flex-col items-stretch justify-center gap-3 sm:flex-row">

@@ -100,7 +100,10 @@ class AppServiceProvider extends ServiceProvider
 
         $this->app->singleton('userRoles', function () {
             if ($user = auth()->user()) {
-                return $user->roles()->get();
+                // Eager-load what the plan predicates read: isPro() walks subscriptions and
+                // is_demo_role() walks user. The dashboard asks both per owned schedule, so without
+                // this a 20-schedule account pays 40 lazy queries on every render.
+                return $user->roles()->with(['subscriptions', 'user'])->get();
             }
 
             return collect();

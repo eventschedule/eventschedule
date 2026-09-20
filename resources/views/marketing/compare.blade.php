@@ -38,7 +38,7 @@
             ],
             [
                 'q' => 'Do I have to pay to use Event Schedule?',
-                'a' => 'No. The free plan is free forever with unlimited events and schedules, and it sells up to 25 paid tickets a month. Pro at '.plan_price($rates['eventschedule']['monthly']).'/mo lifts that to unlimited ticket sales and adds the API, and selfhosted installs get every paid feature at no cost.',
+                'a' => 'Not to publish. The free plan is free forever with unlimited events, unlimited schedules and unlimited free registration. Selling a ticket that carries a price is Pro at '.plan_price($rates['eventschedule']['monthly']).'/mo, which also adds the API, and selfhosted installs get every paid feature at no cost.',
             ],
         ];
 
@@ -99,14 +99,14 @@
                     "name": "Free",
                     "price": "0",
                     "priceCurrency": "{{ platform_currency() }}",
-                    "description": "Unlimited events and schedules, up to 25 paid tickets a month and no platform fees, free forever"
+                    "description": "Unlimited events, schedules and free registration, with no platform fees, free forever"
                 },
                 {
                     "@type": "Offer",
                     "name": "Pro",
                     "price": "{{ $rates['eventschedule']['monthly'] }}",
                     "priceCurrency": "{{ platform_currency() }}",
-                    "description": "Unlimited ticket sales, the check-in dashboard and API access, with 0% platform fees on ticket sales"
+                    "description": "Paid ticket sales, the check-in dashboard and API access, with 0% platform fees on ticket sales"
                 }
             ]
         }
@@ -528,7 +528,7 @@
                         <svg aria-hidden="true" class="h-5 w-5 transition-transform group-hover:translate-x-1 rtl:rotate-180" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6" /></svg>
                     </a>
                     <p class="mx-auto mt-5 max-w-2xl text-xs text-gray-500 dark:text-gray-400">
-                        Estimates from each platform's published rates. Stripe processing ({{ $rates['stripe']['label'] }}) is included for Event Schedule, Luma and Ticket Tailor. Eventbrite is shown with the 2.9% payment processing fee per order that its pricing page adds on top of the service fee. Ticket Tailor publishes {{ $rates['ticket-tailor']['range'] }} depending on volume, so the midpoint is used here. Luma is shown at whichever of its free and Plus plans is cheaper for the event, with Plus at its annual-billing price. Our free plan carries no monthly cost and covers up to 25 paid tickets a month.
+                        Estimates from each platform's published rates. Stripe processing ({{ $rates['stripe']['label'] }}) is included for Event Schedule, Luma and Ticket Tailor. Eventbrite is shown with the 2.9% payment processing fee per order that its pricing page adds on top of the service fee. Ticket Tailor publishes {{ $rates['ticket-tailor']['range'] }} depending on volume, so the midpoint is used here. Luma is shown at whichever of its free and Plus plans is cheaper for the event, with Plus at its annual-billing price. Our own figure includes the Pro subscription, because that is what a priced ticket takes; an event that only collects free registrations carries no monthly cost at all.
                     </p>
                 </div>
             </div>

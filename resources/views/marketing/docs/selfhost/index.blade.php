@@ -108,9 +108,9 @@
                         <td>10 recipients a month on Free, 100 on Pro, 1,000 on Enterprise, and unlimited for a schedule sending through its own SMTP. Each recipient counts as one.</td>
                     </tr>
                     <tr>
-                        <td><span class="font-semibold text-gray-900 dark:text-white">Paid ticket allowance</span></td>
-                        <td>Unlimited</td>
-                        <td>25 paid tickets a month on Free, unlimited on Pro and Enterprise. Free tickets and RSVPs never count.</td>
+                        <td><span class="font-semibold text-gray-900 dark:text-white">Selling priced tickets</span></td>
+                        <td>Included, unlimited</td>
+                        <td>A Pro or Enterprise feature. Free registration and zero-price ticket types are unlimited on every plan, including Free.</td>
                     </tr>
                     <tr>
                         <td><span class="font-semibold text-gray-900 dark:text-white">Payments</span></td>

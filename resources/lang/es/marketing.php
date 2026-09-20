@@ -2,10 +2,10 @@
 
 return [
     'home_title' => 'Event Schedule - Calendario de eventos, entradas y reservas, gratis',
-    'home_description' => 'Publica tus eventos en una sola página de calendario, vende entradas sin comisiones de plataforma y acepta reservas de citas. El plan gratuito vende 25 entradas de pago al mes.',
+    'home_description' => 'Publica tus eventos en una sola página de calendario, acepta inscripciones gratuitas sin límite y recibe reservas de citas. Las entradas de pago son de Pro.',
 
     'pricing_title' => 'Precios de Event Schedule: gratis y sin comisión de plataforma',
-    'pricing_description' => 'Empieza gratis con eventos ilimitados y 25 entradas de pago al mes. Pro quita el límite y Enterprise añade asientos numerados. Sin comisión de plataforma.',
+    'pricing_description' => 'Empieza gratis: eventos e inscripciones ilimitados. Pro añade la venta de entradas de pago y Enterprise los asientos numerados. Sin comisión de plataforma.',
 
     'features_title' => 'Funciones de gestión de eventos, sin comisiones de plataforma - Event Schedule',
     'features_description' => 'Todas las funciones en cinco capítulos: entradas con Stripe o PayPal sin comisión de plataforma, sincronización bidireccional del calendario, boletines, importación con IA y analíticas.',

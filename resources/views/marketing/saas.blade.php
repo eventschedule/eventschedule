@@ -1561,7 +1561,7 @@
             ],
             [
                 'q' => 'Is there a limit on customers or ticket sales?',
-                'a' => 'There is no cap on the number of customers or schedules, and nobody takes a cut of a ticket sale. The built-in Free tier does have allowances your customers upgrade past: 25 paid tickets a month per schedule, 10 newsletter recipients a month, 25 fan photos. Free RSVPs never count, the ticket figure is an environment variable you can raise, and Pro and Enterprise are unlimited on ticket sales.',
+                'a' => 'There is no cap on the number of customers or schedules, and nobody takes a cut of a ticket sale. The built-in Free tier does have allowances your customers upgrade past: 10 newsletter recipients a month and 25 fan photos. Selling a ticket that carries a price belongs to Pro and Enterprise, which is the upgrade most of your customers will buy, while free RSVPs and registration stay unlimited on every tier.',
             ],
             [
                 'q' => 'How do my customers get paid for their tickets?',

@@ -1,6 +1,6 @@
 <x-marketing-layout>
     <x-slot name="title">Event Schedule FAQ: Free Plan, Ticketing, Payments and Sync</x-slot>
-    <x-slot name="description">Straight answers before you sign up: what the free plan includes, 25 paid tickets a month with zero platform fees, PayPal, refunds and calendar sync.</x-slot>
+    <x-slot name="description">Straight answers before you sign up: what the free plan includes, paid ticketing on Pro with zero platform fees, PayPal, refunds and calendar sync.</x-slot>
     <x-slot name="breadcrumbTitle">FAQ</x-slot>
 
     {{-- Motion gate: hidden pre-reveal states only apply when this class is present,
@@ -506,9 +506,11 @@
         // ------------------------------------------------------------------
         // Every answer on this page is a factual claim, so each one is
         // traceable to docs/FEATURES.md or to code. Plan tiers in particular:
-        // newsletters are FREE (10 recipients/month), analytics is FREE, SELLING
-        // TICKETS is free up to 25 paid tickets a month with no platform fee, on
-        // every gateway and with refunds, and SCANNING at the door is free (the
+        // newsletters are FREE (10 recipients/month), analytics is FREE, FREE
+        // REGISTRATION and zero-price ticket types are unlimited on every plan
+        // while selling a ticket that carries a PRICE is Pro/Enterprise
+        // (Event::canSellPaidTickets), the platform fee is zero on every plan
+        // and every gateway, and SCANNING at the door is free (the
         // live check-in dashboard, ticket waitlist, promo codes, passes, add-ons
         // and CSV export are Pro), APPOINTMENT BOOKING is free with one
         // appointment type, custom domains and multiple team members are
@@ -544,7 +546,7 @@
                     ],
                     [
                         'q' => 'Is Event Schedule really free?',
-                        'a' => 'Yes, and the free plan is not a trial that quietly expires. Unlimited events, a mobile-friendly public page at your own address, two-way Google, Outlook and CalDAV sync, sub-schedules, recurring events, free registration with a capacity limit, built-in analytics, the embeddable calendar, backup and restore, and newsletters to 10 recipients a month all cost nothing, permanently. Selling tickets is on the free plan too, through Stripe, PayPal or cash, capped at 25 paid ones a month rather than charged for. The paid plans lift that ceiling and add a short list of other things, and the rate card above sets out exactly which.',
+                        'a' => 'Yes, and the free plan is not a trial that quietly expires. Unlimited events, a mobile-friendly public page at your own address, two-way Google, Outlook and CalDAV sync, sub-schedules, recurring events, free registration with a capacity limit, built-in analytics, the embeddable calendar, backup and restore, and newsletters to 10 recipients a month all cost nothing, permanently. Registration stays free however many people sign up, and so does a ticket type priced at zero. Charging for a ticket is what moves you to Pro, along with a short list of other things, and the rate card above sets out exactly which.',
                         'links' => [['Pricing', marketing_url('/pricing')]],
                     ],
                     [
@@ -562,7 +564,7 @@
                 'items' => [
                     [
                         'q' => "What's the difference between Free and Pro?",
-                        'a' => 'Free gives you the calendar: unlimited events, two-way calendar sync, sub-schedules, recurring events, built-in analytics, the embed, event graphics, and newsletters to 10 recipients a month. Free also sells: 25 paid tickets a month through Stripe, PayPal or any other payment method, scanned at the door, and one bookable appointment type. Pro is ' . plan_price($proMonthly) . ' a month and takes both ceilings off, then adds the rest of the selling kit: the live check-in dashboard, passes, promo codes, gift cards, add-ons, installment payments, unlimited appointment types, the ticket waitlist, custom fields, webhooks, the REST API, custom CSS, and taking the Event Schedule branding off your public pages. It also raises newsletters to 100 recipients a month.',
+                        'a' => 'Free gives you the calendar: unlimited events, two-way calendar sync, sub-schedules, recurring events, built-in analytics, the embed, event graphics, and newsletters to 10 recipients a month. Free also gives you unlimited registration, ticket types priced at zero, QR scanning at the door and one bookable appointment type. Pro is ' . plan_price($proMonthly) . ' a month and is what lets you charge for a ticket, through Stripe, PayPal or any other payment method, then adds the rest of the selling kit: the live check-in dashboard, passes, promo codes, gift cards, add-ons, installment payments, unlimited appointment types, the ticket waitlist, custom fields, webhooks, the REST API, custom CSS, and taking the Event Schedule branding off your public pages. It also raises newsletters to 100 recipients a month.',
                         'links' => [['Compare the plans', marketing_url('/pricing')]],
                     ],
                     [
@@ -594,11 +596,11 @@
                 'id' => 'tickets',
                 'no' => '03',
                 'name' => 'Tickets and money',
-                'note' => 'Selling tickets is on every plan, with no platform fee. What you charge stays between you and your audience.',
+                'note' => 'Free registration is on every plan and paid ticketing is on Pro, with no platform fee either way. What you charge stays between you and your audience.',
                 'items' => [
                     [
                         'q' => 'How do I start selling tickets?',
-                        'a' => 'Connect Stripe or PayPal, which takes a couple of minutes, then add ticket types to an event with a name, a price and a quantity. Buyers check out from the event page and get an emailed ticket carrying a QR code. The first 25 paid tickets a month are on the free plan; Pro removes the ceiling.',
+                        'a' => 'Connect Stripe or PayPal, which takes a couple of minutes, then add ticket types to an event with a name, a price and a quantity. Buyers check out from the event page and get an emailed ticket carrying a QR code. Charging for a ticket needs Pro; free registration and zero-price tickets do not.',
                         'links' => [['Ticketing', marketing_url('/features/ticketing')], ['Connect Stripe', marketing_url('/stripe')], ['Connect PayPal', marketing_url('/paypal')]],
                     ],
                     [
@@ -642,7 +644,7 @@
                     ],
                     [
                         'q' => 'Can I take sign-ups for a free event without paying for Pro?',
-                        'a' => 'Yes. Free registration is on the free plan, with an optional capacity limit counted per date, so a weekly session can hold twenty people this Thursday and twenty more next Thursday, and a waitlist for when it fills up is free too. Priced ticket types, payment through your own Stripe or PayPal account and scanning the QR at the door are all on the free plan as well, capped at 25 paid tickets a month. Pro is what removes the cap and adds the live check-in dashboard.',
+                        'a' => 'Yes. Free registration is on the free plan, with an optional capacity limit counted per date, so a weekly session can hold twenty people this Thursday and twenty more next Thursday, and a waitlist for when it fills up is free too. Scanning the QR at the door is on the free plan as well. Priced ticket types are what need Pro, which also adds the live check-in dashboard. Connecting your own Stripe or PayPal account is free on any plan.',
                         'links' => [['Registration', marketing_url('/docs/tickets#registration')]],
                     ],
                     [
@@ -869,7 +871,7 @@
             ['Built-in analytics', 'Yes', 'Yes', 'Yes'],
             ['Free registration with a capacity limit', 'Yes', 'Yes', 'Yes'],
             ['Newsletter recipients a month', '10', '100', '1,000'],
-            ['Paid tickets you can sell a month', 'Up to 25', 'Unlimited', 'Unlimited'],
+            ['Sell tickets that carry a price', 'No', 'Yes', 'Yes'],
             ['Platform fee on ticket sales', 'Zero', 'Zero', 'Zero'],
             ['Stripe and PayPal checkout, with refunds', 'Yes', 'Yes', 'Yes'],
             ['Scan tickets at the door', 'Yes', 'Yes', 'Yes'],

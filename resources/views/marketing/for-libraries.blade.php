@@ -631,7 +631,7 @@
         $faqs = [
             [
                 'q' => 'Is Event Schedule free for libraries?',
-                'a' => 'Yes. Publishing your program calendar, setting programs up as recurring, organising them into sub-schedules, taking free registrations with a place limit, embedding the calendar on your library site, syncing two ways with Google, Outlook or CalDAV, and the built-in analytics are all free forever. Newsletters are free too, with 10 emails a month counted per recipient; Pro raises that to 100 and Enterprise to 1,000. Selling tickets for a paid program is free as well, up to 25 paid tickets a month, and Pro at '.plan_price($proMonthly).' a month lifts that ceiling and adds the live check-in count at the door. Event Schedule charges zero platform fees on ticket sales, on every plan.',
+                'a' => 'Yes. Publishing your program calendar, setting programs up as recurring, organising them into sub-schedules, taking free registrations with a place limit, embedding the calendar on your library site, syncing two ways with Google, Outlook or CalDAV, and the built-in analytics are all free forever. Newsletters are free too, with 10 emails a month counted per recipient; Pro raises that to 100 and Enterprise to 1,000. Free registration has no ceiling on any plan. Charging for a program is the Pro plan at '.plan_price($proMonthly).' a month, which also adds the live check-in count at the door. Event Schedule charges zero platform fees on ticket sales, on every plan.',
             ],
             [
                 'q' => 'Can I manage story times, author events, and workshops together?',
@@ -643,7 +643,7 @@
             ],
             [
                 'q' => 'Can patrons register for programs?',
-                'a' => 'Yes, on the free plan. Turn on registration and set a place limit, and the limit is counted separately for every date, so this Tuesday filling up does not close next Tuesday. Patrons get a confirmation email with their own link. For a paid program, take payment through Stripe or PayPal, a payment link or cash at the desk, and sell named ticket types on the free plan too, up to 25 paid tickets a month, with zero platform fees past the provider\'s own processing. Pro at '.plan_price($proMonthly).' a month takes the 25 off.',
+                'a' => 'Yes, on the free plan. Turn on registration and set a place limit, and the limit is counted separately for every date, so this Tuesday filling up does not close next Tuesday. Patrons get a confirmation email with their own link. For a paid program, take payment through Stripe or PayPal, a payment link or cash at the desk, with zero platform fees past the provider\'s own processing. Named ticket types that carry a price are the Pro plan at '.plan_price($proMonthly).' a month.',
             ],
             [
                 'q' => 'What happens when a story time fills up?',
@@ -1029,7 +1029,7 @@
                     The Local History Talk is a Draft: on your calendar, not on the public one, until the speaker confirms. Sub-schedules colour-code and organise, so a Draft is how a program hides, not a strand.
                 </p>
                 <p class="es-cat-muted text-sm" data-reveal>
-                    The author reading charges $6, and the free plan still sells it: 25 paid tickets a month, no platform fee. Pro at {{ plan_price($proMonthly) }} a month is what you buy when 90 seats will not fit inside 25. Everything free stays free: the free registration on the other four is not a trial.
+                    The author reading charges $6, and the price is what makes it a Pro program: {{ plan_price($proMonthly) }} a month, still with no platform fee. Everything free stays free: the free registration on the other four is unlimited, and it is not a trial.
                 </p>
             </div>
         </div>
@@ -1269,10 +1269,10 @@
                         <div class="relative z-10">
                             <div class="mb-4 flex flex-wrap items-center gap-2">
                                 <h3 class="es-cat-ink text-xl font-bold">When a program costs money</h3>
-                                <span class="es-cat-plan">Free</span>
+                                <span class="es-cat-plan es-cat-plan-pro">Pro</span>
                             </div>
-                            <p class="es-cat-muted mb-4">An author evening, a paid workshop, a Friends of the Library fundraiser. Named ticket types with their own prices and quantities, sold on the free plan up to 25 paid tickets a month, through your own Stripe or <a href="{{ marketing_url('/paypal') }}" class="es-cat-link font-medium hover:underline">PayPal</a> account, a payment link or cash at the desk, and Event Schedule takes zero platform fees: past the provider's own processing, the money is yours. Announce it before tickets open, switch on the "Notify me" card, and patrons can leave an email address to hear when they do. If it is called off, Stripe and PayPal sales can be refunded from the Sales page, in full or in part, and the money goes back to the patron.</p>
-                            <p class="es-cat-muted text-sm">Pro at {{ plan_price($proMonthly) }} a month takes the 25 off and adds the desk work: extra questions at checkout for access needs or a child's age, a waitlist once a ticket type sells out, and a live count as patrons check in. Scanning the QR on a ticket is free on every plan; it is the running total that is Pro. Free registration for free programs needs none of it.</p>
+                            <p class="es-cat-muted mb-4">An author evening, a paid workshop, a Friends of the Library fundraiser. Named ticket types with their own prices and quantities, sold on the Pro plan through your own Stripe or <a href="{{ marketing_url('/paypal') }}" class="es-cat-link font-medium hover:underline">PayPal</a> account, a payment link or cash at the desk, and Event Schedule takes zero platform fees: past the provider's own processing, the money is yours. Announce it before tickets open, switch on the "Notify me" card, and patrons can leave an email address to hear when they do. If it is called off, Stripe and PayPal sales can be refunded from the Sales page, in full or in part, and the money goes back to the patron.</p>
+                            <p class="es-cat-muted text-sm">Pro at {{ plan_price($proMonthly) }} a month is what lets a ticket carry a price, and it brings the desk work with it: extra questions at checkout for access needs or a child's age, a waitlist once a ticket type sells out, and a live count as patrons check in. Scanning the QR on a ticket is free on every plan; it is the running total that is Pro. Free registration for free programs needs none of it, on any plan.</p>
                         </div>
                         <div class="es-glare" aria-hidden="true"></div>
                         <div class="es-ring-glow" aria-hidden="true"></div>

@@ -633,7 +633,7 @@
             ],
             [
                 'Stripe', 'out then in', 'Free',
-                'Checkout runs on Stripe. On the hosted platform the charge is created on your own connected account, and the result returns as a signed webhook. A refund from the Sales page goes back out along the same wire, in full or in part. Selling starts free at twenty-five paid tickets a month per schedule; Pro takes the ceiling off.',
+                'Checkout runs on Stripe. On the hosted platform the charge is created on your own connected account, and the result returns as a signed webhook. A refund from the Sales page goes back out along the same wire, in full or in part. Connecting it is free on any plan; a ticket that carries a price is what needs Pro.',
             ],
             [
                 'Invoice Ninja', 'out then in', 'Free',
@@ -698,7 +698,7 @@
         $faqs = [
             [
                 'q' => 'Which integrations are free?',
-                'a' => 'Two-way calendar sync with Google Calendar, Outlook or Microsoft 365 and any CalDAV server is free on every plan, and so are the nearby-accommodation map and Google Wallet passes, which the site operator switches on. So are the four money ports, Stripe, PayPal, Payfast and Invoice Ninja: selling starts free at twenty-five paid tickets a month per schedule, with zero platform fees on every plan. Pro at '.plan_price($proMonthly).' a month takes that ceiling off and adds webhooks, the REST API, web push, Eventbrite import and ad boosting. Creating events over WhatsApp is the one Enterprise port, at '.plan_price($entMonthly).'. Selfhosted installs resolve to the top tier, so every port is on from the first boot.',
+                'a' => 'Two-way calendar sync with Google Calendar, Outlook or Microsoft 365 and any CalDAV server is free on every plan, and so are the nearby-accommodation map and Google Wallet passes, which the site operator switches on. So are the four money ports, Stripe, PayPal, Payfast and Invoice Ninja: no gateway is plan-gated, and a free schedule connects one to take paid appointment bookings. What needs Pro at '.plan_price($proMonthly).' a month is putting a price on a ticket. There are zero platform fees on every plan either way. Pro adds webhooks, the REST API, web push, Eventbrite import and ad boosting alongside them. Creating events over WhatsApp is the one Enterprise port, at '.plan_price($entMonthly).'. Selfhosted installs resolve to the top tier, so every port is on from the first boot.',
             ],
             [
                 'q' => 'Is the calendar sync really two-way?',
@@ -1068,7 +1068,7 @@
                     The money never <span class="es-wire-accent">lands here.</span>
                 </h2>
                 <p class="es-wire-muted mt-5 text-lg" data-reveal style="--reveal-delay: 0.15s;">
-                    All four payment ports terminate in an account you own, and all four are open on the free plan, which sells twenty-five paid tickets a month per schedule before Pro takes the ceiling off. Event Schedule charges zero platform fees on ticket sales on every plan, which is only possible because it is not in the middle of the transaction.
+                    All four payment ports terminate in an account you own, and all four are open on every plan. What needs Pro is a ticket with a price on it. Event Schedule charges zero platform fees on ticket sales on every plan, which is only possible because it is not in the middle of the transaction.
                 </p>
             </div>
 
@@ -1131,7 +1131,7 @@
                         <span class="es-wire-spec-k">Payment URL</span>
                         <span class="es-wire-spec-v es-wire-muted">Send buyers to any link you already use. It is a signpost, not a connection, so you reconcile it yourself.</span>
                     </div>
-                    <p class="es-wire-muted mt-auto pt-5 text-sm">Free registration with a capacity limit needs no payment port at all, and works on every plan.</p>
+                    <p class="es-wire-muted mt-auto pt-5 text-sm">Free registration with a capacity limit needs no payment port at all, works on every plan, and has no monthly ceiling on it.</p>
                 </div>
             </div>
 
@@ -1147,7 +1147,7 @@
                     <span class="es-wire-plan">Free</span>
                 </div>
                 <p class="es-wire-muted mb-5 text-sm">
-                    Two more ports out to a buyer and back again, on every plan. Both let a selfhost operator supply one account for the whole install, which an owner who connects their own keeps overriding.
+                    Two more ports out to a buyer and back again, open on every plan like the rest of them. Both let a selfhost operator supply one account for the whole install, which an owner who connects their own keeps overriding.
                 </p>
                 <div class="es-wire-spec mb-5">
                     <span class="es-wire-spec-k">PayPal</span>
@@ -1558,7 +1558,7 @@
                         Pick a port. <span class="es-wire-lit">Wire it up.</span>
                     </h2>
                     <p class="mx-auto mb-10 max-w-2xl text-lg es-wire-onband-muted">
-                        Calendar sync, the accommodation map and your first twenty-five ticket sales a month are free forever. {{ plan_price($proMonthly) }} a month takes the ticket ceiling off and adds webhooks, the API, push and the imports. Nothing is taken from the door on any plan.
+                        Calendar sync, the accommodation map and free registration with no ceiling on it are free forever. {{ plan_price($proMonthly) }} a month buys paid ticket sales and adds webhooks, the API, push and the imports. Nothing is taken from the door on any plan.
                     </p>
 
                     {{-- The last port on the panel is the reader's own, and it is the only

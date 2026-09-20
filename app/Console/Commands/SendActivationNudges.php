@@ -313,12 +313,14 @@ class SendActivationNudges extends Command
      * The one that matters most: a page with something upcoming on it and no way to buy.
      *
      * Scoped to an UPCOMING public event, so it reaches someone with a date still to sell
-     * rather than someone whose season ended. No plan gate - the free plan sells 25 paid
-     * tickets a month and takes no platform fee, which is the point of the email.
+     * rather than someone whose season ended. Plan-gated since paid selling went back to
+     * Pro/Enterprise: mailing a free schedule "you can sell from this page" is an unsolicited
+     * upsell, not activation, because the thing the mail asks them to set up will not sell.
      */
     private function dueForNoTicketType(int $limit)
     {
         return $this->base('no_ticket_type')
+            ->wherePro()
             ->whereHas('events', fn ($q) => $this->ownedEvents($this->publicEvents($q))
                 ->where('events.starts_at', '>=', now()))
             // Any ticket type on any event this schedule owns counts as "they know how".
@@ -345,6 +347,9 @@ class SendActivationNudges extends Command
     private function dueForNoGateway(int $limit)
     {
         return $this->base('no_gateway')
+            // Same reasoning as dueForNoTicketType(): urging a free schedule to connect a gateway
+            // it cannot take money through is an upsell wearing an activation email's clothes.
+            ->wherePro()
             ->whereHas('events', fn ($q) => $this->ownedEvents($q)
                 ->whereHas('tickets', fn ($t) => $t->where('tickets.is_deleted', false)
                     ->where('tickets.price', '>', 0)))

@@ -107,6 +107,10 @@ class BackupService
         // the exporter iterates getFillable() - but listing them keeps the exclusion
         // intentional rather than a side effect, if that ever changes.
         'federated_at', 'federated_hash',
+        // The one-time paid-selling amnesty (2026_09_20). Non-fillable, so both halves of the
+        // round-trip already skip it - listed here so a future $fillable addition for event
+        // cloning cannot silently reopen the backup loophole the stamp exists to close.
+        'tickets_grandfathered_at',
         // Points at a seating_plans row on THIS install. It is fillable so event cloning
         // carries it, and both the exporter and importEvent() walk getFillable() - so a raw id
         // would either abort the WHOLE restore on the foreign key, or (restoring onto the same
@@ -2385,8 +2389,9 @@ class BackupService
 
         // saveQuietly() below fires no hooks, so the saving() hook that normally stamps paid_at
         // does not run. Carry the original payment time across, falling back to created_at for
-        // backups taken before the column existed. Without this a restore of historic sales would
-        // land with paid_at = now() and burn the schedule's monthly ticket allowance.
+        // backups taken before the column existed. paid_at drives the growth export's month
+        // attribution and SendActivationNudges::dueForFirstSale(), so a restore that stamped
+        // now() would misreport both.
         $sale->paid_at = $data['paid_at']
             ?? (($data['status'] ?? null) === 'paid' ? ($data['created_at'] ?? null) : null);
 

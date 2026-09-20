@@ -934,17 +934,18 @@
                 <p>
                     <span class="es-ledg-plan es-ledg-plan-pro">Pro</span>
                     <span class="es-ledg-muted ml-2 text-sm">
-                        No ceiling on ticket sales, plus the check-in dashboard, promo codes and gift
-                        cards, at {{ plan_price($proMonthly) }} a month. Selfhosted installs get every Pro and Enterprise
-                        feature, and no plan pays a platform fee on sales.
+                        Selling tickets that carry a price, plus the check-in dashboard, promo codes and
+                        gift cards, at {{ plan_price($proMonthly) }} a month. Selfhosted installs get every Pro and
+                        Enterprise feature, and no plan pays a platform fee on sales.
                     </span>
                 </p>
                 <p>
                     <span class="es-ledg-plan es-ledg-plan-free">Free</span>
                     <span class="es-ledg-muted ml-2 text-sm">
                         The schedule itself, its public page, calendar sync, RSVP with a capacity per
-                        date, the embeddable calendar, and the first 25 paid tickets a month, each one
-                        scanned at the door like any other.
+                        date, the embeddable calendar, and scanning every arrival at the door. Connecting
+                        Invoice Ninja is free on any plan too; putting a price on the ticket is the
+                        Pro part.
                     </span>
                 </p>
             </div>

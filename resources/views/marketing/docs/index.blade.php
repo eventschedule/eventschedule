@@ -11,7 +11,7 @@
         ['term' => 'Event', 'def' => 'A single occurrence with a date, time, location and details. An event belongs to a schedule and can repeat daily, weekly, every few weeks, monthly or yearly, with dates you add or skip.'],
         ['term' => 'Request', 'def' => 'An event waiting for your approval: one a visitor submitted from your public request page, or one another schedule added you to. Requests sit on the Requests tab until you accept or decline them, and you can opt in to an email when new ones land.'],
         ['term' => 'Unclaimed page', 'def' => 'A schedule page created for a performer or venue you name on an event before they are on Event Schedule. It says who created it, credits each date to the schedule that added it, and stays out of search engines. The person it names claims it with an account on the email address or phone number it lists, and becomes its owner.'],
-        ['term' => 'Ticket', 'def' => 'A ticket type on an event, such as General or VIP. Buyers pay through your own Stripe or PayPal account (or Payfast, Invoice Ninja, a payment link or cash), with no platform fees on any plan. Free schedules sell up to 25 paid tickets a month; Pro removes the cap.'],
+        ['term' => 'Ticket', 'def' => 'A ticket type on an event, such as General or VIP. Buyers pay through your own Stripe or PayPal account (or Payfast, Invoice Ninja, a payment link or cash), with no platform fees on any plan. A ticket type that carries a price needs Pro; one priced at zero sells on every plan.'],
         ['term' => 'RSVP', 'def' => 'Free sign-up for an event, with an optional capacity limit per date. Available on every plan, and no payment account is needed.'],
         ['term' => 'Follower', 'def' => 'Someone with an account who follows your schedule, which shares their name and email with you. Pressing Follow on its own reaches an account follower only through a newsletter you send; the automatic digest goes to people who asked for email updates (see Subscriber).'],
         ['term' => 'Subscriber', 'def' => 'Someone who asked your schedule for email updates: from the sign-up panel on your page, with their name and email, confirmed from the link we send, or from a tick box when they buy a ticket or register. Confirming the sign-up panel also sets up an account for them wherever sign-up is open. Subscribers get a digest automatically when you publish events your schedule created, at most one every few days, and it does not draw on the newsletter allowance.'],
@@ -74,7 +74,7 @@
 
     $steps = [
         ['icon' => 'cog', 'title' => 'Create a schedule', 'text' => 'Pick Talent, Venue or Curator, name it to get your URL, and add a logo and colors.', 'route' => 'marketing.docs.getting_started'],
-        ['icon' => 'plus', 'title' => 'Add your events', 'text' => 'Type them in or paste a listing for AI to parse. Sell tickets through Stripe, PayPal or another payment method, free up to 25 paid tickets a month.', 'route' => 'marketing.docs.creating_events'],
+        ['icon' => 'plus', 'title' => 'Add your events', 'text' => 'Type them in or paste a listing for AI to parse. Take free sign-ups on any plan, or sell paid tickets on Pro through Stripe, PayPal or another payment method.', 'route' => 'marketing.docs.creating_events'],
         ['icon' => 'share', 'title' => 'Share it', 'text' => 'Embed the calendar on your site, post the link, and collect subscribers who hear about new events on their own.', 'route' => 'marketing.docs.sharing'],
     ];
 @endphp

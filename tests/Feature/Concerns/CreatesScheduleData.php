@@ -63,6 +63,25 @@ trait CreatesScheduleData
         return $role->fresh();
     }
 
+    /**
+     * A genuinely FREE schedule on a hosted install, for exercising a plan gate's deny path.
+     *
+     * Every piece matters and all four are load-bearing: Role::isPro() short-circuits to true when
+     * app.hosted is false, createRole() defaults to enterprise, plan_expires has to be in the past,
+     * and onGenericTrial() would make a role with a future trial_ends_at Pro all over again.
+     * Assert $role->fresh()->isPro() is false in the test as a sanity check.
+     */
+    protected function createFreeRole(?User $user = null, string $type = 'venue', array $attrs = []): Role
+    {
+        config(['app.hosted' => true]);
+
+        return $this->createRole($user ?? $this->createOwner(), $type, $attrs + [
+            'plan_type' => 'free',
+            'plan_expires' => now()->subYear()->format('Y-m-d'),
+            'trial_ends_at' => null,
+        ]);
+    }
+
     protected function createEvent(Role $role, array $attrs = []): Event
     {
         $event = new Event;

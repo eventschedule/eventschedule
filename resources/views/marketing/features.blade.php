@@ -227,7 +227,7 @@
         accent="sky"
         badge="Ticketing"
         heading="Sell tickets online"
-        lede="Sell 25 paid tickets a month free, or unlimited on Pro, with zero platform fees. Buyers pay through Stripe, PayPal or four other methods, and Stripe and PayPal sales refund in full or in part. The ticket waitlist and live check-in dashboard are Pro."
+        lede="A ticket with a price on it is a Pro feature, and the platform fee is zero whatever plan you are on. Buyers pay through Stripe, PayPal or four other methods, and Stripe and PayPal sales refund in full or in part. Free registration is unlimited on every tier, and so is QR check-in at the door."
         :chips="['Zero platform fees', 'QR check-ins', 'Stripe and PayPal', 'Check-in dashboard', 'Waitlist', 'Promo codes', 'Sales export', 'Free event RSVP', 'Reserved seating']"
         :lead="true"
         frame="browser"
@@ -1329,11 +1329,11 @@
         $faqs = [
             [
                 'q' => 'Is Event Schedule really free?',
-                'a' => 'Yes. Unlimited events, unlimited schedules, calendar sync, free registration with capacity limits, analytics and QR check-in at the door are all included on the free plan, with no time limit and no credit card required. Two things are metered rather than unlimited: newsletters reach 10 recipients a month, and you can sell up to 25 paid tickets a month. A free schedule is also a team of one, with one bookable appointment type.',
+                'a' => 'Yes. Unlimited events, unlimited schedules, calendar sync, free registration with capacity limits, analytics and QR check-in at the door are all included on the free plan, with no time limit and no credit card required. Newsletters are metered rather than unlimited, at 10 recipients a month. A free schedule is also a team of one, with one bookable appointment type, and a ticket that carries a price is where Pro begins.',
             ],
             [
                 'q' => 'Do you take a cut of ticket sales?',
-                'a' => 'No. Event Schedule charges zero platform fees on tickets, on every plan including free. You connect your own Stripe or PayPal account and payouts go straight to you, so the only deduction is what Stripe or PayPal charges to process the payment. The free plan caps volume at 25 paid tickets a month rather than taking a cut; Pro removes the cap.',
+                'a' => 'No. Event Schedule charges zero platform fees on tickets, on every plan including free. You connect your own Stripe or PayPal account and payouts go straight to you, so the only deduction is what Stripe or PayPal charges to process the payment. Charging for a ticket is a Pro feature, but the fee is zero whatever you charge and whatever plan you are on.',
             ],
             [
                 'q' => 'Which payment methods can I accept?',

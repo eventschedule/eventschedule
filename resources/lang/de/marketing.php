@@ -2,10 +2,10 @@
 
 return [
     'home_title' => 'Event Schedule - Kostenloser Veranstaltungskalender & Buchungen',
-    'home_description' => 'Veröffentliche deine Veranstaltungen auf einer Kalenderseite, verkaufe Tickets ohne Plattformgebühren und nimm Terminbuchungen an. Der kostenlose Plan verkauft 25 bezahlte Tickets im Monat.',
+    'home_description' => 'Veröffentliche deine Veranstaltungen auf einer Kalenderseite, verkaufe Tickets ohne Plattformgebühren und nimm Terminbuchungen an. Kostenlose Anmeldungen ohne Limit.',
 
     'pricing_title' => 'Event Schedule Preise: Gratis-Plan, keine Plattformgebühren',
-    'pricing_description' => 'Kostenlos starten: unbegrenzte Events und 25 bezahlte Tickets im Monat. Pro hebt das Limit auf, Enterprise bringt nummerierte Plätze. Keine Plattformgebühr.',
+    'pricing_description' => 'Kostenlos starten: unbegrenzte Events und Anmeldungen ohne Limit. Bezahlte Tickets gibt es ab Pro, Enterprise bringt nummerierte Plätze. Keine Plattformgebühr.',
 
     'features_title' => 'Funktionen für das Veranstaltungsmanagement, ohne Plattformgebühren - Event Schedule',
     'features_description' => 'Alle Funktionen in fünf Kapiteln: Tickets über Stripe oder PayPal ohne Plattformgebühr, Kalendersynchronisierung in beide Richtungen, Newsletter, KI-Import und Analysen.',

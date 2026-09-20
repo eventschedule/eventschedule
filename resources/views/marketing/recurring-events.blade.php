@@ -1213,7 +1213,7 @@
             </div>
 
             <p class="es-loop-muted mx-auto mt-8 max-w-2xl text-center text-sm" data-reveal>
-                Registration with a capacity limit is free on every plan, and so is selling: 25 paid tickets a month per schedule, counted across the loop's dates rather than reset by each one. Scanning them at the door is free too. {{ plan_price($proMonthly) }} a month takes that ceiling off and adds the live check-in dashboard and the ticket waitlist, and Event Schedule takes zero platform fees on ticket sales on every plan.
+                Registration with a capacity limit is free on every plan, counted afresh for every date of the loop, and scanning at the door is free too. Charging for a seat is what {{ plan_price($proMonthly) }} a month opens, along with the live check-in dashboard and the ticket waitlist, and Event Schedule takes zero platform fees on ticket sales on every plan.
             </p>
         </div>
     </section>
@@ -1631,7 +1631,7 @@
                         Set the loop once. <span class="es-loop-lit">Stop retyping Tuesdays.</span>
                     </h2>
                     <p class="mx-auto mb-10 max-w-2xl text-lg text-gray-300">
-                        Patterns, end conditions and date exceptions are free forever, and the free plan sells 25 paid tickets a month and scans them at the door. {{ plan_price($proMonthly) }} a month takes the ceiling off and adds the live check-in dashboard, and nothing is taken from the door on either.
+                        Patterns, end conditions and date exceptions are free forever, as is free registration on every date and scanning it at the door. {{ plan_price($proMonthly) }} a month is what lets you charge for a seat, and it adds the live check-in dashboard, and nothing is taken from the door on either.
                     </p>
 
                     <div class="mx-auto flex max-w-2xl flex-col items-stretch justify-center gap-3 sm:flex-row">

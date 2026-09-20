@@ -403,10 +403,8 @@ class GrowthExportTest extends TestCase
         $this->assertSame(2, $data['activation']['accounts']);
     }
 
-    public function test_free_pressure_buckets_the_peak_month_and_flags_the_cap(): void
+    public function test_free_pressure_buckets_the_peak_month_of_paid_tickets(): void
     {
-        $cap = (int) config('usage.ticket_sale_monthly_limit_free', 25);
-
         $quiet = $this->freeRole();
         $quietEvent = $this->createEvent($quiet);
         $quietTicket = $this->createTicket($quietEvent, ['price' => 10, 'quantity' => 500]);
@@ -415,7 +413,7 @@ class GrowthExportTest extends TestCase
         $busy = $this->freeRole();
         $busyEvent = $this->createEvent($busy);
         $busyTicket = $this->createTicket($busyEvent, ['price' => 10, 'quantity' => 500]);
-        $this->createSale($busyEvent, $busy, ['status' => 'paid', 'payment_amount' => 300], $busyTicket, $cap);
+        $this->createSale($busyEvent, $busy, ['status' => 'paid', 'payment_amount' => 300], $busyTicket, 30);
 
         $idle = $this->freeRole();
 
@@ -423,10 +421,12 @@ class GrowthExportTest extends TestCase
 
         $this->assertSame(3, $pressure['free_schedules']);
         $this->assertSame(1, $pressure['peak_month_paid_tickets']['1-5'], 'the 3-ticket schedule');
-        $this->assertSame(1, $pressure['peak_month_paid_tickets']['at_or_over_cap'], 'the capped schedule');
+        $this->assertSame(1, $pressure['peak_month_paid_tickets']['16+'], 'the 30-ticket schedule');
         $this->assertSame(1, $pressure['peak_month_paid_tickets']['0'], 'the idle schedule');
-        $this->assertSame(1, $pressure['ever_hit_ticket_cap']);
-        $this->assertSame($cap, $pressure['ticket_cap']);
+
+        // Paid selling is Pro/Enterprise now, so this reads as a conversion list rather than a cap
+        // meter: free schedules that have sold before and are sitting on Free.
+        $this->assertSame(2, $pressure['ever_sold_paid']);
         $this->assertNotNull($idle->fresh());
     }
 

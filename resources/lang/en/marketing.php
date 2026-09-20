@@ -9,10 +9,10 @@
 
 return [
     'home_title' => 'Event Schedule - Free Event Calendar, Ticketing & Booking',
-    'home_description' => 'Publish your events on one calendar page, sell tickets with zero platform fees and take appointment bookings. The free plan sells 25 paid tickets a month.',
+    'home_description' => 'Publish your events on one calendar page, take unlimited free registrations and sell tickets with zero platform fees. Paid ticketing is on the Pro plan.',
 
     'pricing_title' => 'Event Schedule Pricing: Free Plan, Zero Platform Fees',
-    'pricing_description' => 'Start free with unlimited events and 25 paid tickets a month. Pro lifts the ticket cap, Enterprise adds reserved seating. Zero platform fees on every plan.',
+    'pricing_description' => 'Start free with unlimited events and unlimited free registration. Pro adds paid ticketing, Enterprise adds reserved seating. Zero platform fees on every plan.',
 
     'features_title' => 'Event Management Features, No Platform Fees - Event Schedule',
     'features_description' => 'Every feature in five chapters: tickets through Stripe or PayPal with no platform fee, two-way calendar sync, newsletters, AI import and analytics.',

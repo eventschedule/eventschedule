@@ -617,7 +617,7 @@
             ],
             [
                 'q' => 'Can I sell virtual tickets and venue tickets for the same show?',
-                'a' => 'Yes. They are two named ticket types on the same date, so one can be "Standing" at thirty and the other "Livestream" at twelve, each with its own price, quantity and sales window. Selling is free up to 25 paid tickets a month and '.plan_price($proMonthly).' a month on Pro past that, and Event Schedule charges zero platform fees on the sale either way. The full stream link lives on the buyer\'s own ticket page: the public event page shows the room, or the domain you are streaming on when the date has no room at all.',
+                'a' => 'Yes. They are two named ticket types on the same date, so one can be "Standing" at thirty and the other "Livestream" at twelve, each with its own price, quantity and sales window. A ticket type with a price on it needs Pro, at '.plan_price($proMonthly).' a month, and Event Schedule charges zero platform fees on the sale at every tier. The full stream link lives on the buyer\'s own ticket page: the public event page shows the room, or the domain you are streaming on when the date has no room at all.',
             ],
             [
                 'q' => 'What streaming platforms does Event Schedule work with?',
@@ -625,7 +625,7 @@
             ],
             [
                 'q' => 'Is Event Schedule really free for streaming concerts?',
-                'a' => 'Yes. Unlimited dates, the whole routing on one address, recurring residencies with date exceptions, sub-schedules, two-way Google, Outlook and CalDAV sync, the embeddable calendar, free registration with a capacity limit, built-in analytics, ten newsletter recipients a month, selling up to 25 paid tickets a month and scanning them at the door are all free forever. Unlimited ticket sales, passes and the live check-in dashboard are '.plan_price($proMonthly).' a month on Pro. There are zero platform fees on ticket sales at every tier, whether a date sells through your own Stripe or PayPal account, Invoice Ninja, a payment link or cash, so past the provider\'s own fee the money is yours.',
+                'a' => 'Yes. Unlimited dates, the whole routing on one address, recurring residencies with date exceptions, sub-schedules, two-way Google, Outlook and CalDAV sync, the embeddable calendar, free registration with a capacity limit and no monthly ceiling, built-in analytics, ten newsletter recipients a month and scanning a ticket at the door are all free forever. Selling a ticket that carries a price is '.plan_price($proMonthly).' a month on Pro, along with passes and the live check-in dashboard. There are zero platform fees on ticket sales at every tier, whether a date sells through your own Stripe or PayPal account, Invoice Ninja, a payment link or cash, so past the provider\'s own fee the money is yours.',
             ],
             [
                 'q' => 'What happens when a date moves or gets pulled?',
@@ -831,7 +831,7 @@
                 </div>
                 <div class="es-stage-card p-6 text-center" data-reveal="panel">
                     <div class="es-stage-accent es-stage-num mb-1 text-3xl font-black">{{ plan_price($proMonthly) }}</div>
-                    <p class="es-stage-muted text-sm">A month for Pro. The free plan sells 25 paid tickets a month and scans the door already; Pro takes the ceiling off and adds passes and the check-in dashboard.</p>
+                    <p class="es-stage-muted text-sm">A month for Pro. Free registration and scanning the door are already free; Pro is what puts a price on a ticket, and adds passes and the check-in dashboard.</p>
                 </div>
                 <div class="es-stage-card p-6 text-center" data-reveal="panel">
                     <div class="es-stage-accent es-stage-num mb-1 text-3xl font-black">10</div>
@@ -938,9 +938,9 @@
                     <div class="es-stage-card p-6" data-reveal="panel">
                         <div class="mb-3 flex flex-wrap items-center gap-2">
                             <h3 class="es-stage-ink text-lg font-bold">Tiers that open and close</h3>
-                            <span class="es-stage-plan">Free</span>
+                            <span class="es-stage-plan es-stage-plan-pro">Pro</span>
                         </div>
-                        <p class="es-stage-muted text-sm">Each type gets a price, a quantity, a maximum per order and a sales window, so an early-bird allocation stops on its own. Free to 25 paid tickets a month, uncapped on Pro.</p>
+                        <p class="es-stage-muted text-sm">Each type gets a price, a quantity, a maximum per order and a sales window, so an early-bird allocation stops on its own. A type set at no charge goes out on any plan; a price on one is Pro.</p>
                     </div>
                     <div class="es-stage-card p-6" data-reveal="panel">
                         <div class="mb-3 flex flex-wrap items-center gap-2">
@@ -1463,7 +1463,7 @@
                         Put the routing up. <span class="es-stage-lit">Keep the door.</span>
                     </h2>
                     <p class="es-stage-onmuted mx-auto mb-10 max-w-2xl text-lg sm:text-xl">
-                        Publishing the whole run is free forever, and so are your first 25 paid tickets a month and scanning them at the door. {{ plan_price($proMonthly) }} a month takes the ceiling off and adds passes and the check-in dashboard, and nothing is taken from the sale.
+                        Publishing the whole run is free forever, and so is scanning a ticket at the door. {{ plan_price($proMonthly) }} a month is what puts a price on one, and adds passes and the check-in dashboard. Nothing is taken from the sale on any plan.
                     </p>
 
                     <div class="mx-auto flex max-w-2xl flex-col items-stretch justify-center gap-3 sm:flex-row">

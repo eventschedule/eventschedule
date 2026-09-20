@@ -106,11 +106,11 @@
                plan); asking each guest separately needs Individual tickets,
                which is Pro.
 
-           TIER HONESTY: the free plan sells a monthly allowance of paid
-           tickets (Role::ticketSaleLimit()) and Pro takes the ceiling off.
-           Covers, the cutoff and the questions are all free; per-guest
-           answers and the CSV export are the Pro parts, and the badges
-           say exactly that.
+           TIER HONESTY: selling a cover that carries a price is Pro
+           (Event::canSellPaidTickets()); free registration and a ticket
+           type at no charge have no ceiling on any plan. The cutoff and
+           the questions on a ticket are free; per-guest answers and the
+           CSV export are the other Pro parts, and the badges say so.
 
            COLOUR: wine, and the trade-off is named. The audit leaves green
            120-139 (squeezed against food-trucks at 113, which IS a food
@@ -364,7 +364,7 @@
         $faqs = [
             [
                 'q' => 'Is Event Schedule free for restaurants?',
-                'a' => 'The schedule itself is free forever: your public page and its link, sub-schedules for private dining or a supper club, enquiries for private hire, Drafts that keep an event off the public page until you announce it, two-way calendar sync, an embeddable calendar and up to 10 newsletter emails a month, counted per recipient rather than per send. Selling covers is free up to 25 paid tickets a month per schedule, which is one supper club a month with room to spare, and the cutoff and the questions on the ticket come with it. A free evening, a quiz or a tasting on the house, can take registrations up to a capacity per date instead, and those never count toward the 25. Pro at '.plan_price($proMonthly).' a month takes the ceiling off, and Event Schedule charges zero platform fees on sales either way.',
+                'a' => 'The schedule itself is free forever: your public page and its link, sub-schedules for private dining or a supper club, enquiries for private hire, Drafts that keep an event off the public page until you announce it, two-way calendar sync, an embeddable calendar and up to 10 newsletter emails a month, counted per recipient rather than per send. Selling covers at a price is the one part that needs Pro, at '.plan_price($proMonthly).' a month, and the cutoff and the questions on the ticket come with it. A free evening, a quiz or a tasting on the house, can take registrations up to a capacity per date on the free plan, and there is no monthly ceiling on how many names come through. Event Schedule charges zero platform fees on sales either way.',
             ],
             [
                 'q' => 'How do I stop selling more covers than the kitchen can cook?',
@@ -521,9 +521,9 @@
             </div>
 
             <div class="mt-8 text-center" data-reveal>
-                <span class="es-cover-plan es-cover-plan-free">Free</span>
+                <span class="es-cover-plan es-cover-plan-pro">Pro</span>
                 <span class="es-cover-muted ml-2 text-sm">
-                    Selling covers is free up to 25 paid tickets a month, and Pro at {{ plan_price($proMonthly) }} a month takes the ceiling off. The money goes through your own Stripe or <x-link href="{{ marketing_url('/paypal') }}">PayPal</x-link> account, with no platform fee on top of theirs on either plan.
+                    Selling covers at a price is Pro, at {{ plan_price($proMonthly) }} a month; a free sitting takes names on any plan and has no ceiling. The money goes through your own Stripe or <x-link href="{{ marketing_url('/paypal') }}">PayPal</x-link> account, with no platform fee on top of theirs on either plan.
                 </span>
             </div>
         </div>
@@ -971,8 +971,8 @@
                         Cook for the number <span class="es-cover-grad">that actually sold</span>.
                     </h2>
                     <p class="mx-auto mb-10 max-w-xl text-lg text-gray-300 sm:text-xl">
-                        The schedule is free, and so are the first 25 paid covers each month. Pro at
-                        {{ plan_price($proMonthly) }} a month takes the ceiling off, and none of the ticket price comes to us.
+                        The schedule is free, and so is every free sitting you take names for. Pro at
+                        {{ plan_price($proMonthly) }} a month is what puts a price on a cover, and none of the ticket price comes to us.
                     </p>
 
                     <div class="mx-auto flex max-w-2xl flex-col items-stretch justify-center gap-3 sm:flex-row">

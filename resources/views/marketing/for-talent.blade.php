@@ -32,7 +32,7 @@
         $performerTypes = ['Musicians', 'DJs', 'Comedians', 'Dancers', 'Magicians', 'Poets', 'Acrobats', 'Actors', 'Bands', 'Instructors', 'Artists', 'Vendors'];
 
         $faqs = [
-            ['q' => 'Is Event Schedule free for performers?', 'a' => 'Yes. Sharing your show schedule, syncing your calendar, taking booking requests from venues, letting fans follow you and selling up to 25 paid tickets a month are all free forever, and so is a newsletter allowance of 10 emails each month, counted per recipient rather than per send. Unlimited ticket sales and a larger newsletter allowance are on the Pro plan at ' . plan_price($proMonthly) . '/month, and there are still no platform fees on ticket sales.'],
+            ['q' => 'Is Event Schedule free for performers?', 'a' => 'Yes. Sharing your show schedule, syncing your calendar, taking booking requests from venues, letting fans follow you and taking free registrations with no monthly ceiling are all free forever, and so is a newsletter allowance of 10 emails each month, counted per recipient rather than per send. Selling a ticket that carries a price is on the Pro plan at ' . plan_price($proMonthly) . '/month, along with the larger newsletter allowance, and there are still no platform fees on ticket sales.'],
             ['q' => 'What happens when a venue books me for a show?', 'a' => 'The venue adds you to their event and you get a request. Accept it and the gig appears on your schedule automatically, with the venue listed on it. You never type the same date into two calendars, and both schedules stay in sync from then on.'],
             ['q' => 'A venue or curator made a page for me. How do I claim it?', 'a' => 'When a schedule lists you on an event before you are on Event Schedule, a page is created in your name so their lineup can show you. It says who created it and that you have not claimed it yet, credits each date to the schedule that added it, and stays out of search engines until it is claimed. To take it over, press Claim this page and sign in with the email address on it, the one that schedule entered for you. It becomes your schedule, and the schedules already listing you keep listing you without asking again. If the page is not about you, press This is not me: when you hold the address on it the page comes down at once, and otherwise your report is recorded for review.'],
             ['q' => 'I already have a Linktree. Why would I need this?', 'a' => 'A link page shows buttons. A schedule shows dates. Your Event Schedule page lists your actual upcoming shows with venues, times and ticket links, updates itself as you add dates, and lets fans follow you so you can email them when a new show lands. You can keep your link page and point it here, or replace it entirely.'],
@@ -352,7 +352,7 @@
         badge="Sell the tickets"
         heading="Take the door yourself. Keep all of it."
         lede="Sell straight from your event page through your own Stripe or PayPal account, or take cash at the door. Buyers get a QR ticket, you scan them in, and the money lands with you. We never take a cut of a ticket on any plan, and a Stripe or PayPal sale can be refunded from the Sales page, in full or in part."
-        :chips="['Zero platform fees', '25 paid tickets a month, free', 'QR scanning, free', 'Unlimited sales and passes, Pro']"
+        :chips="['Zero platform fees', 'Free registration, unlimited', 'QR scanning, free', 'Paid tickets and passes, Pro']"
         ground="white"
         frame="phone">
         <div>
@@ -531,7 +531,7 @@
                             '<a href="' . marketing_url('/features/calendar-sync') . '" class="font-medium text-blue-600 hover:underline dark:text-blue-400">Google Calendar, Outlook and CalDAV sync</a>',
                             'Website embed, iCal and RSS feeds',
                             '<a href="' . marketing_url('/features/online-events') . '" class="font-medium text-blue-600 hover:underline dark:text-blue-400">Online and hybrid shows</a> with a link to wherever it happens',
-                            'Up to 25 paid tickets a month through <a href="' . marketing_url('/stripe') . '" class="font-medium text-blue-600 hover:underline dark:text-blue-400">Stripe</a> or <a href="' . marketing_url('/paypal') . '" class="font-medium text-blue-600 hover:underline dark:text-blue-400">PayPal</a>, with QR scanning at the door',
+                            'Free registration with a capacity, no monthly ceiling, and QR scanning at the door',
                             'Subscribers who hear automatically when you announce dates, plus 10 newsletter recipients a month',
                             'Fan photos, videos and comments, all approved by you',
                         ] as $freeItem)
@@ -555,7 +555,7 @@
                     </div>
                     <ul class="mb-6 space-y-2.5 text-sm text-gray-600 dark:text-gray-400">
                         @foreach ([
-                            'Unlimited ticket sales, still zero platform fees',
+                            'Sell tickets with a price on them, still zero platform fees',
                             'Season passes, visit passes and promo codes',
                             '100 newsletter recipients a month, up from 10',
                             'Auto-generated schedule graphics for socials',

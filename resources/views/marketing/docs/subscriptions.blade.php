@@ -47,7 +47,7 @@
         </div>
         <div class="doc-callout doc-callout-plan">
             <div class="doc-callout-title">Passes need a Pro plan</div>
-            <p><x-doc-badge plan="pro" /> <a href="{{ route('marketing.docs.tickets') }}" class="doc-link">Selling tickets</a> is available on every plan: the free plan sells up to 25 paid tickets per calendar month, and Pro lifts that cap. Scanning a QR code at the door is on every plan too. The pass switch is the part that needs <strong class="text-gray-900 dark:text-white">Pro</strong>.</p>
+            <p><x-doc-badge plan="pro" /> A pass always carries a price, so it needs <strong class="text-gray-900 dark:text-white">Pro</strong> twice over: <a href="{{ route('marketing.docs.tickets') }}" class="doc-link">selling a ticket that costs money</a> is a Pro feature in its own right, and the pass switch is another. Free registration and scanning a QR code at the door are on every plan.</p>
             <p class="mt-2">The plan is checked when the pass is used, not only when it is sold. If a schedule drops back to the free plan its pass tickets keep every setting and the scanner still checks holders in, but they can no longer book dates in advance. A selfhosted install counts as Enterprise, so nothing on this page is held back there.</p>
         </div>
     </section>
@@ -420,7 +420,7 @@
             <li><strong class="text-gray-900 dark:text-white">Future events.</strong> "All events" and "sub-schedule" coverage automatically include events you create later; "Specific events" does not.</li>
             <li><strong class="text-gray-900 dark:text-white">Advance booking is checked when it is used, not at the till.</strong> Booking dates ahead needs the schedule to be on a paid plan at that moment, so a pass sold while you were on Pro stops taking bookings if the schedule has since lapsed to free. Scanning it in at the door carries on working.</li>
             <li><strong class="text-gray-900 dark:text-white">Webhooks.</strong> <x-doc-badge plan="pro" /> Pass scans and advance bookings fire <a href="{{ route('marketing.docs.developer.webhooks') }}" class="doc-link">webhooks</a> (<strong class="text-gray-900 dark:text-white">ticket.scanned</strong>, <strong class="text-gray-900 dark:text-white">ticket.booked</strong> and <strong class="text-gray-900 dark:text-white">ticket.booking_cancelled</strong>) if you want to feed another system.</li>
-            <li><strong class="text-gray-900 dark:text-white">Plan.</strong> <x-doc-badge plan="pro" /> Selling tickets and scanning them at the door are on every plan (25 paid tickets a month on the free plan); the pass itself is the part that needs Pro, which also lifts the monthly cap. Selfhosted installs include the lot.</li>
+            <li><strong class="text-gray-900 dark:text-white">Plan.</strong> <x-doc-badge plan="pro" /> Free registration and scanning a ticket at the door are on every plan; a ticket with a price on it needs Pro, and so does the pass switch itself. Selfhosted installs include the lot.</li>
         </ul>
     </section>
 

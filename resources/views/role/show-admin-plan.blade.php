@@ -175,28 +175,7 @@
         </div>
 
         {{-- Usage meters. All three share <x-usage-meter>; the markup used to be hand-rolled and
-             duplicated here and across three newsletter pages, which is how the thresholds drifted.
-             Ticket sales come first: it is the allowance tied to revenue. --}}
-
-        {{-- Paid ticket allowance --}}
-        @if (config('app.hosted'))
-        @php
-            $ticketLimit = $role->ticketSaleLimit();
-            $ticketUsed = $ticketLimit === null ? 0 : $role->ticketsSoldThisMonth();
-            $ticketResetDate = $role->ticketAllowanceResetsAt()->translatedFormat('F j');
-        @endphp
-        <x-usage-meter
-            variant="panel"
-            divider
-            :label="__('messages.ticket_allowance_usage')"
-            :used="$ticketUsed"
-            :limit="$ticketLimit"
-            :usedText="$ticketLimit === null ? null : __('messages.tickets_sold_of', ['used' => $ticketUsed, 'limit' => $ticketLimit])"
-            :unlimitedText="__('messages.ticket_allowance_unlimited')"
-            :noteText="$ticketLimit === null ? null : __('messages.ticket_allowance_note', ['date' => $ticketResetDate])"
-            :upgradeUrl="$ticketLimit !== null && config('cashier.key') ? route('role.subscribe', ['subdomain' => $role->subdomain]) : null"
-            :upgradeLabel="__('messages.ticket_allowance_upgrade')" />
-        @endif
+             duplicated here and across three newsletter pages, which is how the thresholds drifted. --}}
 
         {{-- Newsletter Usage --}}
         @php $newsletterLimit = $role->newsletterLimit(); @endphp
@@ -245,15 +224,14 @@
             :title="__('messages.plan_overview_title')"
             :learnMoreUrl="marketing_url('/pricing')"
             :bullets="[
-                __('messages.ticket_allowance_pro_bullet_unlimited'),
-                __('messages.ticket_allowance_pro_bullet_checkin'),
-                __('messages.ticket_allowance_pro_bullet_promo'),
-                __('messages.ticket_allowance_pro_bullet_waitlist'),
-                __('messages.ticket_allowance_pro_bullet_passes'),
+                __('messages.ticket_pro_bullet_selling'),
+                __('messages.ticket_pro_bullet_checkin'),
+                __('messages.ticket_pro_bullet_promo'),
+                __('messages.ticket_pro_bullet_waitlist'),
+                __('messages.ticket_pro_bullet_passes'),
                 __('messages.appointment_type_pro_bullet_unlimited'),
             ]">
             {{ __('messages.plan_overview_body', [
-                'tickets' => $role->ticketSaleLimit() ?? 0,
                 'types' => $role->appointmentTypeLimit() ?? 0,
             ]) }}
         </x-plan-gate>

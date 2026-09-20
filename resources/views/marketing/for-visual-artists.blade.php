@@ -616,7 +616,7 @@
         $faqs = [
             [
                 'q' => 'Is Event Schedule free for visual artists?',
-                'a' => 'Yes. The wall itself costs nothing: your public page and its permanent link, recurring open studio dates with individual dates taken out, sub-schedules with their own colour and their own link, Drafts that stay off the page until you announce, the header wall of the venues you have shown with, two-way Google, Outlook and CalDAV calendar sync, an embeddable calendar, built-in analytics, a downloadable QR code for your schedule, shareable graphics of your upcoming shows, free RSVP with a capacity, one bookable appointment type, QR check-in at the door, and up to 10 newsletter emails a month, counted per recipient rather than per send. Selling paid places is free too, up to 25 a month. The Pro plan at '.plan_price($proMonthly).' a month lifts that cap and adds your own questions at checkout and more appointment types. Event Schedule charges zero platform fees on ticket sales on every plan.',
+                'a' => 'Yes. The wall itself costs nothing: your public page and its permanent link, recurring open studio dates with individual dates taken out, sub-schedules with their own colour and their own link, Drafts that stay off the page until you announce, the header wall of the venues you have shown with, two-way Google, Outlook and CalDAV calendar sync, an embeddable calendar, built-in analytics, a downloadable QR code for your schedule, shareable graphics of your upcoming shows, free RSVP with a capacity, one bookable appointment type, QR check-in at the door, and up to 10 newsletter emails a month, counted per recipient rather than per send. Putting a price on a place is where the Pro plan starts, at '.plan_price($proMonthly).' a month, which also adds your own questions at checkout and more appointment types. Event Schedule charges zero platform fees on ticket sales on every plan.',
             ],
             [
                 'q' => 'Can I list exhibitions, open studios and art fairs together?',
@@ -632,7 +632,7 @@
             ],
             [
                 'q' => 'Can I sell places at a workshop or a ticketed opening?',
-                'a' => 'Yes, and the free plan sells the first 25 paid places each month. Create as many named ticket types as the event needs, each with its own price and quantity. The quantity is counted per occurrence date, so a full March does not stop April selling. Check people in with a QR code at the door on any plan, and take the money through your own Stripe or PayPal account, or as cash, a payment link or Invoice Ninja. Pro at '.plan_price($proMonthly).' a month removes the 25-a-month cap and adds your own questions at checkout. Event Schedule charges zero platform fees either way, so what you keep is the price less the processor\'s fee, and a Stripe or PayPal sale can be refunded in full or in part from the Sales page on every plan.',
+                'a' => 'Yes, on the Pro plan at '.plan_price($proMonthly).' a month, which is what lets a place carry a price. Create as many named ticket types as the event needs, each with its own price and quantity. The quantity is counted per occurrence date, so a full March does not stop April selling. Check people in with a QR code at the door on any plan, and take the money through your own Stripe or PayPal account, or as cash, a payment link or Invoice Ninja. Pro also adds your own questions at checkout. A free opening asks for none of it: registration with a capacity is on every plan. Event Schedule charges zero platform fees either way, so what you keep is the price less the processor\'s fee, and a Stripe or PayPal sale can be refunded in full or in part from the Sales page on every plan.',
             ],
             [
                 'q' => 'What happens to the photographs people take at the opening?',
@@ -816,9 +816,9 @@
 
                     <p class="es-brush-muted mt-5 border-t es-brush-edge pt-4 text-xs">
                         The tape is the colour of the strand it belongs to, and its position comes
-                        from the same dates the row prints. Only one thing here needs the Pro plan,
-                        the workshop's own questions at checkout. Selling the places does not: the
-                        free plan sells twenty-five paid tickets a month.
+                        from the same dates the row prints. Only one row here needs the Pro plan,
+                        the workshop: eight places with a price on them, and its own questions at
+                        checkout. The rest of the wall, print sale included, is on the free plan.
                     </p>
 
                     <div class="es-glare" aria-hidden="true"></div>
@@ -1056,13 +1056,13 @@
                     <p class="es-brush-verd mb-2 text-[0.6rem] font-extrabold uppercase tracking-[0.2em]">Teaching</p>
                     <div class="mb-3 flex flex-wrap items-center gap-2">
                         <h3 class="es-brush-ink text-lg font-bold">The workshop, sold in advance</h3>
-                        <span class="es-brush-plan es-brush-plan-free">Free</span>
+                        <span class="es-brush-plan es-brush-plan-pro">Pro</span>
                     </div>
                     <p class="es-brush-muted mb-5 text-sm">
                         Named ticket types with their own price and quantity, counted per occurrence
                         date. Scan a QR code at the door and take the money through your own Stripe
-                        or PayPal account, or in cash. Free sells twenty-five paid places a month;
-                        Pro lifts the cap and adds your own questions at checkout.
+                        or PayPal account, or in cash. A place that costs money is the Pro plan;
+                        Pro also adds your own questions at checkout.
                     </p>
                     <div class="es-brush-sub mt-auto p-4" aria-hidden="true">
                         <p class="es-brush-muted text-[0.6rem] font-extrabold uppercase tracking-[0.18em]">Platform fee</p>
@@ -1372,9 +1372,9 @@
                         Give the wall <span class="es-brush-grad">an address</span>.
                     </h2>
                     <p class="mx-auto mb-10 max-w-xl text-lg text-gray-300 sm:text-xl">
-                        The page, the dates, the gallery logos and the calendar sync cost nothing, and
-                        so do the first twenty-five paid places you sell each month. Lifting that cap
-                        is {{ plan_price($proMonthly) }} a month, and none of the ticket price comes to us.
+                        The page, the dates, the gallery logos, the calendar sync and a free opening
+                        with a capacity on it all cost nothing. Putting a price on a place is
+                        {{ plan_price($proMonthly) }} a month, and none of the ticket price comes to us.
                     </p>
 
                     <div class="mx-auto flex max-w-2xl flex-col items-stretch justify-center gap-3 sm:flex-row">

@@ -482,7 +482,7 @@
         $faqs = [
             [
                 'q' => 'Is Event Schedule free for open mics and readings?',
-                'a' => 'Yes. Sharing your schedule, running recurring nights, taking free registrations with a capacity limit, generating a flyer for each night, and syncing with Google, Outlook, or CalDAV are all free forever. Selling is free too, up to 25 paid tickets a month per schedule, which covers a monthly night comfortably. Pro at '.plan_price($proMonthly).' a month lifts that ceiling and adds custom questions on the sign-up form. Event Schedule charges zero platform fees on tickets either way.',
+                'a' => 'Yes. Sharing your schedule, running recurring nights, taking free registrations with a capacity limit, generating a flyer for each night, and syncing with Google, Outlook, or CalDAV are all free forever, and no ceiling sits on the sign-ups. Charging at the door is the Pro plan at '.plan_price($proMonthly).' a month, which also adds custom questions on the sign-up form. Event Schedule charges zero platform fees on tickets either way.',
             ],
             [
                 'q' => 'Can poets sign up for a slot themselves?',
@@ -502,7 +502,7 @@
             ],
             [
                 'q' => 'Can I sell tickets to a featured reading?',
-                'a' => 'Yes, and a monthly reading night rarely needs a paid plan to do it. The free plan sells 25 paid tickets a month per schedule, paid through your own Stripe or PayPal account, or by payment link or cash, with the QR code scanned at the door like any other. Pro at '.plan_price($proMonthly).' a month lifts the ceiling and adds the live check-in dashboard, and it is also what a season pass across the whole series needs. Event Schedule takes zero platform fees on any of it, so the only deduction is your payment provider\'s own, and a Stripe or PayPal sale can be refunded in full or in part from the Sales page.',
+                'a' => 'Yes, on the Pro plan at '.plan_price($proMonthly).' a month, which is what lets a ticket carry a price. Take the money through your own Stripe or PayPal account, or by payment link or cash, with the QR code scanned at the door like any other. Pro adds the live check-in dashboard as well, and it is also what a season pass across the whole series needs. A night you run for nothing takes free registrations on any plan. Event Schedule takes zero platform fees on any of it, so the only deduction is your payment provider\'s own, and a Stripe or PayPal sale can be refunded in full or in part from the Sales page.',
             ],
             [
                 'q' => 'Can people ask to hear about a night before sign-up opens?',
@@ -951,10 +951,10 @@
                         <div class="relative z-10">
                             <div class="mb-4 flex flex-wrap items-center gap-2">
                                 <h3 class="text-xl font-bold text-gray-900 dark:text-white">When the feature is ticketed</h3>
-                                <span class="es-sheet-plan dark:border-[rgba(147,197,253,0.4)] dark:text-[#93c5fd]">Free</span>
+                                <span class="es-sheet-plan es-sheet-plan-pro">Pro</span>
                             </div>
                             <p class="mb-4 text-gray-600 dark:text-gray-400">
-                                Take payment through Stripe or PayPal, or cash on the night, and sell straight from the schedule with QR check-in at the door. The free plan covers 25 paid tickets a month, and Event Schedule takes zero platform fees, so what is left after processing is yours.
+                                Take payment through Stripe or PayPal, or cash on the night, and sell straight from the schedule with QR check-in at the door. Putting a price on the night is the Pro plan, and Event Schedule takes zero platform fees, so what is left after processing is yours.
                             </p>
                             <p class="text-sm text-gray-600 dark:text-gray-400">
                                 Announce the feature before tickets are on sale, switch on the "Notify me" card, and people can leave just an email address to hear when they go on sale. Pro adds discount codes for the regulars and a pass that covers a whole season of the series.

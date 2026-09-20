@@ -597,7 +597,7 @@
             ],
             [
                 'q' => 'Do I have to talk to sales before I can sign up?',
-                'a' => 'No. Pricing is published on the pricing page, the free plan needs no card, and you can create a schedule and start adding events without speaking to anybody. Selling is free too, up to 25 paid tickets a month per schedule, scanned at the door; Pro at '.plan_price($proMonthly).' a month is what takes that ceiling off. Event Schedule charges zero platform fees on ticket sales either way.',
+                'a' => 'No. Pricing is published on the pricing page, the free plan needs no card, and you can create a schedule and start adding events without speaking to anybody. Free registration and door scanning come with it; Pro at '.plan_price($proMonthly).' a month is what lets you charge for a ticket. Event Schedule charges zero platform fees on ticket sales either way.',
             ],
             [
                 'q' => 'Can Event Schedule refund my ticket?',

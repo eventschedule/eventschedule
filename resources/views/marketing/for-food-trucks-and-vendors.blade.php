@@ -355,7 +355,7 @@
         $faqs = [
             [
                 'q' => 'Is Event Schedule free for food trucks?',
-                'a' => 'The parts you use every week are free forever: your public schedule and its list layout, the regular pitches as recurring events, date exceptions for the weeks you lose a spot, an address and map on every stop, a QR code for the serving window, booking requests for catering, sub-schedules, two-way calendar sync, a calendar feed your customers can subscribe to, an embeddable calendar and up to 10 newsletter emails a month, counted per recipient rather than per send. Selling tickets to a ticketed event - a supper club, a collaboration night - is free as well, up to 25 paid ones a month per schedule; Pro at '.plan_price($proMonthly).' a month removes that ceiling. Zero platform fees on sales either way.',
+                'a' => 'The parts you use every week are free forever: your public schedule and its list layout, the regular pitches as recurring events, date exceptions for the weeks you lose a spot, an address and map on every stop, a QR code for the serving window, booking requests for catering, sub-schedules, two-way calendar sync, a calendar feed your customers can subscribe to, an embeddable calendar and up to 10 newsletter emails a month, counted per recipient rather than per send. Free registration with a capacity is free as well, for a supper club you are not charging for. Putting a price on a seat, at a supper club or a collaboration night, is Pro at '.plan_price($proMonthly).' a month. Zero platform fees on sales either way.',
             ],
             [
                 'q' => 'How do customers know where I am today?',

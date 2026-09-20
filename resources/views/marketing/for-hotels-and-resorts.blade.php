@@ -622,8 +622,8 @@
             ['Kids club',      'family',   '1111111', '10:00', 'Drop in',    'no limit',  'free', false],
             ['Reef walk',      'water',    '0000001', '16:00', 'Place kept', '8 places',  'free', false],
             ['Terrace trio',   'music',    '0000011', '19:30', 'Drop in',    'no limit',  'free', false],
-            ['Sunset sail',    'water',    '0000100', '17:45', 'Ticket',     '$60',       'free', false],
-            ['Cellar dinner',  'dining',   null,      '19:30', 'Ticket',     '$95',       'free', true],
+            ['Sunset sail',    'water',    '0000100', '17:45', 'Ticket',     '$60',       'pro',  false],
+            ['Cellar dinner',  'dining',   null,      '19:30', 'Ticket',     '$95',       'pro',  true],
         ];
 
         // Four weeks of sunrise yoga, twice. The upper strip is the single
@@ -673,13 +673,13 @@
         // computed from the same figures the text prints.
         $book = [
             ['Sunrise yoga',  'Thursday',  9,  12, 'Sign-ups', 'free', 'No money changes hands. A capacity, counted for this date only, and a free waitlist once the mats are gone.'],
-            ['Cellar dinner', 'Saturday',  22, 30, 'Tickets',  'free', '$95 a head, through your own Stripe or PayPal account, or paid at the desk. Zero platform fees, and the free plan sells 25 paid tickets a month.'],
+            ['Cellar dinner', 'Saturday',  22, 30, 'Tickets',  'pro',  '$95 a head, through your own Stripe or PayPal account, or paid at the desk. Zero platform fees on every plan, and putting a price on a ticket is what Pro is for.'],
         ];
 
         $faqs = [
             [
                 'q' => 'Is Event Schedule free for hotels and resorts?',
-                'a' => 'Yes. The activity page and its link, the QR code, standing activities that repeat on chosen days of the week, date exceptions, sub-schedules, free sign-ups with a capacity and a waitlist when they fill, the embeddable calendar, two-way Google, Outlook and CalDAV sync and built-in analytics are all free forever. Newsletters are on the free plan too, at 10 emails a month counted per recipient, which Pro raises to 100 and Enterprise to 1,000. Selling the paid experiences is free as well, up to 25 paid tickets a month per schedule, and Event Schedule charges zero platform fees on sales. Pro, at '.plan_price($proMonthly).' a month, takes the cap off and adds the extras: promo codes, passes, a waitlist for sold-out tickets, add-ons and the live check-in dashboard.',
+                'a' => 'Yes. The activity page and its link, the QR code, standing activities that repeat on chosen days of the week, date exceptions, sub-schedules, free sign-ups with a capacity and a waitlist when they fill, the embeddable calendar, two-way Google, Outlook and CalDAV sync and built-in analytics are all free forever. Newsletters are on the free plan too, at 10 emails a month counted per recipient, which Pro raises to 100 and Enterprise to 1,000. Putting a price on an experience is where Pro starts, at '.plan_price($proMonthly).' a month, and it brings the rest of the desk kit with it: promo codes, passes, a waitlist for sold-out tickets, add-ons and the live check-in dashboard. Event Schedule charges zero platform fees on sales, on every plan.',
             ],
             [
                 'q' => 'How do guests find out what is on during their stay?',
@@ -691,7 +691,7 @@
             ],
             [
                 'q' => 'Can guests reserve a place, and can I sell the paid experiences?',
-                'a' => 'Both, and both start free. A free activity can take sign-ups with a capacity, and the count is kept for each date separately, so a full Tuesday does not close Thursday, and a full date offers a free waitlist instead. Paid experiences use ticketing: named ticket types with their own prices and quantities, QR scanning at the door, payment through your own Stripe or PayPal account, a payment link or cash at the desk, and no platform fee from us. The free plan sells 25 paid tickets a month per schedule and Pro removes that ceiling. Promo codes, which is how you would carry a resident rate for the people staying with you, are a Pro feature.',
+                'a' => 'Both. Reserving a place is free and has no ceiling; charging for one is where Pro starts. A free activity can take sign-ups with a capacity, and the count is kept for each date separately, so a full Tuesday does not close Thursday, and a full date offers a free waitlist instead. Paid experiences use ticketing: named ticket types with their own prices and quantities, QR scanning at the door, payment through your own Stripe or PayPal account, a payment link or cash at the desk, and no platform fee from us on any plan. A ticket type at no charge goes out on the free plan; the moment one carries a price the schedule needs Pro. Promo codes, which is how you would carry a resident rate for the people staying with you, are a Pro feature too.',
             ],
             [
                 'q' => 'Can I refund a guest who cancels a paid experience?',
@@ -895,8 +895,8 @@
                     The lit squares are the days the activity repeats, read from Sunday, which is
                     exactly how the pattern is stored. The cellar dinner has no pattern on purpose:
                     a repeat is by day of the week, so a once-a-month dinner is entered as its own
-                    dated activity. The two ticketed rows are free to sell as well: the free plan
-                    covers 25 paid tickets a month, and Pro takes the ceiling off.
+                    dated activity. The four free rows keep places on any plan, with no ceiling on
+                    how many. The two with a price on them are what Pro is for.
                 </p>
             </div>
 
@@ -1052,7 +1052,7 @@
     </section>
 
     <!-- ============================================================ -->
-    <!-- 4. Keeping a place (03): sign-ups free, tickets free to 25   -->
+    <!-- 4. Keeping a place (03): sign-ups free, priced tickets Pro   -->
     <!-- ============================================================ -->
     <section id="book" class="scroll-mt-24 es-conc-seam py-20 lg:py-28">
         <div class="mx-auto max-w-6xl px-4 sm:px-6 lg:px-8">
@@ -1099,7 +1099,7 @@
             <div class="mt-4 grid gap-4 md:grid-cols-3" data-reveal-group="90">
                 @foreach ([
                     ['Counted for each date', 'Free', 'A full Tuesday does not close Thursday. Every date keeps its own count, which is the only way a standing activity with a limit can work at all.'],
-                    ['A ticket for the paid ones', 'Free', 'Named ticket types with their own prices and quantities, QR scanning at the door, and payment through your own Stripe or PayPal account, a payment link or cash at the desk. Event Schedule takes nothing from the ticket price. Free covers 25 paid tickets a month per schedule; Pro sells without a cap.'],
+                    ['A ticket for the paid ones', 'Pro', 'Named ticket types with their own prices and quantities, QR scanning at the door, and payment through your own Stripe or PayPal account, a payment link or cash at the desk. Event Schedule takes nothing from the ticket price on any plan. Charging for a place is the Pro half; keeping one is not.'],
                     ['A rate for people staying with you', 'Pro', 'A promo code carries a resident rate that the desk can hand out. Nothing is verifying who is a guest, so the code is what does it.'],
                 ] as [$kTitle, $kPlan, $kDesc])
                     <div class="es-conc-card es-conc-hover p-6" data-reveal>
@@ -1517,8 +1517,8 @@
                     </h2>
                     <p class="mx-auto mb-10 max-w-xl text-lg text-gray-300 sm:text-xl">
                         The card, the address, the QR code, the standing week and the sign-up sheet
-                        are free forever, and so are the first twenty-five paid tickets a month.
-                        None of the ticket price comes to us on any plan.
+                        are free forever, with no limit on how many names you keep. Charging for a
+                        place is Pro, and none of the ticket price comes to us on any plan.
                     </p>
 
                     <div class="mx-auto flex max-w-2xl flex-col items-stretch justify-center gap-3 sm:flex-row">

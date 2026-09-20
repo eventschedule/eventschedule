@@ -1,6 +1,6 @@
 <x-marketing-layout>
     <x-slot name="title">Brewery and Winery Event Calendar | Most Nights Are Free</x-slot>
-    <x-slot name="description">Nobody buys a ticket to trivia night. Set the taproom week once, take requests from bands and food trucks, and sell up to 25 tour tickets a month free.</x-slot>
+    <x-slot name="description">Nobody buys a ticket to trivia night. Set the taproom week once, take requests from bands and food trucks, and keep free places on the tours that fill up.</x-slot>
     <x-slot name="breadcrumbTitle">For Breweries and Wineries</x-slot>
 
     <x-slot name="structuredData">
@@ -44,7 +44,7 @@
             "Sub-schedules for music, tours and private hire, each with its own shareable link",
             "Booking requests from bands and food trucks that want a date",
             "Participants, so a visiting act is offered the date for their own schedule, or gets a page they can claim if they are not on Event Schedule yet",
-            "Ticketed tours and tastings with QR check-in, 25 paid tickets a month on the free plan",
+            "Ticketed tours and tastings with QR check-in, with paid ticket sales on Pro",
             "Zero platform fees on ticket sales, paid through Stripe, PayPal, Invoice Ninja, a payment link or cash",
             "Refunds from the Sales page, sent back through Stripe or PayPal in full or in part",
             "An interest list for a tour or tasting before its tickets go on sale",
@@ -343,7 +343,7 @@
         $faqs = [
             [
                 'q' => 'Is Event Schedule free for a taproom?',
-                'a' => 'Almost all of what a taproom runs is free forever: the weekly nights as recurring events, date exceptions for the weeks you are shut, free registration with a capacity for a tour that is limited but not paid, sub-schedules with their own shareable links, booking requests from bands and food trucks, two-way calendar sync and an embeddable calendar. Selling a ticket to a paid tour or tasting is free too, up to 25 paid ones a month per schedule; Pro at '.plan_price($proMonthly).' a month takes that ceiling off, which a taproom running weekly tours reaches and a taproom running monthly ones does not. Zero platform fees on sales either way.',
+                'a' => 'Almost all of what a taproom runs is free forever: the weekly nights as recurring events, date exceptions for the weeks you are shut, free registration with a capacity for a tour that is limited but not paid, sub-schedules with their own shareable links, booking requests from bands and food trucks, two-way calendar sync and an embeddable calendar. Free registration has no monthly ceiling on it, however many names come through. Putting a price on a tour or tasting is the one part that needs Pro, at '.plan_price($proMonthly).' a month, which a taproom charging for its tours pays and a taproom running a free week never does. Zero platform fees on sales either way.',
             ],
             [
                 'q' => 'Most of our events are free. Is that a problem?',
@@ -613,7 +613,7 @@
                 <div class="es-pour-card p-6 sm:p-7" data-reveal="panel">
                     <div class="mb-1 flex flex-wrap items-baseline justify-between gap-2">
                         <h3 class="es-pour-ink text-lg font-bold">Paid, with a door to scan</h3>
-                        <span class="es-pour-plan es-pour-plan-free">Free to 25 a month</span>
+                        <span class="es-pour-plan es-pour-plan-pro">Pro plan</span>
                     </div>
                     <p class="es-pour-muted mb-5 text-sm">The same event, with a price on it.</p>
                     <ul class="space-y-3">
@@ -632,9 +632,9 @@
             </div>
 
             <p class="es-pour-muted mx-auto mt-8 max-w-2xl text-center text-sm" data-reveal>
-                Selling it is free too, up to 25 paid tickets a month per schedule. A sold-out tour
-                every Saturday is about fifty, and that is where Pro at {{ plan_price($proMonthly) }}
-                a month takes the ceiling off. Everything above it on the board stays free.
+                Keeping a place on it is free, for as many names as turn up. Putting a price on it
+                is Pro, at {{ plan_price($proMonthly) }} a month, and that is the only part of the
+                board that costs anything. Everything above it stays free.
             </p>
         </div>
     </section>
@@ -831,7 +831,7 @@
                     @foreach ([
                         ['01', 'Put the repeating nights up', 'One recurring event per night, with the weeks you are shut taken out. Most of them are free and stay free.'],
                         ['02', 'Open the requests', 'Bands and vans ask for dates through the page. You accept the ones you want and nothing else appears.'],
-                        ['03', 'Charge for the one that needs it', 'The tour gets a price, a quantity and a QR code on the door. Free up to 25 paid tickets a month; Pro takes the ceiling off.'],
+                        ['03', 'Charge for the one that needs it', 'The tour gets a price, a quantity and a QR code on the door. Charging is the Pro half; free places on the rest are not.'],
                     ] as [$n, $t, $d])
                         <div class="rounded-lg border border-white/10 bg-white/[0.05] p-7 backdrop-blur-sm" data-reveal="panel">
                             <p class="es-pour-lit es-pour-num mb-3 text-sm font-bold">{{ $n }}</p>
@@ -974,8 +974,8 @@
                         Put the week up and <span class="es-pour-grad">leave it there</span>.
                     </h2>
                     <p class="mx-auto mb-10 max-w-xl text-lg text-gray-300 sm:text-xl">
-                        The nights, the strands and the requests cost nothing, and neither do the
-                        first 25 paid tickets a month. Pay only when the tours outgrow that.
+                        The nights, the strands, the requests and every free place you keep cost
+                        nothing at all. Pay only when a tour starts carrying a price.
                     </p>
 
                     <div class="mx-auto flex max-w-2xl flex-col items-stretch justify-center gap-3 sm:flex-row">

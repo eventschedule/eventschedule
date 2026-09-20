@@ -1053,9 +1053,9 @@
                     <div class="es-form-card p-6" data-reveal="panel">
                         <div class="mb-3 flex flex-wrap items-center gap-2">
                             <h3 class="es-form-ink text-lg font-bold">Taking money</h3>
-                            <span class="es-form-plan">Free</span>
+                            <span class="es-form-plan es-form-plan-pro">Pro</span>
                         </div>
-                        <p class="es-form-muted text-sm leading-relaxed">Selling starts free: 25 paid tickets a month, through your own Stripe or <a href="{{ route('marketing.paypal') }}" class="es-form-link font-medium hover:underline">PayPal</a> account, and scanning those tickets at the door is free too. Pro lifts that ceiling and adds the live check-in dashboard. Event Schedule charges zero platform fees on every plan, so past the processor's own fee the money is yours.</p>
+                        <p class="es-form-muted text-sm leading-relaxed">A ticket with a price on it is Pro, taken through your own Stripe or <a href="{{ route('marketing.paypal') }}" class="es-form-link font-medium hover:underline">PayPal</a> account, though scanning any ticket at the door is free. Pro brings the live check-in dashboard with it. Event Schedule charges zero platform fees on every plan, so past the processor's own fee the money is yours.</p>
                     </div>
                 </div>
 

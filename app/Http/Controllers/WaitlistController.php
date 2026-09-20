@@ -48,11 +48,20 @@ class WaitlistController extends Controller
                 ]);
             }
         } else {
-            // The TICKET waitlist is Pro. Deliberately gated here and not above, so the RSVP branch
-            // stays free: it has always worked on every plan and free schedules may already depend
-            // on it. Until the free plan could sell tickets this branch needed no gate, because a
-            // free schedule could never reach a sold-out paid ticket.
-            if (! $event->isPro()) {
+            // The TICKET waitlist is Pro. Deliberately gated here and not above, so the RSVP
+            // branch stays free: it has always worked on every plan and free schedules may already
+            // depend on it.
+            //
+            // TWO checks, and both are load-bearing.
+            //
+            // canOfferWaitlist() is the plan half. It cannot be canSellTickets(): that short
+            // circuits true on any surviving $0 row, so a free schedule with a sold-out free tier
+            // would get a Pro feature.
+            //
+            // canSellTickets() is the "is this event selling right now" half. NotifyWaitlist bails
+            // on the same predicate, so without it a free creator with an attached Pro schedule
+            // could accept joins that are never notified - rows piling up as 'waiting' for ever.
+            if (! $event->canOfferWaitlist() || ! $event->canSellTickets($request->event_date)) {
                 abort(404);
             }
 

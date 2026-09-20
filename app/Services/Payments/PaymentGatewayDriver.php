@@ -583,6 +583,10 @@ abstract class PaymentGatewayDriver
 
         $event = $sale->event;
 
+        // Unconditional: the ticket surfaces handle a closed gate themselves. The embed renders
+        // its "not available" state, and the guest page falls through to Add to Calendar. Dropping
+        // the param instead would land an embedded buyer on the whole schedule grid inside the
+        // ticket iframe, because ?embed=true alone selects role/show-guest-embed.
         $url = $event->getGuestUrl($sale->subdomain, $sale->event_date).'?tickets=true';
 
         // Same courtesy handleReturn() extends: an embedded buyer who cancels should land back in an

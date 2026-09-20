@@ -471,10 +471,10 @@
     @php
         // $proMonthly comes from the marketing.* view composer.
 
-        // The free paid-ticket allowance, straight from the setting the app
-        // enforces in Role::ticketSaleLimit(). Selling is FREE up to this many
-        // paid tickets a month per schedule; Pro removes the ceiling.
-        $freeTicketCap = (int) config('usage.ticket_sale_monthly_limit_free', 25);
+        // Where the tier line falls, straight from Event::canSellPaidTickets():
+        // free RSVP places are unlimited on every plan, and a pitch fee with a
+        // price on it needs Pro or Enterprise. There is no monthly allowance to
+        // read out of config any more, so nothing here interpolates a number.
 
         // ONE season, written down once. Every figure the page states is
         // derived from this, so the strip and the prose cannot drift apart.
@@ -526,7 +526,7 @@
         $faqs = [
             [
                 'q' => 'Is Event Schedule free for farmers markets?',
-                'a' => 'Yes. The whole season is free forever: a recurring market day with a closing date, date exceptions for the Saturdays you lose to weather, sub-schedules for produce, bakery, flowers and the winter market, an agenda on each market day, free RSVP with a places limit, a downloadable QR code that puts your market page in a shopper\'s hand, built-in analytics, two-way Google, Outlook and CalDAV sync, and an embeddable calendar. Newsletters are free too, at ten emails a month counted one per recipient, and go up to a hundred on Pro and a thousand on Enterprise. Selling is free as well, for the first '.$freeTicketCap.' paid tickets a month, with zero platform fees on what you sell; Pro at '.plan_price($proMonthly).' a month takes that ceiling off.',
+                'a' => 'Yes. The whole season is free forever: a recurring market day with a closing date, date exceptions for the Saturdays you lose to weather, sub-schedules for produce, bakery, flowers and the winter market, an agenda on each market day, free RSVP with a places limit, a downloadable QR code that puts your market page in a shopper\'s hand, built-in analytics, two-way Google, Outlook and CalDAV sync, and an embeddable calendar. Newsletters are free too, at ten emails a month counted one per recipient, and go up to a hundred on Pro and a thousand on Enterprise. Charging a pitch fee is the one part that needs Pro at '.plan_price($proMonthly).' a month, and there are zero platform fees on what you take whatever the plan.',
             ],
             [
                 'q' => 'How do I set up a whole market season at once?',
@@ -542,7 +542,7 @@
             ],
             [
                 'q' => 'Can I charge for pitches and take the money online?',
-                'a' => 'Yes, and the first '.$freeTicketCap.' paid tickets a month are on the free plan. A pitch fee is a named ticket type with its own price and stock, and the stock is counted per market date, so a full Saturday does not stop the following Saturday selling. Scanning the QR code at the gate on market morning is free too. Pro at '.plan_price($proMonthly).' a month lifts the monthly ceiling and adds the live check-in dashboard and your own questions at checkout, such as whether they need power or how long the van is. Traders pay through your own Stripe or PayPal account, or by a payment link or cash, and Event Schedule charges no platform fee on top.',
+                'a' => 'Yes, on Pro at '.plan_price($proMonthly).' a month, which is what opens paid checkout. A pitch fee is a named ticket type with its own price and stock, and the stock is counted per market date, so a full Saturday does not stop the following Saturday selling. Scanning the QR code at the gate on market morning is free on any plan. Pro also adds the live check-in dashboard and your own questions at checkout, such as whether they need power or how long the van is. Traders pay through your own Stripe or PayPal account, or by a payment link or cash, and Event Schedule charges no platform fee on top.',
             ],
             [
                 'q' => 'Can I refund a pitch fee if a trader pulls out or the day is rained off?',
@@ -969,8 +969,8 @@
 
                             <p class="es-mkt-muted mt-5 es-mkt-hr pt-4 text-xs">
                                 A full Saturday does not stop the following Saturday selling. Each market
-                                date keeps its own count. The free plan sells {{ $freeTicketCap }} paid
-                                tickets a month, so thirty pitches every week is a Pro market.
+                                date keeps its own count. A pitch fee with a price on it is a Pro
+                                feature, so a market charging its traders is a Pro market.
                             </p>
 
                             <div class="es-glare" aria-hidden="true"></div>
@@ -998,7 +998,7 @@
                             ['Ask while they pay', true, 'Attach your own questions to the pitch fee: power, van length, insurance number. The answers arrive with the payment instead of in a separate thread.'],
                             ['Scan them in', false, 'Every buyer gets a QR code, and scanning it at the entrance to the square costs nothing. The live check-in dashboard, counting who is in as the morning goes on, is the Pro half.'],
                             ['Money back when it rains', false, 'Refund a pitch fee from the Sales page, in full or in part. On Stripe or PayPal the money goes back to the trader through the provider; a cash or payment-link fee is marked as refunded for your records.'],
-                            ['Sell tickets too, if you need to', false, 'A ticketed cooking class or a harvest supper works the same way, out of the same monthly allowance and with the same zero platform fee. Post it before tickets open, switch on the "Notify me" card, and shoppers can leave an email address to hear when they do.'],
+                            ['Sell tickets too, if you need to', false, 'A ticketed cooking class or a harvest supper works the same way, on Pro and with the same zero platform fee. Post it before tickets open, switch on the "Notify me" card, and shoppers can leave an email address to hear when they do.'],
                         ] as [$pT, $pIsPro, $pD])
                             <div class="es-mkt-card es-mkt-hover p-4" data-reveal>
                                 <div class="flex flex-wrap items-center gap-2">
@@ -1015,9 +1015,9 @@
                     </div>
 
                     <p class="es-mkt-muted mt-7 text-sm" data-reveal>
-                        Selling is free for your first {{ $freeTicketCap }} paid tickets a month, and Pro
-                        at {{ plan_price($proMonthly) }} a month has no ceiling at all. Publishing the season, taking
-                        submissions and free RSVP places never count against it.
+                        Charging a pitch fee is Pro, at {{ plan_price($proMonthly) }} a month with no ceiling
+                        on what you sell. Publishing the season, taking submissions and free RSVP places
+                        never need it.
                     </p>
                 </div>
             </div>
@@ -1374,8 +1374,8 @@
                         Put the whole season up <span class="es-mkt-grad">before opening day</span>.
                     </h2>
                     <p class="es-mkt-muted mx-auto mb-10 max-w-xl text-lg sm:text-xl">
-                        The season, the pitch list and the email list cost nothing, and so do your first
-                        {{ $freeTicketCap }} paid tickets a month. Unlimited selling is {{ plan_price($proMonthly) }}
+                        The season, the pitch list, the email list and every free RSVP place cost nothing,
+                        for as long as you want them. Charging a pitch fee is {{ plan_price($proMonthly) }}
                         a month, and none of what you take at the gate comes to us.
                     </p>
 

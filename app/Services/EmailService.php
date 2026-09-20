@@ -86,7 +86,7 @@ class EmailService
             // A buyer's ticket is transactional: somebody paid, so they must receive what they
             // bought. When the schedule has no sender of its own we fall back to the platform
             // rather than dropping the mail. This matters most for the free plan, whose organizers
-            // almost never configure SMTP, and which can now sell up to its monthly allowance -
+            // almost never configure SMTP, and whose buyers still need their receipts -
             // without the fallback the tier would take money and deliver nothing, silently, because
             // this failure is a swallowed return value. The per-schedule sender remains the branded
             // upgrade. Sale notifications to editors keep the stricter gate; newsletters do not, they

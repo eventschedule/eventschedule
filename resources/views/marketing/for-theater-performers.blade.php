@@ -369,7 +369,7 @@
         $faqs = [
             [
                 'q' => 'Is Event Schedule free for theater performers?',
-                'a' => 'The parts you use every day are free forever: your public schedule and its list layout, past productions kept and dated, sub-schedules, booking requests from companies that want to cast you, Drafts that keep auditions off the public page, two-way calendar sync, an embeddable calendar and up to 10 newsletter emails a month, counted per recipient rather than per send. Selling tickets to work you produce yourself is free as well, up to 25 paid ones a month per schedule, and that ceiling never stops a sale in the 48 hours before a performance; Pro at '.plan_price($proMonthly).' a month is what removes it. Event Schedule charges zero platform fees on sales either way.',
+                'a' => 'The parts you use every day are free forever: your public schedule and its list layout, past productions kept and dated, sub-schedules, booking requests from companies that want to cast you, Drafts that keep auditions off the public page, two-way calendar sync, an embeddable calendar and up to 10 newsletter emails a month, counted per recipient rather than per send. Free registration with a capacity is free as well, unlimited, and so is scanning the QR at the door. Charging for a seat on work you produce yourself is Pro at '.plan_price($proMonthly).' a month. Event Schedule charges zero platform fees on sales either way.',
             ],
             [
                 'q' => 'How does my schedule become a credits list?',
@@ -389,7 +389,7 @@
             ],
             [
                 'q' => 'Can I sell tickets to my own show?',
-                'a' => 'Yes. Named ticket types with their own prices, quantities and sales windows, payment through Stripe, PayPal, Invoice Ninja, Payfast (in rand), a payment link or cash, and scanning the QR code at the door are all free, up to 25 paid tickets a month per schedule, and the ceiling never stops a sale in the 48 hours before a performance. Pro at '.plan_price($proMonthly).' a month removes that ceiling and adds the live check-in dashboard, promo codes, add-ons and per-attendee tickets. Event Schedule charges no platform fee on either plan.',
+                'a' => 'Yes, on the Pro plan at '.plan_price($proMonthly).' a month, which is what lets a seat carry a price. Named ticket types with their own prices, quantities and sales windows, payment through Stripe, PayPal, Invoice Ninja, Payfast (in rand), a payment link or cash, and the live check-in dashboard, promo codes, add-ons and per-attendee tickets come with it. Scanning the QR code at the door is free on any plan, and a free preview or a scratch night takes registrations without one. Event Schedule charges no platform fee on either plan.',
             ],
         ];
 
@@ -688,7 +688,7 @@
 
                     <div class="space-y-3" data-reveal-group="90">
                         @foreach ([
-                            ['Named ticket types', 'Full price, concession, preview - each with its own price, quantity and sales window.', false],
+                            ['Named ticket types', 'Full price, concession, preview - each with its own price, quantity and sales window.', true],
                             ['QR check-in', 'Scan tickets at the door from any phone, on every plan. Pro adds the live check-in dashboard, so two people can work the queue and see the same count.', false],
                             ['Zero platform fees', 'You keep the ticket price minus what your payment provider charges, on every plan. There is no cut on top.', false],
                         ] as [$t, $d, $isPro])
@@ -703,7 +703,7 @@
                     </div>
 
                     <p class="es-cred-muted mt-6 text-sm" data-reveal>
-                        Setting the run up is free, and so is selling up to 25 paid tickets a month. <x-link href="{{ marketing_url('/for-theaters') }}">How a run is built</x-link>.
+                        Setting the run up is free. Putting a price on the seats is Pro. <x-link href="{{ marketing_url('/for-theaters') }}">How a run is built</x-link>.
                     </p>
                 </div>
             </div>

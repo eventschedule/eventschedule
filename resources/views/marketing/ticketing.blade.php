@@ -39,7 +39,7 @@
             "@type": "Offer",
             "price": "{{ $proMonthly }}",
             "priceCurrency": "{{ platform_currency() }}",
-            "description": "Selling starts on the free plan, at up to 25 paid tickets a month, and those tickets are scanned at the door on every plan. Pro removes the monthly cap and adds the live check-in dashboard, the waitlist, promo codes and passes for {{ plan_price($proMonthly) }} per month, with a 7 day free trial. Zero platform fees on ticket sales, on every plan."
+            "description": "Charging for a ticket is on Pro, at {{ plan_price($proMonthly) }} per month with a 7 day free trial, which also brings the live check-in dashboard, the waitlist, promo codes and passes. Free registration is unlimited on every plan, and scanning a ticket at the door costs nothing on any of them. Zero platform fees on ticket sales, on every plan."
         },
         "featureList": [
             "Zero platform fees on ticket sales",
@@ -688,7 +688,7 @@
             ],
             [
                 'q' => 'Do I need a paid plan to sell tickets?',
-                'a' => 'No. The Free plan sells up to 25 paid tickets a month with any payment method, scans every one of them at the door, and we take no platform fee on any tier. Pro removes the monthly cap and adds the live check-in dashboard, waitlists, promo codes, passes and the sales export, for '.plan_price($proMonthly).' a month with a 7 day free trial. Free registration is separate and unlimited on every plan: turn on RSVP for a free event, set a capacity limit, and attendees still get a confirmation email.',
+                'a' => 'To charge for one, yes: a ticket with a price on it is a Pro feature, at '.plan_price($proMonthly).' a month with a 7 day free trial, which also brings the live check-in dashboard, waitlists, promo codes, passes and the sales export. We take no platform fee on any tier, whatever you charge. Free registration is separate and unlimited on every plan: turn on RSVP for a free event, set a capacity limit, and attendees still get a confirmation email with a QR code that scans at the door for nothing.',
             ],
             [
                 'q' => 'How does QR code check-in work?',
@@ -1189,7 +1189,7 @@
                     You may not need <span class="es-turn-accent">any of this.</span>
                 </h2>
                 <p class="es-turn-muted mt-5 text-lg" data-reveal style="--reveal-delay: 0.15s;">
-                    If the event is free and you only want a headcount, the free plan already does it. If you are charging, it sells the first 25 paid tickets a month too. Read this before you pay us anything.
+                    If the event is free and you only want a headcount, the free plan already does it, with no cap and no payment method to connect. Pro starts where the money does. Read this before you pay us anything.
                 </p>
             </div>
 
@@ -1213,12 +1213,12 @@
 
                 <div class="es-turn-card flex flex-col p-7" data-reveal="panel">
                     <div class="mb-4 flex flex-wrap items-center gap-2">
-                        <h3 class="es-turn-ink text-lg font-black">Ticketing without a ceiling</h3>
+                        <h3 class="es-turn-ink text-lg font-black">The moment there is a price on it</h3>
                         <span class="es-turn-plan es-turn-plan-pro">Pro</span>
                     </div>
-                    <p class="es-turn-muted mb-5 text-sm leading-relaxed">Selling itself starts free, at 25 paid tickets a month. Pro takes the counter's ceiling off and adds the rest of this page: {{ plan_price($proMonthly) }} a month with a 7 day free trial, and still zero platform fees.</p>
+                    <p class="es-turn-muted mb-5 text-sm leading-relaxed">Put a number in the price field and you are on Pro, which brings the rest of this page with it: {{ plan_price($proMonthly) }} a month with a 7 day free trial, and still zero platform fees.</p>
                     <ul class="es-turn-muted space-y-2.5 text-sm">
-                        @foreach (['No monthly cap on the paid tickets you sell', 'Promo codes, add-ons, gift cards and installment plans', 'Passes and season subscriptions across many events', 'Custom questions at checkout, and individual tickets per guest', 'The check-in dashboard and the sold-out waitlist', 'The ticket form embedded on the website you already have'] as $proItem)
+                        @foreach (['Ticket types with their own price, quantity and sales window', 'Promo codes, add-ons, gift cards and installment plans', 'Passes and season subscriptions across many events', 'Custom questions at checkout, and individual tickets per guest', 'The check-in dashboard and the sold-out waitlist', 'The ticket form embedded on the website you already have'] as $proItem)
                             <li class="flex gap-2.5">
                                 <svg aria-hidden="true" class="es-turn-accent mt-0.5 h-4 w-4 flex-none" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.4"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7" /></svg>
                                 <span>{{ $proItem }}</span>
@@ -1420,7 +1420,7 @@
                         Sell the ticket. <span class="es-turn-lit">Keep the ticket.</span>
                     </h2>
                     <p class="mx-auto mb-10 max-w-2xl text-lg es-turn-band-muted">
-                        Publishing your events, taking free registrations and scanning at the door are free forever, and so are the first 25 paid tickets you sell each month. Take the ceiling off, and add the live check-in dashboard and the waitlist, for {{ plan_price($proMonthly) }} a month. Nothing is taken at the gate either way.
+                        Publishing your events, taking free registrations and scanning at the door are free forever, with no monthly ceiling on any of them. Charge for a seat, and add the live check-in dashboard and the waitlist, for {{ plan_price($proMonthly) }} a month. Nothing is taken at the gate either way.
                     </p>
 
                     {{-- The last register. The hero's counter climbed to 142; this one never

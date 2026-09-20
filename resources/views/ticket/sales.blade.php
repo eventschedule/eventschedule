@@ -45,38 +45,6 @@
     @endif
 
     <div id="sales-panel">
-        {{-- Free-plan ticket allowance, one row per schedule that has sold something this month.
-             Schedule names are user-controlled, so they go through <x-user-text>. --}}
-        @foreach ($ticketQuotas ?? [] as $quota)
-            @php $exhausted = $quota['used'] >= $quota['limit']; @endphp
-            @if ($exhausted)
-                <x-plan-gate
-                    variant="banner"
-                    tier="pro"
-                    class="mb-4"
-                    :role="$quota['role']"
-                    :subdomain="$quota['role']->subdomain"
-                    :learnMoreUrl="marketing_url('/features/ticketing')"
-                    :title="__('messages.ticket_allowance_reached_title', ['limit' => $quota['limit'], 'month' => now()->translatedFormat('F')])">
-                    <x-user-text class="font-semibold">{{ $quota['role']->name }}</x-user-text>
-                    {{ __('messages.ticket_allowance_reached_body', ['date' => $quota['role']->ticketAllowanceResetsAt()->translatedFormat('F j')]) }}
-                </x-plan-gate>
-            @else
-                <div class="mb-4">
-                    {{-- The schedule name is user data, so it is rendered through x-user-text rather
-                         than interpolated into the meter's own text. --}}
-                    <x-user-text class="text-sm font-medium text-gray-700 dark:text-gray-300">{{ $quota['role']->name }}</x-user-text>
-                    <x-usage-meter
-                        variant="inline"
-                        class="mt-1"
-                        :label="__('messages.ticket_allowance_usage')"
-                        :used="$quota['used']"
-                        :limit="$quota['limit']"
-                        :usedText="__('messages.tickets_sold_of', ['used' => $quota['used'], 'limit' => $quota['limit']])" />
-                </div>
-            @endif
-        @endforeach
-
         <div class="flow-root">
             <div class="flex flex-col sm:flex-row sm:justify-between gap-4">
                 <div class="flex items-center gap-3 flex-1">

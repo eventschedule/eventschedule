@@ -516,7 +516,7 @@
         $faqs = [
             [
                 'q' => 'Is Event Schedule free for bars and pubs?',
-                'a' => 'Yes. Sharing your calendar, running recurring weekly nights, splitting them into sub-schedules, taking free registrations, and syncing with Google, Outlook or CalDAV are all free forever. Newsletters are free too, at 10 emails a month, counted per recipient rather than per send. Selling tickets is free as well, up to 25 paid ones a month, scanned at the door on any plan. Unlimited sales, the live check-in dashboard and the higher 100-a-month newsletter limit are on the Pro plan at '.plan_price($proMonthly).' a month.',
+                'a' => 'Yes. Sharing your calendar, running recurring weekly nights, splitting them into sub-schedules, taking free registrations, and syncing with Google, Outlook or CalDAV are all free forever. Newsletters are free too, at 10 emails a month, counted per recipient rather than per send. Free registration has no monthly ceiling on it, and a ticket is scanned at the door on any plan. Putting a price on a ticket is what the Pro plan is for at '.plan_price($proMonthly).' a month, along with the live check-in dashboard and the higher 100-a-month newsletter limit.',
             ],
             [
                 'q' => 'Can I set up a night that repeats every week?',
@@ -536,7 +536,7 @@
             ],
             [
                 'q' => 'Can I sell tickets to a ticketed night?',
-                'a' => 'Yes, and the first 25 paid tickets a month are on the free plan. Take the money through your own Stripe or PayPal account, or a payment link or cash at the bar, sell straight from your calendar, and scan the QR code at the door - none of that is gated. What Pro buys at '.plan_price($proMonthly).' a month is the ceiling coming off, plus the live check-in dashboard for a busy door, promo codes and add-ons. Event Schedule charges zero platform fees either way, so beyond the processor\'s own fee the money is yours. If a night is called off, refund it from the Sales page: a Stripe or PayPal sale goes back through the provider, in full or in part. Free registration with a capacity limit is there for the nights you do not charge for.',
+                'a' => 'Yes, on Pro at '.plan_price($proMonthly).' a month, which is what a ticket with a price on it needs. Take the money through your own Stripe or PayPal account, or a payment link or cash at the bar, and sell straight from your calendar. Scanning the QR code at the door is not gated at all, on any plan. Pro also brings the live check-in dashboard for a busy door, promo codes and add-ons. Event Schedule charges zero platform fees either way, so beyond the processor\'s own fee the money is yours. If a night is called off, refund it from the Sales page: a Stripe or PayPal sale goes back through the provider, in full or in part. Free registration with a capacity limit is there for the nights you do not charge for.',
             ],
             [
                 'q' => 'Can regulars put our whole week in their own calendar?',
@@ -924,10 +924,10 @@
                         <div class="relative z-10">
                             <div class="mb-4 flex flex-wrap items-center gap-2">
                                 <h3 class="text-xl font-bold text-gray-900 dark:text-white">When the night is ticketed</h3>
-                                <span class="es-slate-plan">Free</span>
+                                <span class="es-slate-plan es-slate-plan-pro">Pro</span>
                             </div>
                             <p class="mb-4 text-gray-600 dark:text-gray-400">
-                                Sell straight from your calendar and scan the QR code at the door, free up to 25 paid tickets a month. Take the money through your own Stripe or <a href="{{ marketing_url('/paypal') }}" class="es-slate-link font-medium hover:underline">PayPal</a> account, or a payment link or cash at the bar, and Event Schedule takes zero platform fees on any of it.
+                                Sell straight from your calendar and scan the QR code at the door, which is free on any plan. Putting a price on the night is the Pro half. Take the money through your own Stripe or <a href="{{ marketing_url('/paypal') }}" class="es-slate-link font-medium hover:underline">PayPal</a> account, or a payment link or cash at the bar, and Event Schedule takes zero platform fees on any of it.
                             </p>
                             <p class="text-sm text-gray-600 dark:text-gray-400">
                                 Before it goes on sale, and with the "Notify me" card switched on, people can leave an email address on the event page and hear when it does. On Pro: discount codes for the regulars, and a pass that covers a whole season of a night rather than one at a time.

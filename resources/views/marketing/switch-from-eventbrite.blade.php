@@ -217,7 +217,7 @@
                             </a>
                         </div>
                         <p class="es-move-muted mt-4 text-sm" data-reveal style="--reveal-delay: 0.2s;">
-                            The import is a Pro feature. Creating the schedule and <a href="{{ marketing_url('/features/ticketing') }}" class="es-move-accent font-semibold hover:underline">selling up to 25 paid tickets a month</a> from it are not.
+                            The import is a Pro feature, and so is <a href="{{ marketing_url('/features/ticketing') }}" class="es-move-accent font-semibold hover:underline">any ticket with a price on it</a>. Creating the schedule and publishing the dates are not.
                         </p>
                     </div>
 
@@ -400,7 +400,7 @@
                 ['q' => 'Can buyers pay with PayPal?', 'a' => 'Yes, on every plan. Connect your own PayPal account in Settings under Payment Methods and choose PayPal for the event, and the money goes to that account. Stripe is there for cards, and PayPal also works when a buyer takes tickets to several of your events in one checkout. Installment plans, a Pro feature, run on Stripe only.'],
                 ['q' => 'How do refunds work once I have moved?', 'a' => 'From the Sales page. A Stripe or PayPal sale can be refunded in full or in part: the money goes back through that provider first, and only then does the sale change, and a partial refund leaves it paid with its tickets valid. A sale taken another way, such as cash or a payment link, is marked as refunded instead, which records it without moving money. Event Schedule does not email the buyer about a refund, so let them know yourself.'],
                 ['q' => 'Can people be told when tickets go on sale?', 'a' => 'Yes. Switch on the free "Notify me" card and, on an event with nothing on sale yet, a visitor can press "Tell me when tickets go on sale" and leave an email address, with no account. They get one email when tickets go on sale, one if you cancel the event and a reminder shortly before it starts, plus any notice you choose to send if the date or venue changes. It is free on every plan, it is not a subscription to your schedule, and the event\'s Tickets panel shows how many people are waiting.'],
-                ['q' => 'Do I need a paid plan to move?', 'a' => 'The Eventbrite import and the bulk attendee import are Pro features. Creating a schedule, publishing events and selling tickets are not: the free plan sells up to 25 paid tickets a calendar month with no platform fee, so you can put a date on sale before you decide about a plan.'],
+                ['q' => 'Do I need a paid plan to move?', 'a' => 'For the move itself, yes: the Eventbrite import and the bulk attendee import are Pro features, and so is any ticket that carries a price. Creating a schedule, publishing your events and taking free registrations are not, so you can rebuild the whole calendar and see it working before you decide about a plan. There is no platform fee on any plan.'],
                 ['q' => 'Can I take my data out again later?', 'a' => 'Yes. There is a backup and restore for everything you have created, the API and webhooks are there on Pro, and the whole application is open source and can be selfhosted at no cost. Being easy to leave is the point.'],
             ];
         @endphp

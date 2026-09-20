@@ -135,9 +135,10 @@ New Feature-test suites added this session (all use `tests/Feature/Concerns/Crea
 | Feature | Tested | Test |
 |---|---|---|
 | Ticket types (create/settings) | ✓ | `TicketTest` |
-| Paid ticket allowance, 25/month (Free) | ✓ | `FreePlanLimitsTest` |
-| Allowance window after a mid-month downgrade | ✓ | `FreePlanLimitsTest` |
-| Per-owner allowance backstop | ✓ | `FreePlanLimitsTest` |
+| Paid ticket selling is Pro/Enterprise | ✓ | `FreePlanLimitsTest` |
+| Grandfather backfill stamps only genuine paid sales | ✓ | `TicketGrandfatherBackfillTest` |
+| Grandfathered event keeps selling; siblings do not | ✓ | `FreePlanLimitsTest` |
+| A Pro schedule listing a free creator's event does not open selling | ✓ | `FreePlanLimitsTest` |
 | `sales.paid_at` stamping (incl. grouped cascade) | ✓ | `FreePlanLimitsTest` |
 | Free event registration / RSVP | ✓ | `TicketTest`, `TicketingTest` |
 | Promo / discount codes (Pro) | ✓ | `TicketTest`, `TicketingTest`, `FreePlanLimitsTest` (gate) |
@@ -153,7 +154,7 @@ New Feature-test suites added this session (all use `tests/Feature/Concerns/Crea
 | Post-event feedback (Pro) | ✓ | `TicketingTest` |
 | Ticket add-ons / upsells (Pro) | ✓ | `TicketingTest`, `FreePlanLimitsTest` (scrub) |
 | Ticket reservations / release time | ✗ | — |
-| Sell online via Stripe (Free, within allowance) | ✗ | — (needs Stripe) |
+| Sell online via Stripe (Pro) | ✗ | — (needs Stripe) |
 | Embed ticket widget (Pro; RSVP embed is Free) | ✓ | `FreePlanLimitsTest` (both branches) |
 | Invoice Ninja integration | ✗ | — (needs Invoice Ninja) |
 | Payment links | ✓ | `CheckoutBranchCharacterizationTest` (payment_url branch redirect + pending sale) |

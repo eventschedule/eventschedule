@@ -314,7 +314,7 @@
 
         <div class="doc-callout doc-callout-info">
             <div class="doc-callout-title">A Different QR Code from Ticket Check-In</div>
-            <p>This code points at your schedule and is for the public. Tickets carry their own QR codes, on every plan, including the 25 paid tickets a month a Free schedule sells, and the door scanner that admits people is free too. Only the live check-in dashboard, with its running count and per-ticket-type breakdown, is a Pro feature. See <a href="{{ route('marketing.docs.tickets') }}#check-in" class="doc-link">Check-In</a> in the Selling Tickets guide.</p>
+            <p>This code points at your schedule and is for the public. Tickets carry their own QR codes on every plan, free registrations included, and the door scanner that admits people is free too. Selling a ticket that carries a price is a Pro feature, and so is the live check-in dashboard with its running count and per-ticket-type breakdown. See <a href="{{ route('marketing.docs.tickets') }}#check-in" class="doc-link">Check-In</a> in the Selling Tickets guide.</p>
         </div>
     </section>
 

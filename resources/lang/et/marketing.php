@@ -2,10 +2,10 @@
 
 return [
     'home_title' => 'Event Schedule - tasuta sündmuste kalender, piletimüük ja broneeringud',
-    'home_description' => 'Avalda oma sündmused ühel kalendrilehel, müü pileteid ilma platvormitasudeta ja võta vastu broneeringuid. Tasuta plaan müüb 25 tasulist piletit kuus.',
+    'home_description' => 'Avalda oma sündmused ühel kalendrilehel, võta vastu piiramatult tasuta registreerumisi ja broneeringuid. Tasuliste piletite müük on Pro-paketis, platvormitasudeta.',
 
     'pricing_title' => 'Event Schedule\'i hinnad: tasuta plaan, ilma platvormitasudeta',
-    'pricing_description' => 'Alusta tasuta: piiramatud sündmused ja 25 tasulist piletit kuus. Pro kaotab piirangu, Enterprise lisab nummerdatud kohad. Platvormitasu pole üheski plaanis.',
+    'pricing_description' => 'Alusta tasuta: piiramatud sündmused ja tasuta registreerumine. Pro lisab tasuliste piletite müügi, Enterprise nummerdatud kohad. Platvormitasu pole üheski plaanis.',
 
     'features_title' => 'Sündmuste haldamise funktsioonid ilma platvormitasudeta - Event Schedule',
     'features_description' => 'Kõik funktsioonid viies peatükis: piletid Stripe\'i või PayPali kaudu ilma platvormitasuta, kahesuunaline kalendri sünkroonimine, uudiskirjad, tehisintellektiga import ja analüütika.',

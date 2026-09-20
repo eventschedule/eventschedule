@@ -515,7 +515,7 @@
         $faqs = [
             [
                 'q' => 'Is Event Schedule free for nightclubs?',
-                'a' => 'Yes. Sharing your nights, running recurring residencies, splitting them into sub-schedules, taking free registrations with a capacity limit, and two-way sync with Google, Outlook or CalDAV are all free forever. Selling is free too, up to 25 paid tickets a month per schedule, with the QR on each one scanned at the door for nothing - which is a soft launch, not a season. Pro at '.plan_price($proMonthly).' a month removes the ceiling and adds the live check-in dashboard for the door and passes. Event Schedule charges zero platform fees on tickets either way.',
+                'a' => 'Yes. Sharing your nights, running recurring residencies, splitting them into sub-schedules, taking free registrations with a capacity limit, and two-way sync with Google, Outlook or CalDAV are all free forever, with no ceiling on the names you take. Scanning the QR on a ticket at the door costs nothing on any plan. Charging cover is Pro at '.plan_price($proMonthly).' a month, which brings the live check-in dashboard for the door and passes with it. Event Schedule charges zero platform fees on tickets either way.',
             ],
             [
                 'q' => 'Can people sign up for a free night without paying?',
@@ -527,7 +527,7 @@
             ],
             [
                 'q' => 'Can I sell different ticket types for one night?',
-                'a' => 'Yes, and the ticket types themselves are free: early bird, advance, on the door, table, as many as the night needs, each with its own price, quantity and sales window. The free plan sells 25 paid tickets a month per schedule, which a club night passes quickly, and Pro at '.plan_price($proMonthly).' a month is what takes the ceiling off. Pro is also where the extras live - add-ons that attach to a ticket, promo codes, and the live check-in dashboard for the door. Take payment through your own Stripe or PayPal account, or a payment link or cash on the door, and there are zero platform fees either way.'
+                'a' => 'Yes: early bird, advance, on the door, table, as many as the night needs, each with its own price, quantity and sales window. Charging for them is Pro at '.plan_price($proMonthly).' a month, and Pro is where the rest of the door lives too - add-ons that attach to a ticket, promo codes, and the live check-in dashboard. A guest-list night that costs nothing to get into takes free registrations on any plan. Take payment through your own Stripe or PayPal account, or a payment link or cash on the door, and there are zero platform fees either way.'
             ],
             [
                 'q' => 'Can DJs ask to play at my club?',

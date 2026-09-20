@@ -215,7 +215,7 @@
                             </a>
                         </div>
                         <p class="es-line-muted mt-4 text-sm" data-reveal style="--reveal-delay: 0.2s;">
-                            Both are on the Pro plan. Selling itself is free, with no platform fee.
+                            Both are on the Pro plan, along with any ticket that has a price. No platform fee, ever.
                         </p>
                     </div>
 
@@ -380,7 +380,7 @@
                 ['q' => 'Can I stop a code without losing the history?', 'a' => 'Yes. Switch it inactive rather than deleting it. The orders that used it keep their record, the usage count is still there, and you can switch it back on next season.'],
                 ['q' => 'Can a buyer use a promo code and a gift card together?', 'a' => 'Yes, on the same order. They do different jobs: the code changes the price, and the gift card spends a balance somebody already paid you for.'],
                 ['q' => 'Is there anything different about Invoice Ninja?', 'a' => 'In payment-link mode, yes: one promo code per event, applying to all ticket types. If you need several codes or per-ticket targeting on Invoice Ninja, use invoice mode instead.'],
-                ['q' => 'Which plan do I need?', 'a' => 'Promo codes and add-ons are both on the Pro plan, and on every selfhosted install at no cost. Creating ticket types, taking payment and keeping 100% of the money work on the Free plan within its 25 paid tickets a month.'],
+                ['q' => 'Which plan do I need?', 'a' => 'Promo codes and add-ons are both on the Pro plan, and on every selfhosted install at no cost. Anything with a price on it needs Pro anyway, so a discount code always arrives with the rest of the ticketing suite, and you keep 100% of the money on every plan.'],
             ];
         @endphp
         <section id="faq" class="es-line-rule scroll-mt-24 py-20 lg:py-28">

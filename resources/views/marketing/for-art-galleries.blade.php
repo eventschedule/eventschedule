@@ -42,7 +42,7 @@
             "Opening days set by day of week, with date exceptions that add or remove single dates",
             "Separate evening events for the private view, artist talk, curator tour and closing",
             "Free registration with a capacity, counted separately for each date",
-            "Ticketed collector dinners and previews with QR check-in, 25 paid tickets a month on the free plan",
+            "Ticketed collector dinners and previews with QR check-in, on the Pro plan",
             "Zero platform fees on ticket sales, paid through Stripe, PayPal, Invoice Ninja, a payment link or cash",
             "Refunds from the Sales page, sent back through Stripe or PayPal in full or in part",
             "An interest list for a ticketed evening before it goes on sale",
@@ -357,7 +357,7 @@
             ],
             [
                 'q' => 'Is Event Schedule free for a gallery?',
-                'a' => 'The parts you use for every show are free forever: the run as a recurring event, date exceptions, separate evening events, free registration with a capacity for a private view, sub-schedules, exhibition proposals from artists, two-way calendar sync, a live calendar feed and an embeddable calendar. Selling a ticket to a collector dinner or a paid preview is free as well, up to 25 paid tickets a month per schedule, and Pro at '.plan_price($proMonthly).' a month is what lifts that ceiling. Zero platform fees on sales either way.',
+                'a' => 'The parts you use for every show are free forever: the run as a recurring event, date exceptions, separate evening events, free registration with a capacity for a private view, sub-schedules, exhibition proposals from artists, two-way calendar sync, a live calendar feed and an embeddable calendar. Charging for a collector dinner or a paid preview is what needs Pro, at '.plan_price($proMonthly).' a month. Zero platform fees on sales either way.',
             ],
             [
                 'q' => 'Can I cap the private view without charging for it?',
@@ -377,7 +377,7 @@
             ],
             [
                 'q' => 'How do collectors pay for a ticketed dinner?',
-                'a' => 'Through your own Stripe or PayPal account, an Invoice Ninja invoice, a payment link or cash, chosen per event, and Event Schedule takes no platform fee on any of them. If a guest cannot come, refund them from the Sales page: a Stripe or PayPal sale goes back through the provider, in full or in part, and any other method is marked as refunded, which records it without moving money. Refunds are free on every plan, and so is selling, up to 25 paid tickets a month per schedule.',
+                'a' => 'Through your own Stripe or PayPal account, an Invoice Ninja invoice, a payment link or cash, chosen per event, and Event Schedule takes no platform fee on any of them. If a guest cannot come, refund them from the Sales page: a Stripe or PayPal sale goes back through the provider, in full or in part, and any other method is marked as refunded, which records it without moving money. Refunds are free on every plan. Putting a price on the ticket in the first place is Pro; a private view with free registration and a capacity is not.',
             ],
         ];
 
@@ -633,7 +633,7 @@
                 <div class="es-hang-card p-6 sm:p-7" data-reveal="panel">
                     <div class="mb-1 flex flex-wrap items-baseline justify-between gap-2">
                         <h3 class="es-hang-ink text-lg font-bold">The collector dinner</h3>
-                        <span class="es-hang-plan es-hang-plan-free">Free to 25 a month</span>
+                        <span class="es-hang-plan es-hang-plan-pro">Pro plan</span>
                     </div>
                     <p class="es-hang-muted mb-5 text-sm">The evening that is worth charging for.</p>
                     <ul class="space-y-3">
@@ -931,7 +931,7 @@
                     </x-feature-link-card>
                 </div>
                 <div data-reveal>
-                    <x-feature-link-card name="Ticketing" description="For the collector dinner: a price, QR check-in and zero platform fees, free to 25 a month" :url="marketing_url('/features/ticketing')" icon-color="amber">
+                    <x-feature-link-card name="Ticketing" description="For the collector dinner: a price, QR check-in and zero platform fees, on the Pro plan" :url="marketing_url('/features/ticketing')" icon-color="amber">
                         <x-slot:icon><svg aria-hidden="true" class="h-5 w-5 text-amber-600 dark:text-amber-400" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 5v2m0 4v2m0 4v2M5 5a2 2 0 00-2 2v3a2 2 0 110 4v3a2 2 0 002 2h14a2 2 0 002-2v-3a2 2 0 110-4V7a2 2 0 00-2-2H5z" /></svg></x-slot:icon>
                     </x-feature-link-card>
                 </div>
@@ -1043,8 +1043,8 @@
                         Put the show up <span class="es-hang-grad">and leave it there</span>.
                     </h2>
                     <p class="mx-auto mb-10 max-w-xl text-lg text-gray-300 sm:text-xl">
-                        The run, the evenings and the proposals cost nothing, and a ticketed dinner
-                        is free up to 25 paid tickets a month.
+                        The run, the evenings, the proposals and a private view with a capacity
+                        all cost nothing. A ticketed dinner is the part that needs Pro.
                     </p>
 
                     <div class="mx-auto flex max-w-2xl flex-col items-stretch justify-center gap-3 sm:flex-row">

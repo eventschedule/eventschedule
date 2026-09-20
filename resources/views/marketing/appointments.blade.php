@@ -251,7 +251,7 @@
             ],
             [
                 'q' => 'Which plan includes appointment booking?',
-                'a' => 'Booking is on the free plan, with one appointment type. Everything about that type is fully featured: weekly hours, per-date overrides, buffers, approvals and payment. Paid bookings never count against the 25 paid tickets a month the free plan can sell. Pro is what lets you run several types side by side, and a selfhosted deployment has no cap at all. If a hosted Pro plan lapses you keep every type you created and the oldest bookable one stays bookable, so nothing already booked is ever lost and every guest\'s private link still opens.',
+                'a' => 'Booking is on the free plan, with one appointment type. Everything about that type is fully featured: weekly hours, per-date overrides, buffers, approvals and payment. A paid booking is not a ticket, so the plan rules for ticketing do not touch it: money changes hands through your own Stripe account on any plan. Pro is what lets you run several types side by side, and a selfhosted deployment has no cap at all. If a hosted Pro plan lapses you keep every type you created and the oldest bookable one stays bookable, so nothing already booked is ever lost and every guest\'s private link still opens.',
             ],
         ];
 

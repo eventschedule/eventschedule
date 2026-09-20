@@ -202,8 +202,8 @@
                 'name' => 'Free',
                 'price' => plan_price(0),
                 'note' => 'forever',
-                'lede' => 'Everything you need to get the room listed, taking requests and selling its first tickets.',
-                'items' => ['Public event calendar', 'Booking request inbox', '25 paid tickets a month, QR scanning included', 'Sub-schedules for each room', 'Recurring nights', 'Google, Outlook and CalDAV sync', 'Free RSVPs and analytics'],
+                'lede' => 'Everything you need to get the room listed, taking requests and filling its first nights.',
+                'items' => ['Public event calendar', 'Booking request inbox', 'Unlimited free RSVPs, QR scanning included', 'Sub-schedules for each room', 'Recurring nights', 'Google, Outlook and CalDAV sync', 'Analytics'],
                 'featured' => false,
             ],
             [
@@ -211,7 +211,7 @@
                 'price' => plan_price($proMonthly),
                 'note' => 'per month',
                 'lede' => 'Adds the box office and the things that make it look like yours.',
-                'items' => ['Everything in Free', 'Unlimited ticket sales', 'Live check-in dashboard', 'Promo codes, gift cards and waitlists', 'Unlimited bookable spaces', 'No Event Schedule branding'],
+                'items' => ['Everything in Free', 'Selling tickets that carry a price, unlimited', 'Live check-in dashboard', 'Promo codes, gift cards and waitlists', 'Unlimited bookable spaces', 'No Event Schedule branding'],
                 'featured' => true,
             ],
             [
@@ -261,7 +261,7 @@
             ],
             [
                 'q' => 'What does it cost to sell tickets?',
-                'a' => 'Selling is included on every plan, with the Free plan capped at 25 paid tickets a month and Pro removing the cap. Event Schedule charges no platform fee on ticket sales at any tier, so the only deduction is your payment processor\'s standard fee. Connect your own Stripe or PayPal account and payouts go straight to you, or take cash at the door.',
+                'a' => 'Putting a price on a ticket needs Pro or Enterprise. Free RSVPs are unlimited at every tier. Event Schedule charges no platform fee on ticket sales at any tier, so the only deduction is your payment processor\'s standard fee. Connect your own Stripe or PayPal account and payouts go straight to you, or take cash at the door.',
             ],
             [
                 'q' => 'Can I refund a ticket?',

@@ -159,8 +159,9 @@ class EventTicketFirstRunTest extends TestCase
         // rsvp_enabled and ticketMode from localStorage, so the per-schedule carry-over the tests
         // above assert was overwritten the moment the browser had ever saved a preference. Its
         // `?? false` also turned selling OFF for stale entries written before that key existed, on
-        // every tier - and its non-Pro arm hard-forced false, contradicting Role::ticketSaleLimit(),
-        // under which the free plan sells 25 paid tickets a month.
+        // every tier - and its non-Pro arm hard-forced false, which is wrong because free schedules
+        // still use Tickets mode for $0 rows. Paid rows are gated in Event::canSellPaidTickets(),
+        // not by forcing the toggle off.
         //
         // A render assertion, because the clobber is client-side and no server-rendered value can
         // show it: what is pinned is that the handler no longer contains the assignments.

@@ -43,7 +43,7 @@
             "Per-part descriptions in markdown, with schedule-level switches for whether the agenda editor asks for times and descriptions",
             "Agenda scanning that reads a programme from a photo or text and fills in the parts (Enterprise)",
             "One join link per event for Zoom, Microsoft Teams, Google Meet, YouTube Live or any platform",
-            "Named ticket types with their own prices, quantities and sales windows, free up to 25 paid tickets a month (unlimited on Pro)",
+            "Named ticket types with their own prices, quantities and sales windows (charging for a ticket is on Pro; free registration is unlimited everywhere)",
             "Zero platform fees on ticket sales through your own Stripe or PayPal account",
             "Refunds in full or in part from the Sales page, sent back through Stripe or PayPal",
             "An optional, free Tell me when tickets go on sale list on each event, with a count of who is waiting",
@@ -87,7 +87,7 @@
                 "@type": "HowToStep",
                 "position": 3,
                 "name": "Open the doors",
-                "text": "Free registration with a capacity limit, or named ticket types, free for the first 25 paid tickets a month. Share one link for the whole programme."
+                "text": "Free registration with a capacity limit on any plan, or named ticket types with prices on Pro. Share one link for the whole programme."
             }
         ]
     }
@@ -575,7 +575,7 @@
             ],
             [
                 'q' => 'Can I sell different ticket types for my conference?',
-                'a' => 'Yes, and selling starts on the free plan. Create as many named ticket types as the conference needs, each with its own price, quantity and sales window, and sell up to 25 paid tickets a month. Pro at '.plan_price($proMonthly).' a month takes that ceiling off and adds discount codes, add-ons and individual tickets, which give every attendee their own confirmation email and QR code; custom questions collect what you need at checkout. Event Schedule charges zero platform fees at every plan level: attendees pay through your own Stripe or PayPal account, or through Invoice Ninja, a payment link or cash, and your processor\'s fee is the only cut. For a free conference, registration with a capacity limit is unlimited on the free plan.',
+                'a' => 'Yes, on Pro. Create as many named ticket types as the conference needs, each with its own price, quantity and sales window. Pro at '.plan_price($proMonthly).' a month is what opens paid checkout, and it adds discount codes, add-ons and individual tickets, which give every attendee their own confirmation email and QR code; custom questions collect what you need at checkout. Event Schedule charges zero platform fees at every plan level: attendees pay through your own Stripe or PayPal account, or through Invoice Ninja, a payment link or cash, and your processor\'s fee is the only cut. For a free conference, registration with a capacity limit is unlimited on the free plan.',
             ],
             [
                 'q' => 'Can I announce the conference before tickets go on sale?',
@@ -994,7 +994,7 @@
                         Name your prices. <span class="es-agenda-accent">Keep the money.</span>
                     </h2>
                     <p class="es-agenda-muted mb-6 text-lg leading-relaxed" data-reveal style="--reveal-delay: 0.15s;">
-                        A free conference needs nothing but registration and a capacity, and that is on the free plan. So is charging for one: named ticket types, each with its own price, quantity and sales window, and the first 25 paid tickets every month. Pro at {{ plan_price($proMonthly) }} takes the ceiling off and adds individual tickets, discount codes and add-ons. Event Schedule takes nothing from either.
+                        A free conference needs nothing but registration and a capacity, and that is on the free plan, however many people come. Charging for one is Pro at {{ plan_price($proMonthly) }}: named ticket types, each with its own price, quantity and sales window, plus individual tickets, discount codes and add-ons. Event Schedule takes nothing from either.
                     </p>
                     <ul class="es-agenda-muted space-y-3" data-reveal-group="70">
                         <li class="flex gap-3" data-reveal>
@@ -1047,7 +1047,7 @@
                             <span class="es-agenda-accent font-mono text-lg font-black">{{ plan_price(0) }}</span>
                         </div>
                         <p class="es-agenda-muted mt-3 text-xs">
-                            Every row here is on the free plan: the paid ones capped at 25 tickets a month, the $0 one never counted against that and still selling once the cap is reached. A conference with nothing to charge for turns the event over to free registration instead. These are counts, not seats: an online room has nowhere to sit, and the seating plans Enterprise adds are for venues with actual rows in them.
+                            The $0 row runs on the free plan and always will; the priced rows are what Pro is for. A conference with nothing to charge for turns the event over to free registration instead. These are counts, not seats: an online room has nowhere to sit, and the seating plans Enterprise adds are for venues with actual rows in them.
                         </p>
                     </div>
                 </div>
@@ -1298,7 +1298,7 @@
                 @foreach ([
                     ['01', 'Create the day', 'One event per conference day: its date, its start time, how long it runs, and the link people join.'],
                     ['02', 'Type the running order', 'Add each session as a part with a name, a start and an end. Move the parts into order, and write an abstract where one helps.'],
-                    ['03', 'Open the doors', 'Free registration with a capacity limit, or named ticket types, free to 25 paid tickets a month. Share one link for the whole programme.'],
+                    ['03', 'Open the doors', 'Free registration with a capacity limit on any plan, or named ticket types with prices on Pro. Share one link for the whole programme.'],
                 ] as [$stepNum, $stepTitle, $stepBody])
                     <div class="es-agenda-card p-7" data-reveal="panel">
                         <div class="es-agenda-accent mb-3 font-mono text-2xl font-black">{{ $stepNum }}</div>
@@ -1444,7 +1444,7 @@
                         One event. <span class="es-agenda-lit">The whole day inside it.</span>
                     </h2>
                     <p class="es-agenda-muted mx-auto mb-10 max-w-2xl text-lg">
-                        Publishing the running order, the join link and the calendar sync is free forever. So is selling, for the first 25 paid tickets a month; {{ plan_price($proMonthly) }} lifts the ceiling. Event Schedule takes nothing out of what you sell either way.
+                        Publishing the running order, the join link and the calendar sync is free forever, and so is registration. Charging for a seat is {{ plan_price($proMonthly) }} a month. Event Schedule takes nothing out of what you sell either way.
                     </p>
 
                     <div class="mx-auto flex max-w-2xl flex-col items-stretch justify-center gap-3 sm:flex-row">

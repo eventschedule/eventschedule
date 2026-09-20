@@ -2,10 +2,10 @@
 
 return [
     'home_title' => 'Event Schedule - calendar de evenimente, bilete și programări, gratuit',
-    'home_description' => 'Publică-ți evenimentele pe o singură pagină de calendar, vinde bilete fără taxe de platformă și primește programări. Planul gratuit vinde 25 de bilete plătite pe lună.',
+    'home_description' => 'Publică-ți evenimentele pe o pagină de calendar, primește înscrieri gratuite nelimitate și programări. Biletele cu plată sunt în planul Pro.',
 
     'pricing_title' => 'Prețuri Event Schedule: gratuit, fără comision de platformă',
-    'pricing_description' => 'Începe gratuit: evenimente nelimitate și 25 de bilete plătite pe lună. Pro elimină limita, Enterprise adaugă locuri numerotate. Fără comision de platformă.',
+    'pricing_description' => 'Începe gratuit: evenimente și înscrieri nelimitate. Pro adaugă vânzarea biletelor cu plată, Enterprise locuri numerotate. Fără comision de platformă.',
 
     'features_title' => 'Funcții de gestionare a evenimentelor, fără comisioane de platformă - Event Schedule',
     'features_description' => 'Toate funcțiile în cinci capitole: bilete prin Stripe sau PayPal fără comision de platformă, sincronizare bidirecțională a calendarului, buletine informative, import cu AI și statistici.',

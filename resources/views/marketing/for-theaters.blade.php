@@ -400,7 +400,7 @@
         $faqs = [
             [
                 'q' => 'Is Event Schedule free for theaters?',
-                'a' => 'Yes. Setting a production up as a run, marking dark days, splitting your spaces into sub-schedules, publishing your season and syncing two ways with Google, Outlook or CalDAV are all free forever, and so is selling: the free plan takes payment for up to 25 paid tickets a month per schedule, with free registration uncapped (a zero-price ticket never counts), and scanning tickets at the door is free on every plan. The Pro plan at '.plan_price($proMonthly).' a month lifts that ceiling and adds the live check-in dashboard, season passes and custom checkout questions. Event Schedule charges zero platform fees on ticket sales on every plan, the free one included.',
+                'a' => 'Yes. Setting a production up as a run, marking dark days, splitting your spaces into sub-schedules, publishing your season and syncing two ways with Google, Outlook or CalDAV are all free forever, as is free registration however many seats go out, and scanning tickets at the door is free on every plan. Putting a price on a seat is what the Pro plan at '.plan_price($proMonthly).' a month opens, and it adds the live check-in dashboard, season passes and custom checkout questions. Event Schedule charges zero platform fees on ticket sales on every plan, the free one included.',
             ],
             [
                 'q' => 'How do I set up a multi-week run?',
@@ -797,7 +797,7 @@
             </div>
 
             <p class="es-bill-muted mx-auto mt-8 max-w-2xl text-center text-sm" data-reveal>
-                Take payment through Stripe, PayPal, Invoice Ninja, Payfast (in rand), a payment link or cash at the box office, on every plan. Event Schedule charges zero platform fees, so past the provider's own processing the money is yours. On Pro, a big booking can be split into <a href="{{ marketing_url('/features/installments') }}" class="es-bill-link font-medium hover:underline">monthly installments</a> by card through Stripe.
+                No payment method is plan-gated: take the money through Stripe, PayPal, Invoice Ninja, Payfast (in rand), a payment link or cash at the box office. Event Schedule charges zero platform fees, so past the provider's own processing the money is yours. On Pro, a big booking can be split into <a href="{{ marketing_url('/features/installments') }}" class="es-bill-link font-medium hover:underline">monthly installments</a> by card through Stripe.
             </p>
         </div>
     </section>
@@ -1212,7 +1212,7 @@
                         Set the run once. <span class="es-bill-lit">Sell all fourteen.</span>
                     </h2>
                     <p class="mx-auto mb-10 max-w-2xl text-lg text-gray-400">
-                        Publishing your season and its dates is free forever, and so is selling your first 25 paid tickets a month and scanning them at the door. {{ plan_price($proMonthly) }} a month lifts the ceiling and adds season passes and the live check-in dashboard, and nothing is taken from the door.
+                        Publishing your season and its dates is free forever, as is free registration on every one of them and scanning people in at the door. {{ plan_price($proMonthly) }} a month is what puts a price on a seat, and it adds season passes and the live check-in dashboard, and nothing is taken from the door.
                     </p>
 
                     <div class="mx-auto flex max-w-2xl flex-col items-stretch justify-center gap-3 sm:flex-row">

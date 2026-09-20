@@ -522,7 +522,7 @@
             ],
             [
                 'q' => 'Can I sell tickets to an online event?',
-                'a' => 'Yes, and it works exactly the same for an online event as for a room: named ticket types with their own prices and quantities, and payment through your own Stripe or PayPal account. Selling starts on the free plan, at 25 paid tickets a month. Pro is '.plan_price($proMonthly).' a month and takes the ceiling off, and adds per-attendee tickets and the ticket waitlist. Event Schedule charges zero platform fees on every plan, so past the payment provider\'s own processing the money is yours. Free registration with a capacity limit is on the free plan, and the cap is counted per date.',
+                'a' => 'Yes, and it works exactly the same for an online event as for a room: named ticket types with their own prices and quantities, and payment through your own Stripe or PayPal account. A ticket that carries a price is the Pro plan, '.plan_price($proMonthly).' a month, which also adds per-attendee tickets and the ticket waitlist. Event Schedule charges zero platform fees on every plan, so past the payment provider\'s own processing the money is yours. Free registration with a capacity limit is on the free plan, unlimited, and the cap is counted per date.',
             ],
             [
                 'q' => 'What time will people in other countries see?',
@@ -538,7 +538,7 @@
             ],
             [
                 'q' => 'Do I need a paid plan to run online events?',
-                'a' => 'No. Online events are on the free plan, along with recurring dates, sub-schedules, the embeddable calendar, two-way calendar sync, built-in analytics, free registration and selling up to 25 paid tickets a month. Pro is '.plan_price($proMonthly).' a month for unlimited paid tickets, per-attendee tickets and the ticket waitlist.',
+                'a' => 'No. Online events are on the free plan, along with recurring dates, sub-schedules, the embeddable calendar, two-way calendar sync, built-in analytics and unlimited free registration. Pro is '.plan_price($proMonthly).' a month for charging admission at all, plus per-attendee tickets and the ticket waitlist.',
             ],
         ];
 
@@ -951,9 +951,9 @@
                     <div class="es-golive-card p-6" data-reveal="panel">
                         <div class="mb-2 flex flex-wrap items-center gap-2">
                             <h3 class="text-lg font-bold es-golive-onink">Sell seats to a stream</h3>
-                            <span class="es-golive-plan">Free</span>
+                            <span class="es-golive-plan">Pro</span>
                         </div>
-                        <p class="text-sm es-golive-onmuted">Named ticket types with their own prices and quantities, paid through your own Stripe or PayPal account. 25 paid tickets a month on the free plan, no ceiling on Pro, and Event Schedule takes nothing from the sale on either.</p>
+                        <p class="text-sm es-golive-onmuted">Named ticket types with their own prices and quantities, paid through your own Stripe or PayPal account. Charging for a seat is Pro, free registration is not, and Event Schedule takes nothing from the sale either way.</p>
                     </div>
                     <div class="es-golive-card p-6" data-reveal="panel">
                         <div class="mb-2 flex flex-wrap items-center gap-2">
@@ -1338,7 +1338,7 @@
                         Tick the box. <span class="es-golive-lit">Go live.</span>
                     </h2>
                     <p class="mx-auto mb-10 max-w-2xl text-lg es-golive-onmuted">
-                        Online events, recurring dates, free registration and 25 paid tickets a month are on the free plan. {{ plan_price($proMonthly) }} a month lifts the ceiling, and nothing is taken from the sale either way.
+                        Online events, recurring dates and unlimited free registration are on the free plan. {{ plan_price($proMonthly) }} a month is what puts a price on a ticket, and nothing is taken from the sale either way.
                     </p>
 
                     <div class="mx-auto flex max-w-2xl flex-col items-stretch justify-center gap-3 sm:flex-row">

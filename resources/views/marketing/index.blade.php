@@ -386,10 +386,11 @@
         "@id": "{{ config('app.url') }}/#software",
         "name": "Event Schedule",
         "url": "{{ config('app.url') }}",
-        "description": "Event calendar and booking platform. One calendar that takes the bookings, sells the tickets with zero platform fees through Stripe or PayPal, emails the people who follow you and scans tickets at the door. Free plan, open source and selfhostable.",
+        "description": "Event calendar and booking platform. One calendar that takes the bookings, collects free registrations, sells tickets with zero platform fees through Stripe or PayPal, emails the people who follow you and scans tickets at the door. Free plan, open source and selfhostable.",
         "featureList": [
             "Event calendar pages with a custom link and a website embed",
-            "Ticket sales with zero platform fees through Stripe or PayPal",
+            "Free registration and RSVP, unlimited on every plan",
+            "Paid ticket sales with zero platform fees through Stripe or PayPal (Pro)",
             "QR ticket scanning at the door on every plan",
             "Full and partial refunds through Stripe and PayPal",
             "Email sign-up for when an event's tickets go on sale",
@@ -490,9 +491,12 @@
                  solid" directly above, which is why an imperative opening reads right here when it
                  would have fought the headline in a capability list.
 
-                 "buy a ticket or book a time" carries both revenue modes in six words. Both are
-                 free-tier capabilities (25 paid tickets a calendar month, one appointment type), so
-                 the sentence needs no tier qualifier.
+                 "buy a ticket or book a time" carries both revenue modes in six words, and neither
+                 is qualified by tier here. Appointment booking is free with one type; putting a
+                 price on a ticket is Pro. The fold is not where that split gets argued - it sits
+                 beside a badge reading "Free forever. No credit card." and a button reading "Start
+                 for free", and MarketingHeroClaimTest pins the fold against a plan name drifting
+                 back in. The pricing band and the FAQ below carry the tiers.
 
                  "event calendar" is here because the <title> says "Free Event Calendar" and an H1
                  that does not confirm the title's subject is the usual trigger for Google rewriting
@@ -1568,7 +1572,7 @@
                 <div class="rounded-3xl border border-emerald-200 bg-gradient-to-br from-emerald-50 to-teal-50 p-8 text-center dark:border-emerald-500/20 dark:from-emerald-900/25 dark:to-teal-900/25" data-reveal="panel">
                     <div class="es-od text-gradient mb-4 justify-center text-6xl font-black lg:text-7xl" data-odometer="{{ plan_price(0) }}">{{ plan_price(0) }}</div>
                     <div class="mb-1 text-xl font-bold text-gray-900 dark:text-white">Free forever</div>
-                    <p class="text-sm text-gray-500 dark:text-gray-400">Unlimited events and schedules, and 25 paid tickets a month</p>
+                    <p class="text-sm text-gray-500 dark:text-gray-400">Unlimited events, schedules and free registrations</p>
                 </div>
                 <div class="rounded-3xl border border-sky-200 bg-gradient-to-br from-sky-50 to-cyan-50 p-8 text-center dark:border-sky-500/20 dark:from-sky-900/25 dark:to-cyan-900/25" data-reveal="panel">
                     <div class="es-od text-gradient mb-4 justify-center text-6xl font-black lg:text-7xl" data-odometer="100%">100%</div>
@@ -1733,22 +1737,23 @@
     <!-- ============================================================ -->
     @php
         $homeFaqs = [
-            // Tiers verified in code, not in FEATURES.md: Role::ticketSaleLimit() makes selling
-            // free up to 25 paid tickets a month, so "ticketing" is no longer a Pro feature;
-            // Pro is what removes the cap. TicketController::scan()/scanned() have no plan
-            // check, so scanning at the door is free too. Add-ons, promo codes and the ticket
-            // waitlist ARE Pro (EventRepo::saveEvent() $ticketExtrasAllowed scrub, and the
-            // ticket branch of WaitlistController::join()), so they are named as what Pro adds,
-            // never as part of what selling includes. No gateway is plan-gated: there is no
+            // Tiers verified in code, not in FEATURES.md: a ticket that carries a price needs
+            // Pro or Enterprise, so "ticketing" is a paid feature again. Free registration and
+            // ticket types priced at zero stay unlimited on every tier, which is why the free
+            // claims here are written about registration rather than about selling.
+            // TicketController::scan()/scanned() have no plan check, so scanning at the door is
+            // free too. Add-ons, promo codes and the ticket waitlist ARE Pro (EventRepo::saveEvent()
+            // $ticketExtrasAllowed scrub, and the ticket branch of WaitlistController::join()),
+            // so they are named as what Pro adds on top. No gateway is plan-gated: there is no
             // isPro() under app/Services/Payments/, Invoice Ninja included. Refunds
             // (SaleRefundService via TicketController::handleAction) and the interest list
             // (EventInterestController) carry no plan check either. CalDAV has no inbound
             // delete sync - applyInboundDeletion() is called only by the Google and Microsoft
             // services - so the deletion choice is stated for those two only.
-            ['q' => 'Is Event Schedule free?', 'a' => 'Yes, Event Schedule is free to use with unlimited events and schedules, and the free plan sells up to 25 paid tickets a month. Pro and Enterprise plans add unlimited ticket sales, event boosting, custom branding, and AI image generation.'],
-            ['q' => 'Can I sell tickets with Event Schedule?', 'a' => 'Yes, with zero platform fees. The free plan covers 25 paid tickets a month per schedule and Pro removes the cap. Create as many ticket types as you need and scan the QR code on every ticket at the door. Pro also adds extras like parking or merchandise, promo codes and a waitlist for sold-out tickets.'],
+            ['q' => 'Is Event Schedule free?', 'a' => 'Yes, Event Schedule is free to use with unlimited events, unlimited schedules and unlimited free registration. Pro and Enterprise plans add paid ticket sales, event boosting, custom branding, and AI image generation.'],
+            ['q' => 'Can I sell tickets with Event Schedule?', 'a' => 'Yes, with zero platform fees. A ticket that carries a price needs the Pro plan, while free registration stays unlimited on every plan. Create as many ticket types as you need and scan the QR code on every ticket at the door, on any plan. Pro also adds extras like parking or merchandise, promo codes and a waitlist for sold-out tickets.'],
             ['q' => 'Can people get notified when tickets go on sale?', 'a' => 'Yes, on every plan. Switch on the "Notify me" card and, until tickets go on sale, an event page offers "Tell me when tickets go on sale". A visitor leaves an email address, with no account, and gets one email when tickets go on sale, one if it is cancelled, a reminder shortly before it starts, and any notice you choose to send if the date or venue changes. Every email has a one-click unsubscribe, and the event editor shows you how many people are waiting.'],
-            ['q' => 'How do I get paid?', 'a' => 'Straight into your own account. You connect your Stripe or PayPal account and payments land there directly, so we never hold your money and never take a cut. Payfast (for events priced in South African rand), Invoice Ninja, a payment link of your own and cash at the door work too, on every plan.'],
+            ['q' => 'How do I get paid?', 'a' => 'Straight into your own account. You connect your Stripe or PayPal account and payments land there directly, so we never hold your money and never take a cut. Payfast (for events priced in South African rand), Invoice Ninja, a payment link of your own and cash at the door work too, and no payment method is plan-gated.'],
             ['q' => 'Can I refund a ticket?', 'a' => 'Yes, in full or in part, from the Sales page, on every plan. Refund a Stripe or PayPal sale and the money goes back to the buyer through that provider. A partial refund leaves the tickets valid, and a full refund puts them back on sale. A sale paid any other way, cash included, can be marked as refunded so your records match.'],
             ['q' => 'Does Event Schedule sync with my calendar?', 'a' => 'Yes. Google Calendar and Microsoft 365 both sync two ways, with webhook updates so a change made in either place shows up in the other, and you choose whether an event deleted there is kept, marked cancelled or deleted here. Any CalDAV server works as well. Guests can add a single event to Apple, Google or Outlook from the event page, or subscribe to your whole schedule as a live calendar feed that updates itself when a date changes.'],
             ['q' => 'Can I use my own domain?', 'a' => 'Yes. Every schedule gets a free subdomain such as yourname.eventschedule.com, and Enterprise schedules can serve the whole guest portal from a domain you own, with the certificate issued automatically. Selfhosted installs run on your own domain from day one.'],

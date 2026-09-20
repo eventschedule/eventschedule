@@ -2,10 +2,10 @@
 
 return [
     'home_title' => 'Event Schedule - Gratis evenementenagenda, tickets en boekingen',
-    'home_description' => 'Publiceer je evenementen op één agendapagina, verkoop tickets zonder platformkosten en neem afspraken aan. Het gratis plan verkoopt 25 betaalde tickets per maand.',
+    'home_description' => 'Publiceer je evenementen op één agendapagina, verkoop tickets zonder platformkosten en neem afspraken aan. Onbeperkt gratis inschrijven, betaalde tickets zijn Pro.',
 
     'pricing_title' => 'Prijzen van Event Schedule: gratis plan, geen platformkosten',
-    'pricing_description' => 'Begin gratis: onbeperkte evenementen en 25 betaalde tickets per maand. Pro heft de limiet op, Enterprise voegt genummerde plaatsen toe. Nooit platformkosten.',
+    'pricing_description' => 'Begin gratis: onbeperkte evenementen en onbeperkt gratis inschrijven. Betaalde tickets zijn Pro, Enterprise voegt genummerde plaatsen toe. Nooit platformkosten.',
 
     'features_title' => 'Functies voor evenementenbeheer, zonder platformkosten - Event Schedule',
     'features_description' => 'Alle functies in vijf hoofdstukken: tickets via Stripe of PayPal zonder platformkosten, tweerichtingssynchronisatie met je agenda, nieuwsbrieven, AI-import en statistieken.',

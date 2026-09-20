@@ -52,6 +52,60 @@ class AdsGateTest extends TestCase
         return $request;
     }
 
+    /**
+     * The selling exclusion survives paid selling becoming a Pro feature.
+     *
+     * It is keyed on canOfferTickets(), not canSellTickets(): the latter now returns false for a
+     * free schedule's priced rows, which would have switched ads back ON for exactly the pages the
+     * rule exists to protect - a $0 row and a grandfathered event both still have a live buy
+     * button. Keying it on tickets_enabled alone would be worse again: that flag is
+     * organizer-controlled, so it would be a free ad-blocker.
+     */
+    public function test_no_ads_beside_a_live_buy_button_on_a_free_schedule(): void
+    {
+        $service = app(AdsService::class);
+
+        // A $0 row: still selling, so still no ads.
+        $role = $this->freeRole();
+        $free = $this->createEvent($role, ['tickets_enabled' => true]);
+        $this->createTicket($free, ['price' => 0, 'quantity' => 50]);
+        $this->assertNull($service->resolveSlot($role, $free->fresh(), $this->visitorRequest()));
+
+        // Grandfathered: still selling, so still no ads.
+        $stamped = $this->createEvent($role, ['tickets_enabled' => true]);
+        $this->createTicket($stamped, ['price' => 20, 'quantity' => 50]);
+        $stamped->forceFill(['tickets_grandfathered_at' => now()])->saveQuietly();
+        $this->assertNull($service->resolveSlot($role, $stamped->fresh(), $this->visitorRequest()));
+
+        // A free schedule's PRICED row: the gate refuses it, so there is no buy button to sit
+        // beside and the page is monetized like any other.
+        $gated = $this->createEvent($role, ['tickets_enabled' => true]);
+        $this->createTicket($gated, ['price' => 20, 'quantity' => 50]);
+        $this->assertNotNull($service->resolveSlot($role, $gated->fresh(), $this->visitorRequest()));
+    }
+
+    /**
+     * A finished event carries no buy button, so it is monetized like any other archive page.
+     *
+     * canOfferTickets() has no date logic by design, so keying the suppression on it alone would
+     * have taken ads off every past event a free schedule has ever run - the long tail, and the
+     * only pages that schedule earns from.
+     */
+    public function test_a_past_event_is_still_monetized(): void
+    {
+        $role = $this->freeRole();
+        $past = $this->createEvent($role, [
+            'tickets_enabled' => true,
+            'starts_at' => now()->subMonth()->format('Y-m-d H:i:s'),
+        ]);
+        $this->createTicket($past, ['price' => 0, 'quantity' => 50]);
+
+        $this->assertFalse($past->fresh()->canSellTickets(), 'sanity check: it has finished');
+        $this->assertNotNull(
+            app(AdsService::class)->resolveSlot($role, $past->fresh(), $this->visitorRequest())
+        );
+    }
+
     public function test_a_free_schedule_is_monetized(): void
     {
         $this->assertTrue($this->freeRole()->showAds());

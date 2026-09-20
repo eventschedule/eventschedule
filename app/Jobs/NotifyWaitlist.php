@@ -45,6 +45,15 @@ class NotifyWaitlist implements ShouldQueue
             if ($event->allTicketsSoldOut($this->eventDate)) {
                 return;
             }
+
+            // Both halves, matching WaitlistController::join(). canOfferWaitlist() is the plan
+            // check; canSellTickets() stops the mail promising a 24-hour window and linking to
+            // ?tickets=true on a page whose ticket form no longer renders. Entries from schedules
+            // that were selling under the old free allowance are still in the table, so this runs
+            // against rows that were legitimately created.
+            if (! $event->canOfferWaitlist() || ! $event->canSellTickets($this->eventDate)) {
+                return;
+            }
         }
 
         // Find the oldest waiting entry and atomically mark as notified

@@ -493,44 +493,55 @@ class HomeController extends Controller
             ]);
         }
 
-        // 1b) Free-plan ticket allowance running low or spent.
+        // 1b) A free schedule has priced tickets that cannot be sold.
         //
-        // The guest side is deliberately silent when the allowance runs out (a missing buy button
-        // reads the same as sales not being open yet, which is the least-shaming outcome), so the
-        // organizer has to get the loud signal here instead.
+        // The guest side is deliberately silent here (a missing buy button reads the same as sales
+        // not being open yet, which is the least-shaming outcome), so the organizer has to get the
+        // loud signal in this list instead. That reasoning got STRONGER when paid selling went back
+        // to Pro: the silence is now permanent rather than lasting until the month rolled over.
         //
         // Guarded on OWNERSHIP, not editor access: SubscriptionController::show redirects a
         // non-owner, so showing an editor a to-do they cannot act on repeats a mistake this
         // dashboard already avoids elsewhere.
         if (config('app.hosted')) {
             foreach ($rolesById as $role) {
-                if ($role->user_id !== auth()->id()) {
+                if ($role->user_id !== auth()->id() || $role->isPro() || is_demo_role($role)) {
                     continue;
                 }
 
-                $limit = $role->ticketSaleLimit();
+                // Upcoming, non-draft, non-cancelled events this schedule created that carry a
+                // priced row and were not grandfathered by the 2026_09_20 migration.
+                $blocked = \App\Models\Event::where('creator_role_id', $role->id)
+                    ->where('is_draft', false)
+                    ->where('is_cancelled', false)
+                    ->where('tickets_enabled', true)
+                    ->whereNull('tickets_grandfathered_at')
+                    ->whereNull('appointment_type_id')
+                    // days_of_week is the recurring arm and it must be here: for a recurring event
+                    // starts_at is the recurrence ANCHOR, which is in the past by design, so a
+                    // bare starts_at window silently skipped every live weekly show - the loudest
+                    // case this to-do exists for.
+                    ->where(fn ($q) => $q->whereNull('starts_at')
+                        ->orWhereNotNull('days_of_week')
+                        ->orWhere('starts_at', '>=', now()->subDay()))
+                    // whereExists on the bare table rather than whereHas('tickets'): that relation
+                    // carries an orderBy('price'), which Laravel emits inside the EXISTS subquery.
+                    ->whereExists(fn ($q) => $q->selectRaw('1')
+                        ->from('tickets')
+                        ->whereColumn('tickets.event_id', 'events.id')
+                        ->where('tickets.is_deleted', false)
+                        ->where('tickets.is_addon', false)
+                        ->where('tickets.price', '>', 0))
+                    ->count();
 
-                // Null short-circuits before any counting, so paid schedules cost nothing here.
-                if (is_null($limit) || $limit < 1) {
+                if ($blocked < 1) {
                     continue;
                 }
-
-                $used = $role->ticketsSoldThisMonth();
-
-                // Nothing below 80%: the meters on the Plan and Sales pages already cover that,
-                // and a to-do list is for things that need doing.
-                if ($used / $limit < 0.8) {
-                    continue;
-                }
-
-                $remaining = max(0, $limit - $used);
 
                 $items->push([
                     'type' => 'ticket_quota',
-                    'count' => $remaining,
-                    'title' => $remaining > 0
-                        ? trans_choice('messages.pending_action_ticket_quota_low', $remaining, ['count' => $remaining])
-                        : __('messages.pending_action_ticket_quota_spent'),
+                    'count' => $blocked,
+                    'title' => trans_choice('messages.pending_action_tickets_need_pro', $blocked, ['count' => $blocked]),
                     'subtitle' => $role->name,
                     'url' => route('role.view_admin', ['subdomain' => $role->subdomain, 'tab' => 'plan']),
                     'color' => 'amber',

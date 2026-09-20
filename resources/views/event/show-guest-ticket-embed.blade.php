@@ -49,7 +49,7 @@
                 @endif
 
                 @if ($isTicketMode)
-                    @if ($event->canSellTickets($eventDate))
+                    @if ($event->hasProTicketingPlan() && $event->canSellTickets($eventDate))
                         @include('event.tickets', ['accentColor' => $accentColor, 'contrastColor' => $contrastColor])
                     @else
                         <div class="text-center py-8">

@@ -430,7 +430,6 @@ class GrowthExportService
                 'is_nexus' => (bool) config('app.is_nexus'),
                 'app_version' => config('self-update.version_installed'),
                 'schema_version' => 4,
-                'free_ticket_cap' => config('usage.ticket_sale_monthly_limit_free'),
                 'row_cap' => $this->rowCap(),
                 'truncated' => [
                     'signups' => ['capped' => $signups['truncated'], 'total' => $signups['total']],
@@ -776,10 +775,10 @@ class GrowthExportService
     }
 
     /**
-     * Paid tickets per schedule per calendar month, matching what Role::ticketSaleLimit()
-     * enforcement counts: paid, not deleted, not an RSVP or bulk import, not an add-on,
-     * priced above zero, and never an appointment booking. Windowed on sales.paid_at,
-     * never created_at, or cash sales escape entirely.
+     * Paid tickets per schedule per calendar month. Counts the same shape the paid-ticket gate
+     * and its 2026_09_20 grandfather backfill do: paid, not deleted, not an RSVP or bulk import,
+     * not an add-on, priced above zero, and never an appointment booking. Windowed on
+     * sales.paid_at, never created_at, or cash sales escape entirely.
      */
     private function paidTicketsByRoleMonth(): array
     {
@@ -995,13 +994,12 @@ class GrowthExportService
     private function freePressureFrom(array $schedules): array
     {
         $i = array_flip($schedules['columns']);
-        $cap = (int) config('usage.ticket_sale_monthly_limit_free', 25);
-        $buckets = ['0' => 0, '1-5' => 0, '6-15' => 0, '16-24' => 0, 'at_or_over_cap' => 0];
+        $buckets = ['0' => 0, '1-5' => 0, '6-15' => 0, '16+' => 0];
         $newsletter = ['0' => 0, '1-9' => 0, 'at_or_over_cap' => 0];
         $appt = ['0' => 0, '1' => 0, '2+' => 0];
         $photos = ['0' => 0, '1-24' => 0, 'at_or_over_cap' => 0];
         $freeCount = 0;
-        $everHitCap = 0;
+        $everSoldPaid = 0;
 
         foreach ($schedules['rows'] as $row) {
             if ($row[$i['plan']] !== 'free') {
@@ -1010,17 +1008,18 @@ class GrowthExportService
             $freeCount++;
 
             $peak = max($row[$i['paid_tickets_recent']] ?: [0]);
-            if ($peak >= $cap) {
-                $buckets['at_or_over_cap']++;
-                $everHitCap++;
-            } elseif ($peak >= 16) {
-                $buckets['16-24']++;
+            if ($peak >= 16) {
+                $buckets['16+']++;
             } elseif ($peak >= 6) {
                 $buckets['6-15']++;
             } elseif ($peak >= 1) {
                 $buckets['1-5']++;
             } else {
                 $buckets['0']++;
+            }
+
+            if ($peak >= 1) {
+                $everSoldPaid++;
             }
 
             $n = (int) $row[$i['newsletter_emails_this_month']];
@@ -1035,9 +1034,8 @@ class GrowthExportService
 
         return [
             'free_schedules' => $freeCount,
-            'ticket_cap' => $cap,
             'peak_month_paid_tickets' => $buckets,
-            'ever_hit_ticket_cap' => $everHitCap,
+            'ever_sold_paid' => $everSoldPaid,
             'newsletter_emails_this_month' => $newsletter,
             'appointment_types' => $appt,
             'photos' => $photos,

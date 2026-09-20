@@ -120,12 +120,26 @@ class AdsService
 
         // Never on a page that is actively selling tickets. The event page carries the inline ticket
         // form, so an ad here - and worse, a paid promotion for another schedule's event - would sit
-        // beside the organizer's own buy button and compete with it. Free schedules are the only ones
-        // that carry ads and, since the free plan can sell, also the only ones this can happen to.
-        // Extends the checkout/booking exclusion already promised in docs/FEATURES.md.
-        // The occurrence date is a ROUTE parameter (/{slug}/{id}/{date}), not a query string, so
-        // query('date') was always null and this judged the recurrence anchor instead.
-        if ($event && $event->tickets_enabled && $event->canSellTickets($request->route('date') ?? $request->query('date'))) {
+        // beside the organizer's own buy button and compete with it. Free schedules are the only
+        // ones that carry ads, so they are the only ones this can happen to. Extends the
+        // checkout/booking exclusion already promised in docs/FEATURES.md.
+        //
+        // The predicate has to be "would this page be selling if the plan allowed it", which is
+        // canOfferTickets() for the plan half AND passesSellingWindow() for the date half.
+        //
+        // canSellTickets() alone is too narrow now: it goes false for a free schedule's priced
+        // rows, which would switch ads back ON beside a buy button the organizer still means to
+        // have. canOfferTickets() alone is too broad: it carries no date logic, so it would
+        // suppress ads on cancelled events, past occurrences and events whose sales window has
+        // closed - pages with no buy button at all, and the long tail of a free schedule's
+        // archive. Keying it on tickets_enabled alone would be worse again: that flag is
+        // organizer-controlled and nothing forces it off below Pro, so it would be a free
+        // ad-blocker.
+        //
+        // The occurrence date is a ROUTE parameter (/{slug}/{id}/{date}), not a query string.
+        $occurrence = $request->route('date') ?? $request->query('date');
+
+        if ($event && $event->tickets_enabled && $event->canOfferTickets() && $event->passesSellingWindow($occurrence)) {
             return null;
         }
 

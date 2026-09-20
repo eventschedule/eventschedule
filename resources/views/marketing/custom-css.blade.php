@@ -1185,14 +1185,14 @@
                             <h3 class="es-sheet2-ink text-lg font-bold">On Free</h3>
                             <span class="es-sheet2-plan">Free</span>
                         </div>
-                        <p class="es-sheet2-muted text-sm">The whole visual styling suite. Accent colour, typeface, background, header style, layout, and the schedule itself with calendar sync, followers, newsletters and up to 25 paid tickets a month.</p>
+                        <p class="es-sheet2-muted text-sm">The whole visual styling suite. Accent colour, typeface, background, header style, layout, and the schedule itself with calendar sync, followers, newsletters and unlimited free registration.</p>
                     </div>
                     <div class="es-sheet2-card p-6" data-reveal="panel">
                         <div class="mb-2 flex flex-wrap items-center gap-2">
                             <h3 class="es-sheet2-ink text-lg font-bold">On Pro</h3>
                             <span class="es-sheet2-plan es-sheet2-plan-pro">Pro</span>
                         </div>
-                        <p class="es-sheet2-muted text-sm">Custom CSS, alongside unlimited paid tickets, the ticket widget and the removal of our footer line. One price for all of it.</p>
+                        <p class="es-sheet2-muted text-sm">Custom CSS, alongside paid ticket sales, the ticket widget and the removal of our footer line. One price for all of it.</p>
                     </div>
                     <div class="es-sheet2-card p-6" data-reveal="panel">
                         <h3 class="es-sheet2-ink mb-2 text-lg font-bold">Selfhosted</h3>

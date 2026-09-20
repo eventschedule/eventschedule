@@ -2,9 +2,9 @@
 
      Because it is shared, a wrong tier here is wrong sixty times: it used to bill
      "QR check-in" as the Pro column when TicketController::scan() has no plan check
-     at all. The Pro half is the live check-in DASHBOARD (CheckInController), and the
-     free plan really does sell - Role::ticketSaleLimit() allows 25 paid tickets a
-     calendar month per schedule. Both columns say so now.
+     at all. The Pro half is the live check-in DASHBOARD (CheckInController). Selling
+     tickets with a PRICE is Pro (Event::canSellPaidTickets); free registration, RSVP
+     and $0 ticket rows are unlimited on every tier. Both columns say so now.
 
      $proMonthly / $entMonthly come from AppServiceProvider's marketing.* composer,
      via PlatformPricing, so an operator's own prices flow through. Never print a
@@ -16,8 +16,8 @@
                 Free forever. Upgrade when you're ready.
             </h2>
             <p class="mt-3 text-gray-600 dark:text-gray-400" data-reveal style="--reveal-delay: 0.08s;">
-                Zero platform fees on ticket sales, on every plan. The only deduction is your payment
-                processor's own.
+                Free registration for as many people as you like. When you start charging, zero
+                platform fees on every plan - the only deduction is your payment processor's own.
             </p>
         </div>
 
@@ -28,11 +28,11 @@
                     'Free',
                     plan_price(0),
                     'forever, no card',
-                    'Everything you need to publish a schedule, and enough selling to find out whether you need more.',
+                    'Everything you need to publish a schedule and fill the room, for as long as you like.',
                     [
                         'Unlimited events, sub-schedules and recurring dates',
                         'Two-way Google, Outlook and CalDAV sync',
-                        '25 paid tickets a month, each one scanned at the door',
+                        'Unlimited free registration and RSVPs, scanned at the door',
                     ],
                     false,
                 ],
@@ -40,9 +40,9 @@
                     'Pro',
                     plan_price($proMonthly),
                     'per month',
-                    'The ceilings come off, and the rest of the selling kit arrives with them.',
+                    'Start charging, and the rest of the selling kit arrives with it.',
                     [
-                        'Unlimited ticket sales and the live check-in dashboard',
+                        'Sell paid tickets, with the live check-in dashboard',
                         'Promo codes, add-ons, passes and gift cards',
                         'The REST API, webhooks, and no Event Schedule branding',
                     ],

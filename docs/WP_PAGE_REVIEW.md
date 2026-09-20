@@ -112,12 +112,22 @@ A checklist of every WP (marketing) site page, used to track review progress as 
 > updated date and an Improve this page on GitHub link on all 37 docs pages, read from the same
 > manifest entry their JSON-LD already used; 377 decorative glyphs marked `aria-hidden`.
 
+> **REVERSED 2026-09-20. Paid ticket selling is Pro/Enterprise again**, so everything in the
+> block below is history, not current guidance. The allowance, its two config keys and every
+> `Role::ticketSaleLimit()`-family method are gone; the gate is now
+> `Event::canSellPaidTickets()`, keyed on `ticketingRole()?->isPro()`, with one carve-out:
+> `events.tickets_grandfathered_at`, stamped once by the `2026_09_20` migration for events that had
+> already sold. There is no grace window for an imminent event - the 48-hour one went with the cap
+> it softened. Free registration, RSVP and $0 ticket rows stay unlimited on every tier, and door
+> scanning stays free. See `docs/FEATURES.md`.
+>
+> *Superseded, kept for the audit trail:*
+>
 > **Ticketing plan model change - SWEPT 2026-07-31.** Another session shipped a real product
-> change mid-campaign: the FREE tier now SELLS paid tickets, 25 per calendar month per
-> schedule (`Role::ticketSaleLimit()`, `config('usage.ticket_sale_monthly_limit_free')`) with
-> a 50/month per-owner backstop. Selfhost, demo schedules and Pro/trialling are unlimited;
-> non-addon zero-price tickets and events starting within 48 hours are exempt
-> (`Event::hasTicketAllowance()`). **Pro now means UNLIMITED ticket sales, not "ticketing".**
+> change mid-campaign: the FREE tier then SOLD paid tickets, 25 per calendar month per
+> schedule, with a 50/month per-owner backstop. Selfhost, demo schedules and Pro/trialling were
+> unlimited; non-addon zero-price tickets and events starting within 48 hours were exempt.
+> **Pro then meant UNLIMITED ticket sales, not "ticketing".**
 > Still Pro: QR check-in dashboard, individual tickets, passes, waitlist, promo codes,
 > add-ons, sales CSV export, gift cards, bulk import, the ticket-purchase embed.
 >
@@ -134,8 +144,9 @@ A checklist of every WP (marketing) site page, used to track review progress as 
 > `for-musicians` also carried the long-standing "newsletters are available on the Pro and
 > Enterprise plans" error - newsletters are FREE at 10 recipients/month - now corrected.
 >
-> **Door scanning is FREE - resolved and swept 2026-07-31.** The product owner decided free
-> users may scan the 25 tickets a month the free plan sells. **No code change was needed:**
+> **Door scanning is FREE - resolved and swept 2026-07-31, and still true after the 2026-09-20
+> reversal.** Free users may scan every ticket and registration on their schedule, including
+> tickets sold before it dropped to Free. **No code change was needed:**
 > `TicketController::scan()` and `scanned()` carry no plan gate at all (`scan()` even has a
 > comment saying it is available on every plan because the Pro feature is the dashboard),
 > `User::canScanEvent()` is a permission check for owners/admins/viewers with no `isPro()`,

@@ -85,7 +85,7 @@ class MarketingHeroClaimTest extends TestCase
      *
      * Everything the fold claims is free, so a tier word up here is either a mistake or a paid
      * feature being sold inside the free promise. Selling tickets and taking bookings are both free
-     * (Role::ticketSaleLimit, Role::appointmentTypeLimit), which is exactly why this can be a flat
+     * (paid selling is Pro, but the fold does not claim it is free), which is why this is a flat
      * ban rather than a per-feature qualifier check.
      */
     public function test_the_fold_advertises_no_paid_plan(): void

@@ -2,10 +2,10 @@
 
 return [
     'home_title' => 'Event Schedule - Calendário de eventos, ingressos e agendamentos, grátis',
-    'home_description' => 'Publique seus eventos em uma única página de calendário, venda ingressos sem taxas de plataforma e receba agendamentos. O plano gratuito vende 25 ingressos pagos por mês.',
+    'home_description' => 'Publique seus eventos em uma página de calendário, receba inscrições gratuitas sem limite e agendamentos. Os ingressos pagos são do plano Pro.',
 
     'pricing_title' => 'Preços do Event Schedule: plano grátis, sem taxas de plataforma',
-    'pricing_description' => 'Comece grátis: eventos ilimitados e 25 ingressos pagos por mês. O Pro remove o limite e o Enterprise adiciona lugares marcados. Sem taxa de plataforma.',
+    'pricing_description' => 'Comece grátis: eventos e inscrições ilimitados. O Pro adiciona a venda de ingressos pagos e o Enterprise lugares marcados. Sem taxa de plataforma.',
 
     'features_title' => 'Recursos de gestão de eventos, sem taxas de plataforma - Event Schedule',
     'features_description' => 'Todos os recursos em cinco capítulos: ingressos pelo Stripe ou PayPal sem taxa de plataforma, sincronização de calendário nos dois sentidos, newsletters, importação com IA e análises.',

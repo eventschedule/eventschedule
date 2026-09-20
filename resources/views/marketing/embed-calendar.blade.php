@@ -993,7 +993,7 @@
                 </a>
                 <div class="es-paste-card flex flex-col p-6 md:col-span-2" data-reveal>
                     <h3 class="es-paste-ink mb-1 text-base font-bold">Everything else on the free plan</h3>
-                    <p class="es-paste-muted text-sm leading-relaxed">The calendar itself, two-way Google, Outlook and CalDAV sync, RSVP with a capacity per date, sub-schedules, built-in analytics, newsletters to 10 recipients a month and selling up to 25 tickets a month are all free. Pro takes the ceiling off ticket sales and adds the check-in dashboard, the ticket purchase widget and custom fields. Event Schedule takes zero platform fees on ticket sales, on every plan.</p>
+                    <p class="es-paste-muted text-sm leading-relaxed">The calendar itself, two-way Google, Outlook and CalDAV sync, RSVP with a capacity per date, sub-schedules, built-in analytics, newsletters to 10 recipients a month and unlimited free registration are all free. Pro adds paid ticket sales, the check-in dashboard, the ticket purchase widget and custom fields. Event Schedule takes zero platform fees on ticket sales, on every plan.</p>
                     <div class="mt-auto pt-4">
                         <x-link href="{{ marketing_url('/pricing') }}">See pricing</x-link>
                     </div>
