@@ -192,6 +192,48 @@ jobs:
           php artisan storage:link
           php artisan migrate --env=testing --force
 
+      # A one-major gap between Chrome and ChromeDriver is silent: the session is created, pages
+      # load, script() runs and Vue mounts, but synthesized input goes nowhere, so click(), type()
+      # and the Actions API become no-ops. Every journey that drives the screen for real then fails
+      # as though the app were broken - "the plan name never saved", "the section did not move" -
+      # while the ones using dispatchEvent keep passing. That cost SeatingTest 8 of its 10 journeys
+      # and ImageTest its only one, and neither version appeared anywhere in the log.
+      #
+      # guardAgainstChromeDriverDrift() in tests/DuskTestCase.php catches this locally, but it
+      # waives itself when it cannot read a version - and it reads Chrome through the same
+      # hardcoded path list as `dusk:chrome-driver --detect`, which on failing to detect installs
+      # the LATEST driver and exits 0. So the two waive together, which is precisely the case that
+      # needs to be loud. An unreadable version is therefore a failure here, not a pass.
+      - name: Verify Chrome and ChromeDriver agree
+        run: |
+          # `|| true` throughout: the step runs under `bash -e`, and a missing binary or an
+          # unreadable version is a case this must REPORT, not die on before it can say why.
+          chrome=""
+          for bin in /usr/bin/google-chrome /usr/bin/chromium-browser /usr/bin/chromium /usr/bin/google-chrome-stable; do
+            if [ -x "$bin" ]; then
+              chrome=$("$bin" --version 2>/dev/null || true)
+              if [ -n "$chrome" ]; then break; fi
+            fi
+          done
+          driver=$(vendor/laravel/dusk/bin/chromedriver-linux --version 2>/dev/null || true)
+          echo "chrome: ${chrome:-<not found>}"
+          echo "driver: ${driver:-<not found>}"
+
+          chrome_major=$(printf '%s' "$chrome" | grep -oE '[0-9]+' | head -1)
+          driver_major=$(printf '%s' "$driver" | grep -oE '[0-9]+' | head -1)
+
+          if [ -z "$chrome_major" ] || [ -z "$driver_major" ]; then
+            echo "::error::Could not read Chrome and/or ChromeDriver version. dusk:chrome-driver --detect falls back to the latest driver when it cannot detect Chrome, which is how a silent version gap gets in."
+            exit 1
+          fi
+
+          if [ "$chrome_major" != "$driver_major" ]; then
+            echo "::error::Chrome is $chrome_major but ChromeDriver is $driver_major. Across that gap WebDriver input (click, type, drag) silently does nothing, so the browser tests fail as though the app were broken."
+            exit 1
+          fi
+
+          echo "Chrome and ChromeDriver are both major $chrome_major."
+
       - name: Install npm dependencies and build assets
         run: |
           npm ci --ignore-scripts

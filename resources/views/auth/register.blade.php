@@ -31,6 +31,26 @@
         var lockedEmail = null;
         var turnstileWidgetId = null;
 
+        /**
+         * Reveal the fields that only apply once a verification code has been sent.
+         *
+         * The verification code is required, but only from here on: it is rendered without the
+         * attribute because its wrapper starts hidden, and a required control inside a hidden
+         * container is one the browser will not focus, so requestSubmit() aborts on constraint
+         * validation without submitting or saying anything (issue #124).
+         */
+        function revealSignupFields() {
+            ['name-field', 'password-field', 'verification-code-field', 'terms-field', 'submit-section'].forEach(function (id) {
+                var el = document.getElementById(id);
+                if (el) el.style.display = 'block';
+            });
+
+            ['name', 'password', 'terms', 'verification_code'].forEach(function (id) {
+                var el = document.getElementById(id);
+                if (el) el.required = true;
+            });
+        }
+
         // Show all fields if form is reloaded with validation errors or if code was already sent
         document.addEventListener('DOMContentLoaded', function() {
             var verificationCodeInput = document.getElementById('verification_code');
@@ -38,16 +58,7 @@
             var hasErrors = @json($errors->any());
             // If verification code field has a value (from old input), email is readonly, or there are validation errors, show all fields
             if (verificationCodeInput && (verificationCodeInput.value || emailInput.readOnly || hasErrors)) {
-                var nameField = document.getElementById('name-field');
-                var passwordField = document.getElementById('password-field');
-                var verificationCodeField = document.getElementById('verification-code-field');
-                var termsField = document.getElementById('terms-field');
-                var submitSection = document.getElementById('submit-section');
-                if (nameField) nameField.style.display = 'block';
-                if (passwordField) passwordField.style.display = 'block';
-                if (verificationCodeField) verificationCodeField.style.display = 'block';
-                if (termsField) termsField.style.display = 'block';
-                if (submitSection) submitSection.style.display = 'block';
+                revealSignupFields();
                 // Hide the Google signup section
                 var googleSignupSection = document.getElementById('google-signup-section');
                 if (googleSignupSection) googleSignupSection.style.display = 'none';
@@ -130,16 +141,7 @@
                             emailInput.classList.add('bg-gray-100', 'dark:bg-gray-700', 'cursor-not-allowed');
                             codeMessage.innerHTML = '<span class="text-green-600 dark:text-green-400">' + data.message + '</span>';
                             // Show the rest of the form fields
-                            var nameField = document.getElementById('name-field');
-                            var passwordField = document.getElementById('password-field');
-                            var verificationCodeField = document.getElementById('verification-code-field');
-                            var termsField = document.getElementById('terms-field');
-                            var submitSection = document.getElementById('submit-section');
-                            if (nameField) nameField.style.display = 'block';
-                            if (passwordField) passwordField.style.display = 'block';
-                            if (verificationCodeField) verificationCodeField.style.display = 'block';
-                            if (termsField) termsField.style.display = 'block';
-                            if (submitSection) submitSection.style.display = 'block';
+                            revealSignupFields();
                             // Hide the Google signup section
                             var googleSignupSection = document.getElementById('google-signup-section');
                             if (googleSignupSection) googleSignupSection.style.display = 'none';
@@ -367,6 +369,17 @@
     <x-slot name="abovePage">
     </x-slot>
 
+    @php
+        // The hosted sign-up is a two-step flow: the visitor gives an email, we mail a code, and
+        // only then does the rest of the form appear. $stepped is that "still on step one" state.
+        //
+        // It gates `required` as well as the hiding, because a required control inside a hidden
+        // container is one the browser refuses to focus: constraint validation then fails, the
+        // submit is silently abandoned and nothing is reported. That is the defect issue #124 was
+        // about on the booking form, and Enter in the email field reaches a submit from step one.
+        // revealSignupFields() arms all four the moment they become visible.
+        $stepped = config('app.hosted') && ! config('app.is_testing');
+    @endphp
     <form method="POST" action="{{ route('sign_up') }}" class="w-full">
         @csrf
 
@@ -494,18 +507,18 @@
         </div>
 
         <!-- Name -->
-        <div class="mt-4" id="name-field" @if(config('app.hosted') && ! config('app.is_testing')) style="display: none;" @endif>
+        <div class="mt-4" id="name-field" @if($stepped) style="display: none;" @endif>
             <x-input-label for="name" :value="__('messages.full_name')" />
-            <x-text-input id="name" class="block mt-1 w-full" type="text" name="name" :value="old('name')" required
+            <x-text-input id="name" class="block mt-1 w-full" type="text" name="name" :value="old('name')" :required="! $stepped"
                 autofocus autocomplete="name" />
             <x-input-error :messages="$errors->get('name')" class="mt-2" />
         </div>
 
         <!-- Password -->
-        <div class="mt-4" id="password-field" @if(config('app.hosted') && ! config('app.is_testing')) style="display: none;" @endif>
+        <div class="mt-4" id="password-field" @if($stepped) style="display: none;" @endif>
             <x-input-label for="password" :value="__('messages.password')" />
 
-            <x-password-input id="password" class="block mt-1 w-full" name="password" required minlength="8"
+            <x-password-input id="password" class="block mt-1 w-full" name="password" :required="! $stepped" minlength="8"
                 autocomplete="new-password" />
 
             <x-input-error :messages="$errors->get('password')" class="mt-2" />
@@ -515,8 +528,13 @@
         @if (config('app.hosted'))
         <div class="mt-4" id="verification-code-field" style="display: none;">
             <x-input-label for="verification_code" :value="__('messages.verification_code')" />
+            {{-- NOT required in the markup: this wrapper renders display:none until a code has
+                 actually been sent, and a browser refuses to focus a required control it cannot
+                 show - so the form silently refuses to submit and reports nothing, which is the
+                 defect issue #124 was about on the booking form. revealSignupFields() arms it at
+                 the moment it becomes visible, the same way toggleAccountFields() does there. --}}
             <x-text-input id="verification_code" class="block mt-1 w-full" type="text" name="verification_code" 
-                :value="old('verification_code')" maxlength="6" pattern="[0-9]{6}" required autocomplete="off" />
+                :value="old('verification_code')" maxlength="6" pattern="[0-9]{6}" autocomplete="off" />
             <x-input-error :messages="$errors->get('verification_code')" class="mt-2" />
         </div>
         @endif
@@ -577,10 +595,10 @@
         </div>
         @endif
 
-        <div class="mt-8" id="terms-field" @if(config('app.hosted') && ! config('app.is_testing')) style="display: none;" @endif>
+        <div class="mt-8" id="terms-field" @if($stepped) style="display: none;" @endif>
             <div class="relative flex items-start">
                 <div class="flex h-6 items-center">
-                    <input id="terms" name="terms" type="checkbox" required
+                    <input id="terms" name="terms" type="checkbox" {{ $stepped ? '' : 'required' }}
                         class="h-4 w-4 rounded border-gray-300 dark:border-gray-700 dark:bg-gray-900 text-[var(--brand-blue)] focus:ring-[var(--brand-blue)] dark:focus:ring-offset-gray-800">
                 </div>
                 <div class="ml-3 text-sm leading-6">
@@ -617,7 +635,7 @@
         @endif
         
         <div class="flex items-center justify-end mt-8">
-            <div id="submit-section" @if(config('app.hosted') && ! config('app.is_testing')) style="display: none;" @endif>
+            <div id="submit-section" @if($stepped) style="display: none;" @endif>
                 <x-primary-button>
                     {{ __('messages.sign_up') }}
                 </x-primary-button>
