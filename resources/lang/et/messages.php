@@ -64,6 +64,7 @@ return [
     'terms_of_service' => 'Kasutustingimused',
     'privacy_policy' => 'Privaatsuspoliitika',
     'i_accept_the_terms_and_privacy' => 'Nõustun :tingimuste ja :privaatsusega',
+    'terms_must_be_accepted' => 'Jätkamiseks nõustuge palun kasutustingimuste ja privaatsuspoliitikaga.',
     'already_registered' => 'Kas olete juba registreerunud?',
     'reset_password' => 'Lähtestage parool',
     'thanks_for_signing_up' => 'Täname registreerumast! Enne alustamist palun kinnitage oma e-posti aadress, klõpsates lingil, mille me teile just e-postiga saatsime. Kui te e-kirja ei saanud, saadame teile hea meelega uue.',

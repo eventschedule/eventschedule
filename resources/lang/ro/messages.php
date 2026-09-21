@@ -64,6 +64,7 @@ return [
     'terms_of_service' => 'Termeni și Condiții',
     'privacy_policy' => 'Politica de Confidențialitate',
     'i_accept_the_terms_and_privacy' => 'Accept :terms și :privacy',
+    'terms_must_be_accepted' => 'Acceptă termenii serviciului și politica de confidențialitate pentru a continua.',
     'already_registered' => 'Deja înregistrat?',
     'reset_password' => 'Resetează Parola',
     'thanks_for_signing_up' => 'Mulțumim pentru înregistrare! Înainte de a începe, vă rugăm să verificați adresa de email făcând clic pe linkul pe care tocmai vi l-am trimis. Dacă nu ați primit emailul, vă vom trimite cu plăcere altul.',

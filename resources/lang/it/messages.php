@@ -62,6 +62,7 @@ return [
     'terms_of_service' => 'Termini di Servizio',
     'privacy_policy' => 'Informativa sulla Privacy',
     'i_accept_the_terms_and_privacy' => 'Accetto i :terms e :privacy',
+    'terms_must_be_accepted' => 'Accetta i termini di servizio e l\'informativa sulla privacy per continuare.',
     'already_registered' => 'Sei già registrato?',
     'reset_password' => 'Reset Password',
     'thanks_for_signing_up' => 'Grazie per esserti registrato! Prima di iniziare, verifica la tua email cliccando sul link che ti abbiamo inviato. Se non hai ricevuto l\'email, saremo felici di inviartene un\'altra.',

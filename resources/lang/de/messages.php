@@ -60,6 +60,7 @@ return [
     'terms_of_service' => 'Nutzungsbedingungen',
     'privacy_policy' => 'Datenschutzrichtlinie',
     'i_accept_the_terms_and_privacy' => 'Ich akzeptiere die :terms und :privacy',
+    'terms_must_be_accepted' => 'Bitte akzeptieren Sie die Nutzungsbedingungen und die Datenschutzerklärung, um fortzufahren.',
     'already_registered' => 'Bereits registriert?',
     'reset_password' => 'Passwort zurücksetzen',
     'thanks_for_signing_up' => 'Vielen Dank für Ihre Anmeldung! Bevor Sie loslegen, bestätigen Sie bitte Ihre E-Mail-Adresse, indem Sie auf den Link in der E-Mail klicken, die wir Ihnen gesendet haben. Wenn Sie die E-Mail nicht erhalten haben, senden wir Ihnen gerne eine neue.',

@@ -243,6 +243,7 @@ class HoneypotTest extends TestCase
         config(['app.hosted' => true]);
 
         $this->post('/sign_up', [
+            'terms' => '1',
             'name' => 'Spam Bot',
             'email' => 'bot@gmail.com',
             'password' => 'password',

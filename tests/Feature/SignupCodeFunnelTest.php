@@ -137,6 +137,7 @@ class SignupCodeFunnelTest extends TestCase
                 'email' => $email,
                 'password' => 'correct-horse-battery',
                 'verification_code' => $code,
+                'terms' => '1',
             ], [
                 'HTTP_USER_AGENT' => $agent,
                 'HTTP_ACCEPT' => 'text/html',

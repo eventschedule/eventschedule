@@ -47,6 +47,7 @@ class ScheduleClaimByEmailTest extends TestCase
     private function register(string $email): void
     {
         $this->post('/sign_up', [
+            'terms' => '1',
             'name' => 'Claimant',
             'email' => $email,
             'password' => 'password',

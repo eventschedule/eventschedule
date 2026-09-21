@@ -60,6 +60,7 @@ return [
     'terms_of_service' => 'شروط الخدمة',
     'privacy_policy' => 'سياسة الخصوصية',
     'i_accept_the_terms_and_privacy' => 'أوافق على :terms و :privacy',
+    'terms_must_be_accepted' => 'يرجى قبول شروط الخدمة وسياسة الخصوصية للمتابعة.',
     'already_registered' => 'مسجل بالفعل؟',
     'reset_password' => 'إعادة تعيين كلمة المرور',
     'thanks_for_signing_up' => 'شكرًا لتسجيلك! قبل البدء، يرجى التحقق من بريدك الإلكتروني بالنقر على الرابط الذي أرسلناه. إذا لم تستلم البريد، سنرسل واحدًا جديدًا بكل سرور.',

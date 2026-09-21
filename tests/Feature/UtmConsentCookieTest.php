@@ -306,6 +306,7 @@ class UtmConsentCookieTest extends TestCase
             'utm_medium' => 'email',
             'utm_campaign' => 'spring',
         ]))->post('/sign_up', [
+            'terms' => '1',
             'name' => 'Cached Visitor',
             'email' => 'cached@gmail.com',
             'password' => 'password',
@@ -334,6 +335,7 @@ class UtmConsentCookieTest extends TestCase
             'landing' => '/',
             'ref' => 'REF12345',
         ]))->post('/sign_up', [
+            'terms' => '1',
             'name' => 'Referred Visitor',
             'email' => 'referred@gmail.com',
             'password' => 'password',
@@ -364,6 +366,7 @@ class UtmConsentCookieTest extends TestCase
             'utm_params' => ['utm_source' => 'live', 'utm_medium' => null, 'utm_campaign' => null, 'utm_content' => null, 'utm_term' => null],
             'utm_landing_page' => 'live-page',
         ])->post('/sign_up', [
+            'terms' => '1',
             'name' => 'Session Visitor',
             'email' => 'session@gmail.com',
             'password' => 'password',
@@ -394,6 +397,7 @@ class UtmConsentCookieTest extends TestCase
             $email = 'garbage'.($index++).'@gmail.com';
 
             $this->withUnencryptedCookie('es_attribution', $raw)->post('/sign_up', [
+                'terms' => '1',
                 'name' => 'Garbage Visitor',
                 'email' => $email,
                 'password' => 'password',
@@ -462,6 +466,7 @@ class UtmConsentCookieTest extends TestCase
         $this->get('/sign_up')->assertOk();
 
         $this->post('/sign_up', [
+            'terms' => '1',
             'name' => 'Cached Visitor',
             'email' => 'landed@gmail.com',
             'password' => 'password',

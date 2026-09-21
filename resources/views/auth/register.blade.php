@@ -598,7 +598,7 @@
         <div class="mt-8" id="terms-field" @if($stepped) style="display: none;" @endif>
             <div class="relative flex items-start">
                 <div class="flex h-6 items-center">
-                    <input id="terms" name="terms" type="checkbox" {{ $stepped ? '' : 'required' }}
+                    <input id="terms" name="terms" type="checkbox" value="1" {{ old('terms') ? 'checked' : '' }} {{ $stepped ? '' : 'required' }}
                         class="h-4 w-4 rounded border-gray-300 dark:border-gray-700 dark:bg-gray-900 text-[var(--brand-blue)] focus:ring-[var(--brand-blue)] dark:focus:ring-offset-gray-800">
                 </div>
                 <div class="ml-3 text-sm leading-6">
@@ -616,6 +616,12 @@
                     </label>
                 </div>
             </div>
+            {{-- Consistency with every other field, not a fix for an invisible error: the summary
+                 block at the top of this form already renders $errors->first(), so the server-side
+                 `accepted` rule was always announced. This just points at the control it is about,
+                 and pairs with the old('terms') above so a rejected submit does not silently clear
+                 the box the visitor had already ticked. --}}
+            <x-input-error :messages="$errors->get('terms')" class="mt-2" />
         </div>
 
         @if (! config('app.hosted'))

@@ -62,6 +62,7 @@ return [
     'terms_of_service' => 'תנאי השירות',
     'privacy_policy' => 'מדיניות פרטיות',
     'i_accept_the_terms_and_privacy' => 'אני מקבל את :terms ואת :privacy',
+    'terms_must_be_accepted' => 'יש לאשר את תנאי השימוש ומדיניות הפרטיות כדי להמשיך.',
     'already_registered' => 'כבר רשום?',
     'reset_password' => 'איפוס סיסמה',
     'thanks_for_signing_up' => 'תודה שנרשמת! לפני שנתחיל, אנא אמת את כתובת הדוא"ל שלך ע"י לחיצה על הקישור שנשלח אליך. אם לא קיבלת את הדוא"ל, נשמח לשלוח לך שוב.',

@@ -60,6 +60,7 @@ return [
     'terms_of_service' => 'Términos de Servicio',
     'privacy_policy' => 'Política de Privacidad',
     'i_accept_the_terms_and_privacy' => 'Acepto los :terms y :privacy',
+    'terms_must_be_accepted' => 'Acepta los términos del servicio y la política de privacidad para continuar.',
     'already_registered' => '¿Ya estás registrado?',
     'reset_password' => 'Restablecer Contraseña',
     'thanks_for_signing_up' => '¡Gracias por registrarte! Antes de comenzar, ¿podrías verificar tu dirección de correo electrónico haciendo clic en el enlace que te acabamos de enviar? Si no recibiste el correo, con gusto te enviaremos otro.',

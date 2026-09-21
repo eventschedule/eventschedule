@@ -149,6 +149,7 @@ class UnclaimedSchedulePageTest extends TestCase
         $this->assertSame($placeholder->subdomain, session('pending_claim'));
 
         $this->post('/sign_up', [
+            'terms' => '1',
             'name' => 'Someone',
             'email' => 'someone@gmail.com',
             'password' => 'password',
@@ -390,6 +391,7 @@ class UnclaimedSchedulePageTest extends TestCase
         // post_signup_redirect_url() go untaught about pending_claim: this address does not match,
         // so the new account has no schedule tie and would otherwise land on /getting-started.
         $this->post('/sign_up', [
+            'terms' => '1',
             'name' => 'Someone Else',
             'email' => 'nottheband@gmail.com',
             'password' => 'password',

@@ -344,12 +344,25 @@ class RegisteredUserController extends Controller
             'sms_token' => ['nullable', 'string', 'max:60'],
         ];
 
+        // Accepting the terms and the privacy policy is a legal record, so it is checked here and
+        // not only by the checkbox's `required` attribute - that attribute is now armed by the
+        // sign-up form's reveal script, which puts consent behind one JavaScript function. Hosted
+        // only: on selfhost the first account is the operator installing their own software, and a
+        // missing field there is a failed install rather than a missing consent.
+        if (config('app.hosted')) {
+            $validationRules['terms'] = ['accepted'];
+        }
+
         // Add verification code validation for hosted mode only
         if (config('app.hosted') && ! config('app.is_testing')) {
             $validationRules['verification_code'] = ['required', 'string', 'size:6'];
         }
 
-        $request->validate($validationRules);
+        // A custom message because there is no resources/lang/*/validation.php in this repo, so the
+        // `accepted` rule would otherwise fall back to framework English in all 12 locales.
+        $request->validate($validationRules, [
+            'terms.accepted' => __('messages.terms_must_be_accepted'),
+        ]);
 
         // Validate verification code for hosted mode only
         if (config('app.hosted') && ! config('app.is_testing')) {

@@ -64,6 +64,7 @@ return [
     'terms_of_service' => 'Conditions d\'utilisation',
     'privacy_policy' => 'Politique de confidentialité',
     'i_accept_the_terms_and_privacy' => 'J\'accepte les :terms et la :privacy',
+    'terms_must_be_accepted' => 'Veuillez accepter les conditions d\'utilisation et la politique de confidentialité pour continuer.',
     'already_registered' => 'Déjà inscrit ?',
     'reset_password' => 'Réinitialiser le mot de passe',
     'thanks_for_signing_up' => 'Merci pour votre inscription ! Avant de commencer, pourriez-vous vérifier votre adresse e-mail en cliquant sur le lien que nous venons de vous envoyer ? Si vous n\'avez pas reçu l\'e-mail, nous vous en enverrons un autre avec plaisir.',

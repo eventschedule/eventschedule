@@ -64,6 +64,7 @@ return [
     'terms_of_service' => 'Terms of Service',
     'privacy_policy' => 'Privacy Policy',
     'i_accept_the_terms_and_privacy' => 'I accept the :terms and :privacy',
+    'terms_must_be_accepted' => 'Please accept the terms of service and privacy policy to continue.',
     'already_registered' => 'Already registered?',
     'reset_password' => 'Reset Password',
     'thanks_for_signing_up' => 'Thanks for signing up! Before getting started, could you verify your email address by clicking on the link we just emailed to you? If you didn\'t receive the email, we will gladly send you another.',
