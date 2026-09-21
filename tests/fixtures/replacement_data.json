@@ -154,7 +154,7 @@
             },
             {
                 "question": "Is Event Schedule really free?",
-                "answer": "Yes. The free plan includes unlimited events, Google Calendar sync, newsletters, and fan engagement features. Free registration is unlimited and every ticket scans at the door at no cost; selling paid tickets is on Pro at $5/month, which also adds the live check-in dashboard. No payment method is plan-gated: buyers pay through Stripe or PayPal, or by Payfast for rand, Invoice Ninja, a payment link or cash. No credit card required to start."
+                "answer": "Yes. The free plan includes unlimited events, Google Calendar sync, newsletters, and fan engagement features. Free registration is unlimited and every ticket scans at the door at no cost; selling paid tickets is on Pro at $5/month, which also adds the live check-in dashboard and every payment method: buyers pay through Stripe or PayPal, or by Payfast for rand, Invoice Ninja, a payment link or cash. No credit card required to start."
             },
             {
                 "question": "Can Event Schedule handle custom registration fields like Google Forms?",
@@ -993,7 +993,7 @@
             },
             {
                 "question": "Can I record refunds, including partial ones?",
-                "answer": "Yes, from the Sales page, on every plan. A Stripe or PayPal sale can be refunded in full or in part, and the money goes back through the provider before the status changes. A partial refund keeps the sale paid and its tickets valid, and the sale shows how much has been refunded so far; a full refund returns the tickets to inventory. A sale paid in cash, by a payment link, Invoice Ninja or Payfast is marked as refunded instead, which records it without moving money."
+                "answer": "Yes, from the Sales page, on Pro, alongside the paid ticketing that took the money. A Stripe or PayPal sale can be refunded in full or in part, and the money goes back through the provider before the status changes. A partial refund keeps the sale paid and its tickets valid, and the sale shows how much has been refunded so far; a full refund returns the tickets to inventory. A sale paid in cash, by a payment link, Invoice Ninja or Payfast is marked as refunded instead, which records it without moving money."
             },
             {
                 "question": "Can I import the guest list I already keep in a spreadsheet?",
@@ -2046,7 +2046,7 @@
             },
             {
                 "question": "How do payments and refunds work?",
-                "answer": "No payment method is plan-gated: buyers pay through Stripe or PayPal, or by Payfast for rand, Invoice Ninja, a payment link or cash, and can buy tickets to several of your events in one checkout. A Stripe or PayPal sale can be refunded from the Sales page in full or in part, with the money going back through the provider. A CSV export of your sales is on Pro."
+                "answer": "Charging for a ticket is the Pro plan, and it opens every payment method: buyers pay through Stripe or PayPal, or by Payfast for rand, Invoice Ninja, a payment link or cash, and can buy tickets to several of your events in one checkout. A Stripe or PayPal sale can be refunded from the Sales page in full or in part, with the money going back through the provider. A CSV export of your sales is on Pro."
             }
         ],
         "cross_links": [

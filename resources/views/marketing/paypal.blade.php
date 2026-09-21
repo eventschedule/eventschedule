@@ -14,7 +14,7 @@
         "operatingSystem": "Web",
         "featureList": [
             "Connect your own PayPal business account",
-            "No gateway is plan-gated: the same integration whatever your plan",
+            "Included with paid ticketing on the Pro plan, at no extra cost",
             "No platform fee on ticket sales, on any plan",
             "Credentials verified with PayPal before they are stored",
             "The seats are re-checked before the money is taken",
@@ -215,7 +215,7 @@
                             Take the money <span class="es-pp-accent">into your own account.</span>
                         </h1>
                         <p class="es-pp-muted mt-6 text-lg" data-reveal style="--reveal-delay: 0.1s;">
-                            Connect the PayPal business account you already have and sell tickets through it. Event Schedule takes no platform fee on any plan and never holds the money on its way to you. Putting a price on a ticket is the Pro plan; the gateway itself is not something a tier unlocks.
+                            Connect the PayPal business account you already have and sell tickets through it. Taking money for a ticket is the Pro plan, and it comes with every payment method, this one included. Whatever you charge, Event Schedule takes no platform fee and never holds the money on its way to you.
                         </p>
                         <div class="mt-8 flex flex-wrap gap-3" data-reveal style="--reveal-delay: 0.15s;">
                             <a href="{{ app_url('/sign_up') }}" class="inline-flex items-center gap-2 rounded-xl bg-[#854d0e] px-6 py-3 font-semibold text-white transition-colors hover:bg-[#6f4009]">
@@ -313,7 +313,7 @@
 
                 @php
                     $ppFacts = [
-                        ['No gateway is plan-gated', 'There is no plan check anywhere in the payments code, so PayPal is not a tier unlock and costs nothing extra on Pro, Enterprise or a selfhosted install. What does need a paid plan is a ticket that carries a price, and Event Schedule still adds no fee of its own.'],
+                        ['Included, not an add-on', 'PayPal comes with paid ticketing on Pro, at no extra cost, and the same on Enterprise or a selfhosted install. What you pay for is the plan that lets a ticket carry a price; Event Schedule still adds no fee of its own on top of what you charge.'],
                         ['Refunds move real money', 'From the Sales page, a full or partial refund is issued against the capture PayPal actually took, and the sale only changes once the money has gone back. A partial refund leaves the sale paid and its tickets valid.'],
                         ['One order, one capture', 'A multi-event cart pays as a single amount, so a buyer taking tickets for three of your nights approves once and is charged once.'],
                         ['What it does not do', 'Installment plans are Stripe-only, and gift cards and appointment bookings cannot be paid through PayPal either. HUF, JPY and TWD are excluded deliberately, because PayPal rejects a decimal amount in all three and our pricing path can produce one.'],
@@ -345,7 +345,7 @@
         @php
             $ppFaqs = [
                 ['q' => 'Does Event Schedule take a cut of my ticket sales?', 'a' => 'No. There is no platform fee on any plan. The only deduction is PayPal\'s own processing fee, which is between you and PayPal, and the money goes into your own PayPal account rather than through ours.'],
-                ['q' => 'Do I need a paid plan to use PayPal?', 'a' => 'Not for PayPal itself - there is no plan check anywhere in the payments code, so no gateway is reserved for a tier. What does need a paid plan is selling a ticket that carries a price at all, which is Pro or Enterprise. Free registration stays unlimited on every plan. The gateway is never what you are paying for.'],
+                ['q' => 'Do I need a paid plan to use PayPal?', 'a' => 'Yes. Selling a ticket that carries a price is Pro or Enterprise, and PayPal comes with it, at no extra cost and with no fee of ours on top. A free schedule has nothing to charge for, so it has nothing for a gateway to settle. Free registration stays unlimited on every plan, and those places need no payment method at all.'],
                 ['q' => 'Can one event offer both PayPal and Stripe?', 'a' => 'No. An event uses one payment method at a time, chosen on the event itself, so you pick per event rather than showing a row of buttons at checkout. You can connect several accounts and use different ones on different events.'],
                 ['q' => 'What happens if I paste the wrong secret?', 'a' => 'The settings form refuses it. Your client ID and secret are tried against PayPal before they are stored, so a typo is caught by you rather than by the first person who tries to buy a ticket. If the check cannot be run at all, the keys are saved and you are told that we could not verify them.'],
                 ['q' => 'What if a buyer approves the payment and then disappears?', 'a' => 'Nothing is captured. The sale is re-checked when they come back, and if it has expired or been released in the meantime, the payment is not taken. This matters more on PayPal than on other gateways, because the capture is the moment the money moves rather than something that already happened.'],

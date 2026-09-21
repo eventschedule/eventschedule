@@ -388,7 +388,7 @@
             ],
             [
                 'q' => 'Can I refund a booking if a guest cancels?',
-                'a' => 'Yes, from the Sales page, on every plan. A booking paid through Stripe or PayPal can be refunded in full or in part, and the money goes back through the provider before the sale is marked refunded. A full refund puts the cover back on sale for that date. A partial refund, if you keep a cancellation charge, leaves the booking and its cover in place. A booking paid in cash or through a payment link is recorded with Mark as Refunded, which moves no money. The guest is not emailed about a refund, so let them know yourself.',
+                'a' => 'Yes, from the Sales page, on Pro. A booking paid through Stripe or PayPal can be refunded in full or in part, and the money goes back through the provider before the sale is marked refunded. A full refund puts the cover back on sale for that date. A partial refund, if you keep a cancellation charge, leaves the booking and its cover in place. A booking paid in cash or through a payment link is recorded with Mark as Refunded, which moves no money. The guest is not emailed about a refund, so let them know yourself.',
             ],
         ];
 

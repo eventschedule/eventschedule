@@ -647,7 +647,7 @@
             ],
             [
                 'q' => 'Can we refund a class?',
-                'a' => 'Yes, from the Sales page, on every plan. A Stripe or PayPal sale is refunded through the provider, in full or in part, and its status only changes once the money has gone back; a partial refund leaves the ticket valid. Every other method (cash, a payment link, Invoice Ninja or Payfast) shows Mark as Refunded instead, which records the refund without moving money, so you hand that one back yourself. Event Schedule does not email the buyer about a refund, so let them know.',
+                'a' => 'Yes, from the Sales page, on Pro. A Stripe or PayPal sale is refunded through the provider, in full or in part, and its status only changes once the money has gone back; a partial refund leaves the ticket valid. Every other method (cash, a payment link, Invoice Ninja or Payfast) shows Mark as Refunded instead, which records the refund without moving money, so you hand that one back yourself. Event Schedule does not email the buyer about a refund, so let them know.',
             ],
             [
                 'q' => 'Can people ask to hear when a class opens for booking?',
@@ -1249,7 +1249,7 @@
                     </x-feature-link-card>
                 </div>
                 <div data-reveal>
-                    <x-feature-link-card name="PayPal" description="Take class fees through the center's own PayPal account, on every plan" :url="marketing_url('/paypal')" icon-color="blue">
+                    <x-feature-link-card name="PayPal" description="Take class fees through the center's own PayPal account, on the Pro plan" :url="marketing_url('/paypal')" icon-color="blue">
                         <x-slot:icon><svg aria-hidden="true" class="h-5 w-5 text-blue-600 dark:text-blue-400" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z" /></svg></x-slot:icon>
                     </x-feature-link-card>
                 </div>

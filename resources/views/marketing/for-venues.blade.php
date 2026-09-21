@@ -265,7 +265,7 @@
             ],
             [
                 'q' => 'Can I refund a ticket?',
-                'a' => 'Yes, from the Sales page, on every plan. A Stripe or PayPal sale can be refunded in full or in part, and the money goes back through the provider before the sale changes status. A partial refund keeps the tickets valid, and a full refund frees the tickets and seats to sell again. A sale taken in cash, by payment link, through Payfast or through Invoice Ninja is marked as refunded instead, which records it without moving any money.',
+                'a' => 'Yes, from the Sales page, on Pro. A Stripe or PayPal sale can be refunded in full or in part, and the money goes back through the provider before the sale changes status. A partial refund keeps the tickets valid, and a full refund frees the tickets and seats to sell again. A sale taken in cash, by payment link, through Payfast or through Invoice Ninja is marked as refunded instead, which records it without moving any money.',
             ],
             [
                 'q' => 'Can people ask to hear when tickets go on sale?',

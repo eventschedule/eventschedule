@@ -377,7 +377,7 @@
             ],
             [
                 'q' => 'How do collectors pay for a ticketed dinner?',
-                'a' => 'Through your own Stripe or PayPal account, an Invoice Ninja invoice, a payment link or cash, chosen per event, and Event Schedule takes no platform fee on any of them. If a guest cannot come, refund them from the Sales page: a Stripe or PayPal sale goes back through the provider, in full or in part, and any other method is marked as refunded, which records it without moving money. Refunds are free on every plan. Putting a price on the ticket in the first place is Pro; a private view with free registration and a capacity is not.',
+                'a' => 'Through your own Stripe or PayPal account, an Invoice Ninja invoice, a payment link or cash, chosen per event, and Event Schedule takes no platform fee on any of them. If a guest cannot come, refund them from the Sales page: a Stripe or PayPal sale goes back through the provider, in full or in part, and any other method is marked as refunded, which records it without moving money. Putting a price on the ticket is Pro, and the payment methods and refunds come with it; a private view with free registration and a capacity is not.',
             ],
         ];
 

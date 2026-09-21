@@ -709,7 +709,7 @@
             ],
             [
                 'q' => 'How are refunds handled?',
-                'a' => 'From the Sales list, free on every plan. For a Stripe or PayPal sale the money goes back through the provider, in full or in part, and the list shows how much has been refunded so far. A partial refund leaves the sale paid and its tickets valid; a full refund, like a cancellation, returns the tickets to the pool for that date, which can trigger the next waitlist notification. An installment plan is refunded in full only, one charge at a time. Every other method shows Mark as Refunded, which records the refund while you return the money yourself. Either way, the refund policy stays yours.',
+                'a' => 'From the Sales list, on Pro. For a Stripe or PayPal sale the money goes back through the provider, in full or in part, and the list shows how much has been refunded so far. A partial refund leaves the sale paid and its tickets valid; a full refund, like a cancellation, returns the tickets to the pool for that date, which can trigger the next waitlist notification. An installment plan is refunded in full only, one charge at a time. Every other method shows Mark as Refunded, which records the refund while you return the money yourself. Either way, the refund policy stays yours.',
             ],
             [
                 'q' => 'Can I offer promo codes or discounts?',

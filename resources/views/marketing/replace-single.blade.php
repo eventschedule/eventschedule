@@ -101,7 +101,7 @@
                 "name": "Free",
                 "price": "0",
                 "priceCurrency": "{{ platform_currency() }}",
-                "description": "Unlimited events and schedules, public event pages, Google, Outlook and CalDAV calendar sync, unlimited free RSVP with capacity limits, QR codes scanned at the door, every payment method (Stripe, PayPal, Payfast, Invoice Ninja, a payment link or cash), refunds from the Sales page, event graphics, embeddable calendar, built-in analytics, AI event parsing, and newsletters to 10 recipients a month. One team member.",
+                "description": "Unlimited events and schedules, public event pages, Google, Outlook and CalDAV calendar sync, unlimited free RSVP with capacity limits, QR codes scanned at the door, event graphics, embeddable calendar, built-in analytics, AI event parsing, and newsletters to 10 recipients a month. One team member.",
                 "availability": "https://schema.org/InStock"
             },
             {
@@ -109,7 +109,7 @@
                 "name": "Pro",
                 "price": "{{ number_format($proMonthly, 2) }}",
                 "priceCurrency": "{{ platform_currency() }}",
-                "description": "Everything in Free plus tickets that carry a price, the live check-in dashboard, ticket waitlist, promo codes, custom fields, sale notifications, sales CSV export, no Event Schedule branding, custom CSS, the embeddable ticket widget, REST API and webhooks, and newsletters to 100 recipients a month.",
+                "description": "Everything in Free plus tickets that carry a price, every payment method (Stripe, PayPal, Payfast, Invoice Ninja, a payment link or cash), refunds from the Sales page, the live check-in dashboard, ticket waitlist, promo codes, custom fields, sale notifications, sales CSV export, no Event Schedule branding, custom CSS, the embeddable ticket widget, REST API and webhooks, and newsletters to 100 recipients a month.",
                 "availability": "https://schema.org/InStock"
             },
             {
@@ -921,7 +921,7 @@
                 </div>
 
                 <p class="es-swap-band-muted mx-auto mt-8 max-w-3xl text-center text-sm" data-reveal>
-                    Two footnotes worth reading before you switch. Your follower list is never capped, but the monthly newsletter allowance counts recipients rather than sends, so one letter to 40 followers spends 40 of it; the automatic digest of new events that confirmed subscribers get does not count against it. And Free is a single team member; extra members are Enterprise. What does not change with the plan is the fee on ticket sales, which is zero on all three, or the ways to get paid: Stripe, PayPal, Payfast for rand, Invoice Ninja, a payment link or cash. Past the processor's own fee, the money is yours, and a Stripe or PayPal sale can be refunded from the Sales page in full or in part.
+                    Two footnotes worth reading before you switch. Your follower list is never capped, but the monthly newsletter allowance counts recipients rather than sends, so one letter to 40 followers spends 40 of it; the automatic digest of new events that confirmed subscribers get does not count against it. And Free is a single team member; extra members are Enterprise. What does not change with the plan is the fee on ticket sales, which is zero on all three. Charging for a ticket is Pro, and it brings every way to get paid with it: Stripe, PayPal, Payfast for rand, Invoice Ninja, a payment link or cash. Past the processor's own fee, the money is yours, and a Stripe or PayPal sale can be refunded from the Sales page in full or in part.
                 </p>
             </div>
         </div>

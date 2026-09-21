@@ -1455,7 +1455,7 @@
                 <div data-reveal>
                     <x-feature-link-card
                         name="PayPal"
-                        description="Take ticket payments into your own PayPal account, on every plan"
+                        description="Take ticket payments into your own PayPal account, on the Pro plan"
                         :url="marketing_url('/paypal')"
                         icon-color="sky"
                     >

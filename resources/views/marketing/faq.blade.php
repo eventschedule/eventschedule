@@ -608,7 +608,7 @@
                         // verifies before storing, supportsCart() is true, and InstallmentService,
                         // GiftCardController and AppointmentController offer no PayPal branch.
                         'q' => 'Can I take payment with PayPal?',
-                        'a' => 'Yes, on every plan, including free. Connect your own PayPal account under Settings, Payment Methods, where the credentials are checked with PayPal before they are saved, then choose PayPal as the event\'s payment method. The buyer approves the payment on PayPal\'s own page and the money lands in your PayPal account, with no platform fee. A buyer can pay for tickets to several of your events in one PayPal checkout. Installment plans need Stripe, and gift cards and paid appointments do not offer PayPal. The other ways to take money are Stripe, Payfast for South African rand, Invoice Ninja, a payment link of your own, and cash.',
+                        'a' => 'Yes, on Pro, which is the plan that lets a ticket carry a price at all. Connect your own PayPal account under Settings, Payment Methods, where the credentials are checked with PayPal before they are saved, then choose PayPal as the event\'s payment method. The buyer approves the payment on PayPal\'s own page and the money lands in your PayPal account, with no platform fee. A buyer can pay for tickets to several of your events in one PayPal checkout. Installment plans need Stripe, and gift cards and paid appointments do not offer PayPal. The other ways to take money are Stripe, Payfast for South African rand, Invoice Ninja, a payment link of your own, and cash.',
                         'links' => [['PayPal checkout', marketing_url('/paypal')]],
                     ],
                     [
@@ -616,7 +616,7 @@
                         // leaves the sale paid, and only the full amount releases seats and stock.
                         // Rails whose driver answers supportsRefunds() false get Mark as Refunded.
                         'q' => 'Can I refund a ticket?',
-                        'a' => 'Yes, on every plan. From the Sales page, a Stripe or PayPal sale can be refunded in full or in part, and the money goes back through the provider before the sale is marked refunded, so the page never says money moved when it did not. A partial refund leaves the sale paid and its tickets valid, and the page shows how much has gone back so far. A full refund puts the tickets, and any seats, back on sale. An installment plan is refunded leg by leg, in full only. A sale taken any other way, such as cash, a payment link, Invoice Ninja or Payfast, shows a Mark as Refunded button instead, which records the refund while you return the money yourself.',
+                        'a' => 'Yes, on Pro. From the Sales page, a Stripe or PayPal sale can be refunded in full or in part, and the money goes back through the provider before the sale is marked refunded, so the page never says money moved when it did not. A partial refund leaves the sale paid and its tickets valid, and the page shows how much has gone back so far. A full refund puts the tickets, and any seats, back on sale. An installment plan is refunded leg by leg, in full only. A sale taken any other way, such as cash, a payment link, Invoice Ninja or Payfast, shows a Mark as Refunded button instead, which records the refund while you return the money yourself.',
                         'links' => [['Managing sales', marketing_url('/docs/tickets#managing-sales')]],
                     ],
                     [
@@ -644,7 +644,7 @@
                     ],
                     [
                         'q' => 'Can I take sign-ups for a free event without paying for Pro?',
-                        'a' => 'Yes. Free registration is on the free plan, with an optional capacity limit counted per date, so a weekly session can hold twenty people this Thursday and twenty more next Thursday, and a waitlist for when it fills up is free too. Scanning the QR at the door is on the free plan as well. Priced ticket types are what need Pro, which also adds the live check-in dashboard. Connecting your own Stripe or PayPal account is free on any plan.',
+                        'a' => 'Yes. Free registration is on the free plan, with an optional capacity limit counted per date, so a weekly session can hold twenty people this Thursday and twenty more next Thursday, and a waitlist for when it fills up is free too. Scanning the QR at the door is on the free plan as well. Priced ticket types are what need Pro, which also adds the live check-in dashboard. Connecting your own Stripe or PayPal account comes with Pro, at no extra cost, which is also what lets a ticket carry a price.',
                         'links' => [['Registration', marketing_url('/docs/tickets#registration')]],
                     ],
                     [
@@ -873,7 +873,7 @@
             ['Newsletter recipients a month', '10', '100', '1,000'],
             ['Sell tickets that carry a price', 'No', 'Yes', 'Yes'],
             ['Platform fee on ticket sales', 'Zero', 'Zero', 'Zero'],
-            ['Stripe and PayPal checkout, with refunds', 'Yes', 'Yes', 'Yes'],
+            ['Stripe and PayPal checkout, with refunds', 'No', 'Yes', 'Yes'],
             ['Scan tickets at the door', 'Yes', 'Yes', 'Yes'],
             ['Live check-in dashboard, waitlist, promo codes and passes', 'No', 'Yes', 'Yes'],
             ['Appointment booking', '1 type', 'Unlimited types', 'Unlimited types'],
@@ -1053,7 +1053,7 @@
                 </h2>
                 <p class="es-desk-muted mt-5 text-lg" data-reveal style="--reveal-delay: 0.1s;">
                     {{-- Counted, not written: this said "Thirteen" while the card had fifteen rows. --}}
-                    {{ ucfirst(\Illuminate\Support\Number::spell(count($rateRows))) }} rows, three plans. If a page ever tells you newsletters, analytics, PayPal, refunds or scanning a ticket at the door are paid features here, that page is out of date.
+                    {{ ucfirst(\Illuminate\Support\Number::spell(count($rateRows))) }} rows, three plans. If a page ever tells you newsletters, analytics, free registration or scanning a ticket at the door are paid features here, that page is out of date.
                 </p>
             </div>
 

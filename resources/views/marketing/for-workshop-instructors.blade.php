@@ -575,7 +575,7 @@
             ],
             [
                 'q' => 'Can I refund a student?',
-                'a' => 'Yes, on every plan, from the Sales page, for a student who drops out or a class you call off. A Stripe or PayPal payment goes back through the provider, in full or in part, and a partial refund leaves the spot booked. A spot paid in cash, through a payment link, Payfast or Invoice Ninja is marked as refunded instead, which records it without moving any money. Event Schedule does not email the student about a refund, so that message is yours to send.',
+                'a' => 'Yes, on Pro, from the Sales page, for a student who drops out or a class you call off. A Stripe or PayPal payment goes back through the provider, in full or in part, and a partial refund leaves the spot booked. A spot paid in cash, through a payment link, Payfast or Invoice Ninja is marked as refunded instead, which records it without moving any money. Event Schedule does not email the student about a refund, so that message is yours to send.',
             ],
             [
                 'q' => 'How does a multi-class card work?',

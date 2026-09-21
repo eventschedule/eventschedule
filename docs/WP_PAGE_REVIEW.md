@@ -197,6 +197,18 @@ A checklist of every WP (marketing) site page, used to track review progress as 
 > `config('services.stripe_platform.*')` (all correct today; they only go stale if the price
 > changes).
 
+>
+> **2026-09-22 sweep - payment methods and refunds moved Free -> Pro.** The `/pricing` Free column
+> promised "Every payment method" and "Refunds, full or partial" on a plan that cannot put a price
+> on a ticket (`Event::canSellPaidTickets()` is Pro, with no cash carve-out), so neither had
+> anything to settle or reverse. Both bullets moved to the Pro column, and ~35 sentences saying
+> gateways or refunds were "free on every plan" or "not plan-gated" were reframed across the
+> pricing/features/FAQ surfaces, the gateway landing pages, the audience and comparison pages, the
+> docs, the golden fixtures and `llms-full.txt`. The CODE was deliberately left ungated (see
+> `docs/FEATURES.md`), and `tests/Feature/MarketingTicketingTierTest.php` now fails the build on
+> copy that calls a gateway or a refund free or ungated. Untouched: the platform-fee claim ("zero
+> platform fee on any plan"), which is a fee claim and stays true on every tier.
+
 > Scope: static and functional marketing pages served under `marketing.*` routes (`routes/web.php`, `MarketingController`), cross-checked against `resources/views/sitemap.blade.php`. Excludes URL redirects, the shared partials/components, and individual blog posts. The comparison and replacement detail pages each render one shared template driven by per-slug data.
 
 ## Main / Top-level (14)

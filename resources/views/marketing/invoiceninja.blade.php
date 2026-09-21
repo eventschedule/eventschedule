@@ -934,7 +934,8 @@
                 <p>
                     <span class="es-ledg-plan es-ledg-plan-pro">Pro</span>
                     <span class="es-ledg-muted ml-2 text-sm">
-                        Selling tickets that carry a price, plus the check-in dashboard, promo codes and
+                        Selling tickets that carry a price, and with it the Invoice Ninja connection and
+                        every other payment method, refunds, the check-in dashboard, promo codes and
                         gift cards, at {{ plan_price($proMonthly) }} a month. Selfhosted installs get every Pro and
                         Enterprise feature, and no plan pays a platform fee on sales.
                     </span>
@@ -943,9 +944,8 @@
                     <span class="es-ledg-plan es-ledg-plan-free">Free</span>
                     <span class="es-ledg-muted ml-2 text-sm">
                         The schedule itself, its public page, calendar sync, RSVP with a capacity per
-                        date, the embeddable calendar, and scanning every arrival at the door. Connecting
-                        Invoice Ninja is free on any plan too; putting a price on the ticket is the
-                        Pro part.
+                        date, the embeddable calendar, and scanning every arrival at the door. A free
+                        schedule never invoices anyone, so it needs no payment method connected at all.
                     </span>
                 </p>
             </div>

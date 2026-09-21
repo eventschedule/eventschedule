@@ -699,7 +699,7 @@
             ],
             [
                 'q' => 'Can I refund a webinar ticket?',
-                'a' => 'Yes, from the Sales page, on every plan. A Stripe or PayPal sale goes back through the provider, in full or in part, and its status changes only once the money has moved. A partial refund leaves the ticket valid, so the attendee\'s page and its join link keep working; only a full refund cancels it and returns the place to the session. Sales taken by Invoice Ninja, a payment link or cash are marked as refunded instead, which records the refund without moving any money.',
+                'a' => 'Yes, from the Sales page, on Pro. A Stripe or PayPal sale goes back through the provider, in full or in part, and its status changes only once the money has moved. A partial refund leaves the ticket valid, so the attendee\'s page and its join link keep working; only a full refund cancels it and returns the place to the session. Sales taken by Invoice Ninja, a payment link or cash are marked as refunded instead, which records the refund without moving any money.',
             ],
             [
                 'q' => 'Is Event Schedule free for hosting webinars?',

@@ -583,7 +583,7 @@
             ],
             [
                 'q' => 'Can I refund an attendee who cannot make it?',
-                'a' => 'Yes, from the Sales page, on every plan. A Stripe or PayPal payment goes back through the provider, in full or for part of the amount, and the sale only changes once the money has moved. A partial refund leaves the ticket valid; a full refund puts the place back on sale for somebody else. A sale taken through Invoice Ninja, Payfast, a payment link or cash is marked as refunded for your records, and you return that money yourself.',
+                'a' => 'Yes, from the Sales page, on Pro. A Stripe or PayPal payment goes back through the provider, in full or for part of the amount, and the sale only changes once the money has moved. A partial refund leaves the ticket valid; a full refund puts the place back on sale for somebody else. A sale taken through Invoice Ninja, Payfast, a payment link or cash is marked as refunded for your records, and you return that money yourself.',
             ],
             [
                 'q' => 'How do attendees hear about the next edition?',

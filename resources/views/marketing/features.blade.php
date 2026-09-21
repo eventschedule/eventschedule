@@ -1263,8 +1263,8 @@
             ['Promo codes', 'Percentage or fixed, with usage limits and an expiry date', 'Pro', '/features/promo-codes'],
             ['Ticket waitlist', 'Notify people automatically when a sold-out type frees up', 'Pro', '/features/waitlist'],
             ['Multi-event cart', 'One checkout across several of your events, paid as a single amount', 'Free'],
-            ['PayPal checkout', 'Buyers pay into your own PayPal account, multi-event cart included', 'Free', '/paypal'],
-            ['Refunds, full or partial', 'Money goes back through Stripe or PayPal, straight from the Sales page', 'Free', '/docs/tickets#managing-sales'],
+            ['PayPal checkout', 'Buyers pay into your own PayPal account, multi-event cart included', 'Pro', '/paypal'],
+            ['Refunds, full or partial', 'Money goes back through Stripe or PayPal, straight from the Sales page', 'Pro', '/docs/tickets#managing-sales'],
             ['Interest list', 'A "tell me when tickets go on sale" option that asks only for an email', 'Free', '/docs/tickets#interest-list'],
             ['Add to Google Wallet', 'Buyers save the ticket, QR and all, once the site operator switches it on', 'Free', '/docs/tickets#wallet-passes'],
             ['Bulk attendee import', 'Up to 5,000 rows from a CSV, for a list you already hold', 'Pro'],
@@ -1341,7 +1341,7 @@
             ],
             [
                 'q' => 'Can I refund a ticket?',
-                'a' => 'Yes, on every plan. From the Sales page, a Stripe or PayPal sale can be refunded in full or in part, and the status only changes once the money has gone back through the provider. A partial refund keeps the tickets valid; a full one puts them back on sale. An installment plan is refunded in full, one payment at a time. Any other method, such as cash, a payment link, Payfast or Invoice Ninja, shows Mark as Refunded instead, which records the refund without moving money.',
+                'a' => 'Yes, on Pro. From the Sales page, a Stripe or PayPal sale can be refunded in full or in part, and the status only changes once the money has gone back through the provider. A partial refund keeps the tickets valid; a full one puts them back on sale. An installment plan is refunded in full, one payment at a time. Any other method, such as cash, a payment link, Payfast or Invoice Ninja, shows Mark as Refunded instead, which records the refund without moving money.',
             ],
             [
                 'q' => 'Can visitors ask to be told when tickets go on sale?',

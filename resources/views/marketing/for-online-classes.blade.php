@@ -549,7 +549,7 @@
             ],
             [
                 'q' => 'Can I refund a student who drops out?',
-                'a' => 'Yes, from the Sales page, on every plan. A payment taken through Stripe or PayPal goes back through the provider, in full or in part. A partial refund leaves their seat or class card valid, and only a full refund cancels it and puts the seat back on sale. Payments taken by Invoice Ninja, a payment link or cash are marked as refunded instead, which records the refund without moving any money.',
+                'a' => 'Yes, from the Sales page, on Pro. A payment taken through Stripe or PayPal goes back through the provider, in full or in part. A partial refund leaves their seat or class card valid, and only a full refund cancels it and puts the seat back on sale. Payments taken by Invoice Ninja, a payment link or cash are marked as refunded instead, which records the refund without moving any money.',
             ],
         ];
 

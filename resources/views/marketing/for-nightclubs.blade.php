@@ -543,7 +543,7 @@
             ],
             [
                 'q' => 'Can I refund a ticket if a night is cancelled?',
-                'a' => 'Yes, from the Sales page, on every plan. A Stripe or PayPal sale goes back through the provider, in full or in part, and the sale only changes once the money has moved. A full refund puts those tickets back on sale, and a partial one leaves the ticket valid. A sale taken another way, like cash on the door or a payment link, is marked as refunded and you hand the money back yourself.',
+                'a' => 'Yes, from the Sales page, on Pro. A Stripe or PayPal sale goes back through the provider, in full or in part, and the sale only changes once the money has moved. A full refund puts those tickets back on sale, and a partial one leaves the ticket valid. A sale taken another way, like cash on the door or a payment link, is marked as refunded and you hand the money back yourself.',
             ],
         ];
 

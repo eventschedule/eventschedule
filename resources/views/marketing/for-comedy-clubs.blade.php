@@ -357,7 +357,7 @@
             ],
             [
                 'q' => 'Can I refund a ticket, or part of one?',
-                'a' => 'Yes, from the Sales page, on every plan. A ticket paid through Stripe or PayPal can be refunded in full or in part, and the money goes back through the provider before the sale is marked refunded. A full refund puts that ticket back on sale for its night, and on Pro the waitlist for that night is told. A partial refund leaves the ticket valid. A sale taken in cash or through a payment link is recorded with Mark as Refunded, which moves no money. The buyer is not emailed about a refund, so let them know yourself.',
+                'a' => 'Yes, from the Sales page, on Pro. A ticket paid through Stripe or PayPal can be refunded in full or in part, and the money goes back through the provider before the sale is marked refunded. A full refund puts that ticket back on sale for its night, and on Pro the waitlist for that night is told. A partial refund leaves the ticket valid. A sale taken in cash or through a payment link is recorded with Mark as Refunded, which moves no money. The buyer is not emailed about a refund, so let them know yourself.',
             ],
         ];
 

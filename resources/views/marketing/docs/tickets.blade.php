@@ -115,7 +115,7 @@
             <li>A QR code on every ticket and phone scanning at the door, on every plan, plus a live <a href="#checkin-dashboard" class="doc-link">check-in dashboard</a> <x-doc-badge plan="pro" /></li>
             <li>A <a href="#waitlist" class="doc-link">waitlist</a> that opens automatically when an event date sells out (free for registration, <x-doc-badge plan="pro" /> for tickets)</li>
             <li>An <a href="#interest-list" class="doc-link">interest list</a> you can switch on for public event pages, so visitors can ask to hear when tickets go on sale</li>
-            <li><a href="#refunds" class="doc-link">Refunds</a> from the Sales page, sent back through Stripe or PayPal in full or in part</li>
+            <li><a href="#refunds" class="doc-link">Refunds</a> from the Sales page, sent back through Stripe or PayPal in full or in part <x-doc-badge plan="pro" /></li>
             <li>Sale notification emails, a <a href="#export" class="doc-link">CSV export</a> and a bulk <a href="#importing-attendees" class="doc-link">attendee import</a> <x-doc-badge plan="pro" /></li>
             <li><a href="#feedback" class="doc-link">Post-event feedback</a> requests with star ratings <x-doc-badge plan="pro" /></li>
         </ul>
@@ -963,7 +963,7 @@
         <p class="text-gray-600 dark:text-gray-300 mb-6">A full refund, a cancellation or a deletion returns the sale's tickets and any allocated seats to stock, gives back any promo code use, credits any gift card balance the buyer spent, stops any remaining installment payments, and notifies the next person on the <a href="#waitlist" class="doc-link">waitlist</a>. A partial refund does none of that: the sale stays paid and every ticket on it stays valid.</p>
 
         <h3 id="refunds" class="doc-subheading">Refunds</h3>
-        <p class="text-gray-600 dark:text-gray-300 mb-4">Refunds work on every plan, and what the action does depends on how the sale was paid:</p>
+        <p class="text-gray-600 dark:text-gray-300 mb-4">Refunds come with paid ticketing on the Pro plan, and what the action does depends on how the sale was paid:</p>
         <ul class="doc-list mb-6">
             <li><strong class="text-gray-900 dark:text-white">Stripe and PayPal:</strong> <strong class="text-gray-900 dark:text-white">Refund Ticket</strong> sends the money back through the provider, and the status here changes only once it has gone. A dialog shows <strong class="text-gray-900 dark:text-white">Available to refund</strong> and asks for a <strong class="text-gray-900 dark:text-white">Refund Amount</strong>, so you can return all of it or part.</li>
             <li><strong class="text-gray-900 dark:text-white">Every other method</strong> - Invoice Ninja, Payfast, a payment link, cash, or any sale you marked paid by hand - shows <strong class="text-gray-900 dark:text-white">Mark as Refunded</strong> instead. It records the refund and adjusts your revenue figures, and you return the money in your provider's own dashboard.</li>

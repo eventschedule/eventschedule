@@ -780,7 +780,7 @@
             ],
             [
                 'q' => 'How do refunds work?',
-                'a' => 'From the Sales page, in full or in part, on every plan. The money goes back through Stripe first, and only then does the sale change here. A full refund invalidates the tickets, puts the seats back on sale and takes the sale out of your revenue figures. A partial refund leaves the sale paid and its tickets valid, and the Sales page shows how much has gone back so far. An installment plan is refunded payment by payment, and only in full.',
+                'a' => 'From the Sales page, in full or in part, on Pro. The money goes back through Stripe first, and only then does the sale change here. A full refund invalidates the tickets, puts the seats back on sale and takes the sale out of your revenue figures. A partial refund leaves the sale paid and its tickets valid, and the Sales page shows how much has gone back so far. An installment plan is refunded payment by payment, and only in full.',
             ],
             [
                 'q' => 'Can I refund from the Stripe Dashboard instead?',

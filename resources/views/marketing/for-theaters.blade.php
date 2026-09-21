@@ -428,7 +428,7 @@
             ],
             [
                 'q' => 'Can I refund a ticket if a performance is cancelled?',
-                'a' => 'Yes, from the Sales page, on every plan. A Stripe or PayPal sale goes back through the provider, in full or in part, and the sale only changes once the money has moved. A partial refund leaves the ticket valid; a full refund puts the seats back on sale, and on a reserved-seating date the seat returns to the map. A sale taken another way, such as cash at the box office or a payment link, is marked as refunded and you return the money yourself.',
+                'a' => 'Yes, from the Sales page, on Pro. A Stripe or PayPal sale goes back through the provider, in full or in part, and the sale only changes once the money has moved. A partial refund leaves the ticket valid; a full refund puts the seats back on sale, and on a reserved-seating date the seat returns to the map. A sale taken another way, such as cash at the box office or a payment link, is marked as refunded and you return the money yourself.',
             ],
         ];
 
@@ -797,7 +797,7 @@
             </div>
 
             <p class="es-bill-muted mx-auto mt-8 max-w-2xl text-center text-sm" data-reveal>
-                No payment method is plan-gated: take the money through Stripe, PayPal, Invoice Ninja, Payfast (in rand), a payment link or cash at the box office. Event Schedule charges zero platform fees, so past the provider's own processing the money is yours. On Pro, a big booking can be split into <a href="{{ marketing_url('/features/installments') }}" class="es-bill-link font-medium hover:underline">monthly installments</a> by card through Stripe.
+                Pro opens every payment method: take the money through Stripe, PayPal, Invoice Ninja, Payfast (in rand), a payment link or cash at the box office. Event Schedule charges zero platform fees, so past the provider's own processing the money is yours. On Pro, a big booking can be split into <a href="{{ marketing_url('/features/installments') }}" class="es-bill-link font-medium hover:underline">monthly installments</a> by card through Stripe.
             </p>
         </div>
     </section>

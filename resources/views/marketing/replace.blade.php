@@ -608,7 +608,7 @@
             ],
             [
                 'q' => 'Can it take PayPal, and refund a buyer from the same place?',
-                'a' => 'Yes, on every plan. Connect your own Stripe or PayPal account and choose per event; Payfast (rand only), Invoice Ninja, a payment link and cash are there too. A Stripe or PayPal sale is refunded from the Sales page, in full or in part, and the money goes back through the provider before the sale changes status. A full refund puts the places back on sale, while a partial one leaves the tickets valid. A sale paid any other way is marked as refunded instead, because there is no money for the app to move. A ticket buyer is not emailed about a refund, so tell them yourself.',
+                'a' => 'Yes, on Pro. Connect your own Stripe or PayPal account and choose per event; Payfast (rand only), Invoice Ninja, a payment link and cash are there too. A Stripe or PayPal sale is refunded from the Sales page, in full or in part, and the money goes back through the provider before the sale changes status. A full refund puts the places back on sale, while a partial one leaves the tickets valid. A sale paid any other way is marked as refunded instead, because there is no money for the app to move. A ticket buyer is not emailed about a refund, so tell them yourself.',
             ],
             [
                 'q' => 'What replaces the "notify me" form and the mailing-list sign-up?',

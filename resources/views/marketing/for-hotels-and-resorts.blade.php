@@ -695,7 +695,7 @@
             ],
             [
                 'q' => 'Can I refund a guest who cancels a paid experience?',
-                'a' => 'Yes, on every plan, from the Sales page, in full or in part. A Stripe or PayPal payment goes back to the guest through that provider before the sale is marked refunded, and a partial refund leaves the booking valid. A full refund returns the place, so a seat at the cellar dinner can be sold again. A payment taken at the desk, by payment link or any other way shows Mark as Refunded, which records it without moving money. Event Schedule does not email the guest about a refund, so the desk should.',
+                'a' => 'Yes, on Pro, from the Sales page, in full or in part. A Stripe or PayPal payment goes back to the guest through that provider before the sale is marked refunded, and a partial refund leaves the booking valid. A full refund returns the place, so a seat at the cellar dinner can be sold again. A payment taken at the desk, by payment link or any other way shows Mark as Refunded, which records it without moving money. Event Schedule does not email the guest about a refund, so the desk should.',
             ],
             [
                 'q' => 'Can guests ask to hear when tickets for a special dinner go on sale?',

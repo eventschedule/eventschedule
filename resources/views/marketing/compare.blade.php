@@ -14,7 +14,7 @@
             ],
             [
                 'q' => 'Can buyers pay with PayPal, and can I refund them from Event Schedule?',
-                'a' => 'Yes to both, on every plan. You connect your own Stripe or PayPal account and choose one for each event, and the money goes to that account. A Stripe or PayPal sale can be refunded from the Sales page in full or in part, with the money going back through the same provider, and a partial refund leaves the tickets valid. A sale taken another way, such as cash or a payment link, is marked as refunded instead, which records it without moving any money.',
+                'a' => 'Yes to both, on Pro. You connect your own Stripe or PayPal account and choose one for each event, and the money goes to that account. A Stripe or PayPal sale can be refunded from the Sales page in full or in part, with the money going back through the same provider, and a partial refund leaves the tickets valid. A sale taken another way, such as cash or a payment link, is marked as refunded instead, which records it without moving any money.',
             ],
             [
                 'q' => 'Does Event Schedule have reserved seating?',
@@ -22,7 +22,7 @@
             ],
             [
                 'q' => 'Can someone buy tickets to several events at once, or pay in installments?',
-                'a' => 'Yes. A buyer can put tickets to several of your events in one cart and pay once, on every plan, and the cart works with Stripe and PayPal. Installments are a Pro feature that runs on Stripe: the first payment is taken at checkout, the ticket is valid straight away, and the rest are charged to the same card month by month.',
+                'a' => 'Yes. A buyer can put tickets to several of your events in one cart and pay once, and the cart works with Stripe and PayPal. Installments are a Pro feature that runs on Stripe: the first payment is taken at checkout, the ticket is valid straight away, and the rest are charged to the same card month by month.',
             ],
             [
                 'q' => 'How is this different from the pricing page?',

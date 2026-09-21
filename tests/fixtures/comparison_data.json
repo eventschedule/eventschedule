@@ -427,7 +427,7 @@
             },
             {
                 "question": "Can I refund a ticket buyer?",
-                "answer": "Yes, from the Sales page, on every plan. A Stripe or PayPal sale can be refunded in full or in part, and the money goes back through the provider before the sale changes status. A partial refund keeps the tickets valid and shows how much has gone back so far; a full refund returns the tickets to sale. A sale paid another way, such as cash, is marked as refunded instead, because no money moves through us."
+                "answer": "Yes, from the Sales page. Refunds come with paid ticketing on Pro, because that is where the money is taken in the first place. A Stripe or PayPal sale can be refunded in full or in part, and the money goes back through the provider before the sale changes status. A partial refund keeps the tickets valid and shows how much has gone back so far; a full refund returns the tickets to sale. A sale paid another way, such as cash, is marked as refunded instead, because no money moves through us."
             },
             {
                 "question": "Does Event Schedule do reserved seating?",
@@ -793,7 +793,7 @@
                 "Fully open source with selfhosting option for complete data ownership",
                 "Two-way Google, Outlook and CalDAV sync included free on every plan",
                 "A live calendar feed your community subscribes to once, and an interest list that emails people when tickets go on sale",
-                "Stripe or PayPal checkout, with refunds from the Sales page, on every plan"
+                "Stripe or PayPal checkout, with refunds from the Sales page, on Pro"
             ]
         },
         "faq": [
@@ -1172,7 +1172,7 @@
                 "Built-in newsletters and two-way Google, Outlook and CalDAV sync, included free",
                 "AI event parsing on every plan, and AI flyer generation on Enterprise",
                 "Fully open source with selfhosting option for complete data control",
-                "Stripe or PayPal checkout, one cart across several events, and refunds from the Sales page, free on every plan",
+                "Stripe or PayPal checkout, one cart across several events, and refunds from the Sales page, on Pro",
                 "Gift cards, passes and installment payments on Pro, and allocated seating on Enterprise"
             ]
         },
@@ -1191,7 +1191,7 @@
             },
             {
                 "question": "Does Event Schedule have gift cards, passes, payment plans and seating?",
-                "answer": "Yes, each on the plan named. Gift cards, passes (festival, season, visit and membership) and installment payments, which split a ticket into monthly charges on Stripe, are on Pro. Allocated seating, where buyers pick seats from a map of the room, is on Enterprise for venue schedules. Refunds, full or partial, through Stripe or PayPal, are free on every plan."
+                "answer": "Yes, each on the plan named. Gift cards, passes (festival, season, visit and membership) and installment payments, which split a ticket into monthly charges on Stripe, are on Pro. Allocated seating, where buyers pick seats from a map of the room, is on Enterprise for venue schedules. Refunds, full or partial, through Stripe or PayPal, come with paid ticketing on Pro."
             }
         ]
     },
@@ -1548,7 +1548,7 @@
         "why_choose": {
             "summary": "Event Schedule is purpose-built for sharing events publicly with ticketing, newsletters, and custom branding - things Google Calendar was never designed for.",
             "points": [
-                "Ticketing through your own Stripe or PayPal account from the free plan, with QR check-in at the door and refunds from the Sales page",
+                "Ticketing through your own Stripe or PayPal account on Pro, with QR check-in at the door and refunds from the Sales page",
                 "Two-way sync with Google, Outlook and CalDAV keeps both platforms in sync automatically",
                 "Public schedule pages with embeddable widgets, and your own domain on Enterprise",
                 "Built-in newsletters, event graphics, and AI-powered event import",
@@ -3736,7 +3736,7 @@
             },
             {
                 "question": "Can I refund an attendee?",
-                "answer": "Yes, on every plan. From the Sales page, a Stripe or PayPal sale can be refunded in full or in part and the money goes back through the provider; a partial refund keeps the ticket valid. A sale taken another way, such as cash or a payment link, is marked as refunded instead."
+                "answer": "Yes, on Pro, alongside the paid ticketing that took the money. From the Sales page, a Stripe or PayPal sale can be refunded in full or in part and the money goes back through the provider; a partial refund keeps the ticket valid. A sale taken another way, such as cash or a payment link, is marked as refunded instead."
             }
         ]
     },
@@ -4474,7 +4474,7 @@
             },
             {
                 "question": "Can I take PayPal as well as Stripe?",
-                "answer": "Yes, on every plan. Connect your own PayPal account in Settings > Payment Methods, next to Stripe if you like, and choose the method per event; the credentials are checked with PayPal before they are saved. Refunds, full or partial, go back through PayPal or Stripe from the Sales page. Installment plans run on Stripe only."
+                "answer": "Yes, on Pro, which is the plan that lets a ticket carry a price at all. Connect your own PayPal account in Settings > Payment Methods, next to Stripe if you like, and choose the method per event; the credentials are checked with PayPal before they are saved. Refunds, full or partial, go back through PayPal or Stripe from the Sales page. Installment plans run on Stripe only."
             }
         ]
     },

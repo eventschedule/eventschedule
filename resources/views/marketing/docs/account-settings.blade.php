@@ -167,7 +167,7 @@
             Payment Methods
         </h2>
         <p class="text-gray-600 dark:text-gray-300 mb-6">
-            Cash needs nothing set up. To take payment any other way, connect a method here: there are five, each on its own tab - Stripe, Invoice Ninja, Payment Link, Payfast and PayPal. Which one an event uses is decided per event, on the event's <a href="{{ route('marketing.docs.tickets') }}#payment" class="doc-link">Payment</a> tab, so connecting more than one lets you route different events differently. With nothing connected, an event can only take cash, unless the site you are on provides an account for everyone, as described below. Every method works on every plan.
+            Cash needs nothing set up. To take payment any other way, connect a method here: there are five, each on its own tab - Stripe, Invoice Ninja, Payment Link, Payfast and PayPal. Which one an event uses is decided per event, on the event's <a href="{{ route('marketing.docs.tickets') }}#payment" class="doc-link">Payment</a> tab, so connecting more than one lets you route different events differently. With nothing connected, an event can only take cash, unless the site you are on provides an account for everyone, as described below. Taking money for a ticket is the Pro plan, and it comes with all five; a free schedule sells nothing priced, so it needs none of them.
         </p>
 
         <h3 id="stripe" class="doc-subheading">Stripe</h3>

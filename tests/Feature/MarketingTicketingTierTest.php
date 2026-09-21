@@ -6,23 +6,36 @@ use Illuminate\Support\Facades\File;
 use Tests\TestCase;
 
 /**
- * Selling PAID tickets is Pro/Enterprise. This is the inverse of the guard that stood here from
- * 2026-07-30 to 2026-09-20, when the free plan sold 25 paid tickets a calendar month.
+ * Selling PAID tickets is Pro/Enterprise, and so is every surface that exists to move money for
+ * one. This is the inverse of the guard that stood here from 2026-07-30 to 2026-09-20, when the
+ * free plan sold 25 paid tickets a calendar month, and of the guard that stood here until
+ * 2026-09-22, when payment gateways and refunds were advertised as free on every tier.
  *
  * The claim is not a token, it is a sentence, and every page writes it in its own voice: "the free
- * plan sells 25 paid tickets a month", "selling starts free", "25 paid drop-ins", "Free to 25 a
- * month", "twenty-five paid covers". A token grep finds about three quarters of them. So the
+ * plan sells 25 paid tickets a month", "no gateway is plan-gated", "Refunds work on every plan",
+ * "all four are open on every plan". A token grep finds about three quarters of them. So the
  * shapes are pinned here instead.
  *
  * The rule this encodes:
  *
  *   - Selling tickets with a PRICE is Pro/Enterprise.
+ *   - The payment gateways (Stripe, PayPal, Payfast, Invoice Ninja, a payment link, cash) and
+ *     refunds are presented as Pro, because Event::canSellPaidTickets() already makes charging
+ *     for a ticket Pro-only: on Free a gateway has nothing to settle and a refund has nothing to
+ *     reverse, so listing them as free features misleads.
  *   - Free registration, RSVP and $0 ticket rows are unlimited on every tier.
  *   - Scanning a ticket at the door is free; the live check-in DASHBOARD is Pro.
- *   - There is no platform fee on any tier, which is a fee claim and stays true.
+ *   - There is no platform fee on any tier, which is a FEE claim, not an availability claim, and
+ *     it stays true. Every gateway pattern below is anchored gateway-before-plan so that
+ *     "Zero platform fees on every plan, whether traders pay through Stripe..." keeps passing.
+ *
+ * This guards the COPY only. The code is deliberately ungated and stays that way:
+ * `grep -rn "isPro()" app/Services/Payments/` is 0 and SaleRefundService has no plan check,
+ * because a schedule that has been downgraded must still be able to refund money it already
+ * took, and grandfathered events and the demo schedule still sell on Free.
  *
  * A page is free to say any of that in its own words. What it may not do is assert that paid
- * selling is free, or quote the old monthly allowance, and that is all this test looks for.
+ * selling, a gateway or a refund is free or ungated, or quote the retired monthly allowance.
  */
 class MarketingTicketingTierTest extends TestCase
 {
@@ -98,7 +111,39 @@ class MarketingTicketingTierTest extends TestCase
         // never actually guarded until now. "dashboard" exempts the genuinely-Pro sibling.
         '/\bscan(?:ning)?\s+(?:tickets?|the QR|at the door)\b(?:(?!dashboard)[^.]){0,70}?\b(?:is|are)\s+(?:only\s+)?(?:available\s+)?on\s+(?:the\s+)?(?:Pro|Enterprise)\b/i',
 
-        '/\bPro\b[^.]{0,30}\bopens\b[^.]{0,40}\b(?:ports?|gateways?|Stripe|PayPal)\b/i',
+        // ---------------------------------------------------------------------------------
+        // The inverse guard, added 2026-09-22 when gateways and refunds moved Free -> Pro in
+        // the copy. The CODE is unchanged on purpose: there is no isPro() in
+        // app/Services/Payments/ and none in SaleRefundService, because a downgraded schedule
+        // must still refund money it already took, and grandfathered events and the demo
+        // schedule still sell on Free. The marketing claim moves because
+        // Event::canSellPaidTickets() already makes a PRICED ticket Pro-only, so on Free a
+        // gateway has nothing to settle and a refund has nothing to reverse.
+        //
+        // Every pattern below is anchored on a PAYMENT noun or on "refund" appearing BEFORE
+        // the plan phrase. That ordering is what keeps the still-true claims legal:
+        // "Zero platform fees on every plan, whether traders pay through Stripe, PayPal, ..."
+        // names the plan first, so no gateway-anchored pattern can reach it.
+        // ---------------------------------------------------------------------------------
+
+        // "No payment method is plan-gated", "no gateway is plan-gated". The negation is IN
+        // the pattern, so the new true claim ("putting a price on a ticket is plan-gated")
+        // still passes. Both orders, because the negation can lead or trail. Deliberately not
+        // a bare /plan-gated/: "nothing on this page is plan-gated on your own server"
+        // (selfhost) and "Install-wide, and never plan-gated" (SMTP docs) are both true and
+        // carry no payment noun.
+        '/\b(?:no|none|not|never|neither|nothing)\b[^.;]{0,60}?\b(?:Stripe|PayPal|Payfast|Invoice Ninja|payment method|payment port|payment gateway|gateway|refund)\w*\b[^.;]{0,60}?\bplan[ -]gated\b/i',
+        '/\b(?:Stripe|PayPal|Payfast|Invoice Ninja|payment method|payment port|payment gateway|gateway|refund)\w*\b[^.;]{0,60}?\b(?:not|never|no)\b[^.;]{0,25}?\bplan[ -]gated\b/i',
+
+        // The same claim stated as an absence of code rather than an absence of a tier:
+        // "There is no plan check anywhere in the payments code". True of the source and
+        // false as a promise, which is exactly the sentence this move is about.
+        '/\bno\s+plan\s+check\b[^.;]{0,60}\b(?:payment|gateway|checkout|refund)/i',
+        '/\b(?:payment|gateway|checkout|refund)\w*\b[^.;]{0,60}?\bno\s+plan\s+check\b/i',
+
+        // The remaining shapes - a payment noun sitting near an "on every plan" phrase - are
+        // genuinely ambiguous, because the platform-fee claim is written in exactly the same
+        // breath and stays true. They live in AMBIGUOUS below, resolved by STILL_FREE.
     ];
 
     /**
@@ -119,21 +164,33 @@ class MarketingTicketingTierTest extends TestCase
         '/\b(?:paid tickets?|zero-price tickets?)\b[^.]{0,50}\ballowance\b/i' => self::STILL_METERED,
         '/\b(?:the|that|its)\s+(?:monthly\s+)?(?:ceiling|cap)\b[^.]{0,40}\b(?:off|reached|lifted|removed)\b/i' => self::STILL_METERED,
 
-        // The OPPOSITE direction, unguarded until now and the reason two false claims shipped
-        // green: copy that puts a FREE capability behind Pro. Payment gateways and refunds are
-        // ungated - `grep -rn "isPro()" app/Services/Payments/` is 0 and SaleRefundService has no
-        // plan check. Stops at ; as well as . because "sell through Stripe; a priced ticket needs
-        // Pro" is two clauses and only the second one is about Pro.
-        '/(?:Stripe|PayPal|Payfast|Invoice Ninja|payment method|payment port|refunds?|refunding)\b[^.;]{0,70}?\b(?:is|are|requires?|needs?)\s+(?:only\s+)?(?:what\s+)?(?:on|need|needs?|an\s+upgrade\s+to)?\s*(?:the\s+|a\s+)?(?:Pro|Enterprise)\b/i' => self::GENUINELY_PRO,
+        // A payment noun sitting near an "on every plan" phrase, in either order.
+        //
+        // These cannot be unconditional, because the platform-fee claim is written the same way
+        // and stays true on every tier: "Zero platform fees on every plan, whether traders pay
+        // through Stripe, PayPal, a payment link or cash", "Refunds from the Sales page, and no
+        // platform fee on any plan". So is "free on every plan, paid bookings on Pro by Stripe"
+        // (appointments) and "check people in at the door on any plan, and take the money
+        // through your own Stripe account". STILL_FREE settles which is which.
+        //
+        // The gap excludes quotes as well as . and ; so a match cannot bleed across two
+        // neighbouring items of a PHP or JSON array - `'PayPal', 'Two-way sync ... free on
+        // every plan'` is two unrelated bullets, not a claim. The ONE pattern that must cross a
+        // quote is the FAQ refund shape, `['q' => 'Can I refund a ticket?', 'a' => 'Yes, on
+        // every plan`, where the noun is in the question and the claim is in the answer; it
+        // gets its own arm with a wider gap.
+        '/\brefund(?:s|ed|ing)?\b[^.;"\']{0,60}?\bon\s+(?:every|any|all)\s+(?:plan|tier)\b/i' => self::STILL_FREE,
+        '/\bon\s+(?:every|any|all)\s+(?:plan|tier)\b[^.;"\']{0,60}?\brefund(?:s|ed|ing)?\b/i' => self::STILL_FREE,
+        '/(?:\brefund(?:s|ed|ing)?\b|\bStripe\b|\bPayPal\b|\bPayfast\b|\bInvoice Ninja\b|\bpayment method\b)[^.;]{0,40}?\?["\'],\s*["\']?(?:a|answer)["\']?\s*(?:=>|:)\s*["\'][^.;"\']{0,60}?\bon\s+(?:every|any|all)\s+(?:plan|tier)\b/i' => self::STILL_FREE,
 
-        // "unlock PayPal on Pro", "Pro-only", "a Pro capability" - shapes the on/needs form misses.
-        '/\bunlock\b[^.;]{0,60}?\b(?:Stripe|PayPal|Payfast|Invoice Ninja|refunds?|checkout)\b/i' => self::GENUINELY_PRO,
-        '/(?:Stripe|PayPal|Payfast|Invoice Ninja|refunds?|refunding)\b[^.;]{0,70}?\b(?:Pro|Enterprise)-only\b/i' => self::GENUINELY_PRO,
-        '/(?:Stripe|PayPal|Payfast|Invoice Ninja|refunds?|refunding)\b[^.;]{0,70}?\ba\s+(?:Pro|Enterprise)\s+(?:feature|capability|perk)\b/i' => self::GENUINELY_PRO,
+        // "all four are open on every plan", "Invoice Ninja is free on any plan", "Stripe or
+        // PayPal account is free on any plan". An availability word between the gateway and the
+        // plan phrase is what separates this from the fee claim: "You keep the ticket price
+        // minus what Stripe or PayPal charges to process the payment, on every plan" has none.
+        '/\b(?:Stripe|PayPal|Payfast|Invoice Ninja|payment (?:method|port|gateway|option|link)s?|gateways?)\b[^.;"\']{0,80}?\b(?:is|are|work|works|open|available|included|supported|live|enabled|stays?|free|no (?:extra )?cost|nothing extra)\b[^.;"\']{0,40}?\bon\s+(?:every|any|all)\s+(?:plan|tier)\b/i' => self::STILL_FREE,
 
-        // "Billing a ticket through Invoice Ninja is the Pro part" - the same claim without the
-        // on/needs verb, which is how it reads on a gateway's own landing page.
-        '/(?:Stripe|PayPal|Payfast|Invoice Ninja)\b[^.;]{0,50}?\bis\s+the\s+(?:Pro|Enterprise)\b/i' => self::GENUINELY_PRO,
+        // The plan phrase first.
+        '/\bon\s+(?:every|any|all)\s+(?:plan|tier)\b[^.;"\']{0,60}?\b(?:Stripe|PayPal|Payfast|Invoice Ninja|payment (?:method|port|gateway|option)s?|gateways?)\b/i' => self::STILL_FREE,
     ];
 
     /** Words that make an "allowance" or "cap" sentence about something still metered. */
@@ -153,8 +210,15 @@ class MarketingTicketingTierTest extends TestCase
         'resources/views/marketing/docs/newsletters.blade.php',
     ];
 
-    /** Things that ARE Pro or Enterprise and legitimately appear beside a gateway name. */
-    private const GENUINELY_PRO = '/installment|dashboard|CSV|export|waitlist|gift card|add-on|promo|seating|API|webhook|appointment|booking/i';
+    /**
+     * Words that make an "on every plan" sentence about something that really IS on every plan.
+     *
+     * The platform fee is the big one: it is a fee claim, not an availability claim, and it is
+     * still true on every tier. The rest are the capabilities the free plan genuinely keeps -
+     * free registration, RSVP, $0 rows, door scanning - which are frequently named in the same
+     * breath as a gateway ("money always goes to your own Stripe account").
+     */
+    private const STILL_FREE = '/platform fee|no fee|zero fee|0%|takes? nothing|no cut|never take a cut|commission|keep 100|registration|RSVP|scan|check.?in|QR|at the door|\$0|zero-price|free sign-up|sub-schedule|notify me|appointment|booking|calendar|sync/i';
 
     /** @return array<string, string> path => contents */
     private function marketingSources(): array
@@ -254,46 +318,40 @@ class MarketingTicketingTierTest extends TestCase
                 }
 
                 foreach ($m[0] as [$hit, $offset]) {
-                    // Window direction matters and differs by pattern.
+                    // Window width differs by pattern.
                     //
-                    // STILL_METERED is SYMMETRIC: "monthly allowance" sits inside prose and tables
-                    // where the word "newsletter" may be on either side of it.
+                    // STILL_METERED reads back TWO sentences and forward into the NEXT one,
+                    // because the thing being metered is often named in the sentence before the
+                    // limit is described ("Twenty-five photos per schedule on the free plan. Pro
+                    // takes the cap off").
                     //
-                    // GENUINELY_PRO is BACKWARD only: an allow word qualifies the SUBJECT of the
-                    // claim, and a subject comes first. Reading forward as well would let a
-                    // trailing "which also adds the live check-in dashboard" excuse a sentence
-                    // whose actual claim is that Stripe needs Pro.
-                    // Scoped to the SENTENCE the hit sits in, not a raw character window: the FAQ
-                    // answer that welds gateways to Pro has an unrelated "waitlist" one sentence
-                    // earlier, and a fixed window silently excused it.
-                    $backward = $allowed === self::GENUINELY_PRO;
+                    // STILL_FREE reads back to the start of THIS sentence and forward only to the
+                    // end of THIS sentence. Reading into the next one would let "Refunds work on
+                    // every plan. Scanning is free too." excuse itself on the word "scan".
+                    $meteredWindow = $allowed === self::STILL_METERED;
                     $lead = substr($body, 0, $offset);
 
-                    // GENUINELY_PRO reads back to the start of THIS sentence only: the FAQ answer
-                    // that welds gateways to Pro has an unrelated "waitlist" one sentence earlier,
-                    // and a wider window silently excused it.
-                    //
-                    // STILL_METERED reads back TWO sentences and forward one, because the thing
-                    // being metered is often named in the sentence before the limit is described
-                    // ("Twenty-five photos per schedule on the free plan. Pro takes the cap off").
                     $boundary = fn (string $text) => max((int) strrpos($text, '.'), (int) strrpos($text, ';'));
                     $from = $boundary($lead);
 
-                    if (! $backward && $from > 0) {
+                    if ($meteredWindow && $from > 0) {
                         $from = $boundary(substr($lead, 0, $from));
                     }
 
                     $from = max($from, $offset - 600);
                     $sentence = substr($body, $from, ($offset - $from) + strlen($hit));
 
-                    if (! $backward) {
-                        // Forward to the end of the NEXT sentence. ltrim first: a hit that ends a
-                        // sentence is followed immediately by the boundary, so reading to the first
-                        // '.' would return nothing and miss the qualifier sitting right after it
-                        // ("...your remaining monthly allowance. A/B testing also needs enough
-                        // recipients to mean anything.").
-                        $rest = ltrim(substr($body, $offset + strlen($hit), 500), ".; \t\n\r");
+                    $rest = substr($body, $offset + strlen($hit), 500);
+
+                    if ($meteredWindow) {
+                        // ltrim first: a hit that ends a sentence is followed immediately by the
+                        // boundary, so reading to the first '.' would return nothing and miss the
+                        // qualifier sitting right after it ("...your remaining monthly allowance.
+                        // A/B testing also needs enough recipients to mean anything.").
+                        $rest = ltrim($rest, ".; \t\n\r");
                         $sentence .= substr($rest, 0, strcspn($rest, '.'));
+                    } else {
+                        $sentence .= substr($rest, 0, strcspn($rest, '.;'));
                     }
 
                     if (preg_match($allowed, $sentence)) {
@@ -306,8 +364,9 @@ class MarketingTicketingTierTest extends TestCase
         }
 
         $this->assertSame([], $offences, implode("\n", array_merge(
-            ['These say paid ticket selling is free. Event::canSellPaidTickets() is Pro/Enterprise '
-                .'only; free registration, RSVP and $0 ticket rows are what stay unlimited.'],
+            ['These say paid ticket selling, a payment gateway or a refund is free or ungated. '
+                .'Event::canSellPaidTickets() is Pro/Enterprise only; free registration, RSVP, $0 '
+                .'ticket rows, door scanning and the zero platform fee are what stay on every plan.'],
             $offences
         )));
     }

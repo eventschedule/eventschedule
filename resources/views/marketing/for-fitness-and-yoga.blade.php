@@ -648,7 +648,7 @@
             ],
             [
                 'q' => 'Can I refund a drop-in or a class pass?',
-                'a' => 'Yes, on every plan, from the Sales page, whether you called a class off or a student is moving away. A Stripe or PayPal payment goes back through the provider, in full or in part, and a partial refund leaves the booking or the pass valid. One paid in cash, through a payment link, Payfast or Invoice Ninja is marked as refunded instead, which records it without moving any money. Event Schedule does not email the student about a refund, so that message is yours to send.',
+                'a' => 'Yes, on Pro, from the Sales page, whether you called a class off or a student is moving away. A Stripe or PayPal payment goes back through the provider, in full or in part, and a partial refund leaves the booking or the pass valid. One paid in cash, through a payment link, Payfast or Invoice Ninja is marked as refunded instead, which records it without moving any money. Event Schedule does not email the student about a refund, so that message is yours to send.',
             ],
             [
                 'q' => 'Can students book a one-to-one with me?',

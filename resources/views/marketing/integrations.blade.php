@@ -698,7 +698,7 @@
         $faqs = [
             [
                 'q' => 'Which integrations are free?',
-                'a' => 'Two-way calendar sync with Google Calendar, Outlook or Microsoft 365 and any CalDAV server is free on every plan, and so are the nearby-accommodation map and Google Wallet passes, which the site operator switches on. So are the four money ports, Stripe, PayPal, Payfast and Invoice Ninja: no gateway is plan-gated, and a free schedule connects one to take payment. What needs Pro at '.plan_price($proMonthly).' a month is putting a price on a ticket or on an appointment booking. There are zero platform fees on every plan either way. Pro adds webhooks, the REST API, web push, Eventbrite import and ad boosting alongside them. Creating events over WhatsApp is the one Enterprise port, at '.plan_price($entMonthly).'. Selfhosted installs resolve to the top tier, so every port is on from the first boot.',
+                'a' => 'Two-way calendar sync with Google Calendar, Outlook or Microsoft 365 and any CalDAV server is free on every plan, and so are the nearby-accommodation map and Google Wallet passes, which the site operator switches on. The four money ports, Stripe, PayPal, Payfast and Invoice Ninja, come with Pro at '.plan_price($proMonthly).' a month, which is what lets a ticket or an appointment booking carry a price in the first place. There are zero platform fees on every plan either way. Pro adds webhooks, the REST API, web push, Eventbrite import and ad boosting alongside them. Creating events over WhatsApp is the one Enterprise port, at '.plan_price($entMonthly).'. Selfhosted installs resolve to the top tier, so every port is on from the first boot.',
             ],
             [
                 'q' => 'Is the calendar sync really two-way?',
@@ -710,7 +710,7 @@
             ],
             [
                 'q' => 'Can I refund through an integration?',
-                'a' => 'Through two of them, on every plan. A Stripe or PayPal sale is refunded from the Sales page, in full or in part, and the money goes back through the provider before the sale changes; a partial refund leaves the sale paid and its tickets valid. For Payfast, Invoice Ninja, a payment link or cash, the Sales page offers Mark as Refunded instead, which records the refund without moving money, so you return it wherever it was paid.',
+                'a' => 'Through two of them, on Pro. A Stripe or PayPal sale is refunded from the Sales page, in full or in part, and the money goes back through the provider before the sale changes; a partial refund leaves the sale paid and its tickets valid. For Payfast, Invoice Ninja, a payment link or cash, the Sales page offers Mark as Refunded instead, which records the refund without moving money, so you return it wherever it was paid.',
             ],
             [
                 'q' => 'Can I connect a tool that is not on this page?',
@@ -1068,7 +1068,7 @@
                     The money never <span class="es-wire-accent">lands here.</span>
                 </h2>
                 <p class="es-wire-muted mt-5 text-lg" data-reveal style="--reveal-delay: 0.15s;">
-                    All four payment ports terminate in an account you own, and all four are open on every plan. What needs Pro is a ticket with a price on it. Event Schedule charges zero platform fees on ticket sales on every plan, which is only possible because it is not in the middle of the transaction.
+                    All four payment ports terminate in an account you own, and all four come with Pro, which is what lets a ticket carry a price in the first place. Event Schedule charges zero platform fees on ticket sales on every plan, which is only possible because it is not in the middle of the transaction.
                 </p>
             </div>
 
