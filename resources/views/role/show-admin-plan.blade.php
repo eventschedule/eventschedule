@@ -230,6 +230,7 @@
                 __('messages.ticket_pro_bullet_waitlist'),
                 __('messages.ticket_pro_bullet_passes'),
                 __('messages.appointment_type_pro_bullet_unlimited'),
+                __('messages.appointment_pro_bullet_paid'),
             ]">
             {{ __('messages.plan_overview_body', [
                 'types' => $role->appointmentTypeLimit() ?? 0,

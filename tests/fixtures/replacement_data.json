@@ -1040,11 +1040,11 @@
         "name": "Calendly",
         "tagline": "Appointment booking, public events, and ticketing in one place.",
         "meta_title": "Replace Calendly for Bookings and Events | Event Schedule",
-        "description": "Replace Calendly for bookings and events: one appointment type free, paid by Stripe, a payment link or cash, plus public events with tickets.",
+        "description": "Replace Calendly for bookings and events: one free booking type, more types and paid bookings on Pro, plus public events with tickets.",
         "keywords": "Calendly alternative for events, Calendly replacement, event scheduling tool, public event scheduling",
         "audience_hint": "For organizers using appointment scheduling for public events",
         "about": "Calendly is a scheduling tool designed for booking one-on-one meetings and appointments. Some event organizers use it to schedule events, but it lacks public event pages, ticketing, and the ability to share a calendar of events with an audience.",
-        "pricing_note": "Calendly charges $10/month per user for its Standard plan. Event Schedule is free for unlimited events, public pages and one appointment type. Free registration is unlimited, and selling paid tickets is on Pro at $5/month, and it lifts the one-appointment-type limit too, with no per-user fees.",
+        "pricing_note": "Calendly charges $10/month per user for its Standard plan. Event Schedule is free for unlimited events, public pages and one appointment type. Free registration is unlimited, and more types, putting a price on a ticket or a booking, and the advanced scheduling rules are on Pro at $5/month, with no per-user fees.",
         "competitor_price": "From $10/mo per user",
         "es_price": "From $0/mo (Pro $5/mo)",
         "comparison_rows": [
@@ -1126,7 +1126,7 @@
             },
             {
                 "title": "Appointment Booking",
-                "description": "Publish bookable hours and let people pick a slot in their own timezone, free with one appointment type. A slot can take payment by Stripe, a payment link or cash, and nothing can be booked over an event already on your schedule, synced calendar entries included.",
+                "description": "Publish bookable hours and let people pick a slot in their own timezone, free with one booking type on any plan. On Pro a slot can take payment by Stripe, a payment link or cash, and nothing can be booked over an event already on your schedule, synced calendar entries included.",
                 "icon": "calendar",
                 "gradient": "from-sky-50 to-cyan-50 dark:from-sky-900/30 dark:to-cyan-900/30",
                 "border": "border-sky-200 dark:border-sky-500/20",
@@ -1177,7 +1177,7 @@
             },
             {
                 "title": "Set your bookable hours",
-                "description": "Add one appointment type free: weekly hours, slot length, buffers and an optional approval step, with payment by Stripe, a payment link or cash."
+                "description": "Add one appointment type free: weekly hours and slot length. Pro adds more types, payment by Stripe, a payment link or cash, and the scheduling rules - buffers, minimum notice and an approval step."
             },
             {
                 "title": "Sell tickets and grow",
@@ -1207,7 +1207,7 @@
             },
             {
                 "question": "Can people still book a slot with me one to one?",
-                "answer": "Yes, and that part is free with one appointment type. Publish the hours you are available, set the slot length and the interval between start times, add buffers either side, and people pick a time in their own timezone from a public booking page. Overrides cover the days that are different, an approval step is optional, and a slot can take payment through Stripe, a payment link or cash (PayPal and Payfast are for tickets, not bookings). Nothing can be booked over something already on your schedule, synced calendar entries included. More than one appointment type is on the Pro plan."
+                "answer": "Yes, and that part is free with one appointment type. Publish the hours you are available, set the slot length and the interval between start times, and people pick a time in their own timezone from a public booking page. Nothing can be booked over something already on your schedule, synced calendar entries included. Pro adds more appointment types, the scheduling rules (buffers either side, a minimum notice period, how far ahead the calendar opens, date overrides and an approval step), and the ability to charge for a slot through Stripe, a payment link or cash (PayPal and Payfast are for tickets, not bookings)."
             },
             {
                 "question": "What happens if somebody needs to move their booking?",
@@ -1244,7 +1244,7 @@
             {
                 "name": "Appointments",
                 "route": "marketing.appointments",
-                "description": "One bookable appointment type free, unlimited on Pro."
+                "description": "One bookable appointment type free, more and paid on Pro."
             },
             {
                 "name": "Ticketing",

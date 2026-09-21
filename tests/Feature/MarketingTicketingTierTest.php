@@ -32,6 +32,10 @@ class MarketingTicketingTierTest extends TestCase
         // month", "25 paid ones", "25 paid spots/places/covers/drop-ins", "twenty-five paid ...".
         // Anchored on "paid" so a genuine 25 (25 fan photos, 25 endpoints) is not a false hit.
         '/\b(?:25|twenty-five)\b[^.]{0,40}\bpaid\b[^.]{0,40}\b(?:tickets?|ones|spots|places|covers|drop-ins|sales)\b/i',
+        // "selling your first 25 drop-ins a month" carried neither an adjacent `paid` nor the
+        // noun `ticket`, so every pattern above missed it and it shipped for months. Anchor on
+        // the selling verb instead of the noun.
+        '/\bsell(?:ing)?\b[^.]{0,40}\b(?:25|twenty-five)\b[^.]{0,40}\b(?:a|per|each)\s+month\b/i',
 
         // The same figure with the words the other way round: "paid tickets ... 25 a month".
         '/\bpaid\s+tickets?\b[^.]{0,60}\b(?:25|twenty-five)\b[^.]{0,20}\ba\s+month\b/i',
@@ -150,7 +154,7 @@ class MarketingTicketingTierTest extends TestCase
     ];
 
     /** Things that ARE Pro or Enterprise and legitimately appear beside a gateway name. */
-    private const GENUINELY_PRO = '/installment|dashboard|CSV|export|waitlist|gift card|add-on|promo|seating|API|webhook/i';
+    private const GENUINELY_PRO = '/installment|dashboard|CSV|export|waitlist|gift card|add-on|promo|seating|API|webhook|appointment|booking/i';
 
     /** @return array<string, string> path => contents */
     private function marketingSources(): array

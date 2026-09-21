@@ -41,7 +41,7 @@
             <div class="doc-callout-title">Bookings stay off your public schedule</div>
             <p>Every booking is created as an unlisted event, so it never shows up on your public schedule, your iCal feed, your RSS feed, or your event graphics. It does block the time against further bookings, it syncs to your own connected calendars, and it appears on your Sales page.</p>
         </div>
-        <p class="text-gray-600 dark:text-gray-300 mb-4">Appointment booking is available on <strong class="text-gray-900 dark:text-white">every plan</strong>. What the plan controls is how many appointment types you can offer at once, not what a type can do: the single Free type has weekly hours, date overrides, buffers, approval and payment just like any other.</p>
+        <p class="text-gray-600 dark:text-gray-300 mb-4">Appointment booking is available on <strong class="text-gray-900 dark:text-white">every plan</strong>. The free plan carries <strong class="text-gray-900 dark:text-white">one</strong> appointment type with weekly hours, a public booking page and every guest email. Pro adds more types, lets a type carry a <strong class="text-gray-900 dark:text-white">price</strong>, and unlocks the scheduling rules: date overrides, buffers, minimum notice and the approval step.</p>
         <div class="doc-table-wrap mb-6">
             <table class="doc-table">
                 <thead>
@@ -452,12 +452,12 @@
             <li><strong class="text-gray-900 dark:text-white">Email has to work.</strong> On the hosted platform, guests get no confirmations or reminders, and you get no booking notices, until the schedule's <a href="{{ route('marketing.docs.creating_schedules') }}#integrations-email" class="doc-link">email settings</a> are configured, and the Appointments tab warns you about it.</li>
             <li><strong class="text-gray-900 dark:text-white">Reminders only go to confirmed bookings.</strong> A request still waiting on you, or a card booking still waiting on payment, does not get one.</li>
             <li><strong class="text-gray-900 dark:text-white">The same guest cannot double-book.</strong> One email address cannot hold two bookings that start at the same time on your schedule.</li>
-            <li><strong class="text-gray-900 dark:text-white">Paid bookings are not paid tickets.</strong> Taking payment for an appointment works on the Free plan, however many you take. Selling a priced <em>ticket</em> for an event is the part that needs Pro.</li>
+            <li><strong class="text-gray-900 dark:text-white">Paid bookings follow the same rule as paid tickets.</strong> Taking payment for an appointment needs Pro, exactly as selling a priced <em>ticket</em> for an event does. Free bookings work on every plan.</li>
             <li><strong class="text-gray-900 dark:text-white">A booking is not a ticket.</strong> It carries no QR code and offers no Add to Google Wallet button. The confirmation email, its calendar invite and the private link are what the guest keeps.</li>
             <li><strong class="text-gray-900 dark:text-white">You can email past guests.</strong> Everyone who books counts as a ticket buyer on your schedule, so a newsletter sent to the <a href="{{ route('marketing.docs.newsletters') }}#recipients" class="doc-link">Ticket Buyers</a> segment reaches them.</li>
             <li><strong class="text-gray-900 dark:text-white">Turn a type off rather than delete it.</strong> Switching it off hides it from guests and keeps everything already booked, and you can switch it back on later.</li>
             <li><strong class="text-gray-900 dark:text-white">Not the same as Availability.</strong> <a href="{{ route('marketing.docs.availability') }}" class="doc-link">Availability</a> <x-doc-badge plan="enterprise" /> is a tab on talent schedules that marks whole days your team members are unavailable to be booked for events. Appointments offer specific time slots on any schedule type, on any plan.</li>
-            <li><strong class="text-gray-900 dark:text-white">Plan.</strong> Appointment booking is on every plan. Free covers one appointment type; Pro and Enterprise are unlimited, as is every selfhosted deployment.</li>
+            <li><strong class="text-gray-900 dark:text-white">Plan.</strong> Free covers one appointment type. Pro and Enterprise add more types, the ability to charge, and the scheduling rules, as does every selfhosted deployment. Nothing is deleted when a plan lapses: every type and every rule is kept exactly as configured, and they come back on upgrade.</li>
         </ul>
     </section>
 

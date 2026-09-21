@@ -2310,9 +2310,11 @@ class BackupService
         // out of the Bookings tab, into the normal listings, and counting against the ticket
         // allowance, which excludes bookings via whereNull('events.appointment_type_id').
         //
-        // The allowance is applied where it belongs: Role::bookableAppointmentTypes() clamps what a
-        // guest may book, and AppointmentTypeController::planLimit() gates the two creation paths.
-        // The extra types restore intact, stay unbookable, and light up on upgrade.
+        // The gate is applied where it belongs: AppointmentType::isBookable() refuses a PRICED type
+        // the restored schedule may not charge for, and Role::bookableAppointmentTypes() filters on
+        // it, then clamps what is left to the free plan's one-type allowance. Everything restores
+        // either way; what the plan cannot carry restores intact, stays unbookable, and lights up on
+        // upgrade. The grandfather stamp is deliberately not exported.
         $validator = Validator::make($data, [
             'name' => 'required|string|max:255',
             'duration_minutes' => 'required|integer|min:1',

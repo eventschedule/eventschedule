@@ -303,6 +303,59 @@ class FreePlanLimitsTest extends TestCase
         $this->assertCount(3, $role->fresh()->bookableAppointmentTypes(), 'upgrading lights them all up');
     }
 
+    /**
+     * The appointment mirror of the paid-ticket rule: the price is the line, not the count.
+     */
+    public function test_a_priced_appointment_type_needs_pro(): void
+    {
+        $role = $this->createFreeRole();
+
+        $free = $this->createAppointmentType($role, ['name' => 'Intro Call']);
+        $paid = $this->createAppointmentType($role, ['name' => 'Consultation', 'price' => 50, 'currency_code' => 'USD']);
+
+        // canTakePayment() is a PLAN question, so it is false here for both. What matters is that
+        // isBookable() never asks it for a free type - the price is what pulls the gate in.
+        $this->assertTrue($free->fresh()->isBookable(), 'a free type books regardless of plan');
+        $this->assertFalse($paid->fresh()->canTakePayment());
+        $this->assertFalse($paid->fresh()->isBookable(), 'and it drops out of the guest surface');
+
+        $bookable = $role->fresh()->bookableAppointmentTypes();
+        $this->assertCount(1, $bookable);
+        $this->assertSame($free->id, $bookable->first()->id, 'the free type is unaffected');
+
+        // Nothing is deleted: upgrading lights the priced one up without it being re-saved.
+        $role->plan_type = 'pro';
+        $role->plan_expires = now()->addYear()->format('Y-m-d');
+        $role->save();
+        $this->assertCount(2, $role->fresh()->bookableAppointmentTypes(), 'upgrading restores it');
+    }
+
+    public function test_a_grandfathered_priced_type_keeps_booking_on_free(): void
+    {
+        $role = $this->createFreeRole();
+
+        $stamped = $this->createAppointmentType($role, ['name' => 'Consultation', 'price' => 50, 'currency_code' => 'USD']);
+        $stamped->forceFill(['paid_grandfathered_at' => now()])->save();
+
+        $fresh = $this->createAppointmentType($role, ['name' => 'Coaching', 'price' => 80, 'currency_code' => 'USD']);
+
+        $this->assertTrue($stamped->fresh()->canTakePayment(), 'the stamp survives the plan');
+        $this->assertFalse($fresh->fresh()->canTakePayment(), 'a NEW priced type still needs Pro');
+
+        $bookable = $role->fresh()->bookableAppointmentTypes();
+        $this->assertCount(1, $bookable);
+        $this->assertSame($stamped->id, $bookable->first()->id);
+    }
+
+    public function test_selfhost_never_gates_a_priced_appointment_type(): void
+    {
+        $role = $this->createFreeRole();
+        $paid = $this->createAppointmentType($role, ['name' => 'Consultation', 'price' => 50, 'currency_code' => 'USD']);
+
+        config(['app.hosted' => false]);
+        $this->assertTrue($paid->fresh()->canTakePayment(), 'selfhost short-circuits the gate');
+    }
+
     // ---------------------------------------------------------------------------------------
     // Leak tests.
     //
@@ -738,5 +791,55 @@ class FreePlanLimitsTest extends TestCase
         $cascaded = Sale::find($guest->id);
         $this->assertSame('paid', $cascaded->status, 'the guest sale is cascaded to paid');
         $this->assertNotNull($cascaded->paid_at, 'the cascaded guest sale is stamped too');
+    }
+
+    /**
+     * Clone is the second creation path, and it is now checked against the allowance too - its
+     * comment had claimed that for months without it being true.
+     */
+    public function test_cloning_is_refused_once_the_free_allowance_is_used(): void
+    {
+        $role = $this->createFreeRole();
+        $type = $this->createAppointmentType($role, ['name' => 'Consultation']);
+
+        $this->actingAs($role->user)->post(route('appointments.duplicate', [
+            'subdomain' => $role->subdomain,
+            'hash' => $type->hashedId(),
+        ]))->assertRedirect(route('role.view_admin', ['subdomain' => $role->subdomain, 'tab' => 'appointments']));
+
+        $this->assertSame(1, \App\Models\AppointmentType::where('role_id', $role->id)->count(), 'no second type');
+    }
+
+    /**
+     * Clone is also the one path that could mint a grandfather stamp, because replicate() copies
+     * every attribute and does not consult $fillable. Tested on Pro, since the allowance refuses
+     * the clone outright on Free.
+     */
+    public function test_cloning_a_grandfathered_type_does_not_carry_the_stamp(): void
+    {
+        $role = $this->createRole($this->createOwner(), 'talent');
+        $this->assertTrue($role->isPro(), 'sanity check: the fixture is Pro, so the cap does not apply');
+
+        $stamped = $this->createAppointmentType($role, ['name' => 'Consultation', 'price' => 50, 'currency_code' => 'USD']);
+        $stamped->forceFill(['paid_grandfathered_at' => now()])->save();
+
+        $this->actingAs($role->user)->post(route('appointments.duplicate', [
+            'subdomain' => $role->subdomain,
+            'hash' => $stamped->hashedId(),
+        ]));
+
+        $copy = \App\Models\AppointmentType::where('role_id', $role->id)
+            ->where('id', '!=', $stamped->id)
+            ->latest('id')
+            ->firstOrFail();
+
+        $this->assertNull($copy->paid_grandfathered_at, 'the copy must not inherit the stamp');
+
+        // Drop the copy's schedule to free and it may not charge: the stamp was the only thing that
+        // could have carried the right across, and it did not.
+        $role->forceFill(['plan_type' => 'free', 'plan_expires' => now()->subDay()->format('Y-m-d'), 'trial_ends_at' => null])->save();
+        config(['app.hosted' => true]);
+        $this->assertFalse($copy->fresh()->canTakePayment(), 'so the copy may not charge');
+        $this->assertTrue($stamped->fresh()->canTakePayment(), 'and the original keeps its own');
     }
 }

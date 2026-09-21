@@ -708,14 +708,16 @@ class Role extends Model implements MustVerifyEmail
         return $this->hasMany(AppointmentType::class);
     }
 
-    /** Per-request memo for bookableAppointmentTypes(). */
+    /** Per-request memos for bookableAppointmentTypes() and appointmentTypeCount(). */
     protected $bookableAppointmentTypesCache = null;
+
+    protected $appointmentTypeCountCache = null;
 
     /**
      * Whether this schedule currently offers bookable appointments - drives the GP
-     * "Book a Time" button and the guest /book pages. Available on every plan; a type counts when
-     * active, not deleted, free or with a working payment method, and within the plan's allowance
-     * (see bookableAppointmentTypes()).
+     * "Book a Time" button and the guest /book pages. Booking is available on every plan; a type
+     * counts when active, not deleted, and either free or priced with both the plan and a working
+     * payment method behind it (see bookableAppointmentTypes()).
      */
     public function hasBookableAppointments(): bool
     {
@@ -3381,7 +3383,9 @@ class Role extends Model implements MustVerifyEmail
 
     /**
      * Free-plan appointment allowance: how many appointment types this schedule may have.
-     * Null means unlimited. The single free type is otherwise fully featured.
+     * Null means unlimited. The single free type books normally and takes no commission; what it
+     * cannot do is carry a price (AppointmentType::canTakePayment()) or raise the advanced
+     * scheduling fields (AppointmentTypeController::clampAdvanced()).
      */
     public function appointmentTypeLimit(): ?int
     {
@@ -3401,7 +3405,13 @@ class Role extends Model implements MustVerifyEmail
      */
     public function appointmentTypeCount(): int
     {
-        return $this->appointmentTypes()
+        // Memoized: the Appointments tab asks three times per render (the usage meter, its label and
+        // the clamped banner), and canCreateAppointmentType() asks again on every save.
+        if ($this->appointmentTypeCountCache !== null) {
+            return $this->appointmentTypeCountCache;
+        }
+
+        return $this->appointmentTypeCountCache = $this->appointmentTypes()
             ->where('is_deleted', false)
             ->where('is_active', true)
             ->count();
@@ -3419,13 +3429,12 @@ class Role extends Model implements MustVerifyEmail
     }
 
     /**
-     * The appointment types a guest may actually book, with the free-plan cap applied.
+     * The appointment types a guest may actually book.
      *
-     * A schedule whose Pro plan lapsed keeps every type it created; they are clamped, never
-     * deleted, and light up again on upgrade. Clamping picks the oldest BOOKABLE type rather than
-     * the oldest active one: if the oldest active type is a paid type whose payment method has
-     * gone, clamping by age alone would leave the schedule with nothing bookable while a banner
-     * named the dead one as live.
+     * Two rules apply, and they are independent. A priced type drops out unless the schedule may
+     * charge (AppointmentType::canTakePayment()); what survives is then clamped to the free-plan
+     * count allowance (appointmentTypeLimit()). A schedule whose Pro plan lapsed keeps every type it
+     * created - they stop being bookable, are never deleted, and light up again on upgrade.
      */
     public function bookableAppointmentTypes()
     {
@@ -3448,6 +3457,11 @@ class Role extends Model implements MustVerifyEmail
             })
             ->values();
 
+        // Two independent rules, in this order. isBookable() above drops a PRICED type the schedule
+        // may not charge for; the cap below then clamps what is left to the free-plan allowance.
+        // Clamping picks the oldest BOOKABLE type rather than the oldest active one: if the oldest
+        // active type is a paid one the schedule may not charge for, clamping by age alone would
+        // leave the schedule with nothing bookable while a banner named the dead one as live.
         $limit = $this->appointmentTypeLimit();
 
         return $this->bookableAppointmentTypesCache = is_null($limit) ? $types : $types->take($limit)->values();

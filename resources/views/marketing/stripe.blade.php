@@ -745,7 +745,7 @@
             ['Volume discounts', 'Buy more of one ticket type and the per-unit price drops. The reconciliation spreads the rounding a cent at a time so the charge matches the total exactly.', 'Free'],
             ['Gift cards', 'Sold through the same Stripe account and redeemed against a later ticket. A gift-card payment is checked harder still: the connected account that paid has to be the one selling the card, and the currency has to match.', 'Pro'],
             ['Add-ons', 'A drink, a programme, a workshop place. Priced as its own line on the same charge rather than a second checkout.', 'Pro'],
-            ['Appointments', 'A bookable slot can take payment through the same connected account, or a payment link, or cash. One appointment type on the free plan, as many as you like on Pro.', 'Free'],
+            ['Appointments', 'A bookable slot can take payment through the same connected account, or a payment link, or cash. Every plan carries one free booking type; putting a price on one is Pro.', 'Pro'],
             ['Installments', 'Split a ticket into monthly payments. The first is taken at checkout on the same Stripe account and the ticket is valid at once; the rest are charged to the saved card on schedule. No other route can do it.', 'Pro'],
         ];
 

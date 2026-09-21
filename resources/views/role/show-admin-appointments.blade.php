@@ -3,14 +3,17 @@
 
     // Data comes from RoleController::appointmentsTabData(). Only presentation lives here.
     //
-    // Appointments are on every plan. The free plan carries one appointment type, so this tab shows
-    // an allowance rather than a paywall: the editor always renders, and only the "add another"
-    // action is gated. A schedule that lapsed from Pro keeps every type it created; the extras stop
-    // being bookable but are never deleted.
+    // Appointments are on every plan. The free plan carries one appointment type, so the count is
+    // shown as an allowance rather than a paywall: the editor always renders and only "add another"
+    // is gated. Two further rules are the plan's, not the count's: a type may not carry a PRICE
+    // below Pro (enforced at booking time, so a lapsed schedule keeps its config), and advanced
+    // scheduling may not be turned on (enforced on save, clamped not wiped).
     $typeLimit = $role->appointmentTypeLimit();
     $atTypeLimit = ! $role->canCreateAppointmentType();
     $view = request('view', 'types');
     $types = $appointmentTypes;
+    // Priced types this schedule may not currently charge for: kept, but not taking bookings.
+    $blockedPaid = $types->filter(fn ($t) => $t->is_active && ! $t->is_deleted && ! $t->isFree() && ! $t->canTakePayment());
     $editing = $appointmentEditing;
     $showForm = request()->has('new') || $editing;
     $bookings = $appointmentBookings;
@@ -168,6 +171,18 @@
         @else
             {{-- Share toolbar. Sharing the link is the whole point of the page, so it stays visible -
                  but as one row rather than a titled panel of its own. --}}
+            @if ($types->where('is_active', true)->count() && ! $role->hasBookableAppointments() && ! $isViewer)
+                {{-- The share link is gone and the owner's /book URL 404s. Say why, and offer the
+                     free way out as well as the paid one - a gate that only sells reads as a
+                     shakedown. Also covers the pre-existing "every type is paid and Stripe is
+                     disconnected" case, which was equally silent. --}}
+                <x-plan-gate variant="banner" tier="pro" :role="$role" :subdomain="$role->subdomain"
+                    :learnMoreUrl="marketing_url('/features/appointments')"
+                    :title="__('messages.appointments_nothing_bookable_title')">
+                    {{ __('messages.appointments_nothing_bookable_body') }}
+                </x-plan-gate>
+            @endif
+
             @if ($types->where('is_active', true)->count() && $role->hasBookableAppointments())
                 @php $bookUrl = route('appointments.book', ['subdomain' => $role->subdomain]); @endphp
                 <div class="ap-card rounded-xl p-3 flex flex-wrap items-center gap-2">
@@ -191,7 +206,10 @@
                     <h3 class="text-lg font-semibold text-gray-900 dark:text-gray-100">{{ __('messages.appointments_empty_title') }}</h3>
                     <p class="mx-auto max-w-md text-sm text-gray-600 dark:text-gray-400 mt-1 mb-4">{{ __('messages.appointments_empty_body') }}</p>
                     @if ($typeLimit)
-                        {{-- Encourage, do not gate: with no types yet the allowance is unspent. --}}
+                        {{-- The one place a new owner definitely reads: the allowance, and that
+                             charging is the Pro line. Gated on $typeLimit, not on hosted - it is
+                             null for Pro and on selfhost, and a paying schedule being told what its
+                             free plan includes reads as a downgrade notice. --}}
                         <p class="mx-auto max-w-md text-sm text-gray-500 dark:text-gray-400 -mt-2 mb-4">{{ __('messages.appointment_type_included_note') }}</p>
                     @endif
                     @if (! $isViewer)
@@ -217,6 +235,16 @@
                             </div>
                         </div>
                     @endif
+                @endif
+
+                @if ($blockedPaid->isNotEmpty() && ! $isViewer)
+                    {{-- A lapsed Pro schedule keeps its priced types. Lead with what is kept: the
+                         configuration is untouched and books again the moment they upgrade. --}}
+                    <x-plan-gate variant="banner" tier="pro" :role="$role" :subdomain="$role->subdomain"
+                        :learnMoreUrl="marketing_url('/features/appointments')"
+                        :title="__('messages.appointments_paid_blocked_title')">
+                        {{ trans_choice('messages.appointments_paid_blocked_body', $blockedPaid->count(), ['count' => $blockedPaid->count()]) }}
+                    </x-plan-gate>
                 @endif
 
                 <div class="space-y-3">
@@ -274,6 +302,14 @@
                                     <div class="{{ $warnClass }} mt-2">
                                         <svg class="w-5 h-5 text-amber-600 dark:text-amber-400 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01M5 19h14a2 2 0 001.84-2.75L13.74 4a2 2 0 00-3.5 0L3.16 16.25A2 2 0 005 19z" /></svg>
                                         <span>{{ __('messages.appointments_payment_not_set') }}</span>
+                                    </div>
+                                @endif
+                                {{-- Independent of the one above: a type can be both unpayable by
+                                     plan and missing its method, and each is fixed differently. --}}
+                                @if (! $type->isFree() && ! $type->canTakePayment())
+                                    <div class="{{ $warnClass }} mt-2">
+                                        <svg class="w-5 h-5 text-amber-600 dark:text-amber-400 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01M5 19h14a2 2 0 001.84-2.75L13.74 4a2 2 0 00-3.5 0L3.16 16.25A2 2 0 005 19z" /></svg>
+                                        <span>{{ __('messages.appointments_paid_needs_pro_row') }}</span>
                                     </div>
                                 @endif
                             </div>

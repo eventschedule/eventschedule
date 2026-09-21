@@ -38,8 +38,9 @@ return [
     // Free-plan allowance (hosted only; every paid plan, selfhost and the demo are unlimited).
     // Unlike the anti-abuse caps above this is a product limit, so there is only a _free variant:
     // appointmentTypeLimit() returns null for every other tier before any counting happens.
-    // Paid TICKET selling is not metered - it is Pro/Enterprise only, gated in
-    // Event::canSellPaidTickets() rather than by a number here.
+    // Neither money gate is metered: paid TICKET selling is gated in Event::canSellPaidTickets()
+    // and charging for an APPOINTMENT in AppointmentType::canTakePayment(), by plan rather than by a
+    // number here. Advanced scheduling is gated the same way, in AppointmentTypeController::fill().
     'appointment_type_limit_free' => (int) env('APPOINTMENT_TYPE_LIMIT_FREE', 1),
 
     // Ceiling on each row table in the /admin/growth export. Hitting it is reported in

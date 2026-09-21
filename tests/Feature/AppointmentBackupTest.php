@@ -73,9 +73,11 @@ class AppointmentBackupTest extends TestCase
      * appointment type after the first was dropped, taking its bookings out of the Bookings tab with
      * it (importEvent() only remaps appointment_type_id when the type reached $idMap).
      *
-     * The allowances live on the read side instead: bookableAppointmentTypes() clamps what a guest
-     * may book, PromoCode::isValid() refuses to apply a code, PassBookingService::isBookable()
-     * refuses to book a pass. The rows restore intact and light up again on upgrade.
+     * The gates live on the read side instead: bookableAppointmentTypes() clamps what a guest may
+     * book to the free allowance, AppointmentType::isBookable() refuses a PRICED type the restored
+     * schedule may not charge for, PromoCode::isValid() refuses to apply a code,
+     * PassBookingService::isBookable() refuses to book a pass. The rows restore intact and light up
+     * again on upgrade.
      */
     public function test_a_hosted_restore_keeps_pro_data_the_new_schedule_is_not_yet_paying_for(): void
     {
@@ -128,5 +130,40 @@ class AppointmentBackupTest extends TestCase
             $newEvent->promoCodes()->firstOrFail()->code,
             'promo codes must survive the round trip'
         );
+    }
+
+    /**
+     * A restore must not hand out the right to charge.
+     *
+     * The grandfather stamp is what lets an existing priced type keep booking on a free plan, so a
+     * backup that carried it would be a way to mint one: importRole() always lands on a brand new
+     * free schedule. exportAppointmentTypes() is an explicit include-list that does not carry the
+     * column, and importAppointmentType() assigns every column by hand - this pins both.
+     */
+    public function test_a_restore_does_not_carry_the_paid_grandfather_stamp(): void
+    {
+        config(['app.hosted' => true]);
+
+        $owner = $this->createOwner();
+        $role = $this->createRole($owner, 'talent', ['timezone' => 'America/New_York']);
+
+        $paid = $this->createAppointmentType($role, ['name' => 'Consult', 'price' => 50, 'currency_code' => 'USD']);
+        $paid->forceFill(['paid_grandfathered_at' => now()])->save();
+
+        $svc = app(BackupService::class);
+        $exportJob = BackupJob::create(['user_id' => $owner->id, 'type' => 'export', 'status' => 'processing']);
+        $data = $svc->exportSchedules([$role->fresh()], false, $exportJob)['json'];
+
+        $importJob = BackupJob::create(['user_id' => $owner->id, 'type' => 'import', 'status' => 'processing']);
+        $svc->importSchedules($data, [0], $owner->id, $importJob);
+
+        $newRole = Role::where('user_id', $owner->id)->where('id', '!=', $role->id)->latest('id')->firstOrFail();
+        $this->assertFalse($newRole->isPro(), 'sanity check: the restored schedule really is free');
+
+        $restored = $newRole->appointmentTypes()->where('price', '>', 0)->firstOrFail();
+
+        $this->assertNull($restored->paid_grandfathered_at, 'the stamp must not ride the backup');
+        $this->assertFalse($restored->canTakePayment(), 'so the restored type may not charge');
+        $this->assertFalse($restored->isBookable(), 'and it is not offered to guests');
     }
 }

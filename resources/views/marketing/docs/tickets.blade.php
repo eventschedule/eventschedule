@@ -97,7 +97,7 @@
             <li><strong class="text-gray-900 dark:text-white">Free registration and RSVP</strong> - unlimited, with an optional capacity limit per date</li>
             <li><strong class="text-gray-900 dark:text-white">Zero-price ticket types</strong> - a $0 tier sells without limit, and goes on selling on a Free schedule even where the event also carries paid tiers</li>
             <li><strong class="text-gray-900 dark:text-white">QR codes and scanning at the door</strong> - on every ticket, on every plan, with the live <a href="#checkin-dashboard" class="doc-link">check-in dashboard</a> the Pro part</li>
-            <li><strong class="text-gray-900 dark:text-white"><a href="{{ route('marketing.docs.appointments') }}" class="doc-link">Appointment bookings</a></strong> - they have their own separate allowance</li>
+            <li><strong class="text-gray-900 dark:text-white"><a href="{{ route('marketing.docs.appointments') }}" class="doc-link">Appointment bookings</a></strong> - one free type, with its own allowance; charging for one needs Pro, like a priced ticket</li>
         </ul>
 
         <p class="text-gray-600 dark:text-gray-300 mb-6">On a Free schedule the paid rows of an event simply do not go on sale, whichever payment method they are set to: free registration and free ticket tiers keep working, and an event with nothing left to sell falls back to an <strong class="text-gray-900 dark:text-white">Add to Calendar</strong> button rather than a dead buy button. Subscribing opens the paid rows immediately, with no re-publishing and no change to the event.</p>

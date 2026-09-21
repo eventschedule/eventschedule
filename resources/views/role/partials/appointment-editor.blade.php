@@ -47,6 +47,14 @@
     $rowClass = 'flex flex-wrap items-center gap-2 py-2 border-b border-gray-100 dark:border-gray-700 last:border-b-0';
 @endphp
 
+@php
+    // Advanced scheduling - date overrides, buffers, minimum notice, the booking window and the
+    // approval step - is Pro. Unlike price there is no per-type grandfather stamp: the gate is on
+    // the SCHEDULE, and already-stored values survive because the server clamps rather than wipes.
+    // Mirrors AppointmentTypeController::fill()'s $advancedAllowed, demo arm included - otherwise
+    // the demo renders two Pro upsell banners for settings it is allowed to change.
+    $advancedNeedsPro = config('app.hosted') && ! is_demo_role($role) && ! $role->isPro();
+@endphp
 <form method="POST"
       action="{{ $editing ? route('appointments.update', ['subdomain' => $role->subdomain, 'hash' => $editing->hashedId()]) : route('appointments.store', ['subdomain' => $role->subdomain]) }}"
       id="appt-editor-form" class="space-y-4 text-gray-900 dark:text-gray-300">
@@ -203,6 +211,17 @@
          was simply no way to enter them. --}}
     <div class="{{ $sectionClass }}">
         <h3 class="{{ $headingClass }}">{{ __('messages.appointments_date_overrides') }}</h3>
+        @if ($advancedNeedsPro)
+            {{-- Not disabled, on purpose: a lapsed owner has to be able to see and keep what they
+                 configured. The server clamps rather than wipes (AppointmentTypeController::fill()),
+                 so anything already set stays set and keeps working. --}}
+            <x-plan-gate variant="banner" tier="pro" class="mb-4"
+                :role="$role" :subdomain="$role->subdomain"
+                :learnMoreUrl="marketing_url('/features/appointments')"
+                :title="__('messages.appointments_advanced_needs_pro_title')">
+                {{ __('messages.appointments_advanced_needs_pro_body') }}
+            </x-plan-gate>
+        @endif
         <x-input-error :messages="$errors->get('date_overrides')" class="mb-3" />
         <div class="text-xs text-gray-500 dark:text-gray-400 mb-2">{{ __('messages.appointments_date_overrides_help') }}</div>
         <div id="date-overrides">
@@ -250,6 +269,17 @@
 
     <div class="{{ $sectionClass }}">
         <h3 class="{{ $headingClass }}">{{ __('messages.appointments_scheduling_rules') }}</h3>
+        @if ($advancedNeedsPro)
+            {{-- Not disabled, on purpose: a lapsed owner has to be able to see and keep what they
+                 configured. The server clamps rather than wipes (AppointmentTypeController::fill()),
+                 so anything already set stays set and keeps working. --}}
+            <x-plan-gate variant="banner" tier="pro" class="mb-4"
+                :role="$role" :subdomain="$role->subdomain"
+                :learnMoreUrl="marketing_url('/features/appointments')"
+                :title="__('messages.appointments_advanced_needs_pro_title')">
+                {{ __('messages.appointments_advanced_needs_pro_body') }}
+            </x-plan-gate>
+        @endif
         <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div>
                 <x-input-label class="mb-1" for="buffer_before_minutes" :value="__('messages.appointments_buffer_before')" />
@@ -313,6 +343,26 @@
     <div class="{{ $sectionClass }}">
         <h3 class="{{ $headingClass }}">{{ __('messages.price') }}</h3>
 
+        @php
+            // Mirrors $ticketsNeedPro at event/edit.blade.php:2064, with one difference: that flag
+            // only diagnoses an ALREADY priced row, which here would mean the owner picks Paid,
+            // types an amount, saves, and is never told the type will not appear. So the banner is
+            // rendered whenever the schedule may not charge and revealed by the chip, not by the
+            // stored price. A grandfathered type answers false and shows nothing.
+            $pricingNeedsPro = $editing ? ! $editing->canTakePayment() : ! $role->isPro();
+        @endphp
+        @if ($pricingNeedsPro)
+            {{-- A banner, not a disabled chip: a lapsed owner has to be able to open, read and keep
+                 their price, currency and method, all of which live behind the Paid chip. --}}
+            <x-plan-gate variant="banner" tier="pro" id="appt-paid-gate"
+                class="mb-4 {{ (float) old('price', $editing->price ?? 0) > 0 ? '' : 'hidden' }}"
+                :role="$role" :subdomain="$role->subdomain"
+                :learnMoreUrl="marketing_url('/features/appointments')"
+                :title="__('messages.appointments_paid_needs_pro_title')">
+                {{ __('messages.appointments_paid_needs_pro_body') }}
+            </x-plan-gate>
+        @endif
+
         {{-- Free was previously reachable only by typing a zero, and nothing said that a non-zero
              amount is what reveals the currency and the payment methods. --}}
         <div class="{{ $segShell }}" id="price-mode">
@@ -365,6 +415,11 @@
         <h3 class="{{ $headingClass }}">{{ __('messages.appointments_booking_form') }}</h3>
         <div class="space-y-4">
             <x-toggle name="requires_approval" :label="__('messages.appointments_require_approval')" :checked="$oldBool('requires_approval', $editing->requires_approval ?? false)" />
+            @if ($advancedNeedsPro)
+                {{-- Scoped to approval alone: the two phone toggles below are free and must not
+                     read as gated. --}}
+                <p class="text-xs text-amber-700 dark:text-amber-400 -mt-2 ms-14">{{ __('messages.appointments_advanced_needs_pro_title') }}</p>
+            @endif
             <x-toggle name="ask_phone" :label="__('messages.appointments_ask_phone')" :checked="$askPhoneOn" />
             {{-- Nested: "require" only means anything while the field is being asked for at all. The
                  controller normalises the stored value the same way. --}}
@@ -588,10 +643,13 @@
         var priceFields = document.getElementById('price-fields');
         var pm = document.getElementById('payment-methods');
         var priceMode = parseFloat(priceInput.value) > 0 ? 'paid' : 'free';
+        var paidGate = document.getElementById('appt-paid-gate');
         function syncPrice() {
             var paid = priceMode === 'paid';
             priceFields.style.display = paid ? '' : 'none';
             pm.style.display = paid ? '' : 'none';
+            // Only rendered when the schedule may not charge, so its presence is the condition.
+            if (paidGate) paidGate.classList.toggle('hidden', !paid);
             form.querySelectorAll('.price-mode-chip').forEach(function (chip) {
                 var on = chip.dataset.priceMode === priceMode;
                 chip.classList.toggle('bg-white', on);

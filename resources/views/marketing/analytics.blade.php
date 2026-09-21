@@ -985,7 +985,7 @@
                         Two more tabs, once you are <span class="es-dash-lit">selling tickets.</span>
                     </h2>
                     <p class="es-dash-fmuted mt-5 text-lg" data-reveal style="--reveal-delay: 0.15s;">
-                        Views are the free half of the story. Sales and arrivals are the other half. Both tabs are there on every plan, and door scanning fills the Check-ins one for nothing. Revenue needs money to have moved. A paid appointment booking counts on any plan; ticket revenue starts once you are on Pro at {{ plan_price($proMonthly) }} a month, which is what opens paid ticketing and brings the promo codes and boosts two of the rows below come from.
+                        Views are the free half of the story. Sales and arrivals are the other half. Both tabs are there on every plan, and door scanning fills the Check-ins one for nothing. Revenue needs money to have moved. Revenue starts once you are on Pro at {{ plan_price($proMonthly) }} a month, which is what opens paid ticketing and paid appointment bookings and brings the promo codes and boosts two of the rows below come from.
                     </p>
                 </div>
 

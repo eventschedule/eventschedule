@@ -6,8 +6,29 @@
     $sale = $sale ?? null;
     $event = $event ?? null;
     $ownerMode = $ownerMode ?? false;
+    // Set by AppointmentController::showBookType() for a real, published slug that is simply not
+    // taking bookings right now - a priced type on a schedule that may not charge, or one whose
+    // payment method has gone. Rendered instead of the picker, never indexed.
+    $unavailable = $unavailable ?? false;
 @endphp
-<x-app-guest-layout :role="$role" :noIndex="$isReschedule" :page-title="__('messages.appointments')">
+<x-app-guest-layout :role="$role" :noIndex="$isReschedule || $unavailable" :page-title="__('messages.appointments')">
+@if ($unavailable)
+    {{-- Says nothing about plans or upgrades: the guest is the schedule owner's customer, not ours.
+         A "not taking bookings" register, not an error one. --}}
+    <div class="max-w-xl mx-auto px-4 py-16">
+        <div class="rounded-2xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 shadow-sm p-8 text-center">
+            <h1 class="text-xl font-bold text-gray-900 dark:text-gray-100" dir="auto">{{ $type->name }}</h1>
+            @if ($type->description)
+                <p class="mt-2 text-sm text-gray-600 dark:text-gray-400" dir="auto">{{ $type->description }}</p>
+            @endif
+            <p class="mt-4 text-sm text-gray-700 dark:text-gray-300">{{ __('messages.appointments_not_available') }}</p>
+            <a href="{{ $role->getGuestUrl() }}"
+               class="mt-6 inline-flex items-center px-4 py-3 text-base font-semibold rounded-lg bg-gray-100 dark:bg-gray-700 text-gray-900 dark:text-gray-100 hover:bg-gray-200 dark:hover:bg-gray-600 transition-all duration-200">
+                {{ $role->name }}
+            </a>
+        </div>
+    </div>
+@else
     @php
         // A pale accent is unreadable as text on the card, and a pale accent behind hardcoded white
         // text is unreadable as a button label. Both directions get a contrast-checked value, driven
@@ -1001,4 +1022,5 @@
             }).mount('#booking-app');
         })();
     </script>
+@endif
 </x-app-guest-layout>

@@ -176,6 +176,14 @@ class AppointmentService
             // index can express them (PassBookingService locks similarly).
             Role::whereKey($role->id)->lockForUpdate()->first();
 
+            // Defence in depth. The booking path is already closed by isBookable(), which
+            // Role::bookableAppointmentTypes() filters on, so a guest cannot reach here with a
+            // priced type on a schedule that may not charge. This re-asks because the service is
+            // callable directly and because the money is written a few lines below.
+            if (! $type->isFree() && ! $type->canTakePayment()) {
+                throw new BusinessException(__('messages.appointments_not_available'));
+            }
+
             if (! $this->isSlotAvailable($type, $slotUtc)) {
                 throw new BusinessException(__('messages.appointments_slot_taken'));
             }

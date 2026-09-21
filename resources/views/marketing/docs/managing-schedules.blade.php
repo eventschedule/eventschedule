@@ -329,7 +329,7 @@
 
         <div class="doc-callout doc-callout-info mb-6">
             <div class="doc-callout-title">Free plans get one appointment type</div>
-            <p>Appointment booking itself is free. On eventschedule.com a free schedule can have <strong>one</strong> active appointment type; Pro removes the cap. Selfhosted installs are unlimited.</p>
+            <p>Appointment booking itself is free. On eventschedule.com a free schedule can have <strong>one</strong> active appointment type; Pro removes the cap, and also adds paid bookings and the advanced scheduling rules. Selfhosted installs have no cap and no gate.</p>
         </div>
 
         <div class="doc-callout doc-callout-info">

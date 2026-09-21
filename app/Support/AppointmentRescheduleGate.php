@@ -70,9 +70,10 @@ class AppointmentRescheduleGate
             return $unavailable();
         }
 
-        // No plan gate. Appointments are available on every plan, and the free allowance caps how many
-        // types a schedule offers, not what may be done with a booking already taken. Refusing a move
-        // here would strand a guest with a booking they could only cancel.
+        // No plan gate. The paid-booking gate (AppointmentType::canTakePayment(), reached through
+        // isBookable()) decides whether a NEW booking may be taken, not what may be done with one
+        // already taken. Refusing a move here would strand a guest with a booking they could only
+        // cancel.
 
         // Report the cooldown so the manage page does not offer a Reschedule button, and the picker does
         // not render a whole calendar, for a move the write path will refuse. Null until a real move

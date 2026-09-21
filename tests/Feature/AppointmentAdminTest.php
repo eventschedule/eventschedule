@@ -40,6 +40,37 @@ class AppointmentAdminTest extends TestCase
             ->assertSee(__('messages.appointments_empty_title'));
     }
 
+    /**
+     * The empty state's "what your plan includes" line is the one place a new owner definitely
+     * reads, so it must not describe the FREE allowance to a schedule that is paying. It is gated on
+     * the allowance itself rather than on hosted, which is what it read before.
+     */
+    public function test_the_free_allowance_note_is_not_shown_to_a_paying_schedule(): void
+    {
+        config(['app.hosted' => true]);
+
+        $owner = $this->createOwner();
+        // createRole() defaults to enterprise, which isPro() answers true for.
+        $pro = $this->createRole($owner, 'talent', ['timezone' => 'America/New_York']);
+
+        $this->actingAs($owner)
+            ->get(route('role.view_admin', ['subdomain' => $pro->subdomain, 'tab' => 'appointments']))
+            ->assertOk()
+            ->assertDontSee(__('messages.appointment_type_included_note'));
+
+        $free = $this->createRole($owner, 'venue', [
+            'timezone' => 'America/New_York',
+            'plan_type' => 'free',
+            'plan_expires' => now()->subDay()->format('Y-m-d'),
+            'trial_ends_at' => null,
+        ]);
+
+        $this->actingAs($owner)
+            ->get(route('role.view_admin', ['subdomain' => $free->subdomain, 'tab' => 'appointments']))
+            ->assertOk()
+            ->assertSee(__('messages.appointment_type_included_note'));
+    }
+
     public function test_store_creates_type(): void
     {
         $owner = $this->createOwner();

@@ -175,6 +175,8 @@ New Feature-test suites added this session (all use `tests/Feature/Concerns/Crea
 | Fan comments (submit) | ✓ | `EventTest` |
 | Carpool matching (Pro) | ✗ | — |
 | Guest event submission / booking request | ✓ | `ScheduleFeaturesTest` |
+| Appointment booking (one free type; price and advanced scheduling on Pro) | ✓ | `AppointmentBookingTest`, `AppointmentAdminTest`, `AppointmentSlotTest` |
+| Paid appointment bookings (Pro) | ✓ | `PaidAppointmentGateTest`, `FreePlanLimitsTest`, `AppointmentPaymentTest` |
 | Bulk photo download (Pro) | ✗ | skipped — needs real on-disk file fixture |
 
 ### Newsletters

@@ -1329,7 +1329,7 @@
         $faqs = [
             [
                 'q' => 'Is Event Schedule really free?',
-                'a' => 'Yes. Unlimited events, unlimited schedules, calendar sync, free registration with capacity limits, analytics and QR check-in at the door are all included on the free plan, with no time limit and no credit card required. Newsletters are metered rather than unlimited, at 10 recipients a month. A free schedule is also a team of one, with one bookable appointment type, and a ticket that carries a price is where Pro begins.',
+                'a' => 'Yes. Unlimited events, unlimited schedules, calendar sync, free registration with capacity limits, analytics and QR check-in at the door are all included on the free plan, with no time limit and no credit card required. Newsletters are metered rather than unlimited, at 10 recipients a month. A free schedule is also a team of one, with one free appointment type, and a price on a ticket or a booking is where Pro begins.',
             ],
             [
                 'q' => 'Do you take a cut of ticket sales?',

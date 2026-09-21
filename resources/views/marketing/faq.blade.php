@@ -877,6 +877,8 @@
             ['Scan tickets at the door', 'Yes', 'Yes', 'Yes'],
             ['Live check-in dashboard, waitlist, promo codes and passes', 'No', 'Yes', 'Yes'],
             ['Appointment booking', '1 type', 'Unlimited types', 'Unlimited types'],
+            ['Charge for an appointment booking', 'No', 'Yes', 'Yes'],
+            ['Advanced scheduling (overrides, buffers, approvals)', 'No', 'Yes', 'Yes'],
             ['Remove Event Schedule branding', 'No', 'Yes', 'Yes'],
             ['Team members', '1', '1', 'Up to 5'],
             ['Reserved seating for venue schedules', 'No', 'No', 'Yes'],

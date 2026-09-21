@@ -1,6 +1,6 @@
 <x-marketing-layout>
-    <x-slot name="title">Free Appointment Booking | Paid Slots, No Double Booking</x-slot>
-    <x-slot name="description">Share one booking link and guests book an open time in their own timezone. Free with one appointment type, Stripe for paid slots, and no double booking.</x-slot>
+    <x-slot name="title">Free Appointment Booking | One Link, No Double Booking</x-slot>
+    <x-slot name="description">Share one booking link and guests book an open time in their own timezone. Free with one appointment type on any plan, and never a double booking.</x-slot>
     <x-slot name="breadcrumbTitle">Appointments</x-slot>
 
     @php
@@ -202,7 +202,7 @@
         $facts = [
             ['Bookings stay out of the shop window', 'Every booking is created as a private event, so it never shows on your public schedule, the calendar feed guests can subscribe to, your RSS feed or your event graphics. It still holds the time.'],
             ['Email has to be working', 'On the hosted platform appointment mail goes out through your own email settings, so confirmations come from your address. Until those are set up nothing is sent, and the Appointments tab says so.'],
-            ['Not the same as Availability', 'Availability is a separate tab, on Enterprise talent schedules, where members cross out whole dates they cannot be booked for events. Appointments hand out one specific slot at a time, free with one type on any schedule type, and uncapped on Pro.'],
+            ['Not the same as Availability', 'Availability is a separate tab, on Enterprise talent schedules, where members cross out whole dates they cannot be booked for events. Appointments hand out one specific slot at a time, free with one type on any schedule type, with more types, payment and advanced scheduling on Pro.'],
             ['Turn a type off, do not delete it', 'Untick Active and the type leaves your booking page. Bookings already on it keep their time, their emails and their reminders, though nothing can be moved onto a type that is switched off.'],
             ['One guest, one time', 'The same email address cannot hold two bookings at the same moment on your schedule.'],
             ['Reminders chase confirmed bookings only', 'A request still waiting on you, or a card booking still waiting on payment, does not get one.'],
@@ -223,7 +223,7 @@
             ],
             [
                 'q' => 'Can I charge for appointments?',
-                'a' => 'Yes. A type can be free or priced, and paid types take payment by Stripe, a payment link, or cash. PayPal, Payfast and Invoice Ninja are not offered for appointments, even when they are connected. Free bookings are confirmed at once, a paid type stays hidden from guests until a payment method it can use is connected, and Event Schedule takes no cut of what you charge.',
+                'a' => 'Yes, on the Pro plan. A type can be free or priced; every plan carries a free type, and putting a price on one is the Pro line, the same line that applies to tickets. Paid types take payment by Stripe, a payment link, or cash. PayPal, Payfast and Invoice Ninja are not offered for appointments, even when they are connected. Free bookings are confirmed at once, a paid type stays hidden from guests until a payment method it can use is connected, and Event Schedule takes no cut of what you charge.',
             ],
             [
                 'q' => 'How do I refund a paid booking?',
@@ -251,7 +251,7 @@
             ],
             [
                 'q' => 'Which plan includes appointment booking?',
-                'a' => 'Booking is on the free plan, with one appointment type. Everything about that type is fully featured: weekly hours, per-date overrides, buffers, approvals and payment. A paid booking is not a ticket, so the plan rules for ticketing do not touch it: money changes hands through your own Stripe account on any plan. Pro is what lets you run several types side by side, and a selfhosted deployment has no cap at all. If a hosted Pro plan lapses you keep every type you created and the oldest bookable one stays bookable, so nothing already booked is ever lost and every guest\'s private link still opens.',
+                'a' => 'Booking is on the free plan, with one appointment type: weekly hours, a public booking page, a private link for the guest and every confirmation and reminder email. Pro is what adds more types, lets you put a price on one, and unlocks the scheduling rules - per-date overrides, buffers, minimum notice and an approval step. Nothing you build is thrown away if a Pro plan lapses: every type is kept exactly as you left it, the rules you set stay set, the oldest free one keeps taking bookings, every booking already made is honoured, and every guest\'s private link still opens. Selfhosted deployments have no cap and no gate at all.',
             ],
         ];
 
@@ -277,13 +277,13 @@
         "name": "Event Schedule - Appointments",
         "applicationCategory": "BusinessApplication",
         "operatingSystem": "Web",
-        "description": "Appointment booking built into your schedule. Set weekly hours, start-time intervals and buffers, take free or paid bookings, and never offer a time you are already busy.",
+        "description": "Appointment booking built into your schedule. Set weekly hours and start-time intervals, take free bookings on any plan, and never offer a time you are already busy.",
         "featureList": [
             "Bookable appointment types with a duration and weekly hours",
             "Start-time interval, buffers, minimum notice and a booking window",
             "Per-date overrides for holidays and one-off hours",
             "In person, online or phone appointments",
-            "Free or paid bookings by Stripe, a payment link, or cash",
+            "Free bookings on every plan, paid bookings on Pro by Stripe, a payment link, or cash",
             "Open times exclude anything already on your schedule, including synced calendar events",
             "Approval or instant confirmation",
             "Confirmation email with a calendar invite, a reminder, and timezone-aware times",
@@ -1593,8 +1593,9 @@
             <div class="es-book-card mt-6 p-6" data-reveal>
                 <p class="es-book-muted text-sm">
                     <span class="es-book-ink font-bold">Booking is on the free plan, with one appointment type</span>,
-                    and that one type is the whole feature: hours, overrides, buffers, approvals and payment.
-                    Pro is what lets you offer several side by side, and a selfhosted deployment is uncapped.
+                    and that type has weekly hours, a booking page and every guest email.
+                    Pro adds more types, a price, and the scheduling rules: overrides, buffers, notice and approvals.
+                    A selfhosted deployment has no cap and no gate.
                     Everything the book leans on is free too: your public schedule, two-way Google, Outlook
                     and CalDAV calendar sync, and the calendar you can embed on your own site.
                 </p>
@@ -1717,7 +1718,7 @@
                         </a>
                     </div>
 
-                    <p class="es-book-lit mt-6 text-sm font-semibold">Free with one type, uncapped on Pro, and unlimited on every selfhosted deployment</p>
+                    <p class="es-book-lit mt-6 text-sm font-semibold">Free booking on every plan, more types and paid bookings on Pro, and no cap at all when you host it yourself</p>
                 </div>
             </div>
             {{-- The same page-edge stack every sheet on this page sits on, sized for the

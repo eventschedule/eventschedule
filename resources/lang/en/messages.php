@@ -3740,15 +3740,27 @@ return [
     'plan_overview_title' => 'Your plan',
     'plan_overview_body' => 'Free includes :types appointment type, unlimited events and schedules, and unlimited free registration and RSVP. Pro adds:',
 
-    // Free-plan appointment allowance.
+    // Three separate Pro lines: how many types there may be, charging for a booking, and the
+    // advanced scheduling fields. The free type itself books normally.
     'appointment_type_limit_reached' => 'Your plan includes :limit appointment type. Upgrade to Pro to offer more.',
     'appointment_type_usage' => 'Appointment types',
     'appointment_types_used' => ':used of :limit used',
-    'appointment_type_included_note' => 'Your Free plan includes one appointment type, fully featured. Pro adds unlimited types.',
     'appointment_type_limit_title' => 'Add more appointment types with Pro',
     'appointment_type_limit_body' => 'Your Free plan includes one appointment type. Pro removes the limit, so you can offer consultations, lessons and rehearsals side by side.',
     'appointment_types_clamped' => 'Your plan includes :limit appointment type, so only :name is bookable right now. The others are kept and become bookable again when you upgrade.',
     'appointment_type_pro_bullet_unlimited' => 'Unlimited appointment types',
+    'appointment_type_included_note' => 'Your Free plan includes one appointment type with weekly hours and a public booking page. Pro adds more types, lets you charge for a booking, and unlocks date overrides, buffers, minimum notice and approvals.',
+    'appointments_advanced_needs_pro_title' => 'Advanced scheduling is a Pro feature',
+    'appointments_advanced_needs_pro_body' => 'Date overrides, buffers, minimum notice, the booking window and the approval step are on Pro. Anything you have already set stays saved and keeps working, and you can always lower or clear it - Pro is what lets you raise it again.',
+    'appointments_paid_needs_pro_title' => 'Charging for a booking is a Pro feature',
+    'appointments_paid_needs_pro_body' => 'A free appointment type books normally on the Free plan. A type with a price on it stays saved but will not appear on your booking page until you upgrade, and it starts booking again the moment you do.',
+    'appointments_paid_needs_pro_row' => 'Priced bookings need Pro. Hidden from guests until you upgrade.',
+    'appointments_paid_blocked_title' => 'Priced bookings are paused',
+    'appointments_paid_blocked_body' => '{1} :count appointment type has a price on it, so it is not taking bookings right now. It is kept exactly as you left it and books again as soon as you upgrade.|[2,*] :count appointment types have prices on them, so they are not taking bookings right now. They are kept exactly as you left them and book again as soon as you upgrade.',
+    'appointments_nothing_bookable_title' => 'Your booking page is empty',
+    'appointments_nothing_bookable_body' => 'Every active type has a price on it, so guests have nothing to book and your booking link is not live. Add a free type, or upgrade to take payment.',
+    'appointments_not_available' => 'This appointment type is not taking bookings right now.',
+    'appointment_pro_bullet_paid' => 'Charge for appointment bookings, no platform fee',
 
     'download_all_photos' => 'Download all photos',
     'no_photos_to_download' => 'No photos to download.',

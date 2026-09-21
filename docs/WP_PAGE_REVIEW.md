@@ -139,8 +139,15 @@ A checklist of every WP (marketing) site page, used to track review progress as 
 > `docs/selfhost/index` and `docs/analytics` were verified correct and left alone.
 >
 > Two further plan facts surfaced during the sweep and were fixed in passing: **appointment
-> booking is now FREE** (`Role::appointmentTypeLimit()`, one type free) and **volume discounts
-> were never Pro** (`volume_discount` is not in EventRepo's `$ticketExtrasAllowed` scrub).
+> booking is now FREE** (one type free at the time) and **volume discounts were never Pro**
+> (`volume_discount` is not in EventRepo's `$ticketExtrasAllowed` scrub).
+>
+> **Extended 2026-09-21:** the one-type cap STANDS, and two further Pro lines joined it. CHARGING
+> for a booking now mirrors paid tickets (`AppointmentType::canTakePayment()`), and the advanced
+> scheduling fields - date overrides, buffers, minimum notice, the booking window and the approval
+> step - are gated on save (`AppointmentTypeController::clampAdvanced()`). An intermediate version
+> of that day's work did drop the cap; it was reverted before release, so any row below claiming
+> unlimited free types is wrong. `docs/FEATURES.md` is the live reference.
 > `for-musicians` also carried the long-standing "newsletters are available on the Pro and
 > Enterprise plans" error - newsletters are FREE at 10 recipients/month - now corrected.
 >

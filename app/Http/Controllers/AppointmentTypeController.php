@@ -11,8 +11,13 @@ use Illuminate\Http\Request;
 use Illuminate\Validation\ValidationException;
 
 /**
- * Owner-side CRUD for appointment types (the Appointments admin tab). Pro-gated on hosted.
- * Guest-facing booking lives in AppointmentController.
+ * Owner-side CRUD for appointment types (the Appointments admin tab).
+ *
+ * Three plan rules meet here, and they are independent. The free plan allows ONE type, checked on
+ * the two creation paths by planLimit(). Advanced scheduling is clamped on save by fill(). A PRICE
+ * is not gated here at all: it is refused at BOOKING time by AppointmentType::isBookable(), never
+ * on save, so a schedule whose Pro plan lapses keeps its configuration intact and books again on
+ * upgrade. Guest-facing booking lives in AppointmentController.
  */
 class AppointmentTypeController extends Controller
 {
@@ -26,7 +31,7 @@ class AppointmentTypeController extends Controller
 
         $type = new AppointmentType;
         $type->role_id = $role->id;
-        $this->fill($type, $data);
+        $this->fill($type, $data, $role);
         $type->slug = AppointmentType::uniqueSlug($role, $data['name']);
         $type->save();
 
@@ -39,7 +44,7 @@ class AppointmentTypeController extends Controller
         $type = $this->resolveType($role, $hash);
         $data = $this->validated($request);
 
-        $this->fill($type, $data);
+        $this->fill($type, $data, $role);
         $type->save();
 
         return $this->back($role, __('messages.appointments_type_saved'));
@@ -65,9 +70,20 @@ class AppointmentTypeController extends Controller
         // The list posts an explicit value from a toggle switch. Honouring it makes the action
         // idempotent, so a double submit or a re-post cannot flip the type back again. Falls back to
         // inverting for callers that post an empty body.
-        $type->is_active = $request->has('is_active')
+        $active = $request->has('is_active')
             ? $request->boolean('is_active')
             : ! $type->is_active;
+
+        // Activating is the THIRD creation path, and it needs the same allowance check as store()
+        // and duplicate(). appointmentTypeCount() counts active types only, so pausing one frees a
+        // slot; without this, pause -> create -> re-activate leaves a free schedule holding two
+        // live types. Deactivating is always allowed, and a type that is already active is a no-op
+        // rather than a refusal, so re-saving the list cannot lock an owner out of their own row.
+        if ($active && ! $type->is_active) {
+            $this->planLimit($role);
+        }
+
+        $type->is_active = $active;
         $type->save();
 
         return $this->back($role, __('messages.appointments_type_saved'));
@@ -81,14 +97,35 @@ class AppointmentTypeController extends Controller
     public function duplicate(Request $request, $subdomain, $hash)
     {
         $role = $this->gate($request, $subdomain);
-        // Duplicating is the second creation path, so it takes the same allowance check.
+        // Duplicating is the second creation path, so it takes the same allowance check. It never
+        // actually did, despite this comment, until the cap was restored.
         $this->planLimit($role);
         $type = $this->resolveType($role, $hash);
 
-        $copy = $type->replicate();
+        // Excluding the grandfather stamp is load-bearing, not hygiene: replicate() copies every
+        // attribute and does not consult $fillable, so without this a free schedule with one
+        // grandfathered paid type could press Clone and mint a second, then a third, forever.
+        $copy = $type->replicate(['paid_grandfathered_at']);
         $copy->name = $type->name.' ('.__('messages.copy').')';
         $copy->slug = AppointmentType::uniqueSlug($role, $copy->name);
         $copy->is_active = false;
+
+        // The same laundering, one level subtler, for the advanced settings. Price has a stamp to
+        // exclude; advanced scheduling does NOT - the stored value IS its grandfather - so
+        // replicate() copies the grandfather itself, and duplicate() never calls fill(), so
+        // clampAdvanced() never runs on the copy. A free schedule could pause its lapsed-Pro type
+        // (freeing the allowance, since the count is active-only), Clone it, activate the copy and
+        // delete the original, for an endless supply of fully configured types.
+        //
+        // Reset rather than exclude from replicate(): a Pro schedule SHOULD keep its settings when
+        // cloning. Reset rather than clampAdvanced(): a brand new model has no original to clamp
+        // against, so every field would collapse to its default anyway - this just says so directly.
+        if (! (is_demo_role($role) || $role->isPro())) {
+            foreach (self::ADVANCED_DEFAULTS as $field => $value) {
+                $copy->{$field} = $value;
+            }
+        }
+
         $copy->save();
 
         return redirect(route('role.view_admin', [
@@ -258,8 +295,9 @@ class AppointmentTypeController extends Controller
     /**
      * Resolve the schedule and require an editor.
      *
-     * Appointments are available on every plan; the free plan is limited to one appointment type
-     * (enforced by planLimit() on the two creation paths), not locked out of the feature.
+     * Editing an existing type is available on every plan. What the plan decides is how many there
+     * may be (planLimit()), whether one may carry a PRICE (AppointmentType::canTakePayment()), and
+     * whether the advanced scheduling fields may be raised (clampAdvanced()).
      */
     protected function gate(Request $request, $subdomain, bool $json = false): Role
     {
@@ -413,8 +451,102 @@ class AppointmentTypeController extends Controller
         return is_string($value) && preg_match('/^([01]\d|2[0-3]):[0-5]\d$/', $value) === 1;
     }
 
-    protected function fill(AppointmentType $type, array $data): void
+    /**
+     * The value each gated field has when its owner has never touched the setting.
+     *
+     * Note that max_advance_days is 60, not 0: "unset" is not "zero" for every field, which is the
+     * distinction the old emptiness test got wrong.
+     */
+    private const ADVANCED_DEFAULTS = [
+        'buffer_before_minutes' => 0,
+        'buffer_after_minutes' => 0,
+        'min_notice_hours' => 0,
+        'max_advance_days' => 60,
+        'requires_approval' => false,
+        'date_overrides' => [],
+    ];
+
+    /**
+     * Clamp one advanced setting to what a schedule without Pro may reach.
+     *
+     * The rule in one sentence: it may never move the value FURTHER FROM the field's inert default
+     * than it already is. Turning a setting down or off is therefore always allowed, turning one up
+     * or on never is, and a type that never had the setting is pinned to its default - which IS the
+     * gate.
+     *
+     * Two earlier versions got this wrong, both silently, and both are worth naming because the
+     * failure mode is identical: the form still reports the save as successful.
+     *
+     * 1. Letting a value through only when it was EMPTY made zero the one reachable value. An owner
+     *    carrying a 48-hour minimum notice could clear it but could not reduce it to 24.
+     * 2. Clamping into the interval [default, stored] fixed that for every field whose default sits
+     *    at an extreme, but not for max_advance_days, whose default is 60 rather than 0 and is
+     *    therefore the only field a submission can approach from EITHER side. Stored 180, submitted
+     *    30: the interval is [60,180], so 30 became 60. An owner shortening their booking window
+     *    before going on leave silently got a longer one than they asked for.
+     *
+     * Hence the distance test rather than an interval: |submitted - default| <= |stored - default|.
+     * It is the docblock sentence as code, which is the point - the two previous versions were both
+     * paraphrases of it that happened to agree on the common cases.
+     */
+    private function clampAdvanced(string $field, $submitted, AppointmentType $type)
     {
+        $default = self::ADVANCED_DEFAULTS[$field];
+        $stored = $type->getOriginal($field);
+
+        if (is_bool($default)) {
+            // Between off and what is stored: may be switched off, may not be switched on.
+            return (bool) $submitted && (bool) $stored;
+        }
+
+        if (is_array($default)) {
+            // Between no overrides and the ones already there: days may be dropped, never added. The
+            // hours on a day already overridden stay editable - that is not a new capability, and
+            // ignoring the edit would be the same silent trap the numeric rule avoids.
+            return array_intersect_key((array) $submitted, (array) ($stored ?? []));
+        }
+
+        $stored = (int) ($stored ?? $default);
+        $submitted = (int) $submitted;
+
+        return abs($submitted - $default) <= abs($stored - $default) ? $submitted : $stored;
+    }
+
+    /**
+     * Copy the validated form onto the type, refusing to turn on anything the plan does not carry.
+     *
+     * Advanced scheduling - buffers, minimum notice, the booking window, date overrides and the
+     * approval workflow - is a Pro feature. It is gated on the STORED value, the same way
+     * EventRepo::saveEvent() gates individual tickets and passes: a free schedule cannot turn one
+     * ON, but one that already has it keeps it, it keeps working, and it may always be turned down
+     * or off (clampAdvanced()). So a lapsed Pro plan is clamped rather than wiped, and nothing a
+     * guest already relies on - a 48-hour notice period, an approval step - silently changes
+     * underneath them.
+     *
+     * The consequence, stated plainly: a free schedule that configured buffers before this shipped
+     * keeps them indefinitely. That is the same trade EventRepo makes, and it is the reason no
+     * migration or grandfather column is needed here. Every one of these fields ships with an inert
+     * default (0 buffers, 0 notice, a 60-day window, no overrides, approval off), so only owners
+     * who deliberately set one are affected at all.
+     *
+     * Price is NOT handled here: it is gated at booking time by AppointmentType::isBookable(), so a
+     * priced type is always stored and simply stops being offered.
+     */
+    protected function fill(AppointmentType $type, array $data, ?Role $role = null): void
+    {
+        // is_demo_role() for the same reason appointmentTypeLimit() and canTakePayment() carry it:
+        // the demo schedule sits on the free plan on purpose, and an account whose whole job is to
+        // show the product working must not be the one account that cannot set a buffer. isPro()
+        // already short-circuits true on selfhost, so no hosted check is needed here.
+        $advancedAllowed = $role ? (is_demo_role($role) || $role->isPro()) : false;
+
+        // Clamped to the stored value when the plan may not raise it - see clampAdvanced(). On a NEW
+        // type getOriginal() is null, so every field collapses to its own default, which is the
+        // refusal we want.
+        $advanced = function (string $field, $submitted) use ($type, $advancedAllowed) {
+            return $advancedAllowed ? $submitted : $this->clampAdvanced($field, $submitted, $type);
+        };
+
         $type->name = $data['name'];
         $type->description = $data['description'] ?? null;
         $type->duration_minutes = (int) $data['duration_minutes'];
@@ -424,14 +556,14 @@ class AppointmentTypeController extends Controller
         if (request()->has('slot_interval_minutes')) {
             $type->slot_interval_minutes = ! empty($data['slot_interval_minutes']) ? (int) $data['slot_interval_minutes'] : null;
         }
-        $type->buffer_before_minutes = (int) ($data['buffer_before_minutes'] ?? 0);
-        $type->buffer_after_minutes = (int) ($data['buffer_after_minutes'] ?? 0);
-        $type->min_notice_hours = (int) ($data['min_notice_hours'] ?? 0);
-        $type->max_advance_days = (int) ($data['max_advance_days'] ?? 60);
+        $type->buffer_before_minutes = (int) $advanced('buffer_before_minutes', $data['buffer_before_minutes'] ?? 0);
+        $type->buffer_after_minutes = (int) $advanced('buffer_after_minutes', $data['buffer_after_minutes'] ?? 0);
+        $type->min_notice_hours = (int) $advanced('min_notice_hours', $data['min_notice_hours'] ?? 0);
+        $type->max_advance_days = (int) ($advanced('max_advance_days', $data['max_advance_days'] ?? 60) ?: 60);
         $type->weekly_windows = $data['weekly_windows'];
         // Same has-guard as slot_interval_minutes, for the same reason.
         if (request()->has('date_overrides')) {
-            $type->date_overrides = $data['date_overrides'] ?? null;
+            $type->date_overrides = $advanced('date_overrides', $data['date_overrides'] ?? null);
         }
         $type->location_type = $data['location_type'];
         $type->location_address = $data['location_address'] ?? null;
@@ -440,7 +572,7 @@ class AppointmentTypeController extends Controller
         $type->price = (float) ($data['price'] ?? 0);
         $type->currency_code = ((float) ($data['price'] ?? 0) > 0) ? strtoupper($data['currency_code']) : null;
         $type->payment_method = ((float) ($data['price'] ?? 0) > 0) ? ($data['payment_method'] ?? 'cash') : null;
-        $type->requires_approval = request()->boolean('requires_approval');
+        $type->requires_approval = (bool) $advanced('requires_approval', request()->boolean('requires_approval'));
         $type->ask_phone = request()->boolean('ask_phone');
         // Requiring a field that is never asked for is meaningless - the booking validation only
         // reads require_phone inside `if ($type->ask_phone)`. Normalise rather than storing the

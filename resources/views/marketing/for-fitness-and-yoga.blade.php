@@ -1555,7 +1555,7 @@
                         Your classes. Your students. <span class="es-flow-lit">No middleman.</span>
                     </h2>
                     <p class="es-flow-muted mx-auto mb-10 max-w-2xl text-lg sm:text-xl">
-                        Publishing the timetable is free forever, and so is selling your first 25 drop-ins a month. Passes, an unlimited count and the check-in dashboard are {{ plan_price($proMonthly) }} a month, and nothing is taken off the door.
+                        Publishing the timetable is free forever, and so is taking unlimited free bookings and registrations. Charging for a drop-in, passes and the check-in dashboard are {{ plan_price($proMonthly) }} a month, and nothing is taken off the door.
                     </p>
 
                     <div class="mx-auto flex max-w-2xl flex-col items-stretch justify-center gap-3 sm:flex-row">

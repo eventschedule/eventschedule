@@ -3606,6 +3606,12 @@ class RoleController extends Controller
     {
         $types = $role->appointmentTypes()->where('is_deleted', false)->orderBy('name')->get();
 
+        // The tab asks canTakePayment() on every type, in the blocked-paid filter and three times
+        // inside the list, and that predicate reads $type->role. Handing each one the schedule we
+        // already have turns a query per type into none, the same trick
+        // Role::bookableAppointmentTypes() uses.
+        $types->each(fn ($type) => $type->setRelation('role', $role));
+
         $editHash = request('edit');
         $editing = $editHash
             ? $types->firstWhere('id', UrlUtils::decodeId($editHash))

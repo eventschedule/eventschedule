@@ -88,6 +88,7 @@ class AppointmentType extends Model
         'date_overrides' => 'array',
         'custom_fields' => 'array',
         'price' => 'decimal:2',
+        'paid_grandfathered_at' => 'datetime',
         'duration_minutes' => 'integer',
         'slot_interval_minutes' => 'integer',
         'buffer_before_minutes' => 'integer',
@@ -138,6 +139,36 @@ class AppointmentType extends Model
     }
 
     /**
+     * Whether this type may take money.
+     *
+     * The appointment mirror of Event::canSellPaidTickets(), with the same four arms in the same
+     * order: a free type books on every tier, a priced one needs Pro. This predicate answers only
+     * the money question - how MANY types a schedule may offer is Role::appointmentTypeLimit(),
+     * applied separately in bookableAppointmentTypes().
+     *
+     * Fails closed on a schedule-less type. role_id is constrained() and not nullable, so that
+     * cannot happen today, but the predicate must not be the thing that assumes it.
+     */
+    public function canTakePayment(): bool
+    {
+        // Selfhost resolves to the top tier, so it short-circuits before anything can deny it.
+        if (! config('app.hosted')) {
+            return true;
+        }
+
+        $role = $this->role;
+
+        // The stamp is one-time, set by the 2026_09_21 migration for every priced type that
+        // existed when charging became a Pro feature. See that migration for why it is stored
+        // rather than re-derived.
+        if ($role?->isPro() || $this->paid_grandfathered_at !== null) {
+            return true;
+        }
+
+        return is_demo_role($role);
+    }
+
+    /**
      * Hours an unpaid hold survives before app:release-tickets frees the slot.
      * Cash/free never auto-expire (ReleaseTickets has no cash exclusion).
      */
@@ -169,8 +200,14 @@ class AppointmentType extends Model
     }
 
     /**
-     * A type a guest can actually book: active, not deleted, and either free or with a
-     * working payment method. Misconfigured paid types are hidden from the guest surface.
+     * A type a guest can actually book: active, not deleted, and either free or priced with both
+     * the plan and a working payment method behind it. Misconfigured paid types are hidden from
+     * the guest surface, and so are priced ones on a schedule that may not charge.
+     *
+     * This is the Ticket::isSellable() analogue and the ONLY enforcement point the booking path
+     * needs: AppointmentController::book() resolves through Role::bookableAppointmentTypes(),
+     * which filters on this. Deliberately not consulted by AppointmentRescheduleGate, which must
+     * keep working for a booking already taken.
      */
     public function isBookable(): bool
     {
@@ -178,7 +215,8 @@ class AppointmentType extends Model
             return false;
         }
 
-        return $this->isFree() || $this->paymentMethodAvailable();
+        return $this->isFree()
+            || ($this->canTakePayment() && $this->paymentMethodAvailable());
     }
 
     public function hashedId(): string

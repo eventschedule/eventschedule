@@ -57,6 +57,21 @@ class AppointmentController extends Controller
     public function showBookType(Request $request, $subdomain, $typeSlug)
     {
         $role = $this->resolveRole($subdomain);
+
+        // A real, published slug that is simply not taking bookings renders an explanatory page
+        // rather than a 404. Deliberately says nothing about plans: the guest is the schedule
+        // owner's customer, not ours.
+        if (! $this->bookableTypes($role)->firstWhere('slug', $typeSlug)) {
+            if ($unavailable = $this->resolveUnavailableType($role, $typeSlug)) {
+                return response()->view('appointments.book-type', [
+                    'role' => $role,
+                    'type' => $unavailable,
+                    'initialSlots' => ['days' => []],
+                    'unavailable' => true,
+                ], 404);
+            }
+        }
+
         $type = $this->resolveBookableType($role, $typeSlug);
 
         $today = Carbon::now($type->timezone())->format('Y-m-d');
@@ -496,11 +511,13 @@ class AppointmentController extends Controller
     }
 
     /**
-     * Bookable types for the schedule, with the free-plan cap applied.
+     * Bookable types for the schedule.
      *
-     * Appointments are on every plan; the free plan carries one type. A schedule that lapsed from
-     * Pro keeps every type it created, but only the allowance is bookable, so the guest surfaces
-     * and the picker must all read through the same clamped list.
+     * Booking itself is on every plan. Two things drop out here: a PRICED type on a schedule that
+     * may not charge (AppointmentType::canTakePayment()) or whose payment method has gone, and
+     * anything past the free plan's one-type allowance (Role::appointmentTypeLimit()). A schedule
+     * that lapsed from Pro keeps every type it created; they simply stop appearing until it
+     * upgrades.
      */
     protected function bookableTypes(Role $role)
     {
@@ -516,6 +533,29 @@ class AppointmentController extends Controller
         }
 
         return $type;
+    }
+
+    /**
+     * A type that exists on this schedule but is not currently bookable, or null.
+     *
+     * Told apart from "no such slug" on purpose. These URLs are published: they sit in calendar
+     * invites and confirmation emails, and a plan lapse should not turn them into a 404 that reads
+     * as a broken link. Mirrors Event::blockedByPlanOnly(), which exists for exactly this reason on
+     * the ticket side.
+     *
+     * is_active is filtered even though the page this feeds is already a 404, because that page
+     * renders the type's NAME and DESCRIPTION to explain itself. An inactive type was never
+     * published, so it has no circulating URL to keep alive and nothing to explain - and Clone
+     * creates its copy inactive, which would otherwise put a draft's name on a public page for
+     * anyone holding the slug.
+     */
+    protected function resolveUnavailableType(Role $role, string $slug): ?AppointmentType
+    {
+        return $role->appointmentTypes()
+            ->where('slug', $slug)
+            ->where('is_deleted', false)
+            ->where('is_active', true)
+            ->first();
     }
 
     /** Decode the secret-link params to a booking (event + sale), 404 unless it is an appointment. */

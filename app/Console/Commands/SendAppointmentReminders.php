@@ -47,8 +47,9 @@ class SendAppointmentReminders extends Command
                 continue;
             }
 
-            // No plan check: appointments are on every plan, and a booking already taken has to be
-            // honoured whatever the schedule's plan does afterwards.
+            // No plan check. Charging for a booking needs Pro, but that gate lives at BOOKING time
+            // (AppointmentType::isBookable()); a booking already taken has to be honoured whatever the
+            // schedule's plan does afterwards.
             $role = $event->getRoleWithEmailSettings() ?: $event->creatorRole;
             if (! $role) {
                 continue;

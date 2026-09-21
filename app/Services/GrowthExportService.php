@@ -1025,6 +1025,13 @@ class GrowthExportService
             $n = (int) $row[$i['newsletter_emails_this_month']];
             $newsletter[$n === 0 ? '0' : ($n >= 10 ? 'at_or_over_cap' : '1-9')]++;
 
+            // Split at the free plan's one-type allowance, so the population pressed against the
+            // limit is legible. Labelled by COUNT rather than by cap state, unlike the newsletter and
+            // photo columns above: the appointment_types column is filtered on is_deleted only, while
+            // the allowance (Role::appointmentTypeCount()) also requires is_active, so a schedule
+            // with one live type and one paused draft reads as 2 here while nothing is clamped at
+            // all. A label like "over_cap" would assert a plan state this number cannot support.
+            // Do not rename these without filtering the column - and note it is also exported as-is.
             $a = (int) $row[$i['appointment_types']];
             $appt[$a === 0 ? '0' : ($a === 1 ? '1' : '2+')]++;
 
