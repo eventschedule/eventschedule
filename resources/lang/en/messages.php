@@ -3710,6 +3710,8 @@ return [
     'ticket_mode_free_hint' => 'Free registration and $0 tickets are unlimited on every plan. Selling tickets with a price is a Pro feature.',
     'tickets_need_pro_title' => 'Selling paid tickets is a Pro feature',
     'tickets_need_pro_body' => 'This event has ticket types with a price, so they cannot be sold on the Free plan. Free registration, RSVP and $0 tickets keep working, and upgrading starts sales again immediately.',
+    'tickets_embed_needs_pro_title' => 'The embeddable ticket widget is a Pro feature',
+    'tickets_embed_needs_pro_body' => 'This event keeps selling on its own page, but the ticket widget you can embed on another website needs Pro. If you have already embedded it, it now shows a link back to the event page instead. The free registration widget is unaffected.',
     'ticket_pro_bullet_selling' => 'Sell paid tickets with no platform fee',
     'ticket_pro_bullet_checkin' => 'QR code check-in dashboard',
     'ticket_pro_bullet_promo' => 'Promo and discount codes',

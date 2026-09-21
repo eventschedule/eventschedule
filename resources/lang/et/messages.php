@@ -4629,6 +4629,8 @@ return [
     'ticket_mode_free_hint' => 'Tasuta registreerimine ja 0-hinnaga piletid on igas paketis piiramatud. Hinnaga piletite müük on Pro funktsioon.',
     'tickets_need_pro_title' => 'Tasuliste piletite müük on Pro funktsioon',
     'tickets_need_pro_body' => 'Sellel sündmusel on hinnaga piletitüübid, mida tasuta paketis müüa ei saa. Tasuta registreerimine, kinnitused ja 0-hinnaga piletid töötavad edasi ning Pro-le üleminekul algab müük kohe uuesti.',
+    'tickets_embed_needs_pro_title' => 'Manustatav piletividin on Pro paketi funktsioon',
+    'tickets_embed_needs_pro_body' => 'See sündmus müüb edasi omaenda lehel, kuid piletividin, mille saate teisele veebisaidile manustada, vajab Pro paketti. Kui olete selle juba manustanud, kuvab see nüüd hoopis lingi tagasi sündmuse lehele. Tasuta registreerimise vidin ei ole mõjutatud.',
     'ticket_see_pro' => 'Vaata, mida Pro lisab',
     'ticket_pro_bullet_selling' => 'Müü tasulisi pileteid ilma platvormitasuta',
     'ticket_pro_bullet_checkin' => 'QR-koodiga sissepääsu töölaud',

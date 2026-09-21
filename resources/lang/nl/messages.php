@@ -4610,6 +4610,8 @@ return [
     'ticket_mode_free_hint' => 'Gratis aanmeldingen en tickets van 0 zijn onbeperkt in elk abonnement. Tickets met een prijs verkopen is een Pro-functie.',
     'tickets_need_pro_title' => 'Betaalde tickets verkopen is een Pro-functie',
     'tickets_need_pro_body' => 'Dit evenement heeft tickettypes met een prijs, dus die kunnen niet worden verkocht met het Gratis abonnement. Gratis aanmelding, reacties en tickets van 0 blijven werken, en na een upgrade loopt de verkoop meteen weer.',
+    'tickets_embed_needs_pro_title' => 'De insluitbare ticketwidget is een Pro-functie',
+    'tickets_embed_needs_pro_body' => 'Dit evenement blijft verkopen op de eigen pagina, maar de ticketwidget die u op een andere website kunt insluiten vereist Pro. Als u die al hebt ingesloten, toont hij nu een link terug naar de evenementpagina. De widget voor gratis registratie is niet getroffen.',
     'ticket_see_pro' => 'Bekijk wat Pro toevoegt',
     'ticket_pro_bullet_selling' => 'Verkoop betaalde tickets, zonder platformkosten',
     'ticket_pro_bullet_checkin' => 'Inchecken via QR-code met dashboard',

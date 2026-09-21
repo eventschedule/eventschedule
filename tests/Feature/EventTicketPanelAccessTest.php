@@ -177,6 +177,49 @@ class EventTicketPanelAccessTest extends TestCase
     }
 
     /**
+     * The embed banner exists for the one set the grandfather stamp does not cover.
+     *
+     * hasProTicketingPlan() deliberately ignores tickets_grandfathered_at, so a stamped event on a
+     * non-Pro schedule keeps selling on its own page while its ?tickets=true iframe goes dark. The
+     * widget has always been advertised as Pro, but the code did not enforce it until this release,
+     * so the owner has no other way to find out.
+     */
+    public function test_a_grandfathered_event_on_a_free_schedule_is_told_the_embed_needs_pro(): void
+    {
+        $owner = $this->createOwner();
+        $role = $this->createFreeRole($owner);
+        $event = $this->createEvent($role, ['tickets_enabled' => true, 'payment_method' => 'stripe']);
+        $this->createTicket($event, ['price' => 20, 'quantity' => 100]);
+        $event->forceFill(['tickets_grandfathered_at' => now()])->save();
+
+        $this->assertTrue($event->fresh()->canSellPaidTickets(), 'sanity: it still sells on its own page');
+
+        $html = $this->actingAs($owner)
+            ->get($this->editUrl($role, $event))
+            ->assertOk()
+            ->getContent();
+
+        $this->assertStringContainsString(__('messages.tickets_embed_needs_pro_title'), $html);
+        // A missing key renders as the key itself, which is the failure this catches.
+        $this->assertStringNotContainsString('messages.tickets_embed_needs_pro', $html);
+    }
+
+    public function test_a_pro_schedule_is_not_told_the_embed_needs_pro(): void
+    {
+        $owner = $this->createOwner();
+        // createRole() defaults to enterprise, which isPro() answers true for.
+        $role = $this->createRole($owner);
+        $event = $this->createEvent($role, ['tickets_enabled' => true, 'payment_method' => 'stripe']);
+        $this->createTicket($event, ['price' => 20, 'quantity' => 100]);
+        $event->forceFill(['tickets_grandfathered_at' => now()])->save();
+
+        $this->actingAs($owner)
+            ->get($this->editUrl($role, $event))
+            ->assertOk()
+            ->assertDontSee(__('messages.tickets_embed_needs_pro_title'));
+    }
+
+    /**
      * The banner's own copy says "This event has ticket types with a price", so it must not appear
      * for an event that has none. It used to, because the flag asked the EVENT whether it could
      * sell rather than asking whether there was anything priced to sell.

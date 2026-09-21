@@ -58,6 +58,33 @@ class TicketGrandfatherBackfillTest extends TestCase
         $this->assertTrue($event->fresh()->canSellTickets(), 'and it therefore keeps selling');
     }
 
+    /**
+     * The case the price filter alone gets wrong.
+     *
+     * sale_tickets records no price, so `tickets.price > 0` asks what the tier costs TODAY. An
+     * owner who sold at $20 and has since edited that tier down to 0 - or reused it as a free one -
+     * would never be stamped, and would stop selling on deploy with no recovery path: the column is
+     * not fillable, not exported, and written nowhere but this migration. sales.payment_amount is
+     * the evidence that money actually moved.
+     */
+    public function test_a_tier_whose_price_was_edited_to_zero_after_the_sale_is_still_stamped(): void
+    {
+        $role = $this->createFreeRole();
+        $event = $this->createEvent($role, ['tickets_enabled' => true, 'payment_method' => 'stripe']);
+        $ticket = $this->createTicket($event, ['price' => 20, 'quantity' => 100]);
+        $sale = $this->createSale($event, $role, ['status' => 'paid'], $ticket, 1);
+
+        // Money changed hands at $20 ...
+        $sale->forceFill(['payment_amount' => 20])->save();
+        // ... and the owner later made the tier free.
+        $ticket->forceFill(['price' => 0])->save();
+
+        $this->runBackfill();
+
+        $this->assertTrue($this->stamped($event));
+        $this->assertTrue($event->fresh()->canSellTickets(), 'and it therefore keeps selling');
+    }
+
     public function test_it_stamps_a_pro_schedules_events_too(): void
     {
         // Deliberate: the amnesty is not scoped to schedules that are free TODAY, so a Pro

@@ -4614,6 +4614,8 @@ return [
     'ticket_mode_free_hint' => 'Kostenlose Anmeldungen und Tickets zum Preis 0 sind in jedem Tarif unbegrenzt. Der Verkauf von Tickets mit Preis ist eine Pro-Funktion.',
     'tickets_need_pro_title' => 'Bezahlte Tickets zu verkaufen ist eine Pro-Funktion',
     'tickets_need_pro_body' => 'Diese Veranstaltung hat Ticketarten mit einem Preis, die im Gratis-Tarif nicht verkauft werden können. Kostenlose Anmeldung, Zusagen und Tickets zum Preis 0 funktionieren weiter, und nach dem Upgrade läuft der Verkauf sofort wieder.',
+    'tickets_embed_needs_pro_title' => 'Das einbettbare Ticket-Widget ist eine Pro-Funktion',
+    'tickets_embed_needs_pro_body' => 'Dieses Event verkauft weiterhin auf seiner eigenen Seite, aber das Ticket-Widget, das Sie auf einer anderen Website einbetten können, erfordert Pro. Falls Sie es bereits eingebettet haben, zeigt es jetzt stattdessen einen Link zurück zur Event-Seite. Das Widget für die kostenlose Anmeldung ist nicht betroffen.',
     'ticket_see_pro' => 'Sieh dir an, was Pro ergänzt',
     'ticket_pro_bullet_selling' => 'Bezahlte Tickets verkaufen, ohne Plattformgebühr',
     'ticket_pro_bullet_checkin' => 'Einlass-Dashboard mit QR-Code',

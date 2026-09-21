@@ -4610,6 +4610,8 @@ return [
     'ticket_mode_free_hint' => 'Le iscrizioni gratuite e i biglietti a prezzo 0 sono illimitati in ogni piano. Vendere biglietti con un prezzo è una funzione Pro.',
     'tickets_need_pro_title' => 'Vendere biglietti a pagamento è una funzione Pro',
     'tickets_need_pro_body' => 'Questo evento ha tipi di biglietto con un prezzo, quindi non possono essere venduti con il piano Gratuito. L\'iscrizione gratuita, le conferme e i biglietti a prezzo 0 continuano a funzionare, e passando a Pro la vendita riparte subito.',
+    'tickets_embed_needs_pro_title' => 'Il widget biglietti incorporabile è una funzione Pro',
+    'tickets_embed_needs_pro_body' => 'Questo evento continua a vendere sulla propria pagina, ma il widget biglietti che puoi incorporare in un altro sito richiede Pro. Se lo hai già incorporato, ora mostra invece un link alla pagina dell\'evento. Il widget di registrazione gratuita non è interessato.',
     'ticket_see_pro' => 'Scopri cosa aggiunge Pro',
     'ticket_pro_bullet_selling' => 'Vendi biglietti a pagamento, senza commissioni di piattaforma',
     'ticket_pro_bullet_checkin' => 'Pannello di check-in con codice QR',

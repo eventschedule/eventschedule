@@ -4617,6 +4617,8 @@ return [
     'ticket_mode_free_hint' => 'Les inscriptions gratuites et les billets à 0 sont illimités sur tous les forfaits. Vendre des billets payants est une fonctionnalité Pro.',
     'tickets_need_pro_title' => 'Vendre des billets payants est une fonctionnalité Pro',
     'tickets_need_pro_body' => 'Cet événement a des types de billets avec un prix, ils ne peuvent donc pas être vendus avec le forfait Gratuit. L\'inscription gratuite, les réponses et les billets à 0 continuent de fonctionner, et passer à Pro relance la vente immédiatement.',
+    'tickets_embed_needs_pro_title' => 'Le widget de billetterie intégrable est une fonctionnalité Pro',
+    'tickets_embed_needs_pro_body' => 'Cet événement continue de vendre sur sa propre page, mais le widget de billetterie que vous pouvez intégrer à un autre site nécessite Pro. Si vous l\'avez déjà intégré, il affiche désormais un lien vers la page de l\'événement. Le widget d\'inscription gratuite n\'est pas concerné.',
     'ticket_see_pro' => 'Voir ce qu\'ajoute Pro',
     'ticket_pro_bullet_selling' => 'Vendez des billets payants, sans commission de plateforme',
     'ticket_pro_bullet_checkin' => 'Tableau de bord de contrôle par QR code',

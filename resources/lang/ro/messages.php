@@ -4649,6 +4649,8 @@ return [
     'ticket_mode_free_hint' => 'Înscrierile gratuite și biletele cu preț 0 sunt nelimitate în orice plan. Vânzarea biletelor cu preț este o funcție Pro.',
     'tickets_need_pro_title' => 'Vânzarea biletelor cu plată este o funcție Pro',
     'tickets_need_pro_body' => 'Acest eveniment are tipuri de bilete cu preț, așa că nu pot fi vândute în planul Gratuit. Înscrierea gratuită, confirmările și biletele cu preț 0 funcționează în continuare, iar după trecerea la Pro vânzarea repornește imediat.',
+    'tickets_embed_needs_pro_title' => 'Widgetul de bilete încorporabil este o funcție Pro',
+    'tickets_embed_needs_pro_body' => 'Acest eveniment continuă să vândă pe propria pagină, dar widgetul de bilete pe care îl poți încorpora pe alt site necesită Pro. Dacă l-ai încorporat deja, acum afișează în schimb un link înapoi la pagina evenimentului. Widgetul de înregistrare gratuită nu este afectat.',
     'ticket_see_pro' => 'Vezi ce adaugă Pro',
     'ticket_pro_bullet_selling' => 'Vinde bilete cu plată, fără comision de platformă',
     'ticket_pro_bullet_checkin' => 'Panou de acces cu cod QR',

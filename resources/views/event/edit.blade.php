@@ -2078,6 +2078,37 @@
                                 </x-plan-gate>
                                 @endif
 
+                                {{-- The embed, separately, because it is the one thing a grandfather
+                                     stamp does NOT restore. hasProTicketingPlan() deliberately
+                                     ignores tickets_grandfathered_at (see its docblock): the stamp
+                                     buys back paid selling, not the Pro extras. So this exact set -
+                                     a stamped event on a schedule that is not Pro - keeps selling on
+                                     its own page while any <iframe ?tickets=true> the owner put on
+                                     another website goes dark.
+
+                                     Worth saying out loud even though the widget has always been
+                                     advertised as Pro (/features/embed-tickets said so before this
+                                     shipped): the code did not enforce it, so an owner can have a
+                                     working embed today with no reason to think it was unentitled,
+                                     and the first signal would otherwise be a customer complaint.
+                                     We cannot detect a live iframe, so this shows to everyone it
+                                     could apply to. --}}
+                                @if ($event->exists
+                                    && $event->tickets_grandfathered_at !== null
+                                    && ! $event->hasProTicketingPlan())
+                                <x-plan-gate
+                                    variant="banner"
+                                    tier="pro"
+                                    class="mb-4"
+                                    :role="$role"
+                                    :subdomain="$subdomain"
+                                    :learnMoreUrl="marketing_url('/features/embed-tickets')"
+                                    :title="__('messages.tickets_embed_needs_pro_title')"
+                                    v-show="event.tickets_enabled">
+                                    {{ __('messages.tickets_embed_needs_pro_body') }}
+                                </x-plan-gate>
+                                @endif
+
                                 <!-- Ticket Section Tabs -->
                                 <div class="mt-6 mb-6 border-b border-gray-200 dark:border-gray-700" v-show="event.tickets_enabled">
                                     <nav class="-mb-px flex space-x-2 sm:space-x-6 overflow-x-auto scrollbar-hide">
