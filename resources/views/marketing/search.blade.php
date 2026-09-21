@@ -513,7 +513,7 @@
             ],
             [
                 'q' => 'Why only twelve results?',
-                'a' => 'A lookup returns up to twelve schedules, alphabetically by name, and up to twelve upcoming events, soonest first. It is a lookup rather than a directory listing: narrow the wording, or type the schedule web address, to land on the record you want. Browse is the wider view if you would rather read across everything that is on.',
+                'a' => 'A lookup returns up to twelve schedules, alphabetically by name, and up to twelve upcoming events, soonest first, favouring a spread of schedules so one busy organizer does not crowd out the rest. It is a lookup rather than a directory listing: narrow the wording, or type the schedule web address, to land on the record you want. Browse is the wider view if you would rather read across everything that is on.',
             ],
             [
                 'q' => 'Can I search past events?',
@@ -619,7 +619,7 @@
                     </div>
 
                     <p class="es-look-muted es-look-fine es-look-hr mt-5 pt-4">
-                        Two characters minimum. A lookup returns up to twelve schedules, alphabetically, and up to twelve upcoming events, soonest first.
+                        Two characters minimum. A lookup returns up to twelve schedules, alphabetically, and up to twelve upcoming events, soonest first, favouring a spread of schedules.
                         Would you rather read across everything that is on? <a href="{{ marketing_url('/browse') }}" class="es-look-link font-semibold hover:underline">Browse events</a>.
                     </p>
                 </div>
@@ -862,7 +862,7 @@
             <div class="mt-6 grid gap-4 sm:grid-cols-3" data-reveal-group="90">
                 <div class="es-look-card p-5" data-reveal="panel">
                     <p class="es-look-tag mb-2">Order</p>
-                    <p class="es-look-muted text-sm">Schedules come back alphabetically by name. Events come back soonest first, with undated recurring nights after them.</p>
+                    <p class="es-look-muted text-sm">Schedules come back alphabetically by name. Events come back soonest first, favouring a spread of schedules, with undated recurring nights after them.</p>
                 </div>
                 <div class="es-look-card p-5" data-reveal="panel">
                     <p class="es-look-tag mb-2">Depth</p>

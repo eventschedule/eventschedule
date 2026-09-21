@@ -8,6 +8,7 @@ use App\Models\Role;
 use App\Services\AuditService;
 use App\Services\DemoService;
 use App\Utils\AdminReauthUtils;
+use App\Utils\DiscoveryUtils;
 use App\Utils\DocsUtils;
 use App\Utils\PlatformPricing;
 use App\Utils\UrlUtils;
@@ -52,6 +53,9 @@ class MarketingController extends Controller
      * Same visibility rules as /browse: only events whose card shows a real image (own flyer, or
      * a talent/venue schedule's profile photo), so the wall is guaranteed visually rich posters.
      *
+     * Spread across schedules by DiscoveryUtils, so one schedule's cluster of same-day events
+     * cannot own the front of the rail, which renders the first 12 of this collection.
+     *
      * Cached for `marketing.wall_cache_seconds`: this is five correlated subqueries plus an
      * excludeLikelyTest() regex pass, run on the single most-hit page on the site, and its answer
      * only moves when somebody publishes an event. Keyed on the app URL so a white-label nexus
@@ -63,22 +67,29 @@ class MarketingController extends Controller
      */
     private function discoverWallEvents()
     {
-        $build = fn () => $this->publicUpcomingEventsQuery()
-            ->where('is_hidden_from_discovery', false)
-            ->where(function ($sub) {
-                $sub->where(function ($f) {
-                    $f->whereNotNull('flyer_image_url')
-                        ->where('flyer_image_url', '!=', '');
+        $limit = 25;
+
+        // Spread INSIDE the closure so the cached collection is already diverse, and so the
+        // cache still holds $limit models rather than the whole candidate pool.
+        $build = fn () => DiscoveryUtils::spread(
+            $this->publicUpcomingEventsQuery()
+                ->where('is_hidden_from_discovery', false)
+                ->where(function ($sub) {
+                    $sub->where(function ($f) {
+                        $f->whereNotNull('flyer_image_url')
+                            ->where('flyer_image_url', '!=', '');
+                    })
+                        ->orWhereHas('roles', function ($r) {
+                            $r->whereIn('roles.type', ['talent', 'venue'])
+                                ->whereNotNull('roles.profile_image_url')
+                                ->where('roles.profile_image_url', '!=', '');
+                        });
                 })
-                    ->orWhereHas('roles', function ($r) {
-                        $r->whereIn('roles.type', ['talent', 'venue'])
-                            ->whereNotNull('roles.profile_image_url')
-                            ->where('roles.profile_image_url', '!=', '');
-                    });
-            })
-            ->orderByRaw('CASE WHEN starts_at >= ? THEN 0 ELSE 1 END, starts_at IS NULL, starts_at ASC', [Carbon::today()])
-            ->limit(25)
-            ->get();
+                ->orderByRaw('CASE WHEN starts_at >= ? THEN 0 ELSE 1 END, starts_at IS NULL, starts_at ASC, events.id ASC', [Carbon::today()])
+                ->limit(DiscoveryUtils::poolLimit($limit))
+                ->get(),
+            $limit
+        );
 
         $ttl = (int) config('marketing.wall_cache_seconds');
 
@@ -494,26 +505,35 @@ class MarketingController extends Controller
             // rail. Same visibility rules as /browse and the homepage: only events
             // whose card resolves to a real image, so no placeholder ever ships.
             // The section hides itself entirely when this comes back empty - it is
-            // never padded with demo flyers, which would read as fake proof.
-            'talentEvents' => $this->publicUpcomingEventsQuery()
-                ->where('is_hidden_from_discovery', false)
-                ->whereHas('roles', function ($r) {
-                    $r->where('roles.type', 'talent');
-                })
-                ->where(function ($sub) {
-                    $sub->where(function ($f) {
-                        $f->whereNotNull('flyer_image_url')
-                            ->where('flyer_image_url', '!=', '');
+            // never padded with demo flyers, which would read as fake proof. Spread
+            // across schedules for the same reason: a rail of one schedule's dates
+            // proves less than a rail of several. Note the quota is keyed on the
+            // schedule the card credits, which for an act playing a claimed venue can
+            // be the VENUE, so this spreads rooms as readily as acts. The view wants 8
+            // or 4 exactly, so the spread has to reorder rather than drop or the rail
+            // can fall through a threshold.
+            'talentEvents' => DiscoveryUtils::spread(
+                $this->publicUpcomingEventsQuery()
+                    ->where('is_hidden_from_discovery', false)
+                    ->whereHas('roles', function ($r) {
+                        $r->where('roles.type', 'talent');
                     })
-                        ->orWhereHas('roles', function ($r) {
-                            $r->where('roles.type', 'talent')
-                                ->whereNotNull('roles.profile_image_url')
-                                ->where('roles.profile_image_url', '!=', '');
-                        });
-                })
-                ->orderByRaw('CASE WHEN starts_at >= ? THEN 0 ELSE 1 END, starts_at IS NULL, starts_at ASC', [Carbon::today()])
-                ->limit(8)
-                ->get(),
+                    ->where(function ($sub) {
+                        $sub->where(function ($f) {
+                            $f->whereNotNull('flyer_image_url')
+                                ->where('flyer_image_url', '!=', '');
+                        })
+                            ->orWhereHas('roles', function ($r) {
+                                $r->where('roles.type', 'talent')
+                                    ->whereNotNull('roles.profile_image_url')
+                                    ->where('roles.profile_image_url', '!=', '');
+                            });
+                    })
+                    ->orderByRaw('CASE WHEN starts_at >= ? THEN 0 ELSE 1 END, starts_at IS NULL, starts_at ASC, events.id ASC', [Carbon::today()])
+                    ->limit(DiscoveryUtils::poolLimit(8))
+                    ->get(),
+                8
+            ),
         ]);
     }
 
@@ -5195,19 +5215,26 @@ class MarketingController extends Controller
                 ->limit(12)
                 ->get();
 
-            $events = $this->publicUpcomingEventsQuery()
-                ->where(function ($q) use ($escapedQuery) {
-                    $q->where('name', 'like', '%'.$escapedQuery.'%')
-                        ->orWhere('short_description', 'like', '%'.$escapedQuery.'%');
-                })
-                ->where('is_hidden_from_discovery', false)
-                // Same order as browse(): dated events from today first, soonest first, then the
-                // recurring series whose starts_at is the date the series BEGAN (already past), then
-                // undated rows. A plain starts_at sort put a weekly night that started last year ahead
-                // of next week's one-offs, contradicting the /search page's own "soonest first".
-                ->orderByRaw('CASE WHEN starts_at >= ? THEN 0 ELSE 1 END, starts_at IS NULL, starts_at ASC', [Carbon::today()])
-                ->limit(12)
-                ->get();
+            // Spread like the other discovery surfaces. It can never hide a match: the pool is
+            // drawn from the SAME LIKE, so a lookup that only one schedule answers still returns
+            // every one of its events, just with the near-duplicates moved down the list.
+            $events = DiscoveryUtils::spread(
+                $this->publicUpcomingEventsQuery()
+                    ->where(function ($q) use ($escapedQuery) {
+                        $q->where('name', 'like', '%'.$escapedQuery.'%')
+                            ->orWhere('short_description', 'like', '%'.$escapedQuery.'%');
+                    })
+                    ->where('is_hidden_from_discovery', false)
+                    // Same order as browse(): dated events from today first, soonest first, then the
+                    // recurring series whose starts_at is the date the series BEGAN (already past), then
+                    // undated rows. A plain starts_at sort put a weekly night that started last year ahead
+                    // of next week's one-offs, contradicting the /search page's own "soonest first".
+                    // The id tiebreak makes the spread's pick deterministic when events share a start.
+                    ->orderByRaw('CASE WHEN starts_at >= ? THEN 0 ELSE 1 END, starts_at IS NULL, starts_at ASC, events.id ASC', [Carbon::today()])
+                    ->limit(DiscoveryUtils::poolLimit(12))
+                    ->get(),
+                12
+            );
         }
 
         return view('marketing.search', [
@@ -5227,24 +5254,33 @@ class MarketingController extends Controller
 
         // Only surface events whose card shows an image (own flyer, or a talent/venue
         // schedule's profile photo) rather than the letter-gradient placeholder.
-        $events = $this->publicUpcomingEventsQuery()
-            ->where('is_hidden_from_discovery', false)
-            ->where(function ($sub) {
-                $sub->where(function ($f) {
-                    $f->whereNotNull('flyer_image_url')
-                        ->where('flyer_image_url', '!=', '');
+        //
+        // This page renders the whole collection, so unlike the homepage rail it needs the
+        // WIDER pool to see any benefit: reordering 24 rows still leaves the same 24 events on
+        // the page. The FAQ answer below describes the cap, so keep the two in step.
+        $events = DiscoveryUtils::spread(
+            $this->publicUpcomingEventsQuery()
+                ->where('is_hidden_from_discovery', false)
+                ->where(function ($sub) {
+                    $sub->where(function ($f) {
+                        $f->whereNotNull('flyer_image_url')
+                            ->where('flyer_image_url', '!=', '');
+                    })
+                        ->orWhereHas('roles', function ($r) {
+                            $r->whereIn('roles.type', ['talent', 'venue'])
+                                ->whereNotNull('roles.profile_image_url')
+                                ->where('roles.profile_image_url', '!=', '');
+                        });
                 })
-                    ->orWhereHas('roles', function ($r) {
-                        $r->whereIn('roles.type', ['talent', 'venue'])
-                            ->whereNotNull('roles.profile_image_url')
-                            ->where('roles.profile_image_url', '!=', '');
-                    });
-            })
-            ->orderByRaw('CASE WHEN starts_at >= ? THEN 0 ELSE 1 END, starts_at IS NULL, starts_at ASC', [Carbon::today()])
-            ->limit(24)
-            ->get();
+                ->orderByRaw('CASE WHEN starts_at >= ? THEN 0 ELSE 1 END, starts_at IS NULL, starts_at ASC, events.id ASC', [Carbon::today()])
+                ->limit(DiscoveryUtils::poolLimit(24))
+                ->get(),
+            24
+        );
 
-        // Admins also see hidden events so they can restore them.
+        // Admins also see hidden events so they can restore them. Deliberately NOT spread and
+        // NOT widened: this is a moderation list, where demoting an event past the 50th row
+        // would put it out of reach of the person whose job is to find it.
         $hiddenEvents = $isAdmin
             ? $this->publicUpcomingEventsQuery()
                 ->where('is_hidden_from_discovery', true)
@@ -5489,7 +5525,23 @@ class MarketingController extends Controller
         $publicScheduleFilter = $this->publicScheduleFilter();
 
         // creatorRole: every card renders the date in its own schedule's timezone.
-        return Event::with(['roles', 'creatorRole'])
+        //
+        // roles is ordered explicitly because the relation has no ordering of its own, and three
+        // things read its FIRST element: getViewableRole() (the name and city on the card),
+        // getGuestUrlData() via role()/venue (the card's href and the url in the ItemList JSON-LD)
+        // and DiscoveryUtils::spread() (the schedule an event spends its quota against).
+        //
+        // event_role.id, NOT roles.id. It is attachment order, which is what the unordered query
+        // was already returning in practice - the join drives off the event_id index, whose leaves
+        // are (event_id, PK) - so pinning it keeps serving the URLs production already serves.
+        // roles.id would pin a DIFFERENT order: the schedule that registered earliest would take
+        // the credit on every event it touches, so a venue from 2024 would out-rank every act it
+        // books. withPivot('id') already selects the column, so this costs no extra read, and it
+        // avoids the filesort that ordering by roles.id forces over the joined result.
+        //
+        // Scoped to discovery rather than added to Event::roles(), which guest pages, graphics and
+        // emails all read. The sitemap deliberately keeps the natural order for the same reason.
+        return Event::with(['roles' => fn ($q) => $q->orderBy('event_role.id'), 'creatorRole'])
             ->where(function ($q) {
                 $q->where('starts_at', '>=', Carbon::today())
                     ->orWhereNotNull('days_of_week')

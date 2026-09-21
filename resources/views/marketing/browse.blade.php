@@ -579,9 +579,10 @@
                 // MarketingController::browse(): publicUpcomingEventsQuery() (public, upcoming,
                 // accepted by a listed schedule - a verified email or phone, an owner, not
                 // deleted or unlisted), AND flyer_image_url OR a talent/venue schedule with a
-                // profile_image_url, AND is_hidden_from_discovery = false. 24 shown.
+                // profile_image_url, AND is_hidden_from_discovery = false. 24 shown, picked from
+                // a wider pool by DiscoveryUtils::spread() so one schedule cannot own the grid.
                 'q' => 'How does an event end up on this page?',
-                'a' => 'By being public, on a schedule whose owner has confirmed an email address or phone number, and by having a picture. That is either the event\'s own flyer, or the profile photo on a talent or venue schedule, which covers every event on it at once. Nothing else is required: no application, no fee and no waiting. The page shows the next 24, soonest first.',
+                'a' => 'By being public, on a schedule whose owner has confirmed an email address or phone number, and by having a picture. That is either the event\'s own flyer, or the profile photo on a talent or venue schedule, which covers every event on it at once. Nothing else is required: no application, no fee and no waiting. The page shows 24, soonest first, favouring a spread of schedules so one organizer does not fill it.',
             ],
         ];
 
