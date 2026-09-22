@@ -5923,5 +5923,2197 @@
                 "answer": "Yes, on every plan. A buyer adds tickets for several of your events to one cart and pays once, through Stripe or PayPal, and gets one order page with every ticket on it. Each event in the cart is checked on its own, so a priced ticket needs that schedule to be on Pro."
             }
         ]
+    },
+    "timely": {
+        "name": "Timely",
+        "key": "timely",
+        "slug": "timely-alternative",
+        "meta_title": "Timely Alternative With a Free Plan | Event Schedule",
+        "tagline": "An event calendar with ticketing built in, a free plan, and zero platform fees.",
+        "description": "Compare Event Schedule with Timely: a free plan where Timely starts at $9/mo billed annually, zero platform fees on tickets, and calendar sync both ways.",
+        "keywords": "timely alternative, time.ly alternative, timely event calendar alternative, event calendar software, timely competitor",
+        "about": "Timely (time.ly) is hosted event calendar and event management software used by nonprofits, schools, universities, tourism boards and media companies. Its plans are billed annually, and registration and ticketing are sold as an add-on.",
+        "competitor_strengths": [
+            "Many calendar views, including stream, tile, posterboard, map and year",
+            "A registration and ticketing add-on with time-slot bookings, badge printing and QR check-in",
+            "Built for institutions, with WCAG 2.1 AA, SSO on Enterprise and community event submissions"
+        ],
+        "sections": {
+            "Pricing & Fees": [
+                [
+                    "Free plan",
+                    "Yes (forever)",
+                    "No (30-day free trial)",
+                    true
+                ],
+                [
+                    "Paid plan price",
+                    "$5/mo (7-day free trial)",
+                    "From $9/mo, billed annually",
+                    false
+                ],
+                [
+                    "Platform fees",
+                    "0%",
+                    "2.5% + $0.90 per paid ticket (add-on)",
+                    true
+                ],
+                [
+                    "Payment processing",
+                    "Stripe/PayPal/Payfast (processor rates apply)",
+                    "Timely Pay/Stripe/Square/PayPal/Authorize.net",
+                    false
+                ]
+            ],
+            "Events & Ticketing": [
+                [
+                    "Ticketing",
+                    "Yes (Free)",
+                    "Yes (paid add-on)",
+                    true
+                ],
+                [
+                    "QR check-ins",
+                    "Yes (Free)",
+                    "Yes (add-on)",
+                    false
+                ],
+                [
+                    "Ticket waitlist",
+                    "Yes (Pro)",
+                    "Yes (add-on)",
+                    false
+                ],
+                [
+                    "Recurring events",
+                    "Yes (Free)",
+                    "Yes",
+                    false
+                ],
+                [
+                    "Online events",
+                    "Yes (Free)",
+                    "Yes",
+                    false
+                ],
+                [
+                    "Free event RSVP",
+                    "Yes (Free)",
+                    "Yes ($0.90 per registration)",
+                    true
+                ],
+                [
+                    "Promo/discount codes",
+                    "Yes (Pro)",
+                    "Yes (add-on)",
+                    false
+                ]
+            ],
+            "Integrations": [
+                [
+                    "Calendar sync, both ways",
+                    "Yes (Free)",
+                    "Imports feeds hourly, one way",
+                    true
+                ],
+                [
+                    "Newsletters",
+                    "Yes (Free)",
+                    "Mailchimp integration (Growth plan and up)",
+                    true
+                ]
+            ],
+            "Customization": [
+                [
+                    "Custom domains",
+                    "Yes (Enterprise)",
+                    "Yes (Professional and up)",
+                    false
+                ],
+                [
+                    "Remove branding",
+                    "Yes (Pro)",
+                    "Yes (Enterprise)",
+                    true
+                ],
+                [
+                    "Custom fields",
+                    "Yes (Pro)",
+                    "Yes (add-on, up to 8)",
+                    false
+                ],
+                [
+                    "Built-in analytics",
+                    "Yes (Free)",
+                    "Yes (Professional and up)",
+                    true
+                ]
+            ],
+            "Unique Features": [
+                [
+                    "Embeddable calendar",
+                    "Yes (Free)",
+                    "Yes",
+                    false
+                ],
+                [
+                    "Private/password-protected events",
+                    "Yes (Enterprise)",
+                    "Yes (logged-in users only)",
+                    false
+                ],
+                [
+                    "Team collaboration",
+                    "Yes (Enterprise)",
+                    "Yes (1 to 4 users by plan)",
+                    false
+                ]
+            ],
+            "Platform": [
+                [
+                    "REST API",
+                    "Yes (Pro)",
+                    "Yes (Enterprise)",
+                    true
+                ],
+                [
+                    "Webhooks",
+                    "Yes (Pro)",
+                    "Yes (Enterprise)",
+                    true
+                ],
+                [
+                    "Open source",
+                    "Yes",
+                    "No",
+                    true
+                ],
+                [
+                    "Selfhosting",
+                    "Yes",
+                    "No",
+                    true
+                ]
+            ]
+        },
+        "key_advantages": [
+            {
+                "title": "A Free Plan",
+                "description": "Event Schedule has a free plan with unlimited events and the embeddable calendar. Every Timely plan is paid, billed annually, after a 30-day trial.",
+                "icon": "dollar",
+                "gradient": "from-emerald-50 to-teal-50 dark:from-emerald-900/30 dark:to-teal-900/30",
+                "border": "border-emerald-200 dark:border-emerald-500/20",
+                "icon_bg": "bg-emerald-100 dark:bg-emerald-500/20",
+                "icon_color": "text-emerald-600 dark:text-emerald-400"
+            },
+            {
+                "title": "0% Platform Fees",
+                "description": "Timely's ticketing add-on charges 2.5% + $0.90 per paid ticket and $0.90 per free registration. Event Schedule takes no platform fee on any plan.",
+                "icon": "percent",
+                "gradient": "from-sky-50 to-cyan-50 dark:from-sky-900/30 dark:to-cyan-900/30",
+                "border": "border-sky-200 dark:border-sky-500/20",
+                "icon_bg": "bg-sky-100 dark:bg-sky-500/20",
+                "icon_color": "text-sky-600 dark:text-sky-400"
+            },
+            {
+                "title": "Two-Way Calendar Sync",
+                "description": "Google, Outlook and CalDAV sync both ways, free. Timely imports calendar feeds in one direction, on an hourly schedule.",
+                "icon": "calendar",
+                "gradient": "from-teal-50 to-emerald-50 dark:from-teal-900/30 dark:to-emerald-900/30",
+                "border": "border-teal-200 dark:border-teal-500/20",
+                "icon_bg": "bg-teal-100 dark:bg-teal-500/20",
+                "icon_color": "text-teal-600 dark:text-teal-400"
+            },
+            {
+                "title": "Built-in Newsletters",
+                "description": "Email the people who follow your schedule from inside the app. Timely connects to Mailchimp from its Growth plan up.",
+                "icon": "mail",
+                "gradient": "from-blue-50 to-sky-50 dark:from-blue-900/30 dark:to-sky-900/30",
+                "border": "border-blue-200 dark:border-blue-500/20",
+                "icon_bg": "bg-blue-100 dark:bg-blue-500/20",
+                "icon_color": "text-blue-600 dark:text-blue-400"
+            },
+            {
+                "title": "API and Webhooks on Pro",
+                "description": "The REST API and webhooks come with Pro at $5/mo. On Timely both are Enterprise features.",
+                "icon": "code",
+                "gradient": "from-amber-50 to-yellow-50 dark:from-amber-900/30 dark:to-yellow-900/30",
+                "border": "border-amber-200 dark:border-amber-500/20",
+                "icon_bg": "bg-amber-100 dark:bg-amber-500/20",
+                "icon_color": "text-amber-600 dark:text-amber-400"
+            },
+            {
+                "title": "Open Source",
+                "description": "Read the code and selfhost it on your own server. Timely is a hosted service only.",
+                "icon": "globe",
+                "gradient": "from-cyan-50 to-sky-50 dark:from-cyan-900/30 dark:to-sky-900/30",
+                "border": "border-cyan-200 dark:border-cyan-500/20",
+                "icon_bg": "bg-cyan-100 dark:bg-cyan-500/20",
+                "icon_color": "text-cyan-600 dark:text-cyan-400"
+            }
+        ],
+        "cross_links": [
+            {
+                "name": "The Events Calendar",
+                "route": "marketing.compare_the_events_calendar"
+            },
+            {
+                "name": "Tockify",
+                "route": "marketing.compare_tockify"
+            },
+            {
+                "name": "AddEvent",
+                "route": "marketing.compare_addevent"
+            }
+        ],
+        "faq": [
+            {
+                "question": "Is it easy to switch from Timely to Event Schedule?",
+                "answer": "Yes. Create a free schedule, then paste event details or upload a flyer and the AI parser fills in the event for you to check. Visitors can follow the schedule, sign up by email, or subscribe to its live calendar feed."
+            },
+            {
+                "question": "How does Event Schedule pricing compare to Timely?",
+                "answer": "Timely plans start at $9/mo billed annually, with no free plan, and its ticketing add-on charges 2.5% + $0.90 per paid ticket. Event Schedule has a free plan, and Pro is $5/mo with zero platform fees on ticket sales."
+            },
+            {
+                "question": "Can I embed the calendar on my website like Timely?",
+                "answer": "Yes, on every plan. The embeddable calendar shows your upcoming events on any website, and each event links to its own page, where people can register or buy tickets."
+            },
+            {
+                "question": "Are free registrations charged per person?",
+                "answer": "No. Free registration and RSVP are unlimited on every plan, with no per-registration fee. You can set a capacity, and each guest gets a ticket with a QR code that is scanned at the door."
+            }
+        ]
+    },
+    "the-events-calendar": {
+        "name": "The Events Calendar",
+        "key": "the-events-calendar",
+        "slug": "the-events-calendar-alternative",
+        "meta_title": "The Events Calendar Alternative, No Plugins | Event Schedule",
+        "tagline": "Event pages, ticketing and calendar sync without installing or updating a WordPress plugin.",
+        "description": "Compare Event Schedule with The Events Calendar for WordPress: hosted or selfhosted, two-way calendar sync, and Pro at $5/mo instead of from $259 a year.",
+        "keywords": "the events calendar alternative, wordpress event calendar alternative, events calendar pro alternative, wordpress events plugin alternative, event tickets plus alternative",
+        "about": "The Events Calendar is a WordPress plugin, now sold by Liquid Web, that adds an event calendar to your own WordPress site. The core plugin is free and GPL-licensed on wordpress.org, and paid tiers add recurring events, check-in, seating maps and email campaigns.",
+        "competitor_strengths": [
+            "A free, GPL-licensed core plugin with several calendar views and a WordPress REST API",
+            "Runs inside your own WordPress site and theme",
+            "A wide range of add-ons, from event imports to seating maps and email campaigns"
+        ],
+        "sections": {
+            "Pricing & Fees": [
+                [
+                    "Free plan",
+                    "Yes (forever)",
+                    "Yes (core plugin)",
+                    false
+                ],
+                [
+                    "Paid plan price",
+                    "$5/mo (7-day free trial)",
+                    "From $259/yr (Essentials)",
+                    true
+                ],
+                [
+                    "Platform fees",
+                    "0%",
+                    "2% on the free Event Tickets plugin, 0% on Pro and Elite",
+                    true
+                ],
+                [
+                    "Payment processing",
+                    "Stripe/PayPal/Payfast (processor rates apply)",
+                    "Stripe/PayPal/Square, WooCommerce on Pro",
+                    false
+                ]
+            ],
+            "Events & Ticketing": [
+                [
+                    "Ticketing",
+                    "Yes (Free)",
+                    "Yes (Event Tickets plugin)",
+                    false
+                ],
+                [
+                    "QR check-ins",
+                    "Yes (Free)",
+                    "Yes (Pro tier)",
+                    true
+                ],
+                [
+                    "Ticket waitlist",
+                    "Yes (Pro)",
+                    "Yes (Event Tickets Plus)",
+                    false
+                ],
+                [
+                    "Recurring events",
+                    "Yes (Free)",
+                    "Yes (paid tiers)",
+                    true
+                ],
+                [
+                    "Online events",
+                    "Yes (Free)",
+                    "Yes",
+                    false
+                ],
+                [
+                    "Free event RSVP",
+                    "Yes (Free)",
+                    "Yes",
+                    false
+                ],
+                [
+                    "Promo/discount codes",
+                    "Yes (Pro)",
+                    "Yes (coupons, paid tiers)",
+                    false
+                ],
+                [
+                    "Reserved seating",
+                    "Yes (Enterprise)",
+                    "Yes (Elite tier)",
+                    false
+                ]
+            ],
+            "Integrations": [
+                [
+                    "Calendar sync, both ways",
+                    "Yes (Free)",
+                    "Calendar export and one-way imports",
+                    true
+                ],
+                [
+                    "Newsletters",
+                    "Yes (Free)",
+                    "Yes (Elite tier)",
+                    true
+                ]
+            ],
+            "Customization": [
+                [
+                    "Custom domains",
+                    "Yes (Enterprise)",
+                    "Runs on your own WordPress domain",
+                    false
+                ],
+                [
+                    "Custom fields",
+                    "Yes (Pro)",
+                    "Yes (Pro tier)",
+                    false
+                ],
+                [
+                    "Built-in analytics",
+                    "Yes (Free)",
+                    "Attendee reports",
+                    false
+                ]
+            ],
+            "Unique Features": [
+                [
+                    "Hosted service",
+                    "Yes (Free)",
+                    "No (you run the WordPress site)",
+                    true
+                ],
+                [
+                    "Embeddable calendar",
+                    "Yes (Free)",
+                    "Yes (month view embed)",
+                    false
+                ]
+            ],
+            "Platform": [
+                [
+                    "REST API",
+                    "Yes (Pro)",
+                    "Yes (free core plugin)",
+                    false
+                ],
+                [
+                    "Open source",
+                    "Yes",
+                    "Yes (GPLv2 or later)",
+                    false
+                ],
+                [
+                    "Selfhosting",
+                    "Yes",
+                    "Yes (on WordPress)",
+                    false
+                ]
+            ]
+        },
+        "key_advantages": [
+            {
+                "title": "No WordPress Required",
+                "description": "Event Schedule is a hosted service with a free plan, so there is no WordPress site, plugin stack or update cycle to keep running. Selfhosting stays available if you want it.",
+                "icon": "globe",
+                "gradient": "from-emerald-50 to-teal-50 dark:from-emerald-900/30 dark:to-teal-900/30",
+                "border": "border-emerald-200 dark:border-emerald-500/20",
+                "icon_bg": "bg-emerald-100 dark:bg-emerald-500/20",
+                "icon_color": "text-emerald-600 dark:text-emerald-400"
+            },
+            {
+                "title": "$5/mo vs $259/yr",
+                "description": "Event Schedule Pro is $5/mo with a 7-day free trial. The Events Calendar paid tiers are $259, $399 and $599 a year, renewed annually.",
+                "icon": "dollar",
+                "gradient": "from-sky-50 to-cyan-50 dark:from-sky-900/30 dark:to-cyan-900/30",
+                "border": "border-sky-200 dark:border-sky-500/20",
+                "icon_bg": "bg-sky-100 dark:bg-sky-500/20",
+                "icon_color": "text-sky-600 dark:text-sky-400"
+            },
+            {
+                "title": "Zero Platform Fees",
+                "description": "Event Schedule takes no platform fee on any plan, and paid tickets are on Pro. The free Event Tickets plugin takes a 2% application fee on each sale.",
+                "icon": "percent",
+                "gradient": "from-teal-50 to-emerald-50 dark:from-teal-900/30 dark:to-emerald-900/30",
+                "border": "border-teal-200 dark:border-teal-500/20",
+                "icon_bg": "bg-teal-100 dark:bg-teal-500/20",
+                "icon_color": "text-teal-600 dark:text-teal-400"
+            },
+            {
+                "title": "Two-Way Calendar Sync",
+                "description": "Google, Outlook and CalDAV sync both ways, free. The Events Calendar exports to calendar apps and imports feeds in one direction.",
+                "icon": "calendar",
+                "gradient": "from-blue-50 to-sky-50 dark:from-blue-900/30 dark:to-sky-900/30",
+                "border": "border-blue-200 dark:border-blue-500/20",
+                "icon_bg": "bg-blue-100 dark:bg-blue-500/20",
+                "icon_color": "text-blue-600 dark:text-blue-400"
+            },
+            {
+                "title": "Built-in Newsletters",
+                "description": "Email the people who follow your schedule on every plan. On The Events Calendar, email campaigns are part of the Elite tier.",
+                "icon": "mail",
+                "gradient": "from-amber-50 to-yellow-50 dark:from-amber-900/30 dark:to-yellow-900/30",
+                "border": "border-amber-200 dark:border-amber-500/20",
+                "icon_bg": "bg-amber-100 dark:bg-amber-500/20",
+                "icon_color": "text-amber-600 dark:text-amber-400"
+            },
+            {
+                "title": "AI Event Parsing",
+                "description": "Paste event details or upload a flyer and the parser fills in the name, date, time and venue for you to check, on every plan.",
+                "icon": "ai",
+                "gradient": "from-cyan-50 to-sky-50 dark:from-cyan-900/30 dark:to-sky-900/30",
+                "border": "border-cyan-200 dark:border-cyan-500/20",
+                "icon_bg": "bg-cyan-100 dark:bg-cyan-500/20",
+                "icon_color": "text-cyan-600 dark:text-cyan-400"
+            }
+        ],
+        "cross_links": [
+            {
+                "name": "Timely",
+                "route": "marketing.compare_timely"
+            },
+            {
+                "name": "Tockify",
+                "route": "marketing.compare_tockify"
+            },
+            {
+                "name": "Google Calendar",
+                "route": "marketing.compare_google_calendar"
+            }
+        ],
+        "faq": [
+            {
+                "question": "Do I need a WordPress site to use Event Schedule?",
+                "answer": "No. Your schedule gets its own page and an embeddable calendar, so it works with WordPress or any other website builder. On a WordPress site, the calendar goes on a page with one iframe tag."
+            },
+            {
+                "question": "How does Event Schedule pricing compare to The Events Calendar?",
+                "answer": "The core plugin is free, and the paid tiers are $259, $399 and $599 a year. Event Schedule has a free plan, and Pro is $5/mo with zero platform fees on ticket sales."
+            },
+            {
+                "question": "Is Event Schedule open source like The Events Calendar?",
+                "answer": "Yes, both are. The Events Calendar is GPL-licensed and runs inside WordPress. Event Schedule is a standalone app you can selfhost on PHP and MySQL, and a selfhosted install resolves to Enterprise."
+            },
+            {
+                "question": "Can I move my events off WordPress?",
+                "answer": "Yes. Paste your event listings or upload flyers and the AI parser fills in the details for you to check, fifty a day on the free and Pro plans. Then embed the new calendar on your WordPress page, or link to your schedule instead."
+            }
+        ]
+    },
+    "bandsintown": {
+        "name": "Bandsintown",
+        "key": "bandsintown",
+        "slug": "bandsintown-alternative",
+        "meta_title": "Bandsintown Alternative With Your Own Tickets | Event Schedule",
+        "tagline": "Your own tour-date page that takes registrations and sells tickets, with calendar sync and zero platform fees.",
+        "description": "Compare Event Schedule with Bandsintown for Artists: your own schedule page, free registration with QR tickets, paid tickets on Pro, and calendar sync.",
+        "keywords": "bandsintown alternative, bandsintown for artists alternative, tour dates widget, concert listing for musicians, bandsintown competitor",
+        "about": "Bandsintown for Artists is a free platform where musicians and their teams publish tour dates, reach fans who follow them, and send those dates on to streaming and search services. It links out to ticket sellers rather than selling tickets itself.",
+        "competitor_strengths": [
+            "A large built-in audience of fans who follow artists and get alerts about new dates",
+            "Publish once and the dates reach Spotify, Google, Apple Music, Shazam and Amazon Music",
+            "Free for artists, with a tour-date widget for your website and 80+ ticketing integrations"
+        ],
+        "sections": {
+            "Pricing & Fees": [
+                [
+                    "Free plan",
+                    "Yes (forever)",
+                    "Yes (free for artists)",
+                    false
+                ],
+                [
+                    "Paid plan price",
+                    "$5/mo (7-day free trial)",
+                    "Free (paid email and SMS extras)",
+                    false
+                ],
+                [
+                    "Platform fees",
+                    "0%",
+                    "N/A (links to outside ticket sellers)",
+                    false
+                ]
+            ],
+            "Events & Ticketing": [
+                [
+                    "Ticketing",
+                    "Yes (Free)",
+                    "No (links to outside ticket sellers)",
+                    true
+                ],
+                [
+                    "Ticket waitlist",
+                    "Yes (Pro)",
+                    "RSVP waitlist, fans not notified automatically",
+                    true
+                ],
+                [
+                    "Online events",
+                    "Yes (Free)",
+                    "Yes (livestreams)",
+                    false
+                ],
+                [
+                    "Free event RSVP",
+                    "Yes (Free)",
+                    "Yes",
+                    false
+                ]
+            ],
+            "Integrations": [
+                [
+                    "Newsletters",
+                    "Yes (Free)",
+                    "Yes (10,000 free emails/mo, then per email)",
+                    false
+                ]
+            ],
+            "Customization": [
+                [
+                    "Built-in analytics",
+                    "Yes (Free)",
+                    "Yes (from 100 followers)",
+                    false
+                ]
+            ],
+            "Unique Features": [
+                [
+                    "Embeddable calendar",
+                    "Yes (Free)",
+                    "Yes (events widget)",
+                    false
+                ],
+                [
+                    "Team collaboration",
+                    "Yes (Enterprise)",
+                    "Yes (admin, editor and viewer roles)",
+                    false
+                ]
+            ],
+            "Platform": [
+                [
+                    "REST API",
+                    "Yes (Pro)",
+                    "Read-only, for a single artist",
+                    true
+                ],
+                [
+                    "Open source",
+                    "Yes",
+                    "No",
+                    true
+                ],
+                [
+                    "Selfhosting",
+                    "Yes",
+                    "No",
+                    true
+                ]
+            ]
+        },
+        "key_advantages": [
+            {
+                "title": "Tickets on Your Own Page",
+                "description": "Bandsintown links fans out to other ticket sellers. Event Schedule takes free registrations with QR tickets on every plan, and paid tickets on Pro with zero platform fees.",
+                "icon": "ticket",
+                "gradient": "from-emerald-50 to-teal-50 dark:from-emerald-900/30 dark:to-teal-900/30",
+                "border": "border-emerald-200 dark:border-emerald-500/20",
+                "icon_bg": "bg-emerald-100 dark:bg-emerald-500/20",
+                "icon_color": "text-emerald-600 dark:text-emerald-400"
+            },
+            {
+                "title": "Your Page, Your Audience",
+                "description": "Your schedule is your own page, with your own followers and email sign-ups, and it keeps working whichever service your fans use.",
+                "icon": "globe",
+                "gradient": "from-sky-50 to-cyan-50 dark:from-sky-900/30 dark:to-cyan-900/30",
+                "border": "border-sky-200 dark:border-sky-500/20",
+                "icon_bg": "bg-sky-100 dark:bg-sky-500/20",
+                "icon_color": "text-sky-600 dark:text-sky-400"
+            },
+            {
+                "title": "Two-Way Calendar Sync",
+                "description": "Google, Outlook and CalDAV sync both ways, free, so the dates in your own calendar and on your page never disagree.",
+                "icon": "calendar",
+                "gradient": "from-teal-50 to-emerald-50 dark:from-teal-900/30 dark:to-emerald-900/30",
+                "border": "border-teal-200 dark:border-teal-500/20",
+                "icon_bg": "bg-teal-100 dark:bg-teal-500/20",
+                "icon_color": "text-teal-600 dark:text-teal-400"
+            },
+            {
+                "title": "Venues and Artists Together",
+                "description": "Venue and talent schedules link to each other, so a show you play appears on the venue's schedule as well as your own.",
+                "icon": "building",
+                "gradient": "from-blue-50 to-sky-50 dark:from-blue-900/30 dark:to-sky-900/30",
+                "border": "border-blue-200 dark:border-blue-500/20",
+                "icon_bg": "bg-blue-100 dark:bg-blue-500/20",
+                "icon_color": "text-blue-600 dark:text-blue-400"
+            },
+            {
+                "title": "Event Graphics",
+                "description": "Turn your upcoming dates into a shareable graphic for social media in one click, free.",
+                "icon": "image",
+                "gradient": "from-amber-50 to-yellow-50 dark:from-amber-900/30 dark:to-yellow-900/30",
+                "border": "border-amber-200 dark:border-amber-500/20",
+                "icon_bg": "bg-amber-100 dark:bg-amber-500/20",
+                "icon_color": "text-amber-600 dark:text-amber-400"
+            },
+            {
+                "title": "Open Source",
+                "description": "Read the code and selfhost it on your own server. Bandsintown is a hosted service only.",
+                "icon": "code",
+                "gradient": "from-cyan-50 to-sky-50 dark:from-cyan-900/30 dark:to-sky-900/30",
+                "border": "border-cyan-200 dark:border-cyan-500/20",
+                "icon_bg": "bg-cyan-100 dark:bg-cyan-500/20",
+                "icon_color": "text-cyan-600 dark:text-cyan-400"
+            }
+        ],
+        "cross_links": [
+            {
+                "name": "Facebook Events",
+                "route": "marketing.compare_facebook_events"
+            },
+            {
+                "name": "DICE",
+                "route": "marketing.compare_dice"
+            },
+            {
+                "name": "Posh",
+                "route": "marketing.compare_posh"
+            }
+        ],
+        "faq": [
+            {
+                "question": "Can I use Event Schedule alongside Bandsintown?",
+                "answer": "Yes. Many artists keep a Bandsintown listing for its fan alerts and use an Event Schedule page as the home for their dates, with their own tickets, followers and calendar feed. Paste your dates in and the AI parser fills in each show for you to check."
+            },
+            {
+                "question": "How does Event Schedule pricing compare to Bandsintown?",
+                "answer": "Bandsintown is free for artists, with paid extras for email beyond 10,000 a month, promoted emails and SMS. Event Schedule is free for listing dates, registrations and newsletters, and Pro is $5/mo for paid tickets with zero platform fees."
+            },
+            {
+                "question": "Can I sell tickets to my own shows?",
+                "answer": "Yes, on Pro, through your own Stripe or PayPal account, with zero platform fees. Each buyer gets a ticket with a QR code, scanned at the door on any plan."
+            },
+            {
+                "question": "Can I put my tour dates on my website?",
+                "answer": "Yes. The embeddable calendar shows your upcoming dates on any website, free, and each date links to its own event page."
+            }
+        ]
+    },
+    "posh": {
+        "name": "Posh",
+        "key": "posh",
+        "slug": "posh-alternative",
+        "meta_title": "Posh Alternative With 0% Platform Fees | Event Schedule",
+        "tagline": "Tickets for parties and nights out, paid into your own account, with zero platform fees.",
+        "description": "Compare Event Schedule with Posh: zero platform fees instead of a service fee on every ticket, payouts through your own Stripe or PayPal, and calendar sync.",
+        "keywords": "posh alternative, posh.vip alternative, nightlife ticketing, party ticketing platform, posh competitor",
+        "about": "Posh (posh.vip) is a social platform for discovering and creating in-person events, from club nights and run clubs to fashion shows and festivals. Organizers sell tickets through Stripe Connect, and each ticket carries a Posh service fee that can be absorbed or passed to the buyer.",
+        "competitor_strengths": [
+            "SMS blasts to past attendees, with unlimited event-level blasts until shortly after the event",
+            "Promoter commissions tracked with unique links",
+            "An explore feed that brings organizers new buyers"
+        ],
+        "sections": {
+            "Pricing & Fees": [
+                [
+                    "Paid plan price",
+                    "$5/mo (7-day free trial)",
+                    "No subscription (service fee per ticket)",
+                    false
+                ],
+                [
+                    "Platform fees",
+                    "0%",
+                    "Service fee on each ticket",
+                    true
+                ],
+                [
+                    "Payment processing",
+                    "Stripe/PayPal/Payfast (processor rates apply)",
+                    "Stripe Connect",
+                    false
+                ]
+            ],
+            "Events & Ticketing": [
+                [
+                    "Ticketing",
+                    "Yes (Free)",
+                    "Yes",
+                    false
+                ],
+                [
+                    "Ticket waitlist",
+                    "Yes (Pro)",
+                    "Yes",
+                    false
+                ],
+                [
+                    "Free event RSVP",
+                    "Yes (Free)",
+                    "Yes (RSVP and $0 tickets)",
+                    false
+                ],
+                [
+                    "Promo/discount codes",
+                    "Yes (Pro)",
+                    "Yes",
+                    false
+                ]
+            ],
+            "Integrations": [
+                [
+                    "Newsletters",
+                    "Yes (Free)",
+                    "SMS blasts",
+                    false
+                ]
+            ],
+            "Customization": [
+                [
+                    "Built-in analytics",
+                    "Yes (Free)",
+                    "Yes",
+                    false
+                ]
+            ],
+            "Unique Features": [
+                [
+                    "Private/password-protected events",
+                    "Yes (Enterprise)",
+                    "Password or hidden tickets",
+                    false
+                ],
+                [
+                    "Team collaboration",
+                    "Yes (Enterprise)",
+                    "Yes (admin, host and door roles)",
+                    false
+                ]
+            ],
+            "Platform": [
+                [
+                    "Webhooks",
+                    "Yes (Pro)",
+                    "Yes (order created)",
+                    false
+                ],
+                [
+                    "Open source",
+                    "Yes",
+                    "No",
+                    true
+                ],
+                [
+                    "Selfhosting",
+                    "Yes",
+                    "No",
+                    true
+                ]
+            ]
+        },
+        "key_advantages": [
+            {
+                "title": "0% Platform Fees",
+                "description": "Posh adds a service fee to every ticket, absorbed by you or passed to the buyer. Event Schedule takes no platform fee on any plan.",
+                "icon": "percent",
+                "gradient": "from-emerald-50 to-teal-50 dark:from-emerald-900/30 dark:to-teal-900/30",
+                "border": "border-emerald-200 dark:border-emerald-500/20",
+                "icon_bg": "bg-emerald-100 dark:bg-emerald-500/20",
+                "icon_color": "text-emerald-600 dark:text-emerald-400"
+            },
+            {
+                "title": "Flat $5/mo for Pro",
+                "description": "Paid tickets are on Pro at $5/mo with a 7-day free trial, whether you sell ten tickets a month or ten thousand.",
+                "icon": "dollar",
+                "gradient": "from-sky-50 to-cyan-50 dark:from-sky-900/30 dark:to-cyan-900/30",
+                "border": "border-sky-200 dark:border-sky-500/20",
+                "icon_bg": "bg-sky-100 dark:bg-sky-500/20",
+                "icon_color": "text-sky-600 dark:text-sky-400"
+            },
+            {
+                "title": "Your Own Payment Account",
+                "description": "Money goes straight into your own Stripe or PayPal account, and refunds go back through it from the Sales page.",
+                "icon": "ticket",
+                "gradient": "from-teal-50 to-emerald-50 dark:from-teal-900/30 dark:to-emerald-900/30",
+                "border": "border-teal-200 dark:border-teal-500/20",
+                "icon_bg": "bg-teal-100 dark:bg-teal-500/20",
+                "icon_color": "text-teal-600 dark:text-teal-400"
+            },
+            {
+                "title": "Recurring Nights",
+                "description": "Set a weekly or monthly residency once and skip the nights you are closed, on every plan.",
+                "icon": "calendar",
+                "gradient": "from-blue-50 to-sky-50 dark:from-blue-900/30 dark:to-sky-900/30",
+                "border": "border-blue-200 dark:border-blue-500/20",
+                "icon_bg": "bg-blue-100 dark:bg-blue-500/20",
+                "icon_color": "text-blue-600 dark:text-blue-400"
+            },
+            {
+                "title": "Built-in Newsletters",
+                "description": "Email the people who follow your schedule from inside the app, alongside the new-event digest they get automatically.",
+                "icon": "mail",
+                "gradient": "from-amber-50 to-yellow-50 dark:from-amber-900/30 dark:to-yellow-900/30",
+                "border": "border-amber-200 dark:border-amber-500/20",
+                "icon_bg": "bg-amber-100 dark:bg-amber-500/20",
+                "icon_color": "text-amber-600 dark:text-amber-400"
+            },
+            {
+                "title": "Open Source",
+                "description": "Read the code and selfhost it on your own server. Posh is a hosted service only.",
+                "icon": "code",
+                "gradient": "from-cyan-50 to-sky-50 dark:from-cyan-900/30 dark:to-sky-900/30",
+                "border": "border-cyan-200 dark:border-cyan-500/20",
+                "icon_bg": "bg-cyan-100 dark:bg-cyan-500/20",
+                "icon_color": "text-cyan-600 dark:text-cyan-400"
+            }
+        ],
+        "cross_links": [
+            {
+                "name": "Partiful",
+                "route": "marketing.compare_partiful"
+            },
+            {
+                "name": "DICE",
+                "route": "marketing.compare_dice"
+            },
+            {
+                "name": "Eventbrite",
+                "route": "marketing.compare_eventbrite"
+            }
+        ],
+        "faq": [
+            {
+                "question": "Is it easy to switch from Posh to Event Schedule?",
+                "answer": "Yes. Create a free schedule, paste your upcoming nights or upload a flyer and the AI parser fills in each event, then connect Stripe or PayPal and move to Pro to sell paid tickets."
+            },
+            {
+                "question": "How does Event Schedule pricing compare to Posh?",
+                "answer": "Posh has no subscription and adds a service fee to every ticket. Event Schedule Pro is a flat $5/mo with zero platform fees, so what you pay does not grow with the number of tickets you sell."
+            },
+            {
+                "question": "Can I run guest lists and free entry?",
+                "answer": "Yes. Free registration and RSVP are unlimited on every plan, each guest gets a QR code, and the door scans it on any plan. The live check-in dashboard is on Pro."
+            },
+            {
+                "question": "Can I set up a weekly club night once?",
+                "answer": "Yes. A recurring event repeats weekly, every few weeks or monthly, on every plan, and you can skip the dates you are closed. Each date keeps its own tickets and guest list."
+            }
+        ]
+    },
+    "partiful": {
+        "name": "Partiful",
+        "key": "partiful",
+        "slug": "partiful-alternative",
+        "meta_title": "Partiful Alternative With Recurring Events | Event Schedule",
+        "tagline": "Invites and RSVPs, plus a public schedule page, recurring events and ticketing with zero platform fees.",
+        "description": "Compare Event Schedule with Partiful: free RSVPs plus recurring events, a public schedule page for every event you host, and zero platform fees.",
+        "keywords": "partiful alternative, partiful competitor, party invite app alternative, rsvp app, event invitation platform",
+        "about": "Partiful is a free app for party invites and RSVPs, used mostly by people hosting social events, with organization profiles for groups. Hosts in the US and UK can sell tickets, with fees that depend on event size and ticket price.",
+        "competitor_strengths": [
+            "Designed event pages with themes, fonts, effects and music",
+            "Text blasts and automatic reminders to guests",
+            "Free to use, and guests can RSVP from an invite sent on any platform"
+        ],
+        "sections": {
+            "Pricing & Fees": [
+                [
+                    "Free plan",
+                    "Yes (forever)",
+                    "Yes (core app is free)",
+                    false
+                ],
+                [
+                    "Platform fees",
+                    "0%",
+                    "Ticket fees vary by event size and price",
+                    true
+                ]
+            ],
+            "Events & Ticketing": [
+                [
+                    "Ticketing",
+                    "Yes (Free)",
+                    "Yes (US and UK hosts)",
+                    true
+                ],
+                [
+                    "QR check-ins",
+                    "Yes (Free)",
+                    "Yes",
+                    false
+                ],
+                [
+                    "Ticket waitlist",
+                    "Yes (Pro)",
+                    "Yes",
+                    false
+                ],
+                [
+                    "Recurring events",
+                    "Yes (Free)",
+                    "No (clone the event instead)",
+                    true
+                ],
+                [
+                    "Free event RSVP",
+                    "Yes (Free)",
+                    "Yes",
+                    false
+                ],
+                [
+                    "Promo/discount codes",
+                    "Yes (Pro)",
+                    "Yes",
+                    false
+                ]
+            ],
+            "Integrations": [
+                [
+                    "Calendar sync, both ways",
+                    "Yes (Free)",
+                    "Subscription feed, one way",
+                    true
+                ],
+                [
+                    "Newsletters",
+                    "Yes (Free)",
+                    "Text blasts (up to 10 per event)",
+                    false
+                ]
+            ],
+            "Customization": [
+                [
+                    "Custom fields",
+                    "Yes (Pro)",
+                    "Yes (RSVP questions)",
+                    false
+                ]
+            ],
+            "Unique Features": [
+                [
+                    "Private/password-protected events",
+                    "Yes (Enterprise)",
+                    "Yes (private, password)",
+                    false
+                ],
+                [
+                    "Team collaboration",
+                    "Yes (Enterprise)",
+                    "Yes (cohosts)",
+                    false
+                ]
+            ],
+            "Platform": [
+                [
+                    "Open source",
+                    "Yes",
+                    "No",
+                    true
+                ],
+                [
+                    "Selfhosting",
+                    "Yes",
+                    "No",
+                    true
+                ]
+            ]
+        },
+        "key_advantages": [
+            {
+                "title": "Recurring Events",
+                "description": "Set a weekly meetup or monthly party once, on every plan. Partiful has no recurring events and suggests cloning each one.",
+                "icon": "calendar",
+                "gradient": "from-emerald-50 to-teal-50 dark:from-emerald-900/30 dark:to-teal-900/30",
+                "border": "border-emerald-200 dark:border-emerald-500/20",
+                "icon_bg": "bg-emerald-100 dark:bg-emerald-500/20",
+                "icon_color": "text-emerald-600 dark:text-emerald-400"
+            },
+            {
+                "title": "One Page for Everything",
+                "description": "Your schedule lists every event you host on one public page, with followers who hear about the next one automatically.",
+                "icon": "globe",
+                "gradient": "from-sky-50 to-cyan-50 dark:from-sky-900/30 dark:to-cyan-900/30",
+                "border": "border-sky-200 dark:border-sky-500/20",
+                "icon_bg": "bg-sky-100 dark:bg-sky-500/20",
+                "icon_color": "text-sky-600 dark:text-sky-400"
+            },
+            {
+                "title": "0% Platform Fees",
+                "description": "Event Schedule takes no platform fee on any plan. Paid tickets are on Pro, paid into your own Stripe or PayPal account.",
+                "icon": "percent",
+                "gradient": "from-teal-50 to-emerald-50 dark:from-teal-900/30 dark:to-emerald-900/30",
+                "border": "border-teal-200 dark:border-teal-500/20",
+                "icon_bg": "bg-teal-100 dark:bg-teal-500/20",
+                "icon_color": "text-teal-600 dark:text-teal-400"
+            },
+            {
+                "title": "Two-Way Calendar Sync",
+                "description": "Google, Outlook and CalDAV sync both ways, free, so your own calendar and your public page stay in step.",
+                "icon": "calendar",
+                "gradient": "from-blue-50 to-sky-50 dark:from-blue-900/30 dark:to-sky-900/30",
+                "border": "border-blue-200 dark:border-blue-500/20",
+                "icon_bg": "bg-blue-100 dark:bg-blue-500/20",
+                "icon_color": "text-blue-600 dark:text-blue-400"
+            },
+            {
+                "title": "Embed on Your Website",
+                "description": "Put the calendar on any website, free, and each event links to its own page for RSVPs or tickets.",
+                "icon": "layout",
+                "gradient": "from-amber-50 to-yellow-50 dark:from-amber-900/30 dark:to-yellow-900/30",
+                "border": "border-amber-200 dark:border-amber-500/20",
+                "icon_bg": "bg-amber-100 dark:bg-amber-500/20",
+                "icon_color": "text-amber-600 dark:text-amber-400"
+            },
+            {
+                "title": "Open Source",
+                "description": "Read the code and selfhost it on your own server. Partiful is a hosted app only.",
+                "icon": "code",
+                "gradient": "from-cyan-50 to-sky-50 dark:from-cyan-900/30 dark:to-sky-900/30",
+                "border": "border-cyan-200 dark:border-cyan-500/20",
+                "icon_bg": "bg-cyan-100 dark:bg-cyan-500/20",
+                "icon_color": "text-cyan-600 dark:text-cyan-400"
+            }
+        ],
+        "cross_links": [
+            {
+                "name": "Posh",
+                "route": "marketing.compare_posh"
+            },
+            {
+                "name": "Luma",
+                "route": "marketing.compare_luma"
+            },
+            {
+                "name": "Facebook Events",
+                "route": "marketing.compare_facebook_events"
+            }
+        ],
+        "faq": [
+            {
+                "question": "Is Event Schedule free like Partiful?",
+                "answer": "Yes. Unlimited events, free RSVPs with QR tickets, newsletters and calendar sync are on the free plan. Pro at $5/mo adds paid tickets with zero platform fees, promo codes and the check-in dashboard."
+            },
+            {
+                "question": "Can guests RSVP without an account?",
+                "answer": "Yes. A guest registers with a name and an email address and gets a ticket with a QR code. They can follow your schedule to hear about your next event."
+            },
+            {
+                "question": "Can I host the same event every week?",
+                "answer": "Yes. Recurring events repeat weekly, every few weeks or monthly on every plan, and each date keeps its own guest list and capacity."
+            },
+            {
+                "question": "Can I keep an event private?",
+                "answer": "Yes, on Enterprise: an event can be unlisted or protected with a password, so only people you share it with can register."
+            }
+        ]
+    },
+    "facebook-events": {
+        "name": "Facebook Events",
+        "key": "facebook-events",
+        "slug": "facebook-events-alternative",
+        "meta_title": "Facebook Events Alternative You Own | Event Schedule",
+        "tagline": "An events page you own, that people can see without an account, with ticketing and calendar sync.",
+        "description": "Compare Event Schedule with Facebook Events: a public schedule page anyone can open without an account, free registration, and two-way calendar sync.",
+        "keywords": "facebook events alternative, facebook event page alternative, community events calendar, events without facebook, facebook events competitor",
+        "about": "Facebook Events is the free events feature inside Facebook, used by people, Pages and groups to create events and invite others to them. Guests respond Interested or Going, and a ticket link can send them to another site to buy.",
+        "competitor_strengths": [
+            "A huge built-in audience, with invites to friends, groups and past guests",
+            "Free, with privacy levels from public to private and group-only",
+            "Repeating events and online events through Facebook Live or an external link"
+        ],
+        "sections": {
+            "Pricing & Fees": [
+                [
+                    "Free plan",
+                    "Yes (forever)",
+                    "Yes (free)",
+                    false
+                ],
+                [
+                    "Platform fees",
+                    "0%",
+                    "N/A (no ticketing)",
+                    false
+                ]
+            ],
+            "Events & Ticketing": [
+                [
+                    "Ticketing",
+                    "Yes (Free)",
+                    "No (external ticket link)",
+                    true
+                ],
+                [
+                    "Recurring events",
+                    "Yes (Free)",
+                    "Yes",
+                    false
+                ],
+                [
+                    "Online events",
+                    "Yes (Free)",
+                    "Yes",
+                    false
+                ],
+                [
+                    "Free event RSVP",
+                    "Yes (Free)",
+                    "Yes (Interested or Going)",
+                    false
+                ]
+            ],
+            "Integrations": [
+                [
+                    "Calendar sync, both ways",
+                    "Yes (Free)",
+                    "Per-event export (.ics)",
+                    true
+                ]
+            ],
+            "Customization": [
+                [
+                    "Built-in analytics",
+                    "Yes (Free)",
+                    "Yes (Page event metrics)",
+                    false
+                ]
+            ],
+            "Unique Features": [
+                [
+                    "Embeddable calendar",
+                    "Yes (Free)",
+                    "Page plugin events tab",
+                    false
+                ],
+                [
+                    "Private/password-protected events",
+                    "Yes (Enterprise)",
+                    "Yes (private events)",
+                    false
+                ],
+                [
+                    "Team collaboration",
+                    "Yes (Enterprise)",
+                    "Co-hosts (friends or Pages)",
+                    false
+                ]
+            ],
+            "Platform": [
+                [
+                    "REST API",
+                    "Yes (Pro)",
+                    "Read-only, Marketing Partners only",
+                    true
+                ],
+                [
+                    "Open source",
+                    "Yes",
+                    "No",
+                    true
+                ],
+                [
+                    "Selfhosting",
+                    "Yes",
+                    "No",
+                    true
+                ]
+            ]
+        },
+        "key_advantages": [
+            {
+                "title": "No Account to View",
+                "description": "Your schedule and every event page open for anyone with the link, with no sign-in wall in front of the details.",
+                "icon": "globe",
+                "gradient": "from-emerald-50 to-teal-50 dark:from-emerald-900/30 dark:to-teal-900/30",
+                "border": "border-emerald-200 dark:border-emerald-500/20",
+                "icon_bg": "bg-emerald-100 dark:bg-emerald-500/20",
+                "icon_color": "text-emerald-600 dark:text-emerald-400"
+            },
+            {
+                "title": "Tickets on the Page",
+                "description": "Facebook events send buyers to another site. Event Schedule takes free registrations with QR tickets on every plan, and paid tickets on Pro with zero platform fees.",
+                "icon": "ticket",
+                "gradient": "from-sky-50 to-cyan-50 dark:from-sky-900/30 dark:to-cyan-900/30",
+                "border": "border-sky-200 dark:border-sky-500/20",
+                "icon_bg": "bg-sky-100 dark:bg-sky-500/20",
+                "icon_color": "text-sky-600 dark:text-sky-400"
+            },
+            {
+                "title": "Reach People by Email",
+                "description": "Followers get an email digest of your new events and your newsletters, instead of depending on what a feed decides to show them.",
+                "icon": "mail",
+                "gradient": "from-teal-50 to-emerald-50 dark:from-teal-900/30 dark:to-emerald-900/30",
+                "border": "border-teal-200 dark:border-teal-500/20",
+                "icon_bg": "bg-teal-100 dark:bg-teal-500/20",
+                "icon_color": "text-teal-600 dark:text-teal-400"
+            },
+            {
+                "title": "Two-Way Calendar Sync",
+                "description": "Google, Outlook and CalDAV sync both ways, free, and anyone can subscribe to your schedule's live calendar feed.",
+                "icon": "calendar",
+                "gradient": "from-blue-50 to-sky-50 dark:from-blue-900/30 dark:to-sky-900/30",
+                "border": "border-blue-200 dark:border-blue-500/20",
+                "icon_bg": "bg-blue-100 dark:bg-blue-500/20",
+                "icon_color": "text-blue-600 dark:text-blue-400"
+            },
+            {
+                "title": "Embed on Your Website",
+                "description": "Put the calendar on your own website, free, with each event linking to its own page.",
+                "icon": "layout",
+                "gradient": "from-amber-50 to-yellow-50 dark:from-amber-900/30 dark:to-yellow-900/30",
+                "border": "border-amber-200 dark:border-amber-500/20",
+                "icon_bg": "bg-amber-100 dark:bg-amber-500/20",
+                "icon_color": "text-amber-600 dark:text-amber-400"
+            },
+            {
+                "title": "Open Source",
+                "description": "Read the code and selfhost it on your own server, so your event listings stay yours.",
+                "icon": "code",
+                "gradient": "from-cyan-50 to-sky-50 dark:from-cyan-900/30 dark:to-sky-900/30",
+                "border": "border-cyan-200 dark:border-cyan-500/20",
+                "icon_bg": "bg-cyan-100 dark:bg-cyan-500/20",
+                "icon_color": "text-cyan-600 dark:text-cyan-400"
+            }
+        ],
+        "cross_links": [
+            {
+                "name": "Meetup",
+                "route": "marketing.compare_meetup"
+            },
+            {
+                "name": "Partiful",
+                "route": "marketing.compare_partiful"
+            },
+            {
+                "name": "Mobilizon",
+                "route": "marketing.compare_mobilizon"
+            }
+        ],
+        "faq": [
+            {
+                "question": "Can people see my events without a Facebook account?",
+                "answer": "Yes. Your schedule and each event page are public web pages, so anyone with the link can read the details, register and add the event to their calendar, with no account."
+            },
+            {
+                "question": "Is Event Schedule free like Facebook Events?",
+                "answer": "Yes. Unlimited events, free registration with QR tickets, newsletters, the embeddable calendar and calendar sync are on the free plan. Pro at $5/mo adds paid tickets with zero platform fees."
+            },
+            {
+                "question": "Can I still share my events on Facebook?",
+                "answer": "Yes. Share each event page link on Facebook as you would any other link, and the event graphic generator makes an image for the post, free. Boost can also run a paid Facebook and Instagram ad for an event, on Pro."
+            },
+            {
+                "question": "Can I bring my Facebook events across?",
+                "answer": "Yes. Paste the event details or upload the flyer and the AI parser fills in the name, date, time and venue for you to check, fifty a day on the free and Pro plans."
+            }
+        ]
+    },
+    "zeffy": {
+        "name": "Zeffy",
+        "key": "zeffy",
+        "slug": "zeffy-alternative",
+        "meta_title": "Zeffy Alternative for Any Organizer | Event Schedule",
+        "tagline": "Open source event ticketing with zero platform fees, open to any organizer, not only registered nonprofits.",
+        "description": "Compare Event Schedule with Zeffy: event ticketing with zero platform fees for any organizer, not only registered nonprofits, plus calendar sync and selfhosting.",
+        "keywords": "zeffy alternative, zeffy competitor, free event ticketing, nonprofit event ticketing, ticketing for community groups",
+        "about": "Zeffy is a free fundraising and ticketing platform for nonprofits and registered charities in the US, Canada, the UK, Ireland, Australia and Germany. It covers card fees itself and is funded by optional tips from donors and buyers.",
+        "competitor_strengths": [
+            "No fees for the nonprofit: Zeffy covers card and transaction fees",
+            "A full fundraising suite: donations, raffles, auctions, memberships and an online store",
+            "Unlimited users, with permissions per campaign"
+        ],
+        "sections": {
+            "Pricing & Fees": [
+                [
+                    "Free plan",
+                    "Yes (forever)",
+                    "Yes (100% free, tip-funded)",
+                    false
+                ],
+                [
+                    "Paid plan price",
+                    "$5/mo (7-day free trial)",
+                    "None (optional tips at checkout)",
+                    false
+                ],
+                [
+                    "Platform fees",
+                    "0%",
+                    "0% (optional tips at checkout)",
+                    false
+                ],
+                [
+                    "Payment processing",
+                    "Stripe/PayPal/Payfast (processor rates apply)",
+                    "Stripe (card fees covered by Zeffy)",
+                    false
+                ],
+                [
+                    "Open to any organizer",
+                    "Yes",
+                    "No (nonprofits and charities only)",
+                    true
+                ]
+            ],
+            "Events & Ticketing": [
+                [
+                    "Ticketing",
+                    "Yes (Free)",
+                    "Yes",
+                    false
+                ],
+                [
+                    "QR check-ins",
+                    "Yes (Free)",
+                    "Yes",
+                    false
+                ],
+                [
+                    "Recurring events",
+                    "Yes (Free)",
+                    "Multi-date events",
+                    true
+                ],
+                [
+                    "Promo/discount codes",
+                    "Yes (Pro)",
+                    "Yes",
+                    false
+                ],
+                [
+                    "Reserved seating",
+                    "Yes (Enterprise)",
+                    "Yes (seating chart)",
+                    false
+                ]
+            ],
+            "Integrations": [
+                [
+                    "Newsletters",
+                    "Yes (Free)",
+                    "Yes (up to 5,000 contacts per email)",
+                    false
+                ]
+            ],
+            "Customization": [
+                [
+                    "Custom domains",
+                    "Yes (Enterprise)",
+                    "No (email sender domain only)",
+                    true
+                ],
+                [
+                    "Custom fields",
+                    "Yes (Pro)",
+                    "Yes (custom questions)",
+                    false
+                ],
+                [
+                    "Built-in analytics",
+                    "Yes (Free)",
+                    "Yes (reports)",
+                    false
+                ]
+            ],
+            "Unique Features": [
+                [
+                    "Fundraising & donations",
+                    "No",
+                    "Yes (donations, raffles, auctions)",
+                    false
+                ],
+                [
+                    "Team collaboration",
+                    "Yes (Enterprise)",
+                    "Yes (unlimited users)",
+                    false
+                ]
+            ],
+            "Platform": [
+                [
+                    "REST API",
+                    "Yes (Pro)",
+                    "Read access (payments, contacts, campaigns)",
+                    false
+                ],
+                [
+                    "Webhooks",
+                    "Yes (Pro)",
+                    "Yes (payment completed)",
+                    false
+                ],
+                [
+                    "Open source",
+                    "Yes",
+                    "No",
+                    true
+                ],
+                [
+                    "Selfhosting",
+                    "Yes",
+                    "No",
+                    true
+                ]
+            ]
+        },
+        "key_advantages": [
+            {
+                "title": "Open to Everyone",
+                "description": "Zeffy is for registered nonprofits and charities in six countries. Event Schedule works for any organizer, anywhere: a community group, a venue, a band or a business.",
+                "icon": "globe",
+                "gradient": "from-emerald-50 to-teal-50 dark:from-emerald-900/30 dark:to-teal-900/30",
+                "border": "border-emerald-200 dark:border-emerald-500/20",
+                "icon_bg": "bg-emerald-100 dark:bg-emerald-500/20",
+                "icon_color": "text-emerald-600 dark:text-emerald-400"
+            },
+            {
+                "title": "0% Platform Fees",
+                "description": "Event Schedule takes no platform fee on any plan, and there is no tip prompt at checkout. Paid tickets are on Pro at $5/mo.",
+                "icon": "percent",
+                "gradient": "from-sky-50 to-cyan-50 dark:from-sky-900/30 dark:to-cyan-900/30",
+                "border": "border-sky-200 dark:border-sky-500/20",
+                "icon_bg": "bg-sky-100 dark:bg-sky-500/20",
+                "icon_color": "text-sky-600 dark:text-sky-400"
+            },
+            {
+                "title": "Two-Way Calendar Sync",
+                "description": "Google, Outlook and CalDAV sync both ways, free, and anyone can subscribe to your schedule's live calendar feed.",
+                "icon": "calendar",
+                "gradient": "from-teal-50 to-emerald-50 dark:from-teal-900/30 dark:to-emerald-900/30",
+                "border": "border-teal-200 dark:border-teal-500/20",
+                "icon_bg": "bg-teal-100 dark:bg-teal-500/20",
+                "icon_color": "text-teal-600 dark:text-teal-400"
+            },
+            {
+                "title": "A Public Schedule Page",
+                "description": "Every event you run sits on one public schedule page, with followers who hear about new events by email and an embeddable calendar for your website.",
+                "icon": "layout",
+                "gradient": "from-blue-50 to-sky-50 dark:from-blue-900/30 dark:to-sky-900/30",
+                "border": "border-blue-200 dark:border-blue-500/20",
+                "icon_bg": "bg-blue-100 dark:bg-blue-500/20",
+                "icon_color": "text-blue-600 dark:text-blue-400"
+            },
+            {
+                "title": "Recurring Events",
+                "description": "Weekly, monthly or every few weeks, with dates you can skip, on every plan, and each date keeps its own tickets.",
+                "icon": "calendar",
+                "gradient": "from-amber-50 to-yellow-50 dark:from-amber-900/30 dark:to-yellow-900/30",
+                "border": "border-amber-200 dark:border-amber-500/20",
+                "icon_bg": "bg-amber-100 dark:bg-amber-500/20",
+                "icon_color": "text-amber-600 dark:text-amber-400"
+            },
+            {
+                "title": "Open Source",
+                "description": "Read the code and selfhost it on your own server. Zeffy is a hosted service only.",
+                "icon": "code",
+                "gradient": "from-cyan-50 to-sky-50 dark:from-cyan-900/30 dark:to-sky-900/30",
+                "border": "border-cyan-200 dark:border-cyan-500/20",
+                "icon_bg": "bg-cyan-100 dark:bg-cyan-500/20",
+                "icon_color": "text-cyan-600 dark:text-cyan-400"
+            }
+        ],
+        "cross_links": [
+            {
+                "name": "Humanitix",
+                "route": "marketing.compare_humanitix"
+            },
+            {
+                "name": "Eventbrite",
+                "route": "marketing.compare_eventbrite"
+            },
+            {
+                "name": "Hi.Events",
+                "route": "marketing.compare_hi_events"
+            }
+        ],
+        "faq": [
+            {
+                "question": "Can a group that is not a registered nonprofit use Event Schedule?",
+                "answer": "Yes. Any organizer can use Event Schedule: community groups, clubs, venues, artists and businesses, in any country. Zeffy is limited to nonprofits and charities in six countries."
+            },
+            {
+                "question": "How does Event Schedule pricing compare to Zeffy?",
+                "answer": "Zeffy is free for nonprofits and asks buyers for an optional tip at checkout. Event Schedule has a free plan with free registration, and Pro at $5/mo adds paid tickets with zero platform fees and no tip prompt."
+            },
+            {
+                "question": "Does Event Schedule take donations like Zeffy?",
+                "answer": "No. Event Schedule is built for events, not fundraising, so there are no donation forms, raffles or auctions. If fundraising is the heart of what you do, Zeffy covers more of it."
+            },
+            {
+                "question": "Who pays the card fees?",
+                "answer": "Paid tickets go through your own Stripe or PayPal account at its standard rates. Event Schedule adds no platform fee on top, and refunds go back through the same account from the Sales page."
+            }
+        ]
+    },
+    "tockify": {
+        "name": "Tockify",
+        "key": "tockify",
+        "slug": "tockify-alternative",
+        "meta_title": "Tockify Alternative With Ticketing Built In | Event Schedule",
+        "tagline": "An embeddable event calendar that also takes registrations and sells tickets, with a free plan.",
+        "description": "Compare Event Schedule with Tockify: an embeddable calendar with free registration and QR check-in, two-way Google sync, and Pro at $5/mo.",
+        "keywords": "tockify alternative, tockify competitor, embeddable event calendar, website event calendar, free event calendar widget",
+        "about": "Tockify is a hosted, embeddable website calendar used by museums, theatres, schools, churches and gyms. It has a free plan and paid plans charged per calendar, and it sends visitors to another site for tickets.",
+        "competitor_strengths": [
+            "Good-looking, customizable calendar views: agenda, pinboard, month and mini",
+            "Simple per-calendar pricing, with a free plan",
+            "RSVP forms and events submitted by the public"
+        ],
+        "sections": {
+            "Pricing & Fees": [
+                [
+                    "Free plan",
+                    "Yes (forever)",
+                    "Yes (agenda view, 2,000 views/mo)",
+                    false
+                ],
+                [
+                    "Paid plan price",
+                    "$5/mo (7-day free trial)",
+                    "$8/mo per calendar (Premium)",
+                    false
+                ],
+                [
+                    "Platform fees",
+                    "0%",
+                    "N/A (no ticketing)",
+                    false
+                ],
+                [
+                    "Payment processing",
+                    "Stripe/PayPal/Payfast (processor rates apply)",
+                    "No",
+                    true
+                ]
+            ],
+            "Events & Ticketing": [
+                [
+                    "Ticketing",
+                    "Yes (Free)",
+                    "No (links out to your ticket page)",
+                    true
+                ],
+                [
+                    "Recurring events",
+                    "Yes (Free)",
+                    "Yes (Premium)",
+                    true
+                ],
+                [
+                    "Online events",
+                    "Yes (Free)",
+                    "Yes",
+                    false
+                ],
+                [
+                    "Free event RSVP",
+                    "Yes (Free)",
+                    "Yes (Premium)",
+                    true
+                ]
+            ],
+            "Integrations": [
+                [
+                    "Calendar sync, both ways",
+                    "Yes (Free)",
+                    "Google import only (read-only)",
+                    true
+                ]
+            ],
+            "Customization": [
+                [
+                    "Custom domains",
+                    "Yes (Enterprise)",
+                    "Yes (White Label, for event links)",
+                    false
+                ],
+                [
+                    "Remove branding",
+                    "Yes (Pro)",
+                    "Yes (White Label, $40/mo)",
+                    true
+                ]
+            ],
+            "Unique Features": [
+                [
+                    "Embeddable calendar",
+                    "Yes (Free)",
+                    "Yes",
+                    false
+                ],
+                [
+                    "Private/password-protected events",
+                    "Yes (Enterprise)",
+                    "Calendar passcode (experimental)",
+                    false
+                ]
+            ],
+            "Platform": [
+                [
+                    "REST API",
+                    "Yes (Pro)",
+                    "No (embedding API only)",
+                    true
+                ],
+                [
+                    "Open source",
+                    "Yes",
+                    "No",
+                    true
+                ],
+                [
+                    "Selfhosting",
+                    "Yes",
+                    "No",
+                    true
+                ]
+            ]
+        },
+        "key_advantages": [
+            {
+                "title": "Tickets on the Page",
+                "description": "Tockify sends visitors to another site for tickets. Event Schedule takes free registrations with QR tickets on every plan, and paid tickets on Pro with zero platform fees.",
+                "icon": "ticket",
+                "gradient": "from-emerald-50 to-teal-50 dark:from-emerald-900/30 dark:to-teal-900/30",
+                "border": "border-emerald-200 dark:border-emerald-500/20",
+                "icon_bg": "bg-emerald-100 dark:bg-emerald-500/20",
+                "icon_color": "text-emerald-600 dark:text-emerald-400"
+            },
+            {
+                "title": "Event Graphics",
+                "description": "Turn your upcoming events into a shareable graphic for social media in one click, free.",
+                "icon": "image",
+                "gradient": "from-sky-50 to-cyan-50 dark:from-sky-900/30 dark:to-cyan-900/30",
+                "border": "border-sky-200 dark:border-sky-500/20",
+                "icon_bg": "bg-sky-100 dark:bg-sky-500/20",
+                "icon_color": "text-sky-600 dark:text-sky-400"
+            },
+            {
+                "title": "Two-Way Calendar Sync",
+                "description": "Google, Outlook and CalDAV sync both ways, free. Tockify reads from Google Calendar with read-only access.",
+                "icon": "calendar",
+                "gradient": "from-teal-50 to-emerald-50 dark:from-teal-900/30 dark:to-emerald-900/30",
+                "border": "border-teal-200 dark:border-teal-500/20",
+                "icon_bg": "bg-teal-100 dark:bg-teal-500/20",
+                "icon_color": "text-teal-600 dark:text-teal-400"
+            },
+            {
+                "title": "Built-in Newsletters",
+                "description": "Email the people who follow your schedule from inside the app, on every plan.",
+                "icon": "mail",
+                "gradient": "from-blue-50 to-sky-50 dark:from-blue-900/30 dark:to-sky-900/30",
+                "border": "border-blue-200 dark:border-blue-500/20",
+                "icon_bg": "bg-blue-100 dark:bg-blue-500/20",
+                "icon_color": "text-blue-600 dark:text-blue-400"
+            },
+            {
+                "title": "Remove Branding on Pro",
+                "description": "Pro removes the Event Schedule branding. Tockify removes its branding on the White Label plan, at $40/mo.",
+                "icon": "shield",
+                "gradient": "from-amber-50 to-yellow-50 dark:from-amber-900/30 dark:to-yellow-900/30",
+                "border": "border-amber-200 dark:border-amber-500/20",
+                "icon_bg": "bg-amber-100 dark:bg-amber-500/20",
+                "icon_color": "text-amber-600 dark:text-amber-400"
+            },
+            {
+                "title": "Open Source",
+                "description": "Read the code and selfhost it on your own server. Tockify is a hosted service only.",
+                "icon": "globe",
+                "gradient": "from-cyan-50 to-sky-50 dark:from-cyan-900/30 dark:to-sky-900/30",
+                "border": "border-cyan-200 dark:border-cyan-500/20",
+                "icon_bg": "bg-cyan-100 dark:bg-cyan-500/20",
+                "icon_color": "text-cyan-600 dark:text-cyan-400"
+            }
+        ],
+        "cross_links": [
+            {
+                "name": "Timely",
+                "route": "marketing.compare_timely"
+            },
+            {
+                "name": "The Events Calendar",
+                "route": "marketing.compare_the_events_calendar"
+            },
+            {
+                "name": "AddEvent",
+                "route": "marketing.compare_addevent"
+            }
+        ],
+        "faq": [
+            {
+                "question": "Is it easy to switch from Tockify to Event Schedule?",
+                "answer": "Yes. Create a free schedule, connect Google Calendar or paste your event details for the AI parser, then swap the embed code on your website for the Event Schedule calendar."
+            },
+            {
+                "question": "How does Event Schedule pricing compare to Tockify?",
+                "answer": "Tockify's free plan is an agenda view with Tockify branding, Premium is $8/mo per calendar and White Label is $40/mo. Event Schedule's free plan includes the embeddable calendar, and Pro is $5/mo, which also removes our branding."
+            },
+            {
+                "question": "Can people register for events on my calendar?",
+                "answer": "Yes. Free registration and RSVP are unlimited on every plan, each guest gets a ticket with a QR code, and paid tickets are on Pro with zero platform fees, paid into your own Stripe or PayPal account."
+            },
+            {
+                "question": "Can I keep my events in Google Calendar?",
+                "answer": "Yes. Google Calendar sync runs both ways on every plan, so an event added in either place shows up in the other. Outlook and CalDAV calendars sync the same way."
+            }
+        ]
+    },
+    "hi-events": {
+        "name": "Hi.Events",
+        "key": "hi-events",
+        "slug": "hi-events-alternative",
+        "meta_title": "Hi.Events Alternative, No Per-Ticket Fees | Event Schedule",
+        "tagline": "Open source ticketing with a flat price instead of a per-ticket fee, plus calendar sync and newsletters.",
+        "description": "Compare Event Schedule with Hi.Events: open source ticketing with flat $5/mo pricing instead of 1.25% + $0.60 a ticket, calendar sync, and simple selfhosting.",
+        "keywords": "hi.events alternative, hi events alternative, open source ticketing alternative, open source eventbrite alternative, selfhosted ticketing",
+        "about": "Hi.Events is an open source event management and ticketing platform (AGPL-3.0 with additional terms) for conferences, nightlife, concerts and workshops. It offers a hosted Cloud service with a per-ticket fee and a selfhosted version, with paid licences to remove its branding.",
+        "competitor_strengths": [
+            "Open source and selfhostable, with an all-in-one Docker image",
+            "No monthly fee on the hosted Cloud service",
+            "A broad ticketing feature set: waitlists, a check-in app, product add-ons, affiliates, an API and webhooks"
+        ],
+        "sections": {
+            "Pricing & Fees": [
+                [
+                    "Free plan",
+                    "Yes (forever)",
+                    "No monthly fee on Cloud (per-ticket fee)",
+                    false
+                ],
+                [
+                    "Paid plan price",
+                    "$5/mo (7-day free trial)",
+                    "No subscription (1.25% + $0.60 per ticket)",
+                    true
+                ],
+                [
+                    "Platform fees",
+                    "0%",
+                    "1.25% + $0.60 per ticket (Cloud)",
+                    true
+                ],
+                [
+                    "Payment processing",
+                    "Stripe/PayPal/Payfast (processor rates apply)",
+                    "Stripe, plus offline payments",
+                    false
+                ]
+            ],
+            "Events & Ticketing": [
+                [
+                    "Ticketing",
+                    "Yes (Free)",
+                    "Yes",
+                    false
+                ],
+                [
+                    "QR check-ins",
+                    "Yes (Free)",
+                    "Yes (check-in app)",
+                    false
+                ],
+                [
+                    "Ticket waitlist",
+                    "Yes (Pro)",
+                    "Yes",
+                    false
+                ],
+                [
+                    "Recurring events",
+                    "Yes (Free)",
+                    "Yes",
+                    false
+                ],
+                [
+                    "Online events",
+                    "Yes (Free)",
+                    "Yes",
+                    false
+                ],
+                [
+                    "Free event RSVP",
+                    "Yes (Free)",
+                    "Yes (free tickets)",
+                    false
+                ],
+                [
+                    "Promo/discount codes",
+                    "Yes (Pro)",
+                    "Yes",
+                    false
+                ]
+            ],
+            "Customization": [
+                [
+                    "Remove branding",
+                    "Yes (Pro)",
+                    "Selfhost licence, from 499 EUR/yr",
+                    true
+                ],
+                [
+                    "Custom fields",
+                    "Yes (Pro)",
+                    "Yes (questions per ticket type)",
+                    false
+                ],
+                [
+                    "Built-in analytics",
+                    "Yes (Free)",
+                    "Yes (sales reports)",
+                    false
+                ]
+            ],
+            "Unique Features": [
+                [
+                    "Embeddable calendar",
+                    "Yes (Free)",
+                    "Ticket widget",
+                    false
+                ],
+                [
+                    "Team collaboration",
+                    "Yes (Enterprise)",
+                    "Yes (admin and organizer roles)",
+                    false
+                ]
+            ],
+            "Platform": [
+                [
+                    "REST API",
+                    "Yes (Pro)",
+                    "Yes",
+                    false
+                ],
+                [
+                    "Webhooks",
+                    "Yes (Pro)",
+                    "Yes",
+                    false
+                ],
+                [
+                    "Open source",
+                    "Yes",
+                    "Yes (AGPL-3.0 with additional terms)",
+                    false
+                ],
+                [
+                    "Selfhosting",
+                    "Yes",
+                    "Yes (Docker, PostgreSQL, Redis)",
+                    false
+                ]
+            ]
+        },
+        "key_advantages": [
+            {
+                "title": "Flat $5/mo Pricing",
+                "description": "Hi.Events Cloud charges 1.25% + $0.60 on every ticket. Event Schedule Pro is a flat $5/mo with zero platform fees, whatever you sell.",
+                "icon": "dollar",
+                "gradient": "from-emerald-50 to-teal-50 dark:from-emerald-900/30 dark:to-teal-900/30",
+                "border": "border-emerald-200 dark:border-emerald-500/20",
+                "icon_bg": "bg-emerald-100 dark:bg-emerald-500/20",
+                "icon_color": "text-emerald-600 dark:text-emerald-400"
+            },
+            {
+                "title": "Two-Way Calendar Sync",
+                "description": "Google, Outlook and CalDAV sync both ways, free, and anyone can subscribe to your schedule's live calendar feed.",
+                "icon": "calendar",
+                "gradient": "from-sky-50 to-cyan-50 dark:from-sky-900/30 dark:to-cyan-900/30",
+                "border": "border-sky-200 dark:border-sky-500/20",
+                "icon_bg": "bg-sky-100 dark:bg-sky-500/20",
+                "icon_color": "text-sky-600 dark:text-sky-400"
+            },
+            {
+                "title": "Built-in Newsletters",
+                "description": "Email the people who follow your schedule, not only the people who bought a ticket, from inside the app.",
+                "icon": "mail",
+                "gradient": "from-teal-50 to-emerald-50 dark:from-teal-900/30 dark:to-emerald-900/30",
+                "border": "border-teal-200 dark:border-teal-500/20",
+                "icon_bg": "bg-teal-100 dark:bg-teal-500/20",
+                "icon_color": "text-teal-600 dark:text-teal-400"
+            },
+            {
+                "title": "Simpler to Selfhost",
+                "description": "Event Schedule runs on standard PHP hosting with MySQL. Hi.Events selfhosting uses Docker with PostgreSQL and Redis.",
+                "icon": "globe",
+                "gradient": "from-blue-50 to-sky-50 dark:from-blue-900/30 dark:to-sky-900/30",
+                "border": "border-blue-200 dark:border-blue-500/20",
+                "icon_bg": "bg-blue-100 dark:bg-blue-500/20",
+                "icon_color": "text-blue-600 dark:text-blue-400"
+            },
+            {
+                "title": "A Public Schedule Page",
+                "description": "Every event sits on one public schedule page with followers, sub-schedules and an embeddable calendar, not only a checkout.",
+                "icon": "layout",
+                "gradient": "from-amber-50 to-yellow-50 dark:from-amber-900/30 dark:to-yellow-900/30",
+                "border": "border-amber-200 dark:border-amber-500/20",
+                "icon_bg": "bg-amber-100 dark:bg-amber-500/20",
+                "icon_color": "text-amber-600 dark:text-amber-400"
+            },
+            {
+                "title": "AI Event Parsing",
+                "description": "Paste event details or upload a flyer and the parser fills in the name, date, time and venue for you to check, on every plan.",
+                "icon": "ai",
+                "gradient": "from-cyan-50 to-sky-50 dark:from-cyan-900/30 dark:to-sky-900/30",
+                "border": "border-cyan-200 dark:border-cyan-500/20",
+                "icon_bg": "bg-cyan-100 dark:bg-cyan-500/20",
+                "icon_color": "text-cyan-600 dark:text-cyan-400"
+            }
+        ],
+        "cross_links": [
+            {
+                "name": "Pretix",
+                "route": "marketing.compare_pretix"
+            },
+            {
+                "name": "Mobilizon",
+                "route": "marketing.compare_mobilizon"
+            },
+            {
+                "name": "Eventbrite",
+                "route": "marketing.compare_eventbrite"
+            }
+        ],
+        "faq": [
+            {
+                "question": "Are both platforms open source?",
+                "answer": "Yes. Hi.Events is AGPL-3.0 with additional terms that require a visible \"Powered by Hi.Events\" link unless you buy a licence. Event Schedule is open source under the Attribution Assurance License, and a selfhosted install resolves to Enterprise."
+            },
+            {
+                "question": "How does Event Schedule pricing compare to Hi.Events Cloud?",
+                "answer": "Hi.Events Cloud has no monthly fee and charges 1.25% + $0.60 per ticket, paid by buyers by default. Event Schedule Pro is a flat $5/mo with zero platform fees, so the saving grows with every ticket you sell."
+            },
+            {
+                "question": "Which is easier to selfhost?",
+                "answer": "Event Schedule runs on standard PHP hosting with MySQL. Hi.Events ships an all-in-one Docker image and uses PostgreSQL and Redis, which suits a server you already run Docker on."
+            },
+            {
+                "question": "Does Event Schedule have a check-in app?",
+                "answer": "Scanning works in the browser on any phone, free on every plan, with no app to install. The live check-in dashboard, which shows the room filling up, is on Pro."
+            }
+        ]
+    },
+    "mobilizon": {
+        "name": "Mobilizon",
+        "key": "mobilizon",
+        "slug": "mobilizon-alternative",
+        "meta_title": "Mobilizon Alternative With Ticketing | Event Schedule",
+        "tagline": "Open source community events with ticketing, recurring events and two-way calendar sync built in.",
+        "description": "Compare Event Schedule with Mobilizon: open source and selfhostable too, with free registration and QR tickets, recurring events, and two-way calendar sync.",
+        "keywords": "mobilizon alternative, mobilizon competitor, open source meetup alternative, open source event platform, selfhosted community events",
+        "about": "Mobilizon is free, open source software (AGPLv3) for publishing local events and running groups, federated with the fediverse over ActivityPub. Framasoft launched it in 2019, and since 2024 the French nonprofit Kaihuri maintains it. Anyone can join an existing instance or run their own.",
+        "competitor_strengths": [
+            "Federated over ActivityPub, so events can be followed from Mastodon and other fediverse apps",
+            "Privacy-first, with multiple identities and anonymous participation",
+            "Free software you can selfhost, with a GraphQL API"
+        ],
+        "sections": {
+            "Pricing & Fees": [
+                [
+                    "Free plan",
+                    "Yes (forever)",
+                    "Yes (free software, run by instances)",
+                    false
+                ],
+                [
+                    "Platform fees",
+                    "0%",
+                    "N/A (no ticketing)",
+                    false
+                ]
+            ],
+            "Events & Ticketing": [
+                [
+                    "Ticketing",
+                    "Yes (Free)",
+                    "Participation and place limits only",
+                    true
+                ],
+                [
+                    "Online events",
+                    "Yes (Free)",
+                    "Live stream link on the event",
+                    false
+                ],
+                [
+                    "Free event RSVP",
+                    "Yes (Free)",
+                    "Yes (with optional approval)",
+                    false
+                ]
+            ],
+            "Integrations": [
+                [
+                    "Calendar sync, both ways",
+                    "Yes (Free)",
+                    "ICS and RSS feeds, one way",
+                    true
+                ]
+            ],
+            "Unique Features": [
+                [
+                    "Embeddable calendar",
+                    "Yes (Free)",
+                    "Via ICS feed or third-party plugins",
+                    true
+                ],
+                [
+                    "Private/password-protected events",
+                    "Yes (Enterprise)",
+                    "Yes (link-only events)",
+                    false
+                ],
+                [
+                    "Team collaboration",
+                    "Yes (Enterprise)",
+                    "Yes (group roles)",
+                    false
+                ]
+            ],
+            "Platform": [
+                [
+                    "REST API",
+                    "Yes (Pro)",
+                    "GraphQL API",
+                    false
+                ],
+                [
+                    "Open source",
+                    "Yes",
+                    "Yes (AGPLv3)",
+                    false
+                ],
+                [
+                    "Selfhosting",
+                    "Yes",
+                    "Yes (Elixir, PostgreSQL)",
+                    false
+                ]
+            ]
+        },
+        "key_advantages": [
+            {
+                "title": "Tickets and Check-In",
+                "description": "Free registration with a QR ticket for every guest, scanned at the door on every plan, and paid tickets on Pro with zero platform fees.",
+                "icon": "ticket",
+                "gradient": "from-emerald-50 to-teal-50 dark:from-emerald-900/30 dark:to-teal-900/30",
+                "border": "border-emerald-200 dark:border-emerald-500/20",
+                "icon_bg": "bg-emerald-100 dark:bg-emerald-500/20",
+                "icon_color": "text-emerald-600 dark:text-emerald-400"
+            },
+            {
+                "title": "Two-Way Calendar Sync",
+                "description": "Google, Outlook and CalDAV sync both ways, free, as well as a live calendar feed anyone can subscribe to.",
+                "icon": "calendar",
+                "gradient": "from-sky-50 to-cyan-50 dark:from-sky-900/30 dark:to-cyan-900/30",
+                "border": "border-sky-200 dark:border-sky-500/20",
+                "icon_bg": "bg-sky-100 dark:bg-sky-500/20",
+                "icon_color": "text-sky-600 dark:text-sky-400"
+            },
+            {
+                "title": "Embed in One Tag",
+                "description": "Put the calendar on any website with one iframe tag, free, with each event linking to its own page.",
+                "icon": "layout",
+                "gradient": "from-teal-50 to-emerald-50 dark:from-teal-900/30 dark:to-emerald-900/30",
+                "border": "border-teal-200 dark:border-teal-500/20",
+                "icon_bg": "bg-teal-100 dark:bg-teal-500/20",
+                "icon_color": "text-teal-600 dark:text-teal-400"
+            },
+            {
+                "title": "Hosted or Selfhosted",
+                "description": "Start on the hosted service with nothing to install, or selfhost on standard PHP hosting with MySQL. A selfhosted install resolves to Enterprise.",
+                "icon": "globe",
+                "gradient": "from-blue-50 to-sky-50 dark:from-blue-900/30 dark:to-sky-900/30",
+                "border": "border-blue-200 dark:border-blue-500/20",
+                "icon_bg": "bg-blue-100 dark:bg-blue-500/20",
+                "icon_color": "text-blue-600 dark:text-blue-400"
+            },
+            {
+                "title": "Built-in Newsletters",
+                "description": "Email the people who follow your schedule from inside the app, alongside the automatic digest of your new events.",
+                "icon": "mail",
+                "gradient": "from-amber-50 to-yellow-50 dark:from-amber-900/30 dark:to-yellow-900/30",
+                "border": "border-amber-200 dark:border-amber-500/20",
+                "icon_bg": "bg-amber-100 dark:bg-amber-500/20",
+                "icon_color": "text-amber-600 dark:text-amber-400"
+            },
+            {
+                "title": "AI Event Parsing",
+                "description": "Paste event details or upload a flyer and the parser fills in the name, date, time and venue for you to check, on every plan.",
+                "icon": "ai",
+                "gradient": "from-cyan-50 to-sky-50 dark:from-cyan-900/30 dark:to-sky-900/30",
+                "border": "border-cyan-200 dark:border-cyan-500/20",
+                "icon_bg": "bg-cyan-100 dark:bg-cyan-500/20",
+                "icon_color": "text-cyan-600 dark:text-cyan-400"
+            }
+        ],
+        "cross_links": [
+            {
+                "name": "Meetup",
+                "route": "marketing.compare_meetup"
+            },
+            {
+                "name": "Facebook Events",
+                "route": "marketing.compare_facebook_events"
+            },
+            {
+                "name": "Hi.Events",
+                "route": "marketing.compare_hi_events"
+            }
+        ],
+        "faq": [
+            {
+                "question": "Are both platforms open source?",
+                "answer": "Yes. Mobilizon is AGPLv3 and written in Elixir with PostgreSQL. Event Schedule is open source under the Attribution Assurance License and runs on PHP with MySQL, and a selfhosted install resolves to Enterprise."
+            },
+            {
+                "question": "Does Event Schedule federate like Mobilizon?",
+                "answer": "Not over ActivityPub. A selfhosted Event Schedule install can share its public events with the eventschedule.com listings, one schedule at a time and only when the owner opts in, and every listing links back to the original event."
+            },
+            {
+                "question": "Can I sell tickets on Event Schedule?",
+                "answer": "Yes, on Pro at $5/mo, through your own Stripe or PayPal account with zero platform fees. Free registration with QR tickets is on every plan."
+            },
+            {
+                "question": "Do I have to run a server?",
+                "answer": "No. The hosted service has a free plan with nothing to install. Selfhosting is there if you want your events on your own server."
+            }
+        ]
     }
 }

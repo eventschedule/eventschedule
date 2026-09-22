@@ -3,8 +3,8 @@
         /* ==================================================================
            EVERY fact about the competitor on this page comes from
            MarketingController::getComparisonData(). This ONE template renders
-           16 URLs (/eventbrite-alternative through /eventzilla-alternative),
-           so a hard-coded rival name, price or fee would be wrong on fifteen
+           26 URLs (/eventbrite-alternative through /mobilizon-alternative),
+           so a hard-coded rival name, price or fee would be wrong on twenty-five
            of them. Nothing below authors a competitor claim: it reads the
            rows, counts them, and prints them as written.
            ================================================================== */
@@ -63,7 +63,7 @@
 
         // --- The three standing lines -------------------------------------
         // Printed at the top of the card because they are the same three rows
-        // on all sixteen competitors, and because they are self-referential
+        // on all twenty-six competitors, and because they are self-referential
         // truths (0%, open source, selfhostable) rather than rival claims.
         $keyLines = ['Platform fees', 'Open source', 'Selfhosting'];
         $standing = [];
@@ -108,7 +108,7 @@
             ['title' => 'Bring your list across', 'description' => 'Export the addresses you already have and paste them in or upload a CSV, up to ten thousand rows, on any plan. What the newsletter allowance counts is sending to them, not holding them.'],
             ['title' => 'Connect Stripe or PayPal and sell', 'description' => 'Your own Stripe or PayPal account, so the money settles into it rather than into ours. Zero platform fees on every plan, a ticket with a price on it is Pro, and refunds go back through the same account.'],
         ];
-        // Twelve of the sixteen competitors fall through to these, so they are
+        // Twenty-two of the twenty-six competitors fall through to these, so they are
         // written as facts with their tier attached rather than as adjectives.
         // AI flyer and style generation is Enterprise; event graphics are free
         // (GraphicController gates only the AI text and scheduled emails).
@@ -162,7 +162,7 @@
     @endphp
 
     {{-- Each competitor carries its own meta_title (the "X alternative" phrase
-         plus the one difference that decides it), so sixteen titles are not one
+         plus the one difference that decides it), so twenty-six titles are not one
          pattern with a name swapped in. The fallback keeps a new entry safe. --}}
     <x-slot name="title">{{ $meta_title ?? $name.' Alternative | Event Schedule' }}</x-slot>
     <x-slot name="description">{{ $description }}</x-slot>
@@ -283,7 +283,7 @@
            and none will be added, so the plates are typographic on
            purpose, not for want of an image.
 
-           DATA. This file renders 16 competitor URLs from
+           DATA. This file renders 26 competitor URLs from
            getComparisonData(). Nothing here may hard-code a rival name,
            price, fee or logo. The tally, the section scores and the three
            standing lines are all COUNTED from the rows, so pretix (open
@@ -924,7 +924,7 @@
                 </div>
 
                 <!-- The head of the card: two plates, the tally, the score,
-                     and the three lines that hold on all sixteen cards. -->
+                     and the three lines that hold on all twenty-six cards. -->
                 <div class="es-fade-up es-d-4" data-reveal>
                     <div class="es-score-card p-6 sm:p-7">
                         <div class="mb-5 flex flex-wrap items-center justify-between gap-3">

@@ -144,6 +144,16 @@ return [
     '/pretix-alternative' => ['keyword' => 'Pretix alternative'],
     '/humanitix-alternative' => ['keyword' => 'Humanitix alternative'],
     '/eventzilla-alternative' => ['keyword' => 'Eventzilla alternative'],
+    '/timely-alternative' => ['keyword' => 'Timely alternative'],
+    '/the-events-calendar-alternative' => ['keyword' => 'The Events Calendar alternative'],
+    '/bandsintown-alternative' => ['keyword' => 'Bandsintown alternative'],
+    '/posh-alternative' => ['keyword' => 'Posh alternative'],
+    '/partiful-alternative' => ['keyword' => 'Partiful alternative'],
+    '/facebook-events-alternative' => ['keyword' => 'Facebook Events alternative'],
+    '/zeffy-alternative' => ['keyword' => 'Zeffy alternative'],
+    '/tockify-alternative' => ['keyword' => 'Tockify alternative'],
+    '/hi-events-alternative' => ['keyword' => 'Hi.Events alternative'],
+    '/mobilizon-alternative' => ['keyword' => 'Mobilizon alternative'],
     '/switch-from-eventbrite' => ['keyword' => 'migrate from Eventbrite'],
 
     // Tool replacements (replace-single.blade.php). The eyebrow reads "{Tool} alternative for

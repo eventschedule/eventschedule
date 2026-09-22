@@ -409,6 +409,8 @@ class MarketingPriceTest extends TestCase
             // Trello Standard is $5 a user a month billed annually, $6 monthly (trello.com/pricing),
             // the same figure as our retired Pro price, so it is exempted by phrase too.
             'Trello Standard costs $5 per user a month', 'From $5/mo per user', '$5-$6/user/mo',
+            // Timely Lite is $9 a month billed annually (time.ly/pricing), the same figure as our Pro.
+            'Timely starts at $9/mo', 'From $9/mo, billed annually', 'Timely plans start at $9/mo',
         ];
 
         foreach (explode("\n", File::get($path)) as $index => $line) {

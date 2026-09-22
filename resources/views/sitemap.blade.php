@@ -117,6 +117,46 @@ echo '<?xml version="1.0" encoding="UTF-8"?>'; ?>
         {!! $lastmodTag('/eventzilla-alternative') !!}
     </url>
     <url>
+        <loc>{{ url('/timely-alternative') }}</loc>
+        {!! $lastmodTag('/timely-alternative') !!}
+    </url>
+    <url>
+        <loc>{{ url('/the-events-calendar-alternative') }}</loc>
+        {!! $lastmodTag('/the-events-calendar-alternative') !!}
+    </url>
+    <url>
+        <loc>{{ url('/bandsintown-alternative') }}</loc>
+        {!! $lastmodTag('/bandsintown-alternative') !!}
+    </url>
+    <url>
+        <loc>{{ url('/posh-alternative') }}</loc>
+        {!! $lastmodTag('/posh-alternative') !!}
+    </url>
+    <url>
+        <loc>{{ url('/partiful-alternative') }}</loc>
+        {!! $lastmodTag('/partiful-alternative') !!}
+    </url>
+    <url>
+        <loc>{{ url('/facebook-events-alternative') }}</loc>
+        {!! $lastmodTag('/facebook-events-alternative') !!}
+    </url>
+    <url>
+        <loc>{{ url('/zeffy-alternative') }}</loc>
+        {!! $lastmodTag('/zeffy-alternative') !!}
+    </url>
+    <url>
+        <loc>{{ url('/tockify-alternative') }}</loc>
+        {!! $lastmodTag('/tockify-alternative') !!}
+    </url>
+    <url>
+        <loc>{{ url('/hi-events-alternative') }}</loc>
+        {!! $lastmodTag('/hi-events-alternative') !!}
+    </url>
+    <url>
+        <loc>{{ url('/mobilizon-alternative') }}</loc>
+        {!! $lastmodTag('/mobilizon-alternative') !!}
+    </url>
+    <url>
         <loc>{{ url('/replace') }}</loc>
         {!! $lastmodTag('/replace') !!}
     </url>

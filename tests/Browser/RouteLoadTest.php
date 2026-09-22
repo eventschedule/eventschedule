@@ -152,6 +152,16 @@ class RouteLoadTest extends DuskTestCase
                 '/pretix-alternative',
                 '/humanitix-alternative',
                 '/eventzilla-alternative',
+                '/timely-alternative',
+                '/the-events-calendar-alternative',
+                '/bandsintown-alternative',
+                '/posh-alternative',
+                '/partiful-alternative',
+                '/facebook-events-alternative',
+                '/zeffy-alternative',
+                '/tockify-alternative',
+                '/hi-events-alternative',
+                '/mobilizon-alternative',
 
                 // Replacement pages
                 '/replace',

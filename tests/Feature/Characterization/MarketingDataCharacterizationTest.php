@@ -44,6 +44,8 @@ class MarketingDataCharacterizationTest extends TestCase
         'eventbrite', 'luma', 'ticket-tailor', 'google-calendar', 'meetup',
         'dice', 'brown-paper-tickets', 'splash', 'sched', 'whova',
         'accelevents', 'tito', 'addevent', 'pretix', 'humanitix', 'eventzilla',
+        'timely', 'the-events-calendar', 'bandsintown', 'posh', 'partiful',
+        'facebook-events', 'zeffy', 'tockify', 'hi-events', 'mobilizon',
     ];
 
     private const REPLACEMENT_KEYS = [

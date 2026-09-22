@@ -26,7 +26,7 @@ return [
     // Four cannot hold all five, so the three chosen are the ones that make the other two
     // REACHABLE: promo-codes carries installments and waitlist in its own strip, so every new page
     // is within two hops of here. Allocated seating moved one hop out (check-in links it) and the
-    // Eventbrite comparison is still reached from /compare and from its sixteen siblings.
+    // Eventbrite comparison is still reached from /compare and from its twenty-five siblings.
     'features/ticketing' => [
         ['title' => 'Passes & Subscriptions', 'path' => '/features/passes', 'blurb' => 'One pass, many events, counted down on a single QR code.'],
         ['title' => 'Check-in Dashboard', 'path' => '/features/check-in', 'blurb' => 'Watch the room fill up while you are standing at the door.'],
@@ -150,7 +150,7 @@ return [
         ['title' => 'For DJs', 'path' => '/for-djs', 'blurb' => 'DJ sets, residencies, and guest spots in one place.'],
         ['title' => 'For Music Venues', 'path' => '/for-music-venues', 'blurb' => 'Fill the calendar at the venues you play.'],
         ['title' => 'Ticketing', 'path' => '/features/ticketing', 'blurb' => 'Sell tickets to your shows with zero platform fees.'],
-        ['title' => 'Eventbrite Alternative', 'path' => '/eventbrite-alternative', 'blurb' => 'Keep more of every ticket you sell.'],
+        ['title' => 'Bandsintown Alternative', 'path' => '/bandsintown-alternative', 'blurb' => 'Your own tour-date page with ticketing and calendar sync.'],
     ],
 
     'for-djs' => [
@@ -238,7 +238,7 @@ return [
         ['title' => 'Ticketing', 'path' => '/features/ticketing', 'blurb' => 'Ticket types, QR check-in, and zero platform fees.'],
         ['title' => 'Recurring Events', 'path' => '/features/recurring-events', 'blurb' => 'Set a residency once, and skip the weeks you close.'],
         ['title' => 'Sub-schedules', 'path' => '/features/sub-schedules', 'blurb' => 'Keep every night in its own lane on one link.'],
-        ['title' => 'Analytics', 'path' => '/features/analytics', 'blurb' => 'See which nights the interest is actually landing on.'],
+        ['title' => 'Posh Alternative', 'path' => '/posh-alternative', 'blurb' => 'Ticketing for parties and nights out with zero platform fees.'],
     ],
 
     // The for-art-galleries page already links the neighbouring audience pages
@@ -360,7 +360,7 @@ return [
         ['title' => 'Selfhost', 'path' => '/selfhost', 'blurb' => 'Run every Enterprise feature on your own server at no cost.'],
         ['title' => 'White-Label SaaS', 'path' => '/saas', 'blurb' => 'Turn your install into a ticketing business you own.'],
         ['title' => 'Pretix Alternative', 'path' => '/pretix-alternative', 'blurb' => 'Flat pricing instead of per-ticket fees, plus AI features.'],
-        ['title' => 'Pricing', 'path' => '/pricing', 'blurb' => 'See what is included on Free, Pro, and Enterprise plans.'],
+        ['title' => 'Hi.Events Alternative', 'path' => '/hi-events-alternative', 'blurb' => 'Two open source ticketing platforms, compared line by line.'],
     ],
 
     'privacy' => [
@@ -549,7 +549,7 @@ return [
         ['title' => 'Embed Tickets', 'path' => '/features/embed-tickets', 'blurb' => 'Put the ticket checkout on your own website with one iframe tag.'],
         ['title' => 'Custom CSS', 'path' => '/features/custom-css', 'blurb' => 'Write your own CSS and customize every pixel of your schedule.'],
         ['title' => 'Calendar Sync', 'path' => '/features/calendar-sync', 'blurb' => 'Two-way sync with Google Calendar, Outlook and any CalDAV server.'],
-        ['title' => 'AddEvent Alternative', 'path' => '/addevent-alternative', 'blurb' => 'Ticketing and public event pages, not just calendar buttons.'],
+        ['title' => 'The Events Calendar Alternative', 'path' => '/the-events-calendar-alternative', 'blurb' => 'Event pages, ticketing and calendar sync without a WordPress plugin.'],
     ],
 
     'features/fan-videos' => [
@@ -605,7 +605,7 @@ return [
         ['title' => 'For Libraries', 'path' => '/for-libraries', 'blurb' => 'Set story time up once and give every date its own place count.'],
         ['title' => 'For Farmers Markets', 'path' => '/for-farmers-markets', 'blurb' => 'Market days, vendor lineups, and seasonal events.'],
         ['title' => 'Humanitix Alternative', 'path' => '/humanitix-alternative', 'blurb' => 'Flat pricing instead of per-ticket fees, plus selfhosting.'],
-        ['title' => 'Pricing', 'path' => '/pricing', 'blurb' => 'See what is included on Free, Pro, and Enterprise plans.'],
+        ['title' => 'Facebook Events Alternative', 'path' => '/facebook-events-alternative', 'blurb' => 'An events page you own, with ticketing and calendar sync.'],
     ],
 
     'for-farmers-markets' => [
@@ -703,7 +703,7 @@ return [
         ['title' => 'Google Calendar Alternative', 'path' => '/google-calendar-alternative', 'blurb' => 'When a Google Calendar link is not enough.'],
         ['title' => 'Luma Alternative', 'path' => '/luma-alternative', 'blurb' => 'Custom domains, zero platform fees, and open source flexibility.'],
         ['title' => 'Compare Alternatives', 'path' => '/compare', 'blurb' => 'See how Event Schedule stacks up against other platforms.'],
-        ['title' => 'Pricing', 'path' => '/pricing', 'blurb' => 'See what is included on Free, Pro, and Enterprise plans.'],
+        ['title' => 'Tockify Alternative', 'path' => '/tockify-alternative', 'blurb' => 'An embeddable calendar that also takes registrations.'],
     ],
 
     'brown-paper-tickets-alternative' => [
@@ -742,28 +742,28 @@ return [
         ['title' => 'AddEvent Alternative', 'path' => '/addevent-alternative', 'blurb' => 'Ticketing and public event pages, not just calendar buttons.'],
         ['title' => 'Meetup Alternative', 'path' => '/meetup-alternative', 'blurb' => 'Zero platform fees and custom domains, without a subscription.'],
         ['title' => 'Compare Alternatives', 'path' => '/compare', 'blurb' => 'See how Event Schedule stacks up against other platforms.'],
-        ['title' => 'Pricing', 'path' => '/pricing', 'blurb' => 'See what is included on Free, Pro, and Enterprise plans.'],
+        ['title' => 'Timely Alternative', 'path' => '/timely-alternative', 'blurb' => 'A free plan and ticketing with zero platform fees, not an annual add-on.'],
     ],
 
     'humanitix-alternative' => [
         ['title' => 'Eventbrite Alternative', 'path' => '/eventbrite-alternative', 'blurb' => 'Keep more of every ticket you sell.'],
         ['title' => 'Tito Alternative', 'path' => '/tito-alternative', 'blurb' => 'Flat pricing instead of a percentage of every ticket.'],
         ['title' => 'Compare Alternatives', 'path' => '/compare', 'blurb' => 'See how Event Schedule stacks up against other platforms.'],
-        ['title' => 'Pricing', 'path' => '/pricing', 'blurb' => 'See what is included on Free, Pro, and Enterprise plans.'],
+        ['title' => 'Zeffy Alternative', 'path' => '/zeffy-alternative', 'blurb' => 'Open source ticketing for any organizer, with zero platform fees.'],
     ],
 
     'luma-alternative' => [
         ['title' => 'Eventbrite Alternative', 'path' => '/eventbrite-alternative', 'blurb' => 'Keep more of every ticket you sell.'],
         ['title' => 'Meetup Alternative', 'path' => '/meetup-alternative', 'blurb' => 'Zero platform fees and custom domains, without a subscription.'],
         ['title' => 'Compare Alternatives', 'path' => '/compare', 'blurb' => 'See how Event Schedule stacks up against other platforms.'],
-        ['title' => 'Pricing', 'path' => '/pricing', 'blurb' => 'See what is included on Free, Pro, and Enterprise plans.'],
+        ['title' => 'Partiful Alternative', 'path' => '/partiful-alternative', 'blurb' => 'Free RSVPs, plus recurring events and a public schedule page.'],
     ],
 
     'meetup-alternative' => [
         ['title' => 'Luma Alternative', 'path' => '/luma-alternative', 'blurb' => 'Custom domains, zero platform fees, and open source flexibility.'],
         ['title' => 'Eventbrite Alternative', 'path' => '/eventbrite-alternative', 'blurb' => 'Keep more of every ticket you sell.'],
         ['title' => 'Compare Alternatives', 'path' => '/compare', 'blurb' => 'See how Event Schedule stacks up against other platforms.'],
-        ['title' => 'Pricing', 'path' => '/pricing', 'blurb' => 'See what is included on Free, Pro, and Enterprise plans.'],
+        ['title' => 'Mobilizon Alternative', 'path' => '/mobilizon-alternative', 'blurb' => 'Open source events with ticketing and calendar sync built in.'],
     ],
 
     'pretix-alternative' => [
@@ -804,6 +804,76 @@ return [
     'whova-alternative' => [
         ['title' => 'Sched Alternative', 'path' => '/sched-alternative', 'blurb' => 'Zero platform fees, calendar sync, and open source flexibility.'],
         ['title' => 'Accelevents Alternative', 'path' => '/accelevents-alternative', 'blurb' => 'Zero platform fees, instant setup, and open source flexibility.'],
+        ['title' => 'Compare Alternatives', 'path' => '/compare', 'blurb' => 'See how Event Schedule stacks up against other platforms.'],
+        ['title' => 'Pricing', 'path' => '/pricing', 'blurb' => 'See what is included on Free, Pro, and Enterprise plans.'],
+    ],
+
+    'timely-alternative' => [
+        ['title' => 'The Events Calendar Alternative', 'path' => '/the-events-calendar-alternative', 'blurb' => 'Event pages, ticketing and calendar sync without a WordPress plugin.'],
+        ['title' => 'Tockify Alternative', 'path' => '/tockify-alternative', 'blurb' => 'An embeddable calendar that also takes registrations.'],
+        ['title' => 'Compare Alternatives', 'path' => '/compare', 'blurb' => 'See how Event Schedule stacks up against other platforms.'],
+        ['title' => 'Pricing', 'path' => '/pricing', 'blurb' => 'See what is included on Free, Pro, and Enterprise plans.'],
+    ],
+
+    'the-events-calendar-alternative' => [
+        ['title' => 'Timely Alternative', 'path' => '/timely-alternative', 'blurb' => 'A free plan and ticketing with zero platform fees, not an annual add-on.'],
+        ['title' => 'Tockify Alternative', 'path' => '/tockify-alternative', 'blurb' => 'An embeddable calendar that also takes registrations.'],
+        ['title' => 'Compare Alternatives', 'path' => '/compare', 'blurb' => 'See how Event Schedule stacks up against other platforms.'],
+        ['title' => 'Pricing', 'path' => '/pricing', 'blurb' => 'See what is included on Free, Pro, and Enterprise plans.'],
+    ],
+
+    'tockify-alternative' => [
+        ['title' => 'Timely Alternative', 'path' => '/timely-alternative', 'blurb' => 'A free plan and ticketing with zero platform fees, not an annual add-on.'],
+        ['title' => 'The Events Calendar Alternative', 'path' => '/the-events-calendar-alternative', 'blurb' => 'Event pages, ticketing and calendar sync without a WordPress plugin.'],
+        ['title' => 'Compare Alternatives', 'path' => '/compare', 'blurb' => 'See how Event Schedule stacks up against other platforms.'],
+        ['title' => 'Pricing', 'path' => '/pricing', 'blurb' => 'See what is included on Free, Pro, and Enterprise plans.'],
+    ],
+
+    'bandsintown-alternative' => [
+        ['title' => 'Facebook Events Alternative', 'path' => '/facebook-events-alternative', 'blurb' => 'An events page you own, with ticketing and calendar sync.'],
+        ['title' => 'Posh Alternative', 'path' => '/posh-alternative', 'blurb' => 'Ticketing for parties and nights out with zero platform fees.'],
+        ['title' => 'Compare Alternatives', 'path' => '/compare', 'blurb' => 'See how Event Schedule stacks up against other platforms.'],
+        ['title' => 'Pricing', 'path' => '/pricing', 'blurb' => 'See what is included on Free, Pro, and Enterprise plans.'],
+    ],
+
+    'posh-alternative' => [
+        ['title' => 'Partiful Alternative', 'path' => '/partiful-alternative', 'blurb' => 'Free RSVPs, plus recurring events and a public schedule page.'],
+        ['title' => 'Bandsintown Alternative', 'path' => '/bandsintown-alternative', 'blurb' => 'Your own tour-date page with ticketing and calendar sync.'],
+        ['title' => 'Compare Alternatives', 'path' => '/compare', 'blurb' => 'See how Event Schedule stacks up against other platforms.'],
+        ['title' => 'Pricing', 'path' => '/pricing', 'blurb' => 'See what is included on Free, Pro, and Enterprise plans.'],
+    ],
+
+    'partiful-alternative' => [
+        ['title' => 'Posh Alternative', 'path' => '/posh-alternative', 'blurb' => 'Ticketing for parties and nights out with zero platform fees.'],
+        ['title' => 'Facebook Events Alternative', 'path' => '/facebook-events-alternative', 'blurb' => 'An events page you own, with ticketing and calendar sync.'],
+        ['title' => 'Compare Alternatives', 'path' => '/compare', 'blurb' => 'See how Event Schedule stacks up against other platforms.'],
+        ['title' => 'Pricing', 'path' => '/pricing', 'blurb' => 'See what is included on Free, Pro, and Enterprise plans.'],
+    ],
+
+    'facebook-events-alternative' => [
+        ['title' => 'Partiful Alternative', 'path' => '/partiful-alternative', 'blurb' => 'Free RSVPs, plus recurring events and a public schedule page.'],
+        ['title' => 'Mobilizon Alternative', 'path' => '/mobilizon-alternative', 'blurb' => 'Open source events with ticketing and calendar sync built in.'],
+        ['title' => 'Compare Alternatives', 'path' => '/compare', 'blurb' => 'See how Event Schedule stacks up against other platforms.'],
+        ['title' => 'Pricing', 'path' => '/pricing', 'blurb' => 'See what is included on Free, Pro, and Enterprise plans.'],
+    ],
+
+    'zeffy-alternative' => [
+        ['title' => 'Facebook Events Alternative', 'path' => '/facebook-events-alternative', 'blurb' => 'An events page you own, with ticketing and calendar sync.'],
+        ['title' => 'Hi.Events Alternative', 'path' => '/hi-events-alternative', 'blurb' => 'Two open source ticketing platforms, compared line by line.'],
+        ['title' => 'Compare Alternatives', 'path' => '/compare', 'blurb' => 'See how Event Schedule stacks up against other platforms.'],
+        ['title' => 'Pricing', 'path' => '/pricing', 'blurb' => 'See what is included on Free, Pro, and Enterprise plans.'],
+    ],
+
+    'hi-events-alternative' => [
+        ['title' => 'Mobilizon Alternative', 'path' => '/mobilizon-alternative', 'blurb' => 'Open source events with ticketing and calendar sync built in.'],
+        ['title' => 'Zeffy Alternative', 'path' => '/zeffy-alternative', 'blurb' => 'Open source ticketing for any organizer, with zero platform fees.'],
+        ['title' => 'Compare Alternatives', 'path' => '/compare', 'blurb' => 'See how Event Schedule stacks up against other platforms.'],
+        ['title' => 'Pricing', 'path' => '/pricing', 'blurb' => 'See what is included on Free, Pro, and Enterprise plans.'],
+    ],
+
+    'mobilizon-alternative' => [
+        ['title' => 'Hi.Events Alternative', 'path' => '/hi-events-alternative', 'blurb' => 'Two open source ticketing platforms, compared line by line.'],
+        ['title' => 'Facebook Events Alternative', 'path' => '/facebook-events-alternative', 'blurb' => 'An events page you own, with ticketing and calendar sync.'],
         ['title' => 'Compare Alternatives', 'path' => '/compare', 'blurb' => 'See how Event Schedule stacks up against other platforms.'],
         ['title' => 'Pricing', 'path' => '/pricing', 'blurb' => 'See what is included on Free, Pro, and Enterprise plans.'],
     ],

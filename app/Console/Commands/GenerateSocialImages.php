@@ -149,6 +149,16 @@ class GenerateSocialImages extends Command
         'pretix-alternative' => '/pretix-alternative',
         'humanitix-alternative' => '/humanitix-alternative',
         'eventzilla-alternative' => '/eventzilla-alternative',
+        'timely-alternative' => '/timely-alternative',
+        'the-events-calendar-alternative' => '/the-events-calendar-alternative',
+        'bandsintown-alternative' => '/bandsintown-alternative',
+        'posh-alternative' => '/posh-alternative',
+        'partiful-alternative' => '/partiful-alternative',
+        'facebook-events-alternative' => '/facebook-events-alternative',
+        'zeffy-alternative' => '/zeffy-alternative',
+        'tockify-alternative' => '/tockify-alternative',
+        'hi-events-alternative' => '/hi-events-alternative',
+        'mobilizon-alternative' => '/mobilizon-alternative',
 
         // Replacement pages
         'replace' => '/replace',

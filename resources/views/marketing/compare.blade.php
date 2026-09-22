@@ -70,9 +70,9 @@
         "@context": "https://schema.org",
         "@type": "CollectionPage",
         "@id": "{{ config('app.url') }}/compare#page",
-        "name": "Compare Event Schedule with 16 event platforms",
+        "name": "Compare Event Schedule with {{ count($headToHead) }} event platforms",
         "url": "{{ config('app.url') }}/compare",
-        "description": {!! \App\Utils\SeoUtils::jsonLd('Feature-by-feature comparisons of Event Schedule against 16 event and ticketing platforms, with a fee calculator using published rates.') !!},
+        "description": {!! \App\Utils\SeoUtils::jsonLd('Feature-by-feature comparisons of Event Schedule against '.count($headToHead).' event and ticketing platforms, with a fee calculator using published rates.') !!},
         "mainEntity": {
             "@type": "ItemList",
             "name": "Event platform comparisons",
@@ -202,10 +202,10 @@
         }
 
         /* ---- Platform picker ----------------------------------------
-           Sixteen chips will not fit in a horizontal tab strip at any
+           Twenty-six chips will not fit in a horizontal tab strip at any
            width, so the tablist wraps into a grid. Panels ship visible
            and the script hides the inactive ones, so no-JS visitors and
-           crawlers get all sixteen head-to-heads. */
+           crawlers get all twenty-six head-to-heads. */
         .es-chip {
             transition: border-color 0.2s, background-color 0.2s, color 0.2s, transform 0.2s;
         }
@@ -370,7 +370,7 @@
     <!-- ============================================================ -->
     {{-- This replaces both the old six-column matrix as lead content and the
          separate "Detailed comparisons" card grid: the chips are the directory
-         of all 16 pages, so the same 16 are no longer listed twice. --}}
+         of all 26 pages, so the same 26 are no longer listed twice. --}}
     <section id="head-to-head" class="relative scroll-mt-24 overflow-hidden bg-gray-50 py-16 dark:bg-[#0f0f14] lg:py-24">
         <div class="mx-auto max-w-6xl px-4 sm:px-6 lg:px-8">
             <div class="mb-8 text-center">
@@ -991,7 +991,7 @@
                 });
             }
 
-            // Only now do panels start hiding: without JS all sixteen stay visible.
+            // Only now do panels start hiding: without JS all twenty-six stay visible.
             wrap.classList.add('is-ready');
             select(0, false);
         })();

@@ -18,7 +18,7 @@ use Tests\TestCase;
  * empty strip; a key that matches no page is dead weight that will rot (config had a
  * docs/allocated-seating key, and docs pages do not render this component at all).
  *
- * Which paths a view serves cannot be read off the routes - compare-single.blade.php serves 16
+ * Which paths a view serves cannot be read off the routes - compare-single.blade.php serves 26
  * URLs and replace-single.blade.php serves 12 - so the pages are rendered and the view stack is
  * recorded through a wildcard composer.
  */
