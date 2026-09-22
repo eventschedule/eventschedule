@@ -222,7 +222,7 @@
             $breadcrumbs[] = ['name' => $pageName, 'url' => $selfUrl];
         } elseif ($path === 'blog') {
             $breadcrumbs[] = ['name' => 'Blog', 'url' => $selfUrl];
-        } elseif (in_array($path, ['stripe', 'google-calendar', 'caldav', 'invoiceninja'])) {
+        } elseif (in_array($path, ['stripe', 'paypal', 'google-calendar', 'outlook-calendar', 'caldav', 'invoiceninja'])) {
             $breadcrumbs[] = ['name' => 'Integrations', 'url' => url('/features/integrations')];
             $breadcrumbs[] = ['name' => $pageName, 'url' => $selfUrl];
         } elseif ($path === 'use-cases') {

@@ -1572,6 +1572,8 @@
 
     </div>
 
+    <x-marketing.related-pages />
+
     <script src="{{ asset('vendor/canvas-confetti/confetti.browser.min.js') }}" {!! nonce_attr() !!} defer></script>
     @vite('resources/js/marketing-home.js')
 </x-marketing-layout>

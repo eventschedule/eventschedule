@@ -1649,7 +1649,7 @@
                  this page's ground and 5.03 on the card, so the note sits on a card. --}}
             <div class="es-book-card mt-6 px-4 py-3 text-center" data-reveal>
                 <p class="es-book-muted text-sm">
-                    Want the details? <x-link href="{{ route('marketing.docs.appointments') }}">Read the Appointments guide</x-link>
+                    Want the details? <x-link href="{{ route('marketing.docs.appointments') }}">Read the Appointments guide</x-link>, or <x-link href="{{ marketing_url('/features') }}">see all features</x-link>.
                 </p>
             </div>
         </div>
@@ -1742,6 +1742,8 @@
     </nav>
 
     </div>
+
+    <x-marketing.related-pages />
 
     <script src="{{ asset('vendor/canvas-confetti/confetti.browser.min.js') }}" {!! nonce_attr() !!} defer></script>
     @vite('resources/js/marketing-home.js')

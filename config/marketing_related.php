@@ -120,7 +120,7 @@ return [
 
     'selfhost' => [
         ['title' => 'White-Label SaaS', 'path' => '/saas', 'blurb' => 'Turn your install into a ticketing business you own.'],
-        ['title' => 'All Features', 'path' => '/features', 'blurb' => 'Every feature included in the selfhosted build.'],
+        ['title' => 'Pretix Alternative', 'path' => '/pretix-alternative', 'blurb' => 'Flat pricing instead of per-ticket fees, plus AI features.'],
         ['title' => 'Pricing', 'path' => '/pricing', 'blurb' => 'What the hosted plans cost, if you would rather not run a server.'],
         ['title' => 'Open Source', 'path' => '/open-source', 'blurb' => 'The licence, the repositories and how to contribute.'],
     ],
@@ -142,7 +142,7 @@ return [
     'features/calendar-sync' => [
         ['title' => 'Google Calendar', 'path' => '/google-calendar', 'blurb' => 'How the two-way Google Calendar integration works.'],
         ['title' => 'CalDAV', 'path' => '/caldav', 'blurb' => 'Sync with any CalDAV-compatible calendar server.'],
-        ['title' => 'Ticketing', 'path' => '/features/ticketing', 'blurb' => 'Sell tickets and sync sold-out status to your calendar.'],
+        ['title' => 'AddEvent Alternative', 'path' => '/addevent-alternative', 'blurb' => 'Ticketing and public event pages, not just calendar buttons.'],
         ['title' => 'Google Calendar Alternative', 'path' => '/google-calendar-alternative', 'blurb' => 'When a Google Calendar link is not enough.'],
     ],
 
@@ -214,12 +214,13 @@ return [
     ],
 
     // The for-theaters page already links the neighbouring audience pages
-    // inline, so this strip carries the features a run reaches for.
+    // inline, so this strip carries the features a run reaches for, plus the Brown Paper
+    // Tickets comparison: BPT is being retired and many small theaters sold through it.
     'for-theaters' => [
         ['title' => 'Recurring Events', 'path' => '/features/recurring-events', 'blurb' => 'Set a run once, with dark days and a closing performance.'],
         ['title' => 'Ticketing', 'path' => '/features/ticketing', 'blurb' => 'Named ticket types, QR check-in, and zero platform fees.'],
         ['title' => 'Sub-schedules', 'path' => '/features/sub-schedules', 'blurb' => 'Keep mainstage, studio and family programming apart.'],
-        ['title' => 'Newsletters', 'path' => '/features/newsletters', 'blurb' => 'Email the people who follow your theater, with open rates.'],
+        ['title' => 'Brown Paper Tickets Alternative', 'path' => '/brown-paper-tickets-alternative', 'blurb' => 'Brown Paper Tickets is being retired: zero platform fees and unlimited free registration.'],
     ],
 
     // The for-music-venues page already links the neighbouring audience pages
@@ -358,7 +359,7 @@ return [
     'open-source' => [
         ['title' => 'Selfhost', 'path' => '/selfhost', 'blurb' => 'Run every Enterprise feature on your own server at no cost.'],
         ['title' => 'White-Label SaaS', 'path' => '/saas', 'blurb' => 'Turn your install into a ticketing business you own.'],
-        ['title' => 'All Features', 'path' => '/features', 'blurb' => 'Every feature on one page, with the plan each one needs.'],
+        ['title' => 'Pretix Alternative', 'path' => '/pretix-alternative', 'blurb' => 'Flat pricing instead of per-ticket fees, plus AI features.'],
         ['title' => 'Pricing', 'path' => '/pricing', 'blurb' => 'See what is included on Free, Pro, and Enterprise plans.'],
     ],
 
@@ -530,6 +531,34 @@ return [
         ['title' => 'Pricing', 'path' => '/pricing', 'blurb' => 'See what is included on Free, Pro, and Enterprise plans.'],
     ],
 
+    'features/appointments' => [
+        ['title' => 'Availability', 'path' => '/features/availability', 'blurb' => 'Mark whole dates as unavailable so your team sees who is out.'],
+        ['title' => 'Team Scheduling', 'path' => '/features/team-scheduling', 'blurb' => 'Put other people on your schedule with a named position.'],
+        ['title' => 'Custom Fields', 'path' => '/features/custom-fields', 'blurb' => 'Ask your own questions on the ticket and registration forms.'],
+        ['title' => 'Calendly Replacement', 'path' => '/calendly-replacement', 'blurb' => 'One-on-one bookings plus public events with ticketing.'],
+    ],
+
+    'features/boost' => [
+        ['title' => 'Event Graphics', 'path' => '/features/event-graphics', 'blurb' => 'Auto-generate flyers and share graphics from your events.'],
+        ['title' => 'Newsletters', 'path' => '/features/newsletters', 'blurb' => 'Send branded newsletters to your followers and ticket buyers.'],
+        ['title' => 'Analytics', 'path' => '/features/analytics', 'blurb' => 'Page views, traffic sources and devices, with no external service.'],
+        ['title' => 'Pricing', 'path' => '/pricing', 'blurb' => 'See what is included on Free, Pro, and Enterprise plans.'],
+    ],
+
+    'features/embed-calendar' => [
+        ['title' => 'Embed Tickets', 'path' => '/features/embed-tickets', 'blurb' => 'Put the ticket checkout on your own website with one iframe tag.'],
+        ['title' => 'Custom CSS', 'path' => '/features/custom-css', 'blurb' => 'Write your own CSS and customize every pixel of your schedule.'],
+        ['title' => 'Calendar Sync', 'path' => '/features/calendar-sync', 'blurb' => 'Two-way sync with Google Calendar, Outlook and any CalDAV server.'],
+        ['title' => 'AddEvent Alternative', 'path' => '/addevent-alternative', 'blurb' => 'Ticketing and public event pages, not just calendar buttons.'],
+    ],
+
+    'features/fan-videos' => [
+        ['title' => 'Feedback', 'path' => '/features/feedback', 'blurb' => 'A rating and an optional comment from everyone who booked.'],
+        ['title' => 'Polls', 'path' => '/features/polls', 'blurb' => 'Add a poll to any event: a question and two to ten choices.'],
+        ['title' => 'Event Graphics', 'path' => '/features/event-graphics', 'blurb' => 'Auto-generate flyers and share graphics from your events.'],
+        ['title' => 'For Musicians', 'path' => '/for-musicians', 'blurb' => 'Tour dates, gigs, and fans on one link.'],
+    ],
+
     'caldav' => [
         ['title' => 'Google Calendar', 'path' => '/google-calendar', 'blurb' => 'How the two-way Google Calendar integration works.'],
         ['title' => 'Outlook Calendar', 'path' => '/outlook-calendar', 'blurb' => 'Two-way sync with Outlook and Microsoft 365, plus Teams links.'],
@@ -575,7 +604,7 @@ return [
     'for-community-centers' => [
         ['title' => 'For Libraries', 'path' => '/for-libraries', 'blurb' => 'Set story time up once and give every date its own place count.'],
         ['title' => 'For Farmers Markets', 'path' => '/for-farmers-markets', 'blurb' => 'Market days, vendor lineups, and seasonal events.'],
-        ['title' => 'Use Cases', 'path' => '/use-cases', 'blurb' => 'Event scheduling for musicians, venues, restaurants and theaters.'],
+        ['title' => 'Humanitix Alternative', 'path' => '/humanitix-alternative', 'blurb' => 'Flat pricing instead of per-ticket fees, plus selfhosting.'],
         ['title' => 'Pricing', 'path' => '/pricing', 'blurb' => 'See what is included on Free, Pro, and Enterprise plans.'],
     ],
 
@@ -610,8 +639,8 @@ return [
     'for-virtual-conferences' => [
         ['title' => 'For Webinars', 'path' => '/for-webinars', 'blurb' => 'Registration, ticketing, and a join link on any platform.'],
         ['title' => 'For Live Q&A Sessions', 'path' => '/for-live-qa-sessions', 'blurb' => 'Registration, ticketing and email for a live Q&A on any platform.'],
-        ['title' => 'Use Cases', 'path' => '/use-cases', 'blurb' => 'Event scheduling for musicians, venues, restaurants and theaters.'],
-        ['title' => 'Pricing', 'path' => '/pricing', 'blurb' => 'See what is included on Free, Pro, and Enterprise plans.'],
+        ['title' => 'Sched Alternative', 'path' => '/sched-alternative', 'blurb' => 'Zero platform fees, calendar sync, and open source flexibility.'],
+        ['title' => 'Splash Alternative', 'path' => '/splash-alternative', 'blurb' => 'Zero platform fees and open source, without enterprise pricing.'],
     ],
 
     'for-visual-artists' => [
@@ -633,6 +662,34 @@ return [
         ['title' => 'For Fitness & Yoga', 'path' => '/for-fitness-and-yoga', 'blurb' => 'Share your class schedule and sell drop-ins and class passes.'],
         ['title' => 'Use Cases', 'path' => '/use-cases', 'blurb' => 'Event scheduling for musicians, venues, restaurants and theaters.'],
         ['title' => 'Pricing', 'path' => '/pricing', 'blurb' => 'See what is included on Free, Pro, and Enterprise plans.'],
+    ],
+
+    'for-fitness-and-yoga' => [
+        ['title' => 'Passes & Subscriptions', 'path' => '/features/passes', 'blurb' => 'One pass, many events, counted down on a single QR code.'],
+        ['title' => 'Recurring Events', 'path' => '/features/recurring-events', 'blurb' => 'Set a weekly class once, and skip the weeks you are closed.'],
+        ['title' => 'For Workshop Instructors', 'path' => '/for-workshop-instructors', 'blurb' => 'Announce classes, sell spots, and build multi-session series.'],
+        ['title' => 'For Online Classes', 'path' => '/for-online-classes', 'blurb' => 'Sell online classes with registration and recurring sessions.'],
+    ],
+
+    'for-live-concerts' => [
+        ['title' => 'For Musicians', 'path' => '/for-musicians', 'blurb' => 'Tour dates, gigs, and fans on one link.'],
+        ['title' => 'For Music Venues', 'path' => '/for-music-venues', 'blurb' => 'Run your live music calendar in one place.'],
+        ['title' => 'Online Events', 'path' => '/features/online-events', 'blurb' => 'Paste a Zoom, Meet or stream link once and the ticket and listing follow.'],
+        ['title' => 'Brown Paper Tickets Alternative', 'path' => '/brown-paper-tickets-alternative', 'blurb' => 'Brown Paper Tickets is being retired: zero platform fees and unlimited free registration.'],
+    ],
+
+    'for-live-qa-sessions' => [
+        ['title' => 'For Webinars', 'path' => '/for-webinars', 'blurb' => 'Registration, ticketing, and a join link on any platform.'],
+        ['title' => 'For Virtual Conferences', 'path' => '/for-virtual-conferences', 'blurb' => 'One event per day with a timed agenda inside it and one join link.'],
+        ['title' => 'Polls', 'path' => '/features/polls', 'blurb' => 'Add a poll to any event: a question and two to ten choices.'],
+        ['title' => 'Online Events', 'path' => '/features/online-events', 'blurb' => 'Paste a Zoom, Meet or stream link once and the ticket and listing follow.'],
+    ],
+
+    'for-webinars' => [
+        ['title' => 'For Virtual Conferences', 'path' => '/for-virtual-conferences', 'blurb' => 'One event per day with a timed agenda inside it and one join link.'],
+        ['title' => 'For Live Q&A Sessions', 'path' => '/for-live-qa-sessions', 'blurb' => 'Registration, ticketing and email for a live Q&A on any platform.'],
+        ['title' => 'Online Events', 'path' => '/features/online-events', 'blurb' => 'Paste a Zoom, Meet or stream link once and the ticket and listing follow.'],
+        ['title' => 'Eventzilla Alternative', 'path' => '/eventzilla-alternative', 'blurb' => 'A flat-rate alternative to Eventzilla with zero per-ticket fees.'],
     ],
 
     'accelevents-alternative' => [

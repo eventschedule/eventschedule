@@ -351,6 +351,14 @@
                         A Waitlist tab appears on the Sales page as soon as there is one entry, listing each person's name and email with the event, the date and where they are in the line. It is the demand that did not fit, in writing - which is worth reading before you decide whether to add a second night.
                     </p>
                 </div>
+                <div class="mt-10 text-center">
+                    <a href="{{ marketing_url('/features') }}" class="es-queue-accent inline-flex items-center font-medium hover:underline">
+                        See all features
+                        <svg aria-hidden="true" class="ml-1 h-4 w-4 rtl:ml-0 rtl:mr-1 rtl:rotate-180" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6" />
+                        </svg>
+                    </a>
+                </div>
             </div>
         </section>
 

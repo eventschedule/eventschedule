@@ -540,6 +540,9 @@
                     <a href="{{ route('marketing.ticketing') }}" class="inline-flex items-center gap-2 rounded-xl border border-gray-300 px-6 py-3 font-semibold es-house-ink transition-colors hover:border-[#1d4ed8] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#4E81FA] dark:border-white/15">
                         All of ticketing
                     </a>
+                    <a href="{{ marketing_url('/features') }}" class="inline-flex items-center gap-2 rounded-xl border border-gray-300 px-6 py-3 font-semibold es-house-ink transition-colors hover:border-[#1d4ed8] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#4E81FA] dark:border-white/15">
+                        All features
+                    </a>
                 </div>
             </div>
         </section>
