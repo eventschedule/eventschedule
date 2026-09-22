@@ -15,36 +15,51 @@ use App\Http\Controllers\Auth\TwoFactorController;
 use App\Http\Controllers\Auth\VerifyEmailController;
 use Illuminate\Support\Facades\Route;
 
+// Every throttle in this group is NAMED, and that is load-bearing rather than tidy.
+//
+// App\Http\Middleware\ThrottleRequests only scopes by route for an AUTHENTICATED request; a guest
+// falls through to the framework's resolveRequestSignature(), which keys on
+// `$route->getDomain().'|'.$request->ip()` - no route name and no URI. Nothing in this file
+// declares a domain, so without a prefix every POST below shared ONE bucket per IP, governed by
+// whichever limit was strictest. Sending a sign-up code, resending it and mistyping it twice then
+// spent the login allowance too, and two people behind one office NAT blocked each other.
+//
+// The prefix is prepended to that signature by the framework (`'key' => $prefix.$signature`), so a
+// distinct string per route is the whole fix. Same reasoning as the /claim and /audience/join
+// routes in routes/web.php - see the comment above Route::get('/claim').
+//
+// config('app.is_testing') short-circuits the middleware entirely, so no feature test can see any
+// of this. tests/Unit/ThrottleRequestsTest.php drives it with the flag off.
 Route::middleware(['app_subdomain', 'guest'])->group(function () {
     Route::get('sign_up', [RegisteredUserController::class, 'create'])
         ->name('sign_up');
 
     Route::post('sign_up/send-code', [RegisteredUserController::class, 'sendVerificationCode'])
         ->name('sign_up.send_code')
-        ->middleware('throttle:5,1');
+        ->middleware('throttle:5,1,signup_code');
 
     Route::post('sign_up', [RegisteredUserController::class, 'store'])
-        ->middleware('throttle:10,1');
+        ->middleware('throttle:10,1,signup');
 
     Route::get('login', [AuthenticatedSessionController::class, 'create'])
         ->name('login');
 
     Route::post('login', [AuthenticatedSessionController::class, 'store'])
-        ->middleware('throttle:30,1');
+        ->middleware('throttle:30,1,login');
 
     Route::get('reset-password', [PasswordResetLinkController::class, 'create'])
         ->name('password.request');
 
     Route::post('reset-password', [PasswordResetLinkController::class, 'store'])
         ->name('password.email')
-        ->middleware('throttle:5,1');
+        ->middleware('throttle:5,1,password_reset');
 
     Route::get('update-password/{token}', [NewPasswordController::class, 'create'])
         ->name('password.reset');
 
     Route::post('update-password', [NewPasswordController::class, 'store'])
         ->name('password.store')
-        ->middleware('throttle:5,1');
+        ->middleware('throttle:5,1,password_update');
 
     Route::get('auth/google', [SocialAuthController::class, 'redirectToGoogle'])
         ->name('auth.google');
@@ -56,7 +71,7 @@ Route::middleware(['app_subdomain', 'guest'])->group(function () {
         ->name('two-factor.challenge');
 
     Route::post('two-factor-challenge', [TwoFactorChallengeController::class, 'store'])
-        ->middleware('throttle:5,1');
+        ->middleware('throttle:5,1,two_factor_challenge');
 });
 
 Route::middleware('auth')->group(function () {

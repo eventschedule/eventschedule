@@ -123,6 +123,79 @@ class ThrottleRequestsTest extends TestCase
         }
     }
 
+    public function test_two_unprefixed_guest_routes_share_one_bucket(): void
+    {
+        // This is the defect the named prefixes in routes/auth.php exist to avoid, pinned as
+        // framework behaviour so the reason for those prefixes cannot be read as decoration.
+        //
+        // App\Http\Middleware\ThrottleRequests::resolveRequestSignature() scopes by route name only
+        // when $request->user() is set. A GUEST falls through to the parent, which keys on
+        // `$route->getDomain().'|'.$request->ip()` - no route name, no URI. routes/auth.php
+        // declares no domain, so unprefixed every POST in it answered to the same counter.
+        $middleware = $this->middleware();
+
+        $sendCode = $this->request('/sign_up/send-code');
+        $login = $this->request('/login');
+
+        $middleware->handle($sendCode, $this->passThrough(), 1, 1);
+
+        // A different route, its own limit of 1, never used - and already exhausted.
+        try {
+            $middleware->handle($login, $this->passThrough(), 1, 1);
+            $this->fail('two unprefixed guest routes should share a bucket; if this now passes, the framework changed and the prefixes below may be redundant');
+        } catch (\Illuminate\Http\Exceptions\ThrottleRequestsException $e) {
+            $this->assertSame(429, $e->getStatusCode());
+        }
+    }
+
+    public function test_distinct_prefixes_give_each_guest_route_its_own_bucket(): void
+    {
+        $middleware = $this->middleware();
+
+        $sendCode = $this->request('/sign_up/send-code');
+        $login = $this->request('/login');
+
+        $first = $middleware->handle($sendCode, $this->passThrough(), 1, 1, 'unit_signup_code');
+        $this->assertSame('0', $first->headers->get('X-RateLimit-Remaining'));
+
+        // Same IP, same (absent) domain, different prefix: a full allowance of its own.
+        $second = $middleware->handle($login, $this->passThrough(), 1, 1, 'unit_login');
+        $this->assertSame('0', $second->headers->get('X-RateLimit-Remaining'));
+        $this->assertSame('ok', $second->getContent());
+    }
+
+    public function test_every_throttled_guest_auth_route_carries_a_named_prefix(): void
+    {
+        // The behavioural tests above cannot see routes/auth.php itself. This one fails if a
+        // throttled route is added to (or reverted in) that file without its own bucket, which is
+        // the only way the shared-counter bug can come back.
+        $unprefixed = [];
+
+        foreach (app('router')->getRoutes() as $route) {
+            $middleware = $route->gatherMiddleware();
+
+            if (! in_array('guest', $middleware, true)) {
+                continue;
+            }
+
+            foreach ($middleware as $entry) {
+                if (! is_string($entry) || ! str_starts_with($entry, 'throttle:')) {
+                    continue;
+                }
+
+                // throttle:5,1 has two arguments; throttle:5,1,name has the third we require.
+                // A single argument is a NAMED limiter, which already has its own bucket.
+                $args = explode(',', substr($entry, strlen('throttle:')));
+
+                if (count($args) === 2) {
+                    $unprefixed[] = implode('|', $route->methods()).' '.$route->uri().' ('.$entry.')';
+                }
+            }
+        }
+
+        $this->assertSame([], $unprefixed, 'these guest routes share one per-IP throttle bucket with every other guest route on the host: '.implode(', ', $unprefixed));
+    }
+
     public function test_testing_mode_still_bypasses_everything(): void
     {
         // The Dusk 429 fix this subclass exists for.
