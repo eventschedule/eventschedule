@@ -151,6 +151,37 @@ trait AccountSetupTrait
     }
 
     /**
+     * Wait out the save, wherever RoleController::store() decided to send us, and end up on the
+     * schedule page either way.
+     *
+     * A FIRST schedule now goes on to the event form rather than the schedule admin page, because
+     * 91% of the people who ever create one do it within an hour of signing up and a schedule with
+     * nothing in it is not what they came for. Every caller of these helpers still expects to be
+     * left on /{slug}/schedule, so the difference is absorbed here rather than in seventeen test
+     * classes.
+     */
+    private function landAfterScheduleSave(Browser $browser, string $slug): void
+    {
+        try {
+            $browser->waitUntil(
+                'window.location.pathname === "/'.$slug.'/schedule" || window.location.pathname === "/'.$slug.'/add-event"',
+                45
+            );
+        } catch (\Throwable $e) {
+            $this->fail(sprintf(
+                "Expected to land on /%s/schedule or /%s/add-event, but the browser is on %s.\n%s",
+                $slug,
+                $slug,
+                $this->currentUrl($browser),
+                $this->describePage($browser),
+            ));
+        }
+
+        $browser->visit('/'.$slug.'/schedule');
+        $browser->assertPathIs('/'.$slug.'/schedule');
+    }
+
+    /**
      * Create a test venue
      */
     protected function createTestVenue(Browser $browser, string $name = 'Venue', string $address = '123 Test St'): void
@@ -169,9 +200,8 @@ trait AccountSetupTrait
             }
         ");
 
-        // Use JavaScript to switch to address section (more reliable than clicking the nav link)
-        $browser->script("document.querySelector('a[data-section=\"section-address\"]').click()");
-
+        // No section nav to click through any more: the first-run form asks a venue for its
+        // address on the same screen as its name.
         $browser->waitFor('#address1', 15)
             ->type('address1', $address);
 
@@ -187,7 +217,7 @@ trait AccountSetupTrait
         // Use JavaScript to submit form (avoids click-targeting issues with multiple submit buttons)
         $browser->script("document.getElementById('edit-form').requestSubmit()");
 
-        $this->landOn($browser, '/'.strtolower(str_replace(' ', '-', $name)).'/schedule', 45);
+        $this->landAfterScheduleSave($browser, strtolower(str_replace(' ', '-', $name)));
     }
 
     /**
@@ -199,13 +229,8 @@ trait AccountSetupTrait
             ->waitFor('#edit-form', 15)
             ->pause(500);
 
-        // Ensure we're on the General tab (page may land on a different tab)
-        $browser->script("
-            var generalTab = document.querySelector('button.details-tab[data-tab=\"general\"]');
-            if (generalTab) generalTab.click();
-        ");
-        $browser->pause(500)
-            ->clear('name')
+        // No tabs on the first-run form, so there is no wrong tab to land on.
+        $browser->clear('name')
             ->type('name', $name);
 
         // Ensure name was set (JS fallback for headless Chrome flakiness)
@@ -220,7 +245,7 @@ trait AccountSetupTrait
         // Use JavaScript to submit form (avoids click-targeting issues in headless Chrome)
         $browser->script("document.getElementById('edit-form').requestSubmit()");
 
-        $this->landOn($browser, '/'.strtolower(str_replace(' ', '-', $name)).'/schedule', 45);
+        $this->landAfterScheduleSave($browser, strtolower(str_replace(' ', '-', $name)));
     }
 
     /**
@@ -242,17 +267,14 @@ trait AccountSetupTrait
             }
         ");
 
-        // Use JavaScript to switch to engagement section (where the requests tab lives)
-        $browser->script("document.querySelector('a[data-section=\"section-engagement\"]').click()");
-
-        $browser->pause(500)
-            ->click('button.engagement-tab[data-tab="requests"]')
-            ->waitFor('#accept_requests', 5)
-            ->click('label[for="accept_requests"]')
-            ->scrollIntoView('button[type="submit"]')
+        // accept_requests used to be switched on by hand here, through two section clicks and a
+        // tab. It no longer has to be: roles.accept_requests defaults to TRUE and the first-run
+        // form carries that default, where the full form's toggle rendered OFF and posted a 0 over
+        // it. tests/Feature/FirstScheduleFormTest.php pins that.
+        $browser->scrollIntoView('button[type="submit"]')
             ->click('button[type="submit"]');
 
-        $this->landOn($browser, '/'.strtolower(str_replace(' ', '-', $name)).'/schedule', 15);
+        $this->landAfterScheduleSave($browser, strtolower(str_replace(' ', '-', $name)));
     }
 
     /**

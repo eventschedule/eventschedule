@@ -315,17 +315,18 @@ class EventAnnouncementTest extends TestCase
     {
         $owner = $this->createOwner('founder@venues.test');
 
-        $response = $this->actingAs($owner)->get('/new/venue');
+        // Asserts the SAVED ROW rather than a rendered checkbox. It used to check that the
+        // Notifications toggle painted ON, because on the full settings page that toggle decided
+        // whether the browser posted 1 or the hidden 0 beside it. /new/{type} now renders a
+        // first-run form that has no such toggle and lets the column default stand, so the
+        // rendered-checkbox assertion no longer describes the mechanism - but the outcome it was a
+        // proxy for is exactly this, and testing it directly is stronger either way.
+        $viaForm = $this->actingAs($owner)->submitNewScheduleForm('venue', ['name' => 'Announce Venue']);
 
-        $response->assertOk();
-
-        // The mechanism is the rendered checkbox: it is what decides whether the browser submits
-        // 1 or the hidden 0 beside it.
-        $this->assertMatchesRegularExpression(
-            '~name="announce_new_events"[^>]*value="1"[^>]*\bchecked\b~s',
-            $response->getContent(),
-            'the announce_new_events toggle must render ON for a new schedule, or the form posts '.
-            'the hidden 0 and store() persists it over the column default'
+        $this->assertTrue(
+            (bool) $viaForm->announce_new_events,
+            'a schedule created through the UI must announce by default, or no new schedule ever '.
+            'sends the email its subscribe panel promises guests'
         );
 
         // And the column default it mirrors really is on, so the two cannot drift apart.

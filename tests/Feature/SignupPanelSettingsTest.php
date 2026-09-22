@@ -41,16 +41,18 @@ class SignupPanelSettingsTest extends TestCase
         $this->assertSame('0', (string) $defaults['show_event_interest']);
     }
 
-    public function test_the_create_page_paints_both_defaults(): void
+    public function test_a_schedule_made_through_the_form_keeps_both_defaults(): void
     {
-        // The Advanced tab renders on the create page, and a toggle posts its hidden 0 whenever its
-        // checkbox is unticked - so what this page paints is what store() saves.
-        $html = $this->actingAs($this->createOwner())->get('/new/venue')->assertOk()->getContent();
+        // Was an assertion about what the Advanced tab PAINTED, because on the full settings page
+        // a toggle posts its hidden 0 whenever its checkbox is unticked. /new/{type} now renders a
+        // first-run form with no toggles, which lets the column defaults stand - so the saved row
+        // is both the real invariant and a stronger thing to assert.
+        $role = $this->actingAs($this->createOwner())->submitNewScheduleForm('venue', ['name' => 'Panel Venue']);
 
-        $this->assertTrue($this->toggleIsChecked($html, 'show_subscribe_panel'),
-            'the sign-up panel toggle must render ON for a new schedule, or store() persists the hidden 0');
-        $this->assertFalse($this->toggleIsChecked($html, 'show_event_interest'),
-            'the "Notify me" card toggle must render OFF for a new schedule');
+        $this->assertTrue((bool) $role->show_subscribe_panel,
+            'a new schedule must keep its sign-up panel, which the guest-facing copy promises');
+        $this->assertFalse((bool) $role->show_event_interest,
+            'the "Notify me" card is opt-in');
     }
 
     public function test_by_default_the_panel_shows_and_the_card_does_not(): void

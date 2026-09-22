@@ -262,12 +262,25 @@ class BookingFormSettingsTest extends TestCase
      */
     public function test_a_new_schedule_starts_with_online_on(): void
     {
-        $html = $this->actingAs($this->createOwner())
-            ->get(route('new', ['type' => 'venue']))
-            ->assertOk()
-            ->getContent();
+        // The saved row, not the rendered toggle: /new/{type} is a first-run form now and carries
+        // no booking controls at all.
+        //
+        // Both halves matter. applyBookingFormConfig() early-returns unless the request carries the
+        // booking_form_submitted SENTINEL, so a form that omits the booking fields entirely leaves
+        // the config untouched and normalizeBookingFormConfig() supplies allow_online => true. The
+        // failure mode this guards is therefore a first-run form that starts posting the sentinel
+        // without the online field beside it, which would write a hard false over that default -
+        // so the absence of the sentinel is asserted too, not just the resulting value.
+        $user = $this->createOwner();
+        $this->actingAs($user);
 
-        $this->assertMatchesRegularExpression('~name="booking_allow_online"[^>]*value="1"[^>]*\bchecked\b~s', $html);
+        $html = $this->get(route('new', ['type' => 'venue']))->assertOk()->getContent();
+        $this->assertStringNotContainsString('booking_form_submitted', $html,
+            'the first-run form posts the booking sentinel, so it must carry the online field too');
+
+        $role = $this->submitNewScheduleForm('venue', ['name' => 'Online Venue']);
+
+        $this->assertTrue($role->bookingFormAllowsOnline());
     }
 
     // -- The phone field ------------------------------------------------------------------------

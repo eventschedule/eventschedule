@@ -37,6 +37,42 @@ trait CreatesScheduleData
         return $user;
     }
 
+    /**
+     * Save a schedule the way a person does: through /new/{type}, posting what that form posts.
+     *
+     * createRole() writes a Role straight to the database and so cannot see anything about the
+     * form or RoleController::store(). This goes through both. It exists because the first-run
+     * form carries several values as hidden inputs - type, require_account, the background pair,
+     * language_code - and store() does fill($request->all()), so a dropped input is not "use the
+     * column default", it is whatever fill() and the code after it leave behind.
+     *
+     * The caller must already be acting as the owner.
+     */
+    protected function submitNewScheduleForm(string $type, array $overrides = []): Role
+    {
+        $html = $this->get(route('new', ['type' => $type]))->assertOk()->getContent();
+
+        preg_match_all('/<input[^>]*name="([^"]+)"[^>]*value="([^"]*)"[^>]*>/', $html, $matches, PREG_SET_ORDER);
+
+        $payload = [];
+        foreach ($matches as $match) {
+            if ($match[1] !== '_token') {
+                $payload[$match[1]] = html_entity_decode($match[2], ENT_QUOTES);
+            }
+        }
+
+        $payload = $overrides + $payload;
+        $payload['name'] = $payload['name'] ?? 'Test '.$type;
+
+        if ($type === 'venue') {
+            $payload['address1'] = $payload['address1'] ?? '1 Test St';
+        }
+
+        $this->post(route('role.store'), $payload)->assertRedirect();
+
+        return Role::where('user_id', auth()->id())->latest('id')->firstOrFail();
+    }
+
     protected function createRole(User $user, string $type = 'venue', array $attrs = []): Role
     {
         $role = new Role;

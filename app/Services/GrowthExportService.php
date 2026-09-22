@@ -409,6 +409,12 @@ class GrowthExportService
                 .'not add its totals to anything else. claims.claimed is null for months before the '
                 .'claim feature shipped, not 0 - it comes from schedule.claim audit rows. '
                 .'claims.auto_created comes from roles.created_at and is real for every month.',
+            'reached_event means the visitor OPENED the event form of their own accord, or has an '
+                .'event. Saving a first schedule redirects straight to that form, and that one visit is '
+                .'deliberately not stamped - counting it would make reached_event equal saved_schedule '
+                .'for every organizer and turn the stage into a 100% that measures nothing. Compare the '
+                .'months either side of that change with care: before it, the stage also counted people '
+                .'who only ever landed there.',
             'signup_code_requests and signup_code_verified are NOT a funnel pair. Both are deduped per '
                 .'IP+user-agent per day rather than counted per event, and the request counter is also '
                 .'raised by the guest-add flow, which never reaches the verified counter.',

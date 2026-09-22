@@ -4374,7 +4374,10 @@ class RoleController extends Controller
             'socialClickTotals' => [],
         ];
 
-        return view('role/edit', $data);
+        // A first-run form, not the 9,680-line settings page. See role/create.blade.php for why
+        // the hidden inputs it carries are load-bearing; $data is unchanged so the two views stay
+        // interchangeable if this is ever reverted.
+        return view('role/create', $data);
     }
 
     public function store(RoleCreateRequest $request): RedirectResponse
@@ -4611,11 +4614,24 @@ class RoleController extends Controller
 
         $message = __('messages.created_schedule');
 
-        if ($subdomain = session('pending_request')) {
-            return redirect(route('event.create', ['subdomain' => $role->subdomain]))->with('message', $message);
-        } else {
-            return redirect(route('role.view_admin', ['subdomain' => $role->subdomain, 'tab' => 'schedule']))->with('message', $message);
+        // On to the event form: for a pending request as before, and now also for a first
+        // schedule. A schedule with nothing in it is not what anybody came for, and 91% of the
+        // people who ever create one do it within an hour of signing up - so the next step has to
+        // be in front of them while they are still here, rather than behind a dashboard.
+        //
+        // owner() has just gained this schedule, so a count of one means it is their first.
+        $isFirstSchedule = $user->owner()->count() === 1;
+
+        if (session('pending_request') || $isFirstSchedule) {
+            // The flash tells EventController::create() not to stamp event_form_viewed_at for a
+            // visit it did not choose. Without it this redirect makes the funnel's reached_event
+            // stage identical to saved_schedule by construction.
+            return redirect(route('event.create', ['subdomain' => $role->subdomain]))
+                ->with('message', $message)
+                ->with('onboarding_event_redirect', true);
         }
+
+        return redirect(route('role.view_admin', ['subdomain' => $role->subdomain, 'tab' => 'schedule']))->with('message', $message);
     }
 
     public function edit($subdomain)

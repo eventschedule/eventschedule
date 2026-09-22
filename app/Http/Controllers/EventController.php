@@ -602,10 +602,18 @@ class EventController extends Controller
         // Onboarding funnel stage 6 ("reached the add-event step"). First-touch stamp.
         // Base query builder + whereNull writes at most once and does not bump users.updated_at
         // (which the admin active-users metric keys off).
-        DB::table('users')
-            ->where('id', $user->id)
-            ->whereNull('event_form_viewed_at')
-            ->update(['event_form_viewed_at' => now()]);
+        //
+        // Skipped when this visit is the redirect RoleController::store() performs after a first
+        // schedule. That redirect would otherwise stamp every single person who saves one, making
+        // reached_event exactly equal to saved_schedule and the stage a tautology - a 100% that
+        // measures nothing and silently changes what the 75.9% below it is a fraction OF. The
+        // stage keeps its meaning: opened the event form of their own accord, or made an event.
+        if (! session('onboarding_event_redirect')) {
+            DB::table('users')
+                ->where('id', $user->id)
+                ->whereNull('event_form_viewed_at')
+                ->update(['event_form_viewed_at' => now()]);
+        }
 
         $event = new Event;
         $event->user_id = $user->id;
