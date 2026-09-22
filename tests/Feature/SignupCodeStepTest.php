@@ -282,6 +282,69 @@ class SignupCodeStepTest extends TestCase
         $this->assertStringContainsString('#send-code-btn, form button[type="submit"] {', $html);
     }
 
+    /**
+     * An array in the email query parameter must not 500 an unauthenticated page.
+     *
+     * Both pages read a query param into a text field: /login for the "already have an account"
+     * handoff, /sign_up for the address in a claim invitation. `?email[]=x` makes request('email')
+     * return an ARRAY, which reaches ComponentAttributeBag::__toString()'s trim() on one page and
+     * base64_decode() on the other - a TypeError either way, on routes anybody can hit.
+     */
+    public function test_an_array_in_the_email_parameter_does_not_error(): void
+    {
+        config(['app.hosted' => true, 'app.is_testing' => false]);
+
+        $this->get(app_url('/login').'?email[]=x')->assertOk();
+        $this->get(app_url('/sign_up').'?email[]=x')->assertOk();
+    }
+
+    /**
+     * The sixth digit submits once, and only when the rest of the form is filled in.
+     *
+     * maybeAutoSubmit() runs on every `input` event and the handler slices to 6, so a seventh
+     * keystroke leaves the value at 6 and re-fires. Each call reached requestSubmit(), which on an
+     * incomplete form focuses the offending field and pops its bubble - taking the caret out of
+     * the code box, repeatedly, while somebody is typing in it.
+     */
+    public function test_auto_submit_is_guarded(): void
+    {
+        $html = $this->signupPage()->assertOk()->getContent();
+
+        $this->assertStringContainsString('if (autoSubmitted) return;', $html,
+            'auto-submit has no once-only latch, so it re-fires on every keystroke past the sixth');
+        $this->assertStringContainsString('!form.checkValidity()', $html,
+            'auto-submit does not check the form is complete first');
+        $this->assertStringContainsString('form.submit();', $html,
+            'no fallback for browsers without requestSubmit(), where the sixth digit does nothing at all');
+    }
+
+    /**
+     * Asking for a code twice at once sends two codes.
+     *
+     * The endpoint mails synchronously with no SMTP timeout, so the button stays live for however
+     * long that takes, and the countdown meant to space these out only starts once a response
+     * comes back.
+     */
+    public function test_the_send_path_cannot_overlap_itself(): void
+    {
+        $html = $this->signupPage()->assertOk()->getContent();
+
+        $this->assertStringContainsString('if (sendInFlight) return;', $html);
+        // The pressed button gets the busy state, not always the top one.
+        $this->assertStringContainsString('sendVerificationCode(this)', $html);
+    }
+
+    /** Going back to step one has to undo step one's reveal, or required hidden fields remain. */
+    public function test_changing_the_email_restores_step_one(): void
+    {
+        $html = $this->signupPage()->assertOk()->getContent();
+
+        $this->assertStringContainsString('function hideSignupFields()', $html,
+            'revealSignupFields() has no inverse, so "use a different email" leaves a required but hidden code field');
+        $this->assertMatchesRegularExpression('/function changeEmail\(\)[\s\S]*?hideSignupFields\(\)/', $html);
+        $this->assertMatchesRegularExpression('/function changeEmail\(\)[\s\S]*?clearInterval\(resendTimer\)/', $html);
+    }
+
     /** Isolates the verification_code input so an attribute elsewhere cannot satisfy a check. */
     private function codeFieldMarkup(string $html): string
     {

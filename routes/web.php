@@ -136,7 +136,12 @@ if (config('app.hosted') && ! config('app.is_testing')) {
         Route::get('/guest-submit/google', [EventController::class, 'guestSubmitGoogle'])->name('event.guest_submit.google');
         Route::post('/guest-add', [EventController::class, 'guestImport'])->name('event.guest_import.store')->middleware('throttle:10,1');
         Route::post('/guest-add/check-email', [EventController::class, 'checkEmail'])->name('event.check_email')->middleware('throttle:10,1');
-        Route::post('/guest-add/send-code', [RegisteredUserController::class, 'sendVerificationCode'])->name('event.guest_send_code')->middleware('throttle:5,1');
+        // Named for the same reason the /claim routes are, and doubly so here: this is the SAME
+        // controller method as sign_up.send_code, mailing the same code, and it was the one copy
+        // left sharing the unprefixed per-IP bucket with every other throttled guest route on the
+        // host. That pool mixes decay windows - /submit-comment is 20,60 - so one comment could
+        // set an hour-long timer that then locked this out after five hits.
+        Route::post('/guest-add/send-code', [RegisteredUserController::class, 'sendVerificationCode'])->name('event.guest_send_code')->middleware('throttle:5,1,guest_add_code');
         Route::get('/booking-request', [EventController::class, 'showBookingRequest'])->name('event.booking_request');
         Route::post('/booking-request', [EventController::class, 'bookingRequest'])->name('event.booking_request.store')->middleware('throttle:10,1');
         // Appointments (Calendly-style booking). Registered before the /{slug} catch-alls below.

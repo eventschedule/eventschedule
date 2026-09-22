@@ -4623,12 +4623,21 @@ class RoleController extends Controller
         $isFirstSchedule = $user->owner()->count() === 1;
 
         if (session('pending_request') || $isFirstSchedule) {
+            $redirect = redirect(route('event.create', ['subdomain' => $role->subdomain]))
+                ->with('message', $message);
+
             // The flash tells EventController::create() not to stamp event_form_viewed_at for a
-            // visit it did not choose. Without it this redirect makes the funnel's reached_event
-            // stage identical to saved_schedule by construction.
-            return redirect(route('event.create', ['subdomain' => $role->subdomain]))
-                ->with('message', $message)
-                ->with('onboarding_event_redirect', true);
+            // visit it did not choose. Without it, sending every new organizer to the event form
+            // makes the funnel's reached_event stage identical to saved_schedule by construction.
+            //
+            // Only for the FIRST-SCHEDULE redirect. The pending_request one predates this change
+            // and has always stamped; suppressing it too would move a number for a reason nothing
+            // in this commit is about.
+            if ($isFirstSchedule) {
+                $redirect->with('onboarding_event_redirect', true);
+            }
+
+            return $redirect;
         }
 
         return redirect(route('role.view_admin', ['subdomain' => $role->subdomain, 'tab' => 'schedule']))->with('message', $message);

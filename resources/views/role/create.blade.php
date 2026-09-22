@@ -43,9 +43,15 @@
 <x-app-layout :theme-variants="true" :title="__('messages.new_schedule') . ' | Event Schedule'">
 
     <div class="flex flex-col items-center px-4 pt-8 pb-12 sm:px-6 lg:px-8">
+        {{-- /new/{type} serves everyone, not only first-timers, and "Create Account / Create
+             Schedule / Create Event" is noise on somebody's tenth schedule. Same predicate the
+             page's "choose a different type" link uses, and the one HomeController uses to decide
+             whether this person still needs a schedule at all. --}}
+        @if (auth()->user()->member()->doesntExist())
         <div class="w-full max-w-2xl rounded-2xl overflow-hidden">
             <x-step-indicator :currentStep="2" />
         </div>
+        @endif
 
         <div class="w-full max-w-xl mt-8">
             <div class="text-center mb-6">

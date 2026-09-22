@@ -9,7 +9,10 @@
         <!-- Email Address -->
         <div>
             <x-input-label for="email" :value="__('messages.email')" />
-            <x-text-input id="email" class="block mt-1 w-full" type="email" name="email" :value="old('email', request('email'))" required autofocus autocomplete="username" />
+            {{-- is_string, not a bare request('email'): ?email[]=x hands this an ARRAY, which reaches
+                 ComponentAttributeBag::__toString()'s trim() and 500s on an unauthenticated page. --}}
+            <x-text-input id="email" class="block mt-1 w-full" type="email" name="email"
+                :value="old('email', is_string(request('email')) ? request('email') : null)" required autofocus autocomplete="username" />
 
             <x-input-error :messages="$errors->get('email')" class="mt-2" />
         </div>

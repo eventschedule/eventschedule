@@ -117,6 +117,7 @@ class StepIndicatorTest extends TestCase
             'resources/views/role/edit.blade.php',
             'resources/views/event/edit.blade.php',
             'resources/views/auth/verify-email.blade.php',
+            'resources/views/role/create.blade.php',
         ];
 
         foreach ($views as $view) {

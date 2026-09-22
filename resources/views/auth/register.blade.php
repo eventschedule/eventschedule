@@ -52,6 +52,26 @@
         }
 
         /**
+         * The inverse of revealSignupFields(), for going back to step one.
+         *
+         * Disarming `required` matters as much as hiding: a required control inside a hidden
+         * container is one the browser refuses to focus, so constraint validation fails and the
+         * submit is abandoned silently. That is issue #124, and it is why revealSignupFields()
+         * arms these at the moment they become visible rather than in the markup.
+         */
+        function hideSignupFields() {
+            ['name-field', 'password-field', 'verification-code-field', 'terms-field', 'submit-section'].forEach(function (id) {
+                var el = document.getElementById(id);
+                if (el) el.style.display = 'none';
+            });
+
+            ['name', 'password', 'terms', 'verification_code'].forEach(function (id) {
+                var el = document.getElementById(id);
+                if (el) el.required = false;
+            });
+        }
+
+        /**
          * Put the page into the "we have sent you a code" state.
          *
          * Note what this deliberately does NOT do: hide the Google button, the guest option or the
@@ -74,8 +94,17 @@
                 if (address) address.textContent = email;
             }
 
+            // Only with an address. The restore path calls this with emailInput.value, which can
+            // be empty on an error reload, and the panel then reads "We sent a code to ." with a
+            // blank <bdi> where the address should be.
             var panel = document.getElementById('code-sent-panel');
-            if (panel) panel.style.display = 'block';
+            if (panel && email) panel.style.display = 'block';
+
+            // Hide the top "Email me a code" button. setSendButtonIdle() re-enables it on every
+            // response and startResendCountdown() only governs the panel's Resend, so leaving it on
+            // screen gave step two a second send path with no rate-limit feedback at all.
+            var sendCodeBtn = document.getElementById('send-code-btn');
+            if (sendCodeBtn) sendCodeBtn.style.display = 'none';
 
             // Name the step, in the page and in the tab strip. This flow REQUIRES leaving the tab
             // to read a mail, and every auth page shipped the same literal <title>Event Schedule</title>,
@@ -105,6 +134,26 @@
             if (panel) panel.style.display = 'none';
             if (codeInput) codeInput.value = '';
             if (codeMessage) codeMessage.innerHTML = '';
+
+            // The rest of the inverse. Without it the page sat in a hybrid state: the panel gone,
+            // but Name, Password, Terms, Submit and an empty REQUIRED "Verification code" box all
+            // still on screen, with nothing left to explain where a code would come from.
+            hideSignupFields();
+
+            // Put the send button back, since showCodeSentState() hid it.
+            var sendCodeBtn = document.getElementById('send-code-btn');
+            if (sendCodeBtn) sendCodeBtn.style.display = '';
+
+            // And stop the countdown, which otherwise ticks on inside a hidden panel and
+            // eventually re-reveals a Resend button behind it.
+            if (resendTimer) {
+                clearInterval(resendTimer);
+                resendTimer = null;
+            }
+            var counter = document.getElementById('resend-countdown');
+            if (counter) counter.style.display = 'none';
+            var resendBtn = document.getElementById('resend-code-btn');
+            if (resendBtn) resendBtn.style.display = '';
 
             // Back to step one means back to step one's heading, or the page still says to go and
             // read a mail that no longer applies to the address in the box.
@@ -143,7 +192,9 @@
                     clearInterval(resendTimer);
                     resendTimer = null;
                     counter.style.display = 'none';
-                    btn.style.display = 'inline';
+                    // '' not 'inline': a <button>'s UA default is inline-block, and the markup
+                    // carries no inline display to begin with.
+                    btn.style.display = '';
                 }
                 remaining--;
             };
@@ -163,6 +214,11 @@
          */
         function setSendButtonBusy(btn) {
             if (!btn) return;
+            // Stash the label rather than hardcoding one: this serves both "Email me a code" and
+            // "Resend code", and restoring the wrong one silently relabels whichever was pressed.
+            if (btn.dataset.idleLabel === undefined) {
+                btn.dataset.idleLabel = btn.innerHTML;
+            }
             btn.disabled = true;
             btn.setAttribute('aria-busy', 'true');
             btn.innerHTML = '<svg class="inline-block w-4 h-4 me-2 animate-spin" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" aria-hidden="true"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg>'
@@ -173,7 +229,9 @@
             if (!btn) return;
             btn.disabled = false;
             btn.removeAttribute('aria-busy');
-            btn.textContent = @json(__('messages.email_me_a_code'));
+            if (btn.dataset.idleLabel !== undefined) {
+                btn.innerHTML = btn.dataset.idleLabel;
+            }
         }
 
         // Restore the code state when the form comes back from a failed submit.
@@ -188,9 +246,25 @@
             }
         });
 
-        function sendVerificationCode() {
+        /**
+         * Ask for a code.
+         *
+         * Takes the button that was pressed, because there are two: the one beside the email field
+         * and Resend inside the panel. It used to always grey #send-code-btn, so pressing Resend
+         * spun a spinner on a different control and left Resend itself live.
+         *
+         * sendInFlight is the part that matters. The endpoint mails SYNCHRONOUSLY with no SMTP
+         * timeout, so the button stays pressable for however long that takes, and the countdown
+         * that is supposed to space these out only starts once a response comes back. Four taps on
+         * a slow send meant four codes, and spent both the per-IP minute bucket and the per-address
+         * hourly one at once.
+         */
+        var sendInFlight = false;
+        function sendVerificationCode(triggerBtn) {
+                if (sendInFlight) return;
+
                 var email = document.getElementById('email').value;
-                var sendCodeBtn = document.getElementById('send-code-btn');
+                var sendCodeBtn = triggerBtn || document.getElementById('send-code-btn');
                 var codeMessage = document.getElementById('code-message');
                 var emailInput = document.getElementById('email');
 
@@ -221,6 +295,7 @@
                 }
 
                 // Disable button and show loading
+                sendInFlight = true;
                 setSendButtonBusy(sendCodeBtn);
                 codeMessage.innerHTML = '';
 
@@ -239,14 +314,23 @@
                 })
                 .then(response => {
                     // Always re-enable button and restore text
+                    sendInFlight = false;
                     setSendButtonIdle(sendCodeBtn);
 
                     return response.json().then(data => {
                         // Check if response is successful
                         if (response.ok && data.success) {
                             // The panel carries the address, the expiry and both escape hatches, so
-                            // the status line stays empty rather than repeating "we sent a code".
+                            // the status line says nothing VISIBLE - but it is the page's only live
+                            // region (role="status"), and the panel appears via display:block,
+                            // which no screen reader announces. Emptying it meant the one event
+                            // this region exists for was silent. sr-only keeps that fixed without
+                            // repeating "we sent a code" next to a panel that already says it.
                             codeMessage.innerHTML = '';
+                            var announcement = document.createElement('span');
+                            announcement.className = 'sr-only';
+                            announcement.textContent = data.message || '';
+                            codeMessage.appendChild(announcement);
                             showCodeSentState(email);
                             startResendCountdown(30);
 
@@ -273,10 +357,16 @@
                             // framework's untranslated "Too Many Requests" - rendered verbatim in
                             // red under the email field, in every one of the 12 locales. Retry-After
                             // is on the response and was being discarded.
+                            // Two different 429s reach here and they mean different things. The
+                            // route throttle (5/min/IP) sends Retry-After; the per-address counter
+                            // in RegisteredUserController is 5 per HOUR and sends its own message.
+                            // Overriding both with "wait a minute" told someone who had exhausted
+                            // the hourly limit to try again in sixty seconds - and then again, and
+                            // again, for up to an hour. Only override when the header is there.
                             if (response.status === 429) {
-                                errorMessage = @json(__('messages.too_many_attempts'));
-                                var retryAfter = parseInt(response.headers.get('Retry-After') || '60', 10);
+                                var retryAfter = parseInt(response.headers.get('Retry-After') || '0', 10);
                                 if (retryAfter > 0) {
+                                    errorMessage = @json(__('messages.too_many_attempts'));
                                     startResendCountdown(retryAfter);
                                 }
                             }
@@ -316,6 +406,7 @@
                 })
                 .catch(error => {
                     codeMessage.innerHTML = '<span class="text-red-600 dark:text-red-400">' + @json(__('messages.error_sending_code')) + '</span>';
+                    sendInFlight = false;
                     setSendButtonIdle(sendCodeBtn);
                     // Reset Turnstile widget on failure
                     if (typeof turnstile !== 'undefined' && turnstileWidgetId !== null) {
@@ -337,7 +428,7 @@
                     e.preventDefault();
                     e.stopPropagation();
                     e.stopImmediatePropagation();
-                    sendVerificationCode();
+                    sendVerificationCode(this);
                     return false;
                 }, true); // Use capture phase
             }
@@ -401,9 +492,10 @@
             if (resendBtn) {
                 resendBtn.addEventListener('click', function(e) {
                     e.preventDefault();
-                    // sendVerificationCode() reads the email input, which is locked to the address
-                    // the first code went to, so this is a resend rather than a new request.
-                    sendVerificationCode();
+                    // Reads the email input, which is locked to the address the first code went to,
+                    // so this is a resend rather than a new request. Passing `this` puts the busy
+                    // state on the button that was actually pressed.
+                    sendVerificationCode(this);
                 });
             }
 
@@ -439,15 +531,37 @@
          * validation, and revealSignupFields() has already armed `required` on everything by the
          * time a code can be entered, so the form either submits or reports which field is missing.
          */
+        var autoSubmitted = false;
         function maybeAutoSubmit(codeInput) {
             if (codeInput.value.length !== 6) return;
+
+            // Once only. This runs on every `input` event, and the handler slices to 6, so typing a
+            // seventh digit leaves the value at 6 and fires again. Each attempt calls
+            // requestSubmit(), which on an incomplete form focuses the offending field and pops its
+            // bubble - yanking the caret out of the code box, repeatedly, while somebody is typing
+            // in it. Worst after a failed submit, where the page reloads with the code restored and
+            // the terms box re-checked but the password field emptied by the browser.
+            if (autoSubmitted) return;
 
             var terms = document.getElementById('terms');
             if (terms && !terms.checked) return;
 
             var form = codeInput.form;
-            if (form && typeof form.requestSubmit === 'function') {
+            if (!form) return;
+
+            // Do not auto-submit an incomplete form. Let the visitor finish Name and Password and
+            // press the button themselves, rather than being bounced out of the field mid-entry.
+            if (typeof form.checkValidity === 'function' && !form.checkValidity()) return;
+
+            autoSubmitted = true;
+
+            if (typeof form.requestSubmit === 'function') {
                 form.requestSubmit();
+            } else {
+                // Safari below 16 has no requestSubmit(). Without this the sixth digit did nothing
+                // at all, for ever, with no message. checkValidity() above has already run, so
+                // submit() skipping validation is not a hole here.
+                form.submit();
             }
         }
         @endif
@@ -699,7 +813,7 @@
             <x-input-label for="email" :value="__('messages.email')" />
             @if (config('app.hosted'))
             <div class="flex flex-col sm:flex-row gap-2">
-                <x-text-input id="email" class="block mt-1 flex-1 min-w-0 w-full sm:w-auto" type="email" name="email" :value="old('email', base64_decode(request()->email ?? ''))" required
+                <x-text-input id="email" class="block mt-1 flex-1 min-w-0 w-full sm:w-auto" type="email" name="email" :value="old('email', base64_decode(is_string(request()->email) ? request()->email : ''))" required
                     autocomplete="email" />
                 <button type="button" id="send-code-btn" class="mt-1 w-full sm:w-auto sm:flex-shrink-0 whitespace-nowrap inline-flex items-center justify-center px-6 py-3 bg-gray-800 dark:bg-gray-200 border border-transparent rounded-md font-semibold text-sm text-white dark:text-gray-800 uppercase tracking-widest hover:bg-gray-700 dark:hover:bg-white focus:bg-gray-700 dark:focus:bg-white active:bg-gray-900 dark:active:bg-gray-300 focus:outline-none focus:ring-2 focus:ring-[var(--brand-blue)] focus:ring-offset-2 dark:focus:ring-offset-gray-800 transition ease-in-out duration-150">
                     {{ __('messages.email_me_a_code') }}
@@ -730,7 +844,7 @@
                 </p>
             </div>
             @else
-            <x-text-input id="email" class="block mt-1 w-full" type="email" name="email" :value="old('email', base64_decode(request()->email ?? ''))" required
+            <x-text-input id="email" class="block mt-1 w-full" type="email" name="email" :value="old('email', base64_decode(is_string(request()->email) ? request()->email : ''))" required
                 autocomplete="email" />
             @endif
             <x-input-error :messages="$errors->get('email')" class="mt-2" />

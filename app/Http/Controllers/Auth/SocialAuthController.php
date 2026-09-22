@@ -189,9 +189,15 @@ class SocialAuthController extends Controller
         session()->forget(['utm_params', 'utm_referrer_url', 'utm_landing_page', 'guest_language', 'referral_code']);
 
         // Half of all accounts are created here rather than by RegisteredUserController::store(),
-        // and only that one fired this. Nothing listens today - the framework's verification
-        // listener no-ops on an already-verified address - but "the event fires for half of our
-        // signups" is not a property to leave to chance for whatever is added next.
+        // and only that one fired this.
+        //
+        // Something DOES listen: Illuminate\Auth\Listeners\SendEmailVerificationNotification is
+        // auto-registered by the framework's EventServiceProvider (reachable through
+        // Application::configure()->withEvents(), so it is not in bootstrap/providers.php), and
+        // User implements MustVerifyEmail. It is safe only because :137 above sets
+        // email_verified_at inside User::create() and the listener early-returns on
+        // hasVerifiedEmail(). If this path is ever made conditional on Google's own
+        // email_verified claim, this line starts mailing every new Google signup.
         //
         // Deliberately NOT also logging AuditService::AUTH_REGISTER: the line below already
         // records this account's creation as AUTH_GOOGLE_LOGIN with a 'new_account' note, and
