@@ -13,7 +13,11 @@
     <!-- Step Indicator for Add Event Flow -->
     @if(session('pending_request'))
         <div class="my-6">
-            <x-step-indicator :currentStep="2" />
+            {{-- 3, not 2: this view served /new/{type} when "2" was written, and no longer does
+                 - RoleController::create() renders role/create now. The one flow that reaches this
+                 page with the indicator showing (session('pending_request')) already has its
+                 schedule, so the step in front of them is the event. --}}
+            <x-step-indicator :currentStep="3" />
         </div>
     @endif
 

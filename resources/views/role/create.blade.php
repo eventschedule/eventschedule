@@ -40,101 +40,35 @@
     tests/Feature/FirstScheduleFormTest.php compares a schedule saved from here against one saved
     from the full form, column by column, so a field dropped from this list fails the build.
 --}}
+{{--
+    Two layouts, one form.
+
+    /new/{type} serves everyone, not only first-timers. The bare shell keeps the first run focused,
+    the way /getting-started is - but a returning user reaches this page from the dashboard's "New
+    schedule" dropdown, and layouts/app.blade.php renders no navigation at all (its only anchor is
+    the skip-to-content link), so they were landing somewhere with no nav, no cancel and no back.
+    role/edit.blade.php, which this replaced at this route, opened <x-app-admin-layout>.
+
+    The form itself lives in the partial so the two branches cannot drift apart.
+
+    The bare-shell branch carries the platform manifest itself, exactly as getting-started.blade.php
+    does and for the same reason: layouts/app.blade.php omits it because it is also the guest-portal
+    shell, so each inner layout supplies its own. app-admin already includes it.
+--}}
+@php
+    $hasSchedules = auth()->user()->member()->exists();
+@endphp
+
+@if ($hasSchedules)
+<x-app-admin-layout>
+    @include('role.partials.create-form', ['hasSchedules' => $hasSchedules])
+</x-app-admin-layout>
+@else
 <x-app-layout :theme-variants="true" :title="__('messages.new_schedule') . ' | Event Schedule'">
+    <x-slot name="head">
+        @include('partials.web-app-manifest', ['platformApp' => true])
+    </x-slot>
 
-    <div class="flex flex-col items-center px-4 pt-8 pb-12 sm:px-6 lg:px-8">
-        {{-- /new/{type} serves everyone, not only first-timers, and "Create Account / Create
-             Schedule / Create Event" is noise on somebody's tenth schedule. Same predicate the
-             page's "choose a different type" link uses, and the one HomeController uses to decide
-             whether this person still needs a schedule at all. --}}
-        @if (auth()->user()->member()->doesntExist())
-        <div class="w-full max-w-2xl rounded-2xl overflow-hidden">
-            <x-step-indicator :currentStep="2" />
-        </div>
-        @endif
-
-        <div class="w-full max-w-xl mt-8">
-            <div class="text-center mb-6">
-                <h1 class="text-2xl font-semibold text-gray-900 dark:text-white">
-                    {{ __('messages.' . $role->type) }}
-                </h1>
-                <p class="mt-1 text-sm text-gray-500 dark:text-gray-400">
-                    {{ __('messages.' . $role->type . '_tagline') }}
-                </p>
-            </div>
-
-            <div class="ap-card rounded-xl p-6">
-                <form method="post" action="{{ route('role.store') }}" enctype="multipart/form-data" id="edit-form">
-                    @csrf
-
-                    {{-- See the block comment at the top of this file before touching these. --}}
-                    <input type="hidden" name="type" value="{{ $role->type }}">
-                    <input type="hidden" name="email" value="{{ $user->email }}">
-                    {{-- Both fall back, because create() copies them straight off the user and a
-                         user can carry neither: roles.language_code is NOT NULL, and the full form
-                         never hit this because its <select required> always posted its first
-                         option. store() has the same guard for translation_language_code, for the
-                         same reason. --}}
-                    <input type="hidden" name="timezone" value="{{ $role->timezone ?: config('app.timezone') }}">
-                    <input type="hidden" name="language_code" value="{{ $role->language_code ?: 'en' }}">
-                    <input type="hidden" name="use_24_hour_time" value="{{ $role->use_24_hour_time ? 1 : 0 }}">
-                    <input type="hidden" name="require_account" value="{{ $role->require_account ? 1 : 0 }}">
-                    <input type="hidden" name="accept_requests" value="1">
-                    <input type="hidden" name="background" value="{{ $role->background }}">
-                    <input type="hidden" name="background_colors" value="{{ $role->background_colors }}">
-                    <input type="hidden" name="background_image" value="{{ $role->background_image }}">
-                    <input type="hidden" name="background_rotation" value="{{ $role->background_rotation }}">
-
-                    @if ($errors->any())
-                    <div role="alert" class="mb-4 rounded-lg bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-700 p-3">
-                        <div class="flex items-center gap-2">
-                            <svg class="w-5 h-5 text-red-600 dark:text-red-400 flex-shrink-0" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" aria-hidden="true">
-                                <path stroke-linecap="round" stroke-linejoin="round" d="M12 9v3.75m-9.303 3.376c-.866 1.5.217 3.374 1.948 3.374h14.71c1.73 0 2.813-1.874 1.948-3.374L13.949 3.378c-.866-1.5-3.032-1.5-3.898 0L2.697 16.126ZM12 15.75h.007v.008H12v-.008Z" />
-                            </svg>
-                            <p class="text-sm text-red-700 dark:text-red-300">{{ $errors->first() }}</p>
-                        </div>
-                    </div>
-                    @endif
-
-                    <div>
-                        <x-input-label for="name" :value="__('messages.schedule_name')" />
-                        <x-text-input id="name" name="name" type="text" class="mt-1 block w-full"
-                            :value="old('name', $role->name)" required autofocus autocomplete="organization" />
-                        <x-input-error :messages="$errors->get('name')" class="mt-2" />
-                    </div>
-
-                    @if ($role->isVenue())
-                    <div class="mt-4">
-                        <x-input-label for="address1" :value="__('messages.street_address')" />
-                        <x-text-input id="address1" name="address1" type="text" class="mt-1 block w-full"
-                            :value="old('address1')" autocomplete="off" required />
-                        <x-input-error :messages="$errors->get('address1')" class="mt-2" />
-                    </div>
-                    @endif
-
-                    {{-- Shown rather than asked. Both are inherited from the account and are
-                         changeable afterwards, so making them fields here would be two more
-                         decisions in front of the one that matters. --}}
-                    <p class="mt-4 text-xs text-gray-500 dark:text-gray-400">
-                        <bdi dir="ltr">{{ $user->email }}</bdi> &middot; {{ $role->timezone }}
-                    </p>
-
-                    <p class="mt-4 text-sm text-gray-500 dark:text-gray-400">
-                        {{ __('messages.note_all_schedules_are_publicly_listed') }}
-                    </p>
-
-                    <div class="mt-6 flex items-center justify-end gap-3">
-                        @if (auth()->user()->member()->doesntExist())
-                        <a href="{{ route('getting-started') }}" class="text-sm text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-200 hover:underline">
-                            {{ __('messages.choose_different_type') }}
-                        </a>
-                        @endif
-                        <x-brand-button type="submit">
-                            {{ __('messages.save') }}
-                        </x-brand-button>
-                    </div>
-                </form>
-            </div>
-        </div>
-    </div>
+    @include('role.partials.create-form', ['hasSchedules' => $hasSchedules])
 </x-app-layout>
+@endif

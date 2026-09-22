@@ -4633,7 +4633,11 @@ class RoleController extends Controller
             // Only for the FIRST-SCHEDULE redirect. The pending_request one predates this change
             // and has always stamped; suppressing it too would move a number for a reason nothing
             // in this commit is about.
-            if ($isFirstSchedule) {
+            // Both conditions, because a guest-submit visitor who signs up and then creates a
+            // schedule has BOTH flags set - that is the common shape of the pending_request path -
+            // so guarding on $isFirstSchedule alone suppressed the stamp for them too, which is
+            // exactly what the comment above says it does not do.
+            if ($isFirstSchedule && ! session('pending_request')) {
                 $redirect->with('onboarding_event_redirect', true);
             }
 

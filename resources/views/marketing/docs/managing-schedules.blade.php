@@ -356,7 +356,7 @@
             Two different things land here:
         </p>
         <ul class="doc-list mb-6">
-            <li><strong class="text-gray-900 dark:text-white">Event requests.</strong> Anyone with your public request link can submit an event to your schedule, if you have turned <strong>Accept requests</strong> on. A date another schedule adds you to lands here too when your schedule reviews it first, which a Talent schedule always does unless that schedule is already on its approved list. Each card shows the submitting schedule or venue with its picture, the date, the sub-schedule it was filed under, and the answers to any questions you added to your request form.</li>
+            <li><strong class="text-gray-900 dark:text-white">Event requests.</strong> Anyone with your public request link can submit an event to your schedule, unless you have turned <strong>Accept requests</strong> off. A date another schedule adds you to lands here too when your schedule reviews it first, which a Talent schedule always does unless that schedule is already on its approved list. Each card shows the submitting schedule or venue with its picture, the date, the sub-schedule it was filed under, and the answers to any questions you added to your request form.</li>
             <li><strong class="text-gray-900 dark:text-white">Appointment bookings</strong>, when the appointment type has <strong>Require approval before confirming</strong> turned on. These cards are badged with the appointment type and show the guest's name, email, phone, chosen time, price and payment status, plus any note they left. A booking a guest has moved to a new time is badged as moved, so you can spot it in a long list.</li>
         </ul>
 

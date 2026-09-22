@@ -167,6 +167,21 @@
                 {{-- Action buttons --}}
                 @php
                 $hasSubmitButton = ($role->isCurator() || $role->isVenue() || $role->isTalent()) && $role->accept_requests;
+                // Whether to offer the Follow / subscribe trigger.
+                //
+                // This used to be inlined at both call sites as a pair of branches that made the
+                // trigger depend on $hasSubmitButton, and the effect for a SIGNED-OUT visitor was
+                // that a schedule accepting event requests showed Submit INSTEAD of Follow. That
+                // was invisible while every schedule made through the UI had accept_requests
+                // false - the create form's toggle painted off and posted a 0 over the column
+                // default - so flipping that default would have quietly removed the Follow button
+                // from every new schedule's public page. Follow is what mints subscriber accounts.
+                //
+                // Signed out: always offer it. Signed in: unchanged from before.
+                $showFollowTrigger = ! auth()->user()
+                    || ($hasSubmitButton
+                        ? (! auth()->user()->isFollowing($role->subdomain) && ! auth()->user()->isConnected($role->subdomain))
+                        : ! auth()->user()->isConnected($role->subdomain));
                 @endphp
                 @if ($role->hasBookableAppointments() || $hasSubmitButton || $role->canSellGiftCards() || config('app.hosted') || config('app.is_testing'))
                 <div class="flex flex-row flex-wrap gap-3 items-center justify-center">
@@ -204,10 +219,7 @@
                   </a>
                   @endif
                   @if (config('app.hosted') || config('app.is_testing'))
-                  @if (! is_demo_mode() && (
-                      ($hasSubmitButton && auth()->user() && ! auth()->user()->isFollowing($role->subdomain) && ! auth()->user()->isConnected($role->subdomain)) ||
-                      (! $hasSubmitButton && (! auth()->user() || ! auth()->user()->isConnected($role->subdomain)))
-                  ))
+                  @if (! is_demo_mode() && $showFollowTrigger)
                   <button
                     type="button"
                     data-follow-trigger
@@ -390,10 +402,7 @@
                   </a>
                   @endif
                   @if (config('app.hosted') || config('app.is_testing'))
-                  @if (! is_demo_mode() && (
-                      ($hasSubmitButton && auth()->user() && ! auth()->user()->isFollowing($role->subdomain) && ! auth()->user()->isConnected($role->subdomain)) ||
-                      (! $hasSubmitButton && (! auth()->user() || ! auth()->user()->isConnected($role->subdomain)))
-                  ))
+                  @if (! is_demo_mode() && $showFollowTrigger)
                   <button
                     type="button"
                     data-follow-trigger

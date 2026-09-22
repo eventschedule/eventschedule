@@ -134,8 +134,8 @@ if (config('app.hosted') && ! config('app.is_testing')) {
         Route::get('/guest-add', [EventController::class, 'showGuestImport'])->name('event.guest_import');
         Route::get('/guest-submit', [EventController::class, 'showGuestSubmit'])->name('event.guest_submit');
         Route::get('/guest-submit/google', [EventController::class, 'guestSubmitGoogle'])->name('event.guest_submit.google');
-        Route::post('/guest-add', [EventController::class, 'guestImport'])->name('event.guest_import.store')->middleware('throttle:10,1');
-        Route::post('/guest-add/check-email', [EventController::class, 'checkEmail'])->name('event.check_email')->middleware('throttle:10,1');
+        Route::post('/guest-add', [EventController::class, 'guestImport'])->name('event.guest_import.store')->middleware('throttle:10,1,guest_add');
+        Route::post('/guest-add/check-email', [EventController::class, 'checkEmail'])->name('event.check_email')->middleware('throttle:10,1,guest_add_email');
         // Named for the same reason the /claim routes are, and doubly so here: this is the SAME
         // controller method as sign_up.send_code, mailing the same code, and it was the one copy
         // left sharing the unprefixed per-IP bucket with every other throttled guest route on the
@@ -143,7 +143,7 @@ if (config('app.hosted') && ! config('app.is_testing')) {
         // set an hour-long timer that then locked this out after five hits.
         Route::post('/guest-add/send-code', [RegisteredUserController::class, 'sendVerificationCode'])->name('event.guest_send_code')->middleware('throttle:5,1,guest_add_code');
         Route::get('/booking-request', [EventController::class, 'showBookingRequest'])->name('event.booking_request');
-        Route::post('/booking-request', [EventController::class, 'bookingRequest'])->name('event.booking_request.store')->middleware('throttle:10,1');
+        Route::post('/booking-request', [EventController::class, 'bookingRequest'])->name('event.booking_request.store')->middleware('throttle:10,1,booking_request');
         // Appointments (Calendly-style booking). Registered before the /{slug} catch-alls below.
         Route::get('/book', [AppointmentController::class, 'showBook'])->name('appointments.book');
         Route::get('/book/{typeSlug}', [AppointmentController::class, 'showBookType'])->name('appointments.book_type');
@@ -154,8 +154,8 @@ if (config('app.hosted') && ! config('app.is_testing')) {
         Route::get('/guest-search-youtube', [RoleController::class, 'guestSearchYouTube'])->name('role.guest_search_youtube');
         Route::get('/curate-event/{hash}', [EventController::class, 'curate'])->name('event.curate');
         Route::post('/submit-video/{event_hash}', [EventController::class, 'submitVideo'])->name('event.submit_video')->middleware('throttle:10,60');
-        Route::post('/submit-comment/{event_hash}', [EventController::class, 'submitComment'])->name('event.submit_comment')->middleware('throttle:20,60');
-        Route::post('/submit-photo/{event_hash}', [EventController::class, 'submitPhoto'])->name('event.submit_photo')->middleware('throttle:10,60');
+        Route::post('/submit-comment/{event_hash}', [EventController::class, 'submitComment'])->name('event.submit_comment')->middleware('throttle:20,60,submit_comment');
+        Route::post('/submit-photo/{event_hash}', [EventController::class, 'submitPhoto'])->name('event.submit_photo')->middleware('throttle:10,60,submit_photo');
         Route::post('/vote-poll/{event_hash}/{poll_hash}', [EventController::class, 'votePoll'])->name('event.vote_poll')->middleware('throttle:30,60');
         Route::post('/suggest-poll-option/{event_hash}/{poll_hash}', [EventController::class, 'suggestPollOption'])->name('event.suggest_poll_option')->middleware('throttle:20,60');
         Route::post('/event-password', [RoleController::class, 'checkEventPassword'])->name('event.check_password')->middleware('throttle:10,5');
@@ -164,8 +164,8 @@ if (config('app.hosted') && ! config('app.is_testing')) {
         // payload, so one visitor cannot claim another's held seats by replaying a token.
         Route::get('/seating/state', [SeatingPickerController::class, 'state'])->name('seating.state')->middleware('throttle:120,1');
         Route::post('/seating/hold', [SeatingPickerController::class, 'hold'])->name('seating.hold')->middleware('throttle:60,1');
-        Route::post('/checkout', [TicketController::class, 'checkout'])->name('event.checkout')->middleware('throttle:10,1');
-        Route::post('/rsvp', [TicketController::class, 'rsvp'])->name('event.rsvp')->middleware('throttle:10,1');
+        Route::post('/checkout', [TicketController::class, 'checkout'])->name('event.checkout')->middleware('throttle:10,1,checkout');
+        Route::post('/rsvp', [TicketController::class, 'rsvp'])->name('event.rsvp')->middleware('throttle:10,1,rsvp');
         Route::post('/waitlist/join', [WaitlistController::class, 'join'])->name('waitlist.join')->middleware('throttle:10,1');
         Route::get('/checkout/success/{sale_id}/{date}', [TicketController::class, 'success'])->name('checkout.success');
         Route::get('/checkout/cancel/{sale_id}/{date}', [TicketController::class, 'cancel'])->name('checkout.cancel');
@@ -1989,11 +1989,13 @@ if (! config('app.hosted') || config('app.is_testing')) {
     Route::get('/{subdomain}/guest-add', [EventController::class, 'showGuestImport'])->name('event.guest_import');
     Route::get('/{subdomain}/guest-submit', [EventController::class, 'showGuestSubmit'])->name('event.guest_submit');
     Route::get('/{subdomain}/guest-submit/google', [EventController::class, 'guestSubmitGoogle'])->name('event.guest_submit.google');
-    Route::post('/{subdomain}/guest-add', [EventController::class, 'guestImport'])->name('event.guest_import.store')->middleware('throttle:10,1');
-    Route::post('/{subdomain}/guest-add/check-email', [EventController::class, 'checkEmail'])->name('event.check_email')->middleware('throttle:10,1');
-    Route::post('/{subdomain}/guest-add/send-code', [RegisteredUserController::class, 'sendVerificationCode'])->name('event.guest_send_code')->middleware('throttle:5,1');
+    Route::post('/{subdomain}/guest-add', [EventController::class, 'guestImport'])->name('event.guest_import.store')->middleware('throttle:10,1,guest_add');
+    Route::post('/{subdomain}/guest-add/check-email', [EventController::class, 'checkEmail'])->name('event.check_email')->middleware('throttle:10,1,guest_add_email');
+    // Same bucket name as the hosted copy above: this is the selfhost path-based twin, and on
+    // selfhost there is no domain group to keep the pools apart in the first place.
+    Route::post('/{subdomain}/guest-add/send-code', [RegisteredUserController::class, 'sendVerificationCode'])->name('event.guest_send_code')->middleware('throttle:5,1,guest_add_code');
     Route::get('/{subdomain}/booking-request', [EventController::class, 'showBookingRequest'])->name('event.booking_request');
-    Route::post('/{subdomain}/booking-request', [EventController::class, 'bookingRequest'])->name('event.booking_request.store')->middleware('throttle:10,1');
+    Route::post('/{subdomain}/booking-request', [EventController::class, 'bookingRequest'])->name('event.booking_request.store')->middleware('throttle:10,1,booking_request');
     // Appointments (Calendly-style booking). Registered before the /{subdomain}/{slug} catch-all below.
     Route::get('/{subdomain}/book', [AppointmentController::class, 'showBook'])->name('appointments.book');
     Route::get('/{subdomain}/book/{typeSlug}', [AppointmentController::class, 'showBookType'])->name('appointments.book_type');
@@ -2004,8 +2006,8 @@ if (! config('app.hosted') || config('app.is_testing')) {
     Route::get('/{subdomain}/guest-search-youtube', [RoleController::class, 'guestSearchYouTube'])->name('role.guest_search_youtube');
     Route::get('/{subdomain}/curate-event/{hash}', [EventController::class, 'curate'])->name('event.curate');
     Route::post('/{subdomain}/submit-video/{event_hash}', [EventController::class, 'submitVideo'])->name('event.submit_video')->middleware('throttle:10,60');
-    Route::post('/{subdomain}/submit-comment/{event_hash}', [EventController::class, 'submitComment'])->name('event.submit_comment')->middleware('throttle:20,60');
-    Route::post('/{subdomain}/submit-photo/{event_hash}', [EventController::class, 'submitPhoto'])->name('event.submit_photo')->middleware('throttle:10,60');
+    Route::post('/{subdomain}/submit-comment/{event_hash}', [EventController::class, 'submitComment'])->name('event.submit_comment')->middleware('throttle:20,60,submit_comment');
+    Route::post('/{subdomain}/submit-photo/{event_hash}', [EventController::class, 'submitPhoto'])->name('event.submit_photo')->middleware('throttle:10,60,submit_photo');
     Route::post('/{subdomain}/vote-poll/{event_hash}/{poll_hash}', [EventController::class, 'votePoll'])->name('event.vote_poll')->middleware('throttle:30,60');
     Route::post('/{subdomain}/suggest-poll-option/{event_hash}/{poll_hash}', [EventController::class, 'suggestPollOption'])->name('event.suggest_poll_option')->middleware('throttle:20,60');
     Route::post('/{subdomain}/event-password', [RoleController::class, 'checkEventPassword'])->name('event.check_password')->middleware('throttle:10,5');
@@ -2014,8 +2016,8 @@ if (! config('app.hosted') || config('app.is_testing')) {
     // registered twice, once per routing mode, and only the path-based copy exists on selfhost.
     Route::get('/{subdomain}/seating/state', [SeatingPickerController::class, 'state'])->name('seating.state')->middleware('throttle:120,1');
     Route::post('/{subdomain}/seating/hold', [SeatingPickerController::class, 'hold'])->name('seating.hold')->middleware('throttle:60,1');
-    Route::post('/{subdomain}/checkout', [TicketController::class, 'checkout'])->name('event.checkout')->middleware('throttle:10,1');
-    Route::post('/{subdomain}/rsvp', [TicketController::class, 'rsvp'])->name('event.rsvp')->middleware('throttle:10,1');
+    Route::post('/{subdomain}/checkout', [TicketController::class, 'checkout'])->name('event.checkout')->middleware('throttle:10,1,checkout');
+    Route::post('/{subdomain}/rsvp', [TicketController::class, 'rsvp'])->name('event.rsvp')->middleware('throttle:10,1,rsvp');
     Route::post('/{subdomain}/waitlist/join', [WaitlistController::class, 'join'])->name('waitlist.join')->middleware('throttle:10,1');
     Route::get('/{subdomain}/checkout/success/{sale_id}', [TicketController::class, 'success'])->name('checkout.success');
     Route::get('/{subdomain}/checkout/cancel/{sale_id}', [TicketController::class, 'cancel'])->name('checkout.cancel');

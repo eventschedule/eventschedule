@@ -62,6 +62,15 @@ class ThemeVariantGatingTest extends TestCase
             '/getting-started must follow the palette the dashboard is about to use'
         );
 
+        // /new/{type} renders through the bare shell for a FIRST schedule (a returning user gets
+        // app-admin instead), and it sits between /getting-started and the dashboard - exactly the
+        // two pages this test's docblock is about.
+        $this->assertStringContainsString(
+            'var VARIANTS = true',
+            $this->actingAs($newcomer)->get(route('new', ['type' => 'venue']))->assertOk()->getContent(),
+            'the first-run schedule form must follow the palette too'
+        );
+
         // The site-admin newsletter templates page, the only one of its seven siblings that
         // renders through the bare shell.
         $admin = $this->createOwner(admin: true);

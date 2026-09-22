@@ -164,18 +164,50 @@ class ThrottleRequestsTest extends TestCase
         $this->assertSame('ok', $second->getContent());
     }
 
-    public function test_every_throttled_guest_auth_route_carries_a_named_prefix(): void
+    /**
+     * The routes that must have their own bucket, named explicitly.
+     *
+     * NOT "every guest route": an earlier version filtered on `in_array('guest', $middleware)`,
+     * which only ever matches routes/auth.php's group. The tenant-scoped guest routes in
+     * routes/web.php carry no `guest` alias, so that scan was structurally blind to them while
+     * reading as though it covered everything reachable signed-out.
+     *
+     * These are the ones prefixed so far: the auth group, plus the guest-portal POSTs that share
+     * the funnel with it. The `submit_comment` and `submit_photo` pair matter most - their decay
+     * is 60 MINUTES, so one of them could set an hour-long timer on a bucket the sign-up and
+     * checkout routes were sharing.
+     *
+     * Other throttled tenant routes remain unprefixed and still share a bucket. That is a known
+     * gap, not a covered one, and this list is where it gets closed a route at a time.
+     */
+    private const MUST_BE_PREFIXED = [
+        'sign_up.send_code',
+        'event.guest_send_code',
+        'event.guest_import.store',
+        'event.check_email',
+        'event.booking_request.store',
+        'event.submit_comment',
+        'event.submit_photo',
+        'event.checkout',
+        'event.rsvp',
+    ];
+
+    public function test_the_named_routes_each_carry_their_own_throttle_bucket(): void
     {
-        // The behavioural tests above cannot see routes/auth.php itself. This one fails if a
-        // throttled route is added to (or reverted in) that file without its own bucket, which is
-        // the only way the shared-counter bug can come back.
         $unprefixed = [];
+        $seen = [];
 
         foreach (app('router')->getRoutes() as $route) {
             $middleware = $route->gatherMiddleware();
+            $isAuthGroup = in_array('guest', $middleware, true);
+            $named = in_array($route->getName(), self::MUST_BE_PREFIXED, true);
 
-            if (! in_array('guest', $middleware, true)) {
+            if (! $isAuthGroup && ! $named) {
                 continue;
+            }
+
+            if ($named) {
+                $seen[$route->getName()] = true;
             }
 
             foreach ($middleware as $entry) {
@@ -193,7 +225,12 @@ class ThrottleRequestsTest extends TestCase
             }
         }
 
-        $this->assertSame([], $unprefixed, 'these guest routes share one per-IP throttle bucket with every other guest route on the host: '.implode(', ', $unprefixed));
+        $this->assertSame([], $unprefixed, 'these routes share one per-IP throttle bucket with every other unprefixed route on the host: '.implode(', ', $unprefixed));
+
+        // A renamed or deleted route must not silently drop out of the list above.
+        $missing = array_diff(self::MUST_BE_PREFIXED, array_keys($seen));
+        $this->assertSame([], array_values($missing),
+            'these route names are in MUST_BE_PREFIXED but no longer exist: '.implode(', ', $missing));
     }
 
     public function test_testing_mode_still_bypasses_everything(): void

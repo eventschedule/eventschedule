@@ -238,6 +238,34 @@ class FirstScheduleFormTest extends TestCase
         $this->assertNotNull($user->fresh()->event_form_viewed_at);
     }
 
+    /**
+     * The pending_request redirect keeps stamping, as it always did.
+     *
+     * The suppression exists so that sending EVERY new organizer to the event form does not make
+     * reached_event equal saved_schedule by construction. The pending_request redirect predates
+     * that and has always stamped, so it must keep doing so - and guarding on $isFirstSchedule
+     * alone was not enough, because a guest-submit visitor who signs up and then creates a
+     * schedule has both conditions true at once. That is the common shape of this path, so the
+     * guard was suppressing most of it.
+     */
+    public function test_a_pending_request_redirect_still_stamps_the_event_form_stage(): void
+    {
+        $user = $this->distinctiveUser();
+        $this->actingAs($user);
+
+        // Their first schedule AND a pending request: the case the two conditions overlap on.
+        session(['pending_request' => 'some-venue']);
+
+        $payload = $this->fieldsFrom($this->get(route('new', ['type' => 'venue']))->getContent());
+        $payload['name'] = 'Pending Venue';
+        $payload['address1'] = '1 Test St';
+
+        $this->followingRedirects()->post(route('role.store'), $payload)->assertOk();
+
+        $this->assertNotNull($user->fresh()->event_form_viewed_at,
+            'the pending_request path lost its stamp, which the suppression was written not to touch');
+    }
+
     /** A second schedule does not: that person has already been through onboarding. */
     public function test_a_later_schedule_still_lands_on_the_schedule_page(): void
     {

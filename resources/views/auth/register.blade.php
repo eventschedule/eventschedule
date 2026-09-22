@@ -92,6 +92,15 @@
 
                 var address = document.getElementById('code-sent-address');
                 if (address) address.textContent = email;
+
+                // Hide the top "Email me a code" button - but ONLY here, inside the address guard.
+                // setSendButtonIdle() re-enables it on every response and the countdown only
+                // governs the panel's Resend, so leaving it on screen gave step two a second send
+                // path with no rate-limit feedback. Outside this guard it was worse: an
+                // empty-address restore hid it while also not showing the panel, leaving no way to
+                // request a code at all.
+                var sendCodeBtn = document.getElementById('send-code-btn');
+                if (sendCodeBtn) sendCodeBtn.style.display = 'none';
             }
 
             // Only with an address. The restore path calls this with emailInput.value, which can
@@ -100,11 +109,6 @@
             var panel = document.getElementById('code-sent-panel');
             if (panel && email) panel.style.display = 'block';
 
-            // Hide the top "Email me a code" button. setSendButtonIdle() re-enables it on every
-            // response and startResendCountdown() only governs the panel's Resend, so leaving it on
-            // screen gave step two a second send path with no rate-limit feedback at all.
-            var sendCodeBtn = document.getElementById('send-code-btn');
-            if (sendCodeBtn) sendCodeBtn.style.display = 'none';
 
             // Name the step, in the page and in the tab strip. This flow REQUIRES leaving the tab
             // to read a mail, and every auth page shipped the same literal <title>Event Schedule</title>,
@@ -143,6 +147,20 @@
             // Put the send button back, since showCodeSentState() hid it.
             var sendCodeBtn = document.getElementById('send-code-btn');
             if (sendCodeBtn) sendCodeBtn.style.display = '';
+
+            // Supersede anything still in flight. Without this the page looked live and was dead:
+            // a slow Resend left sendInFlight true, changeEmail() un-hid #send-code-btn - which was
+            // only ever HIDDEN, never disabled - and clicking it hit `if (sendInFlight) return;`
+            // and did nothing at all. No spinner, no message. The bump also tells that response it
+            // has been superseded, so it cannot re-lock the address being abandoned.
+            sendGeneration++;
+            sendInFlight = false;
+            setSendButtonIdle(document.getElementById('send-code-btn'));
+            setSendButtonIdle(document.getElementById('resend-code-btn'));
+
+            // The auto-submit latch is page-lifetime, so without this a second address could never
+            // auto-submit.
+            autoSubmitted = false;
 
             // And stop the countdown, which otherwise ticks on inside a hidden panel and
             // eventually re-reveals a Resend button behind it.
@@ -204,6 +222,36 @@
         }
 
         /**
+         * Hold a send button down for a cooldown, and show the wait where it can be seen.
+         *
+         * startResendCountdown() alone is not enough: #resend-code-btn and #resend-countdown both
+         * live INSIDE #code-sent-panel, which is display:none until a code has actually been sent.
+         * A per-address 429 on the first click of a fresh page therefore ran a countdown nobody
+         * could see, while the only visible control had just been re-enabled. So disable the
+         * button that was actually pressed as well, and drive the panel counter only when the
+         * panel is up.
+         */
+        function startSendCooldown(btn, seconds) {
+            var panel = document.getElementById('code-sent-panel');
+
+            if (panel && panel.style.display !== 'none') {
+                startResendCountdown(seconds);
+            }
+
+            if (!btn) return;
+
+            // The mark, not just the disabled flag: .finally() runs after this and calls
+            // setSendButtonIdle(), which would hand the button straight back and undo the cooldown.
+            btn.dataset.cooldown = '1';
+            btn.disabled = true;
+
+            setTimeout(function () {
+                delete btn.dataset.cooldown;
+                if (!sendInFlight) btn.disabled = false;
+            }, seconds * 1000);
+        }
+
+        /**
          * Busy state for the send button.
          *
          * sendVerificationCode() posts to an endpoint that sends the mail SYNCHRONOUSLY
@@ -227,7 +275,10 @@
 
         function setSendButtonIdle(btn) {
             if (!btn) return;
-            btn.disabled = false;
+            // A button serving out a 429 cooldown stays down; only its label comes back.
+            if (btn.dataset.cooldown === undefined) {
+                btn.disabled = false;
+            }
             btn.removeAttribute('aria-busy');
             if (btn.dataset.idleLabel !== undefined) {
                 btn.innerHTML = btn.dataset.idleLabel;
@@ -260,8 +311,23 @@
          * hourly one at once.
          */
         var sendInFlight = false;
+
+        /**
+         * Which send the page currently belongs to.
+         *
+         * changeEmail() bumps this, so a response that arrives after the visitor has gone back to
+         * step one knows it has been superseded and stays out of the way. Without it, a slow send
+         * that lands after "use a different email" re-locks the ABANDONED address: the .then below
+         * closes over the email it was called with, and showCodeSentState() would re-apply
+         * readonly, re-open the panel and restart the countdown, while the input listener rewrote
+         * every keystroke of the new address back to the old one.
+         */
+        var sendGeneration = 0;
+
         function sendVerificationCode(triggerBtn) {
                 if (sendInFlight) return;
+
+                var myGeneration = ++sendGeneration;
 
                 var email = document.getElementById('email').value;
                 var sendCodeBtn = triggerBtn || document.getElementById('send-code-btn');
@@ -313,9 +379,9 @@
                     })
                 })
                 .then(response => {
-                    // Always re-enable button and restore text
-                    sendInFlight = false;
-                    setSendButtonIdle(sendCodeBtn);
+                    // Superseded by a changeEmail() while this was in flight: touch nothing. The
+                    // reset still happens, in the .finally() below.
+                    if (myGeneration !== sendGeneration) return;
 
                     return response.json().then(data => {
                         // Check if response is successful
@@ -365,10 +431,20 @@
                             // again, for up to an hour. Only override when the header is there.
                             if (response.status === 429) {
                                 var retryAfter = parseInt(response.headers.get('Retry-After') || '0', 10);
+
+                                // The header-bearing one is the per-IP route throttle, and only it
+                                // knows how long to wait, so only it may say "wait a minute". The
+                                // other is the per-address 5-per-HOUR limit, whose own message is
+                                // already correct - overriding it told somebody with an hour to
+                                // wait to try again in sixty seconds, and again, for an hour.
                                 if (retryAfter > 0) {
                                     errorMessage = @json(__('messages.too_many_attempts'));
-                                    startResendCountdown(retryAfter);
                                 }
+
+                                // But BOTH need a cooldown. Without one the visitor can hammer the
+                                // button, and each attempt is a live request that spends the per-IP
+                                // bucket on top of the limit they have already hit.
+                                startSendCooldown(sendCodeBtn, retryAfter > 0 ? retryAfter : 60);
                             }
 
                             // Check for Laravel validation errors (422 status)
@@ -405,13 +481,27 @@
                     });
                 })
                 .catch(error => {
+                    if (myGeneration !== sendGeneration) return;
+
                     codeMessage.innerHTML = '<span class="text-red-600 dark:text-red-400">' + @json(__('messages.error_sending_code')) + '</span>';
-                    sendInFlight = false;
-                    setSendButtonIdle(sendCodeBtn);
                     // Reset Turnstile widget on failure
                     if (typeof turnstile !== 'undefined' && turnstileWidgetId !== null) {
                         turnstile.reset(turnstileWidgetId);
                     }
+                })
+                .finally(() => {
+                    // Guarded by the SAME counter, and that guard is load-bearing. Without it:
+                    // send A, change email, send B - and A's late response clears the flag that now
+                    // belongs to B, letting a third send start while B is still out. With it, A
+                    // no-ops entirely and B keeps the lock.
+                    //
+                    // In .finally() rather than at the top of .then() so the flag survives until
+                    // the body has been parsed; clearing it at headers-received left a window
+                    // where the button was live but the success handler had not run yet.
+                    if (myGeneration !== sendGeneration) return;
+
+                    sendInFlight = false;
+                    setSendButtonIdle(sendCodeBtn);
                 });
             }
 
@@ -532,6 +622,7 @@
          * time a code can be entered, so the form either submits or reports which field is missing.
          */
         var autoSubmitted = false;
+        var autoSubmitReported = false;
         function maybeAutoSubmit(codeInput) {
             if (codeInput.value.length !== 6) return;
 
@@ -549,9 +640,18 @@
             var form = codeInput.form;
             if (!form) return;
 
-            // Do not auto-submit an incomplete form. Let the visitor finish Name and Password and
-            // press the button themselves, rather than being bounced out of the field mid-entry.
-            if (typeof form.checkValidity === 'function' && !form.checkValidity()) return;
+            // Do not auto-submit an incomplete form - but do not fail silently either.
+            // checkValidity() fires `invalid` events and renders NOTHING (that is reportValidity),
+            // and nothing here listens for them, so the sixth digit became a no-op with no
+            // explanation. Report once: repeating it on every keystroke is what made the old
+            // unconditional requestSubmit() yank the caret out of the code box.
+            if (typeof form.checkValidity === 'function' && !form.checkValidity()) {
+                if (!autoSubmitReported && typeof form.reportValidity === 'function') {
+                    autoSubmitReported = true;
+                    form.reportValidity();
+                }
+                return;
+            }
 
             autoSubmitted = true;
 
