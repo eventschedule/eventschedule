@@ -198,6 +198,90 @@ class SignupCodeStepTest extends TestCase
         }
     }
 
+    /**
+     * The page had no <h1> and nothing saying why to be on it.
+     *
+     * 468 sign-up views produced 64 accounts in August. The complete text of the page was: Email,
+     * SEND CODE, Full Name, Password, Verification Code, the consent line, SIGN UP, or, Sign up
+     * with Google, Already registered? - while the page the visitor had just left promised setup
+     * in under two minutes and no credit card.
+     */
+    public function test_the_page_states_what_it_is_offering(): void
+    {
+        $html = $this->signupPage()->assertOk()->getContent();
+
+        $this->assertMatchesRegularExpression('/<h1[^>]*id="signup-heading"/', $html);
+        $this->assertStringContainsString(__('messages.signup_heading'), $html);
+        $this->assertStringContainsString(__('messages.signup_subheading'), $html);
+    }
+
+    /** On selfhost this is an install wizard or an operator adding an account to their own server. */
+    public function test_the_marketing_heading_is_hosted_only(): void
+    {
+        config(['app.hosted' => false, 'app.is_testing' => false]);
+
+        $html = $this->get(app_url('/sign_up'))->getContent();
+
+        $this->assertStringNotContainsString('id="signup-heading"', $html);
+    }
+
+    /**
+     * Half of all accounts arrive through Google, and a returning Google user reaching this page
+     * should not be told they are signing up.
+     */
+    public function test_the_google_button_says_continue_and_hides_its_icon_from_screen_readers(): void
+    {
+        $html = $this->signupPage()->assertOk()->getContent();
+
+        $this->assertStringContainsString(__('messages.continue_with_google'), $html);
+        $this->assertStringNotContainsString(__('messages.sign_up_with_google'), $html);
+
+        // The shared component carries aria-hidden and the logical me-2 margin; the hand-rolled
+        // copy this replaced had neither, and ar and he are shipped locales.
+        $this->assertMatchesRegularExpression('/<svg class="w-5 h-5 me-2"[^>]*aria-hidden="true"/', $html);
+    }
+
+    /**
+     * .auth-card is a gradient, so a flat colour behind the "or" label cannot match it.
+     *
+     * The two auth pages disagreed about WHICH flat colour to use, which is the tell.
+     */
+    public function test_the_or_divider_does_not_mask_the_card_gradient(): void
+    {
+        foreach (['/sign_up', '/login'] as $path) {
+            config(['app.hosted' => true, 'app.is_testing' => false, 'services.google.client_id' => 'x']);
+            $html = $this->get(app_url($path))->getContent();
+
+            $this->assertStringNotContainsString('px-2 bg-white dark:bg-gray-800', $html, $path);
+            $this->assertStringNotContainsString('px-2 bg-white dark:bg-gray-900', $html, $path);
+        }
+    }
+
+    /** Somebody who has just typed their address should not have to type it again on /login. */
+    public function test_login_prefills_an_address_handed_to_it(): void
+    {
+        config(['app.hosted' => true, 'app.is_testing' => false]);
+
+        $html = $this->get(app_url('/login').'?email=someone%40eventschedule-test.org')->getContent();
+
+        $this->assertMatchesRegularExpression(
+            '/<input[^>]*id="email"[^>]*value="someone@eventschedule-test\.org"/',
+            $html
+        );
+    }
+
+    /**
+     * min-width was applied to `form button`, which includes the password reveal toggle - an
+     * absolutely positioned button inside the field.
+     */
+    public function test_the_min_width_rule_does_not_catch_the_password_toggle(): void
+    {
+        $html = $this->signupPage()->assertOk()->getContent();
+
+        $this->assertStringNotContainsString('form button {', $html);
+        $this->assertStringContainsString('#send-code-btn, form button[type="submit"] {', $html);
+    }
+
     /** Isolates the verification_code input so an attribute elsewhere cannot satisfy a check. */
     private function codeFieldMarkup(string $html): string
     {

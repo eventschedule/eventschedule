@@ -76,6 +76,15 @@
 
             var panel = document.getElementById('code-sent-panel');
             if (panel) panel.style.display = 'block';
+
+            // Name the step, in the page and in the tab strip. This flow REQUIRES leaving the tab
+            // to read a mail, and every auth page shipped the same literal <title>Event Schedule</title>,
+            // so finding the way back meant recognising one of several identical tabs.
+            var heading = document.getElementById('signup-heading');
+            var subheading = document.getElementById('signup-subheading');
+            if (heading) heading.textContent = @json(__('messages.signup_check_email_heading'));
+            if (subheading) subheading.style.display = 'none';
+            document.title = @json(__('messages.signup_check_email_heading')) + ' | Event Schedule';
         }
 
         /**
@@ -96,6 +105,14 @@
             if (panel) panel.style.display = 'none';
             if (codeInput) codeInput.value = '';
             if (codeMessage) codeMessage.innerHTML = '';
+
+            // Back to step one means back to step one's heading, or the page still says to go and
+            // read a mail that no longer applies to the address in the box.
+            var heading = document.getElementById('signup-heading');
+            var subheading = document.getElementById('signup-subheading');
+            if (heading) heading.textContent = @json(__('messages.signup_heading'));
+            if (subheading) subheading.style.display = '';
+            document.title = 'Event Schedule';
 
             emailInput.focus();
             emailInput.select();
@@ -156,7 +173,7 @@
             if (!btn) return;
             btn.disabled = false;
             btn.removeAttribute('aria-busy');
-            btn.textContent = @json(__('messages.send_code'));
+            btn.textContent = @json(__('messages.email_me_a_code'));
         }
 
         // Restore the code state when the form comes back from a failed submit.
@@ -390,6 +407,21 @@
                 });
             }
 
+            // Carry the address to /login rather than making somebody who has just typed it, and
+            // been told it already has an account, type it a second time. login.blade.php reads
+            // request('email') into its own field.
+            var alreadyRegisteredLink = document.getElementById('already-registered-link');
+            if (alreadyRegisteredLink) {
+                alreadyRegisteredLink.addEventListener('click', function() {
+                    var typed = document.getElementById('email');
+                    if (typed && typed.value && typed.value.indexOf('@') > 0) {
+                        var url = new URL(this.href, window.location.origin);
+                        url.searchParams.set('email', typed.value);
+                        this.href = url.toString();
+                    }
+                });
+            }
+
             var changeEmailBtn = document.getElementById('change-email-btn');
             if (changeEmailBtn) {
                 changeEmailBtn.addEventListener('click', function(e) {
@@ -506,7 +538,10 @@
         </script>
 
         <style {!! nonce_attr() !!}>
-            form button {
+            /* Scoped: this used to be `form button`, which also caught the password reveal
+               toggle - an absolutely positioned button inside the field - so the eye icon painted
+               about 88px in from the edge and its hit area covered the end of the input. */
+            #send-code-btn, form button[type="submit"] {
                 min-width: 100px;
             }
             button:disabled {
@@ -530,6 +565,28 @@
         // revealSignupFields() arms all four the moment they become visible.
         $stepped = config('app.hosted') && ! config('app.is_testing');
     @endphp
+
+    {{-- The page had no <h1> and nothing saying why to be on it: a logo, then fields. Every promise
+         the visitor was reading a moment earlier ("Set up in under 2 minutes", "No credit card
+         required", marketing/index.blade.php:533,1832) was dropped at the point of commitment.
+
+         Hosted only. On selfhost this is either the install wizard or an operator adding an account
+         to their own server, where "no credit card" describes nothing.
+
+         No price here, deliberately: plan_price() and platform_currency() own those, and a figure
+         written into a string is wrong on any install that changed its currency. "No credit card"
+         is currency-free, which is why the claim is phrased that way. --}}
+    @if (config('app.hosted'))
+    <div class="mb-6 text-center">
+        <h1 id="signup-heading" class="text-xl font-bold text-gray-900 dark:text-gray-100">
+            {{ __('messages.signup_heading') }}
+        </h1>
+        <p id="signup-subheading" class="mt-1 text-sm text-gray-500 dark:text-gray-400">
+            {{ __('messages.signup_subheading') }}
+        </p>
+    </div>
+    @endif
+
     <form method="POST" action="{{ route('sign_up') }}" class="w-full">
         @csrf
 
@@ -537,7 +594,7 @@
         <input type="hidden" id="language_code" name="language_code"/>
 
         @if ($errors->any() && ! $errors->has('database_host'))
-        <div class="mb-4 rounded-lg bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-700 p-3">
+        <div role="alert" class="mb-4 rounded-lg bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-700 p-3">
             <div class="flex items-center gap-2">
                 <svg class="w-5 h-5 text-red-600 dark:text-red-400 flex-shrink-0" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
                     <path stroke-linecap="round" stroke-linejoin="round" d="M12 9v3.75m-9.303 3.376c-.866 1.5.217 3.374 1.948 3.374h14.71c1.73 0 2.813-1.874 1.948-3.374L13.949 3.378c-.866-1.5-3.032-1.5-3.898 0L2.697 16.126ZM12 15.75h.007v.008H12v-.008Z" />
@@ -642,10 +699,10 @@
             <x-input-label for="email" :value="__('messages.email')" />
             @if (config('app.hosted'))
             <div class="flex flex-col sm:flex-row gap-2">
-                <x-text-input id="email" class="block mt-1 flex-1 min-w-0 w-full sm:w-auto" type="email" name="email" :value="old('email', base64_decode(request()->email))" required
+                <x-text-input id="email" class="block mt-1 flex-1 min-w-0 w-full sm:w-auto" type="email" name="email" :value="old('email', base64_decode(request()->email ?? ''))" required
                     autocomplete="email" />
                 <button type="button" id="send-code-btn" class="mt-1 w-full sm:w-auto sm:flex-shrink-0 whitespace-nowrap inline-flex items-center justify-center px-6 py-3 bg-gray-800 dark:bg-gray-200 border border-transparent rounded-md font-semibold text-sm text-white dark:text-gray-800 uppercase tracking-widest hover:bg-gray-700 dark:hover:bg-white focus:bg-gray-700 dark:focus:bg-white active:bg-gray-900 dark:active:bg-gray-300 focus:outline-none focus:ring-2 focus:ring-[var(--brand-blue)] focus:ring-offset-2 dark:focus:ring-offset-gray-800 transition ease-in-out duration-150">
-                    {{ __('messages.send_code') }}
+                    {{ __('messages.email_me_a_code') }}
                 </button>
             </div>
             {{-- role="status" because every success and every failure of this page's key
@@ -673,7 +730,7 @@
                 </p>
             </div>
             @else
-            <x-text-input id="email" class="block mt-1 w-full" type="email" name="email" :value="old('email', base64_decode(request()->email))" required
+            <x-text-input id="email" class="block mt-1 w-full" type="email" name="email" :value="old('email', base64_decode(request()->email ?? ''))" required
                 autocomplete="email" />
             @endif
             <x-input-error :messages="$errors->get('email')" class="mt-2" />
@@ -692,7 +749,13 @@
             <x-input-label for="password" :value="__('messages.password')" />
 
             <x-password-input id="password" class="block mt-1 w-full" name="password" :required="! $stepped" minlength="8"
-                autocomplete="new-password" />
+                autocomplete="new-password" aria-describedby="password-help" />
+
+            {{-- The only statement of the rule used to be minlength="8", whose violation message is
+                 supplied by the browser in ITS language, not the visitor's - so in eleven of the
+                 twelve shipped locales the one piece of guidance on this field arrived in English,
+                 and only after a failed submit. Key already exists and is already translated. --}}
+            <p id="password-help" class="mt-1 text-xs text-gray-500 dark:text-gray-400">{{ __('messages.password_min_chars') }}</p>
 
             <x-input-error :messages="$errors->get('password')" class="mt-2" />
         </div>
@@ -747,32 +810,34 @@
 
         @if (config('services.google.client_id') && public_registration_enabled())
         <div id="google-signup-section" class="w-full mt-6">
-            <div class="relative mb-6">
-                <div class="absolute inset-0 flex items-center">
-                    <div class="w-full border-t border-gray-300 dark:border-gray-600"></div>
-                </div>
-                <div class="relative flex justify-center text-sm">
-                    <span class="px-2 bg-white dark:bg-gray-800 text-gray-500 dark:text-gray-400">{{ __('messages.or') }}</span>
-                </div>
+            {{-- A flex rule with the label between the two halves, NOT an absolutely-positioned
+                 line behind an opaque label. .auth-card is a gradient (app.css) and this layout
+                 opts into the six --ap-* palettes, so no flat mask colour can match the surface
+                 behind it: the old `px-2 bg-white dark:bg-gray-800` painted a visible patch.
+                 Same fix, and the same reasoning, as event/guest-submit.blade.php:569-571. --}}
+            <div class="mb-6 flex items-center gap-4">
+                <div class="flex-1 h-px bg-gray-300 dark:bg-gray-600"></div>
+                <span class="text-sm text-gray-500 dark:text-gray-400">{{ __('messages.or') }}</span>
+                <div class="flex-1 h-px bg-gray-300 dark:bg-gray-600"></div>
             </div>
 
-            <a href="{{ route('auth.google') }}" class="w-full inline-flex items-center justify-center px-4 py-3 bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 rounded-md font-semibold text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-[var(--brand-blue)] dark:focus:ring-offset-gray-800 transition ease-in-out duration-150">
-                <svg class="w-5 h-5 mr-2" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                    <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/>
-                    <path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/>
-                    <path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z"/>
-                    <path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"/>
-                </svg>
-                {{ __('messages.sign_up_with_google') }}
-            </a>
+            {{-- "Continue with", not "Sign up with": half of all accounts arrive this way and a
+                 returning Google user reaching this page should not be told they are signing up.
+                 The component carries aria-hidden on the icon and the logical me-2 margin; its
+                 docblock asks the seven hand-rolled copies to adopt it when next touched. --}}
+            <x-google-button>{{ __('messages.continue_with_google') }}</x-google-button>
         </div>
         @endif
 
         @if (config('app.hosted'))
-        <div class="mt-6" id="already-registered">
-            <a class="hover:underline text-sm text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-100 rounded-md focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-[var(--brand-blue)] dark:focus:ring-offset-gray-800"
+        {{-- The whole link used to be the question, so the destination was never stated. Two
+             existing keys rather than a new sentence: the question stays plain text and only the
+             answer is a link. Also carries the address, so /login can prefill it. --}}
+        <div class="mt-6 text-sm text-gray-600 dark:text-gray-400" id="already-registered">
+            {{ __('messages.already_registered') }}
+            <a id="already-registered-link" class="underline hover:no-underline text-[var(--brand-blue)] rounded-md focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-[var(--brand-blue)] dark:focus:ring-offset-gray-800"
                 href="{{ route('login') }}">
-                {{ __('messages.already_registered') }}
+                {{ __('messages.log_in') }}
             </a>
         </div>
         @endif
@@ -783,7 +848,7 @@
                     <input id="terms" name="terms" type="checkbox" value="1" {{ old('terms') ? 'checked' : '' }} {{ $stepped ? '' : 'required' }}
                         class="h-4 w-4 rounded border-gray-300 dark:border-gray-700 dark:bg-gray-900 text-[var(--brand-blue)] focus:ring-[var(--brand-blue)] dark:focus:ring-offset-gray-800">
                 </div>
-                <div class="ml-3 text-sm leading-6">
+                <div class="ms-3 text-sm leading-6">
                     <label for="terms" class="font-medium text-gray-900 dark:text-gray-300">
                         @if (config('app.hosted'))
                             {!! str_replace([':terms', ':privacy'], [
@@ -813,7 +878,7 @@
                     <input id="report_errors" name="report_errors" type="checkbox" value="1"
                         class="h-4 w-4 rounded border-gray-300 dark:border-gray-700 dark:bg-gray-900 text-[var(--brand-blue)] focus:ring-[var(--brand-blue)] dark:focus:ring-offset-gray-800">
                 </div>
-                <div class="ml-3 text-sm leading-6">
+                <div class="ms-3 text-sm leading-6">
                     <label for="report_errors" class="font-medium text-gray-900 dark:text-gray-300">
                         {{ __('messages.report_errors') }}
                     </label>
@@ -823,8 +888,8 @@
         @endif
         
         <div class="flex items-center justify-end mt-8">
-            <div id="submit-section" @if($stepped) style="display: none;" @endif>
-                <x-primary-button>
+            <div id="submit-section" class="w-full sm:w-auto" @if($stepped) style="display: none;" @endif>
+                <x-primary-button class="w-full sm:w-auto justify-center">
                     {{ __('messages.sign_up') }}
                 </x-primary-button>
             </div>
