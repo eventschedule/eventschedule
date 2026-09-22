@@ -247,6 +247,27 @@ class BlogController extends Controller
     }
 
     /**
+     * Keep a post out of the search index (or put it back) without unpublishing it.
+     *
+     * Deliberately its own action rather than a field on update(): noindex is not fillable, so
+     * neither the edit form nor the AI generators can set it by accident.
+     */
+    public function toggleNoindex(Request $request, string $blogPostId)
+    {
+        if (! auth()->user()->isAdmin()) {
+            return redirect()->back()->with('error', __('messages.not_authorized'));
+        }
+
+        $blogPost = BlogPost::findOrFail(UrlUtils::decodeId($blogPostId));
+
+        // Not a content edit, so it must not move updated_at, which feeds <lastmod> and
+        // dateModified (see BlogPost::incrementViewCount()).
+        BlogPost::withoutTimestamps(fn () => $blogPost->forceFill(['noindex' => $request->boolean('noindex')])->save());
+
+        return redirect()->back()->with('message', __('messages.settings_saved'));
+    }
+
+    /**
      * Admin index - show all posts (published and unpublished)
      */
     public function adminIndex()

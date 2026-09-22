@@ -5,6 +5,7 @@ namespace App\Console\Commands;
 use App\Models\BlogPost;
 use App\Utils\GeminiUtils;
 use Illuminate\Console\Command;
+use Illuminate\Support\Facades\Log;
 
 class GenerateDailyBlogPost extends Command
 {
@@ -33,12 +34,21 @@ class GenerateDailyBlogPost extends Command
             return 0;
         }
 
-        // Check if we already created a post today
-        $todayStart = now()->startOfDay();
-        $existsToday = BlogPost::where('created_at', '>=', $todayStart)->exists();
+        // One post a day across BOTH generators (and the admin), not one per generator: up to two
+        // formulaic AI posts a day is the pattern Google's scaled-content policy targets.
+        //
+        // created_at, not published_at: both generators backdate published_at by up to 6 hours
+        // at random, so it says little about when a post actually appeared. And 23 hours, not
+        // 24: this command runs at 00:00 and app:generate-sub-audience-blog at 03:00, so the
+        // window must reach back past 03:00 yesterday (21 hours) to see that post, while a
+        // full 24 would catch this command's own post from the previous midnight whenever
+        // tonight's tick lands a few seconds earlier than last night's.
+        $recentlyPublished = BlogPost::where('is_published', true)
+            ->where('created_at', '>=', now()->subHours(23))
+            ->exists();
 
-        if ($existsToday) {
-            $this->info('Already created a blog post today.');
+        if ($recentlyPublished) {
+            $this->info('A blog post was already published in the last day.');
 
             return 0;
         }
@@ -72,6 +82,15 @@ class GenerateDailyBlogPost extends Command
             $this->error('Failed to generate blog post.');
 
             return 1;
+        }
+
+        $rejection = BlogPost::qualityGateFailure($postData);
+
+        if ($rejection !== null) {
+            Log::warning('Daily blog post rejected by the quality gate: '.$rejection, ['title' => $postData['title'] ?? null]);
+            $this->warn('Rejected by the quality gate: '.$rejection);
+
+            return 0;
         }
 
         // Create the blog post with randomized timestamp (up to 6 hours earlier)

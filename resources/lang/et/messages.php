@@ -1816,6 +1816,8 @@ return [
     'update_post' => 'Värskenda postitust',
     'current_image' => 'Praegune pilt',
     'blog_posts' => 'Blogi postitused',
+    'blog_word_count' => 'Sõnad',
+    'blog_noindex' => 'Peida otsingumootorite eest',
     'blog_posts_description' => 'Hallake oma ajaveebi postitusi. Avalikkusele on nähtavad ainult avaldatud postitused.',
     'published' => 'Avaldatud',
     'scheduled' => 'Planeeritud',

@@ -1096,6 +1096,7 @@ Route::middleware(['auth', 'verified', 'app_subdomain'])->group(function () {
             Route::get('/admin/blog/{blog_post}/edit', [BlogController::class, 'edit'])->name('blog.edit');
             Route::put('/admin/blog/{blog_post}', [BlogController::class, 'update'])->name('blog.update');
             Route::delete('/admin/blog/{blog_post}', [BlogController::class, 'destroy'])->name('blog.destroy');
+            Route::post('/admin/blog/{blog_post}/noindex', [BlogController::class, 'toggleNoindex'])->name('blog.noindex');
             Route::post('/admin/blog/generate-content', [BlogController::class, 'generateContent'])->name('blog.generate-content');
         }
     });

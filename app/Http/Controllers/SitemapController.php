@@ -622,7 +622,10 @@ class SitemapController extends Controller
     {
         return BlogPost::query()
             ->select(['id', 'slug', 'published_at', 'updated_at', 'is_published'])
-            ->published();
+            ->published()
+            // A post an admin marked noindex renders `noindex, follow`; listing it here would
+            // ask Google to crawl a URL the page itself refuses.
+            ->where('noindex', false);
     }
 
     /** Bound a query to one page's id range. A null bound is open (see pageRanges). */

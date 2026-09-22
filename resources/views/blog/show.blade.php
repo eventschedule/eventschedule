@@ -1,6 +1,13 @@
 <x-marketing-layout>
-    <x-slot name="title">{{ $post->meta_title }} | Event Schedule</x-slot>
-    <x-slot name="description">{{ $post->meta_description }}</x-slot>
+    {{-- Both bounded in the model: the brand suffix only when it still fits in 60 characters,
+         and the description cut at a word boundary to 160. See BlogPost::pageTitle(). --}}
+    <x-slot name="title">{{ $post->pageTitle() }}</x-slot>
+    <x-slot name="description">{{ $post->pageDescription() }}</x-slot>
+    @if($post->noindex)
+    {{-- An admin kept this post out of the index (blog admin list). follow, so its links still
+         count; SitemapController leaves it out of sitemap-blog-*.xml to match. --}}
+    <x-slot name="robots">noindex, follow</x-slot>
+    @endif
     <x-slot name="canonical">{{ url()->current() }}</x-slot>
     @if($post->tags)
     @endif
@@ -69,7 +76,7 @@
                 '@type' => 'SpeakableSpecification',
                 'cssSelector' => ["[itemprop='headline']", "[itemprop='description']"],
             ],
-            'wordCount' => str_word_count(strip_tags($post->content)),
+            'wordCount' => $post->wordCount(),
         ];
 
         if ($post->tags) {

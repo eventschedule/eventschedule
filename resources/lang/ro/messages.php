@@ -1832,6 +1832,8 @@ return [
     'update_post' => 'Actualizează Articol',
     'current_image' => 'Imaginea curentă',
     'blog_posts' => 'Articole Blog',
+    'blog_word_count' => 'Cuvinte',
+    'blog_noindex' => 'Ascunde de motoarele de căutare',
     'blog_posts_description' => 'Administrează articolele de blog. Doar articolele publicate sunt vizibile publicului.',
     'published' => 'Publicat',
     'scheduled' => 'Programat',

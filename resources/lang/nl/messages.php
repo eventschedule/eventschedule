@@ -1811,6 +1811,8 @@ return [
     'update_post' => 'Bericht Bijwerken',
     'current_image' => 'Huidige afbeelding',
     'blog_posts' => 'Blogberichten',
+    'blog_word_count' => 'Woorden',
+    'blog_noindex' => 'Verbergen voor zoekmachines',
     'blog_posts_description' => 'Beheer uw blogberichten. Alleen gepubliceerde berichten zijn zichtbaar voor het publiek.',
     'published' => 'Gepubliceerd',
     'scheduled' => 'Ingepland',

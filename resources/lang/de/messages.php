@@ -1808,6 +1808,8 @@ return [
     'update_post' => 'Beitrag aktualisieren',
     'current_image' => 'Aktuelles Bild',
     'blog_posts' => 'Blogbeiträge',
+    'blog_word_count' => 'Wörter',
+    'blog_noindex' => 'Vor Suchmaschinen verbergen',
     'blog_posts_description' => 'Verwalten Sie Ihre Blogbeiträge. Nur veröffentlichte Beiträge sind öffentlich sichtbar.',
     'published' => 'Veröffentlicht',
     'scheduled' => 'Geplant',

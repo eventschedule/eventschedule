@@ -97,6 +97,8 @@
                                         <th scope="col" class="px-3 py-3.5 text-left text-sm font-semibold text-gray-900 dark:text-gray-100">{{ __('messages.status') }}</th>
                                         <th scope="col" class="px-3 py-3.5 text-left text-sm font-semibold text-gray-900 dark:text-gray-100">{{ __('messages.published') }}</th>
                                         <th scope="col" class="px-3 py-3.5 text-left text-sm font-semibold text-gray-900 dark:text-gray-100">{{ __('messages.views') }}</th>
+                                        <th scope="col" class="px-3 py-3.5 text-left text-sm font-semibold text-gray-900 dark:text-gray-100">{{ __('messages.blog_word_count') }}</th>
+                                        <th scope="col" class="px-3 py-3.5 text-left text-sm font-semibold text-gray-900 dark:text-gray-100">{{ __('messages.blog_noindex') }}</th>
                                         <th scope="col" class="relative py-3.5 pl-3 pr-4 sm:pr-6">
                                             <span class="sr-only">{{ __('messages.actions') }}</span>
                                         </th>
@@ -136,6 +138,18 @@
                                             <td class="whitespace-nowrap px-3 py-4 text-sm text-gray-500 dark:text-gray-400">
                                                 {{ number_format($post->view_count) }}
                                             </td>
+                                            {{-- The triage report: a thin post is the one to hide. Amber below the
+                                                 generators' own quality floor. --}}
+                                            @php($words = $post->wordCount())
+                                            <td class="whitespace-nowrap px-3 py-4 text-sm {{ $words < \App\Models\BlogPost::QUALITY_MIN_WORDS ? 'text-amber-600 dark:text-amber-400 font-medium' : 'text-gray-500 dark:text-gray-400' }}">
+                                                {{ number_format($words) }}
+                                            </td>
+                                            <td class="whitespace-nowrap px-3 py-4 text-sm">
+                                                <form method="POST" action="{{ route('blog.noindex', $post->encodeId()) }}">
+                                                    @csrf
+                                                    <x-toggle name="noindex" :checked="$post->noindex" :id="'noindex-'.$post->encodeId()" aria-label="{{ __('messages.blog_noindex') }}" data-auto-submit />
+                                                </form>
+                                            </td>
                                             <td class="relative whitespace-nowrap py-4 pl-3 pr-4 text-right text-sm font-medium sm:pr-6">
                                                 <div class="flex items-center justify-end gap-3">
                                                     @if($post->is_published && $post->published_at && $post->published_at <= now())
@@ -164,7 +178,7 @@
                                                         {{ __('messages.edit') }}
                                                     </a>
                                                     <form method="POST" action="{{ route('blog.destroy', $post->encodeId()) }}"
-                                                          class="js-confirm-form inline" data-confirm="{{ __('messages.confirm_delete_post') }}"
+                                                          class="js-confirm-form inline" data-confirm="{{ __('messages.confirm_delete_post') }}">
                                                         @csrf
                                                         @method('DELETE')
                                                         <button type="submit" class="text-red-600 hover:text-red-800 dark:text-red-400 dark:hover:text-red-300 transition-colors">
@@ -176,7 +190,7 @@
                                         </tr>
                                     @empty
                                         <tr>
-                                            <td colspan="6" class="px-6 py-12 text-center text-sm text-gray-500 dark:text-gray-400">
+                                            <td colspan="7" class="px-6 py-12 text-center text-sm text-gray-500 dark:text-gray-400">
                                                 <div class="flex flex-col items-center">
                                                     <svg class="mx-auto h-12 w-12 text-gray-400 dark:text-gray-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />

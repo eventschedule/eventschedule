@@ -3,9 +3,11 @@
 namespace Tests\Feature;
 
 use App\Models\BlogPost;
+use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Str;
 use Tests\TestCase;
 
@@ -354,6 +356,197 @@ class BlogSeoTest extends TestCase
 
         $this->assertStringContainsString('<meta property="og:image:width" content="1200">', $body);
         $this->assertStringContainsString('<meta property="og:image:height" content="600">', $body);
+    }
+
+    /**
+     * The blog is served on blog.{domain}, so HTMLPurifier's HTML.Nofollow counted every link to
+     * the product as external: 211 posts linking the feature pages, and not one of them passing
+     * equity. They also pointed at www., a redirect hop.
+     */
+    public function test_a_first_party_link_follows_and_drops_www_while_an_external_one_stays_nofollow(): void
+    {
+        $base = _base_domain();
+
+        $post = $this->makePost([
+            'content' => '<p>See <a href="https://www.'.$base.'/for-x">the page</a>, '
+                .'<a href="https://blog.'.$base.'/other">another post</a> and '
+                .'<a href="https://example.org/elsewhere">a stranger</a>.</p>',
+        ]);
+
+        $body = $this->get('/blog/'.$post->slug)->assertOk()->getContent();
+
+        $this->assertStringContainsString('<a href="https://'.$base.'/for-x">the page</a>', $body);
+        $this->assertStringNotContainsString('https://www.'.$base.'/for-x', $body, 'the www. hop survived');
+        $this->assertStringContainsString('<a href="https://blog.'.$base.'/other">another post</a>', $body);
+
+        // User content is sanitized by the same MarkdownUtils::sanitizeHtml(), so the external
+        // link must keep exactly what the purifier gives it.
+        $this->assertMatchesRegularExpression(
+            '~<a href="https://example\.org/elsewhere" rel="nofollow[^"]*" target="_blank">a stranger</a>~',
+            $body
+        );
+    }
+
+    /**
+     * The old prompt showed the model a markdown link INSIDE the href, and the model copied it.
+     * The purifier percent-encodes that into a relative path, which 404s on the blog host.
+     */
+    public function test_a_stored_markdown_href_is_repaired_to_its_first_url(): void
+    {
+        $base = _base_domain();
+
+        $post = $this->makePost([
+            'content' => '<p><a href="[https://www.'.$base.'/for-y](https://www.'.$base.'/for-y)">Event Schedule</a></p>',
+        ]);
+
+        $body = $this->get('/blog/'.$post->slug)->assertOk()->getContent();
+
+        $this->assertStringContainsString('<a href="https://'.$base.'/for-y">Event Schedule</a>', $body);
+        $this->assertStringNotContainsString('%5B', $body);
+
+        // Stored bodies are never rewritten.
+        $this->assertStringContainsString('[https://www.', BlogPost::find($post->id)->content);
+    }
+
+    public function test_the_ai_prompt_asks_for_plain_apex_links(): void
+    {
+        foreach (['links_with_parent', 'links_without_parent'] as $key) {
+            $prompt = config('ai_prompts.blog_post.'.$key);
+
+            $this->assertStringContainsString('href=":base_url', $prompt, $key);
+            $this->assertStringNotContainsString('href="[', $prompt, $key.' still puts markdown in an href');
+            $this->assertStringNotContainsString('www.', $prompt, $key);
+        }
+    }
+
+    public function test_a_long_meta_title_drops_the_suffix_and_stays_within_60_characters(): void
+    {
+        $long = $this->makePost(['meta_title' => str_repeat('Ticketing ', 8)]); // 80 characters
+        $short = $this->makePost(['meta_title' => 'Selling Tickets Online']);
+
+        $title = $this->titleOf($this->get('/blog/'.$long->slug)->assertOk()->getContent());
+        $this->assertLessThanOrEqual(60, mb_strlen($title), 'title is '.mb_strlen($title).' chars: '.$title);
+        $this->assertStringNotContainsString('| Event Schedule', $title);
+
+        $this->assertSame(
+            'Selling Tickets Online | Event Schedule',
+            $this->titleOf($this->get('/blog/'.$short->slug)->assertOk()->getContent())
+        );
+    }
+
+    public function test_a_long_meta_description_is_cut_at_a_word_boundary_within_160_characters(): void
+    {
+        $post = $this->makePost(['meta_description' => str_repeat('Sell tickets online ', 10)]); // 200 characters
+
+        $body = $this->get('/blog/'.$post->slug)->assertOk()->getContent();
+        preg_match('~<meta name="description" content="(.*?)">~s', $body, $match);
+        $description = html_entity_decode($match[1]);
+
+        $this->assertLessThanOrEqual(160, mb_strlen($description), $description);
+        $this->assertMatchesRegularExpression('~(Sell|tickets|online)…$~u', $description, 'cut mid-word');
+    }
+
+    public function test_the_quality_gate_rejects_a_short_post_and_a_near_duplicate_title(): void
+    {
+        $this->makePost(['title' => 'How to Sell Concert Tickets Online in 2026']);
+
+        $long = '<p>'.str_repeat('Venues sell more tickets when fans can find them. ', 100).'</p>'; // 900 words
+        $short = '<p>'.str_repeat('Too thin to publish here. ', 60).'</p>'; // 300 words
+
+        $this->assertStringContainsString('too short', (string) BlogPost::qualityGateFailure([
+            'title' => 'A Brand New Subject Entirely',
+            'content' => $short,
+        ]));
+
+        $this->assertStringContainsString('near-duplicate', (string) BlogPost::qualityGateFailure([
+            'title' => 'How to Sell Concert Tickets Online in 2027',
+            'content' => $long,
+        ]));
+
+        $this->assertNull(BlogPost::qualityGateFailure([
+            'title' => 'Running a Pottery Workshop Waitlist',
+            'content' => $long,
+        ]));
+    }
+
+    public function test_a_noindex_post_is_hidden_from_the_blog_sitemap_and_says_so(): void
+    {
+        $hidden = $this->makePost(['title' => 'Hidden Post']);
+        $hidden->forceFill(['noindex' => true])->save();
+        $listed = $this->makePost(['title' => 'Listed Post']);
+
+        $body = $this->get('/blog/'.$hidden->slug)->assertOk()->getContent();
+        $this->assertStringContainsString('<meta name="robots" content="noindex, follow">', $body);
+        $this->assertStringNotContainsString('noindex', $this->get('/blog/'.$listed->slug)->assertOk()->getContent());
+
+        $xml = $this->get('/sitemap-blog-1.xml')->assertOk()->streamedContent();
+        $this->assertStringContainsString($listed->slug, $xml);
+        $this->assertStringNotContainsString($hidden->slug, $xml);
+    }
+
+    public function test_noindex_is_not_mass_assignable(): void
+    {
+        $post = $this->makePost(['noindex' => true]);
+
+        $this->assertFalse((bool) $post->fresh()->noindex);
+    }
+
+    public function test_the_daily_generator_does_nothing_when_a_post_was_published_two_hours_ago(): void
+    {
+        config(['app.hosted' => true]);
+
+        $recent = $this->makePost(['title' => 'Published Earlier']);
+        DB::table('blog_posts')->where('id', $recent->id)->update(['created_at' => now()->subHours(2)]);
+
+        $this->artisan('app:generate-daily-blog-post')
+            ->expectsOutput('A blog post was already published in the last day.')
+            ->assertExitCode(0);
+
+        $this->assertSame(1, BlogPost::count());
+    }
+
+    /**
+     * The triage report: the admin list shows each post's word count and flips noindex, which is
+     * not a content edit and so must not restamp updated_at (the sitemap's lastmod).
+     */
+    public function test_an_admin_can_see_word_counts_and_toggle_noindex(): void
+    {
+        if (! Route::has('blog.noindex')) {
+            $this->markTestSkipped('The admin blog routes are registered on hosted installs only.');
+        }
+
+        config(['services.google.gemini_key' => 'test-key']);
+
+        $admin = User::factory()->create();
+        $admin->is_admin = true;
+        $admin->save();
+
+        $post = $this->makePost(['content' => '<p>'.str_repeat('word ', 321).'</p>']);
+        $stamp = $post->updated_at->toDateTimeString();
+        $this->travel(1)->hours();
+
+        // The /admin area sits behind EnsureUserIsAdmin's password re-confirmation.
+        $this->withSession([\App\Utils\AdminReauthUtils::SESSION_KEY => now()->timestamp]);
+
+        $this->actingAs($admin)->get('/admin/blog')->assertOk()->assertSee('321');
+
+        $this->actingAs($admin)
+            ->post(route('blog.noindex', $post->encodeId()), ['noindex' => '1'])
+            ->assertRedirect();
+
+        $fresh = $post->fresh();
+        $this->assertTrue($fresh->noindex);
+        $this->assertSame($stamp, $fresh->updated_at->toDateTimeString(), 'toggling noindex restamped updated_at');
+
+        $this->actingAs($admin)->post(route('blog.noindex', $post->encodeId()), ['noindex' => '0']);
+        $this->assertFalse($post->fresh()->noindex);
+    }
+
+    private function titleOf(string $html): string
+    {
+        preg_match('~<title>(.*?)</title>~s', $html, $match);
+
+        return html_entity_decode(trim($match[1] ?? ''));
     }
 
     /**

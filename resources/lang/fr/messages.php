@@ -1807,6 +1807,8 @@ return [
     'update_post' => 'Mettre à jour',
     'current_image' => 'Image actuelle',
     'blog_posts' => 'Articles de blog',
+    'blog_word_count' => 'Mots',
+    'blog_noindex' => 'Masquer des moteurs de recherche',
     'blog_posts_description' => 'Gérez vos articles. Seuls les articles publiés sont visibles par le public.',
     'published' => 'Publié',
     'scheduled' => 'Planifié',

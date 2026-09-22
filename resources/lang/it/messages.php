@@ -1813,6 +1813,8 @@ return [
     'update_post' => 'Aggiorna Articolo',
     'current_image' => 'Immagine attuale',
     'blog_posts' => 'Articoli del Blog',
+    'blog_word_count' => 'Parole',
+    'blog_noindex' => 'Nascondi dai motori di ricerca',
     'blog_posts_description' => 'Gestisci i tuoi articoli del blog. Solo gli articoli pubblicati sono visibili al pubblico.',
     'published' => 'Pubblicato',
     'scheduled' => 'Programmato',

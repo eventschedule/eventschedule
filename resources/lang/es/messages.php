@@ -1804,6 +1804,8 @@ return [
     'update_post' => 'Actualizar Publicacion',
     'current_image' => 'Imagen actual',
     'blog_posts' => 'Publicaciones del Blog',
+    'blog_word_count' => 'Palabras',
+    'blog_noindex' => 'Ocultar de los buscadores',
     'blog_posts_description' => 'Administra tus publicaciones de blog. Solo las publicaciones publicadas son visibles al publico.',
     'published' => 'Publicado',
     'scheduled' => 'Programado',

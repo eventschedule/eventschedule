@@ -6,6 +6,7 @@ use App\Models\BlogPost;
 use App\Utils\GeminiUtils;
 use Illuminate\Console\Command;
 use Illuminate\Support\Facades\Cache;
+use Illuminate\Support\Facades\Log;
 
 class GenerateSubAudienceBlog extends Command
 {
@@ -145,6 +146,15 @@ class GenerateSubAudienceBlog extends Command
 
                 if (empty($result) || empty($result['content'])) {
                     $this->error("  Failed to generate content for {$item['name']}");
+
+                    continue;
+                }
+
+                $rejection = BlogPost::qualityGateFailure($result);
+
+                if ($rejection !== null) {
+                    Log::warning("Sub-audience blog post for {$item['slug']} rejected by the quality gate: ".$rejection, ['title' => $result['title'] ?? null]);
+                    $this->warn('  Rejected by the quality gate: '.$rejection);
 
                     continue;
                 }

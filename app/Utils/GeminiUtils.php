@@ -2461,17 +2461,26 @@ class GeminiUtils
 
     public static function generateBlogPost($topic, $parentPageUrl = null, $parentPageTitle = null, $features = [])
     {
-        // Randomly select a length to vary content length
-        $lengths = ['short', 'medium', 'long'];
+        // Randomly select a length to vary content length. Not 'short' (300-500 words): the
+        // unattended generators reject anything under BlogPost::QUALITY_MIN_WORDS, so a short
+        // post was a guaranteed rejection and a wasted API call.
+        $lengths = ['medium', 'long'];
         $length = $lengths[array_rand($lengths)];
 
         $config = config('ai_prompts.blog_post');
 
-        // Build the internal links requirement based on whether we have parent page info
+        // Build the internal links requirement based on whether we have parent page info.
+        // The apex from marketing_url(), not a hardcoded www. host: www. is a redirect hop.
+        $baseUrl = preg_replace('~^(https?://)www\.~i', '$1', rtrim(marketing_url(), '/'));
+
         if ($parentPageUrl && $parentPageTitle) {
-            $linksRequirement = str_replace([':parent_url', ':parent_title'], [$parentPageUrl, $parentPageTitle], $config['links_with_parent']);
+            $linksRequirement = str_replace(
+                [':base_url', ':parent_url', ':parent_title'],
+                [$baseUrl, ltrim($parentPageUrl, '/'), $parentPageTitle],
+                $config['links_with_parent']
+            );
         } else {
-            $linksRequirement = $config['links_without_parent'];
+            $linksRequirement = str_replace(':base_url', $baseUrl, $config['links_without_parent']);
         }
 
         // Build features context if available

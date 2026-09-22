@@ -1866,6 +1866,8 @@ return [
     'update_post' => 'עדכן פוסט',
     'current_image' => 'תמונה נוכחית',
     'blog_posts' => 'פוסטים בבלוג',
+    'blog_word_count' => 'מילים',
+    'blog_noindex' => 'הסתרה ממנועי חיפוש',
     'blog_posts_description' => 'נהל את הפוסטים שלך. רק פוסטים שפורסמו גלויים לציבור.',
     'published' => 'פורסם',
     'scheduled' => 'מתוזמן',

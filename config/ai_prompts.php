@@ -158,11 +158,15 @@ return [
         :features_requirement
         :links_requirement
         - For image_category, strictly choose one from the provided list based on the core topic.",
+        // :base_url is filled from marketing_url() at the call site (the apex, no www., which
+        // would be a redirect hop). Plain URLs only: the old wording put a markdown link inside
+        // the href, the model copied it, and the purifier turned it into a relative 404.
         'links_with_parent' => '- IMPORTANT: You MUST seamlessly integrate exactly 2 internal links in the HTML content:
-          1. <a href="[https://www.eventschedule.com/:parent_url](https://www.eventschedule.com/:parent_url)">Event Schedule for :parent_title</a> (or natural variation).
-          2. <a href="[https://www.eventschedule.com](https://www.eventschedule.com)">Event Schedule</a>.
-        - Place these links where they provide genuine contextual value to the reader.',
-        'links_without_parent' => '- IMPORTANT: Integrate exactly 2 internal links naturally in the HTML content to <a href="[https://www.eventschedule.com](https://www.eventschedule.com)">Event Schedule</a>. Do not force them; place them where they contextually fit.',
+          1. <a href=":base_url/:parent_url">Event Schedule for :parent_title</a> (or natural variation).
+          2. <a href=":base_url">Event Schedule</a>.
+        - Place these links where they provide genuine contextual value to the reader.
+        - Write each href exactly as a plain absolute URL, as shown above. Never use markdown link syntax inside an href.',
+        'links_without_parent' => '- IMPORTANT: Integrate exactly 2 internal links naturally in the HTML content to <a href=":base_url">Event Schedule</a>. Do not force them; place them where they contextually fit. Write each href exactly as the plain absolute URL shown. Never use markdown link syntax inside an href.',
         'features_line' => "- Integrate these specific platform features into the practical advice naturally, rather than listing them like a sales pitch: :features.\n        ",
     ],
 

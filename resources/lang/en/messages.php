@@ -2169,6 +2169,8 @@ return [
     'update_post' => 'Update Post',
     'current_image' => 'Current image',
     'blog_posts' => 'Blog Posts',
+    'blog_word_count' => 'Words',
+    'blog_noindex' => 'Hide from search engines',
     'blog_posts_description' => 'Manage your blog posts. Only published posts are visible to the public.',
     'published' => 'Published',
     'scheduled' => 'Scheduled',

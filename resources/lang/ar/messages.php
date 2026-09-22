@@ -1867,6 +1867,8 @@ return [
     'update_post' => 'تحديث المقال',
     'current_image' => 'الصورة الحالية',
     'blog_posts' => 'المقالات',
+    'blog_word_count' => 'الكلمات',
+    'blog_noindex' => 'إخفاء من محركات البحث',
     'blog_posts_description' => 'إدارة مقالاتك. المقالات المنشورة فقط مرئية للعامة.',
     'published' => 'منشور',
     'scheduled' => 'مجدول',

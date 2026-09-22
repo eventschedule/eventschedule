@@ -11,6 +11,12 @@ class BlogPost extends Model
 {
     use HasFactory;
 
+    /** The quality gate's floor: see qualityGateFailure(). */
+    public const QUALITY_MIN_WORDS = 800;
+
+    /** similar_text() percent at or above which a title counts as a repeat. */
+    public const QUALITY_MAX_SIMILARITY = 80.0;
+
     public function encodeId()
     {
         return UrlUtils::encodeId($this->id);
@@ -35,6 +41,7 @@ class BlogPost extends Model
         'tags' => 'array',
         'published_at' => 'datetime',
         'is_published' => 'boolean',
+        'noindex' => 'boolean',
     ];
 
     // Generic header images that work well for blog posts
@@ -182,9 +189,210 @@ class BlogPost extends Model
      */
     public function renderedContent(): string
     {
-        $html = \App\Utils\MarkdownUtils::sanitizeHtml($this->content);
+        $html = \App\Utils\MarkdownUtils::sanitizeHtml(self::repairMarkdownHrefs((string) $this->content));
 
-        return preg_replace('~<(/?)h1(?=[\s>])~i', '<$1h2', $html) ?? $html;
+        $html = preg_replace('~<(/?)h1(?=[\s>])~i', '<$1h2', $html) ?? $html;
+
+        return self::followFirstPartyLinks($html);
+    }
+
+    /**
+     * Undo the old prompt's markdown-inside-an-attribute links.
+     *
+     * config/ai_prompts.php used to show the model `href="[https://www.eventschedule.com/x](https://www.eventschedule.com/x)"`,
+     * a markdown link pasted into an HTML attribute, and the model copied it faithfully. The
+     * purifier then percent-encodes the brackets into a RELATIVE path, so on blog.{domain} the
+     * link 404s. The first URL is the one that was meant. Stored bodies are never rewritten.
+     */
+    public static function repairMarkdownHrefs(string $html): string
+    {
+        return preg_replace(
+            '~href=(["\'])\s*\[\s*(https?://[^\]\s"\']+)\s*\]\([^)"\']*\)\s*\1~i',
+            'href=$1$2$1',
+            $html
+        ) ?? $html;
+    }
+
+    /**
+     * Let the blog pass link equity to the product it writes about.
+     *
+     * MarkdownUtils::sanitizeHtml() stamps every anchor with rel="nofollow noreferrer noopener"
+     * and target="_blank". That is right for user content, which is why it is not changed there,
+     * but the blog lives on blog.{domain}, so its links to {domain} looked external and every
+     * one of them was nofollow. The stored bodies also link www.{domain}, a redirect hop.
+     *
+     * For a first-party anchor only - the base domain, www. plus it, or any subdomain of it -
+     * this drops nofollow/noopener/noreferrer and target="_blank", and rewrites www. to the apex.
+     * Everything else keeps exactly what the purifier gave it.
+     */
+    public static function followFirstPartyLinks(string $html): string
+    {
+        $bases = self::firstPartyBaseHosts();
+
+        if ($bases === []) {
+            return $html;
+        }
+
+        return preg_replace_callback('~<a\s[^>]*>~i', function ($match) use ($bases) {
+            $tag = $match[0];
+
+            if (! preg_match('~\shref="([^"]*)"~i', $tag, $href)) {
+                return $tag;
+            }
+
+            $host = strtolower((string) parse_url(html_entity_decode($href[1]), PHP_URL_HOST));
+
+            if ($host === '') {
+                return $tag;
+            }
+
+            $base = null;
+            foreach ($bases as $candidate) {
+                if ($host === $candidate || str_ends_with($host, '.'.$candidate)) {
+                    $base = $candidate;
+                    break;
+                }
+            }
+
+            if ($base === null) {
+                return $tag;
+            }
+
+            if ($host === 'www.'.$base) {
+                $newHref = preg_replace('~^(https?://)www\.~i', '$1', $href[1], 1);
+                $tag = str_replace($href[0], ' href="'.$newHref.'"', $tag);
+            }
+
+            $tag = preg_replace('~\starget="_blank"~i', '', $tag);
+
+            return preg_replace_callback('~\srel="([^"]*)"~i', function ($rel) {
+                $kept = array_filter(
+                    preg_split('~\s+~', trim($rel[1])) ?: [],
+                    fn ($token) => $token !== '' && ! in_array(strtolower($token), ['nofollow', 'noopener', 'noreferrer'], true)
+                );
+
+                return $kept === [] ? '' : ' rel="'.implode(' ', $kept).'"';
+            }, $tag);
+        }, $html) ?? $html;
+    }
+
+    /**
+     * The registrable host(s) the blog counts as its own: _base_domain(), plus the marketing
+     * site's host when an operator points APP_MARKETING_URL somewhere else.
+     *
+     * @return list<string>
+     */
+    private static function firstPartyBaseHosts(): array
+    {
+        $hosts = [strtolower(_base_domain())];
+
+        $marketing = strtolower((string) parse_url((string) config('app.marketing_url'), PHP_URL_HOST));
+        if ($marketing !== '') {
+            $hosts[] = preg_replace('~^www\.~', '', $marketing);
+        }
+
+        return array_values(array_unique(array_filter($hosts, fn ($host) => $host !== '' && $host !== 'localhost')));
+    }
+
+    /**
+     * The document <title>: the brand suffix only when it still fits in 60 characters.
+     *
+     * The AI generator writes a 50 to 60 character meta_title of its own, so a blanket
+     * " | Event Schedule" pushed most posts to 70 to 80 characters and Google truncated them.
+     */
+    public function pageTitle(): string
+    {
+        $title = trim((string) $this->meta_title);
+        $suffix = ' | Event Schedule';
+
+        if (mb_strlen($title.$suffix) <= 60) {
+            return $title.$suffix;
+        }
+
+        return Str::limit($title, 59, '…', true);
+    }
+
+    /**
+     * The meta description, cut at a word boundary to at most 160 characters (the ellipsis
+     * included). The generator is asked for 150 to 160 and regularly returns 180.
+     */
+    public function pageDescription(): string
+    {
+        return Str::limit(trim((string) $this->meta_description), 159, '…', true);
+    }
+
+    /**
+     * Words in an HTML body. Tags become spaces first, so "</p><p>" cannot glue two words into
+     * one the way a bare strip_tags() does.
+     */
+    public static function wordCountOf(?string $html): int
+    {
+        $text = html_entity_decode(preg_replace('~<[^>]*>~', ' ', (string) $html) ?? '', ENT_QUOTES | ENT_HTML5, 'UTF-8');
+
+        return (int) preg_match_all('~[\p{L}\p{N}][\p{L}\p{N}\'’-]*~u', $text);
+    }
+
+    public function wordCount(): int
+    {
+        return self::wordCountOf($this->content);
+    }
+
+    /**
+     * Why a generated post should not be published, or null when it may be.
+     *
+     * The two AI generators publish unattended, and a thin or near-repeat post is exactly what
+     * Google's scaled-content policy demotes a whole host for. This is the one check both run
+     * before BlogPost::create():
+     *
+     * - fewer than QUALITY_MIN_WORDS words once the markup is stripped, or
+     * - a title within QUALITY_MAX_SIMILARITY percent (similar_text, after normalising case and
+     *   punctuation) of an existing post's title or slug.
+     *
+     * An explicitly configured slug (the sub-audience posts) is not compared: config chose it and
+     * the generator only runs for slugs that do not exist yet, and similar audience slugs
+     * ("for-jazz-bands", "for-jam-bands") would otherwise block one another forever.
+     *
+     * @param  array{title?: ?string, content?: ?string}  $data
+     */
+    public static function qualityGateFailure(array $data): ?string
+    {
+        $words = self::wordCountOf($data['content'] ?? '');
+
+        if ($words < self::QUALITY_MIN_WORDS) {
+            return "too short ({$words} words, minimum ".self::QUALITY_MIN_WORDS.')';
+        }
+
+        $title = self::normaliseForComparison($data['title'] ?? '');
+
+        if ($title === '') {
+            return 'missing title';
+        }
+
+        foreach (static::query()->select(['id', 'title', 'slug'])->cursor() as $existing) {
+            foreach (['title', 'slug'] as $field) {
+                $other = self::normaliseForComparison((string) $existing->{$field});
+
+                if ($other === '') {
+                    continue;
+                }
+
+                similar_text($title, $other, $percent);
+
+                if ($percent >= self::QUALITY_MAX_SIMILARITY) {
+                    return sprintf('near-duplicate of post #%d %s "%s" (%.0f%% similar)', $existing->id, $field, $existing->{$field}, $percent);
+                }
+            }
+        }
+
+        return null;
+    }
+
+    private static function normaliseForComparison(string $value): string
+    {
+        $value = mb_strtolower($value);
+        $value = preg_replace('~[^\p{L}\p{N}]+~u', ' ', $value) ?? $value;
+
+        return trim($value);
     }
 
     public function getFeaturedImageUrlAttribute()
