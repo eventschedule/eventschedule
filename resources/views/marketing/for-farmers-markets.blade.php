@@ -589,9 +589,8 @@
         <div class="relative z-10 mx-auto w-full max-w-6xl px-4 sm:px-6 lg:px-8">
             <div class="grid items-center gap-12 lg:grid-cols-[1fr_1.05fr] lg:gap-14">
                 <div>
-                    <p class="es-mkt-tag es-fade-up es-d-1 mb-5">For farmers markets and outdoor markets</p>
-
                     <h1 class="es-balance es-mkt-ink mb-7 text-[2.6rem] font-black leading-[1.05] tracking-tight sm:text-6xl">
+                        <x-marketing.hero-eyebrow class="block es-mkt-tag es-fade-up es-d-1 mb-5">Farmers market calendar, for outdoor markets too</x-marketing.hero-eyebrow>
                         <span class="es-mask"><span class="es-mask-line">A market is not</span></span>
                         <span class="es-mask es-mask-2"><span class="es-mask-line">a Saturday. It is <span class="es-mkt-grad">a season</span>.</span></span>
                     </h1>

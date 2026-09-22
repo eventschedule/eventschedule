@@ -1,6 +1,6 @@
 <x-docs-page
     key="analytics"
-    title="Analytics: Views, Revenue and Check-Ins - Event Schedule"
+    title="Analytics Guide: Views, Revenue and Check-Ins - Event Schedule"
     description="Read your schedule's built-in analytics: views, traffic sources, short-link clicks, broken links, revenue and check-ins, with no tracking script to add."
     lede="See how people find your schedule, what they open and click, what they buy, and who turns up at the door."
 >

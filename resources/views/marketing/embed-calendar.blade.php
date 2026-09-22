@@ -1,5 +1,5 @@
 <x-marketing-layout>
-    <x-slot name="title">Embed Calendar | Add Events to Any Website - Event Schedule</x-slot>
+    <x-slot name="title">Embed an Event Calendar on Your Website - Event Schedule</x-slot>
     <x-slot name="description">One iframe tag puts your live calendar on the site you already have. It follows the visitor's dark mode, speaks 12 languages, and never needs pasting twice.</x-slot>
     <x-slot name="breadcrumbTitle">Embed Calendar</x-slot>
 
@@ -612,14 +612,13 @@
         <div class="relative z-10 mx-auto w-full max-w-6xl px-4 sm:px-6 lg:px-8">
             <div class="grid items-center gap-14 lg:grid-cols-[1.05fr_1fr]">
                 <div>
-                    <div class="es-fade-up es-d-1 glass mb-8 inline-flex items-center gap-3 rounded-full px-5 py-2.5">
-                        <svg aria-hidden="true" class="h-5 w-5 es-paste-accent" fill="none" viewBox="0 0 24 24" stroke-width="1.8" stroke="currentColor">
-                            <path stroke-linecap="round" stroke-linejoin="round" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z" />
-                        </svg>
-                        <span class="es-paste-muted text-sm font-medium tracking-wide">Embed calendar &middot; free on every plan</span>
-                    </div>
-
                     <h1 class="es-balance es-paste-ink mb-8 text-[2.4rem] font-black leading-[1.05] tracking-tight sm:text-6xl">
+                        <x-marketing.hero-eyebrow class="es-fade-up es-d-1 glass inline-flex items-center gap-3 rounded-full px-5 py-2.5 mb-8">
+                            <svg aria-hidden="true" class="h-5 w-5 es-paste-accent" fill="none" viewBox="0 0 24 24" stroke-width="1.8" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z" />
+                            </svg>
+                            <span class="es-paste-muted text-sm font-medium tracking-wide">Embed an event calendar, free</span>
+                        </x-marketing.hero-eyebrow>
                         <span class="es-mask"><span class="es-mask-line">Paste it once.</span></span>
                         <span class="es-mask es-mask-2"><span class="es-mask-line">It is never <span class="es-paste-accent">wrong</span> again.</span></span>
                     </h1>

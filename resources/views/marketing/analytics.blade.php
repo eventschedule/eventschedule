@@ -590,12 +590,11 @@
         <div class="relative z-10 mx-auto w-full max-w-6xl px-4 sm:px-6 lg:px-8">
             <div class="grid items-center gap-14 lg:grid-cols-[1fr_1.05fr]">
                 <div>
-                    <div class="es-fade-up es-d-1 glass mb-8 inline-flex items-center gap-3 rounded-full px-5 py-2.5">
-                        <span class="es-dash-pip" aria-hidden="true"></span>
-                        <span class="es-dash-muted text-sm font-medium tracking-wide">Built-in analytics, free on every plan</span>
-                    </div>
-
                     <h1 class="es-balance es-dash-ink mb-8 text-[2.4rem] font-black leading-[1.05] tracking-tight sm:text-6xl">
+                        <x-marketing.hero-eyebrow class="es-fade-up es-d-1 glass inline-flex items-center gap-3 rounded-full px-5 py-2.5 mb-8">
+                            <span class="es-dash-pip" aria-hidden="true"></span>
+                            <span class="es-dash-muted text-sm font-medium tracking-wide">Built-in event analytics, free on every plan</span>
+                        </x-marketing.hero-eyebrow>
                         <span class="es-mask"><span class="es-mask-line">Read the panel.</span></span>
                         <span class="es-mask es-mask-2"><span class="es-mask-line"><span class="es-dash-accent">Not the person.</span></span></span>
                     </h1>

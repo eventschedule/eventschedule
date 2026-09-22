@@ -693,14 +693,13 @@
         <div class="relative z-10 mx-auto w-full max-w-6xl px-4 sm:px-6 lg:px-8">
             <div class="grid items-center gap-14 lg:grid-cols-[1.05fr_1fr]">
                 <div>
-                    <div class="es-fade-up es-d-1 glass mb-8 inline-flex items-center gap-3 rounded-full px-5 py-2.5">
-                        <svg aria-hidden="true" class="es-conv-accent h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8">
-                            <path stroke-linecap="round" stroke-linejoin="round" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" />
-                        </svg>
-                        <span class="es-conv-muted text-sm font-medium tracking-wide">For AMAs, office hours and live Q&amp;A</span>
-                    </div>
-
                     <h1 class="es-balance es-conv-ink mb-8 text-[2.4rem] font-black leading-[1.05] tracking-tight sm:text-6xl">
+                        <x-marketing.hero-eyebrow class="es-fade-up es-d-1 glass inline-flex items-center gap-3 rounded-full px-5 py-2.5 mb-8">
+                            <svg aria-hidden="true" class="es-conv-accent h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" />
+                            </svg>
+                            <span class="es-conv-muted text-sm font-medium tracking-wide">For live Q&amp;A sessions and AMAs</span>
+                        </x-marketing.hero-eyebrow>
                         <span class="es-mask"><span class="es-mask-line">A live Q&amp;A is a</span></span>
                         <span class="es-mask es-mask-2"><span class="es-mask-line"><span class="es-conv-accent es-conv-mark">conversation<svg class="es-conv-mark-line" viewBox="0 0 240 12" fill="none" preserveAspectRatio="none" aria-hidden="true"><path d="M3 8.4C48 3.2 118 2.4 237 6.2" stroke="currentColor" stroke-width="3.2" stroke-linecap="round" /></svg></span>, so plan it like one.</span></span>
                     </h1>

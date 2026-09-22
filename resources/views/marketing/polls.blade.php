@@ -587,15 +587,14 @@
         <div class="relative z-10 mx-auto w-full max-w-6xl px-4 sm:px-6 lg:px-8">
             <div class="grid items-center gap-14 lg:grid-cols-[1.05fr_1fr]">
                 <div>
-                    <div class="es-fade-up es-d-1 glass mb-8 inline-flex items-center gap-3 rounded-full px-5 py-2.5">
-                        <svg aria-hidden="true" class="h-5 w-5 es-vote-accent" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8">
-                            <path stroke-linecap="round" stroke-linejoin="round" d="M9 12.75L11.25 15 15 9.75M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-                        </svg>
-                        <span class="es-vote-muted text-sm font-medium tracking-wide">Event polls</span>
-                        <span class="es-vote-plan">Pro</span>
-                    </div>
-
                     <h1 class="es-balance es-vote-ink mb-8 text-[2.4rem] font-black leading-[1.05] tracking-tight sm:text-6xl">
+                        <x-marketing.hero-eyebrow class="es-fade-up es-d-1 glass inline-flex items-center gap-3 rounded-full px-5 py-2.5 mb-8">
+                            <svg aria-hidden="true" class="h-5 w-5 es-vote-accent" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M9 12.75L11.25 15 15 9.75M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                            </svg>
+                            <span class="es-vote-muted text-sm font-medium tracking-wide">Event polls</span>
+                            <span class="es-vote-plan">Pro</span>
+                        </x-marketing.hero-eyebrow>
                         <span class="es-mask"><span class="es-mask-line">You have a question.</span></span>
                         <span class="es-mask es-mask-2"><span class="es-mask-line">Poll your <span class="es-vote-accent">audience.</span></span></span>
                     </h1>

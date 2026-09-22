@@ -1,5 +1,5 @@
 <x-marketing-layout>
-    <x-slot name="title">Compare Event Schedule vs Eventbrite, Luma &amp; {{ count($headToHead) - 2 }} More</x-slot>
+    <x-slot name="title">Compare Event Platforms: Eventbrite, Luma &amp; {{ count($headToHead) - 2 }} More</x-slot>
     <x-slot name="description">Compare Event Schedule with Eventbrite, Luma, Meetup and {{ count($headToHead) - 3 }} more platforms: feature by feature, a fee calculator at published rates, and 0% platform fees.</x-slot>
     <x-slot name="breadcrumbTitle">Compare</x-slot>
 
@@ -336,14 +336,13 @@
         </div>
 
         <div class="relative z-10 mx-auto w-full max-w-5xl px-4 text-center sm:px-6 lg:px-8">
-            <div class="es-fade-up es-d-1 mb-6 inline-flex items-center gap-3 rounded-full glass px-5 py-2.5">
-                <svg aria-hidden="true" class="h-5 w-5 text-blue-500 dark:text-blue-400" fill="none" viewBox="0 0 24 24" stroke-width="1.8" stroke="currentColor">
-                    <path stroke-linecap="round" stroke-linejoin="round" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
-                </svg>
-                <span class="text-sm font-medium tracking-wide text-gray-600 dark:text-gray-300">{{ count($headToHead) }} platforms compared</span>
-            </div>
-
             <h1 class="es-balance mb-6 text-[2.6rem] font-black leading-[1.05] tracking-tight text-gray-900 dark:text-white sm:text-6xl lg:text-7xl">
+                <x-marketing.hero-eyebrow class="es-fade-up es-d-1 inline-flex items-center gap-3 rounded-full glass px-5 py-2.5 mb-6">
+                    <svg aria-hidden="true" class="h-5 w-5 text-blue-500 dark:text-blue-400" fill="none" viewBox="0 0 24 24" stroke-width="1.8" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
+                    </svg>
+                    <span class="text-sm font-medium tracking-wide text-gray-600 dark:text-gray-300">Compare event platforms, all {{ count($headToHead) }}</span>
+                </x-marketing.hero-eyebrow>
                 <span class="es-mask"><span class="es-mask-line">Event Schedule</span></span>
                 <span class="es-mask es-mask-2"><span class="es-mask-line"><span class="es-vs">vs</span> <span class="text-gradient-compare">everyone else</span></span></span>
             </h1>

@@ -899,9 +899,8 @@
                         </a>
                     </div>
 
-                    <p class="es-fade-up es-d-1 es-score-tag mb-5">{{ $name }} alternative scorecard</p>
-
                     <h1 class="es-balance es-score-ink mb-7 text-[2.6rem] font-black leading-[1.05] tracking-tight sm:text-6xl">
+                        <x-marketing.hero-eyebrow class="block es-fade-up es-d-1 es-score-tag mb-5">{{ $name }} alternative scorecard</x-marketing.hero-eyebrow>
                         <span class="es-mask"><span class="es-mask-line">Event Schedule</span></span>
                         <span class="es-mask es-mask-2"><span class="es-mask-line"><span class="es-score-vs">vs</span> <span class="es-score-accent">{{ $name }}</span></span></span>
                     </h1>

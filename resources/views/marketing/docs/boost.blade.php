@@ -1,6 +1,6 @@
 <x-docs-page
     key="boost"
-    title="Boost: Facebook and Instagram Event Ads - Event Schedule"
+    title="Boost Setup Guide: Meta Ads and Promotions - Event Schedule"
     plan="pro"
     description="Learn how to promote your events with Boost: Facebook and Instagram ad campaigns, and promoted cards on other schedules on the same site."
     lede="Promote your events two ways from one page: Facebook and Instagram ads bought through Meta, and promoted cards shown on other schedules on the same site."

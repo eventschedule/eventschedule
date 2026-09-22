@@ -680,12 +680,11 @@
         <div class="relative z-10 mx-auto w-full max-w-6xl px-4 sm:px-6 lg:px-8">
             <div class="grid items-center gap-12 lg:grid-cols-2 lg:gap-16">
                 <div>
-                    <p class="es-ledg-tag es-fade-up es-d-1 mb-5 flex items-center gap-3">
-                        @include('marketing.partials.integration-logo', ['name' => 'invoiceninja', 'class' => 'h-6 w-6 shrink-0'])
-                        <span>Invoice Ninja integration</span>
-                    </p>
-
                     <h1 class="es-balance mb-7 text-[2.6rem] font-black leading-[1.05] tracking-tight sm:text-6xl">
+                        <x-marketing.hero-eyebrow class="es-ledg-tag es-fade-up es-d-1 flex items-center gap-3 mb-5">
+                            @include('marketing.partials.integration-logo', ['name' => 'invoiceninja', 'class' => 'h-6 w-6 shrink-0'])
+                            <span>Invoice Ninja ticketing</span>
+                        </x-marketing.hero-eyebrow>
                         <span class="es-mask"><span class="es-mask-line">You already keep</span></span>
                         <span class="es-mask es-mask-2"><span class="es-mask-line"><span class="es-ledg-grad">the books</span>.</span></span>
                     </h1>

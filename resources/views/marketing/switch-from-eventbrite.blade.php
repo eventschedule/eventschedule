@@ -1,5 +1,5 @@
 <x-marketing-layout>
-    <x-slot name="title">Switch from Eventbrite to Event Schedule: Migration Guide</x-slot>
+    <x-slot name="title">Migrate from Eventbrite to Event Schedule | Switching Guide</x-slot>
     <x-slot name="description">What the Eventbrite import brings across, what stays behind, and how payments and refunds work once you sell from your own page with no platform fee.</x-slot>
     <x-slot name="breadcrumbTitle">Switch from Eventbrite</x-slot>
 
@@ -201,8 +201,8 @@
             <div class="mx-auto max-w-6xl px-4 sm:px-6 lg:px-8">
                 <div class="grid items-center gap-12 lg:grid-cols-2">
                     <div>
-                        <p class="es-move-tag mb-4" data-reveal>Moving from Eventbrite</p>
                         <h1 class="es-balance es-move-ink text-4xl font-black tracking-tight md:text-6xl" data-reveal style="--reveal-delay: 0.05s;">
+                            <x-marketing.hero-eyebrow class="block es-move-tag mb-4">Migrate from Eventbrite</x-marketing.hero-eyebrow>
                             Bring the events. <span class="es-move-accent">Leave the fee.</span>
                         </h1>
                         <p class="es-move-muted mt-6 text-lg" data-reveal style="--reveal-delay: 0.1s;">

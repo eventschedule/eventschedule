@@ -588,14 +588,13 @@
         <div class="relative z-10 mx-auto w-full max-w-6xl px-4 sm:px-6 lg:px-8">
             <div class="grid items-center gap-14 lg:grid-cols-[1.05fr_1fr]">
                 <div>
-                    <div class="es-fade-up es-d-1 es-vault-ghost mb-8 inline-flex items-center gap-3 rounded-full px-5 py-2.5">
-                        <svg aria-hidden="true" class="es-vault-accent h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8">
-                            <path stroke-linecap="round" stroke-linejoin="round" d="M16.5 10.5V6.75a4.5 4.5 0 10-9 0v3.75m-.75 11.25h10.5a2.25 2.25 0 002.25-2.25v-6.75a2.25 2.25 0 00-2.25-2.25H6.75a2.25 2.25 0 00-2.25 2.25v6.75a2.25 2.25 0 002.25 2.25z" />
-                        </svg>
-                        <span class="es-vault-muted text-sm font-medium tracking-wide">Private events</span>
-                    </div>
-
                     <h1 class="es-balance es-vault-ink mb-8 text-[2.4rem] font-black leading-[1.05] tracking-tight sm:text-6xl">
+                        <x-marketing.hero-eyebrow class="es-fade-up es-d-1 es-vault-ghost inline-flex items-center gap-3 rounded-full px-5 py-2.5 mb-8">
+                            <svg aria-hidden="true" class="es-vault-accent h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M16.5 10.5V6.75a4.5 4.5 0 10-9 0v3.75m-.75 11.25h10.5a2.25 2.25 0 002.25-2.25v-6.75a2.25 2.25 0 00-2.25-2.25H6.75a2.25 2.25 0 00-2.25 2.25v6.75a2.25 2.25 0 002.25 2.25z" />
+                            </svg>
+                            <span class="es-vault-muted text-sm font-medium tracking-wide">Private events</span>
+                        </x-marketing.hero-eyebrow>
                         <span class="es-mask"><span class="es-mask-line">A private event is not one door.</span></span>
                         <span class="es-mask es-mask-2"><span class="es-mask-line">It is <span class="es-vault-accent">four</span> of them.</span></span>
                     </h1>

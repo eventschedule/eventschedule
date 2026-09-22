@@ -409,9 +409,8 @@
         <div class="relative z-10 mx-auto w-full max-w-6xl px-4 sm:px-6 lg:px-8">
             <div class="grid items-center gap-12 lg:grid-cols-[1fr_1.05fr] lg:gap-16">
                 <div>
-                    <p class="es-stop-tag es-fade-up es-d-1 mb-5">For food trucks, carts and mobile kitchens</p>
-
                     <h1 class="es-balance mb-7 text-[2.6rem] font-black leading-[1.05] tracking-tight sm:text-6xl">
+                        <x-marketing.hero-eyebrow class="block es-stop-tag es-fade-up es-d-1 mb-5">Food truck schedule, for carts and mobile kitchens too</x-marketing.hero-eyebrow>
                         <span class="es-mask"><span class="es-mask-line">Your address is</span></span>
                         <span class="es-mask es-mask-2"><span class="es-mask-line"><span class="es-stop-grad">the news</span>.</span></span>
                     </h1>

@@ -623,15 +623,14 @@
         <div class="relative z-10 mx-auto w-full max-w-6xl px-4 sm:px-6 lg:px-8">
             <div class="grid items-center gap-14 lg:grid-cols-[1.05fr_1fr]">
                 <div>
-                    <div class="es-fade-up es-d-1 glass mb-8 inline-flex items-center gap-3 rounded-full px-5 py-2.5">
-                        <svg aria-hidden="true" class="es-comment-accent h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8">
-                            <path stroke-linecap="round" stroke-linejoin="round" d="M7.5 8.25h9m-9 3.75h5.25M21 12a8.955 8.955 0 01-1.05 4.22L21 21l-4.86-1.02A9 9 0 1121 12z" />
-                        </svg>
-                        <span class="es-comment-muted text-sm font-medium tracking-wide">Post-event feedback</span>
-                        <span class="es-comment-plan">Pro</span>
-                    </div>
-
                     <h1 class="es-balance es-comment-ink mb-8 text-[2.4rem] font-black leading-[1.05] tracking-tight sm:text-6xl">
+                        <x-marketing.hero-eyebrow class="es-fade-up es-d-1 glass inline-flex items-center gap-3 rounded-full px-5 py-2.5 mb-8">
+                            <svg aria-hidden="true" class="es-comment-accent h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M7.5 8.25h9m-9 3.75h5.25M21 12a8.955 8.955 0 01-1.05 4.22L21 21l-4.86-1.02A9 9 0 1121 12z" />
+                            </svg>
+                            <span class="es-comment-muted text-sm font-medium tracking-wide">Post-event feedback</span>
+                            <span class="es-comment-plan">Pro</span>
+                        </x-marketing.hero-eyebrow>
                         <span class="es-mask"><span class="es-mask-line">A feedback card</span></span>
                         <span class="es-mask es-mask-2"><span class="es-mask-line">per <span class="es-comment-accent">booking.</span></span></span>
                     </h1>

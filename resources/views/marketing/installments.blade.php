@@ -213,8 +213,8 @@
             <div class="mx-auto max-w-6xl px-4 sm:px-6 lg:px-8">
                 <div class="grid items-center gap-12 lg:grid-cols-2">
                     <div>
-                        <p class="es-inst-tag mb-4" data-reveal>Installments &middot; Pro &middot; Stripe</p>
                         <h1 class="es-balance es-inst-ink text-4xl font-black tracking-tight md:text-6xl" data-reveal style="--reveal-delay: 0.05s;">
+                            <x-marketing.hero-eyebrow class="block es-inst-tag mb-4">Installment payments &middot; Pro &middot; Stripe</x-marketing.hero-eyebrow>
                             Pay in installments, and the price stops being <span class="es-inst-accent">the reason not to.</span>
                         </h1>
                         <p class="es-inst-muted mt-6 text-lg" data-reveal style="--reveal-delay: 0.1s;">

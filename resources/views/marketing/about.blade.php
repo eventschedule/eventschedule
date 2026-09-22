@@ -195,6 +195,8 @@
             color: #4c5158;
         }
         .dark .es-colo-tag { color: #9aa0ab; }
+        /* The colophon mark sits inside the h1 now; keep it in the page's face, not the eyebrow's. */
+        .es-colo-page .es-hero-eyebrow { font-family: inherit; }
 
         /* Signature mark: the letter printed at the foot of each gathering so
            the binder knows the order of the sections. Here it numbers the page. */
@@ -658,14 +660,13 @@
         <div class="relative z-10 mx-auto w-full max-w-6xl px-4 sm:px-6 lg:px-8">
             <div class="grid items-center gap-14 lg:grid-cols-[1.05fr_1fr]">
                 <div>
-                    <div class="es-fade-up es-d-1 mb-8 flex items-center gap-4">
-                        <span class="es-colo-mark" aria-hidden="true">
-                            <span class="es-colo-mark-glyph">ES</span>
-                        </span>
-                        <span class="es-colo-tag">Colophon<br>Event Schedule</span>
-                    </div>
-
                     <h1 class="es-balance es-colo-title es-colo-h1 mb-8">
+                        <x-marketing.hero-eyebrow class="es-fade-up es-d-1 flex items-center gap-4 mb-8">
+                            <span class="es-colo-mark" aria-hidden="true">
+                                <span class="es-colo-mark-glyph">ES</span>
+                            </span>
+                            <span class="es-colo-tag">Colophon<br>Open source event management platform</span>
+                        </x-marketing.hero-eyebrow>
                         <span class="es-mask"><span class="es-mask-line">Every colophon answers</span></span>
                         <span class="es-mask es-mask-2"><span class="es-mask-line"><span class="es-colo-second">three questions.</span></span></span>
                     </h1>

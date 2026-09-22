@@ -13,7 +13,7 @@ return [
     'about_title' => 'Over Event Schedule | Open source platform voor evenementenbeheer',
     'about_description' => 'Wie Event Schedule bouwt, onder welke licentie het verschijnt, waar de broncode staat en een lijst van wat het niet doet. Open source, zonder platformkosten.',
 
-    'selfhost_title' => 'Host Event Schedule zelf - alle functies gratis op je eigen server',
+    'selfhost_title' => 'Zelf gehoste evenementenkalender | Alle functies gratis op je eigen server',
     'selfhost_description' => 'Host Event Schedule op je eigen server en alle Pro- en Enterprise-functies zijn gratis inbegrepen. Open source, installatie in één klik, geen platformkosten, en je gegevens verlaten nooit je eigen infrastructuur.',
 
     'ticketing_title' => 'Ticketverkoop zonder platformkosten - Event Schedule',
@@ -22,6 +22,6 @@ return [
     'ai_title' => 'AI-evenementimport: van flyer naar evenement | Event Schedule',
     'ai_description' => 'Plak de tekst of sleep een flyer erin en AI vult de evenementgegevens in: datum, locatie, artiesten, prijs. Gratis in elk abonnement, met vertaling in 12 talen.',
 
-    'calendar_sync_title' => 'Agendasynchronisatie met Google, Outlook en CalDAV | Event Schedule',
+    'calendar_sync_title' => 'Tweerichtingsagendasynchronisatie met Google, Outlook en CalDAV',
     'calendar_sync_description' => 'Tweerichtingssynchronisatie met Google Calendar, Outlook en elke CalDAV-server, gratis in elk abonnement. Bezoekers voegen één evenement toe of abonneren zich op je live agendafeed.',
 ];

@@ -627,14 +627,13 @@
         <div class="relative z-10 mx-auto w-full max-w-6xl px-4 sm:px-6 lg:px-8">
             <div class="grid items-center gap-12 lg:grid-cols-[1fr_1.05fr]">
                 <div>
-                    <div class="es-fade-up es-d-1 glass mb-8 inline-flex items-center gap-3 rounded-full px-5 py-2.5">
-                        <svg aria-hidden="true" class="h-5 w-5 text-[#0e7490] dark:text-[#67e8f9]" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8">
-                            <path stroke-linecap="round" stroke-linejoin="round" d="M10 20l4-16m4 4l4 4-4 4M6 16l-4-4 4-4" />
-                        </svg>
-                        <span class="es-cons-muted text-sm font-medium tracking-wide">For AI agents, tool builders and developers</span>
-                    </div>
-
                     <h1 class="es-balance es-cons-ink mb-8 text-[2.4rem] font-black leading-[1.05] tracking-tight sm:text-6xl">
+                        <x-marketing.hero-eyebrow class="es-fade-up es-d-1 glass inline-flex items-center gap-3 rounded-full px-5 py-2.5 mb-8">
+                            <svg aria-hidden="true" class="h-5 w-5 text-[#0e7490] dark:text-[#67e8f9]" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M10 20l4-16m4 4l4 4-4 4M6 16l-4-4 4-4" />
+                            </svg>
+                            <span class="es-cons-muted text-sm font-medium tracking-wide">An API for AI agents and developers</span>
+                        </x-marketing.hero-eyebrow>
                         <span class="es-mask"><span class="es-mask-line">One POST, and the</span></span>
                         <span class="es-mask es-mask-2"><span class="es-mask-line">show is <span class="es-cons-grad">on sale.</span><span class="es-cons-caret" aria-hidden="true"></span></span></span>
                     </h1>

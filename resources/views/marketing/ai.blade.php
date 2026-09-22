@@ -781,14 +781,13 @@
         <div class="relative z-10 mx-auto w-full max-w-6xl px-4 sm:px-6 lg:px-8">
             <div class="grid items-center gap-14 lg:grid-cols-[1.05fr_1fr]">
                 <div>
-                    <div class="es-fade-up es-d-1 glass mb-8 inline-flex items-center gap-3 rounded-full px-5 py-2.5">
-                        <svg aria-hidden="true" class="es-spark-accent h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8">
-                            <path stroke-linecap="round" stroke-linejoin="round" d="M13 3L5 14h5l-1 7 8-11h-5l1-7z" />
-                        </svg>
-                        <span class="es-spark-muted text-sm font-medium tracking-wide">AI event import, described exactly</span>
-                    </div>
-
                     <h1 class="es-balance es-spark-ink mb-8 text-[2.4rem] font-black leading-[1.05] tracking-tight sm:text-6xl">
+                        <x-marketing.hero-eyebrow class="es-fade-up es-d-1 glass inline-flex items-center gap-3 rounded-full px-5 py-2.5 mb-8">
+                            <svg aria-hidden="true" class="es-spark-accent h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M13 3L5 14h5l-1 7 8-11h-5l1-7z" />
+                            </svg>
+                            <span class="es-spark-muted text-sm font-medium tracking-wide">AI event import, described exactly</span>
+                        </x-marketing.hero-eyebrow>
                         <span class="es-mask"><span class="es-mask-line">A poster is not an event.</span></span>
                         <span class="es-mask es-mask-2"><span class="es-mask-line">Something has to <span class="es-spark-accent">cross the gap.</span></span></span>
                     </h1>

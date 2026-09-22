@@ -671,15 +671,14 @@
                         </a>
                     </div>
 
-                    <div class="es-fade-up es-d-1 glass mb-8 inline-flex items-center gap-3 rounded-full px-5 py-2.5">
-                        <svg aria-hidden="true" class="es-swap-accent h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8">
-                            <path stroke-linecap="round" stroke-linejoin="round" d="M4 9h13m0 0l-3.5-3.5M17 9l-3.5 3.5" />
-                            <path stroke-linecap="round" stroke-linejoin="round" d="M20 15H7m0 0l3.5-3.5M7 15l3.5 3.5" />
-                        </svg>
-                        <span class="es-swap-muted text-sm font-medium tracking-wide">{{ $shortName }} to Event Schedule</span>
-                    </div>
-
                     <h1 class="es-balance es-swap-ink mb-7 text-[2.4rem] font-black leading-[1.05] tracking-tight sm:text-6xl">
+                        <x-marketing.hero-eyebrow class="es-fade-up es-d-1 glass inline-flex items-center gap-3 rounded-full px-5 py-2.5 mb-8">
+                            <svg aria-hidden="true" class="es-swap-accent h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M4 9h13m0 0l-3.5-3.5M17 9l-3.5 3.5" />
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M20 15H7m0 0l3.5-3.5M7 15l3.5 3.5" />
+                            </svg>
+                            <span class="es-swap-muted text-sm font-medium tracking-wide">{{ $shortName }} alternative for events</span>
+                        </x-marketing.hero-eyebrow>
                         <span class="es-mask"><span class="es-mask-line">Replace <span class="es-swap-accent">{{ $name }}</span></span></span>
                         <span class="es-mask es-mask-2"><span class="es-mask-line">for events.</span></span>
                     </h1>

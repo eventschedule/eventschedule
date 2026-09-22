@@ -368,15 +368,14 @@
         </div>
 
         <div class="pointer-events-none relative z-10 mx-auto w-full max-w-5xl px-4 text-center sm:px-6 lg:px-8">
-            <div class="es-fade-up es-d-1 mb-8 inline-flex items-center gap-3 rounded-full glass px-5 py-2.5">
-                <span class="relative flex h-2 w-2">
-                    <span class="absolute inline-flex h-full w-full animate-ping rounded-full bg-emerald-400 opacity-75"></span>
-                    <span class="relative inline-flex h-2 w-2 rounded-full bg-emerald-500"></span>
-                </span>
-                <span class="text-sm font-medium tracking-wide text-gray-600 dark:text-gray-300">100% open source, AAL licensed</span>
-            </div>
-
             <h1 class="es-balance mb-6 text-[2.6rem] font-black leading-[1.05] tracking-tight text-gray-900 dark:text-white sm:text-6xl lg:text-7xl">
+                <x-marketing.hero-eyebrow class="es-fade-up es-d-1 inline-flex items-center gap-3 rounded-full glass px-5 py-2.5 mb-8">
+                    <span class="relative flex h-2 w-2">
+                        <span class="absolute inline-flex h-full w-full animate-ping rounded-full bg-emerald-400 opacity-75"></span>
+                        <span class="relative inline-flex h-2 w-2 rounded-full bg-emerald-500"></span>
+                    </span>
+                    <span class="text-sm font-medium tracking-wide text-gray-600 dark:text-gray-300">Selfhosted event calendar</span>
+                </x-marketing.hero-eyebrow>
                 <span class="es-mask"><span class="es-mask-line">Selfhost the whole thing.</span></span>
                 <span class="es-mask es-mask-2"><span class="es-mask-line"><span class="text-gradient-selfhost">Nothing is held back</span></span></span>
             </h1>

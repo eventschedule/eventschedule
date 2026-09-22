@@ -1,5 +1,5 @@
 <x-marketing-layout>
-    <x-slot name="title">Integrations | Calendars, Stripe, PayPal, Webhooks, API</x-slot>
+    <x-slot name="title">Event Schedule Integrations: Calendars, Stripe, PayPal, API</x-slot>
     <x-slot name="description">Fifteen real integrations, each labelled with its direction, trigger and plan: Google Calendar, Outlook, CalDAV, Stripe, PayPal, webhooks and more.</x-slot>
     <x-slot name="breadcrumbTitle">Integrations</x-slot>
 
@@ -756,14 +756,13 @@
         <div class="relative z-10 mx-auto w-full max-w-6xl px-4 sm:px-6 lg:px-8">
             <div class="es-wire-split grid items-center gap-14">
                 <div>
-                    <div class="es-fade-up es-d-1 glass mb-8 inline-flex items-center gap-3 rounded-full px-5 py-2.5">
-                        <svg aria-hidden="true" class="es-wire-accent h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8">
-                            <path stroke-linecap="round" stroke-linejoin="round" d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1" />
-                        </svg>
-                        <span class="es-wire-muted text-sm font-medium tracking-wide">Fifteen ports, both ends visible</span>
-                    </div>
-
                     <h1 class="es-balance es-wire-ink mb-8 text-[2.4rem] font-black leading-[1.05] tracking-tight sm:text-6xl">
+                        <x-marketing.hero-eyebrow class="es-fade-up es-d-1 glass inline-flex items-center gap-3 rounded-full px-5 py-2.5 mb-8">
+                            <svg aria-hidden="true" class="es-wire-accent h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1" />
+                            </svg>
+                            <span class="es-wire-muted text-sm font-medium tracking-wide">Fifteen Event Schedule integrations</span>
+                        </x-marketing.hero-eyebrow>
                         <span class="es-mask"><span class="es-mask-line">No middle layer.</span></span>
                         <span class="es-mask es-mask-2"><span class="es-mask-line">Just <span class="es-wire-accent">wires.</span></span></span>
                     </h1>

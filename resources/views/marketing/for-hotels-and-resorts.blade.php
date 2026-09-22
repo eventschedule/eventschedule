@@ -741,9 +741,8 @@
         <div class="relative z-10 mx-auto w-full max-w-6xl px-4 sm:px-6 lg:px-8">
             <div class="es-conc-duo">
                 <div>
-                    <p class="es-conc-eyebrow es-fade-up es-d-1 mb-5">For hotels and resorts</p>
-
                     <h1 class="es-conc-display es-balance mb-7 text-[2.7rem] sm:text-6xl">
+                        <x-marketing.hero-eyebrow class="block es-conc-eyebrow es-fade-up es-d-1 mb-5">Guest activity calendar for hotels</x-marketing.hero-eyebrow>
                         <span class="es-mask"><span class="es-mask-line">The desk closes</span></span>
                         <span class="es-mask es-mask-2"><span class="es-mask-line">at eleven.</span></span>
                         <span class="es-mask es-mask-2"><span class="es-mask-line es-conc-accent">The card does not.</span></span>

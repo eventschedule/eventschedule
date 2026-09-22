@@ -1,6 +1,6 @@
 <x-docs-page
     key="allocated-seating"
-    title="Allocated Seating: Seat Maps and Box Office - Event Schedule"
+    title="How to Set Up Allocated Seating and Seat Maps - Event Schedule"
     description="Sell reserved seats from a plan of your venue: build a plan of levels, sections, rows and tables, and let buyers choose their own seat."
     lede="Draw your room once, attach it to an event, and sell the seats in it. Buyers pick where they sit; your box office holds seats back, books by phone and moves people around."
     article-description="How to sell allocated (reserved) seating: build a seating plan, price each band, let buyers choose their seats, and manage the room from the box office console."

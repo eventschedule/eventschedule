@@ -467,15 +467,14 @@
         </div>
 
         <div class="pointer-events-none relative z-10 mx-auto w-full max-w-5xl px-4 py-12 text-center sm:px-6 sm:py-16 lg:px-8 lg:py-28">
-            <div class="es-fade-up es-d-1 mb-8 inline-flex items-center gap-2 rounded-full glass px-4 py-2">
-                <span class="relative flex h-2 w-2">
-                    <span class="absolute inline-flex h-full w-full animate-ping rounded-full bg-green-400 opacity-75"></span>
-                    <span class="relative inline-flex h-2 w-2 rounded-full bg-green-500"></span>
-                </span>
-                <span class="text-sm text-gray-600 dark:text-gray-300">Free forever. No credit card.</span>
-            </div>
-
             <h1 class="es-balance mb-6 text-[2.7rem] font-black leading-[1.04] tracking-tight text-gray-900 dark:text-white sm:text-6xl lg:text-7xl">
+                <x-marketing.hero-eyebrow class="es-fade-up es-d-1 inline-flex items-center gap-2 rounded-full glass px-4 py-2 mb-8">
+                    <span class="relative flex h-2 w-2">
+                        <span class="absolute inline-flex h-full w-full animate-ping rounded-full bg-green-400 opacity-75"></span>
+                        <span class="relative inline-flex h-2 w-2 rounded-full bg-green-500"></span>
+                    </span>
+                    <span class="text-sm text-gray-600 dark:text-gray-300">Free event calendar. No credit card.</span>
+                </x-marketing.hero-eyebrow>
                 {{-- 24 characters is the budget per line: .es-mask animates the whole line block,
                      so a line that wraps rises as a two-line slab instead of a crisp single line. --}}
                 <span class="es-mask"><span class="es-mask-line">Everything you have on.</span></span>
@@ -494,7 +493,7 @@
                  "buy a ticket or book a time" carries both revenue modes in six words, and neither
                  is qualified by tier here. Appointment booking is free with one type; putting a
                  price on a ticket is Pro. The fold is not where that split gets argued - it sits
-                 beside a badge reading "Free forever. No credit card." and a button reading "Start
+                 beside a badge reading "Free event calendar. No credit card." and a button reading "Start
                  for free", and MarketingHeroClaimTest pins the fold against a plan name drifting
                  back in. The pricing band and the FAQ below carry the tiers.
 

@@ -1,6 +1,6 @@
 <x-docs-page
     key="appointments"
-    title="Appointments: Booking, Payments, Refunds - Event Schedule"
+    title="How to Set Up Appointment Types and Hours - Event Schedule"
     description="Set up Calendly-style appointment booking: types with weekly hours and buffers, payment by Stripe, payment link or cash, and refunds from the Sales page."
     lede="Let guests book time with you on a public page, Calendly-style. You set the hours you are open, they pick an open slot, and everyone gets a confirmation."
     article-description="How to offer appointment booking: create appointment types with weekly hours, buffers, and optional payment, and let guests book a time on your public page."

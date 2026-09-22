@@ -486,12 +486,11 @@
         </div>
 
         <div class="pointer-events-none relative z-10 mx-auto w-full max-w-5xl px-4 text-center sm:px-6 lg:px-8">
-            <div class="es-fade-up es-d-1 mb-8 inline-flex items-center gap-3 rounded-full glass px-5 py-2.5">
-                <span class="es-vinyl" aria-hidden="true"></span>
-                <span class="text-sm font-medium tracking-wide text-gray-600 dark:text-gray-300">For DJs & Electronic Producers</span>
-            </div>
-
             <h1 class="es-balance mb-8 text-[2.6rem] font-black leading-[1.05] tracking-tight text-gray-900 dark:text-white sm:text-6xl lg:text-7xl">
+                <x-marketing.hero-eyebrow class="es-fade-up es-d-1 inline-flex items-center gap-3 rounded-full glass px-5 py-2.5 mb-8">
+                    <span class="es-vinyl" aria-hidden="true"></span>
+                    <span class="text-sm font-medium tracking-wide text-gray-600 dark:text-gray-300">Event Schedule for DJs & Producers</span>
+                </x-marketing.hero-eyebrow>
                 <span class="es-mask"><span class="es-mask-line">Fill the dancefloor.</span></span>
                 <span class="es-mask es-mask-2"><span class="es-mask-line"><span class="es-dj-display es-dj-tube">Skip the a<span class="es-dj-flicker">l</span>gorithm.</span></span></span>
             </h1>

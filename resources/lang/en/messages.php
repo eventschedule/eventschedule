@@ -2589,7 +2589,7 @@ return [
     'editor_text_direction' => 'Text Direction',
 
     // Why create account page
-    'why_create_account_title' => 'Do You Need an Account? What a Free One Adds',
+    'why_create_account_title' => 'Do You Need an Account? What a Free Account Adds',
     'why_create_account_description' => 'Most of Event Schedule works without an account. See what a free one adds: every ticket in one list, the schedules you follow, and a page of your own.',
     'why_create_account_hero_badge' => 'Free Account',
     'why_create_account_hero_headline' => 'Unlock powerful features',

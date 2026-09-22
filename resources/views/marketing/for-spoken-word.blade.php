@@ -546,14 +546,13 @@
         </div>
 
         <div class="pointer-events-none relative z-10 mx-auto w-full max-w-5xl px-4 text-center sm:px-6 lg:px-8">
-            <div class="es-fade-up es-d-1 glass mb-8 inline-flex items-center gap-3 rounded-full px-5 py-2.5">
-                <svg aria-hidden="true" class="h-5 w-5 text-[#1c3d6e] dark:text-[#93c5fd]" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8">
-                    <path stroke-linecap="round" stroke-linejoin="round" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4" />
-                </svg>
-                <span class="text-sm font-medium tracking-wide text-gray-600 dark:text-gray-300">For poets, storytellers, and open mic hosts</span>
-            </div>
-
             <h1 class="es-balance mb-8 text-[2.4rem] font-black leading-[1.05] tracking-tight text-gray-900 dark:text-white sm:text-6xl lg:text-7xl">
+                <x-marketing.hero-eyebrow class="es-fade-up es-d-1 glass inline-flex items-center gap-3 rounded-full px-5 py-2.5 mb-8">
+                    <svg aria-hidden="true" class="h-5 w-5 text-[#1c3d6e] dark:text-[#93c5fd]" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4" />
+                    </svg>
+                    <span class="text-sm font-medium tracking-wide text-gray-600 dark:text-gray-300">Open mic schedule for poets, storytellers, and hosts</span>
+                </x-marketing.hero-eyebrow>
                 <span class="es-mask"><span class="es-mask-line">Every open mic has a list.</span></span>
                 <span class="es-mask es-mask-2"><span class="es-mask-line"><span class="text-gradient-signup">Yours should outlive the night.</span></span></span>
             </h1>

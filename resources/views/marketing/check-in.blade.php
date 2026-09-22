@@ -229,8 +229,8 @@
             <div class="mx-auto max-w-6xl px-4 sm:px-6 lg:px-8">
                 <div class="grid items-center gap-12 lg:grid-cols-2">
                     <div>
-                        <p class="es-head-tag mb-4" data-reveal>Check-in &middot; scanning is free, the dashboard is Pro</p>
                         <h1 class="es-balance es-head-ink text-4xl font-black tracking-tight md:text-6xl" data-reveal style="--reveal-delay: 0.05s;">
+                            <x-marketing.hero-eyebrow class="block es-head-tag mb-4">QR ticket check-in &middot; scanning is free, the dashboard is Pro</x-marketing.hero-eyebrow>
                             Check-in: how many are <span class="es-head-accent">actually in?</span>
                         </h1>
                         <p class="es-head-muted mt-6 text-lg" data-reveal style="--reveal-delay: 0.1s;">

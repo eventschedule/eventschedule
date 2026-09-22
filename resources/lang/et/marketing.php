@@ -13,7 +13,7 @@ return [
     'about_title' => 'Event Schedule\'ist | Avatud lähtekoodiga sündmuste haldamise platvorm',
     'about_description' => 'Kes Event Schedule\'it arendab, millise litsentsi all see ilmub, kus asub lähtekood ja loetelu sellest, mida see ei tee. Avatud lähtekood ja platvormitasudeta.',
 
-    'selfhost_title' => 'Majuta Event Schedule ise - kõik funktsioonid tasuta sinu serveris',
+    'selfhost_title' => 'Isemajutatav sündmuste kalender | Kõik funktsioonid tasuta sinu serveris',
     'selfhost_description' => 'Majuta Event Schedule oma serveris ja kõik Pro- ja Enterprise-funktsioonid on tasuta kaasas. Avatud lähtekoodiga, ühe klikiga paigaldus, ilma platvormitasudeta, ja sinu andmed ei lahku kunagi sinu taristust.',
 
     'ticketing_title' => 'Piletimüük ilma platvormitasudeta - Event Schedule',
@@ -22,6 +22,6 @@ return [
     'ai_title' => 'AI sündmuste import: plakatist saab sündmus | Event Schedule',
     'ai_description' => 'Kleebi tekst või lohista plakat ja AI täidab sündmuse andmed: kuupäev, koht, esinejad, hind. Tasuta igas paketis, koos tõlkega 12 keelde.',
 
-    'calendar_sync_title' => 'Kalendri sünkroonimine Google\'i, Outlooki ja CalDAV-iga | Event Schedule',
+    'calendar_sync_title' => 'Kahesuunaline kalendri sünkroonimine Google\'i, Outlooki ja CalDAV-iga',
     'calendar_sync_description' => 'Kahesuunaline sünkroonimine Google Calendari, Outlooki ja mis tahes CalDAV-serveriga, tasuta igas paketis. Osalejad lisavad ühe sündmuse või tellivad sinu kalendri elava voo.',
 ];

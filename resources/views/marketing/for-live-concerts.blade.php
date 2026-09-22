@@ -670,14 +670,13 @@
         <div class="relative z-10 mx-auto w-full max-w-7xl px-4 sm:px-6 lg:px-8">
             <div class="grid items-center gap-12 lg:grid-cols-2">
                 <div>
-                    <div class="es-fade-up es-d-1 glass mb-8 inline-flex items-center gap-3 rounded-full px-5 py-2.5">
-                        <svg aria-hidden="true" class="h-5 w-5 es-stage-accent" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8">
-                            <path stroke-linecap="round" stroke-linejoin="round" d="M9 19V6l12-3v13M9 19c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zm12-3c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2z" />
-                        </svg>
-                        <span class="es-stage-muted text-sm font-medium tracking-wide">For concert promoters and touring shows</span>
-                    </div>
-
                     <h1 class="es-balance es-stage-ink mb-8 text-[2.4rem] font-black leading-[1.04] tracking-tight sm:text-6xl">
+                        <x-marketing.hero-eyebrow class="es-fade-up es-d-1 glass inline-flex items-center gap-3 rounded-full px-5 py-2.5 mb-8">
+                            <svg aria-hidden="true" class="h-5 w-5 es-stage-accent" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M9 19V6l12-3v13M9 19c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zm12-3c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2z" />
+                            </svg>
+                            <span class="es-stage-muted text-sm font-medium tracking-wide">Event schedule for live concerts and touring shows</span>
+                        </x-marketing.hero-eyebrow>
                         <span class="es-mask"><span class="es-mask-line">A tour is not one event.</span></span>
                         <span class="es-mask es-mask-2"><span class="es-mask-line">It is <span class="es-stage-accent">nine rooms</span> in a row.</span></span>
                     </h1>

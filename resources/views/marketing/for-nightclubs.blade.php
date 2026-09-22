@@ -577,14 +577,13 @@
         </div>
 
         <div class="pointer-events-none relative z-10 mx-auto w-full max-w-5xl px-4 text-center sm:px-6 lg:px-8">
-            <div class="es-fade-up es-d-1 glass mb-8 inline-flex items-center gap-3 rounded-full px-5 py-2.5">
-                <svg aria-hidden="true" class="h-5 w-5 text-[#166534] dark:text-[#4ade80]" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8">
-                    <path stroke-linecap="round" stroke-linejoin="round" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a2 2 0 01-2 2H5a2 2 0 01-2-2V7a2 2 0 012-2h6a2 2 0 012 2v1" />
-                </svg>
-                <span class="text-sm font-medium tracking-wide text-gray-600 dark:text-gray-300">For nightclubs and dance venues</span>
-            </div>
-
             <h1 class="es-balance mb-8 text-[2.4rem] font-black leading-[1.05] tracking-tight text-gray-900 dark:text-white sm:text-6xl lg:text-7xl">
+                <x-marketing.hero-eyebrow class="es-fade-up es-d-1 glass inline-flex items-center gap-3 rounded-full px-5 py-2.5 mb-8">
+                    <svg aria-hidden="true" class="h-5 w-5 text-[#166534] dark:text-[#4ade80]" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a2 2 0 01-2 2H5a2 2 0 01-2-2V7a2 2 0 012-2h6a2 2 0 012 2v1" />
+                    </svg>
+                    <span class="text-sm font-medium tracking-wide text-gray-600 dark:text-gray-300">Nightclub event calendar and tickets</span>
+                </x-marketing.hero-eyebrow>
                 <span class="es-mask"><span class="es-mask-line">The night is won at the door.</span></span>
                 <span class="es-mask es-mask-2"><span class="es-mask-line"><span class="text-gradient-steel">Not in the booth.</span></span></span>
             </h1>

@@ -543,15 +543,14 @@
             <div class="grid items-center gap-14 lg:grid-cols-12 lg:gap-8">
                 <!-- Copy -->
                 <div class="text-center lg:col-span-6 lg:text-left rtl:lg:text-right">
-                    <div class="es-fade-up es-d-1 mb-8 inline-flex items-center gap-3 rounded-full glass px-5 py-2.5">
-                        <span class="relative flex h-2 w-2">
-                            <span class="absolute inline-flex h-full w-full animate-ping rounded-full bg-blue-400 opacity-75"></span>
-                            <span class="relative inline-flex h-2 w-2 rounded-full bg-blue-500"></span>
-                        </span>
-                        <span class="text-sm font-medium tracking-wide text-gray-600 dark:text-gray-300">Free white-label platform</span>
-                    </div>
-
                     <h1 class="es-balance mb-6 text-[2.6rem] font-black leading-[1.05] tracking-tight text-gray-900 dark:text-white sm:text-6xl lg:text-6xl xl:text-7xl">
+                        <x-marketing.hero-eyebrow class="es-fade-up es-d-1 inline-flex items-center gap-3 rounded-full glass px-5 py-2.5 mb-8">
+                            <span class="relative flex h-2 w-2">
+                                <span class="absolute inline-flex h-full w-full animate-ping rounded-full bg-blue-400 opacity-75"></span>
+                                <span class="relative inline-flex h-2 w-2 rounded-full bg-blue-500"></span>
+                            </span>
+                            <span class="text-sm font-medium tracking-wide text-gray-600 dark:text-gray-300">Free white-label ticketing platform</span>
+                        </x-marketing.hero-eyebrow>
                         <span class="es-mask"><span class="es-mask-line">Launch your own</span></span>
                         <span class="es-mask es-mask-2"><span class="es-mask-line">ticketing SaaS.</span></span>
                         <span class="es-mask es-mask-2"><span class="es-mask-line"><span class="text-gradient-saas">Own every layer.</span></span></span>

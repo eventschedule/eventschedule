@@ -215,8 +215,8 @@
             <div class="mx-auto max-w-6xl px-4 sm:px-6 lg:px-8">
                 <div class="grid items-center gap-12 lg:grid-cols-2">
                     <div>
-                        <p class="es-queue-tag mb-4" data-reveal>Waitlist &middot; free on registration, Pro on tickets</p>
                         <h1 class="es-balance es-queue-ink text-4xl font-black tracking-tight md:text-6xl" data-reveal style="--reveal-delay: 0.05s;">
+                            <x-marketing.hero-eyebrow class="block es-queue-tag mb-4">Ticket waitlist &middot; free on registration, Pro on tickets</x-marketing.hero-eyebrow>
                             Sold out is not <span class="es-queue-accent">the end of it.</span>
                         </h1>
                         <p class="es-queue-muted mt-6 text-lg" data-reveal style="--reveal-delay: 0.1s;">

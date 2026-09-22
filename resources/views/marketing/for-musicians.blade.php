@@ -1,5 +1,5 @@
 <x-marketing-layout>
-    <x-slot name="title">Free Event Schedule for Musicians | Tour Dates & Tickets</x-slot>
+    <x-slot name="title">Band Tour Dates Page, Free | For Musicians and Solo Artists</x-slot>
     <x-slot name="description">Put every gig and tour date on one link. Sell tickets with zero platform fees, email fans directly, and let venues add you to their bills. Free forever.</x-slot>
     <x-slot name="breadcrumbTitle">For Musicians</x-slot>
 
@@ -445,12 +445,11 @@
             <div class="es-poster-rule es-fade-up es-d-1 mx-auto mt-4 max-w-xs" aria-hidden="true">
                 <svg aria-hidden="true" class="h-4 w-4" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2l2.4 7.6L22 12l-7.6 2.4L12 22l-2.4-7.6L2 12l7.6-2.4L12 2z" /></svg>
             </div>
-            <p class="es-fade-up es-d-1 mt-4 inline-flex items-center justify-center gap-3 text-[11px] font-bold uppercase tracking-[0.3em] text-[#0e7490] dark:text-[#22d3ee] sm:text-xs">
-                For musicians, bands &amp; solo artists
-                <span class="es-poster-eq" aria-hidden="true"><i style="--i: 0; --s: 0.4;"></i><i style="--i: 1; --s: 0.8;"></i><i style="--i: 2; --s: 0.55;"></i><i style="--i: 3; --s: 1;"></i><i style="--i: 4; --s: 0.68;"></i></span>
-            </p>
-
-            <h1 class="es-poster-display es-balance mt-6 text-5xl text-[#1c2733] dark:text-[#ede9dd] sm:text-7xl lg:text-[6.5rem]">
+            <h1 class="es-poster-display es-balance text-5xl text-[#1c2733] dark:text-[#ede9dd] sm:text-7xl lg:text-[6.5rem]">
+                <x-marketing.hero-eyebrow spacing="mb-6" class="es-fade-up es-d-1 mt-4 inline-flex items-center justify-center gap-3 text-[11px] font-bold uppercase tracking-[0.3em] text-[#0e7490] dark:text-[#22d3ee] sm:text-xs">
+                    Tour dates page for musicians, bands &amp; solo artists
+                    <span class="es-poster-eq" aria-hidden="true"><i style="--i: 0; --s: 0.4;"></i><i style="--i: 1; --s: 0.8;"></i><i style="--i: 2; --s: 0.55;"></i><i style="--i: 3; --s: 1;"></i><i style="--i: 4; --s: 0.68;"></i></span>
+                </x-marketing.hero-eyebrow>
                 <span class="es-mask"><span class="es-mask-line">Your gigs.</span></span>
                 <span class="es-mask es-mask-2"><span class="es-mask-line">Your fans.</span></span>
                 <span class="es-mask es-mask-3"><span class="es-mask-line"><span class="es-poster-ink-offset">No middleman.</span></span></span>

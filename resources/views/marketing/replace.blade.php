@@ -1,5 +1,5 @@
 <x-marketing-layout>
-    <x-slot name="title">Replace Google Forms, Canva & 10 More Tools | Event Schedule</x-slot>
+    <x-slot name="title">All-in-One Event Platform: Replace Google Forms, Canva & More</x-slot>
     <x-slot name="description">Replace twelve tools with one event record: Google Forms, Mailchimp, Canva, Linktree, Sheets, Calendly and more. Free to publish, zero platform fees.</x-slot>
     <x-slot name="breadcrumbTitle">Replace</x-slot>
 
@@ -660,15 +660,14 @@
 
         <div class="relative z-10 mx-auto w-full max-w-6xl px-4 sm:px-6 lg:px-8">
             <div class="mx-auto max-w-3xl text-center">
-                <div class="es-fade-up es-d-1 glass mb-8 inline-flex items-center gap-3 rounded-full px-5 py-2.5">
-                    <svg aria-hidden="true" class="es-belt-accent h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8">
-                        <path stroke-linecap="round" stroke-linejoin="round" d="M3 6h5l4.5 6H21" />
-                        <path stroke-linecap="round" stroke-linejoin="round" d="M3 18h5l4.5-6" />
-                    </svg>
-                    <span class="es-belt-muted text-sm font-medium tracking-wide">One strap, twelve loops</span>
-                </div>
-
                 <h1 class="es-balance es-belt-ink mb-7 text-[2.4rem] font-black leading-[1.05] tracking-tight sm:text-6xl">
+                    <x-marketing.hero-eyebrow class="es-fade-up es-d-1 glass inline-flex items-center gap-3 rounded-full px-5 py-2.5 mb-8">
+                        <svg aria-hidden="true" class="es-belt-accent h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M3 6h5l4.5 6H21" />
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M3 18h5l4.5-6" />
+                        </svg>
+                        <span class="es-belt-muted text-sm font-medium tracking-wide">All-in-one event platform</span>
+                    </x-marketing.hero-eyebrow>
                     <span class="es-mask"><span class="es-mask-line">Twelve tools to describe</span></span>
                     <span class="es-mask es-mask-2"><span class="es-mask-line"><span class="es-belt-accent">one</span> event.</span></span>
                 </h1>

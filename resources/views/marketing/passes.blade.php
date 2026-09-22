@@ -255,8 +255,8 @@
             <div class="mx-auto max-w-6xl px-4 sm:px-6 lg:px-8">
                 <div class="grid items-center gap-12 lg:grid-cols-2">
                     <div>
-                        <p class="es-punch-tag mb-4" data-reveal>Passes &amp; subscriptions &middot; Pro</p>
                         <h1 class="es-balance es-punch-ink text-4xl font-black tracking-tight md:text-6xl" data-reveal style="--reveal-delay: 0.05s;">
+                            <x-marketing.hero-eyebrow class="block es-punch-tag mb-4">Passes, class packs and memberships &middot; Pro</x-marketing.hero-eyebrow>
                             Sold once. <span class="es-punch-accent">Used ten times.</span>
                         </h1>
                         <p class="es-punch-muted mt-6 text-lg" data-reveal style="--reveal-delay: 0.1s;">

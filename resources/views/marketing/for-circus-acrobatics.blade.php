@@ -360,13 +360,12 @@
         </div>
 
         <div class="pointer-events-none relative z-10 mx-auto w-full max-w-5xl px-4 text-center sm:px-6 lg:px-8">
-            <div class="es-fade-up es-d-1 mb-8 inline-flex items-center gap-3 rounded-full glass px-5 py-2.5">
-                <span class="h-2 w-2 motion-safe:animate-pulse rounded-full bg-amber-500 dark:bg-amber-400"></span>
-                <span class="es-circus-announce-badge text-gray-600 dark:text-gray-300">Ladies and gentlemen, the circus is in town</span>
-                <span class="h-2 w-2 motion-safe:animate-pulse rounded-full bg-amber-500 dark:bg-amber-400"></span>
-            </div>
-
             <h1 class="es-balance mb-8 text-[2.75rem] font-black leading-[1.05] tracking-tight text-gray-900 dark:text-white sm:text-6xl lg:text-7xl">
+                <x-marketing.hero-eyebrow class="es-fade-up es-d-1 inline-flex items-center gap-3 rounded-full glass px-5 py-2.5 mb-8">
+                    <span class="h-2 w-2 motion-safe:animate-pulse rounded-full bg-amber-500 dark:bg-amber-400"></span>
+                    <span class="es-circus-announce-badge text-gray-600 dark:text-gray-300">The event schedule for circus &amp; acrobatics</span>
+                    <span class="h-2 w-2 motion-safe:animate-pulse rounded-full bg-amber-500 dark:bg-amber-400"></span>
+                </x-marketing.hero-eyebrow>
                 <span class="es-mask"><span class="es-mask-line"><span class="es-circus-gold es-gradient-anim">Defy gravity.</span></span></span>
                 <span class="es-mask es-mask-2"><span class="es-mask-line">Fill every seat.</span></span>
             </h1>

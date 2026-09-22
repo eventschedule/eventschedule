@@ -1,6 +1,6 @@
 <x-docs-page
     key="ai-import"
-    title="AI Event Import from Text and Flyers - Event Schedule"
+    title="How to Import Events with AI: Text and Flyers - Event Schedule"
     description="Paste event text or add a flyer image and AI fills in each event's name, date, venue, price and performers on a card you review before saving."
     lede="Save hours of manual data entry. Paste event text or add a flyer image and let AI extract the event details automatically."
 >

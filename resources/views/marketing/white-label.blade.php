@@ -695,9 +695,8 @@
 
         <div class="relative z-10 mx-auto w-full max-w-6xl px-4 sm:px-6 lg:px-8">
             <div class="mx-auto max-w-3xl text-center">
-                <p class="es-slate2-tag es-fade-up es-d-1 mb-5">Remove Event Schedule branding</p>
-
                 <h1 class="es-balance mb-7 text-[2.6rem] font-black leading-[1.05] tracking-tight sm:text-6xl">
+                    <x-marketing.hero-eyebrow class="block es-slate2-tag es-fade-up es-d-1 mb-5">Remove Event Schedule branding</x-marketing.hero-eyebrow>
                     <span class="es-mask"><span class="es-mask-line">White label takes off</span></span>
                     <span class="es-mask es-mask-2"><span class="es-mask-line">the <span class="es-slate2-grad">one chip</span> in the corner.</span></span>
                 </h1>

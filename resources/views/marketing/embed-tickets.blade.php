@@ -774,9 +774,8 @@
         <div class="relative z-10 mx-auto w-full max-w-6xl px-4 sm:px-6 lg:px-8">
             <div class="grid items-center gap-12 lg:grid-cols-2 lg:gap-16">
                 <div>
-                    <p class="es-widg-eyebrow es-fade-up es-d-1 mb-5">Embed tickets &middot; Pro plan</p>
-
                     <h1 class="es-balance mb-7 text-[2.6rem] font-black leading-[1.05] tracking-tight sm:text-6xl">
+                        <x-marketing.hero-eyebrow class="block es-widg-eyebrow es-fade-up es-d-1 mb-5">Embed tickets &middot; Pro plan</x-marketing.hero-eyebrow>
                         <span class="es-mask"><span class="es-mask-line">Embed the whole checkout,</span></span>
                         <span class="es-mask es-mask-2"><span class="es-mask-line">as <span class="es-widg-accent">one part</span>.</span></span>
                     </h1>

@@ -20,7 +20,7 @@ use Tests\TestCase;
  *
  * The second is that the fold makes no tier claim. Appointment booking is free with one type and
  * selling tickets is free to 25 paid tickets a month, so a plan name appearing up here is either
- * wrong or is a paid feature being advertised beside a badge reading "Free forever. No credit card."
+ * wrong or is a paid feature being advertised beside a badge reading "Free event calendar. No credit card."
  * and a button reading "Start for free". An earlier version of this fold carried a chip row that
  * named Pro and Enterprise; it was removed deliberately, and this is what stops it drifting back in
  * unqualified.

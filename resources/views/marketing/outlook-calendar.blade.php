@@ -730,17 +730,16 @@
         <div class="relative z-10 mx-auto w-full max-w-6xl px-4 sm:px-6 lg:px-8">
             <div class="grid items-center gap-14 lg:grid-cols-[1.05fr_1fr]">
                 <div>
-                    <div class="es-fade-up es-d-1 glass mb-8 inline-flex items-center gap-3 rounded-full px-5 py-2.5">
-                        <svg aria-hidden="true" class="h-5 w-5" viewBox="0 0 23 23" xmlns="http://www.w3.org/2000/svg">
-                            <path fill="#f25022" d="M1 1h10v10H1z"/>
-                            <path fill="#7fba00" d="M12 1h10v10H12z"/>
-                            <path fill="#00a4ef" d="M1 12h10v10H1z"/>
-                            <path fill="#ffb900" d="M12 12h10v10H12z"/>
-                        </svg>
-                        <span class="es-req-muted text-sm font-medium tracking-wide">Microsoft 365 and Outlook</span>
-                    </div>
-
                     <h1 class="es-balance es-req-ink mb-8 text-[2.4rem] font-black leading-[1.05] tracking-tight sm:text-6xl">
+                        <x-marketing.hero-eyebrow class="es-fade-up es-d-1 glass inline-flex items-center gap-3 rounded-full px-5 py-2.5 mb-8">
+                            <svg aria-hidden="true" class="h-5 w-5" viewBox="0 0 23 23" xmlns="http://www.w3.org/2000/svg">
+                                <path fill="#f25022" d="M1 1h10v10H1z"/>
+                                <path fill="#7fba00" d="M12 1h10v10H12z"/>
+                                <path fill="#00a4ef" d="M1 12h10v10H1z"/>
+                                <path fill="#ffb900" d="M12 12h10v10H12z"/>
+                            </svg>
+                            <span class="es-req-muted text-sm font-medium tracking-wide">Outlook calendar sync for Microsoft 365</span>
+                        </x-marketing.hero-eyebrow>
                         <span class="es-mask"><span class="es-mask-line">Every event you publish</span></span>
                         <span class="es-mask es-mask-2"><span class="es-mask-line">is an Outlook <span class="es-req-accent">meeting request.</span></span></span>
                     </h1>

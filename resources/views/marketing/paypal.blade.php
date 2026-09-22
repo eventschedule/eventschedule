@@ -210,8 +210,8 @@
             <div class="mx-auto max-w-6xl px-4 sm:px-6 lg:px-8">
                 <div class="grid items-center gap-12 lg:grid-cols-2">
                     <div>
-                        <p class="es-pp-tag mb-4" data-reveal>PayPal &middot; zero platform fees</p>
                         <h1 class="es-balance es-pp-ink text-4xl font-black tracking-tight md:text-6xl" data-reveal style="--reveal-delay: 0.05s;">
+                            <x-marketing.hero-eyebrow class="block es-pp-tag mb-4">Sell event tickets with PayPal</x-marketing.hero-eyebrow>
                             Take the money <span class="es-pp-accent">into your own account.</span>
                         </h1>
                         <p class="es-pp-muted mt-6 text-lg" data-reveal style="--reveal-delay: 0.1s;">

@@ -13,7 +13,7 @@ return [
     'about_title' => 'אודות Event Schedule | פלטפורמת קוד פתוח לניהול אירועים',
     'about_description' => 'מי בונה את Event Schedule, תחת איזה רישיון היא מופצת, איפה נמצא קוד המקור ורשימה של מה שהיא לא עושה. קוד פתוח, ללא עמלות פלטפורמה.',
 
-    'selfhost_title' => 'אירוח עצמי של Event Schedule - כל התכונות בחינם בשרת שלכם',
+    'selfhost_title' => 'לוח אירועים באירוח עצמי | כל התכונות בחינם בשרת שלכם',
     'selfhost_description' => 'אחסנו את Event Schedule בשרת שלכם וכל תכונות Pro ו-Enterprise כלולות בחינם. קוד פתוח, התקנה בלחיצה אחת, ללא עמלות פלטפורמה, והנתונים שלכם לעולם לא עוזבים את התשתית שלכם.',
 
     'ticketing_title' => 'מכירת כרטיסים ללא עמלות פלטפורמה - Event Schedule',
@@ -22,6 +22,6 @@ return [
     'ai_title' => 'ייבוא אירועים עם AI: מפלייר לאירוע | Event Schedule',
     'ai_description' => 'הדביקו את הטקסט או גררו פלייר, וה-AI ממלא את פרטי האירוע: תאריך, מקום, מופיעים ומחיר. חינם בכל תוכנית, עם תרגום ל-12 שפות.',
 
-    'calendar_sync_title' => 'סנכרון יומן עם Google, Outlook ו-CalDAV | Event Schedule',
+    'calendar_sync_title' => 'סנכרון יומן דו-כיווני עם Google, Outlook ו-CalDAV',
     'calendar_sync_description' => 'סנכרון דו-כיווני עם Google Calendar, Outlook וכל שרת CalDAV, בחינם בכל תוכנית. המוזמנים מוסיפים אירוע אחד או נרשמים לפיד היומן החי שלכם.',
 ];

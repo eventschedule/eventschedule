@@ -412,9 +412,8 @@
         <div class="relative z-10 mx-auto w-full max-w-6xl px-4 sm:px-6 lg:px-8">
             <div class="grid items-center gap-12 lg:grid-cols-2 lg:gap-16">
                 <div>
-                    <p class="es-hang-tag es-fade-up es-d-1 mb-5">For galleries, project spaces and cooperatives</p>
-
                     <h1 class="es-balance mb-7 text-[2.6rem] font-black leading-[1.05] tracking-tight sm:text-6xl">
+                        <x-marketing.hero-eyebrow class="block es-hang-tag es-fade-up es-d-1 mb-5">Art gallery calendar, for project spaces too</x-marketing.hero-eyebrow>
                         <span class="es-mask"><span class="es-mask-line">The show runs.</span></span>
                         <span class="es-mask es-mask-2"><span class="es-mask-line">The <span class="es-hang-grad">evenings</span> do not.</span></span>
                     </h1>

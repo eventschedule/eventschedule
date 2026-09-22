@@ -681,14 +681,13 @@
         <div class="relative z-10 mx-auto w-full max-w-6xl px-4 sm:px-6 lg:px-8">
             <div class="grid items-center gap-14 lg:grid-cols-[1.05fr_1fr]">
                 <div>
-                    <div class="es-fade-up es-d-1 glass mb-8 inline-flex items-center gap-3 rounded-full px-5 py-2.5">
-                        <svg aria-hidden="true" class="h-5 w-5 es-hours-icon" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.7">
-                            <path stroke-linecap="round" stroke-linejoin="round" d="M8 7V3m8 4V3M4 11h16M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
-                        </svg>
-                        <span class="es-hours-muted text-sm font-medium tracking-wide">Availability &middot; talent schedules &middot; Enterprise</span>
-                    </div>
-
                     <h1 class="es-balance es-hours-ink mb-8 text-[2.4rem] font-black leading-[1.05] tracking-tight sm:text-6xl">
+                        <x-marketing.hero-eyebrow class="es-fade-up es-d-1 glass inline-flex items-center gap-3 rounded-full px-5 py-2.5 mb-8">
+                            <svg aria-hidden="true" class="h-5 w-5 es-hours-icon" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.7">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M8 7V3m8 4V3M4 11h16M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                            </svg>
+                            <span class="es-hours-muted text-sm font-medium tracking-wide">Availability calendar &middot; talent schedules &middot; Enterprise</span>
+                        </x-marketing.hero-eyebrow>
                         <span class="es-mask"><span class="es-mask-line">Do not list the days you are free.</span></span>
                         <span class="es-mask es-mask-2"><span class="es-mask-line"><span class="es-hours-accent">Cross out</span> the days you are gone.</span></span>
                     </h1>

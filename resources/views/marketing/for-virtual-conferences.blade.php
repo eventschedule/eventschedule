@@ -621,14 +621,13 @@
         <div class="relative z-10 mx-auto w-full max-w-6xl px-4 sm:px-6 lg:px-8">
             <div class="grid items-center gap-14 lg:grid-cols-[1.05fr_1fr]">
                 <div>
-                    <div class="es-fade-up es-d-1 glass mb-8 inline-flex items-center gap-3 rounded-full px-5 py-2.5">
-                        <svg aria-hidden="true" class="es-agenda-accent h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8">
-                            <path stroke-linecap="round" stroke-linejoin="round" d="M8.25 6.75h12M8.25 12h12m-12 5.25h12M3.75 6.75h.008v.008H3.75V6.75zM3.75 12h.008v.008H3.75V12zm0 5.25h.008v.008H3.75v-.008z" />
-                        </svg>
-                        <span class="es-agenda-muted text-sm font-medium tracking-wide">For virtual conference and online summit organizers</span>
-                    </div>
-
                     <h1 class="es-balance es-agenda-ink mb-8 text-[2.4rem] font-black leading-[1.05] tracking-tight sm:text-6xl">
+                        <x-marketing.hero-eyebrow class="es-fade-up es-d-1 glass inline-flex items-center gap-3 rounded-full px-5 py-2.5 mb-8">
+                            <svg aria-hidden="true" class="es-agenda-accent h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M8.25 6.75h12M8.25 12h12m-12 5.25h12M3.75 6.75h.008v.008H3.75V6.75zM3.75 12h.008v.008H3.75V12zm0 5.25h.008v.008H3.75v-.008z" />
+                            </svg>
+                            <span class="es-agenda-muted text-sm font-medium tracking-wide">Virtual conference agenda for online summit organizers</span>
+                        </x-marketing.hero-eyebrow>
                         <span class="es-mask"><span class="es-mask-line">A conference day is one event.</span></span>
                         <span class="es-mask es-mask-2"><span class="es-mask-line">The <span class="es-agenda-accent">agenda</span> goes inside it.</span></span>
                     </h1>

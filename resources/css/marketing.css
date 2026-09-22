@@ -372,6 +372,24 @@ html.es-anim [data-reveal].is-revealed {
 
 .es-balance { text-wrap: balance; }
 
+/* <x-marketing.hero-eyebrow>: the pill that now sits inside a hero h1. Undo everything the h1
+   hands down so it renders as it did when it sat above the heading, in body text: the face,
+   size, weight, stretch, tracking and leading, and ordinary wrapping rather than balance. Colour
+   is left alone: each pill sets its own. */
+.es-hero-eyebrow {
+    display: block;
+    font-family: theme('fontFamily.sans');
+    font-size: 1rem;
+    font-stretch: normal;
+    font-style: normal;
+    font-weight: 400;
+    letter-spacing: normal;
+    line-height: 1.5;
+    text-transform: none;
+    text-wrap: wrap;
+    word-spacing: normal;
+}
+
 ::selection { background: rgba(78, 129, 250, 0.35); }
 
 /* Film grain */

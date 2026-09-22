@@ -13,7 +13,7 @@ return [
     'about_title' => 'Despre Event Schedule | Platformă open source pentru gestionarea evenimentelor',
     'about_description' => 'Cine dezvoltă Event Schedule, sub ce licență este distribuit, unde se află codul sursă și o listă cu ce nu face. Open source, fără comisioane de platformă.',
 
-    'selfhost_title' => 'Găzduiește singur Event Schedule - toate funcțiile gratuit pe serverul tău',
+    'selfhost_title' => 'Calendar de evenimente găzduit de tine | Toate funcțiile gratuit pe serverul tău',
     'selfhost_description' => 'Găzduiește Event Schedule pe propriul server și toate funcțiile Pro și Enterprise sunt incluse gratuit. Open source, instalare dintr-un clic, fără comisioane de platformă, iar datele tale nu îți părăsesc niciodată infrastructura.',
 
     'ticketing_title' => 'Vânzare de bilete fără taxe de platformă - Event Schedule',
@@ -22,6 +22,6 @@ return [
     'ai_title' => 'Import de evenimente cu AI: de la afiș la eveniment | Event Schedule',
     'ai_description' => 'Lipește textul sau trage un afiș și AI completează detaliile evenimentului: dată, loc, artiști, preț. Gratuit în toate planurile, cu traducere în 12 limbi.',
 
-    'calendar_sync_title' => 'Sincronizare calendar cu Google, Outlook și CalDAV | Event Schedule',
+    'calendar_sync_title' => 'Sincronizare bidirecțională a calendarului cu Google, Outlook și CalDAV',
     'calendar_sync_description' => 'Sincronizare bidirecțională cu Google Calendar, Outlook și orice server CalDAV, gratuită în toate planurile. Participanții adaugă un eveniment sau se abonează la fluxul live al calendarului tău.',
 ];

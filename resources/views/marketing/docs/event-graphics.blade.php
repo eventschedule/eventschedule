@@ -1,6 +1,6 @@
 <x-docs-page
     key="event-graphics"
-    title="Event Graphics: Shareable Schedule Images - Event Schedule"
+    title="How to Make Event Graphics and Text Posts - Event Schedule"
     description="Turn your upcoming events into one shareable image and ready-to-paste text, free on every plan: layouts, social sizes and every template variable."
     lede="Compose your upcoming events into one image and one block of text you can paste anywhere: a social post, a WhatsApp group, or an email."
     plan="free"

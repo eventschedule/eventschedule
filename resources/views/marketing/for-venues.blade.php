@@ -1,5 +1,5 @@
 <x-marketing-layout>
-    <x-slot name="title">Free Event Schedule for Venues | Calendar, Bookings, Tickets</x-slot>
+    <x-slot name="title">Venue Calendar Software, Free | Bookings, Tickets, Check-in</x-slot>
     <x-slot name="description">Run your venue calendar front to back: a booking inbox for acts, tickets via Stripe or PayPal with zero platform fees, and a sub-schedule for every room.</x-slot>
     <x-slot name="breadcrumbTitle">For Venues</x-slot>
 
@@ -316,12 +316,11 @@
              is not competing with the H1 and the CTAs. --}}
 
         <div class="relative z-10 mx-auto w-full max-w-5xl px-4 text-center sm:px-6 lg:px-8">
-            <div class="es-fade-up es-d-1 mb-7 inline-flex items-center gap-3 rounded-full glass px-5 py-2.5">
-                <span class="h-1.5 w-1.5 rounded-full bg-gradient-to-r from-sky-400 to-cyan-400" aria-hidden="true"></span>
-                <span class="text-sm font-medium tracking-wide text-gray-600 dark:text-gray-300">Event calendar for bars, clubs, theaters and event spaces</span>
-            </div>
-
             <h1 class="es-balance mb-7 text-[2.6rem] font-black leading-[1.05] tracking-tight text-gray-900 dark:text-white sm:text-6xl lg:text-7xl">
+                <x-marketing.hero-eyebrow class="es-fade-up es-d-1 inline-flex items-center gap-3 rounded-full glass px-5 py-2.5 mb-7">
+                    <span class="h-1.5 w-1.5 rounded-full bg-gradient-to-r from-sky-400 to-cyan-400" aria-hidden="true"></span>
+                    <span class="text-sm font-medium tracking-wide text-gray-600 dark:text-gray-300">Venue calendar software for bars, clubs, theaters and event spaces</span>
+                </x-marketing.hero-eyebrow>
                 <span class="es-mask"><span class="es-mask-line">Front of house, back of house,</span></span>
                 <span class="es-mask es-mask-2"><span class="es-mask-line"><span class="text-gradient-house es-gradient-anim">one calendar.</span></span></span>
             </h1>

@@ -448,12 +448,11 @@
         </div>
 
         <div class="pointer-events-none relative z-10 mx-auto w-full max-w-5xl px-4 text-center sm:px-6 lg:px-8">
-            <div class="es-fade-up es-d-1 mb-8 inline-flex items-center gap-3 rounded-full glass px-5 py-2.5">
-                <span class="inline-flex h-5 w-5 items-center justify-center text-red-700 dark:text-red-400" aria-hidden="true">{!! $suitHeart !!}</span>
-                <span class="text-sm font-medium tracking-wide text-gray-600 dark:text-gray-300">For magicians, mentalists, and illusionists</span>
-            </div>
-
             <h1 class="es-balance mb-8 text-[2.6rem] font-black leading-[1.05] tracking-tight text-gray-900 dark:text-white sm:text-6xl lg:text-7xl">
+                <x-marketing.hero-eyebrow class="es-fade-up es-d-1 inline-flex items-center gap-3 rounded-full glass px-5 py-2.5 mb-8">
+                    <span class="inline-flex h-5 w-5 items-center justify-center text-red-700 dark:text-red-400" aria-hidden="true">{!! $suitHeart !!}</span>
+                    <span class="text-sm font-medium tracking-wide text-gray-600 dark:text-gray-300">Event schedule for magicians, mentalists, and illusionists</span>
+                </x-marketing.hero-eyebrow>
                 <span class="es-mask"><span class="es-mask-line">Pick a card.</span></span>
                 <span class="es-mask es-mask-2"><span class="es-mask-line"><span class="es-pick-red">Any card.</span></span></span>
             </h1>

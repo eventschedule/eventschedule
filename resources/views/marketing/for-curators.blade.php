@@ -568,6 +568,7 @@
                              sets on three. The shared es-mask only ships a -2 delay,
                              so -3 is declared in the style block above. --}}
                         <h1 class="es-cur-name es-balance">
+                            <x-marketing.hero-eyebrow class="es-cur-dateline es-fade-up es-d-1 mb-4 block">Your local events guide</x-marketing.hero-eyebrow>
                             <span class="es-mask"><span class="es-mask-line">A group chat</span></span>
                             <span class="es-mask es-mask-2"><span class="es-mask-line">forgets.</span></span>
                             <span class="es-mask es-mask-3"><span class="es-mask-line"><span class="text-gradient-guide es-gradient-anim">A guide does not.</span></span></span>

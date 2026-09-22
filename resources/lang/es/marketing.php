@@ -13,7 +13,7 @@ return [
     'about_title' => 'Acerca de Event Schedule | Plataforma de gestión de eventos de código abierto',
     'about_description' => 'Quién desarrolla Event Schedule, con qué licencia se publica, dónde está el código fuente y una lista de lo que no hace. Código abierto y sin comisiones de plataforma.',
 
-    'selfhost_title' => 'Autoaloja Event Schedule - todas las funciones gratis en tu propio servidor',
+    'selfhost_title' => 'Calendario de eventos autoalojado | Todas las funciones gratis en tu servidor',
     'selfhost_description' => 'Autoaloja Event Schedule en tu propio servidor y todas las funciones Pro y Enterprise están incluidas gratis. Código abierto, instalación con un clic, sin comisiones de plataforma, y tus datos nunca salen de tu infraestructura.',
 
     'ticketing_title' => 'Venta de entradas sin comisiones de plataforma - Event Schedule',
@@ -22,6 +22,6 @@ return [
     'ai_title' => 'Importación de eventos con IA: de un cartel a un evento | Event Schedule',
     'ai_description' => 'Pega el texto o suelta un cartel y la IA completa los datos del evento: fecha, lugar, artistas y precio. Gratis en todos los planes, con traducción a 12 idiomas.',
 
-    'calendar_sync_title' => 'Sincronización de calendario con Google, Outlook y CalDAV | Event Schedule',
+    'calendar_sync_title' => 'Sincronización bidireccional de calendario con Google, Outlook y CalDAV',
     'calendar_sync_description' => 'Sincronización bidireccional con Google Calendar, Outlook y cualquier servidor CalDAV, gratis en todos los planes. Los asistentes añaden un evento o se suscriben a tu calendario en vivo.',
 ];
