@@ -4302,10 +4302,15 @@ class Event extends Model
     /**
      * Get offers schema data for JSON-LD (tickets)
      * Always returns at least a default free offer if no tickets are available
+     *
+     * Each offer's url is the event's canonical URL for $date - the same URL as the Event node's
+     * own "url" - rather than getGuestUrl(). That one ignored the custom domain a schedule is
+     * canonical on and, with no date, pointed a recurring event's offers at its FIRST occurrence,
+     * so the offers on a page disagreed with the page they sat on.
      */
-    public function getSchemaOffers()
+    public function getSchemaOffers($date = null)
     {
-        $url = $this->getGuestUrl();
+        $url = $this->getCanonicalUrl($date);
         $validFrom = $this->created_at ? $this->created_at->toIso8601String() : $this->getSchemaStartDate();
 
         if ($this->tickets_enabled && ! $this->tickets->isEmpty()) {

@@ -11,7 +11,6 @@
         if ($event && !isset($otherRole)) {
             $otherRole = $event->getOtherRole($subdomain);
         }
-        $jsonLdFlags = JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES | JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_AMP | JSON_HEX_QUOT;
         // Event text resolved by language rather than by a "showing translation" boolean, which
         // inverts for an aggregated event whose language pair differs from this schedule's.
         // $role's OWN translated*() calls below need no such treatment - $guestLang came from it.
@@ -360,40 +359,43 @@
                 $startDate = $event->getSchemaStartDate($date ?? null);
                 $endDate = $event->getSchemaEndDate($date ?? null);
                 $location = $event->getSchemaLocation();
-                $offers = $event->getSchemaOffers();
-                $organizer = $event->getSchemaOrganizer();
+                // Same $date as the "url" above, so every offer points at the page it describes -
+                // the occurrence on a recurring event, the custom domain where it is canonical.
+                $offers = $event->getSchemaOffers($date ?? null);
                 $performers = $event->getSchemaPerformers();
-                $eventStatus = $event->getSchemaEventStatus();
-                $attendanceMode = $event->getSchemaAttendanceMode();
+
+                // Built as an array and encoded once, never stitched by hand: every value goes
+                // through SeoUtils::jsonLd(), and an optional key cannot leave a stray comma.
+                $eventJsonLd = [
+                    '@context' => 'https://schema.org',
+                    '@type' => 'Event',
+                    'name' => $eventName,
+                    'description' => $eventDescription,
+                    'startDate' => $startDate,
+                    'endDate' => $endDate,
+                    'url' => $eventUrl,
+                    'eventStatus' => $event->getSchemaEventStatus(),
+                    'eventAttendanceMode' => $event->getSchemaAttendanceMode(),
+                    'organizer' => $event->getSchemaOrganizer(),
+                ];
+                if (count($offers)) {
+                    $eventJsonLd['offers'] = count($offers) === 1 ? $offers[0] : $offers;
+                }
+                $eventJsonLd['location'] = $location;
+                $eventJsonLd['isAccessibleForFree'] = (bool) $event->isFree();
+                if ($role->language_code) {
+                    $eventJsonLd['inLanguage'] = $role->language_code;
+                }
+                if ($eventImage) {
+                    $eventJsonLd['image'] = $eventImage;
+                }
+                if ($performers) {
+                    $eventJsonLd['performer'] = count($performers) === 1 ? $performers[0] : $performers;
+                }
             @endphp
 
             <script type="application/ld+json" {!! nonce_attr() !!}>
-            {
-                "@context": "https://schema.org",
-                "@type": "Event",
-                "name": @json($eventName, $jsonLdFlags),
-                "description": @json($eventDescription, $jsonLdFlags),
-                "startDate": @json($startDate, $jsonLdFlags),
-                "endDate": @json($endDate, $jsonLdFlags),
-                "url": @json($eventUrl, $jsonLdFlags),
-                "eventStatus": @json($eventStatus, $jsonLdFlags),
-                "eventAttendanceMode": @json($attendanceMode, $jsonLdFlags),
-                "organizer": @json($organizer, $jsonLdFlags),
-@if (count($offers))
-                "offers": @json(count($offers) === 1 ? $offers[0] : $offers, $jsonLdFlags),
-@endif
-                "location": @json($location, $jsonLdFlags),
-                "isAccessibleForFree": {{ $event->isFree() ? 'true' : 'false' }},
-                "inLanguage": "{{ $role->language_code }}"
-                @if ($eventImage)
-                ,
-                "image": @json($eventImage, $jsonLdFlags)
-                @endif
-                @if ($performers)
-                ,
-                "performer": @json(count($performers) === 1 ? $performers[0] : $performers, $jsonLdFlags)
-                @endif
-            }
+            {!! \App\Utils\SeoUtils::jsonLd($eventJsonLd) !!}
             </script>
         @elseif ($role->exists)
             @php
@@ -441,34 +443,32 @@
                         }
                     }
                 }
+
+                $roleJsonLd = [
+                    '@context' => 'https://schema.org',
+                    '@type' => $schemaType,
+                    'name' => $roleName,
+                ];
+                if ($roleDescription) {
+                    $roleJsonLd['description'] = $roleDescription;
+                }
+                $roleJsonLd['url'] = $roleUrl;
+                if ($roleImage) {
+                    $roleJsonLd['image'] = $roleImage;
+                }
+                if ($address) {
+                    $roleJsonLd['address'] = $address;
+                }
+                if (! empty($sameAs)) {
+                    $roleJsonLd['sameAs'] = $sameAs;
+                }
+                if ($role->language_code) {
+                    $roleJsonLd['inLanguage'] = $role->language_code;
+                }
             @endphp
 
             <script type="application/ld+json" {!! nonce_attr() !!}>
-            {
-                "@context": "https://schema.org",
-                "@type": @json($schemaType, $jsonLdFlags),
-                "name": @json($roleName, $jsonLdFlags)
-                @if ($roleDescription)
-                ,
-                "description": @json($roleDescription, $jsonLdFlags)
-                @endif
-                ,
-                "url": @json($roleUrl, $jsonLdFlags)
-                @if ($roleImage)
-                ,
-                "image": @json($roleImage, $jsonLdFlags)
-                @endif
-                @if ($address)
-                ,
-                "address": @json($address, $jsonLdFlags)
-                @endif
-                @if (!empty($sameAs))
-                ,
-                "sameAs": @json($sameAs, $jsonLdFlags)
-                @endif
-                ,
-                "inLanguage": "{{ $role->language_code }}"
-            }
+            {!! \App\Utils\SeoUtils::jsonLd($roleJsonLd) !!}
             </script>
         @endif
 
@@ -478,57 +478,38 @@
             // whose first item sits on a different domain, which is what the marketing root was on
             // every custom domain. Same predicate the canonical uses, so the two always agree.
             $breadcrumbRootsAtSchedule = $role->servesOnCustomDomain();
+            // Crumbs in order; positions are numbered from the list, so dropping the marketing
+            // root on a custom domain cannot leave a gap or a duplicate.
+            $breadcrumbCrumbs = [];
+            if (! $breadcrumbRootsAtSchedule) {
+                $breadcrumbCrumbs[] = [__('messages.home'), marketing_url()];
+            }
+            $breadcrumbCrumbs[] = [$role->translatedName(), $role->getCanonicalUrl()];
+
+            $breadcrumbForEvent = $event && $event->exists && $event->starts_at && ! $event->is_draft && ! ($passwordGate ?? false);
+            if ($breadcrumbForEvent) {
+                $breadcrumbCrumbs[] = [$guestEventName, $event->getCanonicalUrl($date ?? null)];
+            }
+
+            // A schedule page on its own domain would be a one-item trail, which says nothing.
+            $breadcrumbJsonLd = null;
+            if ($breadcrumbForEvent || ($role->exists && ! $breadcrumbRootsAtSchedule)) {
+                $breadcrumbJsonLd = [
+                    '@context' => 'https://schema.org',
+                    '@type' => 'BreadcrumbList',
+                    'itemListElement' => array_map(fn ($crumb, $index) => [
+                        '@type' => 'ListItem',
+                        'position' => $index + 1,
+                        'name' => $crumb[0],
+                        'item' => $crumb[1],
+                    ], $breadcrumbCrumbs, array_keys($breadcrumbCrumbs)),
+                ];
+            }
         @endphp
 
-        @if ($event && $event->exists && $event->starts_at && !$event->is_draft && !($passwordGate ?? false))
+        @if ($breadcrumbJsonLd)
             <script type="application/ld+json" {!! nonce_attr() !!}>
-            {
-                "@context": "https://schema.org",
-                "@type": "BreadcrumbList",
-                "itemListElement": [
-                    @if (! $breadcrumbRootsAtSchedule)
-                    {
-                        "@type": "ListItem",
-                        "position": 1,
-                        "name": @json(__('messages.home')),
-                        "item": "{{ marketing_url() }}"
-                    },
-                    @endif
-                    {
-                        "@type": "ListItem",
-                        "position": {{ $breadcrumbRootsAtSchedule ? 1 : 2 }},
-                        "name": @json($role->translatedName(), $jsonLdFlags),
-                        "item": "{{ $role->getCanonicalUrl() }}"
-                    },
-                    {
-                        "@type": "ListItem",
-                        "position": {{ $breadcrumbRootsAtSchedule ? 2 : 3 }},
-                        "name": @json($guestEventName, $jsonLdFlags),
-                        "item": "{{ $event->getCanonicalUrl($date ?? null) }}"
-                    }
-                ]
-            }
-            </script>
-        @elseif ($role->exists && ! $breadcrumbRootsAtSchedule)
-            <script type="application/ld+json" {!! nonce_attr() !!}>
-            {
-                "@context": "https://schema.org",
-                "@type": "BreadcrumbList",
-                "itemListElement": [
-                    {
-                        "@type": "ListItem",
-                        "position": 1,
-                        "name": @json(__('messages.home')),
-                        "item": "{{ marketing_url() }}"
-                    },
-                    {
-                        "@type": "ListItem",
-                        "position": 2,
-                        "name": @json($role->translatedName(), $jsonLdFlags),
-                        "item": "{{ $role->getCanonicalUrl() }}"
-                    }
-                ]
-            }
+            {!! \App\Utils\SeoUtils::jsonLd($breadcrumbJsonLd) !!}
             </script>
         @endif
 
@@ -553,7 +534,7 @@
             @endphp
             @foreach ($videoSchemaItems as $videoSchema)
             <script type="application/ld+json" {!! nonce_attr() !!}>
-            @json($videoSchema + ['@context' => 'https://schema.org'], $jsonLdFlags)
+            {!! \App\Utils\SeoUtils::jsonLd($videoSchema + ['@context' => 'https://schema.org']) !!}
             </script>
             @endforeach
         @endif

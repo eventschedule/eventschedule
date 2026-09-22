@@ -82,7 +82,9 @@ class GuestSocialImageTest extends TestCase
         preg_match_all('#<script type="application/ld\+json"[^>]*>(.*?)</script>#s', $content, $m);
 
         foreach ($m[1] as $block) {
-            if (str_contains($block, '"@type": "Event"')) {
+            // Decoded rather than string-matched: the layout encodes each block compactly
+            // through SeoUtils::jsonLd(), so there is no '"@type": "Event"' spacing to match.
+            if ((json_decode($block, true)['@type'] ?? null) === 'Event') {
                 return $block;
             }
         }
