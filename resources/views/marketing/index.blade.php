@@ -50,6 +50,12 @@
         }
         foreach ($wallCards as $wallIndex => $wallCard) {
             $wallCards[$wallIndex]['eager'] = $wallIndex < $wallEagerCount;
+            // fetchpriority="high" on card 0 only. It is the first strip poster on a phone and
+            // row 0 of column 0 on the wall, so it is the same URL in both breakpoints' markup:
+            // marking it in both places still issues ONE high-priority request, whichever of the
+            // two is displayed. Any more than one and "high" stops meaning anything against the
+            // CSS and fonts the hero text needs.
+            $wallCards[$wallIndex]['priority'] = $wallIndex === 0;
         }
         // Warm the connection to whichever host is actually serving the posters, derived from
         // the first card rather than hardcoded: a selfhost install serves them from its own
@@ -543,11 +549,11 @@
                                     @php $stripEager = $stripCopy === 0 && $stripCard['eager']; @endphp
                                     @if ($stripCard['url'])
                                         <a href="{{ $stripCard['url'] }}" target="_blank" rel="noopener" @if ($stripCopy === 1) aria-hidden="true" tabindex="-1" @endif class="block w-24 shrink-0 overflow-hidden rounded-lg shadow-md ring-1 ring-black/5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#4E81FA] dark:ring-white/10" aria-label="{{ $stripCard['name'] }}">
-                                            <img src="{{ $stripCard['img'] }}" alt="" class="aspect-[3/4] w-full object-cover" width="96" height="128" loading="{{ $stripEager ? 'eager' : 'lazy' }}" decoding="async" fetchpriority="{{ $stripEager ? 'auto' : 'low' }}">
+                                            <img src="{{ $stripCard['img'] }}" alt="" class="aspect-[3/4] w-full object-cover" width="96" height="128" loading="{{ $stripEager ? 'eager' : 'lazy' }}" decoding="async" fetchpriority="{{ $stripEager ? ($stripCard['priority'] ? 'high' : 'auto') : 'low' }}">
                                         </a>
                                     @else
                                         <div class="w-24 shrink-0 overflow-hidden rounded-lg shadow-md ring-1 ring-black/5 dark:ring-white/10" aria-hidden="true">
-                                            <img src="{{ $stripCard['img'] }}" alt="" class="aspect-[3/4] w-full object-cover" width="96" height="128" loading="{{ $stripEager ? 'eager' : 'lazy' }}" decoding="async" fetchpriority="{{ $stripEager ? 'auto' : 'low' }}">
+                                            <img src="{{ $stripCard['img'] }}" alt="" class="aspect-[3/4] w-full object-cover" width="96" height="128" loading="{{ $stripEager ? 'eager' : 'lazy' }}" decoding="async" fetchpriority="{{ $stripEager ? ($stripCard['priority'] ? 'high' : 'auto') : 'low' }}">
                                         </div>
                                     @endif
                                 @endforeach
@@ -573,7 +579,7 @@
                                     @php $wallEager = $wallCopy === 0 && $wallRowIndex === 0 && $wallCard['eager']; @endphp
                                     @if ($wallCard['url'])
                                         <a href="{{ $wallCard['url'] }}" target="_blank" rel="noopener" @if ($wallCopy === 1) aria-hidden="true" tabindex="-1" @endif class="es-wall-card group relative block bg-gray-200 focus-visible:outline-none dark:bg-white/10" aria-label="{{ $wallCard['name'] }}">
-                                            <img src="{{ $wallCard['img'] }}" alt="" class="aspect-[3/4] w-full object-cover" width="208" height="277" loading="{{ $wallEager ? 'eager' : 'lazy' }}" decoding="async" fetchpriority="{{ $wallEager ? 'auto' : 'low' }}">
+                                            <img src="{{ $wallCard['img'] }}" alt="" class="aspect-[3/4] w-full object-cover" width="208" height="277" loading="{{ $wallEager ? 'eager' : 'lazy' }}" decoding="async" fetchpriority="{{ $wallEager ? ($wallCard['priority'] ? 'high' : 'auto') : 'low' }}">
                                             <span class="absolute inset-x-0 bottom-0 bg-gradient-to-t from-black/80 to-transparent px-3 pb-2.5 pt-8">
                                                 <span class="block truncate text-xs font-bold text-white">{{ $wallCard['name'] }}</span>
                                                 <span class="block text-[10px] text-white/75">{{ $wallCard['date'] }}</span>
@@ -581,7 +587,7 @@
                                         </a>
                                     @else
                                         <div class="es-wall-card relative bg-gray-200 dark:bg-white/10" aria-hidden="true">
-                                            <img src="{{ $wallCard['img'] }}" alt="" class="aspect-[3/4] w-full object-cover" width="208" height="277" loading="{{ $wallEager ? 'eager' : 'lazy' }}" decoding="async" fetchpriority="{{ $wallEager ? 'auto' : 'low' }}">
+                                            <img src="{{ $wallCard['img'] }}" alt="" class="aspect-[3/4] w-full object-cover" width="208" height="277" loading="{{ $wallEager ? 'eager' : 'lazy' }}" decoding="async" fetchpriority="{{ $wallEager ? ($wallCard['priority'] ? 'high' : 'auto') : 'low' }}">
                                         </div>
                                     @endif
                                 @endforeach

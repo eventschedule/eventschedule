@@ -3,10 +3,12 @@
 namespace App\Console\Commands;
 
 use App\Models\Event;
+use App\Models\Role;
 use App\Utils\ImageUtils;
 use Carbon\Carbon;
 use Illuminate\Console\Command;
 use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\Log;
 
 /**
@@ -24,17 +26,22 @@ use Illuminate\Support\Facades\Log;
  * to reconsider those, e.g. after re-uploading an original that had gone missing). A TRANSIENT
  * skip - the disk would not hand the original over, or would not take the derivative - is
  * re-attempted by the next plain run, because the answer really can be different next time.
+ *
+ * `--roles` walks schedule profile photos instead of flyers, in one pass. They matter because a
+ * profile photo is the card image of every event without a flyer (Event::getImageUrl()), so the
+ * homepage wall used to serve a 2MB original into a 96px slot once per event wearing it.
  */
 class BackfillImageVariants extends Command
 {
     protected $signature = 'images:backfill-variants
-        {--upcoming-only : Stop after upcoming and recurring events, skipping past ones}
+        {--roles : Process schedule profile photos instead of event flyers}
+        {--upcoming-only : Stop after upcoming and recurring events, skipping past ones (ignored with --roles)}
         {--retry-skipped : Also reprocess rows whose recorded skip was deterministic (transient ones are always retried)}
-        {--limit=0 : Stop after this many events (0 = no limit)}
+        {--limit=0 : Stop after this many rows (0 = no limit)}
         {--chunk=100 : Rows per database chunk}
         {--dry-run : List what would be generated without touching storage}';
 
-    protected $description = 'Generate the resized WebP derivatives of every event flyer that is missing one.';
+    protected $description = 'Generate the resized WebP derivatives of every event flyer (or, with --roles, schedule profile photo) that is missing one.';
 
     private int $processed = 0;
 
@@ -63,30 +70,17 @@ class BackfillImageVariants extends Command
 
         $this->info('Target widths: '.implode('px, ', ImageUtils::VARIANT_WIDTHS).'px WebP'.($dryRun ? ' (dry run)' : ''));
 
-        $this->runPass('upcoming', $chunk, $dryRun, function (Builder $query) {
-            $query->where(function ($q) {
-                $q->where('starts_at', '>=', Carbon::today())
-                    ->orWhereNotNull('days_of_week');
-            });
-        });
-
-        if (! $this->option('upcoming-only') && ! $this->limitReached()) {
-            // The exact complement of the pass above, so a dateless one-off event (starts_at
-            // null, no days_of_week) is picked up by the second pass instead of by neither.
-            $this->runPass('past', $chunk, $dryRun, function (Builder $query) {
-                $query->whereNull('days_of_week')
-                    ->where(function ($q) {
-                        $q->where('starts_at', '<', Carbon::today())
-                            ->orWhereNull('starts_at');
-                    });
-            });
+        if ($this->option('roles')) {
+            $this->runPass('schedules', Role::query(), $chunk, $dryRun, fn (Builder $query) => null);
+        } else {
+            $this->runEventPasses($chunk, $dryRun);
         }
 
         $this->info("Done. Processed: {$this->processed}, generated: {$this->generated}, skipped: {$this->skipped}");
 
         // Which reasons, not just how many. Nothing else reads the recorded `skipped` values back
         // out, so without this the only way to find out why a production run skipped rows is to
-        // open a SQL console against the events table.
+        // open a SQL console against the table.
         if ($this->skippedReasons) {
             arsort($this->skippedReasons);
             $parts = [];
@@ -99,7 +93,32 @@ class BackfillImageVariants extends Command
         return self::SUCCESS;
     }
 
-    private function runPass(string $label, int $chunk, bool $dryRun, callable $scope): void
+    private function runEventPasses(int $chunk, bool $dryRun): void
+    {
+        $this->runPass('upcoming', Event::query(), $chunk, $dryRun, function (Builder $query) {
+            $query->where(function ($q) {
+                $q->where('starts_at', '>=', Carbon::today())
+                    ->orWhereNotNull('days_of_week');
+            });
+        });
+
+        if (! $this->option('upcoming-only') && ! $this->limitReached()) {
+            // The exact complement of the pass above, so a dateless one-off event (starts_at
+            // null, no days_of_week) is picked up by the second pass instead of by neither.
+            $this->runPass('past', Event::query(), $chunk, $dryRun, function (Builder $query) {
+                $query->whereNull('days_of_week')
+                    ->where(function ($q) {
+                        $q->where('starts_at', '<', Carbon::today())
+                            ->orWhereNull('starts_at');
+                    });
+            });
+        }
+    }
+
+    /**
+     * @param  Builder  $query  A fresh query on the model to walk (Event or Role).
+     */
+    private function runPass(string $label, Builder $query, int $chunk, bool $dryRun, callable $scope): void
     {
         if ($this->limitReached()) {
             return;
@@ -107,14 +126,14 @@ class BackfillImageVariants extends Command
 
         $this->line("Pass: {$label}");
 
-        $query = $this->baseQuery();
+        $this->baseQuery($query);
         $scope($query);
 
         // chunkById, not chunk: the pass writes to the rows it is walking, and an offset-based
         // page would then skip rows as the result set shifts under it.
-        $query->chunkById($chunk, function ($events) use ($dryRun) {
-            foreach ($events as $event) {
-                $this->processEvent($event, $dryRun);
+        $query->chunkById($chunk, function ($rows) use ($dryRun) {
+            foreach ($rows as $row) {
+                $this->processRow($row, $dryRun);
 
                 if ($this->limitReached()) {
                     return false;
@@ -126,7 +145,8 @@ class BackfillImageVariants extends Command
     }
 
     /**
-     * Events with a resizable flyer that is missing at least one of the target widths.
+     * Rows with a resizable stored image (the model's imageVariantSourceColumn()) that is missing
+     * at least one of the target widths.
      *
      * The JSON filter has to go through JSON_TYPE: `JSON_EXTRACT(col, '$.w480') IS NULL` is FALSE
      * for a recorded skip, because a JSON null is a value, not SQL NULL. COALESCE supplies the
@@ -139,15 +159,16 @@ class BackfillImageVariants extends Command
      * A recorded skip is then filtered by its reason, not by its existence: a transient one gets
      * another go unasked, a deterministic one waits for --retry-skipped.
      */
-    private function baseQuery(): Builder
+    private function baseQuery(Builder $query): Builder
     {
         $retrySkipped = (bool) $this->option('retry-skipped');
+        $column = $query->getModel()->imageVariantSourceColumn();
 
-        return Event::query()
-            ->whereNotNull('flyer_image_url')
-            ->where('flyer_image_url', '!=', '')
-            ->where('flyer_image_url', 'not like', 'demo\_%')
-            ->where('flyer_image_url', 'not like', 'http%')
+        return $query
+            ->whereNotNull($column)
+            ->where($column, '!=', '')
+            ->where($column, 'not like', 'demo\_%')
+            ->where($column, 'not like', 'http%')
             ->where(function ($q) use ($retrySkipped) {
                 $q->whereNull('image_variants');
 
@@ -173,15 +194,20 @@ class BackfillImageVariants extends Command
             });
     }
 
-    private function processEvent(Event $event, bool $dryRun): void
+    /**
+     * @param  Event|Role  $row
+     */
+    private function processRow(Model $row, bool $dryRun): void
     {
         $this->processed++;
 
-        $raw = $event->getAttributes()['flyer_image_url'] ?? null;
+        $raw = $row->imageVariantSource();
+        // Events keep their historical bare "[12]"; schedules say so, since the ids overlap.
+        $tag = $row instanceof Role ? 'schedule '.$row->id : (string) $row->id;
 
         if ($dryRun) {
             $names = array_map(fn (int $width) => ImageUtils::variantFilename($raw, $width), ImageUtils::VARIANT_WIDTHS);
-            $this->line("  [{$event->id}] would generate ".implode(', ', $names));
+            $this->line("  [{$tag}] would generate ".implode(', ', $names));
             $this->generated++;
 
             return;
@@ -194,7 +220,7 @@ class BackfillImageVariants extends Command
             $results = ImageUtils::generateStoredVariants($raw);
         } catch (\Throwable $e) {
             report($e);
-            $this->warn("  [{$event->id}] error: ".$e->getMessage());
+            $this->warn("  [{$tag}] error: ".$e->getMessage());
             $this->countSkip('error');
 
             return;
@@ -210,7 +236,7 @@ class BackfillImageVariants extends Command
         $written = [];
         $reason = null;
         $detail = null;
-        $existing = $event->image_variants;
+        $existing = $row->image_variants;
         $existing = is_array($existing) ? $existing : [];
 
         foreach (ImageUtils::VARIANT_WIDTHS as $width) {
@@ -235,20 +261,20 @@ class BackfillImageVariants extends Command
             $variants['skipped'] = $reason;
         }
 
-        $event->recordImageVariants($variants);
+        $row->recordImageVariants($variants);
 
         // A partial run counts as skipped: the row still needs another pass.
         if ($reason !== null) {
             $this->countSkip($reason);
             $described = $reason.($detail !== null ? " ({$detail})" : '');
-            $this->line("  [{$event->id}] skipped: {$described}");
-            Log::info("images:backfill-variants skipped event {$event->id}: {$described}");
+            $this->line("  [{$tag}] skipped: {$described}");
+            Log::info('images:backfill-variants skipped '.($row instanceof Role ? 'schedule' : 'event')." {$row->id}: {$described}");
 
             return;
         }
 
         $this->generated++;
-        $this->line("  [{$event->id}] ".implode(', ', $written));
+        $this->line("  [{$tag}] ".implode(', ', $written));
     }
 
     private function countSkip(string $reason): void

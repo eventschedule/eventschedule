@@ -2,11 +2,15 @@
 
 namespace App\Models;
 
+use App\Http\Controllers\MarketingController;
+use App\Jobs\GenerateRoleImageVariants;
 use App\Notifications\VerifyEmail as CustomVerifyEmail;
+use App\Traits\HasImageVariants;
 use App\Traits\RoleBillable;
 use App\Utils\CssUtils;
 use App\Utils\CustomFieldUtils;
 use App\Utils\GeminiUtils;
+use App\Utils\ImageUtils;
 use App\Utils\MarkdownUtils;
 use App\Utils\UrlUtils;
 use Illuminate\Auth\MustVerifyEmail as MustVerifyEmailTrait;
@@ -18,7 +22,7 @@ use Illuminate\Support\Str;
 
 class Role extends Model implements MustVerifyEmail
 {
-    use MustVerifyEmailTrait, Notifiable, RoleBillable;
+    use HasImageVariants, MustVerifyEmailTrait, Notifiable, RoleBillable;
 
     protected $fillable = [
         'type',
@@ -153,6 +157,11 @@ class Role extends Model implements MustVerifyEmail
      * @var array<string, string>
      */
     protected $casts = [
+        // {"w480": "profile_abc_w480.webp", "w960": ...} or {"w480": null, "skipped": "too_large"}.
+        // Written only by GenerateRoleImageVariants / `images:backfill-variants --roles` through
+        // recordImageVariants(), so deliberately NOT in $fillable - and not in
+        // BackupService::ROLE_EXPORT_FIELDS, since a restore holds none of the derivative files.
+        'image_variants' => 'array',
         'announce_new_events' => 'boolean',
         'last_announced_at' => 'datetime',
         'google_webhook_expires_at' => 'datetime',
@@ -599,7 +608,42 @@ class Role extends Model implements MustVerifyEmail
             }
         });
 
+        // The profile photo's WebP derivatives, mirroring Event's flyer hooks: it is also the card
+        // image of every event without a flyer, including on the homepage wall.
+        static::saving(function ($model) {
+            // A new photo invalidates every derivative of the old one. Cleared here rather than in
+            // the job so cards fall straight back to the (correct) original until the queue
+            // rebuilds, and the files deleted because their names derive from the old filename -
+            // once this row stops holding it nothing can address them. getRawOriginal(), because
+            // getOriginal() runs the accessor and would hand back a URL. deleteStoredVariants()
+            // never throws, so this cannot fail the save.
+            if ($model->exists && $model->isDirty('profile_image_url')) {
+                $previous = $model->getRawOriginal('profile_image_url');
+                if (is_string($previous) && $previous !== '') {
+                    ImageUtils::deleteStoredVariants($previous);
+                }
+
+                $model->image_variants = null;
+            }
+        });
+
+        static::created(function ($model) {
+            self::queueImageVariants($model);
+        });
+
         static::updated(function ($model) {
+            // created() is separate because an insert never syncs changes, so wasChanged() is
+            // blind to it.
+            if ($model->wasChanged('profile_image_url')) {
+                self::queueImageVariants($model);
+
+                // Events wearing this photo on the wall are cached with it, and the saving hook
+                // above just deleted the derivative files the cached copy points at. Only the
+                // photo change busts, as Event::WALL_CACHE_FIELDS' flyer does; recording the new
+                // derivatives later does not (see recordImageVariants()).
+                MarketingController::forgetWallCache();
+            }
+
             if ($model->wasChanged('translation_language_code')) {
                 \App\Jobs\RegenerateRoleTranslations::dispatch($model);
             }
@@ -623,6 +667,15 @@ class Role extends Model implements MustVerifyEmail
                         $q->whereNotNull('federated_at')->orWhereNotNull('federated_skipped_at');
                     })
                     ->update(['federated_at' => null, 'federated_skipped_at' => null]);
+            }
+        });
+
+        static::deleted(function ($model) {
+            // Nothing can address this row's derivatives once it is gone. The controller deletes
+            // the original itself; the derivatives are ours.
+            $raw = $model->imageVariantSource();
+            if ($raw !== null) {
+                ImageUtils::deleteStoredVariants($raw);
             }
         });
 
@@ -1841,6 +1894,47 @@ class Role extends Model implements MustVerifyEmail
         } else {
             return $value;
         }
+    }
+
+    /**
+     * Queue the resized WebP derivatives of this schedule's profile photo, if it has one worth
+     * resizing.
+     *
+     * afterCommit() for the same reason as Event::queueImageVariants(): schedules are saved inside
+     * transactions (calendar sync, merges), and on the `sync` queue the job would otherwise do
+     * S3 reads and writes inside the open transaction. The job itself swallows every failure on
+     * `sync`, so it cannot turn a successful save into a 500.
+     */
+    protected static function queueImageVariants(self $model): void
+    {
+        $raw = $model->imageVariantSource();
+
+        // demo_ photos ship in the repo; a legacy http value is not ours to resize.
+        if ($raw === null || str_starts_with($raw, 'demo_') || str_starts_with($raw, 'http')) {
+            return;
+        }
+
+        GenerateRoleImageVariants::dispatch($model->id, $raw)->afterCommit();
+    }
+
+    public function imageVariantSourceColumn(): string
+    {
+        return 'profile_image_url';
+    }
+
+    /**
+     * The profile photo's URL, as a resized derivative when $width is given and one is recorded
+     * (see ImageUtils::VARIANT_WIDTHS), else the original - so the result is always renderable.
+     * No width means the original, for full-size consumers. '' when there is no photo, like the
+     * accessor.
+     */
+    public function getProfileImageUrl(?int $width = null): string
+    {
+        if ($width && $this->imageVariantSource() && ($variant = $this->imageVariantFilename($width))) {
+            return ImageUtils::variantUrl($variant);
+        }
+
+        return $this->profile_image_url;
     }
 
     public function getProfileImageUrlAttribute($value)

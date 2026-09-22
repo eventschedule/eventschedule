@@ -8,6 +8,7 @@ use App\Jobs\SyncEventToCalDAV;
 use App\Jobs\SyncEventToGoogleCalendar;
 use App\Jobs\SyncEventToMicrosoftCalendar;
 use App\Services\TicketVolumeDiscount;
+use App\Traits\HasImageVariants;
 use App\Utils\EventTextGenerator;
 use App\Utils\ImageUtils;
 use App\Utils\MarkdownUtils;
@@ -22,6 +23,8 @@ use Illuminate\Support\Facades\Storage;
 
 class Event extends Model
 {
+    use HasImageVariants;
+
     /**
      * Names that, on their own, mark an event as throwaway test data.
      * Matched against LOWER(TRIM(name)) by scopeExcludeLikelyTest().
@@ -2533,11 +2536,12 @@ class Event extends Model
      * The image a card should render for this event: its own flyer, else the talent schedule's
      * profile photo, else the venue's.
      *
-     * Pass $width to ask for a resized derivative (see ImageUtils::VARIANT_WIDTH). It only ever
-     * applies to the FLYER: the schedule and venue fallbacks have no derivatives yet, and an
-     * event with no flyer must keep resolving exactly as before. An event whose derivative has
-     * not been generated (or was skipped) also falls through to the original, so a caller never
-     * has to check first - the URL is always renderable.
+     * Pass $width to ask for a resized derivative (see ImageUtils::VARIANT_WIDTH). It applies to
+     * whichever image wins: the flyer's derivatives live on the event, the fallbacks' on the
+     * schedule (Role::getProfileImageUrl()). Which image is chosen never depends on the width -
+     * an event with no flyer resolves to the same schedule at every width. A derivative that has
+     * not been generated (or was skipped) falls through to that image's original, so a caller
+     * never has to check first - the URL is always renderable.
      */
     public function getImageUrl(?int $width = null)
     {
@@ -2547,98 +2551,59 @@ class Event extends Model
             }
 
             return $this->flyer_image_url;
-        } elseif ($this->role() && $this->role()->profile_image_url) {
-            return $this->role()->profile_image_url;
-        } elseif ($this->venue && $this->venue->profile_image_url) {
-            return $this->venue->profile_image_url;
+        }
+
+        if ($fallback = $this->fallbackImageRole()) {
+            return $fallback->getProfileImageUrl($width);
         }
 
         return null;
     }
 
     /**
-     * A `srcset` of every generated width, or null when the set is incomplete.
+     * The schedule whose profile photo stands in for a missing flyer: the talent, else the venue.
+     * Null when the event has a flyer of its own or neither schedule has a photo.
+     */
+    protected function fallbackImageRole(): ?Role
+    {
+        if ($this->flyer_image_url) {
+            return null;
+        }
+
+        $talent = $this->role();
+        if ($talent && $talent->profile_image_url) {
+            return $talent;
+        }
+
+        $venue = $this->venue;
+        if ($venue && $venue->profile_image_url) {
+            return $venue;
+        }
+
+        return null;
+    }
+
+    /**
+     * A `srcset` of every generated width of the image getImageUrl() resolves to, or null when
+     * that image's set is incomplete (see HasImageVariants::imageVariantSrcset()).
      *
-     * All-or-nothing on purpose: a srcset listing one width is just a slower way of writing
-     * `src`, and a card that offered only the 480 would tell a 2x screen that 480 is the best
-     * available and stop it falling back to the (sharper) original. Callers pair this with a
-     * `sizes` attribute matching their own CSS width and keep `src` pointed at the 480, so a row
-     * with no derivatives at all renders exactly as it did before.
+     * Callers pair this with a `sizes` attribute matching their own CSS width and keep `src`
+     * pointed at getImageUrl(480), so a row with no derivatives at all renders exactly as it did
+     * before. Both calls resolve the same image, so the srcset never describes a different
+     * picture from the src beside it.
      */
     public function imageSrcset(): ?string
     {
-        if (! $this->flyer_image_url) {
-            return null;
+        if ($this->flyer_image_url) {
+            return $this->imageVariantSrcset();
         }
 
-        $parts = [];
-
-        foreach (ImageUtils::VARIANT_WIDTHS as $width) {
-            $filename = $this->imageVariantFilename($width);
-
-            if (! $filename) {
-                return null;
-            }
-
-            $parts[] = ImageUtils::variantUrl($filename).' '.$width.'w';
-        }
-
-        return $parts ? implode(', ', $parts) : null;
+        return $this->fallbackImageRole()?->imageVariantSrcset();
     }
 
-    /**
-     * The stored filename of this event's flyer derivative at the given width, or null.
-     *
-     * Null covers all three "no derivative" cases at once: never generated, deliberately skipped
-     * (the value is null beside a `skipped` reason), and a narrowed get() that did not select the
-     * column at all.
-     */
-    public function imageVariantFilename(int $width = ImageUtils::VARIANT_WIDTH): ?string
+    public function imageVariantSourceColumn(): string
     {
-        $variants = $this->image_variants;
-
-        if (! is_array($variants)) {
-            return null;
-        }
-
-        $name = $variants['w'.$width] ?? null;
-
-        return (is_string($name) && $name !== '') ? $name : null;
-    }
-
-    /**
-     * Record the result of a derivative build.
-     *
-     * Written with the query builder, guarded on the flyer filename it was built from: resizing
-     * a multi-megabyte original takes seconds, and if the owner replaced the flyer in that window
-     * the saving hook already cleared this column and queued a fresh job. An unguarded write here
-     * would file the OLD flyer's thumbnail under the NEW one, and every card would show the wrong
-     * poster until someone edited the event again. Going around Eloquent also keeps updated_at
-     * (and the federation re-publish check that reads it) out of a purely derived write.
-     *
-     * Returns whether the row still matched.
-     */
-    public function recordImageVariants(array $variants): bool
-    {
-        $raw = $this->getAttributes()['flyer_image_url'] ?? null;
-
-        if (! $raw) {
-            return false;
-        }
-
-        $encoded = json_encode($variants);
-
-        $affected = DB::table('events')
-            ->where('id', $this->id)
-            ->where('flyer_image_url', $raw)
-            ->update(['image_variants' => $encoded]);
-
-        if ($affected) {
-            $this->attributes['image_variants'] = $encoded;
-            $this->syncOriginalAttribute('image_variants');
-        }
-
-        return $affected > 0;
+        return 'flyer_image_url';
     }
 
     /**

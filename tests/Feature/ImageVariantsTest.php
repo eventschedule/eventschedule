@@ -4,8 +4,10 @@ namespace Tests\Feature;
 
 use App\Http\Controllers\MarketingController;
 use App\Jobs\GenerateEventImageVariants;
+use App\Jobs\GenerateRoleImageVariants;
 use App\Models\BackupJob;
 use App\Models\Event;
+use App\Models\Role;
 use App\Services\BackupService;
 use App\Utils\ImageUtils;
 use Illuminate\Filesystem\FilesystemAdapter;
@@ -698,7 +700,8 @@ class ImageVariantsTest extends TestCase
         $role = $this->createRole($owner, 'talent', ['name' => 'Blue Room', 'profile_image_url' => 'demo_wall_venue.jpg']);
         $event = $this->createEvent($role, ['name' => 'Autumn Session']);
 
-        // The schedule photo fallback has no derivatives, so offering a srcset would 404.
+        // A demo schedule photo never gets derivatives, so offering a srcset would 404. (A stored
+        // photo with a full set does get one - see the schedule photo tests below.)
         $this->assertNull($event->imageSrcset());
     }
 
@@ -721,7 +724,8 @@ class ImageVariantsTest extends TestCase
         $role = $this->createRole($owner, 'talent', ['name' => 'Blue Room', 'profile_image_url' => 'demo_wall_venue.jpg']);
         $event = $this->createEvent($role, ['name' => 'Autumn Session']);
 
-        // No flyer: the talent schedule's photo, which has no derivatives, at either width.
+        // No flyer: the talent schedule's photo at either width. A demo photo has no derivatives,
+        // so the width changes nothing - it never switches to some other image.
         $this->assertSame($event->getImageUrl(), $event->fresh()->getImageUrl(480));
         $this->assertStringContainsString('demo_wall_venue.jpg', (string) $event->getImageUrl(480));
     }
@@ -1397,5 +1401,363 @@ class ImageVariantsTest extends TestCase
 
         $html = $this->get('/')->assertOk()->getContent();
         $this->assertStringNotContainsString('flyer_abc123.png', $html, 'The toggle must bust the wall cache');
+    }
+
+    // ------------------------------------------------- schedule profile photos
+
+    /**
+     * A schedule's profile photo is the card image of every event without a flyer, and the
+     * homepage wall served those originals - a 2.1MB PNG, eight times over - into 96px slots.
+     */
+    public function test_the_schedule_photo_fallback_serves_its_derivative_when_one_is_recorded(): void
+    {
+        $owner = $this->createOwner();
+        $role = $this->createRole($owner, 'talent', ['name' => 'Blue Room', 'profile_image_url' => 'profile_abc.png']);
+        $event = $this->createEvent($role, ['name' => 'Autumn Session']);
+
+        // Nothing recorded yet: the original at every width, and no srcset.
+        $this->assertStringEndsWith('/storage/profile_abc.png', $event->getImageUrl(480));
+        $this->assertNull($event->imageSrcset());
+
+        $role->recordImageVariants(['w480' => 'profile_abc_w480.webp', 'w960' => 'profile_abc_w960.webp']);
+        $event = $event->fresh();
+
+        $this->assertSame(url('/storage/profile_abc_w480.webp'), $event->getImageUrl(480));
+        $this->assertSame(url('/storage/profile_abc_w960.webp'), $event->getImageUrl(960));
+        // No width asked for: full-size consumers keep the original.
+        $this->assertSame(url('/storage/profile_abc.png'), $event->getImageUrl());
+        $this->assertSame(
+            url('/storage/profile_abc_w480.webp').' 480w, '.url('/storage/profile_abc_w960.webp').' 960w',
+            $event->imageSrcset()
+        );
+    }
+
+    public function test_the_venue_photo_fallback_serves_its_derivative_too(): void
+    {
+        $owner = $this->createOwner();
+        $venue = $this->createRole($owner, 'venue', ['name' => 'Blue Room', 'profile_image_url' => 'profile_venue.png']);
+        $event = $this->createEvent($venue, ['name' => 'Autumn Session']);
+
+        $this->assertStringEndsWith('/storage/profile_venue.png', $event->getImageUrl(480));
+
+        $venue->recordImageVariants(['w480' => 'profile_venue_w480.webp', 'w960' => 'profile_venue_w960.webp']);
+
+        $this->assertSame(url('/storage/profile_venue_w480.webp'), $event->fresh()->getImageUrl(480));
+    }
+
+    public function test_a_flyer_still_beats_the_schedule_photo_derivative(): void
+    {
+        $owner = $this->createOwner();
+        $role = $this->createRole($owner, 'talent', ['name' => 'Blue Room', 'profile_image_url' => 'profile_abc.png']);
+        $role->recordImageVariants(['w480' => 'profile_abc_w480.webp', 'w960' => 'profile_abc_w960.webp']);
+        $event = $this->createEvent($role, ['name' => 'Autumn Session', 'flyer_image_url' => 'flyer_abc123.png']);
+
+        // The event's own flyer, with no derivative yet: its original, never the schedule's WebP.
+        $this->assertStringEndsWith('flyer_abc123.png', $event->fresh()->getImageUrl(480));
+        $this->assertNull($event->fresh()->imageSrcset());
+    }
+
+    public function test_get_profile_image_url_returns_the_variant_only_when_one_is_recorded(): void
+    {
+        $owner = $this->createOwner();
+        $role = $this->createRole($owner, 'talent', ['name' => 'Blue Room', 'profile_image_url' => 'profile_abc.png']);
+
+        $this->assertSame(url('/storage/profile_abc.png'), $role->getProfileImageUrl(480));
+
+        $role->recordImageVariants(['w480' => 'profile_abc_w480.webp', 'w960' => null, 'skipped' => 'write_failed']);
+
+        $this->assertSame(url('/storage/profile_abc_w480.webp'), $role->getProfileImageUrl(480));
+        $this->assertSame(url('/storage/profile_abc.png'), $role->getProfileImageUrl(960), 'A skipped width falls back');
+        $this->assertSame(url('/storage/profile_abc.png'), $role->getProfileImageUrl());
+        $this->assertSame($role->profile_image_url, $role->getProfileImageUrl());
+
+        $bare = $this->createRole($owner, 'talent', ['name' => 'No Photo']);
+        $this->assertSame('', $bare->getProfileImageUrl(480));
+    }
+
+    public function test_setting_a_schedule_photo_queues_a_generation_job(): void
+    {
+        $owner = $this->createOwner();
+        $role = $this->createRole($owner, 'talent', ['name' => 'Blue Room']);
+
+        Queue::assertNotPushed(GenerateRoleImageVariants::class);
+
+        $role->profile_image_url = 'profile_abc.png';
+        $role->save();
+
+        Queue::assertPushed(GenerateRoleImageVariants::class, 1);
+        Queue::assertPushed(function (GenerateRoleImageVariants $job) use ($role) {
+            return $job->roleId === $role->id && $job->profileImage === 'profile_abc.png';
+        });
+
+        // Created with one: queued from the created hook.
+        Queue::fake();
+        $created = $this->createRole($owner, 'venue', ['name' => 'Green Room', 'profile_image_url' => 'profile_new.png']);
+        Queue::assertPushed(function (GenerateRoleImageVariants $job) use ($created) {
+            return $job->roleId === $created->id && $job->profileImage === 'profile_new.png';
+        });
+    }
+
+    public function test_an_unrelated_schedule_save_and_demo_photos_queue_nothing(): void
+    {
+        $owner = $this->createOwner();
+        $role = $this->createRole($owner, 'talent', ['name' => 'Blue Room', 'profile_image_url' => 'profile_abc.png']);
+
+        Queue::fake();
+
+        $role->name = 'Blue Room II';
+        $role->save();
+
+        $demo = $this->createRole($owner, 'talent', ['name' => 'Demo Room', 'profile_image_url' => 'demo_profile_donuts.jpg']);
+        $role->profile_image_url = null;
+        $role->save();
+
+        Queue::assertNotPushed(GenerateRoleImageVariants::class);
+        $this->assertNotNull($demo->id);
+    }
+
+    public function test_the_role_job_generates_and_records_every_width(): void
+    {
+        $owner = $this->createOwner();
+        $role = $this->createRole($owner, 'talent', ['name' => 'Blue Room', 'profile_image_url' => 'profile_abc.png']);
+        $this->storeFlyer('profile_abc.png', 1200, 1200);
+
+        (new GenerateRoleImageVariants($role->id, 'profile_abc.png'))->handle();
+
+        Storage::assertExists('public/profile_abc_w480.webp');
+        Storage::assertExists('public/profile_abc_w960.webp');
+        $this->assertSame(
+            ['w480' => 'profile_abc_w480.webp', 'w960' => 'profile_abc_w960.webp'],
+            $role->fresh()->image_variants
+        );
+    }
+
+    public function test_the_role_job_bails_when_the_photo_was_replaced_after_dispatch(): void
+    {
+        $owner = $this->createOwner();
+        $role = $this->createRole($owner, 'talent', ['name' => 'Blue Room', 'profile_image_url' => 'profile_new.png']);
+        $this->storeFlyer('profile_old.png', 600, 600);
+
+        (new GenerateRoleImageVariants($role->id, 'profile_old.png'))->handle();
+
+        Storage::assertMissing('public/profile_old_w480.webp');
+        $this->assertNull($role->fresh()->image_variants);
+    }
+
+    public function test_role_recording_is_refused_when_the_photo_changed_underneath(): void
+    {
+        $owner = $this->createOwner();
+        $role = $this->createRole($owner, 'talent', ['name' => 'Blue Room', 'profile_image_url' => 'profile_abc.png']);
+
+        $stale = Role::find($role->id);
+        Role::whereKey($role->id)->update(['profile_image_url' => 'profile_replaced.png']);
+
+        $this->assertFalse($stale->recordImageVariants(['w480' => 'profile_abc_w480.webp']));
+        $this->assertNull($role->fresh()->image_variants);
+    }
+
+    public function test_a_throwing_helper_never_breaks_the_schedule_save_on_the_sync_queue(): void
+    {
+        $owner = $this->createOwner();
+        $role = $this->createRole($owner, 'talent', ['name' => 'Blue Room']);
+        $this->storeFlyer('profile_boom.png', 400, 400);
+
+        $this->swapDisk($this->diskThatThrows());
+        $this->useSyncQueue();
+
+        $role->profile_image_url = 'profile_boom.png';
+        $role->save();
+
+        $fresh = $role->fresh();
+        $this->assertSame('profile_boom.png', $fresh->getAttributes()['profile_image_url'], 'The photo save must stand');
+        $this->assertSame(['w480' => null, 'w960' => null, 'skipped' => 'failed'], $fresh->image_variants);
+    }
+
+    public function test_a_transient_disk_failure_never_breaks_the_schedule_save_on_the_sync_queue(): void
+    {
+        $owner = $this->createOwner();
+        $role = $this->createRole($owner, 'talent', ['name' => 'Blue Room']);
+        $this->storeFlyer('profile_boom.png', 400, 400);
+
+        $this->swapDisk($this->diskThatCannotWrite());
+        $this->useSyncQueue();
+
+        $role->profile_image_url = 'profile_boom.png';
+        $role->save();
+
+        $fresh = $role->fresh();
+        $this->assertSame('profile_boom.png', $fresh->getAttributes()['profile_image_url'], 'The photo save must stand');
+        $this->assertSame(['w480' => null, 'w960' => null, 'skipped' => 'write_failed'], $fresh->image_variants);
+    }
+
+    public function test_replacing_the_schedule_photo_clears_and_deletes_the_old_derivatives(): void
+    {
+        $owner = $this->createOwner();
+        $role = $this->createRole($owner, 'talent', ['name' => 'Blue Room', 'profile_image_url' => 'profile_old.png']);
+
+        $this->storeFlyer('profile_old.png', 400, 400);
+        $this->storeFlyer('profile_new.png', 400, 400);
+        ImageUtils::generateStoredVariants('profile_old.png');
+        $role->recordImageVariants(['w480' => 'profile_old_w480.webp', 'w960' => 'profile_old_w960.webp']);
+
+        Storage::assertExists('public/profile_old_w480.webp');
+
+        $role->profile_image_url = 'profile_new.png';
+        $role->save();
+
+        $this->assertNull($role->fresh()->image_variants);
+        $this->assertSame(url('/storage/profile_new.png'), $role->fresh()->getProfileImageUrl(480));
+        Storage::assertMissing('public/profile_old_w480.webp');
+        Storage::assertMissing('public/profile_old_w960.webp');
+        Storage::assertExists('public/profile_new.png');
+    }
+
+    public function test_deleting_the_schedule_deletes_the_photo_derivatives(): void
+    {
+        $owner = $this->createOwner();
+        $role = $this->createRole($owner, 'talent', ['name' => 'Blue Room', 'profile_image_url' => 'profile_old.png']);
+
+        $this->storeFlyer('profile_old.png', 400, 400);
+        ImageUtils::generateStoredVariants('profile_old.png');
+        $role->recordImageVariants(['w480' => 'profile_old_w480.webp', 'w960' => 'profile_old_w960.webp']);
+
+        $role->delete();
+
+        Storage::assertMissing('public/profile_old_w480.webp');
+        Storage::assertMissing('public/profile_old_w960.webp');
+    }
+
+    public function test_the_backfill_command_fills_schedule_photos_only_with_the_roles_option(): void
+    {
+        $owner = $this->createOwner();
+        $role = $this->createRole($owner, 'talent', ['name' => 'Blue Room', 'profile_image_url' => 'profile_abc.png']);
+        $demo = $this->createRole($owner, 'talent', ['name' => 'Demo Room', 'profile_image_url' => 'demo_profile_donuts.jpg']);
+        $event = $this->createEvent($role, ['name' => 'Autumn Session', 'flyer_image_url' => 'flyer_abc123.png']);
+        $this->storeFlyer('profile_abc.png', 800, 800);
+        $this->storeFlyer('flyer_abc123.png', 600, 800);
+
+        // A plain run is about flyers, and must leave schedules alone.
+        Artisan::call('images:backfill-variants');
+        $this->assertNull($role->fresh()->image_variants);
+
+        // Reset the flyer's row, so the next assertion can tell whether --roles walked events.
+        DB::table('events')->where('id', $event->id)->update(['image_variants' => null]);
+
+        Artisan::call('images:backfill-variants', ['--roles' => true]);
+
+        $this->assertSame(
+            ['w480' => 'profile_abc_w480.webp', 'w960' => 'profile_abc_w960.webp'],
+            $role->fresh()->image_variants
+        );
+        $this->assertNull($demo->fresh()->image_variants, 'demo_ photos ship in the repo');
+        $this->assertNull($event->fresh()->image_variants, '--roles must not walk the events table');
+
+        Artisan::call('images:backfill-variants', ['--roles' => true]);
+        $this->assertStringContainsString('Processed: 0', Artisan::output());
+    }
+
+    public function test_the_roles_backfill_records_and_retries_a_skip_on_request(): void
+    {
+        $owner = $this->createOwner();
+        $role = $this->createRole($owner, 'talent', ['name' => 'Blue Room', 'profile_image_url' => 'profile_huge.png']);
+        $this->storeOversizedHeader('profile_huge.png', 12000, 12000);
+
+        Artisan::call('images:backfill-variants', ['--roles' => true]);
+        $this->assertStringContainsString('[schedule '.$role->id.'] skipped: too_large', Artisan::output());
+        $this->assertSame(['w480' => null, 'w960' => null, 'skipped' => 'too_large'], $role->fresh()->image_variants);
+
+        Artisan::call('images:backfill-variants', ['--roles' => true]);
+        $this->assertStringContainsString('Processed: 0', Artisan::output());
+
+        Storage::delete('public/profile_huge.png');
+        $this->storeFlyer('profile_huge.png', 600, 600);
+        Artisan::call('images:backfill-variants', ['--roles' => true, '--retry-skipped' => true]);
+
+        $this->assertSame(
+            ['w480' => 'profile_huge_w480.webp', 'w960' => 'profile_huge_w960.webp'],
+            $role->fresh()->image_variants
+        );
+    }
+
+    public function test_the_role_column_is_neither_exported_nor_restored(): void
+    {
+        $owner = $this->createOwner();
+        $role = $this->createRole($owner, 'talent', ['name' => 'Blue Room', 'profile_image_url' => 'profile_abc.png']);
+        $role->recordImageVariants(['w480' => 'profile_abc_w480.webp', 'w960' => 'profile_abc_w960.webp']);
+
+        $service = app(BackupService::class);
+
+        $exportJob = BackupJob::create(['user_id' => $owner->id, 'type' => 'export', 'status' => 'processing']);
+        $data = $service->exportSchedules([$role->fresh()], false, $exportJob)['json'];
+
+        $this->assertArrayNotHasKey('image_variants', $data['schedules'][0]);
+
+        $importJob = BackupJob::create(['user_id' => $owner->id, 'type' => 'import', 'status' => 'processing']);
+        $service->importSchedules($data, [0], $owner->id, $importJob);
+
+        $restored = Role::where('id', '!=', $role->id)->latest('id')->firstOrFail();
+        $this->assertNull($restored->image_variants);
+    }
+
+    public function test_the_homepage_wall_uses_the_schedule_photo_derivative(): void
+    {
+        $owner = $this->createOwner();
+        $role = $this->createRole($owner, 'talent', ['name' => 'Blue Room', 'profile_image_url' => 'profile_abc.png']);
+        $role->recordImageVariants(['w480' => 'profile_abc_w480.webp', 'w960' => 'profile_abc_w960.webp']);
+        $this->createEvent($role, ['name' => 'Autumn Session']);
+
+        $html = $this->get('/')->assertOk()->getContent();
+
+        $this->assertStringContainsString('profile_abc_w480.webp', $html);
+        $this->assertStringNotContainsString('profile_abc.png', $html, 'The original must not be requested when a derivative exists');
+    }
+
+    public function test_a_new_schedule_photo_busts_the_wall_cache(): void
+    {
+        config(['marketing.wall_cache_seconds' => 60]);
+
+        $owner = $this->createOwner();
+        $role = $this->createRole($owner, 'talent', ['name' => 'Blue Room', 'profile_image_url' => 'profile_old.png']);
+        $this->createEvent($role, ['name' => 'Autumn Session']);
+
+        $this->assertStringContainsString('profile_old.png', $this->get('/')->assertOk()->getContent());
+
+        $role->profile_image_url = 'profile_new.png';
+        $role->save();
+
+        $html = $this->get('/')->assertOk()->getContent();
+        $this->assertStringContainsString('profile_new.png', $html, 'The cached wall pointed at a photo that was just deleted');
+        $this->assertStringNotContainsString('profile_old.png', $html);
+    }
+
+    /**
+     * One poster, and only one, is marked fetchpriority="high": card 0, which is the same URL on
+     * the mobile strip and the desktop wall, so both copies in the markup are one request.
+     */
+    public function test_the_homepage_asks_for_exactly_one_high_priority_poster(): void
+    {
+        $owner = $this->createOwner();
+        $role = $this->createRole($owner, 'talent', ['name' => 'Blue Room']);
+
+        foreach (range(1, 8) as $i) {
+            $this->createEvent($role, ['name' => 'Autumn Session '.$i, 'flyer_image_url' => 'flyer_prio'.$i.'.png']);
+        }
+
+        $html = $this->get('/')->assertOk()->getContent();
+
+        preg_match_all('/<img src="([^"]+)"[^>]*fetchpriority="high"/', $html, $matches);
+
+        $this->assertNotEmpty($matches[1], 'The first eager poster must be fetched at high priority');
+        $this->assertCount(1, array_unique($matches[1]), 'Only one distinct image may be high priority');
+        // The strip and the wall each carry it once, in marquee copy 0.
+        $this->assertCount(2, $matches[1]);
+        $this->assertStringContainsString('loading="eager"', $this->imgTagFor($html, $matches[1][0]));
+    }
+
+    private function imgTagFor(string $html, string $src): string
+    {
+        preg_match('/<img src="'.preg_quote($src, '/').'"[^>]*>/', $html, $m);
+
+        return $m[0] ?? '';
     }
 }
