@@ -6,7 +6,6 @@ use App\Http\Middleware\TrackMarketingVisit;
 use App\Models\Event;
 use App\Models\Role;
 use App\Services\AuditService;
-use App\Services\DemoService;
 use App\Utils\AdminReauthUtils;
 use App\Utils\DiscoveryUtils;
 use App\Utils\DocsUtils;
@@ -5203,8 +5202,12 @@ class MarketingController extends Controller
                     ->orWhere('short_description', 'like', '%'.$escapedQuery.'%');
             })
                 ->where($this->publicScheduleFilter())
-                ->where('subdomain', '!=', DemoService::DEMO_ROLE_SUBDOMAIN)
-                ->where('subdomain', 'not like', 'demo-%')
+                // Explicit, because demoContent() below is null-safe by necessity and so no longer
+                // filters these rows out as a side effect of NULL propagation, the way the
+                // `subdomain != ...` pair it replaced did. A schedule with no subdomain has no
+                // guest URL, so a result card for it would link nowhere.
+                ->whereNotNull('subdomain')
+                ->whereNot(fn ($q) => $q->demoContent())
                 ->when($excludeCountry !== '', function ($q) use ($excludeCountry) {
                     // strict: only schedules with a known country other than the excluded one
                     $q->whereNotNull('country_code')
@@ -5560,11 +5563,16 @@ class MarketingController extends Controller
                 $publicScheduleFilter($q);
                 $q->where('event_role.is_accepted', true);
             })
-            // Keep demo seed data out of the public showcase.
-            ->whereDoesntHave('roles', function ($r) {
-                $r->where('subdomain', DemoService::DEMO_ROLE_SUBDOMAIN)
-                    ->orWhere('subdomain', 'like', 'demo-%');
-            })
+            // Keep demo content out of the public showcase. See Role::scopeDemoContent() for why
+            // that is a wider question than the subdomain shapes this used to test.
+            //
+            // Note this drops an event if ANY attached schedule is demo, where
+            // SitemapController::eventQuery() instead binds its demo check to the same pivot row as
+            // is_accepted, so a real schedule's event survives a demo curator picking it up. The
+            // stricter rule here is what actually removes the reported "Wine & Jazz Evening", whose
+            // only schedules are demo ones - but widening the predicate widens that exposure, so
+            // the asymmetry is deliberate rather than overlooked.
+            ->whereDoesntHave('roles', fn ($r) => $r->demoContent())
             // Keep throwaway "test" events (and events under "test"-named schedules) out too.
             ->excludeLikelyTest()
             ->when($excludeCountry !== '', function ($q) use ($excludeCountry) {

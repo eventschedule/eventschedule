@@ -1493,6 +1493,56 @@ class Role extends Model implements MustVerifyEmail
     }
 
     /**
+     * Constrain a roles query to demo CONTENT, for negation by the callers.
+     *
+     * A third demo predicate on purpose. The three ask different questions, and the names are not
+     * inverses of each other:
+     *
+     * - is_demo_role() asks about the demo ACCOUNT. ~30 call sites hang off it - free Pro features
+     *   (isPro bypass), ad suppression, blocked paid tickets, suppressed email - so widening it to
+     *   cover the showcase schedules would change all of that for them. Keeping them out of
+     *   discovery should not cost that.
+     * - notDemoSchedule() above is the ADMIN LISTING question, and keys on subdomain shape only.
+     * - This one asks "is this fabricated content we show off from /examples", which is the only
+     *   question the public discovery surfaces need answered.
+     *
+     * The email arm is what makes it work. The twelve showcase schedules linked from /examples
+     * (villageidiot, sufficientgroundscoffeemusic, karateclub, painting, ...) are ordinary
+     * schedules, owned by ordinary accounts, on ordinary subdomains, so the subdomain arms and the
+     * owner-email arm all miss them - which is how villageidiot and a fabricated "Wine & Jazz
+     * Evening" came to be the top hits for /search?q=jazz. What they DO share is roles.email, the
+     * schedule's own contact address, set to DemoService::DEMO_EMAIL.
+     *
+     * EVERY ARM IS NULL-SAFE, and must stay that way. Callers negate this with whereNot(), i.e.
+     * NOT (a OR b OR ...), and in MySQL's three-valued logic one NULL arm with no TRUE arm makes
+     * the whole expression NULL - and NOT NULL is NULL, so the row is filtered out. A bare
+     * `roles.email = ?` would therefore silently drop every schedule with NO contact email from its
+     * own search results, including one with a verified phone, which publicScheduleFilter()
+     * explicitly admits. <=> is null-safe equality (MySQL only, which this app already is) and is
+     * still index-usable; the LIKE arm carries an explicit IS NOT NULL. EXISTS never returns NULL.
+     *
+     * Deliberately NOT gated on config('app.hosted') the way is_demo_role() is. A gate would make
+     * tests and production disagree about the same row, and the surfaces that call this are
+     * nexus-only anyway (/search redirects to home on non-nexus selfhost).
+     */
+    public function scopeDemoContent($query)
+    {
+        return $query->where(function ($q) {
+            $q->whereRaw('roles.email <=> ?', [\App\Services\DemoService::DEMO_EMAIL])
+                ->orWhereRaw('roles.subdomain <=> ?', [\App\Services\DemoService::DEMO_ROLE_SUBDOMAIN])
+                ->orWhere(fn ($s) => $s->whereNotNull('roles.subdomain')
+                    ->where('roles.subdomain', 'like', 'demo-%'))
+                // A correlated subquery rather than a join, matching
+                // SitemapController::scopeToDemoSchedules(): these queries scan, and reading
+                // $role->user per row would be an N+1 across every schedule in the database.
+                ->orWhereExists(fn ($u) => $u->select(DB::raw(1))
+                    ->from('users')
+                    ->whereColumn('users.id', 'roles.user_id')
+                    ->where('users.email', \App\Services\DemoService::DEMO_EMAIL));
+        });
+    }
+
+    /**
      * The set of schedules /admin/schedules shows by default: real, owned schedules,
      * never the demo ones.
      *
