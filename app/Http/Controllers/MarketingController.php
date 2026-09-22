@@ -745,6 +745,62 @@ class MarketingController extends Controller
     }
 
     /**
+     * For Churches page
+     */
+    public function forChurches()
+    {
+        return view('marketing.for-churches');
+    }
+
+    /**
+     * For Schools page
+     */
+    public function forSchools()
+    {
+        return view('marketing.for-schools');
+    }
+
+    /**
+     * For Nonprofits page
+     */
+    public function forNonprofits()
+    {
+        return view('marketing.for-nonprofits');
+    }
+
+    /**
+     * For Festivals page
+     */
+    public function forFestivals()
+    {
+        return view('marketing.for-festivals');
+    }
+
+    /**
+     * For Sports Leagues page
+     */
+    public function forSportsLeagues()
+    {
+        return view('marketing.for-sports-leagues');
+    }
+
+    /**
+     * For Museums page
+     */
+    public function forMuseums()
+    {
+        return view('marketing.for-museums');
+    }
+
+    /**
+     * For Meetup Groups page
+     */
+    public function forMeetupGroups()
+    {
+        return view('marketing.for-meetup-groups');
+    }
+
+    /**
      * For Webinars page
      */
     public function forWebinars()

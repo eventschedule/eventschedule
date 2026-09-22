@@ -192,4 +192,57 @@ return [
         ],
     ],
 
+    // Organisations and communities: the seven audiences whose calendar belongs to a group
+    // rather than a room or a performer. Listed on /use-cases in their own section.
+    'communities' => [
+        [
+            'url' => '/for-churches',
+            'name' => 'Churches',
+            'blurb' => 'Set the weekly services once and put every group, rehearsal and sign-up on the same link.',
+            'tags' => ['Parish Churches', 'Multi-Site Churches', 'Youth Ministries', 'Synagogues', 'Mosques', 'Temples'],
+            'icon' => '<path stroke-linecap="round" stroke-linejoin="round" d="M12 2v4m-2-2h4M6 21V11l6-4 6 4v10M4 21h16M10 21v-4a2 2 0 014 0v4" />',
+        ],
+        [
+            'url' => '/for-schools',
+            'name' => 'Schools',
+            'blurb' => 'Term dates, concerts and parent evenings on a calendar families subscribe to once.',
+            'tags' => ['Elementary Schools', 'High Schools', 'Colleges', 'Universities', 'Parent-Teacher Associations'],
+            'icon' => '<path stroke-linecap="round" stroke-linejoin="round" d="M12 14l9-5-9-5-9 5 9 5zm0 0v7m-6-9.5V16c0 1.657 2.686 3 6 3s6-1.343 6-3v-4.5" />',
+        ],
+        [
+            'url' => '/for-nonprofits',
+            'name' => 'Nonprofits',
+            'blurb' => 'Galas, volunteer days and campaign events, with zero platform fees on what supporters pay.',
+            'tags' => ['Charity Fundraisers', 'Volunteer Programs', 'Advocacy Groups', 'Mutual Aid Networks'],
+            'icon' => '<path stroke-linecap="round" stroke-linejoin="round" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" />',
+        ],
+        [
+            'url' => '/for-festivals',
+            'name' => 'Festivals',
+            'blurb' => 'Every stage and every set on one schedule, and a weekend pass on a single QR code.',
+            'tags' => ['Music Festivals', 'Arts & Fringe', 'Film Festivals', 'Food & Street Festivals'],
+            'icon' => '<path stroke-linecap="round" stroke-linejoin="round" d="M3 21l9-17 9 17M7.5 12.5h9M12 4v17" />',
+        ],
+        [
+            'url' => '/for-sports-leagues',
+            'name' => 'Sports Leagues',
+            'blurb' => 'Fixtures by team, one season calendar for the league, and seats shared for away games.',
+            'tags' => ['Youth Leagues', 'Adult Rec Leagues', 'Amateur Clubs', 'Running & Cycling Clubs'],
+            'icon' => '<path stroke-linecap="round" stroke-linejoin="round" d="M12 21a9 9 0 100-18 9 9 0 000 18zm0-13l3.5 2.5-1.3 4h-4.4l-1.3-4L12 8z" />',
+        ],
+        [
+            'url' => '/for-museums',
+            'name' => 'Museums',
+            'blurb' => 'Tours, talks and family days on top of the galleries that are simply open.',
+            'tags' => ['History Museums', 'Science Centers', 'Children\'s Museums', 'Heritage Sites'],
+            'icon' => '<path stroke-linecap="round" stroke-linejoin="round" d="M3 9l9-5 9 5M5 9v8m4-8v8m6-8v8m4-8v8M3 21h18M4 17h16" />',
+        ],
+        [
+            'url' => '/for-meetup-groups',
+            'name' => 'Meetup Groups',
+            'blurb' => 'Free RSVPs with a cap on a page the group owns, with no organizer fee to keep it.',
+            'tags' => ['Tech Meetups', 'Hiking Groups', 'Language Exchanges', 'Board Game Groups'],
+            'icon' => '<path stroke-linecap="round" stroke-linejoin="round" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0z" />',
+        ],
+    ],
 ];

@@ -234,6 +234,13 @@
                             'for-live-qa-sessions' => ['from' => 'violet-500', 'to' => 'purple-500', 'shadow' => 'violet-500/25'],
                             'for-watch-parties' => ['from' => 'indigo-500', 'to' => 'cyan-500', 'shadow' => 'indigo-500/25'],
                             'for-ai-agents' => ['from' => 'cyan-600', 'to' => 'emerald-600', 'shadow' => 'cyan-500/25'],
+                            'for-churches' => ['from' => 'amber-600', 'to' => 'amber-700', 'shadow' => 'amber-500/25'],
+                            'for-schools' => ['from' => 'sky-500', 'to' => 'blue-500', 'shadow' => 'sky-500/25'],
+                            'for-nonprofits' => ['from' => 'emerald-500', 'to' => 'teal-500', 'shadow' => 'emerald-500/25'],
+                            'for-festivals' => ['from' => 'rose-500', 'to' => 'amber-500', 'shadow' => 'rose-500/25'],
+                            'for-sports-leagues' => ['from' => 'emerald-500', 'to' => 'green-500', 'shadow' => 'emerald-500/25'],
+                            'for-museums' => ['from' => 'teal-600', 'to' => 'cyan-600', 'shadow' => 'teal-500/25'],
+                            'for-meetup-groups' => ['from' => 'cyan-600', 'to' => 'teal-600', 'shadow' => 'cyan-500/25'],
                         ];
                         $colors = $colorMap[$subAudienceInfo->parent_page] ?? ['from' => 'violet-500', 'to' => 'purple-500', 'shadow' => 'violet-500/25'];
                     @endphp

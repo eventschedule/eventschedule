@@ -21,6 +21,9 @@
             ['url' => '/for-hotels-and-resorts', 'name' => 'Hotels & Resorts', 'blurb' => 'Elevate the guest experience with activity calendars and events.', 'tags' => ['Boutique Hotels', 'Beach Resorts', 'Conference Hotels', 'Spa & Wellness', 'Mountain Lodges', 'Casino Hotels'], 'icon' => '<path stroke-linecap="round" stroke-linejoin="round" d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z" />'],
             ['url' => '/for-libraries', 'name' => 'Libraries', 'blurb' => 'Share programs, author events, and community activities with patrons.', 'tags' => ['Public Libraries', 'University Libraries', 'Community Reading Rooms', 'Children\'s Libraries', 'Archive Centers', 'Mobile Libraries'], 'icon' => '<path stroke-linecap="round" stroke-linejoin="round" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" />'],
         ];
+        // Churches, schools, nonprofits and the rest of the organisations whose calendar belongs
+        // to a group rather than a room or a performer. Shared config, like $performers.
+        $communities = config('marketing_audiences.communities');
         $online = [
             ['url' => '/for-webinars', 'name' => 'Webinars', 'blurb' => 'Host webinars with free registration, paid tickets, and one link field for any platform.', 'tags' => ['Product Demos', 'Training Sessions', 'Workshops', 'Panel Discussions', 'All-Hands', 'Lectures'], 'icon' => '<path stroke-linecap="round" stroke-linejoin="round" d="M15 10l4.553-2.276A1 1 0 0121 8.618v6.764a1 1 0 01-1.447.894L15 14M5 18h8a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z" />'],
             ['url' => '/for-online-classes', 'name' => 'Online Classes', 'blurb' => 'Schedule recurring classes, sell tickets, and put the join link on every student\'s ticket.', 'tags' => ['Yoga & Fitness', 'Cooking Classes', 'Art & Music Lessons', 'Language Courses', 'Coding Bootcamps', 'Tutoring'], 'icon' => '<path stroke-linecap="round" stroke-linejoin="round" d="M12 14l9-5-9-5-9 5 9 5z" /><path stroke-linecap="round" stroke-linejoin="round" d="M12 14l6.16-3.422a12.083 12.083 0 01.665 6.479A11.952 11.952 0 0012 20.055a11.952 11.952 0 00-6.824-2.998 12.078 12.078 0 01.665-6.479L12 14z" />'],
@@ -57,6 +60,7 @@
             [$hubPages[1]], $venues,
             [$hubPages[2]],
             $online,
+            $communities,
             [$hubPages[3]],
         );
 
@@ -155,6 +159,7 @@
                 <a href="#venues" class="inline-flex items-center gap-1.5 rounded-full border border-amber-200 bg-amber-50 px-3.5 py-1.5 text-sm font-medium text-amber-800 transition-colors hover:bg-amber-100 dark:border-amber-400/30 dark:bg-amber-500/10 dark:text-amber-300 dark:hover:bg-amber-500/20">Venues</a>
                 <a href="#curators" class="inline-flex items-center gap-1.5 rounded-full border border-emerald-200 bg-emerald-50 px-3.5 py-1.5 text-sm font-medium text-emerald-700 transition-colors hover:bg-emerald-100 dark:border-emerald-400/30 dark:bg-emerald-500/10 dark:text-emerald-300 dark:hover:bg-emerald-500/20">Curators</a>
                 <a href="#online" class="inline-flex items-center gap-1.5 rounded-full border border-cyan-200 bg-cyan-50 px-3.5 py-1.5 text-sm font-medium text-cyan-700 transition-colors hover:bg-cyan-100 dark:border-cyan-400/30 dark:bg-cyan-500/10 dark:text-cyan-300 dark:hover:bg-cyan-500/20">Online</a>
+                <a href="#communities" class="inline-flex items-center gap-1.5 rounded-full border border-teal-200 bg-teal-50 px-3.5 py-1.5 text-sm font-medium text-teal-800 transition-colors hover:bg-teal-100 dark:border-teal-400/30 dark:bg-teal-500/10 dark:text-teal-300 dark:hover:bg-teal-500/20">Communities</a>
                 <a href="#developers" class="inline-flex items-center gap-1.5 rounded-full border border-slate-200 bg-slate-50 px-3.5 py-1.5 text-sm font-medium text-slate-700 transition-colors hover:bg-slate-100 dark:border-slate-400/30 dark:bg-slate-500/10 dark:text-slate-300 dark:hover:bg-slate-500/20">Developers</a>
             </nav>
         </div>
@@ -334,9 +339,51 @@
     </section>
 
     <!-- ============================================================ -->
+    <!-- Organizations & Communities                                  -->
+    <!-- ============================================================ -->
+    <section id="communities" class="scroll-mt-24 bg-gray-50 py-16 dark:bg-[#0f0f14] lg:py-24">
+        <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+            <div class="mb-10 max-w-3xl" data-reveal>
+                <div class="mb-4 flex items-center gap-3">
+                    <span class="inline-flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-teal-100 dark:bg-teal-500/20">
+                        <svg class="h-6 w-6 text-teal-700 dark:text-teal-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.6" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0z" /></svg>
+                    </span>
+                    <h2 class="es-balance text-3xl font-black tracking-tight text-gray-900 dark:text-white md:text-4xl">For Organizations &amp; Communities</h2>
+                </div>
+                <p class="text-lg text-gray-600 dark:text-gray-400">Churches, schools, nonprofits, festivals, leagues, museums and meetup groups: the calendar belongs to a group of people rather than one room or one act. Set the regular dates once, give each team or strand its own link, take free sign-ups with a cap, and let members subscribe to the whole thing in their own calendar.</p>
+            </div>
+
+            {{-- Seven cards and one closing tile make eight: two rows of four at lg, four rows of two
+                 at sm, so the grid has no hole at any width. Add a card and this tile must go or move. --}}
+            <div class="grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-4" data-reveal-group="55">
+                @foreach ($communities as $a)
+                    <x-marketing.audience-card
+                        :url="marketing_url($a['url'])"
+                        :name="$a['name']"
+                        :blurb="$a['blurb']"
+                        accent="teal"
+                        :tags="$a['tags']">
+                        <x-slot name="icon">{!! $a['icon'] !!}</x-slot>
+                    </x-marketing.audience-card>
+                @endforeach
+
+                <a href="{{ app_url('/sign_up') }}" data-reveal
+                   class="group relative flex h-full flex-col rounded-3xl border border-dashed border-teal-300 bg-teal-50/60 p-6 transition-colors duration-200 hover:bg-teal-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#4E81FA] dark:border-teal-400/30 dark:bg-teal-500/[0.06] dark:hover:bg-teal-500/10">
+                    <h3 class="mb-2 text-lg font-bold text-gray-900 dark:text-white">Something else?</h3>
+                    <p class="mb-4 flex-grow text-sm text-gray-600 dark:text-gray-400">A club, a society, a congregation or a campaign: if it meets on a date, it fits on a schedule. Free forever, no credit card.</p>
+                    <span class="mt-auto inline-flex items-center gap-1.5 text-sm font-semibold text-teal-800 transition-all group-hover:gap-2.5 dark:text-teal-300">
+                        Start a schedule
+                        <svg aria-hidden="true" class="h-4 w-4 rtl:rotate-180" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6" /></svg>
+                    </span>
+                </a>
+            </div>
+        </div>
+    </section>
+
+    <!-- ============================================================ -->
     <!-- Developers & AI Agents                                      -->
     <!-- ============================================================ -->
-    <section id="developers" class="scroll-mt-24 bg-gray-50 py-16 dark:bg-[#0f0f14] lg:py-24">
+    <section id="developers" class="scroll-mt-24 bg-white py-16 dark:bg-[#0a0a0f] lg:py-24">
         <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
             <div class="mb-10 max-w-3xl" data-reveal>
                 <div class="mb-4 flex items-center gap-3">
@@ -442,7 +489,7 @@
     <!-- ============================================================ -->
     <!-- FAQ                                                         -->
     <!-- ============================================================ -->
-    <section class="bg-white py-16 dark:bg-[#0a0a0f] lg:py-24">
+    <section class="bg-gray-50 py-16 dark:bg-[#0f0f14] lg:py-24">
         <div class="mx-auto max-w-3xl px-4 sm:px-6 lg:px-8">
             <div class="mb-12 text-center">
                 <h2 class="es-balance mb-4 text-3xl font-black tracking-tight text-gray-900 dark:text-white md:text-4xl" data-reveal>
@@ -520,6 +567,7 @@
             ['venues', 'Venues'],
             ['curators', 'Curators'],
             ['online', 'Online'],
+            ['communities', 'Communities'],
             ['developers', 'Developers'],
             ['claim', 'Get started'],
         ];

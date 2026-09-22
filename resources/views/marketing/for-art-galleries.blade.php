@@ -969,7 +969,7 @@
                     ['/for-visual-artists', 'Visual Artists'],
                     ['/for-libraries', 'Libraries'],
                     ['/for-community-centers', 'Community Centers'],
-                    ['/for-workshop-instructors', 'Workshop Instructors'],
+                    ['/for-museums', 'Museums'],
                 ] as [$relHref, $relName])
                     <a href="{{ marketing_url($relHref) }}" data-reveal class="es-hang-card es-hang-hover group flex items-center justify-between p-5">
                         <div>

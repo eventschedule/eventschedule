@@ -506,7 +506,7 @@ return [
     'features/recurring-events' => [
         ['title' => 'Ticketing', 'path' => '/features/ticketing', 'blurb' => 'Sell tickets with QR check-in and zero platform fees.'],
         ['title' => 'Calendar Sync', 'path' => '/features/calendar-sync', 'blurb' => 'Two-way sync with Google Calendar, Outlook and any CalDAV server.'],
-        ['title' => 'All Features', 'path' => '/features', 'blurb' => 'Every feature on one page, with the plan each one needs.'],
+        ['title' => 'For Sports Leagues', 'path' => '/for-sports-leagues', 'blurb' => 'A fixture list per team, one season calendar for the league, and rides to away games.'],
         ['title' => 'Pricing', 'path' => '/pricing', 'blurb' => 'See what is included on Free, Pro, and Enterprise plans.'],
     ],
 
@@ -611,7 +611,7 @@ return [
     'for-farmers-markets' => [
         ['title' => 'For Food Trucks', 'path' => '/for-food-trucks-and-vendors', 'blurb' => "One link that always has today's stop."],
         ['title' => 'For Community Centers', 'path' => '/for-community-centers', 'blurb' => 'Programs, classes, hall-hire requests and events in one place.'],
-        ['title' => 'Use Cases', 'path' => '/use-cases', 'blurb' => 'Event scheduling for musicians, venues, restaurants and theaters.'],
+        ['title' => 'For Festivals', 'path' => '/for-festivals', 'blurb' => 'Stages as sub-schedules, sets in the running order, and a weekend pass on one QR.'],
         ['title' => 'Pricing', 'path' => '/pricing', 'blurb' => 'See what is included on Free, Pro, and Enterprise plans.'],
     ],
 
@@ -625,8 +625,57 @@ return [
     'for-libraries' => [
         ['title' => 'For Community Centers', 'path' => '/for-community-centers', 'blurb' => 'Programs, classes, hall-hire requests and events in one place.'],
         ['title' => 'For Workshop Instructors', 'path' => '/for-workshop-instructors', 'blurb' => 'Announce classes, sell spots, and build multi-session series.'],
-        ['title' => 'Use Cases', 'path' => '/use-cases', 'blurb' => 'Event scheduling for musicians, venues, restaurants and theaters.'],
+        ['title' => 'For Museums', 'path' => '/for-museums', 'blurb' => 'Tours, talks and family days on top of the galleries that are simply open.'],
         ['title' => 'Pricing', 'path' => '/pricing', 'blurb' => 'See what is included on Free, Pro, and Enterprise plans.'],
+    ],
+
+    'for-churches' => [
+        ['title' => 'For Nonprofits', 'path' => '/for-nonprofits', 'blurb' => 'Galas, volunteer days and campaigns, with zero platform fees on every ticket.'],
+        ['title' => 'For Community Centers', 'path' => '/for-community-centers', 'blurb' => 'Programs, classes, hall-hire requests and events in one place.'],
+        ['title' => 'Recurring Events', 'path' => '/features/recurring-events', 'blurb' => 'Set the weekly service once, and take out the Sundays it moves.'],
+        ['title' => 'Newsletters', 'path' => '/features/newsletters', 'blurb' => 'Write to the congregation yourself, within an allowance counted per recipient.'],
+    ],
+
+    'for-schools' => [
+        ['title' => 'For Libraries', 'path' => '/for-libraries', 'blurb' => 'Set story time up once and give every date its own place count.'],
+        ['title' => 'Appointments', 'path' => '/features/appointments', 'blurb' => 'Write your hours down once and let guests pick an open time.'],
+        ['title' => 'For Sports Leagues', 'path' => '/for-sports-leagues', 'blurb' => 'A fixture list per team, one season calendar for the league, and rides to away games.'],
+        ['title' => 'Sub-schedules', 'path' => '/features/sub-schedules', 'blurb' => 'Keep each year group, club and team on its own link.'],
+    ],
+
+    'for-nonprofits' => [
+        ['title' => 'Zeffy Alternative', 'path' => '/zeffy-alternative', 'blurb' => 'Open source ticketing for any organizer, with zero platform fees.'],
+        ['title' => 'Humanitix Alternative', 'path' => '/humanitix-alternative', 'blurb' => 'Flat pricing instead of per-ticket fees, plus selfhosting.'],
+        ['title' => 'For Churches', 'path' => '/for-churches', 'blurb' => 'Sunday set once, and every group, rehearsal and sign-up on the same link.'],
+        ['title' => 'Newsletters', 'path' => '/features/newsletters', 'blurb' => 'Write to supporters yourself, within an allowance counted per recipient.'],
+    ],
+
+    'for-festivals' => [
+        ['title' => 'Passes & Subscriptions', 'path' => '/features/passes', 'blurb' => 'One pass, many events, counted down on a single QR code.'],
+        ['title' => 'For Food Trucks', 'path' => '/for-food-trucks-and-vendors', 'blurb' => "One link that always has today's stop."],
+        ['title' => 'For Farmers Markets', 'path' => '/for-farmers-markets', 'blurb' => 'Market days, vendor lineups, and seasonal events.'],
+        ['title' => 'For Curators', 'path' => '/for-curators', 'blurb' => 'Run a festival or multi-artist bill across many schedules.'],
+    ],
+
+    'for-sports-leagues' => [
+        ['title' => 'Recurring Events', 'path' => '/features/recurring-events', 'blurb' => 'Set the weekly training session once, and skip the weeks the pitch is closed.'],
+        ['title' => 'Passes & Subscriptions', 'path' => '/features/passes', 'blurb' => 'One pass, many events, counted down on a single QR code.'],
+        ['title' => 'Carpool', 'path' => '/features/carpool', 'blurb' => 'Let families offer and ask for a seat to the away game.'],
+        ['title' => 'For Schools', 'path' => '/for-schools', 'blurb' => 'Term dates, the school play and parent evenings on one calendar families subscribe to.'],
+    ],
+
+    'for-museums' => [
+        ['title' => 'For Art Galleries', 'path' => '/for-art-galleries', 'blurb' => 'A six-week hang is one recurring event, not thirty entries.'],
+        ['title' => 'For Libraries', 'path' => '/for-libraries', 'blurb' => 'Set story time up once and give every date its own place count.'],
+        ['title' => 'Passes & Subscriptions', 'path' => '/features/passes', 'blurb' => 'One pass, many events, counted down on a single QR code.'],
+        ['title' => 'Appointments', 'path' => '/features/appointments', 'blurb' => 'Write your hours down once and let guests pick an open time.'],
+    ],
+
+    'for-meetup-groups' => [
+        ['title' => 'Meetup Alternative', 'path' => '/meetup-alternative', 'blurb' => 'Zero platform fees and custom domains, without a subscription.'],
+        ['title' => 'Mobilizon Alternative', 'path' => '/mobilizon-alternative', 'blurb' => 'Open source events with ticketing and calendar sync built in.'],
+        ['title' => 'For Curators', 'path' => '/for-curators', 'blurb' => 'Run a festival or multi-artist bill across many schedules.'],
+        ['title' => 'Newsletters', 'path' => '/features/newsletters', 'blurb' => 'Write to members yourself, within an allowance counted per recipient.'],
     ],
 
     'for-online-classes' => [
@@ -660,7 +709,7 @@ return [
     'for-workshop-instructors' => [
         ['title' => 'For Online Classes', 'path' => '/for-online-classes', 'blurb' => 'Sell online classes with registration and recurring sessions.'],
         ['title' => 'For Fitness & Yoga', 'path' => '/for-fitness-and-yoga', 'blurb' => 'Share your class schedule and sell drop-ins and class passes.'],
-        ['title' => 'Use Cases', 'path' => '/use-cases', 'blurb' => 'Event scheduling for musicians, venues, restaurants and theaters.'],
+        ['title' => 'For Schools', 'path' => '/for-schools', 'blurb' => 'Term dates, the school play and parent evenings on one calendar families subscribe to.'],
         ['title' => 'Pricing', 'path' => '/pricing', 'blurb' => 'See what is included on Free, Pro, and Enterprise plans.'],
     ],
 
@@ -762,7 +811,7 @@ return [
     'meetup-alternative' => [
         ['title' => 'Luma Alternative', 'path' => '/luma-alternative', 'blurb' => 'Custom domains, zero platform fees, and open source flexibility.'],
         ['title' => 'Eventbrite Alternative', 'path' => '/eventbrite-alternative', 'blurb' => 'Keep more of every ticket you sell.'],
-        ['title' => 'Compare Alternatives', 'path' => '/compare', 'blurb' => 'See how Event Schedule stacks up against other platforms.'],
+        ['title' => 'For Meetup Groups', 'path' => '/for-meetup-groups', 'blurb' => 'Free RSVPs with a cap, a page the group owns, and no organizer fee to keep it.'],
         ['title' => 'Mobilizon Alternative', 'path' => '/mobilizon-alternative', 'blurb' => 'Open source events with ticketing and calendar sync built in.'],
     ],
 
@@ -860,7 +909,7 @@ return [
     'zeffy-alternative' => [
         ['title' => 'Facebook Events Alternative', 'path' => '/facebook-events-alternative', 'blurb' => 'An events page you own, with ticketing and calendar sync.'],
         ['title' => 'Hi.Events Alternative', 'path' => '/hi-events-alternative', 'blurb' => 'Two open source ticketing platforms, compared line by line.'],
-        ['title' => 'Compare Alternatives', 'path' => '/compare', 'blurb' => 'See how Event Schedule stacks up against other platforms.'],
+        ['title' => 'For Nonprofits', 'path' => '/for-nonprofits', 'blurb' => 'Galas, volunteer days and campaigns, with zero platform fees on every ticket.'],
         ['title' => 'Pricing', 'path' => '/pricing', 'blurb' => 'See what is included on Free, Pro, and Enterprise plans.'],
     ],
 
@@ -874,7 +923,7 @@ return [
     'mobilizon-alternative' => [
         ['title' => 'Hi.Events Alternative', 'path' => '/hi-events-alternative', 'blurb' => 'Two open source ticketing platforms, compared line by line.'],
         ['title' => 'Facebook Events Alternative', 'path' => '/facebook-events-alternative', 'blurb' => 'An events page you own, with ticketing and calendar sync.'],
-        ['title' => 'Compare Alternatives', 'path' => '/compare', 'blurb' => 'See how Event Schedule stacks up against other platforms.'],
+        ['title' => 'For Nonprofits', 'path' => '/for-nonprofits', 'blurb' => 'Galas, volunteer days and campaigns, with zero platform fees on every ticket.'],
         ['title' => 'Pricing', 'path' => '/pricing', 'blurb' => 'See what is included on Free, Pro, and Enterprise plans.'],
     ],
 

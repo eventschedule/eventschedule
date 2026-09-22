@@ -40,6 +40,11 @@
             'icon' => 'text-cyan-600 dark:text-cyan-400',
             'hover' => 'group-hover:text-cyan-600 dark:group-hover:text-cyan-400',
         ],
+        'teal' => [
+            'chip' => 'bg-teal-100 dark:bg-teal-500/20',
+            'icon' => 'text-teal-700 dark:text-teal-400',
+            'hover' => 'group-hover:text-teal-700 dark:group-hover:text-teal-400',
+        ],
         'slate' => [
             'chip' => 'bg-slate-100 dark:bg-slate-500/20',
             'icon' => 'text-slate-600 dark:text-slate-300',

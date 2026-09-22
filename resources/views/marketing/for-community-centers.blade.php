@@ -1273,7 +1273,7 @@
         <div class="mx-auto max-w-3xl px-4 sm:px-6 lg:px-8">
             <h2 class="es-gather-ink mb-8 text-center text-2xl font-black tracking-tight md:text-3xl" data-reveal>Related pages</h2>
             <div class="grid grid-cols-1 gap-4 sm:grid-cols-2" data-reveal-group="70">
-                @foreach ([['/for-libraries', 'Libraries'], ['/for-theaters', 'Theaters'], ['/for-workshop-instructors', 'Workshop Instructors'], ['/for-fitness-and-yoga', 'Fitness & Yoga']] as [$relHref, $relName])
+                @foreach ([['/for-libraries', 'Libraries'], ['/for-churches', 'Churches'], ['/for-workshop-instructors', 'Workshop Instructors'], ['/for-fitness-and-yoga', 'Fitness & Yoga']] as [$relHref, $relName])
                     <a href="{{ marketing_url($relHref) }}" data-reveal class="es-gather-card es-gather-hover group flex items-center justify-between p-5">
                         <div>
                             <div class="es-gather-muted text-sm">Event Schedule for</div>

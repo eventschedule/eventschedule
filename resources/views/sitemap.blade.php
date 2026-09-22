@@ -497,6 +497,34 @@ echo '<?xml version="1.0" encoding="UTF-8"?>'; ?>
         {!! $lastmodTag('/for-libraries') !!}
     </url>
     <url>
+        <loc>{{ url('/for-churches') }}</loc>
+        {!! $lastmodTag('/for-churches') !!}
+    </url>
+    <url>
+        <loc>{{ url('/for-schools') }}</loc>
+        {!! $lastmodTag('/for-schools') !!}
+    </url>
+    <url>
+        <loc>{{ url('/for-nonprofits') }}</loc>
+        {!! $lastmodTag('/for-nonprofits') !!}
+    </url>
+    <url>
+        <loc>{{ url('/for-festivals') }}</loc>
+        {!! $lastmodTag('/for-festivals') !!}
+    </url>
+    <url>
+        <loc>{{ url('/for-sports-leagues') }}</loc>
+        {!! $lastmodTag('/for-sports-leagues') !!}
+    </url>
+    <url>
+        <loc>{{ url('/for-museums') }}</loc>
+        {!! $lastmodTag('/for-museums') !!}
+    </url>
+    <url>
+        <loc>{{ url('/for-meetup-groups') }}</loc>
+        {!! $lastmodTag('/for-meetup-groups') !!}
+    </url>
+    <url>
         <loc>{{ url('/for-webinars') }}</loc>
         {!! $lastmodTag('/for-webinars') !!}
     </url>
