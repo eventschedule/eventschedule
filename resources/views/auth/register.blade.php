@@ -826,6 +826,18 @@
                  The component carries aria-hidden on the icon and the logical me-2 margin; its
                  docblock asks the seven hand-rolled copies to adopt it when next touched. --}}
             <x-google-button>{{ __('messages.continue_with_google') }}</x-google-button>
+
+            {{-- The Google button collects no checkbox, so the terms are stated beside it and
+                 pressing it is the consent. Both documents are replaceable by the operator, so
+                 policy_url() resolves them, never marketing_url(). --}}
+            @if (config('app.hosted'))
+            <p class="mt-3 text-xs text-center text-gray-500 dark:text-gray-400">
+                {!! str_replace([':terms', ':privacy'], [
+                    '<a href="' . policy_url('terms') . '" target="_blank" class="underline hover:no-underline">' . __('messages.terms_of_service') . '</a>',
+                    '<a href="' . policy_url('privacy') . '" target="_blank" class="underline hover:no-underline">' . __('messages.privacy_policy') . '</a>'
+                ], __('messages.by_continuing_you_accept')) !!}
+            </p>
+            @endif
         </div>
         @endif
 

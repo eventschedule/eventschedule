@@ -60,6 +60,7 @@ return [
     'terms_of_service' => 'شروط الخدمة',
     'privacy_policy' => 'سياسة الخصوصية',
     'i_accept_the_terms_and_privacy' => 'أوافق على :terms و :privacy',
+    'by_continuing_you_accept' => 'بالمتابعة فإنك توافق على :terms و :privacy',
     'terms_must_be_accepted' => 'يرجى قبول شروط الخدمة وسياسة الخصوصية للمتابعة.',
     'already_registered' => 'مسجل بالفعل؟',
     'reset_password' => 'إعادة تعيين كلمة المرور',

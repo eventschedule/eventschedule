@@ -64,6 +64,7 @@ return [
     'terms_of_service' => 'Terms of Service',
     'privacy_policy' => 'Privacy Policy',
     'i_accept_the_terms_and_privacy' => 'I accept the :terms and :privacy',
+    'by_continuing_you_accept' => 'By continuing you accept the :terms and :privacy',
     'terms_must_be_accepted' => 'Please accept the terms of service and privacy policy to continue.',
     'already_registered' => 'Already registered?',
     'reset_password' => 'Reset Password',

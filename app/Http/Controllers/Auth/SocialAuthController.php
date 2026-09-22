@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Models\Referral;
 use App\Models\User;
 use App\Services\AuditService;
+use Illuminate\Auth\Events\Registered;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Cache;
@@ -149,6 +150,19 @@ class SocialAuthController extends Controller
         ]);
 
         $user->profile_image_url = $googleUser->getAvatar();
+
+        // Consent, on the path that never asked for it. RegisteredUserController::store()
+        // validates `terms => accepted` on hosted; this one created an account with no consent
+        // step at all, and it is roughly half of them.
+        //
+        // No checkbox here, deliberately: a tick in front of the button that converts best is
+        // friction on the wrong path. Both auth pages state the terms beside the button instead,
+        // and pressing it is the act being recorded. Only on the NEW-account branch - linking
+        // Google to an account that already exists is not a moment of consent.
+        if (config('app.hosted')) {
+            $user->terms_accepted_at = now();
+        }
+
         if (session()->pull('pending_follow_consent_dismissed')) {
             $user->follow_consent_dismissed = true;
         }
@@ -173,6 +187,16 @@ class SocialAuthController extends Controller
         }
 
         session()->forget(['utm_params', 'utm_referrer_url', 'utm_landing_page', 'guest_language', 'referral_code']);
+
+        // Half of all accounts are created here rather than by RegisteredUserController::store(),
+        // and only that one fired this. Nothing listens today - the framework's verification
+        // listener no-ops on an already-verified address - but "the event fires for half of our
+        // signups" is not a property to leave to chance for whatever is added next.
+        //
+        // Deliberately NOT also logging AuditService::AUTH_REGISTER: the line below already
+        // records this account's creation as AUTH_GOOGLE_LOGIN with a 'new_account' note, and
+        // adding a second entry would double-count every Google signup in the audit log.
+        event(new Registered($user));
 
         Auth::login($user, true);
         $this->processPendingClaims($user);

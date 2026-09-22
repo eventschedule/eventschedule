@@ -2,7 +2,7 @@
 
     <x-slot name="abovePage">
         @if(session('pending_request'))
-            <x-step-indicator :compact="true" />
+            <x-step-indicator :currentStep="1" />
         @endif
     </x-slot>
 

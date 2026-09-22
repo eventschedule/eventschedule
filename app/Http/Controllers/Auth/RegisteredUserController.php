@@ -509,17 +509,27 @@ class RegisteredUserController extends Controller
 
         session()->forget(['utm_params', 'utm_referrer_url', 'utm_landing_page', 'guest_language', 'referral_code']);
 
+        // Record the consent that was just validated. `terms` is only required on hosted - on
+        // selfhost the first account is the operator installing their own software - so a null
+        // here keeps meaning "not recorded" rather than "declined".
+        if (config('app.hosted') && $request->boolean('terms')) {
+            $user->terms_accepted_at = now();
+        }
+
         // On any non-nexus install (selfhost or a self-hosted SaaS), make the first user the
         // instance admin so they can reach the admin portal and self-updater.
         if (! config('app.is_nexus') && User::count() === 1) {
             $user->is_admin = true;
         }
 
-        // Mark email as verified if code was validated (hosted mode) or in non-hosted/testing mode
-        if ((config('app.hosted') && ! config('app.is_testing')) || ! config('app.hosted') || config('app.is_testing')) {
-            $user->email_verified_at = now();
-            $user->save();
-        }
+        // Every path that reaches here has proved the address: hosted verified the emailed code a
+        // few lines up, and selfhost has no code step to fail. The condition this replaces read
+        // `(hosted && !testing) || !hosted || testing`, which is true for all four combinations -
+        // so it never guarded anything, while looking like it did. Written out because the save
+        // below now also persists terms_accepted_at, and consent must not depend on a tautology
+        // surviving the next person who reads it.
+        $user->email_verified_at = now();
+        $user->save();
 
         if (session()->pull('pending_follow_consent_dismissed')) {
             $user->follow_consent_dismissed = true;

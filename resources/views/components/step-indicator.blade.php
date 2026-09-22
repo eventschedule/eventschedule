@@ -12,15 +12,25 @@
     // Determine the current step if not provided
     if ($currentStep === null) {
         $user = auth()->user();
-        
+
         if (!$user || ! $user->email_verified_at) {
             $currentStep = 1; // Create Account
-        } elseif ($user->talents()->count() == 0) {
+        } elseif (! $user->member()->exists()) {
             $currentStep = 2; // Create Schedule
         } else {
             $currentStep = 3; // Create Event
         }
     }
+
+    // Step 2 asks "have you made a schedule yet", and this used to read talents()->count() - which
+    // is editor() narrowed to type talent. So somebody who had just created a VENUE or a CURATOR
+    // schedule was still told "Create Schedule" was the step they were on, on the page for the step
+    // after it. Only a talent organizer ever saw the truth.
+    //
+    // member() rather than roles(): roles() includes follower pivots, so merely following someone
+    // else's schedule would read as having made one. member() is owner/admin/viewer, which is the
+    // same predicate HomeController::gettingStarted() uses to decide whether this person still
+    // needs to create a schedule - the indicator and that redirect must not disagree.
 @endphp
 
 <div class="step-indicator p-6 relative overflow-hidden bg-gray-100 dark:bg-gray-900">

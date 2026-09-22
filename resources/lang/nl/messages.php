@@ -62,6 +62,7 @@ return [
     'terms_of_service' => 'Gebruiksvoorwaarden',
     'privacy_policy' => 'Privacybeleid',
     'i_accept_the_terms_and_privacy' => 'Ik accepteer de :terms en :privacy',
+    'by_continuing_you_accept' => 'Door door te gaan accepteer je de :terms en :privacy',
     'terms_must_be_accepted' => 'Accepteer de servicevoorwaarden en het privacybeleid om door te gaan.',
     'already_registered' => 'Al geregistreerd?',
     'reset_password' => 'Wachtwoord Resetten',

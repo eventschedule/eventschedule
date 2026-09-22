@@ -60,6 +60,7 @@ return [
     'terms_of_service' => 'Nutzungsbedingungen',
     'privacy_policy' => 'Datenschutzrichtlinie',
     'i_accept_the_terms_and_privacy' => 'Ich akzeptiere die :terms und :privacy',
+    'by_continuing_you_accept' => 'Mit der Fortsetzung akzeptieren Sie die :terms und :privacy',
     'terms_must_be_accepted' => 'Bitte akzeptieren Sie die Nutzungsbedingungen und die Datenschutzerklärung, um fortzufahren.',
     'already_registered' => 'Bereits registriert?',
     'reset_password' => 'Passwort zurücksetzen',

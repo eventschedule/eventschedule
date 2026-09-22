@@ -60,6 +60,7 @@ return [
     'terms_of_service' => 'Términos de Servicio',
     'privacy_policy' => 'Política de Privacidad',
     'i_accept_the_terms_and_privacy' => 'Acepto los :terms y :privacy',
+    'by_continuing_you_accept' => 'Al continuar, aceptas los :terms y :privacy',
     'terms_must_be_accepted' => 'Acepta los términos del servicio y la política de privacidad para continuar.',
     'already_registered' => '¿Ya estás registrado?',
     'reset_password' => 'Restablecer Contraseña',

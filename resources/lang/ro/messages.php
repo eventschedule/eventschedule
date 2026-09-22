@@ -64,6 +64,7 @@ return [
     'terms_of_service' => 'Termeni și Condiții',
     'privacy_policy' => 'Politica de Confidențialitate',
     'i_accept_the_terms_and_privacy' => 'Accept :terms și :privacy',
+    'by_continuing_you_accept' => 'Continuând, accepți :terms și :privacy',
     'terms_must_be_accepted' => 'Acceptă termenii serviciului și politica de confidențialitate pentru a continua.',
     'already_registered' => 'Deja înregistrat?',
     'reset_password' => 'Resetează Parola',

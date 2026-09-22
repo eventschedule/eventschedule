@@ -13,7 +13,7 @@
     <!-- Step Indicator for Add Event Flow -->
     @if(session('pending_request'))
         <div class="my-6">
-            <x-step-indicator :compact="true" />
+            <x-step-indicator :currentStep="2" />
         </div>
     @endif
 

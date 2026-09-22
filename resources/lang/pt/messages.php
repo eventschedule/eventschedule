@@ -62,6 +62,7 @@ return [
     'terms_of_service' => 'Termos de Serviço',
     'privacy_policy' => 'Política de Privacidade',
     'i_accept_the_terms_and_privacy' => 'Eu aceito os :terms e a :privacy',
+    'by_continuing_you_accept' => 'Ao continuar, você aceita os :terms e a :privacy',
     'terms_must_be_accepted' => 'Aceite os termos de serviço e a política de privacidade para continuar.',
     'already_registered' => 'Já registrado?',
     'reset_password' => 'Redefinir Senha',

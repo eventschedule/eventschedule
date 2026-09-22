@@ -56,6 +56,18 @@
 
         <x-google-button>{{ __('messages.log_in_with_google') }}</x-google-button>
 
+        {{-- The Google button collects no checkbox, so the terms are stated beside it and
+             pressing it is the consent. Both documents are replaceable by the operator, so
+             policy_url() resolves them, never marketing_url(). --}}
+        @if (config('app.hosted'))
+        <p class="mt-3 text-xs text-center text-gray-500 dark:text-gray-400">
+            {!! str_replace([':terms', ':privacy'], [
+                '<a href="' . policy_url('terms') . '" target="_blank" class="underline hover:no-underline">' . __('messages.terms_of_service') . '</a>',
+                '<a href="' . policy_url('privacy') . '" target="_blank" class="underline hover:no-underline">' . __('messages.privacy_policy') . '</a>'
+            ], __('messages.by_continuing_you_accept')) !!}
+        </p>
+        @endif
+
         <div class="flex items-center {{ public_registration_enabled() ? 'justify-between' : 'justify-end' }} mt-8">
             @if (public_registration_enabled())
             <a class="hover:underline text-sm text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-100 rounded-md focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-[var(--brand-blue)] dark:focus:ring-offset-gray-800" href="{{ route('sign_up') }}">

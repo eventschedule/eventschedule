@@ -219,6 +219,7 @@ class User extends Authenticatable implements MustVerifyEmail
     {
         return [
             'email_verified_at' => 'datetime',
+            'terms_accepted_at' => 'datetime',
             'phone_verified_at' => 'datetime',
             'google_token_expires_at' => 'datetime',
             'microsoft_token_expires_at' => 'datetime',

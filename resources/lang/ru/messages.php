@@ -64,6 +64,7 @@ return [
     'terms_of_service' => 'Условия использования',
     'privacy_policy' => 'Политика конфиденциальности',
     'i_accept_the_terms_and_privacy' => 'Я принимаю :terms и :privacy',
+    'by_continuing_you_accept' => 'Продолжая, вы принимаете :terms и :privacy',
     'terms_must_be_accepted' => 'Примите условия обслуживания и политику конфиденциальности, чтобы продолжить.',
     'already_registered' => 'Уже зарегистрированы?',
     'reset_password' => 'Сбросить пароль',
