@@ -170,13 +170,23 @@ class RegisteredUserController extends Controller
         // Each code has its own independent 10-minute expiration
         Cache::put('signup_code_email_'.$code, $email, now()->addMinutes(10));
 
+        // Send BEFORE spending an attempt. The counter used to be incremented first, so an SMTP
+        // failure charged the visitor one of their five hourly codes for a mail that never left -
+        // five outages in an hour and the address is locked out of signing up until it expires.
+        // The per-IP route throttle is what bounds a retry loop here, not this counter.
+        try {
+            Notification::route('mail', $email)->notifyNow(new SignupVerificationCode($code));
+        } catch (\Throwable $e) {
+            report($e);
+
+            return response()->json([
+                'success' => false,
+                'message' => __('messages.error_sending_code'),
+            ], 500);
+        }
+
         // Increment attempts counter (expires in 1 hour)
         Cache::put($attemptsKey, $attempts + 1, now()->addHour());
-
-        // Send notification to email (using a temporary user object for notification)
-        $tempUser = new User;
-        $tempUser->email = $email;
-        Notification::route('mail', $email)->notifyNow(new SignupVerificationCode($code));
 
         // Funnel step between "viewed /sign_up" and "verified account". Hosted signup makes
         // people leave the tab for a 6-digit code, and nothing measured how many never came

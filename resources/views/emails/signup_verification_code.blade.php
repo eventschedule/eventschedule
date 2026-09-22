@@ -3,11 +3,11 @@
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>{{ __('messages.signup_verification_code_subject') }}</title>
+    <title>{{ __('messages.signup_verification_code_heading') }}</title>
 </head>
 <body style="font-family: Arial, sans-serif; line-height: 1.6; color: #333; max-width: 600px; margin: 0 auto; padding: 20px;">
     <div style="background-color: #4E81FA; color: white; padding: 30px 20px; text-align: center; border-radius: 8px 8px 0 0;">
-        <h1 style="margin: 0; font-size: 24px; font-weight: 600;">{{ __('messages.signup_verification_code_subject') }}</h1>
+        <h1 style="margin: 0; font-size: 24px; font-weight: 600;">{{ __('messages.signup_verification_code_heading') }}</h1>
     </div>
     
     <div style="background-color: #f9f9f9; padding: 20px; border-radius: 0 0 8px 8px;">

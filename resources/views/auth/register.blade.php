@@ -51,29 +51,123 @@
             });
         }
 
-        // Show all fields if form is reloaded with validation errors or if code was already sent
+        /**
+         * Put the page into the "we have sent you a code" state.
+         *
+         * Note what this deliberately does NOT do: hide the Google button, the guest option or the
+         * "Already registered?" link. It used to hide all three, and because the same branch also
+         * runs on a validation error, ONE mistyped digit reloaded into a page whose only remaining
+         * action was to retype a code the visitor did not have - no resend, no way to correct the
+         * address, and the password field emptied by the browser. Those are the escape hatches; the
+         * moment somebody is stuck is the moment they have to stay on screen.
+         */
+        function showCodeSentState(email) {
+            revealSignupFields();
+
+            var emailInput = document.getElementById('email');
+            if (email) {
+                lockedEmail = email.toLowerCase();
+                emailInput.setAttribute('readonly', 'readonly');
+                emailInput.classList.add('bg-gray-100', 'dark:bg-gray-700', 'cursor-not-allowed');
+
+                var address = document.getElementById('code-sent-address');
+                if (address) address.textContent = email;
+            }
+
+            var panel = document.getElementById('code-sent-panel');
+            if (panel) panel.style.display = 'block';
+        }
+
+        /**
+         * Back to step one, with the address editable again.
+         *
+         * The input listener below rewrites any edit back to lockedEmail, so a typo was
+         * unrecoverable without reloading the page. Clearing the lock is the whole fix.
+         */
+        function changeEmail() {
+            var emailInput = document.getElementById('email');
+            var panel = document.getElementById('code-sent-panel');
+            var codeInput = document.getElementById('verification_code');
+            var codeMessage = document.getElementById('code-message');
+
+            lockedEmail = null;
+            emailInput.removeAttribute('readonly');
+            emailInput.classList.remove('bg-gray-100', 'dark:bg-gray-700', 'cursor-not-allowed');
+            if (panel) panel.style.display = 'none';
+            if (codeInput) codeInput.value = '';
+            if (codeMessage) codeMessage.innerHTML = '';
+
+            emailInput.focus();
+            emailInput.select();
+        }
+
+        /**
+         * Hold the resend button for a moment after a send.
+         *
+         * Not decoration: sign_up/send-code allows 5 per hour per address AND, since the named
+         * prefix in routes/auth.php, 5 per minute per IP. A visitor who taps resend four times
+         * because nothing arrived would spend the whole minute bucket and meet a 429.
+         */
+        var resendTimer = null;
+        function startResendCountdown(seconds) {
+            var btn = document.getElementById('resend-code-btn');
+            var counter = document.getElementById('resend-countdown');
+            if (!btn || !counter) return;
+
+            var remaining = seconds;
+            btn.style.display = 'none';
+            counter.style.display = 'inline';
+
+            if (resendTimer) clearInterval(resendTimer);
+
+            var tick = function () {
+                counter.textContent = @json(__('messages.resend_in_label')) + ' ' + remaining + 's';
+                if (remaining <= 0) {
+                    clearInterval(resendTimer);
+                    resendTimer = null;
+                    counter.style.display = 'none';
+                    btn.style.display = 'inline';
+                }
+                remaining--;
+            };
+
+            tick();
+            resendTimer = setInterval(tick, 1000);
+        }
+
+        /**
+         * Busy state for the send button.
+         *
+         * sendVerificationCode() posts to an endpoint that sends the mail SYNCHRONOUSLY
+         * (notifyNow, because the visitor is waiting for the code) and config/mail.php sets no
+         * SMTP timeout, so this can block for seconds. It used to grey the button and change its
+         * text, with no spinner and nothing announced - while the selfhost database test further
+         * down this same file has had one all along.
+         */
+        function setSendButtonBusy(btn) {
+            if (!btn) return;
+            btn.disabled = true;
+            btn.setAttribute('aria-busy', 'true');
+            btn.innerHTML = '<svg class="inline-block w-4 h-4 me-2 animate-spin" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" aria-hidden="true"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg>'
+                + @json(__('messages.sending'));
+        }
+
+        function setSendButtonIdle(btn) {
+            if (!btn) return;
+            btn.disabled = false;
+            btn.removeAttribute('aria-busy');
+            btn.textContent = @json(__('messages.send_code'));
+        }
+
+        // Restore the code state when the form comes back from a failed submit.
         document.addEventListener('DOMContentLoaded', function() {
             var verificationCodeInput = document.getElementById('verification_code');
             var emailInput = document.getElementById('email');
             var hasErrors = @json($errors->any());
-            // If verification code field has a value (from old input), email is readonly, or there are validation errors, show all fields
             if (verificationCodeInput && (verificationCodeInput.value || emailInput.readOnly || hasErrors)) {
-                revealSignupFields();
-                // Hide the Google signup section
-                var googleSignupSection = document.getElementById('google-signup-section');
-                if (googleSignupSection) googleSignupSection.style.display = 'none';
-                // Hide guest option if code was already sent
-                var guestOption = document.getElementById('guest-option');
-                if (guestOption) guestOption.style.display = 'none';
-                // Hide "Already registered?" link
-                var alreadyRegistered = document.getElementById('already-registered');
-                if (alreadyRegistered) alreadyRegistered.style.display = 'none';
-                // Re-lock email field (code was already sent before the error redirect)
-                if (emailInput.value) {
-                    lockedEmail = emailInput.value.toLowerCase();
-                    emailInput.setAttribute('readonly', 'readonly');
-                    emailInput.classList.add('bg-gray-100', 'dark:bg-gray-700', 'cursor-not-allowed');
-                }
+                showCodeSentState(emailInput.value);
+                // Straight to the field they have to correct, rather than the name field above it.
+                verificationCodeInput.focus();
             }
         });
 
@@ -110,8 +204,7 @@
                 }
 
                 // Disable button and show loading
-                sendCodeBtn.disabled = true;
-                sendCodeBtn.innerHTML = @json(__('messages.sending')) + '...';
+                setSendButtonBusy(sendCodeBtn);
                 codeMessage.innerHTML = '';
 
                 fetch('{{ route('sign_up.send_code') }}', {
@@ -129,35 +222,27 @@
                 })
                 .then(response => {
                     // Always re-enable button and restore text
-                    sendCodeBtn.disabled = false;
-                    sendCodeBtn.innerHTML = @json(__('messages.send_code'));
+                    setSendButtonIdle(sendCodeBtn);
 
                     return response.json().then(data => {
                         // Check if response is successful
                         if (response.ok && data.success) {
-                            // Lock the email field after successful code send
-                            lockedEmail = email.toLowerCase();
-                            emailInput.setAttribute('readonly', 'readonly');
-                            emailInput.classList.add('bg-gray-100', 'dark:bg-gray-700', 'cursor-not-allowed');
-                            codeMessage.innerHTML = '<span class="text-green-600 dark:text-green-400">' + data.message + '</span>';
-                            // Show the rest of the form fields
-                            revealSignupFields();
-                            // Hide the Google signup section
-                            var googleSignupSection = document.getElementById('google-signup-section');
-                            if (googleSignupSection) googleSignupSection.style.display = 'none';
-                            // Hide the guest option
-                            var guestOption = document.getElementById('guest-option');
-                            if (guestOption) guestOption.style.display = 'none';
-                            // Hide the "Already registered?" link
-                            var alreadyRegistered = document.getElementById('already-registered');
-                            if (alreadyRegistered) alreadyRegistered.style.display = 'none';
-                            // Focus on the name field and pre-fill if available
+                            // The panel carries the address, the expiry and both escape hatches, so
+                            // the status line stays empty rather than repeating "we sent a code".
+                            codeMessage.innerHTML = '';
+                            showCodeSentState(email);
+                            startResendCountdown(30);
+
+                            // Pre-fill a known name (a stub account), but focus the field the
+                            // visitor actually has to fill: they have just been sent a code.
                             var nameInput = document.getElementById('name');
-                            if (nameInput) {
-                                if (data.name) {
-                                    nameInput.value = data.name;
-                                }
-                                nameInput.focus();
+                            if (nameInput && data.name) {
+                                nameInput.value = data.name;
+                            }
+                            var codeInput = document.getElementById('verification_code');
+                            if (codeInput) {
+                                codeInput.focus();
+                                codeInput.scrollIntoView({ behavior: 'smooth', block: 'center' });
                             }
                             // Reset Turnstile widget so user gets a fresh token for form submission
                             if (typeof turnstile !== 'undefined' && turnstileWidgetId !== null) {
@@ -166,6 +251,18 @@
                         } else {
                             // Handle validation errors or other errors
                             var errorMessage = data.message || @json(__('messages.error_sending_code'));
+
+                            // A 429 here is the route's per-IP bucket, whose body is the
+                            // framework's untranslated "Too Many Requests" - rendered verbatim in
+                            // red under the email field, in every one of the 12 locales. Retry-After
+                            // is on the response and was being discarded.
+                            if (response.status === 429) {
+                                errorMessage = @json(__('messages.too_many_attempts'));
+                                var retryAfter = parseInt(response.headers.get('Retry-After') || '60', 10);
+                                if (retryAfter > 0) {
+                                    startResendCountdown(retryAfter);
+                                }
+                            }
 
                             // Check for Laravel validation errors (422 status)
                             if (data.errors && data.errors.email) {
@@ -202,8 +299,7 @@
                 })
                 .catch(error => {
                     codeMessage.innerHTML = '<span class="text-red-600 dark:text-red-400">' + @json(__('messages.error_sending_code')) + '</span>';
-                    sendCodeBtn.disabled = false;
-                    sendCodeBtn.innerHTML = @json(__('messages.send_code'));
+                    setSendButtonIdle(sendCodeBtn);
                     // Reset Turnstile widget on failure
                     if (typeof turnstile !== 'undefined' && turnstileWidgetId !== null) {
                         turnstile.reset(turnstileWidgetId);
@@ -264,10 +360,64 @@
             var codeInput = document.getElementById('verification_code');
             if (codeInput) {
                 codeInput.addEventListener('input', function(e) {
-                    this.value = this.value.replace(/[^0-9]/g, '');
+                    this.value = this.value.replace(/[^0-9]/g, '').slice(0, 6);
+                    maybeAutoSubmit(this);
+                });
+
+                // Most people paste the whole line out of the email rather than the six digits.
+                // Handled here because the field carries no maxlength any more (it truncated the
+                // paste before this could run), so without a slice a long paste would stick.
+                codeInput.addEventListener('paste', function(e) {
+                    var clipboard = (e.clipboardData || window.clipboardData);
+                    if (!clipboard) return;
+
+                    var digits = (clipboard.getData('text') || '').replace(/[^0-9]/g, '').slice(0, 6);
+                    if (digits.length === 6) {
+                        e.preventDefault();
+                        this.value = digits;
+                        maybeAutoSubmit(this);
+                    }
+                });
+            }
+
+            var resendBtn = document.getElementById('resend-code-btn');
+            if (resendBtn) {
+                resendBtn.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    // sendVerificationCode() reads the email input, which is locked to the address
+                    // the first code went to, so this is a resend rather than a new request.
+                    sendVerificationCode();
+                });
+            }
+
+            var changeEmailBtn = document.getElementById('change-email-btn');
+            if (changeEmailBtn) {
+                changeEmailBtn.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    changeEmail();
                 });
             }
         });
+
+        /**
+         * Submit once the sixth digit lands, so the code step ends where it started.
+         *
+         * Gated on the consent box being ticked: an auto-submit that trips `terms => accepted`
+         * would report a failure the visitor did not cause. requestSubmit() runs constraint
+         * validation, and revealSignupFields() has already armed `required` on everything by the
+         * time a code can be entered, so the form either submits or reports which field is missing.
+         */
+        function maybeAutoSubmit(codeInput) {
+            if (codeInput.value.length !== 6) return;
+
+            var terms = document.getElementById('terms');
+            if (terms && !terms.checked) return;
+
+            var form = codeInput.form;
+            if (form && typeof form.requestSubmit === 'function') {
+                form.requestSubmit();
+            }
+        }
         @endif
 
         @if (! config('app.hosted'))
@@ -498,7 +648,30 @@
                     {{ __('messages.send_code') }}
                 </button>
             </div>
-            <div id="code-message" class="mt-1 text-sm"></div>
+            {{-- role="status" because every success and every failure of this page's key
+                 interaction was previously announced to nobody. --}}
+            <div id="code-message" class="mt-1 text-sm" role="status" aria-live="polite"></div>
+
+            {{-- Where the code went, and the two ways out. Without these a mistyped address, a
+                 mail in a spam folder or one missed expiry was a dead end: the field locks itself
+                 readonly and silently rewrites keystrokes, and there was no resend.
+                 Every key here already exists and is already translated in all 12 locales,
+                 because event/guest-submit.blade.php has had this panel all along. --}}
+            <div id="code-sent-panel" class="mt-2 rounded-lg bg-blue-50 dark:bg-blue-500/10 border border-blue-200 dark:border-blue-700 p-3" style="display: none;">
+                <p class="text-sm text-blue-800 dark:text-blue-200">
+                    {{ __('messages.code_sent_to_prefix') }}
+                    <bdi dir="ltr" class="font-medium" id="code-sent-address"></bdi>.
+                    {{ __('messages.code_sent_to_suffix') }}
+                </p>
+                <p class="mt-1 text-xs text-blue-700 dark:text-blue-300">{{ __('messages.signup_verification_code_expiry') }}</p>
+                <p class="mt-2 text-sm">
+                    <span class="text-gray-600 dark:text-gray-400">{{ __('messages.didnt_receive_code') }}</span>
+                    <span id="resend-countdown" class="text-gray-500 dark:text-gray-500" style="display: none;"></span>
+                    <button type="button" id="resend-code-btn" class="text-blue-600 dark:text-blue-300 underline hover:no-underline focus:outline-none focus:ring-2 focus:ring-[var(--brand-blue)] rounded">{{ __('messages.resend_code') }}</button>
+                    <span class="text-gray-300 dark:text-gray-600" aria-hidden="true">&middot;</span>
+                    <button type="button" id="change-email-btn" class="text-blue-600 dark:text-blue-300 underline hover:no-underline focus:outline-none focus:ring-2 focus:ring-[var(--brand-blue)] rounded">{{ __('messages.use_another_email') }}</button>
+                </p>
+            </div>
             @else
             <x-text-input id="email" class="block mt-1 w-full" type="email" name="email" :value="old('email', base64_decode(request()->email))" required
                 autocomplete="email" />
@@ -533,8 +706,17 @@
                  show - so the form silently refuses to submit and reports nothing, which is the
                  defect issue #124 was about on the booking form. revealSignupFields() arms it at
                  the moment it becomes visible, the same way toggleAccountFields() does there. --}}
-            <x-text-input id="verification_code" class="block mt-1 w-full" type="text" name="verification_code" 
-                :value="old('verification_code')" maxlength="6" pattern="[0-9]{6}" autocomplete="off" />
+            {{-- autocomplete="one-time-code" is the whole reason a phone offers the emailed code
+                 above the keyboard; "off" - which is what x-text-input defaults to, see
+                 components/text-input.blade.php - is the one value that SUPPRESSES it, and iOS
+                 reads Mail for this, not only SMS. inputmode keeps a digits-only field off QWERTY.
+                 No maxlength: the browser truncates a paste BEFORE the input handler can strip the
+                 prose around the code, so pasting "Your code is 123456" left the box empty. The
+                 paste handler in the script block extracts the digits instead.
+                 Matches event/guest-submit.blade.php, which has had this shape all along. --}}
+            <x-text-input id="verification_code" class="block mt-1 w-full sm:w-44 text-center text-lg tracking-[0.4em]" type="text" name="verification_code"
+                :value="$errors->has('verification_code') ? '' : old('verification_code')"
+                inputmode="numeric" autocomplete="one-time-code" pattern="[0-9]{6}" placeholder="000000" />
             <x-input-error :messages="$errors->get('verification_code')" class="mt-2" />
         </div>
         @endif

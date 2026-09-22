@@ -69,7 +69,7 @@ class SignupVerificationCode extends Notification
             public function envelope(): Envelope
             {
                 return new Envelope(
-                    subject: __('messages.signup_verification_code_subject'),
+                    subject: __('messages.signup_verification_code_subject', ['code' => $this->code]),
                 );
             }
 

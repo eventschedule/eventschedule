@@ -1,4 +1,4 @@
-{{ __('messages.signup_verification_code_subject') }}
+{{ __('messages.signup_verification_code_heading') }}
 
 {{ __('messages.hello') }},
 
