@@ -261,6 +261,10 @@ echo '<?xml version="1.0" encoding="UTF-8"?>'; ?>
         {!! $lastmodTag('/features/waitlist') !!}
     </url>
     <url>
+        <loc>{{ url('/features/registration') }}</loc>
+        {!! $lastmodTag('/features/registration') !!}
+    </url>
+    <url>
         <loc>{{ url('/features/installments') }}</loc>
         {!! $lastmodTag('/features/installments') !!}
     </url>
@@ -523,6 +527,14 @@ echo '<?xml version="1.0" encoding="UTF-8"?>'; ?>
     <url>
         <loc>{{ url('/for-meetup-groups') }}</loc>
         {!! $lastmodTag('/for-meetup-groups') !!}
+    </url>
+    <url>
+        <loc>{{ url('/community-event-calendar') }}</loc>
+        {!! $lastmodTag('/community-event-calendar') !!}
+    </url>
+    <url>
+        <loc>{{ url('/wordpress-event-calendar') }}</loc>
+        {!! $lastmodTag('/wordpress-event-calendar') !!}
     </url>
     <url>
         <loc>{{ url('/for-webinars') }}</loc>

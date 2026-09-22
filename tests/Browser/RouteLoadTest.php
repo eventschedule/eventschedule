@@ -90,6 +90,7 @@ class RouteLoadTest extends DuskTestCase
                 '/features/custom-labels',
                 '/features/feedback',
                 '/features/availability',
+                '/features/registration',
 
                 // Integration pages
                 '/google-calendar',
@@ -133,6 +134,8 @@ class RouteLoadTest extends DuskTestCase
                 '/for-sports-leagues',
                 '/for-museums',
                 '/for-meetup-groups',
+                '/community-event-calendar',
+                '/wordpress-event-calendar',
                 '/for-webinars',
                 '/for-live-concerts',
                 '/for-online-classes',

@@ -1260,8 +1260,10 @@
             ['Installment payments', 'Split a ticket over monthly charges, taken off the saved card', 'Pro', '/features/installments'],
             ['Ticket add-ons', 'Parking, merchandise or a workshop, each with its own stock', 'Pro', '/features/promo-codes#addons'],
             ['Promo codes', 'Percentage or fixed, with usage limits and an expiry date', 'Pro', '/features/promo-codes'],
+            ['Free registration and RSVP', 'Sign-ups with no payment step, a cap per date and a QR code for the door', 'Free', '/features/registration'],
             ['Ticket waitlist', 'Notify people automatically when a sold-out type frees up', 'Pro', '/features/waitlist'],
             ['Multi-event cart', 'One checkout across several of your events, paid as a single amount', 'Free'],
+            ['Sales windows and group rates', 'Open and close each ticket type on a date, and discount bigger orders', 'Free'],
             ['PayPal checkout', 'Buyers pay into your own PayPal account, multi-event cart included', 'Pro', '/paypal'],
             ['Refunds, full or partial', 'Money goes back through Stripe or PayPal, straight from the Sales page', 'Pro', '/docs/tickets#managing-sales'],
             ['Interest list', 'A "tell me when tickets go on sale" option that asks only for an email', 'Free', '/docs/tickets#interest-list'],
@@ -1281,6 +1283,8 @@
             ['Pages for the acts you list', 'Name an act or venue who is not here yet and they get a page to claim', 'Free', '/docs/creating-events#claim'],
             ['The whole lineup', 'Every act you list shows on the event page, linked where it has a page', 'Free'],
             ['Sponsor and partner logos', 'A tiered logo wall on your schedule page, for the people funding it', 'Pro'],
+            ['Venue logo wall', 'A header of the venues you play, or the acts you host, from your approved events', 'Free'],
+            ['Announcement banner', 'A banner of your own across the top of your schedule\'s public pages', 'Pro'],
         ];
         $alsoBadge = [
             'Free' => 'bg-emerald-100 text-emerald-700 dark:bg-emerald-500/15 dark:text-emerald-300',
@@ -1295,7 +1299,7 @@
                     And the small print, which is mostly good news
                 </h2>
                 <p class="mt-3 text-gray-500 dark:text-gray-400" data-reveal style="--reveal-delay: 0.08s;">
-                    Twenty-four more things the app does, and the plan each one sits on.
+                    Twenty-eight more things the app does, and the plan each one sits on.
                 </p>
             </div>
             <dl class="grid grid-cols-1 gap-x-8 gap-y-5 sm:grid-cols-2 lg:grid-cols-4" data-reveal-group="35">

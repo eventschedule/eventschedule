@@ -272,6 +272,30 @@ class MarketingController extends Controller
     }
 
     /**
+     * Free Event Registration and RSVP page
+     */
+    public function registration()
+    {
+        return view('marketing.registration');
+    }
+
+    /**
+     * Community Event Calendar page
+     */
+    public function communityEventCalendar()
+    {
+        return view('marketing.community-event-calendar');
+    }
+
+    /**
+     * WordPress Event Calendar page
+     */
+    public function wordpressEventCalendar()
+    {
+        return view('marketing.wordpress-event-calendar');
+    }
+
+    /**
      * Installment Payments page
      */
     public function installments()

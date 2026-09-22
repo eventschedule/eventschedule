@@ -31,6 +31,7 @@ return [
     '/caldav' => '2026-09-22',
     '/calendly-replacement' => '2026-09-22',
     '/canva-replacement' => '2026-09-22',
+    '/community-event-calendar' => '2026-09-22',
     '/compare' => '2026-09-22',
     '/contact' => '2026-09-22',
     '/dice-alternative' => '2026-09-22',
@@ -108,6 +109,7 @@ return [
     '/features/private-events' => '2026-09-22',
     '/features/promo-codes' => '2026-09-22',
     '/features/recurring-events' => '2026-09-22',
+    '/features/registration' => '2026-09-22',
     '/features/sub-schedules' => '2026-09-22',
     '/features/team-scheduling' => '2026-09-22',
     '/features/ticketing' => '2026-09-22',
@@ -197,5 +199,6 @@ return [
     '/use-cases' => '2026-09-22',
     '/whova-alternative' => '2026-09-22',
     '/why-create-account' => '2026-09-22',
+    '/wordpress-event-calendar' => '2026-09-22',
     '/zeffy-alternative' => '2026-09-22',
 ];

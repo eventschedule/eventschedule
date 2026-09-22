@@ -27,11 +27,13 @@ return [
     // REACHABLE: promo-codes carries installments and waitlist in its own strip, so every new page
     // is within two hops of here. Allocated seating moved one hop out (check-in links it) and the
     // Eventbrite comparison is still reached from /compare and from its twenty-five siblings.
+    // The fourth slot, once Pricing, is /features/registration: the free, no-payment half of the
+    // same Tickets panel, which this page describes only in passing.
     'features/ticketing' => [
         ['title' => 'Passes & Subscriptions', 'path' => '/features/passes', 'blurb' => 'One pass, many events, counted down on a single QR code.'],
         ['title' => 'Check-in Dashboard', 'path' => '/features/check-in', 'blurb' => 'Watch the room fill up while you are standing at the door.'],
         ['title' => 'Promo Codes & Add-ons', 'path' => '/features/promo-codes', 'blurb' => 'Discounts that expire and cap themselves, and extras with their own stock.'],
-        ['title' => 'Pricing', 'path' => '/pricing', 'blurb' => 'See what is included on Free, Pro, and Enterprise plans.'],
+        ['title' => 'Free Registration & RSVP', 'path' => '/features/registration', 'blurb' => 'Free sign-ups with a cap per date, a waitlist and a QR code, on every plan.'],
     ],
 
     'paypal' => [
@@ -59,7 +61,7 @@ return [
         ['title' => 'Selling Tickets', 'path' => '/features/ticketing', 'blurb' => 'Ticket types, QR check-in and a live door dashboard, with zero platform fees.'],
         ['title' => 'Check-in Dashboard', 'path' => '/features/check-in', 'blurb' => 'Watch the room fill up while you are standing at the door.'],
         ['title' => 'Passes & Subscriptions', 'path' => '/features/passes', 'blurb' => 'One pass, many events, counted down on a single QR code.'],
-        ['title' => 'Pricing', 'path' => '/pricing', 'blurb' => 'See what is included on Free, Pro, and Enterprise plans.'],
+        ['title' => 'Free Registration & RSVP', 'path' => '/features/registration', 'blurb' => 'Free sign-ups with a cap per date, a waitlist and a QR code, on every plan.'],
     ],
 
     'features/installments' => [
@@ -443,7 +445,7 @@ return [
     'features/embed-tickets' => [
         ['title' => 'Embed Calendar', 'path' => '/features/embed-calendar', 'blurb' => 'Embed your calendar on any website with one line of code.'],
         ['title' => 'Ticketing', 'path' => '/features/ticketing', 'blurb' => 'Sell tickets with QR check-in and zero platform fees.'],
-        ['title' => 'All Features', 'path' => '/features', 'blurb' => 'Every feature on one page, with the plan each one needs.'],
+        ['title' => 'WordPress Event Calendar', 'path' => '/wordpress-event-calendar', 'blurb' => 'Put your live calendar on a WordPress page with one Custom HTML block.'],
         ['title' => 'Pricing', 'path' => '/pricing', 'blurb' => 'See what is included on Free, Pro, and Enterprise plans.'],
     ],
 
@@ -513,7 +515,7 @@ return [
     'features/sub-schedules' => [
         ['title' => 'Custom Labels', 'path' => '/features/custom-labels', 'blurb' => 'Rename the words on your public schedule, across 34 labels.'],
         ['title' => 'Embed Calendar', 'path' => '/features/embed-calendar', 'blurb' => 'Embed your calendar on any website with one line of code.'],
-        ['title' => 'All Features', 'path' => '/features', 'blurb' => 'Every feature on one page, with the plan each one needs.'],
+        ['title' => 'Community Event Calendar', 'path' => '/community-event-calendar', 'blurb' => 'One shared calendar for a town, fed by the organizers in it.'],
         ['title' => 'Pricing', 'path' => '/pricing', 'blurb' => 'See what is included on Free, Pro, and Enterprise plans.'],
     ],
 
@@ -867,7 +869,7 @@ return [
     'the-events-calendar-alternative' => [
         ['title' => 'Timely Alternative', 'path' => '/timely-alternative', 'blurb' => 'A free plan and ticketing with zero platform fees, not an annual add-on.'],
         ['title' => 'Tockify Alternative', 'path' => '/tockify-alternative', 'blurb' => 'An embeddable calendar that also takes registrations.'],
-        ['title' => 'Compare Alternatives', 'path' => '/compare', 'blurb' => 'See how Event Schedule stacks up against other platforms.'],
+        ['title' => 'WordPress Event Calendar', 'path' => '/wordpress-event-calendar', 'blurb' => 'Put your live calendar on a WordPress page with one Custom HTML block.'],
         ['title' => 'Pricing', 'path' => '/pricing', 'blurb' => 'See what is included on Free, Pro, and Enterprise plans.'],
     ],
 
@@ -902,7 +904,7 @@ return [
     'facebook-events-alternative' => [
         ['title' => 'Partiful Alternative', 'path' => '/partiful-alternative', 'blurb' => 'Free RSVPs, plus recurring events and a public schedule page.'],
         ['title' => 'Mobilizon Alternative', 'path' => '/mobilizon-alternative', 'blurb' => 'Open source events with ticketing and calendar sync built in.'],
-        ['title' => 'Compare Alternatives', 'path' => '/compare', 'blurb' => 'See how Event Schedule stacks up against other platforms.'],
+        ['title' => 'Community Event Calendar', 'path' => '/community-event-calendar', 'blurb' => 'One shared calendar for a town, fed by the organizers in it.'],
         ['title' => 'Pricing', 'path' => '/pricing', 'blurb' => 'See what is included on Free, Pro, and Enterprise plans.'],
     ],
 
@@ -1016,5 +1018,29 @@ return [
         ['title' => 'Google Sheets Replacement', 'path' => '/google-sheets-replacement', 'blurb' => 'Attendee management and ticket sales tracking in one place.'],
         ['title' => 'Replace Your Tools', 'path' => '/replace', 'blurb' => 'Swapping a spreadsheet or a form rather than a platform.'],
         ['title' => 'Pricing', 'path' => '/pricing', 'blurb' => 'See what is included on Free, Pro, and Enterprise plans.'],
+    ],
+
+    // Phase 6.3 generic pages. /features/registration is the free, no-payment half of ticketing
+    // and links across to it for the paid half; the two calendar pages point at the feature pages
+    // they explain for one audience or one website builder.
+    'features/registration' => [
+        ['title' => 'Selling Tickets', 'path' => '/features/ticketing', 'blurb' => 'Ticket types, QR check-in and a live door dashboard, with zero platform fees.'],
+        ['title' => 'Ticket Waitlist', 'path' => '/features/waitlist', 'blurb' => 'A sold-out date offers a returned seat to one person at a time.'],
+        ['title' => 'Check-in Dashboard', 'path' => '/features/check-in', 'blurb' => 'Watch the room fill up while you are standing at the door.'],
+        ['title' => 'For Meetup Groups', 'path' => '/for-meetup-groups', 'blurb' => 'Free RSVPs with a cap, a page the group owns, and no organizer fee to keep it.'],
+    ],
+
+    'community-event-calendar' => [
+        ['title' => 'For Curators', 'path' => '/for-curators', 'blurb' => 'Build a local events guide that fills itself from venue and talent schedules.'],
+        ['title' => 'For Community Centers', 'path' => '/for-community-centers', 'blurb' => 'Programs, classes, hall-hire requests and events in one place.'],
+        ['title' => 'Sub-schedules', 'path' => '/features/sub-schedules', 'blurb' => 'Sort what arrives into the sections of your guide.'],
+        ['title' => 'Newsletters', 'path' => '/features/newsletters', 'blurb' => "Send the week's highlights to your subscribers."],
+    ],
+
+    'wordpress-event-calendar' => [
+        ['title' => 'Embed Calendar', 'path' => '/features/embed-calendar', 'blurb' => 'Embed your calendar on any website with one line of code.'],
+        ['title' => 'Embed Tickets', 'path' => '/features/embed-tickets', 'blurb' => 'Put the ticket checkout on your own website with one iframe tag.'],
+        ['title' => 'The Events Calendar Alternative', 'path' => '/the-events-calendar-alternative', 'blurb' => 'Event pages, ticketing and calendar sync without a WordPress plugin.'],
+        ['title' => 'Free Registration & RSVP', 'path' => '/features/registration', 'blurb' => 'Free sign-ups with a cap per date, a waitlist and a QR code, on every plan.'],
     ],
 ];

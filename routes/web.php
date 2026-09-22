@@ -1148,6 +1148,7 @@ if (config('app.is_nexus')) {
         Route::get('/features/check-in', [MarketingController::class, 'checkIn'])->name('marketing.check_in');
         Route::get('/features/promo-codes', [MarketingController::class, 'promoCodes'])->name('marketing.promo_codes');
         Route::get('/features/waitlist', [MarketingController::class, 'waitlist'])->name('marketing.waitlist');
+        Route::get('/features/registration', [MarketingController::class, 'registration'])->name('marketing.registration');
         Route::get('/features/installments', [MarketingController::class, 'installments'])->name('marketing.installments');
         Route::get('/features/ai', [MarketingController::class, 'ai'])->name('marketing.ai');
         Route::get('/features/calendar-sync', [MarketingController::class, 'calendarSync'])->name('marketing.calendar_sync');
@@ -1229,6 +1230,8 @@ if (config('app.is_nexus')) {
         Route::get('/for-sports-leagues', [MarketingController::class, 'forSportsLeagues'])->name('marketing.for_sports_leagues');
         Route::get('/for-museums', [MarketingController::class, 'forMuseums'])->name('marketing.for_museums');
         Route::get('/for-meetup-groups', [MarketingController::class, 'forMeetupGroups'])->name('marketing.for_meetup_groups');
+        Route::get('/community-event-calendar', [MarketingController::class, 'communityEventCalendar'])->name('marketing.community_event_calendar');
+        Route::get('/wordpress-event-calendar', [MarketingController::class, 'wordpressEventCalendar'])->name('marketing.wordpress_event_calendar');
         Route::get('/for-webinars', [MarketingController::class, 'forWebinars'])->name('marketing.for_webinars');
         Route::get('/for-live-concerts', [MarketingController::class, 'forLiveConcerts'])->name('marketing.for_live_concerts');
         Route::get('/for-online-classes', [MarketingController::class, 'forOnlineClasses'])->name('marketing.for_online_classes');
@@ -1411,6 +1414,7 @@ if (config('app.is_nexus')) {
             Route::get('/features/check-in', [MarketingController::class, 'checkIn'])->name('marketing.check_in');
             Route::get('/features/promo-codes', [MarketingController::class, 'promoCodes'])->name('marketing.promo_codes');
             Route::get('/features/waitlist', [MarketingController::class, 'waitlist'])->name('marketing.waitlist');
+            Route::get('/features/registration', [MarketingController::class, 'registration'])->name('marketing.registration');
             Route::get('/features/installments', [MarketingController::class, 'installments'])->name('marketing.installments');
             Route::get('/features/ai', [MarketingController::class, 'ai'])->name('marketing.ai');
             Route::get('/features/calendar-sync', [MarketingController::class, 'calendarSync'])->name('marketing.calendar_sync');
@@ -1494,6 +1498,8 @@ if (config('app.is_nexus')) {
             Route::get('/for-sports-leagues', [MarketingController::class, 'forSportsLeagues'])->name('marketing.for_sports_leagues');
             Route::get('/for-museums', [MarketingController::class, 'forMuseums'])->name('marketing.for_museums');
             Route::get('/for-meetup-groups', [MarketingController::class, 'forMeetupGroups'])->name('marketing.for_meetup_groups');
+            Route::get('/community-event-calendar', [MarketingController::class, 'communityEventCalendar'])->name('marketing.community_event_calendar');
+            Route::get('/wordpress-event-calendar', [MarketingController::class, 'wordpressEventCalendar'])->name('marketing.wordpress_event_calendar');
             Route::get('/for-webinars', [MarketingController::class, 'forWebinars'])->name('marketing.for_webinars');
             Route::get('/for-live-concerts', [MarketingController::class, 'forLiveConcerts'])->name('marketing.for_live_concerts');
             Route::get('/for-online-classes', [MarketingController::class, 'forOnlineClasses'])->name('marketing.for_online_classes');
@@ -1719,6 +1725,9 @@ if (config('app.is_nexus')) {
             Route::get('/for-sports-leagues', fn () => redirect('https://'._base_domain().'/for-sports-leagues', 301));
             Route::get('/for-museums', fn () => redirect('https://'._base_domain().'/for-museums', 301));
             Route::get('/for-meetup-groups', fn () => redirect('https://'._base_domain().'/for-meetup-groups', 301));
+            Route::get('/features/registration', fn () => redirect('https://'._base_domain().'/features/registration', 301));
+            Route::get('/community-event-calendar', fn () => redirect('https://'._base_domain().'/community-event-calendar', 301));
+            Route::get('/wordpress-event-calendar', fn () => redirect('https://'._base_domain().'/wordpress-event-calendar', 301));
             Route::get('/for-webinars', fn () => redirect('https://'._base_domain().'/for-webinars', 301));
             Route::get('/for-live-concerts', fn () => redirect('https://'._base_domain().'/for-live-concerts', 301));
             Route::get('/for-online-classes', fn () => redirect('https://'._base_domain().'/for-online-classes', 301));
@@ -1916,6 +1925,9 @@ if (config('app.is_nexus')) {
     Route::get('/for-sports-leagues', fn () => redirect()->route('home'));
     Route::get('/for-museums', fn () => redirect()->route('home'));
     Route::get('/for-meetup-groups', fn () => redirect()->route('home'));
+    Route::get('/features/registration', fn () => redirect()->route('home'));
+    Route::get('/community-event-calendar', fn () => redirect()->route('home'));
+    Route::get('/wordpress-event-calendar', fn () => redirect()->route('home'));
     Route::get('/for-webinars', fn () => redirect()->route('home'));
     Route::get('/for-live-concerts', fn () => redirect()->route('home'));
     Route::get('/for-online-classes', fn () => redirect()->route('home'));

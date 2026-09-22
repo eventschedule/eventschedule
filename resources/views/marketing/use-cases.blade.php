@@ -350,11 +350,12 @@
                     </span>
                     <h2 class="es-balance text-3xl font-black tracking-tight text-gray-900 dark:text-white md:text-4xl">For Organizations &amp; Communities</h2>
                 </div>
-                <p class="text-lg text-gray-600 dark:text-gray-400">Churches, schools, nonprofits, festivals, leagues, museums and meetup groups: the calendar belongs to a group of people rather than one room or one act. Set the regular dates once, give each team or strand its own link, take free sign-ups with a cap, and let members subscribe to the whole thing in their own calendar.</p>
+                <p class="text-lg text-gray-600 dark:text-gray-400">Churches, schools, nonprofits, festivals, leagues, museums, meetup groups and whole towns: the calendar belongs to a group of people rather than one room or one act. Set the regular dates once, give each team or strand its own link, take free sign-ups with a cap, and let members subscribe to the whole thing in their own calendar.</p>
             </div>
 
-            {{-- Seven cards and one closing tile make eight: two rows of four at lg, four rows of two
-                 at sm, so the grid has no hole at any width. Add a card and this tile must go or move. --}}
+            {{-- Eight cards: two rows of four at lg, four rows of two at sm, so the grid has no hole
+                 at any width. The eighth, /community-event-calendar, replaced a "Something else?"
+                 sign-up tile. Add a card and the grid needs a ninth thing or a different shape. --}}
             <div class="grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-4" data-reveal-group="55">
                 @foreach ($communities as $a)
                     <x-marketing.audience-card
@@ -366,16 +367,6 @@
                         <x-slot name="icon">{!! $a['icon'] !!}</x-slot>
                     </x-marketing.audience-card>
                 @endforeach
-
-                <a href="{{ app_url('/sign_up') }}" data-reveal
-                   class="group relative flex h-full flex-col rounded-3xl border border-dashed border-teal-300 bg-teal-50/60 p-6 transition-colors duration-200 hover:bg-teal-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#4E81FA] dark:border-teal-400/30 dark:bg-teal-500/[0.06] dark:hover:bg-teal-500/10">
-                    <h3 class="mb-2 text-lg font-bold text-gray-900 dark:text-white">Something else?</h3>
-                    <p class="mb-4 flex-grow text-sm text-gray-600 dark:text-gray-400">A club, a society, a congregation or a campaign: if it meets on a date, it fits on a schedule. Free forever, no credit card.</p>
-                    <span class="mt-auto inline-flex items-center gap-1.5 text-sm font-semibold text-teal-800 transition-all group-hover:gap-2.5 dark:text-teal-300">
-                        Start a schedule
-                        <svg aria-hidden="true" class="h-4 w-4 rtl:rotate-180" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6" /></svg>
-                    </span>
-                </a>
             </div>
         </div>
     </section>

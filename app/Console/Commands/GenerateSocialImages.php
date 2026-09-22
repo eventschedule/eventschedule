@@ -87,6 +87,7 @@ class GenerateSocialImages extends Command
         'features-availability' => '/features/availability',
         'features-feedback' => '/features/feedback',
         'features-carpool' => '/features/carpool',
+        'features-registration' => '/features/registration',
 
         // Integration pages
         'google-calendar' => '/google-calendar',
@@ -129,6 +130,8 @@ class GenerateSocialImages extends Command
         'for-sports-leagues' => '/for-sports-leagues',
         'for-museums' => '/for-museums',
         'for-meetup-groups' => '/for-meetup-groups',
+        'community-event-calendar' => '/community-event-calendar',
+        'wordpress-event-calendar' => '/wordpress-event-calendar',
         'for-webinars' => '/for-webinars',
         'for-live-concerts' => '/for-live-concerts',
         'for-online-classes' => '/for-online-classes',

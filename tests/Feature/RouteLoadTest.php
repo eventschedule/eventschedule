@@ -148,6 +148,7 @@ class RouteLoadTest extends TestCase
             '/features/availability',
             '/features/gift-cards',
             '/features/carpool',
+            '/features/registration',
 
             // Integration pages
             '/google-calendar',
@@ -191,6 +192,8 @@ class RouteLoadTest extends TestCase
             '/for-sports-leagues',
             '/for-museums',
             '/for-meetup-groups',
+            '/community-event-calendar',
+            '/wordpress-event-calendar',
             '/for-webinars',
             '/for-live-concerts',
             '/for-online-classes',
