@@ -123,6 +123,28 @@ class GuestStructuredDataTest extends TestCase
         $this->assertSame($canonical, $node['offers']['url']);
     }
 
+    public function test_organizer_and_performer_urls_use_the_custom_domain(): void
+    {
+        $owner = $this->createOwner();
+        $role = $this->createRole($owner, 'talent', [
+            'name' => 'Domain Talent',
+            'custom_domain' => 'https://jsonld-people.test',
+            'custom_domain_mode' => 'direct',
+            'custom_domain_status' => 'active',
+        ]);
+        $event = $this->createEvent($role, ['name' => 'Domain Event']);
+        $event->creator_role_id = $role->id;
+        $event->save();
+
+        $html = $this->get($this->guestEventUrl($role, $event))->assertOk()->getContent();
+        $node = $this->nodeOfType($this->jsonLdBlocks($html), 'Event');
+
+        // The schedule serves on its own domain, so a subdomain URL here would name a host
+        // other than the one the crawler is reading.
+        $this->assertStringStartsWith('https://jsonld-people.test', $node['organizer']['url']);
+        $this->assertStringStartsWith('https://jsonld-people.test', $node['performer']['url']);
+    }
+
     public function test_offer_url_is_the_occurrence_canonical_on_a_recurring_event(): void
     {
         $owner = $this->createOwner();

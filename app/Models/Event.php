@@ -4382,8 +4382,10 @@ class Event extends Model
                 'name' => $member->translatedName(),
             ];
 
-            if ($member->getGuestUrl()) {
-                $performer['url'] = $member->getGuestUrl();
+            // Canonical, not guest: on a custom domain the page lives there, and a url pointing
+            // at the subdomain names a different host than the one the crawler is reading.
+            if ($url = $member->getCanonicalUrl()) {
+                $performer['url'] = $url;
             }
 
             $performers[] = $performer;
@@ -4416,12 +4418,12 @@ class Event extends Model
      */
     public function getSchemaOrganizer()
     {
-        $eventUrl = $this->getGuestUrl();
+        $eventUrl = $this->getCanonicalUrl();
         $eventName = $this->translatedName() ?: 'Event Organizer';
 
         if ($this->venue && $this->venue->isClaimed()) {
             $name = $this->venue->translatedName();
-            $url = $this->venue->getGuestUrl();
+            $url = $this->venue->getCanonicalUrl();
 
             return [
                 '@type' => 'Organization',
@@ -4430,7 +4432,7 @@ class Event extends Model
             ];
         } elseif ($this->role() && $this->role()->isClaimed()) {
             $name = $this->role()->translatedName();
-            $url = $this->role()->getGuestUrl();
+            $url = $this->role()->getCanonicalUrl();
 
             return [
                 '@type' => 'Person',
@@ -4440,7 +4442,7 @@ class Event extends Model
         } elseif ($this->creatorRole) {
             // Fallback to creator role
             $name = $this->creatorRole->translatedName();
-            $url = $this->creatorRole->getGuestUrl();
+            $url = $this->creatorRole->getCanonicalUrl();
 
             return [
                 '@type' => $this->creatorRole->isVenue() ? 'Organization' : 'Person',
