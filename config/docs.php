@@ -566,6 +566,17 @@ return [
             'modified' => '2026-02-27',
         ],
 
+        'saas/facebook-login' => [
+            'group' => 'saas',
+            'route' => 'marketing.docs.saas.facebook_login',
+            'path' => '/docs/saas/facebook-login',
+            'title' => 'Facebook Login',
+            'blurb' => 'Let your customers sign up and log in with Facebook.',
+            'icon' => 'account',
+            'published' => '2026-09-23',
+            'modified' => '2026-09-23',
+        ],
+
         'saas/federation' => [
             'group' => 'saas',
             'route' => 'marketing.docs.saas.federation',

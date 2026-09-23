@@ -1624,6 +1624,14 @@ class MarketingController extends Controller
     }
 
     /**
+     * Facebook Login setup documentation
+     */
+    public function docsSaasFacebookLogin()
+    {
+        return view('marketing.docs.saas.facebook-login');
+    }
+
+    /**
      * Federation documentation.
      *
      * Mirrored across both docs trees because federation is available to any
@@ -6955,6 +6963,7 @@ class MarketingController extends Controller
             'saas_setup' => route('marketing.docs.saas.setup'),
             'saas_custom_domains' => route('marketing.docs.saas.custom_domains'),
             'saas_twilio' => route('marketing.docs.saas.twilio'),
+            'saas_facebook_login' => route('marketing.docs.saas.facebook_login'),
             'saas_federation' => route('marketing.docs.saas.federation'),
             'saas_monetization' => route('marketing.docs.saas.monetization'),
             'selfhost_federation' => route('marketing.docs.selfhost.federation'),
@@ -7328,7 +7337,15 @@ class MarketingController extends Controller
             ['page' => 'Installation', 'section' => 'Custom translations', 'description' => 'Rename Talent to Artist or any other UI term. Overrides live in storage/app/lang/ and survive upgrades.', 'url' => $r['selfhost_installation'].'#translations', 'category' => 'Selfhost', 'keywords' => 'translation language rename customize override messages talent artist curator event planner locale'],
             ['page' => 'SaaS Setup', 'section' => 'Scheduler and queue', 'description' => 'Drive timed tasks with a cron entry, a schedule:work process, or the /translate_data HTTP endpoint. Includes the stalled-scheduler alert.', 'url' => $r['saas_setup'].'#scheduler', 'category' => 'SaaS', 'keywords' => 'cron scheduler schedule:work schedule:run queue worker queue:work translate_data APP_CRON_SECRET heartbeat stalled timed tasks background jobs'],
             ['page' => 'SaaS Setup', 'section' => 'Backup storage', 'description' => 'Point schedule exports at object storage when the app runs on more than one server. Must be a private bucket, never the images bucket.', 'url' => $r['saas_setup'].'#backup-storage', 'category' => 'SaaS', 'keywords' => 'backup export storage bucket spaces s3 private BACKUP_SPACES_BUCKET download archive'],
-            ['page' => 'SaaS Setup', 'section' => 'Facebook Login', 'description' => 'Enable optional Continue with Facebook sign-in with a Meta app.', 'url' => $r['saas_setup'].'#facebook-login', 'category' => 'SaaS', 'keywords' => 'facebook login sign in oauth meta app redirect uri FACEBOOK_CLIENT_ID FACEBOOK_CLIENT_SECRET'],
+            ['page' => 'Facebook Login', 'section' => 'Overview', 'description' => 'Add Continue with Facebook sign-in and a Facebook Settings section for your customers. Off by default.', 'url' => $r['saas_facebook_login'].'#overview', 'category' => 'SaaS', 'keywords' => 'facebook login sign in sign up oauth meta social login continue with facebook'],
+            ['page' => 'Facebook Login', 'section' => 'Create the app', 'description' => 'Create a Consumer Meta app with the Facebook Login use case.', 'url' => $r['saas_facebook_login'].'#create-app', 'category' => 'SaaS', 'keywords' => 'facebook meta app developers create app consumer business'],
+            ['page' => 'Facebook Login', 'section' => 'Basic settings', 'description' => 'App domains, privacy policy, terms, data deletion URL, icon and category.', 'url' => $r['saas_facebook_login'].'#basic-settings', 'category' => 'SaaS', 'keywords' => 'facebook meta app domains privacy policy terms data deletion app secret app id'],
+            ['page' => 'Facebook Login', 'section' => 'Facebook Login settings', 'description' => 'Register the three OAuth redirect URIs on the app subdomain.', 'url' => $r['saas_facebook_login'].'#login-settings', 'category' => 'SaaS', 'keywords' => 'facebook redirect uri callback oauth valid oauth redirect uris strict mode https'],
+            ['page' => 'Facebook Login', 'section' => 'Permissions', 'description' => 'Add the email and public_profile permissions. No App Review needed.', 'url' => $r['saas_facebook_login'].'#permissions', 'category' => 'SaaS', 'keywords' => 'facebook permissions email public_profile advanced access app review'],
+            ['page' => 'Facebook Login', 'section' => 'Configure Event Schedule', 'description' => 'Set FACEBOOK_CLIENT_ID and FACEBOOK_CLIENT_SECRET in .env.', 'url' => $r['saas_facebook_login'].'#configure', 'category' => 'SaaS', 'keywords' => 'facebook env FACEBOOK_CLIENT_ID FACEBOOK_CLIENT_SECRET FACEBOOK_REDIRECT_URI config'],
+            ['page' => 'Facebook Login', 'section' => 'Test, then go Live', 'description' => 'Test with app roles and test users, then switch the app to Live.', 'url' => $r['saas_facebook_login'].'#go-live', 'category' => 'SaaS', 'keywords' => 'facebook test users app roles development live mode app not active'],
+            ['page' => 'Facebook Login', 'section' => 'How accounts are matched', 'description' => 'How a Facebook sign-in links to an existing account or creates a new one.', 'url' => $r['saas_facebook_login'].'#account-matching', 'category' => 'SaaS', 'keywords' => 'facebook account linking matching existing email placeholder rotate app secret'],
+            ['page' => 'Facebook Login', 'section' => 'Turning it off', 'description' => 'Unset either value to hide Facebook login. Stored links are kept.', 'url' => $r['saas_facebook_login'].'#disable', 'category' => 'SaaS', 'keywords' => 'facebook disable turn off remove login reset password'],
             ['page' => 'SaaS Setup', 'section' => 'Custom translations', 'description' => 'Override UI strings in storage/app/lang/ across every tenant. Survives upgrades.', 'url' => $r['saas_setup'].'#translations', 'category' => 'SaaS', 'keywords' => 'translation language rename customize override messages talent artist curator event planner locale'],
             ['page' => 'Installation', 'section' => 'Custom dashboard links', 'description' => 'Add custom links to the admin sidebar via CUSTOM_LINK_* environment variables.', 'url' => $r['selfhost_installation'].'#custom-links', 'category' => 'Selfhost', 'keywords' => 'custom links sidebar dashboard navigation menu env environment'],
             ['page' => 'SaaS Setup', 'section' => 'Custom dashboard links', 'description' => 'Add platform-wide custom links to the admin sidebar via CUSTOM_LINK_* environment variables.', 'url' => $r['saas_setup'].'#custom-links', 'category' => 'SaaS', 'keywords' => 'custom links sidebar dashboard navigation menu env environment'],

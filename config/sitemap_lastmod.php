@@ -54,6 +54,7 @@ return [
     '/docs/referral-program' => '2026-09-13',
     '/docs/saas' => '2026-09-23',
     '/docs/saas/custom-domains' => '2026-09-10',
+    '/docs/saas/facebook-login' => '2026-09-23',
     '/docs/saas/federation' => '2026-09-17',
     '/docs/saas/monetization' => '2026-09-10',
     '/docs/saas/twilio' => '2026-09-10',

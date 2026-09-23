@@ -685,6 +685,10 @@ echo '<?xml version="1.0" encoding="UTF-8"?>'; ?>
         {!! $lastmodTag('/docs/saas/twilio') !!}
     </url>
     <url>
+        <loc>{{ url('/docs/saas/facebook-login') }}</loc>
+        {!! $lastmodTag('/docs/saas/facebook-login') !!}
+    </url>
+    <url>
         <loc>{{ url('/docs/saas/federation') }}</loc>
         {!! $lastmodTag('/docs/saas/federation') !!}
     </url>

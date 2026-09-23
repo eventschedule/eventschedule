@@ -1355,6 +1355,7 @@ if (config('app.is_nexus')) {
         Route::get('/docs/saas', [MarketingController::class, 'docsSaasSetup'])->name('marketing.docs.saas.setup');
         Route::get('/docs/saas/custom-domains', [MarketingController::class, 'docsSaasCustomDomains'])->name('marketing.docs.saas.custom_domains');
         Route::get('/docs/saas/twilio', [MarketingController::class, 'docsSaasTwilio'])->name('marketing.docs.saas.twilio');
+        Route::get('/docs/saas/facebook-login', [MarketingController::class, 'docsSaasFacebookLogin'])->name('marketing.docs.saas.facebook_login');
         Route::get('/docs/saas/federation', [MarketingController::class, 'docsSaasFederation'])->name('marketing.docs.saas.federation');
         Route::get('/docs/saas/monetization', [MarketingController::class, 'docsSaasMonetization'])->name('marketing.docs.saas.monetization');
         Route::get('/docs/selfhost/federation', [MarketingController::class, 'docsSelfhostFederation'])->name('marketing.docs.selfhost.federation');
@@ -1623,6 +1624,7 @@ if (config('app.is_nexus')) {
             Route::get('/docs/saas', [MarketingController::class, 'docsSaasSetup'])->name('marketing.docs.saas.setup');
             Route::get('/docs/saas/custom-domains', [MarketingController::class, 'docsSaasCustomDomains'])->name('marketing.docs.saas.custom_domains');
             Route::get('/docs/saas/twilio', [MarketingController::class, 'docsSaasTwilio'])->name('marketing.docs.saas.twilio');
+            Route::get('/docs/saas/facebook-login', [MarketingController::class, 'docsSaasFacebookLogin'])->name('marketing.docs.saas.facebook_login');
             Route::get('/docs/saas/federation', [MarketingController::class, 'docsSaasFederation'])->name('marketing.docs.saas.federation');
             Route::get('/docs/saas/monetization', [MarketingController::class, 'docsSaasMonetization'])->name('marketing.docs.saas.monetization');
             Route::get('/docs/selfhost/federation', [MarketingController::class, 'docsSelfhostFederation'])->name('marketing.docs.selfhost.federation');
@@ -1826,6 +1828,7 @@ if (config('app.is_nexus')) {
             Route::get('/docs/saas', fn () => redirect('https://'._base_domain().'/docs/saas', 301));
             Route::get('/docs/saas/custom-domains', fn () => redirect('https://'._base_domain().'/docs/saas/custom-domains', 301));
             Route::get('/docs/saas/twilio', fn () => redirect('https://'._base_domain().'/docs/saas/twilio', 301));
+            Route::get('/docs/saas/facebook-login', fn () => redirect('https://'._base_domain().'/docs/saas/facebook-login', 301));
             Route::get('/docs/saas/federation', fn () => redirect('https://'._base_domain().'/docs/saas/federation', 301));
             Route::get('/docs/saas/monetization', fn () => redirect('https://'._base_domain().'/docs/saas/monetization', 301));
             Route::get('/docs/selfhost/federation', fn () => redirect('https://'._base_domain().'/docs/selfhost/federation', 301));
@@ -1993,6 +1996,7 @@ if (config('app.is_nexus')) {
     Route::get('/docs/saas', fn () => redirect()->route('home'))->name('marketing.docs.saas.setup');
     Route::get('/docs/saas/custom-domains', fn () => redirect()->route('home'))->name('marketing.docs.saas.custom_domains');
     Route::get('/docs/saas/twilio', fn () => redirect()->route('home'))->name('marketing.docs.saas.twilio');
+    Route::get('/docs/saas/facebook-login', fn () => redirect()->route('home'))->name('marketing.docs.saas.facebook_login');
     Route::get('/docs/saas/federation', fn () => redirect()->route('home'))->name('marketing.docs.saas.federation');
     Route::get('/docs/saas/monetization', fn () => redirect()->route('home'))->name('marketing.docs.saas.monetization');
     Route::get('/docs/selfhost/federation', fn () => redirect()->route('home'))->name('marketing.docs.selfhost.federation');

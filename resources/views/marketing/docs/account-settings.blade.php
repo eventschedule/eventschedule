@@ -457,7 +457,7 @@
             </div>
             <div class="doc-field">
                 <h4 class="font-semibold text-gray-900 dark:text-white mb-2">Setting it up</h4>
-                <p class="text-sm text-gray-500 dark:text-gray-400">Facebook login needs a Facebook app configured by whoever runs the installation. Without it there is no Facebook button or settings section. See <x-link href="{{ route('marketing.docs.saas.setup') }}#facebook-login">Facebook login setup</x-link>.</p>
+                <p class="text-sm text-gray-500 dark:text-gray-400">Facebook login needs a Facebook app configured by whoever runs the installation. Without it there is no Facebook button or settings section. See <x-link href="{{ route('marketing.docs.saas.facebook_login') }}">Facebook login setup</x-link>.</p>
             </div>
         </div>
     </section>
