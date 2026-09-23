@@ -130,6 +130,16 @@ return [
         'app_hostname' => env('DO_APP_HOSTNAME'),
     ],
 
+    // Facebook Login ("Continue with Facebook" on the login and sign-up pages, plus a Facebook
+    // panel in Settings). Separate from 'meta' below, which is Boost's Marketing API app. Every
+    // surface gates on facebook_login_enabled(), which needs BOTH values: unset = no Facebook UI
+    // anywhere and the auth.facebook* routes 404. Setup: docs/FACEBOOK_LOGIN_SETUP.md.
+    'facebook' => [
+        'client_id' => env('FACEBOOK_CLIENT_ID'),
+        'client_secret' => env('FACEBOOK_CLIENT_SECRET'),
+        'redirect' => env('FACEBOOK_REDIRECT_URI'),
+    ],
+
     'openai' => [
         'api_key' => env('OPENAI_API_KEY'),
         'translation_model' => env('OPENAI_TRANSLATION_MODEL') ?: 'gpt-4o',

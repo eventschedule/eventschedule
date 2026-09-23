@@ -129,6 +129,7 @@ class HelpUtils
                 'section-webhooks' => '/docs/account-settings#webhooks',
                 'section-google-calendar' => '/docs/account-settings#google',
                 'section-microsoft-calendar' => '/docs/account-settings#microsoft',
+                'section-facebook' => '/docs/account-settings#facebook',
                 'section-backup' => '/docs/account-settings#backup',
                 'section-app' => '/docs/account-settings#app-update',
                 'section-password' => '/docs/account-settings#password',

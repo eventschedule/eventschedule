@@ -26,7 +26,7 @@
             </svg>
             Overview
         </h2>
-        <p class="text-gray-600 dark:text-gray-300 mb-6">Boost lets the schedules on your instance promote events through paid Facebook and Instagram ads via the Meta Marketing API. Your instance acts as the intermediary: it creates the campaign, ad set and ad on behalf of the schedule owner using a single platform-owned Meta ad account, Facebook Page and system user token that you configure here. Nobody has to connect their own Facebook account, and there is no Facebook login step anywhere in the boost flow. For what the feature looks like from the schedule owner's side, see the <a href="{{ route('marketing.docs.boost') }}" class="doc-link">Boost user guide</a>.</p>
+        <p class="text-gray-600 dark:text-gray-300 mb-6">Boost lets the schedules on your instance promote events through paid Facebook and Instagram ads via the Meta Marketing API. Your instance acts as the intermediary: it creates the campaign, ad set and ad on behalf of the schedule owner using a single platform-owned Meta ad account, Facebook Page and system user token that you configure here. Nobody has to connect their own Facebook account: Boost never asks a schedule owner to sign in to Facebook, and it is unrelated to the optional Facebook login. For what the feature looks like from the schedule owner's side, see the <a href="{{ route('marketing.docs.boost') }}" class="doc-link">Boost user guide</a>.</p>
 
         <p class="text-gray-600 dark:text-gray-300 mb-4">Before you start, make sure you have:</p>
         <ul class="doc-list mb-6">

@@ -67,6 +67,14 @@ Route::middleware(['app_subdomain', 'guest'])->group(function () {
     Route::get('auth/google/callback', [SocialAuthController::class, 'handleGoogleCallback'])
         ->name('auth.google.callback');
 
+    // Facebook Login. Always registered so the names resolve; every action 404s unless
+    // facebook_login_enabled().
+    Route::get('auth/facebook', [SocialAuthController::class, 'redirectToFacebook'])
+        ->name('auth.facebook');
+
+    Route::get('auth/facebook/callback', [SocialAuthController::class, 'handleFacebookCallback'])
+        ->name('auth.facebook.callback');
+
     Route::get('two-factor-challenge', [TwoFactorChallengeController::class, 'create'])
         ->name('two-factor.challenge');
 
@@ -137,4 +145,20 @@ Route::middleware('auth')->group(function () {
 
     Route::post('auth/google/disconnect', [SocialAuthController::class, 'disconnectGoogle'])
         ->name('auth.google.disconnect');
+
+    // Facebook: re-authentication to set a password, and connect/disconnect from Settings
+    Route::get('auth/facebook/set-password', [SocialAuthController::class, 'redirectToFacebookForSetPassword'])
+        ->name('auth.facebook.set_password');
+
+    Route::get('auth/facebook/set-password/callback', [SocialAuthController::class, 'handleFacebookCallbackForSetPassword'])
+        ->name('auth.facebook.set_password.callback');
+
+    Route::get('auth/facebook/connect', [SocialAuthController::class, 'redirectToFacebookConnect'])
+        ->name('auth.facebook.connect');
+
+    Route::get('auth/facebook/connect/callback', [SocialAuthController::class, 'handleFacebookConnectCallback'])
+        ->name('auth.facebook.connect.callback');
+
+    Route::post('auth/facebook/disconnect', [SocialAuthController::class, 'disconnectFacebook'])
+        ->name('auth.facebook.disconnect');
 });

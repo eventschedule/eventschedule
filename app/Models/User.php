@@ -1016,6 +1016,24 @@ class User extends Authenticatable implements MustVerifyEmail
     }
 
     /**
+     * Whether unlinking this social provider still leaves a way to sign in: a password, or the
+     * other provider. Removing the last one would lock the account.
+     *
+     * A Facebook link only counts while Facebook login is configured: once the install unsets it
+     * the auth.facebook* routes 404, so a stored facebook_id is no way in at all.
+     */
+    public function canDisconnectSocialLogin(string $provider): bool
+    {
+        if ($this->hasPassword()) {
+            return true;
+        }
+
+        return $provider === 'google'
+            ? facebook_login_enabled() && ! is_null($this->facebook_id)
+            : ! is_null($this->google_oauth_id);
+    }
+
+    /**
      * Check if user's language is RTL (right-to-left)
      */
     public function isRtl(): bool

@@ -1036,11 +1036,20 @@
         {{-- Hosted puts Google FIRST: about half of all accounts arrive this way, and it is the
              one path with no code to wait for. It stays on screen in step two on purpose - see
              showCodeSentState(). Selfhost keeps it below the form (further down). --}}
-        @if (config('app.hosted') && config('services.google.client_id') && public_registration_enabled())
+        @if (config('app.hosted') && (config('services.google.client_id') || facebook_login_enabled()) && public_registration_enabled())
         <div id="google-signup-section" class="w-full" data-requires-terms>
             {{-- "Continue with", not "Sign up with": a returning Google user reaching this page
-                 should not be told they are signing up. --}}
-            <x-google-button>{{ __('messages.continue_with_google') }}</x-google-button>
+                 should not be told they are signing up. Google first, Facebook second: Google is
+                 the proven path. Both sit inside [data-requires-terms], so the terms check covers
+                 them alike. --}}
+            <div class="space-y-3">
+                @if (config('services.google.client_id'))
+                <x-google-button>{{ __('messages.continue_with_google') }}</x-google-button>
+                @endif
+                @if (facebook_login_enabled())
+                <x-facebook-button>{{ __('messages.continue_with_facebook') }}</x-facebook-button>
+                @endif
+            </div>
 
             {{-- A flex rule, not a line behind an opaque label: .auth-card is a gradient, so no
                  flat mask colour can match the surface behind it. --}}
@@ -1192,7 +1201,7 @@
         </button>
         @endif
 
-        @if (! config('app.hosted') && config('services.google.client_id') && public_registration_enabled())
+        @if (! config('app.hosted') && (config('services.google.client_id') || facebook_login_enabled()) && public_registration_enabled())
         <div id="google-signup-section" class="w-full mt-6">
             {{-- A flex rule with the label between the two halves, NOT an absolutely-positioned
                  line behind an opaque label. .auth-card is a gradient (app.css) and this layout
@@ -1209,7 +1218,14 @@
                  returning Google user reaching this page should not be told they are signing up.
                  The component carries aria-hidden on the icon and the logical me-2 margin; its
                  docblock asks the seven hand-rolled copies to adopt it when next touched. --}}
-            <x-google-button>{{ __('messages.continue_with_google') }}</x-google-button>
+            <div class="space-y-3">
+                @if (config('services.google.client_id'))
+                <x-google-button>{{ __('messages.continue_with_google') }}</x-google-button>
+                @endif
+                @if (facebook_login_enabled())
+                <x-facebook-button>{{ __('messages.continue_with_facebook') }}</x-facebook-button>
+                @endif
+            </div>
         </div>
         @endif
 
@@ -1305,4 +1321,5 @@
         </a>
     </div>
     @endif
+    @include('partials.social-login-guard')
 </x-auth-layout>

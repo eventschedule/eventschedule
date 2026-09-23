@@ -800,6 +800,11 @@
             ...(\App\Services\Wallet\GoogleWalletService::isConfigured()
                 ? [['Google Wallet', 'Ticket passes, and only when a buyer chooses to add a ticket to their wallet. The pass carries the attendee name, the ticket type and number, how many it admits, any seat labels, the event name and a link to its page, the venue with its address and map coordinates, the start and end time, up to 200 characters of the ticket notes the organizer wrote for the event, the schedule name, color and logo, the event image, and the ticket link, which includes the secret code of that ticket because that is what the door scanner reads. Google keeps a saved pass; it can be expired but not deleted']]
                 : []),
+            // Same rule: listed only while facebook_login_enabled(), the predicate behind every
+            // Facebook button and route. Meta's app review reads this page for exactly this.
+            ...(facebook_login_enabled()
+                ? [['Meta (Facebook Login)', 'Sign-in, and only when you choose Continue with Facebook. Facebook tells us your name, email address and Facebook account ID; we keep the name and email on your account and store the ID to recognise you next time. We never receive your password and never store a Facebook access token. You can disconnect Facebook in Settings at any time, and deleting your account removes all of it']]
+                : []),
             ['Stay22', 'Accommodation search, on event pages where the schedule has enabled the accommodation map, and only once the map has been loaded'],
         ];
 

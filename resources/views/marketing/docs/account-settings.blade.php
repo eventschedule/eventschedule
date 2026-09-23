@@ -18,6 +18,7 @@
         <x-doc-nav-link href="#webhooks">Webhooks</x-doc-nav-link>
         <x-doc-nav-link href="#google">Google Settings</x-doc-nav-link>
         <x-doc-nav-link href="#microsoft">Outlook Calendar</x-doc-nav-link>
+        <x-doc-nav-link href="#facebook">Facebook Settings</x-doc-nav-link>
         <x-doc-nav-link href="#backup">Backup & Restore</x-doc-nav-link>
         <x-doc-nav-link href="#app-update">App Update</x-doc-nav-link>
         <x-doc-nav-link href="#password">Update Password</x-doc-nav-link>
@@ -385,7 +386,7 @@
         <div class="doc-fields">
             <div class="doc-field">
                 <h3 class="font-semibold text-gray-900 dark:text-white mb-2">Google Account</h3>
-                <p class="text-sm text-gray-500 dark:text-gray-400">Links your Google identity so you can sign in with Google. <strong class="text-gray-900 dark:text-white">Disconnect</strong> is only available once your account has a password, otherwise you would lock yourself out; set one first under <a href="#password" class="doc-link">Update Password</a>.</p>
+                <p class="text-sm text-gray-500 dark:text-gray-400">Links your Google identity so you can sign in with Google. <strong class="text-gray-900 dark:text-white">Disconnect</strong> is only available while you have another way to log in (a password, or a connected Facebook account), otherwise you would lock yourself out; set a password first under <a href="#password" class="doc-link">Update Password</a>.</p>
             </div>
             <div class="doc-field">
                 <h4 class="font-semibold text-gray-900 dark:text-white mb-2">Google Calendar</h4>
@@ -430,6 +431,34 @@
         <div class="doc-callout doc-callout-tip">
             <div class="doc-callout-title">Tip</div>
             <p>Enable the Teams meetings option on a schedule to have a Microsoft Teams meeting created automatically for its online events.</p>
+        </div>
+    </section>
+
+    <!-- Facebook Settings -->
+    <section id="facebook" class="doc-section">
+        <h2 class="doc-heading">
+            <svg aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-5 h-5 text-gray-500 dark:text-gray-400 flex-shrink-0">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M14.25 8.25h-1.5a1.5 1.5 0 0 0-1.5 1.5v11.25M9 13.5h6M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z" />
+            </svg>
+            Facebook Settings
+        </h2>
+        <p class="text-gray-600 dark:text-gray-300 mb-4">
+            Links your Facebook account so you can log in with <strong class="text-gray-900 dark:text-white">Continue with Facebook</strong>. The section only appears when Facebook login is enabled on the installation.
+        </p>
+
+        <div class="doc-fields">
+            <div class="doc-field">
+                <h3 class="font-semibold text-gray-900 dark:text-white mb-2">Connecting</h3>
+                <p class="text-sm text-gray-500 dark:text-gray-400">Click <strong class="text-gray-900 dark:text-white">Connect Facebook Account</strong> and approve on Facebook. If you use Continue with Facebook on the login page and an account with your email already exists, you are asked to log in once the usual way; your Facebook account is linked as soon as you do.</p>
+            </div>
+            <div class="doc-field">
+                <h4 class="font-semibold text-gray-900 dark:text-white mb-2">Disconnecting</h4>
+                <p class="text-sm text-gray-500 dark:text-gray-400"><strong class="text-gray-900 dark:text-white">Disconnect</strong> is only available while you still have another way to log in: a password, or a connected Google account. Set a password first under <a href="#password" class="doc-link">Update Password</a> if Facebook is your only one.</p>
+            </div>
+            <div class="doc-field">
+                <h4 class="font-semibold text-gray-900 dark:text-white mb-2">Selfhosted installations</h4>
+                <p class="text-sm text-gray-500 dark:text-gray-400">Facebook login needs a Facebook app on the server. Without it there is no Facebook button or settings section. See <x-link href="{{ route('marketing.docs.selfhost.installation') }}#facebook-login">Facebook login setup</x-link>.</p>
+            </div>
         </div>
     </section>
 
@@ -506,7 +535,7 @@
             Enter your current password, choose a new one and save. A password must be at least 8 characters long.
         </p>
         <p class="text-gray-600 dark:text-gray-300 mb-4">
-            If your account was created by signing in with Google it has no password yet, and the section is titled <strong class="text-gray-900 dark:text-white">Set Password</strong> instead. It first asks you to confirm who you are with Google; after that you have a few minutes to choose a password, and only the new password field is shown.
+            If your account was created by signing in with Google or Facebook it has no password yet, and the section is titled <strong class="text-gray-900 dark:text-white">Set Password</strong> instead. It first asks you to confirm who you are with that account; after that you have a few minutes to choose a password, and only the new password field is shown.
         </p>
         <div class="doc-callout doc-callout-tip">
             <div class="doc-callout-title">Tip</div>
@@ -528,7 +557,7 @@
 
         <h3 class="doc-subheading">Turning it on</h3>
         <ol class="doc-list doc-list-numbered mb-6">
-            <li>Enter your current password and click <strong class="text-gray-900 dark:text-white">Enable Two-Factor Authentication</strong>. Accounts with no password, created by signing in with Google, are not asked for one.</li>
+            <li>Enter your current password and click <strong class="text-gray-900 dark:text-white">Enable Two-Factor Authentication</strong>. Accounts with no password, created by signing in with Google or Facebook, are not asked for one.</li>
             <li>Scan the QR code with your authenticator app. If you cannot scan, type the key printed under the code into the app by hand.</li>
             <li>Save the recovery codes shown on the same screen, somewhere other than the device holding the authenticator app.</li>
             <li>Type the 6-digit code from the app and click <strong class="text-gray-900 dark:text-white">Confirm</strong>. Two-factor authentication is not active until this step succeeds.</li>
@@ -575,7 +604,7 @@
 
         <div class="doc-callout doc-callout-warning">
             <div class="doc-callout-title">Warning</div>
-            <p>Deletion is permanent and cannot be undone. If your account has a password you are asked to type it in the dialog to confirm; accounts that only sign in with Google confirm without one.</p>
+            <p>Deletion is permanent and cannot be undone. If your account has a password you are asked to type it in the dialog to confirm; accounts that only sign in with Google or Facebook confirm without one.</p>
         </div>
 
         <div class="doc-callout doc-callout-info">

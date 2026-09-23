@@ -70,6 +70,14 @@
                             </svg>
                             {{ __('messages.microsoft_settings') }}
                         </a>
+                        @if (facebook_login_enabled())
+                        <a href="#section-facebook" class="section-nav-link" data-section="section-facebook">
+                            <svg class="w-5 h-5" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M14.25 8.25h-1.5a1.5 1.5 0 0 0-1.5 1.5v11.25M9 13.5h6M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z" />
+                            </svg>
+                            {{ __('messages.facebook_settings') }}
+                        </a>
+                        @endif
                         <a href="#section-backup" class="section-nav-link" data-section="section-backup">
                             <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-5 h-5">
                                 <path stroke-linecap="round" stroke-linejoin="round" d="M20.25 6.375c0 2.278-3.694 4.125-8.25 4.125S3.75 8.653 3.75 6.375m16.5 0c0-2.278-3.694-4.125-8.25-4.125S3.75 4.097 3.75 6.375m16.5 0v11.25c0 2.278-3.694 4.125-8.25 4.125s-8.25-1.847-8.25-4.125V6.375m16.5 0v3.75m-16.5-3.75v3.75m16.5 0v3.75C20.25 16.153 16.556 18 12 18s-8.25-1.847-8.25-4.125v-3.75m16.5 0c0 2.278-3.694 4.125-8.25 4.125s-8.25-1.847-8.25-4.125" />
@@ -212,6 +220,25 @@
                         @include('profile.partials.microsoft-calendar-form')
                     </div>
                 </div>
+
+                @if (facebook_login_enabled())
+                <button type="button" class="mobile-section-header" data-section="section-facebook">
+                    <span class="flex items-center gap-2 text-sm font-medium text-gray-700 dark:text-gray-300">
+                        <svg class="w-5 h-5" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M14.25 8.25h-1.5a1.5 1.5 0 0 0-1.5 1.5v11.25M9 13.5h6M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z" />
+                        </svg>
+                        {{ __('messages.facebook_settings') }}
+                    </span>
+                    <svg class="w-5 h-5 text-gray-400 transition-transform duration-200 accordion-chevron" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
+                    </svg>
+                </button>
+                <div id="section-facebook" class="section-content lg:mt-0">
+                    <div class="max-w-xl">
+                        @include('profile.partials.facebook-account-form')
+                    </div>
+                </div>
+                @endif
 
                 <button type="button" class="mobile-section-header" data-section="section-backup">
                     <span class="flex items-center gap-2 text-sm font-medium text-gray-700 dark:text-gray-300">

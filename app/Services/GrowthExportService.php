@@ -554,7 +554,7 @@ class GrowthExportService
                 $u->utm_medium,
                 $this->hostOf($u->referrer_url),
                 $this->pathOf($u->landing_page),
-                $u->google_oauth_id ? 'google' : ($u->password ? 'email' : 'other'),
+                $u->google_oauth_id ? 'google' : ($u->facebook_id ? 'facebook' : ($u->password ? 'email' : 'other')),
                 // OR-defined, exactly as funnelData()'s reached_schedule stage is, so the step
                 // can never come out BELOW the saved_schedule it contains. The timestamp alone
                 // is only stamped by RoleController::create() and only since 2026-07-07, so a

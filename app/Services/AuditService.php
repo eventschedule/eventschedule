@@ -21,6 +21,8 @@ class AuditService
 
     const AUTH_GOOGLE_LOGIN = 'auth.google_login';
 
+    const AUTH_FACEBOOK_LOGIN = 'auth.facebook_login';
+
     const AUTH_2FA_ENABLED = 'auth.2fa_enabled';
 
     const AUTH_2FA_DISABLED = 'auth.2fa_disabled';

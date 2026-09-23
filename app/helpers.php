@@ -1052,6 +1052,22 @@ if (! function_exists('public_registration_enabled')) {
     }
 }
 
+if (! function_exists('facebook_login_enabled')) {
+    /**
+     * Whether "Continue with Facebook" is offered on this install.
+     *
+     * The single switch for every Facebook Login surface: the login and sign-up buttons, the
+     * Settings panel and its sidebar link, the set-password re-auth button, and the auth.facebook*
+     * routes themselves (which 404 when this is false). Both values are required - an ID without
+     * its secret would render a button whose callback can only fail.
+     */
+    function facebook_login_enabled(): bool
+    {
+        return filled(config('services.facebook.client_id'))
+            && filled(config('services.facebook.client_secret'));
+    }
+}
+
 if (! function_exists('selfhost_needs_setup')) {
     /**
      * Whether a selfhosted install still needs the first-run setup wizard.

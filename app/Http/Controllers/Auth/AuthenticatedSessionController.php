@@ -7,6 +7,7 @@ use App\Http\Requests\Auth\LoginRequest;
 use App\Models\User;
 use App\Services\AuditService;
 use App\Utils\HoneypotUtils;
+use App\Utils\SocialLoginUtils;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -88,7 +89,14 @@ class AuthenticatedSessionController extends Controller
             $user->update(['follow_consent_dismissed' => true]);
         }
 
-        return redirect()->intended(route('home', absolute: false));
+        SocialLoginUtils::rememberMethod('password');
+
+        // "Continue with Facebook" found this account by email and sent its owner here to prove
+        // they hold it; signing in completes the link.
+        $linked = SocialLoginUtils::consumePendingLink($user);
+        $redirect = redirect()->intended(route('home', absolute: false));
+
+        return $linked ? $redirect->with('message', $linked) : $redirect;
     }
 
     /**

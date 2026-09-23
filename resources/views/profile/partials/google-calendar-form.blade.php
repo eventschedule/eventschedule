@@ -39,7 +39,7 @@
                                 {{ __('messages.google_account_connected') }}
                             </span>
                         </div>
-                        @if (auth()->user()->hasPassword())
+                        @if (auth()->user()->canDisconnectSocialLogin('google'))
                             <form method="POST" action="{{ route('auth.google.disconnect') }}" class="inline">
                                 @csrf
                                 <button type="submit"
@@ -54,7 +54,7 @@
                             </span>
                         @endif
                     </div>
-                    @if (!auth()->user()->hasPassword())
+                    @if (! auth()->user()->canDisconnectSocialLogin('google'))
                         <p class="mt-2 text-sm text-amber-600 dark:text-amber-400">
                             {{ __('messages.cannot_disconnect_google_no_password') }}
                         </p>

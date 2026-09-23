@@ -123,7 +123,7 @@
 
         <ol class="doc-list doc-list-numbered mb-6">
             <li>Grant the flag by running <code class="doc-inline-code">php artisan app:make-admin you@example.com</code> on the server, or by updating the <code class="doc-inline-code">users</code> table directly (see the query below). Run the command with no email to list who is an admin already.</li>
-            <li>Make sure the account has a password. An account created through Google sign-in has none, and the panel will send you to your profile settings to set one first.</li>
+            <li>Make sure the account has a password. An account created through Google or Facebook sign-in has none, and the panel will send you to your profile settings to set one first.</li>
             <li>Sign in and open <code class="doc-inline-code">/admin</code>, or use the <strong class="text-gray-900 dark:text-white">Admin</strong> item that now appears at the bottom of the main sidebar.</li>
             <li>Re-enter your password when prompted. This confirmation is required once per session, on top of being signed in.</li>
         </ol>

@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Models\User;
 use App\Services\AuditService;
 use App\Utils\HoneypotUtils;
+use App\Utils\SocialLoginUtils;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -131,6 +132,12 @@ class TwoFactorChallengeController extends Controller
 
         AuditService::log(AuditService::AUTH_LOGIN, $user->id);
 
-        return redirect()->intended(route('home', absolute: false));
+        SocialLoginUtils::rememberMethod('password');
+
+        // A pending Facebook link survives the 2FA step: session()->regenerate() keeps its data.
+        $linked = SocialLoginUtils::consumePendingLink($user);
+        $redirect = redirect()->intended(route('home', absolute: false));
+
+        return $linked ? $redirect->with('message', $linked) : $redirect;
     }
 }
