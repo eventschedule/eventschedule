@@ -24,7 +24,15 @@
             Overview
         </h2>
         <p class="text-gray-600 dark:text-gray-300 mb-4">Adds <span class="font-semibold text-gray-900 dark:text-white">Continue with Facebook</span> to the login and sign-up pages, and a <span class="font-semibold text-gray-900 dark:text-white">Facebook Settings</span> section where your customers connect or disconnect Facebook, or verify with it before setting a password. It is optional and <span class="font-semibold text-gray-900 dark:text-white">off by default</span>. Until both values under <a href="#configure" class="doc-link">Configure Event Schedule</a> are set there is no Facebook button, settings section or sidebar link, no Facebook entry in the bundled privacy policy's processor list, and every <code class="doc-inline-code">/auth/facebook</code> URL returns 404.</p>
-        <p class="text-gray-600 dark:text-gray-300 mb-6">This is a separate Meta app from the one Boost uses (<code class="doc-inline-code">META_APP_ID</code>). Do not reuse those credentials.</p>
+        <div class="doc-callout doc-callout-info">
+            <div class="doc-callout-title">Events are not synced</div>
+            <p>Facebook login only signs people in. It does not import events from Facebook or publish events there: Meta limits reading Page and personal events to its approved Marketing Partners, and publishing them to its Official Events API partners, which is closed to new applicants. To promote an event on Facebook, share its link, post an image from <a href="{{ route('marketing.docs.event_graphics') }}" class="doc-link">event graphics</a>, or run a paid <a href="{{ route('marketing.docs.boost') }}" class="doc-link">Boost</a>.</p>
+        </div>
+
+        <h3 id="reuse-boost-app" class="doc-subheading">Reusing the Boost app</h3>
+        <p class="text-gray-600 dark:text-gray-300 mb-4">We recommend a new Consumer app just for login, as described below. The app the <a href="{{ route('marketing.docs.selfhost.boost') }}#facebook-app" class="doc-link">Boost setup</a> creates (<code class="doc-inline-code">META_APP_ID</code>) is a Business app, and Business apps usually offer only <span class="font-semibold text-gray-900 dark:text-white">Facebook Login for Business</span>, which Event Schedule does not support.</p>
+        <p class="text-gray-600 dark:text-gray-300 mb-4">You can reuse the Boost app only if its dashboard lets you add the <span class="font-semibold text-gray-900 dark:text-white">Authenticate and request data from users with Facebook Login</span> use case. If it does, follow steps 2 to 6 on that app and set <code class="doc-inline-code">FACEBOOK_CLIENT_ID</code> and <code class="doc-inline-code">FACEBOOK_CLIENT_SECRET</code> to its App ID and App Secret. Both features then share one App Secret, so rotating it means updating <code class="doc-inline-code">META_APP_SECRET</code> too.</p>
+        <p class="text-gray-600 dark:text-gray-300 mb-6">Decide before launch. Facebook links belong to one app, so switching apps later disconnects everyone who linked Facebook (see <a href="#account-matching" class="doc-link">How accounts are matched</a>).</p>
     </section>
 
     <section id="create-app" class="doc-section">

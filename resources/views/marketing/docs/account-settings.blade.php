@@ -443,7 +443,7 @@
             Facebook Settings
         </h2>
         <p class="text-gray-600 dark:text-gray-300 mb-4">
-            Links your Facebook account so you can log in with <strong class="text-gray-900 dark:text-white">Continue with Facebook</strong>. The section only appears when Facebook login is enabled on the installation.
+            Links your Facebook account so you can log in with <strong class="text-gray-900 dark:text-white">Continue with Facebook</strong>. The section only appears when Facebook login is enabled on the installation. It is only for logging in: your events are not imported from or published to Facebook.
         </p>
 
         <div class="doc-fields">
