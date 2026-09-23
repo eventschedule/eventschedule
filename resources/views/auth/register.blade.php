@@ -30,6 +30,8 @@
         @if (config('app.hosted'))
         var lockedEmail = null;
         var turnstileWidgetId = null;
+        // True while Cloudflare has a challenge on screen; see waitForTurnstileToken().
+        var turnstileInteractive = false;
 
         /**
          * Reveal the fields that only apply once a verification code has been sent.
@@ -40,12 +42,12 @@
          * validation without submitting or saying anything (issue #124).
          */
         function revealSignupFields() {
-            ['name-field', 'password-field', 'verification-code-field', 'terms-field', 'submit-section'].forEach(function (id) {
+            ['name-field', 'password-field', 'verification-code-field', 'submit-section'].forEach(function (id) {
                 var el = document.getElementById(id);
                 if (el) el.style.display = 'block';
             });
 
-            ['name', 'password', 'terms', 'verification_code'].forEach(function (id) {
+            ['name', 'password', 'verification_code'].forEach(function (id) {
                 var el = document.getElementById(id);
                 if (el) el.required = true;
             });
@@ -60,12 +62,12 @@
          * arms these at the moment they become visible rather than in the markup.
          */
         function hideSignupFields() {
-            ['name-field', 'password-field', 'verification-code-field', 'terms-field', 'submit-section'].forEach(function (id) {
+            ['name-field', 'password-field', 'verification-code-field', 'submit-section'].forEach(function (id) {
                 var el = document.getElementById(id);
                 if (el) el.style.display = 'none';
             });
 
-            ['name', 'password', 'terms', 'verification_code'].forEach(function (id) {
+            ['name', 'password', 'verification_code'].forEach(function (id) {
                 var el = document.getElementById(id);
                 if (el) el.required = false;
             });
@@ -101,6 +103,12 @@
                 // request a code at all.
                 var sendCodeBtn = document.getElementById('send-code-btn');
                 if (sendCodeBtn) sendCodeBtn.style.display = 'none';
+
+                // The panel states the address and offers "use a different email", so the locked
+                // field above it only repeated it. Same guard as the panel: with no address (an
+                // error reload) the field must stay, or there is nothing left to type into.
+                var emailEntry = document.getElementById('email-entry');
+                if (emailEntry) emailEntry.style.display = 'none';
             }
 
             // Only with an address. The restore path calls this with emailInput.value, which can
@@ -137,6 +145,9 @@
             emailInput.classList.remove('bg-gray-100', 'dark:bg-gray-700', 'cursor-not-allowed');
             if (panel) panel.style.display = 'none';
             if (codeInput) codeInput.value = '';
+
+            var emailEntry = document.getElementById('email-entry');
+            if (emailEntry) emailEntry.style.display = '';
             if (codeMessage) codeMessage.innerHTML = '';
 
             // The rest of the inverse. Without it the page sat in a hybrid state: the panel gone,
@@ -327,6 +338,8 @@
         function sendVerificationCode(triggerBtn) {
                 if (sendInFlight) return;
 
+                if (!requireTerms()) return;
+
                 var myGeneration = ++sendGeneration;
 
                 var email = document.getElementById('email').value;
@@ -346,24 +359,79 @@
                     return;
                 }
 
-                // Get Turnstile token if available
-                var turnstileToken = '';
-                var turnstileInput = document.querySelector('input[name="cf-turnstile-response"]');
-                if (turnstileInput) {
-                    turnstileToken = turnstileInput.value;
-                }
+                // Disable button and show loading
+                sendInFlight = true;
+                setSendButtonBusy(sendCodeBtn);
+                codeMessage.innerHTML = '';
 
+                // The widget is interaction-only, so its token arrives on its own a moment after
+                // load - or after a challenge - and a quick click can beat it. Wait for it under
+                // the busy state instead of posting an empty token into a guaranteed "verification
+                // failed". After the deadline, send anyway: the server's own Turnstile error then
+                // comes back through the normal failure path below.
+                waitForTurnstileToken(8000, function (turnstileToken) {
+                    // Superseded by changeEmail() while waiting: that already reset the flag.
+                    if (myGeneration !== sendGeneration) return;
+                    postVerificationCode(email, turnstileToken, sendCodeBtn, codeMessage, myGeneration);
+                });
+            }
+
+        /**
+         * The consent box sits above both ways in and gates both.
+         *
+         * Google is a plain link and the code request is a fetch, so neither is covered by the
+         * form's own constraint validation - this is the check for them. Returns false and says
+         * why, at the box, when it is not ticked.
+         */
+        function requireTerms() {
+            var terms = document.getElementById('terms');
+            var error = document.getElementById('terms-error');
+            if (!terms || terms.checked) return true;
+
+            if (error) error.style.display = 'block';
+            terms.focus();
+            return false;
+        }
+
+        function readTurnstileToken() {
+            var turnstileInput = document.querySelector('input[name="cf-turnstile-response"]');
+            return turnstileInput ? turnstileInput.value : '';
+        }
+
+        function waitForTurnstileToken(timeoutMs, done) {
+            var turnstileEnabled = !!document.getElementById('turnstile-widget');
+            var token = readTurnstileToken();
+            if (!turnstileEnabled || token) {
+                done(token);
+                return;
+            }
+
+            // The short deadline only covers the invisible pass. While a challenge is on screen a
+            // person is solving it, and giving up on them posts an empty token, earns "verification
+            // failed" and resets the widget - so they solve it twice. Wait for them, within reason.
+            var waited = 0;
+            var waitedInteractive = 0;
+            var poll = setInterval(function () {
+                if (turnstileInteractive) {
+                    waitedInteractive += 250;
+                } else {
+                    waited += 250;
+                }
+                token = readTurnstileToken();
+                if (token || waited >= timeoutMs || waitedInteractive >= 120000) {
+                    clearInterval(poll);
+                    done(token);
+                }
+            }, 250);
+        }
+
+        function postVerificationCode(email, turnstileToken, sendCodeBtn, codeMessage, myGeneration) {
                 // Get honeypot value
                 var honeypotValue = '';
                 var honeypotInput = document.querySelector('input[name="website"]');
                 if (honeypotInput) {
                     honeypotValue = honeypotInput.value;
                 }
-
-                // Disable button and show loading
-                sendInFlight = true;
-                setSendButtonBusy(sendCodeBtn);
-                codeMessage.innerHTML = '';
 
                 fetch('{{ route('sign_up.send_code') }}', {
                     method: 'POST',
@@ -604,6 +672,27 @@
                 });
             }
 
+            // Selected by what it needs rather than by id: the script never reaches for the Google
+            // section itself, which is how it used to get hidden (see SignupCodeStepTest).
+            // auxclick too: a middle-click opens the link in a new tab without firing `click`.
+            document.querySelectorAll('[data-requires-terms]').forEach(function (section) {
+                ['click', 'auxclick'].forEach(function (type) {
+                    section.addEventListener(type, function (e) {
+                        if (e.target.closest('a') && !requireTerms()) {
+                            e.preventDefault();
+                        }
+                    });
+                });
+            });
+
+            var termsBox = document.getElementById('terms');
+            if (termsBox) {
+                termsBox.addEventListener('change', function () {
+                    var error = document.getElementById('terms-error');
+                    if (error && this.checked) error.style.display = 'none';
+                });
+            }
+
             var changeEmailBtn = document.getElementById('change-email-btn');
             if (changeEmailBtn) {
                 changeEmailBtn.addEventListener('click', function(e) {
@@ -640,29 +729,36 @@
             var form = codeInput.form;
             if (!form) return;
 
-            // Do not auto-submit an incomplete form - but do not fail silently either.
-            // checkValidity() fires `invalid` events and renders NOTHING (that is reportValidity),
-            // and nothing here listens for them, so the sixth digit became a no-op with no
-            // explanation. Report once: repeating it on every keystroke is what made the old
-            // unconditional requestSubmit() yank the caret out of the code box.
+            // The code now comes BEFORE Name and Password, so an incomplete form here is the normal
+            // case, not a mistake: move on to the first field still to fill, quietly. Not
+            // reportValidity(), whose "please fill in this field" bubble would scold somebody for
+            // doing things in the order the page laid out. Once only, so a seventh keystroke does
+            // not yank the caret out of the code box again.
             if (typeof form.checkValidity === 'function' && !form.checkValidity()) {
-                if (!autoSubmitReported && typeof form.reportValidity === 'function') {
+                if (!autoSubmitReported) {
                     autoSubmitReported = true;
-                    form.reportValidity();
+                    var next = Array.prototype.find.call(form.elements, function (el) {
+                        return el !== codeInput && el.willValidate && !el.checkValidity() && el.offsetParent !== null;
+                    });
+                    if (next) next.focus();
                 }
                 return;
             }
 
             autoSubmitted = true;
 
-            if (typeof form.requestSubmit === 'function') {
-                form.requestSubmit();
-            } else {
-                // Safari below 16 has no requestSubmit(). Without this the sixth digit did nothing
-                // at all, for ever, with no message. checkValidity() above has already run, so
-                // submit() skipping validation is not a hole here.
-                form.submit();
-            }
+            // store() validates Turnstile too, and a successful send reset the widget, so the token
+            // can be momentarily empty (or behind a challenge) when a fast sixth digit lands.
+            waitForTurnstileToken(8000, function () {
+                if (typeof form.requestSubmit === 'function') {
+                    form.requestSubmit();
+                } else {
+                    // Safari below 16 has no requestSubmit(). Without this the sixth digit did
+                    // nothing at all, for ever, with no message. checkValidity() above has already
+                    // run, so submit() skipping validation is not a hole here.
+                    form.submit();
+                }
+            });
         }
         @endif
 
@@ -776,7 +872,9 @@
         // container is one the browser refuses to focus: constraint validation then fails, the
         // submit is silently abandoned and nothing is reported. That is the defect issue #124 was
         // about on the booking form, and Enter in the email field reaches a submit from step one.
-        // revealSignupFields() arms all four the moment they become visible.
+        // revealSignupFields() arms name, password and the code the moment they become visible.
+        // The hosted terms box is the exception: it is on screen from the start, so it is always
+        // required.
         $stepped = config('app.hosted') && ! config('app.is_testing');
     @endphp
 
@@ -795,7 +893,7 @@
         <h1 id="signup-heading" class="text-xl font-bold text-gray-900 dark:text-gray-100">
             {{ __('messages.signup_heading') }}
         </h1>
-        <p id="signup-subheading" class="mt-1 text-sm text-gray-500 dark:text-gray-400">
+        <p id="signup-subheading" class="mt-1 text-sm text-gray-500 dark:text-gray-400 text-balance">
             {{ __('messages.signup_subheading') }}
         </p>
     </div>
@@ -908,16 +1006,64 @@
             </div>
         @endif
 
+        @if (config('app.hosted'))
+        {{-- One consent box, ABOVE both ways in, so it visibly gates Google and the emailed code
+             alike. Always required: it is on screen from the first moment, so the #124 rule
+             (never require a control inside a hidden container) does not apply to it. Clicking
+             Google or "Email me a code" unticked is stopped client-side by requireTerms(); the
+             server still validates `terms => accepted` on the email path. Both documents are
+             replaceable by the operator, so policy_url() resolves them, never marketing_url(). --}}
+        <div id="terms-field" class="mb-5">
+            <div class="relative flex items-start">
+                <div class="flex h-6 items-center">
+                    <input id="terms" name="terms" type="checkbox" value="1" {{ old('terms') ? 'checked' : '' }} required aria-describedby="terms-error"
+                        class="h-4 w-4 rounded border-gray-300 dark:border-gray-700 dark:bg-gray-900 text-[var(--brand-blue)] focus:ring-[var(--brand-blue)] dark:focus:ring-offset-gray-800">
+                </div>
+                <div class="ms-3 text-sm leading-6">
+                    <label for="terms" class="text-gray-700 dark:text-gray-300">
+                        {!! str_replace([':terms', ':privacy'], [
+                            '<a href="' . policy_url('terms') . '" target="_blank" class="text-[var(--brand-blue)] hover:underline">' . __('messages.terms_of_service') . '</a>',
+                            '<a href="' . policy_url('privacy') . '" target="_blank" class="text-[var(--brand-blue)] hover:underline">' . __('messages.privacy_policy') . '</a>'
+                        ], __('messages.i_accept_the_terms_and_privacy')) !!}
+                    </label>
+                </div>
+            </div>
+            <p id="terms-error" role="alert" class="mt-1 text-sm text-red-600 dark:text-red-400" style="display: none;">{{ __('messages.terms_must_be_accepted') }}</p>
+            <x-input-error :messages="$errors->get('terms')" class="mt-2" />
+        </div>
+        @endif
+
+        {{-- Hosted puts Google FIRST: about half of all accounts arrive this way, and it is the
+             one path with no code to wait for. It stays on screen in step two on purpose - see
+             showCodeSentState(). Selfhost keeps it below the form (further down). --}}
+        @if (config('app.hosted') && config('services.google.client_id') && public_registration_enabled())
+        <div id="google-signup-section" class="w-full" data-requires-terms>
+            {{-- "Continue with", not "Sign up with": a returning Google user reaching this page
+                 should not be told they are signing up. --}}
+            <x-google-button>{{ __('messages.continue_with_google') }}</x-google-button>
+
+            {{-- A flex rule, not a line behind an opaque label: .auth-card is a gradient, so no
+                 flat mask colour can match the surface behind it. --}}
+            <div class="mt-6 flex items-center gap-4">
+                <div class="flex-1 h-px bg-gray-300 dark:bg-gray-600"></div>
+                <span class="text-sm text-gray-500 dark:text-gray-400">{{ __('messages.or') }}</span>
+                <div class="flex-1 h-px bg-gray-300 dark:bg-gray-600"></div>
+            </div>
+        </div>
+        @endif
+
         <!-- Email Address -->
         <div class="mt-4">
-            <x-input-label for="email" :value="__('messages.email')" />
             @if (config('app.hosted'))
-            <div class="flex flex-col sm:flex-row gap-2">
-                <x-text-input id="email" class="block mt-1 flex-1 min-w-0 w-full sm:w-auto" type="email" name="email" :value="old('email', base64_decode(is_string(request()->email) ? request()->email : ''))" required
-                    autocomplete="email" />
-                <button type="button" id="send-code-btn" class="mt-1 w-full sm:w-auto sm:flex-shrink-0 whitespace-nowrap inline-flex items-center justify-center px-6 py-3 bg-gray-800 dark:bg-gray-200 border border-transparent rounded-md font-semibold text-sm text-white dark:text-gray-800 uppercase tracking-widest hover:bg-gray-700 dark:hover:bg-white focus:bg-gray-700 dark:focus:bg-white active:bg-gray-900 dark:active:bg-gray-300 focus:outline-none focus:ring-2 focus:ring-[var(--brand-blue)] focus:ring-offset-2 dark:focus:ring-offset-gray-800 transition ease-in-out duration-150">
-                    {{ __('messages.email_me_a_code') }}
-                </button>
+            {{-- Full width: the send button used to share this row and squeezed the address to
+                 half the card. It now sits below the Turnstile widget, where the step ends.
+                 #email-entry folds away once a code is sent, because #code-sent-panel then states
+                 the address and offers "use a different email". Folded, not removed: the
+                 read-only input is still what the form posts. --}}
+            <div id="email-entry">
+                <x-input-label for="email" :value="__('messages.email')" />
+                <x-text-input id="email" class="block mt-1 w-full" type="email" name="email" :value="old('email', base64_decode(is_string(request()->email) ? request()->email : ''))" required
+                    autofocus autocomplete="email" placeholder="you@example.com" />
             </div>
             {{-- role="status" because every success and every failure of this page's key
                  interaction was previously announced to nobody. --}}
@@ -943,7 +1089,31 @@
                     <button type="button" id="change-email-btn" class="text-blue-600 dark:text-blue-300 underline hover:no-underline focus:outline-none focus:ring-2 focus:ring-[var(--brand-blue)] rounded">{{ __('messages.use_another_email') }}</button>
                 </p>
             </div>
+
+            {{-- Straight under the panel: the code is what the visitor has just come back from
+                 their inbox with, so it comes before Name and Password, not after them. --}}
+            <div class="mt-4" id="verification-code-field" style="display: none;">
+                <x-input-label for="verification_code" :value="__('messages.verification_code')" />
+                {{-- NOT required in the markup: this wrapper renders display:none until a code has
+                     actually been sent, and a browser refuses to focus a required control it cannot
+                     show - so the form silently refuses to submit and reports nothing, which is the
+                     defect issue #124 was about on the booking form. revealSignupFields() arms it at
+                     the moment it becomes visible, the same way toggleAccountFields() does there. --}}
+                {{-- autocomplete="one-time-code" is the whole reason a phone offers the emailed code
+                     above the keyboard; "off" - which is what x-text-input defaults to, see
+                     components/text-input.blade.php - is the one value that SUPPRESSES it, and iOS
+                     reads Mail for this, not only SMS. inputmode keeps a digits-only field off QWERTY.
+                     No maxlength: the browser truncates a paste BEFORE the input handler can strip the
+                     prose around the code, so pasting "Your code is 123456" left the box empty. The
+                     paste handler in the script block extracts the digits instead.
+                     Matches event/guest-submit.blade.php, which has had this shape all along. --}}
+                <x-text-input id="verification_code" class="block mt-1 w-full h-14 text-center text-2xl font-semibold tracking-[0.5em]" type="text" name="verification_code"
+                    :value="$errors->has('verification_code') ? '' : old('verification_code')"
+                    inputmode="numeric" autocomplete="one-time-code" pattern="[0-9]{6}" placeholder="000000" />
+                <x-input-error :messages="$errors->get('verification_code')" class="mt-2" />
+            </div>
             @else
+            <x-input-label for="email" :value="__('messages.email')" />
             <x-text-input id="email" class="block mt-1 w-full" type="email" name="email" :value="old('email', base64_decode(is_string(request()->email) ? request()->email : ''))" required
                 autocomplete="email" />
             @endif
@@ -974,30 +1144,6 @@
             <x-input-error :messages="$errors->get('password')" class="mt-2" />
         </div>
 
-        <!-- Verification Code -->
-        @if (config('app.hosted'))
-        <div class="mt-4" id="verification-code-field" style="display: none;">
-            <x-input-label for="verification_code" :value="__('messages.verification_code')" />
-            {{-- NOT required in the markup: this wrapper renders display:none until a code has
-                 actually been sent, and a browser refuses to focus a required control it cannot
-                 show - so the form silently refuses to submit and reports nothing, which is the
-                 defect issue #124 was about on the booking form. revealSignupFields() arms it at
-                 the moment it becomes visible, the same way toggleAccountFields() does there. --}}
-            {{-- autocomplete="one-time-code" is the whole reason a phone offers the emailed code
-                 above the keyboard; "off" - which is what x-text-input defaults to, see
-                 components/text-input.blade.php - is the one value that SUPPRESSES it, and iOS
-                 reads Mail for this, not only SMS. inputmode keeps a digits-only field off QWERTY.
-                 No maxlength: the browser truncates a paste BEFORE the input handler can strip the
-                 prose around the code, so pasting "Your code is 123456" left the box empty. The
-                 paste handler in the script block extracts the digits instead.
-                 Matches event/guest-submit.blade.php, which has had this shape all along. --}}
-            <x-text-input id="verification_code" class="block mt-1 w-full sm:w-44 text-center text-lg tracking-[0.4em]" type="text" name="verification_code"
-                :value="$errors->has('verification_code') ? '' : old('verification_code')"
-                inputmode="numeric" autocomplete="one-time-code" pattern="[0-9]{6}" placeholder="000000" />
-            <x-input-error :messages="$errors->get('verification_code')" class="mt-2" />
-        </div>
-        @endif
-
         <x-honeypot />
 
         <!-- Turnstile widget -->
@@ -1006,9 +1152,23 @@
             <script {!! nonce_attr() !!}>
                 function onTurnstileLoad() {
                     @if (config('app.hosted'))
+                    // interaction-only: most visitors pass without seeing anything, so the
+                    // widget only takes up room for the traffic Cloudflare wants to challenge.
+                    // The token therefore arrives on its own a moment after load, which is why
+                    // sendVerificationCode() waits for it rather than posting an empty one.
                     turnstileWidgetId = turnstile.render('#turnstile-widget', {
                         sitekey: '{{ \App\Utils\TurnstileUtils::getSiteKey() }}',
                         size: 'flexible',
+                        appearance: 'interaction-only',
+                        // The container still holds a hidden iframe when nothing is shown, so
+                        // its spacing is added only once a challenge actually appears.
+                        'before-interactive-callback': function () {
+                            turnstileInteractive = true;
+                            document.getElementById('turnstile-widget').classList.add('mt-4');
+                        },
+                        'after-interactive-callback': function () {
+                            turnstileInteractive = false;
+                        },
                     });
                     @else
                     turnstile.render('#turnstile-widget', {
@@ -1018,11 +1178,21 @@
                     @endif
                 }
             </script>
-            <div id="turnstile-widget" class="mt-4"></div>
+            <div id="turnstile-widget" @if (! config('app.hosted')) class="mt-4" @endif></div>
             <x-input-error :messages="$errors->get('cf-turnstile-response')" class="mt-2" />
         @endif
 
-        @if (config('services.google.client_id') && public_registration_enabled())
+        @if (config('app.hosted'))
+        {{-- Below the Turnstile widget rather than beside the email field, so the address gets
+             the full width and the step reads top to bottom: address, check, go. The id is what
+             the script block drives (busy state, cooldown, hidden in step two), so keep it. --}}
+        <button type="button" id="send-code-btn" class="mt-4 w-full inline-flex items-center justify-center gap-2 px-4 py-3 bg-gradient-to-r from-[var(--brand-button-bg-light)] to-[var(--brand-button-bg)] hover:from-[var(--brand-button-bg)] hover:to-[var(--brand-button-bg-hover)] border border-transparent rounded-md font-semibold text-base text-white shadow-sm hover:shadow-md focus:outline-none focus:ring-2 focus:ring-[var(--brand-blue)] focus:ring-offset-2 dark:focus:ring-offset-gray-800 transition-all duration-200">
+            {{ __('messages.email_me_a_code') }}
+            <svg class="w-5 h-5 rtl:rotate-180" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M13.5 4.5 21 12m0 0-7.5 7.5M21 12H3" /></svg>
+        </button>
+        @endif
+
+        @if (! config('app.hosted') && config('services.google.client_id') && public_registration_enabled())
         <div id="google-signup-section" class="w-full mt-6">
             {{-- A flex rule with the label between the two halves, NOT an absolutely-positioned
                  line behind an opaque label. .auth-card is a gradient (app.css) and this layout
@@ -1040,52 +1210,21 @@
                  The component carries aria-hidden on the icon and the logical me-2 margin; its
                  docblock asks the seven hand-rolled copies to adopt it when next touched. --}}
             <x-google-button>{{ __('messages.continue_with_google') }}</x-google-button>
-
-            {{-- The Google button collects no checkbox, so the terms are stated beside it and
-                 pressing it is the consent. Both documents are replaceable by the operator, so
-                 policy_url() resolves them, never marketing_url(). --}}
-            @if (config('app.hosted'))
-            <p class="mt-3 text-xs text-center text-gray-500 dark:text-gray-400">
-                {!! str_replace([':terms', ':privacy'], [
-                    '<a href="' . policy_url('terms') . '" target="_blank" class="underline hover:no-underline">' . __('messages.terms_of_service') . '</a>',
-                    '<a href="' . policy_url('privacy') . '" target="_blank" class="underline hover:no-underline">' . __('messages.privacy_policy') . '</a>'
-                ], __('messages.by_continuing_you_accept')) !!}
-            </p>
-            @endif
         </div>
         @endif
 
-        @if (config('app.hosted'))
-        {{-- The whole link used to be the question, so the destination was never stated. Two
-             existing keys rather than a new sentence: the question stays plain text and only the
-             answer is a link. Also carries the address, so /login can prefill it. --}}
-        <div class="mt-6 text-sm text-gray-600 dark:text-gray-400" id="already-registered">
-            {{ __('messages.already_registered') }}
-            <a id="already-registered-link" class="underline hover:no-underline text-[var(--brand-blue)] rounded-md focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-[var(--brand-blue)] dark:focus:ring-offset-gray-800"
-                href="{{ route('login') }}">
-                {{ __('messages.log_in') }}
-            </a>
-        </div>
-        @endif
-
-        <div class="mt-8" id="terms-field" @if($stepped) style="display: none;" @endif>
+        @if (! config('app.hosted'))
+        <div class="mt-8" id="terms-field">
             <div class="relative flex items-start">
                 <div class="flex h-6 items-center">
-                    <input id="terms" name="terms" type="checkbox" value="1" {{ old('terms') ? 'checked' : '' }} {{ $stepped ? '' : 'required' }}
+                    <input id="terms" name="terms" type="checkbox" value="1" {{ old('terms') ? 'checked' : '' }} required
                         class="h-4 w-4 rounded border-gray-300 dark:border-gray-700 dark:bg-gray-900 text-[var(--brand-blue)] focus:ring-[var(--brand-blue)] dark:focus:ring-offset-gray-800">
                 </div>
                 <div class="ms-3 text-sm leading-6">
                     <label for="terms" class="font-medium text-gray-900 dark:text-gray-300">
-                        @if (config('app.hosted'))
-                            {!! str_replace([':terms', ':privacy'], [
-                                '<a href="' . policy_url('terms') . '" target="_blank" class="text-blue-600 dark:text-blue-400 hover:underline"> ' . __('messages.terms_of_service') . '</a>',
-                                '<a href="' . policy_url('privacy') . '" target="_blank" class="text-blue-600 dark:text-blue-400 hover:underline">' . __('messages.privacy_policy') . '</a>'
-                            ], __('messages.i_accept_the_terms_and_privacy')) !!}
-                        @else
-                            {!! str_replace([':terms'], [
-                                '<a href="' . policy_url('terms', '/self-hosting-terms-of-service') . '" target="_blank" class="text-blue-600 dark:text-blue-400 hover:underline"> ' . __('messages.terms_of_service') . '</a>',
-                            ], __('messages.i_accept_the_terms')) !!}
-                        @endif
+                        {!! str_replace([':terms'], [
+                            '<a href="' . policy_url('terms', '/self-hosting-terms-of-service') . '" target="_blank" class="text-blue-600 dark:text-blue-400 hover:underline"> ' . __('messages.terms_of_service') . '</a>',
+                        ], __('messages.i_accept_the_terms')) !!}
                     </label>
                 </div>
             </div>
@@ -1096,6 +1235,7 @@
                  the box the visitor had already ticked. --}}
             <x-input-error :messages="$errors->get('terms')" class="mt-2" />
         </div>
+        @endif
 
         @if (! config('app.hosted'))
         <div class="mt-4">
@@ -1113,13 +1253,36 @@
         </div>
         @endif
         
-        <div class="flex items-center justify-end mt-8">
-            <div id="submit-section" class="w-full sm:w-auto" @if($stepped) style="display: none;" @endif>
+        {{-- The margin lives on #submit-section, not on this wrapper: the wrapper is always
+             rendered, so in step one its margin was dead space at the bottom of the card. --}}
+        <div class="flex items-center justify-end">
+            <div id="submit-section" class="w-full {{ config('app.hosted') ? 'mt-6' : 'mt-8 sm:w-auto' }}" @if($stepped) style="display: none;" @endif>
+                @if (config('app.hosted'))
+                {{-- Same full-width brand CTA as step one's send button, so both steps end in the
+                     same place with the same kind of button. --}}
+                <button type="submit" class="w-full inline-flex items-center justify-center px-4 py-3 bg-gradient-to-r from-[var(--brand-button-bg-light)] to-[var(--brand-button-bg)] hover:from-[var(--brand-button-bg)] hover:to-[var(--brand-button-bg-hover)] border border-transparent rounded-md font-semibold text-base text-white shadow-sm hover:shadow-md focus:outline-none focus:ring-2 focus:ring-[var(--brand-blue)] focus:ring-offset-2 dark:focus:ring-offset-gray-800 transition-all duration-200">
+                    {{ __('messages.create_account') }}
+                </button>
+                @else
                 <x-primary-button class="w-full sm:w-auto justify-center">
                     {{ __('messages.sign_up') }}
                 </x-primary-button>
+                @endif
             </div>
         </div>
+
+        @if (config('app.hosted'))
+        {{-- The whole link used to be the question, so the destination was never stated. Two
+             existing keys rather than a new sentence: the question stays plain text and only the
+             answer is a link. Also carries the address, so /login can prefill it. --}}
+        <div class="mt-5 text-sm text-center text-gray-600 dark:text-gray-400" id="already-registered">
+            {{ __('messages.already_registered') }}
+            <a id="already-registered-link" class="underline hover:no-underline text-[var(--brand-blue)] rounded-md focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-[var(--brand-blue)] dark:focus:ring-offset-gray-800"
+                href="{{ route('login') }}">
+                {{ __('messages.log_in') }}
+            </a>
+        </div>
+        @endif
 
         @if (selfhost_needs_setup())
         </div>
@@ -1128,13 +1291,12 @@
 
     @if(session('pending_request') && session('pending_request_allow_guest') && config('app.hosted'))
     <div id="guest-option" class="w-full mt-2">
-        <div class="relative mb-6">
-            <div class="absolute inset-0 flex items-center">
-                <div class="w-full border-t border-gray-300 dark:border-gray-600"></div>
-            </div>
-            <div class="relative flex justify-center text-sm">
-                <span class="px-2 bg-white dark:bg-gray-800 text-gray-500 dark:text-gray-400">{{ __('messages.or') }}</span>
-            </div>
+        {{-- Flex rule, not a line behind an opaque label: the old bg-white mask painted a patch
+             on the gradient .auth-card. --}}
+        <div class="mb-6 flex items-center gap-4">
+            <div class="flex-1 h-px bg-gray-300 dark:bg-gray-600"></div>
+            <span class="text-sm text-gray-500 dark:text-gray-400">{{ __('messages.or') }}</span>
+            <div class="flex-1 h-px bg-gray-300 dark:bg-gray-600"></div>
         </div>
 
         <a href="{{ session('pending_request_form') === 'booking' ? route('event.booking_request', ['subdomain' => session('pending_request'), 'lang' => is_valid_language_code(request()->lang) ? request()->lang : null]) : route('event.guest_import', ['subdomain' => session('pending_request'), 'lang' => is_valid_language_code(request()->lang) ? request()->lang : null]) }}"
