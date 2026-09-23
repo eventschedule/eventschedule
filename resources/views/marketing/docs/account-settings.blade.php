@@ -456,8 +456,8 @@
                 <p class="text-sm text-gray-500 dark:text-gray-400"><strong class="text-gray-900 dark:text-white">Disconnect</strong> is only available while you still have another way to log in: a password, or a connected Google account. Set a password first under <a href="#password" class="doc-link">Update Password</a> if Facebook is your only one.</p>
             </div>
             <div class="doc-field">
-                <h4 class="font-semibold text-gray-900 dark:text-white mb-2">Selfhosted installations</h4>
-                <p class="text-sm text-gray-500 dark:text-gray-400">Facebook login needs a Facebook app on the server. Without it there is no Facebook button or settings section. See <x-link href="{{ route('marketing.docs.selfhost.installation') }}#facebook-login">Facebook login setup</x-link>.</p>
+                <h4 class="font-semibold text-gray-900 dark:text-white mb-2">Setting it up</h4>
+                <p class="text-sm text-gray-500 dark:text-gray-400">Facebook login needs a Facebook app configured by whoever runs the installation. Without it there is no Facebook button or settings section. See <x-link href="{{ route('marketing.docs.saas.setup') }}#facebook-login">Facebook login setup</x-link>.</p>
             </div>
         </div>
     </section>

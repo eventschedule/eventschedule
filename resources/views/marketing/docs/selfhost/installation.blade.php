@@ -15,7 +15,6 @@
         <x-doc-nav-link href="#verification">Verification</x-doc-nav-link>
         <x-doc-nav-link href="#push-notifications">Push notifications</x-doc-nav-link>
         <x-doc-nav-link href="#spam-protection">Spam protection</x-doc-nav-link>
-        <x-doc-nav-link href="#facebook-login">Facebook login</x-doc-nav-link>
         <x-doc-nav-link href="#troubleshooting">Troubleshooting</x-doc-nav-link>
         <x-doc-nav-link href="#translations">Custom translations</x-doc-nav-link>
         <x-doc-nav-link href="#custom-links">Custom dashboard links</x-doc-nav-link>
@@ -495,49 +494,6 @@ TURNSTILE_SECRET_KEY=your-turnstile-secret-key</code></pre>
             <p>If either one is missing the challenge is skipped entirely, so a half-filled configuration leaves those forms unprotected without any warning. Enabling Turnstile loads Cloudflare's widget script on the affected pages.</p>
         </div>
         <p class="text-gray-600 dark:text-gray-300 mb-4">Turnstile is deliberately inactive on tenant custom domains, because a site key is registered against specific hostnames and would fail to validate on a domain you do not control. If you run a multi-tenant SaaS with <a href="{{ route('marketing.docs.saas.custom_domains') }}" class="doc-link">custom domains</a>, expect those pages to fall back to no challenge.</p>
-    </section>
-
-    <!-- Facebook login -->
-    <section id="facebook-login" class="doc-section">
-        <h2 class="doc-heading">
-            <span class="doc-heading-icon">
-                <svg aria-hidden="true" class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.75 5.25a3 3 0 013 3m3 0a6 6 0 01-7.029 5.912c-.563-.097-1.159.026-1.563.43L10.5 17.25H8.25v2.25H6v2.25H2.25v-2.818c0-.597.237-1.17.659-1.591l6.499-6.499c.404-.404.527-1 .43-1.563A6 6 0 1121.75 8.25z" /></svg>
-            </span>
-            Facebook Login (Optional)
-        </h2>
-        <p class="text-gray-600 dark:text-gray-300 mb-4">Adds a <strong>Continue with Facebook</strong> button to the login and sign-up pages, and a <strong>Facebook Settings</strong> section where users connect or disconnect their Facebook account. It is <strong>off by default</strong>: until both values below are set, no Facebook button, settings section or link appears anywhere, and the Facebook sign-in URLs return 404.</p>
-        <ol class="doc-list doc-list-numbered mb-6">
-            <li>At <a href="https://developers.facebook.com/apps" target="_blank" rel="noopener noreferrer" class="doc-link">developers.facebook.com</a>, create an app with the <strong>Authenticate and request data from users with Facebook Login</strong> use case. Choose the Consumer type if you are offered one.</li>
-            <li>Under <strong>App settings &gt; Basic</strong>, fill in the app domain, a privacy policy URL, a terms of service URL and a user data deletion instructions URL, then copy the <strong>App ID</strong> and <strong>App Secret</strong>.</li>
-            <li>Under <strong>Facebook Login &gt; Settings</strong>, add these three <strong>Valid OAuth Redirect URIs</strong>, using your <code class="doc-inline-code">APP_URL</code> host:
-                <div class="doc-code-block mt-2">
-                    <div class="doc-code-header">
-                        <span>Redirect URIs</span>
-                        <button class="doc-copy-btn">Copy</button>
-                    </div>
-                    <pre><code>https://your-domain.com/auth/facebook/callback
-https://your-domain.com/auth/facebook/connect/callback
-https://your-domain.com/auth/facebook/set-password/callback</code></pre>
-                </div>
-            </li>
-            <li>Set both values in your <code class="doc-inline-code">.env</code>, then run <code class="doc-inline-code">php artisan config:clear</code>:
-                <div class="doc-code-block mt-2">
-                    <div class="doc-code-header">
-                        <span>.env</span>
-                        <button class="doc-copy-btn">Copy</button>
-                    </div>
-                    <pre><code>FACEBOOK_CLIENT_ID=your-facebook-app-id
-FACEBOOK_CLIENT_SECRET=your-facebook-app-secret</code></pre>
-                </div>
-            </li>
-            <li>Test with your own Facebook account while the app is in Development mode, then switch it to <strong>Live</strong>. Until then, only people with a role on the app can sign in.</li>
-        </ol>
-        <div class="doc-callout doc-callout-warning">
-            <div class="doc-callout-title">Register all three redirect URIs</div>
-            <p>Facebook rejects any redirect that is not on the list, so a missing one breaks only that flow: sign-in, connecting from Settings, or verifying before setting a password.</p>
-        </div>
-        <p class="text-gray-600 dark:text-gray-300 mb-4">Event Schedule stores only the Facebook account ID, never an access token. Sign-in with Facebook follows the same rules as the sign-up form, so on a single-user install it can only sign in existing accounts unless <code class="doc-inline-code">ALLOW_REGISTRATION</code> is set. If you turn Facebook login off later, people who only ever signed in with Facebook can get back in with <strong>Reset password</strong> on the login page.</p>
-        <p class="text-gray-600 dark:text-gray-300 mb-4">Keep using the same Facebook app. Facebook gives every app its own ID for each person, so switching to a different app later disconnects everyone who linked Facebook. To rotate the secret, reset it on the same app.</p>
     </section>
 
     <!-- Troubleshooting -->

@@ -133,7 +133,7 @@ return [
     // Facebook Login ("Continue with Facebook" on the login and sign-up pages, plus a Facebook
     // panel in Settings). Separate from 'meta' below, which is Boost's Marketing API app. Every
     // surface gates on facebook_login_enabled(), which needs BOTH values: unset = no Facebook UI
-    // anywhere and the auth.facebook* routes 404. Setup: docs/FACEBOOK_LOGIN_SETUP.md.
+    // anywhere and the auth.facebook* routes 404. Setup: /docs/saas#facebook-login.
     'facebook' => [
         'client_id' => env('FACEBOOK_CLIENT_ID'),
         'client_secret' => env('FACEBOOK_CLIENT_SECRET'),
