@@ -1,6 +1,6 @@
 <x-docs-page
     key="newsletters"
-    title="How to Send Newsletters: Segments and A/B Tests - Event Schedule"
+    title="Newsletters Guide: Segments and A/B Tests - Event Schedule"
     description="Build and send newsletters to followers, email subscribers and ticket buyers, with segments, CSV import, A/B tests and an allowance counted per recipient."
     lede="Compose branded emails and send them to your followers, email subscribers and ticket buyers. Newsletters are included on every plan, and you decide what goes out and when."
 >

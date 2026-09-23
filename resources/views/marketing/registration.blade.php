@@ -422,7 +422,7 @@
                             <span class="es-reg-pill es-reg-pill-pro">Pro</span>
                         </div>
                         <p class="es-reg-muted mt-2 text-sm leading-relaxed">
-                            Dietary needs, an access requirement, which session they are coming for: <x-link href="{{ marketing_url('/features/custom-fields') }}">custom fields</x-link> put your own questions on the form, as text, a dropdown or a yes-or-no, and the answers sit beside each registration. This is the one part of registration that needs the Pro plan.
+                            Dietary needs, an access requirement, which session they are coming for: <x-link href="{{ marketing_url('/features/custom-fields') }}">custom fields</x-link> put your own questions on the form, as text, a dropdown or a yes-or-no, and the answers sit beside each registration. This is one of the parts of registration that need the Pro plan.
                         </p>
                     </div>
                 </div>

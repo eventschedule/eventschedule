@@ -131,7 +131,7 @@ return [
 
         Specifications:
         - Tone: Professional, authoritative, and deeply practical.
-        - Length: :length (short: 300-500 words, medium: 800-1200 words, long: 1500-2000 words).
+        - Length: :length (short: 300-500 words, medium: 1000-1400 words, long: 1500-2000 words).
 
         CRITICAL STYLE RULES:
         - Write at an 8th-grade reading level.

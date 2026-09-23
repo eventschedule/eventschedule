@@ -37,15 +37,20 @@ class GenerateDailyBlogPost extends Command
         // One post a day across BOTH generators (and the admin), not one per generator: up to two
         // formulaic AI posts a day is the pattern Google's scaled-content policy targets.
         //
-        // created_at, not published_at: both generators backdate published_at by up to 6 hours
-        // at random, so it says little about when a post actually appeared. And 23 hours, not
-        // 24: this command runs at 00:00 and app:generate-sub-audience-blog at 03:00, so the
-        // window must reach back past 03:00 yesterday (21 hours) to see that post, while a
-        // full 24 would catch this command's own post from the previous midnight whenever
-        // tonight's tick lands a few seconds earlier than last night's.
-        $recentlyPublished = BlogPost::where('is_published', true)
-            ->where('created_at', '>=', now()->subHours(23))
-            ->exists();
+        // The two generators use different windows on purpose. app:generate-sub-audience-blog
+        // (03:00) skips only when a post was created in the last 12 hours, and this command
+        // (00:00) skips when one was created in the last 25. So on the scheduler rail a
+        // sub-audience post at 03:00 is still inside the window at the next midnight (21 hours
+        // later), which leaves the targeted sub-audience posts running daily and this command
+        // filling only the days they skip. When this command does post at 00:00, that post is 3
+        // hours old when the sub-audience command looks at 03:00 and is still inside this
+        // command's own window at the next midnight, so the day after goes back to the
+        // sub-audience command. Neither order ever yields two posts in one day. On the HTTP rail
+        // (/translate_data) the sub-audience command runs first in the same tick, and this one
+        // then sees its post and skips.
+        //
+        // 25 rather than 24 so a tick that lands a few seconds late still sees yesterday's post.
+        $recentlyPublished = BlogPost::recentlyGenerated(25);
 
         if ($recentlyPublished) {
             $this->info('A blog post was already published in the last day.');

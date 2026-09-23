@@ -3,7 +3,7 @@
 /**
  * Sub-audience configuration for marketing pages
  *
- * Each main audience page has a "Perfect For" section with 6 sub-audiences.
+ * Each main audience page has a "Perfect For" section with 4 to 6 sub-audiences.
  * Each sub-audience can have an associated blog post (matched by slug).
  *
  * Structure:
@@ -1793,7 +1793,7 @@ return [
             'charity-fundraisers' => [
                 'name' => 'Charity Fundraisers',
                 'slug' => 'for-charity-fundraisers',
-                'description' => 'Galas, sponsored walks and auction nights, with tiered tickets, sponsor logos on the page and no platform fee taken from what supporters pay.',
+                'description' => 'Galas, sponsored walks and auction nights, with tiered tickets and sponsor logos on the page (Pro), and no platform fee taken from what supporters pay.',
                 'blog_topic' => 'How charities can sell fundraising gala tickets with zero platform fees and show sponsor logos on the event page',
                 'icon_color' => 'rose',
                 'features' => ['Ticket sales', 'Multiple ticket types', 'Schedule sharing'],
@@ -1831,7 +1831,7 @@ return [
             'music-festivals' => [
                 'name' => 'Music Festivals',
                 'slug' => 'for-music-festivals',
-                'description' => 'Stages as sub-schedules, every act linked to its own page, and a weekend pass that scans at every gate on one QR code.',
+                'description' => 'Stages as sub-schedules, every act linked to its own page, and a weekend pass (Pro) that scans at every gate on one QR code.',
                 'blog_topic' => 'How music festivals can publish a stage-by-stage lineup and sell weekend passes with zero platform fees',
                 'icon_color' => 'amber',
                 'features' => ['Sub-schedules', 'Ticket sales', 'Schedule sharing'],
@@ -1847,7 +1847,7 @@ return [
             'film-festivals' => [
                 'name' => 'Film Festivals',
                 'slug' => 'for-film-festivals',
-                'description' => 'Screenings by venue and strand, Q&As added as parts of the programme, and a festival pass that counts down as it is used.',
+                'description' => 'Screenings by venue and strand, Q&As added as parts of the programme, and a festival pass (Pro) that counts down as it is used.',
                 'blog_topic' => 'How film festivals can organize screenings by strand and sell festival passes on one schedule',
                 'icon_color' => 'sky',
                 'features' => ['Sub-schedules', 'Multiple ticket types', 'Embeddable calendar'],
@@ -1869,7 +1869,7 @@ return [
             'youth-sports-leagues' => [
                 'name' => 'Youth Sports Leagues',
                 'slug' => 'for-youth-sports-leagues',
-                'description' => 'Training nights and match days per age group, a feed parents add to their phone once, and rides to the away game sorted between families.',
+                'description' => 'Training nights and match days per age group, a feed parents add to their phone once, and rides to the away game sorted between families (Pro).',
                 'blog_topic' => 'How youth sports leagues can share fixtures by age group and let families subscribe to the season calendar',
                 'icon_color' => 'sky',
                 'features' => ['Sub-schedules', 'Recurring events', 'Schedule sharing'],
@@ -1877,7 +1877,7 @@ return [
             'adult-rec-leagues' => [
                 'name' => 'Adult Rec Leagues',
                 'slug' => 'for-adult-rec-leagues',
-                'description' => 'Weekly games at the same court, a season fee as a pass, and a newsletter to players when the playoff dates are set.',
+                'description' => 'Weekly games at the same court, a season fee as a pass (Pro), and a newsletter to players when the playoff dates are set.',
                 'blog_topic' => 'How adult recreational leagues can publish weekly games and sell season passes without platform fees',
                 'icon_color' => 'amber',
                 'features' => ['Recurring events', 'Ticket sales', 'Fan newsletters'],
@@ -1931,7 +1931,7 @@ return [
             'heritage-sites' => [
                 'name' => 'Heritage Sites & Historic Houses',
                 'slug' => 'for-heritage-sites',
-                'description' => 'Seasonal opening, costumed tours and open-air theatre in the grounds, with a membership pass that covers every visit.',
+                'description' => 'Seasonal opening, costumed tours and open-air theatre in the grounds, with a membership pass (Pro) that covers every visit.',
                 'blog_topic' => 'How heritage sites and historic houses can publish seasonal tours and sell membership passes on one schedule',
                 'icon_color' => 'emerald',
                 'features' => ['Recurring events', 'Ticket sales', 'Embeddable calendar'],
@@ -1953,7 +1953,7 @@ return [
             'hiking-outdoor-groups' => [
                 'name' => 'Hiking & Outdoor Groups',
                 'slug' => 'for-hiking-outdoor-groups',
-                'description' => 'A new trailhead every week with a group size limit, and rides between members for the ones that are hard to reach.',
+                'description' => 'A new trailhead every week with a group size limit, and rides between members (Pro) for the ones that are hard to reach.',
                 'blog_topic' => 'How hiking and outdoor groups can cap group sizes and publish weekly meet points on a free event calendar',
                 'icon_color' => 'emerald',
                 'features' => ['Registration', 'Recurring events', 'Schedule sharing'],

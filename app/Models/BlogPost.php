@@ -114,6 +114,21 @@ class BlogPost extends Model
             ->where('published_at', '<=', now());
     }
 
+    /**
+     * Whether a published post was created in the last $hours hours, by either generator or by
+     * an admin. This is the one pacing check both AI generators share, so that together they
+     * post at most once a day.
+     *
+     * created_at, not published_at: both generators backdate published_at by up to 6 hours at
+     * random, so it says little about when a post actually appeared.
+     */
+    public static function recentlyGenerated(int $hours): bool
+    {
+        return self::where('is_published', true)
+            ->where('created_at', '>=', now()->subHours($hours))
+            ->exists();
+    }
+
     public function scopeByTag($query, $tag)
     {
         return $query->whereJsonContains('tags', $tag);
@@ -259,7 +274,7 @@ class BlogPost extends Model
             }
 
             if ($host === 'www.'.$base) {
-                $newHref = preg_replace('~^(https?://)www\.~i', '$1', $href[1], 1);
+                $newHref = preg_replace('~^((?:https?:)?//)www\.~i', '$1', $href[1], 1);
                 $tag = str_replace($href[0], ' href="'.$newHref.'"', $tag);
             }
 

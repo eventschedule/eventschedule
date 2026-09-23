@@ -46,20 +46,13 @@ class GenerateSubAudienceBlog extends Command
         $targetAudience = $this->option('audience');
         $targetSubAudience = $this->option('sub-audience');
 
-        // Skip if we already generated a sub-audience post today (unless --all flag)
-        if (! $generateAll) {
-            $subAudienceSlugs = collect($config)->flatMap(fn ($a) => collect($a['sub_audiences'])->pluck('slug')
-            )->toArray();
+        // Skip if any post was created in the last 12 hours (unless --all), whichever generator
+        // or admin wrote it: together the two generators post at most once a day. The pairing
+        // with app:generate-daily-blog-post's 25-hour window is explained there.
+        if (! $generateAll && BlogPost::recentlyGenerated(12)) {
+            $this->info('A blog post was already created in the last 12 hours. Skipping.');
 
-            $createdToday = BlogPost::where('created_at', '>=', now()->startOfDay())
-                ->whereIn('slug', $subAudienceSlugs)
-                ->exists();
-
-            if ($createdToday) {
-                $this->info('Already generated a sub-audience post today. Skipping.');
-
-                return 0;
-            }
+            return 0;
         }
 
         $missing = [];

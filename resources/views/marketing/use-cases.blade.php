@@ -1,5 +1,5 @@
 <x-marketing-layout>
-    <x-slot name="title">Event Scheduling Software for Every Industry | Event Schedule</x-slot>
+    <x-slot name="title">Event Scheduling Software for Any Industry | Event Schedule</x-slot>
     <x-slot name="description">Event scheduling software for musicians, venues, curators, theaters and online events. Sell tickets with zero platform fees. Free forever, open source.</x-slot>
     <x-slot name="breadcrumbTitle">Use Cases</x-slot>
 

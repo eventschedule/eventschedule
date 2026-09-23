@@ -43,7 +43,7 @@
             "Events & Ticketing": [
                 [
                     "Ticketing",
-                    "Yes (Free)",
+                    "Yes (free RSVP, paid on Pro)",
                     "Yes",
                     false
                 ],
@@ -479,7 +479,7 @@
             "Events & Ticketing": [
                 [
                     "Ticketing",
-                    "Yes (Free)",
+                    "Yes (free RSVP, paid on Pro)",
                     "Yes",
                     false
                 ],
@@ -859,7 +859,7 @@
             "Events & Ticketing": [
                 [
                     "Ticketing",
-                    "Yes (Free)",
+                    "Yes (free RSVP, paid on Pro)",
                     "Yes",
                     false
                 ],
@@ -1239,7 +1239,7 @@
             "Ticketing & Payments": [
                 [
                     "Ticketing",
-                    "Yes (Free)",
+                    "Yes (free RSVP, paid on Pro)",
                     "No",
                     true
                 ],
@@ -1618,7 +1618,7 @@
             "Events & Ticketing": [
                 [
                     "Ticketing",
-                    "Yes (Free)",
+                    "Yes (free RSVP, paid on Pro)",
                     "Yes (paid events)",
                     false
                 ],
@@ -1975,7 +1975,7 @@
             "Events & Ticketing": [
                 [
                     "Ticketing",
-                    "Yes (Free)",
+                    "Yes (free RSVP, paid on Pro)",
                     "Yes",
                     false
                 ],
@@ -2338,7 +2338,7 @@
             "Events & Ticketing": [
                 [
                     "Ticketing",
-                    "Yes (Free)",
+                    "Yes (free RSVP, paid on Pro)",
                     "Yes",
                     false
                 ],
@@ -2701,7 +2701,7 @@
             "Events & Ticketing": [
                 [
                     "Ticketing",
-                    "Yes (Free)",
+                    "Yes (free RSVP, paid on Pro)",
                     "Yes",
                     false
                 ],
@@ -3064,9 +3064,9 @@
             "Events & Ticketing": [
                 [
                     "Ticketing",
-                    "Yes (Free)",
+                    "Yes (free RSVP, paid on Pro)",
                     "Yes (paid add-on)",
-                    true
+                    false
                 ],
                 [
                     "Unlimited ticket sales",
@@ -3421,7 +3421,7 @@
             "Events & Ticketing": [
                 [
                     "Ticketing",
-                    "Yes (Free)",
+                    "Yes (free RSVP, paid on Pro)",
                     "Yes",
                     false
                 ],
@@ -3784,7 +3784,7 @@
             "Events & Ticketing": [
                 [
                     "Ticketing",
-                    "Yes (Free)",
+                    "Yes (free RSVP, paid on Pro)",
                     "Yes",
                     false
                 ],
@@ -4153,7 +4153,7 @@
             "Events & Ticketing": [
                 [
                     "Ticketing",
-                    "Yes (Free)",
+                    "Yes (free RSVP, paid on Pro)",
                     "Yes",
                     false
                 ],
@@ -4522,7 +4522,7 @@
             "Events & Calendar": [
                 [
                     "Ticketing",
-                    "Yes (Free)",
+                    "Yes (free RSVP, paid on Pro)",
                     "No",
                     true
                 ],
@@ -4861,7 +4861,7 @@
             "Events & Ticketing": [
                 [
                     "Ticketing",
-                    "Yes (Free)",
+                    "Yes (free RSVP, paid on Pro)",
                     "Yes",
                     false
                 ],
@@ -5230,7 +5230,7 @@
             "Events & Ticketing": [
                 [
                     "Ticketing",
-                    "Yes (Free)",
+                    "Yes (free RSVP, paid on Pro)",
                     "Yes",
                     false
                 ],
@@ -5599,7 +5599,7 @@
             "Events & Ticketing": [
                 [
                     "Ticketing",
-                    "Yes (Free)",
+                    "Yes (free RSVP, paid on Pro)",
                     "Yes",
                     false
                 ],
@@ -5968,9 +5968,9 @@
             "Events & Ticketing": [
                 [
                     "Ticketing",
-                    "Yes (Free)",
+                    "Yes (free RSVP, paid on Pro)",
                     "Yes (paid add-on)",
-                    true
+                    false
                 ],
                 [
                     "QR check-ins",
@@ -6013,7 +6013,7 @@
                 [
                     "Calendar sync, both ways",
                     "Yes (Free)",
-                    "Imports feeds hourly, one way",
+                    "Imports feeds (two-way sync not listed)",
                     true
                 ],
                 [
@@ -6117,7 +6117,7 @@
             },
             {
                 "title": "Two-Way Calendar Sync",
-                "description": "Google, Outlook and CalDAV sync both ways, free. Timely imports calendar feeds in one direction, on an hourly schedule.",
+                "description": "Google, Outlook and CalDAV sync both ways, free. Timely imports calendar feeds on an hourly schedule and does not list two-way sync.",
                 "icon": "calendar",
                 "gradient": "from-teal-50 to-emerald-50 dark:from-teal-900/30 dark:to-emerald-900/30",
                 "border": "border-teal-200 dark:border-teal-500/20",
@@ -6229,7 +6229,7 @@
             "Events & Ticketing": [
                 [
                     "Ticketing",
-                    "Yes (Free)",
+                    "Yes (free RSVP, paid on Pro)",
                     "Yes (Event Tickets plugin)",
                     false
                 ],
@@ -6348,7 +6348,7 @@
         "key_advantages": [
             {
                 "title": "No WordPress Required",
-                "description": "Event Schedule is a hosted service with a free plan, so there is no WordPress site, plugin stack or update cycle to keep running. Selfhosting stays available if you want it.",
+                "description": "Event Schedule is a hosted service with a free plan, so there is no WordPress site, plugin stack or update cycle to keep running. Self-hosting stays available if you want it.",
                 "icon": "globe",
                 "gradient": "from-emerald-50 to-teal-50 dark:from-emerald-900/30 dark:to-teal-900/30",
                 "border": "border-emerald-200 dark:border-emerald-500/20",
@@ -6472,7 +6472,7 @@
             "Events & Ticketing": [
                 [
                     "Ticketing",
-                    "Yes (Free)",
+                    "Yes (free RSVP, paid on Pro)",
                     "No (links to outside ticket sellers)",
                     true
                 ],
@@ -6673,7 +6673,7 @@
             "Events & Ticketing": [
                 [
                     "Ticketing",
-                    "Yes (Free)",
+                    "Yes (free RSVP, paid on Pro)",
                     "Yes",
                     false
                 ],
@@ -6868,7 +6868,7 @@
             "Events & Ticketing": [
                 [
                     "Ticketing",
-                    "Yes (Free)",
+                    "Yes (free RSVP, paid on Pro)",
                     "Yes (US and UK hosts)",
                     true
                 ],
@@ -7075,7 +7075,7 @@
             "Events & Ticketing": [
                 [
                     "Ticketing",
-                    "Yes (Free)",
+                    "Yes (free RSVP, paid on Pro)",
                     "No (external ticket link)",
                     true
                 ],
@@ -7250,7 +7250,7 @@
         "slug": "zeffy-alternative",
         "meta_title": "Zeffy Alternative for Any Organizer | Event Schedule",
         "tagline": "Open source event ticketing with zero platform fees, open to any organizer, not only registered nonprofits.",
-        "description": "Compare Event Schedule with Zeffy: event ticketing with zero platform fees for any organizer, not only registered nonprofits, plus calendar sync and selfhosting.",
+        "description": "Compare Event Schedule with Zeffy: event ticketing with zero platform fees for any organizer, not only registered nonprofits, plus calendar sync and self-hosting.",
         "keywords": "zeffy alternative, zeffy competitor, free event ticketing, nonprofit event ticketing, ticketing for community groups",
         "about": "Zeffy is a free fundraising and ticketing platform for nonprofits and registered charities in the US, Canada, the UK, Ireland, Australia and Germany. It covers card fees itself and is funded by optional tips from donors and buyers.",
         "competitor_strengths": [
@@ -7294,7 +7294,7 @@
             "Events & Ticketing": [
                 [
                     "Ticketing",
-                    "Yes (Free)",
+                    "Yes (free RSVP, paid on Pro)",
                     "Yes",
                     false
                 ],
@@ -7525,7 +7525,7 @@
             "Events & Ticketing": [
                 [
                     "Ticketing",
-                    "Yes (Free)",
+                    "Yes (free RSVP, paid on Pro)",
                     "No (links out to your ticket page)",
                     true
                 ],
@@ -7700,7 +7700,7 @@
         "slug": "hi-events-alternative",
         "meta_title": "Hi.Events Alternative, No Per-Ticket Fees | Event Schedule",
         "tagline": "Open source ticketing with a flat price instead of a per-ticket fee, plus calendar sync and newsletters.",
-        "description": "Compare Event Schedule with Hi.Events: open source ticketing with flat $5/mo pricing instead of 1.25% + $0.60 a ticket, calendar sync, and simple selfhosting.",
+        "description": "Compare Event Schedule with Hi.Events: open source ticketing with flat $5/mo pricing instead of 1.25% + $0.60 a ticket, calendar sync, and simple self-hosting.",
         "keywords": "hi.events alternative, hi events alternative, open source ticketing alternative, open source eventbrite alternative, selfhosted ticketing",
         "about": "Hi.Events is an open source event management and ticketing platform (AGPL-3.0 with additional terms) for conferences, nightlife, concerts and workshops. It offers a hosted Cloud service with a per-ticket fee and a selfhosted version, with paid licences to remove its branding.",
         "competitor_strengths": [
@@ -7738,7 +7738,7 @@
             "Events & Ticketing": [
                 [
                     "Ticketing",
-                    "Yes (Free)",
+                    "Yes (free RSVP, paid on Pro)",
                     "Yes",
                     false
                 ],
@@ -7784,11 +7784,11 @@
                     "Remove branding",
                     "Yes (Pro)",
                     "Selfhost licence, from 499 EUR/yr",
-                    true
+                    false
                 ],
                 [
                     "Custom fields",
-                    "Yes (Pro)",
+                    "Yes (ticket questions free, event fields Pro)",
                     "Yes (questions per ticket type)",
                     false
                 ],
@@ -7870,7 +7870,7 @@
             },
             {
                 "title": "Simpler to Selfhost",
-                "description": "Event Schedule runs on standard PHP hosting with MySQL. Hi.Events selfhosting uses Docker with PostgreSQL and Redis.",
+                "description": "Event Schedule runs on standard PHP hosting with MySQL. Hi.Events self-hosting uses Docker with PostgreSQL and Redis.",
                 "icon": "globe",
                 "gradient": "from-blue-50 to-sky-50 dark:from-blue-900/30 dark:to-sky-900/30",
                 "border": "border-blue-200 dark:border-blue-500/20",
@@ -7913,7 +7913,7 @@
         "faq": [
             {
                 "question": "Are both platforms open source?",
-                "answer": "Yes. Hi.Events is AGPL-3.0 with additional terms that require a visible \"Powered by Hi.Events\" link unless you buy a licence. Event Schedule is open source under the Attribution Assurance License, and a selfhosted install resolves to Enterprise."
+                "answer": "Yes. Hi.Events is AGPL-3.0 with additional terms that require a visible \"Powered by Hi.Events\" link unless you buy a licence. Event Schedule is open source under the Attribution Assurance License, and a selfhosted install resolves to Enterprise. It carries an attribution credit too: the license requires it, and no plan removes it on a selfhosted install."
             },
             {
                 "question": "How does Event Schedule pricing compare to Hi.Events Cloud?",
@@ -7961,7 +7961,7 @@
             "Events & Ticketing": [
                 [
                     "Ticketing",
-                    "Yes (Free)",
+                    "Yes (free RSVP, paid on Pro)",
                     "Participation and place limits only",
                     true
                 ],
@@ -8112,7 +8112,7 @@
             },
             {
                 "question": "Do I have to run a server?",
-                "answer": "No. The hosted service has a free plan with nothing to install. Selfhosting is there if you want your events on your own server."
+                "answer": "No. The hosted service has a free plan with nothing to install. Self-hosting is there if you want your events on your own server."
             }
         ]
     }

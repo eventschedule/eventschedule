@@ -628,7 +628,7 @@
                                 <path stroke-linecap="round" stroke-linejoin="round" d="M21 12a9 9 0 01-9 9m9-9a9 9 0 00-9-9m9 9H3m9 9a9 9 0 01-9-9m9 9c1.657 0 3-4.03 3-9s-1.343-9-3-9m0 18c-1.657 0-3-4.03-3-9s1.343-9 3-9m-9 9a9 9 0 019-9" />
                             </svg>
                             <span class="es-plate-muted text-sm font-medium tracking-wide">Custom domain</span>
-                            <span class="es-plate-pill">Enterprise</span>
+                            <span class="es-plate-pill" aria-hidden="true">Enterprise</span>
                         </x-marketing.hero-eyebrow>
                         <span class="es-mask"><span class="es-mask-line">Your own domain</span></span>
                         <span class="es-mask es-mask-2"><span class="es-mask-line"><span class="es-plate-accent">on the door.</span></span></span>

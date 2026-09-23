@@ -219,14 +219,14 @@ return [
         [
             'url' => '/for-festivals',
             'name' => 'Festivals',
-            'blurb' => 'Every stage and every set on one schedule, and a weekend pass on a single QR code.',
+            'blurb' => 'Every stage and every set on one schedule, and a weekend pass on a single QR code (Pro).',
             'tags' => ['Music Festivals', 'Arts & Fringe', 'Film Festivals', 'Food & Street Festivals'],
             'icon' => '<path stroke-linecap="round" stroke-linejoin="round" d="M3 21l9-17 9 17M7.5 12.5h9M12 4v17" />',
         ],
         [
             'url' => '/for-sports-leagues',
             'name' => 'Sports Leagues',
-            'blurb' => 'Fixtures by team, one season calendar for the league, and seats shared for away games.',
+            'blurb' => 'Fixtures by team, one season calendar for the league, and seats shared for away games (Pro).',
             'tags' => ['Youth Leagues', 'Adult Rec Leagues', 'Amateur Clubs', 'Running & Cycling Clubs'],
             'icon' => '<path stroke-linecap="round" stroke-linejoin="round" d="M12 21a9 9 0 100-18 9 9 0 000 18zm0-13l3.5 2.5-1.3 4h-4.4l-1.3-4L12 8z" />',
         ],

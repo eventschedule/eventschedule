@@ -506,6 +506,54 @@ class BlogSeoTest extends TestCase
     }
 
     /**
+     * The daily generator runs at 00:00 and the sub-audience one at 03:00. The sub-audience
+     * command used to check only for a sub-audience post created today, so a daily post at
+     * midnight and a sub-audience post three hours later made two posts in one day.
+     */
+    public function test_the_sub_audience_generator_does_nothing_when_a_post_was_created_three_hours_ago(): void
+    {
+        config(['app.hosted' => true]);
+
+        $recent = $this->makePost(['title' => 'Daily Post From Midnight']);
+        DB::table('blog_posts')->where('id', $recent->id)->update(['created_at' => now()->subHours(3)]);
+
+        $this->artisan('app:generate-sub-audience-blog')
+            ->expectsOutput('A blog post was already created in the last 12 hours. Skipping.')
+            ->assertExitCode(0);
+
+        $this->assertSame(1, BlogPost::count());
+    }
+
+    /**
+     * And the other way round: yesterday's 03:00 sub-audience post is 21 hours old at the next
+     * midnight and must still hold the daily generator off. 24 hours is the edge case a 23-hour
+     * window missed.
+     */
+    public function test_the_daily_generator_does_nothing_when_a_post_was_created_24_hours_ago(): void
+    {
+        config(['app.hosted' => true]);
+
+        $recent = $this->makePost(['title' => 'Sub-Audience Post From Yesterday', 'slug' => 'for-solo-artists']);
+        DB::table('blog_posts')->where('id', $recent->id)->update(['created_at' => now()->subHours(24)]);
+
+        $this->artisan('app:generate-daily-blog-post')
+            ->expectsOutput('A blog post was already published in the last day.')
+            ->assertExitCode(0);
+
+        $this->assertSame(1, BlogPost::count());
+    }
+
+    /** A protocol-relative first-party link is a www. hop too. */
+    public function test_a_protocol_relative_www_link_is_rewritten_to_the_apex(): void
+    {
+        $base = _base_domain();
+
+        $html = BlogPost::followFirstPartyLinks('<a href="//www.'.$base.'/for-z">x</a>');
+
+        $this->assertSame('<a href="//'.$base.'/for-z">x</a>', $html);
+    }
+
+    /**
      * The triage report: the admin list shows each post's word count and flips noindex, which is
      * not a content edit and so must not restamp updated_at (the sitemap's lastmod).
      */

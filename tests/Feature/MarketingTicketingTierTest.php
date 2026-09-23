@@ -287,6 +287,61 @@ class MarketingTicketingTierTest extends TestCase
         )));
     }
 
+    /**
+     * The comparison tables said "Ticketing: Yes (Free)" for Event Schedule on all 26 competitor
+     * pages and the /compare hub, which a reader takes as "paid ticketing is free". The prose
+     * scan above cannot see a two-word table cell, so the rows are read from the data itself.
+     *
+     * - Our Ticketing cell must name Pro, since a price on a ticket is Pro.
+     * - The row may only be scored as a win where the competitor has no native ticketing, or
+     *   restricts it (a "No ..." cell, Mobilizon's participation limits, Partiful's US and UK
+     *   hosts). Against a competitor that sells tickets, even as a paid add-on, it is not a win.
+     */
+    public function test_no_comparison_row_says_ticketing_is_free_or_wins_against_real_ticketing(): void
+    {
+        $controller = app(\App\Http\Controllers\MarketingController::class);
+        $slugs = (new \ReflectionClassConstant($controller, 'HUB_PICKER_ORDER'))->getValue();
+        $comparison = new \ReflectionMethod($controller, 'getComparisonData');
+        $hub = new \ReflectionMethod($controller, 'getHubComparisonData');
+
+        $restricted = ['Participation and place limits only', 'Yes (US and UK hosts)'];
+
+        $rows = [];
+        foreach ($slugs as $slug) {
+            foreach ($comparison->invoke($controller, $slug)['sections'] as $sectionRows) {
+                foreach ($sectionRows as $row) {
+                    if ($row[0] === 'Ticketing') {
+                        $rows[$slug] = $row;
+                    }
+                }
+            }
+        }
+        foreach ($hub->invoke($controller) as $sectionRows) {
+            foreach ($sectionRows as $row) {
+                if ($row[0] === 'Ticketing') {
+                    $rows['/compare hub'] = $row;
+                }
+            }
+        }
+
+        $this->assertGreaterThanOrEqual(25, count($rows), 'The Ticketing rows were not found; did the label change?');
+
+        $offences = [];
+        foreach ($rows as $where => $row) {
+            if (! str_contains($row[1], 'Pro')) {
+                $offences[] = "{$where}: our Ticketing cell \"{$row[1]}\" does not say paid tickets are Pro";
+            }
+
+            $theirs = (string) $row[2];
+            $noNativeTicketing = str_starts_with($theirs, 'No') || in_array($theirs, $restricted, true);
+            if (($row[3] ?? false) === true && ! $noNativeTicketing) {
+                $offences[] = "{$where}: Ticketing scored as a win against \"{$theirs}\"";
+            }
+        }
+
+        $this->assertSame([], $offences, implode("\n", $offences));
+    }
+
     public function test_no_marketing_surface_says_paid_selling_is_free(): void
     {
         $offences = [];

@@ -20,7 +20,7 @@ return [
     'about_title' => 'About Event Schedule | Open Source Event Management Platform',
     'about_description' => 'Who builds Event Schedule, the license it ships under, where the source lives, and a list of what it does not do. Open source, with zero platform fees.',
 
-    'selfhost_title' => 'Selfhosted Event Calendar | Every Feature Free on Your Server',
+    'selfhost_title' => 'Selfhosted Event Calendar: Every Feature Free on Your Server',
     'selfhost_description' => 'Selfhost Event Schedule on your own server and every Pro and Enterprise feature is included free. Open source, one-click installs, no platform fees.',
 
     'ticketing_title' => 'Event Ticketing with Zero Platform Fees - Event Schedule',

@@ -1,6 +1,6 @@
 <x-marketing-layout>
     <x-slot name="title">WordPress Event Calendar | Add One Without a Plugin</x-slot>
-    <x-slot name="description">Add a WordPress event calendar with one Custom HTML block: step-by-step embed code, free RSVP and ticket forms, and nothing to install, update or patch.</x-slot>
+    <x-slot name="description">Add a WordPress event calendar with one Custom HTML block: step-by-step embed code, free RSVP, ticket forms on Pro, and nothing to install, update or patch.</x-slot>
     <x-slot name="breadcrumbTitle">WordPress Event Calendar</x-slot>
 
     {{-- There is no Event Schedule WordPress plugin, in this repo or anywhere else, and this page

@@ -1,5 +1,5 @@
 <x-marketing-layout>
-    <x-slot name="title">All-in-One Event Platform: Replace Google Forms, Canva & More</x-slot>
+    <x-slot name="title">All-in-One Event Platform to Replace Google Forms & Canva</x-slot>
     <x-slot name="description">Replace twelve tools with one event record: Google Forms, Mailchimp, Canva, Linktree, Sheets, Calendly and more. Free to publish, zero platform fees.</x-slot>
     <x-slot name="breadcrumbTitle">Replace</x-slot>
 

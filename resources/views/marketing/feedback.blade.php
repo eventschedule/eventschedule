@@ -629,7 +629,7 @@
                                 <path stroke-linecap="round" stroke-linejoin="round" d="M7.5 8.25h9m-9 3.75h5.25M21 12a8.955 8.955 0 01-1.05 4.22L21 21l-4.86-1.02A9 9 0 1121 12z" />
                             </svg>
                             <span class="es-comment-muted text-sm font-medium tracking-wide">Post-event feedback</span>
-                            <span class="es-comment-plan">Pro</span>
+                            <span class="es-comment-plan" aria-hidden="true">Pro</span>
                         </x-marketing.hero-eyebrow>
                         <span class="es-mask"><span class="es-mask-line">A feedback card</span></span>
                         <span class="es-mask es-mask-2"><span class="es-mask-line">per <span class="es-comment-accent">booking.</span></span></span>

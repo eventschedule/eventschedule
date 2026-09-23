@@ -1795,7 +1795,7 @@ class MarketingController extends Controller
                 ['Payment processing', 'Stripe/PayPal/Payfast', 'Built-in (2.9% per order, on top)', 'Stripe (2.9% + $0.30)', 'Stripe/PayPal/Square', 'No'],
             ],
             'Events & Ticketing' => [
-                ['Ticketing', 'Yes (Free)', 'Yes', 'Yes', 'Yes', 'No'],
+                ['Ticketing', 'Yes (free RSVP, paid on Pro)', 'Yes', 'Yes', 'Yes', 'No'],
                 ['Unlimited ticket sales', 'Yes (Pro)', 'Yes', 'Yes', 'Yes', 'No'],
                 ['QR check-ins', 'Yes (Free)', 'Yes', 'Yes', 'Yes', 'No'],
                 ['Ticket waitlist', 'Yes (Pro)', 'Yes', 'Yes', 'Yes (email sign-ups)', 'No'],
@@ -1970,7 +1970,7 @@ class MarketingController extends Controller
                         ['Payment processing', 'Stripe/PayPal/Payfast (processor rates apply)', 'Built-in (2.9% per order, on top)', false],
                     ],
                     'Events & Ticketing' => [
-                        ['Ticketing', 'Yes (Free)', 'Yes', false],
+                        ['Ticketing', 'Yes (free RSVP, paid on Pro)', 'Yes', false],
                         ['Unlimited ticket sales', 'Yes (Pro)', 'Yes', false],
                         ['QR check-ins', 'Yes (Free)', 'Yes', false],
                         ['Ticket waitlist', 'Yes (Pro)', 'Yes', false],
@@ -2146,7 +2146,7 @@ class MarketingController extends Controller
                         ['Payment processing', 'Stripe/PayPal/Payfast (processor rates apply)', 'Stripe (2.9% + $0.30)', false],
                     ],
                     'Events & Ticketing' => [
-                        ['Ticketing', 'Yes (Free)', 'Yes', false],
+                        ['Ticketing', 'Yes (free RSVP, paid on Pro)', 'Yes', false],
                         ['Unlimited ticket sales', 'Yes (Pro)', 'Yes', false],
                         ['QR check-ins', 'Yes (Free)', 'Yes', false],
                         ['Ticket waitlist', 'Yes (Pro)', 'Yes', false],
@@ -2295,7 +2295,7 @@ class MarketingController extends Controller
                         ['Payment processing', 'Stripe/PayPal/Payfast (processor rates apply)', 'Stripe/PayPal/Square', false],
                     ],
                     'Events & Ticketing' => [
-                        ['Ticketing', 'Yes (Free)', 'Yes', false],
+                        ['Ticketing', 'Yes (free RSVP, paid on Pro)', 'Yes', false],
                         ['Unlimited ticket sales', 'Yes (Pro)', 'Yes', false],
                         ['QR check-ins', 'Yes (Free)', 'Yes', false],
                         ['Ticket waitlist', 'Yes (Pro)', 'Yes (email sign-ups)', false],
@@ -2449,7 +2449,7 @@ class MarketingController extends Controller
                     // "Sub-schedules/categories" - and with it two tiers that stopped
                     // being true when the free plan started selling.
                     'Ticketing & Payments' => [
-                        ['Ticketing', 'Yes (Free)', 'No', true],
+                        ['Ticketing', 'Yes (free RSVP, paid on Pro)', 'No', true],
                         ['Unlimited ticket sales', 'Yes (Pro)', 'No', true],
                         ['Payment processing', 'Stripe/PayPal/Payfast (processor rates apply)', 'No', true],
                         ['QR check-ins', 'Yes (Free)', 'No', true],
@@ -2597,7 +2597,7 @@ class MarketingController extends Controller
                         ['Payment processing', 'Stripe/PayPal/Payfast (processor rates apply)', 'Built-in (for paid events)', false],
                     ],
                     'Events & Ticketing' => [
-                        ['Ticketing', 'Yes (Free)', 'Yes (paid events)', false],
+                        ['Ticketing', 'Yes (free RSVP, paid on Pro)', 'Yes (paid events)', false],
                         ['Unlimited ticket sales', 'Yes (Pro)', 'Yes', false],
                         ['QR check-ins', 'Yes (Free)', 'No', true],
                         ['Ticket waitlist', 'Yes (Pro)', 'No', true],
@@ -2733,7 +2733,7 @@ class MarketingController extends Controller
                         ['Payment processing', 'Stripe/PayPal/Payfast (processor rates apply)', 'Built-in', false],
                     ],
                     'Events & Ticketing' => [
-                        ['Ticketing', 'Yes (Free)', 'Yes', false],
+                        ['Ticketing', 'Yes (free RSVP, paid on Pro)', 'Yes', false],
                         ['Unlimited ticket sales', 'Yes (Pro)', 'Yes', false],
                         ['QR check-ins', 'Yes (Free)', 'Yes (app-based)', false],
                         ['Ticket waitlist', 'Yes (Pro)', 'No', true],
@@ -2870,7 +2870,7 @@ class MarketingController extends Controller
                         ['Payment processing', 'Stripe/PayPal/Payfast (processor rates apply)', 'Built-in', false],
                     ],
                     'Events & Ticketing' => [
-                        ['Ticketing', 'Yes (Free)', 'Yes', false],
+                        ['Ticketing', 'Yes (free RSVP, paid on Pro)', 'Yes', false],
                         ['Unlimited ticket sales', 'Yes (Pro)', 'Yes', false],
                         ['QR check-ins', 'Yes (Free)', 'Limited', true],
                         ['Ticket waitlist', 'Yes (Pro)', 'No', true],
@@ -3007,7 +3007,7 @@ class MarketingController extends Controller
                         ['Payment processing', 'Stripe/PayPal/Payfast (processor rates apply)', 'Built-in', false],
                     ],
                     'Events & Ticketing' => [
-                        ['Ticketing', 'Yes (Free)', 'Yes', false],
+                        ['Ticketing', 'Yes (free RSVP, paid on Pro)', 'Yes', false],
                         ['Unlimited ticket sales', 'Yes (Pro)', 'Yes', false],
                         ['QR check-ins', 'Yes (Free)', 'Yes', false],
                         ['Ticket waitlist', 'Yes (Pro)', 'No', true],
@@ -3144,7 +3144,7 @@ class MarketingController extends Controller
                         ['Payment processing', 'Stripe/PayPal/Payfast (processor rates apply)', 'Stripe (separate)', false],
                     ],
                     'Events & Ticketing' => [
-                        ['Ticketing', 'Yes (Free)', 'Yes (paid add-on)', true],
+                        ['Ticketing', 'Yes (free RSVP, paid on Pro)', 'Yes (paid add-on)', false],
                         ['Unlimited ticket sales', 'Yes (Pro)', 'Yes', false],
                         ['QR check-ins', 'Yes (Free)', 'Yes (Boost+)', false],
                         ['Ticket waitlist', 'Yes (Pro)', 'No', true],
@@ -3280,7 +3280,7 @@ class MarketingController extends Controller
                         ['Payment processing', 'Stripe/PayPal/Payfast (processor rates apply)', 'Stripe (2.9% + $0.30)', false],
                     ],
                     'Events & Ticketing' => [
-                        ['Ticketing', 'Yes (Free)', 'Yes', false],
+                        ['Ticketing', 'Yes (free RSVP, paid on Pro)', 'Yes', false],
                         ['Unlimited ticket sales', 'Yes (Pro)', 'Yes', false],
                         ['QR check-ins', 'Yes (Free)', 'Yes', false],
                         ['Ticket waitlist', 'Yes (Pro)', 'No', true],
@@ -3417,7 +3417,7 @@ class MarketingController extends Controller
                         ['Payment processing', 'Stripe/PayPal/Payfast (processor rates apply)', 'Stripe/Square/Payflow', false],
                     ],
                     'Events & Ticketing' => [
-                        ['Ticketing', 'Yes (Free)', 'Yes', false],
+                        ['Ticketing', 'Yes (free RSVP, paid on Pro)', 'Yes', false],
                         ['Unlimited ticket sales', 'Yes (Pro)', 'Yes', false],
                         ['QR check-ins', 'Yes (Free)', 'Yes', false],
                         ['Ticket waitlist', 'Yes (Pro)', 'Yes', false],
@@ -3555,7 +3555,7 @@ class MarketingController extends Controller
                         ['Payment processing', 'Stripe/PayPal/Payfast (processor rates apply)', 'Stripe/PayPal', true],
                     ],
                     'Events & Ticketing' => [
-                        ['Ticketing', 'Yes (Free)', 'Yes', false],
+                        ['Ticketing', 'Yes (free RSVP, paid on Pro)', 'Yes', false],
                         ['Unlimited ticket sales', 'Yes (Pro)', 'Yes', false],
                         ['QR check-ins', 'Yes (Free)', 'Yes (iOS/Android/web)', false],
                         ['Ticket waitlist', 'Yes (Pro)', 'Yes', false],
@@ -3693,7 +3693,7 @@ class MarketingController extends Controller
                         ['Payment processing', 'Stripe/PayPal/Payfast (processor rates apply)', 'N/A (no ticketing)', true],
                     ],
                     'Events & Calendar' => [
-                        ['Ticketing', 'Yes (Free)', 'No', true],
+                        ['Ticketing', 'Yes (free RSVP, paid on Pro)', 'No', true],
                         ['Unlimited ticket sales', 'Yes (Pro)', 'N/A (no ticketing)', true],
                         ['QR check-ins', 'Yes (Free)', 'No', true],
                         ['Free event RSVP', 'Yes (Free)', 'Yes (limited)', true],
@@ -3826,7 +3826,7 @@ class MarketingController extends Controller
                         ['Payment processing', 'Stripe/PayPal/Payfast (processor rates apply)', 'Stripe/PayPal/Mollie', false],
                     ],
                     'Events & Ticketing' => [
-                        ['Ticketing', 'Yes (Free)', 'Yes', false],
+                        ['Ticketing', 'Yes (free RSVP, paid on Pro)', 'Yes', false],
                         ['Unlimited ticket sales', 'Yes (Pro)', 'Yes', false],
                         ['QR check-ins', 'Yes (Free)', 'Yes (pretixSCAN, offline-capable)', false],
                         ['Ticket waitlist', 'Yes (Pro)', 'Yes (automated)', false],
@@ -3965,7 +3965,7 @@ class MarketingController extends Controller
                         ['Payment processing', 'Stripe/PayPal/Payfast (processor rates apply)', 'Included in platform fee', false],
                     ],
                     'Events & Ticketing' => [
-                        ['Ticketing', 'Yes (Free)', 'Yes', false],
+                        ['Ticketing', 'Yes (free RSVP, paid on Pro)', 'Yes', false],
                         ['Unlimited ticket sales', 'Yes (Pro)', 'Yes', false],
                         ['QR check-ins', 'Yes (Free)', 'Yes', false],
                         ['Ticket waitlist', 'Yes (Pro)', 'Yes', false],
@@ -4104,7 +4104,7 @@ class MarketingController extends Controller
                         ['Payment processing', 'Stripe/PayPal/Payfast (processor rates apply)', 'Stripe/PayPal (separate fees)', true],
                     ],
                     'Events & Ticketing' => [
-                        ['Ticketing', 'Yes (Free)', 'Yes', false],
+                        ['Ticketing', 'Yes (free RSVP, paid on Pro)', 'Yes', false],
                         ['Unlimited ticket sales', 'Yes (Pro)', 'Yes', false],
                         ['QR check-ins', 'Yes (Free)', 'Yes (kiosk mode)', false],
                         ['Ticket waitlist', 'Yes (Pro)', 'Yes', false],
@@ -4245,7 +4245,7 @@ class MarketingController extends Controller
                         ['Payment processing', 'Stripe/PayPal/Payfast (processor rates apply)', 'Timely Pay/Stripe/Square/PayPal/Authorize.net', false],
                     ],
                     'Events & Ticketing' => [
-                        ['Ticketing', 'Yes (Free)', 'Yes (paid add-on)', true],
+                        ['Ticketing', 'Yes (free RSVP, paid on Pro)', 'Yes (paid add-on)', false],
                         ['QR check-ins', 'Yes (Free)', 'Yes (add-on)', false],
                         ['Ticket waitlist', 'Yes (Pro)', 'Yes (add-on)', false],
                         ['Recurring events', 'Yes (Free)', 'Yes', false],
@@ -4254,7 +4254,7 @@ class MarketingController extends Controller
                         ['Promo/discount codes', 'Yes (Pro)', 'Yes (add-on)', false],
                     ],
                     'Integrations' => [
-                        ['Calendar sync, both ways', 'Yes (Free)', 'Imports feeds hourly, one way', true],
+                        ['Calendar sync, both ways', 'Yes (Free)', 'Imports feeds (two-way sync not listed)', true],
                         ['Newsletters', 'Yes (Free)', 'Mailchimp integration (Growth plan and up)', true],
                     ],
                     'Customization' => [
@@ -4296,7 +4296,7 @@ class MarketingController extends Controller
                     ],
                     [
                         'title' => 'Two-Way Calendar Sync',
-                        'description' => 'Google, Outlook and CalDAV sync both ways, free. Timely imports calendar feeds in one direction, on an hourly schedule.',
+                        'description' => 'Google, Outlook and CalDAV sync both ways, free. Timely imports calendar feeds on an hourly schedule and does not list two-way sync.',
                         'icon' => 'calendar',
                         'gradient' => 'from-teal-50 to-emerald-50 dark:from-teal-900/30 dark:to-emerald-900/30',
                         'border' => 'border-teal-200 dark:border-teal-500/20',
@@ -4369,7 +4369,7 @@ class MarketingController extends Controller
                         ['Payment processing', 'Stripe/PayPal/Payfast (processor rates apply)', 'Stripe/PayPal/Square, WooCommerce on Pro', false],
                     ],
                     'Events & Ticketing' => [
-                        ['Ticketing', 'Yes (Free)', 'Yes (Event Tickets plugin)', false],
+                        ['Ticketing', 'Yes (free RSVP, paid on Pro)', 'Yes (Event Tickets plugin)', false],
                         ['QR check-ins', 'Yes (Free)', 'Yes (Pro tier)', true],
                         ['Ticket waitlist', 'Yes (Pro)', 'Yes (Event Tickets Plus)', false],
                         ['Recurring events', 'Yes (Free)', 'Yes (paid tiers)', true],
@@ -4400,7 +4400,7 @@ class MarketingController extends Controller
                 'key_advantages' => [
                     [
                         'title' => 'No WordPress Required',
-                        'description' => 'Event Schedule is a hosted service with a free plan, so there is no WordPress site, plugin stack or update cycle to keep running. Selfhosting stays available if you want it.',
+                        'description' => 'Event Schedule is a hosted service with a free plan, so there is no WordPress site, plugin stack or update cycle to keep running. Self-hosting stays available if you want it.',
                         'icon' => 'globe',
                         'gradient' => 'from-emerald-50 to-teal-50 dark:from-emerald-900/30 dark:to-teal-900/30',
                         'border' => 'border-emerald-200 dark:border-emerald-500/20',
@@ -4490,7 +4490,7 @@ class MarketingController extends Controller
                         ['Platform fees', '0%', 'N/A (links to outside ticket sellers)', false],
                     ],
                     'Events & Ticketing' => [
-                        ['Ticketing', 'Yes (Free)', 'No (links to outside ticket sellers)', true],
+                        ['Ticketing', 'Yes (free RSVP, paid on Pro)', 'No (links to outside ticket sellers)', true],
                         ['Ticket waitlist', 'Yes (Pro)', 'RSVP waitlist, fans not notified automatically', true],
                         ['Online events', 'Yes (Free)', 'Yes (livestreams)', false],
                         ['Free event RSVP', 'Yes (Free)', 'Yes', false],
@@ -4604,7 +4604,7 @@ class MarketingController extends Controller
                         ['Payment processing', 'Stripe/PayPal/Payfast (processor rates apply)', 'Stripe Connect', false],
                     ],
                     'Events & Ticketing' => [
-                        ['Ticketing', 'Yes (Free)', 'Yes', false],
+                        ['Ticketing', 'Yes (free RSVP, paid on Pro)', 'Yes', false],
                         ['Ticket waitlist', 'Yes (Pro)', 'Yes', false],
                         ['Free event RSVP', 'Yes (Free)', 'Yes (RSVP and $0 tickets)', false],
                         ['Promo/discount codes', 'Yes (Pro)', 'Yes', false],
@@ -4717,7 +4717,7 @@ class MarketingController extends Controller
                         ['Platform fees', '0%', 'Ticket fees vary by event size and price', true],
                     ],
                     'Events & Ticketing' => [
-                        ['Ticketing', 'Yes (Free)', 'Yes (US and UK hosts)', true],
+                        ['Ticketing', 'Yes (free RSVP, paid on Pro)', 'Yes (US and UK hosts)', true],
                         ['QR check-ins', 'Yes (Free)', 'Yes', false],
                         ['Ticket waitlist', 'Yes (Pro)', 'Yes', false],
                         ['Recurring events', 'Yes (Free)', 'No (clone the event instead)', true],
@@ -4832,7 +4832,7 @@ class MarketingController extends Controller
                         ['Platform fees', '0%', 'N/A (no ticketing)', false],
                     ],
                     'Events & Ticketing' => [
-                        ['Ticketing', 'Yes (Free)', 'No (external ticket link)', true],
+                        ['Ticketing', 'Yes (free RSVP, paid on Pro)', 'No (external ticket link)', true],
                         ['Recurring events', 'Yes (Free)', 'Yes', false],
                         ['Online events', 'Yes (Free)', 'Yes', false],
                         ['Free event RSVP', 'Yes (Free)', 'Yes (Interested or Going)', false],
@@ -4932,7 +4932,7 @@ class MarketingController extends Controller
                 'slug' => 'zeffy-alternative',
                 'meta_title' => 'Zeffy Alternative for Any Organizer | Event Schedule',
                 'tagline' => 'Open source event ticketing with zero platform fees, open to any organizer, not only registered nonprofits.',
-                'description' => 'Compare Event Schedule with Zeffy: event ticketing with zero platform fees for any organizer, not only registered nonprofits, plus calendar sync and selfhosting.',
+                'description' => 'Compare Event Schedule with Zeffy: event ticketing with zero platform fees for any organizer, not only registered nonprofits, plus calendar sync and self-hosting.',
                 'keywords' => 'zeffy alternative, zeffy competitor, free event ticketing, nonprofit event ticketing, ticketing for community groups',
                 'about' => 'Zeffy is a free fundraising and ticketing platform for nonprofits and registered charities in the US, Canada, the UK, Ireland, Australia and Germany. It covers card fees itself and is funded by optional tips from donors and buyers.',
                 'competitor_strengths' => [
@@ -4949,7 +4949,7 @@ class MarketingController extends Controller
                         ['Open to any organizer', 'Yes', 'No (nonprofits and charities only)', true],
                     ],
                     'Events & Ticketing' => [
-                        ['Ticketing', 'Yes (Free)', 'Yes', false],
+                        ['Ticketing', 'Yes (free RSVP, paid on Pro)', 'Yes', false],
                         ['QR check-ins', 'Yes (Free)', 'Yes', false],
                         ['Recurring events', 'Yes (Free)', 'Multi-date events', true],
                         ['Promo/discount codes', 'Yes (Pro)', 'Yes', false],
@@ -5068,7 +5068,7 @@ class MarketingController extends Controller
                         ['Payment processing', 'Stripe/PayPal/Payfast (processor rates apply)', 'No', true],
                     ],
                     'Events & Ticketing' => [
-                        ['Ticketing', 'Yes (Free)', 'No (links out to your ticket page)', true],
+                        ['Ticketing', 'Yes (free RSVP, paid on Pro)', 'No (links out to your ticket page)', true],
                         ['Recurring events', 'Yes (Free)', 'Yes (Premium)', true],
                         ['Online events', 'Yes (Free)', 'Yes', false],
                         ['Free event RSVP', 'Yes (Free)', 'Yes (Premium)', true],
@@ -5168,7 +5168,7 @@ class MarketingController extends Controller
                 'slug' => 'hi-events-alternative',
                 'meta_title' => 'Hi.Events Alternative, No Per-Ticket Fees | Event Schedule',
                 'tagline' => 'Open source ticketing with a flat price instead of a per-ticket fee, plus calendar sync and newsletters.',
-                'description' => 'Compare Event Schedule with Hi.Events: open source ticketing with flat '.plan_price($this->planPrice()).'/mo pricing instead of 1.25% + $0.60 a ticket, calendar sync, and simple selfhosting.',
+                'description' => 'Compare Event Schedule with Hi.Events: open source ticketing with flat '.plan_price($this->planPrice()).'/mo pricing instead of 1.25% + $0.60 a ticket, calendar sync, and simple self-hosting.',
                 'keywords' => 'hi.events alternative, hi events alternative, open source ticketing alternative, open source eventbrite alternative, selfhosted ticketing',
                 'about' => 'Hi.Events is an open source event management and ticketing platform (AGPL-3.0 with additional terms) for conferences, nightlife, concerts and workshops. It offers a hosted Cloud service with a per-ticket fee and a selfhosted version, with paid licences to remove its branding.',
                 'competitor_strengths' => [
@@ -5184,7 +5184,7 @@ class MarketingController extends Controller
                         ['Payment processing', 'Stripe/PayPal/Payfast (processor rates apply)', 'Stripe, plus offline payments', false],
                     ],
                     'Events & Ticketing' => [
-                        ['Ticketing', 'Yes (Free)', 'Yes', false],
+                        ['Ticketing', 'Yes (free RSVP, paid on Pro)', 'Yes', false],
                         ['QR check-ins', 'Yes (Free)', 'Yes (check-in app)', false],
                         ['Ticket waitlist', 'Yes (Pro)', 'Yes', false],
                         ['Recurring events', 'Yes (Free)', 'Yes', false],
@@ -5193,8 +5193,8 @@ class MarketingController extends Controller
                         ['Promo/discount codes', 'Yes (Pro)', 'Yes', false],
                     ],
                     'Customization' => [
-                        ['Remove branding', 'Yes (Pro)', 'Selfhost licence, from 499 EUR/yr', true],
-                        ['Custom fields', 'Yes (Pro)', 'Yes (questions per ticket type)', false],
+                        ['Remove branding', 'Yes (Pro)', 'Selfhost licence, from 499 EUR/yr', false],
+                        ['Custom fields', 'Yes (ticket questions free, event fields Pro)', 'Yes (questions per ticket type)', false],
                         ['Built-in analytics', 'Yes (Free)', 'Yes (sales reports)', false],
                     ],
                     'Unique Features' => [
@@ -5238,7 +5238,7 @@ class MarketingController extends Controller
                     ],
                     [
                         'title' => 'Simpler to Selfhost',
-                        'description' => 'Event Schedule runs on standard PHP hosting with MySQL. Hi.Events selfhosting uses Docker with PostgreSQL and Redis.',
+                        'description' => 'Event Schedule runs on standard PHP hosting with MySQL. Hi.Events self-hosting uses Docker with PostgreSQL and Redis.',
                         'icon' => 'globe',
                         'gradient' => 'from-blue-50 to-sky-50 dark:from-blue-900/30 dark:to-sky-900/30',
                         'border' => 'border-blue-200 dark:border-blue-500/20',
@@ -5270,7 +5270,7 @@ class MarketingController extends Controller
                     ['name' => 'Eventbrite', 'route' => 'marketing.compare_eventbrite'],
                 ],
                 'faq' => [
-                    ['question' => 'Are both platforms open source?', 'answer' => 'Yes. Hi.Events is AGPL-3.0 with additional terms that require a visible "Powered by Hi.Events" link unless you buy a licence. Event Schedule is open source under the Attribution Assurance License, and a selfhosted install resolves to Enterprise.'],
+                    ['question' => 'Are both platforms open source?', 'answer' => 'Yes. Hi.Events is AGPL-3.0 with additional terms that require a visible "Powered by Hi.Events" link unless you buy a licence. Event Schedule is open source under the Attribution Assurance License, and a selfhosted install resolves to Enterprise. It carries an attribution credit too: the license requires it, and no plan removes it on a selfhosted install.'],
                     ['question' => 'How does Event Schedule pricing compare to Hi.Events Cloud?', 'answer' => 'Hi.Events Cloud has no monthly fee and charges 1.25% + $0.60 per ticket, paid by buyers by default. Event Schedule Pro is a flat '.plan_price($this->planPrice()).'/mo with zero platform fees, so the saving grows with every ticket you sell.'],
                     ['question' => 'Which is easier to selfhost?', 'answer' => 'Event Schedule runs on standard PHP hosting with MySQL. Hi.Events ships an all-in-one Docker image and uses PostgreSQL and Redis, which suits a server you already run Docker on.'],
                     ['question' => 'Does Event Schedule have a check-in app?', 'answer' => 'Scanning works in the browser on any phone, free on every plan, with no app to install. The live check-in dashboard, which shows the room filling up, is on Pro.'],
@@ -5300,7 +5300,7 @@ class MarketingController extends Controller
                         ['Platform fees', '0%', 'N/A (no ticketing)', false],
                     ],
                     'Events & Ticketing' => [
-                        ['Ticketing', 'Yes (Free)', 'Participation and place limits only', true],
+                        ['Ticketing', 'Yes (free RSVP, paid on Pro)', 'Participation and place limits only', true],
                         ['Online events', 'Yes (Free)', 'Live stream link on the event', false],
                         ['Free event RSVP', 'Yes (Free)', 'Yes (with optional approval)', false],
                     ],
@@ -5383,7 +5383,7 @@ class MarketingController extends Controller
                     ['question' => 'Are both platforms open source?', 'answer' => 'Yes. Mobilizon is AGPLv3 and written in Elixir with PostgreSQL. Event Schedule is open source under the Attribution Assurance License and runs on PHP with MySQL, and a selfhosted install resolves to Enterprise.'],
                     ['question' => 'Does Event Schedule federate like Mobilizon?', 'answer' => 'Not over ActivityPub. A selfhosted Event Schedule install can share its public events with the eventschedule.com listings, one schedule at a time and only when the owner opts in, and every listing links back to the original event.'],
                     ['question' => 'Can I sell tickets on Event Schedule?', 'answer' => 'Yes, on Pro at '.plan_price($this->planPrice()).'/mo, through your own Stripe or PayPal account with zero platform fees. Free registration with QR tickets is on every plan.'],
-                    ['question' => 'Do I have to run a server?', 'answer' => 'No. The hosted service has a free plan with nothing to install. Selfhosting is there if you want your events on your own server.'],
+                    ['question' => 'Do I have to run a server?', 'answer' => 'No. The hosted service has a free plan with nothing to install. Self-hosting is there if you want your events on your own server.'],
                 ],
             ],
         ];

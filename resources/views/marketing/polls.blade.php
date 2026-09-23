@@ -593,7 +593,7 @@
                                 <path stroke-linecap="round" stroke-linejoin="round" d="M9 12.75L11.25 15 15 9.75M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
                             </svg>
                             <span class="es-vote-muted text-sm font-medium tracking-wide">Event polls</span>
-                            <span class="es-vote-plan">Pro</span>
+                            <span class="es-vote-plan" aria-hidden="true">Pro</span>
                         </x-marketing.hero-eyebrow>
                         <span class="es-mask"><span class="es-mask-line">You have a question.</span></span>
                         <span class="es-mask es-mask-2"><span class="es-mask-line">Poll your <span class="es-vote-accent">audience.</span></span></span>

@@ -163,7 +163,7 @@
                     <svg aria-hidden="true" class="h-5 w-5 text-blue-600 dark:text-blue-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19V6l12-3v13M9 19c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zm12-3c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zM9 10l12-3" />
                     </svg>
-                    <span class="text-sm font-medium tracking-wide text-gray-600 dark:text-gray-300">A Gig Calendar for Every Performer</span>
+                    <span class="text-sm font-medium tracking-wide text-gray-600 dark:text-gray-300">A gig calendar for every performer</span>
                 </x-marketing.hero-eyebrow>
                 <span class="es-mask"><span class="es-mask-line">Every show you play,</span></span>
                 <span class="es-mask es-mask-2"><span class="es-mask-line"><span class="text-gradient-talent es-gradient-anim">on one link</span></span></span>
