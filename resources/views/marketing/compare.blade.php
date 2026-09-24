@@ -162,10 +162,10 @@
         }
 
         /* ---- Platform picker ----------------------------------------
-           Twenty-six chips will not fit in a horizontal tab strip at any
-           width, so the tablist wraps into a grid. Panels ship visible
+           A chip per competitor will not fit in a horizontal tab strip at
+           any width, so the tablist wraps into a grid. Panels ship visible
            and the script hides the inactive ones, so no-JS visitors and
-           crawlers get all twenty-six head-to-heads. */
+           crawlers get every head-to-head. */
         .es-chip {
             transition: border-color 0.2s, background-color 0.2s, color 0.2s, transform 0.2s;
         }
@@ -330,7 +330,7 @@
     <!-- ============================================================ -->
     {{-- This replaces both the old six-column matrix as lead content and the
          separate "Detailed comparisons" card grid: the chips are the directory
-         of all 26 pages, so the same 26 are no longer listed twice. --}}
+         of every comparison page, so none is listed twice. --}}
     <section id="head-to-head" class="relative scroll-mt-24 overflow-hidden bg-gray-50 py-16 dark:bg-[#0f0f14] lg:py-24">
         <div class="mx-auto max-w-6xl px-4 sm:px-6 lg:px-8">
             <div class="mb-8 text-center">
@@ -894,7 +894,7 @@
                 });
             }
 
-            // Only now do panels start hiding: without JS all twenty-six stay visible.
+            // Only now do panels start hiding: without JS every panel stays visible.
             wrap.classList.add('is-ready');
             select(0, false);
         })();

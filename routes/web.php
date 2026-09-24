@@ -1280,6 +1280,7 @@ if (config('app.is_nexus')) {
         Route::get('/tockify-alternative', [MarketingController::class, 'compareTockify'])->name('marketing.compare_tockify');
         Route::get('/hi-events-alternative', [MarketingController::class, 'compareHiEvents'])->name('marketing.compare_hi_events');
         Route::get('/mobilizon-alternative', [MarketingController::class, 'compareMobilizon'])->name('marketing.compare_mobilizon');
+        Route::get('/ticketleap-alternative', [MarketingController::class, 'compareTicketLeap'])->name('marketing.compare_ticketleap');
         Route::get('/replace', [MarketingController::class, 'replace'])->name('marketing.replace');
         Route::get('/google-forms-replacement', [MarketingController::class, 'replaceGoogleForms'])->name('marketing.replace_google_forms');
         Route::get('/mailchimp-replacement', [MarketingController::class, 'replaceMailchimp'])->name('marketing.replace_mailchimp');
@@ -1552,6 +1553,7 @@ if (config('app.is_nexus')) {
             Route::get('/tockify-alternative', [MarketingController::class, 'compareTockify'])->name('marketing.compare_tockify');
             Route::get('/hi-events-alternative', [MarketingController::class, 'compareHiEvents'])->name('marketing.compare_hi_events');
             Route::get('/mobilizon-alternative', [MarketingController::class, 'compareMobilizon'])->name('marketing.compare_mobilizon');
+            Route::get('/ticketleap-alternative', [MarketingController::class, 'compareTicketLeap'])->name('marketing.compare_ticketleap');
             Route::get('/replace', [MarketingController::class, 'replace'])->name('marketing.replace');
             Route::get('/google-forms-replacement', [MarketingController::class, 'replaceGoogleForms'])->name('marketing.replace_google_forms');
             Route::get('/mailchimp-replacement', [MarketingController::class, 'replaceMailchimp'])->name('marketing.replace_mailchimp');
@@ -1765,6 +1767,7 @@ if (config('app.is_nexus')) {
             Route::get('/dice-alternative', fn () => redirect('https://'._base_domain().'/dice-alternative', 301));
             Route::get('/brown-paper-tickets-alternative', fn () => redirect('https://'._base_domain().'/brown-paper-tickets-alternative', 301));
             Route::get('/splash-alternative', fn () => redirect('https://'._base_domain().'/splash-alternative', 301));
+            Route::get('/ticketleap-alternative', fn () => redirect('https://'._base_domain().'/ticketleap-alternative', 301));
             Route::get('/replace', fn () => redirect('https://'._base_domain().'/replace', 301));
             Route::get('/google-forms-replacement', fn () => redirect('https://'._base_domain().'/google-forms-replacement', 301));
             Route::get('/mailchimp-replacement', fn () => redirect('https://'._base_domain().'/mailchimp-replacement', 301));
@@ -1961,6 +1964,7 @@ if (config('app.is_nexus')) {
     Route::get('/use-cases', fn () => redirect()->route('home'));
     Route::get('/compare', fn () => redirect()->route('home'));
     Route::get('/ticket-fee-calculator', fn () => redirect()->route('home'));
+    Route::get('/ticketleap-alternative', fn () => redirect()->route('home'));
     Route::get('/contact', fn () => redirect()->route('home'));
     // The legal documents are the exception to the redirect-to-home rule above: an
     // operator can author their own from /admin/legal, and this is where they are

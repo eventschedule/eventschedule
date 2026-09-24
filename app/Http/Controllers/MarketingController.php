@@ -1148,6 +1148,14 @@ class MarketingController extends Controller
     }
 
     /**
+     * Compare vs TicketLeap page
+     */
+    public function compareTicketLeap()
+    {
+        return view('marketing.compare-single', $this->getComparisonData('ticketleap'));
+    }
+
+    /**
      * Replace hub page
      */
     public function replace()
@@ -1846,13 +1854,13 @@ class MarketingController extends Controller
         'brown-paper-tickets', 'addevent', 'pretix', 'eventzilla',
         'facebook-events', 'partiful', 'posh', 'bandsintown',
         'the-events-calendar', 'timely', 'tockify', 'zeffy',
-        'hi-events', 'mobilizon',
+        'hi-events', 'mobilizon', 'ticketleap',
     ];
 
     /**
      * Feature rows the /compare head-to-head prefers, highest signal first.
-     * Every label here exists on at least 21 of the 26 competitors, so in
-     * practice 24 of them fill all six slots from this list alone.
+     * Nearly every competitor carries most of these labels, so in practice
+     * almost all of them fill the six slots from this list alone.
      */
     private const HUB_HEAD_TO_HEAD_ROWS = [
         'Platform fees',
@@ -5369,6 +5377,126 @@ class MarketingController extends Controller
                     ['question' => 'Does Event Schedule federate like Mobilizon?', 'answer' => 'Not over ActivityPub. A selfhosted Event Schedule install can share its public events with the eventschedule.com listings, one schedule at a time and only when the owner opts in, and every listing links back to the original event.'],
                     ['question' => 'Can I sell tickets on Event Schedule?', 'answer' => 'Yes, on Pro at '.plan_price($this->planPrice()).'/mo, through your own Stripe or PayPal account with zero platform fees. Free registration with QR tickets is on every plan.'],
                     ['question' => 'Do I have to run a server?', 'answer' => 'No. The hosted service has a free plan with nothing to install. Self-hosting is there if you want your events on your own server.'],
+                ],
+            ],
+
+            // TicketLeap cells checked 2026-09-24 against ticketleap.com/info/pricing, /info/features, /solutions/reserved-seating
+            // and support.ticketleap.com (fees, payouts, recurring events, users, scan app, email campaigns, hidden events,
+            // Buy Tickets button). Waitlist, online events, API, webhooks, custom domains and calendar sync were not found and are left out.
+            'ticketleap' => [
+                'name' => 'TicketLeap',
+                'key' => 'ticketleap',
+                'slug' => 'ticketleap-alternative',
+                'meta_title' => 'TicketLeap Alternative, No Per-Ticket Fees | Event Schedule',
+                'tagline' => 'Sell tickets from your own page with zero platform fees, payouts into your own account, and calendar sync.',
+                'description' => 'Compare Event Schedule with TicketLeap: zero platform fees instead of $1 + 2% a ticket plus 3% per order, paid to your own Stripe or PayPal, and calendar sync.',
+                'keywords' => 'ticketleap alternative, ticketleap competitor, ticketleap fees, haunted attraction ticketing, reserved seating ticketing',
+                'about' => 'TicketLeap is a self-serve ticketing platform founded in 2003 and now part of Leap Event Technology. It is free to use, sells in US, Canadian and Australian currencies, and charges a per-ticket fee plus a transaction fee that organizers can pass on to buyers.',
+                'competitor_strengths' => [
+                    'A free drag-and-drop seating chart builder, with tables and held seats',
+                    'Scanning and box office apps, with card readers for sales at the door',
+                    'No subscription or contract, and phone support on weekdays',
+                ],
+                'sections' => [
+                    'Pricing & Fees' => [
+                        ['Free plan', 'Yes (forever)', 'Free to use (fees on paid tickets)', false],
+                        ['Paid plan price', plan_price($this->planPrice()).'/mo (7-day free trial)', 'No subscription (fees per ticket)', false],
+                        ['Platform fees', '0%', '$1 + 2% per ticket, plus 3% per order', true],
+                        ['Payment processing', 'Stripe/PayPal/Payfast (processor rates apply)', 'Built in (Stripe), paid out after the event', false],
+                    ],
+                    'Events & Ticketing' => [
+                        ['Ticketing', 'Yes (free RSVP, paid on Pro)', 'Yes', false],
+                        ['QR check-ins', 'Yes (Free)', 'Yes (TicketLeap Scan app)', false],
+                        ['Recurring events', 'Yes (Free)', 'Yes (schedule builder)', false],
+                        ['Free event RSVP', 'Yes (Free)', 'Yes (no fees on free events)', false],
+                        ['Promo/discount codes', 'Yes (Pro)', 'Yes', false],
+                        ['Reserved seating', 'Yes (Enterprise)', 'Yes (seating chart builder, free)', false],
+                    ],
+                    'Integrations' => [
+                        ['Newsletters', 'Yes (Free)', 'Email campaigns to ticket buyers', false],
+                    ],
+                    'Customization' => [
+                        ['Custom fields', 'Yes (ticket questions free, event fields Pro)', 'Yes (checkout questions and waivers)', false],
+                        ['Built-in analytics', 'Yes (Free)', 'Yes (reports, GA4 and Meta Pixel)', false],
+                    ],
+                    'Unique Features' => [
+                        ['Embeddable calendar', 'Yes (Free)', 'Buy Tickets button only', true],
+                        ['Private/password-protected events', 'Yes (Enterprise)', 'Hidden events (link only)', false],
+                        ['Team collaboration', 'Yes (Enterprise)', 'Yes (six user roles)', false],
+                    ],
+                    'Platform' => [
+                        ['Open source', 'Yes', 'No', true],
+                        ['Selfhosting', 'Yes', 'No', true],
+                    ],
+                ],
+                'key_advantages' => [
+                    [
+                        'title' => '0% Platform Fees',
+                        'description' => 'TicketLeap charges $1 + 2% per paid ticket plus a 3% transaction fee per order. Event Schedule takes no platform fee on any plan.',
+                        'icon' => 'dollar',
+                        'gradient' => 'from-emerald-50 to-teal-50 dark:from-emerald-900/30 dark:to-teal-900/30',
+                        'border' => 'border-emerald-200 dark:border-emerald-500/20',
+                        'icon_bg' => 'bg-emerald-100 dark:bg-emerald-500/20',
+                        'icon_color' => 'text-emerald-600 dark:text-emerald-400',
+                    ],
+                    [
+                        'title' => 'Paid Into Your Own Account',
+                        'description' => 'On Pro, ticket money goes straight into your own Stripe or PayPal account instead of arriving days after the event.',
+                        'icon' => 'ticket',
+                        'gradient' => 'from-sky-50 to-cyan-50 dark:from-sky-900/30 dark:to-cyan-900/30',
+                        'border' => 'border-sky-200 dark:border-sky-500/20',
+                        'icon_bg' => 'bg-sky-100 dark:bg-sky-500/20',
+                        'icon_color' => 'text-sky-600 dark:text-sky-400',
+                    ],
+                    [
+                        'title' => 'Two-Way Calendar Sync',
+                        'description' => 'Google, Outlook and CalDAV sync both ways, free, and anyone can subscribe to your schedule\'s live calendar feed.',
+                        'icon' => 'calendar',
+                        'gradient' => 'from-teal-50 to-emerald-50 dark:from-teal-900/30 dark:to-emerald-900/30',
+                        'border' => 'border-teal-200 dark:border-teal-500/20',
+                        'icon_bg' => 'bg-teal-100 dark:bg-teal-500/20',
+                        'icon_color' => 'text-teal-600 dark:text-teal-400',
+                    ],
+                    [
+                        'title' => 'Embed on Your Website',
+                        'description' => 'Put the whole calendar on any website, free, with each event linking to its own page.',
+                        'icon' => 'layout',
+                        'gradient' => 'from-blue-50 to-sky-50 dark:from-blue-900/30 dark:to-sky-900/30',
+                        'border' => 'border-blue-200 dark:border-blue-500/20',
+                        'icon_bg' => 'bg-blue-100 dark:bg-blue-500/20',
+                        'icon_color' => 'text-blue-600 dark:text-blue-400',
+                    ],
+                    [
+                        'title' => 'API and Webhooks on Pro',
+                        'description' => 'A REST API and webhooks for sales, events and check-ins come with Pro.',
+                        'icon' => 'link',
+                        'gradient' => 'from-amber-50 to-yellow-50 dark:from-amber-900/30 dark:to-yellow-900/30',
+                        'border' => 'border-amber-200 dark:border-amber-500/20',
+                        'icon_bg' => 'bg-amber-100 dark:bg-amber-500/20',
+                        'icon_color' => 'text-amber-600 dark:text-amber-400',
+                    ],
+                    [
+                        'title' => 'Open Source',
+                        'description' => 'Read the code and selfhost it on your own server. TicketLeap is a hosted service only.',
+                        'icon' => 'code',
+                        'gradient' => 'from-cyan-50 to-sky-50 dark:from-cyan-900/30 dark:to-sky-900/30',
+                        'border' => 'border-cyan-200 dark:border-cyan-500/20',
+                        'icon_bg' => 'bg-cyan-100 dark:bg-cyan-500/20',
+                        'icon_color' => 'text-cyan-600 dark:text-cyan-400',
+                    ],
+                ],
+                'cross_links' => [
+                    ['name' => 'Eventbrite', 'route' => 'marketing.compare_eventbrite'],
+                    ['name' => 'Ticket Tailor', 'route' => 'marketing.compare_ticket_tailor'],
+                    ['name' => 'Brown Paper Tickets', 'route' => 'marketing.compare_brown_paper_tickets'],
+                ],
+                'faq' => [
+                    ['question' => 'How does Event Schedule pricing compare to TicketLeap?', 'answer' => 'TicketLeap has no subscription and charges $1 + 2% on each paid ticket, plus a 3% transaction fee per order, passed on to buyers or absorbed by you. Event Schedule Pro is a flat '.plan_price($this->planPrice()).'/mo with zero platform fees, so you pay only Stripe\'s or PayPal\'s own processing.'],
+                    ['question' => 'When does the money from ticket sales reach me?', 'answer' => 'On Pro, paid tickets are charged through your own Stripe or PayPal account, so the money goes there as each order is placed and follows their normal payout schedule. TicketLeap pays organizers by direct deposit 4 to 6 business days after each event date, or weekly once approved for its FastPay advances.'],
+                    ['question' => 'Can I price tickets in my own currency?', 'answer' => 'Yes, on Pro. Payments go through your own Stripe or PayPal account, so you can price tickets in most of the currencies they support. TicketLeap sells in US, Canadian and Australian dollars.'],
+                    ['question' => 'Does Event Schedule have reserved seating like TicketLeap?', 'answer' => 'Yes, on Enterprise. A venue schedule draws its room once, with sections, rows, tables, standing areas and wheelchair spaces, and buyers pick their seats from the map at checkout. TicketLeap includes its seating chart builder at no extra cost.'],
+                    ['question' => 'Can I put my events on my own website?', 'answer' => 'Yes. The embeddable calendar shows your upcoming events on any website, free, and each event links to its own page. On Pro, the ticket widget puts checkout on your site too. TicketLeap offers a Buy Tickets button that links to its own event page.'],
+                    ['question' => 'Is it easy to switch from TicketLeap?', 'answer' => 'Yes. Create a free schedule, paste your event details or upload a flyer and the AI parser fills in each event for you to check. Then connect Stripe or PayPal and move to Pro to sell paid tickets.'],
                 ],
             ],
         ];

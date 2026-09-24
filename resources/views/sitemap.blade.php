@@ -161,6 +161,10 @@ echo '<?xml version="1.0" encoding="UTF-8"?>'; ?>
         {!! $lastmodTag('/mobilizon-alternative') !!}
     </url>
     <url>
+        <loc>{{ url('/ticketleap-alternative') }}</loc>
+        {!! $lastmodTag('/ticketleap-alternative') !!}
+    </url>
+    <url>
         <loc>{{ url('/replace') }}</loc>
         {!! $lastmodTag('/replace') !!}
     </url>

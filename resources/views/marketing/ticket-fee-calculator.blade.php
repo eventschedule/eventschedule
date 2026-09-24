@@ -72,8 +72,8 @@
                 'rate' => $feeRates['ticketleap']['label'],
                 'how' => $usd($feeRates['ticketleap']['fixed']).' + '.$pct($feeRates['ticketleap']['percent']).' of the price on each ticket, or a flat '.$usd($feeRates['ticketleap']['low_fixed']).' on a ticket of '.$usd($feeRates['ticketleap']['low_price']).' or less, capped at '.$usd($feeRates['ticketleap']['cap']).' a ticket. On top of that, a '.$pct($feeRates['ticketleap']['processing']).' online transaction fee on each order, with no cap. No subscription.',
                 'source' => 'ticketleap.com/info/pricing',
-                'route' => null,
-                'link' => null,
+                'route' => 'marketing.compare_ticketleap',
+                'link' => 'TicketLeap alternative',
             ],
             [
                 'key' => 'universe',

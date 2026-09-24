@@ -172,6 +172,7 @@ class GenerateSocialImages extends Command
         'tockify-alternative' => '/tockify-alternative',
         'hi-events-alternative' => '/hi-events-alternative',
         'mobilizon-alternative' => '/mobilizon-alternative',
+        'ticketleap-alternative' => '/ticketleap-alternative',
 
         // Replacement pages
         'replace' => '/replace',

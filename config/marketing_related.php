@@ -768,7 +768,7 @@ return [
 
     'brown-paper-tickets-alternative' => [
         ['title' => 'Eventbrite Alternative', 'path' => '/eventbrite-alternative', 'blurb' => 'Keep more of every ticket you sell.'],
-        ['title' => 'Ticket Tailor Alternative', 'path' => '/ticket-tailor-alternative', 'blurb' => 'Zero platform fees, open source flexibility, and AI features.'],
+        ['title' => 'TicketLeap Alternative', 'path' => '/ticketleap-alternative', 'blurb' => 'No per-ticket fees, payouts into your own account, and calendar sync.'],
         ['title' => 'Compare Alternatives', 'path' => '/compare', 'blurb' => 'See how Event Schedule stacks up against other platforms.'],
         ['title' => 'Pricing', 'path' => '/pricing', 'blurb' => 'See what is included on Free, Pro, and Enterprise plans.'],
     ],
@@ -935,6 +935,15 @@ return [
         ['title' => 'Hi.Events Alternative', 'path' => '/hi-events-alternative', 'blurb' => 'Two open source ticketing platforms, compared line by line.'],
         ['title' => 'Facebook Events Alternative', 'path' => '/facebook-events-alternative', 'blurb' => 'An events page you own, with ticketing and calendar sync.'],
         ['title' => 'For Nonprofits', 'path' => '/for-nonprofits', 'blurb' => 'Galas, volunteer days and campaigns, with zero platform fees on every ticket.'],
+        ['title' => 'Pricing', 'path' => '/pricing', 'blurb' => 'See what is included on Free, Pro, and Enterprise plans.'],
+    ],
+
+    // TicketLeap's standout is its free seating chart builder, so the seating page is the card a
+    // reader weighing the two is most likely to want next.
+    'ticketleap-alternative' => [
+        ['title' => 'Ticket Fee Calculator', 'path' => '/ticket-fee-calculator', 'blurb' => 'What TicketLeap, Eventbrite and six other platforms take from your ticket sales.'],
+        ['title' => 'Allocated Seating', 'path' => '/features/allocated-seating', 'blurb' => 'Draw your room once and let buyers pick their own seats from a map of it.'],
+        ['title' => 'Eventbrite Alternative', 'path' => '/eventbrite-alternative', 'blurb' => 'Keep more of every ticket you sell.'],
         ['title' => 'Pricing', 'path' => '/pricing', 'blurb' => 'See what is included on Free, Pro, and Enterprise plans.'],
     ],
 

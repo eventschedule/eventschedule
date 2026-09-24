@@ -167,6 +167,7 @@ return [
     '/tockify-alternative' => ['keyword' => 'Tockify alternative'],
     '/hi-events-alternative' => ['keyword' => 'Hi.Events alternative'],
     '/mobilizon-alternative' => ['keyword' => 'Mobilizon alternative'],
+    '/ticketleap-alternative' => ['keyword' => 'TicketLeap alternative'],
     '/switch-from-eventbrite' => ['keyword' => 'migrate from Eventbrite'],
 
     // Tool replacements (replace-single.blade.php). The eyebrow reads "{Tool} alternative for

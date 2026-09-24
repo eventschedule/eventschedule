@@ -233,6 +233,7 @@ class RouteLoadTest extends TestCase
             '/tockify-alternative',
             '/hi-events-alternative',
             '/mobilizon-alternative',
+            '/ticketleap-alternative',
 
             // Replacement pages
             '/replace',
