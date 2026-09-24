@@ -156,6 +156,12 @@ class GuestSeo
             SeoUtils::plainText($role->translatedDescription()),
         );
 
+        // The owner wrote nothing: say what the page is before listing facts about it. Appending
+        // the facts to an empty string gave a venue the bare "10 Main" as its whole description.
+        if ($text === '') {
+            $text = __('messages.view_schedule_for', ['name' => SeoUtils::cleanText($role->translatedName())]);
+        }
+
         if ($role->isVenue()) {
             $text = self::append($text, implode(', ', array_filter([
                 self::unlessContained(SeoUtils::cleanText($role->translatedAddress1()), $text),
@@ -174,10 +180,6 @@ class GuestSeo
             if ($names !== '') {
                 $text = self::append($text, __('messages.guest_meta_upcoming_list', ['events' => $names]));
             }
-        }
-
-        if ($text === '') {
-            $text = __('messages.view_schedule_for', ['name' => SeoUtils::cleanText($role->translatedName())]);
         }
 
         return SeoUtils::excerpt($text, self::DESCRIPTION_MAX);

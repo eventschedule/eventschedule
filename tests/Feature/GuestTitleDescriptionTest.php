@@ -389,7 +389,11 @@ class GuestTitleDescriptionTest extends TestCase
         );
     }
 
-    public function test_the_old_wording_is_only_for_a_schedule_with_nothing_to_say(): void
+    /**
+     * A schedule whose owner wrote nothing leads with what the page is, then its facts. Facts on
+     * their own gave a venue the bare "10 Main" as its whole description.
+     */
+    public function test_a_schedule_with_no_text_of_its_own_leads_with_what_the_page_is(): void
     {
         $talent = $this->talent();
 
@@ -401,8 +405,16 @@ class GuestTitleDescriptionTest extends TestCase
         $this->event($talent, 'Jazz Night');
 
         $this->assertSame(
-            'Upcoming: Jazz Night',
+            'View the event schedule for Late Show · Upcoming: Jazz Night',
             $this->description($this->get('/'.$talent->subdomain)->assertOk()->getContent())
+        );
+
+        // The case found locally: a venue with an address and nothing else.
+        $venue = $this->venue(['description' => null, 'short_description' => null]);
+
+        $this->assertSame(
+            'View the event schedule for Blue Note · 131 W 3rd St, New York',
+            $this->description($this->get('/'.$venue->subdomain)->assertOk()->getContent())
         );
     }
 
@@ -417,6 +429,6 @@ class GuestTitleDescriptionTest extends TestCase
         $html = $this->get('/'.$talent->subdomain.'/workshops')->assertOk()->getContent();
 
         $this->assertSame('Workshops | Late Show', $this->title($html));
-        $this->assertSame('Upcoming: Drum Workshop', $this->description($html));
+        $this->assertSame('View the event schedule for Late Show · Upcoming: Drum Workshop', $this->description($html));
     }
 }
