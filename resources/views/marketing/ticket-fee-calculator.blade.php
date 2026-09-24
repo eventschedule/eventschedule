@@ -88,8 +88,8 @@
                 'rate' => $feeRates['allevents']['label'],
                 'how' => 'A booking fee of '.$usd($feeRates['allevents']['fixed']).' on each ticket, charged to the buyer unless you absorb it. Outside India the ticket money goes to your own Stripe or PayPal account, which charges its own processing. Its paid plans raise how many upcoming events you can list at once.',
                 'source' => 'allevents.in/pages/pricing',
-                'route' => null,
-                'link' => null,
+                'route' => 'marketing.compare_allevents',
+                'link' => 'AllEvents alternative',
             ],
             [
                 'key' => 'hi-events',

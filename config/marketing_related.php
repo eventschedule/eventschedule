@@ -912,7 +912,7 @@ return [
 
     'facebook-events-alternative' => [
         ['title' => 'Partiful Alternative', 'path' => '/partiful-alternative', 'blurb' => 'Free RSVPs, plus recurring events and a public schedule page.'],
-        ['title' => 'Mobilizon Alternative', 'path' => '/mobilizon-alternative', 'blurb' => 'Open source events with ticketing and calendar sync built in.'],
+        ['title' => 'AllEvents Alternative', 'path' => '/allevents-alternative', 'blurb' => 'Your own schedule page, with no booking fee on the tickets you sell.'],
         ['title' => 'Community Event Calendar', 'path' => '/community-event-calendar', 'blurb' => 'One shared calendar for a town, fed by the organizers in it.'],
         ['title' => 'Pricing', 'path' => '/pricing', 'blurb' => 'See what is included on Free, Pro, and Enterprise plans.'],
     ],
@@ -954,6 +954,15 @@ return [
         ['title' => 'For Musicians', 'path' => '/for-musicians', 'blurb' => 'Tour dates, gigs, and fans on one link.'],
         ['title' => 'For Music Venues', 'path' => '/for-music-venues', 'blurb' => 'Run your live music calendar in one place.'],
         ['title' => 'Embed Calendar', 'path' => '/features/embed-calendar', 'blurb' => 'Embed your calendar on any website with one line of code.'],
+    ],
+
+    // AllEvents is a city-wide discovery feed, so the cards lead to what an organizer gets instead:
+    // the fee maths, a page of their own for every event, and a shared calendar a town can run itself.
+    'allevents-alternative' => [
+        ['title' => 'Ticket Fee Calculator', 'path' => '/ticket-fee-calculator', 'blurb' => 'What AllEvents, Eventbrite and six other platforms take from your ticket sales.'],
+        ['title' => 'Event Landing Page', 'path' => '/event-landing-page', 'blurb' => 'Every event gets a free page: the flyer, the date, a map and a ticket button.'],
+        ['title' => 'Community Event Calendar', 'path' => '/community-event-calendar', 'blurb' => 'One shared calendar for a town, fed by the organizers in it.'],
+        ['title' => 'Pricing', 'path' => '/pricing', 'blurb' => 'See what is included on Free, Pro, and Enterprise plans.'],
     ],
 
     'replace' => [

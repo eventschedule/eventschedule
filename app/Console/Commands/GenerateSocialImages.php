@@ -174,6 +174,7 @@ class GenerateSocialImages extends Command
         'mobilizon-alternative' => '/mobilizon-alternative',
         'ticketleap-alternative' => '/ticketleap-alternative',
         'songkick-alternative' => '/songkick-alternative',
+        'allevents-alternative' => '/allevents-alternative',
 
         // Replacement pages
         'replace' => '/replace',

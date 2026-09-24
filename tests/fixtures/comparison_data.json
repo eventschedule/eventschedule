@@ -8547,5 +8547,256 @@
                 "answer": "Yes. The embeddable calendar shows your upcoming dates on any website, free, and each date links to its own event page. Fans can also subscribe to your schedule's live calendar feed, so a moved date updates in their own calendar."
             }
         ]
+    },
+    "allevents": {
+        "name": "AllEvents",
+        "key": "allevents",
+        "slug": "allevents-alternative",
+        "meta_title": "AllEvents Alternative With No Booking Fees | Event Schedule",
+        "tagline": "Sell tickets from your own schedule page with no booking fee, unlimited events and two-way calendar sync.",
+        "description": "Compare Event Schedule with AllEvents: no per-ticket booking fee, unlimited events on the free plan, two-way calendar sync, and the API and webhooks on Pro.",
+        "keywords": "allevents alternative, allevents.in alternative, allevents competitor, event listing platform alternative, sell event tickets online",
+        "about": "AllEvents (allevents.in) is an event discovery platform founded in 2011 that lists events in over 40,000 cities, many of them gathered from other websites. Organizers can publish events and sell tickets for a booking fee charged to buyers, and buy paid promotion.",
+        "competitor_strengths": [
+            "A discovery marketplace it says reaches 20 million event seekers a month",
+            "Paid promotion run by its own marketing team, plus email invite credits",
+            "Ticket money paid straight into your own Stripe or PayPal account, outside India"
+        ],
+        "sections": {
+            "Pricing & Fees": [
+                [
+                    "Free plan",
+                    "Yes (forever)",
+                    "Yes (5 active upcoming events)",
+                    false
+                ],
+                [
+                    "Paid plan price",
+                    "$5/mo (7-day free trial)",
+                    "USD 12, 60 or 200/mo",
+                    false
+                ],
+                [
+                    "Platform fees",
+                    "0%",
+                    "USD 1 per ticket (buyers pay by default)",
+                    true
+                ],
+                [
+                    "Payment processing",
+                    "Stripe/PayPal/Payfast (processor rates apply)",
+                    "Your Stripe or PayPal (India: AllEvents)",
+                    false
+                ]
+            ],
+            "Events & Ticketing": [
+                [
+                    "Ticketing",
+                    "Yes (free RSVP, paid on Pro)",
+                    "Yes",
+                    false
+                ],
+                [
+                    "QR check-ins",
+                    "Yes (Free)",
+                    "Yes (Event Manager app)",
+                    false
+                ],
+                [
+                    "Recurring events",
+                    "Yes (Free)",
+                    "Yes",
+                    false
+                ],
+                [
+                    "Online events",
+                    "Yes (Free)",
+                    "Yes",
+                    false
+                ],
+                [
+                    "Free event RSVP",
+                    "Yes (Free)",
+                    "Yes (free tickets)",
+                    false
+                ],
+                [
+                    "Promo/discount codes",
+                    "Yes (Pro)",
+                    "Yes",
+                    false
+                ],
+                [
+                    "Reserved seating",
+                    "Yes (Enterprise)",
+                    "Seat map built by their team on request",
+                    false
+                ]
+            ],
+            "Integrations": [
+                [
+                    "Newsletters",
+                    "Yes (Free)",
+                    "Email invite credits, buyer broadcasts",
+                    false
+                ]
+            ],
+            "Customization": [
+                [
+                    "Custom fields",
+                    "Yes (ticket questions free, event fields Pro)",
+                    "Yes (custom registration form)",
+                    false
+                ]
+            ],
+            "Unique Features": [
+                [
+                    "Embeddable calendar",
+                    "Yes (Free)",
+                    "Yes (event list and ticket embeds)",
+                    false
+                ],
+                [
+                    "Private/password-protected events",
+                    "Yes (Enterprise)",
+                    "Private (link-only) listings",
+                    false
+                ],
+                [
+                    "Team collaboration",
+                    "Yes (Enterprise)",
+                    "Yes (event admins)",
+                    false
+                ],
+                [
+                    "Event boost (ads)",
+                    "Yes (Pro)",
+                    "Paid promotion packages",
+                    false
+                ]
+            ],
+            "Platform": [
+                [
+                    "REST API",
+                    "Yes (Pro)",
+                    "Events data API by request only",
+                    true
+                ],
+                [
+                    "Webhooks",
+                    "Yes (Pro)",
+                    "Professional plan (USD 60/mo) and up",
+                    true
+                ],
+                [
+                    "Open source",
+                    "Yes",
+                    "No",
+                    true
+                ],
+                [
+                    "Selfhosting",
+                    "Yes",
+                    "No",
+                    true
+                ]
+            ]
+        },
+        "key_advantages": [
+            {
+                "title": "No Booking Fee",
+                "description": "AllEvents adds USD 1 to every ticket. Event Schedule takes no platform fee on any plan, and Pro is a flat $5/mo.",
+                "icon": "dollar",
+                "gradient": "from-emerald-50 to-teal-50 dark:from-emerald-900/30 dark:to-teal-900/30",
+                "border": "border-emerald-200 dark:border-emerald-500/20",
+                "icon_bg": "bg-emerald-100 dark:bg-emerald-500/20",
+                "icon_color": "text-emerald-600 dark:text-emerald-400"
+            },
+            {
+                "title": "Unlimited Events, Free",
+                "description": "The free plan has no cap on events. The AllEvents free plan allows 5 upcoming events at a time.",
+                "icon": "ticket",
+                "gradient": "from-sky-50 to-cyan-50 dark:from-sky-900/30 dark:to-cyan-900/30",
+                "border": "border-sky-200 dark:border-sky-500/20",
+                "icon_bg": "bg-sky-100 dark:bg-sky-500/20",
+                "icon_color": "text-sky-600 dark:text-sky-400"
+            },
+            {
+                "title": "Two-Way Calendar Sync",
+                "description": "Google, Outlook and CalDAV sync both ways, free, and anyone can subscribe to your schedule's live calendar feed.",
+                "icon": "calendar",
+                "gradient": "from-teal-50 to-emerald-50 dark:from-teal-900/30 dark:to-emerald-900/30",
+                "border": "border-teal-200 dark:border-teal-500/20",
+                "icon_bg": "bg-teal-100 dark:bg-teal-500/20",
+                "icon_color": "text-teal-600 dark:text-teal-400"
+            },
+            {
+                "title": "API and Webhooks on Pro",
+                "description": "Both come with Pro. On AllEvents, webhooks start on the Professional plan at USD 60 a month.",
+                "icon": "link",
+                "gradient": "from-blue-50 to-sky-50 dark:from-blue-900/30 dark:to-sky-900/30",
+                "border": "border-blue-200 dark:border-blue-500/20",
+                "icon_bg": "bg-blue-100 dark:bg-blue-500/20",
+                "icon_color": "text-blue-600 dark:text-blue-400"
+            },
+            {
+                "title": "Your Own Page",
+                "description": "Your schedule lists only your events, with your followers, instead of sitting in a city feed beside everyone else's.",
+                "icon": "layout",
+                "gradient": "from-amber-50 to-yellow-50 dark:from-amber-900/30 dark:to-yellow-900/30",
+                "border": "border-amber-200 dark:border-amber-500/20",
+                "icon_bg": "bg-amber-100 dark:bg-amber-500/20",
+                "icon_color": "text-amber-600 dark:text-amber-400"
+            },
+            {
+                "title": "Open Source",
+                "description": "Read the code and selfhost it on your own server. AllEvents is a hosted service only.",
+                "icon": "code",
+                "gradient": "from-cyan-50 to-sky-50 dark:from-cyan-900/30 dark:to-sky-900/30",
+                "border": "border-cyan-200 dark:border-cyan-500/20",
+                "icon_bg": "bg-cyan-100 dark:bg-cyan-500/20",
+                "icon_color": "text-cyan-600 dark:text-cyan-400"
+            }
+        ],
+        "cross_links": [
+            {
+                "name": "Eventbrite",
+                "route": "marketing.compare_eventbrite"
+            },
+            {
+                "name": "Meetup",
+                "route": "marketing.compare_meetup"
+            },
+            {
+                "name": "Facebook Events",
+                "route": "marketing.compare_facebook_events"
+            }
+        ],
+        "faq": [
+            {
+                "question": "How does Event Schedule pricing compare to AllEvents?",
+                "answer": "AllEvents adds a booking fee of USD 1 per ticket, charged to buyers unless you absorb it, and its paid plans at USD 12, 60 and 200 a month raise how many upcoming events you can list at once. Event Schedule has no booking fee, and Pro at $5/mo adds paid tickets with zero platform fees."
+            },
+            {
+                "question": "Do I need a paid plan to list more events?",
+                "answer": "No. The free plan has no limit on events, and free registration with QR tickets is unlimited too. The AllEvents free plan allows 5 upcoming events at a time, and its paid plans raise that to 20, 100 or more."
+            },
+            {
+                "question": "When do I get paid for ticket sales?",
+                "answer": "On Pro, paid tickets are charged through your own Stripe or PayPal account, so the money goes there as each order is placed. AllEvents also pays into your own PayPal or Stripe account, except for events priced in Indian rupees, which it pays out 3 to 5 business days after the event."
+            },
+            {
+                "question": "Can Event Schedule promote my event like AllEvents?",
+                "answer": "Event Schedule is built around your own schedule page rather than a shared marketplace. People who sign up on your schedule get an email when you add events, you can send newsletters, and on Pro you can boost an event with a Facebook and Instagram ad. If reaching strangers in your city matters most, AllEvents does more of that."
+            },
+            {
+                "question": "Can I sell tickets on my own website?",
+                "answer": "Yes, on Pro. The ticket widget puts checkout on your own site, and the embeddable calendar, which is free, lists every upcoming event. AllEvents offers event list plugins and a ticket embed as well."
+            },
+            {
+                "question": "Are the API and webhooks included?",
+                "answer": "Yes, both are on Pro at $5/mo, with a REST API for events, schedules and sales. AllEvents includes webhooks from its Professional plan at USD 60 a month, and its API is a data product for event listings rather than for managing your own events."
+            }
+        ]
     }
 }

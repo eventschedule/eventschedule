@@ -177,6 +177,7 @@ class RouteLoadTest extends DuskTestCase
                 '/mobilizon-alternative',
                 '/ticketleap-alternative',
                 '/songkick-alternative',
+                '/allevents-alternative',
 
                 // Replacement pages
                 '/replace',

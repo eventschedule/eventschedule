@@ -235,6 +235,7 @@ class RouteLoadTest extends TestCase
             '/mobilizon-alternative',
             '/ticketleap-alternative',
             '/songkick-alternative',
+            '/allevents-alternative',
 
             // Replacement pages
             '/replace',

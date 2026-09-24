@@ -25,6 +25,7 @@ return [
     '/accelevents-alternative' => '2026-09-24',
     '/accessibility' => '2026-09-10',
     '/addevent-alternative' => '2026-09-24',
+    '/allevents-alternative' => '2026-09-24',
     '/bandsintown-alternative' => '2026-09-24',
     '/brown-paper-tickets-alternative' => '2026-09-24',
     '/browse' => '2026-09-21',

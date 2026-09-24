@@ -169,6 +169,10 @@ echo '<?xml version="1.0" encoding="UTF-8"?>'; ?>
         {!! $lastmodTag('/songkick-alternative') !!}
     </url>
     <url>
+        <loc>{{ url('/allevents-alternative') }}</loc>
+        {!! $lastmodTag('/allevents-alternative') !!}
+    </url>
+    <url>
         <loc>{{ url('/replace') }}</loc>
         {!! $lastmodTag('/replace') !!}
     </url>
