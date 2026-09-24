@@ -923,6 +923,28 @@ if (! function_exists('accent_contrast_color')) {
     }
 }
 
+if (! function_exists('css_url')) {
+    /**
+     * A URL to print inside CSS url("...") or url('...'), in a <style> block or a style=""
+     * attribute, where Blade's escaping is not enough.
+     *
+     * Inside <style> no entity is decoded, but a raw line break ends a CSS string and whatever
+     * follows parses as rules. Inside style="" the browser decodes &#039; before CSS reads it, so
+     * an escaped quote still closes the string. So this percent-encodes everything that can end the
+     * string, the url() or the style around it: a backslash, both quotes, both parentheses, < and >,
+     * whitespace and control characters. Anything else, % included, is left alone, so an app URL or
+     * an already-encoded one reads exactly as before.
+     */
+    function css_url(?string $url): string
+    {
+        return preg_replace_callback(
+            '/[\\\\"\'()<>\s\x00-\x1F\x7F]/',
+            fn (array $match) => rawurlencode($match[0]),
+            (string) $url
+        ) ?? '';
+    }
+}
+
 if (! function_exists('get_use_24_hour_time')) {
     /**
      * Get the effective 24-hour time preference.

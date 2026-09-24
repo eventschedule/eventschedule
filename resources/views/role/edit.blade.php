@@ -1975,7 +1975,7 @@
                                             </svg>
                                             <x-text-input id="custom_color2" name="custom_color2" type="color"
                                                 class="block flex-1 h-10"
-                                                :value="old('custom_color2', $role->background_colors ? explode(', ', $role->background_colors)[1] : '')"
+                                                :value="old('custom_color2', $role->background_colors ? (explode(', ', $role->background_colors)[1] ?? '') : '')"
                                                 data-action="update-preview-on-input" />
                                         </div>
                                         <div id="custom_gradient_preview" class="mt-2 h-3 rounded-full"></div>
@@ -9430,7 +9430,7 @@ document.addEventListener('DOMContentLoaded', function() {
     :fields="[
         ['key' => 'profile_image', 'label' => __('messages.profile_image'), 'has_value' => (bool)$role->profile_image_url],
         ['key' => 'header_image', 'label' => __('messages.header_image'), 'has_value' => (bool)$role->header_image_url],
-        ['key' => 'accent_color', 'label' => __('messages.accent_color'), 'has_value' => strtolower($role->accent_color) !== '#007bff'],
+        ['key' => 'accent_color', 'label' => __('messages.accent_color'), 'has_value' => strtolower((string) $role->accent_color) !== '#007bff'],
         ['key' => 'font', 'label' => __('messages.font_family'), 'has_value' => $role->font_family !== 'Roboto'],
         ['key' => 'background_image', 'label' => __('messages.background_image'), 'has_value' => (bool)$role->background_image_url],
     ]"

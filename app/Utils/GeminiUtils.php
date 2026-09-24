@@ -1876,7 +1876,9 @@ class GeminiUtils
         $textElements = array_intersect($elements, ['accent_color', 'font']);
         $imageElements = array_intersect($elements, ['profile_image', 'header_image', 'background_image']);
 
-        $accentColor = $currentValues['accent_color'] ?? $role->accent_color;
+        // ?? '': the image prompt builders take a string, and the accessor reads a cleared or
+        // malformed accent as null.
+        $accentColor = $currentValues['accent_color'] ?? $role->accent_color ?? '';
 
         // Step 1: Generate text-based style (accent color, font) via single prompt
         if (! empty($textElements)) {

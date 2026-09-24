@@ -269,7 +269,8 @@
 
         <link rel="preconnect" href="https://fonts.googleapis.com">
         <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-        @foreach($fonts as $font)
+        {{-- array_filter: the Role accessor reads an invalid font as null, as it does a missing one. --}}
+        @foreach(array_filter($fonts) as $font)
             <link href="https://fonts.googleapis.com/css2?family={{ str_replace(['_', ' '], '+', $font) }}:wght@400;700&display=swap" rel="stylesheet">
         @endforeach
 
@@ -311,21 +312,21 @@
                     @media (min-width: 768px) {
                     @endif
                         @if ($otherRole->background_image)
-                            background-image: url("{{ asset('images/backgrounds/' . $otherRole->background_image . '.webp') }}");
+                            background-image: url("{{ css_url(asset('images/backgrounds/' . $otherRole->background_image . '.webp')) }}");
                             background-image: image-set(
-                                url("{{ asset('images/backgrounds/' . $otherRole->background_image . '.webp') }}") type("image/webp"),
-                                url("{{ asset('images/backgrounds/' . $otherRole->background_image . '.png') }}") type("image/png")
+                                url("{{ css_url(asset('images/backgrounds/' . $otherRole->background_image . '.webp')) }}") type("image/webp"),
+                                url("{{ css_url(asset('images/backgrounds/' . $otherRole->background_image . '.png')) }}") type("image/png")
                             );
                         @elseif ($showMobileBackground)
                             {{-- An upload, painted at every width here: a phone's derivative, and the
                                  desktop one from md up. Both fall back to the original until the
                                  derivatives exist, so the rule is never an empty url(). --}}
-                            background-image: url("{{ $otherRole->backgroundImageUrl(960) }}");
+                            background-image: url("{{ css_url($otherRole->backgroundImageUrl(960)) }}");
                             @media (min-width: 768px) {
-                                background-image: url("{{ $otherRole->backgroundImageUrl(1920) }}");
+                                background-image: url("{{ css_url($otherRole->backgroundImageUrl(1920)) }}");
                             }
                         @else
-                            background-image: url("{{ $otherRole->backgroundImageUrl(1920) }}");
+                            background-image: url("{{ css_url($otherRole->backgroundImageUrl(1920)) }}");
                         @endif
                         background-size: cover;
                         background-position: center;
@@ -349,14 +350,14 @@
                                 @if (request()->graphic)
                                     linear-gradient(rgba(255, 255, 255, 0.5), rgba(255, 255, 255, 0.5)),
                                 @endif
-                            url("{{ asset('images/backgrounds/' . $role->background_image . '.webp') }}");
+                            url("{{ css_url(asset('images/backgrounds/' . $role->background_image . '.webp')) }}");
                             background-image:
                                 @if (request()->graphic)
                                     linear-gradient(rgba(255, 255, 255, 0.5), rgba(255, 255, 255, 0.5)),
                                 @endif
                             image-set(
-                                url("{{ asset('images/backgrounds/' . $role->background_image . '.webp') }}") type("image/webp"),
-                                url("{{ asset('images/backgrounds/' . $role->background_image . '.png') }}") type("image/png")
+                                url("{{ css_url(asset('images/backgrounds/' . $role->background_image . '.webp')) }}") type("image/webp"),
+                                url("{{ css_url(asset('images/backgrounds/' . $role->background_image . '.png')) }}") type("image/png")
                             );
                         @elseif ($showMobileBackground)
                             {{-- An upload, painted at every width here: a phone's derivative, and the
@@ -368,20 +369,20 @@
                                 @if (request()->graphic)
                                     linear-gradient(rgba(255, 255, 255, 0.5), rgba(255, 255, 255, 0.5)),
                                 @endif
-                            url("{{ $role->backgroundImageUrl(960) }}");
+                            url("{{ css_url($role->backgroundImageUrl(960)) }}");
                             @media (min-width: 768px) {
                                 background-image:
                                     @if (request()->graphic)
                                         linear-gradient(rgba(255, 255, 255, 0.5), rgba(255, 255, 255, 0.5)),
                                     @endif
-                                url("{{ $role->backgroundImageUrl(1920) }}");
+                                url("{{ css_url($role->backgroundImageUrl(1920)) }}");
                             }
                         @else
                             background-image:
                                 @if (request()->graphic)
                                     linear-gradient(rgba(255, 255, 255, 0.5), rgba(255, 255, 255, 0.5)),
                                 @endif
-                            url("{{ $role->backgroundImageUrl(1920) }}");
+                            url("{{ css_url($role->backgroundImageUrl(1920)) }}");
                         @endif
                         background-size: cover;
                         background-position: center;

@@ -170,6 +170,18 @@ class SponsorsTest extends TestCase
         $this->assertNull($role->fresh()->sponsor_background_color);
     }
 
+    public function test_an_empty_background_is_stored_as_null_whoever_writes_it(): void
+    {
+        // A form post never reaches the saving hook with '' (ConvertEmptyStringsToNull does), but a
+        // model write does. Read raw: the accessor reads '' as null as well.
+        $role = $this->createSponsoredRole($this->createOwner(), 1, ['sponsor_background_color' => '#abcdef']);
+
+        $role->sponsor_background_color = '';
+        $role->save();
+
+        $this->assertNull($role->fresh()->getRawOriginal('sponsor_background_color'));
+    }
+
     public function test_invalid_background_color_is_rejected(): void
     {
         $owner = $this->createOwner();

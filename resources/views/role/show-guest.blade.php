@@ -95,7 +95,7 @@ html[data-es-view="list"] #gp-calendar {
                  container's top edge instead: -top-3 cancels the mobile pt-3, landing it flush
                  against the bar's bottom border. --}}
             <div class="absolute {{ $headerStyle === 'banner' ? '-top-40' : '-top-3' }} -bottom-3 left-1/2 -translate-x-1/2 w-screen bg-cover bg-no-repeat bg-top md:hidden -z-10"
-                 style="background-image: url('{{ $mobileBannerUrl }}');"></div>
+                 style="background-image: url('{{ css_url($mobileBannerUrl) }}');"></div>
         @endif
         @if ($headerStyle === 'banner')
         @include('role.partials.headers.banner')

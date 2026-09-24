@@ -165,7 +165,8 @@ class FirstScheduleFormTest extends TestCase
     {
         $role = $this->submitCreateForm('venue', ['name' => 'Background Test', 'address1' => '1 Test St']);
 
-        $this->assertNotSame(', ', $role->background_colors);
+        // Raw: Role's accessor reads ", " as no colours at all.
+        $this->assertNotSame(', ', $role->getRawOriginal('background_colors'));
         $this->assertNotEmpty(trim(str_replace(',', '', (string) $role->background_colors)));
     }
 

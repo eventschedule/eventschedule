@@ -437,8 +437,9 @@ class Role extends Model implements MustVerifyEmail
                 $model->accent_color = '#000000';
             }
 
-            // Store the default panel as null rather than an empty string.
-            if ($model->sponsor_background_color === '') {
+            // Store the default panel as null rather than an empty string. Read raw: the accessor
+            // already reads '' as null, which would hide the '' this is here to clear.
+            if (($model->getAttributes()['sponsor_background_color'] ?? null) === '') {
                 $model->sponsor_background_color = null;
             }
 
@@ -1994,6 +1995,73 @@ class Role extends Model implements MustVerifyEmail
         };
     }
 
+    /*
+     * The style values the guest pages print into CSS, sanitized where they are READ.
+     *
+     * The gradient, the solid colour and the background image go into the layout's <style> block,
+     * the font into style="" attributes, and the accent into both and into Vue :style expressions,
+     * which the runtime compiler evaluates as JavaScript. No write path validates all of them - the
+     * web form checks a few, a backup restore none - so a stored value could close its declaration
+     * and restyle the page, including, through $otherRole, an event page of SOMEONE ELSE's schedule
+     * that this one appears on. Reading them here gives every reader a safe value: this schedule's
+     * pages, other schedules' event pages, a restored row and any view written later.
+     *
+     * Only reads change. The column keeps what was written, and getAttributes(), getRawOriginal()
+     * and every dirty check still see that.
+     */
+
+    /** Every hex token, rejoined with ", "; null when there is none, which reads as unconfigured. */
+    public function getBackgroundColorsAttribute($value): ?string
+    {
+        // Every preset in storage/gradients.json passes as stored, the one whose colours have no #
+        // included (RoleStyleAttributesTest walks the file).
+        $colors = array_filter(
+            array_map('trim', explode(',', (string) $value)),
+            fn (string $color) => preg_match('/^#?[0-9A-Fa-f]{3,8}\z/', $color) === 1
+        );
+
+        return $colors ? implode(', ', $colors) : null;
+    }
+
+    public function getBackgroundColorAttribute($value): ?string
+    {
+        return self::cssHexColor($value);
+    }
+
+    /** Null reads as "no accent": the guest views fall back to their default for it. */
+    public function getAccentColorAttribute($value): ?string
+    {
+        return self::cssHexColor($value);
+    }
+
+    public function getBackgroundRotationAttribute($value): ?int
+    {
+        return $value === null ? null : (int) $value;
+    }
+
+    /** A built-in background's name: public/images/backgrounds/{name}.webp. */
+    public function getBackgroundImageAttribute($value): ?string
+    {
+        return is_string($value) && preg_match('/^[A-Za-z0-9_-]+\z/', $value) ? $value : null;
+    }
+
+    /** Every value in storage/fonts.json passes. Views print it with the underscores as spaces. */
+    public function getFontFamilyAttribute($value): ?string
+    {
+        return is_string($value) && preg_match('/^[A-Za-z0-9_ ]{1,100}\z/', $value) ? $value : null;
+    }
+
+    /** What the settings form accepts and sponsorBackground() reads: transparent or #rrggbb. */
+    public function getSponsorBackgroundColorAttribute($value): ?string
+    {
+        return is_string($value) && preg_match('/^(?:transparent|#[0-9A-Fa-f]{6})\z/', $value) ? $value : null;
+    }
+
+    private static function cssHexColor($value): ?string
+    {
+        return is_string($value) && preg_match('/^#(?:[0-9A-Fa-f]{3}|[0-9A-Fa-f]{6}|[0-9A-Fa-f]{8})\z/', $value) ? $value : null;
+    }
+
     public function isEditableBy(?User $user): bool
     {
         if (! $user) {
@@ -3291,8 +3359,8 @@ class Role extends Model implements MustVerifyEmail
      * Not the same question as the page's own accent, which does default - show-guest.blade.php
      * falls back for buttons. A default button colour is UI; a tinted address bar reads as identity.
      *
-     * ?: rather than ??: accent_color is NOT NULL with a '#007bff' default, so a cleared accent
-     * reaches us as an empty string, never null.
+     * accent_color is NOT NULL with a '#007bff' default, so a cleared accent is stored as an empty
+     * string; the accessor reads that, and anything else that is not a hex colour, as null.
      */
     public function manifestThemeColor(): ?string
     {
