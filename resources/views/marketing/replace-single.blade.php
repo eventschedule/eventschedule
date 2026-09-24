@@ -14,6 +14,10 @@
             ['title' => 'Share and sell', 'description' => 'Share your schedule URL and start selling tickets.'],
         ];
 
+        // The same steps as the HowTo schema reads them, so the visible steps and
+        // the structured data cannot say different things.
+        $switchHowTo = array_map(fn ($step) => ['name' => $step['title'], 'text' => $step['description']], $steps);
+
         // The visible FAQ and the FAQPage schema are rendered from one array, so
         // the two can no longer drift apart.
         $faqs = array_map(fn ($item) => ['q' => $item['question'], 'a' => $item['answer']], $faq);
@@ -92,7 +96,7 @@
         "operatingSystem": ["Web", "Android", "iOS"],
         "isSimilarTo": {
             "@type": "SoftwareApplication",
-            "name": "{{ str_replace('"', '\\"', $name) }}",
+            "name": {!! \App\Utils\SeoUtils::jsonLd($name) !!},
             "applicationCategory": "BusinessApplication"
         },
         "offers": [
@@ -148,24 +152,10 @@
         ]
     }
     </script>
-    <script type="application/ld+json" {!! nonce_attr() !!}>
-    {
-        "@context": "https://schema.org",
-        "@type": "HowTo",
-        "name": "How to switch from {{ str_replace('"', '\\"', $name) }} to Event Schedule",
-        "step": [
-            @foreach ($steps as $index => $step)
-            {
-                "@type": "HowToStep",
-                "position": {{ $index + 1 }},
-                "name": "{{ str_replace('"', '\\"', $step['title']) }}",
-                "text": "{{ str_replace('"', '\\"', $step['description']) }}"
-            }@if (!$loop->last),@endif
-
-            @endforeach
-        ]
-    }
-    </script>
+    {{-- Through the component, which encodes with SeoUtils::jsonLd(). The block this replaces
+         escaped quotes by hand inside {{ }}, which then HTML-escaped the quote it had just
+         escaped, so a name or step with a " in it produced invalid JSON. --}}
+    <x-seo.howto-schema :name="'How to switch from '.$name.' to Event Schedule'" :steps="$switchHowTo" />
     </x-slot>
 
     {{-- Motion gate: hidden pre-reveal states only apply when this class is present,

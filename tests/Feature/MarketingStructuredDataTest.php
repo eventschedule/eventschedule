@@ -2,6 +2,7 @@
 
 namespace Tests\Feature;
 
+use App\Http\Controllers\MarketingController;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Blade;
 use Illuminate\Support\Facades\Route;
@@ -142,6 +143,77 @@ class MarketingStructuredDataTest extends TestCase
             'Seating </script><script>alert(1)</script> Charts',
             end($breadcrumb['itemListElement'])['name']
         );
+    }
+
+    /**
+     * compare-single and replace-single render 26 and 12 URLs from controller data, and both built
+     * their HowTo block by hand with {{ str_replace('"', '\\"', ...) }}. Blade then HTML-escaped the
+     * quote the str_replace had just escaped, so `\&quot;` - not a JSON escape at all - reached the
+     * page, and one double quote in a competitor name or a step invalidated the whole block.
+     *
+     * Rendered from the real data with the name and the steps swapped for a hostile string, beside
+     * a control with plain ones: every block must decode, the HowTo must say exactly what it was
+     * given, and neither template may gain a <script> element.
+     */
+    public function test_the_compare_and_replace_templates_encode_their_json_ld(): void
+    {
+        $hostile = 'Rock "N" Roll\'s </script><script>alert(1)</script> & Co';
+        $controller = app(MarketingController::class);
+
+        $templates = [
+            'compare-single' => (new \ReflectionMethod($controller, 'getComparisonData'))->invoke($controller, 'eventbrite'),
+            'replace-single' => (new \ReflectionMethod($controller, 'getReplacementData'))->invoke($controller, 'google-forms'),
+        ];
+
+        foreach ($templates as $view => $data) {
+            $render = function (string $variant, string $text) use ($view, $data) {
+                $path = '/seo/json-ld/'.$view.'-'.$variant;
+                $data['name'] = $text;
+                $data['short_name'] = $text;
+                $data['switch_steps'] = [
+                    ['title' => $text, 'description' => 'Step one for '.$text],
+                    ['title' => 'Then '.$text, 'description' => 'Step two for '.$text],
+                ];
+
+                Route::get($path, fn () => view('marketing.'.$view, $data));
+
+                return $this->get($path)->assertOk()->getContent();
+            };
+
+            $control = $render('control', 'Plain Tool');
+            $body = $render('hostile', $hostile);
+
+            $blocks = $this->jsonLdBlocks($body);
+            $this->assertNotEmpty($blocks, "{$view} emitted no JSON-LD");
+
+            foreach ($blocks as $i => $block) {
+                $this->assertIsArray($block, "JSON-LD block {$i} on {$view} did not decode");
+            }
+
+            $howTo = $this->nodeOfType($blocks, 'HowTo');
+            $this->assertNotNull($howTo, "{$view} lost its HowTo block");
+            $this->assertSame('How to switch from '.$hostile.' to Event Schedule', $howTo['name']);
+            $this->assertSame(
+                [
+                    ['@type' => 'HowToStep', 'position' => 1, 'name' => $hostile, 'text' => 'Step one for '.$hostile],
+                    ['@type' => 'HowToStep', 'position' => 2, 'name' => 'Then '.$hostile, 'text' => 'Step two for '.$hostile],
+                ],
+                $howTo['step']
+            );
+
+            if ($view === 'replace-single') {
+                // The tool being replaced is quoted into the product node too.
+                $this->assertSame($hostile, $this->nodeOfType($blocks, 'SoftwareApplication')['isSimilarTo']['name']);
+            }
+
+            // An escaped payload adds no element; an unescaped one adds the <script> it smuggled in.
+            $this->assertSame(
+                substr_count($control, '<script'),
+                substr_count($body, '<script'),
+                "{$view}: the name opened a script element of its own"
+            );
+            $this->assertStringNotContainsString('<script>alert(1)</script>', $body);
+        }
     }
 
     public function test_about_does_not_emit_a_second_unrelated_organization(): void

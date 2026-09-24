@@ -124,6 +124,10 @@
             'Open source under the Attribution Assurance License, and selfhostable, which resolves to Enterprise',
         ];
 
+        // The same steps as the HowTo schema reads them. One list, so the visible
+        // steps and the structured data cannot say different things.
+        $switchHowTo = array_map(fn ($step) => ['name' => $step['title'], 'text' => $step['description']], $switchSteps);
+
         // FAQ: one array feeds the visible list AND the schema component, so
         // the two can never drift apart.
         $faqs = array_map(fn ($item) => ['q' => $item['question'], 'a' => $item['answer']], $faq);
@@ -185,7 +189,7 @@
                 "name": "Free",
                 "price": "0",
                 "priceCurrency": "{{ platform_currency() }}",
-                "description": "Unlimited events, two-way Google, Outlook and CalDAV sync, newsletters, unlimited free registration and RSVP with capacity, QR scanning at the door, refunds, the multi-event cart, the interest list, a live calendar feed, one bookable appointment type, event graphics, the embeddable calendar, and fan engagement features.",
+                "description": "Unlimited events, two-way Google, Outlook and CalDAV sync, newsletters, unlimited free registration and RSVP with capacity, QR scanning at the door, the multi-event cart, the interest list, a live calendar feed, one bookable appointment type, event graphics, the embeddable calendar, and fan engagement features.",
                 "availability": "https://schema.org/InStock"
             },
             {
@@ -193,7 +197,7 @@
                 "name": "Pro",
                 "price": "{{ number_format($proMonthly, 2) }}",
                 "priceCurrency": "{{ platform_currency() }}",
-                "description": "Everything in Free plus selling tickets that carry a price, the live check-in dashboard, ticket waitlist, promo codes, add-ons, gift cards, passes, installment payments, sale notifications, sales CSV export, remove branding, custom CSS, REST API, and webhooks.",
+                "description": "Everything in Free plus selling tickets that carry a price, every payment method (Stripe, PayPal, Payfast, Invoice Ninja, a payment link or cash), refunds from the Sales page, the live check-in dashboard, ticket waitlist, promo codes, add-ons, gift cards, passes, installment payments, sale notifications, sales CSV export, remove branding, custom CSS, REST API, and webhooks.",
                 "availability": "https://schema.org/InStock"
             },
             {
@@ -239,24 +243,10 @@
         ]
     }
     </script>
-    <script type="application/ld+json" {!! nonce_attr() !!}>
-    {
-        "@context": "https://schema.org",
-        "@type": "HowTo",
-        "name": "How to switch from {{ str_replace('"', '\\"', $name) }} to Event Schedule",
-        "step": [
-            @foreach ($switchSteps as $index => $step)
-            {
-                "@type": "HowToStep",
-                "position": {{ $index + 1 }},
-                "name": "{{ str_replace('"', '\\"', $step['title']) }}",
-                "text": "{{ str_replace('"', '\\"', $step['description']) }}"
-            }@if (!$loop->last),@endif
-
-            @endforeach
-        ]
-    }
-    </script>
+    {{-- Through the component, which encodes with SeoUtils::jsonLd(). The block this replaces
+         escaped quotes by hand inside {{ }}, which then HTML-escaped the quote it had just
+         escaped, so a name or step with a " in it produced invalid JSON. --}}
+    <x-seo.howto-schema :name="'How to switch from '.$name.' to Event Schedule'" :steps="$switchHowTo" />
     </x-slot>
 
     {{-- Motion gate: hidden pre-reveal states only apply when this class is present,
