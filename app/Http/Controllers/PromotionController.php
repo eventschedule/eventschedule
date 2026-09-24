@@ -535,7 +535,9 @@ class PromotionController extends Controller
      */
     public function click(Request $request, string $subdomain, string $hash)
     {
-        $hostRole = Role::where('subdomain', $subdomain)->firstOrFail();
+        // A host no visitor can see carries no promotions to click, and its redirect would say it
+        // is there, so it answers as an unknown subdomain does.
+        $hostRole = Role::findForGuestOrFail($subdomain);
 
         // Only a live, approved campaign gets a redirect. Without the moderation and status
         // predicates the hash keeps working after a campaign is rejected, paused or refunded -

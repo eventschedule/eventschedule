@@ -232,11 +232,13 @@ class UnclaimedSchedulePageTest extends TestCase
         $this->assertFalse($unverified->isClaimed());
         $this->assertTrue($unverified->hasRealOwner());
 
-        // A visitor gets the schedule's 404. It used to be a 302 to the login page, which a crawler
-        // files as a soft 404 against the app host.
+        // A visitor gets the 404 a missing schedule gets, which does not name it. It used to be a
+        // 302 to the login page, which a crawler files as a soft 404 against the app host, and then
+        // the schedule's own 404, which printed the name for anybody who guessed the address.
         $this->get($this->url($unverified))
             ->assertNotFound()
             ->assertSee(__('messages.guest_not_found_heading'))
+            ->assertDontSee('Not Yet Live')
             ->assertDontSee(__('messages.claim_strip_cta'));
 
         // Its owner is still sent into the app, where verifying is one step away.

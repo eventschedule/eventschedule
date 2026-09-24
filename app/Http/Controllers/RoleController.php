@@ -391,7 +391,9 @@ class RoleController extends Controller
 
     public function follow(Request $request, $subdomain)
     {
-        $role = Role::subdomain($subdomain)->firstOrFail();
+        // A deleted schedule, or an unpublished one to anybody outside it, answers as an unknown
+        // subdomain does. This used to redirect, which told anybody who asked that it was there.
+        $role = Role::findForGuestOrFail($subdomain);
 
         // Nobody may follow a placeholder from the outside, and this is a guard rather than a
         // missing button. isEditableBy() grants edit rights on an unclaimed schedule to anyone
@@ -1997,9 +1999,27 @@ class RoleController extends Controller
         // A 404, not the redirect to the app it used to be: that sent a mistyped subdomain - and a
         // crawler following a dead link - to the login page with a 302, which search engines file
         // as a soft 404 on the app host. There is no schedule here to render a tenant 404 for, so
-        // this is the platform's.
+        // this is the platform's, and in an embed an empty one.
         if (! $role || $role->is_deleted) {
-            abort(404);
+            return $this->platformNotFound();
+        }
+
+        // Not published: nobody has verified a contact on it, and it is not a placeholder either.
+        // Its own people are sent into the app, where finishing that is one step away. Anybody else
+        // gets exactly what an address matching no schedule gets. Not the schedule's own 404,
+        // which printed its name for anybody who guessed the address, and not the redirect before
+        // that, which answered a crawler with a 302 to the login page: a soft 404, filed against
+        // the app host. Not recorded as a missing address - the address is fine, the schedule just
+        // is not public yet.
+        //
+        // Ahead of the language block, which answers ?lang= with a redirect: after it, adding
+        // ?lang=zz told an unpublished schedule (a 302) from a missing one (a 404).
+        if (! $role->isClaimed() && ! $role->isClaimable()) {
+            if ($user && ($user->isMember($role->subdomain) || $user->isAdmin())) {
+                return redirect(app_url());
+            }
+
+            return $this->platformNotFound();
         }
 
         // Query params can arrive as arrays (?lang[]=en); is_valid_language_code() is typed
@@ -2040,22 +2060,10 @@ class RoleController extends Controller
         // hasRealOwner(), not isClaimed(). The two disagree on a whole population: a schedule
         // somebody really runs but never verified a contact on is NOT claimed, and printing "is
         // this you?" on it would be offering a stranger a page its owner is sitting in. That
-        // population is handled immediately below.
+        // population was answered above, before the language block. Past this, the schedule is
+        // claimed.
         if ($role->isClaimable()) {
             return $this->viewGuestUnclaimed($request, $role, $slug, $id, $date);
-        }
-
-        // Not published: nobody has verified a contact on it. Its own people are sent into the
-        // app, where finishing that is one step away. Anybody else gets the schedule's 404 rather
-        // than the same redirect, which answered a crawler with a 302 to the login page: a soft
-        // 404, filed against the app host. Not recorded as a missing address - the address is
-        // fine, the schedule just is not public yet.
-        if (! $role->isClaimed()) {
-            if ($user && ($user->isMember($role->subdomain) || $user->isAdmin())) {
-                return redirect(app_url());
-            }
-
-            return $this->guestNotFound($role);
         }
 
         $otherRole = null;
@@ -2606,9 +2614,10 @@ class RoleController extends Controller
         $view = 'role/show-guest';
 
         if ($embed && $event && (request()->get('tickets') === 'true' || request()->get('rsvp') === 'true')) {
-            // Password check for embed mode
+            // Password check for embed mode. An empty 404: this runs inside an iframe on the
+            // organizer's own site, where abort(404) rendered the platform's full 404 page.
             if ($event->isPasswordProtected() && ! $this->bypassesEventPassword($user, $subdomain, $event)) {
-                abort(404);
+                return $this->platformNotFound();
             }
 
             // The TICKET embed widget follows the same gate as the event's own page, NOT
@@ -6924,7 +6933,9 @@ class RoleController extends Controller
 
     public function request(Request $request, $subdomain)
     {
-        $role = Role::whereSubdomain($subdomain)->firstOrFail();
+        // As an unknown subdomain for a deleted schedule, or an unpublished one to anybody outside
+        // it: every redirect below would confirm it is there.
+        $role = Role::findForGuestOrFail($subdomain);
 
         // Talent schedules always use the booking form (require_account does not apply)
         if ($role->isTalent()) {

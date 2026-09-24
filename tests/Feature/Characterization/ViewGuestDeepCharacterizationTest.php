@@ -86,6 +86,30 @@ class ViewGuestDeepCharacterizationTest extends TestCase
             ->assertSee('Embed Event');
     }
 
+    public function test_a_locked_ticket_embed_is_an_empty_404(): void
+    {
+        $owner = $this->createOwner();
+        $role = $this->createRole($owner, 'venue');
+        $event = $this->createEvent($role, [
+            'tickets_enabled' => true,
+            'name' => 'Locked Embed Event',
+            'is_private' => true,
+            'event_password' => 'letmein',
+        ]);
+        $this->createTicket($event);
+
+        $url = $this->guestEventUrl($role, $event).'?embed=1&tickets=true';
+
+        // The widget sits in an iframe on the organizer's own site, and the platform's full 404
+        // page, links out to the marketing site and all, used to render inside it.
+        $response = $this->get($url);
+        $response->assertNotFound();
+        $this->assertSame('', $response->getContent());
+
+        // Its own people get the widget.
+        $this->actingAs($owner)->get($url)->assertOk()->assertSee('Locked Embed Event');
+    }
+
     public function test_curator_schedule_lists_accepted_events_from_other_schedules(): void
     {
         $venueOwner = $this->createOwner();

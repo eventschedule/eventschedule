@@ -22,7 +22,9 @@ class CarpoolController extends Controller
 {
     protected function resolveEventAndRole($subdomain, $event_hash)
     {
-        $role = Role::where('subdomain', $subdomain)->firstOrFail();
+        // A deleted schedule, or an unpublished one to anybody outside it, answers as an unknown
+        // subdomain does: its ride board used to render, event and riders included.
+        $role = Role::findForGuestOrFail($subdomain);
 
         if (! $role->isPro() || ! $role->carpool_enabled) {
             abort(404);

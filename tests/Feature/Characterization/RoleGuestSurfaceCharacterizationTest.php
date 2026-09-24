@@ -103,6 +103,16 @@ class RoleGuestSurfaceCharacterizationTest extends TestCase
         $this->get('/nosuchschedule12345')->assertNotFound();
     }
 
+    public function test_an_embedded_unknown_schedule_404s_without_a_full_page(): void
+    {
+        // As an embedded unknown slug does, above. The platform's full 404 page used to render
+        // inside somebody's iframe, links out to the marketing site and all.
+        $response = $this->get('/nosuchschedule12345?embed=1');
+
+        $response->assertNotFound();
+        $this->assertSame('', $response->getContent());
+    }
+
     public function test_calendar_events_json_shape(): void
     {
         $owner = $this->createOwner();

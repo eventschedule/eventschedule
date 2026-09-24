@@ -505,9 +505,13 @@ class AppointmentController extends Controller
         return $session->url;
     }
 
+    /**
+     * Every guest booking route's schedule. A deleted one, or an unpublished one to anybody outside
+     * it, answers as an unknown subdomain does: the booking pages used to show either, by name.
+     */
     protected function resolveRole($subdomain): Role
     {
-        return Role::subdomain($subdomain)->firstOrFail();
+        return Role::findForGuestOrFail($subdomain);
     }
 
     /**

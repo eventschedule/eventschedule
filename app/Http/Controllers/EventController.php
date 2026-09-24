@@ -1960,7 +1960,9 @@ class EventController extends Controller
 
     public function showGuestImport(Request $request, $subdomain)
     {
-        $role = Role::subdomain($subdomain)->firstOrFail();
+        // A deleted schedule, or an unpublished one to anybody outside it, answers as an unknown
+        // subdomain does: this form used to render either, name and branding included.
+        $role = Role::findForGuestOrFail($subdomain);
 
         // Query params can arrive as arrays (?lang[]=en). is_valid_language_code() answers false
         // for a non-string now, but $lang is also forwarded as a route parameter below, so keep
@@ -2028,7 +2030,7 @@ class EventController extends Controller
      */
     public function showGuestSubmit(Request $request, $subdomain)
     {
-        $role = Role::subdomain($subdomain)->firstOrFail();
+        $role = Role::findForGuestOrFail($subdomain);
 
         // Not accepting submissions → this page doesn't exist. Abort rather than redirect:
         // request() routes require-account curators here without checking acceptEventRequests(),
@@ -2121,7 +2123,7 @@ class EventController extends Controller
      */
     public function guestSubmitGoogle(Request $request, $subdomain)
     {
-        $role = Role::subdomain($subdomain)->firstOrFail();
+        $role = Role::findForGuestOrFail($subdomain);
 
         if (! $role->acceptEventRequests()) {
             abort(404);
@@ -2716,7 +2718,9 @@ class EventController extends Controller
             return response()->json(['message' => __('messages.invalid_request')], 422);
         }
 
-        $role = Role::subdomain($subdomain)->firstOrFail();
+        // Where the lookup has always been, after the honeypot: an unknown subdomain answers a
+        // tripped one too, so a hidden schedule has to as well.
+        $role = Role::findForGuestOrFail($subdomain);
 
         if (! $role->acceptEventRequests()) {
             abort(403, __('messages.not_authorized'));
@@ -3273,7 +3277,7 @@ class EventController extends Controller
 
     public function showBookingRequest(Request $request, $subdomain)
     {
-        $role = Role::subdomain($subdomain)->firstOrFail();
+        $role = Role::findForGuestOrFail($subdomain);
 
         if (! $role->usesBookingForm() || ! $role->acceptEventRequests()) {
             abort(404);
@@ -3351,7 +3355,7 @@ class EventController extends Controller
             return back()->withInput()->with('error', __('messages.invalid_request'));
         }
 
-        $role = Role::subdomain($subdomain)->firstOrFail();
+        $role = Role::findForGuestOrFail($subdomain);
 
         if (! $role->usesBookingForm() || ! $role->acceptEventRequests()) {
             abort(403, __('messages.not_authorized'));
@@ -4428,9 +4432,10 @@ class EventController extends Controller
         // The same answers viewGuest() gives. is_deleted for its reason: the API delete, unfollow
         // and merge paths soft-delete without renaming, and the event page already stopped serving
         // those rows. And a 404 rather than the old redirect to the app, which a crawler read as a
-        // soft 404 on the app host.
+        // soft 404 on the app host. platformNotFound() for both this and the unpublished answer
+        // below, so the two stay the same answer even with ?embed=1 on the address.
         if (! $role || $role->is_deleted) {
-            abort(404);
+            return $this->platformNotFound();
         }
 
         if (! $role->isClaimed()) {
@@ -4438,12 +4443,12 @@ class EventController extends Controller
 
             // A placeholder answers only at its root (viewGuestUnclaimed()), and sends every deeper
             // path into the app; so does an unpublished schedule, for its own people. Anybody else
-            // gets the schedule's 404.
+            // gets what an address matching no schedule gets: the schedule's own 404 would name it.
             if ($role->isClaimable() || ($user && ($user->isMember($role->subdomain) || $user->isAdmin()))) {
                 return redirect(app_url());
             }
 
-            return $this->guestNotFound($role);
+            return $this->platformNotFound();
         }
 
         // Locale handling. ?lang[]=x is an array, which is_valid_language_code()'s ?string
@@ -4630,6 +4635,14 @@ class EventController extends Controller
 
     public function downloadIcal($subdomain, $slug, $id, $date = null)
     {
+        // The abort(404) a subdomain that matches nothing reaches below, for a deleted schedule
+        // or an unpublished one to anybody outside it. Its events' .ics files used to be served.
+        $role = Role::subdomain($subdomain)->first();
+
+        if (! $role || ! $role->isVisibleToGuest(auth()->user())) {
+            abort(404);
+        }
+
         $event = Event::whereHas('roles', fn ($q) => $q->where('subdomain', $subdomain))
             ->find(UrlUtils::decodeId($id));
 

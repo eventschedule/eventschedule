@@ -21,7 +21,9 @@ class GiftCardController extends Controller
 {
     public function showPurchase($subdomain)
     {
-        $role = Role::subdomain($subdomain)->firstOrFail();
+        // A deleted schedule, or an unpublished one to anybody outside it, answers as an unknown
+        // subdomain does, and cannot sell a card either.
+        $role = Role::findForGuestOrFail($subdomain);
 
         if (! $this->canSellGiftCards($role)) {
             abort(404);
@@ -39,7 +41,7 @@ class GiftCardController extends Controller
             return redirect()->back()->withInput()->with('error', __('messages.invalid_request'));
         }
 
-        $role = Role::subdomain($subdomain)->firstOrFail();
+        $role = Role::findForGuestOrFail($subdomain);
 
         if (! $this->canSellGiftCards($role)) {
             abort(404);

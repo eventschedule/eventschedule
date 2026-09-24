@@ -20,9 +20,27 @@ use Illuminate\Http\Response;
  * marketing_url() to eventschedule.com. Serving that on a customer's custom domain hands their
  * visitors to us. ResolveCustomDomain::isHtmlResponse() now permits 404 so this body still gets
  * host-rewritten onto the custom domain.
+ *
+ * platformNotFound() is the other answer, for a schedule the visitor may not know exists: a deleted
+ * one, or one nobody has published. The tenant 404 names the schedule, which confirms the very
+ * thing the 404 is there to deny, so those get exactly what an address matching no schedule gets.
  */
 trait RendersGuestNotFound
 {
+    /**
+     * What an address that matches no schedule gets: the platform's 404, from abort(404) itself so
+     * nothing can tell the two apart (on a custom domain ResolveCustomDomain rewrites it, as it
+     * does an unknown custom domain's), and in an embed an empty 404, as guestNotFound() gives one.
+     */
+    protected function platformNotFound(): Response
+    {
+        if (request()->embed) {
+            return response('', 404);
+        }
+
+        abort(404);
+    }
+
     protected function guestNotFound(Role $role, ?string $slug = null): Response
     {
         $this->recordMissingAddress($role, $slug);

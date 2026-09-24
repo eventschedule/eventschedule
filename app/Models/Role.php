@@ -17,6 +17,7 @@ use App\Utils\UrlUtils;
 use Illuminate\Auth\MustVerifyEmail as MustVerifyEmailTrait;
 use Illuminate\Contracts\Auth\MustVerifyEmail;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\ModelNotFoundException;
 use Illuminate\Notifications\Notifiable;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
@@ -1813,6 +1814,50 @@ class Role extends Model implements MustVerifyEmail
             ->whereNull('roles.phone_verified_at')
             ->notDemoSchedule()
             ->where('roles.is_deleted', false);
+    }
+
+    /**
+     * Whether this schedule's guest routes answer this visitor at all. Where they do not, each one
+     * answers exactly as it does for a subdomain that matches nothing (findForGuestOrFail()), so
+     * the answer cannot confirm the schedule is there.
+     *
+     * - Deleted: nobody, its own people included, as viewGuest() answers.
+     * - Unpublished (nobody has verified a contact, so not isClaimed(), and not a placeholder
+     *   either): only its members and admins, who can do something about it.
+     * - A placeholder (isClaimable()): everybody. Its "is this you?" page is public by design, and
+     *   so is its existence.
+     */
+    public function isVisibleToGuest(?User $user): bool
+    {
+        if ($this->is_deleted) {
+            return false;
+        }
+
+        if ($this->isClaimed() || $this->isClaimable()) {
+            return true;
+        }
+
+        return $user !== null && ($user->isMember($this->subdomain) || $user->isAdmin());
+    }
+
+    /**
+     * The schedule a guest route's {subdomain} names, for the signed-in visitor, or the
+     * ModelNotFoundException firstOrFail() throws for a subdomain that matches nothing.
+     *
+     * Thrown where firstOrFail() threw, rather than by a route middleware. Several of these actions
+     * check a honeypot or a form request before they look the schedule up, and a subdomain that
+     * matches nothing is answered by those checks first; refusing a hidden schedule any earlier
+     * would answer it differently, and the difference would give it away.
+     */
+    public static function findForGuestOrFail(string $subdomain): self
+    {
+        $role = static::subdomain($subdomain)->first();
+
+        if (! $role || ! $role->isVisibleToGuest(auth()->user())) {
+            throw (new ModelNotFoundException)->setModel(static::class);
+        }
+
+        return $role;
     }
 
     /**
