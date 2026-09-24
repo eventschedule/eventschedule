@@ -289,10 +289,13 @@
                             <p class="es-hold-tag">{{ $askType }}</p>
                             <h3 class="mt-2 text-lg font-bold text-gray-900 dark:text-white">{{ $askHead }}</h3>
                             <p class="mt-3 text-sm leading-relaxed text-gray-600 dark:text-gray-400">{{ $askBody }}</p>
-                            <a href="{{ marketing_url($askPath) }}" class="es-hold-accent group mt-auto inline-flex items-center gap-1 pt-5 text-sm font-semibold transition-all hover:gap-2">
-                                {{ $askLink }}
-                                <svg aria-hidden="true" class="h-4 w-4 rtl:rotate-180" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6" /></svg>
-                            </a>
+                            {{-- mt-auto and pt-5 sit on the wrapper: marketing.css's target-size rule outranks them on the link. --}}
+                            <p class="mt-auto pt-5">
+                                <a href="{{ marketing_url($askPath) }}" class="es-hold-accent group inline-flex items-center gap-1 text-sm font-semibold transition-all hover:gap-2">
+                                    {{ $askLink }}
+                                    <svg aria-hidden="true" class="h-4 w-4 rtl:rotate-180" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6" /></svg>
+                                </a>
+                            </p>
                         </div>
                     @endforeach
                 </div>

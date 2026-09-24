@@ -237,13 +237,20 @@
                         <h3 class="text-lg font-bold text-gray-900 dark:text-white">{{ $feeRates[$model['key']]['name'] }}</h3>
                         <p class="mt-1 text-sm font-semibold {{ $model['key'] === 'eventschedule' ? 'text-emerald-700 dark:text-emerald-400' : 'text-rose-700 dark:text-rose-400' }}">{{ $model['rate'] }}</p>
                         <p class="mt-3 text-sm leading-relaxed text-gray-600 dark:text-gray-400">{{ $model['how'] }}</p>
-                        <p class="mt-4 text-xs text-gray-500 dark:text-gray-400">Source: {{ $model['source'] }}</p>
-                        @if ($model['route'])
-                            <a href="{{ route($model['route']) }}" class="group mt-auto inline-flex items-center gap-1 pt-4 text-sm font-semibold text-blue-700 transition-all hover:gap-2 dark:text-blue-400">
-                                {{ $model['link'] }}
-                                <svg aria-hidden="true" class="h-4 w-4 rtl:rotate-180" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6" /></svg>
-                            </a>
-                        @endif
+                        {{-- The source and the link sit together at the foot of the card, on a wrapper: the
+                             target-size rule in marketing.css gives a standalone inline-flex link its own
+                             block margin and padding, which outrank mt-auto and pt-4 on the link itself. --}}
+                        <div class="mt-auto pt-4">
+                            <p class="text-xs text-gray-500 dark:text-gray-400">Source: {{ $model['source'] }}</p>
+                            @if ($model['route'])
+                                <p class="mt-3">
+                                    <a href="{{ route($model['route']) }}" class="group inline-flex items-center gap-1 text-sm font-semibold text-blue-700 transition-all hover:gap-2 dark:text-blue-400">
+                                        {{ $model['link'] }}
+                                        <svg aria-hidden="true" class="h-4 w-4 rtl:rotate-180" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6" /></svg>
+                                    </a>
+                                </p>
+                            @endif
+                        </div>
                     </div>
                 @endforeach
             </div>

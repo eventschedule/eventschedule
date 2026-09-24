@@ -347,7 +347,7 @@
                             </summary>
                             <p class="mt-3 text-sm leading-relaxed text-gray-600 dark:text-gray-400">{{ $faq['a'] }}</p>
                             @if (! empty($faq['link']))
-                                <a href="{{ $faq['link'][0] }}" class="es-page-accent mt-3 inline-block text-sm font-semibold hover:underline">{{ $faq['link'][1] }}</a>
+                                <p class="mt-3"><a href="{{ $faq['link'][0] }}" class="es-page-accent inline-block text-sm font-semibold hover:underline">{{ $faq['link'][1] }}</a></p>
                             @endif
                         </details>
                     @endforeach
