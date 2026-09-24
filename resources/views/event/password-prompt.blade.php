@@ -1,4 +1,5 @@
-<x-app-guest-layout :role="$role" :event="$event" :date="$date" :fonts="$fonts" :password-gate="true" :page-title="__('messages.password')">
+{{-- noindex: served at the event's own URL while it is locked, so what would be indexed is the lock. --}}
+<x-app-guest-layout :role="$role" :event="$event" :date="$date" :fonts="$fonts" :password-gate="true" :page-title="__('messages.password')" :no-index="true">
 
   <main>
     <div class="min-h-[60vh] flex items-center justify-center px-4">

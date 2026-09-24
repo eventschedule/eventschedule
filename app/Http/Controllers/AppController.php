@@ -600,25 +600,78 @@ class AppController extends Controller
         return response()->json(['success' => true]);
     }
 
-    public function robots()
+    /**
+     * App routes a crawler has no business in, for the hosts that serve them (see robots()).
+     *
+     * Each is written three ways - /x$, /x/ and /x? - rather than as the bare prefix /x, which is
+     * a PREFIX match: on selfhost every schedule lives at /{subdomain}, so /events also blocked
+     * /eventsnyc and /login blocked /login-lounge. Google and Bing both honour $.
+     */
+    private const ROBOTS_APP_PATHS = [
+        'login', 'sign_up', 'reset-password', 'update-password', 'confirm-password', 'verify-email',
+        'two-factor-challenge', 'events', 'settings', 'checkout', 'admin',
+    ];
+
+    /**
+     * Prefixes blocked on every host that serves them. /appointment/ and /gift-card/view/ carry a
+     * secret in the path, so they must never be fetched, whatever the pages say about indexing.
+     * /promo/ is a click-counting redirect: a crawler following it would spend an advertiser's
+     * budget on traffic that was never a person.
+     */
+    private const ROBOTS_SECRET_PATHS = ['/appointment/', '/gift-card/view/', '/promo/'];
+
+    /**
+     * robots.txt, which differs by host.
+     *
+     * A tenant host (hosted: a custom domain, or a schedule's subdomain) blocks only its checkout
+     * returns and the secret-bearing paths. It used to get the apex's body, whose app rules
+     * (/events, /admin, /login and friends) mean nothing there and whose bare prefixes also matched
+     * the schedule's own event slugs. Never /api/: the calendar renders from it.
+     *
+     * The apex, www., blog. and every selfhost install keep the app rules. app. is the same without
+     * the Sitemap line: it serves no page the sitemap lists.
+     *
+     * sitemap_url() is host-aware: a custom domain points at its own sitemap, because Google
+     * rejects a third-party host inside the global one ("URL not allowed") whatever robots.txt
+     * says. The same helper builds the <link rel="sitemap"> tag in layouts/app.blade.php, so the
+     * two can never disagree on a page served from this host.
+     */
+    public function robots(Request $request)
     {
-        // /appointment/ carries the booking secret in the path, so it must never be crawled or indexed.
-        // The pages themselves also send noindex; this stops the URL being fetched at all.
-        // /promo/ is a click-counting redirect, so crawling it would spend advertisers'
-        // budgets on traffic that was never a person.
-        $disallowRules = "User-agent: *\nDisallow: /login\nDisallow: /sign_up\nDisallow: /reset-password\nDisallow: /update-password\nDisallow: /confirm-password\nDisallow: /verify-email\nDisallow: /two-factor-challenge\nDisallow: /auth/\nDisallow: /events\nDisallow: /settings\nDisallow: /checkout\nDisallow: /appointment/\nDisallow: /promo/\nDisallow: /admin\n";
+        $host = strtolower($request->getHost());
+        $base = strtolower(_base_domain());
+        $label = str_ends_with($host, '.'.$base) ? explode('.', $host)[0] : null;
 
-        $isAppSubdomain = config('app.hosted') && str_starts_with(request()->getHost(), 'app.');
+        $isTenantHost = config('app.hosted')
+            && ($request->attributes->get('custom_domain_host')
+                || ($label !== null && ! in_array($label, ['www', 'app', 'blog'], true)));
 
-        // sitemap_url() is host-aware: a custom domain points at its own sitemap, because Google
-        // rejects a third-party host inside the global one ("URL not allowed") whatever robots.txt
-        // says. The same helper builds the <link rel="sitemap"> tag in layouts/app.blade.php, so
-        // the two can never disagree on a page served from this host.
-        $content = $isAppSubdomain
-            ? $disallowRules
-            : $disallowRules."\nSitemap: ".sitemap_url()."\n# AI/LLM-friendly docs: ".config('app.url')."/llms.txt\n";
+        if ($isTenantHost) {
+            $content = "User-agent: *\n"
+                .collect(['/checkout/', '/payment/', '/gift-cards/success/', '/gift-cards/cancel/', '/gift-cards/payment/'])
+                    ->merge(self::ROBOTS_SECRET_PATHS)
+                    ->map(fn ($path) => 'Disallow: '.$path."\n")
+                    ->implode('')
+                ."\nSitemap: ".sitemap_url()."\n";
+        } else {
+            $appRules = collect(self::ROBOTS_APP_PATHS)
+                ->flatMap(fn ($path) => ["/{$path}$", "/{$path}/", "/{$path}?"])
+                ->merge(['/auth/', '/admin-edit-event/'])
+                ->merge(self::ROBOTS_SECRET_PATHS)
+                ->map(fn ($path) => 'Disallow: '.$path."\n")
+                ->implode('');
 
-        return response($content, 200)->header('Content-Type', 'text/plain');
+            $content = "User-agent: *\n".$appRules;
+
+            if (! (config('app.hosted') && $label === 'app')) {
+                $content .= "\nSitemap: ".sitemap_url()."\n# AI/LLM-friendly docs: ".config('app.url')."/llms.txt\n";
+            }
+        }
+
+        return response($content, 200)
+            ->header('Content-Type', 'text/plain')
+            // Outside the web group (routes/web.php), so no session cookie stops the CDN caching it.
+            ->header('Cache-Control', 'public, max-age=3600');
     }
 
     /**

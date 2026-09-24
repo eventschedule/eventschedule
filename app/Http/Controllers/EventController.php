@@ -4388,10 +4388,25 @@ class EventController extends Controller
     {
         $role = Role::subdomain($subdomain)->first();
 
-        // is_deleted for the reason viewGuest() gives: the API delete, unfollow and merge paths
-        // soft-delete without renaming, and the event page already stopped serving those rows.
-        if (! $role || $role->is_deleted || ! $role->isClaimed()) {
-            return redirect(app_url());
+        // The same answers viewGuest() gives. is_deleted for its reason: the API delete, unfollow
+        // and merge paths soft-delete without renaming, and the event page already stopped serving
+        // those rows. And a 404 rather than the old redirect to the app, which a crawler read as a
+        // soft 404 on the app host.
+        if (! $role || $role->is_deleted) {
+            abort(404);
+        }
+
+        if (! $role->isClaimed()) {
+            $user = auth()->user();
+
+            // A placeholder answers only at its root (viewGuestUnclaimed()), and sends every deeper
+            // path into the app; so does an unpublished schedule, for its own people. Anybody else
+            // gets the schedule's 404.
+            if ($role->isClaimable() || ($user && ($user->isMember($role->subdomain) || $user->isAdmin()))) {
+                return redirect(app_url());
+            }
+
+            return $this->guestNotFound($role);
         }
 
         // Locale handling. ?lang[]=x is an array, which is_valid_language_code()'s ?string

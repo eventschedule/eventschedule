@@ -7,6 +7,7 @@ use App\Models\Event;
 use App\Models\Role;
 use App\Services\DemoService;
 use Illuminate\Http\Request;
+use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
@@ -56,10 +57,39 @@ class SitemapController extends Controller
     /** The longest a DNS label may be. See isListable(). */
     private const MAX_LABEL_LENGTH = 63;
 
+    /**
+     * The platform's own hosts under the base domain. None of them serves a schedule page. See
+     * isTenantUrl().
+     */
+    private const PLATFORM_HOST_LABELS = ['app', 'www', 'blog'];
+
+    /**
+     * Every roles column the event loops read, for the narrowed eager load: getGuestUrlData() and
+     * canonicalTarget() (subdomain, type, the verification dates, is_deleted and the pivot),
+     * servesOnCustomDomain() (custom_domain_*), Role::isIndexableHost() (user_id, email, phone)
+     * and is_unlisted. A column that is read but not selected reads as null instead of raising,
+     * so an omission fails silently.
+     */
+    private const EVENT_ROLE_COLUMNS = 'id,subdomain,type,user_id,email,email_verified_at,phone,phone_verified_at,'
+        .'is_deleted,is_unlisted,custom_domain,custom_domain_mode,custom_domain_status';
+
     /** Per-request memo of the section list. */
     private ?array $sections = null;
 
     private ?string $staticLastmod = null;
+
+    /*
+     * Per-request state, cleared by resetRequestState() at every public entry point. Laravel keeps
+     * one controller instance per route and serves every request to that route with it (a test
+     * makes several), so anything memoised here would otherwise answer the next request with this
+     * one's data.
+     */
+
+    /** The instant the sitemap windows are measured from. See now(). */
+    private ?Carbon $now = null;
+
+    /** See demoOwnerId(). */
+    private ?int $demoOwnerId = null;
 
     /**
      * The host this sitemap is being served for, and whether its subdomains count as in scope.
@@ -78,6 +108,7 @@ class SitemapController extends Controller
      */
     public function index(): StreamedResponse
     {
+        $this->resetRequestState();
         $this->scopeToBaseDomain();
 
         $sections = $this->sections();
@@ -110,6 +141,7 @@ class SitemapController extends Controller
      */
     public function section(string $section)
     {
+        $this->resetRequestState();
         $this->scopeToBaseDomain();
 
         $meta = collect($this->sections())->firstWhere('name', $section);
@@ -142,6 +174,8 @@ class SitemapController extends Controller
      */
     public function schedule(Request $request, ?string $subdomain = null)
     {
+        $this->resetRequestState();
+
         // ResolveCustomDomain rewrites the Host header to {subdomain}.{base} so tenant routing
         // matches, and stashes what the request actually arrived on. That original host - not the
         // rewritten one - is what this sitemap is allowed to list.
@@ -150,17 +184,19 @@ class SitemapController extends Controller
 
         $subdomain = $request->attributes->get('custom_domain_subdomain') ?: $subdomain;
 
+        // scheduleQuery() is Role::isIndexableHost() in SQL, so a schedule whose pages answer
+        // noindex - unverified, deleted, demo content - has no sitemap to offer.
         $role = $subdomain
-            ? $this->scheduleQuery()->where('subdomain', $subdomain)->first()
+            ? $this->scheduleQuery()->where('roles.subdomain', $subdomain)->first()
             : null;
 
         $url = $role ? $role->getCanonicalUrl() : null;
 
-        // Unknown, deleted or unclaimed - or canonical somewhere other than the host being asked,
-        // which is what a schedule with an active custom domain looks like when its subdomain is
-        // asked instead. A 404 rather than an empty document: a crawler retries a 404, and an
-        // empty urlset would read as "this schedule has nothing".
-        if (! $url || ! $this->isListable($url)) {
+        // Unknown or not indexable - or canonical somewhere other than the host being asked, which
+        // is what a schedule with an active custom domain looks like when its subdomain is asked
+        // instead. A 404 rather than an empty document: a crawler retries a 404, and an empty
+        // urlset would read as "this schedule has nothing".
+        if (! $url || ! $this->isListable($url) || ! $this->isTenantUrl($url)) {
             abort(404);
         }
 
@@ -168,10 +204,13 @@ class SitemapController extends Controller
     }
 
     /**
-     * One schedule, its sub-schedules and its events, in that order.
+     * One schedule and its events, in that order.
      *
-     * Deliberately the unfiltered eventQuery(): the discovery flags say "do not surface this from
-     * OUR listings", and a schedule's own sitemap on its own host is the owner's listing, not ours.
+     * No sub-schedules: a sub-schedule page canonicalizes to the schedule root, so listing it
+     * submitted a URL that names another as the page to index (109 of them, in production).
+     *
+     * Deliberately eventQuery(false): the discovery flags say "do not surface this from OUR
+     * listings", and a schedule's own sitemap on its own host is the owner's listing, not ours.
      */
     private function writeSchedule(Role $role, string $url, callable $write): void
     {
@@ -181,39 +220,44 @@ class SitemapController extends Controller
         $write($this->urlNode($url, $role->updated_at));
         $written++;
 
-        foreach ($role->groups()->whereNotNull('slug')->get(['id', 'role_id', 'slug', 'updated_at']) as $group) {
-            $write($this->urlNode(rtrim($url, '/').'/'.rawurlencode($group->slug), $group->updated_at));
-            $written++;
-        }
-
-        $this->eventQuery()
-            ->select(['id', 'slug', 'starts_at', 'days_of_week', 'creator_role_id', 'updated_at'])
-            // Same shape as eventQuery()'s acceptance check, narrowed to this schedule.
+        // Same shape as eventQuery()'s acceptance check, narrowed to this schedule. A closure,
+        // because the collapse needs the same rows as a separate query.
+        $eligible = fn () => $this->eventQuery(false)
             ->whereExists(fn ($q) => $q->select(DB::raw(1))
                 ->from('event_role')
                 ->whereColumn('event_role.event_id', 'events.id')
                 ->where('event_role.role_id', $role->id)
-                ->where('event_role.is_accepted', true))
-            // The same columns as writeEvents(), for the same reason.
+                ->where('event_role.is_accepted', true));
+
+        $winners = $this->collapseWinners($eligible());
+
+        $eligible()
+            ->select(['id', 'slug', 'starts_at', 'days_of_week', 'creator_role_id', 'updated_at'])
             ->with([
-                'roles:id,subdomain,type,user_id,email_verified_at,phone_verified_at,is_deleted,custom_domain,custom_domain_mode,custom_domain_status',
+                'roles:'.self::EVENT_ROLE_COLUMNS,
                 'creatorRole:id,subdomain,type,user_id,email_verified_at,phone_verified_at',
             ])
-            ->chunkByIdDesc(self::HYDRATE_CHUNK, function ($events) use ($write, $cap, &$written) {
+            ->chunkByIdDesc(self::HYDRATE_CHUNK, function ($events) use ($role, $write, $cap, $winners, &$written) {
                 foreach ($events as $event) {
                     if ($written >= $cap) {
                         return false;
                     }
 
-                    $url = $event->getCanonicalUrlOrNull();
-
-                    // An event listed on several schedules is canonical on only one of them, so
-                    // this drops the ones whose home schedule is a different host.
-                    if (! $url || ! $this->isListable($url)) {
+                    if ($this->isCollapsedAway($event, $winners)) {
                         continue;
                     }
 
-                    $write($this->urlNode($url, $event->updated_at));
+                    // An event listed on several schedules is canonical on only one of them, and
+                    // this sitemap lists it only when that one is this schedule. Checking the host
+                    // alone was not enough: on selfhost every schedule shares one host, so each
+                    // schedule's sitemap listed the canonicals of every event it had accepted.
+                    $loc = $this->eventLoc($event, fn (Role $home) => $home->is($role));
+
+                    if (! $loc) {
+                        continue;
+                    }
+
+                    $write($this->urlNode($loc, $event->updated_at));
                     $written++;
                 }
             });
@@ -285,18 +329,15 @@ class SitemapController extends Controller
         if (Route::has('blog.show')) {
             $sections = array_merge($sections, $this->namedRanges(
                 'blog',
-                $this->pageRanges($this->blogQuery(), 'asc', null, fn ($post) => $this->blogLastmod($post))
+                $this->pageRanges($this->blogQuery(), 'asc', fn ($post) => $this->blogLastmod($post))
             ));
         }
 
+        // One URL per schedule. Sub-schedules are not listed (see writeSchedule()), so a schedule
+        // no longer weighs one URL per sub-schedule.
         $sections = array_merge($sections, $this->namedRanges('schedules', $this->pageRanges(
-            $this->discoverableScheduleQuery()
-                ->select(['id', 'updated_at'])
-                ->withCount(['groups' => fn ($q) => $q->whereNotNull('slug')]),
+            $this->discoverableScheduleQuery()->select(['id', 'updated_at']),
             'asc',
-            // A schedule emits its own URL plus one per sub-schedule. Weighting by that is what
-            // keeps a page under the cap, and it keeps a schedule and its sub-schedules together.
-            fn ($role) => 1 + $role->groups_count,
             fn ($role) => $role->updated_at
         )));
 
@@ -304,7 +345,6 @@ class SitemapController extends Controller
         $sections = array_merge($sections, $this->namedRanges('events', $this->pageRanges(
             $this->discoverableEventQuery()->select(['id', 'updated_at']),
             'desc',
-            null,
             fn ($event) => $event->updated_at
         )));
 
@@ -329,8 +369,12 @@ class SitemapController extends Controller
      * that, and it also stops deep pages re-scanning everything they skip.
      *
      * Only ids and timestamps are read, one SCAN_CHUNK at a time, so this stays memory-flat.
+     *
+     * Every row counts as one URL. A page can end up listing fewer - an event whose canonical is on
+     * a host this sitemap may not carry is skipped, and so is a collapsed instance (see
+     * collapseWinners()) - which keeps it under the cap either way.
      */
-    private function pageRanges($query, string $direction, ?callable $weigh = null, ?callable $stamp = null): array
+    private function pageRanges($query, string $direction, ?callable $stamp = null): array
     {
         $perFile = $this->urlsPerFile();
         $rows = $direction === 'desc'
@@ -341,9 +385,7 @@ class SitemapController extends Controller
         $page = null;
 
         foreach ($rows as $row) {
-            $weight = $weigh ? max(1, (int) $weigh($row)) : 1;
-
-            if ($page && $perFile < $page['urls'] + $weight) {
+            if ($page && $perFile < $page['urls'] + 1) {
                 $ranges[] = $page;
                 $page = null;
             }
@@ -354,7 +396,7 @@ class SitemapController extends Controller
 
             $page['min'] = min($page['min'], $row->id);
             $page['max'] = max($page['max'], $row->id);
-            $page['urls'] += $weight;
+            $page['urls']++;
             $page['lastmod'] = $this->newest($page['lastmod'], $stamp ? $stamp($row) : null);
         }
 
@@ -449,32 +491,26 @@ class SitemapController extends Controller
     {
         // Every column read by Role::getCanonicalUrl() -> getGuestUrl() / isClaimed() /
         // servesOnCustomDomain() must be listed here. A column that is read but not selected reads
-        // as null instead of raising, so omissions fail silently.
+        // as null instead of raising, so omissions fail silently. Indexability needs no columns:
+        // discoverableScheduleQuery() decides it in SQL.
+        //
+        // No sub-schedules. Their pages canonicalize to the schedule root, so every one listed was
+        // a URL naming another as the page to index - 109 of them, in production.
         $this->applyRange($this->discoverableScheduleQuery(), $range)
             ->select([
                 'id', 'subdomain', 'user_id', 'email_verified_at', 'phone_verified_at',
                 'custom_domain', 'custom_domain_mode', 'custom_domain_status', 'updated_at',
             ])
-            ->with(['groups' => fn ($q) => $q->select(['id', 'role_id', 'slug', 'updated_at'])->whereNotNull('slug')])
             ->orderBy('id')
             ->chunkById(self::HYDRATE_CHUNK, function ($roles) use ($write) {
                 foreach ($roles as $role) {
                     $url = $role->getCanonicalUrl();
 
-                    // Skipping the schedule takes its sub-schedules with it, which is right: they
-                    // are emitted as paths under this same host.
-                    if (! $url || ! $this->isListable($url)) {
+                    if (! $url || ! $this->isListable($url) || ! $this->isTenantUrl($url)) {
                         continue;
                     }
 
                     $write($this->urlNode($url, $role->updated_at));
-
-                    foreach ($role->groups as $group) {
-                        $write($this->urlNode(
-                            rtrim($url, '/').'/'.rawurlencode($group->slug),
-                            $group->updated_at
-                        ));
-                    }
                 }
             });
     }
@@ -483,38 +519,66 @@ class SitemapController extends Controller
     {
         $skipped = 0;
 
-        // Every column read by Event::canonicalTarget() must be listed here: getGuestUrlData()'s,
-        // the roles' is_deleted (servesGuestPage(), which also reads the pivot - a narrowed
-        // belongsToMany still loads that) and their custom_domain_* columns
-        // (servesOnCustomDomain). A column that is read but not selected reads as null instead of
-        // raising, so an omission fails silently. The canonical carries no date, so
-        // creatorRole.timezone is no longer among them. is_private / is_draft / is_cancelled /
-        // event_password are query predicates only and are deliberately never selected.
+        // Over every eligible event, not just this page's range: the instances of one slug are
+        // spread across pages, and each page has to agree on which one is listed.
+        $winners = $this->collapseWinners($this->discoverableEventQuery());
+
+        // EVENT_ROLE_COLUMNS lists what the loop reads from the roles. is_private / is_draft /
+        // is_cancelled / event_password are query predicates only and are deliberately never
+        // selected; the canonical carries no date, so creatorRole.timezone is not needed either.
         $this->applyRange($this->discoverableEventQuery(), $range)
             ->select(['id', 'slug', 'starts_at', 'days_of_week', 'creator_role_id', 'updated_at'])
             ->with([
-                'roles:id,subdomain,type,user_id,email_verified_at,phone_verified_at,is_deleted,custom_domain,custom_domain_mode,custom_domain_status',
+                'roles:'.self::EVENT_ROLE_COLUMNS,
                 'creatorRole:id,subdomain,type,user_id,email_verified_at,phone_verified_at',
             ])
-            ->chunkByIdDesc(self::HYDRATE_CHUNK, function ($events) use ($write, &$skipped) {
+            ->chunkByIdDesc(self::HYDRATE_CHUNK, function ($events) use ($write, $winners, &$skipped) {
                 foreach ($events as $event) {
-                    // ...OrNull rather than getCanonicalUrl(), which logs an error per unroutable
-                    // event. Walking every event in the database would otherwise flood the log.
-                    $url = $event->getCanonicalUrlOrNull();
+                    if ($this->isCollapsedAway($event, $winners)) {
+                        continue;
+                    }
 
-                    if (! $url || ! $this->isListable($url)) {
+                    // An unlisted home keeps its events out of OUR listing, as it keeps itself out
+                    // of discoverableScheduleQuery(). The per-schedule sitemap has no such rule.
+                    $loc = $this->eventLoc($event, fn (Role $home) => ! $home->is_unlisted);
+
+                    if (! $loc) {
                         $skipped++;
 
                         continue;
                     }
 
-                    $write($this->urlNode($url, $event->updated_at));
+                    $write($this->urlNode($loc, $event->updated_at));
                 }
             });
 
         if ($skipped) {
-            Log::info('sitemap: skipped '.$skipped.' events with no routable or in-scope URL');
+            Log::info('sitemap: skipped '.$skipped.' events with no routable, indexable or in-scope URL');
         }
+    }
+
+    /**
+     * The URL an event is listed at, or null when it must not be listed.
+     *
+     * The URL is the canonical the page prints (Event::canonicalTarget()), so the sitemap never
+     * submits a URL that names another as the page to index. It is listed only when the schedule it
+     * is canonical on answers "index, follow" (Role::isIndexableHost(), the page's own robots rule)
+     * and passes $homeAllowed: eventQuery() only proves that SOME indexable schedule accepted the
+     * event, and the canonical can sit on another - a performer whose contact was never verified,
+     * say - whose page would refuse indexing.
+     *
+     * canonicalTarget() rather than getCanonicalUrl(), which logs an error per unroutable event:
+     * walking every event in the database would flood the log.
+     */
+    private function eventLoc(Event $event, callable $homeAllowed): ?string
+    {
+        [$url, $home] = $event->canonicalTarget();
+
+        if (! $url || ! $home || ! $home->isIndexableHost($this->demoOwnerId()) || ! $homeAllowed($home)) {
+            return null;
+        }
+
+        return $this->isListable($url) && $this->isTenantUrl($url) ? $url : null;
     }
 
     /*
@@ -524,7 +588,13 @@ class SitemapController extends Controller
     */
 
     /**
-     * Every schedule with a public URL, whether or not it is discoverable.
+     * Every schedule whose pages may be indexed, whether or not it is discoverable.
+     *
+     * Role::isIndexableHost() in SQL - the rule the page's own robots meta applies - so neither
+     * sitemap submits a schedule whose page answers noindex: an unverified one, a deleted one, or
+     * demo content (the /examples showcase included, which is caught only by its contact address).
+     * In SQL rather than per row: these queries chunk over every schedule, and the demo owner check
+     * reads $role->user, which per row would be an N+1.
      *
      * This is the lookup the per-tenant sitemap uses, so it deliberately does NOT apply the
      * discovery rules below: a schedule serving its own host is entitled to a sitemap of that host
@@ -533,10 +603,8 @@ class SitemapController extends Controller
     private function scheduleQuery()
     {
         return Role::query()
-            ->claimed()
-            ->where('is_deleted', false)
-            ->whereNotNull('subdomain')
-            ->whereNot(fn ($q) => $this->scopeToDemoSchedules($q));
+            ->indexableHost()
+            ->whereNotNull('roles.subdomain');
     }
 
     /**
@@ -545,69 +613,58 @@ class SitemapController extends Controller
      * is_unlisted is the owner saying "do not put this in a directory". The page itself stays
      * indexable - unlisted means shared by link, not hidden - but submitting to Google a URL the
      * product keeps out of its own listings is a mixed signal, so discovery is left to the link.
+     *
+     * And only a schedule with something to show: at least one event it accepted that the events
+     * sitemap would consider. 293 of 664 schedules had no listed event at all. Sitemap hygiene
+     * only - an empty schedule's page stays indexable, it is just not submitted.
      */
     private function discoverableScheduleQuery()
     {
-        return $this->scheduleQuery()->where('is_unlisted', false);
+        return $this->scheduleQuery()
+            ->where('roles.is_unlisted', false)
+            ->whereExists(function ($q) {
+                $q->select(DB::raw(1))
+                    ->from('event_role')
+                    ->join('events', 'events.id', '=', 'event_role.event_id')
+                    ->whereColumn('event_role.role_id', 'roles.id')
+                    ->where('event_role.is_accepted', true)
+                    ->where('events.is_hidden_from_discovery', false);
+
+                self::publicEventRows($q);
+                Event::constrainSitemapWindow($q, $this->now());
+            });
     }
 
     /**
-     * Constrain a roles query to the demo schedules, for negation by the callers.
-     *
-     * Demo schedules are seeded fabricated content shown off from /examples; they send noindex
-     * (see layouts/app-guest.blade.php) and so must not be advertised in the sitemap either -
-     * submitting a URL that then refuses indexing is the contradiction "Alternate page"/"Excluded
-     * by noindex" rows are made of.
-     *
-     * Expressed as a query rather than is_demo_role() per row on purpose: these queries chunk over
-     * every role and event in the database, and the helper reads $role->user, so calling it per
-     * row is an N+1 across hundreds of thousands of rows. claimed() already guarantees user_id is
-     * set, so the join cannot drop a legitimate schedule.
+     * Every event with a public URL that is still in the sitemap window, whether or not it is
+     * discoverable. See scheduleQuery() for why the per-tenant sitemap asks for this one with
+     * $global false, and Event::constrainSitemapWindow() for the window.
      */
-    private function scopeToDemoSchedules($query)
+    private function eventQuery(bool $global = true)
     {
-        return $query
-            ->where('roles.subdomain', DemoService::DEMO_ROLE_SUBDOMAIN)
-            ->orWhereExists(fn ($u) => $u->select(DB::raw(1))
-                ->from('users')
-                ->whereColumn('users.id', 'roles.user_id')
-                ->where('users.email', DemoService::DEMO_EMAIL));
-    }
+        $query = self::publicEventRows(Event::query());
 
-    /**
-     * Every event with a public URL, whether or not it is discoverable. See scheduleQuery() for
-     * why the per-tenant sitemap uses this one rather than the discoverable variant below.
-     */
-    private function eventQuery()
-    {
-        return Event::query()
-            ->whereNotNull('starts_at')
-            ->whereNotNull('slug')
-            ->where('is_private', false)
-            ->where('is_draft', false)
-            ->where('is_cancelled', false)
-            ->whereNull('event_password')
-            // A correlated EXISTS rather than whereHas: this subquery is re-planned on every
-            // chunk, and event_role.event_id is already indexed.
-            //
-            // The role-side predicate has to live INSIDE this subquery so it binds to the same
-            // pivot row as is_accepted, the way publicUpcomingEventsQuery() and
-            // FederationService::federatableQuery() do it. Without it, an event whose only
-            // accepted pivot is an ownerless placeholder schedule qualifies - and
-            // RoleController::viewGuest() redirects anything that fails isClaimed(), so the
-            // URL we would emit is a redirect or a soft 404.
-            //
-            // The demo exclusion binds to the same pivot row for the same reason: an event only
-            // qualifies if some NON-demo schedule accepted it. Excluding demo events outright
-            // would drop a real schedule's event that a demo curator happens to have picked up.
-            ->whereExists(fn ($q) => $q->select(DB::raw(1))
-                ->from('event_role')
-                ->join('roles', 'roles.id', '=', 'event_role.role_id')
-                ->whereColumn('event_role.event_id', 'events.id')
-                ->where('event_role.is_accepted', true)
-                ->where('roles.is_deleted', false)
-                ->whereNotNull('roles.user_id')
-                ->whereNot(fn ($d) => $this->scopeToDemoSchedules($d)));
+        Event::constrainSitemapWindow($query, $this->now());
+
+        // A correlated EXISTS rather than whereHas: this subquery is re-planned on every chunk, and
+        // event_role.event_id is already indexed.
+        //
+        // The role-side predicate has to live INSIDE this subquery so it binds to the same pivot
+        // row as is_accepted, the way publicUpcomingEventsQuery() and
+        // FederationService::federatableQuery() do it. Without it, an event whose only accepted
+        // pivot is an ownerless placeholder schedule qualifies - and RoleController::viewGuest()
+        // turns away anything that fails isClaimed(), so the URL we would emit is a 404.
+        //
+        // The demo exclusion (inside isIndexableHost) binds to the same pivot row for the same
+        // reason: an event only qualifies if some NON-demo schedule accepted it. Excluding demo
+        // events outright would drop a real schedule's event that a demo curator picked up.
+        return $query->whereExists(fn ($q) => $q->select(DB::raw(1))
+            ->from('event_role')
+            ->join('roles', 'roles.id', '=', 'event_role.role_id')
+            ->whereColumn('event_role.event_id', 'events.id')
+            ->where('event_role.is_accepted', true)
+            ->where(fn ($r) => Role::constrainIndexableHost($r))
+            ->when($global, fn ($r) => $r->where('roles.is_unlisted', false)));
     }
 
     /**
@@ -619,7 +676,92 @@ class SitemapController extends Controller
      */
     private function discoverableEventQuery()
     {
-        return $this->eventQuery()->where('is_hidden_from_discovery', false);
+        return $this->eventQuery()->where('events.is_hidden_from_discovery', false);
+    }
+
+    /**
+     * The event columns that make a row public at all. Qualified, so the same filter runs inside
+     * discoverableScheduleQuery()'s correlated subquery as on the events query itself.
+     */
+    private static function publicEventRows($query, string $table = 'events')
+    {
+        return $query->whereNotNull($table.'.starts_at')
+            ->whereNotNull($table.'.slug')
+            // An empty slug routes nowhere: route() refuses to build /{subdomain}//{id}, and the
+            // exception would end the urlset early.
+            ->where($table.'.slug', '<>', '')
+            ->where($table.'.is_private', false)
+            ->where($table.'.is_draft', false)
+            ->where($table.'.is_cancelled', false)
+            ->whereNull($table.'.event_password');
+    }
+
+    /**
+     * Which instance of each one-off event the sitemap lists: one URL per (creator, slug).
+     *
+     * Google Calendar sync imports a recurring series with singleEvents (GoogleCalendarService),
+     * so every occurrence arrives as a one-off row of its own sharing a slug: one schedule put
+     * 3,090 of the 4,441 event URLs in the sitemap, 404 of them a single slug. Each row keeps its
+     * page; the sitemap lists one - the one a bare /{slug} shows (EventRepo::getEvent()), which is
+     * the next upcoming instance, else the latest. A recurring series is a single row already, and
+     * an event with no creator, or another creator's, is never folded into a group.
+     *
+     * One GROUP BY over the same rows the listing walks, once per request, and only groups of two
+     * or more come back, so the map is as small as the problem. The winner's id is packed behind
+     * its starts_at - CONCAT(starts_at, LPAD(id, 20, '0')) orders by time, then by id - so an exact
+     * tie resolves the same way on every page of the sitemap, not to whichever row a page saw first.
+     *
+     * @return array<string, int> collapseKey() => the id of the instance to list
+     */
+    private function collapseWinners($eligible): array
+    {
+        $now = $this->now();
+        $packed = "CONCAT(events.starts_at, LPAD(events.id, 20, '0'))";
+
+        // EventRepo::getEvent()'s "upcoming" test for a bare slug.
+        $upcoming = 'events.starts_at >= ? OR (events.duration >= 24 AND DATE_ADD(events.starts_at, INTERVAL events.duration HOUR) >= ?)';
+
+        $rows = $eligible
+            ->whereNull('events.days_of_week')
+            ->whereNotNull('events.creator_role_id')
+            ->groupBy('events.creator_role_id', 'events.slug')
+            ->havingRaw('COUNT(*) > 1')
+            ->selectRaw(
+                "events.creator_role_id, events.slug, COALESCE(MIN(CASE WHEN {$upcoming} THEN {$packed} END), MAX({$packed})) AS pick",
+                [$now->copy()->subDay()->format('Y-m-d H:i:s'), $now->format('Y-m-d H:i:s')]
+            )
+            ->toBase()
+            ->get();
+
+        $winners = [];
+
+        foreach ($rows as $row) {
+            $winners[self::collapseKey($row->creator_role_id, $row->slug)] = (int) substr($row->pick, -20);
+        }
+
+        return $winners;
+    }
+
+    /** Whether $event is an instance collapseWinners() folded into another. */
+    private function isCollapsedAway(Event $event, array $winners): bool
+    {
+        // The same rows the GROUP BY took: days_of_week IS NULL, creator_role_id IS NOT NULL.
+        if ($event->days_of_week !== null || ! $event->creator_role_id) {
+            return false;
+        }
+
+        $winner = $winners[self::collapseKey($event->creator_role_id, $event->slug)] ?? null;
+
+        return $winner !== null && $winner !== (int) $event->id;
+    }
+
+    /**
+     * Lower-cased because MySQL grouped the slugs case-insensitively. Only ever finer than the
+     * collation, so a mismatch can leave an instance listed, never drop the one that was picked.
+     */
+    private static function collapseKey($creatorRoleId, ?string $slug): string
+    {
+        return $creatorRoleId.'|'.mb_strtolower((string) $slug);
     }
 
     private function blogQuery()
@@ -758,6 +900,55 @@ class SitemapController extends Controller
         }
 
         return $this->scopeIncludesSubdomains && str_ends_with($host, '.'.$this->scopeHost);
+    }
+
+    /**
+     * Whether a <loc> is on a host that serves schedule pages at all.
+     *
+     * The platform's own app., www. and blog. hosts never do - routes/web.php keeps the tenant
+     * group off the first two and registers the blog ahead of it - so a schedule holding one of
+     * those names from before they were reserved would be listed at a URL that lands on the
+     * dashboard, the apex or the blog. Kept apart from isListable(), which asks whether Google
+     * accepts the host in this sitemap at all, and has to accept the blog.
+     *
+     * Only those hosts under the base domain: a customer's custom domain is free to be www.
+     */
+    private function isTenantUrl(string $loc): bool
+    {
+        $host = strtolower((string) parse_url($loc, PHP_URL_HOST));
+        $base = strtolower(_base_domain());
+
+        foreach (self::PLATFORM_HOST_LABELS as $label) {
+            if ($host === $label.'.'.$base) {
+                return false;
+            }
+        }
+
+        return $host !== '';
+    }
+
+    /**
+     * The demo user's id, looked up once per request, or 0 when there is none - an id no row has.
+     * Handed to Role::isIndexableHost() so that checking every event's home schedule costs this one
+     * query rather than a users query per event.
+     */
+    private function demoOwnerId(): int
+    {
+        return $this->demoOwnerId ??= (int) DB::table('users')
+            ->where('email', DemoService::DEMO_EMAIL)
+            ->value('id');
+    }
+
+    /** One instant per request, so the queries of one sitemap agree on what "past" means. */
+    private function now(): Carbon
+    {
+        return $this->now ??= Carbon::now('UTC');
+    }
+
+    private function resetRequestState(): void
+    {
+        $this->now = null;
+        $this->demoOwnerId = null;
     }
 
     private function urlNode(string $loc, $lastmod = null): string

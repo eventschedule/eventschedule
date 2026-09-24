@@ -174,7 +174,8 @@ class PhotoGalleryUrlTest extends TestCase
 
         Role::whereKey($role->id)->update(['is_deleted' => true]);
 
-        $this->get($this->galleryUrl($role, $event))->assertRedirect(app_url());
+        // A 404, as on the event page, not the redirect to the app a crawler files as a soft 404.
+        $this->get($this->galleryUrl($role, $event))->assertNotFound();
     }
 
     /**

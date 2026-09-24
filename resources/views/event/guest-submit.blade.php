@@ -1,4 +1,5 @@
-<x-app-guest-layout :role="$role" :showMobileBackground="true" :page-title="__('messages.submit_event')">
+{{-- noindex: a form, not content. Every schedule has one, and none is worth a search result. --}}
+<x-app-guest-layout :role="$role" :showMobileBackground="true" :page-title="__('messages.submit_event')" :no-index="true">
 
 @php
   $hasHeaderImage = ($role->header_image && ! in_array($role->header_image, ['none', 'logos'], true)) || $role->header_image_url;

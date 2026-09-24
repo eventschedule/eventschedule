@@ -91,6 +91,9 @@ class DemoScheduleIndexingTest extends TestCase
     {
         $demo = $this->demoRole();
         $real = $this->createRole($this->createOwner(), 'venue', ['name' => 'Real Venue']);
+        // Both with an event: a schedule with nothing to show is left out for that alone.
+        $this->createEvent($demo, ['name' => 'Fabricated Gig']);
+        $this->createEvent($real, ['name' => 'Real Gig']);
 
         $locs = $this->locs('/sitemap-schedules-1.xml');
 
@@ -150,10 +153,12 @@ class DemoScheduleIndexingTest extends TestCase
      */
     public function test_the_demo_check_never_loads_a_user_row_per_schedule(): void
     {
+        // With events, which a schedule needs to be listed at all - an empty page would pass for
+        // want of anything to check.
         foreach (range(1, 6) as $i) {
-            $this->createRole($this->createOwner(), 'venue');
+            $this->createEvent($this->createRole($this->createOwner(), 'venue'));
         }
-        $this->demoRole();
+        $this->createEvent($this->demoRole());
 
         // Counting total queries is useless here - the document is cached, so a warm run makes
         // fewer queries than a cold one regardless. What matters is the SHAPE: is_demo_role() reads
@@ -161,9 +166,11 @@ class DemoScheduleIndexingTest extends TestCase
         // Done as a subquery inside the roles SELECT, `users` never appears as its own statement.
         \DB::flushQueryLog();
         \DB::enableQueryLog();
-        $this->get('/sitemap-schedules-1.xml')->assertOk()->streamedContent();
+        $xml = $this->get('/sitemap-schedules-1.xml')->assertOk()->streamedContent();
         $log = \DB::getQueryLog();
         \DB::disableQueryLog();
+
+        $this->assertSame(6, substr_count($xml, '<loc>'), 'the six real schedules were walked');
 
         // Match the FIRST `from` (non-greedy), or the correlated `from users` inside the intended
         // subquery counts as a hit and the assertion can never pass.

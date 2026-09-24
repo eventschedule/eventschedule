@@ -1989,8 +1989,13 @@ class RoleController extends Controller
         // WITHOUT renaming - so those schedules kept serving this page indefinitely while their
         // owner had already lost access to them (User::roles() filters is_deleted). The web app
         // manifest has always filtered here; this makes the page agree with it.
+        //
+        // A 404, not the redirect to the app it used to be: that sent a mistyped subdomain - and a
+        // crawler following a dead link - to the login page with a 302, which search engines file
+        // as a soft 404 on the app host. There is no schedule here to render a tenant 404 for, so
+        // this is the platform's.
         if (! $role || $role->is_deleted) {
-            return redirect(app_url());
+            abort(404);
         }
 
         // Query params can arrive as arrays (?lang[]=en); is_valid_language_code() is typed
@@ -2031,13 +2036,22 @@ class RoleController extends Controller
         // hasRealOwner(), not isClaimed(). The two disagree on a whole population: a schedule
         // somebody really runs but never verified a contact on is NOT claimed, and printing "is
         // this you?" on it would be offering a stranger a page its owner is sitting in. That
-        // population keeps the redirect it has always had, immediately below.
+        // population is handled immediately below.
         if ($role->isClaimable()) {
             return $this->viewGuestUnclaimed($request, $role, $slug, $id, $date);
         }
 
+        // Not published: nobody has verified a contact on it. Its own people are sent into the
+        // app, where finishing that is one step away. Anybody else gets the schedule's 404 rather
+        // than the same redirect, which answered a crawler with a 302 to the login page: a soft
+        // 404, filed against the app host. Not recorded as a missing address - the address is
+        // fine, the schedule just is not public yet.
         if (! $role->isClaimed()) {
-            return redirect(app_url());
+            if ($user && ($user->isMember($role->subdomain) || $user->isAdmin())) {
+                return redirect(app_url());
+            }
+
+            return $this->guestNotFound($role);
         }
 
         $otherRole = null;

@@ -1,4 +1,5 @@
-<x-app-guest-layout :role="$role" :page-title="__('messages.view_gift_card')">
+{{-- noindex: the URL carries the gift card's secret. --}}
+<x-app-guest-layout :role="$role" :page-title="__('messages.view_gift_card')" :no-index="true">
 
 @php
     $accentColor = $role->accent_color ?? '#4E81FA';

@@ -60,7 +60,10 @@ class CarpoolController extends Controller
 
         $isRecurring = (bool) $event->days_of_week;
 
-        if ($isRecurring && ! $date) {
+        // A series needs a real calendar date, not just the shape of one: the route only
+        // constrains {date} to \d{4}-\d{2}-\d{2}, which 2026-13-45 satisfies and Carbon::parse()
+        // below throws on - a 500. An impossible date is answered like a missing one.
+        if ($isRecurring && ! Event::isOccurrenceDate($date)) {
             abort(404);
         }
 

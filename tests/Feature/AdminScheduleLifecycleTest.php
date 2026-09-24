@@ -106,8 +106,10 @@ class AdminScheduleLifecycleTest extends TestCase
         $neverRenamed = $this->createRole($owner, 'venue', ['subdomain' => 'haifa']);
         Role::whereKey($neverRenamed->id)->update(['is_deleted' => true]);
 
-        $this->get('/'.$released->fresh()->subdomain)->assertRedirect();
-        $this->get('/haifa')->assertRedirect();
+        // A 404, which it was not while it redirected to the app: search engines filed that 302
+        // to the login page as a soft 404, and kept the dead URL.
+        $this->get('/'.$released->fresh()->subdomain)->assertNotFound();
+        $this->get('/haifa')->assertNotFound();
     }
 
     /**

@@ -93,12 +93,14 @@ class RoleGuestSurfaceCharacterizationTest extends TestCase
         $this->assertSame('', $response->getContent());
     }
 
-    public function test_unknown_subdomain_redirects_home_not_404(): void
+    public function test_unknown_subdomain_is_a_404(): void
     {
-        // viewGuest bails with redirect(app_url()) for an unknown schedule - there is no 404 on
-        // this path. It no longer does so for an UNCLAIMED one: those render a claim page now, and
-        // UnclaimedSchedulePageTest owns that half.
-        $this->get('/nosuchschedule12345')->assertRedirect(app_url());
+        // This used to assert a redirect to app_url(), "not a 404". That 302 sent a mistyped
+        // subdomain - and a crawler following a dead link - to the login page, which search engines
+        // file as a soft 404. There is no schedule to render a tenant 404 for, so it is the
+        // platform's. An UNCLAIMED schedule renders a claim page instead; UnclaimedSchedulePageTest
+        // owns that half.
+        $this->get('/nosuchschedule12345')->assertNotFound();
     }
 
     public function test_calendar_events_json_shape(): void

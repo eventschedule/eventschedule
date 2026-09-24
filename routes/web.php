@@ -60,7 +60,10 @@ use App\Http\Controllers\WebhookSettingsController;
 use App\Http\Controllers\WhatsAppWebhookController;
 use Illuminate\Support\Facades\Route;
 
-Route::get('/robots.txt', [AppController::class, 'robots']);
+// Outside 'web' for the reason the sitemap routes are: crawler traffic never needs a session, and
+// the group's StartSession set a cookie on every fetch, which also stops the CDN caching the body.
+// ResolveCustomDomain is global middleware, so a custom domain still gets its own Sitemap line.
+Route::get('/robots.txt', [AppController::class, 'robots'])->withoutMiddleware('web');
 
 if (config('app.hosted') && ! config('app.is_testing')) {
     if (config('app.env') != 'local') {

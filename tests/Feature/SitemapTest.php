@@ -386,7 +386,10 @@ class SitemapTest extends TestCase
         $owner = $this->createOwner();
         $subdomains = [];
         for ($i = 0; $i < 5; $i++) {
-            $subdomains[] = $this->createRole($owner, 'venue')->subdomain;
+            // Each with an event: a schedule with nothing to show is not submitted at all.
+            $role = $this->createRole($owner, 'venue');
+            $this->createEvent($role, ['creator_role_id' => $role->id]);
+            $subdomains[] = $role->subdomain;
         }
 
         $index = $this->xml('/sitemap.xml');
@@ -439,39 +442,61 @@ class SitemapTest extends TestCase
     }
 
     /**
-     * A schedules page emits one URL per schedule plus one per sub-schedule. Weighting by that is
-     * what keeps the page under the cap.
+     * A sub-schedule page canonicalizes to its schedule's root, so listing it submitted a URL that
+     * names another as the page to index - 109 of them, in production. The schedule is listed; its
+     * sub-schedules never are, and a schedules page holds one URL per schedule.
      */
-    public function test_sub_schedules_count_towards_the_page_cap(): void
+    public function test_sub_schedules_are_never_listed_in_the_global_sitemap(): void
     {
-        config(['app.sitemap_urls_per_file' => 3]);
+        config(['app.sitemap_urls_per_file' => 2]);
 
         $owner = $this->createOwner();
+        $roles = [];
+        $groups = [];
         for ($i = 0; $i < 3; $i++) {
             $role = $this->createRole($owner, 'venue');
-            $this->createGroup($role);
-            $this->createGroup($role);
+            $groups[] = $this->createGroup($role);
+            $groups[] = $this->createGroup($role);
+            // In a sub-schedule, so the sub-schedule has something to show too.
+            $event = $this->createEvent($role, ['creator_role_id' => $role->id]);
+            $event->roles()->updateExistingPivot($role->id, ['group_id' => $groups[count($groups) - 1]->id]);
+            $roles[] = $role;
         }
 
+        $locs = [];
         foreach ($this->advertisedChildren() as $path) {
-            if (! str_contains($path, 'schedules')) {
-                continue;
-            }
-
-            $this->assertLessThanOrEqual(3, substr_count($this->xml($path), '<loc>'), $path.' exceeds the cap');
+            $locs = array_merge($locs, $this->locs($this->xml($path)));
         }
+
+        foreach ($roles as $role) {
+            $this->assertContains($role->getCanonicalUrl(), $locs, 'the schedule itself is still listed');
+        }
+
+        foreach ($groups as $group) {
+            foreach ($locs as $loc) {
+                $this->assertStringNotContainsString('/'.$group->slug, $loc, 'a sub-schedule was listed');
+            }
+        }
+
+        // Two schedules per page now that each weighs one URL: two pages, where weighing each
+        // schedule with its sub-schedules put every one on a page of its own.
+        $schedulePages = array_filter($this->advertisedChildren(), fn ($path) => str_contains($path, 'schedules'));
+        $this->assertSame(['/sitemap-schedules-1.xml', '/sitemap-schedules-2.xml'], array_values($schedulePages));
     }
 
-    public function test_sub_schedules_are_listed_under_their_schedule(): void
+    /** The schedule's own sitemap, too. */
+    public function test_sub_schedules_are_never_listed_in_the_schedule_sitemap(): void
     {
         $owner = $this->createOwner();
         $role = $this->createRole($owner, 'venue');
         $group = $this->createGroup($role);
+        $event = $this->createEvent($role, ['creator_role_id' => $role->id]);
+        $event->roles()->updateExistingPivot($role->id, ['group_id' => $group->id]);
 
-        $this->assertStringContainsString(
-            $role->getCanonicalUrl().'/'.$group->slug,
-            $this->xml('/sitemap-schedules-1.xml')
-        );
+        $locs = $this->locs($this->xml('/'.$role->subdomain.'/sitemap.xml'));
+
+        $this->assertSame([$role->getCanonicalUrl(), $event->getCanonicalUrl()], $locs);
+        $this->assertNotContains($role->getCanonicalUrl().'/'.$group->slug, $locs);
     }
 
     /**
@@ -520,6 +545,9 @@ class SitemapTest extends TestCase
         $owner = $this->createOwner();
         $claimed = $this->createRole($owner, 'venue', ['name' => 'Claimed Venue']);
         $orphan = $this->createRole($owner, 'venue', ['name' => 'Orphan Venue']);
+        // Both with an event, so only the missing owner can be what keeps the orphan out.
+        $this->createEvent($claimed, ['creator_role_id' => $claimed->id]);
+        $this->createEvent($orphan, ['creator_role_id' => $orphan->id]);
         DB::table('roles')->where('id', $orphan->id)->update(['user_id' => null]);
 
         $xml = $this->xml('/sitemap-schedules-1.xml');
@@ -621,6 +649,36 @@ class SitemapTest extends TestCase
         }
     }
 
+    /**
+     * app., www. and blog. are the platform's own hosts, and none of them serves a schedule page: a
+     * schedule holding one of those names from before they were reserved would be listed at a URL
+     * that lands on the dashboard, the apex or the blog. isListable() must keep accepting them
+     * (the blog belongs in the pages child), hence a predicate of its own.
+     *
+     * Tested at the predicate for the reason given above: the suite routes tenants by path, so no
+     * fixture can put a schedule on one of those hosts.
+     */
+    public function test_only_hosts_that_serve_schedules_are_tenant_urls(): void
+    {
+        $method = new \ReflectionMethod(SitemapController::class, 'isTenantUrl');
+        $controller = new SitemapController;
+        $base = _base_domain();
+
+        foreach ([
+            "https://{$base}/some-schedule",     // path-routed, as on selfhost
+            "https://tenant.{$base}/event/abc",
+            "https://apple-fest.{$base}",         // merely starts with a reserved label
+            'https://www.customer-bar.test',       // a custom domain may well be www.
+            'https://app.customer-bar.test/x',
+        ] as $loc) {
+            $this->assertTrue($method->invoke($controller, $loc), $loc.' should be a tenant URL');
+        }
+
+        foreach (["https://app.{$base}/x", "https://www.{$base}", "https://blog.{$base}/post", 'https://WWW.'.strtoupper($base)] as $loc) {
+            $this->assertFalse($method->invoke($controller, $loc), $loc.' should not be a tenant URL');
+        }
+    }
+
     /** A schedule's own sitemap carries its URLs and nobody else's. */
     public function test_schedule_sitemap_lists_only_that_schedules_urls(): void
     {
@@ -641,6 +699,25 @@ class SitemapTest extends TestCase
         $this->assertContains($role->getCanonicalUrl(), $locs);
         $this->assertContains($event->getCanonicalUrl(), $locs);
         $this->assertNotContains($other->getCanonicalUrl(), $locs);
+    }
+
+    /**
+     * An event this schedule accepted from another one is canonical on that other one, so only its
+     * sitemap lists it. Checking the host was never enough for that: on selfhost - and under this
+     * suite's path routing - every schedule shares one host, so each schedule's sitemap listed the
+     * canonical of every event it had picked up.
+     */
+    public function test_schedule_sitemap_leaves_out_events_canonical_on_another_schedule(): void
+    {
+        $owner = $this->createOwner();
+        $curator = $this->createCurator($owner);
+        $act = $this->createRole($owner, 'talent');
+        $picked = $this->createEvent($act, ['creator_role_id' => $act->id]);
+        $picked->roles()->attach($curator->id, ['is_accepted' => true]);
+        $canonical = $picked->fresh()->getCanonicalUrl();
+
+        $this->assertNotContains($canonical, $this->locs($this->xml('/'.$curator->subdomain.'/sitemap.xml')));
+        $this->assertContains($canonical, $this->locs($this->xml('/'.$act->subdomain.'/sitemap.xml')));
     }
 
     /**
@@ -803,11 +880,17 @@ class SitemapTest extends TestCase
         $owner = $this->createOwner();
         $listed = $this->createRole($owner, 'venue');
         $unlisted = $this->createRole($owner, 'venue', ['is_unlisted' => true]);
+        // Both with an event, so only the flag can be what keeps the unlisted one out.
+        $this->createEvent($listed, ['creator_role_id' => $listed->id]);
+        $unlistedEvent = $this->createEvent($unlisted, ['creator_role_id' => $unlisted->id]);
 
         $xml = $this->xml('/sitemap-schedules-1.xml');
 
         $this->assertStringContainsString($listed->subdomain, $xml);
         $this->assertStringNotContainsString($unlisted->subdomain, $xml);
+
+        // Nor its events: listing them would be us surfacing the schedule after all.
+        $this->assertStringNotContainsString($unlistedEvent->slug, $this->xml('/sitemap-events-1.xml'));
     }
 
     /**
@@ -861,10 +944,16 @@ class SitemapTest extends TestCase
     {
         $owner = $this->createOwner();
         $role = $this->createRole($owner, 'venue');
-        $group = $this->createGroup($role);
-        DB::table('groups')->where('id', $group->id)->update(['slug' => "bad\x08slug"]);
+        $event = $this->createEvent($role, ['creator_role_id' => $role->id]);
+        DB::table('events')->where('id', $event->id)->update(['slug' => "bad\x08slug"]);
 
-        $this->assertSame('urlset', $this->parse($this->xml('/sitemap-schedules-1.xml'))->getName());
+        foreach (['/sitemap-events-1.xml', '/'.$role->subdomain.'/sitemap.xml'] as $path) {
+            $xml = $this->xml($path);
+
+            $this->assertSame('urlset', $this->parse($xml)->getName(), $path);
+            // Still listed, so the character really went through the writer.
+            $this->assertStringContainsString('/bad%08slug/', $xml, $path);
+        }
     }
 
     public function test_blog_posts_are_listed_and_paginated(): void

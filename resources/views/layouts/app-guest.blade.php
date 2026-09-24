@@ -29,20 +29,9 @@
         // over a missing pivot row is a worse failure than the one being fixed. The residue is a
         // ConvertsLocationToVenue venue whose address an admin verified by hand, which is an admin
         // deliberately adopting it. Costs no query, unlike hasRealOwner().
-        $isUnverifiedRole = $role && $role->exists
-            && (
-                (!($role->email && $role->email_verified_at) && !($role->phone && $role->phone_verified_at))
-                || !$role->user_id
-            );
-
-        // Demo schedules exist to be LOOKED AT from /examples, not to rank. They are seeded
-        // fabricated venues and events, and Googlebot was spending a quarter of its crawl on them:
-        // countyfairgrounds, weekendyogaretreat, battleofthebands, karateclub and painting alone
-        // took ~165k of 637k requests in 89 days, several of them out-crawling the tenant that
-        // earns 44% of the whole property's clicks. Thousands of thin fabricated event pages are
-        // also a site-wide quality signal this domain should not be sending. They stay fully
-        // viewable and linked from /examples - only the indexing goes.
-        $isDemoRole = is_demo_role($role);
+        //
+        // Still needed on its own: it also withholds the schedule's sameAs links below.
+        $isUnverifiedRole = $role && $role->exists && ! $role->hasVerifiedContact();
 
         // Language variants. The PRIMARY language lives on the clean URL - that is the URL the
         // sitemap submits and the one people link to - so only the alternate language carries
@@ -89,7 +78,15 @@
     @endphp
 
     <x-slot name="meta">
-        @if ($noIndex || request()->embed || request('graphic') || (isset($event) && $event->exists && ($event->is_private || $event->is_draft)) || $isUnverifiedRole || $isDemoRole)
+        {{-- The schedule half is Role::isIndexableHost(), the same rule both sitemaps apply, so
+             neither submits a URL this tag then refuses. It covers an unverified schedule (above)
+             and demo content: the /examples showcase and Springfield schedules exist to be LOOKED
+             AT, not to rank. Googlebot was spending a quarter of its crawl on them -
+             countyfairgrounds, weekendyogaretreat, battleofthebands, karateclub and painting alone
+             took ~165k of 637k requests in 89 days, several out-crawling the tenant that earns 44%
+             of the property's clicks - and thousands of thin fabricated event pages are a
+             site-wide quality signal. They stay fully viewable; only the indexing goes. --}}
+        @if ($noIndex || request()->embed || request('graphic') || (isset($event) && $event->exists && ($event->is_private || $event->is_draft)) || ($role->exists && ! $role->isIndexableHost()))
             <meta name="robots" content="noindex, nofollow">
         @else
             <meta name="robots" content="index, follow">

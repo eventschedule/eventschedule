@@ -189,7 +189,8 @@ class UnclaimedSchedulePageTest extends TestCase
         $placeholder->email_verified_at = now();
         $placeholder->saveQuietly();
 
-        $this->get($this->url($placeholder))->assertRedirect();
+        // Unpublished, with nobody behind it to send into the app: the schedule's 404.
+        $this->get($this->url($placeholder))->assertNotFound();
         $this->assertSame('', $placeholder->fresh()->getClaimUrl());
     }
 
@@ -218,16 +219,25 @@ class UnclaimedSchedulePageTest extends TestCase
         $this->get($this->url($placeholder).'?graphic=1')->assertRedirect();
     }
 
-    public function test_a_schedule_somebody_runs_but_never_verified_still_redirects(): void
+    public function test_a_schedule_somebody_runs_but_never_verified_is_not_a_claim_page(): void
     {
         // The population isClaimed() and hasRealOwner() disagree on. Printing "is this you?" on it
         // would be offering a stranger a page its owner is sitting in.
         $owner = $this->createOwner();
-        $unverified = $this->createRole($owner, 'venue', ['email_verified_at' => null]);
+        $unverified = $this->createRole($owner, 'venue', ['email_verified_at' => null, 'name' => 'Not Yet Live']);
 
         $this->assertFalse($unverified->isClaimed());
         $this->assertTrue($unverified->hasRealOwner());
-        $this->get($this->url($unverified))->assertRedirect();
+
+        // A visitor gets the schedule's 404. It used to be a 302 to the login page, which a crawler
+        // files as a soft 404 against the app host.
+        $this->get($this->url($unverified))
+            ->assertNotFound()
+            ->assertSee(__('messages.guest_not_found_heading'))
+            ->assertDontSee(__('messages.claim_strip_cta'));
+
+        // Its owner is still sent into the app, where verifying is one step away.
+        $this->actingAs($owner)->get($this->url($unverified))->assertRedirect(app_url());
     }
 
     public function test_an_unclaimed_act_appears_on_the_event_that_listed_it(): void
@@ -302,9 +312,10 @@ class UnclaimedSchedulePageTest extends TestCase
         $this->assertCount(1, $tags[0], 'the act\'s picture belongs in its card, not also above it');
     }
 
-    public function test_a_deleted_placeholder_still_redirects(): void
+    public function test_a_deleted_placeholder_is_gone(): void
     {
-        $this->get($this->url($this->placeholder(['is_deleted' => true])))->assertRedirect();
+        // No claim page for a deleted row: it 404s like any deleted schedule, ahead of the split.
+        $this->get($this->url($this->placeholder(['is_deleted' => true])))->assertNotFound();
     }
 
     public function test_the_claim_button_is_absent_when_there_is_nothing_to_verify(): void

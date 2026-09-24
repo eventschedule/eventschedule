@@ -1,4 +1,5 @@
-<x-app-guest-layout :role="$role" :page-title="__('messages.gift_card')">
+{{-- noindex: a form, not content. Every schedule has one, and none is worth a search result. --}}
+<x-app-guest-layout :role="$role" :page-title="__('messages.gift_card')" :no-index="true">
 
 @php
     $accentColor = $role->accent_color ?? '#4E81FA';

@@ -156,14 +156,41 @@ class DemoDiscoveryExclusionTest extends TestCase
         $this->assertSame([], $this->searchSchedules('Springfield'));
     }
 
-    public function test_the_demo_subdomain_prefix_stays_excluded(): void
+    /**
+     * The Springfield rows DemoService seeds on demo-* subdomains stay out without a subdomain
+     * arm: it creates every one of them owned by the demo user and wearing DEMO_EMAIL, so the
+     * owner and contact arms catch them.
+     */
+    public function test_the_seeded_demo_prefixed_schedules_stay_excluded(): void
     {
-        $this->createRole($this->createOwner(), 'venue', [
+        $demoUser = User::factory()->create([
+            'email' => DemoService::DEMO_EMAIL,
+            'email_verified_at' => now(),
+        ]);
+
+        // As DemoService::createDemoVenues() writes it.
+        $this->createRole($demoUser, 'venue', [
             'name' => 'Moes Tavern Jazz',
             'subdomain' => 'demo-moestavern',
+            'email' => DemoService::DEMO_EMAIL,
         ]);
 
         $this->assertSame([], $this->searchSchedules('Moes'));
+    }
+
+    /**
+     * What the dropped `demo-%` arm used to catch as well: generateSubdomain() hands a real "Demo
+     * Night" the subdomain demo-night, and the arm hid it from search - and, now that the same
+     * predicate decides indexing, would have de-indexed it.
+     */
+    public function test_a_real_schedule_on_a_demo_prefixed_subdomain_is_not_demo_content(): void
+    {
+        $this->createRole($this->createOwner(), 'venue', [
+            'name' => 'Demo Night Comedy',
+            'subdomain' => 'demo-night',
+        ]);
+
+        $this->assertSame(['Demo Night Comedy'], $this->searchSchedules('Demo Night'));
     }
 
     public function test_a_schedule_owned_by_the_demo_user_stays_excluded(): void

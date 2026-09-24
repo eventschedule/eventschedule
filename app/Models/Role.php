@@ -1572,7 +1572,13 @@ class Role extends Model implements MustVerifyEmail
      * `roles.email = ?` would therefore silently drop every schedule with NO contact email from its
      * own search results, including one with a verified phone, which publicScheduleFilter()
      * explicitly admits. <=> is null-safe equality (MySQL only, which this app already is) and is
-     * still index-usable; the LIKE arm carries an explicit IS NOT NULL. EXISTS never returns NULL.
+     * still index-usable. EXISTS never returns NULL.
+     *
+     * There is no `demo-%` subdomain arm any more. The Springfield rows DemoService seeds on those
+     * subdomains are owned by the demo user and carry DEMO_EMAIL as their contact address, so the
+     * email and owner arms already catch every one of them - while generateSubdomain() hands
+     * `demo-night` to a real "Demo Night", which that arm hid from search and, through
+     * isIndexableHost(), would have de-indexed.
      *
      * Deliberately NOT gated on config('app.hosted') the way is_demo_role() is. A gate would make
      * tests and production disagree about the same row, and the surfaces that call this are
@@ -1580,19 +1586,59 @@ class Role extends Model implements MustVerifyEmail
      */
     public function scopeDemoContent($query)
     {
+        return static::constrainDemoContent($query);
+    }
+
+    /**
+     * scopeDemoContent() for any query that has `roles` in it, not only a Role builder: the sitemap
+     * applies it inside an event_role join. Columns are qualified for that reason.
+     */
+    public static function constrainDemoContent($query)
+    {
         return $query->where(function ($q) {
             $q->whereRaw('roles.email <=> ?', [\App\Services\DemoService::DEMO_EMAIL])
                 ->orWhereRaw('roles.subdomain <=> ?', [\App\Services\DemoService::DEMO_ROLE_SUBDOMAIN])
-                ->orWhere(fn ($s) => $s->whereNotNull('roles.subdomain')
-                    ->where('roles.subdomain', 'like', 'demo-%'))
-                // A correlated subquery rather than a join, matching
-                // SitemapController::scopeToDemoSchedules(): these queries scan, and reading
+                // A correlated subquery rather than a join: these queries scan, and reading
                 // $role->user per row would be an N+1 across every schedule in the database.
                 ->orWhereExists(fn ($u) => $u->select(DB::raw(1))
                     ->from('users')
                     ->whereColumn('users.id', 'roles.user_id')
                     ->where('users.email', \App\Services\DemoService::DEMO_EMAIL));
         });
+    }
+
+    /**
+     * In-memory mirror of scopeDemoContent(). Keep the two in sync: RoleIndexabilityPredicateTest
+     * holds them to the same answer for every arm.
+     *
+     * $demoOwnerId is the demo user's id, for a caller that walks many schedules: it turns the
+     * owner arm into an id comparison instead of a users query per row. Pass 0 when there is no
+     * demo user, which matches no row. Null, the default, reads $this->user instead - one query,
+     * the one is_demo_role() has always cost a guest page.
+     */
+    public function isDemoContent(?int $demoOwnerId = null): bool
+    {
+        if (self::equalsAsCollated($this->email, \App\Services\DemoService::DEMO_EMAIL)
+            || self::equalsAsCollated($this->subdomain, \App\Services\DemoService::DEMO_ROLE_SUBDOMAIN)) {
+            return true;
+        }
+
+        if (! $this->user_id) {
+            return false;
+        }
+
+        return $demoOwnerId !== null
+            ? (int) $this->user_id === $demoOwnerId
+            : self::equalsAsCollated($this->user?->email, \App\Services\DemoService::DEMO_EMAIL);
+    }
+
+    /**
+     * String equality the way the utf8mb4_unicode_ci columns compare, so the PHP predicates agree
+     * with their SQL twins: case-insensitive, and blind to trailing spaces (a PAD SPACE collation).
+     */
+    private static function equalsAsCollated(?string $value, string $expected): bool
+    {
+        return $value !== null && strcasecmp(rtrim($value, ' '), $expected) === 0;
     }
 
     /**
@@ -1775,6 +1821,76 @@ class Role extends Model implements MustVerifyEmail
                 $q->whereNotNull('email_verified_at')
                     ->orWhereNotNull('phone_verified_at');
             });
+    }
+
+    /**
+     * Whether the schedule has an owner and a contact channel that was both given and verified:
+     * an email with email_verified_at, or a phone with phone_verified_at.
+     *
+     * Stricter than isClaimed(), which reads only the dates. A verified_at with no address beside
+     * it is not a channel anybody can be reached on, and the guest layout has never indexed such a
+     * page. This is that rule, lifted out of the layout so the sitemap asks the same question -
+     * it used to ask isClaimed()'s, and submitted 31 event URLs whose pages answered noindex.
+     * federationEligible() spells the same condition out for its own reasons.
+     */
+    public function hasVerifiedContact(): bool
+    {
+        return (bool) $this->user_id
+            && ((filled($this->email) && $this->email_verified_at !== null)
+                || (filled($this->phone) && $this->phone_verified_at !== null));
+    }
+
+    /**
+     * hasVerifiedContact() in SQL, for any query with `roles` in it. `<> ''` because an empty
+     * contact is no contact, which filled() also says.
+     */
+    public static function constrainVerifiedContact($query)
+    {
+        return $query->whereNotNull('roles.user_id')
+            ->where(function ($q) {
+                $q->where(fn ($e) => $e->whereNotNull('roles.email')
+                    ->where('roles.email', '<>', '')
+                    ->whereNotNull('roles.email_verified_at'))
+                    ->orWhere(fn ($p) => $p->whereNotNull('roles.phone')
+                        ->where('roles.phone', '<>', '')
+                        ->whereNotNull('roles.phone_verified_at'));
+            });
+    }
+
+    /**
+     * Whether this schedule's guest pages may be indexed: the one rule the page's robots meta
+     * (layouts/app-guest.blade.php) and both sitemaps apply, so the sitemap never submits a URL
+     * the page then refuses. It exists, is not deleted, has a verified contact, and is not demo
+     * content.
+     *
+     * Not is_demo_role(), which asks about the demo ACCOUNT and has ~70 call sites (free Pro, ad
+     * suppression, suppressed email) - see scopeDemoContent() for why the two differ.
+     *
+     * $demoOwnerId: see isDemoContent().
+     */
+    public function isIndexableHost(?int $demoOwnerId = null): bool
+    {
+        return $this->exists
+            && ! $this->is_deleted
+            && $this->hasVerifiedContact()
+            && ! $this->isDemoContent($demoOwnerId);
+    }
+
+    /**
+     * isIndexableHost() in SQL, for any query with `roles` in it - including the event_role join
+     * the sitemap binds it into, so it holds for the same pivot row as is_accepted. Keep the two
+     * in sync: RoleIndexabilityPredicateTest holds them to the same answer.
+     */
+    public static function constrainIndexableHost($query)
+    {
+        return $query->where('roles.is_deleted', false)
+            ->where(fn ($q) => static::constrainVerifiedContact($q))
+            ->whereNot(fn ($q) => static::constrainDemoContent($q));
+    }
+
+    public function scopeIndexableHost($query)
+    {
+        return static::constrainIndexableHost($query);
     }
 
     /**

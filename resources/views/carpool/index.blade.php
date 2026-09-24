@@ -1,4 +1,5 @@
-<x-app-guest-layout :role="$role" :fonts="$fonts" :page-title="($event ? $event->translatedName() . ' - ' : '') . __('messages.carpool')">
+{{-- noindex: a ride board for one event, not content worth a search result. --}}
+<x-app-guest-layout :role="$role" :fonts="$fonts" :page-title="($event ? $event->translatedName() . ' - ' : '') . __('messages.carpool')" :no-index="true">
 
 <x-slot name="head">
     <script src="{{ asset('js/vue.global.prod.js') }}" {!! nonce_attr() !!}></script>

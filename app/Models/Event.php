@@ -256,6 +256,9 @@ class Event extends Model
      */
     public const DEFAULT_COUPON_DISCOUNT_TYPE = 'fixed';
 
+    /** How long an event stays in the sitemaps after it ends. See constrainSitemapWindow(). */
+    public const SITEMAP_GRACE_DAYS = 30;
+
     /**
      * Columns that decide whether - or how - an event shows on the homepage poster wall, which
      * MarketingController caches for `marketing.wall_cache_seconds`.
@@ -1681,6 +1684,100 @@ class Event extends Model
                     ->orWhere('duration', '<', 24)
                     ->orWhereRaw('DATE_ADD(starts_at, INTERVAL duration HOUR) < ?', [$date]);
             });
+    }
+
+    /** See constrainSitemapWindow(). */
+    public function scopeInSitemapWindow($query, ?Carbon $nowUtc = null)
+    {
+        return static::constrainSitemapWindow($query, $nowUtc ?? Carbon::now('UTC'), $this->getTable());
+    }
+
+    /**
+     * Constrain an events query to the rows the sitemaps still list: a one-off event until
+     * SITEMAP_GRACE_DAYS after it ends, a recurring series while it is still running.
+     *
+     * Sitemap hygiene only. The pages stay indexable - an old event still answers "index, follow" -
+     * the sitemap just stops asking Google to recrawl them: 86% of the event URLs it submitted were
+     * past, 966 of them by more than a month.
+     *
+     * $nowUtc bounds a grace period and nothing else. It never decides which DAY an event falls on
+     * (that is the schedule's zone), so a UTC day either way is immaterial.
+     *
+     * No JSON and no window functions: selfhost promises MySQL 5.7. That leaves two things SQL can
+     * only bound, and both are bounded so that a running series is never dropped:
+     *  - recurring_include_dates bypass the pattern and the end in matchesDate(), and their dates
+     *    are unreadable without JSON_*, so a series that has any is kept.
+     *  - an 'after_events' series ends on its Nth occurrence, which SQL cannot enumerate. The bound
+     *    is starts_at plus N + E periods, where a period is the longest gap between two occurrences
+     *    of that frequency and E counts the excluded dates, each of which pushes the Nth occurrence
+     *    one period later (countOccurrences() subtracts them). E is read off the JSON's length: a
+     *    stored list of n Y-m-d strings is 13n + 1 characters, and any looser encoding only
+     *    overestimates.
+     *
+     * '0000000' never occurs on a weekly or every_n_weeks series, whose matchesFrequency() reads the
+     * days, so that series is over unless it has include dates. The other frequencies ignore
+     * days_of_week (saveEvent() writes '1111111' for them).
+     *
+     * $table names the events table in $query, for a caller that reaches it through a join.
+     */
+    public static function constrainSitemapWindow($query, Carbon $nowUtc, string $table = 'events')
+    {
+        if (! preg_match('/^[A-Za-z_][A-Za-z0-9_]*$/', $table)) {
+            throw new \InvalidArgumentException('Not a table name: '.$table);
+        }
+
+        $cut = $nowUtc->copy()->setTimezone('UTC')->subDays(self::SITEMAP_GRACE_DAYS);
+        $cutAt = $cut->format('Y-m-d H:i:s');
+        $cutDate = $cut->format('Y-m-d');
+        $c = fn (string $column) => $table.'.'.$column;
+
+        return $query->where(fn ($window) => $window
+            // One-off: until the grace period after it ends. Only an event of a day or more ends
+            // meaningfully later than it starts - the scopeUpcomingOrOngoing() shape.
+            ->where(fn ($oneOff) => $oneOff->whereNull($c('days_of_week'))
+                ->where(fn ($ends) => $ends->where($c('starts_at'), '>=', $cutAt)
+                    ->orWhere(fn ($long) => $long->where($c('duration'), '>=', 24)
+                        ->whereRaw("DATE_ADD({$table}.starts_at, INTERVAL {$table}.duration HOUR) >= ?", [$cutAt]))))
+            // A series: while it has an occurrence to come, or had one within the grace period.
+            ->orWhere(fn ($series) => $series->whereNotNull($c('days_of_week'))
+                ->where(fn ($running) => $running
+                    ->where(fn ($include) => $include->whereNotNull($c('recurring_include_dates'))
+                        ->whereNotIn($c('recurring_include_dates'), ['', '[]']))
+                    ->orWhere(fn ($pattern) => $pattern
+                        ->where(fn ($days) => $days->where($c('days_of_week'), '<>', '0000000')
+                            ->orWhereIn($c('recurring_frequency'), ['daily', 'monthly_date', 'monthly_weekday', 'yearly']))
+                        ->where(fn ($end) => $end->whereNull($c('recurring_end_type'))
+                            ->orWhereNotIn($c('recurring_end_type'), ['on_date', 'after_events'])
+                            // matchesDate() tests the value for truthiness: '' and '0' mean no end.
+                            ->orWhereNull($c('recurring_end_value'))
+                            ->orWhereIn($c('recurring_end_value'), ['', '0'])
+                            // A Y-m-d, so it compares as a string. Its last occurrence is on or
+                            // before it.
+                            ->orWhere(fn ($onDate) => $onDate->where($c('recurring_end_type'), 'on_date')
+                                ->where($c('recurring_end_value'), '>=', $cutDate))
+                            ->orWhere(fn ($after) => $after->where($c('recurring_end_type'), 'after_events')
+                                ->whereRaw(self::afterEventsEndSql($table).' >= ?', [$cutAt])))))));
+    }
+
+    /**
+     * SQL for the latest date an 'after_events' series can still occur on. See
+     * constrainSitemapWindow(). Capped at a century: DATE_ADD past 9999-12-31 is NULL, which would
+     * read as "ended" for a series that in practice never does.
+     */
+    private static function afterEventsEndSql(string $table): string
+    {
+        $occurrences = "CAST({$table}.recurring_end_value AS UNSIGNED)"
+            ." + COALESCE(FLOOR(CHAR_LENGTH({$table}.recurring_exclude_dates) / 13), 0)";
+
+        $period = "CASE {$table}.recurring_frequency"
+            ." WHEN 'daily' THEN 1"
+            ." WHEN 'monthly_date' THEN 31"
+            ." WHEN 'monthly_weekday' THEN 35"
+            ." WHEN 'yearly' THEN 366"
+            ." WHEN 'every_n_weeks' THEN 7 * GREATEST(COALESCE({$table}.recurring_interval, 2), 1)"
+            .' ELSE 7 END';
+
+        return "DATE_ADD({$table}.starts_at, INTERVAL LEAST(({$occurrences}) * ({$period}), 36600) DAY)";
     }
 
     /**
