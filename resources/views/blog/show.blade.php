@@ -8,7 +8,9 @@
          count; SitemapController leaves it out of sitemap-blog-*.xml to match. --}}
     <x-slot name="robots">noindex, follow</x-slot>
     @endif
-    <x-slot name="canonical">{{ url()->current() }}</x-slot>
+    {{-- blog_url() and the stored slug, not url()->current(): slugs match case-insensitively, so
+         /For-Solo-Artists rendered this post too and called itself the canonical. --}}
+    <x-slot name="canonical">{{ blog_url('/'.$post->slug) }}</x-slot>
     @if($post->tags)
     @endif
     <x-slot name="breadcrumbTitle">{{ $post->title }}</x-slot>
@@ -70,7 +72,7 @@
             'dateModified' => ($post->updated_at ?: $post->published_at)?->toISOString() ?: '',
             'mainEntityOfPage' => [
                 '@type' => 'WebPage',
-                '@id' => url()->current(),
+                '@id' => blog_url('/'.$post->slug),
             ],
             'speakable' => [
                 '@type' => 'SpeakableSpecification',

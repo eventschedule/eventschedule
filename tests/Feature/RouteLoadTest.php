@@ -8,14 +8,13 @@ use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Process;
 use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
+use Tests\Feature\Concerns\ForcesEnvironment;
 use Tests\TestCase;
 
 class RouteLoadTest extends TestCase
 {
+    use ForcesEnvironment;
     use RefreshDatabase;
-
-    /** Env values as they stood before forceEnv() overrode them, keyed by variable name. */
-    private array $originalEnv = [];
 
     private function createUserWithSchedule(string $type = 'talent', string $subdomain = 'testtalent'): array
     {
@@ -569,55 +568,5 @@ class RouteLoadTest extends TestCase
 
             $connection->disconnect();
         }
-    }
-
-    /**
-     * Pin an env value ahead of every layer Laravel's Env repository reads.
-     *
-     * The repository queries $_SERVER, then $_ENV, then getenv(), so a putenv() alone loses to
-     * anything phpunit.xml or the .env loader already wrote - which is why the whole $_SERVER
-     * mirror in tests/bootstrap.php exists. Original values are captured for tearDown(), because
-     * these decide which half of routes/web.php the NEXT test class registers.
-     */
-    private function forceEnv(string $key, string $value): void
-    {
-        if (! array_key_exists($key, $this->originalEnv)) {
-            $this->originalEnv[$key] = [
-                'server' => $_SERVER[$key] ?? null,
-                'env' => $_ENV[$key] ?? null,
-                'getenv' => getenv($key),
-            ];
-        }
-
-        $_SERVER[$key] = $value;
-        $_ENV[$key] = $value;
-        putenv($key.'='.$value);
-    }
-
-    protected function tearDown(): void
-    {
-        foreach ($this->originalEnv as $key => $original) {
-            if ($original['server'] === null) {
-                unset($_SERVER[$key]);
-            } else {
-                $_SERVER[$key] = $original['server'];
-            }
-
-            if ($original['env'] === null) {
-                unset($_ENV[$key]);
-            } else {
-                $_ENV[$key] = $original['env'];
-            }
-
-            if ($original['getenv'] === false) {
-                putenv($key);
-            } else {
-                putenv($key.'='.$original['getenv']);
-            }
-        }
-
-        $this->originalEnv = [];
-
-        parent::tearDown();
     }
 }

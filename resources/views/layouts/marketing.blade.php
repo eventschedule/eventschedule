@@ -67,7 +67,10 @@
         if (isset($socialImage) && str_starts_with($socialImage, 'http')) {
             $ogImage = $socialImage;
         } else {
-            $pathSlug = trim(request()->path(), '/') ?: 'home';
+            // The blog by route name, as the breadcrumb does: on the blog host the index's path
+            // is "/" (which read as the homepage) and a post's is its bare slug (which could match
+            // an unrelated section, pricing-* reading as /pricing).
+            $pathSlug = request()->routeIs('blog.index', 'blog.show') ? 'blog' : (trim(request()->path(), '/') ?: 'home');
             $pathSlug = str_replace('/', '-', $pathSlug);
             // Fall back from an exact page image to a section image (e.g. docs-getting-started -> docs), then home.
             $section = explode('-', $pathSlug)[0];
@@ -186,7 +189,9 @@
     </script>
     {{ $structuredData ?? '' }}
 
-    @if (!request()->is('/') && !request()->is('') && ! ($errorPage ?? false))
+    {{-- Every page but the homepage. The blog index is named because on the blog host its path
+         is "/" too. --}}
+    @if ((request()->routeIs('blog.index') || (! request()->is('/') && ! request()->is(''))) && ! ($errorPage ?? false))
     <!-- BreadcrumbList Schema for subpages -->
     @php
         // A title reaches this as a RENDERED slot, so it is already HTML-escaped and may hold a
@@ -202,10 +207,24 @@
         $selfUrl = trim((string) ($canonical ?? $basePath));
         $pageName = $crumbName($breadcrumbTitle ?? $title ?? 'Page');
 
+        // The section crumbs are absolute on config('app.url'), never url(): the blog is a second
+        // host, and url('/use-cases') built on blog.eventschedule.com named a page that does not
+        // exist there. That is how 144 of 213 posts shipped a 404 in their BreadcrumbList.
+        $siteUrl = rtrim((string) config('app.url'), '/');
+
         $breadcrumbs = [['name' => 'Home', 'url' => config('app.url')]];
         $path = request()->path();
         $skipBreadcrumb = false;
-        if ($path === 'docs') {
+        // Blog pages by ROUTE NAME, never by path. On the hosted blog host a post's path is its
+        // bare slug, so a path test never saw the blog at all, and a post slugged for-* or
+        // *-alternative fell into the marketing branches below. Both registrations (the blog host
+        // and the path-based /blog) use these names.
+        if (request()->routeIs('blog.index')) {
+            $breadcrumbs[] = ['name' => 'Blog', 'url' => blog_url()];
+        } elseif (request()->routeIs('blog.show')) {
+            $breadcrumbs[] = ['name' => 'Blog', 'url' => blog_url()];
+            $breadcrumbs[] = ['name' => $pageName, 'url' => $selfUrl];
+        } elseif ($path === 'docs') {
             $breadcrumbs[] = ['name' => 'Documentation', 'url' => $selfUrl];
         } elseif (str_starts_with($path, 'docs/')) {
             // Every page under /docs/ is an <x-docs-page> and renders its own
@@ -214,24 +233,19 @@
             // above this branch and so emitted a second one.
             $skipBreadcrumb = true;
         } elseif (str_starts_with($path, 'features/')) {
-            $breadcrumbs[] = ['name' => 'Features', 'url' => url('/features')];
+            $breadcrumbs[] = ['name' => 'Features', 'url' => $siteUrl.'/features'];
             $breadcrumbs[] = ['name' => $pageName, 'url' => $selfUrl];
         } elseif (str_starts_with($path, 'for-')) {
-            $breadcrumbs[] = ['name' => 'Use Cases', 'url' => url('/use-cases')];
+            $breadcrumbs[] = ['name' => 'Use Cases', 'url' => $siteUrl.'/use-cases'];
             $breadcrumbs[] = ['name' => $pageName, 'url' => $selfUrl];
         } elseif (str_ends_with($path, '-alternative')) {
-            $breadcrumbs[] = ['name' => 'Compare', 'url' => url('/compare')];
+            $breadcrumbs[] = ['name' => 'Compare', 'url' => $siteUrl.'/compare'];
             $breadcrumbs[] = ['name' => $pageName, 'url' => $selfUrl];
         } elseif (str_ends_with($path, '-replacement')) {
-            $breadcrumbs[] = ['name' => 'Replace', 'url' => url('/replace')];
+            $breadcrumbs[] = ['name' => 'Replace', 'url' => $siteUrl.'/replace'];
             $breadcrumbs[] = ['name' => $pageName, 'url' => $selfUrl];
-        } elseif (str_starts_with($path, 'blog/')) {
-            $breadcrumbs[] = ['name' => 'Blog', 'url' => blog_url()];
-            $breadcrumbs[] = ['name' => $pageName, 'url' => $selfUrl];
-        } elseif ($path === 'blog') {
-            $breadcrumbs[] = ['name' => 'Blog', 'url' => $selfUrl];
         } elseif (in_array($path, ['stripe', 'paypal', 'google-calendar', 'outlook-calendar', 'caldav', 'invoiceninja'])) {
-            $breadcrumbs[] = ['name' => 'Integrations', 'url' => url('/features/integrations')];
+            $breadcrumbs[] = ['name' => 'Integrations', 'url' => $siteUrl.'/features/integrations'];
             $breadcrumbs[] = ['name' => $pageName, 'url' => $selfUrl];
         } elseif ($path === 'use-cases') {
             $breadcrumbs[] = ['name' => 'Use Cases', 'url' => $selfUrl];
