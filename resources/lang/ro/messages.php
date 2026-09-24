@@ -2597,6 +2597,7 @@ return [
     'ai_style_replace_warning' => 'Aceasta va înlocui valorile curente pentru elementele bifate.',
     'ai_style_generation_failed' => 'Generarea stilului a eșuat. Te rugăm să încerci din nou.',
     'ai_style_image_partial_error' => 'Unele imagini nu au putut fi generate. Valorile de stil text au fost aplicate.',
+    'ai_image_not_applied' => 'Modificările au fost salvate, dar imaginea generată nu a putut fi folosită. Te rugăm să o generezi din nou.',
     'upgrade_feature_description_ai_style' => 'Folosește AI pentru a genera automat un branding și stil coerent pentru programul tău.',
     'ai_details_generator' => 'Detalii cu AI',
     'ai_details_description' => 'Generează detalii folosind AI pe baza informațiilor tale existente.',

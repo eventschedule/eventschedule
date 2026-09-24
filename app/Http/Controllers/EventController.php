@@ -46,6 +46,7 @@ use App\Services\MetaAdsService;
 use App\Services\OneSignalService;
 use App\Services\UsageTrackingService;
 use App\Services\WebhookService;
+use App\Utils\AiImageIssuance;
 use App\Utils\ColorUtils;
 use App\Utils\GeminiUtils;
 use App\Utils\HoneypotUtils;
@@ -1211,6 +1212,13 @@ class EventController extends Controller
                 ? __('messages.saved_without_notifying')
                 : __('messages.event_updated'));
 
+        // Instead of the success toast, which the layout would show in its place: the event saved,
+        // and the flyer did not (EventRepo::$aiImageRejected).
+        if ($this->eventRepo->aiImageRejected) {
+            return redirect(route('role.view_admin', $data))
+                ->with('error', __('messages.ai_image_not_applied'));
+        }
+
         return redirect(route('role.view_admin', $data))
             ->with('message', $message);
     }
@@ -1711,6 +1719,12 @@ class EventController extends Controller
             'month' => $date->month,
             'year' => $date->year,
         ];
+
+        // As in update(): the event is created, without the flyer the save refused.
+        if ($this->eventRepo->aiImageRejected) {
+            return redirect(route('role.view_admin', $data))
+                ->with('error', __('messages.ai_image_not_applied'));
+        }
 
         return redirect(route('role.view_admin', $data))
             ->with('message', __('messages.event_created'));
@@ -2358,8 +2372,9 @@ class EventController extends Controller
         $styleInstructions = $request->input('style_instructions');
         $customPrompt = $request->input('custom_prompt');
         $roleId = $role->id;
+        $userId = auth()->id();
 
-        dispatch(function () use ($requestId, $event, $styleInstructions, $role, $customPrompt, $eventId, $roleId, $subdomain) {
+        dispatch(function () use ($requestId, $event, $styleInstructions, $role, $customPrompt, $eventId, $roleId, $userId, $subdomain) {
             set_time_limit(120);
 
             try {
@@ -2376,6 +2391,10 @@ class EventController extends Controller
                 }
 
                 $filename = ImageUtils::saveImageData($imageData, 'generated_flyer.png', 'flyer_');
+
+                // Keyed to the schedule in the URL, which is the one EventRepo::saveEvent() checks
+                // the posted ai_flyer_image against; the event may not exist yet.
+                AiImageIssuance::record($filename, $roleId, $userId);
 
                 UsageTrackingService::track(UsageTrackingService::GEMINI_GENERATE_FLYER, $roleId);
 

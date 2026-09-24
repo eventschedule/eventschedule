@@ -2564,6 +2564,7 @@ return [
     'ai_style_replace_warning' => 'Isso substituirá seus valores atuais para os itens marcados.',
     'ai_style_generation_failed' => 'Falha ao gerar o estilo. Por favor, tente novamente.',
     'ai_style_image_partial_error' => 'Algumas imagens não puderam ser geradas. Os valores de estilo de texto foram aplicados.',
+    'ai_image_not_applied' => 'Suas alterações foram salvas, mas não foi possível usar a imagem gerada. Por favor, gere-a novamente.',
     'upgrade_feature_description_ai_style' => 'Use IA para gerar automaticamente uma marca e estilo coerentes para sua agenda.',
     'ai_details_generator' => 'Detalhes com IA',
     'ai_details_description' => 'Gere detalhes usando IA com base nas suas informações existentes.',

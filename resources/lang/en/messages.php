@@ -2935,6 +2935,7 @@ return [
     'ai_style_replace_warning' => 'This will replace your current values for the checked items.',
     'ai_style_generation_failed' => 'Failed to generate style. Please try again.',
     'ai_style_image_partial_error' => 'Some images could not be generated. Text style values have been applied.',
+    'ai_image_not_applied' => 'Your changes were saved, but the generated image could not be used. Please generate it again.',
     'upgrade_feature_description_ai_style' => 'Use AI to automatically generate cohesive branding and style for your schedule.',
     'ai_details_generator' => 'AI Details',
     'ai_details_description' => 'Generate details using AI based on your existing information.',

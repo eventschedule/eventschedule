@@ -19,10 +19,12 @@ use App\Services\EventChangeNotifier;
 use App\Services\SmsService;
 use App\Services\TicketVolumeDiscount;
 use App\Services\WebhookService;
+use App\Utils\AiImageIssuance;
 use App\Utils\ColorUtils;
 use App\Utils\GeminiUtils;
 use App\Utils\ImageUtils;
 use App\Utils\SlugPatternUtils;
+use App\Utils\SponsorUtils;
 use App\Utils\UrlUtils;
 use Carbon\Carbon;
 use Illuminate\Database\QueryException;
@@ -39,6 +41,12 @@ class EventRepo
 
     /** How many of lastNotifiedCount are interest-list rows rather than ticket holders. */
     public ?int $lastNotifiedInterestCount = null;
+
+    /**
+     * Whether the most recent saveEvent() call ignored a posted ai_flyer_image, which was not a
+     * name issued to the schedule it saved under (AiImageIssuance). Drives the AP toast.
+     */
+    public bool $aiImageRejected = false;
 
     /**
      * Resolve the default category id to apply to a new event on this schedule.
@@ -376,6 +384,8 @@ class EventRepo
      */
     public function saveEvent($currentRole, $request, $event = null, $followNewRoles = true, ?string $timezoneOverride = null, bool $allowExistingVenueClaim = false)
     {
+        $this->aiImageRejected = false;
+
         $this->validatePassConfiguration($request);
 
         $user = $request->user();
@@ -1157,9 +1167,10 @@ class EventRepo
                 $oldSponsors = json_decode($event->getOriginal('sponsor_logos') ?? '[]', true) ?: [];
                 $oldLogoFiles = array_filter(array_column($oldSponsors, 'logo'));
 
-                // Process existing sponsors (reordered via drag-and-drop)
+                // Process existing sponsors (reordered via drag-and-drop). The browser builds this
+                // list, so a logo in it is kept only when this event already holds it.
                 $existingSponsorsJson = $request->input('existing_event_sponsors', '[]');
-                $sponsors = json_decode($existingSponsorsJson, true) ?: [];
+                $sponsors = SponsorUtils::keepStoredLogos(json_decode($existingSponsorsJson, true), $oldLogoFiles);
 
                 // Process new sponsor uploads
                 $newFiles = $request->file('event_sponsor_logos', []);
@@ -1538,18 +1549,30 @@ class EventRepo
             $event->save();
         }
 
+        // The name EventController::generateFlyer() wrote, posted back by the form. It is stored and
+        // the flyer it replaces deleted, so it has to be a name issued to the schedule this event
+        // is saved under (AiImageIssuance). The shape check alone accepted any PNG flyer, which an
+        // uploaded one is too, and refused every AI flyer saved as a JPEG or WebP. Anything else is
+        // ignored and deletes nothing; the name already stored is the same form posted again.
         if (! $request->hasFile('flyer_image') && $request->input('ai_flyer_image')) {
             $aiFilename = $request->input('ai_flyer_image');
-            if (preg_match('/^flyer_[a-z0-9]+\.png$/', $aiFilename)) {
-                if ($event->flyer_image_url) {
-                    $path = $event->getAttributes()['flyer_image_url'];
-                    if (config('filesystems.default') == 'local') {
-                        $path = 'public/'.$path;
+
+            if ($aiFilename !== ($event->getAttributes()['flyer_image_url'] ?? null)) {
+                $aiFilename = $currentRole ? AiImageIssuance::accept('flyer', $aiFilename, $currentRole) : null;
+
+                if ($aiFilename) {
+                    if ($event->flyer_image_url) {
+                        $path = $event->getAttributes()['flyer_image_url'];
+                        if (config('filesystems.default') == 'local') {
+                            $path = 'public/'.$path;
+                        }
+                        Storage::delete($path);
                     }
-                    Storage::delete($path);
+                    $event->flyer_image_url = $aiFilename;
+                    $event->save();
+                } else {
+                    $this->aiImageRejected = true;
                 }
-                $event->flyer_image_url = $aiFilename;
-                $event->save();
             }
         }
 

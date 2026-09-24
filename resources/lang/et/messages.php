@@ -2580,6 +2580,7 @@ return [
     'ai_style_replace_warning' => 'See asendab valitud elementide praegused väärtused.',
     'ai_style_generation_failed' => 'Stiili genereerimine ebaõnnestus. Palun proovi uuesti.',
     'ai_style_image_partial_error' => 'Mõnda pilti ei õnnestunud genereerida. Teksti stiili väärtused on rakendatud.',
+    'ai_image_not_applied' => 'Muudatused salvestati, kuid genereeritud pilti ei õnnestunud kasutada. Palun genereeri see uuesti.',
     'upgrade_feature_description_ai_style' => 'Kasuta tehisintellekti, et automaatselt genereerida ühtne bränding ja stiil oma ajakavale.',
     'ai_details_generator' => 'AI üksikasjad',
     'ai_details_description' => 'Genereeri üksikasjad tehisintellekti abil oma olemasoleva teabe põhjal.',

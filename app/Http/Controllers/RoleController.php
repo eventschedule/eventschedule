@@ -45,6 +45,7 @@ use App\Services\ScheduleDeletionService;
 use App\Services\ScheduleTransferService;
 use App\Services\SmsService;
 use App\Services\UsageTrackingService;
+use App\Utils\AiImageIssuance;
 use App\Utils\ColorUtils;
 use App\Utils\DateUtils;
 use App\Utils\GeminiUtils;
@@ -54,6 +55,7 @@ use App\Utils\OpenAIUtils;
 use App\Utils\PhoneUtils;
 use App\Utils\QrCodeUtils;
 use App\Utils\SlugPatternUtils;
+use App\Utils\SponsorUtils;
 use App\Utils\UrlUtils;
 use App\Utils\VenueUtils;
 use App\Utils\VideoUtils;
@@ -5012,10 +5014,16 @@ class RoleController extends Controller
             $request->merge(['custom_css' => $role->custom_css]);
         }
 
+        // sponsor_logos is fillable, but no form posts it on any plan: the sponsor block at the end
+        // of this method rebuilds it from existing_sponsors, and deletes every logo the rebuilt list
+        // drops from the stored one. A posted sponsor_logos was filled and saved before that block
+        // ran, so it became the stored list, and any filename in it - another schedule's logo - was
+        // deleted as an orphan.
+        $request->merge(['sponsor_logos' => $role->sponsor_logos]);
+
         // Guard sponsor logos behind Pro plan
         if (! $role->isPro()) {
             $request->merge([
-                'sponsor_logos' => $role->sponsor_logos,
                 'sponsor_background_color' => $role->sponsor_background_color,
             ]);
             $request->files->remove('new_sponsor_logos');
@@ -5860,8 +5868,29 @@ class RoleController extends Controller
             $role->save();
         }
 
-        // Handle AI-generated images (already saved to storage by generateStyle endpoint)
-        if ($request->input('ai_profile_image') && ! $request->hasFile('profile_image')) {
+        // AI-generated images. generateStyle() and generateStyleImage() already wrote the file, and
+        // the form posts back its bare name, which is stored and the image it replaces deleted. So
+        // it has to be a name this app issued to THIS schedule (AiImageIssuance); any other value
+        // is ignored - never stored, and never a reason to delete the current image. The name the
+        // column already holds is the same form posted again, and needs nothing.
+        $aiImages = [];
+        $aiImageRejected = false;
+        foreach ([
+            'profile' => ['ai_profile_image', 'profile_image', 'profile_image_url'],
+            'header' => ['ai_header_image', 'header_image_url', 'header_image_url'],
+            'background' => ['ai_background_image', 'background_image_url', 'background_image_url'],
+        ] as $slot => [$input, $upload, $column]) {
+            $value = $request->input($input);
+
+            if (! $value || $request->hasFile($upload) || $value === ($role->getAttributes()[$column] ?? null)) {
+                continue;
+            }
+
+            $aiImages[$slot] = AiImageIssuance::accept($slot, $value, $role);
+            $aiImageRejected = $aiImageRejected || $aiImages[$slot] === null;
+        }
+
+        if (! empty($aiImages['profile'])) {
             if ($role->profile_image_url) {
                 $path = $role->getAttributes()['profile_image_url'];
                 if (config('filesystems.default') == 'local') {
@@ -5869,12 +5898,12 @@ class RoleController extends Controller
                 }
                 Storage::delete($path);
             }
-            $role->profile_image_url = $request->input('ai_profile_image');
+            $role->profile_image_url = $aiImages['profile'];
 
             $role->save();
         }
 
-        if ($request->input('ai_header_image') && ! $request->hasFile('header_image_url')) {
+        if (! empty($aiImages['header'])) {
             if ($role->header_image_url) {
                 $path = $role->getAttributes()['header_image_url'];
                 if (config('filesystems.default') == 'local') {
@@ -5882,12 +5911,12 @@ class RoleController extends Controller
                 }
                 Storage::delete($path);
             }
-            $role->header_image_url = $request->input('ai_header_image');
+            $role->header_image_url = $aiImages['header'];
 
             $role->save();
         }
 
-        if ($request->input('ai_background_image') && ! $request->hasFile('background_image_url')) {
+        if (! empty($aiImages['background'])) {
             if ($role->background_image_url) {
                 $path = $role->getAttributes()['background_image_url'];
                 if (config('filesystems.default') == 'local') {
@@ -5895,7 +5924,7 @@ class RoleController extends Controller
                 }
                 Storage::delete($path);
             }
-            $role->background_image_url = $request->input('ai_background_image');
+            $role->background_image_url = $aiImages['background'];
             $role->background = 'image';
             $role->background_image = null;
 
@@ -5907,9 +5936,10 @@ class RoleController extends Controller
             $oldSponsors = json_decode($role->getAttributes()['sponsor_logos'] ?? '[]', true) ?: [];
             $oldLogoFiles = array_filter(array_column($oldSponsors, 'logo'));
 
-            // Process existing sponsors (reordered via drag-and-drop)
+            // Process existing sponsors (reordered via drag-and-drop). The browser builds this
+            // list, so a logo in it is kept only when this schedule already holds it.
             $existingSponsorsJson = $request->input('existing_sponsors', '[]');
-            $sponsors = json_decode($existingSponsorsJson, true) ?: [];
+            $sponsors = SponsorUtils::keepStoredLogos(json_decode($existingSponsorsJson, true), $oldLogoFiles);
 
             // Process new sponsor uploads
             $newFiles = $request->file('new_sponsor_logos', []);
@@ -5962,8 +5992,16 @@ class RoleController extends Controller
 
         AuditService::log(AuditService::SCHEDULE_UPDATE, auth()->id(), 'Role', $role->id, null, null, $role->name);
 
-        return redirect(route('role.view_admin', ['subdomain' => $role->subdomain, 'tab' => 'schedule']))
-            ->with('message', __('messages.updated_schedule'));
+        $redirect = redirect(route('role.view_admin', ['subdomain' => $role->subdomain, 'tab' => 'schedule']));
+
+        // Instead of the success toast, which the layout would show in its place: the rest of the
+        // save went through, and the owner needs to know to generate the image again. A genuine
+        // name is refused only once its record is gone, which a deploy or a day does.
+        if ($aiImageRejected) {
+            return $redirect->with('error', __('messages.ai_image_not_applied'));
+        }
+
+        return $redirect->with('message', __('messages.updated_schedule'));
     }
 
     public function generateStyle(Request $request, $subdomain)
@@ -6042,6 +6080,10 @@ class RoleController extends Controller
             foreach (['profile_image', 'header_image', 'background_image'] as $imageField) {
                 if (isset($results[$imageField])) {
                     $filename = $results[$imageField];
+
+                    // So update() stores this name for this schedule, and no other name.
+                    AiImageIssuance::record($filename, $role->id, auth()->id());
+
                     if (config('app.hosted') && config('filesystems.default') == 'do_spaces') {
                         $response[$imageField.'_url'] = 'https://eventschedule.nyc3.cdn.digitaloceanspaces.com/'.$filename;
                     } elseif (in_array(config('filesystems.default'), ['local', 'public'])) {
@@ -6279,8 +6321,9 @@ class RoleController extends Controller
         Cache::put("ai_style_image_{$requestId}", ['status' => 'processing'], 300);
 
         $roleId = $role->id;
+        $userId = auth()->id();
 
-        dispatch(function () use ($requestId, $role, $imageType, $accentColor, $styleInstructions, $customPrompt, $roleId) {
+        dispatch(function () use ($requestId, $role, $imageType, $accentColor, $styleInstructions, $customPrompt, $roleId, $userId) {
             set_time_limit(120);
 
             try {
@@ -6303,6 +6346,9 @@ class RoleController extends Controller
 
                 $prefix = str_replace('_image', '_', $imageType);
                 $filename = ImageUtils::saveImageData($imageData, 'generated_style.png', $prefix);
+
+                // So update() stores this name for this schedule, and no other name.
+                AiImageIssuance::record($filename, $roleId, $userId);
 
                 $result = ['status' => 'completed', 'success' => true];
                 if (config('app.hosted') && config('filesystems.default') == 'do_spaces') {
