@@ -2921,10 +2921,15 @@ class RoleController extends Controller
         // makes "a printed slug cannot be stolen" structural rather than a thing to remember. It is
         // also the alias pass - shortLinkSlugs() reports one slug per link, so a facebook.com link
         // carrying a custom /fb is only listed there under "fb".
+        //
+        // A link with no safe href (UrlUtils::safeHref() - a javascript: value, free text) is
+        // skipped by both passes, so its slug answers as an unknown one does. A scheme-less link
+        // redirects to its https:// form rather than to a path on this host.
         if (! $suggested) {
             foreach ($links as $link) {
-                if (is_string($link->url) && UrlUtils::detectPlatform($link->url) === $slug) {
-                    return ['url' => $link->url, 'key' => $slug];
+                if (is_string($link->url) && UrlUtils::detectPlatform($link->url) === $slug
+                    && ($href = UrlUtils::safeHref($link->url)) !== null) {
+                    return ['url' => $href, 'key' => $slug];
                 }
             }
         }
@@ -2943,13 +2948,13 @@ class RoleController extends Controller
                 continue;
             }
 
-            if (! is_string($link->url)) {
+            if (! is_string($link->url) || ($href = UrlUtils::safeHref($link->url)) === null) {
                 continue;
             }
 
             $platform = UrlUtils::detectPlatform($link->url);
 
-            return ['url' => $link->url, 'key' => $platform !== 'website' ? $platform : $slug];
+            return ['url' => $href, 'key' => $platform !== 'website' ? $platform : $slug];
         }
 
         return null;

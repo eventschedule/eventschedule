@@ -53,8 +53,14 @@
                                 @endif
                             </td>
                             <td class="whitespace-nowrap px-3 py-4 text-sm text-gray-500 dark:text-gray-400">
-                                <a href="{{ $role->website }}"
+                                {{-- Another owner's website: linked only through safeHref(), since a
+                                     javascript: value would run here, in the app. --}}
+                                @if ($followingWebsiteHref = \App\Utils\UrlUtils::safeHref($role->website))
+                                <a href="{{ $followingWebsiteHref }}"
                                     target="_blank" class="hover:underline">{{ App\Utils\UrlUtils::clean($role->website) }}</a>
+                                @elseif ($role->website)
+                                {{ App\Utils\UrlUtils::clean($role->website) }}
+                                @endif
                             </td>
                             <td class="relative whitespace-nowrap py-4 ps-3 pe-4 text-end text-sm font-medium sm:pe-6">
                                 <div class="relative inline-block" x-data="{

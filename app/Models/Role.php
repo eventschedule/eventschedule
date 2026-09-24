@@ -2608,6 +2608,20 @@ class Role extends Model implements MustVerifyEmail
         );
     }
 
+    /**
+     * The href of the social link at $index in decodeLinks('social_links'): its short link on this
+     * schedule when it has one, else the link itself. Null - leave the icon out - when the link is
+     * not one a browser should open (UrlUtils::safeHref()), since the short-link resolver refuses
+     * those and their short address would be a dead end.
+     */
+    public function socialLinkHref(object $link, int $index): ?string
+    {
+        $href = UrlUtils::safeHref($link->url ?? null);
+        $slug = $this->shortLinkSlugs()[$index] ?? '';
+
+        return $href !== null && $slug !== '' ? $this->getGuestUrl().'/'.$slug : $href;
+    }
+
     public function getFirstVideoUrl()
     {
         if (! $this->youtube_links) {

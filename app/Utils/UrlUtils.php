@@ -616,11 +616,11 @@ class UrlUtils
     /**
      * An owner-typed link as an href that can only ever open a web page, or null.
      *
-     * An event's registration and join links are typed by an owner, a guest submitter, an import
-     * or the API, and printed into href on pages other people open. The web form validates neither
-     * as more than a string, so a stored javascript: value ran as script on that page's origin - a
-     * tenant subdomain, which on hosted shares the session cookie's site with the app. Every such
-     * href goes through here:
+     * Schedule websites, social and payment links, sponsor links and an event's registration and
+     * join links are typed by an owner, a guest submitter, an import or the API, and printed into
+     * href on pages other people open. Most are validated as nothing more than a string, so a
+     * stored javascript: value ran as script on that page's origin - a tenant subdomain, which on
+     * hosted shares the session cookie's site with the app. Every such href goes through here:
      *
      *  - an absolute http(s) URL is kept as it is;
      *  - a scheme-less value whose host is a real domain ("www.example.com/tickets") gets https://

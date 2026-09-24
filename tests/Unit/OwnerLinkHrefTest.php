@@ -10,9 +10,9 @@ use PHPUnit\Framework\TestCase;
  * UrlUtils::safeHref() and UrlUtils::linkHost(): what an owner-typed link may become on a page
  * somebody else opens.
  *
- * safeHref() is every guest-facing href built from an event's registration or join link. The web
- * form validates neither as more than a string, so a stored javascript: value ran as script on the
- * page.
+ * safeHref() is every guest-facing href built from a stored link - an event's registration and
+ * join links, a schedule's website, social, payment and sponsor links. Most of those are validated
+ * as a string at most, so a stored javascript: value ran as script on the page.
  *
  * linkHost() is the only part of an online event's private join link a public page may print. It
  * used to be whatever parse_url() returned, which for free-text join instructions was the whole

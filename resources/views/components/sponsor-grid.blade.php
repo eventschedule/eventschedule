@@ -49,9 +49,14 @@
     </h3>
     <div class="grid {{ $gridColumns }} {{ $gridGap }} place-content-center">
         @foreach ($sponsors as $sponsor)
+            @php
+                // The url is client-built JSON that nothing validates: linked only through
+                // safeHref(), and a sponsor without a safe link shows unlinked.
+                $sponsorHref = \App\Utils\UrlUtils::safeHref($sponsor['url'] ?? null);
+            @endphp
             <div class="flex flex-col items-center text-center">
-                @if (!empty($sponsor['url']))
-                    <a href="{{ $sponsor['url'] }}" target="_blank" rel="noopener noreferrer nofollow" class="flex flex-col items-center text-center w-full hover:opacity-80 transition-opacity">
+                @if ($sponsorHref)
+                    <a href="{{ $sponsorHref }}" target="_blank" rel="noopener noreferrer nofollow" class="flex flex-col items-center text-center w-full hover:opacity-80 transition-opacity">
                 @endif
                 <div class="{{ $tileHeight }} w-full flex items-end justify-center pb-2 overflow-hidden">
                     @if (!empty($sponsor['logo_url']))
@@ -74,7 +79,7 @@
                         {{ $sponsor['tier'] === 'bronze' ? 'bg-orange-100 dark:bg-orange-900/30 text-orange-800 dark:text-orange-300' : '' }}
                     ">{{ __('messages.' . $sponsor['tier']) }}</span>
                 @endif
-                @if (!empty($sponsor['url']))
+                @if ($sponsorHref)
                     </a>
                 @endif
             </div>

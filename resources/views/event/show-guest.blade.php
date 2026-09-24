@@ -574,9 +574,15 @@
                     <path d="M12.0001 2C12.831 2 13.5708 2.36421 14.1793 2.92113C14.7849 3.47525 15.2966 4.24878 15.7104 5.16315C16.1267 6.08292 16.4501 7.15868 16.669 8.32612C16.8445 9.26194 16.9512 10.2485 16.9868 11.25H21.9724C21.5889 6.07745 17.2707 2 12.0001 2Z" />
                     <path d="M16.669 15.6739C16.4501 16.8413 16.1267 17.9171 15.7104 18.8368C15.2966 19.7512 14.7849 20.5247 14.1793 21.0789C13.5708 21.6358 12.831 22 12.0001 22C17.2707 22 21.5889 17.9226 21.9724 12.75H16.9868C16.9512 13.7515 16.8445 14.7381 16.669 15.6739Z" />
                   </svg>
-                  <x-link href="{{ $event->venue->website }}" target="_blank" :nofollow="true" class="text-sm text-gray-700 dark:text-gray-300 min-w-0 break-all">
+                  {{-- Linked only through safeHref(): the website is free text, and a javascript:
+                       value would run on this page. Without a safe link it reads as text. --}}
+                  @if ($venueWebsiteHref = \App\Utils\UrlUtils::safeHref($event->venue->website))
+                  <x-link href="{{ $venueWebsiteHref }}" target="_blank" :nofollow="true" class="text-sm text-gray-700 dark:text-gray-300 min-w-0 break-all">
                     {{ App\Utils\UrlUtils::clean($event->venue->website) }}
                   </x-link>
+                  @else
+                  <span class="text-sm text-gray-700 dark:text-gray-300 min-w-0 break-all">{{ App\Utils\UrlUtils::clean($event->venue->website) }}</span>
+                  @endif
                 </div>
                 @endif
               </div>
@@ -584,9 +590,10 @@
               @if ($event->venue->social_links)
               <div id="gp-venue-socials" class="flex flex-row gap-3 items-center mt-2 {{ $role->isRtl() ? 'rtl' : '' }}">
                 @foreach ($event->venue->decodeLinks('social_links') as $link)
-                  @php $venueLinkSlug = $event->venue->shortLinkSlugs()[$loop->index] ?? ''; @endphp
+                  {{-- No icon for a link a browser should not open - see Role::socialLinkHref(). --}}
+                  @if ($venueLinkHref = $event->venue->socialLinkHref($link, $loop->index))
                   <a
-                    href="{{ $venueLinkSlug !== '' ? $event->venue->getGuestUrl() . '/' . $venueLinkSlug : $link->url }}" target="_blank" rel="noopener noreferrer nofollow"
+                    href="{{ $venueLinkHref }}" target="_blank" rel="noopener noreferrer nofollow"
                     class="w-10 h-10 rounded-full flex justify-center items-center bg-gray-100 dark:bg-gray-700 shadow-sm hover:shadow-lg hover:scale-105 transition-all duration-200"
                     title="{{ App\Utils\UrlUtils::clean($link->url) }}"
                     >
@@ -594,6 +601,7 @@
                       {{ \App\Utils\UrlUtils::clean($link->url) }}
                     </x-url-icon>
                   </a>
+                  @endif
                 @endforeach
               </div>
               @endif

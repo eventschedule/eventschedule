@@ -89,7 +89,10 @@
             @php
                 $hasEmail = $role->email && $role->show_email;
                 $hasPhone = $role->showsPhone();
-                $hasWebsite = $role->website;
+                // Every owner-typed href goes through UrlUtils::safeHref(): a javascript: value
+                // would run on this page. Without a safe link the icon is left out.
+                $websiteHref = \App\Utils\UrlUtils::safeHref($role->website);
+                $hasWebsite = $websiteHref !== null;
                 $hasSocial = $role->social_links && $role->social_links != '[]';
                 $hasPayment = $role->payment_links && $role->payment_links != '[]';
             @endphp
@@ -144,7 +147,7 @@
                     </a>
                     @endif
                     @if($hasWebsite)
-                    <a href="{{ $role->website }}" target="_blank" rel="noopener noreferrer nofollow"
+                    <a href="{{ $websiteHref }}" target="_blank" rel="noopener noreferrer nofollow"
                        class="w-10 h-10 rounded-lg flex justify-center items-center shadow-sm hover:shadow-lg hover:scale-105 transition-all duration-200 social-tooltip"
                        style="background-color: {{ $accentColor }}"
                        data-tooltip="Website: {{ App\Utils\UrlUtils::clean($role->website) }}">
@@ -155,8 +158,8 @@
                     @endif
                     @if($hasSocial)
                         @foreach ($role->decodeLinks('social_links') as $link)
-                        @php $gpLinkSlug = $role->shortLinkSlugs()[$loop->index] ?? ''; @endphp
-                        <a href="{{ $gpLinkSlug !== '' ? $role->getGuestUrl() . '/' . $gpLinkSlug : $link->url }}" target="_blank" rel="noopener noreferrer nofollow"
+                        @if ($gpLinkHref = $role->socialLinkHref($link, $loop->index))
+                        <a href="{{ $gpLinkHref }}" target="_blank" rel="noopener noreferrer nofollow"
                            class="w-10 h-10 rounded-lg flex justify-center items-center shadow-sm hover:shadow-lg hover:scale-105 transition-all duration-200 social-tooltip"
                            style="background-color: {{ $accentColor }}"
                            data-tooltip="{{ App\Utils\UrlUtils::getBrand($link->url) }}: {{ App\Utils\UrlUtils::getHandle($link->url) }}">
@@ -164,11 +167,13 @@
                                 {{ \App\Utils\UrlUtils::clean($link->url) }}
                             </x-url-icon>
                         </a>
+                        @endif
                         @endforeach
                     @endif
                     @if($hasPayment)
                         @foreach ($role->decodeLinks('payment_links') as $link)
-                        <a href="{{ $link->url }}" target="_blank" rel="noopener noreferrer nofollow"
+                        @if ($gpPaymentHref = \App\Utils\UrlUtils::safeHref($link->url))
+                        <a href="{{ $gpPaymentHref }}" target="_blank" rel="noopener noreferrer nofollow"
                            class="w-10 h-10 rounded-lg flex justify-center items-center shadow-sm hover:shadow-lg hover:scale-105 transition-all duration-200 social-tooltip"
                            style="background-color: {{ $accentColor }}"
                            data-tooltip="{{ App\Utils\UrlUtils::getBrand($link->url) }}: {{ App\Utils\UrlUtils::getHandle($link->url) }}">
@@ -176,6 +181,7 @@
                                 {{ \App\Utils\UrlUtils::clean($link->url) }}
                             </x-url-icon>
                         </a>
+                        @endif
                         @endforeach
                     @endif
                 </div>
@@ -351,7 +357,7 @@
                       </a>
                       @endif
                       @if($hasWebsite)
-                      <a href="{{ $role->website }}" target="_blank" rel="noopener noreferrer nofollow"
+                      <a href="{{ $websiteHref }}" target="_blank" rel="noopener noreferrer nofollow"
                          class="text-[#33383C] dark:text-gray-400 hover:text-[#151B26] dark:hover:text-gray-200 transition-colors social-tooltip"
                          data-tooltip="Website: {{ App\Utils\UrlUtils::clean($role->website) }}">
                           <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
@@ -361,25 +367,28 @@
                       @endif
                       @if($hasSocial)
                           @foreach ($role->decodeLinks('social_links') as $link)
-                          @php $gpLinkSlug2 = $role->shortLinkSlugs()[$loop->index] ?? ''; @endphp
-                          <a href="{{ $gpLinkSlug2 !== '' ? $role->getGuestUrl() . '/' . $gpLinkSlug2 : $link->url }}" target="_blank" rel="noopener noreferrer nofollow"
+                          @if ($gpLinkHref2 = $role->socialLinkHref($link, $loop->index))
+                          <a href="{{ $gpLinkHref2 }}" target="_blank" rel="noopener noreferrer nofollow"
                              class="text-[#33383C] dark:text-gray-400 hover:text-[#151B26] dark:hover:text-gray-200 transition-colors social-tooltip"
                              data-tooltip="{{ App\Utils\UrlUtils::getBrand($link->url) }}: {{ App\Utils\UrlUtils::getHandle($link->url) }}">
                               <x-url-icon class="w-5 h-5" color="currentColor">
                                   {{ \App\Utils\UrlUtils::clean($link->url) }}
                               </x-url-icon>
                           </a>
+                          @endif
                           @endforeach
                       @endif
                       @if($hasPayment)
                           @foreach ($role->decodeLinks('payment_links') as $link)
-                          <a href="{{ $link->url }}" target="_blank" rel="noopener noreferrer nofollow"
+                          @if ($gpPaymentHref2 = \App\Utils\UrlUtils::safeHref($link->url))
+                          <a href="{{ $gpPaymentHref2 }}" target="_blank" rel="noopener noreferrer nofollow"
                              class="text-[#33383C] dark:text-gray-400 hover:text-[#151B26] dark:hover:text-gray-200 transition-colors social-tooltip"
                              data-tooltip="{{ App\Utils\UrlUtils::getBrand($link->url) }}: {{ App\Utils\UrlUtils::getHandle($link->url) }}">
                               <x-url-icon class="w-5 h-5" color="currentColor">
                                   {{ \App\Utils\UrlUtils::clean($link->url) }}
                               </x-url-icon>
                           </a>
+                          @endif
                           @endforeach
                       @endif
                   </div>

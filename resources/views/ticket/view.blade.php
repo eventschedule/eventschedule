@@ -777,10 +777,17 @@
                 // own terms in place the link no longer goes to the marketing domain, and
                 // the old literal '/terms' was not a real route on any install either.
                 $termsDisplay = preg_replace('#^https?://(www\.)?#', '', rtrim($termsUrl, '/'));
+                // The event's own terms link is owner-typed free text: linked only through
+                // safeHref(), and shown as text when it is no web link.
+                $termsHref = $event->terms_url ? \App\Utils\UrlUtils::safeHref($event->terms_url) : $termsUrl;
               @endphp
-              <a href="{{ $termsUrl }}" target="_blank" class="text-[11px] text-white/60 print-text-gray hover:text-white/80 transition-colors break-all">
+              @if ($termsHref)
+              <a href="{{ $termsHref }}" target="_blank" class="text-[11px] text-white/60 print-text-gray hover:text-white/80 transition-colors break-all">
                 {{ Str::limit($termsDisplay, 30) }}
               </a>
+              @else
+              <span class="text-[11px] text-white/60 print-text-gray break-all">{{ Str::limit($termsDisplay, 30) }}</span>
+              @endif
             </div>
             <div>
               <h3 class="text-[11px] uppercase tracking-wider text-violet-400 print:text-violet-600 font-semibold mb-[6px]">{{ __('messages.event_support_contact') }}</h3>

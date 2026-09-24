@@ -21,17 +21,22 @@
         <table role="presentation" width="100%" cellpadding="0" cellspacing="0">
             <tr>
                 @foreach ($sponsors as $index => $sponsor)
+                @php
+                    // Client-built JSON that nothing validates, shown in the builder's preview
+                    // too: linked only through safeHref().
+                    $sponsorHref = \App\Utils\UrlUtils::safeHref($sponsor['url'] ?? null);
+                @endphp
                 <td align="center" valign="top" style="padding: 8px; width: {{ $colWidth }}%;">
                     <table role="presentation" cellpadding="0" cellspacing="0">
                         <tr>
                             <td align="center" style="padding-bottom: 4px;">
-                                @if (!empty($sponsor['url']))
-                                <a href="{{ $sponsor['url'] }}" style="text-decoration: none;">
+                                @if ($sponsorHref)
+                                <a href="{{ $sponsorHref }}" style="text-decoration: none;">
                                 @endif
                                 @if (!empty($sponsor['logo_url']))
                                 <img src="{{ $sponsor['logo_url'] }}" alt="{{ $sponsor['display_name'] ?? '' }}" width="120" style="max-width: 120px; max-height: 80px; height: auto; display: block;" />
                                 @endif
-                                @if (!empty($sponsor['url']))
+                                @if ($sponsorHref)
                                 </a>
                                 @endif
                             </td>
@@ -39,8 +44,8 @@
                         @if (!empty($sponsor['display_name']))
                         <tr>
                             <td align="center" style="font-family: '{{ $style['fontFamily'] }}', sans-serif; font-size: 12px; color: {{ $style['textColor'] }}; padding-top: 4px;">
-                                @if (!empty($sponsor['url']))
-                                <a href="{{ $sponsor['url'] }}" style="color: {{ $style['textColor'] }}; text-decoration: none;">{{ $sponsor['display_name'] }}</a>
+                                @if ($sponsorHref)
+                                <a href="{{ $sponsorHref }}" style="color: {{ $style['textColor'] }}; text-decoration: none;">{{ $sponsor['display_name'] }}</a>
                                 @else
                                 {{ $sponsor['display_name'] }}
                                 @endif

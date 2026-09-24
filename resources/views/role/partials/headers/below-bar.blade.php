@@ -8,7 +8,9 @@
     $onDark = $onDark ?? false;
     $hasEmail = $role->email && $role->show_email;
     $hasPhone = $role->showsPhone();
-    $hasWebsite = $role->website;
+    // Owner-typed hrefs only through UrlUtils::safeHref(), as in the banner header.
+    $websiteHref = \App\Utils\UrlUtils::safeHref($role->website);
+    $hasWebsite = $websiteHref !== null;
     $hasSocial = $role->social_links && $role->social_links != '[]';
     $hasPayment = $role->payment_links && $role->payment_links != '[]';
     $hasContact = $hasEmail || $hasPhone || $hasWebsite || $hasSocial || $hasPayment;
@@ -51,25 +53,28 @@
         </a>
         @endif
         @if($hasWebsite)
-        <a href="{{ $role->website }}" target="_blank" rel="noopener noreferrer nofollow" class="{{ $iconClass }} transition-colors social-tooltip" data-tooltip="Website: {{ App\Utils\UrlUtils::clean($role->website) }}">
+        <a href="{{ $websiteHref }}" target="_blank" rel="noopener noreferrer nofollow" class="{{ $iconClass }} transition-colors social-tooltip" data-tooltip="Website: {{ App\Utils\UrlUtils::clean($role->website) }}">
             <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 24 24"><path fill-rule="evenodd" clip-rule="evenodd" d="M12 2C17.52 2 22 6.48 22 12C22 17.52 17.52 22 12 22C6.48 22 2 17.52 2 12C2 6.48 6.48 2 12 2ZM11 19.93C7.05 19.44 4 16.08 4 12C4 11.38 4.08 10.79 4.21 10.21L9 15V16C9 17.1 9.9 18 11 18V19.93ZM17.9 17.39C17.64 16.58 16.9 16 16 16H15V13C15 12.45 14.55 12 14 12H8V10H10C10.55 10 11 9.55 11 9V7H13C14.1 7 15 6.1 15 5V4.59C17.93 5.78 20 8.65 20 12C20 14.08 19.2 15.97 17.9 17.39Z"/></svg>
         </a>
         @endif
         @if($hasSocial)
             @foreach ($role->decodeLinks('social_links') as $link)
-            @php $gpBelowSlug = $role->shortLinkSlugs()[$loop->index] ?? ''; @endphp
-            <a href="{{ $gpBelowSlug !== '' ? $role->getGuestUrl() . '/' . $gpBelowSlug : $link->url }}" target="_blank" rel="noopener noreferrer nofollow"
+            @if ($gpBelowHref = $role->socialLinkHref($link, $loop->index))
+            <a href="{{ $gpBelowHref }}" target="_blank" rel="noopener noreferrer nofollow"
                class="{{ $iconClass }} transition-colors social-tooltip" data-tooltip="{{ App\Utils\UrlUtils::getBrand($link->url) }}: {{ App\Utils\UrlUtils::getHandle($link->url) }}">
                 <x-url-icon class="w-5 h-5" color="currentColor">{{ \App\Utils\UrlUtils::clean($link->url) }}</x-url-icon>
             </a>
+            @endif
             @endforeach
         @endif
         @if($hasPayment)
             @foreach ($role->decodeLinks('payment_links') as $link)
-            <a href="{{ $link->url }}" target="_blank" rel="noopener noreferrer nofollow"
+            @if ($gpBelowPaymentHref = \App\Utils\UrlUtils::safeHref($link->url))
+            <a href="{{ $gpBelowPaymentHref }}" target="_blank" rel="noopener noreferrer nofollow"
                class="{{ $iconClass }} transition-colors social-tooltip" data-tooltip="{{ App\Utils\UrlUtils::getBrand($link->url) }}: {{ App\Utils\UrlUtils::getHandle($link->url) }}">
                 <x-url-icon class="w-5 h-5" color="currentColor">{{ \App\Utils\UrlUtils::clean($link->url) }}</x-url-icon>
             </a>
+            @endif
             @endforeach
         @endif
     </div>
