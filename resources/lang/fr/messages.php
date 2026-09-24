@@ -2569,6 +2569,7 @@ return [
     'ai_style_generation_failed' => 'Échec de la génération du style. Veuillez réessayer.',
     'ai_style_image_partial_error' => 'Certaines images n\'ont pas pu être générées. Les valeurs de style texte ont été appliquées.',
     'ai_image_not_applied' => 'Vos modifications ont été enregistrées, mais l\'image générée n\'a pas pu être utilisée. Veuillez la générer à nouveau.',
+    'agenda_image_not_applied' => 'L\'événement a été enregistré, mais l\'image de l\'agenda n\'a pas pu être utilisée. Veuillez scanner l\'agenda à nouveau.',
     'upgrade_feature_description_ai_style' => 'Utilisez l\'IA pour générer automatiquement une image de marque et un style cohérents pour votre calendrier.',
     'ai_details_generator' => 'Détails par IA',
     'ai_details_description' => 'Générez des détails à l\'aide de l\'IA à partir de vos informations existantes.',

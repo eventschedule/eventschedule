@@ -43,6 +43,19 @@ class AiImageIssuanceTest extends TestCase
         }
     }
 
+    public function test_every_extension_an_agenda_scan_keeps_is_accepted(): void
+    {
+        $role = $this->role(7);
+
+        // EventController::parseEventParts() keeps the uploaded photo's own extension.
+        foreach (['jpg', 'jpeg', 'png', 'gif', 'webp'] as $extension) {
+            $name = $this->issuedName('agenda', $extension);
+            AiImageIssuance::record($name, 7, 3);
+
+            $this->assertSame($name, AiImageIssuance::accept('agenda', $name, $role), $extension);
+        }
+    }
+
     public function test_an_issued_name_is_accepted_once(): void
     {
         $role = $this->role(7);
@@ -108,8 +121,8 @@ class AiImageIssuanceTest extends TestCase
             'upper case' => ['profile_'.strtoupper($random).'.png'],
             'a short random part' => ['profile_abc123.png'],
             'a long random part' => ["profile_{$random}0.png"],
-            'an extension the generator never writes' => ["profile_{$random}.svg"],
-            'jpeg, which the generator writes as jpg' => ["profile_{$random}.jpeg"],
+            'an extension no generator writes' => ["profile_{$random}.svg"],
+            'an upper-case extension' => ["profile_{$random}.JPEG"],
             'a double extension' => ["profile_{$random}.png.php"],
             'a quote' => ["profile_{$random}.png'"],
             'an array' => [["profile_{$random}.png"]],

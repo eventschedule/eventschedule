@@ -2570,6 +2570,7 @@ return [
     'ai_style_generation_failed' => 'Stil konnte nicht generiert werden. Bitte versuchen Sie es erneut.',
     'ai_style_image_partial_error' => 'Einige Bilder konnten nicht generiert werden. Die Text-Stilwerte wurden angewendet.',
     'ai_image_not_applied' => 'Ihre Änderungen wurden gespeichert, aber das generierte Bild konnte nicht verwendet werden. Bitte generieren Sie es erneut.',
+    'agenda_image_not_applied' => 'Die Veranstaltung wurde gespeichert, aber das Agenda-Bild konnte nicht verwendet werden. Bitte scannen Sie die Agenda erneut.',
     'upgrade_feature_description_ai_style' => 'Verwenden Sie KI, um automatisch ein stimmiges Branding und Stil für Ihren Kalender zu generieren.',
     'ai_details_generator' => 'KI-Details',
     'ai_details_description' => 'Generieren Sie Details mithilfe von KI basierend auf Ihren vorhandenen Informationen.',

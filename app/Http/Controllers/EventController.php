@@ -1683,11 +1683,19 @@ class EventController extends Controller
             $event->agenda_ai_prompt = $request->input('agenda_ai_prompt');
             $event->save();
         }
-        if ($request->input('agenda_image_url')) {
-            $agendaUrl = $request->input('agenda_image_url');
-            if (preg_match('/^agenda_[a-z0-9]+\.(jpg|jpeg|png|gif|webp)$/', $agendaUrl)) {
+        // The photo an agenda scan on this create form kept (parseEventParts()), posted back by
+        // name. Deleting the event's agenda image deletes the file it names, so only a name issued
+        // to this schedule is taken (AiImageIssuance); the shape check alone took any schedule's
+        // agenda file. Enterprise, as agenda scanning is: that endpoint is the only issuer, and
+        // this covers a plan that lapsed between the scan and the save.
+        $agendaImageRejected = false;
+        if ($request->input('agenda_image_url') && $role->isEnterprise()) {
+            $agendaUrl = AiImageIssuance::accept('agenda', $request->input('agenda_image_url'), $role);
+            if ($agendaUrl) {
                 $event->agenda_image_url = $agendaUrl;
                 $event->save();
+            } else {
+                $agendaImageRejected = true;
             }
         }
         $role->agenda_show_times = $request->boolean('agenda_show_times');
@@ -1720,10 +1728,15 @@ class EventController extends Controller
             'year' => $date->year,
         ];
 
-        // As in update(): the event is created, without the flyer the save refused.
+        // As in update(): the event is created, without the flyer or agenda image the save refused.
         if ($this->eventRepo->aiImageRejected) {
             return redirect(route('role.view_admin', $data))
                 ->with('error', __('messages.ai_image_not_applied'));
+        }
+
+        if ($agendaImageRejected) {
+            return redirect(route('role.view_admin', $data))
+                ->with('error', __('messages.agenda_image_not_applied'));
         }
 
         return redirect(route('role.view_admin', $data))
@@ -2281,6 +2294,11 @@ class EventController extends Controller
                 if (isset($event)) {
                     $event->agenda_image_url = $filename;
                     $event->save();
+                } else {
+                    // The create form keeps the name and posts it with the new event, so store()
+                    // takes it only for this schedule. An existing event was given it just above,
+                    // and a record for it would let a second event claim the same file.
+                    AiImageIssuance::record($filename, $role->id, auth()->id());
                 }
             }
 

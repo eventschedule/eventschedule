@@ -2619,6 +2619,7 @@ return [
     'ai_style_generation_failed' => 'יצירת הסגנון נכשלה. אנא נסה שנית.',
     'ai_style_image_partial_error' => 'חלק מהתמונות לא נוצרו. ערכי סגנון הטקסט הוחלו.',
     'ai_image_not_applied' => 'השינויים נשמרו, אך לא ניתן היה להשתמש בתמונה שנוצרה. אנא צור אותה שוב.',
+    'agenda_image_not_applied' => 'האירוע נשמר, אך לא ניתן היה להשתמש בתמונת סדר היום. אנא סרוק את סדר היום שוב.',
     'upgrade_feature_description_ai_style' => 'השתמש ב-AI כדי ליצור אוטומטית מיתוג וסגנון עקביים עבור לוח הזמנים שלך.',
     'ai_details_generator' => 'פרטים עם AI',
     'ai_details_description' => 'צור פרטים באמצעות AI על סמך המידע הקיים שלך.',

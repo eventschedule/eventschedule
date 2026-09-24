@@ -2566,6 +2566,7 @@ return [
     'ai_style_generation_failed' => 'Generazione dello stile non riuscita. Riprova.',
     'ai_style_image_partial_error' => 'Alcune immagini non sono state generate. I valori di stile del testo sono stati applicati.',
     'ai_image_not_applied' => 'Le modifiche sono state salvate, ma non è stato possibile usare l\'immagine generata. Generala di nuovo.',
+    'agenda_image_not_applied' => 'L\'evento è stato salvato, ma non è stato possibile usare l\'immagine dell\'agenda. Scansiona di nuovo l\'agenda.',
     'upgrade_feature_description_ai_style' => 'Usa l\'IA per generare automaticamente un branding e uno stile coerenti per il tuo calendario.',
     'ai_details_generator' => 'Dettagli con IA',
     'ai_details_description' => 'Genera dettagli utilizzando l\'IA in base alle tue informazioni esistenti.',

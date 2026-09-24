@@ -2564,6 +2564,7 @@ return [
     'ai_style_generation_failed' => 'Stijl genereren mislukt. Probeer het opnieuw.',
     'ai_style_image_partial_error' => 'Sommige afbeeldingen konden niet worden gegenereerd. De tekststijlwaarden zijn toegepast.',
     'ai_image_not_applied' => 'Je wijzigingen zijn opgeslagen, maar de gegenereerde afbeelding kon niet worden gebruikt. Genereer deze opnieuw.',
+    'agenda_image_not_applied' => 'Het evenement is opgeslagen, maar de agendafoto kon niet worden gebruikt. Scan de agenda opnieuw.',
     'upgrade_feature_description_ai_style' => 'Gebruik AI om automatisch een samenhangende branding en stijl voor je agenda te genereren.',
     'ai_details_generator' => 'AI-details',
     'ai_details_description' => 'Genereer details met behulp van AI op basis van je bestaande informatie.',

@@ -10,9 +10,10 @@ use Illuminate\Support\Facades\Cache;
  *
  * The AI endpoints write the image to storage first and hand the browser its bare filename; the
  * edit form posts that name back on save (ai_profile_image, ai_header_image, ai_background_image,
- * ai_flyer_image), and the save stores it and deletes the image it replaces. Nothing tied the name
- * to the schedule, so a posted name could be ANOTHER schedule's file: stored here, the next
- * replace or delete here deleted it, along with its derivatives.
+ * ai_flyer_image, and agenda_image_url for the photo an agenda scan kept on the create form), and
+ * the save stores it and deletes the image it replaces. Nothing tied the name to the schedule, so a
+ * posted name could be ANOTHER schedule's file: stored here, the next replace or delete here
+ * deleted it, along with its derivatives.
  *
  * So each name is recorded where the file is written, keyed to the schedule in that request's URL,
  * and a save stores a posted name only when it was issued to the same schedule. A session list
@@ -27,10 +28,12 @@ use Illuminate\Support\Facades\Cache;
 class AiImageIssuance
 {
     /**
-     * The extensions ImageUtils::saveImageData() can give an AI image, which are exactly the values
-     * of ImageUtils::getImageExtension(). tests/Unit/AiImageIssuanceTest.php fails if they drift.
+     * The extensions an issued file can have: those ImageUtils::saveImageData() gives a generated
+     * image, which are exactly the values of ImageUtils::getImageExtension(), plus jpeg, which an
+     * agenda scan keeps from the uploaded photo (EventController::parseEventParts()).
+     * tests/Unit/AiImageIssuanceTest.php fails if they drift.
      */
-    private const EXTENSIONS = ['png', 'jpg', 'gif', 'webp', 'bmp'];
+    private const EXTENSIONS = ['png', 'jpg', 'jpeg', 'gif', 'webp', 'bmp'];
 
     public static function record(string $filename, ?int $roleId, ?int $userId): void
     {
@@ -42,8 +45,8 @@ class AiImageIssuance
      * up its record.
      *
      * $slot is the filename prefix the generator used: 'profile', 'header' or 'background' for a
-     * schedule's style images, 'flyer' for an event's. Anchored with \z rather than $, which also
-     * matches before a trailing newline.
+     * schedule's style images, 'flyer' and 'agenda' for an event's. Anchored with \z rather than $,
+     * which also matches before a trailing newline.
      */
     public static function accept(string $slot, mixed $value, Role $role): ?string
     {
