@@ -4,8 +4,11 @@ namespace Tests\Feature;
 
 use App\Repos\EventRepo;
 use Carbon\Carbon;
+use Carbon\Exceptions\InvalidFormatException;
+use Illuminate\Database\QueryException;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Exceptions;
 use Tests\Feature\Concerns\CreatesScheduleData;
 use Tests\TestCase;
 
@@ -80,5 +83,70 @@ class UpcomingForGuestTest extends TestCase
 
         $this->assertContains('Weekly Jam', $names);
         $this->assertSame(['Weekly Jam'], array_values(array_unique($names)));
+    }
+
+    /**
+     * A restored backup can carry recurrence data saveEvent() never writes, and matchesDate()
+     * throws on it: an every_n_weeks interval of 0 is a modulo by zero, and an on_date end that is
+     * not a date fails to parse. Each such series is reported and left out, and the schedule page
+     * still renders everything else.
+     */
+    public function test_a_series_whose_recurrence_cannot_be_read_is_left_out(): void
+    {
+        Exceptions::fake();
+
+        $role = $this->createRole($this->createOwner(), 'venue');
+        $series = fn (string $name, array $attrs = []) => $this->createEvent($role, $attrs + [
+            'name' => $name,
+            'creator_role_id' => $role->id,
+            'starts_at' => Carbon::now('UTC')->subWeek()->setTime(12, 0)->format('Y-m-d H:i:s'),
+            'days_of_week' => '1111111',
+            'recurring_frequency' => 'weekly',
+        ]);
+
+        $series('Weekly Jam');
+        $series('Zero Interval', ['recurring_frequency' => 'every_n_weeks', 'recurring_interval' => 0]);
+        $series('Garbled End', ['recurring_end_type' => 'on_date', 'recurring_end_value' => 'soon']);
+
+        $names = app(EventRepo::class)->upcomingForGuest($role)->map(fn ($row) => $row['event']->name)->all();
+
+        $this->assertSame(['Weekly Jam'], array_values(array_unique($names)));
+        Exceptions::assertReported(\DivisionByZeroError::class);
+        Exceptions::assertReported(InvalidFormatException::class);
+
+        $this->get('/'.$role->subdomain)->assertOk();
+    }
+
+    /**
+     * The series query runs the sitemap window, whose SQL once overflowed on a huge count and took
+     * every visit to the schedule page down with it. A failure there now costs only the series:
+     * it is reported, and the one-off events are still listed.
+     */
+    public function test_a_failing_series_query_costs_only_the_series(): void
+    {
+        Exceptions::fake();
+
+        $role = $this->createRole($this->createOwner(), 'venue');
+        $this->createEvent($role, ['name' => 'One Night Only', 'creator_role_id' => $role->id]);
+        $this->createEvent($role, [
+            'name' => 'Weekly Jam',
+            'creator_role_id' => $role->id,
+            'starts_at' => Carbon::now('UTC')->subWeek()->setTime(12, 0)->format('Y-m-d H:i:s'),
+            'days_of_week' => '1111111',
+            'recurring_frequency' => 'weekly',
+        ]);
+
+        // The series query is the only one here that reads recurring_end_type.
+        DB::connection()->beforeExecuting(function (string $query, array $bindings) {
+            if (str_contains($query, 'recurring_end_type')) {
+                throw new QueryException('mysql', $query, $bindings,
+                    new \PDOException('SQLSTATE[22003]: Numeric value out of range: 1690 BIGINT UNSIGNED value is out of range'));
+            }
+        });
+
+        $names = app(EventRepo::class)->upcomingForGuest($role)->map(fn ($row) => $row['event']->name)->all();
+
+        $this->assertSame(['One Night Only'], $names);
+        Exceptions::assertReported(QueryException::class);
     }
 }

@@ -25,6 +25,7 @@ use App\Utils\ImageUtils;
 use App\Utils\SlugPatternUtils;
 use App\Utils\UrlUtils;
 use Carbon\Carbon;
+use Illuminate\Database\QueryException;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
@@ -2652,13 +2653,23 @@ class EventRepo
         // The sitemap's window answers "still running" in SQL for every end type, with a grace
         // period that only lets a just-ended series through to nextOccurrenceFrom(), which then
         // drops it.
-        $series = $base()
-            ->whereNotNull('events.days_of_week')
-            ->where(fn ($q) => Event::constrainSitemapWindow($q, Carbon::now('UTC')))
-            ->orderBy('events.starts_at')
-            ->orderBy('events.id')
-            ->limit(self::UPCOMING_SERIES_LIMIT)
-            ->get();
+        //
+        // A failure here costs the series, not the page, as it does in the sitemap: this runs on
+        // every visit to the schedule page, and the window's SQL has overflowed before (a count of
+        // 9223372036854775807 raised ERROR 1690 and 500'd the page for every visitor).
+        try {
+            $series = $base()
+                ->whereNotNull('events.days_of_week')
+                ->where(fn ($q) => Event::constrainSitemapWindow($q, Carbon::now('UTC')))
+                ->orderBy('events.starts_at')
+                ->orderBy('events.id')
+                ->limit(self::UPCOMING_SERIES_LIMIT)
+                ->get();
+        } catch (QueryException $e) {
+            report($e);
+
+            $series = collect();
+        }
 
         $seriesDates = $this->upcomingSeriesDates($role, $group, $series);
 
@@ -2699,8 +2710,27 @@ class EventRepo
         $key = 'guest_upcoming_series:'.$role->id.':'.($group?->id ?? 0).':'.$today.':'.md5($fingerprint);
 
         return Cache::remember($key, self::UPCOMING_CACHE_SECONDS, fn () => $series
-            ->mapWithKeys(fn (Event $event) => [$event->id => $event->nextOccurrenceFrom(null, 60)])
+            ->mapWithKeys(fn (Event $event) => [$event->id => $this->nextOccurrenceOrNull($event)])
             ->all());
+    }
+
+    /**
+     * nextOccurrenceFrom() within 60 days, or null when the series' recurrence cannot be read.
+     *
+     * matchesDate() trusts what saveEvent() writes, and a restored backup never went through it:
+     * an on_date end or an exclude date that is not a date, an every_n_weeks interval of 0 (a
+     * modulo by zero) and a days_of_week shorter than seven characters all throw. One such series
+     * is reported and left out, rather than taking the schedule page down with it.
+     */
+    private function nextOccurrenceOrNull(Event $event): ?string
+    {
+        try {
+            return $event->nextOccurrenceFrom(null, 60);
+        } catch (\Throwable $e) {
+            report($e);
+
+            return null;
+        }
     }
 
     /** starts_at's time of day in the event's own schedule timezone, for ordering one day. */

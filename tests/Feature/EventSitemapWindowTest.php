@@ -69,19 +69,63 @@ class EventSitemapWindowTest extends TestCase
         return Event::query()->inSitemapWindow()->pluck('id')->all();
     }
 
-    /** Whether matchesDate() finds an occurrence from the grace cut-off onwards. */
+    /**
+     * Whether matchesDate() finds an occurrence from the grace cut-off onwards. 1,500 days, because
+     * a yearly series from Feb 29 next occurs four years on.
+     */
     private function occursSinceTheCut(Event $event): bool
     {
         $timezone = $event->scheduleTimezone();
         $day = Carbon::now($timezone)->subDays(Event::SITEMAP_GRACE_DAYS)->startOfDay();
 
-        for ($i = 0; $i < 400; $i++, $day->addDay()) {
+        for ($i = 0; $i < 1500; $i++, $day->addDay()) {
             if ($event->matchesDate($day->format('Y-m-d'), $timezone)) {
                 return true;
             }
         }
 
         return false;
+    }
+
+    /**
+     * A monthly_weekday series whose first date is a local 29th to 31st, so its nth weekday is the
+     * 5th: started about ten months back at $localTime New York time, with enough occurrences that
+     * the last of them is still to come. $monthEnd starts it on the last day of its month, so an
+     * evening start is already the next month's 1st in UTC.
+     */
+    private function fifthWeekdaySeries(string $localTime, bool $monthEnd): Event
+    {
+        $timezone = $this->role->timezone;
+        $start = Carbon::now($timezone)->subDays(300)->startOfDay();
+
+        while ($start->day < 29 || ($monthEnd && $start->day !== $start->daysInMonth)) {
+            $start->subDay();
+        }
+
+        [$hour, $minute] = array_map('intval', explode(':', $localTime));
+        $start->setTime($hour, $minute);
+
+        $event = $this->createRecurringEvent($this->role, [
+            'starts_at' => $start->copy()->utc()->format('Y-m-d H:i:s'),
+            'days_of_week' => '1111111',
+            'recurring_frequency' => 'monthly_weekday',
+            'creator_role_id' => $this->role->id,
+        ]);
+
+        // Every occurrence through the next 120 days. A 5th weekday is never more than 119 days
+        // after the one before it, so the last one counted is still ahead.
+        $count = 0;
+        $until = Carbon::now($timezone)->addDays(120)->format('Y-m-d');
+
+        for ($day = $start->copy()->startOfDay(); $day->format('Y-m-d') <= $until; $day->addDay()) {
+            $count += $event->matchesDate($day->format('Y-m-d'), $timezone) ? 1 : 0;
+        }
+
+        $event->recurring_end_type = 'after_events';
+        $event->recurring_end_value = (string) $count;
+        $event->save();
+
+        return $event->fresh();
     }
 
     public function test_a_one_off_event_stays_until_thirty_days_after_it_ends(): void
@@ -158,6 +202,116 @@ class EventSitemapWindowTest extends TestCase
             $this->assertSame($listed, $this->occursSinceTheCut($event), $label.': the fixture is not what it claims');
             $this->assertSame($listed, in_array($event->id, $in, true), $label);
         }
+    }
+
+    /**
+     * The event form stores any huge count as 9223372036854775807 (saveEvent() keeps
+     * (string)(int), which saturates), and a restored backup keeps whatever text it carried. The
+     * bound's CAST AS UNSIGNED overflowed on a huge or negative count, with ERROR 1690.
+     */
+    public function test_a_malformed_after_events_count_neither_errors_nor_drops_a_running_series(): void
+    {
+        $counts = ['9223372036854775807', '99999999999999999999', '-1', 'abc', '1e5'];
+
+        $events = collect($counts)->mapWithKeys(fn (string $count) => [$count => $this->series(-200, [
+            'recurring_end_type' => 'after_events',
+            'recurring_end_value' => $count,
+        ])]);
+
+        $in = $this->inWindow();
+
+        foreach ($events as $count => $event) {
+            $this->assertSame($this->occursSinceTheCut($event->fresh()), in_array($event->id, $in, true), "after_events '{$count}'");
+        }
+
+        // The huge ones and the exponent are running series, which is what makes this a test.
+        $this->assertContains($events['9223372036854775807']->id, $in);
+        $this->assertContains($events['1e5']->id, $in);
+    }
+
+    /**
+     * countOccurrences() counts only the months that have a monthly_weekday series' nth weekday. A
+     * 5th weekday (a local 29th to 31st) can be 119 days after the one before, so a 35-day period
+     * dropped such a series while it was still running. The evening one starts on a New York
+     * month end, which in UTC is already the next month's 1st.
+     */
+    public function test_a_fifth_weekday_series_stays_listed_while_it_runs(): void
+    {
+        $expected = [
+            'fifth weekday, at midday' => $this->fifthWeekdaySeries('12:00', false),
+            'fifth weekday, a month-end evening' => $this->fifthWeekdaySeries('21:00', true),
+        ];
+
+        $in = $this->inWindow();
+
+        foreach ($expected as $label => $event) {
+            $this->assertTrue($this->occursSinceTheCut($event), $label.': the fixture is not what it claims');
+            $this->assertContains($event->id, $in, $label);
+        }
+    }
+
+    /**
+     * Regression pins, not mutation-tested: these pass with the old SQL and the new alike, and are
+     * here so a later "tightening" of the periods cannot slip through. countOccurrences() counts
+     * addMonth() and addYear() steps, which are at most 31 and 366 days, so those periods bound a
+     * series on the 31st, which skips the short months, and one on Feb 29, which occurs every
+     * fourth year.
+     *
+     * Each is checked at the one moment the bound is tight: the last day the grace period still
+     * covers the series' last date. Any earlier and the bound has room to spare, so a period one
+     * day too short passes unnoticed.
+     */
+    public function test_series_on_the_31st_and_on_feb_29_stay_listed_until_their_last_date_ages_out(): void
+    {
+        $timezone = $this->role->timezone;
+
+        $cases = [
+            // The addMonth() steps from Jan 31 run Mar 3, Apr 3 and on, so the seventh step is
+            // Aug 3 and the last 31st it admits is Aug 31: 212 days on, against a bound of 217.
+            'monthly on the 31st, after 7' => ['2026-01-31', 'monthly_date', 7, '2026-08-31'],
+            // "after 4" from one Feb 29 ends on the next: 1,461 days on, against a bound of 1,464.
+            'yearly on Feb 29, after 4' => ['2024-02-29', 'yearly', 4, '2028-02-29'],
+        ];
+
+        foreach ($cases as $label => [$start, $frequency, $count, $last]) {
+            $event = $this->createRecurringEvent($this->role, [
+                'starts_at' => Carbon::parse($start.' 12:00', $timezone)->utc()->format('Y-m-d H:i:s'),
+                'days_of_week' => '1111111',
+                'recurring_frequency' => $frequency,
+                'recurring_end_type' => 'after_events',
+                'recurring_end_value' => (string) $count,
+                'creator_role_id' => $this->role->id,
+            ]);
+
+            $this->travelTo(Carbon::parse($last.' 12:00', $timezone)->addDays(Event::SITEMAP_GRACE_DAYS));
+            $this->assertTrue($this->occursSinceTheCut($event), $label.': the fixture is not what it claims');
+            $this->assertContains($event->id, $this->inWindow(), $label);
+
+            // A day later it has aged out, which is what makes the moment above the edge.
+            $this->travel(1)->days();
+            $this->assertFalse($this->occursSinceTheCut($event), "{$label}: {$last} is not its last date");
+
+            $this->travelBack();
+        }
+    }
+
+    /**
+     * The same overflow, where a visitor meets it: the schedule page's upcoming list runs the
+     * window, and the error 500'd the page for everyone.
+     */
+    public function test_the_schedule_page_survives_a_huge_after_events_count(): void
+    {
+        $this->series(-14, [
+            'name' => 'Endless Jam',
+            'recurring_end_type' => 'after_events',
+            'recurring_end_value' => '9223372036854775807',
+        ]);
+
+        $html = $this->get('/'.$this->role->subdomain)->assertOk()->getContent();
+
+        // Listed, not merely survived: it is weekly, well inside the 60 days the list looks ahead.
+        $this->assertSame(1, preg_match('#<noscript v-pre>(.*?)</noscript>#s', $html, $noscript));
+        $this->assertStringContainsString('Endless Jam', $noscript[1]);
     }
 
     /** Both sitemaps apply it, and a schedule whose only event has aged out is not submitted. */

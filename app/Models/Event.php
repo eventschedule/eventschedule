@@ -1719,6 +1719,10 @@ class Event extends Model
      * days, so that series is over unless it has include dates. The other frequencies ignore
      * days_of_week (saveEvent() writes '1111111' for them).
      *
+     * SELECT ONLY. afterEventsEndSql() casts a free-text column, which only warns on a malformed
+     * value inside a SELECT; strict mode turns that same warning into an error inside an UPDATE or
+     * DELETE, so never use this window to pick the rows a write touches.
+     *
      * $table names the events table in $query, for a caller that reaches it through a join.
      */
     public static function constrainSitemapWindow($query, Carbon $nowUtc, string $table = 'events')
@@ -1764,16 +1768,37 @@ class Event extends Model
      * SQL for the latest date an 'after_events' series can still occur on. See
      * constrainSitemapWindow(). Capped at a century: DATE_ADD past 9999-12-31 is NULL, which would
      * read as "ended" for a series that in practice never does.
+     *
+     * SELECT ONLY: the cast below warns on malformed text, and strict mode makes that warning an
+     * error inside an UPDATE or DELETE.
+     *
+     * The count is clamped to 0..100000 through DECIMAL(65,0). CAST AS UNSIGNED overflowed the
+     * product (ERROR 1690) for -1, and for 9223372036854775807, which is what the event form
+     * stores for any huge number because saveEvent() keeps (string)(int). That error came out of
+     * the series query on every visit to the schedule page. SIGNED is no fix: it wraps a count
+     * past the BIGINT range, such as twenty nines, to -1. DECIMAL reads text and '' as 0 and '1e5'
+     * as 100000, as PHP's (int) does, and rounds '3.7' up, which can only keep a series longer.
+     *
+     * A period is the longest gap one counted occurrence can stand for. countOccurrences() counts
+     * addMonth() and addYear() steps, so 31 and 366 are exact bounds even on the 31st or on Feb 29.
+     * monthly_weekday counts only the months that have its nth weekday: the 1st to 4th recur
+     * within 35 days, but a 5th (a local 29th to 31st) can be 119 days after the one before.
+     * starts_at is UTC and the local date can run from 12 hours behind it to 14 hours ahead, so
+     * every date the start could fall on locally is checked: 9pm on the 31st in New York is
+     * already the 1st in UTC.
      */
     private static function afterEventsEndSql(string $table): string
     {
-        $occurrences = "CAST({$table}.recurring_end_value AS UNSIGNED)"
+        $occurrences = "LEAST(GREATEST(CAST({$table}.recurring_end_value AS DECIMAL(65,0)), 0), 100000)"
             ." + COALESCE(FLOOR(CHAR_LENGTH({$table}.recurring_exclude_dates) / 13), 0)";
+
+        $fifthWeekday = "GREATEST(DAY(DATE_SUB({$table}.starts_at, INTERVAL 12 HOUR)), DAY({$table}.starts_at),"
+            ." DAY(DATE_ADD({$table}.starts_at, INTERVAL 14 HOUR))) >= 29";
 
         $period = "CASE {$table}.recurring_frequency"
             ." WHEN 'daily' THEN 1"
             ." WHEN 'monthly_date' THEN 31"
-            ." WHEN 'monthly_weekday' THEN 35"
+            ." WHEN 'monthly_weekday' THEN CASE WHEN {$fifthWeekday} THEN 124 ELSE 35 END"
             ." WHEN 'yearly' THEN 366"
             ." WHEN 'every_n_weeks' THEN 7 * GREATEST(COALESCE({$table}.recurring_interval, 2), 1)"
             .' ELSE 7 END';
