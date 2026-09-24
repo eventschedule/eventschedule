@@ -227,8 +227,11 @@ class TicketFeesTest extends TestCase
         })));
         JS;
 
-        $harnessFile = tempnam(sys_get_temp_dir(), 'ticketfees').'.js';
-        $inputFile = tempnam(sys_get_temp_dir(), 'ticketfees').'.json';
+        // tempnam() creates its file; the suffixed paths are two more, so all four are removed.
+        $harnessBase = tempnam(sys_get_temp_dir(), 'ticketfees');
+        $inputBase = tempnam(sys_get_temp_dir(), 'ticketfees');
+        $harnessFile = $harnessBase.'.js';
+        $inputFile = $inputBase.'.json';
 
         try {
             file_put_contents($harnessFile, $harness);
@@ -251,6 +254,8 @@ class TicketFeesTest extends TestCase
         } finally {
             @unlink($harnessFile);
             @unlink($inputFile);
+            @unlink($harnessBase);
+            @unlink($inputBase);
         }
 
         $this->assertCount(count($cases), $fromNode);
@@ -269,6 +274,24 @@ class TicketFeesTest extends TestCase
      * multiplication, in an @php block or a script, is a rate that did not come from TicketFees -
      * which is exactly how /pricing and /for-talent came to leave a fee out.
      */
+    /**
+     * The calculator lays its cards out four to a row. A platform list of any other length used to
+     * switch to three columns or leave a ragged last row; it is refused instead, so a new list has to
+     * be chosen to fill the grid (CLAUDE.md: complete grids).
+     */
+    public function test_the_calculator_refuses_a_platform_list_that_would_leave_a_ragged_row(): void
+    {
+        $html = \Illuminate\Support\Facades\Blade::render('<x-marketing.fee-calculator :platforms="$p" />', [
+            'p' => array_slice(TicketFees::CALCULATOR_PLATFORMS, 0, 4),
+        ]);
+        $this->assertStringContainsString('lg:grid-cols-4', $html);
+
+        $this->expectException(\Illuminate\View\ViewException::class);
+        \Illuminate\Support\Facades\Blade::render('<x-marketing.fee-calculator :platforms="$p" />', [
+            'p' => array_slice(TicketFees::CALCULATOR_PLATFORMS, 0, 3),
+        ]);
+    }
+
     public function test_no_calculator_view_multiplies_by_a_rate_of_its_own(): void
     {
         $offenders = [];

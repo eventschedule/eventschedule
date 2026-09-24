@@ -47,8 +47,13 @@
         ];
     }
 
-    // Full class strings: an interpolated Tailwind class is never generated.
-    $feeGrid = (count($platforms) % 3 === 0 && count($platforms) % 4 !== 0) ? 'lg:grid-cols-3' : 'lg:grid-cols-4';
+    // Four to a row. Every caller passes four or eight platforms (TicketFees::COMPARE_PLATFORMS,
+    // CALCULATOR_PLATFORMS), which fill the rows exactly; any other count would leave a ragged
+    // last row, so it is refused rather than quietly laid out some other way.
+    if (count($platforms) % 4 !== 0) {
+        throw new \InvalidArgumentException('The fee calculator lays out four platforms to a row; pass a multiple of four.');
+    }
+    $feeGrid = 'lg:grid-cols-4';
 
     // The footnote says how each figure was worked out, in the order the cards run.
     $feeOnStripe = array_values(array_filter($platforms, fn ($p) => $feeRates[$p]['stripe'] ?? true));
@@ -147,43 +152,60 @@
         function money(n) { return '$' + n.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ','); }
         function whole(n) { return '$' + Math.round(n).toString().replace(/\B(?=(\d{3})+(?!\d))/g, ','); }
 
-        document.querySelectorAll('[data-fee-calculator]').forEach(function (panel) {
-            var ticketsEl = panel.querySelector('[data-fee-input="tickets"]');
-            var priceEl = panel.querySelector('[data-fee-input="price"]');
-            var rates;
-            try { rates = JSON.parse(panel.getAttribute('data-rates')); } catch (e) { return; }
-            if (!ticketsEl || !priceEl || !rates || !rates.stripe || !window.esTicketFeeCost) return;
+        // This script is printed once, after the FIRST calculator's markup, so a query run right
+        // here would miss every calculator further down the page. Bind them all once the document
+        // has been parsed.
+        function bindAll() {
+            document.querySelectorAll('[data-fee-calculator]').forEach(function (panel) {
+                var ticketsEl = panel.querySelector('[data-fee-input="tickets"]');
+                var priceEl = panel.querySelector('[data-fee-input="price"]');
+                var rates;
+                try { rates = JSON.parse(panel.getAttribute('data-rates')); } catch (e) { return; }
+                if (!ticketsEl || !priceEl || !rates || !rates.stripe || !window.esTicketFeeCost) return;
 
-            var platforms = Object.keys(rates).filter(function (key) { return key !== 'stripe'; });
-            var saving = panel.querySelector('[data-fee-saving]');
+                var platforms = Object.keys(rates).filter(function (key) { return key !== 'stripe'; });
+                var saving = panel.querySelector('[data-fee-saving]');
 
-            function calc() {
-                var tickets = parseFloat(ticketsEl.value) || 0;
-                var price = parseFloat(priceEl.value) || 0;
-                var costs = {};
-                var worst = 0;
+                function calc() {
+                    var tickets = parseFloat(ticketsEl.value) || 0;
+                    var price = parseFloat(priceEl.value) || 0;
+                    var costs = {};
+                    var worst = 0;
 
-                platforms.forEach(function (key) {
-                    costs[key] = window.esTicketFeeCost(rates[key], rates.stripe, tickets, price);
-                    worst = Math.max(worst, costs[key]);
-                });
+                    platforms.forEach(function (key) {
+                        costs[key] = window.esTicketFeeCost(rates[key], rates.stripe, tickets, price);
+                        worst = Math.max(worst, costs[key]);
+                    });
 
-                platforms.forEach(function (key) {
-                    var total = panel.querySelector('[data-fee-total="' + key + '"]');
-                    var bar = panel.querySelector('[data-fee-bar="' + key + '"]');
-                    if (total) total.textContent = money(costs[key]);
-                    if (bar) bar.style.width = (worst > 0 ? Math.max(2, Math.round((costs[key] / worst) * 100)) : 0) + '%';
-                });
+                    platforms.forEach(function (key) {
+                        var total = panel.querySelector('[data-fee-total="' + key + '"]');
+                        var bar = panel.querySelector('[data-fee-bar="' + key + '"]');
+                        if (total) total.textContent = money(costs[key]);
+                        if (bar) bar.style.width = (worst > 0 ? Math.max(2, Math.round((costs[key] / worst) * 100)) : 0) + '%';
+                    });
 
-                if (saving) {
-                    var ours = costs.eventschedule === undefined ? worst : costs.eventschedule;
-                    saving.textContent = whole(Math.max(0, worst - ours));
+                    if (saving) {
+                        var ours = costs.eventschedule === undefined ? worst : costs.eventschedule;
+                        var text = whole(Math.max(0, worst - ours));
+                        saving.textContent = text;
+                        // The odometer (marketing-home.js) makes this span role="img" with the
+                        // first-paint figure as its aria-label; without this a screen reader kept
+                        // announcing the saving for the numbers the page was rendered with.
+                        saving.setAttribute('data-odometer', text);
+                        if (saving.hasAttribute('aria-label')) saving.setAttribute('aria-label', text);
+                    }
                 }
-            }
 
-            ticketsEl.addEventListener('input', calc);
-            priceEl.addEventListener('input', calc);
-        });
+                ticketsEl.addEventListener('input', calc);
+                priceEl.addEventListener('input', calc);
+            });
+        }
+
+        if (document.readyState === 'loading') {
+            document.addEventListener('DOMContentLoaded', bindAll);
+        } else {
+            bindAll();
+        }
     })();
 </script>
 @endonce

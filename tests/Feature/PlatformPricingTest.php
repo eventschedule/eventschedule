@@ -281,9 +281,8 @@ class PlatformPricingTest extends TestCase
         $this->assertSame(4321.0, $planPrice->invoke($controller, false));
         $this->assertSame(8765.0, $planPrice->invoke($controller, true));
 
-        $rates = new \ReflectionMethod($controller, 'getHubFeeRates');
-        $rates->setAccessible(true);
-        $this->assertSame(4321.0, $rates->invoke($controller)['eventschedule']['monthly']);
+        // Every fee calculator's own price, from the same reader.
+        $this->assertSame(4321.0, \App\Utils\TicketFees::rates()['eventschedule']['monthly']);
     }
 
     public function test_the_referral_program_quotes_it(): void

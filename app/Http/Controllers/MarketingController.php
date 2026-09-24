@@ -913,7 +913,7 @@ class MarketingController extends Controller
         return view('marketing.compare', [
             'sections' => $this->getHubComparisonData(),
             'headToHead' => $this->getHubHeadToHead(),
-            'rates' => $this->getHubFeeRates(),
+            'rates' => TicketFees::rates(),
             // The open-source card renders the live star badge, which is a
             // no-op without this and leaves the card visibly empty.
             'githubStars' => \App\Utils\GitHubUtils::getStars(),
@@ -926,17 +926,6 @@ class MarketingController extends Controller
     public function ticketFeeCalculator()
     {
         return view('marketing.ticket-fee-calculator');
-    }
-
-    /**
-     * Every rate quoted on /compare: App\Utils\TicketFees, which every fee calculator on the site
-     * reads. It holds the published rates with the date each was checked, and our own price comes
-     * from the same PlatformPricing reader /pricing uses, so no two pages can quote different
-     * figures. Kept as a method because PlatformPricingTest reaches it by name.
-     */
-    private function getHubFeeRates(): array
-    {
-        return TicketFees::rates();
     }
 
     /**

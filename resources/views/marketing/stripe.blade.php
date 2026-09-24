@@ -598,7 +598,7 @@
         // from these four values in cents, so the rows, the stub and the
         // prose can never quote different numbers. The processing rate is
         // Stripe's published US card rate, the same figure the /compare
-        // fee calculator uses (MarketingController::getHubFeeRates()).
+        // fee calculator uses (App\Utils\TicketFees::rates()).
         $stmt = [
             'currency'    => 'USD',
             'grossCents'  => 2500,
