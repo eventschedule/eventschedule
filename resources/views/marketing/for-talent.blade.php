@@ -15,17 +15,16 @@
         $rail = $railCount >= 8 ? $talentEvents->take(8) : ($railCount >= 4 ? $talentEvents->take(4) : collect());
         $hasRail = $rail->isNotEmpty();
 
-        // Fee math mirrors marketing/compare.blade.php:356-357 and the /pricing
-        // calculator verbatim, so the three pages can never quote different totals.
-        // Eventbrite's 3.7% + $1.79 bundles payment processing; ours does not, so
-        // the Stripe fee is shown on our side rather than claimed as zero.
-        // $proMonthly comes from the marketing.* view composer.
-        $feeTickets = 200;
-        $feePrice = 25;
+        // The same example event and the same App\Utils\TicketFees maths as the /pricing and
+        // /compare calculators, so the three pages cannot quote different totals. Eventbrite
+        // charges its 2.9% payment processing fee per order ON TOP of the 3.7% + $1.79 service
+        // fee; ours is Stripe's rate plus the Pro subscription, shown rather than claimed as zero.
+        $feeRates = \App\Utils\TicketFees::rates();
+        $feeTickets = \App\Utils\TicketFees::EXAMPLE_TICKETS;
+        $feePrice = \App\Utils\TicketFees::EXAMPLE_PRICE;
         $feeRevenue = $feeTickets * $feePrice;
-        $feeStripe = ($feeRevenue * 0.029) + ($feeTickets * 0.30);
-        $feeEs = $proMonthly + $feeStripe;
-        $feeEb = ($feeRevenue * 0.037) + ($feeTickets * 1.79);
+        $feeEs = \App\Utils\TicketFees::cost('eventschedule', $feeTickets, $feePrice, $feeRates);
+        $feeEb = \App\Utils\TicketFees::cost('eventbrite', $feeTickets, $feePrice, $feeRates);
         $feeKeep = $feeEb - $feeEs;
 
         // Decorative only: the twelve linked audiences sit directly below it.
@@ -428,17 +427,17 @@
                     </p>
                 </div>
 
-                <div class="grid grid-cols-1 gap-4 md:grid-cols-3" data-reveal-group="110">
+                <div class="grid grid-cols-1 gap-4 md:grid-cols-3" data-reveal-group="110" data-fee-tickets="{{ $feeTickets }}" data-fee-price="{{ $feePrice }}">
                     <div class="rounded-2xl border border-white/10 bg-white/[0.05] p-6 text-center backdrop-blur-sm" data-reveal="panel">
                         <div class="mb-2 text-xs font-semibold uppercase tracking-[0.18em] text-gray-500 dark:text-gray-400">Eventbrite</div>
-                        <div class="mb-2 text-4xl font-black text-white">${{ number_format($feeEb, 2) }}</div>
-                        <p class="text-sm text-gray-500 dark:text-gray-400">3.7% + $1.79 per ticket, with payment processing bundled in.</p>
+                        <div data-fee-total="eventbrite" class="mb-2 text-4xl font-black text-white">${{ number_format($feeEb, 2) }}</div>
+                        <p class="text-sm text-gray-500 dark:text-gray-400">{{ $feeRates['eventbrite']['label'] }}.</p>
                     </div>
 
                     <div class="rounded-2xl border border-cyan-400/30 bg-cyan-500/10 p-6 text-center backdrop-blur-sm" data-reveal="panel">
                         <div class="mb-2 text-xs font-semibold uppercase tracking-[0.18em] text-cyan-300">Event Schedule</div>
-                        <div class="mb-2 text-4xl font-black text-white">${{ number_format($feeEs, 2) }}</div>
-                        <p class="text-sm text-gray-500 dark:text-gray-400">{{ plan_price($proMonthly) }} for Pro plus Stripe's 2.9% + $0.30. Our platform fee is {{ plan_price(0) }}.</p>
+                        <div data-fee-total="eventschedule" class="mb-2 text-4xl font-black text-white">${{ number_format($feeEs, 2) }}</div>
+                        <p class="text-sm text-gray-500 dark:text-gray-400">{{ plan_price($proMonthly) }} for Pro plus Stripe's {{ $feeRates['stripe']['label'] }}. Our platform fee is {{ plan_price(0) }}.</p>
                     </div>
 
                     <div class="rounded-2xl border border-white/10 bg-white/[0.05] p-6 text-center backdrop-blur-sm" data-reveal="panel">
@@ -450,7 +449,7 @@
 
                 {{-- gray-400, not gray-500: small text on the dark band needs 4.5:1. --}}
                 <p class="mx-auto mt-8 max-w-3xl text-center text-sm text-gray-500 dark:text-gray-400" data-reveal>
-                    Card processing is real either way. Eventbrite folds it into their rate; we show Stripe's separately and charge nothing on top, so the comparison is like for like.
+                    Card processing is real either way. Eventbrite adds its own 2.9% to every order on top of the service fee, and we show Stripe's on our side and charge nothing on top, so the comparison is like for like.
                     <a href="{{ marketing_url('/pricing') }}#fees" class="ms-1 font-medium text-cyan-300 hover:underline">Run your own numbers</a>
                 </p>
             </div>

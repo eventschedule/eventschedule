@@ -79,10 +79,12 @@ class MarketingPriceTest extends TestCase
             "['Free', '\$0', 0], ['Pro', '\$29', 1]",
             '$29/mo after trial',
         ],
-        'compare.blade.php' => [
+        // The fee calculator /compare renders. A dollar calculator on purpose, our own column
+        // included: everything else in it is competitors' published US pricing (TicketFees).
+        'components/marketing/fee-calculator.blade.php' => [
             'number_format($card[\'value\'], 2)',
-            'data-odometer="${{ number_format($calcSaving, 0) }}"',
-            '\'note\' => \'$\'.$rates[\'eventschedule\'][\'monthly\']',
+            'data-odometer="${{ number_format($feeSaving, 0) }}"',
+            '\'$\'.$feeRates[\'eventschedule\'][\'monthly\']',
         ],
         'for-breweries-and-wineries.blade.php' => [
             '${{ $wPrice }}',
@@ -106,9 +108,30 @@ class MarketingPriceTest extends TestCase
     /** Price literals that are ours, across every generation. Retired ones must not come back. */
     private const PLAN_AMOUNTS = '5|9|12|15|19|29|50|90|150|290';
 
+    /**
+     * The marketing views, and the marketing components they are assembled from. A component is
+     * where a shared block of copy ends up once two pages need it (the fee calculator moved out of
+     * /compare into one), and a price written there reaches every page that renders it.
+     */
     private function marketingViews(): array
     {
-        return File::allFiles(resource_path('views/marketing'));
+        return array_merge(
+            File::allFiles(resource_path('views/marketing')),
+            File::allFiles(resource_path('views/components/marketing')),
+        );
+    }
+
+    /**
+     * A scanned file's key in ALLOWED: relative to views/marketing for a page, and to views/ for a
+     * component, so 'components/marketing/x.blade.php' can never collide with a page's name.
+     */
+    private function relativeName(string $path): string
+    {
+        $pages = resource_path('views/marketing').'/';
+
+        return str_starts_with($path, $pages)
+            ? substr($path, strlen($pages))
+            : str_replace(resource_path('views').'/', '', $path);
     }
 
     /**
@@ -158,7 +181,7 @@ class MarketingPriceTest extends TestCase
         $offenders = [];
 
         foreach ($this->marketingViews() as $file) {
-            $relative = str_replace(resource_path('views/marketing').'/', '', $file->getPathname());
+            $relative = $this->relativeName($file->getPathname());
             $lines = explode("\n", File::get($file->getPathname()));
 
             foreach ($lines as $index => $line) {
@@ -195,7 +218,7 @@ class MarketingPriceTest extends TestCase
         $offenders = [];
 
         foreach ($this->marketingViews() as $file) {
-            $relative = str_replace(resource_path('views/marketing').'/', '', $file->getPathname());
+            $relative = $this->relativeName($file->getPathname());
 
             foreach (explode("\n", File::get($file->getPathname())) as $index => $line) {
                 if ($this->isAllowed($relative, $line)) {
@@ -225,7 +248,7 @@ class MarketingPriceTest extends TestCase
         $files = $this->marketingViews();
         $sources = [];
         foreach ($files as $file) {
-            $sources[str_replace(resource_path('views/marketing').'/', '', $file->getPathname())] = $file->getPathname();
+            $sources[$this->relativeName($file->getPathname())] = $file->getPathname();
         }
         $sources['MarketingController.php'] = app_path('Http/Controllers/MarketingController.php');
         $sources['SeoUtils.php'] = app_path('Utils/SeoUtils.php');
@@ -260,7 +283,7 @@ class MarketingPriceTest extends TestCase
         $offenders = [];
 
         foreach ($this->marketingViews() as $file) {
-            $relative = str_replace(resource_path('views/marketing').'/', '', $file->getPathname());
+            $relative = $this->relativeName($file->getPathname());
 
             foreach (explode("\n", File::get($file->getPathname())) as $index => $line) {
                 if (preg_match('~"priceCurrency"\s*:\s*"[A-Z]{3}"~', $line)) {
@@ -332,7 +355,7 @@ class MarketingPriceTest extends TestCase
         $stale = [];
 
         foreach (self::ALLOWED as $relative => $snippets) {
-            $path = resource_path('views/marketing/'.$relative);
+            $path = resource_path(str_starts_with($relative, 'components/') ? 'views/'.$relative : 'views/marketing/'.$relative);
 
             if (! File::exists($path)) {
                 $stale[] = "{$relative}: file no longer exists";
@@ -363,7 +386,7 @@ class MarketingPriceTest extends TestCase
         $offenders = [];
 
         foreach ($this->marketingViews() as $file) {
-            $relative = str_replace(resource_path('views/marketing').'/', '', $file->getPathname());
+            $relative = $this->relativeName($file->getPathname());
 
             foreach (explode("\n", File::get($file->getPathname())) as $index => $line) {
                 // "dollars" is required, so "capped at five" team members, "twenty-five paid
@@ -473,7 +496,7 @@ class MarketingPriceTest extends TestCase
         $offenders = [];
 
         foreach ($this->marketingViews() as $file) {
-            $relative = str_replace(resource_path('views/marketing').'/', '', $file->getPathname());
+            $relative = $this->relativeName($file->getPathname());
             $lines = explode("\n", File::get($file->getPathname()));
 
             foreach ($lines as $index => $line) {
@@ -547,7 +570,7 @@ class MarketingPriceTest extends TestCase
 
         $sources = [];
         foreach ($this->marketingViews() as $file) {
-            $sources[str_replace(resource_path('views/marketing').'/', '', $file->getPathname())] = $file->getPathname();
+            $sources[$this->relativeName($file->getPathname())] = $file->getPathname();
         }
         $sources['MarketingController.php'] = app_path('Http/Controllers/MarketingController.php');
         $sources['SeoUtils.php'] = app_path('Utils/SeoUtils.php');

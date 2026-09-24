@@ -41,27 +41,6 @@
                 'a' => 'Not to publish. The free plan is free forever with unlimited events, unlimited schedules and unlimited free registration. Selling a ticket that carries a price is Pro at '.plan_price($rates['eventschedule']['monthly']).'/mo, which also adds the API, and selfhosted installs get every paid feature at no cost.',
             ],
         ];
-
-        // Server-rendered calculator defaults, so the figures are correct with
-        // JS off and for crawlers. The script recomputes with the same maths.
-        $calcTickets = 100;
-        $calcPrice = 10;
-        $calcRevenue = $calcTickets * $calcPrice;
-        $stripeCost = ($calcRevenue * $rates['stripe']['percent']) + ($calcTickets * $rates['stripe']['fixed']);
-
-        $costOf = function (array $rate) use ($calcRevenue, $calcTickets, $stripeCost) {
-            // 'processing' is a platform's own card fee, charged instead of Stripe's (Eventbrite).
-            $own = ($calcRevenue * ($rate['percent'] + ($rate['processing'] ?? 0))) + ($calcTickets * $rate['fixed']) + ($rate['monthly'] ?? 0);
-
-            return $own + (($rate['stripe'] ?? true) ? $stripeCost : 0);
-        };
-
-        $esCost = $costOf($rates['eventschedule']);
-        $ebCost = $costOf($rates['eventbrite']);
-        $lumaCost = min($costOf($rates['luma']), $rates['luma']['monthly'] + $stripeCost);
-        $ttCost = $costOf($rates['ticket-tailor']);
-        $worstCost = max($ebCost, $lumaCost, $ttCost);
-        $calcSaving = max(0, $worstCost - $esCost);
     @endphp
 
     <x-slot name="structuredData">
@@ -436,21 +415,9 @@
     <!-- What it actually costs                                      -->
     <!-- ============================================================ -->
     {{-- Not a duplicate of /pricing's calculator: that one compares us with
-         "a typical platform" at a blended rate, this one names real platforms
-         at their published rates. The maths is shared so the two cannot
-         disagree, and every rate comes from getHubFeeRates(). --}}
-    @php
-        $calcCards = [
-            // Deliberately still a dollar sign, and NOT plan_price(). This row sits inside the
-            // fee calculator, whose other rows are competitors' published US pricing; rendering
-            // ours in the platform currency would put "R9/mo" beside a "$247.50" saving and
-            // compare two different currencies. The calculator is a USD unit or nothing.
-            ['key' => 'eventschedule', 'id' => 'fc-es', 'value' => $esCost, 'best' => true, 'note' => '$'.$rates['eventschedule']['monthly'].'/mo + Stripe, 0% platform fee'],
-            ['key' => 'eventbrite', 'id' => 'fc-eb', 'value' => $ebCost, 'best' => false, 'note' => $rates['eventbrite']['label']],
-            ['key' => 'luma', 'id' => 'fc-luma', 'value' => $lumaCost, 'best' => false, 'note' => $rates['luma']['label']],
-            ['key' => 'ticket-tailor', 'id' => 'fc-tt', 'value' => $ttCost, 'best' => false, 'note' => $rates['ticket-tailor']['label']],
-        ];
-    @endphp
+         "a typical platform" at Eventbrite's rates, this one names real platforms
+         at their published rates. Both read App\Utils\TicketFees, so the two
+         cannot disagree. --}}
     <section id="fees" class="relative scroll-mt-24 overflow-hidden bg-white py-16 dark:bg-[#0a0a0f] lg:py-24">
         <div class="mx-auto max-w-5xl px-4 sm:px-6 lg:px-8">
             <div class="mb-10 text-center">
@@ -462,56 +429,7 @@
                 </p>
             </div>
 
-            <div class="rounded-3xl border border-gray-200 bg-gray-50 p-6 shadow-sm dark:border-white/10 dark:bg-white/[0.04] sm:p-10"
-                 data-reveal="panel" data-pro-monthly="{{ $rates['eventschedule']['monthly'] }}">
-
-                <div class="mb-10 flex flex-col items-center justify-center gap-6 sm:flex-row">
-                    <div class="flex items-center gap-3">
-                        <label for="fc-tickets" class="whitespace-nowrap text-sm font-medium text-gray-700 dark:text-gray-300">Tickets sold</label>
-                        <input id="fc-tickets" type="number" value="{{ $calcTickets }}" min="1" max="100000" class="w-28 rounded-xl border border-gray-200 bg-white px-3 py-2.5 text-sm text-gray-900 focus:border-transparent focus:ring-2 focus:ring-blue-500 dark:border-white/10 dark:bg-white/5 dark:text-white">
-                    </div>
-                    <div class="flex items-center gap-3">
-                        <label for="fc-price" class="whitespace-nowrap text-sm font-medium text-gray-700 dark:text-gray-300">Ticket price</label>
-                        <div class="relative">
-                            <span class="absolute top-1/2 -translate-y-1/2 text-sm text-gray-500 dark:text-gray-400 ltr:left-3 rtl:right-3">$</span>
-                            <input id="fc-price" type="number" value="{{ $calcPrice }}" min="1" max="10000" class="w-28 rounded-xl border border-gray-200 bg-white py-2.5 text-sm text-gray-900 focus:border-transparent focus:ring-2 focus:ring-blue-500 dark:border-white/10 dark:bg-white/5 dark:text-white ltr:pl-7 ltr:pr-3 rtl:pr-7 rtl:pl-3">
-                        </div>
-                    </div>
-                </div>
-
-                <div class="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4" data-reveal-group="70">
-                    @foreach ($calcCards as $card)
-                        <div data-reveal class="relative flex flex-col rounded-2xl border p-5 {{ $card['best']
-                            ? 'border-blue-300 bg-white ring-2 ring-blue-500/25 dark:border-blue-500/40 dark:bg-white/[0.06] dark:ring-blue-400/20'
-                            : 'border-gray-200 bg-white dark:border-white/10 dark:bg-white/5' }}">
-                            @if ($card['best'])
-                                <span class="absolute -top-3 rounded-full bg-gradient-to-r from-blue-600 to-sky-500 px-3 py-1 text-[11px] font-bold uppercase tracking-wide text-white shadow-lg shadow-blue-500/30 ltr:right-4 rtl:left-4">Ours</span>
-                            @endif
-                            <div class="mb-1 text-sm font-semibold text-gray-900 dark:text-white">{{ $rates[$card['key']]['name'] }}</div>
-                            <div class="mb-3 text-xs text-gray-500 dark:text-gray-400">{{ $card['note'] }}</div>
-                            <div id="{{ $card['id'] }}" class="text-3xl font-black tabular-nums {{ $card['best'] ? 'es-keep' : 'es-cost' }}">${{ number_format($card['value'], 2) }}</div>
-                            <div class="mt-3 h-2 overflow-hidden rounded-full bg-gray-100 dark:bg-white/10">
-                                <div id="{{ $card['id'] }}-bar" class="es-bar h-full rounded-full {{ $card['best'] ? 'bg-emerald-500' : 'bg-rose-500' }}" style="width: {{ $worstCost > 0 ? max(2, round(($card['value'] / $worstCost) * 100)) : 0 }}%;"></div>
-                            </div>
-                        </div>
-                    @endforeach
-                </div>
-
-                <div class="mt-10 text-center">
-                    <p class="text-lg text-gray-700 dark:text-gray-300">
-                        On this event you keep up to
-                        <span id="fc-savings" class="es-od es-keep mx-1 justify-center align-middle text-4xl font-black tabular-nums sm:text-5xl" data-odometer="${{ number_format($calcSaving, 0) }}">${{ number_format($calcSaving, 0) }}</span>
-                        more.
-                    </p>
-                    <a href="{{ app_url('/sign_up') }}" class="group mt-6 inline-flex items-center justify-center gap-2 rounded-2xl bg-gradient-to-r from-blue-600 to-sky-600 px-7 py-3.5 font-semibold text-white shadow-lg shadow-blue-500/25 transition-all duration-200 hover:-translate-y-0.5 hover:scale-[1.02] hover:shadow-2xl hover:shadow-blue-500/40">
-                        Start free
-                        <svg aria-hidden="true" class="h-5 w-5 transition-transform group-hover:translate-x-1 rtl:rotate-180" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6" /></svg>
-                    </a>
-                    <p class="mx-auto mt-5 max-w-2xl text-xs text-gray-500 dark:text-gray-400">
-                        Estimates from each platform's published rates. Stripe processing ({{ $rates['stripe']['label'] }}) is included for Event Schedule, Luma and Ticket Tailor. Eventbrite is shown with the 2.9% payment processing fee per order that its pricing page adds on top of the service fee. Ticket Tailor publishes {{ $rates['ticket-tailor']['range'] }} depending on volume, so the midpoint is used here. Luma is shown at whichever of its free and Plus plans is cheaper for the event, with Plus at its annual-billing price. Our own figure includes the Pro subscription, because that is what a priced ticket takes; an event that only collects free registrations carries no monthly cost at all.
-                    </p>
-                </div>
-            </div>
+            <x-marketing.fee-calculator :tickets="100" :price="10" data-reveal="panel" />
         </div>
     </section>
 
@@ -916,7 +834,7 @@
         </ul>
     </nav>
 
-    <!-- Platform picker, matrix disclosure and fee calculator (no inline handlers) -->
+    <!-- Platform picker and matrix disclosure (no inline handlers); the fee calculator carries its own script -->
     <script {!! nonce_attr() !!}>
         (function () {
             var wrap = document.querySelector('.es-picker');
@@ -988,58 +906,6 @@
             }
             if (mq.addEventListener) { mq.addEventListener('change', sync); }
             sync();
-        })();
-
-        (function () {
-            var ticketsEl = document.getElementById('fc-tickets');
-            var priceEl = document.getElementById('fc-price');
-            if (!ticketsEl || !priceEl) return;
-
-            var panel = ticketsEl.closest('[data-pro-monthly]');
-            // The fallback is rendered from config rather than written as a literal. A hardcoded
-            // number here survived the price raise and kept quoting the old $5.
-            var proMonthly = parseFloat(panel && panel.getAttribute('data-pro-monthly')) || {{ $proMonthly }};
-
-            var out = {
-                es: document.getElementById('fc-es'),
-                eb: document.getElementById('fc-eb'),
-                luma: document.getElementById('fc-luma'),
-                tt: document.getElementById('fc-tt'),
-                saving: document.getElementById('fc-savings'),
-            };
-
-            function fmt(n) { return '$' + n.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ','); }
-            function fmt0(n) { return '$' + Math.round(n).toString().replace(/\B(?=(\d{3})+(?!\d))/g, ','); }
-
-            // Same rates the server rendered with, from getHubFeeRates().
-            function calc() {
-                var tickets = parseFloat(ticketsEl.value) || 0;
-                var price = parseFloat(priceEl.value) || 0;
-                var revenue = tickets * price;
-                var stripe = (revenue * 0.029) + (tickets * 0.30);
-
-                var es = proMonthly + stripe;
-                var eb = (revenue * (0.037 + 0.029)) + (tickets * 1.79);
-                var luma = Math.min((revenue * 0.05) + stripe, 59 + stripe);
-                var tt = (tickets * 0.44) + stripe;
-
-                var worst = Math.max(eb, luma, tt);
-                var saving = Math.max(0, worst - es);
-
-                if (out.es) out.es.textContent = fmt(es);
-                if (out.eb) out.eb.textContent = fmt(eb);
-                if (out.luma) out.luma.textContent = fmt(luma);
-                if (out.tt) out.tt.textContent = fmt(tt);
-                if (out.saving) out.saving.textContent = fmt0(saving);
-
-                [['fc-es', es], ['fc-eb', eb], ['fc-luma', luma], ['fc-tt', tt]].forEach(function (pair) {
-                    var bar = document.getElementById(pair[0] + '-bar');
-                    if (bar) bar.style.width = (worst > 0 ? Math.max(2, Math.round((pair[1] / worst) * 100)) : 0) + '%';
-                });
-            }
-
-            ticketsEl.addEventListener('input', calc);
-            priceEl.addEventListener('input', calc);
         })();
     </script>
 

@@ -10,6 +10,7 @@ use App\Utils\AdminReauthUtils;
 use App\Utils\DiscoveryUtils;
 use App\Utils\DocsUtils;
 use App\Utils\PlatformPricing;
+use App\Utils\TicketFees;
 use App\Utils\UrlUtils;
 use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Builder;
@@ -904,62 +905,14 @@ class MarketingController extends Controller
     }
 
     /**
-     * Every rate quoted on /compare, in one place.
-     *
-     * These numbers used to be retyped in the table, the calculator markup,
-     * the calculator JS, the FAQ and the JSON-LD: Luma's monthly price alone
-     * appeared four times and Stripe's rate six. The view and its script now
-     * both read this, so a change lands everywhere at once.
-     *
-     * Our own price comes from the same config /pricing reads, so the two
-     * pages cannot quote different figures.
+     * Every rate quoted on /compare: App\Utils\TicketFees, which every fee calculator on the site
+     * reads. It holds the published rates with the date each was checked, and our own price comes
+     * from the same PlatformPricing reader /pricing uses, so no two pages can quote different
+     * figures. Kept as a method because PlatformPricingTest reaches it by name.
      */
     private function getHubFeeRates(): array
     {
-        return [
-            'stripe' => ['percent' => 0.029, 'fixed' => 0.30, 'label' => '2.9% + $0.30 per ticket'],
-
-            'eventschedule' => [
-                'name' => 'Event Schedule',
-                'monthly' => PlatformPricing::proMonthly(),
-                'percent' => 0.0,
-                'fixed' => 0.0,
-                'label' => '0% platform fee',
-            ],
-
-            // Published rates. Each competitor's own comparison page carries
-            // the same figure; see getComparisonData().
-            'eventbrite' => [
-                'name' => 'Eventbrite',
-                'monthly' => 0,
-                'percent' => 0.037,
-                'fixed' => 1.79,
-                // Not Stripe: Eventbrite takes its own 2.9% payment processing fee per
-                // order, listed separately from the service fee on its pricing page.
-                'processing' => 0.029,
-                'stripe' => false,
-                'label' => '3.7% + $1.79 per ticket, plus 2.9% per order',
-            ],
-            'luma' => [
-                'name' => 'Luma',
-                'monthly' => 59,
-                'percent' => 0.05,
-                'fixed' => 0.0,
-                'label' => '5% on the free plan, 0% on Plus at $59/mo',
-            ],
-            'ticket-tailor' => [
-                'name' => 'Ticket Tailor',
-                'monthly' => 0,
-                'percent' => 0.0,
-                // Published as a $0.28-$0.60 per-ticket band that narrows with
-                // volume. The midpoint is used for the estimate and the range
-                // is stated in the footnote, so the page quotes one number
-                // instead of the three it used to.
-                'fixed' => 0.44,
-                'range' => '$0.28-$0.60 per ticket',
-                'label' => '$0.28-$0.60 per ticket',
-            ],
-        ];
+        return TicketFees::rates();
     }
 
     /**

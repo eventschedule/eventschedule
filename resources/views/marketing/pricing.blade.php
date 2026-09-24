@@ -67,13 +67,15 @@
             '1,000 ' . __('messages.newsletters_per_month'),
         ];
 
-        // Fee calculator defaults, computed server-side so the section is correct
-        // and meaningful with JavaScript disabled. Same math as compare.blade.php.
-        $calcTickets = 200;
-        $calcPrice = 25;
-        $calcRevenue = $calcTickets * $calcPrice;
-        $calcEs = $proMonthly + ($calcRevenue * 0.029) + ($calcTickets * 0.30);
-        $calcEb = ($calcRevenue * 0.037) + ($calcTickets * 1.79);
+        // Fee calculator defaults, computed server-side so the section is correct and meaningful
+        // with JavaScript disabled. Everything comes from App\Utils\TicketFees, like /compare and
+        // /for-talent; the "typical platform" is Eventbrite at its published US rates, processing
+        // fee included, and the script below recomputes from the same rates (data-rates).
+        $feeRates = \App\Utils\TicketFees::rates();
+        $calcTickets = \App\Utils\TicketFees::EXAMPLE_TICKETS;
+        $calcPrice = \App\Utils\TicketFees::EXAMPLE_PRICE;
+        $calcEs = \App\Utils\TicketFees::cost('eventschedule', $calcTickets, $calcPrice, $feeRates);
+        $calcEb = \App\Utils\TicketFees::cost('eventbrite', $calcTickets, $calcPrice, $feeRates);
         $calcSave = $calcEb - $calcEs;
         $calcEsBar = $calcEb > 0 ? round(($calcEs / $calcEb) * 100) : 0;
 
@@ -383,7 +385,8 @@
             </div>
 
             <div class="rounded-3xl border border-gray-200 bg-gray-50 p-6 shadow-sm dark:border-white/10 dark:bg-white/[0.04] sm:p-10"
-                 data-reveal="panel" data-pro-monthly="{{ $proMonthly }}">
+                 data-reveal="panel" data-fee-tickets="{{ $calcTickets }}" data-fee-price="{{ $calcPrice }}"
+                 data-rates="{{ json_encode(\App\Utils\TicketFees::forScript(['eventschedule', 'eventbrite'], $feeRates)) }}">
 
                 <div class="mb-10 flex flex-col items-center justify-center gap-6 sm:flex-row">
                     <div class="flex items-center gap-3">
@@ -402,8 +405,8 @@
                 <div class="grid grid-cols-1 gap-4 sm:grid-cols-2">
                     <div class="rounded-2xl border border-gray-200 bg-white p-6 dark:border-white/10 dark:bg-white/5">
                         <div class="mb-1 text-sm font-semibold text-gray-900 dark:text-white">Typical ticketing platform</div>
-                        <div class="mb-3 text-xs text-gray-500 dark:text-gray-400">3.7% + $1.79 per ticket</div>
-                        <div id="pf-eb" class="mb-3 text-4xl font-black tracking-tight text-gray-900 tabular-nums dark:text-white">${{ number_format($calcEb, 2) }}</div>
+                        <div class="mb-3 text-xs text-gray-500 dark:text-gray-400">{{ $feeRates['eventbrite']['label'] }}</div>
+                        <div id="pf-eb" data-fee-total="eventbrite" class="mb-3 text-4xl font-black tracking-tight text-gray-900 tabular-nums dark:text-white">${{ number_format($calcEb, 2) }}</div>
                         <div class="h-2 overflow-hidden rounded-full bg-gray-100 dark:bg-white/10">
                             <div class="h-full rounded-full bg-gray-400 dark:bg-gray-500" style="width: 100%"></div>
                         </div>
@@ -411,13 +414,13 @@
 
                     <div class="rounded-2xl border-2 border-emerald-300 bg-emerald-50/60 p-6 dark:border-emerald-500/40 dark:bg-emerald-500/10">
                         <div class="mb-1 text-sm font-semibold text-emerald-800 dark:text-emerald-300">Event Schedule Pro</div>
-                        {{-- Deliberately still a dollar sign, and NOT plan_price(). This label sits
-                             inside the fee calculator, whose totals ($calcEs above literally adds
-                             $proMonthly to Stripe's USD per-ticket fee, and $calcEb is Eventbrite's
-                             published US pricing) are a USD unit. Converting just this line would put
-                             "R9/month" directly above "$247.50". Same call as compare.blade.php. --}}
-                        <div class="mb-3 text-xs text-emerald-800 dark:text-emerald-400/80">{{ plan_price($proMonthly) }}/month + Stripe, 0% platform fee</div>
-                        <div id="pf-es" class="mb-3 text-4xl font-black tracking-tight text-emerald-700 tabular-nums dark:text-emerald-300">${{ number_format($calcEs, 2) }}</div>
+                        {{-- Deliberately a dollar sign, and NOT plan_price(). This label sits inside
+                             the fee calculator, whose totals ($calcEs adds the Pro price to Stripe's
+                             USD per-ticket fee, and $calcEb is Eventbrite's published US pricing) are
+                             a USD unit. Converting just this line would put "R9/month" directly above
+                             "$247.50". Same call as the <x-marketing.fee-calculator> component. --}}
+                        <div class="mb-3 text-xs text-emerald-800 dark:text-emerald-400/80">${{ $feeRates['eventschedule']['monthly'] }}/month + Stripe, 0% platform fee</div>
+                        <div id="pf-es" data-fee-total="eventschedule" class="mb-3 text-4xl font-black tracking-tight text-emerald-700 tabular-nums dark:text-emerald-300">${{ number_format($calcEs, 2) }}</div>
                         <div class="h-2 overflow-hidden rounded-full bg-emerald-100 dark:bg-emerald-500/20">
                             <div id="pf-bar" class="h-full rounded-full bg-emerald-500" style="width: {{ $calcEsBar }}%"></div>
                         </div>
@@ -433,7 +436,7 @@
                         <svg aria-hidden="true" class="h-5 w-5 transition-transform group-hover:translate-x-1 rtl:rotate-180" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6" /></svg>
                     </a>
                     <p class="mt-5 text-xs text-gray-500 dark:text-gray-400">
-                        Stripe processing (2.9% + $0.30 per ticket) is included on the Event Schedule side. The comparison platform bundles processing into its own rate. Payouts go straight to your own Stripe account; connect PayPal instead and the money lands in your PayPal account the same way, at PayPal's own rate.
+                        Stripe processing ({{ $feeRates['stripe']['label'] }}) is included on the Event Schedule side. The typical platform is Eventbrite at its published US rates, with the 2.9% payment processing fee it charges on each order on top of the service fee. Payouts go straight to your own Stripe account; connect PayPal instead and the money lands in your PayPal account the same way, at PayPal's own rate.
                     </p>
                 </div>
             </div>
@@ -578,6 +581,7 @@
     </nav>
 
     <!-- Billing toggle + fee calculator + mobile plan disclosure (vanilla JS) -->
+    @include('marketing.partials.ticket-fee-math')
     <script {!! nonce_attr() !!}>
         (function () {
             var wrap = document.getElementById('pricing-plans');
@@ -601,22 +605,22 @@
             var ebEl = document.getElementById('pf-eb');
             var saveEl = document.getElementById('pf-save');
             var barEl = document.getElementById('pf-bar');
-            if (!ticketsEl || !priceEl || !esEl || !ebEl || !saveEl || !barEl) return;
+            if (!ticketsEl || !priceEl || !esEl || !ebEl || !saveEl || !barEl || !window.esTicketFeeCost) return;
 
-            var panel = ticketsEl.closest('[data-pro-monthly]');
-            // The fallback is rendered from config rather than written as a literal. A hardcoded
-            // number here survived the price raise and kept quoting the old $5.
-            var proMonthly = parseFloat(panel && panel.getAttribute('data-pro-monthly')) || {{ $proMonthly }};
+            // The same rates the server rendered with (App\Utils\TicketFees), through the same
+            // formula, so this panel, /compare and /for-talent cannot disagree.
+            var panel = ticketsEl.closest('[data-rates]');
+            var rates;
+            try { rates = JSON.parse(panel.getAttribute('data-rates')); } catch (e) { return; }
+            if (!rates || !rates.stripe || !rates.eventschedule || !rates.eventbrite) return;
 
             function fmt(n) { return '$' + n.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ','); }
 
-            // Same math as the /compare fee calculator so the two pages cannot disagree.
             function calc() {
                 var tickets = parseFloat(ticketsEl.value) || 0;
                 var price = parseFloat(priceEl.value) || 0;
-                var revenue = tickets * price;
-                var esTotal = proMonthly + (revenue * 0.029) + (tickets * 0.30);
-                var ebTotal = (revenue * 0.037) + (tickets * 1.79);
+                var esTotal = window.esTicketFeeCost(rates.eventschedule, rates.stripe, tickets, price);
+                var ebTotal = window.esTicketFeeCost(rates.eventbrite, rates.stripe, tickets, price);
                 var save = ebTotal - esTotal;
                 esEl.textContent = fmt(esTotal);
                 ebEl.textContent = fmt(ebTotal);
