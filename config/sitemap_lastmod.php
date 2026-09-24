@@ -203,6 +203,7 @@ return [
     '/tito-alternative' => '2026-09-24',
     '/tockify-alternative' => '2026-09-24',
     '/trello-replacement' => '2026-09-24',
+    '/universe-alternative' => '2026-09-24',
     '/use-cases' => '2026-09-23',
     '/whova-alternative' => '2026-09-24',
     '/why-create-account' => '2026-09-24',

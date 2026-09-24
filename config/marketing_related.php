@@ -775,7 +775,7 @@ return [
 
     'dice-alternative' => [
         ['title' => 'Eventbrite Alternative', 'path' => '/eventbrite-alternative', 'blurb' => 'Keep more of every ticket you sell.'],
-        ['title' => 'Ticket Tailor Alternative', 'path' => '/ticket-tailor-alternative', 'blurb' => 'Zero platform fees, open source flexibility, and AI features.'],
+        ['title' => 'Universe Alternative', 'path' => '/universe-alternative', 'blurb' => 'Zero platform fees instead of a service fee on every ticket.'],
         ['title' => 'Compare Alternatives', 'path' => '/compare', 'blurb' => 'See how Event Schedule stacks up against other platforms.'],
         ['title' => 'Pricing', 'path' => '/pricing', 'blurb' => 'See what is included on Free, Pro, and Enterprise plans.'],
     ],
@@ -962,6 +962,15 @@ return [
         ['title' => 'Ticket Fee Calculator', 'path' => '/ticket-fee-calculator', 'blurb' => 'What AllEvents, Eventbrite and six other platforms take from your ticket sales.'],
         ['title' => 'Event Landing Page', 'path' => '/event-landing-page', 'blurb' => 'Every event gets a free page: the flyer, the date, a map and a ticket button.'],
         ['title' => 'Community Event Calendar', 'path' => '/community-event-calendar', 'blurb' => 'One shared calendar for a town, fed by the organizers in it.'],
+        ['title' => 'Pricing', 'path' => '/pricing', 'blurb' => 'See what is included on Free, Pro, and Enterprise plans.'],
+    ],
+
+    // Universe retired its seat maps in 2019 and sells long runs of timed dates, so the seating and
+    // recurring-event pages are the cards a reader weighing the two is most likely to want next.
+    'universe-alternative' => [
+        ['title' => 'Ticket Fee Calculator', 'path' => '/ticket-fee-calculator', 'blurb' => 'What Universe, Eventbrite and six other platforms take from your ticket sales.'],
+        ['title' => 'Allocated Seating', 'path' => '/features/allocated-seating', 'blurb' => 'Draw your room once and let buyers pick their own seats from a map of it.'],
+        ['title' => 'Recurring Events', 'path' => '/features/recurring-events', 'blurb' => 'Set a long run of dates once, with tickets counted per date.'],
         ['title' => 'Pricing', 'path' => '/pricing', 'blurb' => 'See what is included on Free, Pro, and Enterprise plans.'],
     ],
 

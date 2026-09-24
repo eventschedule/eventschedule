@@ -175,6 +175,7 @@ class GenerateSocialImages extends Command
         'ticketleap-alternative' => '/ticketleap-alternative',
         'songkick-alternative' => '/songkick-alternative',
         'allevents-alternative' => '/allevents-alternative',
+        'universe-alternative' => '/universe-alternative',
 
         // Replacement pages
         'replace' => '/replace',

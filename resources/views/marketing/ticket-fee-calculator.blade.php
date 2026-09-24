@@ -80,8 +80,8 @@
                 'rate' => $feeRates['universe']['label'],
                 'how' => 'On the US Starter tier, '.$pct($feeRates['universe']['percent']).' + '.$usd($feeRates['universe']['fixed']).' on each ticket, capped at '.$usd($feeRates['universe']['cap']).', plus a '.$pct($feeRates['universe']['processing']).' processing fee through Universe Payments. Connect your own Stripe account instead and the service fee stays, with Stripe\'s rate in place of the processing fee.',
                 'source' => 'support.universe.com, payment processing preferences',
-                'route' => null,
-                'link' => null,
+                'route' => 'marketing.compare_universe',
+                'link' => 'Universe alternative',
             ],
             [
                 'key' => 'allevents',

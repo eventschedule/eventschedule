@@ -173,6 +173,10 @@ echo '<?xml version="1.0" encoding="UTF-8"?>'; ?>
         {!! $lastmodTag('/allevents-alternative') !!}
     </url>
     <url>
+        <loc>{{ url('/universe-alternative') }}</loc>
+        {!! $lastmodTag('/universe-alternative') !!}
+    </url>
+    <url>
         <loc>{{ url('/replace') }}</loc>
         {!! $lastmodTag('/replace') !!}
     </url>

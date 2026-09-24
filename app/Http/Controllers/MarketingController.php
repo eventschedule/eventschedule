@@ -1172,6 +1172,14 @@ class MarketingController extends Controller
     }
 
     /**
+     * Compare vs Universe page
+     */
+    public function compareUniverse()
+    {
+        return view('marketing.compare-single', $this->getComparisonData('universe'));
+    }
+
+    /**
      * Replace hub page
      */
     public function replace()
@@ -1870,7 +1878,8 @@ class MarketingController extends Controller
         'brown-paper-tickets', 'addevent', 'pretix', 'eventzilla',
         'facebook-events', 'partiful', 'posh', 'bandsintown',
         'the-events-calendar', 'timely', 'tockify', 'zeffy',
-        'hi-events', 'mobilizon', 'ticketleap', 'songkick', 'allevents',
+        'hi-events', 'mobilizon', 'ticketleap', 'songkick',
+        'allevents', 'universe',
     ];
 
     /**
@@ -5751,6 +5760,131 @@ class MarketingController extends Controller
                     ['question' => 'Can Event Schedule promote my event like AllEvents?', 'answer' => 'Event Schedule is built around your own schedule page rather than a shared marketplace. People who sign up on your schedule get an email when you add events, you can send newsletters, and on Pro you can boost an event with a Facebook and Instagram ad. If reaching strangers in your city matters most, AllEvents does more of that.'],
                     ['question' => 'Can I sell tickets on my own website?', 'answer' => 'Yes, on Pro. The ticket widget puts checkout on your own site, and the embeddable calendar, which is free, lists every upcoming event. AllEvents offers event list plugins and a ticket embed as well.'],
                     ['question' => 'Are the API and webhooks included?', 'answer' => 'Yes, both are on Pro at '.plan_price($this->planPrice()).'/mo, with a REST API for events, schedules and sales. AllEvents includes webhooks from its Professional plan at USD 60 a month, and its API is a data product for event listings rather than for managing your own events.'],
+                ],
+            ],
+
+            // Universe cells checked 2026-09-24 against universe.com/pricing (plan list and its embedded fee table), universe.com/features
+            // and support.universe.com (fees, payment processing, payouts, waitlist, discount codes, BoxOffice, embeddable widgets,
+            // webhooks, OAuth API, Mailchimp, message attendees, private events, product updates). Still onboarding organizers.
+            // Custom domains and calendar sync were not found and are left out.
+            'universe' => [
+                'name' => 'Universe',
+                'key' => 'universe',
+                'slug' => 'universe-alternative',
+                'meta_title' => 'Universe Alternative With 0% Platform Fees | Event Schedule',
+                'tagline' => 'Ticketing with zero platform fees, payouts into your own account, reserved seating and two-way calendar sync.',
+                'description' => 'Compare Event Schedule with Universe: zero platform fees instead of 2% + $0.79 a ticket plus 3% processing, reserved seating, and two-way calendar sync.',
+                'keywords' => 'universe alternative, universe.com alternative, universe ticketing alternative, ticketmaster universe alternative, timed entry ticketing',
+                'about' => 'Universe is a self-serve ticketing platform owned by Ticketmaster since 2015, used by attractions, clubs and event organizers. Publishing is free, paid tickets carry a per-ticket service fee plus a processing fee, and custom Pro plans add selling on Ticketmaster.',
+                'competitor_strengths' => [
+                    'Timed-entry tools for attractions, with repeating timeslots that each have their own prices and capacity',
+                    'Selling on Ticketmaster, on custom Pro plans',
+                    'The BoxOffice app for scanning and card sales at the door, plus a GraphQL API and webhooks',
+                ],
+                'sections' => [
+                    'Pricing & Fees' => [
+                        ['Free plan', 'Yes (forever)', 'Free to publish (fees on paid tickets)', false],
+                        ['Paid plan price', plan_price($this->planPrice()).'/mo (7-day free trial)', 'No subscription (Pro plans custom)', false],
+                        ['Platform fees', '0%', '2% + $0.79 per ticket (US Starter)', true],
+                        ['Payment processing', 'Stripe/PayPal/Payfast (processor rates apply)', 'Universe Payments (3%) or your own Stripe', false],
+                    ],
+                    'Events & Ticketing' => [
+                        ['Ticketing', 'Yes (free RSVP, paid on Pro)', 'Yes', false],
+                        ['QR check-ins', 'Yes (Free)', 'Yes (BoxOffice app)', false],
+                        ['Ticket waitlist', 'Yes (Pro)', 'Yes (automatic)', false],
+                        ['Recurring events', 'Yes (Free)', 'Yes (repeating timeslots)', false],
+                        ['Online events', 'Yes (Free)', 'Yes (virtual events)', false],
+                        ['Free event RSVP', 'Yes (Free)', 'Yes (no fees on free events)', false],
+                        ['Promo/discount codes', 'Yes (Pro)', 'Yes', false],
+                        ['Reserved seating', 'Yes (Enterprise)', 'No (retired in 2019)', true],
+                    ],
+                    'Integrations' => [
+                        ['Newsletters', 'Yes (Free)', 'Message attendees, Mailchimp sync', false],
+                    ],
+                    'Customization' => [
+                        ['Custom fields', 'Yes (ticket questions free, event fields Pro)', 'Yes (checkout questions)', false],
+                        ['Built-in analytics', 'Yes (Free)', 'Yes (dashboards and reports)', false],
+                    ],
+                    'Unique Features' => [
+                        ['Embeddable calendar', 'Yes (Free)', 'Yes (ticket, listings and calendar widgets)', false],
+                        ['Private/password-protected events', 'Yes (Enterprise)', 'Unlisted events, password-protected ticket types', false],
+                        ['Team collaboration', 'Yes (Enterprise)', 'Yes (team permissions)', false],
+                    ],
+                    'Platform' => [
+                        ['REST API', 'Yes (Pro)', 'GraphQL API', false],
+                        ['Webhooks', 'Yes (Pro)', 'Yes (ticket purchase and update)', false],
+                        ['Open source', 'Yes', 'No', true],
+                        ['Selfhosting', 'Yes', 'No', true],
+                    ],
+                ],
+                'key_advantages' => [
+                    [
+                        'title' => '0% Platform Fees',
+                        'description' => 'Universe charges US organizers 2% + $0.79 per ticket on Starter plus 3% processing. Event Schedule takes no platform fee on any plan.',
+                        'icon' => 'dollar',
+                        'gradient' => 'from-emerald-50 to-teal-50 dark:from-emerald-900/30 dark:to-teal-900/30',
+                        'border' => 'border-emerald-200 dark:border-emerald-500/20',
+                        'icon_bg' => 'bg-emerald-100 dark:bg-emerald-500/20',
+                        'icon_color' => 'text-emerald-600 dark:text-emerald-400',
+                    ],
+                    [
+                        'title' => 'Paid Into Your Own Account',
+                        'description' => 'On Pro, ticket money goes straight into your own Stripe or PayPal account, not into a balance you withdraw after the event.',
+                        'icon' => 'ticket',
+                        'gradient' => 'from-sky-50 to-cyan-50 dark:from-sky-900/30 dark:to-cyan-900/30',
+                        'border' => 'border-sky-200 dark:border-sky-500/20',
+                        'icon_bg' => 'bg-sky-100 dark:bg-sky-500/20',
+                        'icon_color' => 'text-sky-600 dark:text-sky-400',
+                    ],
+                    [
+                        'title' => 'Reserved Seating',
+                        'description' => 'Venue schedules draw a seat map once and buyers pick their seats, on Enterprise. Universe retired seating plans in 2019.',
+                        'icon' => 'layout',
+                        'gradient' => 'from-teal-50 to-emerald-50 dark:from-teal-900/30 dark:to-emerald-900/30',
+                        'border' => 'border-teal-200 dark:border-teal-500/20',
+                        'icon_bg' => 'bg-teal-100 dark:bg-teal-500/20',
+                        'icon_color' => 'text-teal-600 dark:text-teal-400',
+                    ],
+                    [
+                        'title' => 'Two-Way Calendar Sync',
+                        'description' => 'Google, Outlook and CalDAV sync both ways, free, and anyone can subscribe to your schedule\'s live calendar feed.',
+                        'icon' => 'calendar',
+                        'gradient' => 'from-blue-50 to-sky-50 dark:from-blue-900/30 dark:to-sky-900/30',
+                        'border' => 'border-blue-200 dark:border-blue-500/20',
+                        'icon_bg' => 'bg-blue-100 dark:bg-blue-500/20',
+                        'icon_color' => 'text-blue-600 dark:text-blue-400',
+                    ],
+                    [
+                        'title' => 'A Public Schedule Page',
+                        'description' => 'Every event sits on one public schedule page with followers, sub-schedules and an embeddable calendar.',
+                        'icon' => 'globe',
+                        'gradient' => 'from-amber-50 to-yellow-50 dark:from-amber-900/30 dark:to-yellow-900/30',
+                        'border' => 'border-amber-200 dark:border-amber-500/20',
+                        'icon_bg' => 'bg-amber-100 dark:bg-amber-500/20',
+                        'icon_color' => 'text-amber-600 dark:text-amber-400',
+                    ],
+                    [
+                        'title' => 'Open Source',
+                        'description' => 'Read the code and selfhost it on your own server. Universe is a hosted service only.',
+                        'icon' => 'code',
+                        'gradient' => 'from-cyan-50 to-sky-50 dark:from-cyan-900/30 dark:to-sky-900/30',
+                        'border' => 'border-cyan-200 dark:border-cyan-500/20',
+                        'icon_bg' => 'bg-cyan-100 dark:bg-cyan-500/20',
+                        'icon_color' => 'text-cyan-600 dark:text-cyan-400',
+                    ],
+                ],
+                'cross_links' => [
+                    ['name' => 'Eventbrite', 'route' => 'marketing.compare_eventbrite'],
+                    ['name' => 'DICE', 'route' => 'marketing.compare_dice'],
+                    ['name' => 'Ticket Tailor', 'route' => 'marketing.compare_ticket_tailor'],
+                ],
+                'faq' => [
+                    ['question' => 'How does Event Schedule pricing compare to Universe?', 'answer' => 'Universe charges US organizers 2% + $0.79 per paid ticket on its Starter plan, plus a 3% processing fee through Universe Payments, passed on to buyers or absorbed by you. Event Schedule Pro is a flat '.plan_price($this->planPrice()).'/mo with zero platform fees, so you pay only Stripe\'s or PayPal\'s own processing.'],
+                    ['question' => 'When do I get paid?', 'answer' => 'On Pro, paid tickets are charged through your own Stripe or PayPal account, so the money goes there as each order is placed. With Universe Payments, funds reach your Universe balance 48 hours after the event ends, and connecting your own Stripe account is its option for money before the event.'],
+                    ['question' => 'Does Event Schedule have reserved seating?', 'answer' => 'Yes, on Enterprise. A venue schedule draws its room once, with sections, rows, tables, standing areas and wheelchair spaces, and buyers pick their seats from the map at checkout. Universe stopped offering seating plans for new listings in 2019.'],
+                    ['question' => 'Can I run a long series of dates?', 'answer' => 'Yes. Recurring events repeat daily, weekly on chosen days, every few weeks or monthly, with dates you can skip, and each date keeps its own tickets and capacity. For attractions with many entry times a day, Universe\'s timed-entry events go further.'],
+                    ['question' => 'Can I keep my events in Google Calendar?', 'answer' => 'Yes. Google Calendar sync runs both ways on every plan, and Outlook and CalDAV calendars sync the same way. Anyone can also subscribe to your schedule\'s live calendar feed.'],
+                    ['question' => 'Is it easy to switch from Universe?', 'answer' => 'Yes. Create a free schedule, paste your event details or upload a flyer and the AI parser fills in each event for you to check, then connect Stripe or PayPal and move to Pro to sell paid tickets.'],
                 ],
             ],
         ];
