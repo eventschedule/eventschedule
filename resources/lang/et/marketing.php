@@ -7,7 +7,7 @@ return [
     'pricing_title' => 'Event Schedule\'i hinnad: tasuta plaan, ilma platvormitasudeta',
     'pricing_description' => 'Alusta tasuta: piiramatud sündmused ja tasuta registreerumine. Pro lisab tasuliste piletite müügi, Enterprise nummerdatud kohad. Platvormitasu pole üheski plaanis.',
 
-    'features_title' => 'Sündmuste haldamise funktsioonid ilma platvormitasudeta - Event Schedule',
+    'features_title' => 'Sündmuste haldamise tarkvara: kõik funktsioonid, ilma platvormitasudeta',
     'features_description' => 'Kõik funktsioonid viies peatükis: piletid Stripe\'i või PayPali kaudu ilma platvormitasuta, kahesuunaline kalendri sünkroonimine, uudiskirjad, tehisintellektiga import ja analüütika.',
 
     'about_title' => 'Event Schedule\'ist | Avatud lähtekoodiga sündmuste haldamise platvorm',
@@ -16,7 +16,7 @@ return [
     'selfhost_title' => 'Isemajutatav sündmuste kalender | Kõik funktsioonid tasuta sinu serveris',
     'selfhost_description' => 'Majuta Event Schedule oma serveris ja kõik Pro- ja Enterprise-funktsioonid on tasuta kaasas. Avatud lähtekoodiga, ühe klikiga paigaldus, ilma platvormitasudeta, ja sinu andmed ei lahku kunagi sinu taristust.',
 
-    'ticketing_title' => 'Piletimüük ilma platvormitasudeta - Event Schedule',
+    'ticketing_title' => 'Sündmuste piletimüügi tarkvara ilma platvormitasudeta - Event Schedule',
     'ticketing_description' => 'Müü pileteid oma sündmuse lehelt ilma platvormitasudeta. Maksed Stripe\'i või PayPaliga, täielik või osaline tagasimakse ja registreerimine QR-koodiga.',
 
     'ai_title' => 'AI sündmuste import: plakatist saab sündmus | Event Schedule',

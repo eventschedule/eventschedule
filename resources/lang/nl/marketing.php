@@ -7,7 +7,7 @@ return [
     'pricing_title' => 'Prijzen van Event Schedule: gratis plan, geen platformkosten',
     'pricing_description' => 'Begin gratis: onbeperkte evenementen en onbeperkt gratis inschrijven. Betaalde tickets zijn Pro, Enterprise voegt genummerde plaatsen toe. Nooit platformkosten.',
 
-    'features_title' => 'Functies voor evenementenbeheer, zonder platformkosten - Event Schedule',
+    'features_title' => 'Software voor evenementenbeheer: alle functies, zonder platformkosten',
     'features_description' => 'Alle functies in vijf hoofdstukken: tickets via Stripe of PayPal zonder platformkosten, tweerichtingssynchronisatie met je agenda, nieuwsbrieven, AI-import en statistieken.',
 
     'about_title' => 'Over Event Schedule | Open source platform voor evenementenbeheer',
@@ -16,7 +16,7 @@ return [
     'selfhost_title' => 'Zelf gehoste evenementenkalender | Alle functies gratis op je eigen server',
     'selfhost_description' => 'Host Event Schedule op je eigen server en alle Pro- en Enterprise-functies zijn gratis inbegrepen. Open source, installatie in één klik, geen platformkosten, en je gegevens verlaten nooit je eigen infrastructuur.',
 
-    'ticketing_title' => 'Ticketverkoop zonder platformkosten - Event Schedule',
+    'ticketing_title' => 'Ticketsoftware voor evenementen, zonder platformkosten - Event Schedule',
     'ticketing_description' => 'Verkoop tickets vanaf je evenementpagina zonder platformkosten. Betalen met Stripe of PayPal, volledige of gedeeltelijke terugbetaling en QR-check-in per telefoon.',
 
     'ai_title' => 'AI-evenementimport: van flyer naar evenement | Event Schedule',

@@ -1,5 +1,5 @@
 <x-marketing-layout>
-    <x-slot name="title">Free Event Registration & RSVP | No Payment Step Needed</x-slot>
+    <x-slot name="title">Free Event Registration Software & RSVP | Event Schedule</x-slot>
     <x-slot name="description">Free event registration and RSVP on every plan: a cap per date, a waitlist when it fills, a QR code in every confirmation and a form you can embed.</x-slot>
     <x-slot name="breadcrumbTitle">Registration</x-slot>
 
@@ -222,7 +222,7 @@
                 <div class="grid grid-cols-1 items-center gap-12 lg:grid-cols-2">
                     <div class="min-w-0">
                         <h1 class="es-balance es-reg-ink text-4xl font-black tracking-tight md:text-6xl" data-reveal style="--reveal-delay: 0.05s;">
-                            <x-marketing.hero-eyebrow class="block es-reg-tag mb-4">Free event registration and RSVP &middot; every plan</x-marketing.hero-eyebrow>
+                            <x-marketing.hero-eyebrow class="block es-reg-tag mb-4">Free event registration software and RSVP &middot; every plan</x-marketing.hero-eyebrow>
                             Know who is coming. <span class="es-reg-accent">Charge nobody.</span>
                         </h1>
                         <p class="es-reg-muted mt-6 text-lg" data-reveal style="--reveal-delay: 0.1s;">

@@ -14,7 +14,7 @@ return [
     'pricing_title' => 'Event Schedule Pricing: Free Plan, Zero Platform Fees',
     'pricing_description' => 'Start free with unlimited events and unlimited free registration. Pro adds paid ticketing, Enterprise adds reserved seating. Zero platform fees on every plan.',
 
-    'features_title' => 'Event Management Features, No Platform Fees - Event Schedule',
+    'features_title' => 'Event Management Software: Every Feature, No Platform Fees',
     'features_description' => 'Every feature in five chapters: tickets through Stripe or PayPal with no platform fee, two-way calendar sync, newsletters, AI import and analytics.',
 
     'about_title' => 'About Event Schedule | Open Source Event Management Platform',
@@ -23,7 +23,7 @@ return [
     'selfhost_title' => 'Selfhosted Event Calendar: Every Feature Free on Your Server',
     'selfhost_description' => 'Selfhost Event Schedule on your own server and every Pro and Enterprise feature is included free. Open source, one-click installs, no platform fees.',
 
-    'ticketing_title' => 'Event Ticketing with Zero Platform Fees - Event Schedule',
+    'ticketing_title' => 'Event Ticketing Software, No Platform Fees - Event Schedule',
     'ticketing_description' => 'Sell tickets from your own event page with zero platform fees. Stripe or PayPal checkout, full or partial refunds, and QR check-in from any phone.',
 
     'ai_title' => 'AI Event Import: Turn a Flyer into an Event | Event Schedule',

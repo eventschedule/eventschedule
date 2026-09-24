@@ -7,7 +7,7 @@ return [
     'pricing_title' => 'Event Schedule Preise: Gratis-Plan, keine Plattformgebühren',
     'pricing_description' => 'Kostenlos starten: unbegrenzte Events und Anmeldungen ohne Limit. Bezahlte Tickets gibt es ab Pro, Enterprise bringt nummerierte Plätze. Keine Plattformgebühr.',
 
-    'features_title' => 'Funktionen für das Veranstaltungsmanagement, ohne Plattformgebühren - Event Schedule',
+    'features_title' => 'Software für Veranstaltungsmanagement: alle Funktionen, ohne Plattformgebühren',
     'features_description' => 'Alle Funktionen in fünf Kapiteln: Tickets über Stripe oder PayPal ohne Plattformgebühr, Kalendersynchronisierung in beide Richtungen, Newsletter, KI-Import und Analysen.',
 
     'about_title' => 'Über Event Schedule | Open-Source-Plattform für Veranstaltungsmanagement',
@@ -16,7 +16,7 @@ return [
     'selfhost_title' => 'Selbst gehosteter Veranstaltungskalender | Alle Funktionen kostenlos auf deinem Server',
     'selfhost_description' => 'Hoste Event Schedule auf deinem eigenen Server und alle Pro- und Enterprise-Funktionen sind kostenlos enthalten. Open Source, Installation mit einem Klick, keine Plattformgebühren, und deine Daten verlassen nie deine Infrastruktur.',
 
-    'ticketing_title' => 'Ticketverkauf ohne Plattformgebühren - Event Schedule',
+    'ticketing_title' => 'Ticketing-Software für Veranstaltungen, ohne Plattformgebühren - Event Schedule',
     'ticketing_description' => 'Verkaufe Tickets über deine Veranstaltungsseite ohne Plattformgebühren. Zahlung per Stripe oder PayPal, volle oder teilweise Erstattungen und QR-Check-in per Handy.',
 
     'ai_title' => 'KI-Veranstaltungsimport: vom Flyer zur Veranstaltung | Event Schedule',

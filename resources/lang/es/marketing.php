@@ -7,7 +7,7 @@ return [
     'pricing_title' => 'Precios de Event Schedule: gratis y sin comisión de plataforma',
     'pricing_description' => 'Empieza gratis: eventos e inscripciones ilimitados. Pro añade la venta de entradas de pago y Enterprise los asientos numerados. Sin comisión de plataforma.',
 
-    'features_title' => 'Funciones de gestión de eventos, sin comisiones de plataforma - Event Schedule',
+    'features_title' => 'Software de gestión de eventos: todas las funciones, sin comisiones de plataforma',
     'features_description' => 'Todas las funciones en cinco capítulos: entradas con Stripe o PayPal sin comisión de plataforma, sincronización bidireccional del calendario, boletines, importación con IA y analíticas.',
 
     'about_title' => 'Acerca de Event Schedule | Plataforma de gestión de eventos de código abierto',
@@ -16,7 +16,7 @@ return [
     'selfhost_title' => 'Calendario de eventos autoalojado | Todas las funciones gratis en tu servidor',
     'selfhost_description' => 'Autoaloja Event Schedule en tu propio servidor y todas las funciones Pro y Enterprise están incluidas gratis. Código abierto, instalación con un clic, sin comisiones de plataforma, y tus datos nunca salen de tu infraestructura.',
 
-    'ticketing_title' => 'Venta de entradas sin comisiones de plataforma - Event Schedule',
+    'ticketing_title' => 'Software de venta de entradas para eventos, sin comisiones de plataforma - Event Schedule',
     'ticketing_description' => 'Vende entradas desde la página de tu evento sin comisiones de plataforma. Cobra con Stripe o PayPal, reembolsa total o parcialmente y registra asistentes con QR.',
 
     'ai_title' => 'Importación de eventos con IA: de un cartel a un evento | Event Schedule',

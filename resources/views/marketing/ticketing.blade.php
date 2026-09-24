@@ -586,7 +586,7 @@
             ['Your own Stripe or PayPal', 'Buyers pay by card, Apple Pay or Google Pay through Stripe, or from a PayPal balance or card, straight into your account. You choose the method per event.'],
             ['Installments', 'A buyer splits the price over monthly charges. The first is taken at checkout and the ticket is valid straight away; the rest come off the saved card on their own.'],
             ['One cart, several events', 'Somebody buying into three of your nights pays once, as a single amount, instead of running checkout three times.'],
-            ['Refunds that move the money', 'Refund a Stripe or PayPal sale in full or in part from the Sales list, and the money goes back through the provider. A partial refund keeps the tickets valid; a full one puts them back on sale. Free on every plan.'],
+            ['Refunds that move the money', 'Refund a Stripe or PayPal sale in full or in part from the Sales list, and the money goes back through the provider. A partial refund keeps the tickets valid; a full one puts them back on sale. On Pro, like the sale it reverses.'],
         ];
 
         $doorSide = [
@@ -622,6 +622,10 @@
         ];
 
         $faqs = [
+            [
+                'q' => 'Can I sell tickets online with Event Schedule?',
+                'a' => 'Yes. It is an online ticketing platform built around your own event page: the buyer picks a ticket type there, pays by card, Apple Pay or Google Pay through your own Stripe account or with PayPal, and gets the ticket by email with a QR code for the door. On Pro the checkout can also sit on your own website, through the ticket embed. Putting a price on a ticket is the Pro plan; free registration works on every plan, and no plan adds a platform fee.',
+            ],
             [
                 'q' => 'What are the fees for selling tickets?',
                 'a' => 'Event Schedule charges zero platform fees on ticket sales. Card payments run through your own connected Stripe or PayPal account, so the provider charges you its standard processing rate directly and the rest of the ticket price is yours. Nothing is deducted by us, on any plan, at any volume.',
@@ -707,7 +711,7 @@
                             <svg aria-hidden="true" class="es-turn-accent h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8">
                                 <path stroke-linecap="round" stroke-linejoin="round" d="M15 5v2m0 4v2m0 4v2M5 5a2 2 0 00-2 2v3a2 2 0 110 4v3a2 2 0 002 2h14a2 2 0 002-2v-3a2 2 0 110-4V7a2 2 0 00-2-2H5z" />
                             </svg>
-                            <span class="es-turn-muted text-sm font-medium tracking-wide">Event ticketing, with zero platform fees</span>
+                            <span class="es-turn-muted text-sm font-medium tracking-wide">Event ticketing software, with zero platform fees</span>
                         </x-marketing.hero-eyebrow>
                         <span class="es-mask"><span class="es-mask-line">A ticket is only half of it.</span></span>
                         <span class="es-mask es-mask-2"><span class="es-mask-line">The other half is <span class="es-turn-accent">the turn.</span></span></span>

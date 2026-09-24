@@ -73,7 +73,7 @@
                         <span class="absolute inline-flex h-full w-full animate-ping rounded-full bg-emerald-400 opacity-75"></span>
                         <span class="relative inline-flex h-2 w-2 rounded-full bg-emerald-500"></span>
                     </span>
-                    <span class="text-sm font-medium tracking-wide text-gray-600 dark:text-gray-300">Event management features</span>
+                    <span class="text-sm font-medium tracking-wide text-gray-600 dark:text-gray-300">Event management software</span>
                 </x-marketing.hero-eyebrow>
                 <span class="es-mask"><span class="es-mask-line">Every feature, in</span></span>
                 <span class="es-mask es-mask-2"><span class="es-mask-line"><span class="text-gradient-features">five chapters</span></span></span>
@@ -1278,7 +1278,7 @@
             ],
             [
                 'q' => 'Which payment methods can I accept?',
-                'a' => 'Stripe and PayPal, each paying into your own account, plus Payfast for events priced in South African rand, an Invoice Ninja invoice, a payment link of your own, or cash. Every method is available on every plan, and you choose one per event. Installment plans, which are a Pro feature, run on Stripe only.',
+                'a' => 'Stripe and PayPal, each paying into your own account, plus Payfast for events priced in South African rand, an Invoice Ninja invoice, a payment link of your own, or cash. They come with Pro, because that is the plan that puts a price on a ticket, and you choose one per event. Installment plans, also on Pro, run on Stripe only.',
             ],
             [
                 'q' => 'Can I refund a ticket?',

@@ -31,7 +31,7 @@
 return [
     // Home and hubs
     '/' => ['keyword' => 'free event calendar'],
-    '/features' => ['keyword' => 'event management features'],
+    '/features' => ['keyword' => 'event management software'],
     '/pricing' => ['keyword' => 'Event Schedule pricing'],
     '/about' => ['keyword' => 'open source event management platform'],
     '/examples' => ['keyword' => 'Event Schedule examples'],
@@ -87,9 +87,9 @@ return [
     '/features/recurring-events' => ['keyword' => 'recurring events'],
     '/features/sub-schedules' => ['keyword' => 'sub-schedules'],
     '/features/team-scheduling' => ['keyword' => 'team scheduling'],
-    '/features/ticketing' => ['keyword' => 'event ticketing'],
+    '/features/ticketing' => ['keyword' => 'event ticketing software'],
     '/features/waitlist' => ['keyword' => 'ticket waitlist'],
-    '/features/registration' => ['keyword' => 'free event registration', 'match' => ['free event registration and RSVP']],
+    '/features/registration' => ['keyword' => 'free event registration'],
     '/features/white-label' => ['keyword' => 'remove branding', 'match' => ['remove Event Schedule branding']],
 
     // Audiences
