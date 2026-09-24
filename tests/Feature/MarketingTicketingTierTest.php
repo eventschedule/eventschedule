@@ -3,6 +3,7 @@
 namespace Tests\Feature;
 
 use Illuminate\Support\Facades\File;
+use Tests\Support\PlanSections;
 use Tests\TestCase;
 
 /**
@@ -344,6 +345,36 @@ class MarketingTicketingTierTest extends TestCase
         }
 
         $this->assertSame([], $offences, implode("\n", $offences));
+    }
+
+    /**
+     * The files written for AI crawlers list the plans as sections - a "### Free Plan" heading in
+     * llms-full.txt, a "**Free plan**" label in llms.txt - and a bullet there is a noun phrase
+     * with no "on every plan" for the sentence patterns above to anchor on. So "Every payment
+     * method" and "Full and partial refunds" sat in llms-full.txt's Free list, invisible to every
+     * check in this class, after the copy everywhere else had moved them to Pro.
+     */
+    public function test_no_free_plan_section_lists_a_payment_method_or_refunds(): void
+    {
+        $offences = [];
+
+        foreach (['llms.txt', 'llms-full.txt'] as $file) {
+            $sections = PlanSections::free(file_get_contents(public_path($file)));
+
+            $this->assertNotEmpty($sections, "public/{$file} has no Free plan section to check");
+
+            foreach ($sections as $section) {
+                if (preg_match_all(PlanSections::PAYMENT, $section, $m)) {
+                    $offences[] = "public/{$file}: the Free plan lists ".implode(', ', array_unique($m[0]));
+                }
+            }
+        }
+
+        $this->assertSame([], $offences, implode("\n", array_merge(
+            ['A payment method or a refund is listed under the Free plan. Taking money for a ticket '
+                .'is Pro, so the gateways and refunds are Pro too (docs/FEATURES.md).'],
+            $offences
+        )));
     }
 
     public function test_no_marketing_surface_says_paid_selling_is_free(): void

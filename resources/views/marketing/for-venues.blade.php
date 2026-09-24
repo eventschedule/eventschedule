@@ -645,8 +645,8 @@
         accent="emerald"
         badge="Booking inbox"
         heading="Let the acts come to you"
-        lede="Turn on the public request form and performers submit their own dates. Ask whatever you need to know up front, approve or decline in one click, and let the acts you trust skip the queue entirely."
-        :chips="['Public request form', 'Custom questions', 'Approve or decline', 'Auto-approve trusted acts', 'Email notifications']"
+        lede="Turn on the public request form and performers submit their own dates. Ask whatever you need to know up front with custom fields on Pro, approve or decline in one click, and let the acts you trust skip the queue entirely."
+        :chips="['Public request form', 'Custom request fields, Pro', 'Approve or decline', 'Auto-approve trusted acts', 'Email notifications']"
         :lead="true"
         frame="panel"
         ground="dark">

@@ -831,7 +831,7 @@
                                 @endforeach
                             </div>
                             <p class="es-vault-muted mt-4 text-sm">Of the fan content only the counts survive, never a photo, a video or a line of a comment.</p>
-                            <p class="es-vault-muted mt-3 text-sm">The locked page is also marked noindex and nofollow, and its social preview tags carry the password notice in place of the event: no name, no description, and the generic Event Schedule card rather than your image. Pasting the link into a chat gives nothing away.</p>
+                            <p class="es-vault-muted mt-3 text-sm">The locked page is also marked noindex and nofollow, and its social preview tags carry the password notice in place of the event: no name, no description and no flyer. The only picture is your schedule's own logo, or none at all if the schedule has no logo. Pasting the link into a chat gives nothing away.</p>
                             <p class="es-vault-muted mt-3 text-sm">And if your schedule is on the free plan and shows ads, none are ever rendered in front of a password prompt.</p>
                         </div>
                     </div>

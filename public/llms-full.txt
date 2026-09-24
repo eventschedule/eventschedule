@@ -1896,8 +1896,6 @@ its own prices and currency.
 Everything needed to publish events and gather an audience:
 - Unlimited events and schedules
 - Unlimited free registration and zero-price ticket types (selling a ticket that carries a price is a Pro feature)
-- Every payment method: Stripe, PayPal, Payfast, Invoice Ninja, a payment link or cash
-- Full and partial refunds (Stripe and PayPal refund through the provider)
 - QR ticket scanning at the door
 - Google Calendar, Outlook and CalDAV sync
 - Analytics
@@ -1915,6 +1913,8 @@ $5/month or $50/year.
 
 Pro adds:
 - Selling tickets that carry a price, unlimited and with zero platform fees
+- Every payment method: Stripe, PayPal, Payfast, Invoice Ninja, a payment link or cash
+- Full and partial refunds (Stripe and PayPal refund through the provider)
 - Promo codes, add-ons, passes and subscriptions, gift cards, the ticket waitlist and installment payments
 - Live check-in dashboard, sales CSV export and bulk attendee import
 - REST API and webhooks
@@ -2070,8 +2070,11 @@ Use `category_id` (numeric) or `category` (name string) when creating or updatin
 - [API Documentation](https://eventschedule.com/docs/developer/api) - Interactive API docs
 - [Features](https://eventschedule.com/features) - Full feature overview
 - [Pricing](https://eventschedule.com/pricing) - Plans and pricing details
+- [Use Cases](https://eventschedule.com/use-cases) - Who it is for: performers, venues, curators, communities and online events
+- [Compare](https://eventschedule.com/compare) - Side-by-side comparisons with other event platforms
 - [For AI Agents](https://eventschedule.com/for-ai-agents) - AI agent integration guide
 - [Documentation](https://eventschedule.com/docs) - User guides
+- [Selfhost](https://eventschedule.com/selfhost) - Running Event Schedule on your own server
 - [Selfhost Guide](https://eventschedule.com/docs/selfhost/installation) - Self-hosting instructions
 - [Open Source](https://eventschedule.com/open-source) - Source code and contributions
-- [Blog](https://eventschedule.com/blog) - Platform updates
+- [Blog](https://blog.eventschedule.com) - Platform updates

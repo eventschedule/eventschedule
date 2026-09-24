@@ -1,39 +1,69 @@
 # Event Schedule
 
-> Event Schedule is an open-source platform for sharing events, selling tickets, and bringing communities together. It provides a full REST API with OpenAPI 3.0 spec for programmatic event management.
+> Event Schedule is an open-source event calendar and ticketing platform. A performer, a venue or a curator gets one public page for every event, with free registration and RSVP, ticket sales with zero platform fees through their own Stripe or PayPal account, two-way calendar sync, newsletters to the people who follow them, and QR tickets scanned at the door. It runs hosted at eventschedule.com or selfhosted, and has a full REST API with an OpenAPI 3.0 spec.
 
-Key details:
+Key facts:
 
-- **Schedule types**: Venue (physical locations), Talent (performers), Curator (event organizers)
+- **Schedule types**: three. Talent (performers and artists), Venue (places that host events) and Curator (guides that collect events from many talents and venues).
+- **Free plan**: unlimited events and schedules, unlimited free registration and RSVP, zero-price ticket types, QR ticket scanning at the door, two-way Google Calendar, Outlook and CalDAV sync, analytics, event graphics, an embeddable calendar and iCal feeds, recurring events, sub-schedules, one appointment type, email subscribers with automatic new-event digests, newsletters to 10 recipients a month, and AI event parsing. One team member per schedule.
+- **Pro plan**: selling tickets that carry a price, with every payment method (Stripe, PayPal, Payfast, Invoice Ninja, a payment link or cash) and full or partial refunds; promo codes, add-ons, passes, gift cards, the ticket waitlist and installment payments; the live check-in dashboard and sales export; the REST API and webhooks; more appointment types and paid bookings; custom fields, custom CSS, polls, feedback and carpools; the embeddable ticket widget; no Event Schedule branding; newsletters to 100 recipients a month.
+- **Enterprise plan**: everything in Pro, plus custom domains, allocated (reserved) seating with a box office console, multiple team members, internal and unlisted events, AI flyer, style and description generation, agenda scanning, WhatsApp event creation, availability management, newsletters to 1,000 recipients a month and priority support.
+- **Selfhosted**: every Pro and Enterprise feature is included on your own server.
+- **Fees**: zero platform fees on ticket sales, on every plan. Only the payment processor's own fee applies.
+- **Open source**: the whole codebase is public under the Attribution Assurance License.
+- **Languages**: 12 supported languages, with automatic translation of event content.
+
+## Product
+
+- [Features](https://eventschedule.com/features): Every feature, grouped by what it does
+- [Pricing](https://eventschedule.com/pricing): Free, Pro and Enterprise, and what each adds
+- [Ticketing](https://eventschedule.com/features/ticketing): Ticket types, QR check-in and payment into your own account
+- [Free registration and RSVP](https://eventschedule.com/features/registration): Free sign-ups with a capacity per date and a waitlist
+- [Calendar sync](https://eventschedule.com/features/calendar-sync): Two-way sync with Google Calendar, Outlook and CalDAV
+- [Newsletters](https://eventschedule.com/features/newsletters): Newsletters and automatic new-event digests for followers
+- [Appointments](https://eventschedule.com/features/appointments): Bookable appointment types on a public booking page
+- [Allocated seating](https://eventschedule.com/features/allocated-seating): Seating plans, a guest seat picker and a box office console
+- [AI](https://eventschedule.com/features/ai): Event parsing from text and images, agenda scanning and translation
+- [Embed calendar](https://eventschedule.com/features/embed-calendar): The live calendar on any website with one iframe tag
+- [Integrations](https://eventschedule.com/features/integrations): Stripe, PayPal, Invoice Ninja, calendars and more
+
+## Who it is for
+
+- [Use cases](https://eventschedule.com/use-cases): Performers, venues, curators, communities and online events
+- [For talent](https://eventschedule.com/for-talent): Musicians, DJs, comedians and every other kind of performer
+- [For venues](https://eventschedule.com/for-venues): Bars, clubs, theaters, restaurants and every space that hosts events
+- [For curators](https://eventschedule.com/for-curators): Local event guides that collect events from many sources
+
+## Compare
+
+- [Compare](https://eventschedule.com/compare): Event Schedule next to other event and ticketing platforms
+- [Eventbrite alternative](https://eventschedule.com/eventbrite-alternative): Zero platform fees instead of a per-ticket fee
+- [Luma alternative](https://eventschedule.com/luma-alternative): Open source code and zero platform fees on ticket sales
+
+## Documentation
+
+- [Documentation](https://eventschedule.com/docs): User guides for schedules, events, tickets and integrations
+- [Getting started](https://eventschedule.com/docs/getting-started): Create an account and a first schedule
+- [Selling tickets](https://eventschedule.com/docs/tickets): Ticket types, payment methods, refunds and check-in
+- [Sharing your schedule](https://eventschedule.com/docs/sharing): Links, embeds, feeds and followers
+- [Selfhost](https://eventschedule.com/docs/selfhost): Install and run Event Schedule on your own server
+- [SaaS](https://eventschedule.com/docs/saas): Run Event Schedule as a multi-tenant platform of your own
+
+## API
+
 - **Authentication**: API key via `X-API-Key` header, obtained through registration or login
 - **Plans**: Most of the API is on the Pro plan: schedule, event, sub-schedule and sale endpoints return only Pro schedules' data, or a 403. Creating or deleting a schedule, the category list, fan content and recording a sale (`POST /api/sales`, free ticket tiers only unless the schedule is Pro) have no Pro check.
 - **Rate limits**: 300 GET requests/min, 30 POST/PUT/DELETE requests/min, counted per IP address
-- **Languages**: 12 supported languages, with automatic translation of event content
-- **Deployment**: Hosted SaaS at eventschedule.com or selfhosted
-
-## API Documentation
-
+- **Getting started**: register (`POST /api/register`; hosted mode requires email verification via `POST /api/register/send-code` first), create a schedule (`POST /api/schedules` with a name and type: venue, talent or curator), then create events (`POST /api/events/{subdomain}`)
 - [llms-full.txt](https://eventschedule.com/llms-full.txt): Complete self-contained documentation for LLMs (no link-following needed)
 - [API Reference](https://eventschedule.com/docs/developer/api): Full API documentation with examples for all endpoints
 - [OpenAPI Spec](https://eventschedule.com/api/openapi.json): OpenAPI 3.0 specification for client generation and tool integration
 - [agents.json](https://eventschedule.com/.well-known/agents.json): Agent workflow definitions for multi-step API tasks
-
-## Getting Started
-
-1. Register an account: `POST /api/register` (hosted mode requires email verification via `POST /api/register/send-code` first)
-2. Create a schedule: `POST /api/schedules` with a name and type (venue, talent, or curator)
-3. Create events: `POST /api/events/{subdomain}` with event details under your schedule
-4. Optionally configure tickets, upload flyers, and create sub-schedules
-
-## Platform Information
-
-- [Features](https://eventschedule.com/features): Full feature overview: ticketing, refunds, PayPal and Stripe payments, Google/Outlook/CalDAV calendar sync, newsletters, analytics, and more
-- [Pricing](https://eventschedule.com/pricing): Pro plan required for API access (7-day free trial). Paid ticket sales need the Pro plan; free registration is unlimited on every plan, and every plan has zero platform fees on tickets
 - [For AI Agents](https://eventschedule.com/for-ai-agents): Overview of API capabilities for AI agents and developers
-- [Documentation](https://eventschedule.com/docs): User guides for schedules, events, tickets, and integrations
 
 ## Optional
 
-- [Selfhost Guide](https://eventschedule.com/docs/selfhost/installation): Instructions for self-hosting Event Schedule
-- [Open Source](https://eventschedule.com/open-source): Source code and contribution information
-- [Blog](https://eventschedule.com/blog): Platform updates and use case guides
+- [Selfhost](https://eventschedule.com/selfhost): Every Pro and Enterprise feature on your own server
+- [SaaS](https://eventschedule.com/saas): Run your own white-label ticketing platform on Event Schedule
+- [Open Source](https://eventschedule.com/open-source): Source code, license and contribution information
+- [Blog](https://blog.eventschedule.com): Platform updates and use case guides
