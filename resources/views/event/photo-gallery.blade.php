@@ -18,7 +18,8 @@
 
     {{-- Header --}}
     <div class="mb-6">
-      <a href="{{ $event->getGuestUrl($subdomain, $date) }}" class="inline-flex items-center gap-1.5 text-sm text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300 mb-3 transition-colors">
+      {{-- `?: false`: with no date, getGuestUrl() would fall back to the series' first date. --}}
+      <a href="{{ $event->getGuestUrl($subdomain, $date ?: false) }}" class="inline-flex items-center gap-1.5 text-sm text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300 mb-3 transition-colors">
         <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-4 h-4 {{ $role->isRtl() ? 'rotate-180' : '' }}" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M10.5 19.5 3 12m0 0 7.5-7.5M3 12h18" /></svg>
         {{ $event->translatedName() }}
       </a>

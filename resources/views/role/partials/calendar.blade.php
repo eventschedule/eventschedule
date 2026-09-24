@@ -4119,8 +4119,10 @@ document.addEventListener('DOMContentLoaded', function() {
             $noscriptShort = $noscriptEvent->shortDescriptionInLanguage($noscriptLang, $role ?? null);
             $noscriptDirLang = $noscriptEvent->creatorRole?->language_code ?: $noscriptLang;
         @endphp
+        {{-- Undated: getGuestUrl() would link a series at its first date, which may no longer be
+             an occurrence and then only redirects to this URL anyway. --}}
         <li style="margin-bottom: 1rem;">
-            <a href="{{ $noscriptEvent->getGuestUrl($role?->subdomain ?? $noscriptEvent->roles->first()?->subdomain) }}">
+            <a href="{{ $noscriptEvent->getUndatedGuestUrl($role?->subdomain ?? $noscriptEvent->roles->first()?->subdomain) }}">
                 <strong dir="{{ content_dir_for_language($noscriptName, $noscriptDirLang) }}">{{ $noscriptName }}</strong>
             </a>
             <br>

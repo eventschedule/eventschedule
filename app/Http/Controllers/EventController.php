@@ -4388,27 +4388,41 @@ class EventController extends Controller
     {
         $role = Role::subdomain($subdomain)->first();
 
-        if (! $role || ! $role->isClaimed()) {
+        // is_deleted for the reason viewGuest() gives: the API delete, unfollow and merge paths
+        // soft-delete without renaming, and the event page already stopped serving those rows.
+        if (! $role || $role->is_deleted || ! $role->isClaimed()) {
             return redirect(app_url());
         }
 
-        // Locale handling
-        if ($request->lang) {
-            if (is_valid_language_code($request->lang)) {
-                app()->setLocale($request->lang);
+        // Locale handling. ?lang[]=x is an array, which is_valid_language_code()'s ?string
+        // signature cannot take, so only a string is honoured (as in viewGuest()).
+        $lang = is_string($request->lang) ? $request->lang : null;
 
-                if ($request->lang == $role->translation_language_code && $request->lang != $role->language_code) {
+        if ($lang) {
+            if (is_valid_language_code($lang)) {
+                app()->setLocale($lang);
+
+                if ($lang == $role->translation_language_code && $lang != $role->language_code) {
                     session()->put('translate', true);
                 } else {
                     session()->forget('translate');
                 }
             } else {
-                return redirect(request()->url());
+                // Drop only ?lang=. url() would strip the whole query string with it.
+                return redirect(request()->fullUrlWithoutQuery('lang'));
             }
         } elseif (session()->has('translate')) {
             app()->setLocale($role->translation_language_code);
         } elseif (is_valid_language_code($role->language_code)) {
             app()->setLocale($role->language_code);
+        }
+
+        // The route only constrains {date} to \d{4}-\d{2}-\d{2}, which 2026-13-45 satisfies and
+        // Carbon::parse() throws on. Null it before anything parses it; $routeDate remembers that
+        // the URL carried one, so it can be redirected once the event is known.
+        $routeDate = $date;
+        if ($date && ! Event::isOccurrenceDate($date)) {
+            $date = null;
         }
 
         $eventIdParam = $id ? UrlUtils::decodeId($id) : null;
@@ -4434,28 +4448,49 @@ class EventController extends Controller
         // Unlisted (is_private, no password) events are reachable by direct link, so their fan-photo
         // gallery is too. Password-protected ones still hit the password gate below.
 
-        // Password gate
+        // Only a real occurrence survives, so the two redirects below never send the visitor to a
+        // dated event URL that would bounce them a second time.
+        if ($date && ! $event->matchesDate($date, $event->scheduleTimezone())) {
+            $date = null;
+        }
+
+        // Password gate. `?: false`, never null: getGuestUrl() reads null as "the series' first
+        // date", which need not be an occurrence.
         $bypassPassword = $isMemberOrAdmin || session()->has('event_password_'.$event->id);
         if ($event->isPasswordProtected() && ! $bypassPassword) {
-            return redirect($event->getGuestUrl($subdomain, $date));
+            return redirect($event->getGuestUrl($subdomain, $date ?: false));
         }
 
         // Redirect if fan photos are disabled
         if (! $event->isFanPhotosEnabled()) {
-            return redirect($event->getGuestUrl($subdomain, $date));
+            return redirect($event->getGuestUrl($subdomain, $date ?: false));
         }
 
-        // Resolve next date for recurring events
-        if (! $date && $event->days_of_week) {
-            $nextDate = now();
-            $daysOfWeek = str_split($event->days_of_week);
-            while (true) {
-                if ($daysOfWeek[$nextDate->dayOfWeek] == '1' && $nextDate >= now()->format('Y-m-d')) {
-                    break;
-                }
-                $nextDate->addDay();
+        // The event page's rule (RoleController::viewGuest()): a date in the URL has to be a real
+        // occurrence, or every well-formed date is another 200, self-canonical gallery. A path date
+        // that is not one - or that isOccurrenceDate() already nulled - goes to the UNDATED gallery,
+        // keeping the query, as a 302 because an owner can re-include an excluded date. reflash()
+        // keeps a flash from the previous request alive across the extra hop (the photo upload
+        // confirmation with return_to=gallery lands on getPhotoGalleryUrl(), the first-date URL).
+        if ($routeDate && ! $date) {
+            session()->reflash();
+
+            $target = $event->getUndatedGuestUrl($subdomain).'/photos';
+
+            if ($query = $request->getQueryString()) {
+                $target .= '?'.$query;
             }
-            $date = $nextDate->format('Y-m-d');
+
+            return redirect($target, 302);
+        }
+
+        // An undated gallery of a series shows its next REAL occurrence. This used to scan
+        // days_of_week in an unbounded `while (true)`, which never ended on '0000000' and answered
+        // TODAY for a monthly or yearly event (saveEvent() stores '1111111' for those). Null when
+        // nothing occurs within a year, which the photo filter and the view both take as "no
+        // date": every photo shows, and uploads are not pinned to an occurrence.
+        if (! $date && $event->days_of_week) {
+            $date = $event->nextOccurrenceFrom();
         }
 
         // Load photos

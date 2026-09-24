@@ -64,6 +64,14 @@
         $guestLangSuffix = ($guestHasAltLang && $guestShownLang !== $guestPrimaryLang)
             ? '?lang=' . $guestShownLang
             : '';
+
+        // The photo gallery's own canonical, shared by the canonical tag, og:url and the hreflang
+        // alternates, which used to point the gallery's language variants at the EVENT page.
+        // `?: false`, never null: handed null, getGuestUrlData() re-adds the series' first date,
+        // and a gallery with no occurrence in view is the undated gallery.
+        $galleryCanonicalUrl = ($galleryMode && $event && $event->exists)
+            ? $event->getCanonicalPhotoGalleryUrl($date ?: false)
+            : null;
     @endphp
 
     <x-slot name="meta">
@@ -75,7 +83,8 @@
 
         @if ($guestHasAltLang)
             @php
-                $hreflangBase = ($event && $event->exists) ? $event->getCanonicalUrl($date ?? null) : $role->getCanonicalUrl();
+                $hreflangBase = $galleryCanonicalUrl
+                    ?? (($event && $event->exists) ? $event->getCanonicalUrl($date ?? null) : $role->getCanonicalUrl());
             @endphp
             <link rel="alternate" hreflang="{{ $guestTargetLang }}" href="{{ $hreflangBase }}?lang={{ $guestTargetLang }}">
             <link rel="alternate" hreflang="{{ $guestPrimaryLang }}" href="{{ $hreflangBase }}">
@@ -128,7 +137,7 @@
                     // the page's own contents rather than to an advert of ours.
                     $galleryOgImage = $firstPhoto ? $firstPhoto->photo_url : $event->getImageUrl();
                 @endphp
-                <link rel="canonical" href="{{ $event->getCanonicalPhotoGalleryUrl($date) }}">
+                <link rel="canonical" href="{{ $galleryCanonicalUrl }}{{ $guestLangSuffix }}">
                 <meta name="description" content="{{ $galleryTitle }}">
                 <meta property="og:type" content="website">
                 <meta property="og:title" content="{{ $galleryTitle }}">
@@ -137,7 +146,7 @@
                 <meta property="og:image" content="{{ $galleryOgImage }}">
                 <meta property="og:image:alt" content="{{ $galleryTitle }}">
                 @endif
-                <meta property="og:url" content="{{ $event->getCanonicalPhotoGalleryUrl($date) }}">
+                <meta property="og:url" content="{{ $galleryCanonicalUrl }}">
                 <meta property="og:site_name" content="{{ $role->translatedName() ?: config('app.name') }}">
                 <meta name="twitter:title" content="{{ $galleryTitle }}">
                 <meta name="twitter:description" content="{{ $event->getMetaDescription($date, $guestLang, $role) }}">
@@ -345,7 +354,12 @@
 
         </style>
 
-        @if ($event && $event->exists && $event->starts_at && !$event->is_draft && !($passwordGate ?? false))
+        @if ($galleryMode)
+            {{-- No Event node and no schedule node. The gallery is ABOUT the event, not the event:
+                 printing the same Event here made two URLs compete for one rich result, one of
+                 them a page whose content is fan photos. The breadcrumb below still ties it to
+                 the event page. --}}
+        @elseif ($event && $event->exists && $event->starts_at && !$event->is_draft && !($passwordGate ?? false))
             @php
                 $eventName = $guestEventName;
                 $eventDescription = trim(strip_tags((string) $guestEventDescriptionHtml));
@@ -513,7 +527,8 @@
             </script>
         @endif
 
-        @if ($event && $event->exists && !($passwordGate ?? false))
+        {{-- Not on the gallery, which shows photos: a VideoObject belongs on the page that plays it. --}}
+        @if ($event && $event->exists && !($passwordGate ?? false) && ! $galleryMode)
             @php
                 $allVideos = $event->approvedVideos;
                 $videoSchemaItems = [];

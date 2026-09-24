@@ -2594,7 +2594,8 @@ class EventRepo
 
         // Parse dates with timezone context - local timezone first, then UTC as fallback
         $roleTimezone = $subdomainRole?->timezone ?? config('app.timezone');
-        $validDate = $date && preg_match('/^\d{4}-\d{2}-\d{2}$/', $date);
+        // A real calendar date, not just the shape of one: Carbon::parse() throws on 2026-13-45.
+        $validDate = Event::isOccurrenceDate($date);
         $eventDateLocal = $validDate ? Carbon::parse($date, $roleTimezone) : null;
         $eventDateUtc = $validDate ? Carbon::parse($date, 'UTC') : null;
 

@@ -71,7 +71,13 @@ if (config('app.hosted') && ! config('app.is_testing')) {
         });
     }
 
-    Route::domain('{subdomain}.'._base_domain())->where(['subdomain' => '^(?!www|app).*'])->group(function () {
+    // Excludes exactly the www and app HOSTS. It used to read '^(?!www|app).*', and a lookahead with
+    // nothing after the alternation only tests a prefix, so it refused every subdomain that merely
+    // STARTS with those letters: apple-fest, www-fans and application fell through to the app
+    // routes, and a schedule holding one had no public page. The \. ends the test at the end of the
+    // first host label. Symfony strips a leading ^ from a requirement and anchors the host itself,
+    // case-insensitively, so WWW and App stay excluded too. Pinned by RouteLoadTest.
+    Route::domain('{subdomain}.'._base_domain())->where(['subdomain' => '(?!(?:www|app)\.).+'])->group(function () {
         // Must be registered here, ahead of the domain-less marketing "/" routes below,
         // otherwise those match first on every host and send schedule home pages to login.
         Route::get('/', [RoleController::class, 'viewGuest'])->name('role.view_guest');

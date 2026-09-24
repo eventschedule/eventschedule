@@ -549,8 +549,8 @@ if (! function_exists('policy_url')) {
             //    they just wrote.
             //  - Everywhere else the route is domain-less, and the tenant subdomain group
             //    is registered ~1500 lines earlier in routes/web.php, so on a tenant host
-            //    /{slug} still wins. app_url() is the one host that group excludes
-            //    ('^(?!www|app).*'). On a plain selfhost it collapses to url($path),
+            //    /{slug} still wins. app_url() is on one of the two hosts that group
+            //    excludes ('(?!(?:www|app)\.).+'). On a plain selfhost it collapses to url($path),
             //    which is why path-based installs keep working exactly as before.
             //
             // A literal PATH, never a route() result - app_url() prepends the root, and an

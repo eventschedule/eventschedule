@@ -27,6 +27,11 @@
           <form method="POST" action="{{ route('event.check_password', ['subdomain' => $role->subdomain]) }}">
             @csrf
             <input type="hidden" name="event_id" value="{{ \App\Utils\UrlUtils::encodeId($event->id) }}">
+            {{-- The occurrence the visitor opened, so the answer returns them to it. The controller
+                 re-checks it is still an occurrence before redirecting anywhere near it. --}}
+            @if (! empty($returnDate))
+            <input type="hidden" name="date" value="{{ $returnDate }}">
+            @endif
 
             <div class="mb-4">
               <x-text-input type="password" name="password" class="w-full text-center" required autofocus

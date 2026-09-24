@@ -2755,6 +2755,21 @@ class Event extends Model
     }
 
     /**
+     * This event's guest URL with no date segment, recurring or not.
+     *
+     * getGuestUrl($subdomain) is NOT that for a recurring event: handed a null date,
+     * getGuestUrlData() re-adds the series' first date, so it names one specific occurrence - and
+     * that date need not be an occurrence at all (an excluded first date, or a starts_at weekday
+     * outside days_of_week). Redirecting a non-occurrence there sent 25 of the 159 dated recurring
+     * URLs in the sitemap to themselves forever. Anything that has to land on the series rather
+     * than on its first night uses this. For a one-off event the two are the same URL.
+     */
+    public function getUndatedGuestUrl($subdomain = false, $useCustomDomain = false): string
+    {
+        return $this->getGuestUrl($subdomain, false, $useCustomDomain);
+    }
+
+    /**
      * Build the guest URL from already-resolved getGuestUrlData() output. Split out so callers
      * that hold the data can reuse it instead of resolving it a second time.
      */
@@ -2838,6 +2853,16 @@ class Event extends Model
         return $url ? $url.'/photos' : '';
     }
 
+    /**
+     * The route parameters of this event's guest URL.
+     *
+     * Only a recurring event's URL carries a date segment, and $date decides it:
+     *  - null: the anchor date, the schedule-local date of starts_at - the series' FIRST date,
+     *    which is not necessarily an occurrence. This is what every getGuestUrl($subdomain) call
+     *    gets, including the links in email, sales and graphics.
+     *  - false or '': no date, the undated series URL. See getUndatedGuestUrl().
+     *  - a Y-m-d string: that occurrence.
+     */
     public function getGuestUrlData($subdomain = false, $date = null, $includeId = true)
     {
         $venueSubdomain = $this->venue && $this->venue->isClaimed() ? $this->venue->subdomain : null;

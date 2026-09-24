@@ -2114,6 +2114,12 @@ class Role extends Model implements MustVerifyEmail
 
         // Check each variation in order - use the first available one
         foreach ($variations as $variation) {
+            // cleanSubdomain() vetted only the WHOLE name, so a prefix could still be reserved:
+            // "App Night" was handed "app", "Events at the Park" "events".
+            if (in_array($variation, self::RESERVED_SUBDOMAINS, true)) {
+                continue;
+            }
+
             if (! self::where('subdomain', $variation)->exists()) {
                 $subdomain = $variation;
                 break;

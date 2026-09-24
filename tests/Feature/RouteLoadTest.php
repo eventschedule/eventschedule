@@ -7,6 +7,7 @@ use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Process;
+use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 use Tests\TestCase;
 
 class RouteLoadTest extends TestCase
@@ -482,6 +483,84 @@ class RouteLoadTest extends TestCase
             // transaction holding metadata locks, and the next test class's migrate:fresh then
             // blocks on DROP TABLE for lock_wait_timeout - a year by default in MySQL - so the
             // suite hangs instead of failing.
+            $connection = $this->app['db']->connection();
+
+            if ($connection->getPdo() && $connection->getPdo()->inTransaction()) {
+                $connection->rollBack();
+            }
+
+            $connection->disconnect();
+        }
+    }
+
+    /**
+     * The hosted tenant group excludes the app and www HOSTS, not every subdomain that begins with
+     * those letters.
+     *
+     * Its constraint was '^(?!www|app).*'. A lookahead with nothing after the alternation only
+     * tests a prefix, so it refused apple-fest, www-fans and application along with app and www
+     * themselves. Those hosts fell through to the domain-less app routes - verified on production,
+     * where an apple-... subdomain landed on /dashboard - and a schedule holding one of those names
+     * had no public page at all.
+     *
+     * Same forceEnv() + refreshApplication() sequence as test_hosted_gp_routes_load(): the tenant
+     * group is gated on `hosted && ! is_testing`, so without it none of these routes exist.
+     */
+    public function test_hosted_tenant_subdomains_that_start_with_app_or_www_reach_their_schedule(): void
+    {
+        $this->app['db']->connection()->rollBack();
+
+        $this->forceEnv('IS_HOSTED', 'true');
+        $this->forceEnv('APP_TESTING', 'false');
+        $this->refreshApplication();
+        $this->app['db']->connection()->beginTransaction();
+
+        try {
+            $this->assertTrue(config('app.hosted'));
+            $this->assertFalse(config('app.is_testing'), 'fixture: the hosted tenant group is registered');
+
+            $base = parse_url(config('app.url'), PHP_URL_HOST);
+            $routes = app('router')->getRoutes();
+
+            $routeFor = function (string $host) use ($routes) {
+                try {
+                    return $routes->match(Request::create("https://{$host}/"));
+                } catch (NotFoundHttpException) {
+                    return null;
+                }
+            };
+
+            foreach (['apple-fest', 'www-fans', 'application', 'wwwx', 'appx', 'apps'] as $subdomain) {
+                $route = $routeFor("{$subdomain}.{$base}");
+
+                $this->assertSame('role.view_guest', $route?->getName(), "{$subdomain} is a schedule");
+                $this->assertSame($subdomain, $route->parameter('subdomain'));
+            }
+
+            // The hosts the group exists to leave alone. Symfony lowercases the host before it
+            // matches, and the compiled host regex is case-insensitive as well.
+            foreach (['www', 'app', 'WWW', 'App'] as $reserved) {
+                $this->assertNotSame('role.view_guest', $routeFor("{$reserved}.{$base}")?->getName(),
+                    "{$reserved}.{$base} must not be treated as a schedule");
+            }
+
+            // End to end: a verified schedule on one of the hosts the old constraint refused.
+            $user = User::factory()->create();
+            $role = new Role;
+            $role->subdomain = 'apple-fest';
+            $role->user_id = $user->id;
+            $role->type = 'venue';
+            $role->name = 'Apple Fest';
+            $role->email = 'apple-fest@gmail.com';
+            $role->email_verified_at = now();
+            $role->save();
+            $role->users()->attach($user->id, ['level' => 'owner']);
+
+            $this->get("https://apple-fest.{$base}/")
+                ->assertOk()
+                ->assertSee('Apple Fest');
+        } finally {
+            // See test_hosted_gp_routes_load() for why this has to close its own transaction.
             $connection = $this->app['db']->connection();
 
             if ($connection->getPdo() && $connection->getPdo()->inTransaction()) {

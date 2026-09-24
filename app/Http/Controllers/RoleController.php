@@ -2043,14 +2043,21 @@ class RoleController extends Controller
         $otherRole = null;
         $event = null;
         $selectedGroup = null;
+        // The occurrence the URL asked for, once it is known to be one. See the event branch.
+        $requestedOccurrence = null;
         // Support both path params and query params (backwards compatibility).
         // ?date[]=x hands strtotime() an array, which is a TypeError, so only take a string.
         $requestDate = is_string($request->date) ? $request->date : null;
         // Kept before the merge below: only the PATH form is a crawlable, self-canonical URL, so
-        // only it 404s on a non-occurrence. See the guard further down.
+        // only it is redirected away from a date that is not an occurrence. See the guard further
+        // down, which also needs it to know a path date was nulled here.
         $routeDate = $date;
         $date = $date ?: ($requestDate ? date('Y-m-d', strtotime($requestDate)) : null);
-        if ($date && ! preg_match('/^\d{4}-\d{2}-\d{2}$/', $date)) {
+        // A real calendar date, not merely the shape of one. The route only constrains {date} to
+        // \d{4}-\d{2}-\d{2}, which 2026-13-45 satisfies, and Carbon::parse() below (and in
+        // EventRepo::getEvent()) throws on it - a 500 - while 2026-02-30 silently rolls over to
+        // March 2nd.
+        if ($date && ! Event::isOccurrenceDate($date)) {
             $date = null;
         }
         $eventIdParam = $id ? UrlUtils::decodeId($id) : ($request->id ? UrlUtils::decodeId($request->id) : null);
@@ -2131,46 +2138,72 @@ class RoleController extends Controller
                 // range-checks multi-day events and isSameDay()s the rest), so it is applied to
                 // every event rather than gated on days_of_week.
                 //
-                // '1970-01-01' is not a user-supplied date: date('Y-m-d', strtotime($bad)) yields
-                // it for an unparseable ?date=, so drop it the way the month/year branch below
-                // already does instead of 404ing an otherwise valid event URL.
+                // '1970-01-01' from a ?date= is not a user-supplied date: date('Y-m-d',
+                // strtotime($bad)) yields it for an unparseable value, so drop it the way the
+                // month/year branch above already does. A PATH 1970-01-01 is nulled here too, and
+                // then redirects below like any other date that is not an occurrence.
                 if ($date === '1970-01-01') {
                     $date = null;
-                } elseif ($date && ! $event->matchesDate($date, $event->scheduleTimezone())) {
-                    if ($routeDate) {
-                        // Redirect rather than 404. Stored dates build user-facing URLs all over
-                        // the app - Sale::getEventUrl() on the buyer's tickets page and the
-                        // owner's sales table, the Stripe cancel URL, waitlist mail, the
-                        // ticket-confirmation push - and every one of them stops matching the
-                        // moment an owner edits the recurrence. Excluding a single date IS the
-                        // "cancel this occurrence" feature, which is precisely when a ticket
-                        // holder is most likely to click their link, so 404ing here would break a
-                        // paying customer's own confirmation.
-                        //
-                        // 302 rather than 301: the state is revocable (an owner can re-include an
-                        // excluded date) and a cached 301 would strand that visitor on the undated
-                        // page for good. Either way the duplicate 200 is gone, which is all the
-                        // crawl problem needed - Googlebot only follows dates it finds linked.
-                        //
-                        // Same host as the request (getGuestUrl($subdomain), not
-                        // getCanonicalUrl()), so a subdomain visitor is not thrown onto a custom
-                        // domain mid-checkout; the canonical tag still does the consolidating.
-                        $target = $event->getGuestUrl($subdomain);
+                }
 
-                        if ($query = $request->getQueryString()) {
-                            $target .= (str_contains($target, '?') ? '&' : '?').$query;
-                        }
+                $isOccurrence = $date && $event->matchesDate($date, $event->scheduleTimezone());
 
-                        return redirect($target, 302);
+                // $date is null here for a path date isOccurrenceDate() rejected above, so an
+                // impossible date (2026-13-45) redirects exactly like a well-formed non-occurrence.
+                if ($routeDate && ! $isOccurrence) {
+                    // Redirect rather than 404. Stored dates build user-facing URLs all over
+                    // the app - Sale::getEventUrl() on the buyer's tickets page and the
+                    // owner's sales table, the Stripe cancel URL, waitlist mail, the
+                    // ticket-confirmation push - and every one of them stops matching the
+                    // moment an owner edits the recurrence. Excluding a single date IS the
+                    // "cancel this occurrence" feature, which is precisely when a ticket
+                    // holder is most likely to click their link, so 404ing here would break a
+                    // paying customer's own confirmation.
+                    //
+                    // 302 rather than 301: the state is revocable (an owner can re-include an
+                    // excluded date) and a cached 301 would strand that visitor on the undated
+                    // page for good. Either way the duplicate 200 is gone, which is all the
+                    // crawl problem needed - Googlebot only follows dates it finds linked.
+                    //
+                    // To the UNDATED URL, never getGuestUrl($subdomain). Handed no date, that one
+                    // re-adds the series' first date, and when the first date is not an occurrence
+                    // either (excluded, or a starts_at weekday outside days_of_week) the target was
+                    // this very request: 25 of the 159 dated recurring URLs in the sitemap 302'd
+                    // to themselves forever. The undated URL has no date to reject, so this is
+                    // always the last hop.
+                    //
+                    // Same host as the request (not getCanonicalUrl()), so a subdomain visitor is
+                    // not thrown onto a custom domain mid-checkout; the canonical tag still does
+                    // the consolidating.
+                    //
+                    // reflash(): this is often the second hop of a redirect that already carries a
+                    // flash. The comment, video and photo confirmations in EventController all land
+                    // on getGuestUrl($subdomain), the first-date URL, and without this they would
+                    // expire here, one request before the page that shows them.
+                    session()->reflash();
+
+                    $target = $event->getUndatedGuestUrl($subdomain);
+
+                    if ($query = $request->getQueryString()) {
+                        $target .= (str_contains($target, '?') ? '&' : '?').$query;
                     }
 
-                    // A ?date= that is not an occurrence is dropped rather than 404'd: a malformed
-                    // query param must not break an otherwise valid event page (pinned by
-                    // RoleGuestSurfaceCharacterizationTest, where strtotime() rolls '2026-02-30'
-                    // over to a real but non-occurring date), and leaving it set would point the
-                    // canonical at a path URL that now 404s.
+                    return redirect($target, 302);
+                }
+
+                if (! $isOccurrence) {
+                    // A ?date= that is not an occurrence is dropped rather than redirected: a
+                    // malformed query param must not break an otherwise valid event page (pinned
+                    // by RoleGuestSurfaceCharacterizationTest, where strtotime() rolls
+                    // '2026-02-30' over to a real but non-occurring date), and leaving it set
+                    // would point the canonical at a path URL that redirects away.
                     $date = null;
                 }
+
+                // Taken before the backfills below put a date the visitor did NOT ask for in its
+                // place: the password prompt posts this back, so only a requested occurrence
+                // returns them to a dated URL.
+                $requestedOccurrence = $date;
 
                 // Handle direct registration redirect when URL has trailing slash
                 if ($request->attributes->get('has_trailing_slash') && $event->registration_url) {
@@ -2558,8 +2591,14 @@ class RoleController extends Controller
 
                 $passwordGate = true;
 
+                // The occurrence the visitor asked for - a path date or ?date= that survived the
+                // guard above, so a real one - for the form to post back, and checkEventPassword()
+                // to return them to. Not the computed next occurrence of an undated URL: that
+                // visitor goes back to the undated URL.
+                $returnDate = $requestedOccurrence;
+
                 return response()->view('event/password-prompt', compact(
-                    'role', 'event', 'date', 'fonts', 'passwordGate'
+                    'role', 'event', 'date', 'fonts', 'passwordGate', 'returnDate'
                 ));
             }
 
@@ -2671,8 +2710,17 @@ class RoleController extends Controller
             abort(404);
         }
 
-        // Construct redirect URL server-side from event's guest URL
-        $redirectUrl = $event->getGuestUrl($subdomain);
+        // Constructed server-side. Back to the occurrence the prompt was showing when the form
+        // named one and it still IS an occurrence - the same test viewGuest() applies to a path
+        // date, so that URL renders rather than redirects - and otherwise to the undated URL.
+        //
+        // Never getGuestUrl($subdomain) with no date: that carries the series' first date, which
+        // need not be an occurrence, and on such a series the wrong-password error was flashed
+        // onto a URL that redirected to itself.
+        $date = $request->input('date');
+        $redirectUrl = Event::isOccurrenceDate($date) && $event->matchesDate($date, $event->scheduleTimezone())
+            ? $event->getGuestUrl($subdomain, $date)
+            : $event->getUndatedGuestUrl($subdomain);
 
         if ($event->event_password && hash_equals($event->event_password, $request->password)) {
             session()->put('event_password_'.$event->id, true);

@@ -439,7 +439,7 @@ class LegalPagesTest extends TestCase
      * A multi-tenant install with no marketing site (a self-hosted SaaS): the legal routes are
      * domain-less, but the Route::domain('{subdomain}...') group is registered ~1500 lines
      * earlier in routes/web.php, so on a tenant host its /{slug} catch-all still wins. The app
-     * host is the one host that group excludes ('^(?!www|app).*').
+     * host is one of the two hosts that group excludes ('(?!(?:www|app)\.).+').
      */
     public function test_on_a_multi_tenant_install_a_written_document_is_linked_on_the_app_host(): void
     {
