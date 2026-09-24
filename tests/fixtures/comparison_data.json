@@ -8348,5 +8348,204 @@
                 "answer": "Yes. Create a free schedule, paste your event details or upload a flyer and the AI parser fills in each event for you to check. Then connect Stripe or PayPal and move to Pro to sell paid tickets."
             }
         ]
+    },
+    "songkick": {
+        "name": "Songkick",
+        "key": "songkick",
+        "slug": "songkick-alternative",
+        "meta_title": "Songkick Alternative With Your Own Tickets | Event Schedule",
+        "tagline": "A schedule page that takes registrations and sells its own tickets, for artists and venues alike.",
+        "description": "Compare Event Schedule with Songkick: your own schedule page with free RSVPs and QR tickets, paid tickets on Pro, two-way calendar sync, and venue tools too.",
+        "keywords": "songkick alternative, songkick tourbox alternative, tour dates widget, concert listings for artists, songkick competitor",
+        "about": "Songkick is a concert discovery app and website that lists tour dates gathered from hundreds of sources and alerts fans when artists they track announce shows. Artist teams manage their dates with the Tourbox tool, and tickets are sold by outside vendors. Suno Inc. has operated Songkick since late 2025.",
+        "competitor_strengths": [
+            "A large fan audience that gets alerts when the artists they track announce dates",
+            "The free Tourbox tool, with a tour-date widget and partners such as Deezer, Bandcamp and SoundCloud",
+            "Paid email campaigns to an artist's Songkick fans, and fan insights for bigger artists"
+        ],
+        "sections": {
+            "Pricing & Fees": [
+                [
+                    "Free plan",
+                    "Yes (forever)",
+                    "Yes (Tourbox for artists)",
+                    false
+                ],
+                [
+                    "Paid plan price",
+                    "$5/mo (7-day free trial)",
+                    "Free (paid email campaigns)",
+                    false
+                ],
+                [
+                    "Platform fees",
+                    "0%",
+                    "N/A (links to outside ticket sellers)",
+                    false
+                ]
+            ],
+            "Events & Ticketing": [
+                [
+                    "Ticketing",
+                    "Yes (free RSVP, paid on Pro)",
+                    "No (links to outside ticket sellers)",
+                    true
+                ],
+                [
+                    "Online events",
+                    "Yes (Free)",
+                    "Yes (live stream listings)",
+                    false
+                ],
+                [
+                    "Free event RSVP",
+                    "Yes (Free)",
+                    "No (fans mark Interested or Going)",
+                    true
+                ]
+            ],
+            "Integrations": [
+                [
+                    "Newsletters",
+                    "Yes (Free)",
+                    "Automatic fan alerts, paid campaigns",
+                    false
+                ]
+            ],
+            "Customization": [
+                [
+                    "Built-in analytics",
+                    "Yes (Free)",
+                    "Fan insights from 3,000 trackers",
+                    true
+                ]
+            ],
+            "Unique Features": [
+                [
+                    "Embeddable calendar",
+                    "Yes (Free)",
+                    "Yes (Tourbox widget)",
+                    false
+                ],
+                [
+                    "Venue and promoter tools",
+                    "Yes (venue and curator schedules)",
+                    "No (Tourbox is for artist teams)",
+                    true
+                ]
+            ],
+            "Platform": [
+                [
+                    "REST API",
+                    "Yes (Pro)",
+                    "Paid licence, partners only",
+                    true
+                ],
+                [
+                    "Open source",
+                    "Yes",
+                    "No",
+                    true
+                ],
+                [
+                    "Selfhosting",
+                    "Yes",
+                    "No",
+                    true
+                ]
+            ]
+        },
+        "key_advantages": [
+            {
+                "title": "Tickets on Your Own Page",
+                "description": "Songkick links fans out to other ticket sellers. Event Schedule takes free registrations with QR tickets on every plan, and paid tickets on Pro with zero platform fees.",
+                "icon": "ticket",
+                "gradient": "from-emerald-50 to-teal-50 dark:from-emerald-900/30 dark:to-teal-900/30",
+                "border": "border-emerald-200 dark:border-emerald-500/20",
+                "icon_bg": "bg-emerald-100 dark:bg-emerald-500/20",
+                "icon_color": "text-emerald-600 dark:text-emerald-400"
+            },
+            {
+                "title": "For Venues Too",
+                "description": "Venue, talent and curator schedules link to each other, so a show a venue lists can appear on the performer's schedule as well.",
+                "icon": "globe",
+                "gradient": "from-sky-50 to-cyan-50 dark:from-sky-900/30 dark:to-cyan-900/30",
+                "border": "border-sky-200 dark:border-sky-500/20",
+                "icon_bg": "bg-sky-100 dark:bg-sky-500/20",
+                "icon_color": "text-sky-600 dark:text-sky-400"
+            },
+            {
+                "title": "Your Own Audience",
+                "description": "People who sign up on your schedule get an email when you add dates, and you can write to them yourself from inside the app.",
+                "icon": "mail",
+                "gradient": "from-teal-50 to-emerald-50 dark:from-teal-900/30 dark:to-emerald-900/30",
+                "border": "border-teal-200 dark:border-teal-500/20",
+                "icon_bg": "bg-teal-100 dark:bg-teal-500/20",
+                "icon_color": "text-teal-600 dark:text-teal-400"
+            },
+            {
+                "title": "Two-Way Calendar Sync",
+                "description": "Google, Outlook and CalDAV sync both ways, free, so the dates in your calendar and on your page never disagree.",
+                "icon": "calendar",
+                "gradient": "from-blue-50 to-sky-50 dark:from-blue-900/30 dark:to-sky-900/30",
+                "border": "border-blue-200 dark:border-blue-500/20",
+                "icon_bg": "bg-blue-100 dark:bg-blue-500/20",
+                "icon_color": "text-blue-600 dark:text-blue-400"
+            },
+            {
+                "title": "Event Graphics",
+                "description": "Turn your upcoming dates into a shareable graphic for social media in one click, free.",
+                "icon": "image",
+                "gradient": "from-amber-50 to-yellow-50 dark:from-amber-900/30 dark:to-yellow-900/30",
+                "border": "border-amber-200 dark:border-amber-500/20",
+                "icon_bg": "bg-amber-100 dark:bg-amber-500/20",
+                "icon_color": "text-amber-600 dark:text-amber-400"
+            },
+            {
+                "title": "Open Source",
+                "description": "Read the code and selfhost it on your own server. Songkick is a hosted service only.",
+                "icon": "code",
+                "gradient": "from-cyan-50 to-sky-50 dark:from-cyan-900/30 dark:to-sky-900/30",
+                "border": "border-cyan-200 dark:border-cyan-500/20",
+                "icon_bg": "bg-cyan-100 dark:bg-cyan-500/20",
+                "icon_color": "text-cyan-600 dark:text-cyan-400"
+            }
+        ],
+        "cross_links": [
+            {
+                "name": "Bandsintown",
+                "route": "marketing.compare_bandsintown"
+            },
+            {
+                "name": "DICE",
+                "route": "marketing.compare_dice"
+            },
+            {
+                "name": "Facebook Events",
+                "route": "marketing.compare_facebook_events"
+            }
+        ],
+        "faq": [
+            {
+                "question": "Does Songkick sell tickets?",
+                "answer": "No. Songkick lists dates from hundreds of sources and links fans to outside ticket sellers, so orders and refunds are handled by whoever sold the ticket. Event Schedule takes free registrations with QR tickets on every plan, and paid tickets on Pro with zero platform fees."
+            },
+            {
+                "question": "Can I use Event Schedule alongside Songkick?",
+                "answer": "Yes. Keep your Songkick listing for its fan alerts and add your Event Schedule event page as the ticket link in Tourbox, so fans who find a date there land on your own page. Paste your dates in and the AI parser fills in each show for you to check."
+            },
+            {
+                "question": "Can venues and promoters use Event Schedule?",
+                "answer": "Yes. Venues, talent and curators each get their own schedule, and a show a venue lists can appear on the performer's schedule too. Songkick's Tourbox is only for artist teams, and venues and promoters cannot add ticket links themselves."
+            },
+            {
+                "question": "How does Event Schedule pricing compare to Songkick?",
+                "answer": "Songkick is free for artists, with paid email campaigns to their fans. Event Schedule is free for listing dates, registrations and newsletters, and Pro is $5/mo for paid tickets with zero platform fees."
+            },
+            {
+                "question": "Can I put my tour dates on my website?",
+                "answer": "Yes. The embeddable calendar shows your upcoming dates on any website, free, and each date links to its own event page. Fans can also subscribe to your schedule's live calendar feed, so a moved date updates in their own calendar."
+            }
+        ]
     }
 }

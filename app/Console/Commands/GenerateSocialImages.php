@@ -173,6 +173,7 @@ class GenerateSocialImages extends Command
         'hi-events-alternative' => '/hi-events-alternative',
         'mobilizon-alternative' => '/mobilizon-alternative',
         'ticketleap-alternative' => '/ticketleap-alternative',
+        'songkick-alternative' => '/songkick-alternative',
 
         // Replacement pages
         'replace' => '/replace',

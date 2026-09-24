@@ -891,7 +891,7 @@ return [
 
     'bandsintown-alternative' => [
         ['title' => 'Facebook Events Alternative', 'path' => '/facebook-events-alternative', 'blurb' => 'An events page you own, with ticketing and calendar sync.'],
-        ['title' => 'Posh Alternative', 'path' => '/posh-alternative', 'blurb' => 'Ticketing for parties and nights out with zero platform fees.'],
+        ['title' => 'Songkick Alternative', 'path' => '/songkick-alternative', 'blurb' => 'Tour dates on your own page, with registrations and tickets built in.'],
         ['title' => 'Compare Alternatives', 'path' => '/compare', 'blurb' => 'See how Event Schedule stacks up against other platforms.'],
         ['title' => 'Pricing', 'path' => '/pricing', 'blurb' => 'See what is included on Free, Pro, and Enterprise plans.'],
     ],
@@ -945,6 +945,15 @@ return [
         ['title' => 'Allocated Seating', 'path' => '/features/allocated-seating', 'blurb' => 'Draw your room once and let buyers pick their own seats from a map of it.'],
         ['title' => 'Eventbrite Alternative', 'path' => '/eventbrite-alternative', 'blurb' => 'Keep more of every ticket you sell.'],
         ['title' => 'Pricing', 'path' => '/pricing', 'blurb' => 'See what is included on Free, Pro, and Enterprise plans.'],
+    ],
+
+    // Songkick lists artists' dates for their fans, so the reader is a performer or the venue they
+    // play: the cards follow them rather than the other ticketing comparisons.
+    'songkick-alternative' => [
+        ['title' => 'Bandsintown Alternative', 'path' => '/bandsintown-alternative', 'blurb' => 'Your own tour-date page with ticketing and calendar sync.'],
+        ['title' => 'For Musicians', 'path' => '/for-musicians', 'blurb' => 'Tour dates, gigs, and fans on one link.'],
+        ['title' => 'For Music Venues', 'path' => '/for-music-venues', 'blurb' => 'Run your live music calendar in one place.'],
+        ['title' => 'Embed Calendar', 'path' => '/features/embed-calendar', 'blurb' => 'Embed your calendar on any website with one line of code.'],
     ],
 
     'replace' => [

@@ -187,6 +187,7 @@ return [
     '/search' => '2026-09-24',
     '/self-hosting-terms-of-service' => '2026-09-17',
     '/selfhost' => '2026-09-24',
+    '/songkick-alternative' => '2026-09-24',
     '/splash-alternative' => '2026-09-24',
     '/squarespace-replacement' => '2026-09-24',
     '/stripe' => '2026-09-24',

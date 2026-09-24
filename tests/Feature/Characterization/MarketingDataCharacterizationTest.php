@@ -46,7 +46,7 @@ class MarketingDataCharacterizationTest extends TestCase
         'accelevents', 'tito', 'addevent', 'pretix', 'humanitix', 'eventzilla',
         'timely', 'the-events-calendar', 'bandsintown', 'posh', 'partiful',
         'facebook-events', 'zeffy', 'tockify', 'hi-events', 'mobilizon',
-        'ticketleap',
+        'ticketleap', 'songkick',
     ];
 
     private const REPLACEMENT_KEYS = [
