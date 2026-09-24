@@ -385,7 +385,8 @@ class RecurringOccurrenceUrlTest extends TestCase
 
         // The query form is not a crawlable, self-canonical URL, and a malformed ?date= must not
         // break an otherwise valid event page. So it renders - but the non-occurrence must not
-        // survive into the canonical, or the canonical would advertise a URL that redirects away.
+        // survive into the page's URLs: og:url names the occurrence a dated page is about, and
+        // would advertise a URL that redirects away.
         $content = $this->get($this->guestEventUrl($role, $event).'?date=2099-12-25')
             ->assertOk()
             ->getContent();

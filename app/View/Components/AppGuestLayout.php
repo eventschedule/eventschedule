@@ -62,6 +62,17 @@ class AppGuestLayout extends Component
          * print the very name og:title is hiding.
          */
         public ?string $pageTitle = null,
+        /**
+         * The occurrence of a recurring event the URL asked for (Y-m-d), by path or by a ?date=
+         * that survived viewGuest()'s guard. Never the next occurrence an undated page fills in
+         * for itself: that page is the series.
+         *
+         * Only og:url reads it. Every dated page canonicalizes to the undated series URL, but a
+         * share of next Friday's page should still open next Friday, and og:url is what Facebook
+         * and the chat apps take as the share target - Google ignores it for canonicalization.
+         * $date cannot stand in for it, because the undated page backfills $date too.
+         */
+        public ?string $occurrenceDate = null,
     ) {}
 
     /**

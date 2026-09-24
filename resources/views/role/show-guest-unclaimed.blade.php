@@ -113,6 +113,10 @@
         <ul class="mt-3 divide-y divide-gray-200 dark:divide-gray-700">
             @foreach ($events as $event)
             <li class="py-3 flex flex-col gap-1">
+                {{-- The canonical, on a schedule that accepted the event: this placeholder cannot
+                     serve it (viewGuestUnclaimed() answers only the root), and neither can a
+                     performer who has not accepted it yet. A series links at its undated URL, not
+                     at its first date, which need not be an occurrence. --}}
                 <a href="{{ $event->getCanonicalUrl() }}" class="text-sm font-medium text-gray-900 dark:text-gray-100 hover:underline"
                    dir="{{ content_dir_for_language($event->translatedName(), $lang) }}">
                     <x-user-text>{{ $event->translatedName() }}</x-user-text>

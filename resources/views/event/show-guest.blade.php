@@ -1,4 +1,4 @@
-<x-app-guest-layout :role="$role" :event="$event" :date="$date" :fonts="$fonts" :showMobileBackground="true" :otherRole="$otherRole" :ad-slot="true" :cart="true">
+<x-app-guest-layout :role="$role" :event="$event" :date="$date" :occurrence-date="$requestedOccurrence ?? null" :fonts="$fonts" :showMobileBackground="true" :otherRole="$otherRole" :ad-slot="true" :cart="true">
 
   <style {!! nonce_attr() !!}>
     /* GP Dropdown Menus */

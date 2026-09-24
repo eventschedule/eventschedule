@@ -65,12 +65,26 @@
             ? '?lang=' . $guestShownLang
             : '';
 
+        // The event's canonical: its undated URL on its home schedule (Event::canonicalTarget()).
+        // For a recurring event that is the SERIES URL, the same on the undated page and on every
+        // dated occurrence. The canonical tag, the hreflang alternates, the JSON-LD url and
+        // offers, the breadcrumb and the password page's og:url all name it. $date stays what the
+        // page SHOWS - the occurrence in the URL, or the next one on the undated page - for the
+        // dates in the JSON-LD; only the URL loses it.
+        $eventCanonicalUrl = ($event && $event->exists) ? $event->getCanonicalUrl() : null;
+
+        // og:url alone keeps the occurrence a dated page is about, on the same home host: it is
+        // the share target, and Google ignores it for canonicalization. See
+        // AppGuestLayout::$occurrenceDate, which is null on the undated page.
+        $eventShareUrl = ($occurrenceDate && $event && $event->exists)
+            ? ($event->canonicalTarget($occurrenceDate)[0] ?? $eventCanonicalUrl)
+            : $eventCanonicalUrl;
+
         // The photo gallery's own canonical, shared by the canonical tag, og:url and the hreflang
-        // alternates, which used to point the gallery's language variants at the EVENT page.
-        // `?: false`, never null: handed null, getGuestUrlData() re-adds the series' first date,
-        // and a gallery with no occurrence in view is the undated gallery.
+        // alternates, which used to point the gallery's language variants at the EVENT page. The
+        // series gallery for every occurrence, like the event page's.
         $galleryCanonicalUrl = ($galleryMode && $event && $event->exists)
-            ? $event->getCanonicalPhotoGalleryUrl($date ?: false)
+            ? $event->getCanonicalPhotoGalleryUrl()
             : null;
     @endphp
 
@@ -83,8 +97,7 @@
 
         @if ($guestHasAltLang)
             @php
-                $hreflangBase = $galleryCanonicalUrl
-                    ?? (($event && $event->exists) ? $event->getCanonicalUrl($date ?? null) : $role->getCanonicalUrl());
+                $hreflangBase = $galleryCanonicalUrl ?? $eventCanonicalUrl ?? $role->getCanonicalUrl();
             @endphp
             <link rel="alternate" hreflang="{{ $guestTargetLang }}" href="{{ $hreflangBase }}?lang={{ $guestTargetLang }}">
             <link rel="alternate" hreflang="{{ $guestPrimaryLang }}" href="{{ $hreflangBase }}">
@@ -112,7 +125,7 @@
             @if ($gateOgImage)
             <meta property="og:image" content="{{ $gateOgImage }}">
             @endif
-            <meta property="og:url" content="{{ $event->getCanonicalUrl($date) }}">
+            <meta property="og:url" content="{{ $eventCanonicalUrl }}">
             <meta property="og:site_name" content="{{ $role->translatedName() ?: config('app.name') }}">
             <meta name="twitter:title" content="{{ __('messages.event_password_required') }}">
             <meta name="twitter:description" content="{{ __('messages.event_password_required') }}">
@@ -157,7 +170,7 @@
                 <meta name="twitter:card" content="{{ $galleryOgImage ? 'summary_large_image' : 'summary' }}">
                 <meta name="twitter:site" content="@ScheduleEvent">
             @else
-            <link rel="canonical" href="{{ $event->getCanonicalUrl($date) }}{{ $guestLangSuffix }}">
+            <link rel="canonical" href="{{ $eventCanonicalUrl }}{{ $guestLangSuffix }}">
             <meta name="description" content="{{ $event->getMetaDescription($date, $guestLang, $role) }}">
             <meta property="og:type" content="event">
             <meta property="og:title" content="{{ $guestEventName }}">
@@ -170,7 +183,7 @@
             <meta property="og:image" content="{{ $eventOgImage }}">
             <meta property="og:image:alt" content="{{ $guestEventName }}">
             @endif
-            <meta property="og:url" content="{{ $event->getCanonicalUrl($date) }}">
+            <meta property="og:url" content="{{ $eventShareUrl }}">
             <meta property="og:site_name" content="{{ $role->translatedName() ?: config('app.name') }}">
             <meta name="twitter:title" content="{{ $guestEventName }}">
             <meta name="twitter:description" content="{{ $event->getMetaDescription($date, $guestLang, $role) }}">
@@ -366,16 +379,20 @@
                 if (empty($eventDescription)) {
                     $eventDescription = $eventName . ' - ' . __('messages.event');
                 }
-                $eventUrl = $event->getCanonicalUrl($date ?? null);
+                // The series URL, while the dates below are the occurrence this page shows (the
+                // next one on the undated page): the node describes that occurrence of the event
+                // whose canonical page is the series.
+                $eventUrl = $eventCanonicalUrl;
                 // The block below is already @if-guarded, so null simply omits "image" rather
                 // than asserting to Google that this event looks like an Event Schedule advert.
                 $eventImage = $event->getImageUrl();
                 $startDate = $event->getSchemaStartDate($date ?? null);
                 $endDate = $event->getSchemaEndDate($date ?? null);
                 $location = $event->getSchemaLocation();
-                // Same $date as the "url" above, so every offer points at the page it describes -
-                // the occurrence on a recurring event, the custom domain where it is canonical.
-                $offers = $event->getSchemaOffers($date ?? null);
+                // The same canonical as the "url" above, so every offer points at the page it
+                // sits on - the series on a recurring event, the custom domain where it is
+                // canonical.
+                $offers = $event->getSchemaOffers();
                 $performers = $event->getSchemaPerformers();
 
                 // Built as an array and encoded once, never stitched by hand: every value goes
@@ -502,7 +519,7 @@
 
             $breadcrumbForEvent = $event && $event->exists && $event->starts_at && ! $event->is_draft && ! ($passwordGate ?? false);
             if ($breadcrumbForEvent) {
-                $breadcrumbCrumbs[] = [$guestEventName, $event->getCanonicalUrl($date ?? null)];
+                $breadcrumbCrumbs[] = [$guestEventName, $eventCanonicalUrl];
             }
 
             // A schedule page on its own domain would be a one-item trail, which says nothing.

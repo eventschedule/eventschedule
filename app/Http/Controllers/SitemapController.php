@@ -194,9 +194,10 @@ class SitemapController extends Controller
                 ->whereColumn('event_role.event_id', 'events.id')
                 ->where('event_role.role_id', $role->id)
                 ->where('event_role.is_accepted', true))
+            // The same columns as writeEvents(), for the same reason.
             ->with([
-                'roles:id,subdomain,type,user_id,email_verified_at,phone_verified_at,custom_domain,custom_domain_mode,custom_domain_status',
-                'creatorRole:id,subdomain,type,user_id,email_verified_at,phone_verified_at,timezone',
+                'roles:id,subdomain,type,user_id,email_verified_at,phone_verified_at,is_deleted,custom_domain,custom_domain_mode,custom_domain_status',
+                'creatorRole:id,subdomain,type,user_id,email_verified_at,phone_verified_at',
             ])
             ->chunkByIdDesc(self::HYDRATE_CHUNK, function ($events) use ($write, $cap, &$written) {
                 foreach ($events as $event) {
@@ -482,15 +483,18 @@ class SitemapController extends Controller
     {
         $skipped = 0;
 
-        // Every column read by Event::getGuestUrlData() must be listed here, including
-        // creatorRole.timezone (saleEventDateFromStartsAt) and the roles' custom_domain_* columns
-        // (servesOnCustomDomain). is_private / is_draft / is_cancelled / event_password are query
-        // predicates only and are deliberately never selected.
+        // Every column read by Event::canonicalTarget() must be listed here: getGuestUrlData()'s,
+        // the roles' is_deleted (servesGuestPage(), which also reads the pivot - a narrowed
+        // belongsToMany still loads that) and their custom_domain_* columns
+        // (servesOnCustomDomain). A column that is read but not selected reads as null instead of
+        // raising, so an omission fails silently. The canonical carries no date, so
+        // creatorRole.timezone is no longer among them. is_private / is_draft / is_cancelled /
+        // event_password are query predicates only and are deliberately never selected.
         $this->applyRange($this->discoverableEventQuery(), $range)
             ->select(['id', 'slug', 'starts_at', 'days_of_week', 'creator_role_id', 'updated_at'])
             ->with([
-                'roles:id,subdomain,type,user_id,email_verified_at,phone_verified_at,custom_domain,custom_domain_mode,custom_domain_status',
-                'creatorRole:id,subdomain,type,user_id,email_verified_at,phone_verified_at,timezone',
+                'roles:id,subdomain,type,user_id,email_verified_at,phone_verified_at,is_deleted,custom_domain,custom_domain_mode,custom_domain_status',
+                'creatorRole:id,subdomain,type,user_id,email_verified_at,phone_verified_at',
             ])
             ->chunkByIdDesc(self::HYDRATE_CHUNK, function ($events) use ($write, &$skipped) {
                 foreach ($events as $event) {

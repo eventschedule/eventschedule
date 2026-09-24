@@ -2808,14 +2808,12 @@ class Event extends Model
     }
 
     /**
-     * The event's canonical guest URL. Decided by the event's HOME schedule (the same role
-     * getGuestUrl resolves), so the canonical is identical no matter which schedule's page
-     * renders the event. Uses the custom domain only when that home schedule is served directly
-     * on it (direct + active); redirect mode keeps the subdomain canonical.
+     * The event's canonical guest URL: its undated URL on its home schedule, which for a recurring
+     * event is the series URL. See canonicalTarget().
      */
-    public function getCanonicalUrl($date = null)
+    public function getCanonicalUrl()
     {
-        $url = $this->getCanonicalUrlOrNull($date);
+        $url = $this->getCanonicalUrlOrNull();
 
         if ($url === null) {
             \Log::error('No subdomain found for event '.$this->id);
@@ -2828,29 +2826,99 @@ class Event extends Model
 
     /**
      * getCanonicalUrl() without the log-and-empty-string fallback: returns null when the event
-     * has no routable subdomain. Resolves getGuestUrlData() once, and stays silent, so bulk
-     * callers that walk every event in the database (the sitemap) cannot flood the log.
+     * has no routable subdomain. Stays silent, so bulk callers that walk every event in the
+     * database (the sitemap) cannot flood the log.
      */
-    public function getCanonicalUrlOrNull($date = null)
+    public function getCanonicalUrlOrNull()
     {
-        $data = $this->getGuestUrlData(false, $date);
-
-        if (! $data['subdomain']) {
-            return null;
-        }
-
-        $homeRole = $this->roles->first(function ($role) use ($data) {
-            return $role->subdomain == $data['subdomain'];
-        });
-
-        return $this->buildGuestUrl($data, $homeRole && $homeRole->servesOnCustomDomain());
+        return $this->canonicalTarget()[0];
     }
 
-    public function getCanonicalPhotoGalleryUrl($date = null)
+    public function getCanonicalPhotoGalleryUrl()
     {
-        $url = $this->getCanonicalUrl($date);
+        $url = $this->getCanonicalUrl();
 
         return $url ? $url.'/photos' : '';
+    }
+
+    /**
+     * The event's canonical URL, and the schedule it is canonical on.
+     *
+     * No date. Every occurrence of a recurring series canonicalizes to the series URL
+     * /{slug}/{id}: the dated URLs all carry the same page, and a weekly event made 52 of them a
+     * year, each self-canonical. The undated URL used to canonicalize to "today's" occurrence
+     * instead, a target that moved every day. The dated URLs still render - sales are keyed by
+     * event_date, and tickets, email, the Stripe cancel URL and waitlist mail all link to them -
+     * they just stop competing with the series. A one-off event's URL never had a date, so it is
+     * unchanged. $date exists only for og:url, which names the occurrence a dated page is about,
+     * on the same home host (a share target, which Google ignores for canonicalization); never
+     * pass one for a canonical.
+     *
+     * The home schedule is the one getGuestUrlData() picks - the claimed performer, then the
+     * claimed venue, then the creator - but only while that schedule SERVES the event: its pivot
+     * accepted, claimed, and not deleted. That pick never looked at the pivot, and every guest
+     * lookup does (EventRepo::getEvent() requires is_accepted on the host), while saveEvent()
+     * leaves a claimed performer on a venue's or curator's event pending until they accept - so
+     * the canonical, and the sitemap built from it, named a host where the event 404s. When the
+     * pick does not serve it, the first schedule that does takes over: a performer, then a venue,
+     * then anything else, lowest id first so the choice cannot drift between requests. Its URL is
+     * rebuilt with getGuestUrlData(), whose venue/performer slug rule is exactly what that
+     * schedule's own calendar links to; the id resolves it either way.
+     *
+     * The custom domain is used only when the home schedule is served directly on it (direct +
+     * active); redirect mode keeps the subdomain canonical. getGuestUrl() is deliberately not
+     * this: email, graphics and every in-app link go through it and keep their dates and hosts.
+     *
+     * When no schedule serves the event yet (a member previewing one that is still pending), the
+     * URL is the one getGuestUrlData() picked and there is no home.
+     *
+     * @return array{0: ?string, 1: ?Role} the URL (null when the event has no routable subdomain)
+     *                                     and its home schedule (null when none serves the event)
+     */
+    public function canonicalTarget($date = null): array
+    {
+        // `?: false`, never null: handed null, getGuestUrlData() re-adds the series' first date.
+        $date = $date ?: false;
+        $data = $this->getGuestUrlData(false, $date);
+
+        $picked = $data['subdomain']
+            ? $this->roles->first(fn ($role) => $role->subdomain == $data['subdomain'])
+            : null;
+
+        if ($picked && self::servesGuestPage($picked)) {
+            return [$this->buildGuestUrl($data, $picked->servesOnCustomDomain()), $picked];
+        }
+
+        $serving = $this->roles->filter(fn ($role) => self::servesGuestPage($role))->sortBy('id');
+        $home = $serving->first(fn ($role) => $role->isTalent())
+            ?? $serving->first(fn ($role) => $role->isVenue())
+            ?? $serving->first();
+
+        if ($home) {
+            return [
+                $this->buildGuestUrl($this->getGuestUrlData($home->subdomain, $date), $home->servesOnCustomDomain()),
+                $home,
+            ];
+        }
+
+        if (! $data['subdomain']) {
+            return [null, null];
+        }
+
+        return [$this->buildGuestUrl($data, $picked && $picked->servesOnCustomDomain()), null];
+    }
+
+    /**
+     * Whether $role, one of this event's roles, renders the event on its own host: the three
+     * things RoleController::viewGuest() and EventRepo::getEvent() check before answering 200.
+     * Needs the pivot, so only for a role that came through the roles relation.
+     */
+    private static function servesGuestPage(Role $role): bool
+    {
+        return $role->pivot
+            && $role->pivot->is_accepted
+            && $role->isClaimed()
+            && ! $role->is_deleted;
     }
 
     /**
@@ -4328,14 +4396,15 @@ class Event extends Model
      * Get offers schema data for JSON-LD (tickets)
      * Always returns at least a default free offer if no tickets are available
      *
-     * Each offer's url is the event's canonical URL for $date - the same URL as the Event node's
-     * own "url" - rather than getGuestUrl(). That one ignored the custom domain a schedule is
-     * canonical on and, with no date, pointed a recurring event's offers at its FIRST occurrence,
-     * so the offers on a page disagreed with the page they sat on.
+     * Each offer's url is the event's canonical URL - the same URL as the Event node's own "url" -
+     * rather than getGuestUrl(). That one ignored the custom domain a schedule is canonical on and,
+     * with no date, pointed a recurring event's offers at its FIRST occurrence, so the offers on a
+     * page disagreed with the page they sat on. On a recurring event that is the series URL, on
+     * every occurrence's page, because that is what each of those pages canonicalizes to.
      */
-    public function getSchemaOffers($date = null)
+    public function getSchemaOffers()
     {
-        $url = $this->getCanonicalUrl($date);
+        $url = $this->getCanonicalUrl();
         $validFrom = $this->created_at ? $this->created_at->toIso8601String() : $this->getSchemaStartDate();
 
         if ($this->tickets_enabled && ! $this->tickets->isEmpty()) {

@@ -2172,9 +2172,10 @@ class RoleController extends Controller
                     // to themselves forever. The undated URL has no date to reject, so this is
                     // always the last hop.
                     //
-                    // Same host as the request (not getCanonicalUrl()), so a subdomain visitor is
-                    // not thrown onto a custom domain mid-checkout; the canonical tag still does
-                    // the consolidating.
+                    // Same host as the request, not getCanonicalUrl(), which can name another one
+                    // (the custom domain, or whichever schedule accepted the event) - a subdomain
+                    // visitor must not be thrown onto it mid-checkout. The canonical tag does the
+                    // consolidating: it names this same undated series URL, on the home host.
                     //
                     // reflash(): this is often the second hop of a redirect that already carries a
                     // flash. The comment, video and photo confirmations in EventController all land
@@ -2196,13 +2197,15 @@ class RoleController extends Controller
                     // malformed query param must not break an otherwise valid event page (pinned
                     // by RoleGuestSurfaceCharacterizationTest, where strtotime() rolls
                     // '2026-02-30' over to a real but non-occurring date), and leaving it set
-                    // would point the canonical at a path URL that redirects away.
+                    // would hand og:url and the password prompt below a dated URL that redirects
+                    // away. (The canonical never carries a date.)
                     $date = null;
                 }
 
                 // Taken before the backfills below put a date the visitor did NOT ask for in its
                 // place: the password prompt posts this back, so only a requested occurrence
-                // returns them to a dated URL.
+                // returns them to a dated URL. The event page's og:url reads it for the same
+                // reason - see AppGuestLayout::$occurrenceDate.
                 $requestedOccurrence = $date;
 
                 // Handle direct registration redirect when URL has trailing slash
@@ -2676,6 +2679,7 @@ class RoleController extends Controller
                 'event',
                 'embed',
                 'date',
+                'requestedOccurrence',
                 'curatorRoles',
                 'fonts',
                 'selectedGroup',

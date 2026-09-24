@@ -530,30 +530,38 @@ class SitemapTest extends TestCase
     }
 
     /**
-     * The date segment of a recurring event's URL is the schedule's calendar date, not the UTC
-     * one. The old eager load omitted creatorRole.timezone, and loadMissing() will not refetch an
-     * already-loaded relation, so it silently fell back to UTC and advertised the wrong day.
+     * A recurring series is one page, so it is one <loc>: the undated series URL every one of its
+     * dated occurrences canonicalizes to. It used to be listed at its first date - a URL that is
+     * not even an occurrence when that date was excluded or off the weekly pattern, and that
+     * canonicalized to itself as one of 52 near-identical pages a year.
+     *
+     * The first date that URL carried had to be the schedule's calendar date rather than the UTC
+     * one, which is what this test pinned before. getGuestUrl() still builds it for email, sales
+     * and graphics, so that check now lives in RecurringSeriesCanonicalTest.
      */
-    public function test_recurring_event_url_uses_the_creator_schedule_timezone(): void
+    public function test_a_recurring_series_is_listed_once_at_its_undated_url(): void
     {
         $owner = $this->createOwner();
         $role = $this->createRole($owner, 'talent', ['timezone' => 'America/New_York']);
 
-        // 02:00 UTC is the previous evening in New York.
+        // 02:00 UTC is the previous evening in New York, so neither calendar date may leak in.
         $startsAt = Carbon::now()->addDays(7)->setTime(2, 0);
         $event = $this->createRecurringEvent($role, [
             'starts_at' => $startsAt->format('Y-m-d H:i:s'),
             'creator_role_id' => $role->id,
         ]);
+        $series = $this->guestEventUrl($role, $event);
+        $this->assertSame($event->getCanonicalUrl(), $series, 'fixture: the series URL is the canonical the page prints');
 
-        $localDate = $startsAt->copy()->timezone('America/New_York')->format('Y-m-d');
-        $this->assertNotSame($startsAt->format('Y-m-d'), $localDate, 'fixture no longer straddles midnight');
+        // Both sitemaps: the global one, and the schedule's own.
+        foreach (['/sitemap-events-1.xml', '/'.$role->subdomain.'/sitemap.xml'] as $path) {
+            $listed = array_values(array_filter(
+                $this->locs($this->xml($path)),
+                fn ($loc) => str_contains($loc, '/'.$event->slug.'/')
+            ));
 
-        $xml = $this->xml('/sitemap-events-1.xml');
-
-        $this->assertStringContainsString($event->slug, $xml);
-        $this->assertStringContainsString('/'.$localDate.'<', $xml);
-        $this->assertStringNotContainsString('/'.$startsAt->format('Y-m-d').'<', $xml);
+            $this->assertSame([$series], $listed, $path.' lists the series once, at its undated URL');
+        }
     }
 
     /**

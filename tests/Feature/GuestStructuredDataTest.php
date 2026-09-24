@@ -145,22 +145,31 @@ class GuestStructuredDataTest extends TestCase
         $this->assertStringStartsWith('https://jsonld-people.test', $node['performer']['url']);
     }
 
-    public function test_offer_url_is_the_occurrence_canonical_on_a_recurring_event(): void
+    /**
+     * A dated occurrence canonicalizes to the series, so its url and offers name the series too -
+     * while the dates stay the occurrence the page is about.
+     */
+    public function test_a_recurring_occurrence_points_its_url_and_offers_at_the_series(): void
     {
         $owner = $this->createOwner();
         $role = $this->createRole($owner, 'talent', ['name' => 'Weekly Talent']);
         $event = $this->createRecurringEvent($role, [
             'name' => 'Weekly Event',
             'starts_at' => now()->addDays(1)->setTime(12, 0)->format('Y-m-d H:i:s'),
+            'tickets_enabled' => true,
         ]);
+        $this->createTicket($event, ['price' => 20]);
         $date = now()->addDays(15)->format('Y-m-d');
 
         $html = $this->get($this->guestEventUrl($role, $event, $date))->assertOk()->getContent();
         $node = $this->nodeOfType($this->jsonLdBlocks($html), 'Event');
         $canonical = $this->canonical($html);
 
-        $this->assertStringEndsWith('/'.$date, $canonical);
-        $this->assertSame($canonical, $node['offers']['url']);
+        $this->assertSame($this->guestEventUrl($role, $event), $canonical, 'the canonical is the undated series URL');
+        $this->assertSame($canonical, $node['url']);
+        $this->assertSame($canonical.'?tickets=true', $node['offers']['url']);
+        // Noon UTC is the morning of the same calendar day in the schedule's New York.
+        $this->assertStringStartsWith($date.'T', $node['startDate'], 'startDate is the occurrence this page shows');
     }
 
     public function test_ticket_offers_point_at_the_canonical_with_the_ticket_flag(): void
