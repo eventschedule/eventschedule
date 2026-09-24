@@ -76,6 +76,7 @@ return [
     '/docs/subscriptions' => '2026-09-20',
     '/docs/tickets' => '2026-09-24',
     '/doodle-replacement' => '2026-09-24',
+    '/event-landing-page' => '2026-09-24',
     '/eventbrite-alternative' => '2026-09-24',
     '/eventzilla-alternative' => '2026-09-24',
     '/examples' => '2026-09-22',

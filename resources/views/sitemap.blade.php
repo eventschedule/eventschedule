@@ -545,6 +545,10 @@ echo '<?xml version="1.0" encoding="UTF-8"?>'; ?>
         {!! $lastmodTag('/wordpress-event-calendar') !!}
     </url>
     <url>
+        <loc>{{ url('/event-landing-page') }}</loc>
+        {!! $lastmodTag('/event-landing-page') !!}
+    </url>
+    <url>
         <loc>{{ url('/for-webinars') }}</loc>
         {!! $lastmodTag('/for-webinars') !!}
     </url>

@@ -1012,7 +1012,7 @@ return [
         ['title' => 'Linktree Replacement', 'path' => '/linktree-replacement', 'blurb' => 'One bio link that shows your actual dates, not just buttons.'],
         ['title' => 'Embed Calendar', 'path' => '/features/embed-calendar', 'blurb' => 'Embed your calendar on any website with one line of code.'],
         ['title' => 'Replace Your Tools', 'path' => '/replace', 'blurb' => 'Swapping a spreadsheet or a form rather than a platform.'],
-        ['title' => 'Pricing', 'path' => '/pricing', 'blurb' => 'See what is included on Free, Pro, and Enterprise plans.'],
+        ['title' => 'Event Landing Page', 'path' => '/event-landing-page', 'blurb' => 'Every event gets a free page: the flyer, the date, a map and a ticket button.'],
     ],
 
     'surveymonkey-replacement' => [
@@ -1051,6 +1051,15 @@ return [
         ['title' => 'For Community Centers', 'path' => '/for-community-centers', 'blurb' => 'Programs, classes, hall-hire requests and events in one place.'],
         ['title' => 'Sub-schedules', 'path' => '/features/sub-schedules', 'blurb' => 'Sort what arrives into the sections of your guide.'],
         ['title' => 'Newsletters', 'path' => '/features/newsletters', 'blurb' => "Send the week's highlights to your subscribers."],
+    ],
+
+    // Cross-linked with /squarespace-replacement, which owns the comparison with a website
+    // builder while this page owns the anatomy of the page itself.
+    'event-landing-page' => [
+        ['title' => 'Squarespace Replacement', 'path' => '/squarespace-replacement', 'blurb' => 'Purpose-built event pages and ticketing, with no site to build.'],
+        ['title' => 'Selling Tickets', 'path' => '/features/ticketing', 'blurb' => 'Ticket types, QR check-in and a live door dashboard, with zero platform fees.'],
+        ['title' => 'Free Registration & RSVP', 'path' => '/features/registration', 'blurb' => 'Free sign-ups with a cap per date, a waitlist and a QR code, on every plan.'],
+        ['title' => 'Custom Domain', 'path' => '/features/custom-domain', 'blurb' => 'Use your own domain instead of the default subdomain.'],
     ],
 
     'wordpress-event-calendar' => [

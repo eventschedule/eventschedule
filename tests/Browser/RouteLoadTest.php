@@ -137,6 +137,7 @@ class RouteLoadTest extends DuskTestCase
                 '/for-meetup-groups',
                 '/community-event-calendar',
                 '/wordpress-event-calendar',
+                '/event-landing-page',
                 '/for-webinars',
                 '/for-live-concerts',
                 '/for-online-classes',

@@ -1242,6 +1242,7 @@ if (config('app.is_nexus')) {
         Route::get('/for-meetup-groups', [MarketingController::class, 'forMeetupGroups'])->name('marketing.for_meetup_groups');
         Route::get('/community-event-calendar', [MarketingController::class, 'communityEventCalendar'])->name('marketing.community_event_calendar');
         Route::get('/wordpress-event-calendar', [MarketingController::class, 'wordpressEventCalendar'])->name('marketing.wordpress_event_calendar');
+        Route::get('/event-landing-page', [MarketingController::class, 'eventLandingPage'])->name('marketing.event_landing_page');
         Route::get('/for-webinars', [MarketingController::class, 'forWebinars'])->name('marketing.for_webinars');
         Route::get('/for-live-concerts', [MarketingController::class, 'forLiveConcerts'])->name('marketing.for_live_concerts');
         Route::get('/for-online-classes', [MarketingController::class, 'forOnlineClasses'])->name('marketing.for_online_classes');
@@ -1513,6 +1514,7 @@ if (config('app.is_nexus')) {
             Route::get('/for-meetup-groups', [MarketingController::class, 'forMeetupGroups'])->name('marketing.for_meetup_groups');
             Route::get('/community-event-calendar', [MarketingController::class, 'communityEventCalendar'])->name('marketing.community_event_calendar');
             Route::get('/wordpress-event-calendar', [MarketingController::class, 'wordpressEventCalendar'])->name('marketing.wordpress_event_calendar');
+            Route::get('/event-landing-page', [MarketingController::class, 'eventLandingPage'])->name('marketing.event_landing_page');
             Route::get('/for-webinars', [MarketingController::class, 'forWebinars'])->name('marketing.for_webinars');
             Route::get('/for-live-concerts', [MarketingController::class, 'forLiveConcerts'])->name('marketing.for_live_concerts');
             Route::get('/for-online-classes', [MarketingController::class, 'forOnlineClasses'])->name('marketing.for_online_classes');
@@ -1744,6 +1746,7 @@ if (config('app.is_nexus')) {
             Route::get('/features/booking-requests', fn () => redirect('https://'._base_domain().'/features/booking-requests', 301));
             Route::get('/community-event-calendar', fn () => redirect('https://'._base_domain().'/community-event-calendar', 301));
             Route::get('/wordpress-event-calendar', fn () => redirect('https://'._base_domain().'/wordpress-event-calendar', 301));
+            Route::get('/event-landing-page', fn () => redirect('https://'._base_domain().'/event-landing-page', 301));
             Route::get('/for-webinars', fn () => redirect('https://'._base_domain().'/for-webinars', 301));
             Route::get('/for-live-concerts', fn () => redirect('https://'._base_domain().'/for-live-concerts', 301));
             Route::get('/for-online-classes', fn () => redirect('https://'._base_domain().'/for-online-classes', 301));
@@ -1947,6 +1950,7 @@ if (config('app.is_nexus')) {
     Route::get('/features/booking-requests', fn () => redirect()->route('home'));
     Route::get('/community-event-calendar', fn () => redirect()->route('home'));
     Route::get('/wordpress-event-calendar', fn () => redirect()->route('home'));
+    Route::get('/event-landing-page', fn () => redirect()->route('home'));
     Route::get('/for-webinars', fn () => redirect()->route('home'));
     Route::get('/for-live-concerts', fn () => redirect()->route('home'));
     Route::get('/for-online-classes', fn () => redirect()->route('home'));

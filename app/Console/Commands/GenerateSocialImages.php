@@ -133,6 +133,7 @@ class GenerateSocialImages extends Command
         'for-meetup-groups' => '/for-meetup-groups',
         'community-event-calendar' => '/community-event-calendar',
         'wordpress-event-calendar' => '/wordpress-event-calendar',
+        'event-landing-page' => '/event-landing-page',
         'for-webinars' => '/for-webinars',
         'for-live-concerts' => '/for-live-concerts',
         'for-online-classes' => '/for-online-classes',

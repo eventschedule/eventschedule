@@ -297,6 +297,14 @@ class MarketingController extends Controller
     }
 
     /**
+     * Event Landing Page page
+     */
+    public function eventLandingPage()
+    {
+        return view('marketing.event-landing-page');
+    }
+
+    /**
      * WordPress Event Calendar page
      */
     public function wordpressEventCalendar()

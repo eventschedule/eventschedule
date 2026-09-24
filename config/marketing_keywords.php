@@ -120,6 +120,7 @@ return [
     '/for-meetup-groups' => ['keyword' => 'meetup group events'],
     '/community-event-calendar' => ['keyword' => 'community event calendar'],
     '/wordpress-event-calendar' => ['keyword' => 'WordPress event calendar'],
+    '/event-landing-page' => ['keyword' => 'event landing page'],
     '/for-live-concerts' => ['keyword' => 'event schedule for live concerts'],
     '/for-live-qa-sessions' => ['keyword' => 'live Q&A sessions'],
     '/for-magicians' => ['keyword' => 'event schedule for magicians'],
