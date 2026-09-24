@@ -19,7 +19,7 @@
             <h2 style="margin-top: 0; color: #4E81FA;">{{ $type?->name ?? $event->name }}</h2>
             @include('emails.partials.appointment_datetime')
             @if ($event->event_url)
-                <p style="margin: 10px 0;"><strong>{{ __('messages.online') }}:</strong> <a href="{{ $event->event_url }}" style="color: #4E81FA;">{{ $event->event_url }}</a></p>
+                <p style="margin: 10px 0;"><strong>{{ __('messages.online') }}:</strong> @if ($joinHref = $event->eventUrlHref()) <a href="{{ $joinHref }}" style="color: #4E81FA;">{{ $event->event_url }}</a> @else {{ $event->event_url }} @endif</p>
             @elseif ($type && $type->location_type === 'in_person' && $type->location_address)
                 <p style="margin: 10px 0;"><strong>{{ __('messages.location') }}:</strong> {{ $type->location_address }}</p>
             @elseif ($type && $type->location_type === 'phone')

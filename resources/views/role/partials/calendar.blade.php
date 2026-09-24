@@ -133,7 +133,7 @@
                 'recurring_exclude_dates' => $event->recurring_exclude_dates ?? [],
                 'start_date' => $event->starts_at ? $event->getStartDateTime(null, true)->format('Y-m-d') : null,
                 'is_online' => !empty($event->event_url),
-                'registration_url' => $event->registration_url,
+                'registration_url' => $event->registrationHref(),
                 'ticket_price' => $event->ticket_price,
                 'ticket_currency_code' => $event->ticket_currency_code,
                 'coupon_code' => $event->coupon_code,
@@ -3290,10 +3290,14 @@ const calendarApp = createApp({
         // registration opens the registration page instead, as a click on the card does. Anything
         // else - a modified or middle click, or no direct registration - is the browser's own
         // navigation to the anchor's href and target.
+        //
+        // registration_url arrives as Event::registrationHref(), an http(s) link or null. The
+        // test is the backstop in the only place it would execute: window.open() runs a
+        // javascript: URL on this page.
         onEventLinkClick(event, e) {
             if (!e || e.defaultPrevented || e.button !== 0 || e.metaKey || e.ctrlKey || e.shiftKey || e.altKey) return;
 
-            if (this.directRegistration && event.registration_url) {
+            if (this.directRegistration && event.registration_url && /^https?:\/\//i.test(event.registration_url)) {
                 e.preventDefault();
                 window.open(event.registration_url, '_blank', 'noopener');
             }
@@ -3302,9 +3306,9 @@ const calendarApp = createApp({
             // Don't navigate if clicking on the edit link or a form/button
             if (!e?.target || e.target?.closest('a') || e.target?.closest('form') || e.target?.closest('button')) return;
 
-            // Check if direct registration is enabled AND event has registration URL
-            if (this.directRegistration && event.registration_url) {
-                window.open(event.registration_url, '_blank');
+            // Direct registration, on the same terms as onEventLinkClick() above.
+            if (this.directRegistration && event.registration_url && /^https?:\/\//i.test(event.registration_url)) {
+                window.open(event.registration_url, '_blank', 'noopener');
                 return;
             }
 

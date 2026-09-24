@@ -176,7 +176,7 @@ class EventTextGenerator
         // for recurring events, the date segment) up front instead of stripping
         // it after, producing a clean slug-only link when the option is unchecked.
         $eventUrl = $event->getGuestUrl($role->subdomain, null, true, $urlIncludeId);
-        if ($directRegistration && $event->registration_url) {
+        if ($directRegistration && $event->registrationHref()) {
             if (str_contains($eventUrl, '?')) {
                 $eventUrl = str_replace('?', '/?', $eventUrl);
             } else {

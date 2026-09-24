@@ -120,7 +120,13 @@
                     @if ($event->event_url)
                         <div class="sm:col-span-2">
                             <dt class="text-xs text-gray-500 dark:text-gray-400">{{ __('messages.online') }}</dt>
-                            <dd><a href="{{ $event->event_url }}" class="break-all hover:underline" style="color: var(--es-accent-readable)">{{ $event->event_url }}</a></dd>
+                            {{-- Linked only when it is a web link (eventUrlHref()); free-text join
+                                 instructions are shown to the guest as they were written. --}}
+                            @if ($joinHref = $event->eventUrlHref())
+                                <dd><a href="{{ $joinHref }}" class="break-all hover:underline" style="color: var(--es-accent-readable)">{{ $event->event_url }}</a></dd>
+                            @else
+                                <dd class="break-all">{{ $event->event_url }}</dd>
+                            @endif
                         </div>
                     @elseif ($type && $type->location_type === 'in_person' && $type->location_address)
                         <div class="sm:col-span-2">

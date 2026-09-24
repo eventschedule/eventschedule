@@ -173,10 +173,14 @@
           </h1>
           @if ($event->event_url || $event->venue)
             <p class="mt-[12px] text-[13px] text-white/60 print-text-gray">
-              @if ($event->event_url)
-                <a href="{{ $event->event_url }}" target="_blank" class="hover:text-white/80 transition-colors print:text-slate-600">
+              {{-- The whole join link is the ticket holder's to see. Only a web link is linked
+                   (eventUrlHref()); free-text join instructions read as text. --}}
+              @if ($event->event_url && ($joinHref = $event->eventUrlHref()))
+                <a href="{{ $joinHref }}" target="_blank" class="hover:text-white/80 transition-colors print:text-slate-600">
                   {{ \App\Utils\UrlUtils::clean($event->event_url) }}
                 </a>
+              @elseif ($event->event_url)
+                <span class="print:text-slate-600">{{ \App\Utils\UrlUtils::clean($event->event_url) }}</span>
               @elseif ($event->venue)
                 <a href="https://www.google.com/maps/search/?api=1&query={{ urlencode($event->venue->bestAddress()) }}" target="_blank" class="hover:text-white/80 transition-colors print:text-slate-600">
                   {{ $event->venue->shortAddress() }}

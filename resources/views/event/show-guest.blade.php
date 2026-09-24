@@ -895,8 +895,9 @@
           </div>
         </div>
 
-        {{-- Location icon badge --}}
-        @if (($event->venue && ($event->venue->name || $event->venue->shortAddress())) || $event->getEventUrlDomain())
+        {{-- Location icon badge. An online event shows the domain of its link, or "Online" when
+             the link is free text or has no public domain - never the link itself. --}}
+        @if (($event->venue && ($event->venue->name || $event->venue->shortAddress())) || $event->event_url)
         <div id="gp-event-location">
           <div class="flex items-center gap-4 {{ $role->isRtl() ? 'rtl' : '' }}">
             <div class="flex-shrink-0 w-16 h-16 rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900
@@ -944,7 +945,9 @@
                     <span dir="{{ content_dir_for_language($event->venue->nameInLanguage($displayLang), $displayLang) }}" class="text-lg font-semibold text-gray-900 dark:text-white">{!! str_replace(' , ', '<br>', e($event->venue->nameInLanguage($displayLang))) !!}</span>
                   @endif
                 @else
-                  <span class="text-lg font-semibold text-gray-900 dark:text-white">{{ $event->getEventUrlDomain() }}</span>
+                  {{-- Also reached by a venue with no name in this language, which must never read
+                       "Online": the fallback is only for an event that has a link. --}}
+                  <span class="text-lg font-semibold text-gray-900 dark:text-white">{{ $event->event_url ? ($event->getEventUrlDomain() ?: __('messages.online')) : '' }}</span>
                 @endif
               </span>
               @if ($event->venue && $event->venue->shortAddress())
@@ -976,8 +979,9 @@
         </div>
         @endif
 
-        {{-- Ticket price --}}
-        @if ($event->registration_url && $event->ticket_price !== null && !$event->tickets_enabled && !$event->rsvp_enabled)
+        {{-- Ticket price. The registration link is read through registrationHref() here and at
+             every CTA below, never the column: a legacy value that is no link offers nothing. --}}
+        @if ($event->registrationHref() && $event->ticket_price !== null && !$event->tickets_enabled && !$event->rsvp_enabled)
         <div id="gp-event-price" class="flex items-center gap-4 {{ $role->isRtl() ? 'rtl' : '' }}">
           <div class="flex-shrink-0 w-16 h-16 rounded-xl border border-gray-200 dark:border-gray-700
                       bg-white dark:bg-gray-900 flex items-center justify-center shadow-sm">
@@ -1060,7 +1064,7 @@
                 {{ $role->customLabel('register') }}
               @endif
             </button>
-        @elseif ($event->canSellTickets($date) || ($event->registration_url && (!$event->tickets_enabled || $event->blockedByPlanOnly($date)) && !$event->rsvp_enabled))
+        @elseif ($event->canSellTickets($date) || ($event->registrationHref() && (!$event->tickets_enabled || $event->blockedByPlanOnly($date)) && !$event->rsvp_enabled))
           @if ($event->canSellTickets($date))
             <button type="button"
                   @click="$dispatch('show-event-form')"
@@ -1076,7 +1080,7 @@
               @endif
             </button>
           @else
-            <a href="{{ $event->registration_url }}" target="_blank" rel="noopener noreferrer nofollow"
+            <a href="{{ $event->registrationHref() }}" target="_blank" rel="noopener noreferrer nofollow"
               @if ($event->payment_method === 'payment_url' && $event->user && $event->user->paymentUrlMobileOnly() && ! is_mobile())
                 class="payment-mobile-only-link"
                 data-mobile-msg="{{ __('messages.payment_url_mobile_only') }}"
@@ -1217,7 +1221,7 @@
         </div>
 
         {{-- Mobile calendar bottom sheet (outside hidden sm:block container so it's visible on mobile) --}}
-        @if (!$event->is_draft && !($event->canSellTickets($date) || $event->canAcceptRsvp($date) || $event->registration_url))
+        @if (!$event->is_draft && !($event->canSellTickets($date) || $event->canAcceptRsvp($date) || $event->registrationHref()))
         <div id="calendar-mobile-sheet" class="hidden fixed inset-0 z-50 sm:hidden">
           <div class="fixed inset-0 bg-black/60" id="calendar-mobile-overlay"></div>
           <div class="gp-bottom-sheet fixed inset-x-0 bottom-0 rounded-t-2xl shadow-xl">
@@ -2414,7 +2418,7 @@
               {{ $role->customLabel('register') }}
             @endif
           </button>
-      @elseif ($event->canSellTickets($date) || ($event->registration_url && (!$event->tickets_enabled || $event->blockedByPlanOnly($date)) && !$event->rsvp_enabled))
+      @elseif ($event->canSellTickets($date) || ($event->registrationHref() && (!$event->tickets_enabled || $event->blockedByPlanOnly($date)) && !$event->rsvp_enabled))
         @if ($event->canSellTickets($date))
           <button type="button"
                 @click="$dispatch('show-event-form')"
@@ -2429,7 +2433,7 @@
             @endif
           </button>
         @else
-          <a href="{{ $event->registration_url }}" target="_blank" rel="noopener noreferrer nofollow"
+          <a href="{{ $event->registrationHref() }}" target="_blank" rel="noopener noreferrer nofollow"
             @if ($event->payment_method === 'payment_url' && $event->user && $event->user->paymentUrlMobileOnly() && ! is_mobile())
               class="payment-mobile-only-link flex-1"
               data-mobile-msg="{{ __('messages.payment_url_mobile_only') }}"

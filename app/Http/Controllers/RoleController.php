@@ -2222,13 +2222,19 @@ class RoleController extends Controller
                 // reason - see AppGuestLayout::$occurrenceDate.
                 $requestedOccurrence = $date;
 
-                // Handle direct registration redirect when URL has trailing slash
-                if ($request->attributes->get('has_trailing_slash') && $event->registration_url) {
+                // Direct registration: the event's address with a trailing slash goes straight to
+                // its registration link. Only to a link a browser should open, and only for a
+                // visitor the password gate below would let through - this runs before that gate,
+                // and used to hand a password event's link to anybody who added the slash.
+                // Otherwise the request falls through to the page, which asks for the password.
+                $registrationHref = $request->attributes->get('has_trailing_slash') ? $event->registrationHref() : null;
+
+                if ($registrationHref && (! $event->isPasswordProtected() || $this->bypassesEventPassword($user, $subdomain, $event))) {
                     if (! auth()->user()?->isAdmin()) {
                         app(AnalyticsService::class)->recordView($role, $event, $request);
                     }
 
-                    return redirect($event->registration_url ?: $event->getGuestUrl($subdomain));
+                    return redirect()->away($registrationHref);
                 }
 
                 if (! $date && $event->days_of_week) {
@@ -2584,9 +2590,7 @@ class RoleController extends Controller
 
         if ($embed && $event && (request()->get('tickets') === 'true' || request()->get('rsvp') === 'true')) {
             // Password check for embed mode
-            $bypassPassword = ($user && ($user->isAdmin() || $user->isMember($subdomain)))
-                || session()->has('event_password_'.$event->id);
-            if ($event->isPasswordProtected() && ! $bypassPassword) {
+            if ($event->isPasswordProtected() && ! $this->bypassesEventPassword($user, $subdomain, $event)) {
                 abort(404);
             }
 
@@ -2610,10 +2614,7 @@ class RoleController extends Controller
             $view = 'role/show-guest-embed';
         } elseif ($event) {
             // Check if event requires a password and user hasn't provided it
-            $bypassPassword = ($user && ($user->isAdmin() || $user->isMember($subdomain)))
-                || session()->has('event_password_'.$event->id);
-
-            if ($event->isPasswordProtected() && ! $bypassPassword) {
+            if ($event->isPasswordProtected() && ! $this->bypassesEventPassword($user, $subdomain, $event)) {
                 $fonts = [];
                 if ($event->venue) {
                     $fonts[] = $event->venue->font_family;
@@ -2783,6 +2784,17 @@ class RoleController extends Controller
         }
 
         return redirect($redirectUrl)->with('password_error', true);
+    }
+
+    /**
+     * Whether $user gets past a password event's prompt on this schedule: its members and admins
+     * do, and so does a session that already entered the password (checkEventPassword()). One
+     * definition for the page, the ticket embed and the direct-registration redirect.
+     */
+    private function bypassesEventPassword(?User $user, string $subdomain, Event $event): bool
+    {
+        return ($user && ($user->isAdmin() || $user->isMember($subdomain)))
+            || session()->has('event_password_'.$event->id);
     }
 
     public function listPastEvents(Request $request, $subdomain): JsonResponse

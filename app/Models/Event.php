@@ -352,6 +352,17 @@ class Event extends Model
                 $model->{$column} = TextUtils::clamp($model->{$column}, $width);
             }
 
+            // registration_url is an href on the event page and a window.open() target in the
+            // calendar, and nothing validates it on the web form, guest import, the AI import,
+            // WhatsApp or the curator scraper - so a stored javascript: value ran on the page for
+            // any visitor who clicked it. It is stored the way registrationHref() reads it: an
+            // http(s) link, a scheme-less one given https://, or null. Guarded on dirty like the
+            // clamp above, so an untouched legacy value is never rewritten by an unrelated save;
+            // registrationHref() covers that row, and a saveQuietly() restore, where it renders.
+            if (! $model->exists || $model->isDirty('registration_url')) {
+                $model->registration_url = UrlUtils::safeHref($model->registration_url);
+            }
+
             // Re-queue for federation when something a federated listing actually shows
             // changes. Hooked here rather than in EventRepo::saveEvent() because that is
             // not the only write path - inbound Google and Microsoft calendar sync call
@@ -2859,34 +2870,56 @@ class Event extends Model
         return $this->translationLanguageCodeCache = $lang;
     }
 
+    /**
+     * Where the event is, for a guest: the venue, else the domain of its online link, else
+     * "Online" for an online link whose domain cannot be shown (free-text join instructions, an
+     * IP address), else ''. The one place that fallback lives, so the calendar, the noscript list,
+     * the carousel, the share graphic, the emails and the ticket list all say the same thing.
+     */
     public function getVenueDisplayName($translate = true, ?string $want = null)
     {
         if ($this->venue) {
             return $this->venue->shortVenue($translate, false, $want);
         }
 
-        return $this->getEventUrlDomain();
+        return $this->getEventUrlDomain() ?: ($this->event_url ? __('messages.online', [], $want) : '');
     }
 
     /**
-     * The host of the event's online link: the only part of it a guest surface may show, because
-     * the link itself is the private way in (messages.event_url_help). It names the venue of an
-     * online event on the page, in the calendar feed and in email.
+     * The domain of the event's online link: the only part of it a guest surface may show, because
+     * the link itself is the private way in (messages.event_url_help). It names the location of
+     * an online event on the page, in the calendar feed and in email.
      *
-     * A link stored without its scheme ("zoom.us/j/123?pwd=...") has no host for parse_url(), and
-     * the whole link used to come back as its "domain" and print on the public page. The web form
-     * validates event_url only as a string, so such a value can be stored.
+     * '' unless the link is a web link on a real public domain - see UrlUtils::linkHost(). The web
+     * form validates event_url only as a string, so free text such as "Zoom 884 1234 pw 998877"
+     * is stored, and parse_url() handed all of it back as the "domain" that printed on the public
+     * page. A caller that needs a label wants getVenueDisplayName(), which says "Online" instead.
      */
     public function getEventUrlDomain()
     {
-        if (! $this->event_url) {
-            return '';
-        }
+        return UrlUtils::linkHost($this->event_url);
+    }
 
-        $link = trim((string) $this->event_url);
-        $host = parse_url($link, PHP_URL_HOST) ?: parse_url('https://'.ltrim($link, '/'), PHP_URL_HOST);
+    /**
+     * The external registration link as an href, or null when there is none a browser should
+     * open (UrlUtils::safeHref()). The saving hook stores that form already, so this only differs
+     * from registration_url on a row written around the hook - a restore uses saveQuietly() - or
+     * before it existed. Every guest surface reads this, never the column.
+     */
+    public function registrationHref(): ?string
+    {
+        return UrlUtils::safeHref($this->registration_url);
+    }
 
-        return is_string($host) ? $host : '';
+    /**
+     * The online join link as an href, for the people entitled to the whole of it: ticket holders
+     * and booked guests. Null when event_url is not a web link, and the caller then shows it as
+     * text, so free-text join instructions ("Zoom 884 1234 pw 998877") stay readable for them. A
+     * public surface shows getEventUrlDomain() at most.
+     */
+    public function eventUrlHref(): ?string
+    {
+        return UrlUtils::safeHref($this->event_url);
     }
 
     public function getSponsorLogos(): array
@@ -3199,11 +3232,20 @@ class Event extends Model
         return $data;
     }
 
+    /**
+     * "{name} at {where}" for calendar entries and feeds: the venue's name, else the domain of the
+     * online link. Just the name when there is neither - never a dangling "{name} at", and never
+     * "at Online", which reads as a place.
+     */
     public function getTitle()
     {
-        $title = __('messages.event_title');
+        $where = ($this->venue ? $this->venue->getDisplayName() : '') ?: $this->getEventUrlDomain();
 
-        return str_replace([':role', ':venue'], [$this->name, $this->venue ? $this->venue->getDisplayName() : $this->getEventUrlDomain()], $title);
+        if ($where === '') {
+            return $this->name;
+        }
+
+        return str_replace([':role', ':venue'], [$this->name, $where], __('messages.event_title'));
     }
 
     /**
@@ -4793,7 +4835,10 @@ class Event extends Model
             return [$offers, $free];
         }
 
-        if ($this->registration_url && $this->ticket_price !== null && ! $this->tickets_enabled) {
+        // registrationHref(), as the badge reads it: a legacy value that is no link shows no price.
+        $registrationHref = $this->registrationHref();
+
+        if ($registrationHref && $this->ticket_price !== null && ! $this->tickets_enabled) {
             $price = round((float) $this->ticket_price, 2);
 
             if ($closed || $this->schemaOccurrenceOver($occurrence)) {
@@ -4803,7 +4848,7 @@ class Event extends Model
             return [[self::schemaOffer([
                 'price' => $price,
                 'priceCurrency' => $currency,
-                'url' => self::isHttpUrl($this->registration_url) ? $this->registration_url : $url,
+                'url' => self::isHttpUrl($registrationHref) ? $registrationHref : $url,
                 'availability' => self::SCHEMA_IN_STOCK,
                 'validFrom' => $this->schemaPublishedAt(),
             ])], $price <= 0];

@@ -8,6 +8,7 @@ use App\Models\Role;
 use App\Utils\PlatformCurrency;
 use App\Utils\SeoUtils;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Support\Facades\DB;
 use Tests\Feature\Concerns\CreatesScheduleData;
 use Tests\TestCase;
 
@@ -430,10 +431,26 @@ class GuestEventSchemaRulesTest extends TestCase
         $this->assertEquals(0, $node['offers']['price']);
         $this->assertTrue($node['isAccessibleForFree']);
 
-        // Not an http(s) link: the offer stays on the event's own page.
+        // Stored without a scheme: the saving hook puts https:// in front, so the offer is at the
+        // link the page's button opens rather than on the page.
         $bare = $this->createEvent($venue, ['registration_url' => 'tickets.example.org/e/44', 'ticket_price' => 10]);
-        [$node, $html] = $this->eventPage($venue, $bare);
+        $this->assertSame('https://tickets.example.org/e/44', $bare->registration_url);
+        [$node] = $this->eventPage($venue, $bare);
+        $this->assertSame('https://tickets.example.org/e/44', $node['offers']['url']);
+
+        // A web link structured data will not take as a URL (a Unicode host): the offer stays on
+        // the event's own page.
+        $unicode = $this->createEvent($venue, ['registration_url' => 'https://karten.münchen.de/e/47', 'ticket_price' => 10]);
+        [$node, $html] = $this->eventPage($venue, $unicode);
         $this->assertSame($this->canonical($html), $node['offers']['url']);
+
+        // A legacy value that is no link, written around the hook: the page shows no price badge
+        // and no button, so there is no offer either.
+        $legacy = $this->createEvent($venue, ['ticket_price' => 10]);
+        DB::table('events')->where('id', $legacy->id)->update(['registration_url' => 'Tickets at the door']);
+        [$node, $html] = $this->eventPage($venue, $legacy->fresh());
+        $this->assertArrayNotHasKey('offers', $node);
+        $this->assertStringNotContainsString('id="gp-event-price"', $html);
 
         // Over: nothing left to buy, though the price is still what it was.
         $past = $this->createEvent($venue, [

@@ -613,6 +613,119 @@ class UrlUtils
         return (bool) preg_match('#^https?://#i', $url);
     }
 
+    /**
+     * An owner-typed link as an href that can only ever open a web page, or null.
+     *
+     * An event's registration and join links are typed by an owner, a guest submitter, an import
+     * or the API, and printed into href on pages other people open. The web form validates neither
+     * as more than a string, so a stored javascript: value ran as script on that page's origin - a
+     * tenant subdomain, which on hosted shares the session cookie's site with the app. Every such
+     * href goes through here:
+     *
+     *  - an absolute http(s) URL is kept as it is;
+     *  - a scheme-less value whose host is a real domain ("www.example.com/tickets") gets https://
+     *    in front, where it used to render as a broken link relative to the page;
+     *  - anything else - javascript:, data:, mailto:, free text such as "Zoom 884 1234" - is null,
+     *    and the caller renders the text without a link or leaves the icon out.
+     *
+     * Surrounding spaces and control characters are trimmed, and a value with one left inside is
+     * refused: a browser strips the first kind and drops a tab or newline anywhere, so to it
+     * "java\tscript:" is still javascript:.
+     *
+     * Takes mixed: a url read out of client-built JSON can be any type, and is then no link.
+     */
+    public static function safeHref(mixed $url): ?string
+    {
+        return self::webLink($url)['href'] ?? null;
+    }
+
+    /**
+     * The domain of an owner-typed link as a guest may read it, or ''.
+     *
+     * Only a real public domain name counts: free text, an IP address, localhost, "pw.998877" and
+     * any scheme other than http(s) give ''. The host comes back as it was typed, lowercased and
+     * without a trailing dot, so a Unicode host such as münchen.de stays readable.
+     */
+    public static function linkHost(mixed $url): string
+    {
+        return self::webLink($url)['host'] ?? '';
+    }
+
+    /**
+     * safeHref() and linkHost() in one pass: the href, and the host when it is a public domain.
+     *
+     * @return array{href: string, host: string}|null
+     */
+    private static function webLink(mixed $url): ?array
+    {
+        if (! is_string($url)) {
+            return null;
+        }
+
+        $value = trim($url, "\x00..\x20");
+
+        if ($value === '' || preg_match('/[\x00-\x1F\x7F]/', $value)) {
+            return null;
+        }
+
+        // parse_url() only ever sees ASCII. It works on bytes and, under some C libraries (macOS),
+        // rewrites every byte from 0x80 to 0x9F as "_" - a byte that most upper-case accented
+        // letters and most Cyrillic ones contain - so a host is read percent-encoded and decoded.
+        $encoded = preg_replace_callback('/[\x80-\xFF]+/', fn ($m) => rawurlencode($m[0]), $value);
+
+        if (self::isAbsoluteHttpUrl($value)) {
+            $host = parse_url($encoded, PHP_URL_HOST);
+
+            return is_string($host) && $host !== ''
+                ? ['href' => $value, 'host' => self::publicHost(rawurldecode($host))]
+                : null;
+        }
+
+        // Any other scheme, or a value parse_url() cannot read at all. "example.com:8080/room" is
+        // read as a host and a port rather than a scheme, so it still reaches the branch below.
+        $parts = parse_url($encoded);
+
+        if ($parts === false || isset($parts['scheme'])) {
+            return null;
+        }
+
+        // Without a scheme, "info@venue.com" is an email address, not a login to venue.com.
+        $parts = parse_url('https://'.ltrim($encoded, '/'));
+        $host = is_array($parts) && ! isset($parts['user']) && isset($parts['host'])
+            ? self::publicHost(rawurldecode($parts['host']))
+            : '';
+
+        return $host === '' ? null : ['href' => 'https://'.ltrim($value, '/'), 'host' => $host];
+    }
+
+    /**
+     * $host, lowercased and without a trailing dot, when it is a real public domain name, else ''.
+     *
+     * The one host test behind safeHref() and linkHost(). The ASCII form is what is validated -
+     * idn_to_ascii() when intl is installed, which a selfhost server may not have - and it must
+     * end in a real top-level label, which is what turns away dotted digits, IP addresses,
+     * localhost and single words.
+     */
+    private static function publicHost(mixed $host): string
+    {
+        if (! is_string($host) || $host === '') {
+            return '';
+        }
+
+        $host = rtrim(mb_strtolower($host), '.');
+        $ascii = function_exists('idn_to_ascii')
+            ? idn_to_ascii($host, IDNA_DEFAULT, INTL_IDNA_VARIANT_UTS46)
+            : $host;
+
+        if (! is_string($ascii)
+            || filter_var($ascii, FILTER_VALIDATE_DOMAIN, FILTER_FLAG_HOSTNAME) === false
+            || ! preg_match('/\.(?:[a-z]{2,63}|xn--[a-z0-9-]{1,59})$/', $ascii)) {
+            return '';
+        }
+
+        return $host;
+    }
+
     public static function cleanSlug($slug)
     {
         $slug = preg_replace('/[^a-zA-Z0-9]/', '', trim($slug));

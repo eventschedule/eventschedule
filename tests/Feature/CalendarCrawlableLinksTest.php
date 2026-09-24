@@ -22,6 +22,12 @@ class CalendarCrawlableLinksTest extends TestCase
     /** The anchor every card title is: the event URL, the card target, the shared click handler. */
     private const LINK_ATTRIBUTES = ':href="getEventUrl(event)" :target="eventLinkTarget()" @click="onEventLinkClick(event, $event)"';
 
+    /** Direct registration opens the registration link only when it is an http(s) one... */
+    private const DIRECT_REGISTRATION_TEST = 'this.directRegistration && event.registration_url && /^https?:\/\//i.test(event.registration_url)';
+
+    /** ...and without handing the new tab window.opener. */
+    private const DIRECT_REGISTRATION_OPEN = "window.open(event.registration_url, '_blank', 'noopener');";
+
     private function source(string $view): string
     {
         return File::get(resource_path('views/'.$view));
@@ -97,9 +103,28 @@ class CalendarCrawlableLinksTest extends TestCase
         foreach (['e.defaultPrevented', 'e.button !== 0', 'e.metaKey', 'e.ctrlKey', 'e.shiftKey', 'e.altKey'] as $guard) {
             $this->assertStringContainsString($guard, $handler[1], "A {$guard} click is left to the browser");
         }
-        $this->assertStringContainsString('this.directRegistration && event.registration_url', $handler[1]);
+        $this->assertStringContainsString(self::DIRECT_REGISTRATION_TEST, $handler[1]);
         $this->assertStringContainsString('e.preventDefault();', $handler[1]);
-        $this->assertStringContainsString("window.open(event.registration_url, '_blank', 'noopener');", $handler[1]);
+        $this->assertStringContainsString(self::DIRECT_REGISTRATION_OPEN, $handler[1]);
+    }
+
+    /**
+     * Both places a card opens the registration link - the link handler and the whole-card click -
+     * open only an http(s) link, and without an opener. registration_url arrives as
+     * Event::registrationHref(), but window.open() is where a javascript: value would run, on the
+     * schedule's page, and the card click used to open it with window.opener still set.
+     */
+    public function test_direct_registration_opens_only_a_web_link_without_an_opener(): void
+    {
+        $calendar = $this->source('role/partials/calendar.blade.php');
+
+        $this->assertSame(1, preg_match('/navigateToEvent\(event, e\) \{(.*?)\n        \},/s', $calendar, $navigate));
+        $this->assertStringContainsString(self::DIRECT_REGISTRATION_TEST, $navigate[1]);
+        $this->assertStringContainsString(self::DIRECT_REGISTRATION_OPEN, $navigate[1]);
+
+        $this->assertSame(2, substr_count($calendar, 'window.open(event.registration_url'), 'no third way to open it');
+        $this->assertSame(2, substr_count($calendar, self::DIRECT_REGISTRATION_TEST));
+        $this->assertSame(2, substr_count($calendar, self::DIRECT_REGISTRATION_OPEN));
     }
 
     /**
