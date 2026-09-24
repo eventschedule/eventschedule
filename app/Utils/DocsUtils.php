@@ -16,6 +16,9 @@ class DocsUtils
     /** Route name => page key, built lazily. */
     private static ?array $routeIndex = null;
 
+    /** Marketing path => docs key, from the manifest's `feature` entries; see featureGuideKeys(). */
+    private static ?array $featureGuideKeys = null;
+
     /**
      * Every page, keyed by manifest key, with the key merged in as 'key'.
      */
@@ -322,14 +325,34 @@ class DocsUtils
             return self::guide($explicit);
         }
 
+        $key = self::featureGuideKeys()[$path] ?? null;
+
+        return $key !== null ? self::guide($key) : null;
+    }
+
+    /**
+     * [marketing path => docs key] from the manifest's `feature` entries, first match winning,
+     * built once per request: guideForPath() runs on every marketing page's related strip, and
+     * walking the whole manifest there meant ~40 route lookups per render.
+     *
+     * @return array<string, string>
+     */
+    private static function featureGuideKeys(): array
+    {
+        if (self::$featureGuideKeys !== null) {
+            return self::$featureGuideKeys;
+        }
+
+        $map = [];
+
         foreach (self::pages() as $key => $page) {
             $feature = $page['feature'] ?? null;
 
-            if (is_string($feature) && Route::has($feature) && route($feature, [], false) === $path) {
-                return self::guide($key);
+            if (is_string($feature) && Route::has($feature)) {
+                $map[route($feature, [], false)] ??= $key;
             }
         }
 
-        return null;
+        return self::$featureGuideKeys = $map;
     }
 }

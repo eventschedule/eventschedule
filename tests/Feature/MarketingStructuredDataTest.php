@@ -470,6 +470,29 @@ class MarketingStructuredDataTest extends TestCase
     /**
      * @return array<int, array<string, mixed>>
      */
+    /**
+     * Every #website and #organization reference on a page names the same node, even when APP_URL
+     * carries a trailing slash: the layout used to spell the site root three ways (raw config,
+     * a local rtrim, SeoUtils::siteUrl()), so "https://x//#website" and "https://x/#website" would
+     * have been two unlinked websites in one graph.
+     */
+    public function test_the_graph_ids_agree_when_app_url_has_a_trailing_slash(): void
+    {
+        $root = rtrim((string) config('app.url'), '/');
+        $this->pinAppUrl($root.'/');
+
+        $html = $this->get($root.'/features')->assertOk()->getContent();
+
+        preg_match_all('~"(?:@id|url)":\s*"([^"]*#(?:website|organization))"~', $html, $m);
+
+        $this->assertNotEmpty($m[1]);
+
+        $ids = array_values(array_unique(array_map(fn ($id) => str_replace('\/', '/', $id), $m[1])));
+        sort($ids);
+
+        $this->assertSame([$root.'/#organization', $root.'/#website'], $ids);
+    }
+
     private function jsonLdBlocks(string $html): array
     {
         preg_match_all('~<script type="application/ld\+json"[^>]*>(.*?)</script>~s', $html, $matches);

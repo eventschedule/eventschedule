@@ -4,7 +4,8 @@
     // The docs page for this one: an audience page's entry in config/marketing_guides.php, or
     // the guide whose manifest `feature` names this page. Beside the heading rather than as a
     // fifth card, so the grid below stays a complete row of four.
-    $guide = \App\Utils\DocsUtils::guideForPath($path);
+    // Only when there is a strip to put it in: the lookup is for this heading alone.
+    $guide = ! empty($related) ? \App\Utils\DocsUtils::guideForPath($path) : null;
     $gridCols = match (min(count($related), 4)) {
         1 => 'lg:grid-cols-1',
         2 => 'lg:grid-cols-2',

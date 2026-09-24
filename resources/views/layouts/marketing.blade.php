@@ -81,7 +81,7 @@
             $ogImagePath = function (string $slug): ?string {
                 foreach (['jpg', 'png'] as $extension) {
                     if (file_exists(public_path("images/social/{$slug}.{$extension}"))) {
-                        return config('app.url') . "/images/social/{$slug}.{$extension}";
+                        return \App\Utils\SeoUtils::siteUrl() . "/images/social/{$slug}.{$extension}";
                     }
                 }
 
@@ -90,7 +90,7 @@
             $ogImage = $ogImagePath($pathSlug)
                 ?? ($section !== $pathSlug ? $ogImagePath($section) : null)
                 ?? $ogImagePath('home')
-                ?? config('app.url') . '/images/social/home.jpg';
+                ?? \App\Utils\SeoUtils::siteUrl() . '/images/social/home.jpg';
         }
 
         // $socialImage can be a page's own file (a blog post's featured image), so read the type
@@ -140,18 +140,18 @@
     {
         "@context": "https://schema.org",
         "@type": "WebSite",
-        "@id": "{{ config('app.url') }}/#website",
+        "@id": "{{ \App\Utils\SeoUtils::siteUrl() }}/#website",
         "name": "Event Schedule",
-        "url": "{{ config('app.url') }}",
+        "url": "{{ \App\Utils\SeoUtils::siteUrl() }}",
         "description": "A free, open-source event calendar and ticketing platform for performers, venues and curators: one page for every event, tickets with zero platform fees, and newsletters to the people who follow you.",
         "publisher": {
-            "@id": "{{ config('app.url') }}/#organization"
+            "@id": "{{ \App\Utils\SeoUtils::siteUrl() }}/#organization"
         },
         "potentialAction": {
             "@type": "SearchAction",
             "target": {
                 "@type": "EntryPoint",
-                "urlTemplate": "{{ config('app.url') }}/search?q={search_term_string}"
+                "urlTemplate": "{{ \App\Utils\SeoUtils::siteUrl() }}/search?q={search_term_string}"
             },
             "query-input": "required name=search_term_string"
         }
@@ -209,9 +209,12 @@
         // The section crumbs are absolute on config('app.url'), never url(): the blog is a second
         // host, and url('/use-cases') built on blog.eventschedule.com named a page that does not
         // exist there. That is how 144 of 213 posts shipped a 404 in their BreadcrumbList.
-        $siteUrl = rtrim((string) config('app.url'), '/');
+        // One spelling of the site root, SeoUtils::siteUrl(), the one every @id in the graph uses:
+        // a raw config('app.url') with a trailing slash would name a second website and a second
+        // organization that the WebPage nodes never point at.
+        $siteUrl = \App\Utils\SeoUtils::siteUrl();
 
-        $breadcrumbs = [['name' => 'Home', 'url' => config('app.url')]];
+        $breadcrumbs = [['name' => 'Home', 'url' => $siteUrl]];
         $path = request()->path();
         $skipBreadcrumb = false;
         // Blog pages by ROUTE NAME, never by path. On the hosted blog host a post's path is its
