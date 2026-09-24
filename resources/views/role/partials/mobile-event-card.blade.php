@@ -1,10 +1,17 @@
-{{-- Shared mobile event card content - used in both calendar and list views --}}
+{{-- Shared mobile event card content - used in both calendar and list views.
+
+     The title and the image are real links to the event (getEventUrl()), so a crawler without
+     JavaScript and a visitor who middle-clicks both reach it; onEventLinkClick() keeps the direct
+     registration behaviour and leaves modified clicks to the browser. The whole-card click the
+     including templates put on the wrapper still works for the rest of the card - it ignores
+     clicks inside a link. The image's link is a duplicate of the title's, so it is kept out of
+     the tab order and the accessibility tree. --}}
 <div class="flex-1 py-3 px-4 flex flex-col min-w-0">
     <div class="flex items-start gap-1.5">
         <span v-if="getEventDotColor(event)" class="inline-block w-2.5 h-2.5 rounded-full flex-shrink-0 mt-1" :style="{ backgroundColor: getEventDotColor(event) }"></span>
         <h3 class="font-semibold text-gray-900 dark:text-gray-100 text-base leading-snug line-clamp-2" :dir="event.dir || 'auto'">
             <svg v-if="event.is_password_protected" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="inline-block w-4 h-4 text-gray-400 me-2 align-[-0.2em]"><path stroke-linecap="round" stroke-linejoin="round" d="M16.5 10.5V6.75a4.5 4.5 0 10-9 0v3.75m-.75 11.25h10.5a2.25 2.25 0 002.25-2.25v-6.75a2.25 2.25 0 00-2.25-2.25H6.75a2.25 2.25 0 00-2.25 2.25v6.75a2.25 2.25 0 002.25 2.25z" /></svg>
-            <span v-text="event.name"></span>
+            <a :href="getEventUrl(event)" :target="eventLinkTarget()" @click="onEventLinkClick(event, $event)" v-text="event.name"></a>
             <span v-if="event.is_internal" class="inline-flex items-center px-1.5 py-0.5 rounded text-xs font-medium bg-amber-100 text-amber-800 dark:bg-amber-900/50 dark:text-amber-200 ms-1.5">{{ __('messages.internal') }}</span><span v-else-if="event.is_draft" class="inline-flex items-center px-1.5 py-0.5 rounded text-xs font-medium bg-blue-100 text-blue-800 dark:bg-blue-900/50 dark:text-blue-200 ms-1.5">{{ __('messages.draft') }}</span>
         </h3>
     </div>
@@ -59,5 +66,8 @@
     </div>
 </div>
 <div v-if="(event.image_url || event.flyer_url) && !event.is_password_protected" class="flex-shrink-0 w-40 max-w-[50%] self-stretch">
-    <img :src="event.flyer_url || event.image_url" :class="event._isPast ? 'grayscale' : ''" class="w-full h-full object-cover" :alt="event.name">
+    {{-- A 160px column: the 480 derivative, or the 960 on a dense screen, never the original. --}}
+    <a :href="getEventUrl(event)" :target="eventLinkTarget()" @click="onEventLinkClick(event, $event)" tabindex="-1" aria-hidden="true" class="block w-full h-full">
+        <img :src="event.image_thumb_url || event.image_url || event.flyer_url" :srcset="event.image_srcset || null" sizes="160px" loading="lazy" :class="event._isPast ? 'grayscale' : ''" class="w-full h-full object-cover" :alt="event.name">
+    </a>
 </div>

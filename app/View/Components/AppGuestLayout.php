@@ -91,6 +91,14 @@ class AppGuestLayout extends Component
          * a form or a gift-card page that happens to render through this layout.
          */
         public bool $scheduleHome = false,
+        /**
+         * The image a phone paints as this page's background banner, preloaded at high priority
+         * for narrow screens only - it is the schedule page's mobile LCP element, and as a CSS
+         * background it is otherwise discovered late. Only role/show-guest passes it (the same
+         * Role::backgroundImageUrl(960) its banner paints); event, embed and graphic pages do not
+         * paint that banner, so they preload nothing.
+         */
+        public ?string $mobileBannerImage = null,
     ) {}
 
     /**

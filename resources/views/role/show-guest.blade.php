@@ -1,4 +1,4 @@
-<x-app-guest-layout :role="$role" :fonts="$fonts" :has-inline-lang-toggle="$role->headerStyle() !== 'banner'" :ad-slot="true" :banner-bar="true" :cart="true" :page-title="isset($selectedGroup) && $selectedGroup ? $selectedGroup->translatedName() : null" :upcoming="$upcoming ?? null" :schedule-home="! (isset($selectedGroup) && $selectedGroup)">
+<x-app-guest-layout :role="$role" :fonts="$fonts" :has-inline-lang-toggle="$role->headerStyle() !== 'banner'" :ad-slot="true" :banner-bar="true" :cart="true" :page-title="isset($selectedGroup) && $selectedGroup ? $selectedGroup->translatedName() : null" :upcoming="$upcoming ?? null" :schedule-home="! (isset($selectedGroup) && $selectedGroup)" :mobile-banner-image="(request()->embed || request()->graphic) ? null : $role->backgroundImageUrl(960)">
 
   @php
    $isRtl = is_rtl();
@@ -80,14 +80,12 @@ html[data-es-view="list"] #gp-calendar {
     <div>
       <div class="container mx-auto pt-3 md:pt-4 pb-3 md:pb-10 px-5 md:mt-0 relative z-10"
       >
-        {{-- Mobile background wrapper - covers header and carousel only --}}
+        {{-- Mobile background wrapper - covers header and carousel only. It is the page's LCP
+             element on a phone, so an upload is painted from its 960 derivative (a built-in
+             background is already a phone-sized WebP), and the layout preloads the same URL
+             (AppGuestLayout::$mobileBannerImage). --}}
         @php
-            $mobileBannerUrl = null;
-            if ($role->background == 'image' && !request()->embed) {
-                $mobileBannerUrl = $role->background_image
-                    ? asset('images/backgrounds/' . $role->background_image . '.webp')
-                    : $role->background_image_url;
-            }
+            $mobileBannerUrl = request()->embed ? null : $role->backgroundImageUrl(960);
         @endphp
         @if ($mobileBannerUrl)
         <div class="relative {{ $headerStyle === 'banner' ? '-mt-10 pt-10' : '' }} md:m-0 md:p-0">

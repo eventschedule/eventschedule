@@ -41,18 +41,34 @@
             </div>
             @endif
             @elseif ($role->header_image && $role->header_image !== 'none')
+            {{-- width and height give the box its shape before the file arrives, so nothing
+                 below it jumps: every built-in header is 1536x768. fetchpriority="high" only
+                 when the background is not an image - that one is the layout's high-priority
+                 preload, and a page gets one. --}}
             <picture>
               <source srcset="{{ asset('images/headers') }}/{{ $role->header_image }}.webp" type="image/webp">
               <img
                 class="block max-h-72 w-full object-cover"
                 src="{{ asset('images/headers') }}/{{ $role->header_image }}.png"
+                width="{{ \App\Models\Role::BUILT_IN_HEADER_SIZE[0] }}" height="{{ \App\Models\Role::BUILT_IN_HEADER_SIZE[1] }}"
+                @if (! $role->backgroundImageUrl()) fetchpriority="high" @endif
                 alt="{{ $role->translatedName() }}"
               />
             </picture>
             @elseif ($role->header_image_url && $role->header_image !== 'none')
+            @php
+                // The owner's upload: its 960 derivative as the src, the 960 and 1920 for the
+                // browser to choose between, and the original's recorded size for the box's shape.
+                // Until the derivatives exist all three fall away and this is the plain original.
+                $headerSrcset = $role->imageVariantSrcset('header');
+                $headerSize = $role->imageSourceDimensions('header');
+            @endphp
             <img
               class="block max-h-72 w-full object-cover"
-              src="{{ $role->header_image_url }}"
+              src="{{ $role->headerImageUrl(960) }}"
+              @if ($headerSrcset) srcset="{{ $headerSrcset }}" sizes="(min-width: 1536px) 1496px, calc(100vw - 40px)" @endif
+              @if ($headerSize) width="{{ $headerSize[0] }}" height="{{ $headerSize[1] }}" @endif
+              @if (! $role->backgroundImageUrl()) fetchpriority="high" @endif
               alt="{{ $role->translatedName() }}"
             />
             @endif
@@ -62,7 +78,8 @@
             <div id="gp-profile-image" class="rounded-lg w-[130px] h-[130px] -mt-[100px] mx-auto {{ $isRtl ? 'sm:mr-0 sm:ml-auto' : 'sm:mx-0 sm:-ml-2' }} mb-3 sm:mb-6 bg-white dark:bg-gray-900 flex items-center justify-center">
               <img
                 class="rounded-md w-[120px] h-[120px] object-cover"
-                src="{{ $role->profile_image_url }}"
+                src="{{ $role->getProfileImageUrl(\App\Utils\ImageUtils::VARIANT_WIDTH) }}"
+                width="120" height="120"
                 alt="{{ $role->translatedName() }}"
               />
             </div>

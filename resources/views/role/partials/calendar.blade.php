@@ -119,8 +119,8 @@
                 'local_date' => $event->starts_at ? $event->getStartDateTime(null, true)->format('Y-m-d') : null,
                 'utc_date' => $event->starts_at ? $event->getStartDateTime(null, false)->format('Y-m-d') : null,
                 'guest_url' => $event->getGuestUrl(isset($subdomain) ? $subdomain : '', ''),
-                'image_url' => $event->getImageUrl(),
-                'flyer_url' => $event->flyer_image_url ?: null,
+                // The same image fields the month payload carries (Event::cardImageFields()).
+                ...$event->cardImageFields(),
                 'can_edit' => auth()->user() && auth()->user()->canEditEvent($event),
                 'edit_url' => auth()->user() && auth()->user()->canEditEvent($event)
                     ? (isset($role) ? app_url(route('event.edit', ['subdomain' => $role->subdomain, 'hash' => App\Utils\UrlUtils::encodeId($event->id)], false)) : app_url(route('event.edit_admin', ['hash' => App\Utils\UrlUtils::encodeId($event->id)], false)))
@@ -151,14 +151,12 @@
                 ])->values()->toArray(),
                 'video_count' => $event->approved_videos_count ?? 0,
                 'comment_count' => $event->approved_comments_count ?? 0,
-                'venue_profile_image' => $event->venue?->profile_image_url ?: null,
-                'venue_header_image' => ($event->venue && $event->venue->getAttributes()['header_image'] && ! in_array($event->venue->getAttributes()['header_image'], ['none', 'logos'], true)) ? $event->venue->getHeaderImageUrlAttribute($event->venue->getAttributes()['header_image']) : null,
                 'venue_guest_url' => ($event->venue && isset($role) && $event->venue->subdomain === $role->subdomain) ? null : ($event->venue?->getGuestUrl() ?: null),
                 'talent' => $event->roles->filter(fn($r) => $r->type === 'talent' && ($route !== 'guest' || $r->isClaimed()))->map(fn($r) => [
                     'name' => $r->name,
                     'dir' => content_dir_for_language($r->name, $r->language_code ?: $dirLang),
-                    'profile_image' => $r->profile_image_url ?: null,
-                    'header_image' => ($r->getAttributes()['header_image'] && ! in_array($r->getAttributes()['header_image'], ['none', 'logos'], true)) ? $r->getHeaderImageUrlAttribute($r->getAttributes()['header_image']) : null,
+                    'profile_image' => $r->getProfileImageUrl(\App\Utils\ImageUtils::VARIANT_WIDTH) ?: null,
+                    'header_image' => $r->headerImageUrl(960),
                     'guest_url' => (isset($role) && $r->subdomain === $role->subdomain) ? null : ($r->getGuestUrl() ?: null),
                 ])->values()->toArray(),
                 'videos' => $event->relationLoaded('approvedVideos') ? $event->approvedVideos->take(3)->map(fn($v) => [
@@ -860,7 +858,7 @@
                                         <div class="flex items-start gap-2">
                                             <span v-if="getEventDotColor(event)" class="inline-block w-3 h-3 rounded-full flex-shrink-0 mt-2" :style="{ backgroundColor: getEventDotColor(event) }"></span>
                                             <h2 class="font-bold text-2xl md:text-3xl leading-snug line-clamp-2 text-gray-900 dark:text-gray-100" :dir="event.dir || 'auto'">
-                                                <span v-html="commaBreak(event.name)"></span>
+                                                <a :href="getEventUrl(event)" :target="eventLinkTarget()" @click="onEventLinkClick(event, $event)" v-html="commaBreak(event.name)"></a>
                                                 <svg v-if="event.is_password_protected" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="inline-block w-6 h-6 text-gray-400 ms-2 align-middle"><path stroke-linecap="round" stroke-linejoin="round" d="M16.5 10.5V6.75a4.5 4.5 0 10-9 0v3.75m-.75 11.25h10.5a2.25 2.25 0 002.25-2.25v-6.75a2.25 2.25 0 00-2.25-2.25H6.75a2.25 2.25 0 00-2.25 2.25v6.75a2.25 2.25 0 002.25 2.25z" /></svg>
                                                 <span v-if="event.is_internal" class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-amber-100 text-amber-800 dark:bg-amber-900/50 dark:text-amber-200 ms-2 align-middle">{{ __('messages.internal') }}</span><span v-else-if="event.is_draft" class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-blue-100 text-blue-800 dark:bg-blue-900/50 dark:text-blue-200 ms-2 align-middle">{{ __('messages.draft') }}</span>
                                             </h2>
@@ -1192,19 +1190,26 @@
                                             {{ __('messages.edit_event') }}
                                         </a>
                                     </div>
-                                    {{-- Flyer Image Column --}}
+                                    {{-- Flyer Image Column: about 320px wide, so the 480 or 960 derivative, with
+                                         the original's size to hold the column's shape while it loads. A duplicate of
+                                         the title's link, so out of the tab order and the accessibility tree. --}}
                                     <div v-if="!event.is_password_protected" class="md:w-[35%] md:flex-shrink-0">
-                                        <img :src="event.flyer_url" :class="event._isPast ? 'grayscale' : ''" class="w-full" :alt="event.name">
+                                        <a :href="getEventUrl(event)" :target="eventLinkTarget()" @click="onEventLinkClick(event, $event)" tabindex="-1" aria-hidden="true" class="block">
+                                            <img :src="event.flyer_thumb_url || event.flyer_url" :srcset="event.flyer_srcset || null" sizes="320px" loading="lazy" :width="event.flyer_width || null" :height="event.flyer_height || null" :class="event._isPast ? 'grayscale' : ''" class="w-full" :alt="event.name">
+                                        </a>
                                     </div>
                                 </div>
                             </template>
 
                             {{-- Stacked layout when no flyer image --}}
                             <template v-else>
-                                {{-- Hero Banner (only when no flyer) --}}
+                                {{-- Hero Banner (only when no flyer): the venue's or an act's header at 960
+                                     (Event::cardImageFields()). The gradient lets clicks through to the link. --}}
                                 <div v-if="getHeaderImage(event) && !event.is_password_protected" class="h-40 relative overflow-hidden">
-                                    <img :src="getHeaderImage(event)" :class="event._isPast ? 'grayscale' : ''" class="w-full h-full object-cover" :alt="event.name" v-on:error="$event?.target?.closest('.h-40') && ($event.target.closest('.h-40').style.display='none')">
-                                    <div class="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent"></div>
+                                    <a :href="getEventUrl(event)" :target="eventLinkTarget()" @click="onEventLinkClick(event, $event)" tabindex="-1" aria-hidden="true" class="block w-full h-full">
+                                        <img :src="getHeaderImage(event)" loading="lazy" :class="event._isPast ? 'grayscale' : ''" class="w-full h-full object-cover" :alt="event.name" v-on:error="$event?.target?.closest('.h-40') && ($event.target.closest('.h-40').style.display='none')">
+                                    </a>
+                                    <div class="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent pointer-events-none"></div>
                                 </div>
 
                                 {{-- Content --}}
@@ -1213,7 +1218,7 @@
                                     <div class="flex items-start gap-2">
                                         <span v-if="getEventDotColor(event)" class="inline-block w-3 h-3 rounded-full flex-shrink-0 mt-2" :style="{ backgroundColor: getEventDotColor(event) }"></span>
                                         <h2 class="font-bold text-2xl md:text-3xl leading-snug line-clamp-2 text-gray-900 dark:text-gray-100" :dir="event.dir || 'auto'">
-                                            <span v-html="commaBreak(event.name)"></span>
+                                            <a :href="getEventUrl(event)" :target="eventLinkTarget()" @click="onEventLinkClick(event, $event)" v-html="commaBreak(event.name)"></a>
                                             <svg v-if="event.is_password_protected" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="inline-block w-6 h-6 text-gray-400 ms-2 align-middle"><path stroke-linecap="round" stroke-linejoin="round" d="M16.5 10.5V6.75a4.5 4.5 0 10-9 0v3.75m-.75 11.25h10.5a2.25 2.25 0 002.25-2.25v-6.75a2.25 2.25 0 00-2.25-2.25H6.75a2.25 2.25 0 00-2.25 2.25v6.75a2.25 2.25 0 002.25 2.25z" /></svg>
                                             <span v-if="event.is_internal" class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-amber-100 text-amber-800 dark:bg-amber-900/50 dark:text-amber-200 ms-2 align-middle">{{ __('messages.internal') }}</span><span v-else-if="event.is_draft" class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-blue-100 text-blue-800 dark:bg-blue-900/50 dark:text-blue-200 ms-2 align-middle">{{ __('messages.draft') }}</span>
                                         </h2>
@@ -3245,7 +3250,9 @@ const calendarApp = createApp({
                     poll.results = data.results;
                     poll.total_votes = data.total_votes;
                     const btn = clickEvent?.target?.closest('button');
-                    if (btn) firePollConfetti(btn, this.accentColor);
+                    // Loaded only where the page's own events carry a poll (see the script tags
+                    // above), and a poll can arrive later with an Ajax month.
+                    if (btn && typeof firePollConfetti === 'function') firePollConfetti(btn, this.accentColor);
                     this.pollAnimating = { ...this.pollAnimating, [poll.id]: true };
                     await new Promise(r => setTimeout(r, 600));
                     poll.user_vote = optionIndex;
@@ -3272,6 +3279,24 @@ const calendarApp = createApp({
         getMaxVoteCount(poll) {
             if (!poll.results) return 0;
             return Math.max(...Object.values(poll.results), 0);
+        },
+        // The target of the event links on the cards: a new tab where a click on the card opens
+        // one (navigateToEvent() below) - inside an embed, and in the admin portal.
+        eventLinkTarget() {
+            return (this.embed || this.route === 'admin') ? '_blank' : null;
+        },
+        // A card's title and image are real links, for crawlers and for "open in new tab". A
+        // plain click keeps the one behaviour a link cannot express on its own: direct
+        // registration opens the registration page instead, as a click on the card does. Anything
+        // else - a modified or middle click, or no direct registration - is the browser's own
+        // navigation to the anchor's href and target.
+        onEventLinkClick(event, e) {
+            if (!e || e.defaultPrevented || e.button !== 0 || e.metaKey || e.ctrlKey || e.shiftKey || e.altKey) return;
+
+            if (this.directRegistration && event.registration_url) {
+                e.preventDefault();
+                window.open(event.registration_url, '_blank', 'noopener');
+            }
         },
         navigateToEvent(event, e) {
             // Don't navigate if clicking on the edit link or a form/button
@@ -3300,7 +3325,8 @@ const calendarApp = createApp({
                 venue_name: event.venue_name || '',
                 venue_dir: event.venue_dir || 'auto',
                 time: time || '',
-                image_url: event.image_url || '',
+                // A 160px column: the card-size derivative when there is one.
+                image_url: event.image_thumb_url || event.image_url || '',
                 description: '', // Description not currently in event data
                 ticket_price: event.ticket_price,
                 ticket_currency_code: event.ticket_currency_code || '',
@@ -4108,27 +4134,34 @@ document.addEventListener('DOMContentLoaded', function() {
      Event names, venue names and descriptions are all written by somebody else - on a curator
      they come from the source schedules, and venues are invented by calendar sync - so without
      this an event named "{{ constructor... }}" runs as JavaScript on the schedule's public page.
-     CSP unsafe-eval is on by design (Vue template compilation), so it does not block this. --}}
+     CSP unsafe-eval is on by design (Vue template compilation), so it does not block this.
+
+     The list is EventRepo::upcomingForGuest(): the schedule's next 50 public events, each dated by
+     the occurrence it next happens on - the same list its title and description read. It used to
+     be the whole month's grid plus every recurring series ever created, with a heavy eager load
+     per row, on every schedule page for a list only a crawler reads. --}}
 <noscript v-pre>
-    @if ($events->isNotEmpty() && $events->first() instanceof \App\Models\Event)
+    @if (! empty($upcoming) && $upcoming->isNotEmpty())
+    @php $noscriptLang = isset($role) ? $role->displayLanguageCode() : 'en'; @endphp
     <ul>
-        @foreach ($events as $noscriptEvent)
+        @foreach ($upcoming as $noscriptItem)
         @php
-            $noscriptLang = isset($role) ? $role->displayLanguageCode() : 'en';
+            $noscriptEvent = $noscriptItem['event'];
             $noscriptName = $noscriptEvent->nameInLanguage($noscriptLang, $role ?? null);
             $noscriptShort = $noscriptEvent->shortDescriptionInLanguage($noscriptLang, $role ?? null);
             $noscriptDirLang = $noscriptEvent->creatorRole?->language_code ?: $noscriptLang;
+            $noscriptVenue = $noscriptEvent->getVenueDisplayName(true, $noscriptLang);
         @endphp
-        {{-- Undated: getGuestUrl() would link a series at its first date, which may no longer be
-             an occurrence and then only redirects to this URL anyway. --}}
+        {{-- Undated: a series is one page (its canonical), and getGuestUrl() would link it at its
+             first date, which may no longer be an occurrence and then only redirects here. --}}
         <li style="margin-bottom: 1rem;">
             <a href="{{ $noscriptEvent->getUndatedGuestUrl($role?->subdomain ?? $noscriptEvent->roles->first()?->subdomain) }}">
                 <strong dir="{{ content_dir_for_language($noscriptName, $noscriptDirLang) }}">{{ $noscriptName }}</strong>
             </a>
             <br>
-            {{ $noscriptEvent->localStartsAt(true) }}
-            @if ($noscriptEvent->venue)
-                - {{ $noscriptEvent->venue->getDisplayName() }}
+            {{ $noscriptEvent->localStartsAt(true, $noscriptItem['date']) }}
+            @if ($noscriptVenue)
+                - <span dir="{{ content_dir_for_language($noscriptVenue, $noscriptEvent->venue?->language_code ?: $noscriptDirLang) }}">{{ $noscriptVenue }}</span>
             @endif
             @if ($noscriptShort)
                 <br>

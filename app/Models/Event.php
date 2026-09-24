@@ -2736,6 +2736,48 @@ class Event extends Model
     }
 
     /**
+     * The image fields of a calendar card's payload, one definition for the three builders that
+     * serialize an event for the Vue calendar (CalendarDataTrait::calendarEventToVueArray(),
+     * RoleController::eventToVueArray() for past events, and the ?graphic=1 builder in
+     * role/partials/calendar.blade.php) - which is how the list, the agenda and the popups came
+     * to request originals while every other card used derivatives.
+     *
+     * - image_url: the card image at full size (getImageUrl()), for anything that has no better
+     *   option. image_thumb_url and image_srcset are the same image resized, for the 160px
+     *   mobile card and the popup.
+     * - flyer_*: the event's own flyer, which the desktop list shows in a column of its own, with
+     *   the original's recorded size so the column keeps its shape while the file loads.
+     * - venue_profile_image: the venue's photo at card size, for a 44px avatar.
+     * - venue_header_image: the header the venue's page shows (Role::headerImageUrl()), at 960.
+     *   This used to hand a built-in header's NAME to the storage URL accessor, which made every
+     *   one of them a dead link that the card then hid on error.
+     *
+     * Every key belongs to the image set: a builder that nulls image data (a password-protected
+     * event) nulls exactly these keys, so a key added here can never leak past that.
+     *
+     * @return array<string, string|int|null>
+     */
+    public function cardImageFields(): array
+    {
+        $hasFlyer = (bool) $this->flyer_image_url;
+        $flyerSize = $hasFlyer ? $this->imageSourceDimensions() : null;
+        $venue = $this->venue;
+
+        return [
+            'image_url' => $this->getImageUrl() ?: null,
+            'image_thumb_url' => $this->getImageUrl(ImageUtils::VARIANT_WIDTH) ?: null,
+            'image_srcset' => $this->imageSrcset(),
+            'flyer_url' => $this->flyer_image_url ?: null,
+            'flyer_thumb_url' => $hasFlyer ? ($this->imageVariantUrl(ImageUtils::VARIANT_WIDTH) ?: $this->flyer_image_url) : null,
+            'flyer_srcset' => $hasFlyer ? $this->imageVariantSrcset() : null,
+            'flyer_width' => $flyerSize[0] ?? null,
+            'flyer_height' => $flyerSize[1] ?? null,
+            'venue_profile_image' => $venue?->getProfileImageUrl(ImageUtils::VARIANT_WIDTH) ?: null,
+            'venue_header_image' => $venue?->headerImageUrl(960),
+        ];
+    }
+
+    /**
      * Memoized: the resolver below asks for these once per field per event, and both walk the
      * `venue` accessor and the `roles` collection.
      */

@@ -191,22 +191,23 @@
 
         @if (!$hasTalentImage)
         @php
-          $fallbackImage = null;
-          $anyTalentWithImage = $event->roles->first(fn($r) => $r->isTalent() && $r->profile_image_url);
-          if ($anyTalentWithImage) {
-              $fallbackImage = $anyTalentWithImage->profile_image_url;
-          } elseif ($event->venue && $event->venue->profile_image_url) {
-              $fallbackImage = $event->venue->profile_image_url;
-          } elseif ($role->profile_image_url) {
-              $fallbackImage = $role->profile_image_url;
-          }
+          // The schedule whose photo stands in: a talent's, else the venue's, else this one's. The
+          // schedule rather than its URL, because the resized derivatives are recorded on it.
+          $fallbackImageRole = $event->roles->first(fn($r) => $r->isTalent() && $r->profile_image_url)
+              ?: (($event->venue && $event->venue->profile_image_url) ? $event->venue : null)
+              ?: ($role->profile_image_url ? $role : null);
+          $fallbackImageSrcset = $fallbackImageRole?->imageVariantSrcset();
         @endphp
-        @if ($fallbackImage)
+        @if ($fallbackImageRole)
+        {{-- The 960 derivative, with the 480 for a phone at 1x. fetchpriority="high" only without
+             a flyer: the flyer is the page's largest image when there is one, and on a phone this
+             column renders below it. --}}
         <div id="gp-event-hero-image" class="bg-white/95 dark:bg-gray-900/95 backdrop-blur-sm sm:rounded-2xl overflow-hidden">
-            <img src="{{ $fallbackImage }}"
+            <img src="{{ $fallbackImageRole->getProfileImageUrl(960) }}"
+                 @if ($fallbackImageSrcset) srcset="{{ $fallbackImageSrcset }}" sizes="(min-width: 1024px) 380px, (min-width: 640px) calc(100vw - 40px), 100vw" @endif
                  alt="{{ $eventName }}"
                  class="w-full aspect-square object-cover"
-                 fetchpriority="high"/>
+                 @if (! $event->flyer_image_url) fetchpriority="high" @endif/>
         </div>
         @endif
         @endif
@@ -223,19 +224,16 @@
         <div id="gp-talent" class="contents">
         @foreach ($talentMembers as $talentIndex => $each)
         @php
-          $hasTalentHeader = ($each->header_image && ! in_array($each->header_image, ['none', 'logos'], true)) || $each->header_image_url;
+          // The header this act's own page shows (Role::headerImageUrl()): a built-in one, or an
+          // upload only while "custom" is selected - never an old upload behind 'none' or 'logos'.
+          $talentHeaderUrl = $each->headerImageUrl(960);
+          $hasTalentHeader = (bool) $talentHeaderUrl;
         @endphp
         <div class="bg-white/95 dark:bg-gray-900/95 backdrop-blur-sm sm:rounded-2xl overflow-hidden">
           @if ($hasTalentHeader)
-            {{-- Header banner --}}
-            @if ($each->header_image && ! in_array($each->header_image, ['none', 'logos'], true))
-              <picture>
-                <source srcset="{{ asset('images/headers') }}/{{ $each->header_image }}.webp" type="image/webp">
-                <img class="block max-h-40 w-full object-cover" src="{{ asset('images/headers') }}/{{ $each->header_image }}.png" alt="{{ $each->nameInLanguage($displayLang) }}"/>
-              </picture>
-            @elseif ($each->header_image_url)
-              <img class="block max-h-40 w-full object-cover" src="{{ $each->header_image_url }}" alt="{{ $each->nameInLanguage($displayLang) }}"/>
-            @endif
+            {{-- Header banner: a built-in header's bundled WebP, or an upload's 960 derivative. --}}
+            @php $talentHeaderSize = $each->headerImageDimensions(); @endphp
+            <img class="block max-h-40 w-full object-cover" src="{{ $talentHeaderUrl }}" @if ($talentHeaderSize) width="{{ $talentHeaderSize[0] }}" height="{{ $talentHeaderSize[1] }}" @endif alt="{{ $each->nameInLanguage($displayLang) }}"/>
             <div class="px-5 pb-5">
               {{-- Profile image overlapping header --}}
               @if ($each->profile_image_url)
@@ -262,10 +260,10 @@
                       }
                     @endphp
                     <a href="{{ $talentUrl }}">
-                      <img src="{{ $each->profile_image_url }}" alt="{{ $each->nameInLanguage($displayLang) }}" class="rounded-lg w-full h-full object-cover"/>
+                      <img src="{{ $each->getProfileImageUrl(\App\Utils\ImageUtils::VARIANT_WIDTH) }}" alt="{{ $each->nameInLanguage($displayLang) }}" class="rounded-lg w-full h-full object-cover"/>
                     </a>
                   @else
-                    <img src="{{ $each->profile_image_url }}" alt="{{ $each->nameInLanguage($displayLang) }}" class="rounded-lg w-full h-full object-cover"/>
+                    <img src="{{ $each->getProfileImageUrl(\App\Utils\ImageUtils::VARIANT_WIDTH) }}" alt="{{ $each->nameInLanguage($displayLang) }}" class="rounded-lg w-full h-full object-cover"/>
                   @endif
                 </div>
               @else
@@ -297,10 +295,10 @@
                     }
                   @endphp
                   <a href="{{ $talentUrl }}">
-                    <img src="{{ $each->profile_image_url }}" alt="{{ $each->nameInLanguage($displayLang) }}" class="w-full aspect-square object-cover rounded-xl mb-4"/>
+                    <img src="{{ $each->getProfileImageUrl(960) }}" @if ($eachSrcset = $each->imageVariantSrcset()) srcset="{{ $eachSrcset }}" sizes="(min-width: 1024px) 340px, (min-width: 640px) calc(100vw - 80px), calc(100vw - 40px)" @endif alt="{{ $each->nameInLanguage($displayLang) }}" class="w-full aspect-square object-cover rounded-xl mb-4"/>
                   </a>
                 @else
-                  <img src="{{ $each->profile_image_url }}" alt="{{ $each->nameInLanguage($displayLang) }}" class="w-full aspect-square object-cover rounded-xl mb-4"/>
+                  <img src="{{ $each->getProfileImageUrl(960) }}" @if ($eachSrcset = $each->imageVariantSrcset()) srcset="{{ $eachSrcset }}" sizes="(min-width: 1024px) 340px, (min-width: 640px) calc(100vw - 80px), calc(100vw - 40px)" @endif alt="{{ $each->nameInLanguage($displayLang) }}" class="w-full aspect-square object-cover rounded-xl mb-4"/>
                 @endif
               @endif
           @endif
@@ -490,28 +488,24 @@
         {{-- Venue card --}}
         @if ($event->venue && ($event->venue->name || $event->venue->formatted_address))
         @php
-          $hasVenueHeader = ($event->venue->header_image && ! in_array($event->venue->header_image, ['none', 'logos'], true)) || $event->venue->header_image_url;
+          // As for the talent cards above: the header the venue's own page shows, or none.
+          $venueHeaderUrl = $event->venue->headerImageUrl(960);
+          $hasVenueHeader = (bool) $venueHeaderUrl;
         @endphp
         <div id="gp-venue" class="bg-white/95 dark:bg-gray-900/95 backdrop-blur-sm sm:rounded-2xl z-20 relative {{ $role->isRtl() ? 'rtl' : '' }}">
           @if ($hasVenueHeader)
             <div class="overflow-hidden rounded-t-2xl">
-              @if ($event->venue->header_image && ! in_array($event->venue->header_image, ['none', 'logos'], true))
-                <picture>
-                  <source srcset="{{ asset('images/headers') }}/{{ $event->venue->header_image }}.webp" type="image/webp">
-                  <img class="block max-h-40 w-full object-cover" src="{{ asset('images/headers') }}/{{ $event->venue->header_image }}.png" alt="{{ $event->venue->nameInLanguage($displayLang) }}" loading="lazy" decoding="async"/>
-                </picture>
-              @elseif ($event->venue->header_image_url)
-                <img class="block max-h-40 w-full object-cover" src="{{ $event->venue->header_image_url }}" alt="{{ $event->venue->nameInLanguage($displayLang) }}" loading="lazy" decoding="async"/>
-              @endif
+              @php $venueHeaderSize = $event->venue->headerImageDimensions(); @endphp
+              <img class="block max-h-40 w-full object-cover" src="{{ $venueHeaderUrl }}" @if ($venueHeaderSize) width="{{ $venueHeaderSize[0] }}" height="{{ $venueHeaderSize[1] }}" @endif alt="{{ $event->venue->nameInLanguage($displayLang) }}" loading="lazy" decoding="async"/>
             </div>
           @endif
           <div class="p-5 relative z-10">
             @if ($event->venue->profile_image_url && $hasVenueHeader)
               <div class="rounded-lg w-[100px] h-[100px] -mt-[60px] bg-white/95 dark:bg-gray-900/95 flex items-center justify-center mb-3">
-                <img class="rounded-md w-[90px] h-[90px] object-cover" src="{{ $event->venue->profile_image_url }}" alt="{{ $event->venue->nameInLanguage($displayLang) }}" loading="lazy" decoding="async"/>
+                <img class="rounded-md w-[90px] h-[90px] object-cover" src="{{ $event->venue->getProfileImageUrl(\App\Utils\ImageUtils::VARIANT_WIDTH) }}" alt="{{ $event->venue->nameInLanguage($displayLang) }}" loading="lazy" decoding="async"/>
               </div>
             @elseif ($event->venue->profile_image_url)
-              <img class="w-full aspect-square object-cover rounded-xl mb-3" src="{{ $event->venue->profile_image_url }}" alt="{{ $event->venue->nameInLanguage($displayLang) }}" loading="lazy" decoding="async"/>
+              <img class="w-full aspect-square object-cover rounded-xl mb-3" src="{{ $event->venue->getProfileImageUrl(960) }}" @if ($venueSrcset = $event->venue->imageVariantSrcset()) srcset="{{ $venueSrcset }}" sizes="(min-width: 1024px) 340px, (min-width: 640px) calc(100vw - 80px), calc(100vw - 40px)" @endif alt="{{ $event->venue->nameInLanguage($displayLang) }}" loading="lazy" decoding="async"/>
             @endif
             <div class="flex flex-col gap-2">
               @if ($event->venue->name)
@@ -908,7 +902,7 @@
             <div class="flex-shrink-0 w-16 h-16 rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900
                         flex items-center justify-center shadow-sm">
               @if ($event->venue && $event->venue->profile_image_url)
-                <img src="{{ $event->venue->profile_image_url }}" alt="{{ $event->venue->nameInLanguage($displayLang) }}" class="w-11 h-11 rounded-lg object-cover" loading="lazy" decoding="async">
+                <img src="{{ $event->venue->getProfileImageUrl(\App\Utils\ImageUtils::VARIANT_WIDTH) }}" alt="{{ $event->venue->nameInLanguage($displayLang) }}" class="w-11 h-11 rounded-lg object-cover" loading="lazy" decoding="async">
               @else
                 <svg width="24" height="24" viewBox="0 0 24 24" fill="{{ $accentColor }}" aria-hidden="true">
                   <path fill-rule="evenodd" clip-rule="evenodd" d="M12 2C7.58172 2 4 6.00258 4 10.5C4 14.9622 6.55332 19.8124 10.5371 21.6744C11.4657 22.1085 12.5343 22.1085 13.4629 21.6744C17.4467 19.8124 20 14.9622 20 10.5C20 6.00258 16.4183 2 12 2ZM12 12C13.1046 12 14 11.1046 14 10C14 8.89543 13.1046 8 12 8C10.8954 8 10 8.89543 10 10C10 11.1046 10.8954 12 12 12Z" />
@@ -1425,21 +1419,27 @@
         })();
         </script>
 
-        {{-- Flyer image --}}
+        {{-- Flyer image. The page's LCP image when there is one: its 960 derivative as the src,
+             the 480, the 960 and the original (where it is wider) for the browser to choose from,
+             the original's recorded size so the box keeps its shape before the file arrives, and
+             fetchpriority="high" - never loading="lazy", which held it back until layout. The
+             link opens the full-size original: the flyer-lightbox app at the bottom of this page
+             shows it in place, and without JavaScript the link simply goes there. The #gp-flyer
+             id is a documented custom-CSS hook. --}}
         @if ($event->flyer_image_url)
-        <div id="gp-flyer" class="bg-white/95 dark:bg-gray-900/95 backdrop-blur-sm sm:rounded-2xl overflow-hidden"
-             x-data="{ flyerOpen: false }"
-             @keydown.escape.window="if (flyerOpen) { flyerOpen = false; document.body.style.overflow = ''; }">
-          <img src="{{ $event->flyer_image_url }}" alt="{{ $eventName }} - {{ __('messages.flyer') }}" class="w-full cursor-pointer" loading="lazy" decoding="async" @click="flyerOpen = true; document.body.style.overflow = 'hidden'"/>
-          <template x-teleport="body">
-            <div x-show="flyerOpen" x-cloak
-                 @click.self="flyerOpen = false; document.body.style.overflow = ''"
-                 class="fixed inset-0 z-[70] flex items-center justify-center bg-black/90"
-                 style="font-family: sans-serif">
-              <button @click="flyerOpen = false; document.body.style.overflow = ''" class="absolute top-3 {{ $role->isRtl() ? 'left-3' : 'right-3' }} text-white/80 hover:text-white text-4xl leading-none z-10 w-10 h-10 flex items-center justify-center">&times;</button>
-              <img src="{{ $event->flyer_image_url }}" class="max-w-[96vw] max-h-[90vh] object-contain pointer-events-none" alt="{{ $eventName }} - {{ __('messages.flyer') }}">
-            </div>
-          </template>
+        @php
+          $flyerSrcset = $event->imageVariantSrcset('default', true);
+          $flyerSize = $event->imageSourceDimensions();
+        @endphp
+        <div id="gp-flyer" class="bg-white/95 dark:bg-gray-900/95 backdrop-blur-sm sm:rounded-2xl overflow-hidden">
+          <a href="{{ $event->flyer_image_url }}" data-flyer-open class="block">
+            <img src="{{ $event->getImageUrl(960) }}"
+                 @if ($flyerSrcset) srcset="{{ $flyerSrcset }}" sizes="(min-width: 1024px) 564px, (min-width: 640px) calc(100vw - 40px), 100vw" @endif
+                 @if ($flyerSize) width="{{ $flyerSize[0] }}" height="{{ $flyerSize[1] }}" @endif
+                 alt="{{ $eventName }} - {{ __('messages.flyer') }}"
+                 class="w-full cursor-pointer"
+                 fetchpriority="high"/>
+          </a>
         </div>
         @endif
 
@@ -2691,6 +2691,10 @@
 
 @if (! is_demo_mode())
     @include('partials.follow-consent-modal')
+@endif
+
+@if ($event->flyer_image_url)
+    @include('event.partials.flyer-lightbox')
 @endif
 
 </x-app-guest-layout>

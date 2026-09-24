@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Traits;
 use App\Models\Event;
 use App\Models\Role;
 use App\Utils\DateUtils;
+use App\Utils\ImageUtils;
 use App\Utils\UrlUtils;
 use Carbon\Carbon;
 use Illuminate\Http\JsonResponse;
@@ -42,6 +43,10 @@ trait CalendarDataTrait
             $canEdit = $user->canEditEvent($event);
         }
 
+        // One definition of every image field (Event::cardImageFields()), so the nulling below for
+        // a password-protected event covers each of them by construction.
+        $imageFields = $event->cardImageFields();
+
         $data = [
             'id' => UrlUtils::encodeId($event->id),
             'group_id' => $groupId ? UrlUtils::encodeId($groupId) : null,
@@ -65,8 +70,7 @@ trait CalendarDataTrait
             'local_date' => $event->starts_at ? $event->getStartDateTime(null, true)->format('Y-m-d') : null,
             'utc_date' => $event->starts_at ? $event->getStartDateTime(null, false)->format('Y-m-d') : null,
             'guest_url' => $event->getGuestUrl($subdomain ?? '', ''),
-            'image_url' => $event->getImageUrl(),
-            'flyer_url' => $event->flyer_image_url ?: null,
+            ...$imageFields,
             'can_edit' => $canEdit,
             'edit_url' => $canEdit
                 ? ($role ? app_url(route('event.edit', ['subdomain' => $role->subdomain, 'hash' => UrlUtils::encodeId($event->id)], false)) : app_url(route('event.edit_admin', ['hash' => UrlUtils::encodeId($event->id)], false)))
@@ -99,14 +103,13 @@ trait CalendarDataTrait
             'video_count' => $event->approved_videos_count ?? 0,
             'comment_count' => $event->approved_comments_count ?? 0,
             'photo_count' => $event->approved_photos_count ?? 0,
-            'venue_profile_image' => $event->venue?->profile_image_url ?: null,
-            'venue_header_image' => ($event->venue && $event->venue->getAttributes()['header_image'] && ! in_array($event->venue->getAttributes()['header_image'], ['none', 'logos'], true)) ? $event->venue->getHeaderImageUrlAttribute($event->venue->getAttributes()['header_image']) : null,
             'venue_guest_url' => ($event->venue && isset($role) && $event->venue->subdomain === $role->subdomain) ? null : ($event->venue?->getGuestUrl() ?: null),
             'talent' => $event->roles->filter(fn ($r) => $r->type === 'talent' && (! $guestView || $r->isClaimed()))->map(fn ($r) => [
                 'name' => $r->name,
                 'dir' => content_dir_for_language($r->name, $r->language_code ?: $dirLang),
-                'profile_image' => $r->profile_image_url ?: null,
-                'header_image' => ($r->getAttributes()['header_image'] && ! in_array($r->getAttributes()['header_image'], ['none', 'logos'], true)) ? $r->getHeaderImageUrlAttribute($r->getAttributes()['header_image']) : null,
+                // A 32px avatar and a card-width banner: the card sizes, never the originals.
+                'profile_image' => $r->getProfileImageUrl(ImageUtils::VARIANT_WIDTH) ?: null,
+                'header_image' => $r->headerImageUrl(960),
                 'guest_url' => (isset($role) && $r->subdomain === $role->subdomain) ? null : ($r->getGuestUrl() ?: null),
             ])->values()->toArray(),
             'videos' => $event->relationLoaded('approvedVideos') ? $event->approvedVideos->take(3)->map(fn ($v) => [
@@ -152,12 +155,11 @@ trait CalendarDataTrait
         ];
 
         if ($event->isPasswordProtected()) {
+            $data = array_merge($data, array_fill_keys(array_keys($imageFields), null));
             $data['short_description'] = null;
             $data['venue_name'] = null;
             $data['venue_dir'] = null;
             $data['venue_guest_url'] = null;
-            $data['venue_profile_image'] = null;
-            $data['venue_header_image'] = null;
             $data['ticket_price'] = null;
             $data['registration_url'] = null;
             $data['coupon_code'] = null;
@@ -168,8 +170,6 @@ trait CalendarDataTrait
             $data['photos'] = [];
             $data['polls'] = [];
             $data['parts'] = [];
-            $data['image_url'] = null;
-            $data['flyer_url'] = null;
             $data['custom_field_values'] = [];
         }
 

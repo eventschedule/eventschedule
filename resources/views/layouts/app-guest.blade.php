@@ -91,6 +91,16 @@
     @endphp
 
     <x-slot name="meta">
+        {{-- The mobile LCP image, asked for before anything else in the head. On a phone the
+             schedule page's largest paint is the background banner role/show-guest paints behind
+             its header (the lab measured 11.2 s, on a 1.1MB original), and a CSS background is
+             found only once the stylesheet and the markup that uses it have both arrived. Only the
+             schedule page passes it (AppGuestLayout::$mobileBannerImage), and media= keeps a
+             desktop from fetching a phone's image it will never paint. --}}
+        @if ($mobileBannerImage)
+        <link rel="preload" as="image" href="{{ $mobileBannerImage }}" media="(max-width: 767px)" fetchpriority="high">
+        @endif
+
         {{-- The schedule half is Role::isIndexableHost(), the same rule both sitemaps apply, so
              neither submits a URL this tag then refuses. It covers an unverified schedule (above)
              and demo content: the /examples showcase and Springfield schedules exist to be LOOKED
@@ -306,8 +316,16 @@
                                 url("{{ asset('images/backgrounds/' . $otherRole->background_image . '.webp') }}") type("image/webp"),
                                 url("{{ asset('images/backgrounds/' . $otherRole->background_image . '.png') }}") type("image/png")
                             );
+                        @elseif ($showMobileBackground)
+                            {{-- An upload, painted at every width here: a phone's derivative, and the
+                                 desktop one from md up. Both fall back to the original until the
+                                 derivatives exist, so the rule is never an empty url(). --}}
+                            background-image: url("{{ $otherRole->backgroundImageUrl(960) }}");
+                            @media (min-width: 768px) {
+                                background-image: url("{{ $otherRole->backgroundImageUrl(1920) }}");
+                            }
                         @else
-                            background-image: url("{{ $otherRole->background_image_url }}");
+                            background-image: url("{{ $otherRole->backgroundImageUrl(1920) }}");
                         @endif
                         background-size: cover;
                         background-position: center;
@@ -340,12 +358,30 @@
                                 url("{{ asset('images/backgrounds/' . $role->background_image . '.webp') }}") type("image/webp"),
                                 url("{{ asset('images/backgrounds/' . $role->background_image . '.png') }}") type("image/png")
                             );
+                        @elseif ($showMobileBackground)
+                            {{-- An upload, painted at every width here: a phone's derivative, and the
+                                 desktop one from md up. On the schedule page this rule is desktop
+                                 only (the @media above) and role/show-guest paints the phone's
+                                 banner itself. Both fall back to the original until the derivatives
+                                 exist, so the rule is never an empty url(). --}}
+                            background-image:
+                                @if (request()->graphic)
+                                    linear-gradient(rgba(255, 255, 255, 0.5), rgba(255, 255, 255, 0.5)),
+                                @endif
+                            url("{{ $role->backgroundImageUrl(960) }}");
+                            @media (min-width: 768px) {
+                                background-image:
+                                    @if (request()->graphic)
+                                        linear-gradient(rgba(255, 255, 255, 0.5), rgba(255, 255, 255, 0.5)),
+                                    @endif
+                                url("{{ $role->backgroundImageUrl(1920) }}");
+                            }
                         @else
                             background-image:
                                 @if (request()->graphic)
                                     linear-gradient(rgba(255, 255, 255, 0.5), rgba(255, 255, 255, 0.5)),
                                 @endif
-                            url("{{ $role->background_image_url }}");
+                            url("{{ $role->backgroundImageUrl(1920) }}");
                         @endif
                         background-size: cover;
                         background-position: center;
@@ -523,23 +559,6 @@
         @if ($bannerBar)
             @include('role.partials.guest-banner')
         @endif
-
-        @php
-            $showMobileBanner = false;
-            $mobileBannerUrl = '';
-
-            if ($event && $otherRole && $otherRole->isClaimed() && $otherRole->hasConfiguredBackground() && $otherRole->background == 'image') {
-                $showMobileBanner = true;
-                $mobileBannerUrl = $otherRole->background_image
-                    ? asset('images/backgrounds/' . $otherRole->background_image . '.webp')
-                    : $otherRole->background_image_url;
-            } elseif ($role->background == 'image') {
-                $showMobileBanner = true;
-                $mobileBannerUrl = $role->background_image
-                    ? asset('images/backgrounds/' . $role->background_image . '.webp')
-                    : $role->background_image_url;
-            }
-        @endphp
 
         @php
             $switcherLanguages = config('app.supported_languages');

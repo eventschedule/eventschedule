@@ -2360,6 +2360,10 @@ class RoleController extends Controller
         $isMemberOrAdmin = $user && ($user->isMember($subdomain) || $user->isAdmin());
         $unlockedEventIds = ! $isMemberOrAdmin ? $this->getUnlockedEventIds() : [];
 
+        // The schedule page's next public events (EventRepo::upcomingForGuest()): its <noscript>
+        // list, and on its own page the title and description (AppGuestLayout::$upcoming).
+        $upcoming = null;
+
         if ($event && ! request()->graphic) {
             // For event detail view (non-graphic), only check if calendar has events
             // The calendar partial loads data via Ajax, so we just need existence
@@ -2398,30 +2402,45 @@ class RoleController extends Controller
                 $hasCalendarEvents = $query->exists();
             }
             $events = $hasCalendarEvents ? collect([true]) : collect();
-        } elseif ($role->isCurator()) {
-            $events = Event::with(['roles', 'parts', 'approvedVideos', 'approvedPhotos', 'approvedComments.user', 'polls' => fn ($q) => $q->withCount('votes')])->withCount(['approvedVideos', 'approvedComments', 'approvedPhotos', 'polls'])
-                ->inMonth($startOfGridUtc, $endOfGridUtc)
-                ->whereIn('id', function ($query) use ($role) {
-                    $query->select('event_id')
-                        ->from('event_role')
-                        ->where('role_id', $role->id)
-                        ->where('is_accepted', true);
-                })
-                ->when(! $isMemberOrAdmin, fn ($q) => $q->where('is_draft', false)->where('is_cancelled', false))
-                ->orderBy('starts_at')
-                ->get();
-        } else {
-            $events = Event::with(['roles', 'parts', 'approvedVideos', 'approvedPhotos', 'approvedComments.user', 'polls' => fn ($q) => $q->withCount('votes')])->withCount(['approvedVideos', 'approvedComments', 'approvedPhotos', 'polls'])
-                ->inMonth($startOfGridUtc, $endOfGridUtc)
-                ->where(function ($query) use ($role) {
-                    $query->whereHas('roles', function ($query) use ($role) {
-                        $query->where('role_id', $role->id)
+        } elseif (request()->graphic) {
+            // ?graphic=1 renders the month itself (role/partials/calendar-graphic), so it keeps the
+            // full month's events with everything a card shows.
+            if ($role->isCurator()) {
+                $events = Event::with(['roles', 'parts', 'approvedVideos', 'approvedPhotos', 'approvedComments.user', 'polls' => fn ($q) => $q->withCount('votes')])->withCount(['approvedVideos', 'approvedComments', 'approvedPhotos', 'polls'])
+                    ->inMonth($startOfGridUtc, $endOfGridUtc)
+                    ->whereIn('id', function ($query) use ($role) {
+                        $query->select('event_id')
+                            ->from('event_role')
+                            ->where('role_id', $role->id)
                             ->where('is_accepted', true);
-                    });
-                })
-                ->when(! $isMemberOrAdmin, fn ($q) => $q->where('is_draft', false)->where('is_cancelled', false));
+                    })
+                    ->when(! $isMemberOrAdmin, fn ($q) => $q->where('is_draft', false)->where('is_cancelled', false))
+                    ->orderBy('starts_at')
+                    ->get();
+            } else {
+                $events = Event::with(['roles', 'parts', 'approvedVideos', 'approvedPhotos', 'approvedComments.user', 'polls' => fn ($q) => $q->withCount('votes')])->withCount(['approvedVideos', 'approvedComments', 'approvedPhotos', 'polls'])
+                    ->inMonth($startOfGridUtc, $endOfGridUtc)
+                    ->where(function ($query) use ($role) {
+                        $query->whereHas('roles', function ($query) use ($role) {
+                            $query->where('role_id', $role->id)
+                                ->where('is_accepted', true);
+                        });
+                    })
+                    ->when(! $isMemberOrAdmin, fn ($q) => $q->where('is_draft', false)->where('is_cancelled', false));
 
-            $events = $events->orderBy('starts_at')->get();
+                $events = $events->orderBy('starts_at')->get();
+            }
+        } else {
+            // Every other schedule page (the home, a sub-schedule, the embed). The calendar fetches
+            // its own months by Ajax, so $events feeds only the <noscript> list and the
+            // poll-confetti check in role/partials/calendar.blade.php - and it used to be the
+            // month's grid PLUS every recurring series the schedule ever created (inMonth() admits
+            // any days_of_week row), each with its parts, videos, photos, commented users and
+            // polls. A 3,000-event schedule spent 6.65 s on it. Now it is the next 50 public
+            // events, the list the noscript block shows; withCount('polls') still answers the
+            // confetti check.
+            $upcoming = $this->eventRepo->upcomingForGuest($role, $selectedGroup, 50);
+            $events = $upcoming->pluck('event');
         }
 
         // Fetch past non-recurring events only for graphic mode (otherwise loaded via Ajax)
@@ -2680,10 +2699,11 @@ class RoleController extends Controller
 
         // The schedule page's next public events, the same for every visitor: its <title> says
         // "Upcoming Events" while there are any, and its meta description names the first few.
-        // See AppGuestLayout::$upcoming. Only the schedule page itself (home or sub-schedule) looks.
-        $upcoming = ($view === 'role/show-guest' && ! $event)
-            ? $this->eventRepo->upcomingForGuest($role, $selectedGroup, 50)
-            : null;
+        // See AppGuestLayout::$upcoming. Only the schedule page itself (home or sub-schedule) looks,
+        // and outside ?graphic=1 the lookup above has already made it.
+        if ($upcoming === null && $view === 'role/show-guest' && ! $event) {
+            $upcoming = $this->eventRepo->upcomingForGuest($role, $selectedGroup, 50);
+        }
 
         $response = response()
             ->view($view, compact(
@@ -3000,6 +3020,10 @@ class RoleController extends Controller
         // language the string turns out not to be written in is harmless.
         $dirLang = $event->creatorRole?->language_code ?: $displayLang;
 
+        // Event::cardImageFields(), as the month payload uses, so a card loaded by "load more"
+        // renders exactly like the same card loaded with the month.
+        $imageFields = $event->cardImageFields();
+
         $data = [
             'id' => UrlUtils::encodeId($event->id),
             'group_id' => $groupId ? UrlUtils::encodeId($groupId) : null,
@@ -3016,7 +3040,7 @@ class RoleController extends Controller
             'local_date' => $event->starts_at ? $event->getStartDateTime(null, true)->format('Y-m-d') : null,
             'utc_date' => $event->starts_at ? $event->getStartDateTime(null, false)->format('Y-m-d') : null,
             'guest_url' => $event->getGuestUrl($subdomain ?? '', ''),
-            'image_url' => $event->getImageUrl(),
+            ...$imageFields,
             'can_edit' => auth()->user() && auth()->user()->canEditEvent($event),
             'edit_url' => auth()->user() && auth()->user()->canEditEvent($event)
                 ? ($role ? app_url(route('event.edit', ['subdomain' => $role->subdomain, 'hash' => UrlUtils::encodeId($event->id)], false)) : app_url(route('event.edit_admin', ['hash' => UrlUtils::encodeId($event->id)], false)))
@@ -3034,13 +3058,11 @@ class RoleController extends Controller
             'video_count' => $event->approved_videos_count ?? 0,
             'comment_count' => $event->approved_comments_count ?? 0,
             'photo_count' => $event->approved_photos_count ?? 0,
-            'venue_profile_image' => $event->venue?->profile_image_url ?: null,
-            'venue_header_image' => ($event->venue && $event->venue->getAttributes()['header_image'] && ! in_array($event->venue->getAttributes()['header_image'], ['none', 'logos'], true)) ? $event->venue->getHeaderImageUrlAttribute($event->venue->getAttributes()['header_image']) : null,
             'talent' => $event->roles->filter(fn ($r) => $r->type === 'talent' && $r->isClaimed())->map(fn ($r) => [
                 'name' => $r->name,
                 'dir' => content_dir_for_language($r->name, $r->language_code ?: $dirLang),
-                'profile_image' => $r->profile_image_url ?: null,
-                'header_image' => ($r->getAttributes()['header_image'] && ! in_array($r->getAttributes()['header_image'], ['none', 'logos'], true)) ? $r->getHeaderImageUrlAttribute($r->getAttributes()['header_image']) : null,
+                'profile_image' => $r->getProfileImageUrl(ImageUtils::VARIANT_WIDTH) ?: null,
+                'header_image' => $r->headerImageUrl(960),
                 'guest_url' => ($role && $r->subdomain === $role->subdomain) ? null : ($r->getGuestUrl() ?: null),
             ])->values()->toArray(),
             'videos' => $event->approvedVideos->take(3)->map(fn ($v) => [
@@ -3058,15 +3080,13 @@ class RoleController extends Controller
         ];
 
         if ($event->isPasswordProtected()) {
+            $data = array_merge($data, array_fill_keys(array_keys($imageFields), null));
             $data['venue_name'] = null;
             $data['venue_dir'] = null;
-            $data['venue_profile_image'] = null;
-            $data['venue_header_image'] = null;
             $data['talent'] = [];
             $data['videos'] = [];
             $data['recent_comments'] = [];
             $data['parts'] = [];
-            $data['image_url'] = null;
         }
 
         return $data;
