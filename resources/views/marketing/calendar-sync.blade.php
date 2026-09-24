@@ -4,53 +4,9 @@
     <x-slot name="breadcrumbTitle">Calendar Sync</x-slot>
 
     <x-slot name="structuredData">
-    <script type="application/ld+json" {!! nonce_attr() !!}>
-    {
-        "@context": "https://schema.org",
-        "@type": "Service",
-        "name": "Event Schedule Calendar Sync",
-        "description": "Two-way calendar sync with Google Calendar, Outlook and Microsoft 365, or any CalDAV server. Events leave when you save them, and edits made in your calendar app come back. Free on every plan.",
-        "provider": {
-            "@type": "Organization",
-            "name": "Event Schedule",
-            "url": "{{ config('app.url') }}"
-        },
-        "serviceType": "Calendar Synchronization"
-    }
-    </script>
-    <script type="application/ld+json" {!! nonce_attr() !!}>
-    {
-        "@context": "https://schema.org",
-        "@type": "SoftwareApplication",
-        "name": "Event Schedule Calendar Sync",
-        "applicationCategory": "BusinessApplication",
-        "applicationSubCategory": "Calendar Synchronization Software",
-        "operatingSystem": "Web",
-        "description": "Two-way calendar sync with Google Calendar, Outlook and Microsoft 365, or any CalDAV server. Push events out, pull events in, or both. Guests get Add to Calendar links and a live iCal feed they can subscribe to. Free on every plan.",
-        "offers": {
-            "@type": "Offer",
-            "price": "0",
-            "priceCurrency": "{{ platform_currency() }}",
-            "description": "Included free on every plan"
-        },
-        "featureList": [
-            "Google Calendar two-way sync with webhook push notifications",
-            "Outlook and Microsoft 365 two-way sync over the Microsoft Graph API",
-            "CalDAV two-way sync with any CalDAV server",
-            "Per-schedule direction: out, back, or both",
-            "Choose which calendar each schedule syncs with",
-            "Per-schedule policy for events deleted in the connected calendar",
-            "Calendar description template for outbound entries",
-            "Add to Calendar buttons for Google Calendar, Apple Calendar and Outlook on event pages",
-            "Live iCal feed of a whole schedule, offered to guests in the Add to Calendar menu"
-        ],
-        "url": "{{ url()->current() }}",
-        "provider": {
-            "@type": "Organization",
-            "name": "Event Schedule"
-        }
-    }
-    </script>
+    <x-seo.webpage
+        name="Event Schedule Calendar Sync"
+        description="Two-way calendar sync with Google Calendar, Outlook and Microsoft 365, or any CalDAV server. Events leave when you save them, and edits made in your calendar app come back. Free on every plan." />
     </x-slot>
 
     {{-- Motion gate: hidden pre-reveal states only apply when this class is present,

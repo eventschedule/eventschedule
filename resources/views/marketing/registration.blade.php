@@ -23,34 +23,9 @@
          closes at the end of the event's day in the schedule's timezone. --}}
 
     <x-slot name="structuredData">
-    <script type="application/ld+json" {!! nonce_attr() !!}>
-    {
-        "@context": "https://schema.org",
-        "@type": "SoftwareApplication",
-        "name": "Event Schedule - Free Event Registration and RSVP",
-        "description": "Free event registration with no payment step: a capacity for each date, a waitlist when it fills, a confirmation email with a QR code, self-cancellation, door scanning and an embeddable form, on every plan.",
-        "applicationCategory": "BusinessApplication",
-        "operatingSystem": "Web",
-        "featureList": [
-            "Free registration and RSVP, unlimited on every plan",
-            "A capacity for each date, counted separately on a recurring event",
-            "A waitlist on a full date that offers a freed place to one person at a time",
-            "A confirmation email and ticket page with a QR code for every registration",
-            "Registrants cancel from their own ticket page, which frees the place",
-            "Per-guest registration, so each person in a party gets their own QR code",
-            "An optional phone number, required or not",
-            "An embeddable registration form for your own website",
-            "QR scanning at the door from any phone",
-            "Custom registration questions and the live check-in dashboard, on the Pro plan"
-        ],
-        "offers": {
-            "@type": "Offer",
-            "price": "0",
-            "priceCurrency": "{{ platform_currency() }}",
-            "description": "Free registration is unlimited on every plan, including Free"
-        }
-    }
-    </script>
+    <x-seo.webpage
+        name="Event Schedule - Free Event Registration and RSVP"
+        description="Free event registration with no payment step: a capacity for each date, a waitlist when it fills, a confirmation email with a QR code, self-cancellation, door scanning and an embeddable form, on every plan." />
     <script type="application/ld+json" {!! nonce_attr() !!}>
     {
         "@context": "https://schema.org",

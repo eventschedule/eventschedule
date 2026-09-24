@@ -67,9 +67,11 @@ class GoogleWalletMarketingClaimTest extends TestCase
 
     public function test_the_structured_data_parses_either_way(): void
     {
-        // The featureList lines are gated by an @if inside the JSON itself, the one place a stray
-        // comma would silently invalidate the whole block. MarketingStructuredDataTest renders
-        // these pages too, but only ever in the default state, which is off.
+        // These two pages gated a Google Wallet line with an @if inside their own product node's
+        // featureList, the one place a stray comma would silently invalidate the whole block.
+        // The per-page product nodes are gone (the layout emits one, SeoUtils::softwareApplication(),
+        // with no wallet claim), so what is left to hold is that every block still decodes in both
+        // states. MarketingStructuredDataTest renders these pages too, but only ever with it off.
         foreach ([false, true] as $live) {
             $live ? $this->walletOn() : $this->walletOff();
             $state = $live ? 'on' : 'off';
@@ -78,22 +80,9 @@ class GoogleWalletMarketingClaimTest extends TestCase
                 $blocks = $this->jsonLdBlocks($this->get(route($name))->assertOk()->getContent());
                 $this->assertNotEmpty($blocks, "{$name} emits no JSON-LD at all");
 
-                $features = [];
                 foreach ($blocks as $i => $block) {
                     $this->assertIsArray($block, "JSON-LD block {$i} on {$name} did not decode with wallet {$state}");
-                    $features = array_merge($features, $block['featureList'] ?? []);
                 }
-
-                $walletFeatures = array_filter(
-                    $features,
-                    fn ($feature) => str_contains(strtolower((string) $feature), 'google wallet')
-                );
-
-                $this->assertSame(
-                    $live,
-                    $walletFeatures !== [],
-                    "{$name}'s featureList does not follow the gate with wallet {$state}"
-                );
             }
         }
     }

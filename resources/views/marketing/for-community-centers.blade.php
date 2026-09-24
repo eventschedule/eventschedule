@@ -4,65 +4,11 @@
     <x-slot name="breadcrumbTitle">For Community Centers</x-slot>
 
     <x-slot name="structuredData">
-    <script type="application/ld+json" {!! nonce_attr() !!}>
-    {
-        "@context": "https://schema.org",
-        "@type": "Service",
-        "name": "Event Schedule for Community Centers",
-        "description": "The lobby timetable, online: recurring programs, free sign-ups with a capacity, hall-hire requests you approve, a live calendar feed and email to members who sign up. Free forever.",
-        "provider": {
-            "@type": "Organization",
-            "name": "Event Schedule",
-            "url": "{{ config('app.url') }}"
-        },
-        "serviceType": "Event Management",
-        "audience": {
-            "@type": "Audience",
-            "audienceType": "Community Centers & Recreation Facilities"
-        }
-    }
-    </script>
-    <!-- Product Schema for Rich Snippets -->
-    <script type="application/ld+json" {!! nonce_attr() !!}>
-    {
-        "@context": "https://schema.org",
-        "@type": "SoftwareApplication",
-        "name": "Event Schedule for Community Centers",
-        "applicationCategory": "BusinessApplication",
-        "applicationSubCategory": "Community Center Event Management Software",
-        "operatingSystem": "Web",
-        "description": "Every program the center runs, on one calendar with its own link. Embed it, sync it, print its QR code, let members subscribe to it, and email the people who follow it. Free forever.",
-        "offers": {
-            "@type": "Offer",
-            "price": "0",
-            "priceCurrency": "{{ platform_currency() }}",
-            "description": "Free forever"
-        },
-        "featureList": [
-            "Recurring weekly programs with date exceptions for the weeks they skip",
-            "Sub-schedules that group and color-code the strands, each with its own link",
-            "Free RSVP sign-up with an optional capacity, counted afresh for every date",
-            "Hall-hire requests that stay pending until you accept them",
-            "Public program calendar with an embeddable iframe",
-            "Two-way Google, Outlook and CalDAV calendar sync, plus a live calendar feed members subscribe to from any event page or the sign-up panel",
-            "A downloadable QR code that opens your calendar",
-            "A short digest of the center's own new dates to confirmed email subscribers, at most one every 72 hours",
-            "Direct newsletters to the people who follow the center",
-            "Ticketed classes paid through Stripe, PayPal, Invoice Ninja, a payment link or cash, with zero platform fees on every plan (charging for a place needs Pro)",
-            "Refunds from the Sales page, sent back through Stripe or PayPal in full or in part",
-            "An interest list for a class announced before booking opens",
-            "QR ticket scanning at the door on every plan",
-            "Member photos and comments on events, held in an approval queue (25 photos on the free plan)",
-            "Online events with the link people join on"
-        ],
-        "url": "{{ url()->current() }}",
-        "keywords": "community center calendar, recreation program schedule, facility booking software, community events, free community center scheduling",
-        "provider": {
-            "@type": "Organization",
-            "name": "Event Schedule"
-        }
-    }
-    </script>
+    <x-seo.webpage
+        name="Event Schedule for Community Centers"
+        description="The lobby timetable, online: recurring programs, free sign-ups with a capacity, hall-hire requests you approve, a live calendar feed and email to members who sign up. Free forever."
+        audience="Community Centers & Recreation Facilities"
+        keywords="community center calendar, recreation program schedule, facility booking software, community events, free community center scheduling" />
     </x-slot>
 
     {{-- Motion gate: hidden pre-reveal states only apply when this class is present,

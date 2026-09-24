@@ -4,39 +4,9 @@
     <x-slot name="breadcrumbTitle">Invoice Ninja</x-slot>
 
     <x-slot name="structuredData">
-    <script type="application/ld+json" {!! nonce_attr() !!}>
-    {
-        "@context": "https://schema.org",
-        "@type": "SoftwareApplication",
-        "name": "Event Schedule - Invoice Ninja Integration",
-        "applicationCategory": "BusinessApplication",
-        "applicationSubCategory": "Event Ticketing and Invoicing",
-        "operatingSystem": "Web",
-        "description": "Sell tickets in Event Schedule and the entry lands in Invoice Ninja: a client matched by email and currency, a line item per ticket type, discounts as negative lines, the QR ticket printed on the invoice, and the payment reconciled to the cent.",
-        "featureList": [
-            "An invoice created in your Invoice Ninja company for every ticket purchase",
-            "Clients matched by email address and currency, or created when new",
-            "A line item per ticket type, with promo codes, volume discounts and gift cards as negative lines",
-            "QR code tickets printed in the invoice, so the invoice is the ticket",
-            "Payment tracking by webhook, with the amount reconciled to the cent before a sale is marked paid",
-            "Two checkout modes: an invoice per purchase, or an Invoice Ninja payment link with grouped invoices",
-            "Invoices for corporate buyers who need paperwork for expenses",
-            "104 currency codes mapped to Invoice Ninja currencies",
-            "Works with a selfhosted Invoice Ninja install or with invoicing.co",
-            "Zero platform fees on ticket sales"
-        ],
-        "offers": {
-            "@type": "Offer",
-            "price": "0",
-            "priceCurrency": "{{ platform_currency() }}"
-        },
-        "url": "{{ url()->current() }}",
-        "provider": {
-            "@type": "Organization",
-            "name": "Event Schedule"
-        }
-    }
-    </script>
+    <x-seo.webpage
+        name="Event Schedule - Invoice Ninja Integration"
+        description="Sell tickets in Event Schedule and the entry lands in Invoice Ninja: a client matched by email and currency, a line item per ticket type, discounts as negative lines, the QR ticket printed on the invoice, and the payment reconciled to the cent." />
     </x-slot>
 
     {{-- Motion gate: hidden pre-reveal states only apply when this class is present,

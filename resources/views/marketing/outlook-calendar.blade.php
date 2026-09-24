@@ -4,37 +4,9 @@
     <x-slot name="breadcrumbTitle">Outlook Calendar</x-slot>
 
     <x-slot name="structuredData">
-    <script type="application/ld+json" {!! nonce_attr() !!}>
-    {
-        "@context": "https://schema.org",
-        "@type": "SoftwareApplication",
-        "name": "Event Schedule - Outlook Calendar Sync",
-        "applicationCategory": "BusinessApplication",
-        "operatingSystem": "Web",
-        "description": "Two-way Outlook and Microsoft 365 calendar sync, free on every plan, with Graph change notifications, a delete policy and optional Teams meetings.",
-        "featureList": [
-            "Two-way Outlook Calendar sync",
-            "Microsoft 365 and personal Microsoft account support",
-            "OAuth sign-in with Microsoft, with automatic token refresh",
-            "Microsoft Graph change notifications, with a fifteen-minute polling fallback",
-            "Per-schedule sync direction: to Outlook, from Outlook, both ways or off",
-            "Optional Microsoft Teams meetings for online events",
-            "Per-schedule policy for events deleted in Outlook",
-            "A live iCal feed guests can subscribe to from Outlook, offered on your event pages"
-        ],
-        "offers": {
-            "@type": "Offer",
-            "price": "0",
-            "priceCurrency": "{{ platform_currency() }}",
-            "description": "Free on every plan"
-        },
-        "url": "{{ url()->current() }}",
-        "provider": {
-            "@type": "Organization",
-            "name": "Event Schedule"
-        }
-    }
-    </script>
+    <x-seo.webpage
+        name="Event Schedule - Outlook Calendar Sync"
+        description="Two-way Outlook and Microsoft 365 calendar sync, free on every plan, with Graph change notifications, a delete policy and optional Teams meetings." />
     </x-slot>
 
     {{-- Motion gate: hidden pre-reveal states only apply when this class is present,

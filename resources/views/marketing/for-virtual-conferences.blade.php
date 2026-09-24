@@ -4,65 +4,11 @@
     <x-slot name="breadcrumbTitle">For Virtual Conferences</x-slot>
 
     <x-slot name="structuredData">
-    <script type="application/ld+json" {!! nonce_attr() !!}>
-    {
-        "@context": "https://schema.org",
-        "@type": "Service",
-        "name": "Event Schedule for Virtual Conferences",
-        "description": "Run a virtual conference day as one event with its running order inside it: every session is a part with its own start and end time, published on one link with one join link and zero platform fees.",
-        "provider": {
-            "@type": "Organization",
-            "name": "Event Schedule",
-            "url": "{{ config('app.url') }}"
-        },
-        "serviceType": "Event Management",
-        "audience": {
-            "@type": "Audience",
-            "audienceType": "Virtual Conference Organizers"
-        }
-    }
-    </script>
-    <!-- Product Schema for Rich Snippets -->
-    <script type="application/ld+json" {!! nonce_attr() !!}>
-    {
-        "@context": "https://schema.org",
-        "@type": "SoftwareApplication",
-        "name": "Event Schedule for Virtual Conferences",
-        "applicationCategory": "BusinessApplication",
-        "applicationSubCategory": "Virtual Conference Scheduling Software",
-        "operatingSystem": "Web",
-        "description": "Enter a conference day as one event and its sessions as parts of the agenda, each with a name, a description and its own start and end time. The running order publishes on one link with one join link, and there are zero platform fees on tickets.",
-        "offers": {
-            "@type": "Offer",
-            "price": "0",
-            "priceCurrency": "{{ platform_currency() }}",
-            "description": "Free forever"
-        },
-        "featureList": [
-            "A running order inside each event: named parts with start and end times, reorderable",
-            "Per-part descriptions in markdown, with schedule-level switches for whether the agenda editor asks for times and descriptions",
-            "Agenda scanning that reads a programme from a photo or text and fills in the parts (Enterprise)",
-            "One join link per event for Zoom, Microsoft Teams, Google Meet, YouTube Live or any platform",
-            "Named ticket types with their own prices, quantities and sales windows (charging for a ticket is on Pro; free registration is unlimited everywhere)",
-            "Zero platform fees on ticket sales through your own Stripe or PayPal account",
-            "Refunds in full or in part from the Sales page, sent back through Stripe or PayPal",
-            "An optional, free Tell me when tickets go on sale list on each event, with a count of who is waiting",
-            "Free registration with a capacity limit, counted per date",
-            "Two-way Google, Outlook and CalDAV calendar sync, plus an iCal download and a live calendar feed of the whole schedule",
-            "Photos, video and comments that attach to the session they are about, behind an approval queue",
-            "Newsletters you write and send to the people who follow your schedule",
-            "Embeddable calendar for the website you already have",
-            "Open source, with a selfhosted option"
-        ],
-        "url": "{{ url()->current() }}",
-        "keywords": "virtual conference platform, online conference scheduling, conference agenda, virtual summit, conference ticketing",
-        "screenshot": "{{ asset('images/social/for-virtual-conferences.jpg') }}",
-        "provider": {
-            "@type": "Organization",
-            "name": "Event Schedule"
-        }
-    }
-    </script>
+    <x-seo.webpage
+        name="Event Schedule for Virtual Conferences"
+        description="Run a virtual conference day as one event with its running order inside it: every session is a part with its own start and end time, published on one link with one join link and zero platform fees."
+        audience="Virtual Conference Organizers"
+        keywords="virtual conference platform, online conference scheduling, conference agenda, virtual summit, conference ticketing" />
     <!-- HowTo Schema for Rich Snippets -->
     <script type="application/ld+json" {!! nonce_attr() !!}>
     {

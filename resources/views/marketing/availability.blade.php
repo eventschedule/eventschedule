@@ -4,37 +4,9 @@
     <x-slot name="breadcrumbTitle">Availability</x-slot>
 
     <x-slot name="structuredData">
-    <script type="application/ld+json" {!! nonce_attr() !!}>
-    {
-        "@context": "https://schema.org",
-        "@type": "SoftwareApplication",
-        "name": "Event Schedule Availability Management",
-        "applicationCategory": "BusinessApplication",
-        "applicationSubCategory": "Scheduling Software",
-        "operatingSystem": "Web",
-        "description": "Mark whole dates as unavailable on a talent schedule. Each team member keeps their own dates, and the shared Schedule tab shows who is out on which day. Availability is never shown publicly.",
-        "offers": {
-            "@type": "Offer",
-            "price": "0",
-            "priceCurrency": "{{ platform_currency() }}",
-            "description": "Availability management is an Enterprise plan feature on the hosted platform and is included on selfhosted deployments"
-        },
-        "featureList": [
-            "Month calendar where every date starts available",
-            "Click a date to mark it unavailable, click again to clear it",
-            "Whole dates only, with no times or reasons stored",
-            "One set of dates per team member, editable only by that member",
-            "Crossed dates surface on the shared Schedule tab with the names of who is out",
-            "Never shown on the public schedule page, the embed or the calendar feed",
-            "Talent schedules on the Enterprise plan"
-        ],
-        "url": "{{ url()->current() }}",
-        "provider": {
-            "@type": "Organization",
-            "name": "Event Schedule"
-        }
-    }
-    </script>
+    <x-seo.webpage
+        name="Event Schedule Availability Management"
+        description="Mark whole dates as unavailable on a talent schedule. Each team member keeps their own dates, and the shared Schedule tab shows who is out on which day. Availability is never shown publicly." />
     <script type="application/ld+json" {!! nonce_attr() !!}>
     {
         "@context": "https://schema.org",

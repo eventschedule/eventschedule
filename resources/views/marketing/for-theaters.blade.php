@@ -4,63 +4,11 @@
     <x-slot name="breadcrumbTitle">For Theaters</x-slot>
 
     <x-slot name="structuredData">
-    <script type="application/ld+json" {!! nonce_attr() !!}>
-    {
-        "@context": "https://schema.org",
-        "@type": "Service",
-        "name": "Event Schedule for Theaters",
-        "description": "Set a production up once as a run with a day-of-week pattern, dark days and a closing performance, then sell the whole run from one link with zero platform fees.",
-        "provider": {
-            "@type": "Organization",
-            "name": "Event Schedule",
-            "url": "{{ config('app.url') }}"
-        },
-        "serviceType": "Event Management",
-        "audience": {
-            "@type": "Audience",
-            "audienceType": "Theaters"
-        }
-    }
-    </script>
-    <!-- Product Schema for Rich Snippets -->
-    <script type="application/ld+json" {!! nonce_attr() !!}>
-    {
-        "@context": "https://schema.org",
-        "@type": "SoftwareApplication",
-        "name": "Event Schedule for Theaters",
-        "applicationCategory": "BusinessApplication",
-        "applicationSubCategory": "Theater Management Software",
-        "operatingSystem": "Web",
-        "offers": {
-            "@type": "Offer",
-            "price": "0",
-            "priceCurrency": "{{ platform_currency() }}",
-            "description": "Free forever"
-        },
-        "featureList": [
-            "Runs set up once with a day-of-week pattern, dark days and a closing performance",
-            "Recurrences that end on a date or after a set number of performances",
-            "Season passes valid for every performance of a run, once each",
-            "Named ticket types with their own prices, quantities and sales windows",
-            "Custom questions collected at checkout",
-            "QR check-in at the door on every plan, with a live check-in dashboard on Pro",
-            "Zero platform fees on ticket sales, paid through Stripe, PayPal, Invoice Ninja, Payfast, a payment link or cash",
-            "Reserved seating on Enterprise, with best-available seats and a box office console",
-            "An optional 'Tell me when tickets go on sale' list on every performance",
-            "Full and partial refunds through Stripe and PayPal from the Sales page",
-            "Sub-schedules that keep mainstage, studio and family programming apart",
-            "Direct newsletters with open and click rates",
-            "Two-way Google, Outlook and CalDAV calendar sync",
-            "Embeddable calendar for the website you already have"
-        ],
-        "url": "{{ url()->current() }}",
-        "keywords": "theater calendar, show run scheduling, season pass, theater ticketing, performance dates, matinee scheduling",
-        "provider": {
-            "@type": "Organization",
-            "name": "Event Schedule"
-        }
-    }
-    </script>
+    <x-seo.webpage
+        name="Event Schedule for Theaters"
+        description="Set a production up once as a run with a day-of-week pattern, dark days and a closing performance, then sell the whole run from one link with zero platform fees."
+        audience="Theaters"
+        keywords="theater calendar, show run scheduling, season pass, theater ticketing, performance dates, matinee scheduling" />
     <!-- HowTo Schema for Rich Snippets -->
     <script type="application/ld+json" {!! nonce_attr() !!}>
     {

@@ -4,42 +4,9 @@
     <x-slot name="breadcrumbTitle">White-Label SaaS</x-slot>
 
     <x-slot name="structuredData">
-    <script type="application/ld+json" {!! nonce_attr() !!}>
-    {
-        "@context": "https://schema.org",
-        "@type": "SoftwareApplication",
-        "@id": "{{ url()->current() }}#software",
-        "name": "Event Schedule White-Label Ticketing Platform",
-        "url": "{{ url()->current() }}",
-        "description": "Free, open source white-label ticketing platform with multi-tenant subscription billing built in. Selfhost it, set your own prices, and keep 100% of revenue.",
-        "applicationCategory": "BusinessApplication",
-        "applicationSubCategory": "Event Ticketing Software",
-        "operatingSystem": "Linux",
-        "downloadUrl": "https://github.com/eventschedule/eventschedule",
-        "offers": {
-            "@type": "Offer",
-            "price": "0",
-            "priceCurrency": "{{ platform_currency() }}",
-            "description": "Free and open source under the AAL license"
-        },
-        "featureList": [
-            "Multi-tenant customer subdomains",
-            "Stripe subscription billing",
-            "Free, Pro, and Enterprise plan tiers with feature gating",
-            "Configurable trial length",
-            "White-label branding, bar one small attribution link",
-            "Ticketing with QR check-in",
-            "Ticket checkout through Stripe Connect or each customer's own PayPal account, with refunds",
-            "Optional operator revenue from ads, network promotions and an accommodation affiliate",
-            "REST API and webhooks"
-        ],
-        "provider": {
-            "@type": "Organization",
-            "name": "Event Schedule",
-            "url": "{{ config('app.url') }}"
-        }
-    }
-    </script>
+    <x-seo.webpage
+        name="Event Schedule White-Label Ticketing Platform"
+        description="Free, open source white-label ticketing platform with multi-tenant subscription billing built in. Selfhost it, set your own prices, and keep 100% of revenue." />
     @php
         $howToSteps = [
             ['name' => 'Deploy the platform', 'text' => 'Install Event Schedule on your own server with Docker or the Softaculous one-click installer, then point wildcard DNS at it so every customer can get a subdomain.'],

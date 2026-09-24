@@ -4,39 +4,9 @@
     <x-slot name="breadcrumbTitle">Event Polls</x-slot>
 
     <x-slot name="structuredData">
-    <script type="application/ld+json" {!! nonce_attr() !!}>
-    {
-        "@context": "https://schema.org",
-        "@type": "SoftwareApplication",
-        "name": "Event Schedule Event Polls",
-        "applicationCategory": "BusinessApplication",
-        "applicationSubCategory": "Audience Engagement Software",
-        "operatingSystem": "Web",
-        "description": "Add a poll to any event: a question and between two and ten fixed choices. Signed-in guests mark one, and the count comes back with their vote. Up to five polls per event on the Pro plan.",
-        "offers": {
-            "@type": "Offer",
-            "price": "0",
-            "priceCurrency": "{{ platform_currency() }}",
-            "description": "Free to sign up; polls are included on the Pro plan"
-        },
-        "featureList": [
-            "A question with between 2 and 10 fixed choices",
-            "Up to 5 polls on one event",
-            "One vote per signed-in guest, per poll, per date",
-            "Results hidden until the guest votes",
-            "Close a poll to publish the count to everyone",
-            "Guest write-in options with an optional approval queue",
-            "A separate count for every date of a recurring event",
-            "Full-width voting buttons on phones",
-            "Counts and shares only, never a list of who voted for what"
-        ],
-        "url": "{{ url()->current() }}",
-        "provider": {
-            "@type": "Organization",
-            "name": "Event Schedule"
-        }
-    }
-    </script>
+    <x-seo.webpage
+        name="Event Schedule Event Polls"
+        description="Add a poll to any event: a question and between two and ten fixed choices. Signed-in guests mark one, and the count comes back with their vote. Up to five polls per event on the Pro plan." />
     </x-slot>
 
     {{-- Motion gate: hidden pre-reveal states only apply when this class is present,

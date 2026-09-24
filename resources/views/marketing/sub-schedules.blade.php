@@ -4,43 +4,10 @@
     <x-slot name="breadcrumbTitle">Sub-Schedules</x-slot>
 
     <x-slot name="structuredData">
-    <script type="application/ld+json" {!! nonce_attr() !!}>
-    {
-        "@context": "https://schema.org",
-        "@type": "SoftwareApplication",
-        "name": "Event Schedule - Sub-Schedules",
-        "applicationCategory": "BusinessApplication",
-        "applicationSubCategory": "Event Management Software",
-        "operatingSystem": "Web",
-        "description": "Sort one schedule into named sections. A sub-schedule carries a name, an English name, a URL slug and a colour, and gives visitors a filter and a direct link. It organises and colour-codes; it cannot hide an event. Free on every plan.",
-        "featureList": [
-            "Unlimited sub-schedules on every plan",
-            "A name, an English name, a URL slug and a colour per sub-schedule",
-            "A colour from a fixed palette of fourteen, shown as a dot beside the event",
-            "Its own URL, so you can link straight to one section of your schedule",
-            "An embed that opens already filtered to one sub-schedule",
-            "Curator event sources filed under a chosen sub-schedule as they arrive",
-            "A schedule filter for visitors, with an event count beside each name scoped to the view",
-            "A shareable schedule query parameter that survives a click into an event",
-            "One sub-schedule per event, per schedule",
-            "A newsletter segment built from one sub-schedule's ticket holders and RSVPs",
-            "Passes that can be scoped to a single sub-schedule on the Pro plan",
-            "Full sub-schedule CRUD through the REST API on the Pro plan"
-        ],
-        "offers": {
-            "@type": "Offer",
-            "price": "0",
-            "priceCurrency": "{{ platform_currency() }}",
-            "description": "Free forever"
-        },
-        "url": "{{ url()->current() }}",
-        "keywords": "sub-schedules, event categories, filter events, schedule sections, colour coded calendar",
-        "provider": {
-            "@type": "Organization",
-            "name": "Event Schedule"
-        }
-    }
-    </script>
+    <x-seo.webpage
+        name="Event Schedule - Sub-Schedules"
+        description="Sort one schedule into named sections. A sub-schedule carries a name, an English name, a URL slug and a colour, and gives visitors a filter and a direct link. It organises and colour-codes; it cannot hide an event. Free on every plan."
+        keywords="sub-schedules, event categories, filter events, schedule sections, colour coded calendar" />
     </x-slot>
 
     {{-- Motion gate: hidden pre-reveal states only apply when this class is present,

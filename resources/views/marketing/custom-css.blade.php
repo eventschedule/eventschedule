@@ -4,32 +4,9 @@
     <x-slot name="breadcrumbTitle">Custom CSS</x-slot>
 
     <x-slot name="structuredData">
-    <script type="application/ld+json" {!! nonce_attr() !!}>
-    {
-        "@context": "https://schema.org",
-        "@type": "SoftwareApplication",
-        "name": "Event Schedule - Custom CSS",
-        "description": "Add your own CSS to your schedule page, event pages and embeds. Your rules are written into the same stylesheet as the built-in styles, immediately after them, so a tie in the cascade goes to you.",
-        "applicationCategory": "BusinessApplication",
-        "operatingSystem": ["Web", "Android", "iOS"],
-        "featureList": [
-            "Write real CSS against your public schedule pages",
-            "Your rules are emitted after the built-in styles in the same stylesheet",
-            "10,000 characters per schedule",
-            "Sanitized on save: script hooks, @import, @font-face and external url() are stripped",
-            "No property allowlist, so modern CSS passes through untouched",
-            "Applies to the schedule page, event pages, the embedded calendar and the ticket widget",
-            "Layers on top of the free visual styling settings",
-            "Included on every schedule in a selfhosted install"
-        ],
-        "offers": {
-            "@type": "Offer",
-            "price": "{{ $proMonthly }}",
-            "priceCurrency": "{{ platform_currency() }}",
-            "description": "Available on Pro plan"
-        }
-    }
-    </script>
+    <x-seo.webpage
+        name="Event Schedule - Custom CSS"
+        description="Add your own CSS to your schedule page, event pages and embeds. Your rules are written into the same stylesheet as the built-in styles, immediately after them, so a tie in the cascade goes to you." />
     </x-slot>
 
     {{-- Motion gate: hidden pre-reveal states only apply when this class is present,

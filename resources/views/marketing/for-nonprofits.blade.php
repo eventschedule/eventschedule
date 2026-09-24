@@ -4,63 +4,11 @@
     <x-slot name="breadcrumbTitle">For Nonprofits</x-slot>
 
     <x-slot name="structuredData">
-    <script type="application/ld+json" {!! nonce_attr() !!}>
-    {
-        "@context": "https://schema.org",
-        "@type": "Service",
-        "name": "Event Schedule for Nonprofits",
-        "description": "Event management for charities, volunteer programs and campaign groups: free registration with a capacity for volunteer days, ticketed galas with zero platform fees, and one page supporters subscribe to.",
-        "provider": {
-            "@type": "Organization",
-            "name": "Event Schedule",
-            "url": "{{ config('app.url') }}"
-        },
-        "serviceType": "Event Management",
-        "audience": {
-            "@type": "Audience",
-            "audienceType": "Nonprofits, Charities, Volunteer Programs & Advocacy Groups"
-        }
-    }
-    </script>
-    <!-- Product Schema for Rich Snippets -->
-    <script type="application/ld+json" {!! nonce_attr() !!}>
-    {
-        "@context": "https://schema.org",
-        "@type": "SoftwareApplication",
-        "name": "Event Schedule for Nonprofits",
-        "applicationCategory": "BusinessApplication",
-        "applicationSubCategory": "Nonprofit Event Management Software",
-        "operatingSystem": "Web",
-        "offers": {
-            "@type": "Offer",
-            "price": "0",
-            "priceCurrency": "{{ platform_currency() }}",
-            "description": "Free forever"
-        },
-        "featureList": [
-            "Free registration with a capacity, counted separately for each date and unlimited on every plan",
-            "Recurring volunteer shifts with date exceptions for the weeks they do not run",
-            "Ticketed galas with several ticket types, on the Pro plan",
-            "Zero platform fees on ticket sales, paid into the organization's own Stripe or PayPal account, or by Invoice Ninja, a payment link or cash, on the Pro plan",
-            "Refunds from the Sales page, sent back through Stripe or PayPal in full or in part, on the Pro plan",
-            "Promo codes and add-ons for a gala, on the Pro plan",
-            "Sponsor and partner logos with tiers on the schedule page, on the Pro plan",
-            "A short digest of new events to confirmed email subscribers, at most one every 72 hours",
-            "Newsletters to supporters within a monthly allowance counted per recipient",
-            "An interest list for an event announced before tickets go on sale",
-            "Sub-schedules for programs, chapters and campaigns, each with its own link",
-            "Embeddable calendar for the organization's own website",
-            "Online events with the link people join on",
-            "Open source, and selfhostable on your own server"
-        ],
-        "url": "{{ url()->current() }}",
-        "keywords": "nonprofit event management, charity event ticketing, volunteer sign-up, fundraising gala tickets, nonprofit event calendar",
-        "provider": {
-            "@type": "Organization",
-            "name": "Event Schedule"
-        }
-    }
-    </script>
+    <x-seo.webpage
+        name="Event Schedule for Nonprofits"
+        description="Event management for charities, volunteer programs and campaign groups: free registration with a capacity for volunteer days, ticketed galas with zero platform fees, and one page supporters subscribe to."
+        audience="Nonprofits, Charities, Volunteer Programs & Advocacy Groups"
+        keywords="nonprofit event management, charity event ticketing, volunteer sign-up, fundraising gala tickets, nonprofit event calendar" />
     <!-- HowTo Schema for Rich Snippets -->
     <script type="application/ld+json" {!! nonce_attr() !!}>
     {

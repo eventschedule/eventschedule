@@ -4,65 +4,11 @@
     <x-slot name="breadcrumbTitle">For Breweries and Wineries</x-slot>
 
     <x-slot name="structuredData">
-    <script type="application/ld+json" {!! nonce_attr() !!}>
-    {
-        "@context": "https://schema.org",
-        "@type": "Service",
-        "name": "Event Schedule for Breweries & Wineries",
-        "description": "A taproom calendar of mostly free events - music, quizzes, visiting food trucks - with ticketing for the tours and tastings that need it.",
-        "provider": {
-            "@type": "Organization",
-            "name": "Event Schedule",
-            "url": "{{ config('app.url') }}"
-        },
-        "serviceType": "Event Management",
-        "audience": {
-            "@type": "Audience",
-            "audienceType": "Breweries, Wineries & Tasting Rooms"
-        }
-    }
-    </script>
-    <!-- Product Schema for Rich Snippets -->
-    <script type="application/ld+json" {!! nonce_attr() !!}>
-    {
-        "@context": "https://schema.org",
-        "@type": "SoftwareApplication",
-        "name": "Event Schedule for Breweries & Wineries",
-        "applicationCategory": "BusinessApplication",
-        "applicationSubCategory": "Taproom Event Scheduling Software",
-        "operatingSystem": "Web",
-        "offers": {
-            "@type": "Offer",
-            "price": "0",
-            "priceCurrency": "{{ platform_currency() }}",
-            "description": "Free forever"
-        },
-        "featureList": [
-            "A weekly taproom rhythm set up once as recurring events",
-            "Date exceptions for the weeks you are shut",
-            "Free registration with a capacity, for tours that are limited but not paid",
-            "Sub-schedules for music, tours and private hire, each with its own shareable link",
-            "Booking requests from bands and food trucks that want a date",
-            "Participants, so a visiting act is offered the date for their own schedule, or gets a page they can claim if they are not on Event Schedule yet",
-            "Ticketed tours and tastings with QR check-in, with paid ticket sales on Pro",
-            "Zero platform fees on ticket sales, paid through Stripe, PayPal, Invoice Ninja, a payment link or cash",
-            "Refunds from the Sales page, sent back through Stripe or PayPal in full or in part",
-            "An interest list for a tour or tasting before its tickets go on sale",
-            "A live calendar feed regulars subscribe to once, which picks up every new night",
-            "Followers you can email directly, within a monthly allowance counted per recipient",
-            "Two-way Google, Outlook and CalDAV calendar sync",
-            "Embeddable calendar for your own website",
-            "Draft events that stay members-only until a release date is confirmed",
-            "Online events with the link people join on"
-        ],
-        "url": "{{ url()->current() }}",
-        "keywords": "taproom calendar, brewery events, winery tasting schedule, brewery tour tickets, tasting room calendar, free brewery scheduling",
-        "provider": {
-            "@type": "Organization",
-            "name": "Event Schedule"
-        }
-    }
-    </script>
+    <x-seo.webpage
+        name="Event Schedule for Breweries & Wineries"
+        description="A taproom calendar of mostly free events - music, quizzes, visiting food trucks - with ticketing for the tours and tastings that need it."
+        audience="Breweries, Wineries & Tasting Rooms"
+        keywords="taproom calendar, brewery events, winery tasting schedule, brewery tour tickets, tasting room calendar, free brewery scheduling" />
     </x-slot>
 
     {{-- Motion gate: hidden pre-reveal states only apply when this class is present,

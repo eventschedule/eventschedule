@@ -4,41 +4,10 @@
     <x-slot name="breadcrumbTitle">Private Events</x-slot>
 
     <x-slot name="structuredData">
-    <script type="application/ld+json" {!! nonce_attr() !!}>
-    {
-        "@context": "https://schema.org",
-        "@type": "SoftwareApplication",
-        "name": "Event Schedule - Private Events",
-        "description": "Keep events members-only with Internal visibility, or hide them from your public schedule as Unlisted with an optional password. Control who sees what, per event.",
-        "applicationCategory": "BusinessApplication",
-        "applicationSubCategory": "Event Privacy Controls",
-        "operatingSystem": ["Web", "Android", "iOS"],
-        "featureList": [
-            "Four visibility states per event: Public, Draft, Internal and Unlisted",
-            "Internal events visible only to signed-in schedule members",
-            "Unlisted events reachable by direct link only",
-            "Optional password on an unlisted event",
-            "Hidden events excluded from the live iCal feed guests subscribe to, the RSS feed, the sitemap and discovery search",
-            "Hidden events excluded from the automatic subscriber digest, newsletter round-ups, generated graphics and promotions",
-            "Interest-list sign-ups taken on public events only, with visibility checked again before each email",
-            "A schedule-wide default visibility for new events",
-            "Draft and Internal events never pushed to a connected calendar; Unlisted events synced as private",
-            "Losing Enterprise keeps hidden events hidden rather than publishing them"
-        ],
-        "offers": {
-            "@type": "Offer",
-            "price": "0",
-            "priceCurrency": "{{ platform_currency() }}",
-            "description": "Free plan available. Internal and Unlisted visibility are included on the Enterprise plan."
-        },
-        "url": "{{ url()->current() }}",
-        "keywords": "private events, unlisted events, internal events, password protected event, members only events, event visibility",
-        "provider": {
-            "@type": "Organization",
-            "name": "Event Schedule"
-        }
-    }
-    </script>
+    <x-seo.webpage
+        name="Event Schedule - Private Events"
+        description="Keep events members-only with Internal visibility, or hide them from your public schedule as Unlisted with an optional password. Control who sees what, per event."
+        keywords="private events, unlisted events, internal events, password protected event, members only events, event visibility" />
     </x-slot>
 
     {{-- Motion gate: hidden pre-reveal states only apply when this class is present,

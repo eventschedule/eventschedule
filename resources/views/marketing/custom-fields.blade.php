@@ -4,42 +4,10 @@
     <x-slot name="breadcrumbTitle">Custom Fields</x-slot>
 
     <x-slot name="structuredData">
-    <script type="application/ld+json" {!! nonce_attr() !!}>
-    {
-        "@context": "https://schema.org",
-        "@type": "SoftwareApplication",
-        "name": "Event Schedule - Custom Fields",
-        "applicationCategory": "BusinessApplication",
-        "applicationSubCategory": "Event Registration Forms",
-        "operatingSystem": "Web",
-        "description": "Define your own questions and have them asked on ticket forms, registration forms and public event request forms, with the answers filed on the order, the ticket and the sales export.",
-        "featureList": [
-            "Six field types: text, long text, Yes/No, date, dropdown and multi-select",
-            "Ten fields per schedule, ten per event and ten per ticket type",
-            "Fields asked once per order or once per ticket, or once per guest in a party",
-            "Questions asked on the public event request form",
-            "Required fields enforced in the browser and on the server",
-            "Validation patterns with ready-made presets, a tester and a hint",
-            "Private fields kept off the public schedule",
-            "Answers on the request card, the sales table, the ticket and the CSV export",
-            "Field values available to graphic templates and URL patterns as {custom_1} to {custom_10}",
-            "Public dropdown and multi-select fields become filters on your guest calendar",
-            "Field names and dropdown options translated automatically"
-        ],
-        "offers": {
-            "@type": "Offer",
-            "price": "0",
-            "priceCurrency": "{{ platform_currency() }}",
-            "description": "Free plan available. Questions on a ticket type work on every plan; schedule and event custom fields are on the Pro plan."
-        },
-        "url": "{{ url()->current() }}",
-        "keywords": "custom fields, event registration form, attendee questions, checkout questions, event request form, dietary requirements, form validation",
-        "provider": {
-            "@type": "Organization",
-            "name": "Event Schedule"
-        }
-    }
-    </script>
+    <x-seo.webpage
+        name="Event Schedule - Custom Fields"
+        description="Define your own questions and have them asked on ticket forms, registration forms and public event request forms, with the answers filed on the order, the ticket and the sales export."
+        keywords="custom fields, event registration form, attendee questions, checkout questions, event request form, dietary requirements, form validation" />
     </x-slot>
 
     {{-- Motion gate: hidden pre-reveal states only apply when this class is present,

@@ -4,40 +4,9 @@
     <x-slot name="breadcrumbTitle">Allocated Seating</x-slot>
 
     <x-slot name="structuredData">
-    <script type="application/ld+json" {!! nonce_attr() !!}>
-    {
-        "@context": "https://schema.org",
-        "@type": "SoftwareApplication",
-        "name": "Event Schedule - Allocated Seating",
-        "description": "Reserved seating for venues: a reusable seating plan of levels, sections, rows, tables and standing areas, a buyer-facing seat picker, and a box office console.",
-        "applicationCategory": "BusinessApplication",
-        "operatingSystem": ["Web", "Android", "iOS"],
-        "featureList": [
-            "Drag and drop seating plan designer",
-            "Multiple levels for stalls, circle and balcony",
-            "Rows and seats, round and rectangular tables, and standing sections",
-            "Wheelchair spaces and companion seats",
-            "One reusable plan across every date of a run",
-            "Edit a single date without touching the others",
-            "Buyers choose their own seats from the map",
-            "Best available seats chosen automatically for a party size",
-            "Stage markers and text labels drawn on the map",
-            "Single-seat rule set per room, lifted as the house fills",
-            "Box office console to hold back, move and release seats",
-            "Select a whole row or section to hold or release at once",
-            "Take a booking over the phone against the map",
-            "Arrivals shown on the box office map as tickets are scanned",
-            "Printable seating plan report and CSV",
-            "Run summary of how full each date is"
-        ],
-        "offers": {
-            "@type": "Offer",
-            "price": "{{ $entMonthly }}",
-            "priceCurrency": "{{ platform_currency() }}",
-            "description": "Available on Enterprise plan"
-        }
-    }
-    </script>
+    <x-seo.webpage
+        name="Event Schedule - Allocated Seating"
+        description="Reserved seating for venues: a reusable seating plan of levels, sections, rows, tables and standing areas, a buyer-facing seat picker, and a box office console." />
     </x-slot>
 
     {{-- Motion gate: the hidden pre-reveal states below only apply when this class is present, so

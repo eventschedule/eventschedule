@@ -4,38 +4,9 @@
     <x-slot name="breadcrumbTitle">CalDAV</x-slot>
 
     <x-slot name="structuredData">
-    <script type="application/ld+json" {!! nonce_attr() !!}>
-    {
-        "@context": "https://schema.org",
-        "@type": "SoftwareApplication",
-        "name": "Event Schedule - CalDAV Sync",
-        "applicationCategory": "BusinessApplication",
-        "operatingSystem": "Web",
-        "description": "Two-way CalDAV sync with iCloud, Nextcloud, Fastmail or any conformant server. Free on every plan, HTTPS only, and selfhost friendly at both ends.",
-        "featureList": [
-            "CalDAV sync over the published RFC 4791 protocol, free on every plan",
-            "Automatic calendar discovery from a single server URL",
-            "Per-schedule sync direction: to the calendar, from it, both ways or off",
-            "iCalendar VEVENT payloads, readable by any calendar client",
-            "Works with Apple Calendar and iCloud, Nextcloud, Fastmail and any conformant server",
-            "HTTPS required, credentials stored encrypted",
-            "Collection and resource tags so an unchanged calendar costs one request",
-            "Outbound on every save, inbound read every fifteen minutes",
-            "Selfhost friendly: both ends can run on your own infrastructure"
-        ],
-        "offers": {
-            "@type": "Offer",
-            "price": "0",
-            "priceCurrency": "{{ platform_currency() }}",
-            "description": "Free on every plan"
-        },
-        "url": "{{ url()->current() }}",
-        "provider": {
-            "@type": "Organization",
-            "name": "Event Schedule"
-        }
-    }
-    </script>
+    <x-seo.webpage
+        name="Event Schedule - CalDAV Sync"
+        description="Two-way CalDAV sync with iCloud, Nextcloud, Fastmail or any conformant server. Free on every plan, HTTPS only, and selfhost friendly at both ends." />
     </x-slot>
 
     {{-- Motion gate: hidden pre-reveal states only apply when this class is present,

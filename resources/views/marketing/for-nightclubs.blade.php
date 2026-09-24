@@ -4,64 +4,11 @@
     <x-slot name="breadcrumbTitle">For Nightclubs</x-slot>
 
     <x-slot name="structuredData">
-    <script type="application/ld+json" {!! nonce_attr() !!}>
-    {
-        "@context": "https://schema.org",
-        "@type": "Service",
-        "name": "Event Schedule for Nightclubs",
-        "description": "Run the entry side of your club from one link: capacity, cover, timed ticket tiers and QR check-in at the door, with zero platform fees on ticket sales.",
-        "provider": {
-            "@type": "Organization",
-            "name": "Event Schedule",
-            "url": "{{ config('app.url') }}"
-        },
-        "serviceType": "Event Management",
-        "audience": {
-            "@type": "Audience",
-            "audienceType": "Nightclubs and Dance Venues"
-        }
-    }
-    </script>
-    <!-- Product Schema for Rich Snippets -->
-    <script type="application/ld+json" {!! nonce_attr() !!}>
-    {
-        "@context": "https://schema.org",
-        "@type": "SoftwareApplication",
-        "name": "Event Schedule for Nightclubs",
-        "applicationCategory": "BusinessApplication",
-        "applicationSubCategory": "Nightclub Event Management Software",
-        "operatingSystem": "Web",
-        "offers": {
-            "@type": "Offer",
-            "price": "0",
-            "priceCurrency": "{{ platform_currency() }}",
-            "description": "Free forever"
-        },
-        "featureList": [
-            "Free registration with an optional capacity limit for each night",
-            "Ticket types with their own sales windows, so cover can change at a set time",
-            "Free QR scanning on the door, with a live check-in dashboard on Pro",
-            "Ticket payments through Stripe, PayPal, a payment link or cash, with zero platform fees",
-            "Per-attendee tickets, each with its own confirmation email and QR code",
-            "An interest list for people waiting for tickets to go on sale",
-            "Automatic waitlist notifications when a sold-out night frees up",
-            "Refunds from the Sales page, in full or in part",
-            "Multi-use passes and memberships for regulars",
-            "Recurring themed nights with date exceptions",
-            "Sub-schedules that keep each night apart on one link",
-            "A public submission form so DJs can ask to play",
-            "Direct newsletters to the people who follow your schedule",
-            "Story-sized event graphics for social",
-            "Two-way Google, Outlook and CalDAV calendar sync"
-        ],
-        "url": "{{ url()->current() }}",
-        "keywords": "nightclub event calendar, club night ticketing, door capacity management, QR check-in nightclub, recurring club nights, free nightclub scheduling",
-        "provider": {
-            "@type": "Organization",
-            "name": "Event Schedule"
-        }
-    }
-    </script>
+    <x-seo.webpage
+        name="Event Schedule for Nightclubs"
+        description="Run the entry side of your club from one link: capacity, cover, timed ticket tiers and QR check-in at the door, with zero platform fees on ticket sales."
+        audience="Nightclubs and Dance Venues"
+        keywords="nightclub event calendar, club night ticketing, door capacity management, QR check-in nightclub, recurring club nights, free nightclub scheduling" />
     <!-- HowTo Schema for Rich Snippets -->
     <script type="application/ld+json" {!! nonce_attr() !!}>
     {

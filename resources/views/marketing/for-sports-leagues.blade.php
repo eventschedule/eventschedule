@@ -4,63 +4,11 @@
     <x-slot name="breadcrumbTitle">For Sports Leagues</x-slot>
 
     <x-slot name="structuredData">
-    <script type="application/ld+json" {!! nonce_attr() !!}>
-    {
-        "@context": "https://schema.org",
-        "@type": "Service",
-        "name": "Event Schedule for Sports Leagues",
-        "description": "A season calendar for a league or club: each team or age group as a sub-schedule with its own link, weekly training as recurring events, match days at their grounds, and a live calendar feed families subscribe to once.",
-        "provider": {
-            "@type": "Organization",
-            "name": "Event Schedule",
-            "url": "{{ config('app.url') }}"
-        },
-        "serviceType": "Event Management",
-        "audience": {
-            "@type": "Audience",
-            "audienceType": "Sports Leagues, Amateur Sports Clubs & Youth Sports Organizations"
-        }
-    }
-    </script>
-    <!-- Product Schema for Rich Snippets -->
-    <script type="application/ld+json" {!! nonce_attr() !!}>
-    {
-        "@context": "https://schema.org",
-        "@type": "SoftwareApplication",
-        "name": "Event Schedule for Sports Leagues",
-        "applicationCategory": "BusinessApplication",
-        "applicationSubCategory": "Sports League Scheduling Software",
-        "operatingSystem": "Web",
-        "offers": {
-            "@type": "Offer",
-            "price": "0",
-            "priceCurrency": "{{ platform_currency() }}",
-            "description": "Free forever"
-        },
-        "featureList": [
-            "Sub-schedules for each team, division or age group, each with its own link and colour",
-            "Weekly training as one recurring event, with date exceptions for closed pitches and holidays",
-            "Match days as events at their grounds, with a map to each venue",
-            "A live calendar feed families subscribe to once, so a moved fixture updates in their own calendar",
-            "Two-way Google, Outlook and CalDAV calendar sync",
-            "Free registration with a capacity for trials, tryouts and camps, counted for each date",
-            "Season passes that cover a whole sub-schedule on one QR code, on the Pro plan",
-            "Match-day tickets with zero platform fees, on the Pro plan",
-            "QR ticket scanning at the gate on every plan",
-            "Carpool matching for away games, with the driver approving every rider, on the Pro plan",
-            "Sponsor logos in tiers on the league page, on the Pro plan",
-            "Newsletters to members within a monthly allowance counted per recipient",
-            "Embeddable calendar for the club website",
-            "Fan photos from match day, held in an approval queue"
-        ],
-        "url": "{{ url()->current() }}",
-        "keywords": "sports league schedule, fixture list, youth sports calendar, club fixtures, season pass, sports club events",
-        "provider": {
-            "@type": "Organization",
-            "name": "Event Schedule"
-        }
-    }
-    </script>
+    <x-seo.webpage
+        name="Event Schedule for Sports Leagues"
+        description="A season calendar for a league or club: each team or age group as a sub-schedule with its own link, weekly training as recurring events, match days at their grounds, and a live calendar feed families subscribe to once."
+        audience="Sports Leagues, Amateur Sports Clubs & Youth Sports Organizations"
+        keywords="sports league schedule, fixture list, youth sports calendar, club fixtures, season pass, sports club events" />
     <!-- HowTo Schema for Rich Snippets -->
     <script type="application/ld+json" {!! nonce_attr() !!}>
     {

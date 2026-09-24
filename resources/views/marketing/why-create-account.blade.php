@@ -36,35 +36,6 @@
         }
     }
     </script>
-    <script type="application/ld+json" {!! nonce_attr() !!}>
-    {
-        "@context": "https://schema.org",
-        "@type": "SoftwareApplication",
-        "name": "Event Schedule",
-        "applicationCategory": "BusinessApplication",
-        "operatingSystem": "Web",
-        "offers": {
-            "@type": "Offer",
-            "price": "0",
-            "priceCurrency": "{{ platform_currency() }}",
-            "description": "Free account, no credit card required"
-        },
-        "featureList": [
-            "Follow schedules and see them all on one Following page",
-            "Every ticket and free registration you bought, upcoming and past",
-            "Submitted events saved on your own schedule and linked to the schedule you sent them to",
-            "Email when a schedule accepts or declines your submission",
-            "Edit your own events after they are submitted",
-            "A Talent, Venue or Curator schedule with its own address",
-            "Claim a page an organizer created for you by signing in with the address on it",
-            "Two-way Google, Outlook and CalDAV calendar sync on the free plan",
-            "Built-in analytics, embeddable calendar and sub-schedules on the free plan",
-            "Newsletters to the people who follow you",
-            "Two-factor sign-in, backup and restore, and one-screen account deletion"
-        ],
-        "url": "{{ url()->current() }}"
-    }
-    </script>
     </x-slot>
 
     {{-- Motion gate: hidden pre-reveal states only apply when this class is present,

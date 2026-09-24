@@ -4,56 +4,9 @@
     <x-slot name="breadcrumbTitle">Analytics</x-slot>
 
     <x-slot name="structuredData">
-    <script type="application/ld+json" {!! nonce_attr() !!}>
-    {
-        "@context": "https://schema.org",
-        "@type": "Service",
-        "name": "Event Schedule Analytics",
-        "description": "Free built-in event analytics: page views, devices, traffic sources, UTM tags, countries and clicks on every link on a schedule. No third-party analytics service and no visitor log.",
-        "provider": {
-            "@type": "Organization",
-            "name": "Event Schedule",
-            "url": "{{ config('app.url') }}"
-        },
-        "serviceType": "Event Analytics"
-    }
-    </script>
-    <script type="application/ld+json" {!! nonce_attr() !!}>
-    {
-        "@context": "https://schema.org",
-        "@type": "SoftwareApplication",
-        "name": "Event Schedule Analytics",
-        "applicationCategory": "BusinessApplication",
-        "applicationSubCategory": "Event Analytics Software",
-        "operatingSystem": "Web",
-        "description": "Privacy-first event analytics. Page views by day, week or month, device breakdown, eight traffic-source buckets, referrer domains, UTM parameters, country-level visitor locations and clicks on every link on a schedule, with no external services required.",
-        "offers": {
-            "@type": "Offer",
-            "price": "0",
-            "priceCurrency": "{{ platform_currency() }}",
-            "description": "Included free"
-        },
-        "featureList": [
-            "Page views by day, week or month across seven date ranges",
-            "Device breakdown across desktop, mobile, tablet and unknown",
-            "Eight traffic-source buckets including newsletter, boost and promo",
-            "Top referrer domains and top UTM source, medium and campaign values",
-            "Country-level visitor locations from a local lookup file",
-            "Clicks on every link on a schedule, counted through its short address, including sites the app does not recognise",
-            "Top events by views, and views split by schedule",
-            "Appearance views for talent and venue schedules",
-            "Conversion rate, revenue per view and promo code performance with ticketing",
-            "Check-in attendance rates, no-shows and arrival times with ticketing",
-            "Crawler filtering and a daily per-visitor view cap",
-            "No external analytics services and no tracking cookie"
-        ],
-        "url": "{{ url()->current() }}",
-        "provider": {
-            "@type": "Organization",
-            "name": "Event Schedule"
-        }
-    }
-    </script>
+    <x-seo.webpage
+        name="Event Schedule Analytics"
+        description="Free built-in event analytics: page views, devices, traffic sources, UTM tags, countries and clicks on every link on a schedule. No third-party analytics service and no visitor log." />
     </x-slot>
 
     {{-- Motion gate: hidden pre-reveal states only apply when this class is present,

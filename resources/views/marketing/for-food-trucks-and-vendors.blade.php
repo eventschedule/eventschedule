@@ -4,64 +4,11 @@
     <x-slot name="breadcrumbTitle">For Food Trucks and Vendors</x-slot>
 
     <x-slot name="structuredData">
-    <script type="application/ld+json" {!! nonce_attr() !!}>
-    {
-        "@context": "https://schema.org",
-        "@type": "Service",
-        "name": "Event Schedule for Food Trucks & Vendors",
-        "description": "A public schedule that always carries today's stop, with the regular pitches set up once as recurring events, a QR code for the serving window and a live calendar feed customers subscribe to once.",
-        "provider": {
-            "@type": "Organization",
-            "name": "Event Schedule",
-            "url": "{{ config('app.url') }}"
-        },
-        "serviceType": "Event Management",
-        "audience": {
-            "@type": "Audience",
-            "audienceType": "Food Trucks, Vendors & Mobile Kitchens"
-        }
-    }
-    </script>
-    <!-- Product Schema for Rich Snippets -->
-    <script type="application/ld+json" {!! nonce_attr() !!}>
-    {
-        "@context": "https://schema.org",
-        "@type": "SoftwareApplication",
-        "name": "Event Schedule for Food Trucks & Vendors",
-        "applicationCategory": "BusinessApplication",
-        "applicationSubCategory": "Food Truck Location and Schedule Software",
-        "operatingSystem": "Web",
-        "offers": {
-            "@type": "Offer",
-            "price": "0",
-            "priceCurrency": "{{ platform_currency() }}",
-            "description": "Free forever"
-        },
-        "featureList": [
-            "One public link carrying every stop, opening on the next one",
-            "A list layout that reads as a route rather than a month grid",
-            "Regular pitches set up once as recurring events with their own hours",
-            "Date exceptions for the weeks you lose a pitch",
-            "A street address and map on every stop",
-            "A downloadable QR code for the serving window that takes people to your schedule",
-            "Followers you can email directly, with newsletters on the free plan",
-            "An automatic digest of new stops to confirmed email subscribers, at most one every three days",
-            "A live calendar feed customers subscribe to once, so every new stop appears in their own calendar",
-            "Booking requests for catering and private hire, each waiting for your approval",
-            "An email to you when a new booking request lands",
-            "Sub-schedules that keep markets, festivals and private hire apart",
-            "Auto-generated share graphics for any stop",
-            "Two-way Google, Outlook and CalDAV calendar sync",
-            "Embeddable calendar for your own website"
-        ],
-        "url": "{{ url()->current() }}",
-        "keywords": "food truck schedule, food truck locations, mobile vendor calendar, where is the food truck, catering booking requests, street food route",
-        "provider": {
-            "@type": "Organization",
-            "name": "Event Schedule"
-        }
-    }
-    </script>
+    <x-seo.webpage
+        name="Event Schedule for Food Trucks & Vendors"
+        description="A public schedule that always carries today's stop, with the regular pitches set up once as recurring events, a QR code for the serving window and a live calendar feed customers subscribe to once."
+        audience="Food Trucks, Vendors & Mobile Kitchens"
+        keywords="food truck schedule, food truck locations, mobile vendor calendar, where is the food truck, catering booking requests, street food route" />
     </x-slot>
 
     {{-- Motion gate: hidden pre-reveal states only apply when this class is present,

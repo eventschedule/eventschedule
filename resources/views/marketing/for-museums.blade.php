@@ -4,63 +4,11 @@
     <x-slot name="breadcrumbTitle">For Museums</x-slot>
 
     <x-slot name="structuredData">
-    <script type="application/ld+json" {!! nonce_attr() !!}>
-    {
-        "@context": "https://schema.org",
-        "@type": "Service",
-        "name": "Event Schedule for Museums",
-        "description": "A museum event calendar for the programme on top of opening hours: recurring guided tours, lecture series, family sessions and late openings, each with its own capacity per date.",
-        "provider": {
-            "@type": "Organization",
-            "name": "Event Schedule",
-            "url": "{{ config('app.url') }}"
-        },
-        "serviceType": "Event Management",
-        "audience": {
-            "@type": "Audience",
-            "audienceType": "Museums, Science Centers, Heritage Sites & Historic Houses"
-        }
-    }
-    </script>
-    <!-- Product Schema for Rich Snippets -->
-    <script type="application/ld+json" {!! nonce_attr() !!}>
-    {
-        "@context": "https://schema.org",
-        "@type": "SoftwareApplication",
-        "name": "Event Schedule for Museums",
-        "applicationCategory": "BusinessApplication",
-        "applicationSubCategory": "Museum Programme Scheduling Software",
-        "operatingSystem": "Web",
-        "offers": {
-            "@type": "Offer",
-            "price": "0",
-            "priceCurrency": "{{ platform_currency() }}",
-            "description": "Free forever"
-        },
-        "featureList": [
-            "Guided tours as recurring events: daily, weekly on chosen days, or monthly by weekday such as the first Sunday",
-            "Date exceptions for closure days and one-off extra dates",
-            "Temporary exhibitions as a recurring event that ends on the closing date",
-            "Free registration with a capacity, counted separately for each date, with a waitlist when a free session fills",
-            "Sub-schedules for tours, talks, families, lates and learning, each with its own link",
-            "One free appointment type for group and school visits, with weekly hours and a public booking page",
-            "Ticketed late openings and special events with QR check-in, on the Pro plan",
-            "Zero platform fees on ticket sales",
-            "Memberships as passes redeemable across events on one QR code, on the Pro plan",
-            "Event names and descriptions translated into one other language",
-            "Embeddable calendar and a live calendar feed visitors subscribe to",
-            "A digest of new events to confirmed email subscribers, and newsletters you write",
-            "Post-event feedback from attendees, on the Pro plan",
-            "Two-way Google, Outlook and CalDAV calendar sync"
-        ],
-        "url": "{{ url()->current() }}",
-        "keywords": "museum event calendar, museum tour booking, museum programme calendar, lecture series registration, museum membership pass, heritage site events",
-        "provider": {
-            "@type": "Organization",
-            "name": "Event Schedule"
-        }
-    }
-    </script>
+    <x-seo.webpage
+        name="Event Schedule for Museums"
+        description="A museum event calendar for the programme on top of opening hours: recurring guided tours, lecture series, family sessions and late openings, each with its own capacity per date."
+        audience="Museums, Science Centers, Heritage Sites & Historic Houses"
+        keywords="museum event calendar, museum tour booking, museum programme calendar, lecture series registration, museum membership pass, heritage site events" />
     <!-- HowTo Schema for Rich Snippets -->
     <script type="application/ld+json" {!! nonce_attr() !!}>
     {

@@ -4,65 +4,11 @@
     <x-slot name="breadcrumbTitle">For Restaurants</x-slot>
 
     <x-slot name="structuredData">
-    <script type="application/ld+json" {!! nonce_attr() !!}>
-    {
-        "@context": "https://schema.org",
-        "@type": "Service",
-        "name": "Event Schedule for Restaurants",
-        "description": "Ticketed dinners with a fixed covers count, a sales cutoff set before you shop, and dietary questions answered at checkout.",
-        "provider": {
-            "@type": "Organization",
-            "name": "Event Schedule",
-            "url": "{{ config('app.url') }}"
-        },
-        "serviceType": "Event Management",
-        "audience": {
-            "@type": "Audience",
-            "audienceType": "Restaurants"
-        }
-    }
-    </script>
-    <!-- Product Schema for Rich Snippets -->
-    <script type="application/ld+json" {!! nonce_attr() !!}>
-    {
-        "@context": "https://schema.org",
-        "@type": "SoftwareApplication",
-        "name": "Event Schedule for Restaurants",
-        "applicationCategory": "BusinessApplication",
-        "applicationSubCategory": "Restaurant Event Ticketing Software",
-        "operatingSystem": "Web",
-        "offers": {
-            "@type": "Offer",
-            "price": "0",
-            "priceCurrency": "{{ platform_currency() }}",
-            "description": "Free forever"
-        },
-        "featureList": [
-            "A fixed number of covers per sitting, counted per date",
-            "A sales cutoff set on the event, so the count is final before you shop",
-            "Questions attached to the ticket and answered at checkout, for allergies and courses",
-            "Named ticket types with their own prices and quantities",
-            "A date for sales to open, and an interest list that emails people once when they do",
-            "Free registration with a capacity per date, for evenings that take no payment",
-            "QR ticket scanning at the door on every plan",
-            "Zero platform fees on ticket sales, paid through your own Stripe or PayPal account, a payment link or cash",
-            "Refunds in full or in part from the Sales page, sent back through Stripe or PayPal",
-            "Private hire enquiries that wait for you to accept them",
-            "Sub-schedules with their own shareable link, for private dining or a supper club",
-            "Draft events that stay members-only until you are ready to announce",
-            "Direct newsletters to the people who follow the restaurant",
-            "Two-way Google, Outlook and CalDAV calendar sync",
-            "Embeddable calendar for your own website",
-            "Online events with the link people join on"
-        ],
-        "url": "{{ url()->current() }}",
-        "keywords": "restaurant event ticketing, wine dinner tickets, covers count, supper club booking, private dining enquiries, chef's table tickets",
-        "provider": {
-            "@type": "Organization",
-            "name": "Event Schedule"
-        }
-    }
-    </script>
+    <x-seo.webpage
+        name="Event Schedule for Restaurants"
+        description="Ticketed dinners with a fixed covers count, a sales cutoff set before you shop, and dietary questions answered at checkout."
+        audience="Restaurants"
+        keywords="restaurant event ticketing, wine dinner tickets, covers count, supper club booking, private dining enquiries, chef's table tickets" />
     </x-slot>
 
     {{-- Motion gate: hidden pre-reveal states only apply when this class is present,

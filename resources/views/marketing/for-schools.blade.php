@@ -4,65 +4,11 @@
     <x-slot name="breadcrumbTitle">For Schools</x-slot>
 
     <x-slot name="structuredData">
-    <script type="application/ld+json" {!! nonce_attr() !!}>
-    {
-        "@context": "https://schema.org",
-        "@type": "Service",
-        "name": "Event Schedule for Schools",
-        "description": "A school event calendar where weekly clubs are set once for the term, closure days are date exceptions, and concerts, trips and parent evenings sit on top with free sign-ups or tickets.",
-        "provider": {
-            "@type": "Organization",
-            "name": "Event Schedule",
-            "url": "{{ config('app.url') }}"
-        },
-        "serviceType": "Event Management",
-        "audience": {
-            "@type": "Audience",
-            "audienceType": "Schools, Colleges, Universities & Parent-Teacher Associations"
-        }
-    }
-    </script>
-    <!-- Product Schema for Rich Snippets -->
-    <script type="application/ld+json" {!! nonce_attr() !!}>
-    {
-        "@context": "https://schema.org",
-        "@type": "SoftwareApplication",
-        "name": "Event Schedule for Schools",
-        "applicationCategory": "BusinessApplication",
-        "applicationSubCategory": "School Event Calendar Software",
-        "operatingSystem": "Web",
-        "offers": {
-            "@type": "Offer",
-            "price": "0",
-            "priceCurrency": "{{ platform_currency() }}",
-            "description": "Free forever"
-        },
-        "featureList": [
-            "Weekly clubs and fixtures set once as recurring events for the whole term",
-            "Date exceptions for half term, closure days and training days",
-            "Free registration with a capacity, counted separately for each date",
-            "Per-guest details on free registrations, so each child on a trip is named",
-            "Tickets with a price for the school play or concert, on the Pro plan",
-            "Zero platform fees on ticket sales, paid through Stripe, PayPal, Invoice Ninja, a payment link or cash",
-            "QR scanning at the door on every plan, with the live check-in dashboard on Pro",
-            "One free appointment type with weekly hours, so parents pick an open time",
-            "Sub-schedules for year groups, clubs, teams and the parent-teacher association, each with its own link",
-            "A live calendar feed families subscribe to once, which updates itself when a date moves",
-            "Embeddable calendar for the school website",
-            "Two-way Google, Outlook and CalDAV calendar sync",
-            "A digest of new dates to confirmed email subscribers, at most one every 72 hours",
-            "Newsletters written by the school, within a monthly allowance counted per recipient",
-            "Event names and descriptions translated into one other language",
-            "Draft events that stay members-only until they are announced"
-        ],
-        "url": "{{ url()->current() }}",
-        "keywords": "school event calendar, school calendar app, parent teacher conference booking, school play tickets, school club schedule, pta events",
-        "provider": {
-            "@type": "Organization",
-            "name": "Event Schedule"
-        }
-    }
-    </script>
+    <x-seo.webpage
+        name="Event Schedule for Schools"
+        description="A school event calendar where weekly clubs are set once for the term, closure days are date exceptions, and concerts, trips and parent evenings sit on top with free sign-ups or tickets."
+        audience="Schools, Colleges, Universities & Parent-Teacher Associations"
+        keywords="school event calendar, school calendar app, parent teacher conference booking, school play tickets, school club schedule, pta events" />
     <!-- HowTo Schema for Rich Snippets -->
     <script type="application/ld+json" {!! nonce_attr() !!}>
     {

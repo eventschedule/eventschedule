@@ -4,62 +4,11 @@
     <x-slot name="breadcrumbTitle">For Bars</x-slot>
 
     <x-slot name="structuredData">
-    <script type="application/ld+json" {!! nonce_attr() !!}>
-    {
-        "@context": "https://schema.org",
-        "@type": "Service",
-        "name": "Event Schedule for Bars and Pubs",
-        "description": "Put your bar's whole week on one link. Recurring quiz nights and live music, free registration, and zero platform fees on ticket sales.",
-        "provider": {
-            "@type": "Organization",
-            "name": "Event Schedule",
-            "url": "{{ config('app.url') }}"
-        },
-        "serviceType": "Event Management",
-        "audience": {
-            "@type": "Audience",
-            "audienceType": "Bars, Pubs and Taprooms"
-        }
-    }
-    </script>
-    <!-- Product Schema for Rich Snippets -->
-    <script type="application/ld+json" {!! nonce_attr() !!}>
-    {
-        "@context": "https://schema.org",
-        "@type": "SoftwareApplication",
-        "name": "Event Schedule for Bars and Pubs",
-        "applicationCategory": "BusinessApplication",
-        "applicationSubCategory": "Bar and Pub Event Management Software",
-        "operatingSystem": "Web",
-        "offers": {
-            "@type": "Offer",
-            "price": "0",
-            "priceCurrency": "{{ platform_currency() }}",
-            "description": "Free forever"
-        },
-        "featureList": [
-            "Recurring weekly nights with date exceptions for holidays and closures",
-            "Sub-schedules that keep live music, quiz and sports nights apart",
-            "A public submission form so performers can ask to play",
-            "Direct newsletters to the regulars who follow your schedule",
-            "Email sign-up with an automatic round-up of new nights for confirmed subscribers",
-            "A live calendar feed regulars can subscribe to, which updates itself",
-            "Free registration with an optional capacity limit",
-            "Ticket sales with zero platform fees through Stripe or PayPal, and free QR scanning at the door",
-            "A logo wall of the acts that have played your room",
-            "Fan photos, video and comments with an approval queue",
-            "Two-way Google, Outlook and CalDAV calendar sync",
-            "Embeddable calendar for the website you already have",
-            "Built-in analytics for page views, devices and traffic sources"
-        ],
-        "url": "{{ url()->current() }}",
-        "keywords": "bar event calendar, pub quiz night schedule, live music calendar for bars, bar event management software, free pub event calendar, recurring bar events",
-        "provider": {
-            "@type": "Organization",
-            "name": "Event Schedule"
-        }
-    }
-    </script>
+    <x-seo.webpage
+        name="Event Schedule for Bars and Pubs"
+        description="Put your bar's whole week on one link. Recurring quiz nights and live music, free registration, and zero platform fees on ticket sales."
+        audience="Bars, Pubs and Taprooms"
+        keywords="bar event calendar, pub quiz night schedule, live music calendar for bars, bar event management software, free pub event calendar, recurring bar events" />
     <!-- HowTo Schema for Rich Snippets -->
     <script type="application/ld+json" {!! nonce_attr() !!}>
     {

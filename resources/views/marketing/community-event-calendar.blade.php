@@ -22,60 +22,11 @@
          has. /for-community-centers is one building's programme. --}}
 
     <x-slot name="structuredData">
-    <script type="application/ld+json" {!! nonce_attr() !!}>
-    {
-        "@context": "https://schema.org",
-        "@type": "Service",
-        "name": "Event Schedule for Community Event Calendars",
-        "description": "A shared community event calendar for a town, neighbourhood, local news site or tourism board: local organizers submit events, an editor approves them, and the calendar embeds on the site readers already visit. Free forever.",
-        "provider": {
-            "@type": "Organization",
-            "name": "Event Schedule",
-            "url": "{{ config('app.url') }}"
-        },
-        "serviceType": "Community Event Calendar",
-        "audience": {
-            "@type": "Audience",
-            "audienceType": "Towns, Neighbourhood Associations, Local News Sites, Tourism Boards"
-        }
-    }
-    </script>
-    <script type="application/ld+json" {!! nonce_attr() !!}>
-    {
-        "@context": "https://schema.org",
-        "@type": "SoftwareApplication",
-        "name": "Event Schedule Community Event Calendar",
-        "applicationCategory": "BusinessApplication",
-        "applicationSubCategory": "Community Event Calendar Software",
-        "operatingSystem": "Web",
-        "offers": {
-            "@type": "Offer",
-            "price": "0",
-            "priceCurrency": "{{ platform_currency() }}",
-            "description": "Free forever"
-        },
-        "featureList": [
-            "A public submission form where organizers paste an event or upload a flyer",
-            "An approval queue, with trusted schedules able to skip it",
-            "Venue and organizer schedules as event sources that feed the calendar automatically",
-            "Sub-schedules for neighbourhoods or kinds of event, each with its own link",
-            "An embeddable calendar or list for an existing website",
-            "A live calendar feed readers subscribe to",
-            "Email sign-up with an automatic digest of new events",
-            "Newsletters within a monthly allowance counted per recipient",
-            "Two-way Google, Outlook and CalDAV calendar sync",
-            "Downloadable graphics of upcoming events for social media",
-            "More team members and a custom domain on the Enterprise plan",
-            "Open source and selfhostable"
-        ],
-        "url": "{{ url()->current() }}",
-        "keywords": "community event calendar, town event calendar, local events calendar, neighbourhood calendar, community calendar software, submit local events",
-        "provider": {
-            "@type": "Organization",
-            "name": "Event Schedule"
-        }
-    }
-    </script>
+    <x-seo.webpage
+        name="Event Schedule for Community Event Calendars"
+        description="A shared community event calendar for a town, neighbourhood, local news site or tourism board: local organizers submit events, an editor approves them, and the calendar embeds on the site readers already visit. Free forever."
+        audience="Towns, Neighbourhood Associations, Local News Sites, Tourism Boards"
+        keywords="community event calendar, town event calendar, local events calendar, neighbourhood calendar, community calendar software, submit local events" />
     <script type="application/ld+json" {!! nonce_attr() !!}>
     {
         "@context": "https://schema.org",

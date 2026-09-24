@@ -4,62 +4,11 @@
     <x-slot name="breadcrumbTitle">For Libraries</x-slot>
 
     <x-slot name="structuredData">
-    <script type="application/ld+json" {!! nonce_attr() !!}>
-    {
-        "@context": "https://schema.org",
-        "@type": "Service",
-        "name": "Event Schedule for Libraries",
-        "description": "Set a library program up once as a recurring event, exclude the dates the branch is closed, and take free registrations with a place limit counted separately for every date.",
-        "provider": {
-            "@type": "Organization",
-            "name": "Event Schedule",
-            "url": "{{ config('app.url') }}"
-        },
-        "serviceType": "Event Management",
-        "audience": {
-            "@type": "Audience",
-            "audienceType": "Libraries"
-        }
-    }
-    </script>
-    <!-- Product Schema for Rich Snippets -->
-    <script type="application/ld+json" {!! nonce_attr() !!}>
-    {
-        "@context": "https://schema.org",
-        "@type": "SoftwareApplication",
-        "name": "Event Schedule for Libraries",
-        "applicationCategory": "BusinessApplication",
-        "applicationSubCategory": "Library Program Management Software",
-        "operatingSystem": "Web",
-        "description": "Set a library program up once as a recurring event, take out the dates the branch is closed, and give every date its own place count.",
-        "offers": {
-            "@type": "Offer",
-            "price": "0",
-            "priceCurrency": "{{ platform_currency() }}",
-            "description": "Free forever"
-        },
-        "featureList": [
-            "Recurring programs by day of week, every few weeks, or the same weekday each month",
-            "Date exceptions that take out closed days and add extra sessions",
-            "A recurrence that ends on a date or after a set number of sessions",
-            "Free registration with a place limit counted separately for every date, and a free waitlist once a date is full",
-            "Sub-schedules that keep children, teen, adult and senior programming apart",
-            "A public request form so community groups can ask for the meeting room",
-            "Newsletters you write and send to the patrons who follow you",
-            "A downloadable QR code that points at your program calendar",
-            "Embeddable calendar for the library website you already have",
-            "Two-way Google, Outlook and CalDAV calendar sync",
-            "Zero platform fees on ticket sales through Stripe, PayPal, a payment link or cash",
-            "A live calendar feed patrons subscribe to once, which follows when a date moves or comes out"
-        ],
-        "url": "{{ url()->current() }}",
-        "keywords": "library program calendar, library event schedule, story time scheduling, author event management, free library scheduling",
-        "provider": {
-            "@type": "Organization",
-            "name": "Event Schedule"
-        }
-    }
-    </script>
+    <x-seo.webpage
+        name="Event Schedule for Libraries"
+        description="Set a library program up once as a recurring event, exclude the dates the branch is closed, and take free registrations with a place limit counted separately for every date."
+        audience="Libraries"
+        keywords="library program calendar, library event schedule, story time scheduling, author event management, free library scheduling" />
     <!-- HowTo Schema for Rich Snippets -->
     <script type="application/ld+json" {!! nonce_attr() !!}>
     {

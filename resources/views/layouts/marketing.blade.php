@@ -44,8 +44,8 @@
         // Marketing pages are English-only for SEO. The page bodies are not translated,
         // so we canonicalize every ?lang= variant onto the clean English URL and do not
         // emit hreflang language alternates. The ?lang= switcher still works for users.
-        $path = request()->path();
-        $basePath = $path === '/' ? config('app.url') : config('app.url') . '/' . ltrim(rtrim($path, '/'), '/');
+        // SeoUtils::canonicalUrl() is also what <x-seo.webpage> names as the page's @id.
+        $basePath = \App\Utils\SeoUtils::canonicalUrl();
     @endphp
     {{-- An error page answers at the URL that was asked for, so "this page's URL" would be the
          missing one: no canonical, og:url, twitter:url or breadcrumb for it (MarketingLayout). --}}
@@ -178,6 +178,14 @@
         ],
     ]) !!}
     </script>
+    {{-- The product, once. Pages describe themselves with <x-seo.webpage>, which points here by
+         @id, instead of each carrying a product node of its own. Only where the marketing site is
+         (the nexus), and not on an error page, which is not about anything. --}}
+    @if (config('app.is_nexus') && ! ($errorPage ?? false))
+    <script type="application/ld+json" {!! nonce_attr() !!}>
+    {!! \App\Utils\SeoUtils::jsonLd(\App\Utils\SeoUtils::softwareApplication()) !!}
+    </script>
+    @endif
     {{ $structuredData ?? '' }}
 
     {{-- Every page but the homepage. The blog index is named because on the blog host its path

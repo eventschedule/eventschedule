@@ -42,58 +42,11 @@
     @endphp
 
     <x-slot name="structuredData">
-    <script type="application/ld+json" {!! nonce_attr() !!}>
-    {
-        "@context": "https://schema.org",
-        "@type": "Service",
-        "name": "Event Schedule for Performers & Artists",
-        "description": "Free event scheduling for performers and artists of every kind. Share your shows, sell tickets through Stripe or PayPal, sync with Google Calendar, let venues add you to their schedule, and claim the page a venue or curator made in your name. Zero platform fees.",
-        "provider": {
-            "@type": "Organization",
-            "name": "Event Schedule",
-            "url": "{{ config('app.url') }}"
-        },
-        "serviceType": "Event Management",
-        "audience": {
-            "@type": "Audience",
-            "audienceType": "Performers & Artists"
-        }
-    }
-    </script>
-    <script type="application/ld+json" {!! nonce_attr() !!}>
-    {
-        "@context": "https://schema.org",
-        "@type": "SoftwareApplication",
-        "name": "Event Schedule for Performers & Artists",
-        "applicationCategory": "BusinessApplication",
-        "applicationSubCategory": "Performer Scheduling Software",
-        "operatingSystem": "Web",
-        "description": "Free event scheduling for performers and artists. Share your shows, sell tickets through Stripe or PayPal, sync with Google Calendar, let venues add you to their schedule, and claim the page a venue or curator made in your name.",
-        "offers": {
-            "@type": "Offer",
-            "price": "0",
-            "priceCurrency": "{{ platform_currency() }}",
-            "description": "Free forever"
-        },
-        "featureList": [
-            "Custom schedule URL",
-            "Google Calendar, Outlook and CalDAV sync",
-            "Venue booking requests",
-            "Claim the page a venue or curator created for you",
-            "Ticket sales through Stripe or PayPal with zero platform fees",
-            "Interest list for shows not yet on sale",
-            "Embeddable calendar",
-            "iCal and RSS feeds",
-            "Fan photos, videos and comments on events"
-        ],
-        "url": "{{ url()->current() }}",
-        "keywords": "performer schedule, share tour dates, artist event calendar, performer booking, gig management, free event scheduling",
-        "provider": {
-            "@type": "Organization",
-            "name": "Event Schedule"
-        }
-    }
-    </script>
+    <x-seo.webpage
+        name="Event Schedule for Performers & Artists"
+        description="Free event scheduling for performers and artists of every kind. Share your shows, sell tickets through Stripe or PayPal, sync with Google Calendar, let venues add you to their schedule, and claim the page a venue or curator made in your name. Zero platform fees."
+        audience="Performers & Artists"
+        keywords="performer schedule, share tour dates, artist event calendar, performer booking, gig management, free event scheduling" />
     <script type="application/ld+json" {!! nonce_attr() !!}>
     {
         "@context": "https://schema.org",

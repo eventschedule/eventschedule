@@ -4,7 +4,10 @@ namespace Tests\Feature;
 
 use App\Http\Controllers\MarketingController;
 use App\Models\BlogPost;
+use App\Models\LegalDocument;
 use App\Utils\DocsUtils;
+use App\Utils\PlatformPricing;
+use App\Utils\SeoUtils;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Blade;
 use Illuminate\Support\Facades\Route;
@@ -203,10 +206,12 @@ class MarketingStructuredDataTest extends TestCase
                 $howTo['step']
             );
 
-            if ($view === 'replace-single') {
-                // The tool being replaced is quoted into the product node too.
-                $this->assertSame($hostile, $this->nodeOfType($blocks, 'SoftwareApplication')['isSimilarTo']['name']);
-            }
+            // The competitor or the replaced tool is quoted into the page's WebPage node too.
+            $this->assertSame(
+                [['@type' => 'Brand', 'name' => $hostile]],
+                $this->nodeOfType($blocks, 'WebPage')['mentions'] ?? null,
+                "{$view}: the WebPage does not mention the competitor exactly"
+            );
 
             // An escaped payload adds no element; an unescaped one adds the <script> it smuggled in.
             $this->assertSame(
@@ -270,6 +275,73 @@ class MarketingStructuredDataTest extends TestCase
         }
 
         $this->assertGreaterThanOrEqual(40, $checked, 'fixture: every docs page was checked');
+    }
+
+    /**
+     * One product, described once.
+     *
+     * 92 marketing pages each emitted a SoftwareApplication of their own - "Event Schedule for Bars
+     * and Pubs", "Event Schedule - Gift Cards" - with their own offers, so to a crawler the site
+     * described 92 different applications, and the replace pages hung an invalid isSimilarTo off
+     * theirs. Now the layout emits one node, {site}/#software, from SeoUtils::softwareApplication(),
+     * and a page describes itself with a WebPage that is `about` it. Counted recursively, because a
+     * product nested as a page's `about` is a second product all the same.
+     */
+    public function test_every_sitemap_page_describes_exactly_one_product(): void
+    {
+        $xml = simplexml_load_string($this->get('/sitemap-pages.xml')->assertOk()->streamedContent());
+        $this->assertNotFalse($xml, 'the pages sitemap is not valid XML');
+
+        $software = config('app.url').'/#software';
+        $checked = 0;
+        $webPages = 0;
+
+        foreach ($xml->url as $node) {
+            $path = parse_url((string) $node->loc, PHP_URL_PATH) ?: '/';
+            $blocks = $this->jsonLdBlocks($this->get($path)->assertOk()->getContent());
+
+            // An operator-authored policy renders on layouts/legal.blade.php, which carries no
+            // structured data at all by design (see its docblock). Every other page listed here is
+            // on the marketing layout.
+            if ($blocks === [] && in_array($path, LegalDocument::PATHS, true)) {
+                continue;
+            }
+
+            $products = [];
+
+            foreach ($blocks as $i => $block) {
+                $this->assertIsArray($block, "JSON-LD block {$i} on {$path} did not decode");
+                $this->collectNodesOfType($block, 'SoftwareApplication', $products);
+
+                if (($block['@type'] ?? null) === 'WebPage' && isset($block['@id'])) {
+                    $this->assertSame(SeoUtils::canonicalUrl($path).'#webpage', $block['@id'], "{$path}: the WebPage names another URL");
+                    $this->assertSame(['@id' => $software], $block['about'] ?? null, "{$path}: the WebPage is not about the product");
+                    $webPages++;
+                }
+            }
+
+            $this->assertCount(1, $products, "{$path} describes ".count($products).' products');
+            $this->assertSame($software, $products[0]['@id'] ?? null, "{$path}: the product node is not {$software}");
+            $checked++;
+        }
+
+        $this->assertGreaterThan(150, $checked, 'fixture: the whole pages sitemap was walked');
+        $this->assertGreaterThan(80, $webPages, 'fixture: the marketing pages describe themselves');
+    }
+
+    /** The product node is what every WebPage points at, so it has to carry the real offers. */
+    public function test_the_product_node_quotes_the_configured_plans(): void
+    {
+        $product = SeoUtils::softwareApplication();
+
+        $this->assertSame(config('app.url').'/#software', $product['@id']);
+        $this->assertSame(config('app.url').'/#organization', $product['publisher']['@id']);
+        $this->assertSame(['Free', 'Pro', 'Enterprise'], array_column($product['offers'], 'name'));
+        $this->assertSame(
+            ['0', number_format(PlatformPricing::proMonthly(), 2, '.', ''), number_format(PlatformPricing::enterpriseMonthly(), 2, '.', '')],
+            array_column($product['offers'], 'price')
+        );
+        $this->assertSame([platform_currency()], array_values(array_unique(array_column($product['offers'], 'priceCurrency'))));
     }
 
     public function test_about_does_not_emit_a_second_unrelated_organization(): void
@@ -431,6 +503,28 @@ class MarketingStructuredDataTest extends TestCase
 
         foreach ($node as $child) {
             $this->collectOrganizations($child, $found);
+        }
+    }
+
+    /**
+     * Every node of $type anywhere in $node, nested ones included.
+     *
+     * @param  array<int, array<string, mixed>>  $found
+     */
+    private function collectNodesOfType(mixed $node, string $type, array &$found): void
+    {
+        if (! is_array($node)) {
+            return;
+        }
+
+        $types = (array) ($node['@type'] ?? []);
+
+        if (in_array($type, $types, true)) {
+            $found[] = $node;
+        }
+
+        foreach ($node as $child) {
+            $this->collectNodesOfType($child, $type, $found);
         }
     }
 

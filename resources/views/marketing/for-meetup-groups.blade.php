@@ -4,66 +4,11 @@
     <x-slot name="breadcrumbTitle">For Meetup Groups</x-slot>
 
     <x-slot name="structuredData">
-    <script type="application/ld+json" {!! nonce_attr() !!}>
-    {
-        "@context": "https://schema.org",
-        "@type": "Service",
-        "name": "Event Schedule for Meetup Groups",
-        "description": "A group page with its own link, recurring meetups set once, free RSVPs with a capacity and a waitlist, and email to the members who sign up. Free forever, with no organizer subscription.",
-        "provider": {
-            "@type": "Organization",
-            "name": "Event Schedule",
-            "url": "{{ config('app.url') }}"
-        },
-        "serviceType": "Event Management",
-        "audience": {
-            "@type": "Audience",
-            "audienceType": "Meetup Groups, Clubs & Community Organizers"
-        }
-    }
-    </script>
-    <!-- Product Schema for Rich Snippets -->
-    <script type="application/ld+json" {!! nonce_attr() !!}>
-    {
-        "@context": "https://schema.org",
-        "@type": "SoftwareApplication",
-        "name": "Event Schedule for Meetup Groups",
-        "applicationCategory": "BusinessApplication",
-        "applicationSubCategory": "Meetup and Community Event Software",
-        "operatingSystem": "Web",
-        "offers": {
-            "@type": "Offer",
-            "price": "0",
-            "priceCurrency": "{{ platform_currency() }}",
-            "description": "Free forever"
-        },
-        "featureList": [
-            "A group page with its own link that the group owns",
-            "Recurring meetups: weekly, every other week, or monthly by weekday such as the first Tuesday",
-            "Date exceptions to skip a week or add a one-off date",
-            "Free RSVP with a capacity counted separately for every date, unlimited on every plan",
-            "A waitlist for a full RSVP event, free",
-            "Per-guest registration so each person in a party gets their own confirmation",
-            "A digest of new dates to confirmed email subscribers, at most one every 72 hours",
-            "Newsletters to members, within a monthly allowance counted per recipient",
-            "Speakers and hosts listed by name, with a claimable page for anyone not on Event Schedule yet",
-            "Online and hybrid meetups with the join link printed on the ticket",
-            "Two-way Google, Outlook and CalDAV calendar sync, plus a live feed members subscribe to",
-            "Embeddable calendar for the group's own website",
-            "Event names and descriptions translated into one other language",
-            "Member photos and comments held in an approval queue (25 photos on the free plan)",
-            "Polls and carpool matching, on the Pro plan",
-            "Paid tickets for the occasional workshop or dinner, with zero platform fees, on the Pro plan",
-            "Backup and restore, open source, and selfhostable"
-        ],
-        "url": "{{ url()->current() }}",
-        "keywords": "meetup group events, meetup rsvp, free meetup page, community group calendar, recurring meetup schedule, meetup organizer tools",
-        "provider": {
-            "@type": "Organization",
-            "name": "Event Schedule"
-        }
-    }
-    </script>
+    <x-seo.webpage
+        name="Event Schedule for Meetup Groups"
+        description="A group page with its own link, recurring meetups set once, free RSVPs with a capacity and a waitlist, and email to the members who sign up. Free forever, with no organizer subscription."
+        audience="Meetup Groups, Clubs & Community Organizers"
+        keywords="meetup group events, meetup rsvp, free meetup page, community group calendar, recurring meetup schedule, meetup organizer tools" />
     <!-- HowTo Schema for Rich Snippets -->
     <script type="application/ld+json" {!! nonce_attr() !!}>
     {

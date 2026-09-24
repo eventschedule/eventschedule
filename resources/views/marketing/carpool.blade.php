@@ -4,42 +4,9 @@
     <x-slot name="breadcrumbTitle">Carpool</x-slot>
 
     <x-slot name="structuredData">
-    <!-- Product Schema for Rich Snippets -->
-    <script type="application/ld+json" {!! nonce_attr() !!}>
-    {
-        "@context": "https://schema.org",
-        "@type": "SoftwareApplication",
-        "name": "Event Schedule Carpool Matching",
-        "applicationCategory": "BusinessApplication",
-        "applicationSubCategory": "Ride Sharing Coordination Software",
-        "operatingSystem": "Web",
-        "description": "Attendees offer and request lifts on the event page. The driver approves each rider before any email or phone number is shared. Ratings follow the ride.",
-        "offers": {
-            "@type": "Offer",
-            "price": "0",
-            "priceCurrency": "{{ platform_currency() }}",
-            "description": "Free plan available, carpool matching on the Pro plan"
-        },
-        "featureList": [
-            "Ride offers with a city, a direction and a number of spots from 1 to 10",
-            "To-event, from-event and round trip directions",
-            "Rider requests with an optional message, approved or declined by the driver",
-            "Contact details exchanged only once the driver approves a rider",
-            "Spots counted per offer, and per occurrence date on a repeating event",
-            "Email notification on every request, approval and decline, and to every rider when an offer is pulled",
-            "An hourly reminder job for rides inside the next 24 hours",
-            "One-time carpool disclaimer before anyone can offer or request a ride",
-            "Post-event 1 to 5 star ratings between people who shared the ride",
-            "Reports and offer removal from the event's Engagement tab",
-            "A My Carpools page listing every ride a person has offered or asked for"
-        ],
-        "url": "{{ url()->current() }}",
-        "provider": {
-            "@type": "Organization",
-            "name": "Event Schedule"
-        }
-    }
-    </script>
+    <x-seo.webpage
+        name="Event Schedule Carpool Matching"
+        description="Attendees offer and request lifts on the event page. The driver approves each rider before any email or phone number is shared. Ratings follow the ride." />
     </x-slot>
 
     {{-- Motion gate: hidden pre-reveal states only apply when this class is present,

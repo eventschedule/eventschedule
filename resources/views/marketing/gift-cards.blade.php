@@ -4,40 +4,9 @@
     <x-slot name="breadcrumbTitle">Gift Cards</x-slot>
 
     <x-slot name="structuredData">
-    <script type="application/ld+json" {!! nonce_attr() !!}>
-    {
-        "@context": "https://schema.org",
-        "@type": "SoftwareApplication",
-        "name": "Event Schedule - Gift Cards",
-        "applicationCategory": "BusinessApplication",
-        "applicationSubCategory": "Event Gift Card Software",
-        "operatingSystem": "Web",
-        "description": "Sell balance-tracked gift cards your customers buy for someone else and redeem toward tickets for any event on your schedule. Set denominations, deliver by email, and track every card.",
-        "featureList": [
-            "Up to twelve denominations you choose, in one currency",
-            "Emailed to the recipient with the buyer's personal message",
-            "A twelve character code redeemed toward tickets at checkout",
-            "A running balance that carries over between orders",
-            "Applied after the volume discount and the promo code",
-            "A cancelled or fully refunded order returns the redeemed amount to the card",
-            "Every card tracked with its balance, status and redemptions",
-            "Mark paid, resend, cancel or refund from the Gift cards tab",
-            "Optional validity period, counted from the day payment clears",
-            "Paid for through Stripe, Invoice Ninja, a payment link or cash"
-        ],
-        "offers": {
-            "@type": "Offer",
-            "price": "{{ $proMonthly }}",
-            "priceCurrency": "{{ platform_currency() }}",
-            "description": "Selling gift cards is included in the Pro plan at {{ plan_price($proMonthly) }} per month"
-        },
-        "url": "{{ url()->current() }}",
-        "provider": {
-            "@type": "Organization",
-            "name": "Event Schedule"
-        }
-    }
-    </script>
+    <x-seo.webpage
+        name="Event Schedule - Gift Cards"
+        description="Sell balance-tracked gift cards your customers buy for someone else and redeem toward tickets for any event on your schedule. Set denominations, deliver by email, and track every card." />
     </x-slot>
 
     {{-- Motion gate: hidden pre-reveal states only apply when this class is present,

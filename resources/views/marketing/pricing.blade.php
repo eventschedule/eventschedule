@@ -103,55 +103,11 @@
     @endphp
 
     <x-slot name="structuredData">
-    <script type="application/ld+json" {!! nonce_attr() !!}>
-    {
-        "@context": "https://schema.org",
-        "@type": "SoftwareApplication",
-        "name": "Event Schedule",
-        "description": "Event scheduling and ticketing platform with zero platform fees on ticket sales.",
-        "applicationCategory": "BusinessApplication",
-        "operatingSystem": ["Web", "Android", "iOS"],
-        "offers": [
-            {
-                "@type": "Offer",
-                "name": "Free",
-                "price": "0",
-                "priceCurrency": "{{ platform_currency() }}",
-                "description": "Unlimited events and schedules, calendar sync, analytics, unlimited free event registration, and QR ticket scanning at the door, with no platform fee on any plan."
-            },
-            {
-                "@type": "Offer",
-                "name": "Pro",
-                "price": "{{ number_format($proMonthly, 2, '.', '') }}",
-                "priceCurrency": "{{ platform_currency() }}",
-                "description": "Paid ticket sales, live check-in dashboard, passes, gift cards, installment payments, API and webhooks. Also available at {{ plan_price($proYearly) }}/year.",
-                "priceSpecification": {
-                    "@type": "UnitPriceSpecification",
-                    "price": "{{ number_format($proMonthly, 2, '.', '') }}",
-                    "priceCurrency": "{{ platform_currency() }}",
-                    "billingDuration": 1,
-                    "billingIncrement": 1,
-                    "unitCode": "MON"
-                }
-            },
-            {
-                "@type": "Offer",
-                "name": "Enterprise",
-                "price": "{{ number_format($entMonthly, 2, '.', '') }}",
-                "priceCurrency": "{{ platform_currency() }}",
-                "description": "Allocated seating, custom domains, private events, multiple team members, and AI content generation. Also available at {{ plan_price($entYearly) }}/year.",
-                "priceSpecification": {
-                    "@type": "UnitPriceSpecification",
-                    "price": "{{ number_format($entMonthly, 2, '.', '') }}",
-                    "priceCurrency": "{{ platform_currency() }}",
-                    "billingDuration": 1,
-                    "billingIncrement": 1,
-                    "unitCode": "MON"
-                }
-            }
-        ]
-    }
-    </script>
+    {{-- The plans themselves - Free, Pro and Enterprise, priced from PlatformPricing - are the
+         offers on the layout's one product node, SeoUtils::softwareApplication(). --}}
+    <x-seo.webpage
+        name="Event Schedule pricing"
+        :description="__('marketing.pricing_description')" />
     </x-slot>
 
     <style {!! nonce_attr() !!}>

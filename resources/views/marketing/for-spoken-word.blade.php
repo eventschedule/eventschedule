@@ -4,63 +4,11 @@
     <x-slot name="breadcrumbTitle">For Spoken Word</x-slot>
 
     <x-slot name="structuredData">
-    <script type="application/ld+json" {!! nonce_attr() !!}>
-    {
-        "@context": "https://schema.org",
-        "@type": "Service",
-        "name": "Event Schedule for Spoken Word",
-        "description": "Run open mic sign-ups, reading series, and workshops from one link. Free registration with a capacity limit, recurring dates, and zero platform fees on tickets.",
-        "provider": {
-            "@type": "Organization",
-            "name": "Event Schedule",
-            "url": "{{ config('app.url') }}"
-        },
-        "serviceType": "Event Management",
-        "audience": {
-            "@type": "Audience",
-            "audienceType": "Poets, Storytellers, and Open Mic Hosts"
-        }
-    }
-    </script>
-    <!-- Product Schema for Rich Snippets -->
-    <script type="application/ld+json" {!! nonce_attr() !!}>
-    {
-        "@context": "https://schema.org",
-        "@type": "SoftwareApplication",
-        "name": "Event Schedule for Poets and Spoken Word",
-        "applicationCategory": "BusinessApplication",
-        "applicationSubCategory": "Open Mic and Poetry Reading Scheduling Software",
-        "operatingSystem": "Web",
-        "offers": {
-            "@type": "Offer",
-            "price": "0",
-            "priceCurrency": "{{ platform_currency() }}",
-            "description": "Free forever"
-        },
-        "featureList": [
-            "Free registration with an optional per-date capacity limit for open mic slots",
-            "A free waitlist for a full night that emails the next poet when a spot opens",
-            "Recurring weekly and monthly mics with date exceptions for holidays",
-            "Sub-schedules that keep the mic, the reading series, and workshops apart",
-            "A public submission form so performers can put themselves forward",
-            "Custom questions on the registration form for what is being read",
-            "Ticket sales through Stripe, PayPal or cash, with zero platform fees and QR check-in for featured readings",
-            "A digest of the nights you add, for email subscribers, and newsletters you write",
-            "A live calendar feed that updates itself when a night moves",
-            "Fan photos, videos, and comments from the night with an approval queue",
-            "Two-way Google, Outlook, and CalDAV calendar sync",
-            "Auto-generated flyers and social graphics for each night",
-            "Embeddable calendar for a venue, bookstore, or personal site",
-            "Online and hybrid readings for people who cannot make the room"
-        ],
-        "url": "{{ url()->current() }}",
-        "keywords": "open mic schedule, poetry reading calendar, open mic sign up sheet, spoken word event management, poetry slam scheduling, storytelling event calendar, free open mic software",
-        "provider": {
-            "@type": "Organization",
-            "name": "Event Schedule"
-        }
-    }
-    </script>
+    <x-seo.webpage
+        name="Event Schedule for Spoken Word"
+        description="Run open mic sign-ups, reading series, and workshops from one link. Free registration with a capacity limit, recurring dates, and zero platform fees on tickets."
+        audience="Poets, Storytellers, and Open Mic Hosts"
+        keywords="open mic schedule, poetry reading calendar, open mic sign up sheet, spoken word event management, poetry slam scheduling, storytelling event calendar, free open mic software" />
     <!-- HowTo Schema for Rich Snippets -->
     <script type="application/ld+json" {!! nonce_attr() !!}>
     {

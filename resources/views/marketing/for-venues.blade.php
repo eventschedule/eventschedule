@@ -4,64 +4,11 @@
     <x-slot name="breadcrumbTitle">For Venues</x-slot>
 
     <x-slot name="structuredData">
-    <script type="application/ld+json" {!! nonce_attr() !!}>
-    {
-        "@context": "https://schema.org",
-        "@type": "Service",
-        "name": "Event Schedule for Venues",
-        "description": "Run your venue calendar front to back. Accept booking requests, sell tickets through Stripe or PayPal with QR check-in, take private hire bookings, and give every room and stage its own sub-schedule. Zero platform fees.",
-        "provider": {
-            "@type": "Organization",
-            "name": "Event Schedule",
-            "url": "{{ config('app.url') }}"
-        },
-        "serviceType": "Event Management",
-        "audience": {
-            "@type": "Audience",
-            "audienceType": "Event Venues"
-        }
-    }
-    </script>
-    <!-- Product Schema for Rich Snippets -->
-    <script type="application/ld+json" {!! nonce_attr() !!}>
-    {
-        "@context": "https://schema.org",
-        "@type": "SoftwareApplication",
-        "name": "Event Schedule for Venues",
-        "applicationCategory": "BusinessApplication",
-        "applicationSubCategory": "Venue Management Software",
-        "operatingSystem": "Web",
-        "description": "Run your venue calendar front to back. Accept booking requests, sell tickets through Stripe or PayPal with QR check-in, take private hire bookings, and give every room and stage its own sub-schedule.",
-        "offers": {
-            "@type": "Offer",
-            "price": "0",
-            "priceCurrency": "{{ platform_currency() }}",
-            "description": "Free forever"
-        },
-        "featureList": [
-            "Public event calendar",
-            "Booking request inbox",
-            "QR code ticketing and check-in dashboard",
-            "Stripe and PayPal checkout with zero platform fees",
-            "Full and partial refunds from the Sales page",
-            "Interest list for events not yet on sale",
-            "Pages for acts who are not on Event Schedule yet",
-            "Reserved seating",
-            "Promo codes and gift cards",
-            "Private hire booking",
-            "Sub-schedules for rooms and stages",
-            "Custom domain and white label",
-            "Team management",
-            "Google Calendar sync"
-        ],
-        "url": "{{ url()->current() }}",
-        "keywords": "venue event calendar, venue booking management, venue schedule software, event space calendar, free venue scheduling",
-        "provider": {
-            "@type": "Organization",
-            "name": "Event Schedule"
-        }
-    }
-    </script>
+    <x-seo.webpage
+        name="Event Schedule for Venues"
+        description="Run your venue calendar front to back. Accept booking requests, sell tickets through Stripe or PayPal with QR check-in, take private hire bookings, and give every room and stage its own sub-schedule. Zero platform fees."
+        audience="Event Venues"
+        keywords="venue event calendar, venue booking management, venue schedule software, event space calendar, free venue scheduling" />
     </x-slot>
 
     {{-- Motion gate: hidden pre-reveal states only apply when this class is present,

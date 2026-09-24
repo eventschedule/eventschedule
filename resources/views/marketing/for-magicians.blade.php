@@ -4,66 +4,11 @@
     <x-slot name="breadcrumbTitle">For Magicians</x-slot>
 
     <x-slot name="structuredData">
-    <script type="application/ld+json" {!! nonce_attr() !!}>
-    {
-        "@context": "https://schema.org",
-        "@type": "Service",
-        "name": "Event Schedule for Magicians",
-        "description": "Every show, residency and private booking on one link. Sell tickets with zero platform fees and keep corporate gigs off your public schedule. Free forever.",
-        "provider": {
-            "@type": "Organization",
-            "name": "Event Schedule",
-            "url": "{{ config('app.url') }}"
-        },
-        "serviceType": "Event Management",
-        "audience": {
-            "@type": "Audience",
-            "audienceType": "Magicians"
-        }
-    }
-    </script>
-    <!-- Product Schema for Rich Snippets -->
-    <script type="application/ld+json" {!! nonce_attr() !!}>
-    {
-        "@context": "https://schema.org",
-        "@type": "SoftwareApplication",
-        "name": "Event Schedule for Magicians",
-        "applicationCategory": "BusinessApplication",
-        "applicationSubCategory": "Magician Scheduling Software",
-        "operatingSystem": "Web",
-        "description": "Every show, residency and private booking on one link. Sell tickets with zero platform fees and keep corporate gigs off your public schedule. Free forever.",
-        "offers": {
-            "@type": "Offer",
-            "price": "0",
-            "priceCurrency": "{{ platform_currency() }}",
-            "description": "Free forever"
-        },
-        "featureList": [
-            "One link where planners and fans find every show",
-            "A booking request form planners fill in from that link",
-            "Ticketing through Stripe, PayPal or cash, with zero platform fees, QR check-in, and general admission, VIP, and meet-and-greet tiers",
-            "Internal and unlisted events for private and corporate bookings",
-            "Recurring weekly residencies with date exceptions",
-            "Season passes and balance-tracked gift cards",
-            "Ticket waitlists for sold-out shows",
-            "An email-only list for fans waiting on a show's tickets",
-            "Embeddable ticket widget and calendar for any website",
-            "A live calendar feed fans subscribe to",
-            "Auto-generated show posters and social graphics",
-            "AI event parsing that turns a booking email into a draft event",
-            "Two-way Google, Outlook, and CalDAV calendar sync",
-            "Team availability marked against your calendar",
-            "Direct fan newsletters and automatic new-show digests",
-            "Claimable pages for acts a venue lists by name"
-        ],
-        "url": "{{ url()->current() }}",
-        "keywords": "magician schedule, magic show calendar, magician booking platform, magic event management, free magician scheduling, private event magician booking, close-up magic schedule, corporate magician calendar, mentalist show scheduling",
-        "provider": {
-            "@type": "Organization",
-            "name": "Event Schedule"
-        }
-    }
-    </script>
+    <x-seo.webpage
+        name="Event Schedule for Magicians"
+        description="Every show, residency and private booking on one link. Sell tickets with zero platform fees and keep corporate gigs off your public schedule. Free forever."
+        audience="Magicians"
+        keywords="magician schedule, magic show calendar, magician booking platform, magic event management, free magician scheduling, private event magician booking, close-up magic schedule, corporate magician calendar, mentalist show scheduling" />
     <!-- HowTo Schema for Rich Snippets -->
     <script type="application/ld+json" {!! nonce_attr() !!}>
     {

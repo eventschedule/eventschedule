@@ -4,34 +4,9 @@
     <x-slot name="breadcrumbTitle">Installments</x-slot>
 
     <x-slot name="structuredData">
-    <script type="application/ld+json" {!! nonce_attr() !!}>
-    {
-        "@context": "https://schema.org",
-        "@type": "SoftwareApplication",
-        "name": "Event Schedule - Installment Payments",
-        "description": "Split an expensive ticket over monthly payments charged automatically to the buyer's saved card, with no interest and no fee, and the ticket valid from the first payment.",
-        "applicationCategory": "BusinessApplication",
-        "operatingSystem": "Web",
-        "featureList": [
-            "Split an order over a chosen number of monthly payments",
-            "The first payment is taken at checkout and the ticket is valid immediately",
-            "No interest and no fee - the total is the same either way",
-            "Every date and amount shown before the buyer commits",
-            "The plan finishes before the event, and the editor checks that it does",
-            "Only offered above an order value you choose",
-            "A reminder two days before each payment, naming the card and the amount",
-            "A payment-plan page where the buyer can pay early or change their card",
-            "Progress, balances and a cash-flow forecast on the Sales page",
-            "Refunded leg by leg through Stripe, with the payments still to come cancelled"
-        ],
-        "offers": {
-            "@type": "Offer",
-            "price": "{{ $proMonthly }}",
-            "priceCurrency": "{{ platform_currency() }}",
-            "description": "Available on the Pro plan, on events paid through Stripe"
-        }
-    }
-    </script>
+    <x-seo.webpage
+        name="Event Schedule - Installment Payments"
+        description="Split an expensive ticket over monthly payments charged automatically to the buyer's saved card, with no interest and no fee, and the ticket valid from the first payment." />
     </x-slot>
 
     {{-- Motion gate: the hidden pre-reveal states below only apply when this class is present, so

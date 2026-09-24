@@ -4,64 +4,11 @@
     <x-slot name="breadcrumbTitle">For Live Concerts</x-slot>
 
     <x-slot name="structuredData">
-    <script type="application/ld+json" {!! nonce_attr() !!}>
-    {
-        "@context": "https://schema.org",
-        "@type": "Service",
-        "name": "Event Schedule for Live Concerts",
-        "description": "Put a whole tour routing online at once: a room, a door time and an on-sale in every city, sold from one address with zero platform fees.",
-        "provider": {
-            "@type": "Organization",
-            "name": "Event Schedule",
-            "url": "{{ config('app.url') }}"
-        },
-        "serviceType": "Event Management",
-        "audience": {
-            "@type": "Audience",
-            "audienceType": "Concert Promoters and Touring Shows"
-        }
-    }
-    </script>
-    <!-- Product Schema for Rich Snippets -->
-    <script type="application/ld+json" {!! nonce_attr() !!}>
-    {
-        "@context": "https://schema.org",
-        "@type": "SoftwareApplication",
-        "name": "Event Schedule for Live Concerts",
-        "applicationCategory": "BusinessApplication",
-        "applicationSubCategory": "Concert and Tour Scheduling Software",
-        "operatingSystem": "Web",
-        "description": "A tour routing published as one schedule: every date with its own room and door time, its own ticket types, and a running order on the event page.",
-        "offers": {
-            "@type": "Offer",
-            "price": "0",
-            "priceCurrency": "{{ platform_currency() }}",
-            "description": "Free forever"
-        },
-        "featureList": [
-            "Every tour date is its own event with its own venue and door time",
-            "One public address for the whole routing, embeddable on your own site",
-            "A running order on the event page built from event parts",
-            "Named ticket types with their own price, quantity and sales window",
-            "Ticket inventory counted per occurrence date",
-            "Fans can leave an email address to hear when a date goes on sale",
-            "Zero platform fees on ticket sales through your own Stripe or PayPal account",
-            "Free registration with a capacity limit for free shows",
-            "Recurring residencies with day-of-week patterns and date exceptions",
-            "Direct newsletters to your followers, with open and click rates",
-            "Per-event views, sales and revenue in built-in analytics",
-            "Two-way Google, Outlook and CalDAV calendar sync",
-            "An online date carries a link to wherever you are streaming"
-        ],
-        "url": "{{ url()->current() }}",
-        "keywords": "live concert streaming, virtual concert tickets, livestream concerts, tour routing, concert promoter calendar, gig schedule",
-        "screenshot": "{{ asset('images/social/for-live-concerts.jpg') }}",
-        "provider": {
-            "@type": "Organization",
-            "name": "Event Schedule"
-        }
-    }
-    </script>
+    <x-seo.webpage
+        name="Event Schedule for Live Concerts"
+        description="Put a whole tour routing online at once: a room, a door time and an on-sale in every city, sold from one address with zero platform fees."
+        audience="Concert Promoters and Touring Shows"
+        keywords="live concert streaming, virtual concert tickets, livestream concerts, tour routing, concert promoter calendar, gig schedule" />
     </x-slot>
 
     {{-- Motion gate: hidden pre-reveal states only apply when this class is present,

@@ -4,52 +4,9 @@
     <x-slot name="breadcrumbTitle">Boost</x-slot>
 
     <x-slot name="structuredData">
-    <script type="application/ld+json" {!! nonce_attr() !!}>
-    {
-        "@context": "https://schema.org",
-        "@type": "Service",
-        "name": "Event Schedule Boost",
-        "description": "Turn your event details into live Facebook and Instagram ads. Automated targeting, a prepaid budget, and campaign numbers while it runs, with no ad manager experience required.",
-        "provider": {
-            "@type": "Organization",
-            "name": "Event Schedule",
-            "url": "{{ config('app.url') }}"
-        },
-        "serviceType": "Event Advertising Automation"
-    }
-    </script>
-    <script type="application/ld+json" {!! nonce_attr() !!}>
-    {
-        "@context": "https://schema.org",
-        "@type": "SoftwareApplication",
-        "name": "Event Schedule Boost",
-        "applicationCategory": "BusinessApplication",
-        "applicationSubCategory": "Event Advertising Software",
-        "operatingSystem": "Web",
-        "description": "Turn your event details into live Facebook and Instagram ads. Automated targeting, a prepaid budget, and campaign numbers while it runs, with no ad manager experience required.",
-        "offers": {
-            "@type": "Offer",
-            "price": "0",
-            "priceCurrency": "{{ platform_currency() }}",
-            "description": "Ad budget starts at $10, plus a 20% service fee. Boost requires a Pro schedule."
-        },
-        "featureList": [
-            "Facebook and Instagram campaigns built from an event you have already published",
-            "Automatic targeting from the event's location, category and format",
-            "Delivery across Facebook and Instagram, with the surface left to Meta",
-            "Prepaid budgets from $10, with a per-campaign ceiling that grows with completed campaigns",
-            "Impressions, reach, clicks, CTR, CPC, CPM and Meta Pixel conversions",
-            "Pause, resume or cancel at any time",
-            "Unspent budget and its share of the service fee refunded automatically",
-            "On-network promotions billed by CPM or CPC where the site runs a promotions network"
-        ],
-        "url": "{{ url()->current() }}",
-        "provider": {
-            "@type": "Organization",
-            "name": "Event Schedule"
-        }
-    }
-    </script>
+    <x-seo.webpage
+        name="Event Schedule Boost"
+        description="Turn your event details into live Facebook and Instagram ads. Automated targeting, a prepaid budget, and campaign numbers while it runs, with no ad manager experience required." />
     </x-slot>
 
     {{-- Motion gate: hidden pre-reveal states only apply when this class is present,

@@ -9,42 +9,10 @@
     <x-slot name="breadcrumbTitle">For AI Agents</x-slot>
 
     <x-slot name="structuredData">
-    <script type="application/ld+json" {!! nonce_attr() !!}>
-    {
-        "@context": "https://schema.org",
-        "@type": "SoftwareApplication",
-        "name": "Event Schedule API",
-        "applicationCategory": "DeveloperApplication",
-        "operatingSystem": "Web",
-        "description": "A REST API over the whole of Event Schedule: schedules, sub-schedules, events, recurrences, ticket types, sales and refunds, post-event feedback and fan content, with an OpenAPI 3.0 spec, llms.txt and agents.json so an agent can discover it and drive it without a human in the loop.",
-        "offers": {
-            "@type": "Offer",
-            "price": "{{ $proMonthly }}",
-            "priceCurrency": "{{ platform_currency() }}",
-            "description": "REST API access is part of the Pro plan. Selfhosted installations include it at no cost."
-        },
-        "featureList": [
-            "27 REST endpoints across registration, schedules, sub-schedules, events, categories, sales, feedback and fan content",
-            "OpenAPI 3.0 specification at /api/openapi.json",
-            "llms.txt and llms-full.txt for LLM discovery",
-            "agents.json describing four multi-step agent flows",
-            "API key authentication through the X-API-Key header",
-            "Recurring events with a seven-bit day-of-week mask and three ways to end",
-            "Ticket types, agenda parts, members and a venue in the same create call",
-            "Full and partial refunds through Stripe or PayPal, with an idempotency key for safe retries",
-            "HMAC-SHA256 signed webhooks for fourteen event types",
-            "300 GET and 30 write requests per minute, per IP",
-            "Encoded string IDs rather than sequential integers",
-            "Zero platform fees on ticket sales"
-        ],
-        "url": "{{ url()->current() }}",
-        "keywords": "event API, scheduling API, AI agent event management, event automation API, REST API event scheduling, llms.txt, agents.json, OpenAPI",
-        "provider": {
-            "@type": "Organization",
-            "name": "Event Schedule"
-        }
-    }
-    </script>
+    <x-seo.webpage
+        name="Event Schedule API"
+        description="A REST API over the whole of Event Schedule: schedules, sub-schedules, events, recurrences, ticket types, sales and refunds, post-event feedback and fan content, with an OpenAPI 3.0 spec, llms.txt and agents.json so an agent can discover it and drive it without a human in the loop."
+        keywords="event API, scheduling API, AI agent event management, event automation API, REST API event scheduling, llms.txt, agents.json, OpenAPI" />
     </x-slot>
 
     {{-- Motion gate: hidden pre-reveal states only apply when this class is present,

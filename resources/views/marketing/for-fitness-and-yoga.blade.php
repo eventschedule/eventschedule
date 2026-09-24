@@ -4,64 +4,11 @@
     <x-slot name="breadcrumbTitle">For Fitness & Yoga</x-slot>
 
     <x-slot name="structuredData">
-    <script type="application/ld+json" {!! nonce_attr() !!}>
-    {
-        "@context": "https://schema.org",
-        "@type": "Service",
-        "name": "Event Schedule for Fitness & Yoga",
-        "description": "Publish a weekly class timetable once as recurring classes, then sell visits off a pass instead of seats at a single night. Zero platform fees.",
-        "provider": {
-            "@type": "Organization",
-            "name": "Event Schedule",
-            "url": "{{ config('app.url') }}"
-        },
-        "serviceType": "Event Management",
-        "audience": {
-            "@type": "Audience",
-            "audienceType": "Fitness & Yoga Instructors"
-        }
-    }
-    </script>
-    <!-- Product Schema for Rich Snippets -->
-    <script type="application/ld+json" {!! nonce_attr() !!}>
-    {
-        "@context": "https://schema.org",
-        "@type": "SoftwareApplication",
-        "name": "Event Schedule for Fitness & Yoga Instructors",
-        "applicationCategory": "BusinessApplication",
-        "applicationSubCategory": "Fitness Class Scheduling Software",
-        "operatingSystem": "Web",
-        "description": "Set each class up once as a recurring event with the days it runs and a start time, then sell visit passes, memberships and drop-ins with zero platform fees. Built for yoga teachers, personal trainers and fitness studios.",
-        "offers": {
-            "@type": "Offer",
-            "price": "0",
-            "priceCurrency": "{{ platform_currency() }}",
-            "description": "Free forever"
-        },
-        "featureList": [
-            "Recurring classes with a day-of-week pattern, date exceptions and an end",
-            "Visit passes, memberships, festival passes and season passes",
-            "A cancellation deadline per pass, with forfeit or block after it",
-            "A cap on how many advance seats pass holders may take per date",
-            "Free registration with a capacity limit per class date",
-            "QR check-in with a real-time check-in dashboard",
-            "Zero platform fees on class payments through your own Stripe or PayPal account, or cash at the desk",
-            "Full or partial refunds of Stripe and PayPal payments from the Sales page",
-            "Bookable one-to-one appointment types on a public booking page",
-            "Newsletters to the students who follow you, with open and click rates",
-            "Two-way Google, Outlook and CalDAV calendar sync",
-            "A live calendar feed of the timetable that students subscribe to once",
-            "Tell me when tickets go on sale, per class date, with no account needed",
-            "Embeddable timetable for the website you already have"
-        ],
-        "url": "{{ url()->current() }}",
-        "keywords": "fitness class schedule, yoga class calendar, class pass, studio timetable, fitness studio scheduling, free fitness scheduling",
-        "provider": {
-            "@type": "Organization",
-            "name": "Event Schedule"
-        }
-    }
-    </script>
+    <x-seo.webpage
+        name="Event Schedule for Fitness & Yoga"
+        description="Publish a weekly class timetable once as recurring classes, then sell visits off a pass instead of seats at a single night. Zero platform fees."
+        audience="Fitness & Yoga Instructors"
+        keywords="fitness class schedule, yoga class calendar, class pass, studio timetable, fitness studio scheduling, free fitness scheduling" />
     <!-- HowTo Schema for Rich Snippets -->
     <script type="application/ld+json" {!! nonce_attr() !!}>
     {

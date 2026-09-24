@@ -4,65 +4,11 @@
     <x-slot name="breadcrumbTitle">For Musicians</x-slot>
 
     <x-slot name="structuredData">
-    <script type="application/ld+json" {!! nonce_attr() !!}>
-    {
-        "@context": "https://schema.org",
-        "@type": "Service",
-        "name": "Event Schedule for Musicians",
-        "description": "Put every gig and tour date on one link. Sell tickets with zero platform fees, email fans directly, and let venues add you to their bills. Free forever.",
-        "provider": {
-            "@type": "Organization",
-            "name": "Event Schedule",
-            "url": "{{ config('app.url') }}"
-        },
-        "serviceType": "Event Management",
-        "audience": {
-            "@type": "Audience",
-            "audienceType": "Musicians"
-        }
-    }
-    </script>
-    <!-- Product Schema for Rich Snippets -->
-    <script type="application/ld+json" {!! nonce_attr() !!}>
-    {
-        "@context": "https://schema.org",
-        "@type": "SoftwareApplication",
-        "name": "Event Schedule for Musicians",
-        "applicationCategory": "BusinessApplication",
-        "applicationSubCategory": "Musician Scheduling Software",
-        "operatingSystem": "Web",
-        "description": "Share your tour dates, sell tickets, and reach fans directly with newsletters. Built for musicians, bands, and solo artists.",
-        "offers": {
-            "@type": "Offer",
-            "price": "0",
-            "priceCurrency": "{{ platform_currency() }}",
-            "description": "Free forever"
-        },
-        "featureList": [
-            "Tour date page with a custom link",
-            "Zero-fee ticket sales through Stripe, PayPal or cash, with QR door check-in",
-            "Refunds, full or partial, back through Stripe or PayPal",
-            "Direct fan newsletters with open and click stats",
-            "Fan email sign-ups with an automatic new-date digest",
-            "Ticket alerts for fans before tickets go on sale",
-            "A live calendar feed fans can subscribe to",
-            "Recurring events for weekly residencies",
-            "Two-way Google Calendar, Outlook and CalDAV sync for gigs, rehearsals, and sessions",
-            "Venue bookings that land on your schedule once you accept",
-            "A page to claim when a venue lists you before you join",
-            "Band, manager, and agent team access on Enterprise",
-            "Waitlists for sold-out shows on Pro",
-            "AI parsing of booking emails into events",
-            "Auto-generated show graphics"
-        ],
-        "url": "{{ url()->current() }}",
-        "keywords": "musician schedule, band tour dates, share gig schedule, musician event calendar, band booking platform, free musician scheduling, band website with tour dates, residency schedule",
-        "provider": {
-            "@type": "Organization",
-            "name": "Event Schedule"
-        }
-    }
-    </script>
+    <x-seo.webpage
+        name="Event Schedule for Musicians"
+        description="Put every gig and tour date on one link. Sell tickets with zero platform fees, email fans directly, and let venues add you to their bills. Free forever."
+        audience="Musicians"
+        keywords="musician schedule, band tour dates, share gig schedule, musician event calendar, band booking platform, free musician scheduling, band website with tour dates, residency schedule" />
     <!-- HowTo Schema for Rich Snippets -->
     <script type="application/ld+json" {!! nonce_attr() !!}>
     {

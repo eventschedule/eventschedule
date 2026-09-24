@@ -4,43 +4,9 @@
     <x-slot name="breadcrumbTitle">Event Feedback</x-slot>
 
     <x-slot name="structuredData">
-    <!-- Product Schema for Rich Snippets -->
-    <script type="application/ld+json" {!! nonce_attr() !!}>
-    {
-        "@context": "https://schema.org",
-        "@type": "SoftwareApplication",
-        "name": "Event Schedule Post-Event Feedback",
-        "applicationCategory": "BusinessApplication",
-        "applicationSubCategory": "Feedback Collection Software",
-        "operatingSystem": "Web",
-        "description": "After an event ends, everyone who held a booking for that date is emailed a private feedback link: a required rating from one to five and an optional comment of up to 2,000 characters. One card per booking. Read them on the Feedback tab, export to CSV, or publish them on the event page.",
-        "offers": {
-            "@type": "Offer",
-            "price": "0",
-            "priceCurrency": "{{ platform_currency() }}",
-            "description": "Free to sign up; post-event feedback is included on the Pro plan"
-        },
-        "featureList": [
-            "A required rating from 1 to 5 and an optional comment up to 2,000 characters",
-            "Requests emailed to everyone who held a booking, paid tickets and free RSVP registrations alike",
-            "Bookings cancelled or refunded in full are not asked and drop out of the published reviews",
-            "One card per booking, enforced in the database",
-            "A delay of 1, 2, 6, 12, 24 or 48 hours after each occurrence ends",
-            "No request goes out more than 30 days after the event ended",
-            "A per-event override of the schedule-level setting",
-            "A form branded with your schedule's logo, colour and font",
-            "Feedback kept private by default, or published on the event page as attendee reviews",
-            "Pending, sent, responded and response-rate counters on the Feedback tab",
-            "Resend, send-now and cancel-all controls for pending requests",
-            "CSV export, a feedback.submitted webhook, and a REST API endpoint"
-        ],
-        "url": "{{ url()->current() }}",
-        "provider": {
-            "@type": "Organization",
-            "name": "Event Schedule"
-        }
-    }
-    </script>
+    <x-seo.webpage
+        name="Event Schedule Post-Event Feedback"
+        description="After an event ends, everyone who held a booking for that date is emailed a private feedback link: a required rating from one to five and an optional comment of up to 2,000 characters. One card per booking. Read them on the Feedback tab, export to CSV, or publish them on the event page." />
     </x-slot>
 
     {{-- Motion gate: hidden pre-reveal states only apply when this class is present,

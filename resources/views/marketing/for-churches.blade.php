@@ -4,65 +4,11 @@
     <x-slot name="breadcrumbTitle">For Churches</x-slot>
 
     <x-slot name="structuredData">
-    <script type="application/ld+json" {!! nonce_attr() !!}>
-    {
-        "@context": "https://schema.org",
-        "@type": "Service",
-        "name": "Event Schedule for Churches",
-        "description": "A church event calendar where services and weekly groups are set once as recurring events, each ministry has its own link, and special services take free sign-ups with a capacity.",
-        "provider": {
-            "@type": "Organization",
-            "name": "Event Schedule",
-            "url": "{{ config('app.url') }}"
-        },
-        "serviceType": "Event Management",
-        "audience": {
-            "@type": "Audience",
-            "audienceType": "Churches, Parishes, Ministries & Congregations"
-        }
-    }
-    </script>
-    <!-- Product Schema for Rich Snippets -->
-    <script type="application/ld+json" {!! nonce_attr() !!}>
-    {
-        "@context": "https://schema.org",
-        "@type": "SoftwareApplication",
-        "name": "Event Schedule for Churches",
-        "applicationCategory": "BusinessApplication",
-        "applicationSubCategory": "Church Event Calendar Software",
-        "operatingSystem": "Web",
-        "offers": {
-            "@type": "Offer",
-            "price": "0",
-            "priceCurrency": "{{ platform_currency() }}",
-            "description": "Free forever"
-        },
-        "featureList": [
-            "Weekly services and groups as recurring events: weekly on chosen days, every few weeks, monthly by weekday or yearly",
-            "Date exceptions that take out a single week or add a one-off date",
-            "Sub-schedules for worship, groups, youth, music and community work, each with its own link",
-            "Free registration with a capacity, counted separately for each date",
-            "Per-guest names on a free sign-up, so a family of five is five places",
-            "Paid tickets for a weekend away, a concert or a fundraising dinner on the Pro plan, with zero platform fees",
-            "Installment payments for a camp or trip, on the Pro plan through Stripe",
-            "QR check-in at the door on any phone",
-            "A live calendar feed members subscribe to once",
-            "A short digest of new dates to confirmed email subscribers, at most one every 72 hours",
-            "Newsletters you write and send to the congregation",
-            "An embeddable calendar for the church website and a downloadable QR code for the notice board",
-            "Event names and descriptions translated into one other language",
-            "Hall-hire requests from outside groups that stay pending until you accept them",
-            "One bookable appointment type with weekly hours",
-            "Two-way Google, Outlook and CalDAV calendar sync"
-        ],
-        "url": "{{ url()->current() }}",
-        "keywords": "church event calendar, church calendar software, parish calendar, ministry schedule, church events sign up, church website calendar",
-        "provider": {
-            "@type": "Organization",
-            "name": "Event Schedule"
-        }
-    }
-    </script>
+    <x-seo.webpage
+        name="Event Schedule for Churches"
+        description="A church event calendar where services and weekly groups are set once as recurring events, each ministry has its own link, and special services take free sign-ups with a capacity."
+        audience="Churches, Parishes, Ministries & Congregations"
+        keywords="church event calendar, church calendar software, parish calendar, ministry schedule, church events sign up, church website calendar" />
     <!-- HowTo Schema for Rich Snippets -->
     <script type="application/ld+json" {!! nonce_attr() !!}>
     {

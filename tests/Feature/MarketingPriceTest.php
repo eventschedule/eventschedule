@@ -228,6 +228,7 @@ class MarketingPriceTest extends TestCase
             $sources[str_replace(resource_path('views/marketing').'/', '', $file->getPathname())] = $file->getPathname();
         }
         $sources['MarketingController.php'] = app_path('Http/Controllers/MarketingController.php');
+        $sources['SeoUtils.php'] = app_path('Utils/SeoUtils.php');
 
         foreach ($sources as $relative => $path) {
             foreach (explode("\n", File::get($path)) as $index => $line) {
@@ -413,24 +414,27 @@ class MarketingPriceTest extends TestCase
             'Timely starts at $9/mo', 'From $9/mo, billed annually', 'Timely plans start at $9/mo',
         ];
 
-        foreach (explode("\n", File::get($path)) as $index => $line) {
-            $number = $index + 1;
-            $trimmed = ltrim($line);
+        // SeoUtils builds the product node's plan offers, which every marketing page carries.
+        foreach (['MarketingController.php' => $path, 'SeoUtils.php' => app_path('Utils/SeoUtils.php')] as $file => $source) {
+            foreach (explode("\n", File::get($source)) as $index => $line) {
+                $number = $index + 1;
+                $trimmed = ltrim($line);
 
-            // Comments explain the prices; they do not render.
-            if (str_starts_with($trimmed, '*') || str_starts_with($trimmed, '//') || str_starts_with($trimmed, '/*')) {
-                continue;
-            }
+                // Comments explain the prices; they do not render.
+                if (str_starts_with($trimmed, '*') || str_starts_with($trimmed, '//') || str_starts_with($trimmed, '/*')) {
+                    continue;
+                }
 
-            // A line can legitimately carry a competitor number AND one of ours, so strip the
-            // known competitor phrases before looking for a literal of our own.
-            $stripped = str_replace($competitorPrices, '', $line);
+                // A line can legitimately carry a competitor number AND one of ours, so strip the
+                // known competitor phrases before looking for a literal of our own.
+                $stripped = str_replace($competitorPrices, '', $line);
 
-            // Both generations. The retired 5/15/50/150 must not return, and the current
-            // 9/29/90/290 must not be written down either - that is the literal the NEXT price
-            // change would leave behind, and the old regex could not see it.
-            if (preg_match('~\$('.self::PLAN_AMOUNTS.')\b~', $stripped)) {
-                $offenders[] = "MarketingController.php:{$number}: ".trim(mb_substr($line, 0, 120));
+                // Both generations. The retired 5/15/50/150 must not return, and the current
+                // 9/29/90/290 must not be written down either - that is the literal the NEXT price
+                // change would leave behind, and the old regex could not see it.
+                if (preg_match('~\$('.self::PLAN_AMOUNTS.')\b~', $stripped)) {
+                    $offenders[] = "{$file}:{$number}: ".trim(mb_substr($line, 0, 120));
+                }
             }
         }
 
@@ -505,7 +509,10 @@ class MarketingPriceTest extends TestCase
         PlatformPricing::flush();
 
         // One view per context the sweep had to handle: HTML prose, an @php FAQ array,
-        // JSON-LD structured data, and an Enterprise-priced page.
+        // JSON-LD structured data, and an Enterprise-priced page. gift-cards is the JSON-LD
+        // case: its own product node used to quote the Pro price, and the offers now come from
+        // the layout's one node, SeoUtils::softwareApplication(), which every one of these
+        // renders - so this also holds that node to the configured amounts.
         $expectations = [
             'marketing.pricing' => '77',
             'marketing.gift-cards' => '77',
@@ -543,6 +550,7 @@ class MarketingPriceTest extends TestCase
             $sources[str_replace(resource_path('views/marketing').'/', '', $file->getPathname())] = $file->getPathname();
         }
         $sources['MarketingController.php'] = app_path('Http/Controllers/MarketingController.php');
+        $sources['SeoUtils.php'] = app_path('Utils/SeoUtils.php');
 
         // "platform fee", "we take", "0% platform fee", "From $0/mo" - the phrases that make a
         // zero a claim about what WE charge.
@@ -622,6 +630,9 @@ class MarketingPriceTest extends TestCase
             'app/Models/Event.php' => app_path('Models/Event.php'),
             'app/Http/Controllers/MarketingController.php' => app_path('Http/Controllers/MarketingController.php'),
             'app/Http/Controllers/RoleController.php' => app_path('Http/Controllers/RoleController.php'),
+            // Every marketing page's plan offers, since the per-page product nodes were folded
+            // into SeoUtils::softwareApplication().
+            'app/Utils/SeoUtils.php' => app_path('Utils/SeoUtils.php'),
         ];
 
         foreach ($paths as $relative => $path) {

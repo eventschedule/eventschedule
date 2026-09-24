@@ -4,63 +4,11 @@
     <x-slot name="breadcrumbTitle">For Theater Performers</x-slot>
 
     <x-slot name="structuredData">
-    <script type="application/ld+json" {!! nonce_attr() !!}>
-    {
-        "@context": "https://schema.org",
-        "@type": "Service",
-        "name": "Event Schedule for Theater Performers",
-        "description": "A public schedule that doubles as a credits list: past productions stay dated and visible, and companies that cast you can put the dates on your page for you to accept.",
-        "provider": {
-            "@type": "Organization",
-            "name": "Event Schedule",
-            "url": "{{ config('app.url') }}"
-        },
-        "serviceType": "Event Management",
-        "audience": {
-            "@type": "Audience",
-            "audienceType": "Theater Performers"
-        }
-    }
-    </script>
-    <!-- Product Schema for Rich Snippets -->
-    <script type="application/ld+json" {!! nonce_attr() !!}>
-    {
-        "@context": "https://schema.org",
-        "@type": "SoftwareApplication",
-        "name": "Event Schedule for Theater Performers",
-        "applicationCategory": "BusinessApplication",
-        "applicationSubCategory": "Performer Scheduling Software",
-        "operatingSystem": "Web",
-        "offers": {
-            "@type": "Offer",
-            "price": "0",
-            "priceCurrency": "{{ platform_currency() }}",
-            "description": "Free forever"
-        },
-        "featureList": [
-            "A list layout that shows every production, with past work kept under its own divider",
-            "Past productions stay public and dated, or can be hidden with one toggle",
-            "Booking requests from companies that want to cast you",
-            "Booking requests wait for the performer to accept them before they go on their schedule",
-            "A page a company creates when it lists a performer by name, which the performer can claim with its credits attached",
-            "Sub-schedules that keep productions, workshops and auditions apart",
-            "Draft events that stay members-only, so auditions are not public",
-            "Runs set up once as a recurring event with a closing performance",
-            "Named ticket types with their own prices, quantities and sales windows",
-            "QR check-in for work you produce yourself, free on every plan",
-            "Zero platform fees on ticket sales, paid through Stripe, PayPal, Invoice Ninja, Payfast, a payment link or cash",
-            "Direct newsletters to the people who follow you",
-            "Two-way Google, Outlook and CalDAV calendar sync",
-            "Embeddable calendar for your own website"
-        ],
-        "url": "{{ url()->current() }}",
-        "keywords": "actor schedule, theatre credits list, performer calendar, casting booking requests, actor resume online, theatre performance dates",
-        "provider": {
-            "@type": "Organization",
-            "name": "Event Schedule"
-        }
-    }
-    </script>
+    <x-seo.webpage
+        name="Event Schedule for Theater Performers"
+        description="A public schedule that doubles as a credits list: past productions stay dated and visible, and companies that cast you can put the dates on your page for you to accept."
+        audience="Theater Performers"
+        keywords="actor schedule, theatre credits list, performer calendar, casting booking requests, actor resume online, theatre performance dates" />
     </x-slot>
 
     {{-- Motion gate: hidden pre-reveal states only apply when this class is present,

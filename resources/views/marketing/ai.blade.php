@@ -4,64 +4,10 @@
     <x-slot name="breadcrumbTitle">AI Features</x-slot>
 
     <x-slot name="structuredData">
-    <script type="application/ld+json" {!! nonce_attr() !!}>
-    {
-        "@context": "https://schema.org",
-        "@type": "Service",
-        "name": "Event Schedule AI Features",
-        "description": "Paste the text or drop the image and AI fills the event form: name, date, duration, venue, address, performers, price, currency and registration link. Agenda scanning, description writing, flyer and style generation, WhatsApp event creation and whole-schedule translation.",
-        "provider": {
-            "@type": "Organization",
-            "name": "Event Schedule",
-            "url": "{{ config('app.url') }}"
-        },
-        "serviceType": "AI-Powered Event Management"
-    }
-    </script>
-    <script type="application/ld+json" {!! nonce_attr() !!}>
-    {
-        "@context": "https://schema.org",
-        "@type": "SoftwareApplication",
-        "name": "Event Schedule AI Features",
-        "applicationCategory": "BusinessApplication",
-        "applicationSubCategory": "AI Event Management Software",
-        "operatingSystem": "Web",
-        "description": "AI event parsing from pasted text or a dropped image, on every plan. Agenda scanning, description writing, flyer and style generation, graphic email text and WhatsApp event creation on Enterprise. Whole-schedule translation into {{ count(config('app.supported_languages')) }} languages, free.",
-        "offers": {
-            "@type": "Offer",
-            "price": "0",
-            "priceCurrency": "{{ platform_currency() }}",
-            "description": "AI event parsing and translation are included free"
-        },
-        "featureList": [
-            "Event parsing from pasted text",
-            "Event parsing from a dropped, pasted or uploaded image (JPEG, PNG, GIF, WebP)",
-            "One document can yield several events",
-            "Extraction into the real event fields, including price, currency and country code",
-            "Category matched against your own category list",
-            "Venue resolution against venues you already have, before a new one is created",
-            "Performer matching against talent already on the schedule",
-            "A new performer or venue gets a page of its own, kept out of search engines until claimed",
-            "Duplicate detection against events already on the schedule",
-            "Agenda and setlist scanning into event parts (Enterprise)",
-            "Custom agenda prompts per event or as a schedule default (Enterprise)",
-            "Schedule and event description writing (Enterprise)",
-            "Flyer image generation (Enterprise)",
-            "Schedule style generation: profile, header and background images, accent colour and font (Enterprise)",
-            "AI pass over graphic email text (Enterprise)",
-            "Event creation over WhatsApp (Enterprise)",
-            "Whole-schedule translation into {{ count(config('app.supported_languages')) }} languages",
-            "REST API, OpenAPI 3.0 spec, llms.txt and agents.json for AI agents",
-            "Selfhosted installs use their own API keys with no daily caps"
-        ],
-        "url": "{{ url()->current() }}",
-        "keywords": "AI event import, parse event from flyer, event data extraction, AI agenda scanning, AI event flyer, schedule translation",
-        "provider": {
-            "@type": "Organization",
-            "name": "Event Schedule"
-        }
-    }
-    </script>
+    <x-seo.webpage
+        name="Event Schedule AI Features"
+        description="Paste the text or drop the image and AI fills the event form: name, date, duration, venue, address, performers, price, currency and registration link. Agenda scanning, description writing, flyer and style generation, WhatsApp event creation and whole-schedule translation."
+        keywords="AI event import, parse event from flyer, event data extraction, AI agenda scanning, AI event flyer, schedule translation" />
     </x-slot>
 
     {{-- Motion gate: hidden pre-reveal states only apply when this class is present,

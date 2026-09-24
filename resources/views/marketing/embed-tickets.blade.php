@@ -4,54 +4,9 @@
     <x-slot name="breadcrumbTitle">Embed Tickets</x-slot>
 
     <x-slot name="structuredData">
-    <script type="application/ld+json" {!! nonce_attr() !!}>
-    {
-        "@context": "https://schema.org",
-        "@type": "Service",
-        "name": "Event Schedule Embed Tickets",
-        "description": "Embed a ticket purchase or RSVP form on any website with one iframe tag. Supports every payment method, dark mode, and 12 languages.",
-        "provider": {
-            "@type": "Organization",
-            "name": "Event Schedule",
-            "url": "{{ config('app.url') }}"
-        },
-        "serviceType": "Embeddable Ticket Widget"
-    }
-    </script>
-    <script type="application/ld+json" {!! nonce_attr() !!}>
-    {
-        "@context": "https://schema.org",
-        "@type": "SoftwareApplication",
-        "name": "Event Schedule - Embed Tickets",
-        "applicationCategory": "BusinessApplication",
-        "applicationSubCategory": "Website Integration Software",
-        "operatingSystem": "Web",
-        "description": "Put the whole ticket checkout on your own website with one iframe tag: ticket types, buyer details, custom questions, promo codes, gift cards and payment.",
-        "offers": {
-            "@type": "Offer",
-            "price": "{{ $proMonthly }}",
-            "priceCurrency": "{{ platform_currency() }}",
-            "description": "The ticket widget is on the Pro plan; the RSVP widget is free on every plan"
-        },
-        "featureList": [
-            "One iframe tag, no script and no dependency",
-            "Every ticket type, add-on and pass on sale for that date",
-            "Buyer details, per-attendee details, and your own custom questions",
-            "Promo codes, with a code pre-fillable from the embed URL",
-            "Stripe, PayPal, Payfast, Invoice Ninja, custom payment URL, and cash or at the door",
-            "Zero platform fees on ticket sales",
-            "RSVP and registration mode for events that take no payment",
-            "Light or dark, following the visitor's own system setting",
-            "12 interface languages, including right-to-left layout",
-            "Served noindex, and never carrying ads"
-        ],
-        "url": "{{ url()->current() }}",
-        "provider": {
-            "@type": "Organization",
-            "name": "Event Schedule"
-        }
-    }
-    </script>
+    <x-seo.webpage
+        name="Event Schedule Embed Tickets"
+        description="Embed a ticket purchase or RSVP form on any website with one iframe tag. Supports every payment method, dark mode, and 12 languages." />
     <script type="application/ld+json" {!! nonce_attr() !!}>
     {
         "@context": "https://schema.org",

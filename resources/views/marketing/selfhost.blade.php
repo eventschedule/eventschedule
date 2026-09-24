@@ -4,42 +4,9 @@
     <x-slot name="breadcrumbTitle">Selfhost</x-slot>
 
     <x-slot name="structuredData">
-    <script type="application/ld+json" {!! nonce_attr() !!}>
-    {
-        "@context": "https://schema.org",
-        "@type": "SoftwareApplication",
-        "@id": "{{ url()->current() }}#software",
-        "name": "Event Schedule - Selfhosted",
-        "url": "{{ url()->current() }}",
-        "applicationCategory": "BusinessApplication",
-        "applicationSubCategory": "Event Management Software",
-        "operatingSystem": "Linux",
-        "description": {!! \App\Utils\SeoUtils::jsonLd(__('marketing.selfhost_description')) !!},
-        "offers": {
-            "@type": "Offer",
-            "price": "0",
-            "priceCurrency": "{{ platform_currency() }}",
-            "description": "Free and open source under the Attribution Assurance License"
-        },
-        "featureList": [
-            "One-click Softaculous installation",
-            "Docker Compose deployment",
-            "Browser-based setup wizard",
-            "One-click application updates",
-            "Every Pro and Enterprise feature included",
-            "Stripe and PayPal checkout with no platform fees",
-            "AI-powered auto import from URLs",
-            "Full data ownership",
-            "White-label SaaS capability"
-        ],
-        "downloadUrl": "https://github.com/eventschedule/eventschedule",
-        "provider": {
-            "@type": "Organization",
-            "name": "Event Schedule",
-            "url": "{{ config('app.url') }}"
-        }
-    }
-    </script>
+    <x-seo.webpage
+        name="Event Schedule - Selfhosted"
+        :description="__('marketing.selfhost_description')" />
     @php
         // One array drives both the visible "Get it running" band and this HowTo
         // block, so the markup and the schema can never drift apart.

@@ -4,67 +4,11 @@
     <x-slot name="breadcrumbTitle">For Comedy Clubs</x-slot>
 
     <x-slot name="structuredData">
-    <script type="application/ld+json" {!! nonce_attr() !!}>
-    {
-        "@context": "https://schema.org",
-        "@type": "Service",
-        "name": "Event Schedule for Comedy Clubs",
-        "description": "Run a room on recurring nights, sell advance and door tickets from one link, and add the participants later so the date appears on each comic's own schedule.",
-        "provider": {
-            "@type": "Organization",
-            "name": "Event Schedule",
-            "url": "{{ config('app.url') }}"
-        },
-        "serviceType": "Event Management",
-        "audience": {
-            "@type": "Audience",
-            "audienceType": "Comedy Clubs"
-        }
-    }
-    </script>
-    <!-- Product Schema for Rich Snippets -->
-    <script type="application/ld+json" {!! nonce_attr() !!}>
-    {
-        "@context": "https://schema.org",
-        "@type": "SoftwareApplication",
-        "name": "Event Schedule for Comedy Clubs",
-        "applicationCategory": "BusinessApplication",
-        "applicationSubCategory": "Comedy Club Scheduling Software",
-        "operatingSystem": "Web",
-        "offers": {
-            "@type": "Offer",
-            "price": "0",
-            "priceCurrency": "{{ platform_currency() }}",
-            "description": "Free forever"
-        },
-        "featureList": [
-            "Weekly nights set up once as recurring events with their own end",
-            "Date exceptions for the weeks the room is dark",
-            "Participants added to a show, so the date reaches comics who run their own schedule",
-            "A public page for each new comic you add, which stays out of search engines until they claim it",
-            "Booking requests from comics, each waiting for the club to accept it",
-            "An approved list so regulars you book often post without a queue",
-            "An email to the club when new requests are waiting",
-            "Named ticket types with their own prices, quantities and sales windows",
-            "Advance and door pricing on the same show",
-            "QR ticket scanning at the door on every plan, with a live check-in dashboard on Pro",
-            "Free registration with a capacity for open mics, and a free waitlist when it fills",
-            "Zero platform fees on ticket sales, paid through your own Stripe or PayPal account, a payment link or cash",
-            "Refunds in full or in part from the Sales page, sent back through Stripe or PayPal",
-            "An interest list that emails people once when a show's tickets go on sale",
-            "Sub-schedules that keep the open mic, the showcase and the weekend apart",
-            "Direct newsletters to the people who follow the room",
-            "Two-way Google, Outlook and CalDAV calendar sync",
-            "Embeddable calendar for your own website"
-        ],
-        "url": "{{ url()->current() }}",
-        "keywords": "comedy club schedule, comedy night ticketing, open mic capacity, comedy booking requests, recurring comedy night, comedy club calendar",
-        "provider": {
-            "@type": "Organization",
-            "name": "Event Schedule"
-        }
-    }
-    </script>
+    <x-seo.webpage
+        name="Event Schedule for Comedy Clubs"
+        description="Run a room on recurring nights, sell advance and door tickets from one link, and add the participants later so the date appears on each comic's own schedule."
+        audience="Comedy Clubs"
+        keywords="comedy club schedule, comedy night ticketing, open mic capacity, comedy booking requests, recurring comedy night, comedy club calendar" />
     </x-slot>
 
     {{-- Motion gate: hidden pre-reveal states only apply when this class is present,

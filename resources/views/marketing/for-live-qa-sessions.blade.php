@@ -4,64 +4,11 @@
     <x-slot name="breadcrumbTitle">For Live Q&A Sessions</x-slot>
 
     <x-slot name="structuredData">
-    <script type="application/ld+json" {!! nonce_attr() !!}>
-    {
-        "@context": "https://schema.org",
-        "@type": "Service",
-        "name": "Event Schedule for Live Q&A Sessions",
-        "description": "Schedule live Q&A sessions and office hours for free: registration with a place limit per date, one join link for Zoom, YouTube Live or any platform, and zero platform fees.",
-        "provider": {
-            "@type": "Organization",
-            "name": "Event Schedule",
-            "url": "{{ config('app.url') }}"
-        },
-        "serviceType": "Event Management",
-        "audience": {
-            "@type": "Audience",
-            "audienceType": "Q&A Session Hosts"
-        }
-    }
-    </script>
-    <!-- Product Schema for Rich Snippets -->
-    <script type="application/ld+json" {!! nonce_attr() !!}>
-    {
-        "@context": "https://schema.org",
-        "@type": "SoftwareApplication",
-        "name": "Event Schedule for Live Q&A Sessions",
-        "applicationCategory": "BusinessApplication",
-        "applicationSubCategory": "Live Q&A Session Scheduling Software",
-        "operatingSystem": "Web",
-        "description": "Schedule live Q&A sessions, AMAs and office hours with free registration and a capacity limit per date, an agenda your audience can read, polls your audience can add options to, and one join link for whatever platform you host on.",
-        "offers": {
-            "@type": "Offer",
-            "price": "0",
-            "priceCurrency": "{{ platform_currency() }}",
-            "description": "Free forever"
-        },
-        "featureList": [
-            "Free registration with a capacity limit counted per session date",
-            "Confirmation email carrying your own registration notes",
-            "Agenda segments with their own start and end times",
-            "Polls on a session, with options your audience can suggest (Pro plan)",
-            "Comments on a session or on a single agenda segment, held for approval",
-            "One join link for Zoom, Google Meet, Microsoft Teams or YouTube Live",
-            "Recurring office hours with date exceptions and an end",
-            "Zero platform fees on ticket sales through your own Stripe or PayPal account",
-            "A Tell me if anything changes link for visitors not ready to register: an email address only, then a reminder before the session",
-            "Two-way Google, Outlook and CalDAV calendar sync",
-            "Embeddable calendar for the website you already have",
-            "Newsletters you write and send yourself",
-            "Open source, with a selfhosted option"
-        ],
-        "url": "{{ url()->current() }}",
-        "keywords": "live Q&A platform, Q&A session scheduling, interactive Q&A events, paid Q&A sessions, office hours scheduling, AMA scheduling",
-        "screenshot": "{{ asset('images/social/for-live-qa-sessions.jpg') }}",
-        "provider": {
-            "@type": "Organization",
-            "name": "Event Schedule"
-        }
-    }
-    </script>
+    <x-seo.webpage
+        name="Event Schedule for Live Q&A Sessions"
+        description="Schedule live Q&A sessions and office hours for free: registration with a place limit per date, one join link for Zoom, YouTube Live or any platform, and zero platform fees."
+        audience="Q&A Session Hosts"
+        keywords="live Q&A platform, Q&A session scheduling, interactive Q&A events, paid Q&A sessions, office hours scheduling, AMA scheduling" />
     <!-- HowTo Schema for Rich Snippets -->
     <script type="application/ld+json" {!! nonce_attr() !!}>
     {

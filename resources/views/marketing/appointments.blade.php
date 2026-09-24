@@ -270,39 +270,9 @@
     @endphp
 
     <x-slot name="structuredData">
-    <script type="application/ld+json" {!! nonce_attr() !!}>
-    {
-        "@context": "https://schema.org",
-        "@type": "SoftwareApplication",
-        "name": "Event Schedule - Appointments",
-        "applicationCategory": "BusinessApplication",
-        "operatingSystem": "Web",
-        "description": "Appointment booking built into your schedule. Set weekly hours and start-time intervals, take free bookings on any plan, and never offer a time you are already busy.",
-        "featureList": [
-            "Bookable appointment types with a duration and weekly hours",
-            "Start-time interval, buffers, minimum notice and a booking window",
-            "Per-date overrides for holidays and one-off hours",
-            "In person, online or phone appointments",
-            "Free bookings on every plan, paid bookings on Pro by Stripe, a payment link, or cash",
-            "Open times exclude anything already on your schedule, including synced calendar events",
-            "Approval or instant confirmation",
-            "Confirmation email with a calendar invite, a reminder, and timezone-aware times",
-            "Guests can move or cancel a booking from a private link",
-            "Guests book without an account, and a type can ask for a phone number",
-            "Stripe bookings refunded in full or in part from the Sales page"
-        ],
-        "offers": {
-            "@type": "Offer",
-            "price": "0",
-            "priceCurrency": "{{ platform_currency() }}"
-        },
-        "url": "{{ url()->current() }}",
-        "provider": {
-            "@type": "Organization",
-            "name": "Event Schedule"
-        }
-    }
-    </script>
+    <x-seo.webpage
+        name="Event Schedule - Appointments"
+        description="Appointment booking built into your schedule. Set weekly hours and start-time intervals, take free bookings on any plan, and never offer a time you are already busy." />
     <x-seo.faq-schema :items="$faqs" />
     </x-slot>
 

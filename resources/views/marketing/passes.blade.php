@@ -12,37 +12,9 @@
     <x-slot name="breadcrumbTitle">Passes</x-slot>
 
     <x-slot name="structuredData">
-    <script type="application/ld+json" {!! nonce_attr() !!}>
-    {
-        "@context": "https://schema.org",
-        "@type": "SoftwareApplication",
-        "name": "Event Schedule - Passes and Subscriptions",
-        "description": "Multi-use passes redeemable across events: visit passes, memberships, festival passes and season passes, each on a single QR code with its own visit counter.",
-        "applicationCategory": "BusinessApplication",
-        "operatingSystem": ["Web", "Android", "iOS"],
-        "featureList": [
-            "Visit pass with a fixed number of visits",
-            "Membership with unlimited visits until it expires",
-            "Festival pass good for each covered event once",
-            "Season pass covering every date of a recurring event",
-            "One QR code for the whole series",
-            @if ($walletLive)
-            "Saves to Google Wallet as one pass, not one per date",
-            @endif
-            "Cover the whole schedule, a sub-schedule, or hand-picked events",
-            "Optional advance booking from the holder's own pass page",
-            "Cancellation deadline with a forfeit or block policy",
-            "Admit a guest without spending an extra visit",
-            "Visit log showing attended, booked and forfeited dates"
-        ],
-        "offers": {
-            "@type": "Offer",
-            "price": "{{ $proMonthly }}",
-            "priceCurrency": "{{ platform_currency() }}",
-            "description": "Available on the Pro plan"
-        }
-    }
-    </script>
+    <x-seo.webpage
+        name="Event Schedule - Passes and Subscriptions"
+        description="Multi-use passes redeemable across events: visit passes, memberships, festival passes and season passes, each on a single QR code with its own visit counter." />
     </x-slot>
 
     {{-- Motion gate: the hidden pre-reveal states below only apply when this class is present, so

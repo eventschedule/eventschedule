@@ -4,44 +4,9 @@
     <x-slot name="breadcrumbTitle">Integrations</x-slot>
 
     <x-slot name="structuredData">
-    <script type="application/ld+json" {!! nonce_attr() !!}>
-    {
-        "@context": "https://schema.org",
-        "@type": "SoftwareApplication",
-        "name": "Event Schedule - Integrations",
-        "applicationCategory": "BusinessApplication",
-        "operatingSystem": "Web",
-        "description": "Event Schedule connects directly to the services you already run: two-way calendar sync with Google Calendar, Outlook and CalDAV, payments through your own Stripe, PayPal or Payfast account or Invoice Ninja, refunds sent back through Stripe and PayPal, signed outbound webhooks, a REST API, OneSignal web push, Google Wallet ticket passes, a nearby-accommodation map, Eventbrite import, Facebook and Instagram ad boosting, and event creation over WhatsApp.",
-        "featureList": [
-            "Google Calendar two-way sync with change notifications",
-            "Outlook and Microsoft 365 two-way sync via Microsoft Graph",
-            "CalDAV two-way sync with any CalDAV server",
-            "Stripe payments on your own connected account with zero platform fees",
-            "PayPal checkout on your own PayPal account, one capture per order",
-            "Payfast checkout for events priced in South African rand",
-            "Invoice Ninja invoicing or payment links",
-            "Refunds, full or partial, sent back through Stripe and PayPal",
-            "Signed outbound webhooks on fourteen event types",
-            "REST API for schedules, sub-schedules, events and sales",
-            "OneSignal browser and mobile web push",
-            "Google Wallet ticket passes that scan at the door like the ticket",
-            "Nearby accommodation map on public event pages",
-            "Eventbrite import for events, ticket types and venues",
-            "Facebook and Instagram ad boosting through Meta",
-            "Event creation over WhatsApp with AI parsing"
-        ],
-        "offers": {
-            "@type": "Offer",
-            "price": "0",
-            "priceCurrency": "{{ platform_currency() }}"
-        },
-        "url": "{{ url()->current() }}",
-        "provider": {
-            "@type": "Organization",
-            "name": "Event Schedule"
-        }
-    }
-    </script>
+    <x-seo.webpage
+        name="Event Schedule - Integrations"
+        description="Event Schedule connects directly to the services you already run: two-way calendar sync with Google Calendar, Outlook and CalDAV, payments through your own Stripe, PayPal or Payfast account or Invoice Ninja, refunds sent back through Stripe and PayPal, signed outbound webhooks, a REST API, OneSignal web push, Google Wallet ticket passes, a nearby-accommodation map, Eventbrite import, Facebook and Instagram ad boosting, and event creation over WhatsApp." />
     </x-slot>
 
     {{-- Motion gate: hidden pre-reveal states only apply when this class is present,

@@ -4,67 +4,11 @@
     <x-slot name="breadcrumbTitle">For Art Galleries</x-slot>
 
     <x-slot name="structuredData">
-    <script type="application/ld+json" {!! nonce_attr() !!}>
-    {
-        "@context": "https://schema.org",
-        "@type": "Service",
-        "name": "Event Schedule for Art Galleries",
-        "description": "An exhibition calendar where the run is one recurring event and the private view, artist talk and closing are separate evenings.",
-        "provider": {
-            "@type": "Organization",
-            "name": "Event Schedule",
-            "url": "{{ config('app.url') }}"
-        },
-        "serviceType": "Event Management",
-        "audience": {
-            "@type": "Audience",
-            "audienceType": "Art Galleries, Project Spaces & Artist Cooperatives"
-        }
-    }
-    </script>
-    <!-- Product Schema for Rich Snippets -->
-    <script type="application/ld+json" {!! nonce_attr() !!}>
-    {
-        "@context": "https://schema.org",
-        "@type": "SoftwareApplication",
-        "name": "Event Schedule for Art Galleries",
-        "applicationCategory": "BusinessApplication",
-        "applicationSubCategory": "Exhibition Scheduling Software",
-        "operatingSystem": "Web",
-        "offers": {
-            "@type": "Offer",
-            "price": "0",
-            "priceCurrency": "{{ platform_currency() }}",
-            "description": "Free forever"
-        },
-        "featureList": [
-            "A whole exhibition run as one recurring event that ends on the closing date",
-            "Opening days set by day of week, with date exceptions that add or remove single dates",
-            "Separate evening events for the private view, artist talk, curator tour and closing",
-            "Free registration with a capacity, counted separately for each date",
-            "Ticketed collector dinners and previews with QR check-in, on the Pro plan",
-            "Zero platform fees on ticket sales, paid through Stripe, PayPal, Invoice Ninja, a payment link or cash",
-            "Refunds from the Sales page, sent back through Stripe or PayPal in full or in part",
-            "An interest list for a ticketed evening before it goes on sale",
-            "A live calendar feed collectors subscribe to once, which picks up every new show",
-            "Followers you can email directly, within a monthly allowance counted per recipient",
-            "Exhibition proposals submitted through your own page, pasted in or uploaded as a flyer",
-            "Custom fields on the request form, so every proposal arrives with a portfolio link",
-            "Participants, so a showing artist is offered the dates for their own schedule, or gets a page they can claim if they are not on Event Schedule yet",
-            "Sub-schedules for exhibitions, talks and hire, each with its own shareable link",
-            "Two-way Google, Outlook and CalDAV calendar sync",
-            "Embeddable calendar for your own website",
-            "Draft events that stay members-only until a show is announced",
-            "Online events with the link people join on"
-        ],
-        "url": "{{ url()->current() }}",
-        "keywords": "gallery calendar, exhibition schedule, private view rsvp, art gallery events, artist talk booking, exhibition proposal form",
-        "provider": {
-            "@type": "Organization",
-            "name": "Event Schedule"
-        }
-    }
-    </script>
+    <x-seo.webpage
+        name="Event Schedule for Art Galleries"
+        description="An exhibition calendar where the run is one recurring event and the private view, artist talk and closing are separate evenings."
+        audience="Art Galleries, Project Spaces & Artist Cooperatives"
+        keywords="gallery calendar, exhibition schedule, private view rsvp, art gallery events, artist talk booking, exhibition proposal form" />
     </x-slot>
 
     {{-- Motion gate: hidden pre-reveal states only apply when this class is present,

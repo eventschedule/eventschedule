@@ -31,32 +31,9 @@
          the WordPress how-to, and links to both. --}}
 
     <x-slot name="structuredData">
-    <script type="application/ld+json" {!! nonce_attr() !!}>
-    {
-        "@context": "https://schema.org",
-        "@type": "SoftwareApplication",
-        "name": "Event Schedule - Event Calendar for WordPress",
-        "description": "A hosted event calendar you add to any WordPress page with a Custom HTML block: an embedded month calendar or list, an embeddable registration or ticket form, and no plugin to install or update.",
-        "applicationCategory": "BusinessApplication",
-        "operatingSystem": "Web",
-        "featureList": [
-            "Embed a live month calendar or event list on a WordPress page or post",
-            "Works in the block editor, the classic editor, widget areas and page builders",
-            "No WordPress plugin to install, update or keep compatible",
-            "Events update on your site the moment you change them",
-            "A free registration form you can embed on a single event page",
-            "An embeddable ticket checkout, on the Pro plan",
-            "Two-way Google, Outlook and CalDAV calendar sync",
-            "Dark mode and language options set in the embed URL"
-        ],
-        "offers": {
-            "@type": "Offer",
-            "price": "0",
-            "priceCurrency": "{{ platform_currency() }}",
-            "description": "Embedding the calendar is free on every plan"
-        }
-    }
-    </script>
+    <x-seo.webpage
+        name="Event Schedule - Event Calendar for WordPress"
+        description="A hosted event calendar you add to any WordPress page with a Custom HTML block: an embedded month calendar or list, an embeddable registration or ticket form, and no plugin to install or update." />
     <script type="application/ld+json" {!! nonce_attr() !!}>
     {
         "@context": "https://schema.org",

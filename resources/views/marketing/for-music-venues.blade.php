@@ -4,63 +4,11 @@
     <x-slot name="breadcrumbTitle">For Music Venues</x-slot>
 
     <x-slot name="structuredData">
-    <script type="application/ld+json" {!! nonce_attr() !!}>
-    {
-        "@context": "https://schema.org",
-        "@type": "Service",
-        "name": "Event Schedule for Music Venues",
-        "description": "Publish the whole show day on one link: set times for every band on the bill, tickets with zero platform fees, and QR check-in on the door.",
-        "provider": {
-            "@type": "Organization",
-            "name": "Event Schedule",
-            "url": "{{ config('app.url') }}"
-        },
-        "serviceType": "Event Management",
-        "audience": {
-            "@type": "Audience",
-            "audienceType": "Music Venues"
-        }
-    }
-    </script>
-    <!-- Product Schema for Rich Snippets -->
-    <script type="application/ld+json" {!! nonce_attr() !!}>
-    {
-        "@context": "https://schema.org",
-        "@type": "SoftwareApplication",
-        "name": "Event Schedule for Music Venues",
-        "applicationCategory": "BusinessApplication",
-        "applicationSubCategory": "Music Venue Management Software",
-        "operatingSystem": "Web",
-        "offers": {
-            "@type": "Offer",
-            "price": "0",
-            "priceCurrency": "{{ platform_currency() }}",
-            "description": "Free forever"
-        },
-        "featureList": [
-            "Set times for every act on a bill, published on the public event page",
-            "The whole lineup on the event page, and a page for any act who is not on Event Schedule yet",
-            "Photos, video and comments attached to the act that played, not just the show",
-            "Sub-schedules that keep each room's listings apart on one link",
-            "A public submission form so bands can ask to play",
-            "Ticket types with their own sales windows and group rates, plus add-ons on Pro",
-            "Free QR scanning on the door, with a live check-in dashboard on Pro",
-            "Zero platform fees on ticket sales, paid into your own Stripe or PayPal account",
-            "An interest list for fans waiting for tickets to go on sale",
-            "Refunds from the Sales page, in full or in part",
-            "Recurring residencies with date exceptions",
-            "Direct newsletters with open and click rates",
-            "Two-way Google, Outlook and CalDAV calendar sync",
-            "Embeddable calendar for the website you already have"
-        ],
-        "url": "{{ url()->current() }}",
-        "keywords": "music venue calendar, set times, concert listings, venue ticketing, QR check-in, band booking requests, live music schedule",
-        "provider": {
-            "@type": "Organization",
-            "name": "Event Schedule"
-        }
-    }
-    </script>
+    <x-seo.webpage
+        name="Event Schedule for Music Venues"
+        description="Publish the whole show day on one link: set times for every band on the bill, tickets with zero platform fees, and QR check-in on the door."
+        audience="Music Venues"
+        keywords="music venue calendar, set times, concert listings, venue ticketing, QR check-in, band booking requests, live music schedule" />
     <!-- HowTo Schema for Rich Snippets -->
     <script type="application/ld+json" {!! nonce_attr() !!}>
     {

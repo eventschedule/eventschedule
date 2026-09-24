@@ -4,65 +4,11 @@
     <x-slot name="breadcrumbTitle">For Workshop Instructors</x-slot>
 
     <x-slot name="structuredData">
-    <script type="application/ld+json" {!! nonce_attr() !!}>
-    {
-        "@context": "https://schema.org",
-        "@type": "Service",
-        "name": "Event Schedule for Workshop Instructors",
-        "description": "Set a class up once as a weekly series, cap the bench per session, and sell the spots from one link with zero platform fees.",
-        "provider": {
-            "@type": "Organization",
-            "name": "Event Schedule",
-            "url": "{{ config('app.url') }}"
-        },
-        "serviceType": "Event Management",
-        "audience": {
-            "@type": "Audience",
-            "audienceType": "Workshop Instructors & Educators"
-        }
-    }
-    </script>
-    <!-- Product Schema for Rich Snippets -->
-    <script type="application/ld+json" {!! nonce_attr() !!}>
-    {
-        "@context": "https://schema.org",
-        "@type": "SoftwareApplication",
-        "name": "Event Schedule for Workshop Instructors",
-        "applicationCategory": "BusinessApplication",
-        "applicationSubCategory": "Workshop and Class Scheduling Software",
-        "operatingSystem": "Web",
-        "description": "One class, set up once as a weekly series that ends after a set number of sessions, with the seat count kept per session date. Sell spots through your own Stripe or PayPal account with zero platform fees, or run free registration with a seat limit.",
-        "offers": {
-            "@type": "Offer",
-            "price": "0",
-            "priceCurrency": "{{ platform_currency() }}",
-            "description": "Free forever"
-        },
-        "featureList": [
-            "A class set up once as a weekly series, ending on a date or after a set number of sessions",
-            "Single dates skipped or added without rebuilding the series",
-            "Free registration with a seat limit counted per session date",
-            "Named ticket types with their own prices, quantities and sales windows",
-            "Multi-class cards valid across the series, with a cancellation cutoff in hours before each session",
-            "A waitlist when a session fills, offering a freed seat to the next person waiting for that date",
-            "QR check-in, plus a downloadable QR code for your schedule",
-            "Zero platform fees on ticket sales through your own Stripe or PayPal account",
-            "Full or partial refunds of Stripe and PayPal sales from the Sales page",
-            "Tell me when tickets go on sale, kept per session date, with no account needed",
-            "Sub-schedules that keep beginner and advanced strands apart on one link",
-            "Direct newsletters to the students who follow your schedule",
-            "Two-way Google, Outlook and CalDAV calendar sync, a recurring class syncing as one entry",
-            "A live calendar feed of your classes that students subscribe to once",
-            "Embeddable calendar for the studio site you already have"
-        ],
-        "url": "{{ url()->current() }}",
-        "keywords": "workshop scheduling, class registration software, workshop calendar, teaching class management, free workshop scheduling",
-        "provider": {
-            "@type": "Organization",
-            "name": "Event Schedule"
-        }
-    }
-    </script>
+    <x-seo.webpage
+        name="Event Schedule for Workshop Instructors"
+        description="Set a class up once as a weekly series, cap the bench per session, and sell the spots from one link with zero platform fees."
+        audience="Workshop Instructors & Educators"
+        keywords="workshop scheduling, class registration software, workshop calendar, teaching class management, free workshop scheduling" />
     <!-- HowTo Schema for Rich Snippets -->
     <script type="application/ld+json" {!! nonce_attr() !!}>
     {

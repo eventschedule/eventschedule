@@ -89,26 +89,7 @@
             ]
         },
         "about": {
-            "@type": "SoftwareApplication",
-            "name": "Event Schedule",
-            "applicationCategory": "BusinessApplication",
-            "operatingSystem": "Web",
-            "offers": [
-                {
-                    "@type": "Offer",
-                    "name": "Free",
-                    "price": "0",
-                    "priceCurrency": "{{ platform_currency() }}",
-                    "description": "Unlimited events, schedules and free registration, with no platform fees, free forever"
-                },
-                {
-                    "@type": "Offer",
-                    "name": "Pro",
-                    "price": "{{ $rates['eventschedule']['monthly'] }}",
-                    "priceCurrency": "{{ platform_currency() }}",
-                    "description": "Paid ticket sales, the check-in dashboard and API access, with 0% platform fees on ticket sales"
-                }
-            ]
+            "@id": "{{ \App\Utils\SeoUtils::siteUrl() }}/#software"
         }
     }
     </script>

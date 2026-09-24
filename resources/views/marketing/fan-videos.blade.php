@@ -4,41 +4,9 @@
     <x-slot name="breadcrumbTitle">Fan Videos, Photos & Comments</x-slot>
 
     <x-slot name="structuredData">
-    <script type="application/ld+json" {!! nonce_attr() !!}>
-    {
-        "@context": "https://schema.org",
-        "@type": "SoftwareApplication",
-        "name": "Event Schedule Fan Videos, Photos & Comments",
-        "applicationCategory": "BusinessApplication",
-        "applicationSubCategory": "Community Engagement Software",
-        "operatingSystem": "Web",
-        "description": "Let fans send photos, a YouTube link and a comment to your event pages for free. Every submission arrives unapproved, files itself against the part of the night and the date it came from, and only appears once you approve it.",
-        "offers": {
-            "@type": "Offer",
-            "price": "0",
-            "priceCurrency": "{{ platform_currency() }}",
-            "description": "Included free"
-        },
-        "featureList": [
-            "Fan photo uploads, JPG, PNG, GIF or WebP up to 5 MB",
-            "Fan videos from a pasted YouTube link",
-            "Fan comments up to 1,000 characters",
-            "Approval queue on the event's Fan Content tab",
-            "Submissions filed against an agenda part and an occurrence date",
-            "Guest submissions with a name, an email and a bot check",
-            "Per-schedule switches for comments, photos and videos",
-            "Photo gallery page per event with a lightbox",
-            "Approved fan videos, photos and comments previewed on event cards in the schedule's list view",
-            "Per-event override of the fan content switches on the Pro plan",
-            "Bulk photo download as a zip on the Pro plan"
-        ],
-        "url": "{{ url()->current() }}",
-        "provider": {
-            "@type": "Organization",
-            "name": "Event Schedule"
-        }
-    }
-    </script>
+    <x-seo.webpage
+        name="Event Schedule Fan Videos, Photos & Comments"
+        description="Let fans send photos, a YouTube link and a comment to your event pages for free. Every submission arrives unapproved, files itself against the part of the night and the date it came from, and only appears once you approve it." />
     </x-slot>
 
     {{-- Motion gate: hidden pre-reveal states only apply when this class is present,

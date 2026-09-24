@@ -85,73 +85,14 @@
     <x-slot name="breadcrumbTitle">{{ $shortName }} Replacement</x-slot>
 
     <x-slot name="structuredData">
-    <script type="application/ld+json" {!! nonce_attr() !!}>
-    {
-        "@context": "https://schema.org",
-        "@type": "SoftwareApplication",
-        "name": "Event Schedule",
-        "description": "Open-source event management platform for sharing events, selling tickets, and bringing communities together. Zero platform fees.",
-        "url": "{{ config('app.url') }}",
-        "applicationCategory": "BusinessApplication",
-        "operatingSystem": ["Web", "Android", "iOS"],
-        "isSimilarTo": {
-            "@type": "SoftwareApplication",
-            "name": {!! \App\Utils\SeoUtils::jsonLd($name) !!},
-            "applicationCategory": "BusinessApplication"
-        },
-        "offers": [
-            {
-                "@type": "Offer",
-                "name": "Free",
-                "price": "0",
-                "priceCurrency": "{{ platform_currency() }}",
-                "description": "Unlimited events and schedules, public event pages, Google, Outlook and CalDAV calendar sync, unlimited free RSVP with capacity limits, QR codes scanned at the door, event graphics, embeddable calendar, built-in analytics, AI event parsing, and newsletters to 10 recipients a month. One team member.",
-                "availability": "https://schema.org/InStock"
-            },
-            {
-                "@type": "Offer",
-                "name": "Pro",
-                "price": "{{ number_format($proMonthly, 2) }}",
-                "priceCurrency": "{{ platform_currency() }}",
-                "description": "Everything in Free plus tickets that carry a price, every payment method (Stripe, PayPal, Payfast, Invoice Ninja, a payment link or cash), refunds from the Sales page, the live check-in dashboard, ticket waitlist, promo codes, custom fields, sale notifications, sales CSV export, no Event Schedule branding, custom CSS, the embeddable ticket widget, REST API and webhooks, and newsletters to 100 recipients a month.",
-                "availability": "https://schema.org/InStock"
-            },
-            {
-                "@type": "Offer",
-                "name": "Enterprise",
-                "price": "{{ number_format($entMonthly, 2) }}",
-                "priceCurrency": "{{ platform_currency() }}",
-                "description": "Everything in Pro plus your own custom domain, up to five team members, internal and unlisted events, AI flyer and style generation, AI agenda scanning, WhatsApp event creation, newsletters to 1,000 recipients a month, and priority support.",
-                "availability": "https://schema.org/InStock"
-            }
-        ],
-        "featureList": [
-            "Zero platform fees on ticket sales",
-            "Stripe, PayPal, Payfast and Invoice Ninja payments",
-            "Full and partial refunds from the Sales page",
-            "Email when tickets go on sale, free on every plan",
-            "AI event parsing from pasted text or images",
-            "AI flyer generation",
-            "AI style generation",
-            "Two-way Google Calendar sync",
-            "Outlook and CalDAV sync",
-            "iCal download",
-            "Newsletter builder with A/B testing",
-            "QR code ticketing and check-in",
-            "Check-in dashboard",
-            "Ticket waitlist",
-            "Promo and discount codes",
-            "Sale notification emails",
-            "Sales CSV export",
-            "Open source with selfhosting option",
-            "Embeddable calendar and ticket widgets",
-            "WhatsApp event creation",
-            "Custom CSS styling",
-            "Fan videos, photos and comments",
-            "Free RSVP with capacity limits"
-        ]
-    }
-    </script>
+    {{-- The page, about the product (the layout's SeoUtils::softwareApplication()) and
+         mentioning the tool it replaces. isSimilarTo, which this used, is not a property a
+         SoftwareApplication takes. --}}
+    <x-seo.webpage
+        :name="'Replace '.$shortName.' with Event Schedule'"
+        :description="$description"
+        :keywords="$keywords"
+        :mentions="[$name]" />
     {{-- Through the component, which encodes with SeoUtils::jsonLd(). The block this replaces
          escaped quotes by hand inside {{ }}, which then HTML-escaped the quote it had just
          escaped, so a name or step with a " in it produced invalid JSON. --}}

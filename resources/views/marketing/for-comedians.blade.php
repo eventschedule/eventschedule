@@ -4,63 +4,11 @@
     <x-slot name="breadcrumbTitle">For Comedians</x-slot>
 
     <x-slot name="structuredData">
-    <script type="application/ld+json" {!! nonce_attr() !!}>
-    {
-        "@context": "https://schema.org",
-        "@type": "Service",
-        "name": "Event Schedule for Comedians",
-        "description": "One link for every mic, guest set, and headline. Sell tickets with zero fees, email fans directly, and let clubs book you onto your schedule. Free forever.",
-        "provider": {
-            "@type": "Organization",
-            "name": "Event Schedule",
-            "url": "{{ config('app.url') }}"
-        },
-        "serviceType": "Event Management",
-        "audience": {
-            "@type": "Audience",
-            "audienceType": "Comedians"
-        }
-    }
-    </script>
-    <!-- Product Schema for Rich Snippets -->
-    <script type="application/ld+json" {!! nonce_attr() !!}>
-    {
-        "@context": "https://schema.org",
-        "@type": "SoftwareApplication",
-        "name": "Event Schedule for Comedians",
-        "applicationCategory": "BusinessApplication",
-        "applicationSubCategory": "Comedy Show Scheduling Software",
-        "operatingSystem": "Web",
-        "description": "Track your open mics, guest spots, and headlining gigs. Email fans directly - no algorithm burying your posts. Zero fees on ticket sales. Built for stand-up comedians.",
-        "offers": {
-            "@type": "Offer",
-            "price": "0",
-            "priceCurrency": "{{ platform_currency() }}",
-            "description": "Free forever"
-        },
-        "featureList": [
-            "Weekly mic and set tracking on one calendar",
-            "One schedule link for every bio",
-            "Zero-fee ticketing through Stripe, PayPal or cash, with QR door check-in",
-            "Refunds, full or partial, back through Stripe or PayPal",
-            "Ticket alerts for fans before tickets go on sale",
-            "Comedy club bookings that land on your schedule once you accept",
-            "A page to claim when a club lists you before you join",
-            "Recurring weekly open mics",
-            "Direct fan newsletters and an automatic new-show digest",
-            "Auto-generated show flyers",
-            "Draft events for unannounced sets",
-            "Sub-schedules for stand-up, improv, and podcasts",
-            "Late night show support"
-        ],
-        "url": "{{ url()->current() }}",
-        "keywords": "comedian schedule, comedy show calendar, stand-up comedy booking, comedy event management, free comedian scheduling, open mic tracker, comedy tour schedule, comedian link in bio",
-        "provider": {
-            "@type": "Organization",
-            "name": "Event Schedule"
-        }
-    }
-    </script>
+    <x-seo.webpage
+        name="Event Schedule for Comedians"
+        description="One link for every mic, guest set, and headline. Sell tickets with zero fees, email fans directly, and let clubs book you onto your schedule. Free forever."
+        audience="Comedians"
+        keywords="comedian schedule, comedy show calendar, stand-up comedy booking, comedy event management, free comedian scheduling, open mic tracker, comedy tour schedule, comedian link in bio" />
     <!-- HowTo Schema for Rich Snippets -->
     <script type="application/ld+json" {!! nonce_attr() !!}>
     {

@@ -106,6 +106,142 @@ class SeoUtils
     }
 
     /**
+     * The canonical URL of a marketing page: the site root plus the request path, whatever host
+     * served it, and never a ?lang= variant (the marketing pages are English-only, so every
+     * language variant canonicalizes to the clean URL and no hreflang alternates are emitted).
+     *
+     * The layout's <link rel="canonical"> and <x-seo.webpage>'s @id both come from here, so the
+     * WebPage node always names the URL the page says it is.
+     */
+    public static function canonicalUrl(?string $path = null): string
+    {
+        $path = trim($path ?? request()->path(), '/');
+
+        return $path === '' ? self::siteUrl() : self::siteUrl().'/'.$path;
+    }
+
+    /**
+     * The product, as one SoftwareApplication node that the marketing layout emits once per page.
+     *
+     * Every marketing page used to carry a product node of its own - 92 of them, named "Event
+     * Schedule for Bars and Pubs", "Event Schedule - Gift Cards" and so on, with their own offers
+     * and feature lists - so to a crawler the site described 92 different applications. Now there
+     * is one, with the @id {site}/#software, and each page describes ITSELF with a WebPage that is
+     * `about` it (<x-seo.webpage>).
+     *
+     * Prices come from PlatformPricing and the currency from platform_currency(), the same pair
+     * every visible price on the site renders, so the offers cannot disagree with /pricing on a
+     * platform that set its own. Tiers follow docs/FEATURES.md.
+     *
+     * @return array<string, mixed>
+     */
+    public static function softwareApplication(): array
+    {
+        $site = self::siteUrl();
+        $currency = platform_currency();
+
+        $offer = function (string $name, float $monthly, string $description) use ($site, $currency): array {
+            $price = $monthly > 0 ? number_format($monthly, 2, '.', '') : '0';
+
+            $offer = [
+                '@type' => 'Offer',
+                'name' => $name,
+                'price' => $price,
+                'priceCurrency' => $currency,
+                'description' => $description,
+                'url' => $site.'/pricing',
+                'availability' => 'https://schema.org/InStock',
+            ];
+
+            if ($monthly > 0) {
+                $offer['priceSpecification'] = [
+                    '@type' => 'UnitPriceSpecification',
+                    'price' => $price,
+                    'priceCurrency' => $currency,
+                    'billingDuration' => 1,
+                    'billingIncrement' => 1,
+                    'unitCode' => 'MON',
+                ];
+            }
+
+            return $offer;
+        };
+
+        return [
+            '@context' => 'https://schema.org',
+            '@type' => 'SoftwareApplication',
+            '@id' => $site.'/#software',
+            'name' => 'Event Schedule',
+            'url' => $site,
+            'description' => 'Event calendar and booking platform. One calendar that takes the bookings, collects free registrations, sells tickets with zero platform fees through Stripe or PayPal, emails the people who follow you and scans tickets at the door. Free plan, open source and selfhostable.',
+            'featureList' => [
+                'Event calendar pages with a custom link and a website embed',
+                'Free registration and RSVP, unlimited on every plan',
+                'Paid ticket sales with zero platform fees through Stripe or PayPal (Pro)',
+                'QR ticket scanning at the door on every plan',
+                'Full and partial refunds through Stripe and PayPal (Pro)',
+                "Email sign-up for when an event's tickets go on sale",
+                'Newsletters, and automatic new-event digests for confirmed subscribers',
+                'Two-way calendar sync with Google Calendar, Microsoft 365 and CalDAV',
+                'A live calendar feed guests can subscribe to',
+                'Appointment booking, free with one appointment type',
+                'Passes and gift cards (Pro)',
+                'Reserved seating with a box office console (Enterprise)',
+            ],
+            'applicationCategory' => 'BusinessApplication',
+            'operatingSystem' => ['Web', 'Android', 'iOS'],
+            'screenshot' => $site.'/images/social/home.jpg',
+            'publisher' => self::organizationRef(),
+            'offers' => [
+                $offer('Free', 0, 'Unlimited events and schedules, calendar sync, analytics, unlimited free event registration, and QR ticket scanning at the door, with no platform fee on any plan.'),
+                $offer('Pro', PlatformPricing::proMonthly(),
+                    'Paid ticket sales with every payment method and refunds, the live check-in dashboard, passes, gift cards, installment payments, API and webhooks. Also available at '.plan_price(PlatformPricing::proYearly()).'/year.'),
+                $offer('Enterprise', PlatformPricing::enterpriseMonthly(),
+                    'Allocated seating, custom domains, internal and unlisted events, multiple team members, and AI content generation. Also available at '.plan_price(PlatformPricing::enterpriseYearly()).'/year.'),
+            ],
+        ];
+    }
+
+    /**
+     * The WebPage node <x-seo.webpage> emits: this page, what it is about (the one product), and
+     * whose site it is part of - all by @id, so the page never restates the product.
+     *
+     * @param  array<int, string>  $mentions  competitors the page is about, as schema.org Brand
+     * @return array<string, mixed>
+     */
+    public static function webPage(
+        ?string $name,
+        ?string $description = null,
+        ?string $audience = null,
+        ?string $keywords = null,
+        array $mentions = [],
+    ): array {
+        $site = self::siteUrl();
+        $url = self::canonicalUrl();
+
+        $mentions = array_values(array_filter(array_map(
+            fn ($brand) => is_string($brand) && trim($brand) !== '' ? ['@type' => 'Brand', 'name' => trim($brand)] : null,
+            $mentions
+        )));
+
+        return array_filter([
+            '@context' => 'https://schema.org',
+            '@type' => 'WebPage',
+            '@id' => $url.'#webpage',
+            'url' => $url,
+            'name' => $name,
+            'description' => $description,
+            'inLanguage' => 'en',
+            'isPartOf' => ['@id' => $site.'/#website'],
+            'about' => ['@id' => $site.'/#software'],
+            'publisher' => ['@id' => $site.'/#organization'],
+            'audience' => $audience ? ['@type' => 'Audience', 'audienceType' => $audience] : null,
+            'keywords' => $keywords,
+            'mentions' => $mentions,
+        ], fn ($value) => $value !== null && $value !== '' && $value !== []);
+    }
+
+    /**
      * Owner HTML (a rendered markdown description) as one line of plain text, for a meta
      * description or a structured-data field.
      *

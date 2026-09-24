@@ -4,62 +4,11 @@
     <x-slot name="breadcrumbTitle">For Online Classes</x-slot>
 
     <x-slot name="structuredData">
-    <script type="application/ld+json" {!! nonce_attr() !!}>
-    {
-        "@context": "https://schema.org",
-        "@type": "Service",
-        "name": "Event Schedule for Online Classes",
-        "description": "Set a course up once as a term: the night it meets, the weeks you skip, and the session it ends on. Sell the whole term from one link with zero platform fees.",
-        "provider": {
-            "@type": "Organization",
-            "name": "Event Schedule",
-            "url": "{{ config('app.url') }}"
-        },
-        "serviceType": "Event Management",
-        "audience": {
-            "@type": "Audience",
-            "audienceType": "Online Instructors"
-        }
-    }
-    </script>
-    <!-- Product Schema for Rich Snippets -->
-    <script type="application/ld+json" {!! nonce_attr() !!}>
-    {
-        "@context": "https://schema.org",
-        "@type": "SoftwareApplication",
-        "name": "Event Schedule for Online Classes",
-        "applicationCategory": "BusinessApplication",
-        "applicationSubCategory": "Online Class Scheduling Software",
-        "operatingSystem": "Web",
-        "description": "Set a course up once as a term with a repeat pattern, skipped weeks and an end after a set number of sessions. Take free registrations with a per-date seat cap, or sell single sessions and multi-session class cards with zero platform fees.",
-        "offers": {
-            "@type": "Offer",
-            "price": "0",
-            "priceCurrency": "{{ platform_currency() }}",
-            "description": "Free forever"
-        },
-        "featureList": [
-            "Terms set up once as a recurring event, with skipped weeks and an end after a set number of sessions",
-            "Free registration with a seat cap counted per session date",
-            "Class cards good for a set number of visits, or a membership valid until it expires",
-            "Passes scoped to one sub-schedule, so a beginner card does not open the advanced track",
-            "One link for the whole schedule, embeddable on the site you already have",
-            "Any video platform: one class link on the course, joined from your schedule",
-            "Zero platform fees on payments through your own Stripe or PayPal account",
-            "Two-way Google, Outlook and CalDAV calendar sync",
-            "A live calendar feed students can subscribe to, updated when a date changes",
-            "Newsletters to the students who follow you, with open and click rates",
-            "Built-in analytics on views, devices and traffic sources"
-        ],
-        "url": "{{ url()->current() }}",
-        "keywords": "online class scheduling, virtual class platform, sell online classes, online teaching, class registration software",
-        "screenshot": "{{ asset('images/social/for-online-classes.jpg') }}",
-        "provider": {
-            "@type": "Organization",
-            "name": "Event Schedule"
-        }
-    }
-    </script>
+    <x-seo.webpage
+        name="Event Schedule for Online Classes"
+        description="Set a course up once as a term: the night it meets, the weeks you skip, and the session it ends on. Sell the whole term from one link with zero platform fees."
+        audience="Online Instructors"
+        keywords="online class scheduling, virtual class platform, sell online classes, online teaching, class registration software" />
     <!-- HowTo Schema for Rich Snippets -->
     <script type="application/ld+json" {!! nonce_attr() !!}>
     {

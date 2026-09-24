@@ -4,34 +4,9 @@
     <x-slot name="breadcrumbTitle">Online Events</x-slot>
 
     <x-slot name="structuredData">
-    <script type="application/ld+json" {!! nonce_attr() !!}>
-    {
-        "@context": "https://schema.org",
-        "@type": "SoftwareApplication",
-        "name": "Event Schedule - Online Events",
-        "description": "An online event is one link field on the event. Tick Online, paste the URL people join on, and the listing, the ticket and the search-engine markup follow. Tick In person as well and the same event is a hybrid.",
-        "applicationCategory": "BusinessApplication",
-        "operatingSystem": ["Web", "Android", "iOS"],
-        "featureList": [
-            "One link field on any event, for any platform",
-            "In person and online on the same event, for hybrids",
-            "Hybrid events published as MixedEventAttendanceMode",
-            "An online-only listing shows the link's domain, never the join link",
-            "The full join link printed on every ticket",
-            "An Online filter that appears on your public schedule",
-            "Free registration with a capacity limit counted per date",
-            "Ticket sales through your own Stripe or PayPal account with zero platform fees",
-            "A per-event email list that hears when tickets go on sale and gets any change notice you send",
-            "A live calendar feed visitors can subscribe to, stamped in UTC"
-        ],
-        "offers": {
-            "@type": "Offer",
-            "price": "0",
-            "priceCurrency": "{{ platform_currency() }}",
-            "description": "Online events are on the free plan"
-        }
-    }
-    </script>
+    <x-seo.webpage
+        name="Event Schedule - Online Events"
+        description="An online event is one link field on the event. Tick Online, paste the URL people join on, and the listing, the ticket and the search-engine markup follow. Tick In person as well and the same event is a hybrid." />
     </x-slot>
 
     {{-- Motion gate: hidden pre-reveal states only apply when this class is present,

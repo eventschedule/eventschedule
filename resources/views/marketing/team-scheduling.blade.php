@@ -4,40 +4,9 @@
     <x-slot name="breadcrumbTitle">Team Scheduling</x-slot>
 
     <x-slot name="structuredData">
-    <script type="application/ld+json" {!! nonce_attr() !!}>
-    {
-        "@context": "https://schema.org",
-        "@type": "SoftwareApplication",
-        "name": "Event Schedule - Team Scheduling",
-        "applicationCategory": "BusinessApplication",
-        "operatingSystem": "Web",
-        "description": "Invite colleagues onto one schedule with a named position. Admins create and edit events, open the settings page and see the schedule's ticket sales, viewers get read-only access to the schedule and can still scan tickets, and the owner alone changes levels, removes members, holds billing and can hand the schedule to another account.",
-        "featureList": [
-            "Invite a member by name and email, with an optional phone number",
-            "Three access levels: owner, admin and viewer",
-            "Admins see the schedule's ticket sales, waitlist and check-in dashboard, and can refund a sale",
-            "Viewers get read-only access to the admin panel, see no ticket sales, and can still scan tickets",
-            "Only the owner changes a member's level, removes a member or holds billing",
-            "Ownership transfer to another account on every plan, including Free",
-            "Pending invitations can be resent from the team tab",
-            "Per-member notification settings on the same schedule",
-            "Each member syncs the schedule to their own Google Calendar",
-            "Availability dates per member on a talent schedule, on the Enterprise plan",
-            "Audit log of who did what, with time, member, action and detail"
-        ],
-        "offers": {
-            "@type": "Offer",
-            "price": "0",
-            "priceCurrency": "{{ platform_currency() }}",
-            "description": "Free plan includes one team member. Multiple team members are on the Enterprise plan."
-        },
-        "url": "{{ url()->current() }}",
-        "provider": {
-            "@type": "Organization",
-            "name": "Event Schedule"
-        }
-    }
-    </script>
+    <x-seo.webpage
+        name="Event Schedule - Team Scheduling"
+        description="Invite colleagues onto one schedule with a named position. Admins create and edit events, open the settings page and see the schedule's ticket sales, viewers get read-only access to the schedule and can still scan tickets, and the owner alone changes levels, removes members, holds billing and can hand the schedule to another account." />
     </x-slot>
 
     {{-- Motion gate: hidden pre-reveal states only apply when this class is present,

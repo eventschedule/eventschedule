@@ -4,52 +4,9 @@
     <x-slot name="breadcrumbTitle">Embed Calendar</x-slot>
 
     <x-slot name="structuredData">
-    <script type="application/ld+json" {!! nonce_attr() !!}>
-    {
-        "@context": "https://schema.org",
-        "@type": "Service",
-        "name": "Event Schedule Embed Calendar",
-        "description": "One iframe tag puts your live calendar on the site you already have. It follows the visitor's dark mode, speaks 12 languages, and never needs pasting twice.",
-        "provider": {
-            "@type": "Organization",
-            "name": "Event Schedule",
-            "url": "{{ config('app.url') }}"
-        },
-        "serviceType": "Embeddable Calendar Widget"
-    }
-    </script>
-    <script type="application/ld+json" {!! nonce_attr() !!}>
-    {
-        "@context": "https://schema.org",
-        "@type": "SoftwareApplication",
-        "name": "Event Schedule - Embed Calendar",
-        "applicationCategory": "BusinessApplication",
-        "applicationSubCategory": "Website Integration Software",
-        "operatingSystem": "Web",
-        "description": "Embed your event calendar on any website with one line of code. Responsive iframe with dark mode and multilingual support.",
-        "offers": {
-            "@type": "Offer",
-            "price": "0",
-            "priceCurrency": "{{ platform_currency() }}",
-            "description": "Included free"
-        },
-        "featureList": [
-            "One iframe tag, no script and no dependency",
-            "Responsive width, with the height set in the tag",
-            "Dark mode forced with a URL parameter or left to the visitor's system setting",
-            "12 interface languages, including right-to-left layout",
-            "Filter the frame down to a single sub-schedule",
-            "Header, footer, banner and branding stripped inside the frame",
-            "Clicks open the full event page in a new tab, so the host page stays put",
-            "Served noindex so your own page is the one search engines read"
-        ],
-        "url": "{{ url()->current() }}",
-        "provider": {
-            "@type": "Organization",
-            "name": "Event Schedule"
-        }
-    }
-    </script>
+    <x-seo.webpage
+        name="Event Schedule Embed Calendar"
+        description="One iframe tag puts your live calendar on the site you already have. It follows the visitor's dark mode, speaks 12 languages, and never needs pasting twice." />
     <script type="application/ld+json" {!! nonce_attr() !!}>
     {
         "@context": "https://schema.org",

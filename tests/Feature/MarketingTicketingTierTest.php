@@ -244,6 +244,10 @@ class MarketingTicketingTierTest extends TestCase
                 // Hand-maintained, served to AI crawlers, and missed by every views/ glob.
                 public_path('llms.txt'),
                 public_path('llms-full.txt'),
+                // The one product node every marketing page carries, plan offers and all
+                // (SeoUtils::softwareApplication()). It replaced 92 per-page nodes that these
+                // globs did see, so without this line their claims would move out of view.
+                app_path('Utils/SeoUtils.php'),
             ]
         );
 

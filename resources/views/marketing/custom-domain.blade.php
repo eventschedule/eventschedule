@@ -4,32 +4,9 @@
     <x-slot name="breadcrumbTitle">Custom Domain</x-slot>
 
     <x-slot name="structuredData">
-    <script type="application/ld+json" {!! nonce_attr() !!}>
-    {
-        "@context": "https://schema.org",
-        "@type": "SoftwareApplication",
-        "name": "Event Schedule - Custom Domain",
-        "description": "Serve your event schedule on your own domain, with HTTPS provisioned automatically in Direct mode or a Cloudflare redirect in Redirect mode.",
-        "applicationCategory": "BusinessApplication",
-        "operatingSystem": ["Web", "Android", "iOS"],
-        "featureList": [
-            "Direct mode: the schedule is served on your own domain",
-            "Automatic HTTPS certificate in Direct mode",
-            "Redirect mode: a Cloudflare 301 from your domain to your schedule URL",
-            "One CNAME record at your registrar",
-            "Domain status shown as setting up, active or failed",
-            "Canonical URL and sitemap on your domain in Direct mode",
-            "Event links in schedule emails, the calendar feed and social short links on your domain",
-            "No ads on a custom domain"
-        ],
-        "offers": {
-            "@type": "Offer",
-            "price": "{{ $entMonthly }}",
-            "priceCurrency": "{{ platform_currency() }}",
-            "description": "Available on Enterprise plan"
-        }
-    }
-    </script>
+    <x-seo.webpage
+        name="Event Schedule - Custom Domain"
+        description="Serve your event schedule on your own domain, with HTTPS provisioned automatically in Direct mode or a Cloudflare redirect in Redirect mode." />
     </x-slot>
 
     {{-- Motion gate: hidden pre-reveal states only apply when this class is present,

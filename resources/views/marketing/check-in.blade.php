@@ -4,35 +4,9 @@
     <x-slot name="breadcrumbTitle">Check-in</x-slot>
 
     <x-slot name="structuredData">
-    <script type="application/ld+json" {!! nonce_attr() !!}>
-    {
-        "@context": "https://schema.org",
-        "@type": "SoftwareApplication",
-        "name": "Event Schedule - Check-in Dashboard",
-        "description": "Live attendance tracking at the door: QR scanning on every plan, plus a Pro dashboard with an overall progress bar, a per-ticket-type breakdown and a recent-arrivals feed.",
-        "applicationCategory": "BusinessApplication",
-        "operatingSystem": ["Web", "Android", "iOS"],
-        "featureList": [
-            "QR code scanning at the door on every plan",
-            "Unpaid, cancelled, fully refunded and expired orders refused at the scan",
-            "Live overall progress with the percentage checked in",
-            "Per-ticket-type breakdown of who has arrived",
-            "Recent activity feed of the last ten arrivals with times",
-            "Seat shown beside the name on an allocated event",
-            "Headcount including guests admitted on a pass",
-            "Reserved pass seats still expected at the door",
-            "Filter by event and by event date",
-            "Counts keyed to the venue's own calendar date",
-            "Refreshes every ten seconds while the tab is in front"
-        ],
-        "offers": {
-            "@type": "Offer",
-            "price": "{{ $proMonthly }}",
-            "priceCurrency": "{{ platform_currency() }}",
-            "description": "Scanning is free on every plan; the live dashboard is on the Pro plan"
-        }
-    }
-    </script>
+    <x-seo.webpage
+        name="Event Schedule - Check-in Dashboard"
+        description="Live attendance tracking at the door: QR scanning on every plan, plus a Pro dashboard with an overall progress bar, a per-ticket-type breakdown and a recent-arrivals feed." />
     </x-slot>
 
     {{-- Motion gate: the hidden pre-reveal states below only apply when this class is present, so

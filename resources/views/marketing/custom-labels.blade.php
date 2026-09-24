@@ -4,37 +4,10 @@
     <x-slot name="breadcrumbTitle">Custom Labels</x-slot>
 
     <x-slot name="structuredData">
-    <script type="application/ld+json" {!! nonce_attr() !!}>
-    {
-        "@context": "https://schema.org",
-        "@type": "SoftwareApplication",
-        "name": "Event Schedule Custom Labels",
-        "applicationCategory": "BusinessApplication",
-        "applicationSubCategory": "Event Management Software",
-        "operatingSystem": "Web",
-        "description": "Rename the built-in labels on your public schedule. Change 'Events' to 'Classes', 'Follow' to 'Subscribe' or 'Free entry' to 'No cover', across 36 labels. Each label keeps a second form for the language your schedule translates into. Pro plan.",
-        "offers": {
-            "@type": "Offer",
-            "price": "{{ $proMonthly }}",
-            "priceCurrency": "{{ platform_currency() }}",
-            "description": "Included in the Pro plan at {{ plan_price($proMonthly) }} per month. Every Pro feature is included in a selfhosted install."
-        },
-        "featureList": [
-            "36 renameable labels across the public schedule, event pages, photo gallery and appointment booking",
-            "Your own wording, typed in, up to 200 characters per label",
-            "Per-schedule configuration, so two schedules on one account can use different vocabularies",
-            "A second form per label for the language your schedule translates into, filled in automatically or written by hand",
-            "Applies to the embeddable calendar and to the Schedule tab in the admin portal",
-            "Pro plan"
-        ],
-        "url": "{{ url()->current() }}",
-        "keywords": "custom labels, rename events, schedule terminology, label overrides, classes instead of events",
-        "provider": {
-            "@type": "Organization",
-            "name": "Event Schedule"
-        }
-    }
-    </script>
+    <x-seo.webpage
+        name="Event Schedule Custom Labels"
+        description="Rename the built-in labels on your public schedule. Change 'Events' to 'Classes', 'Follow' to 'Subscribe' or 'Free entry' to 'No cover', across 36 labels. Each label keeps a second form for the language your schedule translates into. Pro plan."
+        keywords="custom labels, rename events, schedule terminology, label overrides, classes instead of events" />
     </x-slot>
 
     {{-- Motion gate: hidden pre-reveal states only apply when this class is present,

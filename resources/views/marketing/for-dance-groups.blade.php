@@ -4,65 +4,11 @@
     <x-slot name="breadcrumbTitle">For Dance Groups</x-slot>
 
     <x-slot name="structuredData">
-    <script type="application/ld+json" {!! nonce_attr() !!}>
-    {
-        "@context": "https://schema.org",
-        "@type": "Service",
-        "name": "Event Schedule for Dance Groups",
-        "description": "One schedule for the class, the rehearsal and the show. Weekly classes run as recurring events with per-class capacity, rehearsal calls stay members-only, and passes cover a set number of visits.",
-        "provider": {
-            "@type": "Organization",
-            "name": "Event Schedule",
-            "url": "{{ config('app.url') }}"
-        },
-        "serviceType": "Event Management",
-        "audience": {
-            "@type": "Audience",
-            "audienceType": "Dance Groups"
-        }
-    }
-    </script>
-    <!-- Product Schema for Rich Snippets -->
-    <script type="application/ld+json" {!! nonce_attr() !!}>
-    {
-        "@context": "https://schema.org",
-        "@type": "SoftwareApplication",
-        "name": "Event Schedule for Dance Groups",
-        "applicationCategory": "BusinessApplication",
-        "applicationSubCategory": "Dance Studio Scheduling Software",
-        "operatingSystem": "Web",
-        "offers": {
-            "@type": "Offer",
-            "price": "0",
-            "priceCurrency": "{{ platform_currency() }}",
-            "description": "Free forever"
-        },
-        "featureList": [
-            "Weekly classes as recurring events with day-of-week patterns and date exceptions",
-            "Per-class capacity with free registration and a remaining-spots count",
-            "Draft events that stay members-only, so rehearsal calls are not public",
-            "Visit passes for a set number of classes, such as a 10-visit card",
-            "Memberships with unlimited visits until the pass expires",
-            "Season passes valid for every occurrence of a recurring event",
-            "Per-pass cancellation deadline and late-cancel policy",
-            "Named ticket types with their own prices, quantities and sales windows",
-            "QR check-in for shows and classes, free on every plan",
-            "Zero platform fees on ticket sales, paid through Stripe, PayPal, Invoice Ninja, Payfast, a payment link or cash",
-            "An optional 'Tell me when tickets go on sale' list on every show date",
-            "A live calendar feed dancers can subscribe to, which updates itself when a class moves",
-            "Sub-schedules that keep classes, rehearsals and performances apart",
-            "Direct newsletters to the people who follow your schedule",
-            "Two-way Google, Outlook and CalDAV calendar sync",
-            "Embeddable calendar for the website you already have"
-        ],
-        "url": "{{ url()->current() }}",
-        "keywords": "dance studio schedule, dance class calendar, class card, dance company rehearsal schedule, recital ticketing, dance recurring classes",
-        "provider": {
-            "@type": "Organization",
-            "name": "Event Schedule"
-        }
-    }
-    </script>
+    <x-seo.webpage
+        name="Event Schedule for Dance Groups"
+        description="One schedule for the class, the rehearsal and the show. Weekly classes run as recurring events with per-class capacity, rehearsal calls stay members-only, and passes cover a set number of visits."
+        audience="Dance Groups"
+        keywords="dance studio schedule, dance class calendar, class card, dance company rehearsal schedule, recital ticketing, dance recurring classes" />
     </x-slot>
 
     {{-- Motion gate: hidden pre-reveal states only apply when this class is present,

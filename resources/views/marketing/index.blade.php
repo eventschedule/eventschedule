@@ -385,41 +385,8 @@
     </style>
 
     <x-slot name="structuredData">
-    <script type="application/ld+json" {!! nonce_attr() !!}>
-    {
-        "@context": "https://schema.org",
-        "@type": "SoftwareApplication",
-        "@id": "{{ config('app.url') }}/#software",
-        "name": "Event Schedule",
-        "url": "{{ config('app.url') }}",
-        "description": "Event calendar and booking platform. One calendar that takes the bookings, collects free registrations, sells tickets with zero platform fees through Stripe or PayPal, emails the people who follow you and scans tickets at the door. Free plan, open source and selfhostable.",
-        "featureList": [
-            "Event calendar pages with a custom link and a website embed",
-            "Free registration and RSVP, unlimited on every plan",
-            "Paid ticket sales with zero platform fees through Stripe or PayPal (Pro)",
-            "QR ticket scanning at the door on every plan",
-            "Full and partial refunds through Stripe and PayPal",
-            "Email sign-up for when an event's tickets go on sale",
-            "Newsletters, and automatic new-event digests for confirmed subscribers",
-            "Two-way calendar sync with Google Calendar, Microsoft 365 and CalDAV",
-            "A live calendar feed guests can subscribe to",
-            "Appointment booking, free with one appointment type",
-            "Passes and gift cards (Pro)",
-            "Reserved seating with a box office console (Enterprise)"
-        ],
-        "applicationCategory": "BusinessApplication",
-        "operatingSystem": ["Web", "Android", "iOS"],
-        "screenshot": "{{ config('app.url') }}/images/social/home.jpg",
-        "publisher": { "@id": "{{ config('app.url') }}/#organization" },
-        "offers": {
-            "@type": "Offer",
-            "price": "0",
-            "priceCurrency": "{{ platform_currency() }}",
-            "url": "{{ config('app.url') }}/pricing",
-            "availability": "https://schema.org/InStock"
-        }
-    }
-    </script>
+    {{-- The product node ({site}/#software) is emitted once by the layout for every marketing page:
+         SeoUtils::softwareApplication(). --}}
     <x-seo.howto-schema
         name="How to share your event schedule"
         description="Get your event schedule live and shared with your audience in three simple steps."

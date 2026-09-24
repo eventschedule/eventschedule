@@ -4,34 +4,9 @@
     <x-slot name="breadcrumbTitle">PayPal</x-slot>
 
     <x-slot name="structuredData">
-    <script type="application/ld+json" {!! nonce_attr() !!}>
-    {
-        "@context": "https://schema.org",
-        "@type": "SoftwareApplication",
-        "name": "Event Schedule - PayPal Integration",
-        "description": "Sell event tickets through your own PayPal business account, with no platform fee on any plan, credentials verified before they are stored and every payment confirmed by reading the capture back from PayPal.",
-        "applicationCategory": "BusinessApplication",
-        "operatingSystem": "Web",
-        "featureList": [
-            "Connect your own PayPal business account",
-            "Included with paid ticketing on the Pro plan, at no extra cost",
-            "No platform fee on ticket sales, on any plan",
-            "Credentials verified with PayPal before they are stored",
-            "The seats are re-checked before the money is taken",
-            "Payment confirmed by reading the capture back from PayPal",
-            "Seats held, not resold, while PayPal reviews a payment",
-            "Refunds, full or partial, issued against the real capture",
-            "One order and one capture across a multi-event cart",
-            "Works alongside Stripe, Payfast, Invoice Ninja, a payment link or cash"
-        ],
-        "offers": {
-            "@type": "Offer",
-            "price": "0",
-            "priceCurrency": "{{ platform_currency() }}",
-            "description": "The gateway costs nothing extra, and there is no platform fee on ticket sales on any plan"
-        }
-    }
-    </script>
+    <x-seo.webpage
+        name="Event Schedule - PayPal Integration"
+        description="Sell event tickets through your own PayPal business account, with no platform fee on any plan, credentials verified before they are stored and every payment confirmed by reading the capture back from PayPal." />
     </x-slot>
 
     {{-- Motion gate: the hidden pre-reveal states below only apply when this class is present, so

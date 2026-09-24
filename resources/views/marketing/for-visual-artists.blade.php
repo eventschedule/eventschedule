@@ -4,68 +4,11 @@
     <x-slot name="breadcrumbTitle">For Visual Artists</x-slot>
 
     <x-slot name="structuredData">
-    <script type="application/ld+json" {!! nonce_attr() !!}>
-    {
-        "@context": "https://schema.org",
-        "@type": "Service",
-        "name": "Event Schedule for Visual Artists",
-        "description": "Build your collector base directly. Announce exhibitions, sell tickets to openings, and email collectors. Zero platform fees. Free forever.",
-        "provider": {
-            "@type": "Organization",
-            "name": "Event Schedule",
-            "url": "{{ config('app.url') }}"
-        },
-        "serviceType": "Event Management",
-        "audience": {
-            "@type": "Audience",
-            "audienceType": "Visual Artists"
-        }
-    }
-    </script>
-    <!-- Product Schema for Rich Snippets -->
-    <script type="application/ld+json" {!! nonce_attr() !!}>
-    {
-        "@context": "https://schema.org",
-        "@type": "SoftwareApplication",
-        "name": "Event Schedule for Visual Artists",
-        "applicationCategory": "BusinessApplication",
-        "applicationSubCategory": "Artist Exhibition and Event Scheduling Software",
-        "operatingSystem": "Web",
-        "description": "One page for your exhibitions, open studio days and workshops, with a link of its own. Sell workshop places through Stripe or PayPal with zero platform fees, and let collectors subscribe to your calendar.",
-        "offers": {
-            "@type": "Offer",
-            "price": "0",
-            "priceCurrency": "{{ platform_currency() }}",
-            "description": "Free forever"
-        },
-        "featureList": [
-            "Recurring open studio dates, with individual dates taken out",
-            "Sub-schedules with their own colour and their own shareable link",
-            "Draft events that stay off the public page until the gallery announces",
-            "A header wall of the venue logos from your accepted public events",
-            "Visitor photos, videos and comments on events, held for your approval",
-            "Free RSVP with a capacity, counted per date",
-            "Named ticket types with quantities counted per occurrence date",
-            "Custom questions answered at checkout",
-            "QR check-in at the door on every plan",
-            "Zero platform fees on ticket sales through your own Stripe or PayPal account",
-            "Bookable studio visits with weekly hours and per-date overrides",
-            "Direct newsletters to the people who follow your schedule",
-            "A downloadable QR code for your schedule",
-            "Two-way Google, Outlook and CalDAV calendar sync",
-            "A live calendar feed collectors subscribe to once",
-            "Embeddable calendar for your own portfolio site",
-            "A page made for you when a gallery lists you, which you claim with the email address on it",
-            "Shareable graphics built from the flyer images of your upcoming events"
-        ],
-        "url": "{{ url()->current() }}",
-        "keywords": "artist exhibition calendar, visual artist scheduling, gallery show management, art event calendar, free artist scheduling",
-        "provider": {
-            "@type": "Organization",
-            "name": "Event Schedule"
-        }
-    }
-    </script>
+    <x-seo.webpage
+        name="Event Schedule for Visual Artists"
+        description="Build your collector base directly. Announce exhibitions, sell tickets to openings, and email collectors. Zero platform fees. Free forever."
+        audience="Visual Artists"
+        keywords="artist exhibition calendar, visual artist scheduling, gallery show management, art event calendar, free artist scheduling" />
     </x-slot>
 
     {{-- Motion gate: hidden pre-reveal states only apply when this class is present,

@@ -4,63 +4,11 @@
     <x-slot name="breadcrumbTitle">For Circus & Acrobatics</x-slot>
 
     <x-slot name="structuredData">
-    <script type="application/ld+json" {!! nonce_attr() !!}>
-    {
-        "@context": "https://schema.org",
-        "@type": "Service",
-        "name": "Event Schedule for Circus & Acrobatics",
-        "description": "Every circus show, aerial class and festival stop on one link. Zero platform fees on tickets, rigging specs for bookers, and a calendar fans subscribe to.",
-        "provider": {
-            "@type": "Organization",
-            "name": "Event Schedule",
-            "url": "{{ config('app.url') }}"
-        },
-        "serviceType": "Event Management",
-        "audience": {
-            "@type": "Audience",
-            "audienceType": "Circus & Acrobatic Performers"
-        }
-    }
-    </script>
-    <!-- Product Schema for Rich Snippets -->
-    <script type="application/ld+json" {!! nonce_attr() !!}>
-    {
-        "@context": "https://schema.org",
-        "@type": "SoftwareApplication",
-        "name": "Event Schedule for Circus & Acrobatics",
-        "applicationCategory": "BusinessApplication",
-        "applicationSubCategory": "Circus Performer Scheduling Software",
-        "operatingSystem": "Web",
-        "description": "Share your circus performances, sell tickets with zero platform fees, and reach your audience directly. Built for aerialists, acrobats, and touring troupes.",
-        "offers": {
-            "@type": "Offer",
-            "price": "0",
-            "priceCurrency": "{{ platform_currency() }}",
-            "description": "Free forever"
-        },
-        "featureList": [
-            "Festival circuit tracking for summer tours",
-            "A live calendar feed fans subscribe to, so a moved date updates itself",
-            "Technical rigging specs on your schedule page",
-            "Workshop scheduling with multi-class passes on Pro",
-            "Crew members and availability on Enterprise",
-            "Ticket sales through Stripe, PayPal or cash, with zero platform fees and QR door check-in",
-            "An email-only list for fans waiting on a show's tickets",
-            "Booking request form for event planners",
-            "Sub-schedules for shows, classes, and corporate gigs",
-            "A digest of the dates you add, for email subscribers, and newsletters you write",
-            "Claimable pages for acts a festival lists by name",
-            "Online events carried by one link field",
-            "Auto-generated show posters on every plan"
-        ],
-        "url": "{{ url()->current() }}",
-        "keywords": "circus schedule, acrobat show calendar, circus performer booking, circus event management, free circus scheduling, aerial class passes, circus troupe schedule",
-        "provider": {
-            "@type": "Organization",
-            "name": "Event Schedule"
-        }
-    }
-    </script>
+    <x-seo.webpage
+        name="Event Schedule for Circus & Acrobatics"
+        description="Every circus show, aerial class and festival stop on one link. Zero platform fees on tickets, rigging specs for bookers, and a calendar fans subscribe to."
+        audience="Circus & Acrobatic Performers"
+        keywords="circus schedule, acrobat show calendar, circus performer booking, circus event management, free circus scheduling, aerial class passes, circus troupe schedule" />
     <!-- HowTo Schema for Rich Snippets -->
     <script type="application/ld+json" {!! nonce_attr() !!}>
     {

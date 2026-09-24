@@ -4,65 +4,11 @@
     <x-slot name="breadcrumbTitle">For Festivals</x-slot>
 
     <x-slot name="structuredData">
-    <script type="application/ld+json" {!! nonce_attr() !!}>
-    {
-        "@context": "https://schema.org",
-        "@type": "Service",
-        "name": "Event Schedule for Festivals",
-        "description": "A festival schedule where each stage is a sub-schedule with its own link, each act can be credited and offered its date, and a weekend pass covers every day on one QR code.",
-        "provider": {
-            "@type": "Organization",
-            "name": "Event Schedule",
-            "url": "{{ config('app.url') }}"
-        },
-        "serviceType": "Event Management",
-        "audience": {
-            "@type": "Audience",
-            "audienceType": "Music, Arts, Film and Food Festival Organizers"
-        }
-    }
-    </script>
-    <!-- Product Schema for Rich Snippets -->
-    <script type="application/ld+json" {!! nonce_attr() !!}>
-    {
-        "@context": "https://schema.org",
-        "@type": "SoftwareApplication",
-        "name": "Event Schedule for Festivals",
-        "applicationCategory": "BusinessApplication",
-        "applicationSubCategory": "Festival Lineup and Ticketing Software",
-        "operatingSystem": "Web",
-        "offers": {
-            "@type": "Offer",
-            "price": "0",
-            "priceCurrency": "{{ platform_currency() }}",
-            "description": "Free forever"
-        },
-        "featureList": [
-            "Each stage as a sub-schedule with its own shareable link",
-            "Each set as its own event, or a whole day as one event with the running order as agenda parts",
-            "Acts added as participants, offered the date for their own schedule, or given a page they can claim",
-            "Curator event sources that link on every event a listed act or venue publishes",
-            "Weekend and day passes redeemable across events on one QR code, on the Pro plan",
-            "Several events bought in one checkout",
-            "Early-bird sales windows and group-rate discounts on ticket types",
-            "Promo codes, add-ons such as parking or camping, installments and a ticket waitlist, on the Pro plan",
-            "Zero platform fees on ticket sales",
-            "QR scanning at the gate from any phone, and a live check-in dashboard on Pro",
-            "Sponsor and partner logos with tiers on the festival page, on Pro",
-            "Act and vendor applications through the festival page",
-            "Free registration with a capacity for free-entry days",
-            "A live calendar feed and Add to Calendar on every event",
-            "A digest of new dates to confirmed email subscribers, and newsletters you write",
-            "Fan photos, videos and comments held in an approval queue"
-        ],
-        "url": "{{ url()->current() }}",
-        "keywords": "festival schedule, festival lineup, festival ticketing, weekend pass, stage schedule, festival app alternative",
-        "provider": {
-            "@type": "Organization",
-            "name": "Event Schedule"
-        }
-    }
-    </script>
+    <x-seo.webpage
+        name="Event Schedule for Festivals"
+        description="A festival schedule where each stage is a sub-schedule with its own link, each act can be credited and offered its date, and a weekend pass covers every day on one QR code."
+        audience="Music, Arts, Film and Food Festival Organizers"
+        keywords="festival schedule, festival lineup, festival ticketing, weekend pass, stage schedule, festival app alternative" />
     <!-- HowTo Schema for Rich Snippets -->
     <script type="application/ld+json" {!! nonce_attr() !!}>
     {

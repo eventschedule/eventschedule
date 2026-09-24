@@ -4,32 +4,9 @@
     <x-slot name="breadcrumbTitle">Waitlist</x-slot>
 
     <x-slot name="structuredData">
-    <script type="application/ld+json" {!! nonce_attr() !!}>
-    {
-        "@context": "https://schema.org",
-        "@type": "SoftwareApplication",
-        "name": "Event Schedule - Ticket Waitlist",
-        "description": "A waitlist that opens automatically when an event date sells out, notifying one person at a time with a 24-hour window so a returned seat can never be oversold.",
-        "applicationCategory": "BusinessApplication",
-        "operatingSystem": "Web",
-        "featureList": [
-            "A Join Waitlist button appears automatically when a date sells out",
-            "Guests join with a name and an email address",
-            "A cancelled, fully refunded or expired sale frees a place",
-            "Only one person is notified at a time",
-            "The offer holds for 24 hours, then passes on",
-            "A pass holder cancelling a booked date frees a place too",
-            "Waitlist tab listing every entry, event, date and status",
-            "Free on registration events, Pro on ticketed ones"
-        ],
-        "offers": {
-            "@type": "Offer",
-            "price": "{{ $proMonthly }}",
-            "priceCurrency": "{{ platform_currency() }}",
-            "description": "Free on registration events; the ticketed waitlist is on the Pro plan"
-        }
-    }
-    </script>
+    <x-seo.webpage
+        name="Event Schedule - Ticket Waitlist"
+        description="A waitlist that opens automatically when an event date sells out, notifying one person at a time with a 24-hour window so a returned seat can never be oversold." />
     </x-slot>
 
     {{-- Motion gate: the hidden pre-reveal states below only apply when this class is present, so

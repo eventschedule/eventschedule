@@ -4,33 +4,9 @@
     <x-slot name="breadcrumbTitle">White Label</x-slot>
 
     <x-slot name="structuredData">
-    <script type="application/ld+json" {!! nonce_attr() !!}>
-    {
-        "@context": "https://schema.org",
-        "@type": "SoftwareApplication",
-        "name": "Event Schedule - White Label",
-        "description": "On Pro, Event Schedule branding comes off seven surfaces at once, from the foot of your page to both embeds and your newsletters, with nothing to switch on.",
-        "applicationCategory": "BusinessApplication",
-        "operatingSystem": ["Web", "Android", "iOS"],
-        "featureList": [
-            "Removes the small Event Schedule chip from the corner of your public schedule",
-            "Removes the Create your own event schedule card from your public event pages",
-            "Embed snippets ship without a Powered by line",
-            "The embedded ticket widget loses its Powered by footer",
-            "Newsletter emails send without a Powered by footer",
-            "Your own logo becomes the browser tab icon",
-            "Public pages are never monetized above the free tier",
-            "Nothing to configure: the check reads your plan",
-            "Any install other than eventschedule.com, selfhosted or your own platform, is white-labeled apart from a small corner credit the license asks for, and no page carries more than one credit"
-        ],
-        "offers": {
-            "@type": "Offer",
-            "price": "{{ $proMonthly }}",
-            "priceCurrency": "{{ platform_currency() }}",
-            "description": "Available on Pro plan"
-        }
-    }
-    </script>
+    <x-seo.webpage
+        name="Event Schedule - White Label"
+        description="On Pro, Event Schedule branding comes off seven surfaces at once, from the foot of your page to both embeds and your newsletters, with nothing to switch on." />
     </x-slot>
 
     {{-- Motion gate: hidden pre-reveal states only apply when this class is present,

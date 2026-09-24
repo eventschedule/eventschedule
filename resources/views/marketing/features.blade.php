@@ -4,71 +4,9 @@
     <x-slot name="breadcrumbTitle">Features</x-slot>
 
     <x-slot name="structuredData">
-    <script type="application/ld+json" {!! nonce_attr() !!}>
-    {
-        "@context": "https://schema.org",
-        "@type": "SoftwareApplication",
-        "name": "Event Schedule Features",
-        "description": "Every Event Schedule feature: ticketing through Stripe or PayPal with no platform fee, two-way calendar sync, newsletters, AI event import, analytics, and an open-source codebase you can selfhost.",
-        "applicationCategory": "BusinessApplication",
-        "operatingSystem": ["Web", "Android", "iOS"],
-        "featureList": [
-            "Event Ticketing with QR Check-in",
-            "Stripe and PayPal Checkout",
-            "Full and Partial Refunds",
-            "Reserved Seating",
-            "Passes and Subscriptions",
-            "Gift Cards",
-            "Appointment Booking",
-            "Promo/Discount Codes",
-            "Ticket Waitlist",
-            "Event Interest List",
-            "Check-in Dashboard",
-            "Free Event Registration",
-            "Sales CSV Export",
-            "Sale Notification Emails",
-            "Custom Fields",
-            "AI Event Parsing",
-            "AI Flyer Generation",
-            "WhatsApp Event Creation",
-            "Google Calendar Sync",
-            "Outlook and Microsoft 365 Sync",
-            "CalDAV Sync",
-            "iCal Download",
-            "Live Calendar Subscription Feed",
-            "Recurring Events",
-            "Sub-schedules",
-            "Online Events",
-            "Availability Management",
-            "Team Scheduling",
-            "Claimable Pages for Listed Acts and Venues",
-            "Email Newsletters",
-            "Event Graphics",
-            "Event Boost Ad Campaigns",
-            "Embed Calendar",
-            "Embed Ticket Widget",
-            "Fan Videos & Comments",
-            "Event Polls",
-            "Post-Event Feedback",
-            "Carpool Matching",
-            "Analytics Dashboard",
-            "Short Links with Click Counts",
-            "Private Events",
-            "Custom Domains",
-            "White Label Branding",
-            "Custom CSS",
-            "Custom Labels",
-            "Backup and Restore",
-            "Open Source, REST API and Webhooks"
-        ],
-        "offers": {
-            "@type": "Offer",
-            "price": "0",
-            "priceCurrency": "{{ platform_currency() }}",
-            "description": "Free plan available"
-        }
-    }
-    </script>
+    <x-seo.webpage
+        name="Event Schedule Features"
+        description="Every Event Schedule feature: ticketing through Stripe or PayPal with no platform fee, two-way calendar sync, newsletters, AI event import, analytics, and an open-source codebase you can selfhost." />
     </x-slot>
 
     <style {!! nonce_attr() !!}>

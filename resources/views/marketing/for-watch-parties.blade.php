@@ -4,65 +4,11 @@
     <x-slot name="breadcrumbTitle">For Watch Parties</x-slot>
 
     <x-slot name="structuredData">
-    <script type="application/ld+json" {!! nonce_attr() !!}>
-    {
-        "@context": "https://schema.org",
-        "@type": "Service",
-        "name": "Event Schedule for Watch Parties",
-        "description": "Free, open-source watch party scheduling software. Publish the running order, take free registrations against a per-date cap, and hand every registrant a confirmation page carrying the join link. Zero platform fees.",
-        "provider": {
-            "@type": "Organization",
-            "name": "Event Schedule",
-            "url": "{{ config('app.url') }}"
-        },
-        "serviceType": "Event Management",
-        "audience": {
-            "@type": "Audience",
-            "audienceType": "Watch Party Hosts"
-        }
-    }
-    </script>
-    <!-- Product Schema for Rich Snippets -->
-    <script type="application/ld+json" {!! nonce_attr() !!}>
-    {
-        "@context": "https://schema.org",
-        "@type": "SoftwareApplication",
-        "name": "Event Schedule for Watch Parties",
-        "applicationCategory": "BusinessApplication",
-        "applicationSubCategory": "Watch Party Scheduling Software",
-        "operatingSystem": "Web",
-        "description": "Schedule watch parties and screenings: one join link per event, a published running order, free registration with a cap counted per date, and a confirmation page that carries the link.",
-        "offers": {
-            "@type": "Offer",
-            "price": "0",
-            "priceCurrency": "{{ platform_currency() }}",
-            "description": "Free forever"
-        },
-        "featureList": [
-            "One join link per event, for whatever platform you are streaming through",
-            "Free registration with a capacity cap counted for each date on its own",
-            "A confirmation page carrying the join link, emailed to every registrant",
-            "A published running order with times, for doors, feature and discussion",
-            "Weekly and monthly screening series as one recurring event with date exceptions",
-            "An .ics file for every event and every date of a series, stamped in UTC so a viewer's own calendar shows their local time",
-            "Newsletters to your followers, to everyone who registered for one screening, or to a sub-schedule",
-            "Named ticket types with their own prices, quantities and sales windows for paid screenings",
-            "Zero platform fees on ticket sales through your own Stripe or PayPal account",
-            "Refunds in full or in part from the Sales page, sent back through Stripe or PayPal",
-            "An email-only Tell me if anything changes list on each date, with a reminder before it starts",
-            "Two-way Google, Outlook and CalDAV calendar sync",
-            "Embeddable calendar for the site you already have",
-            "Open source, with a selfhosted option"
-        ],
-        "url": "{{ url()->current() }}",
-        "keywords": "watch party platform, schedule watch parties, virtual watch party, online watch party hosting, group streaming events, watch party ticketing, movie night scheduling, free watch party app",
-        "screenshot": "{{ asset('images/social/for-watch-parties.jpg') }}",
-        "provider": {
-            "@type": "Organization",
-            "name": "Event Schedule"
-        }
-    }
-    </script>
+    <x-seo.webpage
+        name="Event Schedule for Watch Parties"
+        description="Free, open-source watch party scheduling software. Publish the running order, take free registrations against a per-date cap, and hand every registrant a confirmation page carrying the join link. Zero platform fees."
+        audience="Watch Party Hosts"
+        keywords="watch party platform, schedule watch parties, virtual watch party, online watch party hosting, group streaming events, watch party ticketing, movie night scheduling, free watch party app" />
     <!-- HowTo Schema for Rich Snippets -->
     <script type="application/ld+json" {!! nonce_attr() !!}>
     {

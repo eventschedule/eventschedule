@@ -4,63 +4,11 @@
     <x-slot name="breadcrumbTitle">For Webinars</x-slot>
 
     <x-slot name="structuredData">
-    <script type="application/ld+json" {!! nonce_attr() !!}>
-    {
-        "@context": "https://schema.org",
-        "@type": "Service",
-        "name": "Event Schedule for Webinars",
-        "description": "Publish a webinar on a public schedule, take free registrations or sell tickets with zero platform fees, and hand the join link only to the people who registered. One Event URL field, so any meeting or streaming platform works.",
-        "provider": {
-            "@type": "Organization",
-            "name": "Event Schedule",
-            "url": "{{ config('app.url') }}"
-        },
-        "serviceType": "Event Management",
-        "audience": {
-            "@type": "Audience",
-            "audienceType": "Webinar Hosts"
-        }
-    }
-    </script>
-    <!-- Product Schema for Rich Snippets -->
-    <script type="application/ld+json" {!! nonce_attr() !!}>
-    {
-        "@context": "https://schema.org",
-        "@type": "SoftwareApplication",
-        "name": "Event Schedule for Webinars",
-        "applicationCategory": "BusinessApplication",
-        "applicationSubCategory": "Webinar Scheduling Software",
-        "operatingSystem": "Web",
-        "description": "Publish a webinar on a public schedule, take free registrations or sell tickets with zero platform fees, and hand the join link only to the people who registered. One Event URL field, so any meeting or streaming platform works.",
-        "offers": {
-            "@type": "Offer",
-            "price": "0",
-            "priceCurrency": "{{ platform_currency() }}",
-            "description": "Free forever"
-        },
-        "featureList": [
-            "One Event URL field, so any meeting or streaming link works",
-            "Public listing shows the platform's domain, never the join link",
-            "Free registration with a capacity limit counted per session date",
-            "Registrants get their own registration page carrying the join link",
-            "A change notice you approve before it emails everyone who registered, free RSVPs included",
-            "An email-only reminder list for visitors not ready to register, which never carries the join link",
-            "A running order on the event built from agenda parts",
-            "Weekly or monthly recurring series with skipped dates and a fixed end",
-            "Zero platform fees on ticket sales through your own Stripe or PayPal account",
-            "Two-way Google, Outlook and CalDAV calendar sync",
-            "Direct newsletters to followers with open and click rates",
-            "Embeddable calendar and a downloadable QR code for your closing slide"
-        ],
-        "url": "{{ url()->current() }}",
-        "keywords": "webinar hosting, webinar scheduling, webinar registration, paid webinars, recurring webinar series",
-        "screenshot": "{{ asset('images/social/for-webinars.jpg') }}",
-        "provider": {
-            "@type": "Organization",
-            "name": "Event Schedule"
-        }
-    }
-    </script>
+    <x-seo.webpage
+        name="Event Schedule for Webinars"
+        description="Publish a webinar on a public schedule, take free registrations or sell tickets with zero platform fees, and hand the join link only to the people who registered. One Event URL field, so any meeting or streaming platform works."
+        audience="Webinar Hosts"
+        keywords="webinar hosting, webinar scheduling, webinar registration, paid webinars, recurring webinar series" />
     <!-- HowTo Schema for Rich Snippets -->
     <script type="application/ld+json" {!! nonce_attr() !!}>
     {

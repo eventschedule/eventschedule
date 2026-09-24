@@ -4,34 +4,9 @@
     <x-slot name="breadcrumbTitle">Promo Codes</x-slot>
 
     <x-slot name="structuredData">
-    <script type="application/ld+json" {!! nonce_attr() !!}>
-    {
-        "@context": "https://schema.org",
-        "@type": "SoftwareApplication",
-        "name": "Event Schedule - Promo Codes and Add-ons",
-        "description": "Percentage or fixed-amount discount codes with usage caps, expiry dates and per-ticket-type targeting, plus optional add-ons sold alongside a ticket with their own stock.",
-        "applicationCategory": "BusinessApplication",
-        "operatingSystem": "Web",
-        "featureList": [
-            "Percentage or fixed-amount discount codes",
-            "Cap how many times a code can be used",
-            "Expiry date and time on any code",
-            "Switch a code off without deleting it",
-            "Target a code at specific ticket types",
-            "Codes are set per event, and the same code can be added to several",
-            "A share link that fills the code in at checkout",
-            "Add-ons with their own stock and per-order maximum",
-            "Promo codes never discount add-ons",
-            "Applied after any volume discount, so the two never double-count"
-        ],
-        "offers": {
-            "@type": "Offer",
-            "price": "{{ $proMonthly }}",
-            "priceCurrency": "{{ platform_currency() }}",
-            "description": "Available on the Pro plan"
-        }
-    }
-    </script>
+    <x-seo.webpage
+        name="Event Schedule - Promo Codes and Add-ons"
+        description="Percentage or fixed-amount discount codes with usage caps, expiry dates and per-ticket-type targeting, plus optional add-ons sold alongside a ticket with their own stock." />
     </x-slot>
 
     {{-- Motion gate: the hidden pre-reveal states below only apply when this class is present, so

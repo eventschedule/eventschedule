@@ -12,69 +12,9 @@
     <x-slot name="breadcrumbTitle">Ticketing</x-slot>
 
     <x-slot name="structuredData">
-    <script type="application/ld+json" {!! nonce_attr() !!}>
-    {
-        "@context": "https://schema.org",
-        "@type": "Service",
-        "name": "Event Schedule Ticketing",
-        "description": "Sell tickets from your own event page with named ticket types, promo codes, add-ons and passes, take payment through your own Stripe or PayPal account, then scan the QR code at the door. Zero platform fees on ticket sales.",
-        "provider": {
-            "@type": "Organization",
-            "name": "Event Schedule",
-            "url": "{{ config('app.url') }}"
-        },
-        "serviceType": "Event Ticketing"
-    }
-    </script>
-    <script type="application/ld+json" {!! nonce_attr() !!}>
-    {
-        "@context": "https://schema.org",
-        "@type": "SoftwareApplication",
-        "name": "Event Schedule Ticketing",
-        "applicationCategory": "BusinessApplication",
-        "applicationSubCategory": "Event Ticketing Software",
-        "operatingSystem": "Web",
-        "description": "Sell tickets from your own event page and check them in at the door with a phone. Ticket types with their own price, quantity and sales window, promo codes, add-ons, passes, waitlist and QR check-in, with Stripe or PayPal checkout and full or partial refunds. Zero platform fees on ticket sales.",
-        "offers": {
-            "@type": "Offer",
-            "price": "{{ $proMonthly }}",
-            "priceCurrency": "{{ platform_currency() }}",
-            "description": "Charging for a ticket is on Pro, at {{ plan_price($proMonthly) }} per month with a 7 day free trial, which also brings the live check-in dashboard, the waitlist, promo codes and passes. Free registration is unlimited on every plan, and scanning a ticket at the door costs nothing on any of them. Zero platform fees on ticket sales, on every plan."
-        },
-        "featureList": [
-            "Zero platform fees on ticket sales",
-            "Stripe or PayPal checkout into your own account",
-            "Ticket types with their own price, quantity and sales window",
-            "Ticket inventory counted per occurrence date on recurring events",
-            "Combined inventory across every ticket type",
-            "Volume discounts and a maximum per order",
-            "Add-ons for parking, merchandise and meal packages",
-            "Promo codes with percentage or fixed discounts, usage limits and per-ticket targeting",
-            "Passes and season subscriptions valid across many events",
-            "Custom questions collected at checkout",
-            "One checkout across several events",
-            "Monthly installment plans on Stripe",
-            "An interest list that emails people when tickets go on sale",
-            "Individual tickets, so each guest gets their own confirmation and QR code",
-            "QR code on every ticket, scanned from a phone at the door",
-            @if ($walletLive)
-            "Add to Google Wallet from the ticket page and the confirmation email",
-            @endif
-            "One admission per ticket, with a warning on a second scan",
-            "Live check-in dashboard with a per-ticket-type breakdown",
-            "Ticket waitlist that notifies one person at a time",
-            "Full or partial refunds sent back through Stripe or PayPal",
-            "Sale notification emails",
-            "Sales CSV export including custom field answers",
-            "Free registration and RSVP with optional capacity limits"
-        ],
-        "url": "{{ url()->current() }}",
-        "provider": {
-            "@type": "Organization",
-            "name": "Event Schedule"
-        }
-    }
-    </script>
+    <x-seo.webpage
+        name="Event Schedule Ticketing"
+        description="Sell tickets from your own event page with named ticket types, promo codes, add-ons and passes, take payment through your own Stripe or PayPal account, then scan the QR code at the door. Zero platform fees on ticket sales." />
     <script type="application/ld+json" {!! nonce_attr() !!}>
     {
         "@context": "https://schema.org",

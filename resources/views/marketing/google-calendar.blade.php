@@ -4,41 +4,9 @@
     <x-slot name="breadcrumbTitle">Google Calendar</x-slot>
 
     <x-slot name="structuredData">
-    <script type="application/ld+json" {!! nonce_attr() !!}>
-    {
-        "@context": "https://schema.org",
-        "@type": "SoftwareApplication",
-        "name": "Event Schedule - Google Calendar Sync",
-        "applicationCategory": "BusinessApplication",
-        "applicationSubCategory": "Calendar Synchronization Software",
-        "operatingSystem": "Web",
-        "description": "Two-way Google Calendar sync, free on every plan. Each schedule picks its own calendar, and edits made in Google come back within seconds.",
-        "featureList": [
-            "Two-way Google Calendar sync, free on every plan",
-            "Google OAuth connection with automatic token refresh",
-            "Push notifications from Google, with a fifteen-minute incremental sweep as a backstop",
-            "Per-schedule direction: to Google, from Google, both, or off",
-            "Choose which Google Calendar each schedule syncs with",
-            "Per-schedule policy for events deleted in Google Calendar",
-            "Calendar description template for the text of the Google entry",
-            "An address typed into Google Calendar becomes a venue on your schedule",
-            "Followers and team members can sync a schedule to a Google Calendar of their own",
-            "Add to Google Calendar links on public event pages",
-            "A live calendar feed guests can subscribe to in Google Calendar, separate from sync"
-        ],
-        "offers": {
-            "@type": "Offer",
-            "price": "0",
-            "priceCurrency": "{{ platform_currency() }}",
-            "description": "Included free on every plan"
-        },
-        "url": "{{ url()->current() }}",
-        "provider": {
-            "@type": "Organization",
-            "name": "Event Schedule"
-        }
-    }
-    </script>
+    <x-seo.webpage
+        name="Event Schedule - Google Calendar Sync"
+        description="Two-way Google Calendar sync, free on every plan. Each schedule picks its own calendar, and edits made in Google come back within seconds." />
     </x-slot>
 
     {{-- Motion gate: hidden pre-reveal states only apply when this class is present,

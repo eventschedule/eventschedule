@@ -4,60 +4,9 @@
     <x-slot name="breadcrumbTitle">Newsletters</x-slot>
 
     <x-slot name="structuredData">
-    <script type="application/ld+json" {!! nonce_attr() !!}>
-    {
-        "@context": "https://schema.org",
-        "@type": "Service",
-        "name": "Event Schedule Newsletters",
-        "description": "Send newsletters to email subscribers, followers and ticket buyers, while new public events reach confirmed subscribers as an automatic digest. Drag-and-drop editor, templates, audience segments, A/B testing and delivery analytics.",
-        "provider": {
-            "@type": "Organization",
-            "name": "Event Schedule",
-            "url": "{{ config('app.url') }}"
-        },
-        "serviceType": "Event Email Marketing"
-    }
-    </script>
-    <script type="application/ld+json" {!! nonce_attr() !!}>
-    {
-        "@context": "https://schema.org",
-        "@type": "SoftwareApplication",
-        "name": "Event Schedule Newsletters",
-        "applicationCategory": "BusinessApplication",
-        "applicationSubCategory": "Email Marketing Software",
-        "operatingSystem": "Web",
-        "description": "Compose a newsletter from fourteen block types, choose who receives it, and send it yourself. A newsletter never sends itself; the separate new-event digest to confirmed subscribers goes out on its own and outside the allowance. Monthly allowances count recipients rather than sends.",
-        "offers": {
-            "@type": "Offer",
-            "price": "0",
-            "priceCurrency": "{{ platform_currency() }}",
-            "description": "The newsletter builder is included on the free plan, with 10 recipients per month"
-        },
-        "featureList": [
-            "Every newsletter is one you compose and send; the new-event digest to confirmed subscribers goes out on its own, outside the allowance",
-            "An email sign-up form on your schedule and event pages; confirming also sets up an account that follows the schedule",
-            "Fourteen block types, dragged into order, cloned or deleted",
-            "An events block that pulls your upcoming events into the email",
-            "Five built-in templates, plus templates you save yourself",
-            "Colours, five email-safe fonts, button shape and event layout",
-            "Segments: email subscribers, account followers, ticket buyers, a manual list, sub-schedule buyers, waitlist",
-            "Combined segments merged and deduplicated by email address",
-            "Import addresses by form, paste, or a CSV upload of up to 10,000 rows",
-            "Preview in the browser and send a test to yourself",
-            "Send now or schedule a date and time",
-            "Open and click tracking per recipient, with top links",
-            "A/B test the subject line or the content on a sample of the list",
-            "One-click unsubscribe headers on every message",
-            "Monthly allowance counts recipients: 10 free, 100 on Pro, 1,000 on Enterprise",
-            "No limit when the schedule uses its own SMTP server, or on a selfhosted install"
-        ],
-        "url": "{{ url()->current() }}",
-        "provider": {
-            "@type": "Organization",
-            "name": "Event Schedule"
-        }
-    }
-    </script>
+    <x-seo.webpage
+        name="Event Schedule Newsletters"
+        description="Send newsletters to email subscribers, followers and ticket buyers, while new public events reach confirmed subscribers as an automatic digest. Drag-and-drop editor, templates, audience segments, A/B testing and delivery analytics." />
     </x-slot>
 
     {{-- Motion gate: hidden pre-reveal states only apply when this class is present,

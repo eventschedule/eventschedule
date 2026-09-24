@@ -4,60 +4,9 @@
     <x-slot name="breadcrumbTitle">Recurring Events</x-slot>
 
     <x-slot name="structuredData">
-    <script type="application/ld+json" {!! nonce_attr() !!}>
-    {
-        "@context": "https://schema.org",
-        "@type": "Service",
-        "name": "Event Schedule Recurring Events",
-        "description": "Repeat events daily, weekly, biweekly, monthly or yearly. Skip or add dates, count tickets per date, and give guests a calendar feed that updates itself.",
-        "provider": {
-            "@type": "Organization",
-            "name": "Event Schedule",
-            "url": "{{ config('app.url') }}"
-        },
-        "serviceType": "Recurring Event Scheduling"
-    }
-    </script>
-    <script type="application/ld+json" {!! nonce_attr() !!}>
-    {
-        "@context": "https://schema.org",
-        "@type": "SoftwareApplication",
-        "name": "Event Schedule - Recurring Events",
-        "applicationCategory": "BusinessApplication",
-        "applicationSubCategory": "Event Scheduling Software",
-        "operatingSystem": "Web",
-        "description": "One event record with a day-of-week pattern, an end condition and date exceptions produces every date on your calendar. Ticket inventory, registration capacity and check-in count per date, and guests can subscribe to the series as a live calendar feed or ask to hear about a single date.",
-        "offers": {
-            "@type": "Offer",
-            "price": "0",
-            "priceCurrency": "{{ platform_currency() }}",
-            "description": "Included free"
-        },
-        "featureList": [
-            "Daily recurrence",
-            "Weekly recurrence on chosen days of the week",
-            "Every N weeks recurrence, from 2 to 52 weeks",
-            "Monthly recurrence on the same date",
-            "Monthly recurrence on the same weekday",
-            "Yearly recurrence",
-            "Three end conditions: never, on a date, or after a number of dates",
-            "Exclude Dates that take a date out of the pattern",
-            "Include Dates that add a date the pattern does not produce",
-            "Ticket inventory counted per date",
-            "Registration capacity counted per date",
-            "Check-in counted per date",
-            "A page and an .ics download for every date",
-            "Live iCal feed guests subscribe to from your schedule and event pages, one entry per date for the next 90 days",
-            "Per-date interest list: a guest leaves an email address to hear when that date's tickets go on sale",
-            "Two-way Google, Outlook and CalDAV calendar sync"
-        ],
-        "url": "{{ url()->current() }}",
-        "provider": {
-            "@type": "Organization",
-            "name": "Event Schedule"
-        }
-    }
-    </script>
+    <x-seo.webpage
+        name="Event Schedule Recurring Events"
+        description="Repeat events daily, weekly, biweekly, monthly or yearly. Skip or add dates, count tickets per date, and give guests a calendar feed that updates itself." />
     </x-slot>
 
     {{-- Motion gate: hidden pre-reveal states only apply when this class is present,

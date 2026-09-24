@@ -150,54 +150,9 @@
     <x-slot name="breadcrumbTitle">Event Graphics</x-slot>
 
     <x-slot name="structuredData">
-    <script type="application/ld+json" {!! nonce_attr() !!}>
-    {
-        "@context": "https://schema.org",
-        "@type": "Service",
-        "name": "Event Schedule Event Graphics",
-        "description": "Turn an event into a poster and a caption without opening a design tool: pick a size and a template, and the date, venue and price fill themselves in.",
-        "provider": {
-            "@type": "Organization",
-            "name": "Event Schedule",
-            "url": "{{ config('app.url') }}"
-        },
-        "serviceType": "Event Graphics Generation"
-    }
-    </script>
-    <script type="application/ld+json" {!! nonce_attr() !!}>
-    {
-        "@context": "https://schema.org",
-        "@type": "SoftwareApplication",
-        "name": "Event Schedule - Event Graphics",
-        "applicationCategory": "BusinessApplication",
-        "applicationSubCategory": "Event Graphics Generator",
-        "operatingSystem": "Web",
-        "description": "Turn an event into a poster and a caption without opening a design tool: pick a size and a template, and the date, venue and price fill themselves in.",
-        "offers": {
-            "@type": "Offer",
-            "price": "0",
-            "priceCurrency": "{{ platform_currency() }}",
-            "description": "Free on every plan. The AI rewrite of the generated text and scheduled graphic emails are on the Enterprise plan."
-        },
-        "featureList": [
-            "One PNG built from the flyer images of your upcoming events",
-            "Grid, row and list arrangements",
-            "Square, portrait, story and landscape output formats, or the native size",
-            "Custom header image, header text and footer text with schedule variables",
-            "Optional date strip across the top of each flyer, or on a bar above it",
-            "Numbered badges that match the numbered caption",
-            "A QR code on every flyer linking to that event's page",
-            "Formatted text from your own template, ready to paste",
-            "AI text transformations on the Enterprise plan",
-            "Scheduled graphic emails on the Enterprise plan"
-        ],
-        "url": "{{ url()->current() }}",
-        "provider": {
-            "@type": "Organization",
-            "name": "Event Schedule"
-        }
-    }
-    </script>
+    <x-seo.webpage
+        name="Event Schedule Event Graphics"
+        description="Turn an event into a poster and a caption without opening a design tool: pick a size and a template, and the date, venue and price fill themselves in." />
     <script type="application/ld+json" {!! nonce_attr() !!}>
     {
         "@context": "https://schema.org",

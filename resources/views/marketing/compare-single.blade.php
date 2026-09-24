@@ -177,75 +177,13 @@
     <x-slot name="breadcrumbTitle">{{ $name }} Alternative</x-slot>
 
     <x-slot name="structuredData">
-    <script type="application/ld+json" {!! nonce_attr() !!}>
-    {
-        "@context": "https://schema.org",
-        "@type": "SoftwareApplication",
-        "name": "Event Schedule",
-        "description": "Open-source event management platform for sharing events, selling tickets, and bringing communities together. Zero platform fees.",
-        "url": "{{ config('app.url') }}",
-        "applicationCategory": "BusinessApplication",
-        "operatingSystem": ["Web", "Android", "iOS"],
-        "offers": [
-            {
-                "@type": "Offer",
-                "name": "Free",
-                "price": "0",
-                "priceCurrency": "{{ platform_currency() }}",
-                "description": "Unlimited events, two-way Google, Outlook and CalDAV sync, newsletters, unlimited free registration and RSVP with capacity, QR scanning at the door, the multi-event cart, the interest list, a live calendar feed, one bookable appointment type, event graphics, the embeddable calendar, and fan engagement features.",
-                "availability": "https://schema.org/InStock"
-            },
-            {
-                "@type": "Offer",
-                "name": "Pro",
-                "price": "{{ number_format($proMonthly, 2) }}",
-                "priceCurrency": "{{ platform_currency() }}",
-                "description": "Everything in Free plus selling tickets that carry a price, every payment method (Stripe, PayPal, Payfast, Invoice Ninja, a payment link or cash), refunds from the Sales page, the live check-in dashboard, ticket waitlist, promo codes, add-ons, gift cards, passes, installment payments, sale notifications, sales CSV export, remove branding, custom CSS, REST API, and webhooks.",
-                "availability": "https://schema.org/InStock"
-            },
-            {
-                "@type": "Offer",
-                "name": "Enterprise",
-                "price": "{{ number_format($entMonthly, 2) }}",
-                "priceCurrency": "{{ platform_currency() }}",
-                "description": "Everything in Pro plus allocated seating, AI style generation, AI content generation, AI flyer generation, WhatsApp event creation, custom domains, multiple team members, and priority support.",
-                "availability": "https://schema.org/InStock"
-            }
-        ],
-        "featureList": [
-            "Zero platform fees on ticket sales",
-            "Stripe and PayPal checkout",
-            "Refunds through Stripe and PayPal",
-            "Multi-event cart",
-            "AI-powered event import",
-            "AI flyer generation",
-            "AI style generation",
-            "Two-way Google Calendar sync",
-            "Two-way Outlook sync",
-            "CalDAV sync",
-            "iCal download",
-            "Live calendar feed",
-            "Newsletter builder with A/B testing",
-            "QR code ticketing and check-in",
-            "Ticket interest list",
-            "Check-in dashboard",
-            "Ticket waitlist",
-            "Promo and discount codes",
-            "Passes",
-            "Gift cards",
-            "Installment payments",
-            "Allocated seating",
-            "Sale notification emails",
-            "Sales CSV export",
-            "Open source with selfhosting option",
-            "Embeddable calendar and ticket widgets",
-            "WhatsApp event creation",
-            "Custom CSS styling",
-            "Fan videos and comments",
-            "Sub-schedules"
-        ]
-    }
-    </script>
+    {{-- The page, about the product (the layout's SeoUtils::softwareApplication()) and
+         mentioning the competitor it is compared with. --}}
+    <x-seo.webpage
+        :name="'Event Schedule vs '.$name"
+        :description="$description"
+        :keywords="$keywords"
+        :mentions="[$name]" />
     {{-- Through the component, which encodes with SeoUtils::jsonLd(). The block this replaces
          escaped quotes by hand inside {{ }}, which then HTML-escaped the quote it had just
          escaped, so a name or step with a " in it produced invalid JSON. --}}

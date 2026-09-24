@@ -4,58 +4,11 @@
     <x-slot name="breadcrumbTitle">For Curators</x-slot>
 
     <x-slot name="structuredData">
-    <script type="application/ld+json" {!! nonce_attr() !!}>
-    {
-        "@context": "https://schema.org",
-        "@type": "Service",
-        "name": "Event Schedule for Curators",
-        "description": "Build a local events guide. Follow the venues and performers you cover as event sources, review what gets submitted, and grow your following. Zero platform fees.",
-        "provider": {
-            "@type": "Organization",
-            "name": "Event Schedule",
-            "url": "{{ config('app.url') }}"
-        },
-        "serviceType": "Event Management",
-        "audience": {
-            "@type": "Audience",
-            "audienceType": "Event Curators"
-        }
-    }
-    </script>
-    <!-- Product Schema for Rich Snippets -->
-    <script type="application/ld+json" {!! nonce_attr() !!}>
-    {
-        "@context": "https://schema.org",
-        "@type": "SoftwareApplication",
-        "name": "Event Schedule for Curators",
-        "applicationCategory": "BusinessApplication",
-        "applicationSubCategory": "Event Curation Software",
-        "operatingSystem": "Web",
-        "description": "Build a local events guide. Follow the venues and performers you cover as event sources, review what gets submitted, and grow your following.",
-        "offers": {
-            "@type": "Offer",
-            "price": "0",
-            "priceCurrency": "{{ platform_currency() }}",
-            "description": "Free forever"
-        },
-        "featureList": [
-            "Event sources that follow talent and venue schedules",
-            "Submission and approval inbox",
-            "Pages for the acts and venues you list, which they can claim",
-            "Live calendar feed readers can subscribe to",
-            "AI event import from text and flyers",
-            "Sub-schedules",
-            "Newsletters to your followers",
-            "Schedule graphics"
-        ],
-        "url": "{{ url()->current() }}",
-        "keywords": "event curator schedule, event promoter calendar, multi-venue event management, curator booking platform, free curator scheduling",
-        "provider": {
-            "@type": "Organization",
-            "name": "Event Schedule"
-        }
-    }
-    </script>
+    <x-seo.webpage
+        name="Event Schedule for Curators"
+        description="Build a local events guide. Follow the venues and performers you cover as event sources, review what gets submitted, and grow your following. Zero platform fees."
+        audience="Event Curators"
+        keywords="event curator schedule, event promoter calendar, multi-venue event management, curator booking platform, free curator scheduling" />
     </x-slot>
 
     {{-- Motion gate: hidden pre-reveal states only apply when this class is present,

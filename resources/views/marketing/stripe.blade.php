@@ -4,44 +4,10 @@
     <x-slot name="breadcrumbTitle">Stripe</x-slot>
 
     <x-slot name="structuredData">
-    <script type="application/ld+json" {!! nonce_attr() !!}>
-    {
-        "@context": "https://schema.org",
-        "@type": "SoftwareApplication",
-        "name": "Event Schedule - Stripe Payments",
-        "applicationCategory": "BusinessApplication",
-        "applicationSubCategory": "Event Ticketing Payments",
-        "operatingSystem": "Web",
-        "description": "Sell tickets through your own connected Stripe account. The charge is created on your account with no platform fee, and Stripe pays you out on its own schedule.",
-        "featureList": [
-            "Stripe Checkout, so cards and wallets are handled on Stripe's own page",
-            "Charges created directly on your connected Stripe account",
-            "Zero platform fee: no application fee is added to the charge",
-            "Stripe Connect onboarding on the hosted platform",
-            "Your own Stripe keys on a selfhosted install",
-            "28 ticket currencies to choose from",
-            "Signed webhooks confirm payment before a ticket is issued",
-            "The charged amount is checked against the ticket total before the sale is marked paid",
-            "Promo codes, volume discounts and gift cards priced into the same charge",
-            "Installment payment plans on the Pro plan, charged to the buyer's saved card",
-            "Refunds from the Sales page, in full or in part, sent back through Stripe",
-            "PayPal, Payfast, Invoice Ninja, a payment link, or cash at the door as alternatives",
-            "Sales exportable as CSV for your records"
-        ],
-        "offers": {
-            "@type": "Offer",
-            "price": "0",
-            "priceCurrency": "{{ platform_currency() }}",
-            "description": "Connecting Stripe is free. Selling tickets that carry a price is on Pro at {{ plan_price($proMonthly) }} a month, with no platform fee on top."
-        },
-        "url": "{{ url()->current() }}",
-        "keywords": "stripe ticket payments, stripe connect event tickets, zero platform fee ticketing, stripe checkout tickets, direct payouts",
-        "provider": {
-            "@type": "Organization",
-            "name": "Event Schedule"
-        }
-    }
-    </script>
+    <x-seo.webpage
+        name="Event Schedule - Stripe Payments"
+        description="Sell tickets through your own connected Stripe account. The charge is created on your account with no platform fee, and Stripe pays you out on its own schedule."
+        keywords="stripe ticket payments, stripe connect event tickets, zero platform fee ticketing, stripe checkout tickets, direct payouts" />
     </x-slot>
 
     {{-- Motion gate: hidden pre-reveal states only apply when this class is present,

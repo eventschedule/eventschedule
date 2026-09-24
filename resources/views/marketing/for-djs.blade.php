@@ -4,63 +4,11 @@
     <x-slot name="breadcrumbTitle">For DJs</x-slot>
 
     <x-slot name="structuredData">
-    <script type="application/ld+json" {!! nonce_attr() !!}>
-    {
-        "@context": "https://schema.org",
-        "@type": "Service",
-        "name": "Event Schedule for DJs",
-        "description": "Put your DJ set times, residencies and guest spots on one link. Reach fans direct, no promoter middleman, and sell tickets with zero platform fees.",
-        "provider": {
-            "@type": "Organization",
-            "name": "Event Schedule",
-            "url": "{{ config('app.url') }}"
-        },
-        "serviceType": "Event Management",
-        "audience": {
-            "@type": "Audience",
-            "audienceType": "DJs"
-        }
-    }
-    </script>
-    <!-- Product Schema for Rich Snippets -->
-    <script type="application/ld+json" {!! nonce_attr() !!}>
-    {
-        "@context": "https://schema.org",
-        "@type": "SoftwareApplication",
-        "name": "Event Schedule for DJs",
-        "applicationCategory": "BusinessApplication",
-        "applicationSubCategory": "DJ Event Scheduling Software",
-        "operatingSystem": "Web",
-        "description": "Put your DJ set times, residencies, and guest spots on one link. Built for club DJs, festival DJs, and electronic producers.",
-        "offers": {
-            "@type": "Offer",
-            "price": "0",
-            "priceCurrency": "{{ platform_currency() }}",
-            "description": "Free forever"
-        },
-        "featureList": [
-            "Residency tracking with free recurring events",
-            "Late-night sets that cross midnight",
-            "Club lineups that land on your schedule once you accept",
-            "A page to claim when a promoter lists you before you join",
-            "One schedule link for every bio",
-            "A live calendar feed that updates when a set time moves",
-            "Auto-generated set-time flyers and promo graphics",
-            "Zero-fee ticketing through Stripe, PayPal or cash, with QR door check-in",
-            "Ticket alerts for fans before tickets go on sale",
-            "Sub-schedules for multiple club nights and brands",
-            "Direct fan newsletters and an automatic new-date digest",
-            "Draft events, plus internal and unlisted events on Enterprise",
-            "Manager and agency team access on Enterprise"
-        ],
-        "url": "{{ url()->current() }}",
-        "keywords": "DJ schedule, DJ set times, DJ residency schedule, DJ booking platform, DJ event calendar, DJ gig management, club DJ calendar, DJ link in bio, free DJ scheduling",
-        "provider": {
-            "@type": "Organization",
-            "name": "Event Schedule"
-        }
-    }
-    </script>
+    <x-seo.webpage
+        name="Event Schedule for DJs"
+        description="Put your DJ set times, residencies and guest spots on one link. Reach fans direct, no promoter middleman, and sell tickets with zero platform fees."
+        audience="DJs"
+        keywords="DJ schedule, DJ set times, DJ residency schedule, DJ booking platform, DJ event calendar, DJ gig management, club DJ calendar, DJ link in bio, free DJ scheduling" />
     <!-- HowTo Schema for Rich Snippets -->
     <script type="application/ld+json" {!! nonce_attr() !!}>
     {

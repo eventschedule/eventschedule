@@ -4,67 +4,11 @@
     <x-slot name="breadcrumbTitle">For Farmers Markets</x-slot>
 
     <x-slot name="structuredData">
-    <script type="application/ld+json" {!! nonce_attr() !!}>
-    {
-        "@context": "https://schema.org",
-        "@type": "Service",
-        "name": "Event Schedule for Farmers Markets",
-        "description": "Set the whole season out as one recurring market day with a closing date, take a washed-out Saturday back off the calendar, and let traders put themselves forward for a pitch.",
-        "provider": {
-            "@type": "Organization",
-            "name": "Event Schedule",
-            "url": "{{ config('app.url') }}"
-        },
-        "serviceType": "Event Management",
-        "audience": {
-            "@type": "Audience",
-            "audienceType": "Farmers Markets & Outdoor Markets"
-        }
-    }
-    </script>
-    <!-- Product Schema for Rich Snippets -->
-    <script type="application/ld+json" {!! nonce_attr() !!}>
-    {
-        "@context": "https://schema.org",
-        "@type": "SoftwareApplication",
-        "name": "Event Schedule for Farmers Markets",
-        "applicationCategory": "BusinessApplication",
-        "applicationSubCategory": "Farmers Market Event Management Software",
-        "operatingSystem": "Web",
-        "description": "Put a whole farmers market season online as one recurring market day, let traders apply for a pitch, and take pitch fees with no platform fee. Free forever.",
-        "offers": {
-            "@type": "Offer",
-            "price": "0",
-            "priceCurrency": "{{ platform_currency() }}",
-            "description": "Free forever"
-        },
-        "featureList": [
-            "A whole season as one recurring market day, ending on a closing date or after a set number of markets",
-            "Date exceptions that take a washed-out Saturday off the calendar, and put a one-off date back on",
-            "A second market day, such as a midweek evening, as its own event with its own hours",
-            "Traders submitting themselves for a market day, with every submission waiting for your approval",
-            "Named regular traders whose submissions are approved automatically",
-            "Sub-schedules that keep produce, bakery, flowers and the winter market on their own strands of one link",
-            "An agenda on each market day for demos, music and workshops",
-            "Free RSVP with a places limit, counted per market date",
-            "Pitch fees sold as ticket types, with stock counted per market date and free QR scanning at the gate",
-            "Zero platform fees on every plan, whether traders pay through Stripe, PayPal, a payment link or cash",
-            "Refunds from the Sales page, in full or in part, with Stripe and PayPal payments returned through the provider",
-            "A downloadable QR code that puts your market page in a shopper's hand, one tap from following",
-            "A digest of the new events you add, to confirmed email subscribers, at most one every few days",
-            "Newsletters you write and send to the people who follow the market",
-            "A live calendar feed shoppers subscribe to once, with the next three months of market days in their own calendar",
-            "Two-way Google, Outlook and CalDAV calendar sync",
-            "An embeddable calendar for the website you already have"
-        ],
-        "url": "{{ url()->current() }}",
-        "keywords": "farmers market calendar, market vendor schedule, farmers market events, outdoor market management, free farmers market scheduling",
-        "provider": {
-            "@type": "Organization",
-            "name": "Event Schedule"
-        }
-    }
-    </script>
+    <x-seo.webpage
+        name="Event Schedule for Farmers Markets"
+        description="Set the whole season out as one recurring market day with a closing date, take a washed-out Saturday back off the calendar, and let traders put themselves forward for a pitch."
+        audience="Farmers Markets & Outdoor Markets"
+        keywords="farmers market calendar, market vendor schedule, farmers market events, outdoor market management, free farmers market scheduling" />
     </x-slot>
 
     {{-- Motion gate: hidden pre-reveal states only apply when this class is present,

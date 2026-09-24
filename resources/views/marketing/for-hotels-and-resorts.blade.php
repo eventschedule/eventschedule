@@ -4,67 +4,11 @@
     <x-slot name="breadcrumbTitle">For Hotels & Resorts</x-slot>
 
     <x-slot name="structuredData">
-    <script type="application/ld+json" {!! nonce_attr() !!}>
-    {
-        "@context": "https://schema.org",
-        "@type": "Service",
-        "name": "Event Schedule for Hotels & Resorts",
-        "description": "Put the week of guest activities on a page with your property's name on it, print the link on the key-card sleeve, and let guests read the card without asking the desk.",
-        "provider": {
-            "@type": "Organization",
-            "name": "Event Schedule",
-            "url": "{{ config('app.url') }}"
-        },
-        "serviceType": "Event Management",
-        "audience": {
-            "@type": "Audience",
-            "audienceType": "Hotels & Resorts"
-        }
-    }
-    </script>
-    <!-- Product Schema for Rich Snippets -->
-    <script type="application/ld+json" {!! nonce_attr() !!}>
-    {
-        "@context": "https://schema.org",
-        "@type": "SoftwareApplication",
-        "name": "Event Schedule for Hotels & Resorts",
-        "applicationCategory": "BusinessApplication",
-        "applicationSubCategory": "Hotel and Resort Activity Management Software",
-        "operatingSystem": "Web",
-        "description": "One page for every guest activity at your property: the standing week entered once as recurring activities, a printable QR code and link, free sign-ups with a capacity, and zero-fee ticketing for the paid experiences.",
-        "offers": {
-            "@type": "Offer",
-            "price": "0",
-            "priceCurrency": "{{ platform_currency() }}",
-            "description": "Free forever"
-        },
-        "featureList": [
-            "Standing activities entered once, repeating on chosen days of the week",
-            "Date exceptions for the weeks an activity does not run",
-            "A printable QR code and a short link for the key-card sleeve",
-            "Embeddable calendar for the hotel website you already have",
-            "Free sign-ups with a capacity, counted separately for each date, with a free waitlist when a date fills",
-            "Ticket sales for paid experiences through Stripe, PayPal, a payment link or cash at the desk, with no platform fee",
-            "Refunds in full or in part from the Sales page, returned through Stripe or PayPal",
-            "QR ticket scanning at the door on every plan",
-            "Promo codes for a resident rate",
-            "Sub-schedules with a name, a colour and their own link",
-            "Draft activities that stay members-only until you publish them",
-            "Booking requests that wait for you to accept them",
-            "Two-way Google, Outlook and CalDAV calendar sync",
-            "A live calendar feed guests can subscribe to from the page",
-            "An email when tickets go on sale, for guests who asked on a special event's page",
-            "Newsletters to the guests who followed the schedule",
-            "Built-in analytics per activity"
-        ],
-        "url": "{{ url()->current() }}",
-        "keywords": "hotel activity calendar, resort event schedule, guest activity management, hotel entertainment calendar, free hotel scheduling",
-        "provider": {
-            "@type": "Organization",
-            "name": "Event Schedule"
-        }
-    }
-    </script>
+    <x-seo.webpage
+        name="Event Schedule for Hotels & Resorts"
+        description="Put the week of guest activities on a page with your property's name on it, print the link on the key-card sleeve, and let guests read the card without asking the desk."
+        audience="Hotels & Resorts"
+        keywords="hotel activity calendar, resort event schedule, guest activity management, hotel entertainment calendar, free hotel scheduling" />
     </x-slot>
 
     {{-- Motion gate: hidden pre-reveal states only apply when this class is present,
