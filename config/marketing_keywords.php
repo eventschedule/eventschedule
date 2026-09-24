@@ -91,6 +91,7 @@ return [
     '/features/ticketing' => ['keyword' => 'event ticketing software'],
     '/features/waitlist' => ['keyword' => 'ticket waitlist'],
     '/features/registration' => ['keyword' => 'free event registration'],
+    '/features/booking-requests' => ['keyword' => 'booking request form'],
     '/features/white-label' => ['keyword' => 'remove branding', 'match' => ['remove Event Schedule branding']],
 
     // Audiences

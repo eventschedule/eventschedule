@@ -149,6 +149,7 @@ class RouteLoadTest extends TestCase
             '/features/gift-cards',
             '/features/carpool',
             '/features/registration',
+            '/features/booking-requests',
 
             // Integration pages
             '/google-calendar',

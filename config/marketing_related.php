@@ -204,7 +204,7 @@ return [
     'for-talent' => [
         ['title' => 'For Venues', 'path' => '/for-venues', 'blurb' => 'The other side of the booking: how venues build a lineup.'],
         ['title' => 'For Curators', 'path' => '/for-curators', 'blurb' => 'Run a festival or multi-artist bill across many schedules.'],
-        ['title' => 'Ticketing', 'path' => '/features/ticketing', 'blurb' => 'Sell tickets with QR check-in and zero platform fees.'],
+        ['title' => 'Booking Requests', 'path' => '/features/booking-requests', 'blurb' => 'Promoters and venues ask to book you from your own page, free.'],
         ['title' => 'Linktree Replacement', 'path' => '/linktree-replacement', 'blurb' => 'One bio link that shows your actual dates, not just buttons.'],
     ],
 
@@ -220,7 +220,7 @@ return [
     'for-venues' => [
         ['title' => 'For Music Venues', 'path' => '/for-music-venues', 'blurb' => 'Run every show from one schedule.'],
         ['title' => 'For Bars & Pubs', 'path' => '/for-bars', 'blurb' => 'Fill the room with trivia, bands, and events.'],
-        ['title' => 'Ticketing', 'path' => '/features/ticketing', 'blurb' => 'Sell tickets with QR check-in and zero platform fees.'],
+        ['title' => 'Booking Requests', 'path' => '/features/booking-requests', 'blurb' => 'Acts ask you for a date on a form of your own.'],
         ['title' => 'Eventbrite Alternative', 'path' => '/eventbrite-alternative', 'blurb' => 'Why venues are moving off Eventbrite.'],
     ],
 
@@ -240,7 +240,7 @@ return [
         ['title' => 'Ticketing', 'path' => '/features/ticketing', 'blurb' => 'Ticket types, QR check-in, and zero platform fees.'],
         ['title' => 'Sub-schedules', 'path' => '/features/sub-schedules', 'blurb' => "Keep each room's listings apart on one link."],
         ['title' => 'Recurring Events', 'path' => '/features/recurring-events', 'blurb' => 'Set a residency once, and skip the weeks you are dark.'],
-        ['title' => 'Newsletters', 'path' => '/features/newsletters', 'blurb' => 'Email the people who follow your venue, with open rates.'],
+        ['title' => 'Booking Requests', 'path' => '/features/booking-requests', 'blurb' => 'Bands ask for a date on a form whose fields you choose.'],
     ],
 
     // The for-nightclubs page already links the neighbouring audience pages
@@ -1037,6 +1037,13 @@ return [
         ['title' => 'Ticket Waitlist', 'path' => '/features/waitlist', 'blurb' => 'A sold-out date offers a returned seat to one person at a time.'],
         ['title' => 'Check-in Dashboard', 'path' => '/features/check-in', 'blurb' => 'Watch the room fill up while you are standing at the door.'],
         ['title' => 'For Meetup Groups', 'path' => '/for-meetup-groups', 'blurb' => 'Free RSVPs with a cap, a page the group owns, and no organizer fee to keep it.'],
+    ],
+
+    'features/booking-requests' => [
+        ['title' => 'Custom Fields', 'path' => '/features/custom-fields', 'blurb' => 'Add your own questions to the ticket, registration and event request forms.'],
+        ['title' => 'Appointments', 'path' => '/features/appointments', 'blurb' => 'Write your hours down once and let guests pick an open time.'],
+        ['title' => 'Community Event Calendar', 'path' => '/community-event-calendar', 'blurb' => 'One shared calendar for a town, fed by the organizers in it.'],
+        ['title' => 'For Music Venues', 'path' => '/for-music-venues', 'blurb' => 'Run every show from one schedule.'],
     ],
 
     'community-event-calendar' => [

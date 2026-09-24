@@ -281,6 +281,14 @@ class MarketingController extends Controller
     }
 
     /**
+     * Booking Request Form page
+     */
+    public function bookingRequests()
+    {
+        return view('marketing.booking-requests');
+    }
+
+    /**
      * Community Event Calendar page
      */
     public function communityEventCalendar()

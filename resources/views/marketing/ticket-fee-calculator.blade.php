@@ -176,7 +176,7 @@
     <!-- ============================================================ -->
     <!-- Hero                                                         -->
     <!-- ============================================================ -->
-    <section id="top" class="es-hero relative flex min-h-[calc(40svh-4rem)] items-center overflow-hidden bg-white py-14 dark:bg-[#0a0a0f] noise">
+    <section id="top" class="es-hero relative flex min-h-[calc(46svh-4rem)] items-center overflow-hidden bg-white py-14 dark:bg-[#0a0a0f] noise">
         <div class="pointer-events-none absolute inset-0" aria-hidden="true">
             <div class="es-aurora es-aurora-1" style="background: radial-gradient(circle at 25% 70%, rgba(37, 99, 235, 0.26), rgba(37, 99, 235, 0) 65%);"></div>
             <div class="es-aurora es-aurora-2" style="background: radial-gradient(circle at 75% 32%, rgba(14, 165, 233, 0.24), rgba(14, 165, 233, 0) 65%);"></div>
@@ -233,7 +233,7 @@
 
             <div class="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4" data-reveal-group="60">
                 @foreach ($models as $model)
-                    <div class="flex flex-col rounded-2xl border p-6 {{ $model['key'] === 'eventschedule' ? 'border-blue-300 bg-white ring-2 ring-blue-500/20 dark:border-blue-500/40 dark:bg-white/[0.06]' : 'border-gray-200 bg-white dark:border-white/10 dark:bg-white/[0.04]' }}" data-reveal="panel">
+                    <div class="flex flex-col rounded-2xl border p-6 {{ $model['key'] === 'eventschedule' ? 'border-blue-300 bg-white ring-2 ring-blue-500/25 dark:border-blue-500/40 dark:bg-white/[0.06]' : 'border-gray-200 bg-white dark:border-white/10 dark:bg-white/[0.04]' }}" data-reveal="panel">
                         <h3 class="text-lg font-bold text-gray-900 dark:text-white">{{ $feeRates[$model['key']]['name'] }}</h3>
                         <p class="mt-1 text-sm font-semibold {{ $model['key'] === 'eventschedule' ? 'text-emerald-700 dark:text-emerald-400' : 'text-rose-700 dark:text-rose-400' }}">{{ $model['rate'] }}</p>
                         <p class="mt-3 text-sm leading-relaxed text-gray-600 dark:text-gray-400">{{ $model['how'] }}</p>

@@ -1047,14 +1047,17 @@
     <!-- ============================================================ -->
     @php
         $moreFeatures = [
+            // Booking requests had no page behind them until /features/booking-requests; the tile it
+            // took was Integrations, whose page the integrations band above already links as
+            // "See all integrations", so the grid stays at twelve without losing a destination.
             [
-                'href' => route('marketing.integrations'),
-                'aria' => 'Learn more about integrations',
-                'title' => 'Integrations',
-                'desc' => 'Connect Event Schedule to the calendar, payment and invoicing tools you already run on.',
+                'href' => route('marketing.booking_requests'),
+                'aria' => 'Learn more about the booking request form',
+                'title' => 'Booking Requests',
+                'desc' => 'Promoters ask to book an act and acts ask a venue for a date, on a form on your schedule page.',
                 'chip' => 'bg-blue-100 dark:bg-blue-500/20',
                 'text' => 'text-blue-600 dark:text-blue-400',
-                'icon' => '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M13.19 8.688a4.5 4.5 0 0 1 1.242 7.244l-4.5 4.5a4.5 4.5 0 0 1-6.364-6.364l1.757-1.757m13.35-.622 1.757-1.757a4.5 4.5 0 0 0-6.364-6.364l-4.5 4.5a4.5 4.5 0 0 0 1.242 7.244" />',
+                'icon' => '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M2.25 13.5h3.86a2.25 2.25 0 0 1 2.012 1.244l.256.512a2.25 2.25 0 0 0 2.013 1.244h3.218a2.25 2.25 0 0 0 2.013-1.244l.256-.512a2.25 2.25 0 0 1 2.013-1.244h3.859m-19.5.338V18a2.25 2.25 0 0 0 2.25 2.25h15A2.25 2.25 0 0 0 21.75 18v-4.162c0-.224-.034-.447-.1-.661L19.24 5.338a2.25 2.25 0 0 0-2.15-1.588H6.911a2.25 2.25 0 0 0-2.15 1.588L2.35 13.177a2.25 2.25 0 0 0-.1.661Z" />',
             ],
             [
                 'href' => route('marketing.white_label'),

@@ -61,6 +61,11 @@ return [
     '/for-curators' => 'creating-schedules#engagement-requests',
     '/community-event-calendar' => 'creating-schedules#engagement-requests',
 
+    // The request form and its inbox: a section of a broad guide rather than a guide of its own, so
+    // it is named here instead of by a `feature` key on Creating Schedules, whose docs hero would
+    // then call the whole page a booking request form.
+    '/features/booking-requests' => 'creating-schedules#engagement-requests',
+
     // Free sign-ups first, paid tickets only sometimes.
     '/for-meetup-groups' => 'tickets#registration',
     '/for-nonprofits' => 'tickets#registration',

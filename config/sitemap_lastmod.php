@@ -87,6 +87,7 @@ return [
     '/features/analytics' => '2026-09-24',
     '/features/appointments' => '2026-09-24',
     '/features/availability' => '2026-09-24',
+    '/features/booking-requests' => '2026-09-24',
     '/features/boost' => '2026-09-24',
     '/features/calendar-sync' => '2026-09-24',
     '/features/carpool' => '2026-09-24',

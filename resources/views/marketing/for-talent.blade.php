@@ -228,8 +228,7 @@
 
     {{-- 3a. Get booked --}}
     <x-marketing.feature-banner
-        {{-- No /features page covers booking requests; the user guide section does. --}}
-        :href="marketing_url('/docs/managing-schedules') . '#requests'"
+        :href="marketing_url('/features/booking-requests')"
         accent="blue"
         badge="Get booked"
         heading="Venues add you. You just say yes."

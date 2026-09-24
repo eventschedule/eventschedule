@@ -641,7 +641,7 @@
         ground="dark" />
 
     <x-marketing.feature-banner
-        :href="marketing_url('/docs/managing-schedules') . '#requests'"
+        :href="marketing_url('/features/booking-requests')"
         accent="emerald"
         badge="Booking inbox"
         heading="Let the acts come to you"

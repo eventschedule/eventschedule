@@ -1158,6 +1158,7 @@ if (config('app.is_nexus')) {
         Route::get('/features/promo-codes', [MarketingController::class, 'promoCodes'])->name('marketing.promo_codes');
         Route::get('/features/waitlist', [MarketingController::class, 'waitlist'])->name('marketing.waitlist');
         Route::get('/features/registration', [MarketingController::class, 'registration'])->name('marketing.registration');
+        Route::get('/features/booking-requests', [MarketingController::class, 'bookingRequests'])->name('marketing.booking_requests');
         Route::get('/features/installments', [MarketingController::class, 'installments'])->name('marketing.installments');
         Route::get('/features/ai', [MarketingController::class, 'ai'])->name('marketing.ai');
         Route::get('/features/calendar-sync', [MarketingController::class, 'calendarSync'])->name('marketing.calendar_sync');
@@ -1426,6 +1427,7 @@ if (config('app.is_nexus')) {
             Route::get('/features/promo-codes', [MarketingController::class, 'promoCodes'])->name('marketing.promo_codes');
             Route::get('/features/waitlist', [MarketingController::class, 'waitlist'])->name('marketing.waitlist');
             Route::get('/features/registration', [MarketingController::class, 'registration'])->name('marketing.registration');
+            Route::get('/features/booking-requests', [MarketingController::class, 'bookingRequests'])->name('marketing.booking_requests');
             Route::get('/features/installments', [MarketingController::class, 'installments'])->name('marketing.installments');
             Route::get('/features/ai', [MarketingController::class, 'ai'])->name('marketing.ai');
             Route::get('/features/calendar-sync', [MarketingController::class, 'calendarSync'])->name('marketing.calendar_sync');
@@ -1739,6 +1741,7 @@ if (config('app.is_nexus')) {
             Route::get('/for-museums', fn () => redirect('https://'._base_domain().'/for-museums', 301));
             Route::get('/for-meetup-groups', fn () => redirect('https://'._base_domain().'/for-meetup-groups', 301));
             Route::get('/features/registration', fn () => redirect('https://'._base_domain().'/features/registration', 301));
+            Route::get('/features/booking-requests', fn () => redirect('https://'._base_domain().'/features/booking-requests', 301));
             Route::get('/community-event-calendar', fn () => redirect('https://'._base_domain().'/community-event-calendar', 301));
             Route::get('/wordpress-event-calendar', fn () => redirect('https://'._base_domain().'/wordpress-event-calendar', 301));
             Route::get('/for-webinars', fn () => redirect('https://'._base_domain().'/for-webinars', 301));
@@ -1941,6 +1944,7 @@ if (config('app.is_nexus')) {
     Route::get('/for-museums', fn () => redirect()->route('home'));
     Route::get('/for-meetup-groups', fn () => redirect()->route('home'));
     Route::get('/features/registration', fn () => redirect()->route('home'));
+    Route::get('/features/booking-requests', fn () => redirect()->route('home'));
     Route::get('/community-event-calendar', fn () => redirect()->route('home'));
     Route::get('/wordpress-event-calendar', fn () => redirect()->route('home'));
     Route::get('/for-webinars', fn () => redirect()->route('home'));

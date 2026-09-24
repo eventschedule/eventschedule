@@ -88,6 +88,7 @@ class GenerateSocialImages extends Command
         'features-feedback' => '/features/feedback',
         'features-carpool' => '/features/carpool',
         'features-registration' => '/features/registration',
+        'features-booking-requests' => '/features/booking-requests',
 
         // Integration pages
         'google-calendar' => '/google-calendar',
