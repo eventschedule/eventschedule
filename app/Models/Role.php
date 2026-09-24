@@ -1595,6 +1595,14 @@ class Role extends Model implements MustVerifyEmail
      */
     public static function constrainDemoContent($query)
     {
+        // Demo content only exists where DemoService does: hosted (and the test suite, which
+        // exercises the hosted paths). A selfhost install has no demo, so a schedule of its own
+        // that happens to be called "simpsons" must not be treated as one - the same gate
+        // is_demo_role() applies.
+        if (! self::demoContentApplies()) {
+            return $query->whereRaw('1 = 0');
+        }
+
         return $query->where(function ($q) {
             $q->whereRaw('roles.email <=> ?', [\App\Services\DemoService::DEMO_EMAIL])
                 ->orWhereRaw('roles.subdomain <=> ?', [\App\Services\DemoService::DEMO_ROLE_SUBDOMAIN])
@@ -1618,6 +1626,10 @@ class Role extends Model implements MustVerifyEmail
      */
     public function isDemoContent(?int $demoOwnerId = null): bool
     {
+        if (! self::demoContentApplies()) {
+            return false;
+        }
+
         if (self::equalsAsCollated($this->email, \App\Services\DemoService::DEMO_EMAIL)
             || self::equalsAsCollated($this->subdomain, \App\Services\DemoService::DEMO_ROLE_SUBDOMAIN)) {
             return true;
@@ -1636,6 +1648,15 @@ class Role extends Model implements MustVerifyEmail
      * String equality the way the utf8mb4_unicode_ci columns compare, so the PHP predicates agree
      * with their SQL twins: case-insensitive, and blind to trailing spaces (a PAD SPACE collation).
      */
+    /**
+     * Whether demo content can exist on this install at all: hosted, or the test suite. The same
+     * gate as is_demo_role().
+     */
+    private static function demoContentApplies(): bool
+    {
+        return (bool) (config('app.hosted') || config('app.is_testing'));
+    }
+
     private static function equalsAsCollated(?string $value, string $expected): bool
     {
         return $value !== null && strcasecmp(rtrim($value, ' '), $expected) === 0;

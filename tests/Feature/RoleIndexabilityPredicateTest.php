@@ -117,6 +117,32 @@ class RoleIndexabilityPredicateTest extends TestCase
     }
 
     /**
+     * A selfhost install has no demo at all, so nothing on it is demo content - the gate
+     * is_demo_role() has always had. Without it, a selfhosted schedule of its own that happens to
+     * be called "simpsons", or that uses the demo contact address, was de-indexed and dropped from
+     * the sitemap. Both twins must agree on that too.
+     */
+    public function test_selfhost_has_no_demo_content(): void
+    {
+        $matrix = $this->matrix();
+
+        config(['app.hosted' => false, 'app.is_testing' => false]);
+
+        $demo = Role::query()->demoContent()->pluck('id')->all();
+        $indexable = Role::query()->indexableHost()->pluck('id')->all();
+
+        $this->assertSame([], $demo);
+
+        foreach (['showcase contact address', 'demo owner', 'simpsons'] as $label) {
+            $role = $matrix[$label][0]->fresh();
+
+            $this->assertFalse($role->isDemoContent(), $label.': isDemoContent()');
+            $this->assertTrue($role->isIndexableHost(), $label.': isIndexableHost()');
+            $this->assertContains($role->id, $indexable, $label.': indexableHost()');
+        }
+    }
+
+    /**
      * The robots meta is this rule. A showcase schedule - caught only by its contact address, which
      * is_demo_role() never looked at - used to render "index, follow".
      */
