@@ -1,6 +1,6 @@
 <x-docs-page
     key="tickets"
-    title="Selling Tickets: Payments, Refunds, Check-In - Event Schedule"
+    title="Sell Tickets: Payments, Refunds, Check-In - Event Schedule"
     description="Sell tickets or run free registration: connect Stripe or PayPal, build ticket types, refund from the Sales page and scan QR codes at the door."
     lede="Free registration on every plan, paid ticketing on Pro, and zero platform fees either way. Connect payment processing, create ticket types, and keep 100% of your sales."
     article-description="How to sell tickets and run free registration: payment methods, ticket types, refunds, check-in at the door and the interest list."

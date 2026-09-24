@@ -1,6 +1,6 @@
 <x-docs-page
     key="saas/twilio"
-    title="Twilio: SMS, WhatsApp and Phone Verification - Event Schedule"
+    title="Twilio: SMS, WhatsApp, Phone Verification - Event Schedule"
     description="Set up Twilio for SMS phone verification, texted invitations that let an act or venue claim its page, and WhatsApp event creation on your platform."
     lede="Set up Twilio to enable SMS phone verification, SMS invitations and WhatsApp event creation across your Event Schedule deployment."
 >

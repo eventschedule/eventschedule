@@ -1,6 +1,6 @@
 <x-docs-page
     key="managing-schedules"
-    title="Managing Schedules: Team, Requests, Followers - Event Schedule"
+    title="Manage Schedules: Team, Requests, Followers - Event Schedule"
     description="Run a schedule day to day: the calendar, templates, appointments, event requests, followers and email subscribers, team access levels and the audit log."
     lede="Everything on the day-to-day side of a schedule: the calendar and its Actions menu, event requests, followers, team access, your plan, and the audit log."
 >

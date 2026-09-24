@@ -44,6 +44,67 @@ class SeoUtils
     /** Punctuation that already ends a sentence or a clause, so a boundary after it needs no ". ". */
     private const ENDING_PUNCTUATION = '.!?…:;。！？؟';
 
+    /** The publisher logo, relative to the site root. See organization(). */
+    private const ORGANIZATION_LOGO = '/images/dark_logo.png';
+
+    /**
+     * The marketing site's root, with no trailing slash: the base every structured-data @id hangs
+     * off, so a node on a docs page, the blog host and the homepage all name the same entity.
+     */
+    public static function siteUrl(): string
+    {
+        return rtrim((string) config('app.url'), '/');
+    }
+
+    /**
+     * The one Organization node: the publisher of every marketing page, doc and blog post.
+     *
+     * One logo for all of them, dark_logo.png - dark ink on a light ground, the mark the site header
+     * shows in light mode, which is what a search result or a feed reader draws it on. The layout
+     * used the dark logo while the docs and the blog named light_logo.png as the publisher of the
+     * very same @id, so two nodes that are meant to merge disagreed about what the publisher looks
+     * like.
+     *
+     * Compact on purpose, so it can be embedded as a publisher; the layout adds the site-wide facts
+     * (sameAs, contact point) to the one top-level copy it emits.
+     *
+     * @return array<string, mixed>
+     */
+    public static function organization(): array
+    {
+        $logo = self::siteUrl().self::ORGANIZATION_LOGO;
+        [$width, $height] = self::imageDimensions($logo) ?? [712, 140];
+
+        return [
+            '@type' => 'Organization',
+            '@id' => self::siteUrl().'/#organization',
+            'name' => 'Event Schedule',
+            'url' => self::siteUrl(),
+            'logo' => [
+                '@type' => 'ImageObject',
+                'url' => $logo,
+                'width' => $width,
+                'height' => $height,
+            ],
+        ];
+    }
+
+    /**
+     * organization() by reference, for a node that names it again (an article's author). The @id
+     * is what merges it with the full node the layout emits; the type and name are for a consumer
+     * that does not resolve references.
+     *
+     * @return array<string, string>
+     */
+    public static function organizationRef(): array
+    {
+        return [
+            '@type' => 'Organization',
+            '@id' => self::siteUrl().'/#organization',
+            'name' => 'Event Schedule',
+        ];
+    }
+
     /**
      * Owner HTML (a rendered markdown description) as one line of plain text, for a meta
      * description or a structured-data field.

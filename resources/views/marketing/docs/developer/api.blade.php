@@ -1,6 +1,6 @@
 <x-docs-page
     key="developer/api"
-    title="REST API Reference: Schedules, Events, Sales - Event Schedule"
+    title="API Reference: Schedules, Events, Sales - Event Schedule"
     description="Manage schedules, events, sales and refunds with the Event Schedule REST API: authentication, rate limits, pagination and every endpoint, with examples."
     plan="pro"
     lede="A JSON REST API for your schedules, events, sales, refunds and fan content. API access is a Pro feature: on the hosted service the schedules you read and write have to be on a Pro or Enterprise plan, apart from the few endpoints listed under Authentication. A selfhosted install counts as Enterprise, so nothing here is held back by plan."

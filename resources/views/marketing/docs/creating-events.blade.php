@@ -1,6 +1,6 @@
 <x-docs-page
     key="creating-events"
-    title="Creating Events: Tickets, Recurring, Privacy - Event Schedule"
+    title="Creating Events: Tickets, Repeats, Privacy - Event Schedule"
     description="Add events to your schedule and set up each one: venue, lineup, recurrence, visibility, tickets and polls, plus how to tell attendees when plans change."
     lede="Add events to your schedule and configure event settings like venue, participants, recurrence, visibility, and tickets."
 >

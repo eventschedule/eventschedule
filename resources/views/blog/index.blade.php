@@ -82,17 +82,7 @@
                 '@type' => 'CollectionPage',
                 '@id' => $blogCanonical,
             ],
-            'publisher' => [
-                '@type' => 'Organization',
-                '@id' => config('app.url').'/#organization',
-                'name' => 'Event Schedule',
-                'logo' => [
-                    '@type' => 'ImageObject',
-                    'url' => config('app.url').'/images/light_logo.png',
-                    'width' => 712,
-                    'height' => 140,
-                ],
-            ],
+            'publisher' => \App\Utils\SeoUtils::organization(),
         ];
 
         // Not $post: @php shares the view scope, and $post is the card loop's variable below.
@@ -109,11 +99,7 @@
                 'image' => $listed->socialImageUrl() ?: config('app.url').'/images/social/home.jpg',
                 'datePublished' => $listed->published_at?->toISOString() ?: '',
                 'dateModified' => ($listed->updated_at ?: $listed->published_at)?->toISOString() ?: '',
-                'author' => [
-                    '@type' => 'Organization',
-                    '@id' => config('app.url').'/#organization',
-                    'name' => 'Event Schedule',
-                ],
+                'author' => \App\Utils\SeoUtils::organizationRef(),
             ];
         }
     @endphp

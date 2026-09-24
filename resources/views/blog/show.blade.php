@@ -51,23 +51,8 @@
             'headline' => $post->title,
             'description' => $post->meta_description,
             'image' => $post->socialImageUrl() ?: config('app.url').'/images/social/home.jpg',
-            'author' => [
-                '@type' => 'Organization',
-                '@id' => config('app.url').'/#organization',
-                'name' => 'Event Schedule',
-                'url' => config('app.url'),
-            ],
-            'publisher' => [
-                '@type' => 'Organization',
-                '@id' => config('app.url').'/#organization',
-                'name' => 'Event Schedule',
-                'logo' => [
-                    '@type' => 'ImageObject',
-                    'url' => config('app.url').'/images/light_logo.png',
-                    'width' => 712,
-                    'height' => 140,
-                ],
-            ],
+            'author' => \App\Utils\SeoUtils::organizationRef(),
+            'publisher' => \App\Utils\SeoUtils::organization(),
             'datePublished' => $post->published_at?->toISOString() ?: '',
             'dateModified' => ($post->updated_at ?: $post->published_at)?->toISOString() ?: '',
             'mainEntityOfPage' => [

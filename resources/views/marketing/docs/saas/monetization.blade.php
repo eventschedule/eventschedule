@@ -1,6 +1,6 @@
 <x-docs-page
     key="saas/monetization"
-    title="SaaS Monetization: Ads, Promotions and Stay22 - Event Schedule"
+    title="SaaS Monetization: Ads, Promotions, Stay22 - Event Schedule"
     description="Earn from your free tier: Google AdSense on free schedules' pages, prepaid promotions your paid schedules buy, and a Stay22 accommodation affiliate."
     lede="Cover your hosting costs by monetizing the free tier, and give your paying customers somewhere to advertise."
 >

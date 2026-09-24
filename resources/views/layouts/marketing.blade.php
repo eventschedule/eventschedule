@@ -157,35 +157,26 @@
         }
     }
     </script>
+    {{-- The same node every docs page and blog post names as its publisher (SeoUtils::organization()),
+         plus the site-wide facts only this top-level copy carries. --}}
     <script type="application/ld+json" {!! nonce_attr() !!}>
-    {
-        "@context": "https://schema.org",
-        "@type": "Organization",
-        "@id": "{{ config('app.url') }}/#organization",
-        "name": "Event Schedule",
-        "url": "{{ config('app.url') }}",
-        "description": "Event Schedule is an open-source platform for sharing events, selling tickets, and bringing communities together.",
-        "logo": {
-            "@type": "ImageObject",
-            "url": "{{ config('app.url') }}/images/dark_logo.png",
-            "width": 712,
-            "height": 140
-        },
-        "sameAs": [
-            "https://github.com/eventschedule/eventschedule",
-            "https://www.facebook.com/appeventschedule",
-            "https://www.instagram.com/eventschedule/",
-            "https://youtube.com/@EventSchedule",
-            "https://x.com/ScheduleEvent",
-            "https://www.linkedin.com/company/eventschedule/"
+    {!! \App\Utils\SeoUtils::jsonLd(['@context' => 'https://schema.org'] + \App\Utils\SeoUtils::organization() + [
+        'description' => 'Event Schedule is an open-source platform for sharing events, selling tickets, and bringing communities together.',
+        'sameAs' => [
+            'https://github.com/eventschedule/eventschedule',
+            'https://www.facebook.com/appeventschedule',
+            'https://www.instagram.com/eventschedule/',
+            'https://youtube.com/@EventSchedule',
+            'https://x.com/ScheduleEvent',
+            'https://www.linkedin.com/company/eventschedule/',
         ],
-        "foundingDate": "2024",
-        "contactPoint": {
-            "@type": "ContactPoint",
-            "email": "support@eventschedule.com",
-            "contactType": "customer service"
-        }
-    }
+        'foundingDate' => '2024',
+        'contactPoint' => [
+            '@type' => 'ContactPoint',
+            'email' => 'support@eventschedule.com',
+            'contactType' => 'customer service',
+        ],
+    ]) !!}
     </script>
     {{ $structuredData ?? '' }}
 

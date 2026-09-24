@@ -3,6 +3,8 @@
 namespace Tests\Feature;
 
 use App\Http\Controllers\MarketingController;
+use App\Models\BlogPost;
+use App\Utils\DocsUtils;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Blade;
 use Illuminate\Support\Facades\Route;
@@ -216,6 +218,60 @@ class MarketingStructuredDataTest extends TestCase
         }
     }
 
+    /**
+     * One publisher, drawn one way. The layout named dark_logo.png as the Organization's logo while
+     * the docs and the blog named light_logo.png as the publisher of the very same @id, so the nodes
+     * that are meant to merge disagreed about what the publisher looks like. Every copy now comes
+     * from SeoUtils::organization().
+     */
+    public function test_every_publisher_logo_is_the_one_dark_logo(): void
+    {
+        $post = BlogPost::create([
+            'title' => 'A Post About Calendars',
+            'slug' => 'a-post-about-calendars',
+            'content' => '<p>Body copy.</p>',
+            'is_published' => true,
+            'published_at' => now()->subWeek(),
+        ]);
+
+        $logo = config('app.url').'/images/dark_logo.png';
+
+        foreach (['/', '/docs', '/docs/getting-started', '/blog', '/blog/'.$post->slug] as $path) {
+            $found = ['logos' => [], 'ids' => []];
+
+            foreach ($this->jsonLdBlocks($this->get($path)->assertOk()->getContent()) as $block) {
+                $this->collectOrganizations($block, $found);
+            }
+
+            $this->assertNotEmpty($found['logos'], "{$path} names no publisher logo");
+            $this->assertSame([$logo], array_values(array_unique($found['logos'])), "{$path} names another logo");
+            $this->assertSame([config('app.url').'/#organization'], array_values(array_unique($found['ids'])),
+                "{$path} names an Organization other than the site's own");
+        }
+    }
+
+    /**
+     * The docs <title> ends in " - Event Schedule" so a search result names the site. The
+     * TechArticle headline used to copy it whole, so all 39 docs articles ended in the same two
+     * words; the publisher already says who wrote them.
+     */
+    public function test_no_docs_article_headline_ends_with_the_brand(): void
+    {
+        $paths = array_merge(['/docs'], array_column(DocsUtils::pages(), 'path'));
+        $checked = 0;
+
+        foreach ($paths as $path) {
+            $article = $this->nodeOfType($this->jsonLdBlocks($this->get($path)->assertOk()->getContent()), 'TechArticle');
+
+            $this->assertNotNull($article, "{$path} has no TechArticle");
+            $this->assertNotSame('', trim($article['headline']), "{$path} has an empty headline");
+            $this->assertStringEndsNotWith('Event Schedule', $article['headline'], "{$path}: {$article['headline']}");
+            $checked++;
+        }
+
+        $this->assertGreaterThanOrEqual(40, $checked, 'fixture: every docs page was checked');
+    }
+
     public function test_about_does_not_emit_a_second_unrelated_organization(): void
     {
         $blocks = $this->jsonLdBlocks($this->get('/about')->assertOk()->getContent());
@@ -349,6 +405,33 @@ class MarketingStructuredDataTest extends TestCase
         return array_map(function (string $raw) {
             return json_decode($raw, true);
         }, $matches[1]);
+    }
+
+    /**
+     * Every Organization node anywhere in $node - a top-level block, a publisher, an author - with
+     * the logo URL it names and its @id.
+     *
+     * @param  array{logos: array<int, string>, ids: array<int, string>}  $found
+     */
+    private function collectOrganizations(mixed $node, array &$found): void
+    {
+        if (! is_array($node)) {
+            return;
+        }
+
+        if (($node['@type'] ?? null) === 'Organization') {
+            if (isset($node['logo'])) {
+                $found['logos'][] = is_array($node['logo']) ? ($node['logo']['url'] ?? '') : (string) $node['logo'];
+            }
+
+            if (isset($node['@id'])) {
+                $found['ids'][] = $node['@id'];
+            }
+        }
+
+        foreach ($node as $child) {
+            $this->collectOrganizations($child, $found);
+        }
     }
 
     /**

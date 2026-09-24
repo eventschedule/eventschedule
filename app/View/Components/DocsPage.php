@@ -3,6 +3,7 @@
 namespace App\View\Components;
 
 use App\Utils\DocsUtils;
+use App\Utils\SeoUtils;
 use Illuminate\View\Component;
 use Illuminate\View\View;
 
@@ -117,6 +118,23 @@ class DocsPage extends Component
     }
 
     /**
+     * The article's own headline: the page title without the " - Event Schedule" brand suffix
+     * every docs <title> carries. The suffix is for a search result, where the site name has to
+     * be spelled out; in the TechArticle the publisher already says who wrote it, and every one of
+     * the 39 headlines ending in the same two words made them read as one site-name repeated.
+     */
+    public function articleHeadlineText(): string
+    {
+        if ($this->articleHeadline !== null && $this->articleHeadline !== '') {
+            return $this->articleHeadline;
+        }
+
+        $title = $this->pageTitle();
+
+        return preg_replace('/\s+[-|]\s+Event Schedule$/u', '', $title) ?: $title;
+    }
+
+    /**
      * The TechArticle blob every doc page used to carry inline.
      */
     public function structuredData(): array
@@ -124,22 +142,10 @@ class DocsPage extends Component
         return [
             '@context' => 'https://schema.org',
             '@type' => 'TechArticle',
-            'headline' => $this->articleHeadline ?? $this->pageTitle(),
+            'headline' => $this->articleHeadlineText(),
             'description' => $this->articleDescription ?? $this->metaDescription(),
-            'author' => [
-                '@type' => 'Organization',
-                'name' => 'Event Schedule',
-            ],
-            'publisher' => [
-                '@type' => 'Organization',
-                'name' => 'Event Schedule',
-                'logo' => [
-                    '@type' => 'ImageObject',
-                    'url' => config('app.url').'/images/light_logo.png',
-                    'width' => 712,
-                    'height' => 140,
-                ],
-            ],
+            'author' => SeoUtils::organizationRef(),
+            'publisher' => SeoUtils::organization(),
             'mainEntityOfPage' => [
                 '@type' => 'WebPage',
                 '@id' => url()->current(),

@@ -1,6 +1,6 @@
 <x-docs-page
     key="saas/setup"
-    title="White-Label SaaS Setup: Run Your Own Platform - Event Schedule"
+    title="White-Label SaaS Setup: Your Own Platform - Event Schedule"
     description="Run Event Schedule as a white-label SaaS: wildcard subdomains, your branding, Stripe plan billing, and tenants selling through their own Stripe or PayPal."
     lede="Configure Event Schedule for SaaS (Software as a Service) deployment, where you host the platform for multiple customers using subdomains."
 >

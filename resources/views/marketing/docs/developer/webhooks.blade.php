@@ -1,6 +1,6 @@
 <x-docs-page
     key="developer/webhooks"
-    title="Webhooks: Signed Sale and Event Notifications - Event Schedule"
+    title="Webhooks: Signed Sale and Event Alerts - Event Schedule"
     description="Signed POST notifications for sales, refunds, installments, events, check-ins and feedback: fourteen event types, HMAC-SHA256 signatures, a delivery log."
     lede="Receive real-time HTTP POST notifications when events happen in your schedules."
     article-description="Signed HTTP POST notifications for sales, refunds, installments, events, check-ins and feedback, with the payload format, signature checks and delivery rules."
