@@ -35,7 +35,7 @@ The deploy itself is two actions:
 
 Everything else is either a one-time infrastructure step or something you *look at* afterwards -
 the deploy log, `/admin`, `/admin/queue`. Two steps do need the App Platform console, so budget
-for it: **step 3** backfills the flyer thumbnails and must run before step 4, and **P2** may want
+for it: **step 3** backfills the image derivatives and must run before step 4, and **P2** may want
 the three `events` migrations run by hand first if the table is large.
 
 **Since v1.0.132 the heaviest migration is a different one.** Paid ticket selling and paid
@@ -241,7 +241,7 @@ verification.
 |---|---|---|---|
 | 1 | Create the backups bucket | DO infra | one-time |
 | 2 | Deploy `main` | DO deploy | 21 migrations; two irreversible, two more with a no-op `down()` |
-| 3 | Backfill the flyer thumbnails | console command | one-time; must precede step 4 |
+| 3 | Backfill the image derivatives | console command | one-time; must precede step 4 |
 | 4 | Cloudflare cache rule | Cloudflare dashboard | one-time; the edge cache is inert until this exists |
 | 5 | Set `BACKUP_*` and `CACHE_STORE` | DO app spec | one-time; one save, one redeploy |
 | 6 | Create the `scheduler` worker, parked | DO console | one-time; runs nothing yet |
@@ -250,7 +250,7 @@ verification.
 | 9 | Restate the docs | code | one-time |
 
 Expect four App Platform deployments - step 2 (code), step 5 (env vars), step 6 (the worker
-component) and step 7 (`SCHEDULER_EXPECTED_RAIL` plus the run command) - and the flyer backfill.
+component) and step 7 (`SCHEDULER_EXPECTED_RAIL` plus the run command) - and the image backfill.
 Everything up to step 6 can run whenever.
 
 **Steps 7 and 8 carry the main timing constraint**, and it is two rules rather than one (step 5
@@ -317,7 +317,7 @@ curl -sI 'https://eventschedule.com/pricing?lang=fr'
 *Undo:* console rollback to the deployment ID from P3. Note the two irreversible migrations from
 P1: a rollback restores code, not data.
 
-### 3. Backfill the flyer thumbnails - [one-time] [console command]
+### 3. Backfill the image derivatives - [one-time] [console command]
 
 Do this **before** the Cloudflare rule, or cached HTML will reference the original flyers for up
 to 10 minutes. The homepage poster wall was 18 MB of originals and a 28.7 s mobile LCP; the fix
@@ -332,6 +332,28 @@ php artisan images:backfill-variants --limit=500          # then the rest, in ba
 
 Batch it: the console session is ephemeral, and image work can push `memory_limit` on a 512 MB
 box. Use `--dry-run` first for a count.
+
+Then the schedule images. **The background goes first**: a custom background is what a phone
+paints as the schedule page's LCP image, and it was served as the owner's original upload (a
+1.1 MB JPEG behind the 11.2 s lab LCP). These build the 960 and 1920 WebP derivatives
+(`ImageUtils::BANNER_VARIANT_WIDTHS`) of the uploaded backgrounds and headers, then the 480 and 960
+of the profile photos, which have never been backfilled:
+
+```
+php artisan images:backfill-variants --roles --slot=background
+php artisan images:backfill-variants --roles --slot=header
+php artisan images:backfill-variants --roles                # profile photos (--slot=profile)
+```
+
+Every run above also records each original's pixel size (`src`), which is what lets the pages
+declare an image's width and height and `og:image:width` describe a file on the CDN. Last, fill
+that in for rows whose derivatives were built before it was recorded. `--dimensions` generates
+nothing and reads only the first 256 KB of each original, so these are quick:
+
+```
+php artisan images:backfill-variants --dimensions
+php artisan images:backfill-variants --roles --slot=all --dimensions
+```
 
 The run ends with a per-reason tally (`Skipped by reason - too_large: 3, missing: 1`), and a
 `too_large` line names the source size, e.g. `skipped: too_large (3508x3508, 12.3MP)`. That is the
@@ -367,7 +389,9 @@ container that predates the config.
 
 **Verify:** homepage wall images come back as `.webp` derivatives rather than originals. Allow up
 to 10 minutes - the wall query is cached (`config('marketing.wall_cache_seconds')`) and recording
-a variant deliberately does *not* bust that cache, so the switch is not instant.
+a variant deliberately does *not* bust that cache, so the switch is not instant. A schedule with a
+custom background serves `..._w960.webp` in its `<link rel="preload" as="image">` and the mobile
+banner, and `..._w1920.webp` in the desktop background CSS.
 
 *Undo:* none needed; a missing variant falls back to the original.
 

@@ -165,7 +165,42 @@ class ImageUtils
      */
     public const VARIANT_WIDTHS = [480, 960];
 
+    /**
+     * The widths of the two WIDE images a schedule can upload: its header and its background
+     * (Role::imageVariantSlots()).
+     *
+     * They are page-width surfaces, not cards. The banner header spans the content column (up to
+     * 1496 CSS px) and the background covers the viewport, so 480 would be useless to either.
+     * 960 is the phone: the mobile banner a custom background paints, which was the schedule
+     * page's LCP element at 11.2 s on a 1.1MB original. 1920 is the desktop background and the
+     * header on a large screen.
+     *
+     * Additive for the same reason as VARIANT_WIDTHS: the width is part of the derivative's name.
+     */
+    public const BANNER_VARIANT_WIDTHS = [960, 1920];
+
     public const VARIANT_QUALITY = 80;
+
+    /**
+     * How much of an original storedImageDimensions() reads to size it: enough to reach the frame
+     * header of every JPEG a camera or phone writes (EXIF, XMP and ICC segments are 64KB apiece at
+     * most) and trivially enough for PNG, GIF and WebP, whose size is in the first few bytes.
+     */
+    public const DIMENSIONS_READ_BYTES = 256 * 1024;
+
+    /**
+     * Every width any slot generates, smallest first: what deleteStoredVariants() removes when it
+     * is not told otherwise. Computed from both lists so a width added to either is covered.
+     *
+     * @return int[]
+     */
+    public static function allVariantWidths(): array
+    {
+        $widths = array_values(array_unique(array_merge(self::VARIANT_WIDTHS, self::BANNER_VARIANT_WIDTHS)));
+        sort($widths);
+
+        return $widths;
+    }
 
     /**
      * The complete `reason` vocabulary of generateStoredVariants(), split by whether trying
@@ -425,22 +460,14 @@ class ImageUtils
      */
     public static function applyExifOrientation(\GdImage $image, string $path): \GdImage
     {
-        if (! function_exists('exif_read_data') || ! function_exists('imagerotate')) {
+        if (! function_exists('imagerotate')) {
             return $image;
         }
 
-        // exif_read_data() warns and returns false for anything that is not a JPEG or TIFF, so
-        // ask the header first rather than suppressing our way through every PNG the app resizes.
-        $info = @getimagesize($path);
-        if (($info[2] ?? null) !== IMAGETYPE_JPEG) {
-            return $image;
-        }
+        $orientation = self::exifOrientation($path);
 
-        $exif = @exif_read_data($path);
-        $orientation = is_array($exif) ? (int) ($exif['Orientation'] ?? 0) : 0;
-
-        // 1 is upright and anything outside 2-8 is not a value the tag can hold.
-        if ($orientation < 2 || $orientation > 8) {
+        // 1 is upright (exifOrientation() answers 1 for anything outside 2-8).
+        if ($orientation === 1) {
             return $image;
         }
 
@@ -476,6 +503,113 @@ class ImageUtils
     }
 
     /**
+     * A JPEG's EXIF Orientation tag, 2-8, or 1 (upright) for anything else: no tag, a value the
+     * tag cannot hold, a file that is not a JPEG, or no exif extension.
+     *
+     * exif_read_data() warns and returns false for anything that is not a JPEG or TIFF, so the
+     * header is asked first rather than suppressing our way through every PNG the app resizes.
+     * It reads only the APP1 segment at the head of the file, so a truncated copy of an original
+     * (storedImageDimensions()) answers the same as the whole file.
+     */
+    public static function exifOrientation(string $path): int
+    {
+        if (! function_exists('exif_read_data')) {
+            return 1;
+        }
+
+        $info = @getimagesize($path);
+        if (($info[2] ?? null) !== IMAGETYPE_JPEG) {
+            return 1;
+        }
+
+        $exif = @exif_read_data($path);
+        $orientation = is_array($exif) ? (int) ($exif['Orientation'] ?? 0) : 0;
+
+        return ($orientation >= 2 && $orientation <= 8) ? $orientation : 1;
+    }
+
+    /**
+     * An image's size as a browser displays it: the header's width and height, swapped when the
+     * EXIF tag turns the picture a quarter circle (orientations 5-8), because a browser honours
+     * the tag and the header describes the sensor frame. Null for anything getimagesize() cannot
+     * read.
+     *
+     * @return array{w: int, h: int}|null
+     */
+    public static function orientedImageSize(string $path): ?array
+    {
+        $info = @getimagesize($path);
+
+        if ($info === false || ($info[0] ?? 0) < 1 || ($info[1] ?? 0) < 1) {
+            return null;
+        }
+
+        return self::orientedSize((int) $info[0], (int) $info[1], self::exifOrientation($path));
+    }
+
+    /**
+     * @return array{w: int, h: int}
+     */
+    private static function orientedSize(int $width, int $height, int $orientation): array
+    {
+        return $orientation >= 5
+            ? ['w' => $height, 'h' => $width]
+            : ['w' => $width, 'h' => $height];
+    }
+
+    /**
+     * The pixel size of a stored original, as displayed (see orientedImageSize()), read from its
+     * first DIMENSIONS_READ_BYTES only - a header read, not a download of a multi-megabyte photo
+     * off object storage. For `images:backfill-variants --dimensions`, which records the size of
+     * originals whose derivatives were built before the pipeline recorded it.
+     *
+     * Null for anything that is not ours to read (demo_ images ship in the repo, and a legacy
+     * http value is somebody else's), for a file the disk will not hand over, and for a header
+     * that does not fit in the prefix. Never throws.
+     *
+     * @return array{w: int, h: int}|null
+     */
+    public static function storedImageDimensions(string $storedName): ?array
+    {
+        if ($storedName === '' || str_starts_with($storedName, 'demo_') || str_starts_with($storedName, 'http')) {
+            return null;
+        }
+
+        try {
+            $stream = Storage::readStream(self::storagePathFor($storedName));
+        } catch (\Throwable) {
+            return null;
+        }
+
+        if (! $stream) {
+            return null;
+        }
+
+        $temp = tempnam(sys_get_temp_dir(), 'variant_dims_');
+
+        try {
+            $head = stream_get_contents($stream, self::DIMENSIONS_READ_BYTES);
+
+            if (! is_string($head) || $head === '') {
+                return null;
+            }
+
+            file_put_contents($temp, $head);
+
+            return self::orientedImageSize($temp);
+        } catch (\Throwable) {
+            return null;
+        } finally {
+            if (is_resource($stream)) {
+                fclose($stream);
+            }
+            if (file_exists($temp)) {
+                @unlink($temp);
+            }
+        }
+    }
+
+    /**
      * Write WebP derivatives of a stored image next to the original, on the same disk.
      *
      * Model-agnostic on purpose: it takes the raw stored filename (what
@@ -491,13 +625,21 @@ class ImageUtils
      * is still a large win (the wall's originals are multi-megabyte PNGs). The returned
      * filename always names the REQUESTED width so the recorded key stays predictable.
      *
+     * The result is keyed by width. `reason` is one of VARIANT_DETERMINISTIC_REASONS or
+     * VARIANT_TRANSIENT_REASONS. `detail` is an optional human-readable note about the reason
+     * (currently the source dimensions behind a `too_large`); it is for display only and is never
+     * persisted, so read it with `?? null`.
+     *
+     * `src` is the original's size as a browser displays it, after the EXIF rotation above
+     * ({w, h}), or null where the original was never read - the same value on every width, since
+     * they share one decode. It is what lets a page declare an image's width and height
+     * (og:image:width, an <img>'s aspect ratio) for a file on object storage, which nothing can
+     * measure at render time. A `too_large` skip carries the header's size, turned for EXIF
+     * orientations 5-8 the same way: the image is refused for decoding, not for being unknown.
+     * Read it with `?? null` too.
+     *
      * @param  int[]  $widths
-     * @return array<int, array{ok: bool, filename: ?string, reason: ?string, detail?: ?string}> keyed by
-     *                                                                                           width; see VARIANT_DETERMINISTIC_REASONS and
-     *                                                                                           VARIANT_TRANSIENT_REASONS. `detail` is an optional
-     *                                                                                           human-readable note about the reason (currently the source
-     *                                                                                           dimensions behind a `too_large`); it is for display only and
-     *                                                                                           is never persisted, so read it with `?? null`.
+     * @return array<int, array{ok: bool, filename: ?string, reason: ?string, detail?: ?string, src?: ?array{w: int, h: int}}>
      */
     public static function generateStoredVariants(
         string $storedName,
@@ -508,9 +650,9 @@ class ImageUtils
 
         // `detail` is display only: it reaches the console line and the log, never the recorded
         // `skipped` value, which stays the bare token the reason vocabulary is matched on.
-        $skipAll = fn (string $reason, ?string $detail = null) => array_fill_keys(
+        $skipAll = fn (string $reason, ?string $detail = null, ?array $src = null) => array_fill_keys(
             $widths,
-            ['ok' => false, 'filename' => null, 'reason' => $reason, 'detail' => $detail]
+            ['ok' => false, 'filename' => null, 'reason' => $reason, 'detail' => $detail, 'src' => $src]
         );
 
         if (! $storedName) {
@@ -607,7 +749,13 @@ class ImageUtils
             // this needs and the platform is willing, so a 20MP flyer gets its derivatives in a
             // console session even though it stays refused inside a pinned 128MB worker.
             if (! self::canDecodePixels($srcWidth * $srcHeight, $ceilingBytes)) {
-                return $skipAll('too_large', $srcWidth.'x'.$srcHeight.', '.round($srcWidth * $srcHeight / 1_000_000, 1).'MP');
+                // The header's size, as displayed: too large to decode is not the same as unknown,
+                // and a page can still declare the original's dimensions from it.
+                return $skipAll(
+                    'too_large',
+                    $srcWidth.'x'.$srcHeight.', '.round($srcWidth * $srcHeight / 1_000_000, 1).'MP',
+                    self::orientedSize((int) $srcWidth, (int) $srcHeight, self::exifOrientation($tempIn))
+                );
             }
 
             $sourceImage = match ($mimeType) {
@@ -629,11 +777,13 @@ class ImageUtils
             // the pre-rotation numbers would squash the derivative.
             $srcWidth = imagesx($sourceImage);
             $srcHeight = imagesy($sourceImage);
+            $src = ['w' => $srcWidth, 'h' => $srcHeight];
 
             $results = [];
 
             foreach ($widths as $width) {
-                $results[$width] = self::writeStoredVariant($sourceImage, $storedName, $width, $srcWidth, $srcHeight, $tempOut);
+                $results[$width] = self::writeStoredVariant($sourceImage, $storedName, $width, $srcWidth, $srcHeight, $tempOut)
+                    + ['src' => $src];
             }
 
             return $results;
@@ -732,14 +882,19 @@ class ImageUtils
      * from the original's, so once that filename is gone nothing can address them again and they
      * would sit on Spaces forever - a replaced flyer stranded one file per width, every time.
      *
-     * Walks VARIANT_WIDTHS rather than whatever the row recorded: the saving hook nulls
-     * `image_variants` before this could read it, and a run that failed halfway may have written
-     * a file it never got to record.
+     * Walks a list of widths rather than whatever the row recorded: the saving hook nulls the
+     * variants column before this could read it, and a run that failed halfway may have written
+     * a file it never got to record. By default the list is every width any slot generates
+     * (allVariantWidths()), so the caller never has to know which slot built the files - a
+     * deletion that misses a width strands that file for good. A width that was never generated
+     * costs one no-op delete.
      *
      * Never throws. This is cleanup beside a save that has already been decided, and a disk that
      * cannot delete a stale thumbnail must not fail the user's edit.
+     *
+     * @param  int[]|null  $widths
      */
-    public static function deleteStoredVariants(string $storedName): void
+    public static function deleteStoredVariants(string $storedName, ?array $widths = null): void
     {
         // Demo flyers ship in the repo and legacy http values are not ours; neither has
         // derivatives, and storagePathFor() would name something that is not theirs.
@@ -747,7 +902,7 @@ class ImageUtils
             return;
         }
 
-        foreach (self::VARIANT_WIDTHS as $width) {
+        foreach ($widths ?? self::allVariantWidths() as $width) {
             try {
                 Storage::delete(self::storagePathFor(self::variantFilename($storedName, $width)));
             } catch (\Throwable $e) {

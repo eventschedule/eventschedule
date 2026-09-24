@@ -2666,20 +2666,27 @@ class Event extends Model
      * image degrades to the owner's own text and page.
      *
      * The original, not a card derivative: previews are shown large, and scrapers downscale.
-     * width and height are present only when known. The hook for sizes recorded at upload time is
-     * SeoUtils::imageObject()'s second argument: pass the chosen image's recorded [width, height]
-     * there, and every page that renders og:image:width picks it up.
+     * width and height are present only when known: the size the image pipeline recorded for the
+     * chosen image (HasImageVariants::imageSourceDimensions(), the flyer's on the event and a
+     * photo's on its schedule), else whatever SeoUtils::imageDimensions() can read from a file
+     * this app serves itself. Every page that renders og:image:width, and the Event JSON-LD's
+     * ImageObject, picks it up from here.
      *
      * @return array{url: string, width?: int, height?: int}|null
      */
     public function shareImage(): ?array
     {
-        $url = $this->flyer_image_url
-            ?: $this->role()?->profile_image_url
-            ?: $this->venue?->profile_image_url
-            ?: $this->creatorRole?->profile_image_url;
+        if ($this->flyer_image_url) {
+            return SeoUtils::imageObject($this->flyer_image_url, $this->imageSourceDimensions());
+        }
 
-        return \App\Utils\SeoUtils::imageObject($url ?: null);
+        foreach ([$this->role(), $this->venue, $this->creatorRole] as $role) {
+            if ($role && $role->profile_image_url) {
+                return SeoUtils::imageObject($role->profile_image_url, $role->imageSourceDimensions());
+            }
+        }
+
+        return null;
     }
 
     /**

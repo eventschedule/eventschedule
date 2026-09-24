@@ -124,6 +124,32 @@ class ImageVariantsTest extends TestCase
         Storage::put(ImageUtils::storagePathFor($filename), $this->jpegBytes($orientation, $width, $height));
     }
 
+    /**
+     * The head of a JPEG and nothing else: SOI, an EXIF block declaring $orientation, $padding
+     * bytes of APP2 segments, a frame header declaring $width x $height, and a scan header. Enough
+     * for getimagesize() and exif_read_data() - both stop at the scan - and far too little to
+     * decode, which is the point: it can claim any size without allocating it.
+     */
+    private function jpegHeaderBytes(int $orientation, int $width, int $height, int $padding = 0): string
+    {
+        $tiff = "MM\x00\x2a\x00\x00\x00\x08"
+            ."\x00\x01"
+            ."\x01\x12\x00\x03\x00\x00\x00\x01".pack('n', $orientation)."\x00\x00"
+            ."\x00\x00\x00\x00";
+        $bytes = "\xff\xd8\xff\xe1".pack('n', strlen($tiff) + 8)."Exif\x00\x00".$tiff;
+
+        while ($padding > 0) {
+            $chunk = min($padding, 65000);
+            $bytes .= "\xff\xe2".pack('n', $chunk + 2).str_repeat("\x00", $chunk);
+            $padding -= $chunk;
+        }
+
+        $frame = "\x08".pack('n', $height).pack('n', $width)."\x03\x01\x22\x00\x02\x11\x01\x03\x11\x01";
+        $bytes .= "\xff\xc0".pack('n', strlen($frame) + 2).$frame;
+
+        return $bytes."\xff\xda\x00\x0c\x03\x01\x00\x02\x11\x03\x11\x00\x3f\x00\xff\xd9";
+    }
+
     /** A file whose PNG header declares huge dimensions, without allocating them. */
     private function storeOversizedHeader(string $filename, int $width, int $height): void
     {
@@ -234,6 +260,26 @@ class ImageVariantsTest extends TestCase
     private function useSyncQueue(): void
     {
         Queue::swap($this->realQueue);
+    }
+
+    /**
+     * A variants column compared key by key, in any order. MySQL's JSON type stores an object's
+     * keys sorted (by length, then bytes), so a column read back from the database does not keep
+     * the order it was written in - `src`, the shortest key, always comes back first.
+     */
+    private function assertVariants(array $expected, ?array $actual, string $message = ''): void
+    {
+        $normalise = function (?array $value) use (&$normalise): ?array {
+            if ($value === null) {
+                return null;
+            }
+
+            ksort($value);
+
+            return array_map(fn ($each) => is_array($each) ? $normalise($each) : $each, $value);
+        };
+
+        $this->assertSame($normalise($expected), $normalise($actual), $message);
     }
 
     // ---------------------------------------------------------------- helper
@@ -876,8 +922,9 @@ class ImageVariantsTest extends TestCase
 
         Storage::assertExists('public/flyer_abc123_w480.webp');
         Storage::assertExists('public/flyer_abc123_w960.webp');
-        $this->assertSame(
-            ['w480' => 'flyer_abc123_w480.webp', 'w960' => 'flyer_abc123_w960.webp'],
+        // And the original's size, which is what og:image:width and the flyer's <img> declare.
+        $this->assertVariants(
+            ['w480' => 'flyer_abc123_w480.webp', 'w960' => 'flyer_abc123_w960.webp', 'src' => ['w' => 1600, 'h' => 2133]],
             $event->fresh()->image_variants
         );
     }
@@ -903,10 +950,11 @@ class ImageVariantsTest extends TestCase
         $this->storeOversizedHeader('flyer_huge.png', 12000, 12000);
 
         // Deterministic, so the job returns normally rather than sending the queue round again.
+        // Too large to decode is not unknown: the header's size is still recorded.
         (new GenerateEventImageVariants($event->id, 'flyer_huge.png'))->handle();
 
-        $this->assertSame(
-            ['w480' => null, 'w960' => null, 'skipped' => 'too_large'],
+        $this->assertVariants(
+            ['w480' => null, 'w960' => null, 'skipped' => 'too_large', 'src' => ['w' => 12000, 'h' => 12000]],
             $event->fresh()->image_variants
         );
     }
@@ -990,7 +1038,11 @@ class ImageVariantsTest extends TestCase
 
         $fresh = $event->fresh();
         $this->assertSame('flyer_boom.png', $fresh->getAttributes()['flyer_image_url'], 'The flyer save must stand');
-        $this->assertSame(['w480' => null, 'w960' => null, 'skipped' => 'write_failed'], $fresh->image_variants);
+        // The original decoded fine - only the write failed - so its size is known.
+        $this->assertVariants(
+            ['w480' => null, 'w960' => null, 'skipped' => 'write_failed', 'src' => ['w' => 400, 'h' => 500]],
+            $fresh->image_variants
+        );
     }
 
     public function test_a_throwing_helper_never_breaks_the_flyer_save_on_the_sync_queue(): void
@@ -1029,8 +1081,8 @@ class ImageVariantsTest extends TestCase
 
         Storage::assertExists('public/flyer_abc123_w480.webp');
         Storage::assertExists('public/flyer_abc123_w960.webp');
-        $this->assertSame(
-            ['w480' => 'flyer_abc123_w480.webp', 'w960' => 'flyer_abc123_w960.webp'],
+        $this->assertVariants(
+            ['w480' => 'flyer_abc123_w480.webp', 'w960' => 'flyer_abc123_w960.webp', 'src' => ['w' => 1600, 'h' => 2133]],
             $event->fresh()->image_variants
         );
 
@@ -1053,8 +1105,8 @@ class ImageVariantsTest extends TestCase
         Artisan::call('images:backfill-variants', ['--upcoming-only' => true]);
 
         Storage::assertExists('public/flyer_abc123_w960.webp');
-        $this->assertSame(
-            ['w480' => 'flyer_abc123_w480.webp', 'w960' => 'flyer_abc123_w960.webp'],
+        $this->assertVariants(
+            ['w480' => 'flyer_abc123_w480.webp', 'w960' => 'flyer_abc123_w960.webp', 'src' => ['w' => 600, 'h' => 800]],
             $event->fresh()->image_variants
         );
     }
@@ -1104,8 +1156,8 @@ class ImageVariantsTest extends TestCase
         $this->storeOversizedHeader('flyer_huge.png', 12000, 12000);
 
         Artisan::call('images:backfill-variants', ['--upcoming-only' => true]);
-        $this->assertSame(
-            ['w480' => null, 'w960' => null, 'skipped' => 'too_large'],
+        $this->assertVariants(
+            ['w480' => null, 'w960' => null, 'skipped' => 'too_large', 'src' => ['w' => 12000, 'h' => 12000]],
             $event->fresh()->image_variants
         );
 
@@ -1117,8 +1169,8 @@ class ImageVariantsTest extends TestCase
         $this->storeFlyer('flyer_huge.png', 600, 800);
         Artisan::call('images:backfill-variants', ['--upcoming-only' => true, '--retry-skipped' => true]);
 
-        $this->assertSame(
-            ['w480' => 'flyer_huge_w480.webp', 'w960' => 'flyer_huge_w960.webp'],
+        $this->assertVariants(
+            ['w480' => 'flyer_huge_w480.webp', 'w960' => 'flyer_huge_w960.webp', 'src' => ['w' => 600, 'h' => 800]],
             $event->fresh()->image_variants
         );
     }
@@ -1135,8 +1187,8 @@ class ImageVariantsTest extends TestCase
 
         Artisan::call('images:backfill-variants', ['--upcoming-only' => true]);
 
-        $this->assertSame(
-            ['w480' => 'flyer_abc123_w480.webp', 'w960' => 'flyer_abc123_w960.webp'],
+        $this->assertVariants(
+            ['w480' => 'flyer_abc123_w480.webp', 'w960' => 'flyer_abc123_w960.webp', 'src' => ['w' => 600, 'h' => 800]],
             $event->fresh()->image_variants,
             'A transient skip must be re-attempted without --retry-skipped'
         );
@@ -1166,8 +1218,8 @@ class ImageVariantsTest extends TestCase
         $this->assertNull($past->fresh()->image_variants, '--upcoming-only must stop before past events');
 
         Artisan::call('images:backfill-variants');
-        $this->assertSame(
-            ['w480' => 'flyer_past_w480.webp', 'w960' => 'flyer_past_w960.webp'],
+        $this->assertVariants(
+            ['w480' => 'flyer_past_w480.webp', 'w960' => 'flyer_past_w960.webp', 'src' => ['w' => 600, 'h' => 800]],
             $past->fresh()->image_variants
         );
     }
@@ -1526,8 +1578,8 @@ class ImageVariantsTest extends TestCase
 
         Storage::assertExists('public/profile_abc_w480.webp');
         Storage::assertExists('public/profile_abc_w960.webp');
-        $this->assertSame(
-            ['w480' => 'profile_abc_w480.webp', 'w960' => 'profile_abc_w960.webp'],
+        $this->assertVariants(
+            ['w480' => 'profile_abc_w480.webp', 'w960' => 'profile_abc_w960.webp', 'src' => ['w' => 1200, 'h' => 1200]],
             $role->fresh()->image_variants
         );
     }
@@ -1587,7 +1639,10 @@ class ImageVariantsTest extends TestCase
 
         $fresh = $role->fresh();
         $this->assertSame('profile_boom.png', $fresh->getAttributes()['profile_image_url'], 'The photo save must stand');
-        $this->assertSame(['w480' => null, 'w960' => null, 'skipped' => 'write_failed'], $fresh->image_variants);
+        $this->assertVariants(
+            ['w480' => null, 'w960' => null, 'skipped' => 'write_failed', 'src' => ['w' => 400, 'h' => 400]],
+            $fresh->image_variants
+        );
     }
 
     public function test_replacing_the_schedule_photo_clears_and_deletes_the_old_derivatives(): void
@@ -1645,8 +1700,8 @@ class ImageVariantsTest extends TestCase
 
         Artisan::call('images:backfill-variants', ['--roles' => true]);
 
-        $this->assertSame(
-            ['w480' => 'profile_abc_w480.webp', 'w960' => 'profile_abc_w960.webp'],
+        $this->assertVariants(
+            ['w480' => 'profile_abc_w480.webp', 'w960' => 'profile_abc_w960.webp', 'src' => ['w' => 800, 'h' => 800]],
             $role->fresh()->image_variants
         );
         $this->assertNull($demo->fresh()->image_variants, 'demo_ photos ship in the repo');
@@ -1664,7 +1719,10 @@ class ImageVariantsTest extends TestCase
 
         Artisan::call('images:backfill-variants', ['--roles' => true]);
         $this->assertStringContainsString('[schedule '.$role->id.'] skipped: too_large', Artisan::output());
-        $this->assertSame(['w480' => null, 'w960' => null, 'skipped' => 'too_large'], $role->fresh()->image_variants);
+        $this->assertVariants(
+            ['w480' => null, 'w960' => null, 'skipped' => 'too_large', 'src' => ['w' => 12000, 'h' => 12000]],
+            $role->fresh()->image_variants
+        );
 
         Artisan::call('images:backfill-variants', ['--roles' => true]);
         $this->assertStringContainsString('Processed: 0', Artisan::output());
@@ -1673,8 +1731,8 @@ class ImageVariantsTest extends TestCase
         $this->storeFlyer('profile_huge.png', 600, 600);
         Artisan::call('images:backfill-variants', ['--roles' => true, '--retry-skipped' => true]);
 
-        $this->assertSame(
-            ['w480' => 'profile_huge_w480.webp', 'w960' => 'profile_huge_w960.webp'],
+        $this->assertVariants(
+            ['w480' => 'profile_huge_w480.webp', 'w960' => 'profile_huge_w960.webp', 'src' => ['w' => 600, 'h' => 600]],
             $role->fresh()->image_variants
         );
     }
@@ -1752,6 +1810,457 @@ class ImageVariantsTest extends TestCase
         // The strip and the wall each carry it once, in marquee copy 0.
         $this->assertCount(2, $matches[1]);
         $this->assertStringContainsString('loading="eager"', $this->imgTagFor($html, $matches[1][0]));
+    }
+
+    // --------------------------------------------- schedule header and background
+
+    /**
+     * The two wide images a schedule can upload get page widths, not card widths, and every build
+     * records the original's size - which nothing can measure at render time for a CDN file.
+     */
+    public function test_the_banner_slots_build_page_widths_and_record_the_original_size(): void
+    {
+        $owner = $this->createOwner();
+        $role = $this->createRole($owner, 'venue', [
+            'name' => 'Blue Room',
+            'header_image' => '',
+            'header_image_url' => 'header_abc.png',
+            'background' => 'image',
+            'background_image' => null,
+            'background_image_url' => 'background_abc.png',
+        ]);
+        $this->storeFlyer('header_abc.png', 2400, 1200);
+        $this->storeFlyer('background_abc.png', 1200, 1600);
+
+        (new GenerateRoleImageVariants($role->id, 'header_abc.png', 'header'))->handle();
+        (new GenerateRoleImageVariants($role->id, 'background_abc.png', 'background'))->handle();
+
+        $this->assertSame([960, 1920], ImageUtils::BANNER_VARIANT_WIDTHS);
+
+        $fresh = $role->fresh();
+        $this->assertVariants(
+            ['w960' => 'header_abc_w960.webp', 'w1920' => 'header_abc_w1920.webp', 'src' => ['w' => 2400, 'h' => 1200]],
+            $fresh->header_image_variants
+        );
+        $this->assertVariants(
+            ['w960' => 'background_abc_w960.webp', 'w1920' => 'background_abc_w1920.webp', 'src' => ['w' => 1200, 'h' => 1600]],
+            $fresh->background_image_variants
+        );
+        $this->assertNull($fresh->image_variants, 'The profile slot is not touched');
+
+        $this->assertSame([960, 480, IMAGETYPE_WEBP], $this->variantSize('header_abc_w960.webp'));
+        $this->assertSame([1920, 960, IMAGETYPE_WEBP], $this->variantSize('header_abc_w1920.webp'));
+        // Never upscaled: a 1200px background's "1920" is a WebP of its own width.
+        $this->assertSame([1200, 1600, IMAGETYPE_WEBP], $this->variantSize('background_abc_w1920.webp'));
+        Storage::assertMissing('public/header_abc_w480.webp');
+
+        // The readers every page uses.
+        $this->assertSame([2400, 1200], $fresh->imageSourceDimensions('header'));
+        $this->assertSame([960, 480], $fresh->imageVariantDimensions(960, 'header'));
+        $this->assertSame([1200, 1600], $fresh->imageVariantDimensions(1920, 'background'));
+        $this->assertSame(url('/storage/header_abc_w960.webp'), $fresh->imageVariantUrl(960, 'header'));
+        $this->assertSame(
+            url('/storage/header_abc_w960.webp').' 960w, '.url('/storage/header_abc_w1920.webp').' 1920w',
+            $fresh->imageVariantSrcset('header')
+        );
+        // The original joins only where it is wider than every derivative.
+        $this->assertSame(
+            url('/storage/header_abc_w960.webp').' 960w, '.url('/storage/header_abc_w1920.webp').' 1920w, '.url('/storage/header_abc.png').' 2400w',
+            $fresh->imageVariantSrcset('header', true)
+        );
+        $this->assertSame(
+            url('/storage/background_abc_w960.webp').' 960w, '.url('/storage/background_abc_w1920.webp').' 1920w',
+            $fresh->imageVariantSrcset('background', true)
+        );
+        $this->assertSame(url('/storage/header_abc_w1920.webp'), $fresh->headerImageUrl(1920));
+        $this->assertSame(url('/storage/header_abc.png'), $fresh->headerImageUrl());
+        $this->assertSame(url('/storage/background_abc_w960.webp'), $fresh->backgroundImageUrl(960));
+    }
+
+    /**
+     * Why each image has a column of its own: recordImageVariants() rewrites a whole column,
+     * guarded on one source, so two jobs from one save sharing a column would have overwritten
+     * each other - whichever finished last erasing the other's filenames.
+     */
+    public function test_one_save_replacing_the_header_and_background_keeps_both_derivative_sets(): void
+    {
+        $owner = $this->createOwner();
+        $role = $this->createRole($owner, 'venue', [
+            'name' => 'Blue Room',
+            'profile_image_url' => 'profile_abc.png',
+            'header_image' => '',
+            'background' => 'image',
+            'background_image' => null,
+        ]);
+        $role->recordImageVariants(['w480' => 'profile_abc_w480.webp', 'w960' => 'profile_abc_w960.webp']);
+        $this->storeFlyer('header_new.png', 1200, 600);
+        $this->storeFlyer('background_new.png', 1000, 1400);
+
+        Queue::fake();
+
+        $role->header_image_url = 'header_new.png';
+        $role->background_image_url = 'background_new.png';
+        $role->save();
+
+        // One job per image, each naming its slot.
+        Queue::assertPushed(GenerateRoleImageVariants::class, 2);
+        Queue::assertPushed(fn (GenerateRoleImageVariants $job) => $job->slot === 'header' && $job->profileImage === 'header_new.png');
+        Queue::assertPushed(fn (GenerateRoleImageVariants $job) => $job->slot === 'background' && $job->profileImage === 'background_new.png');
+
+        // Run them the way a worker might: both loaded before either finishes, finishing in the
+        // opposite order to the one they were queued in.
+        foreach (Queue::pushed(GenerateRoleImageVariants::class)->reverse() as $job) {
+            $job->handle();
+        }
+
+        $fresh = $role->fresh();
+        $this->assertSame('header_new_w1920.webp', $fresh->imageVariantFilename(1920, 'header'));
+        $this->assertSame('background_new_w1920.webp', $fresh->imageVariantFilename(1920, 'background'));
+        $this->assertSame('profile_abc_w480.webp', $fresh->imageVariantFilename(480), 'The profile photo did not change');
+
+        // Two writers holding stale copies of the row still write only their own column.
+        $staleForHeader = Role::find($role->id);
+        $staleForBackground = Role::find($role->id);
+        $staleForBackground->recordImageVariants(['w960' => 'background_new_w960.webp', 'w1920' => null, 'skipped' => 'write_failed'], 'background');
+        $staleForHeader->recordImageVariants(['w960' => 'header_new_w960.webp', 'w1920' => 'header_new_w1920.webp'], 'header');
+
+        $fresh = $role->fresh();
+        $this->assertSame('write_failed', $fresh->background_image_variants['skipped']);
+        $this->assertSame('header_new_w1920.webp', $fresh->imageVariantFilename(1920, 'header'));
+    }
+
+    public function test_replacing_the_background_deletes_its_derivatives_and_leaves_the_others(): void
+    {
+        $owner = $this->createOwner();
+        $role = $this->createRole($owner, 'venue', [
+            'name' => 'Blue Room',
+            'profile_image_url' => 'profile_abc.png',
+            'header_image' => '',
+            'header_image_url' => 'header_abc.png',
+            'background' => 'image',
+            'background_image' => null,
+            'background_image_url' => 'background_old.png',
+        ]);
+
+        foreach (['profile_abc_w480', 'header_abc_w960', 'header_abc_w1920', 'background_old_w960', 'background_old_w1920'] as $name) {
+            Storage::put(ImageUtils::storagePathFor($name.'.webp'), 'webp');
+        }
+        $role->recordImageVariants(['w480' => 'profile_abc_w480.webp', 'w960' => null, 'skipped' => 'write_failed']);
+        $role->recordImageVariants(['w960' => 'header_abc_w960.webp', 'w1920' => 'header_abc_w1920.webp'], 'header');
+        $role->recordImageVariants(['w960' => 'background_old_w960.webp', 'w1920' => 'background_old_w1920.webp'], 'background');
+
+        $role = $role->fresh();
+        $role->background_image_url = 'background_new.png';
+        $role->save();
+
+        $fresh = $role->fresh();
+        $this->assertNull($fresh->background_image_variants);
+        $this->assertSame(url('/storage/background_new.png'), $fresh->backgroundImageUrl(960), 'The new original until its derivatives exist');
+        Storage::assertMissing('public/background_old_w960.webp');
+        Storage::assertMissing('public/background_old_w1920.webp');
+        // The other two images are untouched, record and files alike.
+        $this->assertSame('header_abc_w1920.webp', $fresh->imageVariantFilename(1920, 'header'));
+        $this->assertSame('profile_abc_w480.webp', $fresh->imageVariantFilename(480));
+        Storage::assertExists('public/header_abc_w1920.webp');
+        Storage::assertExists('public/profile_abc_w480.webp');
+
+        // And deleting the schedule takes every image's derivatives with it.
+        $fresh->delete();
+        Storage::assertMissing('public/header_abc_w960.webp');
+        Storage::assertMissing('public/header_abc_w1920.webp');
+        Storage::assertMissing('public/profile_abc_w480.webp');
+    }
+
+    /**
+     * Deletion by default walks every width any slot builds: the saving hook has already nulled
+     * the record, so a width it missed would strand that file on the CDN for good.
+     */
+    public function test_deleting_derivatives_covers_every_width_of_every_slot(): void
+    {
+        $this->assertSame([480, 960, 1920], ImageUtils::allVariantWidths());
+
+        foreach ([480, 960, 1920] as $width) {
+            Storage::put(ImageUtils::storagePathFor("header_abc_w{$width}.webp"), 'webp');
+            Storage::put(ImageUtils::storagePathFor("flyer_abc_w{$width}.webp"), 'webp');
+        }
+
+        ImageUtils::deleteStoredVariants('header_abc.png');
+
+        foreach ([480, 960, 1920] as $width) {
+            Storage::assertMissing("public/header_abc_w{$width}.webp");
+        }
+
+        // An explicit list is honoured as given.
+        ImageUtils::deleteStoredVariants('flyer_abc.png', [480]);
+        Storage::assertMissing('public/flyer_abc_w480.webp');
+        Storage::assertExists('public/flyer_abc_w960.webp');
+    }
+
+    /** An EXIF-rotated photo records the size a browser shows, not the sensor frame's. */
+    public function test_the_recorded_size_is_the_displayed_one(): void
+    {
+        $this->storeJpeg('flyer_upright.jpg', 6, 600, 400);
+
+        $result = ImageUtils::generateStoredVariant('flyer_upright.jpg');
+
+        $this->assertTrue($result['ok']);
+        $this->assertSame(['w' => 400, 'h' => 600], $result['src']);
+    }
+
+    /**
+     * Refusing to DECODE an original is not the same as not knowing its size: a too_large skip
+     * still records the header's, turned by the EXIF tag like everything else.
+     */
+    public function test_a_too_large_original_still_records_its_displayed_size(): void
+    {
+        // 70MP is past IMAGE_MAX_PIXELS_CEILING, refused before any decode whatever the budget.
+        Storage::put(ImageUtils::storagePathFor('flyer_vast.jpg'), $this->jpegHeaderBytes(6, 10000, 7000));
+
+        $result = ImageUtils::generateStoredVariant('flyer_vast.jpg');
+
+        $this->assertSame('too_large', $result['reason']);
+        $this->assertSame(['w' => 7000, 'h' => 10000], $result['src']);
+    }
+
+    public function test_the_size_read_honours_exif_and_stops_at_the_head_of_the_file(): void
+    {
+        // A megabyte of scan data after the header, which the read never touches.
+        Storage::put(ImageUtils::storagePathFor('flyer_tall.jpg'), $this->jpegHeaderBytes(6, 4000, 3000).str_repeat("\x00", 1024 * 1024));
+        $this->assertSame(['w' => 3000, 'h' => 4000], ImageUtils::storedImageDimensions('flyer_tall.jpg'));
+
+        // A frame header pushed past the first 256KB is out of reach, although the whole file
+        // says where it is: proof that only the head is read.
+        Storage::put(ImageUtils::storagePathFor('flyer_deep.jpg'), $this->jpegHeaderBytes(1, 4000, 3000, 300 * 1024));
+        $this->assertSame(4000, getimagesizefromstring(Storage::get('public/flyer_deep.jpg'))[0], 'fixture: the whole file is readable');
+        $this->assertNull(ImageUtils::storedImageDimensions('flyer_deep.jpg'));
+
+        $this->storeFlyer('flyer_small.png', 300, 200);
+        $this->assertSame(['w' => 300, 'h' => 200], ImageUtils::storedImageDimensions('flyer_small.png'));
+
+        $this->assertNull(ImageUtils::storedImageDimensions('flyer_gone.png'));
+        $this->assertNull(ImageUtils::storedImageDimensions('demo_flyer_jazz.webp'));
+        $this->assertNull(ImageUtils::storedImageDimensions('https://example.com/a.png'));
+    }
+
+    public function test_the_backfill_walks_the_slot_it_is_asked_for(): void
+    {
+        $owner = $this->createOwner();
+        // Queue::fake() in setUp() keeps the created hook's three jobs from running, so the
+        // schedule starts with nothing built - the state every existing upload is in.
+        $role = $this->createRole($owner, 'venue', [
+            'name' => 'Blue Room',
+            'profile_image_url' => 'profile_abc.png',
+            'header_image' => '',
+            'header_image_url' => 'header_abc.png',
+            'background' => 'image',
+            'background_image' => null,
+            'background_image_url' => 'background_abc.png',
+        ]);
+        $this->storeFlyer('profile_abc.png', 600, 600);
+        $this->storeFlyer('header_abc.png', 1200, 600);
+        $this->storeFlyer('background_abc.png', 900, 1200);
+
+        Artisan::call('images:backfill-variants', ['--roles' => true, '--slot' => 'background']);
+        $output = Artisan::output();
+
+        $fresh = $role->fresh();
+        $this->assertStringContainsString('Pass: schedule backgrounds', $output);
+        $this->assertStringContainsString('Target widths: 960px, 1920px WebP', $output);
+        $this->assertStringContainsString('[schedule '.$role->id.' background] background_abc_w960.webp, background_abc_w1920.webp', $output);
+        $this->assertVariants(
+            ['w960' => 'background_abc_w960.webp', 'w1920' => 'background_abc_w1920.webp', 'src' => ['w' => 900, 'h' => 1200]],
+            $fresh->background_image_variants
+        );
+        $this->assertNull($fresh->header_image_variants, '--slot=background builds the background only');
+        $this->assertNull($fresh->image_variants);
+
+        Artisan::call('images:backfill-variants', ['--roles' => true, '--slot' => 'all']);
+
+        $fresh = $role->fresh();
+        $this->assertSame('header_abc_w1920.webp', $fresh->imageVariantFilename(1920, 'header'));
+        $this->assertSame('profile_abc_w960.webp', $fresh->imageVariantFilename(960));
+        $this->assertSame([600, 600], $fresh->imageSourceDimensions());
+
+        // A plain --roles is still the profile photo, and everything is done now.
+        Artisan::call('images:backfill-variants', ['--roles' => true, '--slot' => 'all']);
+        $this->assertStringContainsString('Processed: 0', Artisan::output());
+    }
+
+    public function test_the_backfill_refuses_a_slot_it_cannot_honour(): void
+    {
+        // Silently running the flyer pass instead would tell the operator the backgrounds are done.
+        $this->assertSame(1, Artisan::call('images:backfill-variants', ['--slot' => 'background']));
+        $this->assertStringContainsString('needs --roles', Artisan::output());
+
+        $this->assertSame(1, Artisan::call('images:backfill-variants', ['--roles' => true, '--slot' => 'banner']));
+        $this->assertStringContainsString('Unknown --slot "banner"', Artisan::output());
+    }
+
+    /**
+     * Rows built before sizes were recorded get one from a header read, and nothing else: no
+     * derivative is generated or even needed, and the recorded filenames are left exactly alone.
+     */
+    public function test_dimensions_records_a_missing_size_and_generates_nothing(): void
+    {
+        $owner = $this->createOwner();
+        $role = $this->createRole($owner, 'venue', ['name' => 'Blue Room', 'header_image' => '', 'header_image_url' => 'header_old.png']);
+        $event = $this->createEvent($role, ['name' => 'Autumn Session', 'flyer_image_url' => 'flyer_old.png']);
+        $this->storeFlyer('flyer_old.png', 600, 800);
+        $this->storeFlyer('header_old.png', 2400, 1200);
+
+        // What the pipeline recorded before it recorded sizes. The derivative FILES are
+        // deliberately absent: --dimensions must neither need them nor write them.
+        $event->recordImageVariants(['w480' => 'flyer_old_w480.webp', 'w960' => 'flyer_old_w960.webp']);
+        $role->recordImageVariants(['w960' => 'header_old_w960.webp', 'w1920' => 'header_old_w1920.webp'], 'header');
+
+        Artisan::call('images:backfill-variants', ['--dimensions' => true]);
+        $this->assertStringContainsString('Recording original sizes only', Artisan::output());
+
+        $this->assertVariants(
+            ['w480' => 'flyer_old_w480.webp', 'w960' => 'flyer_old_w960.webp', 'src' => ['w' => 600, 'h' => 800]],
+            $event->fresh()->image_variants
+        );
+        Storage::assertMissing('public/flyer_old_w480.webp');
+        $this->assertNull($role->fresh()->imageSourceDimensions('header'), 'A flyer run leaves schedules alone');
+
+        Artisan::call('images:backfill-variants', ['--roles' => true, '--slot' => 'all', '--dimensions' => true]);
+
+        $this->assertVariants(
+            ['w960' => 'header_old_w960.webp', 'w1920' => 'header_old_w1920.webp', 'src' => ['w' => 2400, 'h' => 1200]],
+            $role->fresh()->header_image_variants
+        );
+        Storage::assertMissing('public/header_old_w960.webp');
+
+        // Done means done, on both rails.
+        Artisan::call('images:backfill-variants', ['--dimensions' => true]);
+        $this->assertStringContainsString('Processed: 0', Artisan::output());
+        Artisan::call('images:backfill-variants', ['--roles' => true, '--slot' => 'all', '--dimensions' => true]);
+        $this->assertStringContainsString('Processed: 0', Artisan::output());
+    }
+
+    public function test_the_banner_columns_are_neither_exported_nor_restored(): void
+    {
+        $owner = $this->createOwner();
+        $role = $this->createRole($owner, 'venue', [
+            'name' => 'Blue Room',
+            'header_image' => '',
+            'header_image_url' => 'header_abc.png',
+            'background' => 'image',
+            'background_image' => null,
+            'background_image_url' => 'background_abc.png',
+        ]);
+        $role->recordImageVariants(['w960' => 'header_abc_w960.webp', 'w1920' => 'header_abc_w1920.webp'], 'header');
+        $role->recordImageVariants(['w960' => 'background_abc_w960.webp', 'w1920' => 'background_abc_w1920.webp'], 'background');
+
+        $service = app(BackupService::class);
+
+        $exportJob = BackupJob::create(['user_id' => $owner->id, 'type' => 'export', 'status' => 'processing']);
+        $data = $service->exportSchedules([$role->fresh()], false, $exportJob)['json'];
+
+        $this->assertArrayNotHasKey('header_image_variants', $data['schedules'][0]);
+        $this->assertArrayNotHasKey('background_image_variants', $data['schedules'][0]);
+
+        $importJob = BackupJob::create(['user_id' => $owner->id, 'type' => 'import', 'status' => 'processing']);
+        $service->importSchedules($data, [0], $owner->id, $importJob);
+
+        $restored = Role::where('id', '!=', $role->id)->latest('id')->firstOrFail();
+        $this->assertNull($restored->header_image_variants);
+        $this->assertNull($restored->background_image_variants);
+    }
+
+    /**
+     * A job queued by the previous release is a serialized GenerateRoleImageVariants with no slot
+     * property at all, and unserialize() runs no constructor. The class-level default is what
+     * gives it one; a promoted constructor property would come back uninitialized and throw.
+     *
+     * (SerializesModels::__serialize() also leaves out any property still at its declared
+     * default, so today's profile-photo jobs are serialized without a slot too - which only works
+     * for the same reason.)
+     */
+    public function test_a_job_queued_before_slots_existed_still_builds_the_profile_photo(): void
+    {
+        $owner = $this->createOwner();
+        $role = $this->createRole($owner, 'talent', ['name' => 'Blue Room', 'profile_image_url' => 'profile_abc.png']);
+        $this->storeFlyer('profile_abc.png', 800, 800);
+
+        // What the previous release's queue holds: the class and the two properties it had.
+        $legacy = sprintf(
+            'O:%d:"%s":2:{s:6:"roleId";i:%d;s:12:"profileImage";%s}',
+            strlen(GenerateRoleImageVariants::class),
+            GenerateRoleImageVariants::class,
+            $role->id,
+            serialize('profile_abc.png')
+        );
+
+        $job = unserialize($legacy);
+
+        $this->assertInstanceOf(GenerateRoleImageVariants::class, $job);
+        $this->assertSame('default', $job->slot);
+
+        $job->handle();
+
+        $this->assertSame('profile_abc_w480.webp', $role->fresh()->imageVariantFilename(480));
+
+        // And a slot that is not the default does survive the round trip.
+        $header = unserialize(serialize(new GenerateRoleImageVariants($role->id, 'header_abc.png', 'header')));
+        $this->assertSame('header', $header->slot);
+        $this->assertSame('header_abc.png', $header->profileImage);
+    }
+
+    /**
+     * The recorded size is what lets og:image:width, og:image:height and the JSON-LD ImageObjects
+     * describe an upload on the CDN, which SeoUtils::imageDimensions() cannot open.
+     */
+    public function test_a_recorded_size_reaches_og_image_and_the_json_ld(): void
+    {
+        $owner = $this->createOwner();
+        $role = $this->createRole($owner, 'venue', [
+            'name' => 'Blue Room',
+            'profile_image_url' => 'profile_abc.png',
+            'header_image' => '',
+            'header_image_url' => 'header_abc.png',
+        ]);
+
+        $html = $this->get('/'.$role->subdomain)->assertOk()->getContent();
+        $this->assertStringNotContainsString('og:image:width', $html, 'Nothing recorded, nothing declared');
+
+        $role->recordImageVariants(['w960' => 'header_abc_w960.webp', 'w1920' => 'header_abc_w1920.webp', 'src' => ['w' => 3000, 'h' => 1500]], 'header');
+        $role->recordImageVariants(['w480' => 'profile_abc_w480.webp', 'w960' => 'profile_abc_w960.webp', 'src' => ['w' => 800, 'h' => 800]]);
+
+        $html = $this->get('/'.$role->subdomain)->assertOk()->getContent();
+        $this->assertStringContainsString('<meta property="og:image" content="'.url('/storage/header_abc.png').'">', $html);
+        $this->assertStringContainsString('<meta property="og:image:width" content="3000">', $html);
+        $this->assertStringContainsString('<meta property="og:image:height" content="1500">', $html);
+
+        $node = $this->jsonLdNode($html, 'EventVenue');
+        $this->assertSame(['@type' => 'ImageObject', 'url' => url('/storage/header_abc.png'), 'width' => 3000, 'height' => 1500], $node['image']);
+        $this->assertSame(['@type' => 'ImageObject', 'url' => url('/storage/profile_abc.png'), 'width' => 800, 'height' => 800], $node['logo']);
+
+        $event = $this->createEvent($role, ['name' => 'Autumn Session', 'creator_role_id' => $role->id, 'flyer_image_url' => 'flyer_abc.png']);
+        $event->recordImageVariants(['w480' => 'flyer_abc_w480.webp', 'w960' => 'flyer_abc_w960.webp', 'src' => ['w' => 1600, 'h' => 2133]]);
+
+        $html = $this->get($this->guestEventUrl($role, $event))->assertOk()->getContent();
+        $this->assertStringContainsString('<meta property="og:image:width" content="1600">', $html);
+        $this->assertStringContainsString('<meta property="og:image:height" content="2133">', $html);
+        $this->assertSame(
+            ['@type' => 'ImageObject', 'url' => url('/storage/flyer_abc.png'), 'width' => 1600, 'height' => 2133],
+            $this->jsonLdNode($html, 'Event')['image']
+        );
+    }
+
+    private function jsonLdNode(string $html, string $type): array
+    {
+        preg_match_all('#<script type="application/ld\+json"[^>]*>(.*?)</script>#s', $html, $m);
+
+        foreach ($m[1] as $block) {
+            $node = json_decode($block, true);
+
+            if (($node['@type'] ?? null) === $type) {
+                return $node;
+            }
+        }
+
+        $this->fail('No '.$type.' JSON-LD node on the page');
     }
 
     private function imgTagFor(string $html, string $src): string

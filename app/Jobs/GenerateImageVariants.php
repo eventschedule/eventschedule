@@ -12,9 +12,11 @@ use Illuminate\Support\Facades\Log;
 /**
  * Build the resized WebP derivatives of one stored image and record them on its row.
  *
- * Shared by GenerateEventImageVariants (flyers) and GenerateRoleImageVariants (schedule profile
- * photos); a subclass says which row and which stored filename, and everything else - the
- * failure split below, the merge onto what is already recorded, the guarded write - is the same.
+ * Shared by GenerateEventImageVariants (flyers) and GenerateRoleImageVariants (a schedule's
+ * profile photo, header or background); a subclass says which row, which image slot
+ * (HasImageVariants::imageVariantSlots()) and which stored filename, and everything else - the
+ * widths, the failure split below, the merge onto what is already recorded, the guarded write -
+ * follows from the slot.
  *
  * Queue latency is up to a minute on the hosted deploy (the queue is drained by the scheduler's
  * process-queue entry, not a resident worker). That is fine: every consumer falls back to the
@@ -68,6 +70,15 @@ abstract class GenerateImageVariants implements ShouldQueue
     /** "event 12", "schedule 7": for log lines only. */
     abstract protected function subject(): string;
 
+    /**
+     * Which of the model's image slots this job builds. Everything but a schedule has only the
+     * one, 'default'.
+     */
+    protected function variantSlot(): string
+    {
+        return 'default';
+    }
+
     public function handle(): void
     {
         $model = $this->findModel();
@@ -76,17 +87,24 @@ abstract class GenerateImageVariants implements ShouldQueue
             return;
         }
 
-        $raw = $model->imageVariantSource();
+        $slot = $this->variantSlot();
+        $raw = $model->imageVariantSource($slot);
 
         if ($raw === null || $raw !== $this->storedName()) {
             return;
         }
 
+        $widths = $model->imageVariantWidths($slot);
+        $existing = $model->imageVariants($slot);
+        // A size recorded by an earlier run (or --dimensions) survives a run that never got to
+        // read the original, like the filenames below.
+        $knownSrc = is_array($existing['src'] ?? null) ? $existing['src'] : null;
+
         // Every width, not just the default: a row carrying only w480 predates the second width
         // and still needs one.
         $missing = array_filter(
-            ImageUtils::VARIANT_WIDTHS,
-            fn (int $width) => ! $model->imageVariantFilename($width)
+            $widths,
+            fn (int $width) => ! $model->imageVariantFilename($width, $slot)
         );
 
         if (! $missing) {
@@ -94,7 +112,7 @@ abstract class GenerateImageVariants implements ShouldQueue
         }
 
         try {
-            $results = ImageUtils::generateStoredVariants($raw);
+            $results = ImageUtils::generateStoredVariants($raw, $widths);
         } catch (\Throwable $e) {
             // GD or the disk layer blew up rather than returning a reason. Nothing here can tell
             // whether another attempt would go better, and the cost of guessing wrong in the
@@ -102,7 +120,7 @@ abstract class GenerateImageVariants implements ShouldQueue
             // treated as deterministic: reported, recorded, swallowed.
             report($e);
             Log::warning(class_basename($this).' failed for '.$this->subject().': '.$e->getMessage());
-            $model->recordImageVariants($this->payload([], 'failed'));
+            $model->recordImageVariants($this->payload($widths, [], 'failed', $knownSrc), $slot);
 
             return;
         }
@@ -117,11 +135,18 @@ abstract class GenerateImageVariants implements ShouldQueue
         $transient = null;
         $deterministic = null;
         $deterministicDetail = null;
-        $existing = $model->image_variants;
-        $existing = is_array($existing) ? $existing : [];
+        $src = $knownSrc;
 
-        foreach (ImageUtils::VARIANT_WIDTHS as $width) {
+        foreach ($widths as $width) {
             $result = $results[$width] ?? ['ok' => false, 'filename' => null, 'reason' => 'failed'];
+
+            // The original's displayed size, which every width's result carries alike. Recorded
+            // whether or not this width worked: it is a fact about the original, and a too_large
+            // skip reports the header's size precisely so a page can still declare it.
+            if (is_array($result['src'] ?? null)) {
+                $src = $result['src'];
+            }
+
             $kept = $existing['w'.$width] ?? null;
             $variants['w'.$width] = $result['ok']
                 ? $result['filename']
@@ -171,7 +196,7 @@ abstract class GenerateImageVariants implements ShouldQueue
         // Transient wins the `skipped` slot when both happened, because it is the one the
         // backfill's un-flagged query keys on; a deterministic reason recorded over it would
         // strand the row until someone ran --retry-skipped by hand.
-        $model->recordImageVariants($this->payload($variants, $transient ?? $deterministic));
+        $model->recordImageVariants($this->payload($widths, $variants, $transient ?? $deterministic, $src), $slot);
     }
 
     /**
@@ -192,17 +217,24 @@ abstract class GenerateImageVariants implements ShouldQueue
     }
 
     /**
-     * The `image_variants` value to store: one key per width, plus the reason when at least one
-     * width was skipped for good.
+     * The variants value to store: one key per width of the slot, plus the reason when at least
+     * one width was skipped for good, plus the original's size when it is known.
+     *
+     * @param  int[]  $widths
+     * @param  array{w: int, h: int}|null  $src
      */
-    private function payload(array $variants, ?string $skipped): array
+    private function payload(array $widths, array $variants, ?string $skipped, ?array $src = null): array
     {
-        foreach (ImageUtils::VARIANT_WIDTHS as $width) {
+        foreach ($widths as $width) {
             $variants['w'.$width] = $variants['w'.$width] ?? null;
         }
 
         if ($skipped !== null) {
             $variants['skipped'] = $skipped;
+        }
+
+        if ($src !== null) {
+            $variants['src'] = $src;
         }
 
         return $variants;

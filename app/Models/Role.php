@@ -158,11 +158,15 @@ class Role extends Model implements MustVerifyEmail
      * @var array<string, string>
      */
     protected $casts = [
-        // {"w480": "profile_abc_w480.webp", "w960": ...} or {"w480": null, "skipped": "too_large"}.
-        // Written only by GenerateRoleImageVariants / `images:backfill-variants --roles` through
-        // recordImageVariants(), so deliberately NOT in $fillable - and not in
-        // BackupService::ROLE_EXPORT_FIELDS, since a restore holds none of the derivative files.
+        // {"w480": "profile_abc_w480.webp", "w960": ..., "src": {"w": 800, "h": 800}} or
+        // {"w480": null, "skipped": "too_large"}. Written only by GenerateRoleImageVariants /
+        // `images:backfill-variants --roles` through recordImageVariants(), so deliberately NOT in
+        // $fillable - and not in BackupService::ROLE_EXPORT_FIELDS, since a restore holds none of
+        // the derivative files. The header and background uploads have a column each, for the
+        // reason imageVariantSlots() gives.
         'image_variants' => 'array',
+        'header_image_variants' => 'array',
+        'background_image_variants' => 'array',
         'announce_new_events' => 'boolean',
         'last_announced_at' => 'datetime',
         'google_webhook_expires_at' => 'datetime',
@@ -609,39 +613,56 @@ class Role extends Model implements MustVerifyEmail
             }
         });
 
-        // The profile photo's WebP derivatives, mirroring Event's flyer hooks: it is also the card
-        // image of every event without a flyer, including on the homepage wall.
+        // The WebP derivatives of every uploaded image (imageVariantSlots()), mirroring Event's
+        // flyer hooks. The profile photo is also the card image of every event without a flyer,
+        // including on the homepage wall; the background is the schedule page's LCP image.
         static::saving(function ($model) {
-            // A new photo invalidates every derivative of the old one. Cleared here rather than in
-            // the job so cards fall straight back to the (correct) original until the queue
+            // A new image invalidates every derivative of the old one. Cleared here rather than in
+            // the job so pages fall straight back to the (correct) original until the queue
             // rebuilds, and the files deleted because their names derive from the old filename -
             // once this row stops holding it nothing can address them. getRawOriginal(), because
             // getOriginal() runs the accessor and would hand back a URL. deleteStoredVariants()
             // never throws, so this cannot fail the save.
-            if ($model->exists && $model->isDirty('profile_image_url')) {
-                $previous = $model->getRawOriginal('profile_image_url');
+            if (! $model->exists) {
+                return;
+            }
+
+            foreach ($model->imageVariantSlots() as [$source, $column]) {
+                if (! $model->isDirty($source)) {
+                    continue;
+                }
+
+                $previous = $model->getRawOriginal($source);
                 if (is_string($previous) && $previous !== '') {
                     ImageUtils::deleteStoredVariants($previous);
                 }
 
-                $model->image_variants = null;
+                $model->{$column} = null;
             }
         });
 
         static::created(function ($model) {
-            self::queueImageVariants($model);
+            foreach (array_keys($model->imageVariantSlots()) as $slot) {
+                self::queueImageVariants($model, $slot);
+            }
         });
 
         static::updated(function ($model) {
             // created() is separate because an insert never syncs changes, so wasChanged() is
-            // blind to it.
-            if ($model->wasChanged('profile_image_url')) {
-                self::queueImageVariants($model);
+            // blind to it. One job per slot: a save that replaces the header and the background
+            // queues two, which write two different columns.
+            foreach ($model->imageVariantSlots() as $slot => [$source]) {
+                if ($model->wasChanged($source)) {
+                    self::queueImageVariants($model, $slot);
+                }
+            }
 
+            if ($model->wasChanged('profile_image_url')) {
                 // Events wearing this photo on the wall are cached with it, and the saving hook
                 // above just deleted the derivative files the cached copy points at. Only the
                 // photo change busts, as Event::WALL_CACHE_FIELDS' flyer does; recording the new
-                // derivatives later does not (see recordImageVariants()).
+                // derivatives later does not (see recordImageVariants()). The header and the
+                // background are not on the wall.
                 MarketingController::forgetWallCache();
             }
 
@@ -673,10 +694,12 @@ class Role extends Model implements MustVerifyEmail
 
         static::deleted(function ($model) {
             // Nothing can address this row's derivatives once it is gone. The controller deletes
-            // the original itself; the derivatives are ours.
-            $raw = $model->imageVariantSource();
-            if ($raw !== null) {
-                ImageUtils::deleteStoredVariants($raw);
+            // the originals itself; the derivatives are ours.
+            foreach (array_keys($model->imageVariantSlots()) as $slot) {
+                $raw = $model->imageVariantSource($slot);
+                if ($raw !== null) {
+                    ImageUtils::deleteStoredVariants($raw);
+                }
             }
         });
 
@@ -2035,29 +2058,125 @@ class Role extends Model implements MustVerifyEmail
     }
 
     /**
-     * Queue the resized WebP derivatives of this schedule's profile photo, if it has one worth
-     * resizing.
+     * Queue the resized WebP derivatives of one of this schedule's images (a slot of
+     * imageVariantSlots()), if it has one worth resizing.
      *
      * afterCommit() for the same reason as Event::queueImageVariants(): schedules are saved inside
      * transactions (calendar sync, merges), and on the `sync` queue the job would otherwise do
      * S3 reads and writes inside the open transaction. The job itself swallows every failure on
      * `sync`, so it cannot turn a successful save into a 500.
      */
-    protected static function queueImageVariants(self $model): void
+    protected static function queueImageVariants(self $model, string $slot): void
     {
-        $raw = $model->imageVariantSource();
+        $raw = $model->imageVariantSource($slot);
 
-        // demo_ photos ship in the repo; a legacy http value is not ours to resize.
+        // demo_ images ship in the repo; a legacy http value is not ours to resize.
         if ($raw === null || str_starts_with($raw, 'demo_') || str_starts_with($raw, 'http')) {
             return;
         }
 
-        GenerateRoleImageVariants::dispatch($model->id, $raw)->afterCommit();
+        GenerateRoleImageVariants::dispatch($model->id, $raw, $slot)->afterCommit();
     }
 
     public function imageVariantSourceColumn(): string
     {
         return 'profile_image_url';
+    }
+
+    /**
+     * The profile photo ('default', the card and wall sizes), and the two wide images an owner can
+     * upload: the banner header and the page background, at page widths.
+     *
+     * Uploads only. header_image and background_image name BUILT-IN art under public/images,
+     * which ships as WebP already sized for the page, so neither is a slot; headerImageUrl() and
+     * backgroundImageUrl() serve those files directly.
+     *
+     * A column each, so the two jobs one save can queue (a new header AND a new background) write
+     * different columns: recordImageVariants() rewrites a whole column, guarded on one source.
+     */
+    public function imageVariantSlots(): array
+    {
+        return [
+            'default' => ['profile_image_url', 'image_variants', ImageUtils::VARIANT_WIDTHS],
+            'header' => ['header_image_url', 'header_image_variants', ImageUtils::BANNER_VARIANT_WIDTHS],
+            'background' => ['background_image_url', 'background_image_variants', ImageUtils::BANNER_VARIANT_WIDTHS],
+        ];
+    }
+
+    /** The pixel size of every built-in header under public/images/headers. */
+    public const BUILT_IN_HEADER_SIZE = [1536, 768];
+
+    /**
+     * The URL of the header this schedule shows, or null when it shows none.
+     *
+     * Mirrors role/partials/headers/banner.blade.php: 'none' and 'logos' (the logo wall) are no
+     * image; any other header_image names a built-in header, served as its bundled WebP; a blank
+     * header_image with an upload in header_image_url is the owner's own header, which the edit
+     * form's "custom" option saves.
+     *
+     * $width asks for a resized derivative of an upload (ImageUtils::BANNER_VARIANT_WIDTHS), and
+     * falls back to the original until one is recorded, so the URL is always renderable. A
+     * built-in header ignores it: the bundled file is already a 1536px WebP.
+     */
+    public function headerImageUrl(?int $width = null): ?string
+    {
+        $builtIn = $this->header_image;
+
+        if (in_array($builtIn, ['none', 'logos'], true)) {
+            return null;
+        }
+
+        if (filled($builtIn)) {
+            return asset('images/headers/'.$builtIn.'.webp');
+        }
+
+        if (! $this->imageVariantSource('header')) {
+            return null;
+        }
+
+        return ($width ? $this->imageVariantUrl($width, 'header') : null) ?: $this->header_image_url;
+    }
+
+    /**
+     * The header's size, [width, height], for an <img>'s width and height attributes: fixed for a
+     * built-in header, recorded by the pipeline for an upload, null when neither is known.
+     *
+     * @return array{0: int, 1: int}|null
+     */
+    public function headerImageDimensions(): ?array
+    {
+        if (! $this->headerImageUrl()) {
+            return null;
+        }
+
+        return filled($this->header_image)
+            ? self::BUILT_IN_HEADER_SIZE
+            : $this->imageSourceDimensions('header');
+    }
+
+    /**
+     * The URL of this schedule's background image, or null when its background is not an image.
+     *
+     * The same rules as headerImageUrl(): background_image names a built-in background, served as
+     * its bundled WebP (already sized for a phone); a blank one with an upload in
+     * background_image_url is the owner's own, as a derivative at $width when one is recorded and
+     * the original otherwise.
+     */
+    public function backgroundImageUrl(?int $width = null): ?string
+    {
+        if ($this->background !== 'image') {
+            return null;
+        }
+
+        if (filled($this->background_image)) {
+            return asset('images/backgrounds/'.$this->background_image.'.webp');
+        }
+
+        if (! $this->imageVariantSource('background')) {
+            return null;
+        }
+
+        return ($width ? $this->imageVariantUrl($width, 'background') : null) ?: $this->background_image_url;
     }
 
     /**
@@ -2088,7 +2207,9 @@ class Role extends Model implements MustVerifyEmail
      * ever is (docs/BRANDING_MATRIX.md rule 6): with no upload this is null and the card degrades
      * to the owner's own text.
      *
-     * width and height only when known: see Event::shareImage() for the upload-time hook.
+     * width and height only when known: the size the image pipeline recorded for the chosen upload
+     * (HasImageVariants::imageSourceDimensions()), else whatever SeoUtils::imageDimensions() can
+     * read from a file this app serves itself.
      *
      * @return array{url: string, width?: int, height?: int}|null
      */
@@ -2099,7 +2220,12 @@ class Role extends Model implements MustVerifyEmail
             ? $this->background_image_url
             : '';
 
-        return \App\Utils\SeoUtils::imageObject(($header ?: $this->profile_image_url ?: $background) ?: null);
+        return match (true) {
+            (bool) $header => SeoUtils::imageObject($header, $this->imageSourceDimensions('header')),
+            (bool) $this->profile_image_url => SeoUtils::imageObject($this->profile_image_url, $this->imageSourceDimensions()),
+            (bool) $background => SeoUtils::imageObject($background, $this->imageSourceDimensions('background')),
+            default => null,
+        };
     }
 
     public function getProfileImageUrlAttribute($value)
@@ -2706,7 +2832,7 @@ class Role extends Model implements MustVerifyEmail
             $node['url'] = $canonical.$this->langQuerySuffix($lang);
         }
 
-        if ($type !== 'Person' && ($logo = SeoUtils::schemaImageObject(SeoUtils::imageObject($this->profile_image_url ?: null)))) {
+        if ($type !== 'Person' && ($logo = SeoUtils::schemaImageObject(SeoUtils::imageObject($this->profile_image_url ?: null, $this->imageSourceDimensions())))) {
             $node['logo'] = $logo;
         }
 
