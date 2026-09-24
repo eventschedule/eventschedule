@@ -71,10 +71,11 @@ final class CounterUtils
                 // and this INSERT. Not worth retrying and not worth reporting - the row is
                 // permanently gone, and ON DELETE CASCADE has already taken whatever
                 // counters landed before it went. The hourly demo reset
-                // (DemoService::resetDemoData) hard-deletes and recreates every demo-%
-                // schedule and its events, so a guest mid-render on a demo page loses this
-                // race roughly once an hour; a user deleting an event under a live visitor
-                // loses it the same way on any schedule. Sentry EVENTSCHEDULE-PHP-46.
+                // (DemoService::resetDemoData) hard-deletes and recreates the demo user's
+                // demo-* schedules and the events they created, so a guest mid-render on a
+                // demo page loses this race roughly once an hour; a user deleting an event
+                // under a live visitor loses it the same way on any schedule. Sentry
+                // EVENTSCHEDULE-PHP-46.
                 // Every other failure still reports - see the 42S02 case in
                 // AnalyticsCounterResilienceTest, which pins that boundary.
                 if ($e instanceof QueryException && ($e->errorInfo[1] ?? null) === 1452) {

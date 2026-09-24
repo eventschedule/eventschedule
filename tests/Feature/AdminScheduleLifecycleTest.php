@@ -277,6 +277,36 @@ class AdminScheduleLifecycleTest extends TestCase
         $this->assertSame('alpha', $role->fresh()->subdomain);
     }
 
+    /** demo- is the demo's namespace (Role::cleanSubdomain() rewrites it for an owner). */
+    public function test_an_admin_rename_refuses_the_demo_prefix(): void
+    {
+        $role = $this->createRole($this->createOwner(), 'venue', ['subdomain' => 'alpha']);
+
+        $this->actingAsAdmin()->put(route('admin.schedules.update_details', ['role' => $role->encodeId()]), [
+            'name' => $role->name,
+            'new_subdomain' => 'demo-alpha',
+            'email' => $role->email,
+        ])->assertSessionHasErrors(['new_subdomain' => __('messages.subdomain_reserved')]);
+
+        $this->assertSame('alpha', $role->fresh()->subdomain);
+    }
+
+    /** Same rule as the reserved list: only a change is refused, so an existing demo-night saves. */
+    public function test_saving_details_keeps_a_grandfathered_demo_prefixed_subdomain(): void
+    {
+        $role = $this->createRole($this->createOwner(), 'venue', ['subdomain' => 'demo-night']);
+
+        $this->actingAsAdmin()->put(route('admin.schedules.update_details', ['role' => $role->encodeId()]), [
+            'name' => 'Demo Night Live',
+            'new_subdomain' => 'demo-night',
+            'email' => $role->email,
+        ])->assertSessionHasNoErrors();
+
+        $role->refresh();
+        $this->assertSame('Demo Night Live', $role->name);
+        $this->assertSame('demo-night', $role->subdomain);
+    }
+
     /**
      * The subdomain field is posted on every save of this form, so a stored value that no longer
      * passes the current rules must not lock the admin out of editing the schedule's name.

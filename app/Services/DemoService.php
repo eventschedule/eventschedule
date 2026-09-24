@@ -17,6 +17,8 @@ use App\Models\SeatingSection;
 use App\Models\Ticket;
 use App\Models\User;
 use Carbon\Carbon;
+use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Str;
@@ -799,10 +801,14 @@ Hosting town halls, talent shows, AA meetings, and everything in between since t
         $createdVenues = [];
 
         foreach ($venues as $venueIndex => $venueData) {
-            // Skip if already exists
+            // Skip if already exists. Reused only when it is the demo's own: a real schedule on
+            // one of these names must never be handed the demo's events, sales and seating plan,
+            // so it is left out and createEvents() puts its events on another demo venue.
             $existing = Role::where('subdomain', $venueData['subdomain'])->first();
             if ($existing) {
-                $createdVenues[$venueData['subdomain']] = $existing;
+                if ((int) $existing->user_id === (int) $user->id) {
+                    $createdVenues[$venueData['subdomain']] = $existing;
+                }
 
                 continue;
             }
@@ -910,10 +916,10 @@ Hosting town halls, talent shows, AA meetings, and everything in between since t
         // These are synthetic counters that gain nothing from being atomic with the event and
         // sale deletes, but holding their row locks for the whole reset is what deadlocked
         // live traffic: this runs hourly on production, and while it X-locks a demo role row
-        // (the demo-% roles are dropped and recreated on every run) a concurrent guest view of
-        // that same schedule needs an FK shared lock on the very same roles row to insert its
-        // analytics_daily counter, while already holding the counter row. That cycle is the
-        // 1213 reported in Sentry as a 500 on demo-troymcclure.eventschedule.com.
+        // (the demo's own demo-* roles are dropped and recreated on every run) a concurrent
+        // guest view of that same schedule needs an FK shared lock on the very same roles row
+        // to insert its analytics_daily counter, while already holding the counter row. That
+        // cycle is the 1213 reported in Sentry as a 500 on demo-troymcclure.eventschedule.com.
         //
         // Wiping first and seeding after the commit keeps each analytics lock to a single
         // autocommit statement, so there is no long-lived lock for a page view to cycle with.
@@ -922,39 +928,32 @@ Hosting town halls, talent shows, AA meetings, and everything in between since t
         $venues = [];
 
         DB::transaction(function () use ($role, &$venues) {
-            $user = $role->user;
+            // The demo's own schedules (venues, talents, followed schedules) and nothing else:
+            // see resettableDemoRoles(). The curator (simpsons) is kept and emptied below.
+            $demoRoles = $this->resettableDemoRoles($role)->get();
 
-            // Delete demo user's ticket purchases first (sales where user_id is demo user)
-            if ($user) {
-                $userSaleIds = Sale::where('user_id', $user->id)->pluck('id');
-                SaleTicket::whereIn('sale_id', $userSaleIds)->delete();
-                Sale::where('user_id', $user->id)->delete();
-            }
+            // Worked out BEFORE anything is deleted, and the only events that lose sales and
+            // tickets: the ones the demo's schedules created. A real event also reaches these
+            // schedules - curated into simpsons by a demo visitor, or with demo-krusty among its
+            // members - and it is only detached below, so its organizer keeps every ticket and
+            // sale. That includes one a demo visitor bought while signed in as the demo user: a
+            // sale on a real event is that organizer's record, so the reset no longer deletes
+            // the demo user's purchases wholesale. Its purchases on demo events are all in here.
+            $demoEventIds = $this->demoCreatedEventIds($demoRoles->pluck('id')->push($role->id));
 
-            // Delete all demo-prefixed roles EXCEPT the curator (simpsons)
-            // This includes venues (demo-moestavern, demo-bowlarama, etc.), talents, and followed schedules
-            $demoRoles = Role::where('subdomain', 'like', 'demo-%')
-                ->where('subdomain', '!=', self::DEMO_ROLE_SUBDOMAIN)
-                ->get();
+            SaleTicket::whereIn('sale_id', function ($query) use ($demoEventIds) {
+                $query->select('id')
+                    ->from('sales')
+                    ->whereIn('event_id', $demoEventIds);
+            })->delete();
+            Sale::whereIn('event_id', $demoEventIds)->delete();
+            Ticket::whereIn('event_id', $demoEventIds)->delete();
+
+            // Analytics for these schedules and events were cleared before the transaction
+            // opened; deleting a schedule below also cascades any row written since.
 
             foreach ($demoRoles as $demoRole) {
-                // Delete events and related data for this role
-                $demoEventIds = $demoRole->events()->pluck('events.id');
-
-                // Delete sales and sale tickets
-                SaleTicket::whereIn('sale_id', function ($query) use ($demoEventIds) {
-                    $query->select('id')
-                        ->from('sales')
-                        ->whereIn('event_id', $demoEventIds);
-                })->delete();
-
-                Sale::whereIn('event_id', $demoEventIds)->delete();
-                Ticket::whereIn('event_id', $demoEventIds)->delete();
-
-                // Analytics for this role and its events were cleared before the transaction
-                // opened; deleting the role below also cascades any row written since.
-
-                // Detach events and delete events created by this role
+                // Detach every event and delete the ones this schedule created
                 $demoRole->events()->detach();
                 Event::where('creator_role_id', $demoRole->id)->delete();
 
@@ -966,19 +965,8 @@ Hosting town halls, talent shows, AA meetings, and everything in between since t
                 $demoRole->delete();
             }
 
-            // Now clean up the curator (the role passed in)
-            $curatorEventIds = $role->events()->pluck('events.id');
-
-            // Delete sales and tickets for curator's events first
-            SaleTicket::whereIn('sale_id', function ($query) use ($curatorEventIds) {
-                $query->select('id')
-                    ->from('sales')
-                    ->whereIn('event_id', $curatorEventIds);
-            })->delete();
-            Sale::whereIn('event_id', $curatorEventIds)->delete();
-            Ticket::whereIn('event_id', $curatorEventIds)->delete();
-
-            // Detach events from curator
+            // Now clean up the curator (the role passed in). Its own events' sales and tickets
+            // went with the rest above; an event curated into it from elsewhere is only detached.
             $role->events()->detach();
 
             // Delete events created by the curator (this catches user-created events)
@@ -997,6 +985,53 @@ Hosting town halls, talent shows, AA meetings, and everything in between since t
     }
 
     /**
+     * The demo-* schedules a reset deletes: the ones the demo user owns, plus orphans.
+     *
+     * Never "every demo-% subdomain". Real schedules hold them too: a customer's "Demo Night" was
+     * handed demo-night before Role::cleanSubdomain() reserved the prefix, and the venue or act a
+     * real event names is auto-created as an ownerless placeholder on the same kind of name.
+     * Every demo-* row DemoService itself writes carries both the demo user as its owner and
+     * DEMO_EMAIL as its contact address.
+     *
+     * - The owner test is written with when(), never as where('user_id', $id): Laravel compiles a
+     *   null id to whereNull(), which would select every ownerless placeholder - exactly the rows
+     *   this protects. With no demo user at all, nothing matches.
+     * - The orphan arm is for a restore that bypassed the foreign key: DEMO_EMAIL, and an owner
+     *   id with no users row behind it. Left alone, createFollowedSchedules() would find its
+     *   subdomain taken. roles.email alone is not enough (any owner can type that address, and
+     *   the /examples showcase schedules do), and a NULL owner is a real placeholder that nobody
+     *   has claimed yet, not an orphan.
+     */
+    protected function resettableDemoRoles(Role $curator): Builder
+    {
+        $demoUserId = $curator->user_id ?: User::where('email', self::DEMO_EMAIL)->value('id');
+
+        return Role::where('subdomain', 'like', 'demo-%')
+            ->where('subdomain', '!=', self::DEMO_ROLE_SUBDOMAIN)
+            ->where(fn ($query) => $query
+                ->when(
+                    $demoUserId,
+                    fn ($owned) => $owned->where('user_id', $demoUserId),
+                    fn ($owned) => $owned->whereRaw('1 = 0')
+                )
+                ->orWhere(fn ($orphan) => $orphan
+                    ->whereRaw('roles.email <=> ?', [self::DEMO_EMAIL])
+                    ->whereNotNull('roles.user_id')
+                    ->whereNotExists(fn ($owner) => $owner->selectRaw('1')
+                        ->from('users')
+                        ->whereColumn('users.id', 'roles.user_id'))));
+    }
+
+    /**
+     * The events a reset may take sales, tickets and analytics from: the ones created by the given
+     * schedules (the demo's own, and the curator). An event another schedule created stays whole.
+     */
+    protected function demoCreatedEventIds(Collection $roleIds): Collection
+    {
+        return Event::whereIn('creator_role_id', $roleIds)->pluck('id');
+    }
+
+    /**
      * Clear the demo analytics counters ahead of a reset.
      *
      * Runs in autocommit, one statement at a time, so it never holds an analytics row lock
@@ -1004,16 +1039,13 @@ Hosting town halls, talent shows, AA meetings, and everything in between since t
      */
     protected function clearAnalyticsForDemoRoles(Role $role): void
     {
-        $demoRoleIds = Role::where('subdomain', 'like', 'demo-%')
-            ->where('subdomain', '!=', self::DEMO_ROLE_SUBDOMAIN)
+        $demoRoleIds = $this->resettableDemoRoles($role)
             ->pluck('id')
             ->push($role->id);
 
-        $eventIds = DB::table('event_role')
-            ->whereIn('role_id', $demoRoleIds)
-            ->pluck('event_id')
-            ->merge(Event::whereIn('creator_role_id', $demoRoleIds)->pluck('id'))
-            ->unique();
+        // The same events whose sales the reset deletes, and no others: a real event attached to
+        // a demo schedule keeps its own counters.
+        $eventIds = $this->demoCreatedEventIds($demoRoleIds);
 
         AnalyticsDaily::whereIn('role_id', $demoRoleIds)->delete();
         AnalyticsReferrersDaily::whereIn('role_id', $demoRoleIds)->delete();
@@ -1089,6 +1121,11 @@ Hosting town halls, talent shows, AA meetings, and everything in between since t
             $venueSubdomain = $eventData['venue'] ?? 'demo-moestavern';
             $venue = $venues[$venueSubdomain] ?? reset($venues);
 
+            // Only when createDemoVenues() found every venue name held by a real schedule.
+            if (! $venue) {
+                continue;
+            }
+
             // Create event (owned by the venue)
             $event = new Event;
             $event->user_id = $user->id;
@@ -1133,7 +1170,9 @@ Hosting town halls, talent shows, AA meetings, and everything in between since t
             // Attach talent role(s) if specified
             $talents = $eventData['talents'] ?? (isset($eventData['talent']) ? [$eventData['talent']] : []);
             foreach ($talents as $talentSubdomain) {
-                $talentRole = Role::where('subdomain', $talentSubdomain)->first();
+                // The demo's own talent only: createDemoTalents() skips a name a real schedule
+                // already holds, and that schedule must not be handed a demo event.
+                $talentRole = Role::where('subdomain', $talentSubdomain)->where('user_id', $user->id)->first();
                 if ($talentRole) {
                     $talentRole->events()->attach($event->id, ['is_accepted' => true]);
                 }
@@ -2635,6 +2674,13 @@ The state\'s premier entertainment venue. Home of the Capital City Goofballs and
         ];
 
         foreach ($schedules as $scheduleData) {
+            // Skip if the name is taken, as createDemoTalents() does: by the demo's own copy from
+            // an earlier run, or by a real schedule, which a reset leaves alone. Creating over it
+            // would fail on the unique subdomain and roll the whole reset back, every hour.
+            if (Role::where('subdomain', $scheduleData['subdomain'])->exists()) {
+                continue;
+            }
+
             // Create the role
             $role = new Role;
             $role->user_id = $user->id;
@@ -2751,12 +2797,14 @@ The state\'s premier entertainment venue. Home of the Capital City Goofballs and
      */
     protected function createUserTicketPurchases(User $user): void
     {
-        // Get events from followed schedules only (Shelbyville & Capital City)
+        // Get events from followed schedules only (Shelbyville & Capital City). The demo's own
+        // copies and the events they created: a real schedule on one of these names, or a real
+        // event attached to one, must never be handed a made-up sale.
         $followedSubdomains = ['demo-shelbyville', 'demo-capitalcity'];
-        $followedRoles = Role::whereIn('subdomain', $followedSubdomains)->get();
+        $followedRoles = Role::whereIn('subdomain', $followedSubdomains)->where('user_id', $user->id)->get();
 
         foreach ($followedRoles as $role) {
-            $events = $role->events;
+            $events = $role->events()->where('events.creator_role_id', $role->id)->get();
 
             foreach ($events as $event) {
                 // 70% chance of having purchased tickets to each event

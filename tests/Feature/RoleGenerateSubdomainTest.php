@@ -51,7 +51,27 @@ class RoleGenerateSubdomainTest extends TestCase
 
             $this->assertNotContains($subdomain, Role::RESERVED_SUBDOMAINS,
                 "'{$reserved} Community Club' was handed the reserved name '{$subdomain}'");
+            // 'demo' is on the list, and "demo Community Club" used to skip it for demo-community.
+            $this->assertStringStartsNotWith('demo-', $subdomain,
+                "'{$reserved} Community Club' was handed '{$subdomain}', in the demo's namespace");
         }
+    }
+
+    /**
+     * demo- is the demo's: its hourly reset used to delete every demo- schedule, and the admin
+     * lists and plan jobs still read one as demo. So the prefix is rewritten, not handed out, and
+     * not refused either - refusing in cleanSubdomain() means a random eight characters.
+     */
+    public function test_the_demo_prefix_is_rewritten_rather_than_handed_out(): void
+    {
+        $this->assertSame('demoday', Role::generateSubdomain('Demo Day'));
+        $this->assertSame('demonight', Role::generateSubdomain('Demo Night Live'));
+
+        $this->createRole($this->createOwner(), 'venue', ['subdomain' => 'demoday']);
+        $this->assertSame('demoday1', Role::generateSubdomain('Demo Day'));
+
+        // Only the prefix: a name that merely contains the word is untouched.
+        $this->assertSame('live-demo-night', Role::cleanSubdomain('Live Demo Night'));
     }
 
     public function test_when_every_free_variation_is_taken_the_suffix_fallback_still_applies(): void

@@ -90,10 +90,10 @@ class UnclaimedSchedulePageTest extends TestCase
     public function test_the_in_memory_and_query_claimable_predicates_agree(): void
     {
         // They did not. isClaimable() asked is_demo_role() - the demo ACCOUNT, false outright on
-        // selfhost - while the scope excludes the demo SUBDOMAIN shapes, and generateSubdomain()
-        // hands out demo-2, demo-3 once "demo" is taken. Such a row rendered a page whose two
-        // buttons then bounced off claimTarget() to the marketing home: the exact bug the shared
-        // predicate exists to prevent, in mirror image.
+        // selfhost - while the scope excludes the demo SUBDOMAIN shapes, and placeholders created
+        // before cleanSubdomain() reserved the demo- prefix still hold one ("Demo 4" was given
+        // demo-4). Such a row rendered a page whose two buttons then bounced off claimTarget() to
+        // the marketing home: the exact bug the shared predicate exists to prevent, in mirror image.
         $owner = $this->createOwner();
         $rows = [
             $this->placeholder(['subdomain' => 'demo-4']),

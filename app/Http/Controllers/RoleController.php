@@ -5166,9 +5166,15 @@ class RoleController extends Controller
         // would replace it with a random string - silently renaming a live schedule on a save that
         // never touched the field, breaking every link to it. Grandfathering the stored value is
         // the same call the custom_domain rule in RoleUpdateRequest makes, for the same reason.
-        if ($request->new_subdomain !== $subdomain) {
+        //
+        // Compared with the STORED name, not the URL's: the lookup above matches case-blind, so a
+        // /Demo-Night/update path would otherwise send an untouched demo-night through
+        // cleanSubdomain(), which now rewrites the demo- prefix, and rename the schedule.
+        $storedSubdomain = $role->getOriginal('subdomain');
+
+        if ($request->new_subdomain !== $storedSubdomain) {
             $newSubdomain = Role::cleanSubdomain($request->new_subdomain);
-            if ($newSubdomain != $subdomain) {
+            if ($newSubdomain != $storedSubdomain) {
                 if (Role::subdomain($newSubdomain)->first()) {
                     return redirect()->back()->withErrors(['new_subdomain' => __('messages.subdomain_taken')]);
                 }

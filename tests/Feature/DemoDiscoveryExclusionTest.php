@@ -179,9 +179,10 @@ class DemoDiscoveryExclusionTest extends TestCase
     }
 
     /**
-     * What the dropped `demo-%` arm used to catch as well: generateSubdomain() hands a real "Demo
-     * Night" the subdomain demo-night, and the arm hid it from search - and, now that the same
-     * predicate decides indexing, would have de-indexed it.
+     * What the dropped `demo-%` arm used to catch as well: a real "Demo Night" named before
+     * Role::cleanSubdomain() reserved the prefix holds demo-night (a new one gets demonight), and
+     * the arm hid it from search - and, now that the same predicate decides indexing, would have
+     * de-indexed it.
      */
     public function test_a_real_schedule_on_a_demo_prefixed_subdomain_is_not_demo_content(): void
     {

@@ -57,7 +57,8 @@ class RoleIndexabilityPredicateTest extends TestCase
             'showcase contact address' => [$this->createRole($owner(), 'venue', ['email' => DemoService::DEMO_EMAIL]), false],
             'demo owner' => [$this->createRole($demoUser), false],
             'simpsons' => [$this->createRole($owner(), 'curator', ['subdomain' => DemoService::DEMO_ROLE_SUBDOMAIN]), false],
-            // generateSubdomain() hands a real "Demo Night" this name. It is not demo content.
+            // A real "Demo Night" named before cleanSubdomain() reserved the prefix holds this
+            // name (a new one gets demonight). It is not demo content.
             'a real demo-night' => [$this->createRole($owner(), 'venue', ['subdomain' => 'demo-night', 'name' => 'Demo Night']), true],
         ];
 

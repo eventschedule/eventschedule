@@ -7,6 +7,7 @@ use App\Rules\NoFakeEmail;
 use App\Rules\SquareImage;
 use App\Utils\UrlUtils;
 use Illuminate\Foundation\Http\FormRequest;
+use Illuminate\Support\Str;
 use Illuminate\Validation\Rule;
 
 class RoleUpdateRequest extends FormRequest
@@ -96,7 +97,19 @@ class RoleUpdateRequest extends FormRequest
             ),
             'new_subdomain' => array_merge(
                 is_demo_mode() ? [] : ['required'],
-                ['string', 'max:50']
+                ['string', 'max:50'],
+                [
+                    // demo- belongs to the demo (see Role::cleanSubdomain()). Only a CHANGE is
+                    // refused: this field is posted on every save, so a schedule that already
+                    // holds demo-night must keep saving, and RoleController::update() leaves an
+                    // unchanged value alone.
+                    function ($attribute, $value, $fail) use ($role) {
+                        if (is_string($value) && $value !== $role->subdomain
+                            && str_starts_with(Str::slug($value), 'demo-')) {
+                            $fail(__('messages.subdomain_reserved'));
+                        }
+                    },
+                ]
             ),
             'phone' => ['nullable', 'string', 'max:20', 'regex:/^\+[1-9]\d{1,14}$/'],
             // string, not url: a scheme-less "example.com" is a legitimate stored value (clean()

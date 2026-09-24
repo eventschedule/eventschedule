@@ -1600,9 +1600,10 @@ class Role extends Model implements MustVerifyEmail
      *
      * There is no `demo-%` subdomain arm any more. The Springfield rows DemoService seeds on those
      * subdomains are owned by the demo user and carry DEMO_EMAIL as their contact address, so the
-     * email and owner arms already catch every one of them - while generateSubdomain() hands
-     * `demo-night` to a real "Demo Night", which that arm hid from search and, through
-     * isIndexableHost(), would have de-indexed.
+     * email and owner arms already catch every one of them - while real schedules named before
+     * cleanSubdomain() reserved the prefix still hold one (a "Demo Night" was handed `demo-night`;
+     * it gets `demonight` now), and that arm hid them from search and, through isIndexableHost(),
+     * would have de-indexed them.
      *
      * Deliberately NOT gated on config('app.hosted') the way is_demo_role() is. A gate would make
      * tests and production disagree about the same row, and the surfaces that call this are
@@ -1790,8 +1791,9 @@ class Role extends Model implements MustVerifyEmail
             && ! $this->phone_verified_at
             // The SCOPE's demo predicate, not is_demo_role(). They are different questions:
             // is_demo_role() asks about the demo ACCOUNT (and answers false outright on selfhost),
-            // while notDemoSchedule() excludes the subdomain shapes. generateSubdomain() hands out
-            // demo-2, demo-3 and so on once "demo" is taken, so an ordinary placeholder could pass
+            // while notDemoSchedule() excludes the subdomain shapes. cleanSubdomain() no longer
+            // hands out a demo- name, but placeholders created before it reserved the prefix
+            // still hold one ("Demo 2" was given demo-2), so an ordinary placeholder could pass
             // this and fail the scope - rendering a page whose two buttons then bounced off
             // claimTarget() to the marketing home, which is the exact bug this predicate exists to
             // prevent, in mirror image.
@@ -2333,6 +2335,18 @@ class Role extends Model implements MustVerifyEmail
         // RoleController::update() only calls this when new_subdomain actually differs from the
         // stored value, so a schedule already holding one of these keeps it rather than being
         // silently renamed on its next unrelated save.
+        //
+        // demo- is the Springfield demo's namespace. Its hourly reset deletes and recreates the
+        // demo-* schedules it owns, and the admin lists, the plan jobs and federation all read
+        // demo-% as "demo", so a real schedule should not be handed one. Rewritten rather than
+        // refused, because refusing here means Str::random(8): "Demo Day" becomes demoday, and
+        // generateSubdomain() adds a number if that is taken. The same "only a change" rule as
+        // above keeps an existing demo-night where it is; RoleUpdateRequest and
+        // AdminScheduleDetailsRequest reject a change to one with a message.
+        if (str_starts_with($subdomain, 'demo-')) {
+            $subdomain = 'demo'.substr($subdomain, 5);
+        }
+
         if (in_array($subdomain, self::RESERVED_SUBDOMAINS, true)) {
             $subdomain = '';
         }

@@ -31,8 +31,8 @@ class AnalyticsCounterForeignKeyTest extends TestCase
     /**
      * An events id that does not exist. InnoDB cannot tell "never existed" from "deleted one
      * millisecond ago", which is the actual production case: the hourly demo reset
-     * (DemoService::resetDemoData) hard-deletes and recreates every demo-% schedule and its
-     * events while guest pages are mid-render.
+     * (DemoService::resetDemoData) hard-deletes and recreates the demo user's demo-* schedules and
+     * the events they created while guest pages are mid-render.
      */
     private const GHOST_EVENT_ID = 987654321;
 

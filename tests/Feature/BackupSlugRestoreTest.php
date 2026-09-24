@@ -59,6 +59,37 @@ class BackupSlugRestoreTest extends TestCase
         $this->assertMatchesRegularExpression('/^[a-z0-9-]+$/', $restored->subdomain);
     }
 
+    /**
+     * A backup's subdomain used to be restored verbatim. demo- is the demo's namespace, so a
+     * restored demo-night gets the name a new "Demo Night" would.
+     */
+    public function test_a_restored_demo_prefixed_subdomain_is_rewritten(): void
+    {
+        $role = $this->createRole($this->createOwner(), 'venue', ['name' => 'Friday Jazz']);
+
+        $restored = $this->roundTrip($role, function ($data) {
+            $data['schedules'][0]['role']['subdomain'] = 'demo-night';
+
+            return $data;
+        });
+
+        $this->assertSame('demonight', $restored->subdomain);
+    }
+
+    /** A reserved name belongs to an app route, so it is rebuilt from the schedule's own name. */
+    public function test_a_restored_reserved_subdomain_is_rebuilt_from_the_name(): void
+    {
+        $role = $this->createRole($this->createOwner(), 'venue', ['name' => 'Harbor Lights']);
+
+        $restored = $this->roundTrip($role, function ($data) {
+            $data['schedules'][0]['role']['subdomain'] = 'admin';
+
+            return $data;
+        });
+
+        $this->assertSame('harbor-lights', $restored->subdomain);
+    }
+
     public function test_two_restored_non_latin_appointment_types_get_distinct_booking_slugs(): void
     {
         $owner = $this->createOwner();

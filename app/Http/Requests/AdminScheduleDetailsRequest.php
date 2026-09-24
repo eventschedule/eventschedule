@@ -5,6 +5,7 @@ namespace App\Http\Requests;
 use App\Models\Role;
 use App\Utils\UrlUtils;
 use Illuminate\Foundation\Http\FormRequest;
+use Illuminate\Support\Str;
 
 /**
  * The admin's edit of a schedule's identity: name, subdomain and contact details.
@@ -49,7 +50,10 @@ class AdminScheduleDetailsRequest extends FormRequest
                     'required', 'string', 'min:3', 'max:50',
                     'regex:/^[a-z0-9]+(-[a-z0-9]+)*$/',
                     function ($attribute, $value, $fail) use ($role) {
-                        if (in_array($value, Role::RESERVED_SUBDOMAINS, true)) {
+                        // demo- is the demo's namespace, reserved in Role::cleanSubdomain(). This
+                        // branch only runs for a changed value, so an existing demo-night saves.
+                        if (in_array($value, Role::RESERVED_SUBDOMAINS, true)
+                            || str_starts_with(Str::slug((string) $value), 'demo-')) {
                             $fail(__('messages.subdomain_reserved'));
 
                             return;
