@@ -2323,6 +2323,7 @@ return [
     'admin_session_changed' => 'Los detalles de su sesión han cambiado. Por favor, confirme su contraseña de nuevo.',
     'admin_password_required' => 'Debe establecer una contraseña antes de acceder al área de administración.',
     'view_schedule_for' => 'Ver la agenda de eventos de :name',
+    'guest_meta_upcoming_list' => 'Próximamente: :events',
 
     // Boost
     'boost' => 'Boost',

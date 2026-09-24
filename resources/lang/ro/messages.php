@@ -2355,6 +2355,7 @@ return [
     'admin_session_changed' => 'Detaliile sesiunii s-au schimbat. Vă rugăm confirmați din nou parola.',
     'admin_password_required' => 'Trebuie să setați o parolă înainte de a accesa zona de administrare.',
     'view_schedule_for' => 'Vezi programul de evenimente pentru :name',
+    'guest_meta_upcoming_list' => 'În curând: :events',
     'user' => 'Utilizator',
 
     // Boost

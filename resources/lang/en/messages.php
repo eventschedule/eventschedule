@@ -2692,6 +2692,7 @@ return [
     'admin_session_changed' => 'Your session details changed. Please confirm your password again.',
     'admin_password_required' => 'You must set a password before accessing the admin area.',
     'view_schedule_for' => 'View the event schedule for :name',
+    'guest_meta_upcoming_list' => 'Upcoming: :events',
     'user' => 'User',
 
     // Boost

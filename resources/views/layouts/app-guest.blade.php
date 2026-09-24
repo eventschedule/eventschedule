@@ -75,6 +75,20 @@
         $galleryCanonicalUrl = ($galleryMode && $event && $event->exists)
             ? $event->getCanonicalPhotoGalleryUrl()
             : null;
+
+        // The page's description, built ONCE for the description, og: and twitter: tags, which
+        // used to be three calls that could drift apart. It is plain decoded text, so the {{ }}
+        // below escapes it exactly once. On an event page the date comes from $occurrenceDate,
+        // not $date: the undated series page backfills $date with the next occurrence, and a
+        // series page is about every occurrence (GuestSeo::eventDescription()). The password gate
+        // and the gallery keep their own tags below, and a draft's page carries the schedule's,
+        // matching the branches of the meta slot.
+        $guestMetaDescription = match (true) {
+            ($passwordGate ?? false) || $galleryMode => '',
+            $event && $event->exists && ! $event->is_draft => \App\Utils\GuestSeo::eventDescription($event, $occurrenceDate, $guestLang, $role),
+            $role->exists => \App\Utils\GuestSeo::scheduleDescription($role, $upcoming),
+            default => '',
+        };
     @endphp
 
     <x-slot name="meta">
@@ -89,7 +103,9 @@
         @if ($noIndex || request()->embed || request('graphic') || (isset($event) && $event->exists && ($event->is_private || $event->is_draft)) || ($role->exists && ! $role->isIndexableHost()))
             <meta name="robots" content="noindex, nofollow">
         @else
-            <meta name="robots" content="index, follow">
+            {{-- max-image-preview:large and the uncapped snippet and video previews, as on the
+                 marketing pages: without them Google shows a tenant's event at thumbnail size. --}}
+            <meta name="robots" content="{{ \App\Utils\SeoUtils::ROBOTS_INDEX }}">
         @endif
 
         @if ($guestHasAltLang)
@@ -168,24 +184,29 @@
                 <meta name="twitter:site" content="@ScheduleEvent">
             @else
             <link rel="canonical" href="{{ $eventCanonicalUrl }}{{ $guestLangSuffix }}">
-            <meta name="description" content="{{ $event->getMetaDescription($date, $guestLang, $role) }}">
+            <meta name="description" content="{{ $guestMetaDescription }}">
             <meta property="og:type" content="event">
             <meta property="og:title" content="{{ $guestEventName }}">
-            <meta property="og:description" content="{{ $event->getMetaDescription($date, $guestLang, $role) }}">
-            {{-- getImageUrl() already cascades flyer -> schedule logo -> venue logo, so null here
-                 means the owner has no image anywhere. Advertising none lets the scraper fall
-                 back to their own page, which beats handing it an advert of ours. --}}
-            @php $eventOgImage = $event->getImageUrl(); @endphp
+            <meta property="og:description" content="{{ $guestMetaDescription }}">
+            {{-- Event::shareImage() cascades flyer -> performer -> venue -> the creating schedule,
+                 uploads only, so null here means the owners have no image anywhere. Advertising
+                 none lets the scraper fall back to their own page, which beats handing it an
+                 advert of ours. --}}
+            @php $eventOgImage = $event->shareImage(); @endphp
             @if ($eventOgImage)
-            <meta property="og:image" content="{{ $eventOgImage }}">
+            <meta property="og:image" content="{{ $eventOgImage['url'] }}">
+            @if (isset($eventOgImage['width'], $eventOgImage['height']))
+            <meta property="og:image:width" content="{{ $eventOgImage['width'] }}">
+            <meta property="og:image:height" content="{{ $eventOgImage['height'] }}">
+            @endif
             <meta property="og:image:alt" content="{{ $guestEventName }}">
             @endif
             <meta property="og:url" content="{{ $eventShareUrl }}">
             <meta property="og:site_name" content="{{ $role->translatedName() ?: config('app.name') }}">
             <meta name="twitter:title" content="{{ $guestEventName }}">
-            <meta name="twitter:description" content="{{ $event->getMetaDescription($date, $guestLang, $role) }}">
+            <meta name="twitter:description" content="{{ $guestMetaDescription }}">
             @if ($eventOgImage)
-            <meta name="twitter:image" content="{{ $eventOgImage }}">
+            <meta name="twitter:image" content="{{ $eventOgImage['url'] }}">
             <meta name="twitter:image:alt" content="{{ $guestEventName }}">
             @endif
             <meta name="twitter:card" content="{{ $eventOgImage ? 'summary_large_image' : 'summary' }}">
@@ -193,43 +214,33 @@
             @endif
         @elseif ($role->exists)
             <link rel="canonical" href="{{ $role->getCanonicalUrl() }}{{ $guestLangSuffix }}">
-            @if ($description = Str::limit(trim(strip_tags($role->translatedDescription())), 155))
-            <meta name="description" content="{{ $description }}">
-            <meta property="og:description" content="{{ $description }}">
-            <meta name="twitter:description" content="{{ $description }}">
-            @else
-            @php
-                $description = __('messages.view_schedule_for', ['name' => $role->translatedName()]);
-                if ($role->translatedShortDescription()) {
-                    $description .= ' - ' . $role->translatedShortDescription();
-                }
-                if ($role->isVenue() && $role->shortAddress()) {
-                    $description .= ' | ' . $role->shortAddress();
-                }
-                $description = Str::limit($description, 155);
-            @endphp
-            <meta name="description" content="{{ $description }}">
-            <meta property="og:description" content="{{ $description }}">
-            <meta name="twitter:description" content="{{ $description }}">
-            @endif
+            <meta name="description" content="{{ $guestMetaDescription }}">
+            <meta property="og:description" content="{{ $guestMetaDescription }}">
+            <meta name="twitter:description" content="{{ $guestMetaDescription }}">
             @if ($name = $role->translatedName())
             <meta property="og:title" content="{{ $name }}">
             <meta name="twitter:title" content="{{ $name }}">
             @endif
-            {{-- No @else: a schedule with no logo used to advertise US in its own link preview.
+            {{-- No @else: a schedule with no picture used to advertise US in its own link preview.
                  Advertising nothing is the right fallback. It does not guarantee a picture-less
                  card - Facebook's crawler will pick one out of the page body - but whatever it
-                 finds there is the owner's, which an advert of ours never is. --}}
-            @if ($image = $role->profile_image_url)
-            <meta property="og:image" content="{{ $image }}">
+                 finds there is the owner's, which an advert of ours never is. Role::shareImage()
+                 is the header, logo or background the owner UPLOADED, never built-in art. --}}
+            @php $scheduleOgImage = $role->shareImage(); @endphp
+            @if ($scheduleOgImage)
+            <meta property="og:image" content="{{ $scheduleOgImage['url'] }}">
+            @if (isset($scheduleOgImage['width'], $scheduleOgImage['height']))
+            <meta property="og:image:width" content="{{ $scheduleOgImage['width'] }}">
+            <meta property="og:image:height" content="{{ $scheduleOgImage['height'] }}">
+            @endif
             <meta property="og:image:alt" content="{{ $name ?? $role->translatedName() }}">
-            <meta name="twitter:image" content="{{ $image }}">
+            <meta name="twitter:image" content="{{ $scheduleOgImage['url'] }}">
             <meta name="twitter:image:alt" content="{{ $name ?? $role->translatedName() }}">
             @endif
             <meta property="og:type" content="website">
             <meta property="og:url" content="{{ $role->getCanonicalUrl() }}">
             <meta property="og:site_name" content="{{ $role->translatedName() ?: config('app.name') }}">
-            <meta name="twitter:card" content="{{ $role->profile_image_url ? 'summary_large_image' : 'summary' }}">
+            <meta name="twitter:card" content="{{ $scheduleOgImage ? 'summary_large_image' : 'summary' }}">
             <meta name="twitter:site" content="@ScheduleEvent">
         @endif
     </x-slot>

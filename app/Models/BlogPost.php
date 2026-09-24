@@ -206,7 +206,7 @@ class BlogPost extends Model
     {
         $html = \App\Utils\MarkdownUtils::sanitizeHtml(self::repairMarkdownHrefs((string) $this->content));
 
-        $html = preg_replace('~<(/?)h1(?=[\s>])~i', '<$1h2', $html) ?? $html;
+        $html = \App\Utils\MarkdownUtils::demoteH1($html, false);
 
         return self::followFirstPartyLinks($html);
     }

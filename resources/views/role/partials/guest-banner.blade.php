@@ -16,7 +16,8 @@
 <div id="gp-announcement" class="relative z-20 {{ $onEventPage ? 'mt-4' : '' }} bg-blue-50 dark:bg-blue-950 border-b border-blue-200 dark:border-blue-800 py-3">
   <div class="container mx-auto px-5">
     <div class="gp-banner text-center text-sm sm:text-base text-blue-800 dark:text-blue-200" dir="auto">
-      {!! \App\Utils\UrlUtils::convertUrlsToLinks($bannerHtml) !!}
+      {{-- demoteH1(): an announcement is never the page's heading, which is the <h1> below it. --}}
+      {!! \App\Utils\UrlUtils::convertUrlsToLinks(\App\Utils\MarkdownUtils::demoteH1($bannerHtml)) !!}
     </div>
   </div>
 </div>

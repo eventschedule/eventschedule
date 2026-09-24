@@ -2584,6 +2584,129 @@ class EventRepo
         return $slug.'-'.Str::lower(Str::random(6));
     }
 
+    /**
+     * How many recurring series upcomingForGuest() considers. Each costs a nextOccurrenceFrom()
+     * scan, so this bounds the CPU a schedule page can spend on them.
+     */
+    public const UPCOMING_SERIES_LIMIT = 30;
+
+    /**
+     * The public events coming up on a schedule's guest page, soonest first, each with the date
+     * it next happens on: [['event' => Event, 'date' => 'Y-m-d'], ...].
+     *
+     * Its head reads this (the "Upcoming Events" title and the "Upcoming: ..." line of the meta
+     * description), so it answers the same for every visitor: public events only - no drafts, no
+     * cancelled or unlisted events - accepted on this schedule (and on $group's sub-schedule when
+     * one is selected), whoever is looking.
+     *
+     * One-off events come from one bounded query, dated by their schedule-local start
+     * (saleEventDateFromStartsAt()). A recurring series is dated by its NEXT occurrence, which SQL
+     * cannot compute, so at most UPCOMING_SERIES_LIMIT series are loaded and each is asked
+     * nextOccurrenceFrom() within 60 days; one with no occurrence in that window is left out. A
+     * series whose 'on_date' end has already passed is dropped in SQL first, a day early so no
+     * timezone can drop one still running - nextOccurrenceFrom() is the authority either way.
+     *
+     * The occurrence dates are cached per schedule and sub-schedule for UPCOMING_CACHE_SECONDS,
+     * because an 'after_events' series answers matchesDate() by counting every occurrence since it
+     * started (countOccurrences()), which a long-running series makes slow. The events themselves
+     * are always read fresh, so a series that has since been cancelled, unlisted or deleted is
+     * still left out.
+     *
+     * Dates are in each event's schedule timezone (Event::scheduleTimezone()), like every other
+     * occurrence date.
+     *
+     * @return \Illuminate\Support\Collection<int, array{event: Event, date: string}>
+     */
+    public function upcomingForGuest(Role $role, ?\App\Models\Group $group = null, int $limit = 50): \Illuminate\Support\Collection
+    {
+        $base = fn () => Event::query()
+            ->where('events.is_draft', false)
+            ->where('events.is_cancelled', false)
+            ->where('events.is_private', false)
+            ->whereIn('events.id', fn ($pivot) => $pivot->select('event_id')
+                ->from('event_role')
+                ->where('role_id', $role->id)
+                ->where('is_accepted', true)
+                ->when($group, fn ($q) => $q->where('group_id', $group->id)))
+            ->with(['roles', 'creatorRole'])
+            ->withCount('polls');
+
+        $oneOff = $base()
+            ->whereNull('events.days_of_week')
+            ->upcomingOrOngoing(Carbon::now('UTC'))
+            ->orderBy('events.starts_at')
+            ->limit($limit)
+            ->get()
+            ->map(fn (Event $event) => ['event' => $event, 'date' => $event->saleEventDateFromStartsAt()])
+            ->filter(fn (array $row) => $row['date'] !== null);
+
+        $seriesCutoff = Carbon::now($role->timezone ?: config('app.timezone'))->subDay()->format('Y-m-d');
+
+        $series = $base()
+            ->whereNotNull('events.days_of_week')
+            ->where(fn ($q) => $q->whereNull('events.recurring_end_type')
+                ->orWhere('events.recurring_end_type', '<>', 'on_date')
+                ->orWhereNull('events.recurring_end_value')
+                ->orWhereIn('events.recurring_end_value', ['', '0'])
+                ->orWhere('events.recurring_end_value', '>=', $seriesCutoff))
+            ->orderBy('events.starts_at')
+            ->orderBy('events.id')
+            ->limit(self::UPCOMING_SERIES_LIMIT)
+            ->get();
+
+        $seriesDates = $this->upcomingSeriesDates($role, $group, $series);
+
+        $series = $series
+            ->map(fn (Event $event) => ['event' => $event, 'date' => $seriesDates[$event->id] ?? null])
+            ->filter(fn (array $row) => $row['date'] !== null);
+
+        // Same day: by the time it starts, in its own schedule's clock.
+        return $oneOff->concat($series)
+            ->sortBy(fn (array $row) => $row['date'].' '.$this->localTimeOfDay($row['event']))
+            ->take($limit)
+            ->values();
+    }
+
+    /** How long upcomingForGuest() trusts a series' next-occurrence date. */
+    public const UPCOMING_CACHE_SECONDS = 600;
+
+    /**
+     * [event id => next occurrence date or null] for $series, cached per schedule and sub-schedule.
+     *
+     * The key also carries each series' id and updated_at, so adding, removing or editing one
+     * (excluding a date, moving the end) is never answered from the old map, and the schedule's
+     * date, so yesterday's answer does not outlive midnight.
+     *
+     * @param  \Illuminate\Support\Collection<int, Event>  $series
+     * @return array<int, ?string>
+     */
+    private function upcomingSeriesDates(Role $role, ?\App\Models\Group $group, \Illuminate\Support\Collection $series): array
+    {
+        if ($series->isEmpty()) {
+            return [];
+        }
+
+        $fingerprint = $series->sortBy('id')
+            ->map(fn (Event $event) => $event->id.'@'.$event->updated_at?->getTimestamp())
+            ->implode(',');
+        $today = Carbon::now($role->timezone ?: config('app.timezone'))->format('Y-m-d');
+        $key = 'guest_upcoming_series:'.$role->id.':'.($group?->id ?? 0).':'.$today.':'.md5($fingerprint);
+
+        return Cache::remember($key, self::UPCOMING_CACHE_SECONDS, fn () => $series
+            ->mapWithKeys(fn (Event $event) => [$event->id => $event->nextOccurrenceFrom(null, 60)])
+            ->all());
+    }
+
+    /** starts_at's time of day in the event's own schedule timezone, for ordering one day. */
+    private function localTimeOfDay(Event $event): string
+    {
+        if (! $event->starts_at || strlen((string) $event->starts_at) === 10) {
+            return '00:00';
+        }
+
+        return $event->getStartDateTime(null, true)->format('H:i');
+    }
+
     public function getEvent($subdomain, $slug, $date = null, $eventId = null, ?Role $role = null)
     {
         $event = null;

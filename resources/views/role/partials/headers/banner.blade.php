@@ -284,10 +284,14 @@
 
             {{-- Desktop layout (>= sm): horizontal with spacer --}}
             <div id="gp-header-body-desktop" class="hidden sm:flex flex-col gap-3 mb-3">
-              {{-- Row 1: Name (full width) --}}
-              <h1 class="text-[32px] font-semibold leading-10 text-[#151B26] dark:text-gray-100" style="font-family: '{{ str_replace('_', ' ', $role->font_family) }}', sans-serif;">
+              {{-- Row 1: Name (full width). A heading to assistive tech, but not a second <h1> in the
+                   markup: the mobile copy above is the page's one <h1>, which is what a smartphone
+                   crawler reads, and the two used to give 181 of 188 schedule pages two H1s. The
+                   hidden copy's display:none takes it out of the accessibility tree, so a screen
+                   reader still meets exactly one level-1 heading at any width. --}}
+              <div role="heading" aria-level="1" class="text-[32px] font-semibold leading-10 text-[#151B26] dark:text-gray-100" style="font-family: '{{ str_replace('_', ' ', $role->font_family) }}', sans-serif;">
                 {!! str_replace(' , ', '<br>', e($role->translatedName())) !!}
-              </h1>
+              </div>
               {{-- Row 2: Description/Location/Social left, Action buttons right --}}
               <div class="flex items-start gap-3">
                 {{-- Description/Location/Social --}}

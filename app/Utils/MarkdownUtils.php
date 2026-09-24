@@ -232,6 +232,35 @@ class MarkdownUtils
     }
 
     /**
+     * Owner HTML with every <h1> demoted to an <h2>, for a page that already has its own <h1>.
+     *
+     * A markdown "# Heading" renders as an <h1>, and on a guest page that sits beneath the page's
+     * real one - the event name, the schedule name - so the page ends up with two or more and its
+     * outline no longer says what it is about. Rendered text is demoted rather than stored content
+     * rewritten, the way BlogPost::renderedContent() has always done it.
+     *
+     * $mark adds data-es-h1 so partials/custom-content-styles.blade.php can keep the H1's size:
+     * the owner typed a top-level heading and should still see one. The blog passes false, because
+     * its body headings are styled as the H2s they now are.
+     *
+     * Only the tag NAME changes, so ids (the in-page anchors) and every other attribute survive.
+     * The lookahead stops it touching anything else that starts with "h1", such as a custom
+     * element.
+     */
+    public static function demoteH1(?string $html, bool $mark = true): string
+    {
+        if ($html === null || $html === '') {
+            return '';
+        }
+
+        return preg_replace_callback(
+            '~<(/?)h1(?=[\s>])~i',
+            fn ($m) => $m[1] === '/' ? '</h2' : ($mark ? '<h2 data-es-h1' : '<h2'),
+            $html
+        ) ?? $html;
+    }
+
+    /**
      * Sanitize HTML content to prevent XSS attacks.
      * Allows common HTML tags while stripping dangerous content.
      */

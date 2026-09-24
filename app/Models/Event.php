@@ -2658,6 +2658,30 @@ class Event extends Model
     }
 
     /**
+     * The picture a link preview of this event shows (og:image, twitter:image): the flyer's
+     * original, else the performer's photo, else the venue's, else the photo of the schedule that
+     * created it. Null when the owners have uploaded nothing - never a stock image and never one
+     * of ours (docs/BRANDING_MATRIX.md rule 6, pinned by GuestSocialImageTest): a card with no
+     * image degrades to the owner's own text and page.
+     *
+     * The original, not a card derivative: previews are shown large, and scrapers downscale.
+     * width and height are present only when known. The hook for sizes recorded at upload time is
+     * SeoUtils::imageObject()'s second argument: pass the chosen image's recorded [width, height]
+     * there, and every page that renders og:image:width picks it up.
+     *
+     * @return array{url: string, width?: int, height?: int}|null
+     */
+    public function shareImage(): ?array
+    {
+        $url = $this->flyer_image_url
+            ?: $this->role()?->profile_image_url
+            ?: $this->venue?->profile_image_url
+            ?: $this->creatorRole?->profile_image_url;
+
+        return \App\Utils\SeoUtils::imageObject($url ?: null);
+    }
+
+    /**
      * The schedule whose profile photo stands in for a missing flyer: the talent, else the venue.
      * Null when the event has a flyer of its own or neither schedule has a photo.
      */
@@ -3102,38 +3126,19 @@ class Event extends Model
     }
 
     /**
+     * The event's meta description: GuestSeo::eventDescription(), which is where the rules live.
+     *
      * $want/$viewingRole let the guest layout resolve by language instead of by the translate
-     * boolean; omitting them keeps the legacy behavior for any caller without a viewing schedule.
+     * boolean; a caller without them gets the viewing schedule's language, else the event's own.
+     * $date is the occurrence the page is about - see GuestSeo::eventDescription().
      */
     public function getMetaDescription($date = null, ?string $want = null, ?Role $viewingRole = null)
     {
-        if ($this->short_description) {
-            $short = $want ? $this->shortDescriptionInLanguage($want, $viewingRole) : $this->translatedShortDescription();
+        $want ??= $viewingRole
+            ? $viewingRole->displayLanguageCode()
+            : (showing_translation($this) ? $this->getTranslationLanguageCode() : $this->getLanguageCode());
 
-            return \Illuminate\Support\Str::limit($short, 155);
-        }
-
-        if ($this->description_html) {
-            $html = $want ? $this->descriptionHtmlInLanguage($want, $viewingRole) : $this->translatedDescription();
-
-            return \Illuminate\Support\Str::limit(trim(strip_tags($html)), 155);
-        }
-
-        $str = $want ? $this->nameInLanguage($want, $viewingRole) : $this->translatedName();
-
-        if ($this->venue) {
-            $str .= ' '.__('messages.at').' '.$this->venue->getDisplayName();
-        } elseif ($this->getEventUrlDomain()) {
-            $str .= ' '.__('messages.at').' '.$this->getEventUrlDomain();
-        }
-
-        if ($this->is_multi_day) {
-            $str .= ' | '.$this->getDateRangeDisplay($date);
-        } else {
-            $str .= ' | '.$this->localStartsAt(true, $date);
-        }
-
-        return \Illuminate\Support\Str::limit($str, 155);
+        return \App\Utils\GuestSeo::eventDescription($this, is_string($date) ? $date : null, $want, $viewingRole);
     }
 
     public function getGoogleCalendarUrl($date = null)

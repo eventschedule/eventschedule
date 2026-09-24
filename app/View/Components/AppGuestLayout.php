@@ -4,6 +4,8 @@ namespace App\View\Components;
 
 use App\Models\Event;
 use App\Models\Role;
+use App\Utils\GuestSeo;
+use Illuminate\Support\Collection;
 use Illuminate\View\Component;
 use Illuminate\View\View;
 
@@ -73,6 +75,15 @@ class AppGuestLayout extends Component
          * $date cannot stand in for it, because the undated page backfills $date too.
          */
         public ?string $occurrenceDate = null,
+        /**
+         * The schedule page's upcoming events, EventRepo::upcomingForGuest(): whether there are
+         * any picks its title ("Upcoming Events" or "Events"), and the first few are named in its
+         * meta description. Null on every page that did not look them up, which then keeps the
+         * bare schedule name as its title.
+         *
+         * @var \Illuminate\Support\Collection<int, array{event: Event, date: string}>|null
+         */
+        public ?Collection $upcoming = null,
     ) {}
 
     /**
@@ -82,20 +93,30 @@ class AppGuestLayout extends Component
      * string is not a link, so it earns no link equity anywhere - attribution lives on the credit
      * chip and the free-tier footer strip instead. See docs/BRANDING_MATRIX.md.
      *
-     * Uses translatedName() so the title follows the language the page is rendered in, matching
-     * og:title, twitter:title and the JSON-LD. Both hreflang variants are indexed, so each needs a
-     * title in its own language.
+     * Follows the language the page is rendered in, matching og:title, twitter:title and the
+     * JSON-LD. Both hreflang variants are indexed, so each needs a title in its own language.
+     *
+     * A page that names itself ($pageTitle: the password gate, the gallery, the forms) keeps
+     * "{page} | {schedule}". An event page and the schedule home are built by GuestSeo, which adds
+     * the date and place, or the "Upcoming Events" label, while they fit.
      */
     public function guestTitle(): string
     {
-        $segment = $this->pageTitle
-            ?: (($this->event && $this->event->exists)
-                ? $this->event->nameInLanguage($this->role->displayLanguageCode(), $this->role)
-                : null);
-
         $name = $this->role->translatedName() ?: config('app.name');
 
-        return $segment ? $segment.' | '.$name : $name;
+        if ($this->pageTitle) {
+            return $this->pageTitle.' | '.$name;
+        }
+
+        if ($this->event && $this->event->exists) {
+            return GuestSeo::eventTitle($this->event, $this->role);
+        }
+
+        if ($this->upcoming !== null) {
+            return GuestSeo::scheduleTitle($this->role, null, $this->upcoming->isNotEmpty());
+        }
+
+        return $name;
     }
 
     /**

@@ -139,7 +139,7 @@
             </div>
             <div class="doc-field">
                 <h4 class="font-semibold text-gray-900 dark:text-white mb-2">Your social preview</h4>
-                <p class="text-sm text-gray-500 dark:text-gray-400">It becomes the preview image when your schedule page is shared to a chat app or social network. Without one, the page offers no preview image, so most apps show the link without a picture (Facebook may pick one from the page itself). It is never an Event Schedule image.</p>
+                <p class="text-sm text-gray-500 dark:text-gray-400">It becomes the preview image when your schedule page is shared to a chat app or social network, unless your header image is one you uploaded, which is wider and so goes first. With neither, a background image you uploaded is used, and with none of them the page offers no preview image, so most apps show the link without a picture (Facebook may pick one from the page itself). It is never an Event Schedule image.</p>
             </div>
             <div class="doc-field">
                 <h4 class="font-semibold text-gray-900 dark:text-white mb-2">Talent and venue logo walls</h4>
@@ -175,7 +175,7 @@
             </div>
             <div class="doc-field">
                 <h4 class="font-semibold text-gray-900 dark:text-white mb-2">Custom</h4>
-                <p class="text-sm text-gray-500 dark:text-gray-400">Upload your own header. Use a wide image, around 1200x400 pixels or a similar aspect ratio. PNG or JPG, under 2.5 MB.</p>
+                <p class="text-sm text-gray-500 dark:text-gray-400">Upload your own header. Use a wide image, around 1200x400 pixels or a similar aspect ratio. PNG or JPG, under 2.5 MB. It is also the picture a shared link to your schedule shows, ahead of your profile image.</p>
             </div>
             <div class="doc-field">
                 <h4 class="font-semibold text-gray-900 dark:text-white mb-2">31 preset headers</h4>

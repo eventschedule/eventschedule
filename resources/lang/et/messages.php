@@ -351,7 +351,7 @@ return [
     'create_new_account' => 'Loo uus konto',
     'questions_or_suggestions' => 'Kui teil on küsimusi või ettepanekuid, saatke meile e-kiri aadressil :email',
     'add_to_calendar' => 'Lisa kalendrisse',
-    'event_title' => ':roll at :ventue',
+    'event_title' => ':role kohas :venue',
     'full_name' => 'Täisnimi',
     'claim_your_venue' => ':role kavandas sündmuse kohas :venue',
     'claim_your_role' => ':venue kavandas sündmuse :rollile',
@@ -2338,6 +2338,7 @@ return [
     'admin_session_changed' => 'Teie seansi andmed muutusid. Palun kinnitage oma parool uuesti.',
     'admin_password_required' => 'Enne haldusliidesesse pääsemist peate määrama parooli.',
     'view_schedule_for' => 'Vaata ürituste kava: :name',
+    'guest_meta_upcoming_list' => 'Tulemas: :events',
 
     // Boost
     'boost' => 'Edendus',

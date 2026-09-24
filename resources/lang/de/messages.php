@@ -2327,6 +2327,7 @@ return [
     'admin_session_changed' => 'Ihre Sitzungsdaten haben sich geändert. Bitte bestätigen Sie Ihr Passwort erneut.',
     'admin_password_required' => 'Sie müssen ein Passwort festlegen, bevor Sie auf den Adminbereich zugreifen können.',
     'view_schedule_for' => 'Veranstaltungsplan für :name anzeigen',
+    'guest_meta_upcoming_list' => 'Demnächst: :events',
 
     // Boost
     'boost' => 'Boost',

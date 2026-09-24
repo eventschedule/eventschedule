@@ -173,12 +173,13 @@
         <p class="text-gray-600 dark:text-gray-300 mb-4">Share your schedule URL on any platform. Event Schedule builds the preview card for you from what is already on the schedule:</p>
         <ul class="doc-list">
             <li><strong class="text-gray-900 dark:text-white">Title</strong> is your schedule name</li>
-            <li><strong class="text-gray-900 dark:text-white">Description</strong> is the first 155 characters of your schedule description. If you have not written one, it is generated from your schedule name, short description and, for a venue, the town</li>
-            <li><strong class="text-gray-900 dark:text-white">Image</strong> is your profile image, falling back to a generic Event Schedule image if you have not uploaded one</li>
+            <li><strong class="text-gray-900 dark:text-white">Description</strong> is your short description, joined to your full description when the short one is under 50 characters, and shortened at a sentence or a word to about 155 characters. A venue adds its street and town when the text does not already give them, and while there is room it names your next three events. A schedule with nothing written and nothing coming up reads "View the event schedule for" and its name</li>
+            <li><strong class="text-gray-900 dark:text-white">Image</strong> is the header image you uploaded, or else your profile image, or else the background image you uploaded. The built-in headers and backgrounds are never used. With none of these the page offers no image, so most apps show the link without a picture (Facebook may pick one from the page itself); it is never an Event Schedule image</li>
         </ul>
+        <p class="text-gray-600 dark:text-gray-300 mb-4">In search results and browser tabs, the page title also says "Upcoming Events" while you have some, and a venue's adds its town, as long as they fit.</p>
 
         <h3 class="doc-subheading">Sharing Individual Events</h3>
-        <p class="text-gray-600 dark:text-gray-300 mb-4">Each event has its own URL. Its preview card uses the event name as the title and the event flyer as the image. The description is the event's short description, or its full description, or a line built from the event name, the venue and the date.</p>
+        <p class="text-gray-600 dark:text-gray-300 mb-4">Each event has its own URL. Its preview card uses the event name as the title. The image is the event flyer, or else the profile image of its talent, then of its venue, then of the schedule that created it. The description is the event's short description, joined to its full description when the short one is under 50 characters, or else the event name, followed by the date and the venue while there is room. A recurring event's own link stands for every date, so it leaves the date out. In search results and browser tabs, the page title adds the date and the venue or town to the event name while they fit.</p>
 
         <div class="doc-callout doc-callout-info">
             <div class="doc-callout-title">Cards Are Cached by the Platform</div>

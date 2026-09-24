@@ -2386,6 +2386,7 @@ return [
     'admin_session_changed' => 'تم تغيير تفاصيل جلستك. يرجى تأكيد كلمة المرور مرة أخرى.',
     'admin_password_required' => 'يجب عليك تعيين كلمة مرور قبل الوصول إلى منطقة الإدارة.',
     'view_schedule_for' => 'عرض جدول الأحداث لـ :name',
+    'guest_meta_upcoming_list' => 'القادم: :events',
 
     // Boost
     'boost' => 'تعزيز',

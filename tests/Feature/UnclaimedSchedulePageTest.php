@@ -169,10 +169,13 @@ class UnclaimedSchedulePageTest extends TestCase
         $placeholder = $this->placeholder(['email' => 'band@gmail.com']);
         $this->listedOn($placeholder);
 
+        // The indexable form is 'index, follow, max-image-preview:large, ...', so the negative
+        // half matches the tag's opening rather than the old exact 'index, follow"' - which the
+        // longer directive list would have made pass on any page.
         $this->get($this->url($placeholder))
             ->assertOk()
-            ->assertSee('noindex, nofollow', false)
-            ->assertDontSee('index, follow"', false);
+            ->assertSee('<meta name="robots" content="noindex, nofollow">', false)
+            ->assertDontSee('<meta name="robots" content="index', false);
     }
 
     public function test_a_verified_contact_on_an_ownerless_row_withdraws_the_page_entirely(): void

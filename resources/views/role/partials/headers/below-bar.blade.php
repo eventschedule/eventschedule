@@ -22,7 +22,8 @@
     @if ($hasDescription)
     <details class="es-desc min-w-0 flex-1" dir="{{ content_dir($role, false, $role->translatedDescription()) }}">
         <summary class="es-desc-summary cursor-pointer flex items-start gap-1.5 text-sm {{ $onDark ? 'text-white/80' : 'text-[#33383C] dark:text-gray-300' }}">
-            <span class="es-desc-text custom-content min-w-0 flex-1">{!! \App\Utils\UrlUtils::convertUrlsToLinks($role->translatedDescription()) !!}</span>
+            {{-- demoteH1(): the schedule name in the bar above is the page's one <h1>. --}}
+            <span class="es-desc-text custom-content min-w-0 flex-1">{!! \App\Utils\UrlUtils::convertUrlsToLinks(\App\Utils\MarkdownUtils::demoteH1($role->translatedDescription())) !!}</span>
             <svg class="es-desc-chevron w-4 h-4 mt-0.5 flex-shrink-0 transition-transform duration-200 {{ $onDark ? 'text-white/50' : 'text-gray-400' }}" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/>
             </svg>

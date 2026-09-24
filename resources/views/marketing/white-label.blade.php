@@ -977,11 +977,13 @@
                         </div>
 
                         <p class="es-slate2-muted mt-auto text-sm">
-                            The tab reads your schedule's name and nothing else, and so does the site
-                            name on a shared link preview - on every plan, free included. The picture
-                            on that preview is your event's artwork or your logo, and if you have
-                            neither, the card falls back to whatever is already on your page, never
-                            to a picture of ours. The
+                            The tab reads your schedule's name, with the event and its date or a note
+                            of your upcoming events where they fit, and nothing of ours; the site name
+                            on a shared link preview is your schedule's name alone - on every plan,
+                            free included. The picture on that preview is your own artwork - the
+                            event's flyer, your header or your logo - and if you have none, the card
+                            falls back to whatever is already on your page, never to a picture of
+                            ours. The
                             icon beside it becomes your uploaded logo on Pro. One string is left, and
                             you will only ever meet it in the page source: the breadcrumb data names
                             <span class="es-slate2-lit">eventschedule.com</span> as the site root. Point

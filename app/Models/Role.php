@@ -2074,6 +2074,33 @@ class Role extends Model implements MustVerifyEmail
         return $this->profile_image_url;
     }
 
+    /**
+     * The picture a link preview of this schedule shows (og:image, twitter:image): the header the
+     * owner uploaded, else their profile photo, else the background they uploaded. A wide header
+     * is what a large card is shaped for, which a square logo is not.
+     *
+     * Uploads only, and only the one the owner has selected. header_image names a BUILT-IN header
+     * (a public/images/headers file), 'logos' or 'none'; an upload in header_image_url is the
+     * schedule's header only while header_image is blank, which is what the edit form's "custom"
+     * option saves. The background works the same way through background_image, and only while
+     * the background is an image at all. Built-in art is not the owner's picture, and none of ours
+     * ever is (docs/BRANDING_MATRIX.md rule 6): with no upload this is null and the card degrades
+     * to the owner's own text.
+     *
+     * width and height only when known: see Event::shareImage() for the upload-time hook.
+     *
+     * @return array{url: string, width?: int, height?: int}|null
+     */
+    public function shareImage(): ?array
+    {
+        $header = blank($this->header_image) ? $this->header_image_url : '';
+        $background = ($this->background === 'image' && blank($this->background_image))
+            ? $this->background_image_url
+            : '';
+
+        return \App\Utils\SeoUtils::imageObject(($header ?: $this->profile_image_url ?: $background) ?: null);
+    }
+
     public function getProfileImageUrlAttribute($value)
     {
         if (! $value) {

@@ -2678,10 +2678,18 @@ class RoleController extends Controller
 
         $fonts = array_unique($fonts);
 
+        // The schedule page's next public events, the same for every visitor: its <title> says
+        // "Upcoming Events" while there are any, and its meta description names the first few.
+        // See AppGuestLayout::$upcoming. Only the schedule page itself (home or sub-schedule) looks.
+        $upcoming = ($view === 'role/show-guest' && ! $event)
+            ? $this->eventRepo->upcomingForGuest($role, $selectedGroup, 50)
+            : null;
+
         $response = response()
             ->view($view, compact(
                 'subdomain',
                 'events',
+                'upcoming',
                 'hasEarlierUpcomingEvents',
                 'carouselEvents',
                 'role',

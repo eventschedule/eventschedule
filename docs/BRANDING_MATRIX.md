@@ -103,7 +103,7 @@ the head, and `servesOnCustomDomain()` removes that one too.
 | Embed snippet line | `resources/views/components/embed-modal.blade.php`, `components/embed-ticket-modal.blade.php` | `$role->showBranding()` |
 | Ticket embed frame | `resources/views/event/show-guest-ticket-embed.blade.php` | `$role->showBranding()` |
 | Newsletter footer | `resources/views/emails/newsletter.blade.php` via `NewsletterService` | `$role->showBranding()` |
-| `<title>` | `App\View\Components\AppGuestLayout::guestTitle()` | none - never branded |
+| `<title>` | `App\View\Components\AppGuestLayout::guestTitle()`, built by `App\Utils\GuestSeo` | none - never branded |
 | `og:site_name` | `resources/views/layouts/app-guest.blade.php` (4 branches) | none - never branded |
 | `BreadcrumbList` root | `resources/views/layouts/app-guest.blade.php` (2 branches) | `! $role->servesOnCustomDomain()` |
 | `og:image` / `twitter:image` | `resources/views/layouts/app-guest.blade.php` (5 branches incl. JSON-LD) | none - never branded; omitted entirely when the owner has no image |

@@ -2376,6 +2376,7 @@ return [
     'admin_session_changed' => 'פרטי ההפעלה שלך השתנו. אנא אשר את הסיסמה שלך שוב.',
     'admin_password_required' => 'עליך להגדיר סיסמה לפני הגישה לאזור הניהול.',
     'view_schedule_for' => 'צפה בלוח האירועים של :name',
+    'guest_meta_upcoming_list' => 'בקרוב: :events',
 
     // Boost
     'boost' => 'קידום',

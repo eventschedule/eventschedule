@@ -230,6 +230,107 @@ class GuestSocialImageTest extends TestCase
     }
 
     /**
+     * A wide header the owner uploaded is what a large card is shaped for, so it comes before
+     * their square logo (Role::shareImage()).
+     */
+    public function test_a_schedule_prefers_its_uploaded_header_to_its_logo(): void
+    {
+        // header_image blank is the edit form's "custom" option: the upload is the header.
+        $role = $this->role([
+            'profile_image_url' => 'profile_bluenote.png',
+            'header_image' => '',
+            'header_image_url' => 'header_bluenote.png',
+        ]);
+
+        $content = $this->get('/'.$role->subdomain)->assertOk()->getContent();
+
+        $this->assertStringContainsString('header_bluenote.png', (string) $this->ogImage($content));
+        $this->assertStringContainsString('header_bluenote.png', (string) $this->twitterImage($content));
+        $this->assertStringContainsString('<meta name="twitter:card" content="summary_large_image">', $content);
+    }
+
+    /**
+     * A built-in header is stock art, not the owner's picture. With nothing uploaded the page
+     * still advertises no image - even though an upload from before they picked the built-in one
+     * is still stored.
+     */
+    public function test_a_built_in_header_or_background_is_never_the_preview(): void
+    {
+        $role = $this->role([
+            'profile_image_url' => null,
+            'header_image' => 'Arena',
+            'header_image_url' => 'header_old_upload.png',
+            'background' => 'image',
+            'background_image' => 'Abstract_Sunrise',
+            'background_image_url' => 'background_old_upload.png',
+        ]);
+
+        $content = $this->get('/'.$role->subdomain)->assertOk()->getContent();
+
+        $this->assertStringNotContainsString('property="og:image"', $content);
+        $this->assertStringNotContainsString('name="twitter:image"', $content);
+        $this->assertStringContainsString('<meta name="twitter:card" content="summary">', $content);
+    }
+
+    /** With no header and no logo, the background the owner uploaded is still theirs. */
+    public function test_a_schedule_falls_back_to_its_uploaded_background(): void
+    {
+        $role = $this->role([
+            'profile_image_url' => null,
+            'header_image' => 'none',
+            'background' => 'image',
+            'background_image' => null,
+            'background_image_url' => 'background_bluenote.png',
+        ]);
+
+        $content = $this->get('/'.$role->subdomain)->assertOk()->getContent();
+
+        $this->assertStringContainsString('background_bluenote.png', (string) $this->ogImage($content));
+        $this->assertStringNotContainsString(self::PLATFORM_AD, $content);
+    }
+
+    /**
+     * An event with no flyer, performer or venue picture falls back to the schedule that created
+     * it - a curator's logo on a curated listing - before giving up (Event::shareImage()).
+     */
+    public function test_an_event_falls_back_to_the_logo_of_the_schedule_that_created_it(): void
+    {
+        $curator = $this->createCurator($this->createOwner(), ['profile_image_url' => 'profile_curator.png']);
+        $venue = $this->role(['profile_image_url' => null]);
+        $event = $this->createEvent($venue, ['creator_role_id' => $curator->id]);
+        $event->roles()->attach($curator->id, ['is_accepted' => true]);
+
+        $content = $this->get($this->guestEventUrl($venue, $event))->assertOk()->getContent();
+
+        $this->assertStringContainsString('profile_curator.png', (string) $this->ogImage($content));
+    }
+
+    /**
+     * og:image:width and og:image:height are emitted only when the file's real size is known -
+     * today, a file this app serves itself - never guessed: scrapers crop to a declared size.
+     */
+    public function test_image_dimensions_are_declared_only_when_known(): void
+    {
+        $role = $this->role(['profile_image_url' => null]);
+
+        // A bundled demo flyer: a real 800x600 file under public/.
+        $known = $this->createEvent($role, ['creator_role_id' => $role->id, 'flyer_image_url' => 'demo_flyer_jazz.jpg']);
+        $content = $this->get($this->guestEventUrl($role, $known))->assertOk()->getContent();
+
+        $this->assertStringContainsString('demo_flyer_jazz.jpg', (string) $this->ogImage($content));
+        $this->assertStringContainsString('<meta property="og:image:width" content="800">', $content);
+        $this->assertStringContainsString('<meta property="og:image:height" content="600">', $content);
+
+        // An upload with no readable file behind it: the image, and no size.
+        $unknown = $this->createEvent($role, ['creator_role_id' => $role->id, 'flyer_image_url' => 'flyer_missing.png']);
+        $content = $this->get($this->guestEventUrl($role, $unknown))->assertOk()->getContent();
+
+        $this->assertStringContainsString('flyer_missing.png', (string) $this->ogImage($content));
+        $this->assertStringNotContainsString('og:image:width', $content);
+        $this->assertStringNotContainsString('og:image:height', $content);
+    }
+
+    /**
      * FAILS before the change: ticket/view.blade.php set no `meta` slot, so it fell through to
      * layouts/app.blade.php's default block - which names "Event Schedule" in og:title and
      * og:site_name and offers PLATFORM_AD as og:image.

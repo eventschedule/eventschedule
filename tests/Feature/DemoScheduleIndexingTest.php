@@ -83,8 +83,12 @@ class DemoScheduleIndexingTest extends TestCase
         $role = $this->createRole($this->createOwner(), 'venue', ['name' => 'Real Venue']);
         $event = $this->createEvent($role, ['name' => 'Real Gig']);
 
-        $this->assertSame('index, follow', $this->robotsOf('/'.$role->subdomain));
-        $this->assertSame('index, follow', $this->robotsOf($this->guestEventUrl($role, $event)));
+        // The full indexable directive set, the same the marketing pages send: max-image-preview
+        // is what lets a result show the event's picture larger than a thumbnail.
+        $indexable = 'index, follow, max-image-preview:large, max-snippet:-1, max-video-preview:-1';
+
+        $this->assertSame($indexable, $this->robotsOf('/'.$role->subdomain));
+        $this->assertSame($indexable, $this->robotsOf($this->guestEventUrl($role, $event)));
     }
 
     public function test_demo_schedules_are_not_in_the_sitemap(): void

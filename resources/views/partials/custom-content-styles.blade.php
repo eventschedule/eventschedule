@@ -36,6 +36,14 @@
     .custom-content * + h3 { margin-top: 0.5rem; }
     .custom-content * + h4, .custom-content * + h5, .custom-content * + h6 { margin-top: 0.5rem; }
 
+    {{-- An owner's "# Heading" on a guest page, demoted to an h2 so the page keeps a single h1
+         (MarkdownUtils::demoteH1()). It keeps the H1's look: the owner typed a top-level heading.
+         These out-rank the h2 rules above on specificity, so their order is not load-bearing.
+         A Blade comment, not a CSS one: this block is printed into every page, and heading counts
+         read the markup. --}}
+    .custom-content [data-es-h1] { font-size: 1.8rem; font-weight: 700; }
+    .custom-content * + [data-es-h1] { margin-top: 1rem; }
+
     /* Paragraph spacing */
     .custom-content p { margin: 0 0 0.5em; }
     .custom-content * + p { margin-top: 0.5em; }

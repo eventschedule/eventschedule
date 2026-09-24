@@ -1454,8 +1454,10 @@
             {{ $role->customLabel('about') }}
           </h2>
           <div class="{{ $descriptionDir === 'rtl' ? 'rtl' : '' }}" dir="{{ $descriptionDir }}">
+            {{-- demoteH1(): the event name above is the page's one <h1>, so an owner's "# Heading"
+                 renders as a marked <h2> that keeps the H1's look (custom-content-styles). --}}
             <div class="text-gray-700 dark:text-gray-300 text-base custom-content">
-              {!! \App\Utils\UrlUtils::convertUrlsToLinks($descriptionHtml) !!}
+              {!! \App\Utils\UrlUtils::convertUrlsToLinks(\App\Utils\MarkdownUtils::demoteH1($descriptionHtml)) !!}
             </div>
           </div>
         </article>
@@ -1491,7 +1493,7 @@
                   @endif
                   <span dir="{{ content_dir_for_language($part->nameInLanguage($displayLang, $eventTargetLang), $displayLang) }}" class="text-gray-900 dark:text-gray-100 font-medium">{!! str_replace(' , ', '<br>', e($part->nameInLanguage($displayLang, $eventTargetLang))) !!}</span>
                   @if ($part->descriptionHtmlInLanguage($displayLang, $eventTargetLang))
-                  <div dir="{{ content_dir_for_language($part->descriptionHtmlInLanguage($displayLang, $eventTargetLang), $displayLang) }}" class="text-sm text-gray-500 dark:text-gray-400 mt-0.5 prose prose-sm dark:prose-invert max-w-none">{!! $part->descriptionHtmlInLanguage($displayLang, $eventTargetLang) !!}</div>
+                  <div dir="{{ content_dir_for_language($part->descriptionHtmlInLanguage($displayLang, $eventTargetLang), $displayLang) }}" class="text-sm text-gray-500 dark:text-gray-400 mt-0.5 prose prose-sm dark:prose-invert max-w-none">{!! \App\Utils\MarkdownUtils::demoteH1($part->descriptionHtmlInLanguage($displayLang, $eventTargetLang)) !!}</div>
                   @endif
                   @if (!is_demo_role($role))
                   @php
@@ -1685,7 +1687,7 @@
                 <div class="flex-1">
                   <span dir="{{ content_dir_for_language($part->nameInLanguage($displayLang, $eventTargetLang), $displayLang) }}" class="text-gray-900 dark:text-gray-100 font-medium">{!! str_replace(' , ', '<br>', e($part->nameInLanguage($displayLang, $eventTargetLang))) !!}</span>
                   @if ($part->descriptionHtmlInLanguage($displayLang, $eventTargetLang))
-                  <div dir="{{ content_dir_for_language($part->descriptionHtmlInLanguage($displayLang, $eventTargetLang), $displayLang) }}" class="text-sm text-gray-500 dark:text-gray-400 block mt-0.5 prose prose-sm dark:prose-invert max-w-none">{!! $part->descriptionHtmlInLanguage($displayLang, $eventTargetLang) !!}</div>
+                  <div dir="{{ content_dir_for_language($part->descriptionHtmlInLanguage($displayLang, $eventTargetLang), $displayLang) }}" class="text-sm text-gray-500 dark:text-gray-400 block mt-0.5 prose prose-sm dark:prose-invert max-w-none">{!! \App\Utils\MarkdownUtils::demoteH1($part->descriptionHtmlInLanguage($displayLang, $eventTargetLang)) !!}</div>
                   @endif
                   @if (!is_demo_role($role))
                   @php
