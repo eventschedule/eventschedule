@@ -1,4 +1,4 @@
-<x-app-guest-layout :role="$role" :fonts="$fonts" :has-inline-lang-toggle="$role->headerStyle() !== 'banner'" :ad-slot="true" :banner-bar="true" :cart="true" :page-title="isset($selectedGroup) && $selectedGroup ? $selectedGroup->translatedName() : null" :upcoming="$upcoming ?? null">
+<x-app-guest-layout :role="$role" :fonts="$fonts" :has-inline-lang-toggle="$role->headerStyle() !== 'banner'" :ad-slot="true" :banner-bar="true" :cart="true" :page-title="isset($selectedGroup) && $selectedGroup ? $selectedGroup->translatedName() : null" :upcoming="$upcoming ?? null" :schedule-home="! (isset($selectedGroup) && $selectedGroup)">
 
   @php
    $isRtl = is_rtl();

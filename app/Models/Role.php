@@ -12,6 +12,7 @@ use App\Utils\CustomFieldUtils;
 use App\Utils\GeminiUtils;
 use App\Utils\ImageUtils;
 use App\Utils\MarkdownUtils;
+use App\Utils\SeoUtils;
 use App\Utils\UrlUtils;
 use Illuminate\Auth\MustVerifyEmail as MustVerifyEmailTrait;
 use Illuminate\Contracts\Auth\MustVerifyEmail;
@@ -2609,6 +2610,342 @@ class Role extends Model implements MustVerifyEmail
     public function getCanonicalUrl()
     {
         return $this->getGuestUrl($this->servesOnCustomDomain());
+    }
+
+    /**
+     * The query a guest URL of this schedule carries when shown in $lang: "?lang={code}" for its
+     * second language, nothing for its first. The primary language lives on the clean URL - the one
+     * the sitemap submits and people link to - so only the alternate carries the parameter.
+     *
+     * The one definition layouts/app-guest.blade.php prints on the canonical tag and the JSON-LD
+     * prints as each node's url (Event::schemaNode(), schemaNode()), so the two cannot drift.
+     */
+    public function langQuerySuffix(?string $lang): string
+    {
+        return ($lang && $this->offersTranslation() && $lang !== $this->language_code) ? '?lang='.$lang : '';
+    }
+
+    /**
+     * Whether the schedule shows its phone number: given, switched on, and verified. The rule the
+     * guest header has always applied, shared with the structured data.
+     */
+    public function showsPhone(): bool
+    {
+        return (bool) ($this->phone && $this->show_phone && $this->phone_verified_at);
+    }
+
+    /*
+     * Structured data. A schedule is a node of its own on its page (schemaNode()) and appears in
+     * every event's node as its venue, organizer or performer (Event::schemaNode()). All of them
+     * share one @id, "{canonical}#schedule", so a crawler reads one entity however it arrives.
+     */
+
+    /** How many upcoming events a schedule's node lists. */
+    public const SCHEMA_UPCOMING_LIMIT = 10;
+
+    /**
+     * The canonical URL structured data may link this schedule at: claimed and not deleted. An
+     * unclaimed placeholder's page is not its own (getGuestUrl() is '' for it), and a deleted
+     * schedule's page is a 404.
+     */
+    public function schemaCanonicalUrl(): ?string
+    {
+        if (! $this->isClaimed() || $this->is_deleted) {
+            return null;
+        }
+
+        return $this->getCanonicalUrl() ?: null;
+    }
+
+    /** "{canonical}#schedule", or null when the schedule has no canonical to hang it on. */
+    public function schemaId(): ?string
+    {
+        $url = $this->schemaCanonicalUrl();
+
+        return $url ? $url.'#schedule' : null;
+    }
+
+    /**
+     * This schedule's node on its own guest pages.
+     *
+     * A venue is an EventVenue (a Place: address, geo, a telephone only where the page shows one),
+     * talent a Person, a curator an Organization; venues and curators carry their profile picture
+     * as their logo, which a Person has no property for. Named and described in $lang, the page's
+     * language; the url is the page's canonical, ?lang= included (langQuerySuffix()).
+     *
+     * No inLanguage, which schema.org defines on creative works and events, not on a place, a
+     * person or an organization. sameAs is withheld for an unverified schedule ($isUnverified), so
+     * a page nobody has vouched for cannot seed structured-data backlinks.
+     *
+     * $upcoming is EventRepo::upcomingForGuest(): up to SCHEMA_UPCOMING_LIMIT of those events with a
+     * location are listed as compact Event nodes - "event" on a venue or an organization,
+     * "performerIn" on a person - at their undated canonical URLs, dated by the occurrence the list
+     * computed. Everything they read is already loaded with them, so the list adds no queries.
+     *
+     * @param  \Illuminate\Support\Collection<int, array{event: Event, date: string}>  $upcoming
+     * @return array<string, mixed>
+     */
+    public function schemaNode(string $lang, bool $isUnverified, \Illuminate\Support\Collection $upcoming): array
+    {
+        $type = $this->isVenue() ? 'EventVenue' : ($this->isTalent() ? 'Person' : 'Organization');
+        $canonical = $this->schemaCanonicalUrl();
+
+        $node = ['@context' => 'https://schema.org', '@type' => $type];
+
+        if ($canonical) {
+            $node['@id'] = $canonical.'#schedule';
+        }
+
+        $node['name'] = SeoUtils::cleanText($this->nameInLanguage($lang));
+
+        if (($description = $this->schemaDescription($lang)) !== null) {
+            $node['description'] = $description;
+        }
+
+        if ($canonical) {
+            $node['url'] = $canonical.$this->langQuerySuffix($lang);
+        }
+
+        if ($type !== 'Person' && ($logo = SeoUtils::schemaImageObject(SeoUtils::imageObject($this->profile_image_url ?: null)))) {
+            $node['logo'] = $logo;
+        }
+
+        if ($image = SeoUtils::schemaImageObject($this->shareImage())) {
+            $node['image'] = $image;
+        }
+
+        if ($this->isVenue()) {
+            if ($address = $this->schemaAddress($lang)) {
+                $node['address'] = $address;
+            }
+
+            if ($geo = $this->schemaGeo()) {
+                $node['geo'] = $geo;
+            }
+
+            if ($this->showsPhone()) {
+                $node['telephone'] = (string) $this->phone;
+            }
+        }
+
+        if (! $isUnverified && ($sameAs = $this->schemaSameAs())) {
+            $node['sameAs'] = $sameAs;
+        }
+
+        $events = [];
+
+        foreach ($upcoming as $row) {
+            if (! ($row['event'] ?? null) instanceof Event) {
+                continue;
+            }
+
+            $entry = $row['event']->schemaNode($row['date'] ?? null, $this, $lang, true);
+
+            // Google reads an event without a location as no event at all.
+            if (! isset($entry['location'])) {
+                continue;
+            }
+
+            $events[] = $entry;
+
+            if (count($events) === self::SCHEMA_UPCOMING_LIMIT) {
+                break;
+            }
+        }
+
+        if ($events) {
+            $node[$type === 'Person' ? 'performerIn' : 'event'] = $events;
+        }
+
+        return $node;
+    }
+
+    /**
+     * The WebSite node that lets Google show this schedule's name as the site name in results.
+     *
+     * Only where the schedule IS the site: its canonical is the root of a host (a hosted subdomain,
+     * or a custom domain it is served on directly), and the page is that root in its primary
+     * language. Null under selfhost path routing, where /{subdomain} is a section of the operator's
+     * site, and on the ?lang= alternate, which is not the site's home URL - Google takes one name
+     * per site, from its home page. The layout emits it on the schedule home alone.
+     *
+     * @return array<string, string>|null
+     */
+    public function websiteSchemaNode(string $lang): ?array
+    {
+        $canonical = $this->schemaCanonicalUrl();
+
+        if (! $canonical || $this->langQuerySuffix($lang) !== '') {
+            return null;
+        }
+
+        if (! in_array(parse_url($canonical, PHP_URL_PATH), [null, '', '/'], true)) {
+            return null;
+        }
+
+        $name = SeoUtils::cleanText($this->nameInLanguage($lang));
+
+        if ($name === '') {
+            return null;
+        }
+
+        return [
+            '@context' => 'https://schema.org',
+            '@type' => 'WebSite',
+            'name' => $name,
+            'url' => $canonical,
+        ];
+    }
+
+    /**
+     * This schedule as an event's organizer or performer: a Person for talent, else an
+     * Organization (or $type), named in $lang, with its url and @id only when it is claimed. Null
+     * without a name.
+     *
+     * @return array<string, string>|null
+     */
+    public function schemaAgent(string $lang, ?string $type = null): ?array
+    {
+        $name = SeoUtils::cleanText($this->nameInLanguage($lang));
+
+        if ($name === '') {
+            return null;
+        }
+
+        $node = ['@type' => $type ?? ($this->isTalent() ? 'Person' : 'Organization')];
+
+        if ($id = $this->schemaId()) {
+            $node['@id'] = $id;
+        }
+
+        $node['name'] = $name;
+
+        if ($url = $this->schemaCanonicalUrl()) {
+            $node['url'] = $url;
+        }
+
+        return $node;
+    }
+
+    /**
+     * This venue as the Place an event happens at, in $lang: its name, else its short address;
+     * the PostalAddress; geo when coordinates exist; url and @id only when it is claimed. Null
+     * when it has nothing at all to say about where it is.
+     *
+     * @return array<string, mixed>|null
+     */
+    public function schemaPlace(string $lang): ?array
+    {
+        $name = SeoUtils::cleanText($this->nameInLanguage($lang)) ?: implode(', ', array_filter([
+            SeoUtils::cleanText($this->textInLanguage('address1', $lang)),
+            SeoUtils::cleanText($this->textInLanguage('city', $lang)),
+        ]));
+        $address = $this->schemaAddress($lang);
+        $geo = $this->schemaGeo();
+
+        if ($name === '' && ! $address && ! $geo) {
+            return null;
+        }
+
+        $place = ['@type' => 'Place'];
+
+        if ($id = $this->schemaId()) {
+            $place['@id'] = $id;
+        }
+
+        if ($name !== '') {
+            $place['name'] = $name;
+        }
+
+        if ($url = $this->schemaCanonicalUrl()) {
+            $place['url'] = $url;
+        }
+
+        if ($address) {
+            $place['address'] = $address;
+        }
+
+        if ($geo) {
+            $place['geo'] = $geo;
+        }
+
+        return $place;
+    }
+
+    /**
+     * The venue's PostalAddress in $lang: the street (with its second line), city, region and
+     * postal code, then the country as an upper-case ISO code. With none of the first four, the
+     * geocoded formatted_address stands in as the street. Null when there is neither - never an
+     * empty PostalAddress, and never a country on its own, which was 18% of production's event
+     * addresses and locates nothing.
+     *
+     * @return array<string, string>|null
+     */
+    private function schemaAddress(string $lang): ?array
+    {
+        $fields = array_filter([
+            'streetAddress' => implode(', ', array_filter([
+                SeoUtils::cleanText($this->textInLanguage('address1', $lang)),
+                SeoUtils::cleanText($this->textInLanguage('address2', $lang)),
+            ])),
+            'addressLocality' => SeoUtils::cleanText($this->textInLanguage('city', $lang)),
+            'addressRegion' => SeoUtils::cleanText($this->textInLanguage('state', $lang)),
+            'postalCode' => SeoUtils::cleanText((string) $this->postal_code),
+        ], fn (string $value) => $value !== '');
+
+        if (! $fields && ($formatted = SeoUtils::cleanText((string) $this->formatted_address)) !== '') {
+            $fields['streetAddress'] = $formatted;
+        }
+
+        if (! $fields) {
+            return null;
+        }
+
+        if ($country = strtoupper(trim((string) $this->country_code))) {
+            $fields['addressCountry'] = $country;
+        }
+
+        return ['@type' => 'PostalAddress'] + $fields;
+    }
+
+    /** GeoCoordinates from geo_lat and geo_lon, when both are real coordinates. */
+    private function schemaGeo(): ?array
+    {
+        if (! is_numeric($this->geo_lat) || ! is_numeric($this->geo_lon)) {
+            return null;
+        }
+
+        $latitude = (float) $this->geo_lat;
+        $longitude = (float) $this->geo_lon;
+
+        if (($latitude == 0.0 && $longitude == 0.0) || abs($latitude) > 90 || abs($longitude) > 180) {
+            return null;
+        }
+
+        return ['@type' => 'GeoCoordinates', 'latitude' => $latitude, 'longitude' => $longitude];
+    }
+
+    /**
+     * The schedule's description as plain text in $lang: the long one, else the short one, at most
+     * Event::SCHEMA_DESCRIPTION_MAX characters. Null when it has neither.
+     */
+    private function schemaDescription(string $lang): ?string
+    {
+        $text = SeoUtils::plainText($this->textInLanguage('description_html', $lang))
+            ?: SeoUtils::cleanText($this->textInLanguage('short_description', $lang));
+
+        return $text === '' ? null : SeoUtils::excerpt($text, Event::SCHEMA_DESCRIPTION_MAX);
+    }
+
+    /** @return array<int, string> the social links' URLs */
+    private function schemaSameAs(): array
+    {
+        return collect($this->decodeLinks('social_links'))
+            ->map(fn ($link) => is_string($link->url ?? null) ? trim($link->url) : '')
+            ->filter()
+            ->unique()
+            ->values()
+            ->all();
     }
 
     public function toData()

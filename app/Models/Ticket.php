@@ -400,6 +400,7 @@ class Ticket extends Model
                 ? count($this->pass_event_ids ?? [])
                 : null;
         }
+        // Keeps the key's place in the payload; availableQuantity() fills in the real bound below.
         $data['quantity'] = $this->quantity;
         $data['seating_band'] = $this->seating_band ?: null;
         // The guest form swaps the quantity dropdown for the seat picker on this flag.
@@ -409,7 +410,24 @@ class Ticket extends Model
         $data['description'] = $this->description ? UrlUtils::convertUrlsToLinks($this->description_html ?? $this->description) : null;
         $data['image_url'] = $this->image_url ?: null;
         $data['url'] = $this->url ?: null;
+        $data['quantity'] = $this->availableQuantity($date);
+        $data['volume_discount'] = TicketVolumeDiscount::toGuestPayload($this->volume_discount);
 
+        return $data;
+    }
+
+    /**
+     * How many of this ticket one order may take for the occurrence on $date: the guest form's
+     * quantity dropdown, which prints "Sold out" at 0. The event's JSON-LD reads the same number
+     * (Event::schemaNode()), so the two cannot disagree about a sell-out.
+     *
+     * Set the event relation first when calling it for several rows (setRelation('event', ...)):
+     * the house bound below reads it.
+     *
+     * @return int
+     */
+    public function availableQuantity($date = null)
+    {
         $sold = $this->soldCountFor($date);
 
         // ?: 20 as well as the clamp in config/app.php: an install that caches its config
@@ -428,23 +446,23 @@ class Ticket extends Model
         // individual mode both apply, and for non-pass events the house never binds
         // tighter than the per-ticket limit (so behavior is unchanged there).
         if ($this->is_pass || $this->is_addon || ! $this->event) {
-            $data['quantity'] = $this->quantity > 0 ? max(0, min($perOrderCap, $this->quantity - $sold)) : $perOrderCap;
-        } elseif ($this->isAllocated($date)) {
+            return $this->quantity > 0 ? max(0, min($perOrderCap, $this->quantity - $sold)) : $perOrderCap;
+        }
+
+        if ($this->isAllocated($date)) {
             // An allocated ticket's inventory is rows in the seat map, not quantity minus sold, so
             // the JSON sold-count map does not enter into it - a seat that was refunded is back in
             // the map the moment its status flips, with no counter to keep in step. The number is
             // still clamped to the per-order cap because it drives the picker's selectable maximum.
             $available = $this->event->allocatedSeatsRemaining($date, $this);
-            $data['quantity'] = $available === null ? $perOrderCap : max(0, min($perOrderCap, $available));
-        } else {
-            $houseRemaining = $this->event->occurrenceSeatsRemaining($date);
-            $ownRemaining = $this->quantity > 0 ? max(0, $this->quantity - $sold) : null;
-            $bounds = array_filter([$ownRemaining, $houseRemaining], fn ($v) => $v !== null);
-            $data['quantity'] = empty($bounds) ? $perOrderCap : max(0, min($perOrderCap, min($bounds)));
+
+            return $available === null ? $perOrderCap : max(0, min($perOrderCap, $available));
         }
 
-        $data['volume_discount'] = TicketVolumeDiscount::toGuestPayload($this->volume_discount);
+        $houseRemaining = $this->event->occurrenceSeatsRemaining($date);
+        $ownRemaining = $this->quantity > 0 ? max(0, $this->quantity - $sold) : null;
+        $bounds = array_filter([$ownRemaining, $houseRemaining], fn ($v) => $v !== null);
 
-        return $data;
+        return empty($bounds) ? $perOrderCap : max(0, min($perOrderCap, min($bounds)));
     }
 }

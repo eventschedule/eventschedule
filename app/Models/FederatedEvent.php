@@ -246,7 +246,7 @@ class FederatedEvent extends Model
 
     /**
      * Mirrors Event::getSchemaAttendanceMode(): online plus a venue is hybrid, the
-     * flag alone is online, neither is in-person.
+     * flag alone is online, and without the flag a listing is not online at all.
      *
      * The flag is the only signal, deliberately. Inferring "online" from the absence
      * of a venue calls an in-person event whose sender simply sent no venue data

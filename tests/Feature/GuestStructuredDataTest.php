@@ -49,18 +49,20 @@ class GuestStructuredDataTest extends TestCase
         $this->assertSame(self::HOSTILE_SCHEDULE, $node['location']['name']);
         $this->assertSame('Talent "T" ☃', $node['performer']['name']);
         $this->assertSame('en', $node['inLanguage']);
-        $this->assertIsBool($node['isAccessibleForFree']);
+        // No tickets, RSVP or registration link: the page states no price, so neither does this.
+        $this->assertArrayNotHasKey('isAccessibleForFree', $node);
 
         $breadcrumb = $this->nodeOfType($blocks, 'BreadcrumbList');
         $this->assertSame(self::HOSTILE_SCHEDULE, $breadcrumb['itemListElement'][1]['name']);
         $this->assertSame(self::HOSTILE_EVENT, $breadcrumb['itemListElement'][2]['name']);
 
         $html = $this->get('/'.$venue->subdomain)->assertOk()->getContent();
-        $node = $this->nodeOfType($this->jsonLdBlocks($html), 'Organization');
-        $this->assertNotNull($node, 'the schedule page emitted no Organization node');
+        $node = $this->nodeOfType($this->jsonLdBlocks($html), 'EventVenue');
+        $this->assertNotNull($node, 'the venue page emitted no EventVenue node');
         $this->assertSame(self::HOSTILE_SCHEDULE, $node['name']);
         $this->assertSame('About "us" ünï', $node['description']);
-        $this->assertSame('en', $node['inLanguage']);
+        // schema.org defines inLanguage on creative works and events, not on a place.
+        $this->assertArrayNotHasKey('inLanguage', $node);
     }
 
     public function test_breadcrumb_items_are_absolute_urls_numbered_from_one(): void
@@ -111,7 +113,7 @@ class GuestStructuredDataTest extends TestCase
             'custom_domain_mode' => 'direct',
             'custom_domain_status' => 'active',
         ]);
-        $event = $this->createEvent($role, ['name' => 'Offer Event']);
+        $event = $this->createEvent($role, ['name' => 'Offer Event', 'rsvp_enabled' => true]);
 
         $html = $this->get($this->guestEventUrl($role, $event))->assertOk()->getContent();
         $node = $this->nodeOfType($this->jsonLdBlocks($html), 'Event');
@@ -119,8 +121,15 @@ class GuestStructuredDataTest extends TestCase
 
         $this->assertStringStartsWith('https://jsonld-offer.test/', $canonical);
         $this->assertSame($canonical, $node['url']);
-        // No tickets, so a single free offer at the event's own URL.
-        $this->assertSame($canonical, $node['offers']['url']);
+        // RSVP, so a single free offer at the event's own URL, opening the registration form.
+        $this->assertSame($canonical.'?rsvp=true', $node['offers']['url']);
+
+        // With no tickets, no RSVP and no registration link the page offers nothing, and the node
+        // used to invent a price-0, in-stock Offer for it all the same.
+        $plain = $this->createEvent($role, ['name' => 'Plain Event']);
+        $node = $this->nodeOfType($this->jsonLdBlocks($this->get($this->guestEventUrl($role, $plain))->assertOk()->getContent()), 'Event');
+        $this->assertArrayNotHasKey('offers', $node);
+        $this->assertArrayNotHasKey('isAccessibleForFree', $node);
     }
 
     public function test_organizer_and_performer_urls_use_the_custom_domain(): void

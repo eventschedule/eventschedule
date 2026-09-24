@@ -84,6 +84,13 @@ class AppGuestLayout extends Component
          * @var \Illuminate\Support\Collection<int, array{event: Event, date: string}>|null
          */
         public ?Collection $upcoming = null,
+        /**
+         * Whether this page is the schedule's HOME: its own page with no sub-schedule selected.
+         * Only the home carries the WebSite node (Role::websiteSchemaNode()), which names the site
+         * after the schedule - a claim that belongs to the site's front page, not to a sub-schedule,
+         * a form or a gift-card page that happens to render through this layout.
+         */
+        public bool $scheduleHome = false,
     ) {}
 
     /**

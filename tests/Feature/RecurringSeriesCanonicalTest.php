@@ -107,7 +107,11 @@ class RecurringSeriesCanonicalTest extends TestCase
     {
         $role = $this->createRole($this->createOwner(), 'venue');
         // Started three weeks ago, so the occurrence the page shows is not the series' first date.
-        $event = $this->sundaySeries($role, ['starts_at' => $this->sunday(-5)->format('Y-m-d H:i:s')]);
+        // Taking RSVPs, so the node has an offer whose url to check.
+        $event = $this->sundaySeries($role, [
+            'starts_at' => $this->sunday(-5)->format('Y-m-d H:i:s'),
+            'rsvp_enabled' => true,
+        ]);
         $series = $this->guestEventUrl($role, $event);
         $next = $event->nextOccurrenceFrom();
 
@@ -117,7 +121,7 @@ class RecurringSeriesCanonicalTest extends TestCase
         $this->assertSame($series, $this->canonical($html), 'the undated URL used to canonicalize to its next occurrence');
         $this->assertSame($series, $this->ogUrl($html));
         $this->assertSame($series, $node['url']);
-        $this->assertSame($series, $node['offers']['url']);
+        $this->assertSame($series.'?rsvp=true', $node['offers']['url']);
         // The dates are still the occurrence the page shows: the next one.
         $this->assertStringStartsWith($next.'T', $node['startDate']);
     }
@@ -125,7 +129,7 @@ class RecurringSeriesCanonicalTest extends TestCase
     public function test_a_dated_occurrence_canonicalizes_to_the_series_and_keeps_its_share_url(): void
     {
         $role = $this->createRole($this->createOwner(), 'venue');
-        $event = $this->sundaySeries($role);
+        $event = $this->sundaySeries($role, ['rsvp_enabled' => true]);
         $series = $this->guestEventUrl($role, $event);
         $occurrence = $this->sunday(2)->format('Y-m-d');
         $dated = $this->guestEventUrl($role, $event, $occurrence);
@@ -138,7 +142,7 @@ class RecurringSeriesCanonicalTest extends TestCase
         // og:url is the share target, so a share of this page opens this occurrence.
         $this->assertSame($dated, $this->ogUrl($html));
         $this->assertSame($series, $node['url']);
-        $this->assertSame($series, $node['offers']['url']);
+        $this->assertSame($series.'?rsvp=true', $node['offers']['url']);
         $this->assertSame($series, end($crumbs)['item']);
         // The occurrence this page is about. Noon UTC is the morning of the same day in New York.
         $this->assertStringStartsWith($occurrence.'T', $node['startDate']);

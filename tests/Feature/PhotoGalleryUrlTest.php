@@ -219,17 +219,18 @@ class PhotoGalleryUrlTest extends TestCase
 
         $galleryTypes = $this->jsonLdTypes($this->get($this->galleryUrl($role, $event))->assertOk()->getContent());
 
-        foreach (['Event', 'VideoObject', 'Organization', 'Person'] as $type) {
+        foreach (['Event', 'VideoObject', 'EventVenue', 'Organization', 'Person'] as $type) {
             $this->assertNotContains($type, $galleryTypes, "the gallery must not emit a {$type} node");
         }
 
         // An event with no date yet fails the layout's Event condition and falls to the schedule
-        // branch, which is how a gallery printed the schedule's Organization node instead.
+        // branch, which is how a gallery printed the schedule's node (this venue's EventVenue)
+        // instead.
         $tba = $this->createEvent($role, ['name' => 'Date TBA', 'fan_photos_enabled' => true]);
         Event::whereKey($tba->id)->update(['starts_at' => null]);
 
         $tbaTypes = $this->jsonLdTypes($this->get($this->galleryUrl($role, $tba))->assertOk()->getContent());
-        $this->assertNotContains('Organization', $tbaTypes, 'the gallery must not emit the schedule node');
+        $this->assertNotContains('EventVenue', $tbaTypes, 'the gallery must not emit the schedule node');
         $this->assertContains('BreadcrumbList', $tbaTypes, 'fixture: the page still renders its JSON-LD');
     }
 

@@ -13,6 +13,7 @@ use App\Utils\EventTextGenerator;
 use App\Utils\ImageUtils;
 use App\Utils\MarkdownUtils;
 use App\Utils\MoneyUtils;
+use App\Utils\SeoUtils;
 use App\Utils\TextUtils;
 use App\Utils\UrlUtils;
 use Carbon\Carbon;
@@ -2793,19 +2794,25 @@ class Event extends Model
         return $this->getEventUrlDomain();
     }
 
+    /**
+     * The host of the event's online link: the only part of it a guest surface may show, because
+     * the link itself is the private way in (messages.event_url_help). It names the venue of an
+     * online event on the page, in the calendar feed and in email.
+     *
+     * A link stored without its scheme ("zoom.us/j/123?pwd=...") has no host for parse_url(), and
+     * the whole link used to come back as its "domain" and print on the public page. The web form
+     * validates event_url only as a string, so such a value can be stored.
+     */
     public function getEventUrlDomain()
     {
-        if ($this->event_url) {
-            $parsedUrl = parse_url($this->event_url);
-
-            if (isset($parsedUrl['host'])) {
-                return $parsedUrl['host'];
-            } else {
-                return $this->event_url;
-            }
+        if (! $this->event_url) {
+            return '';
         }
 
-        return '';
+        $link = trim((string) $this->event_url);
+        $host = parse_url($link, PHP_URL_HOST) ?: parse_url('https://'.ltrim($link, '/'), PHP_URL_HOST);
+
+        return is_string($host) ? $host : '';
     }
 
     public function getSponsorLogos(): array
@@ -4375,338 +4382,474 @@ class Event extends Model
         return Carbon::createFromFormat('Y-m-d H:i:s', (string) $startsAt, 'UTC')->timezone($tz)->format('Y-m-d');
     }
 
-    /**
-     * Get location schema data for JSON-LD
-     */
-    public function getSchemaLocation()
-    {
-        // Always return a location object (required by Google)
-        // Use venue if available, otherwise fallback to organizer or event name
-        if ($this->venue) {
-            $venueName = $this->venue->translatedName();
-            if (empty($venueName)) {
-                $venueName = $this->translatedName(); // Fallback to event name
-            }
-
-            $location = [
-                '@type' => 'Place',
-                'name' => $venueName,
-            ];
-
-            // Add address if available
-            $address = [];
-            if ($this->venue->translatedAddress1()) {
-                $address['streetAddress'] = $this->venue->translatedAddress1();
-                if ($this->venue->translatedAddress2()) {
-                    $address['streetAddress'] .= ', '.$this->venue->translatedAddress2();
-                }
-            }
-            if ($this->venue->translatedCity()) {
-                $address['addressLocality'] = $this->venue->translatedCity();
-            }
-            if ($this->venue->translatedState()) {
-                $address['addressRegion'] = $this->venue->translatedState();
-            }
-            if ($this->venue->postal_code) {
-                $address['postalCode'] = $this->venue->postal_code;
-            }
-            if ($this->venue->country_code) {
-                $address['addressCountry'] = strtoupper($this->venue->country_code);
-            }
-
-            // Always include address field (required by Google)
-            // If we have address data, use it; otherwise provide minimal address
-            if (! empty($address)) {
-                $address['@type'] = 'PostalAddress';
-                $location['address'] = $address;
-            } else {
-                // Provide minimal address object to satisfy Google's requirement
-                $location['address'] = [
-                    '@type' => 'PostalAddress',
-                ];
-            }
-
-            // Add geo coordinates if available
-            if ($this->venue->geo_lat && $this->venue->geo_lon) {
-                $location['geo'] = [
-                    '@type' => 'GeoCoordinates',
-                    'latitude' => (float) $this->venue->geo_lat,
-                    'longitude' => (float) $this->venue->geo_lon,
-                ];
-            }
-
-            return $location;
-        }
-
-        // Fallback: use organizer name if available
-        $organizer = $this->getSchemaOrganizer();
-        $locationName = $organizer['name'] ?? $this->translatedName();
-
-        $location = [
-            '@type' => 'Place',
-            'name' => $locationName,
-        ];
-
-        // Try to get address from organizer role if available
-        $address = [];
-        $organizerRole = null;
-
-        // Check if organizer is a role with address information
-        if ($this->role() && $this->role()->isClaimed()) {
-            $organizerRole = $this->role();
-        } elseif ($this->creatorRole) {
-            $organizerRole = $this->creatorRole;
-        }
-
-        if ($organizerRole) {
-            if ($organizerRole->translatedAddress1()) {
-                $address['streetAddress'] = $organizerRole->translatedAddress1();
-                if ($organizerRole->translatedAddress2()) {
-                    $address['streetAddress'] .= ', '.$organizerRole->translatedAddress2();
-                }
-            }
-            if ($organizerRole->translatedCity()) {
-                $address['addressLocality'] = $organizerRole->translatedCity();
-            }
-            if ($organizerRole->translatedState()) {
-                $address['addressRegion'] = $organizerRole->translatedState();
-            }
-            if ($organizerRole->postal_code) {
-                $address['postalCode'] = $organizerRole->postal_code;
-            }
-            if ($organizerRole->country_code) {
-                $address['addressCountry'] = strtoupper($organizerRole->country_code);
-            }
-        }
-
-        // Always include address field (required by Google)
-        // If we have address data, use it; otherwise provide minimal address
-        if (! empty($address)) {
-            $address['@type'] = 'PostalAddress';
-            $location['address'] = $address;
-        } else {
-            // Provide minimal address object to satisfy Google's requirement
-            $location['address'] = [
-                '@type' => 'PostalAddress',
-            ];
-        }
-
-        return $location;
-    }
-
-    /**
-     * Get offers schema data for JSON-LD (tickets)
-     * Always returns at least a default free offer if no tickets are available
+    /*
+     * Structured data: the schema.org Event node on the guest pages (layouts/app-guest.blade.php)
+     * and the entries a schedule's node lists (Role::schemaNode()).
      *
-     * Each offer's url is the event's canonical URL - the same URL as the Event node's own "url" -
-     * rather than getGuestUrl(). That one ignored the custom domain a schedule is canonical on and,
-     * with no date, pointed a recurring event's offers at its FIRST occurrence, so the offers on a
-     * page disagreed with the page they sat on. On a recurring event that is the series URL, on
-     * every occurrence's page, because that is what each of those pages canonicalizes to.
+     * Every value describes what the page itself shows and offers, and nothing it does not. A crawl
+     * of 1,322 production event pages found an invented price-0 offer on 90% of them (1,057 beside
+     * isAccessibleForFree: false), an address of only a country on 18%, events with no venue
+     * located at their ORGANIZER, online events that were never a VirtualLocation, and a quarter
+     * described as "{name} - Event". Google reads all of it as fact. An event whose page states no
+     * place or price says none here: honestly ineligible for event results beats eligible on
+     * invented data.
+     *
+     * events.event_url is the PRIVATE join link of an online event (messages.event_url_help): the
+     * page prints only its domain and federation stopped sending it. It never appears here. An
+     * online event's VirtualLocation is its own page, which is where people register for the link.
      */
-    public function getSchemaOffers()
+
+    private const SCHEMA_IN_STOCK = 'https://schema.org/InStock';
+
+    private const SCHEMA_SOLD_OUT = 'https://schema.org/SoldOut';
+
+    /** The longest description a node carries: more than any consumer reads, less than a novel. */
+    public const SCHEMA_DESCRIPTION_MAX = 5000;
+
+    /**
+     * This event as a schema.org Event node, for the guest page of $viewingRole shown in $lang.
+     *
+     * $date is the occurrence the page shows - the dated URL's, the next one on a series page, a
+     * one-off event's own day - and it dates the node. The url is the page's canonical, which for a
+     * recurring event is the SERIES (canonicalTarget()), so a dated page and the series page
+     * describe different occurrences under one URL. That is why the node has no @id: one id would
+     * name one entity with two start dates.
+     *
+     * Other schedules' names are resolved in $lang (Role::nameInLanguage()), never through
+     * translatedName(), which asks the viewer's translate flag about a schedule whose language pair
+     * may be the reverse of the page's (TranslationLanguageTargetTest).
+     *
+     * $compact is an entry in a schedule node's upcoming list: when and where, what it looks like
+     * and who organizes it. No description, performers or offers - those cost ticket queries per
+     * event and belong on the event's own page - and an organizer that IS the listing schedule is a
+     * bare {"@id"} pointing at the node the page already carries.
+     *
+     * @return array<string, mixed>
+     */
+    public function schemaNode(?string $date, Role $viewingRole, string $lang, bool $compact = false): array
     {
-        $url = $this->getCanonicalUrl();
-        $validFrom = $this->created_at ? $this->created_at->toIso8601String() : $this->getSchemaStartDate();
+        $url = $this->schemaUrl($viewingRole, $lang);
 
-        if ($this->tickets_enabled && ! $this->tickets->isEmpty()) {
-            // Three states, not two. Falling through to the "free offer" default below for a
-            // ticketed event would publish structured data claiming a $25 event is free and in
-            // stock; emitting the real prices when nothing can be bought is just as wrong, because
-            // search results would show prices that lead to no buy button. So when the event is
-            // ticketed but not currently selling, publish no offers at all. Deliberately not
-            // SoldOut: that would contradict the guest-facing rule never to claim a sell-out.
-            if (! $this->canOfferTickets()) {
-                return [];
-            }
+        $node = $compact ? [] : ['@context' => 'https://schema.org'];
+        $node['@type'] = 'Event';
+        $node['name'] = SeoUtils::cleanText($this->nameInLanguage($lang, $viewingRole));
 
-            $offers = [];
-            $currency = $this->ticket_currency_code ?: 'USD';
-
-            foreach ($this->tickets as $ticket) {
-                $offer = [
-                    '@type' => 'Offer',
-                    'price' => (float) $ticket->price,
-                    'priceCurrency' => $currency,
-                    'url' => $url.(strpos($url, '?') !== false ? '&' : '?').'tickets=true',
-                    'availability' => 'https://schema.org/InStock',
-                    'validFrom' => $validFrom,
-                ];
-
-                if ($ticket->name) {
-                    $offer['name'] = $ticket->name;
-                }
-
-                if ($ticket->quantity > 0) {
-                    $offer['inventoryLevel'] = $ticket->quantity;
-                }
-
-                $offers[] = $offer;
-            }
-
-            return $offers;
+        if (! $compact && ($description = $this->getSchemaDescription($lang, $viewingRole)) !== null) {
+            $node['description'] = $description;
         }
 
-        // Return default free offer if no tickets
-        return [
-            [
-                '@type' => 'Offer',
-                'price' => '0',
-                // The event's own currency where it has one, then the installation's - never a
-                // hardcoded USD. A free offer still has to name a currency Google will accept,
-                // and a ZAR operator's every free event was publishing "USD" to search engines
-                // while the page beside it printed R.
-                'priceCurrency' => $this->ticket_currency_code ?: platform_currency(),
-                'url' => $url,
-                'availability' => 'https://schema.org/InStock',
-                'validFrom' => $validFrom,
-            ],
-        ];
+        if ($url !== '') {
+            $node['url'] = $url;
+        }
+
+        $node['startDate'] = $this->getSchemaStartDate($date);
+
+        if (($endDate = $this->getSchemaEndDate($date)) !== null) {
+            $node['endDate'] = $endDate;
+        }
+
+        $node['eventStatus'] = $this->getSchemaEventStatus();
+
+        if ($location = $this->getSchemaLocation($lang, $viewingRole)) {
+            $node['eventAttendanceMode'] = self::schemaAttendanceModeOf($location);
+            $node['location'] = $location;
+        }
+
+        if ($image = SeoUtils::schemaImageObject($this->shareImage())) {
+            $node['image'] = $image;
+        }
+
+        if ($organizer = $this->getSchemaOrganizer($lang, $compact ? $viewingRole : null)) {
+            $node['organizer'] = $organizer;
+        }
+
+        if ($compact) {
+            return $node;
+        }
+
+        if ($performers = $this->getSchemaPerformers($lang)) {
+            $node['performer'] = count($performers) === 1 ? $performers[0] : $performers;
+        }
+
+        [$offers, $free] = $this->schemaOffersAndAccess($date, $url);
+
+        if ($offers) {
+            $node['offers'] = count($offers) === 1 ? $offers[0] : $offers;
+        }
+
+        if ($free !== null) {
+            $node['isAccessibleForFree'] = $free;
+        }
+
+        $node['inLanguage'] = $lang;
+
+        return $node;
     }
 
     /**
-     * Get performers schema data for JSON-LD
+     * The event's description as plain text in $lang: the long description (block-aware and
+     * entity-decoded, SeoUtils::plainText()), else the short one, at most SCHEMA_DESCRIPTION_MAX
+     * characters. Null when the owner wrote neither - never a stand-in such as "{name} - Event",
+     * which a quarter of production's event pages published as their description.
      */
-    public function getSchemaPerformers()
+    public function getSchemaDescription(string $lang, ?Role $viewingRole = null): ?string
     {
-        $performers = [];
-        $members = $this->members();
+        $text = SeoUtils::plainText($this->descriptionHtmlInLanguage($lang, $viewingRole))
+            ?: SeoUtils::cleanText($this->shortDescriptionInLanguage($lang, $viewingRole));
 
-        foreach ($members as $member) {
-            $performer = [
-                '@type' => 'Person',
-                'name' => $member->translatedName(),
-            ];
-
-            // Canonical, not guest: on a custom domain the page lives there, and a url pointing
-            // at the subdomain names a different host than the one the crawler is reading.
-            if ($url = $member->getCanonicalUrl()) {
-                $performer['url'] = $url;
-            }
-
-            $performers[] = $performer;
-        }
-
-        return ! empty($performers) ? $performers : null;
+        return $text === '' ? null : SeoUtils::excerpt($text, self::SCHEMA_DESCRIPTION_MAX);
     }
 
     /**
-     * Get event status for JSON-LD
+     * Where the event happens, as the page shows it: the venue as a Place, the event's own page as a
+     * VirtualLocation when it is online, both for a hybrid, and null for neither.
+     *
+     * Null is the honest answer for an event with no venue and no link. The old fallback made its
+     * ORGANIZER the place - a comedy show "located" at the promoter's schedule, with that
+     * schedule's country - and filled the rest with an empty PostalAddress. The VirtualLocation's
+     * url is the page, never event_url, which is the private join link.
+     *
+     * @return array<string, mixed>|array<int, array<string, mixed>>|null
      */
-    public function getSchemaEventStatus()
+    public function getSchemaLocation(string $lang, ?Role $viewingRole = null): ?array
     {
-        if ($this->is_cancelled) {
-            return 'https://schema.org/EventCancelled';
+        $place = $this->venue?->schemaPlace($lang);
+        $pageUrl = $this->event_url ? $this->schemaUrl($viewingRole, $lang) : '';
+        $virtual = $pageUrl !== '' ? ['@type' => 'VirtualLocation', 'url' => $pageUrl] : null;
+
+        if ($place && $virtual) {
+            return [$place, $virtual];
         }
 
-        if (! $this->starts_at) {
-            return 'https://schema.org/EventScheduled';
-        }
-
-        // EventScheduled is the appropriate status for all non-cancelled events.
-        return 'https://schema.org/EventScheduled';
+        return $place ?? $virtual;
     }
 
     /**
-     * Get organizer schema data for JSON-LD
-     * Always returns an organizer (with fallback if needed)
-     * Ensures both "name" and "url" fields are always present
+     * In person, online or both, for a caller that needs only the mode (the Meta Pixel's
+     * content_category); null for an event with neither. The JSON-LD derives the same mode from
+     * the location it actually publishes (schemaAttendanceModeOf()), which also drops a venue that
+     * has nothing at all to say about itself (Role::schemaPlace()).
      */
-    public function getSchemaOrganizer()
+    public function getSchemaAttendanceMode(): ?string
     {
-        $eventUrl = $this->getCanonicalUrl();
-        $eventName = $this->translatedName() ?: 'Event Organizer';
-
-        if ($this->venue && $this->venue->isClaimed()) {
-            $name = $this->venue->translatedName();
-            $url = $this->venue->getCanonicalUrl();
-
-            return [
-                '@type' => 'Organization',
-                'name' => $name ?: $eventName,
-                'url' => $url ?: $eventUrl,
-            ];
-        } elseif ($this->role() && $this->role()->isClaimed()) {
-            $name = $this->role()->translatedName();
-            $url = $this->role()->getCanonicalUrl();
-
-            return [
-                '@type' => 'Person',
-                'name' => $name ?: $eventName,
-                'url' => $url ?: $eventUrl,
-            ];
-        } elseif ($this->creatorRole) {
-            // Fallback to creator role
-            $name = $this->creatorRole->translatedName();
-            $url = $this->creatorRole->getCanonicalUrl();
-
-            return [
-                '@type' => $this->creatorRole->isVenue() ? 'Organization' : 'Person',
-                'name' => $name ?: $eventName,
-                'url' => $url ?: $eventUrl,
-            ];
-        }
-
-        // Final fallback - use event name as organizer
-        return [
-            '@type' => 'Organization',
-            'name' => $eventName,
-            'url' => $eventUrl,
-        ];
+        return match (true) {
+            $this->venue && $this->event_url => 'https://schema.org/MixedEventAttendanceMode',
+            (bool) $this->event_url => 'https://schema.org/OnlineEventAttendanceMode',
+            (bool) $this->venue => 'https://schema.org/OfflineEventAttendanceMode',
+            default => null,
+        };
     }
 
-    /**
-     * Get event attendance mode for JSON-LD
-     */
-    public function getSchemaAttendanceMode()
+    /** The attendance mode a getSchemaLocation() result describes. */
+    private static function schemaAttendanceModeOf(array $location): string
     {
-        if ($this->event_url && $this->venue) {
+        if (array_is_list($location)) {
             return 'https://schema.org/MixedEventAttendanceMode';
-        } elseif ($this->event_url) {
-            return 'https://schema.org/OnlineEventAttendanceMode';
         }
 
-        return 'https://schema.org/OfflineEventAttendanceMode';
+        return ($location['@type'] ?? null) === 'VirtualLocation'
+            ? 'https://schema.org/OnlineEventAttendanceMode'
+            : 'https://schema.org/OfflineEventAttendanceMode';
     }
 
     /**
-     * Get description for JSON-LD
-     * Always returns a description (with fallback if needed)
-     */
-    public function getSchemaDescription()
-    {
-        $description = $this->translatedDescription();
-        $description = trim(strip_tags($description));
-
-        if (empty($description)) {
-            // Fallback description
-            return $this->translatedName().' - '.__('messages.event');
-        }
-
-        return $description;
-    }
-
-    /**
-     * Get ISO 8601 formatted date string for schema.
+     * Who organizes the event: the first CLAIMED schedule of its creator, its venue and its
+     * performers - a Person for a talent schedule, an Organization otherwise - named in $lang, with
+     * its canonical url and "{canonical}#schedule" @id, the @id the schedule's own page gives its
+     * node (Role::schemaNode()), so the two describe one entity.
      *
-     * Structured data must be absolute: pinned to the venue so a crawler and a signed-in owner
-     * emit the same instant, not just the same wall-clock with a different offset.
+     * Null when none of them is claimed. An unclaimed placeholder has no page of its own to point
+     * at, and the old last resort - an Organization named after the EVENT - was invented.
+     *
+     * $listedOn: the schedule whose page lists this event (a compact entry). When the organizer IS
+     * that schedule, a bare {"@id"} points at the node the page already carries.
+     *
+     * @return array<string, string>|null
+     */
+    public function getSchemaOrganizer(string $lang, ?Role $listedOn = null): ?array
+    {
+        $candidates = collect([$this->creatorRole, $this->venue])->concat($this->members());
+
+        foreach ($candidates as $candidate) {
+            if (! $candidate || $candidate->schemaCanonicalUrl() === null) {
+                continue;
+            }
+
+            if (! $agent = $candidate->schemaAgent($lang)) {
+                continue;
+            }
+
+            if ($listedOn && $candidate->id === $listedOn->id) {
+                return ['@id' => $agent['@id']];
+            }
+
+            return $agent;
+        }
+
+        return null;
+    }
+
+    /**
+     * The talent on the bill, each a Person named in $lang, linked (url and @id) only when claimed:
+     * an unclaimed act's name is still the page's lineup, it just has no page of its own.
+     *
+     * @return array<int, array<string, string>>
+     */
+    public function getSchemaPerformers(string $lang): array
+    {
+        return $this->members()
+            ->map(fn (Role $member) => $member->schemaAgent($lang, 'Person'))
+            ->filter()
+            ->values()
+            ->all();
+    }
+
+    /** Cancelled or scheduled: the app records no postponement to report, and no completion. */
+    public function getSchemaEventStatus(): string
+    {
+        return $this->is_cancelled
+            ? 'https://schema.org/EventCancelled'
+            : 'https://schema.org/EventScheduled';
+    }
+
+    /**
+     * The offers the page makes for the occurrence on $date, each at the page's canonical $url.
+     * See schemaOffersAndAccess().
+     *
+     * @return array<int, array<string, mixed>>
+     */
+    public function getSchemaOffers(?string $date, string $lang, ?Role $viewingRole = null): array
+    {
+        return $this->schemaOffersAndAccess($date, $this->schemaUrl($viewingRole, $lang))[0];
+    }
+
+    /**
+     * The offers the page actually makes, and whether getting in costs nothing.
+     *
+     * In the order the page decides its call to action (event/show-guest.blade.php):
+     *  - Cancelled, or a series with no occurrence left to date them: no offers.
+     *  - RSVP: one free Offer at the registration form (?rsvp=true) while it takes registrations,
+     *    SoldOut once this date's RSVP limit is reached (the form then offers the waitlist).
+     *  - Tickets: none while the PLAN stops the event selling (canOfferTickets()) - deliberately
+     *    not SoldOut, which would claim a sell-out that never happened. While it sells, or before
+     *    every type has gone on sale, one Offer per type the ticket form offers: a pass only when
+     *    there is nothing else, never a paid type the plan cannot sell (Ticket::isSellable()), never
+     *    one whose sales have ended. SoldOut only where the form prints "Sold out": that type's
+     *    available quantity for this date (Ticket::availableQuantity()), or the whole house. No
+     *    inventoryLevel, which used to publish the TOTAL quantity as if it were what remained.
+     *  - An external registration with a price (the page's price badge): one Offer at that price,
+     *    at the registration link, until the event is over.
+     *  - Anything else: none. The old default, a price-0 in-stock Offer on every event, sat on 90%
+     *    of production's event pages.
+     *
+     * isAccessibleForFree comes from the pricing, not the availability: true for RSVP; for
+     * tickets, whether a type the event may sell costs nothing; for an external registration,
+     * whether its price is zero; null (omitted) where the page states no price.
+     *
+     * Prices are in the event's currency, else the installation's - never a hardcoded USD.
+     *
+     * @return array{0: array<int, array<string, mixed>>, 1: ?bool}
+     */
+    private function schemaOffersAndAccess(?string $date, string $url): array
+    {
+        // The key sales and RSVPs are counted under: the occurrence, or a one-off event's own day.
+        $occurrence = self::isOccurrenceDate($date) ? $date : $this->saleEventDateFromStartsAt();
+
+        // A series with no occurrence left falls back to its FIRST date for the page's dates, and
+        // the sale and RSVP checks skip a missing date - which would offer seats at a past date.
+        $closed = $this->is_cancelled || ($this->days_of_week && ! self::isOccurrenceDate($date));
+        $currency = $this->ticket_currency_code ?: platform_currency();
+
+        if ($this->rsvp_enabled) {
+            if ($closed || ! $this->canAcceptRsvp($occurrence)) {
+                return [[], true];
+            }
+
+            return [[self::schemaOffer([
+                'price' => 0,
+                'priceCurrency' => $currency,
+                'url' => self::withSchemaQuery($url, 'rsvp=true'),
+                'availability' => $this->isRsvpFull($occurrence) ? self::SCHEMA_SOLD_OUT : self::SCHEMA_IN_STOCK,
+                'validFrom' => $this->schemaPublishedAt(),
+            ])], true];
+        }
+
+        if ($this->tickets_enabled && $this->tickets->isNotEmpty()) {
+            // The rows the ticket form offers (event/tickets.blade.php), whatever the date. Sharing
+            // this instance keeps isSellable() and the quantity lookups from reloading the event
+            // once per row.
+            $tickets = $this->tickets->each(fn (Ticket $ticket) => $ticket->setRelation('event', $this));
+            $passesOnly = $tickets->every(fn (Ticket $ticket) => $ticket->is_pass);
+            $offered = $tickets->filter(fn (Ticket $ticket) => ($passesOnly || ! $ticket->is_pass)
+                && $ticket->isSellable()
+                && ! $ticket->isSalesEnded());
+
+            $free = $offered->isEmpty() ? null : $offered->contains(fn (Ticket $ticket) => (float) $ticket->price <= 0);
+
+            $onSale = ! $closed
+                && $this->canOfferTickets()
+                && ($this->canSellTickets($occurrence)
+                    || ($this->allTicketSalesNotStarted() && ! $this->schemaOccurrenceOver($occurrence)));
+
+            if (! $onSale) {
+                return [[], $free];
+            }
+
+            $houseFull = $this->allTicketsSoldOut($occurrence);
+
+            $offers = $offered->map(function (Ticket $ticket) use ($currency, $url, $houseFull, $occurrence) {
+                $offer = [];
+
+                if (($name = SeoUtils::cleanText($ticket->type)) !== '') {
+                    $offer['name'] = $name;
+                }
+
+                return self::schemaOffer($offer + [
+                    'price' => round((float) $ticket->price, 2),
+                    'priceCurrency' => $currency,
+                    'url' => self::withSchemaQuery($url, 'tickets=true'),
+                    'availability' => ($houseFull || (int) $ticket->availableQuantity($occurrence) <= 0)
+                        ? self::SCHEMA_SOLD_OUT
+                        : self::SCHEMA_IN_STOCK,
+                    'validFrom' => $ticket->sales_start_at?->toIso8601String() ?? $this->schemaPublishedAt(),
+                    'validThrough' => $ticket->sales_end_at?->toIso8601String(),
+                ]);
+            })->values()->all();
+
+            return [$offers, $free];
+        }
+
+        if ($this->registration_url && $this->ticket_price !== null && ! $this->tickets_enabled) {
+            $price = round((float) $this->ticket_price, 2);
+
+            if ($closed || $this->schemaOccurrenceOver($occurrence)) {
+                return [[], $price <= 0];
+            }
+
+            return [[self::schemaOffer([
+                'price' => $price,
+                'priceCurrency' => $currency,
+                'url' => self::isHttpUrl($this->registration_url) ? $this->registration_url : $url,
+                'availability' => self::SCHEMA_IN_STOCK,
+                'validFrom' => $this->schemaPublishedAt(),
+            ])], $price <= 0];
+        }
+
+        return [[], null];
+    }
+
+    /** An Offer node from $fields, leaving out the ones that have no value. */
+    private static function schemaOffer(array $fields): array
+    {
+        return ['@type' => 'Offer'] + array_filter($fields, fn ($value) => $value !== null && $value !== '');
+    }
+
+    /** When the event went public, as an offer's default validFrom. */
+    private function schemaPublishedAt(): ?string
+    {
+        return ($this->published_at ?? $this->created_at)?->toIso8601String();
+    }
+
+    /**
+     * Whether the occurrence on $date (a schedule-local Y-m-d) is over: its end - two hours after
+     * the start when it has no duration, getEndDateTime()'s assumption - is behind us. A date-only
+     * event lasts to the end of its last day at the venue.
+     */
+    private function schemaOccurrenceOver(?string $date): bool
+    {
+        if (! $this->starts_at) {
+            return false;
+        }
+
+        $timezone = $this->scheduleTimezone();
+
+        if ($this->hasDateOnlyStart()) {
+            return Carbon::parse($this->schemaDay($date), $timezone)
+                ->addMinutes(max($this->durationInMinutes(), 24 * 60))
+                ->isPast();
+        }
+
+        return $this->getEndDateTime($date, true, $timezone)->isPast();
+    }
+
+    /** $url with $query appended, after any query it already carries (the page's ?lang=). */
+    private static function withSchemaQuery(string $url, string $query): string
+    {
+        return $url.(str_contains($url, '?') ? '&' : '?').$query;
+    }
+
+    private static function isHttpUrl(string $url): bool
+    {
+        return (bool) preg_match('~^https?://~i', $url) && filter_var($url, FILTER_VALIDATE_URL) !== false;
+    }
+
+    /**
+     * The URL the node names: exactly the page's <link rel="canonical"> - the event's undated URL
+     * on its home schedule (canonicalTarget()), plus ?lang= on a page shown in the viewing
+     * schedule's second language (Role::langQuerySuffix()). Empty when the event has no routable
+     * schedule.
+     */
+    private function schemaUrl(?Role $viewingRole, string $lang): string
+    {
+        $canonical = $this->getCanonicalUrl();
+
+        if ($canonical === '') {
+            return '';
+        }
+
+        return $canonical.($viewingRole ? $viewingRole->langQuerySuffix($lang) : '');
+    }
+
+    /** Whether starts_at is a bare date (Y-m-d): an all-day event, already the schedule's calendar day. */
+    private function hasDateOnlyStart(): bool
+    {
+        return strlen((string) $this->starts_at) === 10;
+    }
+
+    /**
+     * The calendar day a date-only event's occurrence on $date falls on. Untyped like
+     * isOccurrenceDate(), which is what vets it.
+     */
+    private function schemaDay($date): string
+    {
+        return self::isOccurrenceDate($date) ? $date : substr((string) $this->starts_at, 0, 10);
+    }
+
+    /**
+     * The start of the occurrence on $date as schema.org wants it.
+     *
+     * An absolute instant pinned to the schedule's timezone, so a crawler and a signed-in owner
+     * emit the same value. A date-only starts_at is a bare Y-m-d: it already IS the schedule's
+     * calendar day (saleEventDateFromStartsAt()), and reading it as midnight UTC before converting
+     * put an all-day event on the previous day everywhere west of Greenwich.
      */
     public function getSchemaStartDate($date = null)
     {
-        $startAt = $this->getStartDateTime($date, true, $this->scheduleTimezone());
+        if ($this->hasDateOnlyStart()) {
+            return $this->schemaDay($date);
+        }
 
-        return $startAt->toIso8601String();
+        return $this->getStartDateTime($date, true, $this->scheduleTimezone())->toIso8601String();
     }
 
     /**
-     * Get ISO 8601 formatted end date string for schema
+     * The end of that occurrence, or null when the event has no duration: getEndDateTime() assumes
+     * two hours for those, a guess the page never shows. A date-only event ends on the last
+     * calendar day it covers.
      */
-    public function getSchemaEndDate($date = null)
+    public function getSchemaEndDate($date = null): ?string
     {
-        $endAt = $this->getEndDateTime($date, true, $this->scheduleTimezone());
+        if (! ($this->duration > 0)) {
+            return null;
+        }
 
-        return $endAt->toIso8601String();
+        if ($this->hasDateOnlyStart()) {
+            return Carbon::parse($this->schemaDay($date))
+                ->addMinutes(max(0, $this->durationInMinutes() - 1))
+                ->format('Y-m-d');
+        }
+
+        return $this->getEndDateTime($date, true, $this->scheduleTimezone())->toIso8601String();
     }
 
     /**

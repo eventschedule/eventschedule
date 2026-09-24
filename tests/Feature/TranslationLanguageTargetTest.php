@@ -720,6 +720,90 @@ class TranslationLanguageTargetTest extends TestCase
             ->assertDontSee('גמרא מסכת ברכות', false);
     }
 
+    /**
+     * The structured data speaks the page's language too, for every schedule it names.
+     *
+     * Another schedule's name went through translatedName(), which asks the VIEWER's translate
+     * flag of a schedule whose language pair may be the reverse of the page's: with the session
+     * that switching language leaves behind, the en->he venue's Hebrew name reached the English
+     * page's JSON-LD. Role::nameInLanguage() is asked for the page's language instead.
+     */
+    public function test_the_guest_event_json_ld_names_every_schedule_in_the_viewed_language(): void
+    {
+        [$curator, $venue, $event] = $this->createMismatchedCuratorFixture();
+
+        $venue->name = 'Torah Learning Center';
+        $venue->city = 'Pardes Hanna';
+        $venue->address1 = 'Herzl 1';
+        $venue->saveQuietly();
+        $venue->name_en = 'מרכז ללימוד תורה';
+        $venue->city_en = 'פרדס חנה';
+        $venue->address1_en = 'הרצל 1';
+        $venue->saveQuietly();
+
+        $url = route('event.view_guest', ['subdomain' => $curator->subdomain, 'slug' => $event->slug]);
+
+        // English: the venue's authored names, and the page's own ?lang= URL.
+        $html = $this->withSession(['translate' => true])->get($url.'?lang=en')->assertOk()->getContent();
+        $jsonLd = $this->jsonLdText($html);
+        $node = $this->eventJsonLd($html);
+
+        $this->assertSame('Gemara Masechet Brachot', $node['name']);
+        $this->assertSame('Torah Learning Center', $node['location']['name']);
+        $this->assertSame('Pardes Hanna', $node['location']['address']['addressLocality']);
+        $this->assertSame('Torah Learning Center', $node['organizer']['name']);
+        $this->assertSame('en', $node['inLanguage']);
+        $this->assertStringEndsWith('?lang=en', $node['url']);
+        $this->assertSame(1, preg_match('~<link rel="canonical" href="([^"]+)">~', $html, $m));
+        $this->assertSame(html_entity_decode($m[1]), $node['url'], 'the node names the page\'s canonical');
+
+        foreach (['מרכז ללימוד תורה', 'פרדס חנה', 'הרצל 1', 'גמרא מסכת ברכות'] as $hebrew) {
+            $this->assertStringNotContainsString($hebrew, $jsonLd, "Hebrew leaked into the English JSON-LD: $hebrew");
+        }
+
+        // Hebrew, the curator's default: the venue's translations, and nothing English.
+        $this->flushSession();
+        $html = $this->get($url)->assertOk()->getContent();
+        $jsonLd = $this->jsonLdText($html);
+        $node = $this->eventJsonLd($html);
+
+        $this->assertSame('גמרא מסכת ברכות', $node['name']);
+        $this->assertSame('מרכז ללימוד תורה', $node['location']['name']);
+        $this->assertSame('he', $node['inLanguage']);
+
+        foreach (['Torah Learning Center', 'Pardes Hanna', 'Herzl 1', 'Gemara Masechet Brachot'] as $english) {
+            $this->assertStringNotContainsString($english, $jsonLd, "English leaked into the Hebrew JSON-LD: $english");
+        }
+    }
+
+    /** Every JSON-LD block on the page, decoded and re-encoded unescaped, as one string. */
+    private function jsonLdText(string $html): string
+    {
+        preg_match_all('~<script type="application/ld\+json"[^>]*>(.*?)</script>~s', $html, $matches);
+        $this->assertNotEmpty($matches[1], 'the page emitted no JSON-LD');
+
+        return implode("\n", array_map(
+            fn (string $raw) => json_encode(json_decode($raw, true), JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES),
+            $matches[1]
+        ));
+    }
+
+    /** The page's Event node. */
+    private function eventJsonLd(string $html): array
+    {
+        preg_match_all('~<script type="application/ld\+json"[^>]*>(.*?)</script>~s', $html, $matches);
+
+        foreach ($matches[1] as $raw) {
+            $node = json_decode($raw, true);
+
+            if (($node['@type'] ?? null) === 'Event') {
+                return $node;
+            }
+        }
+
+        $this->fail('the event page emitted no Event node');
+    }
+
     public function test_guest_schedule_page_renders(): void
     {
         [$curator] = $this->createMismatchedCuratorFixture();

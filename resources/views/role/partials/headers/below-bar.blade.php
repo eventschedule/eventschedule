@@ -7,7 +7,7 @@
 @php
     $onDark = $onDark ?? false;
     $hasEmail = $role->email && $role->show_email;
-    $hasPhone = $role->phone && $role->show_phone && $role->phone_verified_at;
+    $hasPhone = $role->showsPhone();
     $hasWebsite = $role->website;
     $hasSocial = $role->social_links && $role->social_links != '[]';
     $hasPayment = $role->payment_links && $role->payment_links != '[]';

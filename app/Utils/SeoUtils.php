@@ -216,6 +216,22 @@ class SeoUtils
     }
 
     /**
+     * An imageObject() result as a schema.org ImageObject node, for JSON-LD: the same URL, and the
+     * same width and height only when they are known.
+     *
+     * @param  array{url: string, width?: int, height?: int}|null  $image
+     * @return array<string, string|int>|null
+     */
+    public static function schemaImageObject(?array $image): ?array
+    {
+        if (! $image || empty($image['url'])) {
+            return null;
+        }
+
+        return ['@type' => 'ImageObject'] + array_intersect_key($image, array_flip(['url', 'width', 'height']));
+    }
+
+    /**
      * Whether $text already ends a sentence or a clause, so whatever follows it needs a space and
      * not a ". ".
      */

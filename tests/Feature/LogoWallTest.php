@@ -103,8 +103,24 @@ class LogoWallTest extends TestCase
         $response = $this->get(route('role.view_guest', ['subdomain' => $curator->subdomain]));
         $response->assertOk();
         $response->assertSee('/images/demo/demo_wall_yes.jpg', false);
-        $response->assertDontSee('/images/demo/demo_wall_maybe.jpg');
-        $response->assertDontSee('/images/demo/demo_wall_no.jpg');
+
+        // The schedule's JSON-LD lists each upcoming event as its own page describes it, and that
+        // page names the event's first venue - here the one that never answered - and shows its
+        // picture, so the structured data may carry it too. What must not happen is the WALL
+        // advertising it as this curator's venue: everything outside the structured data.
+        $page = $this->withoutStructuredData($response->getContent());
+        $this->assertStringNotContainsString('/images/demo/demo_wall_maybe.jpg', $page);
+        $this->assertStringNotContainsString('/images/demo/demo_wall_no.jpg', $page);
+    }
+
+    /** The page without its JSON-LD blocks. */
+    private function withoutStructuredData(string $html): string
+    {
+        $stripped = preg_replace('~<script type="application/ld\+json"[^>]*>.*?</script>~s', '', $html);
+        $this->assertIsString($stripped);
+        $this->assertStringContainsString('data-logo-wall', $stripped, 'fixture: the wall is still on the page');
+
+        return $stripped;
     }
 
     /**

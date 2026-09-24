@@ -16,7 +16,6 @@
         // $role's OWN translated*() calls below need no such treatment - $guestLang came from it.
         $guestLang = $role->displayLanguageCode();
         $guestEventName = ($event && $event->exists) ? $event->nameInLanguage($guestLang, $role) : null;
-        $guestEventDescriptionHtml = ($event && $event->exists) ? $event->descriptionHtmlInLanguage($guestLang, $role) : null;
         // user_id as well as the contact columns, because only one half was being asked.
         // AdminController::verifyScheduleEmail() stamps email_verified_at on whatever row it is
         // handed - including a placeholder, reachable in one click from the ?owner=unclaimed list -
@@ -50,9 +49,9 @@
         $guestShownLang = is_valid_language_code($guestRequestedLang)
             ? $guestRequestedLang
             : (session()->has('translate') ? $guestTargetLang : $guestPrimaryLang);
-        $guestLangSuffix = ($guestHasAltLang && $guestShownLang !== $guestPrimaryLang)
-            ? '?lang=' . $guestShownLang
-            : '';
+        // Role::langQuerySuffix() is also what every JSON-LD url below carries, so the structured
+        // data names exactly the URL the canonical tag does.
+        $guestLangSuffix = $role->langQuerySuffix($guestShownLang);
 
         // The event's canonical: its undated URL on its home schedule (Event::canonicalTarget()).
         // For a recurring event that is the SERIES URL, the same on the undated page and on every
@@ -381,134 +380,28 @@
                  them a page whose content is fan photos. The breadcrumb below still ties it to
                  the event page. --}}
         @elseif ($event && $event->exists && $event->starts_at && !$event->is_draft && !($passwordGate ?? false))
-            @php
-                $eventName = $guestEventName;
-                $eventDescription = trim(strip_tags((string) $guestEventDescriptionHtml));
-                if (empty($eventDescription)) {
-                    $eventDescription = $eventName . ' - ' . __('messages.event');
-                }
-                // The series URL, while the dates below are the occurrence this page shows (the
-                // next one on the undated page): the node describes that occurrence of the event
-                // whose canonical page is the series.
-                $eventUrl = $eventCanonicalUrl;
-                // The block below is already @if-guarded, so null simply omits "image" rather
-                // than asserting to Google that this event looks like an Event Schedule advert.
-                $eventImage = $event->getImageUrl();
-                $startDate = $event->getSchemaStartDate($date ?? null);
-                $endDate = $event->getSchemaEndDate($date ?? null);
-                $location = $event->getSchemaLocation();
-                // The same canonical as the "url" above, so every offer points at the page it
-                // sits on - the series on a recurring event, the custom domain where it is
-                // canonical.
-                $offers = $event->getSchemaOffers();
-                $performers = $event->getSchemaPerformers();
-
-                // Built as an array and encoded once, never stitched by hand: every value goes
-                // through SeoUtils::jsonLd(), and an optional key cannot leave a stray comma.
-                $eventJsonLd = [
-                    '@context' => 'https://schema.org',
-                    '@type' => 'Event',
-                    'name' => $eventName,
-                    'description' => $eventDescription,
-                    'startDate' => $startDate,
-                    'endDate' => $endDate,
-                    'url' => $eventUrl,
-                    'eventStatus' => $event->getSchemaEventStatus(),
-                    'eventAttendanceMode' => $event->getSchemaAttendanceMode(),
-                    'organizer' => $event->getSchemaOrganizer(),
-                ];
-                if (count($offers)) {
-                    $eventJsonLd['offers'] = count($offers) === 1 ? $offers[0] : $offers;
-                }
-                $eventJsonLd['location'] = $location;
-                $eventJsonLd['isAccessibleForFree'] = (bool) $event->isFree();
-                if ($role->language_code) {
-                    $eventJsonLd['inLanguage'] = $role->language_code;
-                }
-                if ($eventImage) {
-                    $eventJsonLd['image'] = $eventImage;
-                }
-                if ($performers) {
-                    $eventJsonLd['performer'] = count($performers) === 1 ? $performers[0] : $performers;
-                }
-            @endphp
-
+            {{-- Event::schemaNode() is where the rules live. It is dated by $date, the occurrence
+                 this page shows (the next one on the undated page), while its url and offers name
+                 the page's canonical - the SERIES on a recurring event - with this page's ?lang=,
+                 exactly as the canonical tag above. The private join link (event_url) is never in it. --}}
             <script type="application/ld+json" {!! nonce_attr() !!}>
-            {!! \App\Utils\SeoUtils::jsonLd($eventJsonLd) !!}
+            {!! \App\Utils\SeoUtils::jsonLd($event->schemaNode($date ?? null, $role, $guestLang)) !!}
             </script>
         @elseif ($role->exists)
-            @php
-                $roleName = $role->translatedName();
-                $roleDescription = trim(strip_tags($role->translatedDescription()));
-                $roleUrl = $role->getCanonicalUrl();
-                $roleImage = $role->profile_image_url;
-                
-                // Determine schema type based on role type
-                $schemaType = $role->isVenue() ? 'Organization' : ($role->isCurator() ? 'Organization' : 'Person');
-                
-                // Build address if venue
-                $address = null;
-                if ($role->isVenue() && ($role->formatted_address || $role->translatedAddress1() || $role->translatedCity())) {
-                    $address = ['@type' => 'PostalAddress'];
-                    if ($role->translatedAddress1()) {
-                        $address['streetAddress'] = $role->translatedAddress1();
-                        if ($role->translatedAddress2()) {
-                            $address['streetAddress'] .= ', ' . $role->translatedAddress2();
-                        }
-                    }
-                    if ($role->translatedCity()) {
-                        $address['addressLocality'] = $role->translatedCity();
-                    }
-                    if ($role->translatedState()) {
-                        $address['addressRegion'] = $role->translatedState();
-                    }
-                    if ($role->postal_code) {
-                        $address['postalCode'] = $role->postal_code;
-                    }
-                    if ($role->country_code) {
-                        $address['addressCountry'] = $role->country_code;
-                    }
-                }
-                
-                // Suppressed for unverified schedules to avoid seeding structured-data backlinks.
-                $sameAs = [];
-                if ($role->social_links && !$isUnverifiedRole) {
-                    $socialLinks = json_decode($role->social_links, true);
-                    if (is_array($socialLinks)) {
-                        foreach ($socialLinks as $link) {
-                            if (isset($link['url']) && $link['url']) {
-                                $sameAs[] = $link['url'];
-                            }
-                        }
-                    }
-                }
-
-                $roleJsonLd = [
-                    '@context' => 'https://schema.org',
-                    '@type' => $schemaType,
-                    'name' => $roleName,
-                ];
-                if ($roleDescription) {
-                    $roleJsonLd['description'] = $roleDescription;
-                }
-                $roleJsonLd['url'] = $roleUrl;
-                if ($roleImage) {
-                    $roleJsonLd['image'] = $roleImage;
-                }
-                if ($address) {
-                    $roleJsonLd['address'] = $address;
-                }
-                if (! empty($sameAs)) {
-                    $roleJsonLd['sameAs'] = $sameAs;
-                }
-                if ($role->language_code) {
-                    $roleJsonLd['inLanguage'] = $role->language_code;
-                }
-            @endphp
-
+            {{-- Role::schemaNode(): an EventVenue, Person or Organization with the page's upcoming
+                 events, and no sameAs for an unverified schedule. $upcoming is only looked up by
+                 the schedule page itself; everywhere else the node lists no events. --}}
             <script type="application/ld+json" {!! nonce_attr() !!}>
-            {!! \App\Utils\SeoUtils::jsonLd($roleJsonLd) !!}
+            {!! \App\Utils\SeoUtils::jsonLd($role->schemaNode($guestLang, $isUnverifiedRole, $upcoming ?? collect())) !!}
             </script>
+
+            {{-- The site's name is the schedule's, where the schedule is the site: its home, at the
+                 root of its own host (Role::websiteSchemaNode()). --}}
+            @if ($scheduleHome && ($websiteJsonLd = $role->websiteSchemaNode($guestLang)))
+            <script type="application/ld+json" {!! nonce_attr() !!}>
+            {!! \App\Utils\SeoUtils::jsonLd($websiteJsonLd) !!}
+            </script>
+            @endif
         @endif
 
         @php
@@ -557,13 +450,18 @@
             @php
                 $allVideos = $event->approvedVideos;
                 $videoSchemaItems = [];
+                // The Event node's own plain-text description (block-aware, entity-decoded), else the
+                // event's name: a VideoObject needs one, and strip_tags() glued words across lines.
+                $videoDescription = $allVideos->isNotEmpty()
+                    ? ($event->getSchemaDescription($guestLang, $role) ?? \App\Utils\SeoUtils::cleanText($guestEventName))
+                    : null;
                 foreach ($allVideos as $video) {
                     $videoId = \App\Utils\UrlUtils::extractYouTubeVideoId($video->youtube_url);
                     if ($videoId) {
                         $videoSchemaItems[] = [
                             '@type' => 'VideoObject',
                             'name' => $guestEventName . ($video->eventPart ? ' - ' . $video->eventPart->nameInLanguage($guestLang, $event->getTranslationLanguageCode()) : ''),
-                            'description' => trim(strip_tags($guestEventDescriptionHtml)) ?: $guestEventName,
+                            'description' => $videoDescription,
                             'thumbnailUrl' => 'https://img.youtube.com/vi/' . $videoId . '/hqdefault.jpg',
                             'uploadDate' => $video->created_at->toIso8601String(),
                             'contentUrl' => $video->youtube_url,
