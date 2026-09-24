@@ -2661,8 +2661,16 @@ class RoleController extends Controller
                     ->where('status', 'paid')
                     ->where('is_deleted', false)
                     ->where(function ($q) {
-                        $q->where('user_id', auth()->id())
-                            ->orWhere('email', auth()->user()->email);
+                        $q->where('user_id', auth()->id());
+
+                        // Not for the shared demo account. Every visitor signed into it has the
+                        // same address and the ticket forms prefill it, so the address would hand
+                        // one visitor's ticket (its name, email and QR code) to the next, on
+                        // every event they bought for. The demo's own purchases carry its
+                        // user_id, and DemoService's reset detaches the rest.
+                        if (! is_demo_mode()) {
+                            $q->orWhere('email', auth()->user()->email);
+                        }
                     })
                     ->when($date, fn ($q, $d) => $q->where('event_date', $d))
                     ->first();

@@ -260,13 +260,20 @@ From Duff-fueled nights at Moe\'s to cultural enlightenment at the Aztec Theater
 
     /**
      * Seed the synthetic analytics counters for the demo curator and its venues.
+     *
+     * Event counters go on the demo's own events only: the ones the demo's schedules or the
+     * curator created, the rule resetDemoData() deletes by, worked out again here because this runs
+     * after the reset commits (and on the first populate, over schedules that already exist). A
+     * real event attached to simpsons or to a demo venue, curated in or naming a demo act, keeps
+     * its real counters, which updateOrCreate() would otherwise overwrite day by day.
      */
     protected function seedAnalyticsData(Role $role, array $venues): void
     {
-        $this->createAnalyticsData($role);
+        $demoRoleIds = $this->resettableDemoRoles($role)->pluck('id')->push($role->id);
 
-        foreach ($venues as $venue) {
-            $this->createAnalyticsData($venue);
+        foreach ([$role, ...array_values($venues)] as $schedule) {
+            $this->createAnalyticsData($schedule);
+            $this->createEventAnalyticsData($schedule, $demoRoleIds);
         }
     }
 
@@ -940,6 +947,19 @@ Hosting town halls, talent shows, AA meetings, and everything in between since t
             // sale on a real event is that organizer's record, so the reset no longer deletes
             // the demo user's purchases wholesale. Its purchases on demo events are all in here.
             $demoEventIds = $this->demoCreatedEventIds($demoRoles->pluck('id')->push($role->id));
+
+            // ...and detaches it instead. The demo account is shared, so a sale left on it lists
+            // one visitor's name, email and ticket under My Tickets for every visitor after. A
+            // null owner is what a guest checkout stores, and the organizer's sales list, check-in
+            // and refunds never read it. The DEMO_EMAIL account specifically: it is the one
+            // DemoAutoLogin signs visitors into.
+            $demoUserId = User::where('email', self::DEMO_EMAIL)->value('id');
+
+            if ($demoUserId) {
+                Sale::where('user_id', $demoUserId)
+                    ->whereNotIn('event_id', $demoEventIds)
+                    ->update(['user_id' => null]);
+            }
 
             SaleTicket::whereIn('sale_id', function ($query) use ($demoEventIds) {
                 $query->select('id')
@@ -2908,8 +2928,8 @@ The state\'s premier entertainment venue. Home of the Capital City Goofballs and
             $this->createReferrerDataForDay($role, $date, $baseViews);
         }
 
-        // Create event-specific analytics for past events
-        $this->createEventAnalyticsData($role);
+        // Event-specific analytics are seeded by seedAnalyticsData(), which knows which events
+        // are the demo's own.
     }
 
     /**
@@ -2941,12 +2961,13 @@ The state\'s premier entertainment venue. Home of the Capital City Goofballs and
     }
 
     /**
-     * Create event-specific analytics data
+     * Create event-specific analytics data, for $role's events that one of $demoRoleIds created.
+     * See seedAnalyticsData().
      */
-    protected function createEventAnalyticsData(Role $role): void
+    protected function createEventAnalyticsData(Role $role, Collection $demoRoleIds): void
     {
         $now = Carbon::now();
-        $events = $role->events;
+        $events = $role->events()->whereIn('events.creator_role_id', $demoRoleIds)->get();
 
         foreach ($events as $event) {
             $eventDate = Carbon::parse($event->starts_at);

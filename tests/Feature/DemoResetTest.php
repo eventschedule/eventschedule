@@ -54,6 +54,43 @@ class DemoResetTest extends TestCase
     }
 
     /**
+     * A DemoService whose analytics seeding runs for real on the events - seedAnalyticsData() is
+     * what these tests are about - but skips the 366 days of per-schedule counters, and runs
+     * $beforeSeeding first.
+     */
+    private function seedingDemoService(?\Closure $beforeSeeding = null): DemoService
+    {
+        return new class($beforeSeeding) extends DemoService
+        {
+            public function __construct(private ?\Closure $beforeSeeding) {}
+
+            protected function downloadDemoImages(): void {}
+
+            protected function createAnalyticsData(Role $role): void {}
+
+            protected function seedAnalyticsData(Role $role, array $venues): void
+            {
+                if ($this->beforeSeeding) {
+                    ($this->beforeSeeding)();
+                }
+
+                parent::seedAnalyticsData($role, $venues);
+            }
+        };
+    }
+
+    /** Synthetic event counters on the demo's own events, so a zero elsewhere means something. */
+    private function assertTheDemoGotEventAnalytics(): void
+    {
+        $demoRoleIds = Role::where('subdomain', 'like', 'demo-%')
+            ->orWhere('subdomain', DemoService::DEMO_ROLE_SUBDOMAIN)
+            ->pluck('id');
+
+        $this->assertGreaterThan(0, AnalyticsEventsDaily::whereIn('event_id', Event::whereIn('creator_role_id', $demoRoleIds)->pluck('id'))->count(),
+            'fixture: the seeding wrote no event counters at all');
+    }
+
+    /**
      * The demo as app:setup-demo leaves it before its first hourly reset.
      *
      * @return array{DemoService, User, Role}
@@ -201,19 +238,82 @@ class DemoResetTest extends TestCase
     }
 
     /**
-     * A demo visitor who buys a ticket to a real event does it as the demo user. That sale is the
-     * organizer's record, and deleting it also left the ticket's sold count inflated for good.
+     * A demo visitor who buys a ticket to a real event does it as the demo user, under the demo
+     * account's name and address, which the ticket form prefills. That sale is the organizer's
+     * record, and deleting it also left the ticket's sold count inflated for good - so it stays,
+     * but detached: left on the shared account, every later visitor would find it under My
+     * Tickets and as "You're registered" on the event's page, with a link to the ticket.
      */
-    public function test_a_purchase_the_demo_user_made_on_a_real_event_is_kept(): void
+    public function test_a_purchase_the_demo_user_made_on_a_real_event_is_kept_but_detached(): void
     {
         [$svc, $demoUser] = $this->seedDemo();
 
         $venue = $this->createRole($this->createOwner(), 'venue', ['name' => 'Harbor Hall']);
-        [$event, $ticket, $sale] = $this->eventWithSales($venue, 'Harbor Jazz', ['user_id' => $demoUser->id]);
+        [$event, $ticket, $sale] = $this->eventWithSales($venue, 'Harbor Jazz', [
+            'user_id' => $demoUser->id,
+            'name' => $demoUser->name,
+            'email' => DemoService::DEMO_EMAIL,
+        ]);
+
+        // One on the demo's own event, for contrast: that one is still deleted.
+        $demoEvent = Event::where('creator_role_id', Role::where('subdomain', 'demo-moestavern')->value('id'))->firstOrFail();
+        $demoSale = $this->createSale($demoEvent, $demoEvent->creatorRole, ['user_id' => $demoUser->id], $demoEvent->tickets->first());
+
+        // Both surfaces show it before the reset, or the checks after it prove nothing.
+        $this->actingAs($demoUser)->get(route('tickets'))->assertOk()->assertSee('Harbor Jazz');
+        $this->get($this->guestEventUrl($venue, $event))->assertOk()->assertSee(__('messages.you_are_registered'));
 
         $this->reset($svc);
 
         $this->assertKeepsItsSales($event, $ticket, $sale, 'the demo user\'s purchase on a real event');
+        $this->assertNull($sale->fresh()->user_id, 'the sale is still on the shared demo account');
+        $this->assertFalse(Sale::whereKey($demoSale->id)->exists(), 'a purchase on a demo event survived the reset');
+
+        $this->get(route('tickets'))->assertOk()->assertDontSee('Harbor Jazz');
+        $this->get($this->guestEventUrl($venue, $event))->assertOk()->assertDontSee(__('messages.you_are_registered'));
+    }
+
+    /**
+     * The reset seeds analytics after it commits, over whatever is attached by then. A real event
+     * a visitor curates into simpsons in that gap, or one naming a demo venue, keeps its own
+     * counters: updateOrCreate() would overwrite them day by day.
+     */
+    public function test_the_reset_seeds_no_analytics_onto_a_real_event(): void
+    {
+        $this->seedDemo();
+
+        $venue = $this->createRole($this->createOwner(), 'venue', ['name' => 'Harbor Hall']);
+        $real = $this->createEvent($venue, ['name' => 'Harbor Jazz', 'creator_role_id' => $venue->id]);
+
+        $this->reset($this->seedingDemoService(function () use ($real) {
+            foreach ([DemoService::DEMO_ROLE_SUBDOMAIN, 'demo-moestavern'] as $subdomain) {
+                Role::where('subdomain', $subdomain)->firstOrFail()->events()
+                    ->syncWithoutDetaching([$real->id => ['is_accepted' => true]]);
+            }
+        }));
+
+        $this->assertTrue($real->roles()->where('subdomain', 'demo-moestavern')->exists(), 'fixture: attached before the seeding');
+        $this->assertSame(0, AnalyticsEventsDaily::where('event_id', $real->id)->count(), 'the reset seeded made-up counters onto a real event');
+        $this->assertTheDemoGotEventAnalytics();
+    }
+
+    /**
+     * The populate app:setup-demo runs when simpsons has no events seeds analytics as well, over
+     * demo schedules that already exist, with whatever real events are attached to them.
+     */
+    public function test_a_populate_seeds_no_analytics_onto_a_real_event(): void
+    {
+        [, , $curator] = $this->seedDemo();
+
+        $venue = $this->createRole($this->createOwner(), 'venue', ['name' => 'Harbor Hall']);
+        $real = $this->createEvent($venue, ['name' => 'Harbor Jazz', 'creator_role_id' => $venue->id]);
+        $curator->events()->attach($real->id, ['is_accepted' => true]);
+        Role::where('subdomain', 'demo-moestavern')->firstOrFail()->events()->attach($real->id, ['is_accepted' => true]);
+
+        $this->seedingDemoService()->populateDemoData($curator->fresh());
+
+        $this->assertSame(0, AnalyticsEventsDaily::where('event_id', $real->id)->count(), 'the populate seeded made-up counters onto a real event');
+        $this->assertTheDemoGotEventAnalytics();
     }
 
     public function test_the_demos_own_data_is_deleted_and_recreated(): void
