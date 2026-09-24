@@ -1946,6 +1946,8 @@ class RoleController extends Controller
             ->where('is_draft', false)
             ->where('is_private', false)
             ->where('is_cancelled', false)
+            // Older rows can carry a password while listed, and this list names each event.
+            ->notPasswordProtected()
             ->upcomingOrOngoing()
             ->orderBy('starts_at')
             ->limit(20)
@@ -2413,6 +2415,12 @@ class RoleController extends Controller
         } elseif (request()->graphic) {
             // ?graphic=1 renders the month itself (role/partials/calendar-graphic), so it keeps the
             // full month's events with everything a card shows.
+            //
+            // Never a password-protected event, for anyone, members included: this page is made to
+            // be shared as an image, and its builder serializes the name, flyer, venue,
+            // registration link and coupon unblanked. The downloadable graphic has always left
+            // those events out (GraphicController), and so do the past events fetched below for
+            // this same view.
             if ($role->isCurator()) {
                 $events = Event::with(['roles', 'parts', 'approvedVideos', 'approvedPhotos', 'approvedComments.user', 'polls' => fn ($q) => $q->withCount('votes')])->withCount(['approvedVideos', 'approvedComments', 'approvedPhotos', 'polls'])
                     ->inMonth($startOfGridUtc, $endOfGridUtc)
@@ -2423,6 +2431,7 @@ class RoleController extends Controller
                             ->where('is_accepted', true);
                     })
                     ->when(! $isMemberOrAdmin, fn ($q) => $q->where('is_draft', false)->where('is_cancelled', false))
+                    ->notPasswordProtected()
                     ->orderBy('starts_at')
                     ->get();
             } else {
@@ -2434,7 +2443,8 @@ class RoleController extends Controller
                                 ->where('is_accepted', true);
                         });
                     })
-                    ->when(! $isMemberOrAdmin, fn ($q) => $q->where('is_draft', false)->where('is_cancelled', false));
+                    ->when(! $isMemberOrAdmin, fn ($q) => $q->where('is_draft', false)->where('is_cancelled', false))
+                    ->notPasswordProtected();
 
                 $events = $events->orderBy('starts_at')->get();
             }
@@ -2466,6 +2476,7 @@ class RoleController extends Controller
                             ->where('is_accepted', true);
                     })
                     ->when(! $isMemberOrAdmin, fn ($q) => $q->where('is_draft', false)->where('is_cancelled', false))
+                    ->notPasswordProtected()
                     ->orderByDesc('starts_at')
                     ->limit(51)
                     ->get();
@@ -2475,6 +2486,7 @@ class RoleController extends Controller
                     ->whereNull('days_of_week')
                     ->whereHas('roles', fn ($q) => $q->where('role_id', $role->id)->where('is_accepted', true))
                     ->when(! $isMemberOrAdmin, fn ($q) => $q->where('is_draft', false)->where('is_cancelled', false))
+                    ->notPasswordProtected()
                     ->orderByDesc('starts_at')
                     ->limit(51)
                     ->get();
@@ -2568,6 +2580,9 @@ class RoleController extends Controller
                     ->whereNotNull('youtube_links')
                     ->where('youtube_links', '!=', '[]'))
                 ->when(! $isMemberOrAdmin, fn ($q) => $q->where('is_draft', false)->where('is_cancelled', false)->where('is_private', false))
+                // Every card names the event and its venue, so a password-protected event stays
+                // out for everyone, as it does from ?graphic=1 above.
+                ->notPasswordProtected()
                 ->orderBy('starts_at')
                 ->limit(20)
                 ->get();
@@ -7429,6 +7444,15 @@ class RoleController extends Controller
             return response()->json([]);
         }
 
+        $user = auth()->user();
+        $isMemberOrAdmin = $user && ($user->isMember($subdomain) || $user->isAdmin());
+
+        // Any signed-in account may search any schedule here, and the query matches on the
+        // description. A password-protected event's description is blanked in the response, but a
+        // match still names the event, so searching word by word would read the description back.
+        // Its own people can open it anyway; everybody else never matches it at all.
+        $hidePasswordEvents = fn ($query) => $query->when(! $isMemberOrAdmin, fn ($q) => $q->notPasswordProtected());
+
         // Get the group ID if a group slug is provided
         $groupId = null;
         if (! empty($groupSlug)) {
@@ -7450,6 +7474,7 @@ class RoleController extends Controller
                     $query->where('name', 'like', "%{$search}%")
                         ->orWhere('description', 'like', "%{$search}%");
                 })
+                ->tap($hidePasswordEvents)
                 ->when($groupId, function ($query) use ($groupId) {
                     $query->whereIn('id', function ($subQuery) use ($groupId) {
                         $subQuery->select('event_id')
@@ -7474,6 +7499,7 @@ class RoleController extends Controller
                     $query->where('name', 'like', "%{$search}%")
                         ->orWhere('description', 'like', "%{$search}%");
                 })
+                ->tap($hidePasswordEvents)
                 ->when($groupId, function ($query) use ($groupId) {
                     $query->whereIn('id', function ($subQuery) use ($groupId) {
                         $subQuery->select('event_id')
@@ -7487,8 +7513,6 @@ class RoleController extends Controller
         }
 
         // Filter draft and private events for non-members
-        $user = auth()->user();
-        $isMemberOrAdmin = $user && ($user->isMember($subdomain) || $user->isAdmin());
         if (! $isMemberOrAdmin) {
             $unlockedEventIds = $this->getUnlockedEventIds();
             $events = $events->filter(fn ($e) => ! $e->is_draft && (! $e->is_private || in_array($e->id, $unlockedEventIds)));

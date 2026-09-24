@@ -1064,10 +1064,12 @@ class Role extends Model implements MustVerifyEmail
                     });
             })
             // Draft/internal and unlisted events must not leak booking
-            // relationships onto the public wall.
+            // relationships onto the public wall, and neither may a password-protected one,
+            // which older rows can be while listed.
             ->where('events.is_draft', false)
             ->where('events.is_private', false)
             ->where('events.is_cancelled', false)
+            ->where(fn ($q) => Event::constrainNotPasswordProtected($q))
             ->where('roles.id', '!=', $this->id)
             ->where('roles.type', $type)
             ->where('roles.is_deleted', false)

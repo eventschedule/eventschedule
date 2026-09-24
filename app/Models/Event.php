@@ -1421,6 +1421,38 @@ class Event extends Model
         return ! empty($this->event_password);
     }
 
+    /**
+     * Only events without a password: the rows isPasswordProtected() calls unprotected, for the
+     * surfaces that show an event to people who have not unlocked it.
+     *
+     * Most older queries use whereNull('event_password') instead, which also drops a row whose
+     * password is ''. An `= ''` test would not do either: the column's collation pads with spaces,
+     * so it also matches a password of only spaces, which isPasswordProtected() counts as a
+     * password. CHAR_LENGTH() counts the spaces. The one value the two still disagree on is '0',
+     * which empty() calls no password and this keeps out, on the side of hiding.
+     *
+     * The column is table-qualified because most of these queries join.
+     */
+    public function scopeNotPasswordProtected(Builder $query): Builder
+    {
+        return static::constrainNotPasswordProtected($query);
+    }
+
+    /**
+     * scopeNotPasswordProtected() for a query that is not an Event builder: a schedule query that
+     * joins events, or a DB::table() query that aliases the table.
+     *
+     * @param  \Illuminate\Database\Eloquent\Builder|\Illuminate\Database\Query\Builder  $query
+     * @return \Illuminate\Database\Eloquent\Builder|\Illuminate\Database\Query\Builder
+     */
+    public static function constrainNotPasswordProtected($query, string $table = 'events')
+    {
+        $column = $table.'.event_password';
+
+        return $query->where(fn ($q) => $q->whereNull($column)
+            ->orWhereRaw('CHAR_LENGTH('.$q->getGrammar()->wrap($column).') = 0'));
+    }
+
     public function isAtVenue($subdomain)
     {
         return $this->venue && $this->venue->subdomain == $subdomain;
@@ -2788,8 +2820,10 @@ class Event extends Model
      *   This used to hand a built-in header's NAME to the storage URL accessor, which made every
      *   one of them a dead link that the card then hid on error.
      *
-     * Every key belongs to the image set: a builder that nulls image data (a password-protected
-     * event) nulls exactly these keys, so a key added here can never leak past that.
+     * Every key belongs to the image set. For a password-protected event,
+     * calendarEventToVueArray() and eventToVueArray() null exactly these keys, so a key added here
+     * cannot leak past them. The ?graphic=1 builder nulls nothing: its queries never hand it a
+     * password-protected event, for anyone, members included.
      *
      * @return array<string, string|int|null>
      */

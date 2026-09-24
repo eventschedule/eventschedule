@@ -195,6 +195,9 @@
                 'fan_comments_enabled' => $event->isFanCommentsEnabled(),
                 'fan_photos_enabled' => $event->isFanPhotosEnabled(),
                 'fan_videos_enabled' => $event->isFanVideosEnabled(),
+                // Always false here: the ?graphic=1 queries leave password-protected events out.
+                // Kept so this payload has the key the Ajax builders' payloads carry.
+                'is_password_protected' => $event->isPasswordProtected(),
             ];
         };
 

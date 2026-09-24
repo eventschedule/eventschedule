@@ -206,6 +206,9 @@ class PromotionService
                 // for an event the advertiser has since hidden, cancelled or let expire.
                 ->where('e.is_draft', false)
                 ->where('e.is_private', false)
+                // The creative carries the event's name and flyer onto other schedules' pages, and
+                // older rows can carry a password while listed.
+                ->where(fn ($q) => Event::constrainNotPasswordProtected($q, 'e'))
                 ->where(fn ($q) => $q->whereNull('e.is_cancelled')->orWhere('e.is_cancelled', false))
                 // ...and must not be over. A recurring event has no single date and is
                 // always current; a one-off is done once its end time has passed

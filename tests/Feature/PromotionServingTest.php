@@ -238,6 +238,8 @@ class PromotionServingTest extends TestCase
         return [
             'draft' => [['is_draft' => true]],
             'unlisted' => [['is_private' => true]],
+            // A save keeps a password only on an unlisted event now; older rows carry one while listed.
+            'password on a listed event' => [['is_private' => false, 'event_password' => 'hunter2']],
             'cancelled' => [['is_cancelled' => true]],
             'already over' => [['starts_at' => '2020-01-01 12:00:00']],
         ];
