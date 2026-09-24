@@ -172,6 +172,81 @@ class SitemapCoverageTest extends TestCase
             'unindexed.');
     }
 
+    /**
+     * NOT_A_PAGE is a claim about indexing as much as about the sitemap: a route left out of the
+     * sitemap because it is not a page must not ask to be indexed either, or Google finds it by a
+     * link and indexes the thing the sitemap was keeping out. /search did exactly that - it said
+     * noindex only once a query had been typed, so the empty results page was indexable.
+     *
+     * Only the routes that render HTML are checked: a redirect or a JSON payload has no robots
+     * meta to carry. Both the bare URL and a queried one, because the old gate was on the query.
+     */
+    public function test_every_html_route_left_out_as_not_a_page_is_noindex(): void
+    {
+        $checked = [];
+
+        foreach (Route::getRoutes() as $route) {
+            $name = $route->getName();
+
+            if (! $name || ! array_key_exists($name, self::NOT_A_PAGE)
+                || ! in_array('GET', $route->methods(), true) || str_contains($route->uri(), '{')) {
+                continue;
+            }
+
+            $path = '/'.ltrim($route->uri(), '/');
+
+            foreach ([$path, $path.'?q=x'] as $url) {
+                $response = $this->get($url);
+
+                if ($response->getStatusCode() !== 200
+                    || ! str_contains((string) $response->headers->get('Content-Type'), 'text/html')) {
+                    continue;
+                }
+
+                $this->assertMatchesRegularExpression(
+                    '~<meta name="robots" content="[^"]*\bnoindex\b~',
+                    $response->getContent(),
+                    "{$url} ({$name}) is left out of the sitemap as not a page, but does not say noindex"
+                );
+
+                $checked[] = $url;
+            }
+        }
+
+        // Without this the loop can pass by rendering nothing at all.
+        $this->assertContains('/search', $checked, 'fixture: the bare results page was not checked');
+        $this->assertContains('/search?q=x', $checked, 'fixture: a queried results page was not checked');
+    }
+
+    /**
+     * The platform 404 answers at the URL that was asked for, so every tag that names "this page's
+     * URL" named the missing one: a canonical and og:url claiming a page that does not exist, and
+     * a breadcrumb whose last crumb was the dead address.
+     *
+     * A fixture route, so the test cannot depend on what the guest portal's catch-alls do with an
+     * unknown path. Three segments with a hyphenated last one: a route added at runtime is appended
+     * after /{subdomain}/{slug}/{id} in routes/web.php, and {id} is constrained to the encodeId
+     * charset, which has no hyphen.
+     */
+    public function test_the_404_page_names_no_url_of_its_own(): void
+    {
+        Route::get('/seo/error-page/missing-fixture', fn () => abort(404));
+
+        $html = $this->get('/seo/error-page/missing-fixture')->assertNotFound()->getContent();
+
+        $this->assertStringContainsString('<title>Page Not Found - Event Schedule</title>', $html,
+            'fixture: the platform 404 page rendered');
+        $this->assertStringContainsString('<meta name="robots" content="noindex, follow">', $html);
+
+        $this->assertDoesNotMatchRegularExpression('~<link[^>]+rel="canonical"~i', $html, 'a 404 must not declare a canonical');
+        $this->assertStringNotContainsString('property="og:url"', $html);
+        $this->assertStringNotContainsString('name="twitter:url"', $html);
+        $this->assertStringNotContainsString('BreadcrumbList', $html);
+
+        // The Blog link used to be /blog, a 301 to the blog host on the hosted install.
+        $this->assertStringContainsString('href="'.blog_url().'"', $html);
+    }
+
     public function test_the_lastmod_manifest_keys_match_the_listed_paths(): void
     {
         $listed = $this->sitemapPaths();

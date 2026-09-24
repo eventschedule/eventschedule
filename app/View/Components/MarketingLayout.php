@@ -17,6 +17,12 @@ class MarketingLayout extends Component
          * assets land in <head> with no ordering question and no FOUC.
          */
         public bool $docs = false,
+        /**
+         * Set by errors/404.blade.php. An error page is served at whatever URL was requested, so
+         * the tags that name "this page's URL" - the canonical, og:url, twitter:url and the
+         * BreadcrumbList's last crumb - would all claim the missing URL as a real page.
+         */
+        public bool $errorPage = false,
     ) {}
 
     /**

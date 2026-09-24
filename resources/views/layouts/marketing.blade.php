@@ -47,14 +47,20 @@
         $path = request()->path();
         $basePath = $path === '/' ? config('app.url') : config('app.url') . '/' . ltrim(rtrim($path, '/'), '/');
     @endphp
+    {{-- An error page answers at the URL that was asked for, so "this page's URL" would be the
+         missing one: no canonical, og:url, twitter:url or breadcrumb for it (MarketingLayout). --}}
+    @unless ($errorPage ?? false)
     <link rel="canonical" href="{{ $canonical ?? $basePath }}">
+    @endunless
     <meta name="description" content="{{ $description ?? 'Free, open-source event calendar and ticketing platform. Publish your events on one page, sell tickets with zero platform fees and grow your audience.' }}">
     <meta name="robots" content="{{ $robots ?? 'index, follow, max-image-preview:large, max-snippet:-1, max-video-preview:-1' }}">
     <meta name="author" content="Event Schedule">
 
     <!-- Open Graph / Facebook -->
     <meta property="og:type" content="{{ $ogType ?? 'website' }}">
+    @unless ($errorPage ?? false)
     <meta property="og:url" content="{{ $canonical ?? $basePath }}">
+    @endunless
     <meta property="og:title" content="{{ $title ?? 'Event Schedule' }}">
     <meta property="og:description" content="{{ $description ?? 'Free, open-source event calendar and ticketing platform. Publish your events on one page, sell tickets with zero platform fees and grow your audience.' }}">
     @php
@@ -117,7 +123,9 @@
 
     <!-- Twitter Card -->
     <meta name="twitter:card" content="summary_large_image">
+    @unless ($errorPage ?? false)
     <meta name="twitter:url" content="{{ $canonical ?? $basePath }}">
+    @endunless
     <meta name="twitter:title" content="{{ $title ?? 'Event Schedule' }}">
     <meta name="twitter:description" content="{{ $description ?? 'Free, open-source event calendar and ticketing platform. Publish your events on one page, sell tickets with zero platform fees and grow your audience.' }}">
     <meta name="twitter:image" content="{{ $ogImage }}">
@@ -178,7 +186,7 @@
     </script>
     {{ $structuredData ?? '' }}
 
-    @if (!request()->is('/') && !request()->is(''))
+    @if (!request()->is('/') && !request()->is('') && ! ($errorPage ?? false))
     <!-- BreadcrumbList Schema for subpages -->
     @php
         // A title reaches this as a RENDERED slot, so it is already HTML-escaped and may hold a

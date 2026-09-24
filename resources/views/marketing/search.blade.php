@@ -4,9 +4,9 @@
     <x-slot name="description">Look up a schedule by name, web address, city or blurb, and an upcoming event by name or blurb. Free, no account needed, and past dates never come back.</x-slot>
     <x-slot name="breadcrumbTitle">{{ __('messages.search') }}</x-slot>
 
-    @if($query)
+    {{-- Always, not only once a query is typed: a bare /search is the same results page with
+         nothing in it, and the sitemap leaves it out as one (SitemapCoverageTest::NOT_A_PAGE). --}}
     <x-slot name="robots">noindex, follow</x-slot>
-    @endif
 
     {{-- Structured Data --}}
     <x-slot name="structuredData">

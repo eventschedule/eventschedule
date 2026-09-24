@@ -182,7 +182,7 @@ return [
     '/replace' => '2026-09-23',
     '/saas' => '2026-09-22',
     '/sched-alternative' => '2026-09-23',
-    '/search' => '2026-09-21',
+    '/search' => '2026-09-24',
     '/self-hosting-terms-of-service' => '2026-09-17',
     '/selfhost' => '2026-09-22',
     '/splash-alternative' => '2026-09-23',
