@@ -3,7 +3,6 @@
 namespace App\Utils;
 
 use App\Models\Event;
-use App\Models\Group;
 use App\Models\Role;
 use Carbon\Carbon;
 use Illuminate\Support\Collection;
@@ -84,15 +83,12 @@ class GuestSeo
     /**
      * A schedule page's title: "{name} - Upcoming Events" while it has any, "{name} - Events"
      * otherwise, with the city for a venue whose name does not already carry it, and the bare name
-     * when nothing else fits. A sub-schedule keeps "{sub-schedule} | {name}".
+     * when nothing else fits. A sub-schedule page never gets here: it passes a page title, and
+     * AppGuestLayout::guestTitle() makes that "{sub-schedule} | {name}".
      */
-    public static function scheduleTitle(Role $role, ?Group $group, bool $hasUpcoming): string
+    public static function scheduleTitle(Role $role, bool $hasUpcoming): string
     {
         $name = SeoUtils::cleanText($role->translatedName()) ?: config('app.name');
-
-        if ($group) {
-            return $group->translatedName().' | '.($role->translatedName() ?: config('app.name'));
-        }
 
         $label = __($hasUpcoming ? 'messages.upcoming_events' : 'messages.events');
         $candidates = [];
@@ -256,7 +252,7 @@ class GuestSeo
 
         $day = $start->isoFormat('ddd, ll');
 
-        if (strlen((string) $event->starts_at) === 10) {
+        if ($event->hasDateOnlyStart()) {
             return $day;
         }
 
@@ -295,7 +291,7 @@ class GuestSeo
     {
         $locale = app()->getLocale();
 
-        if (strlen((string) $event->starts_at) === 10) {
+        if ($event->hasDateOnlyStart()) {
             return Carbon::parse(Event::isOccurrenceDate($date) ? $date : $event->starts_at)->locale($locale);
         }
 

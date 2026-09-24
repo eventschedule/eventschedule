@@ -2602,9 +2602,10 @@ class EventRepo
      * One-off events come from one bounded query, dated by their schedule-local start
      * (saleEventDateFromStartsAt()). A recurring series is dated by its NEXT occurrence, which SQL
      * cannot compute, so at most UPCOMING_SERIES_LIMIT series are loaded and each is asked
-     * nextOccurrenceFrom() within 60 days; one with no occurrence in that window is left out. A
-     * series whose 'on_date' end has already passed is dropped in SQL first, a day early so no
-     * timezone can drop one still running - nextOccurrenceFrom() is the authority either way.
+     * nextOccurrenceFrom() within 60 days; one with no occurrence in that window is left out. Series
+     * that can no longer be running (Event::constrainSitemapWindow(): an end date or an
+     * after_events count already behind them, or no weekday at all) are dropped in SQL first, so
+     * they cannot use up that budget - nextOccurrenceFrom() is the authority either way.
      *
      * The occurrence dates are cached per schedule and sub-schedule for UPCOMING_CACHE_SECONDS,
      * because an 'after_events' series answers matchesDate() by counting every occurrence since it
@@ -2623,6 +2624,11 @@ class EventRepo
             ->where('events.is_draft', false)
             ->where('events.is_cancelled', false)
             ->where('events.is_private', false)
+            // A password gate hides the event's details on the calendar; this list feeds the
+            // schedule's JSON-LD (venue address, flyer), its meta description and the noscript
+            // list, so a gated event must not appear here at all. is_private normally travels with
+            // a password, but rows that predate that rule do not.
+            ->where(fn ($q) => $q->whereNull('events.event_password')->orWhere('events.event_password', ''))
             ->whereIn('events.id', fn ($pivot) => $pivot->select('event_id')
                 ->from('event_role')
                 ->where('role_id', $role->id)
@@ -2640,15 +2646,15 @@ class EventRepo
             ->map(fn (Event $event) => ['event' => $event, 'date' => $event->saleEventDateFromStartsAt()])
             ->filter(fn (array $row) => $row['date'] !== null);
 
-        $seriesCutoff = Carbon::now($role->timezone ?: config('app.timezone'))->subDay()->format('Y-m-d');
-
+        // Only series that can still be running reach the budget below. Filtering just the ended
+        // 'on_date' ones let long-finished 'after_events' series and '0000000' rows fill all
+        // UPCOMING_SERIES_LIMIT slots by age, so a newer series that IS running never got looked at.
+        // The sitemap's window answers "still running" in SQL for every end type, with a grace
+        // period that only lets a just-ended series through to nextOccurrenceFrom(), which then
+        // drops it.
         $series = $base()
             ->whereNotNull('events.days_of_week')
-            ->where(fn ($q) => $q->whereNull('events.recurring_end_type')
-                ->orWhere('events.recurring_end_type', '<>', 'on_date')
-                ->orWhereNull('events.recurring_end_value')
-                ->orWhereIn('events.recurring_end_value', ['', '0'])
-                ->orWhere('events.recurring_end_value', '>=', $seriesCutoff))
+            ->where(fn ($q) => Event::constrainSitemapWindow($q, Carbon::now('UTC')))
             ->orderBy('events.starts_at')
             ->orderBy('events.id')
             ->limit(self::UPCOMING_SERIES_LIMIT)
@@ -2700,7 +2706,7 @@ class EventRepo
     /** starts_at's time of day in the event's own schedule timezone, for ordering one day. */
     private function localTimeOfDay(Event $event): string
     {
-        if (! $event->starts_at || strlen((string) $event->starts_at) === 10) {
+        if (! $event->starts_at || $event->hasDateOnlyStart()) {
             return '00:00';
         }
 

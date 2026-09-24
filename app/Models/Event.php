@@ -4850,7 +4850,7 @@ class Event extends Model
     }
 
     /** Whether starts_at is a bare date (Y-m-d): an all-day event, already the schedule's calendar day. */
-    private function hasDateOnlyStart(): bool
+    public function hasDateOnlyStart(): bool
     {
         return strlen((string) $this->starts_at) === 10;
     }

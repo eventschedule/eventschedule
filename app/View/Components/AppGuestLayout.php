@@ -128,7 +128,7 @@ class AppGuestLayout extends Component
         }
 
         if ($this->upcoming !== null) {
-            return GuestSeo::scheduleTitle($this->role, null, $this->upcoming->isNotEmpty());
+            return GuestSeo::scheduleTitle($this->role, $this->upcoming->isNotEmpty());
         }
 
         return $name;

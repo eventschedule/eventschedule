@@ -912,10 +912,20 @@ class SitemapController extends Controller
      * accepts the host in this sitemap at all, and has to accept the blog.
      *
      * Only those hosts under the base domain: a customer's custom domain is free to be www.
+     *
+     * Hosted only. A selfhost install routes schedules by PATH under its own host, and that host
+     * may well be www.example.com or app.example.com - _base_domain() strips the www. and the
+     * install's own host would then read as a platform host, so every schedule and event URL it
+     * has was dropped and its sitemaps came out empty.
      */
     private function isTenantUrl(string $loc): bool
     {
         $host = strtolower((string) parse_url($loc, PHP_URL_HOST));
+
+        if (! config('app.hosted')) {
+            return $host !== '';
+        }
+
         $base = strtolower(_base_domain());
 
         foreach (self::PLATFORM_HOST_LABELS as $label) {

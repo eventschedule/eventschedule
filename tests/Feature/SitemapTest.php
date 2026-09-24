@@ -679,6 +679,29 @@ class SitemapTest extends TestCase
         }
     }
 
+    /**
+     * isTenantUrl() is a hosted rule. A selfhost install routes schedules by path under its own
+     * host, which may well be www.example.com or app.example.com; _base_domain() strips the www.,
+     * so the install's own host read as a platform host and every schedule and event was dropped.
+     */
+    public function test_a_selfhost_install_on_a_www_host_still_lists_its_schedules(): void
+    {
+        config(['app.hosted' => false]);
+        $this->pinAppUrl('https://www.selfhost-install.test');
+
+        $method = new \ReflectionMethod(SitemapController::class, 'isTenantUrl');
+        $this->assertTrue($method->invoke(new SitemapController, 'https://www.selfhost-install.test/some-schedule'));
+        $this->assertTrue($method->invoke(new SitemapController, 'https://app.selfhost-install.test/some-schedule'));
+
+        $role = $this->createRole($this->createOwner(), 'venue');
+        $this->createEvent($role, ['creator_role_id' => $role->id]);
+
+        $locs = $this->locs($this->xml('/sitemap-schedules-1.xml'));
+
+        $this->assertContains($role->getCanonicalUrl(), $locs);
+        $this->assertStringStartsWith('https://www.selfhost-install.test/', $role->getCanonicalUrl());
+    }
+
     /** A schedule's own sitemap carries its URLs and nobody else's. */
     public function test_schedule_sitemap_lists_only_that_schedules_urls(): void
     {

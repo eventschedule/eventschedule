@@ -1669,10 +1669,6 @@ class Role extends Model implements MustVerifyEmail
     }
 
     /**
-     * String equality the way the utf8mb4_unicode_ci columns compare, so the PHP predicates agree
-     * with their SQL twins: case-insensitive, and blind to trailing spaces (a PAD SPACE collation).
-     */
-    /**
      * Whether demo content can exist on this install at all: hosted, or the test suite. The same
      * gate as is_demo_role().
      */
@@ -1681,6 +1677,10 @@ class Role extends Model implements MustVerifyEmail
         return (bool) (config('app.hosted') || config('app.is_testing'));
     }
 
+    /**
+     * String equality the way the utf8mb4_unicode_ci columns compare, so the PHP predicates agree
+     * with their SQL twins: case-insensitive, and blind to trailing spaces (a PAD SPACE collation).
+     */
     private static function equalsAsCollated(?string $value, string $expected): bool
     {
         return $value !== null && strcasecmp(rtrim($value, ' '), $expected) === 0;
