@@ -204,6 +204,7 @@ class RouteLoadTest extends TestCase
 
             // Comparison pages
             '/compare',
+            '/ticket-fee-calculator',
             '/eventbrite-alternative',
             '/luma-alternative',
             '/ticket-tailor-alternative',

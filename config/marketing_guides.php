@@ -80,4 +80,8 @@ return [
 
     // The page teaches the iframe, so the guide is the embed section.
     '/wordpress-event-calendar' => 'sharing#embed',
+
+    // A calculator of what platforms take; the guide is connecting your own Stripe or PayPal, which
+    // is where our side of the sum is paid.
+    '/ticket-fee-calculator' => 'tickets#payment',
 ];

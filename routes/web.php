@@ -1250,6 +1250,7 @@ if (config('app.is_nexus')) {
         Route::get('/for-ai-agents', [MarketingController::class, 'forAiAgents'])->name('marketing.for_ai_agents');
         Route::get('/use-cases', [MarketingController::class, 'useCases'])->name('marketing.use_cases');
         Route::get('/compare', [MarketingController::class, 'compare'])->name('marketing.compare');
+        Route::get('/ticket-fee-calculator', [MarketingController::class, 'ticketFeeCalculator'])->name('marketing.ticket_fee_calculator');
         Route::get('/eventbrite-alternative', [MarketingController::class, 'compareEventbrite'])->name('marketing.compare_eventbrite');
         Route::get('/switch-from-eventbrite', [MarketingController::class, 'switchFromEventbrite'])->name('marketing.switch_from_eventbrite');
         Route::get('/luma-alternative', [MarketingController::class, 'compareLuma'])->name('marketing.compare_luma');
@@ -1519,6 +1520,7 @@ if (config('app.is_nexus')) {
             Route::get('/for-ai-agents', [MarketingController::class, 'forAiAgents'])->name('marketing.for_ai_agents');
             Route::get('/use-cases', [MarketingController::class, 'useCases'])->name('marketing.use_cases');
             Route::get('/compare', [MarketingController::class, 'compare'])->name('marketing.compare');
+            Route::get('/ticket-fee-calculator', [MarketingController::class, 'ticketFeeCalculator'])->name('marketing.ticket_fee_calculator');
             Route::get('/eventbrite-alternative', [MarketingController::class, 'compareEventbrite'])->name('marketing.compare_eventbrite');
             Route::get('/switch-from-eventbrite', [MarketingController::class, 'switchFromEventbrite'])->name('marketing.switch_from_eventbrite');
             Route::get('/luma-alternative', [MarketingController::class, 'compareLuma'])->name('marketing.compare_luma');
@@ -1748,6 +1750,7 @@ if (config('app.is_nexus')) {
             Route::get('/for-ai-agents', fn () => redirect('https://'._base_domain().'/for-ai-agents', 301));
             Route::get('/use-cases', fn () => redirect('https://'._base_domain().'/use-cases', 301));
             Route::get('/compare', fn () => redirect('https://'._base_domain().'/compare', 301));
+            Route::get('/ticket-fee-calculator', fn () => redirect('https://'._base_domain().'/ticket-fee-calculator', 301));
             Route::get('/eventbrite-alternative', fn () => redirect('https://'._base_domain().'/eventbrite-alternative', 301));
             Route::get('/luma-alternative', fn () => redirect('https://'._base_domain().'/luma-alternative', 301));
             Route::get('/ticket-tailor-alternative', fn () => redirect('https://'._base_domain().'/ticket-tailor-alternative', 301));
@@ -1949,6 +1952,7 @@ if (config('app.is_nexus')) {
     Route::get('/for-ai-agents', fn () => redirect()->route('home'));
     Route::get('/use-cases', fn () => redirect()->route('home'));
     Route::get('/compare', fn () => redirect()->route('home'));
+    Route::get('/ticket-fee-calculator', fn () => redirect()->route('home'));
     Route::get('/contact', fn () => redirect()->route('home'));
     // The legal documents are the exception to the redirect-to-home rule above: an
     // operator can author their own from /admin/legal, and this is where they are

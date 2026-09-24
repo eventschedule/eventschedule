@@ -450,7 +450,7 @@
                 {{-- gray-400, not gray-500: small text on the dark band needs 4.5:1. --}}
                 <p class="mx-auto mt-8 max-w-3xl text-center text-sm text-gray-500 dark:text-gray-400" data-reveal>
                     Card processing is real either way. Eventbrite adds its own 2.9% to every order on top of the service fee, and we show Stripe's on our side and charge nothing on top, so the comparison is like for like.
-                    <a href="{{ marketing_url('/pricing') }}#fees" class="ms-1 font-medium text-cyan-300 hover:underline">Run your own numbers</a>
+                    <a href="{{ marketing_url('/ticket-fee-calculator') }}" class="ms-1 font-medium text-cyan-300 hover:underline">Run your own numbers</a>
                 </p>
             </div>
         </div>

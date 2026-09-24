@@ -41,6 +41,7 @@ return [
     '/contact' => ['keyword' => 'contact Event Schedule'],
     '/why-create-account' => ['keyword' => 'free account'],
     '/compare' => ['keyword' => 'compare event platforms'],
+    '/ticket-fee-calculator' => ['keyword' => 'ticket fee calculator'],
     '/replace' => ['keyword' => 'all-in-one event platform'],
 
     // Hosting and licensing

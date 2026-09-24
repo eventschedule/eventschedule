@@ -438,6 +438,9 @@
                     <p class="mt-5 text-xs text-gray-500 dark:text-gray-400">
                         Stripe processing ({{ $feeRates['stripe']['label'] }}) is included on the Event Schedule side. The typical platform is Eventbrite at its published US rates, with the 2.9% payment processing fee it charges on each order on top of the service fee. Payouts go straight to your own Stripe account; connect PayPal instead and the money lands in your PayPal account the same way, at PayPal's own rate.
                     </p>
+                    <p class="mt-3 text-sm text-gray-600 dark:text-gray-400">
+                        Weighing up a particular platform? The <x-link href="{{ marketing_url('/ticket-fee-calculator') }}">ticket fee calculator</x-link> sets several side by side at their published rates.
+                    </p>
                 </div>
             </div>
         </div>

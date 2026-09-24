@@ -33,7 +33,13 @@
         }
 
         var revenue = tickets * price;
-        var perTicket = price * (rate.percent || 0) + (rate.fixed || 0);
+        var perTicket = (rate.low_price !== undefined && price <= rate.low_price)
+            ? (rate.low_fixed || 0)
+            : price * (rate.percent || 0) + (rate.fixed || 0);
+
+        if (rate.cap !== undefined) {
+            perTicket = Math.min(perTicket, rate.cap);
+        }
         var cost = tickets * perTicket + revenue * (rate.processing || 0) + (rate.monthly || 0);
 
         if (rate.stripe !== false) {

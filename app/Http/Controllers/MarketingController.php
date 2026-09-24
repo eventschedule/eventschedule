@@ -905,6 +905,14 @@ class MarketingController extends Controller
     }
 
     /**
+     * Ticket Fee Calculator page
+     */
+    public function ticketFeeCalculator()
+    {
+        return view('marketing.ticket-fee-calculator');
+    }
+
+    /**
      * Every rate quoted on /compare: App\Utils\TicketFees, which every fee calculator on the site
      * reads. It holds the published rates with the date each was checked, and our own price comes
      * from the same PlatformPricing reader /pricing uses, so no two pages can quote different

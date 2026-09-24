@@ -143,6 +143,7 @@ class GenerateSocialImages extends Command
         // Comparison pages
         'use-cases' => '/use-cases',
         'compare' => '/compare',
+        'ticket-fee-calculator' => '/ticket-fee-calculator',
         'eventbrite-alternative' => '/eventbrite-alternative',
         'luma-alternative' => '/luma-alternative',
         'ticket-tailor-alternative' => '/ticket-tailor-alternative',

@@ -430,6 +430,10 @@
             </div>
 
             <x-marketing.fee-calculator :tickets="100" :price="10" data-reveal="panel" />
+
+            <p class="mx-auto mt-8 max-w-2xl text-center text-gray-600 dark:text-gray-400" data-reveal>
+                The <x-link href="{{ marketing_url('/ticket-fee-calculator') }}">ticket fee calculator</x-link> sets more platforms side by side, and explains how each one charges.
+            </p>
         </div>
     </section>
 

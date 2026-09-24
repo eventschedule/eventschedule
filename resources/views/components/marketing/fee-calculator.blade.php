@@ -126,6 +126,22 @@
 @include('marketing.partials.ticket-fee-math')
 
 @once
+<style {!! nonce_attr() !!}>
+    /* The calculator's money rule, carried with it so it reads the same on any page: what leaves
+       your pocket is rose, what you keep is emerald, and the savings odometer's digits with it.
+       background-image, not the background shorthand, on the digits: the shorthand resets
+       background-clip and turns each one into a solid block. */
+    [data-fee-calculator] .es-cost { color: #e11d48; }
+    .dark [data-fee-calculator] .es-cost { color: #fb7185; }
+    [data-fee-calculator] .es-keep { color: #047857; }
+    .dark [data-fee-calculator] .es-keep { color: #6ee7b7; }
+    [data-fee-calculator] .es-od-strip span {
+        background-image: linear-gradient(135deg, #059669 0%, #10b981 50%, #0d9488 100%);
+    }
+    .dark [data-fee-calculator] .es-od-strip span {
+        background-image: linear-gradient(135deg, #6ee7b7 0%, #34d399 50%, #2dd4bf 100%);
+    }
+</style>
 <script {!! nonce_attr() !!}>
     (function () {
         function money(n) { return '$' + n.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ','); }

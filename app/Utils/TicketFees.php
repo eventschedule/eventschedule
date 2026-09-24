@@ -5,8 +5,8 @@ namespace App\Utils;
 /**
  * What ticketing platforms take out of one event's ticket sales, at their published US rates.
  *
- * Every fee calculator on the marketing site reads this: <x-marketing.fee-calculator> on /compare,
- * the savings panel on /pricing and the door-money band on /for-talent. Each renders its first paint
+ * Every fee calculator on the marketing site reads this: <x-marketing.fee-calculator> on /compare
+ * and /ticket-fee-calculator, the savings panel on /pricing and the door-money band on /for-talent. Each renders its first paint
  * from cost(), and the scripts that recompute as a visitor types are handed rates() as a data-rates
  * attribute and run the same formula (marketing/partials/ticket-fee-math.blade.php), so a keystroke
  * cannot change the answer the page was rendered with. Before this class the rates were retyped in
@@ -23,6 +23,9 @@ namespace App\Utils;
  *
  * Rate keys, all optional apart from 'name':
  *   percent, fixed    the platform's own fee on each ticket: a share of the price plus a fixed amount
+ *   low_price         at or below this ticket price...
+ *   low_fixed         ...a flat fee replaces percent and fixed (TicketLeap's cheapest tickets)
+ *   cap               the most the per-ticket fee can come to
  *   processing        the platform's own payment processing, as a share of the order
  *   stripe            false when the platform processes the payment itself, so Stripe's rate is not added
  *   monthly           a subscription, counted once for the event
@@ -43,6 +46,12 @@ final class TicketFees
 
     /** The platforms /compare's calculator shows, in the order it shows them. Ours comes first. */
     public const COMPARE_PLATFORMS = ['eventschedule', 'eventbrite', 'luma', 'ticket-tailor'];
+
+    /** Every platform with a rate here, for /ticket-fee-calculator: eight, so two full rows of four. */
+    public const CALCULATOR_PLATFORMS = [
+        'eventschedule', 'eventbrite', 'luma', 'ticket-tailor',
+        'ticketleap', 'universe', 'allevents', 'hi-events',
+    ];
 
     /**
      * Every rate, keyed by platform, plus Stripe's under 'stripe'.
@@ -102,6 +111,62 @@ final class TicketFees
                 'label' => '$0.28-$0.60 per ticket',
                 'basis' => 'Ticket Tailor publishes $0.28-$0.60 per ticket depending on volume, so the midpoint is used here.',
             ],
+
+            // ticketleap.com/info/pricing, checked 2026-09-24: "$1 + 2% of the event ticket price" on
+            // each ticket plus "a 3% online transaction fee per order"; "for tickets $5 and below" a
+            // flat $0.49 instead; "no more than $20 in ticketing fees" on a ticket, and no cap on the
+            // 3%. No subscription. TicketLeap processes the payment itself, so Stripe's rate is not added.
+            'ticketleap' => [
+                'name' => 'TicketLeap',
+                'percent' => 0.02,
+                'fixed' => 1.00,
+                'low_price' => 5.00,
+                'low_fixed' => 0.49,
+                'cap' => 20.00,
+                'processing' => 0.03,
+                'stripe' => false,
+                'label' => '$1 + 2% per ticket, plus 3% per order',
+                'basis' => 'TicketLeap is shown with its 3% transaction fee per order, its flat fee on the cheapest tickets and its cap on the per-ticket fee.',
+            ],
+
+            // support.universe.com, "Payment processing preferences" (updated 2026-09-07), checked
+            // 2026-09-24: on the US Starter tier a "$0.79 + 2%" service fee capped at $19.95 a ticket,
+            // and a 3.00% payment processing fee through Universe Payments, which is not capped.
+            // universe.com/pricing renders the Canadian rate until its currency picker runs, so read
+            // the help center's table, not the page's text.
+            'universe' => [
+                'name' => 'Universe',
+                'percent' => 0.02,
+                'fixed' => 0.79,
+                'cap' => 19.95,
+                'processing' => 0.03,
+                'stripe' => false,
+                'label' => '2% + $0.79 per ticket, plus 3% processing',
+                'basis' => 'Universe is shown at its US Starter rate, with the 3% processing fee Universe Payments adds and the cap on its service fee.',
+            ],
+
+            // allevents.in/pages/pricing and the fee feed behind it
+            // (allevents.in/api/index.php/tickets/plans_prices), checked 2026-09-24: a USD 1 booking
+            // fee on each ticket, charged to buyers unless the organizer absorbs it. Outside India the
+            // ticket money settles into the organizer's own Stripe or PayPal account, whose fee is on
+            // top. A 2025 help article says "USD 1 or 0.5%, whichever is higher"; the feed says a flat
+            // USD 1, and the two differ only on a ticket over 200 dollars.
+            'allevents' => [
+                'name' => 'AllEvents',
+                'fixed' => 1.00,
+                'label' => '$1 booking fee per ticket',
+                'basis' => 'AllEvents is shown with its booking fee absorbed rather than passed to the buyer, and Stripe processing on your own account.',
+            ],
+
+            // hi.events/pricing, checked 2026-09-24: Hi.Events Cloud charges "1.25% + $0.60" on each
+            // paid ticket, and "payment processing is charged on top" (Stripe).
+            'hi-events' => [
+                'name' => 'Hi.Events',
+                'percent' => 0.0125,
+                'fixed' => 0.60,
+                'label' => '1.25% + $0.60 per ticket',
+                'basis' => 'Hi.Events is shown at its Cloud rate, with Stripe processing on top.',
+            ],
         ];
     }
 
@@ -147,7 +212,13 @@ final class TicketFees
         }
 
         $revenue = $tickets * $price;
-        $perTicket = $price * (float) ($rate['percent'] ?? 0) + (float) ($rate['fixed'] ?? 0);
+        $perTicket = isset($rate['low_price']) && $price <= (float) $rate['low_price']
+            ? (float) ($rate['low_fixed'] ?? 0)
+            : $price * (float) ($rate['percent'] ?? 0) + (float) ($rate['fixed'] ?? 0);
+
+        if (isset($rate['cap'])) {
+            $perTicket = min($perTicket, (float) $rate['cap']);
+        }
 
         $cost = $tickets * $perTicket + $revenue * (float) ($rate['processing'] ?? 0) + (float) ($rate['monthly'] ?? 0);
 
@@ -168,7 +239,7 @@ final class TicketFees
     public static function forScript(array $platforms, ?array $rates = null): array
     {
         $rates ??= self::rates();
-        $keep = ['percent', 'fixed', 'processing', 'stripe', 'monthly', 'plans'];
+        $keep = ['percent', 'fixed', 'low_price', 'low_fixed', 'cap', 'processing', 'stripe', 'monthly', 'plans'];
 
         $out = ['stripe' => array_intersect_key($rates['stripe'], array_flip(['percent', 'fixed']))];
 

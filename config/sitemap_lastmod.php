@@ -192,6 +192,7 @@ return [
     '/switch-from-eventbrite' => '2026-09-22',
     '/terms-of-service' => '2026-09-04',
     '/the-events-calendar-alternative' => '2026-09-24',
+    '/ticket-fee-calculator' => '2026-09-24',
     '/ticket-tailor-alternative' => '2026-09-24',
     '/timely-alternative' => '2026-09-24',
     '/tito-alternative' => '2026-09-24',

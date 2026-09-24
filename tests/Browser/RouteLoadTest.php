@@ -146,6 +146,7 @@ class RouteLoadTest extends DuskTestCase
 
                 // Comparison pages
                 '/compare',
+                '/ticket-fee-calculator',
                 '/eventbrite-alternative',
                 '/luma-alternative',
                 '/ticket-tailor-alternative',

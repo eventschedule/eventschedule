@@ -28,16 +28,17 @@ class TicketFeesTest extends TestCase
     use RefreshDatabase;
 
     /** The pages that draw a calculator. */
-    private const PAGES = ['/compare', '/pricing', '/for-talent'];
+    private const PAGES = ['/compare', '/pricing', '/for-talent', '/ticket-fee-calculator'];
 
     /** The pages whose calculator recomputes in the browser. */
-    private const INTERACTIVE = ['/compare', '/pricing'];
+    private const INTERACTIVE = ['/compare', '/pricing', '/ticket-fee-calculator'];
 
     /** Every file a calculator is drawn or computed in. */
     private const SOURCES = [
         'resources/views/marketing/compare.blade.php',
         'resources/views/marketing/pricing.blade.php',
         'resources/views/marketing/for-talent.blade.php',
+        'resources/views/marketing/ticket-fee-calculator.blade.php',
         'resources/views/components/marketing/fee-calculator.blade.php',
         'resources/views/marketing/partials/ticket-fee-math.blade.php',
     ];
@@ -96,6 +97,32 @@ class TicketFeesTest extends TestCase
         $this->assertSame('103.00', $this->money(TicketFees::cost('ticket-tailor', 100, 10)));
     }
 
+    public function test_ticketleap_charges_its_own_processing_with_a_flat_fee_and_a_cap(): void
+    {
+        // 200 x 25: (1.00 + 2% of 25) on each ticket is 300.00, and 3% of the 5,000 order is 150.00.
+        $this->assertSame('450.00', $this->money(TicketFees::cost('ticketleap', 200, 25)));
+        // 100 x 5, at the threshold: a flat 0.49 a ticket (49.00) and 3% of 500 (15.00).
+        $this->assertSame('64.00', $this->money(TicketFees::cost('ticketleap', 100, 5)));
+        // 10 x 2,000: 1.00 + 40.00 is capped at 20.00 a ticket (200.00); the 3% is not (600.00).
+        $this->assertSame('800.00', $this->money(TicketFees::cost('ticketleap', 10, 2000)));
+    }
+
+    public function test_universe_caps_its_service_fee_but_not_its_processing(): void
+    {
+        // 200 x 25: (0.79 + 2% of 25) on each ticket is 258.00, and 3% of 5,000 is 150.00.
+        $this->assertSame('408.00', $this->money(TicketFees::cost('universe', 200, 25)));
+        // 10 x 1,000: 0.79 + 20.00 is capped at 19.95 a ticket (199.50); the 3% is not (300.00).
+        $this->assertSame('499.50', $this->money(TicketFees::cost('universe', 10, 1000)));
+    }
+
+    public function test_allevents_and_hi_events_charge_a_fee_with_stripe_on_top(): void
+    {
+        // 200 x 25: 1.00 a ticket (200.00) plus Stripe (145.00 + 60.00).
+        $this->assertSame('405.00', $this->money(TicketFees::cost('allevents', 200, 25)));
+        // 200 x 25: (1.25% of 25 + 0.60) on each ticket is 182.50, plus Stripe's 205.00.
+        $this->assertSame('387.50', $this->money(TicketFees::cost('hi-events', 200, 25)));
+    }
+
     public function test_nothing_sold_or_nothing_charged_costs_nothing(): void
     {
         foreach ($this->platforms() as $platform) {
@@ -116,15 +143,17 @@ class TicketFeesTest extends TestCase
             $this->assertSame(1, preg_match('/data-fee-tickets="(\d+)"/', $html, $tickets), "{$path} names no ticket count");
             $this->assertSame(1, preg_match('/data-fee-price="(\d+(?:\.\d+)?)"/', $html, $price), "{$path} names no ticket price");
 
-            foreach (['eventbrite', 'eventschedule'] as $platform) {
-                $this->assertSame(
-                    1,
-                    preg_match('/data-fee-total="'.$platform.'"[^>]*>\$([\d,]+\.\d{2})</', $html, $total),
-                    "{$path} renders no {$platform} total"
-                );
+            preg_match_all('/data-fee-total="([a-z-]+)"[^>]*>\$([\d,]+\.\d{2})</', $html, $totals, PREG_SET_ORDER);
+            $shown = array_column($totals, 2, 1);
+
+            // Every page sets Eventbrite against us, and every total it prints is TicketFees'.
+            $this->assertArrayHasKey('eventbrite', $shown, "{$path} renders no Eventbrite total");
+            $this->assertArrayHasKey('eventschedule', $shown, "{$path} renders no total of ours");
+
+            foreach ($shown as $platform => $amount) {
                 $this->assertSame(
                     $this->money(TicketFees::cost($platform, (int) $tickets[1], (float) $price[1])),
-                    $total[1],
+                    $amount,
                     "{$path} prints a {$platform} total TicketFees does not"
                 );
             }

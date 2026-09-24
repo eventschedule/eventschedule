@@ -49,6 +49,10 @@ echo '<?xml version="1.0" encoding="UTF-8"?>'; ?>
         {!! $lastmodTag('/compare') !!}
     </url>
     <url>
+        <loc>{{ url('/ticket-fee-calculator') }}</loc>
+        {!! $lastmodTag('/ticket-fee-calculator') !!}
+    </url>
+    <url>
         <loc>{{ url('/eventbrite-alternative') }}</loc>
         {!! $lastmodTag('/eventbrite-alternative') !!}
     </url>
