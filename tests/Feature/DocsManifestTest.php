@@ -3,6 +3,7 @@
 namespace Tests\Feature;
 
 use App\Utils\DocsUtils;
+use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Route;
 use Tests\TestCase;
 
@@ -14,6 +15,10 @@ use Tests\TestCase;
  */
 class DocsManifestTest extends TestCase
 {
+    // The feature-link tests render marketing pages as well as doc pages, and the marketing
+    // footer reads the legal documents table.
+    use RefreshDatabase;
+
     public function test_manifest_is_not_empty(): void
     {
         $this->assertNotEmpty(DocsUtils::pages(), 'config/docs.php has no pages.');
@@ -560,6 +565,173 @@ class DocsManifestTest extends TestCase
                 str_contains($sitemap, $page['route']) || str_contains($sitemap, $page['path']),
                 "Docs page '{$key}' is missing from resources/views/sitemap.blade.php."
             );
+        }
+    }
+
+    /**
+     * A docs page's `feature` is the marketing page for the same feature: a registered marketing
+     * route that answers 200, and never another docs page - that is a See also, not a twin.
+     */
+    public function test_every_feature_is_a_registered_marketing_page(): void
+    {
+        $features = array_filter(array_column(DocsUtils::pages(), 'feature', 'key'));
+
+        $this->assertNotEmpty($features, 'fixture: the manifest names feature pages');
+
+        foreach ($features as $key => $route) {
+            $this->assertTrue(Route::has($route), "Docs page '{$key}' names unknown route '{$route}' as its feature.");
+            $this->assertStringStartsWith('marketing.', $route, "Docs page '{$key}': '{$route}' is not a marketing page.");
+            $this->assertStringStartsNotWith('marketing.docs.', $route, "Docs page '{$key}': '{$route}' is a docs page, not its feature page.");
+            $this->assertSame(200, $this->get(route($route))->status(), "Docs page '{$key}': {$route} does not answer 200.");
+        }
+    }
+
+    /** Every docs page that has a marketing twin links it, under the hero, by the twin's keyword. */
+    public function test_every_docs_page_with_a_twin_links_it(): void
+    {
+        $checked = 0;
+
+        foreach (DocsUtils::pages() as $key => $page) {
+            if (empty($page['feature'])) {
+                $this->assertNull(DocsUtils::featureFor($key), "Docs page '{$key}' names no feature, so links none.");
+
+                continue;
+            }
+
+            $link = DocsUtils::featureFor($key);
+            $keyword = (config('marketing_keywords') ?: [])[route($page['feature'], [], false)]['keyword'] ?? null;
+
+            $this->assertNotNull($link, "Docs page '{$key}' names a feature but gets no link.");
+            $this->assertSame(route($page['feature']), $link['url']);
+            $this->assertNotNull($keyword, "The feature page of '{$key}' has no entry in config/marketing_keywords.php.");
+            $this->assertSame(ucfirst($keyword), $link['text']);
+
+            $html = $this->get($page['path'])->assertOk()->getContent();
+
+            $this->assertStringContainsString(
+                'href="'.$link['url'].'" class="doc-link font-medium">'.e($link['text']).'</a>',
+                $html,
+                "Docs page '{$key}' does not link its feature page."
+            );
+            $checked++;
+        }
+
+        $this->assertGreaterThanOrEqual(20, $checked, 'fixture: most guides have a twin');
+    }
+
+    /**
+     * And every twin links back - to a guide that names it, not merely to some guide. The link is
+     * derived from the same manifest entry, which is what keeps the pair from drifting to one-way.
+     */
+    public function test_every_twin_links_back_to_a_guide_that_names_it(): void
+    {
+        $guidesByRoute = [];
+
+        foreach (DocsUtils::pages() as $key => $page) {
+            if (! empty($page['feature'])) {
+                $guidesByRoute[$page['feature']][] = $key;
+            }
+        }
+
+        foreach ($guidesByRoute as $route => $keys) {
+            $path = route($route, [], false);
+            $guide = DocsUtils::guideForPath($path);
+
+            $this->assertNotNull($guide, "{$path} links no guide.");
+            $this->assertContains($guide['key'], $keys,
+                "{$path} links the '{$guide['key']}' guide, but only ".implode(', ', $keys).' name it as their feature.');
+            $this->assertStringContainsString(
+                'href="'.$guide['url'].'"',
+                $this->get($path)->assertOk()->getContent(),
+                "{$path} does not render its guide link."
+            );
+        }
+    }
+
+    /**
+     * config/marketing_guides.php is hand-written: every key must be a marketing page, every
+     * value a manifest key, every #anchor one the page declares, and the page must render it.
+     */
+    public function test_every_marketing_guide_entry_is_a_real_page_and_anchor(): void
+    {
+        $guides = config('marketing_guides') ?: [];
+
+        $this->assertNotEmpty($guides, 'fixture: config/marketing_guides.php has entries');
+
+        $marketingPaths = [];
+
+        foreach (Route::getRoutes() as $route) {
+            $name = (string) $route->getName();
+
+            if (str_starts_with($name, 'marketing.') && ! str_starts_with($name, 'marketing.docs.')
+                && in_array('GET', $route->methods(), true)) {
+                $marketingPaths['/'.ltrim($route->uri(), '/')] = $name;
+            }
+        }
+
+        foreach ($guides as $path => $ref) {
+            $this->assertArrayHasKey($path, $marketingPaths, "config/marketing_guides.php names '{$path}', which is not a marketing page.");
+
+            [$key, $anchor] = array_pad(explode('#', $ref, 2), 2, '');
+
+            $this->assertNotNull(DocsUtils::page($key), "'{$path}' points at unknown docs page '{$key}'.");
+
+            if ($anchor !== '') {
+                $this->assertContains($anchor, $this->anchorsFor($key), "'{$path}' points at '{$ref}', which does not exist.");
+            }
+
+            $guide = DocsUtils::guideForPath($path);
+
+            $this->assertSame($key, $guide['key'] ?? null);
+            $this->assertStringContainsString(
+                'href="'.$guide['url'].'"',
+                $this->get($path)->assertOk()->getContent(),
+                "{$path} does not render its guide link."
+            );
+        }
+    }
+
+    /**
+     * The compare pages' default switch steps each link a guide section, and the replace pages
+     * link one for the whole section. A dead #anchor would land the reader at the top of a long
+     * page, which is why every anchor they render is checked against the page it names.
+     */
+    public function test_the_compare_and_replace_guide_links_resolve(): void
+    {
+        $expected = [
+            // Luma has no switch_steps of its own, so it renders the default four.
+            '/luma-alternative' => ['getting-started#create-schedule', 'ai-import', 'newsletters#importing-emails', 'tickets#payment'],
+            '/google-forms-replacement' => ['getting-started'],
+        ];
+
+        foreach ($expected as $path => $refs) {
+            $html = $this->get($path)->assertOk()->getContent();
+
+            preg_match_all('~href="('.preg_quote(url('/docs'), '~').'[^"#]*)(?:#([a-z0-9-]+))?"~', $html, $links, PREG_SET_ORDER);
+
+            $found = [];
+
+            foreach ($links as $link) {
+                // The docs index, linked from the site header and footer, is not a manifest page.
+                if (rtrim($link[1], '/') === url('/docs')) {
+                    continue;
+                }
+
+                $key = $this->pageKeyForUrl($link[1]);
+                $anchor = $link[2] ?? '';
+
+                $this->assertNotNull($key, "{$path} links {$link[1]}, which is not a docs page.");
+
+                if ($anchor !== '') {
+                    $this->assertContains($anchor, $this->anchorsFor($key), "{$path} links '{$key}#{$anchor}', which does not exist.");
+                }
+
+                $found[] = $key.($anchor !== '' ? '#'.$anchor : '');
+            }
+
+            foreach ($refs as $ref) {
+                $this->assertContains($ref, $found, "{$path} no longer links the '{$ref}' guide.");
+            }
         }
     }
 

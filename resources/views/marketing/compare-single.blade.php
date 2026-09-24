@@ -102,11 +102,14 @@
         // NewsletterController::importStore for the list (10,000 rows, no plan
         // gate), and Event::canSellPaidTickets() for what selling costs: a
         // ticket that carries a price is Pro, free registration never is.
+        //
+        // `doc` is the guide section for the step ('docs key#anchor', see DocsUtils::guide()),
+        // rendered as a link at the foot of its card. DocsManifestTest checks every anchor.
         $switchSteps = $switch_steps ?? [
-            ['title' => 'Create your schedule', 'description' => 'Free, no card, and it has its own address the moment it exists. Nothing has to move before it is useful.'],
-            ['title' => 'Bring the events across', 'description' => 'Paste a listing or upload the flyer and the parser fills in the name, date, time, venue and description for you to check. Fifty a day on the free and Pro plans (ten during a Pro trial), a hundred on Enterprise.'],
-            ['title' => 'Bring your list across', 'description' => 'Export the addresses you already have and paste them in or upload a CSV, up to ten thousand rows, on any plan. What the newsletter allowance counts is sending to them, not holding them.'],
-            ['title' => 'Connect Stripe or PayPal and sell', 'description' => 'Your own Stripe or PayPal account, so the money settles into it rather than into ours. Zero platform fees on every plan, a ticket with a price on it is Pro, and refunds go back through the same account.'],
+            ['title' => 'Create your schedule', 'description' => 'Free, no card, and it has its own address the moment it exists. Nothing has to move before it is useful.', 'doc' => 'getting-started#create-schedule'],
+            ['title' => 'Bring the events across', 'description' => 'Paste a listing or upload the flyer and the parser fills in the name, date, time, venue and description for you to check. Fifty a day on the free and Pro plans (ten during a Pro trial), a hundred on Enterprise.', 'doc' => 'ai-import'],
+            ['title' => 'Bring your list across', 'description' => 'Export the addresses you already have and paste them in or upload a CSV, up to ten thousand rows, on any plan. What the newsletter allowance counts is sending to them, not holding them.', 'doc' => 'newsletters#importing-emails'],
+            ['title' => 'Connect Stripe or PayPal and sell', 'description' => 'Your own Stripe or PayPal account, so the money settles into it rather than into ours. Zero platform fees on every plan, a ticket with a price on it is Pro, and refunds go back through the same account.', 'doc' => 'tickets#payment'],
         ];
         // Twenty-two of the twenty-six competitors fall through to these, so they are
         // written as facts with their tier attached rather than as adjectives.
@@ -1339,10 +1342,18 @@
                     'md:grid-cols-3' => count($switchSteps) % 3 === 0,
                 ]) data-reveal-group="100">
                 @foreach ($switchSteps as $index => $step)
+                    @php($stepGuide = ! empty($step['doc']) ? \App\Utils\DocsUtils::guide($step['doc']) : null)
                     <div class="es-score-card flex flex-col p-7" data-reveal="panel">
                         <p class="es-score-num es-score-accent mb-3 text-2xl">{{ str_pad($index + 1, 2, '0', STR_PAD_LEFT) }}</p>
                         <h3 class="es-score-ink mb-2 text-lg font-bold">{{ $step['title'] }}</h3>
                         <p class="es-score-muted text-sm leading-relaxed">{{ $step['description'] }}</p>
+                        {{-- mt-auto so the links line up across cards whatever the copy above them. --}}
+                        @if ($stepGuide)
+                            <a href="{{ $stepGuide['url'] }}" class="es-score-link mt-auto inline-flex items-center gap-1 pt-5 text-sm font-medium transition-all duration-200 hover:gap-2 hover:underline">
+                                {{ $stepGuide['title'] }} guide
+                                <svg aria-hidden="true" class="h-4 w-4 flex-none rtl:rotate-180" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7" /></svg>
+                            </a>
+                        @endif
                     </div>
                 @endforeach
             </div>

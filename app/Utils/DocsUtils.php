@@ -3,6 +3,7 @@
 namespace App\Utils;
 
 use Illuminate\Support\Facades\Route;
+use Illuminate\Support\Str;
 
 /**
  * Accessors over the documentation manifest in config/docs.php.
@@ -243,5 +244,92 @@ class DocsUtils
     public static function navTitle(array $page): string
     {
         return $page['nav_title'] ?? $page['title'];
+    }
+
+    /**
+     * The marketing page for a docs page's feature, for the line under the docs hero: its URL,
+     * and the link text, which is that page's keyword from config/marketing_keywords.php.
+     *
+     * Null when the page names no feature, or names a route this install does not register (the
+     * marketing pages exist only on the nexus).
+     *
+     * @return array{url: string, text: string}|null
+     */
+    public static function featureFor(string $key): ?array
+    {
+        $route = self::page($key)['feature'] ?? null;
+
+        if (! is_string($route) || $route === '' || ! Route::has($route)) {
+            return null;
+        }
+
+        $path = route($route, [], false);
+
+        // Bracket lookup, not config('marketing_keywords.'.$path): the keys are URL paths, and
+        // dot notation would walk their slashes as nothing and miss every time.
+        $keyword = (config('marketing_keywords') ?: [])[$path]['keyword'] ?? null;
+
+        return [
+            'url' => route($route),
+            'text' => $keyword !== null
+                ? ucfirst($keyword)
+                : Str::headline(basename($path)),
+        ];
+    }
+
+    /**
+     * A docs reference - 'key' or 'key#anchor' - as a link: the page's URL with the anchor, and
+     * its title. Null for a key the manifest does not know.
+     *
+     * @return array{key: string, anchor: string, url: string, title: string}|null
+     */
+    public static function guide(string $ref): ?array
+    {
+        [$key, $anchor] = array_pad(explode('#', $ref, 2), 2, '');
+
+        $page = self::page($key);
+
+        if ($page === null || ! Route::has($page['route'])) {
+            return null;
+        }
+
+        return [
+            'key' => $key,
+            'anchor' => $anchor,
+            'url' => route($page['route']).($anchor !== '' ? '#'.$anchor : ''),
+            'title' => $page['title'],
+        ];
+    }
+
+    /**
+     * The guide a marketing page links to, for the "Read the guide" link in its related strip.
+     *
+     * An explicit entry in config/marketing_guides.php first - the audience pages, whose best guide
+     * is a judgement rather than a feature pairing - then any docs page whose `feature` is this
+     * page, first in manifest order. So a feature page and its guide link each other from a single
+     * manifest entry, and cannot drift into linking one way only.
+     *
+     * @param  string  $path  a URL path, e.g. '/features/gift-cards' or 'for-musicians'
+     * @return array{key: string, anchor: string, url: string, title: string}|null
+     */
+    public static function guideForPath(string $path): ?array
+    {
+        $path = '/'.trim($path, '/');
+
+        $explicit = (config('marketing_guides') ?: [])[$path] ?? null;
+
+        if (is_string($explicit) && $explicit !== '') {
+            return self::guide($explicit);
+        }
+
+        foreach (self::pages() as $key => $page) {
+            $feature = $page['feature'] ?? null;
+
+            if (is_string($feature) && Route::has($feature) && route($feature, [], false) === $path) {
+                return self::guide($key);
+            }
+        }
+
+        return null;
     }
 }

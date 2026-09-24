@@ -97,6 +97,18 @@ class DocsPage extends Component
             : rtrim(config('app.url'), '/').'/'.ltrim($this->canonical, '/');
     }
 
+    /**
+     * The marketing page for this page's feature (the manifest's `feature` key), for the line
+     * under the hero lede. That page's related strip links back here, so a reader can move
+     * between the pitch and the how in either direction.
+     *
+     * @return array{url: string, text: string}|null
+     */
+    public function featureLink(): ?array
+    {
+        return DocsUtils::featureFor($this->key);
+    }
+
     public function headingText(): string
     {
         return $this->heading ?? $this->page['title'];

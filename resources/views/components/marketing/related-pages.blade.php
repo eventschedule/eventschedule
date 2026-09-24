@@ -1,6 +1,10 @@
 @php
     $path = trim(request()->path(), '/');
     $related = config('marketing_related.' . $path, []);
+    // The docs page for this one: an audience page's entry in config/marketing_guides.php, or
+    // the guide whose manifest `feature` names this page. Beside the heading rather than as a
+    // fifth card, so the grid below stays a complete row of four.
+    $guide = \App\Utils\DocsUtils::guideForPath($path);
     $gridCols = match (min(count($related), 4)) {
         1 => 'lg:grid-cols-1',
         2 => 'lg:grid-cols-2',
@@ -11,9 +15,23 @@
 @if (!empty($related))
     <section class="bg-gray-50 dark:bg-[#0f0f14] border-t border-gray-200 dark:border-white/10 py-16">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div class="mb-8">
-                <p class="text-sm font-semibold uppercase tracking-wider text-[var(--wp-link)] mb-2">Related</p>
-                <h2 class="text-2xl md:text-3xl font-bold text-gray-900 dark:text-white">Keep exploring</h2>
+            <div class="mb-8 flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
+                <div>
+                    <p class="text-sm font-semibold uppercase tracking-wider text-[var(--wp-link)] mb-2">Related</p>
+                    <h2 class="text-2xl md:text-3xl font-bold text-gray-900 dark:text-white">Keep exploring</h2>
+                </div>
+                @if ($guide)
+                    <a href="{{ $guide['url'] }}"
+                       class="inline-flex items-center gap-2 self-start rounded-lg text-sm font-medium text-[var(--wp-link)] transition-all duration-200 hover:gap-2.5 hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#4E81FA] sm:self-auto">
+                        <svg aria-hidden="true" class="h-4 w-4 flex-none" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" />
+                        </svg>
+                        <span>Read the guide: {{ $guide['title'] }}</span>
+                        <svg aria-hidden="true" class="h-4 w-4 flex-none rtl:rotate-180" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7" />
+                        </svg>
+                    </a>
+                @endif
             </div>
             <div class="grid grid-cols-1 sm:grid-cols-2 {{ $gridCols }} gap-4">
                 @foreach ($related as $item)

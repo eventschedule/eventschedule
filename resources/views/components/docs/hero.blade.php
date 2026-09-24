@@ -25,6 +25,9 @@
     'title',
     'emphasis' => null,
     'lede' => null,
+    // ['url' => ..., 'text' => ...] from DocsUtils::featureFor(): the marketing page for this
+    // guide's feature, linked on one line under the lede.
+    'feature' => null,
     'eyebrow' => null,
     'plan' => null,
     'section' => null,
@@ -121,6 +124,13 @@
 
                 @if ($lede)
                     <p class="es-fade-up es-d-2 mt-3.5 max-w-2xl text-base text-gray-500 dark:text-gray-400 sm:text-lg">{{ $lede }}</p>
+                @endif
+
+                @if ($feature)
+                    {{-- .doc-link carries its own light and dark colours (docs.css). --}}
+                    <p class="es-fade-up es-d-2 mt-2.5 max-w-2xl text-sm text-gray-500 dark:text-gray-400">
+                        Feature overview: <a href="{{ $feature['url'] }}" class="doc-link font-medium">{{ $feature['text'] }}</a>
+                    </p>
                 @endif
             </div>
 

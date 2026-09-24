@@ -952,6 +952,14 @@
                     </svg>
                 </a>
                 <p class="es-swap-muted mt-4 text-sm">No credit card required.</p>
+                {{-- One guide for the whole section, not one per step: the steps differ per tool,
+                     and all of them begin where the Getting Started guide does. --}}
+                @php($switchGuide = \App\Utils\DocsUtils::guide('getting-started'))
+                @if ($switchGuide)
+                    <p class="es-swap-muted mt-2 text-sm">
+                        New here? Start with <a href="{{ $switchGuide['url'] }}" class="es-swap-link font-medium hover:underline">the {{ $switchGuide['title'] }} guide</a>.
+                    </p>
+                @endif
             </div>
         </div>
     </section>

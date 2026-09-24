@@ -52,6 +52,7 @@
             :title="$headingText()"
             :emphasis="$emphasis"
             :lede="$ledeText()"
+            :feature="$featureLink()"
             :eyebrow="$eyebrow"
             :plan="$plan"
             :section="$crumb['section']"
