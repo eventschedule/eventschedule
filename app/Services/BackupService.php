@@ -974,18 +974,18 @@ class BackupService
             }
         }
 
-        // Sponsor logos
-        $sponsorLogos = $role->sponsor_logos;
-        if (is_array($sponsorLogos)) {
-            foreach ($sponsorLogos as $i => $logo) {
-                $logoUrl = $logo['image'] ?? null;
-                if ($logoUrl && ! str_starts_with($logoUrl, 'http')) {
-                    $storagePath = config('filesystems.default') == 'local' ? 'public/'.$logoUrl : $logoUrl;
-                    if (Storage::exists($storagePath)) {
-                        $imageKey = 'images/'.$logoUrl;
-                        $imageFiles[$imageKey] = $storagePath;
-                        $roleData['_sponsor_logo_'.$i] = $imageKey;
-                    }
+        // Sponsor logos, as collectEventImages() reads them: the column is a JSON string, and each
+        // entry names its file under 'logo'. Read as an array with an 'image' key, it matched
+        // nothing, so no archive ever carried a schedule's sponsor logos.
+        $sponsorLogos = json_decode($role->getAttributes()['sponsor_logos'] ?? '[]', true) ?: [];
+        foreach ($sponsorLogos as $i => $logo) {
+            $logoFile = is_array($logo) ? ($logo['logo'] ?? null) : null;
+            if (is_string($logoFile) && $logoFile !== '' && ! str_starts_with($logoFile, 'http')) {
+                $storagePath = config('filesystems.default') == 'local' ? 'public/'.$logoFile : $logoFile;
+                if (Storage::exists($storagePath)) {
+                    $imageKey = 'images/'.$logoFile;
+                    $imageFiles[$imageKey] = $storagePath;
+                    $roleData['_sponsor_logo_'.$i] = $imageKey;
                 }
             }
         }
@@ -1713,25 +1713,21 @@ class BackupService
         $role->subdomain = $subdomain;
         $role->user_id = $userId;
 
-        // Clear local image paths (non-http) since they reference the source system.
-        // External URLs are preserved. Local images will be restored by importRoleImages if included.
+        // Clear local image paths since they reference the source system. External URLs are
+        // preserved, and local images are restored by importRoleImages() under new names if the
+        // archive carries them. Read raw: the accessors turn a filename into a full URL, so this
+        // used to see http on every value and keep them all - and a kept filename is shared with
+        // whichever row on this install holds it, so the restored schedule's next image replace
+        // or delete deleted that row's file.
         foreach (['profile_image_url', 'header_image_url', 'background_image_url'] as $imgField) {
-            if ($role->$imgField && ! str_starts_with($role->$imgField, 'http')) {
+            if (! $this->isExternalImageUrl($role->getAttributes()[$imgField] ?? null)) {
                 $role->$imgField = null;
             }
         }
 
-        // Clear local sponsor logo image paths
-        $sponsorLogos = $role->sponsor_logos;
-        if (is_array($sponsorLogos)) {
-            foreach ($sponsorLogos as $i => &$logo) {
-                if (isset($logo['image']) && $logo['image'] && ! str_starts_with($logo['image'], 'http')) {
-                    $logo['image'] = null;
-                }
-            }
-            unset($logo);
-            $role->sponsor_logos = $sponsorLogos;
-        }
+        // The same for sponsor logos. The column is a JSON string with the file under 'logo', and
+        // this read it as an array with an 'image' key, so it cleared nothing.
+        $role->sponsor_logos = $this->withoutLocalLogos($role->getAttributes()['sponsor_logos'] ?? null);
 
         // Regenerate HTML fields from markdown
         $role->description_html = MarkdownUtils::convertToHtml($role->description);
@@ -1898,22 +1894,14 @@ class BackupService
         $planRefId = $data['_seating_plan_ref_id'] ?? null;
         $event->seating_plan_id = $planRefId ? ($idMap['seating_plans'][$planRefId] ?? null) : null;
 
-        // Clear local flyer image path
-        if ($event->flyer_image_url && ! str_starts_with($event->flyer_image_url, 'http')) {
+        // The flyer is not fillable, so the walk above never restores it; only importEventImages()
+        // sets one, under a new name. Read raw all the same, for the reason importRole() gives.
+        if (! $this->isExternalImageUrl($event->getAttributes()['flyer_image_url'] ?? null)) {
             $event->flyer_image_url = null;
         }
 
-        // Clear local event sponsor logo image paths
-        if ($event->sponsor_logos) {
-            $eventSponsorLogos = json_decode($event->sponsor_logos, true) ?: [];
-            foreach ($eventSponsorLogos as &$logo) {
-                if (isset($logo['logo']) && $logo['logo'] && ! str_starts_with($logo['logo'], 'http')) {
-                    $logo['logo'] = null;
-                }
-            }
-            unset($logo);
-            $event->sponsor_logos = ! empty($eventSponsorLogos) ? json_encode($eventSponsorLogos) : null;
-        }
+        // Sponsor logos are fillable, so the walk above restored the list as it came.
+        $event->sponsor_logos = $this->withoutLocalLogos($event->getAttributes()['sponsor_logos'] ?? null);
 
         $event->saveQuietly();
 
@@ -2911,36 +2899,36 @@ class BackupService
             $role->$field = $filename;
         }
 
-        // Sponsor logos
-        $sponsorLogos = $role->sponsor_logos;
-        if (is_array($sponsorLogos)) {
-            $updated = false;
-            foreach ($sponsorLogos as $i => &$logo) {
-                $imageKey = $roleData['_sponsor_logo_'.$i] ?? null;
-                if (! $imageKey) {
-                    continue;
-                }
-
-                $imageData = $zip->getFromName($imageKey);
-                if ($imageData === false || ! $this->isValidImageData($imageData)) {
-                    continue;
-                }
-
-                $extension = $this->safeImageExtension($imageKey);
-                $filename = strtolower(Str::random(32).'.'.$extension);
-
-                if (config('filesystems.default') == 'local') {
-                    Storage::put('public/'.$filename, $imageData);
-                } else {
-                    Storage::put($filename, $imageData);
-                }
-
-                $logo['image'] = $filename;
-                $updated = true;
+        // Sponsor logos, keyed by their position in the list as collectRoleImages() wrote them, and
+        // stored under 'logo' in the JSON string, as importEventImages() does for an event's.
+        $sponsorLogos = json_decode($role->getAttributes()['sponsor_logos'] ?? '[]', true) ?: [];
+        $updated = false;
+        foreach ($sponsorLogos as $i => &$logo) {
+            $imageKey = $roleData['_sponsor_logo_'.$i] ?? null;
+            if (! $imageKey || ! is_array($logo)) {
+                continue;
             }
-            if ($updated) {
-                $role->sponsor_logos = $sponsorLogos;
+
+            $imageData = $zip->getFromName($imageKey);
+            if ($imageData === false || ! $this->isValidImageData($imageData)) {
+                continue;
             }
+
+            $extension = $this->safeImageExtension($imageKey);
+            $filename = strtolower(Str::random(32).'.'.$extension);
+
+            if (config('filesystems.default') == 'local') {
+                Storage::put('public/'.$filename, $imageData);
+            } else {
+                Storage::put($filename, $imageData);
+            }
+
+            $logo['logo'] = $filename;
+            $updated = true;
+        }
+        unset($logo);
+        if ($updated) {
+            $role->sponsor_logos = json_encode($sponsorLogos);
         }
 
         $role->saveQuietly();
@@ -3037,6 +3025,45 @@ class BackupService
                 ]);
             });
         }
+    }
+
+    /**
+     * Whether a restored image value may stay as it came: an external http(s) URL, which names no
+     * file on this install. Anything else is a filename from the source install - or one typed
+     * into the archive - and a restored row holding it shares that file with whichever row here
+     * already does, so the restored row's next replace or delete would delete it.
+     *
+     * A ".." segment is refused even in a URL: the delete paths hand the column to
+     * Storage::delete(), which resolves it, so "https://x/../../profile_abc.png" names profile_abc.png.
+     */
+    private function isExternalImageUrl(mixed $value): bool
+    {
+        return is_string($value)
+            && preg_match('#^https?://#i', $value) === 1
+            && preg_match('#(?:^|[/\\\\])\.\.(?:[/\\\\]|$)#', $value) === 0;
+    }
+
+    /**
+     * A restored sponsor list, JSON-encoded, with every logo that is not an external URL cleared,
+     * by isExternalImageUrl()'s rule. Entries keep their places: importRoleImages() and
+     * importEventImages() match the archive's logo files to them by position. Null for no list.
+     */
+    private function withoutLocalLogos(mixed $value): ?string
+    {
+        $sponsors = is_string($value) ? json_decode($value, true) : $value;
+
+        if (! is_array($sponsors) || $sponsors === []) {
+            return null;
+        }
+
+        foreach ($sponsors as &$sponsor) {
+            if (is_array($sponsor) && array_key_exists('logo', $sponsor) && ! $this->isExternalImageUrl($sponsor['logo'])) {
+                $sponsor['logo'] = null;
+            }
+        }
+        unset($sponsor);
+
+        return json_encode($sponsors);
     }
 
     private function isValidImageData(string $data): bool
