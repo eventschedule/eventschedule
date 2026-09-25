@@ -3,8 +3,10 @@
 namespace Tests\Feature;
 
 use App\Models\Event;
+use App\Models\EventPhoto;
 use App\Models\EventVideo;
 use App\Models\Role;
+use App\Utils\SeoUtils;
 use Carbon\Carbon;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\Feature\Concerns\CreatesScheduleData;
@@ -21,6 +23,10 @@ use Tests\TestCase;
  *    '1111111' for every non-weekly frequency).
  *  - It printed the event's full Event JSON-LD, so the gallery competed with the event page for
  *    the same rich result.
+ *  - Every dated gallery canonicalized to the undated one, which shows the NEXT occurrence's
+ *    photos, a different night every week, and named that next night in its description. A dated
+ *    gallery is its own canonical now, with its date in its title, and a gallery with no photo to
+ *    show is noindex.
  */
 class PhotoGalleryUrlTest extends TestCase
 {
@@ -73,6 +79,28 @@ class PhotoGalleryUrlTest extends TestCase
         return preg_match($pattern, $html, $m) ? html_entity_decode($m[1]) : null;
     }
 
+    private function robots(string $html): ?string
+    {
+        return $this->linkHref($html, '#<meta name="robots" content="([^"]*)">#');
+    }
+
+    private function metaContent(string $html, string $attribute, string $name): ?string
+    {
+        return $this->linkHref($html, '#<meta '.$attribute.'="'.preg_quote($name, '#').'" content="([^"]*)">#');
+    }
+
+    /** An approved photo, pinned to one night of a series when $night is given. */
+    private function photo(Event $event, ?string $night, string $path, bool $approved = true, ?int $userId = null): EventPhoto
+    {
+        return EventPhoto::create([
+            'event_id' => $event->id,
+            'user_id' => $userId ?? $event->user_id,
+            'event_date' => $night,
+            'photo_url' => $path,
+            'is_approved' => $approved,
+        ]);
+    }
+
     public function test_a_non_occurrence_date_bounces_to_the_undated_gallery_keeping_the_query(): void
     {
         [$role, $event] = $this->sundayEvent();
@@ -98,7 +126,8 @@ class PhotoGalleryUrlTest extends TestCase
 
         $this->get($this->galleryUrl($role, $event, $occurrence))
             ->assertOk()
-            ->assertViewHas('date', $occurrence);
+            ->assertViewHas('date', $occurrence)
+            ->assertViewHas('occurrenceDate', $occurrence);
     }
 
     /**
@@ -192,9 +221,12 @@ class PhotoGalleryUrlTest extends TestCase
             'starts_at' => $start->format('Y-m-d H:i:s'),
         ]);
 
+        // The photos are that night's, but the page is the series gallery: the date is filled in,
+        // not asked for. A closure, because assertViewHas() handed null only checks the key.
         $this->get($this->galleryUrl($role, $event))
             ->assertOk()
-            ->assertViewHas('date', $start->format('Y-m-d'));
+            ->assertViewHas('date', $start->format('Y-m-d'))
+            ->assertViewHas('occurrenceDate', fn ($occurrenceDate) => $occurrenceDate === null);
     }
 
     /**
@@ -270,5 +302,120 @@ class PhotoGalleryUrlTest extends TestCase
         $this->flushSession();
         $html = $this->get($this->galleryUrl($role, $event))->assertOk()->getContent();
         $this->assertSame($gallery, $this->linkHref($html, '#<link rel="canonical" href="([^"]*)"#'));
+    }
+
+    /**
+     * A dated gallery shows its own night's photos, so it is its own canonical and is indexed. The
+     * undated gallery fills in the series' next occurrence - nextSunday(0), its first date - which
+     * has no photo here, so it shows none and is noindex.
+     */
+    public function test_a_dated_gallery_is_its_own_indexed_canonical_and_an_empty_one_is_noindex(): void
+    {
+        [$role, $event] = $this->sundayEvent();
+        $earlier = $this->nextSunday(1)->format('Y-m-d');
+        $night = $this->nextSunday(2)->format('Y-m-d');
+        $this->photo($event, $earlier, 'photos/earlier.jpg');
+        $this->photo($event, $night, 'photos/night.jpg');
+
+        $dated = $this->galleryUrl($role, $event, $night);
+        $html = $this->get($dated)->assertOk()->getContent();
+
+        $this->assertSame($dated, $this->linkHref($html, '#<link rel="canonical" href="([^"]*)"#'));
+        $this->assertSame(SeoUtils::ROBOTS_INDEX, $this->robots($html));
+        $this->assertStringContainsString('photos/night.jpg', $html);
+        // Not in the grid, and not as the preview image either: og:image used to be the event's
+        // first photo of ANY night.
+        $this->assertStringNotContainsString('photos/earlier.jpg', $html);
+        $this->assertSame(url('/storage/photos/night.jpg'), $this->metaContent($html, 'property', 'og:image'));
+
+        $html = $this->get($this->galleryUrl($role, $event))->assertOk()->getContent();
+
+        $this->assertSame('noindex, nofollow', $this->robots($html));
+        $this->assertSame($this->galleryUrl($role, $event), $this->linkHref($html, '#<link rel="canonical" href="([^"]*)"#'));
+    }
+
+    /** A pending photo is its poster's alone, so a gallery holding nothing else is still empty. */
+    public function test_a_gallery_with_only_a_pending_photo_is_noindex_until_it_is_approved(): void
+    {
+        $role = $this->createRole($this->createOwner(), 'venue');
+        $event = $this->createEvent($role, ['name' => 'Gallery Night', 'fan_photos_enabled' => true]);
+        $fan = $this->createOwner();
+        $photo = $this->photo($event, null, 'photos/pending.jpg', approved: false, userId: $fan->id);
+        $gallery = $this->galleryUrl($role, $event);
+
+        // The poster sees their own pending photo, and the page is still empty to everyone else.
+        $html = $this->actingAs($fan)->get($gallery)->assertOk()->getContent();
+        $this->assertStringContainsString('photos/pending.jpg', $html, 'fixture: the poster sees it');
+        $this->assertSame('noindex, nofollow', $this->robots($html));
+
+        $photo->update(['is_approved' => true]);
+
+        $this->assertSame(SeoUtils::ROBOTS_INDEX, $this->robots($this->get($gallery)->assertOk()->getContent()));
+    }
+
+    /**
+     * The undated gallery is the series gallery: its description used to name the next occurrence
+     * it fills in, a date that changes every week. A dated gallery names its own night, in the
+     * description and in the title, which every dated gallery otherwise shared.
+     */
+    public function test_only_a_dated_gallery_names_a_date(): void
+    {
+        [$role, $event] = $this->sundayEvent();
+        $next = $event->nextOccurrenceFrom();
+        $night = $this->nextSunday(2)->format('Y-m-d');
+        $day = fn (string $date) => Carbon::parse($date)->locale('en')->isoFormat('ddd, ll');
+        $page = 'Sunday Yin Yoga - '.__('messages.photo_gallery');
+
+        $html = $this->get($this->galleryUrl($role, $event))->assertOk()->assertViewHas('date', $next)->getContent();
+
+        foreach ([['property', 'og:description'], ['name', 'twitter:description']] as [$attribute, $name]) {
+            $this->assertNotNull($this->metaContent($html, $attribute, $name), "fixture: {$name} is there");
+            $this->assertStringNotContainsString($day($next), $this->metaContent($html, $attribute, $name), $name);
+        }
+        $this->assertSame($page.' | Test Schedule', $this->linkHref($html, '#<title>([^<]*)</title>#'));
+
+        $html = $this->get($this->galleryUrl($role, $event, $night))->assertOk()->getContent();
+        $label = Carbon::parse($night)->locale('en')->isoFormat('ll');
+
+        $this->assertStringContainsString($day($night), $this->metaContent($html, 'property', 'og:description'));
+        $this->assertSame("{$page} - {$label} | Test Schedule", $this->linkHref($html, '#<title>([^<]*)</title>#'));
+        $this->assertSame("{$page} - {$label}", $this->metaContent($html, 'name', 'description'));
+        $this->assertSame("{$page} - {$label}", $this->metaContent($html, 'property', 'og:title'));
+
+        // A one-off event has one gallery whatever its URL says, so its own date adds nothing.
+        $oneOff = $this->createEvent($role, ['name' => 'Gallery Night', 'fan_photos_enabled' => true]);
+        $own = $oneOff->getStartDateTime(null, true)->format('Y-m-d');
+
+        $html = $this->get($this->guestEventUrl($role, $oneOff, $own).'/photos')->assertOk()->assertViewHas('occurrenceDate', $own)->getContent();
+        $this->assertSame('Gallery Night - '.__('messages.photo_gallery').' | Test Schedule', $this->linkHref($html, '#<title>([^<]*)</title>#'));
+        $this->assertSame($this->galleryUrl($role, $oneOff), $this->linkHref($html, '#<link rel="canonical" href="([^"]*)"#'));
+    }
+
+    /**
+     * The event page and its gallery link each other by the date the URL asked for. The undated
+     * series page linked the next occurrence's gallery, a page of its own that changed every week,
+     * and the undated gallery's back link went to that occurrence's page rather than the series.
+     */
+    public function test_the_event_page_and_the_gallery_link_each_other_by_the_date_asked_for(): void
+    {
+        [$role, $event] = $this->sundayEvent();
+        $next = $event->nextOccurrenceFrom();
+        $night = $this->nextSunday(2)->format('Y-m-d');
+        // Undated, so it shows on every night and the event page offers its gallery link.
+        $this->photo($event, null, 'photos/any-night.jpg');
+
+        $html = $this->get($this->guestEventUrl($role, $event))->assertOk()->getContent();
+        $this->assertStringContainsString('href="'.$this->galleryUrl($role, $event).'"', $html);
+        $this->assertStringNotContainsString('href="'.$this->galleryUrl($role, $event, $next).'"', $html);
+
+        $html = $this->get($this->guestEventUrl($role, $event, $night))->assertOk()->getContent();
+        $this->assertStringContainsString('href="'.$this->galleryUrl($role, $event, $night).'"', $html);
+
+        $html = $this->get($this->galleryUrl($role, $event))->assertOk()->getContent();
+        $this->assertStringContainsString('href="'.$this->guestEventUrl($role, $event).'"', $html);
+        $this->assertStringNotContainsString('href="'.$this->guestEventUrl($role, $event, $next).'"', $html);
+
+        $html = $this->get($this->galleryUrl($role, $event, $night))->assertOk()->getContent();
+        $this->assertStringContainsString('href="'.$this->guestEventUrl($role, $event, $night).'"', $html);
     }
 }

@@ -2087,7 +2087,10 @@
           @endif
           @if ($allPhotoData->count() > 0)
           <div class="mb-4">
-            <a href="{{ $event->getPhotoGalleryUrl($subdomain, $date) }}" class="inline-flex items-center gap-1 text-sm font-medium text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-200 transition-colors">
+            {{-- The occurrence the URL asked for, else the series gallery: never $date, which the
+                 undated page fills in with the next occurrence, so it linked a dated gallery - a
+                 page of its own - that changed every week. --}}
+            <a href="{{ $event->getPhotoGalleryUrl($subdomain, ($requestedOccurrence ?? null) ?: false) }}" class="inline-flex items-center gap-1 text-sm font-medium text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-200 transition-colors">
               {{ __('messages.view_photo_gallery') }}
               <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="w-4 h-4 {{ $role->isRtl() ? 'rotate-180' : '' }}" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M13.5 4.5 21 12m0 0-7.5 7.5M21 12H3" /></svg>
             </a>

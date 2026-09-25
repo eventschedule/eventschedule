@@ -104,6 +104,24 @@ class GuestSeo
     }
 
     /**
+     * The date a recurring event's dated photo gallery adds to its title and its description
+     * ("{event} - Photo gallery - {date}"), in the page's language, or null.
+     *
+     * Each occurrence's gallery is a page of its own, the canonical of that night's photos
+     * (Event::getCanonicalPhotoGalleryUrl()), and without the date every one of them had the same
+     * title and description. Null for the undated series gallery, which is about every date, and
+     * for a one-off event, whose one gallery is the canonical whatever date its URL carries.
+     */
+    public static function galleryDate(Event $event, ?string $occurrenceDate): ?string
+    {
+        if (! $event->days_of_week || ! Event::isOccurrenceDate($occurrenceDate)) {
+            return null;
+        }
+
+        return Carbon::parse($occurrenceDate)->locale(app()->getLocale())->isoFormat('ll');
+    }
+
+    /**
      * An event page's meta description, also its og: and twitter: description.
      *
      * The owner's text first: the short description, joined to the long one when it is too thin to

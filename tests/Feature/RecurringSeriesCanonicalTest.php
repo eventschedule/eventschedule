@@ -23,6 +23,9 @@ use Tests\TestCase;
  *  - The canonical host has to have ACCEPTED the event. It used to be the claimed performer
  *    whatever their pivot said, and every guest lookup requires is_accepted on the host, so a
  *    performer still pending on a venue's event got a canonical - and a sitemap entry - that 404s.
+ *  - The photo gallery is the exception: each night's gallery shows that night's photos, so a
+ *    dated gallery is its own canonical, on the same home host, and the undated one is the series
+ *    gallery.
  *
  * getGuestUrl() is untouched: email, graphics and in-app links keep their dates and hosts.
  */
@@ -330,7 +333,13 @@ class RecurringSeriesCanonicalTest extends TestCase
         $this->assertSame($url, $this->canonical($html));
     }
 
-    public function test_the_gallery_canonicalizes_to_the_series_gallery(): void
+    /**
+     * Unlike the event page, each gallery is its own canonical. A dated gallery shows that night's
+     * photos, which no other gallery does, and canonicalizing it to the undated one pointed it at
+     * the NEXT occurrence's photos, a different night every week. The undated gallery is the series
+     * gallery, and names no date.
+     */
+    public function test_each_gallery_is_its_own_canonical(): void
     {
         $role = $this->createRole($this->createOwner(), 'venue', [
             'language_code' => 'en',
@@ -343,11 +352,45 @@ class RecurringSeriesCanonicalTest extends TestCase
         foreach ([$gallery, $datedGallery] as $url) {
             $html = $this->get($url)->assertOk()->getContent();
 
-            $this->assertSame($gallery, $this->canonical($html), $url);
-            $this->assertSame($gallery, $this->ogUrl($html), $url);
-            $this->assertSame($gallery, $this->hreflang($html, 'en'), $url);
-            $this->assertSame($gallery.'?lang=es', $this->hreflang($html, 'es'), $url);
+            $this->assertSame($url, $this->canonical($html), $url);
+            $this->assertSame($url, $this->ogUrl($html), $url);
+            $this->assertSame($url, $this->hreflang($html, 'en'), $url);
+            $this->assertSame($url.'?lang=es', $this->hreflang($html, 'es'), $url);
         }
+    }
+
+    /**
+     * A dated gallery's canonical keeps its date and moves to the home host, as the event page's
+     * og:url does: a venue shows the event, but the performer who accepted it is its home.
+     */
+    public function test_a_dated_gallery_on_another_host_canonicalizes_to_the_home_hosts(): void
+    {
+        $venue = $this->createRole($this->createOwner(), 'venue', ['name' => 'The Hall']);
+        $talent = $this->createRole($this->createOwner(), 'talent', ['name' => 'The Act']);
+        $event = $this->sundaySeries($venue, ['fan_photos_enabled' => true]);
+        $event->roles()->attach($talent->id, ['is_accepted' => true]);
+        $event = $event->fresh();
+        $date = $this->sunday(2)->format('Y-m-d');
+
+        // Each host names the other schedule as the slug, the rule getGuestUrlData() applies.
+        $venueGallery = route('event.view_guest_full', [
+            'subdomain' => $venue->subdomain,
+            'slug' => $talent->subdomain,
+            'id' => UrlUtils::encodeId($event->id),
+            'date' => $date,
+        ]).'/photos';
+        $homeGallery = route('event.view_guest_full', [
+            'subdomain' => $talent->subdomain,
+            'slug' => $venue->subdomain,
+            'id' => UrlUtils::encodeId($event->id),
+            'date' => $date,
+        ]).'/photos';
+
+        $html = $this->get($venueGallery)->assertOk()->getContent();
+
+        $this->assertSame($homeGallery, $this->canonical($html));
+        $this->assertSame($homeGallery, $this->ogUrl($html));
+        $this->assertSame($homeGallery, $this->canonical($this->get($homeGallery)->assertOk()->getContent()), 'the canonical is itself a 200, and self-canonical');
     }
 
     public function test_a_one_off_event_is_unchanged(): void

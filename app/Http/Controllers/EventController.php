@@ -4572,6 +4572,12 @@ class EventController extends Controller
             return redirect($target, 302);
         }
 
+        // The occurrence the URL asked for, taken before the fill-in below puts a date the visitor
+        // did NOT ask for in its place (RoleController::viewGuest()'s $requestedOccurrence). A
+        // dated gallery shows that night's photos and is its own canonical; the undated one is the
+        // series gallery, which names no date, and whose next-occurrence fill-in moves every week.
+        $occurrenceDate = $date;
+
         // An undated gallery of a series shows its next REAL occurrence. This used to scan
         // days_of_week in an unbounded `while (true)`, which never ended on '0000000' and answered
         // TODAY for a monthly or yearly event (saveEvent() stores '1111111' for those). Null when
@@ -4657,6 +4663,7 @@ class EventController extends Controller
             'otherRole',
             'event',
             'date',
+            'occurrenceDate',
             'fonts',
             'allPhotos',
             'myPendingPhotos',

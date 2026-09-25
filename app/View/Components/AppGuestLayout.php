@@ -69,10 +69,12 @@ class AppGuestLayout extends Component
          * that survived viewGuest()'s guard. Never the next occurrence an undated page fills in
          * for itself: that page is the series.
          *
-         * Only og:url reads it. Every dated page canonicalizes to the undated series URL, but a
-         * share of next Friday's page should still open next Friday, and og:url is what Facebook
-         * and the chat apps take as the share target - Google ignores it for canonicalization.
-         * $date cannot stand in for it, because the undated page backfills $date too.
+         * On an event page only og:url reads it. Every dated page canonicalizes to the undated
+         * series URL, but a share of next Friday's page should still open next Friday, and og:url
+         * is what Facebook and the chat apps take as the share target - Google ignores it for
+         * canonicalization. On the photo gallery it is the whole page's date: each night's gallery
+         * is its own canonical, with the date in its title and description. $date cannot stand in
+         * for it, because an undated page backfills $date too.
          */
         public ?string $occurrenceDate = null,
         /**
@@ -99,6 +101,12 @@ class AppGuestLayout extends Component
          * paint that banner, so they preload nothing.
          */
         public ?string $mobileBannerImage = null,
+        /**
+         * The photo gallery's og:image and twitter:image: the first photo the gallery shows, so a
+         * shared dated gallery previews one of that night's photos rather than any night's. Null
+         * when it shows none, and the event's own image stands in.
+         */
+        public ?string $galleryImage = null,
     ) {}
 
     /**

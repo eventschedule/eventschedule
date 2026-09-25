@@ -3169,9 +3169,18 @@ class Event extends Model
         return $this->canonicalTarget()[0];
     }
 
-    public function getCanonicalPhotoGalleryUrl()
+    /**
+     * The photo gallery's canonical: the gallery of $date, a recurring event's occurrence, on the
+     * home host - or with no date, the series gallery.
+     *
+     * Unlike the event page, a dated gallery is its own canonical: it shows that night's photos,
+     * which no other gallery of the series does. It used to canonicalize to the undated gallery,
+     * whose next-occurrence fill-in shows a different night every week. canonicalTarget() drops
+     * the date of a one-off event, whose one gallery is the canonical whatever the URL.
+     */
+    public function getCanonicalPhotoGalleryUrl(?string $date = null): string
     {
-        $url = $this->getCanonicalUrl();
+        $url = $date ? $this->canonicalTarget($date)[0] : $this->getCanonicalUrl();
 
         return $url ? $url.'/photos' : '';
     }
@@ -3185,9 +3194,10 @@ class Event extends Model
      * instead, a target that moved every day. The dated URLs still render - sales are keyed by
      * event_date, and tickets, email, the Stripe cancel URL and waitlist mail all link to them -
      * they just stop competing with the series. A one-off event's URL never had a date, so it is
-     * unchanged. $date exists only for og:url, which names the occurrence a dated page is about,
-     * on the same home host (a share target, which Google ignores for canonicalization); never
-     * pass one for a canonical.
+     * unchanged. $date names one occurrence on the same home host, for two callers: og:url, the
+     * share target of a dated event page (which Google ignores for canonicalization), and a dated
+     * photo gallery's canonical (getCanonicalPhotoGalleryUrl()), since each night's gallery shows
+     * photos no other one does. Never pass one for an event page's canonical.
      *
      * The home schedule is the one getGuestUrlData() picks - the claimed performer, then the
      * claimed venue, then the creator - but only while that schedule SERVES the event: its pivot

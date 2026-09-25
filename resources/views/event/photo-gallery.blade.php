@@ -1,4 +1,11 @@
-<x-app-guest-layout :role="$role" :event="$event" :date="$date" :fonts="$fonts" :otherRole="$otherRole" :galleryMode="true" :showMobileBackground="true" :page-title="$event->translatedName() . ' - ' . __('messages.photo_gallery')">
+@php
+    // A recurring event's dated gallery names its night in the title, as the layout's description
+    // does: each is a page of its own (Event::getCanonicalPhotoGalleryUrl()). A gallery showing no
+    // approved photo is noindex - pending ones are the poster's alone - and its og:image is the
+    // first photo it does show, never another night's.
+    $galleryDate = \App\Utils\GuestSeo::galleryDate($event, $occurrenceDate);
+@endphp
+<x-app-guest-layout :role="$role" :event="$event" :date="$date" :occurrence-date="$occurrenceDate" :fonts="$fonts" :otherRole="$otherRole" :galleryMode="true" :showMobileBackground="true" :no-index="$allPhotos->isEmpty()" :gallery-image="$allPhotos->first()?->photo_url" :page-title="$event->translatedName() . ' - ' . __('messages.photo_gallery') . ($galleryDate ? ' - ' . $galleryDate : '')">
 
   <main>
     @php
@@ -18,8 +25,10 @@
 
     {{-- Header --}}
     <div class="mb-6">
-      {{-- `?: false`: with no date, getGuestUrl() would fall back to the series' first date. --}}
-      <a href="{{ $event->getGuestUrl($subdomain, $date ?: false) }}" class="inline-flex items-center gap-1.5 text-sm text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300 mb-3 transition-colors">
+      {{-- The page the visitor came from: the occurrence the URL asked for, or the series page,
+           never the next occurrence the undated gallery fills in. `?: false`: with no date,
+           getGuestUrl() would fall back to the series' first date. --}}
+      <a href="{{ $event->getGuestUrl($subdomain, $occurrenceDate ?: false) }}" class="inline-flex items-center gap-1.5 text-sm text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300 mb-3 transition-colors">
         <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-4 h-4 {{ $role->isRtl() ? 'rotate-180' : '' }}" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M10.5 19.5 3 12m0 0 7.5-7.5M3 12h18" /></svg>
         {{ $event->translatedName() }}
       </a>

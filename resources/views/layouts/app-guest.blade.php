@@ -69,10 +69,11 @@
             : $eventCanonicalUrl;
 
         // The photo gallery's own canonical, shared by the canonical tag, og:url and the hreflang
-        // alternates, which used to point the gallery's language variants at the EVENT page. The
-        // series gallery for every occurrence, like the event page's.
+        // alternates, which used to point the gallery's language variants at the EVENT page.
+        // Unlike the event page, a dated gallery is its own: it shows that night's photos
+        // (Event::getCanonicalPhotoGalleryUrl()). The undated one is the series gallery.
         $galleryCanonicalUrl = ($galleryMode && $event && $event->exists)
-            ? $event->getCanonicalPhotoGalleryUrl()
+            ? $event->getCanonicalPhotoGalleryUrl($occurrenceDate)
             : null;
 
         // The page's description, built ONCE for the description, og: and twitter: tags, which
@@ -159,24 +160,25 @@
         @elseif ($event && $event->exists && !$event->is_draft)
             @if ($galleryMode)
                 @php
-                    $galleryTitle = $guestEventName . ' - ' . __('messages.photo_gallery');
-                    $firstPhoto = $event->approvedPhotos->first();
-                    if (!$firstPhoto) {
-                        foreach ($event->parts as $part) {
-                            $firstPhoto = $part->approvedPhotos->first();
-                            if ($firstPhoto) break;
-                        }
-                    }
+                    // A dated gallery names its night (GuestSeo::galleryDate()), or every one of a
+                    // series' galleries had this same title and description.
+                    $galleryDate = \App\Utils\GuestSeo::galleryDate($event, $occurrenceDate);
+                    $galleryTitle = $guestEventName . ' - ' . __('messages.photo_gallery') . ($galleryDate ? ' - ' . $galleryDate : '');
+                    // The first photo the gallery SHOWS (AppGuestLayout::$galleryImage), never the
+                    // event's first photo of any night: that previewed another night's photo.
                     // Never /images/social/home.jpg: an event with no photo, no flyer and no
                     // schedule or venue logo advertises no image, and the scraper falls back to
                     // the page's own contents rather than to an advert of ours.
-                    $galleryOgImage = $firstPhoto ? $firstPhoto->photo_url : $event->getImageUrl();
+                    $galleryOgImage = $galleryImage ?: $event->getImageUrl();
+                    // $occurrenceDate, not $date: the undated gallery fills $date in with the next
+                    // occurrence, and the series gallery names no date (GuestSeo::eventWhen()).
+                    $galleryDescription = $event->getMetaDescription($occurrenceDate, $guestLang, $role);
                 @endphp
                 <link rel="canonical" href="{{ $galleryCanonicalUrl }}{{ $guestLangSuffix }}">
                 <meta name="description" content="{{ $galleryTitle }}">
                 <meta property="og:type" content="website">
                 <meta property="og:title" content="{{ $galleryTitle }}">
-                <meta property="og:description" content="{{ $event->getMetaDescription($date, $guestLang, $role) }}">
+                <meta property="og:description" content="{{ $galleryDescription }}">
                 @if ($galleryOgImage)
                 <meta property="og:image" content="{{ $galleryOgImage }}">
                 <meta property="og:image:alt" content="{{ $galleryTitle }}">
@@ -184,7 +186,7 @@
                 <meta property="og:url" content="{{ $galleryCanonicalUrl }}">
                 <meta property="og:site_name" content="{{ $role->translatedName() ?: config('app.name') }}">
                 <meta name="twitter:title" content="{{ $galleryTitle }}">
-                <meta name="twitter:description" content="{{ $event->getMetaDescription($date, $guestLang, $role) }}">
+                <meta name="twitter:description" content="{{ $galleryDescription }}">
                 @if ($galleryOgImage)
                 <meta name="twitter:image" content="{{ $galleryOgImage }}">
                 <meta name="twitter:image:alt" content="{{ $galleryTitle }}">
