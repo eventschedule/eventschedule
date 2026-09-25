@@ -75,6 +75,7 @@ Enterprise Stripe subscription.
 | Ticket/RSVP embed frame | yes | -- | -- | yes | -- | -- |
 | Newsletter email footer | yes | -- | -- | yes | -- | -- |
 | Head metadata: `<title>`, `og:site_name` | -- | -- | -- | -- | -- | -- |
+| Head metadata: `twitter:site` | -- | -- | -- | -- | -- | -- |
 | Head metadata: `BreadcrumbList` root | `marketing_url()` | `marketing_url()` | `marketing_url()` | `marketing_url()` | `marketing_url()` | `marketing_url()` |
 | Head metadata: `og:image` | the owner's, or none | the owner's, or none | the owner's, or none | the owner's, or none | the owner's, or none | the owner's, or none |
 | Head metadata: web app manifest | the schedule's own | the schedule's own | the schedule's own | the schedule's own | the schedule's own | the schedule's own |
@@ -87,7 +88,7 @@ asserts it over all six deployment-by-tier cells. The other half holds on every 
 exactly one of the two is `yes`, which `GuestBrandingTest::test_every_free_guest_page_carries_exactly_one_credit`
 asserts, so retiring one credit for a tier without switching the other on fails the build.
 
-The two head-metadata rows do **not** turn on the plan - they turn on the domain, which is why they
+The head-metadata rows do **not** turn on the plan - they turn on the domain, which is why they
 are flat across every column. `<title>` and `og:site_name` carry the schedule's own name
 everywhere, on every tier and every install. The breadcrumb root is the only platform string left in
 the head, and `servesOnCustomDomain()` removes that one too.
@@ -105,6 +106,7 @@ the head, and `servesOnCustomDomain()` removes that one too.
 | Newsletter footer | `resources/views/emails/newsletter.blade.php` via `NewsletterService` | `$role->showBranding()` |
 | `<title>` | `App\View\Components\AppGuestLayout::guestTitle()`, built by `App\Utils\GuestSeo` | none - never branded |
 | `og:site_name` | `resources/views/layouts/app-guest.blade.php` (4 branches) | none - never branded |
+| `twitter:site` | `resources/views/layouts/marketing.blade.php` only | never on a guest page; the marketing layout keeps it (`GuestBrandingTest` renders every branch of the guest layout's head and scans its source) |
 | `BreadcrumbList` root | `resources/views/layouts/app-guest.blade.php` (2 branches) | `! $role->servesOnCustomDomain()` |
 | `og:image` / `twitter:image` | `resources/views/layouts/app-guest.blade.php` (5 branches incl. JSON-LD) | none - never branded; omitted entirely when the owner has no image |
 | `og:image` on ticket / order / installment / Payfast | `resources/views/partials/private-page-meta.blade.php` | none - those four set a `meta` slot purely to avoid the shell's default |

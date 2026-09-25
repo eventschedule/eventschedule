@@ -156,7 +156,6 @@
             <meta name="twitter:image" content="{{ $gateOgImage }}">
             @endif
             <meta name="twitter:card" content="{{ $gateOgImage ? 'summary_large_image' : 'summary' }}">
-            <meta name="twitter:site" content="@ScheduleEvent">
         @elseif ($event && $event->exists && !$event->is_draft)
             @if ($galleryMode)
                 @php
@@ -192,7 +191,6 @@
                 <meta name="twitter:image:alt" content="{{ $galleryTitle }}">
                 @endif
                 <meta name="twitter:card" content="{{ $galleryOgImage ? 'summary_large_image' : 'summary' }}">
-                <meta name="twitter:site" content="@ScheduleEvent">
             @else
             <link rel="canonical" href="{{ $eventCanonicalUrl }}{{ $guestLangSuffix }}">
             <meta name="description" content="{{ $guestMetaDescription }}">
@@ -222,7 +220,6 @@
             <meta name="twitter:image:alt" content="{{ $guestEventName }}">
             @endif
             <meta name="twitter:card" content="{{ $eventOgImage ? 'summary_large_image' : 'summary' }}">
-            <meta name="twitter:site" content="@ScheduleEvent">
             @endif
         @elseif ($role->exists)
             <link rel="canonical" href="{{ $role->getCanonicalUrl() }}{{ $guestLangSuffix }}">
@@ -254,7 +251,6 @@
             <meta property="og:url" content="{{ $role->getCanonicalUrl() }}">
             <meta property="og:site_name" content="{{ $role->translatedName() ?: config('app.name') }}">
             <meta name="twitter:card" content="{{ $scheduleOgImage ? 'summary_large_image' : 'summary' }}">
-            <meta name="twitter:site" content="@ScheduleEvent">
         @endif
     </x-slot>
 

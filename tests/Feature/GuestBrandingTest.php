@@ -309,6 +309,72 @@ class GuestBrandingTest extends TestCase
         $this->assertStringContainsString(self::CHIP_SELFHOST, $content);
     }
 
+    // ---------------------------------------------------- the head metadata
+
+    /** Everything before </head>: the metadata, never the body, which quotes whatever it likes. */
+    private function pageHead(string $html): string
+    {
+        $end = stripos($html, '</head>');
+
+        $this->assertNotFalse($end, 'The page has no </head> to cut at.');
+
+        return substr($html, 0, $end);
+    }
+
+    public function test_no_guest_page_names_our_x_account_in_its_head(): void
+    {
+        // twitter:site is the X account of the site a card belongs to. On a guest page that site
+        // is the schedule's, and @ScheduleEvent there was the one mention of us left in its head,
+        // which white-label.blade.php promises is gone. The matrix row is flat, so every
+        // deployment is checked, and one page per branch of app-guest's meta slot: each marker
+        // proves the page reached the branch it is named after.
+        $role = $this->paidRole();
+        $event = $this->createEvent($role, ['name' => 'Head Check', 'creator_role_id' => $role->id, 'fan_photos_enabled' => true]);
+        $gated = $this->createEvent($role, ['name' => 'Locked Night', 'creator_role_id' => $role->id, 'event_password' => 'letmein']);
+
+        $pages = [
+            'schedule' => ['/'.$role->subdomain, '~<meta property="og:type" content="website">~'],
+            'embed' => ['/'.$role->subdomain.'?embed=true', '~<meta name="robots" content="noindex, nofollow">~'],
+            'event' => [$this->guestEventUrl($role, $event), '~<meta property="og:title" content="Head Check">~'],
+            'gallery' => [$this->guestEventUrl($role, $event).'/photos', '~<link rel="canonical" href="[^"]*/photos"~'],
+            'password gate' => [$this->guestEventUrl($role, $gated), '~<meta property="og:title" content="'.preg_quote(e(__('messages.event_password_required')), '~').'">~'],
+        ];
+
+        foreach (['nexus', 'saas', 'selfhost'] as $mode) {
+            $this->deploy($mode);
+
+            foreach ($pages as $kind => [$url, $marker]) {
+                $head = $this->pageHead($this->get($url)->assertOk()->getContent());
+                $label = "{$mode} {$kind} page";
+
+                $this->assertMatchesRegularExpression($marker, $head, $label.': not the branch it is named after');
+                $this->assertStringContainsString('name="twitter:card"', $head, $label.': no card metadata at all');
+                $this->assertStringNotContainsString('twitter:site', $head, $label);
+                $this->assertStringNotContainsString('@ScheduleEvent', $head, $label);
+            }
+        }
+    }
+
+    public function test_the_guest_layout_source_never_prints_twitter_site(): void
+    {
+        // Every branch of the meta slot at once, including the ones no render above reaches,
+        // such as a draft's page. The whole string, not the tag: a comment naming it is how a
+        // copy-paste brings it back.
+        $source = file_get_contents(resource_path('views/layouts/app-guest.blade.php'));
+
+        $this->assertStringNotContainsString('twitter:site', $source);
+        $this->assertStringNotContainsString('@ScheduleEvent', $source);
+    }
+
+    public function test_the_marketing_site_keeps_its_x_account(): void
+    {
+        // The control for the two above: the same cut and the same string match do find the tag
+        // where it belongs, on our own pages - so their silence on a guest page means something.
+        $head = $this->pageHead($this->get(route('marketing.white_label'))->assertOk()->getContent());
+
+        $this->assertStringContainsString('<meta name="twitter:site" content="@ScheduleEvent">', $head);
+    }
+
     // ------------------------------------------------------- the predicates
 
     public function test_show_branding_is_free_tier_when_hosted_and_never_on_selfhost(): void

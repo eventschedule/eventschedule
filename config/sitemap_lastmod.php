@@ -118,7 +118,7 @@ return [
     '/features/team-scheduling' => '2026-09-24',
     '/features/ticketing' => '2026-09-24',
     '/features/waitlist' => '2026-09-24',
-    '/features/white-label' => '2026-09-24',
+    '/features/white-label' => '2026-09-25',
     '/for-ai-agents' => '2026-09-24',
     '/for-art-galleries' => '2026-09-24',
     '/for-bars' => '2026-09-24',

@@ -619,7 +619,7 @@
             ],
             [
                 'q' => 'Is anything left?',
-                'a' => 'On a schedule hosted here, one line in the page head, and on one kind of plan the chip in the corner. First, the head: the breadcrumb data still names eventschedule.com as the site root. The title in the browser tab and the site name in a shared link preview both read your schedule\'s name on every plan, free included, the picture on that preview is your own artwork or, failing that, whatever your page already shows - never one of ours, and the tab icon becomes your logo on Pro. Point a custom domain at the schedule and the breadcrumb roots at your own domain too, which leaves the head with nothing of ours in it. Second, if an admin granted your Enterprise plan by hand rather than you buying it, the small Event Schedule chip a free schedule carries stays in the corner of your public pages; customers who pay through Stripe lose it, and so do plans earned through the referral programme. '.($walletLive ? 'Two more things are not on your page at all: every event graphic made here carries a small eventschedule.com credit in its corner, whatever the plan, and a Google Wallet pass shows our logo if you have not uploaded one of your own.' : 'One more thing is not on your page at all: every event graphic made here carries a small eventschedule.com credit in its corner, whatever the plan.').' On any install that is not eventschedule.com the chip is the normal case rather than an exception, on every plan except a free one that is already carrying the operator\'s own strip - see the two questions below.',
+                'a' => 'On a schedule hosted here, one line in the page head, and on one kind of plan the chip in the corner. First, the head: the breadcrumb data still names eventschedule.com as the site root. The title in the browser tab and the site name in a shared link preview both read your schedule\'s name on every plan, free included, the picture on that preview is one uploaded for the page - the event\'s flyer, a photo of its act or venue, or your own header, logo or background - or, failing that, whatever your page already shows, never one of ours, and the tab icon becomes your logo on Pro. Point a custom domain at the schedule and the breadcrumb roots at your own domain too, which leaves the head with nothing of ours in it. Second, if an admin granted your Enterprise plan by hand rather than you buying it, the small Event Schedule chip a free schedule carries stays in the corner of your public pages; customers who pay through Stripe lose it, and so do plans earned through the referral programme. '.($walletLive ? 'Two more things are not on your page at all: every event graphic made here carries a small eventschedule.com credit in its corner, whatever the plan, and a Google Wallet pass shows our logo if you have not uploaded one of your own.' : 'One more thing is not on your page at all: every event graphic made here carries a small eventschedule.com credit in its corner, whatever the plan.').' On any install that is not eventschedule.com the chip is the normal case rather than an exception, on every plan except a free one that is already carrying the operator\'s own strip - see the two questions below.',
             ],
             [
                 'q' => 'Do I need to change my embed after upgrading?',
@@ -956,10 +956,10 @@
                             The tab reads your schedule's name, with the event and its date or a note
                             of your upcoming events where they fit, and nothing of ours; the site name
                             on a shared link preview is your schedule's name alone - on every plan,
-                            free included. The picture on that preview is your own artwork - the
-                            event's flyer, your header or your logo - and if you have none, the card
-                            falls back to whatever is already on your page, never to a picture of
-                            ours. The
+                            free included. The picture on that preview is one uploaded for the
+                            page - the event's flyer, a photo of its act or venue, or your own
+                            header, logo or background - and if there is none, the card falls back
+                            to whatever is already on your page, never to a picture of ours. The
                             icon beside it becomes your uploaded logo on Pro. One string is left, and
                             you will only ever meet it in the page source: the breadcrumb data names
                             <span class="es-slate2-lit">eventschedule.com</span> as the site root. Point
