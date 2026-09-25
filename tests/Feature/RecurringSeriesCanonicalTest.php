@@ -27,7 +27,9 @@ use Tests\TestCase;
  *    dated gallery is its own canonical, on the same home host, and the undated one is the series
  *    gallery.
  *
- * getGuestUrl() is untouched: email, graphics and in-app links keep their dates and hosts.
+ * getGuestUrl() is not canonicalized: email, graphics and in-app links keep their dates, and a
+ * link that names its schedule keeps that host. One that names no schedule goes to a schedule
+ * that serves the event (EventLinkServingScheduleTest).
  */
 class RecurringSeriesCanonicalTest extends TestCase
 {

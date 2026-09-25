@@ -432,8 +432,8 @@
             [
                 'boxes' => [false, true],
                 'name' => 'Online only',
-                'listing' => 'The link\'s domain on its own, so people can see it is a Zoom call without being able to walk into it.',
-                'ticket' => 'The whole join link, live and clickable.',
+                'listing' => 'The link\'s domain, so people can see it is a Zoom call without being able to walk into it, or just Online when the join details are not a web link.',
+                'ticket' => 'The whole join link, clickable when it is a web link.',
                 'schema' => 'OnlineEventAttendanceMode',
             ],
             [
@@ -450,13 +450,13 @@
             [
                 'label' => 'On the public listing',
                 'title' => 'The domain, and nothing more',
-                'body' => 'An online event with no venue shows the host of the link on its location line. Enough to tell somebody what they are joining, not enough to join it.',
+                'body' => 'An online event with no venue shows the host of the link on its location line, or just Online when the join details are not a web link. Enough to tell somebody what they are joining, not enough to join it.',
                 'sample' => 'meet.google.com',
             ],
             [
                 'label' => 'On the ticket',
                 'title' => 'The whole link',
-                'body' => 'The ticket page carries the full join link, live and clickable, at the top where the address would be. A free registration produces a ticket too, so people who signed up without paying get it as well.',
+                'body' => 'The ticket page carries the full join link at the top where the address would be, clickable when it is a web link. A free registration produces a ticket too, so people who signed up without paying get it as well.',
                 // What the ticket actually prints: UrlUtils::clean() drops the scheme and any
                 // "www.", and the whole URL is the href. So no "https://" in this sample.
                 'sample' => 'meet.google.com/kfr-hxbz-qde',
@@ -496,7 +496,7 @@
             ],
             [
                 'q' => 'Who can see the join link?',
-                'a' => 'The public listing shows only the domain the event is hosted on, so a visitor can tell it is a Zoom call without being able to walk into it. The full link is printed on the ticket, at the top where the venue address would be. Free registration produces a ticket as well, so people who signed up without paying get the link the same way buyers do.',
+                'a' => 'The public listing shows only the domain the event is hosted on, so a visitor can tell it is a Zoom call without being able to walk into it, or just Online when the join details are not a web link. The full link is printed on the ticket, at the top where the venue address would be, and it is clickable there when it is a web link. Free registration produces a ticket as well, so people who signed up without paying get the link the same way buyers do.',
             ],
             [
                 'q' => 'Can one event be in person and online at the same time?',
@@ -788,7 +788,7 @@
                     You paste it once. <span class="es-golive-accent">It lands in three places.</span>
                 </h2>
                 <p class="es-golive-muted mt-5 text-lg" data-reveal style="--reveal-delay: 0.15s;">
-                    And it is deliberately not the same link in all three. The public gets the domain; the people who signed up get the door.
+                    And it is deliberately not the same link in all three. The public gets the domain at most; the people who signed up get the door.
                 </p>
             </div>
 

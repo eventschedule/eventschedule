@@ -3277,7 +3277,9 @@ class Event extends Model
      *
      * The custom domain is used only when the home schedule is served directly on it (direct +
      * active); redirect mode keeps the subdomain canonical. getGuestUrl() is deliberately not
-     * this: email, graphics and every in-app link go through it and keep their dates and hosts.
+     * this: email, graphics and every in-app link go through it and keep their dates, and one
+     * that names its schedule keeps that host. One that names no schedule goes to a schedule
+     * that serves the event, the same servingHome() choice as above.
      *
      * When no schedule serves the event yet (a member previewing one that is still pending), the
      * URL is the one getGuestUrlData() picked and there is no home.

@@ -50,7 +50,7 @@
                 "@type": "HowToStep",
                 "position": 3,
                 "name": "Open it to organizers",
-                "text": "Keep Accept requests on and share the submission link. Submissions wait for approval until you accept them, and schedules you trust can skip the queue."
+                "text": "Keep Accept requests on and share the submission link. Submissions wait for approval until you accept them, and while Require Account stays on, as it starts, schedules you trust can skip the queue."
             },
             {
                 "@type": "HowToStep",
@@ -351,7 +351,7 @@
                     <div class="es-cc-panel flex flex-col p-6" data-reveal="panel">
                         <h3 class="es-cc-ink text-base font-bold">A shortcut for the regulars</h3>
                         <p class="es-cc-muted mt-2 text-sm leading-relaxed">
-                            Put the schedules you already trust, such as the library or the leisure centre, on your approved list and their events skip the queue, while everyone else still waits for you.
+                            Put the schedules you already trust, such as the library or the leisure centre, on your approved list and, while Require Account stays on, their events skip the queue. Everyone else still waits for you.
                         </p>
                     </div>
                 </div>
@@ -508,7 +508,7 @@
             $communityFaqs = [
                 ['q' => 'Is a community event calendar on Event Schedule free?', 'a' => 'Yes. The calendar, public submissions, the approval queue, event sources, sub-schedules, embedding it on your website, the live calendar feed and email sign-up with an automatic digest are all free forever. Pro removes our branding and raises the newsletter allowance; Enterprise adds more team members and a custom domain.'],
                 ['q' => 'How do local organizers add their events?', 'a' => 'Through your public request link. On the AI Import form they paste the announcement or upload a photo of the flyer and check the details it reads out. On the Booking Form they fill in the fields you ask for. Organizers who keep their own schedule on Event Schedule can also be listed as event sources, so their events appear on yours without them submitting anything.', 'link' => [marketing_url('/docs/creating-schedules').'#engagement-requests', 'Request settings in the guide']],
-                ['q' => 'Can I approve events before they appear?', 'a' => 'Yes, and it is on by default. Submitted events wait on the Requests tab until you accept or decline them. Schedules you add to your approved list skip the queue, and event sources you picked yourself are listed straight away.'],
+                ['q' => 'Can I approve events before they appear?', 'a' => 'Yes, and it is on by default. Submitted events wait on the Requests tab until you accept or decline them. Schedules you add to your approved list skip the queue while Require Account is on, as it is by default, and event sources you picked yourself are listed straight away.'],
                 ['q' => 'Do people need an account to submit an event?', 'a' => 'On a curator schedule Require Account starts on, so every request has a name behind it, and a first-time submitter creates their account on the same page as the event. You can turn it off to take requests from guests instead.'],
                 ['q' => 'Can I put the calendar on our existing website?', 'a' => 'Yes, on every plan. Choose Embed Schedule from the Actions menu, pick a month calendar or a list, and paste the iframe code into your page. The embedded calendar updates on its own whenever an event is added or approved.', 'link' => [marketing_url('/docs/sharing').'#embed', 'Embedding in the guide']],
                 ['q' => 'Can residents get the events without visiting the site?', 'a' => 'Yes. They can subscribe to the whole calendar as a live feed in Google Calendar, Apple Calendar or Outlook, or leave an email address in the sign-up panel. Confirmed subscribers get a digest of newly published events, at most one every 72 hours.'],

@@ -1003,7 +1003,7 @@
             </div>
             <div class="doc-field">
                 <h4 class="font-semibold text-gray-900 dark:text-white mb-2">Ask for Phone Number</h4>
-                <p class="text-sm text-gray-500 dark:text-gray-400">Off by default. Turn it on and the Booking Form asks the visitor for a phone number, and a <strong class="text-gray-900 dark:text-white">Required</strong> switch appears beneath it if you want to insist on one. Signed-in visitors are asked too, because their account has a name and an email but no phone. The number is shown with the request under <strong class="text-gray-900 dark:text-white">Admin Panel &rarr; Requests</strong>, as a link you can tap to call. The AI Import form is not affected.</p>
+                <p class="text-sm text-gray-500 dark:text-gray-400">Off by default. Turn it on and the Booking Form asks the visitor for a phone number, and a <strong class="text-gray-900 dark:text-white">Required</strong> switch appears beneath it if you want to insist on one. Signed-in visitors are asked too, since the form does not take one from their account. The number is shown with the request under <strong class="text-gray-900 dark:text-white">Admin Panel &rarr; Requests</strong>, as a link you can tap to call. The AI Import form is not affected.</p>
             </div>
             <div class="doc-field">
                 <h4 class="font-semibold text-gray-900 dark:text-white mb-2">Require Approval</h4>
@@ -1011,7 +1011,7 @@
             </div>
             <div class="doc-field">
                 <h4 class="font-semibold text-gray-900 dark:text-white mb-2">Approved Schedules</h4>
-                <p class="text-sm text-gray-500 dark:text-gray-400">Name schedules you already trust and their submissions skip the queue, while everyone else still waits for approval. Start typing to search and pick a schedule. Not offered on Talent schedules.</p>
+                <p class="text-sm text-gray-500 dark:text-gray-400">Name schedules you already trust and what they send from their own schedule skips the queue: an event of theirs that they add you to, or a submission they make signed in while <strong class="text-gray-900 dark:text-white">Require Account</strong> is on. A Booking Form request, or a submission sent without an account, waits for approval like everyone else's. Start typing to search and pick a schedule. Not offered on Talent schedules.</p>
             </div>
             <div class="doc-field">
                 <h4 class="font-semibold text-gray-900 dark:text-white mb-2">Request Terms</h4>

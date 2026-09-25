@@ -42,7 +42,11 @@
              - The pitch list is accept_requests + require_approval +
                approved_subdomains ("Events submitted from these
                schedules will be automatically approved"), which is why
-               the table has exactly two states and no others.
+               the table has exactly two states and no others. The list
+               only lets through what a trader sends from their own
+               schedule, signed in, so the page pairs it with Require
+               Account: a booking form request, or an anonymous one,
+               still waits.
              - Market morning is event parts (EventPart: name,
                description, start_time, end_time, sort_order), free,
                which is why each line in the mock carries a note.
@@ -447,7 +451,11 @@
         $winterMarkets = ['Dec 5', 'Dec 12'];
 
         // The pitch list. Two states only, because approved_subdomains is
-        // the ONLY thing that skips require_approval.
+        // the ONLY thing that skips require_approval, and only for what a
+        // trader sends signed in from their own schedule: a submission while
+        // require_account is on (EventController::guestImportWithAccount()),
+        // or an event of theirs they add the market to
+        // (Role::autoAcceptsEventFrom()).
         $pitches = [
             ['Hedgerow Farm', 'Produce', true],
             ['Loaf and Crumb', 'Bakery', true],
@@ -482,7 +490,7 @@
             ],
             [
                 'q' => 'Can traders put themselves forward for a market day?',
-                'a' => 'Yes, on the free plan. Turn on submissions and traders can offer themselves for a date through your market page, with your terms shown on the form. Every submission waits for you to approve it, so nothing appears publicly that you have not agreed to, and you are emailed when new ones are waiting. Name your regulars as approved schedules and their submissions are approved automatically, which leaves you reading only the new ones. On the Pro plan you can add your own questions to that form.',
+                'a' => 'Yes, on the free plan. Turn on submissions and traders can offer themselves for a date through your market page, with your terms shown on the form. Every submission waits for you to approve it, so nothing appears publicly that you have not agreed to, and you are emailed when new ones are waiting. Turn on Require Account and name your regulars as approved schedules: what they then submit, signed in, is approved automatically, which leaves you reading only the new ones. On the Pro plan you can add your own questions to that form.',
             ],
             [
                 'q' => 'Can I charge for pitches and take the money online?',
@@ -790,8 +798,9 @@
                     </tbody>
                 </table>
                 <p class="es-mkt-muted mt-5 es-mkt-hr pt-4 text-xs">
-                    Two states, because the product has two. Name a trader as an approved schedule and
-                    their submissions go straight on; everybody else waits. Nothing publishes itself.
+                    Two states, because the product has two. Ask traders for an account, name one as an
+                    approved schedule, and their submissions go straight on; everybody else waits.
+                    Nothing publishes itself.
                 </p>
             </div>
 
@@ -1173,7 +1182,7 @@
             <div class="grid gap-4 md:grid-cols-3" data-reveal-group="100">
                 @foreach ([
                     ['01', 'Set the season', 'The market name, the square, the days of the week and the hours. Then give the recurrence a closing date so it stops on its own.'],
-                    ['02', 'Open the pitch list', 'Turn on submissions, write your pitch terms, and name your regulars as approved schedules. Everybody else waits for you.'],
+                    ['02', 'Open the pitch list', 'Turn on submissions and Require Account, write your pitch terms, and name your regulars as approved schedules. Everybody else waits for you.'],
                     ['03', 'Print the code', 'Download your QR code, put it on the A-board, and start a list of shoppers who tapped Follow, yours to email with no algorithm in the middle.'],
                 ] as [$hN, $hT, $hD])
                     <div class="es-mkt-card p-7" data-reveal="panel">
