@@ -199,11 +199,12 @@
             <meta property="og:type" content="event">
             <meta property="og:title" content="{{ $guestEventName }}">
             <meta property="og:description" content="{{ $guestMetaDescription }}">
-            {{-- Event::shareImage() cascades flyer -> performer -> venue -> the creating schedule,
-                 uploads only, so null here means the owners have no image anywhere. Advertising
-                 none lets the scraper fall back to their own page, which beats handing it an
-                 advert of ours. --}}
-            @php $eventOgImage = $event->shareImage(); @endphp
+            {{-- Event::shareImage() is the picture this page shows: the flyer, else the first
+                 performer with a photo, the venue's or this schedule's own, as the page's hero
+                 picks them (Event::pagePhotoRoles()). Uploads only, so null here means the page
+                 shows no such picture. Advertising none lets the scraper fall back to their own
+                 page, which beats handing it an advert of ours. --}}
+            @php $eventOgImage = $event->shareImage($role); @endphp
             @if ($eventOgImage)
             <meta property="og:image" content="{{ $eventOgImage['url'] }}">
             @if (isset($eventOgImage['width'], $eventOgImage['height']))
@@ -236,7 +237,8 @@
                  Advertising nothing is the right fallback. It does not guarantee a picture-less
                  card - Facebook's crawler will pick one out of the page body - but whatever it
                  finds there is the owner's, which an advert of ours never is. Role::shareImage()
-                 is the header, logo or background the owner UPLOADED, never built-in art. --}}
+                 is the header (in the banner style, the one that draws it), logo or background
+                 the owner UPLOADED, never built-in art. --}}
             @php $scheduleOgImage = $role->shareImage(); @endphp
             @if ($scheduleOgImage)
             <meta property="og:image" content="{{ $scheduleOgImage['url'] }}">

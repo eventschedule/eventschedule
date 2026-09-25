@@ -2779,11 +2779,22 @@ class Event extends Model
     }
 
     /**
-     * The picture a link preview of this event shows (og:image, twitter:image): the flyer's
-     * original, else the performer's photo, else the venue's, else the photo of the schedule that
-     * created it. Null when the owners have uploaded nothing - never a stock image and never one
-     * of ours (docs/BRANDING_MATRIX.md rule 6, pinned by GuestSocialImageTest): a card with no
-     * image degrades to the owner's own text and page.
+     * The picture a link preview of this event's page on $viewingRole shows (og:image,
+     * twitter:image, and the Event JSON-LD's image): the flyer's original, else the first photo
+     * pagePhotoRoles() lists - the first performer with one, else the venue's, else
+     * $viewingRole's own - so the preview is always a picture the page itself shows. It used to
+     * be the first performer's photo whether or not they had one (so a second act's photo lost
+     * to the venue's), then the photo of the schedule that CREATED the event, which a venue's page
+     * showing a curator's listing never shows anywhere.
+     *
+     * A deleted schedule, and one that declined the event, is skipped. The page still renders
+     * them (a known gap, not this method's to fix), and a preview that stays a subset of the page
+     * simply never puts them forward: with no other photo left it is null, never a schedule whose
+     * photo the page does not show.
+     *
+     * Null when there is no such upload - never a stock image and never one of ours
+     * (docs/BRANDING_MATRIX.md rule 6, pinned by GuestSocialImageTest): a card with no image
+     * degrades to the owner's own text and page.
      *
      * The original, not a card derivative: previews are shown large, and scrapers downscale.
      * width and height are present only when known: the size the image pipeline recorded for the
@@ -2794,24 +2805,71 @@ class Event extends Model
      *
      * @return array{url: string, width?: int, height?: int}|null
      */
-    public function shareImage(): ?array
+    public function shareImage(?Role $viewingRole = null): ?array
     {
         if ($this->flyer_image_url) {
             return SeoUtils::imageObject($this->flyer_image_url, $this->imageSourceDimensions());
         }
 
-        foreach ([$this->role(), $this->venue, $this->creatorRole] as $role) {
-            if ($role && $role->profile_image_url) {
-                return SeoUtils::imageObject($role->profile_image_url, $role->imageSourceDimensions());
-            }
-        }
+        $role = $this->pagePhotoRoles($viewingRole)->first(fn (Role $role) => ! self::isDeletedOrDeclined($role));
 
-        return null;
+        return $role ? SeoUtils::imageObject($role->profile_image_url, $role->imageSourceDimensions()) : null;
     }
 
     /**
-     * The schedule whose profile photo stands in for a missing flyer: the talent, else the venue.
-     * Null when the event has a flyer of its own or neither schedule has a photo.
+     * The schedules whose profile photos this event's page on $viewingRole shows, in the order
+     * the page gives them weight (event/show-guest.blade.php):
+     *
+     *  1. every performer with a photo, in bill order: each one's card shows it;
+     *  2. the venue, when it has a photo: its card shows it, and so does the square hero image
+     *     at the top of the page while no performer has one;
+     *  3. $viewingRole, the schedule whose page it is, only while neither of those has a photo:
+     *     that is when the hero shows it.
+     *
+     * The page's hero is the first entry whenever no performer has a photo, and shareImage()
+     * reads the same list, so the page and its link preview cannot drift apart. Every schedule on
+     * the bill, as the page renders it, deleted and declined ones included: which of them to put
+     * forward is the caller's decision. $viewingRole may be an empty model, which the guest
+     * layout's container fills in when a view passes none: that is no schedule.
+     *
+     * @return \Illuminate\Support\Collection<int, Role>
+     */
+    public function pagePhotoRoles(?Role $viewingRole = null): \Illuminate\Support\Collection
+    {
+        $roles = $this->members()->filter(fn (Role $role) => $role->profile_image_url)->values();
+        $venue = $this->venue;
+
+        if ($venue && $venue->profile_image_url) {
+            $roles->push($venue);
+        } elseif ($roles->isEmpty() && $viewingRole?->exists && $viewingRole->profile_image_url) {
+            $roles->push($viewingRole);
+        }
+
+        return $roles;
+    }
+
+    /**
+     * Whether $role is a deleted schedule, or one that declined this event: a decline leaves its
+     * pivot at is_accepted = false (EventController::decline()), where null is still pending. A
+     * schedule that did not come through the roles relation has no such pivot and is not
+     * declined.
+     */
+    private static function isDeletedOrDeclined(Role $role): bool
+    {
+        $accepted = $role->pivot?->is_accepted;
+
+        return (bool) $role->is_deleted || ($accepted !== null && ! $accepted);
+    }
+
+    /**
+     * The schedule whose profile photo stands in for a missing flyer on a card: the first
+     * performer's, else the venue's. Null when the event has a flyer of its own or neither
+     * schedule has a photo.
+     *
+     * Deliberately not pagePhotoRoles(), which is the event PAGE's choice: a card has no viewing
+     * schedule to fall back to, and it asks only whether its first performer has a photo, so a
+     * second act's photo does not stand in on a card. Changing which picture every card, list and
+     * wall entry shows is a change of its own.
      */
     protected function fallbackImageRole(): ?Role
     {
@@ -4722,6 +4780,9 @@ class Event extends Model
      * translatedName(), which asks the viewer's translate flag about a schedule whose language pair
      * may be the reverse of the page's (TranslationLanguageTargetTest).
      *
+     * The image is shareImage($viewingRole): the picture the event's page on $viewingRole shows,
+     * the one its og:image names too.
+     *
      * $compact is an entry in a schedule node's upcoming list: when and where, what it looks like
      * and who organizes it. No description, performers or offers - those cost ticket queries per
      * event and belong on the event's own page - and an organizer that IS the listing schedule is a
@@ -4758,7 +4819,7 @@ class Event extends Model
             $node['location'] = $location;
         }
 
-        if ($image = SeoUtils::schemaImageObject($this->shareImage())) {
+        if ($image = SeoUtils::schemaImageObject($this->shareImage($viewingRole))) {
             $node['image'] = $image;
         }
 

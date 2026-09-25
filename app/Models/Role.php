@@ -2530,6 +2530,11 @@ class Role extends Model implements MustVerifyEmail
      * ever is (docs/BRANDING_MATRIX.md rule 6): with no upload this is null and the card degrades
      * to the owner's own text.
      *
+     * The header only in the banner style, the one that draws it (role/partials/headers/
+     * banner.blade.php). The compact bar shows the profile photo alone, so a header uploaded
+     * before the owner switched to it is a picture the page no longer shows, and the preview
+     * moves on to the photo, then the background.
+     *
      * width and height only when known: the size the image pipeline recorded for the chosen upload
      * (HasImageVariants::imageSourceDimensions()), else whatever SeoUtils::imageDimensions() can
      * read from a file this app serves itself.
@@ -2538,7 +2543,7 @@ class Role extends Model implements MustVerifyEmail
      */
     public function shareImage(): ?array
     {
-        $header = blank($this->header_image) ? $this->header_image_url : '';
+        $header = ($this->headerStyle() === 'banner' && blank($this->header_image)) ? $this->header_image_url : '';
         $background = ($this->background === 'image' && blank($this->background_image))
             ? $this->background_image_url
             : '';

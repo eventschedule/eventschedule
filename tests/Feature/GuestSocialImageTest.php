@@ -290,19 +290,119 @@ class GuestSocialImageTest extends TestCase
     }
 
     /**
-     * An event with no flyer, performer or venue picture falls back to the schedule that created
-     * it - a curator's logo on a curated listing - before giving up (Event::shareImage()).
+     * An event with no flyer, performer or venue picture shows the photo of the schedule whose
+     * page it is, in the square hero image, and previews that same photo (Event::shareImage()).
+     *
+     * FAILS before the change on the venue's page: the preview was the logo of the schedule that
+     * CREATED the event, whichever page it was on, so the venue's page of a curator's listing
+     * previewed a logo that page shows nowhere.
      */
-    public function test_an_event_falls_back_to_the_logo_of_the_schedule_that_created_it(): void
+    public function test_an_event_falls_back_to_the_logo_of_the_schedule_whose_page_it_is(): void
     {
         $curator = $this->createCurator($this->createOwner(), ['profile_image_url' => 'profile_curator.png']);
         $venue = $this->role(['profile_image_url' => null]);
         $event = $this->createEvent($venue, ['creator_role_id' => $curator->id]);
         $event->roles()->attach($curator->id, ['is_accepted' => true]);
 
+        $onCurator = $this->get($this->guestEventUrl($curator, $event))->assertOk()->getContent();
+        $preview = (string) $this->ogImage($onCurator);
+
+        $this->assertStringContainsString('profile_curator.png', $preview);
+        $this->assertStringContainsString('profile_curator.png', $this->eventJsonLd($onCurator));
+        $this->assertMatchesRegularExpression(
+            '~<div id="gp-event-hero-image".*?src="'.preg_quote($preview, '~').'"~s',
+            $onCurator,
+            'the preview is the picture the page shows as its hero'
+        );
+
+        $onVenue = $this->get($this->guestEventUrl($venue, $event))->assertOk()->getContent();
+        $eventBlock = $this->eventJsonLd($onVenue);
+
+        $this->assertNull($this->ogImage($onVenue));
+        $this->assertNull($this->twitterImage($onVenue));
+        $this->assertNotSame('', $eventBlock, 'No Event JSON-LD block was found to inspect.');
+        $this->assertStringNotContainsString('"image"', $eventBlock);
+        $this->assertStringNotContainsString('profile_curator.png', $onVenue, 'the venue page shows the curator logo nowhere');
+    }
+
+    /**
+     * FAILS before the change: the preview asked only whether the FIRST performer had a photo, so
+     * an opening act without one handed the preview to the venue while the headliner's card, the
+     * performer's photo this page shows, was passed over.
+     */
+    public function test_the_preview_is_the_first_performer_with_a_photo_not_the_first_performer(): void
+    {
+        $venue = $this->role(['profile_image_url' => 'profile_venue.png']);
+        $opener = $this->createRole($this->createOwner(), 'talent', ['name' => 'Opening Act', 'profile_image_url' => null]);
+        $headliner = $this->createRole($this->createOwner(), 'talent', ['name' => 'Headliner', 'profile_image_url' => 'profile_headliner.png']);
+        $event = $this->createEvent($venue, ['creator_role_id' => $venue->id]);
+        $event->roles()->attach($opener->id, ['is_accepted' => true]);
+        $event->roles()->attach($headliner->id, ['is_accepted' => true]);
+
+        $this->assertSame($opener->id, $event->fresh()->role()->id, 'fixture: the first performer on the bill has no photo');
+
         $content = $this->get($this->guestEventUrl($venue, $event))->assertOk()->getContent();
 
-        $this->assertStringContainsString('profile_curator.png', (string) $this->ogImage($content));
+        $this->assertStringContainsString('profile_headliner.png', (string) $this->ogImage($content));
+        $this->assertStringContainsString('profile_headliner.png', (string) $this->twitterImage($content));
+        $this->assertStringContainsString('profile_headliner.png', $this->eventJsonLd($content));
+    }
+
+    /**
+     * A deleted schedule, or one that declined the event, is never the preview, though the page
+     * still renders both. The next photo the page shows takes over, and never one it does not.
+     *
+     * FAILS before the change: the declined act's photo was the preview, and so was the deleted
+     * venue's.
+     */
+    public function test_a_deleted_or_declined_schedule_is_never_the_preview(): void
+    {
+        // A declined act: the venue's photo, which its card shows, takes over.
+        $venue = $this->role(['profile_image_url' => 'profile_venue.png']);
+        $declined = $this->createRole($this->createOwner(), 'talent', ['name' => 'Declined Act', 'profile_image_url' => 'profile_declined.png']);
+        $event = $this->createEvent($venue, ['creator_role_id' => $venue->id]);
+        $event->roles()->attach($declined->id, ['is_accepted' => false]);
+
+        $content = $this->get($this->guestEventUrl($venue, $event))->assertOk()->getContent();
+
+        $this->assertStringContainsString('profile_venue.png', (string) $this->ogImage($content));
+        $this->assertStringNotContainsString('profile_declined.png', $this->eventJsonLd($content));
+
+        // A deleted venue on a curator's listing. The page's hero shows the venue's photo, so the
+        // curator's logo appears nowhere on it and cannot stand in: no preview at all.
+        $curator = $this->createCurator($this->createOwner(), ['profile_image_url' => 'profile_curator.png']);
+        $deleted = $this->role(['profile_image_url' => 'profile_deleted_venue.png']);
+        $listing = $this->createEvent($curator, ['creator_role_id' => $curator->id]);
+        $listing->roles()->attach($deleted->id, ['is_accepted' => true]);
+        $deleted->forceFill(['is_deleted' => true])->save();
+
+        $content = $this->get($this->guestEventUrl($curator, $listing))->assertOk()->getContent();
+
+        $this->assertNull($this->ogImage($content));
+        $this->assertStringNotContainsString('"image"', $this->eventJsonLd($content));
+    }
+
+    /**
+     * A compact header is a slim bar with the profile photo and no header image
+     * (role/partials/headers/compact.blade.php), so a header uploaded while the schedule was on
+     * the banner style is a picture its page no longer shows. The preview is the photo.
+     *
+     * FAILS before the change: the old upload was the preview.
+     */
+    public function test_a_compact_header_previews_the_profile_photo_not_an_old_header_upload(): void
+    {
+        $role = $this->role([
+            'header_style' => 'compact',
+            'profile_image_url' => 'profile_bluenote.png',
+            'header_image' => '',
+            'header_image_url' => 'header_bluenote.png',
+        ]);
+
+        $content = $this->get('/'.$role->subdomain)->assertOk()->getContent();
+
+        $this->assertStringContainsString('profile_bluenote.png', (string) $this->ogImage($content));
+        $this->assertStringContainsString('profile_bluenote.png', (string) $this->twitterImage($content));
+        $this->assertStringNotContainsString('header_bluenote.png', $content, 'the compact page shows the upload nowhere');
     }
 
     /**

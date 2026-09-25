@@ -191,11 +191,12 @@
 
         @if (!$hasTalentImage)
         @php
-          // The schedule whose photo stands in: a talent's, else the venue's, else this one's. The
-          // schedule rather than its URL, because the resized derivatives are recorded on it.
-          $fallbackImageRole = $event->roles->first(fn($r) => $r->isTalent() && $r->profile_image_url)
-              ?: (($event->venue && $event->venue->profile_image_url) ? $event->venue : null)
-              ?: ($role->profile_image_url ? $role : null);
+          // The schedule whose photo stands in: with no performer's photo on the page, the
+          // venue's, else this one's. Event::pagePhotoRoles() lists them in the page's order, and
+          // Event::shareImage() reads the same list, so the link preview is always a picture this
+          // page shows. The schedule rather than its URL, because the resized derivatives are
+          // recorded on it.
+          $fallbackImageRole = $event->pagePhotoRoles($role)->first();
           $fallbackImageSrcset = $fallbackImageRole?->imageVariantSrcset();
         @endphp
         @if ($fallbackImageRole)
