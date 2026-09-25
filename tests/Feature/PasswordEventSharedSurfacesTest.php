@@ -5,6 +5,7 @@ namespace Tests\Feature;
 use App\Models\Event;
 use App\Models\Role;
 use App\Models\User;
+use App\Repos\EventRepo;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Str;
@@ -211,6 +212,24 @@ class PasswordEventSharedSurfacesTest extends TestCase
 
         $this->assertSame(['Open Tasting Night'], $search($this->createOwner()));
         $this->assertSame(['Locked Tasting Night', 'Open Tasting Night'], $search($owner));
+    }
+
+    /**
+     * The schedule page's own list (its noscript list, JSON-LD and meta description) had its own
+     * `= ''` test, which the padded column matched for a password of only spaces.
+     */
+    public function test_the_schedule_pages_own_list_counts_a_password_of_only_spaces(): void
+    {
+        $role = $this->createRole($this->createOwner(), 'venue', ['name' => 'Harbour Wine Bar']);
+        $spaces = $this->openEvent($role, ['name' => 'Spaced Night']);
+        $empty = $this->openEvent($role, ['name' => 'Empty Night', 'starts_at' => '2026-10-18 19:00:00']);
+        Event::whereKey($spaces->id)->update(['event_password' => '   ']);
+        Event::whereKey($empty->id)->update(['event_password' => '']);
+
+        $names = app(EventRepo::class)->upcomingForGuest($role)->pluck('event.name')->all();
+
+        $this->assertContains('Empty Night', $names, 'an empty password is no password');
+        $this->assertNotContains('Spaced Night', $names);
     }
 
     /**

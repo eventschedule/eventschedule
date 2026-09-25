@@ -4661,33 +4661,40 @@ class EventController extends Controller
 
     public function downloadIcal($subdomain, $slug, $id, $date = null)
     {
+        $user = auth()->user();
+
         // The abort(404) a subdomain that matches nothing reaches below, for a deleted schedule
         // or an unpublished one to anybody outside it. Its events' .ics files used to be served.
         $role = Role::subdomain($subdomain)->first();
 
-        if (! $role || ! $role->isVisibleToGuest(auth()->user())) {
+        if (! $role || ! $role->isVisibleToGuest($user)) {
             abort(404);
         }
 
-        $event = Event::whereHas('roles', fn ($q) => $q->where('subdomain', $subdomain))
-            ->find(UrlUtils::decodeId($id));
-
-        if (! $event) {
-            abort(404);
-        }
-
-        $user = auth()->user();
         $isMemberOrAdmin = $user && ($user->isMember($subdomain) || $user->isAdmin());
 
-        if ($event->is_draft && ! $isMemberOrAdmin) {
-            abort(404);
-        }
-        if ($event->is_private && ! $isMemberOrAdmin) {
-            abort(404);
-        }
+        // Only an event this schedule's own page shows this visitor, and otherwise the 404 an
+        // unknown event gets. This used to serve any event merely attached to the schedule, one
+        // it had declined or not yet answered included, and to answer a locked one with a 403
+        // that said it was there.
+        // - Accepted on this schedule, as EventRepo::getEvent() asks; its own people also reach
+        //   what is pending here, as they do on the page.
+        // - Event::guestVisibilityFailure(), the gate checkout and the seat map use: not a draft,
+        //   and not unlisted unless unlocked. Stricter than the page, which shows an unlisted event
+        //   to anybody holding the link, and on purpose: an appointment booking is an unlisted
+        //   event named after its guest, and its .ics goes out behind the booking's own secret
+        //   (AppointmentController::ical()).
+        // - Past any password, for anybody outside it: a member, an admin or a session that entered
+        //   it, as RoleController::bypassesEventPassword() has it. Older listed rows carry one as
+        //   well, which the gate above does not look at.
+        $event = Event::whereHas('roles', fn ($q) => $q->where('roles.id', $role->id)
+            ->when(! $isMemberOrAdmin, fn ($q) => $q->where('event_role.is_accepted', true)))
+            ->find(UrlUtils::decodeId($id));
 
-        if ($event->isPasswordProtected() && ! $isMemberOrAdmin && ! session()->has('event_password_'.$event->id)) {
-            abort(403);
+        if (! $event
+            || $event->guestVisibilityFailure($role, $isMemberOrAdmin) !== null
+            || ($event->isPasswordProtected() && ! $isMemberOrAdmin && ! session()->has('event_password_'.$event->id))) {
+            abort(404);
         }
 
         $title = $event->getTitle();

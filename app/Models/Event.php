@@ -3319,9 +3319,14 @@ class Event extends Model
         return $url;
     }
 
-    public function getAppleCalendarUrl($date = null)
+    /**
+     * The .ics download, on $subdomain when given. The event page passes the schedule it is showing:
+     * the canonical schedule (false) can be an act that has not accepted the event yet, and the
+     * download answers only where the event is accepted, as that schedule's page does.
+     */
+    public function getAppleCalendarUrl($date = null, $subdomain = false)
     {
-        $guestUrl = $this->getGuestUrl(false, $date);
+        $guestUrl = $this->getGuestUrl($subdomain, $date);
 
         if (! $guestUrl) {
             return '';

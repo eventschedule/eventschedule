@@ -1940,16 +1940,20 @@ class RoleController extends Controller
             return redirect(app_url());
         }
 
-        // No narrowed select: Role::saving recomputes description_html and its siblings from
-        // in-memory attributes, and Event needs creator_role_id present or getStartDateTime()
-        // short-circuits on the null key and silently falls back to the app timezone.
-        $events = Event::with(['roles', 'creatorRole', 'venue'])
+        // The events a guest could see here: accepted on this schedule, and neither a draft, nor
+        // unlisted, nor cancelled, nor - older rows can carry a password while listed - locked.
+        $guestVisible = fn ($query) => $query
             ->whereHas('roles', fn ($q) => $q->where('roles.id', $role->id)->where('event_role.is_accepted', true))
             ->where('is_draft', false)
             ->where('is_private', false)
             ->where('is_cancelled', false)
-            // Older rows can carry a password while listed, and this list names each event.
-            ->notPasswordProtected()
+            ->notPasswordProtected();
+
+        // No narrowed select: Role::saving recomputes description_html and its siblings from
+        // in-memory attributes, and Event needs creator_role_id present or getStartDateTime()
+        // short-circuits on the null key and silently falls back to the app timezone.
+        $events = Event::with(['roles', 'creatorRole', 'venue'])
+            ->tap($guestVisible)
             ->upcomingOrOngoing()
             ->orderBy('starts_at')
             ->limit(20)
@@ -1958,12 +1962,25 @@ class RoleController extends Controller
         // Who to name in "this page was created by". The row itself records no creator, so the
         // earliest event on it is the best evidence: whoever listed this act first is who brought
         // the page into being. Falls back to nothing rather than to a guess.
-        $createdBy = $events->map(fn ($e) => $e->creatorRole)->filter()->first()
+        //
+        // Only an event a guest could see, the list's own filter: the earliest of ANY event named
+        // the schedule behind a draft or a password event, which the visitor could not see. And
+        // only a creator whose own pages a guest could see: naming a deleted or unpublished
+        // schedule told the visitor it was there.
+        $publicCreator = fn (?Event $event) => ($creator = $event?->creatorRole) && $creator->isVisibleToGuest(null)
+            ? $creator
+            : null;
+
+        $createdBy = $events->map($publicCreator)->filter()->first()
             ?: Event::where('creator_role_id', '!=', null)
-                ->whereHas('roles', fn ($q) => $q->where('roles.id', $role->id))
+                ->tap($guestVisible)
                 ->with('creatorRole')
                 ->orderBy('created_at')
-                ->first()?->creatorRole;
+                ->limit(20)
+                ->get()
+                ->map($publicCreator)
+                ->filter()
+                ->first();
 
         // Recorded like both sibling paths in viewGuest(). Without it this feature emits no signal
         // at all - the page is noindex, every inbound link is rel=nofollow, and the only other

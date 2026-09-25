@@ -2,6 +2,7 @@
 
 namespace Tests\Feature;
 
+use App\Models\Event;
 use App\Models\Role;
 use App\Services\AuditService;
 use Illuminate\Foundation\Testing\RefreshDatabase;
@@ -85,6 +86,73 @@ class UnclaimedSchedulePageTest extends TestCase
             ->assertSee(__('messages.claim_strip_title', ['schedule' => 'Ba-Be Bar']))
             ->assertDontSee(__('messages.claim_strip_title_generic'))
             ->assertSee(__('messages.claim_strip_no_events'));
+    }
+
+    /**
+     * The second lookup took the earliest event of ANY kind, so the strip named whoever was behind
+     * a draft or a password event: a schedule, and an event, the visitor could not see. It now reads
+     * the same events the page's list does. Listed first, the two hidden ones would win on date.
+     */
+    public function test_the_creator_it_names_is_behind_an_event_a_guest_could_see(): void
+    {
+        $placeholder = $this->placeholder(['name' => 'Second On']);
+
+        $this->listedBy($placeholder, 'Draft Promoter', ['is_draft' => true], 6);
+        $this->listedBy($placeholder, 'Locked Promoter', ['event_password' => 'hunter2'], 5);
+        $this->listedBy($placeholder, 'Public Promoter', [], 4);
+
+        $this->get($this->url($placeholder))
+            ->assertOk()
+            ->assertSee(__('messages.claim_strip_title', ['schedule' => 'Public Promoter']))
+            ->assertDontSee('Draft Promoter')
+            ->assertDontSee('Locked Promoter');
+    }
+
+    /**
+     * Naming a deleted schedule, or an unpublished one, on a public page told the visitor it was
+     * there, the thing their own addresses now refuse to say. The strip moves on to a creator a
+     * guest could see, and with none left it names nobody.
+     */
+    public function test_it_names_only_a_creator_a_guest_could_see(): void
+    {
+        $placeholder = $this->placeholder(['name' => 'Second On']);
+
+        $deleted = $this->listedBy($placeholder, 'Gone Promoter', [], 6);
+        Role::whereKey($deleted->id)->update(['is_deleted' => true]);
+        $unpublished = $this->listedBy($placeholder, 'Quiet Promoter', [], 5);
+        Role::whereKey($unpublished->id)->update(['email_verified_at' => null]);
+
+        $this->get($this->url($placeholder))
+            ->assertOk()
+            ->assertSee(__('messages.claim_strip_title_generic'))
+            ->assertDontSee('Gone Promoter')
+            ->assertDontSee('Quiet Promoter');
+
+        $this->listedBy($placeholder, 'Public Promoter', [], 4);
+
+        $this->get($this->url($placeholder))
+            ->assertOk()
+            ->assertSee(__('messages.claim_strip_title', ['schedule' => 'Public Promoter']))
+            ->assertDontSee('Gone Promoter')
+            ->assertDontSee('Quiet Promoter');
+    }
+
+    /**
+     * A past event by a new schedule named $creator, listing the placeholder, created $monthsAgo
+     * months ago - past, so the page's list is empty and the strip reads the second lookup.
+     */
+    private function listedBy(Role $placeholder, string $creator, array $attrs, int $monthsAgo): Role
+    {
+        $role = $this->createRole($this->createOwner(), 'venue', ['name' => $creator]);
+        $event = $this->createEvent($role, $attrs + [
+            'name' => 'Late Show',
+            'creator_role_id' => $role->id,
+            'starts_at' => now()->subMonths(3)->setTime(20, 0)->format('Y-m-d H:i:s'),
+        ]);
+        $event->roles()->attach($placeholder->id, ['is_accepted' => true]);
+        Event::whereKey($event->id)->update(['created_at' => now()->subMonths($monthsAgo)]);
+
+        return $role;
     }
 
     public function test_the_in_memory_and_query_claimable_predicates_agree(): void

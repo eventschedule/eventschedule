@@ -2651,8 +2651,9 @@ class EventRepo
             // A password gate hides the event's details on the calendar; this list feeds the
             // schedule's JSON-LD (venue address, flyer), its meta description and the noscript
             // list, so a gated event must not appear here at all. is_private normally travels with
-            // a password, but rows that predate that rule do not.
-            ->where(fn ($q) => $q->whereNull('events.event_password')->orWhere('events.event_password', ''))
+            // a password, but rows that predate that rule do not. The scope, not an `= ''` test:
+            // the column pads with spaces, so that also let a password of only spaces through.
+            ->notPasswordProtected()
             ->whereIn('events.id', fn ($pivot) => $pivot->select('event_id')
                 ->from('event_role')
                 ->where('role_id', $role->id)
