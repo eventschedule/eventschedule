@@ -14,6 +14,10 @@
     // Filter to only images with URLs
     $images = array_values(array_filter($images, fn($img) => !empty($img['url'])));
 
+    // A link is client-built JSON that nothing validates as one, shown in the builder's preview
+    // too: linked only through safeActionHref(), and without a safe href the image shows unlinked.
+    $images = array_map(fn ($img) => array_merge($img, ['href' => \App\Utils\UrlUtils::safeActionHref($img['link'] ?? null)]), $images);
+
     // Validate width
     if (!preg_match('/^\d+(px|%)?$/', $width)) {
         $width = '100%';
@@ -31,9 +35,9 @@
     @foreach ($images as $img)
     <tr>
         <td align="{{ $align }}" style="padding: 10px 30px;">
-            @if (!empty($img['link']))<a href="{{ $img['link'] }}" style="text-decoration: none; color: inherit;">@endif
+            @if ($img['href'])<a href="{{ $img['href'] }}" style="text-decoration: none; color: inherit;">@endif
             <img src="{{ $img['url'] }}" alt="{{ $img['alt'] ?? '' }}" width="600" style="max-width: 600px; width: {{ $width }}; height: auto; display: block; {{ $imgExtra }}" />
-            @if (!empty($img['link']))</a>@endif
+            @if ($img['href'])</a>@endif
             @if (!empty($img['caption']))
             <p style="margin: 6px 0 0 0; font-size: 13px; color: {{ $style['textColor'] }}cc; font-family: '{{ $style['fontFamily'] }}', sans-serif; text-align: {{ $align }};">{{ $img['caption'] }}</p>
             @endif
@@ -53,9 +57,9 @@
                 <tr>
                     @foreach ($images as $img)
                     <td width="{{ $tdWidth }}%" valign="top" style="padding: 0 {{ $loop->last ? '0' : '5' }}px 0 {{ $loop->first ? '0' : '5' }}px;">
-                        @if (!empty($img['link']))<a href="{{ $img['link'] }}" style="text-decoration: none; color: inherit;">@endif
+                        @if ($img['href'])<a href="{{ $img['href'] }}" style="text-decoration: none; color: inherit;">@endif
                         <img src="{{ $img['url'] }}" alt="{{ $img['alt'] ?? '' }}" width="{{ $pixelWidth }}" style="width: 100%; max-width: {{ $pixelWidth }}px; height: auto; display: block; {{ $imgExtra }}" />
-                        @if (!empty($img['link']))</a>@endif
+                        @if ($img['href'])</a>@endif
                         @if (!empty($img['caption']))
                         <p style="margin: 6px 0 0 0; font-size: 13px; color: {{ $style['textColor'] }}cc; font-family: '{{ $style['fontFamily'] }}', sans-serif; text-align: center;">{{ $img['caption'] }}</p>
                         @endif
@@ -75,9 +79,9 @@
                 <tr>
                     @foreach ($row as $img)
                     <td width="50%" valign="top" style="padding: 0 {{ $loop->last ? '0' : '5' }}px 0 {{ $loop->first ? '0' : '5' }}px;">
-                        @if (!empty($img['link']))<a href="{{ $img['link'] }}" style="text-decoration: none; color: inherit;">@endif
+                        @if ($img['href'])<a href="{{ $img['href'] }}" style="text-decoration: none; color: inherit;">@endif
                         <img src="{{ $img['url'] }}" alt="{{ $img['alt'] ?? '' }}" width="{{ $pixelWidth }}" style="width: 100%; max-width: {{ $pixelWidth }}px; height: auto; display: block; {{ $imgExtra }}" />
-                        @if (!empty($img['link']))</a>@endif
+                        @if ($img['href'])</a>@endif
                         @if (!empty($img['caption']))
                         <p style="margin: 6px 0 0 0; font-size: 13px; color: {{ $style['textColor'] }}cc; font-family: '{{ $style['fontFamily'] }}', sans-serif; text-align: center;">{{ $img['caption'] }}</p>
                         @endif

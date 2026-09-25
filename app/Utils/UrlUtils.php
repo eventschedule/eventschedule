@@ -640,6 +640,27 @@ class UrlUtils
     }
 
     /**
+     * safeHref(), or else a mailto: or tel: link, or null.
+     *
+     * For a call to action an owner builds, such as a newsletter button, whose whole point can be
+     * "email us" or "call to book"; NewsletterService::rewriteLinks() already expects both schemes
+     * and leaves them untracked. Either one only hands the address to the mail or phone app, so
+     * neither can run anything. Trimmed, and refused on a control character, as safeHref() is.
+     */
+    public static function safeActionHref(mixed $url): ?string
+    {
+        $href = self::safeHref($url);
+
+        if ($href !== null || ! is_string($url)) {
+            return $href;
+        }
+
+        $value = trim($url, "\x00..\x20");
+
+        return preg_match('/^(?:mailto|tel):[^\x00-\x1F\x7F]+\z/i', $value) ? $value : null;
+    }
+
+    /**
      * The domain of an owner-typed link as a guest may read it, or ''.
      *
      * Only a real public domain name counts: free text, an IP address, localhost, "pw.998877" and

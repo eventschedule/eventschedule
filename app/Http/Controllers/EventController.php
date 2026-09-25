@@ -1752,23 +1752,25 @@ class EventController extends Controller
         // subdomain does.
         $role = Role::findForGuestOrFail($subdomain);
 
-        if ($event->isMembersOnly()) {
+        if ($event->isMembersOnly() || $event->is_private) {
+            // Who may reach a hidden event here: a member of a schedule the event is ON, or an
+            // admin. Membership of $subdomain says nothing about the event, since that is the
+            // schedule it would be added TO. Asked that way, anybody who runs a curator could add
+            // another schedule's draft, or a booking the API had listed, to it, and then see it
+            // there as one of its members.
             $user = auth()->user();
-            $isMemberOrAdmin = $user && ($user->isMember($subdomain) || $user->isAdmin());
-            if (! $isMemberOrAdmin) {
-                abort(404);
-            }
-        }
+            $isEventMemberOrAdmin = $user
+                && ($user->isAdmin() || $event->roles->contains(fn ($r) => $user->isMember($r->subdomain)));
 
-        if ($event->is_private) {
-            $user = auth()->user();
-            $isEventMember = $event->roles->contains(fn ($r) => $user && $user->isMember($r->subdomain));
-            if (! $isEventMember && ! $user?->isAdmin()) {
-                abort(404);
+            // A draft or a booking answers as an unknown event does: this is the exception
+            // findOrFail() above throws for an id that matches nothing, so the JSON the import page
+            // reads is that one's too, where abort(404) sent a different body.
+            if ($event->isMembersOnly() && ! $isEventMemberOrAdmin) {
+                throw (new \Illuminate\Database\Eloquent\ModelNotFoundException)->setModel(Event::class, [$event->id]);
             }
 
-            // Don't allow curating private events to other schedules
-            if (! $event->roles->contains('id', $role->id)) {
+            // An unlisted event only by its own people, and never onto another schedule.
+            if ($event->is_private && (! $isEventMemberOrAdmin || ! $event->roles->contains('id', $role->id))) {
                 abort(404);
             }
         }

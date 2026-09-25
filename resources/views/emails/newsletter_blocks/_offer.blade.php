@@ -5,7 +5,10 @@
     $salePrice = $block['data']['salePrice'] ?? '';
     $couponCode = $block['data']['couponCode'] ?? '';
     $buttonText = $block['data']['buttonText'] ?? '';
-    $buttonUrl = $block['data']['buttonUrl'] ?? '#';
+    // Client-built JSON that nothing validates as a link, shown in the builder's preview too:
+    // linked only through safeActionHref(), and without a safe href the button still reads,
+    // unlinked.
+    $buttonUrl = \App\Utils\UrlUtils::safeActionHref($block['data']['buttonUrl'] ?? null);
     $align = $block['data']['align'] ?? 'center';
     $template = $template ?? 'modern';
 @endphp
@@ -56,7 +59,7 @@
             @if ($buttonText)
             <tr>
                 <td align="{{ $align }}" style="padding: 16px 24px 20px;">
-                    <a href="{{ $buttonUrl }}" style="display: inline-block; padding: 12px 24px; background-color: {{ $style['accentColor'] }}; color: #ffffff; text-decoration: none; font-size: 15px; font-weight: bold; {{ $style['buttonRadius'] === 'rounded' ? 'border-radius: 6px;' : '' }} font-family: '{{ $style['fontFamily'] }}', sans-serif;">{{ $buttonText }}</a>
+                    <a @if ($buttonUrl) href="{{ $buttonUrl }}" @endif style="display: inline-block; padding: 12px 24px; background-color: {{ $style['accentColor'] }}; color: #ffffff; text-decoration: none; font-size: 15px; font-weight: bold; {{ $style['buttonRadius'] === 'rounded' ? 'border-radius: 6px;' : '' }} font-family: '{{ $style['fontFamily'] }}', sans-serif;">{{ $buttonText }}</a>
                 </td>
             </tr>
             @endif

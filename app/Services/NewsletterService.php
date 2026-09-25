@@ -390,8 +390,14 @@ class NewsletterService
         foreach ($blocks as &$block) {
             $type = $block['type'] ?? '';
 
-            if ($type === 'text' && ! empty($block['data']['content'])) {
-                $block['data']['contentHtml'] = MarkdownUtils::convertToHtml($block['data']['content']);
+            // Only ever the HTML the markdown renders to: the view prints contentHtml unescaped,
+            // and a stored block can carry one of its own, since the builder's JSON is saved as
+            // posted (SanitizesNewsletterContent::parseBlocks() leaves the key alone) and a backup
+            // restores it as it was. With no content, one used to be printed as it was.
+            if ($type === 'text') {
+                $block['data']['contentHtml'] = ! empty($block['data']['content'])
+                    ? MarkdownUtils::convertToHtml($block['data']['content'])
+                    : '';
             }
 
             if ($type === 'events') {
@@ -409,10 +415,17 @@ class NewsletterService
                 }
             }
 
+            // Everything the block prints comes from the video id read out of its YouTube link:
+            // the link it opens, which is rebuilt, and the thumbnail. The id is matched anywhere in
+            // the stored url, so "javascript:...//youtu.be/<id>" used to be linked as it was, and a
+            // videoId or thumbnailUrl stored with the block was printed beside whatever url it held.
             if ($type === 'video') {
                 $videoUrl = $block['data']['url'] ?? '';
-                if (preg_match('/(?:youtube\.com\/watch\?.*v=|youtu\.be\/|youtube\.com\/shorts\/)([a-zA-Z0-9_-]{11})/', $videoUrl, $m)) {
+                unset($block['data']['videoId'], $block['data']['thumbnailUrl']);
+                $block['data']['url'] = '';
+                if (is_string($videoUrl) && preg_match('/(?:youtube\.com\/watch\?.*v=|youtu\.be\/|youtube\.com\/shorts\/)([a-zA-Z0-9_-]{11})/', $videoUrl, $m)) {
                     $block['data']['videoId'] = $m[1];
+                    $block['data']['url'] = 'https://www.youtube.com/watch?v='.$m[1];
                     $block['data']['thumbnailUrl'] = 'https://img.youtube.com/vi/'.$m[1].'/hqdefault.jpg';
                 }
             }

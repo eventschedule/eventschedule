@@ -81,6 +81,42 @@ class OwnerLinkHrefTest extends TestCase
         }
     }
 
+    /**
+     * safeActionHref(): safeHref(), plus a mailto: or tel: link, for a call to action such as a
+     * newsletter button.
+     *
+     * @return array<string, array{0: mixed, 1: ?string}>
+     */
+    public static function actionHrefs(): array
+    {
+        return [
+            'a web link, as safeHref() gives it' => ['www.example.com/tickets', 'https://www.example.com/tickets'],
+            'mailto' => ['mailto:tickets@example.com', 'mailto:tickets@example.com'],
+            'mailto with a subject' => ['mailto:tickets@example.com?subject=Two%20tickets', 'mailto:tickets@example.com?subject=Two%20tickets'],
+            'tel' => ['tel:+15550100', 'tel:+15550100'],
+            'an upper-case scheme' => ['MAILTO:tickets@example.com', 'MAILTO:tickets@example.com'],
+            'surrounding whitespace' => ["  tel:+15550100 \n", 'tel:+15550100'],
+            'a scheme with nothing after it' => ['mailto:', null],
+            'a line break inside' => ["mailto:a@example.com\njavascript:alert(1)", null],
+            'a tab inside the scheme' => ["mail\tto:a@example.com", null],
+            'javascript' => ['javascript:alert(1)', null],
+            'javascript behind a control character' => ["\x01javascript:alert(1)", null],
+            'javascript split by a tab' => ["java\tscript:alert(1)", null],
+            'data' => ['data:text/html;base64,PHNjcmlwdD4=', null],
+            'another app scheme' => ['sms:+15550100', null],
+            'an email address' => ['tickets@example.com', null],
+            'a path' => ['/tickets', null],
+            'null' => [null, null],
+            'not a string' => [['mailto:a@example.com'], null],
+        ];
+    }
+
+    #[DataProvider('actionHrefs')]
+    public function test_safe_action_href(mixed $value, ?string $expected): void
+    {
+        $this->assertSame($expected, UrlUtils::safeActionHref($value));
+    }
+
     /** @return array<string, array{0: mixed, 1: string}> */
     public static function hosts(): array
     {
