@@ -22,8 +22,13 @@ use Illuminate\Support\Facades\Cache;
  * its image requests in parallel, each of which rewrites the whole session. One cache key per file
  * has no such race.
  *
- * A name is accepted once. The cache is wiped by a deploy and a record lasts a day, so a genuine
- * name can be refused; the save then keeps the current image and asks the owner to generate again.
+ * A name is stored once. accept() only checks it, and the save uses up its record with consume()
+ * once the schedule or event holds it. So a save that fails before then can be posted again, where
+ * a record used up by accept() told the owner to generate the image again. And once it is used up,
+ * a form left open in another tab cannot put back a name whose file a newer image has replaced and
+ * deleted, and a second event cannot take a file another event holds. The cache is wiped by a
+ * deploy and a record lasts a day, so a genuine name can be refused; the save then keeps the
+ * current image and asks the owner to generate again.
  */
 class AiImageIssuance
 {
@@ -41,8 +46,8 @@ class AiImageIssuance
     }
 
     /**
-     * $value when it is a name this app issued to $role for $slot, else null. Accepting it uses
-     * up its record.
+     * $value when it is a name this app issued to $role for $slot, else null. Accepting it leaves
+     * its record: the caller uses that up with consume() once the name is saved.
      *
      * $slot is the filename prefix the generator used: 'profile', 'header' or 'background' for a
      * schedule's style images, 'flyer' and 'agenda' for an event's. Anchored with \z rather than $,
@@ -62,9 +67,18 @@ class AiImageIssuance
             return null;
         }
 
-        Cache::forget(self::key($value));
-
         return $value;
+    }
+
+    /**
+     * Use up the records of names accept() passed, once the schedule or event that took them has
+     * been saved with them, so no later save can take them again.
+     */
+    public static function consume(string ...$filenames): void
+    {
+        foreach ($filenames as $filename) {
+            Cache::forget(self::key($filename));
+        }
     }
 
     private static function key(string $filename): string

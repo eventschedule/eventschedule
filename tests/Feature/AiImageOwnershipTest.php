@@ -2,9 +2,11 @@
 
 namespace Tests\Feature;
 
+use App\Models\Event;
 use App\Models\Role;
 use App\Models\User;
 use App\Utils\AiImageIssuance;
+use Illuminate\Database\Eloquent\Model;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
@@ -69,6 +71,25 @@ class AiImageOwnershipTest extends TestCase
     {
         // A future date, so the save does not move the event into the past.
         return array_merge(['starts_at' => now()->addDays(10)->format('Y-m-d').' 20:00:00'], $overrides);
+    }
+
+    /**
+     * Fails the first save that writes $name to $column of a $model, as a database or storage
+     * error would: after the save accepted the name, before the row holds it.
+     *
+     * @param  class-string<Model>  $model
+     */
+    private function failFirstSaveStoring(string $model, string $column, string $name): void
+    {
+        $failed = false;
+
+        $model::saving(function (Model $row) use ($column, $name, &$failed) {
+            if (! $failed && $row->isDirty($column) && ($row->getAttributes()[$column] ?? null) === $name) {
+                $failed = true;
+
+                throw new \RuntimeException('The save failed before the row held the image.');
+            }
+        });
     }
 
     /** @return array<string, array{0: string, 1: string, 2: string}> */
@@ -167,6 +188,53 @@ class AiImageOwnershipTest extends TestCase
         $this->assertTrue(Storage::exists($this->path($current)));
     }
 
+    public function test_a_schedule_save_that_fails_before_storing_the_name_can_be_posted_again(): void
+    {
+        $owner = $this->createOwner();
+        $role = $this->createRole($owner, 'venue', ['profile_image_url' => $this->storedImage('profile')]);
+
+        $generated = $this->storedImage('profile', 'jpg');
+        AiImageIssuance::record($generated, $role->id, $owner->id);
+
+        $this->failFirstSaveStoring(Role::class, 'profile_image_url', $generated);
+
+        $this->saveSchedule($owner, $role, ['ai_profile_image' => $generated])->assertStatus(500);
+        $this->assertNotSame($generated, $role->fresh()->getRawOriginal('profile_image_url'), 'fixture: the failed save stored nothing');
+
+        // The same form sent again. Taking the name used to use it up, so this was told to
+        // generate the image again, while the failed save had already deleted the old one.
+        $this->saveSchedule($owner, $role, ['ai_profile_image' => $generated])
+            ->assertRedirect()
+            ->assertSessionHas('message', __('messages.updated_schedule'))
+            ->assertSessionMissing('error');
+
+        $this->assertSame($generated, $role->fresh()->getRawOriginal('profile_image_url'));
+        $this->assertTrue(Storage::exists($this->path($generated)));
+    }
+
+    public function test_a_stored_name_cannot_come_back_once_a_newer_image_replaced_it(): void
+    {
+        // A form left open in another tab still holds the first image's name. The replace deleted
+        // its file, so taking the name again would point the schedule at nothing.
+        $owner = $this->createOwner();
+        $role = $this->createRole($owner, 'venue');
+
+        $first = $this->storedImage('header');
+        $second = $this->storedImage('header', 'jpg');
+        AiImageIssuance::record($first, $role->id, $owner->id);
+        AiImageIssuance::record($second, $role->id, $owner->id);
+
+        $this->saveSchedule($owner, $role, ['ai_header_image' => $first])->assertSessionMissing('error');
+        $this->saveSchedule($owner, $role, ['ai_header_image' => $second])->assertSessionMissing('error');
+        $this->assertFalse(Storage::exists($this->path($first)), 'fixture: the newer image replaced the first');
+
+        $this->saveSchedule($owner, $role, ['ai_header_image' => $first])
+            ->assertSessionHas('error', __('messages.ai_image_not_applied'));
+
+        $this->assertSame($second, $role->fresh()->getRawOriginal('header_image_url'));
+        $this->assertTrue(Storage::exists($this->path($second)));
+    }
+
     public function test_a_path_or_a_line_break_is_ignored_even_when_recorded(): void
     {
         $owner = $this->createOwner();
@@ -258,6 +326,32 @@ class AiImageOwnershipTest extends TestCase
             ->assertSessionHas('message', __('messages.event_created'));
 
         $this->assertSame($generated, $this->latestEvent()->getRawOriginal('flyer_image_url'));
+    }
+
+    public function test_an_event_save_that_fails_before_storing_its_flyer_can_be_posted_again(): void
+    {
+        $owner = $this->createOwner();
+        $role = $this->createRole($owner, 'venue');
+        $event = $this->createEvent($role);
+
+        $generated = $this->storedImage('flyer', 'webp');
+        AiImageIssuance::record($generated, $role->id, $owner->id);
+
+        $this->failFirstSaveStoring(Event::class, 'flyer_image_url', $generated);
+
+        $this->putUpdateEvent($owner, $role, $event, $this->eventOverrides(['ai_flyer_image' => $generated]))->assertStatus(500);
+        $this->assertNull($event->fresh()->getRawOriginal('flyer_image_url'), 'fixture: the failed save stored nothing');
+
+        $this->putUpdateEvent($owner, $role, $event, $this->eventOverrides(['ai_flyer_image' => $generated]))
+            ->assertRedirect()
+            ->assertSessionMissing('error');
+        $this->assertSame($generated, $event->fresh()->getRawOriginal('flyer_image_url'));
+
+        // Used up once the event held it, so no second event can share the file.
+        $this->postCreateEvent($owner, $role, $this->eventOverrides(['name' => 'Second Night', 'ai_flyer_image' => $generated]))
+            ->assertSessionHas('error', __('messages.ai_image_not_applied'));
+        $this->assertSame('Second Night', $this->latestEvent()->name);
+        $this->assertNull($this->latestEvent()->getRawOriginal('flyer_image_url'));
     }
 
     public function test_a_new_event_is_created_without_a_flyer_it_was_not_issued(): void

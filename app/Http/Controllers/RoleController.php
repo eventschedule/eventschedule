@@ -5998,6 +5998,10 @@ class RoleController extends Controller
             $role->save();
         }
 
+        // Used up only now that the schedule holds them, so a save that failed before this point
+        // can be posted again (AiImageIssuance::consume()).
+        AiImageIssuance::consume(...array_values(array_filter($aiImages)));
+
         // Handle sponsor logos (Pro feature)
         if ($role->isPro() && ! is_demo_mode()) {
             $oldSponsors = json_decode($role->getAttributes()['sponsor_logos'] ?? '[]', true) ?: [];

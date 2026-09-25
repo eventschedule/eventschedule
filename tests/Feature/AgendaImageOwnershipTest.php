@@ -134,6 +134,59 @@ class AgendaImageOwnershipTest extends TestCase
         $this->assertNull($this->latestEvent()->getRawOriginal('agenda_image_url'), 'two events would share one file');
     }
 
+    public function test_a_create_that_fails_before_storing_the_agenda_can_be_posted_again(): void
+    {
+        $owner = $this->createOwner();
+        $role = $this->createRole($owner, 'venue');
+        $name = $this->scan($owner, $role)->assertOk()->json('agenda_image_url');
+
+        // Fails the first save that writes the name, as a database or storage error would: after
+        // store() accepted it, before the new event holds it.
+        $failed = false;
+        Event::saving(function (Event $event) use ($name, &$failed) {
+            if (! $failed && $event->isDirty('agenda_image_url') && ($event->getAttributes()['agenda_image_url'] ?? null) === $name) {
+                $failed = true;
+
+                throw new \RuntimeException('The save failed before the event held the image.');
+            }
+        });
+
+        $this->create($owner, $role, $name)->assertStatus(500);
+        $this->assertNull($this->latestEvent()->getRawOriginal('agenda_image_url'), 'fixture: the failed save stored nothing');
+
+        // Taking the name used to use it up, so this was told to scan the agenda again.
+        $this->create($owner, $role, $name)
+            ->assertRedirect()
+            ->assertSessionHas('message', __('messages.event_created'));
+        $this->assertSame($name, $this->latestEvent()->getRawOriginal('agenda_image_url'));
+
+        // Used up once that event held it, so no other event can share the file.
+        $this->create($owner, $role, $name)->assertSessionHas('error', __('messages.agenda_image_not_applied'));
+        $this->assertNull($this->latestEvent()->getRawOriginal('agenda_image_url'));
+    }
+
+    public function test_a_new_event_that_refuses_both_images_says_so_about_both(): void
+    {
+        $owner = $this->createOwner();
+        $role = $this->createRole($owner, 'venue');
+
+        // Neither was issued to this schedule. store() used to return on the flyer's refusal, and
+        // the agenda's was never said.
+        $this->postCreateEvent($owner, $role, [
+            'name' => 'Borrowed Everything',
+            'starts_at' => now()->addDays(10)->format('Y-m-d').' 20:00:00',
+            'ai_flyer_image' => 'flyer_'.strtolower(Str::random(32)).'.png',
+            'agenda_image_url' => $this->storedAgenda(),
+        ])
+            ->assertRedirect()
+            ->assertSessionHas('error', __('messages.ai_image_not_applied').' '.__('messages.agenda_image_not_applied'));
+
+        $created = $this->latestEvent();
+        $this->assertSame('Borrowed Everything', $created->name, 'the event itself is still created');
+        $this->assertNull($created->getRawOriginal('flyer_image_url'));
+        $this->assertNull($created->getRawOriginal('agenda_image_url'));
+    }
+
     public function test_a_schedule_without_agenda_scanning_takes_no_agenda_image(): void
     {
         $owner = $this->createOwner();

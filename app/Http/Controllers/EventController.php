@@ -1694,6 +1694,9 @@ class EventController extends Controller
             if ($agendaUrl) {
                 $event->agenda_image_url = $agendaUrl;
                 $event->save();
+
+                // Used up right after the save that stores it, as a flyer is in saveEvent().
+                AiImageIssuance::consume($agendaUrl);
             } else {
                 $agendaImageRejected = true;
             }
@@ -1729,14 +1732,16 @@ class EventController extends Controller
         ];
 
         // As in update(): the event is created, without the flyer or agenda image the save refused.
-        if ($this->eventRepo->aiImageRejected) {
-            return redirect(route('role.view_admin', $data))
-                ->with('error', __('messages.ai_image_not_applied'));
-        }
+        // The layout toasts a single error string, so a save that refused both says both in it; it
+        // used to return on the flyer and never mention the agenda.
+        $refused = array_filter([
+            $this->eventRepo->aiImageRejected ? __('messages.ai_image_not_applied') : null,
+            $agendaImageRejected ? __('messages.agenda_image_not_applied') : null,
+        ]);
 
-        if ($agendaImageRejected) {
+        if ($refused) {
             return redirect(route('role.view_admin', $data))
-                ->with('error', __('messages.agenda_image_not_applied'));
+                ->with('error', implode(' ', $refused));
         }
 
         return redirect(route('role.view_admin', $data))

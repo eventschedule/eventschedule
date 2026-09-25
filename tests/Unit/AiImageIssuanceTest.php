@@ -56,7 +56,7 @@ class AiImageIssuanceTest extends TestCase
         }
     }
 
-    public function test_an_issued_name_is_accepted_once(): void
+    public function test_an_issued_name_is_used_up_only_once_its_save_has_stored_it(): void
     {
         $role = $this->role(7);
         $name = $this->issuedName('profile');
@@ -64,7 +64,30 @@ class AiImageIssuanceTest extends TestCase
         AiImageIssuance::record($name, 7, 3);
 
         $this->assertSame($name, AiImageIssuance::accept('profile', $name, $role));
+        $this->assertSame($name, AiImageIssuance::accept('profile', $name, $role), 'a save that failed before storing it can be posted again');
+
+        AiImageIssuance::consume($name);
+
         $this->assertNull(AiImageIssuance::accept('profile', $name, $role), 'a second save must not reuse the record');
+    }
+
+    /** A schedule save hands it every style image it stored at once (RoleController::update()). */
+    public function test_consume_uses_up_every_name_it_is_given_and_no_other(): void
+    {
+        $role = $this->role(7);
+        $profile = $this->issuedName('profile');
+        $header = $this->issuedName('header');
+        $background = $this->issuedName('background');
+
+        foreach ([$profile, $header, $background] as $name) {
+            AiImageIssuance::record($name, 7, 3);
+        }
+
+        AiImageIssuance::consume($profile, $header);
+
+        $this->assertNull(AiImageIssuance::accept('profile', $profile, $role));
+        $this->assertNull(AiImageIssuance::accept('header', $header, $role));
+        $this->assertSame($background, AiImageIssuance::accept('background', $background, $role));
     }
 
     public function test_a_name_issued_to_another_schedule_is_refused_and_stays_issued(): void

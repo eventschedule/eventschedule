@@ -1580,6 +1580,12 @@ class EventRepo
                     }
                     $event->flyer_image_url = $aiFilename;
                     $event->save();
+
+                    // Used up right after the save that stores it, not when accepted: a save that
+                    // failed before this point can be posted again. Not at the end of saveEvent()
+                    // either, or a create that failed past here would let its retry put the same
+                    // file on a second event.
+                    AiImageIssuance::consume($aiFilename);
                 } else {
                     $this->aiImageRejected = true;
                 }
