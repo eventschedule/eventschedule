@@ -1,21 +1,30 @@
 <x-marketing-layout>
-    <x-slot name="title">Event Landing Page, Free | Tickets, RSVP and a Map Built In</x-slot>
-    <x-slot name="description">Every event gets a free landing page: the flyer, the date and time, the venue with a map, tickets or free RSVP, add to calendar and sharing, all built in.</x-slot>
+    <x-slot name="title">Event Landing Page, Free | RSVP, a Map, Paid Tickets on Pro</x-slot>
+    <x-slot name="description">Every event gets a free landing page: the flyer, the date and time, the venue with a map, free RSVP, add to calendar and sharing, and paid tickets on Pro.</x-slot>
     <x-slot name="breadcrumbTitle">Event Landing Page</x-slot>
 
     {{-- What an event page carries, read off event/show-guest.blade.php and the layout rather than
          off other marketing pages:
          - The flyer (with a full-size lightbox), the description, the lineup linked to each act's
            page, and the venue with a map and a Google Maps link. An online event's join link is
-           NOT on the page: it goes on the ticket (see /features/online-events).
+           NOT on the page: with no venue the page names the link's domain, or "Online" when the
+           link has no public domain (Event::getEventUrlDomain()), and the link itself goes on the
+           ticket (see /features/online-events).
          - The date and time are the schedule's own (Event::getStartDateTime() in
            scheduleTimezone()), with a machine-readable <time datetime>.
          - Buy or Register, a waitlist on a full date, the "Notify me" card where the schedule has
            switched it on, Add to Calendar (Google, Apple, Microsoft Outlook) and Share. On a phone
            the button bar is pinned to the bottom of the screen (#gp-mobile-cta).
-         - Link previews use Event::shareImage(): the flyer, then a performer's, the venue's or the
-           schedule's own upload, and nothing at all rather than an image of ours
-           (GuestSocialImageTest). The title is GuestSeo::eventTitle(): name, date and venue.
+         - Link previews use Event::shareImage(): the flyer, else the first photo the page itself
+           shows (Event::pagePhotoRoles(): each performer with one, then the venue, then the
+           schedule whose page it is), passing over a deleted or declined schedule, and nothing at
+           all rather than an image of ours (GuestSocialImageTest). The title is
+           GuestSeo::eventTitle(): the name, with the date and the venue while they fit, and never
+           a date on a recurring event.
+         - Search: search engines are invited in once a schedule showing the event has a verified
+           email or phone (Role::isIndexableHost()), and the sitemap lists a one-off event until
+           30 days after it ends (Event::SITEMAP_GRACE_DAYS) and a series while it runs
+           (Event::constrainSitemapWindow()).
          Tiers, from docs/FEATURES.md: a page and free registration on every plan; a ticket with a
          price, custom CSS and removing our branding on Pro; a custom domain on Enterprise.
 
@@ -26,7 +35,7 @@
     <x-slot name="structuredData">
     <x-seo.webpage
         name="Event Schedule - Event Landing Page"
-        description="A free landing page for every event: the flyer, the date and time, the venue with a map, tickets or free registration, add to calendar, sharing and event structured data for search."
+        description="A free landing page for every event: the flyer, the date and time, the venue with a map, free registration, add to calendar, sharing and event structured data for search, with paid tickets on Pro."
         keywords="event landing page, event page, free event page, event website, event page with tickets, event registration page" />
     </x-slot>
 
@@ -35,7 +44,7 @@
             ['The flyer', 'Upload the poster and it leads the page, with a tap to see it full size. It is also the picture a link preview shows.', 'Free'],
             ['What it is', 'Your description, formatted the way you wrote it, with headings, lists and links, and the whole lineup, each act linked to its own page where it has one.', 'Free'],
             ['When', 'The date and the start time as your schedule keeps them, in its own time zone, so a visitor abroad still sees when the doors open where the event is.', 'Free'],
-            ['Where', 'The venue with its address and a map, and a link that opens the address in Google Maps. An online event says Online, and its join link goes on the ticket instead.', 'Free'],
+            ['Where', 'The venue with its address and a map, and a link that opens the address in Google Maps. An online event shows the domain of its link, such as zoom.us, or else just Online, and the join link itself goes on the ticket.', 'Free'],
             ['Register or buy', 'A Register button for a free event, with a cap per date and a waitlist when it fills. A Buy button for ticket types with a price, on Pro, with zero platform fees.', 'Free / Pro'],
             ['Add to calendar', 'Google Calendar, Apple Calendar and Microsoft Outlook, one tap each, so the date ends up where the guest will actually see it.', 'Free'],
             ['Tell me when', 'Before tickets go on sale, a visitor can leave an email address to hear when they do, once you switch the card on for your schedule.', 'Free'],
@@ -47,7 +56,7 @@
             ['q' => 'Do I need a website?', 'a' => 'No. Each event page has its own link on your schedule, which you can share anywhere. If you already have a website, embed your whole calendar on it, free, and each event still opens its own page.'],
             ['q' => 'Can people buy tickets on the page?', 'a' => 'Yes. Free registration works on every plan, with a cap per date and a waitlist. Putting a price on a ticket is the Pro plan, paid through your own Stripe or PayPal account, and there is no platform fee on any plan.'],
             ['q' => 'What shows up when I share the link?', 'a' => 'The event name, a description from your own text, and your flyer. With no flyer the preview uses a performer\'s, the venue\'s or your schedule\'s own picture, and with none of those it shows no picture at all, rather than an advert of ours.'],
-            ['q' => 'Will the page show up on Google?', 'a' => 'It is built to be found. The page title carries the date and the venue, the description comes from your own text, and every event page carries event structured data describing what the page shows. Once your schedule\'s email address is confirmed, search engines are invited to index its pages and its events are listed in the sitemap. A recurring event keeps one page for the whole series rather than one per week. Nobody can promise a ranking, but nothing on the page stands in the way.'],
+            ['q' => 'Will the page show up on Google?', 'a' => 'It is built to be found. The page title carries the event\'s name, with its date and venue while they fit (a recurring event\'s title leaves the date out), the description comes from your own text, and every event page carries event structured data describing what the page shows. Once your schedule\'s email address or phone number is confirmed, search engines are invited to index its pages, and its public events are listed in the sitemap until 30 days after they end. A recurring event keeps one page for the whole series rather than one per week, listed while the series runs. Nobody can promise a ranking, but nothing on the page stands in the way.'],
             ['q' => 'Can I use my own domain or remove your branding?', 'a' => 'Yes. Removing Event Schedule branding is on Pro, and custom CSS for the finer details is too. A custom domain, so the page lives at your own address, is on Enterprise. Colours, fonts, backgrounds and header images are free on every plan.'],
             ['q' => 'How is this different from building a page on a website builder?', 'a' => 'A website builder is a blank page for anything, and an event page on one is yours to assemble. Here the page is built around the event: the date, the map, the ticket button and the calendar buttons are already in place, filled in from the event you entered.', 'link' => [marketing_url('/squarespace-replacement'), 'Compare with Squarespace']],
         ];
@@ -261,7 +270,7 @@
         <!-- ============================================================ -->
         @php
             $findable = [
-                ['A title that says when and where', 'The page title carries the event\'s name, its date and its venue, and the description comes from your own words, so a search result or a shared link says what the event is before anyone taps it.'],
+                ['A title that says when and where', 'The page title carries the event\'s name, with its date and venue while they fit, and the description comes from your own words, so a search result or a shared link says what the event is before anyone taps it. A recurring event\'s title leaves the date out, because its page covers every date.'],
                 ['Event structured data', 'Every event page describes itself to search engines as an event: the date, the place and, where the page sells them, the tickets. It says only what the page shows, so it never promises more than the page does.'],
                 ['A preview with your picture', 'Share the link and the preview uses your flyer, or a performer\'s, the venue\'s or your schedule\'s own picture. With none of them it shows no picture, never an advert of ours.'],
             ];
@@ -274,7 +283,7 @@
                         Built to be found <span class="text-gradient-page">and passed on</span>
                     </h2>
                     <p class="mt-5 text-lg text-gray-600 dark:text-gray-400" data-reveal style="--reveal-delay: 0.1s;">
-                        Confirm your schedule's email address and its events are listed in the sitemap search engines read. A recurring event keeps one page for the whole series, so its link gathers the attention rather than splitting it week by week.
+                        Confirm your schedule's email address and its public events are listed in the sitemap search engines read, until 30 days after each one ends. A recurring event keeps one page for the whole series, listed while the series runs, so its link gathers the attention rather than splitting it week by week.
                     </p>
                 </div>
 

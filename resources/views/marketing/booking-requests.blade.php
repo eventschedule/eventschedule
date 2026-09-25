@@ -10,10 +10,20 @@
            reads $role->getRequestFormCustomFields() only when $role->isPro().
          - A talent schedule ALWAYS uses the Booking Form (Role::usesBookingForm()) and always
            reviews requests (Role::getRequireApprovalAttribute() is forced true), and its form never
-           forces an account (Role::bookingFormRequiresAccount()). A venue or curator chooses the
-           AI Import form or the Booking Form, and can switch Require Approval off, in which case a
-           request goes straight onto the schedule (bookingRequest(): is_accepted true). So never
-           say every request waits for approval.
+           forces an account (Role::bookingFormRequiresAccount()). A venue or curator can switch
+           Require Approval off, in which case a request goes straight onto the schedule
+           (bookingRequest(): is_accepted true). So never say every request waits for approval.
+         - bookingRequest() reads require_approval and nothing else, so Approved Schedules never
+           lets a booking form request through. The list is honoured when an approved schedule
+           adds this one to an event of its own (Role::autoAcceptsEventFrom(), from EventRepo) and
+           on the import form while Require Account is on
+           (EventController::guestImportWithAccount()). So never say an approved schedule's
+           booking form request skips the queue.
+         - The choice between the AI Import form and the Booking Form is offered only while
+           Require Account is off (role/edit.blade.php). A new curator starts with Require
+           Account on, a new venue with it off.
+         - The phone field is never filled in from the sender's account, so signed-in visitors
+           are asked too.
          - The sender's name and email, and phone when asked, are stored on the event and shown on
            the Requests tab, owner-facing only. Accept and Decline email the sender only when they
            sent it signed in: requestDecisionRecipient() returns nobody for a guest submission.
@@ -32,7 +42,7 @@
         $bookingFaqs = [
             ['q' => 'What is a booking request form?', 'a' => 'A form on your schedule page that lets someone ask you for a date. On a performer\'s schedule it sits behind a Request to Book button, for promoters and venues who want to book the act. On a venue or curator schedule it is one of two ways visitors can submit an event, beside a form that reads a pasted listing or a flyer, from the band asking for a Friday to the neighbour listing a market. Requests that need your approval wait on the Requests tab of your schedule.'],
             ['q' => 'Is it free?', 'a' => 'Yes, on every plan: the form itself, choosing which fields are required, the online option, the phone number field, your request terms, approval and the Requests tab. The one part that needs Pro is asking questions of your own, which uses custom fields.'],
-            ['q' => 'Do requests go live straight away?', 'a' => 'Not on a performer\'s schedule: a request to book a performer always waits for you to accept it. On a venue or curator schedule, Require Approval is on by default. Turn it off and requests go straight onto your schedule, or leave it on and name approved schedules whose requests skip the queue.'],
+            ['q' => 'Do requests go live straight away?', 'a' => 'Not on a performer\'s schedule: a request to book a performer always waits for you to accept it. On a venue or curator schedule, Require Approval is on by default, and switching it off sends requests straight onto your schedule. Schedules on your approved list skip the queue when they add you to one of their own events, but a booking form request waits like any other while approval is on.'],
             ['q' => 'Does the person asking need an account?', 'a' => 'Not on a performer\'s schedule, where making one is left to them. A venue or curator schedule can require one. Where the site accepts new accounts, someone sending a request as a guest can choose to create one as they send it.'],
             ['q' => 'How do I reply to a request?', 'a' => 'Each request shows the name and email of whoever sent it, and their phone number if your form asks for one, so you can write back before you decide. Accept and Decline email your decision to anyone who sent the request while signed in; a guest hears from you directly.'],
             ['q' => 'Can I ask my own questions?', 'a' => 'Yes, on Pro. Any custom field marked for the request form appears on it: the backline an act needs as a checklist, a reference number checked against a pattern, an expected head count. The answers show on the request, and on the event once you accept it.'],
@@ -251,21 +261,21 @@
                 [
                     'Talent',
                     'Promoters and venues ask to book you',
-                    'Your schedule page carries a Request to Book button. The form never makes anyone create an account, and every request waits for you: a date on a performer\'s calendar is always a person\'s decision.',
+                    'Your schedule page carries a Request to Book button. The form never makes anyone create an account, and every request sent through it waits for you to accept it.',
                     '/for-talent',
                     'Event Schedule for talent',
                 ],
                 [
                     'Venue',
                     'Acts ask you for a date',
-                    'Choose the booking form, or the AI import form that reads a pasted listing or a flyer. Requests wait for approval by default; switch that off, or name the schedules you trust so theirs go straight on.',
+                    'Choose the booking form, or the AI import form that reads a pasted listing or a flyer. Requests wait for approval by default; switch that off and they go straight on. Schedules you approve skip the queue when they add you to one of their own events.',
                     '/for-venues',
                     'Event Schedule for venues',
                 ],
                 [
                     'Curator',
                     'The community sends you events',
-                    'A local guide, a festival or a community calendar takes submissions the same way, with the same choice of form. Keep approval on and nothing appears in public until you say so.',
+                    'A local guide, a festival or a community calendar takes submissions the same way. A curator asks submitters for an account by default; switch that off to choose between the booking form and the import form. Keep approval on and a submission appears in public only once you accept it, or, while you ask for an account, straight away from a schedule you have approved.',
                     '/for-curators',
                     'Event Schedule for curators',
                 ],
@@ -309,7 +319,7 @@
             $formOptions = [
                 ['Choose what is required', 'The form asks for an event name, a date and start time, a description and a location. Nothing is required until you tick it, so a venue that needs the date and a description can insist on exactly those.', 'Free'],
                 ['In person or online', 'The location is a venue name, an address or a city, or a tick in the Online box with a link. Take online events off the form and every request is for a real room. A venue\'s own form never asks where: the venue is the place.', 'Free'],
-                ['A phone number, if you want one', 'Ask for a phone number as optional or required. Signed-in visitors are asked too, because their account has a name and an email but no phone. On the request it is a link you can tap to call.', 'Free'],
+                ['A phone number, if you want one', 'Ask for a phone number as optional or required. Signed-in visitors are asked too, since the form does not take one from their account. On the request it is a link you can tap to call.', 'Free'],
                 ['Your request terms', 'Set out your booking policy, your technical needs or what you will not take. The terms sit just above the submit button, where they are read before a request is sent.', 'Free'],
                 ['Your own questions', 'Add custom fields to the form: a checklist of the backline an act needs, a reference number checked against a pattern, an expected head count. The answers show on the request and on the event once you accept it.', 'Pro'],
                 ['An account, or not', 'On a performer\'s schedule nobody needs an account to ask. A venue or curator can require one, and where the site accepts new accounts a guest can choose to create one as they send the request.', 'Free'],
@@ -353,7 +363,7 @@
                 ['It lands on the Requests tab', 'The tab appears while something is waiting and carries the count. Each request shows the event, the date, and the name and email of whoever sent it, with their phone number and your custom answers when you asked for them.'],
                 ['You hear about it', 'Owners and admins get an email when new requests arrive, unless they switch it off under Settings, Notifications. Viewers can open a request but not decide it.'],
                 ['Accept or decline', 'Accept puts the event on your public schedule; Decline removes it, after you confirm. Anyone who sent the request signed in is emailed your decision. Accept All clears the list in one go; declining is one at a time, on purpose.'],
-                ['Or let it straight through', 'On a venue or curator schedule, switch Require Approval off and requests go straight onto the schedule, or keep it on and name approved schedules whose requests skip the queue. A performer\'s requests always wait.'],
+                ['Or let it straight through', 'On a venue or curator schedule, switch Require Approval off and requests go straight onto the schedule. Approved schedules skip the queue when they add you to one of their own events, but a booking form request still waits. A performer\'s booking requests always wait.'],
             ];
         @endphp
         <section id="inbox" class="scroll-mt-24 bg-gray-50 py-20 dark:bg-[#0f0f14] lg:py-28">
