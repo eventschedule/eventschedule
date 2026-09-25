@@ -2432,8 +2432,12 @@ class Role extends Model implements MustVerifyEmail
      * $width asks for a resized derivative of an upload (ImageUtils::BANNER_VARIANT_WIDTHS), and
      * falls back to the original until one is recorded, so the URL is always renderable. A
      * built-in header ignores it: the bundled file is already a 1536px WebP.
+     *
+     * $pageWidth is the schedule page's banner, which shows an animated upload as it is, the
+     * original, rather than a still derivative of its first frame
+     * (HasImageVariants::imageVariantUrl()). A card showing the header never passes it.
      */
-    public function headerImageUrl(?int $width = null): ?string
+    public function headerImageUrl(?int $width = null, bool $pageWidth = false): ?string
     {
         $builtIn = $this->header_image;
 
@@ -2449,7 +2453,7 @@ class Role extends Model implements MustVerifyEmail
             return null;
         }
 
-        return ($width ? $this->imageVariantUrl($width, 'header') : null) ?: $this->header_image_url;
+        return ($width ? $this->imageVariantUrl($width, 'header', $pageWidth) : null) ?: $this->header_image_url;
     }
 
     /**
@@ -2476,8 +2480,12 @@ class Role extends Model implements MustVerifyEmail
      * its bundled WebP (already sized for a phone); a blank one with an upload in
      * background_image_url is the owner's own, as a derivative at $width when one is recorded and
      * the original otherwise.
+     *
+     * A background covers the page, so every caller that asks for a width passes $pageWidth: an
+     * animated upload is shown as the original, which moves, never a still derivative of its first
+     * frame (HasImageVariants::imageVariantUrl()).
      */
-    public function backgroundImageUrl(?int $width = null): ?string
+    public function backgroundImageUrl(?int $width = null, bool $pageWidth = false): ?string
     {
         if ($this->background !== 'image') {
             return null;
@@ -2491,7 +2499,7 @@ class Role extends Model implements MustVerifyEmail
             return null;
         }
 
-        return ($width ? $this->imageVariantUrl($width, 'background') : null) ?: $this->background_image_url;
+        return ($width ? $this->imageVariantUrl($width, 'background', $pageWidth) : null) ?: $this->background_image_url;
     }
 
     /**

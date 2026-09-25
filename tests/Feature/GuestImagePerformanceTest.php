@@ -491,4 +491,113 @@ class GuestImagePerformanceTest extends TestCase
         $this->assertNull($solid->backgroundImageUrl(960), 'Only an image background is an image');
         $this->assertSame(asset('images/backgrounds/Abstract_Sunrise.webp'), $bundled->backgroundImageUrl(1920));
     }
+
+    // ------------------------------------------------------ animated originals
+
+    /**
+     * Every derivative of an animated image is a still of its first frame. The event page shows
+     * the flyer as the page itself, so an animated one is its original there, which moves; a card
+     * is a thumbnail, and keeps the still.
+     */
+    public function test_an_animated_flyer_moves_on_its_page_and_stays_still_on_cards(): void
+    {
+        $role = $this->createRole($this->createOwner(), 'venue', ['name' => 'Blue Room']);
+        $event = $this->createEvent($role, ['name' => 'Autumn Session', 'creator_role_id' => $role->id, 'flyer_image_url' => 'flyer_anim.gif']);
+        $event->recordImageVariants(['w480' => 'flyer_anim_w480.webp', 'w960' => 'flyer_anim_w960.webp', 'src' => ['w' => 1600, 'h' => 2133], 'animated' => true]);
+
+        $html = $this->page($this->guestEventUrl($role, $event));
+
+        $this->assertSame(1, preg_match('#<div id="gp-flyer"[^>]*>(.*?)</div>#s', $html, $m));
+        $flyer = $this->imgTag($m[1], 'flyer_anim');
+        $this->assertStringContainsString('src="'.url('/storage/flyer_anim.gif').'"', $flyer);
+        // A srcset would hand the browser the stills to choose from.
+        $this->assertStringNotContainsString('srcset=', $flyer);
+        $this->assertStringContainsString('width="1600" height="2133"', $flyer);
+        $this->assertStringContainsString('fetchpriority="high"', $flyer);
+
+        // The calendar's card and the homepage wall keep the still.
+        $card = $event->fresh()->cardImageFields();
+        $stills = url('/storage/flyer_anim_w480.webp').' 480w, '.url('/storage/flyer_anim_w960.webp').' 960w';
+        $this->assertSame(url('/storage/flyer_anim_w480.webp'), $card['image_thumb_url']);
+        $this->assertSame(url('/storage/flyer_anim_w480.webp'), $card['flyer_thumb_url']);
+        $this->assertSame($stills, $card['image_srcset']);
+        $this->assertSame($stills, $card['flyer_srcset']);
+        $this->assertStringContainsString('flyer_anim_w480.webp', $this->page('/'));
+    }
+
+    public function test_an_animated_header_moves_in_the_banner_and_stays_still_on_cards(): void
+    {
+        $venue = $this->createRole($this->createOwner(), 'venue', [
+            'name' => 'Blue Room',
+            'header_image' => '',
+            'header_image_url' => 'header_anim.gif',
+        ]);
+        $venue->recordImageVariants(
+            ['w960' => 'header_anim_w960.webp', 'w1920' => 'header_anim_w1920.webp', 'src' => ['w' => 3000, 'h' => 1000], 'animated' => true],
+            'header'
+        );
+
+        $header = $this->imgTag($this->page('/'.$venue->subdomain), 'header_anim');
+
+        $this->assertStringContainsString('src="'.url('/storage/header_anim.gif').'"', $header);
+        $this->assertStringNotContainsString('srcset=', $header);
+        $this->assertStringContainsString('width="3000" height="1000"', $header);
+
+        // A card showing the venue's header gets the 960 still.
+        $event = $this->createEvent($venue, ['name' => 'Autumn Session', 'creator_role_id' => $venue->id]);
+        $this->assertSame(url('/storage/header_anim_w960.webp'), $event->fresh()->cardImageFields()['venue_header_image']);
+    }
+
+    /**
+     * A background covers the page wherever it is painted, and each place paints it from a rule of
+     * its own: the schedule page's desktop rule, its phone banner and that banner's preload, and an
+     * event page's rule at both widths, for its own schedule's background and for another's.
+     */
+    public function test_an_animated_background_moves_behind_every_page(): void
+    {
+        $owner = $this->createOwner();
+        $act = $this->createRole($owner, 'talent', [
+            'name' => 'The Quartet',
+            'background' => 'image',
+            'background_image' => null,
+            'background_image_url' => 'background_anim.gif',
+        ]);
+        $act->recordImageVariants(
+            ['w960' => 'background_anim_w960.webp', 'w1920' => 'background_anim_w1920.webp', 'src' => ['w' => 3000, 'h' => 4000], 'animated' => true],
+            'background'
+        );
+        // A venue with no background of its own, so the act's page paints the act's behind it.
+        $venue = $this->createRole($owner, 'venue', ['name' => 'Blue Room', 'background' => 'solid', 'background_color' => null]);
+        $this->assertFalse($venue->hasConfiguredBackground(), 'fixture: the venue paints no background');
+
+        $event = $this->createEvent($venue, ['name' => 'Autumn Session', 'creator_role_id' => $venue->id]);
+        $event->roles()->attach($act->id, ['is_accepted' => true]);
+
+        $original = url('/storage/background_anim.gif');
+
+        foreach ([
+            'the schedule page' => '/'.$act->subdomain,
+            'the event on the act\'s page' => $event->fresh()->getGuestUrl($act->subdomain),
+            'the event on the venue\'s page' => $event->fresh()->getGuestUrl($venue->subdomain),
+        ] as $label => $url) {
+            $html = $this->page($url);
+
+            $this->assertStringContainsString('url("'.$original.'")', $html, $label);
+            $this->assertStringNotContainsString('background_anim_w', $html, $label);
+        }
+
+        $html = $this->page('/'.$act->subdomain);
+        $this->assertStringContainsString('<link rel="preload" as="image" href="'.$original.'" media="(max-width: 767px)" fetchpriority="high">', $html);
+        $this->assertStringContainsString("background-image: url('".$original."');", $html);
+
+        // The layout's last rule, another schedule's background for a page with no phone banner.
+        // No page hands the layout another schedule without one today, so it is rendered directly.
+        $html = (string) $this->blade(
+            '<x-app-guest-layout :role="$role" :event="$event" :other-role="$otherRole"></x-app-guest-layout>',
+            ['role' => $venue->fresh(), 'event' => $event->fresh(), 'otherRole' => $act->fresh()]
+        );
+
+        $this->assertMatchesRegularExpression('#@media \(min-width: 768px\) \{\s*background-image: url\("'.preg_quote($original, '#').'"\);#', $html);
+        $this->assertStringNotContainsString('background_anim_w', $html);
+    }
 }

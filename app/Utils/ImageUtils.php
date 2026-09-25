@@ -610,6 +610,177 @@ class ImageUtils
     }
 
     /**
+     * Whether an image MOVES: an animated GIF, WebP or PNG. $mimeType is what getimagesize() read
+     * from the bytes, so a GIF stored under a .jpg name is still a GIF here.
+     *
+     * GD decodes only the first frame of an animated GIF or PNG, so every derivative of one is a
+     * still picture, and it cannot decode an animated WebP at all. generateStoredVariants() builds
+     * the stills all the same - cards, the homepage wall and avatars keep still thumbnails - and
+     * records `animated` beside them, which the page-width surfaces read to show the original
+     * instead (HasImageVariants::imageIsAnimated()). resizeImageToMax() leaves one untouched,
+     * since a re-encode would keep that first frame only.
+     *
+     * Reads the file's structure, never its pixels: a few header bytes for WebP and PNG, and for a
+     * GIF a walk that seeks over each frame's image data.
+     */
+    public static function isAnimated(string $path, ?string $mimeType): bool
+    {
+        return match ($mimeType) {
+            'image/gif' => self::gifFrameCount($path) > 1,
+            'image/webp' => self::isAnimatedWebp($path),
+            'image/png', 'image/apng' => self::isAnimatedPng($path),
+            default => false,
+        };
+    }
+
+    /**
+     * How many frames a GIF has, counting no further than $stopAt; 0 for a file that is not a GIF.
+     *
+     * Walks the blocks rather than matching bytes: it counts image descriptors, seeking over every
+     * colour table and every run of image data, and stops at the trailer or at anything it does not
+     * recognise. Counting graphic control extensions instead is unreliable - they are optional, a
+     * still GIF often carries one for its transparency, and the usual "\x00\x21\xF9\x04" pattern
+     * misses the first frame unless the colour table before it happens to end in a zero byte.
+     */
+    public static function gifFrameCount(string $path, int $stopAt = 2): int
+    {
+        $handle = @fopen($path, 'rb');
+
+        if (! $handle) {
+            return 0;
+        }
+
+        try {
+            // The signature and the logical screen descriptor, whose packed byte says whether a
+            // global colour table follows and how large it is.
+            $header = fread($handle, 13);
+
+            if (! is_string($header) || strlen($header) < 13 || ! in_array(substr($header, 0, 6), ['GIF87a', 'GIF89a'], true)) {
+                return 0;
+            }
+
+            if (ord($header[10]) & 0x80) {
+                fseek($handle, 3 * (2 << (ord($header[10]) & 7)), SEEK_CUR);
+            }
+
+            // A run of data sub-blocks, each a length byte and that many bytes, ended by a zero.
+            $skipSubBlocks = function () use ($handle): bool {
+                while (($length = fgetc($handle)) !== false) {
+                    if (($length = ord($length)) === 0) {
+                        return true;
+                    }
+
+                    fseek($handle, $length, SEEK_CUR);
+                }
+
+                return false;
+            };
+
+            $frames = 0;
+
+            while (($byte = fgetc($handle)) !== false) {
+                $byte = ord($byte);
+
+                if ($byte === 0x2C) {
+                    // An image descriptor: one frame.
+                    if (++$frames >= $stopAt) {
+                        return $frames;
+                    }
+
+                    $descriptor = fread($handle, 9);
+
+                    if (! is_string($descriptor) || strlen($descriptor) < 9) {
+                        return $frames;
+                    }
+
+                    if (ord($descriptor[8]) & 0x80) {
+                        fseek($handle, 3 * (2 << (ord($descriptor[8]) & 7)), SEEK_CUR);
+                    }
+
+                    // The LZW minimum code size, then the image data.
+                    fgetc($handle);
+
+                    if (! $skipSubBlocks()) {
+                        return $frames;
+                    }
+                } elseif ($byte === 0x21) {
+                    // An extension: its label, then its sub-blocks.
+                    fgetc($handle);
+
+                    if (! $skipSubBlocks()) {
+                        return $frames;
+                    }
+                } else {
+                    // The trailer, or bytes that are not a block.
+                    return $frames;
+                }
+            }
+
+            return $frames;
+        } finally {
+            fclose($handle);
+        }
+    }
+
+    /**
+     * An animated WebP is the extended format: its first chunk is VP8X, whose flags byte carries
+     * the animation bit. A simple (VP8 or VP8L) WebP is always a still.
+     */
+    private static function isAnimatedWebp(string $path): bool
+    {
+        $head = @file_get_contents($path, false, null, 0, 21);
+
+        return is_string($head)
+            && strlen($head) === 21
+            && substr($head, 0, 4) === 'RIFF'
+            && substr($head, 8, 4) === 'WEBP'
+            && substr($head, 12, 4) === 'VP8X'
+            && (ord($head[20]) & 0x02) !== 0;
+    }
+
+    /**
+     * An animated PNG (APNG) announces itself with an acTL chunk, which has to come before the
+     * first image data, naming how many frames it plays. One frame is a still.
+     */
+    private static function isAnimatedPng(string $path): bool
+    {
+        $handle = @fopen($path, 'rb');
+
+        if (! $handle) {
+            return false;
+        }
+
+        try {
+            if (fread($handle, 8) !== "\x89PNG\r\n\x1a\n") {
+                return false;
+            }
+
+            // Each chunk: its length, its type, its data and a CRC.
+            while (is_string($chunk = fread($handle, 8)) && strlen($chunk) === 8) {
+                $type = substr($chunk, 4, 4);
+
+                if ($type === 'acTL') {
+                    $frames = fread($handle, 4);
+
+                    return is_string($frames) && strlen($frames) === 4 && unpack('N', $frames)[1] > 1;
+                }
+
+                if ($type === 'IDAT' || $type === 'IEND') {
+                    return false;
+                }
+
+                if (fseek($handle, unpack('N', $chunk)[1] + 4, SEEK_CUR) !== 0) {
+                    return false;
+                }
+            }
+
+            return false;
+        } finally {
+            fclose($handle);
+        }
+    }
+
+    /**
      * Write WebP derivatives of a stored image next to the original, on the same disk.
      *
      * Model-agnostic on purpose: it takes the raw stored filename (what
@@ -638,8 +809,15 @@ class ImageUtils
      * orientations 5-8 the same way: the image is refused for decoding, not for being unknown.
      * Read it with `?? null` too.
      *
+     * `animated` is whether the original moves (isAnimated()): true or false wherever the file was
+     * read, null where it never was, and the same on every width, like `src`. An animated GIF or
+     * PNG still gets every width, built from the first frame GD decodes, because cards, the
+     * homepage wall and avatars show still thumbnails; the page-width surfaces read the flag the
+     * caller records and show the original, which moves (HasImageVariants::imageIsAnimated()). An
+     * animated WebP, which GD cannot decode, is `unreadable` as before, with the flag beside it.
+     *
      * @param  int[]  $widths
-     * @return array<int, array{ok: bool, filename: ?string, reason: ?string, detail?: ?string, src?: ?array{w: int, h: int}}>
+     * @return array<int, array{ok: bool, filename: ?string, reason: ?string, detail?: ?string, src?: ?array{w: int, h: int}, animated?: ?bool}>
      */
     public static function generateStoredVariants(
         string $storedName,
@@ -650,9 +828,9 @@ class ImageUtils
 
         // `detail` is display only: it reaches the console line and the log, never the recorded
         // `skipped` value, which stays the bare token the reason vocabulary is matched on.
-        $skipAll = fn (string $reason, ?string $detail = null, ?array $src = null) => array_fill_keys(
+        $skipAll = fn (string $reason, ?string $detail = null, ?array $src = null, ?bool $animated = null) => array_fill_keys(
             $widths,
-            ['ok' => false, 'filename' => null, 'reason' => $reason, 'detail' => $detail, 'src' => $src]
+            ['ok' => false, 'filename' => null, 'reason' => $reason, 'detail' => $detail, 'src' => $src, 'animated' => $animated]
         );
 
         if (! $storedName) {
@@ -745,6 +923,9 @@ class ImageUtils
                 return $skipAll('unreadable');
             }
 
+            // From the file's structure, before any decode: GD only ever sees the first frame.
+            $animated = self::isAnimated($tempIn, $mimeType);
+
             // Measured, not assumed: canDecodePixels() raises memory_limit where that is all
             // this needs and the platform is willing, so a 20MP flyer gets its derivatives in a
             // console session even though it stays refused inside a pinned 128MB worker.
@@ -754,7 +935,8 @@ class ImageUtils
                 return $skipAll(
                     'too_large',
                     $srcWidth.'x'.$srcHeight.', '.round($srcWidth * $srcHeight / 1_000_000, 1).'MP',
-                    self::orientedSize((int) $srcWidth, (int) $srcHeight, self::exifOrientation($tempIn))
+                    self::orientedSize((int) $srcWidth, (int) $srcHeight, self::exifOrientation($tempIn)),
+                    $animated
                 );
             }
 
@@ -767,7 +949,9 @@ class ImageUtils
             };
 
             if (! $sourceImage) {
-                return $skipAll('unreadable');
+                // GD cannot decode an animated WebP at all, which ends here: no still thumbnail,
+                // so every surface shows the original, and the flag still says why it moves.
+                return $skipAll('unreadable', null, null, $animated);
             }
 
             $sourceImage = self::applyExifOrientation($sourceImage, $tempIn);
@@ -783,7 +967,7 @@ class ImageUtils
 
             foreach ($widths as $width) {
                 $results[$width] = self::writeStoredVariant($sourceImage, $storedName, $width, $srcWidth, $srcHeight, $tempOut)
-                    + ['src' => $src];
+                    + ['src' => $src, 'animated' => $animated];
             }
 
             return $results;
@@ -1127,9 +1311,10 @@ class ImageUtils
     /**
      * Resize an image in place so its longest side is at most $maxDim pixels.
      *
-     * No-op if the image is already within the limit. Preserves aspect ratio,
-     * transparency, and original format. Returns false if the image is too
-     * large to safely decode within current memory limits.
+     * No-op if the image is already within the limit, or if it is animated (isAnimated()): GD
+     * decodes the first frame only, so the re-encode stored a still picture in place of the
+     * owner's animation. Preserves aspect ratio, transparency, and original format. Returns false
+     * if the image is too large to safely decode within current memory limits.
      */
     public static function resizeImageToMax(
         string $path,
@@ -1150,6 +1335,12 @@ class ImageUtils
         $mimeType = $info['mime'] ?? null;
 
         if ($srcWidth <= $maxDim && $srcHeight <= $maxDim) {
+            return true;
+        }
+
+        // Kept whole, frames and all, at its full size. The derivative pipeline still makes the
+        // still thumbnails the cards show, and the flyer's page shows this original.
+        if (self::isAnimated($path, $mimeType)) {
             return true;
         }
 

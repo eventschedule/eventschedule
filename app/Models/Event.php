@@ -2755,12 +2755,17 @@ class Event extends Model
      * an event with no flyer resolves to the same schedule at every width. A derivative that has
      * not been generated (or was skipped) falls through to that image's original, so a caller
      * never has to check first - the URL is always renderable.
+     *
+     * $pageWidth is the event page's flyer, which shows an animated flyer as it is, the original,
+     * rather than a still derivative of its first frame (HasImageVariants::imageVariantUrl()).
+     * Cards and the homepage wall never pass it. It only concerns the flyer: a schedule's profile
+     * photo standing in for one is never shown at page width.
      */
-    public function getImageUrl(?int $width = null)
+    public function getImageUrl(?int $width = null, bool $pageWidth = false)
     {
         if ($this->flyer_image_url) {
-            if ($width && ($variant = $this->imageVariantFilename($width))) {
-                return ImageUtils::variantUrl($variant);
+            if ($width && ($variant = $this->imageVariantUrl($width, pageWidth: $pageWidth))) {
+                return $variant;
             }
 
             return $this->flyer_image_url;

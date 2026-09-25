@@ -39,6 +39,12 @@ use Illuminate\Support\Facades\Log;
  * those built before the pipeline recorded it - reading only the head of each original
  * (ImageUtils::storedImageDimensions()), never decoding or re-encoding it. That size is what lets
  * og:image:width and an <img>'s width and height describe a file on object storage.
+ *
+ * `--animated` re-checks every original stored as a GIF or a WebP, whatever its row records: it
+ * rebuilds the row like any other and records `"animated": true` for an original that moves, or
+ * drops the flag for one that does not. Rows built before the pipeline recorded the flag hold
+ * still derivatives of an animated flyer, header or background and nothing saying so, and a plain
+ * run never selects them again, since every width is there.
  */
 class BackfillImageVariants extends Command
 {
@@ -46,6 +52,7 @@ class BackfillImageVariants extends Command
         {--roles : Process schedule images instead of event flyers (the profile photo unless --slot says otherwise)}
         {--slot=profile : With --roles, which image: profile, header, background or all}
         {--dimensions : Only record the size of originals whose size is not recorded yet, generating nothing}
+        {--animated : Re-check every GIF and WebP original, whatever is recorded, and record whether it is animated}
         {--upcoming-only : Stop after upcoming and recurring events, skipping past ones (ignored with --roles)}
         {--retry-skipped : Also reprocess rows whose recorded skip was deterministic (transient ones are always retried)}
         {--limit=0 : Stop after this many rows (0 = no limit)}
@@ -82,6 +89,11 @@ class BackfillImageVariants extends Command
 
     private bool $dimensionsOnly = false;
 
+    private bool $recheckAnimated = false;
+
+    /** Rows this run recorded as animated. */
+    private int $animated = 0;
+
     public function handle(): int
     {
         // Reset explicitly: Artisan registers each command as a single instance, so a second
@@ -91,11 +103,21 @@ class BackfillImageVariants extends Command
         $this->generated = 0;
         $this->skipped = 0;
         $this->skippedReasons = [];
+        $this->animated = 0;
 
         $this->limit = max(0, (int) $this->option('limit'));
         $chunk = max(10, (int) $this->option('chunk'));
         $dryRun = (bool) $this->option('dry-run');
         $this->dimensionsOnly = (bool) $this->option('dimensions');
+        $this->recheckAnimated = (bool) $this->option('animated');
+
+        // Refused rather than letting one win: --dimensions builds nothing, and --animated
+        // rebuilds rows a --dimensions run never looks at.
+        if ($this->dimensionsOnly && $this->recheckAnimated) {
+            $this->error('--animated rebuilds derivatives and --dimensions builds none, so run them separately.');
+
+            return self::FAILURE;
+        }
 
         $slotOption = strtolower(trim((string) ($this->option('slot') ?? 'profile')));
 
@@ -125,6 +147,10 @@ class BackfillImageVariants extends Command
 
         $done = $this->dimensionsOnly ? 'recorded' : 'generated';
         $this->info("Done. Processed: {$this->processed}, {$done}: {$this->generated}, skipped: {$this->skipped}");
+
+        if ($this->recheckAnimated) {
+            $this->line("  Animated: {$this->animated}");
+        }
 
         // Which reasons, not just how many. Nothing else reads the recorded `skipped` values back
         // out, so without this the only way to find out why a production run skipped rows is to
@@ -168,6 +194,7 @@ class BackfillImageVariants extends Command
     {
         $this->info(
             ($this->dimensionsOnly ? 'Recording original sizes only, no derivatives' : 'Target widths: '.implode('px, ', $widths).'px WebP')
+            .($this->recheckAnimated ? ', re-checking every GIF and WebP for animation' : '')
             .($dryRun ? ' (dry run)' : '')
         );
     }
@@ -184,7 +211,14 @@ class BackfillImageVariants extends Command
 
         $this->line("Pass: {$label}");
 
-        $this->dimensionsOnly ? $this->dimensionsQuery($query, $slot) : $this->baseQuery($query, $slot);
+        if ($this->dimensionsOnly) {
+            $this->dimensionsQuery($query, $slot);
+        } elseif ($this->recheckAnimated) {
+            $this->animatedQuery($query, $slot);
+        } else {
+            $this->baseQuery($query, $slot);
+        }
+
         $scope($query);
 
         // chunkById, not chunk: the pass writes to the rows it is walking, and an offset-based
@@ -247,6 +281,26 @@ class BackfillImageVariants extends Command
                         array_merge(['$.skipped'], ImageUtils::VARIANT_TRANSIENT_REASONS)
                     );
                 }
+            });
+    }
+
+    /**
+     * --animated: every row whose stored image is a .gif or a .webp, whatever it records, including
+     * rows with every width built.
+     *
+     * By name, because only the bytes can say whether an image moves, and reading every original
+     * to ask would download the whole catalogue. Every upload path stores the name lowercased, and
+     * those are the two formats that animate in practice. An animated PNG, or a GIF uploaded under
+     * another extension, is flagged by the generation job when it is next uploaded.
+     */
+    private function animatedQuery(Builder $query, string $slot = 'default'): Builder
+    {
+        [$column] = $query->getModel()->imageVariantSlots()[$slot];
+
+        return $this->resizableSource($query, $column)
+            ->where(function ($q) use ($column) {
+                $q->where($column, 'like', '%.gif')
+                    ->orWhere($column, 'like', '%.webp');
             });
     }
 
@@ -341,14 +395,21 @@ class BackfillImageVariants extends Command
         $detail = null;
         $existing = $row->imageVariants($slot);
         // The original's displayed size: from this run's read when it got that far, else from an
-        // earlier one - a fact about the original either way. See GenerateImageVariants.
+        // earlier one - a fact about the original either way. See GenerateImageVariants. So is
+        // whether it moves: this run's answer wherever it read the file, true or false, else the
+        // flag already recorded.
         $src = is_array($existing['src'] ?? null) ? $existing['src'] : null;
+        $animated = ($existing['animated'] ?? false) === true;
 
         foreach ($widths as $width) {
             $result = $results[$width] ?? ['ok' => false, 'filename' => null, 'reason' => 'failed'];
 
             if (is_array($result['src'] ?? null)) {
                 $src = $result['src'];
+            }
+
+            if (is_bool($result['animated'] ?? null)) {
+                $animated = $result['animated'];
             }
 
             $kept = $existing['w'.$width] ?? null;
@@ -375,20 +436,31 @@ class BackfillImageVariants extends Command
             $variants['src'] = $src;
         }
 
-        $row->recordImageVariants($variants, $slot);
+        // Only an original that moves carries the flag, as the job records it.
+        if ($animated) {
+            $variants['animated'] = true;
+        }
+
+        $recorded = $row->recordImageVariants($variants, $slot);
+
+        if ($animated && $recorded) {
+            $this->animated++;
+        }
+
+        $moves = $animated ? ' (animated)' : '';
 
         // A partial run counts as skipped: the row still needs another pass.
         if ($reason !== null) {
             $this->countSkip($reason);
             $described = $reason.($detail !== null ? " ({$detail})" : '');
-            $this->line("  [{$tag}] skipped: {$described}");
+            $this->line("  [{$tag}] skipped: {$described}{$moves}");
             Log::info('images:backfill-variants skipped '.($row instanceof Role ? 'schedule' : 'event')." {$row->id}".($slot === 'default' ? '' : " ({$slot})").": {$described}");
 
             return;
         }
 
         $this->generated++;
-        $this->line("  [{$tag}] ".implode(', ', $written));
+        $this->line("  [{$tag}] ".implode(', ', $written).$moves);
     }
 
     /**

@@ -97,8 +97,8 @@ class AppGuestLayout extends Component
          * The image a phone paints as this page's background banner, preloaded at high priority
          * for narrow screens only - it is the schedule page's mobile LCP element, and as a CSS
          * background it is otherwise discovered late. Only role/show-guest passes it (the same
-         * Role::backgroundImageUrl(960) its banner paints); event, embed and graphic pages do not
-         * paint that banner, so they preload nothing.
+         * Role::backgroundImageUrl(960, pageWidth: true) its banner paints); event, embed and
+         * graphic pages do not paint that banner, so they preload nothing.
          */
         public ?string $mobileBannerImage = null,
         /**

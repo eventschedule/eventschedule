@@ -355,6 +355,24 @@ php artisan images:backfill-variants --dimensions
 php artisan images:backfill-variants --roles --slot=all --dimensions
 ```
 
+Then flag the animated originals. GD decodes only the first frame of an animated GIF, so every
+derivative of one is a still picture (an animated WebP it cannot decode at all, so that one has no
+derivatives). Cards, the homepage wall and avatars keep those stills, while the event page's flyer,
+the banner header and the background show the original, which moves, but only on a row that
+records `"animated": true`. The flyer and profile-photo derivatives already
+built in production predate that flag, and a plain run never selects those rows again because every
+width is there. `--animated` re-checks every flyer, or with `--roles` every schedule image, stored
+as a `.gif` or `.webp`, whatever its row records: it rebuilds the row and records the flag, or drops
+it for one that does not move. Its summary adds an `Animated:` count.
+
+```
+php artisan images:backfill-variants --animated
+php artisan images:backfill-variants --roles --slot=all --animated
+```
+
+A GIF stored under another extension, or an animated PNG, is not selected; the generation job
+flags it the next time it is uploaded.
+
 The run ends with a per-reason tally (`Skipped by reason - too_large: 3, missing: 1`), and a
 `too_large` line names the source size, e.g. `skipped: too_large (3508x3508, 12.3MP)`. That is the
 only account of what a run refused: nothing else reads the recorded `skipped` values back out.
@@ -391,7 +409,8 @@ container that predates the config.
 to 10 minutes - the wall query is cached (`config('marketing.wall_cache_seconds')`) and recording
 a variant deliberately does *not* bust that cache, so the switch is not instant. A schedule with a
 custom background serves `..._w960.webp` in its `<link rel="preload" as="image">` and the mobile
-banner, and `..._w1920.webp` in the desktop background CSS.
+banner, and `..._w1920.webp` in the desktop background CSS. An event with an animated GIF flyer
+shows the `.gif` itself, with no `srcset`, on its own page, and a `_w480.webp` still on the wall.
 
 *Undo:* none needed; a missing variant falls back to the original.
 

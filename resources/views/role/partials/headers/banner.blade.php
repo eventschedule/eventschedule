@@ -60,12 +60,13 @@
                 // The owner's upload: its 960 derivative as the src, the 960 and 1920 for the
                 // browser to choose between, and the original's recorded size for the box's shape.
                 // Until the derivatives exist all three fall away and this is the plain original.
-                $headerSrcset = $role->imageVariantSrcset('header');
+                // So is an animated upload (pageWidth), whose derivatives are stills.
+                $headerSrcset = $role->imageVariantSrcset('header', pageWidth: true);
                 $headerSize = $role->imageSourceDimensions('header');
             @endphp
             <img
               class="block max-h-72 w-full object-cover"
-              src="{{ $role->headerImageUrl(960) }}"
+              src="{{ $role->headerImageUrl(960, pageWidth: true) }}"
               @if ($headerSrcset) srcset="{{ $headerSrcset }}" sizes="(min-width: 1536px) 1496px, calc(100vw - 40px)" @endif
               @if ($headerSize) width="{{ $headerSize[0] }}" height="{{ $headerSize[1] }}" @endif
               @if (! $role->backgroundImageUrl()) fetchpriority="high" @endif

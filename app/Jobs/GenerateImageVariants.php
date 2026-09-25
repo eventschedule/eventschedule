@@ -97,8 +97,9 @@ abstract class GenerateImageVariants implements ShouldQueue
         $widths = $model->imageVariantWidths($slot);
         $existing = $model->imageVariants($slot);
         // A size recorded by an earlier run (or --dimensions) survives a run that never got to
-        // read the original, like the filenames below.
+        // read the original, like the filenames below. So does the animated flag.
         $knownSrc = is_array($existing['src'] ?? null) ? $existing['src'] : null;
+        $knownAnimated = ($existing['animated'] ?? false) === true;
 
         // Every width, not just the default: a row carrying only w480 predates the second width
         // and still needs one.
@@ -107,6 +108,11 @@ abstract class GenerateImageVariants implements ShouldQueue
             fn (int $width) => ! $model->imageVariantFilename($width, $slot)
         );
 
+        // Nothing to build, and nothing to record either. A row only arrives here complete from
+        // an earlier run of this job - the saving hooks null the column whenever the image
+        // changes, and only then queue this - and that run recorded `animated` already. Rows
+        // completed before the flag existed are what `images:backfill-variants --animated`
+        // re-checks.
         if (! $missing) {
             return;
         }
@@ -120,7 +126,7 @@ abstract class GenerateImageVariants implements ShouldQueue
             // treated as deterministic: reported, recorded, swallowed.
             report($e);
             Log::warning(class_basename($this).' failed for '.$this->subject().': '.$e->getMessage());
-            $model->recordImageVariants($this->payload($widths, [], 'failed', $knownSrc), $slot);
+            $model->recordImageVariants($this->payload($widths, [], 'failed', $knownSrc, $knownAnimated), $slot);
 
             return;
         }
@@ -136,6 +142,7 @@ abstract class GenerateImageVariants implements ShouldQueue
         $deterministic = null;
         $deterministicDetail = null;
         $src = $knownSrc;
+        $animated = $knownAnimated;
 
         foreach ($widths as $width) {
             $result = $results[$width] ?? ['ok' => false, 'filename' => null, 'reason' => 'failed'];
@@ -145,6 +152,12 @@ abstract class GenerateImageVariants implements ShouldQueue
             // skip reports the header's size precisely so a page can still declare it.
             if (is_array($result['src'] ?? null)) {
                 $src = $result['src'];
+            }
+
+            // Whether the original moves, the same kind of fact: true or false wherever this run
+            // read the file, which then decides it either way, and null where it never did.
+            if (is_bool($result['animated'] ?? null)) {
+                $animated = $result['animated'];
             }
 
             $kept = $existing['w'.$width] ?? null;
@@ -196,7 +209,7 @@ abstract class GenerateImageVariants implements ShouldQueue
         // Transient wins the `skipped` slot when both happened, because it is the one the
         // backfill's un-flagged query keys on; a deterministic reason recorded over it would
         // strand the row until someone ran --retry-skipped by hand.
-        $model->recordImageVariants($this->payload($widths, $variants, $transient ?? $deterministic, $src), $slot);
+        $model->recordImageVariants($this->payload($widths, $variants, $transient ?? $deterministic, $src, $animated), $slot);
     }
 
     /**
@@ -218,12 +231,14 @@ abstract class GenerateImageVariants implements ShouldQueue
 
     /**
      * The variants value to store: one key per width of the slot, plus the reason when at least
-     * one width was skipped for good, plus the original's size when it is known.
+     * one width was skipped for good, plus the original's size when it is known, plus
+     * `"animated": true` for an original that moves (HasImageVariants::imageIsAnimated()). A
+     * still one records no flag at all, which is what every row built before the flag reads as.
      *
      * @param  int[]  $widths
      * @param  array{w: int, h: int}|null  $src
      */
-    private function payload(array $widths, array $variants, ?string $skipped, ?array $src = null): array
+    private function payload(array $widths, array $variants, ?string $skipped, ?array $src = null, bool $animated = false): array
     {
         foreach ($widths as $width) {
             $variants['w'.$width] = $variants['w'.$width] ?? null;
@@ -235,6 +250,10 @@ abstract class GenerateImageVariants implements ShouldQueue
 
         if ($src !== null) {
             $variants['src'] = $src;
+        }
+
+        if ($animated) {
+            $variants['animated'] = true;
         }
 
         return $variants;

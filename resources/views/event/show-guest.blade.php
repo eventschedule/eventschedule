@@ -1437,15 +1437,16 @@
              fetchpriority="high" - never loading="lazy", which held it back until layout. The
              link opens the full-size original: the flyer-lightbox app at the bottom of this page
              shows it in place, and without JavaScript the link simply goes there. The #gp-flyer
-             id is a documented custom-CSS hook. --}}
+             id is a documented custom-CSS hook. pageWidth: an animated flyer is its original
+             here, with no srcset, because every derivative is a still of its first frame. --}}
         @if ($event->flyer_image_url)
         @php
-          $flyerSrcset = $event->imageVariantSrcset('default', true);
+          $flyerSrcset = $event->imageVariantSrcset('default', true, pageWidth: true);
           $flyerSize = $event->imageSourceDimensions();
         @endphp
         <div id="gp-flyer" class="bg-white/95 dark:bg-gray-900/95 backdrop-blur-sm sm:rounded-2xl overflow-hidden">
           <a href="{{ $event->flyer_image_url }}" data-flyer-open class="block">
-            <img src="{{ $event->getImageUrl(960) }}"
+            <img src="{{ $event->getImageUrl(960, pageWidth: true) }}"
                  @if ($flyerSrcset) srcset="{{ $flyerSrcset }}" sizes="(min-width: 1024px) 564px, (min-width: 640px) calc(100vw - 40px), 100vw" @endif
                  @if ($flyerSize) width="{{ $flyerSize[0] }}" height="{{ $flyerSize[1] }}" @endif
                  alt="{{ $eventName }} - {{ __('messages.flyer') }}"

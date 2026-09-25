@@ -35,6 +35,15 @@ class ImageVariantsTest extends TestCase
     /** The real queue manager, so one test can put the `sync` connection back. */
     private $realQueue;
 
+    /**
+     * A 1x1 GIF: a header, a two-colour global table, a graphic control extension and one image.
+     * Built in memory, like every fixture here.
+     */
+    private const ONE_PIXEL_GIF = '474946383961010001008000000000'.'00ffffff21f90401000000002c00000000010001000002024401003b';
+
+    /** Temporary files tempImage() wrote, removed in tearDown(). */
+    private array $tempImages = [];
+
     protected function setUp(): void
     {
         parent::setUp();
@@ -61,7 +70,80 @@ class ImageVariantsTest extends TestCase
     {
         Cache::flush();
 
+        foreach ($this->tempImages as $path) {
+            @unlink($path);
+        }
+        $this->tempImages = [];
+
         parent::tearDown();
+    }
+
+    /** A temporary file holding $bytes, for the helpers that read a path. Removed in tearDown(). */
+    private function tempImage(string $bytes): string
+    {
+        $path = tempnam(sys_get_temp_dir(), 'variant_test_');
+        file_put_contents($path, $bytes);
+        $this->tempImages[] = $path;
+
+        return $path;
+    }
+
+    /**
+     * $gif with the blocks after its global colour table repeated to make $frames frames: a GIF
+     * that moves. GD decodes it as its first frame, as it does every animated GIF.
+     */
+    private function animatedGif(string $gif, int $frames = 2): string
+    {
+        $packed = ord($gif[10]);
+        $blocks = substr($gif, 13 + (($packed & 0x80) ? 3 * (2 << ($packed & 7)) : 0), -1);
+
+        return substr($gif, 0, -1).str_repeat($blocks, $frames - 1).';';
+    }
+
+    /** A one-frame GIF of $width x $height, drawn by GD: no extension blocks, a larger table. */
+    private function gifBytes(int $width, int $height): string
+    {
+        $image = imagecreate($width, $height);
+        imagecolorallocate($image, 30, 90, 200);
+        imagefilledrectangle($image, 0, 0, (int) ($width / 2), $height - 1, imagecolorallocate($image, 240, 200, 30));
+
+        ob_start();
+        imagegif($image);
+        imagedestroy($image);
+
+        return ob_get_clean();
+    }
+
+    /** A still WebP, as GD encodes one: the simple format, a single VP8 chunk. */
+    private function webpBytes(int $width, int $height): string
+    {
+        $image = imagecreatetruecolor($width, $height);
+        imagefill($image, 0, 0, imagecolorallocate($image, 30, 90, 200));
+
+        ob_start();
+        imagewebp($image, null, 80);
+        imagedestroy($image);
+
+        return ob_get_clean();
+    }
+
+    /**
+     * An animated WebP: the extended format's VP8X chunk with the animation flag, an ANIM chunk,
+     * and two ANMF frames that are each the still GD encodes.
+     */
+    private function animatedWebp(int $width, int $height): string
+    {
+        $le24 = fn (int $value) => substr(pack('V', $value), 0, 3);
+        $chunk = fn (string $type, string $payload) => $type.pack('V', strlen($payload)).$payload.(strlen($payload) % 2 ? "\0" : '');
+
+        // The still's own VP8 chunk, header and all, after an ANMF frame header.
+        $frame = $chunk('ANMF', $le24(0).$le24(0).$le24($width - 1).$le24($height - 1).$le24(100)."\0".substr($this->webpBytes($width, $height), 12));
+        $body = 'WEBP'
+            .$chunk('VP8X', "\x02\0\0\0".$le24($width - 1).$le24($height - 1))
+            .$chunk('ANIM', "\0\0\0\0\0\0")
+            .$frame.$frame;
+
+        return 'RIFF'.pack('V', strlen($body)).$body;
     }
 
     /** A real PNG of the given size, stored under the disk rule every flyer write path uses. */
@@ -2246,6 +2328,242 @@ class ImageVariantsTest extends TestCase
             ['@type' => 'ImageObject', 'url' => url('/storage/flyer_abc.png'), 'width' => 1600, 'height' => 2133],
             $this->jsonLdNode($html, 'Event')['image']
         );
+    }
+
+    // --------------------------------------------------------- animated originals
+
+    /**
+     * GD decodes only the first frame of an animated image, so the pipeline has to tell from the
+     * file's structure whether there is more. A GIF is walked block by block, seeking over the
+     * image data, and the walk stops at the second frame.
+     */
+    public function test_the_gif_walker_counts_frames_without_decoding_them(): void
+    {
+        $still = hex2bin(self::ONE_PIXEL_GIF);
+
+        $this->assertSame(1, ImageUtils::gifFrameCount($this->tempImage($still)));
+        $this->assertSame(2, ImageUtils::gifFrameCount($this->tempImage($this->animatedGif($still))));
+        $this->assertSame(2, ImageUtils::gifFrameCount($this->tempImage($this->animatedGif($still, 3))), 'it stops at the second');
+        $this->assertSame(3, ImageUtils::gifFrameCount($this->tempImage($this->animatedGif($still, 3)), 10));
+        // GD's own GIFs carry no extension block and a larger colour table.
+        $this->assertSame(1, ImageUtils::gifFrameCount($this->tempImage($this->gifBytes(40, 30))));
+        $this->assertSame(2, ImageUtils::gifFrameCount($this->tempImage($this->animatedGif($this->gifBytes(40, 30)))));
+        $this->assertSame(0, ImageUtils::gifFrameCount($this->tempImage('not an image')));
+        $this->assertSame(0, ImageUtils::gifFrameCount(sys_get_temp_dir().'/no-such-file.gif'));
+
+        // What GD makes of the animated one: a picture of its first frame, and nothing more.
+        $this->assertNotFalse(@imagecreatefromstring($this->animatedGif($still)), 'fixture: GD decodes it');
+
+        $this->assertTrue(ImageUtils::isAnimated($this->tempImage($this->animatedGif($still)), 'image/gif'));
+        $this->assertFalse(ImageUtils::isAnimated($this->tempImage($still), 'image/gif'));
+    }
+
+    /** GD cannot decode an animated WebP at all, but getimagesize() reads it and so does this. */
+    public function test_an_animated_webp_is_detected(): void
+    {
+        $animated = $this->animatedWebp(40, 30);
+
+        $this->assertSame([40, 30], array_slice(getimagesizefromstring($animated), 0, 2), 'fixture: its canvas is readable');
+        $this->assertTrue(ImageUtils::isAnimated($this->tempImage($animated), 'image/webp'));
+
+        // A still one, simple or extended (the alpha flag alone), is not.
+        $this->assertFalse(ImageUtils::isAnimated($this->tempImage($this->webpBytes(40, 30)), 'image/webp'));
+        $this->assertFalse(ImageUtils::isAnimated($this->tempImage(substr_replace($animated, "\x10", 20, 1)), 'image/webp'));
+
+        // Through the pipeline: whatever this build of GD makes of it, the row says it moves.
+        $owner = $this->createOwner();
+        $role = $this->createRole($owner, 'talent', ['name' => 'Blue Room']);
+        $event = $this->createEvent($role, ['name' => 'Autumn Session', 'flyer_image_url' => 'flyer_moving.webp']);
+        Storage::put(ImageUtils::storagePathFor('flyer_moving.webp'), $animated);
+
+        (new GenerateEventImageVariants($event->id, 'flyer_moving.webp'))->handle();
+
+        $this->assertTrue($event->fresh()->imageIsAnimated());
+    }
+
+    /** An animated PNG names its frame count in an acTL chunk, ahead of the image data. */
+    public function test_an_animated_png_is_detected(): void
+    {
+        $image = imagecreatetruecolor(4, 3);
+        ob_start();
+        imagepng($image);
+        imagedestroy($image);
+        $png = ob_get_clean();
+
+        // After the signature and IHDR, which is its length, type, 13 bytes of data and a CRC.
+        $withFrames = function (int $frames) use ($png): string {
+            $data = pack('NN', $frames, 0);
+
+            return substr($png, 0, 33).pack('N', 8).'acTL'.$data.pack('N', crc32('acTL'.$data)).substr($png, 33);
+        };
+
+        $this->assertFalse(ImageUtils::isAnimated($this->tempImage($png), 'image/png'));
+        $this->assertTrue(ImageUtils::isAnimated($this->tempImage($withFrames(2)), 'image/png'));
+        $this->assertFalse(ImageUtils::isAnimated($this->tempImage($withFrames(1)), 'image/png'), 'one frame is a still');
+        // GD decodes the default image, so an animated PNG gets its still thumbnails too.
+        $this->assertNotFalse(@imagecreatefromstring($withFrames(2)));
+    }
+
+    /**
+     * An animated flyer gets every still thumbnail a still one does - the cards, the homepage wall
+     * and avatars show those - and the row records that it moves, which is what the page-width
+     * surfaces read to show the original instead.
+     */
+    public function test_an_animated_gif_is_flagged_and_still_gets_its_still_thumbnails(): void
+    {
+        $owner = $this->createOwner();
+        $role = $this->createRole($owner, 'talent', ['name' => 'Blue Room']);
+        $event = $this->createEvent($role, ['name' => 'Autumn Session', 'flyer_image_url' => 'flyer_moving.gif']);
+        Storage::put(ImageUtils::storagePathFor('flyer_moving.gif'), $this->animatedGif(hex2bin(self::ONE_PIXEL_GIF)));
+
+        foreach (ImageUtils::generateStoredVariants('flyer_moving.gif') as $width => $result) {
+            $this->assertTrue($result['ok'], "{$width}: ".($result['reason'] ?? ''));
+            $this->assertTrue($result['animated'], (string) $width);
+        }
+
+        (new GenerateEventImageVariants($event->id, 'flyer_moving.gif'))->handle();
+
+        Storage::assertExists('public/flyer_moving_w480.webp');
+        Storage::assertExists('public/flyer_moving_w960.webp');
+        $this->assertVariants(
+            ['w480' => 'flyer_moving_w480.webp', 'w960' => 'flyer_moving_w960.webp', 'src' => ['w' => 1, 'h' => 1], 'animated' => true],
+            $event->fresh()->image_variants
+        );
+    }
+
+    public function test_a_one_frame_gif_is_handled_exactly_as_before(): void
+    {
+        $owner = $this->createOwner();
+        $role = $this->createRole($owner, 'talent', ['name' => 'Blue Room']);
+        $event = $this->createEvent($role, ['name' => 'Autumn Session', 'flyer_image_url' => 'flyer_still.gif']);
+        Storage::put(ImageUtils::storagePathFor('flyer_still.gif'), hex2bin(self::ONE_PIXEL_GIF));
+
+        (new GenerateEventImageVariants($event->id, 'flyer_still.gif'))->handle();
+
+        $fresh = $event->fresh();
+        $this->assertVariants(
+            ['w480' => 'flyer_still_w480.webp', 'w960' => 'flyer_still_w960.webp', 'src' => ['w' => 1, 'h' => 1]],
+            $fresh->image_variants
+        );
+        $this->assertFalse($fresh->imageIsAnimated());
+        // So even the page-width surfaces get its derivatives.
+        $this->assertSame(url('/storage/flyer_still_w960.webp'), $fresh->getImageUrl(960, pageWidth: true));
+        $this->assertSame(
+            url('/storage/flyer_still_w480.webp').' 480w, '.url('/storage/flyer_still_w960.webp').' 960w',
+            $fresh->imageVariantSrcset('default', true, pageWidth: true)
+        );
+    }
+
+    /**
+     * Over the 2000px upload cap a GIF is re-encoded, and GD re-encodes the one frame it decoded:
+     * a large animated flyer used to lose its animation the moment it was uploaded.
+     */
+    public function test_the_upload_resizer_leaves_an_animated_gif_whole(): void
+    {
+        $still = $this->gifBytes(2100, 10);
+        $animated = $this->animatedGif($still);
+        $animatedPath = $this->tempImage($animated);
+        $stillPath = $this->tempImage($still);
+
+        $this->assertTrue(ImageUtils::resizeImageToMax($animatedPath, 2000));
+        $this->assertSame(sha1($animated), sha1_file($animatedPath), 'every frame kept, byte for byte');
+        $this->assertSame(2, ImageUtils::gifFrameCount($animatedPath));
+
+        // A one-frame GIF over the cap is resized exactly as before.
+        $this->assertTrue(ImageUtils::resizeImageToMax($stillPath, 2000));
+        $this->assertSame([2000, 10], array_slice(getimagesize($stillPath), 0, 2));
+    }
+
+    /**
+     * Production holds still derivatives of animated flyers and logos built before the flag
+     * existed, every width present, so no plain run selects those rows again. --animated re-checks
+     * every GIF and WebP whatever its row records.
+     */
+    public function test_animated_rechecks_every_gif_and_webp_whatever_it_records(): void
+    {
+        $owner = $this->createOwner();
+        $role = $this->createRole($owner, 'talent', ['name' => 'Blue Room']);
+        $still = hex2bin(self::ONE_PIXEL_GIF);
+
+        $moving = $this->createEvent($role, ['name' => 'Moving Night', 'flyer_image_url' => 'flyer_moving.gif']);
+        Storage::put(ImageUtils::storagePathFor('flyer_moving.gif'), $this->animatedGif($still));
+        $moving->recordImageVariants(['w480' => 'flyer_moving_w480.webp', 'w960' => 'flyer_moving_w960.webp', 'src' => ['w' => 1, 'h' => 1]]);
+
+        // A GIF that does not move, recorded as one that does.
+        $unmoving = $this->createEvent($role, ['name' => 'Still Night', 'flyer_image_url' => 'flyer_still.gif']);
+        Storage::put(ImageUtils::storagePathFor('flyer_still.gif'), $still);
+        $unmoving->recordImageVariants(['w480' => 'flyer_still_w480.webp', 'w960' => 'flyer_still_w960.webp', 'src' => ['w' => 1, 'h' => 1], 'animated' => true]);
+
+        // An animated WebP, which GD cannot decode: recorded as unreadable, a skip nothing re-reads.
+        $webp = $this->createEvent($role, ['name' => 'Loop Night', 'flyer_image_url' => 'flyer_loop.webp']);
+        Storage::put(ImageUtils::storagePathFor('flyer_loop.webp'), $this->animatedWebp(40, 30));
+        $webp->recordImageVariants(['w480' => null, 'w960' => null, 'skipped' => 'unreadable']);
+
+        // Not a GIF or a WebP, so not re-checked.
+        $poster = $this->createEvent($role, ['name' => 'Poster Night', 'flyer_image_url' => 'flyer_poster.png']);
+        $poster->recordImageVariants(['w480' => 'flyer_poster_w480.webp', 'w960' => 'flyer_poster_w960.webp']);
+
+        Artisan::call('images:backfill-variants');
+        $this->assertStringContainsString('Processed: 0', Artisan::output(), 'every row is done, so a plain run selects none of them');
+
+        Artisan::call('images:backfill-variants', ['--animated' => true]);
+        $output = Artisan::output();
+
+        $this->assertStringContainsString('re-checking every GIF and WebP for animation', $output);
+        $this->assertStringContainsString('Processed: 3', $output);
+        $this->assertStringContainsString('Animated: 2', $output);
+        $this->assertTrue($webp->fresh()->imageIsAnimated());
+        $this->assertVariants(
+            ['w480' => 'flyer_moving_w480.webp', 'w960' => 'flyer_moving_w960.webp', 'src' => ['w' => 1, 'h' => 1], 'animated' => true],
+            $moving->fresh()->image_variants
+        );
+        $this->assertVariants(
+            ['w480' => 'flyer_still_w480.webp', 'w960' => 'flyer_still_w960.webp', 'src' => ['w' => 1, 'h' => 1]],
+            $unmoving->fresh()->image_variants,
+            'a GIF that does not move loses the flag'
+        );
+        $this->assertVariants(['w480' => 'flyer_poster_w480.webp', 'w960' => 'flyer_poster_w960.webp'], $poster->fresh()->image_variants);
+
+        // Schedule images too, with --roles: an animated header here.
+        $venue = $this->createRole($owner, 'venue', ['name' => 'Blue Hall', 'header_image' => '', 'header_image_url' => 'header_moving.gif']);
+        Storage::put(ImageUtils::storagePathFor('header_moving.gif'), $this->animatedGif($still));
+        $venue->recordImageVariants(['w960' => 'header_moving_w960.webp', 'w1920' => 'header_moving_w1920.webp'], 'header');
+
+        Artisan::call('images:backfill-variants', ['--roles' => true, '--slot' => 'all', '--animated' => true]);
+
+        $this->assertStringContainsString('Processed: 1', Artisan::output());
+        $this->assertTrue($venue->fresh()->imageIsAnimated('header'));
+        $this->assertSame('header_moving_w1920.webp', $venue->fresh()->imageVariantFilename(1920, 'header'));
+
+        // One or the other: --dimensions builds nothing, and --animated rebuilds.
+        $this->assertSame(1, Artisan::call('images:backfill-variants', ['--animated' => true, '--dimensions' => true]));
+        $this->assertStringContainsString('run them separately', Artisan::output());
+    }
+
+    /**
+     * Whether an original moves is a fact about it, like its size: a run that never got to read
+     * the file keeps what an earlier one recorded, in the job and in the backfill alike.
+     */
+    public function test_a_run_that_cannot_read_the_original_keeps_its_flag(): void
+    {
+        $owner = $this->createOwner();
+        $role = $this->createRole($owner, 'talent', ['name' => 'Blue Room']);
+        $event = $this->createEvent($role, ['name' => 'Moving Night', 'flyer_image_url' => 'flyer_moving.gif']);
+        Storage::put(ImageUtils::storagePathFor('flyer_moving.gif'), $this->animatedGif(hex2bin(self::ONE_PIXEL_GIF)));
+
+        // What a run during an object-storage outage leaves on a row known to move.
+        $outage = ['w480' => 'flyer_moving_w480.webp', 'w960' => null, 'skipped' => 'write_failed', 'src' => ['w' => 1, 'h' => 1], 'animated' => true];
+        $event->recordImageVariants($outage);
+        $this->swapDisk($this->diskThatCannotRead());
+
+        // The job, on the sync queue where it records rather than throws.
+        (new GenerateEventImageVariants($event->id, 'flyer_moving.gif'))->handle();
+        $this->assertVariants(['skipped' => 'read_failed'] + $outage, $event->fresh()->image_variants);
+
+        // The backfill, which picks the transient skip up again unasked.
+        $event->recordImageVariants($outage);
+        Artisan::call('images:backfill-variants');
+        $this->assertVariants(['skipped' => 'read_failed'] + $outage, $event->fresh()->image_variants);
     }
 
     private function jsonLdNode(string $html, string $type): array

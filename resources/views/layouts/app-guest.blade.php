@@ -322,13 +322,15 @@
                         @elseif ($showMobileBackground)
                             {{-- An upload, painted at every width here: a phone's derivative, and the
                                  desktop one from md up. Both fall back to the original until the
-                                 derivatives exist, so the rule is never an empty url(). --}}
-                            background-image: url("{{ css_url($otherRole->backgroundImageUrl(960)) }}");
+                                 derivatives exist, so the rule is never an empty url(). An animated
+                                 upload is always the original (pageWidth): the derivatives are
+                                 stills of its first frame. --}}
+                            background-image: url("{{ css_url($otherRole->backgroundImageUrl(960, pageWidth: true)) }}");
                             @media (min-width: 768px) {
-                                background-image: url("{{ css_url($otherRole->backgroundImageUrl(1920)) }}");
+                                background-image: url("{{ css_url($otherRole->backgroundImageUrl(1920, pageWidth: true)) }}");
                             }
                         @else
-                            background-image: url("{{ css_url($otherRole->backgroundImageUrl(1920)) }}");
+                            background-image: url("{{ css_url($otherRole->backgroundImageUrl(1920, pageWidth: true)) }}");
                         @endif
                         background-size: cover;
                         background-position: center;
@@ -366,25 +368,26 @@
                                  desktop one from md up. On the schedule page this rule is desktop
                                  only (the @media above) and role/show-guest paints the phone's
                                  banner itself. Both fall back to the original until the derivatives
-                                 exist, so the rule is never an empty url(). --}}
+                                 exist, so the rule is never an empty url(). An animated upload is
+                                 always the original (pageWidth). --}}
                             background-image:
                                 @if (request()->graphic)
                                     linear-gradient(rgba(255, 255, 255, 0.5), rgba(255, 255, 255, 0.5)),
                                 @endif
-                            url("{{ css_url($role->backgroundImageUrl(960)) }}");
+                            url("{{ css_url($role->backgroundImageUrl(960, pageWidth: true)) }}");
                             @media (min-width: 768px) {
                                 background-image:
                                     @if (request()->graphic)
                                         linear-gradient(rgba(255, 255, 255, 0.5), rgba(255, 255, 255, 0.5)),
                                     @endif
-                                url("{{ css_url($role->backgroundImageUrl(1920)) }}");
+                                url("{{ css_url($role->backgroundImageUrl(1920, pageWidth: true)) }}");
                             }
                         @else
                             background-image:
                                 @if (request()->graphic)
                                     linear-gradient(rgba(255, 255, 255, 0.5), rgba(255, 255, 255, 0.5)),
                                 @endif
-                            url("{{ css_url($role->backgroundImageUrl(1920)) }}");
+                            url("{{ css_url($role->backgroundImageUrl(1920, pageWidth: true)) }}");
                         @endif
                         background-size: cover;
                         background-position: center;

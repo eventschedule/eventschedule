@@ -1547,6 +1547,9 @@ class EventRepo
             // small PHP-FPM workers (e.g. DigitalOcean App Platform's 128MB
             // cap). We resize the temp file in place so storeAs() uploads
             // the smaller version, which works for both local and S3 disks.
+            // An animated flyer is stored whole, since a re-encode keeps one
+            // frame; graphic generation budgets that decode itself
+            // (AbstractEventDesign::safeImageCreateFromString()).
             ImageUtils::resizeImageToMax($file->getRealPath(), 2000);
 
             $filename = strtolower('flyer_'.Str::random(32).'.'.$extension);

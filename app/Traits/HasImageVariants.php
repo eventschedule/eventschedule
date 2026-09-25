@@ -18,6 +18,9 @@ use Illuminate\Support\Facades\DB;
  * "h": 2133}}, or a recorded skip such as {"w480": null, "w960": null, "skipped": "too_large",
  * "src": {...}}. `src` is the original's displayed size (ImageUtils::generateStoredVariants()); rows
  * built before it was recorded simply lack it until `images:backfill-variants --dimensions` runs.
+ * `"animated": true` marks an original that moves, whose derivatives are still pictures of its
+ * first frame (imageIsAnimated()); rows built before it was recorded lack it until
+ * `images:backfill-variants --animated` runs.
  *
  * The using model casts each variants column to array, keeps it out of $fillable (it is derived
  * state, written only by the generation job and `images:backfill-variants` through
@@ -101,10 +104,27 @@ trait HasImageVariants
         return (is_string($name) && $name !== '') ? $name : null;
     }
 
-    /** The public URL of the derivative at the given width, or null when there is none. */
-    public function imageVariantUrl(int $width, string $slot = 'default'): ?string
+    /**
+     * Whether the slot's original moves: an animated GIF, WebP or PNG, as the pipeline recorded it
+     * (ImageUtils::isAnimated()). Its derivatives are still pictures of the first frame.
+     */
+    public function imageIsAnimated(string $slot = 'default'): bool
     {
-        if (! $this->imageVariantSource($slot)) {
+        return $this->imageVariantSource($slot) !== null
+            && ($this->imageVariants($slot)['animated'] ?? false) === true;
+    }
+
+    /**
+     * The public URL of the derivative at the given width, or null when there is none.
+     *
+     * $pageWidth is for a surface that shows the image as the page itself - an event's flyer on its
+     * page, a schedule's banner header or its background - where an animated original is shown as
+     * it is: null here, so the caller falls back to the original, which moves. A card, the homepage
+     * wall and an avatar never pass it and keep the still thumbnail.
+     */
+    public function imageVariantUrl(int $width, string $slot = 'default', bool $pageWidth = false): ?string
+    {
+        if (! $this->imageVariantSource($slot) || ($pageWidth && $this->imageIsAnimated($slot))) {
             return null;
         }
 
@@ -163,10 +183,13 @@ trait HasImageVariants
      * enough that a 2x screen can use more than the widest derivative (the event page's flyer).
      * Only when that width is known and wider than every derivative: a small original is already
      * re-encoded whole at its own width, so it would add nothing.
+     *
+     * $pageWidth, as for imageVariantUrl(): null for an animated original, whose page-width surface
+     * shows the original alone, since a browser would pick a still derivative from the set.
      */
-    public function imageVariantSrcset(string $slot = 'default', bool $withOriginal = false): ?string
+    public function imageVariantSrcset(string $slot = 'default', bool $withOriginal = false, bool $pageWidth = false): ?string
     {
-        if (! $this->imageVariantSource($slot)) {
+        if (! $this->imageVariantSource($slot) || ($pageWidth && $this->imageIsAnimated($slot))) {
             return null;
         }
 
