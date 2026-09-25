@@ -74,7 +74,7 @@
 
         <div class="doc-callout doc-callout-warning">
             <div class="doc-callout-title">The contact email has to be verified</div>
-            <p>A schedule only goes live once its contact email is confirmed. Until then its public page redirects visitors back to the home page and the <strong>View Schedule</strong> button is greyed out. Keeping the prefilled account email means it is verified from the start. If you enter a different address, Event Schedule emails it a verification link and shows a <strong>"Please verify the email address"</strong> banner with a <strong>Resend Email</strong> button until you click it. The same banner comes back if you change the address later. (A verified phone number counts too, but the email is the route almost everyone takes.)</p>
+            <p>A schedule only goes live once its contact email is confirmed. Until then its public page shows visitors a page-not-found, you and your team are taken into the app when you open it signed in, and the <strong>View Schedule</strong> button is greyed out. Keeping the prefilled account email means it is verified from the start. If you enter a different address, Event Schedule emails it a verification link and shows a <strong>"Please verify the email address"</strong> banner with a <strong>Resend Email</strong> button until you click it. The same banner comes back if you change the address later. (A verified phone number counts too, but the email is the route almost everyone takes.)</p>
         </div>
 
         <div class="doc-callout doc-callout-tip">

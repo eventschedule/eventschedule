@@ -525,7 +525,7 @@
                             </table>
                         </div>
                         <p class="text-gray-600 dark:text-gray-300 mt-6">On the hosted service one account may own up to 50 schedules. Beyond that the endpoint returns a <code class="doc-inline-code">422</code>.</p>
-                        <p class="text-gray-600 dark:text-gray-300 mt-4">On the hosted service a schedule stays out of search engines until its contact email or phone number is verified. Send your account's own email address and the schedule shares your account's verification; any other address is sent a verification link.</p>
+                        <p class="text-gray-600 dark:text-gray-300 mt-4">On the hosted service a schedule is not public until its contact email or phone number is verified: until then its pages answer visitors with a 404, so search engines never see them. Send your account's own email address and the schedule shares your account's verification; any other address is sent a verification link.</p>
                     </div>
                     <div class="api-endpoint-code">
                         <div class="doc-code-block">

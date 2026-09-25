@@ -972,8 +972,8 @@
                                 <h3 class="es-vault-ink text-xl font-bold">Feeds, sitemap and discovery</h3>
                                 <span class="es-vault-plan es-vault-plan-free">Free</span>
                             </div>
-                            <p class="es-vault-muted mb-4">The public iCal feed, the RSS feed, the XML sitemap and the search on eventschedule.com are all built from one filter: not a draft, not unlisted, not cancelled, and accepted by the schedule. The feeds and the sitemap turn away anything still holding a password as well. That iCal feed is also the live calendar a guest can subscribe to from an event's Add to Calendar menu, so a hidden event cannot reach anybody's calendar through it.</p>
-                            <p class="es-vault-muted text-sm">Four separate surfaces, one rule. That is deliberate: a privacy setting that each surface interprets for itself is a privacy setting that eventually gets one of them wrong.</p>
+                            <p class="es-vault-muted mb-4">The public iCal feed, the RSS feed, the XML sitemap and the search on eventschedule.com all start from one filter: not a draft, not unlisted, not cancelled, accepted by the schedule, and not holding a password. The sitemap and the search narrow it further, never wider. That iCal feed is also the live calendar a guest can subscribe to from an event's Add to Calendar menu, so a hidden event cannot reach anybody's calendar through it.</p>
+                            <p class="es-vault-muted text-sm">Four separate surfaces, one privacy rule. That is deliberate: a privacy setting that each surface interprets for itself is a privacy setting that eventually gets one of them wrong.</p>
                         </div>
                         <div class="es-glare" aria-hidden="true"></div>
                         <div class="es-ring-glow" aria-hidden="true"></div>

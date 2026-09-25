@@ -472,13 +472,17 @@
             }
         }
 
+        // Counted from the files themselves: both are edited by hand, and a typed-in count went
+        // stale the first time one of them grew.
+        $lineCount = fn (string $file) => number_format(count(file(public_path($file)))).' lines';
+
         $discovery = [
             [
-                'llms.txt', '/llms.txt', '39 lines',
-                'The short one. Schedule types, the auth header, which plan the API needs, the rate limits, the deployment modes and a four-step getting-started list, so an agent can decide in one fetch whether this API is relevant at all.',
+                'llms.txt', '/llms.txt', $lineCount('llms.txt'),
+                'The short one. What Event Schedule is and what each plan includes, links to the main product, audience, comparison and documentation pages, and the API essentials: the auth header, which plan the API needs, the rate limits and a getting-started sequence, so an agent can decide in one fetch whether this API is relevant at all.',
             ],
             [
-                'llms-full.txt', '/llms-full.txt', '2,077 lines',
+                'llms-full.txt', '/llms-full.txt', $lineCount('llms-full.txt'),
                 'The whole reference in one file, so an agent never has to follow a link to finish a task. Every endpoint, every parameter, every error shape.',
             ],
             [

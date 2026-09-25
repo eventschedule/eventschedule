@@ -270,7 +270,7 @@
             </div>
             <div class="doc-field">
                 <h4 class="font-semibold text-gray-900 dark:text-white mb-2">Online Events</h4>
-                <p class="text-sm text-gray-500 dark:text-gray-400">Tick <strong class="text-gray-900 dark:text-white">Online</strong> and paste an <strong class="text-gray-900 dark:text-white">Event URL</strong>, for example a Zoom, Meet, or Teams link. It is a single link field, shown on the event page for guests to join, with no platform-specific integration behind it.</p>
+                <p class="text-sm text-gray-500 dark:text-gray-400">Tick <strong class="text-gray-900 dark:text-white">Online</strong> and paste an <strong class="text-gray-900 dark:text-white">Event URL</strong>, for example a Zoom, Meet, or Teams link. It is a single link field with no platform-specific integration behind it. The event page never shows the link itself: where there is no venue to name, it shows the link's domain, such as zoom.us, or just Online. The link appears on the ticket of everyone who registers or buys one, so give an online event registration or tickets if guests need to receive it.</p>
             </div>
             <div class="doc-field">
                 <h4 class="font-semibold text-gray-900 dark:text-white mb-2">Venue Contact and Notifications</h4>

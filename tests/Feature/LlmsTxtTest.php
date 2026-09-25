@@ -176,6 +176,20 @@ class LlmsTxtTest extends TestCase
         )));
     }
 
+    /**
+     * /for-ai-agents gives each file's length in its table of discovery files. The typed-in "39
+     * lines" and "2,077 lines" were 30 and 3 lines short by the time anybody looked, since both
+     * files are edited by hand, so the page counts them as it renders.
+     */
+    public function test_the_ai_agents_page_gives_each_files_real_length(): void
+    {
+        $response = $this->get('/for-ai-agents')->assertOk();
+
+        foreach (self::FILES as $file) {
+            $response->assertSeeText(number_format(count(file(public_path($file)))).' lines');
+        }
+    }
+
     /** The files an AI answer is built from say how the allowance is counted, not only how much it is. */
     public function test_both_files_say_each_recipient_counts_as_one(): void
     {
