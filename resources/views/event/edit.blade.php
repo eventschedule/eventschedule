@@ -1007,7 +1007,7 @@
     }
 
     @php
-        $eventEditUrl = $event->exists ? $event->getGuestUrl($subdomain, false, true, false) : '';
+        $eventEditUrl = $event->exists ? $event->getShortGuestUrl($subdomain, true) : '';
         // registrationHref(), as viewGuest() reads it: a trailing slash on an event whose link is
         // no web page would only fall through to the event page.
         if ($event->exists && $role->direct_registration && $event->registrationHref()) {

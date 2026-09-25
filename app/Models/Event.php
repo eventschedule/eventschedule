@@ -3372,6 +3372,34 @@ class Event extends Model
     }
 
     /**
+     * $slug as an event may store it: "{slug}-event" when a route under a schedule's address owns
+     * the word (UrlUtils::reservedPathSlugs()). The event's short link, /{slug} with no id, is
+     * looked up by its slug, so an event slugged "book", "request" or "follow" was never reached
+     * by it: the appointment booking page, the event submission flow or a follow answered instead.
+     *
+     * Applied wherever a slug is made or typed (SlugPatternUtils::generateSlug(), and a slug typed
+     * into the editor). An event that already holds such a slug keeps it, and its editor shows the
+     * link with the id instead (getShortGuestUrl()).
+     */
+    public static function storableSlug(string $slug): string
+    {
+        return in_array($slug, UrlUtils::reservedPathSlugs(), true) ? $slug.'-event' : $slug;
+    }
+
+    /**
+     * The event's shortest guest URL, the one its editor shows and copies: /{slug} with no id, or
+     * the URL with the id when a route owns that slug (see storableSlug()). The slug here can be
+     * another schedule's subdomain - on a venue, its event with a claimed act takes the act's - so
+     * any event can meet this, whatever it is slugged itself.
+     */
+    public function getShortGuestUrl($subdomain = false, $useCustomDomain = false): string
+    {
+        $slug = $this->getGuestUrlData($subdomain, false, false)['slug'];
+
+        return $this->getGuestUrl($subdomain, false, $useCustomDomain, ! is_string($slug) || self::storableSlug($slug) !== $slug);
+    }
+
+    /**
      * "{name} at {where}" for calendar entries and feeds: the venue's name, else the domain of the
      * online link. Just the name when there is neither - never a dangling "{name} at", and never
      * "at Online", which reads as a place.

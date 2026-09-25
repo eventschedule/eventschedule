@@ -5,6 +5,7 @@ namespace Tests\Feature;
 use App\Models\Event;
 use App\Models\Role;
 use App\Models\User;
+use App\Utils\SlugPatternUtils;
 use App\Utils\UrlUtils;
 use Carbon\Carbon;
 use Illuminate\Foundation\Testing\RefreshDatabase;
@@ -293,6 +294,120 @@ class ShadowedEventSlugTest extends TestCase
         ])->assertOk()->json();
 
         $this->get($saved['view_url'])->assertOk()->assertViewIs('event.show-guest')->assertSee('Agenda Night');
+    }
+
+    /** The link the event's editor shows and copies. */
+    private function editorLink(User $owner, Role $schedule, Event $event): string
+    {
+        $html = $this->actingAs($owner)
+            ->get(route('event.edit', ['subdomain' => $schedule->subdomain, 'hash' => UrlUtils::encodeId($event->id)]))
+            ->assertOk()
+            ->getContent();
+
+        $this->assertSame(1, preg_match('~<div id="event-url-display"[^>]*>\s*<a\s+href="([^"]+)"~', $html, $m), 'the editor shows the event link');
+
+        return html_entity_decode($m[1]);
+    }
+
+    /**
+     * The event's short link, /{slug} with no id, is looked up by its slug, so a slug a schedule
+     * route owns sent it to that route. A new event is slugged with "-event" after the word.
+     */
+    public function test_a_new_event_named_after_a_route_word_gets_a_short_link_that_reaches_it(): void
+    {
+        $owner = $this->createOwner();
+        $venue = $this->createRole($owner, 'venue');
+
+        foreach (['Book', 'Request', 'Follow'] as $name) {
+            $this->actingAs($owner)->post(route('event.store', ['subdomain' => $venue->subdomain]), [
+                'name' => $name,
+                'starts_at' => now()->addDays(10)->setTime(19, 0)->format('Y-m-d H:i:s'),
+                'duration' => 2,
+                'schedule_type' => 'one_time',
+            ])->assertRedirect();
+
+            $event = Event::query()->latest('id')->firstOrFail();
+            $slug = strtolower($name).'-event';
+
+            $this->assertSame($slug, $event->slug);
+
+            $link = $this->editorLink($owner, $venue, $event);
+            $this->assertSame(route('event.view_guest', ['subdomain' => $venue->subdomain, 'slug' => $slug]), $link);
+
+            $this->get($link)
+                ->assertOk()
+                ->assertViewIs('event.show-guest')
+                ->assertViewHas('event', fn ($shown) => $shown->id === $event->id);
+        }
+
+        // Every generated slug goes the same way: a slug pattern, and a calendar sync.
+        $this->assertSame('claim-event', SlugPatternUtils::generateSlug(null, 'Claim', null, null, null));
+        $this->assertSame('claim-event', SlugPatternUtils::generateSlug('{event_name}', 'Claim', null, null, null));
+        $this->assertSame('book-club', SlugPatternUtils::generateSlug(null, 'Book Club', null, null, null));
+    }
+
+    /** A slug typed into the editor is stored the same way - unless it is the one the event has. */
+    public function test_a_typed_route_word_slug_is_stored_with_event_after_it(): void
+    {
+        $owner = $this->createOwner();
+        $venue = $this->createRole($owner, 'venue');
+        $save = fn (Event $event, string $slug) => $this->actingAs($owner)->put(route('event.update', [
+            'subdomain' => $venue->subdomain,
+            'hash' => UrlUtils::encodeId($event->id),
+        ]), [
+            'name' => $event->name,
+            'slug' => $slug,
+            'starts_at' => $event->getStartDateTime(null, true, $venue->timezone)->format('Y-m-d H:i:s'),
+            'duration' => $event->duration,
+            'schedule_type' => 'one_time',
+        ])->assertSessionHasNoErrors();
+
+        $event = $this->createEvent($venue, ['name' => 'Claim Night', 'slug' => 'claim-night', 'creator_role_id' => $venue->id]);
+        $save($event, 'claim');
+        $this->assertSame('claim-event', $event->fresh()->slug);
+
+        // The form posts the slug back whenever the field is open: an existing one stays.
+        $legacy = $this->createEvent($venue, ['name' => 'Follow Along', 'slug' => 'follow', 'creator_role_id' => $venue->id]);
+        $save($legacy, 'follow');
+        $this->assertSame('follow', $legacy->fresh()->slug);
+
+        // And "taken" is asked of the slug as it would be stored: claim-event is taken now.
+        $other = $this->createEvent($venue, ['name' => 'Claim Two', 'slug' => 'claim-two', 'creator_role_id' => $venue->id]);
+        $this->actingAs($owner)->put(route('event.update', ['subdomain' => $venue->subdomain, 'hash' => UrlUtils::encodeId($other->id)]), [
+            'name' => $other->name,
+            'slug' => 'claim',
+            'starts_at' => $other->getStartDateTime(null, true, $venue->timezone)->format('Y-m-d H:i:s'),
+            'duration' => $other->duration,
+            'schedule_type' => 'one_time',
+        ])->assertSessionHasErrors(['slug' => __('messages.event_slug_taken')]);
+        $this->assertSame('claim-two', $other->fresh()->slug);
+    }
+
+    /**
+     * An event that already holds such a slug keeps it, and its editor shows the link with the id.
+     * So does a venue's event whose act is called after such a word: the act's subdomain is the
+     * slug of that event's link on the venue.
+     */
+    public function test_an_existing_route_word_slug_shows_the_link_with_its_id(): void
+    {
+        $owner = $this->createOwner();
+        $venue = $this->createRole($owner, 'venue');
+        $event = $this->createEvent($venue, ['name' => 'Book Launch', 'slug' => 'book', 'creator_role_id' => $venue->id]);
+
+        $link = $this->editorLink($owner, $venue, $event);
+
+        $this->assertSame($event->getGuestUrl($venue->subdomain, false, true), $link);
+        $this->get($link)->assertOk()->assertViewIs('event.show-guest')->assertSee('Book Launch');
+        $this->assertSame('book', $event->fresh()->slug, 'the stored slug is left alone');
+
+        $act = $this->createRole($this->createOwner(), 'talent', ['subdomain' => 'request', 'name' => 'The Requests']);
+        $shared = $this->createEvent($venue, ['name' => 'Requests Night', 'creator_role_id' => $venue->id]);
+        $shared->roles()->attach($act->id, ['is_accepted' => true]);
+
+        $link = $this->editorLink($owner, $venue, $shared->fresh());
+
+        $this->assertStringContainsString('/request/', $link, 'fixture: the act is the slug on the venue');
+        $this->get($link)->assertOk()->assertViewIs('event.show-guest')->assertSee('Requests Night');
     }
 
     /** On selfhost the global /map-image/{id} route takes a whole schedule of that name. */

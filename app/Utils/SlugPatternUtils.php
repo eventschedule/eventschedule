@@ -21,6 +21,14 @@ class SlugPatternUtils
      */
     public static function generateSlug(?string $pattern, string $eventName, ?string $eventNameEn, ?Event $event, ?Role $role, ?Role $venue = null): string
     {
+        // Every generated event slug, the saved form's, a pattern's and a calendar sync's alike: a
+        // word a schedule route owns gets "-event" after it, or the event's short link reaches
+        // that route. See Event::storableSlug().
+        return Event::storableSlug(self::slugFor($pattern, $eventName, $eventNameEn, $event, $role, $venue));
+    }
+
+    private static function slugFor(?string $pattern, string $eventName, ?string $eventNameEn, ?Event $event, ?Role $role, ?Role $venue): string
+    {
         // If no pattern, use default behavior (slug from event name)
         if (empty($pattern)) {
             return self::defaultSlug($eventName, $eventNameEn);

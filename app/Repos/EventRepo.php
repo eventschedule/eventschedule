@@ -1028,8 +1028,15 @@ class EventRepo
         if (! $isNewEvent) {
             if ($request->filled('slug')) {
                 // Romanize before falling back, otherwise typing a Hebrew custom slug reports
-                // success and silently changes nothing.
-                $event->slug = \App\Utils\SlugUtils::slugOrRomanize($request->slug) ?: $event->getOriginal('slug');
+                // success and silently changes nothing. A new slug a schedule route owns is stored
+                // with "-event" after it (Event::storableSlug()); the slug the event already has is
+                // left as it is, since the form posts it back whenever the field is open.
+                $typed = \App\Utils\SlugUtils::slugOrRomanize($request->slug);
+                $event->slug = match (true) {
+                    $typed === '' => $event->getOriginal('slug'),
+                    $typed === $event->getOriginal('slug') => $typed,
+                    default => Event::storableSlug($typed),
+                };
             } elseif ($currentRole?->slug_pattern
                 && self::slugPatternFieldsChanged($currentRole->slug_pattern, $event)) {
                 $event->slug = $this->uniqueSlugFor($event, SlugPatternUtils::generateSlug(

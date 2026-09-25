@@ -113,6 +113,13 @@ class EventUpdateRequest extends FormRequest
                 return;
             }
 
+            // The slug as EventRepo::saveEvent() will store it, which is what could clash.
+            $typed = Event::storableSlug($typed);
+
+            if ($typed === $event->slug) {
+                return;
+            }
+
             $roleIds = $event->roles()->pluck('roles.id')->all();
             if ($event->creator_role_id) {
                 $roleIds[] = $event->creator_role_id;
