@@ -19,7 +19,8 @@ class PromoCodeController extends Controller
         ]);
 
         $eventId = UrlUtils::decodeId($request->event_id);
-        $event = Event::with('tickets')->where('is_draft', false)->find($eventId);
+        // Never a booking: it answers as an event that is not there (Event::isMembersOnly()).
+        $event = Event::with('tickets')->where('is_draft', false)->whereNull('appointment_type_id')->find($eventId);
 
         if (! $event) {
             return response()->json([

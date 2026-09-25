@@ -2159,8 +2159,9 @@ class RoleController extends Controller
             }
 
             if ($event) {
-                // Block direct URL access to draft events for non-members
-                if ($event->is_draft && (! $user || (! $user->isMember($subdomain) && ! $user->isAdmin()))) {
+                // Block direct URL access to draft events and appointment bookings for non-members:
+                // they answer as an event that is not there. See Event::isMembersOnly().
+                if ($event->isMembersOnly() && (! $user || (! $user->isMember($subdomain) && ! $user->isAdmin()))) {
                     $event = null;
                 }
             }
@@ -2808,6 +2809,8 @@ class RoleController extends Controller
         $eventId = UrlUtils::decodeId($request->event_id);
         $event = Event::whereHas('roles', fn ($q) => $q->where('subdomain', $subdomain))
             ->where('is_draft', false)
+            // A booking has no password to enter, and redirecting back to it confirmed it was there.
+            ->whereNull('appointment_type_id')
             ->find($eventId);
 
         if (! $event) {

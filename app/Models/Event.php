@@ -1057,6 +1057,21 @@ class Event extends Model
     }
 
     /**
+     * Whether only the schedule's own people - its members, and admins - may reach this event on a
+     * guest surface, which answers anybody else as it answers an event that is not there.
+     *
+     * A draft, Draft and Internal alike (both set is_draft). And an appointment booking: it is
+     * named after its guest, who manages it through the booking's own secret link
+     * (AppointmentController::manage()), so the public event page is no part of anybody's flow,
+     * and an event id is no secret. Unlisted was never enough: anybody holding the link may open
+     * an unlisted event.
+     */
+    public function isMembersOnly(): bool
+    {
+        return (bool) $this->is_draft || $this->isAppointment();
+    }
+
+    /**
      * Whether the creator schedule has neither accepted nor declined this event yet - the state an
      * appointment booking sits in while `requires_approval` is pending.
      *
@@ -2330,7 +2345,7 @@ class Event extends Model
             return 'not_on_schedule';
         }
 
-        if ($this->is_draft && ! $isMemberOrAdmin) {
+        if ($this->isMembersOnly() && ! $isMemberOrAdmin) {
             return 'hidden';
         }
 

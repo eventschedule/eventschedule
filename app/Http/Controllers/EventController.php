@@ -1752,7 +1752,7 @@ class EventController extends Controller
         // subdomain does.
         $role = Role::findForGuestOrFail($subdomain);
 
-        if ($event->is_draft) {
+        if ($event->isMembersOnly()) {
             $user = auth()->user();
             $isMemberOrAdmin = $user && ($user->isMember($subdomain) || $user->isAdmin());
             if (! $isMemberOrAdmin) {
@@ -3866,7 +3866,7 @@ class EventController extends Controller
 
         $user = auth()->user();
         $isMemberOrAdmin = $user && ($user->isMember($subdomain) || $user->isAdmin());
-        if ($event->is_draft && ! $isMemberOrAdmin) {
+        if ($event->isMembersOnly() && ! $isMemberOrAdmin) {
             abort(404);
         }
         if ($event->is_private && ! $isMemberOrAdmin) {
@@ -3991,7 +3991,7 @@ class EventController extends Controller
 
         $user = auth()->user();
         $isMemberOrAdmin = $user && ($user->isMember($subdomain) || $user->isAdmin());
-        if ($event->is_draft && ! $isMemberOrAdmin) {
+        if ($event->isMembersOnly() && ! $isMemberOrAdmin) {
             abort(404);
         }
         if ($event->is_private && ! $isMemberOrAdmin) {
@@ -4149,7 +4149,7 @@ class EventController extends Controller
 
         $user = auth()->user();
         $isMemberOrAdmin = $user && ($user->isMember($subdomain) || $user->isAdmin());
-        if ($event->is_draft && ! $isMemberOrAdmin) {
+        if ($event->isMembersOnly() && ! $isMemberOrAdmin) {
             abort(404);
         }
         if ($event->is_private && ! $isMemberOrAdmin) {
@@ -4522,6 +4522,12 @@ class EventController extends Controller
         $user = auth()->user();
         $isMemberOrAdmin = $user && ($user->isMember($subdomain) || $user->isAdmin());
 
+        // An appointment booking answers like an event that is not there, as its page does. See
+        // Event::isMembersOnly().
+        if ($event->isAppointment() && ! $isMemberOrAdmin) {
+            return $this->guestNotFound($role, $slug);
+        }
+
         // Draft and internal events (both is_draft=true) are members-only - a non-member must not
         // reach the fan-photo gallery by direct link, matching the guest event page guard.
         if ($event->is_draft && ! $isMemberOrAdmin) {
@@ -4675,24 +4681,23 @@ class EventController extends Controller
 
         // Only an event this schedule's own page shows this visitor, and otherwise the 404 an
         // unknown event gets. This used to serve any event merely attached to the schedule, one
-        // it had declined or not yet answered included, and to answer a locked one with a 403
-        // that said it was there.
-        // - Accepted on this schedule, as EventRepo::getEvent() asks; its own people also reach
-        //   what is pending here, as they do on the page.
-        // - Event::guestVisibilityFailure(), the gate checkout and the seat map use: not a draft,
-        //   and not unlisted unless unlocked. Stricter than the page, which shows an unlisted event
-        //   to anybody holding the link, and on purpose: an appointment booking is an unlisted
-        //   event named after its guest, and its .ics goes out behind the booking's own secret
-        //   (AppointmentController::ical()).
-        // - Past any password, for anybody outside it: a member, an admin or a session that entered
-        //   it, as RoleController::bypassesEventPassword() has it. Older listed rows carry one as
-        //   well, which the gate above does not look at.
+        // it had declined or not yet answered included, to answer a locked one with a 403 that
+        // said it was there, and to refuse an unlisted one to the very people its page shows it
+        // to, so the page's own Apple Calendar link 404'd for them. The page's rules:
+        // - accepted on this schedule, as EventRepo::getEvent() asks; its own people also reach
+        //   what is pending here, as they do on the page;
+        // - not members-only (Event::isMembersOnly()): not a draft, and not an appointment
+        //   booking, whose .ics goes out behind the booking's own secret instead
+        //   (AppointmentController::ical());
+        // - past any password: a member, an admin or a session that entered it, as
+        //   RoleController::bypassesEventPassword() has it. Unlisted is no bar of its own, as it
+        //   is none on the page: anybody holding the link may open it.
         $event = Event::whereHas('roles', fn ($q) => $q->where('roles.id', $role->id)
             ->when(! $isMemberOrAdmin, fn ($q) => $q->where('event_role.is_accepted', true)))
             ->find(UrlUtils::decodeId($id));
 
         if (! $event
-            || $event->guestVisibilityFailure($role, $isMemberOrAdmin) !== null
+            || ($event->isMembersOnly() && ! $isMemberOrAdmin)
             || ($event->isPasswordProtected() && ! $isMemberOrAdmin && ! session()->has('event_password_'.$event->id))) {
             abort(404);
         }
@@ -4934,8 +4939,10 @@ class EventController extends Controller
      * two cannot drift, and ordered on purpose:
      *
      * 1. The event must be on the schedule in the URL, and accepted there.
-     * 2. Draft and Internal (both is_draft) are members-only. A 404 rather than a 401, so an
-     *    anonymous caller cannot tell a draft from an event that does not exist.
+     * 2. Draft and Internal (both is_draft), and appointment bookings, are members-only
+     *    (Event::isMembersOnly()). Thrown as the ModelNotFoundException Event::findOrFail()
+     *    throws for an id that matches nothing, so the answer is that one's, body and all: a
+     *    JSON refusal of our own was a 404 too, but a different one, which told the event apart.
      * 3. A password gates everyone but members until it has been entered this session, on any
      *    event that has one: isPasswordProtected() does not read is_private. Also a 404.
      * 4. Unlisted (is_private) without a password is open to anyone holding the link, as its
@@ -4955,8 +4962,8 @@ class EventController extends Controller
         $user = auth()->user();
         $isMemberOrAdmin = $user && ($user->isMember($subdomain) || $user->isAdmin());
 
-        if ($event->is_draft && ! $isMemberOrAdmin) {
-            return response()->json(['error' => __('messages.not_authorized')], 404);
+        if ($event->isMembersOnly() && ! $isMemberOrAdmin) {
+            throw (new \Illuminate\Database\Eloquent\ModelNotFoundException)->setModel(Event::class, [$event->id]);
         }
 
         if ($event->isPasswordProtected() && ! $isMemberOrAdmin

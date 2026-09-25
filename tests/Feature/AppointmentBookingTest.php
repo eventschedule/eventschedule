@@ -296,8 +296,8 @@ class AppointmentBookingTest extends TestCase
         $this->get(route('appointments.ical', ['event_id' => $encoded, 'secret' => str_repeat('x', 32)]))
             ->assertNotFound();
 
-        // Documents WHY this route exists: bookings are is_private, so the normal event iCal download
-        // 404s for the very guest who made the booking.
+        // Documents WHY this route exists: a booking is members-only (Event::isMembersOnly()), so the
+        // normal event iCal download 404s for the very guest who made the booking.
         $this->get($event->getAppleCalendarUrl())->assertNotFound();
 
         // The Google/Outlook links carry the type name, not the "Type - Guest" event name.

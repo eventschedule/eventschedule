@@ -29,7 +29,7 @@ class WaitlistController extends Controller
         $eventId = UrlUtils::decodeId($request->event_id);
         $event = Event::with('tickets')->findOrFail($eventId);
 
-        if ($event->is_draft) {
+        if ($event->isMembersOnly()) {
             abort(404);
         }
 

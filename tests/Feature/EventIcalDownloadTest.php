@@ -11,17 +11,15 @@ use Tests\Feature\Concerns\CreatesScheduleData;
 use Tests\TestCase;
 
 /**
- * An event's .ics download answers only when the schedule's own event page shows the event to this
- * visitor, and otherwise as an unknown event does.
+ * An event's .ics download answers exactly when the schedule's own event page shows the event to
+ * this visitor, and otherwise as an unknown event does.
  *
  * It used to ask only whether the event was attached to the schedule, in any state: a listing the
  * schedule had declined, or never answered, downloaded in full - title, description and address.
- * A locked event answered 403, which said it was there, and an unlisted locked one stayed a 404
- * even for a visitor who had entered its password.
- *
- * One deliberate difference from the page: an unlisted event without a password is refused here,
- * as it always was, though the page shows it to anybody holding the link. An appointment booking
- * is exactly that kind of event, named after its guest (AppointmentBookingTest).
+ * A locked event answered 403, which said it was there, and an unlisted one was refused even to
+ * the people its page shows it to, so that page's own Apple Calendar link was dead. An
+ * appointment booking, the one unlisted event nobody but its schedule may open, is members-only
+ * in its own right (AppointmentPrivacyTest).
  */
 class EventIcalDownloadTest extends TestCase
 {
@@ -74,7 +72,7 @@ class EventIcalDownloadTest extends TestCase
 
         $unknown = $this->get('/'.$venue->subdomain.'/no-such-event/'.UrlUtils::encodeId(999999).'/ical')->assertNotFound();
 
-        foreach (['pending', 'declined', 'draft', 'locked', 'older locked', 'unlisted'] as $what) {
+        foreach (['pending', 'declined', 'draft', 'locked', 'older locked'] as $what) {
             $response = $this->get($this->ics($venue, $events[$what]));
 
             $this->assertSame(404, $response->getStatusCode(), "a visitor downloads the {$what} event");
@@ -85,6 +83,13 @@ class EventIcalDownloadTest extends TestCase
             ->assertOk()
             ->assertHeader('Content-Type', 'text/calendar; charset=utf-8')
             ->assertSee("SUMMARY:Open Night at Harbour Wine Bar\r\n", false);
+
+        // Unlisted is no bar on the page - anybody holding the link may open it - so it is none
+        // here, and the page's own Apple Calendar link downloads.
+        $page = $this->get($this->guestEventUrl($venue, $events['unlisted']))->assertOk();
+        $link = $events['unlisted']->getAppleCalendarUrl(null, $venue->subdomain);
+        $page->assertSee('href="'.e($link).'"', false);
+        $this->get($link)->assertOk()->assertSee('SUMMARY:Link Only Night', false);
     }
 
     public function test_a_password_event_downloads_once_past_the_password(): void

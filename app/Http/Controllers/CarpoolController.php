@@ -43,7 +43,7 @@ class CarpoolController extends Controller
         $user = auth()->user();
         $isMemberOrAdmin = $user && ($user->isMember($subdomain) || $user->isAdmin());
 
-        if ($event->is_draft && ! $isMemberOrAdmin) {
+        if ($event->isMembersOnly() && ! $isMemberOrAdmin) {
             abort(404);
         }
         if ($event->is_private && ! $isMemberOrAdmin
