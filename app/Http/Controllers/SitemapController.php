@@ -73,6 +73,12 @@ class SitemapController extends Controller
     private const EVENT_ROLE_COLUMNS = 'id,subdomain,type,user_id,email,email_verified_at,phone,phone_verified_at,'
         .'is_deleted,is_unlisted,custom_domain,custom_domain_mode,custom_domain_status';
 
+    /**
+     * EventRepo::getEvent()'s "upcoming" test for a bare slug, bound to [now less a day, now]: the
+     * instance a bare /{slug} shows is the next one it passes, else the latest. See collapseWinners().
+     */
+    private const UPCOMING = '(events.starts_at >= ? OR (events.duration >= 24 AND DATE_ADD(events.starts_at, INTERVAL events.duration HOUR) >= ?))';
+
     /** Per-request memo of the section list. */
     private ?array $sections = null;
 
@@ -229,15 +235,18 @@ class SitemapController extends Controller
                 ->where('event_role.role_id', $role->id)
                 ->where('event_role.is_accepted', true));
 
-        $winners = $this->collapseWinners($eligible());
+        // An event listed on several schedules is canonical on only one of them, and this sitemap
+        // lists it only when that one is this schedule. Checking the host alone was not enough: on
+        // selfhost every schedule shares one host, so each schedule's sitemap listed the canonicals
+        // of every event it had accepted.
+        $homeAllowed = fn (Role $home) => $home->is($role);
 
-        $eligible()
-            ->select(['id', 'slug', 'starts_at', 'days_of_week', 'creator_role_id', 'updated_at'])
-            ->with([
-                'roles:'.self::EVENT_ROLE_COLUMNS,
-                'creatorRole:id,subdomain,type,user_id,email_verified_at,phone_verified_at',
-            ])
-            ->chunkByIdDesc(self::HYDRATE_CHUNK, function ($events) use ($role, $write, $cap, $winners, &$written) {
+        // Not cached, unlike the global map: one schedule's instances are few, and this sitemap is
+        // one request rather than pages that have to agree.
+        $winners = $this->collapseWinners($eligible, $homeAllowed);
+
+        $this->withListingColumns($eligible())
+            ->chunkByIdDesc(self::HYDRATE_CHUNK, function ($events) use ($write, $cap, $winners, $homeAllowed, &$written) {
                 foreach ($events as $event) {
                     if ($written >= $cap) {
                         return false;
@@ -247,11 +256,7 @@ class SitemapController extends Controller
                         continue;
                     }
 
-                    // An event listed on several schedules is canonical on only one of them, and
-                    // this sitemap lists it only when that one is this schedule. Checking the host
-                    // alone was not enough: on selfhost every schedule shares one host, so each
-                    // schedule's sitemap listed the canonicals of every event it had accepted.
-                    $loc = $this->eventLoc($event, fn (Role $home) => $home->is($role));
+                    $loc = $this->eventLoc($event, $homeAllowed);
 
                     if (! $loc) {
                         continue;
@@ -521,26 +526,16 @@ class SitemapController extends Controller
 
         // Over every eligible event, not just this page's range: the instances of one slug are
         // spread across pages, and each page has to agree on which one is listed.
-        $winners = $this->collapseWinners($this->discoverableEventQuery());
+        $winners = $this->globalCollapseWinners();
 
-        // EVENT_ROLE_COLUMNS lists what the loop reads from the roles. is_private / is_draft /
-        // is_cancelled / event_password are query predicates only and are deliberately never
-        // selected; the canonical carries no date, so creatorRole.timezone is not needed either.
-        $this->applyRange($this->discoverableEventQuery(), $range)
-            ->select(['id', 'slug', 'starts_at', 'days_of_week', 'creator_role_id', 'updated_at'])
-            ->with([
-                'roles:'.self::EVENT_ROLE_COLUMNS,
-                'creatorRole:id,subdomain,type,user_id,email_verified_at,phone_verified_at',
-            ])
+        $this->withListingColumns($this->applyRange($this->discoverableEventQuery(), $range))
             ->chunkByIdDesc(self::HYDRATE_CHUNK, function ($events) use ($write, $winners, &$skipped) {
                 foreach ($events as $event) {
                     if ($this->isCollapsedAway($event, $winners)) {
                         continue;
                     }
 
-                    // An unlisted home keeps its events out of OUR listing, as it keeps itself out
-                    // of discoverableScheduleQuery(). The per-schedule sitemap has no such rule.
-                    $loc = $this->eventLoc($event, fn (Role $home) => ! $home->is_unlisted);
+                    $loc = $this->eventLoc($event, self::listedGlobally(...));
 
                     if (! $loc) {
                         $skipped++;
@@ -579,6 +574,35 @@ class SitemapController extends Controller
         }
 
         return $this->isListable($url) && $this->isTenantUrl($url) ? $url : null;
+    }
+
+    /**
+     * The global sitemap's rule for an event's home: an unlisted one keeps its events out of OUR
+     * listing, as it keeps itself out of discoverableScheduleQuery(). The per-schedule sitemap has
+     * no such rule.
+     */
+    private static function listedGlobally(Role $home): bool
+    {
+        return ! $home->is_unlisted;
+    }
+
+    /**
+     * The columns and relations eventLoc() reads, for the listing loops and for collapseWinners(),
+     * which has to see each row exactly as the listing will: a sibling it judged listable on other
+     * data could be refused by the listing, and the group would vanish.
+     *
+     * EVENT_ROLE_COLUMNS lists what is read from the roles. is_private / is_draft / is_cancelled /
+     * event_password are query predicates only and are deliberately never selected; the canonical
+     * carries no date, so creatorRole.timezone is not needed either.
+     */
+    private function withListingColumns($query)
+    {
+        return $query
+            ->select(['id', 'slug', 'starts_at', 'days_of_week', 'creator_role_id', 'updated_at'])
+            ->with([
+                'roles:'.self::EVENT_ROLE_COLUMNS,
+                'creatorRole:id,subdomain,type,user_id,email_verified_at,phone_verified_at',
+            ]);
     }
 
     /*
@@ -706,40 +730,135 @@ class SitemapController extends Controller
      * the next upcoming instance, else the latest. A recurring series is a single row already, and
      * an event with no creator, or another creator's, is never folded into a group.
      *
-     * One GROUP BY over the same rows the listing walks, once per request, and only groups of two
-     * or more come back, so the map is as small as the problem. The winner's id is packed behind
+     * One GROUP BY over the same rows the listing walks, once per map, and only groups of two or
+     * more come back, so the map is as small as the problem. The winner's id is packed behind
      * its starts_at - CONCAT(starts_at, LPAD(id, 20, '0')) orders by time, then by id - so an exact
      * tie resolves the same way on every page of the sitemap, not to whichever row a page saw first.
      *
+     * That instance is only the preferred one. Whether a row is listed is eventLoc()'s call, and it
+     * reads each row's own schedules: an act that accepted only next week's instance makes that one
+     * canonical on the act, so the venue's own sitemap refused it and an unlisted act kept it out of
+     * ours - and with every sibling folded into it, the whole event went unlisted. So the preferred
+     * instances are checked with the listing's own rule, and a group whose preferred instance fails
+     * lists the first of its members, in the same order, that passes. When none does the preferred
+     * id stays, and nothing is listed: no instance of that event belongs in this sitemap.
+     *
+     * @param  callable(): \Illuminate\Database\Eloquent\Builder  $eligible  a fresh query over the rows the listing walks
+     * @param  callable(Role): bool  $homeAllowed  the listing's own rule for the home, as eventLoc() applies it
      * @return array<string, int> collapseKey() => the id of the instance to list
      */
-    private function collapseWinners($eligible): array
+    private function collapseWinners(callable $eligible, callable $homeAllowed): array
     {
         $now = $this->now();
+        $upcoming = self::UPCOMING;
+        $bindings = [$now->copy()->subDay()->format('Y-m-d H:i:s'), $now->format('Y-m-d H:i:s')];
         $packed = "CONCAT(events.starts_at, LPAD(events.id, 20, '0'))";
 
-        // EventRepo::getEvent()'s "upcoming" test for a bare slug.
-        $upcoming = 'events.starts_at >= ? OR (events.duration >= 24 AND DATE_ADD(events.starts_at, INTERVAL events.duration HOUR) >= ?)';
-
-        $rows = $eligible
+        $rows = $eligible()
             ->whereNull('events.days_of_week')
             ->whereNotNull('events.creator_role_id')
             ->groupBy('events.creator_role_id', 'events.slug')
             ->havingRaw('COUNT(*) > 1')
             ->selectRaw(
                 "events.creator_role_id, events.slug, COALESCE(MIN(CASE WHEN {$upcoming} THEN {$packed} END), MAX({$packed})) AS pick",
-                [$now->copy()->subDay()->format('Y-m-d H:i:s'), $now->format('Y-m-d H:i:s')]
+                $bindings
             )
             ->toBase()
             ->get();
 
         $winners = [];
+        $groups = [];
 
         foreach ($rows as $row) {
-            $winners[self::collapseKey($row->creator_role_id, $row->slug)] = (int) substr($row->pick, -20);
+            $key = self::collapseKey($row->creator_role_id, $row->slug);
+            $winners[$key] = (int) substr($row->pick, -20);
+            $groups[$key] = [$row->creator_role_id, $row->slug];
+        }
+
+        // The groups whose preferred instance the listing would refuse. The listing's own columns
+        // and eager loads, so no per-row queries (demoOwnerId() is memoized).
+        $refused = [];
+
+        foreach (array_chunk($winners, self::HYDRATE_CHUNK, true) as $chunk) {
+            $listed = $this->withListingColumns($eligible())
+                ->whereIn('events.id', array_values($chunk))
+                ->get()
+                ->filter(fn (Event $event) => $this->eventLoc($event, $homeAllowed) !== null)
+                ->keyBy(fn (Event $event) => (int) $event->id);
+
+            foreach ($chunk as $key => $id) {
+                if (! $listed->has($id)) {
+                    $refused[$key] = $groups[$key];
+                }
+            }
+        }
+
+        // Their members, most preferred first: the order the pick above packs - upcoming instances
+        // soonest first, then the rest latest first, the id breaking a tie the same way.
+        foreach (array_chunk($refused, self::HYDRATE_CHUNK, true) as $unresolved) {
+            $members = $this->withListingColumns($eligible())
+                ->whereNull('events.days_of_week')
+                ->whereIn('events.creator_role_id', array_unique(array_column($unresolved, 0)))
+                ->whereIn('events.slug', array_unique(array_column($unresolved, 1)))
+                ->orderByRaw("CASE WHEN {$upcoming} THEN 0 ELSE 1 END", $bindings)
+                ->orderByRaw("CASE WHEN {$upcoming} THEN events.starts_at END", $bindings)
+                ->orderByRaw("CASE WHEN {$upcoming} THEN events.id END", $bindings)
+                ->orderByDesc('events.starts_at')
+                ->orderByDesc('events.id')
+                ->lazy(self::HYDRATE_CHUNK);
+
+            foreach ($members as $event) {
+                // The two IN lists cross, so a row may belong to another group, or to none.
+                $key = self::collapseKey($event->creator_role_id, $event->slug);
+
+                if (! isset($unresolved[$key]) || $this->eventLoc($event, $homeAllowed) === null) {
+                    continue;
+                }
+
+                $winners[$key] = (int) $event->id;
+                unset($unresolved[$key]);
+
+                if (! $unresolved) {
+                    break;
+                }
+            }
         }
 
         return $winners;
+    }
+
+    /**
+     * collapseWinners() for the global sitemap, cached.
+     *
+     * Every events-N page needs the whole map, and working it out now hydrates rows, so it is done
+     * once per cache period rather than once per page - which also keeps the pages of one crawl in
+     * agreement. Under its own key, with the section list's TTLs: folding it into that entry would
+     * change the shape of an entry a stale cache still serves after a deploy. A stale map can only
+     * list another instance of a group, or leave one out for a while when its chosen instance has
+     * since gone. The per-schedule sitemap is one request, and works its map out every time.
+     *
+     * A cache store that fails costs the cache, never the sitemap: the map is worked out directly.
+     *
+     * @return array<string, int>
+     */
+    private function globalCollapseWinners(): array
+    {
+        $compute = fn () => $this->collapseWinners(
+            fn () => $this->discoverableEventQuery(),
+            self::listedGlobally(...)
+        );
+
+        try {
+            return Cache::flexible(
+                'sitemap:collapse:'.config('app.url'),
+                [self::CACHE_SECONDS, self::CACHE_STALE_SECONDS],
+                $compute
+            );
+        } catch (\Throwable $e) {
+            report($e);
+
+            return $compute();
+        }
     }
 
     /** Whether $event is an instance collapseWinners() folded into another. */

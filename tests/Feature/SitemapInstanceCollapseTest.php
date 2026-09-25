@@ -5,7 +5,10 @@ namespace Tests\Feature;
 use App\Models\Event;
 use App\Models\Role;
 use Carbon\Carbon;
+use Illuminate\Cache\ArrayStore;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Support\Facades\Cache;
+use Illuminate\Support\Facades\Exceptions;
 use Tests\Feature\Concerns\CreatesScheduleData;
 use Tests\TestCase;
 
@@ -143,5 +146,145 @@ class SitemapInstanceCollapseTest extends TestCase
         }
 
         $this->assertCount(6, $global);
+    }
+
+    /**
+     * A venue's instances of one slug, with an act that accepted only $onlyOn of them - which makes
+     * each of those canonical on the act, not on the venue.
+     *
+     * @param  array<int, int>  $days  one instance per entry, $days from today
+     * @return array{0: Role, 1: array<int, Event>, 2: Role} the venue, its instances keyed by day, the act
+     */
+    private function actOnSomeInstances(array $days, array $onlyOn, bool $actUnlisted): array
+    {
+        $venue = $this->createRole($this->createOwner(), 'venue');
+        $act = $this->createRole($this->createOwner(), 'talent', ['is_unlisted' => $actUnlisted]);
+
+        $instances = [];
+
+        foreach ($days as $day) {
+            $instances[$day] = $this->occurrence($venue, $day);
+        }
+
+        foreach ($onlyOn as $day) {
+            $instances[$day]->roles()->attach($act->id, ['is_accepted' => true]);
+        }
+
+        return [$venue, $instances, $act];
+    }
+
+    /**
+     * The preferred instance is the one an act accepted, so it is canonical on the act, and the
+     * venue's own sitemap lists only its own canonicals. With every sibling folded into that one,
+     * the venue's sitemap used to list no instance at all. It lists the next one it can.
+     */
+    public function test_a_venue_still_lists_an_instance_when_its_act_accepted_only_the_preferred_one(): void
+    {
+        [$venue, $instances, $act] = $this->actOnSomeInstances([-10, 7, 14], onlyOn: [7], actUnlisted: false);
+
+        [$global, $own] = $this->listed($venue);
+
+        $this->assertSame([$this->guestEventUrl($venue, $instances[14])], $own);
+
+        // The global sitemap still lists the preferred instance, where it is canonical.
+        $this->assertSame([$instances[7]->fresh()->getCanonicalUrl()], $global);
+        $this->assertStringStartsWith(url('/'.$act->subdomain.'/'), $global[0], 'fixture: canonical on the act');
+    }
+
+    /** The same fold, globally: an unlisted act keeps its canonicals out of our listing. */
+    public function test_the_global_sitemap_lists_a_venue_instance_when_the_preferred_ones_act_is_unlisted(): void
+    {
+        [$venue, $instances] = $this->actOnSomeInstances([-10, 7, 14], onlyOn: [7], actUnlisted: true);
+
+        [$global, $own] = $this->listed($venue);
+
+        $this->assertSame([$this->guestEventUrl($venue, $instances[14])], $global);
+        $this->assertSame([$this->guestEventUrl($venue, $instances[14])], $own);
+    }
+
+    /**
+     * The instance listed instead is decided over every page's rows at once, so each page agrees:
+     * worked out from one page's rows alone, the next two instances would each look listable on
+     * their own page, and both would be.
+     */
+    public function test_the_instance_listed_instead_is_listed_exactly_once_across_pages(): void
+    {
+        config(['app.sitemap_urls_per_file' => 1]);
+
+        [$venue, $instances] = $this->actOnSomeInstances([7, 14, 21], onlyOn: [7], actUnlisted: true);
+
+        [$global] = $this->listed($venue);
+
+        $this->assertSame([$this->guestEventUrl($venue, $instances[14])], $global);
+    }
+
+    /**
+     * When no instance may be listed, none is: the preferred one stays the pick, and the listing
+     * refuses it. A pin rather than a fix - the listing's own check refused these before and after.
+     */
+    public function test_no_instance_is_listed_when_none_of_them_can_be(): void
+    {
+        [$venue] = $this->actOnSomeInstances([7, 14], onlyOn: [7, 14], actUnlisted: true);
+
+        [$global, $own] = $this->listed($venue);
+
+        $this->assertSame([], $global);
+        $this->assertSame([], $own);
+    }
+
+    /**
+     * The global map is cached under its own key, so a crawl's pages agree and each one does not
+     * work it out again - which is also why data changed between two requests needs a flush.
+     */
+    public function test_the_global_map_is_cached_under_its_own_key(): void
+    {
+        [$venue, $instances, $act] = $this->actOnSomeInstances([7, 14], onlyOn: [7], actUnlisted: true);
+
+        [$global] = $this->listed($venue);
+        $this->assertSame([$this->guestEventUrl($venue, $instances[14])], $global);
+        $this->assertContains($instances[14]->id, Cache::get('sitemap:collapse:'.config('app.url')));
+
+        // The act leaves: the preferred instance is the venue's own again, and listable. The cached
+        // map still names the one it chose.
+        $instances[7]->roles()->detach($act->id);
+
+        [$global] = $this->listed($venue);
+        $this->assertSame([$this->guestEventUrl($venue, $instances[14])], $global);
+
+        Cache::flush();
+
+        [$global] = $this->listed($venue);
+        $this->assertSame([$this->guestEventUrl($venue, $instances[7])], $global);
+    }
+
+    /** A cache store that fails costs the cache, never the sitemap: the map is worked out directly. */
+    public function test_a_failing_cache_store_still_collapses_the_global_sitemap(): void
+    {
+        Exceptions::fake();
+
+        Cache::extend('collapse-map-down', fn ($app) => Cache::repository(new class extends ArrayStore
+        {
+            public function many(array $keys)
+            {
+                foreach ($keys as $key) {
+                    if (str_starts_with($key, 'sitemap:collapse:')) {
+                        throw new \RuntimeException('cache store down');
+                    }
+                }
+
+                return parent::many($keys);
+            }
+        }));
+        config([
+            'cache.stores.collapse-map-down' => ['driver' => 'collapse-map-down'],
+            'cache.default' => 'collapse-map-down',
+        ]);
+
+        [$venue, $instances] = $this->actOnSomeInstances([-10, 7, 14], onlyOn: [7], actUnlisted: true);
+
+        [$global] = $this->listed($venue);
+
+        $this->assertSame([$this->guestEventUrl($venue, $instances[14])], $global);
+        Exceptions::assertReported(fn (\RuntimeException $e) => $e->getMessage() === 'cache store down');
     }
 }
