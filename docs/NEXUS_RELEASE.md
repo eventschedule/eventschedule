@@ -44,6 +44,9 @@ events and appointment types keep working ship with them. **P9** covers this and
 ticket one by hand before triggering the deploy; **P10** and **P11** are two config reads and two
 SQL queries that each prevent a failed `migrate --force`. Read P9 to P11 alongside P2.
 
+**The next deploy also carries SEO round 3 and its fixes**, the 66 commits after v1.0.132. They
+have their own checklist: [SEO round 3 and its fixes](#seo-round-3-and-its-fixes-the-66-commits-after-v10132).
+
 The pre-deploy baseline, confirmed live:
 
 ```
@@ -868,6 +871,236 @@ Watch for:
   same operation). Before this, that second shape offered nothing but Suspend, so the
   dashboard's "changed its address" alert could not be cleared without dropping the install
   off the network and mailing its operator twice to put it back.
+
+## SEO round 3 and its fixes (the 66 commits after v1.0.132)
+
+The commits are `git log v1.0.132..8e02425f0`. They cover three things.
+
+**Guest-page SEO:**
+- one canonical per recurring series;
+- one indexability rule behind the sitemaps and the robots tag;
+- real titles, descriptions and structured data;
+- resized headers and backgrounds.
+
+**New marketing pages:** the ticket fee calculator, booking requests, the event landing page, and
+four comparison pages.
+
+**The fixes its review found,** including older bugs of the same kinds:
+- the hourly demo reset deleting real `demo-*` schedules along with their events' sales;
+- one schedule deleting another's image files, and CSS injection;
+- `javascript:` links;
+- hidden schedules, password events and appointment bookings showing on public pages;
+- about 60 corrected public claims.
+
+**One migration, and it is cheap.** `2026_09_24_000000_add_banner_image_variants_to_roles` adds
+two nullable `json` columns at the end of `roles`, with no `->after()`, so it runs INSTANT. JSON is
+stored off-page, so P11's row-size concern does not apply.
+
+**No new env vars, no new scheduled commands.** CI passed on `8e02425f0` (run 36117719257): the
+feature tests, Dusk and the security audit.
+
+### Before the deploy - read-only
+
+P1 (snapshot) and P3 (app spec) apply as always. Then four queries. None of them blocks the
+deploy; each tells you what the old code has already done.
+
+**Q1. Real schedules on a `demo-` address.**
+
+```sql
+SELECT r.id, r.subdomain, r.name, r.created_at
+FROM roles r
+LEFT JOIN users u ON u.id = r.user_id
+WHERE r.subdomain LIKE 'demo-%'
+  AND r.subdomain <> 'simpsons'
+  AND (u.email IS NULL OR u.email <> 'contact@eventschedule.com');
+```
+
+`contact@eventschedule.com` is `DemoService::DEMO_EMAIL`.
+- On v1.0.132, `app:setup-demo` deletes every `demo-*` schedule within the hour, along with the
+  tickets and sales of every event attached to one. So this can only show schedules created since
+  the last run.
+- Any row at all means real customers are hitting this, and earlier ones were already deleted.
+  Check the support inbox, and restore from the P1 snapshot or the backups.
+- Deploying stops the deletions.
+
+**Q2. Image files shared between rows.**
+
+```sql
+SELECT name, COUNT(*) AS uses,
+       GROUP_CONCAT(CONCAT(col, '#', id) ORDER BY col, id SEPARATOR ', ') AS used_by
+FROM (
+    SELECT profile_image_url COLLATE utf8mb4_bin AS name, 'roles.profile_image_url' AS col, id FROM roles
+    UNION ALL SELECT header_image_url COLLATE utf8mb4_bin, 'roles.header_image_url', id FROM roles
+    UNION ALL SELECT background_image_url COLLATE utf8mb4_bin, 'roles.background_image_url', id FROM roles
+    UNION ALL SELECT flyer_image_url COLLATE utf8mb4_bin, 'events.flyer_image_url', id FROM events
+) AS image
+WHERE name IS NOT NULL AND name <> '' AND name NOT LIKE 'demo\_%' AND name NOT LIKE 'http%'
+GROUP BY name HAVING COUNT(*) > 1 ORDER BY uses DESC, name;
+```
+
+Rows listed together share one file, so replacing or deleting the image on one of them deletes the
+other's. A same-install backup restore produced these legitimately before this release. The
+release stops new sharing, but existing pairs stay shared until every row but one gets its own
+copy of the file.
+
+**Q3. Stored `..` paths.**
+
+```sql
+SELECT 'roles' AS tbl, id FROM roles
+ WHERE CONCAT_WS('|', profile_image_url, header_image_url, background_image_url, sponsor_logos) LIKE '%..%'
+UNION ALL
+SELECT 'events', id FROM events
+ WHERE CONCAT_WS('|', flyer_image_url, agenda_image_url, sponsor_logos) LIKE '%..%'
+UNION ALL
+SELECT 'users', id FROM users WHERE profile_image_url LIKE '%..%';
+```
+
+A row here came from an older or hand-edited backup restore. `Storage::delete()` resolves `..`, so
+clear the value.
+
+**Q4. Appointment bookings stored as listed.**
+
+```sql
+SELECT COUNT(*) AS bookings_not_unlisted
+FROM events
+WHERE appointment_type_id IS NOT NULL AND is_private = 0;
+```
+
+A booking is named after its guest, and the public lists hide an event only for being unlisted. The
+event's saving hook now keeps every booking unlisted, but it fixes an existing row only on its next
+save. To fix them all now, from the console:
+
+```
+php artisan tinker
+> App\Models\Event::whereNotNull('appointment_type_id')->where('is_private', false)->get()->each->save();
+```
+
+### Deploy
+
+Runbook step 2: Console, then Deploy.
+
+**Verify:**
+- The log shows the one migration done, and the deployment is `ACTIVE`.
+- `/admin` shows no new alerts, and `/admin/queue` no failed-job spike.
+- Spot-check the homepage, a schedule page, an event page and checkout.
+
+### Right after the deploy
+
+1. **Backfill the image derivatives.** Run runbook step 3's schedule-image, dimensions and
+   animation commands, in that step's order. The flyer commands at the top of the step already ran
+   for v1.0.130, and re-running them is harmless because they resume.
+
+   ```
+   php artisan images:backfill-variants --roles --slot=background
+   php artisan images:backfill-variants --roles --slot=header
+   php artisan images:backfill-variants --roles
+   php artisan images:backfill-variants --dimensions
+   php artisan images:backfill-variants --roles --slot=all --dimensions
+   php artisan images:backfill-variants --animated
+   php artisan images:backfill-variants --roles --slot=all --animated
+   ```
+
+   Until the `--animated` pair runs, an existing animated flyer shows as a still on its own event
+   page.
+2. **Drop the old sitemap index.** `sitemap:sections:{APP_URL}` is served fresh for an hour and
+   stale for two more, and its key did not change. So on the database cache store (runbook step 5
+   done) the index can list the old code's ranges for up to 3 hours. Forget it:
+
+   ```
+   php artisan cache:forget "sitemap:sections:https://eventschedule.com"
+   ```
+
+   On the `file` store there is nothing to do: the new web container started with an empty cache.
+   A console container could not reach that cache anyway.
+3. **Purge Cloudflare,** if the step 4 rule is live. The corrected copy and the new pages are then
+   served now, instead of within 10 minutes plus serve-stale.
+
+**Verify:**
+- `curl -s https://eventschedule.com/robots.txt` lists `/ticket/view/`, `/appointment/view/` and
+  `/feedback/`.
+- A schedule host's robots.txt lists `/ticket/view/` but not `/feedback/`. There `/feedback/{id}`
+  can be a real event page.
+- `/sitemap.xml` answers 200, and an events child lists each recurring series once, at its undated
+  URL.
+- A dated occurrence of a recurring event carries the series' undated URL as its canonical.
+- After the `--animated` run, an event with an animated GIF flyer shows the `.gif` itself on its
+  page.
+- The new pages answer 200:
+  - `/ticket-fee-calculator`
+  - `/features/booking-requests`
+  - `/event-landing-page`
+  - `/ticketleap-alternative`
+  - `/songkick-alternative`
+  - `/allevents-alternative`
+  - `/universe-alternative`
+
+### Search Console over the next weeks
+
+Resubmitting `sitemap.xml` is optional; Google re-reads it anyway.
+
+**Expected, and not a regression:**
+- **Fewer submitted URLs.** Events drop out 30 days after they end, sub-schedules are no longer
+  listed, and one-off rows from a calendar sync collapse to one URL each.
+- **"Alternate page with proper canonical tag"** grows as the dated URLs of recurring events point
+  at their series.
+- **"Excluded by 'noindex' tag"** now covers:
+  - the submit, import, booking-request, gift-card, carpool and password pages;
+  - `/examples`;
+  - `/search`.
+- **"Blocked by robots.txt"** now covers the ticket, subscription, newsletter and appointment
+  links.
+
+**Worth a look if it moves:**
+- "Server error (5xx)" should stay at zero.
+- "Duplicate, Google chose different canonical than user" should fall.
+- Watch the Events rich-result report for new errors. Run the Rich Results Test on one event page
+  and one schedule page.
+
+### What users will notice - tell support
+
+- **Reserved schedule names.** 187 route words are now reserved.
+  - A new schedule named exactly "Store" or "Feedback" gets a random address.
+  - Renaming a schedule onto one of them gives a random address, as any reserved name always has.
+  - Existing schedules that hold one keep it.
+- **Slugs that collide with routes.** A new or retyped event slug that is a route word gets
+  `-event`, and a sub-schedule slug gets `-schedule`. Existing slugs stay until they are changed.
+- **Registration links.** One that is not a web address is cleared on the event's next save.
+  Until then the page shows no registration button for it.
+- **Online events.** Free-text join details show as "Online" on public pages. Ticket holders and
+  booked guests still see them in full.
+- **Appointment bookings** are always unlisted, and their event page is visible only to the
+  schedule's members.
+- **Deleted and unpublished schedules** answer every guest route as an unknown address does. Their
+  members are taken into the app instead.
+- **Password events** no longer appear in graphics or the carousel, for members too.
+- **AI images.** One generated just before the deploy may ask to be generated again: the name it
+  was issued under lived in the cache.
+- **White-label.** `twitter:site` is gone from guest pages.
+
+### Undo
+
+Console rollback to the v1.0.132 deployment ID from P3.
+
+**Safe for data:**
+- The old code ignores the two new `roles` columns and the new `animated` key in the image
+  variant JSON.
+- It reads everything the new code normalized without trouble: registration links, unlisted
+  bookings and suffixed slugs.
+
+**But a rollback reopens every hole this release closes,** starting with the hourly deletion of
+real `demo-*` schedules. Prefer fixing forward.
+
+### Selfhost
+
+The same code reaches selfhosters with the next GitHub release.
+- Make the usual "Update version" commit (`config/self-update.php`, `build.yml`) after the hosted
+  soak, and write the release notes by the process in `CLAUDE.md`.
+- The migration runs inline in `AppUpdateService` and is trivial.
+- **Selfhost-specific:**
+  - robots.txt gains wildcards for the path-routed secret links (`/*/promo/`,
+    `/*/checkout/success/`, `/*/gift-cards/payment/` and so on);
+  - the reserved names matter most there, because schedules share the path space with the app's
+    routes.
 
 ## Selfhost release
 
