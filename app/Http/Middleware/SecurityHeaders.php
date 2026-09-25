@@ -51,6 +51,7 @@ class SecurityHeaders
             'checkout.cancel',           // Stripe cancel redirect
             'ticket.view',               // Ticket confirmation page
             'event.rsvp',                // RSVP POST
+            'role.audience.join_embed',  // Embedded subscribe form POST
             'payment_url.success',       // Payment URL success
             'payment_url.cancel',        // Payment URL cancel
             // Every gateway's return and cancel landings share these two route names, so this covers

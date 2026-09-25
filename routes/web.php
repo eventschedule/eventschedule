@@ -119,6 +119,14 @@ if (config('app.hosted') && ! config('app.is_testing')) {
         // pre-blocked. The real limit is the per-email one in the controller.
         Route::post('/audience/join', [RoleSubscriberController::class, 'store'])
             ->name('role.audience.join')->middleware('throttle:5,1,audience_join');
+        // The same join, posted from the signup form a schedule embeds on its OWN website
+        // (?embed=true&form=subscribe, issue #125). A route of its own because it is CSRF-exempt
+        // (bootstrap/app.php): inside a cross-site iframe the SameSite=lax session cookie is never
+        // sent, so every token check would 419. Nothing here reads the session or the signed-in
+        // user, and the only effect is an unconfirmed row plus a double opt-in email, so the
+        // exemption costs nothing the public form does not already allow. Same limiter bucket.
+        Route::post('/audience/embed', [RoleSubscriberController::class, 'storeEmbed'])
+            ->name('role.audience.join_embed')->middleware('throttle:5,1,audience_join');
         // Per-EVENT interest capture: "tell me when tickets go on sale, and if anything changes".
         // Separate from /audience/join above because the two consents are different asks - one
         // event versus a standing subscription - and the rows live in different tables.
@@ -2079,6 +2087,9 @@ if (! config('app.hosted') || config('app.is_testing')) {
     // Selfhost twin. See the hosted route for why this is not /{subdomain}/subscribe.
     Route::post('/{subdomain}/audience/join', [RoleSubscriberController::class, 'store'])
         ->name('role.audience.join')->middleware('throttle:5,1,audience_join');
+    // Selfhost twin. See the hosted route for why the embedded form posts somewhere else.
+    Route::post('/{subdomain}/audience/embed', [RoleSubscriberController::class, 'storeEmbed'])
+        ->name('role.audience.join_embed')->middleware('throttle:5,1,audience_join');
     // Selfhost twin. See the hosted route for why the throttle is prefixed.
     Route::post('/{subdomain}/interest/join', [EventInterestController::class, 'store'])
         ->name('event.interest.join')->middleware('throttle:5,1,event_interest_join');

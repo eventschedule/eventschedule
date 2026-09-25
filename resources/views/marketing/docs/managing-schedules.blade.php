@@ -407,9 +407,11 @@
             <li>The table gives each follower's <strong>name</strong>, <strong>email address</strong>, their own schedule if they run one, and the <strong>date</strong> they followed you</li>
             <li>Sort by name, email or date by clicking the column heading, and page through longer lists at the bottom</li>
             <li><strong>QR Code</strong> at the top right downloads a PNG ready to print on a poster or a flyer. Scanning it opens your public schedule page, or your custom domain if you have one, scrolled to the sign-up form</li>
+            <li><strong>Embed Signup Form</strong>, beside the QR code, gives you the code to put the sign-up form on your own website. See <a href="{{ route('marketing.docs.sharing') }}#embed-subscribe-form" class="doc-link">Embedding a Signup Form</a></li>
             <li>Before anyone has joined, the tab shows <strong>Your follow link</strong> with a <strong>Copy Link</strong> button. It opens the same place as the QR code</li>
             <li>The subscriber table adds a <strong>status</strong> for each address: Confirmed, Awaiting confirmation, or Unsubscribed. Only confirmed addresses are ever emailed</li>
             <li>An <strong>Account</strong> badge beside a name means that person also has an account here, so the schedule is on their Following page and they can manage it themselves</li>
+            <li>A <strong>Website</strong> badge means the person signed up through the form embedded on your website</li>
             <li>Removing a subscriber removes them from both lists at once, so they stop receiving newsletters as well as the digest</li>
         </ul>
 

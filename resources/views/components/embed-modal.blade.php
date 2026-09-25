@@ -11,6 +11,19 @@
     $embedBrandingLine = $role->showBranding()
         ? "\n".'<p style="font-size: 12px; text-align: right; margin-top: 4px; opacity: 0.6;"><a href="https://eventschedule.com" target="_blank" rel="noopener" style="color: inherit; text-decoration: none;">Powered by Event Schedule</a></p>'
         : '';
+
+    // The Widget picker's second option: the signup form (issue #125), served by the same guest
+    // route with &form=subscribe. The iframe title names the schedule for screen readers; it is
+    // escaped once here, for the attribute it lands in, and @json below makes it safe for the JS.
+    $embedSubscribeFrameId = 'es-subscribe-'.$role->subdomain;
+    $embedSubscribeTitle = e(__('messages.embed_subscribe_iframe_title', ['schedule' => $role->name]));
+
+    // Whether a signup would actually hear about anything. Announcements are the only automatic
+    // mail a subscriber gets, and both of these silence them without telling the owner.
+    $embedAnnouncementsOff = ! $role->announce_new_events;
+    $embedAudienceLimit = (int) config('usage.audience_mail_unverified_max_recipients', 50);
+    $embedNeedsVerification = config('app.hosted') && ! config('app.is_testing')
+        && ! $role->canSendAudienceMail($embedAudienceLimit + 1);
 @endphp
 <div id="embed-modal" class="fixed inset-0 z-50 hidden" aria-labelledby="modal-title" role="dialog" aria-modal="true">
     <div class="fixed inset-0 bg-gray-500/75 dark:bg-gray-900/75 transition-opacity"></div>
@@ -34,15 +47,86 @@
                     </div>
                     <div class="mt-3 text-center sm:ms-4 sm:mt-0 sm:text-start w-full">
                         <h3 class="text-base font-semibold leading-6 text-gray-900 dark:text-gray-100" id="modal-title">
-                            {{ __('messages.embed_schedule') }}
+                            <span data-embed-for="calendar">{{ __('messages.embed_schedule') }}</span>
+                            <span data-embed-for="subscribe" hidden>{{ __('messages.embed_subscribe_form') }}</span>
                         </h3>
                         <div class="mt-4">
                             <p class="text-sm text-gray-500 dark:text-gray-400 mb-4">
-                                {{ __('messages.embed_description') }}
+                                <span data-embed-for="calendar">{{ __('messages.embed_description') }}</span>
+                                <span data-embed-for="subscribe" hidden>{{ __('messages.embed_subscribe_description') }}</span>
                             </p>
-                            
+
+                            <!-- Widget -->
+                            <div class="mb-4 grid grid-cols-1 sm:grid-cols-2 gap-4">
+                                <div>
+                                    <label for="embed-widget" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                                        {{ __('messages.embed_widget') }}
+                                    </label>
+                                    <select id="embed-widget"
+                                            class="block w-full rounded-lg border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-100 shadow-sm focus:border-[var(--brand-blue)] focus:ring-[var(--brand-blue)] sm:text-sm">
+                                        <option value="calendar">{{ __('messages.embed_widget_calendar') }}</option>
+                                        <option value="subscribe">{{ __('messages.embed_widget_subscribe') }}</option>
+                                    </select>
+                                </div>
+                                {{-- Auto follows each visitor's OS, which on a light website means a
+                                     dark-mode visitor gets a dark widget. The owner knows their
+                                     site's colours, so they can pin either one. --}}
+                                <div>
+                                    <label for="embed-theme" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                                        {{ __('messages.embed_theme') }}
+                                    </label>
+                                    <select id="embed-theme"
+                                            class="block w-full rounded-lg border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-100 shadow-sm focus:border-[var(--brand-blue)] focus:ring-[var(--brand-blue)] sm:text-sm">
+                                        <option value="">{{ __('messages.embed_theme_auto') }}</option>
+                                        <option value="light">{{ __('messages.embed_theme_light') }}</option>
+                                        <option value="dark">{{ __('messages.embed_theme_dark') }}</option>
+                                    </select>
+                                </div>
+                            </div>
+
+                            @if ($embedAnnouncementsOff || $embedNeedsVerification)
+                            <div data-embed-for="subscribe" hidden class="mb-4 space-y-3">
+                                @if ($embedAnnouncementsOff)
+                                <div class="bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-700 rounded-lg p-3">
+                                    <div class="flex">
+                                        <svg class="w-5 h-5 text-amber-600 dark:text-amber-400 flex-shrink-0 mt-0.5" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" aria-hidden="true">
+                                            <path stroke-linecap="round" stroke-linejoin="round" d="M12 9v3.75m-9.303 3.376c-.866 1.5.217 3.374 1.948 3.374h14.71c1.73 0 2.813-1.874 1.948-3.374L13.949 3.378c-.866-1.5-3.032-1.5-3.898 0L2.697 16.126ZM12 15.75h.007v.008H12v-.008Z" />
+                                        </svg>
+                                        <div class="ms-3 text-sm text-amber-700 dark:text-amber-300">
+                                            <p class="font-medium">{{ __('messages.embed_subscribe_announcements_off') }}</p>
+                                            <p class="mt-1">
+                                                <a href="{{ route('role.edit', ['subdomain' => $role->subdomain]) }}#section-settings" class="underline font-medium">{{ __('messages.embed_subscribe_turn_on_announcements') }}</a>
+                                            </p>
+                                        </div>
+                                    </div>
+                                </div>
+                                @endif
+                                @if ($embedNeedsVerification)
+                                {{-- The digest goes through the same trust gate as a newsletter
+                                     (SendEventAnnouncements), so past the limit it stops, silently. --}}
+                                <div class="bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-700 rounded-lg p-3">
+                                    <div class="flex">
+                                        <svg class="w-5 h-5 text-amber-600 dark:text-amber-400 flex-shrink-0 mt-0.5" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" aria-hidden="true">
+                                            <path stroke-linecap="round" stroke-linejoin="round" d="M12 9v3.75m-9.303 3.376c-.866 1.5.217 3.374 1.948 3.374h14.71c1.73 0 2.813-1.874 1.948-3.374L13.949 3.378c-.866-1.5-3.032-1.5-3.898 0L2.697 16.126ZM12 15.75h.007v.008H12v-.008Z" />
+                                        </svg>
+                                        <div class="ms-3 text-sm text-amber-700 dark:text-amber-300">
+                                            <p class="font-medium">{{ __('messages.embed_subscribe_verification_title', ['limit' => $embedAudienceLimit]) }}</p>
+                                            <p class="mt-1">
+                                                {!! __('messages.newsletter_verification_required_body', [
+                                                    'smtp_link' => route('role.edit', ['subdomain' => $role->subdomain]) . '?tab=email#section-integrations',
+                                                    'phone_link' => route('profile.edit') . '?highlight=phone#section-profile',
+                                                    'limit' => $embedAudienceLimit,
+                                                ]) !!}
+                                            </p>
+                                        </div>
+                                    </div>
+                                </div>
+                                @endif
+                            </div>
+                            @endif
+
                             <!-- Layout -->
-                            <div class="mb-4">
+                            <div class="mb-4" data-embed-for="calendar">
                                 <label for="embed-layout" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
                                     {{ __('messages.embed_layout') }}
                                 </label>
@@ -94,7 +178,7 @@
                                 <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
                                     {{ __('messages.preview') }}
                                 </label>                                
-                                <div class="border border-gray-300 dark:border-gray-700 rounded-lg p-2 bg-gray-50 dark:bg-gray-900" style="height: 300px; overflow: auto;">
+                                <div id="embed-preview-box" class="border border-gray-300 dark:border-gray-700 rounded-lg p-2 bg-gray-50 dark:bg-gray-900" style="height: 300px; overflow: auto;">
                                     {{-- No src until the modal opens; the script below sets it. --}}
                                     <iframe id="embed-preview-iframe"
                                             width="100%" height="800" frameborder="0"
@@ -119,26 +203,63 @@
 const embedBaseUrl = @json($embedUrl);
 const embedPreviewBaseUrl = @json($previewUrl);
 const embedBrandingLine = @json($embedBrandingLine);
+const embedSubscribeFrameId = @json($embedSubscribeFrameId);
+const embedSubscribeTitle = @json($embedSubscribeTitle);
+// The fallback height for sites that strip the resize listener: fits the form on a desktop-width
+// page. The listener then sizes it exactly, whatever state the form is in.
+const embedSubscribeHeight = 450;
 let embedPreviewLoaded = '';
 
-// A blank layout means "leave it off" and let the schedule's own setting decide.
-function embedUrlWithLayout(base, layout) {
-    if (! layout) {
-        return base;
-    }
-
-    return base + (base.includes('?') ? '&' : '?') + 'layout=' + encodeURIComponent(layout);
-}
-
-function selectedEmbedLayout() {
-    const select = document.getElementById('embed-layout');
+function selectedEmbedValue(id) {
+    const select = document.getElementById(id);
 
     return select ? select.value : '';
 }
 
+// Blank layout and theme mean "leave it off": the schedule's own Default Layout, and each
+// visitor's OS preference, stay in charge - the pre-existing behaviour.
+function buildEmbedUrl(base) {
+    const params = [];
+
+    if (selectedEmbedValue('embed-widget') === 'subscribe') {
+        params.push('form=subscribe');
+    } else if (selectedEmbedValue('embed-layout')) {
+        params.push('layout=' + encodeURIComponent(selectedEmbedValue('embed-layout')));
+    }
+
+    const theme = selectedEmbedValue('embed-theme');
+    if (theme) {
+        params.push('dark=' + (theme === 'dark' ? 'true' : 'false'));
+    }
+
+    if (! params.length) {
+        return base;
+    }
+
+    return base + (base.includes('?') ? '&' : '?') + params.join('&');
+}
+
+function buildEmbedSnippet(url) {
+    if (selectedEmbedValue('embed-widget') !== 'subscribe') {
+        return '<iframe src="' + url + '" width="100%" height="800" frameborder="0" style="border: none;"></iframe>' + embedBrandingLine;
+    }
+
+    // The listener checks e.source, so only this iframe can resize it, and only a number is read.
+    // The closing tag is split so it cannot end THIS script block.
+    return '<iframe id="' + embedSubscribeFrameId + '" src="' + url + '" title="' + embedSubscribeTitle + '" width="100%" height="' + embedSubscribeHeight + '" frameborder="0" style="border: none;"></iframe>'
+        + '\n<script>window.addEventListener("message",function(e){var f=document.getElementById("' + embedSubscribeFrameId + '");'
+        + 'if(f&&e.source===f.contentWindow&&e.data&&e.data.type==="eventschedule:resize"&&e.data.height>0){f.style.height=Math.ceil(e.data.height)+"px";}});<' + '/script>'
+        + embedBrandingLine;
+}
+
 function updateEmbedSnippets() {
-    const layout = selectedEmbedLayout();
-    const url = embedUrlWithLayout(embedBaseUrl, layout);
+    const isSubscribe = selectedEmbedValue('embed-widget') === 'subscribe';
+
+    document.querySelectorAll('#embed-modal [data-embed-for]').forEach(function (el) {
+        el.hidden = el.getAttribute('data-embed-for') !== (isSubscribe ? 'subscribe' : 'calendar');
+    });
+
+    const url = buildEmbedUrl(embedBaseUrl);
 
     const urlInput = document.getElementById('embed-url');
     if (urlInput) {
@@ -147,7 +268,7 @@ function updateEmbedSnippets() {
 
     const codeTextarea = document.getElementById('iframe-code');
     if (codeTextarea) {
-        codeTextarea.value = '<iframe src="' + url + '" width="100%" height="800" frameborder="0" style="border: none;"></iframe>' + embedBrandingLine;
+        codeTextarea.value = buildEmbedSnippet(url);
     }
 
     refreshEmbedPreview();
@@ -161,16 +282,42 @@ function refreshEmbedPreview() {
         return;
     }
 
-    const url = embedUrlWithLayout(embedPreviewBaseUrl, selectedEmbedLayout());
+    const url = buildEmbedUrl(embedPreviewBaseUrl);
     if (embedPreviewLoaded === url) {
         return;
     }
+
+    // The calendar keeps its tall frame in a scrolling box; the signup form is short, so its box
+    // fits the frame, which the form itself sizes through the message listener below.
+    const box = document.getElementById('embed-preview-box');
+    const isSubscribe = selectedEmbedValue('embed-widget') === 'subscribe';
+    if (box) {
+        box.style.height = isSubscribe ? 'auto' : '300px';
+    }
+    iframe.style.height = '';
+    iframe.setAttribute('height', isSubscribe ? embedSubscribeHeight : 800);
 
     embedPreviewLoaded = url;
     iframe.src = url;
 }
 
-function openEmbedModal() {
+// The preview answers the same resize message the copied snippet listens for.
+window.addEventListener('message', function (e) {
+    const iframe = document.getElementById('embed-preview-iframe');
+    if (iframe && e.source === iframe.contentWindow && e.data && e.data.type === 'eventschedule:resize' && e.data.height > 0) {
+        iframe.style.height = Math.ceil(e.data.height) + 'px';
+    }
+});
+
+// widget: optional preset ('calendar' or 'subscribe'), e.g. from the Followers tab.
+function openEmbedModal(widget) {
+    if (widget) {
+        const select = document.getElementById('embed-widget');
+        if (select) {
+            select.value = widget;
+        }
+    }
+
     document.getElementById('embed-modal').classList.remove('hidden');
     document.body.style.overflow = 'hidden';
 
@@ -241,7 +388,7 @@ document.addEventListener('click', function(event) {
 });
 
 document.addEventListener('change', function(event) {
-    if (event.target.id === 'embed-layout') {
+    if (['embed-layout', 'embed-widget', 'embed-theme'].includes(event.target.id)) {
         updateEmbedSnippets();
     }
 });

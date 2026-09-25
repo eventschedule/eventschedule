@@ -59,6 +59,54 @@ class RoleSubscriberController extends Controller
      */
     private const PER_ROLE_DAILY_LIMIT = 500;
 
+    /**
+     * The join, posted from the signup form a schedule embeds on its own website (issue #125).
+     *
+     * Everything store() does, with two differences that both follow from running inside a
+     * cross-site iframe with no session. The locale arrives as a posted field, because
+     * SetUserLanguage only reads ?lang= on a GET and there is no session to carry it; and the
+     * outcome is RENDERED rather than redirected-and-flashed, since the flash would be written to
+     * a session the browser never sends back (see respond()).
+     */
+    public function storeEmbed(Request $request, $subdomain)
+    {
+        $request->attributes->set('subscribe_embed', true);
+
+        $lang = $request->input('lang');
+
+        if (is_string($lang) && is_valid_language_code($lang)) {
+            app()->setLocale($lang);
+        } else {
+            $roleLanguage = Role::subdomain($subdomain)->value('language_code');
+
+            if (is_string($roleLanguage) && is_valid_language_code($roleLanguage)) {
+                app()->setLocale($roleLanguage);
+            }
+        }
+
+        return $this->store($request, $subdomain);
+    }
+
+    /**
+     * The embeddable signup form: the guest page's subscribe panel on a transparent page of its own.
+     *
+     * Shared by the GET (RoleController::viewGuest() with ?embed=true&form=subscribe), the POST
+     * outcome (respond()) and the throttle bail (bootstrap/app.php), so all three render the same
+     * frame. $state carries what the panel otherwise reads out of the session: done, error,
+     * errorField, email and name.
+     */
+    public static function renderEmbed(Role $role, array $state = [], int $status = 200)
+    {
+        $accentColor = $role->accent_color ?: '#4E81FA';
+
+        return response()->view('role.show-guest-subscribe-embed', [
+            'role' => $role,
+            'subscribeEmbedState' => $state,
+            'accentColor' => $accentColor,
+            'contrastColor' => accent_contrast_color($accentColor),
+        ], $status);
+    }
+
     public function store(Request $request, $subdomain)
     {
         // Honeypot first, before validation, so a bot learns nothing from field-level errors.
@@ -173,7 +221,11 @@ class RoleSubscriberController extends Controller
                 // Already stripped and trimmed above, and validated non-empty.
                 'name' => $request->name,
                 'locale' => app()->getLocale(),
-                'source' => $request->input('source') === 'modal' ? 'guest_modal' : 'guest_panel',
+                // Keyed on the ROUTE for the embed, not the posted field, so only the embedded
+                // form can produce it and the owner's "Website" chip on the Followers tab is true.
+                'source' => $request->attributes->get('subscribe_embed')
+                    ? 'embed'
+                    : ($request->input('source') === 'modal' ? 'guest_modal' : 'guest_panel'),
                 'token' => RoleSubscriber::newToken(),
                 'ip_address' => $request->ip(),
                 // confirm_token is issued by sendConfirmation(), so every send gets a fresh one.
@@ -1127,6 +1179,33 @@ class RoleSubscriberController extends Controller
     {
         if ($request->expectsJson()) {
             return response()->json(['success' => $success, 'message' => $message]);
+        }
+
+        // The embedded form renders its outcome in place. A redirect-and-flash cannot work in a
+        // cross-site iframe: the flash is written to a session whose cookie the browser never
+        // sends back, so the frame would reload showing an empty form and no result.
+        //
+        // Looked up here rather than passed in because the honeypot bails before store() has
+        // resolved the schedule. Same lookup store() makes, so a schedule a guest cannot see
+        // answers 404 on every branch alike.
+        if ($request->attributes->get('subscribe_embed')) {
+            $role = Role::findForGuestOrFail($subdomain);
+
+            if (is_demo_role($role)) {
+                abort(404);
+            }
+
+            if ($success) {
+                // No address: the done state never names it (the guest-surface rule).
+                return self::renderEmbed($role, ['done' => true]);
+            }
+
+            return self::renderEmbed($role, [
+                'error' => $message,
+                'errorField' => $errorField ?: 'email',
+                'email' => is_string($request->input('email')) ? $request->input('email') : '',
+                'name' => is_string($request->input('name')) ? $request->input('name') : '',
+            ]);
         }
 
         $back = back(302, [], custom_domain_url(route('role.view_guest', ['subdomain' => $subdomain])))

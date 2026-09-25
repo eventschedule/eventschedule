@@ -621,6 +621,17 @@ document.addEventListener('DOMContentLoaded', function() {
             openEmbedModal();
         });
     }
+
+    // The Followers tab's "Embed signup form": the same dialog, on its signup-form widget.
+    document.addEventListener('click', function (e) {
+        var trigger = e.target.closest('.js-open-subscribe-embed');
+        if (! trigger || e.metaKey || e.ctrlKey || e.shiftKey || e.button !== 0) {
+            return;
+        }
+        e.preventDefault();
+        e.stopPropagation();
+        openEmbedModal('subscribe');
+    });
 });
 </script>
 

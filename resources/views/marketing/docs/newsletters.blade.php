@@ -429,6 +429,10 @@
                 <h4 class="font-semibold text-gray-900 dark:text-white mb-2">Your sign-up link</h4>
                 <p class="text-sm text-gray-500 dark:text-gray-400">The Followers tab gives you a shareable link and a QR code that open your schedule with the form ready. Useful on a poster, a flyer or a merch table.</p>
             </div>
+            <div class="doc-field">
+                <h4 class="font-semibold text-gray-900 dark:text-white mb-2">Your own website</h4>
+                <p class="text-sm text-gray-500 dark:text-gray-400">The same form, embedded on your website with a short snippet from the Followers tab. It sends the same confirmation email, and people who sign up there carry a Website badge. See <a href="{{ route('marketing.docs.sharing') }}#embed-subscribe-form" class="doc-link">Embedding a Signup Form</a>.</p>
+            </div>
         </div>
 
         <h3 class="doc-subheading">Automatic New-Event Emails</h3>

@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\RoleSubscriberController;
 use App\Http\Middleware\CacheableMarketingResponse;
 use App\Http\Middleware\CaptureUtmParameters;
 use App\Http\Middleware\DemoAutoLogin;
@@ -14,9 +15,12 @@ use App\Http\Middleware\SanitizeUserAgent;
 use App\Http\Middleware\SecurityHeaders;
 use App\Http\Middleware\SetUserLanguage;
 use App\Http\Middleware\TrackMarketingVisit;
+use App\Models\Role;
 use Illuminate\Foundation\Application;
 use Illuminate\Foundation\Configuration\Exceptions;
 use Illuminate\Foundation\Configuration\Middleware;
+use Illuminate\Http\Exceptions\ThrottleRequestsException;
+use Illuminate\Http\Request;
 use Sentry\Laravel\Integration;
 
 return Application::configure(basePath: dirname(__DIR__))
@@ -69,6 +73,12 @@ return Application::configure(basePath: dirname(__DIR__))
             // RFC 8058 one-click unsubscribe: a mail client's POST carries no session and no token.
             'sub/u/*',
             'int/u/*',
+            // The signup form a schedule embeds on its own website. A cross-site iframe never
+            // sends the SameSite=lax session cookie, so no token could match; see the route in
+            // routes/web.php for why exempting it is safe. Both shapes: hosted serves it at the
+            // root of the schedule's host, selfhost under /{subdomain}/.
+            'audience/embed',
+            '*/audience/embed',
             'webhooks/meta',
             'api/whatsapp/webhook',
         ]);
@@ -112,4 +122,34 @@ return Application::configure(basePath: dirname(__DIR__))
     })
     ->withExceptions(function (Exceptions $exceptions) {
         Integration::handles($exceptions);
+
+        // The embedded signup form runs inside an iframe on the schedule's own website, where the
+        // platform's full-page 429 would replace the form with our error screen. Render the form
+        // again with the message inline instead; still a 429, so nothing downstream mistakes it
+        // for a success.
+        $exceptions->render(function (ThrottleRequestsException $e, Request $request) {
+            if (! $request->routeIs('role.audience.join_embed')) {
+                return null;
+            }
+
+            $subdomain = $request->route('subdomain');
+            $role = is_string($subdomain) ? Role::subdomain($subdomain)->first() : null;
+
+            if (! $role || ! $role->isVisibleToGuest(null) || is_demo_role($role)) {
+                return null;
+            }
+
+            // The throttle ran before storeEmbed() could apply the form's language.
+            $lang = $request->input('lang');
+            if (is_string($lang) && is_valid_language_code($lang)) {
+                app()->setLocale($lang);
+            }
+
+            return RoleSubscriberController::renderEmbed($role, [
+                'error' => __('messages.too_many_attempts'),
+                'errorField' => 'email',
+                'email' => is_string($request->input('email')) ? $request->input('email') : '',
+                'name' => is_string($request->input('name')) ? $request->input('name') : '',
+            ], 429)->withHeaders($e->getHeaders());
+        });
     })->create();

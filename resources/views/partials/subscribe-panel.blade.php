@@ -15,15 +15,54 @@
     Expects: $role, and optionally $panelClass to vary the wrapper between the event page (which
     supplies its own container) and the schedule page.
 
+    $subscribeEmbed (default false) is the signup form a schedule embeds on its own website
+    (role/show-guest-subscribe-embed). That page runs in a cross-site iframe with no session, so it
+    posts to the CSRF-exempt role.audience.join_embed and its outcome arrives in
+    $subscribeEmbedState rather than the flash. See RoleSubscriberController::storeEmbed().
+
     Deliberately NOT rendered inside a Vue mount. The schedule name is user-controlled text and the
     app runs Vue's full build, so a mustache in the value would be compiled as a template.
 --}}
 @php
     $subscribePanelRole = $role ?? null;
-    $subscribeDone = $subscribePanelRole && session('subscribe_done') === $subscribePanelRole->subdomain;
-    $subscribeError = $subscribePanelRole && session('subscribe_error_for') === $subscribePanelRole->subdomain
-        ? session('subscribe_error')
-        : null;
+    $subscribeEmbed = $subscribeEmbed ?? false;
+    $subscribeEmbedState = $subscribeEmbedState ?? [];
+
+    if ($subscribeEmbed) {
+        $subscribeDone = (bool) ($subscribeEmbedState['done'] ?? false);
+        $subscribeError = $subscribeEmbedState['error'] ?? null;
+        $subscribeEmailValue = $subscribeEmbedState['email'] ?? '';
+        $subscribeNameValue = $subscribeEmbedState['name'] ?? '';
+        $subscribeErrorFieldValue = $subscribeEmbedState['errorField'] ?? 'email';
+        // A pinned theme (?dark=true|false) has to survive the POST and the way back.
+        // theme-script reads it from window.location.search, so it rides in the URLs themselves;
+        // a hidden field would never reach the script.
+        $subscribeDarkParam = in_array(request()->query('dark'), ['true', 'false'], true) ? request()->query('dark') : null;
+        $subscribeAgainUrl = route('role.view_guest', array_filter([
+            'subdomain' => $subscribePanelRole->subdomain,
+            'embed' => 'true',
+            'form' => 'subscribe',
+            'dark' => $subscribeDarkParam,
+        ]));
+        $subscribeFormAction = route('role.audience.join_embed', array_filter([
+            'subdomain' => $subscribePanelRole->subdomain,
+            'dark' => $subscribeDarkParam,
+        ]));
+    } else {
+        $subscribeDone = $subscribePanelRole && session('subscribe_done') === $subscribePanelRole->subdomain;
+        $subscribeError = $subscribePanelRole && session('subscribe_error_for') === $subscribePanelRole->subdomain
+            ? session('subscribe_error')
+            : null;
+        // session(), not old(): this page's ticket and RSVP forms also post a field called
+        // `email`, so old('email') would cross-fill between them.
+        $subscribeEmailValue = session('subscribe_email');
+        $subscribeNameValue = session('subscribe_name');
+        $subscribeErrorFieldValue = session('subscribe_error_field', 'email');
+        $subscribeAgainUrl = request()->fullUrlWithQuery(['subscribe' => 1]);
+        $subscribeFormAction = $subscribePanelRole
+            ? route('role.audience.join', ['subdomain' => $subscribePanelRole->subdomain])
+            : null;
+    }
 
     // The owner's switch (Settings > Advanced, on by default), with two exceptions that both
     // outrank it:
@@ -37,8 +76,12 @@
     // !== false, not a truthy test: only an explicit off hides the panel. A Role that was never
     // read from the table (or was read before the column existed, between a deploy and its
     // migration) has no value at all, and the column's default is on.
+    //
+    // The embedded form outranks it too: pasting the snippet onto a website is the owner asking
+    // for the form, exactly as sharing ?subscribe=1 is.
     $subscribePanelOn = $subscribePanelRole
-        && ($subscribePanelRole->show_subscribe_panel !== false
+        && ($subscribeEmbed
+            || $subscribePanelRole->show_subscribe_panel !== false
             || request()->boolean('subscribe')
             || $subscribeDone
             || $subscribeError);
@@ -47,7 +90,10 @@
 {{-- Signed-out only. Two reasons, and the second is a repo rule: an account holder should be
      following with their account rather than creating a parallel account-less row, and a honeypot
      must never be rendered into an authenticated page where a password manager could fill it. --}}
-@if ($subscribePanelOn && ! auth()->user() && ! request()->embed && ! is_demo_mode() && ! is_demo_role($subscribePanelRole))
+{{-- The embedded form drops both of the first two conditions. It IS the embed, and inside a
+     cross-site iframe nobody is signed in - while the owner's own preview in the Embed dialog is,
+     and would otherwise be blank. --}}
+@if ($subscribePanelOn && ($subscribeEmbed || (! auth()->user() && ! request()->embed)) && ! is_demo_mode() && ! is_demo_role($subscribePanelRole))
 {{-- v-pre: the schedule name is user-controlled text rendered server-side, and the app runs Vue's
      full build, so anything Vue mounts has its markup compiled as a template. On the schedule page
      this panel currently sits 244 characters after #calendar-app closes - one careless move inside
@@ -97,7 +143,7 @@
             {{-- The no-JS way back to the form: ?subscribe=1 re-renders it and the deep-link script
                  below scrolls and focuses it. --}}
             <p class="mt-2 text-xs">
-                <x-link href="{{ request()->fullUrlWithQuery(['subscribe' => 1]) }}">{{ __('messages.subscribe_use_another_email') }}</x-link>
+                <x-link href="{{ $subscribeAgainUrl }}">{{ __('messages.subscribe_use_another_email') }}</x-link>
             </p>
         </div>
     </div>
@@ -110,14 +156,22 @@
     @php
         // Which input the rejection is about. respond() flashes it; the fallback keeps the
         // pre-existing behaviour for bails that name no field (honeypot, rate limit, mailer).
-        $subscribeInvalidField = $subscribeError ? session('subscribe_error_field', 'email') : null;
+        $subscribeInvalidField = $subscribeError ? $subscribeErrorFieldValue : null;
     @endphp
     <form method="POST"
-        action="{{ route('role.audience.join', ['subdomain' => $subscribePanelRole->subdomain]) }}"
+        action="{{ $subscribeFormAction }}"
         class="mt-4 max-w-4xl flex flex-col sm:flex-row gap-3">
         @csrf
         <x-honeypot />
+        @if ($subscribeEmbed)
+        {{-- embed=true keeps the response frameable (SecurityHeaders). The language rides along
+             because SetUserLanguage only reads ?lang= on a GET and the POST has no session. --}}
+        <input type="hidden" name="embed" value="true">
+        <input type="hidden" name="source" value="embed">
+        <input type="hidden" name="lang" value="{{ app()->getLocale() }}">
+        @else
         <input type="hidden" name="source" value="panel">
+        @endif
 
         {{-- Visible labels, not sr-only + placeholder. A placeholder is the only label these fields
              had, and it disappears the moment the visitor types - taking "(optional)" with it,
@@ -126,11 +180,11 @@
             <label for="subscribe_email_{{ $subscribePanelRole->id }}" class="block text-xs font-medium text-gray-700 dark:text-gray-300 mb-1">
                 {{ __('messages.subscribe_your_email') }}
             </label>
-            {{-- session(), not old(): this page's ticket and RSVP forms also post a field called
-                 `email`, so old('email') would cross-fill between them. --}}
+            {{-- $subscribeEmailValue is the session flash on the guest page, not old() - see the
+                 @php block at the top. --}}
             <input type="email" name="email" id="subscribe_email_{{ $subscribePanelRole->id }}" required
                 autocomplete="email"
-                value="{{ session('subscribe_email') }}"
+                value="{{ $subscribeEmailValue }}"
                 @if ($subscribeInvalidField === 'email') aria-invalid="true" aria-describedby="subscribe_error_{{ $subscribePanelRole->id }}" autofocus @endif
                 class="block w-full rounded-md border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 shadow-sm focus:border-[var(--brand-blue)] focus:ring-[var(--brand-blue)]" />
         </div>
@@ -153,7 +207,7 @@
                  any rejection into retyping. --}}
             <input type="text" name="name" id="subscribe_name_{{ $subscribePanelRole->id }}" required
                 autocomplete="name"
-                value="{{ session('subscribe_name') }}"
+                value="{{ $subscribeNameValue }}"
                 @if ($subscribeInvalidField === 'name') aria-invalid="true" aria-describedby="subscribe_error_{{ $subscribePanelRole->id }}" autofocus @endif
                 class="block w-full rounded-md border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 shadow-sm focus:border-[var(--brand-blue)] focus:ring-[var(--brand-blue)]" />
         </div>
@@ -215,6 +269,9 @@
          runs. Blade's {{ }} escaping does NOT stop Vue compiling a mustache in the VALUE. Same
          guard the audience opt-in labels carry, and AudienceTemplateInjectionTest fails the build
          if it goes missing. --}}
+    {{-- Not in the embedded form, which is kept to the one ask so it stays short on someone
+         else's page; the calendar feed is a click away on the schedule itself. --}}
+    @if (! $subscribeEmbed)
     <p v-pre class="mt-4 border-t border-gray-200 pt-4 text-xs text-gray-500 dark:border-gray-700 dark:text-gray-400">
         <a href="{{ route('feed.ical', ['subdomain' => $subscribePanelRole->subdomain]) }}"
            class="font-medium text-[var(--brand-blue)] hover:underline">
@@ -222,9 +279,10 @@
         </a>
         <span class="ms-1">{{ __('messages.event_interest_subscribe_feed_help') }}</span>
     </p>
+    @endif
 </div>
 
-@if (request()->boolean('subscribe'))
+@if (request()->boolean('subscribe') && ! $subscribeEmbed)
 {{-- Arrived from a scanned QR code or a shared link. Scroll rather than anchor-jump so the
      heading is not pinned under the sticky header. --}}
 <script {!! nonce_attr() !!}>

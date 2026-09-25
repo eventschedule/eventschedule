@@ -1,7 +1,16 @@
 <div class="sm:flex sm:items-center">
     <div class="sm:flex-auto">
     </div>
-    <div class="mt-6 sm:ms-16 sm:mt-0 sm:flex-none">
+    <div class="mt-6 sm:ms-16 sm:mt-0 sm:flex-none flex flex-wrap gap-3">
+        {{-- Opens the Embed dialog (included by role/show-admin) on its signup-form widget. A real
+             href for no-JS and middle-click: the guest form itself. --}}
+        <x-secondary-link href="{{ route('role.view_guest', ['subdomain' => $role->subdomain, 'embed' => 'true', 'form' => 'subscribe']) }}"
+            class="js-open-subscribe-embed">
+            <svg class="-ms-0.5 me-1.5 h-5 w-5" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" aria-hidden="true">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M17.25 6.75 22.5 12l-5.25 5.25m-10.5 0L1.5 12l5.25-5.25m7.5-3-4.5 16.5" />
+            </svg>
+            {{ __('messages.embed_subscribe_form') }}
+        </x-secondary-link>
         <x-brand-link href="{{ route('role.qr_code', ['subdomain' => $role->subdomain]) }}">
             <svg class="-ms-0.5 me-1.5 h-6 w-6" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
                 <path
@@ -51,6 +60,9 @@
             </button>
         </div>
         <p class="mt-2 text-xs text-gray-500 dark:text-gray-400">{{ __('messages.audience_share_link_help') }}</p>
+        <p class="mt-2 text-xs text-gray-500 dark:text-gray-400">
+            <x-link href="{{ route('role.view_guest', ['subdomain' => $role->subdomain, 'embed' => 'true', 'form' => 'subscribe']) }}" class="js-open-subscribe-embed">{{ __('messages.embed_subscribe_empty_state') }}</x-link>
+        </p>
     </div>
 
     <script {!! nonce_attr() !!}>
@@ -192,6 +204,16 @@
                                          colour alone, and no title= - invisible on touch and
                                          unreliable with a screen reader. The section caption above
                                          explains it once. --}}
+                                    {{-- Same neutral chip, for the rows the embedded signup form
+                                         brought in: the owner's one way to see it is working. --}}
+                                    @if ($subscriber->source === 'embed')
+                                    <span data-subscriber-source="embed" class="ms-2 inline-flex items-center gap-1 rounded-md border border-gray-200 dark:border-gray-700 px-1.5 py-0.5 text-[11px] font-medium text-gray-500 dark:text-gray-400 align-middle">
+                                        <svg class="h-3 w-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5" aria-hidden="true">
+                                            <path stroke-linecap="round" stroke-linejoin="round" d="M12 21a9.004 9.004 0 0 0 8.716-6.747M12 21a9.004 9.004 0 0 1-8.716-6.747M12 21c2.485 0 4.5-4.03 4.5-9S14.485 3 12 3m0 18c-2.485 0-4.5-4.03-4.5-9S9.515 3 12 3m0 0a8.997 8.997 0 0 1 7.843 4.582M12 3a8.997 8.997 0 0 0-7.843 4.582m15.686 0A11.953 11.953 0 0 1 12 10.5c-2.998 0-5.74-1.1-7.843-2.918m15.686 0A8.959 8.959 0 0 1 21 12c0 .778-.099 1.533-.284 2.253m0 0A17.919 17.919 0 0 1 12 16.5c-3.162 0-6.133-.815-8.716-2.247m0 0A9.015 9.015 0 0 1 3 12c0-1.605.42-3.113 1.157-4.418" />
+                                        </svg>
+                                        {{ __('messages.subscriber_source_website') }}
+                                    </span>
+                                    @endif
                                     @if ($subscriber->confirmed_at && in_array(strtolower($subscriber->email), $subscriberAccountEmails ?? [], true))
                                     <span class="ms-2 inline-flex items-center gap-1 rounded-md border border-gray-200 dark:border-gray-700 px-1.5 py-0.5 text-[11px] font-medium text-gray-500 dark:text-gray-400 align-middle">
                                         <svg class="h-3 w-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5" aria-hidden="true">

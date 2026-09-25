@@ -63,13 +63,15 @@
         <ol class="doc-list doc-list-numbered mb-6">
             <li>Open your schedule in the admin portal</li>
             <li>Open the <strong class="text-gray-900 dark:text-white">Actions</strong> menu and choose <strong class="text-gray-900 dark:text-white">Embed Schedule</strong></li>
+            <li>Leave <strong class="text-gray-900 dark:text-white">Widget</strong> on <strong class="text-gray-900 dark:text-white">Calendar</strong>. The other option, <strong class="text-gray-900 dark:text-white">Signup form</strong>, is covered in <a href="#embed-subscribe-form" class="doc-link">Embedding a Signup Form</a> below</li>
+            <li>Pick a <strong class="text-gray-900 dark:text-white">Theme</strong>. <strong class="text-gray-900 dark:text-white">Match the visitor's device</strong> follows each visitor's light or dark setting; choose Light or Dark to match your website instead</li>
             <li>Pick a <strong class="text-gray-900 dark:text-white">Layout</strong>. Leave it on <strong class="text-gray-900 dark:text-white">Schedule default</strong> to follow your schedule's own Default Layout, or choose Calendar or List to pin this one frame</li>
-            <li>Check the <strong class="text-gray-900 dark:text-white">Preview</strong>, which reloads each time you change the layout</li>
+            <li>Check the <strong class="text-gray-900 dark:text-white">Preview</strong>, which reloads each time you change the widget, theme or layout</li>
             <li>Copy the <strong class="text-gray-900 dark:text-white">Iframe Code</strong> with the button beside the field, or copy the <strong class="text-gray-900 dark:text-white">Embed URL</strong> if you would rather write the tag yourself</li>
             <li>Paste it into your website where you want the schedule to appear</li>
         </ol>
 
-        <p class="text-gray-600 dark:text-gray-300 mb-6">The layout picker only rewrites the code you copy. It never changes your schedule's own Default Layout setting.</p>
+        <p class="text-gray-600 dark:text-gray-300 mb-6">The theme and layout pickers only rewrite the code you copy. They never change your schedule's own Default Layout setting.</p>
 
         <div class="doc-callout doc-callout-info">
             <div class="doc-callout-title">Free Plans Get a Credit Line</div>
@@ -109,8 +111,12 @@
                         <td>Show a single event category. The value is the category's numeric id, so the practical way to get it is to filter your schedule page and copy the id out of the resulting address bar</td>
                     </tr>
                     <tr>
-                        <td><code class="doc-inline-code">dark=true</code></td>
-                        <td>Force dark mode. Left off, the frame uses the theme the visitor last chose on Event Schedule, and their system setting if they have never chosen one</td>
+                        <td><code class="doc-inline-code">form=subscribe</code></td>
+                        <td>Show the email signup form instead of the calendar. See <a href="#embed-subscribe-form" class="doc-link">Embedding a Signup Form</a></td>
+                    </tr>
+                    <tr>
+                        <td><code class="doc-inline-code">dark=true</code><br><code class="doc-inline-code">dark=false</code></td>
+                        <td>Force dark or light mode. Left off, the frame uses the theme the visitor last chose on Event Schedule, and their system setting if they have never chosen one</td>
                     </tr>
                     <tr>
                         <td><code class="doc-inline-code">lang=xx</code></td>
@@ -123,7 +129,7 @@
                 </tbody>
             </table>
         </div>
-        <p class="text-gray-600 dark:text-gray-300 mt-4">The frame's width and height are plain iframe attributes, not parameters: <code class="doc-inline-code">width="100%"</code> lets it fill whatever column you drop it into, and you choose the height. Nothing measures the schedule and resizes the frame for you.</p>
+        <p class="text-gray-600 dark:text-gray-300 mt-4">The frame's width and height are plain iframe attributes, not parameters: <code class="doc-inline-code">width="100%"</code> lets it fill whatever column you drop it into, and you choose the height. Nothing measures the calendar and resizes the frame for you. The signup form is the exception, below.</p>
 
         <h3 class="doc-subheading">Two Layouts on One Page</h3>
         <p class="text-gray-600 dark:text-gray-300 mb-4">Because the layout is set per URL, you can embed the same schedule twice on the same page and give each frame its own layout:</p>
@@ -157,6 +163,27 @@
             <li><strong class="text-gray-900 dark:text-white">No ads, ever.</strong> A Free schedule's own public pages can carry ads. An embed never does.</li>
             <li><strong class="text-gray-900 dark:text-white">No search-engine competition.</strong> The embed URL is served <code class="doc-inline-code">noindex, nofollow</code>, so the page that ranks is yours, not the frame inside it.</li>
         </ul>
+
+        <h3 class="doc-subheading" id="embed-subscribe-form">Embedding a Signup Form</h3>
+        <p class="text-gray-600 dark:text-gray-300 mb-4">You can also put your <a href="#followers" class="doc-link">email sign-up</a> form on your own website, so visitors can ask to hear about your new events without leaving it. People who sign up there join the same list as those who sign up on your schedule page. Like the calendar embed, it is free on every plan.</p>
+        <ol class="doc-list doc-list-numbered mb-6">
+            <li>Open the <strong class="text-gray-900 dark:text-white">Followers</strong> tab and click <strong class="text-gray-900 dark:text-white">Embed Signup Form</strong>, or open <strong class="text-gray-900 dark:text-white">Actions &rarr; Embed Schedule</strong> and set <strong class="text-gray-900 dark:text-white">Widget</strong> to <strong class="text-gray-900 dark:text-white">Signup form</strong></li>
+            <li>Pick a <strong class="text-gray-900 dark:text-white">Theme</strong> that suits your website, and check the preview</li>
+            <li>Copy the code and paste it into your website where you want the form to appear</li>
+        </ol>
+        <ul class="doc-list mb-6">
+            <li><strong class="text-gray-900 dark:text-white">It sizes itself.</strong> The code is an iframe plus one short script that lets the frame fit the form, the error message and the "check your email" note. If your website builder removes scripts, the frame keeps a fixed height of 450 pixels, which fits the form on a normal-width page</li>
+            <li><strong class="text-gray-900 dark:text-white">It sits on your page.</strong> The form is a card on a clear background, in your schedule's accent colour, rather than on your schedule's background image</li>
+            <li><strong class="text-gray-900 dark:text-white">It asks for confirmation.</strong> Everyone who signs up gets an email with a confirmation link, exactly as on your schedule page, and is emailed nothing else until they open it</li>
+            <li><strong class="text-gray-900 dark:text-white">You can see it working.</strong> People who signed up through the embedded form carry a <strong class="text-gray-900 dark:text-white">Website</strong> badge on the Followers tab</li>
+            <li><strong class="text-gray-900 dark:text-white">It shows even with the panel off.</strong> Turning off <strong class="text-gray-900 dark:text-white">Show Sign-Up Panel</strong> hides the panel on your schedule page, not the form you embedded</li>
+            <li><code class="doc-inline-code">lang=</code> and <code class="doc-inline-code">dark=</code> work here too, as in the <a href="#embed-parameters" class="doc-link">table above</a></li>
+        </ul>
+
+        <div class="doc-callout doc-callout-warning">
+            <div class="doc-callout-title">Keep New-Event Emails On</div>
+            <p>What subscribers get automatically is the digest of your new public events, sent at most once every few days. It is controlled by <strong class="text-gray-900 dark:text-white">Email subscribers about new events</strong> under <a href="{{ route('marketing.docs.creating_schedules') }}#settings-notifications" class="doc-link">Settings &rarr; Notifications</a>. With it off, people can still sign up but will only hear from you when you send a <a href="{{ route('marketing.docs.newsletters') }}" class="doc-link">newsletter</a>, so the embed dialog warns you. On eventschedule.com, digests to more than 50 subscribers also need a verified phone number or your own SMTP settings, and the dialog warns about that too.</p>
+        </div>
     </section>
 
     <!-- Social Media -->
@@ -214,7 +241,7 @@
         <p class="text-gray-600 dark:text-gray-300 mb-6">The Follow button is part of the hosted version at eventschedule.com. On a selfhosted install, the sign-up panel is how people join.</p>
 
         <h3 class="doc-subheading">Email Sign-Ups</h3>
-        <p class="text-gray-600 dark:text-gray-300 mb-4">Signed-out visitors see a <strong class="text-gray-900 dark:text-white">Stay up to date</strong> panel on your schedule page and near the foot of each event page, though never inside an embed. It asks for their email and name, and its button reads <strong class="text-gray-900 dark:text-white">Keep me posted</strong> unless you have <a href="{{ route('marketing.docs.creating_schedules') }}#customize-custom-labels" class="doc-link">relabelled it</a>. The panel is on unless you turn off <strong class="text-gray-900 dark:text-white">Show Sign-Up Panel</strong> under <a href="{{ route('marketing.docs.creating_schedules') }}#settings-advanced" class="doc-link">Settings &rarr; Advanced</a>. With it off, a link made to open the form, like the <a href="#qr-code" class="doc-link">QR code</a>, still shows it.</p>
+        <p class="text-gray-600 dark:text-gray-300 mb-4">Signed-out visitors see a <strong class="text-gray-900 dark:text-white">Stay up to date</strong> panel on your schedule page and near the foot of each event page, though never inside the calendar embed. To put it on your own website, <a href="#embed-subscribe-form" class="doc-link">embed the signup form</a>. It asks for their email and name, and its button reads <strong class="text-gray-900 dark:text-white">Keep me posted</strong> unless you have <a href="{{ route('marketing.docs.creating_schedules') }}#customize-custom-labels" class="doc-link">relabelled it</a>. The panel is on unless you turn off <strong class="text-gray-900 dark:text-white">Show Sign-Up Panel</strong> under <a href="{{ route('marketing.docs.creating_schedules') }}#settings-advanced" class="doc-link">Settings &rarr; Advanced</a>. With it off, a link made to open the form, like the <a href="#qr-code" class="doc-link">QR code</a>, still shows it.</p>
         <ul class="doc-list mb-6">
             <li>They are emailed a confirmation link, and join your list only once they open it. Until then the Followers tab shows them as <strong class="text-gray-900 dark:text-white">Awaiting confirmation</strong></li>
             <li>Confirming also sets up an account for them that follows your schedule. The page they land on offers <strong class="text-gray-900 dark:text-white">Set password and sign in</strong>, and they are on the list whether or not they finish it</li>
@@ -228,9 +255,10 @@
         <p class="text-gray-600 dark:text-gray-300 mb-4">Open the <strong class="text-gray-900 dark:text-white">Followers</strong> tab in the admin portal. The tab label carries the running total, so you can see how big your audience is without opening it. Inside you get:</p>
         <ul class="doc-list">
             <li>Three panels counting your audience: <strong class="text-gray-900 dark:text-white">Can be emailed</strong>, <strong class="text-gray-900 dark:text-white">Get new-event emails</strong> and <strong class="text-gray-900 dark:text-white">Newsletter only</strong></li>
-            <li>Your email subscribers, each with a status, and an <strong class="text-gray-900 dark:text-white">Account</strong> badge on those who have an account</li>
+            <li>Your email subscribers, each with a status, an <strong class="text-gray-900 dark:text-white">Account</strong> badge on those who have an account, and a <strong class="text-gray-900 dark:text-white">Website</strong> badge on those who signed up through your <a href="#embed-subscribe-form" class="doc-link">embedded signup form</a></li>
             <li>A table of account followers: name, email, their own schedule if they run one, and the date they followed you</li>
             <li>Sortable columns, newest first by default, and paging once the list grows</li>
+            <li>An <strong class="text-gray-900 dark:text-white">Embed Signup Form</strong> button, covered in <a href="#embed-subscribe-form" class="doc-link">Embedding a Signup Form</a></li>
             <li>A <strong class="text-gray-900 dark:text-white">QR Code</strong> button, covered in <a href="#qr-code" class="doc-link">QR Codes</a> below</li>
         </ul>
         <p class="text-gray-600 dark:text-gray-300 mt-4 mb-4">Everything on the tab is covered in <a href="{{ route('marketing.docs.managing_schedules') }}#followers" class="doc-link">Managing Schedules: Followers</a>.</p>

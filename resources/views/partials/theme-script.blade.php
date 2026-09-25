@@ -69,13 +69,16 @@
             if (VARIANTS) { html.setAttribute('data-theme', variantFor(b)); }
         }
 
-        // ?dark=true pins dark mode, for embeds on a third-party page.
-        var forced = false;
+        // ?dark=true pins dark mode and ?dark=false pins light, for embeds on a third-party
+        // page: the owner knows their website's colours, the visitor's OS preference does not.
+        // Without the light pin, a visitor in dark mode got a dark widget on a white site.
+        var forced = null;
         try {
-            forced = new URLSearchParams(window.location.search).get('dark') === 'true';
+            var darkParam = new URLSearchParams(window.location.search).get('dark');
+            forced = darkParam === 'true' ? 'dark' : (darkParam === 'false' ? 'light' : null);
         } catch (e) {}
 
-        apply(forced ? 'dark' : mode());
+        apply(forced || mode());
 
         if (!forced) {
             var mq = window.matchMedia('(prefers-color-scheme: dark)');

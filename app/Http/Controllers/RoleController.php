@@ -2084,6 +2084,17 @@ class RoleController extends Controller
             return $this->viewGuestUnclaimed($request, $role, $slug, $id, $date);
         }
 
+        // The embeddable signup form (issue #125). Answered here, before any event, calendar or
+        // analytics work: it renders nothing but the subscribe panel, and like every embed it is
+        // not a page view. Root only, so ?form= on an event URL keeps meaning nothing.
+        if ($request->embed && $request->get('form') === 'subscribe' && ! $slug && ! $id && ! $date) {
+            if (is_demo_mode() || is_demo_role($role)) {
+                return $this->platformNotFound();
+            }
+
+            return RoleSubscriberController::renderEmbed($role);
+        }
+
         $otherRole = null;
         $event = null;
         $selectedGroup = null;
