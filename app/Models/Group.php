@@ -69,6 +69,22 @@ class Group extends Model
 
         $slug = Str::limit($slug, 180, '');
 
+        // The slug this sub-schedule already holds stays as it is. The settings form posts every
+        // slug back on every save, so the rule below must not rename one a save never touched.
+        if ($ignoreId && $slug === DB::table('groups')->where('id', $ignoreId)->value('slug')) {
+            return $slug;
+        }
+
+        // /{schedule}/{slug} is the sub-schedule's page, and a route under the schedule's address
+        // owns some of those words: a sub-schedule called "Book", "Request" or "Follow" was never
+        // reached at its page, the route answered instead. Such a word gets "-schedule" after it,
+        // the name guests know a sub-schedule by (the calendar filters one with ?schedule=), as an
+        // event's gets "-event" (Event::storableSlug()). reservedPathSlugs() reads only the route
+        // table, so no sub-schedule's own slug is among its words.
+        if (in_array($slug, UrlUtils::reservedPathSlugs(), true)) {
+            $slug .= '-schedule';
+        }
+
         // unique(['slug','role_id']) is a hard constraint, and two different non-Latin names
         // can romanize to the same thing, so disambiguate rather than throw.
         $base = $slug;

@@ -1677,13 +1677,15 @@ class BackupService
 
         // The backup's name is kept only where a new schedule could have been given it, the
         // same rules cleanSubdomain() applies. demo- is the demo's namespace, so demo-night
-        // restores as demonight, the name a new "Demo Night" gets. A reserved name belongs to an
-        // app route, so it is rebuilt from the schedule's name like a missing one.
+        // restores as demonight, the name a new "Demo Night" gets. Anything else cleanSubdomain()
+        // would not hand out as it stands is rebuilt from the schedule's name like a missing one:
+        // a reserved name, which belongs to an app route, and the upper case, the slash or the
+        // two letters of a hand-edited file, which no schedule could otherwise be given.
         if (str_starts_with(strtolower($baseSubdomain), 'demo-')) {
             $baseSubdomain = Role::cleanSubdomain($baseSubdomain);
         }
 
-        if ($baseSubdomain === '' || in_array(strtolower($baseSubdomain), Role::RESERVED_SUBDOMAINS, true)) {
+        if (! Role::isCleanSubdomain($baseSubdomain)) {
             $baseSubdomain = Role::cleanSubdomain($data['name'] ?? '', $data['name_en'] ?? null);
         }
         $subdomain = $baseSubdomain;

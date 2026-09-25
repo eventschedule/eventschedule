@@ -90,6 +90,35 @@ class BackupSlugRestoreTest extends TestCase
         $this->assertSame('harbor-lights', $restored->subdomain);
     }
 
+    /**
+     * A backup is a file anybody can edit, and its subdomain was restored as written unless it was
+     * reserved or in demo-: upper case, a slash or two letters made an address no new schedule
+     * could be given. Anything cleanSubdomain() would not hand out as it stands is rebuilt from the
+     * schedule's name, and a clean name is kept exactly.
+     */
+    public function test_a_malformed_restored_subdomain_is_rebuilt_and_a_clean_one_kept(): void
+    {
+        $role = $this->createRole($this->createOwner(), 'venue', ['name' => 'Harbor Lights']);
+
+        foreach (['Harbor-Lights', 'harbor/lights', 'hl', 'harbor--lights'] as $malformed) {
+            $restored = $this->roundTrip($role, function ($data) use ($malformed) {
+                $data['schedules'][0]['role']['subdomain'] = $malformed;
+
+                return $data;
+            });
+
+            $this->assertMatchesRegularExpression('/^harbor-lights(-\d+)?$/', $restored->subdomain, $malformed);
+        }
+
+        $restored = $this->roundTrip($role, function ($data) {
+            $data['schedules'][0]['role']['subdomain'] = 'harbor-lights-live';
+
+            return $data;
+        });
+
+        $this->assertSame('harbor-lights-live', $restored->subdomain);
+    }
+
     public function test_two_restored_non_latin_appointment_types_get_distinct_booking_slugs(): void
     {
         $owner = $this->createOwner();

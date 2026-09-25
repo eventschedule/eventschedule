@@ -2678,6 +2678,18 @@ class Role extends Model implements MustVerifyEmail
     }
 
     /**
+     * Whether $subdomain is a name cleanSubdomain() would hand out as it stands, cleaning it
+     * changing nothing: lower-case letters and digits joined by single hyphens, 3 to 50 of them,
+     * neither reserved nor in demo-. Only lower-case ASCII can get that far, so anything else is
+     * refused up front, without the translation round-trip cleanSubdomain() makes for a
+     * non-Latin name.
+     */
+    public static function isCleanSubdomain(string $subdomain): bool
+    {
+        return preg_match('/^[a-z0-9-]+$/', $subdomain) === 1 && self::cleanSubdomain($subdomain) === $subdomain;
+    }
+
+    /**
      * True when Str::slug dropped more than half of the source's letters/digits - the signal that a
      * non-Latin script survived slugification only as separators (or nothing at all).
      */

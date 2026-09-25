@@ -92,6 +92,65 @@ class GroupSlugTest extends TestCase
         $this->assertSame('shows', Group::cleanSlug($role->id, 'Shows', null, null, $group->id));
     }
 
+    /** The settings save, as the form posts it. */
+    private function saveGroups(Role $role, array $groups)
+    {
+        return $this->actingAs($role->user)->put(route('role.update', ['subdomain' => $role->subdomain]), [
+            'name' => $role->name,
+            'email' => $role->email,
+            'timezone' => $role->timezone,
+            'new_subdomain' => $role->subdomain,
+            'groups' => $groups,
+        ])->assertSessionHasNoErrors();
+    }
+
+    /**
+     * /{schedule}/{slug} is a sub-schedule's page, and a route under the schedule's address owns
+     * some of those words: a sub-schedule called "Book" was never reached at its page, the booking
+     * route answered instead. A new one gets "-schedule" after such a word.
+     */
+    public function test_a_sub_schedule_named_after_a_route_word_is_reachable_at_its_page(): void
+    {
+        $role = $this->createRole($this->createOwner(), 'curator');
+
+        $this->saveGroups($role, [
+            'new_0' => ['name' => 'Book'],
+            'new_1' => ['name' => 'Following', 'slug' => 'follow'],
+        ]);
+
+        $groups = $role->groups()->get()->keyBy('name');
+        $this->assertSame('book-schedule', $groups['Book']->slug);
+        $this->assertSame('follow-schedule', $groups['Following']->slug);
+
+        foreach ($groups as $group) {
+            $this->get(route('event.view_guest', ['subdomain' => $role->subdomain, 'slug' => $group->slug]))
+                ->assertOk()
+                ->assertViewHas('selectedGroup', fn ($selected) => $selected?->id === $group->id);
+        }
+
+        // The API and a restored backup name one through the same helper.
+        $this->assertSame('request-schedule', Group::cleanSlug($role->id, 'Request'));
+    }
+
+    /**
+     * One that already holds such a slug keeps it: the form posts every slug back on every save.
+     * Changing onto such a word is treated like a new one.
+     */
+    public function test_an_unchanged_save_keeps_an_existing_route_word_slug(): void
+    {
+        $role = $this->createRole($this->createOwner(), 'curator');
+        $group = $this->createGroup($role, ['name' => 'Book', 'slug' => 'book']);
+
+        $this->saveGroups($role, [$group->id => ['name' => 'Book', 'slug' => 'book']]);
+        $this->assertSame('book', $group->fresh()->slug);
+
+        // The API sends no slug, only the name.
+        $this->assertSame('book', Group::cleanSlug($role->id, 'Book', null, null, $group->id));
+
+        $this->saveGroups($role, [$group->id => ['name' => 'Book', 'slug' => 'request']]);
+        $this->assertSame('request-schedule', $group->fresh()->slug);
+    }
+
     /** The whole point: two Hebrew sub-schedules on one schedule used to be impossible. */
     public function test_two_non_latin_sub_schedules_can_coexist_and_stay_distinguishable(): void
     {
