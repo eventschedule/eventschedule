@@ -3124,6 +3124,25 @@ class Event extends Model
     }
 
     /**
+     * Where a fan's video, comment or photo sends them back to: the occurrence the form posted
+     * (event_date), or its gallery.
+     *
+     * The content is stored under that date, and the page lists the poster's pending items by
+     * date, so this has to be that occurrence. getGuestUrl($subdomain), which every one of these
+     * redirects used, names the series' FIRST date instead: the item just posted was not listed
+     * there, and on a series whose first date is gone the URL bounced once more. A date that is no
+     * occurrence of this event - excluded since, or none posted - gives the undated series or
+     * gallery (false), never the first date. A one-off event's URL has no date either way.
+     */
+    public function fanContentReturnUrl($subdomain, $date, bool $gallery = false): string
+    {
+        $date = $this->days_of_week && self::isOccurrenceDate($date)
+            && $this->matchesDate($date, $this->scheduleTimezone()) ? $date : false;
+
+        return $gallery ? $this->getPhotoGalleryUrl($subdomain, $date) : $this->getGuestUrl($subdomain, $date);
+    }
+
+    /**
      * The event's canonical guest URL: its undated URL on its home schedule, which for a recurring
      * event is the series URL. See canonicalTarget().
      */

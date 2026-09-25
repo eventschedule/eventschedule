@@ -3956,7 +3956,7 @@ class EventController extends Controller
             ? __('messages.video_submitted_approved')
             : __('messages.video_submitted');
 
-        $redirect = redirect()->to($event->getGuestUrl($subdomain))->with('message', $message);
+        $redirect = redirect()->to($event->fanContentReturnUrl($subdomain, $eventDate))->with('message', $message);
 
         // The pending list on the guest page is keyed on the signed-in user, so a guest has
         // nothing to scroll to - the flash message is their confirmation.
@@ -4052,7 +4052,7 @@ class EventController extends Controller
             ? __('messages.comment_submitted_approved')
             : __('messages.comment_submitted');
 
-        $redirect = redirect()->to($event->getGuestUrl($subdomain))->with('message', $message);
+        $redirect = redirect()->to($event->fanContentReturnUrl($subdomain, $eventDate))->with('message', $message);
 
         // The pending list on the guest page is keyed on the signed-in user, so a guest has
         // nothing to scroll to - the flash message is their confirmation.
@@ -4237,9 +4237,9 @@ class EventController extends Controller
             : __('messages.photo_submitted');
 
         if ($request->input('return_to') === 'gallery') {
-            $redirect = redirect()->to($event->getPhotoGalleryUrl($subdomain))->with('message', $message);
+            $redirect = redirect()->to($event->fanContentReturnUrl($subdomain, $eventDate, gallery: true))->with('message', $message);
         } else {
-            $redirect = redirect()->to($event->getGuestUrl($subdomain))->with('message', $message);
+            $redirect = redirect()->to($event->fanContentReturnUrl($subdomain, $eventDate))->with('message', $message);
 
             // The pending list on the guest page is keyed on the signed-in user, so a guest has
             // nothing to scroll to - the flash message is their confirmation.
@@ -4559,8 +4559,7 @@ class EventController extends Controller
         // occurrence, or every well-formed date is another 200, self-canonical gallery. A path date
         // that is not one - or that isOccurrenceDate() already nulled - goes to the UNDATED gallery,
         // keeping the query, as a 302 because an owner can re-include an excluded date. reflash()
-        // keeps a flash from the previous request alive across the extra hop (the photo upload
-        // confirmation with return_to=gallery lands on getPhotoGalleryUrl(), the first-date URL).
+        // keeps a flash from the previous request alive across the extra hop.
         if ($routeDate && ! $date) {
             session()->reflash();
 

@@ -1229,7 +1229,7 @@ class HomeController extends Controller
                     'youtube_url' => $youtubeUrl,
                     'is_approved' => false,
                 ]);
-                $returnUrl = $event->getGuestUrl($pending['subdomain']);
+                $returnUrl = $event->fanContentReturnUrl($pending['subdomain'], $eventDate);
                 session()->flash('scroll_to', 'pending-video-'.$video->id);
 
                 if ($role && ! auth()->user()->isConnected($role->subdomain)) {
@@ -1252,7 +1252,7 @@ class HomeController extends Controller
                 'comment' => $commentText,
                 'is_approved' => false,
             ]);
-            $returnUrl = $event->getGuestUrl($pending['subdomain']);
+            $returnUrl = $event->fanContentReturnUrl($pending['subdomain'], $eventDate);
             session()->flash('scroll_to', 'pending-comment-'.$comment->id);
 
             if ($role && ! auth()->user()->isConnected($role->subdomain)) {
@@ -1306,9 +1306,9 @@ class HomeController extends Controller
             }
 
             if (($pending['return_to'] ?? null) === 'gallery') {
-                $returnUrl = $event->getPhotoGalleryUrl($pending['subdomain']);
+                $returnUrl = $event->fanContentReturnUrl($pending['subdomain'], $eventDate, gallery: true);
             } else {
-                $returnUrl = $event->getGuestUrl($pending['subdomain']);
+                $returnUrl = $event->fanContentReturnUrl($pending['subdomain'], $eventDate);
                 session()->flash('scroll_to', 'pending-photo-'.$photo->id);
             }
 

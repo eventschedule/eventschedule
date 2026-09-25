@@ -2222,10 +2222,12 @@ class RoleController extends Controller
                     // visitor must not be thrown onto it mid-checkout. The canonical tag does the
                     // consolidating: it names this same undated series URL, on the home host.
                     //
-                    // reflash(): this is often the second hop of a redirect that already carries a
-                    // flash. The comment, video and photo confirmations in EventController all land
-                    // on getGuestUrl($subdomain), the first-date URL, and without this they would
-                    // expire here, one request before the page that shows them.
+                    // reflash(): this can be the second hop of a redirect that already carries a
+                    // flash - a stored link followed after its date was excluded, say - and without
+                    // it the flash would expire here, one request before the page that shows it.
+                    // The fan-content confirmations used to come this way, landing on the
+                    // first-date URL; Event::fanContentReturnUrl() now names a real occurrence or
+                    // none.
                     session()->reflash();
 
                     $target = $event->getUndatedGuestUrl($subdomain);

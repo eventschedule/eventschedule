@@ -2,10 +2,15 @@
 
 namespace Tests\Feature;
 
+use App\Models\EventComment;
+use App\Models\EventPhoto;
+use App\Models\EventVideo;
 use App\Repos\EventRepo;
 use App\Utils\UrlUtils;
 use Carbon\Carbon;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Http\UploadedFile;
+use Illuminate\Support\Facades\Storage;
 use Illuminate\Testing\TestResponse;
 use Tests\Feature\Concerns\CreatesScheduleData;
 use Tests\TestCase;
@@ -329,11 +334,12 @@ class RecurringOccurrenceUrlTest extends TestCase
     }
 
     /**
-     * EventController::submitComment() (and the video and photo siblings) redirect to
-     * getGuestUrl($subdomain) with their confirmation flashed. On a series whose first date is gone
-     * that URL bounces once more, and the confirmation has to survive the extra hop.
+     * EventController::submitComment() (and the video and photo siblings) return the poster to the
+     * occurrence the form posted. With none, they land on the undated series: never on
+     * getGuestUrl($subdomain)'s first date, which on a series whose first date is gone bounced them
+     * once more.
      */
-    public function test_a_confirmation_flashed_onto_the_first_date_survives_the_bounce(): void
+    public function test_a_confirmation_posted_without_a_date_lands_on_the_undated_series(): void
     {
         $first = $this->nextSunday()->format('Y-m-d');
         [$role, $event] = $this->sundayEvent([
@@ -347,16 +353,151 @@ class RecurringOccurrenceUrlTest extends TestCase
                 'event_hash' => UrlUtils::encodeId($event->id),
             ]), ['comment' => 'Lovely class']);
 
-        $response->assertRedirect($event->getGuestUrl($role->subdomain));
-
-        // The hop that used to drop it: the flash was already one request old when it arrived.
-        $this->get($event->getGuestUrl($role->subdomain))
-            ->assertRedirect($event->getUndatedGuestUrl($role->subdomain))
-            ->assertSessionHas('message', __('messages.comment_submitted'));
+        $response->assertRedirect($event->getUndatedGuestUrl($role->subdomain));
 
         $this->get($event->getUndatedGuestUrl($role->subdomain))
             ->assertOk()
             ->assertSee(__('messages.comment_submitted'));
+    }
+
+    /**
+     * A flash can still arrive on a dated URL whose date has stopped being an occurrence - a stored
+     * link, followed after the owner excluded its date. The bounce keeps it for the page after it,
+     * the one that shows it.
+     */
+    public function test_a_flash_survives_the_bounce_off_a_date_that_is_no_occurrence(): void
+    {
+        $first = $this->nextSunday()->format('Y-m-d');
+        [$role, $event] = $this->sundayEvent(['recurring_exclude_dates' => [$first]]);
+
+        // Flashed by the request before this one, so this is already its last request.
+        $this->withSession(['message' => 'Saved for later', '_flash' => ['old' => ['message'], 'new' => []]])
+            ->get($this->guestEventUrl($role, $event, $first))
+            ->assertRedirect($event->getUndatedGuestUrl($role->subdomain));
+
+        $this->get($event->getUndatedGuestUrl($role->subdomain))
+            ->assertOk()
+            ->assertSee('Saved for later');
+    }
+
+    /**
+     * A post goes back to the occurrence it was posted from: it is stored under that date, and the
+     * page lists the poster's pending items by date, so the first date the confirmation used to land
+     * on did not show what they had just posted.
+     */
+    public function test_a_post_returns_to_the_occurrence_it_was_posted_from(): void
+    {
+        Storage::fake(config('filesystems.default'));
+
+        [$role, $event] = $this->sundayEvent([
+            'fan_comments_enabled' => true,
+            'fan_videos_enabled' => true,
+            'fan_photos_enabled' => true,
+        ]);
+        $occurrence = $this->nextSunday(2)->format('Y-m-d');
+        $dated = $this->guestEventUrl($role, $event, $occurrence);
+        $this->actingAs($this->createOwner());
+
+        $pending = [];
+
+        foreach ($this->fanPosts() as $type => [$route, $payload, $model]) {
+            $response = $this->post(route($route, [
+                'subdomain' => $role->subdomain,
+                'event_hash' => UrlUtils::encodeId($event->id),
+            ]), $payload + ['event_date' => $occurrence]);
+
+            $row = $model::where('event_id', $event->id)->latest('id')->firstOrFail();
+            $this->assertSame($occurrence, $row->event_date, "fixture: the {$type} is stored under its occurrence");
+
+            $response->assertRedirect($dated)
+                ->assertSessionHas('message')
+                ->assertSessionHas('scroll_to', "pending-{$type}-{$row->id}");
+
+            $pending[] = "id=\"pending-{$type}-{$row->id}\"";
+        }
+
+        $page = $this->get($dated)->assertOk();
+
+        foreach ($pending as $marker) {
+            $page->assertSee($marker, false);
+        }
+    }
+
+    /** A date the event no longer has, or never had, lands on the undated series. */
+    public function test_a_post_from_a_date_that_is_no_occurrence_returns_to_the_undated_series(): void
+    {
+        $skipped = $this->nextSunday(2)->format('Y-m-d');
+        [$role, $event] = $this->sundayEvent([
+            'recurring_exclude_dates' => [$skipped],
+            'fan_comments_enabled' => true,
+        ]);
+        $url = route('event.submit_comment', ['subdomain' => $role->subdomain, 'event_hash' => UrlUtils::encodeId($event->id)]);
+        $this->actingAs($this->createOwner());
+
+        // Excluded, and a Monday of a Sundays-only series.
+        foreach ([$skipped, $this->nextSunday(2)->addDay()->format('Y-m-d')] as $date) {
+            $this->post($url, ['comment' => 'Lovely class', 'event_date' => $date])
+                ->assertRedirect($event->getUndatedGuestUrl($role->subdomain));
+        }
+    }
+
+    /** A photo posted from a dated gallery goes back to that gallery. */
+    public function test_a_gallery_post_returns_to_that_occurrences_gallery(): void
+    {
+        Storage::fake(config('filesystems.default'));
+
+        [$role, $event] = $this->sundayEvent(['fan_photos_enabled' => true]);
+        $occurrence = $this->nextSunday(2)->format('Y-m-d');
+        $gallery = $event->getPhotoGalleryUrl($role->subdomain, $occurrence);
+
+        $this->actingAs($this->createOwner())
+            ->post(route('event.submit_photo', ['subdomain' => $role->subdomain, 'event_hash' => UrlUtils::encodeId($event->id)]), [
+                'photo' => UploadedFile::fake()->image('class.jpg', 400, 300),
+                'event_date' => $occurrence,
+                'return_to' => 'gallery',
+            ])
+            ->assertRedirect($gallery)
+            ->assertSessionHas('message', __('messages.photo_submitted'));
+
+        $this->get($gallery)->assertOk();
+    }
+
+    /**
+     * A schedule that asks posters to sign in first keeps the post in the session until they have,
+     * then HomeController files it and sends them back: to the occurrence they posted from too.
+     */
+    public function test_the_deferred_flow_lands_on_the_occurrence_it_was_posted_from(): void
+    {
+        Storage::fake(config('filesystems.default'));
+
+        [$role, $event] = $this->sundayEvent([
+            'fan_comments_enabled' => true,
+            'fan_videos_enabled' => true,
+            'fan_photos_enabled' => true,
+        ]);
+        $role->update(['fan_content_require_account' => true]);
+        $occurrence = $this->nextSunday(2)->format('Y-m-d');
+        $poster = $this->createOwner();
+
+        $posts = $this->fanPosts();
+        $posts['gallery'] = ['event.submit_photo', ['photo' => UploadedFile::fake()->image('stage.jpg', 400, 300), 'return_to' => 'gallery'], EventPhoto::class];
+
+        foreach ($posts as $type => [$route, $payload, $model]) {
+            auth()->logout();
+
+            $this->post(route($route, [
+                'subdomain' => $role->subdomain,
+                'event_hash' => UrlUtils::encodeId($event->id),
+            ]), $payload + ['event_date' => $occurrence])->assertRedirect();
+            $this->assertNotNull(session('pending_fan_content'), "fixture: the {$type} waits for an account");
+
+            $expected = $type === 'gallery'
+                ? $event->getPhotoGalleryUrl($role->subdomain, $occurrence)
+                : $this->guestEventUrl($role, $event, $occurrence);
+
+            $this->actingAs($poster)->get(route('home'))->assertRedirect($expected);
+            $this->assertSame($occurrence, $model::where('event_id', $event->id)->latest('id')->value('event_date'), $type);
+        }
     }
 
     /**
@@ -401,5 +542,19 @@ class RecurringOccurrenceUrlTest extends TestCase
         // date('Y-m-d', strtotime('nonsense')) is '1970-01-01'. That is an artifact of the parse
         // failing, not a date anyone asked for, so the event still renders.
         $this->get($this->guestEventUrl($role, $event).'?date=nonsense')->assertOk();
+    }
+
+    /**
+     * One post of each kind: the route, what it posts, and the row it makes.
+     *
+     * @return array<string, array{0: string, 1: array<string, mixed>, 2: class-string}>
+     */
+    private function fanPosts(): array
+    {
+        return [
+            'comment' => ['event.submit_comment', ['comment' => 'Lovely class'], EventComment::class],
+            'video' => ['event.submit_video', ['youtube_url' => 'https://www.youtube.com/watch?v=dQw4w9WgXcQ'], EventVideo::class],
+            'photo' => ['event.submit_photo', ['photo' => UploadedFile::fake()->image('class.jpg', 400, 300)], EventPhoto::class],
+        ];
     }
 }
