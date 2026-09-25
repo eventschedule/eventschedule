@@ -3410,6 +3410,7 @@ return [
     'booking_venue_required' => 'Bitte geben Sie einen Veranstaltungsort ein.',
     'booking_time_invalid' => 'Bitte geben Sie eine gültige Uhrzeit ein.',
     'booking_request_account_required' => 'Für Anfragen an diesen Zeitplan ist ein Konto erforderlich. Bitte laden Sie die Seite neu, um fortzufahren.',
+    'request_needs_account' => 'Erstellen Sie ein Konto oder melden Sie sich an, um eine Anfrage an diesen Zeitplan zu senden.',
     'import_sources' => 'Veranstaltungen importieren',
     'recent_activity' => 'Letzte Aktivität',
     'no_recent_activity' => 'Noch keine Aktivität',

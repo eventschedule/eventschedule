@@ -3937,6 +3937,7 @@ return [
     'booking_venue_required' => 'Please enter a venue.',
     'booking_time_invalid' => 'Please enter a valid time.',
     'booking_request_account_required' => 'This schedule requires an account to send a request. Please reload the page to continue.',
+    'request_needs_account' => 'Create an account, or sign in, to send a request to this schedule.',
     'import_sources' => 'Import Events',
     'recent_activity' => 'Recent Activity',
     'no_recent_activity' => 'No recent activity yet',

@@ -1748,7 +1748,9 @@ class EventController extends Controller
         $event_id = UrlUtils::decodeId($hash);
         $event = Event::findOrFail($event_id);
 
-        $role = Role::subdomain($subdomain)->firstOrFail();
+        // A deleted schedule, or an unpublished one to anybody outside it, answers as an unknown
+        // subdomain does.
+        $role = Role::findForGuestOrFail($subdomain);
 
         if ($event->is_draft) {
             $user = auth()->user();
@@ -2613,7 +2615,9 @@ class EventController extends Controller
             $file = $request->file('details_image');
         }
 
-        $role = Role::subdomain($subdomain)->firstOrFail();
+        // Before Gemini is paid for: a deleted schedule, or an unpublished one to anybody outside
+        // it, answers as an unknown subdomain does.
+        $role = Role::findForGuestOrFail($subdomain);
 
         if (! $role->canMakeAiParseRequest()) {
             return response()->json(['error' => __('messages.ai_text_daily_limit_reached', ['limit' => $role->aiParseDailyLimit()])], 422);
@@ -2779,6 +2783,13 @@ class EventController extends Controller
             }
 
             return $this->guestImportWithAccount($request, $role);
+        }
+
+        // An anonymous submission is filed under the schedule's owner (events.user_id is NOT NULL,
+        // see EventRepo::saveEvent()), and a placeholder nobody has claimed has none to stand in:
+        // there the submitter needs the account this form offers. It used to be a server error.
+        if (! $request->user() && ! $request->boolean('create_account') && ! $role->user) {
+            throw ValidationException::withMessages(['create_account' => __('messages.request_needs_account')]);
         }
 
         // Handle user creation if requested (optional account; event owned by the curator)
@@ -3410,7 +3421,11 @@ class EventController extends Controller
 
             // showBookingRequest() already sends these guests to sign up. This catches a page that
             // was open when the owner switched Require Account on, and a direct post.
-            if ($role->bookingFormRequiresAccount()) {
+            //
+            // The same rule where nobody owns the schedule: an anonymous request is filed under the
+            // owner (events.user_id is NOT NULL), and a placeholder nobody has claimed has none to
+            // stand in, so its form's optional account is required. It used to be a server error.
+            if ($role->bookingFormRequiresAccount() || ! $role->user) {
                 $rules['create_account'] = ['accepted'];
             }
 
@@ -3432,7 +3447,12 @@ class EventController extends Controller
         }
 
         $validator = validator($request->all(), $rules, [
-            'create_account.accepted' => __('messages.booking_request_account_required'),
+            // "Reload" where the owner turned Require Account on, because the reloaded page sends
+            // the visitor to sign up. A placeholder's page cannot, so there the form's own account
+            // option is the way through.
+            'create_account.accepted' => __($role->bookingFormRequiresAccount()
+                ? 'messages.booking_request_account_required'
+                : 'messages.request_needs_account'),
         ], array_merge([
             'event_name' => __('messages.event_name'),
             'date' => __('messages.date'),
@@ -3826,7 +3846,9 @@ class EventController extends Controller
 
     public function submitVideo(EventVideoSubmitRequest $request, $subdomain, $event_hash)
     {
-        $role = Role::where('subdomain', $subdomain)->firstOrFail();
+        // A deleted schedule, or an unpublished one to anybody outside it, answers as an unknown
+        // subdomain does.
+        $role = Role::findForGuestOrFail($subdomain);
         if (is_demo_role($role)) {
             return redirect()->back()->with('error', __('messages.not_authorized'));
         }
@@ -3949,7 +3971,9 @@ class EventController extends Controller
 
     public function submitComment(EventCommentSubmitRequest $request, $subdomain, $event_hash)
     {
-        $role = Role::where('subdomain', $subdomain)->firstOrFail();
+        // A deleted schedule, or an unpublished one to anybody outside it, answers as an unknown
+        // subdomain does.
+        $role = Role::findForGuestOrFail($subdomain);
         if (is_demo_role($role)) {
             return redirect()->back()->with('error', __('messages.not_authorized'));
         }
@@ -4101,7 +4125,9 @@ class EventController extends Controller
 
     public function submitPhoto(EventPhotoSubmitRequest $request, $subdomain, $event_hash)
     {
-        $role = Role::where('subdomain', $subdomain)->firstOrFail();
+        // A deleted schedule, or an unpublished one to anybody outside it, answers as an unknown
+        // subdomain does.
+        $role = Role::findForGuestOrFail($subdomain);
         if (is_demo_role($role)) {
             return redirect()->back()->with('error', __('messages.not_authorized'));
         }
@@ -4940,7 +4966,9 @@ class EventController extends Controller
 
     public function votePoll(EventPollVoteRequest $request, $subdomain, $eventHash, $pollHash)
     {
-        $role = Role::where('subdomain', $subdomain)->firstOrFail();
+        // A deleted schedule, or an unpublished one to anybody outside it, answers as an unknown
+        // subdomain does.
+        $role = Role::findForGuestOrFail($subdomain);
         if (is_demo_role($role)) {
             return response()->json(['error' => __('messages.not_authorized')], 403);
         }
@@ -5009,7 +5037,9 @@ class EventController extends Controller
 
     public function suggestPollOption(Request $request, $subdomain, $eventHash, $pollHash)
     {
-        $role = Role::where('subdomain', $subdomain)->firstOrFail();
+        // A deleted schedule, or an unpublished one to anybody outside it, answers as an unknown
+        // subdomain does.
+        $role = Role::findForGuestOrFail($subdomain);
         if (is_demo_role($role)) {
             return response()->json(['error' => __('messages.not_authorized')], 403);
         }

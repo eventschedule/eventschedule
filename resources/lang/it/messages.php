@@ -3406,6 +3406,7 @@ return [
     'booking_venue_required' => 'Inserisci un luogo.',
     'booking_time_invalid' => 'Inserisci un orario valido.',
     'booking_request_account_required' => 'Questo calendario richiede un account per inviare una richiesta. Ricarica la pagina per continuare.',
+    'request_needs_account' => 'Crea un account o accedi per inviare una richiesta a questo calendario.',
     'import_sources' => 'Importa eventi',
     'recent_activity' => 'Attività Recente',
     'no_recent_activity' => 'Nessuna attività recente',

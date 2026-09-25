@@ -3405,6 +3405,7 @@ return [
     'booking_venue_required' => 'Informe um local.',
     'booking_time_invalid' => 'Informe um horário válido.',
     'booking_request_account_required' => 'Esta agenda exige uma conta para enviar um pedido. Recarregue a página para continuar.',
+    'request_needs_account' => 'Crie uma conta ou entre para enviar um pedido a esta agenda.',
     'import_sources' => 'Importar Eventos',
     'recent_activity' => 'Atividade Recente',
     'no_recent_activity' => 'Nenhuma atividade recente',

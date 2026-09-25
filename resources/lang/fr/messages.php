@@ -3409,6 +3409,7 @@ return [
     'booking_venue_required' => 'Veuillez indiquer un lieu.',
     'booking_time_invalid' => 'Veuillez indiquer une heure valide.',
     'booking_request_account_required' => 'Ce planning exige un compte pour envoyer une demande. Veuillez recharger la page pour continuer.',
+    'request_needs_account' => 'Créez un compte ou connectez-vous pour envoyer une demande à ce planning.',
     'import_sources' => 'Importer des événements',
     'recent_activity' => 'Activité Récente',
     'no_recent_activity' => 'Aucune activité récente',

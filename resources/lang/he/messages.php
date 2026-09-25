@@ -3459,6 +3459,7 @@ return [
     'booking_venue_required' => 'יש להזין מקום.',
     'booking_time_invalid' => 'יש להזין שעה תקינה.',
     'booking_request_account_required' => 'לוח זמנים זה דורש חשבון כדי לשלוח בקשה. יש לרענן את הדף כדי להמשיך.',
+    'request_needs_account' => 'יש ליצור חשבון או להתחבר כדי לשלוח בקשה ללוח זמנים זה.',
     'import_sources' => 'ייבוא אירועים',
     'recent_activity' => 'פעילות אחרונה',
     'no_recent_activity' => 'אין פעילות אחרונה',

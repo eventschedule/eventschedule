@@ -3445,6 +3445,7 @@ return [
     'booking_venue_required' => 'Introduceți o locație.',
     'booking_time_invalid' => 'Introduceți o oră validă.',
     'booking_request_account_required' => 'Acest program necesită un cont pentru a trimite o cerere. Reîncărcați pagina pentru a continua.',
+    'request_needs_account' => 'Creați un cont sau autentificați-vă pentru a trimite o cerere acestui program.',
     'import_sources' => 'Importă evenimente',
     'recent_activity' => 'Activitate Recentă',
     'no_recent_activity' => 'Nicio activitate recentă',

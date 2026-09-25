@@ -3469,6 +3469,7 @@ return [
     'booking_venue_required' => 'يرجى إدخال مكان.',
     'booking_time_invalid' => 'يرجى إدخال وقت صالح.',
     'booking_request_account_required' => 'يتطلب هذا الجدول حسابًا لإرسال طلب. يرجى إعادة تحميل الصفحة للمتابعة.',
+    'request_needs_account' => 'أنشئ حسابًا أو سجّل الدخول لإرسال طلب إلى هذا الجدول.',
     'import_sources' => 'استيراد الفعاليات',
     'recent_activity' => 'النشاط الأخير',
     'no_recent_activity' => 'لا يوجد نشاط حديث',

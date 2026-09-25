@@ -463,7 +463,9 @@ class SeatingPickerController extends Controller
      */
     private function resolveEvent(Request $request, $subdomain): array
     {
-        $role = Role::subdomain($subdomain)->firstOrFail();
+        // A deleted schedule, or an unpublished one to anybody outside it, answers as an unknown
+        // subdomain does.
+        $role = Role::findForGuestOrFail($subdomain);
 
         $event = Event::whereHas('roles', fn ($q) => $q->where('roles.id', $role->id))
             ->findOrFail(UrlUtils::decodeId($request->input('event_id')));

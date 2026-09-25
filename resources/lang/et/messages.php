@@ -3421,6 +3421,7 @@ return [
     'booking_venue_required' => 'Sisestage toimumiskoht.',
     'booking_time_invalid' => 'Sisestage kehtiv kellaaeg.',
     'booking_request_account_required' => 'Sellele ajakavale päringu saatmiseks on vaja kontot. Jätkamiseks laadige leht uuesti.',
+    'request_needs_account' => 'Sellele ajakavale päringu saatmiseks looge konto või logige sisse.',
     'import_sources' => 'Impordi sündmusi',
     'recent_activity' => 'Hiljutine tegevus',
     'no_recent_activity' => 'Hiljutist tegevust pole',

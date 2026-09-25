@@ -2782,6 +2782,12 @@ class RoleController extends Controller
             'password' => 'required|string',
         ]);
 
+        // The abort(404) below that a subdomain matching nothing reaches, for a deleted schedule or
+        // an unpublished one to anybody outside it. Otherwise this unlocked their events.
+        if (! Role::subdomain($subdomain)->first()?->isVisibleToGuest(auth()->user())) {
+            abort(404);
+        }
+
         $eventId = UrlUtils::decodeId($request->event_id);
         $event = Event::whereHas('roles', fn ($q) => $q->where('subdomain', $subdomain))
             ->where('is_draft', false)
@@ -7862,8 +7868,9 @@ class RoleController extends Controller
 
     public function guestSearchYouTube(Request $request, $subdomain)
     {
-        // For guest users, we don't require authentication but we do validate the subdomain
-        $role = Role::subdomain($subdomain)->firstOrFail();
+        // For guest users, we don't require authentication but we do validate the subdomain: a
+        // deleted schedule, or an unpublished one to anybody outside it, answers as an unknown one.
+        $role = Role::findForGuestOrFail($subdomain);
 
         $query = $request->get('q');
 

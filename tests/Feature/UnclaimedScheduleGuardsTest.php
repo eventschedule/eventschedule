@@ -108,4 +108,60 @@ class UnclaimedScheduleGuardsTest extends TestCase
         $this->assertSame('', $this->createRole($owner)->getClaimUrl());
         $this->assertSame('', $this->placeholder(['is_deleted' => true])->getClaimUrl());
     }
+
+    /**
+     * An anonymous request is filed under the schedule's owner (events.user_id is NOT NULL), and a
+     * placeholder with no owner at all has nobody to stand in, so both request forms answered a
+     * signed-out visitor with a server error. They now ask for the account the form offers, in
+     * the form's own error slot, and write nothing until they have one.
+     */
+    public function test_a_signed_out_request_to_an_ownerless_placeholder_asks_for_an_account(): void
+    {
+        $talent = $this->placeholder();
+        $venue = $this->placeholder(['type' => 'venue', 'require_account' => false]);
+        $this->assertNull($talent->user_id, 'fixture: nobody to stand in');
+
+        // What each one's GET offers: the booking form for the act, the AI import for the venue.
+        $this->get('/'.$talent->subdomain.'/booking-request')->assertOk()->assertSee('name="create_account"', false);
+        $this->get('/'.$venue->subdomain.'/guest-add')->assertOk();
+
+        $this->postJson('/'.$talent->subdomain.'/booking-request', [
+            'event_name' => 'Walk-in Night',
+            'contact_name' => 'A Fan',
+            'contact_email' => 'fan@gmail.com',
+        ])->assertStatus(422)
+            ->assertJsonPath('errors.create_account.0', __('messages.request_needs_account'));
+
+        $this->postJson('/'.$venue->subdomain.'/guest-add', ['name' => 'Walk-in Night'])
+            ->assertStatus(422)
+            ->assertJsonPath('errors.create_account.0', __('messages.request_needs_account'));
+
+        $this->assertSame(0, \App\Models\Event::count());
+        $this->assertSame(0, \App\Models\User::count());
+
+        // Signed in, the visitor is the one the request is filed under, as before.
+        $this->actingAs($this->createOwner())
+            ->postJson('/'.$venue->subdomain.'/guest-add', ['name' => 'Walk-in Night'])
+            ->assertOk()
+            ->assertJsonPath('success', true);
+        $this->assertSame(1, \App\Models\Event::count());
+    }
+
+    /** Ticking the form's own account box is the way through, and files the request under that account. */
+    public function test_creating_the_account_the_form_offers_sends_the_request(): void
+    {
+        $talent = $this->placeholder();
+
+        $this->postJson('/'.$talent->subdomain.'/booking-request', [
+            'event_name' => 'Walk-in Night',
+            'contact_name' => 'A Fan',
+            'contact_email' => 'fan@gmail.com',
+            'create_account' => '1',
+            'password' => 'sup3rsecret',
+            'terms' => '1',
+        ])->assertOk()->assertJsonPath('success', true);
+
+        $fan = \App\Models\User::where('email', 'fan@gmail.com')->firstOrFail();
+        $this->assertSame($fan->id, \App\Models\Event::sole()->user_id);
+    }
 }

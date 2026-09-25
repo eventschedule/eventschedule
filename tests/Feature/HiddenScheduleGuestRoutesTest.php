@@ -4,10 +4,12 @@ namespace Tests\Feature;
 
 use App\Models\Event;
 use App\Models\Role;
+use App\Models\Sale;
 use App\Models\User;
 use App\Utils\UrlUtils;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Http\Request;
+use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Str;
 use Illuminate\Testing\TestResponse;
 use Tests\Feature\Concerns\CreatesScheduleData;
@@ -23,7 +25,9 @@ use Tests\TestCase;
  * a deleted schedule's form and saved events to it, /booking-request, /book, /carpool and
  * /gift-cards showed an unpublished one's name and branding, its .ics downloads were served, and
  * /request, /follow and /promo redirected where a subdomain that matches nothing 404s - a yes or
- * no to "is there a schedule here?" for anybody who asked.
+ * no to "is there a schedule here?" for anybody who asked. The rest took what they were sent:
+ * fan photos, videos and comments, poll votes, RSVPs and checkouts, waitlist, audience and
+ * interest sign-ups, and an AI parse billed to Gemini, all for a schedule nobody could see.
  *
  * Compared response to response, status, Location and body, so nothing a route prints can tell the
  * two apart, on the path-based routes and on the hosted install's subdomain group alike. A
@@ -72,7 +76,14 @@ class HiddenScheduleGuestRoutesTest extends TestCase
         ])->save();
 
         $this->createAppointmentType($role, ['slug' => 'chat']);
-        $event = $this->createEvent($role, ['name' => 'Coming Soon Show', 'creator_role_id' => $role->id]);
+        $event = $this->createEvent($role, [
+            'name' => 'Coming Soon Show',
+            'creator_role_id' => $role->id,
+            'rsvp_enabled' => true,
+            'fan_photos_enabled' => true,
+            'fan_videos_enabled' => true,
+            'fan_comments_enabled' => true,
+        ]);
 
         return [$role->fresh(), $event];
     }
@@ -111,6 +122,23 @@ class HiddenScheduleGuestRoutesTest extends TestCase
             ['POST', '/gift-cards', ['amount' => 25, 'purchaser_name' => 'A Fan', 'purchaser_email' => 'fan@fans.test', 'send_to_self' => '1']],
             ['GET', '/'.$event->slug.'/'.$hash.'/ical', []],
             ['GET', '/'.$event->slug.'/'.$hash.'/2030-01-07/ical', []],
+            ['GET', '/guest-search-youtube?q=jazz', []],
+            ['GET', '/curate-event/'.$hash, []],
+            // Gemini is paid per call, so this one must stop at the lookup.
+            ['POST', '/guest-parse', ['event_details' => 'Jazz night on Friday at eight']],
+            ['POST', '/submit-video/'.$hash, ['youtube_url' => 'https://www.youtube.com/watch?v=dQw4w9WgXcQ']],
+            ['POST', '/submit-comment/'.$hash, ['comment' => 'What a night']],
+            ['POST', '/submit-photo/'.$hash, ['photo' => UploadedFile::fake()->image('night.jpg')]],
+            ['POST', '/vote-poll/'.$hash.'/'.$hash, ['option_index' => 0]],
+            ['POST', '/suggest-poll-option/'.$hash.'/'.$hash, ['option' => 'Encore']],
+            ['POST', '/event-password', ['event_id' => $hash, 'password' => 'hunter2']],
+            ['GET', '/seating/state?event_id='.$hash, []],
+            ['POST', '/seating/hold', ['event_id' => $hash]],
+            ['POST', '/checkout', ['name' => 'A Fan', 'email' => 'fan@fans.test', 'event_id' => $hash, 'tickets' => [$hash => 1]]],
+            ['POST', '/rsvp', ['name' => 'A Fan', 'email' => 'fan@fans.test', 'event_id' => $hash, 'event_date' => '2030-01-07']],
+            ['POST', '/waitlist/join', ['name' => 'A Fan', 'email' => 'fan@fans.test', 'event_id' => $hash, 'event_date' => '2030-01-07']],
+            ['POST', '/audience/join', ['name' => 'A Fan', 'email' => 'fan@gmail.com']],
+            ['POST', '/interest/join', ['email' => 'fan@gmail.com', 'event_id' => $hash]],
         ];
     }
 
@@ -179,6 +207,7 @@ class HiddenScheduleGuestRoutesTest extends TestCase
         $this->assertEveryRouteAnswersAsUnknown($role, $event, null, 'a deleted schedule, signed out');
         $this->assertEveryRouteAnswersAsUnknown($role, $event, $owner, 'a deleted schedule, its owner');
         $this->assertSame(1, Event::count(), 'a guest route saved an event to a deleted schedule');
+        $this->assertSame(0, Sale::count(), 'a guest route booked a place at a deleted schedule\'s event');
     }
 
     /** Its own people can do something about an unpublished schedule, so its pages still answer them. */
@@ -194,6 +223,8 @@ class HiddenScheduleGuestRoutesTest extends TestCase
             foreach (['/guest-add', '/booking-request', '/book/chat', '/gift-cards'] as $path) {
                 $this->get('/'.$role->subdomain.$path)->assertOk()->assertSee(self::NAME);
             }
+
+            $this->get('/'.$role->subdomain.'/guest-search-youtube?q=jazz')->assertOk();
 
             $this->get('/'.$role->subdomain.'/'.$event->slug.'/'.UrlUtils::encodeId($event->id).'/ical')
                 ->assertOk()

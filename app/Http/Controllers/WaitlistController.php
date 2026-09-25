@@ -33,8 +33,9 @@ class WaitlistController extends Controller
             abort(404);
         }
 
-        // Verify event belongs to this schedule
-        $role = Role::subdomain($subdomain)->firstOrFail();
+        // Verify event belongs to this schedule. A deleted schedule, or an unpublished one to
+        // anybody outside it, answers as an unknown subdomain does.
+        $role = Role::findForGuestOrFail($subdomain);
         if (! $event->roles()->wherePivot('role_id', $role->id)->exists()) {
             abort(403);
         }

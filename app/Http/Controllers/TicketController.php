@@ -1081,7 +1081,9 @@ class TicketController extends Controller
             return back()->withInput()->with('error', __('messages.invalid_request'));
         }
 
-        $role = Role::subdomain($subdomain)->firstOrFail();
+        // A deleted schedule, or an unpublished one to anybody outside it, answers as an unknown
+        // subdomain does.
+        $role = Role::findForGuestOrFail($subdomain);
         $user = auth()->user();
         $isMemberOrAdmin = $user && ($user->isMember($subdomain) || $user->isAdmin());
 
@@ -2263,7 +2265,9 @@ class TicketController extends Controller
             abort(404);
         }
 
-        $role = Role::subdomain($subdomain)->firstOrFail();
+        // A deleted schedule, or an unpublished one to anybody outside it, answers as an unknown
+        // subdomain does.
+        $role = Role::findForGuestOrFail($subdomain);
         if (! $event->roles()->wherePivot('role_id', $role->id)->exists()) {
             abort(403);
         }

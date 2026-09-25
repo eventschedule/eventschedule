@@ -91,9 +91,11 @@ class EventInterestController extends Controller
                 ?: __('messages.invalid_request'), false, $subdomain);
         }
 
-        $role = Role::subdomain($subdomain)->firstOrFail();
+        // A deleted schedule, or an unpublished one to anybody outside it, answers as an unknown
+        // subdomain does.
+        $role = Role::findForGuestOrFail($subdomain);
 
-        if ($role->is_deleted || is_demo_role($role)) {
+        if (is_demo_role($role)) {
             abort(404);
         }
 

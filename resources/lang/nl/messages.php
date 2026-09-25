@@ -3404,6 +3404,7 @@ return [
     'booking_venue_required' => 'Vul een locatie in.',
     'booking_time_invalid' => 'Vul een geldige tijd in.',
     'booking_request_account_required' => 'Voor dit schema is een account nodig om een verzoek te sturen. Laad de pagina opnieuw om verder te gaan.',
+    'request_needs_account' => 'Maak een account aan of log in om een verzoek naar dit schema te sturen.',
     'import_sources' => 'Evenementen importeren',
     'recent_activity' => 'Recente Activiteit',
     'no_recent_activity' => 'Nog geen recente activiteit',
