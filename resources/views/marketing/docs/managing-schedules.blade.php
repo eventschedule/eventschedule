@@ -375,7 +375,7 @@
 
         <h3 class="doc-subheading">Being told about them</h3>
         <p class="text-gray-600 dark:text-gray-300 mb-4">
-            Event Schedule emails owners and admins when new requests arrive. The setting is <strong class="text-gray-900 dark:text-white">New event requests</strong> under <a href="{{ route('marketing.docs.creating_schedules') }}#settings-notifications" class="doc-link">Settings &rarr; Notifications</a>, it is on unless you turn it off, and it is per person rather than per schedule. Viewers are never notified. If the schedule does not require approval there is nothing to notify about, and no email is sent.
+            Event Schedule emails owners and admins when new requests arrive. The setting is <strong class="text-gray-900 dark:text-white">New event requests</strong> under <a href="{{ route('marketing.docs.creating_schedules') }}#settings-notifications" class="doc-link">Settings &rarr; Notifications</a>, it is on unless you turn it off, and it is per person rather than per schedule. Viewers are never notified. A team that works from a shared mailbox can add it as the schedule's <a href="{{ route('marketing.docs.creating_schedules') }}#notification-email" class="doc-link">shared notification address</a>, which gets a copy of each request email. If the schedule does not require approval there is nothing to notify about, and no email is sent.
         </p>
 
         <p class="text-gray-600 dark:text-gray-300 mb-4">

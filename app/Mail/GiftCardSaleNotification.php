@@ -2,6 +2,7 @@
 
 namespace App\Mail;
 
+use App\Mail\Concerns\SendsToNotificationEmail;
 use App\Models\GiftCard;
 use App\Models\Role;
 use App\Models\User;
@@ -16,7 +17,7 @@ use Illuminate\Queue\SerializesModels;
 
 class GiftCardSaleNotification extends Mailable
 {
-    use Queueable, SerializesModels;
+    use Queueable, SendsToNotificationEmail, SerializesModels;
 
     protected $giftCard;
 
@@ -72,6 +73,7 @@ class GiftCardSaleNotification extends Mailable
                 'recipient' => $this->recipient,
                 'amount' => MoneyUtils::format($this->giftCard->amount, $this->giftCard->currency_code),
                 'salesUrl' => route('sales', ['tab' => 'gift-cards']),
+                'notificationEmailUnsubscribeUrl' => $this->notificationEmailUnsubscribeUrl,
             ]
         );
     }
@@ -81,11 +83,6 @@ class GiftCardSaleNotification extends Mailable
      */
     public function headers(): Headers
     {
-        return new Headers(
-            text: [
-                'List-Unsubscribe' => '<'.route('role.unsubscribe', ['subdomain' => $this->role->subdomain]).'>',
-                'List-Unsubscribe-Post' => 'List-Unsubscribe=One-Click',
-            ],
-        );
+        return $this->listUnsubscribeHeaders($this->role);
     }
 }

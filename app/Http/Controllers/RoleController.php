@@ -41,6 +41,7 @@ use App\Services\DemoService;
 use App\Services\DigitalOceanService;
 use App\Services\EmailService;
 use App\Services\MetaAdsService;
+use App\Services\NotificationEmailService;
 use App\Services\OneSignalService;
 use App\Services\ScheduleDeletionService;
 use App\Services\ScheduleTransferService;
@@ -5044,6 +5045,7 @@ class RoleController extends Controller
             'suggestedSources' => $suggestedSources,
             'sourceEventCounts' => $sourceEventCounts,
             'notificationSettings' => $notificationSettings,
+            'notificationEmailSettings' => $role->notificationEmailSettings(),
             'userCalendarId' => $pivot?->google_calendar_id,
             'userMicrosoftCalendarId' => $pivot?->microsoft_calendar_id,
             'event_category_counts' => $eventCategoryCounts,
@@ -5632,7 +5634,31 @@ class RoleController extends Controller
             }
         }
 
+        // The shared notification address. Not fillable, so fill() above never touches it: a
+        // confirmation can only come from the mailbox's own link. Only the toggles the form posted
+        // are written, like the personal ones below, so a greyed-out toggle keeps its value.
+        $notificationEmailChanged = false;
+        if (! is_demo_mode() && $request->has('notification_email')) {
+            $notificationEmailChanged = $role->setNotificationEmail($request->input('notification_email'));
+
+            $notificationEmailSettings = $role->notificationEmailSettings();
+            foreach (Role::NOTIFICATION_EMAIL_TYPES as $notificationType) {
+                if ($request->has('notification_email_'.$notificationType)) {
+                    $notificationEmailSettings[$notificationType] = $request->boolean('notification_email_'.$notificationType);
+                }
+            }
+            $role->notification_email_settings = $notificationEmailSettings;
+        }
+
         $role->save();
+
+        // A new shared notification address gets its confirmation straight after the save that
+        // stored it, before the image checks below can return early: an address saved with no
+        // email on its way would sit "waiting for confirmation" for nothing. The result is
+        // flashed at the end, in place of the success toast.
+        $notificationEmailResult = ($notificationEmailChanged && $role->notification_email)
+            ? app(NotificationEmailService::class)->sendVerification($role, auth()->user())
+            : null;
 
         // Bulk-update events.category_name for renames (always — no toggle) and
         // emit audit log entries for adds / renames / removes.
@@ -6081,6 +6107,14 @@ class RoleController extends Controller
         // name is refused only once its record is gone, which a deploy or a day does.
         if ($aiImageRejected) {
             return $redirect->with('error', __('messages.ai_image_not_applied'));
+        }
+
+        // Replaces the success toast: "saved" is implied either way, and a confirmation that did
+        // not go out is something the owner has to act on.
+        if ($notificationEmailResult) {
+            [$flashKey, $flashMessage] = NotificationEmailService::verificationFlash($notificationEmailResult, $role);
+
+            return $redirect->with($flashKey, $flashMessage);
         }
 
         return $redirect->with('message', __('messages.updated_schedule'));

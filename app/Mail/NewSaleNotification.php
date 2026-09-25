@@ -2,6 +2,7 @@
 
 namespace App\Mail;
 
+use App\Mail\Concerns\SendsToNotificationEmail;
 use App\Models\Event;
 use App\Models\Role;
 use App\Models\Sale;
@@ -17,7 +18,7 @@ use Illuminate\Queue\SerializesModels;
 
 class NewSaleNotification extends Mailable
 {
-    use Queueable, SerializesModels;
+    use Queueable, SendsToNotificationEmail, SerializesModels;
 
     protected $sale;
 
@@ -103,6 +104,7 @@ class NewSaleNotification extends Mailable
                 'paymentStatus' => __($statusKey),
                 'groupedSales' => $this->groupedSales,
                 'unsubscribeUrl' => $this->role ? route('role.unsubscribe', ['subdomain' => $this->role->subdomain]) : '',
+                'notificationEmailUnsubscribeUrl' => $this->notificationEmailUnsubscribeUrl,
             ]
         );
     }
@@ -112,16 +114,7 @@ class NewSaleNotification extends Mailable
      */
     public function headers(): Headers
     {
-        if ($this->role) {
-            return new Headers(
-                text: [
-                    'List-Unsubscribe' => '<'.route('role.unsubscribe', ['subdomain' => $this->role->subdomain]).'>',
-                    'List-Unsubscribe-Post' => 'List-Unsubscribe=One-Click',
-                ],
-            );
-        }
-
-        return new Headers;
+        return $this->listUnsubscribeHeaders($this->role);
     }
 
     /**

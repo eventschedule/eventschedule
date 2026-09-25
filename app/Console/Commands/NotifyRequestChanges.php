@@ -5,6 +5,7 @@ namespace App\Console\Commands;
 use App\Models\Event;
 use App\Models\Role;
 use App\Notifications\NewRequestsNotification;
+use App\Services\NotificationEmailService;
 use App\Services\OneSignalService;
 use Illuminate\Console\Command;
 
@@ -70,7 +71,12 @@ class NotifyRequestChanges extends Command
                             'options' => ['icon' => $role->profile_image_url],
                         ], $role);
                     }
+                }
 
+                $sharedSent = app(NotificationEmailService::class)
+                    ->sendNotification($role, 'new_request', new NewRequestsNotification($role, $currentRequestCount), $editors);
+
+                if ($editors->isNotEmpty() || $sharedSent) {
                     $notifiedCount++;
                 }
             }

@@ -1001,6 +1001,14 @@
     </form>
     @endif
 
+    @if ($role->exists && $role->notification_email && ! $role->notification_email_verified_at)
+    {{-- The shared notification address's resend button, outside #edit-form because forms cannot
+         nest; the button in the Notifications tab points here with form="". --}}
+    <form id="notification-email-resend-form" action="{{ route('role.notification_email.resend', ['subdomain' => $role->subdomain]) }}" method="POST">
+        @csrf
+    </form>
+    @endif
+
     <form method="post"
         action="{{ $role->exists ? route('role.update', ['subdomain' => $role->subdomain]) : route('role.store') }}"
         enctype="multipart/form-data"
@@ -3436,6 +3444,112 @@
                                 checked="{{ old('notification_installment_due', $notificationSettings['installment_due'] ?? true) }}"
                                 help="{{ __('messages.notification_installment_due_help') }}" />
                         </div>
+
+                        @if ($role->exists)
+                        {{-- The shared notification address (issue #124): one for the whole schedule,
+                             unlike every toggle above, which is the signed-in person's own. A copy,
+                             never a redirect, and nothing reaches it until it is confirmed from the
+                             mailbox itself. See NotificationEmailService. --}}
+                        <hr class="my-6 border-gray-200 dark:border-gray-700">
+
+                        <div class="mb-6 ap-card rounded-xl p-4" id="notification-email-section">
+                            <div class="flex items-start gap-3">
+                                <svg class="w-5 h-5 text-[var(--brand-blue)] flex-shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
+                                </svg>
+                                <div class="flex-1 min-w-0">
+                                    <h3 class="text-sm font-semibold text-gray-900 dark:text-gray-100">{{ __('messages.notification_email') }}</h3>
+                                    <p class="text-sm text-gray-500 dark:text-gray-400 mt-1">{{ __('messages.notification_email_help') }}</p>
+
+                                    <div class="mt-4">
+                                        <x-input-label for="notification_email" :value="__('messages.email')" />
+                                        <x-text-input id="notification_email" name="notification_email" type="email" class="mt-1 block w-full"
+                                            :value="old('notification_email', $role->notification_email)" autocomplete="off" />
+                                        <x-input-error class="mt-2" :messages="$errors->get('notification_email')" />
+                                    </div>
+
+                                    @if ($role->notification_email)
+                                        @if ($role->notification_email_verified_at)
+                                            <p class="mt-3 inline-flex items-center gap-1.5 text-sm font-medium text-green-700 dark:text-green-400">
+                                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
+                                                </svg>
+                                                {{ __('messages.notification_email_verified') }}
+                                            </p>
+                                        @else
+                                            <div class="mt-3 p-3 bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-700 rounded-lg">
+                                                <div class="flex items-start gap-2">
+                                                    <svg class="w-5 h-5 text-amber-600 dark:text-amber-400 flex-shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+                                                    </svg>
+                                                    <div class="flex-1 min-w-0">
+                                                        <p class="text-sm font-medium text-amber-800 dark:text-amber-200">{{ __('messages.notification_email_pending') }}</p>
+                                                        <p class="text-sm text-amber-800 dark:text-amber-200 mt-1 break-words" v-pre>{{ __('messages.notification_email_pending_help', ['email' => $role->notification_email, 'days' => \App\Services\NotificationEmailService::VERIFY_TTL_DAYS]) }}</p>
+                                                        @if (\App\Services\NotificationEmailService::canSend())
+                                                        <x-secondary-button type="submit" form="notification-email-resend-form" class="mt-3">
+                                                            {{ __('messages.notification_email_resend') }}
+                                                        </x-secondary-button>
+                                                        @endif
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        @endif
+                                    @endif
+
+                                    @if (! \App\Services\NotificationEmailService::canSend())
+                                        <div class="mt-3 p-3 bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-700 rounded-lg">
+                                            <p class="text-sm text-amber-800 dark:text-amber-200 flex items-start gap-2">
+                                                <svg class="w-5 h-5 text-amber-600 dark:text-amber-400 flex-shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+                                                </svg>
+                                                <span>{{ __('messages.notification_email_no_mailer') }}</span>
+                                            </p>
+                                        </div>
+                                    @endif
+
+                                    <h4 class="mt-6 mb-4 text-sm font-semibold text-gray-900 dark:text-gray-100">{{ __('messages.notification_email_receives') }}</h4>
+
+                                    <div class="mb-6">
+                                        <x-toggle name="notification_email_new_request"
+                                            label="{{ __('messages.notify_new_request') }}"
+                                            checked="{{ old('notification_email_new_request', $notificationEmailSettings['new_request']) }}"
+                                            help="{{ __('messages.notify_new_request_help') }}" />
+                                    </div>
+
+                                    <div class="mb-6">
+                                        <x-toggle name="notification_email_new_sale"
+                                            label="{{ __('messages.notify_new_sale') }}"
+                                            checked="{{ old('notification_email_new_sale', $notificationEmailSettings['new_sale']) }}"
+                                            help="{{ __('messages.notify_new_sale_help') }}"
+                                            :disabled="$emailDisabled" />
+                                    </div>
+
+                                    <div class="mb-6">
+                                        <x-toggle name="notification_email_new_feedback"
+                                            label="{{ __('messages.notify_new_feedback') }}"
+                                            checked="{{ old('notification_email_new_feedback', $notificationEmailSettings['new_feedback']) }}"
+                                            help="{{ __('messages.notify_new_feedback_help') }}"
+                                            :disabled="$emailDisabled" />
+                                    </div>
+
+                                    <div class="mb-6">
+                                        <x-toggle name="notification_email_new_poll_option"
+                                            label="{{ __('messages.notify_new_poll_option') }}"
+                                            checked="{{ old('notification_email_new_poll_option', $notificationEmailSettings['new_poll_option']) }}"
+                                            help="{{ __('messages.notify_new_poll_option_help') }}"
+                                            :disabled="$emailDisabled" />
+                                    </div>
+
+                                    <div>
+                                        <x-toggle name="notification_email_installment_due"
+                                            label="{{ __('messages.notification_installment_due') }}"
+                                            checked="{{ old('notification_email_installment_due', $notificationEmailSettings['installment_due']) }}"
+                                            help="{{ __('messages.notification_installment_due_help') }}" />
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        @endif
 
                         </div>
                         <!-- End Tab Content: Notifications -->

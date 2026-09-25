@@ -8,4 +8,7 @@
 
 {{ __('messages.thank_you_for_using') }}
 
+@if (empty($notificationEmailUnsubscribeUrl))
 {{ __('messages.unsubscribe') }}: {{ $unsubscribeUrl }}
+@endif
+@include('emails.partials.notification_email_footer_text', ['scheduleName' => $role?->name])

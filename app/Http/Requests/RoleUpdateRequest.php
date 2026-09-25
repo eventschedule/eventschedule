@@ -95,6 +95,16 @@ class RoleUpdateRequest extends FormRequest
                 ['required', 'string', 'email', 'max:255'],
                 config('app.hosted') ? [new NoFakeEmail] : []
             ),
+            // The shared notification address (Settings > Notifications). Optional; blank removes it.
+            'notification_email' => array_merge(
+                ['nullable', 'string', 'email', 'max:255'],
+                config('app.hosted') ? [new NoFakeEmail] : []
+            ),
+            'notification_email_new_request' => ['nullable', 'boolean'],
+            'notification_email_new_sale' => ['nullable', 'boolean'],
+            'notification_email_new_feedback' => ['nullable', 'boolean'],
+            'notification_email_new_poll_option' => ['nullable', 'boolean'],
+            'notification_email_installment_due' => ['nullable', 'boolean'],
             'new_subdomain' => array_merge(
                 is_demo_mode() ? [] : ['required'],
                 ['string', 'max:50'],

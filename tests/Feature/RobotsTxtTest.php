@@ -44,6 +44,7 @@ class RobotsTxtTest extends TestCase
         '/ticket/view/', '/ticket/qr_code/', '/ticket/wallet/', '/ticket/order/',
         '/sub/c/', '/sub/m/', '/sub/u/', '/int/u/',
         '/nl/o/', '/nl/c/', '/nl/u/',
+        '/ne/c/', '/ne/u/',
         '/promo/',
     ];
 
@@ -173,6 +174,8 @@ class RobotsTxtTest extends TestCase
             'newsletter.track_open' => ['token' => 't0ken'],
             'newsletter.track_click' => ['token' => 't0ken', 'encodedUrl' => 'aHR0cHM6Ly9leGFtcGxlLmNvbQ'],
             'newsletter.show_unsubscribe' => ['token' => 't0ken'],
+            'notification_email.show_confirm' => ['role' => 'aBc1', 'token' => 't0ken'],
+            'notification_email.show_unsubscribe' => ['role' => 'aBc1', 'token' => 't0ken'],
         ] as $name => $params) {
             $paths[$name] = route($name, $params, false);
         }

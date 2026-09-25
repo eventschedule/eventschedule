@@ -247,7 +247,8 @@ class EmailService
                 );
             }
 
-            foreach ($role->getEditorsWantingNotification('new_sale') as $editor) {
+            $editors = $role->getEditorsWantingNotification('new_sale');
+            foreach ($editors as $editor) {
                 SendQueuedEmail::dispatch(
                     new GiftCardSaleNotification($giftCard, $role, $editor),
                     $editor->email,
@@ -255,6 +256,9 @@ class EmailService
                     $editor->language_code ?? app()->getLocale()
                 );
             }
+
+            app(NotificationEmailService::class)
+                ->sendMailable($role, 'new_sale', new GiftCardSaleNotification($giftCard, $role), $editors);
         } catch (\Exception $e) {
             Log::error('Failed to send gift card emails: '.$e->getMessage(), [
                 'gift_card_id' => $giftCard->id,
@@ -323,6 +327,9 @@ class EmailService
                 ]);
             }
         }
+
+        app(NotificationEmailService::class)
+            ->sendMailable($role, 'new_sale', new NewSaleNotification($sale, $event, $role), $editors);
     }
 
     /**
@@ -610,6 +617,15 @@ class EmailService
                     $editor->language_code ?? app()->getLocale()
                 );
             }
+
+            // The shared address is the team's copy, so it still hears about a change one editor
+            // made themselves. A move satisfies either of its toggles, as it does for editors.
+            app(NotificationEmailService::class)->sendMailable(
+                $role,
+                $isMove ? [$preference, 'new_sale'] : $preference,
+                new \App\Mail\AppointmentBookedNotification($sale, $event, $role, $event->appointmentType, $kind, $wasPaid, $oldStartsAt),
+                $editors
+            );
         } catch (\Exception $e) {
             Log::error('Failed to send appointment owner notification: '.$e->getMessage(), ['sale_id' => $sale->id]);
         }

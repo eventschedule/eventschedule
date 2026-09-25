@@ -19,3 +19,4 @@
 {{ __('messages.view_feedback') }}: {{ $salesUrl }}
 
 {{ __('messages.thank_you_for_using') }}
+@include('emails.partials.notification_email_footer_text', ['scheduleName' => $role?->name])

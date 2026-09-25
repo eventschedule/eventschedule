@@ -81,6 +81,14 @@ class AuditService
 
     const SCHEDULE_TAKEDOWN_REQUESTED = 'schedule.takedown_requested';
 
+    // The shared notification address (NotificationEmailService). CONFIRMED and REMOVED are
+    // acted on from the mailbox itself, with no signed-in user, so they log a null user_id.
+    const SCHEDULE_NOTIFICATION_EMAIL_SENT = 'schedule.notification_email_sent';
+
+    const SCHEDULE_NOTIFICATION_EMAIL_CONFIRMED = 'schedule.notification_email_confirmed';
+
+    const SCHEDULE_NOTIFICATION_EMAIL_REMOVED = 'schedule.notification_email_removed';
+
     // Event actions
     const EVENT_CREATE = 'event.create';
 

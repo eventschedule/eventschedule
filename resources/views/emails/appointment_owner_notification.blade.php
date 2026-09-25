@@ -66,6 +66,7 @@
         <div style="text-align: center; margin: 20px 0;">
             <a href="{{ $bookingsUrl }}" style="background-color: #4E81FA; color: white; padding: 12px 24px; text-decoration: none; border-radius: 6px; display: inline-block; font-weight: bold;">{{ in_array($kind, ['pending', 'rescheduled_pending'], true) ? __('messages.appointment_owner_review') : __('messages.view') }}</a>
         </div>
+        @include('emails.partials.notification_email_footer', ['scheduleName' => $role?->name])
     </div>
 </body>
 </html>

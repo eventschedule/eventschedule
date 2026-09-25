@@ -38,6 +38,7 @@ use App\Http\Controllers\MicrosoftCalendarController;
 use App\Http\Controllers\MicrosoftCalendarWebhookController;
 use App\Http\Controllers\NewsletterController;
 use App\Http\Controllers\NewsletterTrackingController;
+use App\Http\Controllers\NotificationEmailController;
 use App\Http\Controllers\PaymentGatewayController;
 use App\Http\Controllers\PaymentWebhookController;
 use App\Http\Controllers\ProfileController;
@@ -396,6 +397,17 @@ Route::post('/sub/u/{token}', [RoleSubscriberController::class, 'unsubscribe'])-
 // CSRF-exempt in bootstrap/app.php so a mail client's RFC 8058 one-click works.
 Route::get('/int/u/{token}', [EventInterestController::class, 'showUnsubscribe'])->name('event.interest.show_unsubscribe')->middleware('app_subdomain');
 Route::post('/int/u/{token}', [EventInterestController::class, 'unsubscribe'])->name('event.interest.unsubscribe')->middleware('throttle:audience_unsubscribe');
+// A schedule's shared notification address (issue #124). Same GET-shows / POST-acts split, for
+// the same mail-scanner reason, and signed links whose token is derived from the address, so no
+// login is needed: the people reading a shared inbox may have no account. Signed without a host
+// and checked with hasValidSignature(false) - see NotificationEmailService::verifyUrl(). The
+// unsubscribe POST is CSRF-exempt in bootstrap/app.php for RFC 8058 one-click; the confirm POST
+// deliberately is not, since nothing but the form the GET rendered should post to it.
+// 'ne' is two letters, so no schedule can ever be named it.
+Route::get('/ne/c/{role}/{token}', [NotificationEmailController::class, 'showConfirm'])->name('notification_email.show_confirm')->middleware('throttle:10,1,notification_email_confirm');
+Route::post('/ne/c/{role}/{token}', [NotificationEmailController::class, 'confirm'])->name('notification_email.confirm')->middleware('throttle:10,1,notification_email_confirm');
+Route::get('/ne/u/{role}/{token}', [NotificationEmailController::class, 'showUnsubscribe'])->name('notification_email.show_unsubscribe');
+Route::post('/ne/u/{role}/{token}', [NotificationEmailController::class, 'unsubscribe'])->name('notification_email.unsubscribe')->middleware('throttle:notification_email_unsubscribe');
 
 // Schedule ownership handover, recipient side (discussion #119).
 //
@@ -722,6 +734,7 @@ Route::middleware(['auth', 'verified', 'app_subdomain'])->group(function () {
     Route::get('/{subdomain}/unfollow', [RoleController::class, 'unfollow'])->name('role.unfollow');
     Route::put('/{subdomain}/update', [RoleController::class, 'update'])->name('role.update');
     Route::post('/{subdomain}/test-email', [RoleController::class, 'testEmail'])->name('role.test_email');
+    Route::post('/{subdomain}/notification-email/resend', [NotificationEmailController::class, 'resend'])->name('role.notification_email.resend')->middleware('throttle:5,1');
     Route::post('/{subdomain}/test-feedback-email', [RoleController::class, 'testFeedbackEmail'])->name('role.test_feedback_email');
     Route::delete('/{subdomain}/delete', [RoleController::class, 'delete'])->name('role.delete');
     Route::delete('/{subdomain}/delete-image', [RoleController::class, 'deleteImage'])->name('role.delete_image');

@@ -8,6 +8,7 @@ use App\Models\Event;
 use App\Models\EventFeedback;
 use App\Models\Role;
 use App\Models\Sale;
+use App\Services\NotificationEmailService;
 use App\Services\OneSignalService;
 use App\Services\WebhookService;
 use App\Utils\CsvUtils;
@@ -266,5 +267,8 @@ class FeedbackController extends Controller
                 ]);
             }
         }
+
+        app(NotificationEmailService::class)
+            ->sendMailable($role, 'new_feedback', new FeedbackNotification($feedback, $sale, $event, $role), $editors);
     }
 }

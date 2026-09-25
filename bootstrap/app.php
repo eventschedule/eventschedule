@@ -73,6 +73,7 @@ return Application::configure(basePath: dirname(__DIR__))
             // RFC 8058 one-click unsubscribe: a mail client's POST carries no session and no token.
             'sub/u/*',
             'int/u/*',
+            'ne/u/*/*',
             // The signup form a schedule embeds on its own website. A cross-site iframe never
             // sends the SameSite=lax session cookie, so no token could match; see the route in
             // routes/web.php for why exempting it is safe. Both shapes: hosted serves it at the

@@ -264,6 +264,11 @@ class ScheduleTransferService
                 ];
 
                 $this->releaseCalendarRows($role, $previousOwner);
+
+                // The shared notification address was the previous owner's choice, most likely
+                // their own team's inbox. Left in place it would keep receiving the new owner's
+                // sales and requests, so the new owner starts without one.
+                $role->clearNotificationEmail();
             }
 
             $this->repointEvents($role, $previousOwnerId, $newOwner->id);

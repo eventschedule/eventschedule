@@ -49,6 +49,7 @@
                 {{ __('messages.installment_digest_view_tab') }}
             </a>
         </div>
+        @include('emails.partials.notification_email_footer', ['scheduleName' => $role?->name])
     </div>
 </body>
 </html>

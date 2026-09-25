@@ -623,7 +623,8 @@ class AppController extends Controller
      *    code, its wallet pass and an order;
      *  - /sub/c/, /sub/m/, /sub/u/ and /int/u/: an audience subscription's confirm, manage and
      *    unsubscribe links, and an event-interest unsubscribe;
-     *  - /nl/o/, /nl/c/ and /nl/u/: a newsletter's open pixel, click redirect and unsubscribe.
+     *  - /nl/o/, /nl/c/ and /nl/u/: a newsletter's open pixel, click redirect and unsubscribe;
+     *  - /ne/c/ and /ne/u/: a schedule's shared notification address, its confirm and remove links.
      *
      * Every host, because these routes answer on every host: an emailed link names the base URL,
      * and /sub/c/ and /int/u/ redirect to app., so a rule on only one of them misses where a
@@ -641,6 +642,7 @@ class AppController extends Controller
         '/ticket/view/', '/ticket/qr_code/', '/ticket/wallet/', '/ticket/order/',
         '/sub/c/', '/sub/m/', '/sub/u/', '/int/u/',
         '/nl/o/', '/nl/c/', '/nl/u/',
+        '/ne/c/', '/ne/u/',
         '/promo/',
     ];
 

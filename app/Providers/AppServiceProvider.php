@@ -193,7 +193,7 @@ class AppServiceProvider extends ServiceProvider
         // (one person cannot burn anyone else's budget) and looser where it matters (a shared
         // egress IP is no longer a shared budget). Kept generous: repeating your own unsubscribe
         // is not abuse, and the write is idempotent.
-        foreach (['audience_unsubscribe', 'newsletter_unsubscribe'] as $limiter) {
+        foreach (['audience_unsubscribe', 'newsletter_unsubscribe', 'notification_email_unsubscribe'] as $limiter) {
             RateLimiter::for($limiter, function ($request) {
                 return Limit::perMinutes(2, 10)->by((string) $request->route('token'));
             });

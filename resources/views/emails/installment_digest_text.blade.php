@@ -9,3 +9,4 @@
 {{ \App\Utils\MoneyUtils::format($total, $currency ?? 'USD') }} {{ trans_choice('messages.installment_digest_across', count($rows), ['count' => count($rows)]) }}
 
 {{ route('sales', ['tab' => 'installments']) }}
+@include('emails.partials.notification_email_footer_text', ['scheduleName' => $role?->name])

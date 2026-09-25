@@ -50,7 +50,8 @@ $addonSummary = $addonTickets->groupBy(fn($st) => $st->ticket->type)
 {{ __('messages.view_sales') }}: {{ $salesUrl }}
 
 {{ __('messages.thank_you_for_using') }}
-@if ($unsubscribeUrl)
+@if ($unsubscribeUrl && empty($notificationEmailUnsubscribeUrl))
 
 {{ __('messages.unsubscribe') }}: {{ $unsubscribeUrl }}
 @endif
+@include('emails.partials.notification_email_footer_text', ['scheduleName' => $role?->name])

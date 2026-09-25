@@ -217,6 +217,10 @@ class Role extends Model implements MustVerifyEmail
         // Deliberately not fillable: RoleController::applyBookingFormConfig() is the only writer,
         // and it whitelists the keys. Read it through bookingFormConfig().
         'booking_form_config' => 'array',
+        // Deliberately not fillable: RoleController::update() writes the shared notification
+        // address through setNotificationEmail(), and only the confirm link sets verified_at.
+        'notification_email_verified_at' => 'datetime',
+        'notification_email_settings' => 'array',
     ];
 
     /**
@@ -227,6 +231,11 @@ class Role extends Model implements MustVerifyEmail
     protected $hidden = [
         'email_settings',
         'caldav_settings',
+        // toData() is toArray(), and it feeds venue pickers and search results that list other
+        // people's schedules. A private team inbox must not travel with them.
+        'notification_email',
+        'notification_email_verified_at',
+        'notification_email_settings',
     ];
 
     /**
@@ -1191,13 +1200,140 @@ class Role extends Model implements MustVerifyEmail
             ->filter(function ($user) use ($type) {
                 $settings = json_decode($user->pivot->notification_settings ?? '{}', true);
 
-                // new_request defaults to opt-in when the user has not explicitly set a preference.
-                if ($type === 'new_request' && ! array_key_exists($type, $settings)) {
+                // new_request and installment_due default to opt-in when the user has not
+                // explicitly set a preference (RoleController::edit() renders them on).
+                if (in_array($type, ['new_request', 'installment_due'], true) && ! array_key_exists($type, $settings)) {
                     return true;
                 }
 
                 return ! empty($settings[$type]);
             });
+    }
+
+    /**
+     * The notification types the shared notification address can receive. Fan content is not one:
+     * NotifyFanContentChanges only ever mails the event's own creator, so there is no
+     * schedule-level notice to copy.
+     */
+    public const NOTIFICATION_EMAIL_TYPES = ['new_request', 'new_sale', 'new_feedback', 'new_poll_option', 'installment_due'];
+
+    private const NOTIFICATION_EMAIL_DEFAULTS = [
+        'new_request' => true,
+        'new_sale' => false,
+        'new_feedback' => false,
+        'new_poll_option' => false,
+        'installment_due' => false,
+    ];
+
+    /**
+     * The shared notification address's per-type toggles: the defaults, overlaid with whatever
+     * was saved, known keys only.
+     *
+     * @return array<string, bool>
+     */
+    public function notificationEmailSettings(): array
+    {
+        $stored = is_array($this->notification_email_settings) ? $this->notification_email_settings : [];
+        $settings = self::NOTIFICATION_EMAIL_DEFAULTS;
+
+        foreach (self::NOTIFICATION_EMAIL_TYPES as $type) {
+            if (array_key_exists($type, $stored)) {
+                $settings[$type] = (bool) $stored[$type];
+            }
+        }
+
+        return $settings;
+    }
+
+    public function hasVerifiedNotificationEmail(): bool
+    {
+        return filled($this->notification_email) && $this->notification_email_verified_at !== null;
+    }
+
+    /**
+     * The token in the confirm and unsubscribe links. It is derived from the address, so a link
+     * sent to a previous address can neither confirm nor remove the current one.
+     */
+    public function notificationEmailHash(): ?string
+    {
+        if (blank($this->notification_email)) {
+            return null;
+        }
+
+        return substr(hash_hmac('sha256', $this->id.'|'.mb_strtolower(trim($this->notification_email)), (string) config('app.key')), 0, 40);
+    }
+
+    /**
+     * Set the shared notification address. A different address (ignoring case) starts
+     * unconfirmed; the same one keeps its confirmation. Returns whether it changed.
+     */
+    public function setNotificationEmail(?string $email): bool
+    {
+        $email = trim((string) $email);
+        $email = $email === '' ? null : $email;
+
+        $current = $this->notification_email;
+        $changed = mb_strtolower((string) $current) !== mb_strtolower((string) $email);
+
+        if ($changed) {
+            $this->notification_email = $email;
+            $this->notification_email_verified_at = null;
+        } elseif ($email !== null && $current !== $email) {
+            // Same mailbox, different case: keep the confirmation, store what was typed.
+            $this->notification_email = $email;
+        }
+
+        return $changed;
+    }
+
+    /**
+     * Stop sending to the shared notification address. The toggles are kept, so an address
+     * added later starts from the choices the owner already made.
+     */
+    public function clearNotificationEmail(): void
+    {
+        $this->notification_email = null;
+        $this->notification_email_verified_at = null;
+    }
+
+    /**
+     * The shared notification address, if it should receive this notification: it is confirmed,
+     * one of $types is switched on for it, and it is not the account email of an editor who is
+     * already being sent this same notice (so a shared inbox that is also an editor's login does
+     * not get it twice). Pass the editors actually being notified, not every editor: one who
+     * opted out must not suppress the shared copy.
+     *
+     * @param  string|array<int, string>  $types  any of them switched on
+     * @param  iterable<User>  $notifiedEditors
+     */
+    public function getNotificationEmailWanting(string|array $types, iterable $notifiedEditors = []): ?string
+    {
+        if (is_demo_role($this) || ! $this->hasVerifiedNotificationEmail()) {
+            return null;
+        }
+
+        $settings = $this->notificationEmailSettings();
+        $wanted = false;
+        foreach ((array) $types as $type) {
+            if (! empty($settings[$type])) {
+                $wanted = true;
+                break;
+            }
+        }
+
+        if (! $wanted) {
+            return null;
+        }
+
+        $address = trim($this->notification_email);
+
+        foreach ($notifiedEditors as $editor) {
+            if ($editor->email && strcasecmp(trim($editor->email), $address) === 0) {
+                return null;
+            }
+        }
+
+        return $address;
     }
 
     public function venueEvents()

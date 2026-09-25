@@ -12,3 +12,4 @@
 {{ __('messages.payment') }}: {{ __('messages.'.$giftCard->payment_method) }}
 
 {{ __('messages.view_gift_cards') }}: {{ $salesUrl }}
+@include('emails.partials.notification_email_footer_text', ['scheduleName' => $role?->name])

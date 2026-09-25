@@ -43,6 +43,7 @@ class ReservedSubdomainRoutesTest extends TestCase
         'sitemap.xml.gz',
         // Two letters.
         'ai',
+        'ne',
         'nl',
         'up',
         'wp',

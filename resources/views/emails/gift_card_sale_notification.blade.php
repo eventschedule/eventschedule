@@ -30,6 +30,7 @@
                 {{ __('messages.view_gift_cards') }}
             </a>
         </div>
+        @include('emails.partials.notification_email_footer', ['scheduleName' => $role?->name])
     </div>
 </body>
 </html>

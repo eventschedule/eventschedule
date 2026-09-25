@@ -2,6 +2,7 @@
 
 namespace App\Mail;
 
+use App\Mail\Concerns\SendsToNotificationEmail;
 use App\Models\Event;
 use App\Models\EventFeedback;
 use App\Models\Role;
@@ -17,7 +18,7 @@ use Illuminate\Queue\SerializesModels;
 
 class FeedbackNotification extends Mailable
 {
-    use Queueable, SerializesModels;
+    use Queueable, SendsToNotificationEmail, SerializesModels;
 
     protected $feedback;
 
@@ -73,22 +74,14 @@ class FeedbackNotification extends Mailable
                 'role' => $this->role,
                 'recipient' => $this->recipient,
                 'salesUrl' => $salesUrl,
+                'notificationEmailUnsubscribeUrl' => $this->notificationEmailUnsubscribeUrl,
             ]
         );
     }
 
     public function headers(): Headers
     {
-        if ($this->role) {
-            return new Headers(
-                text: [
-                    'List-Unsubscribe' => '<'.route('role.unsubscribe', ['subdomain' => $this->role->subdomain]).'>',
-                    'List-Unsubscribe-Post' => 'List-Unsubscribe=One-Click',
-                ],
-            );
-        }
-
-        return new Headers;
+        return $this->listUnsubscribeHeaders($this->role);
     }
 
     public function attachments(): array

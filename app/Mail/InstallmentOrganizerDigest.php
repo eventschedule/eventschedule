@@ -2,12 +2,14 @@
 
 namespace App\Mail;
 
+use App\Mail\Concerns\SendsToNotificationEmail;
 use App\Models\Role;
 use Illuminate\Bus\Queueable;
 use Illuminate\Mail\Mailable;
 use Illuminate\Mail\Mailables\Address;
 use Illuminate\Mail\Mailables\Content;
 use Illuminate\Mail\Mailables\Envelope;
+use Illuminate\Mail\Mailables\Headers;
 use Illuminate\Queue\SerializesModels;
 
 /**
@@ -24,7 +26,7 @@ use Illuminate\Queue\SerializesModels;
  */
 class InstallmentOrganizerDigest extends Mailable
 {
-    use Queueable, SerializesModels;
+    use Queueable, SendsToNotificationEmail, SerializesModels;
 
     public function __construct(
         protected Role $role,
@@ -70,8 +72,18 @@ class InstallmentOrganizerDigest extends Mailable
                 'kind' => $this->kind,
                 'currency' => $this->currency,
                 'total' => $this->total,
+                'notificationEmailUnsubscribeUrl' => $this->notificationEmailUnsubscribeUrl,
             ]
         );
+    }
+
+    /**
+     * Only the shared notification address's copy carries an unsubscribe: the editors' digest never
+     * had one, and their way out stays the Notifications toggle.
+     */
+    public function headers(): Headers
+    {
+        return $this->listUnsubscribeHeaders($this->role, withRoleFallback: false);
     }
 
     public function attachments(): array

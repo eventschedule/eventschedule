@@ -41,3 +41,4 @@
 @endif
 
 {{ $bookingsUrl }}
+@include('emails.partials.notification_email_footer_text', ['scheduleName' => $role?->name])

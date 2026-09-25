@@ -321,6 +321,36 @@ class ScheduleTransferTest extends TestCase
         $this->assertSame($newOwner->id, $role->fresh()->user_id);
     }
 
+    /**
+     * The shared notification address was the previous owner's choice (issue #124), most likely their
+     * own team's inbox, so it must not keep receiving the new owner's sales and requests. Kept only
+     * when the previous owner stays on as an admin.
+     */
+    public function test_the_shared_notification_address_leaves_with_the_previous_owner(): void
+    {
+        Mail::fake();
+
+        foreach (['1' => true, '0' => false] as $removeMe => $cleared) {
+            $owner = $this->createOwner();
+            $role = $this->createRole($owner, 'venue', [
+                'notification_email' => 'old.team@gmail.com',
+                'notification_email_verified_at' => now(),
+            ]);
+            $newOwner = $this->recipient('newowner'.$removeMe.'@gmail.com');
+
+            $this->actingAs($owner)->post(route('role.transfer.store', ['subdomain' => $role->subdomain]), [
+                'email' => $newOwner->email,
+                'remove_me' => (string) $removeMe,
+            ]);
+            $this->actingAs($newOwner)->post(route('role.transfer.accept', ['token' => $role->openTransfer()->token]));
+
+            $role->refresh();
+            $this->assertSame($newOwner->id, $role->user_id);
+            $this->assertSame($cleared ? null : 'old.team@gmail.com', $role->notification_email, 'remove_me='.$removeMe);
+            $this->assertSame($cleared, $role->notification_email_verified_at === null, 'remove_me='.$removeMe);
+        }
+    }
+
     public function test_declining_leaves_ownership_alone_and_tells_the_owner(): void
     {
         Mail::fake();

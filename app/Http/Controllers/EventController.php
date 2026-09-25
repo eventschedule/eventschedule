@@ -43,6 +43,7 @@ use App\Services\BoostBillingService;
 use App\Services\DemoService;
 use App\Services\EventChangeNotifier;
 use App\Services\MetaAdsService;
+use App\Services\NotificationEmailService;
 use App\Services\OneSignalService;
 use App\Services\UsageTrackingService;
 use App\Services\WebhookService;
@@ -3649,7 +3650,12 @@ class EventController extends Controller
                 $editor->notify(new NewRequestsNotification($role, $pendingCount));
             }
 
-            if ($editors->isNotEmpty()) {
+            $sharedSent = app(NotificationEmailService::class)
+                ->sendNotification($role, 'new_request', new NewRequestsNotification($role, $pendingCount), $editors);
+
+            // Either counts: the daily digest compares against this, so a shared-address-only
+            // schedule would otherwise be told about the same request again at noon.
+            if ($editors->isNotEmpty() || $sharedSent) {
                 $role->last_notified_request_count = $pendingCount;
                 $role->save();
             }

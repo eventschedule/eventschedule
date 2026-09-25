@@ -5,6 +5,7 @@ namespace App\Console\Commands;
 use App\Models\EventPoll;
 use App\Models\Role;
 use App\Notifications\NewPollOptionsNotification;
+use App\Services\NotificationEmailService;
 use App\Services\OneSignalService;
 use Illuminate\Console\Command;
 
@@ -83,7 +84,12 @@ class NotifyPollOptionChanges extends Command
                             'options' => ['icon' => $role->profile_image_url],
                         ], $role);
                     }
+                }
 
+                $sharedSent = app(NotificationEmailService::class)
+                    ->sendNotification($role, 'new_poll_option', new NewPollOptionsNotification($role, $currentCount), $editors);
+
+                if ($editors->isNotEmpty() || $sharedSent) {
                     $role->last_notified_poll_option_count = $currentCount;
                     $role->save();
 

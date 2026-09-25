@@ -14,6 +14,7 @@ use App\Models\SaleInstallment;
 use App\Models\SaleInstallmentPlan;
 use App\Services\AuditService;
 use App\Services\InstallmentService;
+use App\Services\NotificationEmailService;
 use App\Services\WebhookService;
 use Illuminate\Console\Command;
 use Illuminate\Support\Facades\DB;
@@ -606,15 +607,7 @@ class ChargeInstallments extends Command
     {
         // Opt-in by default when the key was never set, matching new_request: an organizer who
         // has not thought about it still needs to know money did not arrive.
-        $editors = $role->belongsToMany(\App\Models\User::class)
-            ->withPivot('level', 'notification_settings')
-            ->whereIn('level', ['owner', 'admin'])
-            ->get()
-            ->filter(function ($user) {
-                $settings = json_decode($user->pivot->notification_settings ?? '{}', true);
-
-                return ! array_key_exists('installment_due', $settings) || ! empty($settings['installment_due']);
-            });
+        $editors = $role->getEditorsWantingNotification('installment_due');
 
         foreach ($editors as $editor) {
             try {
@@ -628,6 +621,9 @@ class ChargeInstallments extends Command
                 report($e);
             }
         }
+
+        app(NotificationEmailService::class)
+            ->sendMailable($role, 'installment_due', new InstallmentOrganizerDigest($role, $rows, $kind, $currency, $total), $editors);
     }
 
     private function roleFor(?SaleInstallmentPlan $plan): ?Role

@@ -61,6 +61,7 @@
         <p style="font-size: 12px; color: #999; margin-top: 30px; border-top: 1px solid #ddd; padding-top: 20px;">
             {{ __('messages.thank_you_for_using') }}
         </p>
+        @include('emails.partials.notification_email_footer', ['scheduleName' => $role?->name])
     </div>
 </body>
 </html>
