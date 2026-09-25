@@ -226,9 +226,10 @@ class GuestSeo
     }
 
     /**
-     * When: "Sat, Oct 24, 2026, 7:30 PM" in the schedule's timezone and 12/24-hour preference, a
-     * bare date for an event with no time, "Oct 24, 2026 - Oct 26, 2026" for one of a day or more.
-     * Null for a series page, which is about every occurrence at once.
+     * When: "Sat, Oct 24, 2026, 7:30 PM" in the schedule's timezone and 12/24-hour preference and
+     * the page's language, AM/PM included, a bare date for an event with no time, "Oct 24, 2026 -
+     * Oct 26, 2026" for one of a day or more. Null for a series page, which is about every
+     * occurrence at once.
      */
     private static function eventWhen(Event $event, ?string $date, ?Role $role): ?string
     {
@@ -258,7 +259,10 @@ class GuestSeo
 
         $use24 = $role ? get_use_24_hour_time($role) : $event->use24HourTime();
 
-        return $day.', '.$start->format($use24 ? 'H:i' : 'g:i A');
+        // translatedFormat(), not format(): format()'s "A" is English in every locale, so a Spanish
+        // page's date ended in "7:30 PM". Not isoFormat('LT') either, which is the locale's own
+        // clock and ignores the owner's 12/24-hour choice.
+        return $day.', '.$start->translatedFormat($use24 ? 'H:i' : 'g:i A');
     }
 
     /**

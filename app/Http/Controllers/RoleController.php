@@ -22,6 +22,7 @@ use App\Models\BoostCampaign;
 use App\Models\DismissedTimezoneWarning;
 use App\Models\DismissedVenueMergeSuggestion;
 use App\Models\Event;
+use App\Models\EventPoll;
 use App\Models\Group;
 use App\Models\PageView;
 use App\Models\Role;
@@ -2400,6 +2401,10 @@ class RoleController extends Controller
         // list, and on its own page the title and description (AppGuestLayout::$upcoming).
         $upcoming = null;
 
+        // Whether the schedule page loads the poll celebration script. Null leaves the calendar
+        // partial to its own check of $events, which the event page and ?graphic=1 still use.
+        $hasActivePolls = null;
+
         if ($event && ! request()->graphic) {
             // For event detail view (non-graphic), only check if calendar has events
             // The calendar partial loads data via Ajax, so we just need existence
@@ -2476,15 +2481,24 @@ class RoleController extends Controller
             }
         } else {
             // Every other schedule page (the home, a sub-schedule, the embed). The calendar fetches
-            // its own months by Ajax, so $events feeds only the <noscript> list and the
-            // poll-confetti check in role/partials/calendar.blade.php - and it used to be the
-            // month's grid PLUS every recurring series the schedule ever created (inMonth() admits
-            // any days_of_week row), each with its parts, videos, photos, commented users and
-            // polls. A 3,000-event schedule spent 6.65 s on it. Now it is the next 50 public
-            // events, the list the noscript block shows; withCount('polls') still answers the
-            // confetti check.
+            // its own months by Ajax, so the page itself needs only the next 50 public events, for
+            // its <noscript> list - where $events used to be the month's grid PLUS every recurring
+            // series the schedule ever created (inMonth() admits any days_of_week row), each with
+            // its parts, videos, photos, commented users and polls. A 3,000-event schedule spent
+            // 6.65 s on it.
             $upcoming = $this->eventRepo->upcomingForGuest($role, $selectedGroup, 50);
             $events = $upcoming->pluck('event');
+
+            // The calendar's popups let a visitor vote in any active poll of the events it shows,
+            // and it shows past nights of the month, and unlisted events to the schedule's own
+            // people, none of which the list above holds - so asking the list left the confetti
+            // script out wherever the only poll was on one of those. Any active poll on an event
+            // the schedule accepted loads it: the script is small, and a missing one is a vote
+            // with no celebration.
+            $hasActivePolls = $role->isPro() && EventPoll::where('is_active', true)
+                ->whereIn('event_id', fn ($q) => $q->select('event_id')->from('event_role')
+                    ->where('role_id', $role->id)->where('is_accepted', true))
+                ->exists();
         }
 
         // Fetch past non-recurring events only for graphic mode (otherwise loaded via Ajax)
@@ -2765,6 +2779,7 @@ class RoleController extends Controller
                 'upcoming',
                 'hasEarlierUpcomingEvents',
                 'carouselEvents',
+                'hasActivePolls',
                 'role',
                 'otherRole',
                 'month',

@@ -261,6 +261,38 @@ class Event extends Model
     public const SITEMAP_GRACE_DAYS = 30;
 
     /**
+     * Slugs an event URL that carries the id cannot hold as they are.
+     *
+     * Each is the literal first segment of a route registered ahead of the event routes, whose
+     * next segment takes an encoded event id, so /{slug}/{id} - or the dated, gallery or .ics URL
+     * after it - reached that route instead: an event slugged "carpool" opened its carpool board,
+     * one slugged "curate-event" a GET that curates it, and a venue's event with an act called
+     * "book" (the other schedule's subdomain is the slug there) the booking form. guestUrlSlug()
+     * writes such a slug as "{slug}-event". With the id in the URL the slug is decoration - every
+     * guest route resolves the event by its id - so existing events are fixed with no migration,
+     * and their old URLs never reached them anyway.
+     *
+     * book, carpool, curate-event and promo are guest routes on both kinds of install, map-image a
+     * hosted one. The rest are signed-in app routes, which selfhost registers under
+     * /{subdomain}/... ahead of its guest routes. ShadowedEventSlugTest reads both route tables and
+     * fails when this list and they drift apart.
+     */
+    public const SHADOWED_SLUGS = [
+        'book',
+        'carpool',
+        'clear-videos',
+        'clone-event',
+        'curate-event',
+        'download-photos',
+        'edit-event',
+        'generate-flyer',
+        'generate-style-image',
+        'map-image',
+        'promo',
+        'verify',
+    ];
+
+    /**
      * Columns that decide whether - or how - an event shows on the homepage poster wall, which
      * MarketingController caches for `marketing.wall_cache_seconds`.
      *
@@ -3225,6 +3257,8 @@ class Event extends Model
      *    gets, including the links in email, sales and graphics.
      *  - false or '': no date, the undated series URL. See getUndatedGuestUrl().
      *  - a Y-m-d string: that occurrence.
+     *
+     * With the id included, a slug a route owns is written "{slug}-event". See SHADOWED_SLUGS.
      */
     public function getGuestUrlData($subdomain = false, $date = null, $includeId = true)
     {
@@ -3290,7 +3324,8 @@ class Event extends Model
 
         $data = [
             'subdomain' => $subdomain,
-            'slug' => $slug,
+            // Beside the id only: a bare /{slug} is looked up by the slug, so it has to stay as is.
+            'slug' => $includeId ? self::guestUrlSlug($slug) : $slug,
         ];
 
         if ($includeId) {
@@ -3305,6 +3340,16 @@ class Event extends Model
         }
 
         return $data;
+    }
+
+    /**
+     * The slug segment of an event URL that also carries the event's id: $slug, or "{slug}-event"
+     * when a route owns that word. See SHADOWED_SLUGS. For the few places that build such a URL
+     * without getGuestUrlData().
+     */
+    public static function guestUrlSlug(?string $slug): ?string
+    {
+        return $slug !== null && in_array($slug, self::SHADOWED_SLUGS, true) ? $slug.'-event' : $slug;
     }
 
     /**
@@ -4829,10 +4874,11 @@ class Event extends Model
      *  - Tickets: none while the PLAN stops the event selling (canOfferTickets()) - deliberately
      *    not SoldOut, which would claim a sell-out that never happened. While it sells, or before
      *    every type has gone on sale, one Offer per type the ticket form offers: a pass only when
-     *    there is nothing else, never a paid type the plan cannot sell (Ticket::isSellable()), never
-     *    one whose sales have ended. SoldOut only where the form prints "Sold out": that type's
-     *    available quantity for this date (Ticket::availableQuantity()), or the whole house. No
-     *    inventoryLevel, which used to publish the TOTAL quantity as if it were what remained.
+     *    passes are all a buyer can get now (or, before anything is on sale, all there will be),
+     *    never a paid type the plan cannot sell (Ticket::isSellable()), never one whose sales have
+     *    ended. SoldOut only where the form prints "Sold out": that type's available quantity for
+     *    this date (Ticket::availableQuantity()), or the whole house. No inventoryLevel, which used
+     *    to publish the TOTAL quantity as if it were what remained.
      *  - An external registration with a price (the page's price badge): one Offer at that price,
      *    at the registration link, until the event is over.
      *  - Anything else: none. The old default, a price-0 in-stock Offer on every event, sat on 90%
@@ -4875,10 +4921,16 @@ class Event extends Model
             // this instance keeps isSellable() and the quantity lookups from reloading the event
             // once per row.
             $tickets = $this->tickets->each(fn (Ticket $ticket) => $ticket->setRelation('event', $this));
-            $passesOnly = $tickets->every(fn (Ticket $ticket) => $ticket->is_pass);
-            $offered = $tickets->filter(fn (Ticket $ticket) => ($passesOnly || ! $ticket->is_pass)
-                && $ticket->isSellable()
-                && ! $ticket->isSalesEnded());
+
+            // Whether passes are all there is is asked of the rows a buyer can get: those on sale
+            // now, else - before anything is - those still to come. Asked of every row, a regular
+            // ticket whose sales had ended hid the pass still on sale, and one not yet on sale hid
+            // the only thing a buyer could get today. show_unavailable_tickets only changes what
+            // the form displays, never what is offered.
+            $candidates = $tickets->filter(fn (Ticket $ticket) => $ticket->isSellable() && ! $ticket->isSalesEnded());
+            $buyableNow = $candidates->reject(fn (Ticket $ticket) => $ticket->isSalesNotStarted());
+            $passesOnly = ($buyableNow->isNotEmpty() ? $buyableNow : $candidates)->every(fn (Ticket $ticket) => $ticket->is_pass);
+            $offered = $candidates->filter(fn (Ticket $ticket) => $passesOnly || ! $ticket->is_pass);
 
             $free = $offered->isEmpty() ? null : $offered->contains(fn (Ticket $ticket) => (float) $ticket->price <= 0);
 

@@ -371,6 +371,10 @@ class Role extends Model implements MustVerifyEmail
         // Owned by the public audience confirm/unsubscribe routes (/sub/c, /sub/u), registered
         // ahead of the selfhost /{subdomain} catch-all for the same reason as the above.
         'sub',
+        // Owned by the static map image route (/map-image/{id}), which selfhost registers ahead of
+        // its /{subdomain}/... routes: it would take every two-segment path of a schedule by that
+        // name - its sub-schedule pages, its events' short links, its sitemap.
+        'map-image',
     ];
 
     protected static function boot()

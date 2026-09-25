@@ -208,8 +208,8 @@ class GuestNoscriptListTest extends TestCase
     }
 
     /**
-     * The poll celebration script loads only where the page's own events carry a poll, and that
-     * check now reads the upcoming list's withCount('polls').
+     * The poll celebration script loads only where the schedule's events carry an active poll. The
+     * check is its own query now, not the upcoming list's withCount('polls'): see the next test.
      */
     public function test_the_confetti_script_still_loads_when_an_event_has_a_poll(): void
     {
@@ -224,5 +224,50 @@ class GuestNoscriptListTest extends TestCase
         $this->assertTrue($withPoll->fresh()->isPro(), 'fixture: polls are a Pro feature');
         $this->assertStringContainsString('js/poll-confetti.js', $this->schedulePage($withPoll));
         $this->assertStringNotContainsString('js/poll-confetti.js', $this->schedulePage($withoutPoll));
+    }
+
+    /**
+     * The calendar's popups take votes on every event it fetches - this month's past nights too,
+     * and the unlisted events the schedule's own people see - but the script loaded only for a poll
+     * on one of the next 50 public events. Any active poll on an event the schedule shows loads it.
+     */
+    public function test_the_confetti_script_loads_for_a_poll_the_upcoming_list_does_not_hold(): void
+    {
+        $owner = $this->createOwner();
+        $past = $this->createRole($owner, 'venue', ['name' => 'Earlier Room']);
+        $unlisted = $this->createRole($owner, 'venue', ['name' => 'Unlisted Room']);
+
+        $events = [
+            $this->createEvent($past, ['name' => 'Earlier This Month', 'starts_at' => '2026-09-10 18:00:00']),
+            $this->createEvent($unlisted, ['name' => 'Members Night', 'is_private' => true]),
+        ];
+
+        foreach ($events as $event) {
+            EventPoll::create(['event_id' => $event->id, 'question' => 'Encore?', 'options' => ['Yes', 'No'], 'is_active' => true]);
+        }
+
+        foreach ([$past, $unlisted] as $role) {
+            $this->assertStringNotContainsString('<li', $this->noscript($this->schedulePage($role)), 'fixture: the upcoming list is empty');
+            $this->assertStringContainsString('js/poll-confetti.js', $this->schedulePage($role), $role->name);
+        }
+    }
+
+    /**
+     * Not for a poll that is closed, which the popups take no vote on - the old check counted every
+     * poll, closed ones included - and not on a plan without polls.
+     */
+    public function test_the_confetti_script_stays_out_without_an_active_poll_or_a_pro_plan(): void
+    {
+        $closed = $this->createRole($this->createOwner(), 'venue', ['name' => 'Closed Poll Room']);
+        $closedEvent = $this->createEvent($closed, ['name' => 'Voting Closed']);
+        EventPoll::create(['event_id' => $closedEvent->id, 'question' => 'Encore?', 'options' => ['Yes', 'No'], 'is_active' => false]);
+
+        $free = $this->createFreeRole(null, 'venue', ['name' => 'Free Room']);
+        $this->assertFalse($free->fresh()->isPro(), 'fixture: a genuinely free schedule');
+        $freeEvent = $this->createEvent($free, ['name' => 'Free Vote']);
+        EventPoll::create(['event_id' => $freeEvent->id, 'question' => 'Encore?', 'options' => ['Yes', 'No'], 'is_active' => true]);
+
+        $this->assertStringNotContainsString('js/poll-confetti.js', $this->schedulePage($closed));
+        $this->assertStringNotContainsString('js/poll-confetti.js', $this->schedulePage($free));
     }
 }

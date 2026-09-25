@@ -10,6 +10,9 @@
     $accentColor = $role->accent_color ?? '#4E81FA';
     $subdomain = $role->subdomain;
     $eventHash = \App\Utils\UrlUtils::encodeId($event->id);
+    // Event::guestUrlSlug(): the back link carries the id, and a slug such as "carpool" would lead
+    // straight back to this page.
+    $eventSlug = \App\Models\Event::guestUrlSlug($event->slug ?? 'event');
 @endphp
 
 <div class="container mx-auto max-w-2xl px-0 sm:px-5 pt-4 pb-20 sm:pb-8" dir="{{ $isRtl ? 'rtl' : 'ltr' }}">
@@ -18,9 +21,9 @@
         <div class="bg-white/95 dark:bg-gray-700/95 backdrop-blur-sm rounded-2xl p-6 mb-6">
             <a href="{{ config('app.hosted')
                 ? ($date
-                    ? route('event.view_guest_full', ['subdomain' => $subdomain, 'slug' => $event->slug ?? 'event', 'id' => $eventHash, 'date' => $date])
-                    : route('event.view_guest_with_id', ['subdomain' => $subdomain, 'slug' => $event->slug ?? 'event', 'id' => $eventHash]))
-                : '/' . $subdomain . '/' . ($event->slug ?? 'event') . '/' . $eventHash . ($date ? '/' . $date : '') }}"
+                    ? route('event.view_guest_full', ['subdomain' => $subdomain, 'slug' => $eventSlug, 'id' => $eventHash, 'date' => $date])
+                    : route('event.view_guest_with_id', ['subdomain' => $subdomain, 'slug' => $eventSlug, 'id' => $eventHash]))
+                : '/' . $subdomain . '/' . $eventSlug . '/' . $eventHash . ($date ? '/' . $date : '') }}"
                class="text-sm text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300 flex items-center gap-1 mb-3">
                 {{ $isRtl ? '→' : '←' }} {{ __('messages.carpool_back_to_event') }}
             </a>

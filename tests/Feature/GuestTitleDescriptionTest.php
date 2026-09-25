@@ -336,6 +336,35 @@ class GuestTitleDescriptionTest extends TestCase
         $this->assertStringStartsWith('Live music · Sat, Oct 24, 2026', $this->description($english));
     }
 
+    /**
+     * AM and PM are in the page's language too. format('A') is English in every locale, so a
+     * Spanish page's description ended in "7:30 PM" after a Spanish date.
+     */
+    public function test_a_twelve_hour_time_says_am_or_pm_in_the_schedules_language(): void
+    {
+        foreach (['es', 'he'] as $lang) {
+            $talent = $this->talent(['language_code' => $lang]);
+            $event = $this->event($talent, 'Jazz Night');
+
+            // 2026-10-24 19:30 in New York, as Carbon itself writes it in $lang.
+            $start = Carbon::parse('2026-10-24 19:30:00', 'America/New_York')->locale($lang);
+            $this->assertNotSame('7:30 PM', $start->translatedFormat('g:i A'), "fixture: Carbon localizes {$lang}");
+
+            $description = $this->description($this->get($this->guestEventUrl($talent, $event))->assertOk()->getContent());
+
+            $this->assertSame('Jazz Night · '.$start->isoFormat('ddd, ll').', '.$start->translatedFormat('g:i A'), $description, $lang);
+            $this->assertStringNotContainsString('PM', $description, $lang);
+        }
+
+        // Twenty-four hours has no AM or PM to translate.
+        $talent = $this->talent(['language_code' => 'es', 'use_24_hour_time' => true]);
+        $event = $this->event($talent, 'Jazz Night');
+
+        $description = $this->description($this->get($this->guestEventUrl($talent, $event))->assertOk()->getContent());
+
+        $this->assertStringEndsWith(', 19:30', $description);
+    }
+
     public function test_the_schedule_title_says_upcoming_events_only_while_there_are_some(): void
     {
         $talent = $this->talent();

@@ -389,7 +389,11 @@ class GuestEventSchemaRulesTest extends TestCase
         $this->assertSame(['Standard'], array_column($this->offers($node), 'name'));
     }
 
-    /** A multi-event pass is not a ticket to THIS event, unless the event sells nothing else. */
+    /**
+     * A multi-event pass is not a ticket to THIS event, unless the event sells nothing else - now.
+     * A regular type whose sales have ended, or that is not on sale yet, used to hide the pass that
+     * was the only thing a buyer could get.
+     */
     public function test_passes_are_offered_only_when_the_event_sells_nothing_else(): void
     {
         $venue = $this->venue();
@@ -406,6 +410,28 @@ class GuestEventSchemaRulesTest extends TestCase
 
         [$node] = $this->eventPage($venue, $passOnly);
         $this->assertSame(['Season Pass'], array_column($this->offers($node), 'name'));
+
+        // The single nights are over; the pass still sells.
+        $ended = $this->createEvent($venue, ['tickets_enabled' => true]);
+        $this->createTicket($ended, ['type' => 'Season Pass', 'price' => 99, 'is_pass' => true, 'pass_usage_type' => 'unlimited']);
+        $this->createTicket($ended, ['type' => 'Single Night', 'price' => 20, 'sales_end_at' => now()->subDay()]);
+
+        [$node] = $this->eventPage($venue, $ended);
+        $this->assertSame(['Season Pass'], array_column($this->offers($node), 'name'));
+
+        // The single nights go on sale later; the pass is on sale today. Both are offered, each
+        // from its own day.
+        $later = $this->createEvent($venue, [
+            'tickets_enabled' => true,
+            'starts_at' => now()->addDays(20)->setTime(12, 0)->format('Y-m-d H:i:s'),
+        ]);
+        $this->createTicket($later, ['type' => 'Season Pass', 'price' => 99, 'is_pass' => true, 'pass_usage_type' => 'unlimited']);
+        $single = $this->createTicket($later, ['type' => 'Single Night', 'price' => 20, 'sales_start_at' => now()->addDays(3)->startOfHour()]);
+
+        [$node] = $this->eventPage($venue, $later);
+        $offers = collect($this->offers($node))->keyBy('name');
+        $this->assertEqualsCanonicalizing(['Season Pass', 'Single Night'], $offers->keys()->all());
+        $this->assertSame($single->sales_start_at->toIso8601String(), $offers['Single Night']['validFrom']);
     }
 
     /** The page's price badge: a registration link somewhere else, at a stated price. */

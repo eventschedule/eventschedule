@@ -1983,7 +1983,10 @@
     </div>
 </div>
 
-@if (isset($role) && $role->isPro() && $events->contains(fn($e) => ($e->polls_count ?? 0) > 0))
+{{-- A schedule page passes $hasActivePolls: its $events are only the next 50 public ones, while the
+     popups take votes on whatever the calendar fetches. Other callers (the event page, ?graphic=1,
+     the admin) pass none and keep asking their own $events. --}}
+@if (isset($role) && $role->isPro() && ($hasActivePolls ?? $events->contains(fn($e) => ($e->polls_count ?? 0) > 0)))
 <script src="{{ asset('vendor/canvas-confetti/confetti.browser.min.js') }}" {!! nonce_attr() !!}></script>
 <script src="{{ asset('js/poll-confetti.js') }}" {!! nonce_attr() !!}></script>
 @endif
