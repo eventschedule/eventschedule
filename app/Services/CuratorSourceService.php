@@ -63,7 +63,11 @@ class CuratorSourceService
                     ->where('curator_role.type', '=', 'curator');
             })
             ->where($eventAlias.'.is_draft', false)
-            ->where($eventAlias.'.is_private', false);
+            ->where($eventAlias.'.is_private', false)
+            // Never an appointment booking, which is named after its guest. Event's saving hook
+            // keeps every booking unlisted, so is_private already turns it away; this also covers
+            // a row stored listed before that, and takes off one already linked.
+            ->whereNull($eventAlias.'.appointment_type_id');
     }
 
     /**

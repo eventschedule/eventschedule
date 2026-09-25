@@ -1885,6 +1885,13 @@ class BackupService
             $event->appointment_type_id = $idMap['appointment_types'][$apptRefId];
         }
 
+        // A booking is always unlisted, as Event's saving hook has it, and saveQuietly() skips that
+        // hook. Keyed on the archive rather than the remap: a booking whose type did not come back
+        // is still named after its guest.
+        if ($apptRefId) {
+            $event->setVisibilityState('unlisted');
+        }
+
         // Regenerate HTML fields
         $event->description_html = MarkdownUtils::convertToHtml($event->description);
         $event->description_html_en = MarkdownUtils::convertToHtml($event->description_en);

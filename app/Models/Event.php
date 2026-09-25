@@ -318,6 +318,19 @@ class Event extends Model
         parent::boot();
 
         static::saving(function ($model) {
+            // An appointment booking is always unlisted, whatever the writer asked for. It is
+            // named after its guest, with their notes as its description, and while the event
+            // pages hide it for being a booking (isMembersOnly()), the lists, feeds, search and
+            // curator sources hide an event only for being unlisted - and the API could list one
+            // like any other event. Unlisted as setVisibilityState() has it, so never a draft or
+            // internal either, which would stop its calendar sync and its accept flow (see
+            // EventRepo::saveEvent()). First, so everything below sees the state that is written:
+            // a listing reverted here is no change for the federation check to act on.
+            // BackupService::importEvent() saves quietly, so it repeats this.
+            if ($model->appointment_type_id) {
+                $model->setVisibilityState('unlisted');
+            }
+
             // When this event first became publicly visible.
             //
             // The column has existed since 2024_07_13_184927_setup_database and nothing outside
