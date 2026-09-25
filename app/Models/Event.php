@@ -3173,10 +3173,7 @@ class Event extends Model
             return [$this->buildGuestUrl($data, $picked->servesOnCustomDomain()), $picked];
         }
 
-        $serving = $this->roles->filter(fn ($role) => self::servesGuestPage($role))->sortBy('id');
-        $home = $serving->first(fn ($role) => $role->isTalent())
-            ?? $serving->first(fn ($role) => $role->isVenue())
-            ?? $serving->first();
+        $home = $this->servingHome();
 
         if ($home) {
             return [
@@ -3206,6 +3203,20 @@ class Event extends Model
     }
 
     /**
+     * The first of this event's schedules that serves it (servesGuestPage()): a performer, then a
+     * venue, then anything else, lowest id first so the choice cannot drift between requests.
+     * Null when none does yet.
+     */
+    private function servingHome(): ?Role
+    {
+        $serving = $this->roles->filter(fn ($role) => self::servesGuestPage($role))->sortBy('id');
+
+        return $serving->first(fn ($role) => $role->isTalent())
+            ?? $serving->first(fn ($role) => $role->isVenue())
+            ?? $serving->first();
+    }
+
+    /**
      * The route parameters of this event's guest URL.
      *
      * Only a recurring event's URL carries a date segment, and $date decides it:
@@ -3219,6 +3230,7 @@ class Event extends Model
     {
         $venueSubdomain = $this->venue && $this->venue->isClaimed() ? $this->venue->subdomain : null;
         $roleSubdomain = $this->role() && $this->role()->isClaimed() ? $this->role()->subdomain : null;
+        $namedBySchedule = (bool) $subdomain;
 
         if (! $subdomain) {
             $subdomain = $roleSubdomain ? $roleSubdomain : $venueSubdomain;
@@ -3244,6 +3256,20 @@ class Event extends Model
                         $subdomain = $claimedRole->subdomain;
                     }
                 }
+            }
+        }
+
+        // A link that names no schedule - every mail, notification and card that asks for "the"
+        // event URL - goes where the event is shown. The pick above never looked at the pivot,
+        // while every guest lookup does, so a performer who had not yet accepted a venue's or a
+        // curator's event (or a deleted one) got the link, and it 404'd. The same serving schedule
+        // canonicalTarget() falls back to; a schedule the caller names is the caller's choice, and
+        // with none serving yet the pick stands.
+        if (! $namedBySchedule && $subdomain) {
+            $picked = $this->roles->first(fn ($role) => $role->subdomain == $subdomain);
+
+            if (! $picked || ! self::servesGuestPage($picked)) {
+                $subdomain = $this->servingHome()?->subdomain ?? $subdomain;
             }
         }
 

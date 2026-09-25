@@ -118,22 +118,20 @@ class EventIcalDownloadTest extends TestCase
     }
 
     /**
-     * The canonical schedule of an event is its first claimed act, accepted or not, so while the act
-     * has not answered, the canonical .ics is refused like the canonical page. The page's link
-     * names the schedule the visitor is looking at instead, where the event is accepted.
+     * The page links the .ics on the schedule the visitor is looking at. A link that names no
+     * schedule goes to the first one that shows the event (EventLinkServingScheduleTest), which
+     * is the act once it accepts: a working download too, but not the page the visitor is on.
      */
-    public function test_the_event_pages_apple_link_downloads_where_it_is_shown(): void
+    public function test_the_event_pages_apple_link_names_the_schedule_it_is_on(): void
     {
         $venue = $this->createRole($this->createOwner(), 'venue', ['name' => 'Harbour Wine Bar']);
         $act = $this->createRole($this->createOwner(), 'talent', ['name' => 'The Cellar Trio']);
         $event = $this->createEvent($venue, ['name' => 'Trio Night', 'creator_role_id' => $venue->id]);
-        $event->roles()->attach($act->id, ['is_accepted' => null]);
+        $event->roles()->attach($act->id, ['is_accepted' => true]);
         $event = $event->fresh();
 
-        $this->assertStringContainsString('/'.$act->subdomain.'/', $event->getAppleCalendarUrl(), 'fixture: the canonical schedule is the act');
-        $this->get($event->getAppleCalendarUrl())->assertNotFound();
-
         $link = $event->getAppleCalendarUrl(null, $venue->subdomain);
+        $this->assertNotSame($event->getAppleCalendarUrl(), $link, 'fixture: the plain link names the act');
 
         $this->get($this->guestEventUrl($venue, $event))
             ->assertOk()

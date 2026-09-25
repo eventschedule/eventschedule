@@ -245,7 +245,6 @@ class RecurringSeriesCanonicalTest extends TestCase
 
             // What the canonical used to be: the performer's host, which does not serve the event.
             $performerUrl = $this->eventPath($talent, $venue->subdomain, $event);
-            $this->assertSame($performerUrl, $event->getUndatedGuestUrl(), "$label: fixture, the pick is the performer");
             $this->get($performerUrl)->assertNotFound();
 
             // Now the venue's, with the slug the venue's own calendar links to.
@@ -253,6 +252,10 @@ class RecurringSeriesCanonicalTest extends TestCase
             [$url, $home] = $event->canonicalTarget();
             $this->assertSame($venueUrl, $url, $label);
             $this->assertSame($venue->id, $home?->id, $label);
+
+            // A link that names no schedule used to be the performer's as well; it now goes where
+            // the canonical does (EventLinkServingScheduleTest).
+            $this->assertSame($venueUrl, $event->getUndatedGuestUrl(), "$label: the plain link");
 
             $html = $this->get($venueUrl)->assertOk()->getContent();
             $this->assertSame($venueUrl, $this->canonical($html), "$label: the canonical is itself a 200");
