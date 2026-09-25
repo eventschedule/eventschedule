@@ -5,6 +5,7 @@ namespace Tests\Feature;
 use App\Models\Role;
 use App\Utils\UrlUtils;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Support\Facades\Route;
 use Illuminate\Testing\TestResponse;
 use Tests\Feature\Concerns\CreatesScheduleData;
 use Tests\TestCase;
@@ -18,9 +19,12 @@ use Tests\TestCase;
  * bare prefixes blocked schedules such as /eventsnyc or /login-lounge outright. The route also ran
  * the session middleware, so every fetch set a cookie the CDN will not cache past.
  *
- * The secret-bearing paths (a ticket, an order, a subscription's links, a newsletter's tracking
- * links) are blocked on every host, each by its full prefix: a bare /ticket/ or /sub/ would also
- * block an event slugged "ticket" or "sub", whose page on its schedule's host is /ticket/{id}.
+ * The secret-bearing paths (a booking, a ticket, an order, a subscription's links, a newsletter's
+ * tracking links) are blocked on every host, each by its full prefix: a bare /appointment/,
+ * /ticket/ or /sub/ would also block an event slugged "appointment", "ticket" or "sub", whose page
+ * on its schedule's host is /ticket/{id}. Three more (feedback, a schedule transfer, a signed
+ * unsubscribe) are blocked only off a schedule's host, where a rule can name them exactly; their
+ * pages carry noindex wherever they answer (SecretPageNoindexTest).
  */
 class RobotsTxtTest extends TestCase
 {
@@ -34,12 +38,20 @@ class RobotsTxtTest extends TestCase
 
     /** Blocked on every host, in the order the body lists them. */
     private const SECRET_PATHS = [
-        '/appointment/', '/gift-card/view/', '/installment/view/',
+        '/appointment/view/', '/appointment/cancel/', '/appointment/pay/', '/appointment/checkout/',
+        '/appointment/ical/', '/appointment/reschedule/',
+        '/gift-card/view/', '/installment/view/',
         '/ticket/view/', '/ticket/qr_code/', '/ticket/wallet/', '/ticket/order/',
         '/sub/c/', '/sub/m/', '/sub/u/', '/int/u/',
         '/nl/o/', '/nl/c/', '/nl/u/',
         '/promo/',
     ];
+
+    /**
+     * Blocked off a schedule's own host only. There /feedback/{id} is an event slugged
+     * "feedback", and the other two never reach their pages.
+     */
+    private const APP_SECRET_PATHS = ['/feedback/', '/schedule-transfer/', '/user/unsubscribe'];
 
     /** A selfhost schedule's promo clicks and return pages, one segment under its name. */
     private const SELFHOST_SCHEDULE_PATHS = [
@@ -54,12 +66,15 @@ class RobotsTxtTest extends TestCase
      * /{subdomain}/checkout/{id}.
      */
     private const NEVER_BARE = [
-        '/ticket/', '/sub/', '/nl/', '/int/', '/installment/', '/gift-card/',
+        '/appointment/', '/ticket/', '/sub/', '/nl/', '/int/', '/installment/', '/gift-card/', '/user/',
         '/*/', '/*/checkout/', '/*/payment/', '/*/gift-cards/',
     ];
 
     /** Words that are both the start of a secret or return path and a slug an event can have. */
-    private const EVENT_SLUGS = ['checkout', 'payment', 'gift-cards', 'ticket', 'sub', 'nl', 'int', 'installment', 'gift-card'];
+    private const EVENT_SLUGS = [
+        'checkout', 'payment', 'gift-cards', 'appointment', 'ticket', 'sub', 'nl', 'int', 'installment',
+        'gift-card', 'feedback', 'schedule-transfer', 'user',
+    ];
 
     private function robots(string $url): TestResponse
     {
@@ -113,7 +128,7 @@ class RobotsTxtTest extends TestCase
             $this->assertNotContains('/'.$path, $disallows, $host);
         }
 
-        foreach (['/auth/', '/admin-edit-event/', ...self::SECRET_PATHS] as $rule) {
+        foreach (['/auth/', '/admin-edit-event/', ...self::SECRET_PATHS, ...self::APP_SECRET_PATHS] as $rule) {
             $this->assertContains($rule, $disallows, $host);
         }
 
@@ -145,6 +160,12 @@ class RobotsTxtTest extends TestCase
             'installment.view' => ['plan_id' => 'aBc1', 'secret' => 's3cret'],
             'gift_card.view' => ['gift_card_id' => 'aBc1', 'secret' => 's3cret'],
             'appointments.manage' => ['event_id' => 'aBc1', 'secret' => 's3cret'],
+            'appointments.manage_cancel' => ['event_id' => 'aBc1', 'secret' => 's3cret'],
+            'appointments.pay' => ['event_id' => 'aBc1', 'secret' => 's3cret'],
+            'appointments.checkout_success' => ['sale_id' => 'aBc1'],
+            'appointments.ical' => ['event_id' => 'aBc1', 'secret' => 's3cret'],
+            'appointments.reschedule' => ['event_id' => 'aBc1', 'secret' => 's3cret'],
+            'appointments.reschedule_slots' => ['event_id' => 'aBc1', 'secret' => 's3cret'],
             'subscriber.show_confirm' => ['token' => 't0ken'],
             'subscriber.show_manage' => ['token' => 't0ken'],
             'subscriber.show_unsubscribe' => ['token' => 't0ken'],
@@ -157,6 +178,20 @@ class RobotsTxtTest extends TestCase
         }
 
         return $paths;
+    }
+
+    /**
+     * The secret-bearing links blocked off a schedule's own host only (APP_SECRET_PATHS).
+     *
+     * @return array<string, string> route name => path
+     */
+    private function appSecretPaths(): array
+    {
+        return [
+            'feedback.show' => route('feedback.show', ['event_id' => 'aBc1', 'secret' => 's3cret'], false),
+            'role.transfer.show' => route('role.transfer.show', ['token' => 't0ken'], false),
+            'user.unsubscribe' => route('user.unsubscribe', ['email' => 'YUBleGFtcGxlLmNvbQ==', 'sig' => 's1g'], false),
+        ];
     }
 
     /**
@@ -310,6 +345,7 @@ class RobotsTxtTest extends TestCase
         foreach ($this->eventPaths($role) as $slug => $path) {
             $path = $this->onScheduleHost($role, $path);
             $this->assertFalse($this->blocks($disallows, $path), "the event slugged {$slug}: {$path}");
+            $this->assertFalse($this->blocks($disallows, $path.'/2026-10-24'), "a date of the event slugged {$slug}");
             $this->assertFalse($this->blocks($disallows, $path.'/photos'), "the gallery of the event slugged {$slug}");
         }
     }
@@ -360,7 +396,7 @@ class RobotsTxtTest extends TestCase
         $disallows = $this->disallows($this->robots('https://eventschedule.test/robots.txt')->getContent());
         $role = $this->createRole($this->createOwner(), 'venue');
 
-        foreach ($this->secretPaths() + $this->scheduleReturnPaths($role) as $name => $path) {
+        foreach ($this->secretPaths() + $this->appSecretPaths() + $this->scheduleReturnPaths($role) as $name => $path) {
             $this->assertTrue($this->blocks($disallows, $path), "{$name}: {$path}");
         }
 
@@ -371,5 +407,69 @@ class RobotsTxtTest extends TestCase
 
         // And the schedule's own page.
         $this->assertFalse($this->blocks($disallows, '/'.$role->subdomain));
+    }
+
+    /** The apex, as for a tenant host above: every secret link, the off-host three included. */
+    public function test_the_apex_blocks_every_secret_link(): void
+    {
+        config(['app.hosted' => true]);
+
+        $disallows = $this->disallows($this->robots('https://eventschedule.test/robots.txt')->getContent());
+
+        foreach ($this->secretPaths() + $this->appSecretPaths() as $name => $path) {
+            $this->assertTrue($this->blocks($disallows, $path), "{$name}: {$path}");
+        }
+    }
+
+    /**
+     * Read off the route table rather than the lists above, so a new route fails here until
+     * robots.txt names it:
+     *  - every GET route off a schedule's address whose path carries a {secret} or a {token} is
+     *    blocked on the apex and on selfhost;
+     *  - every /appointment/ route is blocked on every host, a schedule's own included, now that
+     *    the rule is a list of exact prefixes rather than /appointment/ itself.
+     */
+    public function test_every_secret_bearing_route_is_blocked(): void
+    {
+        $bodies = [];
+
+        foreach (['hosted apex' => [true, 'https://eventschedule.test/robots.txt'], 'tenant' => [true, 'https://tenant.eventschedule.test/robots.txt'], 'selfhost' => [false, 'https://eventschedule.test/robots.txt']] as $host => [$hosted, $url]) {
+            config(['app.hosted' => $hosted]);
+            $bodies[$host] = $this->disallows($this->robots($url)->getContent());
+        }
+
+        $secret = 0;
+        $appointment = 0;
+
+        foreach (Route::getRoutes() as $route) {
+            $uri = $route->uri();
+
+            // A schedule's own routes (the path-based copies tests register) are its host's.
+            if ($route->getDomain() || str_starts_with($uri, '{subdomain}')) {
+                continue;
+            }
+
+            $path = '/'.preg_replace('~\{[^}]+\}~', 'x1', $uri);
+
+            if (in_array('GET', $route->methods(), true) && preg_match('~\{(?:secret|token)\??\}~', $uri)) {
+                $secret++;
+
+                foreach (['hosted apex', 'selfhost'] as $host) {
+                    $this->assertTrue($this->blocks($bodies[$host], $path), "{$host}: {$uri}");
+                }
+            }
+
+            if (str_starts_with($uri, 'appointment/')) {
+                $appointment++;
+
+                foreach ($bodies as $host => $disallows) {
+                    $this->assertTrue($this->blocks($disallows, $path), "{$host}: {$uri}");
+                }
+            }
+        }
+
+        // Without these the loop can pass by reading nothing.
+        $this->assertGreaterThanOrEqual(15, $secret, 'fixture: the secret-bearing routes were found');
+        $this->assertGreaterThanOrEqual(6, $appointment, 'fixture: the /appointment/ routes were found');
     }
 }

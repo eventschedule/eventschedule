@@ -615,8 +615,10 @@ class AppController extends Controller
     /**
      * Prefixes blocked on every host that serves them. Each carries a secret in the path, so it
      * must never be fetched, whatever the page says about indexing:
-     *  - /appointment/, /gift-card/view/ and /installment/view/: a booking, a gift card and a
-     *    payment plan;
+     *  - /appointment/view/, /cancel/, /pay/, /checkout/, /ical/ and /reschedule/: a booking's
+     *    manage page, its cancel and pay actions, its payment return, its calendar file and its
+     *    reschedule page;
+     *  - /gift-card/view/ and /installment/view/: a gift card and a payment plan;
      *  - /ticket/view/, /ticket/qr_code/, /ticket/wallet/ and /ticket/order/: a ticket, its QR
      *    code, its wallet pass and an order;
      *  - /sub/c/, /sub/m/, /sub/u/ and /int/u/: an audience subscription's confirm, manage and
@@ -625,19 +627,38 @@ class AppController extends Controller
      *
      * Every host, because these routes answer on every host: an emailed link names the base URL,
      * and /sub/c/ and /int/u/ redirect to app., so a rule on only one of them misses where a
-     * crawler lands. And the full prefix each time, never /ticket/ or /sub/ alone: on a schedule's
-     * own host an event page is /{slug}/{id}, so an event slugged "ticket" lives at /ticket/{id}.
+     * crawler lands. And the full prefix each time, never /appointment/, /ticket/ or /sub/ alone:
+     * on a schedule's own host an event page is /{slug}/{id}, so an event slugged "ticket" lives
+     * at /ticket/{id}.
      *
      * /promo/ is a click-counting redirect: a crawler following it would spend an advertiser's
      * budget on traffic that was never a person.
      */
     private const ROBOTS_SECRET_PATHS = [
-        '/appointment/', '/gift-card/view/', '/installment/view/',
+        '/appointment/view/', '/appointment/cancel/', '/appointment/pay/', '/appointment/checkout/',
+        '/appointment/ical/', '/appointment/reschedule/',
+        '/gift-card/view/', '/installment/view/',
         '/ticket/view/', '/ticket/qr_code/', '/ticket/wallet/', '/ticket/order/',
         '/sub/c/', '/sub/m/', '/sub/u/', '/int/u/',
         '/nl/o/', '/nl/c/', '/nl/u/',
         '/promo/',
     ];
+
+    /**
+     * Secret-bearing links that a rule can name exactly only off a schedule's own host: on the
+     * apex, www., blog., app. and selfhost. Each first segment is a reserved schedule name, so on
+     * selfhost no schedule made today lives under one.
+     *  - /feedback/{event_id}/{secret}: a buyer's feedback form;
+     *  - /schedule-transfer/{token}: a schedule's ownership handover;
+     *  - /user/unsubscribe: a signed link that unsubscribes on the GET itself, so a crawler that
+     *    followed one would unsubscribe somebody.
+     *
+     * Not on a schedule's own host. There /feedback/ is also where an event slugged "feedback"
+     * lives (/feedback/{id}, /feedback/{id}/{date}), so the feedback page's own noindex is what
+     * covers it. The other two never reach their pages there: the schedule's /{slug}/{id} route
+     * answers first.
+     */
+    private const ROBOTS_APP_SECRET_PATHS = ['/feedback/', '/schedule-transfer/', '/user/unsubscribe'];
 
     /**
      * The checkout, payment and gift-card return pages under a schedule's own address, each with
@@ -701,6 +722,7 @@ class AppController extends Controller
                 ->flatMap(fn ($path) => ["/{$path}$", "/{$path}/", "/{$path}?"])
                 ->merge(['/auth/', '/admin-edit-event/'])
                 ->merge(self::ROBOTS_SECRET_PATHS)
+                ->merge(self::ROBOTS_APP_SECRET_PATHS)
                 ->merge($scheduleRules)
                 ->map(fn ($path) => 'Disallow: '.$path."\n")
                 ->implode('');
