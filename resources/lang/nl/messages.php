@@ -5277,7 +5277,7 @@ return [
     'subscription_account_ready_heading' => 'Je bent ingelogd',
     'subscription_account_ready_body' => 'Je account voor :email staat klaar. Alles wat je volgt staat op één pagina.',
     'subscriber_has_account' => 'Account',
-    'subscribers_help' => 'Mensen die via je agendapagina om e-mail hebben gevraagd. De meesten hebben hier ook een account.',
+    'subscribers_help' => 'Mensen die via je agendapagina of je website om e-mail hebben gevraagd. De meesten hebben hier ook een account.',
     'followers_account_only_help' => 'Mensen die op Volgen hebben geklikt. Naar een volger met account gaat niets automatisch, alleen een nieuwsbrief die jij schrijft.',
     'audience_reachable' => 'Bereikbaar via e-mail',
     'audience_get_new_event_emails' => 'Krijgen e-mail bij nieuwe events',

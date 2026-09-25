@@ -99,7 +99,7 @@ return [
     '/features/custom-fields' => '2026-09-24',
     '/features/custom-labels' => '2026-09-24',
     '/features/embed-calendar' => '2026-09-25',
-    '/features/embed-tickets' => '2026-09-24',
+    '/features/embed-tickets' => '2026-09-25',
     '/features/event-graphics' => '2026-09-24',
     '/features/fan-videos' => '2026-09-24',
     '/features/feedback' => '2026-09-24',
@@ -207,6 +207,6 @@ return [
     '/use-cases' => '2026-09-23',
     '/whova-alternative' => '2026-09-25',
     '/why-create-account' => '2026-09-25',
-    '/wordpress-event-calendar' => '2026-09-24',
+    '/wordpress-event-calendar' => '2026-09-25',
     '/zeffy-alternative' => '2026-09-25',
 ];

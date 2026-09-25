@@ -5272,7 +5272,7 @@ return [
     'subscription_account_ready_heading' => 'אתם מחוברים',
     'subscription_account_ready_body' => 'החשבון שלכם עבור :email מוכן. כל מה שאתם עוקבים אחריו נמצא בעמוד אחד.',
     'subscriber_has_account' => 'חשבון',
-    'subscribers_help' => 'אנשים שביקשו לקבל מכם מיילים מדף לוח הזמנים. לרובם יש כאן גם חשבון.',
+    'subscribers_help' => 'אנשים שביקשו לקבל מכם מיילים מדף לוח הזמנים או מהאתר שלכם. לרובם יש כאן גם חשבון.',
     'followers_account_only_help' => 'אנשים שלחצו על עקוב. לעוקב עם חשבון לא נשלח דבר אוטומטית, רק ניוזלטר שאתם כותבים.',
     'audience_reachable' => 'ניתן לשלוח אליהם',
     'audience_get_new_event_emails' => 'מקבלים מיילים על אירועים',

@@ -5316,7 +5316,7 @@ return [
     'subscription_account_ready_heading' => 'Ești autentificat',
     'subscription_account_ready_body' => 'Contul tău pentru :email este gata. Tot ce urmărești e pe o singură pagină.',
     'subscriber_has_account' => 'Cont',
-    'subscribers_help' => 'Persoane care au cerut să primească e-mailuri de pe pagina programului tău. Cele mai multe au și un cont aici.',
+    'subscribers_help' => 'Persoane care au cerut să primească e-mailuri de pe pagina programului tău sau de pe site-ul tău. Cele mai multe au și un cont aici.',
     'followers_account_only_help' => 'Persoane care au apăsat Urmărește. Unui urmăritor cu cont nu îi ajunge nimic automat, doar un buletin informativ scris de tine.',
     'audience_reachable' => 'Pot fi contactați',
     'audience_get_new_event_emails' => 'Primesc e-mailuri despre evenimente',

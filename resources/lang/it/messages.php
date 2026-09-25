@@ -5277,7 +5277,7 @@ return [
     'subscription_account_ready_heading' => 'Hai effettuato l\'accesso',
     'subscription_account_ready_body' => 'Il tuo account per :email è pronto. Tutto ciò che segui è in un\'unica pagina.',
     'subscriber_has_account' => 'Account',
-    'subscribers_help' => 'Persone che hanno chiesto di ricevere le tue e-mail dalla pagina del calendario. La maggior parte ha anche un account qui.',
+    'subscribers_help' => 'Persone che hanno chiesto di ricevere le tue e-mail dalla pagina del calendario o dal tuo sito web. La maggior parte ha anche un account qui.',
     'followers_account_only_help' => 'Persone che hanno premuto Segui. A chi segue con un account non arriva nulla in automatico, solo una newsletter scritta da te.',
     'audience_reachable' => 'Raggiungibili via e-mail',
     'audience_get_new_event_emails' => 'Ricevono e-mail sugli eventi',

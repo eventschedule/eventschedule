@@ -5278,7 +5278,7 @@ return [
     'subscription_account_ready_heading' => 'تم تسجيل دخولك',
     'subscription_account_ready_body' => 'حسابك على :email جاهز. كل ما تتابعه في صفحة واحدة.',
     'subscriber_has_account' => 'حساب',
-    'subscribers_help' => 'أشخاص طلبوا تلقي رسائلك من صفحة جدولك. معظمهم لديه حساب هنا أيضًا.',
+    'subscribers_help' => 'أشخاص طلبوا تلقي رسائلك من صفحة جدولك أو من موقعك الإلكتروني. معظمهم لديه حساب هنا أيضًا.',
     'followers_account_only_help' => 'أشخاص ضغطوا على متابعة. لا يصل إلى المتابع صاحب الحساب أي شيء تلقائيًا، فقط نشرة تكتبها أنت.',
     'audience_reachable' => 'يمكن مراسلتهم',
     'audience_get_new_event_emails' => 'يتلقون رسائل الفعاليات',

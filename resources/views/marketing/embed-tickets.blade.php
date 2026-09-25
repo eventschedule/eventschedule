@@ -632,7 +632,7 @@
             ['tickets=true', 'Mode', 'Renders the ticket purchase form. This is what the Embed Tickets link hands you.'],
             ['rsvp=true', 'Mode', 'Renders the registration form instead, for an event that takes RSVPs rather than payments.'],
             ['embed=true', 'Required', 'Strips the schedule header, footer and banner, and is the flag that permits the page to be framed at all.'],
-            ['dark=true', 'Optional', 'Forces the dark finish. Left off, the widget follows the visitor\'s own system setting.'],
+            ['dark=true', 'Optional', 'Forces the dark finish, and dark=false forces the light one. Left off, the widget follows the visitor\'s own system setting.'],
             ['promo=CODE', 'Optional', 'Pre-fills the promo code box, so one link can carry its own discount.'],
             ['lang=xx', 'Optional', 'Sets the interface language. Twelve are supported, Arabic and Hebrew among them, and those lay the form out right to left.'],
         ];

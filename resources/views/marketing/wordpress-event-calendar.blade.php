@@ -341,7 +341,7 @@
                     $wpParams = [
                         ['layout=calendar or layout=list', 'Pin the month grid or the list, whatever your schedule\'s default is. The grid needs about 768 pixels of width, so in a narrow sidebar or on a phone the frame shows a day-by-day agenda instead.'],
                         ['schedule=slug', 'Show one sub-schedule, such as only the workshops, so each page of your site can carry just the events it is about.'],
-                        ['dark=true', 'Force dark mode for a dark theme. Leave it off and the frame follows the theme the visitor chose, or their system setting.'],
+                        ['dark=true', 'Force dark mode for a dark theme, or dark=false for a light one. Leave it off and the frame follows the theme the visitor chose, or their system setting.'],
                         ['lang=xx', 'Show the frame in your schedule\'s second language, for a bilingual site with a page in each language.'],
                     ];
                 @endphp

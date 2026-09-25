@@ -5296,7 +5296,7 @@ return [
     'subscription_account_ready_heading' => 'Oled sisse logitud',
     'subscription_account_ready_body' => 'Sinu konto aadressile :email on valmis. Kõik, mida jälgid, on ühel lehel.',
     'subscriber_has_account' => 'Konto',
-    'subscribers_help' => 'Inimesed, kes palusid sinu kalendri lehelt e-kirju. Enamikul neist on siin ka konto.',
+    'subscribers_help' => 'Inimesed, kes palusid sinu kalendri lehelt või sinu veebisaidilt e-kirju. Enamikul neist on siin ka konto.',
     'followers_account_only_help' => 'Inimesed, kes vajutasid Jälgi. Kontoga jälgijani ei jõua automaatselt midagi, ainult sinu kirjutatud uudiskiri.',
     'audience_reachable' => 'Saab e-kirja saata',
     'audience_get_new_event_emails' => 'Saavad kirju uute sündmuste kohta',

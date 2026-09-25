@@ -5366,7 +5366,7 @@ return [
     'subscription_account_ready_heading' => 'You are signed in',
     'subscription_account_ready_body' => 'Your account for :email is ready. Everything you follow is on one page.',
     'subscriber_has_account' => 'Account',
-    'subscribers_help' => 'People who asked to be emailed from your schedule page. Most of them also have an account here.',
+    'subscribers_help' => 'People who asked to be emailed from your schedule page or your website. Most of them also have an account here.',
     'followers_account_only_help' => 'People who pressed Follow. Nothing reaches an account follower automatically, only a newsletter you write.',
     'audience_reachable' => 'Can be emailed',
     'audience_get_new_event_emails' => 'Get new-event emails',

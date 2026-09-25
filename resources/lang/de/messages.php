@@ -5281,7 +5281,7 @@ return [
     'subscription_account_ready_heading' => 'Du bist angemeldet',
     'subscription_account_ready_body' => 'Dein Konto für :email ist fertig. Alles, dem du folgst, steht auf einer Seite.',
     'subscriber_has_account' => 'Konto',
-    'subscribers_help' => 'Personen, die über deine Terminplan-Seite um E-Mails gebeten haben. Die meisten von ihnen haben hier auch ein Konto.',
+    'subscribers_help' => 'Personen, die über deine Terminplan-Seite oder deine Website um E-Mails gebeten haben. Die meisten von ihnen haben hier auch ein Konto.',
     'followers_account_only_help' => 'Personen, die auf Folgen geklickt haben. An Konto-Follower geht nichts automatisch, nur ein Newsletter, den du schreibst.',
     'audience_reachable' => 'Per E-Mail erreichbar',
     'audience_get_new_event_emails' => 'Erhalten Termin-E-Mails',

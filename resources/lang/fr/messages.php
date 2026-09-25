@@ -5284,7 +5284,7 @@ return [
     'subscription_account_ready_heading' => 'Vous êtes connecté',
     'subscription_account_ready_body' => 'Votre compte pour :email est prêt. Tout ce que vous suivez tient sur une page.',
     'subscriber_has_account' => 'Compte',
-    'subscribers_help' => 'Les personnes qui ont demandé à recevoir vos e-mails depuis votre page. La plupart ont aussi un compte ici.',
+    'subscribers_help' => 'Les personnes qui ont demandé à recevoir vos e-mails depuis votre page ou votre site web. La plupart ont aussi un compte ici.',
     'followers_account_only_help' => 'Les personnes qui ont cliqué sur Suivre. Rien n\'est envoyé automatiquement à un abonné avec compte, seulement une newsletter que vous écrivez.',
     'audience_reachable' => 'Joignables par e-mail',
     'audience_get_new_event_emails' => 'Reçoivent les e-mails d\'événements',

@@ -15,7 +15,6 @@
     // The Widget picker's second option: the signup form (issue #125), served by the same guest
     // route with &form=subscribe. The iframe title names the schedule for screen readers; it is
     // escaped once here, for the attribute it lands in, and @json below makes it safe for the JS.
-    $embedSubscribeFrameId = 'es-subscribe-'.$role->subdomain;
     $embedSubscribeTitle = e(__('messages.embed_subscribe_iframe_title', ['schedule' => $role->name]));
 
     // Whether a signup would actually hear about anything. Announcements are the only automatic
@@ -203,11 +202,11 @@
 const embedBaseUrl = @json($embedUrl);
 const embedPreviewBaseUrl = @json($previewUrl);
 const embedBrandingLine = @json($embedBrandingLine);
-const embedSubscribeFrameId = @json($embedSubscribeFrameId);
 const embedSubscribeTitle = @json($embedSubscribeTitle);
-// The fallback height for sites that strip the resize listener: fits the form on a desktop-width
-// page. The listener then sizes it exactly, whatever state the form is in.
-const embedSubscribeHeight = 450;
+// The fallback height for sites that strip the resize listener. Sized for the tallest ordinary
+// case, the fields stacked on a phone (measured at 486px), because a frame that is too tall only
+// leaves space while one that is too short clips the form. The listener sizes it exactly.
+const embedSubscribeHeight = 520;
 let embedPreviewLoaded = '';
 
 function selectedEmbedValue(id) {
@@ -244,11 +243,12 @@ function buildEmbedSnippet(url) {
         return '<iframe src="' + url + '" width="100%" height="800" frameborder="0" style="border: none;"></iframe>' + embedBrandingLine;
     }
 
-    // The listener checks e.source, so only this iframe can resize it, and only a number is read.
-    // The closing tag is split so it cannot end THIS script block.
-    return '<iframe id="' + embedSubscribeFrameId + '" src="' + url + '" title="' + embedSubscribeTitle + '" width="100%" height="' + embedSubscribeHeight + '" frameborder="0" style="border: none;"></iframe>'
-        + '\n<script>window.addEventListener("message",function(e){var f=document.getElementById("' + embedSubscribeFrameId + '");'
-        + 'if(f&&e.source===f.contentWindow&&e.data&&e.data.type==="eventschedule:resize"&&e.data.height>0){f.style.height=Math.ceil(e.data.height)+"px";}});<' + '/script>'
+    // The listener resizes only the frame that sent the message (e.source), and reads only a
+    // number. No id: matching on the sender means the form can be pasted twice on one page and
+    // both copies still fit. The closing tag is split so it cannot end THIS script block.
+    return '<iframe src="' + url + '" title="' + embedSubscribeTitle + '" width="100%" height="' + embedSubscribeHeight + '" frameborder="0" style="border: none;"></iframe>'
+        + '\n<script>window.addEventListener("message",function(e){if(!e.data||e.data.type!=="eventschedule:resize"||!(e.data.height>0))return;'
+        + 'document.querySelectorAll("iframe").forEach(function(f){if(f.contentWindow===e.source){f.style.height=Math.ceil(e.data.height)+"px";}});});<' + '/script>'
         + embedBrandingLine;
 }
 
@@ -301,10 +301,12 @@ function refreshEmbedPreview() {
     iframe.src = url;
 }
 
-// The preview answers the same resize message the copied snippet listens for.
+// The preview answers the same resize message the copied snippet listens for. Only while the
+// signup form is selected: the iframe's contentWindow survives a src change, so a message the
+// form sent just before switching back could otherwise shrink the calendar preview.
 window.addEventListener('message', function (e) {
     const iframe = document.getElementById('embed-preview-iframe');
-    if (iframe && e.source === iframe.contentWindow && e.data && e.data.type === 'eventschedule:resize' && e.data.height > 0) {
+    if (iframe && selectedEmbedValue('embed-widget') === 'subscribe' && e.source === iframe.contentWindow && e.data && e.data.type === 'eventschedule:resize' && e.data.height > 0) {
         iframe.style.height = Math.ceil(e.data.height) + 'px';
     }
 });

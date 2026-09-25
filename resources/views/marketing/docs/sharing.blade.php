@@ -172,7 +172,7 @@
             <li>Copy the code and paste it into your website where you want the form to appear</li>
         </ol>
         <ul class="doc-list mb-6">
-            <li><strong class="text-gray-900 dark:text-white">It sizes itself.</strong> The code is an iframe plus one short script that lets the frame fit the form, the error message and the "check your email" note. If your website builder removes scripts, the frame keeps a fixed height of 450 pixels, which fits the form on a normal-width page</li>
+            <li><strong class="text-gray-900 dark:text-white">It sizes itself.</strong> The code is an iframe plus one short script that lets the frame fit the form, the error message and the "check your email" note. If your website builder removes scripts, the frame keeps a fixed height of 520 pixels, which fits the form even on a phone</li>
             <li><strong class="text-gray-900 dark:text-white">It sits on your page.</strong> The form is a card on a clear background, in your schedule's accent colour, rather than on your schedule's background image</li>
             <li><strong class="text-gray-900 dark:text-white">It asks for confirmation.</strong> Everyone who signs up gets an email with a confirmation link, exactly as on your schedule page, and is emailed nothing else until they open it</li>
             <li><strong class="text-gray-900 dark:text-white">You can see it working.</strong> People who signed up through the embedded form carry a <strong class="text-gray-900 dark:text-white">Website</strong> badge on the Followers tab</li>

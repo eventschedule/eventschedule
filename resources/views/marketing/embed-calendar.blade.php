@@ -477,7 +477,7 @@
             ['?layout=', 'list', 'Opens the frame as a list or as a month calendar, whatever the schedule itself is set to. Two frames on the same page can each take their own. The calendar wants about 768px of frame width; narrower than that it shows a day-by-day agenda instead.'],
             ['?lang=', 'de', 'Renders the calendar in one of 12 languages. Arabic and Hebrew lay the frame out right to left.'],
             ['?schedule=', 'jazz-nights', 'Shows a single sub-schedule instead of everything on the calendar.'],
-            ['?dark=true', 'optional', 'Forces dark mode. Left off, the frame follows the visitor\'s own system setting.'],
+            ['?dark=true', 'optional', 'Forces dark mode, and ?dark=false forces light. Left off, the frame follows the visitor\'s own system setting.'],
             ['?month= &year=', '3 / 2027', 'Opens the frame on a specific month instead of the current one.'],
         ];
 

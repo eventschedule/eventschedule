@@ -618,7 +618,10 @@ document.addEventListener('DOMContentLoaded', function() {
             e.preventDefault();
             e.stopPropagation();
             hidePopUp();
-            openEmbedModal();
+            // Always the calendar: the dialog otherwise keeps whichever widget was picked last
+            // (the Followers tab opens it on the signup form), and a browser restores a select's
+            // value across a soft reload, so "Embed Schedule" could open on the wrong thing.
+            openEmbedModal('calendar');
         });
     }
 

@@ -5277,7 +5277,7 @@ return [
     'subscription_account_ready_heading' => 'A sua sessão está iniciada',
     'subscription_account_ready_body' => 'A sua conta para :email está pronta. Tudo o que segue está numa só página.',
     'subscriber_has_account' => 'Conta',
-    'subscribers_help' => 'Pessoas que pediram para receber os seus e-mails a partir da página da agenda. A maioria também tem conta aqui.',
+    'subscribers_help' => 'Pessoas que pediram para receber os seus e-mails a partir da página da agenda ou do seu site. A maioria também tem conta aqui.',
     'followers_account_only_help' => 'Pessoas que carregaram em Seguir. A um seguidor com conta não chega nada automaticamente, apenas uma newsletter que escreva.',
     'audience_reachable' => 'Contactáveis por e-mail',
     'audience_get_new_event_emails' => 'Recebem e-mails de eventos',
