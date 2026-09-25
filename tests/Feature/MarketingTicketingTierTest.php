@@ -498,4 +498,51 @@ class MarketingTicketingTierTest extends TestCase
             $offences
         )));
     }
+
+    /**
+     * Generating a schedule graphic is free on every plan: GraphicController has had no plan check
+     * since 2026-01-25 (docs/FEATURES.md, "Generate event graphics"). Only the AI text and the
+     * scheduled graphic emails are paid, and those are Enterprise. /for-talent still sold it as Pro
+     * twice, in an FAQ answer ("Pro also generates a shareable graphic of your upcoming shows")
+     * and as a bullet on its Pro card ("Auto-generated schedule graphics for socials").
+     *
+     * "graphic" near "Pro" is too loose on its own: it hits ten true sentences, chips such as
+     * '100 on Pro', 'Schedule graphics, free' among them. So two shapes:
+     *
+     *   - a sentence that names Pro and then a graphic within about 120 characters, stopping at
+     *     "Enterprise" (whose graphic emails and AI text really are paid), at a full stop, and at a
+     *     quote, a bracket or a line break, so it cannot run from one array item into the next;
+     *   - a Pro feature list written as `@foreach ([...] as $pro...)`, where each bullet is a noun
+     *     phrase with no "Pro" of its own beside it. The file is cut at every @foreach first, so a
+     *     list is read from its own header and never from an earlier loop's text.
+     */
+    public function test_no_marketing_surface_says_graphics_are_pro(): void
+    {
+        $offences = [];
+
+        foreach ($this->marketingSources() as $path => $body) {
+            $body = preg_replace('~\{\{--.*?--\}\}|/\*.*?\*/~s', ' ', $body);
+            $body = preg_replace('~^[ \t]*//.*$~m', ' ', $body);
+
+            $found = preg_match_all('~\bPro\b(?:(?!\bEnterprise\b)[^.\'"\]\n]){0,120}\bgraphics?\b(?!\s+(?:e-?mails?|text))~', $body, $m);
+            $this->assertNotFalse($found, $path.': '.preg_last_error_msg());
+
+            foreach ($m[0] as $hit) {
+                $offences[] = $path.': "'.$hit.'"';
+            }
+
+            foreach (explode('@foreach', $body) as $loop) {
+                if (preg_match('~^\s*\(\[(.*?)\]\s*as\s*\$pro\w*\)~s', $loop, $list)
+                    && preg_match('~[^\'"\n]*\bgraphics?\b[^\'"\n]*~i', $list[1], $item)) {
+                    $offences[] = $path.': a Pro list carries "'.trim($item[0]).'"';
+                }
+            }
+        }
+
+        $this->assertSame([], $offences, implode("\n", array_merge(
+            ['These sell schedule graphics as Pro. Generating one is free on every plan; only the AI '
+                .'text and scheduled graphic emails are paid, on Enterprise (docs/FEATURES.md).'],
+            $offences
+        )));
+    }
 }

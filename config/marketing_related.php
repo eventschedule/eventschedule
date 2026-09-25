@@ -46,7 +46,7 @@ return [
     // The first card used to promise "a calculator" on /eventbrite-alternative, which has none. The
     // calculator is its own page now; the head-to-head is linked twice from this page's body.
     'switch-from-eventbrite' => [
-        ['title' => 'Ticket Fee Calculator', 'path' => '/ticket-fee-calculator', 'blurb' => 'What Eventbrite and seven other platforms take from your ticket sales, at their published rates.'],
+        ['title' => 'Ticket Fee Calculator', 'path' => '/ticket-fee-calculator', 'blurb' => 'What Eventbrite and six other platforms take from your ticket sales, next to our 0% platform fee.'],
         ['title' => 'Selling Tickets', 'path' => '/features/ticketing', 'blurb' => 'Ticket types, QR check-in and a live door dashboard, with zero platform fees.'],
         ['title' => 'Stripe', 'path' => '/stripe', 'blurb' => 'Card payments straight into your own Stripe account.'],
         ['title' => 'Pricing', 'path' => '/pricing', 'blurb' => 'See what is included on Free, Pro, and Enterprise plans.'],
@@ -240,7 +240,7 @@ return [
         ['title' => 'Ticketing', 'path' => '/features/ticketing', 'blurb' => 'Ticket types, QR check-in, and zero platform fees.'],
         ['title' => 'Sub-schedules', 'path' => '/features/sub-schedules', 'blurb' => "Keep each room's listings apart on one link."],
         ['title' => 'Recurring Events', 'path' => '/features/recurring-events', 'blurb' => 'Set a residency once, and skip the weeks you are dark.'],
-        ['title' => 'Booking Requests', 'path' => '/features/booking-requests', 'blurb' => 'Bands ask for a date on a form whose fields you choose.'],
+        ['title' => 'Booking Requests', 'path' => '/features/booking-requests', 'blurb' => 'Bands ask for a date on a form, and you choose which of its fields are required.'],
     ],
 
     // The for-nightclubs page already links the neighbouring audience pages
@@ -941,7 +941,7 @@ return [
     // TicketLeap's standout is its free seating chart builder, so the seating page is the card a
     // reader weighing the two is most likely to want next.
     'ticketleap-alternative' => [
-        ['title' => 'Ticket Fee Calculator', 'path' => '/ticket-fee-calculator', 'blurb' => 'What TicketLeap, Eventbrite and six other platforms take from your ticket sales.'],
+        ['title' => 'Ticket Fee Calculator', 'path' => '/ticket-fee-calculator', 'blurb' => 'What TicketLeap, Eventbrite and five other platforms take from your ticket sales.'],
         ['title' => 'Allocated Seating', 'path' => '/features/allocated-seating', 'blurb' => 'Draw your room once and let buyers pick their own seats from a map of it.'],
         ['title' => 'Eventbrite Alternative', 'path' => '/eventbrite-alternative', 'blurb' => 'Keep more of every ticket you sell.'],
         ['title' => 'Pricing', 'path' => '/pricing', 'blurb' => 'See what is included on Free, Pro, and Enterprise plans.'],
@@ -959,7 +959,7 @@ return [
     // AllEvents is a city-wide discovery feed, so the cards lead to what an organizer gets instead:
     // the fee maths, a page of their own for every event, and a shared calendar a town can run itself.
     'allevents-alternative' => [
-        ['title' => 'Ticket Fee Calculator', 'path' => '/ticket-fee-calculator', 'blurb' => 'What AllEvents, Eventbrite and six other platforms take from your ticket sales.'],
+        ['title' => 'Ticket Fee Calculator', 'path' => '/ticket-fee-calculator', 'blurb' => 'What AllEvents, Eventbrite and five other platforms take from your ticket sales.'],
         ['title' => 'Event Landing Page', 'path' => '/event-landing-page', 'blurb' => 'Every event gets a free page: the flyer, the date, a map and a ticket button.'],
         ['title' => 'Community Event Calendar', 'path' => '/community-event-calendar', 'blurb' => 'One shared calendar for a town, fed by the organizers in it.'],
         ['title' => 'Pricing', 'path' => '/pricing', 'blurb' => 'See what is included on Free, Pro, and Enterprise plans.'],
@@ -968,7 +968,7 @@ return [
     // Universe retired its seat maps in 2019 and sells long runs of timed dates, so the seating and
     // recurring-event pages are the cards a reader weighing the two is most likely to want next.
     'universe-alternative' => [
-        ['title' => 'Ticket Fee Calculator', 'path' => '/ticket-fee-calculator', 'blurb' => 'What Universe, Eventbrite and six other platforms take from your ticket sales.'],
+        ['title' => 'Ticket Fee Calculator', 'path' => '/ticket-fee-calculator', 'blurb' => 'What Universe, Eventbrite and five other platforms take from your ticket sales.'],
         ['title' => 'Allocated Seating', 'path' => '/features/allocated-seating', 'blurb' => 'Draw your room once and let buyers pick their own seats from a map of it.'],
         ['title' => 'Recurring Events', 'path' => '/features/recurring-events', 'blurb' => 'Set a long run of dates once, with tickets counted per date.'],
         ['title' => 'Pricing', 'path' => '/pricing', 'blurb' => 'See what is included on Free, Pro, and Enterprise plans.'],

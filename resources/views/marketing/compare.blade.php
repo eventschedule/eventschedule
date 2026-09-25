@@ -34,7 +34,7 @@
             ],
             [
                 'q' => 'Which of these platforms are open source?',
-                'a' => 'Event Schedule and Pretix. Both can be selfhosted, and both publish their source. Event Schedule runs on standard PHP and MySQL hosting, while Pretix expects Docker, PostgreSQL and Redis.',
+                'a' => 'Five of them: Event Schedule, Pretix, Hi.Events, Mobilizon and The Events Calendar. All five publish their source and can be selfhosted. Event Schedule runs on standard PHP and MySQL hosting, Pretix and Hi.Events expect Docker, PostgreSQL and Redis, Mobilizon runs on Elixir and PostgreSQL, and The Events Calendar is a WordPress plugin.',
             ],
             [
                 'q' => 'Do I have to pay to use Event Schedule?',
@@ -592,8 +592,8 @@
                 <!-- 3. Selfhosting: corrected claim, and the stack is the proof -->
                 <div class="es-bento group relative" data-tilt="3" data-reveal="panel">
                     <div class="es-tilt-inner relative flex h-full flex-col overflow-hidden rounded-3xl border border-gray-200 bg-white p-7 dark:border-white/10 dark:bg-white/[0.04]">
-                        <h3 class="mb-2 text-xl font-bold text-gray-900 dark:text-white">The simpler one to selfhost</h3>
-                        <p class="mb-6 text-sm text-gray-600 dark:text-gray-400">Event Schedule and Pretix are the two platforms here you can run yourself. Ours needs standard PHP hosting.</p>
+                        <h3 class="mb-2 text-xl font-bold text-gray-900 dark:text-white">Simple to selfhost</h3>
+                        <p class="mb-6 text-sm text-gray-600 dark:text-gray-400">Five platforms here can be run yourself. Ours needs standard PHP and MySQL hosting, where Pretix needs Docker, PostgreSQL and Redis.</p>
                         <div class="mt-auto space-y-3" aria-hidden="true">
                             @foreach ([['Event Schedule', ['PHP', 'MySQL'], true], ['Pretix', ['Docker', 'PostgreSQL', 'Redis'], false]] as [$stackName, $parts, $isOurs])
                                 <div>

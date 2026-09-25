@@ -5650,7 +5650,7 @@ class MarketingController extends Controller
                     'Pricing & Fees' => [
                         ['Free plan', 'Yes (forever)', 'Yes (5 active upcoming events)', false],
                         ['Paid plan price', plan_price($this->planPrice()).'/mo (7-day free trial)', 'USD 12, 60 or 200/mo', false],
-                        ['Platform fees', '0%', 'USD 1 per ticket (buyers pay by default)', true],
+                        ['Platform fees', '0%', 'USD 1 per paid ticket (buyers pay by default)', true],
                         ['Payment processing', 'Stripe/PayPal/Payfast (processor rates apply)', 'Your Stripe or PayPal (India: AllEvents)', false],
                     ],
                     'Events & Ticketing' => [
@@ -5684,7 +5684,7 @@ class MarketingController extends Controller
                 'key_advantages' => [
                     [
                         'title' => 'No Booking Fee',
-                        'description' => 'AllEvents adds USD 1 to every ticket. Event Schedule takes no platform fee on any plan, and Pro is a flat '.plan_price($this->planPrice()).'/mo.',
+                        'description' => 'AllEvents adds USD 1 to each paid ticket sold online, and 10% + INR 10 to one priced in rupees. Event Schedule takes no platform fee on any plan, and Pro is a flat '.plan_price($this->planPrice()).'/mo.',
                         'icon' => 'dollar',
                         'gradient' => 'from-emerald-50 to-teal-50 dark:from-emerald-900/30 dark:to-teal-900/30',
                         'border' => 'border-emerald-200 dark:border-emerald-500/20',
@@ -5743,7 +5743,7 @@ class MarketingController extends Controller
                     ['name' => 'Facebook Events', 'route' => 'marketing.compare_facebook_events'],
                 ],
                 'faq' => [
-                    ['question' => 'How does Event Schedule pricing compare to AllEvents?', 'answer' => 'AllEvents adds a booking fee of USD 1 per ticket, charged to buyers unless you absorb it, and its paid plans at USD 12, 60 and 200 a month raise how many upcoming events you can list at once. Event Schedule has no booking fee, and Pro at '.plan_price($this->planPrice()).'/mo adds paid tickets with zero platform fees.'],
+                    ['question' => 'How does Event Schedule pricing compare to AllEvents?', 'answer' => 'AllEvents adds a booking fee of USD 1 to each paid ticket sold online (10% + INR 10 on events priced in rupees), charged to buyers unless you absorb it, and its paid plans at USD 12, 60 and 200 a month raise how many upcoming events you can list at once. Event Schedule has no booking fee, and Pro at '.plan_price($this->planPrice()).'/mo adds paid tickets with zero platform fees.'],
                     ['question' => 'Do I need a paid plan to list more events?', 'answer' => 'No. The free plan has no limit on events, and free registration with QR tickets is unlimited too. The AllEvents free plan allows 5 upcoming events at a time, and its paid plans raise that to 20, 100 or more.'],
                     ['question' => 'When do I get paid for ticket sales?', 'answer' => 'On Pro, paid tickets are charged through your own Stripe or PayPal account, so the money goes there as each order is placed. AllEvents also pays into your own PayPal or Stripe account, except for events priced in Indian rupees, which it pays out 3 to 5 business days after the event.'],
                     ['question' => 'Can Event Schedule promote my event like AllEvents?', 'answer' => 'Event Schedule is built around your own schedule page rather than a shared marketplace. People who sign up on your schedule get an email when you add events, you can send newsletters, and on Pro you can boost an event with a Facebook and Instagram ad. If reaching strangers in your city matters most, AllEvents does more of that.'],
@@ -5761,8 +5761,8 @@ class MarketingController extends Controller
                 'key' => 'universe',
                 'slug' => 'universe-alternative',
                 'meta_title' => 'Universe Alternative With 0% Platform Fees | Event Schedule',
-                'tagline' => 'Ticketing with zero platform fees, payouts into your own account, reserved seating and two-way calendar sync.',
-                'description' => 'Compare Event Schedule with Universe: zero platform fees instead of 2% + $0.79 a ticket plus 3% processing, reserved seating, and two-way calendar sync.',
+                'tagline' => 'Ticketing with zero platform fees, payouts into your own account, two-way calendar sync, and reserved seating on Enterprise.',
+                'description' => 'Compare Event Schedule with Universe: 0% platform fees instead of 2% + $0.79 a ticket plus 3% processing, calendar sync, and reserved seating on Enterprise.',
                 'keywords' => 'universe alternative, universe.com alternative, universe ticketing alternative, ticketmaster universe alternative, timed entry ticketing',
                 'about' => 'Universe is a self-serve ticketing platform owned by Ticketmaster since 2015, used by attractions, clubs and event organizers. Publishing is free, paid tickets carry a per-ticket service fee plus a processing fee, and custom Pro plans add selling on Ticketmaster.',
                 'competitor_strengths' => [

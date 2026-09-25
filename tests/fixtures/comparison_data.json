@@ -8579,7 +8579,7 @@
                 [
                     "Platform fees",
                     "0%",
-                    "USD 1 per ticket (buyers pay by default)",
+                    "USD 1 per paid ticket (buyers pay by default)",
                     true
                 ],
                 [
@@ -8705,7 +8705,7 @@
         "key_advantages": [
             {
                 "title": "No Booking Fee",
-                "description": "AllEvents adds USD 1 to every ticket. Event Schedule takes no platform fee on any plan, and Pro is a flat $5/mo.",
+                "description": "AllEvents adds USD 1 to each paid ticket sold online, and 10% + INR 10 to one priced in rupees. Event Schedule takes no platform fee on any plan, and Pro is a flat $5/mo.",
                 "icon": "dollar",
                 "gradient": "from-emerald-50 to-teal-50 dark:from-emerald-900/30 dark:to-teal-900/30",
                 "border": "border-emerald-200 dark:border-emerald-500/20",
@@ -8775,7 +8775,7 @@
         "faq": [
             {
                 "question": "How does Event Schedule pricing compare to AllEvents?",
-                "answer": "AllEvents adds a booking fee of USD 1 per ticket, charged to buyers unless you absorb it, and its paid plans at USD 12, 60 and 200 a month raise how many upcoming events you can list at once. Event Schedule has no booking fee, and Pro at $5/mo adds paid tickets with zero platform fees."
+                "answer": "AllEvents adds a booking fee of USD 1 to each paid ticket sold online (10% + INR 10 on events priced in rupees), charged to buyers unless you absorb it, and its paid plans at USD 12, 60 and 200 a month raise how many upcoming events you can list at once. Event Schedule has no booking fee, and Pro at $5/mo adds paid tickets with zero platform fees."
             },
             {
                 "question": "Do I need a paid plan to list more events?",
@@ -8804,8 +8804,8 @@
         "key": "universe",
         "slug": "universe-alternative",
         "meta_title": "Universe Alternative With 0% Platform Fees | Event Schedule",
-        "tagline": "Ticketing with zero platform fees, payouts into your own account, reserved seating and two-way calendar sync.",
-        "description": "Compare Event Schedule with Universe: zero platform fees instead of 2% + $0.79 a ticket plus 3% processing, reserved seating, and two-way calendar sync.",
+        "tagline": "Ticketing with zero platform fees, payouts into your own account, two-way calendar sync, and reserved seating on Enterprise.",
+        "description": "Compare Event Schedule with Universe: 0% platform fees instead of 2% + $0.79 a ticket plus 3% processing, calendar sync, and reserved seating on Enterprise.",
         "keywords": "universe alternative, universe.com alternative, universe ticketing alternative, ticketmaster universe alternative, timed entry ticketing",
         "about": "Universe is a self-serve ticketing platform owned by Ticketmaster since 2015, used by attractions, clubs and event organizers. Publishing is free, paid tickets carry a per-ticket service fee plus a processing fee, and custom Pro plans add selling on Ticketmaster.",
         "competitor_strengths": [

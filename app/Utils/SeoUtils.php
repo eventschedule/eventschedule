@@ -189,7 +189,7 @@ class SeoUtils
                 'Reserved seating with a box office console (Enterprise)',
             ],
             'applicationCategory' => 'BusinessApplication',
-            'operatingSystem' => ['Web', 'Android', 'iOS'],
+            'operatingSystem' => 'Web',
             'screenshot' => $site.'/images/social/home.jpg',
             'publisher' => self::organizationRef(),
             'offers' => [

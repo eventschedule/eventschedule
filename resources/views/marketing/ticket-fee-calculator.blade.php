@@ -62,8 +62,8 @@
             [
                 'key' => 'ticket-tailor',
                 'rate' => $feeRates['ticket-tailor']['label'],
-                'how' => 'A booking fee on each paid ticket that falls as you buy credits in advance, from '.$feeRates['ticket-tailor']['range'].'. Stripe, PayPal or Square charges its own processing on top. The calculator uses the middle of the range.',
-                'source' => 'tickettailor.com/pricing',
+                'how' => 'A flat fee on each paid ticket rather than a share of its price, with Stripe, PayPal or Square charging its own processing on top. This is the last US band we recorded, and it could not be re-checked against Ticket Tailor\'s current pricing, so confirm it on tickettailor.com. The calculator uses its middle.',
+                'source' => null,
                 'route' => 'marketing.compare_ticket_tailor',
                 'link' => 'Ticket Tailor alternative',
             ],
@@ -86,7 +86,7 @@
             [
                 'key' => 'allevents',
                 'rate' => $feeRates['allevents']['label'],
-                'how' => 'A booking fee of '.$usd($feeRates['allevents']['fixed']).' on each ticket, charged to the buyer unless you absorb it. Outside India the ticket money goes to your own Stripe or PayPal account, which charges its own processing. Its paid plans raise how many upcoming events you can list at once.',
+                'how' => 'A booking fee of '.$usd($feeRates['allevents']['fixed']).' on each paid ticket sold online, charged to the buyer unless you absorb it; free tickets and payments taken offline carry none. Outside India the ticket money goes to your own Stripe or PayPal account, which charges its own processing. Events priced in Indian rupees pay 10% + INR 10 a ticket instead, and AllEvents collects that money itself. Its paid plans raise how many upcoming events you can list at once.',
                 'source' => 'allevents.in/pages/pricing',
                 'route' => 'marketing.compare_allevents',
                 'link' => 'AllEvents alternative',
@@ -115,7 +115,7 @@
             ],
             [
                 'q' => 'How much does Eventbrite charge per ticket?',
-                'a' => 'In the United States, a service fee of '.$pct($feeRates['eventbrite']['percent']).' + '.$usd($feeRates['eventbrite']['fixed']).' on each paid ticket and a separate '.$pct($feeRates['eventbrite']['processing']).' payment processing fee on each order. On a single '.$usd(\App\Utils\TicketFees::EXAMPLE_PRICE).' ticket that comes to '.$usd($exampleEventbrite).' in fees. Buyers pay them by default, and you can choose to absorb them instead.',
+                'a' => 'In the United States, a service fee of '.$pct($feeRates['eventbrite']['percent']).' + '.$usd($feeRates['eventbrite']['fixed']).' on each paid ticket and a separate '.$pct($feeRates['eventbrite']['processing']).' payment processing fee on each order. Buyers pay them on top of the ticket price by default. If you absorb them instead, as the calculator on this page does, a single '.$usd(\App\Utils\TicketFees::EXAMPLE_PRICE).' ticket costs you '.$usd($exampleEventbrite).' in fees.',
             ],
             [
                 'q' => 'Does Event Schedule charge a fee per ticket?',
@@ -135,7 +135,7 @@
             ],
             [
                 'q' => 'Where do these numbers come from?',
-                'a' => 'From each platform\'s own published pricing for the United States, read from its pricing page or help center; each card above names its source. Platforms change their prices, so confirm the figure on the platform\'s own page before you decide.',
+                'a' => 'From each platform\'s own published pricing for the United States, read from its pricing page or help center, and each card above names its source. Ticket Tailor is the exception: its pricing page could not be re-checked, so its card shows the last band we recorded. Platforms change their prices, so confirm the figure on the platform\'s own page before you decide.',
             ],
         ];
     @endphp
@@ -241,9 +241,11 @@
                              target-size rule in marketing.css gives a standalone inline-flex link its own
                              block margin and padding, which outrank mt-auto and pt-4 on the link itself. --}}
                         <div class="mt-auto pt-4">
-                            <p class="text-xs text-gray-500 dark:text-gray-400">Source: {{ $model['source'] }}</p>
+                            @if ($model['source'])
+                                <p class="text-xs text-gray-500 dark:text-gray-400">Source: {{ $model['source'] }}</p>
+                            @endif
                             @if ($model['route'])
-                                <p class="mt-3">
+                                <p @class(['mt-3' => $model['source']])>
                                     <a href="{{ route($model['route']) }}" class="group inline-flex items-center gap-1 text-sm font-semibold text-blue-700 transition-all hover:gap-2 dark:text-blue-400">
                                         {{ $model['link'] }}
                                         <svg aria-hidden="true" class="h-4 w-4 rtl:rotate-180" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6" /></svg>
@@ -327,10 +329,10 @@
 
                 <div class="relative z-10">
                     <h2 class="es-balance mx-auto mb-6 max-w-3xl text-3xl font-black tracking-tight text-white md:text-5xl">
-                        Keep the <span class="text-gradient-fees">whole ticket price</span>
+                        No platform fee <span class="text-gradient-fees">on any plan</span>
                     </h2>
                     <p class="mx-auto mb-10 max-w-xl text-lg text-gray-300 sm:text-xl">
-                        Zero platform fees on every plan. Free registration on all of them, and paid tickets on Pro.
+                        Only your payment processor's fee comes off a paid ticket. Free registration on every plan, and paid tickets on Pro.
                     </p>
 
                     <div class="mx-auto flex max-w-2xl flex-col items-stretch justify-center gap-3 sm:flex-row">

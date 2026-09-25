@@ -104,12 +104,12 @@ final class TicketFees
             // tickettailor.com answers 403 to an automated fetch, its archived pricing page renders in
             // pounds (0.22 to 0.60 GBP a ticket), and third-party summaries of its US prices disagree.
             // Check the band by hand before quoting it anywhere new. The processor's fee is on top.
+            // The label, the basis and the calculator's card all say it was not re-checked.
             'ticket-tailor' => [
                 'name' => 'Ticket Tailor',
                 'fixed' => 0.44,
-                'range' => '$0.28-$0.60 per ticket',
-                'label' => '$0.28-$0.60 per ticket',
-                'basis' => 'Ticket Tailor publishes $0.28-$0.60 per ticket depending on volume, so the midpoint is used here.',
+                'label' => '$0.28-$0.60 per ticket (not re-checked)',
+                'basis' => 'Ticket Tailor is shown at the middle of $0.28-$0.60 per ticket, the last US band we recorded, which could not be re-checked.',
             ],
 
             // ticketleap.com/info/pricing, checked 2026-09-24: "$1 + 2% of the event ticket price" on
@@ -147,10 +147,15 @@ final class TicketFees
 
             // allevents.in/pages/pricing and the fee feed behind it
             // (allevents.in/api/index.php/tickets/plans_prices), checked 2026-09-24: a USD 1 booking
-            // fee on each ticket, charged to buyers unless the organizer absorbs it. Outside India the
-            // ticket money settles into the organizer's own Stripe or PayPal account, whose fee is on
-            // top. A 2025 help article says "USD 1 or 0.5%, whichever is higher"; the feed says a flat
-            // USD 1, and the two differ only on a ticket over 200 dollars.
+            // fee on each paid ticket sold online, charged to buyers unless the organizer absorbs it;
+            // free tickets and payments taken offline carry none
+            // (support.allevents.in/article/101-how-much-commission-does-allevents-charge-per-ticket-sold).
+            // Outside India the ticket money settles into the organizer's own Stripe or PayPal
+            // account, whose fee is on top. An event priced in rupees pays 10% + INR 10 a ticket
+            // instead, collected by AllEvents itself (the feed's INR row, and
+            // support.allevents.in/article/168-platform-fee-of-allevents-for-events-in-india). A 2025
+            // help article says "USD 1 or 0.5%, whichever is higher"; the feed says a flat USD 1, and
+            // the two differ only on a ticket over 200 dollars.
             'allevents' => [
                 'name' => 'AllEvents',
                 'fixed' => 1.00,
