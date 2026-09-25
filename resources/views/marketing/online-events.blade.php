@@ -47,9 +47,13 @@
            public listing's location line says, what the ticket carries
            and what search engines are told. Every cell is read off the
            code: Event::getEventUrlDomain(), event/show-guest.blade.php
-           (venue name wins, domain only when there is no venue),
+           (venue name wins, domain only when there is no venue, and
+           "Online" when the link has no public domain),
            ticket/view.blade.php (event_url wins over the address), and
-           Event::getSchemaAttendanceMode() (Offline / Online / Mixed).
+           the attendance mode Event::schemaNode() publishes,
+           schemaAttendanceModeOf() over getSchemaLocation() (Offline /
+           Online / Mixed). getSchemaAttendanceMode() now feeds only the
+           Meta Pixel.
 
            WHAT IT REFUSES TO DRAW. No platform integrations, no live
            viewer counts, no attendee caps that are not real. An online
@@ -411,9 +415,12 @@
         // The three legal tick combinations, and what each one produces. Every cell is
         // read off the code, not invented: the listing's location line comes from
         // event/show-guest.blade.php (the venue name wins; Event::getEventUrlDomain()
-        // only fills in when there is no venue), the ticket line from
-        // ticket/view.blade.php (event_url wins over the address), and the last column
-        // from Event::getSchemaAttendanceMode().
+        // only fills in when there is no venue, and "Online" when the link has no public
+        // domain), the ticket line from ticket/view.blade.php (event_url wins over the
+        // address), and the last column from the attendance mode Event::schemaNode()
+        // publishes: schemaAttendanceModeOf() over getSchemaLocation(), which also drops a
+        // venue with nothing to say about itself. getSchemaAttendanceMode() now feeds only
+        // the Meta Pixel.
         $combinations = [
             [
                 'boxes' => [true, false],

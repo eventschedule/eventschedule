@@ -1285,12 +1285,15 @@
                         <p class="es-score-num es-score-accent mb-3 text-2xl">{{ str_pad($index + 1, 2, '0', STR_PAD_LEFT) }}</p>
                         <h3 class="es-score-ink mb-2 text-lg font-bold">{{ $step['title'] }}</h3>
                         <p class="es-score-muted text-sm leading-relaxed">{{ $step['description'] }}</p>
-                        {{-- mt-auto so the links line up across cards whatever the copy above them. --}}
+                        {{-- mt-auto so the links line up across cards whatever the copy above them. It and
+                             pt-5 sit on the wrapper: marketing.css's target-size rule outranks them on the link. --}}
                         @if ($stepGuide)
-                            <a href="{{ $stepGuide['url'] }}" class="es-score-link mt-auto inline-flex items-center gap-1 pt-5 text-sm font-medium transition-all duration-200 hover:gap-2 hover:underline">
-                                {{ $stepGuide['title'] }} guide
-                                <svg aria-hidden="true" class="h-4 w-4 flex-none rtl:rotate-180" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7" /></svg>
-                            </a>
+                            <p class="mt-auto pt-5">
+                                <a href="{{ $stepGuide['url'] }}" class="es-score-link inline-flex items-center gap-1 text-sm font-medium transition-all duration-200 hover:gap-2 hover:underline">
+                                    {{ $stepGuide['title'] }} guide
+                                    <svg aria-hidden="true" class="h-4 w-4 flex-none rtl:rotate-180" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7" /></svg>
+                                </a>
+                            </p>
                         @endif
                     </div>
                 @endforeach

@@ -3264,14 +3264,16 @@ class Event extends Model
      *
      * The home schedule is the one getGuestUrlData() picks - the claimed performer, then the
      * claimed venue, then the creator - but only while that schedule SERVES the event: its pivot
-     * accepted, claimed, and not deleted. That pick never looked at the pivot, and every guest
-     * lookup does (EventRepo::getEvent() requires is_accepted on the host), while saveEvent()
-     * leaves a claimed performer on a venue's or curator's event pending until they accept - so
-     * the canonical, and the sitemap built from it, named a host where the event 404s. When the
-     * pick does not serve it, the first schedule that does takes over: a performer, then a venue,
-     * then anything else, lowest id first so the choice cannot drift between requests. Its URL is
-     * rebuilt with getGuestUrlData(), whose venue/performer slug rule is exactly what that
-     * schedule's own calendar links to; the id resolves it either way.
+     * accepted, claimed, and not deleted. Every guest lookup requires that (EventRepo::getEvent()
+     * requires is_accepted on the host), while saveEvent() leaves a claimed performer on a venue's
+     * or curator's event pending until they accept, so a pick that ignored the pivot named a host
+     * where the event 404s, in the canonical and in the sitemap built from it. When the pick does
+     * not serve it, the first schedule that does takes over: a performer, then a venue, then
+     * anything else, lowest id first so the choice cannot drift between requests
+     * (servingHome()). getGuestUrlData() now makes that swap itself for a link that names no
+     * schedule, so the servingHome() branch below is only a fallback for an event it could pick
+     * no schedule for at all. The URL comes from getGuestUrlData(), whose venue/performer slug
+     * rule is exactly what that schedule's own calendar links to; the id resolves it either way.
      *
      * The custom domain is used only when the home schedule is served directly on it (direct +
      * active); redirect mode keeps the subdomain canonical. getGuestUrl() is deliberately not
@@ -4974,17 +4976,6 @@ class Event extends Model
         return $this->is_cancelled
             ? 'https://schema.org/EventCancelled'
             : 'https://schema.org/EventScheduled';
-    }
-
-    /**
-     * The offers the page makes for the occurrence on $date, each at the page's canonical $url.
-     * See schemaOffersAndAccess().
-     *
-     * @return array<int, array<string, mixed>>
-     */
-    public function getSchemaOffers(?string $date, string $lang, ?Role $viewingRole = null): array
-    {
-        return $this->schemaOffersAndAccess($date, $this->schemaUrl($viewingRole, $lang))[0];
     }
 
     /**

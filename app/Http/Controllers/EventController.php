@@ -3156,9 +3156,10 @@ class EventController extends Controller
         $talent->timezone = $timezone ?: 'UTC';
         $talent->language_code = is_valid_language_code($languageCode) ? $languageCode : 'en';
 
-        // Mark verified (without an email/phone) so the page is "claimed" and viewable by the
-        // owner (RoleController::viewGuest redirects unclaimed schedules). Leaving email/phone
-        // null keeps the auto-created page noindex and out of the sitemap.
+        // Mark verified (without an email/phone) so the page is "claimed" and public:
+        // RoleController::viewGuest() answers an unpublished schedule as an unknown address,
+        // and sends its own members into the app. Leaving email/phone null keeps the
+        // auto-created page noindex and out of the sitemap.
         $talent->email_verified_at = now();
 
         if (config('app.is_testing')) {
