@@ -1940,9 +1940,11 @@
 
         @if (payment_gateways()->usesPaymentInstructions($event->payment_method) && $event->payment_instructions_html)
             {{-- v-pre: this user content is inside the #ticket-selector Vue mount; without it a {{ }} in the
-                 payment instructions would be compiled as a Vue expression (CSTI) in the buyer's browser. --}}
+                 payment instructions would be compiled as a Vue expression (CSTI) in the buyer's browser.
+                 demoteH1(): this form sits on the event page and in the ticket embed, and each has
+                 its own <h1>, so the owner's "# Heading" prints as an <h2>. --}}
             <div class="mt-8 custom-content" v-pre>
-                {!! \App\Utils\UrlUtils::convertUrlsToLinks($event->payment_instructions_html) !!}
+                {!! \App\Utils\UrlUtils::convertUrlsToLinks(\App\Utils\MarkdownUtils::demoteH1($event->payment_instructions_html)) !!}
             </div>
         @endif
 

@@ -15,8 +15,9 @@ use Tests\TestCase;
  * because an owner's markdown "# Heading" renders as an <h1> under the page's own. The desktop copy
  * is now a role="heading" aria-level="1" div (display:none keeps the pair to one level-1 heading
  * for a screen reader at any width), and every piece of owner HTML on a guest page goes through
- * MarkdownUtils::demoteH1(): the announcement, the event and part descriptions, and the schedule,
- * act and venue descriptions inside their Alpine show-more toggles.
+ * MarkdownUtils::demoteH1(): the announcement, the event and part descriptions, the ticket form's
+ * payment instructions, and the schedule, act and venue descriptions inside their Alpine show-more
+ * toggles.
  */
 class GuestHeadingStructureTest extends TestCase
 {
@@ -151,6 +152,30 @@ class GuestHeadingStructureTest extends TestCase
 
         $this->assertSame(1, $this->h1Count($html));
         $this->assertSame(2, substr_count($html, '<h2 data-es-h1 id="the-room">The room</h2>'));
+    }
+
+    /**
+     * The ticket form is rendered into the event page, hidden until the buy button opens it, and
+     * a cash event's form prints the owner's payment instructions.
+     */
+    public function test_the_payment_instructions_heading_is_demoted(): void
+    {
+        $role = $this->createRole($this->createOwner(), 'venue', ['name' => 'Blue Note']);
+        $event = $this->createEvent($role, [
+            'name' => 'Jazz Night',
+            'starts_at' => '2026-10-24 23:30:00',
+            'creator_role_id' => $role->id,
+            'tickets_enabled' => true,
+            'payment_method' => 'cash',
+            'payment_instructions' => "# Pay at the door\n\nCash only, exact change please.",
+        ]);
+        $this->createTicket($event, ['type' => 'General', 'price' => 10, 'quantity' => 50]);
+
+        $html = $this->get($this->guestEventUrl($role, $event))->assertOk()->getContent();
+
+        $this->assertStringContainsString('id="gp-event-form"', $html, 'fixture: the ticket form is on the page');
+        $this->assertSame(1, $this->h1Count($html));
+        $this->assertSame(1, substr_count($html, '<h2 data-es-h1 id="pay-at-the-door">Pay at the door</h2>'));
     }
 
     /** Both agenda layouts: the timed timeline and the untimed setlist render parts separately. */

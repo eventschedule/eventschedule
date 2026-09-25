@@ -1,10 +1,10 @@
 # Branding Matrix
 
 Which Event Schedule branding a guest page shows, for every combination of deployment mode and
-plan tier. Four inputs decide it, read at eleven render sites, so this file is the single place
+plan tier. Four inputs decide it, read at sixteen render sites, so this file is the single place
 they are written down together. Keep it in sync when any of those sites change.
 
-## The three inputs
+## The four inputs
 
 | Input | Source | Meaning |
 |---|---|---|
@@ -148,7 +148,7 @@ the head, and `servesOnCustomDomain()` removes that one too.
    operator's platform and every schedule on a selfhost install leave them unbranded. Putting our
    name into someone's outgoing mail, or into HTML they paste on a client's site, is a different
    decision and has not been made.
-6. **The head is white-label surface too, and it hid two leaks for years.** Both were fallbacks,
+6. **The head is white-label surface too, and it hid three leaks for years.** Two were fallbacks,
    which is why no gate caught them: a gate chooses between the tenant's asset and a neutral one,
    while a fallback fires only when the tenant *has* no asset - exactly the free, unfinished
    schedule least able to notice. `og:image` fell back to `/images/social/home.png`, our 1200x630
@@ -160,8 +160,13 @@ the head, and `servesOnCustomDomain()` removes that one too.
    `summary` card shows no image, but Facebook's crawler falls back to selecting one from the page
    body, so "no og:image" is not "no picture". The claim worth making, and the only one true on
    every platform, is that the picture is never OURS - it degrades to the owner's own page, which
-   an advert of ours does not. Coverage:
-   `tests/Feature/GuestSocialImageTest.php`.
+   an advert of ours does not. The third was no fallback at all, and ran on every plan and every
+   install: each branch of the meta slot in `app-guest.blade.php` named `@ScheduleEvent` as
+   `twitter:site`, the X account of the site a card belongs to. On a schedule's page that site is
+   the schedule's, so no guest page carries the tag now, and only the marketing layout keeps it.
+   Coverage: `tests/Feature/GuestSocialImageTest.php`, and for `twitter:site`
+   `tests/Feature/GuestBrandingTest.php`, which renders every branch of that meta slot and scans
+   the layout's source.
 7. **The tenant manifest is advertised but deliberately not installable.** An Android WebAPK claims
    every link tapped on its host from another app and shows its launch splash before the page, so
    an install branded as ours put our logo full screen in front of every schedule's audience.
