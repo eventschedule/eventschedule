@@ -613,23 +613,60 @@ class AppController extends Controller
     ];
 
     /**
-     * Prefixes blocked on every host that serves them. /appointment/ and /gift-card/view/ carry a
-     * secret in the path, so they must never be fetched, whatever the pages say about indexing.
+     * Prefixes blocked on every host that serves them. Each carries a secret in the path, so it
+     * must never be fetched, whatever the page says about indexing:
+     *  - /appointment/, /gift-card/view/ and /installment/view/: a booking, a gift card and a
+     *    payment plan;
+     *  - /ticket/view/, /ticket/qr_code/, /ticket/wallet/ and /ticket/order/: a ticket, its QR
+     *    code, its wallet pass and an order;
+     *  - /sub/c/, /sub/m/, /sub/u/ and /int/u/: an audience subscription's confirm, manage and
+     *    unsubscribe links, and an event-interest unsubscribe;
+     *  - /nl/o/, /nl/c/ and /nl/u/: a newsletter's open pixel, click redirect and unsubscribe.
+     *
+     * Every host, because these routes answer on every host: an emailed link names the base URL,
+     * and /sub/c/ and /int/u/ redirect to app., so a rule on only one of them misses where a
+     * crawler lands. And the full prefix each time, never /ticket/ or /sub/ alone: on a schedule's
+     * own host an event page is /{slug}/{id}, so an event slugged "ticket" lives at /ticket/{id}.
+     *
      * /promo/ is a click-counting redirect: a crawler following it would spend an advertiser's
      * budget on traffic that was never a person.
      */
-    private const ROBOTS_SECRET_PATHS = ['/appointment/', '/gift-card/view/', '/promo/'];
+    private const ROBOTS_SECRET_PATHS = [
+        '/appointment/', '/gift-card/view/', '/installment/view/',
+        '/ticket/view/', '/ticket/qr_code/', '/ticket/wallet/', '/ticket/order/',
+        '/sub/c/', '/sub/m/', '/sub/u/', '/int/u/',
+        '/nl/o/', '/nl/c/', '/nl/u/',
+        '/promo/',
+    ];
+
+    /**
+     * The checkout, payment and gift-card return pages under a schedule's own address, each with
+     * a sale's or a gift card's id in the path. A tenant host serves them at its root; selfhost
+     * serves them under /{subdomain}/, which robots() writes as a /* wildcard.
+     *
+     * The return prefix each time, never /checkout/ or /payment/ alone. Those words are an event's
+     * slug too: one slugged before such words gained "-event" (Event::storableSlug()) keeps it,
+     * and its page is /checkout/{id} on its schedule's host, or /{subdomain}/checkout/{id} on
+     * selfhost.
+     */
+    private const ROBOTS_TENANT_RETURN_PATHS = [
+        '/checkout/success/', '/checkout/cancel/', '/payment/success/', '/payment/cancel/',
+        '/gift-cards/success/', '/gift-cards/cancel/', '/gift-cards/payment/',
+    ];
 
     /**
      * robots.txt, which differs by host.
      *
-     * A tenant host (hosted: a custom domain, or a schedule's subdomain) blocks only its checkout
-     * returns and the secret-bearing paths. It used to get the apex's body, whose app rules
-     * (/events, /admin, /login and friends) mean nothing there and whose bare prefixes also matched
-     * the schedule's own event slugs. Never /api/: the calendar renders from it.
+     * A tenant host (hosted: a custom domain, or a schedule's subdomain) blocks only its checkout,
+     * payment and gift-card returns and the secret-bearing paths. It used to get the apex's body,
+     * whose app rules (/events, /admin, /login and friends) mean nothing there and whose bare
+     * prefixes also matched the schedule's own event slugs. Never /api/: the calendar renders from
+     * it.
      *
      * The apex, www., blog. and every selfhost install keep the app rules. app. is the same without
-     * the Sitemap line: it serves no page the sitemap lists.
+     * the Sitemap line: it serves no page the sitemap lists. Selfhost also serves every schedule's
+     * own returns and promo clicks, one segment down at /{subdomain}/..., so it adds them as /*
+     * wildcards, which Google and Bing both honour (RFC 9309).
      *
      * sitemap_url() is host-aware: a custom domain points at its own sitemap, because Google
      * rejects a third-party host inside the global one ("URL not allowed") whatever robots.txt
@@ -648,16 +685,23 @@ class AppController extends Controller
 
         if ($isTenantHost) {
             $content = "User-agent: *\n"
-                .collect(['/checkout/', '/payment/', '/gift-cards/success/', '/gift-cards/cancel/', '/gift-cards/payment/'])
+                .collect(self::ROBOTS_TENANT_RETURN_PATHS)
                     ->merge(self::ROBOTS_SECRET_PATHS)
                     ->map(fn ($path) => 'Disallow: '.$path."\n")
                     ->implode('')
                 ."\nSitemap: ".sitemap_url()."\n";
         } else {
+            // A hosted install serves a schedule's returns and promo clicks on the schedule's own
+            // host, above; only selfhost has them under this one.
+            $scheduleRules = config('app.hosted')
+                ? []
+                : array_map(fn ($path) => '/*'.$path, ['/promo/', ...self::ROBOTS_TENANT_RETURN_PATHS]);
+
             $appRules = collect(self::ROBOTS_APP_PATHS)
                 ->flatMap(fn ($path) => ["/{$path}$", "/{$path}/", "/{$path}?"])
                 ->merge(['/auth/', '/admin-edit-event/'])
                 ->merge(self::ROBOTS_SECRET_PATHS)
+                ->merge($scheduleRules)
                 ->map(fn ($path) => 'Disallow: '.$path."\n")
                 ->implode('');
 
