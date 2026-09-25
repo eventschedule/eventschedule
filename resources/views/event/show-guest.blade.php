@@ -404,7 +404,8 @@
                   </div>
                 </div>
 
-                {{-- Description with expand/collapse --}}
+                {{-- Description with expand/collapse. demoteH1(): the event name is the page's one
+                     <h1>, so an act's own "# Heading" prints as an <h2>. --}}
                 @if ($each->description_html)
                   @php $eachDir = content_dir($each, false, $each->description_html); @endphp
                   @if(str_word_count(strip_tags($each->description_html)) > 5)
@@ -417,7 +418,7 @@
                       </span>
                       <div x-show="expanded" x-cloak class="description-expanded">
                         <div class="custom-content {{ $eachDir === 'rtl' ? 'rtl' : '' }}" dir="{{ $eachDir }}">
-                          {!! \App\Utils\UrlUtils::convertUrlsToLinks($each->description_html) !!}
+                          {!! \App\Utils\UrlUtils::convertUrlsToLinks(\App\Utils\MarkdownUtils::demoteH1($each->description_html)) !!}
                         </div>
                         <button :aria-expanded="expanded" @click="expanded = false" class="font-medium hover:underline whitespace-nowrap mt-1 text-blue-600 dark:text-blue-400">
                           {{ __('messages.show_less') }}
@@ -426,7 +427,7 @@
                     </div>
                   @else
                     <div class="text-sm text-gray-700 dark:text-gray-300 custom-content {{ $eachDir === 'rtl' ? 'rtl' : '' }}" dir="{{ $eachDir }}">
-                      {!! \App\Utils\UrlUtils::convertUrlsToLinks($each->description_html) !!}
+                      {!! \App\Utils\UrlUtils::convertUrlsToLinks(\App\Utils\MarkdownUtils::demoteH1($each->description_html)) !!}
                     </div>
                   @endif
                 @endif
@@ -534,12 +535,13 @@
               @endif
               @if ($event->venue->textInLanguage("description_html", $displayLang))
                 @php $venueDir = content_dir_for_language($event->venue->textInLanguage("description_html", $displayLang), $displayLang); @endphp
+                {{-- demoteH1(): the event name is the page's one <h1>, so the venue's "# Heading" prints as an <h2>. --}}
                 <div x-data="{ expanded: false, needsExpand: false }" x-init="$nextTick(() => { let el = $refs.collapsed; needsExpand = el.scrollHeight > el.clientHeight })">
                   <div x-show="!expanded" x-ref="collapsed" class="text-sm text-gray-700 dark:text-gray-300 line-clamp-3 custom-content {{ $venueDir === 'rtl' ? 'rtl' : '' }}" dir="{{ $venueDir }}">
-                    {!! \App\Utils\UrlUtils::convertUrlsToLinks($event->venue->textInLanguage("description_html", $displayLang)) !!}
+                    {!! \App\Utils\UrlUtils::convertUrlsToLinks(\App\Utils\MarkdownUtils::demoteH1($event->venue->textInLanguage("description_html", $displayLang))) !!}
                   </div>
                   <div x-show="expanded" x-cloak class="text-sm text-gray-700 dark:text-gray-300 custom-content {{ $venueDir === 'rtl' ? 'rtl' : '' }}" dir="{{ $venueDir }}">
-                    {!! \App\Utils\UrlUtils::convertUrlsToLinks($event->venue->textInLanguage("description_html", $displayLang)) !!}
+                    {!! \App\Utils\UrlUtils::convertUrlsToLinks(\App\Utils\MarkdownUtils::demoteH1($event->venue->textInLanguage("description_html", $displayLang))) !!}
                   </div>
                   <button x-show="!expanded && needsExpand" :aria-expanded="expanded" @click="expanded = true" class="text-sm font-medium hover:underline mt-1 text-blue-600 dark:text-blue-400">
                     {{ $role->customLabel('read_more') }}

@@ -292,8 +292,9 @@
                      dir="{{ $descDir }}"
                      class="text-start text-sm text-[#33383C] dark:text-gray-300">
                   <div x-show="long && !expanded" x-cloak>{{ $descPreview }}</div>
+                  {{-- demoteH1(): the schedule's name above is the page's one <h1>. --}}
                   <div x-ref="content" x-show="!long || expanded" :class="{ 'line-clamp-3': !long }" class="custom-content">
-                    {!! \App\Utils\UrlUtils::convertUrlsToLinks($role->translatedDescription()) !!}
+                    {!! \App\Utils\UrlUtils::convertUrlsToLinks(\App\Utils\MarkdownUtils::demoteH1($role->translatedDescription())) !!}
                   </div>
                   <button x-show="long && !expanded" x-cloak @click="expanded = true" class="text-blue-600 dark:text-blue-400 hover:underline whitespace-nowrap mt-1">
                     {{ $role->customLabel('show_more') }}
@@ -519,8 +520,9 @@
                    dir="{{ $descDirDesktop }}"
                    class="mt-2 text-sm text-[#33383C] dark:text-gray-300">
                 <div x-show="long && !expanded" x-cloak>{{ $descPreviewDesktop }}</div>
+                {{-- demoteH1(): the schedule's name above is the page's one <h1>. --}}
                 <div x-ref="content" x-show="!long || expanded" :class="{ 'line-clamp-3': !long }" class="custom-content">
-                  {!! \App\Utils\UrlUtils::convertUrlsToLinks($role->translatedDescription()) !!}
+                  {!! \App\Utils\UrlUtils::convertUrlsToLinks(\App\Utils\MarkdownUtils::demoteH1($role->translatedDescription())) !!}
                 </div>
                 <button x-show="long && !expanded" x-cloak @click="expanded = true" class="text-blue-600 dark:text-blue-400 hover:underline whitespace-nowrap mt-1">
                   {{ $role->customLabel('show_more') }}
