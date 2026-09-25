@@ -572,7 +572,7 @@
             ],
             [
                 'q' => 'Is Event Schedule really free for streaming concerts?',
-                'a' => 'Yes. Unlimited dates, the whole routing on one address, recurring residencies with date exceptions, sub-schedules, two-way Google, Outlook and CalDAV sync, the embeddable calendar, free registration with a capacity limit and no monthly ceiling, built-in analytics, ten newsletter recipients a month and scanning a ticket at the door are all free forever. Selling a ticket that carries a price is '.plan_price($proMonthly).' a month on Pro, along with passes and the live check-in dashboard. There are zero platform fees on ticket sales at every tier, whether a date sells through your own Stripe or PayPal account, Invoice Ninja, a payment link or cash, so past the provider\'s own fee the money is yours.',
+                'a' => 'Yes. Unlimited dates, the whole routing on one address, recurring residencies with date exceptions, sub-schedules, two-way Google, Outlook and CalDAV sync, the embeddable calendar, free registration with a capacity limit and no monthly ceiling, built-in analytics, ten newsletter emails a month (each recipient counts as one) and scanning a ticket at the door are all free forever. Selling a ticket that carries a price is '.plan_price($proMonthly).' a month on Pro, along with passes and the live check-in dashboard. There are zero platform fees on ticket sales at every tier, whether a date sells through your own Stripe or PayPal account, Invoice Ninja, a payment link or cash, so past the provider\'s own fee the money is yours.',
             ],
             [
                 'q' => 'What happens when a date moves or gets pulled?',

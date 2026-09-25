@@ -2,7 +2,7 @@
     key="tickets"
     title="Sell Tickets: Payments, Refunds, Check-In - Event Schedule"
     description="Sell tickets or run free registration: connect Stripe or PayPal, build ticket types, refund from the Sales page and scan QR codes at the door."
-    lede="Free registration on every plan, paid ticketing on Pro, and zero platform fees either way. Connect payment processing, create ticket types, and keep 100% of your sales."
+    lede="Free registration on every plan, paid ticketing on Pro, and zero platform fees either way. Connect payment processing and create ticket types; only your processor's fee comes off a paid ticket."
     article-description="How to sell tickets and run free registration: payment methods, ticket types, refunds, check-in at the door and the interest list."
 >
     <x-slot:toc>
@@ -174,7 +174,7 @@
 
         <div class="doc-callout doc-callout-info mb-6">
             <div class="doc-callout-title">What Free includes, and what Pro adds</div>
-            <p>Creating ticket types, handing out free tickets and scanning them at the door all work on the Free plan. <a href="#general" class="doc-link">Charging for a ticket</a> is what needs Pro, and Pro brings the surrounding toolkit with it: the live check-in dashboard, promo codes, add-ons, passes, individual tickets, the ticket waitlist, the CSV export, the bulk import, gift cards and post-event feedback. You keep 100% of the money on every plan that can take it. A <a href="{{ route('marketing.docs.selfhost') }}" class="doc-link">selfhosted</a> install resolves to Enterprise, so nothing here is held back there.</p>
+            <p>Creating ticket types, handing out free tickets and scanning them at the door all work on the Free plan. <a href="#general" class="doc-link">Charging for a ticket</a> is what needs Pro, and Pro brings the surrounding toolkit with it: the live check-in dashboard, promo codes, add-ons, passes, individual tickets, the ticket waitlist, the CSV export, the bulk import, gift cards and post-event feedback. No plan takes a platform fee, so only your payment processor's fee comes off a paid ticket. A <a href="{{ route('marketing.docs.selfhost') }}" class="doc-link">selfhosted</a> install resolves to Enterprise, so nothing here is held back there.</p>
         </div>
 
         <div class="doc-table-wrap">

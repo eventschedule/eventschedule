@@ -531,7 +531,7 @@
                         <div class="es-tilt-inner es-cause-card overflow-hidden p-6 sm:p-7">
                             <div class="mb-5 flex flex-wrap items-baseline justify-between gap-2">
                                 <h3 class="es-cause-ink text-lg font-bold">Newsletter allowance</h3>
-                                <span class="es-cause-muted es-cause-num text-xs">recipients per month</span>
+                                <span class="es-cause-muted es-cause-num text-xs">emails a month</span>
                             </div>
 
                             <div class="space-y-2.5">

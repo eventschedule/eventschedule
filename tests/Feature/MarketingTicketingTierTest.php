@@ -150,11 +150,11 @@ class MarketingTicketingTierTest extends TestCase
     /**
      * Patterns that are only wrong in a TICKETING sentence.
      *
-     * The newsletter allowance is real and still metered (10 recipients a month free, 100 on Pro,
-     * 1,000 on Enterprise), as are the AI-parse, fan-photo and appointment-type limits. So "monthly
-     * allowance" and "the cap comes off" are legitimate prose in those contexts and forbidden in a
-     * ticketing one. Matched against the surrounding sentence, then dropped if that sentence is
-     * about one of the allowances that still exist.
+     * The newsletter allowance is real and still metered (10 newsletter emails a month free, 100 on
+     * Pro, 1,000 on Enterprise, each recipient counting as one), as are the AI-parse, fan-photo and
+     * appointment-type limits. So "monthly allowance" and "the cap comes off" are legitimate prose
+     * in those contexts and forbidden in a ticketing one. Matched against the surrounding
+     * sentence, then dropped if that sentence is about one of the allowances that still exist.
      */
     private const AMBIGUOUS = [
         // "monthly allowance", "the cap comes off" - true of newsletters, AI parsing, fan photos
@@ -457,6 +457,44 @@ class MarketingTicketingTierTest extends TestCase
             ['These say paid ticket selling, a payment gateway or a refund is free or ungated. '
                 .'Event::canSellPaidTickets() is Pro/Enterprise only; free registration, RSVP, $0 '
                 .'ticket rows, door scanning and the zero platform fee are what stay on every plan.'],
+            $offences
+        )));
+    }
+
+    /**
+     * "Keep 100% of ticket sales" is the zero-platform-fee claim stretched one word too far. A paid
+     * ticket settles into the organizer's own Stripe or PayPal account, and that processor's fee
+     * comes off it, so nobody keeps 100%. What is true is that no plan takes a platform fee, which
+     * leaves the processor's fee as the only deduction. A sentence may still say 100% when it takes
+     * that fee back out itself ("you keep 100% of the sale minus your payment provider's fee").
+     */
+    public function test_no_marketing_surface_says_you_keep_all_of_a_sale(): void
+    {
+        $offences = [];
+
+        foreach ($this->marketingSources() as $path => $body) {
+            $body = preg_replace('~\{\{--.*?--\}\}|/\*.*?\*/|<!--.*?-->~s', ' ', $body);
+            $body = preg_replace('~^[ \t]*//.*$~m', ' ', $body);
+
+            if (! preg_match_all('~\bkeep(?:s|ing)?\s+100\s?%|\b100\s?%\s+(?:of\s+[^.]{0,60}?)?(?:stays\s+)?yours\b~i', $body, $m, PREG_OFFSET_CAPTURE)) {
+                continue;
+            }
+
+            foreach ($m[0] as [$hit, $offset]) {
+                $rest = substr($body, $offset, 300);
+                $sentence = substr($rest, 0, strcspn($rest, '.'));
+
+                if (preg_match('~\b(?:minus|less|apart from|except)\b[^.]{0,40}\b(?:fee|processing|processor|provider|Stripe|PayPal)~i', $sentence)) {
+                    continue;
+                }
+
+                $offences[] = $path.': "'.mb_substr(trim(preg_replace('/\s+/', ' ', strip_tags($sentence))), 0, 120).'"';
+            }
+        }
+
+        $this->assertSame([], $offences, implode("\n", array_merge(
+            ['These say the organizer keeps all of a sale. The payment processor\'s fee comes off a '
+                .'paid ticket; say that only the processor\'s fee comes off, or name it in the same sentence.'],
             $offences
         )));
     }

@@ -990,7 +990,7 @@
                         @endforeach
                     </div>
                     <p class="es-dash-dim mt-4 es-dash-fine">
-                        Sample send. Newsletters themselves are free, at ten recipients a month; the sales row at the bottom needs priced tickets on sale, which is the Pro part.
+                        Sample send. Newsletters themselves are free, at ten emails a month with each recipient counting as one; the sales row at the bottom needs priced tickets on sale, which is the Pro part.
                     </p>
                 </div>
 

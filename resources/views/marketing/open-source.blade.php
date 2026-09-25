@@ -546,7 +546,7 @@
             ['REST API and webhooks', 'Pro', 'Included'],
             ['Custom domain', 'Enterprise', 'The install is your domain'],
             ['Team members on one schedule', 'Up to five, on Enterprise', 'No cap'],
-            ['Newsletter sends', '10, 100 or 1,000 recipients a month', 'No monthly cap'],
+            ['Newsletter sends', '10, 100 or 1,000 emails a month, each recipient counting as one', 'No monthly cap'],
             ['The "Powered by" credit', 'Removed on Pro', 'Gone, but one small licence credit stays on public pages'],
             ['Daily import from a list of event URLs', 'Not available', 'Selfhost only'],
             ['AI parsing and translation', 'Our key, with a daily cap per plan', 'Your own Gemini or OpenAI key, no daily cap'],

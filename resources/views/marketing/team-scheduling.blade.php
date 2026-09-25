@@ -791,7 +791,7 @@
                         </div>
                         <p class="es-line-ink mb-2 text-4xl font-black" aria-hidden="true">1</p>
                         <h3 class="es-line-ink mb-2 text-lg font-bold">One member</h3>
-                        <p class="es-line-muted text-sm">You. Nothing else on the free plan is metered by head count: unlimited events, calendar sync, analytics, and newsletters to ten recipients a month. The one thing it does not include is a second name on this card.</p>
+                        <p class="es-line-muted text-sm">You. Nothing else on the free plan is metered by head count: unlimited events, calendar sync, analytics, and ten newsletter emails a month, each recipient counting as one. The one thing it does not include is a second name on this card.</p>
                     </div>
                     <div class="es-line-card p-7" data-reveal="panel">
                         <div class="mb-3 flex flex-wrap items-center gap-2">

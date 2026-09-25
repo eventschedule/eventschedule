@@ -367,7 +367,7 @@
             ['num' => 'II', 'eyebrow' => 'Technical Requirements', 'title' => 'Rigging & Tech Specs', 'desc' => 'Ceiling height, rigging points, weight capacity, floor space - share specs venues actually need.'],
             ['num' => 'III', 'eyebrow' => 'Teaching', 'title' => 'Fill Your Workshops', 'desc' => 'Aerial basics, fire safety, acro fundamentals - share your class schedule with students.'],
             ['num' => 'IV', 'eyebrow' => 'Ensemble', 'title' => 'Coordinate Your Troupe', 'desc' => 'Aerialist, rigger, stage manager - on Enterprise the whole crew edits the same schedule.'],
-            ['num' => 'V', 'eyebrow' => 'Ticketing', 'title' => 'Keep 100% of Sales', 'desc' => 'Your show, your revenue. Zero platform fees on every plan. QR tickets you scan at the door.'],
+            ['num' => 'V', 'eyebrow' => 'Ticketing', 'title' => 'Your Show, Your Revenue', 'desc' => 'Zero platform fees on every plan, so only your payment processor\'s fee comes off a paid ticket. QR tickets you scan at the door.'],
             ['num' => 'VI', 'eyebrow' => 'Booking', 'title' => 'Event Planner Kit', 'desc' => 'One link with your dates, videos, specs, and rates, plus a booking request form. Perfect for corporate bookers and wedding planners.'],
         ];
     @endphp
@@ -553,7 +553,7 @@
                     </div>
                 </article>
 
-                <!-- Act V: Keep 100% of Sales -->
+                <!-- Act V: Your Show, Your Revenue -->
                 <article class="es-circus-swing scroll-mt-24" data-reveal>
                     <div class="relative overflow-hidden rounded-3xl border border-gray-200 bg-white p-8 shadow-sm dark:border-white/10 dark:bg-white/[0.04] lg:p-12">
                         <header class="mb-8 text-center">
@@ -1081,7 +1081,7 @@
                 $faqs = [
                     [
                         'q' => 'Is Event Schedule free for circus performers?',
-                        'a' => 'Yes, for most of it. Sharing your performance schedule, sub-schedules, two-way calendar sync, an embeddable calendar, free registration with a capacity, a calendar feed fans subscribe to, the booking request form and one bookable appointment type are all free forever, with no ceiling on how many people register. Putting a price on a ticket is the part that needs Pro. Newsletters are free up to 10 recipients a month, counted per recipient rather than per send, with 100 on Pro and 1,000 on Enterprise.',
+                        'a' => 'Yes, for most of it. Sharing your performance schedule, sub-schedules, two-way calendar sync, an embeddable calendar, free registration with a capacity, a calendar feed fans subscribe to, the booking request form and one bookable appointment type are all free forever, with no ceiling on how many people register. Putting a price on a ticket is the part that needs Pro. Newsletters are free up to 10 emails a month, counted per recipient rather than per send, with 100 on Pro and 1,000 on Enterprise.',
                     ],
                     [
                         'q' => 'Can I manage tour dates and local shows in one schedule?',

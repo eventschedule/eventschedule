@@ -746,7 +746,7 @@
                                 <div class="mb-3 text-center">
                                     <div class="text-xs uppercase tracking-[0.18em] text-emerald-700 dark:text-emerald-300">Platform fee</div>
                                     <div class="es-od justify-center text-3xl font-black text-gray-900 dark:text-white" data-odometer="{{ plan_price(0) }}">{{ plan_price(0) }}</div>
-                                    <div class="text-xs text-gray-500 dark:text-gray-400">You keep 100%</div>
+                                    <div class="text-xs text-gray-500 dark:text-gray-400">Only processing comes off</div>
                                 </div>
                                 <div class="border-t border-emerald-300/40 pt-3 dark:border-emerald-400/20">
                                     <div class="flex items-center justify-center gap-1">

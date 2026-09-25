@@ -770,7 +770,7 @@
                     ['Before tickets go on sale', 'Switch on the "Notify me" card and fans leave an email address on an announced event. They hear if the date is cancelled and once shortly before it starts, and, when the tickets carry a price on Pro, the moment they go on sale.', 'Free plan'],
                     ['Every new date, on its own', 'People who confirm their email on your page get a short digest when you add events, at most one every three days, and it does not touch your newsletter allowance.', 'Free plan'],
                     ['The lineup in their calendar', 'Fans subscribe to the festival\'s live calendar feed, so a set moved from 18:00 to 19:30 moves in their own phone too.', 'Free plan'],
-                    ['The letters you write', 'A newsletter for the headliner reveal: 10 recipients a month on the free plan, 100 on Pro and 1,000 on Enterprise, counted per person it reaches.', 'All plans'],
+                    ['The letters you write', 'A newsletter for the headliner reveal: 10 emails a month on the free plan, 100 on Pro and 1,000 on Enterprise, counted per person it reaches.', 'All plans'],
                     ['Photos, videos, comments', 'The crowd posts what they saw on each event, held in a queue until you approve it. 25 photos on the free plan, no cap on Pro.', 'Free plan'],
                     ['A lift to the site', 'On Pro, fans can offer and ask for seats in a car to the festival, with the driver approving who comes.', 'Pro plan'],
                 ] as [$t, $d, $p])

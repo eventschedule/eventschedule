@@ -1,6 +1,6 @@
 <x-marketing-layout>
     <x-slot name="title">Event Newsletter Builder, Free to Start - Event Schedule</x-slot>
-    <x-slot name="description">Write newsletters to email subscribers, followers and ticket buyers, and let new events reach subscribers as a digest. Free for 10 recipients a month.</x-slot>
+    <x-slot name="description">Write newsletters to subscribers, followers and ticket buyers, and let new events reach subscribers as a digest. Free for 10 emails a month, counted per recipient.</x-slot>
     <x-slot name="breadcrumbTitle">Newsletters</x-slot>
 
     <x-slot name="structuredData">
@@ -607,7 +607,7 @@
             ],
             [
                 'q' => 'Is the newsletter builder a paid feature?',
-                'a' => 'No. The builder is on the free plan, and so are segments, the five templates, scheduling a send, test sends, open and click tracking, and A/B tests. A paid plan buys you more recipients per month, and Pro adds image file uploads inside a newsletter. An image URL works on any plan.',
+                'a' => 'No. The builder is on the free plan, and so are segments, the five templates, scheduling a send, test sends, open and click tracking, and A/B tests. A paid plan buys you more newsletter emails a month, and Pro adds image file uploads inside a newsletter. An image URL works on any plan.',
             ],
             [
                 'q' => 'How does email deliverability work?',
@@ -781,7 +781,7 @@
                     </div>
                     <p class="mt-5">
                         <span class="es-send-plan es-send-plan-free">Free</span>
-                        <span class="es-send-muted ml-2 text-sm">Ten recipients a month before you pay for anything.</span>
+                        <span class="es-send-muted ml-2 text-sm">Ten emails a month, each recipient counting as one, before you pay for anything.</span>
                     </p>
                 </div>
             </div>

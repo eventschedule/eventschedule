@@ -566,7 +566,7 @@
             ],
             [
                 'q' => 'Do my followers get emailed when I add a screening?',
-                'a' => 'If they left you an email address and confirmed it, yes: a screening you add reaches them as a digest on its own, batched and never more than one every few days. A newsletter is the other kind and you write that one, with the targeting to go with it, free: everyone who follows the schedule, everyone who registered for one particular screening, or one sub-schedule. The free plan covers 10 recipients a month, Pro 100 and Enterprise 1,000.',
+                'a' => 'If they left you an email address and confirmed it, yes: a screening you add reaches them as a digest on its own, batched and never more than one every few days. A newsletter is the other kind and you write that one, with the targeting to go with it, free: everyone who follows the schedule, everyone who registered for one particular screening, or one sub-schedule. The free plan covers 10 emails a month, Pro 100 and Enterprise 1,000, each recipient counting as one.',
             ],
             [
                 'q' => 'Is Event Schedule free for hosting watch parties?',
@@ -1039,7 +1039,7 @@
                         </p>
                     </div>
                     <div class="es-scr-inset p-5">
-                        <p class="es-scr-label mb-4">Recipients a month</p>
+                        <p class="es-scr-label mb-4">Emails a month</p>
                         <dl class="space-y-3">
                             <div class="es-scr-hair flex items-baseline justify-between gap-3 border-b pb-3">
                                 <dt class="es-scr-muted text-sm font-semibold">Free</dt>

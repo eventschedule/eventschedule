@@ -936,7 +936,7 @@
                         @foreach ([
                             ['A QR code you can print', 'Free', 'Download your schedule\'s code and put it where guests already look: the key-card sleeve, the room folder, the lift, a sign by the pool, the pre-arrival email. It opens the page in a browser, with nothing to install and no account needed to read it.'],
                             ['The calendar, inside your own site', 'Free', 'Embed the same calendar in the page your website already has, so the "What\'s on" tab stops being a PDF from last season.'],
-                            ['A list that hears about new dates', 'Free', 'Guests who leave an email address get a digest when you add activities, batched and no more than one every few days, and it does not draw on the allowance. A newsletter you write does: 10 recipients a month free, 100 on Pro and 1,000 on Enterprise.'],
+                            ['A list that hears about new dates', 'Free', 'Guests who leave an email address get a digest when you add activities, batched and no more than one every few days, and it does not draw on the allowance. A newsletter you write does: 10 emails a month free, 100 on Pro and 1,000 on Enterprise, each recipient counting as one.'],
                             ['A calendar that keeps up', 'Free', 'From the page, a guest can subscribe to the whole card as a live calendar on their phone. Move a session or take a date out and it follows there too, and it costs them no email address.'],
                         ] as [$sTitle, $sPlan, $sDesc])
                             <li class="flex items-start gap-3" data-reveal>

@@ -9,8 +9,8 @@
          - Sub-schedules, recurring events, embedding the calendar, the live iCal feed, email
            subscribers and the automatic new-event digest (floored at 72 hours, outside the
            newsletter allowance), calendar sync and schedule graphics are free.
-         - Newsletters: 10 / 100 / 1,000 recipients a month on Free / Pro / Enterprise, unlimited
-           selfhosted or with the schedule's own email settings.
+         - Newsletters: 10 / 100 / 1,000 emails a month on Free / Pro / Enterprise, each recipient
+           counting as one; unlimited selfhosted or with the schedule's own email settings.
          - One team member on Free; more members (admins and viewers) are Enterprise. Custom
            domains are Enterprise. Removing branding is Pro.
          - Federation is for installs that are NOT eventschedule.com, off until the operator
@@ -397,7 +397,7 @@
                     <div class="es-cc-panel flex flex-col p-6" data-reveal="panel">
                         <h3 class="es-cc-ink text-base font-bold">In people's inboxes</h3>
                         <p class="es-cc-muted mt-2 text-sm leading-relaxed">
-                            Readers sign up with an email address from the panel on your calendar. Confirmed subscribers get a digest of the new events you publish, at most one every 72 hours and outside your newsletter allowance. Write a weekly <x-link href="{{ marketing_url('/features/newsletters') }}">newsletter</x-link> of your own on top, 10 recipients a month on Free, 100 on Pro and 1,000 on Enterprise, or unlimited with your own email settings.
+                            Readers sign up with an email address from the panel on your calendar. Confirmed subscribers get a digest of the new events you publish, at most one every 72 hours and outside your newsletter allowance. Write a weekly <x-link href="{{ marketing_url('/features/newsletters') }}">newsletter</x-link> of your own on top, 10 emails a month on Free, 100 on Pro and 1,000 on Enterprise with each recipient counting as one, or unlimited with your own email settings.
                         </p>
                     </div>
                     <div class="es-cc-panel flex flex-col p-6" data-reveal="panel">
@@ -479,13 +479,13 @@
                     <div class="es-cc-panel flex flex-col p-6" data-reveal="panel">
                         <p class="es-cc-tag">Pro &middot; {{ plan_price($proMonthly) }}/mo</p>
                         <p class="es-cc-muted mt-3 text-sm leading-relaxed">
-                            Removes the Event Schedule branding, raises the newsletter allowance to 100 recipients a month, and adds your own questions on the submission form, an announcement banner and sponsor logos.
+                            Removes the Event Schedule branding, raises the newsletter allowance to 100 emails a month, and adds your own questions on the submission form, an announcement banner and sponsor logos.
                         </p>
                     </div>
                     <div class="es-cc-panel flex flex-col p-6" data-reveal="panel">
                         <p class="es-cc-tag">Enterprise &middot; {{ plan_price($entMonthly) }}/mo</p>
                         <p class="es-cc-muted mt-3 text-sm leading-relaxed">
-                            More team members, so several editors can share the queue, with admins who run it day to day and read-only viewers. Your own domain, such as events.yourtown.gov, and 1,000 newsletter recipients a month.
+                            More team members, so several editors can share the queue, with admins who run it day to day and read-only viewers. Your own domain, such as events.yourtown.gov, and 1,000 newsletter emails a month.
                         </p>
                     </div>
                 </div>

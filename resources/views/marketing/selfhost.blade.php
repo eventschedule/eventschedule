@@ -1248,7 +1248,7 @@
                     <div>
                         <div class="es-prompt mb-3" aria-hidden="true"><span class="es-prompt-path">~/eventschedule</span> $ IS_HOSTED=true</div>
                         <h2 class="mb-4 text-3xl font-black tracking-tight text-gray-900 dark:text-white md:text-4xl">Or turn it into your own product</h2>
-                        <p class="mb-6 text-xl text-gray-600 dark:text-gray-300">The same install runs in multi-tenant mode. Give every customer a subdomain, set your own prices, bill them through your Stripe account and keep all of it.</p>
+                        <p class="mb-6 text-xl text-gray-600 dark:text-gray-300">The same install runs in multi-tenant mode. Give every customer a subdomain, set your own prices and bill them through your Stripe account, where only Stripe's own fee comes off.</p>
                         <ul class="mb-8 space-y-3">
                             {{-- "your own prices", not "your own tiers": the tier names are Free,
                                  Pro and Enterprise in code; what you supply is the Stripe Price IDs. --}}

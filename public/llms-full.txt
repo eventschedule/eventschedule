@@ -1872,7 +1872,7 @@ Beyond the API endpoints documented above, Event Schedule includes these platfor
 - **Interest list**: Once the organizer switches on the “Notify me” card (off by default), a visitor on a public event page leaves an email address to hear when tickets go on sale, if the event is cancelled and shortly before it starts, plus any notice the organizer chooses to send when the date or venue changes. Free, and no account is needed.
 - **Calendar sync and feeds**: Two-way sync with Google Calendar (OAuth 2.0 + webhooks), Outlook / Microsoft 365 (with optional Teams links) and CalDAV. Guests can subscribe to a schedule's live iCal feed or download a single event.
 - **Appointments**: Bookable appointment types with weekly hours, a public booking page and guest emails. One free type on the free plan; Pro adds more types, paid bookings, and the scheduling rules (per-date overrides, buffers, minimum notice, approvals).
-- **Newsletters and audience**: Email sign-up with double opt-in, an automatic digest of new events to confirmed subscribers, and a drag-and-drop newsletter builder with templates, segments and A/B testing (10 / 100 / 1,000 recipients a month on Free / Pro / Enterprise).
+- **Newsletters and audience**: Email sign-up with double opt-in, an automatic digest of new events to confirmed subscribers, and a drag-and-drop newsletter builder with templates, segments and A/B testing (10 / 100 / 1,000 newsletter emails a month on Free / Pro / Enterprise, each recipient counting as one).
 - **Analytics**: Privacy-first (no cookies) page view tracking, device/browser breakdown, traffic sources, social link clicks, and conversion funnels.
 - **Event graphics**: Auto-generated promotional images in multiple layouts, sized for social media sharing, on every plan (AI-written graphic text and scheduled graphic emails are Enterprise).
 - **Sub-schedules**: Color-coded event categories within a schedule, with filtering and separate URLs. Manageable via API.
@@ -1904,7 +1904,7 @@ Everything needed to publish events and gather an audience:
 - Recurring events, sub-schedules and online events
 - One appointment type
 - Interest list, email subscribers and automatic new-event digests
-- Up to 10 newsletter recipients per month
+- Up to 10 newsletter emails per month (each recipient counts as one)
 - AI event parsing (50 a day, 10 during the trial)
 
 ### Pro Plan
@@ -1922,7 +1922,7 @@ Pro adds:
 - Custom fields, custom CSS, event polls, post-event feedback and carpool matching
 - Embeddable ticket widget
 - Remove Event Schedule branding
-- Up to 100 newsletter recipients per month
+- Up to 100 newsletter emails per month
 
 ### Enterprise Plan
 
@@ -1936,7 +1936,7 @@ Enterprise adds everything in Pro, plus:
 - AI features: flyer generation, schedule and event detail generation, agenda scanning
 - WhatsApp event creation
 - Availability management
-- Up to 1,000 newsletter recipients per month
+- Up to 1,000 newsletter emails per month
 - 100 AI event parses a day
 - Priority support
 

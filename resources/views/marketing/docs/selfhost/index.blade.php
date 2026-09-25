@@ -105,7 +105,7 @@
                     <tr>
                         <td><span class="font-semibold text-gray-900 dark:text-white">Newsletter allowance</span></td>
                         <td>Unlimited</td>
-                        <td>10 recipients a month on Free, 100 on Pro, 1,000 on Enterprise, and unlimited for a schedule sending through its own SMTP. Each recipient counts as one.</td>
+                        <td>10 newsletter emails a month on Free, 100 on Pro, 1,000 on Enterprise, and unlimited for a schedule sending through its own SMTP. Each recipient counts as one.</td>
                     </tr>
                     <tr>
                         <td><span class="font-semibold text-gray-900 dark:text-white">Selling priced tickets</span></td>

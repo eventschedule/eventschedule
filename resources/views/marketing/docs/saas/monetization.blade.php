@@ -25,7 +25,7 @@
         </p>
         <ul class="doc-list">
             <li><strong>Google AdSense.</strong> Ad units on free schedules' public pages, using your own AdSense account.</li>
-            <li><strong>The promotions network.</strong> Paid schedules buy placement for their events on free schedules' pages. You set the price and keep all of it.</li>
+            <li><strong>The promotions network.</strong> Paid schedules buy placement for their events on free schedules' pages. You set the price, and only Stripe's fee comes off what they pay.</li>
         </ul>
         <p>
             Paid schedules never carry either, so removing ads becomes a concrete reason for your
@@ -241,8 +241,8 @@
         <p>
             The advertiser pays up front. Their budget is drawn down as the promotion actually
             delivers, and anything unspent is refunded a day after the campaign ends, once any late
-            delivery has been counted. Because there is no outside ad network involved, the whole
-            amount is yours.
+            delivery has been counted. Because there is no outside ad network involved, none of it
+            is shared: only Stripe's own fee comes off what the advertiser pays.
         </p>
 
         <h3 class="doc-subheading">How a promotion is chosen</h3>

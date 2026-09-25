@@ -604,7 +604,7 @@
             ],
             [
                 'q' => 'Is one platform really cheaper than five?',
-                'a' => 'Publishing a schedule is free forever, and that free plan already covers the page, unlimited events, two-way Google, Outlook and CalDAV sync, RSVP with a capacity per date and no monthly ceiling on it, scanning at the door, one appointment type, event graphics, built-in analytics, the embeddable calendar and newsletters to ten recipients a month. Pro is '.plan_price($proMonthly).' a month and is what lets a ticket carry a price, then adds the live check-in dashboard, polls, post-event feedback, more appointment types with paid bookings and the API. Enterprise is '.plan_price($entMonthly).'. Event Schedule charges zero platform fees on ticket sales on every plan, free included, so the door money is yours minus your payment provider\'s processing fee.',
+                'a' => 'Publishing a schedule is free forever, and that free plan already covers the page, unlimited events, two-way Google, Outlook and CalDAV sync, RSVP with a capacity per date and no monthly ceiling on it, scanning at the door, one appointment type, event graphics, built-in analytics, the embeddable calendar and ten newsletter emails a month, each recipient counting as one. Pro is '.plan_price($proMonthly).' a month and is what lets a ticket carry a price, then adds the live check-in dashboard, polls, post-event feedback, more appointment types with paid bookings and the API. Enterprise is '.plan_price($entMonthly).'. Event Schedule charges zero platform fees on ticket sales on every plan, free included, so the door money is yours minus your payment provider\'s processing fee.',
             ],
             [
                 'q' => 'Can it take PayPal, and refund a buyer from the same place?',
@@ -1001,7 +1001,7 @@
                         <li>Your own questions at checkout, promo codes, the ticket waitlist</li>
                         <li>Polls, post-event feedback, sales CSV export</li>
                         <li>REST API, webhooks, custom CSS, ticket widget embed</li>
-                        <li>One hundred newsletter recipients a month</li>
+                        <li>One hundred newsletter emails a month</li>
                     </ul>
                     <p class="es-belt-muted es-belt-xs mt-auto pt-5">Covers all of L08, and the paid half of L01, L05, L06, L07, L09, L10 and L11.</p>
                 </div>
@@ -1017,7 +1017,7 @@
                         <li>Up to five team members</li>
                         <li>Internal and unlisted event visibility</li>
                         <li>AI agenda scanning into event parts</li>
-                        <li>One thousand newsletter recipients a month</li>
+                        <li>One thousand newsletter emails a month</li>
                     </ul>
                     <p class="es-belt-muted es-belt-xs mt-auto pt-5">Finishes L10, and adds the parts a staffed organisation needs.</p>
                 </div>

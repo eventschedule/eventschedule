@@ -166,7 +166,7 @@
                 'price' => plan_price($entMonthly),
                 'note' => 'per month',
                 'lede' => 'For rooms with a real team and a brand of their own.',
-                'items' => ['Everything in Pro', 'Your own domain', 'Up to five team members', 'Allocated seating with a seat picker', 'Internal and unlisted events', '1,000 newsletter recipients a month', 'Priority support'],
+                'items' => ['Everything in Pro', 'Your own domain', 'Up to five team members', 'Allocated seating with a seat picker', 'Internal and unlisted events', '1,000 newsletter emails a month, counted per recipient', 'Priority support'],
                 'featured' => false,
             ],
         ];

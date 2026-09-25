@@ -1151,7 +1151,7 @@
                             </li>
                         @endforeach
                     </ul>
-                    <p class="es-turn-muted mt-auto pt-5 text-xs leading-relaxed">Free on every plan. Newsletters are free too, up to 10 recipients a month, so you can email the people who came.</p>
+                    <p class="es-turn-muted mt-auto pt-5 text-xs leading-relaxed">Free on every plan. Newsletters are free too, up to 10 emails a month with each recipient counting as one, so you can email the people who came.</p>
                 </div>
 
                 <div class="es-turn-card flex flex-col p-7" data-reveal="panel">

@@ -1216,7 +1216,7 @@
                             <p class="mt-5 text-sm text-gray-500 dark:text-gray-400">No credit card required</p>
 
                             <div class="-mx-6 mt-6 border-t-2 border-dashed border-white/15 px-6 pt-4 sm:-mx-8 sm:px-8">
-                                <p class="text-[10px] font-bold uppercase tracking-[0.18em] text-gray-500">Free forever &middot; Zero platform fees &middot; Keep 100% of ticket sales</p>
+                                <p class="text-[10px] font-bold uppercase tracking-[0.18em] text-gray-500">Free forever &middot; Zero platform fees &middot; Only your processor's fee comes off</p>
                             </div>
                         </div>
                     </div>

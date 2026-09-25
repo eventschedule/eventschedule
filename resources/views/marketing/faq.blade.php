@@ -546,7 +546,7 @@
                     ],
                     [
                         'q' => 'Is Event Schedule really free?',
-                        'a' => 'Yes, and the free plan is not a trial that quietly expires. Unlimited events, a mobile-friendly public page at your own address, two-way Google, Outlook and CalDAV sync, sub-schedules, recurring events, free registration with a capacity limit, built-in analytics, the embeddable calendar, backup and restore, and newsletters to 10 recipients a month all cost nothing, permanently. Registration stays free however many people sign up, and so does a ticket type priced at zero. Charging for a ticket is what moves you to Pro, along with a short list of other things, and the rate card above sets out exactly which.',
+                        'a' => 'Yes, and the free plan is not a trial that quietly expires. Unlimited events, a mobile-friendly public page at your own address, two-way Google, Outlook and CalDAV sync, sub-schedules, recurring events, free registration with a capacity limit, built-in analytics, the embeddable calendar, backup and restore, and 10 newsletter emails a month (each recipient counts as one) all cost nothing, permanently. Registration stays free however many people sign up, and so does a ticket type priced at zero. Charging for a ticket is what moves you to Pro, along with a short list of other things, and the rate card above sets out exactly which.',
                         'links' => [['Pricing', marketing_url('/pricing')]],
                     ],
                     [
@@ -564,12 +564,12 @@
                 'items' => [
                     [
                         'q' => "What's the difference between Free and Pro?",
-                        'a' => 'Free gives you the calendar: unlimited events, two-way calendar sync, sub-schedules, recurring events, built-in analytics, the embed, event graphics, and newsletters to 10 recipients a month. Free also gives you unlimited registration, ticket types priced at zero, QR scanning at the door and one bookable appointment type. Pro is ' . plan_price($proMonthly) . ' a month and is what lets you charge for a ticket, through Stripe, PayPal or any other payment method, then adds the rest of the selling kit: the live check-in dashboard, passes, promo codes, gift cards, add-ons, installment payments, unlimited appointment types, the ticket waitlist, custom fields, webhooks, the REST API, custom CSS, and taking the Event Schedule branding off your public pages. It also raises newsletters to 100 recipients a month.',
+                        'a' => 'Free gives you the calendar: unlimited events, two-way calendar sync, sub-schedules, recurring events, built-in analytics, the embed, event graphics, and 10 newsletter emails a month, each recipient counting as one. Free also gives you unlimited registration, ticket types priced at zero, QR scanning at the door and one bookable appointment type. Pro is ' . plan_price($proMonthly) . ' a month and is what lets you charge for a ticket, through Stripe, PayPal or any other payment method, then adds the rest of the selling kit: the live check-in dashboard, passes, promo codes, gift cards, add-ons, installment payments, unlimited appointment types, the ticket waitlist, custom fields, webhooks, the REST API, custom CSS, and taking the Event Schedule branding off your public pages. It also raises newsletters to 100 emails a month.',
                         'links' => [['Compare the plans', marketing_url('/pricing')]],
                     ],
                     [
                         'q' => 'What does Enterprise add?',
-                        'a' => 'Enterprise is ' . plan_price($entMonthly) . ' a month and adds reserved seating for venue schedules (a seating plan drawn once and reused on every date), a custom domain for your schedule, Internal and Unlisted event visibility with an optional password, up to five team members with availability tracking, scheduled graphic emails, event creation over WhatsApp, the AI generators for schedule and event copy, agenda scanning, and newsletters to 1,000 recipients a month. Priority support comes with it.',
+                        'a' => 'Enterprise is ' . plan_price($entMonthly) . ' a month and adds reserved seating for venue schedules (a seating plan drawn once and reused on every date), a custom domain for your schedule, Internal and Unlisted event visibility with an optional password, up to five team members with availability tracking, scheduled graphic emails, event creation over WhatsApp, the AI generators for schedule and event copy, agenda scanning, and 1,000 newsletter emails a month. Priority support comes with it.',
                         'links' => [['Pricing', marketing_url('/pricing')], ['Reserved seating', marketing_url('/features/allocated-seating')]],
                     ],
                     [
@@ -870,7 +870,7 @@
             ['Two-way Google, Outlook and CalDAV sync', 'Yes', 'Yes', 'Yes'],
             ['Built-in analytics', 'Yes', 'Yes', 'Yes'],
             ['Free registration with a capacity limit', 'Yes', 'Yes', 'Yes'],
-            ['Newsletter recipients a month', '10', '100', '1,000'],
+            ['Newsletter emails a month (each recipient counts as one)', '10', '100', '1,000'],
             ['Sell tickets that carry a price', 'No', 'Yes', 'Yes'],
             ['Platform fee on ticket sales', 'Zero', 'Zero', 'Zero'],
             ['Stripe and PayPal checkout, with refunds', 'No', 'Yes', 'Yes'],
@@ -888,7 +888,7 @@
         $quickAnswers = [
             [
                 'q' => 'Is it free?',
-                'a' => 'Yes, and permanently. The calendar, the public page, calendar sync, analytics and newsletters to 10 recipients a month cost nothing and always did.',
+                'a' => 'Yes, and permanently. The calendar, the public page, calendar sync, analytics and 10 newsletter emails a month (each recipient counts as one) cost nothing and always did.',
                 'ref' => '01.03',
                 'href' => '#start',
             ],

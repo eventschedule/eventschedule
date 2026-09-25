@@ -460,7 +460,7 @@
             ['File every event under a section', 'Free', 'Sort what arrives into sub-schedules: music, markets, kids, whatever your guide needs.'],
             ['Merge duplicate venues', 'Free', 'Ten submitters spell the same room ten ways. Merge them back into one in a single place.'],
             ['Every act you name gets a page', 'Free', 'Name a performer or venue who is not on Event Schedule yet and they get a page crediting your guide, which they can claim.'],
-            ['Email the week to your readers', 'Free', 'Following the guide is permission to email. You write the newsletter and send it: ten recipients a month free, a hundred on Pro.'],
+            ['Email the week to your readers', 'Free', 'Following the guide is permission to email. You write the newsletter and send it: ten emails a month free and a hundred on Pro, each recipient counting as one.'],
             ['Embed it on the site you have', 'Free', 'Drop the calendar straight into your blog or your organisation page.'],
             ['Schedule graphics', 'Free', 'Build one shareable image out of what is coming up. Events need their own flyer to appear, and twenty of them fit.'],
             ['Your own domain', 'Enterprise', 'Run the guide on your own address instead of a subdomain.'],

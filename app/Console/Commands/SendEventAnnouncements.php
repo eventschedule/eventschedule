@@ -20,7 +20,7 @@ use Illuminate\Support\Facades\Log;
  * checkout and cart checkboxes, subscription_confirmed_body, and subscription_confirm_cadence
  * inside the double-opt-in confirmation itself - while role_subscribers was reachable only from
  * the newsletter composer, by an owner who remembered to write one. On the hosted free tier
- * Role::newsletterLimit() caps that at 10 recipients a month.
+ * Role::newsletterLimit() caps that at 10 newsletter emails a month, each recipient counting as one.
  *
  * Three things keep this from being a mailshot, and all three are load-bearing:
  *

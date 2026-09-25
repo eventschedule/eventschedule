@@ -4,6 +4,7 @@ namespace Tests\Feature;
 
 use App\Utils\PlatformPricing;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Support\Facades\File;
 use Tests\Support\PlanSections;
 use Tests\TestCase;
 
@@ -14,7 +15,8 @@ use Tests\TestCase;
  * to eventschedule.com/blog, which only redirects, and no product overview at all in llms.txt.
  *
  * So every link has to land, every price has to be the one the site quotes, and the Free plan
- * may not claim what Pro sells.
+ * may not claim what Pro sells. The newsletter allowance has to be stated in the unit it is
+ * counted in, here and on every marketing page, since the same sentence was copied into both.
  */
 class LlmsTxtTest extends TestCase
 {
@@ -144,5 +146,68 @@ class LlmsTxtTest extends TestCase
             '~\b'.count(config('app.supported_languages')).' supported languages\b~',
             $this->contents('llms.txt')
         );
+    }
+
+    /**
+     * The newsletter allowance counts EMAILS, one for each recipient a newsletter goes to, so a
+     * newsletter to 100 followers uses 100 of it (Role::newslettersSentThisMonth()). "10 recipients
+     * a month" reads as ten people who can be written to as often as you like, which is not the
+     * limit, and the phrase sat in both files and in about thirty marketing pages. The unit is
+     * "newsletter emails a month, each recipient counting as one", in whatever grammar the sentence
+     * needs. "per month" is in the pattern because llms-full.txt wrote it that way.
+     */
+    public function test_nothing_counts_the_newsletter_allowance_in_recipients_a_month(): void
+    {
+        $offences = [];
+
+        foreach ($this->newsletterAllowanceSources() as $path => $body) {
+            if (preg_match_all('~\brecipients?\s+(?:a|per)\s+month\b~i', $body, $m, PREG_OFFSET_CAPTURE)) {
+                foreach ($m[0] as [$hit, $offset]) {
+                    $offences[] = $path.':'.(substr_count($body, "\n", 0, $offset) + 1).': "'.$hit.'"';
+                }
+            }
+        }
+
+        $this->assertGreaterThan(100, count($this->newsletterAllowanceSources()), 'fixture: the marketing views were found');
+        $this->assertSame([], $offences, implode("\n", array_merge(
+            ['These count the newsletter allowance in recipients a month. It counts emails, each '
+                .'recipient counting as one (Role::newsletterLimit(), docs/FEATURES.md).'],
+            $offences
+        )));
+    }
+
+    /** The files an AI answer is built from say how the allowance is counted, not only how much it is. */
+    public function test_both_files_say_each_recipient_counts_as_one(): void
+    {
+        foreach (self::FILES as $file) {
+            $this->assertMatchesRegularExpression(
+                '~\bnewsletter emails (?:a|per) month\b[^\n]{0,80}\beach recipient count(?:s|ing) as one\b~',
+                $this->contents($file),
+                "public/{$file} states the newsletter allowance without saying each recipient counts as one"
+            );
+        }
+    }
+
+    /** @return array<string, string> path => contents: both files, every marketing view and the controller's page data. */
+    private function newsletterAllowanceSources(): array
+    {
+        $paths = array_merge(
+            array_map(fn ($file) => public_path($file), self::FILES),
+            array_map(
+                fn (\SplFileInfo $file) => $file->getPathname(),
+                array_filter(
+                    File::allFiles(resource_path('views/marketing')),
+                    fn (\SplFileInfo $file) => str_ends_with($file->getFilename(), '.blade.php')
+                )
+            ),
+            [app_path('Http/Controllers/MarketingController.php'), config_path('marketing_related.php')]
+        );
+
+        $out = [];
+        foreach ($paths as $path) {
+            $out[str_replace(base_path().'/', '', $path)] = file_get_contents($path);
+        }
+
+        return $out;
     }
 }

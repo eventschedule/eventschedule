@@ -1323,7 +1323,7 @@
                 @foreach ([
                     ['Creating events', 'Everything the import screen hands off to: dates, recurrence, parts, visibility and tickets.', route('marketing.docs.creating_events')],
                     ['Event graphics', 'Turn the events you just imported into shareable images for Instagram, WhatsApp and email.', marketing_url('/features/event-graphics')],
-                    ['Newsletters', 'Mail the line-up to your followers and ticket buyers. Free on every plan, at ten recipients a month.', route('marketing.newsletters')],
+                    ['Newsletters', 'Mail the line-up to your followers and ticket buyers. Free on every plan, at ten emails a month with each recipient counting as one.', route('marketing.newsletters')],
                     ['Calendar sync', 'Two-way sync with Google, Outlook and CalDAV, so an imported event lands in your own calendar too.', marketing_url('/features/calendar-sync')],
                     ['Recurring events', 'A weekly night is one event with a day-of-week pattern, not fifty rows to import.', marketing_url('/features/recurring-events')],
                     ['Custom fields', 'Add your own fields and the parser will extract them alongside the built-in ones.', marketing_url('/features/custom-fields')],

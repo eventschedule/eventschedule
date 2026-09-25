@@ -827,7 +827,7 @@
                             <span class="es-swap-plan">{{ plan_price(0) }}</span>
                         </div>
                         <p class="es-swap-band-muted text-sm leading-relaxed">
-                            Unlimited events and schedules. Public event pages and a shareable calendar. Two-way Google, Outlook and CalDAV sync. Free RSVP with a capacity limit and no monthly ceiling, scanned at the door. Event graphics, embeddable calendar, built-in analytics, AI event parsing, and newsletters to 10 recipients a month.
+                            Unlimited events and schedules. Public event pages and a shareable calendar. Two-way Google, Outlook and CalDAV sync. Free RSVP with a capacity limit and no monthly ceiling, scanned at the door. Event graphics, embeddable calendar, built-in analytics, AI event parsing, and 10 newsletter emails a month, each recipient counting as one.
                         </p>
                     </div>
                     <div class="es-swap-card p-6" data-reveal="panel">
@@ -836,7 +836,7 @@
                             <span class="es-swap-plan es-swap-plan-pro">{{ plan_price($proMonthly) }} a month</span>
                         </div>
                         <p class="es-swap-band-muted text-sm leading-relaxed">
-                            Tickets that carry a price, and the live check-in dashboard. Custom fields on the form, ticket waitlist, promo codes, sales export. The embeddable ticket widget, the REST API and webhooks. Newsletters to 100 recipients a month.
+                            Tickets that carry a price, and the live check-in dashboard. Custom fields on the form, ticket waitlist, promo codes, sales export. The embeddable ticket widget, the REST API and webhooks. 100 newsletter emails a month.
                         </p>
                     </div>
                     <div class="es-swap-card p-6" data-reveal="panel">
@@ -845,7 +845,7 @@
                             <span class="es-swap-plan es-swap-plan-pro">{{ plan_price($entMonthly) }} a month</span>
                         </div>
                         <p class="es-swap-band-muted text-sm leading-relaxed">
-                            Your own domain. Up to five team members. Internal and unlisted events. AI flyer and style generation, AI agenda scanning, WhatsApp event creation, and newsletters to 1,000 recipients a month.
+                            Your own domain. Up to five team members. Internal and unlisted events. AI flyer and style generation, AI agenda scanning, WhatsApp event creation, and 1,000 newsletter emails a month.
                         </p>
                     </div>
                 </div>

@@ -808,7 +808,7 @@
                 <div class="es-run-corner mb-6" data-reveal aria-hidden="true"><span>07</span></div>
                 <p class="es-run-tag mb-4" data-reveal style="--reveal-delay: 0.05s;">The door</p>
                 <h2 class="es-balance es-run-ink text-3xl font-black tracking-tight md:text-5xl" data-reveal style="--reveal-delay: 0.1s;">
-                    You keep <span class="es-run-mark">all of it.</span>
+                    We take <span class="es-run-mark">none of it.</span>
                 </h2>
                 <p class="es-run-muted mt-5 text-lg" data-reveal style="--reveal-delay: 0.15s;">
                     Event Schedule charges zero platform fees on ticket sales. You connect your own <a href="{{ marketing_url('/stripe') }}" class="es-run-link font-medium hover:underline">Stripe</a> or <a href="{{ marketing_url('/paypal') }}" class="es-run-link font-medium hover:underline">PayPal</a> account, the money lands in it, and the only deduction is the provider's own processing. A payment link or cash on the door works too.
@@ -1195,7 +1195,7 @@
                         Load-in is at two. <span class="es-run-lit">The page can be ready by one.</span>
                     </h2>
                     <p class="mx-auto mb-10 max-w-2xl text-lg text-gray-400">
-                        Put the whole day on one link, keep every penny of the door, and stop answering the same question fourteen times before soundcheck.
+                        Put the whole day on one link, sell the door with no platform fee, and stop answering the same question fourteen times before soundcheck.
                     </p>
 
                     <div class="mx-auto flex max-w-2xl flex-col items-stretch justify-center gap-3 sm:flex-row">

@@ -1,12 +1,12 @@
 <x-marketing-layout>
     <x-slot name="title">White-Label Ticketing Platform - Launch Your Own for Free</x-slot>
-    <x-slot name="description">Launch a white-label ticketing platform for free. Open source, multi-tenant, Stripe billing built in. Set your own prices, keep 100% of revenue. See the demo.</x-slot>
+    <x-slot name="description">Launch a white-label ticketing platform for free. Open source, multi-tenant, Stripe billing built in. Set your prices; only Stripe's fee comes off. See the demo.</x-slot>
     <x-slot name="breadcrumbTitle">White-Label SaaS</x-slot>
 
     <x-slot name="structuredData">
     <x-seo.webpage
         name="Event Schedule White-Label Ticketing Platform"
-        description="Free, open source white-label ticketing platform with multi-tenant subscription billing built in. Selfhost it, set your own prices, and keep 100% of revenue." />
+        description="Free, open source white-label ticketing platform with multi-tenant subscription billing built in. Selfhost it and set your own prices: only Stripe's fee comes off what your customers pay." />
     @php
         $howToSteps = [
             ['name' => 'Deploy the platform', 'text' => 'Install Event Schedule on your own server with Docker or the Softaculous one-click installer, then point wildcard DNS at it so every customer can get a subdomain.'],
@@ -524,7 +524,7 @@
                     </h1>
 
                     <p class="es-fade-up es-d-2 mx-auto mb-8 max-w-xl text-lg text-gray-500 dark:text-gray-400 sm:text-xl lg:mx-0">
-                        Event Schedule is a free, open source white-label ticketing platform with the multi-tenant SaaS layer built in. Selfhost it under your brand: your servers, your Stripe, your prices, and 100% of what your customers pay stays yours.
+                        Event Schedule is a free, open source white-label ticketing platform with the multi-tenant SaaS layer built in. Selfhost it under your brand: your servers, your Stripe, your prices, and what your customers pay stays yours, less only Stripe's own fee.
                     </p>
 
                     <div class="es-fade-up es-d-3 flex flex-col items-center justify-center gap-4 sm:flex-row lg:justify-start">
@@ -877,7 +877,7 @@
 
                         <div>
                             <div class="mb-2 flex items-center justify-between text-xs font-semibold text-gray-600 dark:text-gray-300">
-                                <span>Your platform</span><span class="es-money">100% yours</span>
+                                <span>Your platform</span><span class="es-money">no revenue share</span>
                             </div>
                             <div class="h-3 overflow-hidden rounded-full bg-gray-100 dark:bg-white/10">
                                 <div class="es-hbar h-full w-full rounded-full bg-gradient-to-r from-amber-500 to-amber-400" style="--hd: 0.3s;"></div>
@@ -1527,7 +1527,7 @@
             ],
             [
                 'q' => 'Is there a limit on customers or ticket sales?',
-                'a' => 'There is no cap on the number of customers or schedules, and nobody takes a cut of a ticket sale. The built-in Free tier does have allowances your customers upgrade past: 10 newsletter recipients a month and 25 fan photos. Selling a ticket that carries a price belongs to Pro and Enterprise, which is the upgrade most of your customers will buy, while free RSVPs and registration stay unlimited on every tier.',
+                'a' => 'There is no cap on the number of customers or schedules, and nobody takes a cut of a ticket sale. The built-in Free tier does have allowances your customers upgrade past: 10 newsletter emails a month (each recipient counts as one) and 25 fan photos. Selling a ticket that carries a price belongs to Pro and Enterprise, which is the upgrade most of your customers will buy, while free RSVPs and registration stay unlimited on every tier.',
             ],
             [
                 'q' => 'How do my customers get paid for their tickets?',

@@ -547,7 +547,7 @@
             ],
             [
                 'q' => 'Will following a schedule fill my inbox?',
-                'a' => 'No, and it is worth knowing why, because the two ways to follow land you on different lists. Pressing Follow while signed in makes you an ACCOUNT FOLLOWER: it puts the schedule on your Following page and lets that schedule include you when somebody there writes a newsletter, capped at 10 recipients a month on the free plan, 100 on Pro and 1,000 on Enterprise. The sign-up panel on a schedule page, which is also what Follow opens when you are signed out, asks for a name and an email address, and confirming it does two things: it sets up an account that follows the schedule, and it adds a short digest when new events are published, at most one every three days. Nothing fires at an account follower who has not also confirmed an address there.',
+                'a' => 'No, and it is worth knowing why, because the two ways to follow land you on different lists. Pressing Follow while signed in makes you an ACCOUNT FOLLOWER: it puts the schedule on your Following page and lets that schedule include you when somebody there writes a newsletter, capped at 10 emails a month on the free plan, 100 on Pro and 1,000 on Enterprise, each recipient counting as one. The sign-up panel on a schedule page, which is also what Follow opens when you are signed out, asks for a name and an email address, and confirming it does two things: it sets up an account that follows the schedule, and it adds a short digest when new events are published, at most one every three days. Nothing fires at an account follower who has not also confirmed an address there.',
             ],
             [
                 'q' => 'Can I have an account without creating a schedule?',
@@ -812,7 +812,7 @@
                                 <span class="es-key-plan">Free</span>
                             </div>
                             <h3 class="es-key-ink mb-3 text-xl font-bold">The guest version cuts the key for you</h3>
-                            <p class="es-key-muted mb-4">Following collects the schedules you care about on one page you can sort, search and prune in bulk. Signed out, Follow asks for a name and an email address instead, and confirming it sets up the account, already following. You choose a password on that confirmation page, or any time later from the link at the foot of anything the schedule sends you. Either way it lets the schedule write to you: 10 recipients a month on the free plan, 100 on Pro, 1,000 on Enterprise.</p>
+                            <p class="es-key-muted mb-4">Following collects the schedules you care about on one page you can sort, search and prune in bulk. Signed out, Follow asks for a name and an email address instead, and confirming it sets up the account, already following. You choose a password on that confirmation page, or any time later from the link at the foot of anything the schedule sends you. Either way it lets the schedule write to you: 10 newsletter emails a month on the free plan, 100 on Pro, 1,000 on Enterprise, each recipient counting as one.</p>
                             <p class="es-key-muted text-sm">Worth saying plainly: following is permission, not an alert feed. A newsletter is written and sent by a person, and the automatic new-event digest reaches only an address somebody confirmed.</p>
                         </div>
                         <div class="es-glare" aria-hidden="true"></div>

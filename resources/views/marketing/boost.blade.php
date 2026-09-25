@@ -1243,7 +1243,7 @@
             <div class="grid grid-cols-1 gap-6 md:grid-cols-3" data-reveal-group="90">
                 <a href="{{ marketing_url('/features/newsletters') }}" data-reveal class="es-launch-card es-launch-hover group flex flex-col p-7 transition-all duration-200 hover:-translate-y-1 hover:shadow-md">
                     <h3 class="es-launch-hover-title es-launch-ink mb-3 text-xl font-bold transition-colors">Newsletters</h3>
-                    <p class="es-launch-muted mb-5">Email the followers a campaign brought you, with open and click rates afterwards. Free at 10 recipients a month.</p>
+                    <p class="es-launch-muted mb-5">Email the followers a campaign brought you, with open and click rates afterwards. Free for 10 emails a month, each recipient counting as one.</p>
                     <span class="es-launch-hover-arrow es-launch-muted mt-auto inline-flex items-center gap-2 text-sm font-semibold transition-all group-hover:gap-3">
                         Learn more
                         <svg aria-hidden="true" class="h-4 w-4 rtl:rotate-180" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7" /></svg>

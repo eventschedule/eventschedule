@@ -571,7 +571,7 @@
         $faqs = [
             [
                 'q' => 'Is Event Schedule free for fitness and yoga instructors?',
-                'a' => 'Yes. Publishing your timetable, setting classes up as recurring events, free registration with a capacity limit per date, two-way Google, Outlook and CalDAV sync, the embeddable timetable, built-in analytics and newsletters to 10 recipients a month are all free forever, however many students sign up. Scanning a QR code at the door is free on every plan too. Charging for a drop-in is the Pro half, along with class passes and the live check-in dashboard, on the Pro plan at '.plan_price($proMonthly).' a month, and Event Schedule charges zero platform fees on what you sell, free plan included.',
+                'a' => 'Yes. Publishing your timetable, setting classes up as recurring events, free registration with a capacity limit per date, two-way Google, Outlook and CalDAV sync, the embeddable timetable, built-in analytics and 10 newsletter emails a month (each recipient counts as one) are all free forever, however many students sign up. Scanning a QR code at the door is free on every plan too. Charging for a drop-in is the Pro half, along with class passes and the live check-in dashboard, on the Pro plan at '.plan_price($proMonthly).' a month, and Event Schedule charges zero platform fees on what you sell, free plan included.',
             ],
             [
                 'q' => 'Can I schedule recurring weekly classes?',
