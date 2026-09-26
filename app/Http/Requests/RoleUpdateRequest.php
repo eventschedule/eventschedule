@@ -5,6 +5,8 @@ namespace App\Http\Requests;
 use App\Models\Role;
 use App\Rules\NoFakeEmail;
 use App\Rules\SquareImage;
+use App\Rules\UsableTimezone;
+use App\Utils\TimezoneUtils;
 use App\Utils\UrlUtils;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Support\Str;
@@ -29,6 +31,12 @@ class RoleUpdateRequest extends FormRequest
         // merging a value for an absent key would null a stored website on any save that omits it.
         if ($this->has('website')) {
             $this->merge(['website' => UrlUtils::normalizeWebsiteUrl($this->input('website'))]);
+        }
+
+        // A schedule created before aliases were canonicalized may still hold Asia/Calcutta, and
+        // the edit form round-trips it. Store the listed name; junk is left for the rule to refuse.
+        if (is_string($this->input('timezone')) && ($timezone = TimezoneUtils::canonicalize($this->input('timezone')))) {
+            $this->merge(['timezone' => $timezone]);
         }
 
         // '' and null must not both be storable: Stay22Service::resolveAid() reads null as
@@ -89,7 +97,7 @@ class RoleUpdateRequest extends FormRequest
             // field is disabled in demo mode, so it is only enforced outside demo.
             'timezone' => array_merge(
                 is_demo_mode() ? [] : ['required'],
-                ['timezone']
+                [new UsableTimezone]
             ),
             'email' => array_merge(
                 ['required', 'string', 'email', 'max:255'],

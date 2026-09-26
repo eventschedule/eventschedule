@@ -54,13 +54,71 @@
 </div>
 @endif
 
+{{-- Flashed by EventController::store() for someone's first event: where it lives and what to
+     do next, instead of a three-second toast. A draft has no public page until it is published,
+     so it gets no link. The name is the user's own text, hence x-user-text. --}}
+@php $firstEventCreated = session('first_event_created'); @endphp
+@if (is_array($firstEventCreated))
+<div class="pb-4">
+    <div class="ap-card rounded-xl p-6" role="status">
+        <div class="flex items-start gap-3">
+            <div class="p-2 rounded-xl shrink-0 {{ $firstEventCreated['is_draft'] ? 'bg-amber-50 dark:bg-amber-500/10' : 'bg-green-50 dark:bg-green-500/10' }}">
+                @if ($firstEventCreated['is_draft'])
+                <svg class="w-5 h-5 text-amber-600 dark:text-amber-400" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" aria-hidden="true">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="m16.862 4.487 1.687-1.688a1.875 1.875 0 1 1 2.652 2.652L10.582 16.07a4.5 4.5 0 0 1-1.897 1.13L6 18l.8-2.685a4.5 4.5 0 0 1 1.13-1.897l8.932-8.931Zm0 0L19.5 7.125M18 14v4.75A2.25 2.25 0 0 1 15.75 21H5.25A2.25 2.25 0 0 1 3 18.75V8.25A2.25 2.25 0 0 1 5.25 6H10" />
+                </svg>
+                @else
+                <svg class="w-5 h-5 text-green-600 dark:text-green-400" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" aria-hidden="true">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M9 12.75 11.25 15 15 9.75M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z" />
+                </svg>
+                @endif
+            </div>
+            <div class="min-w-0 flex-1">
+                <h3 class="text-base font-semibold text-gray-900 dark:text-gray-100">
+                    {{ $firstEventCreated['is_draft'] ? __('messages.first_event_draft_title') : __('messages.first_event_live_title') }}
+                </h3>
+                <p class="mt-1 text-sm text-gray-500 dark:text-gray-400">
+                    <x-user-text class="font-medium text-gray-700 dark:text-gray-300">{{ $firstEventCreated['name'] }}</x-user-text>
+                    &middot;
+                    {{ $firstEventCreated['is_draft'] ? __('messages.first_event_draft_body') : __('messages.first_event_live_body') }}
+                </p>
+            </div>
+        </div>
+
+        @if (! empty($firstEventCreated['url']))
+        <x-copy-link id="first-event-url" :value="$firstEventCreated['url']" class="mt-4" :label="__('messages.event_link')" />
+        @endif
+
+        <div class="mt-4 flex flex-wrap gap-3">
+            <x-secondary-link href="{{ route('event.create', ['subdomain' => $role->subdomain]) }}">
+                {{ __('messages.add_another_event') }}
+            </x-secondary-link>
+            <x-secondary-link href="{{ $firstEventCreated['edit_url'] }}#section-tickets">
+                {{ __('messages.add_tickets') }}
+            </x-secondary-link>
+            @if (! empty($firstEventCreated['url']))
+            <x-brand-link href="{{ $firstEventCreated['url'] }}" target="_blank">
+                {{ __('messages.view_event') }}
+            </x-brand-link>
+            @else
+            <x-brand-link href="{{ $firstEventCreated['edit_url'] }}">
+                {{ __('messages.edit_event') }}
+            </x-brand-link>
+            @endif
+        </div>
+    </div>
+</div>
+@endif
+
 {{-- Below the two banners above on purpose: those warn about real problems, this is an
-     optional invitation and must not outrank them. --}}
-@if(!empty($showFederationPrompt))
+     optional invitation and must not outrank them. Held back on the first-event render so the
+     panel above is not buried under an invitation on the one page load it exists for; both
+     prompts are back on the next visit. --}}
+@if(!empty($showFederationPrompt) && ! is_array($firstEventCreated))
     @include('partials.federation-prompt', ['padded' => true])
 @endif
 
-@if (! empty($federationListingSchedules) && $federationListingSchedules->isNotEmpty())
+@if (! empty($federationListingSchedules) && $federationListingSchedules->isNotEmpty() && ! is_array($firstEventCreated))
     @include('partials.federation-listing-prompt', ['listingSchedules' => $federationListingSchedules, 'padded' => true])
 @endif
 

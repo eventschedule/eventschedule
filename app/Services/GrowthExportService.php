@@ -83,7 +83,7 @@ class GrowthExportService
     }
 
     /**
-     * Onboarding funnel: the 11 stage counts + conversions for the selected period, plus
+     * Onboarding funnel: the stage counts + conversions for the selected period, plus
      * the north-star (signup -> first event) with its period-over-period change and the
      * biggest onboarding leak. See the correctness rules in the funnel plan: stages 4/6 are
      * OR-defined so the funnel stays monotonic across all creation paths and history; the
@@ -170,18 +170,44 @@ class GrowthExportService
             && $startDate->toDateString() >= Carbon::parse($trackingStart)->toDateString();
         $visitors = null;
         $signupViews = null;
+        $codeCounts = ['signup_code_requests' => null, 'signup_code_verified' => null, 'signup_code_invalid' => null];
         if ($rangeTracked) {
             $sums = MarketingDailyStat::whereBetween('date', [$startDate->toDateString(), $endDate->toDateString()])
-                ->selectRaw('COALESCE(SUM(visitors), 0) as v, COALESCE(SUM(signup_views), 0) as s')
+                ->selectRaw('COALESCE(SUM(visitors), 0) as v, COALESCE(SUM(signup_views), 0) as s, '
+                    .'COALESCE(SUM(signup_code_requests), 0) as signup_code_requests, '
+                    .'COALESCE(SUM(signup_code_verified), 0) as signup_code_verified, '
+                    .'COALESCE(SUM(signup_code_invalid), 0) as signup_code_invalid')
                 ->first();
             // Visitors are only recorded on the nexus; keep n/a on other deployments.
             $visitors = config('app.is_nexus') ? (int) $sums->v : null;
             $signupViews = (int) $sums->s;
+
+            // Per column, not per table: $rangeTracked only says the TABLE existed at the start
+            // of the window. These columns arrived later with default(0), so a window opening
+            // before a column's own start date would report its backfilled zeros as a
+            // measurement. Null renders as "n/a" instead.
+            foreach (array_keys($codeCounts) as $column) {
+                $from = MarketingDailyStat::COLUMN_TRACKED_FROM[$column] ?? null;
+                if ($from !== null && $startDate->toDateString() >= $from) {
+                    $codeCounts[$column] = (int) $sums->{$column};
+                }
+            }
         }
+
+        // The email-code wall, which sits between the sign-up page and an account on the email
+        // path. Its own group, never part of the chain: Google sign-ups skip the code entirely,
+        // so 'account' can legitimately exceed 'signup_code_verified' and a ratio drawn across
+        // that boundary would be meaningless. Hosted only - selfhost has no code step.
+        $codeStages = config('app.hosted') ? [
+            ['key' => 'signup_code_requests', 'group' => 'email_code', 'count' => $codeCounts['signup_code_requests']],
+            ['key' => 'signup_code_verified', 'group' => 'email_code', 'count' => $codeCounts['signup_code_verified']],
+            ['key' => 'signup_code_invalid', 'group' => 'email_code', 'count' => $codeCounts['signup_code_invalid']],
+        ] : [];
 
         $stages = [
             ['key' => 'visited', 'group' => 'traffic', 'count' => $visitors],
             ['key' => 'signup_view', 'group' => 'traffic', 'count' => $signupViews],
+            ...$codeStages,
             ['key' => 'account', 'group' => 'cohort', 'count' => $accounts],
             ['key' => 'reached_schedule', 'group' => 'cohort', 'count' => $reachedSchedule],
             ['key' => 'saved_schedule', 'group' => 'cohort', 'count' => $savedSchedule],
@@ -212,7 +238,13 @@ class GrowthExportService
         // divider (different populations, a cross-population ratio, not a real in-funnel drop).
         // 'reached_checkout' is skipped for exactly the same reason: it opens the plan group,
         // and the stage above it is about selling tickets, which is a different question.
-        $noStepConv = ['account', 'reached_checkout'];
+        //
+        // In the email_code group, requests -> verified is the code wall's conversion, and
+        // signup_view -> requests is the share of sign-up page visitors who chose email (all three
+        // are deduped per IP + user agent per day, so those ratios compare like with like).
+        // 'signup_code_invalid' is NOT a stage below verified - somebody can mistype and then
+        // succeed, so it overlaps both - and gets no ratio of its own.
+        $noStepConv = ['account', 'reached_checkout', 'signup_code_invalid'];
         $prevCount = null;
         foreach ($stages as &$stage) {
             $c = $stage['count'];
@@ -415,9 +447,12 @@ class GrowthExportService
                 .'for every organizer and turn the stage into a 100% that measures nothing. Compare the '
                 .'months either side of that change with care: before it, the stage also counted people '
                 .'who only ever landed there.',
-            'signup_code_requests and signup_code_verified are NOT a funnel pair. Both are deduped per '
-                .'IP+user-agent per day rather than counted per event, and the request counter is also '
-                .'raised by the guest-add flow, which never reaches the verified counter.',
+            'signup_code_requests, signup_code_verified and signup_code_invalid count the emailed-code '
+                .'step of the email sign-up path only (Google sign-ups never see it). All three are deduped '
+                .'per IP+user-agent per day and share the same bot filters, so verified/requests is the '
+                .'code step\'s conversion. signup_code_invalid is visitors who had at least one code '
+                .'rejected; it overlaps both others (a mistype followed by a success counts in each) and '
+                .'is null before 2026-09-25.',
         ];
         // Every derived section is computed from the row tables, so if those were capped
         // the sections describe the most recent N rows and not the whole population.
@@ -1289,7 +1324,8 @@ class GrowthExportService
                 .'SUM(docs_page_views) as docs_page_views, SUM(docs_visitors) as docs_visitors, '
                 .'SUM(pricing_views) as pricing_views, SUM(pricing_visitors) as pricing_visitors, '
                 .'SUM(signup_code_requests) as signup_code_requests, '
-                .'SUM(signup_code_verified) as signup_code_verified')
+                .'SUM(signup_code_verified) as signup_code_verified, '
+                .'SUM(signup_code_invalid) as signup_code_invalid')
             ->orderBy('ym')
             ->get()->keyBy('ym');
 
@@ -1347,10 +1383,11 @@ class GrowthExportService
                 'pricing_visitors' => $isNexus ? $count('pricing_visitors') : null,
                 'pricing_views' => $isNexus ? $count('pricing_views') : null,
                 'signup_views' => $count('signup_views'),
-                // The 6-digit-code wall, which sits between signup_views and an account. NOT a
-                // pair and NOT a conversion rate: see the notes emitted with this export.
+                // The 6-digit-code wall, which sits between signup_views and an account on the
+                // email path. See the notes emitted with this export for how to read the three.
                 'signup_code_requests' => $count('signup_code_requests'),
                 'signup_code_verified' => $count('signup_code_verified'),
+                'signup_code_invalid' => $count('signup_code_invalid'),
                 // Queried from users, not a counter column, so this one is tracked all the way
                 // back and is the only column here that never goes null.
                 'verified_signups' => (int) ($signups[$m]->c ?? 0),

@@ -26,6 +26,15 @@
             <p style="margin: 10px 0; color: #666;">{{ __('messages.signup_verification_code_expiry') }}</p>
         </div>
 
+        {{-- For whoever opens this somewhere other than the sign-up tab: a phone, or a browser that
+             discarded the tab while they were in their inbox. Brings them to the code step with the
+             address filled in; the code itself is never in the link. --}}
+        @if (! empty($continueUrl))
+        <div style="text-align: center; margin: 24px 0;">
+            <a href="{{ $continueUrl }}" style="display: inline-block; background-color: #4E81FA; color: #ffffff; text-decoration: none; font-weight: 600; padding: 12px 24px; border-radius: 6px;">{{ __('messages.continue_signup') }}</a>
+        </div>
+        @endif
+
         <div style="background-color: #f0f4ff; padding: 15px; border-radius: 8px; margin: 20px 0;">
             <p style="margin: 0; color: #555; font-size: 14px;">{{ __('messages.signup_verification_code_security_notice') }}</p>
         </div>

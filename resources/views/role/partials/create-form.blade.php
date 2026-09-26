@@ -37,12 +37,11 @@
                     {{-- See the block comment at the top of this file before touching these. --}}
                     <input type="hidden" name="type" value="{{ $role->type }}">
                     <input type="hidden" name="email" value="{{ $user->email }}">
-                    {{-- Both fall back, because create() copies them straight off the user and a
-                         user can carry neither: roles.language_code is NOT NULL, and the full form
-                         never hit this because its <select required> always posted its first
-                         option. store() has the same guard for translation_language_code, for the
-                         same reason. --}}
-                    <input type="hidden" name="timezone" value="{{ $role->timezone ?: config('app.timezone') }}">
+                    {{-- Falls back, because create() copies it straight off the user and a user
+                         can carry none: roles.language_code is NOT NULL, and the full form never
+                         hit this because its <select required> always posted its first option.
+                         store() has the same guard for translation_language_code, for the same
+                         reason. The timezone gets the same fallback below, as the select's value. --}}
                     <input type="hidden" name="language_code" value="{{ $role->language_code ?: 'en' }}">
                     <input type="hidden" name="use_24_hour_time" value="{{ $role->use_24_hour_time ? 1 : 0 }}">
                     <input type="hidden" name="require_account" value="{{ $role->require_account ? 1 : 0 }}">
@@ -79,12 +78,94 @@
                     </div>
                     @endif
 
-                    {{-- Shown rather than asked. Both are inherited from the account and are
-                         changeable afterwards, so making them fields here would be two more
-                         decisions in front of the one that matters. --}}
+                    {{-- The email is shown rather than asked: it is the account's own and
+                         changeable afterwards. --}}
                     <p class="mt-4 text-xs text-gray-500 dark:text-gray-400">
-                        <bdi dir="ltr">{{ $user->email }}</bdi> &middot; {{ $role->timezone }}
+                        <bdi dir="ltr">{{ $user->email }}</bdi>
                     </p>
+
+                    {{-- The timezone is shown collapsed but CAN be changed here, because it cannot
+                         be trusted: a Google sign-up used to be stored as America/New_York whatever
+                         the browser said, and every event on the schedule is anchored to this
+                         value. A closed <details> still submits its select, so this works without
+                         JavaScript; the script below only opens it when the device disagrees. --}}
+                    @php
+                        $formTimezone = \App\Utils\TimezoneUtils::canonicalize(old('timezone', $role->timezone))
+                            ?? config('app.timezone');
+                    @endphp
+                    <details id="timezone-details" class="mt-2 group" @if ($errors->has('timezone')) open @endif>
+                        <summary class="inline-flex cursor-pointer items-center gap-1 text-xs text-gray-500 dark:text-gray-400 rounded focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--brand-blue)]">
+                            <span id="timezone-summary" data-template="{{ __('messages.schedule_times_in_timezone', ['timezone' => '__TIMEZONE__']) }}">{{ __('messages.schedule_times_in_timezone', ['timezone' => $formTimezone]) }}</span>
+                            <span aria-hidden="true">&middot;</span>
+                            <span class="text-[var(--brand-blue)] hover:underline">{{ __('messages.change_timezone') }}</span>
+                        </summary>
+
+                        <div class="mt-3">
+                            <div id="timezone-mismatch" class="hidden mb-3 bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-700 rounded-lg p-3"
+                                data-template="{{ __('messages.timezone_device_mismatch', ['timezone' => '__TIMEZONE__']) }}">
+                                <div class="flex items-start gap-2">
+                                    <svg class="w-5 h-5 text-amber-600 dark:text-amber-400 flex-shrink-0" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" aria-hidden="true">
+                                        <path stroke-linecap="round" stroke-linejoin="round" d="M12 9v3.75m-9.303 3.376c-.866 1.5.217 3.374 1.948 3.374h14.71c1.73 0 2.813-1.874 1.948-3.374L13.949 3.378c-.866-1.5-3.032-1.5-3.898 0L2.697 16.126ZM12 15.75h.007v.008H12v-.008Z" />
+                                    </svg>
+                                    <p id="timezone-mismatch-text" class="text-sm text-amber-800 dark:text-amber-200"></p>
+                                </div>
+                            </div>
+
+                            <x-input-label for="timezone" :value="__('messages.timezone')" />
+                            <select name="timezone" id="timezone" required data-searchable
+                                class="mt-1 block w-full border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-[var(--brand-blue)] focus:ring-[var(--brand-blue)] rounded-lg shadow-sm">
+                                <x-timezone-options :selected="$formTimezone" />
+                            </select>
+                            <x-input-error :messages="$errors->get('timezone')" class="mt-2" />
+                        </div>
+                    </details>
+
+                    {{-- Runs inline, before searchable-select.js (deferred) enhances the select, so
+                         the combobox picks up the device timezone as its initial text. The device
+                         check is skipped after a failed save, where the posted value is the user's
+                         own choice. --}}
+                    <script {!! nonce_attr() !!}>
+                    (function () {
+                        var select = document.getElementById('timezone');
+                        var summary = document.getElementById('timezone-summary');
+                        function showSummary(value) {
+                            summary.textContent = summary.getAttribute('data-template').replace('__TIMEZONE__', value);
+                        }
+                        select.addEventListener('change', function () { showSummary(select.value); });
+                        @if ($errors->any())
+                        return;
+                        @endif
+
+                        var aliases = @json(\App\Utils\TimezoneUtils::aliasMap());
+                        var device;
+                        try {
+                            device = Intl.DateTimeFormat().resolvedOptions().timeZone;
+                        } catch (e) {
+                            return;
+                        }
+                        if (!device) {
+                            return;
+                        }
+                        device = aliases[device] || device;
+
+                        if (select.value === device) {
+                            return;
+                        }
+
+                        var option = Array.prototype.find.call(select.options, function (o) { return o.value === device; });
+                        if (!option) {
+                            return;
+                        }
+                        select.value = device;
+                        showSummary(device);
+
+                        var panel = document.getElementById('timezone-mismatch');
+                        document.getElementById('timezone-mismatch-text').textContent =
+                            panel.getAttribute('data-template').replace('__TIMEZONE__', device);
+                        panel.classList.remove('hidden');
+                        document.getElementById('timezone-details').open = true;
+                    })();
+                    </script>
 
                     <p class="mt-4 text-sm text-gray-500 dark:text-gray-400">
                         {{ __('messages.note_all_schedules_are_publicly_listed') }}

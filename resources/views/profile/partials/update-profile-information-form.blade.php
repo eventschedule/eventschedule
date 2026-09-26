@@ -178,10 +178,7 @@
                 <x-input-label for="timezone" :value="__('messages.timezone')" />
                 <select name="timezone" id="timezone" required {{ is_demo_mode() ? 'disabled' : '' }} data-searchable
                     class="mt-1 block w-full border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-[var(--brand-blue)] focus:ring-[var(--brand-blue)] rounded-lg shadow-sm">
-                    @foreach(\Carbon\CarbonTimeZone::listIdentifiers() as $timezone)
-                    <option value="{{ $timezone }}" {{ $user->timezone == $timezone ? 'SELECTED' : '' }}>{{ $timezone }}
-                    </option>
-                    @endforeach
+                    <x-timezone-options :selected="old('timezone', $user->timezone)" />
                 </select>
                 <x-input-error class="mt-2" :messages="$errors->get('timezone')" />
             </div>

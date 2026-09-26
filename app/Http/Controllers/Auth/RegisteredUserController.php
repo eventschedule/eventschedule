@@ -13,6 +13,7 @@ use App\Rules\NoFakeEmail;
 use App\Rules\ValidTurnstile;
 use App\Services\AuditService;
 use App\Utils\HoneypotUtils;
+use App\Utils\TimezoneUtils;
 use App\Utils\TurnstileUtils;
 use Illuminate\Auth\Events\Registered;
 use Illuminate\Auth\Events\Verified;
@@ -175,7 +176,14 @@ class RegisteredUserController extends Controller
         // five outages in an hour and the address is locked out of signing up until it expires.
         // The per-IP route throttle is what bounds a retry loop here, not this counter.
         try {
-            Notification::route('mail', $email)->notifyNow(new SignupVerificationCode($code));
+            // A way back to the code step for whoever reads this mail somewhere else - on their
+            // phone, or after the browser discarded the sign-up tab. Sign-up only: the guest-add
+            // flow mounts this same method and has no page of ours to return to.
+            $continueUrl = request()->routeIs('sign_up.send_code')
+                ? route('sign_up', ['email' => base64_encode($email), 'step' => 'code'])
+                : null;
+
+            Notification::route('mail', $email)->notifyNow(new SignupVerificationCode($code, $continueUrl));
         } catch (\Throwable $e) {
             report($e);
 
@@ -222,9 +230,15 @@ class RegisteredUserController extends Controller
     /**
      * Handle an incoming registration request.
      *
+     * The hosted form submits with fetch and `Accept: application/json`, so a rejected code comes
+     * back as a 422 the page renders in place. A full-page POST used to reload the form, and the
+     * browser never repopulates type="password": one mistyped digit cost the visitor their
+     * password as well as the code. Every exit therefore answers JSON to a JSON request - the
+     * ValidationExceptions do that on their own, the two redirects go through signupRedirect().
+     *
      * @throws \Illuminate\Validation\ValidationException
      */
-    public function store(Request $request): RedirectResponse
+    public function store(Request $request): RedirectResponse|JsonResponse
     {
         // Honeypot. A ValidationException rather than a flash error: x-auth-layout renders
         // only per-field errors, so with('error') would be swallowed by the layout.
@@ -339,7 +353,7 @@ class RegisteredUserController extends Controller
         }
 
         if (! public_registration_enabled() && ! config('app.is_testing') && User::count() > 0) {
-            return redirect()->route('login');
+            return $this->signupRedirect($request, route('login'));
         }
 
         $validationRules = [
@@ -381,6 +395,19 @@ class RegisteredUserController extends Controller
             // Atomically get and remove the code to prevent race conditions
             $originalEmail = Cache::pull('signup_code_email_'.$request->verification_code);
             if (! $originalEmail || strtolower($originalEmail) !== $email) {
+                // The third side of the code wall: the visitor came back from their inbox and the
+                // code was refused. Without it, "never came back" and "came back and got it
+                // wrong" were one number (signup_code_requests minus signup_code_verified).
+                // Deduped and filtered exactly like the other two, so it reads as people, not
+                // attempts - and a visitor who mistypes and then succeeds counts on both sides.
+                $ip = request()->header('CF-Connecting-IP') ?? request()->ip();
+
+                if (! PageView::isBot(request()->userAgent())
+                    && ! PageView::isSuspiciousRequest(request())
+                    && PageView::isFirstDailyVisit('signup_code_invalid', $ip, request()->userAgent())) {
+                    MarketingDailyStat::record('signup_code_invalid');
+                }
+
                 throw ValidationException::withMessages([
                     'verification_code' => [__('messages.code_invalid')],
                 ]);
@@ -440,6 +467,11 @@ class RegisteredUserController extends Controller
             $signupIntent = 'claim';
         }
 
+        // Browsers report backward-compat aliases (Chrome: Asia/Calcutta), which the schedule
+        // form's `timezone` rule rejected. Store the listed name, and derive the clock format from
+        // it too: detect_24_hour_time() reads the prefix, so US/Eastern would read as unknown.
+        $timezone = TimezoneUtils::canonicalize(is_string($request->timezone) ? $request->timezone : null) ?? 'America/New_York';
+
         $email = strtolower($request->email);
         $existingUser = User::where('email', $email)->first();
 
@@ -455,9 +487,9 @@ class RegisteredUserController extends Controller
             $existingUser->update([
                 'name' => $request->name,
                 'password' => Hash::make($request->password),
-                'timezone' => $request->timezone ?? 'America/New_York',
+                'timezone' => $timezone,
                 'language_code' => $languageCode,
-                'use_24_hour_time' => detect_24_hour_time($request->timezone, $languageCode),
+                'use_24_hour_time' => detect_24_hour_time($timezone, $languageCode),
                 'utm_source' => $utmParams['utm_source'] ?? null,
                 'utm_medium' => $utmParams['utm_medium'] ?? null,
                 'utm_campaign' => $utmParams['utm_campaign'] ?? null,
@@ -475,9 +507,9 @@ class RegisteredUserController extends Controller
                 'name' => $request->name,
                 'email' => $email,
                 'password' => Hash::make($request->password),
-                'timezone' => $request->timezone ?? 'America/New_York',
+                'timezone' => $timezone,
                 'language_code' => $languageCode,
-                'use_24_hour_time' => detect_24_hour_time($request->timezone, $languageCode),
+                'use_24_hour_time' => detect_24_hour_time($timezone, $languageCode),
                 'utm_source' => $utmParams['utm_source'] ?? null,
                 'utm_medium' => $utmParams['utm_medium'] ?? null,
                 'utm_campaign' => $utmParams['utm_campaign'] ?? null,
@@ -562,6 +594,21 @@ class RegisteredUserController extends Controller
 
         AuditService::log(AuditService::AUTH_REGISTER, $user->id, 'User', $user->id);
 
-        return redirect(post_signup_redirect_url($user));
+        return $this->signupRedirect($request, post_signup_redirect_url($user));
+    }
+
+    /**
+     * A redirect, or its URL as JSON for the fetch-driven hosted form.
+     *
+     * fetch() follows a 302 on its own and hands the script the HTML of wherever it landed, which
+     * it cannot tell apart from a failure. Answering JSON leaves the navigation to the page.
+     */
+    private function signupRedirect(Request $request, string $url): RedirectResponse|JsonResponse
+    {
+        if ($request->expectsJson()) {
+            return response()->json(['redirect' => $url]);
+        }
+
+        return redirect($url);
     }
 }

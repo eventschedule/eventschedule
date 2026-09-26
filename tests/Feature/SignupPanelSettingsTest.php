@@ -266,6 +266,7 @@ class SignupPanelSettingsTest extends TestCase
 
         $this->actingAs($owner)
             ->post(route('role.store'), [
+                'type' => 'talent',
                 'name' => 'Junk Toggle Schedule',
                 'email' => 'junk@gmail.com',
                 'timezone' => 'America/New_York',

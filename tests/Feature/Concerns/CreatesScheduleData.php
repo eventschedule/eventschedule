@@ -61,6 +61,23 @@ trait CreatesScheduleData
             }
         }
 
+        // A <select> posts its selected option, or its first when none is marked (the timezone).
+        preg_match_all('/<select[^>]*name="([^"]+)"[^>]*>(.*?)<\/select>/s', $html, $selects, PREG_SET_ORDER);
+        foreach ($selects as $select) {
+            preg_match_all('/<option[^>]*value="([^"]*)"([^>]*)>/', $select[2], $options, PREG_SET_ORDER);
+            $chosen = null;
+            foreach ($options as $option) {
+                if (preg_match('/\bselected\b/', $option[2])) {
+                    $chosen = $option[1];
+                    break;
+                }
+            }
+            $chosen ??= $options[0][1] ?? null;
+            if ($chosen !== null) {
+                $payload[$select[1]] = html_entity_decode($chosen, ENT_QUOTES);
+            }
+        }
+
         $payload = $overrides + $payload;
         $payload['name'] = $payload['name'] ?? 'Test '.$type;
 

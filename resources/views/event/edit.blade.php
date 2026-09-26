@@ -1,7 +1,19 @@
 <x-app-admin-layout>
 
+@php
+  // Set by EventController::create() only. A first event gets a slimmer form: the step
+  // indicator, no Boost or locked upgrade controls, and the rarely used sections folded away.
+  $isFirstEventRun = $isFirstEventRun ?? false;
+
+  // Participants, Agenda and Engagement fold behind "More options" on a first event: seven
+  // sections is a lot to face before anything is saved, and none of these three is needed to
+  // publish. Vue shows them again on request (showMoreSections), and showSection() opens the
+  // fold itself when something - a #hash, an invalid field - has to reach one of them.
+  $moreSectionAttrs = $isFirstEventRun ? 'v-cloak v-show="showMoreSections"' : '';
+@endphp
+
 <!-- Step Indicator for Add Event Flow -->
-@if(session('pending_request'))
+@if(session('pending_request') || $isFirstEventRun)
     <div class="my-6">
         <x-step-indicator :currentStep="3" />
     </div>
@@ -449,8 +461,17 @@
             altInput: true,
             altFormat: "M j, Y",
             dateFormat: "Y-m-d",
-            onChange: function() {
+            onChange: function(selectedDates) {
                 updateHiddenFields();
+                @if (! $event->exists)
+                // A new event's next step after the date is its time, so go there: focusing the
+                // time input opens its list. After the calendar has closed and taken its focus
+                // back, hence the timeout.
+                var startEl = document.getElementById('start_time');
+                if (selectedDates.length && startEl && ! startEl.value) {
+                    setTimeout(function () { startEl.focus(); }, 0);
+                }
+                @endif
             },
         }, localeConfig));
         // https://github.com/flatpickr/flatpickr/issues/892#issuecomment-604387030
@@ -595,6 +616,10 @@
             if (window.vueApp) { window.vueApp.currentDuration = hiddenDuration.value; }
 
             updateScheduleTimePreview(hiddenStartsAt.value, multiDayToggle);
+
+            // Every date and time change comes through here, so this is where a shown
+            // "date and time required" message learns it has been answered.
+            if (window.vueApp && window.vueApp.refreshDateTimeError) { window.vueApp.refreshDateTimeError(); }
         }
 
         // Display-only preview of the entered time in the schedule's timezone. The entered wall-clock
@@ -807,7 +832,10 @@
             });
         }
 
-        initTimePicker(startTimeEl, document.getElementById('start_time_dropdown'), function() { return 540; });
+        // Where the start-time list opens when nothing is picked yet: 8 PM for a new event, which
+        // is also the time EventController::create() gives a day clicked on the calendar. It only
+        // scrolls the list; no value is filled in.
+        initTimePicker(startTimeEl, document.getElementById('start_time_dropdown'), function() { return {{ $event->exists ? 540 : 1200 }}; });
         initTimePicker(endTimeEl, document.getElementById('end_time_dropdown'), function() {
             var startMinutes = parseTimeToMinutes(startTimeEl.value);
             if (startMinutes === null) return 600;
@@ -1053,9 +1081,14 @@
   @endif
 
   <div class="pb-4 flex items-center justify-between">
-    <h2 class="text-xl font-bold leading-7 text-gray-900 dark:text-gray-100 sm:truncate sm:text-2xl sm:tracking-tight">
-      {{ $title }}
-    </h2>
+    <div class="min-w-0">
+      <h2 class="text-xl font-bold leading-7 text-gray-900 dark:text-gray-100 sm:truncate sm:text-2xl sm:tracking-tight">
+        {{ $title }}
+      </h2>
+      @if ($isFirstEventRun)
+      <p class="mt-1 text-sm text-gray-500 dark:text-gray-400">{{ __('messages.first_event_form_subtitle') }}</p>
+      @endif
+    </div>
 
     <div class="hidden lg:flex items-center gap-3">
         @if ($event->exists)
@@ -1080,7 +1113,7 @@
             {{ __('messages.boosted') }} - {{ number_format($activeBoost->reach) }} {{ __('messages.reach') }}
         </a>
         @elseif ($boostStaticDisabled === 'upgrade' && config('app.hosted'))
-        <button type="button" x-data x-on:click.prevent="$dispatch('open-modal', 'upgrade-boost')"
+        <button type="button" @click.prevent="openUpgrade('upgrade-boost')"
            class="inline-flex items-center justify-center rounded-lg bg-white dark:bg-gray-800 px-4 py-3 text-base font-semibold text-gray-900 dark:text-gray-100 shadow-sm border border-gray-300 dark:border-gray-600 hover:bg-gray-50 dark:hover:bg-gray-700 transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-[var(--brand-blue)] focus:ring-offset-2 dark:focus:ring-offset-gray-800">
             <svg class="me-2 h-5 w-5 text-gray-400" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
                 <path d="M13.13 22.19L11.5 18.36C13.07 17.78 14.54 17 15.9 16.09L13.13 22.19M5.64 12.5L1.81 10.87L7.91 8.1C7 9.46 6.22 10.93 5.64 12.5M19.22 4C19.5 4 19.75 4 19.96 4.05C20.13 5.44 19.94 8.3 16.66 11.58C14.96 13.29 12.93 14.6 10.65 15.47L8.5 13.37C9.42 11.06 10.73 9.03 12.42 7.34C14.71 5.05 17.11 4.1 18.78 4.04C18.91 4 19.06 4 19.22 4Z"/>
@@ -1088,7 +1121,7 @@
             {{ __('messages.boost_event') }}
         </button>
         @elseif ($boostStaticDisabled)
-        <button type="button" x-data x-on:click="alert('{{ addslashes($boostStaticDisabled) }}')"
+        <button type="button" @click="showMessage(@js($boostStaticDisabled))"
            class="inline-flex items-center justify-center rounded-lg bg-white dark:bg-gray-800 px-4 py-3 text-base font-semibold text-gray-900 dark:text-gray-100 shadow-sm border border-gray-300 dark:border-gray-600 hover:bg-gray-50 dark:hover:bg-gray-700 transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-[var(--brand-blue)] focus:ring-offset-2 dark:focus:ring-offset-gray-800">
             <svg class="me-2 h-5 w-5 text-gray-400" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
                 <path d="M13.13 22.19L11.5 18.36C13.07 17.78 14.54 17 15.9 16.09L13.13 22.19M5.64 12.5L1.81 10.87L7.91 8.1C7 9.46 6.22 10.93 5.64 12.5M19.22 4C19.5 4 19.75 4 19.96 4.05C20.13 5.44 19.94 8.3 16.66 11.58C14.96 13.29 12.93 14.6 10.65 15.47L8.5 13.37C9.42 11.06 10.73 9.03 12.42 7.34C14.71 5.05 17.11 4.1 18.78 4.04C18.91 4 19.06 4 19.22 4Z"/>
@@ -1111,8 +1144,10 @@
             {{ __('messages.boost_event') }}
         </button>
         @endif
-        @else
-        <button type="button" x-data x-on:click="alert('{{ addslashes(__('messages.save_event_first')) }}')"
+        @elseif (! $isFirstEventRun)
+        {{-- Nothing to boost before the event exists. Left out of a first event entirely: an
+             unusable button is noise on the page that has to be the easiest one to finish. --}}
+        <button type="button" @click="showMessage(@js(__('messages.save_event_first')))"
            class="inline-flex items-center justify-center rounded-lg bg-white dark:bg-gray-800 px-4 py-3 text-base font-semibold text-gray-900 dark:text-gray-100 shadow-sm border border-gray-300 dark:border-gray-600 hover:bg-gray-50 dark:hover:bg-gray-700 transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-[var(--brand-blue)] focus:ring-offset-2 dark:focus:ring-offset-gray-800">
             <svg class="me-2 h-5 w-5 text-gray-400" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
                 <path d="M13.13 22.19L11.5 18.36C13.07 17.78 14.54 17 15.9 16.09L13.13 22.19M5.64 12.5L1.81 10.87L7.91 8.1C7 9.46 6.22 10.93 5.64 12.5M19.22 4C19.5 4 19.75 4 19.96 4.05C20.13 5.44 19.94 8.3 16.66 11.58C14.96 13.29 12.93 14.6 10.65 15.47L8.5 13.37C9.42 11.06 10.73 9.03 12.42 7.34C14.71 5.05 17.11 4.1 18.78 4.04C18.91 4 19.06 4 19.22 4Z"/>
@@ -1191,8 +1226,8 @@
     </div>
 
     {{-- Mobile Actions dropdown (header) --}}
-    @if (!$event->exists)
-    <button type="button" x-data x-on:click="alert('{{ addslashes(__('messages.save_event_first')) }}')" class="lg:hidden inline-flex items-center justify-center rounded-lg bg-white dark:bg-gray-800 px-3 py-2 text-sm font-semibold text-gray-900 dark:text-gray-100 shadow-sm border border-gray-300 dark:border-gray-600 hover:bg-gray-50 dark:hover:bg-gray-700 transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-[var(--brand-blue)] focus:ring-offset-2 dark:focus:ring-offset-gray-800">
+    @if (! $event->exists && ! $isFirstEventRun)
+    <button type="button" @click="showMessage(@js(__('messages.save_event_first')))" class="lg:hidden inline-flex items-center justify-center rounded-lg bg-white dark:bg-gray-800 px-3 py-2 text-sm font-semibold text-gray-900 dark:text-gray-100 shadow-sm border border-gray-300 dark:border-gray-600 hover:bg-gray-50 dark:hover:bg-gray-700 transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-[var(--brand-blue)] focus:ring-offset-2 dark:focus:ring-offset-gray-800">
         <svg class="me-1.5 h-4 w-4 text-gray-400" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
             <path d="M13.13 22.19L11.5 18.36C13.07 17.78 14.54 17 15.9 16.09L13.13 22.19M5.64 12.5L1.81 10.87L7.91 8.1C7 9.46 6.22 10.93 5.64 12.5M19.22 4C19.5 4 19.75 4 19.96 4.05C20.13 5.44 19.94 8.3 16.66 11.58C14.96 13.29 12.93 14.6 10.65 15.47L8.5 13.37C9.42 11.06 10.73 9.03 12.42 7.34C14.71 5.05 17.11 4.1 18.78 4.04C18.91 4 19.06 4 19.22 4Z"/>
         </svg>
@@ -1217,14 +1252,14 @@
                     <div>{{ __('messages.boosted') }} - {{ number_format($activeBoost->reach) }} {{ __('messages.reach') }}</div>
                 </a>
                 @elseif ($boostStaticDisabled === 'upgrade' && config('app.hosted'))
-                <button type="button" x-data x-on:click.prevent="$dispatch('open-modal', 'upgrade-boost')" class="w-full group flex items-center px-5 py-3 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 focus:bg-gray-100 dark:focus:bg-gray-700 focus:outline-none transition-colors" role="menuitem" tabindex="0">
+                <button type="button" @click.prevent="openUpgrade('upgrade-boost')" class="w-full group flex items-center px-5 py-3 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 focus:bg-gray-100 dark:focus:bg-gray-700 focus:outline-none transition-colors" role="menuitem" tabindex="0">
                     <svg class="me-3 h-5 w-5 text-gray-400" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
                         <path d="M13.13 22.19L11.5 18.36C13.07 17.78 14.54 17 15.9 16.09L13.13 22.19M5.64 12.5L1.81 10.87L7.91 8.1C7 9.46 6.22 10.93 5.64 12.5M19.22 4C19.5 4 19.75 4 19.96 4.05C20.13 5.44 19.94 8.3 16.66 11.58C14.96 13.29 12.93 14.6 10.65 15.47L8.5 13.37C9.42 11.06 10.73 9.03 12.42 7.34C14.71 5.05 17.11 4.1 18.78 4.04C18.91 4 19.06 4 19.22 4Z"/>
                     </svg>
                     <div>{{ __('messages.boost_event') }}</div>
                 </button>
                 @elseif ($boostStaticDisabled)
-                <button type="button" x-data x-on:click="alert('{{ addslashes($boostStaticDisabled) }}')" class="w-full group flex items-center px-5 py-3 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 focus:bg-gray-100 dark:focus:bg-gray-700 focus:outline-none transition-colors" role="menuitem" tabindex="0">
+                <button type="button" @click="showMessage(@js($boostStaticDisabled))" class="w-full group flex items-center px-5 py-3 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 focus:bg-gray-100 dark:focus:bg-gray-700 focus:outline-none transition-colors" role="menuitem" tabindex="0">
                     <svg class="me-3 h-5 w-5 text-gray-400" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
                         <path d="M13.13 22.19L11.5 18.36C13.07 17.78 14.54 17 15.9 16.09L13.13 22.19M5.64 12.5L1.81 10.87L7.91 8.1C7 9.46 6.22 10.93 5.64 12.5M19.22 4C19.5 4 19.75 4 19.96 4.05C20.13 5.44 19.94 8.3 16.66 11.58C14.96 13.29 12.93 14.6 10.65 15.47L8.5 13.37C9.42 11.06 10.73 9.03 12.42 7.34C14.71 5.05 17.11 4.1 18.78 4.04C18.91 4 19.06 4 19.22 4Z"/>
                     </svg>
@@ -1409,7 +1444,7 @@
                                 </svg>
                                 {{ __('messages.venue') }}
                             </a>
-                            <a href="#section-participants" class="section-nav-link" data-section="section-participants">
+                            <a href="#section-participants" class="section-nav-link" data-section="section-participants" {!! $moreSectionAttrs !!}>
                                 <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-5 h-5">
                                     <path stroke-linecap="round" stroke-linejoin="round" d="M15 19.128a9.38 9.38 0 002.625.372 9.337 9.337 0 004.121-.952 4.125 4.125 0 00-7.533-2.493M15 19.128v-.003c0-1.113-.285-2.16-.786-3.07M15 19.128v.106A12.318 12.318 0 018.624 21c-2.331 0-4.512-.645-6.374-1.766l-.001-.109a6.375 6.375 0 0111.964-3.07M12 6.375a3.375 3.375 0 11-6.75 0 3.375 3.375 0 016.75 0zm8.25 2.25a2.625 2.625 0 11-5.25 0 2.625 2.625 0 015.25 0z" />
                                 </svg>
@@ -1421,7 +1456,7 @@
                                 </svg>
                                 {{ __('messages.recurring') }}
                             </a>
-                            <a href="#section-agenda" class="section-nav-link" data-section="section-agenda">
+                            <a href="#section-agenda" class="section-nav-link" data-section="section-agenda" {!! $moreSectionAttrs !!}>
                                 <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-5 h-5">
                                     <path stroke-linecap="round" stroke-linejoin="round" d="M8.25 6.75h12M8.25 12h12m-12 5.25h12M3.75 6.75h.007v.008H3.75V6.75zm.375 0a.375.375 0 11-.75 0 .375.375 0 01.75 0zM3.75 12h.007v.008H3.75V12zm.375 0a.375.375 0 11-.75 0 .375.375 0 01.75 0zm-.375 5.25h.007v.008H3.75v-.008zm.375 0a.375.375 0 11-.75 0 .375.375 0 01.75 0z" />
                                 </svg>
@@ -1467,7 +1502,7 @@
                             </a>
                             @endif
                             @php $fanContentPendingCount = $event->exists ? (($pendingVideos->count() ?? 0) + ($pendingComments->count() ?? 0) + ($pendingPhotos->count() ?? 0)) : 0; @endphp
-                            <a href="#section-engagement" class="section-nav-link" data-section="section-engagement">
+                            <a href="#section-engagement" class="section-nav-link" data-section="section-engagement" {!! $moreSectionAttrs !!}>
                                 <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-5 h-5">
                                     <path stroke-linecap="round" stroke-linejoin="round" d="M3 13.125C3 12.504 3.504 12 4.125 12h2.25c.621 0 1.125.504 1.125 1.125v6.75C7.5 20.496 6.996 21 6.375 21h-2.25A1.125 1.125 0 0 1 3 19.875v-6.75ZM9.75 8.625c0-.621.504-1.125 1.125-1.125h2.25c.621 0 1.125.504 1.125 1.125v11.25c0 .621-.504 1.125-1.125 1.125h-2.25a1.125 1.125 0 0 1-1.125-1.125V8.625ZM16.5 4.125c0-.621.504-1.125 1.125-1.125h2.25C20.496 3 21 3.504 21 4.125v15.75c0 .621-.504 1.125-1.125 1.125h-2.25a1.125 1.125 0 0 1-1.125-1.125V4.125Z" />
                                 </svg>
@@ -1476,12 +1511,23 @@
                                 <span class="inline-flex items-center justify-center w-5 h-5 text-xs font-bold text-white bg-red-500 rounded-full">{{ $fanContentPendingCount }}</span>
                                 @endif
                             </a>
+                            @if ($isFirstEventRun)
+                            {{-- Not a .section-nav-link: those are collected on load and each one
+                                 opens the section its data-section names, which this has none of. --}}
+                            <button type="button" v-cloak v-if="!showMoreSections" @click="showMoreSections = true"
+                                class="flex w-full items-center gap-2 px-3 py-3 text-lg font-medium text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-100 transition-all duration-200">
+                                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-5 h-5" aria-hidden="true">
+                                    <path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15m7.5-7.5h-15" />
+                                </svg>
+                                {{ __('messages.more_options') }}
+                            </button>
+                            @endif
                         </nav>
                         <!-- Sidebar Save Button -->
                         <div class="mt-6 pt-6 border-t border-gray-200 dark:border-gray-700">
                             <x-primary-button class="w-full justify-center" v-bind:disabled="isSaving">
                                 <span v-if="isSaving">{{ __('messages.saving') }}</span>
-                                <span v-else>{{ __('messages.save') }}</span>
+                                <span v-else>{{ $isFirstEventRun ? __('messages.create_event') : __('messages.save') }}</span>
                             </x-primary-button>
                             @if ($event->exists && $event->is_draft && ! $event->is_internal)
                             <button type="button" @click="publishEvent()" v-bind:disabled="isSaving"
@@ -1530,7 +1576,7 @@
                             {{ __('messages.details') }}
                             @if ((config('services.google.gemini_key') || config('services.openai.api_key')) && !is_demo_mode())
                                 @if ($role->isEnterprise())
-                                    <button type="button" x-data x-on:click.prevent="$dispatch('open-modal', 'ai-event-details')"
+                                    <button type="button" @click.prevent="openModal('ai-event-details')"
                                         class="ml-auto inline-flex items-center px-2 py-1 bg-gray-100 dark:bg-gray-700 hover:bg-gray-200 dark:hover:bg-gray-600 text-gray-700 dark:text-gray-200 text-xs font-medium rounded-lg transition-colors border border-gray-300 dark:border-gray-600"
                                         title="{{ __('messages.ai_generator') }}">
                                         <svg class="w-4 h-4 ltr:mr-1 rtl:ml-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -1538,8 +1584,8 @@
                                         </svg>
                                         {{ __('messages.ai_generator') }}
                                     </button>
-                                @elseif (config('app.hosted'))
-                                    <button type="button" x-data x-on:click.prevent="$dispatch('open-modal', 'upgrade-ai-details')"
+                                @elseif (config('app.hosted') && ! $isFirstEventRun)
+                                    <button type="button" @click.prevent="openUpgrade('upgrade-ai-details')"
                                         class="ml-auto inline-flex items-center px-2 py-1 bg-gray-100 dark:bg-gray-700 text-gray-400 dark:text-gray-500 text-xs font-medium rounded-lg border border-gray-300 dark:border-gray-600 opacity-75"
                                         title="{{ __('messages.ai_generator') }}">
                                         <svg class="w-4 h-4 ltr:mr-1 rtl:ml-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -1641,9 +1687,11 @@
                                                 @focus="hoveredVisibility = '{{ $opt['value'] }}'" @blur="hoveredVisibility = null">
                                             <span class="{{ $segRadio }}">{{ $opt['label'] }}</span>
                                         </label>
-                                    @else
+                                    @elseif (! $isFirstEventRun)
                                         {{-- Locked: a button rather than a disabled radio, so the click still
-                                             reaches the upgrade modal, and it stays out of the radio group. --}}
+                                             reaches the upgrade modal, and it stays out of the radio group.
+                                             Not offered on a first event, where it is only an upsell in the
+                                             way of the two choices that matter. --}}
                                         <button type="button" class="{{ $segLocked }}"
                                             title="{{ $opt['label'] }} ({{ __('messages.enterprise') }})"
                                             aria-label="{{ $opt['label'] }} ({{ __('messages.enterprise') }})"
@@ -1748,6 +1796,7 @@
                                     </div>
                                 </div>
                             </div>
+                            <p v-if="dateTimeError && dateTimeErrorField !== 'end_date'" v-cloak role="alert" class="mt-2 text-sm text-red-600 dark:text-red-400">@{{ dateTimeError }}</p>
                             @php $eventScheduleTz = (isset($role) && $role && $role->timezone) ? $role->timezone : null; @endphp
                             @if($eventScheduleTz)
                                 <p class="mt-1.5 text-sm text-gray-500 dark:text-gray-400">
@@ -1805,8 +1854,35 @@
                                         <div class="time-dropdown" id="end_time_multi_dropdown"></div>
                                     </div>
                                 </div>
+                                <p v-if="dateTimeError && dateTimeErrorField === 'end_date'" v-cloak role="alert" class="mt-2 text-sm text-red-600 dark:text-red-400">@{{ dateTimeError }}</p>
                             </div>
                         </div>
+
+                        @if ($isFirstEventRun && ! $role->isVenue())
+                        {{-- Where the event happens, asked on Details for a first event. The Venue
+                             section has the full form, but someone who never opens that tab publishes
+                             an event with no location at all. These inputs carry no name: they share
+                             the Vue models that the hidden venue_* inputs at the top of the form and
+                             the Venue section's own fields post from, so there is one value, not two. --}}
+                        <fieldset class="mb-6" v-cloak>
+                            <legend class="block font-medium text-sm text-gray-700 dark:text-gray-300">{{ __('messages.where_is_it') }}</legend>
+                            <div v-if="isInPerson && ! selectedVenue && venueType === 'create_new'" class="mt-1 grid grid-cols-1 sm:grid-cols-2 gap-3">
+                                <x-text-input type="text" class="block w-full" v-model="venueName"
+                                    :placeholder="__('messages.venue_name')" :aria-label="__('messages.venue_name')" />
+                                <x-text-input type="text" class="block w-full" v-model="venueAddress1"
+                                    :placeholder="__('messages.address')" :aria-label="__('messages.address')" />
+                            </div>
+                            <p v-else-if="isInPerson && selectedVenue" class="mt-1 text-sm text-gray-900 dark:text-gray-100">@{{ selectedVenue.name || selectedVenue.address1 }}</p>
+                            <label class="mt-3 flex items-center gap-2 text-sm text-gray-700 dark:text-gray-300">
+                                <input type="checkbox" v-model="isOnline"
+                                    class="h-4 w-4 rounded border-gray-300 dark:border-gray-600 text-[var(--brand-blue)] focus:ring-[var(--brand-blue)]">
+                                {{ __('messages.online_event_add_link') }}
+                            </label>
+                            <x-text-input v-if="isOnline" type="url" class="mt-2 block w-full" v-model="event.event_url"
+                                placeholder="https://" :aria-label="__('messages.event_url')" />
+                            <a href="#section-venue" class="mt-3 inline-block text-sm text-[var(--brand-blue)] hover:underline">{{ __('messages.more_venue_details') }}</a>
+                        </fieldset>
+                        @endif
 
                         </div>
                         {{-- End Panel 1 --}}
@@ -3740,7 +3816,7 @@
                     </div>
                 </div>
 
-                <button type="button" class="mobile-section-header" data-section="section-participants">
+                <button type="button" class="mobile-section-header" data-section="section-participants" {!! $moreSectionAttrs !!}>
                     <span class="flex items-center gap-2 text-sm font-medium text-gray-700 dark:text-gray-300">
                         <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-5 h-5">
                             <path stroke-linecap="round" stroke-linejoin="round" d="M15 19.128a9.38 9.38 0 002.625.372 9.337 9.337 0 004.121-.952 4.125 4.125 0 00-7.533-2.493M15 19.128v-.003c0-1.113-.285-2.16-.786-3.07M15 19.128v.106A12.318 12.318 0 018.624 21c-2.331 0-4.512-.645-6.374-1.766l-.001-.109a6.375 6.375 0 0111.964-3.07M12 6.375a3.375 3.375 0 11-6.75 0 3.375 3.375 0 016.75 0zm8.25 2.25a2.625 2.625 0 11-5.25 0 2.625 2.625 0 015.25 0z" />
@@ -4167,7 +4243,7 @@
                 </div>
 
                 <!-- Agenda Section -->
-                <button type="button" class="mobile-section-header" data-section="section-agenda">
+                <button type="button" class="mobile-section-header" data-section="section-agenda" {!! $moreSectionAttrs !!}>
                     <span class="flex items-center gap-2 text-sm font-medium text-gray-700 dark:text-gray-300">
                         <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-5 h-5">
                             <path stroke-linecap="round" stroke-linejoin="round" d="M8.25 6.75h12M8.25 12h12m-12 5.25h12M3.75 6.75h.007v.008H3.75V6.75zm.375 0a.375.375 0 11-.75 0 .375.375 0 01.75 0zM3.75 12h.007v.008H3.75V12zm.375 0a.375.375 0 11-.75 0 .375.375 0 01.75 0zm-.375 5.25h.007v.008H3.75v-.008zm.375 0a.375.375 0 11-.75 0 .375.375 0 01.75 0z" />
@@ -4807,7 +4883,7 @@
                     </div>
                 @endif
 
-            <button type="button" class="mobile-section-header" data-section="section-engagement">
+            <button type="button" class="mobile-section-header" data-section="section-engagement" {!! $moreSectionAttrs !!}>
                 <span class="flex items-center gap-2 text-sm font-medium text-gray-700 dark:text-gray-300">
                     <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-5 h-5">
                         <path stroke-linecap="round" stroke-linejoin="round" d="M3 13.125C3 12.504 3.504 12 4.125 12h2.25c.621 0 1.125.504 1.125 1.125v6.75C7.5 20.496 6.996 21 6.375 21h-2.25A1.125 1.125 0 0 1 3 19.875v-6.75ZM9.75 8.625c0-.621.504-1.125 1.125-1.125h2.25c.621 0 1.125.504 1.125 1.125v11.25c0 .621-.504 1.125-1.125 1.125h-2.25a1.125 1.125 0 0 1-1.125-1.125V8.625ZM16.5 4.125c0-.621.504-1.125 1.125-1.125h2.25C20.496 3 21 3.504 21 4.125v15.75c0 .621-.504 1.125-1.125 1.125h-2.25a1.125 1.125 0 0 1-1.125-1.125V4.125Z" />
@@ -5281,6 +5357,16 @@
                 </div>
             </div>
 
+                @if ($isFirstEventRun)
+                <button type="button" v-cloak v-if="!showMoreSections" @click="showMoreSections = true"
+                    class="lg:hidden flex w-full items-center justify-center gap-2 px-4 py-3 text-sm font-medium text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-100 transition-all duration-200">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-5 h-5" aria-hidden="true">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15m7.5-7.5h-15" />
+                    </svg>
+                    {{ __('messages.more_options') }}
+                </button>
+                @endif
+
                 </div> <!-- End of main content area -->
             </div> <!-- End of grid container -->
 
@@ -5307,7 +5393,7 @@
             <div class="flex gap-3 justify-center max-w-lg mx-auto">
                 <x-primary-button class="flex-1 justify-center" v-bind:disabled="isSaving">
                     <span v-if="isSaving">{{ __('messages.saving') }}</span>
-                    <span v-else>{{ __('messages.save') }}</span>
+                    <span v-else>{{ $isFirstEventRun ? __('messages.create_event') : __('messages.save') }}</span>
                 </x-primary-button>
                 @if ($event->exists && $event->is_draft && ! $event->is_internal)
                 <button type="button" @click="publishEvent()" v-bind:disabled="isSaving"
@@ -5505,6 +5591,13 @@
         // Lets the visibility description line follow the hovered/focused pill and fall
         // back to the selected one, so a locked Enterprise option still explains itself.
         hoveredVisibility: null,
+        // Participants, Agenda and Engagement are folded away on a first event ($moreSectionAttrs).
+        showMoreSections: @json(! $isFirstEventRun),
+        // Inline in place of the alert() it used to be: says what is missing under the fields
+        // themselves, so it is still on screen while they are being filled in.
+        dateTimeError: '',
+        // Which field the message is about, so the end-date one sits under the end-date row.
+        dateTimeErrorField: '',
         isPro: @json($role->isPro()),
         ticketMode: @json($event->tickets_enabled ? 'tickets' : ($event->rsvp_enabled ? 'rsvp' : 'external')),
         venues: @json($venues),
@@ -6581,6 +6674,75 @@
       openUpgrade(name) {
         window.dispatchEvent(new CustomEvent('open-modal', { detail: name }));
       },
+      // Same event as openUpgrade(), named for the modals that are not an upgrade prompt.
+      openModal(name) {
+        window.dispatchEvent(new CustomEvent('open-modal', { detail: name }));
+      },
+      // Template expressions cannot reach window.alert, so the header's static notices go
+      // through here.
+      showMessage(message) {
+        alert(message);
+      },
+      // The date and time are checked here rather than by the browser (the inputs are not
+      // `required`: the date is a flatpickr), so this does what the native invalid handler
+      // below does for a required field - open Details, mark it, focus the field - and says what
+      // is missing under the fields instead of in an alert() that is gone once dismissed.
+      showDateTimeError(message, field) {
+        this.dateTimeError = message;
+        this.dateTimeErrorField = field;
+        this.markDateTimeFields();
+
+        if (window.showEventSection) window.showEventSection('section-details');
+        if (window.highlightEventSectionError) window.highlightEventSectionError('section-details');
+
+        // A required field that is ALSO empty (the name) is focused by the native submit handler,
+        // which runs after this one; focusing a date as well would fight it for the caret.
+        var form = document.getElementById('edit-form');
+        if (form && ! form.checkValidity()) return;
+
+        var id = field === 'start' ? 'start_time' : (field === 'end_date' ? 'event_end_date' : 'event_date');
+        var el = document.getElementById(id);
+        var target = el && el._flatpickr && el._flatpickr.altInput ? el._flatpickr.altInput : el;
+        setTimeout(function () {
+          if (target) {
+            target.focus();
+            target.scrollIntoView({ behavior: 'smooth', block: 'center' });
+          }
+        }, 100);
+      },
+      // flatpickr draws its own altInput outside Vue, so the error border is set by hand.
+      markDateTimeFields() {
+        var pick = function (id) {
+          var el = document.getElementById(id);
+          if (! el) return null;
+          return { input: el._flatpickr && el._flatpickr.altInput ? el._flatpickr.altInput : el, value: el.value };
+        };
+        var fields = [pick('event_date'), pick('start_time')];
+        if (this.isMultiDay) fields.push(pick('event_end_date'));
+        var show = !! this.dateTimeError;
+        fields.forEach(function (f) {
+          if (! f) return;
+          var missing = show && ! f.value;
+          f.input.classList.toggle('border-red-500', missing);
+          f.input.classList.toggle('dark:border-red-400', missing);
+          if (missing) {
+            f.input.setAttribute('aria-invalid', 'true');
+          } else {
+            f.input.removeAttribute('aria-invalid');
+          }
+        });
+      },
+      // Called as the date and times are filled in, so the message goes once it is answered.
+      refreshDateTimeError() {
+        if (! this.dateTimeError) return;
+        var filled = function (id) { var el = document.getElementById(id); return !! (el && el.value); };
+        var done = filled('event_date') && filled('start_time') && (! this.isMultiDay || filled('event_end_date'));
+        if (done) {
+          this.dateTimeError = '';
+          this.dateTimeErrorField = '';
+        }
+        this.markDateTimeFields();
+      },
       validateForm(event) {
         this.formSubmitAttempted = true;
 
@@ -6588,7 +6750,7 @@
         var startVal = document.getElementById('start_time').value;
         if (!dateVal || !startVal) {
           event.preventDefault();
-          alert(@json(__('messages.date_and_time_required')));
+          this.showDateTimeError(@json(__('messages.date_and_time_required')), dateVal ? 'start' : 'date');
           return;
         }
 
@@ -6596,10 +6758,14 @@
           var endDateVal = document.getElementById('event_end_date').value;
           if (!endDateVal) {
             event.preventDefault();
-            alert(@json(__('messages.end_date_required')));
+            this.showDateTimeError(@json(__('messages.end_date_required')), 'end_date');
             return;
           }
         }
+
+        this.dateTimeError = '';
+        this.dateTimeErrorField = '';
+        this.markDateTimeFields();
 
         // Check custom fields if tickets are enabled
         if (this.event.tickets_enabled) {
@@ -8398,6 +8564,14 @@ document.addEventListener('DOMContentLoaded', function() {
         // Track current section
         currentSectionId = sectionId;
 
+        // A section folded behind "More options" on a first event opens the fold when anything
+        // navigates to it (a #hash, an invalid field), or its header would stay hidden while its
+        // content shows.
+        if (window.vueApp && ! window.vueApp.showMoreSections
+            && ['section-participants', 'section-agenda', 'section-engagement'].includes(sectionId)) {
+            window.vueApp.showMoreSections = true;
+        }
+
         sections.forEach(section => {
             if (section.id === sectionId) {
                 section.style.display = 'block';
@@ -8497,7 +8671,10 @@ document.addEventListener('DOMContentLoaded', function() {
     
     // Initialize on page load
     initializeSections();
-    
+
+    // For validateForm() in the Vue app, which runs outside this closure.
+    window.showEventSection = showSection;
+
     // Form validation error handling
     const form = document.getElementById('edit-form');
     if (form) {
@@ -8514,6 +8691,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 mobileHeader.classList.add('validation-error');
             }
         }
+        window.highlightEventSectionError = highlightSectionError;
 
         // Function to clear section error highlight by section ID
         function clearSectionErrorById(sectionId) {
@@ -8534,6 +8712,13 @@ document.addEventListener('DOMContentLoaded', function() {
             const hasErrors = section.querySelectorAll('ul.text-red-600, ul.text-red-400').length > 0;
             if (hasErrors) {
                 highlightSectionError(section.id);
+
+                // A red nav link inside the folded "More options" group is invisible, so open the
+                // fold rather than leave the error unreachable after a refused first-event save.
+                if (window.vueApp && ! window.vueApp.showMoreSections
+                    && ['section-participants', 'section-agenda', 'section-engagement'].includes(section.id)) {
+                    window.vueApp.showMoreSections = true;
+                }
             }
         });
 

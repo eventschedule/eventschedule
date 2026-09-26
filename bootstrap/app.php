@@ -49,6 +49,13 @@ return Application::configure(basePath: dirname(__DIR__))
             // a JSON blob of the visitor's own landing page, referrer and ?utm_*/?ref=
             // values - all of which the visitor already controls through the URL.
             'es_attribution',
+            // Written by the login and sign-up pages from Intl / navigator.language, and read by
+            // SocialAuthController when it creates an account. Encrypted, they were dropped as
+            // undecryptable, so every Google and Facebook sign-up was stored as America/New_York
+            // (and Facebook ones as English) with nothing to show for it. Both values are the
+            // visitor's own browser settings; SocialAuthController validates them before use.
+            'browser_timezone',
+            'browser_language',
         ]);
 
         $middleware->validateCsrfTokens(except: [

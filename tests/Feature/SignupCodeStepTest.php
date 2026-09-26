@@ -2,7 +2,12 @@
 
 namespace Tests\Feature;
 
+use App\Models\MarketingDailyStat;
+use App\Models\User;
+use App\Notifications\SignupVerificationCode;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Support\Facades\Cache;
+use Illuminate\Support\Facades\Notification;
 use Tests\TestCase;
 
 /**
@@ -314,8 +319,12 @@ class SignupCodeStepTest extends TestCase
             'auto-submit has no once-only latch, so it re-fires on every keystroke past the sixth');
         $this->assertStringContainsString('!form.checkValidity()', $html,
             'auto-submit does not check the form is complete first');
-        $this->assertStringContainsString('form.submit();', $html,
+        // The fallback for browsers without requestSubmit() goes through the fetch path too.
+        // form.submit() skips the submit listener, so it would reload the page on a wrong code
+        // and empty the password - the very thing the fetch submit exists to prevent.
+        $this->assertStringContainsString('submitSignupForm(form);', $html,
             'no fallback for browsers without requestSubmit(), where the sixth digit does nothing at all');
+        $this->assertStringNotContainsString('form.submit();', $html);
     }
 
     /**
@@ -343,6 +352,258 @@ class SignupCodeStepTest extends TestCase
             'revealSignupFields() has no inverse, so "use a different email" leaves a required but hidden code field');
         $this->assertMatchesRegularExpression('/function changeEmail\(\)[\s\S]*?hideSignupFields\(\)/', $html);
         $this->assertMatchesRegularExpression('/function changeEmail\(\)[\s\S]*?clearInterval\(resendTimer\)/', $html);
+    }
+
+    /** A browser that looks like a browser, so the counters' bot filters let it through. */
+    private function browserHeaders(string $ip = '203.0.113.40'): array
+    {
+        return [
+            'HTTP_USER_AGENT' => 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 Chrome/120 Safari/537.36',
+            'HTTP_ACCEPT_LANGUAGE' => 'en-GB,en;q=0.9',
+            'HTTP_CF_CONNECTING_IP' => $ip,
+        ];
+    }
+
+    private function signupPayload(string $code, string $email = 'organizer@eventschedule-test.org'): array
+    {
+        return [
+            'name' => 'Test Person',
+            'email' => $email,
+            'password' => 'correct-horse-battery',
+            'verification_code' => $code,
+            'terms' => '1',
+        ];
+    }
+
+    private function stat(string $column): int
+    {
+        return (int) (MarketingDailyStat::where('date', now()->toDateString())->value($column) ?? 0);
+    }
+
+    /**
+     * The hosted form submits with fetch, so a refused code has to come back as data.
+     *
+     * A full-page POST reloaded the form, and browsers never repopulate type="password": one
+     * mistyped digit cost the visitor their password as well as the code. As a 422 with the
+     * field named, the page shows it under the code box and nothing typed is lost.
+     */
+    public function test_a_wrong_code_is_answered_as_json_for_the_page_to_show_in_place(): void
+    {
+        config(['app.hosted' => true, 'app.is_testing' => false]);
+        Cache::put('signup_code_email_654321', 'organizer@eventschedule-test.org', now()->addMinutes(10));
+
+        $this->postJson(app_url('/sign_up'), $this->signupPayload('123456'), $this->browserHeaders())
+            ->assertStatus(422)
+            ->assertJsonValidationErrors('verification_code');
+
+        $this->assertDatabaseMissing('users', ['email' => 'organizer@eventschedule-test.org']);
+    }
+
+    /**
+     * A wrong guess must not burn the right code.
+     *
+     * The page keeps the visitor on the code step after a 422 so they can simply retype, which
+     * is only true if the code in their inbox still works. Cache::pull() takes the SUBMITTED
+     * code, so this pins that a mistype never touches the real one.
+     */
+    public function test_a_correct_code_after_a_wrong_one_signs_up_and_answers_with_the_redirect(): void
+    {
+        config(['app.hosted' => true, 'app.is_testing' => false]);
+        Cache::put('signup_code_email_654321', 'organizer@eventschedule-test.org', now()->addMinutes(10));
+
+        $this->postJson(app_url('/sign_up'), $this->signupPayload('123456'), $this->browserHeaders())
+            ->assertStatus(422);
+
+        $response = $this->postJson(app_url('/sign_up'), $this->signupPayload('654321'), $this->browserHeaders())
+            ->assertOk()
+            ->assertJsonStructure(['redirect']);
+
+        $this->assertNotEmpty($response->json('redirect'));
+        $this->assertDatabaseHas('users', ['email' => 'organizer@eventschedule-test.org']);
+        $this->assertAuthenticated();
+    }
+
+    /** A full-page POST - no JavaScript, or a tab from before this change - still redirects. */
+    public function test_a_plain_form_post_still_redirects(): void
+    {
+        config(['app.hosted' => true, 'app.is_testing' => false]);
+        Cache::put('signup_code_email_654321', 'organizer@eventschedule-test.org', now()->addMinutes(10));
+
+        $this->post(app_url('/sign_up'), $this->signupPayload('654321'), $this->browserHeaders())
+            ->assertRedirect();
+
+        $this->assertDatabaseHas('users', ['email' => 'organizer@eventschedule-test.org']);
+    }
+
+    /**
+     * signup_code_invalid separates "came back and got it wrong" from "never came back".
+     *
+     * Deduped per visitor per day like the other two, so a visitor who mistypes three times is
+     * one person with a problem, not three.
+     */
+    public function test_a_refused_code_is_counted_once_per_visitor(): void
+    {
+        config(['app.hosted' => true, 'app.is_testing' => false]);
+
+        $this->postJson(app_url('/sign_up'), $this->signupPayload('111111'), $this->browserHeaders())->assertStatus(422);
+        $this->assertSame(1, $this->stat('signup_code_invalid'));
+
+        $this->postJson(app_url('/sign_up'), $this->signupPayload('222222'), $this->browserHeaders())->assertStatus(422);
+        $this->assertSame(1, $this->stat('signup_code_invalid'), 'the same visitor again the same day is not a second person');
+
+        $this->postJson(app_url('/sign_up'), $this->signupPayload('333333'), $this->browserHeaders('203.0.113.41'))->assertStatus(422);
+        $this->assertSame(2, $this->stat('signup_code_invalid'));
+    }
+
+    /** And only a refused CODE counts: a missing name is not the code wall. */
+    public function test_a_rejection_before_the_code_check_is_not_counted(): void
+    {
+        config(['app.hosted' => true, 'app.is_testing' => false]);
+
+        $payload = $this->signupPayload('111111');
+        unset($payload['name']);
+
+        $this->postJson(app_url('/sign_up'), $payload, $this->browserHeaders())
+            ->assertStatus(422)
+            ->assertJsonValidationErrors('name');
+
+        $this->assertSame(0, $this->stat('signup_code_invalid'));
+    }
+
+    /** Every submit of the hosted form goes through fetch, asking for JSON. */
+    public function test_the_hosted_form_submits_without_leaving_the_page(): void
+    {
+        $html = $this->signupPage()->assertOk()->getContent();
+
+        $this->assertStringContainsString('function submitSignupForm(form)', $html);
+        $this->assertMatchesRegularExpression("/addEventListener\('submit', function \(e\) \{\s*e\.preventDefault\(\);\s*submitSignupForm\(signupForm\);/", $html,
+            'the form submit is not routed through submitSignupForm()');
+        $this->assertMatchesRegularExpression("/function submitSignupForm[\s\S]*?'Accept': 'application\/json'/", $html);
+        // A refused code resets the once-only latch, or the retyped code never auto-submits.
+        $this->assertMatchesRegularExpression('/if \(errors\.verification_code\) \{[\s\S]*?autoSubmitted = false;/', $html);
+    }
+
+    /** The code panel says where else to look, and a resend is visible. */
+    public function test_the_code_panel_helps_find_the_mail(): void
+    {
+        $html = $this->signupPage()->assertOk()->getContent();
+
+        $this->assertStringContainsString(__('messages.subscribe_done_note'), $html);
+        $this->assertStringContainsString(e(__('messages.signup_code_in_subject')), $html);
+        $this->assertStringContainsString('id="open-webmail-link"', $html);
+        $this->assertStringContainsString('id="code-resent-note"', $html);
+        $this->assertStringContainsString(e(__('messages.code_resent')), $html);
+        // The Gmail button searches every folder for our sender, so spam is covered too.
+        $this->assertStringContainsString(rawurlencode('in:anywhere from:'.config('mail.from.address')), str_replace('\/', '/', $html));
+    }
+
+    /** Somebody who already holds a code can open the code step without asking for another. */
+    public function test_a_visitor_with_a_code_can_open_the_code_step_without_a_send(): void
+    {
+        $html = $this->signupPage()->assertOk()->getContent();
+
+        $this->assertStringContainsString('id="have-code-btn"', $html);
+        $this->assertStringContainsString(e(__('messages.already_have_a_code')), $html);
+        $this->assertMatchesRegularExpression("/getElementById\('have-code-btn'\)[\s\S]*?showCodeSentState\(typed\)/", $html);
+    }
+
+    /** A reloaded or discarded tab comes back to the code step it was on. */
+    public function test_the_code_step_survives_a_reload(): void
+    {
+        $html = $this->signupPage()->assertOk()->getContent();
+
+        $this->assertMatchesRegularExpression('/if \(response\.ok && data\.success\) \{[\s\S]*?rememberCodeSent\(email\);/', $html,
+            'a successful send is not remembered for this tab');
+        $this->assertMatchesRegularExpression('/var stored = readCodeSent\(\);[\s\S]*?showCodeSentState\(stored\.email\)/', $html);
+        // Every sessionStorage access is guarded: it throws in private windows.
+        $this->assertSame(
+            substr_count($html, 'sessionStorage.'),
+            preg_match_all('/try \{\s*(?:var stored = JSON\.parse\()?sessionStorage\./', $html)
+        );
+    }
+
+    /** "Continue sign-up" in the mail opens the code step, with the address filled in. */
+    public function test_the_step_parameter_opens_the_code_step(): void
+    {
+        config([
+            'app.hosted' => true,
+            'app.is_testing' => false,
+        ]);
+
+        $email = 'organizer@eventschedule-test.org';
+
+        $with = $this->get(app_url('/sign_up').'?'.http_build_query(['email' => base64_encode($email), 'step' => 'code']))->assertOk()->getContent();
+        $this->assertStringContainsString('if (true && emailInput.value)', $with);
+        $this->assertStringContainsString('value="'.$email.'"', $with);
+
+        $without = $this->get(app_url('/sign_up'))->assertOk()->getContent();
+        $this->assertStringContainsString('if (false && emailInput.value)', $without);
+    }
+
+    /**
+     * The code mail links back to the code step - for sign-up only, and never with the code in it.
+     *
+     * Rendered rather than inspected: the button is only worth anything if it is in the HTML the
+     * visitor opens. The guest-add flow mounts the same send method and has no page to return
+     * to, so its mail must carry no button.
+     */
+    public function test_the_code_mail_links_back_to_the_code_step(): void
+    {
+        config(['app.hosted' => true]);
+        Notification::fake();
+
+        $email = 'organizer@eventschedule-test.org';
+        $this->postJson(route('sign_up.send_code'), ['email' => $email])->assertOk();
+
+        Notification::assertSentOnDemand(SignupVerificationCode::class, function ($notification, $channels, $notifiable) use ($email) {
+            $mail = $notification->toMail($notifiable);
+            $html = $mail->render();
+            $code = $mail->envelope()->subject;
+            preg_match('/\d{6}/', $code, $m);
+
+            $this->assertStringContainsString(e(__('messages.continue_signup')), $html);
+            $this->assertStringContainsString('step=code', $html);
+            $this->assertStringContainsString(urlencode(base64_encode($email)), $html);
+            $this->assertStringNotContainsString('verification_code='.$m[0], $html);
+            $this->assertStringNotContainsString('code='.$m[0], $html);
+
+            return true;
+        });
+    }
+
+    /**
+     * The text part is plain text, so an HTML-escaped URL arrives as `&amp;step=code` - a parameter
+     * named `amp;step` - and the link opens step one instead of the code step.
+     */
+    public function test_the_text_mail_carries_the_continue_link_unescaped(): void
+    {
+        $url = 'https://app.eventschedule.test/sign_up?email=b3JnYW5pemVy&step=code';
+
+        $text = view('emails.signup_verification_code_text', [
+            'code' => '123456',
+            'continueUrl' => $url,
+        ])->render();
+
+        $this->assertStringContainsString($url, $text);
+        $this->assertStringNotContainsString('&amp;', $text);
+    }
+
+    public function test_the_guest_code_mail_has_no_sign_up_link(): void
+    {
+        config(['app.hosted' => true]);
+        Notification::fake();
+
+        $this->postJson(route('event.guest_send_code', ['subdomain' => 'a-venue']), ['email' => 'guest@eventschedule-test.org'])
+            ->assertOk();
+
+        Notification::assertSentOnDemand(SignupVerificationCode::class, function ($notification, $channels, $notifiable) {
+            $html = $notification->toMail($notifiable)->render();
+
+            $this->assertStringNotContainsString('step=code', $html);
+            $this->assertStringNotContainsString(e(__('messages.continue_signup')), $html);
+
+            return true;
+        });
     }
 
     /** Isolates the verification_code input so an attribute elsewhere cannot satisfy a check. */

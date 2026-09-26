@@ -173,6 +173,7 @@ class BookingFormSettingsTest extends TestCase
         $this->actingAs($owner)->post(route('role.store'), [
             'type' => 'venue',
             'name' => 'Plain Venue',
+            'address1' => '1 Test St',
             'email' => 'plain.venue@gmail.com',
             'timezone' => 'America/New_York',
             'language_code' => 'en',

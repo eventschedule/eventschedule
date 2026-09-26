@@ -7,6 +7,7 @@ use App\Models\Event;
 use App\Models\Role;
 use App\Models\Setting;
 use App\Models\User;
+use App\Utils\TimezoneUtils;
 use App\Utils\UrlUtils;
 use Carbon\Carbon;
 use Illuminate\Support\Collection;
@@ -617,7 +618,9 @@ class FederationService
             'language' => $event->getLanguageCode(),
             'starts_at' => $occurrences[0] ?? null,
             'ends_at' => $this->endsAt($event, $occurrences[0] ?? null),
-            'timezone' => $event->scheduleTimezone(),
+            // The hub validates this with Laravel's plain `timezone` rule, which drops a listing
+            // whose schedule stored a backward-compat alias (Asia/Calcutta). Send the listed name.
+            'timezone' => TimezoneUtils::canonicalize($event->scheduleTimezone()) ?? $event->scheduleTimezone(),
             'occurrences' => $occurrences,
             'occurrences_hash' => $this->hashOccurrences($occurrences),
             'schedule_name' => optional($schedule)->name,

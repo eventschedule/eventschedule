@@ -4,6 +4,7 @@ namespace Tests\Feature;
 
 use App\Models\Role;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Support\Facades\DB;
 use Tests\Feature\Concerns\CreatesScheduleData;
 use Tests\TestCase;
 
@@ -79,6 +80,24 @@ class FirstScheduleFormTest extends TestCase
                 continue;
             }
             $fields[$match[1]] = html_entity_decode($match[2], ENT_QUOTES);
+        }
+
+        // A <select> posts its selected option, or its first one when none is marked: the
+        // timezone is a select now, and a scrape of inputs alone would post no timezone at all.
+        preg_match_all('/<select[^>]*name="([^"]+)"[^>]*>(.*?)<\/select>/s', $html, $selects, PREG_SET_ORDER);
+        foreach ($selects as $select) {
+            preg_match_all('/<option[^>]*value="([^"]*)"([^>]*)>/', $select[2], $options, PREG_SET_ORDER);
+            $chosen = null;
+            foreach ($options as $option) {
+                if (preg_match('/\bselected\b/', $option[2])) {
+                    $chosen = $option[1];
+                    break;
+                }
+            }
+            $chosen ??= $options[0][1] ?? null;
+            if ($chosen !== null) {
+                $fields[$select[1]] = html_entity_decode($chosen, ENT_QUOTES);
+            }
         }
 
         return $fields;
@@ -283,5 +302,77 @@ class FirstScheduleFormTest extends TestCase
         $role = Role::where('user_id', $user->id)->where('type', 'venue')->firstOrFail();
 
         $response->assertRedirect(route('role.view_admin', ['subdomain' => $role->subdomain, 'tab' => 'schedule']));
+    }
+
+    /** /new/bogus used to render, stamp schedule_form_viewed_at and head a form of type "bogus". */
+    public function test_an_unknown_type_is_not_found(): void
+    {
+        $user = $this->createOwner();
+        $this->actingAs($user);
+
+        $this->get('/new/bogus')->assertNotFound();
+
+        $this->assertNull($user->fresh()->schedule_form_viewed_at);
+    }
+
+    /** store() fills from $request->all() and `type` is fillable, so the POST is the real hole. */
+    public function test_an_unknown_type_cannot_be_posted(): void
+    {
+        $user = $this->createOwner();
+        $this->actingAs($user);
+
+        $payload = $this->fieldsFrom($this->get(route('new', ['type' => 'talent']))->getContent());
+        $payload['name'] = 'Bogus Type';
+        $payload['type'] = 'bogus';
+
+        $this->post(route('role.store'), $payload)->assertSessionHasErrors('type');
+
+        $this->assertFalse(Role::where('user_id', $user->id)->exists());
+    }
+
+    /** The address was required only by the browser; a venue needs one to be found on a map. */
+    public function test_a_venue_needs_an_address_on_the_server_too(): void
+    {
+        $user = $this->createOwner();
+        $this->actingAs($user);
+
+        $payload = $this->fieldsFrom($this->get(route('new', ['type' => 'venue']))->getContent());
+        $payload['name'] = 'No Address Venue';
+        unset($payload['address1']);
+
+        $this->post(route('role.store'), $payload)->assertSessionHasErrors('address1');
+
+        $payload['address1'] = str_repeat('a', 256);
+        $this->post(route('role.store'), $payload)->assertSessionHasErrors('address1');
+
+        $this->assertFalse(Role::where('user_id', $user->id)->exists());
+    }
+
+    /**
+     * The timezone is changeable here, not only shown: a Google sign-up used to be stored as
+     * America/New_York whatever the browser said, and this is the last stop before every event on
+     * the schedule is anchored to it.
+     */
+    public function test_the_timezone_can_be_changed_on_the_form(): void
+    {
+        $user = $this->createOwner();
+        DB::table('users')->where('id', $user->id)->update(['timezone' => 'America/New_York']);
+        $this->actingAs($user->fresh());
+
+        $html = $this->get(route('new', ['type' => 'talent']))->assertOk()->getContent();
+
+        $this->assertStringContainsString('<details id="timezone-details"', $html);
+        $this->assertMatchesRegularExpression('/<select name="timezone" id="timezone"/', $html);
+        $this->assertStringNotContainsString('<input type="hidden" name="timezone"', $html,
+            'a hidden timezone input would post after the select and override the user\'s choice');
+
+        $payload = $this->fieldsFrom($html);
+        $this->assertSame('America/New_York', $payload['timezone']);
+
+        $payload['name'] = 'Moved Band';
+        $payload['timezone'] = 'Europe/Berlin';
+        $this->post(route('role.store'), $payload)->assertSessionHasNoErrors()->assertRedirect();
+
+        $this->assertSame('Europe/Berlin', Role::where('user_id', $user->id)->value('timezone'));
     }
 }

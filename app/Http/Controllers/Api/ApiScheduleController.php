@@ -9,11 +9,13 @@ use App\Models\AnalyticsReferrersDaily;
 use App\Models\BoostCampaign;
 use App\Models\Role;
 use App\Notifications\DeletedRoleNotification;
+use App\Rules\UsableTimezone;
 use App\Services\AuditService;
 use App\Services\BoostBillingService;
 use App\Services\MetaAdsService;
 use App\Services\ScheduleDeletionService;
 use App\Utils\ColorUtils;
+use App\Utils\TimezoneUtils;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Notification;
 use Illuminate\Support\Facades\Storage;
@@ -93,6 +95,8 @@ class ApiScheduleController extends Controller
 
     public function store(Request $request)
     {
+        $this->canonicalizeTimezone($request);
+
         try {
             $request->validate([
                 'name' => 'required|string|max:255',
@@ -100,7 +104,7 @@ class ApiScheduleController extends Controller
                 'email' => 'nullable|email|max:255',
                 'description' => 'nullable|string|max:10000',
                 'short_description' => 'nullable|string|max:200',
-                'timezone' => 'nullable|string|max:100',
+                'timezone' => ['nullable', 'string', 'max:100', new UsableTimezone],
                 'language_code' => 'nullable|string|in:'.implode(',', array_keys(config('app.supported_languages', ['en' => 'english']))),
                 'website' => 'nullable|string|max:255',
                 'address1' => 'nullable|string|max:255',
@@ -191,13 +195,15 @@ class ApiScheduleController extends Controller
             return response()->json(['error' => 'API usage is limited to Pro accounts'], 403);
         }
 
+        $this->canonicalizeTimezone($request);
+
         try {
             $request->validate([
                 'name' => 'sometimes|required|string|max:255',
                 'email' => 'nullable|email|max:255',
                 'description' => 'nullable|string|max:10000',
                 'short_description' => 'nullable|string|max:200',
-                'timezone' => 'nullable|string|max:100',
+                'timezone' => ['nullable', 'string', 'max:100', new UsableTimezone],
                 'language_code' => 'nullable|string|in:'.implode(',', array_keys(config('app.supported_languages', ['en' => 'english']))),
                 'website' => 'nullable|string|max:255',
                 'address1' => 'nullable|string|max:255',
@@ -381,5 +387,17 @@ class ApiScheduleController extends Controller
                 'message' => 'Schedule deleted successfully',
             ],
         ], 200, [], JSON_PRETTY_PRINT);
+    }
+
+    /**
+     * Store the listed name for a backward-compat alias (Asia/Calcutta -> Asia/Kolkata), so the
+     * schedule's timezone matches an option in the web form's timezone select. Anything that is not a timezone at all is left for the `timezone` rule to refuse: it used
+     * to be stored as-is, and setTimezone() throws on it at render.
+     */
+    private function canonicalizeTimezone(Request $request): void
+    {
+        if (is_string($request->input('timezone')) && ($canonical = TimezoneUtils::canonicalize($request->input('timezone')))) {
+            $request->merge(['timezone' => $canonical]);
+        }
     }
 }

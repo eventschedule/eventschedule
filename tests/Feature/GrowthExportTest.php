@@ -229,6 +229,81 @@ class GrowthExportTest extends TestCase
     }
 
     /**
+     * The emailed-code step is measured, and drawn as its own group.
+     *
+     * Never part of the cohort chain: a Google sign-up skips the code, so 'account' can exceed
+     * 'signup_code_verified' and a ratio across that boundary would be meaningless. Inside the
+     * group, verified/requests IS the code wall's conversion, while signup_code_invalid overlaps
+     * both (a mistype then a success counts in each) and must get no ratio.
+     */
+    public function test_the_email_code_step_is_its_own_group(): void
+    {
+        $start = \Illuminate\Support\Carbon::parse('2026-09-26');
+        $end = \Illuminate\Support\Carbon::parse('2026-09-30')->endOfDay();
+
+        MarketingDailyStat::create([
+            'date' => '2026-09-26',
+            'signup_views' => 40,
+            'signup_code_requests' => 10,
+            'signup_code_verified' => 6,
+            'signup_code_invalid' => 3,
+        ]);
+
+        $funnel = app(GrowthExportService::class)->funnelData($start, $end, $start->copy()->subDays(5), $start->copy()->subSecond());
+        $byKey = array_column($funnel['stages'], null, 'key');
+
+        $this->assertSame(['signup_code_requests', 'signup_code_verified', 'signup_code_invalid'],
+            array_values(array_map(fn ($s) => $s['key'], array_filter($funnel['stages'], fn ($s) => $s['group'] === 'email_code'))));
+
+        $this->assertSame(10, $byKey['signup_code_requests']['count']);
+        $this->assertEquals(25.0, $byKey['signup_code_requests']['step_conv'], 'share of sign-up page visitors who asked for a code');
+        $this->assertEquals(60.0, $byKey['signup_code_verified']['step_conv'], 'the code wall\'s own conversion');
+        $this->assertSame(3, $byKey['signup_code_invalid']['count']);
+        $this->assertNull($byKey['signup_code_invalid']['step_conv'], 'an overlap counter is not a step');
+        $this->assertNull($byKey['account']['step_conv']);
+
+        // The group sits between the sign-up page and the account, and the leak finder ignores it.
+        $keys = array_column($funnel['stages'], 'key');
+        $this->assertLessThan(array_search('account', $keys), array_search('signup_code_invalid', $keys));
+        $this->assertGreaterThan(array_search('signup_view', $keys), array_search('signup_code_requests', $keys));
+        $this->assertNotContains($funnel['biggest_drop']['from_key'] ?? null, ['signup_code_requests', 'signup_code_verified', 'signup_code_invalid']);
+    }
+
+    /** A window opening before a column existed reports it as n/a, not as its backfilled zero. */
+    public function test_email_code_stages_are_null_before_their_column_existed(): void
+    {
+        MarketingDailyStat::create(['date' => '2026-07-10', 'signup_views' => 5]);
+
+        // Opens after the table but before the code counters (2026-08-03).
+        $early = app(GrowthExportService::class)->funnelData(
+            \Illuminate\Support\Carbon::parse('2026-07-10'), \Illuminate\Support\Carbon::parse('2026-07-31'),
+            \Illuminate\Support\Carbon::parse('2026-06-10'), \Illuminate\Support\Carbon::parse('2026-07-09'));
+        $byKey = array_column($early['stages'], 'count', 'key');
+        $this->assertSame(5, $byKey['signup_view']);
+        $this->assertNull($byKey['signup_code_requests']);
+        $this->assertNull($byKey['signup_code_invalid']);
+
+        // Opens after the request counters but before signup_code_invalid (2026-09-25).
+        $mid = app(GrowthExportService::class)->funnelData(
+            \Illuminate\Support\Carbon::parse('2026-08-10'), \Illuminate\Support\Carbon::parse('2026-08-31'),
+            \Illuminate\Support\Carbon::parse('2026-07-10'), \Illuminate\Support\Carbon::parse('2026-08-09'));
+        $byKey = array_column($mid['stages'], 'count', 'key');
+        $this->assertSame(0, $byKey['signup_code_requests']);
+        $this->assertNull($byKey['signup_code_invalid']);
+    }
+
+    /** Selfhost has no code step, so no group for it. */
+    public function test_email_code_stages_are_hosted_only(): void
+    {
+        config(['app.hosted' => false]);
+
+        $keys = array_column($this->build()['funnel']['stages'], 'key');
+
+        $this->assertNotContains('signup_code_requests', $keys);
+        $this->assertNotContains('signup_code_invalid', $keys);
+    }
+
+    /**
      * Cashier's subscriptions() relation has no status filter, so "has a subscriptions row"
      * counted a declined card as a sale - the very population stripe_subscription_failed exists
      * to separate out.

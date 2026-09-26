@@ -8,6 +8,7 @@ use App\Notifications\SignupVerificationCode;
 use App\Rules\NoFakeEmail;
 use App\Services\AuditService;
 use App\Utils\HoneypotUtils;
+use App\Utils\TimezoneUtils;
 use App\Utils\UrlUtils;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Cache;
@@ -134,6 +135,9 @@ class ApiAuthController extends Controller
             }
         }
 
+        // A browser or device alias (Asia/Calcutta) would fail the schedule form's timezone rule.
+        $timezone = TimezoneUtils::canonicalize($request->timezone) ?? 'America/New_York';
+
         $email = strtolower($request->email);
         $existingUser = User::where('email', $email)->first();
 
@@ -149,9 +153,9 @@ class ApiAuthController extends Controller
             $existingUser->update([
                 'name' => $request->name,
                 'password' => Hash::make($request->password),
-                'timezone' => $request->timezone ?? 'America/New_York',
+                'timezone' => $timezone,
                 'language_code' => $request->language_code ?? 'en',
-                'use_24_hour_time' => detect_24_hour_time($request->timezone, $request->language_code),
+                'use_24_hour_time' => detect_24_hour_time($timezone, $request->language_code),
                 'signup_intent' => $existingUser->signup_intent ?? 'api',
             ]);
             $user = $existingUser;
@@ -160,9 +164,9 @@ class ApiAuthController extends Controller
                 'name' => $request->name,
                 'email' => $email,
                 'password' => Hash::make($request->password),
-                'timezone' => $request->timezone ?? 'America/New_York',
+                'timezone' => $timezone,
                 'language_code' => $request->language_code ?? 'en',
-                'use_24_hour_time' => detect_24_hour_time($request->timezone, $request->language_code),
+                'use_24_hour_time' => detect_24_hour_time($timezone, $request->language_code),
                 'signup_intent' => 'api',
             ]);
         }

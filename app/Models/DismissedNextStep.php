@@ -46,6 +46,10 @@ class DismissedNextStep extends Model
         // has since run and gone quiet. That nudge is the one this whole programme exists for.
         'next_step_first_event',
         'next_step_next_event',
+        // An upcoming event that is still a draft. Its own type because the ask is different -
+        // publish what is there, not add another - and answering "not yet" to it must not
+        // silence the empty-page or dormancy asks above.
+        'next_step_publish_event',
     ];
 
     /**
@@ -72,6 +76,8 @@ class DismissedNextStep extends Model
         'next_step_payments' => ['no_gateway'],
         'next_step_first_event' => ['no_event'],
         'next_step_next_event' => ['idle_30', 'idle_60'],
+        // No email asks this, so a dismissal of it silences nothing.
+        'next_step_publish_event' => [],
     ];
 
     /**

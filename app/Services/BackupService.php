@@ -39,6 +39,7 @@ use App\Utils\CssUtils;
 use App\Utils\JsonUtils;
 use App\Utils\MarkdownUtils;
 use App\Utils\TextUtils;
+use App\Utils\TimezoneUtils;
 use App\Utils\UrlUtils;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\QueryException;
@@ -1714,6 +1715,12 @@ class BackupService
         $role->header_style = $data['header_style'] ?? null;
         $role->subdomain = $subdomain;
         $role->user_id = $userId;
+
+        // A backup taken before timezone aliases were canonicalized can carry Asia/Calcutta and the
+        // like, which the schedule form's timezone select has no option for.
+        if (is_string($role->timezone) && $role->timezone !== '') {
+            $role->timezone = TimezoneUtils::canonicalize($role->timezone) ?? $role->timezone;
+        }
 
         // Clear local image paths since they reference the source system. External URLs are
         // preserved, and local images are restored by importRoleImages() under new names if the

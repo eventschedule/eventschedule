@@ -7,6 +7,7 @@ use App\Models\Referral;
 use App\Models\User;
 use App\Services\AuditService;
 use App\Utils\SocialLoginUtils;
+use App\Utils\TimezoneUtils;
 use Illuminate\Auth\Events\Registered;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Support\Facades\Auth;
@@ -227,7 +228,7 @@ class SocialAuthController extends Controller
             $languageCode = $browserLanguage;
         }
 
-        $timezone = $browserTimezone ?: 'America/New_York';
+        $timezone = TimezoneUtils::canonicalize(is_string($browserTimezone) ? $browserTimezone : null) ?? 'America/New_York';
 
         $user = User::create([
             'name' => $socialUser->getName(),

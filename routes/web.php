@@ -553,7 +553,7 @@ Route::middleware(['auth', 'verified', 'app_subdomain'])->group(function () {
     Route::post('/dashboard/next-steps/dismiss', [HomeController::class, 'dismissNextStep'])->name('home.next_steps_dismiss');
     Route::post('/dashboard/next-steps/dismiss-all', [HomeController::class, 'dismissAllNextSteps'])->name('home.next_steps_dismiss_all');
     Route::get('/getting-started', [HomeController::class, 'gettingStarted'])->name('getting-started');
-    Route::get('/new/{type}', [RoleController::class, 'create'])->name('new');
+    Route::get('/new/{type}', [RoleController::class, 'create'])->name('new')->where('type', 'talent|venue|curator');
     Route::post('/validate_address', [RoleController::class, 'validateAddress'])->name('validate_address')->middleware('throttle:25,1440');
     Route::post('/store', [RoleController::class, 'store'])->name('role.store');
     Route::get('/search-roles', [RoleController::class, 'search'])->name('role.search');

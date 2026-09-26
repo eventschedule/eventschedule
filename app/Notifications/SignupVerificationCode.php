@@ -14,11 +14,21 @@ class SignupVerificationCode extends Notification
     protected $code;
 
     /**
+     * Where "Continue sign-up" in the mail leads, or null for no button.
+     *
+     * Only the sign-up page passes one. The guest-add flow and the API share this notification,
+     * and neither has a page to come back to. The URL carries the address and step=code, never
+     * the code: the visitor still types it, which is what proves they read this mail.
+     */
+    protected ?string $continueUrl;
+
+    /**
      * Create a new notification instance.
      */
-    public function __construct($code)
+    public function __construct($code, ?string $continueUrl = null)
     {
         $this->code = $code;
+        $this->continueUrl = $continueUrl;
     }
 
     /**
@@ -47,7 +57,7 @@ class SignupVerificationCode extends Notification
             $email = $notifiable->email;
         }
 
-        return new class($this->code, $email) extends Mailable
+        return new class($this->code, $email, $this->continueUrl) extends Mailable
         {
             use SerializesModels;
 
@@ -55,10 +65,13 @@ class SignupVerificationCode extends Notification
 
             protected $email;
 
-            public function __construct($code, $email)
+            protected $continueUrl;
+
+            public function __construct($code, $email, $continueUrl)
             {
                 $this->code = $code;
                 $this->email = $email;
+                $this->continueUrl = $continueUrl;
 
                 // Set the recipient
                 if ($this->email) {
@@ -80,6 +93,7 @@ class SignupVerificationCode extends Notification
                     text: 'emails.signup_verification_code_text',
                     with: [
                         'code' => $this->code,
+                        'continueUrl' => $this->continueUrl,
                     ]
                 );
             }

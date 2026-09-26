@@ -141,6 +141,7 @@ class TranslationLanguageTargetTest extends TestCase
         $user = $this->createOwner();
 
         $this->actingAs($user)->post(route('role.store'), [
+            'type' => 'talent',
             'name' => 'Fresh English Schedule',
             'email' => 'fresh@gmail.com',
             'timezone' => 'America/New_York',
@@ -162,6 +163,7 @@ class TranslationLanguageTargetTest extends TestCase
         $user = $this->createOwner();
 
         $this->actingAs($user)->post(route('role.store'), [
+            'type' => 'talent',
             'name' => 'Fresh Italian Schedule',
             'email' => 'fresh-it@gmail.com',
             'timezone' => 'America/New_York',
@@ -227,6 +229,7 @@ class TranslationLanguageTargetTest extends TestCase
         $user = $this->createOwner();
 
         $this->actingAs($user)->post(route('role.store'), [
+            'type' => 'talent',
             'name' => 'No Language Schedule',
             'email' => 'no-lang@gmail.com',
             'timezone' => 'America/New_York',

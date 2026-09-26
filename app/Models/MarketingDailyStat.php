@@ -27,6 +27,7 @@ class MarketingDailyStat extends Model
         'pricing_visitors',
         'signup_code_requests',
         'signup_code_verified',
+        'signup_code_invalid',
     ];
 
     protected $casts = [
@@ -53,6 +54,10 @@ class MarketingDailyStat extends Model
         'pricing_visitors',
         'signup_code_requests',
         'signup_code_verified',
+        // Visitors who had at least one sign-up code rejected that day. NOT a stage below
+        // signup_code_verified: somebody can mistype once and then succeed, so it overlaps
+        // both of the others. It separates "came back and got it wrong" from "never came back".
+        'signup_code_invalid',
     ];
 
     /**
@@ -83,6 +88,8 @@ class MarketingDailyStat extends Model
         // 2026_08_28_000001_add_upgrade_funnel_tracking
         'pricing_views' => '2026-08-28',
         'pricing_visitors' => '2026-08-28',
+        // 2026_09_25_000001_add_signup_code_invalid_to_marketing_daily_stats
+        'signup_code_invalid' => '2026-09-25',
     ];
 
     /**

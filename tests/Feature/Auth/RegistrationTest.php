@@ -27,6 +27,24 @@ class RegistrationTest extends TestCase
         $response->assertStatus(200);
     }
 
+    /**
+     * The sign-up page hands the browser's timezone and language to the Google/Facebook path.
+     *
+     * SocialAuthController reads them from the browser_timezone / browser_language cookies,
+     * because an OAuth round trip never posts this form. Only the login page used to write them,
+     * so every account made with Google FROM THE SIGN-UP PAGE fell back to America/New_York, and
+     * every schedule it then created copied that.
+     */
+    public function test_the_sign_up_page_writes_the_cookies_the_social_path_reads(): void
+    {
+        config(['app.hosted' => true]);
+
+        $html = $this->get('/sign_up')->assertOk()->getContent();
+
+        $this->assertStringContainsString('document.cookie = "browser_timezone=" + timezone', $html);
+        $this->assertStringContainsString('document.cookie = "browser_language=" + document.getElementById(\'language_code\').value', $html);
+    }
+
     public function test_new_users_can_register_in_hosted_app(): void
     {
         config(['app.hosted' => true]);

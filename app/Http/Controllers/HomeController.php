@@ -732,6 +732,21 @@ class HomeController extends Controller
             ->whereIn('event_role.role_id', $ids))
             ->distinct()->pluck('event_role.role_id')->flip();
 
+        // Each schedule's soonest upcoming draft, keyed to that event. A page whose only upcoming
+        // date is a draft is not empty, it is unpublished, so "add your next date" is the wrong
+        // ask - the first event someone saves as a draft got exactly that on day one. Internal
+        // events are left out: there is nothing to publish, they are meant to stay off the page.
+        $upcomingDraft = $owned(DB::table('event_role')
+            ->join('events', 'events.id', '=', 'event_role.event_id')
+            ->whereIn('event_role.role_id', $ids)
+            ->where('events.is_draft', true)
+            ->where('events.is_internal', false)
+            ->where('events.starts_at', '>=', now()))
+            ->orderBy('events.starts_at')
+            ->get(['event_role.role_id', 'events.id as event_id'])
+            ->unique('role_id')
+            ->pluck('event_id', 'role_id');
+
         // is_addon excluded to match Event::tickets(), which the email half goes through: an
         // add-on is not a thing anyone buys on its own, so it is not a ticket type.
         $ticketTypes = fn (bool $paidOnly) => $owned(DB::table('tickets')
@@ -836,7 +851,30 @@ class HomeController extends Controller
                 continue;
             }
 
-            // 3) An empty page, or one whose dates have all passed. Two step types rather than
+            // 3) Something upcoming that is still a draft: publish it. Before the empty-page
+            // branch, which would otherwise read the draft as nothing at all. Unlisted events are
+            // deliberately not included: telling someone to publish an event they chose to keep
+            // off their schedule page argues with that choice.
+            if (! isset($publicUpcoming[$role->id]) && isset($upcomingDraft[$role->id])) {
+                if (! isset($dismissed[$role->id.':next_step_publish_event'])) {
+                    $items->push([
+                        'type' => 'next_step_publish_event',
+                        'count' => 1,
+                        'title' => __('messages.next_step_publish_event'),
+                        'subtitle' => $role->name,
+                        'url' => route('event.edit', [
+                            'subdomain' => $role->subdomain,
+                            'hash' => UrlUtils::encodeId($upcomingDraft[$role->id]),
+                        ]),
+                        'color' => 'blue',
+                        'dismiss_schedule' => UrlUtils::encodeId($role->id),
+                    ]);
+                }
+
+                continue;
+            }
+
+            // 4) An empty page, or one whose dates have all passed. Two step types rather than
             // one, keyed off the same condition that picks the copy: "never published" and "went
             // quiet" are different situations at opposite ends of a schedule's life, and a
             // dismissal is permanent, so folding them together lets a day-one "not ready yet"
@@ -865,6 +903,7 @@ class HomeController extends Controller
             'next_step_payments' => 1,
             'next_step_first_event' => 2,
             'next_step_next_event' => 2,
+            'next_step_publish_event' => 2,
         ];
 
         return $items->sortBy(fn ($item) => $priority[$item['type']] ?? 9)->values();

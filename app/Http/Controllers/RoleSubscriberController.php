@@ -14,6 +14,7 @@ use App\Rules\NoFakeEmail;
 use App\Services\AuditService;
 use App\Utils\HoneypotUtils;
 use App\Utils\StubAccountUtils;
+use App\Utils\TimezoneUtils;
 use Illuminate\Database\QueryException;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -820,9 +821,10 @@ class RoleSubscriberController extends Controller
     {
         // is_string(): input() hands back `timezone[]=x` as an array untouched, and this feeds a
         // string column and detect_24_hour_time().
-        $timezone = $user->timezone ?: (is_string($requestTimezone) && $requestTimezone !== ''
-            ? $requestTimezone
-            : 'America/New_York');
+        // TimezoneUtils stores the listed name for a browser alias (Asia/Calcutta), which the
+        // schedule form's timezone select has no option for.
+        $timezone = $user->timezone
+            ?: (TimezoneUtils::canonicalize(is_string($requestTimezone) ? $requestTimezone : null) ?? 'America/New_York');
         $languageCode = is_valid_language_code($user->language_code) ? $user->language_code : 'en';
 
         $attributes = [

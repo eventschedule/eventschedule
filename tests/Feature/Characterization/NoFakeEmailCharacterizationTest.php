@@ -20,7 +20,6 @@ class NoFakeEmailCharacterizationTest extends TestCase
             'user@padvn.com',        // first entry
             'user@zzz.com',          // last entry
             'user@sharklasers.com',
-            'user@yandex.com',       // deliberate entry - pinned
             'user@0815.ru',
         ] as $email) {
             $this->assertFalse($rule->passes('email', $email), "$email should be blocked");
@@ -42,6 +41,8 @@ class NoFakeEmailCharacterizationTest extends TestCase
             'user@gmail.com',
             'user@outlook.com',
             'user@company.co.il',
+            // A mainstream provider for Russian speakers, unblocked 2026-09-25.
+            'user@yandex.com',
             // example.org/net are handled by Sale::excludeTestEmails, NOT here.
             'user@example.org',
         ] as $email) {
@@ -70,16 +71,14 @@ class NoFakeEmailCharacterizationTest extends TestCase
         $this->assertSame(1, preg_match('/\$fakeDomains = \[(.*?)\];/s', $source, $match), 'blocklist array not found in source');
         preg_match_all("/'([^']+)'/", $match[1], $domains);
 
-        $this->assertCount(3632, $domains[1]);
+        $this->assertCount(3631, $domains[1]);
         $this->assertSame('padvn.com', $domains[1][0]);
         $this->assertSame('zzz.com', end($domains[1]));
     }
 
     public function test_validation_message_is_pinned(): void
     {
-        $this->assertSame(
-            'The :attribute field must be a permanent email address.',
-            (new NoFakeEmail)->message()
-        );
+        $this->assertSame(__('messages.email_not_permanent'), (new NoFakeEmail)->message());
+        $this->assertNotSame('messages.email_not_permanent', (new NoFakeEmail)->message());
     }
 }

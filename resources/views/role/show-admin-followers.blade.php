@@ -48,39 +48,12 @@
         <label for="subscribe-share-url" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
             {{ __('messages.audience_share_link') }}
         </label>
-        <div class="flex gap-2">
-            <input type="text" id="subscribe-share-url" readonly value="{{ $subscribeShareUrl }}"
-                class="flex-1 rounded-lg border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 text-sm shadow-sm focus:border-[var(--brand-blue)] focus:ring-[var(--brand-blue)]">
-            <button type="button" id="copy-subscribe-link"
-                class="inline-flex items-center rounded-lg bg-[var(--brand-button-bg)] px-4 py-2 text-sm font-semibold text-white shadow-sm hover:bg-[var(--brand-button-bg-hover)] transition-colors">
-                <svg class="w-4 h-4 me-1.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 5H6a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2v-1M8 5a2 2 0 002 2h2a2 2 0 002-2M8 5a2 2 0 012-2h2a2 2 0 012 2m0 0h2a2 2 0 012 2v3m2 4H10m0 0l3-3m-3 3l3 3" />
-                </svg>
-                <span id="copy-subscribe-text">{{ __('messages.copy_link') }}</span>
-            </button>
-        </div>
+        <x-copy-link id="subscribe-share-url" :value="$subscribeShareUrl" />
         <p class="mt-2 text-xs text-gray-500 dark:text-gray-400">{{ __('messages.audience_share_link_help') }}</p>
         <p class="mt-2 text-xs text-gray-500 dark:text-gray-400">
             <x-link href="{{ route('role.view_guest', ['subdomain' => $role->subdomain, 'embed' => 'true', 'form' => 'subscribe']) }}" class="js-open-subscribe-embed">{{ __('messages.embed_subscribe_empty_state') }}</x-link>
         </p>
     </div>
-
-    <script {!! nonce_attr() !!}>
-    document.addEventListener('DOMContentLoaded', function () {
-        var btn = document.getElementById('copy-subscribe-link');
-        var input = document.getElementById('subscribe-share-url');
-        var label = document.getElementById('copy-subscribe-text');
-        if (!btn || !input || !label) return;
-        btn.addEventListener('click', function () {
-            input.select();
-            navigator.clipboard.writeText(input.value).then(function () {
-                var original = label.textContent;
-                label.textContent = @json(__('messages.copied'), JSON_UNESCAPED_UNICODE);
-                setTimeout(function () { label.textContent = original; }, 2000);
-            }).catch(function () {});
-        });
-    });
-    </script>
     <div class="mt-3">
         @if ($role->custom_domain)
         <x-link href="{{ $role->custom_domain }}" target="_blank">

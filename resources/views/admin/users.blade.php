@@ -98,7 +98,9 @@
                     @php $prevGroup = null; @endphp
                     @foreach($funnelStages as $i => $stage)
                         @php
-                            $isTraffic = $stage['group'] === 'traffic';
+                            // The email-code counters are anonymous daily counters too, so they
+                            // draw like traffic rather than like the per-user cohort bars.
+                            $isTraffic = in_array($stage['group'], ['traffic', 'email_code'], true);
                             $count = $stage['count'];
                             $label = $funnelStageLabel($stage['key']);
                             $ariaCount = $count === null ? __('messages.funnel_na') : number_format($count);
@@ -134,7 +136,9 @@
                             <div class="flex items-center justify-between text-sm mb-1">
                                 <span class="font-medium text-gray-800 dark:text-gray-200">
                                     {{ $label }}
-                                    @if($isTraffic)
+                                    @if($stage['group'] === 'email_code')
+                                        <span class="text-gray-400 dark:text-gray-500 cursor-help" title="{{ __('messages.funnel_tooltip_email_code') }}">&#9432;</span>
+                                    @elseif($isTraffic)
                                         <span class="text-gray-400 dark:text-gray-500 cursor-help" title="{{ __('messages.funnel_tooltip_traffic') }}">&#9432;</span>
                                     @elseif($stage['key'] === 'account')
                                         <span class="text-gray-400 dark:text-gray-500 cursor-help" title="{{ __('messages.funnel_tooltip_cohort') }}">&#9432;</span>
@@ -153,7 +157,7 @@
                                  aria-label="{{ $label }}: {{ $ariaCount }}{{ $stage['step_conv'] !== null ? ' (' . $stage['step_conv'] . '%)' : '' }}">
                                 @if($count === null)
                                     <div class="h-full w-full rounded-lg border border-dashed border-gray-300 dark:border-gray-600 flex items-center justify-center">
-                                        <span class="text-xs text-gray-400 dark:text-gray-500 px-2 text-center">{{ $trafficNote ?? __('messages.funnel_na') }}</span>
+                                        <span class="text-xs text-gray-400 dark:text-gray-500 px-2 text-center">{{ $stage['group'] === 'email_code' ? __('messages.funnel_na') : ($trafficNote ?? __('messages.funnel_na')) }}</span>
                                     </div>
                                 @else
                                     <div class="h-full rounded-lg transition-all duration-200"

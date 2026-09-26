@@ -617,6 +617,16 @@ class EventController extends Controller
                 ->update(['event_form_viewed_at' => now()]);
         }
 
+        // Whether this is the person's first event, which slims the form down to what a first
+        // event needs. Worked out from the data rather than from the onboarding_event_redirect
+        // flash above: a flash is consumed by the first GET, so a save the server refuses (the
+        // FormRequest redirects back here) or a refresh would drop the step indicator and the
+        // simpler form at exactly the moment someone is struggling with it. Same definition as
+        // the funnel's saved_event stage (GrowthExportService, createdEvents).
+        $isFirstEventRun = ! session('pending_request')
+            && ! is_demo_mode()
+            && $user->createdEvents()->doesntExist();
+
         $event = new Event;
         $event->user_id = $user->id;
         $event->setVisibilityState($role->defaultEventVisibility());
@@ -832,7 +842,8 @@ class EventController extends Controller
             'roles' => $roles,
             'event' => $event,
             'subdomain' => $subdomain,
-            'title' => __('messages.add_event'),
+            'title' => $isFirstEventRun ? __('messages.next_step_add_first_event') : __('messages.add_event'),
+            'isFirstEventRun' => $isFirstEventRun,
             'selectedVenue' => $venue,
             'venues' => $venues,
             'duplicateVenueGroupCount' => $duplicateVenueGroupCount,
@@ -1611,6 +1622,11 @@ class EventController extends Controller
         }
 
         $role = Role::subdomain($subdomain)->firstOrFail();
+
+        // Asked before the save, which is what makes it "first". Not the owner count: saveEvent()
+        // can attach a new venue to this user as its owner.
+        $isFirstEvent = $request->user()->createdEvents()->doesntExist();
+
         $event = $this->eventRepo->saveEvent($role, $request, null, true, $role->captureTimezone());
 
         // Create polls from form data
@@ -1740,13 +1756,28 @@ class EventController extends Controller
             $agendaImageRejected ? __('messages.agenda_image_not_applied') : null,
         ]);
 
-        if ($refused) {
-            return redirect(route('role.view_admin', $data))
-                ->with('error', implode(' ', $refused));
+        $redirect = redirect(route('role.view_admin', $data));
+
+        // The first event gets a panel on the schedule page with its link, instead of only a
+        // toast: it is the moment the page first has something on it to share. Set on both
+        // branches below - a refused flyer does not make the event any less created.
+        //
+        // An internal event has no public page, so there is nothing for the panel to say. A draft
+        // is a 404 for guests until published, so it gets the panel without a link.
+        if ($isFirstEvent && ! $event->is_internal) {
+            $redirect->with('first_event_created', [
+                'name' => $event->name,
+                'is_draft' => (bool) $event->is_draft,
+                'url' => $event->is_draft ? null : $event->getUndatedGuestUrl($subdomain),
+                'edit_url' => route('event.edit', ['subdomain' => $subdomain, 'hash' => UrlUtils::encodeId($event->id)]),
+            ]);
         }
 
-        return redirect(route('role.view_admin', $data))
-            ->with('message', __('messages.event_created'));
+        if ($refused) {
+            return $redirect->with('error', implode(' ', $refused));
+        }
+
+        return $redirect->with('message', __('messages.event_created'));
     }
 
     public function curate(Request $request, $subdomain, $hash)
@@ -3108,7 +3139,9 @@ class EventController extends Controller
         $attributes = [
             'name' => $request->input('account_name'),
             'password' => Hash::make($request->input('account_password')),
-            'timezone' => $request->input('timezone') ?: ($role->timezone ?: 'UTC'),
+            // The browser may report an alias (Asia/Calcutta) the schedule form's select lacks.
+            'timezone' => \App\Utils\TimezoneUtils::canonicalize(is_string($request->input('timezone')) ? $request->input('timezone') : null)
+                ?: ($role->timezone ?: 'UTC'),
             'language_code' => $languageCode,
             'utm_source' => $utmParams['utm_source'] ?? null,
             'utm_medium' => $utmParams['utm_medium'] ?? null,

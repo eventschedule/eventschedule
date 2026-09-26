@@ -90,7 +90,83 @@ class DashboardNextStepsTest extends TestCase
             'is_draft' => true,
         ]);
 
-        $this->assertSame(['next_step_next_event'], $this->types($user), 'a draft leaves the page empty');
+        // Not "add your next date" either: the page is empty because the date that exists is
+        // unpublished, and the ask is to publish it.
+        $this->assertSame(['next_step_publish_event'], $this->types($user), 'a draft is not a reason to sell');
+    }
+
+    /** The publish step opens the draft it is about, not the add-event form. */
+    public function test_an_upcoming_draft_is_asked_to_be_published(): void
+    {
+        $user = $this->createOwner();
+        $role = $this->createRole($user);
+        $later = $this->createEvent($role, [
+            'starts_at' => now()->addDays(20)->format('Y-m-d H:i:s'),
+            'is_draft' => true,
+        ]);
+        $sooner = $this->createEvent($role, [
+            'starts_at' => now()->addDays(5)->format('Y-m-d H:i:s'),
+            'is_draft' => true,
+        ]);
+
+        $steps = $this->nextSteps($user);
+
+        $this->assertSame(['next_step_publish_event'], array_column($steps, 'type'));
+        $this->assertSame(__('messages.next_step_publish_event'), $steps[0]['title']);
+        $this->assertSame(route('event.edit', [
+            'subdomain' => $role->subdomain,
+            'hash' => UrlUtils::encodeId($sooner->id),
+        ]), $steps[0]['url'], 'the soonest draft, since that is the one about to be missed');
+    }
+
+    /** A past draft is history, not something to publish: the schedule is asked for a new date. */
+    public function test_a_past_draft_is_not_asked_to_be_published(): void
+    {
+        $user = $this->createOwner();
+        $role = $this->createRole($user);
+        $this->createEvent($role, [
+            'starts_at' => now()->subDays(5)->format('Y-m-d H:i:s'),
+            'is_draft' => true,
+        ]);
+
+        $this->assertSame(['next_step_next_event'], $this->types($user));
+    }
+
+    /** Internal events are meant to stay off the page, so there is nothing to publish. */
+    public function test_an_internal_event_is_not_asked_to_be_published(): void
+    {
+        $user = $this->createOwner();
+        $role = $this->createRole($user);
+        $this->createEvent($role, [
+            'starts_at' => now()->addDays(5)->format('Y-m-d H:i:s'),
+            'is_draft' => true,
+            'is_internal' => true,
+        ]);
+
+        $this->assertNotContains('next_step_publish_event', $this->types($user));
+    }
+
+    /**
+     * Turning the publish step down keeps the schedule's slot: it must not fall through to
+     * "add your next date" on the same row, which reads as the button not working.
+     */
+    public function test_dismissing_the_publish_step_keeps_the_slot(): void
+    {
+        $user = $this->createOwner();
+        $role = $this->createRole($user);
+        $this->createEvent($role, [
+            'starts_at' => now()->addDays(5)->format('Y-m-d H:i:s'),
+            'is_draft' => true,
+        ]);
+
+        $this->dismiss($user, $role, 'next_step_publish_event')->assertRedirect();
+
+        $this->assertSame([], $this->types($user));
+        $this->assertDatabaseHas('dismissed_next_steps', [
+            'user_id' => $user->id,
+            'role_id' => $role->id,
+            'step_type' => 'next_step_publish_event',
+        ]);
     }
 
     public function test_paid_tickets_without_a_gateway_ask_for_one(): void

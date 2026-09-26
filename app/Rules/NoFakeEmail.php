@@ -43,7 +43,6 @@ class NoFakeEmail implements Rule
             'karenkey.com',
             'sharklasers.com',
             '100072641.help',
-            'yandex.com',
             'bloheyz.com',
             '0-mail.com',
             '027168.com',
@@ -3669,6 +3668,8 @@ class NoFakeEmail implements Rule
 
     public function message()
     {
-        return 'The :attribute field must be a permanent email address.';
+        // Shown on the sign-up page in the visitor's language; there is no translated
+        // validation.php, so a literal here reached every locale in English.
+        return __('messages.email_not_permanent');
     }
 }
