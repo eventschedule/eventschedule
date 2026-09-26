@@ -73,12 +73,24 @@ jobs:
           # check below would fail on every push regardless of whether anything drifted.
           fetch-depth: 0
 
+      # opcache.enable_cli is what keeps the suite inside memory_limit. Every test boots a fresh
+      # app, which re-requires routes/web.php, and without opcache PHP keeps part of every
+      # closure it compiles for the rest of the process: ~450 route closures leak ~130KB per test
+      # regardless of what the test does. Over ~5,000 tests that crossed 1G and the run died with
+      # an OOM "in routes/web.php", which names where the last allocation happened, not the leak.
+      # With opcache on, the per-test leak measures zero.
+      #
+      # It has to be set here: opcache.enable_cli is PHP_INI_SYSTEM, so phpunit.xml cannot set it,
+      # and `artisan test` spawns phpunit as a child process that does not inherit `php -d` flags.
+      # Do not answer a future OOM by raising memory_limit - that hides a real leak, which is what
+      # the 1G ceiling is for. revalidate_freq=0 makes a rewritten PHP file take effect at once.
+      # TestEnvironmentTest fails the build if this goes missing.
       - name: Set up PHP
         uses: shivammathur/setup-php@v2
         with:
           php-version: '8.3'
           extensions: mbstring, intl, pdo, mysql
-          ini-values: memory_limit=1G
+          ini-values: memory_limit=1G, opcache.enable_cli=1, opcache.revalidate_freq=0
           tools: composer
 
       - name: Install Composer dependencies

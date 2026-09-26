@@ -132,4 +132,35 @@ class TestEnvironmentTest extends TestCase
             .'See TestCase::pregMatchOrFail().'
         );
     }
+
+    /**
+     * The suite fits in memory_limit only because opcache is on for the CLI.
+     *
+     * Every test boots a fresh app, which re-requires routes/web.php. Without opcache PHP keeps
+     * part of every closure it compiles for the rest of the process, so its ~450 route closures
+     * leak ~130KB per test, even for a test with an empty body. Over ~5,000 tests that crossed 1G,
+     * and the run died near the end with an OOM "in routes/web.php", which names where the last
+     * allocation happened rather than anything that leaked. With opcache on, the leak is zero.
+     *
+     * opcache.enable_cli is PHP_INI_SYSTEM, so phpunit.xml cannot pin it the way it pins pcre.jit
+     * above; it comes from setup-php's ini-values in .github/workflows/test.yml. Asserted only on
+     * CI, where that is the one place it can come from - locally it is a php.ini setting (see
+     * CLAUDE.md), and tests/bootstrap.php warns when it is off.
+     */
+    public function test_opcache_is_on_for_the_cli_on_ci(): void
+    {
+        if (getenv('GITHUB_ACTIONS') !== 'true') {
+            $this->markTestSkipped('Asserted on CI only: locally opcache.enable_cli is a php.ini setting.');
+        }
+
+        $status = function_exists('opcache_get_status') ? opcache_get_status(false) : false;
+
+        $this->assertTrue(
+            filter_var(ini_get('opcache.enable_cli'), FILTER_VALIDATE_BOOLEAN)
+                && is_array($status) && ! empty($status['opcache_enabled']),
+            'The test job must run with opcache.enable_cli=1 (setup-php ini-values in '
+            .'.github/workflows/test.yml). Without it every app boot leaks the compiled '
+            .'routes/web.php closures and the full suite runs out of memory near the end.'
+        );
+    }
 }

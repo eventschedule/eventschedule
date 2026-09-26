@@ -30,6 +30,14 @@ foreach ([
     }
 }
 
+// Without opcache, PHP keeps part of every closure it compiles for the rest of the process, and each
+// test's app boot re-requires routes/web.php and its ~450 route closures - ~130KB leaked per test.
+// The full suite then dies near the end with an OOM "in routes/web.php", which points nowhere near
+// the cause. opcache.enable_cli is PHP_INI_SYSTEM, so this can only warn; see CLAUDE.md.
+if (! filter_var(ini_get('opcache.enable_cli'), FILTER_VALIDATE_BOOLEAN)) {
+    fwrite(STDERR, "Warning: opcache.enable_cli is off, so the full suite will exhaust memory_limit (~130KB leaked per test). Set opcache.enable_cli=1 in php.ini - see CLAUDE.md.\n");
+}
+
 // Must run here, not in TestCase: PHPUnit loads this after applying phpunit.xml's <env> block but
 // before any test boots the app, which is the only window where DB_DATABASE can still be redirected.
 Tests\TestDatabase::bootstrap(__DIR__.'/..');
