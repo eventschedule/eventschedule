@@ -277,6 +277,11 @@ jobs:
       # so a bare `php artisan dusk "$test"` aborted it on the FIRST failing file and every later
       # one silently never ran - one flaky journey hid thirteen suites. `|| failed=...` is a handled
       # failure, which is what keeps -e out of it.
+      #
+      # `php artisan dusk` purges screenshots/, console/ and source/ when it starts
+      # (DuskCommand::handle), and every file here is its own run - so a failure in any file but
+      # the last was wiped by the next one, and the uploaded artifact came back empty. Each failing
+      # file's evidence is copied to dusk-failures/<file>/ before the next run can purge it.
       - name: Run Laravel Dusk tests
         run: |
           cp .env .env.dusk.local
@@ -288,7 +293,12 @@ jobs:
               continue
             fi
             echo "Running $test"
-            php artisan dusk "$test" || failed="$failed $test"
+            if ! php artisan dusk "$test"; then
+              failed="$failed $test"
+              keep="dusk-failures/$(basename "$test" .php)"
+              mkdir -p "$keep"
+              cp -R tests/Browser/screenshots tests/Browser/console tests/Browser/source "$keep"/ 2>/dev/null || true
+            fi
             php artisan cache:clear
           done
           if [ -n "$failed" ]; then
@@ -304,9 +314,7 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: dusk-screenshots
-          path: |
-            tests/Browser/screenshots
-            tests/Browser/console
+          path: dusk-failures
 
       - name: Upload Query Log
         if: failure()
