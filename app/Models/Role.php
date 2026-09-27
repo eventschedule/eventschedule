@@ -42,6 +42,7 @@ class Role extends Model implements MustVerifyEmail
         // ScheduleDeletionService is the only thing that should ever move them as a set.
         'design',
         'header_style',
+        'list_animation',
         'background',
         'background_rotation',
         'background_colors',
@@ -268,6 +269,30 @@ class Role extends Model implements MustVerifyEmail
         $style = $this->header_style === 'minimal' ? 'compact' : $this->header_style;
 
         return in_array($style, ['banner', 'compact'], true) ? $style : 'banner';
+    }
+
+    /**
+     * The designs a schedule can animate its event list with, in the order the picker shows
+     * them (subtle to bold). "none" is the default: a NULL column resolves to it.
+     */
+    public const LIST_ANIMATIONS = ['none', 'rise', 'focus', 'slide', 'deal', 'shine', 'curtain'];
+
+    /**
+     * The list animation stored on the schedule, normalised. null/invalid resolves to "none".
+     */
+    public function listAnimation(): string
+    {
+        return in_array($this->list_animation, self::LIST_ANIMATIONS, true) ? $this->list_animation : 'none';
+    }
+
+    /**
+     * The list animation to render right now. A valid ?list_animation= on the URL wins over
+     * the stored setting, which is what the edit page's "See it on your schedule" link uses to
+     * show an unsaved choice. Read this on guest-facing surfaces.
+     */
+    public function activeListAnimation(): string
+    {
+        return requested_list_animation() ?? $this->listAnimation();
     }
 
     /**

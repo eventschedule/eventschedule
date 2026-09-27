@@ -60,7 +60,7 @@ class BackupService
         'banner_enabled', 'banner_on_event_pages', 'banner_message', 'banner_message_en',
         'accept_requests', 'event_request_form', 'require_account', 'use_24_hour_time', 'timezone',
         'formatted_address', 'geo_address', 'geo_lat', 'geo_lon', 'show_email', 'show_phone',
-        'require_approval', 'event_layout', 'request_terms', 'request_terms_en', 'custom_css',
+        'require_approval', 'event_layout', 'list_animation', 'request_terms', 'request_terms_en', 'custom_css',
         'event_custom_fields', 'graphic_settings', 'agenda_ai_prompt', 'agenda_show_times',
         'agenda_show_description', 'agenda_save_image', 'slug_pattern', 'direct_registration',
         'default_event_visibility',
@@ -1713,6 +1713,12 @@ class BackupService
         // "banner" style) so the model's "compact" default doesn't change a restored
         // schedule's appearance.
         $role->header_style = $data['header_style'] ?? null;
+        // Import assigns without validation, so a hand-edited backup could carry any string;
+        // keep only a design this install knows, or an over-long value would fail the INSERT
+        // and abort the whole restore.
+        $role->list_animation = in_array($data['list_animation'] ?? null, Role::LIST_ANIMATIONS, true)
+            ? $data['list_animation']
+            : null;
         $role->subdomain = $subdomain;
         $role->user_id = $userId;
 

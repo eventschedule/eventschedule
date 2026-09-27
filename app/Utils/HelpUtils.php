@@ -22,7 +22,7 @@ class HelpUtils
                 'details-tab-contact' => '/docs/creating-schedules#contact-info',
                 'section-merge' => '/docs/creating-schedules#merge',
                 'section-style' => '/docs/schedule-styling#overview',
-                'style-tab-branding' => '/docs/schedule-styling#header-style',
+                'style-tab-branding' => '/docs/schedule-styling#profile-image',
                 'style-tab-background' => '/docs/schedule-styling#backgrounds',
                 'style-tab-advanced' => '/docs/schedule-styling#custom-css',
                 'section-subschedules' => '/docs/creating-schedules#customize',

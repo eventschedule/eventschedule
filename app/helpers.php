@@ -233,6 +233,25 @@ if (! function_exists('requested_event_layout')) {
     }
 }
 
+if (! function_exists('requested_list_animation')) {
+    /**
+     * The list animation asked for by ?list_animation= on the current request, or null when
+     * the parameter is absent or unrecognised. Lets an owner preview a design before saving.
+     */
+    function requested_list_animation(): ?string
+    {
+        $requested = request()->query('list_animation');
+
+        if (! is_string($requested)) {
+            return null;
+        }
+
+        $requested = strtolower(trim($requested));
+
+        return in_array($requested, \App\Models\Role::LIST_ANIMATIONS, true) ? $requested : null;
+    }
+}
+
 if (! function_exists('is_rtl')) {
     /**
      * Check if the current user is on a rtl language

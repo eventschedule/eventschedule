@@ -1,7 +1,7 @@
 <x-docs-page
     key="schedule-styling"
     title="Schedule Styling: Colors, Fonts and Headers - Event Schedule"
-    description="Style your public schedule page: default layout, header style, profile and header images, backgrounds, accent color, fonts, custom CSS and branding."
+    description="Style your public schedule page: default layout, header style, profile and header images, backgrounds, accent color, fonts, event animations, custom CSS and branding."
     lede="Customize your schedule's visual appearance with colors, fonts, backgrounds, and more. Most changes show in a live preview before you save."
 >
     <x-slot:toc>
@@ -13,6 +13,7 @@
         <x-doc-nav-link href="#backgrounds">Background Options</x-doc-nav-link>
         <x-doc-nav-link href="#color-scheme">Color Scheme</x-doc-nav-link>
         <x-doc-nav-link href="#typography">Typography</x-doc-nav-link>
+        <x-doc-nav-link href="#list-animation">Event Animation</x-doc-nav-link>
         <x-doc-nav-link href="#ai-style-generator">AI Style Generator</x-doc-nav-link>
         <x-doc-nav-link href="#remove-branding">Remove Branding</x-doc-nav-link>
         <x-doc-nav-link href="#custom-css">Custom CSS</x-doc-nav-link>
@@ -52,7 +53,7 @@
                 <tbody>
                     <tr>
                         <td><span class="font-semibold text-gray-900 dark:text-white">Branding</span></td>
-                        <td>Square Profile Image, Accent Color, Font Family</td>
+                        <td>Square Profile Image, Accent Color, Font Family, Event Animation</td>
                     </tr>
                     <tr>
                         <td><span class="font-semibold text-gray-900 dark:text-white">Background</span></td>
@@ -278,6 +279,75 @@
         <div class="doc-callout doc-callout-info">
             <div class="doc-callout-title">Event graphics use their own font</div>
             <p>This setting styles web pages. <a href="{{ route('marketing.docs.event_graphics') }}" class="doc-link">Event graphics</a> are drawn as images on the server with a bundled Noto Sans family (including Hebrew and Arabic variants), so changing your font here will not change them.</p>
+        </div>
+    </section>
+
+    <!-- Event Animation -->
+    <section id="list-animation" class="doc-section">
+        <h2 class="doc-heading">
+            <svg aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-5 h-5 text-gray-500 dark:text-gray-400 flex-shrink-0">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M9.813 15.904L9 18.75l-.813-2.846a4.5 4.5 0 00-3.09-3.09L2.25 12l2.846-.813a4.5 4.5 0 003.09-3.09L9 5.25l.813 2.846a4.5 4.5 0 003.09 3.09L15.75 12l-2.846.813a4.5 4.5 0 00-3.09 3.09zM18.259 8.715L18 9.75l-.259-1.035a3.375 3.375 0 00-2.455-2.456L14.25 6l1.036-.259a3.375 3.375 0 002.455-2.456L18 2.25l.259 1.035a3.375 3.375 0 002.456 2.456L21.75 6l-1.035.259a3.375 3.375 0 00-2.456 2.456z" />
+            </svg>
+            Event Animation
+        </h2>
+        <p class="text-gray-600 dark:text-gray-300 mb-4"><strong class="text-gray-900 dark:text-white">Event Animation</strong> on the Branding tab brings your events to life as visitors scroll your schedule: each event card animates into place as it comes into view, then its details follow one after another: the title, the date (which flips down like a tear-off calendar page), the venue, the price and the performers. The first screen plays as an entrance when someone opens your link. It is off (<strong class="text-gray-900 dark:text-white">None</strong>) until you pick a style, and it is available on every plan.</p>
+        <div class="doc-table-wrap">
+            <table class="doc-table">
+                <thead>
+                    <tr>
+                        <th>Style</th>
+                        <th>Mood</th>
+                        <th>What visitors see</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td><span class="font-semibold text-gray-900 dark:text-white">Rise</span></td>
+                        <td>Clean</td>
+                        <td>Events float gently into place, their details rising in a soft wave while the image settles.</td>
+                    </tr>
+                    <tr>
+                        <td><span class="font-semibold text-gray-900 dark:text-white">Focus</span></td>
+                        <td>Dreamy</td>
+                        <td>The image sharpens first, then each line of text comes into focus in turn.</td>
+                    </tr>
+                    <tr>
+                        <td><span class="font-semibold text-gray-900 dark:text-white">Slide</span></td>
+                        <td>Energetic</td>
+                        <td>Events glide in from the side, each detail following like a ticker, with the text and the image meeting in the middle.</td>
+                    </tr>
+                    <tr>
+                        <td><span class="font-semibold text-gray-900 dark:text-white">Deal</span></td>
+                        <td>Playful</td>
+                        <td>Events land like playing cards being dealt, then the venue and ticket badges are dealt onto the card and the performers pop in.</td>
+                    </tr>
+                    <tr>
+                        <td><span class="font-semibold text-gray-900 dark:text-white">Shine</span></td>
+                        <td>Glowing</td>
+                        <td>A sweep of your accent color lights up each event, and every badge glints as the light passes.</td>
+                    </tr>
+                    <tr>
+                        <td><span class="font-semibold text-gray-900 dark:text-white">Curtain</span></td>
+                        <td>Theatrical</td>
+                        <td>Panels in your accent color pull back to reveal each event's image, and the text is unveiled line by line.</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+        <div class="doc-fields">
+            <div class="doc-field">
+                <h3 class="font-semibold text-gray-900 dark:text-white mb-2">Preview before you save</h3>
+                <p class="text-sm text-gray-500 dark:text-gray-400">The preview above the styles plays your choice on your own events, in your accent color and font, and updates as you change them. Use <strong>Replay</strong> to watch it again, or <strong>See it on your schedule</strong> to open your real page with the style you picked, even before saving.</p>
+            </div>
+            <div class="doc-field">
+                <h4 class="font-semibold text-gray-900 dark:text-white mb-2">Phones and computers</h4>
+                <p class="text-sm text-gray-500 dark:text-gray-400">Phones always list your events, so they always show the animation. On a computer it plays in the list layout; if your <a href="#event-layout" class="doc-link">default layout</a> is Calendar, visitors see it after switching to the list. The setting offers a one-click switch to the list layout.</p>
+            </div>
+        </div>
+        <p class="text-gray-600 dark:text-gray-300 mb-4">After you save a new style, the Schedule tab shows your link with a Copy button (and Share, where the device supports it), ready to send to your audience.</p>
+        <div class="doc-callout doc-callout-info">
+            <div class="doc-callout-title">Always easy to read</div>
+            <p>Visitors who turn off animations on their device, or with the accessibility menu on your schedule, see every event right away with no motion. Events a visitor has already scrolled past, returns to with the back button, or prints are never hidden or replayed.</p>
         </div>
     </section>
 

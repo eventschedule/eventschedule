@@ -1,5 +1,6 @@
 @import 'flatpickr/dist/flatpickr.css';
 @import './accessibility-widget.css';
+@import './list-reveal.css';
 
 @font-face {
     font-family: 'Inter';

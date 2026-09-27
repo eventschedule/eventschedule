@@ -5,9 +5,13 @@
      registration behaviour and leaves modified clicks to the browser. The whole-card click the
      including templates put on the wrapper still works for the rest of the card - it ignores
      clicks inside a link. The image's link is a duplicate of the title's, so it is kept out of
-     the tab order and the accessibility tree. --}}
-<div class="flex-1 py-3 px-4 flex flex-col min-w-0">
-    <div class="flex items-start gap-1.5">
+     the tab order and the accessibility tree.
+
+     data-reveal-body / -title / -media are the hooks resources/css/list-reveal.css animates when
+     the schedule has an event animation; they do nothing otherwise. Each direct child of the
+     body is a row the animation cascades in, so keep one detail per child. --}}
+<div data-reveal-body class="flex-1 py-3 px-4 flex flex-col min-w-0">
+    <div data-reveal-title class="flex items-start gap-1.5">
         <span v-if="getEventDotColor(event)" class="inline-block w-2.5 h-2.5 rounded-full flex-shrink-0 mt-1" :style="{ backgroundColor: getEventDotColor(event) }"></span>
         <h3 class="font-semibold text-gray-900 dark:text-gray-100 text-base leading-snug line-clamp-2" :dir="event.dir || 'auto'">
             <svg v-if="event.is_password_protected" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="inline-block w-4 h-4 text-gray-400 me-2 align-[-0.2em]"><path stroke-linecap="round" stroke-linejoin="round" d="M16.5 10.5V6.75a4.5 4.5 0 10-9 0v3.75m-.75 11.25h10.5a2.25 2.25 0 002.25-2.25v-6.75a2.25 2.25 0 00-2.25-2.25H6.75a2.25 2.25 0 00-2.25 2.25v6.75a2.25 2.25 0 002.25 2.25z" /></svg>
@@ -65,7 +69,7 @@
         </a>
     </div>
 </div>
-<div v-if="(event.image_url || event.flyer_url) && !event.is_password_protected" class="flex-shrink-0 w-40 max-w-[50%] self-stretch">
+<div v-if="(event.image_url || event.flyer_url) && !event.is_password_protected" data-reveal-media class="flex-shrink-0 w-40 max-w-[50%] self-stretch">
     {{-- A 160px column: the 480 derivative, or the 960 on a dense screen, never the original. --}}
     <a :href="getEventUrl(event)" :target="eventLinkTarget()" @click="onEventLinkClick(event, $event)" tabindex="-1" aria-hidden="true" class="block w-full h-full">
         <img :src="event.image_thumb_url || event.image_url || event.flyer_url" :srcset="event.image_srcset || null" sizes="160px" loading="lazy" :class="event._isPast ? 'grayscale' : ''" class="w-full h-full object-cover" :alt="event.name">

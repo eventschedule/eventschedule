@@ -32,6 +32,10 @@
         ? rtrim(parse_url(route('role.view_guest', ['subdomain' => $role->subdomain]), PHP_URL_PATH) ?? '', '/')
         : '';
     $firstDay = $role?->first_day_of_week ?? 0;
+    // The owner's event animation (resources/css/list-reveal.css), or ?list_animation= when an
+    // owner is previewing an unsaved choice. Only on the schedule's own guest page: never in the
+    // admin views, the home dashboard, or the event page's side agenda (force_mobile).
+    $listAnimation = ($route === 'guest' && ! ($force_mobile ?? false) && $role) ? $role->activeListAnimation() : 'none';
     $lastDay = ($firstDay + 6) % 7;
     $startOfMonth = Carbon\Carbon::create($year, $month, 1)->startOfMonth()->startOfWeek($firstDay);
     $endOfMonth = Carbon\Carbon::create($year, $month, 1)->endOfMonth()->endOfWeek($lastDay);
@@ -707,7 +711,7 @@
                 <button id="showPastEventsBtn" class="text-[var(--brand-blue)] font-medium hidden mb-4 w-full text-center">
                     {{ $label('show_past_events') }}
                 </button>
-                <div id="mobileEventsList" class="space-y-6">
+                <div id="mobileEventsList" :data-list-anim="activeListAnimation !== 'none' ? activeListAnimation : null" :data-list-rtl="isRtl ? '' : null" style="--es-accent: {{ $accentColor }}" class="space-y-6">
                     <template v-for="(group, groupIndex) in eventsGroupedByDate" :key="'date-' + group.date">
                         {{-- Date Header --}}
                         <div class="sticky top-0 z-10 {{ $stickyBleedClass }} bg-white/95 backdrop-blur-sm dark:bg-gray-900/95"
@@ -722,6 +726,7 @@
                         <div class="space-y-6" :class="isPastEvent(group.date) ? 'past-event hidden' : ''">
                             <template v-for="event in group.events" :key="'mobile-' + event.uniqueKey">
                                 <div v-if="isEventVisible(event)"
+                                     v-list-reveal:a="event.uniqueKey"
                                      @click="navigateToEvent(event, $event)"
                                      class="block cursor-pointer">
                                     <div class="event-item bg-white/95 dark:bg-gray-900/95 backdrop-blur-sm rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 overflow-hidden transition-all duration-200 hover:shadow-lg hover:bg-gray-50/95 dark:hover:bg-gray-800/95"
@@ -818,7 +823,7 @@
         </div>
 
 {{-- List View (Desktop) --}}
-        <div v-show="currentView === 'list' && !isLoadingEvents" class="hidden md:block {{ (isset($force_mobile) && $force_mobile) ? '!hidden' : '' }} {{ rtl_class($role ?? null, 'rtl', '', $isAdminRoute) }}">
+        <div v-show="currentView === 'list' && !isLoadingEvents" :data-list-anim="activeListAnimation !== 'none' ? activeListAnimation : null" :data-list-rtl="isRtl ? '' : null" style="--es-accent: {{ $accentColor }}" class="hidden md:block {{ (isset($force_mobile) && $force_mobile) ? '!hidden' : '' }} {{ rtl_class($role ?? null, 'rtl', '', $isAdminRoute) }}">
             {{-- Upcoming Events --}}
             <div v-if="allListGroups.length" class="space-y-8">
                 <template v-for="(group, groupIndex) in allListGroups" :key="'list-d-' + group.date">
@@ -850,15 +855,15 @@
                         </div>
                         {{-- Cards for this date --}}
                         <template v-for="event in group.events" :key="'list-d-' + event.uniqueKey">
-                    <div @click="navigateToEvent(event, $event)" class="block cursor-pointer">
+                    <div v-list-reveal:d="event.uniqueKey" @click="navigateToEvent(event, $event)" class="block cursor-pointer">
                         <div class="rounded-2xl shadow-sm overflow-hidden transition-all duration-200 hover:shadow-lg hover:-translate-y-0.5 bg-white/95 dark:bg-gray-900/95 backdrop-blur-sm">
                             {{-- Side-by-side layout when flyer image exists --}}
                             <template v-if="event.flyer_url">
                                 <div class="flex flex-col md:flex-row" :class="isRtl ? 'md:flex-row-reverse' : ''">
                                     {{-- Details Column --}}
-                                    <div class="md:flex-1 md:min-w-0 px-5 py-6 md:px-8 lg:px-16 md:py-8 flex flex-col gap-5">
+                                    <div data-reveal-body class="md:flex-1 md:min-w-0 px-5 py-6 md:px-8 lg:px-16 md:py-8 flex flex-col gap-5">
                                         {{-- Event Title --}}
-                                        <div class="flex items-start gap-2">
+                                        <div data-reveal-title class="flex items-start gap-2">
                                             <span v-if="getEventDotColor(event)" class="inline-block w-3 h-3 rounded-full flex-shrink-0 mt-2" :style="{ backgroundColor: getEventDotColor(event) }"></span>
                                             <h2 class="font-bold text-2xl md:text-3xl leading-snug line-clamp-2 text-gray-900 dark:text-gray-100" :dir="event.dir || 'auto'">
                                                 <a :href="getEventUrl(event)" :target="eventLinkTarget()" @click="onEventLinkClick(event, $event)" v-html="commaBreak(event.name)"></a>
@@ -870,7 +875,7 @@
 
                                         {{-- Date Badge --}}
                                         <div v-if="event.occurrenceDate" class="flex items-center gap-4">
-                                            <div class="flex-shrink-0 w-16 h-16 rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900 flex flex-col items-center justify-center shadow-sm">
+                                            <div data-reveal-date class="flex-shrink-0 w-16 h-16 rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900 flex flex-col items-center justify-center shadow-sm">
                                                 <span class="text-[11px] font-bold uppercase tracking-wider leading-none pt-1 es-date-month" v-text="getMonthAbbr(event._originalOccurrenceDate || event.occurrenceDate)"></span>
                                                 <span class="text-2xl font-bold text-gray-900 dark:text-white leading-none" v-text="getDayNum(event._originalOccurrenceDate || event.occurrenceDate)"></span>
                                             </div>
@@ -887,7 +892,7 @@
 
                                         {{-- Venue Badge --}}
                                         <a v-if="event.venue_name && event.venue_guest_url && !event.is_password_protected" :href="event.venue_guest_url" class="w-fit flex items-center gap-4 min-w-0 hover:opacity-80 transition-opacity">
-                                            <div class="flex-shrink-0 w-16 h-16 rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900 flex items-center justify-center shadow-sm">
+                                            <div data-reveal-tile class="flex-shrink-0 w-16 h-16 rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900 flex items-center justify-center shadow-sm">
                                                 <img v-if="event.venue_profile_image" :src="event.venue_profile_image" class="w-11 h-11 rounded-lg object-cover" :alt="event.venue_name">
                                                 <svg v-else width="24" height="24" viewBox="0 0 24 24" fill="{{ $accentColor }}" aria-hidden="true">
                                                     <path fill-rule="evenodd" clip-rule="evenodd" d="M12 2C7.58172 2 4 6.00258 4 10.5C4 14.9622 6.55332 19.8124 10.5371 21.6744C11.4657 22.1085 12.5343 22.1085 13.4629 21.6744C17.4467 19.8124 20 14.9622 20 10.5C20 6.00258 16.4183 2 12 2ZM12 12C13.1046 12 14 11.1046 14 10C14 8.89543 13.1046 8 12 8C10.8954 8 10 8.89543 10 10C10 11.1046 10.8954 12 12 12Z" />
@@ -899,7 +904,7 @@
                                             </svg>
                                         </a>
                                         <div v-else-if="event.venue_name && !event.is_password_protected" class="flex items-center gap-4 min-w-0">
-                                            <div class="flex-shrink-0 w-16 h-16 rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900 flex items-center justify-center shadow-sm">
+                                            <div data-reveal-tile class="flex-shrink-0 w-16 h-16 rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900 flex items-center justify-center shadow-sm">
                                                 <img v-if="event.venue_profile_image" :src="event.venue_profile_image" class="w-11 h-11 rounded-lg object-cover" :alt="event.venue_name">
                                                 <svg v-else width="24" height="24" viewBox="0 0 24 24" fill="{{ $accentColor }}" aria-hidden="true">
                                                     <path fill-rule="evenodd" clip-rule="evenodd" d="M12 2C7.58172 2 4 6.00258 4 10.5C4 14.9622 6.55332 19.8124 10.5371 21.6744C11.4657 22.1085 12.5343 22.1085 13.4629 21.6744C17.4467 19.8124 20 14.9622 20 10.5C20 6.00258 16.4183 2 12 2ZM12 12C13.1046 12 14 11.1046 14 10C14 8.89543 13.1046 8 12 8C10.8954 8 10 8.89543 10 10C10 11.1046 10.8954 12 12 12Z" />
@@ -910,7 +915,7 @@
 
                                         {{-- RSVP Free Badge --}}
                                         <div v-if="event.rsvp_enabled && !event.is_password_protected" class="flex items-center gap-4">
-                                            <div class="flex-shrink-0 w-16 h-16 rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900 flex items-center justify-center shadow-sm">
+                                            <div data-reveal-tile class="flex-shrink-0 w-16 h-16 rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900 flex items-center justify-center shadow-sm">
                                                 <svg width="24" height="24" viewBox="0 0 20 20" fill="{{ $accentColor }}" aria-hidden="true">
                                                     <path fill-rule="evenodd" d="M5.5 3A2.5 2.5 0 003 5.5v2.879a2.5 2.5 0 00.732 1.767l7.5 7.5a2.5 2.5 0 003.536 0l2.878-2.878a2.5 2.5 0 000-3.536l-7.5-7.5A2.5 2.5 0 008.38 3H5.5zM6 7a1 1 0 100-2 1 1 0 000 2z" clip-rule="evenodd" />
                                                 </svg>
@@ -922,7 +927,7 @@
 
                                         {{-- Ticket Price Badge --}}
                                         <div v-if="!event.rsvp_enabled && event.registration_url && event.ticket_price != null && !event.is_password_protected" class="flex items-center gap-4">
-                                            <div class="flex-shrink-0 w-16 h-16 rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900 flex items-center justify-center shadow-sm">
+                                            <div data-reveal-tile class="flex-shrink-0 w-16 h-16 rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900 flex items-center justify-center shadow-sm">
                                                 <svg width="24" height="24" viewBox="0 0 20 20" fill="{{ $accentColor }}" aria-hidden="true">
                                                     <path fill-rule="evenodd" d="M5.5 3A2.5 2.5 0 003 5.5v2.879a2.5 2.5 0 00.732 1.767l7.5 7.5a2.5 2.5 0 003.536 0l2.878-2.878a2.5 2.5 0 000-3.536l-7.5-7.5A2.5 2.5 0 008.38 3H5.5zM6 7a1 1 0 100-2 1 1 0 000 2z" clip-rule="evenodd" />
                                                 </svg>
@@ -938,7 +943,7 @@
 
                                         {{-- Talent Avatars + Names --}}
                                         <div v-if="event.talent && event.talent.length > 0 && !event.is_password_protected" class="flex items-center gap-2 my-2">
-                                            <div class="flex items-center -space-x-2" :class="isRtl ? 'space-x-reverse' : ''">
+                                            <div data-reveal-pop class="flex items-center -space-x-2" :class="isRtl ? 'space-x-reverse' : ''">
                                                 <template v-for="(t, tIndex) in event.talent.slice(0, 5)" :key="'ta-' + tIndex">
                                                     <img v-if="t.profile_image" :src="t.profile_image" class="w-8 h-8 rounded-full object-cover border-2 border-white dark:border-gray-700" :alt="t.name" :title="t.name">
                                                     <div v-else class="w-8 h-8 rounded-full border-2 border-white dark:border-gray-700 bg-gray-200 dark:bg-gray-600 flex items-center justify-center" :title="t.name">
@@ -1196,7 +1201,7 @@
                                     {{-- Flyer Image Column: about 320px wide, so the 480 or 960 derivative, with
                                          the original's size to hold the column's shape while it loads. A duplicate of
                                          the title's link, so out of the tab order and the accessibility tree. --}}
-                                    <div v-if="!event.is_password_protected" class="md:w-[35%] md:flex-shrink-0">
+                                    <div v-if="!event.is_password_protected" data-reveal-media class="md:w-[35%] md:flex-shrink-0">
                                         <a :href="getEventUrl(event)" :target="eventLinkTarget()" @click="onEventLinkClick(event, $event)" tabindex="-1" aria-hidden="true" class="block">
                                             <img :src="event.flyer_thumb_url || event.flyer_url" :srcset="event.flyer_srcset || null" sizes="320px" loading="lazy" :width="event.flyer_width || null" :height="event.flyer_height || null" :class="event._isPast ? 'grayscale' : ''" class="w-full" :alt="event.name">
                                         </a>
@@ -1208,7 +1213,7 @@
                             <template v-else>
                                 {{-- Hero Banner (only when no flyer): the venue's or an act's header at 960
                                      (Event::cardImageFields()). The gradient lets clicks through to the link. --}}
-                                <div v-if="getHeaderImage(event) && !event.is_password_protected" class="h-40 relative overflow-hidden">
+                                <div v-if="getHeaderImage(event) && !event.is_password_protected" data-reveal-media class="h-40 relative overflow-hidden">
                                     <a :href="getEventUrl(event)" :target="eventLinkTarget()" @click="onEventLinkClick(event, $event)" tabindex="-1" aria-hidden="true" class="block w-full h-full">
                                         <img :src="getHeaderImage(event)" loading="lazy" :class="event._isPast ? 'grayscale' : ''" class="w-full h-full object-cover" :alt="event.name" v-on:error="$event?.target?.closest('.h-40') && ($event.target.closest('.h-40').style.display='none')">
                                     </a>
@@ -1216,9 +1221,9 @@
                                 </div>
 
                                 {{-- Content --}}
-                                <div class="px-5 py-6 md:px-8 lg:px-16 md:py-8 flex flex-col gap-5">
+                                <div data-reveal-body class="px-5 py-6 md:px-8 lg:px-16 md:py-8 flex flex-col gap-5">
                                     {{-- Event Title --}}
-                                    <div class="flex items-start gap-2">
+                                    <div data-reveal-title class="flex items-start gap-2">
                                         <span v-if="getEventDotColor(event)" class="inline-block w-3 h-3 rounded-full flex-shrink-0 mt-2" :style="{ backgroundColor: getEventDotColor(event) }"></span>
                                         <h2 class="font-bold text-2xl md:text-3xl leading-snug line-clamp-2 text-gray-900 dark:text-gray-100" :dir="event.dir || 'auto'">
                                             <a :href="getEventUrl(event)" :target="eventLinkTarget()" @click="onEventLinkClick(event, $event)" v-html="commaBreak(event.name)"></a>
@@ -1230,7 +1235,7 @@
 
                                     {{-- Date Badge --}}
                                     <div v-if="event.occurrenceDate" class="flex items-center gap-4">
-                                        <div class="flex-shrink-0 w-16 h-16 rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900 flex flex-col items-center justify-center shadow-sm">
+                                        <div data-reveal-date class="flex-shrink-0 w-16 h-16 rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900 flex flex-col items-center justify-center shadow-sm">
                                             <span class="text-[11px] font-bold uppercase tracking-wider leading-none pt-1 es-date-month" v-text="getMonthAbbr(event._originalOccurrenceDate || event.occurrenceDate)"></span>
                                             <span class="text-2xl font-bold text-gray-900 dark:text-white leading-none" v-text="getDayNum(event._originalOccurrenceDate || event.occurrenceDate)"></span>
                                         </div>
@@ -1247,7 +1252,7 @@
 
                                     {{-- Venue Badge --}}
                                     <a v-if="event.venue_name && event.venue_guest_url && !event.is_password_protected" :href="event.venue_guest_url" class="w-fit flex items-center gap-4 hover:opacity-80 transition-opacity">
-                                        <div class="flex-shrink-0 w-16 h-16 rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900 flex items-center justify-center shadow-sm">
+                                        <div data-reveal-tile class="flex-shrink-0 w-16 h-16 rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900 flex items-center justify-center shadow-sm">
                                             <img v-if="event.venue_profile_image" :src="event.venue_profile_image" class="w-11 h-11 rounded-lg object-cover" :alt="event.venue_name">
                                             <svg v-else width="24" height="24" viewBox="0 0 24 24" fill="{{ $accentColor }}" aria-hidden="true">
                                                 <path fill-rule="evenodd" clip-rule="evenodd" d="M12 2C7.58172 2 4 6.00258 4 10.5C4 14.9622 6.55332 19.8124 10.5371 21.6744C11.4657 22.1085 12.5343 22.1085 13.4629 21.6744C17.4467 19.8124 20 14.9622 20 10.5C20 6.00258 16.4183 2 12 2ZM12 12C13.1046 12 14 11.1046 14 10C14 8.89543 13.1046 8 12 8C10.8954 8 10 8.89543 10 10C10 11.1046 10.8954 12 12 12Z" />
@@ -1259,7 +1264,7 @@
                                         </svg>
                                     </a>
                                     <div v-else-if="event.venue_name && !event.is_password_protected" class="flex items-center gap-4">
-                                        <div class="flex-shrink-0 w-16 h-16 rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900 flex items-center justify-center shadow-sm">
+                                        <div data-reveal-tile class="flex-shrink-0 w-16 h-16 rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900 flex items-center justify-center shadow-sm">
                                             <img v-if="event.venue_profile_image" :src="event.venue_profile_image" class="w-11 h-11 rounded-lg object-cover" :alt="event.venue_name">
                                             <svg v-else width="24" height="24" viewBox="0 0 24 24" fill="{{ $accentColor }}" aria-hidden="true">
                                                 <path fill-rule="evenodd" clip-rule="evenodd" d="M12 2C7.58172 2 4 6.00258 4 10.5C4 14.9622 6.55332 19.8124 10.5371 21.6744C11.4657 22.1085 12.5343 22.1085 13.4629 21.6744C17.4467 19.8124 20 14.9622 20 10.5C20 6.00258 16.4183 2 12 2ZM12 12C13.1046 12 14 11.1046 14 10C14 8.89543 13.1046 8 12 8C10.8954 8 10 8.89543 10 10C10 11.1046 10.8954 12 12 12Z" />
@@ -1270,7 +1275,7 @@
 
                                     {{-- RSVP Free Badge --}}
                                     <div v-if="event.rsvp_enabled && !event.is_password_protected" class="flex items-center gap-4">
-                                        <div class="flex-shrink-0 w-16 h-16 rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900 flex items-center justify-center shadow-sm">
+                                        <div data-reveal-tile class="flex-shrink-0 w-16 h-16 rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900 flex items-center justify-center shadow-sm">
                                             <svg width="24" height="24" viewBox="0 0 20 20" fill="{{ $accentColor }}" aria-hidden="true">
                                                 <path fill-rule="evenodd" d="M5.5 3A2.5 2.5 0 003 5.5v2.879a2.5 2.5 0 00.732 1.767l7.5 7.5a2.5 2.5 0 003.536 0l2.878-2.878a2.5 2.5 0 000-3.536l-7.5-7.5A2.5 2.5 0 008.38 3H5.5zM6 7a1 1 0 100-2 1 1 0 000 2z" clip-rule="evenodd" />
                                             </svg>
@@ -1282,7 +1287,7 @@
 
                                     {{-- Ticket Price Badge --}}
                                     <div v-if="!event.rsvp_enabled && event.registration_url && event.ticket_price != null && !event.is_password_protected" class="flex items-center gap-4">
-                                        <div class="flex-shrink-0 w-16 h-16 rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900 flex items-center justify-center shadow-sm">
+                                        <div data-reveal-tile class="flex-shrink-0 w-16 h-16 rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900 flex items-center justify-center shadow-sm">
                                             <svg width="24" height="24" viewBox="0 0 20 20" fill="{{ $accentColor }}" aria-hidden="true">
                                                 <path fill-rule="evenodd" d="M5.5 3A2.5 2.5 0 003 5.5v2.879a2.5 2.5 0 00.732 1.767l7.5 7.5a2.5 2.5 0 003.536 0l2.878-2.878a2.5 2.5 0 000-3.536l-7.5-7.5A2.5 2.5 0 008.38 3H5.5zM6 7a1 1 0 100-2 1 1 0 000 2z" clip-rule="evenodd" />
                                             </svg>
@@ -1298,7 +1303,7 @@
 
                                     {{-- Talent Avatars + Names --}}
                                     <div v-if="event.talent && event.talent.length > 0 && !event.is_password_protected" class="flex items-center gap-2 my-2">
-                                        <div class="flex items-center -space-x-2" :class="isRtl ? 'space-x-reverse' : ''">
+                                        <div data-reveal-pop class="flex items-center -space-x-2" :class="isRtl ? 'space-x-reverse' : ''">
                                             <template v-for="(t, tIndex) in event.talent.slice(0, 5)" :key="'ta-' + tIndex">
                                                 <img v-if="t.profile_image" :src="t.profile_image" class="w-8 h-8 rounded-full object-cover border-2 border-white dark:border-gray-700" :alt="t.name" :title="t.name">
                                                 <div v-else class="w-8 h-8 rounded-full border-2 border-white dark:border-gray-700 bg-gray-200 dark:bg-gray-600 flex items-center justify-center" :title="t.name">
@@ -1626,7 +1631,7 @@
         </div>
 
         {{-- List View (Mobile) --}}
-        <div v-show="currentView === 'list' && !isLoadingEvents" class="{{ (isset($force_mobile) && $force_mobile) ? 'hidden' : 'md:hidden' }} {{ rtl_class($role ?? null, 'rtl', '', $isAdminRoute) }}">
+        <div v-show="currentView === 'list' && !isLoadingEvents" :data-list-anim="activeListAnimation !== 'none' ? activeListAnimation : null" :data-list-rtl="isRtl ? '' : null" style="--es-accent: {{ $accentColor }}" class="{{ (isset($force_mobile) && $force_mobile) ? 'hidden' : 'md:hidden' }} {{ rtl_class($role ?? null, 'rtl', '', $isAdminRoute) }}">
             {{-- All events grouped by date --}}
             <div v-if="allListGroups.length > 0" class="space-y-6">
                 <template v-for="(group, groupIndex) in allListGroups" :key="'list-m-' + group.date">
@@ -1650,7 +1655,7 @@
                     {{-- Compact cards --}}
                     <div class="space-y-3">
                         <template v-for="event in group.events" :key="'list-mob-' + event.uniqueKey">
-                            <div v-if="isEventVisible(event)" @click="navigateToEvent(event, $event)" class="block cursor-pointer">
+                            <div v-if="isEventVisible(event)" v-list-reveal:m="event.uniqueKey" @click="navigateToEvent(event, $event)" class="block cursor-pointer">
                                 <div class="bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 overflow-hidden transition-all duration-200 hover:shadow-lg hover:bg-gray-50 dark:hover:bg-gray-700">
                                     <div class="flex">
                                         @include('role/partials/mobile-event-card')
@@ -1995,6 +2000,194 @@
 if (typeof Vue !== 'undefined') {
 const { createApp } = Vue;
 
+// Event animations: cards in the three event lists (desktop list, mobile list, mobile agenda)
+// animate in as they scroll into view, styled by resources/css/list-reveal.css. The CSS only hides
+// a card under a root that carries data-list-anim, which Vue binds from activeListAnimation, so a
+// script that never runs leaves every card visible. The reveal state lives in data-list-revealed
+// (an attribute, not a class, so Vue's class patching can never wipe it):
+//   "in"      - playing (transitions and keyframes run, staggered by --reveal-delay)
+//   "instant" - shown with no motion (a card the visitor has already scrolled past)
+//   "done"    - settled: no transform, filter or pseudo-element is left on the card
+const listRevealMotionOk = (() => {
+    try {
+        const nav = performance.getEntriesByType('navigation')[0];
+        return 'IntersectionObserver' in window
+            && !window.matchMedia('(prefers-reduced-motion: reduce)').matches
+            // The accessibility widget's own switch. Its class lands on <html> only once the
+            // widget's module runs, after this script, so read what it persisted instead.
+            && localStorage.getItem('es_a11y_reduce_motion') !== '1'
+            // Coming back from an event page, the list should already be there.
+            && !(nav && nav.type === 'back_forward');
+    } catch (e) {
+        return false;
+    }
+})();
+
+const listReveal = (() => {
+    // Keys of cards that have already revealed, so a card Vue re-creates (a filter change, a
+    // refetch) settles straight away instead of replaying or flashing.
+    const revealedKeys = new Set();
+    const pending = new Set();
+    let observer = null;
+    let dealCounter = 0;
+    let firstBatch = true;
+
+    const keyFor = (binding) => (binding.arg || '') + ':' + binding.value;
+    const isRendered = (el) => el.offsetWidth > 0 || el.offsetHeight > 0 || el.getClientRects().length > 0;
+
+    // The wave inside a card: each row of the text column gets an offset from a decelerating
+    // table (rows start in quick succession and ease into the last ones), each badge tile its
+    // row's offset + 40ms, and each talent avatar its row's + 80ms, 40ms apart. The CSS turns
+    // --lr-t into a delay on the element itself. Empty rows (an action row with nothing in it)
+    // are skipped rather than holding a slot. ListAnimationPicker.vue keeps a copy of this.
+    const ROW_OFFSETS = [0, 50, 95, 135, 170, 200, 225, 245];
+
+    function stampOffsets(card) {
+        const stamped = [];
+        const stamp = (node, ms) => {
+            node.style.setProperty('--lr-t', ms + 'ms');
+            stamped.push(node);
+        };
+        card.querySelectorAll('[data-reveal-body]').forEach(body => {
+            let i = 0;
+            Array.from(body.children).forEach(row => {
+                if (!row.children.length && !row.textContent.trim()) return;
+                const t = ROW_OFFSETS[Math.min(i++, ROW_OFFSETS.length - 1)];
+                stamp(row, t);
+                row.querySelectorAll('[data-reveal-date], [data-reveal-tile]').forEach(tile => stamp(tile, t + 40));
+                row.querySelectorAll('[data-reveal-pop]').forEach(pop => {
+                    Array.from(pop.children).forEach((child, j) => stamp(child, t + 80 + Math.min(j, 4) * 40));
+                });
+            });
+        });
+        return stamped;
+    }
+
+    function settle(el, state, delay) {
+        pending.delete(el);
+        if (observer) observer.unobserve(el);
+        if (el._listRevealKey) revealedKeys.add(el._listRevealKey);
+        if (state === 'instant') {
+            el.setAttribute('data-list-revealed', 'instant');
+            return;
+        }
+        // Written in the same frame as "in": no hidden-state rule reads them, so no reflow.
+        const stamped = stampOffsets(el);
+        el.style.setProperty('--reveal-delay', delay + 'ms');
+        el.setAttribute('data-list-revealed', 'in');
+        setTimeout(() => {
+            el.setAttribute('data-list-revealed', 'done');
+            el.style.removeProperty('--reveal-delay');
+            stamped.forEach(node => node.style.removeProperty('--lr-t'));
+        }, delay + 1500);
+    }
+
+    // A lazy flyer that has not arrived yet would make the card animate in empty and the poster
+    // pop in afterwards. Give it a moment (never more than 350ms) before playing the batch.
+    function whenImagesReady(els) {
+        const waits = [];
+        els.forEach(el => el.querySelectorAll('[data-reveal-media] img').forEach(img => {
+            if (!img.complete) {
+                waits.push(new Promise(resolve => {
+                    img.addEventListener('load', resolve, { once: true });
+                    img.addEventListener('error', resolve, { once: true });
+                }));
+            }
+        }));
+        if (!waits.length) return Promise.resolve();
+        return Promise.race([Promise.all(waits), new Promise(resolve => setTimeout(resolve, 350))]);
+    }
+
+    function onIntersect(entries) {
+        const batch = [];
+        entries.forEach(entry => {
+            if (!entry.isIntersecting || !pending.has(entry.target)) return;
+            if (entry.boundingClientRect.top < 0) {
+                settle(entry.target, 'instant');
+            } else {
+                batch.push(entry.target);
+            }
+        });
+
+        // Anything still waiting ABOVE the viewport was jumped past (End, find-in-page, a restored
+        // scroll). Show it as-is: animating it later, from the wrong direction, looks broken.
+        // Only the list on screen is scanned (two of the three are display:none at any width),
+        // and every position is read before anything is written, so a long jump costs one layout.
+        const rootShown = new Map();
+        const passed = [...pending].filter(el => {
+            const root = el._lrRoot;
+            if (!rootShown.has(root)) rootShown.set(root, !!root && root.getClientRects().length > 0);
+            return rootShown.get(root) && isRendered(el) && el.getBoundingClientRect().bottom <= 0;
+        });
+        passed.forEach(el => settle(el, 'instant'));
+
+        if (!batch.length) return;
+        batch.sort((a, b) => (a.compareDocumentPosition(b) & Node.DOCUMENT_POSITION_FOLLOWING) ? -1 : 1);
+
+        // Slide sends a card's text and image in from their own outer edges, and which side the
+        // image is on differs between the lists. Measure every card first, then write, then
+        // flush styles once, so the hidden state the transition starts from is already correct.
+        // offsetLeft, not getBoundingClientRect(): the hidden state has already shifted the text
+        // column, and a wrong guess makes the two columns overlap so neither test could pass.
+        const sides = batch.map(el => {
+            const body = el.querySelector('[data-reveal-body]');
+            const media = el.querySelector('[data-reveal-media]');
+            if (!body || !media || body.offsetParent !== media.offsetParent) return null;
+            const bl = body.offsetLeft;
+            const ml = media.offsetLeft;
+            if (ml >= bl + body.offsetWidth - 1) return '1';
+            if (ml + media.offsetWidth <= bl + 1) return '-1';
+            return null;
+        });
+        batch.forEach((el, i) => {
+            if (sides[i]) el.style.setProperty('--lr-side', sides[i]);
+        });
+        void batch[0].offsetWidth;
+
+        // The first batch is the entrance someone opening a shared link sees, so it gets a
+        // deliberate cascade. Later batches stay quick so fast scrolling never shows blank cards.
+        const entrance = firstBatch;
+        firstBatch = false;
+        const delays = batch.map((el, i) => entrance
+            ? 80 + Math.min(i, 5) * 90
+            : (batch.length > 4 ? 0 : i * 70));
+
+        whenImagesReady(batch).then(() => {
+            batch.forEach((el, i) => {
+                if (pending.has(el)) settle(el, 'in', delays[i]);
+            });
+        });
+    }
+
+    return {
+        created(el, binding) {
+            el.setAttribute('data-list-reveal', '');
+            el._listRevealKey = keyFor(binding);
+            // Deal tilts alternate cards opposite ways. A running counter rather than
+            // :nth-child, which restarts at every date and counts the date header.
+            el.style.setProperty('--deal-dir', (dealCounter++ % 2) ? '1' : '-1');
+            if (revealedKeys.has(el._listRevealKey)) {
+                el.setAttribute('data-list-revealed', 'done');
+            }
+        },
+        mounted(el) {
+            el._lrRoot = el.closest('[data-list-anim]');
+            if (el.hasAttribute('data-list-revealed') || !el._lrRoot) return;
+            if (!observer) {
+                // Threshold 0 with a bottom inset rather than a ratio threshold: a card taller
+                // than the viewport could never reach a ratio, and would stay hidden.
+                observer = new IntersectionObserver(onIntersect, { threshold: 0, rootMargin: '0px 0px -8% 0px' });
+            }
+            pending.add(el);
+            observer.observe(el);
+        },
+        unmounted(el) {
+            pending.delete(el);
+            if (observer) observer.unobserve(el);
+        },
+    };
+})();
+
 const calendarApp = createApp({
     data() {
         return {
@@ -2058,6 +2251,9 @@ const calendarApp = createApp({
             openCommentForm: {},
             openPhotoForm: {},
             accentColor: '{{ $accentColor ?? "#4E81FA" }}',
+            // 'none' also whenever the visitor asks for less motion, on the device or with the
+            // accessibility widget (listRevealMotionOk). The CSS forces cards visible either way.
+            activeListAnimation: listRevealMotionOk ? @json($listAnimation) : 'none',
             votingPoll: {},
             pollAnimating: {},
             isLoadingEvents: {{ request()->graphic ? 'false' : 'true' }},
@@ -4037,6 +4233,7 @@ const calendarApp = createApp({
 if (typeof FileReader !== 'undefined') {
     calendarApp.config.globalProperties.FileReader = FileReader;
 }
+calendarApp.directive('list-reveal', listReveal);
 const calendarAppInstance = calendarApp.mount('#calendar-app');
 window.calendarVueApp = calendarAppInstance;
 

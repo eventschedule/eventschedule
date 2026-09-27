@@ -1,0 +1,654 @@
+/*
+ * Event animations: how event cards arrive as a visitor scrolls a schedule's event list.
+ *
+ * The owner picks a design on the schedule's Style > Branding tab (roles.list_animation). The
+ * guest page's Vue app (role/partials/calendar.blade.php) binds it to data-list-anim on each list
+ * root and runs the v-list-reveal directive on each card, which moves data-list-revealed through
+ * "in" (playing), then "done" (settled), or straight to "instant" for a card the visitor has
+ * already scrolled past. The edit page's preview (ListAnimationPicker.vue) drives the same
+ * attributes, so it can never drift from what guests see.
+ *
+ * Rules that keep content safe:
+ *   - Nothing is hidden unless a root carries data-list-anim, which only Vue sets, so a page whose
+ *     script failed shows every card.
+ *   - "done" and "instant" match none of the motion rules below: a settled card keeps no
+ *     transform, filter, clip-path or pseudo-element, so it never becomes the containing block
+ *     for a fixed descendant and every hover style works again.
+ *   - No will-change anywhere: 400 promoted layers would exhaust memory on a low-end phone.
+ *   - Reduced motion (the OS setting or the accessibility widget), print, and keyboard focus
+ *     always show the card at rest.
+ *
+ * Choreography: at most three layers per design - the card, its rows, and one signature accent.
+ * Each card's details arrive as a wave: the directive writes an offset (--lr-t) on every row of
+ * [data-reveal-body] from a decelerating table (0, 50, 95, 135, ... ms), on each badge tile
+ * (its row + 40ms) and on each talent avatar (its row + 80ms + 40ms apart). Every animated
+ * element then computes its own delay with the formula below, ON THE ELEMENT: a custom property
+ * resolves where it is declared, so a token built on the list root would see neither the card's
+ * --reveal-delay nor the element's --lr-t. Hidden-state rules never read --lr-t (it is written
+ * in the same frame as "in").
+ *
+ * Hooks inside a card:
+ *   data-reveal-body   the text column; each direct child is a row that cascades in
+ *   data-reveal-title  the title row (rises out of a mask, or blurs in with Focus)
+ *   data-reveal-date   the date tile (a tear-off calendar flip in every design)
+ *   data-reveal-tile   the venue / RSVP / ticket badge tiles
+ *   data-reveal-pop    the talent avatar stack; each avatar arrives on its own
+ *   data-reveal-media  the flyer or image column; the motion goes on its <a>, never the <img>,
+ *                      which carries the past-event grayscale
+ */
+
+[data-list-anim] {
+    --lr-ease: cubic-bezier(.22, 1, .36, 1);
+    --lr-wipe: cubic-bezier(.77, 0, .18, 1);
+    --lr-bounce: cubic-bezier(.34, 1.36, .64, 1);
+    --lr-dir: 1;
+    /* Row cascade: where the wave starts after the card, how its offsets scale, how it moves. */
+    --lr-base: 90ms;
+    --lr-tscale: 1;
+    --lr-row-fade: 280ms;
+    --lr-row-move: 520ms;
+    --lr-row-y: 12px;
+    --lr-row-x: 20px;
+}
+
+[data-list-anim][data-list-rtl] {
+    --lr-dir: -1;
+}
+
+[data-list-anim="focus"] { --lr-base: 120ms; }
+[data-list-anim="deal"] { --lr-row-y: 10px; }
+[data-list-anim="shine"] { --lr-base: 200ms; --lr-tscale: .5; }
+[data-list-anim="curtain"] { --lr-base: 260ms; }
+
+/* Image motion stays inside its own column instead of painting over the text beside it. */
+[data-list-anim] [data-list-reveal] [data-reveal-media] {
+    position: relative;
+    overflow: hidden;
+}
+
+/* ---------------------------------------------------------------------------------------------
+ * Shared details: the date tile swings down like a tear-off calendar page just after its row
+ * arrives, and the title rises out of a mask (every design but Focus, which blurs it in).
+ * ------------------------------------------------------------------------------------------- */
+
+[data-list-anim] [data-list-reveal]:not([data-list-revealed]) [data-reveal-date] {
+    opacity: 0;
+    transform: perspective(500px) rotateX(-90deg);
+    transform-origin: 50% 0;
+}
+
+[data-list-anim] [data-list-reveal][data-list-revealed="in"] [data-reveal-date] {
+    transform-origin: 50% 0;
+    transition:
+        transform 600ms var(--lr-bounce) calc(var(--reveal-delay, 0ms) + var(--lr-base) + var(--lr-t, 0ms) * var(--lr-tscale)),
+        opacity 200ms ease-out calc(var(--reveal-delay, 0ms) + var(--lr-base) + var(--lr-t, 0ms) * var(--lr-tscale));
+}
+
+[data-list-anim]:not([data-list-anim="focus"]) [data-list-reveal]:not([data-list-revealed]) [data-reveal-title],
+[data-list-anim]:not([data-list-anim="focus"]) [data-list-reveal][data-list-revealed="in"] [data-reveal-title] {
+    overflow: hidden;
+}
+
+[data-list-anim]:not([data-list-anim="focus"]) [data-list-reveal]:not([data-list-revealed]) [data-reveal-title] > :is(h2, h3) {
+    transform: translateY(105%);
+}
+
+[data-list-anim]:not([data-list-anim="focus"]) [data-list-reveal][data-list-revealed="in"] [data-reveal-title] > :is(h2, h3) {
+    transition: transform 700ms var(--lr-ease) calc(var(--reveal-delay, 0ms) + var(--lr-base) + var(--lr-t, 0ms) * var(--lr-tscale));
+}
+
+/* ---------------------------------------------------------------------------------------------
+ * Rise (Clean): the card floats up, its details float up after it in a wave, and its image
+ * settles. The calmest design: no bounce anywhere but the date tile.
+ * ------------------------------------------------------------------------------------------- */
+
+[data-list-anim="rise"] [data-list-reveal]:not([data-list-revealed]) {
+    opacity: 0;
+    transform: translateY(20px);
+}
+
+[data-list-anim="rise"] [data-list-reveal][data-list-revealed="in"] {
+    transition:
+        opacity 300ms ease-out var(--reveal-delay, 0ms),
+        transform 650ms var(--lr-ease) var(--reveal-delay, 0ms);
+}
+
+[data-list-anim="rise"] [data-list-reveal]:not([data-list-revealed]) [data-reveal-body] > :not([data-reveal-title], [data-reveal-date]) {
+    opacity: 0;
+    transform: translateY(var(--lr-row-y));
+}
+
+[data-list-anim="rise"] [data-list-reveal]:not([data-list-revealed]) [data-reveal-pop] > * {
+    opacity: 0;
+    transform: scale(.85);
+}
+
+[data-list-anim="rise"] [data-list-reveal][data-list-revealed="in"] :is([data-reveal-body] > :not([data-reveal-title], [data-reveal-date]), [data-reveal-pop] > *) {
+    transition:
+        opacity var(--lr-row-fade) ease-out calc(var(--reveal-delay, 0ms) + var(--lr-base) + var(--lr-t, 0ms) * var(--lr-tscale)),
+        transform var(--lr-row-move) var(--lr-ease) calc(var(--reveal-delay, 0ms) + var(--lr-base) + var(--lr-t, 0ms) * var(--lr-tscale));
+}
+
+[data-list-anim="rise"] [data-list-reveal]:not([data-list-revealed]) [data-reveal-media] > a {
+    transform: scale(1.08);
+}
+
+[data-list-anim="rise"] [data-list-reveal][data-list-revealed="in"] [data-reveal-media] > a {
+    transition: transform 1000ms var(--lr-ease) var(--reveal-delay, 0ms);
+}
+
+/* ---------------------------------------------------------------------------------------------
+ * Focus (Dreamy): a rack-focus pull down the card. The image sharpens first, then each line of
+ * text comes into focus in turn, and the badge tiles "breathe" like a lens settling. Rows are
+ * blurred one by one on desktop; phones blur the text column once (cheaper) and only fade rows.
+ * The wrapper itself is never blurred: one huge filtered layer to repaint every frame, and a
+ * containing block for anything fixed inside the card.
+ * ------------------------------------------------------------------------------------------- */
+
+[data-list-anim="focus"] [data-list-reveal]:not([data-list-revealed]) {
+    opacity: 0;
+    transform: translateY(12px);
+}
+
+[data-list-anim="focus"] [data-list-reveal][data-list-revealed="in"] {
+    transition:
+        opacity 300ms ease-out var(--reveal-delay, 0ms),
+        transform 600ms var(--lr-ease) var(--reveal-delay, 0ms);
+}
+
+[data-list-anim="focus"] [data-list-reveal]:not([data-list-revealed]) [data-reveal-body] > :not([data-reveal-date]) {
+    opacity: 0;
+    filter: blur(4px);
+    transform: translateY(6px);
+}
+
+[data-list-anim="focus"] [data-list-reveal][data-list-revealed="in"] [data-reveal-body] > :not([data-reveal-date]) {
+    transition:
+        opacity var(--lr-row-fade) ease-out calc(var(--reveal-delay, 0ms) + var(--lr-base) + var(--lr-t, 0ms) * var(--lr-tscale)),
+        filter 480ms var(--lr-ease) calc(var(--reveal-delay, 0ms) + var(--lr-base) + var(--lr-t, 0ms) * var(--lr-tscale)),
+        transform var(--lr-row-move) var(--lr-ease) calc(var(--reveal-delay, 0ms) + var(--lr-base) + var(--lr-t, 0ms) * var(--lr-tscale));
+}
+
+[data-list-anim="focus"] [data-list-reveal]:not([data-list-revealed]) [data-reveal-tile] {
+    transform: scale(1.08);
+}
+
+[data-list-anim="focus"] [data-list-reveal]:not([data-list-revealed]) [data-reveal-pop] > * {
+    opacity: 0;
+    transform: scale(.9);
+}
+
+[data-list-anim="focus"] [data-list-reveal][data-list-revealed="in"] :is([data-reveal-tile], [data-reveal-pop] > *) {
+    transition:
+        opacity var(--lr-row-fade) ease-out calc(var(--reveal-delay, 0ms) + var(--lr-base) + var(--lr-t, 0ms) * var(--lr-tscale)),
+        transform var(--lr-row-move) var(--lr-ease) calc(var(--reveal-delay, 0ms) + var(--lr-base) + var(--lr-t, 0ms) * var(--lr-tscale));
+}
+
+[data-list-anim="focus"] [data-list-reveal]:not([data-list-revealed]) [data-reveal-media] > a {
+    filter: blur(12px);
+    transform: scale(1.06);
+}
+
+[data-list-anim="focus"] [data-list-reveal][data-list-revealed="in"] [data-reveal-media] > a {
+    transition:
+        filter 900ms var(--lr-ease) var(--reveal-delay, 0ms),
+        transform 900ms var(--lr-ease) var(--reveal-delay, 0ms);
+}
+
+/* ---------------------------------------------------------------------------------------------
+ * Slide (Energetic): the card glides in from the reading side (--lr-dir), each row glides in
+ * after it like a ticker, the badge tiles travel further (parallax), and the image slides in
+ * from its own outer edge to meet the text. Which side the image sits on is not simply the
+ * reading direction (the RTL desktop card reverses its row inside a direction:rtl list, which
+ * puts the image back on the right), so the directive measures it into --lr-side: 1 when the
+ * image is on the right, -1 on the left.
+ * ------------------------------------------------------------------------------------------- */
+
+[data-list-anim="slide"] [data-list-reveal]:not([data-list-revealed]) {
+    opacity: 0;
+    transform: translateX(calc(var(--lr-dir) * -24px));
+}
+
+[data-list-anim="slide"] [data-list-reveal][data-list-revealed="in"] {
+    transition:
+        opacity 300ms ease-out var(--reveal-delay, 0ms),
+        transform 600ms var(--lr-ease) var(--reveal-delay, 0ms);
+}
+
+[data-list-anim="slide"] [data-list-reveal]:not([data-list-revealed]) [data-reveal-body] > :not([data-reveal-title], [data-reveal-date]) {
+    opacity: 0;
+    transform: translateX(calc(var(--lr-dir) * var(--lr-row-x) * -1));
+}
+
+[data-list-anim="slide"] [data-list-reveal]:not([data-list-revealed]) [data-reveal-tile] {
+    transform: translateX(calc(var(--lr-dir) * -16px));
+}
+
+[data-list-anim="slide"] [data-list-reveal]:not([data-list-revealed]) [data-reveal-pop] > * {
+    opacity: 0;
+    transform: translateX(calc(var(--lr-dir) * -10px));
+}
+
+[data-list-anim="slide"] [data-list-reveal][data-list-revealed="in"] :is([data-reveal-body] > :not([data-reveal-title], [data-reveal-date]), [data-reveal-tile], [data-reveal-pop] > *) {
+    transition:
+        opacity var(--lr-row-fade) ease-out calc(var(--reveal-delay, 0ms) + var(--lr-base) + var(--lr-t, 0ms) * var(--lr-tscale)),
+        transform var(--lr-row-move) var(--lr-ease) calc(var(--reveal-delay, 0ms) + var(--lr-base) + var(--lr-t, 0ms) * var(--lr-tscale));
+}
+
+[data-list-anim="slide"] [data-list-reveal]:not([data-list-revealed]) [data-reveal-media] > a {
+    transform: translateX(calc(var(--lr-side, var(--lr-dir)) * 48px));
+}
+
+[data-list-anim="slide"] [data-list-reveal][data-list-revealed="in"] [data-reveal-media] > a {
+    transition: transform 650ms var(--lr-ease) calc(var(--reveal-delay, 0ms) + 60ms);
+}
+
+/* ---------------------------------------------------------------------------------------------
+ * Deal (Playful): cards land like playing cards, tilted alternately and settling with a bounce;
+ * then the venue and ticket badges are dealt onto the card, and the avatars pop in last.
+ * --deal-dir is set per card by the directive from a running counter. These tile rules come
+ * after the shared date rules on purpose: the specificities tie, so order decides.
+ * ------------------------------------------------------------------------------------------- */
+
+[data-list-anim="deal"] [data-list-reveal]:not([data-list-revealed]) {
+    opacity: 0;
+    transform: translateY(48px) rotate(calc(var(--deal-dir, 1) * 2deg)) scale(.96);
+    transform-origin: 50% 100%;
+}
+
+[data-list-anim="deal"] [data-list-reveal][data-list-revealed="in"] {
+    transform-origin: 50% 100%;
+    transition:
+        opacity 300ms ease-out var(--reveal-delay, 0ms),
+        transform 750ms var(--lr-bounce) var(--reveal-delay, 0ms);
+}
+
+[data-list-anim="deal"] [data-list-reveal]:not([data-list-revealed]) [data-reveal-body] > :not([data-reveal-title], [data-reveal-date]) {
+    opacity: 0;
+    transform: translateY(var(--lr-row-y));
+}
+
+[data-list-anim="deal"] [data-list-reveal][data-list-revealed="in"] [data-reveal-body] > :not([data-reveal-title], [data-reveal-date]) {
+    transition:
+        opacity var(--lr-row-fade) ease-out calc(var(--reveal-delay, 0ms) + var(--lr-base) + var(--lr-t, 0ms) * var(--lr-tscale)),
+        transform var(--lr-row-move) var(--lr-ease) calc(var(--reveal-delay, 0ms) + var(--lr-base) + var(--lr-t, 0ms) * var(--lr-tscale));
+}
+
+[data-list-anim="deal"] [data-list-reveal]:not([data-list-revealed]) [data-reveal-tile] {
+    opacity: 0;
+    transform: translate(calc(var(--deal-dir, 1) * -24px), -16px) rotate(calc(var(--deal-dir, 1) * -14deg)) scale(.85);
+    transform-origin: 50% 50%;
+}
+
+[data-list-anim="deal"] [data-list-reveal]:not([data-list-revealed]) [data-reveal-pop] > * {
+    opacity: 0;
+    transform: scale(.5) rotate(calc(var(--deal-dir, 1) * 10deg));
+}
+
+[data-list-anim="deal"] [data-list-reveal][data-list-revealed="in"] :is([data-reveal-tile], [data-reveal-pop] > *) {
+    transform-origin: 50% 50%;
+    transition:
+        opacity 200ms ease-out calc(var(--reveal-delay, 0ms) + var(--lr-base) + var(--lr-t, 0ms) * var(--lr-tscale)),
+        transform 560ms var(--lr-bounce) calc(var(--reveal-delay, 0ms) + var(--lr-base) + var(--lr-t, 0ms) * var(--lr-tscale));
+}
+
+/* ---------------------------------------------------------------------------------------------
+ * Shine (Glowing): a band of the schedule's accent color sweeps across each card once, the text
+ * washes in quickly behind it, and every badge tile glints as the light crosses the tiles.
+ * ------------------------------------------------------------------------------------------- */
+
+[data-list-anim="shine"] [data-list-reveal]:not([data-list-revealed]) {
+    opacity: 0;
+    transform: translateY(16px);
+}
+
+[data-list-anim="shine"] [data-list-reveal][data-list-revealed="in"] {
+    transition:
+        opacity 380ms ease-out var(--reveal-delay, 0ms),
+        transform 600ms var(--lr-ease) var(--reveal-delay, 0ms);
+}
+
+[data-list-anim="shine"] [data-list-reveal]:not([data-list-revealed]) [data-reveal-body] > :not([data-reveal-title], [data-reveal-date]) {
+    opacity: 0;
+}
+
+[data-list-anim="shine"] [data-list-reveal][data-list-revealed="in"] [data-reveal-body] > :not([data-reveal-title], [data-reveal-date]) {
+    transition: opacity 300ms ease-out calc(var(--reveal-delay, 0ms) + var(--lr-base) + var(--lr-t, 0ms) * var(--lr-tscale));
+}
+
+[data-list-anim="shine"] [data-list-reveal]:is(:not([data-list-revealed]), [data-list-revealed="in"]) > div {
+    position: relative;
+}
+
+[data-list-anim="shine"] [data-list-reveal]:is(:not([data-list-revealed]), [data-list-revealed="in"]) > div::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    z-index: 2;
+    pointer-events: none;
+    background: linear-gradient(105deg, transparent 30%, rgba(255, 255, 255, .28) 44%, rgba(255, 255, 255, .6) 50%, rgba(255, 255, 255, .28) 56%, transparent 70%);
+    background: linear-gradient(105deg, transparent 30%, color-mix(in srgb, var(--es-accent) 26%, transparent) 44%, rgba(255, 255, 255, .55) 50%, color-mix(in srgb, var(--es-accent) 26%, transparent) 56%, transparent 70%);
+    transform: translateX(-101%);
+}
+
+.dark [data-list-anim="shine"] [data-list-reveal]:is(:not([data-list-revealed]), [data-list-revealed="in"]) > div::after {
+    background: linear-gradient(105deg, transparent 30%, rgba(255, 255, 255, .08) 44%, rgba(255, 255, 255, .12) 50%, rgba(255, 255, 255, .08) 56%, transparent 70%);
+    background: linear-gradient(105deg, transparent 30%, color-mix(in srgb, var(--es-accent) 30%, transparent) 44%, rgba(255, 255, 255, .12) 50%, color-mix(in srgb, var(--es-accent) 30%, transparent) 56%, transparent 70%);
+}
+
+[data-list-anim="shine"] [data-list-reveal][data-list-revealed="in"] > div::after {
+    animation: lr-shine 1100ms cubic-bezier(.4, 0, .2, 1) calc(var(--reveal-delay, 0ms) + 180ms) both;
+}
+
+[data-list-anim="shine"][data-list-rtl] [data-list-reveal][data-list-revealed="in"] > div::after {
+    animation-direction: reverse;
+}
+
+/* The glint: a ring in the accent color that swells off each tile and fades, timed to the moment
+ * the band crosses the tile column (it sits near the start of the card, later in RTL). A ring on
+ * a pseudo-element rather than an animated box-shadow, which would repaint every frame and wipe
+ * the tile's own shadow while it ran. */
+[data-list-anim="shine"] {
+    --lr-glint: rgba(255, 255, 255, .7);
+    --lr-glint: color-mix(in srgb, var(--es-accent) 45%, transparent);
+    --lr-glint-at: 480ms;
+}
+
+.dark [data-list-anim="shine"] {
+    --lr-glint: rgba(255, 255, 255, .45);
+    --lr-glint: color-mix(in srgb, color-mix(in srgb, var(--es-accent) 65%, white) 50%, transparent);
+}
+
+[data-list-anim="shine"][data-list-rtl] {
+    --lr-glint-at: 650ms;
+}
+
+[data-list-anim="shine"] [data-list-reveal]:is(:not([data-list-revealed]), [data-list-revealed="in"]) :is([data-reveal-tile], [data-reveal-date]) {
+    position: relative;
+}
+
+[data-list-anim="shine"] [data-list-reveal]:is(:not([data-list-revealed]), [data-list-revealed="in"]) :is([data-reveal-tile], [data-reveal-date])::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    border-radius: inherit;
+    border: 2px solid var(--lr-glint);
+    pointer-events: none;
+    opacity: 0;
+}
+
+[data-list-anim="shine"] [data-list-reveal][data-list-revealed="in"] :is([data-reveal-tile], [data-reveal-date])::after {
+    animation: lr-glint 700ms ease-out calc(var(--reveal-delay, 0ms) + var(--lr-glint-at)) both;
+}
+
+@keyframes lr-shine {
+    from { transform: translateX(-101%); }
+    to { transform: translateX(101%); }
+}
+
+@keyframes lr-glint {
+    0% { opacity: 0; transform: scale(1); }
+    15% { opacity: .9; transform: scale(1); }
+    100% { opacity: 0; transform: scale(1.3); }
+}
+
+/* ---------------------------------------------------------------------------------------------
+ * Curtain (Theatrical): two panels in the schedule's accent color pull back off each image while
+ * the image settles behind them, and the text is unveiled line by line as the stage opens. A card
+ * with no image gets one panel over the whole card.
+ * ------------------------------------------------------------------------------------------- */
+
+[data-list-anim="curtain"] [data-list-reveal]:not([data-list-revealed]) {
+    opacity: 0;
+}
+
+[data-list-anim="curtain"] [data-list-reveal][data-list-revealed="in"] {
+    transition: opacity 300ms ease-out var(--reveal-delay, 0ms);
+}
+
+/* Each row wipes open from the reading side. The -6px insets keep the badge tiles' shadows and
+ * the text's descenders inside the clip, so nothing snaps into view when it lifts. */
+[data-list-anim="curtain"] [data-list-reveal]:not([data-list-revealed]) [data-reveal-body] > :not([data-reveal-title], [data-reveal-date]) {
+    clip-path: inset(-6px 100% -6px -6px);
+}
+
+[data-list-anim="curtain"][data-list-rtl] [data-list-reveal]:not([data-list-revealed]) [data-reveal-body] > :not([data-reveal-title], [data-reveal-date]) {
+    clip-path: inset(-6px -6px -6px 100%);
+}
+
+[data-list-anim="curtain"] [data-list-reveal][data-list-revealed="in"] [data-reveal-body] > :not([data-reveal-title], [data-reveal-date]) {
+    clip-path: inset(-6px);
+    transition: clip-path 480ms var(--lr-ease) calc(var(--reveal-delay, 0ms) + var(--lr-base) + var(--lr-t, 0ms) * var(--lr-tscale));
+}
+
+[data-list-anim="curtain"] [data-list-reveal]:not([data-list-revealed]) [data-reveal-pop] > * {
+    opacity: 0;
+    transform: translateY(8px);
+}
+
+[data-list-anim="curtain"] [data-list-reveal][data-list-revealed="in"] [data-reveal-pop] > * {
+    transition:
+        opacity var(--lr-row-fade) ease-out calc(var(--reveal-delay, 0ms) + var(--lr-base) + var(--lr-t, 0ms) * var(--lr-tscale)),
+        transform var(--lr-row-move) var(--lr-ease) calc(var(--reveal-delay, 0ms) + var(--lr-base) + var(--lr-t, 0ms) * var(--lr-tscale));
+}
+
+[data-list-anim="curtain"] [data-list-reveal]:not([data-list-revealed]) [data-reveal-media] > a {
+    transform: scale(1.12);
+}
+
+[data-list-anim="curtain"] [data-list-reveal][data-list-revealed="in"] [data-reveal-media] > a {
+    transition: transform 1200ms var(--lr-ease) var(--reveal-delay, 0ms);
+}
+
+[data-list-anim="curtain"] [data-list-reveal]:is(:not([data-list-revealed]), [data-list-revealed="in"]) [data-reveal-media]::before,
+[data-list-anim="curtain"] [data-list-reveal]:is(:not([data-list-revealed]), [data-list-revealed="in"]) [data-reveal-media]::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+    transform-origin: 100% 50%;
+}
+
+[data-list-anim="curtain"][data-list-rtl] [data-list-reveal] [data-reveal-media]::before,
+[data-list-anim="curtain"][data-list-rtl] [data-list-reveal] [data-reveal-media]::after {
+    transform-origin: 0 50%;
+}
+
+[data-list-anim="curtain"] [data-list-reveal]:is(:not([data-list-revealed]), [data-list-revealed="in"]) [data-reveal-media]::before {
+    z-index: 2;
+    background: #fff;
+    background: color-mix(in srgb, var(--es-accent) 55%, white);
+}
+
+[data-list-anim="curtain"] [data-list-reveal]:is(:not([data-list-revealed]), [data-list-revealed="in"]) [data-reveal-media]::after {
+    z-index: 3;
+    background: var(--es-accent);
+}
+
+[data-list-anim="curtain"] [data-list-reveal][data-list-revealed="in"] [data-reveal-media]::before {
+    animation: lr-wipe 650ms var(--lr-wipe) calc(var(--reveal-delay, 0ms) + 150ms) both;
+}
+
+[data-list-anim="curtain"] [data-list-reveal][data-list-revealed="in"] [data-reveal-media]::after {
+    animation: lr-wipe 650ms var(--lr-wipe) calc(var(--reveal-delay, 0ms) + 60ms) both;
+}
+
+/* No image: one panel over the whole card. Browsers without :has() simply fade the card in. */
+[data-list-anim="curtain"] [data-list-reveal]:is(:not([data-list-revealed]), [data-list-revealed="in"]):not(:has([data-reveal-media])) > div {
+    position: relative;
+}
+
+[data-list-anim="curtain"] [data-list-reveal]:is(:not([data-list-revealed]), [data-list-revealed="in"]):not(:has([data-reveal-media])) > div::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    z-index: 3;
+    pointer-events: none;
+    background: var(--es-accent);
+    transform-origin: 100% 50%;
+}
+
+[data-list-anim="curtain"][data-list-rtl] [data-list-reveal]:not(:has([data-reveal-media])) > div::after {
+    transform-origin: 0 50%;
+}
+
+[data-list-anim="curtain"] [data-list-reveal][data-list-revealed="in"]:not(:has([data-reveal-media])) > div::after {
+    animation: lr-wipe 650ms var(--lr-wipe) calc(var(--reveal-delay, 0ms) + 60ms) both;
+}
+
+@keyframes lr-wipe {
+    from { transform: scaleX(1); }
+    to { transform: scaleX(0); }
+}
+
+/* ---------------------------------------------------------------------------------------------
+ * Phones: the cards and their rows are small (a row is one ~20px line), so distances shrink,
+ * the wave is quicker, and every card is settled by about 750ms.
+ * ------------------------------------------------------------------------------------------- */
+
+@media (max-width: 767.98px) {
+    [data-list-anim] {
+        --lr-base: 60ms;
+        --lr-tscale: .7;
+        --lr-row-fade: 240ms;
+        --lr-row-move: 420ms;
+        --lr-row-y: 6px;
+        --lr-row-x: 8px;
+    }
+
+    [data-list-anim="shine"] { --lr-base: 160ms; --lr-tscale: .35; }
+    [data-list-anim="curtain"] { --lr-base: 220ms; }
+
+    [data-list-anim="rise"] [data-list-reveal]:not([data-list-revealed]) {
+        transform: translateY(14px);
+    }
+
+    [data-list-anim="rise"] [data-list-reveal][data-list-revealed="in"] {
+        transition:
+            opacity 260ms ease-out var(--reveal-delay, 0ms),
+            transform 520ms var(--lr-ease) var(--reveal-delay, 0ms);
+    }
+
+    /* Focus on a phone: one blurred text column, and rows that only fade. Five filtered rows per
+     * card, several cards at once, is too much for a low-end phone. */
+    [data-list-anim="focus"] [data-list-reveal]:not([data-list-revealed]) [data-reveal-body] > :not([data-reveal-date]) {
+        filter: none;
+        transform: none;
+    }
+
+    [data-list-anim="focus"] [data-list-reveal]:not([data-list-revealed]) [data-reveal-body] {
+        filter: blur(4px);
+    }
+
+    [data-list-anim="focus"] [data-list-reveal][data-list-revealed="in"] [data-reveal-body] {
+        transition: filter 480ms var(--lr-ease) calc(var(--reveal-delay, 0ms) + var(--lr-base));
+    }
+
+    [data-list-anim="slide"] [data-list-reveal]:not([data-list-revealed]) {
+        transform: translateX(calc(var(--lr-dir) * -16px));
+    }
+
+    [data-list-anim="slide"] [data-list-reveal]:not([data-list-revealed]) [data-reveal-media] > a {
+        transform: translateX(calc(var(--lr-side, var(--lr-dir)) * 32px));
+    }
+
+    [data-list-anim="deal"] [data-list-reveal]:not([data-list-revealed]) {
+        transform: translateY(32px) rotate(calc(var(--deal-dir, 1) * 3deg)) scale(.96);
+    }
+}
+
+/* ---------------------------------------------------------------------------------------------
+ * A settled card's image breathes a little on hover (mouse only).
+ * ------------------------------------------------------------------------------------------- */
+
+@media (hover: hover) and (pointer: fine) {
+    [data-list-anim] [data-list-reveal]:is([data-list-revealed="done"], [data-list-revealed="instant"]) [data-reveal-media] > a {
+        transition: transform 900ms var(--lr-ease);
+    }
+
+    [data-list-anim] [data-list-reveal]:is([data-list-revealed="done"], [data-list-revealed="instant"]):hover [data-reveal-media] > a {
+        transform: scale(1.03);
+    }
+}
+
+/* ---------------------------------------------------------------------------------------------
+ * Always at rest: reduced motion (the OS setting, or the accessibility widget's toggle, which
+ * shortens durations but would otherwise leave delays and hidden states in place), print, and a
+ * card that receives keyboard focus before it has revealed.
+ *
+ * The rows, tiles and avatars are forced only while their card is hidden or playing: they carry
+ * hover styles of their own (the venue link dims, buttons scale), and an unscoped !important
+ * would cancel those for good.
+ * ------------------------------------------------------------------------------------------- */
+
+@media (prefers-reduced-motion: reduce) {
+    [data-list-anim] [data-list-reveal],
+    [data-list-anim] [data-list-reveal] :is([data-reveal-body], [data-reveal-date], [data-reveal-media] > a, [data-reveal-title] > h2, [data-reveal-title] > h3),
+    [data-list-anim] [data-list-reveal]:is(:not([data-list-revealed]), [data-list-revealed="in"]) :is([data-reveal-body] > *, [data-reveal-tile], [data-reveal-pop] > *) {
+        opacity: 1 !important;
+        transform: none !important;
+        filter: none !important;
+        clip-path: none !important;
+        transition: none !important;
+        animation: none !important;
+    }
+
+    [data-list-anim] [data-list-reveal] [data-reveal-title] {
+        overflow: visible !important;
+    }
+
+    [data-list-anim] [data-list-reveal] > div::after,
+    [data-list-anim] [data-list-reveal] [data-reveal-media]::before,
+    [data-list-anim] [data-list-reveal] [data-reveal-media]::after,
+    [data-list-anim] [data-list-reveal] :is([data-reveal-tile], [data-reveal-date])::after {
+        content: none !important;
+    }
+}
+
+html.es-a11y-reduce-motion [data-list-anim] [data-list-reveal],
+html.es-a11y-reduce-motion [data-list-anim] [data-list-reveal] :is([data-reveal-body], [data-reveal-date], [data-reveal-media] > a, [data-reveal-title] > h2, [data-reveal-title] > h3),
+html.es-a11y-reduce-motion [data-list-anim] [data-list-reveal]:is(:not([data-list-revealed]), [data-list-revealed="in"]) :is([data-reveal-body] > *, [data-reveal-tile], [data-reveal-pop] > *),
+[data-list-anim] [data-list-reveal]:not([data-list-revealed]):focus-within,
+[data-list-anim] [data-list-reveal]:not([data-list-revealed]):focus-within :is([data-reveal-body], [data-reveal-date], [data-reveal-media] > a, [data-reveal-title] > h2, [data-reveal-title] > h3, [data-reveal-body] > *, [data-reveal-tile], [data-reveal-pop] > *) {
+    opacity: 1 !important;
+    transform: none !important;
+    filter: none !important;
+    clip-path: none !important;
+    transition: none !important;
+    animation: none !important;
+}
+
+html.es-a11y-reduce-motion [data-list-anim] [data-list-reveal] [data-reveal-title],
+[data-list-anim] [data-list-reveal]:not([data-list-revealed]):focus-within [data-reveal-title] {
+    overflow: visible !important;
+}
+
+html.es-a11y-reduce-motion [data-list-anim] [data-list-reveal] > div::after,
+html.es-a11y-reduce-motion [data-list-anim] [data-list-reveal] [data-reveal-media]::before,
+html.es-a11y-reduce-motion [data-list-anim] [data-list-reveal] [data-reveal-media]::after,
+html.es-a11y-reduce-motion [data-list-anim] [data-list-reveal] :is([data-reveal-tile], [data-reveal-date])::after,
+[data-list-anim] [data-list-reveal]:not([data-list-revealed]):focus-within > div::after,
+[data-list-anim] [data-list-reveal]:not([data-list-revealed]):focus-within [data-reveal-media]::before,
+[data-list-anim] [data-list-reveal]:not([data-list-revealed]):focus-within [data-reveal-media]::after,
+[data-list-anim] [data-list-reveal]:not([data-list-revealed]):focus-within :is([data-reveal-tile], [data-reveal-date])::after {
+    content: none !important;
+}
+
+@media print {
+    [data-list-anim] [data-list-reveal],
+    [data-list-anim] [data-list-reveal] :is([data-reveal-body], [data-reveal-date], [data-reveal-media] > a, [data-reveal-title] > h2, [data-reveal-title] > h3, [data-reveal-body] > *, [data-reveal-tile], [data-reveal-pop] > *) {
+        opacity: 1 !important;
+        transform: none !important;
+        filter: none !important;
+        clip-path: none !important;
+        transition: none !important;
+        animation: none !important;
+    }
+
+    [data-list-anim] [data-list-reveal] > div::after,
+    [data-list-anim] [data-list-reveal] [data-reveal-media]::before,
+    [data-list-anim] [data-list-reveal] [data-reveal-media]::after,
+    [data-list-anim] [data-list-reveal] :is([data-reveal-tile], [data-reveal-date])::after {
+        content: none !important;
+    }
+}

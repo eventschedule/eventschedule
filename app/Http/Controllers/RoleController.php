@@ -5052,6 +5052,7 @@ class RoleController extends Controller
             'mergeCandidates' => $mergeCandidates,
             'mergeSuggestion' => $mergeSuggestion,
             'socialClickTotals' => $this->socialClickTotals($role),
+            'listAnimationPreviewEvents' => $this->listAnimationPreviewEvents($role),
         ];
 
         return view('role/edit', $data);
@@ -5203,6 +5204,9 @@ class RoleController extends Controller
         // Capture old category state for rename detection.
         $oldEventCategories = $role->event_categories;
         $eventCategoriesSubmitted = $request->boolean('event_categories_submitted');
+
+        // Compared after the save: picking a new event animation earns a "share it" card.
+        $oldListAnimation = $role->listAnimation();
 
         $role->fill($request->all());
 
@@ -6102,6 +6106,12 @@ class RoleController extends Controller
 
         $redirect = redirect(route('role.view_admin', ['subdomain' => $role->subdomain, 'tab' => 'schedule']));
 
+        // A new event animation is the moment the page looks its best, so the schedule tab opens
+        // with an invitation to share it. Only for a schedule with a public page to share.
+        if ($role->listAnimation() !== 'none' && $role->listAnimation() !== $oldListAnimation && $role->getGuestUrl()) {
+            $redirect->with('list_animation_saved', $role->listAnimation());
+        }
+
         // Instead of the success toast, which the layout would show in its place: the rest of the
         // save went through, and the owner needs to know to generate the image again. A genuine
         // name is refused only once its record is gone, which a deploy or a day does.
@@ -6955,6 +6965,51 @@ class RoleController extends Controller
         );
 
         return array_values(array_unique($taken));
+    }
+
+    /**
+     * Up to four of the schedule's own events for the event-animation preview on the edit page,
+     * so an owner watches THEIR lineup arrive rather than grey bars: the next upcoming ones,
+     * topped up with the most recent past ones for a schedule with little ahead of it. Drafts are
+     * left out, so the preview shows what guests see.
+     *
+     * getStartDateTime(null, true), not the bare call: without $locale it returns UTC, and an
+     * evening show in the Americas lands on the next day. creatorRole is what resolves the
+     * schedule's zone, and roles feeds the image fallback, so both are eager loaded.
+     *
+     * @return array<int, array{name: string, image: string|null, month: string, day: string}>
+     */
+    private function listAnimationPreviewEvents(Role $role): array
+    {
+        $query = fn () => $role->events()
+            ->wherePivot('is_accepted', true)
+            ->where('is_draft', false)
+            ->with(['creatorRole', 'roles']);
+
+        $upcoming = $query()
+            ->where('starts_at', '>=', now())
+            ->orderBy('starts_at')
+            ->limit(4)
+            ->get();
+
+        $events = $upcoming->count() < 4
+            ? $upcoming->concat($query()
+                ->where('starts_at', '<', now())
+                ->orderByDesc('starts_at')
+                ->limit(4 - $upcoming->count())
+                ->get())
+            : $upcoming;
+
+        return $events->map(function (Event $event) {
+            $start = $event->getStartDateTime(null, true);
+
+            return [
+                'name' => (string) $event->name,
+                'image' => $event->getImageUrl(ImageUtils::VARIANT_WIDTH) ?: null,
+                'month' => $start->locale(app()->getLocale())->translatedFormat('M'),
+                'day' => $start->format('j'),
+            ];
+        })->values()->all();
     }
 
     /**

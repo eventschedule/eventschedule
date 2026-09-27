@@ -110,6 +110,56 @@
 </div>
 @endif
 
+{{-- Flashed by RoleController::update() when the owner picks a new event animation: the page
+     looks its best right now, so invite them to share it while they are proud of it. --}}
+@php $listAnimationSaved = session('list_animation_saved'); @endphp
+@if (is_string($listAnimationSaved) && in_array($listAnimationSaved, \App\Models\Role::LIST_ANIMATIONS, true) && $listAnimationSaved !== 'none' && $role->getGuestUrl())
+@php $listAnimationShareUrl = $role->getGuestUrl(true); @endphp
+<div class="pb-4">
+    <div class="ap-card rounded-xl p-6" role="status">
+        <div class="flex items-start gap-3">
+            <div class="dashboard-icon p-2 rounded-xl shrink-0 bg-blue-50 dark:bg-blue-500/10" style="--icon-glow: rgba(78, 129, 250, 0.35)">
+                <svg class="w-5 h-5 text-[var(--brand-blue)]" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" aria-hidden="true">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M9.813 15.904L9 18.75l-.813-2.846a4.5 4.5 0 00-3.09-3.09L2.25 12l2.846-.813a4.5 4.5 0 003.09-3.09L9 5.25l.813 2.846a4.5 4.5 0 003.09 3.09L15.75 12l-2.846.813a4.5 4.5 0 00-3.09 3.09zM18.259 8.715L18 9.75l-.259-1.035a3.375 3.375 0 00-2.455-2.456L14.25 6l1.036-.259a3.375 3.375 0 002.455-2.456L18 2.25l.259 1.035a3.375 3.375 0 002.456 2.456L21.75 6l-1.035.259a3.375 3.375 0 00-2.456 2.456z" />
+                </svg>
+            </div>
+            <div class="min-w-0 flex-1">
+                <h3 class="text-base font-semibold text-gray-900 dark:text-gray-100">{{ __('messages.list_animation_share_title') }}</h3>
+                <p class="mt-1 text-sm text-gray-500 dark:text-gray-400">
+                    {{ __('messages.list_animation_share_body', ['name' => __('messages.list_animation_'.$listAnimationSaved)]) }}
+                </p>
+            </div>
+        </div>
+
+        <x-copy-link id="list-animation-share-url" :value="$listAnimationShareUrl" class="mt-4" :label="__('messages.list_animation_share_link')" />
+
+        <div class="mt-4 flex flex-wrap gap-3">
+            <button type="button" id="list-animation-share-btn" data-share-url="{{ $listAnimationShareUrl }}" data-share-title="{{ $role->translatedName() }}"
+                class="hidden ap-secondary-btn inline-flex items-center justify-center px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-lg font-semibold text-base text-gray-900 dark:text-gray-100 transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-[var(--brand-blue)] focus:ring-offset-2 dark:focus:ring-offset-gray-800">
+                <svg class="w-5 h-5 me-2" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" aria-hidden="true">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M7.217 10.907a2.25 2.25 0 100 2.186m0-2.186c.18.324.283.696.283 1.093s-.103.77-.283 1.093m0-2.186l9.566-5.314m-9.566 7.5l9.566 5.314m0 0a2.25 2.25 0 103.935 2.186 2.25 2.25 0 00-3.935-2.186zm0-12.814a2.25 2.25 0 103.933-2.185 2.25 2.25 0 00-3.933 2.185z" />
+                </svg>
+                {{ __('messages.list_animation_share') }}
+            </button>
+            <x-brand-link href="{{ $listAnimationShareUrl }}" target="_blank">
+                {{ __('messages.view_schedule') }}
+            </x-brand-link>
+        </div>
+    </div>
+</div>
+<script {!! nonce_attr() !!}>
+(function () {
+    var btn = document.getElementById('list-animation-share-btn');
+    if (!btn || typeof navigator.share !== 'function') return;
+    // A class, not the hidden attribute: inline-flex would outrank [hidden].
+    btn.classList.remove('hidden');
+    btn.addEventListener('click', function () {
+        navigator.share({ title: btn.dataset.shareTitle, url: btn.dataset.shareUrl }).catch(function () {});
+    });
+})();
+</script>
+@endif
+
 {{-- Below the two banners above on purpose: those warn about real problems, this is an
      optional invitation and must not outrank them. Held back on the first-event render so the
      panel above is not buried under an invitation on the one page load it exists for; both

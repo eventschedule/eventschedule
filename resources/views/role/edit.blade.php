@@ -8,6 +8,7 @@
 
     @vite([
     'resources/js/color-picker.js',
+    'resources/js/list-animation-picker.js',
     ])
 
     <!-- Step Indicator for Add Event Flow -->
@@ -922,8 +923,10 @@
 
             if (newIndex >= 0 && newIndex < select.options.length) {
                 select.selectedIndex = newIndex;
-                onChangeFont();
-                updateFontNavButtons();
+                // A real change event, not direct calls: the data-action handler runs
+                // onChangeFont() and updateFontNavButtons(), and the event also reaches the
+                // unsaved-changes tracker and the event-animation preview.
+                select.dispatchEvent(new Event('change', { bubbles: true }));
             }
         }
 
@@ -1812,6 +1815,93 @@
                                     {{ $role->name }}
                                 </div>
                             </div>
+
+                            {{-- Event animation: how event cards arrive as visitors scroll the schedule
+                                 (resources/css/list-reveal.css). The radios are plain Blade so the form
+                                 posts without JS; the island above them plays the chosen design on the
+                                 owner's own events, and keeps the preview link and notes in step. --}}
+                            @php
+                                $listAnimationIcons = [
+                                    'none' => 'M18.364 18.364A9 9 0 005.636 5.636m12.728 12.728A9 9 0 015.636 5.636m12.728 12.728L5.636 5.636',
+                                    'rise' => 'M4.5 10.5L12 3m0 0l7.5 7.5M12 3v18',
+                                    'focus' => 'M2.036 12.322a1.012 1.012 0 010-.639C3.423 7.51 7.36 4.5 12 4.5c4.638 0 8.573 3.007 9.963 7.178.07.207.07.431 0 .639C20.577 16.49 16.64 19.5 12 19.5c-4.638 0-8.573-3.007-9.963-7.178zM15 12a3 3 0 11-6 0 3 3 0 016 0z',
+                                    'slide' => 'M13.5 4.5L21 12m0 0l-7.5 7.5M21 12H3',
+                                    'deal' => 'M6 6.878V6a2.25 2.25 0 012.25-2.25h7.5A2.25 2.25 0 0118 6v.878m-12 0c.235-.083.487-.128.75-.128h10.5c.263 0 .515.045.75.128m-12 0A2.25 2.25 0 004.5 9v.878m13.5-3A2.25 2.25 0 0119.5 9v.878m0 0a2.246 2.246 0 00-.75-.128H5.25c-.263 0-.515.045-.75.128m15 0A2.25 2.25 0 0121 12v6a2.25 2.25 0 01-2.25 2.25H5.25A2.25 2.25 0 013 18v-6c0-.98.626-1.813 1.5-2.122',
+                                    'shine' => 'M9.813 15.904L9 18.75l-.813-2.846a4.5 4.5 0 00-3.09-3.09L2.25 12l2.846-.813a4.5 4.5 0 003.09-3.09L9 5.25l.813 2.846a4.5 4.5 0 003.09 3.09L15.75 12l-2.846.813a4.5 4.5 0 00-3.09 3.09zM18.259 8.715L18 9.75l-.259-1.035a3.375 3.375 0 00-2.455-2.456L14.25 6l1.036-.259a3.375 3.375 0 002.455-2.456L18 2.25l.259 1.035a3.375 3.375 0 002.456 2.456L21.75 6l-1.035.259a3.375 3.375 0 00-2.456 2.456z',
+                                    'curtain' => 'M2.25 15.75l5.159-5.159a2.25 2.25 0 013.182 0l5.159 5.159m-1.5-1.5l1.409-1.409a2.25 2.25 0 013.182 0l2.909 2.909m-18 3.75h16.5a1.5 1.5 0 001.5-1.5V6a1.5 1.5 0 00-1.5-1.5H3.75A1.5 1.5 0 002.25 6v12a1.5 1.5 0 001.5 1.5zm10.5-11.25h.008v.008h-.008V8.25zm.375 0a.375.375 0 11-.75 0 .375.375 0 01.75 0z',
+                                ];
+                                $listAnimationSelected = old('list_animation', $role->listAnimation());
+                                $listAnimationDesigns = collect(\App\Models\Role::LIST_ANIMATIONS)
+                                    ->reject(fn ($v) => $v === 'none')
+                                    ->mapWithKeys(fn ($v) => [$v => [
+                                        'name' => __('messages.list_animation_'.$v),
+                                        'desc' => __('messages.list_animation_'.$v.'_desc'),
+                                    ]])->all();
+                                $listAnimationGuestUrl = $role->exists ? $role->getGuestUrl() : '';
+                            @endphp
+                            <fieldset class="mb-6">
+                                <legend class="flex items-center gap-2 font-medium text-sm text-gray-700 dark:text-gray-300">
+                                    {{ __('messages.list_animation') }}
+                                    @if (is_null($role->list_animation))
+                                        <span class="inline-flex rounded-full bg-blue-50 dark:bg-blue-500/10 px-2 py-0.5 text-xs font-medium text-[var(--brand-blue)]">{{ __('messages.new') }}</span>
+                                    @endif
+                                </legend>
+                                <p class="mt-1 mb-3 text-sm text-gray-500 dark:text-gray-400">{{ __('messages.list_animation_help') }}</p>
+
+                                <div class="vue-list-animation-picker mb-4" data-props="{{ json_encode([
+                                    'saved' => $role->listAnimation(),
+                                    'accentColor' => $role->accent_color ?: '#4E81FA',
+                                    'font' => $role->font_family ?: '',
+                                    'rtl' => in_array($role->language_code, ['ar', 'he'], true),
+                                    'guestUrl' => $listAnimationGuestUrl,
+                                    'layout' => $role->eventLayout(),
+                                    'events' => $listAnimationPreviewEvents ?? [],
+                                    'designs' => $listAnimationDesigns,
+                                    'labels' => [
+                                        'pick' => __('messages.list_animation_pick'),
+                                        'replay' => __('messages.list_animation_replay'),
+                                        'deviceOff' => __('messages.list_animation_device_off'),
+                                        'calendarNote' => __('messages.list_animation_calendar_note'),
+                                        'useList' => __('messages.list_animation_use_list'),
+                                        'nowList' => __('messages.list_animation_now_list'),
+                                    ],
+                                ], JSON_INVALID_UTF8_SUBSTITUTE) }}"></div>
+
+                                <div class="grid grid-cols-2 sm:grid-cols-3 gap-4">
+                                    @foreach (\App\Models\Role::LIST_ANIMATIONS as $listAnimationValue)
+                                        <div class="relative {{ $listAnimationValue === 'none' ? 'col-span-2 sm:col-span-3' : '' }}">
+                                            <input type="radio"
+                                                id="list_animation_{{ $listAnimationValue }}"
+                                                name="list_animation"
+                                                value="{{ $listAnimationValue }}"
+                                                @checked($listAnimationSelected === $listAnimationValue)
+                                                class="peer sr-only">
+                                            <label for="list_animation_{{ $listAnimationValue }}"
+                                                class="ap-card rounded-xl flex h-full min-h-[3.5rem] items-center gap-3 p-3 text-start cursor-pointer transition-all duration-200 hover:shadow-md peer-checked:ring-2 peer-checked:ring-[var(--brand-blue)] peer-focus-visible:ring-2 peer-focus-visible:ring-[var(--brand-blue)] peer-focus-visible:ring-offset-2 dark:peer-focus-visible:ring-offset-gray-800">
+                                                <svg class="w-5 h-5 flex-shrink-0 text-gray-500 dark:text-gray-400 {{ $listAnimationValue === 'slide' ? 'rtl:-scale-x-100' : '' }}" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" aria-hidden="true">
+                                                    <path stroke-linecap="round" stroke-linejoin="round" d="{{ $listAnimationIcons[$listAnimationValue] }}" />
+                                                </svg>
+                                                <span class="min-w-0 pe-5">
+                                                    <span class="block text-sm font-semibold text-gray-900 dark:text-gray-100">{{ __('messages.list_animation_'.$listAnimationValue) }}</span>
+                                                    <span class="block text-xs text-gray-500 dark:text-gray-400">{{ $listAnimationValue === 'none' ? __('messages.list_animation_none_desc') : __('messages.list_animation_'.$listAnimationValue.'_mood') }}</span>
+                                                </span>
+                                            </label>
+                                            <svg class="pointer-events-none absolute top-2 end-2 w-4 h-4 text-[var(--brand-blue)] opacity-0 peer-checked:opacity-100 transition-opacity duration-200" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" aria-hidden="true">
+                                                <path stroke-linecap="round" stroke-linejoin="round" d="M4.5 12.75l6 6 9-13.5" />
+                                            </svg>
+                                        </div>
+                                    @endforeach
+                                </div>
+                                <x-input-error class="mt-2" :messages="$errors->get('list_animation')" />
+
+                                @if ($listAnimationGuestUrl)
+                                    <p id="list-animation-preview" class="mt-3 text-sm" {{ $listAnimationSelected === 'none' ? 'hidden' : '' }}>
+                                        <x-link id="list-animation-preview-link" href="{{ $listAnimationGuestUrl }}?layout=list&list_animation={{ $listAnimationSelected }}" target="_blank">{{ __('messages.list_animation_preview') }}</x-link>
+                                        <span id="list-animation-unsaved" class="ms-2 text-xs text-gray-500 dark:text-gray-400" hidden>{{ __('messages.list_animation_unsaved') }}</span>
+                                    </p>
+                                @endif
+                                <p class="mt-2 text-xs text-gray-500 dark:text-gray-400">{{ __('messages.list_animation_device_motion') }}</p>
+                            </fieldset>
                     </div>
 
                     <!-- Background Tab Content -->

@@ -217,6 +217,7 @@ class RoleUpdateRequest extends FormRequest
             'slug_pattern' => ['nullable', 'string', 'max:500'],
             'event_layout' => ['nullable', 'string', 'in:calendar,list'],
             'header_style' => ['nullable', 'string', 'in:banner,compact'],
+            'list_animation' => ['nullable', 'string', Rule::in(Role::LIST_ANIMATIONS)],
             // Auto-translation target language. Nullable (not submitted in demo mode, where the
             // selects are disabled); the controller maps the "offer translation" toggle to this
             // value, so a valid non-null code is always what actually gets persisted.
