@@ -946,6 +946,9 @@ Route::middleware(['auth', 'verified', 'app_subdomain'])->group(function () {
         Route::redirect('/admin', '/admin/dashboard');
         Route::get('/admin/users', [AdminController::class, 'users'])->name('admin.users');
         Route::get('/admin/revenue', [AdminController::class, 'revenue'])->name('admin.revenue');
+        // Only ever acts on a subscription still billing for a deleted schedule - see
+        // AdminAlertService::orphanedBilling().
+        Route::post('/admin/subscriptions/{subscription}/cancel-orphaned', [AdminController::class, 'cancelOrphanedSubscription'])->name('admin.subscriptions.cancel_orphaned');
         Route::get('/admin/analytics', [AdminController::class, 'analytics'])->name('admin.analytics');
         Route::get('/admin/usage', [AdminController::class, 'usage'])->name('admin.usage');
         // Growth reporting. Registered everywhere but runtime-404s off a hosted install

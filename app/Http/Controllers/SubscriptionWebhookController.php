@@ -23,6 +23,15 @@ class SubscriptionWebhookController extends WebhookController
         // Let Cashier handle the base logic
         $response = parent::handleCustomerSubscriptionDeleted($payload);
 
+        // Cashier finds the row through its billable, by CUSTOMER id - so when the schedule has
+        // been hard-deleted (subscriptions.role_id has no foreign key) it finds nothing and the
+        // row stays active forever, holding AdminAlertService's subscriptions_orphaned alert red
+        // after the operator has cancelled it in Stripe. Match on the subscription id instead.
+        // A no-op when Cashier already marked it: ends_at is set by then.
+        \Laravel\Cashier\Subscription::where('stripe_id', $payload['data']['object']['id'])
+            ->whereNull('ends_at')
+            ->update(['stripe_status' => 'canceled', 'ends_at' => now()]);
+
         // Find the role by stripe customer ID
         $role = Role::where('stripe_id', $payload['data']['object']['customer'])->first();
 

@@ -369,9 +369,15 @@
                                     ->where('status', 'active')
                                     ->where('remaining_amount', '>', 0)
                                     ->exists();
-                                $deleteConfirmMessage = $outstandingGiftCards
+                                // Deleting cancels a paid plan immediately (RoleController::delete()),
+                                // so say so. The gift-card warning already ends in its own question.
+                                $deleteWarnings = $role->hasLiveBilling()
+                                    ? [__('messages.delete_schedule_subscription_warning')]
+                                    : [];
+                                $deleteWarnings[] = $outstandingGiftCards
                                     ? __('messages.delete_schedule_gift_cards_warning')
                                     : __('messages.are_you_sure');
+                                $deleteConfirmMessage = implode(' ', $deleteWarnings);
                             @endphp
                             <form method="POST" action="{{ route('role.delete', ['subdomain' => $role->subdomain]) }}" data-confirm="{{ $deleteConfirmMessage }}" class="form-confirm block">
                                 @csrf

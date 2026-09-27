@@ -1,7 +1,7 @@
 <x-docs-page
     key="schedule-styling"
     title="Schedule Styling: Colors, Fonts and Headers - Event Schedule"
-    description="Style your public schedule page: default layout, header style, profile and header images, backgrounds, accent color, fonts, event animations, custom CSS and branding."
+    description="Style your public schedule page: default layout, header style, profile and header images, backgrounds, accent color, fonts, animations, custom CSS and branding."
     lede="Customize your schedule's visual appearance with colors, fonts, backgrounds, and more. Most changes show in a live preview before you save."
 >
     <x-slot:toc>

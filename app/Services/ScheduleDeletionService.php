@@ -47,7 +47,14 @@ class ScheduleDeletionService
      * endpoint is an owner deleting their own schedule and must not land in the admin category
      * that /admin/audit-log filters on.
      *
+     * Cancels the schedule's Stripe subscription immediately, first. A deleted schedule is never
+     * something the owner should go on paying for, and nothing in the app can reach its
+     * subscription afterwards.
+     *
      * @return string the released subdomain
+     *
+     * @throws \App\Exceptions\BillingCancellationException when Stripe will not cancel; nothing
+     *                                                      has been changed
      */
     public function markDeleted(
         Role $role,
@@ -55,6 +62,13 @@ class ScheduleDeletionService
         string $auditAction = AuditService::ADMIN_SCHEDULE_DELETE,
     ): string {
         $host = $role->custom_domain_host;
+
+        // Before the transaction (no network I/O inside one) and before anything moves, so a
+        // Stripe failure leaves the schedule exactly as it was. Throws
+        // BillingCancellationException; a deleted schedule must not go on being billed.
+        // Callers that tear things down first (ApiScheduleController::destroy()) cancel
+        // themselves before that teardown; this second call is then a no-op.
+        $role->cancelBillingForDeletion($actorUserId);
 
         $released = DB::transaction(function () use ($role, $actorUserId, $auditAction) {
             // Re-read under a row lock so a double-clicked button, or a Mark deleted racing a
@@ -122,8 +136,10 @@ class ScheduleDeletionService
      * its released name and subdomain_before_delete is left in place, so the admin can still see
      * what it used to be called.
      *
-     * Deliberately narrow: it does not re-verify email, re-provision a custom domain, or undo the
-     * image and webhook teardown an API delete performed before the row got here.
+     * Deliberately narrow: it does not re-verify email, re-provision a custom domain, undo the
+     * image and webhook teardown an API delete performed before the row got here, or revive the
+     * subscription markDeleted() cancelled - the restored schedule is on the free plan until its
+     * owner subscribes again.
      *
      * No Cache::forget for the custom domain here, unlike markDeleted(). It would be dead code:
      * markDeleted() already cleared the key, and Cache::remember() cannot cache the null the

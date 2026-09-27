@@ -189,7 +189,7 @@
             </table>
         </div>
         <p class="text-gray-600 dark:text-gray-300 mt-6">
-            Scan Agenda and Sync Events only appear when the site has an AI provider configured, and Scan Agenda is a narrow-screen shortcut: on a wide screen you reach the same tool from <strong class="text-gray-900 dark:text-white">Import from Image</strong> in the Agenda section of the event form. If the schedule still has gift cards with a balance left on them, the Delete Schedule confirmation says so before you go ahead.
+            Scan Agenda and Sync Events only appear when the site has an AI provider configured, and Scan Agenda is a narrow-screen shortcut: on a wide screen you reach the same tool from <strong class="text-gray-900 dark:text-white">Import from Image</strong> in the Agenda section of the event form. If the schedule still has gift cards with a balance left on them, the Delete Schedule confirmation says so before you go ahead. It also warns you when the schedule has a paid <a href="#plan" class="doc-link">plan</a>: deleting the schedule cancels that plan immediately, and the rest of the billing period is not refunded.
         </p>
     </section>
 

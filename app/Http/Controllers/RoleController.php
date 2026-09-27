@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Exceptions\BillingCancellationException;
 use App\Http\Requests\MemberAddRequest;
 use App\Http\Requests\RoleCreateRequest;
 use App\Http\Requests\RoleEmailVerificationRequest;
@@ -163,6 +164,17 @@ class RoleController extends Controller
 
         if ($user->id != $role->user_id) {
             return redirect()->back()->with('error', __('messages.not_authorized'));
+        }
+
+        // First, before any teardown. The subscription belongs to this row and has no foreign
+        // key, so once $role->delete() runs nothing can reach it and Stripe renews it forever.
+        // A Stripe failure aborts with the schedule intact.
+        try {
+            $role->cancelBillingForDeletion($user->id);
+        } catch (BillingCancellationException $e) {
+            report($e);
+
+            return redirect()->back()->with('error', __('messages.delete_subscription_cancel_failed'));
         }
 
         if ($role->profile_image_url) {
@@ -538,6 +550,10 @@ class RoleController extends Controller
             return response()->json(['error' => __('messages.not_authorized')], 403);
         }
 
+        if ($source->hasLiveBilling()) {
+            return response()->json(['error' => __('messages.merge_source_has_subscription')], 422);
+        }
+
         $totalEvents = DB::table('event_role')->where('role_id', $source->id)->count();
         $targetEventIds = DB::table('event_role')->where('role_id', $target->id)->pluck('event_id');
         $overlapCount = $targetEventIds->isEmpty()
@@ -569,6 +585,14 @@ class RoleController extends Controller
 
         if (! $this->canMergeRoles($source, $target, $user)) {
             return redirect()->back()->with('error', __('messages.not_authorized'));
+        }
+
+        // A merge soft-deletes the source, and a deleted schedule must not go on being billed.
+        // Refused rather than cancelled on the owner's behalf: ending a paid plan should be a
+        // decision they make on the Plan tab, not a side effect of tidying up duplicates. After
+        // the authorization check, so it tells nobody else that the schedule has a paid plan.
+        if ($source->hasLiveBilling()) {
+            return redirect()->back()->with('error', __('messages.merge_source_has_subscription'));
         }
 
         $eventCount = 0;
@@ -1371,6 +1395,11 @@ class RoleController extends Controller
                 return false;
             }
 
+            // Nor one that is still paying for a plan - see mergeInto().
+            if ($source->hasLiveBilling()) {
+                return false;
+            }
+
             return true;
         });
 
@@ -1665,7 +1694,8 @@ class RoleController extends Controller
         // allowDeleted* on both sides because soft-deleted duplicates are the point of the page,
         // and isEditableBy() goes through User::roles(), which filters them out.
         [$validated, $skipped] = $sources->partition(
-            fn (Role $source) => $this->canMergeRoles($source, $target, $user, true, true)
+            // Still billing counts as skipped, like a claimed venue - see mergeInto().
+            fn (Role $source) => $this->canMergeRoles($source, $target, $user, true, true) && ! $source->hasLiveBilling()
         );
 
         if ($validated->isEmpty()) {

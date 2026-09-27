@@ -180,6 +180,49 @@
         </div>
         @endif
 
+        {{-- Subscriptions still billing for a schedule that has been deleted --}}
+        @if ($orphanedSubscriptions->count() > 0)
+        <div id="orphaned-subscriptions" class="ap-card rounded-xl shadow p-6 border-l-4 border-red-500 scroll-mt-4">
+            <h3 class="text-lg font-medium text-red-600 dark:text-red-400 mb-2">@lang('messages.orphaned_subscriptions')</h3>
+            <p class="text-sm text-gray-600 dark:text-gray-300 mb-4 max-w-3xl">@lang('messages.orphaned_subscriptions_help')</p>
+            <div class="overflow-x-auto">
+                <table class="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
+                    <thead>
+                        <tr>
+                            <th class="px-4 py-3 text-start text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">@lang('messages.schedule')</th>
+                            <th class="px-4 py-3 text-start text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">Stripe ID</th>
+                            <th class="px-4 py-3 text-start text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">@lang('messages.status')</th>
+                            <th class="px-4 py-3 text-start text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">@lang('messages.date')</th>
+                            <th class="px-4 py-3"><span class="sr-only">@lang('messages.actions')</span></th>
+                        </tr>
+                    </thead>
+                    <tbody class="divide-y divide-gray-200 dark:divide-gray-700">
+                        @foreach ($orphanedSubscriptions as $subscription)
+                        <tr>
+                            <td class="px-4 py-3 text-sm text-gray-900 dark:text-white">
+                                {{-- Both null when the schedule row is gone entirely. --}}
+                                {{ \Illuminate\Support\Str::limit($subscription->role_name ?: $subscription->role_subdomain ?: '-', 30) }}
+                            </td>
+                            <td class="px-4 py-3 text-sm font-mono text-gray-900 dark:text-white">{{ $subscription->stripe_id }}</td>
+                            <td class="px-4 py-3 text-sm text-red-600 dark:text-red-400">{{ $subscription->stripe_status }}</td>
+                            <td class="px-4 py-3 text-sm text-gray-500 dark:text-gray-400" title="{{ $subscription->created_at }}">
+                                {{ \Illuminate\Support\Carbon::parse($subscription->created_at)->diffForHumans() }}
+                            </td>
+                            <td class="px-4 py-3 text-end">
+                                <form method="POST" action="{{ route('admin.subscriptions.cancel_orphaned', ['subscription' => \App\Utils\UrlUtils::encodeId($subscription->id)]) }}"
+                                      data-confirm="{{ __('messages.cancel_orphaned_subscription_confirm', ['id' => $subscription->stripe_id]) }}">
+                                    @csrf
+                                    <x-danger-button>@lang('messages.cancel_in_stripe')</x-danger-button>
+                                </form>
+                            </td>
+                        </tr>
+                        @endforeach
+                    </tbody>
+                </table>
+            </div>
+        </div>
+        @endif
+
         {{-- Subscriptions on a price ID config no longer names --}}
         @if ($unrecognizedSubscriptions->count() > 0)
         <div id="unrecognized-subscriptions" class="ap-card rounded-xl shadow p-6 border-l-4 border-red-500 scroll-mt-4">

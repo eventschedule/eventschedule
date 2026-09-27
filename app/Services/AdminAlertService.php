@@ -52,6 +52,10 @@ class AdminAlertService
         // ever reaching the dashboard panel or the nav badge.
         'jobs_stalled',
         'jobs_failed',
+        // Above subscriptions_unrecognized: that customer at least still has the schedule they
+        // are paying for. This one is being charged for a schedule that no longer exists, and
+        // nothing left in the app lets them stop it.
+        'subscriptions_orphaned',
         // Above every review queue below it: this is money moving against a customer who is
         // simultaneously losing the tier they are paying for, and nothing else reports it.
         'subscriptions_unrecognized',
@@ -212,6 +216,12 @@ class AdminAlertService
                     ->where(fn ($q) => self::unrecognizedPrice($q, $configured))
                     ->count();
             },
+
+            // Still billing, but the schedule it pays for is gone - hard-deleted (the row is
+            // missing: subscriptions.role_id has no foreign key) or soft-deleted. Every delete path
+            // now cancels first (Role::cancelBillingForDeletion()), so this is the backlog from
+            // before that, plus anything a future delete path forgets.
+            'subscriptions_orphaned' => fn () => self::orphanedBilling()->count(),
 
             'domains_failed' => fn () => $isHosted ? (int) self::roleCounts()->domains_failed : 0,
 
@@ -391,6 +401,23 @@ class AdminAlertService
     }
 
     /**
+     * Subscriptions Stripe will still charge whose schedule has been deleted, outright or by
+     * flag. Public because AdminController::revenue() lists exactly these rows, and the operator
+     * cancels them by hand in the Stripe dashboard.
+     *
+     * A leftJoin, so a hard-deleted schedule (no row at all) is found; "will still charge" is the
+     * same predicate Role::liveBillingSubscriptions() cancels on.
+     */
+    public static function orphanedBilling()
+    {
+        return DB::table('subscriptions')
+            ->leftJoin('roles', 'roles.id', '=', 'subscriptions.role_id')
+            ->whereNotIn('subscriptions.stripe_status', Role::BILLING_ENDED_STATUSES)
+            ->whereNull('subscriptions.ends_at')
+            ->where(fn ($q) => $q->whereNull('roles.id')->orWhere('roles.is_deleted', true));
+    }
+
+    /**
      * Refund claims whose outcome the gateway never confirmed, past the grace window.
      *
      * Public because AdminController::revenue() lists exactly these rows: the badge says how many,
@@ -437,6 +464,7 @@ class AdminAlertService
             'jobs_failed' => ['system', 'queue', 'admin.queue', [], '', 'red', __('messages.queue')],
             // Its own anchor, not #amount-mismatch: that block is a table of mismatched SALES,
             // and landing there would scroll past the thing the row is about.
+            'subscriptions_orphaned' => ['insights', 'revenue', 'admin.revenue', [], '#orphaned-subscriptions', 'red', __('messages.revenue')],
             'subscriptions_unrecognized' => ['insights', 'revenue', 'admin.revenue', [], '#unrecognized-subscriptions', 'red', __('messages.revenue')],
             'domains_failed' => ['manage', 'domains', 'admin.domains', ['status' => 'failed'], '', 'red', __('messages.domains')],
             'boosts_stuck' => ['manage', 'boost', 'admin.boost', [], '#boost-alerts', 'red', 'Boost'],

@@ -2,11 +2,13 @@
 
 namespace App\Http\Controllers;
 
+use App\Exceptions\BillingCancellationException;
 use App\Exceptions\InvoiceNinjaException;
 use App\Http\Requests\ProfileUpdateRequest;
 use App\Mail\SupportEmail;
 use App\Models\BackupJob;
 use App\Models\BoostCampaign;
+use App\Models\Role;
 use App\Notifications\DeletedUserNotification;
 use App\Services\AppUpdateService;
 use App\Services\AuditService;
@@ -163,6 +165,26 @@ class ProfileController extends Controller
         }
 
         $request->validateWithBag('userDeletion', $rules);
+
+        // Cancel every owned schedule's subscription before anything else happens. roles.user_id
+        // cascades at the database level, so the schedules vanish with the user without a single
+        // model event, and subscriptions.role_id has no foreign key: skipping this left Stripe
+        // renewing the card of someone whose account no longer existed.
+        //
+        // Keyed on roles.user_id, not $user->owner(): that is the column the cascade follows, and
+        // User::roles() filters out soft-deleted schedules, which can still be billing.
+        foreach (Role::where('user_id', $user->id)->whereNotNull('stripe_id')->get() as $ownedRole) {
+            try {
+                $ownedRole->cancelBillingForDeletion($user->id);
+            } catch (BillingCancellationException $e) {
+                report($e);
+
+                // Nothing has been deleted yet. Any subscription cancelled before the failure
+                // stays cancelled, which is what the user asked for either way.
+                return Redirect::to(route('profile.edit').'#section-delete')
+                    ->with('error', __('messages.delete_subscription_cancel_failed'));
+            }
+        }
 
         // Send feedback email if provided (before logout so we have user data)
         // Skip for demo mode to prevent spam

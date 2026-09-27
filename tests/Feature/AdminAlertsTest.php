@@ -200,9 +200,9 @@ class AdminAlertsTest extends TestCase
      * FAILS before the change: the count joined nothing and the panel INNER joined roles, so an
      * orphan was counted but invisible - a red row linking to a page whose panel does not render.
      *
-     * subscriptions.role_id carries no foreign key, and RoleController::destroy calls
-     * $role->delete() with no subscription cleanup and no Stripe cancellation, so a deleted
-     * schedule really can leave an actively-billing row behind. That is the worst case, not one
+     * subscriptions.role_id carries no foreign key, and until every delete path learned to cancel
+     * first (Role::cancelBillingForDeletion()) a deleted schedule left an actively-billing row
+     * behind - production still holds some. That is the worst case, not one
      * to hide: nobody owns it and nobody will notice.
      */
     public function test_a_subscription_whose_schedule_was_deleted_is_counted_and_shown(): void

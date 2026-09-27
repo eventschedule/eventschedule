@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Console\Commands\RetryFailedJobs;
+use App\Exceptions\BillingCancellationException;
 use App\Http\Requests\AdminPlanUpdateRequest;
 use App\Http\Requests\AdminScheduleDetailsRequest;
 use App\Mail\PromotionDecision;
@@ -774,12 +775,12 @@ class AdminController extends Controller
         // keeps charging them.
         $configuredPriceIds = AdminAlertService::configuredPriceIds();
 
-        // leftJoin, not join. subscriptions.role_id carries no foreign key and RoleController's
-        // delete path calls $role->delete() with no subscription cleanup and no Stripe
-        // cancellation, so a deleted schedule can leave an actively-billing row behind. An inner
-        // join hides exactly those, and the alert - which counts without joining - would then
-        // report a number this panel cannot show, linking a red row to an empty page. An
-        // ownerless subscription still being charged is the worst case, not one to drop.
+        // leftJoin, not join. subscriptions.role_id carries no foreign key, and until every delete
+        // path learned to cancel first (Role::cancelBillingForDeletion()) a deleted schedule left
+        // an actively-billing row behind - some still exist. An inner join hides exactly those,
+        // and the alert - which counts without joining - would then report a number this panel
+        // cannot show, linking a red row to an empty page. An ownerless subscription still being
+        // charged is the worst case, not one to drop.
         $unrecognizedSubscriptions = $configuredPriceIds === [] ? collect() : DB::table('subscriptions')
             ->leftJoin('roles', 'roles.id', '=', 'subscriptions.role_id')
             ->where('subscriptions.type', 'default')
@@ -792,6 +793,23 @@ class AdminController extends Controller
                 'subscriptions.created_at',
                 'roles.name as role_name',
                 'roles.subdomain as role_subdomain',
+            ]);
+
+        // Subscriptions still billing for a deleted schedule. Same query as AdminAlertService's
+        // subscriptions_orphaned row, which links here. stripe_id is the column that matters: the
+        // schedule is gone, so the subscription ID is the only handle left to cancel it by in
+        // the Stripe dashboard.
+        $orphanedSubscriptions = AdminAlertService::orphanedBilling()
+            ->orderBy('subscriptions.created_at')
+            ->get([
+                'subscriptions.id',
+                'subscriptions.stripe_id',
+                'subscriptions.stripe_status',
+                'subscriptions.created_at',
+                'roles.name as role_name',
+                // The original name when markDeleted() released it; older soft-deletes were
+                // never renamed, so they still hold it in subdomain.
+                DB::raw('COALESCE(roles.subdomain_before_delete, roles.subdomain) as role_subdomain'),
             ]);
 
         // Recent sales for detailed table
@@ -826,8 +844,64 @@ class AdminController extends Controller
             'mismatchSales',
             'mismatchBoosts',
             'unconfirmedRefunds',
-            'unrecognizedSubscriptions'
+            'unrecognizedSubscriptions',
+            'orphanedSubscriptions'
         ));
+    }
+
+    /**
+     * Cancel, in Stripe, a subscription that is still billing for a deleted schedule.
+     *
+     * The button on the #orphaned-subscriptions panel. There is no schedule left to cancel
+     * through, so this goes to Stripe by subscription id - and it acts ONLY on a row that still
+     * matches AdminAlertService::orphanedBilling(), so a crafted id cannot end a live customer's
+     * plan. Refunds stay a person's decision in the Stripe dashboard.
+     */
+    public function cancelOrphanedSubscription($subscription): RedirectResponse
+    {
+        if (! auth()->user()->isAdmin()) {
+            return redirect()->back()->with('error', __('messages.not_authorized'));
+        }
+
+        $back = redirect(route('admin.revenue').'#orphaned-subscriptions');
+
+        $row = AdminAlertService::orphanedBilling()
+            ->where('subscriptions.id', UrlUtils::decodeId($subscription))
+            ->first(['subscriptions.id', 'subscriptions.stripe_id']);
+
+        if (! $row) {
+            return $back->with('error', __('messages.orphaned_subscription_not_found'));
+        }
+
+        try {
+            \Laravel\Cashier\Cashier::stripe()->subscriptions->cancel($row->stripe_id);
+        } catch (\Throwable $e) {
+            // Already over on Stripe's side, and only our row is stale: record it, as
+            // Role::cancelBillingForDeletion() does. Anything else is a real failure.
+            if (! ($e instanceof \Stripe\Exception\InvalidRequestException && Role::stripeSubscriptionIsOver($row->stripe_id))) {
+                report($e);
+
+                return $back->with('error', __('messages.orphaned_subscription_cancel_failed'));
+            }
+        }
+
+        // The customer.subscription.deleted webhook does this too, but not before the redirect
+        // renders, and the panel should not still list the row the operator just cancelled.
+        Subscription::whereKey($row->id)
+            ->whereNull('ends_at')
+            ->update(['stripe_status' => 'canceled', 'ends_at' => now()]);
+
+        AuditService::log(
+            AuditService::SUBSCRIPTION_CANCEL,
+            auth()->id(),
+            'Subscription',
+            $row->id,
+            null,
+            ['stripe_id' => $row->stripe_id],
+            'Cancelled a subscription still billing for a deleted schedule',
+        );
+
+        return $back->with('message', __('messages.orphaned_subscription_cancelled', ['id' => $row->stripe_id]));
     }
 
     /**
@@ -1926,6 +2000,10 @@ class AdminController extends Controller
             $deletions->markDeleted($role, auth()->id());
         } catch (SubdomainUnavailableException $e) {
             return redirect()->back()->with('error', __('messages.subdomain_taken'));
+        } catch (BillingCancellationException $e) {
+            report($e);
+
+            return redirect()->back()->with('error', __('messages.delete_subscription_cancel_failed'));
         }
 
         return redirect()->route('admin.schedules.edit', ['role' => $role->encodeId()])

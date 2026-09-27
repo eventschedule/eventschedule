@@ -208,4 +208,123 @@ trait RoleBillable
 
         return false;
     }
+
+    /**
+     * Stripe statuses a subscription never bills from again. Everything else - active,
+     * trialing, past_due, unpaid, incomplete - is still open in Stripe and will be charged (or
+     * retried) on its own schedule unless someone cancels it.
+     */
+    public const BILLING_ENDED_STATUSES = ['canceled', 'incomplete_expired'];
+
+    /**
+     * Subscriptions Stripe will still charge: not in an ended status, and not already cancelled
+     * at period end (Cashier stamps ends_at the moment cancel() is called, so a null ends_at is
+     * what "will renew" looks like locally).
+     *
+     * Shared with AdminAlertService::orphanedBilling() so the alert and the cancellation agree on
+     * what "still billing" means.
+     */
+    public function liveBillingSubscriptions()
+    {
+        return $this->subscriptions()
+            ->whereNotIn('stripe_status', self::BILLING_ENDED_STATUSES)
+            ->whereNull('ends_at');
+    }
+
+    public function hasLiveBilling(): bool
+    {
+        return $this->stripe_id !== null && $this->liveBillingSubscriptions()->exists();
+    }
+
+    /**
+     * Cancel every subscription Stripe would otherwise keep charging, immediately.
+     *
+     * Every path that removes a schedule has to call this BEFORE the schedule goes. The
+     * subscription belongs to the schedule (Cashier::useCustomerModel), subscriptions.role_id has
+     * no foreign key, and nothing on Stripe's side knows the schedule is gone - so a deleted
+     * schedule, or an account deletion that cascades its schedules away, left Stripe renewing the
+     * saved card every month. A customer who deleted their account on 10 Sep 2026 was charged
+     * again on 27 Sep.
+     *
+     * Throws BillingCancellationException on a Stripe failure. Callers must abort the deletion
+     * BEFORE tearing anything down, rather than carry on: deleting anyway is exactly the bug this
+     * exists to prevent, and afterwards nobody can reach the subscription from the app.
+     * Idempotent - a second call finds nothing live and makes no Stripe request - and a no-op on
+     * a schedule that never subscribed (every selfhost install).
+     *
+     * Not wrapped in a transaction: no network I/O inside one.
+     *
+     * @return int how many subscriptions were cancelled
+     *
+     * @throws \App\Exceptions\BillingCancellationException
+     */
+    public function cancelBillingForDeletion(?int $actorUserId = null): int
+    {
+        if ($this->stripe_id === null) {
+            return 0;
+        }
+
+        $cancelled = 0;
+
+        foreach ($this->liveBillingSubscriptions()->get() as $subscription) {
+            // cancelNow(), not cancel(): cancel() only stops the NEXT renewal, leaving the
+            // subscription open until period end on a schedule that no longer exists.
+            try {
+                $subscription->cancelNow();
+            } catch (\Throwable $e) {
+                // Already over on Stripe's side, and only our row is stale (a missed webhook, or
+                // the subscription was cancelled from the Stripe dashboard): record that and move
+                // on. Aborting here would make the schedule undeletable forever, over a charge
+                // that can no longer happen.
+                if ($e instanceof \Stripe\Exception\InvalidRequestException && self::stripeSubscriptionIsOver($subscription->stripe_id)) {
+                    $subscription->markAsCanceled();
+
+                    continue;
+                }
+
+                throw new \App\Exceptions\BillingCancellationException(
+                    "Could not cancel subscription {$subscription->stripe_id} for schedule {$this->id}: {$e->getMessage()}",
+                    0,
+                    $e,
+                );
+            }
+
+            $cancelled++;
+
+            \App\Services\AuditService::log(
+                \App\Services\AuditService::SUBSCRIPTION_CANCEL,
+                $actorUserId,
+                'Role',
+                $this->id,
+                null,
+                ['stripe_id' => $subscription->stripe_id],
+                'Cancelled because the schedule is being deleted',
+            );
+        }
+
+        return $cancelled;
+    }
+
+    /**
+     * Whether Stripe itself says this subscription can never bill again. Asked only after a
+     * cancel request was refused, and fails closed: any doubt means the caller aborts.
+     *
+     * Static because it needs no schedule: AdminController::cancelOrphanedSubscription() asks it
+     * about subscriptions whose schedule no longer exists.
+     *
+     * Deliberately NOT satisfied by a resource_missing refusal alone. Stripe answers "No such
+     * subscription" just the same when the install is holding the other mode's key (test vs
+     * live), and treating that as "over" would record a cancellation while the real
+     * subscription keeps billing.
+     */
+    public static function stripeSubscriptionIsOver(string $stripeSubscriptionId): bool
+    {
+        try {
+            $remote = \Laravel\Cashier\Cashier::stripe()->subscriptions->retrieve($stripeSubscriptionId);
+        } catch (\Throwable $e) {
+            return false;
+        }
+
+        return in_array($remote->status, self::BILLING_ENDED_STATUSES, true);
+    }
 }

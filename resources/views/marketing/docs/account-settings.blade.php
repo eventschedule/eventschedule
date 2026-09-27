@@ -596,6 +596,7 @@
             <li>Your user account, profile and profile image</li>
             <li>Every schedule you own, with its events, tickets and sales</li>
             <li>Connections to linked services such as Stripe and Google, including any calendar sync they were running</li>
+            <li>Any paid plan on those schedules, which is cancelled immediately rather than at the end of the billing period. The rest of the period is not refunded, and the confirmation dialog warns you when you have a paid plan</li>
         </ul>
 
         <p class="text-gray-600 dark:text-gray-300 mb-4">

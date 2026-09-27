@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Api;
 
+use App\Exceptions\BillingCancellationException;
 use App\Http\Controllers\Controller;
 use App\Models\AnalyticsAppearancesDaily;
 use App\Models\AnalyticsDaily;
@@ -247,6 +248,16 @@ class ApiScheduleController extends Controller
 
         if (! $role) {
             return response()->json(['error' => 'Schedule not found'], 404);
+        }
+
+        // Before any teardown below, so a Stripe failure leaves the schedule intact rather than
+        // half-deleted and still billing. markDeleted() repeats this at the end as a no-op.
+        try {
+            $role->cancelBillingForDeletion($user->id);
+        } catch (BillingCancellationException $e) {
+            report($e);
+
+            return response()->json(['error' => __('messages.delete_subscription_cancel_failed')], 502);
         }
 
         // Clean up images
