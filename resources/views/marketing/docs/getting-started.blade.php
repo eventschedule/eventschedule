@@ -24,20 +24,20 @@
         <p class="text-gray-600 dark:text-gray-300 mb-6">Signing up is free and takes no credit card. All you need is an email address you can check right away, because Event Schedule confirms it with a code before the account is created.</p>
 
         <ol class="doc-list doc-list-numbered mb-6">
-            <li>Open <a href="{{ app_url('/sign_up') }}" class="doc-link">the sign-up page</a> and type your email address in the <strong class="text-gray-900 dark:text-white">Email</strong> field.</li>
-            <li>Click <strong class="text-gray-900 dark:text-white">"Send Code"</strong>. A six-digit code is emailed to that address and stays valid for 10 minutes. The email field locks so the code cannot drift out of sync with it.</li>
-            <li>The rest of the form appears. Fill in your <strong class="text-gray-900 dark:text-white">Full Name</strong>, a <strong class="text-gray-900 dark:text-white">Password</strong> of at least 8 characters, and the <strong class="text-gray-900 dark:text-white">Verification Code</strong> from the email.</li>
-            <li>Tick <strong class="text-gray-900 dark:text-white">"I accept the Terms of Service and Privacy Policy"</strong>, then click <strong class="text-gray-900 dark:text-white">"Sign Up"</strong>.</li>
+            <li>Open <a href="{{ app_url('/sign_up') }}" class="doc-link">the sign-up page</a>, tick <strong class="text-gray-900 dark:text-white">"I accept the Terms of Service and Privacy Policy"</strong>, and type your email address in the <strong class="text-gray-900 dark:text-white">Email</strong> field.</li>
+            <li>Click <strong class="text-gray-900 dark:text-white">"Continue"</strong>. A six-digit code is emailed to that address and stays valid for 10 minutes. If the address looks like a typo of a common provider (gmial.com, say), the page offers the corrected address first, so no code is sent to an inbox nobody reads.</li>
+            <li>Type or paste the code into the six boxes. It is checked straight away: the boxes turn green when it is right, or red, with the reason, when it is not.</li>
+            <li>Enter your <strong class="text-gray-900 dark:text-white">Full Name</strong> and a <strong class="text-gray-900 dark:text-white">Password</strong> of at least 8 characters, then click <strong class="text-gray-900 dark:text-white">"Create Account"</strong>.</li>
             <li>You are signed in immediately, with the email already verified, and Event Schedule asks you to pick a schedule type.</li>
         </ol>
 
-        <p class="text-gray-600 dark:text-gray-300 mb-6">If the code does not arrive, click <strong class="text-gray-900 dark:text-white">"Send Code"</strong> again to get a fresh one. You can request up to five codes per hour for the same address. Your timezone and language are detected from your browser, so there is nothing to choose during sign-up.</p>
+        <p class="text-gray-600 dark:text-gray-300 mb-6">If the code does not arrive, <strong class="text-gray-900 dark:text-white">"Didn't receive the code? Resend code"</strong> appears under the boxes after 30 seconds, with a note on where else to look (the spam folder, and the email's subject line, which carries the code too). You can request up to five codes per hour for the same address. Typed the wrong address? Click <strong class="text-gray-900 dark:text-white">"Use a different email"</strong> to go back a step. Your timezone and language are detected from your browser, so there is nothing to choose during sign-up.</p>
 
         <p class="text-gray-600 dark:text-gray-300 mb-6">Already confirmed an email sign-up on someone's schedule? That set up an account on your address with no password yet. Sign up with the same address and the form completes that account, so the schedules you follow come with it. If you added a password back then, sign in instead.</p>
 
         <div class="doc-callout doc-callout-tip">
             <div class="doc-callout-title">Signing up with Google is quicker</div>
-            <p>Click <strong>"Sign up with Google"</strong> instead and there is no code to enter: Google has already confirmed the address, so the account is created verified and you land straight on the schedule-type chooser. Either way, your data is yours, and we never share or sell your information.</p>
+            <p>Click <strong>"Continue with Google"</strong> instead and there is no code to enter: Google has already confirmed the address, so the account is created verified and you land straight on the schedule-type chooser. Either way, your data is yours, and we never share or sell your information.</p>
         </div>
 
         <div class="doc-callout doc-callout-info">
@@ -389,7 +389,7 @@
                 {
                     "@type": "HowToStep",
                     "name": "Create Your Account",
-                    "text": "Enter your email on the sign-up page and click Send Code, then fill in your full name, a password of at least 8 characters and the six-digit code from the email, accept the terms and click Sign Up. Signing up with Google skips the code.",
+                    "text": "Accept the terms, enter your email on the sign-up page and click Continue, then type the six-digit code from the email, your full name and a password of at least 8 characters, and click Create Account. Continuing with Google skips the code.",
                     "url": "{{ url(route('marketing.docs.getting_started')) }}#create-account"
                 },
                 {

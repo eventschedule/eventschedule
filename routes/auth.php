@@ -38,6 +38,10 @@ Route::middleware(['app_subdomain', 'guest'])->group(function () {
         ->name('sign_up.send_code')
         ->middleware('throttle:5,1,signup_code');
 
+    Route::post('sign_up/check-code', [RegisteredUserController::class, 'checkSignupCode'])
+        ->name('sign_up.check_code')
+        ->middleware('throttle:10,1,signup_check');
+
     Route::post('sign_up', [RegisteredUserController::class, 'store'])
         ->middleware('throttle:10,1,signup');
 

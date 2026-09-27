@@ -36,6 +36,23 @@
 
         @if (config('app.hosted'))
         var lockedEmail = null;
+
+        /**
+         * Whether a code has gone out for the address on screen.
+         *
+         * Create Account renders disabled and stays that way until then: without a code there is
+         * nothing it can do but earn a "verification code is required" error. showCodeSentState()
+         * is the one place that means "a code was sent" - a send, a reload of this tab, the mail's
+         * ?step=code link, an error reload of a submit that carried one - and changeEmail() takes
+         * it back, because a code for the old address is no use for the new one.
+         */
+        var codeSent = false;
+
+        function setCreateAccountEnabled(enabled) {
+            codeSent = enabled;
+            var btn = document.getElementById('create-account-btn');
+            if (btn) btn.disabled = !enabled;
+        }
         var turnstileWidgetId = null;
         // True while Cloudflare has a challenge on screen; see waitForTurnstileToken().
         var turnstileInteractive = false;
@@ -51,7 +68,13 @@
         function revealSignupFields() {
             ['name-field', 'password-field', 'verification-code-field', 'submit-section'].forEach(function (id) {
                 var el = document.getElementById(id);
-                if (el) el.style.display = 'block';
+                if (!el) return;
+                el.style.display = 'block';
+                // Re-trigger the entrance each time: removing and re-adding the class alone is
+                // coalesced by the browser, the reflow in between is what restarts it.
+                el.classList.remove('signup-step-enter');
+                void el.offsetWidth;
+                el.classList.add('signup-step-enter');
             });
 
             ['name', 'password', 'verification_code'].forEach(function (id) {
@@ -83,15 +106,17 @@
         /**
          * Put the page into the "we have sent you a code" state.
          *
-         * Note what this deliberately does NOT do: hide the Google button, the guest option or the
-         * "Already registered?" link. It used to hide all three, and because the same branch also
+         * Note what this deliberately does NOT do: hide the guest option or the "Already
+         * registered?" link. It used to hide those and Google, and because the same branch also
          * runs on a validation error, ONE mistyped digit reloaded into a page whose only remaining
          * action was to retype a code the visitor did not have - no resend, no way to correct the
-         * address, and the password field emptied by the browser. Those are the escape hatches; the
-         * moment somebody is stuck is the moment they have to stay on screen.
+         * address, and the password field emptied by the browser. Google does fold away now, but
+         * only inside the address guard, where "Use a different email" and Resend are on screen and
+         * changeEmail() brings it back.
          */
         function showCodeSentState(email) {
             revealSignupFields();
+            setCreateAccountEnabled(true);
 
             var emailInput = document.getElementById('email');
             if (email) {
@@ -102,24 +127,51 @@
                 var address = document.getElementById('code-sent-address');
                 if (address) address.textContent = email;
 
-                // Hide the top "Email me a code" button - but ONLY here, inside the address guard.
-                // setSendButtonIdle() re-enables it on every response and the countdown only
-                // governs the panel's Resend, so leaving it on screen gave step two a second send
+                // Hide Continue - but ONLY here, inside the address guard.
+                // setSendButtonIdle() re-enables it on every response and the resend wait only
+                // governs Resend, so leaving it on screen gave step two a second send
                 // path with no rate-limit feedback. Outside this guard it was worse: an
                 // empty-address restore hid it while also not showing the panel, leaving no way to
                 // request a code at all.
                 var sendCodeBtn = document.getElementById('send-code-btn');
                 if (sendCodeBtn) sendCodeBtn.style.display = 'none';
-                var haveCodeRow = document.getElementById('have-code-row');
-                if (haveCodeRow) haveCodeRow.style.display = 'none';
+
+                // Step one's ways in fold away too, so step two reads panel, code, name, password,
+                // Create account, with nothing above it asking to start over. Only here, inside the
+                // address guard: the panel below is then on screen with "Use a different email"
+                // and Resend, and changeEmail() brings both back. Hiding Google used to strand an
+                // error reload because step two had no way back at all; it has two now.
+                var googleSection = document.getElementById('google-signup-section');
+                if (googleSection) googleSection.style.display = 'none';
+
+                // The consent box only when it is already ticked. A ticked box still posts while
+                // hidden, so this is not the #124 trap (an UNFILLED required control nobody can
+                // see). Unticked - a reload or the mail's ?step=code link, both fresh pages - it
+                // stays, and requireTerms() re-shows it in any case before asking for the tick.
+                var termsBox = document.getElementById('terms');
+                var termsField = document.getElementById('terms-field');
+                if (termsField && termsBox && termsBox.checked) termsField.style.display = 'none';
 
                 // The panel states the address and offers "use a different email", so the locked
                 // field above it only repeated it. Same guard as the panel: with no address (an
                 // error reload) the field must stay, or there is nothing left to type into.
+                //
+                // Visually hidden, NOT display:none: a password manager works out the username for
+                // "Save password?" from the fields around the password, and skips ones that are not
+                // rendered - so the new login was saved with no address, or somebody else's.
+                // Out of the tab order and the accessibility tree while it is folded away.
                 var emailEntry = document.getElementById('email-entry');
-                if (emailEntry) emailEntry.style.display = 'none';
+                if (emailEntry) emailEntry.classList.add('signup-visually-hidden');
+                emailInput.setAttribute('tabindex', '-1');
+                emailInput.setAttribute('aria-hidden', 'true');
+                emailInput.setAttribute('autocomplete', 'username');
 
-                updateWebmailLink(email);
+                // A code only goes to an address with no account (the send refuses one that has,
+                // with a Log in link of its own), so "Already registered?" cannot apply here.
+                // changeEmail() brings it back with step one.
+                var alreadyRegistered = document.getElementById('already-registered');
+                if (alreadyRegistered) alreadyRegistered.style.display = 'none';
+
             }
 
             // Only with an address. The restore path calls this with emailInput.value, which can
@@ -135,9 +187,52 @@
             var heading = document.getElementById('signup-heading');
             var subheading = document.getElementById('signup-subheading');
             if (heading) heading.textContent = @json(__('messages.signup_check_email_heading'));
+            // #code-sent-panel takes its place: "We emailed a 6-digit code to x" and the change pill.
             if (subheading) subheading.style.display = 'none';
             document.title = @json(__('messages.signup_check_email_heading')) + ' | Event Schedule';
+
+            // Hidden again on every entry: a send starts the countdown, whose end shows it; the
+            // restore paths call showCodeHelp() themselves, since no countdown runs for them.
+            var helpNote = document.getElementById('code-help-note');
+            if (helpNote) helpNote.style.display = 'none';
+
+            enterStepTwoHistory();
         }
+
+        /**
+         * Where to look for a code that has not arrived: the expiry, spam folder and subject line.
+         *
+         * Shown only once the resend countdown runs out, or at once when the step is restored and
+         * no countdown is running. Somebody whose code arrived in five seconds never needs it.
+         */
+        function showCodeHelp() {
+            var helpNote = document.getElementById('code-help-note');
+            if (helpNote) helpNote.style.display = 'block';
+        }
+
+        /**
+         * Make the browser's Back button return to step one rather than leave the page.
+         *
+         * On a phone, Back is how somebody fixes a mistyped address, and it used to throw the whole
+         * form away. One entry per visit to step two: a reload keeps history.state, so pushing again
+         * there would take two presses of Back to get out. Guarded because pushState can throw in
+         * a sandboxed or file:// context, and the page works the same without it.
+         */
+        function enterStepTwoHistory() {
+            try {
+                if (!(history.state && history.state.signupStep === 2)) {
+                    history.pushState({ signupStep: 2 }, '');
+                }
+            } catch (e) {}
+        }
+
+        window.addEventListener('popstate', function (e) {
+            var inStepTwo = lockedEmail !== null;
+            var toStepTwo = e.state && e.state.signupStep === 2;
+            if (inStepTwo && !toStepTwo) {
+                changeEmail();
+            }
+        });
 
         /**
          * Back to step one, with the address editable again.
@@ -153,26 +248,38 @@
 
             lockedEmail = null;
             forgetCodeSent();
-            updateWebmailLink(null);
             emailInput.removeAttribute('readonly');
             emailInput.classList.remove('bg-gray-100', 'dark:bg-gray-700', 'cursor-not-allowed');
             if (panel) panel.style.display = 'none';
             if (codeInput) codeInput.value = '';
+            setCodeBoxesState('is-invalid', false);
+            markCodeUnchecked();
+            renderCodeSlots();
 
             var emailEntry = document.getElementById('email-entry');
-            if (emailEntry) emailEntry.style.display = '';
+            if (emailEntry) emailEntry.classList.remove('signup-visually-hidden');
+            emailInput.removeAttribute('tabindex');
+            emailInput.removeAttribute('aria-hidden');
+            emailInput.setAttribute('autocomplete', 'email');
+            var alreadyRegistered = document.getElementById('already-registered');
+            if (alreadyRegistered) alreadyRegistered.style.display = '';
             if (codeMessage) codeMessage.innerHTML = '';
 
             // The rest of the inverse. Without it the page sat in a hybrid state: the panel gone,
             // but Name, Password, Terms, Submit and an empty REQUIRED "Verification code" box all
             // still on screen, with nothing left to explain where a code would come from.
             hideSignupFields();
+            setCreateAccountEnabled(false);
 
             // Put the send button back, since showCodeSentState() hid it.
             var sendCodeBtn = document.getElementById('send-code-btn');
             if (sendCodeBtn) sendCodeBtn.style.display = '';
-            var haveCodeRow = document.getElementById('have-code-row');
-            if (haveCodeRow) haveCodeRow.style.display = '';
+
+            // And step one's ways in, which showCodeSentState() folded away.
+            var googleSection = document.getElementById('google-signup-section');
+            if (googleSection) googleSection.style.display = '';
+            var termsField = document.getElementById('terms-field');
+            if (termsField) termsField.style.display = '';
 
             // Supersede anything still in flight. Without this the page looked live and was dead:
             // a slow Resend left sendInFlight true, changeEmail() un-hid #send-code-btn - which was
@@ -188,16 +295,17 @@
             // auto-submit.
             autoSubmitted = false;
 
-            // And stop the countdown, which otherwise ticks on inside a hidden panel and
-            // eventually re-reveals a Resend button behind it.
+            // And stop the resend wait, which otherwise runs on inside a hidden step and later
+            // re-reveals a Resend row behind it.
             if (resendTimer) {
-                clearInterval(resendTimer);
+                clearTimeout(resendTimer);
                 resendTimer = null;
             }
-            var counter = document.getElementById('resend-countdown');
-            if (counter) counter.style.display = 'none';
-            var resendBtn = document.getElementById('resend-code-btn');
-            if (resendBtn) resendBtn.style.display = '';
+            var resendRow = document.getElementById('code-resend-row');
+            if (resendRow) resendRow.style.display = '';
+            // A "Code resent" still fading out belongs to the address being abandoned.
+            var resentNote = document.getElementById('code-resent-note');
+            if (resentNote) resentNote.style.display = 'none';
 
             // Back to step one means back to step one's heading, or the page still says to go and
             // read a mail that no longer applies to the address in the box.
@@ -207,55 +315,48 @@
             if (subheading) subheading.style.display = '';
             document.title = 'Event Schedule';
 
+            var helpNote = document.getElementById('code-help-note');
+            if (helpNote) helpNote.style.display = 'none';
+
             emailInput.focus();
             emailInput.select();
         }
 
         /**
-         * Hold the resend button for a moment after a send.
+         * Keep "Didn't receive the code? Resend code" off screen for a moment after a send.
          *
          * Not decoration: sign_up/send-code allows 5 per hour per address AND, since the named
          * prefix in routes/auth.php, 5 per minute per IP. A visitor who taps resend four times
          * because nothing arrived would spend the whole minute bucket and meet a 429.
+         *
+         * Hidden rather than counted down: a ticking "Resend in 29s" under a code that has only
+         * just been sent is noise, and reads as though the code is late already. The row appears
+         * once a resend is possible, with the where-else-to-look note beside it - the moment
+         * somebody still waiting actually needs both.
          */
         var resendTimer = null;
         function startResendCountdown(seconds) {
-            var btn = document.getElementById('resend-code-btn');
-            var counter = document.getElementById('resend-countdown');
-            if (!btn || !counter) return;
+            var row = document.getElementById('code-resend-row');
+            if (!row) return;
 
-            var remaining = seconds;
-            btn.style.display = 'none';
-            counter.style.display = 'inline';
+            row.style.display = 'none';
+            if (resendTimer) clearTimeout(resendTimer);
 
-            if (resendTimer) clearInterval(resendTimer);
-
-            var tick = function () {
-                counter.textContent = @json(__('messages.resend_in_label')) + ' ' + remaining + 's';
-                if (remaining <= 0) {
-                    clearInterval(resendTimer);
-                    resendTimer = null;
-                    counter.style.display = 'none';
-                    // '' not 'inline': a <button>'s UA default is inline-block, and the markup
-                    // carries no inline display to begin with.
-                    btn.style.display = '';
-                }
-                remaining--;
-            };
-
-            tick();
-            resendTimer = setInterval(tick, 1000);
+            resendTimer = setTimeout(function () {
+                resendTimer = null;
+                row.style.display = '';
+                showCodeHelp();
+            }, seconds * 1000);
         }
 
         /**
          * Hold a send button down for a cooldown, and show the wait where it can be seen.
          *
-         * startResendCountdown() alone is not enough: #resend-code-btn and #resend-countdown both
-         * live INSIDE #code-sent-panel, which is display:none until a code has actually been sent.
-         * A per-address 429 on the first click of a fresh page therefore ran a countdown nobody
-         * could see, while the only visible control had just been re-enabled. So disable the
-         * button that was actually pressed as well, and drive the panel counter only when the
-         * panel is up.
+         * startResendCountdown() alone is not enough: the resend row is part of step two, which is
+         * not on screen until a code has actually been sent. A per-address 429 on the first click
+         * of a fresh page therefore ran a wait nobody could see, while the only visible control
+         * had just been re-enabled. So disable the button that was actually pressed as well, and
+         * hold the resend row back only when step two is up.
          */
         function startSendCooldown(btn, seconds) {
             var panel = document.getElementById('code-sent-panel');
@@ -288,7 +389,7 @@
          */
         function setSendButtonBusy(btn, label) {
             if (!btn) return;
-            // Stash the label rather than hardcoding one: this serves both "Email me a code" and
+            // Stash the label rather than hardcoding one: this serves both Continue and
             // "Resend code", and restoring the wrong one silently relabels whichever was pressed.
             if (btn.dataset.idleLabel === undefined) {
                 btn.dataset.idleLabel = btn.innerHTML;
@@ -351,54 +452,6 @@
         }
 
         /**
-         * A button straight to the inbox the code went to, for the providers most people use.
-         *
-         * A plain link, nothing loaded from the provider. The Gmail one opens a search across
-         * every folder for our sender, so a code filed under Spam or Promotions turns up too.
-         * An address at any other domain gets no button rather than a guess.
-         */
-        var GMAIL_SEARCH_URL = @json('https://mail.google.com/mail/u/0/#search/' . rawurlencode('in:anywhere from:' . config('mail.from.address')));
-
-        function webmailFor(email) {
-            var domain = (email || '').split('@').pop().toLowerCase();
-            if (!domain) return null;
-
-            if (domain === 'gmail.com' || domain === 'googlemail.com') {
-                return { name: 'Gmail', url: GMAIL_SEARCH_URL };
-            }
-            if (/^(outlook|hotmail|live)\.[a-z.]+$/.test(domain) || domain === 'msn.com') {
-                return { name: 'Outlook', url: 'https://outlook.live.com/mail/0/' };
-            }
-            if (/^yahoo\.[a-z.]+$/.test(domain) || domain === 'ymail.com') {
-                return { name: 'Yahoo Mail', url: 'https://mail.yahoo.com/' };
-            }
-            if (domain === 'icloud.com' || domain === 'me.com' || domain === 'mac.com') {
-                return { name: 'iCloud Mail', url: 'https://www.icloud.com/mail' };
-            }
-            if (domain === 'proton.me' || domain === 'protonmail.com' || domain === 'pm.me') {
-                return { name: 'Proton Mail', url: 'https://mail.proton.me/' };
-            }
-
-            return null;
-        }
-
-        function updateWebmailLink(email) {
-            var row = document.getElementById('webmail-row');
-            var link = document.getElementById('open-webmail-link');
-            if (!row || !link) return;
-
-            var provider = email ? webmailFor(email) : null;
-            if (!provider) {
-                row.style.display = 'none';
-                return;
-            }
-
-            link.href = provider.url;
-            link.textContent = @json(__('messages.open_webmail', ['provider' => '__PROVIDER__'])).replace('__PROVIDER__', provider.name);
-            row.style.display = '';
-        }
-
-        /**
          * Say, where it can be seen, that a resend worked.
          *
          * The success used to go only to the screen-reader live region, so on screen the one
@@ -428,6 +481,7 @@
             // A form that came back from a full-page submit (no JavaScript fetch, or an old tab).
             if (verificationCodeInput.value || emailInput.readOnly || hasErrors) {
                 showCodeSentState(emailInput.value);
+                showCodeHelp();
                 // Straight to the field they have to correct, rather than the name field above it.
                 verificationCodeInput.focus();
                 return;
@@ -437,6 +491,7 @@
             // address, or the step would open onto a code bound to nobody.
             if (@json(request()->query('step') === 'code') && emailInput.value) {
                 showCodeSentState(emailInput.value);
+                showCodeHelp();
                 verificationCodeInput.focus();
                 return;
             }
@@ -448,6 +503,7 @@
             if (stored && (!emailInput.value || emailInput.value.toLowerCase() === stored.email.toLowerCase())) {
                 emailInput.value = stored.email;
                 showCodeSentState(stored.email);
+                showCodeHelp();
                 verificationCodeInput.focus();
             }
         });
@@ -482,30 +538,45 @@
         function sendVerificationCode(triggerBtn) {
                 if (sendInFlight) return;
 
-                if (!requireTerms()) return;
-
-                var myGeneration = ++sendGeneration;
-
-                var email = document.getElementById('email').value;
+                var email = document.getElementById('email').value.trim();
                 var sendCodeBtn = triggerBtn || document.getElementById('send-code-btn');
                 var codeMessage = document.getElementById('code-message');
                 var emailInput = document.getElementById('email');
 
+                // Both checks, then one decision, so an unticked box and a bad address are reported
+                // together rather than one per press. requireTerms() focuses the box, which sits
+                // above the address, so it is the first thing to fix either way.
+                var termsOk = requireTerms();
+
+                var emailError = null;
                 if (!email) {
-                    codeMessage.innerHTML = '<span class="text-red-600 dark:text-red-400">' + @json(__('messages.please_enter_email_address')) + '</span>';
+                    emailError = @json(__('messages.please_enter_email_address'));
+                } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+                    emailError = @json(__('messages.invalid_email_address'));
+                }
+
+                if (emailError) {
+                    showCodeMessageError(emailError);
+                    if (termsOk) emailInput.focus();
+                }
+
+                if (!termsOk || emailError) return;
+
+                // A likely typo of a big provider stops the first press only, with the fix on
+                // screen. A second press sends to what was typed: it is a suggestion, and
+                // somebody at a real gmial.com must still be able to sign up.
+                if (triggerBtn !== document.getElementById('resend-code-btn') && updateEmailSuggestion() && suggestionShownFor !== email) {
+                    suggestionShownFor = email;
                     return;
                 }
 
-                // Validate email format
-                var emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-                if (!emailRegex.test(email)) {
-                    codeMessage.innerHTML = '<span class="text-red-600 dark:text-red-400">' + @json(__('messages.invalid_email_address')) + '</span>';
-                    return;
-                }
+                var myGeneration = ++sendGeneration;
 
                 // Disable button and show loading
                 sendInFlight = true;
-                setSendButtonBusy(sendCodeBtn);
+                // "Sending code" on Continue, whose own label does not say a mail is going out;
+                // Resend already does, so it keeps the shorter default.
+                setSendButtonBusy(sendCodeBtn, sendCodeBtn && sendCodeBtn.id === 'send-code-btn' ? @json(__('messages.sending_code')) : undefined);
                 codeMessage.innerHTML = '';
 
                 // The widget is interaction-only, so its token arrives on its own a moment after
@@ -520,6 +591,157 @@
                 });
             }
 
+        function showCodeMessageError(message) {
+            var codeMessage = document.getElementById('code-message');
+            if (!codeMessage) return;
+            codeMessage.innerHTML = '';
+            var span = document.createElement('span');
+            span.className = 'text-red-600 dark:text-red-400';
+            span.textContent = message;
+            codeMessage.appendChild(span);
+        }
+
+        /**
+         * "Did you mean jane@gmail.com?" for a likely typo of a big provider's domain.
+         *
+         * A code sent to gmial.com is a code nobody receives, and the visitor only finds out after
+         * waiting for it. Domains that are real providers in their own right, and a letter away
+         * from one of the targets, are listed so they are never "corrected" (mail.com, ymail.com,
+         * email.com and gmx.com are each one or two edits from gmail.com). Short domains get a
+         * tighter bound, because at five letters two edits reach almost anything.
+         */
+        var SUGGEST_DOMAINS = ['gmail.com', 'yahoo.com', 'hotmail.com', 'outlook.com', 'icloud.com', 'aol.com', 'live.com', 'proton.me', 'protonmail.com', 'googlemail.com'];
+        var REAL_DOMAINS = ['mail.com', 'email.com', 'ymail.com', 'gmx.com', 'gmx.net', 'gmx.de', 'mac.com', 'me.com', 'msn.com', 'aim.com', 'pm.me', 'mail.ru', 'web.de', 'yandex.ru', 'rocketmail.com', 'hotmail.co.uk', 'live.co.uk', 'yahoo.co.uk', 'outlook.co.uk', 'hotmail.fr', 'live.fr', 'outlook.fr', 'hotmail.de', 'hotmail.it', 'hotmail.es', 'yahoo.fr', 'yahoo.de', 'yahoo.es', 'yahoo.it'];
+        var suggestionShownFor = null;
+
+        function editDistance(a, b) {
+            var prev = [], cur, i, j;
+            for (j = 0; j <= b.length; j++) prev[j] = j;
+            for (i = 1; i <= a.length; i++) {
+                cur = [i];
+                for (j = 1; j <= b.length; j++) {
+                    cur[j] = Math.min(prev[j] + 1, cur[j - 1] + 1, prev[j - 1] + (a[i - 1] === b[j - 1] ? 0 : 1));
+                }
+                prev = cur;
+            }
+            return prev[b.length];
+        }
+
+        function suggestEmail(email) {
+            var at = (email || '').lastIndexOf('@');
+            if (at < 1) return null;
+            var local = email.slice(0, at);
+            var domain = email.slice(at + 1).toLowerCase();
+            if (!domain || SUGGEST_DOMAINS.indexOf(domain) !== -1 || REAL_DOMAINS.indexOf(domain) !== -1) return null;
+
+            var best = null, bestDistance = Infinity;
+            SUGGEST_DOMAINS.forEach(function (candidate) {
+                var d = editDistance(domain, candidate);
+                if (d < bestDistance) {
+                    bestDistance = d;
+                    best = candidate;
+                }
+            });
+            if (best && bestDistance <= (domain.length >= 8 ? 2 : 1)) return local + '@' + best;
+
+            // Any other domain with a fumbled .com.
+            var fixed = domain.replace(/\.(con|cmo|cpm|xom|vom|comm|coom)$/, '.com');
+            return fixed !== domain ? local + '@' + fixed : null;
+        }
+
+        // Shows or clears the suggestion for what is in the box; returns whether one is showing.
+        function updateEmailSuggestion() {
+            var input = document.getElementById('email');
+            var row = document.getElementById('email-suggestion');
+            if (!input || !row) return false;
+
+            var suggestion = input.readOnly ? null : suggestEmail(input.value.trim());
+            row.innerHTML = '';
+            if (!suggestion) {
+                row.style.display = 'none';
+                return false;
+            }
+
+            // Built from the translated sentence around a button, never through innerHTML: the
+            // address is typed by the visitor.
+            var parts = @json(__('messages.did_you_mean', ['email' => '__EMAIL__'])).split('__EMAIL__');
+            var fix = document.createElement('button');
+            fix.type = 'button';
+            fix.className = 'font-semibold text-[var(--brand-blue)] hover:underline focus:outline-none focus:ring-2 focus:ring-[var(--brand-blue)] rounded';
+            fix.textContent = suggestion;
+            fix.setAttribute('dir', 'ltr');
+            fix.addEventListener('click', function () {
+                input.value = suggestion;
+                suggestionShownFor = null;
+                updateEmailSuggestion();
+                input.focus();
+            });
+            row.appendChild(document.createTextNode(parts[0] || ''));
+            row.appendChild(fix);
+            row.appendChild(document.createTextNode(parts[1] || ''));
+            row.style.display = 'block';
+            return true;
+        }
+
+        /**
+         * Paint the six code boxes from the one real input lying over them.
+         *
+         * Each box shows its digit; the next one to fill carries the focus ring (and a caret while
+         * empty), or the last box once all six are in. A digit that has just arrived pops in.
+         * Called from every place the value changes, including the ones that set it in script -
+         * an input event does not fire for those.
+         */
+        var lastCodeValue = '';
+        function renderCodeSlots() {
+            var input = document.getElementById('verification_code');
+            var boxes = document.getElementById('code-boxes');
+            if (!input || !boxes) return;
+
+            var value = input.value;
+            var focused = document.activeElement === input;
+            var active = Math.min(value.length, 5);
+
+            boxes.querySelectorAll('[data-code-slot]').forEach(function (slot, i) {
+                var digit = value.charAt(i);
+                slot.querySelector('[data-digit]').textContent = digit;
+                slot.classList.toggle('is-filled', digit !== '');
+                slot.classList.toggle('is-active', focused && i === active);
+
+                slot.classList.remove('is-new');
+                if (digit && i >= lastCodeValue.length) {
+                    void slot.offsetWidth;
+                    slot.classList.add('is-new');
+                }
+            });
+
+            lastCodeValue = value;
+        }
+
+        function setCodeBoxesState(name, on) {
+            var boxes = document.getElementById('code-boxes');
+            if (boxes) boxes.classList.toggle(name, on);
+        }
+
+        /**
+         * Keep the caret after the last digit.
+         *
+         * Clicking the third box of a four-digit code would otherwise put the caret there, and the
+         * next digit would push the rest along - the "my digits shifted" confusion. With the
+         * caret pinned to the end, a click types into the next empty box and Backspace always
+         * takes the last digit, which is how the best one-time-code fields behave.
+         */
+        function keepCodeCaretAtEnd() {
+            var input = document.getElementById('verification_code');
+            if (!input || document.activeElement !== input) return;
+
+            var end = input.value.length;
+            try {
+                if (input.selectionStart !== end || input.selectionEnd !== end) {
+                    input.setSelectionRange(end, end);
+                }
+            } catch (e) {}
+        }
+
         /**
          * The consent box sits above both ways in and gates both.
          *
@@ -532,9 +754,17 @@
             var error = document.getElementById('terms-error');
             if (!terms || terms.checked) return true;
 
+            showTermsField();
             if (error) error.style.display = 'block';
             terms.focus();
             return false;
+        }
+
+        // showCodeSentState() folds a ticked box away; anything that asks about it again has to
+        // put it back first, or the error and the focus land on something nobody can see.
+        function showTermsField() {
+            var field = document.getElementById('terms-field');
+            if (field) field.style.display = '';
         }
 
         function readTurnstileToken() {
@@ -678,6 +908,19 @@
                             codeMessage.innerHTML = '';
                             codeMessage.appendChild(errorSpan);
 
+                            // The address already has an account: the way forward is to log in, so
+                            // offer that right there, carrying the address, instead of a red line
+                            // with nothing to do next.
+                            if (data.reason === 'registered') {
+                                var loginUrl = new URL(@json(route('login')), window.location.origin);
+                                loginUrl.searchParams.set('email', email);
+                                var loginLink = document.createElement('a');
+                                loginLink.href = loginUrl.toString();
+                                loginLink.className = 'ms-1 font-medium text-[var(--brand-blue)] hover:underline';
+                                loginLink.textContent = @json(__('messages.log_in'));
+                                codeMessage.appendChild(loginLink);
+                            }
+
                             // Reset Turnstile widget on failure
                             if (typeof turnstile !== 'undefined' && turnstileWidgetId !== null) {
                                 turnstile.reset(turnstileWidgetId);
@@ -768,6 +1011,21 @@
                         this.value = lockedEmail;
                     }
                 });
+
+                // The typo suggestion, once typing pauses. Not on blur: pressing Continue blurs
+                // the field first, and a line appearing then moves the button out from under the
+                // pointer between mousedown and mouseup, so the click never lands.
+                var suggestTimer = null;
+                emailInput.addEventListener('input', function () {
+                    // A "please enter an address" left over from the last press is about a value
+                    // that no longer exists.
+                    if (!lockedEmail) {
+                        var codeMessage = document.getElementById('code-message');
+                        if (codeMessage) codeMessage.innerHTML = '';
+                    }
+                    if (suggestTimer) clearTimeout(suggestTimer);
+                    suggestTimer = setTimeout(updateEmailSuggestion, 600);
+                });
             }
 
             // Format verification code input (numbers only)
@@ -775,8 +1033,37 @@
             if (codeInput) {
                 codeInput.addEventListener('input', function(e) {
                     this.value = this.value.replace(/[^0-9]/g, '').slice(0, 6);
+                    // A refused code's red boxes are about the old attempt, not this keystroke, and a
+                    // green "Verified" is about the code that was there before this edit.
+                    setCodeBoxesState('is-invalid', false);
+                    var codeError = document.querySelector('[data-signup-error="verification_code"]');
+                    if (codeError) codeError.remove();
+                    if (this.value !== codeCheckedValue) markCodeUnchecked();
+                    // Painted before the submit starts, so the sixth digit is visibly in its box.
+                    renderCodeSlots();
                     maybeAutoSubmit(this);
                 });
+
+                ['focus', 'blur'].forEach(function (type) {
+                    codeInput.addEventListener(type, function () {
+                        renderCodeSlots();
+                        if (type === 'focus') {
+                            // After the click has placed the caret, not before.
+                            setTimeout(keepCodeCaretAtEnd, 0);
+                        }
+                    });
+                });
+                ['click', 'keyup', 'select'].forEach(function (type) {
+                    codeInput.addEventListener(type, keepCodeCaretAtEnd);
+                });
+                // Moving the caret into the middle of the code would type into the middle of it.
+                codeInput.addEventListener('keydown', function (e) {
+                    if (['ArrowLeft', 'ArrowRight', 'ArrowUp', 'ArrowDown', 'Home', 'End'].indexOf(e.key) !== -1) {
+                        e.preventDefault();
+                    }
+                });
+
+                renderCodeSlots();
 
                 // Most people paste the whole line out of the email rather than the six digits.
                 // Handled here because the field carries no maxlength any more (it truncated the
@@ -789,8 +1076,25 @@
                     if (digits.length === 6) {
                         e.preventDefault();
                         this.value = digits;
+                        setCodeBoxesState('is-invalid', false);
+                        renderCodeSlots();
                         maybeAutoSubmit(this);
                     }
+                });
+            }
+
+            // "At least 8 characters" ticks green once it is true, and back if it stops being.
+            var passwordInput = document.getElementById('password');
+            var passwordHelp = document.getElementById('password-help');
+            if (passwordInput && passwordHelp) {
+                passwordInput.addEventListener('input', function () {
+                    var met = this.value.length >= 8;
+                    passwordHelp.classList.toggle('text-green-700', met);
+                    passwordHelp.classList.toggle('dark:text-green-400', met);
+                    passwordHelp.classList.toggle('text-gray-500', !met);
+                    passwordHelp.classList.toggle('dark:text-gray-400', !met);
+                    var icon = passwordHelp.querySelector('[data-met-icon]');
+                    if (icon) icon.style.display = met ? '' : 'none';
                 });
             }
 
@@ -849,36 +1153,6 @@
                 });
             }
 
-            // For somebody who already has a code in their inbox - from before a reload, or read
-            // on another device - and would otherwise have to ask for a second one to get the
-            // field on screen. Sends nothing: store() still checks the code against the address.
-            var haveCodeBtn = document.getElementById('have-code-btn');
-            if (haveCodeBtn) {
-                haveCodeBtn.addEventListener('click', function(e) {
-                    e.preventDefault();
-                    var emailField = document.getElementById('email');
-                    var message = document.getElementById('code-message');
-                    var typed = emailField ? emailField.value.trim() : '';
-
-                    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(typed)) {
-                        if (message) {
-                            message.innerHTML = '';
-                            var span = document.createElement('span');
-                            span.className = 'text-red-600 dark:text-red-400';
-                            span.textContent = typed ? @json(__('messages.invalid_email_address')) : @json(__('messages.please_enter_email_address'));
-                            message.appendChild(span);
-                        }
-                        if (emailField) emailField.focus();
-                        return;
-                    }
-
-                    if (message) message.innerHTML = '';
-                    showCodeSentState(typed);
-                    var code = document.getElementById('verification_code');
-                    if (code) code.focus();
-                });
-            }
-
             // Every submit of the hosted form - the button, Enter, and the sixth-digit
             // auto-submit's requestSubmit() - goes through fetch. See submitSignupForm().
             var signupForm = document.querySelector('form[action="{{ route('sign_up') }}"]');
@@ -902,11 +1176,16 @@
         var signupSubmitting = false;
         function submitSignupForm(form) {
             if (signupSubmitting) return;
+            // The disabled button already stops a click and Enter's implicit submit; this stops
+            // the sixth-digit auto-submit, whose requestSubmit() does not go through the button.
+            if (!codeSent) return;
             signupSubmitting = true;
 
             clearSignupErrors();
             var submitBtn = document.getElementById('create-account-btn');
             setSendButtonBusy(submitBtn, @json(__('messages.create_account')));
+            // The sixth digit visibly did something while the request is out.
+            setCodeBoxesState('is-busy', true);
 
             // store() validates Turnstile, and a token is single-use: a successful send spent the
             // previous one and a rejected submit spends this one. Wait for the fresh token the
@@ -963,7 +1242,11 @@
                     if (succeeded) return;
 
                     signupSubmitting = false;
+                    setCodeBoxesState('is-busy', false);
                     setSendButtonIdle(submitBtn);
+                    // setSendButtonIdle() re-enables, and "Use a different email" may have been
+                    // pressed while this was in flight.
+                    if (submitBtn) submitBtn.disabled = !codeSent;
                     if (typeof turnstile !== 'undefined' && turnstileWidgetId !== null) {
                         turnstile.reset(turnstileWidgetId);
                     }
@@ -1010,6 +1293,7 @@
 
                 if (field === 'terms') {
                     var termsError = document.getElementById('terms-error');
+                    showTermsField();
                     if (termsError) {
                         termsError.textContent = message;
                         termsError.style.display = 'block';
@@ -1041,7 +1325,7 @@
                 p.setAttribute('role', 'alert');
                 p.className = 'mt-2 text-sm text-red-600 dark:text-red-400';
                 p.textContent = message;
-                anchor.appendChild(p);
+                (anchor.querySelector('[data-error-slot]') || anchor).appendChild(p);
 
                 firstField = firstField || document.getElementById(field);
             });
@@ -1054,12 +1338,108 @@
                     codeInput.value = '';
                     firstField = codeInput;
                 }
+                // Red and a single shake, until the next digit.
+                markCodeUnchecked();
+                setCodeBoxesState('is-invalid', true);
+                renderCodeSlots();
                 autoSubmitted = false;
                 autoSubmitReported = false;
             }
 
             if (firstField && typeof firstField.focus === 'function') {
                 firstField.focus();
+            }
+        }
+
+        /**
+         * Ask the server whether the six digits are right, without using the code up.
+         *
+         * Green boxes and "Verified" when they are, then on to name and password exactly as
+         * before; red, cleared boxes and the reason when they are not. Anything else - a network
+         * failure, a throttle, a server error - lets the flow carry on as it did before this
+         * existed: store() checks the code in any case, so the early answer is a courtesy.
+         */
+        var codeCheckedValue = null;
+        var codeCheckInFlight = false;
+        function checkCode(codeInput) {
+            if (codeCheckInFlight) return;
+            codeCheckInFlight = true;
+
+            var value = codeInput.value;
+            var carryOn = function () {
+                codeCheckedValue = value;
+                maybeAutoSubmit(codeInput);
+            };
+
+            setCodeBoxesState('is-busy', true);
+
+            fetch(@json(route('sign_up.check_code')), {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Accept': 'application/json',
+                    'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content
+                },
+                body: JSON.stringify({ email: document.getElementById('email').value, verification_code: value })
+            })
+            .then(function (response) {
+                return response.json().catch(function () { return {}; }).then(function (data) {
+                    return { ok: response.ok, data: data };
+                });
+            })
+            .then(function (result) {
+                codeCheckInFlight = false;
+                setCodeBoxesState('is-busy', false);
+                // Typed on while the answer was out: it is about digits no longer in the boxes.
+                if (codeInput.value !== value) return;
+
+                if (result.ok && result.data.valid === true) {
+                    setCodeBoxesState('is-valid', true);
+                    setCodeHelpRows(false);
+                    var note = document.getElementById('code-verified-note');
+                    if (note) note.style.display = 'flex';
+                    carryOn();
+                } else if (result.ok && result.data.valid === false) {
+                    clearSignupErrors();
+                    showSignupErrors({ verification_code: [result.data.message || @json(__('messages.code_invalid'))] });
+                    // Too many wrong tries: this code is done, so offer a new one at once.
+                    if (result.data.expired) {
+                        if (resendTimer) {
+                            clearTimeout(resendTimer);
+                            resendTimer = null;
+                        }
+                        setCodeHelpRows(true);
+                    }
+                } else {
+                    carryOn();
+                }
+            })
+            .catch(function () {
+                codeCheckInFlight = false;
+                setCodeBoxesState('is-busy', false);
+                if (codeInput.value === value) carryOn();
+            });
+        }
+
+        function markCodeUnchecked() {
+            codeCheckedValue = null;
+            setCodeBoxesState('is-valid', false);
+            var note = document.getElementById('code-verified-note');
+            if (note) note.style.display = 'none';
+            // Back to waiting on a code: the resend row returns, unless its wait is still running.
+            var row = document.getElementById('code-resend-row');
+            if (!resendTimer && row && row.style.display === 'none') setCodeHelpRows(true);
+        }
+
+        // The resend row and the where-to-look note, which mean nothing once a code is accepted.
+        function setCodeHelpRows(show) {
+            var row = document.getElementById('code-resend-row');
+            if (row) row.style.display = show ? '' : 'none';
+            if (show) {
+                showCodeHelp();
+            } else {
+                var help = document.getElementById('code-help-note');
+                if (help) help.style.display = 'none';
             }
         }
 
@@ -1084,9 +1464,16 @@
             // the terms box re-checked but the password field emptied by the browser.
             if (autoSubmitted) return;
 
-            // Unticked is normal only on a page that was restored into the code step (a reload, the
-            // "Continue sign-up" link, "Already have a code?"): the box was ticked before the code
-            // was sent, but this is a fresh page. Say so, once, instead of the sixth digit doing
+            // Check the code before anything else, so a wrong one is reported while it is still
+            // what the visitor is looking at, not after a name and a password. checkCode() comes
+            // back here once the answer is in.
+            if (codeCheckedValue !== codeInput.value) {
+                checkCode(codeInput);
+                return;
+            }
+
+            // Unticked is normal only on a page that was restored into the code step (a reload, or
+            // the "Continue sign-up" link): the box was ticked before the code was sent, but this is a fresh page. Say so, once, instead of the sixth digit doing
             // nothing at all. Consent stays an explicit tick - it is never set for them.
             var terms = document.getElementById('terms');
             if (terms && !terms.checked) {
@@ -1231,6 +1618,165 @@
                 opacity: 0.5;
                 cursor: not-allowed;
             }
+
+            /* Step one's address, folded away in step two but still RENDERED, so a password manager
+               can pair it with the new password. See showCodeSentState(). */
+            .signup-visually-hidden {
+                position: absolute;
+                width: 1px;
+                height: 1px;
+                margin: -1px;
+                padding: 0;
+                overflow: hidden;
+                clip: rect(0, 0, 0, 0);
+                white-space: nowrap;
+                border: 0;
+            }
+
+            /* The six code boxes. Surface and border follow the other inputs through the palette
+               classes on each slot; states key off classes renderCodeSlots() sets. */
+            .code-slots {
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                gap: 0.5rem;
+            }
+            .code-slots-gap {
+                flex: 0 0 0.25rem;
+            }
+            .code-slot {
+                position: relative;
+                display: flex;
+                flex: 1 1 0;
+                align-items: center;
+                justify-content: center;
+                min-width: 0;
+                height: 3.5rem;
+                border-width: 1px;
+                border-radius: 0.75rem;
+                font-size: 1.5rem;
+                font-weight: 600;
+                font-variant-numeric: tabular-nums;
+                color: rgb(var(--ap-ink));
+                box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
+                transition: border-color 150ms, box-shadow 150ms, opacity 150ms;
+            }
+            .code-slot.is-filled {
+                border-color: rgb(var(--ap-ink-4));
+            }
+            .code-slot.is-active {
+                border-color: var(--brand-blue);
+                box-shadow: 0 0 0 3px color-mix(in srgb, var(--brand-blue) 25%, transparent);
+            }
+            .code-slot [data-caret] {
+                display: none;
+                position: absolute;
+                width: 2px;
+                height: 1.5rem;
+                border-radius: 1px;
+                background-color: var(--brand-blue);
+                animation: code-caret 1s step-end infinite;
+            }
+            .code-slot.is-active:not(.is-filled) [data-caret] {
+                display: block;
+            }
+            .code-slot.is-new [data-digit] {
+                display: inline-block;
+                animation: code-digit-in 120ms ease-out;
+            }
+            #code-boxes.is-invalid .code-slot {
+                border-color: rgb(239 68 68);
+            }
+            #code-boxes.is-invalid .code-slot.is-active {
+                box-shadow: 0 0 0 3px rgba(239, 68, 68, 0.25);
+            }
+            #code-boxes.is-invalid .code-slots {
+                animation: code-shake 240ms ease-in-out;
+            }
+            #code-boxes.is-valid .code-slot {
+                border-color: rgb(22 163 74);
+            }
+            #code-boxes.is-valid .code-slot.is-active {
+                box-shadow: 0 0 0 3px rgba(22, 163, 74, 0.2);
+            }
+            #code-boxes.is-busy .code-slot {
+                opacity: 0.6;
+            }
+            @keyframes code-caret {
+                50% { opacity: 0; }
+            }
+            @keyframes code-digit-in {
+                from { transform: scale(0.8); opacity: 0.4; }
+                to { transform: none; opacity: 1; }
+            }
+            @keyframes code-shake {
+                20%, 60% { transform: translateX(-4px); }
+                40%, 80% { transform: translateX(4px); }
+            }
+
+            /* The real input lies over the boxes, invisible but present: transparent, never
+               opacity:0 or hidden, which some browsers skip for autofill and focus. 16px, or iOS
+               zooms the page on focus. The autofill rule stops Chrome painting its own background
+               over the boxes when a code is filled in from Mail.
+
+               44px wider than the boxes, with that strip clipped away: a password manager that
+               ignores the data-*ignore attributes positions its badge from the input's right
+               edge, so it lands in the clipped strip beyond the sixth box instead of on it. */
+            #code-boxes .code-input {
+                position: absolute;
+                top: 0;
+                bottom: 0;
+                left: 0;
+                width: calc(100% + 44px);
+                clip-path: inset(0 44px 0 0);
+                height: 100%;
+                margin: 0;
+                padding: 0;
+                border: 0;
+                outline: none;
+                background: transparent;
+                box-shadow: none;
+                color: transparent;
+                -webkit-text-fill-color: transparent;
+                caret-color: transparent;
+                font-size: 16px;
+                cursor: text;
+            }
+            /* The card is overflow:hidden, which still SCROLLS to reveal a focused element: the
+               input's extra 44px reaches past the card's padding, so focusing it slid the whole
+               card 20px sideways. clip cuts the same corners but cannot be scrolled; a browser
+               without it keeps the layout's overflow-hidden. */
+            .auth-card {
+                overflow: clip;
+            }
+            #code-boxes .code-input:focus {
+                outline: none;
+                box-shadow: none;
+            }
+            #code-boxes .code-input::selection {
+                background: transparent;
+            }
+            #code-boxes .code-input:-webkit-autofill {
+                -webkit-text-fill-color: transparent;
+                transition: background-color 600000s 0s;
+            }
+            @media (prefers-reduced-motion: reduce) {
+                .code-slot [data-caret] { animation: none; }
+                .code-slot.is-new [data-digit],
+                #code-boxes.is-invalid .code-slots { animation: none; }
+            }
+
+            /* Step two's fields settle in rather than snapping into place. */
+            @keyframes signup-step-enter {
+                from { opacity: 0; transform: translateY(6px); }
+                to { opacity: 1; transform: none; }
+            }
+            .signup-step-enter {
+                animation: signup-step-enter 200ms ease-out both;
+            }
+            @media (prefers-reduced-motion: reduce) {
+                .signup-step-enter { animation: none; }
+            }
         </style>
     </x-slot>
 
@@ -1248,7 +1794,11 @@
         // revealSignupFields() arms name, password and the code the moment they become visible.
         // The hosted terms box is the exception: it is on screen from the start, so it is always
         // required.
-        $stepped = config('app.hosted') && ! config('app.is_testing');
+        //
+        // Not gated on is_testing any more: local installs run APP_TESTING=true, so the stepped
+        // page was only ever seen in production and the one-screen fallback is what got reviewed.
+        // store() still skips the code check under is_testing, so locally any six digits pass.
+        $stepped = config('app.hosted');
     @endphp
 
     {{-- The page had no <h1> and nothing saying why to be on it: a logo, then fields. Every promise
@@ -1262,13 +1812,30 @@
          written into a string is wrong on any install that changed its currency. "No credit card"
          is currency-free, which is why the claim is phrased that way. --}}
     @if (config('app.hosted'))
-    <div class="mb-6 text-center">
+    <div class="mb-8 text-center">
         <h1 id="signup-heading" class="text-xl font-bold text-gray-900 dark:text-gray-100">
             {{ __('messages.signup_heading') }}
         </h1>
         <p id="signup-subheading" class="mt-1 text-sm text-gray-500 dark:text-gray-400 text-balance">
             {{ __('messages.signup_subheading') }}
         </p>
+
+        {{-- Step two's subheading: where the code went, and a way to fix the address. The
+             address gets a line of its own, so a long one never breaks the sentence at the card
+             edge, and the fix is a small pill rather than a bare link, so it reads as the one
+             secondary action here. Outside the form, which is fine: the button is type="button".
+             The spam and expiry help is further down, under the code field, and only once it is
+             needed (see showCodeHelp()). --}}
+        <div id="code-sent-panel" class="mt-2" style="display: none;">
+            <p class="text-sm text-gray-500 dark:text-gray-400">{{ __('messages.code_sent_to_prefix') }}</p>
+            <p class="mt-0.5 text-sm font-semibold text-gray-900 dark:text-gray-100 break-words">
+                <bdi dir="ltr" id="code-sent-address"></bdi>
+            </p>
+            <button type="button" id="change-email-btn" class="mt-3 inline-flex items-center gap-1.5 rounded-full px-3 py-1 text-xs font-medium text-gray-600 dark:text-gray-300 bg-gray-100 dark:bg-white/5 hover:bg-gray-200 dark:hover:bg-white/10 focus:outline-none focus:ring-2 focus:ring-[var(--brand-blue)] dark:focus:ring-offset-gray-800 transition-all duration-200">
+                <svg class="w-3.5 h-3.5" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="m16.862 4.487 1.687-1.688a1.875 1.875 0 1 1 2.652 2.652L10.582 16.07a4.5 4.5 0 0 1-1.897 1.13L6 18l.8-2.685a4.5 4.5 0 0 1 1.13-1.897l8.932-8.931Zm0 0L19.5 7.125" /></svg>
+                {{ __('messages.use_another_email') }}
+            </button>
+        </div>
     </div>
     @endif
 
@@ -1383,7 +1950,7 @@
         {{-- One consent box, ABOVE both ways in, so it visibly gates Google and the emailed code
              alike. Always required: it is on screen from the first moment, so the #124 rule
              (never require a control inside a hidden container) does not apply to it. Clicking
-             Google or "Email me a code" unticked is stopped client-side by requireTerms(); the
+             Google or Continue unticked is stopped client-side by requireTerms(); the
              server still validates `terms => accepted` on the email path. Both documents are
              replaceable by the operator, so policy_url() resolves them, never marketing_url(). --}}
         <div id="terms-field" class="mb-5">
@@ -1407,8 +1974,9 @@
         @endif
 
         {{-- Hosted puts Google FIRST: about half of all accounts arrive this way, and it is the
-             one path with no code to wait for. It stays on screen in step two on purpose - see
-             showCodeSentState(). Selfhost keeps it below the form (further down). --}}
+             one path with no code to wait for. It folds away in step two once a code is out, and
+             "Use a different email" brings it back - see showCodeSentState(). Selfhost keeps it
+             below the form (further down). --}}
         @if (config('app.hosted') && (config('services.google.client_id') || facebook_login_enabled()) && public_registration_enabled())
         <div id="google-signup-section" class="w-full" data-requires-terms>
             {{-- "Continue with", not "Sign up with": a returning Google user reaching this page
@@ -1439,72 +2007,97 @@
             @if (config('app.hosted'))
             {{-- Full width: the send button used to share this row and squeezed the address to
                  half the card. It now sits below the Turnstile widget, where the step ends.
-                 #email-entry folds away once a code is sent, because #code-sent-panel then states
+                 #email-entry is visually hidden once a code is sent (still rendered, for password
+                 managers - see showCodeSentState()), because #code-sent-panel then states
                  the address and offers "use a different email". Folded, not removed: the
                  read-only input is still what the form posts. --}}
             <div id="email-entry">
                 <x-input-label for="email" :value="__('messages.email')" />
                 <x-text-input id="email" class="block mt-1 w-full" type="email" name="email" :value="old('email', base64_decode(is_string(request()->email) ? request()->email : ''))" required
-                    autofocus autocomplete="email" placeholder="you@example.com" />
+                    autofocus autocomplete="email" autocapitalize="off" spellcheck="false" placeholder="you@example.com" aria-describedby="signup-code-hint" />
+                {{-- Says, before the button is pressed, what pressing it does and why: without it
+                     the send button read as an odd alternative to signing up rather than the
+                     first half of it. Inside #email-entry, so it folds away with the address. --}}
+                <p id="signup-code-hint" class="mt-2 text-xs text-gray-500 dark:text-gray-400">{{ __('messages.signup_code_hint') }}</p>
+                {{-- "Did you mean jane@gmail.com?" for a likely typo of a big provider, filled in by
+                     updateEmailSuggestion(). A code sent to gmial.com is a code nobody receives. --}}
+                <p id="email-suggestion" class="mt-2 text-sm text-gray-700 dark:text-gray-300" style="display: none;"></p>
             </div>
             {{-- role="status" because every success and every failure of this page's key
                  interaction was previously announced to nobody. --}}
             <div id="code-message" class="mt-1 text-sm" role="status" aria-live="polite"></div>
 
-            {{-- Where the code went, and the two ways out. Without these a mistyped address, a
-                 mail in a spam folder or one missed expiry was a dead end: the field locks itself
-                 readonly and silently rewrites keystrokes, and there was no resend.
-                 Every key here already exists and is already translated in all 12 locales,
-                 because event/guest-submit.blade.php has had this panel all along. --}}
-            <div id="code-sent-panel" class="mt-2 rounded-lg bg-blue-50 dark:bg-blue-500/10 border border-blue-200 dark:border-blue-700 p-3" style="display: none;">
-                <p class="text-sm text-blue-800 dark:text-blue-200">
-                    {{ __('messages.code_sent_to_prefix') }}
-                    <bdi dir="ltr" class="font-medium" id="code-sent-address"></bdi>.
-                    {{ __('messages.code_sent_to_suffix') }}
-                </p>
-                <p class="mt-1 text-xs text-blue-700 dark:text-blue-300">{{ __('messages.signup_verification_code_expiry') }}</p>
-                {{-- Where to look when it is not in the inbox. The spam line is the subscribe
-                     panel's, already translated everywhere; the subject line is true of the code
-                     mail (signup_verification_code_subject), and is the fastest place to read it. --}}
-                <p class="mt-1 text-xs text-blue-700 dark:text-blue-300">{{ __('messages.subscribe_done_note') }} {{ __('messages.signup_code_in_subject') }}</p>
-                {{-- Filled in by updateWebmailLink() for a handful of big providers, and absent for
-                     every other domain. A plain link to the provider, nothing loaded from it. --}}
-                <div id="webmail-row" class="mt-3" style="display: none;">
-                    <x-secondary-link id="open-webmail-link" href="#" target="_blank" rel="noopener noreferrer" class="w-full"></x-secondary-link>
-                </div>
-                {{-- Visible confirmation of a Resend. The status line announces it to screen readers
-                     but shows nothing, and a restarted countdown alone reads as nothing happening. --}}
-                <p id="code-resent-note" class="mt-2 text-sm font-medium text-green-700 dark:text-green-400" style="display: none;">{{ __('messages.code_resent') }}</p>
-                <p class="mt-2 text-sm">
-                    <span class="text-gray-600 dark:text-gray-400">{{ __('messages.didnt_receive_code') }}</span>
-                    <span id="resend-countdown" class="text-gray-500 dark:text-gray-500" style="display: none;"></span>
-                    <button type="button" id="resend-code-btn" class="text-blue-600 dark:text-blue-300 underline hover:no-underline focus:outline-none focus:ring-2 focus:ring-[var(--brand-blue)] rounded">{{ __('messages.resend_code') }}</button>
-                    <span class="text-gray-300 dark:text-gray-600" aria-hidden="true">&middot;</span>
-                    <button type="button" id="change-email-btn" class="text-blue-600 dark:text-blue-300 underline hover:no-underline focus:outline-none focus:ring-2 focus:ring-[var(--brand-blue)] rounded">{{ __('messages.use_another_email') }}</button>
-                </p>
-            </div>
-
-            {{-- Straight under the panel: the code is what the visitor has just come back from
-                 their inbox with, so it comes before Name and Password, not after them. --}}
+            {{-- First in step two: the code is what the visitor has just come back from their inbox
+                 with, so it comes before Name and Password, not after them. --}}
             <div class="mt-4" id="verification-code-field" style="display: none;">
-                <x-input-label for="verification_code" :value="__('messages.verification_code')" />
+                {{-- Screen-reader only: the line under the heading already says "We emailed a 6-digit code",
+                     and the boxes say the rest. It still names the input. --}}
+                <x-input-label for="verification_code" :value="__('messages.verification_code')" class="sr-only" />
                 {{-- NOT required in the markup: this wrapper renders display:none until a code has
                      actually been sent, and a browser refuses to focus a required control it cannot
                      show - so the form silently refuses to submit and reports nothing, which is the
                      defect issue #124 was about on the booking form. revealSignupFields() arms it at
                      the moment it becomes visible, the same way toggleAccountFields() does there. --}}
-                {{-- autocomplete="one-time-code" is the whole reason a phone offers the emailed code
-                     above the keyboard; "off" - which is what x-text-input defaults to, see
-                     components/text-input.blade.php - is the one value that SUPPRESSES it, and iOS
-                     reads Mail for this, not only SMS. inputmode keeps a digits-only field off QWERTY.
-                     No maxlength: the browser truncates a paste BEFORE the input handler can strip the
-                     prose around the code, so pasting "Your code is 123456" left the box empty. The
-                     paste handler in the script block extracts the digits instead.
-                     Matches event/guest-submit.blade.php, which has had this shape all along. --}}
-                <x-text-input id="verification_code" class="block mt-1 w-full h-14 text-center text-2xl font-semibold tracking-[0.5em]" type="text" name="verification_code"
-                    :value="$errors->has('verification_code') ? '' : old('verification_code')"
-                    inputmode="numeric" autocomplete="one-time-code" pattern="[0-9]{6}" placeholder="000000" />
+                {{-- Six boxes, ONE input. The boxes are drawn (aria-hidden) and the real input lies
+                     transparent on top of them, which is how the best OTP fields are built rather
+                     than six separate inputs: a phone's "code from Mail" suggestion fills a single
+                     one-time-code field (into six it lands in the first box only), a pasted
+                     "Your code is 123456" fills all six, and a screen reader meets one labelled
+                     field instead of six unlabelled characters. renderCodeSlots() paints the boxes.
+
+                     A raw <input>, not the text-input component: that one defaults autocomplete to
+                     "off", the one value that SUPPRESSES the phone's suggestion, and brings field
+                     chrome the overlay must not have. Transparent rather than opacity:0 or hidden,
+                     which some browsers skip for autofill and focus. No maxlength: the browser
+                     truncates a paste BEFORE the input handler can strip the prose around the
+                     code. No placeholder: the empty boxes are the placeholder. dir="ltr" because a
+                     code reads left to right in Hebrew and Arabic too. The data-*ignore attributes
+                     (1Password, LastPass, Bitwarden, Dashlane, Proton Pass) keep password managers
+                     from painting their badge over the sixth box; see .code-input for the ones
+                     that do not listen. --}}
+                <div id="code-boxes" class="relative mt-1" dir="ltr">
+                    <div class="code-slots" aria-hidden="true">
+                        {{-- $codeSlot, never $slot: loops share the view's scope, and $slot is Blade's
+                             name for component content. --}}
+                        @for ($codeSlot = 0; $codeSlot < 6; $codeSlot++)
+                            <div data-code-slot class="code-slot bg-white dark:bg-gray-900 border-gray-300 dark:border-gray-700"><span data-digit></span><span data-caret></span></div>
+                            @if ($codeSlot === 2)
+                                <span class="code-slots-gap"></span>
+                            @endif
+                        @endfor
+                    </div>
+                    <input id="verification_code" name="verification_code" type="text" class="code-input"
+                        value="{{ $errors->has('verification_code') ? '' : old('verification_code') }}"
+                        inputmode="numeric" autocomplete="one-time-code" pattern="[0-9]{6}"
+                        aria-describedby="code-resend-row" data-1p-ignore data-lpignore="true" data-bwignore data-form-type="other" data-protonpass-ignore>
+                </div>
                 <x-input-error :messages="$errors->get('verification_code')" class="mt-2" />
+                {{-- showSignupErrors() puts a refused code here, straight under the box, rather than
+                     at the end of the wrapper below the resend row. --}}
+                <div data-error-slot></div>
+                {{-- Shown once checkSignupCode() has accepted the code, before name and password. --}}
+                <p id="code-verified-note" class="mt-2 flex items-center gap-1 text-sm font-medium text-green-700 dark:text-green-400" style="display: none;">
+                    <svg class="w-4 h-4" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="m4.5 12.75 6 6 9-13.5" /></svg>
+                    {{ __('messages.verified') }}
+                </p>
+
+                {{-- Visible confirmation of a Resend. The status line announces it to screen readers
+                     but shows nothing, and the resend row simply going away reads as nothing
+                     happening. --}}
+                <p id="code-resent-note" class="mt-2 text-sm font-medium text-green-700 dark:text-green-400" style="display: none;">{{ __('messages.code_resent') }}</p>
+                {{-- Beside the field the visitor is waiting on, not at the bottom of the card, and
+                     only once a resend is possible: startResendCountdown() holds it back for the
+                     first 30 seconds instead of ticking "Resend in 29s" under a fresh code. --}}
+                <p id="code-resend-row" class="mt-2 text-sm">
+                    <span class="text-gray-600 dark:text-gray-400">{{ __('messages.didnt_receive_code') }}</span>
+                    <button type="button" id="resend-code-btn" class="text-[var(--brand-blue)] hover:underline focus:outline-none focus:ring-2 focus:ring-[var(--brand-blue)] rounded">{{ __('messages.resend_code') }}</button>
+                </p>
+                {{-- Where to look when it is not in the inbox. Hidden until the resend wait is over
+                     (showCodeHelp()): somebody whose code arrived in five seconds never needs it,
+                     and somebody still waiting after thirty is told where to look at that moment.
+                     The spam line is the subscribe panel's, already translated everywhere; the
+                     subject line is true of the code mail (signup_verification_code_subject). --}}
+                <p id="code-help-note" class="mt-1 text-xs text-gray-500 dark:text-gray-400" style="display: none;">{{ __('messages.signup_verification_code_expiry') }} {{ __('messages.subscribe_done_note') }} {{ __('messages.signup_code_in_subject') }}</p>
             </div>
             @else
             <x-input-label for="email" :value="__('messages.email')" />
@@ -1518,7 +2111,7 @@
         <div class="mt-4" id="name-field" @if($stepped) style="display: none;" @endif>
             <x-input-label for="name" :value="__('messages.full_name')" />
             <x-text-input id="name" class="block mt-1 w-full" type="text" name="name" :value="old('name')" :required="! $stepped"
-                autofocus autocomplete="name" />
+                :autofocus="! $stepped" autocomplete="name" />
             <x-input-error :messages="$errors->get('name')" class="mt-2" />
         </div>
 
@@ -1533,7 +2126,11 @@
                  supplied by the browser in ITS language, not the visitor's - so in eleven of the
                  twelve shipped locales the one piece of guidance on this field arrived in English,
                  and only after a failed submit. Key already exists and is already translated. --}}
-            <p id="password-help" class="mt-1 text-xs text-gray-500 dark:text-gray-400">{{ __('messages.password_min_chars') }}</p>
+            <p id="password-help" class="mt-1 flex items-center gap-1 text-xs text-gray-500 dark:text-gray-400">
+                {{-- Ticked by the page once the rule is met, so nobody learns it only from a refusal. --}}
+                <svg data-met-icon class="w-3.5 h-3.5 flex-shrink-0" style="display: none;" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="m4.5 12.75 6 6 9-13.5" /></svg>
+                <span>{{ __('messages.password_min_chars') }}</span>
+            </p>
 
             <x-input-error :messages="$errors->get('password')" class="mt-2" />
         </div>
@@ -1581,16 +2178,9 @@
              the full width and the step reads top to bottom: address, check, go. The id is what
              the script block drives (busy state, cooldown, hidden in step two), so keep it. --}}
         <button type="button" id="send-code-btn" class="mt-4 w-full inline-flex items-center justify-center gap-2 px-4 py-3 bg-gradient-to-r from-[var(--brand-button-bg-light)] to-[var(--brand-button-bg)] hover:from-[var(--brand-button-bg)] hover:to-[var(--brand-button-bg-hover)] border border-transparent rounded-md font-semibold text-base text-white shadow-sm hover:shadow-md focus:outline-none focus:ring-2 focus:ring-[var(--brand-blue)] focus:ring-offset-2 dark:focus:ring-offset-gray-800 transition-all duration-200">
-            {{ __('messages.email_me_a_code') }}
+            {{ __('messages.signup_continue') }}
             <svg class="w-5 h-5 rtl:rotate-180" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M13.5 4.5 21 12m0 0-7.5 7.5M21 12H3" /></svg>
         </button>
-        {{-- For somebody holding a code from before a reload, or read on another device, who
-             would otherwise have to ask for a second one just to get the field on screen. It
-             sends nothing, so it lives outside the send button's cooldown. Step one only:
-             showCodeSentState() hides it with #send-code-btn and changeEmail() brings both back. --}}
-        <p id="have-code-row" class="mt-3 text-sm text-center">
-            <button type="button" id="have-code-btn" class="text-gray-600 dark:text-gray-400 underline hover:no-underline focus:outline-none focus:ring-2 focus:ring-[var(--brand-blue)] rounded">{{ __('messages.already_have_a_code') }}</button>
-        </p>
         @endif
 
         @if (! config('app.hosted') && (config('services.google.client_id') || facebook_login_enabled()) && public_registration_enabled())
@@ -1667,13 +2257,14 @@
             <div id="submit-section" class="w-full {{ config('app.hosted') ? 'mt-6' : 'mt-8 sm:w-auto' }}" @if($stepped) style="display: none;" @endif>
                 @if (config('app.hosted'))
                 {{-- Same full-width brand CTA as step one's send button, so both steps end in the
-                     same place with the same kind of button. --}}
+                     same place with the same kind of button. Disabled until a code has been sent:
+                     see setCreateAccountEnabled(). --}}
                 {{-- Anything store() refuses that has no field of its own to sit under (Turnstile, a
                      rate limit, a dropped connection). Filled in by showGeneralSignupError(). --}}
                 <div id="signup-form-error" role="alert" class="mb-4 rounded-lg bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-700 p-3" style="display: none;">
                     <p id="signup-form-error-text" class="text-sm text-red-700 dark:text-red-300"></p>
                 </div>
-                <button type="submit" id="create-account-btn" class="w-full inline-flex items-center justify-center px-4 py-3 bg-gradient-to-r from-[var(--brand-button-bg-light)] to-[var(--brand-button-bg)] hover:from-[var(--brand-button-bg)] hover:to-[var(--brand-button-bg-hover)] border border-transparent rounded-md font-semibold text-base text-white shadow-sm hover:shadow-md focus:outline-none focus:ring-2 focus:ring-[var(--brand-blue)] focus:ring-offset-2 dark:focus:ring-offset-gray-800 transition-all duration-200">
+                <button type="submit" id="create-account-btn" disabled class="w-full inline-flex items-center justify-center px-4 py-3 bg-gradient-to-r from-[var(--brand-button-bg-light)] to-[var(--brand-button-bg)] hover:from-[var(--brand-button-bg)] hover:to-[var(--brand-button-bg-hover)] border border-transparent rounded-md font-semibold text-base text-white shadow-sm hover:shadow-md focus:outline-none focus:ring-2 focus:ring-[var(--brand-blue)] focus:ring-offset-2 dark:focus:ring-offset-gray-800 transition-all duration-200">
                     {{ __('messages.create_account') }}
                 </button>
                 @else
@@ -1690,7 +2281,7 @@
              answer is a link. Also carries the address, so /login can prefill it. --}}
         <div class="mt-5 text-sm text-center text-gray-600 dark:text-gray-400" id="already-registered">
             {{ __('messages.already_registered') }}
-            <a id="already-registered-link" class="underline hover:no-underline text-[var(--brand-blue)] rounded-md focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-[var(--brand-blue)] dark:focus:ring-offset-gray-800"
+            <a id="already-registered-link" class="hover:underline text-[var(--brand-blue)] rounded-md focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-[var(--brand-blue)] dark:focus:ring-offset-gray-800"
                 href="{{ route('login') }}">
                 {{ __('messages.log_in') }}
             </a>

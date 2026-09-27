@@ -146,9 +146,12 @@ class RegisteredUserController extends Controller
             $isStub = $existingUser->isStub();
 
             if (! $isStub) {
+                // `reason` lets the sign-up page offer "Log in" beside the message, carrying the
+                // address, rather than leave a red line with nothing to do next.
                 return response()->json([
                     'success' => false,
                     'message' => __('messages.email_already_registered'),
+                    'reason' => 'registered',
                 ], 422);
             }
         }
@@ -196,6 +199,10 @@ class RegisteredUserController extends Controller
         // Increment attempts counter (expires in 1 hour)
         Cache::put($attemptsKey, $attempts + 1, now()->addHour());
 
+        // A new code starts a new allowance of checks (see checkSignupCode()). Bounded all the
+        // same: this method sends at most five codes an hour per address.
+        Cache::forget('signup_code_checks_'.$email);
+
         // Funnel step between "viewed /sign_up" and "verified account". Hosted signup makes
         // people leave the tab for a 6-digit code, and nothing measured how many never came
         // back. Deduped per day the same way signup_views is, so the ratio between them is
@@ -225,6 +232,77 @@ class RegisteredUserController extends Controller
         }
 
         return response()->json($response);
+    }
+
+    /**
+     * Check a sign-up code the moment its sixth digit is typed, without using it up.
+     *
+     * The page used to learn a code was wrong only after the visitor had also typed a name and a
+     * password and pressed Create Account. This answers straight away, so the boxes can turn green
+     * or red while the code is still what they are looking at. Cache::get, never pull: store()
+     * still takes the code, so it is spent only by the real sign-up.
+     *
+     * Five wrong checks per address and the code is refused until a new one is sent (sending
+     * clears the count), on top of the route's per-IP throttle - so this is no easier a way to
+     * guess a code than store() already was. Under is_testing it agrees with store(), which skips
+     * the check there, so a local install still accepts any six digits.
+     */
+    public function checkSignupCode(Request $request): JsonResponse
+    {
+        $request->validate([
+            'email' => ['required', 'string', 'email', 'max:255'],
+            'verification_code' => ['required', 'string', 'size:6'],
+        ]);
+
+        if (config('app.is_testing')) {
+            return response()->json(['valid' => true]);
+        }
+
+        $email = strtolower($request->email);
+        $checksKey = 'signup_code_checks_'.$email;
+        $checks = (int) Cache::get($checksKey, 0);
+
+        if ($checks >= 5) {
+            return response()->json([
+                'valid' => false,
+                'expired' => true,
+                'message' => __('messages.code_invalid_request_new'),
+            ]);
+        }
+
+        $codeEmail = Cache::get('signup_code_email_'.$request->verification_code);
+
+        if (! $codeEmail || strtolower($codeEmail) !== $email) {
+            // The code's own lifetime: after ten minutes there is nothing left to guess at.
+            Cache::put($checksKey, $checks + 1, now()->addMinutes(10));
+            $this->recordSignupCodeInvalid();
+
+            return response()->json([
+                'valid' => false,
+                'message' => __('messages.code_invalid'),
+            ]);
+        }
+
+        return response()->json(['valid' => true]);
+    }
+
+    /**
+     * The third side of the code wall: the visitor came back from their inbox and the code was
+     * refused. Without it, "never came back" and "came back and got it wrong" were one number
+     * (signup_code_requests minus signup_code_verified). Deduped and filtered exactly like the
+     * other two, so it reads as people, not attempts - and a visitor who mistypes and then
+     * succeeds counts on both sides. Shared by store() and checkSignupCode(), so a refusal counts
+     * the same whichever of them saw it first.
+     */
+    private function recordSignupCodeInvalid(): void
+    {
+        $ip = request()->header('CF-Connecting-IP') ?? request()->ip();
+
+        if (! PageView::isBot(request()->userAgent())
+            && ! PageView::isSuspiciousRequest(request())
+            && PageView::isFirstDailyVisit('signup_code_invalid', $ip, request()->userAgent())) {
+            MarketingDailyStat::record('signup_code_invalid');
+        }
     }
 
     /**
@@ -395,18 +473,8 @@ class RegisteredUserController extends Controller
             // Atomically get and remove the code to prevent race conditions
             $originalEmail = Cache::pull('signup_code_email_'.$request->verification_code);
             if (! $originalEmail || strtolower($originalEmail) !== $email) {
-                // The third side of the code wall: the visitor came back from their inbox and the
-                // code was refused. Without it, "never came back" and "came back and got it
-                // wrong" were one number (signup_code_requests minus signup_code_verified).
-                // Deduped and filtered exactly like the other two, so it reads as people, not
-                // attempts - and a visitor who mistypes and then succeeds counts on both sides.
-                $ip = request()->header('CF-Connecting-IP') ?? request()->ip();
-
-                if (! PageView::isBot(request()->userAgent())
-                    && ! PageView::isSuspiciousRequest(request())
-                    && PageView::isFirstDailyVisit('signup_code_invalid', $ip, request()->userAgent())) {
-                    MarketingDailyStat::record('signup_code_invalid');
-                }
+                // The third side of the code wall - see recordSignupCodeInvalid().
+                $this->recordSignupCodeInvalid();
 
                 throw ValidationException::withMessages([
                     'verification_code' => [__('messages.code_invalid')],
