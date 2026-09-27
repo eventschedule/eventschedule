@@ -121,10 +121,14 @@ trait AccountSetupTrait
         try {
             return (string) $browser->script('
                 var errors = Array.from(document.querySelectorAll("[role=alert], .text-red-600, .text-red-500, .text-red-400"))
+                    // Only what is on screen: editors keep hidden red warnings in the DOM.
+                    .filter(function (el) { return el.offsetParent !== null; })
                     .map(function (el) { return el.textContent.trim(); })
                     .filter(function (text) { return text.length > 0; })
                     .slice(0, 5);
-                var form = document.querySelector("form");
+                // The AP layout opens with its own search form, so the first <form> on an editor
+                // page is never the one that was submitted. The editors all use #edit-form.
+                var form = document.getElementById("edit-form") || document.querySelector("form");
                 var invalid = form
                     ? Array.from(form.querySelectorAll(":invalid")).map(function (el) { return el.name || el.id; })
                     : [];

@@ -71,7 +71,7 @@ class ImageTest extends DuskTestCase
                 ->waitFor('#profile_image_preview_clear', 5);
 
             $browser->script("window._skipUnsavedWarning = true; document.getElementById('edit-form').requestSubmit();");
-            $browser->waitForLocation('/talent/schedule', 30);
+            $this->landOn($browser, '/talent/schedule', 30);
 
             // Verify DB
             $this->assertNotNull(Role::where('subdomain', 'talent')->first()->profile_image_url);
@@ -122,7 +122,7 @@ class ImageTest extends DuskTestCase
                 ->waitFor('#header_image_url_preview_clear', 5);
 
             $browser->script("window._skipUnsavedWarning = true; document.getElementById('edit-form').requestSubmit();");
-            $browser->waitForLocation('/talent/schedule', 30);
+            $this->landOn($browser, '/talent/schedule', 30);
 
             // Verify DB
             $this->assertNotNull(Role::where('subdomain', 'talent')->first()->refresh()->header_image_url);
@@ -176,7 +176,7 @@ class ImageTest extends DuskTestCase
                 ->waitFor('#background_image_preview_clear', 5);
 
             $browser->script("window._skipUnsavedWarning = true; document.getElementById('edit-form').requestSubmit();");
-            $browser->waitForLocation('/talent/schedule', 30);
+            $this->landOn($browser, '/talent/schedule', 30);
 
             // Verify DB
             $this->assertNotNull(Role::where('subdomain', 'talent')->first()->refresh()->background_image_url);
@@ -214,13 +214,21 @@ class ImageTest extends DuskTestCase
             // E. Event Flyer Image
             // -----------------------------------------------
 
-            // Create event
+            // Create event. #event_name is server-rendered, so it exists before the Vue app that
+            // owns the form has mounted; wait for the app, then set the name through its v-model
+            // (Dusk type() on this input is unreliable in headless CI - see EventManagementTest).
             $browser->visit('/talent/add-event?date='.date('Y-m-d'))
-                ->waitFor('#event_name', 5)
-                ->type('name', 'Flyer Test Event');
+                ->waitFor('#event_name', 15)
+                ->waitUntil('!! window.vueApp', 15)
+                ->pause(500);
+            $browser->script("
+                var nameField = document.getElementById('event_name');
+                nameField.value = 'Flyer Test Event';
+                nameField.dispatchEvent(new Event('input', { bubbles: true }));
+            ");
 
             $browser->script("window._skipUnsavedWarning = true; document.getElementById('edit-form').requestSubmit();");
-            $browser->waitForLocation('/talent/schedule', 30);
+            $this->landOn($browser, '/talent/schedule', 30);
 
             // Get event hash
             $event = Event::first();
@@ -233,7 +241,7 @@ class ImageTest extends DuskTestCase
                 ->waitFor('#image_preview', 5);
 
             $browser->script("window._skipUnsavedWarning = true; document.getElementById('edit-form').requestSubmit();");
-            $browser->waitForLocation('/talent/schedule', 30);
+            $this->landOn($browser, '/talent/schedule', 30);
 
             // Verify DB
             $this->assertNotNull(Event::first()->refresh()->flyer_image_url);
