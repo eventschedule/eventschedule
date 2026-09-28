@@ -517,13 +517,13 @@ class HomeController extends Controller
                     ->where('tickets_enabled', true)
                     ->whereNull('tickets_grandfathered_at')
                     ->whereNull('appointment_type_id')
-                    // days_of_week is the recurring arm and it must be here: for a recurring event
-                    // starts_at is the recurrence ANCHOR, which is in the past by design, so a
-                    // bare starts_at window silently skipped every live weekly show - the loudest
-                    // case this to-do exists for.
+                    // The recurring arm must be here: for a recurring event starts_at is the
+                    // recurrence ANCHOR, which is in the past by design, so a bare starts_at
+                    // window silently skipped every live weekly show - the loudest case this to-do
+                    // exists for. Event::constrainToOccurrencesSince() also drops a series whose
+                    // end date has passed, which a bare days_of_week test kept forever.
                     ->where(fn ($q) => $q->whereNull('starts_at')
-                        ->orWhereNotNull('days_of_week')
-                        ->orWhere('starts_at', '>=', now()->subDay()))
+                        ->orWhere(fn ($w) => \App\Models\Event::constrainToOccurrencesSince($w, now('UTC')->subDay())))
                     // whereExists on the bare table rather than whereHas('tickets'): that relation
                     // carries an orderBy('price'), which Laravel emits inside the EXISTS subquery.
                     ->whereExists(fn ($q) => $q->selectRaw('1')
@@ -724,7 +724,9 @@ class HomeController extends Controller
             ->where('events.is_draft', false)
             ->where('events.is_private', false)
             ->where('events.is_internal', false)
-            ->where('events.starts_at', '>=', now()))
+            // Recurring-aware: a series' starts_at is its anchor, so a bare starts_at test
+            // told a schedule running a weekly show to "add your next date".
+            ->where(fn ($q) => Event::constrainToOccurrencesSince($q, now('UTC'))))
             ->distinct()->pluck('event_role.role_id')->flip();
 
         $anyEvent = $owned(DB::table('event_role')
@@ -741,7 +743,7 @@ class HomeController extends Controller
             ->whereIn('event_role.role_id', $ids)
             ->where('events.is_draft', true)
             ->where('events.is_internal', false)
-            ->where('events.starts_at', '>=', now()))
+            ->where(fn ($q) => Event::constrainToOccurrencesSince($q, now('UTC'))))
             ->orderBy('events.starts_at')
             ->get(['event_role.role_id', 'events.id as event_id'])
             ->unique('role_id')
@@ -773,7 +775,7 @@ class HomeController extends Controller
             ->join('events', 'events.id', '=', 'event_interests.event_id')
             ->whereIn('event_role.role_id', $ids)
             ->whereNotNull('event_interests.confirmed_at')
-            ->where('events.starts_at', '>=', now()))
+            ->where(fn ($q) => Event::constrainToOccurrencesSince($q, now('UTC'))))
             ->groupBy('event_role.role_id')
             // selectRaw + an alias, NOT pluck(DB::raw(...)): pluck treats its first argument as a
             // column NAME, so the raw expression is looked up as a property on the result row and

@@ -290,6 +290,34 @@ class DashboardNextStepsTest extends TestCase
     }
 
     /**
+     * A series' starts_at is its ANCHOR, in the past by design, so a bare starts_at test told a
+     * schedule in the middle of a weekly run to "add your next date". Anchored 200 days back,
+     * running, with no ticket type: the ask is tickets, the one a working page needs.
+     */
+    public function test_a_running_weekly_series_is_not_asked_for_its_next_date(): void
+    {
+        $user = $this->createOwner();
+        $role = $this->createRole($user);
+        $this->createRecurringEvent($role, ['starts_at' => now()->subDays(200)->format('Y-m-d H:i:s')]);
+
+        $this->assertSame(['next_step_tickets'], $this->types($user));
+    }
+
+    /** And the other way: a series whose end date has passed is not running, however it recurs. */
+    public function test_a_series_that_has_ended_is_asked_for_the_next_date(): void
+    {
+        $user = $this->createOwner();
+        $role = $this->createRole($user);
+        $this->createRecurringEvent($role, [
+            'starts_at' => now()->subDays(200)->format('Y-m-d H:i:s'),
+            'recurring_end_type' => 'on_date',
+            'recurring_end_value' => now()->subDays(20)->format('Y-m-d'),
+        ]);
+
+        $this->assertSame(['next_step_next_event'], $this->types($user));
+    }
+
+    /**
      * One step per schedule. A list of chores reads as a chore, not a suggestion.
      *
      * Built on the ONE pair of branches that can both match: a schedule with a paid ticket

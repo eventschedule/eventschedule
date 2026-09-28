@@ -1862,11 +1862,38 @@ class Event extends Model
      */
     public static function constrainSitemapWindow($query, Carbon $nowUtc, string $table = 'events')
     {
+        return static::constrainToOccurrencesSince(
+            $query, $nowUtc->copy()->setTimezone('UTC')->subDays(self::SITEMAP_GRACE_DAYS), $table
+        );
+    }
+
+    /**
+     * An event that still has something to come, or is under way: the recurring-aware
+     * "upcoming". A bare `starts_at >= now()` silently drops every live series, because a
+     * series' starts_at is its ANCHOR, in the past by design - which is how a schedule running
+     * a weekly show was told "add your next date" and mailed "nothing coming up".
+     *
+     * The same window the sitemaps use, with no grace period, so it inherits both of its bounds:
+     * a series with include dates always counts, and an 'after_events' series counts until an
+     * upper bound on its last occurrence. Both err towards "still running", which for a
+     * dormancy nudge is the safe direction. SELECT only, for the reason given there.
+     */
+    public function scopeHasUpcomingOccurrence($query, ?Carbon $nowUtc = null)
+    {
+        return static::constrainToOccurrencesSince($query, $nowUtc ?? Carbon::now('UTC'), $this->getTable());
+    }
+
+    /**
+     * The body of constrainSitemapWindow(): rows with an occurrence on or after $sinceUtc. See
+     * that docblock for how each kind of series is bounded.
+     */
+    public static function constrainToOccurrencesSince($query, Carbon $sinceUtc, string $table = 'events')
+    {
         if (! preg_match('/^[A-Za-z_][A-Za-z0-9_]*$/', $table)) {
             throw new \InvalidArgumentException('Not a table name: '.$table);
         }
 
-        $cut = $nowUtc->copy()->setTimezone('UTC')->subDays(self::SITEMAP_GRACE_DAYS);
+        $cut = $sinceUtc->copy()->setTimezone('UTC');
         $cutAt = $cut->format('Y-m-d H:i:s');
         $cutDate = $cut->format('Y-m-d');
         $c = fn (string $column) => $table.'.'.$column;

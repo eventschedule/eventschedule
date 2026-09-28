@@ -319,6 +319,46 @@ class ActivationNudgeTest extends TestCase
         $this->assertNothingSent();
     }
 
+    /**
+     * A series' starts_at is its anchor, weeks in the past while it runs. The bare starts_at test
+     * this replaced mailed a schedule in the middle of a weekly run "nothing coming up".
+     */
+    public function test_a_running_weekly_series_is_not_idle(): void
+    {
+        $role = $this->createRole($this->owner());
+        $this->createRecurringEvent($role, ['starts_at' => now()->subDays(40)->format('Y-m-d H:i:s')]);
+
+        $this->nudge('idle_30');
+
+        $this->assertNothingSent();
+    }
+
+    /** A series whose end date has passed has nothing coming up, so it can go quiet like any page. */
+    public function test_a_series_that_has_ended_can_be_idle(): void
+    {
+        $role = $this->createRole($this->owner());
+        $this->createRecurringEvent($role, [
+            'starts_at' => now()->subDays(40)->format('Y-m-d H:i:s'),
+            'recurring_end_type' => 'on_date',
+            'recurring_end_value' => now()->subDays(33)->format('Y-m-d'),
+        ]);
+
+        $this->nudge('idle_30');
+
+        $this->assertSent('idle_30');
+    }
+
+    /** The same fix from the other side: a running series has a date still to sell. */
+    public function test_a_running_weekly_series_is_nudged_about_tickets(): void
+    {
+        $role = $this->createRole($this->owner());
+        $this->createRecurringEvent($role, ['starts_at' => now()->subDays(30)->format('Y-m-d H:i:s')]);
+
+        $this->nudge('no_ticket_type');
+
+        $this->assertSent('no_ticket_type');
+    }
+
     /** idle_60 must not re-reach everyone idle_30 already covered, or it is the same email twice. */
     public function test_the_two_idle_windows_do_not_overlap(): void
     {

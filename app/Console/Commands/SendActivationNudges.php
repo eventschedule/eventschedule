@@ -322,7 +322,7 @@ class SendActivationNudges extends Command
         return $this->base('no_ticket_type')
             ->wherePro()
             ->whereHas('events', fn ($q) => $this->ownedEvents($this->publicEvents($q))
-                ->where('events.starts_at', '>=', now()))
+                ->hasUpcomingOccurrence())
             // Any ticket type on any event this schedule owns counts as "they know how".
             ->whereDoesntHave('events', fn ($q) => $this->ownedEvents($q)
                 ->whereHas('tickets', fn ($t) => $t->where('tickets.is_deleted', false)))
@@ -404,8 +404,11 @@ class SendActivationNudges extends Command
                 ->whereBetween('events.starts_at', [now()->subDays($w['max_days']), now()->subDays($w['min_days'])]))
             // Anything upcoming at all means the page is working, draft included - someone
             // mid-edit is not idle.
+            // Recurring-aware (Event::scopeHasUpcomingOccurrence): a running series' starts_at is
+            // its anchor, weeks in the past, and a bare starts_at test mailed a schedule in the
+            // middle of a weekly run "nothing coming up".
             ->whereDoesntHave('events', fn ($q) => $this->ownedEvents($q)
-                ->where('events.starts_at', '>=', now()))
+                ->hasUpcomingOccurrence())
             ->limit($limit)->get();
     }
 }
