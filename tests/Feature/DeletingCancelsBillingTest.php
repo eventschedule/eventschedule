@@ -410,6 +410,11 @@ class DeletingCancelsBillingTest extends TestCase
 
         $this->assertSame([$stripeId], $this->stripeSubscriptions->cancelled);
         $this->assertSame('canceled', $this->statusOf($stripeId));
+
+        // Counted as churn, against the schedule that is already gone.
+        $row = \App\Models\SubscriptionCancellation::sole();
+        $this->assertSame('admin', $row->source);
+        $this->assertSame($role->id, $row->role_id);
     }
 
     /** The button must never end the plan of a schedule that still exists. */

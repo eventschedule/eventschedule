@@ -867,7 +867,7 @@ class AdminController extends Controller
 
         $row = AdminAlertService::orphanedBilling()
             ->where('subscriptions.id', UrlUtils::decodeId($subscription))
-            ->first(['subscriptions.id', 'subscriptions.stripe_id']);
+            ->first(['subscriptions.id', 'subscriptions.stripe_id', 'subscriptions.role_id']);
 
         if (! $row) {
             return $back->with('error', __('messages.orphaned_subscription_not_found'));
