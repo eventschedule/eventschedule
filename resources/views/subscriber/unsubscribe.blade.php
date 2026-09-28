@@ -1,9 +1,7 @@
 {{--
-    Deliberately does NOT reuse messages.unsubscribed. That key is declared twice in
-    resources/lang/en/messages.php - ':395' ("Successfully unsubscribed from emails") and ':2985'
-    ("unsubscribed", an admin stat label) - and PHP keeps the last, so both existing unsubscribe
-    pages render a heading reading, in full, "unsubscribed". It sits in
-    LanguageFileIntegrityTest::KNOWN_DUPLICATES, so the test passes and always will.
+    Deliberately does NOT reuse messages.unsubscribed. That key is an admin stat label, the bare
+    word "unsubscribed" - it was once also declared as "Successfully unsubscribed from emails", but
+    PHP kept the later label, so a page heading built on it reads, in full, "unsubscribed".
 --}}
 <x-auth-layout>
     @php

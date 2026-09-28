@@ -2,9 +2,8 @@
     The GET half renders a button; the POST is what deletes. See EventInterestController for why a
     mutating GET is not an option (mail scanners fetch every URL in an inbound message).
 
-    Deliberately does NOT reuse messages.unsubscribed: that key is declared twice in
-    resources/lang/en/messages.php and PHP keeps the last, so it renders as the bare word
-    "unsubscribed". Same reason subscriber/unsubscribe.blade.php avoids it.
+    Deliberately does NOT reuse messages.unsubscribed: that key is an admin stat label and renders
+    as the bare word "unsubscribed". Same reason subscriber/unsubscribe.blade.php avoids it.
 --}}
 <x-auth-layout>
     @php

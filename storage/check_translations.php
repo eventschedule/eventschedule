@@ -11,7 +11,7 @@
 //   - values still identical to English, ignoring case (informational: some are genuine cognates or
 //     brand names)
 //
-// The first three are also enforced by tests/Unit/TranslationFilesTest.php.
+// Duplicates and placeholder mismatches are also enforced by tests/Feature/LanguageFileIntegrityTest.php.
 
 $files = ['messages.php', 'marketing.php', 'accessibility.php'];
 $locales = array_values(array_filter(
