@@ -13,6 +13,10 @@
    // subset of that rule - the partial still calls canRemoveVideo() and remains the authority - so
    // the view can only ever be more restrictive, never show a button the endpoint would refuse.
    $canRemoveVideos = auth()->check() && ! is_demo_mode() && auth()->user()->isEditor($role->subdomain);
+
+   // The schedule's own photo gallery, on a paid plan. Not on the image the ?graphic= render
+   // captures, where a photo grid would crowd the event list it exists to show.
+   $galleryImages = (! request()->graphic && $role->showsGallery()) ? $role->galleryImages : collect();
   @endphp
 
   @php
@@ -415,6 +419,17 @@ html[data-es-view="list"] #gp-calendar {
         @include('partials.subscribe-panel', ['panelClass' => 'bg-white/95 dark:bg-gray-900/95 backdrop-blur-sm rounded-2xl px-6 lg:px-16 py-6 sm:py-8'])
       </div>
 
+      {{-- The schedule's photo gallery: below the calendar and its subscribe panel, because the
+           events are what the page is for, and in the same data-view-width column as every other
+           panel here (56rem in list view, the full container in calendar view). --}}
+      @if ($galleryImages->isNotEmpty())
+      <section id="gp-gallery" aria-labelledby="es-gallery-title"
+          class="bg-white/95 dark:bg-gray-900/95 backdrop-blur-sm rounded-2xl px-6 lg:px-16 py-6 sm:py-8 mb-6 transition-[max-width] duration-300 ease-in-out mx-auto {{ $role->isRtl() ? 'rtl' : '' }}"
+          data-view-width style="max-width: {{ $role->activeEventLayout() === 'list' ? '56rem' : '200rem' }}">
+        @include('partials.gallery-card', ['galleryImages' => $galleryImages, 'galleryVariant' => 'schedule', 'galleryName' => $role->translatedName(), 'galleryLabel' => $role->customLabel('gallery'), 'galleryPriority' => false, 'accentColor' => $accentColor])
+      </section>
+      @endif
+
       @if ($role->youtube_links && $role->youtube_links != '[]')
         @php
           // Filtered BEFORE counting: the column count and the "is there anything to show" test
@@ -733,6 +748,10 @@ document.addEventListener('DOMContentLoaded', function() {
 
 @if (! is_demo_mode())
     @include('partials.follow-consent-modal')
+@endif
+
+@if ($galleryImages->isNotEmpty())
+    @include('partials.lightbox', ['rtl' => $role->isRtl()])
 @endif
 
 </x-app-guest-layout>

@@ -24,6 +24,7 @@ use App\Http\Controllers\EventInterestController;
 use App\Http\Controllers\EventTemplateController;
 use App\Http\Controllers\FeedbackController;
 use App\Http\Controllers\FeedController;
+use App\Http\Controllers\GalleryController;
 use App\Http\Controllers\GiftCardController;
 use App\Http\Controllers\GoogleCalendarController;
 use App\Http\Controllers\GoogleCalendarWebhookController;
@@ -909,6 +910,13 @@ Route::middleware(['auth', 'verified', 'app_subdomain'])->group(function () {
     Route::get('/{subdomain}/{tab}', [RoleController::class, 'viewAdmin'])->name('role.view_admin')->where('tab', 'schedule|templates|availability|appointments|seating|requests|followers|team|plan|videos')->where('subdomain', $adminTabSubdomain);
 
     Route::post('/{subdomain}/upload-image', [EventController::class, 'uploadImage'])->name('event.upload_image');
+
+    // The organizer gallery editor uploads each photo the moment it is added, as a draft that
+    // the edit form's Save commits (GalleryUtils::sync()). A 50-photo drop is 50 requests, hence
+    // the allowance. Each route has its own prefix: the throttle key is prefix plus user, so a
+    // shared prefix would be one bucket held to whichever limit it met first.
+    Route::post('/{subdomain}/gallery/upload', [GalleryController::class, 'upload'])->name('gallery.upload')->middleware('throttle:120,1,gallery_upload');
+    Route::post('/{subdomain}/gallery/from-fan-photos', [GalleryController::class, 'fromFanPhotos'])->name('gallery.from_fan_photos')->middleware('throttle:30,1,gallery_fan');
 
     Route::get('/api/documentation', fn () => redirect()->route('marketing.docs.developer.api'))->name('api.documentation');
 

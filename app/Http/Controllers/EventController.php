@@ -49,6 +49,7 @@ use App\Services\UsageTrackingService;
 use App\Services\WebhookService;
 use App\Utils\AiImageIssuance;
 use App\Utils\ColorUtils;
+use App\Utils\GalleryUtils;
 use App\Utils\GeminiUtils;
 use App\Utils\HoneypotUtils;
 use App\Utils\ImageUtils;
@@ -1081,6 +1082,8 @@ class EventController extends Controller
 
         $this->eventRepo->saveEvent($role, $request, $event, true, $role->captureTimezone());
 
+        $gallery = $this->syncGallery($request, $role, $event);
+
         // Sync polls from form data
         if ($role->isPro() && $request->has('polls')) {
             $maxSort = $event->polls()->max('sort_order') ?? 0;
@@ -1224,15 +1227,64 @@ class EventController extends Controller
                 ? __('messages.saved_without_notifying')
                 : __('messages.event_updated'));
 
+        $redirect = redirect(route('role.view_admin', $data));
+        $this->flashGalleryPublished($redirect, $gallery, $event, $subdomain);
+
         // Instead of the success toast, which the layout would show in its place: the event saved,
         // and the flyer did not (EventRepo::$aiImageRejected).
         if ($this->eventRepo->aiImageRejected) {
-            return redirect(route('role.view_admin', $data))
-                ->with('error', __('messages.ai_image_not_applied'));
+            return $redirect->with('error', __('messages.ai_image_not_applied'));
         }
 
-        return redirect(route('role.view_admin', $data))
-            ->with('message', $message);
+        // The same: the layout toasts one message, and an error outranks a success.
+        if ($galleryError = GalleryUtils::errorMessage($gallery)) {
+            return $redirect->with('error', $galleryError);
+        }
+
+        return $redirect->with('message', $message);
+    }
+
+    /**
+     * Commit the edit form's gallery (GalleryUtils::sync()) against the event's owning schedule:
+     * its plan decides whether guests see the gallery, and a new event is owned by the schedule it
+     * is being created on.
+     *
+     * @return array<string, int|bool>|null
+     */
+    private function syncGallery(Request $request, Role $role, Event $event): ?array
+    {
+        if (! $request->has('gallery_images')) {
+            return null;
+        }
+
+        $event->unsetRelation('creatorRole');
+        $owner = $event->ticketingRole() ?? $role;
+
+        return GalleryUtils::sync($owner, $event, $request->input('gallery_images'), $request->input('gallery_draft_token'), $request->user(), $request->input('gallery_known_ids'));
+    }
+
+    /**
+     * The first time an event's gallery goes from empty to published, the schedule page shows a
+     * panel with a link to see it, rather than only the save toast (the first_event_created
+     * pattern). Later edits get the toast alone.
+     */
+    private function flashGalleryPublished($redirect, ?array $gallery, Event $event, string $subdomain): void
+    {
+        if (! $gallery || $gallery['before'] > 0 || $gallery['after'] === 0 || $event->is_internal) {
+            return;
+        }
+
+        $event->load('galleryImages');
+        $hidden = $event->is_draft || $event->is_private;
+
+        $redirect->with('gallery_published', [
+            'name' => $event->name,
+            'count' => $gallery['after'],
+            'is_hidden' => $hidden,
+            'thumbs' => $event->galleryImages->take(4)->map(fn ($image) => $image->thumbUrl())->all(),
+            'url' => $hidden ? null : $event->getUndatedGuestUrl($subdomain).'#gp-gallery',
+            'edit_url' => route('event.edit', ['subdomain' => $subdomain, 'hash' => UrlUtils::encodeId($event->id)]).'#section-gallery',
+        ]);
     }
 
     public function accept(Request $request, $subdomain, $hash)
@@ -1629,6 +1681,8 @@ class EventController extends Controller
 
         $event = $this->eventRepo->saveEvent($role, $request, null, true, $role->captureTimezone());
 
+        $gallery = $this->syncGallery($request, $role, $event);
+
         // Create polls from form data
         if ($role->isPro() && $request->has('polls')) {
             $sortOrder = 0;
@@ -1757,6 +1811,7 @@ class EventController extends Controller
         ]);
 
         $redirect = redirect(route('role.view_admin', $data));
+        $this->flashGalleryPublished($redirect, $gallery, $event, $subdomain);
 
         // The first event gets a panel on the schedule page with its link, instead of only a
         // toast: it is the moment the page first has something on it to share. Set on both
@@ -1771,6 +1826,10 @@ class EventController extends Controller
                 'url' => $event->is_draft ? null : $event->getUndatedGuestUrl($subdomain),
                 'edit_url' => route('event.edit', ['subdomain' => $subdomain, 'hash' => UrlUtils::encodeId($event->id)]),
             ]);
+        }
+
+        if ($galleryError = GalleryUtils::errorMessage($gallery)) {
+            $refused[] = $galleryError;
         }
 
         if ($refused) {

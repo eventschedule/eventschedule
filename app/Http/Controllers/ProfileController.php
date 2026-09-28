@@ -334,6 +334,16 @@ class ProfileController extends Controller
         // the user never knew existed would break that promise, and they would keep being mailed.
         \App\Models\RoleSubscriber::where('email', strtolower($user->email))->delete();
 
+        // The account's schedules and events go by database cascade (roles.user_id,
+        // events.user_id, events.creator_role_id), which never reaches GalleryImage's deleting
+        // hook, so their gallery files are removed here first.
+        $ownedRoleIds = \App\Models\Role::where('user_id', $user->id)->pluck('id');
+        \App\Utils\GalleryUtils::purge(\App\Models\GalleryImage::query()->where(function ($query) use ($user, $ownedRoleIds) {
+            $query->whereIn('role_id', $ownedRoleIds)
+                ->orWhereIn('event_id', \App\Models\Event::where('user_id', $user->id)->select('id'))
+                ->orWhereIn('event_id', \App\Models\Event::whereIn('creator_role_id', $ownedRoleIds)->select('id'));
+        }));
+
         // Send notification to the deleted user
         Notification::route('mail', $user->email)->notify(new DeletedUserNotification($user));
 

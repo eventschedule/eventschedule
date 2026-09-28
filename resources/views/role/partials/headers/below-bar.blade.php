@@ -19,7 +19,8 @@
         ? 'text-white/70 hover:text-white'
         : 'text-[#33383C] dark:text-gray-400 hover:text-[#151B26] dark:hover:text-gray-200';
 @endphp
-@if ($hasDescription || $hasContact || $role->isVenue())
+@php $hasGallery = ($galleryImages ?? collect())->isNotEmpty(); @endphp
+@if ($hasDescription || $hasContact || $role->isVenue() || $hasGallery)
 <div id="gp-below-bar" class="py-3 border-t {{ $onDark ? 'border-white/10' : 'border-gray-200 dark:border-gray-700' }} flex flex-col sm:flex-row sm:items-start gap-x-6 gap-y-3 {{ $isRtl ? 'rtl' : '' }}" v-pre>
     @if ($hasDescription)
     <details class="es-desc min-w-0 flex-1" dir="{{ content_dir($role, false, $role->translatedDescription()) }}">
@@ -32,8 +33,14 @@
         </summary>
     </details>
     @endif
-    @if ($hasContact || $role->isVenue())
+    @if ($hasContact || $role->isVenue() || $hasGallery)
     <div class="flex flex-row flex-wrap gap-4 items-center {{ $hasDescription ? ($isRtl ? 'sm:mr-auto' : 'sm:ml-auto') : '' }}">
+        @if ($hasGallery)
+        <a href="#gp-gallery" data-lightbox-set="gallery" @if ($galleryImages->count() > 1) data-lightbox-grid @else data-lightbox-index="0" @endif class="inline-flex items-center gap-1.5 text-sm {{ $iconClass }} transition-colors">
+            <svg class="w-4 h-4 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke-width="1.8" stroke="currentColor" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M6.827 6.175A2.31 2.31 0 015.186 7.23c-.38.054-.757.112-1.134.175C2.999 7.58 2.25 8.507 2.25 9.574V18a2.25 2.25 0 002.25 2.25h15A2.25 2.25 0 0021.75 18V9.574c0-1.067-.75-1.994-1.802-2.169a47.865 47.865 0 00-1.134-.175 2.31 2.31 0 01-1.64-1.055l-.822-1.316a2.192 2.192 0 00-1.736-1.039 48.774 48.774 0 00-5.232 0 2.192 2.192 0 00-1.736 1.039l-.821 1.316z" /><path stroke-linecap="round" stroke-linejoin="round" d="M16.5 12.75a4.5 4.5 0 11-9 0 4.5 4.5 0 019 0z" /></svg>
+            <span>{{ trans_choice('messages.gallery_photo_count', $galleryImages->count(), ['count' => $galleryImages->count()]) }}</span>
+        </a>
+        @endif
         @if($role->isVenue())
         <a href="https://www.google.com/maps/search/?api=1&query={{ urlencode($role->bestAddress()) }}"
            target="_blank" rel="noopener noreferrer nofollow"

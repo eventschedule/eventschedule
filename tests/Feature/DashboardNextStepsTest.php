@@ -817,4 +817,37 @@ class DashboardNextStepsTest extends TestCase
             ->assertOk()
             ->assertDontSee(__('messages.next_steps'));
     }
+
+    /** An event that just ended, with no photo gallery, on a schedule with nothing more pressing. */
+    public function test_a_recently_ended_event_without_a_gallery_is_asked_for_photos(): void
+    {
+        $user = $this->createOwner();
+        $role = $this->createRole($user);
+        $upcoming = $this->createEvent($role, ['creator_role_id' => $role->id, 'starts_at' => now()->addDays(10)->format('Y-m-d H:i:s')]);
+        $this->createTicket($upcoming, ['price' => 0]);
+        $past = $this->createEvent($role, ['creator_role_id' => $role->id, 'name' => 'Spring Social', 'starts_at' => now()->subDays(3)->format('Y-m-d H:i:s')]);
+
+        $steps = $this->nextSteps($user);
+
+        $this->assertSame(['next_step_gallery'], array_column($steps, 'type'));
+        $this->assertStringContainsString('Spring Social', $steps[0]['title']);
+        $this->assertStringEndsWith('#section-gallery', $steps[0]['url']);
+    }
+
+    /**
+     * Dismissing "add your next event" keeps the schedule's slot: the gallery ask must not take
+     * its place, which reads as the dismiss button not working.
+     */
+    public function test_a_dismissed_next_event_step_is_not_replaced_by_the_gallery_step(): void
+    {
+        $user = $this->createOwner();
+        $role = $this->createRole($user);
+        $this->createEvent($role, ['creator_role_id' => $role->id, 'starts_at' => now()->subDays(3)->format('Y-m-d H:i:s')]);
+
+        $this->assertSame(['next_step_next_event'], $this->types($user));
+
+        $this->dismiss($user, $role, 'next_step_next_event')->assertRedirect();
+
+        $this->assertSame([], $this->types($user));
+    }
 }

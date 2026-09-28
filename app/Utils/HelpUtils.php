@@ -22,6 +22,7 @@ class HelpUtils
                 'details-tab-contact' => '/docs/creating-schedules#contact-info',
                 'section-merge' => '/docs/creating-schedules#merge',
                 'section-style' => '/docs/schedule-styling#overview',
+                'section-gallery' => '/docs/creating-schedules#gallery',
                 'style-tab-branding' => '/docs/schedule-styling#profile-image',
                 'style-tab-background' => '/docs/schedule-styling#backgrounds',
                 'style-tab-advanced' => '/docs/schedule-styling#custom-css',
@@ -61,6 +62,7 @@ class HelpUtils
             'anchors' => [
                 'section-details' => '/docs/creating-events#details',
                 'section-venue' => '/docs/creating-events#venue',
+                'section-gallery' => '/docs/creating-events#gallery',
                 'section-participants' => '/docs/creating-events#participants',
                 'section-recurring' => '/docs/creating-events#recurring',
                 'section-agenda' => '/docs/creating-events#agenda',
@@ -90,6 +92,7 @@ class HelpUtils
             'anchors' => [
                 'section-details' => '/docs/creating-events#details',
                 'section-venue' => '/docs/creating-events#venue',
+                'section-gallery' => '/docs/creating-events#gallery',
                 'section-participants' => '/docs/creating-events#participants',
                 'section-recurring' => '/docs/creating-events#recurring',
                 'section-agenda' => '/docs/creating-events#agenda',

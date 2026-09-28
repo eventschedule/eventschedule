@@ -13,10 +13,11 @@
         ? ($otherRole->accent_color ?? '#4E81FA')
         : ($role->accent_color ?? '#4E81FA');
     $contrastColor = accent_contrast_color($accentColor);
+    // The shared viewer's items (partials/lightbox), in grid order.
     $allPhotoData = $allPhotos->map(fn($p) => [
-        'url' => $p->photo_url,
-        'name' => $p->user?->first_name ?? $p->user?->name ?? __('messages.user'),
-        'date' => $p->created_at->format('M j, Y g:ia'),
+        'src' => $p->photo_url,
+        'thumb' => $p->photo_url,
+        'meta' => $p->submitterName().' · '.$p->created_at->format('M j, Y g:ia'),
     ])->values();
     @endphp
 
@@ -154,15 +155,15 @@
     @if ($allPhotos->count() > 0)
     <div class="mt-6 grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-3">
       @foreach ($allPhotos as $photo)
-      <button x-data @click="$dispatch('open-lightbox', { url: '{{ $photo->photo_url }}' })"
-              class="group relative aspect-square rounded-lg overflow-hidden cursor-pointer focus:outline-none focus:ring-2 focus:ring-offset-2 dark:focus:ring-offset-gray-900" style="--tw-ring-color: {{ $accentColor }};">
+      <a href="{{ $photo->photo_url }}" data-lightbox-set="fan" data-lightbox-index="{{ $loop->index }}"
+              class="group relative block aspect-square rounded-lg overflow-hidden cursor-pointer focus:outline-none focus:ring-2 focus:ring-offset-2 dark:focus:ring-offset-gray-900" style="--tw-ring-color: {{ $accentColor }};">
         <img src="{{ $photo->photo_url }}" alt="{{ $event->translatedName() }}" class="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105" loading="lazy">
         <div class="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-200">
           <div class="absolute bottom-0 inset-x-0 p-3">
             <p class="text-white text-sm font-medium truncate">{{ $photo->user?->first_name ?? $photo->user?->name ?? __('messages.user') }}</p>
           </div>
         </div>
-      </button>
+      </a>
       @endforeach
     </div>
     @else
@@ -184,70 +185,9 @@
 
   </div>
 
-  {{-- Shared photo lightbox --}}
+  {{-- The photos in the shared viewer (partials/lightbox, included at the end of the page). --}}
   @if ($allPhotoData->count() > 0)
-  <div x-data="{
-         lbOpen: false,
-         lbPhotos: {{ Js::from($allPhotoData) }},
-         lbIndex: 0,
-         lbTouchStartX: 0,
-         lbRtl: {{ $role->isRtl() ? 'true' : 'false' }},
-         openAt(url) {
-           let idx = this.lbPhotos.findIndex(p => p.url === url);
-           this.lbIndex = idx >= 0 ? idx : 0;
-           this.lbOpen = true;
-           document.body.style.overflow = 'hidden';
-         },
-         close() {
-           this.lbOpen = false;
-           document.body.style.overflow = '';
-         },
-         prev() {
-           this.lbIndex = (this.lbIndex - 1 + this.lbPhotos.length) % this.lbPhotos.length;
-         },
-         next() {
-           this.lbIndex = (this.lbIndex + 1) % this.lbPhotos.length;
-         }
-       }"
-       @open-lightbox.window="openAt($event.detail.url)"
-       @keydown.escape.window="if (lbOpen) close()"
-       @keydown.left.window="if (lbOpen) { lbRtl ? next() : prev() }"
-       @keydown.right.window="if (lbOpen) { lbRtl ? prev() : next() }">
-    <template x-teleport="body">
-      <div x-show="lbOpen" x-cloak
-           @click.self="close()"
-           class="fixed inset-0 z-[70] flex items-center justify-center bg-black/90"
-           style="font-family: sans-serif"
-           @touchstart.passive="lbTouchStartX = $event.changedTouches[0].screenX"
-           @touchend="
-             let dx = $event.changedTouches[0].screenX - lbTouchStartX;
-             if (Math.abs(dx) > 50) {
-               if (lbRtl) { dx > 0 ? next() : prev(); }
-               else { dx > 0 ? prev() : next(); }
-             }
-           ">
-        {{-- Close button --}}
-        <button @click="close()" class="absolute top-3 {{ $role->isRtl() ? 'left-3' : 'right-3' }} text-white/80 hover:text-white text-4xl leading-none z-10 w-10 h-10 flex items-center justify-center">&times;</button>
-        {{-- Counter --}}
-        <div x-show="lbPhotos.length > 1" class="absolute top-4 left-1/2 -translate-x-1/2 text-white/70 text-sm tabular-nums z-10" x-text="(lbIndex + 1) + ' / ' + lbPhotos.length"></div>
-        {{-- Prev button (desktop) --}}
-        <button x-show="lbPhotos.length > 1" @click.stop="lbRtl ? next() : prev()" class="hidden sm:flex absolute {{ $role->isRtl() ? 'right-3' : 'left-3' }} top-1/2 -translate-y-1/2 w-10 h-10 items-center justify-center rounded-full bg-white/10 hover:bg-white/20 text-white transition-colors z-10">
-          <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="w-6 h-6" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M15.75 19.5 8.25 12l7.5-7.5" /></svg>
-        </button>
-        {{-- Next button (desktop) --}}
-        <button x-show="lbPhotos.length > 1" @click.stop="lbRtl ? prev() : next()" class="hidden sm:flex absolute {{ $role->isRtl() ? 'left-3' : 'right-3' }} top-1/2 -translate-y-1/2 w-10 h-10 items-center justify-center rounded-full bg-white/10 hover:bg-white/20 text-white transition-colors z-10">
-          <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="w-6 h-6" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="m8.25 4.5 7.5 7.5-7.5 7.5" /></svg>
-        </button>
-        {{-- Image --}}
-        <img :src="lbPhotos[lbIndex].url" class="max-w-[96vw] max-h-[90vh] object-contain pointer-events-none" alt="">
-        {{-- Caption --}}
-        <div class="absolute bottom-0 inset-x-0 flex items-center justify-between px-4 py-3 text-sm text-white/80 z-10" @click.stop>
-          <span x-text="lbPhotos[lbIndex].name"></span>
-          <span x-text="lbPhotos[lbIndex].date"></span>
-        </div>
-      </div>
-    </template>
-  </div>
+  <script {!! nonce_attr() !!}>(window.EsLightboxSets = window.EsLightboxSets || {}).fan = @json($allPhotoData, JSON_UNESCAPED_UNICODE | JSON_HEX_TAG);</script>
   @endif
 
   </main>
@@ -290,5 +230,9 @@
       @endif
     </div>
   </div>
+
+@if ($allPhotoData->count() > 0)
+    @include('partials.lightbox', ['rtl' => $role->isRtl()])
+@endif
 
 </x-app-guest-layout>

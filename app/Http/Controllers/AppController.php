@@ -500,6 +500,13 @@ class AppController extends Controller
                     \Log::error('Scheduled command app:cleanup-backups failed: '.$e->getMessage());
                     report($e);
                 }
+                // Unsaved gallery uploads. Keep in sync with routes/console.php.
+                try {
+                    \Artisan::call('app:prune-gallery-drafts');
+                } catch (\Throwable $e) {
+                    \Log::error('Scheduled command app:prune-gallery-drafts failed: '.$e->getMessage());
+                    report($e);
+                }
                 // Not hosted-gated: a selfhost install with a YouTube key gets the same rot.
                 try {
                     \Artisan::call('app:recheck-video-embeds');

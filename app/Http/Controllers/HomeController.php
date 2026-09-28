@@ -781,6 +781,27 @@ class HomeController extends Controller
             ->selectRaw('event_role.role_id as role_id, COUNT(DISTINCT event_interests.email) as waiting')
             ->pluck('waiting', 'role_id');
 
+        // Each paid schedule's most recent event that ended in the last two weeks without a photo
+        // gallery: the moment an organizer has photos to share. One query. Only events the
+        // schedule created, since the owning schedule is the one whose plan the gallery follows,
+        // and only public one-off dates - a recurring series' gallery is not about one night.
+        $proIds = $roles->filter(fn (Role $role) => $role->isPro())->pluck('id');
+        $recentWithoutGallery = $proIds->isEmpty() ? collect() : DB::table('events')
+            ->whereIn('events.creator_role_id', $proIds)
+            ->where('events.is_draft', false)
+            ->where('events.is_private', false)
+            ->where('events.is_internal', false)
+            ->whereNull('events.days_of_week')
+            ->whereBetween('events.starts_at', [now()->subDays(14), now()->subHours(6)])
+            ->whereNotExists(fn ($q) => $q->select(DB::raw(1))
+                ->from('gallery_images')
+                ->whereColumn('gallery_images.event_id', 'events.id')
+                ->whereNull('gallery_images.draft_token'))
+            ->orderByDesc('events.starts_at')
+            ->get(['events.creator_role_id', 'events.id', 'events.name'])
+            ->unique('creator_role_id')
+            ->keyBy('creator_role_id');
+
         $user = auth()->user();
         // The canonical check, and what the event form keys the same nudge off. Testing the
         // credential columns by hand missed users.payment_url and read stripe_account_id, which
@@ -881,15 +902,35 @@ class HomeController extends Controller
             // silence the dormancy nudge on a schedule that later ran and stopped.
             $eventStep = isset($anyEvent[$role->id]) ? 'next_step_next_event' : 'next_step_first_event';
 
-            if (! isset($publicUpcoming[$role->id]) && ! isset($dismissed[$role->id.':'.$eventStep])) {
+            if (! isset($publicUpcoming[$role->id])) {
+                if (! isset($dismissed[$role->id.':'.$eventStep])) {
+                    $items->push([
+                        'type' => $eventStep,
+                        'count' => 1,
+                        'title' => isset($anyEvent[$role->id])
+                            ? __('messages.next_step_add_next_event')
+                            : __('messages.next_step_add_first_event'),
+                        'subtitle' => $role->name,
+                        'url' => route('event.create', ['subdomain' => $role->subdomain]),
+                        'color' => 'blue',
+                        'dismiss_schedule' => UrlUtils::encodeId($role->id),
+                    ]);
+                }
+
+                // Dismissed or not, the schedule keeps its slot, as in the branches above.
+                continue;
+            }
+
+            // 5) A schedule with nothing more pressing whose event just ended: share its photos.
+            // Last, because a page with no upcoming date (4) matters more than photos of the past.
+            if (isset($recentWithoutGallery[$role->id]) && ! isset($dismissed[$role->id.':next_step_gallery'])) {
+                $recent = $recentWithoutGallery[$role->id];
                 $items->push([
-                    'type' => $eventStep,
+                    'type' => 'next_step_gallery',
                     'count' => 1,
-                    'title' => isset($anyEvent[$role->id])
-                        ? __('messages.next_step_add_next_event')
-                        : __('messages.next_step_add_first_event'),
+                    'title' => __('messages.next_step_add_gallery', ['event' => $recent->name]),
                     'subtitle' => $role->name,
-                    'url' => route('event.create', ['subdomain' => $role->subdomain]),
+                    'url' => route('event.edit', ['subdomain' => $role->subdomain, 'hash' => UrlUtils::encodeId($recent->id)]).'#section-gallery',
                     'color' => 'blue',
                     'dismiss_schedule' => UrlUtils::encodeId($role->id),
                 ]);
@@ -904,6 +945,7 @@ class HomeController extends Controller
             'next_step_first_event' => 2,
             'next_step_next_event' => 2,
             'next_step_publish_event' => 2,
+            'next_step_gallery' => 3,
         ];
 
         return $items->sortBy(fn ($item) => $priority[$item['type']] ?? 9)->values();

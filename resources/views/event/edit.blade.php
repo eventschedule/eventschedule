@@ -10,6 +10,24 @@
   // publish. Vue shows them again on request (showMoreSections), and showSection() opens the
   // fold itself when something - a #hash, an invalid field - has to reach one of them.
   $moreSectionAttrs = $isFirstEventRun ? 'v-cloak v-show="showMoreSections"' : '';
+
+  // The photo gallery (partials/gallery-editor). Its plan gate is the event's OWNING schedule
+  // (ticketingRole()), not the one this form was reached through, because that is the one whose
+  // plan decides whether guests see it. edit: everything; downgraded: the plan lapsed with photos
+  // in it, so they can only be removed; locked: nothing to edit yet; readonly: demo mode.
+  $galleryRole = ($event->exists ? $event->ticketingRole() : null) ?? $role;
+  $galleryUnlocked = $galleryRole->isPro();
+  $galleryCanUpgrade = config('app.hosted') && $user->isEditor($galleryRole->subdomain);
+  $galleryState = \App\Utils\GalleryUtils::editorState($galleryRole, $event, $user);
+  $galleryMode = is_demo_mode() ? 'readonly' : ($galleryUnlocked ? 'edit' : (count($galleryState['images']) ? 'downgraded' : 'locked'));
+  // A first event gets no locked upgrade controls, and nobody gets a section they cannot save.
+  $galleryShown = (! $event->exists || $user->can('update', $event))
+      && ! ($isFirstEventRun && $galleryMode === 'locked');
+  $galleryFanPhotos = ($approvedPhotos ?? collect())->map(fn ($photo) => [
+      'id' => \App\Utils\UrlUtils::encodeId($photo->id),
+      'url' => $photo->photo_url,
+      'name' => $photo->submitterName(),
+  ])->values();
 @endphp
 
 <!-- Step Indicator for Add Event Flow -->
@@ -1444,6 +1462,19 @@
                                 </svg>
                                 {{ __('messages.venue') }}
                             </a>
+                            @if ($galleryShown)
+                            <a href="#section-gallery" class="section-nav-link" data-section="section-gallery" {!! $moreSectionAttrs !!}>
+                                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-5 h-5">
+                                    <path stroke-linecap="round" stroke-linejoin="round" d="M2.25 15.75l5.159-5.159a2.25 2.25 0 013.182 0l5.159 5.159m-1.5-1.5l1.409-1.409a2.25 2.25 0 013.182 0l2.909 2.909m-18 3.75h16.5a1.5 1.5 0 001.5-1.5V6a1.5 1.5 0 00-1.5-1.5H3.75A1.5 1.5 0 002.25 6v12a1.5 1.5 0 001.5 1.5zm10.5-11.25h.008v.008h-.008V8.25zm.375 0a.375.375 0 11-.75 0 .375.375 0 01.75 0z" />
+                                </svg>
+                                {{ __('messages.gallery') }}
+                                @if ($galleryMode === 'locked')
+                                <x-lock-badge tier="pro" />
+                                @else
+                                <span v-cloak v-if="galleryStore.state.images.length" class="ms-auto inline-flex min-w-[1.25rem] items-center justify-center rounded-full bg-gray-200 dark:bg-gray-700 px-1.5 text-xs font-semibold text-gray-600 dark:text-gray-300">@{{ galleryStore.state.images.length }}</span>
+                                @endif
+                            </a>
+                            @endif
                             <a href="#section-participants" class="section-nav-link" data-section="section-participants" {!! $moreSectionAttrs !!}>
                                 <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-5 h-5">
                                     <path stroke-linecap="round" stroke-linejoin="round" d="M15 19.128a9.38 9.38 0 002.625.372 9.337 9.337 0 004.121-.952 4.125 4.125 0 00-7.533-2.493M15 19.128v-.003c0-1.113-.285-2.16-.786-3.07M15 19.128v.106A12.318 12.318 0 018.624 21c-2.331 0-4.512-.645-6.374-1.766l-.001-.109a6.375 6.375 0 0111.964-3.07M12 6.375a3.375 3.375 0 11-6.75 0 3.375 3.375 0 016.75 0zm8.25 2.25a2.625 2.625 0 11-5.25 0 2.625 2.625 0 015.25 0z" />
@@ -1525,8 +1556,9 @@
                         </nav>
                         <!-- Sidebar Save Button -->
                         <div class="mt-6 pt-6 border-t border-gray-200 dark:border-gray-700">
-                            <x-primary-button class="w-full justify-center" v-bind:disabled="isSaving">
-                                <span v-if="isSaving">{{ __('messages.saving') }}</span>
+                            <x-primary-button class="w-full justify-center" v-bind:disabled="isSaving || galleryWaiting">
+                                <span v-if="galleryWaiting">@{{ galleryFinishingText }}</span>
+                                <span v-else-if="isSaving">{{ __('messages.saving') }}</span>
                                 <span v-else>{{ $isFirstEventRun ? __('messages.create_event') : __('messages.save') }}</span>
                             </x-primary-button>
                             @if ($event->exists && $event->is_draft && ! $event->is_internal)
@@ -1945,6 +1977,30 @@
                             <input type="hidden" name="clone_flyer_image" id="clone_flyer_image" value="{{ $clonedFlyerImage }}" />
                             @endif
                         </div>
+
+                        @if ($galleryShown && $galleryMode === 'edit')
+                        {{-- Where the one-flyer limit is felt: a way into the gallery right here, and
+                             a live glimpse of it once it has photos. Reads the same store as the
+                             Gallery section, so both always agree. --}}
+                        <div class="mb-6" v-cloak>
+                            <input ref="galleryStripInput" type="file" accept="image/*" multiple class="hidden" @change="addGalleryFromStrip">
+                            <button v-if="!galleryStore.state.images.length" type="button" @click="$refs.galleryStripInput.click()"
+                                class="inline-flex items-center gap-1.5 px-3 py-1.5 bg-gray-100 dark:bg-gray-700 hover:bg-gray-200 dark:hover:bg-gray-600 text-gray-700 dark:text-gray-200 text-sm font-medium rounded-lg transition-all duration-200 border border-gray-300 dark:border-gray-600 focus:outline-none focus:ring-2 focus:ring-[var(--brand-blue)]">
+                                <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M2.25 15.75l5.159-5.159a2.25 2.25 0 013.182 0l5.159 5.159m-1.5-1.5l1.409-1.409a2.25 2.25 0 013.182 0l2.909 2.909m-18 3.75h16.5a1.5 1.5 0 001.5-1.5V6a1.5 1.5 0 00-1.5-1.5H3.75A1.5 1.5 0 002.25 6v12a1.5 1.5 0 001.5 1.5zm10.5-11.25h.008v.008h-.008V8.25zm.375 0a.375.375 0 11-.75 0 .375.375 0 01.75 0z" /></svg>
+                                {{ __('messages.gallery_add_first') }}
+                            </button>
+                            <div v-else class="flex flex-wrap items-center gap-3">
+                                <x-input-label :value="__('messages.gallery')" class="w-full" />
+                                <div class="flex -space-x-2 rtl:space-x-reverse">
+                                    <span v-for="image in galleryStore.state.images.slice(0, 5)" :key="image.key" class="h-10 w-10 overflow-hidden rounded-lg ring-2 ring-white dark:ring-gray-800 bg-gray-200 dark:bg-gray-700" :style="{ backgroundColor: image.color || null }">
+                                        <img v-if="image.thumb" :src="image.thumb" alt="" class="h-full w-full object-cover">
+                                    </span>
+                                </div>
+                                <span class="text-sm text-gray-600 dark:text-gray-300">@{{ galleryStripCount }}</span>
+                                <a href="#section-gallery" @click.prevent="openGallerySection" class="text-sm font-medium text-[var(--brand-blue)] hover:underline">{{ __('messages.gallery_manage') }}</a>
+                            </div>
+                        </div>
+                        @endif
 
                         </div>
                         {{-- End Panel 2 --}}
@@ -3816,6 +3872,32 @@
                     </div>
                 </div>
 
+                @if ($galleryShown)
+                <button type="button" class="mobile-section-header" data-section="section-gallery" {!! $moreSectionAttrs !!}>
+                    <span class="flex items-center gap-2 text-sm font-medium text-gray-700 dark:text-gray-300">
+                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-5 h-5">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M2.25 15.75l5.159-5.159a2.25 2.25 0 013.182 0l5.159 5.159m-1.5-1.5l1.409-1.409a2.25 2.25 0 013.182 0l2.909 2.909m-18 3.75h16.5a1.5 1.5 0 001.5-1.5V6a1.5 1.5 0 00-1.5-1.5H3.75A1.5 1.5 0 002.25 6v12a1.5 1.5 0 001.5 1.5zm10.5-11.25h.008v.008h-.008V8.25zm.375 0a.375.375 0 11-.75 0 .375.375 0 01.75 0z" />
+                        </svg>
+                        {{ __('messages.gallery') }}
+                        @if ($galleryMode === 'locked')
+                        <x-lock-badge tier="pro" />
+                        @endif
+                    </span>
+                    <svg class="w-5 h-5 text-gray-400 transition-transform duration-200 accordion-chevron" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
+                    </svg>
+                </button>
+                <div id="section-gallery" class="section-content lg:mt-0">
+                    @include('partials.gallery-section', [
+                        'galleryContext' => 'event',
+                        'galleryMode' => $galleryMode,
+                        'galleryRole' => $galleryRole,
+                        'galleryCanUpgrade' => $galleryCanUpgrade,
+                        'galleryImageCount' => count($galleryState['images']),
+                    ])
+                </div>
+                @endif
+
                 <button type="button" class="mobile-section-header" data-section="section-participants" {!! $moreSectionAttrs !!}>
                     <span class="flex items-center gap-2 text-sm font-medium text-gray-700 dark:text-gray-300">
                         <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-5 h-5">
@@ -5391,8 +5473,9 @@
             </p>
             @endif
             <div class="flex gap-3 justify-center max-w-lg mx-auto">
-                <x-primary-button class="flex-1 justify-center" v-bind:disabled="isSaving">
-                    <span v-if="isSaving">{{ __('messages.saving') }}</span>
+                <x-primary-button class="flex-1 justify-center" v-bind:disabled="isSaving || galleryWaiting">
+                    <span v-if="galleryWaiting">@{{ galleryFinishingText }}</span>
+                    <span v-else-if="isSaving">{{ __('messages.saving') }}</span>
                     <span v-else>{{ $isFirstEventRun ? __('messages.create_event') : __('messages.save') }}</span>
                 </x-primary-button>
                 @if ($event->exists && $event->is_draft && ! $event->is_internal)
@@ -5547,8 +5630,37 @@
 
 </div>
 
+@include('partials.gallery-editor')
+
 <script {!! nonce_attr() !!}>
   const { createApp, ref } = Vue
+
+  // The gallery's store lives outside the component so the Gallery section, the strip under the
+  // flyer, the Save buttons and validateForm() all read the same uploads.
+  @php
+    $galleryUploadUrl = route('gallery.upload', ['subdomain' => $subdomain]);
+    $galleryFanPhotosUrl = $event->exists ? route('gallery.from_fan_photos', ['subdomain' => $subdomain]) : null;
+    $galleryEventHash = $event->exists ? \App\Utils\UrlUtils::encodeId($event->id) : null;
+    // Rendered here rather than split in the browser: the translations use Laravel's {1} / [2,*]
+    // plural syntax, which only trans_choice() reads.
+    $galleryCountForms = [
+        'one' => trans_choice('messages.gallery_photo_count', 1, ['count' => 1]),
+        'many' => trans_choice('messages.gallery_photo_count', 2, ['count' => ':count']),
+    ];
+  @endphp
+  const galleryStore = window.EsGallery.createStore({
+    uploadUrl: @json($galleryUploadUrl),
+    fanPhotosUrl: @json($galleryFanPhotosUrl),
+    target: @json($event->exists ? 'event' : 'new_event'),
+    eventHash: @json($galleryEventHash),
+    draftToken: @json($galleryState['token']),
+    csrf: @json(csrf_token()),
+    max: @json(\App\Utils\GalleryUtils::maxImages()),
+    maxBytes: @json(\App\Utils\GalleryUtils::maxUploadBytes()),
+    initialImages: @json($galleryState['images']),
+    knownIds: @json($galleryState['known']),
+    onChange: function () { if (window.vueApp) { window.vueApp.isDirty = true; } },
+  });
 
   app = createApp({
     data() {
@@ -5742,6 +5854,14 @@
         formSubmitAttempted: false,
         isSaving: false,
         isDirty: false,
+        galleryStore: galleryStore,
+        galleryFanPhotos: @json($galleryFanPhotos),
+        galleryUnsavedLabel: @json(__('messages.gallery_unsaved_event')),
+        galleryRecurringText: @json(__('messages.gallery_recurring_hint')),
+        galleryStripLabels: @json($galleryCountForms),
+        galleryFinishingLabel: @json(__('messages.gallery_finishing')),
+        // Set while a Save waits for uploads to finish (validateForm()).
+        galleryWaiting: false,
         soldLabel: @json(__('messages.sold_reserved')),
         isRecurring: @json($event->days_of_week ? true : false),
         // Attendee change-notification UX (issue #94): confirm dialog on save when a key detail changed.
@@ -6659,6 +6779,23 @@
         }
         @endif
       },
+      addGalleryFromStrip(e) {
+        const added = this.galleryStore.addFiles(e.target.files);
+        e.target.value = '';
+        // Straight to the section, so the uploads are seen happening where they can be arranged.
+        if (added) {
+          this.openGallerySection();
+        }
+      },
+      openGallerySection() {
+        if (window.showEventSection) {
+          window.showEventSection('section-gallery');
+        }
+        const section = document.getElementById('section-gallery');
+        if (section) {
+          section.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        }
+      },
       publishEvent() {
         this.event.is_draft = false;
         this.event.is_internal = false;
@@ -6746,6 +6883,7 @@
       validateForm(event) {
         this.formSubmitAttempted = true;
 
+
         var dateVal = document.getElementById('event_date').value;
         var startVal = document.getElementById('start_time').value;
         if (!dateVal || !startVal) {
@@ -6811,6 +6949,32 @@
           event.preventDefault();
           this.showNotifyModal = true;
           this.$nextTick(() => { if (this.$refs.notifyMessageField) this.$refs.notifyMessageField.focus(); });
+          return;
+        }
+
+        // Photos still uploading would be missing from the gallery this save commits, so the save
+        // waits for them and then goes through the same way it was started. Last, after every
+        // other check, so a missing date or a notify question is answered before the wait rather
+        // than after it. The Publish and notify paths switch the leave-page warning off before
+        // submitting; it comes back on while the uploads finish, and returns to what it was.
+        if (this.galleryStore.pendingCount() > 0) {
+          event.preventDefault();
+          if (!this.galleryWaiting) {
+            const skipBefore = window._skipUnsavedWarning;
+            window._skipUnsavedWarning = false;
+            this.galleryWaiting = true;
+            this.galleryStore.whenIdle().then(() => {
+              this.galleryWaiting = false;
+              // Some photos did not make it: saving now would leave them out without a word.
+              if (this.galleryStore.failedCount() > 0) {
+                this.galleryStore.reportFailedBeforeSave();
+                this.openGallerySection();
+                return;
+              }
+              window._skipUnsavedWarning = skipBefore;
+              document.getElementById('edit-form').requestSubmit();
+            });
+          }
           return;
         }
 
@@ -7760,6 +7924,16 @@
       },
     },
     computed: {
+      galleryRecurringHint() {
+        return this.isRecurring ? this.galleryRecurringText : '';
+      },
+      galleryStripCount() {
+        const count = this.galleryStore.state.images.length;
+        return count === 1 ? this.galleryStripLabels.one : this.galleryStripLabels.many.replace(':count', count);
+      },
+      galleryFinishingText() {
+        return this.galleryFinishingLabel.replace(':count', this.galleryStore.pendingCount());
+      },
       /**
        * The bands offered by the plan currently attached to this event.
        *
@@ -8210,6 +8384,7 @@
       this.$nextTick(() => this.initCustomFieldsSortable());
     }
   });
+  app.component('gallery-editor', window.EsGallery.component);
   const vueInstance = app.mount('#app');
 
   // Store reference for section navigation
@@ -8568,7 +8743,7 @@ document.addEventListener('DOMContentLoaded', function() {
         // navigates to it (a #hash, an invalid field), or its header would stay hidden while its
         // content shows.
         if (window.vueApp && ! window.vueApp.showMoreSections
-            && ['section-participants', 'section-agenda', 'section-engagement'].includes(sectionId)) {
+            && ['section-gallery', 'section-participants', 'section-agenda', 'section-engagement'].includes(sectionId)) {
             window.vueApp.showMoreSections = true;
         }
 
@@ -8716,7 +8891,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 // A red nav link inside the folded "More options" group is invisible, so open the
                 // fold rather than leave the error unreachable after a refused first-event save.
                 if (window.vueApp && ! window.vueApp.showMoreSections
-                    && ['section-participants', 'section-agenda', 'section-engagement'].includes(section.id)) {
+                    && ['section-gallery', 'section-participants', 'section-agenda', 'section-engagement'].includes(section.id)) {
                     window.vueApp.showMoreSections = true;
                 }
             }

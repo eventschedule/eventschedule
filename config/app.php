@@ -336,6 +336,19 @@ return [
 
     /*
     |--------------------------------------------------------------------------
+    | Maximum Gallery Photos
+    |--------------------------------------------------------------------------
+    |
+    | How many photos an organizer's gallery can hold, per event and on the
+    | schedule itself (a Pro feature). Enforced when the gallery is saved
+    | (GalleryUtils::sync()) and shown by the admin editor's counter.
+    |
+    */
+
+    'max_gallery_images' => (int) env('MAX_GALLERY_IMAGES', 50),
+
+    /*
+    |--------------------------------------------------------------------------
     | Maximum Tickets Per Order
     |--------------------------------------------------------------------------
     |

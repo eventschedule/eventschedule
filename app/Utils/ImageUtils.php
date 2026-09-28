@@ -1125,16 +1125,15 @@ class ImageUtils
     /**
      * Validate uploaded file for security
      */
-    public static function validateUploadedFile($file): void
+    public static function validateUploadedFile($file, int $maxBytes = 5242880): void
     {
         // Check if file upload was successful
         if (! $file->isValid()) {
             throw new \Exception('File upload failed');
         }
 
-        // Check file size (5MB limit)
-        if ($file->getSize() > 5242880) {
-            throw new \Exception('File too large. Maximum size is 5MB.');
+        if ($file->getSize() > $maxBytes) {
+            throw new \Exception('File too large. Maximum size is '.round($maxBytes / 1048576).'MB.');
         }
 
         // Use ImageUtils to validate MIME type and format
@@ -1320,7 +1319,8 @@ class ImageUtils
         string $path,
         int $maxDim = 2000,
         int $quality = 85,
-        int $ceilingBytes = self::IMAGE_MEMORY_CEILING_BYTES
+        int $ceilingBytes = self::IMAGE_MEMORY_CEILING_BYTES,
+        bool $reencodePhotos = false
     ): bool {
         if (! file_exists($path)) {
             return false;
@@ -1334,7 +1334,12 @@ class ImageUtils
         [$srcWidth, $srcHeight] = $info;
         $mimeType = $info['mime'] ?? null;
 
-        if ($srcWidth <= $maxDim && $srcHeight <= $maxDim) {
+        // $reencodePhotos rewrites a JPEG or WebP that is already small enough anyway, for a
+        // surface that publishes the original (the gallery): the re-encode is what drops its
+        // EXIF block, and with it the GPS position a phone photo carries.
+        $reencode = $reencodePhotos && in_array($mimeType, ['image/jpeg', 'image/webp'], true);
+
+        if ($srcWidth <= $maxDim && $srcHeight <= $maxDim && ! $reencode) {
             return true;
         }
 
@@ -1408,7 +1413,8 @@ class ImageUtils
         $srcWidth = imagesx($sourceImage);
         $srcHeight = imagesy($sourceImage);
 
-        $scale = $maxDim / max($srcWidth, $srcHeight);
+        // Never up: a re-encode of a photo already inside the limit keeps its size.
+        $scale = min(1, $maxDim / max($srcWidth, $srcHeight));
         $dstWidth = (int) round($srcWidth * $scale);
         $dstHeight = (int) round($srcHeight * $scale);
 
@@ -1445,6 +1451,60 @@ class ImageUtils
         imagedestroy($destImage);
 
         return $ok;
+    }
+
+    /**
+     * An image's average colour as `#rrggbb`, or null when GD cannot read it: the placeholder a
+     * gallery tile paints while the photo loads. One 1x1 resample of the decoded image, so it
+     * costs about what the resize before it did.
+     */
+    public static function averageColor(string $path): ?string
+    {
+        $info = @getimagesize($path);
+
+        if ($info === false) {
+            return null;
+        }
+
+        // Captured BEFORE canDecodePixels(), which raises memory_limit, and put back on every
+        // exit - the same ratchet resizeImageToMax() guards against.
+        $previousMemoryLimit = ini_get('memory_limit');
+
+        try {
+            if (! self::canDecodePixels(($info[0] ?? 0) * ($info[1] ?? 0))) {
+                return null;
+            }
+
+            return self::averageColorOfDecoded($path, $info['mime'] ?? null);
+        } finally {
+            self::restoreMemoryLimit($previousMemoryLimit);
+        }
+    }
+
+    private static function averageColorOfDecoded(string $path, ?string $mime): ?string
+    {
+        $image = match ($mime) {
+            'image/jpeg' => @imagecreatefromjpeg($path),
+            'image/png' => @imagecreatefrompng($path),
+            'image/gif' => @imagecreatefromgif($path),
+            'image/webp' => @imagecreatefromwebp($path),
+            default => false,
+        };
+
+        if (! $image) {
+            return null;
+        }
+
+        $pixel = imagecreatetruecolor(1, 1);
+        // A transparent PNG averages against white, which is what the page behind it mostly is.
+        imagefill($pixel, 0, 0, imagecolorallocate($pixel, 255, 255, 255));
+        imagecopyresampled($pixel, $image, 0, 0, 0, 0, 1, 1, imagesx($image), imagesy($image));
+        $rgb = imagecolorat($pixel, 0, 0);
+
+        imagedestroy($image);
+        imagedestroy($pixel);
+
+        return sprintf('#%02x%02x%02x', ($rgb >> 16) & 0xFF, ($rgb >> 8) & 0xFF, $rgb & 0xFF);
     }
 
     /**

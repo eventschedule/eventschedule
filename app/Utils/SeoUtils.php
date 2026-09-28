@@ -429,6 +429,66 @@ class SeoUtils
     }
 
     /**
+     * A node's `image` extended with the organizer gallery: the existing ImageObject (the share
+     * image) first, then up to $limit gallery photos, each with its caption and photographer
+     * credit. A gallery photo that already IS the share image is not listed twice.
+     *
+     * @param  array<string, mixed>|null  $existing
+     * @param  iterable<\App\Models\GalleryImage>  $gallery
+     * @return array<int, array<string, mixed>>|array<string, mixed>|null
+     */
+    public static function galleryImageList(?array $existing, iterable $gallery, int $limit = 10): ?array
+    {
+        $list = $existing ? [$existing] : [];
+        $seen = $existing ? [$existing['url'] ?? null] : [];
+        $added = 0;
+
+        foreach ($gallery as $image) {
+            if ($added >= $limit) {
+                break;
+            }
+
+            $url = $image->url();
+
+            if ($url === '') {
+                continue;
+            }
+
+            $node = ['@type' => 'ImageObject', 'url' => $url];
+
+            if ($image->width && $image->height) {
+                $node['width'] = $image->width;
+                $node['height'] = $image->height;
+            }
+
+            if ($image->caption) {
+                $node['caption'] = self::cleanText($image->caption);
+            }
+
+            if ($image->credit) {
+                $node['creditText'] = self::cleanText($image->credit);
+            }
+
+            // The share image already IS this photo (an event with no flyer leads with it):
+            // complete that entry rather than listing the photo twice.
+            if (in_array($url, $seen, true)) {
+                $index = array_search($url, array_column($list, 'url'), true);
+                if ($index !== false) {
+                    $list[$index] += $node;
+                }
+
+                continue;
+            }
+
+            $list[] = $node;
+            $seen[] = $url;
+            $added++;
+        }
+
+        return count($list) > 1 ? $list : ($list[0] ?? null);
+    }
+
+    /**
      * Whether $text already ends a sentence or a clause, so whatever follows it needs a space and
      * not a ". ".
      */

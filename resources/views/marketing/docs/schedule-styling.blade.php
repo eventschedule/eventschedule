@@ -507,6 +507,7 @@
                     <tr><td><code class="doc-inline-code">#gp-events</code></td><td>Everything from the events heading down, including the calendar</td></tr>
                     <tr><td><code class="doc-inline-code">#gp-calendar</code></td><td>The calendar or event list panel on its own</td></tr>
                     <tr><td><code class="doc-inline-code">#gp-subscribe</code></td><td>The follow and subscribe panel (also on event pages)</td></tr>
+                    <tr><td><code class="doc-inline-code">#gp-gallery</code></td><td>Your photo gallery (also on event pages, for an event's own gallery)</td></tr>
                     <tr><td><code class="doc-inline-code">#gp-videos</code></td><td>Your own video grid</td></tr>
                 </tbody>
             </table>
@@ -547,6 +548,7 @@
                     <tr><td><code class="doc-inline-code">#gp-event-form</code></td><td>The ticket or RSVP form</td></tr>
                     <tr><td><code class="doc-inline-code">#gp-flyer</code></td><td>The flyer image</td></tr>
                     <tr><td><code class="doc-inline-code">#gp-about</code></td><td>The event description panel</td></tr>
+                    <tr><td><code class="doc-inline-code">#gp-gallery</code></td><td>The event's photo gallery. It takes the flyer's place at the top when there is no flyer</td></tr>
                     <tr><td><code class="doc-inline-code">#gp-agenda-image</code></td><td>The agenda image</td></tr>
                     <tr><td><code class="doc-inline-code">#gp-agenda</code></td><td>The agenda or setlist</td></tr>
                     <tr><td><code class="doc-inline-code">#gp-fan-content</code></td><td>Polls, fan photos, videos and comments</td></tr>

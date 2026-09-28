@@ -110,6 +110,56 @@
 </div>
 @endif
 
+{{-- Flashed by EventController::update()/store() and RoleController::update() the first time a
+     gallery goes from empty to published: the photos, and a way to see them as guests do. A draft
+     or unlisted event (or a schedule with no public page) has nothing to open yet. --}}
+@php $galleryPublished = session('gallery_published'); @endphp
+@if (is_array($galleryPublished))
+<div class="pb-4">
+    <div class="ap-card rounded-xl p-6" role="status">
+        <div class="flex items-start gap-3">
+            <div class="dashboard-icon p-2 rounded-xl shrink-0 {{ $galleryPublished['is_hidden'] ? 'bg-amber-50 dark:bg-amber-500/10' : 'bg-green-50 dark:bg-green-500/10' }}" style="--icon-glow: {{ $galleryPublished['is_hidden'] ? 'rgba(245, 158, 11, 0.35)' : 'rgba(34, 197, 94, 0.35)' }}">
+                <svg class="w-5 h-5 {{ $galleryPublished['is_hidden'] ? 'text-amber-600 dark:text-amber-400' : 'text-green-600 dark:text-green-400' }}" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" aria-hidden="true">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M2.25 15.75l5.159-5.159a2.25 2.25 0 013.182 0l5.159 5.159m-1.5-1.5l1.409-1.409a2.25 2.25 0 013.182 0l2.909 2.909m-18 3.75h16.5a1.5 1.5 0 001.5-1.5V6a1.5 1.5 0 00-1.5-1.5H3.75A1.5 1.5 0 002.25 6v12a1.5 1.5 0 001.5 1.5zm10.5-11.25h.008v.008h-.008V8.25zm.375 0a.375.375 0 11-.75 0 .375.375 0 01.75 0z" />
+                </svg>
+            </div>
+            <div class="min-w-0 flex-1">
+                <h3 class="text-base font-semibold text-gray-900 dark:text-gray-100">
+                    {{ $galleryPublished['is_hidden'] ? __('messages.gallery_saved_title') : __('messages.gallery_live_title') }}
+                </h3>
+                <p class="mt-1 text-sm text-gray-500 dark:text-gray-400">
+                    @if ($galleryPublished['is_hidden'])
+                        {{ __('messages.gallery_saved_body') }}
+                    @else
+                        {{-- The event or schedule name is the owner's text, hence v-pre. --}}
+                        <span v-pre>{{ trans_choice('messages.gallery_live_body', $galleryPublished['count'], ['count' => $galleryPublished['count'], 'name' => $galleryPublished['name']]) }}</span>
+                    @endif
+                </p>
+            </div>
+        </div>
+
+        @if (! empty($galleryPublished['thumbs']))
+        <div class="mt-4 flex gap-2">
+            @foreach ($galleryPublished['thumbs'] as $thumb)
+            <img src="{{ $thumb }}" alt="" class="h-16 w-16 rounded-lg object-cover bg-gray-100 dark:bg-gray-700" loading="lazy">
+            @endforeach
+        </div>
+        @endif
+
+        <div class="mt-4 flex flex-wrap gap-3">
+            <x-secondary-link href="{{ $galleryPublished['edit_url'] }}">
+                {{ __('messages.edit_gallery') }}
+            </x-secondary-link>
+            @if (! empty($galleryPublished['url']))
+            <x-brand-link href="{{ $galleryPublished['url'] }}" target="_blank">
+                {{ __('messages.view_gallery') }}
+            </x-brand-link>
+            @endif
+        </div>
+    </div>
+</div>
+@endif
+
 {{-- Flashed by RoleController::update() when the owner picks a new event animation: the page
      looks its best right now, so invite them to share it while they are proud of it. --}}
 @php $listAnimationSaved = session('list_animation_saved'); @endphp

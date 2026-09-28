@@ -249,7 +249,7 @@ class GuestImagePerformanceTest extends TestCase
         $section = $m[1];
 
         // A real link to the full-size original: what a click opens without JavaScript.
-        $this->assertStringContainsString('<a href="'.url('/storage/flyer_abc.png').'" data-flyer-open', $section);
+        $this->assertStringContainsString('<a href="'.url('/storage/flyer_abc.png').'" data-lightbox-set="flyer"', $section);
 
         $flyer = $this->imgTag($section, 'flyer_abc_w960.webp');
         $this->assertStringContainsString('src="'.url('/storage/flyer_abc_w960.webp').'"', $flyer);
@@ -262,10 +262,11 @@ class GuestImagePerformanceTest extends TestCase
         $this->assertStringContainsString('fetchpriority="high"', $flyer);
         $this->assertStringNotContainsString('loading="lazy"', $flyer);
 
-        // The Alpine lightbox is gone; the Vue app replacing it is mounted after the page.
+        // The Alpine lightbox is gone; the page's one shared viewer (partials/lightbox) is mounted
+        // after the page and opens any link carrying data-lightbox-set.
         $this->assertStringNotContainsString('flyerOpen', $html);
-        $this->assertStringContainsString('<div id="flyer-lightbox-app"></div>', $html);
-        $this->assertStringContainsString("closest('[data-flyer-open]')", $html);
+        $this->assertStringContainsString('<div id="es-lightbox-app"></div>', $html);
+        $this->assertStringContainsString("closest('[data-lightbox-set]')", $html);
     }
 
     public function test_a_flyer_without_derivatives_is_still_eager_and_linked(): void
@@ -329,6 +330,19 @@ class GuestImagePerformanceTest extends TestCase
 
         $plain = $this->createEvent($headerOnly, ['name' => 'Winter Session', 'creator_role_id' => $headerOnly->id]);
         $this->assertSame(1, $this->highPriorityCount($this->page($this->guestEventUrl($headerOnly, $plain))), 'event without one: the hero');
+
+        // With a gallery and no flyer, the gallery leads the page, so its first photo takes the
+        // hero's high priority rather than adding a second.
+        foreach ([0, 1] as $i) {
+            \App\Models\GalleryImage::withoutEvents(fn () => \App\Models\GalleryImage::create([
+                'role_id' => $headerOnly->id, 'event_id' => $plain->id, 'filename' => 'gallery_'.$i.'.jpg',
+                'width' => 1200, 'height' => 800, 'sort_order' => $i,
+            ]));
+        }
+        $html = $this->page($this->guestEventUrl($headerOnly, $plain));
+        $this->assertSame(1, $this->highPriorityCount($html), 'event with a gallery and no flyer: the first photo');
+        $this->assertStringContainsString('fetchpriority="high"', $this->imgTag($html, 'gallery_0.jpg'));
+        $this->assertStringContainsString('loading="lazy"', $this->imgTag($html, 'gallery_1.jpg'));
     }
 
     public function test_performer_and_venue_cards_use_derivatives_and_working_headers(): void

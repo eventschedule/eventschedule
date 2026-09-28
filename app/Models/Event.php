@@ -10,6 +10,7 @@ use App\Jobs\SyncEventToMicrosoftCalendar;
 use App\Services\TicketVolumeDiscount;
 use App\Traits\HasImageVariants;
 use App\Utils\EventTextGenerator;
+use App\Utils\GalleryUtils;
 use App\Utils\ImageUtils;
 use App\Utils\MarkdownUtils;
 use App\Utils\MoneyUtils;
@@ -593,6 +594,11 @@ class Event extends Model
         });
 
         static::deleting(function ($event) {
+            // Before the row goes: gallery_images.event_id cascades in the database, which would
+            // leave every photo's file on the disk. Drafts too - an unsaved upload aimed at this
+            // event has nowhere left to be committed to.
+            GalleryUtils::purge(GalleryImage::where('event_id', $event->id));
+
             // Cancel active boost campaigns on Meta and issue refunds
             $activeCampaigns = $event->boostCampaigns()
                 ->unsettled()
@@ -984,6 +990,32 @@ class Event extends Model
     public function photos()
     {
         return $this->hasMany(EventPhoto::class);
+    }
+
+    /**
+     * The organizer's gallery (not fan photos - those are photos()), committed rows only, in the
+     * order the organizer arranged them.
+     */
+    public function galleryImages()
+    {
+        return $this->hasMany(GalleryImage::class)->whereNull('draft_token')->orderBy('sort_order')->orderBy('id');
+    }
+
+    /**
+     * Whether guests see this event's gallery: it has photos and the event's OWNING schedule
+     * (ticketingRole()) is on a paid plan. Never the schedule the page is viewed through, so the
+     * same event answers the same on a venue's, a talent's and a curator's subdomain. A
+     * downgraded schedule keeps its photos; they are hidden until it upgrades again.
+     */
+    public function showsGallery(): bool
+    {
+        if (! $this->exists || ! $this->ticketingRole()?->isPro()) {
+            return false;
+        }
+
+        return $this->relationLoaded('galleryImages')
+            ? $this->galleryImages->isNotEmpty()
+            : $this->galleryImages()->exists();
     }
 
     public function approvedPhotos()
@@ -2818,10 +2850,18 @@ class Event extends Model
      *
      * @return array{url: string, width?: int, height?: int}|null
      */
-    public function shareImage(?Role $viewingRole = null): ?array
+    public function shareImage(?Role $viewingRole = null, bool $withGallery = true): ?array
     {
         if ($this->flyer_image_url) {
             return SeoUtils::imageObject($this->flyer_image_url, $this->imageSourceDimensions());
+        }
+
+        // With no flyer the gallery takes the flyer's place at the top of the page
+        // (event/show-guest.blade.php), so its first photo is the picture the page leads with.
+        // Not for the compact nodes a schedule page emits per upcoming event ($withGallery false),
+        // where it would be a query per event.
+        if ($withGallery && $this->showsGallery() && ($first = $this->galleryImages->first())) {
+            return SeoUtils::imageObject($first->url(), $first->width && $first->height ? [$first->width, $first->height] : null);
         }
 
         $role = $this->pagePhotoRoles($viewingRole)->first(fn (Role $role) => ! self::isDeletedOrDeclined($role));
@@ -4836,8 +4876,15 @@ class Event extends Model
             $node['location'] = $location;
         }
 
-        if ($image = SeoUtils::schemaImageObject($this->shareImage($viewingRole))) {
+        if ($image = SeoUtils::schemaImageObject($this->shareImage($viewingRole, ! $compact))) {
             $node['image'] = $image;
+        }
+
+        // The page's own node lists the gallery too, which Google Images reads (with each photo's
+        // credit). Never the compact nodes a schedule page emits per upcoming event: one gallery
+        // query per event there. A single object stays a single object when there is no gallery.
+        if (! $compact && $this->showsGallery()) {
+            $node['image'] = SeoUtils::galleryImageList($node['image'] ?? null, $this->galleryImages);
         }
 
         if ($organizer = $this->getSchemaOrganizer($lang, $compact ? $viewingRole : null)) {

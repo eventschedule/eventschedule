@@ -3,6 +3,7 @@
 namespace App\Console\Commands;
 
 use App\Models\Event;
+use App\Models\GalleryImage;
 use App\Models\Role;
 use App\Utils\ImageUtils;
 use Carbon\Carbon;
@@ -35,6 +36,9 @@ use Illuminate\Support\Facades\Log;
  * ImageUtils::BANNER_VARIANT_WIDTHS; or `all` three. The background comes first when an operator
  * runs them one at a time: it is the schedule page's LCP image on a phone.
  *
+ * `--gallery` walks the organizer gallery's committed photos (GalleryImage) instead. Its rows are
+ * written without events by BackupService's restore, which is what leaves them to this command.
+ *
  * `--dimensions` builds nothing. It records the original's size (`src`) on rows that lack one -
  * those built before the pipeline recorded it - reading only the head of each original
  * (ImageUtils::storedImageDimensions()), never decoding or re-encoding it. That size is what lets
@@ -50,6 +54,7 @@ class BackfillImageVariants extends Command
 {
     protected $signature = 'images:backfill-variants
         {--roles : Process schedule images instead of event flyers (the profile photo unless --slot says otherwise)}
+        {--gallery : Process organizer gallery photos instead of event flyers}
         {--slot=profile : With --roles, which image: profile, header, background or all}
         {--dimensions : Only record the size of originals whose size is not recorded yet, generating nothing}
         {--animated : Re-check every GIF and WebP original, whatever is recorded, and record whether it is animated}
@@ -135,7 +140,18 @@ class BackfillImageVariants extends Command
             return self::FAILURE;
         }
 
-        if ($this->option('roles')) {
+        if ($this->option('roles') && $this->option('gallery')) {
+            $this->error('--roles and --gallery walk different tables, so run them separately.');
+
+            return self::FAILURE;
+        }
+
+        if ($this->option('gallery')) {
+            // Committed rows only: a draft may be deleted before anyone sees it, and its own
+            // created hook already queued its derivatives.
+            $this->announce(ImageUtils::VARIANT_WIDTHS, $dryRun);
+            $this->runPass('gallery', GalleryImage::query(), $chunk, $dryRun, fn (Builder $query) => $query->whereNull('draft_token'));
+        } elseif ($this->option('roles')) {
             foreach (self::ROLE_SLOTS[$slotOption] as $slot) {
                 $this->announce((new Role)->imageVariantWidths($slot), $dryRun);
                 $this->runPass(self::ROLE_PASS_LABELS[$slot], Role::query(), $chunk, $dryRun, fn (Builder $query) => null, $slot);
@@ -344,6 +360,10 @@ class BackfillImageVariants extends Command
      */
     private function tagFor(Model $row, string $slot): string
     {
+        if ($row instanceof GalleryImage) {
+            return 'gallery '.$row->id;
+        }
+
         if (! $row instanceof Role) {
             return (string) $row->id;
         }

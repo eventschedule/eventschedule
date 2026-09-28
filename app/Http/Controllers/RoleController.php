@@ -51,6 +51,7 @@ use App\Services\UsageTrackingService;
 use App\Utils\AiImageIssuance;
 use App\Utils\ColorUtils;
 use App\Utils\DateUtils;
+use App\Utils\GalleryUtils;
 use App\Utils\GeminiUtils;
 use App\Utils\HoneypotUtils;
 use App\Utils\ImageUtils;
@@ -743,6 +744,27 @@ class RoleController extends Controller
         DB::table('events')
             ->where('creator_role_id', $source->id)
             ->update(['creator_role_id' => $target->id]);
+
+        // Gallery rows follow: an event's photos belong to its (now re-pointed) owner, and the
+        // source schedule's own gallery is appended after the target's, which would otherwise
+        // take them with it when the source row is deleted below (role_id cascades).
+        DB::table('gallery_images')
+            ->where('role_id', $source->id)
+            ->whereNotNull('event_id')
+            ->update(['role_id' => $target->id]);
+
+        $targetGallerySize = (int) DB::table('gallery_images')
+            ->where('role_id', $target->id)
+            ->whereNull('event_id')
+            ->max('sort_order');
+
+        DB::table('gallery_images')
+            ->where('role_id', $source->id)
+            ->whereNull('event_id')
+            ->update([
+                'role_id' => $target->id,
+                'sort_order' => DB::raw('sort_order + '.($targetGallerySize + 1)),
+            ]);
 
         // Whether the source's nominal owner actually runs it, decided BEFORE the pivots move.
         // canMergeRoles only requires the source to be UNCLAIMED, and an unclaimed role can still
@@ -6132,9 +6154,28 @@ class RoleController extends Controller
             $role->save();
         }
 
+        // The schedule's own gallery (GalleryUtils::sync()): the photos this form uploaded as
+        // drafts are committed in the order it posted, and the ones it no longer lists removed.
+        $gallery = $request->has('gallery_images')
+            ? GalleryUtils::sync($role, null, $request->input('gallery_images'), $request->input('gallery_draft_token'), $request->user(), $request->input('gallery_known_ids'))
+            : null;
+
         AuditService::log(AuditService::SCHEDULE_UPDATE, auth()->id(), 'Role', $role->id, null, null, $role->name);
 
         $redirect = redirect(route('role.view_admin', ['subdomain' => $role->subdomain, 'tab' => 'schedule']));
+
+        // First photos published: a panel with a link to see them, as for an event's gallery.
+        if ($gallery && $gallery['before'] === 0 && $gallery['after'] > 0) {
+            $role->load('galleryImages');
+            $redirect->with('gallery_published', [
+                'name' => $role->translatedName(),
+                'count' => $gallery['after'],
+                'is_hidden' => ! $role->getGuestUrl(),
+                'thumbs' => $role->galleryImages->take(4)->map(fn ($image) => $image->thumbUrl())->all(),
+                'url' => $role->getGuestUrl() ? $role->getGuestUrl().'#gp-gallery' : null,
+                'edit_url' => route('role.edit', ['subdomain' => $role->subdomain]).'#section-gallery',
+            ]);
+        }
 
         // A new event animation is the moment the page looks its best, so the schedule tab opens
         // with an invitation to share it. Only for a schedule with a public page to share.
@@ -6147,6 +6188,10 @@ class RoleController extends Controller
         // name is refused only once its record is gone, which a deploy or a day does.
         if ($aiImageRejected) {
             return $redirect->with('error', __('messages.ai_image_not_applied'));
+        }
+
+        if ($galleryError = GalleryUtils::errorMessage($gallery)) {
+            return $redirect->with('error', $galleryError);
         }
 
         // Replaces the success toast: "saved" is implied either way, and a confirmation that did

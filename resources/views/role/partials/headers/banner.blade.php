@@ -120,6 +120,16 @@
                   <svg class="ml-1 h-3 w-3 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" /></svg>
                 </a>
                 @endif
+                {{-- The gallery sits below the calendar; this puts it one tap from the top. --}}
+                @if (($galleryImages ?? collect())->isNotEmpty())
+                <div class="mt-1">
+                  <a href="#gp-gallery" data-lightbox-set="gallery" @if ($galleryImages->count() > 1) data-lightbox-grid @else data-lightbox-index="0" @endif
+                     class="inline-flex items-center gap-1.5 text-sm text-[#33383C] dark:text-gray-300 hover:text-[var(--brand-blue)] hover:underline transition-colors duration-200">
+                    <svg class="w-4 h-4 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke-width="1.8" stroke="currentColor" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M6.827 6.175A2.31 2.31 0 015.186 7.23c-.38.054-.757.112-1.134.175C2.999 7.58 2.25 8.507 2.25 9.574V18a2.25 2.25 0 002.25 2.25h15A2.25 2.25 0 0021.75 18V9.574c0-1.067-.75-1.994-1.802-2.169a47.865 47.865 0 00-1.134-.175 2.31 2.31 0 01-1.64-1.055l-.822-1.316a2.192 2.192 0 00-1.736-1.039 48.774 48.774 0 00-5.232 0 2.192 2.192 0 00-1.736 1.039l-.821 1.316z" /><path stroke-linecap="round" stroke-linejoin="round" d="M16.5 12.75a4.5 4.5 0 11-9 0 4.5 4.5 0 019 0z" /></svg>
+                    {{ trans_choice('messages.gallery_photo_count', $galleryImages->count(), ['count' => $galleryImages->count()]) }}
+                  </a>
+                </div>
+                @endif
               </div>
 
               {{-- Icons + Buttons together on same row (centered) --}}
@@ -335,6 +345,13 @@
                     </svg>
                     {{ $role->shortAddress() }}
                     <svg class="ml-1 h-3 w-3 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" /></svg>
+                  </a>
+                  @endif
+                  @if (($galleryImages ?? collect())->isNotEmpty())
+                  <a href="#gp-gallery" data-lightbox-set="gallery" @if ($galleryImages->count() > 1) data-lightbox-grid @else data-lightbox-index="0" @endif
+                     class="mt-1 flex w-fit items-center gap-1.5 text-sm text-[#33383C] dark:text-gray-300 hover:text-[var(--brand-blue)] hover:underline transition-colors duration-200">
+                    <svg class="w-4 h-4 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke-width="1.8" stroke="currentColor" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M6.827 6.175A2.31 2.31 0 015.186 7.23c-.38.054-.757.112-1.134.175C2.999 7.58 2.25 8.507 2.25 9.574V18a2.25 2.25 0 002.25 2.25h15A2.25 2.25 0 0021.75 18V9.574c0-1.067-.75-1.994-1.802-2.169a47.865 47.865 0 00-1.134-.175 2.31 2.31 0 01-1.64-1.055l-.822-1.316a2.192 2.192 0 00-1.736-1.039 48.774 48.774 0 00-5.232 0 2.192 2.192 0 00-1.736 1.039l-.821 1.316z" /><path stroke-linecap="round" stroke-linejoin="round" d="M16.5 12.75a4.5 4.5 0 11-9 0 4.5 4.5 0 019 0z" /></svg>
+                    {{ trans_choice('messages.gallery_photo_count', $galleryImages->count(), ['count' => $galleryImages->count()]) }}
                   </a>
                   @endif
                   {{-- Social icons (desktop - simple monochrome style) --}}

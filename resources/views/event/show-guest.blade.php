@@ -47,6 +47,12 @@
             : ($role->accent_color ?? '#4E81FA'));
     $contrastColor = accent_contrast_color($accentColor);
 
+    // The organizer's gallery, when the event's owning schedule is on a paid plan. With no flyer
+    // it takes the flyer's place at the top of the page, so a phone opens on a photo rather than on
+    // text; otherwise it follows the description.
+    $galleryImages = $event->showsGallery() ? $event->galleryImages : collect();
+    $galleryInFlyerSlot = $galleryImages->isNotEmpty() && ! $event->flyer_image_url;
+
     // Collect all approved photo data for lightbox navigation
     $allPhotoData = collect();
     foreach ($event->parts as $part) {
@@ -56,9 +62,9 @@
       }
       foreach ($partPhotos as $photo) {
         $allPhotoData->push([
-          'url' => $photo->photo_url,
-          'name' => $photo->submitterName(),
-          'date' => $photo->created_at->format('M j, Y g:ia'),
+          'src' => $photo->photo_url,
+          'thumb' => $photo->photo_url,
+          'meta' => $photo->submitterName().' · '.$photo->created_at->format('M j, Y g:ia'),
         ]);
       }
     }
@@ -68,9 +74,9 @@
     }
     foreach ($eventPhotos as $photo) {
       $allPhotoData->push([
-        'url' => $photo->photo_url,
-        'name' => $photo->submitterName(),
-        'date' => $photo->created_at->format('M j, Y g:ia'),
+        'src' => $photo->photo_url,
+        'thumb' => $photo->photo_url,
+        'meta' => $photo->submitterName().' · '.$photo->created_at->format('M j, Y g:ia'),
       ]);
     }
     @endphp
@@ -208,7 +214,7 @@
                  @if ($fallbackImageSrcset) srcset="{{ $fallbackImageSrcset }}" sizes="(min-width: 1024px) 380px, (min-width: 640px) calc(100vw - 40px), 100vw" @endif
                  alt="{{ $eventName }}"
                  class="w-full aspect-square object-cover"
-                 @if (! $event->flyer_image_url) fetchpriority="high" @endif/>
+                 @if (! $event->flyer_image_url && ! $galleryInFlyerSlot) fetchpriority="high" @endif/>
         </div>
         @endif
         @endif
@@ -1438,7 +1444,7 @@
              the 480, the 960 and the original (where it is wider) for the browser to choose from,
              the original's recorded size so the box keeps its shape before the file arrives, and
              fetchpriority="high" - never loading="lazy", which held it back until layout. The
-             link opens the full-size original: the flyer-lightbox app at the bottom of this page
+             link opens the full-size original: the shared viewer at the bottom of this page
              shows it in place, and without JavaScript the link simply goes there. The #gp-flyer
              id is a documented custom-CSS hook. pageWidth: an animated flyer is its original
              here, with no srcset, because every derivative is a still of its first frame. --}}
@@ -1448,7 +1454,7 @@
           $flyerSize = $event->imageSourceDimensions();
         @endphp
         <div id="gp-flyer" class="bg-white/95 dark:bg-gray-900/95 backdrop-blur-sm sm:rounded-2xl overflow-hidden">
-          <a href="{{ $event->flyer_image_url }}" data-flyer-open class="block">
+          <a href="{{ $event->flyer_image_url }}" data-lightbox-set="flyer" data-lightbox-index="0" class="block">
             <img src="{{ $event->getImageUrl(960, pageWidth: true) }}"
                  @if ($flyerSrcset) srcset="{{ $flyerSrcset }}" sizes="(min-width: 1024px) 564px, (min-width: 640px) calc(100vw - 40px), 100vw" @endif
                  @if ($flyerSize) width="{{ $flyerSize[0] }}" height="{{ $flyerSize[1] }}" @endif
@@ -1457,6 +1463,23 @@
                  fetchpriority="high"/>
           </a>
         </div>
+        @php
+          $flyerLightbox = [[
+            'src' => $event->flyer_image_url,
+            'srcset' => $flyerSrcset,
+            'thumb' => $event->getImageUrl(960, pageWidth: true),
+            'w' => $flyerSize[0] ?? null,
+            'h' => $flyerSize[1] ?? null,
+            'caption' => '',
+          ]];
+        @endphp
+        <script {!! nonce_attr() !!}>(window.EsLightboxSets = window.EsLightboxSets || {}).flyer = @json($flyerLightbox, JSON_UNESCAPED_UNICODE | JSON_HEX_TAG);</script>
+        @elseif ($galleryInFlyerSlot)
+        {{-- No flyer: the gallery leads the page instead, and its first photo is the page's one
+             high-priority image (the hero fallback in the other column gives it up). --}}
+        <section id="gp-gallery" aria-labelledby="es-gallery-title" class="bg-white/95 dark:bg-gray-900/95 backdrop-blur-sm sm:rounded-2xl p-6 sm:p-8 {{ $role->isRtl() ? 'rtl' : '' }}">
+          @include('partials.gallery-card', ['galleryImages' => $galleryImages, 'galleryVariant' => 'event', 'galleryName' => $eventName, 'galleryLabel' => $role->customLabel('gallery'), 'galleryPriority' => true, 'accentColor' => $accentColor])
+        </section>
         @endif
 
         {{-- Description --}}
@@ -1477,6 +1500,13 @@
             </div>
           </div>
         </article>
+        @endif
+
+        {{-- The organizer's gallery, after the description when a flyer leads the page. --}}
+        @if ($galleryImages->isNotEmpty() && ! $galleryInFlyerSlot)
+        <section id="gp-gallery" aria-labelledby="es-gallery-title" class="bg-white/95 dark:bg-gray-900/95 backdrop-blur-sm sm:rounded-2xl p-6 sm:p-8 {{ $role->isRtl() ? 'rtl' : '' }}">
+          @include('partials.gallery-card', ['galleryImages' => $galleryImages, 'galleryVariant' => 'event', 'galleryName' => $eventName, 'galleryLabel' => $role->customLabel('gallery'), 'galleryPriority' => false, 'accentColor' => $accentColor])
+        </section>
         @endif
 
         {{-- Agenda image --}}
@@ -1538,9 +1568,9 @@
                   <div class="mt-2 flex flex-wrap gap-2">
                     @foreach ($partPhotos as $photo)
                     <div class="flex flex-col">
-                      <button x-data @click="$dispatch('open-lightbox', { url: '{{ $photo->photo_url }}' })" class="block rounded-lg overflow-hidden max-w-full cursor-pointer hover:opacity-90 transition-opacity">
+                      <a href="{{ $photo->photo_url }}" data-lightbox-set="fan" class="block rounded-lg overflow-hidden max-w-full cursor-pointer hover:opacity-90 transition-opacity">
                         <img src="{{ $photo->photo_url }}" alt="{{ $part->nameInLanguage($displayLang, $eventTargetLang) }}" class="h-24 w-auto max-w-full rounded-lg object-cover" loading="lazy">
-                      </button>
+                      </a>
                       <p class="text-xs text-gray-500 dark:text-gray-400 mt-1">{{ $photo->submitterName() }}</p>
                     </div>
                     @endforeach
@@ -1732,9 +1762,9 @@
                   <div class="mt-2 flex flex-wrap gap-2">
                     @foreach ($partPhotos as $photo)
                     <div class="flex flex-col">
-                      <button x-data @click="$dispatch('open-lightbox', { url: '{{ $photo->photo_url }}' })" class="block rounded-lg overflow-hidden max-w-full cursor-pointer hover:opacity-90 transition-opacity">
+                      <a href="{{ $photo->photo_url }}" data-lightbox-set="fan" class="block rounded-lg overflow-hidden max-w-full cursor-pointer hover:opacity-90 transition-opacity">
                         <img src="{{ $photo->photo_url }}" alt="{{ $part->nameInLanguage($displayLang, $eventTargetLang) }}" class="h-24 w-auto max-w-full rounded-lg object-cover" loading="lazy">
-                      </button>
+                      </a>
                       <p class="text-xs text-gray-500 dark:text-gray-400 mt-1">{{ $photo->submitterName() }}</p>
                     </div>
                     @endforeach
@@ -2081,9 +2111,9 @@
           <div class="flex flex-wrap gap-3 mb-4">
             @foreach ($eventLevelPhotos as $photo)
             <div class="flex flex-col">
-              <button x-data @click="$dispatch('open-lightbox', { url: '{{ $photo->photo_url }}' })" class="block rounded-lg overflow-hidden max-w-full cursor-pointer hover:opacity-90 transition-opacity">
+              <a href="{{ $photo->photo_url }}" data-lightbox-set="fan" class="block rounded-lg overflow-hidden max-w-full cursor-pointer hover:opacity-90 transition-opacity">
                 <img src="{{ $photo->photo_url }}" alt="{{ $eventName }}" class="h-32 sm:h-40 w-auto max-w-full rounded-lg object-cover" loading="lazy">
-              </button>
+              </a>
               <p class="text-xs text-gray-500 dark:text-gray-400 mt-1">{{ $photo->submitterName() }}</p>
             </div>
             @endforeach
@@ -2095,7 +2125,7 @@
                  undated page fills in with the next occurrence, so it linked a dated gallery - a
                  page of its own - that changed every week. --}}
             <a href="{{ $event->getPhotoGalleryUrl($subdomain, ($requestedOccurrence ?? null) ?: false) }}" class="inline-flex items-center gap-1 text-sm font-medium text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-200 transition-colors">
-              {{ __('messages.view_photo_gallery') }}
+              {{ __('messages.view_guest_photos') }}
               <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="w-4 h-4 {{ $role->isRtl() ? 'rotate-180' : '' }}" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M13.5 4.5 21 12m0 0-7.5 7.5M21 12H3" /></svg>
             </a>
           </div>
@@ -2314,70 +2344,10 @@
     </div>
   </div>
 
-  {{-- Shared photo lightbox --}}
+  {{-- Fan photos in the shared viewer (partials/lightbox, included at the end of the page). Each
+       thumbnail is a link to its photo, found in this set by its address. --}}
   @if ($allPhotoData->count() > 0)
-  <div x-data="{
-         lbOpen: false,
-         lbPhotos: {{ Js::from($allPhotoData->values()) }},
-         lbIndex: 0,
-         lbTouchStartX: 0,
-         lbRtl: {{ $role->isRtl() ? 'true' : 'false' }},
-         openAt(url) {
-           let idx = this.lbPhotos.findIndex(p => p.url === url);
-           this.lbIndex = idx >= 0 ? idx : 0;
-           this.lbOpen = true;
-           document.body.style.overflow = 'hidden';
-         },
-         close() {
-           this.lbOpen = false;
-           document.body.style.overflow = '';
-         },
-         prev() {
-           this.lbIndex = (this.lbIndex - 1 + this.lbPhotos.length) % this.lbPhotos.length;
-         },
-         next() {
-           this.lbIndex = (this.lbIndex + 1) % this.lbPhotos.length;
-         }
-       }"
-       @open-lightbox.window="openAt($event.detail.url)"
-       @keydown.escape.window="if (lbOpen) close()"
-       @keydown.left.window="if (lbOpen) { lbRtl ? next() : prev() }"
-       @keydown.right.window="if (lbOpen) { lbRtl ? prev() : next() }">
-    <template x-teleport="body">
-      <div x-show="lbOpen" x-cloak
-           @click.self="close()"
-           class="fixed inset-0 z-[70] flex items-center justify-center bg-black/90"
-           style="font-family: sans-serif"
-           @touchstart.passive="lbTouchStartX = $event.changedTouches[0].screenX"
-           @touchend="
-             let dx = $event.changedTouches[0].screenX - lbTouchStartX;
-             if (Math.abs(dx) > 50) {
-               if (lbRtl) { dx > 0 ? next() : prev(); }
-               else { dx > 0 ? prev() : next(); }
-             }
-           ">
-        {{-- Close button --}}
-        <button @click="close()" class="absolute top-3 {{ $role->isRtl() ? 'left-3' : 'right-3' }} text-white/80 hover:text-white text-4xl leading-none z-10 w-10 h-10 flex items-center justify-center">&times;</button>
-        {{-- Counter --}}
-        <div x-show="lbPhotos.length > 1" class="absolute top-4 left-1/2 -translate-x-1/2 text-white/70 text-sm tabular-nums z-10" x-text="(lbIndex + 1) + ' / ' + lbPhotos.length"></div>
-        {{-- Prev button (desktop) --}}
-        <button x-show="lbPhotos.length > 1" @click.stop="lbRtl ? next() : prev()" class="hidden sm:flex absolute {{ $role->isRtl() ? 'right-3' : 'left-3' }} top-1/2 -translate-y-1/2 w-10 h-10 items-center justify-center rounded-full bg-white/10 hover:bg-white/20 text-white transition-colors z-10">
-          <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="w-6 h-6" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M15.75 19.5 8.25 12l7.5-7.5" /></svg>
-        </button>
-        {{-- Next button (desktop) --}}
-        <button x-show="lbPhotos.length > 1" @click.stop="lbRtl ? prev() : next()" class="hidden sm:flex absolute {{ $role->isRtl() ? 'left-3' : 'right-3' }} top-1/2 -translate-y-1/2 w-10 h-10 items-center justify-center rounded-full bg-white/10 hover:bg-white/20 text-white transition-colors z-10">
-          <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="w-6 h-6" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="m8.25 4.5 7.5 7.5-7.5 7.5" /></svg>
-        </button>
-        {{-- Image --}}
-        <img :src="lbPhotos[lbIndex].url" class="max-w-[96vw] max-h-[90vh] object-contain pointer-events-none" alt="">
-        {{-- Caption --}}
-        <div class="absolute bottom-0 inset-x-0 flex items-center justify-between px-4 py-3 text-sm text-white/80 z-10" @click.stop>
-          <span x-text="lbPhotos[lbIndex].name"></span>
-          <span x-text="lbPhotos[lbIndex].date"></span>
-        </div>
-      </div>
-    </template>
-  </div>
+  <script {!! nonce_attr() !!}>(window.EsLightboxSets = window.EsLightboxSets || {}).fan = @json($allPhotoData->values(), JSON_UNESCAPED_UNICODE | JSON_HEX_TAG);</script>
   @endif
 
   </main>
@@ -2712,8 +2682,8 @@
     @include('partials.follow-consent-modal')
 @endif
 
-@if ($event->flyer_image_url)
-    @include('event.partials.flyer-lightbox')
+@if ($event->flyer_image_url || $galleryImages->isNotEmpty() || $allPhotoData->count() > 0)
+    @include('partials.lightbox', ['rtl' => $role->isRtl()])
 @endif
 
 </x-app-guest-layout>

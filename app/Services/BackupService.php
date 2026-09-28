@@ -14,6 +14,7 @@ use App\Models\EventPoll;
 use App\Models\EventPollVote;
 use App\Models\EventSeatingMap;
 use App\Models\EventVideo;
+use App\Models\GalleryImage;
 use App\Models\GiftCard;
 use App\Models\Group;
 use App\Models\Newsletter;
@@ -36,6 +37,7 @@ use App\Models\Ticket;
 use App\Models\TicketWaitlist;
 use App\Utils\CountryUtils;
 use App\Utils\CssUtils;
+use App\Utils\GalleryUtils;
 use App\Utils\JsonUtils;
 use App\Utils\MarkdownUtils;
 use App\Utils\TextUtils;
@@ -990,6 +992,46 @@ class BackupService
                 }
             }
         }
+
+        if ($gallery = $this->collectGallery($role->galleryImages()->get(), $imageFiles)) {
+            $roleData['_gallery'] = $gallery;
+        }
+    }
+
+    /**
+     * An organizer gallery's committed photos, in order, for the archive. Drafts are never
+     * exported: they belong to an edit form that was never saved.
+     *
+     * @param  iterable<GalleryImage>  $images
+     */
+    private function collectGallery(iterable $images, array &$imageFiles): array
+    {
+        $gallery = [];
+
+        foreach ($images as $image) {
+            $raw = $image->getAttributes()['filename'] ?? null;
+            if (! $raw || str_starts_with($raw, 'http')) {
+                continue;
+            }
+
+            $storagePath = config('filesystems.default') == 'local' ? 'public/'.$raw : $raw;
+            if (! Storage::exists($storagePath)) {
+                continue;
+            }
+
+            $imageKey = 'images/'.$raw;
+            $imageFiles[$imageKey] = $storagePath;
+            $gallery[] = [
+                '_image' => $imageKey,
+                'caption' => $image->caption,
+                'credit' => $image->credit,
+                'width' => $image->width,
+                'height' => $image->height,
+                'color' => $image->color,
+            ];
+        }
+
+        return $gallery;
     }
 
     private function collectEventImages(Event $event, array &$eventData, array &$imageFiles): void
@@ -1039,6 +1081,10 @@ class BackupService
         }
         if (! empty($photosData)) {
             $eventData['photos'] = $photosData;
+        }
+
+        if ($gallery = $this->collectGallery($event->galleryImages()->get(), $imageFiles)) {
+            $eventData['_gallery'] = $gallery;
         }
     }
 
@@ -2954,6 +3000,56 @@ class BackupService
         }
 
         $role->saveQuietly();
+
+        $this->importGallery($roleData['_gallery'] ?? [], $role, null, $zip);
+    }
+
+    /**
+     * Restore an organizer gallery under new filenames, in the archive's order. Written without
+     * events, like the fan photos: `images:backfill-variants --gallery` builds the derivatives.
+     * An event's photos belong to the schedule the event was restored under.
+     */
+    private function importGallery(mixed $gallery, Role $owner, ?Event $event, \ZipArchive $zip): void
+    {
+        if (! is_array($gallery)) {
+            return;
+        }
+
+        $position = 0;
+
+        foreach (array_slice($gallery, 0, GalleryUtils::maxImages()) as $item) {
+            $imageKey = is_array($item) ? ($item['_image'] ?? null) : null;
+            if (! is_string($imageKey) || $imageKey === '') {
+                continue;
+            }
+
+            $imageData = $zip->getFromName($imageKey);
+            if ($imageData === false || ! $this->isValidImageData($imageData)) {
+                continue;
+            }
+
+            $extension = $this->safeImageExtension($imageKey);
+            $filename = strtolower('gallery_'.Str::random(32).'.'.$extension);
+
+            Storage::put(config('filesystems.default') == 'local' ? 'public/'.$filename : $filename, $imageData);
+
+            $text = fn ($value, $max) => is_string($value) && trim($value) !== '' ? mb_substr(trim($value), 0, $max) : null;
+            $color = is_string($item['color'] ?? null) && preg_match('/^#[0-9a-f]{6}$/i', $item['color']) ? strtolower($item['color']) : null;
+
+            GalleryImage::withoutEvents(function () use ($owner, $event, $filename, $item, $text, $color, &$position) {
+                GalleryImage::create([
+                    'role_id' => $owner->id,
+                    'event_id' => $event?->id,
+                    'filename' => $filename,
+                    'caption' => $text($item['caption'] ?? null, 255),
+                    'credit' => $text($item['credit'] ?? null, 100),
+                    'width' => is_numeric($item['width'] ?? null) ? (int) $item['width'] : null,
+                    'height' => is_numeric($item['height'] ?? null) ? (int) $item['height'] : null,
+                    'color' => $color,
+                    'sort_order' => $position++,
+                ]);
+            });
+        }
     }
 
     private function importEventImages(array $eventData, Event $event, \ZipArchive $zip, array &$idMap): void
@@ -3046,6 +3142,11 @@ class BackupService
                     'is_approved' => $photoData['is_approved'] ?? true,
                 ]);
             });
+        }
+
+        $owner = $event->creator_role_id ? Role::find($event->creator_role_id) : null;
+        if ($owner) {
+            $this->importGallery($eventData['_gallery'] ?? [], $owner, $event, $zip);
         }
     }
 

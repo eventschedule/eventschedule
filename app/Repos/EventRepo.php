@@ -95,6 +95,8 @@ class EventRepo
         $clonedEventData['flyer_image_url'] = null;
         $clonedEventData['sponsor_logos'] = null;
         $clonedEventData['rsvp_sold'] = 0;
+        // The photo gallery (GalleryImage) is deliberately not carried either: its photos are of
+        // the event being copied, and a clone's form starts with an empty gallery to fill.
 
         // Capture the source flyer's raw filename (not the accessor URL) so it can be
         // copied to a new physical file when the new event is saved. Demo flyers live

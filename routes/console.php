@@ -256,6 +256,11 @@ Schedule::call(function () {
     Artisan::call('app:cleanup-backups');
 })->daily()->name('app-cleanup-backups')->withoutOverlapping(30)->appendOutputTo(storage_path('logs/scheduler.log'));
 
+// Unsaved gallery uploads (GalleryUtils::sync()). Keep in sync with AppController::translateData().
+Schedule::call(function () {
+    Artisan::call('app:prune-gallery-drafts');
+})->daily()->name('app-prune-gallery-drafts')->withoutOverlapping(30)->appendOutputTo(storage_path('logs/scheduler.log'));
+
 // Keep in sync with AppController::translateData(). Daily is plenty: a video having embedding
 // switched off is not urgent, and the command no-ops without a YouTube key.
 Schedule::call(function () {

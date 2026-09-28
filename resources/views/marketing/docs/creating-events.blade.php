@@ -9,6 +9,7 @@
         <x-doc-nav-link href="#details">Details</x-doc-nav-link>
         <x-doc-nav-link href="#ai-details-generator">AI Details Generator</x-doc-nav-link>
         <x-doc-nav-link href="#venue">Venue</x-doc-nav-link>
+        <x-doc-nav-link href="#gallery">Gallery</x-doc-nav-link>
         <x-doc-nav-link href="#participants">Participants</x-doc-nav-link>
         <x-doc-nav-link href="#claim">Pages Created for Others</x-doc-nav-link>
         <x-doc-nav-link href="#recurring">Recurring</x-doc-nav-link>
@@ -81,6 +82,11 @@
                         <td><span class="font-semibold text-gray-900 dark:text-white">Venue</span></td>
                         <td>In-person location or online link</td>
                         <td>Always</td>
+                    </tr>
+                    <tr>
+                        <td><span class="font-semibold text-gray-900 dark:text-white">Gallery</span> <x-doc-badge plan="pro" /></td>
+                        <td>A photo gallery shown on the event page</td>
+                        <td>When you can edit the event. On a free schedule it explains the Pro plan, and it stays out of the way on your first event</td>
                     </tr>
                     <tr>
                         <td><span class="font-semibold text-gray-900 dark:text-white">Participants</span></td>
@@ -275,6 +281,45 @@
             <div class="doc-field">
                 <h4 class="font-semibold text-gray-900 dark:text-white mb-2">Venue Contact and Notifications</h4>
                 <p class="text-sm text-gray-500 dark:text-gray-400">You can store the venue's email, phone number, and website on the venue record. On the hosted platform, entering an email for a new venue reveals <strong class="text-gray-900 dark:text-white">"Send an email to notify them"</strong>, which tells the venue about the event and invites them to claim their page. On installs with SMS configured, a phone number offers <strong class="text-gray-900 dark:text-white">"Send an SMS to notify them"</strong> instead.</p>
+            </div>
+        </div>
+    </section>
+
+    <!-- Gallery -->
+    <section id="gallery" class="doc-section">
+        <h2 class="doc-heading">
+            <svg aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-5 h-5 text-gray-500 dark:text-gray-400 flex-shrink-0">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M2.25 15.75l5.159-5.159a2.25 2.25 0 013.182 0l5.159 5.159m-1.5-1.5l1.409-1.409a2.25 2.25 0 013.182 0l2.909 2.909m-18 3.75h16.5a1.5 1.5 0 001.5-1.5V6a1.5 1.5 0 00-1.5-1.5H3.75A1.5 1.5 0 002.25 6v12a1.5 1.5 0 001.5 1.5zm10.5-11.25h.008v.008h-.008V8.25zm.375 0a.375.375 0 11-.75 0 .375.375 0 01.75 0z" />
+            </svg>
+            Gallery
+            <x-doc-badge plan="pro" />
+        </h2>
+        <p class="text-gray-600 dark:text-gray-300 mb-6">An event can show one flyer, and the Gallery section adds as many photos as you like beside it, up to {{ \App\Utils\GalleryUtils::maxImages() }}: past editions, the room, the lineup. Guests see them on the event page and can open any photo full screen. The gallery is yours to curate; photos guests send in are separate and live under <a href="#fan-content" class="doc-link">Fan Content</a>.</p>
+
+        <div class="doc-fields">
+            <div class="doc-field">
+                <h3 class="font-semibold text-gray-900 dark:text-white mb-2">Adding Photos</h3>
+                <p class="text-sm text-gray-500 dark:text-gray-400">Click <strong class="text-gray-900 dark:text-white">Add photos</strong>, drag photos onto the section, or paste one. You can also start from <strong class="text-gray-900 dark:text-white">Add a photo gallery</strong> under the flyer in Details. Each photo uploads as soon as you add it, so you can keep editing while they finish. Large photos are resized in your browser before they upload, and the location a phone stores in a photo is removed before it is published. JPG, PNG, WebP and GIF work; an iPhone's HEIC photos are converted when you pick them from the phone itself.</p>
+            </div>
+            <div class="doc-field">
+                <h4 class="font-semibold text-gray-900 dark:text-white mb-2">Arranging, Captions and Credits</h4>
+                <p class="text-sm text-gray-500 dark:text-gray-400">The first photo leads the gallery and is shown largest, so drag the photos into the order you want. Click a photo to add a caption and a photographer credit, move it, or remove it; <strong class="text-gray-900 dark:text-white">Apply this credit to all photos</strong> saves typing when one photographer shot them all. A removed photo can be brought back with <strong class="text-gray-900 dark:text-white">Undo</strong>.</p>
+            </div>
+            <div class="doc-field">
+                <h4 class="font-semibold text-gray-900 dark:text-white mb-2">Fan Photos</h4>
+                <p class="text-sm text-gray-500 dark:text-gray-400">When guests have sent in photos that you approved, <strong class="text-gray-900 dark:text-white">Add from fan photos</strong> copies the ones you pick into the gallery, credited to whoever took them. The copy is the gallery's own, so rejecting the fan photo later does not remove it.</p>
+            </div>
+            <div class="doc-field">
+                <h4 class="font-semibold text-gray-900 dark:text-white mb-2">Publishing</h4>
+                <p class="text-sm text-gray-500 dark:text-gray-400">Nothing changes on the event page until you click <strong class="text-gray-900 dark:text-white">Save</strong>, the same as every other field on the form. If photos are still uploading when you save, the form waits for them. The first time a gallery is published, the schedule page shows a link to see it as guests do. A gallery belongs to the event, so every date of a recurring event shows the same photos, and duplicating an event starts its copy with an empty gallery.</p>
+            </div>
+            <div class="doc-field">
+                <h4 class="font-semibold text-gray-900 dark:text-white mb-2">On the Event Page</h4>
+                <p class="text-sm text-gray-500 dark:text-gray-400">Guests see a strip of photos they can swipe on a phone. On a wider screen the layout follows the number of photos: two or four sit side by side as equal tiles, and three or more lead with one large photo, with up to four beside it and a <strong class="text-gray-900 dark:text-white">+</strong> count on the last when there are more. With no flyer, the gallery takes the flyer's place at the top of the page. Any photo opens full screen, where guests can swipe, zoom and read the caption. Rename the heading with the <strong class="text-gray-900 dark:text-white">Gallery</strong> custom label, or hide it with the <code class="doc-inline-code">#gp-gallery</code> id (see <a href="{{ route('marketing.docs.schedule_styling') }}#hiding-sections" class="doc-link">Hiding sections</a>).</p>
+            </div>
+            <div class="doc-field">
+                <h4 class="font-semibold text-gray-900 dark:text-white mb-2">Plans</h4>
+                <p class="text-sm text-gray-500 dark:text-gray-400">Galleries are part of the Pro plan, decided by the schedule the event belongs to. If that schedule's plan ends, the photos are kept but hidden from guests, and you can still remove them; they come back when the schedule upgrades again.</p>
             </div>
         </div>
     </section>

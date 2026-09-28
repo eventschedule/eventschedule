@@ -4,6 +4,14 @@
         // Computed up top: the head-slot script below needs it (logo wall preview)
         // and it renders again in the Style > Advanced section further down.
         $logoWallRoles = $role->logoWallRoles();
+
+        // The schedule's own photo gallery (partials/gallery-section), on an existing schedule only:
+        // a new one is never on a paid plan, so the section would be nothing but an upsell during
+        // sign-up. Modes as on the event form.
+        if ($role->exists) {
+            $galleryState = \App\Utils\GalleryUtils::editorState($role, null, auth()->user());
+            $galleryMode = is_demo_mode() ? 'readonly' : ($role->isPro() ? 'edit' : (count($galleryState['images']) ? 'downgraded' : 'locked'));
+        }
     @endphp
 
     @vite([
@@ -1051,6 +1059,19 @@
                                 {{ __('messages.schedule_style') }}
                             </a>
                             @if ($role->exists)
+                            <a href="#section-gallery" class="section-nav-link" data-section="section-gallery">
+                                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-5 h-5">
+                                    <path stroke-linecap="round" stroke-linejoin="round" d="M2.25 15.75l5.159-5.159a2.25 2.25 0 013.182 0l5.159 5.159m-1.5-1.5l1.409-1.409a2.25 2.25 0 013.182 0l2.909 2.909m-18 3.75h16.5a1.5 1.5 0 001.5-1.5V6a1.5 1.5 0 00-1.5-1.5H3.75A1.5 1.5 0 002.25 6v12a1.5 1.5 0 001.5 1.5zm10.5-11.25h.008v.008h-.008V8.25zm.375 0a.375.375 0 11-.75 0 .375.375 0 01.75 0z" />
+                                </svg>
+                                {{ __('messages.gallery') }}
+                                @if ($galleryMode === 'locked')
+                                <x-lock-badge tier="pro" />
+                                @elseif (count($galleryState['images']))
+                                <span class="ms-auto inline-flex min-w-[1.25rem] items-center justify-center rounded-full bg-gray-200 dark:bg-gray-700 px-1.5 text-xs font-semibold text-gray-600 dark:text-gray-300">{{ count($galleryState['images']) }}</span>
+                                @elseif (now()->lt(\App\Utils\GalleryUtils::NEW_UNTIL))
+                                <span class="ms-auto inline-flex items-center rounded-full bg-blue-50 dark:bg-blue-500/10 px-2 py-0.5 text-xs font-semibold text-[var(--brand-blue)]">{{ __('messages.new') }}</span>
+                                @endif
+                            </a>
                             <a href="#section-links" class="section-nav-link" data-section="section-links">
                                 <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-5 h-5">
                                     <path stroke-linecap="round" stroke-linejoin="round" d="M13.19 8.688a4.5 4.5 0 011.242 7.244l-4.5 4.5a4.5 4.5 0 01-6.364-6.364l1.757-1.757m13.35-.622l1.757-1.757a4.5 4.5 0 00-6.364-6.364l-4.5 4.5a4.5 4.5 0 001.242 7.244" />
@@ -2323,6 +2344,30 @@
                 </div>
 
                 @if ($role->exists)
+                <button type="button" class="mobile-section-header" data-section="section-gallery">
+                    <span class="flex items-center gap-2 text-sm font-medium text-gray-700 dark:text-gray-300">
+                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-5 h-5">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M2.25 15.75l5.159-5.159a2.25 2.25 0 013.182 0l5.159 5.159m-1.5-1.5l1.409-1.409a2.25 2.25 0 013.182 0l2.909 2.909m-18 3.75h16.5a1.5 1.5 0 001.5-1.5V6a1.5 1.5 0 00-1.5-1.5H3.75A1.5 1.5 0 002.25 6v12a1.5 1.5 0 001.5 1.5zm10.5-11.25h.008v.008h-.008V8.25zm.375 0a.375.375 0 11-.75 0 .375.375 0 01.75 0z" />
+                        </svg>
+                        {{ __('messages.gallery') }}
+                        @if ($galleryMode === 'locked')
+                        <x-lock-badge tier="pro" />
+                        @endif
+                    </span>
+                    <svg class="w-5 h-5 text-gray-400 transition-transform duration-200 accordion-chevron" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
+                    </svg>
+                </button>
+                <div id="section-gallery" class="section-content lg:mt-0">
+                    @include('partials.gallery-section', [
+                        'galleryContext' => 'schedule',
+                        'galleryMode' => $galleryMode,
+                        'galleryRole' => $role,
+                        'galleryCanUpgrade' => (bool) config('app.hosted'),
+                        'galleryImageCount' => count($galleryState['images']),
+                    ])
+                </div>
+
                 <button type="button" class="mobile-section-header" data-section="section-links">
                     <span class="flex items-center gap-2 text-sm font-medium text-gray-700 dark:text-gray-300">
                         <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-5 h-5">
@@ -5625,6 +5670,92 @@
 </x-app-admin-layout>
 
 <script src="{{ asset('js/sortable.min.js') }}" {!! nonce_attr() !!}></script>
+
+@if ($role->exists && $galleryMode !== 'locked')
+{{-- The Gallery section's editor. This form is not a Vue app, so the editor is an island of its
+     own inside the form (#gallery-editor-app), which is how its hidden gallery_images field is
+     posted with everything else. --}}
+<script {!! nonce_attr() !!}>window.Vue || document.write('<script src="{{ asset('js/vue.global.prod.js') }}" {!! nonce_attr() !!}><\/script>')</script>
+@include('partials.gallery-editor')
+@php $galleryUploadUrl = route('gallery.upload', ['subdomain' => $role->subdomain]); @endphp
+<script {!! nonce_attr() !!}>
+(function () {
+    var mountEl = document.getElementById('gallery-editor-app');
+    var form = document.getElementById('edit-form');
+
+    if (! mountEl || ! form || ! window.EsGallery) {
+        return;
+    }
+
+    var store = window.EsGallery.createStore({
+        uploadUrl: @json($galleryUploadUrl),
+        fanPhotosUrl: null,
+        target: 'schedule',
+        eventHash: null,
+        draftToken: @json($galleryState['token']),
+        csrf: @json(csrf_token()),
+        max: @json(\App\Utils\GalleryUtils::maxImages()),
+        maxBytes: @json(\App\Utils\GalleryUtils::maxUploadBytes()),
+        initialImages: @json($galleryState['images']),
+        knownIds: @json($galleryState['known']),
+        onChange: function () { if (window._markFormDirty) { window._markFormDirty(); } },
+    });
+
+    Vue.createApp({
+        data: function () {
+            return { galleryStore: store, galleryUnsavedLabel: @json(__('messages.gallery_unsaved_schedule')) };
+        },
+    }).component('gallery-editor', window.EsGallery.component).mount(mountEl);
+
+    // Photos still uploading would be missing from what this save commits, so the save waits for
+    // them. In the capture phase, so it runs before the form's other submit listeners - the one
+    // that clears the leave-page warning and the one that turns every button into "Saving...".
+    var waiting = false;
+    var finishing = @json(__('messages.gallery_finishing'));
+    form.addEventListener('submit', function (e) {
+        if (store.pendingCount() === 0) {
+            return;
+        }
+
+        e.preventDefault();
+        e.stopImmediatePropagation();
+
+        if (waiting) {
+            return;
+        }
+
+        waiting = true;
+        var buttons = form.querySelectorAll('button[type="submit"]');
+        var labels = [];
+        buttons.forEach(function (button, i) {
+            labels[i] = button.innerHTML;
+            button.disabled = true;
+            button.textContent = finishing.replace(':count', store.pendingCount());
+        });
+
+        store.whenIdle().then(function () {
+            waiting = false;
+            buttons.forEach(function (button, i) {
+                button.disabled = false;
+                button.innerHTML = labels[i];
+            });
+
+            // Some photos did not make it: saving now would leave them out without a word.
+            if (store.failedCount() > 0) {
+                store.reportFailedBeforeSave();
+                var section = document.getElementById('section-gallery');
+                var link = document.querySelector('.section-nav-link[data-section="section-gallery"]');
+                if (link) { link.click(); }
+                if (section) { section.scrollIntoView({ behavior: 'smooth', block: 'start' }); }
+                return;
+            }
+
+            form.requestSubmit();
+        });
+    }, true);
+})();
+</script>
+@endif
 
 <script {!! nonce_attr() !!}>
 var isNewSchedule = {{ $role->exists ? 'false' : 'true' }};

@@ -9,6 +9,7 @@ use App\Traits\HasImageVariants;
 use App\Traits\RoleBillable;
 use App\Utils\CssUtils;
 use App\Utils\CustomFieldUtils;
+use App\Utils\GalleryUtils;
 use App\Utils\GeminiUtils;
 use App\Utils\ImageUtils;
 use App\Utils\MarkdownUtils;
@@ -726,6 +727,14 @@ class Role extends Model implements MustVerifyEmail
         });
 
         static::deleting(function ($model) {
+            // Gallery rows cascade in the database, which leaves their files behind: the
+            // schedule's own gallery, drafts uploaded through it, and the galleries of the events
+            // it created (events.creator_role_id cascades too, without Event's hooks).
+            GalleryUtils::purge(GalleryImage::query()->where(function ($query) use ($model) {
+                $query->where('role_id', $model->id)
+                    ->orWhereIn('event_id', Event::where('creator_role_id', $model->id)->select('id'));
+            }));
+
             // Cancel active boost campaigns on Meta and issue refunds
             $activeCampaigns = $model->boostCampaigns()
                 ->unsettled()
@@ -967,6 +976,30 @@ class Role extends Model implements MustVerifyEmail
     public function openTransfer(): ?RoleTransfer
     {
         return $this->transfers()->open()->latest('id')->first();
+    }
+
+    /**
+     * The schedule's own photo gallery (not its events' galleries), committed rows only, in the
+     * order the owner arranged them.
+     */
+    public function galleryImages()
+    {
+        return $this->hasMany(GalleryImage::class)->whereNull('event_id')->whereNull('draft_token')->orderBy('sort_order')->orderBy('id');
+    }
+
+    /**
+     * Whether guests see this schedule's gallery: it has photos and the schedule is on a paid
+     * plan. A downgraded schedule keeps its photos, hidden until it upgrades again.
+     */
+    public function showsGallery(): bool
+    {
+        if (! $this->exists || ! $this->isPro()) {
+            return false;
+        }
+
+        return $this->relationLoaded('galleryImages')
+            ? $this->galleryImages->isNotEmpty()
+            : $this->galleryImages()->exists();
     }
 
     public function events()
@@ -2709,8 +2742,13 @@ class Role extends Model implements MustVerifyEmail
             ? $this->background_image_url
             : '';
 
+        $gallery = $header ? null : ($this->showsGallery() ? $this->galleryImages->first() : null);
+
         return match (true) {
             (bool) $header => SeoUtils::imageObject($header, $this->imageSourceDimensions('header')),
+            // A wide photo the page shows (#gp-gallery) before the square profile photo, which a
+            // large link-preview card crops badly.
+            (bool) $gallery => SeoUtils::imageObject($gallery->url(), $gallery->width && $gallery->height ? [$gallery->width, $gallery->height] : null),
             (bool) $this->profile_image_url => SeoUtils::imageObject($this->profile_image_url, $this->imageSourceDimensions()),
             (bool) $background => SeoUtils::imageObject($background, $this->imageSourceDimensions('background')),
             default => null,
@@ -3365,6 +3403,10 @@ class Role extends Model implements MustVerifyEmail
 
         if ($image = SeoUtils::schemaImageObject($this->shareImage())) {
             $node['image'] = $image;
+        }
+
+        if ($this->showsGallery()) {
+            $node['image'] = SeoUtils::galleryImageList($node['image'] ?? null, $this->galleryImages);
         }
 
         if ($this->isVenue()) {
@@ -4215,6 +4257,9 @@ class Role extends Model implements MustVerifyEmail
             'filters' => 'Filter Events',
             'follow' => 'Follow',
             'free_entry' => 'Free entry',
+            // The organizer's photo gallery (GalleryImage), on the event page and the schedule
+            // page. Not photo_gallery, which titles the page of fan photos.
+            'gallery' => 'Gallery',
             'get_tickets' => 'Get Tickets',
             'load_more' => 'Load More',
             'no_scheduled_events' => 'No scheduled events',

@@ -16,6 +16,7 @@
         <x-doc-nav-link href="#address">Address</x-doc-nav-link>
         <x-doc-nav-link href="#merge">Merging Duplicates</x-doc-nav-link>
         <x-doc-nav-link href="#style">Style</x-doc-nav-link>
+        <x-doc-nav-link href="#gallery">Gallery</x-doc-nav-link>
         <x-doc-nav-link href="#videos-links">Videos & Links</x-doc-nav-link>
         <x-doc-nav-group label="Customize" href="#customize">
             <x-doc-nav-link href="#customize-subschedules">Sub-schedules</x-doc-nav-link>
@@ -358,6 +359,19 @@
             Style
         </h2>
         <p class="text-gray-600 dark:text-gray-300 mb-6">Customize your schedule's visual appearance including colors, fonts, backgrounds, and layout. See the full <a href="{{ route('marketing.docs.schedule_styling') }}" class="doc-link">Schedule Styling</a> guide for all customization options.</p>
+    </section>
+
+    <!-- Gallery -->
+    <section id="gallery" class="doc-section">
+        <h2 class="doc-heading">
+            <svg aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-5 h-5 text-gray-500 dark:text-gray-400 flex-shrink-0">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M2.25 15.75l5.159-5.159a2.25 2.25 0 013.182 0l5.159 5.159m-1.5-1.5l1.409-1.409a2.25 2.25 0 013.182 0l2.909 2.909m-18 3.75h16.5a1.5 1.5 0 001.5-1.5V6a1.5 1.5 0 00-1.5-1.5H3.75A1.5 1.5 0 002.25 6v12a1.5 1.5 0 001.5 1.5zm10.5-11.25h.008v.008h-.008V8.25zm.375 0a.375.375 0 11-.75 0 .375.375 0 01.75 0z" />
+            </svg>
+            Gallery
+            <x-doc-badge plan="pro" />
+        </h2>
+        <p class="text-gray-600 dark:text-gray-300 mb-6">The Gallery section puts up to {{ \App\Utils\GalleryUtils::maxImages() }} photos on your schedule page: the venue, past events, your team. They appear below your events, and a <strong class="text-gray-900 dark:text-white">photos</strong> link in the header opens them all at once. The section appears once your schedule has been created.</p>
+        <p class="text-gray-600 dark:text-gray-300 mb-6">Adding, arranging and captioning photos works exactly as it does for an event's gallery, and nothing is published until you click <strong class="text-gray-900 dark:text-white">Save</strong>. See <a href="{{ route('marketing.docs.creating_events') }}#gallery" class="doc-link">the event gallery</a> for the details. Each event can have a gallery of its own as well.</p>
     </section>
 
     <!-- Videos & Links -->
