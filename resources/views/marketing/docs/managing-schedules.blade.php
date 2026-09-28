@@ -554,7 +554,7 @@
             <li>See how long a <a href="{{ route('marketing.docs.tickets') }}#selling-trial" class="doc-link">selling trial</a> has left, if one is running. It is not a plan, so the plan still reads Free</li>
             <li><strong>Manage subscription</strong> opens the Stripe billing portal for invoices and card details</li>
             <li>Switch between <strong>monthly and yearly</strong> billing, with the price for each shown on the button</li>
-            <li><strong>Cancel</strong>, which leaves your paid features running until the end of the period, and <strong>Resume</strong> during that grace period</li>
+            <li><strong>Cancel</strong>, which leaves your paid features running until the end of the period, and <strong>Resume</strong> during that grace period. Cancelling asks why you are leaving; answering is optional</li>
             <li><strong>Change to the free plan</strong> outright</li>
         </ul>
         <p class="text-gray-600 dark:text-gray-300 mb-4">

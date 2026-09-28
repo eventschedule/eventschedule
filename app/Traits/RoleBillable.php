@@ -291,6 +291,16 @@ trait RoleBillable
 
             $cancelled++;
 
+            // Counted as churn with no reason: nobody was asked, the schedule is going.
+            \App\Models\SubscriptionCancellation::record([
+                'role_id' => $this->id,
+                'user_id' => $actorUserId,
+                'stripe_subscription_id' => $subscription->stripe_id,
+                'source' => 'schedule_deleted',
+                'plan_type' => $this->plan_type,
+                'plan_term' => $this->plan_term,
+            ]);
+
             \App\Services\AuditService::log(
                 \App\Services\AuditService::SUBSCRIPTION_CANCEL,
                 $actorUserId,

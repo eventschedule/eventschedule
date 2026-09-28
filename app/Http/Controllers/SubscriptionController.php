@@ -6,6 +6,7 @@ use App\Http\Requests\SubscriptionStoreRequest;
 use App\Http\Requests\SubscriptionSwapRequest;
 use App\Models\Referral;
 use App\Models\Role;
+use App\Models\SubscriptionCancellation;
 use App\Services\AuditService;
 use App\Services\UsageTrackingService;
 use App\Utils\PlanPriceUtils;
@@ -331,6 +332,12 @@ class SubscriptionController extends Controller
             return redirect()->back()->with('error', __('messages.no_active_subscription'));
         }
 
+        // Optional on purpose: asking why must never stand between someone and cancelling.
+        $validated = $request->validate([
+            'reason' => ['nullable', 'string', 'in:'.implode(',', SubscriptionCancellation::REASONS)],
+            'comment' => ['nullable', 'string', 'max:1000'],
+        ]);
+
         try {
             $subscription->cancel();
         } catch (\Exception $e) {
@@ -339,7 +346,19 @@ class SubscriptionController extends Controller
             return redirect()->back()->with('error', __('messages.subscription_error'));
         }
 
-        AuditService::log(AuditService::SUBSCRIPTION_CANCEL, auth()->id(), 'Role', $role->id, null, null, $role->subdomain);
+        SubscriptionCancellation::record([
+            'role_id' => $role->id,
+            'user_id' => auth()->id(),
+            'stripe_subscription_id' => $subscription->stripe_id,
+            'source' => 'app',
+            'reason' => $validated['reason'] ?? null,
+            'comment' => $validated['comment'] ?? null,
+            'plan_type' => $role->plan_type,
+            'plan_term' => $role->plan_term,
+        ]);
+
+        AuditService::log(AuditService::SUBSCRIPTION_CANCEL, auth()->id(), 'Role', $role->id, null,
+            array_filter(['reason' => $validated['reason'] ?? null]) ?: null, $role->subdomain);
 
         return redirect()
             ->route('role.view_admin', ['subdomain' => $subdomain, 'tab' => 'plan'])
@@ -370,6 +389,8 @@ class SubscriptionController extends Controller
 
             return redirect()->back()->with('error', __('messages.subscription_error'));
         }
+
+        SubscriptionCancellation::markResumed($subscription->stripe_id);
 
         AuditService::log(AuditService::SUBSCRIPTION_RESUME, auth()->id(), 'Role', $role->id, null, null, $role->subdomain);
 

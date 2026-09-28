@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Mail\SubscriptionPaymentFailed;
 use App\Models\Role;
+use App\Models\SubscriptionCancellation;
 use App\Services\OneSignalService;
 use App\Utils\PlanPriceUtils;
 use Illuminate\Support\Facades\Log;
@@ -34,6 +35,11 @@ class SubscriptionWebhookController extends WebhookController
 
         // Find the role by stripe customer ID
         $role = Role::where('stripe_id', $payload['data']['object']['customer'])->first();
+
+        // Churn record. After an in-app or portal cancel the row already exists and this only
+        // fills gaps; what is new here is the subscription that ended with no cancel first - an
+        // immediate cancel in the Stripe dashboard or portal, or payments that failed for good.
+        $this->recordCancellation($payload['data']['object'], $role);
 
         if ($role) {
             // Downgrade to free plan when subscription is deleted
@@ -171,6 +177,20 @@ class SubscriptionWebhookController extends WebhookController
         $data = $payload['data']['object'];
         $role = Role::where('stripe_id', $data['customer'])->first();
 
+        // A cancel scheduled or taken back, in the portal or anywhere else. Only when the cancel
+        // fields actually CHANGED in this event: every renewal and card update is also a
+        // subscription.updated, and reading "not cancelling" off those would mark real
+        // cancellations as resumed. Newer API versions schedule a portal cancel with cancel_at
+        // rather than cancel_at_period_end, so both are read.
+        $previous = $payload['data']['previous_attributes'] ?? [];
+        if (array_key_exists('cancel_at_period_end', $previous) || array_key_exists('cancel_at', $previous)) {
+            if (! empty($data['cancel_at_period_end']) || ! empty($data['cancel_at'])) {
+                $this->recordCancellation($data, $role);
+            } else {
+                SubscriptionCancellation::markResumed($data['id'] ?? null);
+            }
+        }
+
         if ($role) {
             // Update the plan type and term based on the price
             $currentPrice = $data['items']['data'][0]['price']['id'] ?? null;
@@ -200,5 +220,27 @@ class SubscriptionWebhookController extends WebhookController
         }
 
         return $response;
+    }
+
+    /**
+     * One subscription_cancellations row per subscription, from Stripe's own record of it.
+     * cancellation_details carries what the portal asked (feedback, comment) and why it ended
+     * (reason: cancellation_requested, payment_failed, payment_disputed).
+     */
+    private function recordCancellation(array $subscription, ?Role $role): void
+    {
+        $details = $subscription['cancellation_details'] ?? [];
+        $feedback = $details['feedback'] ?? null;
+
+        SubscriptionCancellation::record([
+            'role_id' => $role?->id,
+            'user_id' => $role?->user_id,
+            'stripe_subscription_id' => $subscription['id'] ?? null,
+            'source' => ($details['reason'] ?? null) === 'payment_failed' ? 'payment_failed' : 'portal',
+            'reason' => $feedback ? (SubscriptionCancellation::STRIPE_FEEDBACK[$feedback] ?? 'other') : null,
+            'comment' => isset($details['comment']) ? mb_substr((string) $details['comment'], 0, 1000) : null,
+            'plan_type' => $role?->plan_type,
+            'plan_term' => $role?->plan_term,
+        ]);
     }
 }

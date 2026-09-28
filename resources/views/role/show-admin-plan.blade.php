@@ -353,15 +353,51 @@
             @endif
 
             {{-- Cancel Subscription --}}
+            {{-- Cancelling asks why, and never requires an answer: the reason is optional and the
+                 cancel button is always live. The confirmation this replaced ("are you sure")
+                 recorded nothing, which is why 18 cancellations came with no reason at all. --}}
             @if ($subscription && $subscription->active() && !$subscription->onGracePeriod())
-            <div>
-                <form action="{{ route('subscription.cancel', ['subdomain' => $role->subdomain]) }}" method="POST" class="inline form-confirm" data-confirm="{{ __('messages.are_you_sure') }}">
+            <div id="cancel-subscription-app">
+                <button type="button" v-show="! open" @click="open = true" aria-controls="cancel-subscription-form" :aria-expanded="open ? 'true' : 'false'"
+                    class="text-sm text-red-600 dark:text-red-400 hover:text-red-500 font-medium">
+                    {{ __('messages.cancel_subscription') }}
+                </button>
+                <form id="cancel-subscription-form" v-show="open" style="display: none"
+                    action="{{ route('subscription.cancel', ['subdomain' => $role->subdomain]) }}" method="POST"
+                    class="max-w-xl space-y-4">
                     @csrf
-                    <button type="submit" class="text-sm text-red-600 dark:text-red-400 hover:text-red-500 font-medium">
-                        {{ __('messages.cancel_subscription') }}
-                    </button>
+                    <fieldset>
+                        <legend class="text-base font-semibold text-gray-900 dark:text-gray-100">{{ __('messages.cancel_reason_question') }}</legend>
+                        <p class="mt-1 text-sm text-gray-500 dark:text-gray-400">{{ __('messages.cancel_reason_optional') }}</p>
+                        <div class="mt-3 space-y-2">
+                            @foreach (\App\Models\SubscriptionCancellation::REASONS as $reason)
+                            <label class="flex items-center gap-3 text-sm text-gray-700 dark:text-gray-300 cursor-pointer">
+                                <input type="radio" name="reason" value="{{ $reason }}"
+                                    class="h-4 w-4 border-gray-300 dark:border-gray-600 text-[var(--brand-blue)] focus:ring-[var(--brand-blue)]">
+                                {{ __('messages.cancel_reason_'.$reason) }}
+                            </label>
+                            @endforeach
+                        </div>
+                    </fieldset>
+                    <div>
+                        <x-input-label for="cancel_comment" :value="__('messages.cancel_reason_comment')" />
+                        <textarea id="cancel_comment" name="comment" rows="3" maxlength="1000"
+                            class="mt-1 block w-full rounded-lg border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 shadow-sm focus:border-[var(--brand-blue)] focus:ring-[var(--brand-blue)]"></textarea>
+                    </div>
+                    <p class="text-sm text-gray-500 dark:text-gray-400">{{ __('messages.cancel_keeps_until_period_end') }}</p>
+                    <div class="flex flex-wrap items-center gap-3">
+                        <button type="button" @click="open = false"
+                            class="ap-secondary-btn inline-flex items-center justify-center px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-lg font-semibold text-base text-gray-900 dark:text-gray-100 transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-[var(--brand-blue)] focus:ring-offset-2 dark:focus:ring-offset-gray-800">
+                            {{ __('messages.keep_subscription') }}
+                        </button>
+                        <x-danger-button type="submit">{{ __('messages.cancel_subscription') }}</x-danger-button>
+                    </div>
                 </form>
             </div>
+            <script src="{{ asset('js/vue.global.prod.js') }}" {!! nonce_attr() !!}></script>
+            <script {!! nonce_attr() !!}>
+                Vue.createApp({ data: () => ({ open: false }) }).mount('#cancel-subscription-app');
+            </script>
             @endif
 
             {{-- Resume Subscription --}}

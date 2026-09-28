@@ -479,6 +479,9 @@ class GrowthExportService
                 .'It is not a subset of saved_paid_ticket, and reached_checkout is not a subset of it. '
                 .'subscription.create audit rows carry new_values.source = "tickets" when the checkout '
                 .'was opened from that paywall.',
+            'churn counts subscription_cancellations, which began on 2026-09-28: cancellations before '
+                .'that have no row. Comments are deliberately left out of this export (free text). '
+                .'source is app (the plan tab form), portal (Stripe), payment_failed, schedule_deleted or admin.',
             'monetization.ticket_trials counts the card-free paid-selling trial, which is not a plan: '
                 .'those schedules stay "free" in plan_counts. converted means a real subscription created '
                 .'after the trial started and within 14 days of its end; sold_during means a paid sale '
@@ -517,6 +520,7 @@ class GrowthExportService
             'free_pressure' => $this->freePressureFrom($schedules),
             'payers_vs_free' => $this->payersVsFreeFrom($schedules),
             'monetization' => $this->monetization(),
+            'churn' => $this->churn(),
             'retention' => $this->retentionFrom($schedules),
             'traffic' => $this->traffic(),
             'claims' => $this->claims($months),
@@ -1251,6 +1255,30 @@ class GrowthExportService
             'median_days_to_upgrade' => $this->median($daysToUpgrade),
             'gmv_by_currency' => $this->gmvByCurrency(),
             'ticket_trials' => $this->ticketTrials(),
+        ];
+    }
+
+    /**
+     * Why subscribers leave, from subscription_cancellations: one row per cancelled subscription,
+     * whichever cancel path saw it first. A cancel resumed during its grace period is counted
+     * apart, not as churn. Demo schedules never subscribe, so nothing is excluded here.
+     */
+    private function churn(): array
+    {
+        $rows = DB::table('subscription_cancellations');
+
+        $churned = (clone $rows)->whereNull('resumed_at');
+
+        return [
+            'cancelled' => (clone $churned)->count(),
+            'resumed' => (clone $rows)->whereNotNull('resumed_at')->count(),
+            'with_reason' => (clone $churned)->whereNotNull('reason')->count(),
+            'by_reason' => (clone $churned)->selectRaw("COALESCE(reason, 'none') as k, COUNT(*) as c")
+                ->groupBy('k')->orderByDesc('c')->pluck('c', 'k'),
+            'by_source' => (clone $churned)->selectRaw('source as k, COUNT(*) as c')
+                ->groupBy('k')->orderByDesc('c')->pluck('c', 'k'),
+            'by_month' => (clone $churned)->selectRaw("DATE_FORMAT(created_at, '%Y-%m') as k, COUNT(*) as c")
+                ->groupBy('k')->orderBy('k')->pluck('c', 'k'),
         ];
     }
 

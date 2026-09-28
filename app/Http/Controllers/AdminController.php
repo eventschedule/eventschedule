@@ -891,6 +891,12 @@ class AdminController extends Controller
             ->whereNull('ends_at')
             ->update(['stripe_status' => 'canceled', 'ends_at' => now()]);
 
+        \App\Models\SubscriptionCancellation::record([
+            'role_id' => $row->role_id,
+            'stripe_subscription_id' => $row->stripe_id,
+            'source' => 'admin',
+        ]);
+
         AuditService::log(
             AuditService::SUBSCRIPTION_CANCEL,
             auth()->id(),
