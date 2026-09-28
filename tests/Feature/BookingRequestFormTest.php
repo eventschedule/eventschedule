@@ -460,6 +460,41 @@ class BookingRequestFormTest extends TestCase
         Notification::assertSentTo($user, \App\Notifications\VerifyEmail::class);
     }
 
+    /**
+     * The verification mail is sent synchronously, after the account exists and before the request
+     * is saved. A mail failure must not take the request down with it: the visitor would get a 500
+     * and a retry would be refused as "email already taken".
+     */
+    public function test_a_failed_verification_email_does_not_lose_the_request(): void
+    {
+        // Only the verification mail fails; the owner's new-request notice still goes out.
+        Notification::swap(new class
+        {
+            public function send($notifiables, $notification): void
+            {
+                $this->sendNow($notifiables, $notification);
+            }
+
+            public function sendNow($notifiables, $notification, ?array $channels = null): void
+            {
+                if ($notification instanceof \App\Notifications\VerifyEmail) {
+                    throw new \RuntimeException('SMTP is down');
+                }
+            }
+        });
+
+        $role = $this->bookingSchedule();
+
+        $this->postJson($this->storeUrl($role), $this->complete([
+            'create_account' => '1',
+            'password' => 'long-enough-password',
+            'terms' => 'on',
+        ]))->assertOk();
+
+        $this->assertFalse(User::where('email', 'sam.guest@gmail.com')->firstOrFail()->hasVerifiedEmail());
+        $this->assertNotNull(Event::where('name', 'Late Night Set')->first());
+    }
+
     public function test_an_optional_account_on_selfhost_is_verified_as_registration_is(): void
     {
         config(['app.hosted' => false]);

@@ -3386,7 +3386,15 @@ class EventController extends Controller
         // hasVerifiedEmail() gate trusts: claiming schedules registered to it, and the ticket
         // link on an event page. Selfhost has no code step anywhere, as in registration.
         if (config('app.hosted')) {
-            $user->sendEmailVerificationNotification();
+            // VerifyEmail is sent synchronously, and neither caller runs in a transaction: a mail
+            // failure escaping here would leave the account created, the request unsaved, and a
+            // retry refused as "email already taken". The verify-email page every unverified
+            // request lands on has its own resend button.
+            try {
+                $user->sendEmailVerificationNotification();
+            } catch (\Throwable $e) {
+                report($e);
+            }
         } else {
             $user->email_verified_at = now();
             $user->save();
