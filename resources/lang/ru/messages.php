@@ -336,7 +336,7 @@ return [
     'close_sidebar' => 'Закрыть боковую панель',
     'no_scheduled_events' => 'Нет запланированных мероприятий',
     'create_new_account' => 'Создать новую учетную запись',
-    'questions_or_suggestions' => 'Если у вас есть вопросы или предложения, напишите нам по электронной почте: email',
+    'questions_or_suggestions' => 'Если у вас есть вопросы или предложения, напишите нам по электронной почте: :email',
     'add_to_calendar' => 'Добавить в календарь',
     'event_title' => ':role в :venue',
     'full_name' => 'Полное имя',
