@@ -6,6 +6,9 @@
     <title>{{ __('messages.signup_verification_code_heading') }}</title>
 </head>
 <body style="font-family: Arial, sans-serif; line-height: 1.6; color: #333; max-width: 600px; margin: 0 auto; padding: 20px;">
+    {{-- Preview text. Without it the inbox shows the heading and "Hello," - the code is what the
+         reader came for, and a clear, early code is what mail clients' "Copy code" detection keys on. --}}
+    <div style="display: none; max-height: 0; max-width: 0; overflow: hidden; opacity: 0; mso-hide: all;">{{ $code }} - {{ __('messages.your_verification_code') }}</div>
     <div style="background-color: #4E81FA; color: white; padding: 30px 20px; text-align: center; border-radius: 8px 8px 0 0;">
         <h1 style="margin: 0; font-size: 24px; font-weight: 600;">{{ __('messages.signup_verification_code_heading') }}</h1>
     </div>
@@ -16,9 +19,8 @@
         <p>{{ __('messages.signup_verification_code_intro') }}</p>
         
         <div style="background-color: white; padding: 20px; border-radius: 8px; margin: 20px 0; border-left: 4px solid #4E81FA;">
-            <h2 style="margin-top: 0; color: #4E81FA; text-align: center; font-size: 32px; letter-spacing: 4px; font-weight: bold;">
-                {{ $code }}
-            </h2>
+            {{-- One text node, no per-digit markup, so a copy (ours or Gmail's) yields exactly the code. --}}
+            <div style="margin: 0 0 10px; color: #4E81FA; text-align: center; font-family: 'Courier New', Courier, monospace; font-size: 32px; letter-spacing: 4px; font-weight: bold;">{{ $code }}</div>
             <p style="margin: 10px 0; text-align: center; color: #666; font-size: 14px;">{{ __('messages.your_verification_code') }}</p>
         </div>
         

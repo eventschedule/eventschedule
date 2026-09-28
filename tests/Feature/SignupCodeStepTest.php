@@ -214,6 +214,38 @@ class SignupCodeStepTest extends TestCase
     }
 
     /**
+     * The inbox preview is the first text in the body, and it used to be the heading and "Hello,".
+     *
+     * The preheader has to come before anything visible, or the preview shows that instead.
+     */
+    public function test_the_mail_preview_text_leads_with_the_code(): void
+    {
+        $notification = new \App\Notifications\SignupVerificationCode('123456');
+        $notifiable = (new \Illuminate\Notifications\AnonymousNotifiable)->route('mail', 'someone@eventschedule-test.org');
+
+        $html = $notification->toMail($notifiable)->render();
+
+        $this->assertMatchesRegularExpression(
+            '/<body[^>]*>\s*<div style="display: none;[^"]*">123456 /',
+            $html,
+            'the first element in <body> is not a hidden preheader that starts with the code'
+        );
+    }
+
+    /** A plain-text client previews the first line, so the code goes there, not seven lines down. */
+    public function test_the_text_mail_leads_with_the_code(): void
+    {
+        $text = view('emails.signup_verification_code_text', [
+            'code' => '123456',
+            'continueUrl' => null,
+        ])->render();
+
+        $firstLine = strtok(ltrim($text), "\n");
+
+        $this->assertStringContainsString('123456', $firstLine);
+    }
+
+    /**
      * Read the language files directly rather than rendering.
      *
      * __() falls back to English, so a test that renders the mail per locale and greps for an

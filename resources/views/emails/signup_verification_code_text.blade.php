@@ -1,3 +1,5 @@
+{{ __('messages.your_verification_code') }}: {{ $code }}
+
 {{ __('messages.signup_verification_code_heading') }}
 
 {{ __('messages.hello') }},
