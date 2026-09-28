@@ -4792,7 +4792,7 @@ return [
     'plan_gate_ask_owner' => 'Paketti saab muuta ainult kalendri omanik. Palu tal uuendada.',
     'ticket_trial_start' => 'Müü pileteid :days päeva tasuta',
     'ticket_trial_title' => 'Tasuliste piletite müügi prooviperiood',
-    'ticket_trial_plan_hint' => 'Hinnaga piletid lähevad seitsmeks päevaks müüki, ilma kaardita ja paketti muutmata. Teised Pro funktsioonid jäävad Pro-sse.',
+    'ticket_trial_plan_hint' => 'Hinnaga piletid lähevad :days päevaks müüki, ilma kaardita ja paketti muutmata. Teised Pro funktsioonid jäävad Pro-sse.',
     'ticket_trial_started' => 'Tasuliste piletite müük on järgmised :days päeva sisse lülitatud. Salvesta sündmus, et müüki alustada. Sinu pakett ei muutu ja midagi ei võeta tasu.',
     'ticket_trial_unavailable' => 'Tasuta müügiprooviperiood pole selle kalendri jaoks saadaval. Tasuliste piletite müümiseks uuenda Pro-le.',
     'ticket_trial_days_left' => '{1} Tasuliste piletite müügi prooviperiood lõpeb 1 päeva pärast.|[2,*] Tasuliste piletite müügi prooviperiood lõpeb :count päeva pärast.',

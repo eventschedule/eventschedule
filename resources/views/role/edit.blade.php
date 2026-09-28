@@ -3578,8 +3578,9 @@
 
                         {{-- Defaults ON. One email a week for all of your schedules, sent only in a
                              week with something to report (app:send-owner-digests). The owner is
-                             the only one who receives it. --}}
-                        @if (! $role->exists || $role->user_id === auth()->id())
+                             the only one who receives it. Not on the create form: store() reads no
+                             notification settings, so unticking it there would be ignored. --}}
+                        @if ($role->exists && $role->user_id === auth()->id())
                         <div class="mb-6">
                             <x-toggle name="notification_weekly_digest"
                                 label="{{ __('messages.notify_weekly_digest') }}"

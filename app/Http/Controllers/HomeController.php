@@ -763,12 +763,22 @@ class HomeController extends Controller
         $withTicketType = $ticketTypes(false);
         $withPaidTicketType = $ticketTypes(true);
 
-        // Schedules with an event that keeps selling paid tickets whatever the plan
-        // (events.tickets_grandfathered_at). Only asked about when branch 2 needs it.
+        // Schedules with a grandfathered event (events.tickets_grandfathered_at) that is itself
+        // still selling: not cancelled, a date to come, and a priced row. Any old stamp was not
+        // enough - a free schedule with one grandfathered 2025 event and a NEW priced event that
+        // cannot sell got "connect payments" beside the to-do saying those tickets need Pro.
         $grandfatheredSellers = DB::table('events')
-            ->whereIn('creator_role_id', $ids)
-            ->whereNotNull('tickets_grandfathered_at')
-            ->distinct()->pluck('creator_role_id')->flip();
+            ->whereIn('events.creator_role_id', $ids)
+            ->whereNotNull('events.tickets_grandfathered_at')
+            ->where('events.is_cancelled', false)
+            ->where(fn ($q) => Event::constrainToOccurrencesSince($q, now('UTC')))
+            ->whereExists(fn ($q) => $q->selectRaw('1')
+                ->from('tickets')
+                ->whereColumn('tickets.event_id', 'events.id')
+                ->where('tickets.is_deleted', false)
+                ->where('tickets.is_addon', false)
+                ->where('tickets.price', '>', 0))
+            ->distinct()->pluck('events.creator_role_id')->flip();
 
         // How many DISTINCT people have asked to be told when each schedule's events go on sale.
         // One query, like the four above: the dashboard renders on every page load.

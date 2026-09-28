@@ -4812,7 +4812,7 @@ return [
     'plan_gate_ask_owner' => 'Doar proprietarul calendarului poate schimba planul. Cere-i să facă upgrade.',
     'ticket_trial_start' => 'Vinde bilete gratuit timp de :days zile',
     'ticket_trial_title' => 'Perioadă de probă pentru vânzarea biletelor cu plată',
-    'ticket_trial_plan_hint' => 'Biletele cu preț sunt puse în vânzare timp de șapte zile, fără card și fără schimbarea planului. Celelalte funcții Pro rămân în Pro.',
+    'ticket_trial_plan_hint' => 'Biletele cu preț sunt puse în vânzare timp de :days zile, fără card și fără schimbarea planului. Celelalte funcții Pro rămân în Pro.',
     'ticket_trial_started' => 'Vânzarea biletelor cu plată este activă în următoarele :days zile. Salvează evenimentul pentru a începe vânzarea. Planul tău nu se schimbă și nu se percepe nimic.',
     'ticket_trial_unavailable' => 'Perioada gratuită de vânzare nu este disponibilă pentru acest calendar. Fă upgrade la Pro pentru a vinde bilete cu plată.',
     'ticket_trial_days_left' => '{1} Perioada de probă pentru vânzarea biletelor cu plată se încheie peste 1 zi.|[2,*] Perioada de probă pentru vânzarea biletelor cu plată se încheie peste :count zile.',

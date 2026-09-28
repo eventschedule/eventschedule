@@ -84,6 +84,9 @@ class SubscriptionController extends Controller
             $role->ticket_trial_reminder_sent_at = null;
             $role->save();
 
+            // Per owner, and it has to outlive the schedule: see the 2026_09_28_000004 migration.
+            DB::table('users')->where('id', $role->user_id)->update(['ticket_trial_used_at' => now()]);
+
             return true;
         });
 

@@ -184,6 +184,20 @@ class OwnerDigestTest extends TestCase
         Queue::assertNothingPushed();
     }
 
+    /**
+     * With no zone of their own, an owner's day comes from their own first schedule, whichever
+     * schedule an email is about - so the nudges and the digest always agree on which day is
+     * Monday.
+     */
+    public function test_an_owner_without_a_timezone_uses_their_first_schedules(): void
+    {
+        $owner = $this->owner(['timezone' => null]);
+        $this->createRole($owner, 'venue', ['timezone' => 'Asia/Tokyo']);
+        $this->createRole($owner, 'venue', ['timezone' => 'America/Los_Angeles']);
+
+        $this->assertSame('Asia/Tokyo', \App\Utils\OwnerLocalTime::timezone($owner->fresh()));
+    }
+
     public function test_the_dry_run_neither_sends_nor_claims(): void
     {
         $role = $this->createRole($this->owner());

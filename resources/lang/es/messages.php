@@ -4773,7 +4773,7 @@ return [
     'plan_gate_ask_owner' => 'Solo el propietario del calendario puede cambiar el plan. Pídele que lo actualice.',
     'ticket_trial_start' => 'Vende entradas gratis durante :days días',
     'ticket_trial_title' => 'Prueba de venta de entradas de pago',
-    'ticket_trial_plan_hint' => 'Las entradas con precio salen a la venta durante siete días, sin tarjeta y sin cambiar tu plan. Las demás funciones Pro siguen siendo de Pro.',
+    'ticket_trial_plan_hint' => 'Las entradas con precio salen a la venta durante :days días, sin tarjeta y sin cambiar tu plan. Las demás funciones Pro siguen siendo de Pro.',
     'ticket_trial_started' => 'La venta de entradas de pago está activada durante los próximos :days días. Guarda el evento para empezar a vender. Tu plan no cambia y no se cobra nada.',
     'ticket_trial_unavailable' => 'La prueba gratuita de venta no está disponible para este calendario. Actualiza a Pro para vender entradas de pago.',
     'ticket_trial_days_left' => '{1} Tu prueba de venta de entradas de pago termina en 1 día.|[2,*] Tu prueba de venta de entradas de pago termina en :count días.',

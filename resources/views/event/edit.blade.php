@@ -2111,12 +2111,22 @@
 
                                 {{-- The evergreen place a free organizer learns what their plan
                                      covers here: free registration is unlimited, priced rows are Pro. --}}
-                                @if ($role->onTicketTrial())
+                                {{-- The schedule whose plan decides - the event's creator once it
+                                     exists - not whichever schedule this form was reached through.
+                                     The hint, the countdown and the paywall banner below all read it,
+                                     or a venue admin editing a talent's event is told about the
+                                     venue's trial above a banner saying the rows cannot sell. --}}
+                                @php
+                                    $sellingRole = ($event->exists ? $event->ticketingRole() : null) ?? $role;
+                                @endphp
+                                @if ($sellingRole->onTicketTrial())
                                 <p class="mt-4 text-sm text-gray-500 dark:text-gray-400">
-                                    {{ trans_choice('messages.ticket_trial_days_left', $role->ticketTrialDaysRemaining(), ['count' => $role->ticketTrialDaysRemaining()]) }}
-                                    <x-link href="{{ route('role.view_admin', ['subdomain' => $role->subdomain, 'tab' => 'plan']) }}">{{ __('messages.plan') }}</x-link>
+                                    {{ trans_choice('messages.ticket_trial_days_left', $sellingRole->ticketTrialDaysRemaining(), ['count' => $sellingRole->ticketTrialDaysRemaining()]) }}
+                                    @if ($sellingRole->user_id === $user->id)
+                                    <x-link href="{{ route('role.view_admin', ['subdomain' => $sellingRole->subdomain, 'tab' => 'plan']) }}">{{ __('messages.plan') }}</x-link>
+                                    @endif
                                 </p>
-                                @elseif (! $role->isPro())
+                                @elseif (! $sellingRole->isPro())
                                 <p class="mt-4 text-sm text-gray-500 dark:text-gray-400">
                                     {{ __('messages.ticket_mode_free_hint') }}
                                 </p>
@@ -2214,10 +2224,7 @@
                                     $ticketsNeedProOnLoad = $cannotSellPaid
                                         && $event->tickets_enabled
                                         && $event->tickets->contains(fn ($t) => ! $t->is_addon && (float) $t->price > 0);
-                                    // The schedule whose plan decides - the event's creator once it
-                                    // exists - is the one to upgrade or put on the selling trial,
-                                    // not whichever schedule this form was reached through.
-                                    $sellingRole = ($event->exists ? $event->ticketingRole() : null) ?? $role;
+                                    // $sellingRole is set above the ticket-mode hint.
                                     $ownsSellingRole = $sellingRole->user_id === $user->id;
                                     $offerTicketTrial = $cannotSellPaid && $ownsSellingRole && $sellingRole->isEligibleForTicketTrial();
                                 @endphp

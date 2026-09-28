@@ -131,10 +131,13 @@ class SendActivationNudges extends Command
                 // only sees digests already sent) could not keep the two apart. first_sale is a
                 // congratulation and goes out whatever the day.
                 if (! $ignoreLocalTime) {
-                    if (! OwnerLocalTime::isMorning($role->user, $role)) {
+                    $localNow = OwnerLocalTime::now($role->user);
+                    if ($localNow->hour < OwnerLocalTime::MORNING_FROM || $localNow->hour > OwnerLocalTime::MORNING_TO) {
                         continue;
                     }
-                    if ($key !== 'first_sale' && OwnerLocalTime::now($role->user, $role)->isMonday()) {
+                    // Sunday too: a nudge on Sunday is followed by the digest on Monday morning,
+                    // and DIGEST_QUIET_DAYS only looks back from a digest already sent.
+                    if ($key !== 'first_sale' && ($localNow->isMonday() || $localNow->isSunday())) {
                         continue;
                     }
                 }
@@ -158,11 +161,15 @@ class SendActivationNudges extends Command
                     'created_at' => now(),
                 ]);
 
+                // Seen either way. A claim that fails means the other scheduler rail (its own
+                // mutex) got this schedule first and is emailing this owner now; carrying on to
+                // their next due schedule would send them a second nudge from this run.
+                $seenUsers[$role->user_id] = true;
+
                 if ($claimed === 0) {
                     continue;
                 }
 
-                $seenUsers[$role->user_id] = true;
                 $budget--;
 
                 try {
@@ -419,21 +426,28 @@ class SendActivationNudges extends Command
      */
     private function dueForNoGateway(int $limit)
     {
+        // A priced row on a public event with a date still to come. Without the date this reached
+        // every Pro schedule that EVER priced a ticket: on 2026-09-28 that was 67 schedules, 59 of
+        // them with no event in 90 days and 61 of them admin comps - a mailshot about payments to
+        // dormant accounts.
+        $sellingEvent = fn ($q) => $this->ownedEvents($this->publicEvents($q))
+            ->where('events.is_cancelled', false)
+            ->hasUpcomingOccurrence()
+            ->whereHas('tickets', fn ($t) => $t->where('tickets.is_deleted', false)
+                ->where('tickets.price', '>', 0));
+
         return $this->base('no_gateway')
-            // Same reasoning as dueForNoTicketType(): urging a free schedule to connect a gateway
-            // it cannot take money through is an upsell wearing an activation email's clothes.
-            // A grandfathered event CAN take money on a free schedule, so it counts.
-            ->where(fn ($q) => $q->whereCanSellPaidTickets()
-                ->orWhereHas('events', fn ($e) => $e->whereColumn('events.creator_role_id', 'roles.id')
+            // Only where that event can actually take money. Same reasoning as
+            // dueForNoTicketType(): urging a free schedule to connect a gateway it cannot take
+            // money through is an upsell wearing an activation email's clothes. The plan can
+            // allow it, or the SAME event can be grandfathered - any old stamp on some other
+            // event is not enough, or a free schedule with a 2025 grandfathered event is told to
+            // connect payments for a new event that cannot sell.
+            ->where(fn ($q) => $q
+                ->where(fn ($plan) => $plan->whereCanSellPaidTickets()->whereHas('events', $sellingEvent))
+                ->orWhereHas('events', fn ($e) => $sellingEvent($e)
+                    ->whereColumn('events.creator_role_id', 'roles.id')
                     ->whereNotNull('events.tickets_grandfathered_at')))
-            // On a public event with a date still to come. Without it this reached every Pro
-            // schedule that EVER priced a ticket: on 2026-09-28 that was 67 schedules, 59 of them
-            // with no event in 90 days and 61 of them admin comps - a mailshot about payments to
-            // dormant accounts.
-            ->whereHas('events', fn ($q) => $this->ownedEvents($this->publicEvents($q))
-                ->hasUpcomingOccurrence()
-                ->whereHas('tickets', fn ($t) => $t->where('tickets.is_deleted', false)
-                    ->where('tickets.price', '>', 0)))
             ->limit($limit)->get()
             ->filter(fn (Role $role) => empty(payment_gateways()->connectedFor($role->user)))
             ->values();

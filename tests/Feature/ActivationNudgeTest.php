@@ -829,6 +829,70 @@ class ActivationNudgeTest extends TestCase
         $this->assertStringContainsString('no way to sign up', $html);
     }
 
+    /**
+     * The two scheduler rails hold different mutexes. When this run loses the claim on one of an
+     * owner's schedules, the other rail is emailing that owner right now, so this run must not
+     * move on to their next due schedule and send a second nudge.
+     */
+    public function test_a_lost_claim_still_counts_as_the_owners_nudge_this_run(): void
+    {
+        $owner = $this->owner();
+        $first = $this->createRole($owner);
+        $this->createEvent($first, ['starts_at' => now()->addDays(10)->format('Y-m-d H:i:s')]);
+        $second = $this->createRole($owner);
+        $this->createEvent($second, ['starts_at' => now()->addDays(10)->format('Y-m-d H:i:s')]);
+
+        // The other rail claims the first schedule between this run's candidate read and its own
+        // insert: fire once, right after the candidate SELECT has run.
+        $raced = false;
+        DB::listen(function ($query) use (&$raced, $first) {
+            if (! $raced && str_starts_with(ltrim($query->sql), 'select') && str_contains($query->sql, 'from `roles`')
+                && str_contains($query->sql, 'schedule_nudges')) {
+                $raced = true;
+                DB::table('schedule_nudges')->insert(['role_id' => $first->id, 'nudge_key' => 'no_ticket_type', 'created_at' => now()]);
+            }
+        });
+
+        $this->nudge('no_ticket_type');
+
+        $this->assertTrue($raced, 'sanity: the simulated race fired');
+
+        Queue::assertNothingPushed();
+        $this->assertSame(0, DB::table('schedule_nudges')->where('role_id', $second->id)->count(),
+            'the owner was being emailed by the other rail; this run must not add a second');
+    }
+
+    /** Sunday's nudge would be followed by Monday's digest; Sundays are left alone too. */
+    public function test_it_does_not_nudge_on_the_owners_sunday(): void
+    {
+        $owner = $this->owner(['timezone' => 'UTC']);
+        $role = $this->createRole($owner, 'venue', ['timezone' => 'UTC']);
+        $this->createEvent($role, ['starts_at' => now()->addDays(20)->format('Y-m-d H:i:s')]);
+
+        $this->travelTo(now()->utc()->next('Sunday')->setTime(10, 0));
+        $this->nudge(now: false);
+
+        $this->assertNothingSent();
+    }
+
+    /**
+     * Only the event that can take money counts. An old grandfathered event elsewhere does not
+     * make a new priced event sellable on a free schedule, so there is nothing to connect for.
+     */
+    public function test_an_old_grandfathered_event_does_not_trigger_the_gateway_nudge(): void
+    {
+        $role = $this->createFreeRole($this->owner(['stripe_account_id' => null]));
+        $old = $this->createEvent($role, ['starts_at' => now()->subDays(300)->format('Y-m-d H:i:s'), 'creator_role_id' => $role->id]);
+        $old->forceFill(['tickets_grandfathered_at' => now()->subYear()])->save();
+        $this->createTicket($old, ['price' => 20]);
+        $new = $this->createEvent($role, ['starts_at' => now()->addDays(10)->format('Y-m-d H:i:s'), 'creator_role_id' => $role->id]);
+        $this->createTicket($new, ['price' => 20]);
+
+        $this->nudge('no_gateway');
+
+        $this->assertNothingSent();
+    }
+
     /** A timezone PHP does not know falls back rather than stopping the run. */
     public function test_a_bad_timezone_falls_back_to_the_schedules(): void
     {

@@ -211,6 +211,21 @@ class DashboardNextStepsTest extends TestCase
         $this->assertSame(['next_step_payments'], $this->types($user->fresh()));
     }
 
+    /** An OLD grandfathered event does not make a new priced event on a free schedule sellable. */
+    public function test_an_old_grandfathered_event_does_not_ask_for_payments(): void
+    {
+        $user = $this->createOwner();
+        $user->forceFill(['stripe_account_id' => null])->save();
+        $role = $this->createFreeRole($user->fresh());
+        $old = $this->createEvent($role, ['starts_at' => now()->subDays(300)->format('Y-m-d H:i:s'), 'creator_role_id' => $role->id]);
+        $old->forceFill(['tickets_grandfathered_at' => now()->subYear()])->save();
+        $this->createTicket($old, ['price' => 25]);
+        $new = $this->createEvent($role, ['starts_at' => now()->addDays(10)->format('Y-m-d H:i:s'), 'creator_role_id' => $role->id]);
+        $this->createTicket($new, ['price' => 25]);
+
+        $this->assertNotContains('next_step_payments', $this->types($user->fresh()));
+    }
+
     /** "So people can buy" is not true on Free; registration is what that schedule can offer. */
     public function test_a_free_schedule_is_asked_for_registration_not_a_sale(): void
     {

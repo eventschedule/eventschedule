@@ -4773,7 +4773,7 @@ return [
     'plan_gate_ask_owner' => 'Alleen de agenda-eigenaar kan het abonnement wijzigen. Vraag hem of haar om te upgraden.',
     'ticket_trial_start' => ':days dagen gratis tickets verkopen',
     'ticket_trial_title' => 'Proefperiode betaalde tickets',
-    'ticket_trial_plan_hint' => 'Tickets met een prijs gaan zeven dagen in de verkoop, zonder kaart en zonder wijziging van je abonnement. Andere Pro-functies blijven bij Pro.',
+    'ticket_trial_plan_hint' => 'Tickets met een prijs gaan :days dagen in de verkoop, zonder kaart en zonder wijziging van je abonnement. Andere Pro-functies blijven bij Pro.',
     'ticket_trial_started' => 'Betaalde tickets verkopen staat de komende :days dagen aan. Sla het evenement op om te beginnen met verkopen. Je abonnement verandert niet en er wordt niets in rekening gebracht.',
     'ticket_trial_unavailable' => 'De gratis verkoopproefperiode is niet beschikbaar voor deze agenda. Upgrade naar Pro om betaalde tickets te verkopen.',
     'ticket_trial_days_left' => '{1} Je proefperiode voor betaalde tickets eindigt over 1 dag.|[2,*] Je proefperiode voor betaalde tickets eindigt over :count dagen.',

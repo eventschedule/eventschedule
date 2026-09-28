@@ -81,10 +81,10 @@ class SendOwnerDigests extends Command
 
             // The owner's own Monday morning, and their own ISO week for the claim, so the hourly
             // runs across that window resolve to one week and one send.
-            $localNow = OwnerLocalTime::now($user, $roles->first());
+            $localNow = OwnerLocalTime::now($user);
             $week = $localNow->format('o-\WW');
 
-            if (! $ignoreLocalTime && (! $localNow->isMonday() || ! OwnerLocalTime::isMorning($user, $roles->first()))) {
+            if (! $ignoreLocalTime && (! $localNow->isMonday() || $localNow->hour < OwnerLocalTime::MORNING_FROM || $localNow->hour > OwnerLocalTime::MORNING_TO)) {
                 continue;
             }
 

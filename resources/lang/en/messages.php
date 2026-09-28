@@ -3859,7 +3859,7 @@ return [
     'plan_gate_ask_owner' => 'Only the schedule owner can change the plan. Ask them to upgrade.',
     'ticket_trial_start' => 'Sell tickets free for :days days',
     'ticket_trial_title' => 'Paid ticket selling trial',
-    'ticket_trial_plan_hint' => 'Priced tickets go on sale for seven days, with no card and no change to your plan. Other Pro features stay on Pro.',
+    'ticket_trial_plan_hint' => 'Priced tickets go on sale for :days days, with no card and no change to your plan. Other Pro features stay on Pro.',
     'ticket_trial_started' => 'Paid ticket selling is on for the next :days days. Save the event to start selling. Your plan does not change, and nothing is charged.',
     'ticket_trial_unavailable' => 'The free selling trial is not available for this schedule. Upgrade to Pro to sell paid tickets.',
     'ticket_trial_days_left' => '{1} Your paid ticket selling trial ends in 1 day.|[2,*] Your paid ticket selling trial ends in :count days.',

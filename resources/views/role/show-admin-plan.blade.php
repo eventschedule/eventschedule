@@ -290,7 +290,7 @@
                         {{ __('messages.ticket_trial_start', ['days' => (int) config('app.trial_days', 7)]) }}
                     </button>
                 </form>
-                <p class="mt-2 text-sm text-gray-500 dark:text-gray-400">{{ __('messages.ticket_trial_plan_hint') }}</p>
+                <p class="mt-2 text-sm text-gray-500 dark:text-gray-400">{{ __('messages.ticket_trial_plan_hint', ['days' => (int) config('app.trial_days', 7)]) }}</p>
             </div>
             @endif
 

@@ -133,6 +133,61 @@ class TicketTrialTest extends TestCase
         $this->assertFalse($role->fresh()->onTicketTrial());
     }
 
+    /**
+     * Deleting a schedule removes its row outright (Role has no soft deletes), so a stamp kept
+     * only on the schedule let trial, delete, recreate grant it again, forever.
+     */
+    public function test_deleting_the_trialled_schedule_does_not_reset_the_trial(): void
+    {
+        $owner = $this->createOwner();
+        $first = $this->createFreeRole($owner);
+
+        $this->actingAs($owner);
+        $this->start($first)->assertOk();
+        $this->assertNotNull($owner->fresh()->ticket_trial_used_at);
+
+        $first->delete();
+        $second = $this->createFreeRole($owner);
+
+        $this->assertFalse($second->fresh()->isEligibleForTicketTrial());
+        $this->start($second)->assertStatus(422);
+    }
+
+    /** A declined card or abandoned 3DS leaves an incomplete row; that is not "has paid". */
+    public function test_a_failed_checkout_does_not_block_the_trial(): void
+    {
+        $owner = $this->createOwner();
+        $role = $this->createFreeRole($owner);
+        $role->subscriptions()->create([
+            'type' => 'default',
+            'stripe_id' => 'sub_'.Str::random(14),
+            'stripe_status' => 'incomplete_expired',
+            'stripe_price' => 'price_test_monthly',
+            'quantity' => 1,
+        ]);
+
+        $this->assertTrue($role->fresh()->isEligibleForTicketTrial());
+    }
+
+    /**
+     * Subscribing mid-trial leaves ticket_trial_ends_at set. The countdown must go, or a paying
+     * schedule is told its trial ends in 5 days beside an Upgrade link that bounces.
+     */
+    public function test_a_schedule_that_subscribes_mid_trial_no_longer_shows_the_trial(): void
+    {
+        $owner = $this->createOwner();
+        $role = $this->createRole($owner); // Pro
+        $role->forceFill(['ticket_trial_ends_at' => now()->addDays(5)])->save();
+
+        $this->assertFalse($role->fresh()->onTicketTrial());
+        $this->assertTrue($role->fresh()->canSellPaidTickets());
+
+        $this->actingAs($owner)
+            ->get(route('role.view_admin', ['subdomain' => $role->subdomain, 'tab' => 'plan']))
+            ->assertOk()
+            ->assertDontSee(__('messages.ticket_trial_title'));
+    }
+
     /** Someone who has already had a subscription has nothing left to try. */
     public function test_a_past_subscriber_is_not_offered_the_trial(): void
     {

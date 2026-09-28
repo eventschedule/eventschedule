@@ -3764,6 +3764,15 @@ class Role extends Model implements MustVerifyEmail
      */
     public function onTicketTrial(): bool
     {
+        // False once the schedule is Pro: ticket_trial_ends_at is never cleared on subscribe, and
+        // a paying schedule shown "your trial ends in 5 days" with an Upgrade link that bounces
+        // is worse than silence. Column first, so the common case costs no plan lookup.
+        return $this->ticketTrialRunning() && ! $this->isPro();
+    }
+
+    /** The raw window, plan aside. canSellPaidTickets() ORs isPro() itself. */
+    private function ticketTrialRunning(): bool
+    {
         return config('app.hosted')
             && $this->ticket_trial_ends_at !== null
             && $this->ticket_trial_ends_at->isFuture();
@@ -3787,7 +3796,7 @@ class Role extends Model implements MustVerifyEmail
      */
     public function canSellPaidTickets(): bool
     {
-        return $this->isPro() || $this->onTicketTrial();
+        return $this->isPro() || $this->ticketTrialRunning();
     }
 
     /** The query form of canSellPaidTickets(). */
@@ -3815,9 +3824,17 @@ class Role extends Model implements MustVerifyEmail
             return false;
         }
 
+        // users.ticket_trial_used_at first: deleting a schedule removes its row outright, so the
+        // schedule stamp alone let trial, delete, recreate grant it again.
+        if (User::whereKey($this->user_id)->whereNotNull('ticket_trial_used_at')->exists()) {
+            return false;
+        }
+
+        // A subscription that never started (a declined card, an abandoned 3DS) is not "has
+        // already paid", the same line the growth funnel draws.
         return ! static::where('user_id', $this->user_id)
             ->where(fn ($q) => $q->whereNotNull('ticket_trial_ends_at')
-                ->orWhereHas('subscriptions'))
+                ->orWhereHas('subscriptions', fn ($sub) => $sub->whereNotIn('stripe_status', ['incomplete', 'incomplete_expired'])))
             ->exists();
     }
 

@@ -205,7 +205,7 @@ class SendSubscriptionReminders extends Command
                     // The owner's own date: a trial ending 02:00 UTC on the 5th ends the evening of the
                     // 4th in Los Angeles, and saying the 5th tells them about a day they do not have.
                     $endDate = $role->ticket_trial_ends_at->copy()
-                        ->setTimezone(OwnerLocalTime::timezone($role->user, $role))
+                        ->setTimezone(OwnerLocalTime::timezone($role->user))
                         ->locale($locale)
                         ->translatedFormat('F j, Y');
 
