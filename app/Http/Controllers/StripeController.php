@@ -170,6 +170,10 @@ class StripeController extends Controller
                         break;
                     }
 
+                    if ($this->saleWebhookRejected($sale, $verifiedViaConnect, $event->account ?? null, $paymentIntent->currency ?? null, $paymentIntent->id)) {
+                        break;
+                    }
+
                     // The amount arrives in Stripe's smallest unit; the settlement service reconciles
                     // in major units.
                     $currencyCode = $sale->event?->ticket_currency_code ?? 'USD';
@@ -247,6 +251,10 @@ class StripeController extends Controller
                             break;
                         }
 
+                        if ($this->saleWebhookRejected($sale, $verifiedViaConnect, $event->account ?? null, $session->currency ?? null, $session->id)) {
+                            break;
+                        }
+
                         $currencyCode = $sale->event?->ticket_currency_code ?? 'USD';
 
                         // payment_intent can be null on a session, and the hand-written version wrote
@@ -280,6 +288,50 @@ class StripeController extends Controller
         }
 
         return response()->json(['status' => 'success']);
+    }
+
+    /**
+     * Whether a webhook about a ticket sale must be refused before it settles anything.
+     *
+     * The sale is found from the payload's own metadata, and the Connect webhook secret only proves
+     * the event came from SOME connected account - so without the account match anyone with a
+     * connected account could pay themselves with a victim's sale_id in the metadata and have the
+     * victim's sale marked paid. The currency is checked for the same reason: the amount is
+     * reconciled against the order total in the event's currency. Same rules as
+     * handleGiftCardPayment() and handleInstallmentPayment().
+     *
+     * Deliberately NOT the reverse direction (platform key, owner has an account): the checkout rail
+     * is `hosted && stripe_account_id` (StripeGateway), so a selfhost owner with an account id
+     * still pays on the platform rail, and each branch already carries its own rule for that.
+     */
+    private function saleWebhookRejected(Sale $sale, bool $verifiedViaConnect, ?string $eventAccount, ?string $payloadCurrency, ?string $reference): bool
+    {
+        $merchantAccount = $sale->event?->user?->stripe_account_id;
+
+        if ($verifiedViaConnect && (! $merchantAccount || $eventAccount !== $merchantAccount)) {
+            \Log::error('Stripe sale webhook: connected account mismatch - sale NOT settled', [
+                'sale_id' => $sale->id,
+                'event_account' => $eventAccount,
+                'reference' => $reference,
+            ]);
+
+            return true;
+        }
+
+        $expectedCurrency = $sale->event?->ticket_currency_code;
+
+        if ($payloadCurrency && $expectedCurrency && strcasecmp($payloadCurrency, $expectedCurrency) !== 0) {
+            \Log::error('Stripe sale webhook: currency mismatch - sale NOT settled', [
+                'sale_id' => $sale->id,
+                'expected_currency' => $expectedCurrency,
+                'webhook_currency' => $payloadCurrency,
+                'reference' => $reference,
+            ]);
+
+            return true;
+        }
+
+        return false;
     }
 
     /**

@@ -28,6 +28,8 @@ class StripeMultiEventOrderTest extends TestCase
 
     private const WEBHOOK_SECRET = 'whsec_test_multi_event_order';
 
+    private const MERCHANT = 'acct_merchant_multi_event';
+
     private string $ownerApiKey = '';
 
     protected function setUp(): void
@@ -52,7 +54,7 @@ class StripeMultiEventOrderTest extends TestCase
      */
     private function createTwoLegOrder(float $legA = 50, float $legB = 30, string $email = 'cart-buyer@gmail.com'): array
     {
-        $owner = $this->createOwner();
+        $owner = $this->connectedOwner();
         $this->ownerApiKey = $this->apiKey($owner);
         $role = $this->createRole($owner);
 
@@ -83,17 +85,19 @@ class StripeMultiEventOrderTest extends TestCase
      * The secret is ours in the test config, so signing the payload here is the same work Stripe
      * does - and it exercises webhook() through its signature check rather than reaching past it.
      */
-    private function payOrder(Sale $primary, float $amount): void
+    private function payOrder(Sale $primary, float $amount, ?string $account = null, string $currency = 'usd'): void
     {
         $payload = json_encode([
             'id' => 'evt_'.$primary->id,
             'object' => 'event',
             'type' => 'payment_intent.succeeded',
+            // Signed with the Connect secret, so it has to come from the merchant's own account.
+            'account' => $account ?? $primary->event->user->stripe_account_id,
             'data' => ['object' => [
                 'id' => 'pi_'.$primary->id,
                 'object' => 'payment_intent',
                 'amount' => (int) round($amount * 100),
-                'currency' => 'usd',
+                'currency' => $currency,
                 'metadata' => ['sale_id' => UrlUtils::encodeId($primary->id)],
             ]],
         ]);
@@ -104,6 +108,16 @@ class StripeMultiEventOrderTest extends TestCase
             'HTTP_STRIPE_SIGNATURE' => 't='.$timestamp.',v1='.hash_hmac('sha256', $timestamp.'.'.$payload, self::WEBHOOK_SECRET),
             'CONTENT_TYPE' => 'application/json',
         ], $payload)->assertOk();
+    }
+
+    /** An owner on the Connect rail: the webhook only settles events from the merchant's own account. */
+    private function connectedOwner(): \App\Models\User
+    {
+        $owner = $this->createOwner();
+        $owner->stripe_account_id = self::MERCHANT;
+        $owner->save();
+
+        return $owner;
     }
 
     /** Configure an API key on the user and return the raw key for the X-API-Key header. */
@@ -207,7 +221,7 @@ class StripeMultiEventOrderTest extends TestCase
 
     public function test_a_single_event_stripe_sale_still_takes_the_webhook_amount(): void
     {
-        $owner = $this->createOwner();
+        $owner = $this->connectedOwner();
         $role = $this->createRole($owner);
         $event = $this->createEvent($role, ['tickets_enabled' => true, 'payment_method' => 'stripe', 'ticket_currency_code' => 'USD']);
 
@@ -227,7 +241,7 @@ class StripeMultiEventOrderTest extends TestCase
 
     public function test_a_refund_nets_off_the_amount_the_settlement_credited(): void
     {
-        $owner = $this->createOwner();
+        $owner = $this->connectedOwner();
         $this->ownerApiKey = $this->apiKey($owner);
         $role = $this->createRole($owner);
         $event = $this->createEvent($role, ['tickets_enabled' => true, 'payment_method' => 'stripe', 'ticket_currency_code' => 'USD']);
