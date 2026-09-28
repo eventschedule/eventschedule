@@ -521,6 +521,7 @@ class GrowthExportService
             'payers_vs_free' => $this->payersVsFreeFrom($schedules),
             'monetization' => $this->monetization(),
             'churn' => $this->churn(),
+            'nudges' => $this->nudges(),
             'retention' => $this->retentionFrom($schedules),
             'traffic' => $this->traffic(),
             'claims' => $this->claims($months),
@@ -1256,6 +1257,26 @@ class GrowthExportService
             'gmv_by_currency' => $this->gmvByCurrency(),
             'ticket_trials' => $this->ticketTrials(),
         ];
+    }
+
+    /**
+     * What app:send-activation-nudges has sent, per key, from its claim table. It is hand-run
+     * until a production pass has been read, and this is the only place that shows whether one
+     * ever was: an empty result means it has never sent anything on this install.
+     */
+    private function nudges(): array
+    {
+        return DB::table('schedule_nudges')
+            ->selectRaw('nudge_key, COUNT(*) as total, SUM(created_at >= ?) as last_7_days, MAX(created_at) as last_sent_at', [now()->subDays(7)])
+            ->groupBy('nudge_key')
+            ->orderBy('nudge_key')
+            ->get()
+            ->mapWithKeys(fn ($row) => [$row->nudge_key => [
+                'total' => (int) $row->total,
+                'last_7_days' => (int) $row->last_7_days,
+                'last_sent_at' => $row->last_sent_at ? Carbon::parse($row->last_sent_at)->toIso8601String() : null,
+            ]])
+            ->all();
     }
 
     /**

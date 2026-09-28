@@ -8,6 +8,7 @@ use App\Models\User;
 use App\Services\DemoService;
 use App\Services\GrowthExportService;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
 use Tests\Feature\Concerns\CreatesScheduleData;
 use Tests\TestCase;
@@ -62,6 +63,34 @@ class GrowthExportTest extends TestCase
         return app(GrowthExportService::class)->build(
             now()->subDays(30), now(), now()->subDays(60), now()->subDays(31)
         );
+    }
+
+    /**
+     * app:send-activation-nudges is hand-run, and before this the only way to know whether it had
+     * ever been was a production query against schedule_nudges.
+     */
+    public function test_the_page_says_whether_the_activation_nudges_ever_ran(): void
+    {
+        $admin = $this->createOwner(true);
+
+        $this->adminActing($admin)->get('/admin/growth')->assertOk()
+            ->assertSee(__('messages.growth_nudges_never_run'))
+            ->assertSee(__('messages.growth_churn_and_trials'));
+
+        $role = $this->freeRole();
+        DB::table('schedule_nudges')->insert([
+            ['role_id' => $role->id, 'nudge_key' => 'no_ticket_type_free', 'created_at' => now()->subDays(2)],
+            ['role_id' => $role->id, 'nudge_key' => 'idle_30', 'created_at' => now()->subDays(20)],
+        ]);
+
+        $nudges = $this->build()['nudges'];
+        $this->assertSame(1, $nudges['no_ticket_type_free']['last_7_days']);
+        $this->assertSame(0, $nudges['idle_30']['last_7_days']);
+        $this->assertSame(1, $nudges['idle_30']['total']);
+
+        $this->adminActing($admin)->get('/admin/growth')->assertOk()
+            ->assertDontSee(__('messages.growth_nudges_never_run'))
+            ->assertSee('no_ticket_type_free');
     }
 
     public function test_the_page_renders_and_the_download_is_valid_json(): void
