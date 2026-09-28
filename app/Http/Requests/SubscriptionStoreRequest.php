@@ -17,6 +17,7 @@ class SubscriptionStoreRequest extends FormRequest
             'payment_method' => ['required', 'string'],
             'plan' => ['required', 'in:monthly,yearly'],
             'tier' => ['sometimes', 'in:pro,enterprise'],
+            'source' => ['sometimes', 'nullable', 'in:'.implode(',', \App\Http\Controllers\SubscriptionController::CHECKOUT_SOURCES)],
         ];
     }
 }

@@ -16,6 +16,39 @@ use Laravel\Cashier\Exceptions\IncompletePayment;
 class SubscriptionController extends Controller
 {
     /**
+     * Where a checkout was started from, carried through the subscribe form into the
+     * subscription.create audit row. Allow-listed, because it lands in the growth export.
+     */
+    public const CHECKOUT_SOURCES = ['tickets'];
+
+    /**
+     * Records that the viewer was shown the paid-ticket paywall in the event editor. Fired by
+     * the editor's Vue app the first time its live banner shows, which covers both a banner
+     * rendered on load and one that appeared because a price was just typed.
+     *
+     * Per USER and first-touch only, like subscribe_form_viewed_at. The stamp can only ever
+     * be written on the caller's own row, so the check below is about keeping the number
+     * honest (a schedule the caller actually edits), not about protecting anyone else.
+     */
+    public function paywallSeen(Request $request, $subdomain)
+    {
+        $user = auth()->user();
+
+        if (! config('app.hosted') || ! $user->isEditor($subdomain)) {
+            return response()->json(['ok' => false], 403);
+        }
+
+        // Base query builder + whereNull: writes at most once and leaves users.updated_at alone,
+        // which the admin active-users metric keys off.
+        DB::table('users')
+            ->where('id', $user->id)
+            ->whereNull('ticket_paywall_viewed_at')
+            ->update(['ticket_paywall_viewed_at' => now()]);
+
+        return response()->json(['ok' => true]);
+    }
+
+    /**
      * Show the subscription page.
      */
     public function show(Request $request, $subdomain)
@@ -70,6 +103,7 @@ class SubscriptionController extends Controller
             'yearlyPrice' => PlanPriceUtils::current('pro', 'yearly'),
             'selectedTier' => $requestedTier,
             'enterpriseConfigured' => $enterpriseConfigured,
+            'checkoutSource' => in_array($request->query('source'), self::CHECKOUT_SOURCES, true) ? $request->query('source') : null,
         ]);
     }
 
@@ -172,7 +206,12 @@ class SubscriptionController extends Controller
             UsageTrackingService::track(UsageTrackingService::STRIPE_SUBSCRIPTION, $role->id);
 
             AuditService::log(AuditService::SUBSCRIPTION_CREATE, auth()->id(), 'Role', $role->id,
-                null, ['plan_type' => $tier, 'plan_term' => $request->plan], $role->subdomain);
+                null, array_filter([
+                    'plan_type' => $tier,
+                    'plan_term' => $request->plan,
+                    // Validated against CHECKOUT_SOURCES by SubscriptionStoreRequest.
+                    'source' => $request->input('source'),
+                ]), $role->subdomain);
 
             // Track referral subscription
             if (config('app.hosted')) {

@@ -728,6 +728,8 @@ Route::middleware(['auth', 'verified', 'app_subdomain'])->group(function () {
     Route::get('/{subdomain}/edit', [RoleController::class, 'edit'])->name('role.edit');
     Route::get('/{subdomain}/subscribe', [SubscriptionController::class, 'show'])->name('role.subscribe');
     Route::post('/{subdomain}/subscribe', [SubscriptionController::class, 'store'])->name('subscription.store');
+    // Beacon from the event editor's paid-ticket paywall. Plain throttle, not a named limiter.
+    Route::post('/{subdomain}/paywall-seen', [SubscriptionController::class, 'paywallSeen'])->name('subscription.paywall_seen')->middleware('throttle:30,1');
     Route::get('/{subdomain}/subscription/portal', [SubscriptionController::class, 'portal'])->name('subscription.portal');
     Route::post('/{subdomain}/subscription/cancel', [SubscriptionController::class, 'cancel'])->name('subscription.cancel');
     Route::post('/{subdomain}/subscription/resume', [SubscriptionController::class, 'resume'])->name('subscription.resume');

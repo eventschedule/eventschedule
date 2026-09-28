@@ -3818,6 +3818,7 @@ return [
     'start_free_trial' => 'Start free trial',
     'plan_price_line' => ':monthly per month or :yearly per year. Cancel anytime.',
     'plan_trial_note' => 'Includes a :days day free trial.',
+    'plan_gate_ask_owner' => 'Only the schedule owner can change the plan. Ask them to upgrade.',
 
     // Paid ticket selling is Pro/Enterprise. Free registration, RSVP and $0 ticket rows stay
     // unlimited on every tier, so the wording separates "selling" from "registration" throughout.
@@ -4576,6 +4577,7 @@ return [
     'funnel_stage_saved_event' => 'Saved an event',
     'funnel_stage_saved_ticket' => 'Added a ticket type',
     'funnel_stage_saved_paid_ticket' => 'Added a paid ticket',
+    'funnel_stage_hit_ticket_paywall' => 'Saw the paid-ticket paywall',
     'funnel_stage_reached_checkout' => 'Reached checkout',
     'funnel_stage_subscribed' => 'Subscribed',
     'funnel_stage_signup_code_requests' => 'Asked for a code',

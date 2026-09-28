@@ -220,9 +220,13 @@ class EventTicketPanelAccessTest extends TestCase
     }
 
     /**
-     * The banner's own copy says "This event has ticket types with a price", so it must not appear
+     * The banner's own copy says "This event has ticket types with a price", so it must not SHOW
      * for an event that has none. It used to, because the flag asked the EVENT whether it could
      * sell rather than asking whether there was anything priced to sell.
+     *
+     * It is in the page, though: on a schedule that cannot sell, Vue shows it the moment a price
+     * is typed (ticketsNeedPro), so the markup has to be there to show. What this pins is that it
+     * starts hidden, inline, so nothing flashes before Vue mounts.
      */
     public function test_a_free_schedule_with_only_free_rows_sees_no_pro_banner(): void
     {
@@ -231,11 +235,71 @@ class EventTicketPanelAccessTest extends TestCase
         $event = $this->createEvent($role, ['tickets_enabled' => true]);
         $this->createTicket($event, ['price' => 0, 'quantity' => 100]);
 
-        $this->actingAs($owner)
+        $html = $this->actingAs($owner)
             ->get($this->editUrl($role, $event))
             ->assertOk()
             ->assertSee('id="section-tickets"', false)
-            ->assertDontSee(__('messages.tickets_need_pro_title'));
+            ->getContent();
+
+        $this->assertStringContainsString('display: none', $this->paywallBannerTag($html),
+            'no priced row yet, so the banner must start hidden');
+    }
+
+    /**
+     * The live half: the banner is bound to ticketsNeedPro, which Vue computes from the rows as
+     * they are typed, and the server tells Vue only whether the schedule can sell at all.
+     */
+    public function test_a_free_schedule_gets_the_live_paywall_wiring(): void
+    {
+        $owner = $this->createOwner();
+        $role = $this->createFreeRole($owner);
+        $event = $this->createEvent($role, ['tickets_enabled' => true, 'payment_method' => 'stripe']);
+        $this->createTicket($event, ['price' => 20, 'quantity' => 100]);
+
+        $html = $this->actingAs($owner)
+            ->get($this->editUrl($role, $event))
+            ->assertOk()
+            ->getContent();
+
+        $this->assertStringNotContainsString('display: none', $this->paywallBannerTag($html),
+            'a saved priced row shows the banner on load, before Vue has run');
+        $this->assertStringContainsString('cannotSellPaid: true', $html);
+        $this->assertStringContainsString(route('subscription.paywall_seen', ['subdomain' => $role->subdomain]), str_replace('\\/', '/', $html));
+        // The owner is the one person who can buy the plan, and the checkout says where it came from.
+        $this->assertStringContainsString('source=tickets', $html);
+        $this->assertStringNotContainsString(__('messages.plan_gate_ask_owner'), $html);
+    }
+
+    /**
+     * SubscriptionController lets only the owner check out, so an editor who is not the owner
+     * would have been bounced with "not authorized" by the upgrade button.
+     */
+    public function test_an_editor_who_is_not_the_owner_is_told_to_ask_the_owner(): void
+    {
+        $owner = $this->createOwner();
+        $role = $this->createFreeRole($owner);
+        $editor = $this->createOwner();
+        $role->users()->attach($editor->id, ['level' => 'admin']);
+        $event = $this->createEvent($role, ['tickets_enabled' => true, 'payment_method' => 'stripe']);
+        $this->createTicket($event, ['price' => 20, 'quantity' => 100]);
+
+        $html = $this->actingAs($editor)
+            ->get($this->editUrl($role, $event))
+            ->assertOk()
+            ->getContent();
+
+        $this->assertStringContainsString(__('messages.tickets_need_pro_title'), $html);
+        $this->assertStringContainsString(__('messages.plan_gate_ask_owner'), $html);
+        $this->assertStringNotContainsString('source=tickets', $html);
+    }
+
+    /** The opening tag of the paid-ticket paywall banner, the element Vue's v-show drives. */
+    private function paywallBannerTag(string $html): string
+    {
+        $this->assertSame(1, preg_match('/<div[^>]*v-show="ticketsNeedPro"[^>]*>/', $html, $match),
+            'the paywall banner must be rendered, bound to ticketsNeedPro');
+
+        return $match[0];
     }
 
     /**
@@ -261,10 +325,13 @@ class EventTicketPanelAccessTest extends TestCase
         $owner = $this->createOwner();
         $role = $this->createFreeRole($owner);
 
-        // Nothing priced exists yet, so there is nothing to warn about.
-        $this->actingAs($owner)
+        // Nothing priced exists yet, so there is nothing to warn about - until a price is typed,
+        // which is exactly when a first event needs to hear it.
+        $html = $this->actingAs($owner)
             ->get(route('event.create', ['subdomain' => $role->subdomain]))
             ->assertOk()
-            ->assertDontSee(__('messages.tickets_need_pro_title'));
+            ->getContent();
+
+        $this->assertStringContainsString('display: none', $this->paywallBannerTag($html));
     }
 }

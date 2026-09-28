@@ -23,6 +23,12 @@ class GrowthExportService
     /** The month the schedule.claim audit action shipped; nothing before it can be counted. */
     private const CLAIMS_TRACKED_FROM = '2026-09';
 
+    /**
+     * The day users.ticket_paywall_viewed_at shipped. A window opening earlier reports the
+     * hit_ticket_paywall stage as null, not as the zeros every older row carries.
+     */
+    public const TICKET_PAYWALL_TRACKED_FROM = '2026-09-28';
+
     /** How many trailing months of per-schedule ticket volume to emit. */
     public const RECENT_MONTHS = 6;
 
@@ -164,6 +170,14 @@ class GrowthExportService
         $subscribed = $this->cohort($startDate, $endDate)
             ->whereHas('createdRoles.subscriptions', $converted)->count();
 
+        // Shown the paid-ticket paywall (users.ticket_paywall_viewed_at). NOT OR-defined with the
+        // conversion the way reached_checkout is: subscribing does not imply having met this
+        // paywall (most upgrades happen off the pricing page within the first hour), so there
+        // is no outcome to fall back on, and a window older than the column is null instead.
+        $hitTicketPaywall = $startDate->toDateString() >= self::TICKET_PAYWALL_TRACKED_FROM
+            ? $this->cohort($startDate, $endDate)->whereNotNull('ticket_paywall_viewed_at')->count()
+            : null;
+
         // Traffic stages (1-2): anonymous, only meaningful for a window inside the tracked period.
         $trackingStart = MarketingDailyStat::min('date');
         $rangeTracked = $trackingStart !== null
@@ -220,6 +234,10 @@ class GrowthExportService
             // other renders a conversion above 100% and a funnel that visibly widens.
             ['key' => 'saved_ticket', 'group' => 'tickets', 'count' => $savedTicket],
             ['key' => 'saved_paid_ticket', 'group' => 'tickets', 'count' => $savedPaidTicket],
+            // Opens the plan group. Not a subset of saved_paid_ticket (the live banner fires on a
+            // price that was typed and never saved) and reached_checkout is not a subset of it
+            // (checkout is reachable from anywhere), so it takes no step ratio in either direction.
+            ['key' => 'hit_ticket_paywall', 'group' => 'plan', 'count' => $hitTicketPaywall],
             ['key' => 'reached_checkout', 'group' => 'plan', 'count' => $reachedCheckout],
             ['key' => 'subscribed', 'group' => 'plan', 'count' => $subscribed],
         ];
@@ -236,15 +254,17 @@ class GrowthExportService
         // The 'account' stage is skipped: it is the first cohort stage, so comparing it to
         // 'signup_view' would draw a conversion/drop across the anonymous-traffic -> signup-cohort
         // divider (different populations, a cross-population ratio, not a real in-funnel drop).
-        // 'reached_checkout' is skipped for exactly the same reason: it opens the plan group,
+        // 'hit_ticket_paywall' is skipped for exactly the same reason: it opens the plan group,
         // and the stage above it is about selling tickets, which is a different question.
+        // 'reached_checkout' is skipped too: checkout is reachable from anywhere, so it is not a
+        // subset of the paywall stage above it and a ratio between them could exceed 100%.
         //
         // In the email_code group, requests -> verified is the code wall's conversion, and
         // signup_view -> requests is the share of sign-up page visitors who chose email (all three
         // are deduped per IP + user agent per day, so those ratios compare like with like).
         // 'signup_code_invalid' is NOT a stage below verified - somebody can mistype and then
         // succeed, so it overlaps both - and gets no ratio of its own.
-        $noStepConv = ['account', 'reached_checkout', 'signup_code_invalid'];
+        $noStepConv = ['account', 'hit_ticket_paywall', 'reached_checkout', 'signup_code_invalid'];
         $prevCount = null;
         foreach ($stages as &$stage) {
             $c = $stage['count'];
@@ -453,6 +473,12 @@ class GrowthExportService
                 .'code step\'s conversion. signup_code_invalid is visitors who had at least one code '
                 .'rejected; it overlaps both others (a mistype followed by a success counts in each) and '
                 .'is null before 2026-09-25.',
+            'hit_ticket_paywall counts organizers shown the paid-ticket paywall in the event editor '
+                .'(a priced row on a schedule that cannot sell it), including a price typed and never '
+                .'saved. It is null for a window that opens before '.self::TICKET_PAYWALL_TRACKED_FROM.'. '
+                .'It is not a subset of saved_paid_ticket, and reached_checkout is not a subset of it. '
+                .'subscription.create audit rows carry new_values.source = "tickets" when the checkout '
+                .'was opened from that paywall.',
         ];
         // Every derived section is computed from the row tables, so if those were capped
         // the sections describe the most recent N rows and not the whole population.
@@ -470,7 +496,7 @@ class GrowthExportService
                 'is_hosted' => (bool) config('app.hosted'),
                 'is_nexus' => (bool) config('app.is_nexus'),
                 'app_version' => config('self-update.version_installed'),
-                'schema_version' => 4,
+                'schema_version' => 5,
                 'row_cap' => $this->rowCap(),
                 'truncated' => [
                     'signups' => ['capped' => $signups['truncated'], 'total' => $signups['total']],

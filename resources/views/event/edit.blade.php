@@ -2185,7 +2185,16 @@
                                      (EventController::create() sets it only on the clone branch), so
                                      ticketingRole() returns null there and the event-level call would
                                      answer "cannot sell" for every schedule, Pro and Enterprise
-                                     included. Server-rendered; only visibility is reactive. --}}
+                                     included.
+
+                                     WHETHER the schedule can sell is decided here; whether a priced
+                                     row exists is decided live by Vue (ticketsNeedPro), so the banner
+                                     appears as a price is typed rather than after a save and reload.
+                                     That includes the first-event form: this is not one of the
+                                     "locked upgrade controls" that form hides, it is the consequence
+                                     of the price just typed, and a first event is where most first
+                                     tickets are made. Starts hidden inline, which Vue 3.4+'s v-show
+                                     treats as "no original display", so nothing flashes before mount. --}}
                                 @php
                                     // Saved events ask the EVENT, because User::canEditEvent()
                                     // grants edit to an owner or admin of any attached schedule -
@@ -2195,19 +2204,25 @@
                                     // passes an Event with creator_role_id null, so ticketingRole()
                                     // is null and the event-level call would warn every schedule,
                                     // Pro and Enterprise included.
-                                    $ticketsNeedPro = ($event->exists ? ! $event->canSellPaidTickets() : ! $role->isPro())
+                                    $cannotSellPaid = config('app.hosted')
+                                        && ($event->exists ? ! $event->canSellPaidTickets() : ! $role->isPro());
+                                    $ticketsNeedProOnLoad = $cannotSellPaid
+                                        && $event->tickets_enabled
                                         && $event->tickets->contains(fn ($t) => ! $t->is_addon && (float) $t->price > 0);
                                 @endphp
-                                @if ($ticketsNeedPro)
+                                @if ($cannotSellPaid)
                                 <x-plan-gate
                                     variant="banner"
                                     tier="pro"
                                     class="mb-4"
                                     :role="$role"
                                     :subdomain="$subdomain"
+                                    source="tickets"
+                                    :canUpgrade="$role->user_id === $user->id"
                                     :learnMoreUrl="marketing_url('/features/ticketing')"
                                     :title="__('messages.tickets_need_pro_title')"
-                                    v-show="event.tickets_enabled">
+                                    :style="$ticketsNeedProOnLoad ? null : 'display: none'"
+                                    v-show="ticketsNeedPro">
                                     {{ __('messages.tickets_need_pro_body') }}
                                 </x-plan-gate>
                                 @endif
@@ -5760,6 +5775,12 @@
         // (Do NOT write the Blade directive name in a comment here: Blade compiles it wherever
         // it appears, including inside JS comments, and the view then dies on a parse error.)
         seatingPlanOptions: @json($seatingPlanOptions ?? []),
+        // The server's half of the paid-ticket paywall: this schedule cannot sell a priced row.
+        // The other half, whether one exists, is ticketsNeedPro below. ?? because the tickets
+        // section that sets it is not rendered for everyone who can open this form.
+        cannotSellPaid: @json($cannotSellPaid ?? false),
+        paywallSeenUrl: @json(route('subscription.paywall_seen', ['subdomain' => $subdomain])),
+        paywallSeenSent: false,
         tickets: @json($event->tickets ?? [new Ticket()]).map((ticket, i) => ({
           uid: i,
           ...ticket,
@@ -7924,6 +7945,11 @@
       },
     },
     computed: {
+      ticketsNeedPro() {
+        return this.cannotSellPaid
+          && this.event.tickets_enabled
+          && this.tickets.some(ticket => parseFloat(ticket.price) > 0);
+      },
       galleryRecurringHint() {
         return this.isRecurring ? this.galleryRecurringText : '';
       },
@@ -8107,6 +8133,27 @@
       },
     },
     watch: {
+      // Growth funnel: the first time this person is shown the paid-ticket paywall. Immediate,
+      // so a banner that is already showing on load counts too. Fire-and-forget: the stamp is
+      // write-once on the server, and a failed beacon must never get in the way of the form.
+      ticketsNeedPro: {
+        immediate: true,
+        handler(shown) {
+          if (! shown || this.paywallSeenSent) {
+            return;
+          }
+          this.paywallSeenSent = true;
+          fetch(this.paywallSeenUrl, {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+              'Accept': 'application/json',
+              'X-CSRF-TOKEN': @json(csrf_token()),
+            },
+            body: '{}',
+          }).catch(() => {});
+        },
+      },
       'tickets.length'() {
         this.$nextTick(() => {
           if (typeof window.initHtmlEditors === 'function') {

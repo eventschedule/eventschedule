@@ -223,6 +223,9 @@
                 <input type="hidden" name="plan" id="selected-plan" :value="selectedPlan">
                 <input type="hidden" name="tier" id="selected-tier" :value="selectedTier">
                 <input type="hidden" name="payment_method" id="payment-method">
+                @if ($checkoutSource ?? null)
+                    <input type="hidden" name="source" value="{{ $checkoutSource }}">
+                @endif
 
                 <h3 class="text-lg font-medium text-gray-900 dark:text-gray-100 mb-4">{{ __('messages.payment_details') }}</h3>
 

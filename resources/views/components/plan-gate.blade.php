@@ -16,6 +16,13 @@
     'showPrice' => true,
     // The schedule, when the caller has it. Enables the trial CTA.
     'role' => null,
+    // Where this gate sits, carried to checkout as ?source= so the subscription.create audit
+    // row can say which paywall converted. Must be in SubscriptionController::CHECKOUT_SOURCES.
+    'source' => null,
+    // False for someone who can see the gate but cannot buy the plan (SubscriptionController
+    // lets only the schedule owner check out). They get "ask the owner" instead of a button
+    // that would bounce them with "not authorized".
+    'canUpgrade' => true,
 ])
 
 {{-- Selfhosted installs resolve to Enterprise, so there is no plan to explain and nothing to buy. --}}
@@ -33,7 +40,7 @@
     $canTrial = $role && ! $isDemo && $role->isEligibleForTrial();
 
     $upgradeUrl = $subdomain
-        ? route('role.subscribe', ['subdomain' => $subdomain, 'tier' => $tier])
+        ? route('role.subscribe', array_filter(['subdomain' => $subdomain, 'tier' => $tier, 'source' => $source]))
         : marketing_url('/pricing');
     $upgradeLabel = $canTrial
         ? __('messages.start_free_trial')
@@ -62,11 +69,15 @@
                             <a href="{{ $learnMoreUrl }}" target="_blank" rel="noopener"
                                class="text-sm font-medium text-amber-900 dark:text-amber-100 underline">{{ __('messages.learn_more') }}</a>
                         @endif
+                        @if ($canUpgrade)
                         <a href="{{ $upgradeUrl }}"
                            class="inline-flex items-center gap-1.5 rounded-lg bg-[var(--brand-button-bg)] px-4 py-2 text-sm font-semibold text-white shadow-sm transition-all duration-200 hover:bg-[var(--brand-button-bg-hover)] focus:outline-none focus:ring-2 focus:ring-[var(--brand-blue)] focus:ring-offset-2 dark:focus:ring-offset-gray-800">
                             {{ $upgradeLabel }}
                             <svg class="w-4 h-4 rtl:rotate-180" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7"/></svg>
                         </a>
+                        @else
+                        <span class="text-sm text-amber-800 dark:text-amber-200">{{ __('messages.plan_gate_ask_owner') }}</span>
+                        @endif
                     </div>
                 @endif
             </div>
@@ -132,7 +143,11 @@
                 </x-secondary-link>
                 {{-- Same tab on purpose: an upgrade opened in a new tab has no back button, and the
                      original tab keeps showing the stale locked state after payment. --}}
+                @if ($canUpgrade)
                 <x-brand-link href="{{ $upgradeUrl }}">{{ $upgradeLabel }}</x-brand-link>
+                @else
+                <span class="text-sm text-gray-600 dark:text-gray-400">{{ __('messages.plan_gate_ask_owner') }}</span>
+                @endif
                 @if ($learnMoreUrl)
                     <a href="{{ $learnMoreUrl }}" target="_blank" rel="noopener"
                        class="text-sm font-medium text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-200">{{ __('messages.learn_more') }}</a>

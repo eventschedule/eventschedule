@@ -254,6 +254,7 @@ class User extends Authenticatable implements MustVerifyEmail
             'schedule_form_viewed_at' => 'datetime',
             'event_form_viewed_at' => 'datetime',
             'subscribe_form_viewed_at' => 'datetime',
+            'ticket_paywall_viewed_at' => 'datetime',
         ];
     }
 

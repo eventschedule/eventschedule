@@ -82,7 +82,7 @@ class GrowthExportTest extends TestCase
         $this->assertArrayHasKey('schedules', $decoded);
         // 3 since the claims section landed. Bumping this is deliberate: a reader diffing two
         // pulls needs to know the shape moved.
-        $this->assertSame(4, $decoded['meta']['schema_version']);
+        $this->assertSame(5, $decoded['meta']['schema_version']);
     }
 
     public function test_claims_reports_untracked_months_as_null_not_zero(): void
