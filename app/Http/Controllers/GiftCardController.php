@@ -206,6 +206,7 @@ class GiftCardController extends Controller
         }
 
         $isDirect = request()->query('direct') === '1';
+        $verified = false;
 
         try {
             if ($isDirect) {
@@ -220,19 +221,17 @@ class GiftCardController extends Controller
 
             // Verify the session belongs to this gift card to prevent cross-session reuse
             $sessionGiftCardId = $session->metadata->gift_card_id ?? null;
-            if ($sessionGiftCardId !== UrlUtils::encodeId($giftCard->id)) {
+            $verified = $sessionGiftCardId === UrlUtils::encodeId($giftCard->id);
+
+            if (! $verified) {
                 \Log::warning('Stripe session gift_card_id mismatch in gift card success()', [
                     'url_gift_card_id' => $giftCard->id,
                     'session_gift_card_id' => $sessionGiftCardId,
                     'session_id' => request()->session_id,
                 ]);
-
-                return redirect($giftCard->getViewUrl());
-            }
-
-            // Store the transaction reference so the webhook can find this card,
-            // but leave activation to the webhook (locked + amount-verified)
-            if ($giftCard->status === 'unpaid') {
+            } elseif ($giftCard->status === 'unpaid') {
+                // Store the transaction reference so the webhook can find this card,
+                // but leave activation to the webhook (locked + amount-verified)
                 $giftCard->transaction_reference = $session->payment_intent;
                 $giftCard->save();
             }
@@ -240,7 +239,18 @@ class GiftCardController extends Controller
             \Log::warning('Stripe session retrieval failed in gift card success(): '.$e->getMessage());
         }
 
-        return redirect($giftCard->getViewUrl());
+        // The view URL carries the card's secret, and that page shows the redeemable code - so it
+        // is handed back only once the Stripe session is shown to belong to this card. The encoded
+        // id in this success_url is not secret. Same rule as TicketController::success(); the
+        // buyer still gets the card by email. GHSA-fc2p-5626-5rf4.
+        if ($verified) {
+            return redirect($giftCard->getViewUrl());
+        }
+
+        // The card's own schedule, not the $subdomain route parameter, which nothing validates.
+        return redirect($giftCard->role
+            ? route('gift_card.purchase', ['subdomain' => $giftCard->role->subdomain])
+            : '/');
     }
 
     public function cancel($subdomain, $gift_card_id)

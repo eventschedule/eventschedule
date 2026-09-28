@@ -186,10 +186,13 @@ if (config('app.hosted') && ! config('app.is_testing')) {
         Route::post('/checkout', [TicketController::class, 'checkout'])->name('event.checkout')->middleware('throttle:10,1,checkout');
         Route::post('/rsvp', [TicketController::class, 'rsvp'])->name('event.rsvp')->middleware('throttle:10,1,rsvp');
         Route::post('/waitlist/join', [WaitlistController::class, 'join'])->name('waitlist.join')->middleware('throttle:10,1');
-        Route::get('/checkout/success/{sale_id}/{date}', [TicketController::class, 'success'])->name('checkout.success');
-        Route::get('/checkout/cancel/{sale_id}/{date}', [TicketController::class, 'cancel'])->name('checkout.cancel');
-        Route::get('/payment/success/{sale_id}', [TicketController::class, 'paymentUrlSuccess'])->name('payment_url.success');
-        Route::get('/payment/cancel/{sale_id}', [TicketController::class, 'paymentUrlCancel'])->name('payment_url.cancel');
+        // The four sale-return routes below look a sale up by its encoded id, which is not secret
+        // (and a legacy id is enumerable), so each is throttled. Prefixed: an unprefixed throttle
+        // shares one per-IP bucket with every other guest route. GHSA-fc2p-5626-5rf4.
+        Route::get('/checkout/success/{sale_id}/{date}', [TicketController::class, 'success'])->name('checkout.success')->middleware('throttle:100,1,checkout_return');
+        Route::get('/checkout/cancel/{sale_id}/{date}', [TicketController::class, 'cancel'])->name('checkout.cancel')->middleware('throttle:100,1,checkout_return');
+        Route::get('/payment/success/{sale_id}', [TicketController::class, 'paymentUrlSuccess'])->name('payment_url.success')->middleware('throttle:30,1,payment_url');
+        Route::get('/payment/cancel/{sale_id}', [TicketController::class, 'paymentUrlCancel'])->name('payment_url.cancel')->middleware('throttle:30,1,payment_url');
         Route::get('/gift-cards', [GiftCardController::class, 'showPurchase'])->name('gift_card.purchase');
         Route::post('/gift-cards', [GiftCardController::class, 'purchase'])->name('gift_card.purchase.store')->middleware('throttle:10,1');
         Route::get('/gift-cards/success/{gift_card_id}', [GiftCardController::class, 'success'])->name('gift_card.success')->middleware('throttle:100,1');
@@ -2159,10 +2162,11 @@ if (! config('app.hosted') || config('app.is_testing')) {
     Route::post('/{subdomain}/checkout', [TicketController::class, 'checkout'])->name('event.checkout')->middleware('throttle:10,1,checkout');
     Route::post('/{subdomain}/rsvp', [TicketController::class, 'rsvp'])->name('event.rsvp')->middleware('throttle:10,1,rsvp');
     Route::post('/{subdomain}/waitlist/join', [WaitlistController::class, 'join'])->name('waitlist.join')->middleware('throttle:10,1');
-    Route::get('/{subdomain}/checkout/success/{sale_id}', [TicketController::class, 'success'])->name('checkout.success');
-    Route::get('/{subdomain}/checkout/cancel/{sale_id}', [TicketController::class, 'cancel'])->name('checkout.cancel');
-    Route::get('/{subdomain}/payment/success/{sale_id}', [TicketController::class, 'paymentUrlSuccess'])->name('payment_url.success');
-    Route::get('/{subdomain}/payment/cancel/{sale_id}', [TicketController::class, 'paymentUrlCancel'])->name('payment_url.cancel');
+    // Selfhost twins of the throttled sale-return routes. See the hosted block.
+    Route::get('/{subdomain}/checkout/success/{sale_id}', [TicketController::class, 'success'])->name('checkout.success')->middleware('throttle:100,1,checkout_return');
+    Route::get('/{subdomain}/checkout/cancel/{sale_id}', [TicketController::class, 'cancel'])->name('checkout.cancel')->middleware('throttle:100,1,checkout_return');
+    Route::get('/{subdomain}/payment/success/{sale_id}', [TicketController::class, 'paymentUrlSuccess'])->name('payment_url.success')->middleware('throttle:30,1,payment_url');
+    Route::get('/{subdomain}/payment/cancel/{sale_id}', [TicketController::class, 'paymentUrlCancel'])->name('payment_url.cancel')->middleware('throttle:30,1,payment_url');
     Route::get('/{subdomain}/gift-cards', [GiftCardController::class, 'showPurchase'])->name('gift_card.purchase');
     Route::post('/{subdomain}/gift-cards', [GiftCardController::class, 'purchase'])->name('gift_card.purchase.store')->middleware('throttle:10,1');
     Route::get('/{subdomain}/gift-cards/success/{gift_card_id}', [GiftCardController::class, 'success'])->name('gift_card.success')->middleware('throttle:100,1');

@@ -2544,6 +2544,7 @@ class TicketController extends Controller
         }
 
         $isDirect = request()->query('direct') === '1';
+        $verified = false;
 
         try {
             if ($isDirect) {
@@ -2560,43 +2561,54 @@ class TicketController extends Controller
 
             // Verify the session belongs to this sale to prevent cross-sale session reuse
             $sessionSaleId = $session->metadata->sale_id ?? null;
-            if ($sessionSaleId !== UrlUtils::encodeId($sale->id)) {
+            $verified = $sessionSaleId === UrlUtils::encodeId($sale->id);
+
+            if (! $verified) {
                 \Log::warning('Stripe session sale_id mismatch in success()', [
                     'url_sale_id' => $sale->id,
                     'session_sale_id' => $sessionSaleId,
                     'session_id' => request()->session_id,
                 ]);
+            } else {
+                // Store the transaction reference so the webhook can find this sale,
+                // but don't set status=paid or overwrite payment_amount here - the webhook
+                // handles that with proper locking and amount validation
+                if ($sale->status !== 'paid') {
+                    $sale->transaction_reference = $session->payment_intent;
+                    $sale->save();
+                }
 
-                return $this->redirectToPurchaseLanding($sale, $event, request()->boolean('embed'));
+                // Backstop the installment card capture.
+                //
+                // Which of the two Stripe events reports this purchase is a dashboard setting we do
+                // not control, and only payment_intent.succeeded carries the intent the capture needs.
+                // On an install subscribed to checkout.session.completed alone, a plan was therefore
+                // left with no stored card - which is silent and total: chargeDue() skips it, both
+                // reminder sweeps filter it out, and the organizer collects installment 1 and nothing
+                // else. This path needs no webhook at all.
+                //
+                // Deliberately NOT done by expanding payment_intent on the session retrieve above:
+                // that value is assigned to transaction_reference a few lines up, and expanding it
+                // turns a string into an object for EVERY Stripe checkout, not just these.
+                app(InstallmentService::class)->captureFromSession($sale->installmentPlan, $session);
             }
-
-            // Store the transaction reference so the webhook can find this sale,
-            // but don't set status=paid or overwrite payment_amount here - the webhook
-            // handles that with proper locking and amount validation
-            if ($sale->status !== 'paid') {
-                $sale->transaction_reference = $session->payment_intent;
-                $sale->save();
-            }
-
-            // Backstop the installment card capture.
-            //
-            // Which of the two Stripe events reports this purchase is a dashboard setting we do
-            // not control, and only payment_intent.succeeded carries the intent the capture needs.
-            // On an install subscribed to checkout.session.completed alone, a plan was therefore
-            // left with no stored card - which is silent and total: chargeDue() skips it, both
-            // reminder sweeps filter it out, and the organizer collects installment 1 and nothing
-            // else. This path needs no webhook at all.
-            //
-            // Deliberately NOT done by expanding payment_intent on the session retrieve above:
-            // that value is assigned to transaction_reference a few lines up, and expanding it
-            // turns a string into an object for EVERY Stripe checkout, not just these.
-            app(InstallmentService::class)->captureFromSession($sale->installmentPlan, $session);
         } catch (\Exception $e) {
             // Log the error but don't fail - webhook will handle payment confirmation
             \Log::warning('Stripe session retrieval failed in success(): '.$e->getMessage());
         }
 
-        return $this->redirectToPurchaseLanding($sale, $event, request()->boolean('embed'));
+        // The landing URL carries the sale's secret, the only credential its ticket, QR code and
+        // booking routes ask for, while the encoded sale_id in this success_url is deliberately NOT
+        // secret (and a legacy id is enumerable). So hand it back only once the Stripe session is
+        // shown to belong to this sale - the same rule as AppointmentController::checkoutSuccess().
+        // An unverified hit goes back to the event page, on the sale's own schedule rather than the
+        // $subdomain route parameter, which nothing validates; a real buyer still gets the ticket
+        // link by email, and the webhook settles the sale either way. GHSA-fc2p-5626-5rf4.
+        if ($verified) {
+            return $this->redirectToPurchaseLanding($sale, $event, request()->boolean('embed'));
+        }
+
+        return redirect($event ? $sale->getEventUrl() : '/');
     }
 
     public function cancel($subdomain, $sale_id)
