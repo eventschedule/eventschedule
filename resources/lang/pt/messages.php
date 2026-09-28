@@ -4740,6 +4740,7 @@ return [
     'plan_gate_ask_owner' => 'Apenas o proprietário do calendário pode alterar o plano. Peça-lhe para atualizar.',
     'ticket_trial_start' => 'Venda bilhetes grátis durante :days dias',
     'ticket_trial_title' => 'Teste de venda de bilhetes pagos',
+    'ticket_trial_plan_hint' => 'Os bilhetes com preço ficam à venda durante sete dias, sem cartão e sem alterar o seu plano. As outras funcionalidades Pro continuam no Pro.',
     'ticket_trial_started' => 'A venda de bilhetes pagos está ativa durante os próximos :days dias. Guarde o evento para começar a vender. O seu plano não muda e nada é cobrado.',
     'ticket_trial_unavailable' => 'O teste gratuito de vendas não está disponível para este calendário. Atualize para Pro para vender bilhetes pagos.',
     'ticket_trial_days_left' => '{1} O seu teste de venda de bilhetes pagos termina dentro de 1 dia.|[2,*] O seu teste de venda de bilhetes pagos termina dentro de :count dias.',

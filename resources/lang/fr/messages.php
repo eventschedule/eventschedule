@@ -4747,6 +4747,7 @@ return [
     'plan_gate_ask_owner' => 'Seul le propriétaire du calendrier peut changer de formule. Demandez-lui de passer à la formule supérieure.',
     'ticket_trial_start' => 'Vendre des billets gratuitement pendant :days jours',
     'ticket_trial_title' => 'Essai de vente de billets payants',
+    'ticket_trial_plan_hint' => 'Les billets payants sont mis en vente pendant sept jours, sans carte et sans changer votre forfait. Les autres fonctionnalités Pro restent réservées à Pro.',
     'ticket_trial_started' => 'La vente de billets payants est activée pour les :days prochains jours. Enregistrez l\'événement pour commencer à vendre. Votre forfait ne change pas et rien n\'est facturé.',
     'ticket_trial_unavailable' => 'L\'essai gratuit de vente n\'est pas disponible pour ce calendrier. Passez à Pro pour vendre des billets payants.',
     'ticket_trial_days_left' => '{1} Votre essai de vente de billets payants se termine dans 1 jour.|[2,*] Votre essai de vente de billets payants se termine dans :count jours.',

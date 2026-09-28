@@ -279,6 +279,21 @@
             </div>
             @endif
 
+            {{-- The card-free selling trial. Also offered in the event editor, where the price is
+                 typed; here because the dashboard's "paid tickets cannot be sold" to-do links to
+                 this tab. A plain form is fine on this page: nothing unsaved to lose. --}}
+            @if ($role->isEligibleForTicketTrial())
+            <div>
+                <form action="{{ route('subscription.ticket_trial', ['subdomain' => $role->subdomain]) }}" method="POST" class="inline">
+                    @csrf
+                    <button type="submit" class="ap-secondary-btn inline-flex items-center justify-center px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-lg font-semibold text-base text-gray-900 dark:text-gray-100 transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-[var(--brand-blue)] focus:ring-offset-2 dark:focus:ring-offset-gray-800">
+                        {{ __('messages.ticket_trial_start', ['days' => (int) config('app.trial_days', 7)]) }}
+                    </button>
+                </form>
+                <p class="mt-2 text-sm text-gray-500 dark:text-gray-400">{{ __('messages.ticket_trial_plan_hint') }}</p>
+            </div>
+            @endif
+
             {{-- Upgrade to Enterprise (for active Pro subscribers) --}}
             @if (config('cashier.key') && config('services.stripe_platform.enterprise_price_monthly') && config('services.stripe_platform.enterprise_price_yearly') && $role->hasActiveSubscription() && !$role->hasActiveEnterpriseSubscription() && $subscription && $subscription->active() && !$subscription->onGracePeriod())
             <div>

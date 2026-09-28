@@ -229,6 +229,28 @@ class TicketTrialTest extends TestCase
         $this->assertStringContainsString(trans_choice('messages.ticket_trial_days_left', 4, ['count' => 4]), $html);
     }
 
+    /**
+     * The dashboard's "paid tickets cannot be sold" to-do links to the plan tab, so the trial has
+     * to be on offer there too. A plain form: nothing unsaved to lose on that page.
+     */
+    public function test_the_plan_tab_offers_the_trial_and_starts_it_with_a_redirect(): void
+    {
+        $owner = $this->createOwner();
+        $role = $this->createFreeRole($owner);
+        $planUrl = route('role.view_admin', ['subdomain' => $role->subdomain, 'tab' => 'plan']);
+
+        $this->actingAs($owner)->get($planUrl)->assertOk()
+            ->assertSee(__('messages.ticket_trial_start', ['days' => 7]))
+            ->assertSee(route('subscription.ticket_trial', ['subdomain' => $role->subdomain]), false);
+
+        $this->from($planUrl)
+            ->post(route('subscription.ticket_trial', ['subdomain' => $role->subdomain]))
+            ->assertRedirect($planUrl)
+            ->assertSessionHas('message', __('messages.ticket_trial_started', ['days' => 7]));
+
+        $this->assertTrue($role->fresh()->onTicketTrial());
+    }
+
     /** The dashboard to-do "these paid tickets cannot be sold" is false while the trial runs. */
     public function test_the_dashboard_does_not_say_trialing_tickets_cannot_sell(): void
     {

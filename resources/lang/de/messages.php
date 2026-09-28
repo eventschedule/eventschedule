@@ -4744,6 +4744,7 @@ return [
     'plan_gate_ask_owner' => 'Nur der Kalender-Inhaber kann den Tarif ändern. Bitte ihn um ein Upgrade.',
     'ticket_trial_start' => ':days Tage lang kostenlos Tickets verkaufen',
     'ticket_trial_title' => 'Testphase für den Verkauf bezahlter Tickets',
+    'ticket_trial_plan_hint' => 'Tickets mit Preis gehen sieben Tage lang in den Verkauf, ohne Karte und ohne Änderung deines Tarifs. Andere Pro-Funktionen bleiben bei Pro.',
     'ticket_trial_started' => 'Der Verkauf bezahlter Tickets ist für die nächsten :days Tage aktiviert. Speichere die Veranstaltung, um mit dem Verkauf zu beginnen. Dein Tarif ändert sich nicht, und es wird nichts berechnet.',
     'ticket_trial_unavailable' => 'Die kostenlose Verkaufstestphase ist für diesen Kalender nicht verfügbar. Upgrade auf Pro, um bezahlte Tickets zu verkaufen.',
     'ticket_trial_days_left' => '{1} Deine Testphase für den Verkauf bezahlter Tickets endet in 1 Tag.|[2,*] Deine Testphase für den Verkauf bezahlter Tickets endet in :count Tagen.',

@@ -4740,6 +4740,7 @@ return [
     'plan_gate_ask_owner' => 'Solo il proprietario del calendario può cambiare piano. Chiedigli di passare al piano superiore.',
     'ticket_trial_start' => 'Vendi biglietti gratis per :days giorni',
     'ticket_trial_title' => 'Prova di vendita di biglietti a pagamento',
+    'ticket_trial_plan_hint' => 'I biglietti con un prezzo vanno in vendita per sette giorni, senza carta e senza cambiare il tuo piano. Le altre funzioni Pro restano su Pro.',
     'ticket_trial_started' => 'La vendita di biglietti a pagamento è attiva per i prossimi :days giorni. Salva l\'evento per iniziare a vendere. Il tuo piano non cambia e non viene addebitato nulla.',
     'ticket_trial_unavailable' => 'La prova gratuita di vendita non è disponibile per questo calendario. Passa a Pro per vendere biglietti a pagamento.',
     'ticket_trial_days_left' => '{1} La tua prova di vendita di biglietti a pagamento termina tra 1 giorno.|[2,*] La tua prova di vendita di biglietti a pagamento termina tra :count giorni.',
