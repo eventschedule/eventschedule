@@ -817,6 +817,7 @@ return [
     'activation_nudge_subject_no_ticket_type_free' => 'Laat mensen zich aanmelden voor :schedule',
     'activation_nudge_heading_no_ticket_type_free' => 'Neem aanmeldingen aan via deze pagina',
     'activation_nudge_body_no_ticket_type_free' => ':schedule heeft gepubliceerde evenementen, maar je kunt je er niet voor aanmelden. Gratis aanmeldingen en gratis tickets zijn onbeperkt in je abonnement, met een QR-code voor elke gast om bij de deur te scannen. Wil je geld vragen, dan kun je 7 dagen gratis betaalde tickets verkopen, zonder kaart.',
+    'activation_nudge_body_no_ticket_type_free_no_trial' => ':schedule heeft gepubliceerde evenementen, maar je kunt je er niet voor aanmelden. Gratis aanmeldingen en gratis tickets zijn onbeperkt in je abonnement, met een QR-code voor elke gast om bij de deur te scannen.',
     'activation_nudge_cta_no_ticket_type_free' => 'Aanmelding instellen',
 
     'activation_nudge_subject_no_gateway' => 'Nog één stap voordat :schedule betalingen kan aannemen',

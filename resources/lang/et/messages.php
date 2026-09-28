@@ -428,6 +428,7 @@ return [
     'activation_nudge_subject_no_ticket_type_free' => 'Lase inimestel :schedule üritustele registreeruda',
     'activation_nudge_heading_no_ticket_type_free' => 'Võta sellelt lehelt registreerumisi vastu',
     'activation_nudge_body_no_ticket_type_free' => ':schedule kalendris on avaldatud üritusi, kuid neile ei saa registreeruda. Tasuta registreerimine ja tasuta piletid on sinu paketis piiramatud, iga külalise jaoks on QR-kood, mida uksel skannida. Kui soovid tasu võtta, saad tasuliste piletite müüki 7 päeva tasuta proovida, ilma kaardita.',
+    'activation_nudge_body_no_ticket_type_free_no_trial' => ':schedule kalendris on avaldatud üritusi, kuid neile ei saa registreeruda. Tasuta registreerimine ja tasuta piletid on sinu paketis piiramatud, iga külalise jaoks on QR-kood, mida uksel skannida.',
     'activation_nudge_cta_no_ticket_type_free' => 'Seadista registreerimine',
 
     'activation_nudge_subject_no_gateway' => 'Üks samm on jäänud, enne kui :schedule saab makseid vastu võtta',

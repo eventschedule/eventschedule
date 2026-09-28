@@ -369,6 +369,7 @@ return [
     'activation_nudge_subject_no_ticket_type_free' => 'دع الناس يسجلون في :schedule',
     'activation_nudge_heading_no_ticket_type_free' => 'استقبل التسجيلات من هذه الصفحة',
     'activation_nudge_body_no_ticket_type_free' => 'لدى :schedule فعاليات منشورة لكن لا توجد طريقة للتسجيل فيها. التسجيل المجاني والتذاكر المجانية غير محدودة في باقتك، مع رمز QR لكل ضيف لمسحه عند الباب. إذا أردت فرض رسوم، يمكنك تجربة بيع التذاكر المدفوعة مجانًا لمدة 7 أيام دون بطاقة.',
+    'activation_nudge_body_no_ticket_type_free_no_trial' => 'لدى :schedule فعاليات منشورة لكن لا توجد طريقة للتسجيل فيها. التسجيل المجاني والتذاكر المجانية غير محدودة في باقتك، مع رمز QR لكل ضيف لمسحه عند الباب.',
     'activation_nudge_cta_no_ticket_type_free' => 'إعداد التسجيل',
 
     'activation_nudge_subject_no_gateway' => 'خطوة واحدة قبل أن يتمكن :schedule من قبول الدفع',

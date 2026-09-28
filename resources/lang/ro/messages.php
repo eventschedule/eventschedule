@@ -429,6 +429,7 @@ return [
     'activation_nudge_subject_no_ticket_type_free' => 'Lasă oamenii să se înscrie la :schedule',
     'activation_nudge_heading_no_ticket_type_free' => 'Primește înscrieri de pe această pagină',
     'activation_nudge_body_no_ticket_type_free' => ':schedule are evenimente publicate, dar nu există nicio modalitate de înscriere. Înscrierile gratuite și biletele gratuite sunt nelimitate în planul tău, cu un cod QR pentru fiecare invitat, scanat la intrare. Dacă vrei să percepi o taxă, poți încerca gratuit vânzarea biletelor cu plată timp de 7 zile, fără card.',
+    'activation_nudge_body_no_ticket_type_free_no_trial' => ':schedule are evenimente publicate, dar nu există nicio modalitate de înscriere. Înscrierile gratuite și biletele gratuite sunt nelimitate în planul tău, cu un cod QR pentru fiecare invitat, scanat la intrare.',
     'activation_nudge_cta_no_ticket_type_free' => 'Configurează înscrierea',
 
     'activation_nudge_subject_no_gateway' => 'Mai e un pas până când :schedule poate încasa',

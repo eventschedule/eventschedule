@@ -23,12 +23,6 @@ class GrowthExportService
     /** The month the schedule.claim audit action shipped; nothing before it can be counted. */
     private const CLAIMS_TRACKED_FROM = '2026-09';
 
-    /**
-     * The day users.ticket_paywall_viewed_at shipped. A window opening earlier reports the
-     * hit_ticket_paywall stage as null, not as the zeros every older row carries.
-     */
-    public const TICKET_PAYWALL_TRACKED_FROM = '2026-09-28';
-
     /** How many trailing months of per-schedule ticket volume to emit. */
     public const RECENT_MONTHS = 6;
 
@@ -174,7 +168,14 @@ class GrowthExportService
         // conversion the way reached_checkout is: subscribing does not imply having met this
         // paywall (most upgrades happen off the pricing page within the first hour), so there
         // is no outcome to fall back on, and a window older than the column is null instead.
-        $hitTicketPaywall = $startDate->toDateString() >= self::TICKET_PAYWALL_TRACKED_FROM
+        //
+        // "Older than the column" is measured from the first stamp on THIS install, not from a
+        // date in the code: the column starts filling when the release deploys, and a window
+        // opening between a hard-coded date and that deploy would report zeros for days nothing
+        // could be recorded.
+        $paywallTrackedFrom = User::min('ticket_paywall_viewed_at');
+        $hitTicketPaywall = $paywallTrackedFrom !== null
+            && $startDate->toDateString() >= Carbon::parse($paywallTrackedFrom)->toDateString()
             ? $this->cohort($startDate, $endDate)->whereNotNull('ticket_paywall_viewed_at')->count()
             : null;
 
@@ -475,7 +476,7 @@ class GrowthExportService
                 .'is null before 2026-09-25.',
             'hit_ticket_paywall counts organizers shown the paid-ticket paywall in the event editor '
                 .'(a priced row on a schedule that cannot sell it), including a price typed and never '
-                .'saved. It is null for a window that opens before '.self::TICKET_PAYWALL_TRACKED_FROM.'. '
+                .'saved. It is null for a window that opens before the first such view on this install. '
                 .'It is not a subset of saved_paid_ticket, and reached_checkout is not a subset of it. '
                 .'subscription.create audit rows carry new_values.source = "tickets" when the checkout '
                 .'was opened from that paywall.',

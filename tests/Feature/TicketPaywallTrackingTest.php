@@ -3,8 +3,8 @@
 namespace Tests\Feature;
 
 use App\Services\GrowthExportService;
-use Carbon\Carbon;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Support\Facades\DB;
 use Tests\Feature\Concerns\CreatesScheduleData;
 use Tests\TestCase;
 
@@ -89,9 +89,28 @@ class TicketPaywallTrackingTest extends TestCase
         $this->assertNull($owner->fresh()->ticket_paywall_viewed_at);
     }
 
+    /** An earlier paywall view on the install, which is where the stage starts being tracked. */
+    private function trackedSince(int $daysAgo): void
+    {
+        $early = $this->createOwner();
+        DB::table('users')->where('id', $early->id)->update([
+            'created_at' => now()->subDays($daysAgo + 30),
+            'ticket_paywall_viewed_at' => now()->subDays($daysAgo),
+        ]);
+    }
+
+    private function stages(): \Illuminate\Support\Collection
+    {
+        $funnel = app(GrowthExportService::class)->funnelData(
+            now()->subDays(30), now(), now()->subDays(60), now()->subDays(31)
+        );
+
+        return collect($funnel['stages'])->keyBy('key');
+    }
+
     public function test_the_funnel_counts_it_in_the_plan_group_without_a_step_ratio(): void
     {
-        $this->travelTo(Carbon::parse(GrowthExportService::TICKET_PAYWALL_TRACKED_FROM)->addDays(40));
+        $this->trackedSince(40);
 
         $owner = $this->createOwner();
         $this->createFreeRole($owner);
@@ -99,12 +118,9 @@ class TicketPaywallTrackingTest extends TestCase
 
         $owner->forceFill(['ticket_paywall_viewed_at' => now()])->save();
 
-        $funnel = app(GrowthExportService::class)->funnelData(
-            now()->subDays(30), now(), now()->subDays(60), now()->subDays(31)
-        );
-        $stages = collect($funnel['stages'])->keyBy('key');
+        $stages = $this->stages();
 
-        $this->assertSame(1, $stages['hit_ticket_paywall']['count']);
+        $this->assertSame(1, $stages['hit_ticket_paywall']['count'], 'the early user was created before the window');
         $this->assertSame('plan', $stages['hit_ticket_paywall']['group']);
         $this->assertNull($stages['hit_ticket_paywall']['step_conv'],
             'it is not a subset of saved_paid_ticket, so no ratio off the ticket stages');
@@ -112,20 +128,23 @@ class TicketPaywallTrackingTest extends TestCase
             'checkout is reachable from anywhere, so no ratio off the paywall either');
 
         // Plan order: the paywall opens the plan group, ahead of checkout.
-        $keys = array_column($funnel['stages'], 'key');
+        $keys = $stages->keys()->all();
         $this->assertSame(array_search('hit_ticket_paywall', $keys) + 1, array_search('reached_checkout', $keys));
     }
 
-    /** A window opening before the column existed reports null, not a row of backfilled zeros. */
-    public function test_the_stage_is_null_before_it_was_tracked(): void
+    /**
+     * Tracked from the first stamp on the install, not a date in the code: the column starts
+     * filling on deploy, and a window reaching back before that would report zeros for days
+     * nothing could be recorded.
+     */
+    public function test_the_stage_is_null_until_a_window_opens_after_the_first_view(): void
     {
-        $this->travelTo(Carbon::parse(GrowthExportService::TICKET_PAYWALL_TRACKED_FROM)->addDays(5));
+        $this->assertNull($this->stages()['hit_ticket_paywall']['count'], 'nothing stamped yet');
 
-        $funnel = app(GrowthExportService::class)->funnelData(
-            now()->subDays(30), now(), now()->subDays(60), now()->subDays(31)
-        );
-        $stages = collect($funnel['stages'])->keyBy('key');
+        $this->trackedSince(5);
+        $this->assertNull($this->stages()['hit_ticket_paywall']['count'], 'the window opens before the first view');
 
-        $this->assertNull($stages['hit_ticket_paywall']['count']);
+        $this->travel(30)->days();
+        $this->assertSame(0, $this->stages()['hit_ticket_paywall']['count'], 'a real zero once fully tracked');
     }
 }

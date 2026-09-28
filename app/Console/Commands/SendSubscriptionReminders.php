@@ -9,6 +9,7 @@ use App\Mail\TicketTrialEnding;
 use App\Models\Role;
 use App\Services\OneSignalService;
 use App\Utils\MoneyUtils;
+use App\Utils\OwnerLocalTime;
 use App\Utils\PlanPriceUtils;
 use Carbon\Carbon;
 use Illuminate\Console\Command;
@@ -201,8 +202,15 @@ class SendSubscriptionReminders extends Command
                 try {
                     $locale = $role->user->language_code ?? app()->getLocale();
 
+                    // The owner's own date: a trial ending 02:00 UTC on the 5th ends the evening of the
+                    // 4th in Los Angeles, and saying the 5th tells them about a day they do not have.
+                    $endDate = $role->ticket_trial_ends_at->copy()
+                        ->setTimezone(OwnerLocalTime::timezone($role->user, $role))
+                        ->locale($locale)
+                        ->translatedFormat('F j, Y');
+
                     SendQueuedEmail::dispatch(
-                        new TicketTrialEnding($role, $role->ticket_trial_ends_at->locale($locale)->translatedFormat('F j, Y')),
+                        new TicketTrialEnding($role, $endDate),
                         $role->user->email,
                         // Platform mailer: see sendCompedWindDownReminders().
                         null,

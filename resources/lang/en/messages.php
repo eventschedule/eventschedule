@@ -431,6 +431,7 @@ return [
     'activation_nudge_subject_no_ticket_type_free' => 'Let people sign up for :schedule',
     'activation_nudge_heading_no_ticket_type_free' => 'Take sign-ups from this page',
     'activation_nudge_body_no_ticket_type_free' => ':schedule has events published but no way to sign up for them. Free registration and free tickets are unlimited on your plan, with a QR code for every guest to scan at the door. If you want to charge, you can try selling paid tickets free for 7 days, with no card.',
+    'activation_nudge_body_no_ticket_type_free_no_trial' => ':schedule has events published but no way to sign up for them. Free registration and free tickets are unlimited on your plan, with a QR code for every guest to scan at the door.',
     'activation_nudge_cta_no_ticket_type_free' => 'Set up registration',
 
     'activation_nudge_subject_no_gateway' => 'One step left before :schedule can take payment',

@@ -763,8 +763,9 @@ class ActivationNudgeTest extends TestCase
         $role = $this->createRole($owner);
         $this->createEvent($role, ['starts_at' => now()->addDays(10)->format('Y-m-d H:i:s')]);
 
-        // 18:00 UTC is 03:00 in Tokyo: not sent, and not claimed either.
-        $this->travelTo(now()->utc()->setTime(18, 0));
+        // 18:00 UTC Tuesday is 03:00 Wednesday in Tokyo: not sent, and not claimed either.
+        // (Weekdays pinned: Monday is the digest's morning, when nudges stand aside.)
+        $this->travelTo(now()->utc()->next('Tuesday')->setTime(18, 0));
         $this->nudge(now: false);
         $this->assertNothingSent();
 
@@ -774,6 +775,60 @@ class ActivationNudgeTest extends TestCase
         $this->assertSame(1, DB::table('schedule_nudges')->count());
     }
 
+    /**
+     * Monday morning is the weekly digest's, and this command runs first in the same tick, so it
+     * stands aside that day rather than landing a second email beside the digest.
+     */
+    public function test_it_does_not_nudge_on_the_owners_digest_morning(): void
+    {
+        $owner = $this->owner(['timezone' => 'UTC']);
+        $role = $this->createRole($owner, 'venue', ['timezone' => 'UTC']);
+        $this->createEvent($role, ['starts_at' => now()->addDays(20)->format('Y-m-d H:i:s')]);
+
+        $this->travelTo(now()->utc()->next('Monday')->setTime(10, 0));
+        $this->nudge(now: false);
+        $this->assertNothingSent();
+
+        $this->travelTo(now()->utc()->next('Thursday')->setTime(10, 0));
+        $this->nudge(now: false);
+        $this->assertSame(1, DB::table('schedule_nudges')->count());
+    }
+
+    /** A first sale is congratulated on a Monday all the same. */
+    public function test_a_first_sale_goes_out_on_a_monday(): void
+    {
+        $owner = $this->owner(['timezone' => 'UTC']);
+        $role = $this->createRole($owner, 'venue', ['timezone' => 'UTC']);
+        $event = $this->createEvent($role);
+        $ticket = $this->createTicket($event, ['price' => 20]);
+
+        $this->travelTo(now()->utc()->next('Monday')->setTime(10, 0));
+        $this->createSale($event, $role, ['payment_amount' => 20, 'paid_at' => now()->subDay()], $ticket);
+        $this->nudge('first_sale', now: false);
+
+        $this->assertSent('first_sale');
+    }
+
+    /**
+     * The free-plan copy offers the card-free selling trial, which an owner who has already had it
+     * cannot start. Promising it only for the paywall to refuse is worse than not mentioning it.
+     */
+    public function test_the_free_copy_only_offers_the_trial_to_owners_who_can_start_it(): void
+    {
+        $trialLine = 'free for 7 days';
+
+        $firstTimer = $this->createFreeRole($this->owner());
+        $html = (new ActivationNudge($firstTimer, 'no_ticket_type_free'))->render();
+        $this->assertStringContainsString($trialLine, $html);
+
+        $owner = $this->owner();
+        $this->createFreeRole($owner)->forceFill(['ticket_trial_ends_at' => now()->subMonth()])->save();
+        $second = $this->createFreeRole($owner);
+        $html = (new ActivationNudge($second->fresh(), 'no_ticket_type_free'))->render();
+        $this->assertStringNotContainsString($trialLine, $html);
+        $this->assertStringContainsString('no way to sign up', $html);
+    }
+
     /** A timezone PHP does not know falls back rather than stopping the run. */
     public function test_a_bad_timezone_falls_back_to_the_schedules(): void
     {
@@ -781,7 +836,7 @@ class ActivationNudgeTest extends TestCase
         $role = $this->createRole($owner, 'venue', ['timezone' => 'UTC']);
         $this->createEvent($role, ['starts_at' => now()->addDays(10)->format('Y-m-d H:i:s')]);
 
-        $this->travelTo(now()->utc()->setTime(10, 0));
+        $this->travelTo(now()->utc()->next('Wednesday')->setTime(10, 0));
         $this->nudge(now: false);
 
         $this->assertSame(1, DB::table('schedule_nudges')->count());
@@ -946,6 +1001,7 @@ class ActivationNudgeTest extends TestCase
                 $keys[] = "activation_nudge_{$part}_{$nudge}";
             }
         }
+        $keys[] = 'activation_nudge_body_no_ticket_type_free_no_trial';
 
         $en = require resource_path('lang/en/messages.php');
 

@@ -13,7 +13,7 @@
     <div style="background-color: #f9f9f9; padding: 20px; border-radius: 0 0 8px 8px;">
         <p style="font-size: 16px; margin-top: 0;">{{ __('messages.hello') }} {{ $user->firstName() }},</p>
 
-        <p>{{ __('messages.activation_nudge_body_'.$nudgeKey, ['schedule' => $role->name]) }}</p>
+        <p>{{ __($bodyKey ?? 'messages.activation_nudge_body_'.$nudgeKey, ['schedule' => $role->name]) }}</p>
 
         <div style="text-align: center; margin: 30px 0;">
             <a href="{{ $ctaUrl }}"

@@ -407,6 +407,7 @@ return [
     'activation_nudge_subject_no_ticket_type_free' => 'Laissez les gens s\'inscrire sur :schedule',
     'activation_nudge_heading_no_ticket_type_free' => 'Recevez des inscriptions depuis cette page',
     'activation_nudge_body_no_ticket_type_free' => ':schedule a des événements publiés mais aucun moyen de s\'y inscrire. Les inscriptions gratuites et les billets gratuits sont illimités sur votre forfait, avec un QR code par invité à scanner à l\'entrée. Si vous voulez faire payer, vous pouvez essayer gratuitement la vente de billets payants pendant 7 jours, sans carte.',
+    'activation_nudge_body_no_ticket_type_free_no_trial' => ':schedule a des événements publiés mais aucun moyen de s\'y inscrire. Les inscriptions gratuites et les billets gratuits sont illimités sur votre forfait, avec un QR code par invité à scanner à l\'entrée.',
     'activation_nudge_cta_no_ticket_type_free' => 'Configurer les inscriptions',
 
     'activation_nudge_subject_no_gateway' => 'Une étape avant que :schedule puisse encaisser',

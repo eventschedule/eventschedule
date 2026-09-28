@@ -56,6 +56,7 @@ class ActivationNudge extends Mailable
                 'user' => $user,
                 'role' => $this->role,
                 'nudgeKey' => $this->nudgeKey,
+                'bodyKey' => $this->bodyKey(),
                 'ctaUrl' => $this->ctaUrl(),
                 // This mail interpolates a user-supplied schedule name into prose, so an
                 // unmarked RTL body renders the Latin name in the wrong place. Same test
@@ -67,6 +68,20 @@ class ActivationNudge extends Mailable
                 ]),
             ],
         );
+    }
+
+    /**
+     * The body's translation key. no_ticket_type_free offers the card-free selling trial, which
+     * a past subscriber or an owner who has already had it cannot start - telling them they can
+     * only for the paywall to refuse is worse than not mentioning it.
+     */
+    private function bodyKey(): string
+    {
+        if ($this->nudgeKey === 'no_ticket_type_free' && ! $this->role->isEligibleForTicketTrial()) {
+            return 'messages.activation_nudge_body_no_ticket_type_free_no_trial';
+        }
+
+        return 'messages.activation_nudge_body_'.$this->nudgeKey;
     }
 
     /**

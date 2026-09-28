@@ -121,9 +121,22 @@ class SendActivationNudges extends Command
                 }
 
                 // Hourly runs, local-morning sends (OwnerLocalTime). Not claimed when outside the
-                // window, so a later run in the owner's morning picks it up.
-                if (! $ignoreLocalTime && ! OwnerLocalTime::isMorning($role->user, $role)) {
-                    continue;
+                // window, so a later run in the owner's morning picks it up. Candidates are fetched
+                // limit($budget) at a time by id and this filter runs after, so above ~200 due
+                // schedules the later ones wait for earlier ones to be claimed - far above today's
+                // volume (about 150 candidates on 2026-09-28).
+                //
+                // Never on the owner's local Monday either: that is the weekly digest's morning,
+                // and this command runs first in the same hourly tick, so DIGEST_QUIET_DAYS (which
+                // only sees digests already sent) could not keep the two apart. first_sale is a
+                // congratulation and goes out whatever the day.
+                if (! $ignoreLocalTime) {
+                    if (! OwnerLocalTime::isMorning($role->user, $role)) {
+                        continue;
+                    }
+                    if ($key !== 'first_sale' && OwnerLocalTime::now($role->user, $role)->isMonday()) {
+                        continue;
+                    }
                 }
 
                 if (! $apply) {

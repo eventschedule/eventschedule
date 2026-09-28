@@ -402,6 +402,7 @@ return [
     'activation_nudge_subject_no_ticket_type_free' => 'Deja que la gente se inscriba en :schedule',
     'activation_nudge_heading_no_ticket_type_free' => 'Recibe inscripciones desde esta página',
     'activation_nudge_body_no_ticket_type_free' => ':schedule tiene eventos publicados pero no hay forma de inscribirse en ellos. Las inscripciones y entradas gratuitas son ilimitadas en tu plan, con un código QR para cada invitado que se escanea en la puerta. Si quieres cobrar, puedes probar a vender entradas de pago gratis durante 7 días, sin tarjeta.',
+    'activation_nudge_body_no_ticket_type_free_no_trial' => ':schedule tiene eventos publicados pero no hay forma de inscribirse en ellos. Las inscripciones y entradas gratuitas son ilimitadas en tu plan, con un código QR para cada invitado que se escanea en la puerta.',
     'activation_nudge_cta_no_ticket_type_free' => 'Configurar inscripciones',
 
     'activation_nudge_subject_no_gateway' => 'Falta un paso para que :schedule pueda cobrar',

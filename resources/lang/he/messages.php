@@ -556,6 +556,7 @@ return [
     'activation_nudge_subject_no_ticket_type_free' => 'אפשרו לאנשים להירשם ל-:schedule',
     'activation_nudge_heading_no_ticket_type_free' => 'קבלו הרשמות מהדף הזה',
     'activation_nudge_body_no_ticket_type_free' => 'ל-:schedule יש אירועים שפורסמו אבל אין דרך להירשם אליהם. הרשמה חינם וכרטיסים חינם הם ללא הגבלה בתוכנית שלכם, עם קוד QR לכל אורח לסריקה בכניסה. אם תרצו לגבות תשלום, תוכלו לנסות מכירת כרטיסים בתשלום בחינם למשך 7 ימים, ללא כרטיס אשראי.',
+    'activation_nudge_body_no_ticket_type_free_no_trial' => 'ל-:schedule יש אירועים שפורסמו אבל אין דרך להירשם אליהם. הרשמה חינם וכרטיסים חינם הם ללא הגבלה בתוכנית שלכם, עם קוד QR לכל אורח לסריקה בכניסה.',
     'activation_nudge_cta_no_ticket_type_free' => 'הגדרת הרשמה',
 
     'activation_nudge_subject_no_gateway' => 'נשאר צעד אחד לפני ש:schedule יוכל לגבות תשלום',

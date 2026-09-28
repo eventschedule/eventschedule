@@ -41,7 +41,7 @@ class SendOwnerDigests extends Command
     protected $signature = 'app:send-owner-digests
         {--apply : Send the emails. Without it, print what would be sent}
         {--user= : Only this owner (user id)}
-        {--now : Ignore the Monday-morning local window. For hand runs and tests; the scheduler never passes it.}';
+        {--now : Ignore the Monday-morning local window. For tests and debugging only: a digest sent this way counts, so the next scheduled Monday within five days is skipped. The scheduler never passes it.}';
 
     protected $description = 'Send each active schedule owner a weekly summary of their schedules';
 

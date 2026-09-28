@@ -302,6 +302,27 @@ class TicketTrialTest extends TestCase
         Queue::assertPushed(SendQueuedEmail::class, 2);
     }
 
+    /** The end date is the owner's own calendar day, not UTC's. */
+    public function test_the_reminder_names_the_owners_local_end_date(): void
+    {
+        Queue::fake();
+
+        $owner = $this->createOwner();
+        $owner->forceFill(['timezone' => 'America/Los_Angeles'])->save();
+        $role = $this->createFreeRole($owner->fresh());
+        $ends = now()->utc()->addDays(3)->setTime(2, 0);
+        $role->forceFill(['ticket_trial_ends_at' => $ends])->save();
+
+        $this->artisan('app:send-subscription-reminders')->assertExitCode(0);
+
+        Queue::assertPushed(SendQueuedEmail::class, function ($job) use ($ends) {
+            $mailable = (new \ReflectionProperty($job, 'mailable'))->getValue($job);
+            $endDate = (new \ReflectionProperty($mailable, 'endDate'))->getValue($mailable);
+
+            return $endDate === $ends->copy()->subDay()->format('F j, Y');
+        });
+    }
+
     /** Someone who subscribed during the trial is not told their selling is about to stop. */
     public function test_a_schedule_that_subscribed_is_not_reminded(): void
     {

@@ -376,6 +376,7 @@ return [
     'activation_nudge_subject_no_ticket_type_free' => 'Lass Leute sich für :schedule anmelden',
     'activation_nudge_heading_no_ticket_type_free' => 'Nimm Anmeldungen über diese Seite an',
     'activation_nudge_body_no_ticket_type_free' => ':schedule hat veröffentlichte Veranstaltungen, aber keine Möglichkeit, sich dafür anzumelden. Kostenlose Anmeldungen und kostenlose Tickets sind in deinem Tarif unbegrenzt, mit einem QR-Code für jeden Gast zum Scannen am Einlass. Wenn du Geld nehmen möchtest, kannst du den Verkauf bezahlter Tickets 7 Tage lang kostenlos testen, ohne Karte.',
+    'activation_nudge_body_no_ticket_type_free_no_trial' => ':schedule hat veröffentlichte Veranstaltungen, aber keine Möglichkeit, sich dafür anzumelden. Kostenlose Anmeldungen und kostenlose Tickets sind in deinem Tarif unbegrenzt, mit einem QR-Code für jeden Gast zum Scannen am Einlass.',
     'activation_nudge_cta_no_ticket_type_free' => 'Anmeldung einrichten',
 
     'activation_nudge_subject_no_gateway' => 'Ein Schritt fehlt, bis :schedule Zahlungen annehmen kann',
