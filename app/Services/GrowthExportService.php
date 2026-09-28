@@ -486,6 +486,17 @@ class GrowthExportService
                 .'does not tell apart), payment_failed, payment_disputed, schedule_deleted or admin. Transfers '
                 .'(a schedule changing hands) are counted in churn.transferred, not churn.cancelled. '
                 .'nudges and owner_digests totals shrink when a schedule or user is deleted (cascade).',
+            'gmv_by_currency and the schedule rows exclude the demo schedule\'s sales. Exports before '
+                .'schema_version 6 did not exclude them from gmv_by_currency, and the hourly demo re-seed '
+                .'put roughly $12k-15k of fake USD into whichever month was current: discard USD '
+                .'gmv_by_currency from any earlier export. gmv_recent_by_currency (added in 6) gives each '
+                .'schedule\'s revenue per currency, so a schedule that sold in more than one currency, '
+                .'which reports gmv_currency null, can still be sized.',
+            'traffic[].visitors_basis is server, mixed or beacon. From 2026-09-07 the visit counters '
+                .'(visitors, page_views, docs_*, pricing_*) are counted by a JS beacon on edge-cached '
+                .'pages, and daily visitors fell about 4x across that line. Whether that removed bots or '
+                .'the beacon under-counts is not established - see MarketingDailyStat::COLUMN_REBASED_AT. '
+                .'Do not compare visit counts across bases. signup_* counters are unaffected.',
             'monetization.ticket_trials counts the card-free paid-selling trial, which is not a plan: '
                 .'those schedules stay "free" in plan_counts. converted means a real subscription created '
                 .'after the trial started and within 14 days of its end; sold_during means a paid sale '
@@ -507,7 +518,7 @@ class GrowthExportService
                 'is_hosted' => (bool) config('app.hosted'),
                 'is_nexus' => (bool) config('app.is_nexus'),
                 'app_version' => config('self-update.version_installed'),
-                'schema_version' => 5,
+                'schema_version' => 6,
                 'row_cap' => $this->rowCap(),
                 'truncated' => [
                     'signups' => ['capped' => $signups['truncated'], 'total' => $signups['total']],
@@ -569,7 +580,11 @@ class GrowthExportService
             ->where('subdomain', 'not like', 'demo-%');
     }
 
-    /** Subquery of every event id attached to a demo schedule. */
+    /**
+     * Subquery of every event id attached to a demo schedule, by subdomain shape - the same
+     * predicate as excludeDemoRoles(), so the signup and schedule sections agree. Sales use
+     * DemoService::demoEventIdsQuery() instead; see gmvByCurrency().
+     */
     private function demoEventIds()
     {
         return DB::table('event_role')
@@ -815,6 +830,20 @@ class GrowthExportService
                 }
             }
 
+            // Every currency separately, so a mixed-currency seller can still be sized. The
+            // null above hid one of the four paying sellers entirely. gmv_currency/gmv_recent
+            // keep their shape for anything already reading them.
+            $gmvByCurrencyRecent = null;
+            if ($currencies) {
+                $gmvByCurrencyRecent = [];
+                foreach ($currencies as $currency) {
+                    $gmvByCurrencyRecent[($currency === null || $currency === '') ? 'unknown' : $currency] = array_map(
+                        fn ($m) => (float) ($gmvByMonth[$r->id][$currency][$m] ?? 0),
+                        $months
+                    );
+                }
+            }
+
             $subAt = $firstSub[$r->id]->first_at ?? null;
 
             $rows[] = [
@@ -834,6 +863,7 @@ class GrowthExportService
                 $firstPaidMonth,
                 $gmvCurrency,
                 $gmvPerMonth,
+                $gmvByCurrencyRecent,
                 (int) ($views[$r->id]->v ?? 0),
                 (int) ($followers[$r->id]->c ?? 0),
                 (int) ($subscribers[$r->id]->c ?? 0),
@@ -852,6 +882,7 @@ class GrowthExportService
                 'events_total', 'events_public', 'events_recent_90d', 'ticket_types',
                 'paid_ticket_types', 'paid_tickets_total',
                 'paid_tickets_recent', 'first_paid_sale_month', 'gmv_currency', 'gmv_recent',
+                'gmv_recent_by_currency',
                 'views_90d', 'followers', 'subscribers', 'interests_90d', 'interests_total',
                 'appointment_types',
                 'photos', 'newsletter_emails_this_month', 'features', 'days_to_upgrade'],
@@ -1399,6 +1430,9 @@ class GrowthExportService
             ->where('sales.is_deleted', false)
             ->whereNotIn('sales.payment_method', ['rsvp', 'import'])
             ->whereNotNull('sales.paid_at')
+            // The demo's hourly re-seed would otherwise be most of this - see
+            // DemoService::demoEventIdsQuery() for why this is not the demo-% shape.
+            ->whereNotIn('sales.event_id', DemoService::demoEventIdsQuery())
             ->groupBy('events.ticket_currency_code', DB::raw("DATE_FORMAT(sales.paid_at, '%Y-%m')"))
             ->selectRaw("events.ticket_currency_code as currency, DATE_FORMAT(sales.paid_at, '%Y-%m') as ym, "
                 .'SUM(sales.payment_amount) as amount, COUNT(*) as sales_count')
@@ -1526,6 +1560,12 @@ class GrowthExportService
 
             return [
                 'month' => $m,
+                // server, mixed or beacon - see MarketingDailyStat::COLUMN_REBASED_AT. It covers
+                // every visit counter below (visitors, page_views, docs_*, pricing_*) but not the
+                // signup_* ones, which never changed. Only months with the same basis compare.
+                'visitors_basis' => ($isNexus && $visitors !== null)
+                    ? MarketingDailyStat::basisInMonth('visitors', $m)
+                    : null,
                 'visitors' => $isNexus ? $visitors : null,
                 'page_views' => $isNexus ? $count('page_views') : null,
                 // Docs/selfhost readers are a subset of the totals above, not prospects for the

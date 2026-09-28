@@ -65,6 +65,28 @@ class DemoService
     }
 
     /**
+     * Subquery of every event id attached to demo content, for `whereNotIn('...event_id', ...)`.
+     *
+     * Any platform-wide sum over sales needs it. The hourly app:setup-demo reset deletes the
+     * demo's sales and creates new `status=paid`, `payment_method=stripe` USD ones, and Sale's
+     * saving hook stamps paid_at = now() - so every batch lands in the current month. That is how
+     * the growth export reported ~$14.6k of USD ticket revenue for August 2026 when real sellers
+     * took ~$2.3k.
+     *
+     * Keyed on Role::constrainDemoContent(), NOT the `demo-%` subdomain shape: every schedule
+     * DemoService seeds carries DEMO_EMAIL as its contact address, while real schedules named
+     * before cleanSubdomain() reserved the prefix (a "Demo Night" got `demo-night`) still hold
+     * one - and hiding a real seller's revenue is the worse error when there are only a handful.
+     * It matches nothing on selfhost, which has no demo.
+     */
+    public static function demoEventIdsQuery(): \Illuminate\Database\Query\Builder
+    {
+        return Role::constrainDemoContent(
+            DB::table('event_role')->join('roles', 'roles.id', '=', 'event_role.role_id')
+        )->select('event_role.event_id');
+    }
+
+    /**
      * Check if the given user is the demo user
      */
     public static function isDemoUser(?User $user): bool

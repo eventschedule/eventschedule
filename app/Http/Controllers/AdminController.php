@@ -662,22 +662,26 @@ class AdminController extends Controller
         $startDate = $dates['start'];
         $endDate = $dates['end'];
 
-        // Revenue & Sales Metrics
-        $totalRevenue = Sale::where('status', 'paid')->sum('payment_amount');
-        $revenueInPeriod = Sale::where('status', 'paid')
+        // Revenue & Sales Metrics. The demo's sales are re-seeded every hour as paid Stripe
+        // sales, so without this they dominate every figure below. $recentSales uses the same
+        // exclusion, so the table and the totals agree about every sale.
+        $sales = fn () => Sale::query()->whereNotIn('event_id', DemoService::demoEventIdsQuery());
+
+        $totalRevenue = $sales()->where('status', 'paid')->sum('payment_amount');
+        $revenueInPeriod = $sales()->where('status', 'paid')
             ->whereBetween('created_at', [$startDate, $endDate])
             ->sum('payment_amount');
 
-        $totalSales = Sale::where('status', 'paid')->count();
-        $salesInPeriod = Sale::where('status', 'paid')
+        $totalSales = $sales()->where('status', 'paid')->count();
+        $salesInPeriod = $sales()->where('status', 'paid')
             ->whereBetween('created_at', [$startDate, $endDate])
             ->count();
 
-        $refundedSales = Sale::where('status', 'refunded')->count();
+        $refundedSales = $sales()->where('status', 'refunded')->count();
         $refundRate = ($totalSales + $refundedSales) > 0 ? round(($refundedSales / ($totalSales + $refundedSales)) * 100, 1) : 0;
 
-        $pendingSales = Sale::where('status', 'unpaid')->count();
-        $pendingRevenue = Sale::where('status', 'unpaid')->sum('payment_amount');
+        $pendingSales = $sales()->where('status', 'unpaid')->count();
+        $pendingRevenue = $sales()->where('status', 'unpaid')->sum('payment_amount');
 
         // Boost markup revenue
         $boostMarkupTotal = BoostBillingRecord::where('type', 'charge')
@@ -814,8 +818,7 @@ class AdminController extends Controller
 
         // Recent sales for detailed table
         $recentSales = Sale::with('event:id,name')
-            ->where('subdomain', '!=', DemoService::DEMO_ROLE_SUBDOMAIN)
-            ->where('subdomain', 'not like', 'demo-%')
+            ->whereNotIn('event_id', DemoService::demoEventIdsQuery())
             ->orderByDesc('created_at')
             ->limit(50)
             ->get();

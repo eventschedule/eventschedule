@@ -109,9 +109,10 @@ class GrowthExportTest extends TestCase
         $this->assertArrayHasKey('meta', $decoded);
         $this->assertArrayHasKey('signups', $decoded);
         $this->assertArrayHasKey('schedules', $decoded);
-        // 3 since the claims section landed. Bumping this is deliberate: a reader diffing two
-        // pulls needs to know the shape moved.
-        $this->assertSame(5, $decoded['meta']['schema_version']);
+        // 3 since the claims section landed, 6 since gmv_recent_by_currency and the demo-free
+        // gmv_by_currency. Bumping this is deliberate: a reader diffing two pulls needs to know
+        // the shape (or the meaning) moved.
+        $this->assertSame(6, $decoded['meta']['schema_version']);
     }
 
     public function test_claims_reports_untracked_months_as_null_not_zero(): void
@@ -870,6 +871,67 @@ class GrowthExportTest extends TestCase
         $this->assertNull($row[$i['gmv_recent']]);
         // The ticket COUNT is still currency-free, so it keeps working.
         $this->assertSame(2, $row[$i['paid_tickets_total']]);
+
+        // ...and each currency is still sizeable on its own. One of the four paying sellers in
+        // the 2026-09-28 export sold in two currencies and was invisible without this.
+        $byCurrency = $row[$i['gmv_recent_by_currency']];
+        $this->assertSame(['EUR', 'GBP'], collect($byCurrency)->keys()->sort()->values()->all());
+        $this->assertCount(GrowthExportService::RECENT_MONTHS, $byCurrency['GBP']);
+        $this->assertSame(50.0, end($byCurrency['GBP']));
+        $this->assertSame(40.0, end($byCurrency['EUR']));
+    }
+
+    /**
+     * The demo's hourly re-seed creates paid Stripe sales stamped paid_at = now(), so they land
+     * in the current month of gmv_by_currency. Before this, they were ~$12k-15k of the USD
+     * "revenue" in every export - more than every real seller combined.
+     */
+    public function test_demo_sales_are_excluded_from_gmv_by_currency(): void
+    {
+        // Seeded the way DemoService seeds it: the schedule's contact address is DEMO_EMAIL.
+        $demo = $this->createRole($this->createOwner(), 'venue', [
+            'subdomain' => 'demo-springfield-hall', 'email' => DemoService::DEMO_EMAIL,
+        ]);
+        $demoEvent = $this->createEvent($demo, ['ticket_currency_code' => 'USD']);
+        $demoTicket = $this->createTicket($demoEvent, ['price' => 50, 'quantity' => 100]);
+        $this->createSale($demoEvent, $demo, ['status' => 'paid', 'payment_amount' => 5000], $demoTicket, 1);
+
+        $real = $this->freeRole();
+        $realEvent = $this->createEvent($real, ['ticket_currency_code' => 'USD']);
+        $realTicket = $this->createTicket($realEvent, ['price' => 10, 'quantity' => 100]);
+        $this->createSale($realEvent, $real, ['status' => 'paid', 'payment_amount' => 30], $realTicket, 3);
+
+        // A real schedule named before cleanSubdomain() reserved the prefix. Its money is real,
+        // and with only a handful of sellers, hiding one is the worse error.
+        $legacy = $this->createRole($this->createOwner(), 'venue', ['subdomain' => 'demo-night']);
+        $legacyEvent = $this->createEvent($legacy, ['ticket_currency_code' => 'USD']);
+        $legacyTicket = $this->createTicket($legacyEvent, ['price' => 20, 'quantity' => 100]);
+        $this->createSale($legacyEvent, $legacy, ['status' => 'paid', 'payment_amount' => 20], $legacyTicket, 1);
+
+        $usd = collect($this->build()['monetization']['gmv_by_currency'])->where('currency', 'USD');
+
+        $this->assertSame(50.0, $usd->sum('amount'), 'the demo sale is excluded, demo-night is not');
+        $this->assertSame(2, $usd->sum('sales'));
+    }
+
+    /**
+     * The edge cache moved the visit counters onto a JS beacon, and daily visitors fell ~4x
+     * across that line. Each month says which way it was counted so nobody reads the step as
+     * lost traffic (or as a fixed bot problem) without checking.
+     */
+    public function test_traffic_says_how_each_month_was_counted(): void
+    {
+        config(['app.is_nexus' => true]);
+
+        foreach (['2026-08-10', '2026-09-10', '2026-10-10'] as $date) {
+            MarketingDailyStat::create(['date' => $date, 'visitors' => 10, 'page_views' => 12, 'signup_views' => 1]);
+        }
+
+        $basis = collect($this->build()['traffic'])->pluck('visitors_basis', 'month');
+
+        $this->assertSame('server', $basis['2026-08']);
+        $this->assertSame('mixed', $basis['2026-09'], 'the rebase fell mid-September');
+        $this->assertSame('beacon', $basis['2026-10']);
     }
 
     public function test_schedule_rows_carry_capture_counts(): void
