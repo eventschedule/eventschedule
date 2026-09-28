@@ -425,6 +425,10 @@ return [
     'activation_nudge_heading_no_ticket_type' => 'Sellelt lehelt saab müüa',
     'activation_nudge_body_no_ticket_type' => ':schedule on avaldatud sündmused, kuid piletitüüpe pole, nii et lehte saab lugeda, aga sealt osta ei saa. Ühe loomiseks on vaja nime, hinda ja kogust. Iga pileti QR-koodi skaneerid uksel ning Event Schedule ei võta üheski paketis platvormitasu.',
     'activation_nudge_cta_no_ticket_type' => 'Seadista piletid',
+    'activation_nudge_subject_no_ticket_type_free' => 'Lase inimestel :schedule üritustele registreeruda',
+    'activation_nudge_heading_no_ticket_type_free' => 'Võta sellelt lehelt registreerumisi vastu',
+    'activation_nudge_body_no_ticket_type_free' => ':schedule kalendris on avaldatud üritusi, kuid neile ei saa registreeruda. Tasuta registreerimine ja tasuta piletid on sinu paketis piiramatud, iga külalise jaoks on QR-kood, mida uksel skannida. Kui soovid tasu võtta, saad tasuliste piletite müüki 7 päeva tasuta proovida, ilma kaardita.',
+    'activation_nudge_cta_no_ticket_type_free' => 'Seadista registreerimine',
 
     'activation_nudge_subject_no_gateway' => 'Üks samm on jäänud, enne kui :schedule saab makseid vastu võtta',
     'activation_nudge_heading_no_gateway' => 'Ühendage makseviis',
@@ -448,6 +452,7 @@ return [
 
     'next_steps' => 'Järgmised sammud',
     'next_step_add_ticket_type' => 'Lisa piletitüüp, et saaks osta',
+    'next_step_add_registration' => 'Lisa tasuta registreerimine, et inimesed saaksid registreeruda',
     'next_step_connect_payments' => 'Ühenda makseviis, et raha vastu võtta',
     'next_step_add_first_event' => 'Lisa oma esimene sündmus',
     'first_event_form_subtitle' => 'Ainult nimi, kuupäev ja kellaaeg. Ülejäänu saad lisada hiljem.',

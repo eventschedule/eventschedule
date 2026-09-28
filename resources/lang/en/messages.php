@@ -428,6 +428,10 @@ return [
     'activation_nudge_heading_no_ticket_type' => 'You can sell from this page',
     'activation_nudge_body_no_ticket_type' => ':schedule has events published but no ticket types, so the page can be read but not bought from. Adding one takes a name, a price and a quantity. You scan the QR code on every ticket at the door, and Event Schedule takes no platform fee on any plan.',
     'activation_nudge_cta_no_ticket_type' => 'Set up tickets',
+    'activation_nudge_subject_no_ticket_type_free' => 'Let people sign up for :schedule',
+    'activation_nudge_heading_no_ticket_type_free' => 'Take sign-ups from this page',
+    'activation_nudge_body_no_ticket_type_free' => ':schedule has events published but no way to sign up for them. Free registration and free tickets are unlimited on your plan, with a QR code for every guest to scan at the door. If you want to charge, you can try selling paid tickets free for 7 days, with no card.',
+    'activation_nudge_cta_no_ticket_type_free' => 'Set up registration',
 
     'activation_nudge_subject_no_gateway' => 'One step left before :schedule can take payment',
     'activation_nudge_heading_no_gateway' => 'Connect a way to get paid',
@@ -452,6 +456,7 @@ return [
     // In-app next steps, the dashboard half of the activation nudges above.
     'next_steps' => 'Next steps',
     'next_step_add_ticket_type' => 'Add a ticket type so people can buy',
+    'next_step_add_registration' => 'Add free registration so people can sign up',
     'next_step_connect_payments' => 'Connect a payment method to take money',
     'next_step_add_first_event' => 'Add your first event',
     'first_event_form_subtitle' => 'Just a name, date and time. You can add the rest later.',

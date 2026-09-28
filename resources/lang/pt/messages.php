@@ -819,6 +819,10 @@ return [
     'activation_nudge_heading_no_ticket_type' => 'Pode vender a partir desta página',
     'activation_nudge_body_no_ticket_type' => ':schedule tem eventos publicados mas nenhum tipo de bilhete, por isso a página lê-se mas não se compra nela. Criar um leva um nome, um preço e uma quantidade. Faz a leitura do QR de cada bilhete à entrada, e o Event Schedule não cobra comissão de plataforma em nenhum plano.',
     'activation_nudge_cta_no_ticket_type' => 'Configurar bilhetes',
+    'activation_nudge_subject_no_ticket_type_free' => 'Deixe as pessoas inscreverem-se em :schedule',
+    'activation_nudge_heading_no_ticket_type_free' => 'Receba inscrições a partir desta página',
+    'activation_nudge_body_no_ticket_type_free' => ':schedule tem eventos publicados, mas não há forma de se inscrever neles. As inscrições gratuitas e os bilhetes gratuitos são ilimitados no seu plano, com um código QR para cada convidado ler à entrada. Se quiser cobrar, pode experimentar vender bilhetes pagos gratuitamente durante 7 dias, sem cartão.',
+    'activation_nudge_cta_no_ticket_type_free' => 'Configurar inscrições',
 
     'activation_nudge_subject_no_gateway' => 'Falta um passo para :schedule poder receber pagamentos',
     'activation_nudge_heading_no_gateway' => 'Ligue uma forma de receber',
@@ -842,6 +846,7 @@ return [
 
     'next_steps' => 'Próximos passos',
     'next_step_add_ticket_type' => 'Adicione um tipo de bilhete para poderem comprar',
+    'next_step_add_registration' => 'Adicione inscrição gratuita para que as pessoas se possam inscrever',
     'next_step_connect_payments' => 'Ligue um método de pagamento para receber',
     'next_step_add_first_event' => 'Adicione o seu primeiro evento',
     'first_event_form_subtitle' => 'Só um nome, uma data e uma hora. Pode adicionar o resto mais tarde.',

@@ -366,6 +366,10 @@ return [
     'activation_nudge_heading_no_ticket_type' => 'يمكنك البيع من هذه الصفحة',
     'activation_nudge_body_no_ticket_type' => 'لدى :schedule فعاليات منشورة لكن بلا أنواع تذاكر، فالصفحة تُقرأ ولا يمكن الشراء منها. إنشاء نوع يحتاج اسمًا وسعرًا وكمية. تمسح رمز QR لكل تذكرة عند الباب، ولا تأخذ Event Schedule رسوم منصة في أي باقة.',
     'activation_nudge_cta_no_ticket_type' => 'إعداد التذاكر',
+    'activation_nudge_subject_no_ticket_type_free' => 'دع الناس يسجلون في :schedule',
+    'activation_nudge_heading_no_ticket_type_free' => 'استقبل التسجيلات من هذه الصفحة',
+    'activation_nudge_body_no_ticket_type_free' => 'لدى :schedule فعاليات منشورة لكن لا توجد طريقة للتسجيل فيها. التسجيل المجاني والتذاكر المجانية غير محدودة في باقتك، مع رمز QR لكل ضيف لمسحه عند الباب. إذا أردت فرض رسوم، يمكنك تجربة بيع التذاكر المدفوعة مجانًا لمدة 7 أيام دون بطاقة.',
+    'activation_nudge_cta_no_ticket_type_free' => 'إعداد التسجيل',
 
     'activation_nudge_subject_no_gateway' => 'خطوة واحدة قبل أن يتمكن :schedule من قبول الدفع',
     'activation_nudge_heading_no_gateway' => 'اربط وسيلة لتحصيل المدفوعات',
@@ -389,6 +393,7 @@ return [
 
     'next_steps' => 'الخطوات التالية',
     'next_step_add_ticket_type' => 'أضف نوع تذكرة ليتمكن الناس من الشراء',
+    'next_step_add_registration' => 'أضف تسجيلًا مجانيًا ليتمكن الناس من التسجيل',
     'next_step_connect_payments' => 'اربط وسيلة دفع لتحصيل الأموال',
     'next_step_add_first_event' => 'أضف أول فعالية لك',
     'first_event_form_subtitle' => 'فقط الاسم والتاريخ والوقت. يمكنك إضافة الباقي لاحقًا.',

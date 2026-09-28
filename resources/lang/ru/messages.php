@@ -426,6 +426,10 @@ return [
     'activation_nudge_heading_no_ticket_type' => 'С этой страницы можно продавать',
     'activation_nudge_body_no_ticket_type' => 'У :schedule есть опубликованные мероприятия, но нет типов билетов, поэтому страницу можно читать, но нельзя ничего купить. Чтобы создать тип, нужны название, цена и количество. QR-код каждого билета вы сканируете на входе, и Event Schedule не берёт комиссию платформы ни в одном тарифе.',
     'activation_nudge_cta_no_ticket_type' => 'Настроить билеты',
+    'activation_nudge_subject_no_ticket_type_free' => 'Дайте людям записаться в :schedule',
+    'activation_nudge_heading_no_ticket_type_free' => 'Принимайте записи с этой страницы',
+    'activation_nudge_body_no_ticket_type_free' => 'У :schedule есть опубликованные мероприятия, но на них нельзя записаться. Бесплатная регистрация и бесплатные билеты не ограничены в вашем тарифе, с QR-кодом для каждого гостя, который сканируется на входе. Если хотите брать плату, можете бесплатно попробовать продажу платных билетов в течение 7 дней, без карты.',
+    'activation_nudge_cta_no_ticket_type_free' => 'Настроить регистрацию',
 
     'activation_nudge_subject_no_gateway' => 'Остался один шаг, чтобы :schedule могло принимать оплату',
     'activation_nudge_heading_no_gateway' => 'Подключите способ получать деньги',
@@ -449,6 +453,7 @@ return [
 
     'next_steps' => 'Следующие шаги',
     'next_step_add_ticket_type' => 'Добавьте тип билета, чтобы можно было купить',
+    'next_step_add_registration' => 'Добавьте бесплатную регистрацию, чтобы люди могли записаться',
     'next_step_connect_payments' => 'Подключите способ оплаты, чтобы принимать деньги',
     'next_step_add_first_event' => 'Добавьте первое событие',
     'first_event_form_subtitle' => 'Только название, дата и время. Остальное можно добавить позже.',

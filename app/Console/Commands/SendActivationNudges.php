@@ -183,6 +183,7 @@ class SendActivationNudges extends Command
     {
         return [
             'no_ticket_type' => fn (int $limit) => $this->dueForNoTicketType($limit),
+            'no_ticket_type_free' => fn (int $limit) => $this->dueForNoTicketTypeFree($limit),
             'no_gateway' => fn (int $limit) => $this->dueForNoGateway($limit),
             'first_sale' => fn (int $limit) => $this->dueForFirstSale($limit),
             'no_event' => fn (int $limit) => $this->dueForNoEvent($limit),
@@ -330,6 +331,30 @@ class SendActivationNudges extends Command
     }
 
     /**
+     * The same moment on a schedule that cannot sell a priced ticket: something upcoming on the
+     * page and no way to sign up for it. That is where the ticket cliff is, and no_ticket_type
+     * cannot reach it. The ask is different, so the key and the copy are too: free registration
+     * and $0 tickets, which every plan has without limit, with the selling trial as the way to
+     * charge.
+     *
+     * The plan test is a NOT IN over the can-sell set, never whereNot(wherePro()): that scope
+     * compares plan_expires, which is NULL on most free schedules, and NOT over a NULL comparison
+     * drops the row - the free schedules this exists for.
+     */
+    private function dueForNoTicketTypeFree(int $limit)
+    {
+        return $this->base('no_ticket_type_free')
+            ->whereNotIn('roles.id', Role::query()->whereCanSellPaidTickets()->select('roles.id'))
+            ->whereHas('events', fn ($q) => $this->ownedEvents($this->publicEvents($q))
+                ->hasUpcomingOccurrence())
+            ->whereDoesntHave('events', fn ($q) => $this->ownedEvents($q)
+                ->whereHas('tickets', fn ($t) => $t->where('tickets.is_deleted', false)))
+            // Registration is the free way to sign up, so a schedule taking it has done this.
+            ->whereDoesntHave('events', fn ($q) => $this->ownedEvents($q)->where('events.rsvp_enabled', true))
+            ->limit($limit)->get();
+    }
+
+    /**
      * Paid tickets set up, but nothing connected to take the money with.
      *
      * The "connected" test is payment_gateways()->connectedFor(), whose docblock says it is what
@@ -349,7 +374,10 @@ class SendActivationNudges extends Command
         return $this->base('no_gateway')
             // Same reasoning as dueForNoTicketType(): urging a free schedule to connect a gateway
             // it cannot take money through is an upsell wearing an activation email's clothes.
-            ->whereCanSellPaidTickets()
+            // A grandfathered event CAN take money on a free schedule, so it counts.
+            ->where(fn ($q) => $q->whereCanSellPaidTickets()
+                ->orWhereHas('events', fn ($e) => $e->whereColumn('events.creator_role_id', 'roles.id')
+                    ->whereNotNull('events.tickets_grandfathered_at')))
             ->whereHas('events', fn ($q) => $this->ownedEvents($q)
                 ->whereHas('tickets', fn ($t) => $t->where('tickets.is_deleted', false)
                     ->where('tickets.price', '>', 0)))

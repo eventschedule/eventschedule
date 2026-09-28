@@ -814,6 +814,10 @@ return [
     'activation_nudge_heading_no_ticket_type' => 'Vanaf deze pagina kun je verkopen',
     'activation_nudge_body_no_ticket_type' => ':schedule heeft gepubliceerde evenementen maar geen tickettypes, dus de pagina is te lezen maar er valt niets te kopen. Er een maken vraagt om een naam, een prijs en een aantal. Je scant de QR-code van elk ticket bij de deur, en Event Schedule rekent in geen enkel abonnement platformkosten.',
     'activation_nudge_cta_no_ticket_type' => 'Tickets instellen',
+    'activation_nudge_subject_no_ticket_type_free' => 'Laat mensen zich aanmelden voor :schedule',
+    'activation_nudge_heading_no_ticket_type_free' => 'Neem aanmeldingen aan via deze pagina',
+    'activation_nudge_body_no_ticket_type_free' => ':schedule heeft gepubliceerde evenementen, maar je kunt je er niet voor aanmelden. Gratis aanmeldingen en gratis tickets zijn onbeperkt in je abonnement, met een QR-code voor elke gast om bij de deur te scannen. Wil je geld vragen, dan kun je 7 dagen gratis betaalde tickets verkopen, zonder kaart.',
+    'activation_nudge_cta_no_ticket_type_free' => 'Aanmelding instellen',
 
     'activation_nudge_subject_no_gateway' => 'Nog één stap voordat :schedule betalingen kan aannemen',
     'activation_nudge_heading_no_gateway' => 'Koppel een manier om betaald te worden',
@@ -837,6 +841,7 @@ return [
 
     'next_steps' => 'Volgende stappen',
     'next_step_add_ticket_type' => 'Voeg een tickettype toe zodat mensen kunnen kopen',
+    'next_step_add_registration' => 'Voeg gratis aanmelding toe zodat mensen zich kunnen aanmelden',
     'next_step_connect_payments' => 'Koppel een betaalmethode om geld aan te nemen',
     'next_step_add_first_event' => 'Voeg je eerste evenement toe',
     'first_event_form_subtitle' => 'Alleen een naam, datum en tijd. De rest kun je later toevoegen.',

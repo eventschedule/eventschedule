@@ -426,6 +426,10 @@ return [
     'activation_nudge_heading_no_ticket_type' => 'Puteți vinde din această pagină',
     'activation_nudge_body_no_ticket_type' => ':schedule are evenimente publicate, dar niciun tip de bilet, așa că pagina se poate citi, dar nu se poate cumpăra de pe ea. Crearea unuia cere un nume, un preț și o cantitate. Scanezi codul QR al fiecărui bilet la intrare, iar Event Schedule nu percepe comision de platformă în niciun plan.',
     'activation_nudge_cta_no_ticket_type' => 'Configurați biletele',
+    'activation_nudge_subject_no_ticket_type_free' => 'Lasă oamenii să se înscrie la :schedule',
+    'activation_nudge_heading_no_ticket_type_free' => 'Primește înscrieri de pe această pagină',
+    'activation_nudge_body_no_ticket_type_free' => ':schedule are evenimente publicate, dar nu există nicio modalitate de înscriere. Înscrierile gratuite și biletele gratuite sunt nelimitate în planul tău, cu un cod QR pentru fiecare invitat, scanat la intrare. Dacă vrei să percepi o taxă, poți încerca gratuit vânzarea biletelor cu plată timp de 7 zile, fără card.',
+    'activation_nudge_cta_no_ticket_type_free' => 'Configurează înscrierea',
 
     'activation_nudge_subject_no_gateway' => 'Mai e un pas până când :schedule poate încasa',
     'activation_nudge_heading_no_gateway' => 'Conectați o modalitate de a fi plătit',
@@ -449,6 +453,7 @@ return [
 
     'next_steps' => 'Pașii următori',
     'next_step_add_ticket_type' => 'Adăugați un tip de bilet pentru a se putea cumpăra',
+    'next_step_add_registration' => 'Adaugă înscriere gratuită ca oamenii să se poată înscrie',
     'next_step_connect_payments' => 'Conectați o metodă de plată pentru a încasa',
     'next_step_add_first_event' => 'Adăugați primul eveniment',
     'first_event_form_subtitle' => 'Doar un nume, o dată și o oră. Restul le puteți adăuga mai târziu.',

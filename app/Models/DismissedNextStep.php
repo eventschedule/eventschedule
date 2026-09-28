@@ -75,7 +75,7 @@ class DismissedNextStep extends Model
      * control on the panel and nothing can silence it.
      */
     public const NUDGE_KEYS = [
-        'next_step_tickets' => ['no_ticket_type'],
+        'next_step_tickets' => ['no_ticket_type', 'no_ticket_type_free'],
         'next_step_payments' => ['no_gateway'],
         'next_step_first_event' => ['no_event'],
         'next_step_next_event' => ['idle_30', 'idle_60'],

@@ -149,6 +149,83 @@ class ActivationNudgeTest extends TestCase
         $this->assertNothingSent();
     }
 
+    /**
+     * The free half of the same moment, which no_ticket_type cannot reach: the ticket cliff is on
+     * free schedules. Its own key and copy, because the ask is registration, not selling.
+     */
+    public function test_it_nudges_a_free_schedule_to_take_sign_ups(): void
+    {
+        $role = $this->createFreeRole($this->owner());
+        $this->createEvent($role, ['starts_at' => now()->addDays(10)->format('Y-m-d H:i:s')]);
+
+        $this->nudge();
+
+        $this->assertSame(['no_ticket_type_free'], DB::table('schedule_nudges')->pluck('nudge_key')->all());
+    }
+
+    /**
+     * Most free schedules carry a NULL plan_expires. A negated wherePro() compares it and drops
+     * the row, so this is the case the NOT IN exists for.
+     */
+    public function test_a_free_schedule_with_no_plan_expiry_is_still_reached(): void
+    {
+        $role = $this->createFreeRole($this->owner(), 'venue', ['plan_expires' => null]);
+        $this->createEvent($role, ['starts_at' => now()->addDays(10)->format('Y-m-d H:i:s')]);
+
+        $this->nudge('no_ticket_type_free');
+
+        $this->assertSent('no_ticket_type_free');
+    }
+
+    public function test_a_pro_schedule_never_gets_the_free_copy(): void
+    {
+        $role = $this->createRole($this->owner());
+        $this->createEvent($role, ['starts_at' => now()->addDays(10)->format('Y-m-d H:i:s')]);
+
+        $this->nudge('no_ticket_type_free');
+
+        $this->assertNothingSent();
+    }
+
+    /** Registration is the free way to sign up, so a schedule taking it has done what this asks. */
+    public function test_a_free_schedule_taking_registrations_is_left_alone(): void
+    {
+        $role = $this->createFreeRole($this->owner());
+        $this->createEvent($role, ['starts_at' => now()->addDays(10)->format('Y-m-d H:i:s'), 'rsvp_enabled' => true]);
+
+        $this->nudge('no_ticket_type_free');
+
+        $this->assertNothingSent();
+    }
+
+    /** A schedule on the selling trial can sell, so it gets the selling copy. */
+    public function test_a_schedule_on_the_selling_trial_gets_the_selling_copy(): void
+    {
+        $role = $this->createFreeRole($this->owner());
+        $role->forceFill(['ticket_trial_ends_at' => now()->addDays(5)])->save();
+        $this->createEvent($role, ['starts_at' => now()->addDays(10)->format('Y-m-d H:i:s')]);
+
+        $this->nudge();
+
+        $this->assertSame(['no_ticket_type'], DB::table('schedule_nudges')->pluck('nudge_key')->all());
+    }
+
+    /** A grandfathered event takes money on a free schedule, so it needs somewhere to put it. */
+    public function test_a_grandfathered_free_seller_is_nudged_to_connect_a_gateway(): void
+    {
+        $role = $this->createFreeRole($this->owner(['stripe_account_id' => null]));
+        $event = $this->createEvent($role, [
+            'starts_at' => now()->addDays(10)->format('Y-m-d H:i:s'),
+            'creator_role_id' => $role->id,
+        ]);
+        $event->forceFill(['tickets_grandfathered_at' => now()])->save();
+        $this->createTicket($event, ['price' => 20, 'quantity' => 50]);
+
+        $this->nudge('no_gateway');
+
+        $this->assertSent('no_gateway');
+    }
+
     public function test_it_does_not_nudge_a_free_schedule_to_connect_a_gateway(): void
     {
         $role = $this->createFreeRole($this->owner());
@@ -753,7 +830,7 @@ class ActivationNudgeTest extends TestCase
     public function test_every_language_defines_its_own_copy(): void
     {
         $keys = [];
-        foreach (['no_event', 'no_ticket_type', 'no_gateway', 'first_sale', 'idle_30', 'idle_60'] as $nudge) {
+        foreach (['no_event', 'no_ticket_type', 'no_ticket_type_free', 'no_gateway', 'first_sale', 'idle_30', 'idle_60'] as $nudge) {
             foreach (['subject', 'heading', 'body', 'cta'] as $part) {
                 $keys[] = "activation_nudge_{$part}_{$nudge}";
             }
@@ -817,6 +894,18 @@ class ActivationNudgeTest extends TestCase
             'role_id' => $role->id,
             'step_type' => $stepType,
         ]);
+    }
+
+    public function test_a_dismissed_tickets_step_silences_the_free_copy_too(): void
+    {
+        $owner = $this->owner();
+        $role = $this->createFreeRole($owner);
+        $this->createEvent($role, ['starts_at' => now()->addDays(10)->format('Y-m-d H:i:s')]);
+        $this->dismissInApp($owner, $role, 'next_step_tickets');
+
+        $this->nudge('no_ticket_type_free');
+
+        $this->assertNothingSent();
     }
 
     public function test_a_dismissed_tickets_step_silences_the_no_ticket_type_nudge(): void

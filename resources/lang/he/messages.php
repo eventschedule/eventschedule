@@ -553,6 +553,10 @@ return [
     'activation_nudge_heading_no_ticket_type' => 'אפשר למכור מהעמוד הזה',
     'activation_nudge_body_no_ticket_type' => 'ל-:schedule יש אירועים שפורסמו אך אין סוגי כרטיסים, כך שאפשר לקרוא את הדף אבל לא לקנות בו. יצירת סוג דורשת שם, מחיר וכמות. אתם סורקים את קוד ה-QR של כל כרטיס בכניסה, ו-Event Schedule לא גובה עמלת פלטפורמה באף תוכנית.',
     'activation_nudge_cta_no_ticket_type' => 'הגדרת כרטיסים',
+    'activation_nudge_subject_no_ticket_type_free' => 'אפשרו לאנשים להירשם ל-:schedule',
+    'activation_nudge_heading_no_ticket_type_free' => 'קבלו הרשמות מהדף הזה',
+    'activation_nudge_body_no_ticket_type_free' => 'ל-:schedule יש אירועים שפורסמו אבל אין דרך להירשם אליהם. הרשמה חינם וכרטיסים חינם הם ללא הגבלה בתוכנית שלכם, עם קוד QR לכל אורח לסריקה בכניסה. אם תרצו לגבות תשלום, תוכלו לנסות מכירת כרטיסים בתשלום בחינם למשך 7 ימים, ללא כרטיס אשראי.',
+    'activation_nudge_cta_no_ticket_type_free' => 'הגדרת הרשמה',
 
     'activation_nudge_subject_no_gateway' => 'נשאר צעד אחד לפני ש:schedule יוכל לגבות תשלום',
     'activation_nudge_heading_no_gateway' => 'חברו דרך לקבל תשלום',
@@ -576,6 +580,7 @@ return [
 
     'next_steps' => 'הצעדים הבאים',
     'next_step_add_ticket_type' => 'הוסיפו סוג כרטיס כדי שאפשר יהיה לקנות',
+    'next_step_add_registration' => 'הוסיפו הרשמה חינם כדי שאנשים יוכלו להירשם',
     'next_step_connect_payments' => 'חברו אמצעי תשלום כדי לגבות כסף',
     'next_step_add_first_event' => 'הוסיפו את האירוע הראשון',
     'first_event_form_subtitle' => 'רק שם, תאריך ושעה. את השאר אפשר להוסיף אחר כך.',

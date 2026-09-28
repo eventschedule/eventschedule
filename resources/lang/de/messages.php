@@ -373,6 +373,10 @@ return [
     'activation_nudge_heading_no_ticket_type' => 'Von dieser Seite aus können Sie verkaufen',
     'activation_nudge_body_no_ticket_type' => ':schedule hat veröffentlichte Veranstaltungen, aber keine Ticketarten - die Seite lässt sich lesen, aber nichts kaufen. Eine anzulegen braucht Name, Preis und Menge. Du scannst den QR-Code jedes Tickets am Einlass, und Event Schedule nimmt in keinem Tarif eine Plattformgebühr.',
     'activation_nudge_cta_no_ticket_type' => 'Tickets einrichten',
+    'activation_nudge_subject_no_ticket_type_free' => 'Lass Leute sich für :schedule anmelden',
+    'activation_nudge_heading_no_ticket_type_free' => 'Nimm Anmeldungen über diese Seite an',
+    'activation_nudge_body_no_ticket_type_free' => ':schedule hat veröffentlichte Veranstaltungen, aber keine Möglichkeit, sich dafür anzumelden. Kostenlose Anmeldungen und kostenlose Tickets sind in deinem Tarif unbegrenzt, mit einem QR-Code für jeden Gast zum Scannen am Einlass. Wenn du Geld nehmen möchtest, kannst du den Verkauf bezahlter Tickets 7 Tage lang kostenlos testen, ohne Karte.',
+    'activation_nudge_cta_no_ticket_type_free' => 'Anmeldung einrichten',
 
     'activation_nudge_subject_no_gateway' => 'Ein Schritt fehlt, bis :schedule Zahlungen annehmen kann',
     'activation_nudge_heading_no_gateway' => 'Verbinden Sie eine Zahlungsmethode',
@@ -396,6 +400,7 @@ return [
 
     'next_steps' => 'Nächste Schritte',
     'next_step_add_ticket_type' => 'Ticketart hinzufügen, damit gekauft werden kann',
+    'next_step_add_registration' => 'Kostenlose Anmeldung hinzufügen, damit sich Leute anmelden können',
     'next_step_connect_payments' => 'Zahlungsmethode verbinden, um Geld anzunehmen',
     'next_step_add_first_event' => 'Erste Veranstaltung hinzufügen',
     'first_event_form_subtitle' => 'Nur Name, Datum und Uhrzeit. Den Rest können Sie später ergänzen.',

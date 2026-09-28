@@ -763,6 +763,13 @@ class HomeController extends Controller
         $withTicketType = $ticketTypes(false);
         $withPaidTicketType = $ticketTypes(true);
 
+        // Schedules with an event that keeps selling paid tickets whatever the plan
+        // (events.tickets_grandfathered_at). Only asked about when branch 2 needs it.
+        $grandfatheredSellers = DB::table('events')
+            ->whereIn('creator_role_id', $ids)
+            ->whereNotNull('tickets_grandfathered_at')
+            ->distinct()->pluck('creator_role_id')->flip();
+
         // How many DISTINCT people have asked to be told when each schedule's events go on sale.
         // One query, like the four above: the dashboard renders on every page load.
         //
@@ -838,9 +845,13 @@ class HomeController extends Controller
                     $items->push([
                         'type' => 'next_step_tickets',
                         'count' => 1,
+                        // "So people can buy" is not true of a schedule that cannot sell a priced
+                        // ticket: on Free the ask is registration or a $0 row, both unlimited.
                         'title' => $waiting > 0
                             ? trans_choice('messages.next_step_add_ticket_type_waiting', $waiting, ['count' => $waiting])
-                            : __('messages.next_step_add_ticket_type'),
+                            : ($role->canSellPaidTickets()
+                                ? __('messages.next_step_add_ticket_type')
+                                : __('messages.next_step_add_registration')),
                         'subtitle' => $role->name,
                         'url' => route('role.view_admin', ['subdomain' => $role->subdomain, 'tab' => 'schedule']),
                         'color' => 'blue',
@@ -854,8 +865,12 @@ class HomeController extends Controller
                 continue;
             }
 
-            // 2) Paid tickets set up with nothing to take the money with.
-            if (isset($withPaidTicketType[$role->id]) && ! $hasGateway) {
+            // 2) Paid tickets set up with nothing to take the money with. Only where they can
+            // actually sell: telling a free schedule to connect a gateway, beside the to-do that
+            // says those same tickets cannot be sold, was two contradictory messages at once.
+            // A grandfathered event still sells on a free schedule, so it still counts.
+            if (isset($withPaidTicketType[$role->id]) && ! $hasGateway
+                && ($role->canSellPaidTickets() || isset($grandfatheredSellers[$role->id]))) {
                 // Account-wide, not per schedule: $hasGateway is one gateway for the whole
                 // account, so turning this down on any schedule answers it for all of them.
                 // Otherwise an owner with five schedules selling tickets says no five times.

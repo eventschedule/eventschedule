@@ -821,6 +821,10 @@ return [
     'activation_nudge_heading_no_ticket_type' => 'Da questa pagina puoi vendere',
     'activation_nudge_body_no_ticket_type' => ':schedule ha eventi pubblicati ma nessun tipo di biglietto, quindi la pagina si legge ma non ci si può comprare nulla. Crearne uno richiede un nome, un prezzo e una quantità. Scansioni il QR di ogni biglietto all\'ingresso, ed Event Schedule non applica commissioni di piattaforma in nessun piano.',
     'activation_nudge_cta_no_ticket_type' => 'Configura i biglietti',
+    'activation_nudge_subject_no_ticket_type_free' => 'Lascia che le persone si iscrivano a :schedule',
+    'activation_nudge_heading_no_ticket_type_free' => 'Ricevi iscrizioni da questa pagina',
+    'activation_nudge_body_no_ticket_type_free' => ':schedule ha eventi pubblicati ma nessun modo per iscriversi. Le iscrizioni gratuite e i biglietti gratuiti sono illimitati nel tuo piano, con un codice QR per ogni ospite da scansionare all\'ingresso. Se vuoi far pagare, puoi provare gratis la vendita di biglietti a pagamento per 7 giorni, senza carta.',
+    'activation_nudge_cta_no_ticket_type_free' => 'Configura le iscrizioni',
 
     'activation_nudge_subject_no_gateway' => 'Manca un passo perché :schedule possa incassare',
     'activation_nudge_heading_no_gateway' => 'Collega un modo per farti pagare',
@@ -844,6 +848,7 @@ return [
 
     'next_steps' => 'Prossimi passi',
     'next_step_add_ticket_type' => 'Aggiungi un tipo di biglietto per poter vendere',
+    'next_step_add_registration' => 'Aggiungi l\'iscrizione gratuita perché le persone possano iscriversi',
     'next_step_connect_payments' => 'Collega un metodo di pagamento per incassare',
     'next_step_add_first_event' => 'Aggiungi il tuo primo evento',
     'first_event_form_subtitle' => 'Solo un nome, una data e un orario. Puoi aggiungere il resto più tardi.',

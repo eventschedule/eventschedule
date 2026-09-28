@@ -180,6 +180,50 @@ class DashboardNextStepsTest extends TestCase
         $this->assertSame(['next_step_payments'], $this->types($user->fresh()));
     }
 
+    /**
+     * A free schedule's priced rows cannot sell, and the to-do list already says so. Telling it
+     * to connect a gateway as well was two contradictory messages on one dashboard.
+     */
+    public function test_a_free_schedule_is_not_told_to_connect_payments_it_cannot_take(): void
+    {
+        $user = $this->createOwner();
+        $user->forceFill(['stripe_account_id' => null])->save();
+        $role = $this->createFreeRole($user->fresh());
+        $event = $this->createEvent($role, ['starts_at' => now()->addDays(10)->format('Y-m-d H:i:s')]);
+        $this->createTicket($event, ['price' => 25]);
+
+        $this->assertNotContains('next_step_payments', $this->types($user->fresh()));
+    }
+
+    /** A grandfathered event still sells on a free schedule, so it still needs a gateway. */
+    public function test_a_grandfathered_free_seller_is_asked_for_payments(): void
+    {
+        $user = $this->createOwner();
+        $user->forceFill(['stripe_account_id' => null])->save();
+        $role = $this->createFreeRole($user->fresh());
+        $event = $this->createEvent($role, [
+            'starts_at' => now()->addDays(10)->format('Y-m-d H:i:s'),
+            'creator_role_id' => $role->id,
+        ]);
+        $event->forceFill(['tickets_grandfathered_at' => now()])->save();
+        $this->createTicket($event, ['price' => 25]);
+
+        $this->assertSame(['next_step_payments'], $this->types($user->fresh()));
+    }
+
+    /** "So people can buy" is not true on Free; registration is what that schedule can offer. */
+    public function test_a_free_schedule_is_asked_for_registration_not_a_sale(): void
+    {
+        $user = $this->createOwner();
+        $role = $this->createFreeRole($user);
+        $this->createEvent($role, ['starts_at' => now()->addDays(10)->format('Y-m-d H:i:s')]);
+
+        $steps = $this->nextSteps($user);
+
+        $this->assertSame(['next_step_tickets'], array_column($steps, 'type'));
+        $this->assertSame(__('messages.next_step_add_registration'), $steps[0]['title']);
+    }
+
     /** stripe_completed_at, not stripe_account_id - see canAcceptStripePayments(). */
     public function test_a_connected_gateway_clears_the_payment_step(): void
     {
