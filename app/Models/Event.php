@@ -2587,7 +2587,8 @@ class Event extends Model
     }
 
     /**
-     * Whether a PAID ticket on this event may be sold right now. Pro/Enterprise only.
+     * Whether a PAID ticket on this event may be sold right now. Pro/Enterprise, or a schedule
+     * on the selling trial (Role::onTicketTrial()).
      *
      * Separate from canOfferTickets() on purpose: an event that keeps selling because it has a free
      * tier must not carry its paid tiers through with it.
@@ -2613,8 +2614,10 @@ class Event extends Model
         // Column reads, no query - canSellTickets() runs about seven times per guest render and
         // Ticket::isSellable() calls it once per row. The grandfather is a one-time stamp (see the
         // 2026_09_20 migration) rather than a live "has this event sold?" lookup, because a
-        // restored backup carries paid sales.
-        if ($role?->isPro() || $this->tickets_grandfathered_at !== null) {
+        // restored backup carries paid sales. Role::canSellPaidTickets() is isPro() or a running
+        // selling trial; an event that sold during a trial is NOT grandfathered when it ends,
+        // or a seven-day trial would be permanent free selling on that event.
+        if ($role?->canSellPaidTickets() || $this->tickets_grandfathered_at !== null) {
             return true;
         }
 

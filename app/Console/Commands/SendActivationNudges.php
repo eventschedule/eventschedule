@@ -320,7 +320,7 @@ class SendActivationNudges extends Command
     private function dueForNoTicketType(int $limit)
     {
         return $this->base('no_ticket_type')
-            ->wherePro()
+            ->whereCanSellPaidTickets()
             ->whereHas('events', fn ($q) => $this->ownedEvents($this->publicEvents($q))
                 ->hasUpcomingOccurrence())
             // Any ticket type on any event this schedule owns counts as "they know how".
@@ -349,7 +349,7 @@ class SendActivationNudges extends Command
         return $this->base('no_gateway')
             // Same reasoning as dueForNoTicketType(): urging a free schedule to connect a gateway
             // it cannot take money through is an upsell wearing an activation email's clothes.
-            ->wherePro()
+            ->whereCanSellPaidTickets()
             ->whereHas('events', fn ($q) => $this->ownedEvents($q)
                 ->whereHas('tickets', fn ($t) => $t->where('tickets.is_deleted', false)
                     ->where('tickets.price', '>', 0)))

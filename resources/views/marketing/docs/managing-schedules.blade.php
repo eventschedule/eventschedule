@@ -551,6 +551,7 @@
         <h3 class="doc-subheading">What you can do</h3>
         <ul class="doc-list mb-6">
             <li><strong>Upgrade</strong> to Pro or Enterprise. A free trial is offered alongside the upgrade button if this schedule has not used one</li>
+            <li>See how long a <a href="{{ route('marketing.docs.tickets') }}#selling-trial" class="doc-link">selling trial</a> has left, if one is running. It is not a plan, so the plan still reads Free</li>
             <li><strong>Manage subscription</strong> opens the Stripe billing portal for invoices and card details</li>
             <li>Switch between <strong>monthly and yearly</strong> billing, with the price for each shown on the button</li>
             <li><strong>Cancel</strong>, which leaves your paid features running until the end of the period, and <strong>Resume</strong> during that grace period</li>

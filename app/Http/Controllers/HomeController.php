@@ -505,7 +505,7 @@ class HomeController extends Controller
         // dashboard already avoids elsewhere.
         if (config('app.hosted')) {
             foreach ($rolesById as $role) {
-                if ($role->user_id !== auth()->id() || $role->isPro() || is_demo_role($role)) {
+                if ($role->user_id !== auth()->id() || $role->canSellPaidTickets() || is_demo_role($role)) {
                     continue;
                 }
 

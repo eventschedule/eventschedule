@@ -174,6 +174,8 @@ class Role extends Model implements MustVerifyEmail
         'last_announced_at' => 'datetime',
         'google_webhook_expires_at' => 'datetime',
         'trial_ends_at' => 'datetime',
+        'ticket_trial_ends_at' => 'datetime',
+        'ticket_trial_reminder_sent_at' => 'datetime',
         'caldav_last_sync_at' => 'datetime',
         'microsoft_webhook_expires_at' => 'datetime',
         'microsoft_last_sync_at' => 'datetime',
@@ -3754,6 +3756,69 @@ class Role extends Model implements MustVerifyEmail
                         ->where('plan_expires', '>=', now()->format('Y-m-d'));
                 });
         });
+    }
+
+    /**
+     * A card-free trial of paid ticket selling is running. Not a Pro trial: it opens
+     * canSellPaidTickets() and nothing else. See the 2026_09_28_000001 migration for why.
+     */
+    public function onTicketTrial(): bool
+    {
+        return config('app.hosted')
+            && $this->ticket_trial_ends_at !== null
+            && $this->ticket_trial_ends_at->isFuture();
+    }
+
+    /** Whole days left on the selling trial, or null when none is running. */
+    public function ticketTrialDaysRemaining(): ?int
+    {
+        if (! $this->onTicketTrial()) {
+            return null;
+        }
+
+        return (int) ceil(now()->floatDiffInDays($this->ticket_trial_ends_at, false));
+    }
+
+    /**
+     * Whether this schedule's plan lets it sell a PRICED ticket: Pro/Enterprise, or a running
+     * selling trial. This is the schedule half of Event::canSellPaidTickets(). Anything asking
+     * "can this schedule sell paid tickets" asks this rather than isPro(), or a schedule on the
+     * trial is told it cannot. Pro extras (passes, installments, add-ons) stay on isPro().
+     */
+    public function canSellPaidTickets(): bool
+    {
+        return $this->isPro() || $this->onTicketTrial();
+    }
+
+    /** The query form of canSellPaidTickets(). */
+    public function scopeWhereCanSellPaidTickets($query)
+    {
+        if (! config('app.hosted')) {
+            return $query;
+        }
+
+        return $query->where(fn ($q) => $q->wherePro()
+            ->orWhere('ticket_trial_ends_at', '>', now()));
+    }
+
+    /**
+     * Whether the owner may start a selling trial on this schedule.
+     *
+     * Once per OWNER, not per schedule: isEligibleForTrial() is per schedule, so a second
+     * schedule would be a second trial. Every schedule the owner has, deleted ones included, is
+     * checked for an earlier selling trial or any subscription at all, since someone who has
+     * already paid for Pro has nothing left to try.
+     */
+    public function isEligibleForTicketTrial(): bool
+    {
+        if (! config('app.hosted') || $this->isPro() || is_demo_role($this) || ! $this->user_id) {
+            return false;
+        }
+
+        return ! static::where('user_id', $this->user_id)
+            ->where(fn ($q) => $q->whereNotNull('ticket_trial_ends_at')
+                ->orWhereHas('subscriptions'))
+            ->exists();
     }
 
     /**

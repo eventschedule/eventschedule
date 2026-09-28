@@ -212,6 +212,22 @@
         @endif
     </div>
 
+    {{-- The card-free selling trial (Role::onTicketTrial()) is not a plan, so nothing above
+         mentions it: the tier still reads Free. Say it is running and when it stops. --}}
+    @if ($role->onTicketTrial())
+    <div class="mt-4 ap-card rounded-xl p-6 flex flex-col sm:flex-row sm:items-center gap-4">
+        <div class="min-w-0 flex-1">
+            <h3 class="text-base font-semibold text-gray-900 dark:text-gray-100">{{ __('messages.ticket_trial_title') }}</h3>
+            <p class="mt-1 text-sm text-gray-600 dark:text-gray-400">
+                {{ trans_choice('messages.ticket_trial_days_left', $role->ticketTrialDaysRemaining(), ['count' => $role->ticketTrialDaysRemaining()]) }}
+            </p>
+        </div>
+        @if ($isOwner && config('cashier.key'))
+        <x-brand-link href="{{ route('role.subscribe', ['subdomain' => $role->subdomain, 'source' => 'tickets']) }}">{{ __('messages.upgrade_to_pro_plan') }}</x-brand-link>
+        @endif
+    </div>
+    @endif
+
     {{-- What the plan actually is. This is the page a confused owner lands on, so it is the right
          place to spell out what Free carries and what Pro adds, rather than only showing what is
          running out. --}}

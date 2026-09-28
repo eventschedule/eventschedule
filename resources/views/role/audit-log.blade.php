@@ -93,6 +93,7 @@
                                         'subscription.swap' => __('messages.audit_subscription_changed'),
                                         'subscription.cancel' => __('messages.audit_subscription_cancelled'),
                                         'subscription.resume' => __('messages.audit_subscription_resumed'),
+                                        'subscription.ticket_trial_start' => __('messages.audit_ticket_trial_started'),
                                         'boost.create' => __('messages.audit_boost_created'),
                                         'boost.pause' => __('messages.audit_boost_paused'),
                                         'boost.resume' => __('messages.audit_boost_resumed'),

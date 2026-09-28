@@ -2111,7 +2111,12 @@
 
                                 {{-- The evergreen place a free organizer learns what their plan
                                      covers here: free registration is unlimited, priced rows are Pro. --}}
-                                @if (! $role->isPro())
+                                @if ($role->onTicketTrial())
+                                <p class="mt-4 text-sm text-gray-500 dark:text-gray-400">
+                                    {{ trans_choice('messages.ticket_trial_days_left', $role->ticketTrialDaysRemaining(), ['count' => $role->ticketTrialDaysRemaining()]) }}
+                                    <x-link href="{{ route('role.view_admin', ['subdomain' => $role->subdomain, 'tab' => 'plan']) }}">{{ __('messages.plan') }}</x-link>
+                                </p>
+                                @elseif (! $role->isPro())
                                 <p class="mt-4 text-sm text-gray-500 dark:text-gray-400">
                                     {{ __('messages.ticket_mode_free_hint') }}
                                 </p>
@@ -2205,26 +2210,53 @@
                                     // is null and the event-level call would warn every schedule,
                                     // Pro and Enterprise included.
                                     $cannotSellPaid = config('app.hosted')
-                                        && ($event->exists ? ! $event->canSellPaidTickets() : ! $role->isPro());
+                                        && ($event->exists ? ! $event->canSellPaidTickets() : ! $role->canSellPaidTickets());
                                     $ticketsNeedProOnLoad = $cannotSellPaid
                                         && $event->tickets_enabled
                                         && $event->tickets->contains(fn ($t) => ! $t->is_addon && (float) $t->price > 0);
+                                    // The schedule whose plan decides - the event's creator once it
+                                    // exists - is the one to upgrade or put on the selling trial,
+                                    // not whichever schedule this form was reached through.
+                                    $sellingRole = ($event->exists ? $event->ticketingRole() : null) ?? $role;
+                                    $ownsSellingRole = $sellingRole->user_id === $user->id;
+                                    $offerTicketTrial = $cannotSellPaid && $ownsSellingRole && $sellingRole->isEligibleForTicketTrial();
                                 @endphp
                                 @if ($cannotSellPaid)
                                 <x-plan-gate
                                     variant="banner"
                                     tier="pro"
                                     class="mb-4"
-                                    :role="$role"
-                                    :subdomain="$subdomain"
+                                    :role="$sellingRole"
+                                    :subdomain="$sellingRole->subdomain"
                                     source="tickets"
-                                    :canUpgrade="$role->user_id === $user->id"
+                                    :canUpgrade="$ownsSellingRole"
                                     :learnMoreUrl="marketing_url('/features/ticketing')"
                                     :title="__('messages.tickets_need_pro_title')"
                                     :style="$ticketsNeedProOnLoad ? null : 'display: none'"
                                     v-show="ticketsNeedPro">
                                     {{ __('messages.tickets_need_pro_body') }}
+                                    @if ($offerTicketTrial)
+                                    {{-- Started in place with fetch rather than a form: this banner
+                                         sits inside the event form, so a nested form would submit
+                                         the event instead, and a redirect would lose the unsaved
+                                         price the organizer just typed. Forward action last. --}}
+                                    <x-slot:actions>
+                                        <a href="{{ route('role.subscribe', ['subdomain' => $sellingRole->subdomain, 'tier' => 'pro', 'source' => 'tickets']) }}"
+                                           class="text-sm font-medium text-amber-900 dark:text-amber-100 underline">{{ __('messages.upgrade_to_pro_plan') }}</a>
+                                        <button type="button" @click="startTicketTrial" :disabled="ticketTrialStarting"
+                                            class="inline-flex items-center gap-1.5 rounded-lg bg-[var(--brand-button-bg)] px-4 py-2 text-sm font-semibold text-white shadow-sm transition-all duration-200 hover:bg-[var(--brand-button-bg-hover)] focus:outline-none focus:ring-2 focus:ring-[var(--brand-blue)] focus:ring-offset-2 dark:focus:ring-offset-gray-800 disabled:opacity-60">
+                                            {{ __('messages.ticket_trial_start', ['days' => (int) config('app.trial_days', 7)]) }}
+                                        </button>
+                                        <p v-show="ticketTrialError" style="display: none" class="w-full text-sm text-red-700 dark:text-red-400" role="alert">@{{ ticketTrialError }}</p>
+                                    </x-slot:actions>
+                                    @endif
                                 </x-plan-gate>
+                                @if ($offerTicketTrial)
+                                <div v-show="ticketTrialMessage" style="display: none" role="status"
+                                    class="mb-4 bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-700 rounded-lg p-3 text-sm text-green-800 dark:text-green-200">
+                                    @{{ ticketTrialMessage }}
+                                </div>
+                                @endif
                                 @endif
 
                                 {{-- The embed, separately, because it is the one thing a grandfather
@@ -5781,6 +5813,10 @@
         cannotSellPaid: @json($cannotSellPaid ?? false),
         paywallSeenUrl: @json(route('subscription.paywall_seen', ['subdomain' => $subdomain])),
         paywallSeenSent: false,
+        ticketTrialUrl: @json(isset($sellingRole) ? route('subscription.ticket_trial', ['subdomain' => $sellingRole->subdomain]) : null),
+        ticketTrialStarting: false,
+        ticketTrialMessage: '',
+        ticketTrialError: '',
         tickets: @json($event->tickets ?? [new Ticket()]).map((ticket, i) => ({
           uid: i,
           ...ticket,
@@ -5972,6 +6008,40 @@
       }
     },
     methods: {
+      // The card-free selling trial, started from the paywall banner. On success the schedule can
+      // sell, so the banner goes (cannotSellPaid) and the price the organizer typed stays put.
+      startTicketTrial() {
+        if (this.ticketTrialStarting || ! this.ticketTrialUrl) {
+          return;
+        }
+        this.ticketTrialStarting = true;
+        this.ticketTrialError = '';
+        const failed = @json(__('messages.something_went_wrong'));
+        fetch(this.ticketTrialUrl, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Accept': 'application/json',
+            'X-CSRF-TOKEN': @json(csrf_token()),
+          },
+          body: '{}',
+        })
+          .then(response => response.json().then(data => ({ ok: response.ok && data.ok, data })))
+          .then(({ ok, data }) => {
+            if (ok) {
+              this.cannotSellPaid = false;
+              this.ticketTrialMessage = data.message;
+            } else {
+              this.ticketTrialError = data.message || failed;
+            }
+          })
+          .catch(() => {
+            this.ticketTrialError = failed;
+          })
+          .finally(() => {
+            this.ticketTrialStarting = false;
+          });
+      },
       /** "Stalls (72 seats)" - the band select was names alone, so bands were priced blind. */
       bandOptionLabel(band) {
         const plan = this.selectedSeatingPlan;

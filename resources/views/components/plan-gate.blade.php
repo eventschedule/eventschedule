@@ -69,7 +69,12 @@
                             <a href="{{ $learnMoreUrl }}" target="_blank" rel="noopener"
                                class="text-sm font-medium text-amber-900 dark:text-amber-100 underline">{{ __('messages.learn_more') }}</a>
                         @endif
-                        @if ($canUpgrade)
+                        @isset($actions)
+                        {{-- A caller that needs its own buttons, such as the event editor's
+                             in-place selling trial. It replaces the upgrade button, not the
+                             "learn more" link. --}}
+                        {{ $actions }}
+                        @elseif ($canUpgrade)
                         <a href="{{ $upgradeUrl }}"
                            class="inline-flex items-center gap-1.5 rounded-lg bg-[var(--brand-button-bg)] px-4 py-2 text-sm font-semibold text-white shadow-sm transition-all duration-200 hover:bg-[var(--brand-button-bg-hover)] focus:outline-none focus:ring-2 focus:ring-[var(--brand-blue)] focus:ring-offset-2 dark:focus:ring-offset-gray-800">
                             {{ $upgradeLabel }}
@@ -77,7 +82,7 @@
                         </a>
                         @else
                         <span class="text-sm text-amber-800 dark:text-amber-200">{{ __('messages.plan_gate_ask_owner') }}</span>
-                        @endif
+                        @endisset
                     </div>
                 @endif
             </div>

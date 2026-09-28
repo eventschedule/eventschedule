@@ -102,6 +102,14 @@
 
         <p class="text-gray-600 dark:text-gray-300 mb-6">On a Free schedule the paid rows of an event simply do not go on sale, whichever payment method they are set to: free registration and free ticket tiers keep working, and an event with nothing left to sell falls back to an <strong class="text-gray-900 dark:text-white">Add to Calendar</strong> button rather than a dead buy button. Subscribing opens the paid rows immediately, with no re-publishing and no change to the event.</p>
 
+        <h3 id="selling-trial" class="doc-subheading">Try selling free for 7 days</h3>
+        <p class="text-gray-600 dark:text-gray-300 mb-4">When you give a ticket type a price on a Free schedule, the event editor says so straight away and offers a <strong class="text-gray-900 dark:text-white">7-day selling trial</strong>. It needs no card and changes nothing about your plan: for seven days the schedule's priced tickets go on sale as if it were on Pro, so you can take your first real sales before deciding. It covers paid tickets only. Passes, installments, add-ons and the other Pro features stay on Pro.</p>
+        <ul class="doc-list mb-6">
+            <li>Only the schedule owner can start it, and each account gets one, on one schedule</li>
+            <li>The plan tab shows the days left, and you get an email 3 days before it ends and on the last day</li>
+            <li>When it ends, priced tickets stop selling until you subscribe. Everyone who bought keeps their ticket, check-in keeps working, and you can still refund any sale</li>
+        </ul>
+
         <h3 class="doc-subheading">What ticketing includes</h3>
         <p class="text-gray-600 dark:text-gray-300 mb-4">Charging for a ticket needs Pro. Everything below works on the Free plan for free tickets and registration, except where a Pro badge says otherwise.</p>
         <ul class="doc-list">

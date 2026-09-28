@@ -226,6 +226,8 @@ class AuditService
 
     const SUBSCRIPTION_RESUME = 'subscription.resume';
 
+    const TICKET_TRIAL_START = 'subscription.ticket_trial_start';
+
     // Boost actions
     const BOOST_CREATE = 'boost.create';
 

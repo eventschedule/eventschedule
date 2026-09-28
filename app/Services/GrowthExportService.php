@@ -479,6 +479,10 @@ class GrowthExportService
                 .'It is not a subset of saved_paid_ticket, and reached_checkout is not a subset of it. '
                 .'subscription.create audit rows carry new_values.source = "tickets" when the checkout '
                 .'was opened from that paywall.',
+            'monetization.ticket_trials counts the card-free paid-selling trial, which is not a plan: '
+                .'those schedules stay "free" in plan_counts. converted means a real subscription created '
+                .'after the trial started and within 14 days of its end; sold_during means a paid sale '
+                .'on a schedule-created event inside the trial window.',
         ];
         // Every derived section is computed from the row tables, so if those were capped
         // the sections describe the most recent N rows and not the whole population.
@@ -1246,7 +1250,73 @@ class GrowthExportService
                 'enterprise_monthly' => $entMonthly, 'enterprise_yearly' => $entYearly],
             'median_days_to_upgrade' => $this->median($daysToUpgrade),
             'gmv_by_currency' => $this->gmvByCurrency(),
+            'ticket_trials' => $this->ticketTrials(),
         ];
+    }
+
+    /**
+     * The card-free selling trial (roles.ticket_trial_ends_at), started from the event editor's
+     * paid-ticket paywall. It is not a plan, so plan_counts above still reads these schedules as
+     * free; this is the only place they are counted.
+     *
+     * The start is the subscription.ticket_trial_start audit row, not ends_at minus TRIAL_DAYS,
+     * so a later change to the trial length cannot move it. A conversion is a real subscription
+     * (not incomplete, as the funnel counts it) created after the start and within 14 days of the
+     * end, which is when the reminders have done their work.
+     */
+    private function ticketTrials(): array
+    {
+        $roles = $this->excludeDemoRoles(Role::query()->whereNotNull('ticket_trial_ends_at'))
+            ->with('subscriptions')
+            ->get(['id', 'subdomain', 'ticket_trial_ends_at']);
+
+        $starts = DB::table('audit_logs')
+            ->where('action', AuditService::TICKET_TRIAL_START)
+            ->where('model_type', 'Role')
+            ->whereIn('model_id', $roles->pluck('id'))
+            ->selectRaw('model_id, MIN(created_at) as started_at')
+            ->groupBy('model_id')
+            ->pluck('started_at', 'model_id');
+
+        $counts = ['started' => 0, 'running' => 0, 'sold_during' => 0, 'converted' => 0, 'expired_unconverted' => 0];
+
+        foreach ($roles as $role) {
+            $ends = $role->ticket_trial_ends_at;
+            $start = isset($starts[$role->id])
+                ? Carbon::parse($starts[$role->id])
+                : $ends->copy()->subDays((int) config('app.trial_days', 7));
+
+            $counts['started']++;
+
+            $converted = $role->subscriptions->contains(fn ($sub) => ! in_array($sub->stripe_status, ['incomplete', 'incomplete_expired'], true)
+                && $sub->created_at >= $start
+                && $sub->created_at <= $ends->copy()->addDays(14));
+
+            if ($converted) {
+                $counts['converted']++;
+            } elseif ($ends->isFuture()) {
+                $counts['running']++;
+            } else {
+                $counts['expired_unconverted']++;
+            }
+
+            // Same "real paid sale" filter as the first_sale nudge: RSVPs and imports are not money.
+            $soldDuring = DB::table('sales')
+                ->join('events', 'events.id', '=', 'sales.event_id')
+                ->where('events.creator_role_id', $role->id)
+                ->where('sales.status', 'paid')
+                ->where('sales.is_deleted', false)
+                ->whereNotIn('sales.payment_method', ['rsvp', 'import'])
+                ->where('sales.payment_amount', '>', 0)
+                ->whereBetween('sales.paid_at', [$start, $ends])
+                ->exists();
+
+            if ($soldDuring) {
+                $counts['sold_during']++;
+            }
+        }
+
+        return $counts;
     }
 
     /** Gross ticket revenue by month and currency (what organizers sold, not our revenue). */

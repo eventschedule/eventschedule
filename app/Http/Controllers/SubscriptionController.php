@@ -49,6 +49,54 @@ class SubscriptionController extends Controller
     }
 
     /**
+     * Start the card-free trial of paid ticket selling, from the event editor's paywall.
+     *
+     * Opens Role::canSellPaidTickets() for config('app.trial_days') and nothing else - see the
+     * 2026_09_28_000001 migration for why it is not a Pro trial. Owner only, like checkout.
+     * The eligibility check and the write run under a lock on the owner's schedules, so two
+     * tabs (or two schedules) cannot both start one.
+     */
+    public function startTicketTrial(Request $request, $subdomain)
+    {
+        $role = Role::subdomain($subdomain)->firstOrFail();
+
+        // JSON from the event editor, which starts the trial in place so the organizer does not
+        // lose the unsaved event they were pricing. A redirect everywhere else.
+        $days = (int) config('app.trial_days', 7);
+        $respond = fn (bool $ok, string $key, int $status = 200) => $request->expectsJson()
+            ? response()->json(['ok' => $ok, 'message' => __($key, ['days' => $days])], $status)
+            : redirect()->back()->with($ok ? 'message' : 'error', __($key, ['days' => $days]));
+
+        if (auth()->user()->id != $role->user_id) {
+            return $respond(false, 'messages.not_authorized', 403);
+        }
+
+        $started = DB::transaction(function () use ($role, $days) {
+            Role::where('user_id', $role->user_id)->lockForUpdate()->get(['id']);
+            $role = Role::find($role->id);
+
+            if (! $role->isEligibleForTicketTrial()) {
+                return false;
+            }
+
+            $role->ticket_trial_ends_at = now()->addDays($days);
+            $role->ticket_trial_reminder_sent_at = null;
+            $role->save();
+
+            return true;
+        });
+
+        if (! $started) {
+            return $respond(false, 'messages.ticket_trial_unavailable', 422);
+        }
+
+        AuditService::log(AuditService::TICKET_TRIAL_START, auth()->id(), 'Role', $role->id,
+            null, ['source' => 'tickets'], $role->subdomain);
+
+        return $respond(true, 'messages.ticket_trial_started');
+    }
+
+    /**
      * Show the subscription page.
      */
     public function show(Request $request, $subdomain)

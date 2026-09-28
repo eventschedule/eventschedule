@@ -5,6 +5,7 @@ namespace App\Console\Commands;
 use App\Jobs\SendQueuedEmail;
 use App\Mail\SubscriptionRenewal;
 use App\Mail\SubscriptionTrialEnding;
+use App\Mail\TicketTrialEnding;
 use App\Models\Role;
 use App\Services\OneSignalService;
 use App\Utils\MoneyUtils;
@@ -31,6 +32,7 @@ class SendSubscriptionReminders extends Command
 
         $this->sendTrialReminders();
         $this->sendCompedWindDownReminders();
+        $this->sendTicketTrialReminders();
         $this->sendRenewalReminders();
 
         return 0;
@@ -153,6 +155,73 @@ class SendSubscriptionReminders extends Command
         // consumed windows, because the claim is taken before the dispatch - a row whose
         // dispatch throws has burned its window without being counted here.
         $this->info("Wind-down reminders: {$sent} queued.");
+    }
+
+    /**
+     * Reminders for the card-free selling trial (roles.ticket_trial_ends_at), which neither
+     * branch above can see: it is not a Stripe subscription and not a generic trial_ends_at.
+     *
+     * Two touches, 3 days out and on the last day. The windows are two days apart on purpose:
+     * the claim below re-opens a row once its last stamp is older than the window, and a daily
+     * run is not exactly 24 hours after the one before, so windows a day apart could merge.
+     * Same conditional-UPDATE claim and platform mailer as sendCompedWindDownReminders(), for
+     * the reasons given there.
+     */
+    protected function sendTicketTrialReminders(): void
+    {
+        $this->info('Checking for selling trial reminders...');
+
+        $sent = 0;
+
+        foreach ([3, 1] as $daysOut) {
+            $target = Carbon::today()->addDays($daysOut);
+
+            $roles = Role::query()
+                ->where('is_deleted', false)
+                ->whereBetween('ticket_trial_ends_at', [$target->copy()->startOfDay(), $target->copy()->endOfDay()])
+                ->get();
+
+            foreach ($roles as $role) {
+                // Subscribed during the trial: nothing is about to stop.
+                if (! $role->user || $role->isPro()) {
+                    continue;
+                }
+
+                $claimed = Role::where('id', $role->id)
+                    ->where(function ($query) use ($daysOut) {
+                        $query->whereNull('ticket_trial_reminder_sent_at')
+                            ->orWhere('ticket_trial_reminder_sent_at', '<=', now()->subDays($daysOut));
+                    })
+                    ->update(['ticket_trial_reminder_sent_at' => now()]);
+
+                if ($claimed === 0) {
+                    continue;
+                }
+
+                try {
+                    $locale = $role->user->language_code ?? app()->getLocale();
+
+                    SendQueuedEmail::dispatch(
+                        new TicketTrialEnding($role, $role->ticket_trial_ends_at->locale($locale)->translatedFormat('F j, Y')),
+                        $role->user->email,
+                        // Platform mailer: see sendCompedWindDownReminders().
+                        null,
+                        $locale
+                    );
+
+                    $this->info("Queued {$daysOut}-day selling trial reminder for {$role->subdomain}.");
+                    $sent++;
+                } catch (\Exception $e) {
+                    $this->error("Failed selling trial reminder for {$role->subdomain}: {$e->getMessage()}");
+                    Log::error('Failed to send selling trial reminder', [
+                        'role_id' => $role->id,
+                        'error' => $e->getMessage(),
+                    ]);
+                }
+            }
+        }
+
+        $this->info("Selling trial reminders: {$sent} queued.");
     }
 
     protected function sendTrialReminders(): void

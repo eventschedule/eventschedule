@@ -3819,6 +3819,14 @@ return [
     'plan_price_line' => ':monthly per month or :yearly per year. Cancel anytime.',
     'plan_trial_note' => 'Includes a :days day free trial.',
     'plan_gate_ask_owner' => 'Only the schedule owner can change the plan. Ask them to upgrade.',
+    'ticket_trial_start' => 'Sell tickets free for :days days',
+    'ticket_trial_title' => 'Paid ticket selling trial',
+    'ticket_trial_started' => 'Paid ticket selling is on for the next :days days. Save the event to start selling. Your plan does not change, and nothing is charged.',
+    'ticket_trial_unavailable' => 'The free selling trial is not available for this schedule. Upgrade to Pro to sell paid tickets.',
+    'ticket_trial_days_left' => '{1} Your paid ticket selling trial ends in 1 day.|[2,*] Your paid ticket selling trial ends in :count days.',
+    'ticket_trial_ending_subject' => 'Paid ticket selling on :schedule ends on :date',
+    'ticket_trial_ending_body' => 'Your free trial of paid ticket selling on :schedule ends on :date. After that, ticket types with a price stop selling until you upgrade to Pro. Free registration and free tickets keep working.',
+    'ticket_trial_ending_buyers' => 'People who already bought keep their tickets, check-in keeps working, and you can still refund any sale.',
 
     // Paid ticket selling is Pro/Enterprise. Free registration, RSVP and $0 ticket rows stay
     // unlimited on every tier, so the wording separates "selling" from "registration" throughout.
@@ -4311,6 +4319,7 @@ return [
     'audit_subscription_changed' => 'Subscription changed',
     'audit_subscription_cancelled' => 'Subscription cancelled',
     'audit_subscription_resumed' => 'Subscription resumed',
+    'audit_ticket_trial_started' => 'Selling trial started',
     'audit_boost_created' => 'Boost created',
     'audit_boost_paused' => 'Boost paused',
     'audit_boost_resumed' => 'Boost resumed',
