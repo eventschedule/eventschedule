@@ -3379,8 +3379,18 @@ class EventController extends Controller
 
         session()->forget(['utm_params', 'utm_referrer_url', 'utm_landing_page', 'guest_language']);
 
-        $user->email_verified_at = now();
-        $user->save();
+        // Nothing on these forms proves the address, so on hosted it stays unverified until the
+        // emailed link is clicked - the same bar as registration, whose emailed code is its proof
+        // (createAccountWithCode() asks for that code too). Marking it verified here minted a
+        // verified account for any address that had none yet, which is what every
+        // hasVerifiedEmail() gate trusts: claiming schedules registered to it, and the ticket
+        // link on an event page. Selfhost has no code step anywhere, as in registration.
+        if (config('app.hosted')) {
+            $user->sendEmailVerificationNotification();
+        } else {
+            $user->email_verified_at = now();
+            $user->save();
+        }
 
         Auth::login($user);
 

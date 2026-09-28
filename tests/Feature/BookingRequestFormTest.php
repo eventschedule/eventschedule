@@ -438,6 +438,42 @@ class BookingRequestFormTest extends TestCase
         $this->assertFalse($event->is_guest_submission);
     }
 
+    /**
+     * Nothing on this form proves the address, so on hosted the account must not come out
+     * verified: every hasVerifiedEmail() gate - claiming a schedule registered to the address, the
+     * ticket link on an event page - would otherwise trust an address typed by anyone. It is sent
+     * the verification link instead, the same as a registration without its emailed code.
+     */
+    public function test_an_optional_account_is_not_verified_until_the_emailed_link_is_clicked(): void
+    {
+        $role = $this->bookingSchedule();
+
+        $this->postJson($this->storeUrl($role), $this->complete([
+            'create_account' => '1',
+            'password' => 'long-enough-password',
+            'terms' => 'on',
+        ]))->assertOk();
+
+        $user = User::where('email', 'sam.guest@gmail.com')->firstOrFail();
+        $this->assertAuthenticatedAs($user);
+        $this->assertFalse($user->hasVerifiedEmail());
+        Notification::assertSentTo($user, \App\Notifications\VerifyEmail::class);
+    }
+
+    public function test_an_optional_account_on_selfhost_is_verified_as_registration_is(): void
+    {
+        config(['app.hosted' => false]);
+        $role = $this->bookingSchedule();
+
+        $this->postJson($this->storeUrl($role), $this->complete([
+            'create_account' => '1',
+            'password' => 'long-enough-password',
+            'terms' => 'on',
+        ]))->assertOk();
+
+        $this->assertTrue(User::where('email', 'sam.guest@gmail.com')->firstOrFail()->hasVerifiedEmail());
+    }
+
     public function test_a_selfhost_with_registration_closed_refuses_the_account(): void
     {
         $role = $this->bookingSchedule();

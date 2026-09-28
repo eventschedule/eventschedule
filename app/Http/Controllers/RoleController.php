@@ -2793,7 +2793,13 @@ class RoleController extends Controller
                         // one visitor's ticket (its name, email and QR code) to the next, on
                         // every event they bought for. The demo's own purchases carry its
                         // user_id, and DemoService's reset detaches the rest.
-                        if (! is_demo_mode()) {
+                        //
+                        // Nor for an address the account has not proved. The link below carries
+                        // the sale's secret, so an email match is an authorisation decision: the
+                        // same bar as User::claimSalesByEmail(), and not one to leave to
+                        // EnsureEmailIsVerified, whose redirect happens to keep unverified
+                        // accounts off this page today.
+                        if (! is_demo_mode() && auth()->user()->hasVerifiedEmail()) {
                             $q->orWhere('email', auth()->user()->email);
                         }
                     })
