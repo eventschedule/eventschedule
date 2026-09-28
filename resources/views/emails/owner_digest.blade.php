@@ -38,6 +38,10 @@
         </div>
         @endforeach
 
+        @if ($more > 0)
+        <p style="font-size: 14px; color: #666;">{{ trans_choice('messages.owner_digest_more', $more, ['count' => $more]) }}</p>
+        @endif
+
         <div style="text-align: center; margin: 30px 0;">
             <a href="{{ $dashboardUrl }}"
                style="display: inline-block; background-color: #4E81FA; color: white; padding: 15px 30px; text-decoration: none; border-radius: 5px; font-weight: bold; font-size: 16px;">

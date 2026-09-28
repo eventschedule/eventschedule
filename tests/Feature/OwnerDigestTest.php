@@ -39,9 +39,11 @@ class OwnerDigestTest extends TestCase
         return $user->fresh();
     }
 
-    private function run_(bool $apply = true): void
+    /** --now skips the owner's Monday-morning window; the tests about that window leave it off. */
+    private function run_(bool $apply = true, bool $now = true): void
     {
-        $this->artisan('app:send-owner-digests', $apply ? ['--apply' => true] : [])->assertExitCode(0);
+        $args = array_filter(['--apply' => $apply, '--now' => $now]);
+        $this->artisan('app:send-owner-digests', $args)->assertExitCode(0);
     }
 
     /** The job's mailable, read the way the other mail tests read SendQueuedEmail. */
@@ -227,14 +229,79 @@ class OwnerDigestTest extends TestCase
         $this->assertSame(1, $section['followers']);
     }
 
-    public function test_the_command_is_not_scheduled_on_either_rail(): void
+    /** Scheduled on both rails, sending, and never with --now: the local window is the point. */
+    public function test_the_command_is_scheduled_on_both_rails_without_now(): void
     {
         foreach (['routes/console.php', 'app/Http/Controllers/AppController.php'] as $file) {
-            $this->assertStringNotContainsString(
-                "Artisan::call('app:send-owner-digests'", file_get_contents(base_path($file)),
-                "{$file} schedules the digest; it is meant to be hand-run until a production pass has been read"
-            );
+            $body = file_get_contents(base_path($file));
+
+            $this->assertStringContainsString("Artisan::call('app:send-owner-digests', ['--apply' => true])", $body, $file);
+            $this->assertDoesNotMatchRegularExpression("/app:send-owner-digests'[^;]*--now/", $body, $file);
         }
+    }
+
+    /** Monday morning in the owner's own timezone, and only then. */
+    public function test_it_sends_on_the_owners_monday_morning_only(): void
+    {
+        $owner = $this->owner(['timezone' => 'America/Los_Angeles']);
+        $role = $this->createRole($owner);
+        // A running series, so there is something to report on EVERY day below. With a one-off
+        // date, a day when it was not in the coming week sent nothing whatever the gate said,
+        // and the Tuesday assertion passed with the Monday check deleted.
+        $this->createRecurringEvent($role, ['starts_at' => now()->subDays(30)->format('Y-m-d H:i:s'), 'creator_role_id' => $role->id]);
+
+        // Monday 10:00 UTC is 03:00 in Los Angeles: too early.
+        $this->travelTo(now()->utc()->next('Monday')->setTime(10, 0));
+        $this->run_(now: false);
+        Queue::assertNothingPushed();
+
+        // Tuesday 17:00 UTC is Tuesday 10:00 there: the right hour, the wrong day.
+        $this->travelTo(now()->utc()->addDay()->setTime(17, 0));
+        $this->run_(now: false);
+        Queue::assertNothingPushed();
+
+        // The next Monday 17:00 UTC is Monday 10:00 there.
+        $this->travelTo(now()->utc()->next('Monday')->setTime(17, 0));
+        $this->run_(now: false);
+        Queue::assertPushed(SendQueuedEmail::class, 1);
+
+        // An hour later, still inside the window: the week is claimed.
+        $this->travel(1)->hour();
+        $this->run_(now: false);
+        Queue::assertPushed(SendQueuedEmail::class, 1);
+    }
+
+    /** One long email for an owner of many schedules: the busiest eight, and the rest counted. */
+    public function test_a_long_digest_shows_the_busiest_eight_and_counts_the_rest(): void
+    {
+        $owner = $this->owner();
+        foreach (range(1, 10) as $i) {
+            $role = $this->createRole($owner, 'venue', ['name' => "Schedule {$i}"]);
+            $this->createEvent($role, ['starts_at' => now()->subDays(10)->format('Y-m-d H:i:s')]);
+            DB::table('analytics_daily')->insert(['role_id' => $role->id, 'date' => now()->subDay()->toDateString(),
+                'desktop_views' => $i * 10, 'mobile_views' => 0, 'tablet_views' => 0, 'unknown_views' => 0]);
+        }
+
+        $this->run_();
+
+        $mail = $this->digests()[0]['mailable'];
+        $this->assertCount(8, $mail->sections);
+        $this->assertSame(2, $mail->more);
+        $this->assertSame('Schedule 10', $mail->sections[0]['name'], 'busiest first');
+        $this->assertStringContainsString(trans_choice('messages.owner_digest_more', 2, ['count' => 2]), $mail->render());
+    }
+
+    /** "3 page views" and nothing else is not news. */
+    public function test_a_few_stray_views_are_not_worth_an_email(): void
+    {
+        $role = $this->createRole($this->owner());
+        $this->createEvent($role, ['starts_at' => now()->subDays(10)->format('Y-m-d H:i:s')]);
+        DB::table('analytics_daily')->insert(['role_id' => $role->id, 'date' => now()->subDay()->toDateString(),
+            'desktop_views' => 3, 'mobile_views' => 0, 'tablet_views' => 0, 'unknown_views' => 0]);
+
+        $this->run_();
+
+        Queue::assertNothingPushed();
     }
 
     public function test_the_mail_renders_in_every_language(): void

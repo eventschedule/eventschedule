@@ -43,9 +43,16 @@ class ActivationNudgeTest extends TestCase
         return $user->fresh();
     }
 
-    private function nudge(?string $key = null): void
+    /**
+     * --now skips the owner's local-morning window, which every test below except the ones about
+     * that window would otherwise depend on the hour the suite happens to run at.
+     */
+    private function nudge(?string $key = null, bool $now = true): void
     {
         $args = ['--apply' => true];
+        if ($now) {
+            $args['--now'] = true;
+        }
         if ($key) {
             $args['--key'] = $key;
         }
@@ -246,6 +253,21 @@ class ActivationNudgeTest extends TestCase
         $this->nudge('no_gateway');
 
         $this->assertSent('no_gateway');
+    }
+
+    /**
+     * Only while the priced tickets are on a date still to come. Unbounded, this reached 59
+     * dormant schedules (61 of 67 candidates were admin comps) on 2026-09-28.
+     */
+    public function test_a_dormant_seller_is_not_nudged_about_payments(): void
+    {
+        $role = $this->createRole($this->owner(['stripe_account_id' => null]));
+        $event = $this->createEvent($role, ['starts_at' => now()->subDays(200)->format('Y-m-d H:i:s')]);
+        $this->createTicket($event, ['price' => 25]);
+
+        $this->nudge('no_gateway');
+
+        $this->assertNothingSent();
     }
 
     /**
@@ -660,23 +682,109 @@ class ActivationNudgeTest extends TestCase
             'the other three must NOT be claimed, so they are still due next run');
     }
 
-    /** And the ones it skipped are still due, so they drain one run at a time. */
-    public function test_the_skipped_schedules_are_still_due_on_the_next_run(): void
+    /**
+     * And the ones it skipped are still due, but a week apart: the per-owner cooldown is what
+     * keeps an hourly schedule from mailing an owner of 17 stalled schedules every day.
+     */
+    public function test_the_skipped_schedules_drain_one_a_week(): void
     {
         $owner = $this->owner();
 
         foreach (range(1, 3) as $ignored) {
             $role = $this->createRole($owner);
-            $this->createEvent($role, ['starts_at' => now()->addDays(10)->format('Y-m-d H:i:s')]);
+            $this->createEvent($role, ['starts_at' => now()->addDays(30)->format('Y-m-d H:i:s')]);
         }
 
         // Asserted after EACH run, not just at the end: with no cap all three go out on the
-        // first run and the closing count is 3 either way, so a single final assertion passes
-        // against the unfixed code.
-        foreach ([1, 2, 3] as $expected) {
-            $this->nudge();
-            $this->assertSame($expected, DB::table('schedule_nudges')->count());
-        }
+        // first run and the closing count is 3 either way.
+        $this->nudge();
+        $this->assertSame(1, DB::table('schedule_nudges')->count());
+
+        $this->travel(3)->days();
+        $this->nudge();
+        $this->assertSame(1, DB::table('schedule_nudges')->count(), 'inside the cooldown: nothing');
+
+        $this->travel(5)->days();
+        $this->nudge();
+        $this->assertSame(2, DB::table('schedule_nudges')->count(), 'a week on: the next one');
+    }
+
+    /** The cooldown is per owner: someone else's nudge does not hold this owner back. */
+    public function test_the_cooldown_does_not_cross_owners(): void
+    {
+        $first = $this->createRole($this->owner());
+        $this->createEvent($first, ['starts_at' => now()->addDays(10)->format('Y-m-d H:i:s')]);
+        $this->nudge();
+
+        $second = $this->createRole($this->owner());
+        $this->createEvent($second, ['starts_at' => now()->addDays(10)->format('Y-m-d H:i:s')]);
+        $this->nudge();
+
+        $this->assertSame(2, DB::table('schedule_nudges')->count());
+    }
+
+    /** A congratulation is not held back by the cooldown - late, it reads like a bug. */
+    public function test_a_first_sale_is_congratulated_inside_the_cooldown(): void
+    {
+        $owner = $this->owner();
+        $role = $this->createRole($owner);
+        $this->createEvent($role, ['starts_at' => now()->addDays(10)->format('Y-m-d H:i:s')]);
+        $this->nudge();
+        $this->assertSent('no_ticket_type');
+
+        $event = $this->createEvent($role);
+        $ticket = $this->createTicket($event, ['price' => 20]);
+        $this->createSale($event, $role, ['payment_amount' => 20, 'paid_at' => now()->subDay()], $ticket);
+        $this->nudge('first_sale');
+
+        $this->assertSame(1, DB::table('schedule_nudges')->where('nudge_key', 'first_sale')->count());
+    }
+
+    /** Never two of our emails at once: the weekly digest covers what a nudge would say. */
+    public function test_no_nudge_within_two_days_of_the_owners_digest(): void
+    {
+        $owner = $this->owner();
+        $role = $this->createRole($owner);
+        $this->createEvent($role, ['starts_at' => now()->addDays(10)->format('Y-m-d H:i:s')]);
+        DB::table('owner_digests')->insert(['user_id' => $owner->id, 'week' => now()->format('o-\WW'), 'schedules' => 1, 'created_at' => now()->subDay()]);
+
+        $this->nudge();
+        $this->assertNothingSent();
+
+        $this->travel(2)->days();
+        $this->nudge();
+        $this->assertSame(1, DB::table('schedule_nudges')->count());
+    }
+
+    /** Sent in the owner's own morning, not at one UTC hour that is midnight somewhere. */
+    public function test_it_waits_for_the_owners_local_morning(): void
+    {
+        $owner = $this->owner(['timezone' => 'Asia/Tokyo']);
+        $role = $this->createRole($owner);
+        $this->createEvent($role, ['starts_at' => now()->addDays(10)->format('Y-m-d H:i:s')]);
+
+        // 18:00 UTC is 03:00 in Tokyo: not sent, and not claimed either.
+        $this->travelTo(now()->utc()->setTime(18, 0));
+        $this->nudge(now: false);
+        $this->assertNothingSent();
+
+        // 01:00 UTC is 10:00 in Tokyo.
+        $this->travelTo(now()->utc()->addDay()->setTime(1, 0));
+        $this->nudge(now: false);
+        $this->assertSame(1, DB::table('schedule_nudges')->count());
+    }
+
+    /** A timezone PHP does not know falls back rather than stopping the run. */
+    public function test_a_bad_timezone_falls_back_to_the_schedules(): void
+    {
+        $owner = $this->owner(['timezone' => 'Not/AZone']);
+        $role = $this->createRole($owner, 'venue', ['timezone' => 'UTC']);
+        $this->createEvent($role, ['starts_at' => now()->addDays(10)->format('Y-m-d H:i:s')]);
+
+        $this->travelTo(now()->utc()->setTime(10, 0));
+        $this->nudge(now: false);
+
+        $this->assertSame(1, DB::table('schedule_nudges')->count());
     }
 
     /** Two owners are independent - the cap is per user, not per run. */
@@ -796,15 +904,18 @@ class ActivationNudgeTest extends TestCase
      * commented, because the repo rule is that the two rails stay in sync and the obvious "fix"
      * for a missing registration is to add one back.
      */
-    public function test_the_command_is_not_scheduled_on_either_rail(): void
+    /**
+     * Scheduled on both rails, sending (--apply) and never with --now: the local-morning window
+     * is what makes an hourly schedule reach each owner at a sensible time.
+     * CronRailSyncTest checks the two rails agree on cadence and gate.
+     */
+    public function test_the_command_is_scheduled_on_both_rails_without_now(): void
     {
         foreach (['routes/console.php', 'app/Http/Controllers/AppController.php'] as $file) {
             $body = file_get_contents(base_path($file));
 
-            $this->assertStringNotContainsString(
-                "Artisan::call('app:send-activation-nudges'", $body,
-                "{$file} schedules the nudges; it is meant to be hand-run for now"
-            );
+            $this->assertStringContainsString("Artisan::call('app:send-activation-nudges', ['--apply' => true])", $body, $file);
+            $this->assertDoesNotMatchRegularExpression("/app:send-activation-nudges'[^;]*--now/", $body, $file);
         }
     }
 

@@ -1267,9 +1267,9 @@ class GrowthExportService
     }
 
     /**
-     * What app:send-activation-nudges has sent, per key, from its claim table. It is hand-run
-     * until a production pass has been read, and this is the only place that shows whether one
-     * ever was: an empty result means it has never sent anything on this install.
+     * What app:send-activation-nudges has sent, per key, from its claim table. An empty result
+     * means it has never sent anything on this install - on a scheduled install, that the
+     * scheduler is not reaching it.
      */
     private function nudges(): array
     {

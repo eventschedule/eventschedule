@@ -7,6 +7,7 @@ use App\Mail\ActivationNudge;
 use App\Models\DismissedNextStep;
 use App\Models\Role;
 use App\Services\DemoService;
+use App\Utils\OwnerLocalTime;
 use Illuminate\Console\Command;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
@@ -31,7 +32,8 @@ class SendActivationNudges extends Command
 {
     protected $signature = 'app:send-activation-nudges
         {--apply : Send the emails. Without this the command only reports.}
-        {--key= : Run one nudge only, for testing.}';
+        {--key= : Run one nudge only, for testing.}
+        {--now : Ignore the owner\'s local-morning window. For hand runs and tests; the scheduler never passes it.}';
 
     protected $description = 'Nudge schedules that stalled after creating their first schedule';
 
@@ -57,6 +59,16 @@ class SendActivationNudges extends Command
         'idle_30' => ['min_days' => 30, 'max_days' => 60],
         'idle_60' => ['min_days' => 60, 'max_days' => 90],
     ];
+
+    /**
+     * At most one activation email per OWNER in this many days, across every schedule and key
+     * (first_sale excepted - see base()). Scheduled hourly, the per-run cap alone would mail an
+     * owner of 17 stalled schedules once a day for weeks.
+     */
+    private const OWNER_COOLDOWN_DAYS = 7;
+
+    /** No activation email this soon after the owner's weekly digest, which already covers it. */
+    private const DIGEST_QUIET_DAYS = 2;
 
     /** Ceiling on one run, so a backlog drains over several passes instead of in one burst. */
     private function batch(): int
@@ -84,10 +96,11 @@ class SendActivationNudges extends Command
         // install owns 37 schedules, 34 of them dormant with history. The nudges() order below
         // is what decides which one they get - tickets and payments before idle reminders.
         //
-        // A skipped role is NOT claimed, so it is still due on the next run and simply drains
-        // one at a time. For an owner with dozens of stalled schedules that is the intended
-        // outcome, not a limitation to engineer around.
+        // A skipped role is NOT claimed, so it stays due; base()'s per-owner cooldown then spaces
+        // the backlog out to one email a week. For an owner with dozens of stalled schedules that
+        // is the intended outcome, not a limitation to engineer around.
         $seenUsers = [];
+        $ignoreLocalTime = (bool) $this->option('now');
 
         foreach ($this->nudges() as $key => $resolver) {
             if ($budget <= 0) {
@@ -104,6 +117,12 @@ class SendActivationNudges extends Command
                 }
 
                 if (isset($seenUsers[$role->user_id])) {
+                    continue;
+                }
+
+                // Hourly runs, local-morning sends (OwnerLocalTime). Not claimed when outside the
+                // window, so a later run in the owner's morning picks it up.
+                if (! $ignoreLocalTime && ! OwnerLocalTime::isMorning($role->user, $role)) {
                     continue;
                 }
 
@@ -216,6 +235,22 @@ class SendActivationNudges extends Command
                     ->whereColumn('schedule_nudges.role_id', 'roles.id')
                     ->where('schedule_nudges.nudge_key', $key);
             });
+
+        // Per-OWNER pacing, now that this runs on a timer: one activation email a week per
+        // person across all their schedules, and none within two days of their weekly digest,
+        // so nobody gets two of our emails at once. first_sale is exempt from both - it is a
+        // congratulation with its own 7-day window, and holding it back makes it read late.
+        if ($key !== 'first_sale') {
+            $query->whereNotExists(fn ($q) => $q->select(DB::raw(1))
+                ->from('schedule_nudges')
+                ->join('roles as nudged', 'nudged.id', '=', 'schedule_nudges.role_id')
+                ->whereColumn('nudged.user_id', 'roles.user_id')
+                ->where('schedule_nudges.created_at', '>=', now()->subDays(self::OWNER_COOLDOWN_DAYS)))
+                ->whereNotExists(fn ($q) => $q->select(DB::raw(1))
+                    ->from('owner_digests')
+                    ->whereColumn('owner_digests.user_id', 'roles.user_id')
+                    ->where('owner_digests.created_at', '>=', now()->subDays(self::DIGEST_QUIET_DAYS)));
+        }
 
         // An in-app dismissal is an answer. The dashboard panel offers the same steps, and if
         // the person this would go to has already turned one down, do not then email it to them.
@@ -378,7 +413,12 @@ class SendActivationNudges extends Command
             ->where(fn ($q) => $q->whereCanSellPaidTickets()
                 ->orWhereHas('events', fn ($e) => $e->whereColumn('events.creator_role_id', 'roles.id')
                     ->whereNotNull('events.tickets_grandfathered_at')))
-            ->whereHas('events', fn ($q) => $this->ownedEvents($q)
+            // On a public event with a date still to come. Without it this reached every Pro
+            // schedule that EVER priced a ticket: on 2026-09-28 that was 67 schedules, 59 of them
+            // with no event in 90 days and 61 of them admin comps - a mailshot about payments to
+            // dormant accounts.
+            ->whereHas('events', fn ($q) => $this->ownedEvents($this->publicEvents($q))
+                ->hasUpcomingOccurrence()
                 ->whereHas('tickets', fn ($t) => $t->where('tickets.is_deleted', false)
                     ->where('tickets.price', '>', 0)))
             ->limit($limit)->get()

@@ -8,6 +8,7 @@ use App\Models\AnalyticsDaily;
 use App\Models\Event;
 use App\Models\Role;
 use App\Services\DemoService;
+use App\Utils\OwnerLocalTime;
 use Carbon\Carbon;
 use Illuminate\Console\Command;
 use Illuminate\Support\Collection;
@@ -30,20 +31,28 @@ use Illuminate\Support\Facades\Log;
  *  - one email per owner per ISO week, claimed with a unique index before sending;
  *  - the owner's own weekly_digest notification setting (default on) and users.is_subscribed.
  *
- * Deliberately NOT scheduled yet, on either rail, like app:send-activation-nudges: run it by hand
- * (no flag is a dry run, --apply sends) and schedule it once a real pass has been read. The claim
- * is per ISO week, so once it runs daily the first run of each week (Monday) is the one that sends.
+ * Scheduled HOURLY on both rails, and it sends to each owner only on Monday morning in their own
+ * timezone (OwnerLocalTime): one UTC hour would be midnight somewhere. The claim is the owner's
+ * LOCAL ISO week, so the hourly runs inside that window cannot send twice. No flag is a dry run;
+ * --now skips the local-time gate for hand runs and tests.
  */
 class SendOwnerDigests extends Command
 {
     protected $signature = 'app:send-owner-digests
         {--apply : Send the emails. Without it, print what would be sent}
-        {--user= : Only this owner (user id)}';
+        {--user= : Only this owner (user id)}
+        {--now : Ignore the Monday-morning local window. For hand runs and tests; the scheduler never passes it.}';
 
     protected $description = 'Send each active schedule owner a weekly summary of their schedules';
 
     /** How many upcoming dates one schedule's section lists. */
     private const UPCOMING_LIMIT = 5;
+
+    /** How many schedules one email shows; the rest are "and N more on your dashboard". */
+    private const SECTION_LIMIT = 8;
+
+    /** Fewer views than this, and nothing else, is not news. */
+    private const MIN_VIEWS = 5;
 
     public function handle(): int
     {
@@ -54,11 +63,11 @@ class SendOwnerDigests extends Command
         }
 
         $apply = (bool) $this->option('apply');
-        $week = now()->format('o-\WW');
+        $ignoreLocalTime = (bool) $this->option('now');
         $since = now()->subDays(7);
         $batch = max(1, (int) config('usage.owner_digest_batch', 500));
 
-        $owners = $this->candidateRoles($week)->groupBy('user_id');
+        $owners = $this->candidateRoles()->groupBy('user_id');
         $sent = 0;
 
         foreach ($owners as $userId => $roles) {
@@ -70,10 +79,26 @@ class SendOwnerDigests extends Command
             $user = $roles->first()->user;
             $locale = $user->language_code ?: config('app.locale');
 
+            // The owner's own Monday morning, and their own ISO week for the claim, so the hourly
+            // runs across that window resolve to one week and one send.
+            $localNow = OwnerLocalTime::now($user, $roles->first());
+            $week = $localNow->format('o-\WW');
+
+            if (! $ignoreLocalTime && (! $localNow->isMonday() || ! OwnerLocalTime::isMorning($user, $roles->first()))) {
+                continue;
+            }
+
+            if (DB::table('owner_digests')->where('user_id', $user->id)->where('week', $week)->exists()) {
+                continue;
+            }
+
             $sections = $roles
                 ->filter(fn (Role $role) => $role->getEditorsWantingNotification('weekly_digest')->contains('id', $user->id))
                 ->map(fn (Role $role) => $this->section($role, $since, $locale))
                 ->filter()
+                // The busiest first, so a long list leads with what matters: money, then people,
+                // then attention.
+                ->sortByDesc(fn ($section) => [$section['tickets'] + $section['rsvps'], $section['followers'] + $section['subscribers'], $section['views']])
                 ->values()
                 ->all();
 
@@ -81,8 +106,11 @@ class SendOwnerDigests extends Command
                 continue;
             }
 
+            $more = max(0, count($sections) - self::SECTION_LIMIT);
+            $sections = array_slice($sections, 0, self::SECTION_LIMIT);
+
             if (! $apply) {
-                $this->line("would send {$user->email}: ".implode(', ', array_column($sections, 'name')));
+                $this->line("would send {$user->email}: ".implode(', ', array_column($sections, 'name')).($more ? " (+{$more} more)" : ''));
                 $sent++;
 
                 continue;
@@ -103,7 +131,7 @@ class SendOwnerDigests extends Command
 
             try {
                 SendQueuedEmail::dispatch(
-                    new OwnerDigest($user, $sections),
+                    new OwnerDigest($user, $sections, $more),
                     $user->email,
                     // Platform mailer, never a schedule's own SMTP: this is our email about their
                     // account, it must not count against their allowance, and a schedule's SMTP
@@ -118,13 +146,16 @@ class SendOwnerDigests extends Command
             }
         }
 
-        $this->info(($apply ? 'Queued' : 'Would send')." {$sent} weekly digest(s) for {$week}.");
+        $this->info(($apply ? 'Queued' : 'Would send')." {$sent} weekly digest(s).");
 
         return self::SUCCESS;
     }
 
-    /** Active schedules whose owner can be emailed and has not had this week's digest. */
-    private function candidateRoles(string $week): Collection
+    /**
+     * Active schedules whose owner can be emailed. Whether the owner already had THIS week's
+     * digest is checked per owner in handle(), because "this week" is the owner's local week.
+     */
+    private function candidateRoles(): Collection
     {
         $public = fn ($q) => $q->where('events.is_draft', false)
             ->where('events.is_private', false)
@@ -138,10 +169,12 @@ class SendOwnerDigests extends Command
             ->whereHas('user', fn ($u) => $u->where('is_subscribed', true)
                 ->where('email', '!=', DemoService::DEMO_EMAIL)
                 ->whereNotNull('email_verified_at'))
+            // Not emailed in the last five days, whatever week that was: a cheap pre-filter
+            // that keeps the hourly runs from rebuilding sections for owners already done.
             ->whereNotExists(fn ($q) => $q->selectRaw('1')
                 ->from('owner_digests')
                 ->whereColumn('owner_digests.user_id', 'roles.user_id')
-                ->where('owner_digests.week', $week))
+                ->where('owner_digests.created_at', '>=', now()->subDays(5)))
             ->where(fn ($q) => $q
                 ->whereHas('events', fn ($e) => $public($e)->where('events.starts_at', '>=', now()->subDays(90)))
                 ->orWhereHas('events', fn ($e) => $public($e)->hasUpcomingOccurrence()))
@@ -179,7 +212,9 @@ class SendOwnerDigests extends Command
 
         $upcoming = $this->upcoming($role, $locale);
 
-        if ($views + $followers + $subscribers + $tickets + $rsvps === 0 && empty($upcoming)) {
+        // A few stray views and nothing else is not worth an email; a digest that says "3 page
+        // views" teaches people to ignore the next one.
+        if ($views < self::MIN_VIEWS && $followers + $subscribers + $tickets + $rsvps === 0 && empty($upcoming)) {
             return null;
         }
 

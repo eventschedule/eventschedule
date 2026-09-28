@@ -19,6 +19,10 @@
 @endif
 
 @endforeach
+@if ($more > 0)
+{{ trans_choice('messages.owner_digest_more', $more, ['count' => $more]) }}
+
+@endif
 {{ __('messages.owner_digest_cta') }}: {{ $dashboardUrl }}
 
 {{ __('messages.owner_digest_why') }}

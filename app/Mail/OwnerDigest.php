@@ -26,14 +26,14 @@ class OwnerDigest extends Mailable
     /**
      * @param  array<int, array{name: string, url: string, views: int, followers: int, subscribers: int, tickets: int, rsvps: int, upcoming: array<int, array{name: string, date: string}>}>  $sections
      */
-    public function __construct(public User $user, public array $sections) {}
+    public function __construct(public User $user, public array $sections, public int $more = 0) {}
 
     public function envelope(): Envelope
     {
         return new Envelope(
-            subject: count($this->sections) === 1
+            subject: count($this->sections) + $this->more === 1
                 ? __('messages.owner_digest_subject_one', ['schedule' => $this->sections[0]['name']])
-                : __('messages.owner_digest_subject_many', ['count' => count($this->sections)]),
+                : __('messages.owner_digest_subject_many', ['count' => count($this->sections) + $this->more]),
         );
     }
 
@@ -51,6 +51,8 @@ class OwnerDigest extends Mailable
             with: [
                 'user' => $this->user,
                 'sections' => $this->sections,
+                // Schedules left out past the section limit, pointed to the dashboard.
+                'more' => $this->more,
                 'dashboardUrl' => app_url(route('home', [], false)),
                 'unsubscribeUrl' => $this->unsubscribeUrl(),
                 // Schedule and event names are interpolated into prose.

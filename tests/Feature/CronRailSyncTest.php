@@ -91,9 +91,8 @@ class CronRailSyncTest extends TestCase
         // app:send-event-announcements came OFF this list once the seven hazards in its docblock
         // were closed; it is now on both rails, hourly, and the parity check above covers it like
         // any other entry.
-        'app:send-activation-nudges',
-        // Hand-run until a production pass has been read, like the activation nudges.
-        'app:send-owner-digests',
+        // app:send-activation-nudges and app:send-owner-digests came off it on 2026-09-28, once
+        // each was paced per owner and sent in the owner's local morning.
     ];
 
     private function console(): string
@@ -151,6 +150,9 @@ class CronRailSyncTest extends TestCase
     {
         $console = $this->console();
         $http = $this->translateData();
+
+        // The list can be empty, and an empty loop would leave this test with no assertions.
+        $this->assertIsArray(self::UNSCHEDULED);
 
         foreach (self::UNSCHEDULED as $command) {
             $this->assertStringNotContainsString(

@@ -312,14 +312,22 @@ Schedule::call(function () {
     }
 })->hourly()->name('send-onboarding-nudges')->withoutOverlapping(30)->appendOutputTo(storage_path('logs/scheduler.log'));
 
-// app:send-activation-nudges is deliberately NOT scheduled, here or in
-// AppController::translateData(). It emails people who are already using the app, and its
-// windows are wide enough that the first pass over an install that has never run it reaches a
-// large backlog at once. Run it by hand - no flag prints a dry run, --apply sends - and put it
-// back on a schedule once a real pass has been read and looks right.
-//
-// app:send-owner-digests is unscheduled for the same reason, on both rails. When it is scheduled,
-// run it daily: its claim is per ISO week, so the first run of each week is the one that sends.
+// The two owner emails. Hourly, not daily, and neither passes --now: each command sends to an
+// owner only inside their own local morning (OwnerLocalTime), so one fixed UTC hour would be
+// midnight for someone. The nudges are paced to one per owner per week and none within two days
+// of their digest; the digest claims the owner's local ISO week, so every hourly run inside
+// Monday morning resolves to one send.
+Schedule::call(function () {
+    if (config('app.hosted')) {
+        Artisan::call('app:send-activation-nudges', ['--apply' => true]);
+    }
+})->hourly()->name('app-send-activation-nudges')->withoutOverlapping(30)->appendOutputTo(storage_path('logs/scheduler.log'));
+
+Schedule::call(function () {
+    if (config('app.hosted')) {
+        Artisan::call('app:send-owner-digests', ['--apply' => true]);
+    }
+})->hourly()->name('app-send-owner-digests')->withoutOverlapping(45)->appendOutputTo(storage_path('logs/scheduler.log'));
 
 Schedule::call(function () {
     Artisan::call('app:notify-request-changes');

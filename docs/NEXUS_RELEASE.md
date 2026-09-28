@@ -1102,6 +1102,43 @@ The same code reaches selfhosters with the next GitHub release.
   - the reserved names matter most there, because schedules share the path space with the app's
     routes.
 
+## Conversion, churn and owner emails (the commits after `8e02425f0`)
+
+**What ships:**
+- the paid-ticket paywall shown as a price is typed, and counted (`hit_ticket_paywall`);
+- a card-free 7-day selling trial (`roles.ticket_trial_ends_at`, paid selling only, not Pro);
+- cancellation reasons (`subscription_cancellations`), from the plan tab and the Stripe webhooks;
+- two owner emails that start sending on their own: the activation nudges and the weekly digest.
+
+**Four migrations, all cheap.** Two nullable columns at the end of `users` and `roles` (no
+`->after()`, so INSTANT) and two new tables, `subscription_cancellations` and `owner_digests`.
+No new env vars.
+
+**Two new scheduled entries, hourly on both rails:** `app-send-activation-nudges` and
+`app-send-owner-digests`. Neither has ever run on production. Each sends to an owner only in
+their own local morning (the digest only on Monday), and the nudges are paced to one per owner
+per week, never within two days of their digest. From the 2026-09-28 growth export, expect:
+- **nudges:** up to about 100 owners over the first day, mostly `no_ticket_type` and
+  `no_ticket_type_free`, then a trickle;
+- **digests:** about 110 owners on the first Monday after the deploy.
+
+### Before the deploy
+
+- Take a growth export (`/admin/growth`, Download). The last one is from before the Pro-only
+  selling change and this release, so it is the baseline for both.
+- In the Stripe dashboard, turn on **cancellation reason** in the customer portal settings, or
+  portal cancels arrive with no reason.
+
+### After the deploy
+
+- **The next morning,** open `/admin/growth`. The Activation nudges card should list keys with
+  counts in line with the estimates above. The digests row fills in after the first Monday.
+- **If the nudges card still says none were sent a day later,** the scheduler is not reaching
+  the command: check the Scheduler card on `/admin/queue`.
+- **To stop either email at once,** comment out its `Schedule::call` in `routes/console.php` and
+  its call in `AppController::translateData()` (`CronRailSyncTest` requires both), then deploy.
+  There is no kill switch in settings.
+
 ## Selfhost release
 
 Cutting v1.0.130 for selfhosters is deliberately **not** part of the hosted deploy. Do it after

@@ -114,9 +114,8 @@
         </div>
 
         <div class="grid grid-cols-1 lg:grid-cols-2 gap-4">
-            {{-- app:send-activation-nudges is hand-run until a production pass has been read (see
-                 routes/console.php), and before this card the only way to tell whether it ever
-                 had been was a query against schedule_nudges. --}}
+            {{-- The two scheduled owner emails, so a bad first day after a deploy is visible here
+                 rather than only in a query against schedule_nudges and owner_digests. --}}
             <div class="ap-card rounded-xl shadow p-6 flex flex-col">
                 <h3 class="text-lg font-medium text-gray-900 dark:text-white mb-1">@lang('messages.growth_nudges')</h3>
                 <p class="text-xs text-gray-500 dark:text-gray-400 mb-4">@lang('messages.growth_nudges_help')</p>
@@ -149,6 +148,19 @@
                         </tbody>
                     </table>
                 @endif
+
+                {{-- The other scheduled owner email, so both can be watched in one place. --}}
+                <div class="mt-4 pt-3 border-t border-gray-200 dark:border-gray-700 text-sm">
+                    <p class="font-medium text-gray-900 dark:text-white mb-2">@lang('messages.growth_digests')</p>
+                    @forelse (array_slice($data['owner_digests'] ?? [], 0, 2, true) as $week => $row)
+                        <div class="flex items-center justify-between">
+                            <span class="font-mono text-xs text-gray-600 dark:text-gray-400">{{ $week }}</span>
+                            <span class="text-gray-900 dark:text-white">{{ trans_choice('messages.growth_digests_owners', $row['owners'], ['count' => number_format($row['owners'])]) }}</span>
+                        </div>
+                    @empty
+                        <p class="text-gray-500 dark:text-gray-400">@lang('messages.growth_digests_none')</p>
+                    @endforelse
+                </div>
             </div>
 
             {{-- Churn and the selling trial: the two ends of the plan, each new on 2026-09-28. --}}

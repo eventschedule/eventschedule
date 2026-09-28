@@ -302,6 +302,24 @@ class AppController extends Controller
                     \Log::error('Scheduled command app:send-onboarding-nudges failed: '.$e->getMessage());
                     report($e);
                 }
+                // Keep in sync with routes/console.php, hosted-gated like the onboarding nudges.
+                // Hourly because each sends in the owner's own local morning; never --now.
+                try {
+                    if (config('app.hosted')) {
+                        \Artisan::call('app:send-activation-nudges', ['--apply' => true]);
+                    }
+                } catch (\Throwable $e) {
+                    \Log::error('Scheduled command app:send-activation-nudges failed: '.$e->getMessage());
+                    report($e);
+                }
+                try {
+                    if (config('app.hosted')) {
+                        \Artisan::call('app:send-owner-digests', ['--apply' => true]);
+                    }
+                } catch (\Throwable $e) {
+                    \Log::error('Scheduled command app:send-owner-digests failed: '.$e->getMessage());
+                    report($e);
+                }
                 try {
                     \Artisan::call('app:send-feedback-requests');
                 } catch (\Throwable $e) {
@@ -466,10 +484,6 @@ class AppController extends Controller
                     \Log::error('Scheduled command translations:publish failed: '.$e->getMessage());
                     report($e);
                 }
-                // app:send-activation-nudges is deliberately NOT called here, and not in
-                // routes/console.php either - the two rails stay in sync, and here that means
-                // absent from both. It is hand-run until a real pass has been read; see the
-                // note in routes/console.php. The same goes for app:send-owner-digests.
                 try {
                     \Artisan::call('google:refresh-webhooks');
                 } catch (\Throwable $e) {
