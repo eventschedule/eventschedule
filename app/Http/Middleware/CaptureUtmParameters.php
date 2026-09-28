@@ -2,6 +2,7 @@
 
 namespace App\Http\Middleware;
 
+use App\Utils\HeroExperiment;
 use Closure;
 use Illuminate\Http\Request;
 use Symfony\Component\HttpFoundation\Response;
@@ -344,7 +345,11 @@ class CaptureUtmParameters
      * is client-controlled, so malformed JSON is ignored, unknown keys are dropped, and every
      * value goes through the same sanitiser and the same length caps the session path uses.
      *
-     * @return array{utm_params: array<string, string|null>, utm_referrer_url: string|null, utm_landing_page: string|null, referral_code: string|null}
+     * `hero` is the homepage headline variant the visitor was shown (App\Utils\HeroExperiment),
+     * merged in by the homepage even when the cookie was first written on another page. Only a
+     * key the experiment currently defines is returned.
+     *
+     * @return array{utm_params: array<string, string|null>, utm_referrer_url: string|null, utm_landing_page: string|null, referral_code: string|null, hero_variant: string|null}
      */
     public static function clientAttribution(Request $request): array
     {
@@ -353,6 +358,7 @@ class CaptureUtmParameters
             'utm_referrer_url' => null,
             'utm_landing_page' => null,
             'referral_code' => null,
+            'hero_variant' => null,
         ];
 
         $raw = $request->cookie(self::CLIENT_COOKIE);
@@ -390,6 +396,7 @@ class CaptureUtmParameters
             'utm_referrer_url' => self::sanitizeUrlish($data['referrer'] ?? null),
             'utm_landing_page' => self::sanitizeUrlish($data['landing'] ?? null),
             'referral_code' => $referralCode,
+            'hero_variant' => HeroExperiment::isVariant($data['hero'] ?? null) ? $data['hero'] : null,
         ];
     }
 

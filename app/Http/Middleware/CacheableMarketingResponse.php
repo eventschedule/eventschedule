@@ -83,19 +83,20 @@ class CacheableMarketingResponse
     /**
      * Marketing routes that hold nothing per visitor and so must never start a session.
      *
-     * Both are fetched BY a cached page rather than being pages themselves, which is what
-     * makes a session cookie on either of them so expensive: it is the cookie Cloudflare
+     * All are fetched BY a cached page rather than being pages themselves, which is what
+     * makes a session cookie on any of them so expensive: it is the cookie Cloudflare
      * bypasses the cache on, so one beacon would take the visitor off the edge for the rest
      * of their session in exchange for a session nothing ever reads. Method is irrelevant
-     * here (the beacon is a POST), and neither response is ever marked public - the JSON
-     * route sets its own `public, max-age=3600` and the beacon stays private.
+     * here (the beacons are POSTs), and none of the responses is ever marked public - the JSON
+     * route sets its own `public, max-age=3600` and the two beacons stay private.
      *
-     * The same two routes are TrackMarketingVisit::NON_PAGE_ROUTES, for the same underlying
+     * The same routes are TrackMarketingVisit::NON_PAGE_ROUTES, for the same underlying
      * reason (neither is a page); MarketingEdgeCacheTest pins the two lists together.
      */
     public const STATELESS_ROUTES = [
         'marketing.visit',
         'marketing.docs.search_index',
+        'marketing.hero_event',
     ];
 
     /**
@@ -127,8 +128,8 @@ class CacheableMarketingResponse
 
     public function handle(Request $request, Closure $next): Response
     {
-        // Mutually exclusive by construction: marketing.visit is a POST and
-        // marketing.docs.search_index is in EXCLUDED_ROUTES, so neither can be eligible.
+        // Mutually exclusive by construction: the two beacons are POSTs and
+        // marketing.docs.search_index is in EXCLUDED_ROUTES, so none can be eligible.
         $stateless = $this->isStateless($request);
         $eligible = $this->isEligible($request);
         // Not cacheable itself, but it must not leave a session cookie behind either - see

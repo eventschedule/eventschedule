@@ -565,6 +565,7 @@ class RegisteredUserController extends Controller
                 'utm_term' => $utmParams['utm_term'] ?? null,
                 'referrer_url' => $referrerUrl,
                 'landing_page' => $landingPage,
+                'hero_variant' => $clientAttribution['hero_variant'],
                 // Keep the stub's original acquisition context (team invite,
                 // newsletter subscriber) rather than re-labeling it organizer
                 'signup_intent' => $existingUser->signup_intent ?? $signupIntent,
@@ -585,6 +586,7 @@ class RegisteredUserController extends Controller
                 'utm_term' => $utmParams['utm_term'] ?? null,
                 'referrer_url' => $referrerUrl,
                 'landing_page' => $landingPage,
+                'hero_variant' => $clientAttribution['hero_variant'],
                 'signup_intent' => $signupIntent,
             ]);
         }

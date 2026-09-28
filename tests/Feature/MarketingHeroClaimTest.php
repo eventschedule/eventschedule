@@ -12,6 +12,9 @@ use Tests\TestCase;
  *
  * Two things have to survive an edit here.
  *
+ * The headline and subtitle are an A/B test (App\Utils\HeroExperiment); this file checks the copy
+ * the server renders, and HeroExperimentTest applies the same rules to every variant.
+ *
  * The first is that the fold says the product takes bookings at all. That is the whole reason it
  * was reworked, and it is four words of one sentence: "Put the date up on your event calendar.
  * People buy a ticket or book a time, and the money lands in your own Stripe or PayPal." A rewrite
@@ -49,6 +52,11 @@ class MarketingHeroClaimTest extends TestCase
         $this->assertNotFalse($end, 'the hero poster wall has moved; this test needs a new end anchor');
 
         $hero = substr($body, $start, $end - $start);
+
+        // The headline test's picker script embeds every variant as JSON. strip_tags() keeps a
+        // script's contents, so without this the other variants' copy would be read as part of
+        // the rendered fold. Each variant is checked on its own in HeroExperimentTest.
+        $hero = preg_replace('#<script\b[^>]*>.*?</script>#s', '', $hero);
 
         return trim(preg_replace('/\s+/', ' ', strip_tags($hero)));
     }

@@ -441,38 +441,114 @@
                 </x-marketing.hero-eyebrow>
                 {{-- 24 characters is the budget per line: .es-mask animates the whole line block,
                      so a line that wraps rises as a two-line slab instead of a crisp single line. --}}
-                <span class="es-mask"><span class="es-mask-line">Everything you have on.</span></span>
-                <span class="es-mask es-mask-2"><span class="es-mask-line"><span class="text-gradient es-gradient-anim">Booked solid.</span></span></span>
+                <span class="es-mask"><span class="es-mask-line" data-hero="l1">{{ $hero['default']['line1'] }}</span></span>
+                <span class="es-mask es-mask-2"><span class="es-mask-line"><span class="text-gradient es-gradient-anim" data-hero="l2">{{ $hero['default']['line2'] }}</span></span></span>
             </h1>
 
-            {{-- A SCENARIO, not a feature list. Four earlier drafts of this line were all the same
-                 sentence - "One page/calendar ..." plus a three-verb list - and a list of verbs is a
-                 spec sheet, which is not what an aspirational headline needs under it.
+            {{-- The headline and this subtitle are an A/B test that runs itself: the copy for every
+                 variant, and the reasoning behind each constraint on it, lives in
+                 App\Utils\HeroExperiment. The server renders the default (or the winner, once one is
+                 locked); the script below picks a variant in the browser, because this page is
+                 edge-cached on its URL alone and a server-side pick would be served to everyone
+                 (docs/CACHING.md).
 
-                 The arc is what makes it work: the reader does exactly ONE thing, "Put the date up",
-                 and everything after that happens to them. That is the mechanism behind "Booked
-                 solid" directly above, which is why an imperative opening reads right here when it
-                 would have fought the headline in a capability list.
+                 The rules every variant must keep, which HeroExperimentTest checks:
+                 - 24 characters per headline line (see the note above the h1).
+                 - "event calendar" somewhere in the fold: the <title> says "Free Event Calendar",
+                   and an H1 + subhead that never confirm it is the usual trigger for Google
+                   rewriting the title.
+                 - It says the product takes bookings, and names no paid plan (MarketingHeroClaimTest). --}}
+            <p class="es-fade-up es-d-2 mx-auto mb-10 max-w-2xl text-lg text-gray-500 dark:text-gray-400 sm:text-xl" data-hero="sub">{{ $hero['default']['subtitle'] }}</p>
 
-                 "buy a ticket or book a time" carries both revenue modes in six words, and neither
-                 is qualified by tier here. Appointment booking is free with one type; putting a
-                 price on a ticket is Pro. The fold is not where that split gets argued - it sits
-                 beside a badge reading "Free event calendar. No credit card." and a button reading "Start
-                 for free", and MarketingHeroClaimTest pins the fold against a plan name drifting
-                 back in. The pricing band and the FAQ below carry the tiers.
+            @guest
+                @if ($hero['running'])
+                    {{-- Runs before the entrance animations reveal the text, so the swap never
+                         shows. The pick is remembered in sessionStorage here and copied into the
+                         es_attribution cookie by the layout's attribution script (which reads
+                         window.esHero), so it reaches sign-up on the app host. Writing that cookie
+                         from here instead would make the attribution script think it already ran
+                         and lose the landing page and utm_* values. --}}
+                    <script {!! nonce_attr() !!}>
+                        (function () {
+                            try {
+                                var variants = @json($hero['variants']);
+                                var weights = @json($hero['weights']);
+                                var endpoint = @json(url('/marketing/hero'));
+                                var key = null;
+                                var fresh = false;
 
-                 "event calendar" is here because the <title> says "Free Event Calendar" and an H1
-                 that does not confirm the title's subject is the usual trigger for Google rewriting
-                 it; the H1 no longer carries the phrase, so this line has to.
+                                var match = document.cookie.match(/(?:^|;\s*)es_attribution=([^;]*)/);
+                                if (match) {
+                                    try {
+                                        key = JSON.parse(decodeURIComponent(match[1])).hero || null;
+                                    } catch (e) {}
+                                }
+                                if (!key || !variants[key]) {
+                                    try {
+                                        key = sessionStorage.getItem('es_hero');
+                                    } catch (e) {}
+                                }
+                                if (!key || !variants[key]) {
+                                    var roll = Math.random();
+                                    var keys = Object.keys(weights);
+                                    key = keys[keys.length - 1];
+                                    for (var i = 0; i < keys.length; i++) {
+                                        roll -= weights[keys[i]];
+                                        if (roll < 0) {
+                                            key = keys[i];
+                                            break;
+                                        }
+                                    }
+                                    fresh = true;
+                                }
+                                try {
+                                    sessionStorage.setItem('es_hero', key);
+                                } catch (e) {}
 
-                 It ends on the reader's own account, in the same words as the 0% card further down
-                 this page, so the fold and the proof below it say the same thing. The explicit
-                 "No platform fee" is deliberately NOT here: the badge above carries free, and the
-                 JSON-LD description carries the fee claim for search snippets. --}}
-            <p class="es-fade-up es-d-2 mx-auto mb-10 max-w-2xl text-lg text-gray-500 dark:text-gray-400 sm:text-xl">
-                Put the date up on your event calendar. People buy a ticket or book a time, and the
-                money lands in your own Stripe or PayPal.
-            </p>
+                                window.esHero = { key: key, fresh: fresh };
+
+                                var copy = variants[key];
+                                document.querySelector('[data-hero="l1"]').textContent = copy.line1;
+                                document.querySelector('[data-hero="l2"]').textContent = copy.line2;
+                                document.querySelector('[data-hero="sub"]').textContent = copy.subtitle;
+
+                                var send = function (event) {
+                                    var body = JSON.stringify({ variant: key, event: event });
+                                    try {
+                                        if (navigator.sendBeacon && navigator.sendBeacon(endpoint, new Blob([body], { type: 'application/json' }))) {
+                                            return;
+                                        }
+                                    } catch (e) {}
+                                    try {
+                                        fetch(endpoint, { method: 'POST', keepalive: true, credentials: 'same-origin', headers: { 'Content-Type': 'application/json' }, body: body }).catch(function () {});
+                                    } catch (e) {}
+                                };
+
+                                if (fresh) {
+                                    send('view');
+                                }
+
+                                // Any sign-up link on the page, not only the hero button: the
+                                // headline is what is being tested, wherever the reader acts on it.
+                                // First click per session, so the rate is per visitor.
+                                document.addEventListener('click', function (e) {
+                                    var link = e.target && e.target.closest ? e.target.closest('a[href*="/sign_up"]') : null;
+                                    if (!link) {
+                                        return;
+                                    }
+                                    try {
+                                        if (sessionStorage.getItem('es_hero_clicked') === key) {
+                                            return;
+                                        }
+                                        sessionStorage.setItem('es_hero_clicked', key);
+                                    } catch (e) {}
+                                    send('click');
+                                }, true);
+                            } catch (e) {}
+                        })();
+                    </script>
+                @endif
+            @endguest
 
             <div class="es-fade-up es-d-3 flex flex-col items-center justify-center gap-4 sm:flex-row">
                 <a href="#showcase" class="group pointer-events-auto inline-flex items-center justify-center gap-2.5 rounded-2xl glass px-7 py-4 text-lg font-semibold text-gray-800 transition-all duration-200 hover:-translate-y-0.5 hover:shadow-lg dark:text-white">

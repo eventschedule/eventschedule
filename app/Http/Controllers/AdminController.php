@@ -38,6 +38,7 @@ use App\Services\TranslationQueue;
 use App\Services\WebhookService;
 use App\Services\WorkBacklog;
 use App\Utils\AdminReauthUtils;
+use App\Utils\HeroExperiment;
 use App\Utils\MoneyUtils;
 use App\Utils\PlanPriceUtils;
 use App\Utils\PlatformCurrency;
@@ -1334,7 +1335,13 @@ class AdminController extends Controller
         $growth = app(GrowthExportService::class);
         $data = $growth->build($dates['start'], $dates['end'], $dates['previous_start'], $dates['previous_end']);
 
-        return view('admin.growth', ['range' => $range, 'data' => $data]);
+        return view('admin.growth', [
+            'range' => $range,
+            'data' => $data,
+            // All-time rather than the selected range: the test decides on its whole history.
+            // Only the nexus serves the homepage the test runs on.
+            'heroTest' => config('app.is_nexus') ? HeroExperiment::report() : null,
+        ]);
     }
 
     /**

@@ -389,15 +389,45 @@
 
              Written by the browser, so it never appears in a server response and cannot make
              a page uncacheable. Session-scoped (no expiry) and first-touch (never overwritten
-             while it exists). Read back at sign-up by CaptureUtmParameters::clientAttribution(). --}}
+             while it exists). Read back at sign-up by CaptureUtmParameters::clientAttribution().
+
+             The one exception to first-touch is `hero`, the homepage headline variant
+             (App\Utils\HeroExperiment), which the homepage's hero script leaves in window.esHero.
+             A visitor who landed on another page first already has the cookie, so the variant is
+             merged into it rather than skipped; every other field is left as it was. --}}
         <script {!! nonce_attr() !!}>
             (function () {
                 try {
-                    if (/(?:^|;\s*)es_attribution=/.test(document.cookie)) {
+                    var domain = @json(config('session.domain'));
+                    var write = function (value) {
+                        document.cookie = 'es_attribution=' + value
+                            + '; path=/'
+                            + (domain ? '; domain=' + domain : '')
+                            + '; samesite=lax'
+                            + (location.protocol === 'https:' ? '; secure' : '');
+                    };
+                    var hero = window.esHero && window.esHero.key;
+
+                    var existing = document.cookie.match(/(?:^|;\s*)es_attribution=([^;]*)/);
+                    if (existing) {
+                        if (hero) {
+                            var current = JSON.parse(decodeURIComponent(existing[1]));
+                            if (current && typeof current === 'object' && current.hero !== hero) {
+                                current.hero = hero;
+                                var merged = encodeURIComponent(JSON.stringify(current));
+                                if (merged.length <= 2048) {
+                                    write(merged);
+                                }
+                            }
+                        }
                         return;
                     }
 
                     var data = { landing: location.pathname.replace(/^\/+/, '') || '/' };
+
+                    if (hero) {
+                        data.hero = hero;
+                    }
 
                     if (document.referrer) {
                         var a = document.createElement('a');
@@ -431,12 +461,7 @@
                         return;
                     }
 
-                    var domain = @json(config('session.domain'));
-                    document.cookie = 'es_attribution=' + value
-                        + '; path=/'
-                        + (domain ? '; domain=' + domain : '')
-                        + '; samesite=lax'
-                        + (location.protocol === 'https:' ? '; secure' : '');
+                    write(value);
                 } catch (e) {}
             })();
         </script>

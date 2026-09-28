@@ -4,11 +4,13 @@ namespace App\Http\Controllers;
 
 use App\Http\Middleware\TrackMarketingVisit;
 use App\Models\Event;
+use App\Models\PageView;
 use App\Models\Role;
 use App\Services\AuditService;
 use App\Utils\AdminReauthUtils;
 use App\Utils\DiscoveryUtils;
 use App\Utils\DocsUtils;
+use App\Utils\HeroExperiment;
 use App\Utils\PlatformPricing;
 use App\Utils\TicketFees;
 use App\Utils\UrlUtils;
@@ -44,6 +46,7 @@ class MarketingController extends Controller
             'personas' => $this->getPersonas(),
             'steps' => $this->getSteps(),
             'discoverEvents' => $this->discoverWallEvents(),
+            'hero' => HeroExperiment::forPage(),
         ]);
     }
 
@@ -7229,6 +7232,38 @@ class MarketingController extends Controller
         }
 
         TrackMarketingVisit::record($request, $routeName, expectDocumentAccept: false);
+
+        return response()->noContent();
+    }
+
+    /**
+     * Beacon target for the homepage headline test. Filtered exactly like the visit beacon
+     * above (signed-in users, bots, requests that do not look like a browser), so the
+     * per-variant visitor count and the site-wide one agree on who counts.
+     *
+     * Deduped per IP+UA per day, per event and variant, on the same daily-salted hash as the
+     * site-wide visitor counter. The browser already sends each event once per session, but
+     * its click flag is per TAB, and the endpoint is unauthenticated: without this, one
+     * visitor with several tabs counted as several clicks, and anyone could POST clicks for
+     * one variant and steer the traffic while it is still following clicks.
+     */
+    public function recordHeroEvent(Request $request)
+    {
+        abort_unless(config('app.is_nexus'), 404);
+
+        $variant = $request->input('variant');
+        $event = $request->input('event');
+
+        if (! HeroExperiment::isVariant($variant) || ! is_string($event) || ! isset(HeroExperiment::EVENTS[$event])) {
+            return response()->noContent(422);
+        }
+
+        if (! auth()->check()
+            && ! PageView::isBot($request->userAgent())
+            && ! PageView::isSuspiciousRequest($request, false)
+            && PageView::isFirstDailyVisit('mkt_hero_'.$event.'_'.$variant, $request->header('CF-Connecting-IP') ?? $request->ip(), $request->userAgent())) {
+            HeroExperiment::recordEvent($variant, $event);
+        }
 
         return response()->noContent();
     }

@@ -40,21 +40,22 @@ class TrackMarketingVisit
     /**
      * The marketing.* routes that are not pages, and so are not page views.
      *
-     * Both are fetched BY a marketing page rather than being one: the beacon this class
-     * feeds, and the docs search widget's index, which a reader pulls on first focus while
-     * already counted for the docs page they are reading. Counting the index made one docs
-     * reader who used the search look like two.
+     * All are fetched BY a marketing page rather than being one: the beacon this class
+     * feeds, the docs search widget's index, which a reader pulls on first focus while
+     * already counted for the docs page they are reading (counting the index made one docs
+     * reader who used the search look like two), and the homepage headline test's beacon.
      *
      * Shared by record() and isCountableRouteName(), which is also what the layout asks
-     * before it ships a beacon at all - so no beacon is ever rendered for either, and a
-     * hand-built one naming either is refused.
+     * before it ships a beacon at all - so no beacon is ever rendered for any of them, and a
+     * hand-built one naming one is refused.
      *
-     * The same two routes are CacheableMarketingResponse::STATELESS_ROUTES, for the same
+     * The same routes are CacheableMarketingResponse::STATELESS_ROUTES, for the same
      * underlying reason; MarketingEdgeCacheTest pins the two lists together.
      */
     public const NON_PAGE_ROUTES = [
         'marketing.visit',
         'marketing.docs.search_index',
+        'marketing.hero_event',
     ];
 
     public function handle(Request $request, Closure $next): Response

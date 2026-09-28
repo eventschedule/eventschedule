@@ -91,10 +91,11 @@ response regardless.
 
 `tests/Feature/MarketingEdgeCacheTest.php` pins the whole rule.
 
-## The two stateless support routes
+## The stateless support routes
 
-`CacheableMarketingResponse::STATELESS_ROUTES` - `marketing.visit` (the page-view beacon) and
-`marketing.docs.search_index` (the docs search index) - get that same `array` driver and the
+`CacheableMarketingResponse::STATELESS_ROUTES` - `marketing.visit` (the page-view beacon),
+`marketing.docs.search_index` (the docs search index) and `marketing.hero_event` (the homepage
+headline test's beacon, see below) - get that same `array` driver and the
 same cookie strip, on any method, whenever the request is anonymous (no session cookie, no
 `remember_*` cookie, no `Authorization` header) and arrived on `_base_domain()`. Neither is a
 page and neither holds anything per visitor.
@@ -109,7 +110,7 @@ Neither response is ever marked public by this middleware: the beacon stays `no-
 private`, and the search index keeps the `public, max-age=3600` its own controller sets (it
 is in `EXCLUDED_ROUTES` precisely so the 10-minute page header cannot overwrite the hour).
 `CaptureUtmParameters` also stands down on both, so a `/docs/search-index.json` fetch can
-never be recorded as a landing page, and `TrackMarketingVisit::NON_PAGE_ROUTES` (the same two
+never be recorded as a landing page, and `TrackMarketingVisit::NON_PAGE_ROUTES` (the same
 routes) keeps it out of the page-view counters.
 
 ## Any shared cache, not just Cloudflare
@@ -321,7 +322,9 @@ purge from the release flow is the obvious follow-up and is not wired up.
 
 Two things the origin used to do per page view cannot happen when the origin never sees the
 view. Both now run as nonce'd inline scripts at the end of `layouts/marketing.blade.php`,
-for guests only.
+for guests only (sections 1 and 2). The homepage headline test (section 3) is browser-side
+for the same reason; its picker lives in `marketing/index.blade.php`, right after the
+subtitle.
 
 ### 1. The page-view beacon
 
@@ -385,6 +388,32 @@ Because the browser writes it, it never appears in a server response and so cann
 page uncacheable. It is exempt from cookie encryption in `bootstrap/app.php` for the same
 reason `cookie_consent` is: Laravel would silently drop a cookie it cannot decrypt.
 
+It is first-touch with one exception, `hero` (next section): when the cookie already exists
+and the homepage has picked a headline, that one key is merged in and everything else is kept.
+
+### 3. The homepage headline test
+
+The homepage headline and subtitle are an A/B test that allocates its own traffic and locks
+its own winner (`App\Utils\HeroExperiment`). The variant is **picked in the browser**, and it
+has to stay that way:
+
+- The server renders the default copy (or the locked winner), every variant, and the current
+  traffic weights. An inline script right after the subtitle picks a variant, swaps the text
+  before the entrance animation reveals it, and leaves the pick in `window.esHero`; the
+  attribution script above copies it into `es_attribution`, which is how a signup is
+  credited (`users.hero_variant`).
+- A variant chosen on the server would be stored at the edge and served to every visitor for
+  ten minutes. A variant **cookie** set by the server is worse: `responseIsAnonymous()`
+  refuses to mark a response that sets any cookie public, so the homepage would silently stop
+  being cached. `HeroExperimentTest` pins that the homepage still sets no cookie.
+- The script writes to `sessionStorage` rather than to the cookie itself: if it created
+  `es_attribution`, the attribution script would find a cookie and skip, losing the landing
+  page and `utm_*` values.
+- It beacons `POST /marketing/hero` with `view` on a visitor's first pick and `click` on their
+  first click on any sign-up link, filtered exactly like the page-view beacon.
+- The weights baked into a cached page are up to ~20 minutes old (the app caches the
+  evaluation for 10 minutes, the edge the page for 10 more). That is fine: they move slowly.
+
 ## The CSP nonce
 
 Everyone served the same cached copy shares one nonce for up to 10 minutes. Marketing pages
@@ -409,3 +438,9 @@ reused against a page an attacker can write into. The reasoning is repeated in
   sharp rise means something is double-counting.
 - New sign-ups should keep non-null `utm_source` / `landing_page` / `referrer_url` at
   roughly the previous rate.
+- The homepage headline test: `curl -sI -X POST https://eventschedule.com/marketing/hero`
+  must carry no `set-cookie` (it answers 422 with no body, which is fine). Within a day the
+  "Homepage headline test" card on `/admin/growth` should show visitors for every variant, and
+  new sign-ups that came through the homepage should carry a non-null `hero_variant`. If
+  Cloudflare floors `s-maxage` to its 2-hour minimum, the weights baked into a cached homepage
+  lag by up to 2 hours instead of ~20 minutes, which is harmless.

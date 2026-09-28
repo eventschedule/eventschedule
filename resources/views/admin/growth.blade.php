@@ -243,5 +243,73 @@
                 </div>
             @endif
         </div>
+
+        {{-- The homepage headline A/B test (App\Utils\HeroExperiment). Read-only: it allocates
+             traffic and picks its winner by itself. --}}
+        @if (config('app.is_nexus'))
+            <div class="ap-card rounded-xl shadow p-6">
+                <h3 class="text-lg font-medium text-gray-900 dark:text-white mb-1">@lang('messages.hero_test')</h3>
+                <p class="text-xs text-gray-500 dark:text-gray-400 mb-4">@lang('messages.hero_test_help')</p>
+
+                @if ($heroTest === null)
+                    <p class="text-sm text-gray-500 dark:text-gray-400">@lang('messages.hero_test_unavailable')</p>
+                @else
+                    @php
+                        $heroHeadline = fn ($key) => collect($heroTest['rows'])->firstWhere('key', $key)['headline'] ?? $key;
+                        $heroPct = fn ($value) => $value === null ? __('messages.funnel_na') : round($value * 100, 1).'%';
+                    @endphp
+                    <p class="text-sm font-medium text-gray-800 dark:text-gray-200 mb-4">
+                        @if ($heroTest['phase'] === 'winner')
+                            {{ __('messages.hero_test_phase_winner', ['variant' => $heroHeadline($heroTest['winner']['key']), 'date' => $heroTest['winner']['date']]) }}
+                        @elseif ($heroTest['phase'] === 'candidate')
+                            {{ __('messages.hero_test_phase_candidate', ['variant' => $heroHeadline($heroTest['candidate']['key']), 'date' => $heroTest['lock_date']]) }}
+                        @elseif ($heroTest['phase'] === 'clicks')
+                            @lang('messages.hero_test_phase_clicks')
+                        @else
+                            @lang('messages.hero_test_phase_signups')
+                        @endif
+                    </p>
+
+                    <div class="overflow-x-auto">
+                        <table class="min-w-full text-sm">
+                            <thead>
+                                <tr class="text-start text-xs uppercase tracking-wide text-gray-400 dark:text-gray-500">
+                                    <th class="py-2 pe-4 text-start font-medium">@lang('messages.hero_test_headline')</th>
+                                    <th class="py-2 pe-4 text-end font-medium">@lang('messages.hero_test_share')</th>
+                                    <th class="py-2 pe-4 text-end font-medium">@lang('messages.hero_test_visitors')</th>
+                                    <th class="py-2 pe-4 text-end font-medium">@lang('messages.click_rate')</th>
+                                    <th class="py-2 pe-4 text-end font-medium">@lang('messages.growth_signups')</th>
+                                    <th class="py-2 pe-4 text-end font-medium">@lang('messages.hero_test_signup_rate')</th>
+                                    <th class="py-2 pe-4 text-end font-medium">@lang('messages.hero_test_chance_best_clicks')</th>
+                                    <th class="py-2 text-end font-medium">@lang('messages.hero_test_chance_best')</th>
+                                </tr>
+                            </thead>
+                            <tbody class="divide-y divide-gray-100 dark:divide-gray-700">
+                                @foreach ($heroTest['rows'] as $row)
+                                    <tr>
+                                        {{-- A floor, so on a phone the table scrolls sideways rather than
+                                             squeezing the copy to a word per line. --}}
+                                        <td class="py-2 pe-4 min-w-[16rem] text-gray-800 dark:text-gray-200">
+                                            <div class="font-medium" dir="ltr">{{ $row['headline'] }}</div>
+                                            <div class="text-xs text-gray-500 dark:text-gray-400 max-w-md" dir="ltr">{{ $row['subtitle'] }}</div>
+                                            @if ($row['is_default'])
+                                                <span class="mt-1 inline-block rounded-md bg-gray-100 dark:bg-gray-700 px-1.5 py-0.5 text-xs text-gray-600 dark:text-gray-300">@lang('messages.hero_test_default')</span>
+                                            @endif
+                                        </td>
+                                        <td class="py-2 pe-4 text-end font-medium text-gray-900 dark:text-white">{{ $heroPct($row['share']) }}</td>
+                                        <td class="py-2 pe-4 text-end text-gray-600 dark:text-gray-400">{{ number_format($row['visitors']) }}</td>
+                                        <td class="py-2 pe-4 text-end text-gray-600 dark:text-gray-400">{{ $heroPct($row['click_rate']) }}</td>
+                                        <td class="py-2 pe-4 text-end text-gray-600 dark:text-gray-400">{{ number_format($row['signups']) }}</td>
+                                        <td class="py-2 pe-4 text-end text-gray-600 dark:text-gray-400">{{ $heroPct($row['signup_rate']) }}</td>
+                                        <td class="py-2 pe-4 text-end text-gray-600 dark:text-gray-400">{{ $heroPct($row['p_best_clicks']) }}</td>
+                                        <td class="py-2 text-end text-gray-600 dark:text-gray-400">{{ $heroPct($row['p_best']) }}</td>
+                                    </tr>
+                                @endforeach
+                            </tbody>
+                        </table>
+                    </div>
+                @endif
+            </div>
+        @endif
     </div>
 </x-app-admin-layout>

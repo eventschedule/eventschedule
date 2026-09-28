@@ -1070,7 +1070,7 @@
                                                      edge-cacheable. A cookie set without asking has to be disclosed
                                                      here, in the same words the code uses. --}}
                                                 <p>
-                                                    One more attribution cookie is set whether or not you accept, and it is fair to say plainly why. Marketing pages are cached for everyone at the edge, so they can no longer carry a session, and <code class="es-fine-code">es_attribution</code> holds in your browser exactly what that session used to hold for the walk from a marketing page to the sign-up form: the page you landed on, the off-site address that referred you, and any <code class="es-fine-code">utm_*</code> or <code class="es-fine-code">ref</code> tag in the link you followed. It is written by your browser rather than by us, it expires when you close it, it is written once and never overwritten while it exists, and it is capped at 2&nbsp;KB with the referrer dropped first if it does not fit. It holds nothing you typed. The consented 30-day cookies above take precedence over it wherever both exist, because they carry an earlier first touch.
+                                                    One more attribution cookie is set whether or not you accept, and it is fair to say plainly why. Marketing pages are cached for everyone at the edge, so they can no longer carry a session, and <code class="es-fine-code">es_attribution</code> holds in your browser exactly what that session used to hold for the walk from a marketing page to the sign-up form: the page you landed on, the off-site address that referred you, and any <code class="es-fine-code">utm_*</code> or <code class="es-fine-code">ref</code> tag in the link you followed. If you visit our homepage, it also notes which of the headlines we are testing there you were shown, so we can tell which one led to a sign-up; the same note, and whether you then clicked a sign-up link, is kept in your browser's session storage as <code class="es-fine-code">es_hero</code> and <code class="es-fine-code">es_hero_clicked</code> until you close the tab. It is written by your browser rather than by us, it expires when you close it, it is written once and never overwritten while it exists (the headline is the one thing added to it later), and it is capped at 2&nbsp;KB with the referrer dropped first if it does not fit. It holds nothing you typed. The consented 30-day cookies above take precedence over it wherever both exist, because they carry an earlier first touch.
                                                 </p>
 
                                                 {{-- A reading aid, not a clause: the exact strings named above,
@@ -1087,6 +1087,8 @@
                                                         <span class="es-fine-chip">utm_referrer_url</span>
                                                         <span class="es-fine-chip">utm_landing_page</span>
                                                         <span class="es-fine-chip">es_attribution</span>
+                                                        <span class="es-fine-chip">es_hero</span>
+                                                        <span class="es-fine-chip">es_hero_clicked</span>
                                                     </p>
                                                 </div>
 

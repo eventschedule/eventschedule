@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Auth;
 
 use App\Http\Controllers\Controller;
+use App\Http\Middleware\CaptureUtmParameters;
 use App\Models\Referral;
 use App\Models\User;
 use App\Services\AuditService;
@@ -247,6 +248,8 @@ class SocialAuthController extends Controller
             'utm_term' => $utmParams['utm_term'] ?? null,
             'referrer_url' => session('utm_referrer_url') ?? request()->cookie('utm_referrer_url'),
             'landing_page' => session('utm_landing_page') ?? request()->cookie('utm_landing_page'),
+            // Only es_attribution carries it: the session seed copies the utm_* values, not this.
+            'hero_variant' => CaptureUtmParameters::clientAttribution(request())['hero_variant'],
             'signup_intent' => signup_intent_from_session(),
         ]);
 

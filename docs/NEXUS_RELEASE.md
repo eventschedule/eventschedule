@@ -496,6 +496,11 @@ curl -sI https://eventschedule.com/docs/search-index.json
      the rest of their session, which is the failure the stateless-route handling exists to stop.
 ```
 
+The homepage headline A/B test (`App\Utils\HeroExperiment`) beacons to its own route, so check
+it the same way: `curl -sI -X POST https://eventschedule.com/marketing/hero` must carry no
+`set-cookie` (a 422 is expected with no body). Within a day, the "Homepage headline test" card
+on `/admin/growth` should show visitors for every variant.
+
 Then **sign in and click around the marketing pages in a real browser**. A signed-in visitor must
 never see the guest header. This is the one failure mode no code can defend against.
 

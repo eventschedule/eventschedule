@@ -1186,6 +1186,12 @@ if (config('app.is_nexus')) {
             ->name('marketing.visit')
             ->middleware('throttle:120,1,marketing_visit')
             ->withoutMiddleware(\Illuminate\Foundation\Http\Middleware\ValidateCsrfToken::class);
+        // The homepage headline test's beacon (App\Utils\HeroExperiment): a `view` on a visitor's
+        // first assignment, a `click` on their first sign-up link click. Same reasoning as above.
+        Route::post('/marketing/hero', [MarketingController::class, 'recordHeroEvent'])
+            ->name('marketing.hero_event')
+            ->middleware('throttle:120,1,marketing_hero')
+            ->withoutMiddleware(\Illuminate\Foundation\Http\Middleware\ValidateCsrfToken::class);
         Route::get('/faq', [MarketingController::class, 'faq'])->name('marketing.faq');
         Route::get('/why-create-account', [MarketingController::class, 'whyCreateAccount'])->name('marketing.why_create_account');
         Route::get('/features/ticketing', [MarketingController::class, 'ticketing'])->name('marketing.ticketing');
@@ -1459,6 +1465,12 @@ if (config('app.is_nexus')) {
             Route::post('/marketing/visit', [MarketingController::class, 'recordVisit'])
                 ->name('marketing.visit')
                 ->middleware('throttle:120,1,marketing_visit')
+                ->withoutMiddleware(\Illuminate\Foundation\Http\Middleware\ValidateCsrfToken::class);
+            // The homepage headline test's beacon (App\Utils\HeroExperiment): a `view` on a visitor's
+            // first assignment, a `click` on their first sign-up link click. Same reasoning as above.
+            Route::post('/marketing/hero', [MarketingController::class, 'recordHeroEvent'])
+                ->name('marketing.hero_event')
+                ->middleware('throttle:120,1,marketing_hero')
                 ->withoutMiddleware(\Illuminate\Foundation\Http\Middleware\ValidateCsrfToken::class);
             Route::get('/faq', [MarketingController::class, 'faq'])->name('marketing.faq');
             Route::get('/why-create-account', [MarketingController::class, 'whyCreateAccount'])->name('marketing.why_create_account');

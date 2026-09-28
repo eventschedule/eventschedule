@@ -180,7 +180,7 @@ return [
     '/posh-alternative' => '2026-09-25',
     '/pretix-alternative' => '2026-09-25',
     '/pricing' => '2026-09-24',
-    '/privacy' => '2026-09-23',
+    '/privacy' => '2026-09-28',
     '/qr-code-generator-replacement' => '2026-09-25',
     '/replace' => '2026-09-25',
     '/saas' => '2026-09-25',

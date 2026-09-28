@@ -73,6 +73,7 @@ class User extends Authenticatable implements MustVerifyEmail
         'utm_term',
         'referrer_url',
         'landing_page',
+        'hero_variant',
         'signup_intent',
         'referral_code',
         'referred_by_user_id',
