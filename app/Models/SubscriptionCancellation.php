@@ -42,7 +42,17 @@ class SubscriptionCancellation extends Model
         'other' => 'other',
     ];
 
-    public const SOURCES = ['app', 'portal', 'payment_failed', 'schedule_deleted', 'admin'];
+    public const SOURCES = ['app', 'portal', 'payment_failed', 'payment_disputed', 'schedule_deleted', 'admin', 'transfer'];
+
+    /**
+     * Sources we record ourselves, knowing exactly what happened. The webhook can only guess
+     * 'portal' for a cancel it did not see start, and each of these runs Stripe first and writes
+     * its row after, so the webhook often lands first. One of these replaces that guess.
+     */
+    public const KNOWN_SOURCES = ['app', 'schedule_deleted', 'admin', 'transfer'];
+
+    /** Not churn: the schedule changed hands, and its new owner may subscribe again. */
+    public const NOT_CHURN_SOURCES = ['transfer'];
 
     protected $fillable = [
         'role_id', 'user_id', 'stripe_subscription_id', 'source', 'reason', 'comment',
@@ -71,10 +81,15 @@ class SubscriptionCancellation extends Model
             ->first();
 
         if ($open) {
-            // The in-app form is where the person actually answered, and the webhook its cancel
-            // triggers can land before this request writes its row, so 'app' wins the source.
-            if (($attributes['source'] ?? null) === 'app') {
-                $open->source = 'app';
+            // A source we recorded ourselves replaces the webhook's 'portal' guess: see
+            // KNOWN_SOURCES. The in-app form is also where the person actually answered.
+            if (in_array($attributes['source'] ?? null, self::KNOWN_SOURCES, true) && $open->source === 'portal') {
+                $open->source = $attributes['source'];
+            }
+            foreach (['role_id', 'plan_type', 'plan_term'] as $field) {
+                if ($open->{$field} === null && ! empty($attributes[$field])) {
+                    $open->{$field} = $attributes[$field];
+                }
             }
             foreach (['reason', 'comment', 'user_id'] as $field) {
                 if ($open->{$field} === null && ! empty($attributes[$field])) {

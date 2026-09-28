@@ -296,14 +296,20 @@ class TicketTrialTest extends TestCase
 
         $this->actingAs($owner)->get($planUrl)->assertOk()
             ->assertSee(__('messages.ticket_trial_start', ['days' => 7]))
-            ->assertSee(route('subscription.ticket_trial', ['subdomain' => $role->subdomain]), false);
+            ->assertSee(route('subscription.ticket_trial', ['subdomain' => $role->subdomain]), false)
+            ->assertSee('name="source" value="plan"', false);
 
         $this->from($planUrl)
-            ->post(route('subscription.ticket_trial', ['subdomain' => $role->subdomain]))
+            // What the plan tab's form posts, hidden input included.
+            ->post(route('subscription.ticket_trial', ['subdomain' => $role->subdomain]), ['source' => 'plan'])
             ->assertRedirect($planUrl)
             ->assertSessionHas('message', __('messages.ticket_trial_started', ['days' => 7]));
 
         $this->assertTrue($role->fresh()->onTicketTrial());
+
+        // Where it was started, for the export: the plan tab, not the editor's paywall.
+        $trials = app(\App\Services\GrowthExportService::class)->build(now()->subDays(30), now(), now()->subDays(60), now()->subDays(31))['monetization']['ticket_trials'];
+        $this->assertSame(['plan' => 1], $trials['started_from']);
     }
 
     /** The dashboard to-do "these paid tickets cannot be sold" is false while the trial runs. */

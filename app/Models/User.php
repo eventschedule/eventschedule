@@ -157,6 +157,14 @@ class User extends Authenticatable implements MustVerifyEmail
                 $user->phone_verified_at = null;
             }
         });
+
+        // A cancellation comment is free text someone wrote about leaving. It outlives the
+        // account otherwise (subscription_cancellations.user_id has no foreign key, so the row
+        // stays for the churn count), so the words go with the person. The row and its reason
+        // are kept: they are counts, not personal data.
+        static::deleted(function ($user) {
+            SubscriptionCancellation::where('user_id', $user->id)->update(['comment' => null]);
+        });
     }
 
     public function sendEmailVerificationNotification()

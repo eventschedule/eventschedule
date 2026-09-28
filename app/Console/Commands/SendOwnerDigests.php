@@ -64,7 +64,8 @@ class SendOwnerDigests extends Command
 
         $apply = (bool) $this->option('apply');
         $ignoreLocalTime = (bool) $this->option('now');
-        $since = now()->subDays(7);
+        // Seven calendar days including today: today and the six before it.
+        $since = now()->subDays(6)->startOfDay();
         $batch = max(1, (int) config('usage.owner_digest_batch', 500));
 
         $owners = $this->candidateRoles()->groupBy('user_id');
@@ -199,6 +200,8 @@ class SendOwnerDigests extends Command
 
         // Sales on events this schedule created: the money is the creator's. One row per order -
         // individual-ticket group rows point at their primary through group_id.
+        // Counted by ORDER: a multi-event checkout writes one primary row per event (sharing
+        // order_id), and three events in one cart is one order, not three.
         $sales = fn () => DB::table('sales')
             ->join('events', 'events.id', '=', 'sales.event_id')
             ->where('events.creator_role_id', $role->id)
@@ -207,8 +210,9 @@ class SendOwnerDigests extends Command
             ->where(fn ($q) => $q->whereNull('sales.group_id')->orWhereColumn('sales.group_id', 'sales.id'))
             ->where('sales.created_at', '>=', $since);
 
-        $tickets = $sales()->whereNotIn('sales.payment_method', ['rsvp', 'import'])->count();
-        $rsvps = $sales()->where('sales.payment_method', 'rsvp')->count();
+        $orders = 'COUNT(DISTINCT COALESCE(sales.order_id, sales.id)) as n';
+        $tickets = (int) $sales()->whereNotIn('sales.payment_method', ['rsvp', 'import'])->selectRaw($orders)->value('n');
+        $rsvps = (int) $sales()->where('sales.payment_method', 'rsvp')->selectRaw($orders)->value('n');
 
         $upcoming = $this->upcoming($role, $locale);
 
@@ -243,6 +247,11 @@ class SendOwnerDigests extends Command
             ->where('events.is_cancelled', false)
             ->wherePivot('is_accepted', true)
             ->hasUpcomingOccurrence()
+            // Ordered before the limit, or a venue with a season of dates synced ahead gets 50
+            // arbitrary ones and can miss this week's. Series first (their starts_at is an anchor
+            // in the past), then one-off dates soonest first.
+            ->orderByRaw('events.days_of_week IS NULL')
+            ->orderBy('events.starts_at')
             ->with('creatorRole')
             ->limit(50)
             ->get();
@@ -252,7 +261,8 @@ class SendOwnerDigests extends Command
         foreach ($events as $event) {
             /** @var Event $event */
             $today = Carbon::parse($event->scheduleToday())->startOfDay();
-            $last = $today->copy()->addDays(7);
+            // Seven days including today.
+            $last = $today->copy()->addDays(6);
 
             foreach ($event->adminOccurrenceDates(0, 7, 14) as $date) {
                 $day = Carbon::parse($date);

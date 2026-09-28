@@ -94,8 +94,11 @@ class SubscriptionController extends Controller
             return $respond(false, 'messages.ticket_trial_unavailable', 422);
         }
 
+        // Where it was started, allow-listed: the event editor's paywall or the plan tab.
+        $source = in_array($request->input('source'), ['tickets', 'plan'], true) ? $request->input('source') : 'tickets';
+
         AuditService::log(AuditService::TICKET_TRIAL_START, auth()->id(), 'Role', $role->id,
-            null, ['source' => 'tickets'], $role->subdomain);
+            null, ['source' => $source], $role->subdomain);
 
         return $respond(true, 'messages.ticket_trial_started');
     }

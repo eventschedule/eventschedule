@@ -482,7 +482,10 @@ class GrowthExportService
                 .'was opened from that paywall.',
             'churn counts subscription_cancellations, which began on 2026-09-28: cancellations before '
                 .'that have no row. Comments are deliberately left out of this export (free text). '
-                .'source is app (the plan tab form), portal (Stripe), payment_failed, schedule_deleted or admin.',
+                .'source is app (the plan tab form), portal (the Stripe portal OR dashboard, which Stripe '
+                .'does not tell apart), payment_failed, payment_disputed, schedule_deleted or admin. Transfers '
+                .'(a schedule changing hands) are counted in churn.transferred, not churn.cancelled. '
+                .'nudges and owner_digests totals shrink when a schedule or user is deleted (cascade).',
             'monetization.ticket_trials counts the card-free paid-selling trial, which is not a plan: '
                 .'those schedules stay "free" in plan_counts. converted means a real subscription created '
                 .'after the trial started and within 14 days of its end; sold_during means a paid sale '
@@ -1296,10 +1299,14 @@ class GrowthExportService
     {
         $rows = DB::table('subscription_cancellations');
 
-        $churned = (clone $rows)->whereNull('resumed_at');
+        // A transfer cancels the old owner's subscription, but the schedule changed hands rather
+        // than left, so it is counted apart.
+        $churned = (clone $rows)->whereNull('resumed_at')
+            ->whereNotIn('source', \App\Models\SubscriptionCancellation::NOT_CHURN_SOURCES);
 
         return [
             'cancelled' => (clone $churned)->count(),
+            'transferred' => (clone $rows)->whereIn('source', \App\Models\SubscriptionCancellation::NOT_CHURN_SOURCES)->count(),
             'resumed' => (clone $rows)->whereNotNull('resumed_at')->count(),
             'with_reason' => (clone $churned)->whereNotNull('reason')->count(),
             'by_reason' => (clone $churned)->selectRaw("COALESCE(reason, 'none') as k, COUNT(*) as c")
@@ -1335,7 +1342,14 @@ class GrowthExportService
             ->groupBy('model_id')
             ->pluck('started_at', 'model_id');
 
-        $counts = ['started' => 0, 'running' => 0, 'sold_during' => 0, 'converted' => 0, 'expired_unconverted' => 0];
+        $counts = ['started' => 0, 'running' => 0, 'sold_during' => 0, 'converted' => 0, 'expired_unconverted' => 0,
+            'started_from' => []];
+
+        // Where each was started (the editor's paywall or the plan tab), from the same audit rows.
+        foreach (DB::table('audit_logs')->where('action', AuditService::TICKET_TRIAL_START)->pluck('new_values') as $values) {
+            $from = json_decode((string) $values, true)['source'] ?? 'unknown';
+            $counts['started_from'][$from] = ($counts['started_from'][$from] ?? 0) + 1;
+        }
 
         foreach ($roles as $role) {
             $ends = $role->ticket_trial_ends_at;

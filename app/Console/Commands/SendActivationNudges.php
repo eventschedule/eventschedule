@@ -70,6 +70,14 @@ class SendActivationNudges extends Command
     /** No activation email this soon after the owner's weekly digest, which already covers it. */
     private const DIGEST_QUIET_DAYS = 2;
 
+    /**
+     * How many candidates each trigger fetches. Deliberately larger than the send budget: the
+     * owner's local-morning gate and no_gateway's gateway check run after the fetch, so fetching
+     * only as many as can be sent let owners outside their morning (lowest ids first) hide the
+     * ones inside it.
+     */
+    private const CANDIDATE_LIMIT = 1000;
+
     /** Ceiling on one run, so a backlog drains over several passes instead of in one burst. */
     private function batch(): int
     {
@@ -111,7 +119,7 @@ class SendActivationNudges extends Command
                 continue;
             }
 
-            foreach ($resolver($budget) as $role) {
+            foreach ($resolver(self::CANDIDATE_LIMIT) as $role) {
                 if ($budget <= 0) {
                     break;
                 }
@@ -121,10 +129,8 @@ class SendActivationNudges extends Command
                 }
 
                 // Hourly runs, local-morning sends (OwnerLocalTime). Not claimed when outside the
-                // window, so a later run in the owner's morning picks it up. Candidates are fetched
-                // limit($budget) at a time by id and this filter runs after, so above ~200 due
-                // schedules the later ones wait for earlier ones to be claimed - far above today's
-                // volume (about 150 candidates on 2026-09-28).
+                // window, so a later run in the owner's morning picks it up. This filter runs after
+                // the fetch, which is why the fetch is CANDIDATE_LIMIT and not the send budget.
                 //
                 // Never on the owner's local Monday either: that is the weekly digest's morning,
                 // and this command runs first in the same hourly tick, so DIGEST_QUIET_DAYS (which

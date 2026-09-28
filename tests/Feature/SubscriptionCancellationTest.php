@@ -267,6 +267,97 @@ class SubscriptionCancellationTest extends TestCase
         $this->assertSame($stripeId, $row->stripe_subscription_id);
     }
 
+    /** A schedule changing hands cancels the old owner's plan, but nobody left. */
+    public function test_a_transfer_is_recorded_as_a_transfer_and_kept_out_of_churn(): void
+    {
+        [, $role, $stripeId] = $this->subscriber();
+
+        $service = app(\App\Services\ScheduleTransferService::class);
+        $cancel = new \ReflectionMethod($service, 'cancelSubscription');
+        $cancel->setAccessible(true);
+        $this->assertTrue($cancel->invoke($service, $role->fresh()));
+
+        // The webhook that cancel triggers must not relabel it.
+        $this->webhook('customer.subscription.updated', [
+            'id' => $stripeId, 'customer' => $role->stripe_id, 'status' => 'active',
+            'cancel_at_period_end' => true, 'current_period_end' => now()->addDays(20)->timestamp,
+            'items' => $this->items(),
+        ], ['cancel_at_period_end' => false]);
+
+        $this->assertSame('transfer', SubscriptionCancellation::sole()->source);
+
+        $churn = app(GrowthExportService::class)->build(now()->subDays(30), now(), now()->subDays(60), now()->subDays(31))['churn'];
+        $this->assertSame(0, $churn['cancelled']);
+        $this->assertSame(1, $churn['transferred']);
+    }
+
+    /** Stripe first, row second: when the webhook lands in between, the known source still wins. */
+    public function test_a_schedule_deletion_replaces_the_webhooks_portal_guess(): void
+    {
+        [, $role, $stripeId] = $this->subscriber();
+
+        $this->webhook('customer.subscription.deleted', [
+            'id' => $stripeId, 'customer' => $role->stripe_id, 'status' => 'canceled',
+            'cancellation_details' => ['reason' => 'cancellation_requested'],
+        ]);
+        $this->assertSame('portal', SubscriptionCancellation::sole()->source);
+
+        SubscriptionCancellation::record(['role_id' => $role->id, 'stripe_subscription_id' => $stripeId, 'source' => 'schedule_deleted']);
+
+        $this->assertSame('schedule_deleted', SubscriptionCancellation::sole()->source);
+    }
+
+    /** A schedule already gone is still named, from the local subscription row. */
+    public function test_the_deleted_webhook_names_a_schedule_that_is_already_gone(): void
+    {
+        [, $role, $stripeId] = $this->subscriber();
+        $customer = $role->stripe_id;
+        DB::table('roles')->where('id', $role->id)->delete();
+
+        $this->webhook('customer.subscription.deleted', [
+            'id' => $stripeId, 'customer' => $customer, 'status' => 'canceled',
+            'cancellation_details' => ['reason' => 'cancellation_requested'],
+        ]);
+
+        $this->assertSame($role->id, SubscriptionCancellation::sole()->role_id);
+    }
+
+    public function test_a_disputed_payment_is_its_own_source(): void
+    {
+        [, $role, $stripeId] = $this->subscriber();
+
+        $this->webhook('customer.subscription.deleted', [
+            'id' => $stripeId, 'customer' => $role->stripe_id, 'status' => 'canceled',
+            'cancellation_details' => ['reason' => 'payment_disputed'],
+        ]);
+
+        $this->assertSame('payment_disputed', SubscriptionCancellation::sole()->source);
+    }
+
+    /** A subscription that never started is not churn when its schedule is deleted. */
+    public function test_deleting_a_schedule_with_a_never_paid_subscription_records_nothing(): void
+    {
+        [, $role] = $this->subscriber();
+        DB::table('subscriptions')->where('role_id', $role->id)->update(['stripe_status' => 'incomplete']);
+
+        $role->fresh()->cancelBillingForDeletion();
+
+        $this->assertSame(0, SubscriptionCancellation::count());
+    }
+
+    /** The words someone wrote about leaving go with their account; the count stays. */
+    public function test_deleting_the_account_clears_the_comment_but_keeps_the_row(): void
+    {
+        [$owner, $role] = $this->subscriber();
+        $this->cancelInApp($owner, $role, ['reason' => 'too_expensive', 'comment' => 'my own words']);
+
+        $owner->fresh()->delete();
+
+        $row = SubscriptionCancellation::sole();
+        $this->assertNull($row->comment);
+        $this->assertSame('too_expensive', $row->reason);
+    }
+
     public function test_the_plan_tab_asks_why(): void
     {
         [$owner, $role] = $this->subscriber();

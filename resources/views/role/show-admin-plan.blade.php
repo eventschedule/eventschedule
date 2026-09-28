@@ -286,6 +286,7 @@
             <div>
                 <form action="{{ route('subscription.ticket_trial', ['subdomain' => $role->subdomain]) }}" method="POST" class="inline">
                     @csrf
+                    <input type="hidden" name="source" value="plan">
                     <button type="submit" class="ap-secondary-btn inline-flex items-center justify-center px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-lg font-semibold text-base text-gray-900 dark:text-gray-100 transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-[var(--brand-blue)] focus:ring-offset-2 dark:focus:ring-offset-gray-800">
                         {{ __('messages.ticket_trial_start', ['days' => (int) config('app.trial_days', 7)]) }}
                     </button>

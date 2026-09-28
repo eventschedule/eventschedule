@@ -6031,7 +6031,7 @@
             'Accept': 'application/json',
             'X-CSRF-TOKEN': @json(csrf_token()),
           },
-          body: '{}',
+          body: JSON.stringify({ source: 'tickets' }),
         })
           .then(response => response.json().then(data => ({ ok: response.ok && data.ok, data })))
           .then(({ ok, data }) => {

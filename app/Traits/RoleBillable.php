@@ -267,6 +267,9 @@ trait RoleBillable
         $cancelled = 0;
 
         foreach ($this->liveBillingSubscriptions()->get() as $subscription) {
+            // Read before cancelling: cancelNow() overwrites stripe_status with 'canceled'.
+            $everStarted = ! in_array($subscription->stripe_status, ['incomplete', 'incomplete_expired'], true);
+
             // cancelNow(), not cancel(): cancel() only stops the NEXT renewal, leaving the
             // subscription open until period end on a schedule that no longer exists.
             try {
@@ -291,15 +294,19 @@ trait RoleBillable
 
             $cancelled++;
 
-            // Counted as churn with no reason: nobody was asked, the schedule is going.
-            \App\Models\SubscriptionCancellation::record([
-                'role_id' => $this->id,
-                'user_id' => $actorUserId,
-                'stripe_subscription_id' => $subscription->stripe_id,
-                'source' => 'schedule_deleted',
-                'plan_type' => $this->plan_type,
-                'plan_term' => $this->plan_term,
-            ]);
+            // Counted as churn with no reason: nobody was asked, the schedule is going. Not for a
+            // subscription that never started (a declined card, an abandoned 3DS): nobody paid, so
+            // nobody left.
+            if ($everStarted) {
+                \App\Models\SubscriptionCancellation::record([
+                    'role_id' => $this->id,
+                    'user_id' => $actorUserId,
+                    'stripe_subscription_id' => $subscription->stripe_id,
+                    'source' => 'schedule_deleted',
+                    'plan_type' => $this->plan_type,
+                    'plan_term' => $this->plan_term,
+                ]);
+            }
 
             \App\Services\AuditService::log(
                 \App\Services\AuditService::SUBSCRIPTION_CANCEL,

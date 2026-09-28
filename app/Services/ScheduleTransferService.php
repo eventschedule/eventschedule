@@ -520,6 +520,17 @@ class ScheduleTransferService
 
         $subscription->cancel();
 
+        // Recorded as a handoff, not churn: without this the webhook the cancel triggers filed it
+        // as a customer cancelling in the Stripe portal.
+        \App\Models\SubscriptionCancellation::record([
+            'role_id' => $role->id,
+            'user_id' => $role->user_id,
+            'stripe_subscription_id' => $subscription->stripe_id,
+            'source' => 'transfer',
+            'plan_type' => $role->plan_type,
+            'plan_term' => $role->plan_term,
+        ]);
+
         return true;
     }
 

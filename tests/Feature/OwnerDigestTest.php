@@ -244,6 +244,35 @@ class OwnerDigestTest extends TestCase
     }
 
     /** Scheduled on both rails, sending, and never with --now: the local window is the point. */
+    /** Three events in one cart is one order, not three. */
+    public function test_a_multi_event_order_counts_once(): void
+    {
+        $role = $this->createRole($this->owner());
+        $first = $this->createEvent($role, ['starts_at' => now()->addDays(2)->format('Y-m-d H:i:s'), 'creator_role_id' => $role->id]);
+        $second = $this->createEvent($role, ['starts_at' => now()->addDays(3)->format('Y-m-d H:i:s'), 'creator_role_id' => $role->id]);
+        $a = $this->createSale($first, $role, ['payment_amount' => 10], $this->createTicket($first, ['price' => 10]));
+        $b = $this->createSale($second, $role, ['payment_amount' => 10], $this->createTicket($second, ['price' => 10]));
+        DB::table('sales')->whereIn('id', [$a->id, $b->id])->update(['order_id' => $a->id]);
+
+        $this->run_();
+
+        $this->assertSame(1, $this->digests()[0]['mailable']->sections[0]['tickets']);
+    }
+
+    /** Ordered before the 50-event limit, so a season synced ahead cannot crowd out this week. */
+    public function test_this_weeks_date_survives_a_season_of_later_ones(): void
+    {
+        $role = $this->createRole($this->owner());
+        foreach (range(1, 55) as $i) {
+            $this->createEvent($role, ['name' => "Later {$i}", 'starts_at' => now()->addDays(30 + $i)->format('Y-m-d H:i:s'), 'creator_role_id' => $role->id]);
+        }
+        $this->createEvent($role, ['name' => 'This Week', 'starts_at' => now()->addDays(2)->setTime(19, 0)->format('Y-m-d H:i:s'), 'creator_role_id' => $role->id]);
+
+        $this->run_();
+
+        $this->assertSame('This Week', $this->digests()[0]['mailable']->sections[0]['upcoming'][0]['name']);
+    }
+
     public function test_the_command_is_scheduled_on_both_rails_without_now(): void
     {
         foreach (['routes/console.php', 'app/Http/Controllers/AppController.php'] as $file) {

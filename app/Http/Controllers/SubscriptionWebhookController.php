@@ -39,7 +39,10 @@ class SubscriptionWebhookController extends WebhookController
         // Churn record. After an in-app or portal cancel the row already exists and this only
         // fills gaps; what is new here is the subscription that ended with no cancel first - an
         // immediate cancel in the Stripe dashboard or portal, or payments that failed for good.
-        $this->recordCancellation($payload['data']['object'], $role);
+        // A schedule already deleted has no Role to find by customer, so the local subscription
+        // row, which carries role_id, names it instead.
+        $this->recordCancellation($payload['data']['object'], $role,
+            \Laravel\Cashier\Subscription::where('stripe_id', $payload['data']['object']['id'])->value('role_id'));
 
         if ($role) {
             // Downgrade to free plan when subscription is deleted
@@ -227,16 +230,24 @@ class SubscriptionWebhookController extends WebhookController
      * cancellation_details carries what the portal asked (feedback, comment) and why it ended
      * (reason: cancellation_requested, payment_failed, payment_disputed).
      */
-    private function recordCancellation(array $subscription, ?Role $role): void
+    private function recordCancellation(array $subscription, ?Role $role, ?int $roleId = null): void
     {
         $details = $subscription['cancellation_details'] ?? [];
         $feedback = $details['feedback'] ?? null;
 
+        // 'portal' is Stripe's cancellation_requested, which is also what a cancel made in the
+        // Stripe DASHBOARD reports; Stripe does not tell the two apart.
+        $source = match ($details['reason'] ?? null) {
+            'payment_failed' => 'payment_failed',
+            'payment_disputed' => 'payment_disputed',
+            default => 'portal',
+        };
+
         SubscriptionCancellation::record([
-            'role_id' => $role?->id,
+            'role_id' => $role?->id ?? $roleId,
             'user_id' => $role?->user_id,
             'stripe_subscription_id' => $subscription['id'] ?? null,
-            'source' => ($details['reason'] ?? null) === 'payment_failed' ? 'payment_failed' : 'portal',
+            'source' => $source,
             'reason' => $feedback ? (SubscriptionCancellation::STRIPE_FEEDBACK[$feedback] ?? 'other') : null,
             'comment' => isset($details['comment']) ? mb_substr((string) $details['comment'], 0, 1000) : null,
             'plan_type' => $role?->plan_type,
