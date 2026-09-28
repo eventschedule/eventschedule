@@ -35,10 +35,15 @@
 @else
     {{-- Only offered once a decision has been made. On a pending row this link leads to the GUEST
          manage page, where "Cancel appointment" fires guest-cancellation emails - not something to
-         put in front of an owner who is still deciding. --}}
-    <a href="{{ route('appointments.manage', ['event_id' => $eventHash, 'secret' => $s->secret]) }}"
-       target="_blank" rel="noopener"
-       class="text-xs text-[var(--brand-blue)] hover:underline me-3">{{ __('messages.preview') }}</a>
+         put in front of an owner who is still deciding.
+         Never to a viewer, who reaches this branch for every row: the link carries the guest's
+         secret, which alone lets its holder cancel, reschedule or pay as the guest - the very
+         actions this partial withholds from viewers everywhere else. --}}
+    @if (! $isViewer)
+        <a href="{{ route('appointments.manage', ['event_id' => $eventHash, 'secret' => $s->secret]) }}"
+           target="_blank" rel="noopener"
+           class="text-xs text-[var(--brand-blue)] hover:underline me-3">{{ __('messages.preview') }}</a>
+    @endif
     {{-- Preview and Reschedule are both "look at / change this booking"; Cancel is destructive and stays
          last. Deliberately absent from the pending branch above: that row asks one clear question. --}}
     @if (! $isViewer && $row['rescheduleBlocked'] === null)
