@@ -1,5 +1,5 @@
 <title>Booked Solid</title>
-<meta name="description" content="Event Schedule: a 30-second motion showreel.">
+<meta name="description" content="Event Schedule: a 33-second motion showreel.">
 <style>
 @font-face{font-family:"InterV";src:url("InterVariable.woff2") format("woff2");font-weight:100 900;font-display:block}
 :root{
@@ -168,8 +168,8 @@ canvas.full{position:absolute;left:0;top:0;width:1920px;height:1080px;pointer-ev
 
   <div id="bar" role="group" aria-label="Player controls">
     <button id="play" aria-label="Pause"><svg viewBox="0 0 24 24" fill="currentColor" id="playIco"></svg></button>
-    <input id="scrub" type="range" min="0" max="30" step="0.001" value="0" aria-label="Seek">
-    <span id="tc">00.0 / 30.0</span>
+    <input id="scrub" type="range" min="0" max="33" step="0.001" value="0" aria-label="Seek">
+    <span id="tc">00.0 / 33.0</span>
     <button id="loop" aria-label="Loop" aria-pressed="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 2l4 4-4 4"/><path d="M3 11v-1a4 4 0 0 1 4-4h14"/><path d="M7 22l-4-4 4-4"/><path d="M21 13v1a4 4 0 0 1-4 4H3"/></svg></button>
   </div>
 </div>
@@ -177,7 +177,7 @@ canvas.full{position:absolute;left:0;top:0;width:1920px;height:1080px;pointer-ev
 <script>
 (() => {
 'use strict';
-const W = 1920, H = 1080, DUR = 30;
+const W = 1920, H = 1080, DUR = 33;
 const Q = new URLSearchParams(location.search);
 const RENDER = Q.has('render');
 
@@ -287,8 +287,8 @@ const gridCanvas = (() => {
 // Atmosphere intensity keyframes: [t, aurora, grid, rays]
 const BGK = [
   [0, 0, 0, 0], [1.4, .15, .25, 0], [2.4, .35, .7, 0], [5.4, .35, .6, 0], [6.3, .95, .35, .55], [7.9, .95, .35, .55],
-  [8.4, .45, .55, .08], [12.3, .45, .55, .08], [12.8, .55, .4, .15], [16.4, .45, .4, .1], [21.2, .45, .3, 0],
-  [22.6, .85, .2, .4], [25.0, .85, .2, .4], [25.5, .08, .1, 0], [26.6, .35, .15, .1], [27.6, 1, .35, .85], [30, 1, .35, .85],
+  [8.4, .45, .55, .08], [12.3, .45, .55, .08], [12.8, .55, .4, .15], [16.4, .45, .4, .1], [24.2, .45, .3, 0],
+  [25.6, .85, .2, .4], [28.0, .85, .2, .4], [28.5, .08, .1, 0], [29.6, .35, .15, .1], [30.6, 1, .35, .85], [33, 1, .35, .85],
 ];
 function bgAt(t) {
   let i = 0; while (i < BGK.length - 2 && t > BGK[i + 1][0]) i++;
@@ -332,7 +332,7 @@ function drawBG(t) {
 }
 function drawGrain(t) { grc.putImageData(grainFrames[Math.floor(t * 30) % 4], 0, 0); }
 
-const FLASHES = [[1.5, .13], [6.45, .08], [14.42, .07], [25.72, .2], [26.28, .1]];
+const FLASHES = [[1.5, .13], [6.45, .08], [14.42, .07], [28.72, .2], [29.28, .1]];
 function flashAt(t) { let v = 0; for (const [a, s] of FLASHES) if (t >= a) v += s * Math.exp(-(t - a) / .1); return Math.min(1, v); }
 
 // fg helpers
@@ -868,7 +868,7 @@ const FEATS = [
   { w: 'Boost', v: 1, g: 'boost' }, { w: 'Event Graphics', v: 0, g: 'flyers' }, { w: 'Reserved Seating', v: 1, g: 'seats' },
   { w: 'Sub-schedules', v: 2, g: 'split' }, { w: 'Embeds', v: 0, g: 'embed' }, { w: 'Custom Domains', v: 1, g: 'domain' }, { w: 'Gift Cards', v: 2, g: 'gift' },
 ];
-const FDUR = [.5, .5, .5, .5, .45, .45, .4, .4, .4, .4];
+const FDUR = FEATS.map(() => .75); // 1.5 beats each at 120 BPM
 const FT = []; { let s = 16.5; FDUR.forEach(d => { FT.push(s); s += d; }); }
 const BLUE_BG = new Set([1, 4, 8]);
 const hudL = mk('div', 'hud', feat, 'EVERYTHING ELSE'); hudL.style.cssText += 'left:96px;top:70px';
@@ -913,7 +913,7 @@ function glyphAnim(G, kind, lt) {
     const d = E.inOutCubic(clamp(lt / .2)); const tr = `translate(0 ${-60 + 100 * d})`;
     paper.setAttribute('transform', tr); pls.forEach(p => p.setAttribute('transform', tr));
     const f = E.outBack(clamp((lt - .18) / .16)); flap.setAttribute('transform', `translate(0 190) scale(1 ${lerp(-1, 1, f)}) translate(0 -190)`);
-    const go = E.inExpo(clamp((lt - .36) / .14)); svg.style.transform = `translate(${go * 700}px,${-go * 260}px) rotate(${go * -14}deg)`;
+    const go = E.inExpo(clamp((lt - .56) / .17)); svg.style.transform = `translate(${go * 700}px,${-go * 260}px) rotate(${go * -14}deg)`;
   } else if (kind === 'bars') {
     const H = [.35, .55, .45, .7, .62, .85, 1];
     qa('.bar').forEach((b, i) => { const s = spring(lt - i * .03, 2.4, .5); const h = 280 * H[i] * s; b.setAttribute('y', 400 - h); b.setAttribute('height', Math.max(0, h)); });
@@ -955,8 +955,9 @@ function updateFeat(t) {
   hudR.textContent = `${String(i + 1).padStart(2, '0')} / ${FEATS.length}`;
   prog.style.background = cur.blue ? 'rgba(11,18,32,.18)' : 'rgba(255,255,255,.14)';
   progI.style.background = ink;
-  progI.style.transform = `scaleX(${range(t, 16.5, 21)})`;
+  progI.style.transform = `scaleX(${range(t, 16.5, 24)})`;
   fitems.forEach(f => vis(f.it, f === cur));
+  cur.it.style.transform = `scale(${1 + .035 * E.outCubic(clamp(lt / FDUR[i]))})`; // slow push through the hold
   const w = cur.w; w.style.color = ink;
   const q = clamp(lt / .3);
   const anchor = cur.f.v === 2 ? 'translate(-50%,-50%)' : 'translate(0,-50%)';
@@ -976,36 +977,36 @@ const m6chars = [];
   m6text._l2 = fv; m6text._l3 = l3;
 }
 function wallCam(t) {
-  if (t < 21) return { x: 0, y: 0, z: 5, r: 0 };
-  const p = E.snap(range(t, 20.95, 22.3));
-  let z = Math.exp(lerp(Math.log(5), Math.log(1.02), p)) * (1 - .08 * range(t, 22.5, 25));
-  let r = lerp(0, -9, p) - 1.2 * range(t, 22.5, 25);
-  const im = E.inExpo(range(t, 25.0, 25.52));
-  z *= Math.max(.0005, 1 - im); r += 120 * E.inCubic(range(t, 25.0, 25.52));
+  if (t < 24) return { x: 0, y: 0, z: 5, r: 0 };
+  const p = E.snap(range(t, 23.95, 25.3));
+  let z = Math.exp(lerp(Math.log(5), Math.log(1.02), p)) * (1 - .08 * range(t, 25.5, 28));
+  let r = lerp(0, -9, p) - 1.2 * range(t, 25.5, 28);
+  const im = E.inExpo(range(t, 28, 28.52));
+  z *= Math.max(.0005, 1 - im); r += 120 * E.inCubic(range(t, 28, 28.52));
   return { x: lerp(0, 60, p), y: lerp(0, -40, p), z, r };
 }
-const drift = (c, t) => c === 0 ? 0 : (c % 2 ? 1 : -1) * Math.max(0, t - 21) * (40 + Math.abs(c) * 6);
+const drift = (c, t) => c === 0 ? 0 : (c % 2 ? 1 : -1) * Math.max(0, t - 24) * (40 + Math.abs(c) * 6);
 function updateM6(t) {
   m6.style.clipPath = t < 16.6 ? bandClip(1300 * E.outExpo(range(t, 16.08, 16.6))) : '';
   const c = wallCam(t);
   wall.style.transform = `translate(960px,540px) rotate(${c.r}deg) scale(${c.z}) translate(${-c.x}px,${-c.y}px)`;
-  const tilesOn = t >= 21;
+  const tilesOn = t >= 24;
   tiles.forEach(o => {
     vis(o.e, tilesOn); if (!tilesOn) return;
     o.e.style.transform = `translate(${o.c * (TW + TGX) - TW / 2}px,${o.r * (TH + TGY) - TH / 2 + drift(o.c, t)}px)`;
   });
-  featTile.style.borderRadius = (t < 21 ? 0 : 12 * range(t, 21, 21.4)) + 'px';
+  featTile.style.borderRadius = (t < 24 ? 0 : 12 * range(t, 24, 24.4)) + 'px';
   updateFeat(t);
-  const dk = E.outCubic(range(t, 21.8, 22.35)) * (1 - range(t, 25.1, 25.5));
+  const dk = E.outCubic(range(t, 24.8, 25.35)) * (1 - range(t, 28.1, 28.5));
   m6dark.style.opacity = dk;
   // headline over the wall
-  const im = E.inExpo(range(t, 25.0, 25.45));
+  const im = E.inExpo(range(t, 28, 28.45));
   m6text.style.transform = `translate(960px,540px) scale(${1 - im}) rotate(${im * 40}deg) translate(-960px,-540px)`;
-  m6text.style.opacity = 1 - range(t, 25.3, 25.45);
-  m6chars.forEach((e, j) => { const p = E.rise(range(t, 22.15 + j * .022, 22.7 + j * .022)); e.style.transform = `translateY(${(1 - p) * 80}px)`; e.style.opacity = clamp(p * 2); });
-  const f = range(t, 23.05, 23.4); m6text._l2.style.transform = `scale(${lerp(1.3, 1, E.outExpo(f))})`; m6text._l2.style.opacity = clamp(f * 3);
-  m6text._l2.style.backgroundPosition = `${lerp(100, 0, E.outCubic(range(t, 23.05, 24.2)))}% 0`;
-  const s3 = E.rise(range(t, 23.65, 24.2)); m6text._l3.style.opacity = s3; m6text._l3.style.transform = `translateY(${(1 - s3) * 24}px)`;
+  m6text.style.opacity = 1 - range(t, 28.3, 28.45);
+  m6chars.forEach((e, j) => { const p = E.rise(range(t, 25.15 + j * .022, 25.7 + j * .022)); e.style.transform = `translateY(${(1 - p) * 80}px)`; e.style.opacity = clamp(p * 2); });
+  const f = range(t, 26.05, 26.4); m6text._l2.style.transform = `scale(${lerp(1.3, 1, E.outExpo(f))})`; m6text._l2.style.opacity = clamp(f * 3);
+  m6text._l2.style.backgroundPosition = `${lerp(100, 0, E.outCubic(range(t, 26.05, 27.2)))}% 0`;
+  const s3 = E.rise(range(t, 26.65, 27.2)); m6text._l3.style.opacity = s3; m6text._l3.style.transform = `translateY(${(1 - s3) * 24}px)`;
 }
 
 /* ================================================================
@@ -1035,51 +1036,51 @@ function measureLock() {
 }
 function updateM7(t) {
   // seed returns, stretches into the cut
-  const sp = E.outBack(range(t, 25.25, 25.55)), so = 1 - range(t, 25.68, 25.78);
-  place(seed2, 960, 540, sp * (1 + .6 * Math.sin(Math.PI * range(t, 25.4, 25.7))), 0, t < 25.25 ? 0 : so);
+  const sp = E.outBack(range(t, 28.25, 28.55)), so = 1 - range(t, 28.68, 28.78);
+  place(seed2, 960, 540, sp * (1 + .6 * Math.sin(Math.PI * range(t, 28.4, 28.7))), 0, t < 28.25 ? 0 : so);
 
   const big = 4.6; // logo units -> px during the meet
-  const s = lerp(big, LOCK.s, E.rise(range(t, 26.95, 27.75)));
+  const s = lerp(big, LOCK.s, E.rise(range(t, 29.95, 30.75)));
   const total = 140 * LOCK.s + LOCK.gap * LOCK.s + lockTextW, left = (W - total) / 2;
   const lockCx = left + 70 * LOCK.s, cy = 470;
-  const pm = E.rise(range(t, 26.95, 27.75));
+  const pm = E.rise(range(t, 29.95, 30.75));
   const cx = lerp(960, lockCx, pm), ccy = lerp(540, cy, pm);
   mark.style.transform = `translate(${cx - 70 * s}px,${ccy - 70 * s}px) scale(${s})`;
-  mark.style.opacity = t >= 25.7 ? 1 : 0;
+  mark.style.opacity = t >= 28.7 ? 1 : 0;
   // E and S slide in along the cut from opposite ends
-  const k = E.outExpo(range(t, 25.74, 26.3)), off = (1 - k) * 420 - 10 * Math.sin(Math.PI * range(t, 26.18, 26.4));
+  const k = E.outExpo(range(t, 28.74, 29.3)), off = (1 - k) * 420 - 10 * Math.sin(Math.PI * range(t, 29.18, 29.4));
   svgE.style.transform = `translate(${-UX * off}px,${-UY * off}px)`;
   svgS.style.transform = `translate(${UX * off}px,${UY * off}px)`;
-  const cp = E.outBack(range(t, 26.2, 26.72));
+  const cp = E.outBack(range(t, 29.2, 29.72));
   markCircle.style.transform = `scale(${clamp(cp, 0, 1.2)})`;
-  markCircle.style.opacity = t < 26.2 ? 0 : 1;
-  const sc = range(t, 26.2, 26.5);
+  markCircle.style.opacity = t < 29.2 ? 0 : 1;
+  const sc = range(t, 29.2, 29.5);
   sPathEl.setAttribute('fill', `rgb(${Math.round(lerp(226, 76, sc))},${Math.round(lerp(232, 85, sc))},${Math.round(lerp(240, 100, sc))})`);
 
   // wordmark
-  const wr = E.rise(range(t, 27.2, 27.95));
+  const wr = E.rise(range(t, 30.2, 30.95));
   wordEl.style.fontSize = (LOCK.font * LOCK.s) + 'px';
   wE.style.fontWeight = LOCK.ew;
-  wS.style.fontWeight = Math.round(lerp(860, LOCK.sw, E.inOutCubic(range(t, 27.5, 28.3))));
+  wS.style.fontWeight = Math.round(lerp(860, LOCK.sw, E.inOutCubic(range(t, 30.5, 31.3))));
   const wx = left + 140 * LOCK.s + LOCK.gap * LOCK.s;
   wordEl.style.transform = `translate(${wx + (1 - wr) * -80}px,${cy}px) translateY(-52%)`;
   wordEl.style.clipPath = `inset(-20% ${100 - wr * 100}% -20% ${-5}%)`;
-  wordEl.style.opacity = t < 27.2 ? 0 : 1;
+  wordEl.style.opacity = t < 30.2 ? 0 : 1;
 
-  const c = E.rise(range(t, 28.1, 28.75)), c2 = E.rise(range(t, 28.25, 28.9));
+  const c = E.rise(range(t, 31.1, 31.75)), c2 = E.rise(range(t, 31.25, 31.9));
   place(cta, 960, 700 + 40 * (1 - c), 1, 0, c);
   place(site, 960, 800 + 40 * (1 - c2), 1, 0, c2);
-  ctaShine.style.left = lerp(-160, 520, E.inOutCubic(range(t, 29.0, 29.55))) + 'px';
-  const push = 1 + .025 * E.outCubic(range(t, 27.8, 30));
+  ctaShine.style.left = lerp(-160, 520, E.inOutCubic(range(t, 32, 32.55))) + 'px';
+  const push = 1 + .025 * E.outCubic(range(t, 30.8, 33));
   m7in.style.transform = `translate(960px,540px) scale(${push}) translate(-960px,-540px)`;
 }
 function fgM7(g, t) {
-  const p = range(t, 25.62, 25.86);
-  if (p > 0 && t < 26.6) {
-    const L = 1500 * E.outExpo(p), a = 1 - range(t, 26.0, 26.5);
+  const p = range(t, 28.62, 28.86);
+  if (p > 0 && t < 29.6) {
+    const L = 1500 * E.outExpo(p), a = 1 - range(t, 29, 29.5);
     glowLine(g, 960 - UX * L, 540 - UY * L, 960 + UX * L, 540 + UY * L, 3.4, a);
   }
-  const dt = t - 26.2; if (dt > 0 && dt < .9) ring(g, 960, 540, 330 + 700 * E.outCubic(dt / .9), 5 * (1 - dt / .9), .5 * (1 - dt / .9), '200,225,255');
+  const dt = t - 29.2; if (dt > 0 && dt < .9) ring(g, 960, 540, 330 + 700 * E.outCubic(dt / .9), 5 * (1 - dt / .9), .5 * (1 - dt / .9), '200,225,255');
 }
 
 /* ================================================================
@@ -1090,8 +1091,8 @@ const SCENES = [
   { el: m4, a: SL1, b: 12.45, u: updateM4, fg: fgM4 },
   { el: m3, a: 5.5, b: SL1 + .7, u: updateM3 },
   { el: m5, a: 12.4, b: 16.62, u: updateM5, fg: fgM5 },
-  { el: m6, a: 16.0, b: 25.6, u: updateM6 },
-  { el: m7, a: 25.0, b: 30.01, u: updateM7, fg: fgM7 },
+  { el: m6, a: 16.0, b: 28.6, u: updateM6 },
+  { el: m7, a: 28, b: 33.01, u: updateM7, fg: fgM7 },
 ];
 const flashEl = $('#flash');
 function fgCommon(g, t) {
@@ -1126,7 +1127,7 @@ function seek(t) {
 window.seek = seek;
 window.DUR = DUR;
 // Windows fast enough that render.mjs spends extra motion-blur samples on them.
-window.FAST = [[2.4, 5.62], [7.9, 8.5], [12.35, 12.8], [13.2, 14.12], [14.4, 15.25], [16.02, 16.55], [20.95, 22.3], [24.98, 26.35], [26.9, 27.8]];
+window.FAST = [[2.4, 5.62], [7.9, 8.5], [12.35, 12.8], [13.2, 14.12], [14.4, 15.25], [16.02, 16.55], [23.95, 25.3], [27.98, 29.35], [29.9, 30.8]];
 
 /* ---------- player ---------- */
 const frame = $('#frame');

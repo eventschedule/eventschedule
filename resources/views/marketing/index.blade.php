@@ -92,7 +92,6 @@
     <x-slot name="description">{{ __('marketing.home_description') }}</x-slot>
     <x-slot name="breadcrumbTitle">Home</x-slot>
     <x-slot name="headMeta">
-        <link rel="preconnect" href="https://i.ytimg.com">
         @if ($wallPreconnect)
             <link rel="preconnect" href="{{ $wallPreconnect }}">
         @endif
@@ -204,13 +203,6 @@
             filter: blur(46px);
             opacity: 0;
             pointer-events: none;
-        }
-        .es-play-ring {
-            animation: es-play-ping 2.4s cubic-bezier(0, 0, 0.2, 1) infinite;
-        }
-        @keyframes es-play-ping {
-            0% { transform: scale(1); opacity: 0.6; }
-            80%, 100% { transform: scale(1.7); opacity: 0; }
         }
 
 
@@ -376,7 +368,6 @@
             .es-ring-2,
             .es-orbit-logo,
             .es-pulse,
-            .es-play-ring,
             .es-caret {
                 animation: none !important;
             }
@@ -653,25 +644,32 @@
                             </span>
                             <span class="w-14"></span>
                         </div>
-                    <!-- Click-to-play video facade -->
+                    {{-- The showreel loops muted while the frame is on screen (see
+                         initShowreel() in marketing-home.js); clicking anywhere swaps in the
+                         3-minute YouTube overview. Source: resources/promo/showreel. Bump
+                         $showreelV whenever the reel is re-rendered: the files keep their names,
+                         so the query string is the only thing that busts a cached copy. --}}
+                    @php $showreelV = '2026-09-28'; @endphp
                     <div class="relative aspect-video bg-black">
+                        <video data-showreel class="absolute inset-0 h-full w-full object-cover" muted loop playsinline preload="none"
+                               poster="{{ asset('videos/event-schedule-showreel-poster.jpg') }}?v={{ $showreelV }}"
+                               width="1920" height="1080" aria-hidden="true" tabindex="-1">
+                            <source src="{{ asset('videos/event-schedule-showreel.mp4') }}?v={{ $showreelV }}" type="video/mp4">
+                            <source src="{{ asset('videos/event-schedule-showreel.webm') }}?v={{ $showreelV }}" type="video/webm">
+                        </video>
                         <a href="https://www.youtube-nocookie.com/embed/w1JLIvGmIjQ"
                            target="_blank"
                            rel="noopener"
                            data-video-facade
                            data-video-src="https://www.youtube-nocookie.com/embed/w1JLIvGmIjQ"
                            data-video-title="Event Schedule Overview"
-                           class="group absolute inset-0 block"
-                           aria-label="Play the Event Schedule overview video">
-                            <img src="https://i.ytimg.com/vi/w1JLIvGmIjQ/maxresdefault.jpg" alt="Event Schedule overview video" class="h-full w-full object-cover opacity-90 transition-opacity group-hover:opacity-100" loading="lazy" decoding="async" width="1280" height="720">
-                            <span class="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-black/10" aria-hidden="true"></span>
-                            <span class="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2" aria-hidden="true">
-                                <span class="es-play-ring absolute inset-0 rounded-full bg-white/40"></span>
-                                <span class="relative flex h-20 w-20 items-center justify-center rounded-full bg-white/95 shadow-2xl transition-transform group-hover:scale-110">
-                                    <svg aria-hidden="true" class="h-8 w-8 text-gray-900 ltr:ml-1 rtl:mr-1 rtl:rotate-180" fill="currentColor" viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg>
+                           class="group absolute inset-0 block transition-colors duration-200 hover:bg-black/10 focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-inset focus-visible:ring-[#22D3EE]"
+                           aria-label="Play the 3-minute Event Schedule overview video">
+                            <span class="absolute inset-x-0 bottom-0 h-1/3 bg-gradient-to-t from-black/55 to-transparent" aria-hidden="true"></span>
+                            <span class="absolute bottom-4 left-1/2 inline-flex -translate-x-1/2 items-center gap-2.5 whitespace-nowrap rounded-full bg-white/95 py-2 pe-5 ps-2 text-sm font-semibold text-gray-900 shadow-xl shadow-black/30 transition-all duration-200 group-hover:-translate-y-0.5 group-hover:bg-white group-hover:shadow-2xl sm:bottom-6 sm:text-base" aria-hidden="true">
+                                <span class="flex h-8 w-8 items-center justify-center rounded-full bg-gradient-to-br from-[#4E81FA] to-[#0EA5E9] text-white">
+                                    <svg aria-hidden="true" class="h-3.5 w-3.5 ltr:ml-0.5 rtl:mr-0.5 rtl:rotate-180" fill="currentColor" viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg>
                                 </span>
-                            </span>
-                            <span class="absolute bottom-4 left-1/2 -translate-x-1/2 whitespace-nowrap rounded-full bg-black/50 px-4 py-1.5 text-sm font-medium text-white backdrop-blur-sm" aria-hidden="true">
                                 Watch the 3-minute overview
                             </span>
                         </a>

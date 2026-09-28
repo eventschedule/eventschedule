@@ -1,8 +1,10 @@
 # Booked Solid: the Event Schedule showreel
 
-A 30-second motion piece built as one HTML page, so every frame is code: no After Effects project, no
-stock footage, nothing to license. The rendered result is `public/videos/event-schedule-showreel.webm`
-(1920x1080, 60fps, silent) with `public/videos/event-schedule-showreel-poster.jpg` as its poster.
+A 33-second motion piece built as one HTML page, so every frame is code: no After Effects project, no
+stock footage, nothing to license. The rendered result is `public/videos/event-schedule-showreel.mp4`
+and `.webm` (1920x1080, 60fps, 33s, silent) with `public/videos/event-schedule-showreel-poster.jpg` as its
+poster. It plays in the homepage's "See it in action" frame (`resources/views/marketing/index.blade.php`,
+`initShowreel()` in `resources/js/marketing-home.js`).
 
 ## Files
 
@@ -25,12 +27,14 @@ half a second), and the scrubber seeks. URL parameters help when working on one 
 ## Render
 
 Needs Google Chrome, Python 3 with Pillow, and the ffmpeg that Playwright installs
-(`~/Library/Caches/ms-playwright/ffmpeg-1011/ffmpeg-mac`; override with `FFMPEG=` or `CHROME=`).
+(`~/Library/Caches/ms-playwright/ffmpeg-1011/ffmpeg-mac`; override with `FFMPEG=` or `CHROME=`). The MP4
+needs x264, which Playwright's build lacks: `brew install ffmpeg` (or point `FFMPEG_FULL=` at one).
 
 ```bash
 node render.mjs --preview --out=preview.webm        # 960x540, 30fps, no blur, ~2 min
 node render.mjs --final --out=../../../public/videos/event-schedule-showreel.webm \
-                --poster=poster.jpg                  # 1080p60, 8 to 16-sample motion blur, ~6 min
+                --mp4=../../../public/videos/event-schedule-showreel.mp4 \
+                --poster=poster.jpg                  # 1080p60, 8 to 16-sample motion blur, ~8 min
 node render.mjs --stills=6.8,14.5,29.9 --out=stills  # PNG stills
 ```
 
@@ -39,6 +43,11 @@ frame JPEGs behind for inspection. Motion blur is real: each frame averages 8 re
 180-degree shutter, and 16 inside the fast windows the page lists in `window.FAST` (whip pans, slashes,
 the dive, odometer rolls, the pull-back). Fewer samples than that turn a whip into a row of ghosts
 instead of a smear, so add a window there when you add a fast move.
+
+**After re-rendering, bump `$showreelV` in `resources/views/marketing/index.blade.php`.** The files keep
+their names and are cached for a month, so that query string is the only thing that makes returning
+visitors fetch the new cut. Copy the new poster (`--poster`, the last frame) to
+`public/videos/event-schedule-showreel-poster.jpg` too.
 
 ## Cue sheet
 
@@ -62,14 +71,14 @@ The cuts sit on a 120 BPM grid (one beat is 0.5s), so a track at that tempo drop
 | 14.42 | Check-in (impact, camera shake) |
 | 15.35 | "No platform fees." |
 | 16.02 | Slash 2 opens the feature run |
-| 16.50 to 21.00 | Ten feature cuts: 4 at 0.5s, 2 at 0.45s, 4 at 0.4s |
-| 20.95 to 22.30 | Infinite zoom out to the wall of schedules |
-| 23.05 | "Forever." |
-| 25.00 to 25.50 | Wall implodes to a point |
-| 25.62 | Slash 3 |
-| 26.20 | Badge lands |
-| 27.20 | Wordmark reveals |
-| 28.10 to 30.00 | Call to action and hold |
+| 16.50 to 24.00 | Ten feature cuts, 0.75s (1.5 beats) each |
+| 23.95 to 25.30 | Infinite zoom out to the wall of schedules |
+| 26.05 | "Forever." |
+| 28.00 to 28.50 | Wall implodes to a point |
+| 28.62 | Slash 3 |
+| 29.20 | Badge lands |
+| 30.20 | Wordmark reveals |
+| 31.10 to 33.00 | Call to action and hold |
 
 ## Copy rules
 

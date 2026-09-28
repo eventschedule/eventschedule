@@ -535,6 +535,13 @@ function initVideoFacade() {
             return;
         }
         const shell = facade.parentElement;
+        // The showreel loops under the facade; stop it so it is not still
+        // downloading and decoding behind the YouTube player.
+        const reel = shell.querySelector('[data-showreel]');
+        if (reel) {
+            reel.pause();
+            reel.remove();
+        }
         const iframe = document.createElement('iframe');
         iframe.className = 'absolute inset-0 h-full w-full';
         iframe.src = src + (src.indexOf('?') !== -1 ? '&' : '?') + 'autoplay=1';
@@ -545,6 +552,43 @@ function initVideoFacade() {
         facade.remove();
         shell.appendChild(iframe);
     });
+}
+
+/* ------------------------------------------------------------------ */
+/* Showreel                                                            */
+/* ------------------------------------------------------------------ */
+
+// The showreel in the showcase frame. It is preload="none" (14MB that
+// most visitors never scroll to), so play() is what starts the download: only
+// once the frame is on screen, and never for reduced motion or Save-Data,
+// where the poster stands in for it.
+function initShowreel() {
+    const video = document.querySelector('[data-showreel]');
+    const saveData = navigator.connection && navigator.connection.saveData;
+    if (!video || reduceMotion.matches || saveData || !('IntersectionObserver' in window)) {
+        return;
+    }
+    let visible = false;
+    const sync = () => {
+        if (!video.isConnected) {
+            return;
+        }
+        if (visible && !document.hidden) {
+            // Autoplay can still be refused (e.g. iOS Low Power Mode); the
+            // poster is the fallback, so there is nothing to report.
+            video.play().catch(() => {});
+        } else {
+            video.pause();
+        }
+    };
+    const io = new IntersectionObserver((entries) => {
+        entries.forEach((entry) => {
+            visible = entry.isIntersecting;
+        });
+        sync();
+    }, { threshold: 0.35 });
+    io.observe(video);
+    document.addEventListener('visibilitychange', sync);
 }
 
 /* ------------------------------------------------------------------ */
@@ -669,6 +713,7 @@ function init() {
     initOdometers();
     initCounters();
     initVideoFacade();
+    initShowreel();
     initClaim();
     initDotNav();
     initConfetti();

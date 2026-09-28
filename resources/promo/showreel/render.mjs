@@ -7,7 +7,8 @@
 //   node render.mjs --final --out=showreel.webm        1920x1080, 60fps, 4-sample motion blur
 //   node render.mjs --stills=1,6.8,14.5 --out=dir      PNG stills at those times
 //
-// Options: --from=S --to=S (seconds), --workers=N, --scale=F, --fps=N, --samples=N, --keep
+// Options: --from=S --to=S (seconds), --workers=N, --scale=F, --fps=N, --samples=N, --keep,
+//          --mp4=FILE (also write H.264; needs a full ffmpeg on PATH or FFMPEG_FULL), --poster=FILE
 
 import { spawn } from 'node:child_process';
 import fs from 'node:fs';
@@ -19,7 +20,7 @@ const here = path.dirname(fileURLToPath(import.meta.url));
 const A = Object.fromEntries(process.argv.slice(2).map(a => { const [k, v] = a.replace(/^--/, '').split('='); return [k, v ?? true]; }));
 const CHROME = process.env.CHROME || '/Applications/Google Chrome.app/Contents/MacOS/Google Chrome';
 const FFMPEG = process.env.FFMPEG || path.join(os.homedir(), 'Library/Caches/ms-playwright/ffmpeg-1011/ffmpeg-mac');
-const DUR = 30;
+const DUR = +fs.readFileSync(path.join(here, 'showreel.html'), 'utf8').match(/\bDUR = (\d+(?:\.\d+)?)/)[1];
 const preset = A.final ? { scale: 1, fps: 60, samples: 8, fast: 16, bitrate: '3800k' } : { scale: .5, fps: 30, samples: 1, fast: 1, bitrate: '2000k' };
 const scale = +(A.scale ?? preset.scale), fps = +(A.fps ?? preset.fps), samples = +(A.samples ?? preset.samples), fastSamples = +(A['fast-samples'] ?? Math.max(samples, preset.fast));
 const shutter = .5; // 180 degree shutter
@@ -131,16 +132,32 @@ async function video() {
   const files = fs.readdirSync(tmp).filter(f => f.endsWith('.jpg')).sort();
   if (files.length !== f1 - f0) throw new Error(`expected ${f1 - f0} frames, found ${files.length}`);
   const log = path.join(tmp, 'pass');
-  const enc = (pass) => new Promise((res, rej) => {
-    const args = ['-y', '-hide_banner', '-loglevel', 'error', '-f', 'image2pipe', '-framerate', String(fps), '-c:v', 'mjpeg', '-i', 'pipe:0',
-      '-c:v', 'libvpx', '-b:v', A.bitrate || preset.bitrate, '-maxrate', '9000k', '-bufsize', '9000k', '-qmin', '2', '-qmax', '42', '-auto-alt-ref', '1', '-lag-in-frames', '16',
-      '-deadline', 'good', '-cpu-used', pass === 1 ? '4' : '1', '-pix_fmt', 'yuv420p', '-pass', String(pass), '-passlogfile', log,
-      ...(pass === 1 ? ['-f', 'webm', '/dev/null'] : [out])];
-    const p = spawn(FFMPEG, args, { stdio: ['pipe', 'inherit', 'inherit'] });
-    p.on('close', c => c ? rej(new Error(`ffmpeg pass ${pass} exited ${c}`)) : res());
+  const input = ['-y', '-hide_banner', '-loglevel', 'error', '-f', 'image2pipe', '-framerate', String(fps), '-c:v', 'mjpeg', '-i', 'pipe:0'];
+  const pipeFrames = (bin, args, label) => new Promise((res, rej) => {
+    const p = spawn(bin, [...input, ...args], { stdio: ['pipe', 'inherit', 'inherit'] });
+    p.on('error', rej);
+    p.on('close', c => c ? rej(new Error(`${label} exited ${c}`)) : res());
     (async () => { for (const f of files) { if (!p.stdin.write(fs.readFileSync(path.join(tmp, f)))) await new Promise(r => p.stdin.once('drain', r)); } p.stdin.end(); })();
   });
-  await enc(1); await enc(2);
+  const vp8 = pass => ['-c:v', 'libvpx', '-b:v', A.bitrate || preset.bitrate, '-maxrate', '9000k', '-bufsize', '9000k', '-qmin', '2', '-qmax', '42', '-auto-alt-ref', '1', '-lag-in-frames', '16',
+    '-deadline', 'good', '-cpu-used', pass === 1 ? '4' : '1', '-pix_fmt', 'yuv420p', '-pass', String(pass), '-passlogfile', log,
+    ...(pass === 1 ? ['-f', 'webm', '/dev/null'] : [out])];
+  await pipeFrames(FFMPEG, vp8(1), 'webm pass 1'); await pipeFrames(FFMPEG, vp8(2), 'webm pass 2');
+
+  // Safari and iOS play VP8 unreliably, so --mp4 also writes H.264. Playwright's ffmpeg has no
+  // x264, so this needs a full build (brew install ffmpeg); FFMPEG_FULL overrides the PATH lookup.
+  if (A.mp4) {
+    const mp4 = path.resolve(A.mp4), full = process.env.FFMPEG_FULL || 'ffmpeg', xlog = path.join(tmp, 'x264');
+    // The frames are JPEGs (full-range BT.601). Left alone, x264 keeps them as yuvj420p, which some
+    // hardware decoders render with crushed contrast, and untagged HD is assumed to be BT.709, which
+    // shifts the brand blues. Convert to limited-range BT.709 and say so in the stream.
+    const x264 = pass => ['-vf', 'scale=in_range=pc:out_range=tv:in_color_matrix=bt601:out_color_matrix=bt709,format=yuv420p',
+      '-color_range', 'tv', '-colorspace', 'bt709', '-color_primaries', 'bt709', '-color_trc', 'bt709',
+      '-c:v', 'libx264', '-preset', 'slow', '-profile:v', 'high', '-b:v', A.bitrate || preset.bitrate, '-maxrate', '6M', '-bufsize', '8M',
+      '-pass', String(pass), '-passlogfile', xlog, ...(pass === 1 ? ['-an', '-f', 'mp4', '/dev/null'] : ['-movflags', '+faststart', mp4])];
+    await pipeFrames(full, x264(1), 'mp4 pass 1'); await pipeFrames(full, x264(2), 'mp4 pass 2');
+    console.log(`${mp4} (${(fs.statSync(mp4).size / 1048576).toFixed(1)} MB)`);
+  }
   if (A.poster) fs.copyFileSync(path.join(tmp, files[files.length - 1]), path.resolve(A.poster));
   if (A.keep) console.log(`frames kept in ${tmp}`); else fs.rmSync(tmp, { recursive: true, force: true });
   console.log(`${out} (${(fs.statSync(out).size / 1048576).toFixed(1)} MB) in ${((Date.now() - started) / 1000).toFixed(0)}s`);
