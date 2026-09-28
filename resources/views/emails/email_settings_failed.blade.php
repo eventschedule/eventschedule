@@ -25,7 +25,7 @@
         </p>
 
         @if (!empty($errorMessage))
-        <div style="background-color: #fff; border-left: 4px solid #f59e0b; padding: 12px 16px; margin: 20px 0; font-family: monospace; font-size: 13px; color: #555; word-break: break-word;">
+        <div style="background-color: #fffbeb; padding: 12px 16px; margin: 20px 0; font-family: monospace; font-size: 13px; color: #555; word-break: break-word; border: 1px solid #fcd34d;">
             {{ $errorMessage }}
         </div>
         @endif

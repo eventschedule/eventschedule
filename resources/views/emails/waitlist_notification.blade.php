@@ -15,7 +15,7 @@
 
         <p style="font-size: 16px;">{{ ($isRsvp ?? false) ? __('messages.waitlist_rsvp_notification_body') : __('messages.waitlist_notification_body') }}</p>
 
-        <div style="background-color: white; padding: 20px; border-radius: 8px; margin: 20px 0; border-left: 4px solid #4E81FA;">
+        <div style="background-color: white; padding: 20px; border-radius: 8px; margin: 20px 0;">
             <p style="margin: 0 0 10px 0; font-size: 18px; color: #333;">
                 <strong>{{ $event->name }}</strong>
             </p>

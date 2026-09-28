@@ -15,7 +15,7 @@
 
         <p>{{ __('messages.boost_budget_75_percent', ['event' => $event?->name ?? __('messages.deleted_event')]) }}</p>
 
-        <div style="background-color: white; padding: 20px; border-radius: 8px; margin: 20px 0; border-left: 4px solid #ffc107;">
+        <div style="background-color: #fffbeb; padding: 20px; border-radius: 8px; margin: 20px 0; border: 1px solid #fcd34d;">
             <p style="margin: 10px 0;"><strong>{{ __('messages.budget') }}:</strong> {{ $campaign->getCurrencySymbol() }}{{ number_format($campaign->user_budget, 2) }}</p>
             <p style="margin: 10px 0;"><strong>{{ __('messages.amount_spent') }}:</strong> {{ $campaign->getCurrencySymbol() }}{{ number_format($campaign->actual_spend, 2) }}</p>
             <p style="margin: 10px 0;"><strong>{{ __('messages.impressions') }}:</strong> {{ number_format($campaign->impressions) }}</p>

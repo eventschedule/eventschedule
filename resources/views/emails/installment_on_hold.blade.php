@@ -18,7 +18,7 @@
             'total' => \App\Utils\MoneyUtils::format($plan->total_amount, $plan->currency),
         ]) }}</p>
 
-        <div style="background-color: #fef3c7; border-left: 4px solid #d97706; padding: 12px 16px; margin: 16px 0; border-radius: 4px;">
+        <div style="background-color: #fef3c7; padding: 12px 16px; margin: 16px 0; border-radius: 4px; border: 1px solid #fcd34d;">
             <p style="margin: 0; color: #92400e;">{{ __('messages.installment_on_hold_door') }}</p>
         </div>
 

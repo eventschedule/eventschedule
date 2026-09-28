@@ -230,9 +230,10 @@ class EventAcceptNotificationTest extends TestCase
         $event->creator_role_id = null;
         $event->save();
 
-        $mailable = new EventAccepted($event->fresh(), $curator);
+        $mailable = new EventAccepted($event->fresh(), $curator, $creator);
 
-        $this->assertSame([], $mailable->headers()->text);
+        // The unsubscribe link no longer depends on it, so the header is always there.
+        $this->assertArrayHasKey('List-Unsubscribe', $mailable->headers()->text);
         $this->assertStringContainsString($event->name, $mailable->render());
 
         // Mailer::render() renders ONLY the html view (renderView($view ?: $plain)), while a real
@@ -268,5 +269,93 @@ class EventAcceptNotificationTest extends TestCase
         // Both were still accepted - only the stand-in's notification is suppressed.
         $this->assertTrue((bool) $this->pivotFor($requested, $curator)->is_accepted);
         $this->assertTrue((bool) $this->pivotFor($guest, $curator)->is_accepted);
+    }
+
+    // -- Opting out -----------------------------------------------------------------------------
+
+    /**
+     * The customer report: somebody who unsubscribed kept getting one of these per accepted event,
+     * because nothing on the send path read the flag. Saved and reloaded, not set in memory - the
+     * column has no cast, so the real value is int 0, and a `=== false` gate passes an in-memory
+     * `false` while never firing in production.
+     */
+    public function test_an_unsubscribed_submitter_is_not_emailed(): void
+    {
+        Queue::fake();
+
+        $submitter = $this->createOwner();
+        $submitter->update(['is_subscribed' => false]);
+        $curatorOwner = $this->createOwner();
+        $curator = $this->createCurator($curatorOwner);
+
+        $single = $this->listOnCurator($submitter, $curator, ['is_accepted' => null, 'is_auto_sourced' => false]);
+        $this->accept($curatorOwner, $curator, $single);
+
+        $batched = $this->listOnCurator($submitter, $curator, ['is_accepted' => null, 'is_auto_sourced' => false]);
+        $this->acceptAll($curatorOwner, $curator);
+
+        $this->assertSame([], $this->sentTo(EventAccepted::class)->all());
+
+        // Anchor the absence: a 403 on either POST would read exactly like working suppression.
+        $this->assertTrue((bool) $this->pivotFor($single, $curator)->is_accepted);
+        $this->assertTrue((bool) $this->pivotFor($batched, $curator)->is_accepted);
+    }
+
+    /**
+     * The footer used to link to an unsigned GET that showed "Unsubscribed" and wrote nothing, and
+     * the List-Unsubscribe header pointed at a POST that 419'd. Both now carry the recipient's own
+     * signed link, and following it actually unsubscribes them.
+     */
+    public function test_the_footer_and_header_unsubscribe_the_recipient(): void
+    {
+        $submitter = $this->createOwner();
+        $curatorOwner = $this->createOwner();
+        $curator = $this->createCurator($curatorOwner);
+
+        $event = $this->listOnCurator($submitter, $curator, ['is_accepted' => null, 'is_auto_sourced' => false]);
+        $mailable = new EventAccepted($event, $curator, $submitter);
+
+        $expected = UrlUtils::userUnsubscribeUrl($submitter->email, 'en');
+
+        $headers = $mailable->headers()->text;
+        $this->assertSame('<'.$expected.'>', $headers['List-Unsubscribe']);
+        $this->assertSame('List-Unsubscribe=One-Click', $headers['List-Unsubscribe-Post']);
+
+        $html = html_entity_decode($mailable->render());
+        $this->assertStringContainsString($expected, $html);
+        $this->assertStringNotContainsString(route('role.show_unsubscribe'), $html);
+
+        $content = $mailable->content();
+        $this->assertStringContainsString($expected, view($content->text, $content->with)->render());
+
+        // One-click, as a mail provider sends it.
+        $this->post($expected)->assertOk();
+        $this->assertFalse((bool) $submitter->refresh()->is_subscribed);
+    }
+
+    /** The reported mail was Hebrew with an English date and left-to-right punctuation. */
+    public function test_a_hebrew_mail_is_rtl_with_a_hebrew_date(): void
+    {
+        $submitter = $this->createOwner();
+        $curatorOwner = $this->createOwner();
+        $curator = $this->createCurator($curatorOwner);
+
+        $event = $this->listOnCurator($submitter, $curator, ['is_accepted' => null, 'is_auto_sourced' => false]);
+        $mailable = new EventAccepted($event, $curator, $submitter);
+
+        $previous = app()->getLocale();
+        app()->setLocale('he');
+
+        try {
+            $content = $mailable->content();
+            $html = $mailable->render();
+        } finally {
+            app()->setLocale($previous);
+        }
+
+        $this->assertTrue($content->with['isRtl']);
+        $this->assertStringContainsString('dir="rtl"', $html);
+        $this->assertMatchesRegularExpression('/\p{Hebrew}/u', $content->with['eventDate']);
+        $this->assertStringContainsString('lang=he', html_entity_decode($content->with['unsubscribeUrl']));
     }
 }

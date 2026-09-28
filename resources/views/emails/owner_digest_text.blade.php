@@ -26,4 +26,4 @@
 {{ __('messages.owner_digest_cta') }}: {{ $dashboardUrl }}
 
 {{ __('messages.owner_digest_why') }}
-{{ __('messages.unsubscribe') }}: {{ $unsubscribeUrl }}
+{{ __('messages.unsubscribe') }}: {!! $unsubscribeUrl !!}{{-- Raw: plain text has no entity decoding, so an escaped &amp; breaks the signed link. --}}

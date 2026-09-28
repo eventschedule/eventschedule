@@ -5667,4 +5667,11 @@ return [
     'next_step_add_gallery' => 'Add photos from :event',
     'plan_gate_gallery_bullet' => 'Photo galleries on your events and schedule',
     'gallery_failed_before_save' => 'Some photos couldn\'t be uploaded (:count). Retry or remove them, then save again.',
+    'request_decision_why' => 'You got this because you asked :schedule to list your event.',
+    'account_unsubscribe_heading' => 'Stop these emails?',
+    'account_unsubscribe_body' => 'You will no longer get newsletters, tips, weekly summaries or updates on your event requests. Receipts, password resets and notifications you turned on for your schedules still arrive.',
+    'account_resubscribe_link' => 'Changed your mind? Turn emails back on in your settings',
+    'invalid_unsubscribe_link' => 'This unsubscribe link is not valid. Please use the link from a recent email.',
+    'email_updates' => 'Email updates',
+    'email_updates_help' => 'Newsletters, tips, weekly summaries and updates on your event requests. Receipts and password resets are always sent.',
 ];

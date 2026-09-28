@@ -5595,4 +5595,11 @@ return [
     'next_step_add_gallery' => 'Fotos von :event hinzufügen',
     'plan_gate_gallery_bullet' => 'Fotogalerien für deine Veranstaltungen und deinen Kalender',
     'gallery_failed_before_save' => 'Einige Fotos konnten nicht hochgeladen werden (:count). Versuche es erneut oder entferne sie und speichere dann noch einmal.',
+    'request_decision_why' => 'Du erhältst dies, weil du :schedule gebeten hast, deine Veranstaltung aufzunehmen.',
+    'account_unsubscribe_heading' => 'Diese E-Mails abbestellen?',
+    'account_unsubscribe_body' => 'Du erhältst keine Newsletter, Tipps, wöchentlichen Zusammenfassungen oder Neuigkeiten zu deinen Veranstaltungsanfragen mehr. Belege, Passwort-Zurücksetzungen und Benachrichtigungen, die du für deine Kalender aktiviert hast, kommen weiterhin an.',
+    'account_resubscribe_link' => 'Meinung geändert? Schalte E-Mails in deinen Einstellungen wieder ein',
+    'invalid_unsubscribe_link' => 'Dieser Abmeldelink ist ungültig. Bitte verwende den Link aus einer aktuellen E-Mail.',
+    'email_updates' => 'E-Mail-Updates',
+    'email_updates_help' => 'Newsletter, Tipps, wöchentliche Zusammenfassungen und Neuigkeiten zu deinen Veranstaltungsanfragen. Belege und Passwort-Zurücksetzungen werden immer gesendet.',
 ];

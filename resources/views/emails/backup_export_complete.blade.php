@@ -13,7 +13,7 @@
     <div style="background-color: #f9f9f9; padding: 20px; border-radius: 0 0 8px 8px;">
         <p style="font-size: 16px; margin-top: 0;">{{ __('messages.backup_export_email_intro') }}</p>
 
-        <div style="background-color: white; padding: 20px; border-radius: 8px; margin: 20px 0; border-left: 4px solid #4E81FA;">
+        <div style="background-color: white; padding: 20px; border-radius: 8px; margin: 20px 0;">
             <h3 style="margin-top: 0; color: #4E81FA;">{{ __('messages.backup_included_schedules') }}</h3>
             <ul style="margin: 0; padding-left: 20px;">
                 @foreach ($scheduleNames as $name)

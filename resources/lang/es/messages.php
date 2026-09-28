@@ -5595,4 +5595,11 @@ return [
     'next_step_add_gallery' => 'Añade fotos de :event',
     'plan_gate_gallery_bullet' => 'Galerías de fotos en tus eventos y tu calendario',
     'gallery_failed_before_save' => 'Algunas fotos no se pudieron subir (:count). Vuelve a intentarlo o elimínalas y luego guarda de nuevo.',
+    'request_decision_why' => 'Recibes esto porque pediste a :schedule que publicara tu evento.',
+    'account_unsubscribe_heading' => '¿Dejar de recibir estos correos?',
+    'account_unsubscribe_body' => 'Dejarás de recibir boletines, consejos, resúmenes semanales y novedades sobre tus solicitudes de eventos. Los recibos, los restablecimientos de contraseña y las notificaciones que activaste para tus calendarios seguirán llegando.',
+    'account_resubscribe_link' => '¿Cambiaste de opinión? Vuelve a activar los correos en tus ajustes',
+    'invalid_unsubscribe_link' => 'Este enlace para darse de baja no es válido. Usa el enlace de un correo reciente.',
+    'email_updates' => 'Novedades por correo',
+    'email_updates_help' => 'Boletines, consejos, resúmenes semanales y novedades sobre tus solicitudes de eventos. Los recibos y los restablecimientos de contraseña siempre se envían.',
 ];

@@ -15,11 +15,11 @@
 
         <p>{{ __(($windDown ?? false) ? 'messages.subscription_winddown_body' : ($hasCard ? 'messages.subscription_trial_ending_body' : 'messages.subscription_trial_ending_body_no_card'), ['schedule' => $role->name, 'plan' => $planLabel, 'date' => $trialEndDate, 'amount' => $amount]) }}</p>
 
-        <div style="background-color: white; padding: 15px; border-radius: 5px; margin: 20px 0; border-left: 4px solid #4E81FA;">
+        <div style="background-color: white; padding: 15px; border-radius: 5px; margin: 20px 0;">
             <p style="margin: 0; color: #333;">{{ __(($windDown ?? false) ? 'messages.subscription_winddown_continue' : ($hasCard ? 'messages.subscription_trial_ending_continue' : 'messages.subscription_trial_ending_continue_no_card'), ['plan' => $planLabel]) }}</p>
         </div>
 
-        <div style="background-color: #fff3cd; padding: 15px; border-radius: 5px; margin: 20px 0; border-left: 4px solid #ffc107;">
+        <div style="background-color: #fff3cd; padding: 15px; border-radius: 5px; margin: 20px 0; border: 1px solid #fcd34d;">
             <p style="margin: 0; color: #856404;">{{ __(($windDown ?? false) ? 'messages.subscription_winddown_cancel' : ($hasCard ? 'messages.subscription_trial_ending_cancel' : 'messages.subscription_trial_ending_cancel_no_card'), ['plan' => $planLabel]) }}</p>
         </div>
 

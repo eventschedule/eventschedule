@@ -19,7 +19,7 @@
 
         <p>{{ $sale->isRsvp() ? __('messages.registration_confirmation') : ($isFreeReservation ? __('messages.thank_you_for_reserving_tickets') : __('messages.thank_you_for_purchasing_tickets')) }}</p>
 
-        <div style="background-color: white; padding: 20px; border-radius: 8px; margin: 20px 0; border-left: 4px solid #4E81FA;">
+        <div style="background-color: white; padding: 20px; border-radius: 8px; margin: 20px 0;">
             <h2 style="margin-top: 0; color: #4E81FA;">{{ $event->name }}</h2>
             <p style="margin: 10px 0;"><strong>{{ __('messages.date') }}:</strong> {{ $event->is_multi_day ? $event->getDateRangeDisplay($sale->event_date) : $event->getStartDateTime($sale->event_date, true)->format('F j, Y') }}</p>
             <p style="margin: 10px 0;"><strong>{{ __('messages.time') }}:</strong> {{ $event->getStartEndTime($sale->event_date) }}</p>
@@ -71,7 +71,7 @@
              coming to their card. --}}
         @php $plan = $sale->installmentPlan; @endphp
         @if ($plan && $plan->status !== 'cancelled')
-        <div style="background-color: white; padding: 20px; border-radius: 8px; margin: 20px 0; border-left: 4px solid #4E81FA;">
+        <div style="background-color: white; padding: 20px; border-radius: 8px; margin: 20px 0;">
             <h3 style="margin-top: 0; color: #4E81FA;">{{ __('messages.payment_plan') }}</h3>
             <table style="width: 100%; border-collapse: collapse; font-size: 14px;">
                 @foreach ($plan->installments as $row)
@@ -109,7 +109,7 @@
         @if (($giftCardAmount ?? 0) > 0 && $giftCard)
         {{-- The ticket buyer may not be the card recipient, so do NOT link the secret-authed card
              view page here (it exposes the purchaser's name/message). Show amounts only. --}}
-        <div style="background-color: white; padding: 20px; border-radius: 8px; margin: 20px 0; border-left: 4px solid #4E81FA;">
+        <div style="background-color: white; padding: 20px; border-radius: 8px; margin: 20px 0;">
             <h3 style="margin-top: 0; color: #4E81FA;">{{ __('messages.gift_card') }}</h3>
             <p style="margin: 10px 0;">{{ __('messages.gift_card_applied_summary') }}: <strong>-{{ \App\Utils\MoneyUtils::format($giftCardAmount, $giftCard->currency_code) }}</strong></p>
             <p style="margin: 10px 0;">{{ __('messages.gift_card_remaining_balance') }}: <strong>{{ \App\Utils\MoneyUtils::format($giftCard->remaining_amount, $giftCard->currency_code) }}</strong></p>
@@ -138,7 +138,7 @@
         
         @php $ticketNotes = $event->parsedTicketNotesHtml($sale->event_date, $role); @endphp
         @if ($ticketNotes && trim(strip_tags($ticketNotes)) !== '')
-        <div style="background-color: white; padding: 20px; border-radius: 8px; margin: 20px 0; border-left: 4px solid #4E81FA;">
+        <div style="background-color: white; padding: 20px; border-radius: 8px; margin: 20px 0;">
             <h3 style="margin-top: 0; color: #4E81FA;">{{ __('messages.important_information') }}</h3>
             <div style="color: #333;">
                 {!! \App\Utils\UrlUtils::convertUrlsToLinks($ticketNotes) !!}

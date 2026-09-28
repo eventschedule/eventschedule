@@ -15,7 +15,7 @@
             {{ __('messages.schedule_transfer_invite_intro', ['user' => $fromUser?->name, 'name' => $role?->name]) }}
         </p>
 
-        <div style="background-color: white; padding: 20px; border-radius: 8px; margin: 20px 0; border-left: 4px solid #4E81FA;">
+        <div style="background-color: white; padding: 20px; border-radius: 8px; margin: 20px 0;">
             <p style="margin: 0;"><strong>{{ $role?->name }}</strong></p>
             @if ($role)
             <p style="margin: 6px 0 0; color: #666;">{{ $role->getGuestUrl(true) }}</p>

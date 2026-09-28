@@ -1,12 +1,20 @@
-<x-auth-layout>
-    <!-- Session Status -->
-    <x-auth-session-status class="mb-4" :status="session('status')" />
+{{--
+    The schedule-level opt-out (roles.is_subscribed, which gates claim invites) and the landing
+    page for a bad account-wide link.
 
-    @if(request()->has('email'))
-        <!-- Direct unsubscribe link - no form needed -->
+    Success is a session flag set by RoleController::unsubscribe(), never the presence of ?email=.
+    It used to be ?email=, and the unsigned footer links in the event request emails carried one,
+    so they reported an unsubscribe that never happened. Those links still exist in inboxes; they
+    now land on the form below.
+
+    Deliberately does NOT reuse messages.unsubscribed as a heading: it is an admin stat label, the
+    bare word "unsubscribed". Same reason subscriber/unsubscribe.blade.php avoids it.
+--}}
+<x-auth-layout>
+    @if (session('role_unsubscribed'))
         <div class="text-center">
             <h2 class="text-lg font-medium text-gray-900 dark:text-gray-100">
-                {{ __('messages.unsubscribed') }}
+                {{ __('messages.subscription_unsubscribed_heading') }}
             </h2>
             <p class="mt-2 text-sm text-gray-600 dark:text-gray-400">
                 {{ __('messages.unsubscribed_message') }}

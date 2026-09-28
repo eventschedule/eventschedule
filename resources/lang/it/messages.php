@@ -5594,4 +5594,11 @@ return [
     'next_step_add_gallery' => 'Aggiungi le foto di :event',
     'plan_gate_gallery_bullet' => 'Gallerie fotografiche nei tuoi eventi e nel tuo programma',
     'gallery_failed_before_save' => 'Alcune foto non sono state caricate (:count). Riprova o rimuovile, poi salva di nuovo.',
+    'request_decision_why' => 'Ricevi questa email perché hai chiesto a :schedule di pubblicare il tuo evento.',
+    'account_unsubscribe_heading' => 'Smettere di ricevere queste email?',
+    'account_unsubscribe_body' => 'Non riceverai più newsletter, consigli, riepiloghi settimanali o aggiornamenti sulle tue richieste di eventi. Ricevute, reimpostazioni della password e notifiche che hai attivato per i tuoi calendari continueranno ad arrivare.',
+    'account_resubscribe_link' => 'Hai cambiato idea? Riattiva le email nelle impostazioni',
+    'invalid_unsubscribe_link' => 'Questo link di disiscrizione non è valido. Usa il link di un\'email recente.',
+    'email_updates' => 'Aggiornamenti via email',
+    'email_updates_help' => 'Newsletter, consigli, riepiloghi settimanali e aggiornamenti sulle tue richieste di eventi. Ricevute e reimpostazioni della password vengono sempre inviate.',
 ];

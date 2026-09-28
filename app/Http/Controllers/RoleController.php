@@ -7440,30 +7440,98 @@ class RoleController extends Controller
             $role->save();
         }
 
-        return redirect()->route('role.show_unsubscribe', ['email' => base64_encode($email)]);
+        // A session flag, not ?email=: the view used to treat the mere presence of ?email= as
+        // success, so every unsigned footer link that carried one reported an unsubscribe that
+        // never happened.
+        return redirect()->route('role.show_unsubscribe')->with('role_unsubscribed', true);
     }
 
+    /**
+     * The account-wide opt-out's confirm page. Renders a button and writes nothing; the POST below
+     * is what acts. See the route in routes/web.php for why a mutating GET is not an option.
+     */
+    public function showUnsubscribeUser(Request $request)
+    {
+        $this->applyUnsubscribeLocale($request);
+
+        if (! $this->signedUnsubscribeEmail($request)) {
+            return $this->invalidUnsubscribeLink();
+        }
+
+        return view('user.unsubscribe', [
+            'done' => false,
+            'action' => route('user.unsubscribe.confirm', $request->only(['email', 'sig', 'lang'])),
+        ]);
+    }
+
+    /**
+     * Sets users.is_subscribed = false for the signed address. CSRF-exempt, because a mail
+     * client's RFC 8058 one-click POST carries no session and no token; the HMAC authorises it.
+     * The query string carries email and sig on both paths - the one-click POST goes to the
+     * List-Unsubscribe URL itself, and the confirm form posts back to the same URL.
+     */
     public function unsubscribeUser(Request $request)
     {
-        if (! $request->has('email')) {
-            return redirect()->route('role.show_unsubscribe')->with('error', 'Invalid unsubscribe link.');
+        $this->applyUnsubscribeLocale($request);
+
+        // Only the confirm page renders the field, so a one-click POST never trips it.
+        if (HoneypotUtils::isTripped($request)) {
+            return $this->invalidUnsubscribeLink();
         }
 
-        // Verify HMAC signature to prevent unauthorized unsubscription
-        if (! $request->has('sig') || ! UrlUtils::verifyEmailSignature($request->email, $request->sig)) {
-            return redirect()->route('role.show_unsubscribe')->with('error', 'Invalid unsubscribe link.');
+        $email = $this->signedUnsubscribeEmail($request);
+
+        if (! $email) {
+            return $this->invalidUnsubscribeLink();
         }
 
-        $email = base64_decode($request->email);
+        User::where('email', $email)->update(['is_subscribed' => false]);
 
-        $users = User::where('email', $email)->get();
+        return view('user.unsubscribe', ['done' => true, 'action' => null]);
+    }
 
-        foreach ($users as $user) {
-            $user->is_subscribed = false;
-            $user->save();
+    /**
+     * The decoded address, or null when the link is missing, malformed or not ours.
+     *
+     * is_string() first: ?email[]= arrives as an array, and verifyEmailSignature() is typed
+     * string, so an array would be a TypeError and a 500 rather than a refusal.
+     */
+    private function signedUnsubscribeEmail(Request $request): ?string
+    {
+        $email = $request->query('email');
+        $sig = $request->query('sig');
+
+        if (! is_string($email) || ! is_string($sig) || ! UrlUtils::verifyEmailSignature($email, $sig)) {
+            return null;
         }
 
-        return redirect()->route('role.show_unsubscribe', ['email' => base64_encode($email)])->with('status', __('messages.unsubscribed'));
+        $decoded = base64_decode($email, true);
+
+        return is_string($decoded) && $decoded !== '' ? $decoded : null;
+    }
+
+    /**
+     * The link carries the recipient's language. The signature covers only the email, so this is
+     * cosmetic and safe to take from the query string.
+     */
+    private function applyUnsubscribeLocale(Request $request): void
+    {
+        $lang = $request->query('lang');
+
+        if (is_string($lang) && is_valid_language_code($lang)) {
+            app()->setLocale($lang);
+        }
+    }
+
+    /**
+     * Back to the manual form with a field error: x-auth-layout renders per-field errors only, so
+     * a session('error') flash - which is what this used to send, in hardcoded English - never
+     * reached the screen.
+     */
+    private function invalidUnsubscribeLink()
+    {
+        return redirect()->route('role.show_unsubscribe')
+            ->withErrors(['email' => __('messages.invalid_unsubscribe_link')]);
     }
 
     public function subscribe(Request $request, $subdomain)

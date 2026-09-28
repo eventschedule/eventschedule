@@ -18,7 +18,7 @@
         
         <p>{{ __('messages.signup_verification_code_intro') }}</p>
         
-        <div style="background-color: white; padding: 20px; border-radius: 8px; margin: 20px 0; border-left: 4px solid #4E81FA;">
+        <div style="background-color: white; padding: 20px; border-radius: 8px; margin: 20px 0;">
             {{-- One text node, no per-digit markup, so a copy (ours or Gmail's) yields exactly the code. --}}
             <div style="margin: 0 0 10px; color: #4E81FA; text-align: center; font-family: 'Courier New', Courier, monospace; font-size: 32px; letter-spacing: 4px; font-weight: bold;">{{ $code }}</div>
             <p style="margin: 10px 0; text-align: center; color: #666; font-size: 14px;">{{ __('messages.your_verification_code') }}</p>

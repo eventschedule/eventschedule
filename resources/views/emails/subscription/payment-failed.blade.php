@@ -15,7 +15,7 @@
 
         <p>{{ __('messages.subscription_payment_failed_body', ['schedule' => $role->name]) }}</p>
 
-        <div style="background-color: #fff3cd; padding: 15px; border-radius: 5px; margin: 20px 0; border-left: 4px solid #ffc107;">
+        <div style="background-color: #fff3cd; padding: 15px; border-radius: 5px; margin: 20px 0; border: 1px solid #fcd34d;">
             <p style="margin: 0; color: #856404;"><strong>{{ __('messages.subscription_payment_failed_warning') }}</strong></p>
         </div>
 

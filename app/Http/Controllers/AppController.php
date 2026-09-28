@@ -673,8 +673,8 @@ class AppController extends Controller
      * selfhost no schedule made today lives under one.
      *  - /feedback/{event_id}/{secret}: a buyer's feedback form;
      *  - /schedule-transfer/{token}: a schedule's ownership handover;
-     *  - /user/unsubscribe: a signed link that unsubscribes on the GET itself, so a crawler that
-     *    followed one would unsubscribe somebody.
+     *  - /user/unsubscribe: a signed per-person link. The GET only renders a confirm button now
+     *    (the POST acts), but it still names an address and has no business in an index.
      *
      * Not on a schedule's own host. There /feedback/ is also where an event slugged "feedback"
      * lives (/feedback/{id}, /feedback/{id}/{date}), so the feedback page's own noindex is what

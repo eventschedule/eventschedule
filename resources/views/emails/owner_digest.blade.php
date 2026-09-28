@@ -15,7 +15,7 @@
         <p>{{ __('messages.owner_digest_intro') }}</p>
 
         @foreach ($sections as $section)
-        <div style="background-color: white; padding: 15px; border-radius: 5px; margin: 20px 0; border-left: 4px solid #4E81FA;">
+        <div style="background-color: white; padding: 15px; border-radius: 5px; margin: 20px 0;">
             <h2 style="margin: 0 0 10px; font-size: 18px;"><a href="{{ $section['url'] }}" style="color: #333; text-decoration: none;">{{ $section['name'] }}</a></h2>
             <table role="presentation" style="width: 100%; border-collapse: collapse; font-size: 14px;">
                 @foreach (['views', 'followers', 'subscribers', 'tickets', 'rsvps'] as $metric)

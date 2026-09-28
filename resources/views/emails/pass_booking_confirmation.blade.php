@@ -15,7 +15,7 @@
 
         <p>{{ __('messages.pass_booking_confirmation_intro') }}</p>
 
-        <div style="background-color: white; padding: 20px; border-radius: 8px; margin: 20px 0; border-left: 4px solid #4E81FA;">
+        <div style="background-color: white; padding: 20px; border-radius: 8px; margin: 20px 0;">
             <h2 style="margin-top: 0; color: #4E81FA;">{{ $bookedEvent->name }}</h2>
             <p style="margin: 10px 0;"><strong>{{ __('messages.date') }}:</strong> {{ $dateLabel }}</p>
             <p style="margin: 10px 0;"><strong>{{ __('messages.attendee') }}:</strong> {{ $sale->name }}</p>
@@ -50,7 +50,7 @@
 
         @php $ticketNotes = $bookedEvent->parsedTicketNotesHtml($date, $role); @endphp
         @if ($ticketNotes && trim(strip_tags($ticketNotes)) !== '')
-        <div style="background-color: white; padding: 20px; border-radius: 8px; margin: 20px 0; border-left: 4px solid #4E81FA;">
+        <div style="background-color: white; padding: 20px; border-radius: 8px; margin: 20px 0;">
             <h3 style="margin-top: 0; color: #4E81FA;">{{ __('messages.important_information') }}</h3>
             <div style="color: #333;">
                 {!! \App\Utils\UrlUtils::convertUrlsToLinks($ticketNotes) !!}

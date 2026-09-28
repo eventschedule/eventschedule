@@ -14,7 +14,7 @@
         <p style="font-size: 16px; margin-top: 0;">{{ __('messages.backup_import_email_intro') }}</p>
 
         @foreach ($report as $schedule)
-        <div style="background-color: white; padding: 20px; border-radius: 8px; margin: 20px 0; border-left: 4px solid #4E81FA;">
+        <div style="background-color: white; padding: 20px; border-radius: 8px; margin: 20px 0;">
             <h3 style="margin-top: 0; color: #4E81FA;">{{ $schedule['name'] ?? 'Unknown' }}</h3>
 
             @if (! empty($schedule['error']))

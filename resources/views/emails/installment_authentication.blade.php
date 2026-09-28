@@ -15,7 +15,7 @@
 
         <p>{{ __('messages.installment_authentication_body') }}</p>
 
-        <div style="background-color: #ecfdf5; border-left: 4px solid #16a34a; padding: 12px 16px; margin: 16px 0; border-radius: 4px;">
+        <div style="background-color: #ecfdf5; padding: 12px 16px; margin: 16px 0; border-radius: 4px; border: 1px solid #86efac;">
             <p style="margin: 0; color: #166534; font-weight: bold;">{{ __('messages.installment_ticket_still_valid') }}</p>
         </div>
 

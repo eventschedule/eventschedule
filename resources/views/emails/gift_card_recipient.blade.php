@@ -16,7 +16,7 @@
         <p>{{ __('messages.gift_card_recipient_intro', ['name' => $giftCard->purchaser_name, 'schedule' => $role->name]) }}</p>
 
         @if ($giftCard->message)
-        <div style="background-color: white; padding: 20px; border-radius: 8px; margin: 20px 0; border-left: 4px solid #4E81FA; font-style: italic;">
+        <div style="background-color: #f3f4f6; padding: 20px; border-radius: 8px; margin: 20px 0; font-style: italic;">
             "{{ $giftCard->message }}"
             <div style="margin-top: 8px; font-style: normal; font-size: 13px; color: #666;">- {{ $giftCard->purchaser_name }}</div>
         </div>

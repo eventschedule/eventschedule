@@ -15,7 +15,7 @@
 
         <p>{{ __('messages.boost_email_completed_body') }}</p>
 
-        <div style="background-color: white; padding: 20px; border-radius: 8px; margin: 20px 0; border-left: 4px solid #4E81FA;">
+        <div style="background-color: white; padding: 20px; border-radius: 8px; margin: 20px 0;">
             <h2 style="margin-top: 0; color: #4E81FA;">{{ $event?->name ?? __('messages.deleted_event') }}</h2>
             <p style="margin: 10px 0;"><strong>{{ __('messages.impressions') }}:</strong> {{ number_format($campaign->impressions) }}</p>
             <p style="margin: 10px 0;"><strong>{{ __('messages.reach') }}:</strong> {{ number_format($campaign->reach) }}</p>
@@ -27,7 +27,7 @@
         </div>
 
         @if ($refundAmount > 0)
-        <div style="background-color: #d4edda; padding: 15px; border-radius: 5px; margin: 20px 0; border-left: 4px solid #28a745;">
+        <div style="background-color: #d4edda; padding: 15px; border-radius: 5px; margin: 20px 0; border: 1px solid #86efac;">
             <p style="margin: 0; color: #155724;"><strong>{{ __('messages.boost_unspent_refund') }}</strong></p>
             <p style="margin: 5px 0 0; color: #155724;">{{ __('messages.boost_refund_amount') }}: {{ $campaign->getCurrencySymbol() }}{{ number_format($refundAmount, 2) }}</p>
         </div>

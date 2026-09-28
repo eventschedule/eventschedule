@@ -5600,4 +5600,11 @@ return [
     'next_step_add_gallery' => 'Ajoutez des photos de :event',
     'plan_gate_gallery_bullet' => 'Galeries photos sur vos événements et votre planning',
     'gallery_failed_before_save' => 'Certaines photos n\'ont pas pu être envoyées (:count). Réessayez ou retirez-les, puis enregistrez à nouveau.',
+    'request_decision_why' => 'Vous recevez ceci parce que vous avez demandé à :schedule de publier votre événement.',
+    'account_unsubscribe_heading' => 'Ne plus recevoir ces e-mails ?',
+    'account_unsubscribe_body' => 'Vous ne recevrez plus de newsletters, de conseils, de résumés hebdomadaires ni de nouvelles de vos demandes d\'événements. Les reçus, les réinitialisations de mot de passe et les notifications activées pour vos calendriers continueront d\'arriver.',
+    'account_resubscribe_link' => 'Vous avez changé d\'avis ? Réactivez les e-mails dans vos paramètres',
+    'invalid_unsubscribe_link' => 'Ce lien de désinscription n\'est pas valide. Utilisez le lien d\'un e-mail récent.',
+    'email_updates' => 'Actualités par e-mail',
+    'email_updates_help' => 'Newsletters, conseils, résumés hebdomadaires et nouvelles de vos demandes d\'événements. Les reçus et les réinitialisations de mot de passe sont toujours envoyés.',
 ];

@@ -149,6 +149,25 @@ class UrlUtils
         return hash_equals(self::signEmail($email), $signature);
     }
 
+    /**
+     * The signed link to the account-wide email opt-out (users.is_subscribed). Signed over the
+     * BASE64 value, which is what RoleController::signedUnsubscribeEmail() verifies. $lang only
+     * picks the language of the confirm page and is not covered by the signature.
+     *
+     * Serves as both the footer link and the List-Unsubscribe header: the GET confirms, and a
+     * mail client's RFC 8058 one-click POST to the same URL acts.
+     */
+    public static function userUnsubscribeUrl(string $email, ?string $lang = null): string
+    {
+        $encodedEmail = base64_encode($email);
+
+        return route('user.unsubscribe', array_filter([
+            'email' => $encodedEmail,
+            'sig' => self::signEmail($encodedEmail),
+            'lang' => $lang,
+        ]));
+    }
+
     public static function detectPlatform(string $url): string
     {
         $parsed = parse_url($url);

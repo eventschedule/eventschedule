@@ -21,7 +21,7 @@
     </div>
 
     <div style="background-color: #f9f9f9; padding: 20px; border-radius: 0 0 8px 8px;">
-        <div style="background-color: white; padding: 20px; border-radius: 8px; margin: 0 0 20px; border-left: 4px solid #4E81FA;">
+        <div style="background-color: white; padding: 20px; border-radius: 8px; margin: 0 0 20px;">
             <h2 style="margin-top: 0; color: #4E81FA;">{{ $type?->name ?? $event->name }}</h2>
             <p style="margin: 8px 0;"><strong>{{ __('messages.name') }}:</strong> {{ $sale->name }}</p>
             <p style="margin: 8px 0;"><strong>{{ __('messages.email') }}:</strong> {{ $sale->email }}</p>

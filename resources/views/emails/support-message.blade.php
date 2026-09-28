@@ -25,7 +25,7 @@
             @endif
         </p>
 
-        <div style="background-color: white; padding: 20px; border-radius: 8px; margin: 20px 0; border-left: 4px solid #4E81FA;">
+        <div style="background-color: white; padding: 20px; border-radius: 8px; margin: 20px 0;">
             <p style="margin: 0; font-size: 14px; color: #333;">{{ $messageBody }}</p>
         </div>
 

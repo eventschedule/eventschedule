@@ -173,6 +173,24 @@ class EventDeclineNotificationTest extends TestCase
         $this->assertFalse((bool) $event->roles()->where('roles.id', $curator->id)->first()->pivot->is_accepted);
     }
 
+    /** See EventAcceptNotificationTest::test_an_unsubscribed_submitter_is_not_emailed(). */
+    public function test_an_unsubscribed_submitter_is_not_emailed(): void
+    {
+        Queue::fake();
+
+        $submitter = $this->createOwner();
+        $submitter->update(['is_subscribed' => false]);
+        $curatorOwner = $this->createOwner();
+        $curator = $this->createCurator($curatorOwner);
+
+        $event = $this->listOnCurator($submitter, $curator, ['is_accepted' => null, 'is_auto_sourced' => false]);
+
+        $this->decline($curatorOwner, $curator, $event);
+
+        $this->assertSame([], $this->sentTo(EventDeclined::class)->all());
+        $this->assertFalse((bool) $event->roles()->where('roles.id', $curator->id)->first()->pivot->is_accepted);
+    }
+
     public function test_the_mail_renders_without_a_creator_role(): void
     {
         $creator = $this->createOwner();
@@ -183,10 +201,11 @@ class EventDeclineNotificationTest extends TestCase
         $event->creator_role_id = null;
         $event->save();
 
-        $mailable = new EventDeclined($event->fresh(), $curator);
+        $mailable = new EventDeclined($event->fresh(), $curator, $creator);
 
         // Both of these used to dereference a null creatorRole and fatal inside SendQueuedEmail.
-        $this->assertSame([], $mailable->headers()->text);
+        // The unsubscribe link no longer depends on it, so the header is always there.
+        $this->assertArrayHasKey('List-Unsubscribe', $mailable->headers()->text);
         $this->assertStringContainsString($event->name, $mailable->render());
 
         // Mailer::render() renders ONLY the html view (renderView($view ?: $plain)), while a real

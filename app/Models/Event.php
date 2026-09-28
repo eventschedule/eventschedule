@@ -1576,8 +1576,12 @@ class Event extends Model
     /**
      * $timezone pins the rendering to a specific zone (pass scheduleTimezone() to show the
      * event in the venue's local time); otherwise it follows the viewer's.
+     *
+     * $locale and $use24 are for callers with no request to read them from - a queued email has
+     * no subdomain and no signed-in user, so without them the date always came out as English
+     * 12-hour text, even inside a Hebrew message. When given they win over the schedule's.
      */
-    public function localStartsAt($pretty = false, $date = null, $endTime = false, ?string $timezone = null)
+    public function localStartsAt($pretty = false, $date = null, $endTime = false, ?string $timezone = null, ?string $locale = null, ?bool $use24 = null)
     {
         if (! $this->starts_at) {
             return '';
@@ -1603,15 +1607,21 @@ class Event extends Model
             }
         }
 
+        if ($use24 !== null) {
+            $enable24 = $use24;
+        }
+
+        $language = $locale ?: ($role ? $role->language_code : null);
+
         $startAt = $this->getStartDateTime($date, true, $timezone);
 
         // Multi-day events in pretty mode: show date range instead of single datetime
         if ($pretty && $this->is_multi_day) {
             $endAt = $startAt->copy()->addMinutes($this->durationInMinutes());
 
-            if ($role && $role->language_code) {
-                $startAt->setLocale($role->language_code);
-                $endAt->setLocale($role->language_code);
+            if ($language) {
+                $startAt->setLocale($language);
+                $endAt->setLocale($language);
                 if ($startAt->year !== $endAt->year) {
                     return $startAt->translatedFormat('F j, Y').' - '.$endAt->translatedFormat('F j, Y');
                 } elseif ($startAt->month !== $endAt->month) {
@@ -1632,9 +1642,9 @@ class Event extends Model
 
         $format = $pretty ? ($enable24 ? 'D, M jS • H:i' : 'D, M jS • g:i A') : 'Y-m-d H:i:s';
 
-        // Set locale for date translation if pretty is true and role has language_code
-        if ($pretty && $role && $role->language_code) {
-            $startAt->setLocale($role->language_code);
+        // Set locale for date translation if pretty is true and a language is known
+        if ($pretty && $language) {
+            $startAt->setLocale($language);
             $localizedFormat = $enable24 ? 'l, j F • H:i' : 'l, j F • g:i A';
             $value = $startAt->translatedFormat($localizedFormat);
         } else {
@@ -1649,7 +1659,7 @@ class Event extends Model
             if ($startDate == $endDate) {
                 $value .= ' '.__('messages.to').' '.$startAt->format($enable24 ? 'H:i' : 'g:i A');
             } else {
-                if ($pretty && $role && $role->language_code) {
+                if ($pretty && $language) {
                     $localizedFormat = $enable24 ? 'l, j F • H:i' : 'l, j F • g:i A';
                     $value = $value.'<br/>'.__('messages.to').'<br/>'.$startAt->translatedFormat($localizedFormat);
                 } else {

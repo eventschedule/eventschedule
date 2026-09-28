@@ -6,4 +6,4 @@
 
 {{ __('messages.activation_nudge_cta_'.$nudgeKey) }}: {{ $ctaUrl }}
 
-{{ __('messages.unsubscribe') }}: {{ $unsubscribeUrl }}
+{{ __('messages.unsubscribe') }}: {!! $unsubscribeUrl !!}{{-- Raw: plain text has no entity decoding, so an escaped &amp; breaks the signed link. --}}

@@ -204,6 +204,14 @@
                 <x-toggle name="ask_before_following" label="{{ __('messages.ask_before_following') }}"
                     checked="{{ old('ask_before_following', ! $user->follow_consent_dismissed) }}" />
             </div>
+
+            {{-- users.is_subscribed: the account-wide opt-out the signed unsubscribe link in our
+                 emails sets. Without this there was no way back once somebody clicked it. --}}
+            <div>
+                <x-toggle name="is_subscribed" label="{{ __('messages.email_updates') }}"
+                    help="{{ __('messages.email_updates_help') }}"
+                    checked="{{ old('is_subscribed', $user->is_subscribed) }}" />
+            </div>
         </div>
 
         {{-- Appearance Tab.

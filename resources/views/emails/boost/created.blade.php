@@ -15,7 +15,7 @@
 
         <p>{{ __('messages.boost_email_created_body') }}</p>
 
-        <div style="background-color: white; padding: 20px; border-radius: 8px; margin: 20px 0; border-left: 4px solid #4E81FA;">
+        <div style="background-color: white; padding: 20px; border-radius: 8px; margin: 20px 0;">
             <h2 style="margin-top: 0; color: #4E81FA;">{{ $event?->name ?? __('messages.deleted_event') }}</h2>
             <p style="margin: 10px 0;"><strong>{{ __('messages.budget') }}:</strong> {{ $campaign->getCurrencySymbol() }}{{ number_format($campaign->user_budget, 2) }}</p>
             <p style="margin: 10px 0;"><strong>{{ __('messages.total_charged') }}:</strong> {{ $campaign->getCurrencySymbol() }}{{ number_format($campaign->getTotalCost(), 2) }}</p>

@@ -2,6 +2,8 @@
 
 namespace App\Mail;
 
+use App\Models\User;
+use App\Utils\UrlUtils;
 use Illuminate\Bus\Queueable;
 use Illuminate\Mail\Mailable;
 use Illuminate\Mail\Mailables\Address;
@@ -19,12 +21,20 @@ class EventAccepted extends Mailable
     protected $role;
 
     /**
+     * The person being told - EventController::requestDecisionRecipient(). Carried so the footer
+     * and the List-Unsubscribe header can sign THEIR address: the old footer linked to the creator
+     * schedule's email, unsigned, and unsubscribed nobody.
+     */
+    protected User $recipient;
+
+    /**
      * Create a new message instance.
      */
-    public function __construct($event, $role)
+    public function __construct($event, $role, User $recipient)
     {
         $this->event = $event;
         $this->role = $role;
+        $this->recipient = $recipient;
     }
 
     /**
@@ -32,7 +42,6 @@ class EventAccepted extends Mailable
      */
     public function envelope(): Envelope
     {
-        $event = $this->event;
         $role = $this->role;
 
         return new Envelope(
@@ -50,7 +59,7 @@ class EventAccepted extends Mailable
     {
         $event = $this->event;
         $role = $this->role;
-        $creatorRole = $event->creatorRole;
+        $locale = app()->getLocale();
 
         return new Content(
             view: 'mail.event.accepted',
@@ -58,8 +67,13 @@ class EventAccepted extends Mailable
             with: [
                 'event' => $event,
                 'role' => $role,
-                'creatorRole' => $creatorRole,
+                'recipient' => $this->recipient,
                 'subject' => str_replace(':venue', $role->name, __('messages.request_accepted_subject')),
+                // A queued send has no request, so the date is rendered in the language this
+                // message is being sent in, and in the recipient's own 12/24-hour preference.
+                'eventDate' => $event->localStartsAt(true, null, false, null, $locale, $this->recipient->use_24_hour_time),
+                'unsubscribeUrl' => $this->unsubscribeUrl(),
+                'isRtl' => is_rtl(),
             ]
         );
     }
@@ -76,19 +90,16 @@ class EventAccepted extends Mailable
 
     public function headers(): Headers
     {
-        $creatorRole = $this->event->creatorRole;
-
-        // creator_role_id is nullable, and dereferencing it here would fatal inside SendQueuedEmail
-        // rather than fail the send visibly. No creator schedule means no list to unsubscribe from.
-        if (! $creatorRole) {
-            return new Headers;
-        }
-
         return new Headers(
             text: [
-                'List-Unsubscribe' => '<'.route('role.unsubscribe', ['subdomain' => $creatorRole->subdomain]).'>',
+                'List-Unsubscribe' => '<'.$this->unsubscribeUrl().'>',
                 'List-Unsubscribe-Post' => 'List-Unsubscribe=One-Click',
             ],
         );
+    }
+
+    private function unsubscribeUrl(): string
+    {
+        return UrlUtils::userUnsubscribeUrl($this->recipient->email, app()->getLocale());
     }
 }

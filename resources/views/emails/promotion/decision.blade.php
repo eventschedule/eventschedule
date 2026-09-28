@@ -17,7 +17,7 @@
 
         <p>{{ $approved ? __('messages.promotion_email_approved_body') : __('messages.promotion_email_rejected_body') }}</p>
 
-        <div style="background-color: white; padding: 20px; border-radius: 8px; margin: 20px 0; border-left: 4px solid {{ $approved ? '#28a745' : '#dc3545' }};">
+        <div style="background-color: {{ $approved ? '#f0fdf4' : '#fef2f2' }}; padding: 20px; border-radius: 8px; margin: 20px 0; border: 1px solid {{ $approved ? '#86efac' : '#fca5a5' }};">
             <h2 style="margin-top: 0; color: {{ $approved ? '#28a745' : '#dc3545' }};">{{ $event?->name ?? __('messages.deleted_event') }}</h2>
             @if (! $approved && $notes)
             <p style="margin: 10px 0;"><strong>{{ __('messages.reason') }}:</strong> {{ $notes }}</p>
@@ -25,7 +25,7 @@
         </div>
 
         @if (! $approved)
-        <div style="background-color: #d4edda; padding: 15px; border-radius: 5px; margin: 20px 0; border-left: 4px solid #28a745;">
+        <div style="background-color: #d4edda; padding: 15px; border-radius: 5px; margin: 20px 0; border: 1px solid #86efac;">
             <p style="margin: 0; color: #155724;"><strong>{{ __('messages.boost_full_refund_issued') }}</strong></p>
         </div>
         @endif

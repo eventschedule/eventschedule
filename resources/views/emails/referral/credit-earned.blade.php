@@ -15,7 +15,7 @@
 
         <p>{{ __('messages.referral_credit_earned_body', ['value' => $creditValue, 'plan' => ucfirst($planType)]) }}</p>
 
-        <div style="background-color: white; padding: 20px; border-radius: 8px; margin: 20px 0; border-left: 4px solid #4E81FA;">
+        <div style="background-color: white; padding: 20px; border-radius: 8px; margin: 20px 0;">
             <p style="margin: 5px 0;"><strong>{{ __('messages.credit_value') }}:</strong> {{ $creditValue }}</p>
             <p style="margin: 5px 0;"><strong>{{ __('messages.plan_tier') }}:</strong> {{ ucfirst($planType) }}</p>
         </div>

@@ -15,7 +15,7 @@
 
         <p>{{ __('messages.gift_card_receipt_intro', ['schedule' => $role->name]) }}</p>
 
-        <div style="background-color: white; padding: 20px; border-radius: 8px; margin: 20px 0; border-left: 4px solid #4E81FA;">
+        <div style="background-color: white; padding: 20px; border-radius: 8px; margin: 20px 0;">
             <p style="margin: 10px 0;"><strong>{{ __('messages.amount') }}:</strong> {{ \App\Utils\MoneyUtils::format($giftCard->amount, $giftCard->currency_code) }}</p>
             <p style="margin: 10px 0;"><strong>{{ __('messages.recipient') }}:</strong> {{ $giftCard->recipient_name }} ({{ $giftCard->recipient_email }})</p>
             <p style="margin: 10px 0;"><strong>{{ __('messages.gift_card_code') }}:</strong> <span dir="ltr" style="font-family: 'Courier New', monospace; font-weight: bold;">{{ $giftCard->formattedCode() }}</span></p>

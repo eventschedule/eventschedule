@@ -13,7 +13,7 @@
     <div style="background-color: #f9f9f9; padding: 20px; border-radius: 0 0 8px 8px;">
         <p style="font-size: 16px; margin-top: 0;">{{ __('messages.new_sale_notification_greeting', ['name' => $recipient?->name ?? __('messages.hello')]) }},</p>
 
-        <div style="background-color: white; padding: 20px; border-radius: 8px; margin: 20px 0; border-left: 4px solid #4E81FA;">
+        <div style="background-color: white; padding: 20px; border-radius: 8px; margin: 20px 0;">
             <p style="margin: 0 0 10px 0; font-size: 18px; color: #333;">
                 <strong>{{ $event->name }}</strong>
             </p>

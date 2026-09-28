@@ -60,6 +60,7 @@ use Carbon\Carbon;
 use Illuminate\Auth\Events\Lockout;
 use Illuminate\Database\QueryException;
 use Illuminate\Http\Request;
+use Illuminate\Mail\Mailable;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\DB;
@@ -1333,12 +1334,7 @@ class EventController extends Controller
         // Tell whoever asked this schedule for a listing - if anybody actually did. Same rule as
         // decline(): events.user_id is the creator, not a record of who requested THIS schedule.
         if ($recipient = $this->requestDecisionRecipient($event, $role)) {
-            SendQueuedEmail::dispatch(
-                new EventAccepted($event, $role),
-                $recipient->email,
-                null,
-                $recipient->language_code
-            );
+            $this->mailRequestDecision(new EventAccepted($event, $role, $recipient), $recipient);
 
             OneSignalService::pushToUser($recipient, [
                 'title_key' => 'messages.push_event_accepted_title',
@@ -1427,12 +1423,7 @@ class EventController extends Controller
 
         // Tell whoever asked this schedule for a listing - if anybody actually did.
         if ($recipient = $this->requestDecisionRecipient($event, $role)) {
-            SendQueuedEmail::dispatch(
-                new EventDeclined($event, $role),
-                $recipient->email,
-                null,
-                $recipient->language_code
-            );
+            $this->mailRequestDecision(new EventDeclined($event, $role, $recipient), $recipient);
 
             OneSignalService::pushToUser($recipient, [
                 'title_key' => 'messages.push_event_declined_title',
@@ -1513,6 +1504,24 @@ class EventController extends Controller
         }
 
         return $user;
+    }
+
+    /**
+     * The email half of telling a submitter about a decision. The push that follows it at each
+     * call site is gated separately, by push_settings inside OneSignalService.
+     *
+     * users.is_subscribed is the account-wide opt-out that the signed link in this email's footer
+     * sets. A loose check, never `=== false`: the column has no cast, so MySQL hands back int 0 and
+     * a strict comparison would never fire - which is the bug that kept these arriving after
+     * somebody unsubscribed.
+     */
+    private function mailRequestDecision(Mailable $mail, User $recipient): void
+    {
+        if (! $recipient->is_subscribed) {
+            return;
+        }
+
+        SendQueuedEmail::dispatch($mail, $recipient->email, null, $recipient->language_code);
     }
 
     public function publish(Request $request, $subdomain, $hash)
@@ -1610,12 +1619,7 @@ class EventController extends Controller
 
                 // Same recipient rule as accept() and decline() - see requestDecisionRecipient().
                 if ($recipient = $this->requestDecisionRecipient($event, $role)) {
-                    SendQueuedEmail::dispatch(
-                        new EventAccepted($event, $role),
-                        $recipient->email,
-                        null,
-                        $recipient->language_code
-                    );
+                    $this->mailRequestDecision(new EventAccepted($event, $role, $recipient), $recipient);
 
                     OneSignalService::pushToUser($recipient, [
                         'title_key' => 'messages.push_event_accepted_title',

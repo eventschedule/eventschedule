@@ -348,7 +348,14 @@ if (config('app.hosted') && ! config('app.is_testing')) {
 }
 Route::get('/unsubscribe', [RoleController::class, 'showUnsubscribe'])->name('role.show_unsubscribe');
 Route::post('/unsubscribe', [RoleController::class, 'unsubscribe'])->name('role.unsubscribe')->middleware('throttle:2,2');
-Route::get('/user/unsubscribe', [RoleController::class, 'unsubscribeUser'])->name('user.unsubscribe')->middleware('throttle:2,2');
+// Account-wide email opt-out (users.is_subscribed). Same GET-shows / POST-acts split as /sub/u and
+// /int/u below: the link ships in high-volume mail (event request decisions, the owner digest, the
+// nudges), and a mutating GET is fetched by corporate mail scanners, which would opt people out of
+// every email we send without their ever clicking. The POST is CSRF-exempt in bootstrap/app.php so a
+// mail client's RFC 8058 one-click works; the HMAC over the email is what authorises it. Throttled
+// per signed address, not per IP - see user_unsubscribe in AppServiceProvider.
+Route::get('/user/unsubscribe', [RoleController::class, 'showUnsubscribeUser'])->name('user.unsubscribe')->middleware('throttle:user_unsubscribe');
+Route::post('/user/unsubscribe', [RoleController::class, 'unsubscribeUser'])->name('user.unsubscribe.confirm')->middleware('throttle:user_unsubscribe');
 Route::post('/clear-pending-request', [EventController::class, 'clearPendingRequest'])->name('event.clear_pending_request');
 
 // Newsletter tracking routes (public, no auth)

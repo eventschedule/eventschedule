@@ -17,7 +17,7 @@
 
         {{-- Only the host, and never as a link: the install's name and site_url are whatever its
              registration sent. See FederatedInstance::displayHost(). --}}
-        <div style="background-color: white; padding: 20px; border-radius: 8px; margin: 20px 0; border-{{ $isRtl ? 'right' : 'left' }}: 4px solid #4E81FA;">
+        <div style="background-color: white; padding: 20px; border-radius: 8px; margin: 20px 0;">
             <p dir="ltr" style="margin: 0; text-align: {{ $isRtl ? 'right' : 'left' }};"><strong>{{ $host }}</strong></p>
         </div>
 

@@ -35,10 +35,6 @@ class OnboardingNudge extends Mailable
 
     public function content(): Content
     {
-        // The signature covers the BASE64 value, not the raw address: unsubscribeUser()
-        // verifies against $request->email before decoding it, so signing the raw address
-        // would produce a link that always fails. Matches CarpoolNotification.
-        $encodedEmail = base64_encode($this->user->email);
 
         return new Content(
             view: 'emails.onboarding_nudge',
@@ -47,10 +43,7 @@ class OnboardingNudge extends Mailable
                 'user' => $this->user,
                 'stage' => $this->stage,
                 'startUrl' => app_url('/getting-started'),
-                'unsubscribeUrl' => route('user.unsubscribe', [
-                    'email' => $encodedEmail,
-                    'sig' => UrlUtils::signEmail($encodedEmail),
-                ]),
+                'unsubscribeUrl' => UrlUtils::userUnsubscribeUrl($this->user->email, app()->getLocale()),
             ],
         );
     }

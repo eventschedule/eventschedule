@@ -89,6 +89,9 @@ class ProfileController extends Controller
         if ($request->has('ask_before_following')) {
             $validated['follow_consent_dismissed'] = ! $request->boolean('ask_before_following');
         }
+        if ($request->has('is_subscribed')) {
+            $validated['is_subscribed'] = $request->boolean('is_subscribed');
+        }
 
         // Validate default_role_id - user must be editor of the selected role
         if (! empty($validated['default_role_id'])) {

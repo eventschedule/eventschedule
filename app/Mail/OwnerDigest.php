@@ -37,10 +37,13 @@ class OwnerDigest extends Mailable
         );
     }
 
-    /** A plain link, not One-Click: user.unsubscribe is a GET, and it is what the footer links to. */
+    /** One-Click (RFC 8058): the GET behind the footer link confirms, a POST to the same URL acts. */
     public function headers(): Headers
     {
-        return new Headers(text: ['List-Unsubscribe' => '<'.$this->unsubscribeUrl().'>']);
+        return new Headers(text: [
+            'List-Unsubscribe' => '<'.$this->unsubscribeUrl().'>',
+            'List-Unsubscribe-Post' => 'List-Unsubscribe=One-Click',
+        ]);
     }
 
     public function content(): Content
@@ -61,11 +64,8 @@ class OwnerDigest extends Mailable
         );
     }
 
-    /** Signed over the BASE64 value, as unsubscribeUser() verifies it. Matches ActivationNudge. */
     private function unsubscribeUrl(): string
     {
-        $encodedEmail = base64_encode($this->user->email);
-
-        return route('user.unsubscribe', ['email' => $encodedEmail, 'sig' => UrlUtils::signEmail($encodedEmail)]);
+        return UrlUtils::userUnsubscribeUrl($this->user->email, app()->getLocale());
     }
 }

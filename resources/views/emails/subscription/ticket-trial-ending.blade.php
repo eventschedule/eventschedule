@@ -15,7 +15,7 @@
 
         <p>{{ __('messages.ticket_trial_ending_body', ['schedule' => $role->name, 'date' => $endDate]) }}</p>
 
-        <div style="background-color: white; padding: 15px; border-radius: 5px; margin: 20px 0; border-left: 4px solid #4E81FA;">
+        <div style="background-color: white; padding: 15px; border-radius: 5px; margin: 20px 0;">
             <p style="margin: 0; color: #333;">{{ __('messages.ticket_trial_ending_buyers') }}</p>
         </div>
 

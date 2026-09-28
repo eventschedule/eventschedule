@@ -199,6 +199,14 @@ class AppServiceProvider extends ServiceProvider
             });
         }
 
+        // The account-wide opt-out has no token; its signed email is the equivalent, and is keyed
+        // for the same reason. Covers the GET too, which only renders.
+        RateLimiter::for('user_unsubscribe', function ($request) {
+            $email = $request->query('email');
+
+            return Limit::perMinutes(2, 10)->by('user_unsubscribe|'.(is_string($email) ? $email : $request->ip()));
+        });
+
         // The subscriber manage page, keyed on its token for the same reason as the pair above: it
         // ships in an email footer, so a per-IP budget would be shared by everyone behind one
         // corporate gateway. Tighter than unsubscribe because the POST sends mail - and mail is

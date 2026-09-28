@@ -5596,4 +5596,11 @@ return [
     'next_step_add_gallery' => 'Lisa fotod sündmuselt :event',
     'plan_gate_gallery_bullet' => 'Fotogaleriid sinu sündmustel ja ajakaval',
     'gallery_failed_before_save' => 'Mõnda fotot ei õnnestunud üles laadida (:count). Proovi uuesti või eemalda need ja salvesta siis uuesti.',
+    'request_decision_why' => 'Saad selle, sest palusid, et :schedule lisaks sinu sündmuse.',
+    'account_unsubscribe_heading' => 'Kas lõpetada need kirjad?',
+    'account_unsubscribe_body' => 'Sa ei saa enam uudiskirju, nõuandeid, nädalakokkuvõtteid ega teateid oma sündmusetaotluste kohta. Kviitungid, parooli lähtestamised ja teavitused, mille oled oma ajakavade jaoks sisse lülitanud, saabuvad endiselt.',
+    'account_resubscribe_link' => 'Mõtlesid ümber? Lülita kirjad seadetes uuesti sisse',
+    'invalid_unsubscribe_link' => 'See tellimusest loobumise link ei kehti. Kasuta hiljutise kirja linki.',
+    'email_updates' => 'Uudised e-postiga',
+    'email_updates_help' => 'Uudiskirjad, nõuanded, nädalakokkuvõtted ja teated sinu sündmusetaotluste kohta. Kviitungid ja parooli lähtestamised saadetakse alati.',
 ];

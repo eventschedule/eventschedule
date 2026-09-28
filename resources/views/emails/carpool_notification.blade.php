@@ -26,7 +26,7 @@
     <div style="background-color: #f9f9f9; padding: 20px; border-radius: 0 0 8px 8px;">
         <p style="font-size: 16px; margin-top: 0;">{{ __('messages.hello') }} {{ $recipient?->name }},</p>
 
-        <div style="background-color: white; padding: 20px; border-radius: 8px; margin: 20px 0; border-left: 4px solid {{ $role?->accent_color ?? '#4E81FA' }};">
+        <div style="background-color: white; padding: 20px; border-radius: 8px; margin: 20px 0;">
             <p style="margin: 0 0 10px 0; font-size: 18px; color: #333;">
                 <strong>{{ $event->name }}</strong>
             </p>
@@ -63,7 +63,7 @@
             {{ __('messages.carpool_email_ride_requested_body', ['name' => $carpoolRequest->user->name]) }}
         </p>
         @if ($carpoolRequest->message)
-        <div style="background-color: white; padding: 15px; border-radius: 8px; margin: 10px 0; border-left: 4px solid #eee;">
+        <div style="background-color: #f3f4f6; padding: 15px; border-radius: 8px; margin: 10px 0;">
             <p style="margin: 0; font-size: 14px; color: #666; font-style: italic;">{{ $carpoolRequest->message }}</p>
         </div>
         @endif
@@ -73,7 +73,7 @@
         <p style="font-size: 14px; color: #333;">
             {{ __('messages.carpool_email_request_approved_body') }}
         </p>
-        <div style="background-color: white; padding: 15px; border-radius: 8px; margin: 10px 0; border-left: 4px solid #10b981;">
+        <div style="background-color: #f0fdf4; padding: 15px; border-radius: 8px; margin: 10px 0; border: 1px solid #86efac;">
             <p style="margin: 0 0 5px 0; font-size: 14px;">
                 <strong>{{ __('messages.carpool_driver') }}:</strong> {{ $offer->user->name }}
             </p>
@@ -111,7 +111,7 @@
             {{ __('messages.carpool_email_reminder_body') }}
         </p>
         @if ($carpoolRequest && $carpoolRequest->status === 'approved' && $recipient?->id !== $offer->user_id)
-        <div style="background-color: white; padding: 15px; border-radius: 8px; margin: 10px 0; border-left: 4px solid #10b981;">
+        <div style="background-color: #f0fdf4; padding: 15px; border-radius: 8px; margin: 10px 0; border: 1px solid #86efac;">
             <p style="margin: 0 0 5px 0; font-size: 14px;">
                 <strong>{{ __('messages.carpool_driver') }}:</strong> {{ $offer->user->name }}
             </p>

@@ -44,11 +44,6 @@ class ActivationNudge extends Mailable
     {
         $user = $this->role->user;
 
-        // The signature covers the BASE64 value, not the raw address: unsubscribeUser()
-        // verifies against $request->email before decoding it, so signing the raw address
-        // would produce a link that always fails. Matches OnboardingNudge.
-        $encodedEmail = base64_encode($user->email);
-
         return new Content(
             view: 'emails.activation_nudge',
             text: 'emails.activation_nudge_text',
@@ -62,10 +57,7 @@ class ActivationNudge extends Mailable
                 // unmarked RTL body renders the Latin name in the wrong place. Same test
                 // EventChanged and EventCancelled use.
                 'isRtl' => in_array(app()->getLocale(), ['ar', 'he']),
-                'unsubscribeUrl' => route('user.unsubscribe', [
-                    'email' => $encodedEmail,
-                    'sig' => UrlUtils::signEmail($encodedEmail),
-                ]),
+                'unsubscribeUrl' => UrlUtils::userUnsubscribeUrl($user->email, app()->getLocale()),
             ],
         );
     }

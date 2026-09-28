@@ -15,11 +15,11 @@
 
         <p>{{ __($hasCard ? 'messages.subscription_renewal_body' : 'messages.subscription_renewal_body_no_card', ['schedule' => $role->name, 'plan' => $planLabel, 'date' => $renewalDate, 'amount' => $amount]) }}</p>
 
-        <div style="background-color: white; padding: 15px; border-radius: 5px; margin: 20px 0; border-left: 4px solid #4E81FA;">
+        <div style="background-color: white; padding: 15px; border-radius: 5px; margin: 20px 0;">
             <p style="margin: 0; color: #333;">{{ __($hasCard ? 'messages.subscription_renewal_continue' : 'messages.subscription_renewal_continue_no_card') }}</p>
         </div>
 
-        <div style="background-color: #fff3cd; padding: 15px; border-radius: 5px; margin: 20px 0; border-left: 4px solid #ffc107;">
+        <div style="background-color: #fff3cd; padding: 15px; border-radius: 5px; margin: 20px 0; border: 1px solid #fcd34d;">
             <p style="margin: 0; color: #856404;">{{ __($hasCard ? 'messages.subscription_renewal_cancel' : 'messages.subscription_renewal_cancel_no_card', ['date' => $renewalDate, 'plan' => $planLabel]) }}</p>
         </div>
 

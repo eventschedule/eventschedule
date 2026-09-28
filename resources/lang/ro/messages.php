@@ -5615,4 +5615,11 @@ return [
     'next_step_add_gallery' => 'Adăugați fotografii de la :event',
     'plan_gate_gallery_bullet' => 'Galerii foto la evenimentele și în programul dvs.',
     'gallery_failed_before_save' => 'Unele fotografii nu au putut fi încărcate (:count). Reîncercați sau eliminați-le, apoi salvați din nou.',
+    'request_decision_why' => 'Primești acest e-mail pentru că ai cerut ca :schedule să îți publice evenimentul.',
+    'account_unsubscribe_heading' => 'Oprești aceste e-mailuri?',
+    'account_unsubscribe_body' => 'Nu vei mai primi buletine informative, sfaturi, rezumate săptămânale sau noutăți despre cererile tale de evenimente. Chitanțele, resetările de parolă și notificările pe care le-ai activat pentru programele tale vor sosi în continuare.',
+    'account_resubscribe_link' => 'Te-ai răzgândit? Reactivează e-mailurile din setări',
+    'invalid_unsubscribe_link' => 'Acest link de dezabonare nu este valid. Folosește linkul dintr-un e-mail recent.',
+    'email_updates' => 'Noutăți prin e-mail',
+    'email_updates_help' => 'Buletine informative, sfaturi, rezumate săptămânale și noutăți despre cererile tale de evenimente. Chitanțele și resetările de parolă sunt trimise întotdeauna.',
 ];

@@ -5596,4 +5596,11 @@ return [
     'next_step_add_gallery' => 'Adicione fotos de :event',
     'plan_gate_gallery_bullet' => 'Galerias de fotos nos seus eventos e na sua agenda',
     'gallery_failed_before_save' => 'Algumas fotos não puderam ser carregadas (:count). Tente novamente ou remova-as e depois guarde de novo.',
+    'request_decision_why' => 'Você recebeu isto porque pediu a :schedule para publicar o seu evento.',
+    'account_unsubscribe_heading' => 'Deixar de receber estes e-mails?',
+    'account_unsubscribe_body' => 'Você deixará de receber newsletters, dicas, resumos semanais e novidades sobre os seus pedidos de eventos. Recibos, redefinições de senha e notificações que ativou para as suas agendas continuarão a chegar.',
+    'account_resubscribe_link' => 'Mudou de ideia? Reative os e-mails nas suas definições',
+    'invalid_unsubscribe_link' => 'Este link de cancelamento de inscrição não é válido. Use o link de um e-mail recente.',
+    'email_updates' => 'Novidades por e-mail',
+    'email_updates_help' => 'Newsletters, dicas, resumos semanais e novidades sobre os seus pedidos de eventos. Recibos e redefinições de senha são sempre enviados.',
 ];

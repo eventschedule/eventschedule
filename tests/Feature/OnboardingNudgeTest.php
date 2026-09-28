@@ -303,8 +303,13 @@ class OnboardingNudgeTest extends TestCase
         preg_match('~/user/unsubscribe\?[^"\']+~', $html, $m);
         $this->assertNotEmpty($m, 'the email must carry an unsubscribe link');
 
-        $this->get(html_entity_decode($m[0]));
+        $url = html_entity_decode($m[0]);
 
+        // The GET only confirms - a mail scanner prefetching it must not opt anybody out.
+        $this->get($url)->assertOk();
+        $this->assertTrue((bool) $user->refresh()->is_subscribed);
+
+        $this->post($url)->assertOk();
         $this->assertFalse((bool) $user->refresh()->is_subscribed);
     }
 }

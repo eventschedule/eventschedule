@@ -2,7 +2,7 @@
 @php
     $currency = $plan->currency;
 @endphp
-<div style="background-color: white; padding: 20px; border-radius: 8px; margin: 20px 0; border-left: 4px solid #4E81FA;">
+<div style="background-color: white; padding: 20px; border-radius: 8px; margin: 20px 0;">
     <p style="margin: 0 0 12px 0; font-weight: bold; color: #4E81FA;">{{ __('messages.your_payment_schedule') }}</p>
     <table style="width: 100%; border-collapse: collapse; font-size: 14px;">
         @foreach ($plan->installments as $row)

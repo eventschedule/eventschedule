@@ -5597,4 +5597,11 @@ return [
     'next_step_add_gallery' => 'Voeg foto\'s van :event toe',
     'plan_gate_gallery_bullet' => 'Fotogalerijen bij je evenementen en op je agenda',
     'gallery_failed_before_save' => 'Sommige foto\'s konden niet worden geüpload (:count). Probeer het opnieuw of verwijder ze en sla daarna opnieuw op.',
+    'request_decision_why' => 'Je ontvangt dit omdat je :schedule hebt gevraagd je evenement op te nemen.',
+    'account_unsubscribe_heading' => 'Deze e-mails stopzetten?',
+    'account_unsubscribe_body' => 'Je ontvangt geen nieuwsbrieven, tips, wekelijkse overzichten of updates over je evenementaanvragen meer. Bonnen, wachtwoordherstel en meldingen die je voor je agenda\'s hebt aangezet, blijven binnenkomen.',
+    'account_resubscribe_link' => 'Van gedachten veranderd? Zet e-mails weer aan in je instellingen',
+    'invalid_unsubscribe_link' => 'Deze afmeldlink is ongeldig. Gebruik de link uit een recente e-mail.',
+    'email_updates' => 'Updates per e-mail',
+    'email_updates_help' => 'Nieuwsbrieven, tips, wekelijkse overzichten en updates over je evenementaanvragen. Bonnen en wachtwoordherstel worden altijd verstuurd.',
 ];
