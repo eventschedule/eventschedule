@@ -3576,6 +3576,18 @@
                                 help="{{ __('messages.notification_installment_due_help') }}" />
                         </div>
 
+                        {{-- Defaults ON. One email a week for all of your schedules, sent only in a
+                             week with something to report (app:send-owner-digests). The owner is
+                             the only one who receives it. --}}
+                        @if (! $role->exists || $role->user_id === auth()->id())
+                        <div class="mb-6">
+                            <x-toggle name="notification_weekly_digest"
+                                label="{{ __('messages.notify_weekly_digest') }}"
+                                checked="{{ old('notification_weekly_digest', $notificationSettings['weekly_digest'] ?? true) }}"
+                                help="{{ __('messages.notify_weekly_digest_help') }}" />
+                        </div>
+                        @endif
+
                         @if ($role->exists)
                         {{-- The shared notification address (issue #124): one for the whole schedule,
                              unlike every toggle above, which is the signed-in person's own. A copy,

@@ -469,7 +469,7 @@ class AppController extends Controller
                 // app:send-activation-nudges is deliberately NOT called here, and not in
                 // routes/console.php either - the two rails stay in sync, and here that means
                 // absent from both. It is hand-run until a real pass has been read; see the
-                // note in routes/console.php.
+                // note in routes/console.php. The same goes for app:send-owner-digests.
                 try {
                     \Artisan::call('google:refresh-webhooks');
                 } catch (\Throwable $e) {

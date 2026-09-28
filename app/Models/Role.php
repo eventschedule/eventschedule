@@ -1260,9 +1260,9 @@ class Role extends Model implements MustVerifyEmail
             ->filter(function ($user) use ($type) {
                 $settings = json_decode($user->pivot->notification_settings ?? '{}', true);
 
-                // new_request and installment_due default to opt-in when the user has not
-                // explicitly set a preference (RoleController::edit() renders them on).
-                if (in_array($type, ['new_request', 'installment_due'], true) && ! array_key_exists($type, $settings)) {
+                // new_request, installment_due and weekly_digest default to opt-in when the user
+                // has not explicitly set a preference (RoleController::edit() renders them on).
+                if (in_array($type, ['new_request', 'installment_due', 'weekly_digest'], true) && ! array_key_exists($type, $settings)) {
                     return true;
                 }
 

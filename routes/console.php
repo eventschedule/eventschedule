@@ -317,6 +317,9 @@ Schedule::call(function () {
 // windows are wide enough that the first pass over an install that has never run it reaches a
 // large backlog at once. Run it by hand - no flag prints a dry run, --apply sends - and put it
 // back on a schedule once a real pass has been read and looks right.
+//
+// app:send-owner-digests is unscheduled for the same reason, on both rails. When it is scheduled,
+// run it daily: its claim is per ISO week, so the first run of each week is the one that sends.
 
 Schedule::call(function () {
     Artisan::call('app:notify-request-changes');

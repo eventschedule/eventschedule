@@ -62,6 +62,10 @@ return [
     // are already using the app, where a burst of mail costs more than a slow drain.
     'activation_nudge_batch' => (int) (env('ACTIVATION_NUDGE_BATCH') ?: 200),
 
+    // Weekly owner digests per run (one per owner). A run that stops here leaves the rest due on
+    // the next one, since the claim is per ISO week.
+    'owner_digest_batch' => (int) (env('OWNER_DIGEST_BATCH') ?: 500),
+
     // Audience mail (newsletters, and automatic event announcements) from a schedule that has
     // neither its own SMTP nor an SMS-verified owner still goes out on the PLATFORM mailer, so the
     // platform carries the reputation. Rather than refusing outright - which is what the newsletter

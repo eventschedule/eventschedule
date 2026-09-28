@@ -5033,7 +5033,7 @@ class RoleController extends Controller
 
         $pivot = $role->users()->where('user_id', auth()->id())->first()?->pivot;
         $notificationSettings = array_merge(
-            ['new_sale' => false, 'new_request' => true, 'new_fan_content' => false, 'new_feedback' => false, 'new_poll_option' => false, 'installment_due' => true],
+            ['new_sale' => false, 'new_request' => true, 'new_fan_content' => false, 'new_feedback' => false, 'new_poll_option' => false, 'installment_due' => true, 'weekly_digest' => true],
             json_decode($pivot?->notification_settings ?? '{}', true)
         );
 
@@ -5767,7 +5767,7 @@ class RoleController extends Controller
         if (! is_array($notificationSettings)) {
             $notificationSettings = [];
         }
-        foreach (['new_sale', 'new_request', 'new_fan_content', 'new_feedback', 'new_poll_option', 'installment_due'] as $notificationKey) {
+        foreach (['new_sale', 'new_request', 'new_fan_content', 'new_feedback', 'new_poll_option', 'installment_due', 'weekly_digest'] as $notificationKey) {
             if ($request->has('notification_'.$notificationKey)) {
                 $notificationSettings[$notificationKey] = $request->boolean('notification_'.$notificationKey);
             }

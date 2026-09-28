@@ -92,6 +92,8 @@ class CronRailSyncTest extends TestCase
         // were closed; it is now on both rails, hourly, and the parity check above covers it like
         // any other entry.
         'app:send-activation-nudges',
+        // Hand-run until a production pass has been read, like the activation nudges.
+        'app:send-owner-digests',
     ];
 
     private function console(): string

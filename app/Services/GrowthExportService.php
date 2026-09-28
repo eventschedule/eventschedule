@@ -522,6 +522,13 @@ class GrowthExportService
             'monetization' => $this->monetization(),
             'churn' => $this->churn(),
             'nudges' => $this->nudges(),
+            // Weekly owner digests (app:send-owner-digests) per ISO week: owners emailed, and how
+            // many schedules those emails covered. Empty until the command has been run.
+            'owner_digests' => DB::table('owner_digests')
+                ->selectRaw('week, COUNT(*) as owners, SUM(schedules) as schedules')
+                ->groupBy('week')->orderByDesc('week')->limit(12)->get()
+                ->mapWithKeys(fn ($row) => [$row->week => ['owners' => (int) $row->owners, 'schedules' => (int) $row->schedules]])
+                ->all(),
             'retention' => $this->retentionFrom($schedules),
             'traffic' => $this->traffic(),
             'claims' => $this->claims($months),
