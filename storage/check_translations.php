@@ -1,61 +1,124 @@
 <?php
 
-$baseFile = 'resources/lang/en/messages.php';
-$langFiles = [
-    'resources/lang/ar/messages.php',
-    'resources/lang/de/messages.php',
-    'resources/lang/es/messages.php',
-    'resources/lang/et/messages.php',
-    'resources/lang/fr/messages.php',
-    'resources/lang/he/messages.php',
-    'resources/lang/it/messages.php',
-    'resources/lang/nl/messages.php',
-    'resources/lang/pt/messages.php',
-    'resources/lang/ru/messages.php',
-    'resources/lang/ro/messages.php'
-];
+// Audits resources/lang/* against English. Run from the repo root:
+//
+//     php storage/check_translations.php
+//
+// Reports, per file and locale:
+//   - missing / extra keys
+//   - duplicate top-level keys (PHP keeps the LAST value, so the earlier line is dead but looks real)
+//   - :placeholder mismatches (a translated or dropped placeholder renders literally or loses its value)
+//   - values still identical to English (informational: some are genuine cognates or brand names)
+//
+// The first three are also enforced by tests/Unit/TranslationFilesTest.php.
 
-// Load base (English) translations
-$baseTranslations = require($baseFile);
-$baseKeys = array_keys($baseTranslations);
+$files = ['messages.php', 'marketing.php', 'accessibility.php'];
+$locales = array_values(array_filter(
+    array_map('basename', glob('resources/lang/*', GLOB_ONLYDIR)),
+    fn ($locale) => $locale !== 'en'
+));
 
-$results = [];
-
-foreach ($langFiles as $langFile) {
-    if (!file_exists($langFile)) {
-        echo "Warning: File not found - $langFile\n";
-        continue;
+$flatten = function (array $array, string $prefix = '') use (&$flatten): array {
+    $out = [];
+    foreach ($array as $key => $value) {
+        if (is_array($value)) {
+            $out += $flatten($value, $prefix.$key.'.');
+        } else {
+            $out[$prefix.$key] = (string) $value;
+        }
     }
 
-    $translations = require($langFile);
-    $langKeys = array_keys($translations);
-    
-    // Check for missing keys
-    $missingKeys = array_diff($baseKeys, $langKeys);
-    
-    // Check for extra keys
-    $extraKeys = array_diff($langKeys, $baseKeys);
-    
-    $results[$langFile] = [
-        'missing' => $missingKeys,
-        'extra' => $extraKeys,
-    ];
+    return $out;
+};
+
+$placeholders = function (string $value): array {
+    preg_match_all('/:([a-zA-Z_]+)/', $value, $matches);
+    $names = array_unique($matches[1]);
+    sort($names);
+
+    return $names;
+};
+
+$duplicateKeys = function (string $path): array {
+    preg_match_all("/^    '([^']+)' =>/m", file_get_contents($path), $matches);
+
+    return array_keys(array_filter(array_count_values($matches[1]), fn ($count) => $count > 1));
+};
+
+$problems = 0;
+
+foreach ($files as $file) {
+    $basePath = "resources/lang/en/$file";
+    $base = $flatten(require $basePath);
+
+    foreach (array_merge(['en'], $locales) as $locale) {
+        $path = "resources/lang/$locale/$file";
+
+        if (! file_exists($path)) {
+            echo "\n$path: FILE NOT FOUND\n";
+            $problems++;
+
+            continue;
+        }
+
+        $report = [];
+
+        if ($duplicates = $duplicateKeys($path)) {
+            $report['Duplicate keys'] = $duplicates;
+        }
+
+        if ($locale !== 'en') {
+            $translations = $flatten(require $path);
+
+            if ($missing = array_keys(array_diff_key($base, $translations))) {
+                $report['Missing keys'] = $missing;
+            }
+
+            if ($extra = array_keys(array_diff_key($translations, $base))) {
+                $report['Extra keys'] = $extra;
+            }
+
+            $mismatched = [];
+            $untranslated = [];
+
+            foreach ($base as $key => $english) {
+                if (! array_key_exists($key, $translations)) {
+                    continue;
+                }
+
+                if ($placeholders($english) !== $placeholders($translations[$key])) {
+                    $mismatched[] = "$key (en: :".implode(' :', $placeholders($english)).')';
+                }
+
+                if ($translations[$key] === $english && preg_match('/[a-z]/i', $english)) {
+                    $untranslated[] = $key;
+                }
+            }
+
+            if ($mismatched) {
+                $report['Placeholder mismatches'] = $mismatched;
+            }
+        }
+
+        $problems += array_sum(array_map('count', $report));
+
+        if ($report) {
+            echo "\n$path:\n";
+
+            foreach ($report as $label => $keys) {
+                echo "$label:\n- ".implode("\n- ", $keys)."\n";
+            }
+        }
+
+        if (! empty($untranslated)) {
+            echo "\n$path: ".count($untranslated)." value(s) identical to English (check they are cognates or names):\n- "
+                .implode("\n- ", $untranslated)."\n";
+        }
+
+        $untranslated = [];
+    }
 }
 
-// Display results
-foreach ($results as $file => $result) {
-    echo "\nChecking $file:\n";
-    
-    if (empty($result['missing']) && empty($result['extra'])) {
-        echo "✓ All keys are correct\n";
-        continue;
-    }
-    
-    if (!empty($result['missing'])) {
-        echo "Missing keys:\n- " . implode("\n- ", $result['missing']) . "\n";
-    }
-    
-    if (!empty($result['extra'])) {
-        echo "Extra keys:\n- " . implode("\n- ", $result['extra']) . "\n";
-    }    
-} 
+echo $problems ? "\n$problems problem(s) found.\n" : "\nNo missing, extra, duplicate or placeholder problems.\n";
+
+exit($problems ? 1 : 0);
