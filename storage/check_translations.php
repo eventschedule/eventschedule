@@ -8,7 +8,8 @@
 //   - missing / extra keys
 //   - duplicate top-level keys (PHP keeps the LAST value, so the earlier line is dead but looks real)
 //   - :placeholder mismatches (a translated or dropped placeholder renders literally or loses its value)
-//   - values still identical to English (informational: some are genuine cognates or brand names)
+//   - values still identical to English, ignoring case (informational: some are genuine cognates or
+//     brand names)
 //
 // The first three are also enforced by tests/Unit/TranslationFilesTest.php.
 
@@ -90,7 +91,9 @@ foreach ($files as $file) {
                     $mismatched[] = "$key (en: :".implode(' :', $placeholders($english)).')';
                 }
 
-                if ($translations[$key] === $english && preg_match('/[a-z]/i', $english)) {
+                // Case-insensitive: re-capitalising the English ("Promo code" to "Promo Code") must
+                // not hide the copies that were made of the old spelling.
+                if (mb_strtolower($translations[$key]) === mb_strtolower($english) && preg_match('/[a-z]/i', $english)) {
                     $untranslated[] = $key;
                 }
             }
