@@ -549,8 +549,8 @@
         // grouped, with what actually lands in it.
         $manifest = [
             ['The event itself', [
-                ['event_name', 'Kept in the language it was written in.'],
-                ['event_short_name', 'A two to five word version, used to build the URL.'],
+                ['event_name', 'Kept in the language it was written in, and as short as it can be while staying clear.'],
+                ['event_short_name', 'The shortest clear version of the name, usually one to three words, used to build the URL.'],
                 ['short_description', 'A one line summary, capped at 200 characters.'],
                 ['event_details', 'The long description, as markdown.'],
                 ['category_name', 'Matched against your own category list: exact first, then partial, then a similarity match above 70 percent.'],

@@ -392,9 +392,9 @@ class GeminiUtils
 
         // Define fields and their descriptions
         $fields = [
-            'event_name' => '',
+            'event_name' => 'The event title, as short as possible while still clear. Do not add the date, time, venue, city, price or a promotional tagline unless they are part of the actual name, since those have their own fields',
             'event_name_en' => 'only if the event_name is not English',
-            'event_short_name' => 'A short version of the event name for URLs (2-5 words max)',
+            'event_short_name' => 'The shortest clear version of the event name, used to build the URL: usually 1 to 3 words, with no date, venue or filler words',
             'event_short_name_en' => 'English translation, only if the event_short_name is not English',
             'short_description' => 'A brief one-line summary of the event (max 200 characters)',
             'short_description_en' => 'English translation, only if the short_description is not English',

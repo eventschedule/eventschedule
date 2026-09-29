@@ -84,7 +84,7 @@ return [
     '/facebook-events-alternative' => '2026-09-25',
     '/faq' => '2026-09-25',
     '/features' => '2026-09-25',
-    '/features/ai' => '2026-09-25',
+    '/features/ai' => '2026-09-29',
     '/features/allocated-seating' => '2026-09-24',
     '/features/analytics' => '2026-09-25',
     '/features/appointments' => '2026-09-24',
