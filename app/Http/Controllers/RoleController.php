@@ -50,6 +50,7 @@ use App\Services\SmsService;
 use App\Services\UsageTrackingService;
 use App\Utils\AiImageIssuance;
 use App\Utils\ColorUtils;
+use App\Utils\CustomFieldUtils;
 use App\Utils\DateUtils;
 use App\Utils\GalleryUtils;
 use App\Utils\GeminiUtils;
@@ -2622,7 +2623,7 @@ class RoleController extends Controller
         // skipped anything. Skipped entirely when the window already starts at or before today,
         // which is every event in the current month.
         //
-        // Not run while a category or sub-schedule filter is active: the client half of this gate
+        // Not run while a category, sub-schedule or custom field filter is active: the client half of this gate
         // compares isEventVisible()-filtered counts, and re-deriving that filtering in SQL is the
         // front/back sync burden this codebase has refused before. Under a filter the client half
         // decides alone - it can under-report the window gap, but it cannot claim events that the
@@ -2630,7 +2631,8 @@ class RoleController extends Controller
         $hasEarlierUpcomingEvents = false;
         $todayStartUtc = Carbon::now($timezone)->startOfDay()->setTimezone('UTC');
 
-        if ($event && ! request('category') && ! request('schedule') && $startOfGridUtc->gt($todayStartUtc)) {
+        if ($event && ! request('category') && ! request('schedule') && ! CustomFieldUtils::filterParams(request()->query())
+            && $startOfGridUtc->gt($todayStartUtc)) {
             $hasEarlierUpcomingEvents = Event::whereNull('days_of_week')
                 // The model's own "upcoming or still running", so a festival that began last week
                 // counts as reachable rather than past.
@@ -5436,6 +5438,11 @@ class RoleController extends Controller
                     // Missing means an older row that predates the checkbox, which has always been
                     // shown on the request form - the editor posts a paired hidden 0 for new rows.
                     'show_on_request' => (bool) ($fieldData['show_on_request'] ?? true),
+                    // "Show as filter". Missing falls back to the type's default (every dropdown and
+                    // multiselect was a filter before the flag existed); the editor posts a paired
+                    // hidden 0. Stored false for types that cannot filter, whatever was posted.
+                    'filter' => in_array($fieldType, Role::FILTERABLE_CUSTOM_FIELD_TYPES, true)
+                        && (bool) ($fieldData['filter'] ?? Role::customFieldFilterDefault($fieldType)),
                     'regex' => $acceptsRegex ? trim($fieldData['regex'] ?? '') : '',
                     'regex_hint' => $acceptsRegex ? trim($fieldData['regex_hint'] ?? '') : '',
                     'options' => implode(',', array_map('trim', explode(',', $fieldData['options'] ?? ''))),

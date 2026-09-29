@@ -578,12 +578,14 @@
                         {{-- fullUrlWithQuery, not url(), so switching language keeps the rest of
                              the query string (?layout=, ?category=, ?month= ...) intact. --}}
                         <a href="{{ str_replace('http://', 'https://', request()->fullUrlWithQuery(['lang' => $role->language_code])) }}"
+                           data-lang-switch="{{ $role->language_code }}"
                            class="gp-lang-inactive px-3 py-1.5 rounded-full font-medium transition-all duration-200"
                            title="{{ $switcherAuthoredName }}" aria-label="{{ $switcherAuthoredName }}">
                             {{ strtoupper($role->language_code) }}
                         </a>
                     @else
                         <a href="{{ str_replace('http://', 'https://', request()->fullUrlWithQuery(['lang' => $switcherTarget])) }}"
+                           data-lang-switch="{{ $switcherTarget }}"
                            class="gp-lang-inactive px-3 py-1.5 rounded-full font-medium transition-all duration-200"
                            title="{{ $switcherTargetName }}" aria-label="{{ $switcherTargetName }}">
                             {{ strtoupper($switcherTarget) }}
@@ -592,6 +594,33 @@
                     @endif
                 </div>
             </div>
+        @endif
+
+        {{-- The language links above (and the compact header's inline toggle) are rendered with
+             the query string the page was REQUESTED with. The schedule page rewrites its own
+             address afterwards - a filter picked from the Filters panel, a sub-schedule, a month -
+             so a link built at render time would switch language and silently drop all of that.
+             Rebuild each link from the live address just before it is followed, touching only
+             ?lang=. On every pointer, focus and click so middle-click and copy-link agree too. --}}
+        @if (! request()->embed && $role->offersTranslation())
+        <script {!! nonce_attr() !!}>
+            (function () {
+                function refreshLangLink(e) {
+                    var link = e.target && e.target.closest ? e.target.closest('a[data-lang-switch]') : null;
+                    if (!link) return;
+                    try {
+                        var url = new URL(window.location.href);
+                        url.searchParams.set('lang', link.getAttribute('data-lang-switch'));
+                        link.href = url.toString();
+                    } catch (err) {
+                        // Leave the server-rendered href in place.
+                    }
+                }
+                ['pointerdown', 'focusin', 'click', 'contextmenu'].forEach(function (type) {
+                    document.addEventListener(type, refreshLangLink, true);
+                });
+            })();
+        </script>
         @endif
 
         {{ $slot }}

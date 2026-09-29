@@ -2881,8 +2881,8 @@
                                         maxlength="500">{{ $field['ai_prompt'] ?? '' }}</textarea>
                                     <p class="mt-1 text-xs text-gray-500 dark:text-gray-400">{{ __('messages.ai_prompt_custom_field_help') }}</p>
                                 </div>
-                                <div class="mt-3 flex items-center justify-between">
-                                    <div class="flex items-center gap-4">
+                                <div class="mt-3 flex items-center justify-between gap-4">
+                                    <div class="flex flex-wrap items-center gap-x-4 gap-y-2">
                                         <div class="flex items-center">
                                             <input type="checkbox" name="event_custom_fields[{{ $fieldKey }}][required]"
                                                 id="event_field_required_{{ $fieldKey }}"
@@ -2894,6 +2894,7 @@
                                         <div class="flex items-center" title="{{ __('messages.field_private_help') }}">
                                             <input type="checkbox" name="event_custom_fields[{{ $fieldKey }}][private]"
                                                 id="event_field_private_{{ $fieldKey }}"
+                                                data-action="custom-field-private-toggle"
                                                 value="1"
                                                 {{ !empty($field['private']) ? 'checked' : '' }}
                                                 class="h-4 w-4 text-[var(--brand-blue)] focus:ring-[var(--brand-blue)] border-gray-300 rounded">
@@ -2910,15 +2911,38 @@
                                                 class="h-4 w-4 text-[var(--brand-blue)] focus:ring-[var(--brand-blue)] border-gray-300 rounded">
                                             <label for="event_field_show_on_request_{{ $fieldKey }}" class="ms-2 text-sm text-gray-700 dark:text-gray-300 cursor-pointer">{{ __('messages.field_show_on_request') }}</label>
                                         </div>
+                                        @php
+                                            $fieldTypeForFilter = $field['type'] ?? 'string';
+                                        @endphp
+                                        {{-- Paired hidden 0, like show_on_request: the default depends on the type,
+                                             so an unchecked box has to post something the controller can tell apart
+                                             from an older field with no flag. data-touched marks a saved choice that
+                                             DIFFERS from the type's default, which updateEventFieldFilterState() then
+                                             never overrides on a type change. Not "has a saved flag": every save
+                                             stores one, so that would freeze every field after its first save. --}}
+                                        <div class="flex items-center event-field-filter-container transition-opacity duration-200" style="{{ in_array($fieldTypeForFilter, \App\Models\Role::FILTERABLE_CUSTOM_FIELD_TYPES, true) ? '' : 'display: none;' }}">
+                                            <input type="hidden" name="event_custom_fields[{{ $fieldKey }}][filter]" value="0">
+                                            <input type="checkbox" name="event_custom_fields[{{ $fieldKey }}][filter]"
+                                                id="event_field_filter_{{ $fieldKey }}"
+                                                data-action="custom-field-filter-toggle"
+                                                @if (array_key_exists('filter', $field) && (bool) $field['filter'] !== \App\Models\Role::customFieldFilterDefault($fieldTypeForFilter)) data-touched="1" @endif
+                                                value="1"
+                                                {{ ($field['filter'] ?? \App\Models\Role::customFieldFilterDefault($fieldTypeForFilter)) ? 'checked' : '' }}
+                                                class="h-4 w-4 text-[var(--brand-blue)] focus:ring-[var(--brand-blue)] border-gray-300 rounded event-field-filter-input">
+                                            <label for="event_field_filter_{{ $fieldKey }}" class="ms-2 text-sm text-gray-700 dark:text-gray-300 cursor-pointer">{{ __('messages.field_show_as_filter') }}</label>
+                                        </div>
                                         <input type="hidden" name="event_custom_fields[{{ $fieldKey }}][index]" value="{{ $field['index'] ?? '' }}">
                                         @if(!empty($field['index']))
                                         <span class="text-xs text-gray-400 dark:text-gray-500 font-mono">→ {custom_{{ $field['index'] }}}</span>
                                         @endif
                                     </div>
-                                    <button type="button" data-action="remove-custom-field" class="text-red-600 hover:text-red-800 dark:text-red-400 text-sm">
+                                    <button type="button" data-action="remove-custom-field" class="text-red-600 hover:text-red-800 dark:text-red-400 text-sm flex-shrink-0">
                                         {{ __('messages.remove') }}
                                     </button>
                                 </div>
+                                <p class="mt-2 text-xs text-gray-500 dark:text-gray-400 event-field-filter-help" style="display: none;"
+                                    data-help="{{ __('messages.field_show_as_filter_help') }}"
+                                    data-private-note="{{ __('messages.field_filter_private_note') }}"></p>
                                 </div>
                             </div>
                             @endforeach
@@ -7889,8 +7913,8 @@ function addEventCustomField() {
                     maxlength="500"></textarea>
                 <p class="mt-1 text-xs text-gray-500 dark:text-gray-400">{!! __('messages.ai_prompt_custom_field_help') !!}</p>
             </div>
-            <div class="mt-3 flex items-center justify-between">
-                <div class="flex items-center gap-4">
+            <div class="mt-3 flex items-center justify-between gap-4">
+                <div class="flex flex-wrap items-center gap-x-4 gap-y-2">
                     <div class="flex items-center">
                         <input type="checkbox" name="event_custom_fields[${fieldKey}][required]"
                             id="event_field_required_${fieldKey}"
@@ -7901,6 +7925,7 @@ function addEventCustomField() {
                     <div class="flex items-center" title="{!! __('messages.field_private_help') !!}">
                         <input type="checkbox" name="event_custom_fields[${fieldKey}][private]"
                             id="event_field_private_${fieldKey}"
+                            data-action="custom-field-private-toggle"
                             value="1"
                             class="h-4 w-4 text-[var(--brand-blue)] focus:ring-[var(--brand-blue)] border-gray-300 rounded">
                         <label for="event_field_private_${fieldKey}" class="ms-2 text-sm text-gray-700 dark:text-gray-300 cursor-pointer">{!! __('messages.field_private') !!}</label>
@@ -7917,13 +7942,28 @@ function addEventCustomField() {
                             class="h-4 w-4 text-[var(--brand-blue)] focus:ring-[var(--brand-blue)] border-gray-300 rounded">
                         <label for="event_field_show_on_request_${fieldKey}" class="ms-2 text-sm text-gray-700 dark:text-gray-300 cursor-pointer">{!! __('messages.field_show_on_request') !!}</label>
                     </div>
+                    {{-- A new field starts as type=string, which is not a filter by default. No
+                         data-touched: until the owner clicks it, updateEventFieldFilterState()
+                         follows the type, so a new dropdown becomes a filter as it always has. --}}
+                    <div class="flex items-center event-field-filter-container transition-opacity duration-200">
+                        <input type="hidden" name="event_custom_fields[${fieldKey}][filter]" value="0">
+                        <input type="checkbox" name="event_custom_fields[${fieldKey}][filter]"
+                            id="event_field_filter_${fieldKey}"
+                            data-action="custom-field-filter-toggle"
+                            value="1"
+                            class="h-4 w-4 text-[var(--brand-blue)] focus:ring-[var(--brand-blue)] border-gray-300 rounded event-field-filter-input">
+                        <label for="event_field_filter_${fieldKey}" class="ms-2 text-sm text-gray-700 dark:text-gray-300 cursor-pointer">{{ __('messages.field_show_as_filter') }}</label>
+                    </div>
                     <input type="hidden" name="event_custom_fields[${fieldKey}][index]" value="${fieldIndex || ''}">
                     ${fieldIndex ? `<span class="text-xs text-gray-400 dark:text-gray-500 font-mono">→ {custom_${fieldIndex}}</span>` : ''}
                 </div>
-                <button type="button" data-action="remove-custom-field" class="text-red-600 hover:text-red-800 dark:text-red-400 text-sm">
+                <button type="button" data-action="remove-custom-field" class="text-red-600 hover:text-red-800 dark:text-red-400 text-sm flex-shrink-0">
                     {!! __('messages.remove') !!}
                 </button>
             </div>
+            <p class="mt-2 text-xs text-gray-500 dark:text-gray-400 event-field-filter-help" style="display: none;"
+                data-help="{{ __('messages.field_show_as_filter_help') }}"
+                data-private-note="{{ __('messages.field_filter_private_note') }}"></p>
             </div>
         </div>
     `;
@@ -7943,6 +7983,7 @@ function addEventCustomField() {
             newPresetSelect.appendChild(option);
         });
     }
+    updateEventFieldFilterState(newItem);
     // Show all drag handles when there are 2+ fields
     const fieldItems = container.querySelectorAll('.event-custom-field-item');
     if (fieldItems.length > 1) {
@@ -7984,7 +8025,50 @@ function toggleEventFieldOptions(selectElement) {
         const acceptsRegex = selectElement.value === 'string' || selectElement.value === 'multiline_string';
         regexContainer.style.display = acceptsRegex ? 'block' : 'none';
     }
+
+    updateEventFieldFilterState(fieldItem);
 }
+
+// "Show as filter": offered for the filterable types only, and until the owner clicks it, it
+// follows the type's default (Role::customFieldFilterDefault) - dropdowns and multiselects on,
+// text off. A private field is never a filter, so the box is dimmed, but NOT disabled: a disabled
+// checkbox does not post, the hidden 0 would win, and the saved choice would be lost.
+const eventFieldFilterableTypes = @json(\App\Models\Role::FILTERABLE_CUSTOM_FIELD_TYPES);
+function updateEventFieldFilterState(fieldItem) {
+    if (!fieldItem) return;
+
+    const typeSelect = fieldItem.querySelector('select[data-action="toggle-field-options"]');
+    const container = fieldItem.querySelector('.event-field-filter-container');
+    const checkbox = fieldItem.querySelector('.event-field-filter-input');
+    const privateBox = fieldItem.querySelector('[data-action="custom-field-private-toggle"]');
+    const help = fieldItem.querySelector('.event-field-filter-help');
+    if (!typeSelect || !container || !checkbox) return;
+
+    const type = typeSelect.value;
+    const filterable = eventFieldFilterableTypes.includes(type);
+    container.style.display = filterable ? '' : 'none';
+
+    if (checkbox.dataset.touched !== '1') {
+        checkbox.checked = type === 'dropdown' || type === 'multiselect';
+    }
+
+    const isPrivate = !!(privateBox && privateBox.checked);
+    container.classList.toggle('opacity-50', isPrivate);
+
+    if (help) {
+        let text = '';
+        if (filterable && isPrivate) {
+            text = help.dataset.privateNote || '';
+        } else if (filterable && checkbox.checked && type === 'string') {
+            // Only free text needs the advice: the option lists are consistent by construction.
+            text = help.dataset.help || '';
+        }
+        help.textContent = text;
+        help.style.display = text ? '' : 'none';
+    }
+}
+
+document.querySelectorAll('.event-custom-field-item').forEach(updateEventFieldFilterState);
 
 // Live pattern tester: the owner types a sample value and sees immediately whether their pattern
 // accepts it. Anchored the same way the server anchors it, so the two agree.
@@ -8983,6 +9067,13 @@ document.addEventListener('DOMContentLoaded', function() {
                 break;
             case 'toggle-field-options':
                 toggleEventFieldOptions(el);
+                break;
+            case 'custom-field-filter-toggle':
+                el.dataset.touched = '1';
+                updateEventFieldFilterState(el.closest('.event-custom-field-item'));
+                break;
+            case 'custom-field-private-toggle':
+                updateEventFieldFilterState(el.closest('.event-custom-field-item'));
                 break;
             case 'custom-field-regex-preset':
                 applyEventFieldRegexPreset(el);

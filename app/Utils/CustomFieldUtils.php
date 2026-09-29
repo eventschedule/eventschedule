@@ -34,6 +34,42 @@ class CustomFieldUtils
     }
 
     /**
+     * Longest custom field filter value read from a URL. The text field's own validation max
+     * (Role::getEventCustomFieldValidationRules()), so any value an event can hold still matches
+     * after a reload - a shorter cap would truncate it into a value no event has.
+     */
+    public const FILTER_PARAM_MAX_LENGTH = 5000;
+
+    /**
+     * The `?custom_N=value` filter params in a query string (N is a field's stable index, 1-10,
+     * the same number as its {custom_N} variable), as a param => trimmed value map. Anything that
+     * is not a non-empty string is dropped, so `?custom_1[]=x` cannot reach a view as an array.
+     *
+     * Only the SHAPE is checked: whether custom_1 is a field that filters, on a Pro schedule, is
+     * up to the calendar, which drops the rest. That makes this the right test for "a custom field
+     * filter may be active", which is all the callers ask.
+     *
+     * @return array<string,string>
+     */
+    public static function filterParams(array $query): array
+    {
+        $params = [];
+
+        foreach ($query as $key => $value) {
+            if (! is_string($value) || ! preg_match('/^custom_(10|[1-9])$/', (string) $key)) {
+                continue;
+            }
+
+            $value = trim(mb_scrub(mb_substr($value, 0, self::FILTER_PARAM_MAX_LENGTH)));
+            if ($value !== '') {
+                $params[$key] = $value;
+            }
+        }
+
+        return $params;
+    }
+
+    /**
      * Ready-made patterns offered in the schedule editor, so an owner never has to write a regex by
      * hand. Bodies only (no delimiters) - the same form the HTML `pattern` attribute takes.
      *

@@ -5011,6 +5011,40 @@ class Role extends Model implements MustVerifyEmail
         return ! empty($field['private']);
     }
 
+    /**
+     * The custom field types a guest can filter the schedule by: short free text and the two
+     * option lists. Multiline text, dates and switches would make useless filters.
+     */
+    public const FILTERABLE_CUSTOM_FIELD_TYPES = ['string', 'dropdown', 'multiselect'];
+
+    /**
+     * The types that are a filter unless the owner says otherwise - every public dropdown and
+     * multiselect was one before the flag existed, so an absent flag keeps them that way.
+     */
+    public static function customFieldFilterDefault(string $type): bool
+    {
+        return in_array($type, ['dropdown', 'multiselect'], true);
+    }
+
+    /**
+     * Whether a field is offered as a filter on the schedule's calendar ("Show as filter").
+     * A private field never is: its values do not reach the guest at all.
+     */
+    public static function isEventCustomFieldFilter(array $field): bool
+    {
+        $type = $field['type'] ?? 'string';
+
+        if (! empty($field['private']) || ! in_array($type, self::FILTERABLE_CUSTOM_FIELD_TYPES, true)) {
+            return false;
+        }
+
+        if ($type !== 'string' && empty(self::customFieldOptions($field))) {
+            return false;
+        }
+
+        return (bool) ($field['filter'] ?? self::customFieldFilterDefault($type));
+    }
+
     public function filterPublicCustomFieldValues(?array $values): array
     {
         if (empty($values)) {

@@ -108,7 +108,11 @@
                     </tr>
                     <tr>
                         <td><code class="doc-inline-code">category=id</code></td>
-                        <td>Show a single event category. The value is the category's numeric id, so the practical way to get it is to filter your schedule page and copy the id out of the resulting address bar</td>
+                        <td>Show a single event category. The value is the category's numeric id: filter your schedule page by the category and it appears in the address bar, ready to copy</td>
+                    </tr>
+                    <tr>
+                        <td><code class="doc-inline-code">custom_N=value</code></td>
+                        <td>Show only the events with one value in a <a href="{{ route('marketing.docs.creating_schedules') }}#customize-custom-fields" class="doc-link">custom field</a> set to Show as Filter, for example <code class="doc-inline-code">custom_1=room+a</code>. N is the number shown next to the field in your settings, and matching ignores capital letters and extra spaces. Custom fields are a Pro feature</td>
                     </tr>
                     <tr>
                         <td><code class="doc-inline-code">form=subscribe</code></td>
@@ -130,6 +134,11 @@
             </table>
         </div>
         <p class="text-gray-600 dark:text-gray-300 mt-4">The frame's width and height are plain iframe attributes, not parameters: <code class="doc-inline-code">width="100%"</code> lets it fill whatever column you drop it into, and you choose the height. Nothing measures the calendar and resizes the frame for you. The signup form is the exception, below.</p>
+
+        <div class="doc-callout doc-callout-tip">
+            <div class="doc-callout-title">Link to One Room</div>
+            <p>A filtered schedule page is a link you can share. Filter your schedule by a custom field value, such as a room, and the address bar holds the whole view, for example <code class="doc-inline-code">{{ route('role.view_guest', ['subdomain' => 'your-schedule-name']) }}?custom_1=room+a</code>. The <strong>Copy link</strong> button in the filters panel copies it for you. Turn it into a QR code for the door of the room and anyone passing can see what is on there next. Add <code class="doc-inline-code">&amp;embed=true</code> to show the same view in a frame.</p>
+        </div>
 
         <h3 class="doc-subheading">Two Layouts on One Page</h3>
         <p class="text-gray-600 dark:text-gray-300 mb-4">Because the layout is set per URL, you can embed the same schedule twice on the same page and give each frame its own layout:</p>

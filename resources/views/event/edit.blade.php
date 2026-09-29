@@ -2030,7 +2030,10 @@
                         <div class="py-6 first:pt-0 last:pb-0">
                             @php
                                 $eventCustomFields = $role->getEventCustomFields();
-                                $customFieldValues = $event->getCustomFieldValues();
+                                // Only this schedule's own answers: values another schedule saved are keyed by
+                                // ITS fields, and prefilling them here would show a talent's private "Fee" in
+                                // this venue's "Notes" and save it as this schedule's answer.
+                                $customFieldValues = $event->customFieldValuesBelongTo($role, unknownCounts: true) ? $event->getCustomFieldValues() : [];
                             @endphp
 
                             @foreach($eventCustomFields as $fieldKey => $field)

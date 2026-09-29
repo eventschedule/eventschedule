@@ -461,7 +461,11 @@
             </div>
             <div class="doc-field">
                 <h4 class="font-semibold text-gray-900 dark:text-white mb-2">Private</h4>
-                <p class="text-sm text-gray-500 dark:text-gray-400">Hide the field's value from the guest portal. The value still appears in the admin portal and can be referenced in graphic templates and slug patterns via <code class="doc-inline-code">{custom_N}</code>. Public dropdown and multiselect fields become guest-portal filters; mark them private to remove the filter chip.</p>
+                <p class="text-sm text-gray-500 dark:text-gray-400">Hide the field's value from the guest portal. The value still appears in the admin portal and can be referenced in graphic templates and slug patterns via <code class="doc-inline-code">{custom_N}</code>. A private field is never offered as a filter, whatever its <strong class="text-gray-900 dark:text-white">Show as Filter</strong> setting.</p>
+            </div>
+            <div class="doc-field">
+                <h4 class="font-semibold text-gray-900 dark:text-white mb-2">Show as Filter</h4>
+                <p class="text-sm text-gray-500 dark:text-gray-400">Offer the field as a filter on your schedule page, so visitors can narrow the calendar to one value, for example every event in <strong class="text-gray-900 dark:text-white">Room A</strong>. Available for <strong class="text-gray-900 dark:text-white">String</strong>, <strong class="text-gray-900 dark:text-white">Dropdown</strong> and <strong class="text-gray-900 dark:text-white">Multiselect</strong> fields. It is on by default for dropdown and multiselect fields and off for string fields. Each different value on your events becomes an option in the filter, and matching ignores capital letters and extra spaces, so <code class="doc-inline-code">Room A</code> and <code class="doc-inline-code">room a</code> count as one. A filtered view is a shareable link: choosing a value adds <code class="doc-inline-code">?custom_N=value</code> to the address, where N is the number shown next to the field. See <a href="{{ route('marketing.docs.sharing') }}#embed-parameters" class="doc-link">embed URL parameters</a> to use it in an embed.</p>
             </div>
             <div class="doc-field">
                 <h4 class="font-semibold text-gray-900 dark:text-white mb-2">On Request Form</h4>

@@ -857,6 +857,7 @@ return [
     'category' => 'Catégorie',
     'all_categories' => 'Toutes les catégories',
     'search_events' => 'Rechercher des événements...',
+    'search_scope_month' => 'Recherche dans ce mois',
     'no_events_found' => 'Aucun événement trouvé',
     'subschedule' => 'Sous-planning',
     'subschedules' => 'Sous-plannings',
@@ -869,8 +870,6 @@ return [
     'all_shows' => 'Tous',
     'filters' => 'Filtrer les événements',
     'clear_filters' => 'Effacer les filtres',
-    'no_filters_available' => 'Aucun filtre disponible',
-    'no_filters_this_month' => 'Aucun filtre pour ce mois',
 
     // Categories
     'parties_&_festivals' => 'Fêtes et festivals',
@@ -1316,6 +1315,9 @@ return [
     'field_private_help' => 'Masquer la valeur de ce champ dans le portail invité. La valeur reste visible dans l\'espace d\'administration et peut toujours être utilisée dans les modèles graphiques et les motifs de slug via {custom_N}.',
     'field_show_on_request' => 'Sur le formulaire de demande',
     'field_show_on_request_help' => 'Poser cette question sur le formulaire public de demande d\'événement. Décochez pour réserver le champ à votre usage dans l\'espace d\'administration.',
+    'field_show_as_filter' => 'Afficher comme filtre',
+    'field_show_as_filter_help' => 'Proposer ce champ comme filtre sur votre planning. Chaque valeur différente devient une option, saisissez donc les valeurs toujours de la même façon (ex. : Salle A).',
+    'field_filter_private_note' => 'Les champs privés ne sont jamais affichés comme filtres.',
     'field_regex' => 'Motif de validation',
     'field_regex_help' => 'Facultatif. Les saisies doivent correspondre à ce motif du début à la fin, sinon le formulaire est refusé.',
     'field_regex_placeholder' => 'ex. [A-Z]{3}-[0-9]{4}',

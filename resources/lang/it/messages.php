@@ -570,6 +570,7 @@ return [
     'category' => 'Categoria',
     'all_categories' => 'Tutte le Categorie',
     'search_events' => 'Cerca eventi...',
+    'search_scope_month' => 'Ricerca in questo mese',
     'no_events_found' => 'Nessun evento trovato',
     'subschedule' => 'Sottoprogramma',
     'subschedules' => 'Sottoprogrammi',
@@ -582,8 +583,6 @@ return [
     'all_shows' => 'Tutti',
     'filters' => 'Filtra eventi',
     'clear_filters' => 'Cancella filtri',
-    'no_filters_available' => 'Nessun filtro disponibile',
-    'no_filters_this_month' => 'Nessun filtro per questo mese',
 
     // Categories
     'parties_&_festivals' => 'Feste e Festival',
@@ -1312,6 +1311,9 @@ return [
     'field_private_help' => 'Nascondi il valore di questo campo nel portale ospiti. Il valore resta visibile nel pannello di amministrazione e può essere usato nei modelli grafici e nei pattern di slug tramite {custom_N}.',
     'field_show_on_request' => 'Nel modulo di richiesta',
     'field_show_on_request_help' => 'Poni questa domanda nel modulo pubblico di richiesta evento. Deseleziona per riservare il campo al tuo uso nel pannello di amministrazione.',
+    'field_show_as_filter' => 'Mostra come filtro',
+    'field_show_as_filter_help' => 'Offri questo campo come filtro nel tuo calendario. Ogni valore diverso diventa un\'opzione, quindi scrivi i valori sempre allo stesso modo (es. Sala A).',
+    'field_filter_private_note' => 'I campi privati non vengono mai mostrati come filtri.',
     'field_regex' => 'Schema di convalida',
     'field_regex_help' => 'Facoltativo. Le voci devono corrispondere a questo schema dall\'inizio alla fine, altrimenti il modulo viene rifiutato.',
     'field_regex_placeholder' => 'es. [A-Z]{3}-[0-9]{4}',

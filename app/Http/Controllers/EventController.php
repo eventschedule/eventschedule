@@ -3089,6 +3089,8 @@ class EventController extends Controller
 
             if (! empty($curatorCustomFieldValues)) {
                 $event->custom_field_values = $curatorCustomFieldValues;
+                // Keyed by the curator's fields, not the talent that created the event.
+                $event->custom_field_values_role_id = $role->id;
                 $event->save();
             }
 
@@ -3733,6 +3735,7 @@ class EventController extends Controller
                 $requestCustomFields
             );
             $event->custom_field_values = ! empty($customFieldValues) ? $customFieldValues : null;
+            $event->custom_field_values_role_id = $event->custom_field_values ? $role->id : null;
         }
 
         $eventName = $request->event_name ?: __('messages.booking_request');

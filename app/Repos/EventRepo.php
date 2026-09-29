@@ -88,6 +88,12 @@ class EventRepo
         // skips them - without this the day-of-week pattern and date exceptions would
         // be silently dropped (the form keys recurrence off $event->days_of_week).
         $clonedEventData['days_of_week'] = $event->days_of_week;
+        // Not fillable either. Carried so the clone's form prefills custom_field_values only when
+        // they are keyed by the cloning schedule's fields (Event::customFieldValuesBelongTo()):
+        // create() stamps the clone's creator as the cloning schedule, which would otherwise make
+        // another schedule's answers look like its own. Older templates without it fall back to
+        // that creator, as before.
+        $clonedEventData['custom_field_values_role_id'] = $event->custom_field_values_role_id ?? $event->creator_role_id;
         $clonedEventData['recurring_include_dates'] = $event->recurring_include_dates;
         $clonedEventData['recurring_exclude_dates'] = $event->recurring_exclude_dates;
 
@@ -867,8 +873,18 @@ class EventRepo
         // Handle custom_field_values (event metadata fields defined at schedule level).
         // Note input() returns null - not the default - when the key is present but null, which
         // guest JSON payloads do send; Role::sanitizeCustomFieldValues() casts before filtering.
+        //
+        // A form that had nothing to say about ANOTHER schedule's answers leaves them alone: the
+        // venue editing a talent's event is shown blank inputs for its own fields (see
+        // customFieldValuesBelongTo()), and saving those blanks must not wipe the talent's values.
+        $keepOtherScheduleCustomFieldValues = false;
         if ($request->has('custom_field_values')) {
             $customFieldValues = $currentRole->sanitizeCustomFieldValues($request->input('custom_field_values', []));
+
+            $keepOtherScheduleCustomFieldValues = empty($customFieldValues)
+                && $event->exists
+                && ! empty($event->custom_field_values)
+                && ! $event->customFieldValuesBelongTo($currentRole, unknownCounts: true);
 
             $request->merge([
                 'custom_field_values' => ! empty($customFieldValues) ? $customFieldValues : null,
@@ -876,6 +892,15 @@ class EventRepo
         }
 
         $event->fill($request->all());
+
+        // Record whose field definitions key those values: this form showed $currentRole's fields,
+        // and it need not be the creator (a venue editing a talent's event). Not fillable, so set
+        // here rather than merged. See Event::customFieldValuesBelongTo().
+        if ($keepOtherScheduleCustomFieldValues) {
+            $event->custom_field_values = $event->getOriginal('custom_field_values');
+        } elseif ($request->has('custom_field_values')) {
+            $event->custom_field_values_role_id = $event->custom_field_values ? $currentRole->id : null;
+        }
 
         // NOT NULL boolean flags are submitted as Vue-bound hidden inputs (`:value="..."`),
         // so a client that doesn't run the Vue bundle (old browser, JS disabled, bot) submits

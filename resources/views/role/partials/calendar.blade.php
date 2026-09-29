@@ -62,7 +62,7 @@
         $eventGroupIds = [];
         $eventCategoryIds = [];
 
-        // Eager-load creator role so custom-field privacy can be resolved without N+1 queries.
+        // Eager-load creator role so direction and category resolution avoid N+1 queries.
         if (method_exists($events, 'loadMissing')) {
             $events->loadMissing('creatorRole');
         }
@@ -192,10 +192,8 @@
                 ])->values()->toArray() : [],
                 'poll_count' => (isset($role) && $role->isPro()) ? ($event->polls_count ?? 0) : 0,
                 'vote_poll_url' => (isset($role) && $role->isPro()) ? route('event.vote_poll', ['subdomain' => $role->subdomain, 'event_hash' => \App\Utils\UrlUtils::encodeId($event->id), 'poll_hash' => 'POLL_HASH']) : null,
-                'custom_field_values' => (function () use ($event, $role) {
-                    $owner = $event->creatorRole ?? $role;
-                    return $owner ? $owner->filterPublicCustomFieldValues($event->custom_field_values ?? []) : [];
-                })(),
+                // Read only against the schedule being viewed - see publicCustomFieldValuesFor().
+                'custom_field_values' => $event->publicCustomFieldValuesFor($role ?? null),
                 'fan_comments_enabled' => $event->isFanCommentsEnabled(),
                 'fan_photos_enabled' => $event->isFanPhotosEnabled(),
                 'fan_videos_enabled' => $event->isFanVideosEnabled(),
@@ -243,30 +241,104 @@
         }
     }
 
-    // Prepare dropdown custom fields for Vue filters
-    $dropdownCustomFields = [];
-    if (isset($role) && $role->event_custom_fields) {
+    // Custom fields for the Vue filters and search. Pro only: custom fields are a Pro feature,
+    // and the payload's custom_field_values are empty for a schedule that is not
+    // (Event::publicCustomFieldValuesFor()), so a filter here would only ever offer nothing.
+    //
+    // $filterCustomFields are the "Show as filter" fields (Role::isEventCustomFieldFilter()).
+    // `index` is the stable {custom_N} number and names the ?custom_N= URL param; a field saved
+    // before indices existed has none and simply gets no URL param - never its position, which
+    // shifts when fields are reordered and would silently repoint a printed link.
+    //
+    // $searchableCustomFields are every public text or option field, filter or not: the search
+    // box matches their values (and translated option labels). Switch and date values ("1",
+    // "2026-09-29") are left out, or searching "1" would match every switched-on event.
+    //
+    // $initialCustomFilters seeds the selection from ?custom_N=, so a shared "Room A" link opens
+    // already filtered. Built here, not in the Vue data, because Blade's @json splits on commas.
+    $filterCustomFields = [];
+    $searchableCustomFields = [];
+    $initialCustomFilters = [];
+    $initialCustomFilterLabels = [];
+    // The PHP twin of the Vue normKey(): collapse whitespace, trim, lowercase. Collapse FIRST:
+    // trim() only strips ASCII whitespace, so a non-breaking space at the edge (options pasted
+    // from a document) would survive it and never match the JS key, which trims Unicode spaces.
+    // A malformed UTF-8 value makes preg_replace() return null, hence the fallback.
+    $normCustomFilter = fn ($value) => mb_strtolower(trim(preg_replace('/\s+/u', ' ', (string) $value) ?? ''));
+    $urlCustomFilters = \App\Utils\CustomFieldUtils::filterParams(request()->query());
+    if (isset($role) && $role->event_custom_fields && $role->isPro()) {
+        $showFieldTranslation = ($isAdminRoute && auth()->check()) ? (app()->getLocale() === 'en') : showing_translation($role ?? null);
         foreach ($role->getEventCustomFields() as $key => $field) {
-            if (!empty($field['private'])) continue;
-            if (in_array($field['type'] ?? '', ['dropdown', 'multiselect']) && !empty($field['options'])) {
-                $originalOptions = array_values(array_filter(array_map('trim', explode(',', $field['options']))));
-                $optionsMap = new \stdClass();
-                $showFieldTranslation = ($isAdminRoute && auth()->check()) ? (app()->getLocale() === 'en') : showing_translation($role ?? null);
-                if ($showFieldTranslation && !empty($field['options_en'])) {
-                    $translatedOptions = array_values(array_filter(array_map('trim', explode(',', $field['options_en']))));
-                    if (count($originalOptions) === count($translatedOptions)) {
-                        $optionsMap = (object) array_combine($originalOptions, $translatedOptions);
-                    }
-                }
-                $dropdownCustomFields[] = [
-                    'key' => (string) $key,
-                    'name' => ($showFieldTranslation && !empty($field['name_en'])) ? $field['name_en'] : $field['name'],
-                    'options' => $originalOptions,
-                    'optionsMap' => $optionsMap,
-                ];
+            $type = $field['type'] ?? 'string';
+            if (!empty($field['private']) || !in_array($type, ['string', 'multiline_string', 'dropdown', 'multiselect'], true)) {
+                continue;
             }
+
+            $originalOptions = \App\Models\Role::customFieldOptions($field);
+            $optionsMap = new \stdClass();
+            if ($showFieldTranslation && !empty($field['options_en'])) {
+                $translatedOptions = array_values(array_filter(array_map('trim', explode(',', $field['options_en']))));
+                if (count($originalOptions) === count($translatedOptions)) {
+                    $optionsMap = (object) array_combine($originalOptions, $translatedOptions);
+                }
+            }
+
+            $searchableCustomFields[(string) $key] = ['optionsMap' => $optionsMap];
+
+            if (! \App\Models\Role::isEventCustomFieldFilter($field)) {
+                continue;
+            }
+
+            $index = isset($field['index']) && (int) $field['index'] >= 1 && (int) $field['index'] <= 10 ? (int) $field['index'] : null;
+            $filterCustomFields[] = [
+                'key' => (string) $key,
+                'name' => ($showFieldTranslation && !empty($field['name_en'])) ? $field['name_en'] : ($field['name'] ?? ''),
+                'type' => $type,
+                'index' => $index,
+                'options' => $type === 'string' ? [] : $originalOptions,
+                'optionsMap' => $optionsMap,
+            ];
+
+            // filterParams(): strings only, invalid UTF-8 scrubbed (it would make @json print
+            // nothing and take the whole script down), capped at the text field's own max.
+            $initial = $index ? ($urlCustomFilters['custom_' . $index] ?? '') : '';
+            if ($initial !== '') {
+                if ($type !== 'string') {
+                    // An option list only accepts one of its own options. Compared without case,
+                    // then replaced with the stored spelling, so ?custom_1=room+a still selects
+                    // "Room A" while a stale or hand-edited value selects nothing.
+                    $match = collect($originalOptions)->first(fn ($option) => $normCustomFilter($option) === $normCustomFilter($initial));
+                    $initial = $match ?? '';
+                }
+            }
+            // The label keeps the spelling; the selection is the same normalization as the Vue
+            // normKey() (collapse whitespace, trim, lowercase), so no watcher fires on load and
+            // rewrites the address the visitor arrived at.
+            $initialCustomFilterLabels[(string) $key] = $initial;
+            $initialCustomFilters[(string) $key] = $normCustomFilter($initial);
         }
     }
+    $initialCustomFilters = (object) $initialCustomFilters;
+    $initialCustomFilterLabels = (object) $initialCustomFilterLabels;
+    $searchableCustomFields = (object) $searchableCustomFields;
+
+    // The base of the link "Copy link" builds: the page the visitor is on for the guest view
+    // (built in JS from location.origin + guestBasePath, so a custom domain stays the domain),
+    // and the schedule's own guest page for the admin view, where the address bar is the AP's.
+    // getCanonicalUrl(): the custom domain when the page is served on it, else the subdomain.
+    $filterShareBaseUrl = ($isAdminRoute && $role && $role->subdomain)
+        ? rtrim($role->getCanonicalUrl() ?: route('role.view_guest', ['subdomain' => $role->subdomain]), '/')
+        : '';
+
+    // Labels for the active-filter chips, resolved through customLabel() like the panel's own.
+    $filterChipLabels = [
+        'schedule' => $label('schedule'),
+        'category' => $label('category'),
+        'venue' => $label('venue'),
+        'free_entry' => $label('free_entry'),
+        'online' => $label('online'),
+        'remove' => __('messages.remove'),
+    ];
 
     $accentColor = $accentColor ?? (isset($role) && $role->accent_color ? $role->accent_color : '#4E81FA');
     $contrastColor = accent_contrast_color($accentColor);
@@ -507,6 +579,35 @@
 </header>
 @endif
 
+@if (! request()->graphic && ! (isset($embed) && $embed) && ! (isset($force_mobile) && $force_mobile))
+{{-- Active filters: what is narrowing the view, each with its own remove button. Without it a
+     visitor who opens a shared "Room A" link (or scans one on a door) sees a partial schedule
+     with nothing but a badge on the Filters button to explain it. --}}
+{{-- narrowingFilterCount, not activeFilterCount: a sub-schedule page's own sub-schedule is the
+     page, not a filter, so a bare /schedule/kids shows no row. Owner-customizable labels sit in
+     v-pre spans: this is inside the Vue mount, and a label is owner-authored text. --}}
+<div v-cloak v-if="narrowingFilterCount > 0" id="active-filter-chips" class="mb-4 rounded-xl bg-white/95 dark:bg-gray-900/95 backdrop-blur-sm px-3 py-2 flex flex-wrap items-center gap-2 {{ rtl_class($role ?? null, 'rtl', '', $isAdminRoute) }}">
+    <span v-for="chip in activeFilterChips" :key="chip.id"
+          class="inline-flex items-center gap-1 rounded-full border border-gray-300 dark:border-gray-600 bg-gray-50 dark:bg-gray-800 ps-3 pe-1 text-sm text-gray-800 dark:text-gray-200 max-w-full">
+        <span class="truncate" dir="auto" v-text="chip.text"></span>
+        <button type="button" @click="removeFilterChip(chip)"
+                :aria-label="filterChipLabels.remove + ': ' + chip.text"
+                class="flex-shrink-0 inline-flex items-center justify-center h-11 w-11 md:h-7 md:w-7 -my-2 md:my-0 rounded-full text-gray-500 hover:text-gray-700 hover:bg-gray-200 dark:text-gray-400 dark:hover:text-gray-200 dark:hover:bg-gray-700 transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-[var(--brand-blue)]">
+            <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" aria-hidden="true">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M6 18 18 6M6 6l12 12" />
+            </svg>
+        </button>
+    </span>
+    <span class="text-sm text-gray-500 dark:text-gray-400 ms-1"
+          :aria-live="(showFiltersDrawer || showDesktopFiltersModal) ? 'off' : 'polite'"
+          v-text="filteredCountLabel"></span>
+    <button type="button" @click="clearFilters(); focusFiltersOpener()"
+            class="ms-auto inline-flex items-center min-h-11 md:min-h-0 text-sm font-medium text-[var(--brand-blue)] hover:text-[var(--brand-blue-dark)] px-2 py-1 rounded focus:outline-none focus:ring-2 focus:ring-[var(--brand-blue)]">
+        <span v-pre>{{ $label('clear_filters') }}</span>
+    </button>
+</div>
+@endif
+
     <div v-show="currentView === 'calendar'" class="{{ rtl_class($role ?? null, 'rtl', '', $isAdminRoute) }}">
 
         @if (request()->graphic)
@@ -533,6 +634,35 @@
                 </div>
             </div>
         </div>
+        @if (($tab ?? '') != 'availability')
+        {{-- The month grid has nothing for the active filters. Offers the two ways out that keep
+             them: the list (every upcoming event, not just this month) and the next month. --}}
+        <div v-cloak v-if="!isLoadingEvents && narrowingFilterCount > 0 && monthMatchCount === 0"
+             class="hidden md:flex {{ (isset($force_mobile) && $force_mobile) ? '!hidden' : '' }} mb-4 flex-wrap items-center justify-between gap-3 rounded-xl bg-white/95 dark:bg-gray-900/95 border border-gray-200 dark:border-gray-700 px-4 py-3">
+            <span v-pre class="text-sm font-medium text-gray-700 dark:text-gray-300">{{ $label('no_events_found') }}</span>
+            @if ($route === 'guest' && ! (isset($embed) && $embed))
+            <div class="flex items-center gap-2">
+                <button type="button" @click="toggleView('list')"
+                        class="px-3 py-1.5 text-sm font-medium rounded-lg border border-gray-300 dark:border-gray-600 text-gray-900 dark:text-gray-100 hover:bg-gray-50 dark:hover:bg-gray-700 transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-[var(--brand-blue)]">
+                    {{ __('messages.list') }}
+                </button>
+                <button type="button" @click="navigateMonth(1)"
+                        class="px-3 py-1.5 text-sm font-medium rounded-lg border border-gray-300 dark:border-gray-600 text-gray-900 dark:text-gray-100 hover:bg-gray-50 dark:hover:bg-gray-700 transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-[var(--brand-blue)]">
+                    {{ __('messages.next_month') }}
+                </button>
+                <button type="button" @click="clearFilters"
+                        class="px-3 py-1.5 text-sm font-medium text-[var(--brand-blue)] hover:text-[var(--brand-blue-dark)] rounded-lg focus:outline-none focus:ring-2 focus:ring-[var(--brand-blue)]">
+                    <span v-pre>{{ $label('clear_filters') }}</span>
+                </button>
+            </div>
+            @elseif (! (isset($embed) && $embed))
+            <button type="button" @click="clearFilters"
+                    class="px-3 py-1.5 text-sm font-medium text-[var(--brand-blue)] hover:text-[var(--brand-blue-dark)] rounded-lg focus:outline-none focus:ring-2 focus:ring-[var(--brand-blue)]">
+                <span v-pre>{{ $label('clear_filters') }}</span>
+            </button>
+            @endif
+        </div>
+        @endif
         <div v-show="!isLoadingEvents" class="{{ ($tab ?? '') == 'availability' ? '' : 'hidden md:block' }} {{ (isset($force_mobile) && $force_mobile) ? '!hidden' : '' }} border border-gray-300 dark:border-gray-700 rounded-lg overflow-hidden">
             <div
                 class="grid grid-cols-7 gap-px border-b border-gray-300 dark:border-gray-700 bg-gray-200 dark:bg-gray-700 text-center text-xs font-semibold leading-6 text-gray-700 dark:text-gray-300">
@@ -762,6 +892,23 @@
                 </div>
                 @endif
             </div>
+            {{-- Not on the event page (force_mobile): its side agenda has no filter UI, and a Clear
+                 there would change the sub-schedule and rewrite the event page's own address. --}}
+            @if (! (isset($force_mobile) && $force_mobile))
+            <div v-else-if="!isLoadingEvents && narrowingFilterCount > 0" class="pb-4 text-center">
+                <div class="bg-white/95 dark:bg-gray-900/95 backdrop-blur-sm rounded-2xl shadow-sm border border-gray-200 dark:border-gray-700 py-12 px-8">
+                    <div v-pre class="text-xl text-gray-500 dark:text-gray-400">
+                        {{ $label('no_events_found') }}
+                    </div>
+                    @if (! (isset($embed) && $embed))
+                    <button type="button" @click="clearFilters"
+                            class="mt-4 inline-flex items-center justify-center px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-lg font-semibold text-base text-gray-900 dark:text-gray-100 transition-all duration-200 hover:bg-gray-50 dark:hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-[var(--brand-blue)] focus:ring-offset-2 dark:focus:ring-offset-gray-800">
+                        <span v-pre>{{ $label('clear_filters') }}</span>
+                    </button>
+                    @endif
+                </div>
+            </div>
+            @endif
             <div v-else-if="!isLoadingEvents && {{ $tab != 'availability' ? 'true' : 'false' }}" class="pb-4 text-center">
                 <div class="bg-white/95 dark:bg-gray-900/95 backdrop-blur-sm rounded-2xl shadow-sm border border-gray-200 dark:border-gray-700 py-12 px-8">
                     <div class="text-xl text-gray-500 dark:text-gray-400">
@@ -1581,8 +1728,22 @@
             </div>
 
 
-            {{-- Empty State --}}
-            <div v-if="!isLoadingEvents && flatUpcomingEvents.length === 0 && pastEvents.length === 0" class="pb-4 text-center">
+            {{-- Empty State. With a filter active, flatPastEvents is always empty, so the raw
+                 pastEvents test below would leave a filter that matches nothing on a blank page. --}}
+            <div v-if="!isLoadingEvents && narrowingFilterCount > 0 && allListGroups.length === 0" class="pb-4 text-center">
+                <div class="bg-white/95 dark:bg-gray-900/95 backdrop-blur-sm rounded-2xl shadow-sm border border-gray-200 dark:border-gray-700 py-12 px-8">
+                    <div v-pre class="text-xl text-gray-500 dark:text-gray-400">
+                        {{ $label('no_events_found') }}
+                    </div>
+                    @if (! (isset($embed) && $embed))
+                    <button type="button" @click="clearFilters"
+                            class="mt-4 inline-flex items-center justify-center px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-lg font-semibold text-base text-gray-900 dark:text-gray-100 transition-all duration-200 hover:bg-gray-50 dark:hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-[var(--brand-blue)] focus:ring-offset-2 dark:focus:ring-offset-gray-800">
+                        <span v-pre>{{ $label('clear_filters') }}</span>
+                    </button>
+                    @endif
+                </div>
+            </div>
+            <div v-else-if="!isLoadingEvents && flatUpcomingEvents.length === 0 && pastEvents.length === 0" class="pb-4 text-center">
                 <div class="bg-white/95 dark:bg-gray-900/95 backdrop-blur-sm rounded-2xl shadow-sm border border-gray-200 dark:border-gray-700 py-12 px-8">
                     <div class="text-xl text-gray-500 dark:text-gray-400">
                         {{ $label('no_scheduled_events') }}
@@ -1681,8 +1842,21 @@
                 </button>
             </div>
 
-            {{-- Empty State --}}
-            <div v-if="!isLoadingEvents && flatUpcomingEvents.length === 0 && pastEvents.length === 0 && {{ ($tab ?? '') != 'availability' ? 'true' : 'false' }}" class="pb-4 text-center">
+            {{-- Empty State (see the desktop list's note on filters) --}}
+            <div v-if="!isLoadingEvents && narrowingFilterCount > 0 && allListGroups.length === 0 && {{ ($tab ?? '') != 'availability' ? 'true' : 'false' }}" class="pb-4 text-center">
+                <div class="bg-white/95 dark:bg-gray-900/95 backdrop-blur-sm rounded-2xl shadow-sm border border-gray-200 dark:border-gray-700 py-12 px-8">
+                    <div v-pre class="text-xl text-gray-500 dark:text-gray-400">
+                        {{ $label('no_events_found') }}
+                    </div>
+                    @if (! (isset($embed) && $embed))
+                    <button type="button" @click="clearFilters"
+                            class="mt-4 inline-flex items-center justify-center px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-lg font-semibold text-base text-gray-900 dark:text-gray-100 transition-all duration-200 hover:bg-gray-50 dark:hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-[var(--brand-blue)] focus:ring-offset-2 dark:focus:ring-offset-gray-800">
+                        <span v-pre>{{ $label('clear_filters') }}</span>
+                    </button>
+                    @endif
+                </div>
+            </div>
+            <div v-else-if="!isLoadingEvents && flatUpcomingEvents.length === 0 && pastEvents.length === 0 && {{ ($tab ?? '') != 'availability' ? 'true' : 'false' }}" class="pb-4 text-center">
                 <div class="bg-white/95 dark:bg-gray-900/95 backdrop-blur-sm rounded-2xl shadow-sm border border-gray-200 dark:border-gray-700 py-12 px-8">
                     <div class="text-xl text-gray-500 dark:text-gray-400">
                         {{ $label('no_scheduled_events') }}
@@ -1700,27 +1874,51 @@
          class="fixed inset-0 bg-gray-500/75 dark:bg-gray-900/75 transition-opacity"></div>
 
     {{-- Bottom sheet panel --}}
-    <div class="fixed inset-x-0 bottom-0 bg-white dark:bg-gray-800 rounded-t-2xl shadow-xl max-h-[80vh] overflow-y-auto {{ rtl_class($role ?? null, 'rtl', '', $isAdminRoute) }}">
+    <div ref="mobileFilterPanel" tabindex="-1" role="dialog" aria-modal="true" aria-labelledby="filters-drawer-title"
+         class="fixed inset-x-0 bottom-0 bg-white dark:bg-gray-800 rounded-t-2xl shadow-xl max-h-[80vh] overflow-y-auto focus:outline-none {{ rtl_class($role ?? null, 'rtl', '', $isAdminRoute) }}">
         {{-- Header --}}
         <div class="px-6 pt-5 pb-4 flex items-center justify-between border-b border-gray-200 dark:border-gray-700">
             <div>
-                <h3 class="text-lg font-semibold text-gray-900 dark:text-gray-100">{{ $label('filters') }}</h3>
-                <p class="text-xs text-gray-500 dark:text-gray-400 mt-1" aria-live="polite">
-                    @{{ filteredEventsForView.length }} {{ $label('events') }}
-                </p>
+                <h3 id="filters-drawer-title" class="text-lg font-semibold text-gray-900 dark:text-gray-100">{{ $label('filters') }}</h3>
+                <p class="text-xs text-gray-500 dark:text-gray-400 mt-1" aria-live="polite" v-text="filteredCountLabel"></p>
             </div>
             <button v-if="activeFilterCount > 0"
+                    type="button"
                     @click="clearFilters"
                     class="text-sm text-[var(--brand-blue)] hover:text-[var(--brand-blue-dark)] font-medium">
                 {{ $label('clear_filters') }}
             </button>
         </div>
 
+        {{-- Search. Matches the name, description, venue, category, talent, agenda parts and
+             public custom field values of the events the filters look at. --}}
+        <div class="px-6 py-4 border-b border-gray-100 dark:border-gray-700">
+            <div class="relative">
+                <span class="pointer-events-none absolute inset-y-0 start-0 flex items-center ps-3 text-gray-400 dark:text-gray-500">
+                    <svg class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" aria-hidden="true">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="m21 21-5.197-5.197m0 0A7.5 7.5 0 1 0 5.196 5.196a7.5 7.5 0 0 0 10.607 10.607Z" />
+                    </svg>
+                </span>
+                {{-- dir only once there is text: an empty dir="auto" box lays the placeholder out
+                     left-to-right under a right-aligned icon on a Hebrew schedule. --}}
+                <input type="search" id="filter-search-m" v-model="searchInput" ref="mobileFilterSearch"
+                       :dir="searchInput ? 'auto' : null"
+                       enterkeyhint="search" autocomplete="off"
+                       aria-label="{{ $label('search_events') }}"
+                       placeholder="{{ $label('search_events') }}"
+                       @keydown.enter.prevent="onSearchEnter($event)"
+                       @keydown.escape.stop.prevent="onSearchEscape"
+                       style="font-family: sans-serif"
+                       class="w-full py-2.5 ps-9 pe-3 border-gray-300 dark:border-gray-600 rounded-md shadow-sm bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 placeholder-gray-400 dark:placeholder-gray-500 text-sm focus:border-[var(--brand-blue)] focus:ring-[var(--brand-blue)]">
+            </div>
+            <p v-if="filterScopeIsMonth" class="mt-2 text-xs text-gray-500 dark:text-gray-400"><span v-pre>{{ $label('search_scope_month') }}</span></p>
+        </div>
+
         {{-- Schedule Filter --}}
         @if(isset($role) && $role->groups && $role->groups->count() > 1)
         <div class="px-6 py-4 border-b border-gray-100 dark:border-gray-700">
-            <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">{{ $label('schedule') }}</label>
-            <select v-model="selectedGroup" style="font-family: sans-serif"
+            <label for="filter-group-m" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">{{ $label('schedule') }}</label>
+            <select id="filter-group-m" v-model="selectedGroup" style="font-family: sans-serif"
                     class="w-full py-2.5 px-3 border-gray-300 dark:border-gray-600 rounded-md shadow-sm
                            bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 text-sm {{ rtl_class($role ?? null, 'rtl', '', $isAdminRoute) }}">
                 <option value="">{{ $label('show_all') }}</option>
@@ -1733,12 +1931,12 @@
 
         {{-- Category Filter --}}
         <div v-if="availableCategories.length > 1" class="px-6 py-4 border-b border-gray-100 dark:border-gray-700">
-            <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">{{ $label('category') }}</label>
+            <label for="filter-category-m" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">{{ $label('category') }}</label>
             <div class="relative">
                 <span v-if="selectedCategoryColor"
                       class="absolute start-3 top-1/2 -translate-y-1/2 inline-block w-2.5 h-2.5 rounded-full pointer-events-none z-10"
                       :style="{ backgroundColor: selectedCategoryColor }"></span>
-                <select v-model="selectedCategory" style="font-family: sans-serif"
+                <select id="filter-category-m" v-model="selectedCategory" style="font-family: sans-serif"
                         :class="['w-full py-2.5 pe-3 border-gray-300 dark:border-gray-600 rounded-md shadow-sm bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 text-sm', selectedCategoryColor ? 'ps-8' : 'ps-3']">
                     <option value="">{{ $label('show_all') }}</option>
                     <option v-for="category in availableCategories" :key="category.id" :value="category.id">
@@ -1750,8 +1948,8 @@
 
         {{-- Venue Filter --}}
         <div v-if="uniqueVenues.length > 1" class="px-6 py-4 border-b border-gray-100 dark:border-gray-700">
-            <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">{{ $label('venue') }}</label>
-            <select v-model="selectedVenue" style="font-family: sans-serif"
+            <label for="filter-venue-m" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">{{ $label('venue') }}</label>
+            <select id="filter-venue-m" v-model="selectedVenue" style="font-family: sans-serif"
                     class="w-full py-2.5 px-3 border-gray-300 dark:border-gray-600 rounded-md shadow-sm
                            bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 text-sm">
                 <option value="">{{ $label('show_all') }}</option>
@@ -1761,19 +1959,21 @@
             </select>
         </div>
 
-        {{-- Custom Field Filters --}}
-        <template v-for="field in dropdownCustomFields" :key="field.key">
-            <div v-if="(availableCustomFieldOptions[field.key] || []).length > 1"
+        {{-- Custom Field Filters ("Show as filter" fields). Shown while there is a choice to make, and
+             always while one is selected, so a filter that arrived in a shared link can be seen and
+             cleared even when it matches nothing in view. --}}
+        <template v-for="field in filterCustomFields" :key="field.key">
+            <div v-if="(availableCustomFieldOptions[field.key] || []).length > 1 || selectedCustomFields[field.key]"
                  class="px-6 py-4 border-b border-gray-100 dark:border-gray-700">
-                <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                <label :for="'filter-cf-m-' + field.key" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
                     @{{ field.name }}
                 </label>
-                <select v-model="selectedCustomFields[field.key]" style="font-family: sans-serif"
+                <select :id="'filter-cf-m-' + field.key" v-model="selectedCustomFields[field.key]" style="font-family: sans-serif"
                         class="w-full py-2.5 px-3 border-gray-300 dark:border-gray-600 rounded-md shadow-sm
                                bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 text-sm">
                     <option value="">{{ $label('show_all') }}</option>
-                    <option v-for="opt in availableCustomFieldOptions[field.key]" :key="opt" :value="opt">
-                        @{{ field.optionsMap[opt] || opt }} (@{{ (eventCountByCustomField[field.key] || {})[opt] || 0 }})
+                    <option v-for="opt in availableCustomFieldOptions[field.key]" :key="opt.key" :value="opt.key">
+                        @{{ opt.label }} (@{{ (eventCountByCustomField[field.key] || {})[opt.key] || 0 }})
                     </option>
                 </select>
             </div>
@@ -1805,19 +2005,24 @@
             </div>
         </div>
 
-        {{-- Empty state: no filters apply to the events in view --}}
-        <div v-if="dynamicFilterCount === 0 && activeFilterCount === 0"
-             class="px-6 py-8 text-center text-sm text-gray-500 dark:text-gray-400">
-            <template v-if="currentView === 'calendar'">{{ $label('no_filters_this_month') }}</template>
-            <template v-else>{{ $label('no_filters_available') }}</template>
-        </div>
-
-        {{-- Done button --}}
-        <div class="px-6 py-4">
-                <x-brand-button @click="showFiltersDrawer = false" class="w-full">
+        {{-- Footer. Copy link hands out the filtered view (category and custom fields, the params a
+             visitor could not otherwise type); Done, the forward action, stays last. --}}
+        <div class="px-6 py-4 flex gap-3">
+            @if (! (isset($embed) && $embed))
+            <button v-if="hasShareableFilter && (route === 'admin' || (route === 'guest' && !forceMobile))"
+                    type="button" @click="copyFilterLink"
+                    class="flex-1 inline-flex items-center justify-center gap-2 px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-lg font-semibold text-base text-gray-900 dark:text-gray-100 transition-all duration-200 hover:bg-gray-50 dark:hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-[var(--brand-blue)] focus:ring-offset-2 dark:focus:ring-offset-gray-800">
+                <svg class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" aria-hidden="true">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M13.19 8.688a4.5 4.5 0 0 1 1.242 7.244l-4.5 4.5a4.5 4.5 0 0 1-6.364-6.364l1.757-1.757m13.35-.622 1.757-1.757a4.5 4.5 0 0 0-6.364-6.364l-4.5 4.5a4.5 4.5 0 0 0 1.242 7.244" />
+                </svg>
+                <span aria-live="polite"><span v-if="linkCopied">{{ __('messages.copied') }}</span><span v-else>{{ __('messages.copy_link') }}</span></span>
+            </button>
+            @endif
+            <x-brand-button @click="showFiltersDrawer = false" class="flex-1">
                 {{ $label('done') }}
             </x-brand-button>
         </div>
+
     </div>
 </div>
 </Teleport>
@@ -1831,27 +2036,51 @@
 
     {{-- Modal panel --}}
     <div class="fixed inset-0 flex items-center justify-center p-4 z-[101] pointer-events-none">
-        <div class="bg-white dark:bg-gray-800 rounded-xl shadow-xl w-full max-w-md max-h-[80vh] overflow-y-auto pointer-events-auto {{ rtl_class($role ?? null, 'rtl', '', $isAdminRoute) }}">
+        <div ref="desktopFilterPanel" tabindex="-1" role="dialog" aria-modal="true" aria-labelledby="filters-modal-title"
+             class="bg-white dark:bg-gray-800 rounded-xl shadow-xl w-full max-w-md max-h-[80vh] overflow-y-auto pointer-events-auto focus:outline-none {{ rtl_class($role ?? null, 'rtl', '', $isAdminRoute) }}">
             {{-- Header --}}
-            <div class="px-6 py-4 flex items-center justify-between border-b border-gray-200 dark:border-gray-700 sticky top-0 bg-white dark:bg-gray-800">
+            <div class="px-6 py-4 flex items-center justify-between border-b border-gray-200 dark:border-gray-700 sticky top-0 bg-white dark:bg-gray-800 z-10">
                 <div>
-                    <h3 class="text-lg font-semibold text-gray-900 dark:text-gray-100">{{ $label('filters') }}</h3>
-                    <p class="text-xs text-gray-500 dark:text-gray-400 mt-1" aria-live="polite">
-                        @{{ filteredEventsForView.length }} {{ $label('events') }}
-                    </p>
+                    <h3 id="filters-modal-title" class="text-lg font-semibold text-gray-900 dark:text-gray-100">{{ $label('filters') }}</h3>
+                    <p class="text-xs text-gray-500 dark:text-gray-400 mt-1" aria-live="polite" v-text="filteredCountLabel"></p>
                 </div>
                 <button v-if="activeFilterCount > 0"
+                        type="button"
                         @click="clearFilters"
                         class="text-sm text-[var(--brand-blue)] hover:text-[var(--brand-blue-dark)] font-medium">
                     {{ $label('clear_filters') }}
                 </button>
             </div>
 
+            {{-- Search. Matches the name, description, venue, category, talent, agenda parts and
+                 public custom field values of the events the filters look at. --}}
+            <div class="px-6 py-4 border-b border-gray-100 dark:border-gray-700">
+                <div class="relative">
+                    <span class="pointer-events-none absolute inset-y-0 start-0 flex items-center ps-3 text-gray-400 dark:text-gray-500">
+                        <svg class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" aria-hidden="true">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="m21 21-5.197-5.197m0 0A7.5 7.5 0 1 0 5.196 5.196a7.5 7.5 0 0 0 10.607 10.607Z" />
+                        </svg>
+                    </span>
+                    {{-- dir only once there is text: an empty dir="auto" box lays the placeholder out
+                         left-to-right under a right-aligned icon on a Hebrew schedule. --}}
+                    <input type="search" id="filter-search-d" v-model="searchInput" ref="desktopFilterSearch"
+                           :dir="searchInput ? 'auto' : null"
+                           enterkeyhint="search" autocomplete="off"
+                           aria-label="{{ $label('search_events') }}"
+                           placeholder="{{ $label('search_events') }}"
+                           @keydown.enter.prevent="onSearchEnter($event)"
+                           @keydown.escape.stop.prevent="onSearchEscape"
+                           style="font-family: sans-serif"
+                           class="w-full py-2.5 ps-9 pe-3 border-gray-300 dark:border-gray-600 rounded-md shadow-sm bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 placeholder-gray-400 dark:placeholder-gray-500 text-sm focus:border-[var(--brand-blue)] focus:ring-[var(--brand-blue)]">
+                </div>
+                <p v-if="filterScopeIsMonth" class="mt-2 text-xs text-gray-500 dark:text-gray-400"><span v-pre>{{ $label('search_scope_month') }}</span></p>
+            </div>
+
             {{-- Schedule Filter --}}
             @if(isset($role) && $role->groups && $role->groups->count() > 1)
             <div class="px-6 py-4 border-b border-gray-100 dark:border-gray-700">
-                <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">{{ $label('schedule') }}</label>
-                <select v-model="selectedGroup" style="font-family: sans-serif"
+                <label for="filter-group-d" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">{{ $label('schedule') }}</label>
+                <select id="filter-group-d" v-model="selectedGroup" style="font-family: sans-serif"
                         class="w-full py-2.5 px-3 border-gray-300 dark:border-gray-600 rounded-md shadow-sm
                                bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 text-sm {{ rtl_class($role ?? null, 'rtl', '', $isAdminRoute) }}">
                     <option value="">{{ $label('show_all') }}</option>
@@ -1864,12 +2093,12 @@
 
             {{-- Category Filter --}}
             <div v-if="availableCategories.length > 1" class="px-6 py-4 border-b border-gray-100 dark:border-gray-700">
-                <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">{{ $label('category') }}</label>
+                <label for="filter-category-d" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">{{ $label('category') }}</label>
                 <div class="relative">
                     <span v-if="selectedCategoryColor"
                           class="absolute start-3 top-1/2 -translate-y-1/2 inline-block w-2.5 h-2.5 rounded-full pointer-events-none z-10"
                           :style="{ backgroundColor: selectedCategoryColor }"></span>
-                    <select v-model="selectedCategory" style="font-family: sans-serif"
+                    <select id="filter-category-d" v-model="selectedCategory" style="font-family: sans-serif"
                             :class="['w-full py-2.5 pe-3 border-gray-300 dark:border-gray-600 rounded-md shadow-sm bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 text-sm', selectedCategoryColor ? 'ps-8' : 'ps-3']">
                         <option value="">{{ $label('show_all') }}</option>
                         <option v-for="category in availableCategories" :key="category.id" :value="category.id">
@@ -1881,8 +2110,8 @@
 
             {{-- Venue Filter --}}
             <div v-if="uniqueVenues.length > 1" class="px-6 py-4 border-b border-gray-100 dark:border-gray-700">
-                <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">{{ $label('venue') }}</label>
-                <select v-model="selectedVenue" style="font-family: sans-serif"
+                <label for="filter-venue-d" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">{{ $label('venue') }}</label>
+                <select id="filter-venue-d" v-model="selectedVenue" style="font-family: sans-serif"
                         class="w-full py-2.5 px-3 border-gray-300 dark:border-gray-600 rounded-md shadow-sm
                                bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 text-sm">
                     <option value="">{{ $label('show_all') }}</option>
@@ -1892,19 +2121,21 @@
                 </select>
             </div>
 
-            {{-- Custom Field Filters --}}
-            <template v-for="field in dropdownCustomFields" :key="field.key">
-                <div v-if="(availableCustomFieldOptions[field.key] || []).length > 1"
+            {{-- Custom Field Filters ("Show as filter" fields). Shown while there is a choice to make, and
+                 always while one is selected, so a filter that arrived in a shared link can be seen and
+                 cleared even when it matches nothing in view. --}}
+            <template v-for="field in filterCustomFields" :key="field.key">
+                <div v-if="(availableCustomFieldOptions[field.key] || []).length > 1 || selectedCustomFields[field.key]"
                      class="px-6 py-4 border-b border-gray-100 dark:border-gray-700">
-                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                    <label :for="'filter-cf-d-' + field.key" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
                         @{{ field.name }}
                     </label>
-                    <select v-model="selectedCustomFields[field.key]" style="font-family: sans-serif"
+                    <select :id="'filter-cf-d-' + field.key" v-model="selectedCustomFields[field.key]" style="font-family: sans-serif"
                             class="w-full py-2.5 px-3 border-gray-300 dark:border-gray-600 rounded-md shadow-sm
                                    bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 text-sm">
                         <option value="">{{ $label('show_all') }}</option>
-                        <option v-for="opt in availableCustomFieldOptions[field.key]" :key="opt" :value="opt">
-                            @{{ field.optionsMap[opt] || opt }} (@{{ (eventCountByCustomField[field.key] || {})[opt] || 0 }})
+                        <option v-for="opt in availableCustomFieldOptions[field.key]" :key="opt.key" :value="opt.key">
+                            @{{ opt.label }} (@{{ (eventCountByCustomField[field.key] || {})[opt.key] || 0 }})
                         </option>
                     </select>
                 </div>
@@ -1936,19 +2167,24 @@
                 </div>
             </div>
 
-            {{-- Empty state: no filters apply to the events in view --}}
-            <div v-if="dynamicFilterCount === 0 && activeFilterCount === 0"
-                 class="px-6 py-8 text-center text-sm text-gray-500 dark:text-gray-400">
-                <template v-if="currentView === 'calendar'">{{ $label('no_filters_this_month') }}</template>
-                <template v-else>{{ $label('no_filters_available') }}</template>
-            </div>
-
-            {{-- Done button --}}
-            <div class="px-6 py-4">
-                <x-brand-button @click="showDesktopFiltersModal = false" class="w-full">
+            {{-- Footer. Copy link hands out the filtered view (category and custom fields, the params a
+                 visitor could not otherwise type); Done, the forward action, stays last. --}}
+            <div class="px-6 py-4 flex gap-3">
+                @if (! (isset($embed) && $embed))
+                <button v-if="hasShareableFilter && (route === 'admin' || (route === 'guest' && !forceMobile))"
+                        type="button" @click="copyFilterLink"
+                        class="flex-1 inline-flex items-center justify-center gap-2 px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-lg font-semibold text-base text-gray-900 dark:text-gray-100 transition-all duration-200 hover:bg-gray-50 dark:hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-[var(--brand-blue)] focus:ring-offset-2 dark:focus:ring-offset-gray-800">
+                    <svg class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" aria-hidden="true">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M13.19 8.688a4.5 4.5 0 0 1 1.242 7.244l-4.5 4.5a4.5 4.5 0 0 1-6.364-6.364l1.757-1.757m13.35-.622 1.757-1.757a4.5 4.5 0 0 0-6.364-6.364l-4.5 4.5a4.5 4.5 0 0 0 1.242 7.244" />
+                    </svg>
+                    <span aria-live="polite"><span v-if="linkCopied">{{ __('messages.copied') }}</span><span v-else>{{ __('messages.copy_link') }}</span></span>
+                </button>
+                @endif
+                <x-brand-button @click="showDesktopFiltersModal = false" class="flex-1">
                     {{ $label('done') }}
                 </x-brand-button>
             </div>
+
         </div>
     </div>
 </div>
@@ -2192,7 +2428,9 @@ const calendarApp = createApp({
     data() {
         return {
             selectedGroup: '{{ isset($selectedGroup) ? $selectedGroup->slug : "" }}',
-            selectedCategory: '{{ $category ?? "" }}',
+            // JSON-encoded, not echoed inside quotes: HTML escaping leaves a backslash alone, so a
+            // shared ?category=%5C would close the string early and take the whole calendar down.
+            selectedCategory: @json(is_scalar($category ?? null) ? (string) $category : ''),
             allEvents: @json($eventsForVue),
             eventsMap: @json($eventsMapForVue),
             eventIdsInViewedMonth: [],
@@ -2258,8 +2496,26 @@ const calendarApp = createApp({
             pollAnimating: {},
             isLoadingEvents: {{ request()->graphic ? 'false' : 'true' }},
             uniqueCategoryIds: @json($uniqueCategoryIds ?? []),
-            dropdownCustomFields: @json($dropdownCustomFields ?? []),
-            selectedCustomFields: @json(collect($dropdownCustomFields ?? [])->pluck('key')->mapWithKeys(fn($k) => [$k => ''])),
+            filterCustomFields: @json($filterCustomFields),
+            searchableCustomFields: @json($searchableCustomFields),
+            // Normalized keys (normKey()); the raw spellings they came from label an option that
+            // no event in scope uses, so a shared link to an empty room still reads "Room A".
+            selectedCustomFields: @json($initialCustomFilters),
+            initialCustomFilterLabels: @json($initialCustomFilterLabels),
+            searchInput: '',
+            searchQuery: '',
+            searchDebounceTimer: null,
+            // Below md the calendar layout is the flat agenda, not the month grid (see
+            // filterScopeIsMonth). Kept live by a matchMedia listener in mounted().
+            isNarrow: !!(window.matchMedia && window.matchMedia('(max-width: 767.98px)').matches),
+            restoringFiltersFromUrl: false,
+            filterShareBaseUrl: @json($filterShareBaseUrl),
+            filterParamMaxLength: {{ \App\Utils\CustomFieldUtils::FILTER_PARAM_MAX_LENGTH }},
+            filterChipLabels: @json($filterChipLabels),
+            eventsLabel: @json($label('events')),
+            linkCopied: false,
+            linkCopiedTimer: null,
+            filterPanelOpener: null,
             pageMonth: {{ $month }},
             pageYear: {{ $year }},
             listDataLoaded: false,
@@ -2319,7 +2575,7 @@ const calendarApp = createApp({
             return String(this.pageYear).padStart(4, '0') + '-' + String(this.pageMonth).padStart(2, '0');
         },
         hasDesktopFilters() {
-            return this.groups.length > 1 || this.availableCategories.length > 1 || this.hasOnlineEvents || this.uniqueVenues.length > 1 || this.hasFreeEvents || this.dropdownCustomFields.length > 0;
+            return this.groups.length > 1 || this.availableCategories.length > 1 || this.hasOnlineEvents || this.uniqueVenues.length > 1 || this.hasFreeEvents || this.filterCustomFields.length > 0;
         },
         dynamicFilterCount() {
             let count = 0;
@@ -2328,7 +2584,7 @@ const calendarApp = createApp({
             if (this.hasOnlineEvents) count++;
             if (this.uniqueVenues.length > 1) count++;
             if (this.hasFreeEvents) count++;
-            this.dropdownCustomFields.forEach(field => {
+            this.filterCustomFields.forEach(field => {
                 if ((this.availableCustomFieldOptions[field.key] || []).length > 1) count++;
             });
             return count;
@@ -2341,7 +2597,18 @@ const calendarApp = createApp({
             if (this.selectedVenue) count++;
             if (this.showFreeOnly) count++;
             Object.values(this.selectedCustomFields).forEach(v => { if (v) count++; });
+            if (this.isSearching) count++;
             return count;
+        },
+        // The filters that narrow the page the visitor is on. A sub-schedule is left out: it is
+        // the page itself (/schedule/kids), so on its own it gets no chips row and keeps the
+        // plain "No scheduled events" message. The hero badge still counts it, as before.
+        narrowingFilterCount() {
+            return this.activeFilterCount - (this.selectedGroup ? 1 : 0);
+        },
+        selectedGroupObj() {
+            if (!this.selectedGroup) return null;
+            return this.groups.find(g => g.slug === this.selectedGroup) || null;
         },
         selectedGroupName() {
             if (!this.selectedGroup) return '';
@@ -2353,46 +2620,49 @@ const calendarApp = createApp({
             const cat = this.availableCategories.find(c => c.id == this.selectedCategory);
             return cat ? cat.name : '';
         },
-        eventCountByGroup() {
-            // Filter by other active filters (except group)
-            const baseEvents = this.eventsForFilters.filter(e => {
-                if (this.showOnlineOnly && !e.is_online) return false;
-                if (this.selectedVenue && e.venue_subdomain !== this.selectedVenue) return false;
-                if (this.showFreeOnly && !e.is_free) return false;
-                for (const [k, v] of Object.entries(this.selectedCustomFields)) {
-                    if (v && (e.custom_field_values || {})[k] !== v) return false;
+        // The search box, folded the way the event text is (see searchFold()) and split into
+        // words. Every word has to appear somewhere in an event for it to match.
+        searchTokens() {
+            return this.searchFold(this.searchQuery).split(/\s+/).filter(Boolean);
+        },
+        isSearching() {
+            return this.searchTokens.length > 0;
+        },
+        // Each loaded event's searchable text, folded once per payload rather than per keystroke.
+        // Depends on isSearching (a boolean) rather than the query, so typing does not rebuild it,
+        // and nothing is built at all until someone searches.
+        searchHaystacks() {
+            const map = {};
+            if (!this.isSearching) return map;
+            // Upcoming only: any active filter, search included, hides past events
+            // (flatPastEvents), so indexing them would be work nobody sees.
+            this.allEvents.forEach(event => {
+                if (event && !(event.id in map)) {
+                    map[event.id] = this.buildSearchHaystack(event);
                 }
-                return true;
             });
+            return map;
+        },
+        // Whether the filters look at the one month on the desktop grid (true), or at every
+        // loaded upcoming event: the list layout, and the calendar layout below md, which is a
+        // flat agenda reaching six months ahead rather than a month grid. Offering the phone
+        // only this month's rooms would hide a room that is in use next month from the very
+        // list it filters.
+        filterScopeIsMonth() {
+            return this.currentView === 'calendar' && !this.forceMobile && !this.isNarrow;
+        },
+        eventCountByGroup() {
+            // Filter by other active filters (except sub-schedule and category)
+            const baseEvents = this.eventsForFilters.filter(e => this.passesFilters(e, { group: true, category: true }));
 
             const counts = { '': baseEvents.length };
             this.groups.forEach(g => {
-                counts[g.slug] = baseEvents.filter(e => {
-                    const selectedGroupObj = this.groups.find(grp => grp.slug === g.slug);
-                    return selectedGroupObj && e.group_id === selectedGroupObj.id;
-                }).length;
+                counts[g.slug] = baseEvents.filter(e => e.group_id === g.id).length;
             });
             return counts;
         },
         eventCountByCategory() {
-            // Filter by group, online status, venue, price, and custom fields
-            const filteredEvents = this.eventsForFilters.filter(event => {
-                if (this.selectedGroup) {
-                    const selectedGroupObj = this.groups.find(group => group.slug === this.selectedGroup);
-                    if (selectedGroupObj && event.group_id !== selectedGroupObj.id) {
-                        return false;
-                    }
-                }
-                if (this.showOnlineOnly && !event.is_online) {
-                    return false;
-                }
-                if (this.selectedVenue && event.venue_subdomain !== this.selectedVenue) return false;
-                if (this.showFreeOnly && !event.is_free) return false;
-                for (const [k, v] of Object.entries(this.selectedCustomFields)) {
-                    if (v && (event.custom_field_values || {})[k] !== v) return false;
-                }
-                return true;
-            });
+            const filteredEvents = this.eventsForFilters.filter(e => this.passesFilters(e, { category: true }));
             const counts = { '': filteredEvents.length };
             this.availableCategories.forEach(c => {
                 counts[c.id] = filteredEvents.filter(e => e.category_id == c.id).length;
@@ -2400,7 +2670,7 @@ const calendarApp = createApp({
             return counts;
         },
         eventsForFilters() {
-            if (this.currentView === 'list') {
+            if (this.currentView === 'list' || !this.filterScopeIsMonth) {
                 return this.futureEvents;
             }
             return this.allEvents.filter(e => this.eventIdsInViewedMonth.includes(e.id));
@@ -2412,74 +2682,21 @@ const calendarApp = createApp({
             });
         },
         filteredEvents() {
-            return this.allEvents.filter(event => {
-                if (this.selectedGroup) {
-                    // Find the group by slug to get its ID for filtering
-                    const selectedGroupObj = this.groups.find(group => group.slug === this.selectedGroup);
-                    if (selectedGroupObj && event.group_id !== selectedGroupObj.id) {
-                        return false;
-                    }
-                }
-                if (this.selectedCategory && event.category_id != this.selectedCategory) {
-                    return false;
-                }
-                if (this.showOnlineOnly && !event.is_online) {
-                    return false;
-                }
-                if (this.selectedVenue && event.venue_subdomain !== this.selectedVenue) {
-                    return false;
-                }
-                if (this.showFreeOnly && !event.is_free) {
-                    return false;
-                }
-                for (const [key, value] of Object.entries(this.selectedCustomFields)) {
-                    if (!value) continue;
-                    const eventValue = (event.custom_field_values || {})[key] || '';
-                    // Support multiselect: check if the filter value is one of the comma-separated values
-                    const eventValues = eventValue.split(',').map(v => v.trim());
-                    if (!eventValues.includes(value)) return false;
-                }
-                return true;
-            });
+            return this.allEvents.filter(event => this.passesFilters(event));
         },
         filteredEventsForView() {
-            return this.eventsForFilters.filter(event => {
-                if (this.selectedGroup) {
-                    const selectedGroupObj = this.groups.find(group => group.slug === this.selectedGroup);
-                    if (selectedGroupObj && event.group_id !== selectedGroupObj.id) {
-                        return false;
-                    }
-                }
-                if (this.selectedCategory && event.category_id != this.selectedCategory) {
-                    return false;
-                }
-                if (this.showOnlineOnly && !event.is_online) {
-                    return false;
-                }
-                if (this.selectedVenue && event.venue_subdomain !== this.selectedVenue) {
-                    return false;
-                }
-                if (this.showFreeOnly && !event.is_free) {
-                    return false;
-                }
-                for (const [key, value] of Object.entries(this.selectedCustomFields)) {
-                    if (!value) continue;
-                    const eventValue = (event.custom_field_values || {})[key] || '';
-                    const eventValues = eventValue.split(',').map(v => v.trim());
-                    if (!eventValues.includes(value)) return false;
-                }
-                return true;
-            });
+            return this.eventsForFilters.filter(event => this.passesFilters(event));
+        },
+        // How many events on the viewed month's grid survive the filters. Drives the desktop
+        // grid's "nothing matches" notice, which is about that grid whatever eventsForFilters is.
+        monthMatchCount() {
+            return this.allEvents.filter(e => this.eventIdsInViewedMonth.includes(e.id) && this.passesFilters(e)).length;
         },
         availableCategories() {
             // Get events filtered only by group (not by category) to show all available categories
             const groupFilteredEvents = this.eventsForFilters.filter(event => {
-                if (this.selectedGroup) {
-                    // Find the group by slug to get its ID for filtering
-                    const selectedGroupObj = this.groups.find(group => group.slug === this.selectedGroup);
-                    if (selectedGroupObj && event.group_id !== selectedGroupObj.id) {
-                        return false;
-                    }
+                if (this.selectedGroupObj && event.group_id !== this.selectedGroupObj.id) {
+                    return false;
                 }
                 return true;
             });
@@ -2527,20 +2744,7 @@ const calendarApp = createApp({
             return this.eventsForFilters.some(e => e.is_online);
         },
         eventCountByVenue() {
-            // Filter by group, category, online, price, and custom fields first
-            const baseEvents = this.eventsForFilters.filter(event => {
-                if (this.selectedGroup) {
-                    const selectedGroupObj = this.groups.find(g => g.slug === this.selectedGroup);
-                    if (selectedGroupObj && event.group_id !== selectedGroupObj.id) return false;
-                }
-                if (this.selectedCategory && event.category_id != this.selectedCategory) return false;
-                if (this.showOnlineOnly && !event.is_online) return false;
-                if (this.showFreeOnly && !event.is_free) return false;
-                for (const [k, v] of Object.entries(this.selectedCustomFields)) {
-                    if (v && (event.custom_field_values || {})[k] !== v) return false;
-                }
-                return true;
-            });
+            const baseEvents = this.eventsForFilters.filter(e => this.passesFilters(e, { venue: true }));
 
             const counts = { '': baseEvents.length };
             this.uniqueVenues.forEach(v => {
@@ -2548,42 +2752,140 @@ const calendarApp = createApp({
             });
             return counts;
         },
+        // The options each filter field offers: [{ key, value, label }]. `key` is the normalized
+        // form every comparison uses (normKey()), `value` the spelling the URL carries, and
+        // `label` what the guest reads. An option list keeps the order the owner defined and only
+        // offers options some event in scope uses. A text field offers each distinct value, with
+        // "Room A", "room a" and "Room  A " folded into one, labelled with the most common
+        // spelling and sorted naturally (Room 2 before Room 10). The selected option is always
+        // offered, even when nothing in scope uses it, so an active filter stays visible and
+        // clearable - a shared ?custom_1= link can name a room that is empty this month.
         availableCustomFieldOptions() {
             const result = {};
-            this.dropdownCustomFields.forEach(field => {
-                const values = new Set();
-                this.eventsForFilters.forEach(event => {
-                    const val = (event.custom_field_values || {})[field.key];
-                    if (val) values.add(val);
+            this.filterCustomFields.forEach(field => {
+                const optionsMap = field.optionsMap || {};
+                const selected = this.selectedCustomFields[field.key] || '';
+
+                if (field.type !== 'string') {
+                    const inUse = new Set();
+                    this.eventsForFilters.forEach(e => this.customFieldValuesOf(e, field).forEach(k => inUse.add(k)));
+                    const options = [];
+                    (field.options || []).forEach(option => {
+                        const key = this.normKey(option);
+                        if (key && (inUse.has(key) || key === selected) && !options.some(o => o.key === key)) {
+                            options.push({ key, value: option, label: optionsMap[option] || option });
+                        }
+                    });
+                    result[field.key] = options;
+                    return;
+                }
+
+                const spellings = {};
+                this.eventsForFilters.forEach(e => {
+                    const raw = (e.custom_field_values || {})[field.key];
+                    if (raw === null || raw === undefined) return;
+                    const value = String(raw).trim().replace(/\s+/g, ' ');
+                    const key = this.normKey(value);
+                    if (!key) return;
+                    if (!spellings[key]) spellings[key] = {};
+                    spellings[key][value] = (spellings[key][value] || 0) + 1;
                 });
-                result[field.key] = Array.from(values).sort((a, b) => a.localeCompare(b));
+
+                const options = Object.entries(spellings).map(([key, counts]) => {
+                    let best = '';
+                    let bestCount = 0;
+                    Object.entries(counts).forEach(([spelling, count]) => {
+                        if (count > bestCount) {
+                            best = spelling;
+                            bestCount = count;
+                        }
+                    });
+                    return { key, value: best, label: best };
+                });
+
+                if (selected && !spellings[selected]) {
+                    const initial = String((this.initialCustomFilterLabels || {})[field.key] || '');
+                    const label = this.normKey(initial) === selected ? initial.trim().replace(/\s+/g, ' ') : selected;
+                    options.push({ key: selected, value: label, label });
+                }
+
+                result[field.key] = options.sort((a, b) => a.label.localeCompare(b.label, undefined, { numeric: true, sensitivity: 'base' }));
             });
             return result;
         },
         eventCountByCustomField() {
             const result = {};
-            this.dropdownCustomFields.forEach(field => {
-                const baseEvents = this.eventsForFilters.filter(e => {
-                    if (this.selectedGroup) {
-                        const selectedGroupObj = this.groups.find(g => g.slug === this.selectedGroup);
-                        if (selectedGroupObj && e.group_id !== selectedGroupObj.id) return false;
-                    }
-                    if (this.selectedCategory && e.category_id != this.selectedCategory) return false;
-                    if (this.showOnlineOnly && !e.is_online) return false;
-                    if (this.selectedVenue && e.venue_subdomain !== this.selectedVenue) return false;
-                    if (this.showFreeOnly && !e.is_free) return false;
-                    for (const [k, v] of Object.entries(this.selectedCustomFields)) {
-                        if (k !== field.key && v && (e.custom_field_values || {})[k] !== v) return false;
-                    }
-                    return true;
-                });
+            this.filterCustomFields.forEach(field => {
+                const baseEvents = this.eventsForFilters.filter(e => this.passesFilters(e, { customField: field.key }));
                 const counts = { '': baseEvents.length };
-                (this.availableCustomFieldOptions[field.key] || []).forEach(opt => {
-                    counts[opt] = baseEvents.filter(e => (e.custom_field_values || {})[field.key] === opt).length;
+                (this.availableCustomFieldOptions[field.key] || []).forEach(option => {
+                    counts[option.key] = baseEvents.filter(e => this.customFieldValuesOf(e, field).includes(option.key)).length;
                 });
                 result[field.key] = counts;
             });
             return result;
+        },
+        // One chip per active filter, for the row above the calendar: what is narrowing the view
+        // and a way to drop each piece. A visitor arriving from a shared "Room A" link or a QR
+        // code on a door otherwise sees a partial schedule with no explanation.
+        activeFilterChips() {
+            const labels = this.filterChipLabels || {};
+            const chips = [];
+            if (this.selectedGroup) {
+                chips.push({ id: 'group', text: (labels.schedule ? labels.schedule + ': ' : '') + this.selectedGroupName, clear: () => { this.selectedGroup = ''; } });
+            }
+            if (this.selectedCategory) {
+                const name = this.selectedCategoryName || this.categories[this.selectedCategory] || '';
+                chips.push({ id: 'category', text: (labels.category ? labels.category + ': ' : '') + name, clear: () => { this.selectedCategory = ''; } });
+            }
+            if (this.selectedVenue) {
+                const venue = this.uniqueVenues.find(v => v.subdomain === this.selectedVenue);
+                chips.push({ id: 'venue', text: (labels.venue ? labels.venue + ': ' : '') + (venue ? venue.name : this.selectedVenue), clear: () => { this.selectedVenue = ''; } });
+            }
+            this.filterCustomFields.forEach(field => {
+                const selected = this.selectedCustomFields[field.key];
+                if (!selected) return;
+                const option = (this.availableCustomFieldOptions[field.key] || []).find(o => o.key === selected);
+                chips.push({
+                    id: 'cf-' + field.key,
+                    text: field.name + ': ' + (option ? option.label : selected),
+                    clear: () => { this.selectedCustomFields = { ...this.selectedCustomFields, [field.key]: '' }; },
+                });
+            });
+            if (this.isSearching) {
+                chips.push({ id: 'search', text: '"' + this.searchQuery.trim() + '"', clear: () => { this.clearSearch(); } });
+            }
+            if (this.showFreeOnly) {
+                chips.push({ id: 'free', text: labels.free_entry || '', clear: () => { this.showFreeOnly = false; } });
+            }
+            if (this.showOnlineOnly) {
+                chips.push({ id: 'online', text: labels.online || '', clear: () => { this.showOnlineOnly = false; } });
+            }
+            return chips;
+        },
+        // The count shown beside the filters, with the month when the filters only look at one.
+        filteredCountLabel() {
+            const count = this.filteredEventsForView.length;
+            return this.filterScopeIsMonth ? count + ' ' + this.eventsLabel + ' · ' + this.monthYearLabel : count + ' ' + this.eventsLabel;
+        },
+        // A category or custom field filter someone could hand to another visitor. Sub-schedule
+        // alone is not one: its own page URL already is that link.
+        hasShareableFilter() {
+            return !!this.selectedCategory || this.filterCustomFields.some(f => f.index && this.selectedCustomFields[f.key]);
+        },
+        // The link "Copy link" copies: the schedule page, the sub-schedule path, and the category
+        // and custom_N params - nothing else, so no month, language or layout rides along.
+        shareableFilterUrl() {
+            const base = this.route === 'admin'
+                ? this.filterShareBaseUrl
+                : (window.location.origin + this.guestBasePath);
+            if (!base) return '';
+            const url = base + (this.selectedGroup ? '/' + encodeURIComponent(this.selectedGroup) : '');
+            const params = new URLSearchParams();
+            if (this.selectedCategory) params.set('category', this.selectedCategory);
+            this.customFieldUrlParams().forEach(([name, value]) => params.set(name, value));
+            const query = params.toString();
+            return query ? url + '?' + query : url;
         },
         // Every upcoming occurrence the loaded payload can project, UNSLICED. Split out of
         // mobileEventsList so the widget can tell whether its own max_events cap hid anything -
@@ -2934,19 +3236,47 @@ const calendarApp = createApp({
     },
     watch: {
         selectedGroup(newGroupSlug) {
-            if (this.route === 'guest' && !this.embed) {
+            // Back/Forward (readFiltersFromUrl) restores the sub-schedule AND the category the
+            // address names together: neither re-writes the address nor second-guesses them.
+            if (this.restoringFiltersFromUrl) {
+                return;
+            }
+            // Not on the event page (forceMobile): its side agenda is not the schedule page, and
+            // pushing the schedule's path there would reload onto a different page.
+            if (this.route === 'guest' && !this.embed && !this.forceMobile) {
                 this.updateUrlWithGroup(newGroupSlug);
             }
             // Reset category selection when group changes, as available categories may change
             if (this.selectedCategory && !this.availableCategories.find(cat => cat.id == this.selectedCategory)) {
                 this.selectedCategory = '';
             }
+            // updateUrlWithGroup() drops ?category= unconditionally; put back the one that survived.
+            this.syncFiltersToUrl();
+        },
+        selectedCategory() {
+            this.syncFiltersToUrl();
+        },
+        selectedCustomFields: {
+            deep: true,
+            handler() {
+                this.syncFiltersToUrl();
+            },
+        },
+        searchInput(value) {
+            clearTimeout(this.searchDebounceTimer);
+            if (!value) {
+                this.searchQuery = '';
+                return;
+            }
+            this.searchDebounceTimer = setTimeout(() => { this.searchQuery = value; }, 150);
         },
         showFiltersDrawer(open) {
             document.body.style.overflow = open ? 'hidden' : '';
+            this.onFilterPanelToggle(open, false);
         },
         showDesktopFiltersModal(open) {
             document.body.style.overflow = open ? 'hidden' : '';
+            this.onFilterPanelToggle(open, true);
         },
     },
     methods: {
@@ -3283,7 +3613,256 @@ const calendarApp = createApp({
             this.showOnlineOnly = false;
             this.selectedVenue = '';
             this.showFreeOnly = false;
-            this.selectedCustomFields = Object.fromEntries(this.dropdownCustomFields.map(f => [f.key, '']));
+            this.selectedCustomFields = Object.fromEntries(this.filterCustomFields.map(f => [f.key, '']));
+            this.clearSearch();
+        },
+        // Cancels a pending debounce too, or the text just cleared would come back 150ms later.
+        clearSearch() {
+            clearTimeout(this.searchDebounceTimer);
+            this.searchDebounceTimer = null;
+            this.searchInput = '';
+            this.searchQuery = '';
+        },
+        // How every custom field value is compared: trimmed, inner whitespace collapsed, and
+        // lowercased, so text typed by hand ("Room A", "room a ") still lands on one option.
+        normKey(value) {
+            if (value === null || value === undefined) return '';
+            return String(value).trim().replace(/\s+/g, ' ').toLowerCase();
+        },
+        // An event's values for one filter field, normalized. A multiselect is stored as the
+        // comma-joined "A, B" (Role::sanitizeCustomFieldValues()), so it is split into its
+        // options; a dropdown or text value is kept whole. String() because an AI-parsed value
+        // is not guaranteed to be a string, and .trim() on anything else would throw and take
+        // the whole calendar down with it.
+        customFieldValuesOf(event, field) {
+            const raw = (event.custom_field_values || {})[field.key];
+            if (raw === null || raw === undefined || raw === '') return [];
+            if (field.type === 'multiselect') {
+                return String(raw).split(',').map(v => this.normKey(v)).filter(v => v !== '');
+            }
+            const key = this.normKey(raw);
+            return key === '' ? [] : [key];
+        },
+        matchesCustomFields(event, exceptKey = null) {
+            for (const field of this.filterCustomFields) {
+                if (field.key === exceptKey) continue;
+                const selected = this.selectedCustomFields[field.key];
+                if (!selected) continue;
+                if (!this.customFieldValuesOf(event, field).includes(selected)) return false;
+            }
+            return true;
+        },
+        // Accent- and case-insensitive: "cafe" finds "Café".
+        searchFold(text) {
+            if (text === null || text === undefined) return '';
+            return String(text).normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase();
+        },
+        buildSearchHaystack(event) {
+            const parts = [event.name, event.short_description, event.venue_name, event.category_name || (event.category_id ? this.categories[event.category_id] : '')];
+            (event.talent || []).forEach(t => parts.push(t && t.name));
+            (event.parts || []).forEach(p => parts.push(p && p.name));
+            const values = event.custom_field_values || {};
+            Object.entries(this.searchableCustomFields || {}).forEach(([key, conf]) => {
+                const raw = values[key];
+                if (raw === null || raw === undefined || raw === '') return;
+                parts.push(raw);
+                // The translated option labels too, so a visitor reading the English version can
+                // search for the words they are actually looking at.
+                const map = (conf && conf.optionsMap) || {};
+                String(raw).split(',').forEach(v => {
+                    const translated = map[v.trim()];
+                    if (translated) parts.push(translated);
+                });
+            });
+            return this.searchFold(parts.filter(p => p !== null && p !== undefined && p !== '').map(p => String(p)).join('\n'));
+        },
+        matchesSearch(event) {
+            if (!this.isSearching) return true;
+            const haystack = this.searchHaystacks[event.id] ?? this.buildSearchHaystack(event);
+            return this.searchTokens.every(token => haystack.includes(token));
+        },
+        // The one filter predicate. Every list, grid cell and count goes through here, so they
+        // cannot disagree about what a filter means. `except` leaves one filter out, for the
+        // counts beside that filter's own options.
+        passesFilters(event, except = {}) {
+            if (!except.group && this.selectedGroupObj && event.group_id !== this.selectedGroupObj.id) {
+                return false;
+            }
+            if (!except.category && this.selectedCategory && event.category_id != this.selectedCategory) {
+                return false;
+            }
+            if (this.showOnlineOnly && !event.is_online) {
+                return false;
+            }
+            if (!except.venue && this.selectedVenue && event.venue_subdomain !== this.selectedVenue) {
+                return false;
+            }
+            if (this.showFreeOnly && !event.is_free) {
+                return false;
+            }
+            if (!this.matchesCustomFields(event, except.customField || null)) {
+                return false;
+            }
+            return this.matchesSearch(event);
+        },
+        // [param, value] pairs for the active custom field filters that have a stable index. The
+        // value is the option's own spelling where it is known ("Room A"), not the lowercased key.
+        customFieldUrlParams() {
+            const pairs = [];
+            this.filterCustomFields.forEach(field => {
+                const selected = this.selectedCustomFields[field.key];
+                if (!field.index || !selected) return;
+                const option = (this.availableCustomFieldOptions[field.key] || []).find(o => o.key === selected);
+                pairs.push(['custom_' + field.index, option ? option.value : selected]);
+            });
+            return pairs;
+        },
+        // Mirrors the category and custom field filters into the address bar, so the page a
+        // visitor copies or reloads is the page they are looking at. replaceState, not
+        // pushState: a filter change is not a place to go Back to, and passing history.state on
+        // keeps navigateMonth()'s { month, year } for the popstate handler. The sub-schedule is
+        // the path and is written by updateUrlWithGroup().
+        syncFiltersToUrl() {
+            if (this.route !== 'guest' || this.embed || this.forceMobile || this.restoringFiltersFromUrl) {
+                return;
+            }
+            const url = new URL(window.location);
+            if (this.selectedCategory) {
+                url.searchParams.set('category', this.selectedCategory);
+            } else {
+                url.searchParams.delete('category');
+            }
+            for (let i = 1; i <= 10; i++) {
+                url.searchParams.delete('custom_' + i);
+            }
+            this.customFieldUrlParams().forEach(([name, value]) => url.searchParams.set(name, value));
+            if (url.toString() !== window.location.href) {
+                window.history.replaceState(window.history.state, '', url.toString());
+            }
+        },
+        // The popstate half of syncFiltersToUrl(): Back/Forward lands on a URL whose filters
+        // should be the ones shown. The flag keeps the watchers from writing the URL straight back.
+        // The sub-schedule is restored too, from the path (or ?schedule=): restoring a category
+        // without it can pair the category with a sub-schedule that has none of its events.
+        readFiltersFromUrl() {
+            const params = new URLSearchParams(window.location.search);
+            this.restoringFiltersFromUrl = true;
+
+            const path = window.location.pathname;
+            const base = this.guestBasePath || '';
+            const rest = path.startsWith(base) ? path.slice(base.length) : '';
+            let segment = rest.replace(/^\/+/, '').split('/')[0] || '';
+            // decodeURIComponent throws on a malformed "%" sequence; an unknown slug is dropped below anyway.
+            try { segment = decodeURIComponent(segment); } catch (e) { segment = ''; }
+            let slug = segment || params.get('schedule') || '';
+            if (slug && !this.groups.some(g => g.slug === slug)) slug = '';
+            this.selectedGroup = slug;
+
+            this.selectedCategory = params.get('category') || '';
+            const selection = {};
+            this.filterCustomFields.forEach(field => {
+                // A field without an index has no URL param, so the address says nothing about
+                // it: keep what is selected rather than clearing it on every Back.
+                if (!field.index) {
+                    selection[field.key] = this.selectedCustomFields[field.key] || '';
+                    return;
+                }
+                const raw = params.get('custom_' + field.index);
+                let key = raw ? this.normKey(raw.slice(0, this.filterParamMaxLength)) : '';
+                if (key && field.type !== 'string' && !(field.options || []).some(o => this.normKey(o) === key)) {
+                    key = '';
+                }
+                selection[field.key] = key;
+            });
+            this.selectedCustomFields = selection;
+            this.$nextTick(() => { this.restoringFiltersFromUrl = false; });
+        },
+        // The Clipboard API only exists in a secure context, so a plain-HTTP selfhost install (or
+        // a denied permission) falls back to a hidden textarea and execCommand('copy'), the same
+        // way the schedule editor's copy buttons do.
+        copyFilterLink() {
+            const url = this.shareableFilterUrl;
+            if (!url) return;
+            const done = () => {
+                this.linkCopied = true;
+                clearTimeout(this.linkCopiedTimer);
+                this.linkCopiedTimer = setTimeout(() => { this.linkCopied = false; }, 2000);
+            };
+            const fallback = () => {
+                const textarea = document.createElement('textarea');
+                textarea.value = url;
+                textarea.setAttribute('readonly', '');
+                textarea.style.position = 'fixed';
+                textarea.style.opacity = '0';
+                document.body.appendChild(textarea);
+                textarea.select();
+                try { if (document.execCommand('copy')) done(); } catch (err) {}
+                document.body.removeChild(textarea);
+            };
+            if (navigator.clipboard && navigator.clipboard.writeText) {
+                navigator.clipboard.writeText(url).then(done).catch(fallback);
+            } else {
+                fallback();
+            }
+        },
+        // Removing a chip can remove the row it sits in; focus then goes back to the Filters
+        // button rather than falling to <body>.
+        removeFilterChip(chip) {
+            chip.clear();
+            this.$nextTick(() => {
+                if (this.narrowingFilterCount === 0) this.focusFiltersOpener();
+            });
+        },
+        focusFiltersOpener() {
+            this.$nextTick(() => {
+                const candidates = ['hero-filters-btn', 'hero-filters-btn-mobile']
+                    .map(id => document.getElementById(id))
+                    .filter(el => el && el.offsetParent !== null);
+                if (candidates.length) candidates[0].focus();
+            });
+        },
+        closeFilterPanels() {
+            this.showFiltersDrawer = false;
+            this.showDesktopFiltersModal = false;
+        },
+        // Focus goes into the panel on open and back to whatever opened it on close. The search
+        // box takes focus only in the desktop modal: in the phone drawer it would pop the keyboard
+        // up over the filters the visitor opened the sheet to see.
+        onFilterPanelToggle(open, desktop) {
+            if (open) {
+                this.filterPanelOpener = document.activeElement && document.activeElement !== document.body ? document.activeElement : null;
+                this.$nextTick(() => {
+                    // The search box only with a real pointer: a tablet opens the desktop modal too,
+                    // and focusing a text box there pops the keyboard over the filters.
+                    const finePointer = window.matchMedia && window.matchMedia('(pointer: fine)').matches;
+                    const target = desktop
+                        ? (finePointer ? this.$refs.desktopFilterSearch : this.$refs.desktopFilterPanel)
+                        : this.$refs.mobileFilterPanel;
+                    if (target && target.focus) target.focus();
+                });
+                return;
+            }
+            const opener = this.filterPanelOpener;
+            this.filterPanelOpener = null;
+            if (opener && opener.focus && document.body.contains(opener)) {
+                opener.focus();
+            }
+        },
+        // Enter applies the search and gets out of the way: on a phone the keyboard plus the
+        // sheet otherwise cover every result the search just found.
+        onSearchEnter(event) {
+            clearTimeout(this.searchDebounceTimer);
+            this.searchQuery = this.searchInput;
+            if (event && event.target) event.target.blur();
+            this.closeFilterPanels();
+        },
+        // Escape in the box clears it first; a second Escape (or one on an empty box) closes.
+        onSearchEscape() {
+            if (this.searchInput) {
+                this.clearSearch();
+                return;
+            }
+            this.closeFilterPanels();
         },
         getEventsForDate(dateStr) {
             // Use the pre-calculated events map from the backend
@@ -3305,29 +3884,7 @@ const calendarApp = createApp({
             this.eventIdsInViewedMonth = Array.from(ids);
         },
         isEventVisible(event) {
-            if (this.selectedGroup) {
-                // Find the group by slug to get its ID for filtering
-                const selectedGroupObj = this.groups.find(group => group.slug === this.selectedGroup);
-                if (selectedGroupObj && event.group_id !== selectedGroupObj.id) {
-                    return false;
-                }
-            }
-            if (this.selectedCategory && event.category_id != this.selectedCategory) {
-                return false;
-            }
-            if (this.showOnlineOnly && !event.is_online) {
-                return false;
-            }
-            if (this.selectedVenue && event.venue_subdomain !== this.selectedVenue) {
-                return false;
-            }
-            if (this.showFreeOnly && !event.is_free) {
-                return false;
-            }
-            for (const [key, value] of Object.entries(this.selectedCustomFields)) {
-                if (value && (event.custom_field_values || {})[key] !== value) return false;
-            }
-            return true;
+            return this.passesFilters(event);
         },
         getEventUrl(event, occurrenceDate = null) {
             let url = event.guest_url;  // Already has /{subdomain}/{slug}/{id}
@@ -3356,6 +3913,11 @@ const calendarApp = createApp({
             if (this.selectedGroup) {
                 queryParams.push('schedule=' + this.selectedGroup);
             }
+
+            // So the event page's back link returns to the same filtered view.
+            this.customFieldUrlParams().forEach(([name, value]) => {
+                queryParams.push(name + '=' + encodeURIComponent(value));
+            });
 
             // Carry a URL-forced layout through to the event page so the breadcrumb there
             // can hand it back and the visitor returns to the view they left.
@@ -3731,6 +4293,11 @@ const calendarApp = createApp({
             this.$nextTick(() => {
                 const eventLinks = document.querySelectorAll('.event-link-popup');
                 eventLinks.forEach(el => {
+                    // This runs again whenever filteredEvents changes - on every search keystroke -
+                    // and Vue keeps the surviving elements, so bind each one once. The handlers
+                    // read data-event-id when they fire, so a reused element stays correct.
+                    if (el.dataset.popupBound) return;
+                    el.dataset.popupBound = '1';
                     el.addEventListener('mouseenter', () => {
                         const eventId = el.getAttribute('data-event-id');
                         const event = this.allEvents.find(ev => ev.id === eventId);
@@ -4224,8 +4791,30 @@ const calendarApp = createApp({
                 this.isLoadingEvents = true;
                 this.fetchCalendarEventsForMonth(month, year);
             }
+            if (!this.embed && !this.forceMobile) {
+                this.readFiltersFromUrl();
+            }
         });
         @endif
+
+        // Keep isNarrow in step with the viewport (see filterScopeIsMonth).
+        if (window.matchMedia) {
+            const narrowQuery = window.matchMedia('(max-width: 767.98px)');
+            const onNarrowChange = (e) => { this.isNarrow = e.matches; };
+            if (narrowQuery.addEventListener) {
+                narrowQuery.addEventListener('change', onNarrowChange);
+            } else if (narrowQuery.addListener) {
+                narrowQuery.addListener(onNarrowChange);
+            }
+        }
+
+        // Escape closes the filter panels wherever focus is. The search box handles its own
+        // Escape first (clear, then close) and stops it from reaching here.
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'Escape' && (this.showFiltersDrawer || this.showDesktopFiltersModal)) {
+                this.closeFilterPanels();
+            }
+        });
 
     }
 });

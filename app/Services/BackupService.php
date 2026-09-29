@@ -120,6 +120,11 @@ class BackupService
         // install) silently point the event at another schedule's seat map. The plan travels
         // instead as `_seating_plan_ref_id` and is remapped through $idMap['seating_plans'].
         'seating_plan_id',
+        // Names the schedule whose custom field definitions key custom_field_values. Non-fillable,
+        // and an id from this install. A restore leaves it null, so the values are read against
+        // creator_role_id - the importing schedule - which is why exportEvent() only carries values
+        // that were keyed by the exporting schedule's own fields.
+        'custom_field_values_role_id',
     ];
 
     private const MAX_SCHEDULES = 50;
@@ -587,6 +592,16 @@ class BackupService
                 continue;
             }
             $eventData[$field] = $attributes[$field] ?? null;
+        }
+
+        // An event another schedule created or saved carries answers keyed by THAT schedule's
+        // fields. The restore reads them against the importing schedule's own (see the
+        // custom_field_values_role_id exclusion above), so they are left behind rather than
+        // re-keyed into whichever of its fields happens to share the key. Unknown ownership (a
+        // legacy row with no creator) is kept: a backup that silently drops data is worse, and
+        // such rows are this schedule's own booking requests.
+        if (! $event->customFieldValuesBelongTo($role, unknownCounts: true)) {
+            $eventData['custom_field_values'] = null;
         }
 
         $eventData['_ref_id'] = $event->id;

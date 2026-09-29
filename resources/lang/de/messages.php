@@ -845,6 +845,7 @@ return [
     'category' => 'Kategorie',
     'all_categories' => 'Alle Kategorien',
     'search_events' => 'Veranstaltungen suchen...',
+    'search_scope_month' => 'Suche in diesem Monat',
     'no_events_found' => 'Keine Veranstaltungen gefunden',
     'subschedule' => 'Unterzeitplan',
     'subschedules' => 'Unterzeitpläne',
@@ -857,8 +858,6 @@ return [
     'all_shows' => 'Alle',
     'filters' => 'Veranstaltungen filtern',
     'clear_filters' => 'Filter löschen',
-    'no_filters_available' => 'Keine Filter verfügbar',
-    'no_filters_this_month' => 'Keine Filter für diesen Monat',
 
     // Categories
     'parties_&_festivals' => 'Partys & Festivals',
@@ -1310,6 +1309,9 @@ return [
     'field_private_help' => 'Den Wert dieses Feldes im Gast-Portal ausblenden. Der Wert bleibt im Admin-Portal sichtbar und kann weiterhin in Grafikvorlagen und Slug-Mustern über {custom_N} verwendet werden.',
     'field_show_on_request' => 'Im Anfrageformular',
     'field_show_on_request_help' => 'Diese Frage im öffentlichen Veranstaltungsanfrage-Formular stellen. Deaktivieren, um das Feld nur im Admin-Portal zu verwenden.',
+    'field_show_as_filter' => 'Als Filter anzeigen',
+    'field_show_as_filter_help' => 'Bieten Sie dieses Feld als Filter in Ihrem Kalender an. Jeder unterschiedliche Wert wird zu einer Option, geben Sie Werte daher immer gleich ein (z. B. Raum A).',
+    'field_filter_private_note' => 'Private Felder werden nie als Filter angezeigt.',
     'field_regex' => 'Prüfmuster',
     'field_regex_help' => 'Optional. Eingaben müssen diesem Muster von Anfang bis Ende entsprechen, sonst wird das Formular abgelehnt.',
     'field_regex_placeholder' => 'z. B. [A-Z]{3}-[0-9]{4}',

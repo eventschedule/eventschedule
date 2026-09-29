@@ -146,6 +146,8 @@
     $queryParams = [];
     if (request('category')) $queryParams['category'] = request('category');
     if (request('schedule')) $queryParams['schedule'] = request('schedule');
+    // A custom field filter (?custom_1=room+a), carried here by the calendar's event links.
+    $queryParams += \App\Utils\CustomFieldUtils::filterParams(request()->query());
     if ($requestedLayout = requested_event_layout()) $queryParams['layout'] = $requestedLayout;
     // Scratch name, never $date: the controller passes a sanitized $date into this view and
     // assigning to it here would replace it with the raw query param for the whole rest of

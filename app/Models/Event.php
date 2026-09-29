@@ -5435,6 +5435,60 @@ class Event extends Model
     }
 
     /**
+     * Whether this event's custom_field_values are keyed by $role's field definitions.
+     *
+     * The values are written by whichever schedule's form saved them (custom_field_values_role_id,
+     * or the creator for rows written before that column), and field keys collide across
+     * schedules - every schedule's first field is new_0. Read against any other schedule's
+     * definitions, a venue's "Room" lands in a talent's unrelated field, and a private answer can
+     * pass another schedule's public check.
+     *
+     * Unknown ownership (both columns null: legacy rows with no creator) is a match only when
+     * $unknownCounts is set. Public reads leave it off and fail closed. The admin event form turns
+     * it on, because there an authorized editor is working on the event, and blanking its answers
+     * would lose them on the next save.
+     */
+    public function customFieldValuesBelongTo(?Role $role, bool $unknownCounts = false): bool
+    {
+        if (! $role) {
+            return false;
+        }
+
+        $keyedBy = $this->custom_field_values_role_id ?? $this->creator_role_id;
+
+        if ($keyedBy === null) {
+            return $unknownCounts;
+        }
+
+        return (int) $keyedBy === (int) $role->id;
+    }
+
+    /**
+     * The custom field values a guest viewing $role's calendar may filter and search by: only
+     * values keyed by $role's own fields (customFieldValuesBelongTo()), minus the private ones,
+     * and nothing unless $role is Pro, the tier custom fields belong to.
+     */
+    public function publicCustomFieldValuesFor(?Role $role): array
+    {
+        if (! $role || empty($this->custom_field_values)) {
+            return [];
+        }
+
+        // A narrowed select that left out either ownership column would read it as null and fall
+        // back to the wrong schedule's definitions - refuse to guess.
+        $attributes = $this->getAttributes();
+        if (! array_key_exists('creator_role_id', $attributes) || ! array_key_exists('custom_field_values_role_id', $attributes)) {
+            return [];
+        }
+
+        if (! $this->customFieldValuesBelongTo($role) || ! $role->isPro()) {
+            return [];
+        }
+
+        return $role->filterPublicCustomFieldValues($this->custom_field_values);
+    }
+
+    /**
      * Get a specific custom field value by key
      */
     public function getCustomFieldValue(string $key): ?string

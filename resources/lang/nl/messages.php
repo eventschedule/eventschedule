@@ -565,6 +565,7 @@ return [
     'category' => 'Categorie',
     'all_categories' => 'Alle Categorieën',
     'search_events' => 'Zoek evenementen...',
+    'search_scope_month' => 'Zoeken in deze maand',
     'no_events_found' => 'Geen evenementen gevonden',
     'subschedule' => 'Subschema',
     'subschedules' => 'Subschema\'s',
@@ -577,8 +578,6 @@ return [
     'all_shows' => 'Alle',
     'filters' => 'Evenementen filteren',
     'clear_filters' => 'Filters wissen',
-    'no_filters_available' => 'Geen filters beschikbaar',
-    'no_filters_this_month' => 'Geen filters voor deze maand',
 
     // Categories
     'parties_&_festivals' => 'Feesten & Festivals',
@@ -1312,6 +1311,9 @@ return [
     'field_private_help' => 'Verberg de waarde van dit veld voor het gastenportaal. De waarde blijft zichtbaar in het beheerderpaneel en kan nog steeds worden gebruikt in afbeeldingssjablonen en slug-patronen via {custom_N}.',
     'field_show_on_request' => 'Op aanvraagformulier',
     'field_show_on_request_help' => 'Stel deze vraag op het openbare aanvraagformulier voor evenementen. Vink uit om het veld alleen in het beheerderpaneel te gebruiken.',
+    'field_show_as_filter' => 'Tonen als filter',
+    'field_show_as_filter_help' => 'Bied dit veld aan als filter in je agenda. Elke andere waarde wordt een optie, dus typ waarden altijd op dezelfde manier (bijv. Zaal A).',
+    'field_filter_private_note' => 'Privévelden worden nooit als filter getoond.',
     'field_regex' => 'Validatiepatroon',
     'field_regex_help' => 'Optioneel. Invoer moet van begin tot eind aan dit patroon voldoen, anders wordt het formulier geweigerd.',
     'field_regex_placeholder' => 'bijv. [A-Z]{3}-[0-9]{4}',

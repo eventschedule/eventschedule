@@ -853,6 +853,7 @@ return [
     'category' => 'Categoría',
     'all_categories' => 'Todas las Categorías',
     'search_events' => 'Buscar eventos...',
+    'search_scope_month' => 'Buscando en este mes',
     'no_events_found' => 'No se encontraron eventos',
     'subschedule' => 'Subhorario',
     'subschedules' => 'Subhorarios',
@@ -865,8 +866,6 @@ return [
     'all_shows' => 'Todos',
     'filters' => 'Filtrar eventos',
     'clear_filters' => 'Borrar Filtros',
-    'no_filters_available' => 'No hay filtros disponibles',
-    'no_filters_this_month' => 'No hay filtros para este mes',
 
     // Categories
     'parties_&_festivals' => 'Fiestas y Festivales',
@@ -1310,6 +1309,9 @@ return [
     'field_private_help' => 'Ocultar el valor de este campo del portal de invitados. El valor sigue visible en el panel de administración y puede usarse en plantillas de gráficos y patrones de slug mediante {custom_N}.',
     'field_show_on_request' => 'En el formulario de solicitud',
     'field_show_on_request_help' => 'Haz esta pregunta en el formulario público de solicitud de eventos. Desmárcalo para reservar el campo a tu uso en el panel de administración.',
+    'field_show_as_filter' => 'Mostrar como filtro',
+    'field_show_as_filter_help' => 'Ofrece este campo como filtro en tu calendario. Cada valor distinto se convierte en una opción, así que escribe los valores siempre igual (p. ej., Sala A).',
+    'field_filter_private_note' => 'Los campos privados nunca se muestran como filtros.',
     'field_regex' => 'Patrón de validación',
     'field_regex_help' => 'Opcional. Las entradas deben coincidir con este patrón de principio a fin; de lo contrario, se rechaza el formulario.',
     'field_regex_placeholder' => 'p. ej. [A-Z]{3}-[0-9]{4}',

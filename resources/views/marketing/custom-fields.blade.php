@@ -241,7 +241,7 @@
            where an 8.5rem label column would leave the value two words wide. */
         .es-form-spec-tight > div { grid-template-columns: 1fr; gap: 0.15rem; }
 
-        /* --- Flag pills: the four switches a field carries --- */
+        /* --- Flag pills: the five switches a field carries --- */
         .es-form-switch {
             display: inline-flex;
             align-items: center;
@@ -567,7 +567,7 @@
                 'Once per event',
                 'Defined on the schedule: Customize, then Custom Fields',
                 'Ten per schedule, answered once for each event. They appear on your own event form, and each one can also be asked of visitors on your public event request form. This is the set that carries the extra switches.',
-                'All four switches',
+                'All five switches',
                 'You, or a visitor submitting an event to you',
                 'Pro',
             ],
@@ -589,11 +589,12 @@
             ],
         ];
 
-        // The four per-field switches on a schedule field.
+        // The five per-field switches on a schedule field.
         $flags = [
             ['Required', 'on', 'The form will not submit without an answer. Checked in the browser and checked again on the server, so an empty answer cannot slip past either one.'],
             ['On request form', 'on', 'Ask the question of visitors submitting an event to you. On by default. Uncheck it to keep the field for your own use inside the admin portal.'],
             ['Private', 'off', 'Keep the answer off your public schedule. It stays visible to you, and it still fills {custom_N} in graphic templates and URL patterns.'],
+            ['Show as filter', 'on', 'Offer the field as a filter on your schedule page, so a visitor can pick Room A and see only what is on there. On by default for dropdowns and multi-selects, one click away for a text field, and the filtered view is a link you can share.'],
             ['Validation pattern', 'on', 'Text fields can require a format. Pick email address, phone number, web address, numbers only or letters and numbers, or write your own, and test a sample value before you save it.'],
         ];
 
@@ -644,7 +645,7 @@
             ['top', 'The form'],
             ['places', 'Three places'],
             ['types', 'Six types'],
-            ['switches', 'Four switches'],
+            ['switches', 'Five switches'],
             ['free', 'Free list, Pro questions'],
             ['column', 'Question and column'],
             ['requests', 'On the request form'],
@@ -727,6 +728,7 @@
                                     <span class="es-form-switch es-form-switch-on">Required</span>
                                     <span class="es-form-switch es-form-switch-on">On request form</span>
                                     <span class="es-form-switch">Private</span>
+                                    <span class="es-form-switch es-form-switch-on">Show as filter</span>
                                 </dd>
                             </div>
                         </dl>
@@ -899,19 +901,19 @@
     </section>
 
     <!-- ============================================================ -->
-    <!-- 4. Four switches per field                                   -->
+    <!-- 4. Five switches per field                                   -->
     <!-- ============================================================ -->
     <section id="switches" class="scroll-mt-24 py-20 lg:py-28">
         <div class="mx-auto max-w-6xl px-4 sm:px-6 lg:px-8">
             <div class="grid items-start gap-12 lg:grid-cols-2">
                 <div>
                     <div class="es-form-slot mb-6" data-reveal aria-hidden="true"><span>{custom_3}</span></div>
-                    <p class="es-form-tag mb-4" data-reveal style="--reveal-delay: 0.05s;">Four switches</p>
+                    <p class="es-form-tag mb-4" data-reveal style="--reveal-delay: 0.05s;">Five switches</p>
                     <h2 class="es-balance es-form-ink mb-5 text-3xl font-black tracking-tight md:text-4xl" data-reveal style="--reveal-delay: 0.1s;">
                         A question is not just <span class="es-form-fill">its wording.</span>
                     </h2>
                     <p class="es-form-muted mb-8 text-lg leading-relaxed" data-reveal style="--reveal-delay: 0.15s;">
-                        Each field on your schedule carries four switches. They are what turn a box on a form into something you can rely on when the answers come back.
+                        Each field on your schedule carries five switches. They are what turn a box on a form into something you can rely on when the answers come back.
                     </p>
 
                     <div class="space-y-4" data-reveal-group="80">
@@ -1236,7 +1238,7 @@
                     </div>
                     <div class="es-form-well p-5" data-reveal>
                         <h3 class="es-form-ink mb-2 text-base font-bold">As a filter</h3>
-                        <p class="es-form-muted text-sm leading-relaxed">A public dropdown or multi-select becomes a filter on your guest calendar. Mark it private and the filter goes away with it.</p>
+                        <p class="es-form-muted text-sm leading-relaxed">A dropdown or multi-select is a filter on your schedule page by default, and a text field such as Room joins them with one switch. Pick a value and the address bar holds a link to just that view. Mark a field private and it is never a filter.</p>
                     </div>
                 </div>
             </div>
