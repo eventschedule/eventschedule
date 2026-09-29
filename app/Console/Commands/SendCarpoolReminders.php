@@ -107,7 +107,9 @@ class SendCarpoolReminders extends Command
 
     protected function sendReminder($recipient, $role, $event, $offer, $carpoolRequest): void
     {
-        if ($recipient->is_subscribed === false) {
+        // Loose, never `=== false`: users.is_subscribed has no cast, so an opted-out row reads as
+        // int 0 and a strict check let every carpool email through after an unsubscribe.
+        if (! $recipient->is_subscribed) {
             return;
         }
 

@@ -16,7 +16,7 @@
                 {{ __('messages.account_unsubscribe_body') }}
             </p>
             <p class="mt-4 text-sm">
-                <x-link href="{{ route('profile.edit') }}">{{ __('messages.account_resubscribe_link') }}</x-link>
+                <x-link href="{{ route('profile.edit', ['tab' => 'general']) }}#section-profile">{{ __('messages.account_resubscribe_link') }}</x-link>
             </p>
         @else
             <h2 class="text-lg font-medium text-gray-900 dark:text-gray-100">

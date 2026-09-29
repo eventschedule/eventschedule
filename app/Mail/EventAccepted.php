@@ -71,7 +71,7 @@ class EventAccepted extends Mailable
                 'subject' => str_replace(':venue', $role->name, __('messages.request_accepted_subject')),
                 // A queued send has no request, so the date is rendered in the language this
                 // message is being sent in, and in the recipient's own 12/24-hour preference.
-                'eventDate' => $event->localStartsAt(true, null, false, null, $locale, $this->recipient->use_24_hour_time),
+                'eventDate' => $event->localStartsAt(true, null, false, null, $locale, (bool) $this->recipient->use_24_hour_time),
                 'unsubscribeUrl' => $this->unsubscribeUrl(),
                 'isRtl' => is_rtl(),
             ]

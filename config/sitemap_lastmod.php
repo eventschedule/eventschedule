@@ -37,7 +37,7 @@ return [
     '/contact' => '2026-09-22',
     '/dice-alternative' => '2026-09-25',
     '/docs' => '2026-09-24',
-    '/docs/account-settings' => '2026-09-27',
+    '/docs/account-settings' => '2026-09-29',
     '/docs/ai-import' => '2026-09-23',
     '/docs/allocated-seating' => '2026-09-23',
     '/docs/analytics' => '2026-09-23',

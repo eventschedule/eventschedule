@@ -4,8 +4,8 @@
 
     Success is a session flag set by RoleController::unsubscribe(), never the presence of ?email=.
     It used to be ?email=, and the unsigned footer links in the event request emails carried one,
-    so they reported an unsubscribe that never happened. Those links still exist in inboxes; they
-    now land on the form below.
+    so they reported an unsubscribe that never happened. The claim invites still send that unsigned
+    link (as do older event request emails in inboxes); it now only prefills the form below.
 
     Deliberately does NOT reuse messages.unsubscribed as a heading: it is an admin stat label, the
     bare word "unsubscribed". Same reason subscriber/unsubscribe.blade.php avoids it.
@@ -29,7 +29,7 @@
             <!-- Email Address -->
             <div>
                 <x-input-label for="email" :value="__('messages.email')" />
-                <x-text-input id="email" class="block mt-1 w-full" type="email" name="email" :value="old('email')" required autofocus autocomplete="off" />
+                <x-text-input id="email" class="block mt-1 w-full" type="email" name="email" :value="old('email', $prefill ?? null)" required autofocus autocomplete="off" />
                 <x-input-error :messages="$errors->get('email')" class="mt-2" />
             </div>
 

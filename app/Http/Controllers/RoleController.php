@@ -7408,7 +7408,20 @@ class RoleController extends Controller
 
     public function showUnsubscribe(Request $request)
     {
-        return view('role/unsubscribe');
+        // The claim invites still link here with an unsigned ?email=. It is not proof of anything,
+        // so it only prefills the form; the CSRF-protected button is still what unsubscribes.
+        $prefill = null;
+        $email = $request->query('email');
+
+        if (is_string($email)) {
+            $decoded = base64_decode($email, true);
+
+            if (is_string($decoded) && filter_var($decoded, FILTER_VALIDATE_EMAIL)) {
+                $prefill = $decoded;
+            }
+        }
+
+        return view('role/unsubscribe', ['prefill' => $prefill]);
     }
 
     public function unsubscribe(Request $request)
@@ -7530,7 +7543,9 @@ class RoleController extends Controller
      */
     private function invalidUnsubscribeLink()
     {
-        return redirect()->route('role.show_unsubscribe')
+        // Carry the language along, or a Hebrew error lands inside an English page.
+        // applyUnsubscribeLocale() has already validated it into the app locale.
+        return redirect()->route('role.show_unsubscribe', ['lang' => app()->getLocale()])
             ->withErrors(['email' => __('messages.invalid_unsubscribe_link')]);
     }
 

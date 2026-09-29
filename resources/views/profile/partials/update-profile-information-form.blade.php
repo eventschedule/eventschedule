@@ -77,6 +77,16 @@
                 @endif
             </div>
 
+            {{-- users.is_subscribed: the account-wide opt-out the signed unsubscribe link in our
+                 emails sets. Without this there was no way back once somebody clicked it. On the
+                 General tab, next to the address it governs, because the unsubscribe page's "turn
+                 emails back on" link lands on the profile's default tab. --}}
+            <div>
+                <x-toggle name="is_subscribed" label="{{ __('messages.email_updates') }}"
+                    help="{{ __('messages.email_updates_help') }}"
+                    checked="{{ old('is_subscribed', $user->is_subscribed) }}" />
+            </div>
+
             <div id="phone-field">
                 <x-input-label for="phone" :value="__('messages.phone_number')" />
                 <x-phone-input name="phone" :value="old('phone', $user->phone)" :disabled="is_demo_mode()" />
@@ -203,14 +213,6 @@
             <div>
                 <x-toggle name="ask_before_following" label="{{ __('messages.ask_before_following') }}"
                     checked="{{ old('ask_before_following', ! $user->follow_consent_dismissed) }}" />
-            </div>
-
-            {{-- users.is_subscribed: the account-wide opt-out the signed unsubscribe link in our
-                 emails sets. Without this there was no way back once somebody clicked it. --}}
-            <div>
-                <x-toggle name="is_subscribed" label="{{ __('messages.email_updates') }}"
-                    help="{{ __('messages.email_updates_help') }}"
-                    checked="{{ old('is_subscribed', $user->is_subscribed) }}" />
             </div>
         </div>
 
@@ -510,8 +512,14 @@ document.addEventListener('DOMContentLoaded', function() {
     var profileTabContents = document.querySelectorAll('.profile-tab-content');
     var profileTabWithError = @json($errors->hasAny(['timezone', 'language_code', 'use_24_hour_time']) ? 'localization' : null);
 
+    // ?tab= wins over the remembered tab, so a deep link (the unsubscribe page's "turn emails
+    // back on") lands on the tab that holds the setting it points at.
+    var requestedProfileTab = new URLSearchParams(window.location.search).get('tab');
+
     if (profileTabWithError) {
         switchProfileTab(profileTabWithError);
+    } else if (requestedProfileTab && document.getElementById('profile-tab-' + requestedProfileTab)) {
+        switchProfileTab(requestedProfileTab);
     } else {
         var savedProfileTab = localStorage.getItem('profileActiveTab');
         if (savedProfileTab) {

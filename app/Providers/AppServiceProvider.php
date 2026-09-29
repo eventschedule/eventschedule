@@ -199,12 +199,18 @@ class AppServiceProvider extends ServiceProvider
             });
         }
 
-        // The account-wide opt-out has no token; its signed email is the equivalent, and is keyed
-        // for the same reason. Covers the GET too, which only renders.
+        // The account-wide opt-out has no token; its signed link is the equivalent, and is keyed
+        // for the same reason. Keyed on email AND sig, not the email alone: ?email= is only base64
+        // of an address, so anyone who knew it could burn that person's budget with forged
+        // requests and 429 their real unsubscribe. A forged sig now only spends its own bucket.
+        // Covers the GET too, which only renders.
         RateLimiter::for('user_unsubscribe', function ($request) {
             $email = $request->query('email');
+            $sig = $request->query('sig');
 
-            return Limit::perMinutes(2, 10)->by('user_unsubscribe|'.(is_string($email) ? $email : $request->ip()));
+            $key = is_string($email) && is_string($sig) ? sha1($email.'|'.$sig) : $request->ip();
+
+            return Limit::perMinutes(2, 10)->by('user_unsubscribe|'.$key);
         });
 
         // The subscriber manage page, keyed on its token for the same reason as the pair above: it

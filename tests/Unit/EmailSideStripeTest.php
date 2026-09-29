@@ -16,7 +16,9 @@ use Tests\TestCase;
  */
 class EmailSideStripeTest extends TestCase
 {
-    private const PATTERN = '/border-(?:left|right|inline-start|inline-end|\{\{[^}]*\}\})\s*:\s*[2-9]px\s+solid/';
+    // Any width of 2px or more anywhere in the value, so colour-first shorthand (`#xxx solid 4px`)
+    // and wide stripes are caught too; 1px hairlines are allowed.
+    private const PATTERN = '/border-(?:left|right|inline-start|inline-end|\{\{[^}]*\}\})(?:-width)?\s*:[^;"]*\b(?:[2-9]|\d{2,})px/';
 
     public function test_no_email_view_uses_a_side_stripe(): void
     {
@@ -44,6 +46,10 @@ class EmailSideStripeTest extends TestCase
     {
         $this->assertMatchesRegularExpression(self::PATTERN, 'margin: 0; border-left: 4px solid #4E81FA;');
         $this->assertMatchesRegularExpression(self::PATTERN, "border-{{ \$isRtl ? 'right' : 'left' }}: 4px solid #9ca3af;");
+        $this->assertMatchesRegularExpression(self::PATTERN, 'border-left: #48bb78 solid 4px;');
+        $this->assertMatchesRegularExpression(self::PATTERN, 'border-left: 12px solid #eee;');
+        $this->assertMatchesRegularExpression(self::PATTERN, 'border-left-width: 4px;');
+        $this->assertDoesNotMatchRegularExpression(self::PATTERN, 'border-left: 1px solid #eee;');
         $this->assertDoesNotMatchRegularExpression(self::PATTERN, 'border: 1px solid #fcd34d;');
         $this->assertDoesNotMatchRegularExpression(self::PATTERN, 'border-top: 1px solid #ddd;');
     }

@@ -910,7 +910,9 @@ class CarpoolController extends Controller
             return;
         }
 
-        if ($recipient->is_subscribed === false) {
+        // Loose, never `=== false`: users.is_subscribed has no cast, so an opted-out row reads as
+        // int 0 and a strict check let every carpool email through after an unsubscribe.
+        if (! $recipient->is_subscribed) {
             return;
         }
 

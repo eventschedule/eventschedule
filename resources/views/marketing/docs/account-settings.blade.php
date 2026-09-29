@@ -63,6 +63,10 @@
                         <td>Required. The address you sign in with and where account email is sent. Editing it clears your verification: the field then shows an unverified notice with a link to re-send the verification email.</td>
                     </tr>
                     <tr>
+                        <td><span class="font-semibold text-gray-900 dark:text-white">Email updates</span></td>
+                        <td>On by default. Covers newsletters, tips, the weekly summary and updates on events you asked other schedules to list. Turning it off (or using the Unsubscribe link at the bottom of one of those emails) stops them all. Receipts, password resets and the notifications you turned on for your own schedules are always sent.</td>
+                    </tr>
+                    <tr>
                         <td><span class="font-semibold text-gray-900 dark:text-white">Phone Number</span></td>
                         <td>Optional, in international format. On the hosted platform you can verify it by SMS. A verified number is required before you can buy <a href="{{ route('marketing.docs.boost') }}" class="doc-link">ad campaigns</a> and on-network promotions, and it lets a schedule without its own email settings send <a href="{{ route('marketing.docs.newsletters') }}" class="doc-link">newsletters</a> and automatic new-event emails to more than 50 people at once. If one of your schedules uses the same number, that schedule's number counts as verified too.</td>
                     </tr>

@@ -52,7 +52,7 @@ class UserUnsubscribeTest extends TestCase
         $this->post(html_entity_decode($m[1]))
             ->assertOk()
             ->assertSee(__('messages.subscription_unsubscribed_heading'))
-            ->assertSee(route('profile.edit'), false);
+            ->assertSee(route('profile.edit', ['tab' => 'general']), false);
 
         $this->assertFalse((bool) $user->refresh()->is_subscribed);
     }
@@ -81,14 +81,16 @@ class UserUnsubscribeTest extends TestCase
      * egress hosts, and a per-IP budget there is what turns an unsubscribe into a 429. The
      * throttle middleware is off under APP_TESTING, so the limiter is driven directly.
      */
-    public function test_the_limiter_keys_on_the_address(): void
+    public function test_the_limiter_keys_on_the_signed_link(): void
     {
         $limiter = RateLimiter::limiter('user_unsubscribe');
+        $key = fn (string $query) => $limiter(Request::create('/user/unsubscribe?'.$query, 'POST'))->key;
 
-        $a = $limiter(Request::create('/user/unsubscribe?email=YQ%3D%3D&sig=x', 'POST'));
-        $b = $limiter(Request::create('/user/unsubscribe?email=Yg%3D%3D&sig=x', 'POST'));
-
-        $this->assertNotSame($a->key, $b->key);
+        // Per address...
+        $this->assertNotSame($key('email=YQ%3D%3D&sig=x'), $key('email=Yg%3D%3D&sig=x'));
+        // ...and per signature, so forged requests against somebody's address cannot spend the
+        // budget their real link draws on. Base64 of an email is not a secret.
+        $this->assertNotSame($key('email=YQ%3D%3D&sig=forged'), $key('email=YQ%3D%3D&sig=real'));
         // An array value must not throw inside the limiter, before the controller can refuse it.
         $this->assertNotEmpty($limiter(Request::create('/user/unsubscribe?email[]=x', 'POST'))->key);
     }
@@ -99,9 +101,9 @@ class UserUnsubscribeTest extends TestCase
         $email = base64_encode($user->email);
 
         foreach (['get', 'post'] as $method) {
-            $this->$method(route('user.unsubscribe', ['email' => $email, 'sig' => 'forged']))
-                ->assertRedirect(route('role.show_unsubscribe'))
-                ->assertSessionHasErrors(['email' => __('messages.invalid_unsubscribe_link')]);
+            $this->$method(route('user.unsubscribe', ['email' => $email, 'sig' => 'forged', 'lang' => 'he']))
+                ->assertRedirect(route('role.show_unsubscribe', ['lang' => 'he']))
+                ->assertSessionHasErrors(['email' => trans('messages.invalid_unsubscribe_link', [], 'he')]);
         }
 
         $this->assertTrue((bool) $user->refresh()->is_subscribed);
@@ -110,8 +112,8 @@ class UserUnsubscribeTest extends TestCase
     /** ?email[]= used to reach a string-typed verifier and 500. */
     public function test_an_array_email_is_refused_not_a_500(): void
     {
-        $this->get('/user/unsubscribe?email[]=x&sig=y')->assertRedirect(route('role.show_unsubscribe'));
-        $this->post('/user/unsubscribe?email[]=x&sig=y')->assertRedirect(route('role.show_unsubscribe'));
+        $this->get('/user/unsubscribe?email[]=x&sig=y')->assertRedirect(route('role.show_unsubscribe', ['lang' => 'en']));
+        $this->post('/user/unsubscribe?email[]=x&sig=y')->assertRedirect(route('role.show_unsubscribe', ['lang' => 'en']));
     }
 
     public function test_the_honeypot_blocks_the_post(): void
@@ -119,7 +121,7 @@ class UserUnsubscribeTest extends TestCase
         $user = $this->subscribedUser();
 
         $this->post(UrlUtils::userUnsubscribeUrl($user->email), ['website' => 'http://spam.example'])
-            ->assertRedirect(route('role.show_unsubscribe'));
+            ->assertRedirect(route('role.show_unsubscribe', ['lang' => 'en']));
 
         $this->assertTrue((bool) $user->refresh()->is_subscribed);
     }
@@ -134,15 +136,21 @@ class UserUnsubscribeTest extends TestCase
     }
 
     /**
-     * The old footer links in event request emails were unsigned GETs carrying ?email=, and the
-     * page reported success on the parameter alone. They must not claim anything any more.
+     * The claim invites (and older event request emails still in inboxes) link here unsigned with
+     * ?email=, and the page used to report success on the parameter alone. Now it only prefills
+     * the form, so the reader is one click from actually unsubscribing.
      */
-    public function test_an_old_unsigned_link_no_longer_claims_success(): void
+    public function test_an_unsigned_link_prefills_the_form_and_claims_nothing(): void
     {
         $this->get(route('role.show_unsubscribe', ['email' => base64_encode('someone@example.com')]))
             ->assertOk()
             ->assertDontSee(__('messages.unsubscribed_message'))
-            ->assertSee('name="email"', false);
+            ->assertSee('value="someone@example.com"', false);
+
+        // Anything that is not an address is dropped, not echoed.
+        $this->get(route('role.show_unsubscribe', ['email' => base64_encode('<b>nope</b>')]))
+            ->assertOk()
+            ->assertDontSee('nope');
     }
 
     public function test_the_schedule_level_form_still_reports_success(): void
