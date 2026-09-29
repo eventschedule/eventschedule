@@ -4,6 +4,7 @@ namespace Tests\Feature;
 
 use App\Models\DismissedNextStep;
 use App\Models\Role;
+use App\Models\User;
 use App\Services\DemoService;
 use App\Utils\UrlUtils;
 use Illuminate\Foundation\Testing\RefreshDatabase;
@@ -286,23 +287,52 @@ class DashboardNextStepsTest extends TestCase
         $this->assertSame(['next_step_tickets'], $this->types($user));
     }
 
-    /** A curator that only lists someone else's event is offered nothing for it. */
+    /**
+     * A curator that only lists someone else's event is offered nothing for it.
+     *
+     * Not tickets, because it cannot price an event it does not own. And not "add an event"
+     * either: the listed event IS on its page, and this test used to assert that step, which is
+     * how a curator with a full calendar was told its page had no upcoming dates.
+     */
     public function test_a_curator_listing_someone_elses_event_is_offered_nothing(): void
     {
-        $venueOwner = $this->createOwner();
-        $venue = $this->createRole($venueOwner, 'venue');
+        $curatorUser = $this->curatorListingAnEvent(true);
+
+        $this->assertSame([], $this->types($curatorUser));
+    }
+
+    /** An uncurated row is off the curator's page, so it is still asked for an event of its own. */
+    public function test_a_curator_whose_listed_event_was_uncurated_is_asked_for_one(): void
+    {
+        $curatorUser = $this->curatorListingAnEvent(false);
+
+        $this->assertSame(['next_step_first_event'], $this->types($curatorUser));
+    }
+
+    /**
+     * Once everything it listed has passed, a curator's page went quiet rather than never started,
+     * so it gets the "next date" ask. Reading only what it created called that its first.
+     */
+    public function test_a_curator_whose_listed_events_have_passed_is_asked_for_the_next_one(): void
+    {
+        $curatorUser = $this->curatorListingAnEvent(true, -10);
+
+        $this->assertSame(['next_step_next_event'], $this->types($curatorUser));
+    }
+
+    private function curatorListingAnEvent(bool $accepted, int $inDays = 10): User
+    {
+        $venue = $this->createRole($this->createOwner(), 'venue');
         $event = $this->createEvent($venue, [
-            'starts_at' => now()->addDays(10)->format('Y-m-d H:i:s'),
+            'starts_at' => now()->addDays($inDays)->format('Y-m-d H:i:s'),
             'creator_role_id' => $venue->id,
         ]);
 
         $curatorUser = $this->createOwner();
         $curator = $this->createRole($curatorUser, 'curator');
-        $event->roles()->attach($curator->id, ['is_accepted' => true]);
+        $event->roles()->attach($curator->id, ['is_accepted' => $accepted]);
 
-        // Not "nothing at all": the curator's own page has no upcoming event of its own, so the
-        // step it gets must be about publishing one, never about pricing someone else's.
-        $this->assertSame(['next_step_first_event'], $this->types($curatorUser));
+        return $curatorUser;
     }
 
     /** But a venue that accepted a talent's event can price it, so it is asked to. */

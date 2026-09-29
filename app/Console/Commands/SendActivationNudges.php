@@ -359,6 +359,28 @@ class SendActivationNudges extends Command
         });
     }
 
+    /**
+     * Events that appear on this schedule's page, which is a different question from
+     * ownedEvents(): is_accepted is the gate the guest page reads, for every schedule type.
+     *
+     * The two only differ for a curator. A curator does not own what it lists, so it is never
+     * asked to price it, but those listed events are its page. Asking ownedEvents() whether a
+     * curator has anything coming up told one whose calendar was full of events that it listed
+     * from other schedules that its page was empty. Those keep the other schedule's
+     * creator_role_id: events pulled from a source, auto-curated through default_curator_ids or
+     * curated by hand, and submissions to a require_account curator, which save onto the
+     * submitter's own talent schedule. An anonymous submission is the curator's own.
+     *
+     * The creator branch is kept so a schedule's own event counts whatever its pivot says, as in
+     * ownedEvents(). A declined or uncurated row (is_accepted false, someone else's event) is not
+     * on the page and does not count.
+     */
+    private function listedEvents($query)
+    {
+        return $query->where(fn ($q) => $q->whereColumn('event_role.role_id', 'events.creator_role_id')
+            ->orWhere('event_role.is_accepted', true));
+    }
+
     /** A schedule created recently that still has nothing on its page. */
     private function dueForNoEvent(int $limit)
     {
@@ -508,7 +530,10 @@ class SendActivationNudges extends Command
             // Recurring-aware (Event::scopeHasUpcomingOccurrence): a running series' starts_at is
             // its anchor, weeks in the past, and a bare starts_at test mailed a schedule in the
             // middle of a weekly run "nothing coming up".
-            ->whereDoesntHave('events', fn ($q) => $this->ownedEvents($q)
+            // listedEvents(), not ownedEvents(): the email says the PAGE is empty, and a curator's
+            // page is the events it lists. The trigger half above stays on ownedEvents(), so this
+            // only stops false alarms and does not start mailing curators that never created one.
+            ->whereDoesntHave('events', fn ($q) => $this->listedEvents($q)
                 ->hasUpcomingOccurrence())
             ->limit($limit)->get();
     }

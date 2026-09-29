@@ -717,19 +717,34 @@ class HomeController extends Controller
                 ->orWhere(fn ($w) => $w->where('event_role.is_accepted', true)
                     ->where('roles.type', '!=', 'curator')));
 
+        // Events on the schedule's PAGE, mirroring SendActivationNudges::listedEvents(). The
+        // "is the page empty" questions use this instead of $owned: is_accepted is the gate the
+        // guest page reads, so a curator's listed events are its page even though it cannot price
+        // them. Same predicate as $owned for every other schedule type.
+        $listed = fn ($query) => $query
+            ->where(fn ($q) => $q->whereColumn('event_role.role_id', 'events.creator_role_id')
+                ->orWhere('event_role.is_accepted', true));
+
         // One query each rather than per schedule: the dashboard renders on every page load.
-        $publicUpcoming = $owned(DB::table('event_role')
+        //
+        // Recurring-aware: a series' starts_at is its anchor, so a bare starts_at test told a
+        // schedule running a weekly show to "add your next date".
+        $publicUpcomingBy = fn ($filter) => $filter(DB::table('event_role')
             ->join('events', 'events.id', '=', 'event_role.event_id')
             ->whereIn('event_role.role_id', $ids)
             ->where('events.is_draft', false)
             ->where('events.is_private', false)
             ->where('events.is_internal', false)
-            // Recurring-aware: a series' starts_at is its anchor, so a bare starts_at test
-            // told a schedule running a weekly show to "add your next date".
             ->where(fn ($q) => Event::constrainToOccurrencesSince($q, now('UTC'))))
             ->distinct()->pluck('event_role.role_id')->flip();
 
-        $anyEvent = $owned(DB::table('event_role')
+        // Something upcoming this schedule can sell (branch 1), and something upcoming anyone
+        // visiting its page can see (branch 4). Only a curator can have the second without the
+        // first, and it was told its page had no upcoming dates while it listed dozens.
+        $publicUpcoming = $publicUpcomingBy($owned);
+        $listedUpcoming = $publicUpcomingBy($listed);
+
+        $anyEvent = $listed(DB::table('event_role')
             ->join('events', 'events.id', '=', 'event_role.event_id')
             ->whereIn('event_role.role_id', $ids))
             ->distinct()->pluck('event_role.role_id')->flip();
@@ -929,7 +944,7 @@ class HomeController extends Controller
             // silence the dormancy nudge on a schedule that later ran and stopped.
             $eventStep = isset($anyEvent[$role->id]) ? 'next_step_next_event' : 'next_step_first_event';
 
-            if (! isset($publicUpcoming[$role->id])) {
+            if (! isset($listedUpcoming[$role->id])) {
                 if (! isset($dismissed[$role->id.':'.$eventStep])) {
                     $items->push([
                         'type' => $eventStep,

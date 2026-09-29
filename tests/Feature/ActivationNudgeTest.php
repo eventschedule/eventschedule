@@ -419,6 +419,55 @@ class ActivationNudgeTest extends TestCase
     }
 
     /**
+     * A curator's page is the events it lists, not only the ones it created.
+     *
+     * The upcoming check went through ownedEvents(), which leaves out a curator's listed events so
+     * it is never asked to price them. A curator whose calendar was full of events it listed from
+     * other schedules was emailed "your page has no upcoming dates".
+     *
+     * creator_role_id is set on the curator's own event on purpose: createEvent() leaves it null,
+     * and without it the trigger half never matches a curator, so this would pass vacuously.
+     */
+    public function test_a_curator_with_upcoming_listed_events_is_not_idle(): void
+    {
+        $this->curatorListingAnUpcomingEvent(true);
+
+        $this->nudge('idle_30');
+
+        $this->assertNothingSent();
+    }
+
+    /** An uncurated row is off the page, so the curator can still go quiet. */
+    public function test_a_curator_whose_upcoming_event_was_uncurated_can_be_idle(): void
+    {
+        $curator = $this->curatorListingAnUpcomingEvent(false);
+
+        $this->nudge('idle_30');
+
+        $this->assertSent('idle_30');
+        $this->assertSame($curator->id, (int) DB::table('schedule_nudges')->value('role_id'));
+    }
+
+    /** A curator that created one event 40 days ago, and a venue's event 10 days out on its page. */
+    private function curatorListingAnUpcomingEvent(bool $accepted): Role
+    {
+        $curator = $this->createRole($this->owner(), 'curator');
+        $this->createEvent($curator, [
+            'starts_at' => now()->subDays(40)->format('Y-m-d H:i:s'),
+            'creator_role_id' => $curator->id,
+        ]);
+
+        $venue = $this->createRole($this->owner(), 'venue');
+        $event = $this->createEvent($venue, [
+            'starts_at' => now()->addDays(10)->format('Y-m-d H:i:s'),
+            'creator_role_id' => $venue->id,
+        ]);
+        $event->roles()->attach($curator->id, ['is_accepted' => $accepted]);
+
+        return $curator;
+    }
+
+    /**
      * A series' starts_at is its anchor, weeks in the past while it runs. The bare starts_at test
      * this replaced mailed a schedule in the middle of a weekly run "nothing coming up".
      */
