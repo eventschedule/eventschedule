@@ -2,6 +2,7 @@
 
 namespace App\Console\Commands;
 
+use App\Utils\HeroExperiment;
 use Facebook\WebDriver\Chrome\ChromeOptions;
 use Facebook\WebDriver\Remote\DesiredCapabilities;
 use Facebook\WebDriver\Remote\RemoteWebDriver;
@@ -349,6 +350,12 @@ class GenerateSocialImages extends Command
 
                 $browser->visit($urlPath);
 
+                // The temporary server runs with IS_NEXUS=true, so the homepage's headline test is
+                // live and its picker swaps in a random variant. The card is what every shared link
+                // previews, so it shows the default copy, whichever variant this visit drew.
+                $heroCopy = json_encode(HeroExperiment::VARIANTS[HeroExperiment::DEFAULT]);
+                $browser->script("(function (copy) { var set = function (name, text) { var el = document.querySelector('[data-hero=\"' + name + '\"]'); if (el) { el.textContent = text; } }; set('l1', copy.line1); set('l2', copy.line2); set('sub', copy.subtitle); })({$heroCopy})");
+
                 // Force dark mode
                 $browser->script("document.documentElement.classList.add('dark')");
 
@@ -357,11 +364,14 @@ class GenerateSocialImages extends Command
                 // static base state instead of freezing hidden when animations are disabled.
                 $browser->script("document.documentElement.classList.remove('es-anim')");
 
-                // Inject all screenshot overrides: disable animations, hide header/footer, center hero content
+                // Inject all screenshot overrides: disable animations, hide header/footer, center hero content.
+                // The .mb-6:first-child rule hides a lead-in element above the headline; since 2026-09-22
+                // the eyebrow sits INSIDE the h1 (x-marketing.hero-eyebrow), which makes the h1 itself the
+                // first child, hence :not(h1) - without it the card is captured with no headline at all.
                 $heroHeight = self::HEIGHT;
                 $browser->script("
                     var style = document.createElement('style');
-                    style.textContent = '*, *::before, *::after { animation: none !important; transition: none !important; } .animate-reveal { opacity: 1 !important; } .es-mask .es-mask-line { transform: none !important; } .es-fade-up { opacity: 1 !important; transform: none !important; } header { display: none !important; } footer { display: none !important; } .es-dotnav { display: none !important; } main > section:first-of-type { height: {$heroHeight}px !important; min-height: unset !important; padding: 0 !important; overflow: hidden !important; } main > section:first-of-type .flex.justify-center.gap-4 { display: none !important; } main > section:first-of-type .relative.z-10 > .mb-6:first-child { display: none !important; } main > section:first-of-type nav[aria-label=\"Breadcrumb\"] { display: none !important; } main > section:first-of-type > .relative.z-10 { position: absolute !important; top: 50% !important; left: 0 !important; right: 0 !important; transform: translateY(-50%) !important; padding: 0 !important; margin: 0 auto !important; } main > section:first-of-type .relative.z-10.text-center { display: flex !important; flex-direction: column !important; align-items: center !important; gap: 2rem !important; } main > section:first-of-type .relative.z-10.text-center > * { margin-top: 0 !important; margin-bottom: 0 !important; } .fixed.bottom-4.right-4.z-50 { display: none !important; } main > .doc-accent-guide > section:first-of-type { height: {$heroHeight}px !important; min-height: unset !important; overflow: hidden !important; }';
+                    style.textContent = '*, *::before, *::after { animation: none !important; transition: none !important; } .animate-reveal { opacity: 1 !important; } .es-mask .es-mask-line { transform: none !important; } .es-fade-up { opacity: 1 !important; transform: none !important; } header { display: none !important; } footer { display: none !important; } .es-dotnav { display: none !important; } main > section:first-of-type { height: {$heroHeight}px !important; min-height: unset !important; padding: 0 !important; overflow: hidden !important; } main > section:first-of-type .flex.justify-center.gap-4 { display: none !important; } main > section:first-of-type .relative.z-10 > .mb-6:first-child:not(h1) { display: none !important; } main > section:first-of-type nav[aria-label=\"Breadcrumb\"] { display: none !important; } main > section:first-of-type > .relative.z-10 { position: absolute !important; top: 50% !important; left: 0 !important; right: 0 !important; transform: translateY(-50%) !important; padding: 0 !important; margin: 0 auto !important; } main > section:first-of-type .relative.z-10.text-center { display: flex !important; flex-direction: column !important; align-items: center !important; gap: 2rem !important; } main > section:first-of-type .relative.z-10.text-center > * { margin-top: 0 !important; margin-bottom: 0 !important; } .fixed.bottom-4.right-4.z-50 { display: none !important; } main > .doc-accent-guide > section:first-of-type { height: {$heroHeight}px !important; min-height: unset !important; overflow: hidden !important; }';
                     document.head.appendChild(style);
                 ");
 

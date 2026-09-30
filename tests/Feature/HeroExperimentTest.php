@@ -40,8 +40,10 @@ class HeroExperimentTest extends TestCase
         $response->assertSee('data-hero="sub">'.e($default['subtitle']).'<', false);
         $response->assertSee('var variants =', false);
 
+        // Subtitles too: a challenger can share the control's headline and differ only below it.
         foreach (HeroExperiment::VARIANTS as $copy) {
             $response->assertSee(json_encode($copy['line1']), false);
+            $response->assertSee(json_encode($copy['subtitle']), false);
         }
     }
 
@@ -59,17 +61,17 @@ class HeroExperimentTest extends TestCase
 
     public function test_a_locked_winner_is_rendered_by_the_server_with_no_picker(): void
     {
-        Setting::set(HeroExperiment::WINNER_SETTING, HeroExperiment::setHash().'|sells|2026-09-01');
+        Setting::set(HeroExperiment::WINNER_SETTING, HeroExperiment::setHash().'|plan_sell|2026-09-01');
 
         $response = $this->get('/')->assertOk();
 
-        $response->assertSee('data-hero="l1">'.e(HeroExperiment::VARIANTS['sells']['line1']).'<', false);
+        $response->assertSee('data-hero="l1">'.e(HeroExperiment::VARIANTS['plan_sell']['line1']).'<', false);
         $response->assertDontSee('var variants =', false);
     }
 
     public function test_a_winner_from_a_different_variant_set_is_ignored(): void
     {
-        Setting::set(HeroExperiment::WINNER_SETTING, 'stalehash000|sells|2026-09-01');
+        Setting::set(HeroExperiment::WINNER_SETTING, 'stalehash000|plan_sell|2026-09-01');
 
         $this->get('/')->assertOk()->assertSee('var variants =', false);
     }
@@ -94,19 +96,19 @@ class HeroExperimentTest extends TestCase
     public function test_the_beacon_counts_each_visitor_once_per_day(): void
     {
         foreach (range(1, 3) as $i) {
-            $this->beacon(['variant' => 'booked', 'event' => 'view'])->assertNoContent();
-            $this->beacon(['variant' => 'booked', 'event' => 'click'])->assertNoContent();
+            $this->beacon(['variant' => 'plan_fees', 'event' => 'view'])->assertNoContent();
+            $this->beacon(['variant' => 'plan_fees', 'event' => 'click'])->assertNoContent();
         }
 
-        $row = MarketingExperimentStat::where('variant', 'booked')->firstOrFail();
+        $row = MarketingExperimentStat::where('variant', 'plan_fees')->firstOrFail();
 
         $this->assertSame(1, $row->visitors);
         $this->assertSame(1, $row->clicks);
 
         // The dedup is per variant: the same visitor in a later session with another variant
         // did see that one too.
-        $this->beacon(['variant' => 'sells', 'event' => 'view'])->assertNoContent();
-        $this->assertSame(1, MarketingExperimentStat::where('variant', 'sells')->value('visitors'));
+        $this->beacon(['variant' => 'plan_sell', 'event' => 'view'])->assertNoContent();
+        $this->assertSame(1, MarketingExperimentStat::where('variant', 'plan_sell')->value('visitors'));
     }
 
     public function test_the_beacon_refuses_unknown_variants_and_events(): void
@@ -148,7 +150,7 @@ class HeroExperimentTest extends TestCase
     {
         config(['app.hosted' => true]);
 
-        $this->withUnencryptedCookie('es_attribution', json_encode(['landing' => '/', 'hero' => 'sells']))
+        $this->withUnencryptedCookie('es_attribution', json_encode(['landing' => '/', 'hero' => 'plan_sell']))
             ->post('/sign_up', [
                 'terms' => '1',
                 'name' => 'Headline Visitor',
@@ -158,9 +160,9 @@ class HeroExperimentTest extends TestCase
 
         $user = User::where('email', 'headline@gmail.com')->firstOrFail();
 
-        $this->assertSame('sells', $user->hero_variant);
+        $this->assertSame('plan_sell', $user->hero_variant);
         $this->assertSame('/', $user->landing_page, 'the variant must ride alongside the attribution, not replace it');
-        $this->assertSame(1, HeroExperiment::stats()['sells']['signups']);
+        $this->assertSame(1, HeroExperiment::stats()['plan_sell']['signups']);
     }
 
     /**
@@ -184,10 +186,10 @@ class HeroExperimentTest extends TestCase
 
         \Laravel\Socialite\Facades\Socialite::shouldReceive('driver')->with('google')->andReturn($provider);
 
-        $this->withUnencryptedCookie('es_attribution', json_encode(['landing' => '/', 'hero' => 'sells']))
+        $this->withUnencryptedCookie('es_attribution', json_encode(['landing' => '/', 'hero' => 'plan_sell']))
             ->get(route('auth.google.callback'));
 
-        $this->assertSame('sells', User::where('email', 'google-hero@eventschedule-test.org')->firstOrFail()->hero_variant);
+        $this->assertSame('plan_sell', User::where('email', 'google-hero@eventschedule-test.org')->firstOrFail()->hero_variant);
     }
 
     public function test_an_unknown_variant_in_es_attribution_is_not_stored(): void
@@ -228,7 +230,7 @@ class HeroExperimentTest extends TestCase
 
         $this->assertSame('plan', $locked['winner']['key']);
         $this->assertSame(1.0, $locked['weights']['plan']);
-        $this->assertSame(0.0, $locked['weights']['booked']);
+        $this->assertSame(0.0, $locked['weights']['plan_fees']);
     }
 
     /**
@@ -238,7 +240,7 @@ class HeroExperimentTest extends TestCase
     public function test_a_click_leader_is_never_the_candidate(): void
     {
         $stats = $this->stats(visitors: 2000, clicks: 100, signups: 30);
-        $stats['sells']['clicks'] = 600;
+        $stats['plan_sell']['clicks'] = 600;
 
         $this->assertNull(HeroExperiment::evaluate($stats)['candidate']);
     }
@@ -248,7 +250,7 @@ class HeroExperimentTest extends TestCase
     {
         $stats = $this->stats(visitors: 2000, clicks: 100, signups: 20);
         $stats['plan']['signups'] = 80;
-        $stats['sells'] = ['visitors' => HeroExperiment::BURN_IN_VISITORS - 1, 'clicks' => 3, 'signups' => 2];
+        $stats['plan_sell'] = ['visitors' => HeroExperiment::BURN_IN_VISITORS - 1, 'clicks' => 3, 'signups' => 2];
 
         $this->assertNull(HeroExperiment::evaluate($stats)['candidate']);
     }
@@ -262,9 +264,9 @@ class HeroExperimentTest extends TestCase
     {
         $stats = $this->stats(visitors: 2000, clicks: 100, signups: 20);
         $stats['plan']['signups'] = 80;
-        $stats['sells'] = ['visitors' => HeroExperiment::BURN_IN_VISITORS, 'clicks' => 15, 'signups' => 3];
+        $stats['plan_sell'] = ['visitors' => HeroExperiment::BURN_IN_VISITORS, 'clicks' => 15, 'signups' => 3];
 
-        $this->assertLessThan(HeroExperiment::WIN_MIN_VISITORS, $stats['sells']['visitors']);
+        $this->assertLessThan(HeroExperiment::WIN_MIN_VISITORS, $stats['plan_sell']['visitors']);
         $this->assertSame('plan', HeroExperiment::evaluate($stats)['candidate']['key']);
     }
 
@@ -286,7 +288,7 @@ class HeroExperimentTest extends TestCase
         $this->assertNotNull(Setting::get(HeroExperiment::CANDIDATE_SETTING));
 
         $stats['plan']['signups'] = 20;
-        $stats['sells']['signups'] = 21;
+        $stats['plan_sell']['signups'] = 21;
 
         $this->assertNull(HeroExperiment::evaluate($stats)['candidate']);
         $this->assertNull(Setting::get(HeroExperiment::CANDIDATE_SETTING));

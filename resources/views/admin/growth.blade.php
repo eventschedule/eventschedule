@@ -255,7 +255,8 @@
                     <p class="text-sm text-gray-500 dark:text-gray-400">@lang('messages.hero_test_unavailable')</p>
                 @else
                     @php
-                        $heroHeadline = fn ($key) => collect($heroTest['rows'])->firstWhere('key', $key)['headline'] ?? $key;
+                        // Challengers can share the control's headline, so the key is what tells them apart.
+                        $heroHeadline = fn ($key) => (collect($heroTest['rows'])->firstWhere('key', $key)['headline'] ?? $key).' ('.$key.')';
                         $heroPct = fn ($value) => $value === null ? __('messages.funnel_na') : round($value * 100, 1).'%';
                     @endphp
                     <p class="text-sm font-medium text-gray-800 dark:text-gray-200 mb-4">
@@ -292,9 +293,12 @@
                                         <td class="py-2 pe-4 min-w-[16rem] text-gray-800 dark:text-gray-200">
                                             <div class="font-medium" dir="ltr">{{ $row['headline'] }}</div>
                                             <div class="text-xs text-gray-500 dark:text-gray-400 max-w-md" dir="ltr">{{ $row['subtitle'] }}</div>
-                                            @if ($row['is_default'])
-                                                <span class="mt-1 inline-block rounded-md bg-gray-100 dark:bg-gray-700 px-1.5 py-0.5 text-xs text-gray-600 dark:text-gray-300">@lang('messages.hero_test_default')</span>
-                                            @endif
+                                            <div class="mt-1 flex flex-wrap gap-1">
+                                                <span class="inline-block rounded-md bg-gray-100 dark:bg-gray-700 px-1.5 py-0.5 font-mono text-xs text-gray-600 dark:text-gray-300" dir="ltr">{{ $row['key'] }}</span>
+                                                @if ($row['is_default'])
+                                                    <span class="inline-block rounded-md bg-gray-100 dark:bg-gray-700 px-1.5 py-0.5 text-xs text-gray-600 dark:text-gray-300">@lang('messages.hero_test_default')</span>
+                                                @endif
+                                            </div>
                                         </td>
                                         <td class="py-2 pe-4 text-end font-medium text-gray-900 dark:text-white">{{ $heroPct($row['share']) }}</td>
                                         <td class="py-2 pe-4 text-end text-gray-600 dark:text-gray-400">{{ number_format($row['visitors']) }}</td>

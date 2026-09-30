@@ -37,40 +37,44 @@ final class HeroExperiment
     public const EXPERIMENT = 'home_hero';
 
     /** Rendered by the server while the test runs, and to visitors without JS. */
-    public const DEFAULT = 'booked';
+    public const DEFAULT = 'plan';
 
     /**
      * line1/line2 must each fit the 24-character .es-mask budget (see the h1 in
      * marketing/index.blade.php), and every variant must pass MarketingHeroClaimTest's rules:
      * say "event calendar", say it takes bookings, name no paid plan. HeroExperimentTest
      * checks each one.
+     *
+     * Round two (from 2026-09-30): 'plan' is the control, and each challenger changes ONE thing
+     * about it, so a win says which change earned it.
      */
     public const VARIANTS = [
-        // The copy that shipped on 2026-09-19. The subtitle is a scenario, not a feature list:
-        // the reader does one thing ("Put the date up") and everything after it happens to
-        // them, which is the mechanism behind "Booked solid".
-        'booked' => [
-            'line1' => 'Everything you have on.',
-            'line2' => 'Booked solid.',
-            'subtitle' => 'Put the date up on your event calendar. People buy a ticket or book a time, and the money lands in your own Stripe or PayPal.',
-        ],
-        // The fold before 2026-09-19, with "take bookings" added to its subtitle so it keeps
-        // the booking claim every variant has to make.
+        // Picked by hand as the winner of round one (against 'booked' and 'sells'), before the
+        // test's own lock rules were met. The fold before 2026-09-19, with "take bookings" added
+        // to its subtitle so it keeps the booking claim every variant has to make.
         'plan' => [
             'line1' => 'Plan, promote, and share',
             'line2' => 'your event calendar',
             'subtitle' => 'One page for your events and your open hours. Sell tickets and take bookings with zero platform fees, and scan people in at the door.',
         ],
-        'sells' => [
-            'line1' => 'The event calendar',
-            'line2' => 'that sells the tickets.',
-            'subtitle' => 'Put your events and your open hours on one page. People buy a ticket or book a time, and the money lands in your own Stripe or PayPal.',
+        // Headline only: "sell" in the H1 instead of "share", since selling is what turns
+        // sign-ups into paying customers. Same subtitle as 'plan'.
+        'plan_sell' => [
+            'line1' => 'Plan, promote, and sell',
+            'line2' => 'from your event calendar',
+            'subtitle' => 'One page for your events and your open hours. Sell tickets and take bookings with zero platform fees, and scan people in at the door.',
         ],
-        // Removed 2026-09-30, two days in, at about 12 visitors each: 'sellout' ("Pack the room.
-        // Sell out every date.") and 'crowd' ("Your events, one link. Your crowd, coming back.").
-        // Not because they were losing - nothing was measurable yet - but because at roughly 40
-        // homepage visitors a day five arms take months just to finish burn-in. What is left is
-        // the clever control against two plain "what it is" headlines. Their counts stay in
+        // Subtitle only: opens with the zero-fee point instead of "one page". Same headline as 'plan'.
+        'plan_fees' => [
+            'line1' => 'Plan, promote, and share',
+            'line2' => 'your event calendar',
+            'subtitle' => 'Sell tickets and take bookings with zero platform fees. Put your events and open hours on one page, and scan people in at the door.',
+        ],
+        // Retired 2026-09-30 when 'plan' was picked as the winner of round one: 'booked'
+        // ("Everything you have on. Booked solid.") and 'sells' ("The event calendar that sells
+        // the tickets."). Removed earlier the same day, two days in at about 12 visitors each and
+        // only to cut the number of arms: 'sellout' ("Pack the room. Sell out every date.") and
+        // 'crowd' ("Your events, one link. Your crowd, coming back."). Their counts stay in
         // marketing_experiment_stats and users.hero_variant under their keys; stats() reads only
         // the keys listed here, so re-adding one under the SAME key would resume its history.
     ];
