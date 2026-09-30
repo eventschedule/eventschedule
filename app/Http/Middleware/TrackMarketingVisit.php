@@ -49,6 +49,11 @@ class TrackMarketingVisit
      * before it ships a beacon at all - so no beacon is ever rendered for any of them, and a
      * hand-built one naming one is refused.
      *
+     * The support-chat.guest.* routes are the marketing site's visitor chat widget. They are
+     * not marketing.* (so the counter would skip them anyway), but CaptureUtmParameters also
+     * stands down on this list, and without them a chat poll would be recorded as a landing
+     * page.
+     *
      * The same routes are CacheableMarketingResponse::STATELESS_ROUTES, for the same
      * underlying reason; MarketingEdgeCacheTest pins the two lists together.
      */
@@ -56,6 +61,11 @@ class TrackMarketingVisit
         'marketing.visit',
         'marketing.docs.search_index',
         'marketing.hero_event',
+        'support-chat.guest.status',
+        'support-chat.guest.messages',
+        'support-chat.guest.send',
+        'support-chat.guest.contact',
+        'support-chat.guest.read',
     ];
 
     public function handle(Request $request, Closure $next): Response

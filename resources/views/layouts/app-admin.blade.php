@@ -263,7 +263,14 @@
 
     @auth
         @if (config('app.hosted'))
-            @include('partials.support-chat-widget')
+            {{-- An admin answers the chat rather than using it: they get the presence driver
+                 (hourly check, heartbeat, new-message alerts) and the sidebar's availability
+                 popover instead of a launcher that would open a chat with themselves. --}}
+            @if (auth()->user()->isAdmin())
+                @include('partials.support-presence')
+            @else
+                @include('partials.support-chat-widget')
+            @endif
         @endif
     @endauth
 

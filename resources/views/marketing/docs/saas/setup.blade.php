@@ -854,18 +854,24 @@ BACKUP_SPACES_BUCKET=your-private-backups-bucket</code></pre>
         <h3 class="doc-subheading">For You, the Platform Admin</h3>
         <ul class="doc-list">
             <li><span class="font-semibold text-gray-900 dark:text-white">Admin panel:</span> Manage conversations from <span class="font-semibold text-gray-900 dark:text-white">System &rarr; Support</span> in the admin panel at <code class="doc-inline-code">/admin</code></li>
-            <li><span class="font-semibold text-gray-900 dark:text-white">Availability toggle:</span> Switch yourself online to show the green dot. It lapses on its own after four hours, so you never leave it on overnight by accident</li>
+            <li><span class="font-semibold text-gray-900 dark:text-white">Availability toggle:</span> Switch yourself online to show the green dot, either at the top of the Support page or from the chat icon in the sidebar footer, which for an admin opens an availability switch and a link to the inbox instead of a chat</li>
+            <li><span class="font-semibold text-gray-900 dark:text-white">Hourly check:</span> While you are online, every hour the admin portal asks whether you are still available. Confirm within 10 minutes or you are switched offline, so you never leave it on overnight by accident. Replying to a conversation counts as confirming</li>
+            <li><span class="font-semibold text-gray-900 dark:text-white">Away when the admin portal is closed:</span> If no admin portal tab of yours has checked in for 5 minutes (the laptop is closed or the browser quit), customers see you as away until you open it again. Only the admin who switched the chat on counts, so another admin's open tab does not keep you looking available</li>
+            <li><span class="font-semibold text-gray-900 dark:text-white">New message alerts:</span> While you are online, a new message shows a notice with a Reply link, plays a soft chime and flashes the tab title on whichever admin portal page you are on</li>
             <li><span class="font-semibold text-gray-900 dark:text-white">Conversations list:</span> Every conversation, with unread badges, and a matching badge on the System menu</li>
-            <li><span class="font-semibold text-gray-900 dark:text-white">Replying:</span> Open a conversation to read the history and reply</li>
+            <li><span class="font-semibold text-gray-900 dark:text-white">Replying:</span> Open a conversation to read the history and reply. The customer sees a typing indicator while you write, and you see "Seen" once they have read your reply</li>
             <li><span class="font-semibold text-gray-900 dark:text-white">Closing conversations:</span> Close resolved conversations to keep the list short</li>
         </ul>
 
         <h3 class="doc-subheading">Who Gets Notified</h3>
         <ul class="doc-list">
-            <li>Every customer message emails you, whether or not you are marked available, and sends a push notification if OneSignal is configured</li>
-            <li>Your reply emails the customer only when they are not currently in the chat, so an active back-and-forth does not fill their inbox</li>
-            <li>Notifications go to the first account flagged as a platform admin, so keep one dedicated admin account with a monitored address</li>
+            <li>While you are not available (offline, or away from the admin portal), each new message emails you. While you are available the in-app alert tells you instead, and the message is emailed only if it is still unread five minutes later. Every message also sends a push notification if OneSignal is configured</li>
+            <li>Your replies email the customer only once they have left the chat without reading them. The email waits at least two minutes, and carries every unread reply at once, so a quick back-and-forth does not fill their inbox</li>
+            <li>Notifications go to the admin who switched the chat on, or to the first account flagged as a platform admin while nobody is online, so keep one dedicated admin account with a monitored address</li>
         </ul>
+
+        <h3 class="doc-subheading">Website Visitors</h3>
+        <p class="text-gray-600 dark:text-gray-300 mb-4">On eventschedule.com, the marketing site also offers signed-out visitors a chat with a person, and only while you are available. Visitors can leave an email so a reply reaches them after they leave, and it is required once you are away. Their conversations appear in the same Support inbox, marked Visitor, with the page they are on and their country. This needs the marketing site, so it does not apply to your own SaaS install.</p>
     </section>
 
     <!-- Custom translations -->

@@ -465,6 +465,15 @@
                 } catch (e) {}
             })();
         </script>
+
+        {{-- "Chat with a person" (resources/js/support-chat-boot.js). Everything here is the
+             same for every visitor, because this HTML is edge-cached: whether anyone is online,
+             and who, is fetched by the script after load, and the widget itself is only
+             downloaded when someone is. --}}
+        @if (config('app.hosted') && config('app.is_nexus') && ! ($errorPage ?? false) && str_starts_with((string) \Illuminate\Support\Facades\Route::currentRouteName(), 'marketing.'))
+            <div id="es-support-chat-host"></div>
+            <script type="application/json" id="es-support-chat-config">@json(\App\Http\Controllers\SupportChatGuestController::widgetConfig())</script>
+        @endif
     @endguest
 
     {{-- @if (config('app.is_testing'))

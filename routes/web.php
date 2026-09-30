@@ -56,6 +56,7 @@ use App\Http\Controllers\StripeController;
 use App\Http\Controllers\SubscriptionController;
 use App\Http\Controllers\SubscriptionWebhookController;
 use App\Http\Controllers\SupportChatController;
+use App\Http\Controllers\SupportChatGuestController;
 use App\Http\Controllers\TicketController;
 use App\Http\Controllers\WaitlistController;
 use App\Http\Controllers\WebhookSettingsController;
@@ -951,6 +952,14 @@ Route::middleware(['auth', 'verified', 'app_subdomain'])->group(function () {
             Route::get('/support-chat/messages', [SupportChatController::class, 'getMessages'])->name('support-chat.messages');
             Route::post('/support-chat/messages', [SupportChatController::class, 'sendMessage'])->name('support-chat.send');
             Route::post('/support-chat/mark-read', [SupportChatController::class, 'markRead'])->name('support-chat.mark-read');
+
+            // The admin's own presence, pinged from every AP page by partials/support-presence.
+            // Deliberately outside the `admin` middleware (see SupportChatController) - the
+            // controller checks isAdmin() itself.
+            Route::post('/support-chat/presence/ping', [SupportChatController::class, 'presencePing'])->name('support-chat.presence.ping');
+            Route::post('/support-chat/presence/confirm', [SupportChatController::class, 'presenceConfirm'])->name('support-chat.presence.confirm');
+            Route::post('/support-chat/presence/online', [SupportChatController::class, 'presenceOnline'])->name('support-chat.presence.online');
+            Route::post('/support-chat/presence/offline', [SupportChatController::class, 'presenceOffline'])->name('support-chat.presence.offline');
         });
     }
 
@@ -1138,6 +1147,7 @@ Route::middleware(['auth', 'verified', 'app_subdomain'])->group(function () {
             Route::get('/admin/support/{id}/messages', [SupportChatController::class, 'adminMessages'])->name('admin.support.messages');
             Route::post('/admin/support/{id}/reply', [SupportChatController::class, 'adminReply'])->name('admin.support.reply');
             Route::post('/admin/support/{id}/mark-read', [SupportChatController::class, 'adminMarkRead'])->name('admin.support.mark-read');
+            Route::post('/admin/support/{id}/typing', [SupportChatController::class, 'adminTyping'])->name('admin.support.typing');
             Route::post('/admin/support/toggle-availability', [SupportChatController::class, 'adminToggleAvailability'])->name('admin.support.toggle-availability');
             Route::post('/admin/support/{id}/close', [SupportChatController::class, 'adminCloseConversation'])->name('admin.support.close');
         }
@@ -2103,6 +2113,43 @@ if (config('app.is_nexus')) {
     Route::get('/docs/google-calendar', fn () => redirect()->route('home'));
     Route::get('/docs/installation', fn () => redirect()->route('home'));
     Route::get('/docs/api', fn () => redirect()->route('home'));
+}
+
+// Support chat for signed-out visitors on the marketing site (SupportChatGuestController).
+//
+// Named support-chat.guest.*, NOT marketing.*: CacheableMarketingResponse only ever marks a
+// marketing.* route public, and a shared cache keys on the URL alone, so a token-bearing GET that
+// slipped into that set would serve one visitor's transcript to everyone. They are in its
+// STATELESS_ROUTES instead (and TrackMarketingVisit::NON_PAGE_ROUTES), so they never hand the
+// visitor a laravel_session cookie and take them off the edge. CSRF is off on the POSTs because a
+// cached page's token is useless and the credential is a header, not a cookie - see the controller.
+if (config('app.hosted') && config('app.is_nexus')) {
+    $supportChatGuestRoutes = function () {
+        Route::get('/support-chat/guest/status', [SupportChatGuestController::class, 'status'])
+            ->name('support-chat.guest.status')
+            ->middleware('throttle:120,1,support_guest_status');
+        Route::get('/support-chat/guest/messages', [SupportChatGuestController::class, 'messages'])
+            ->name('support-chat.guest.messages')
+            ->middleware('throttle:120,1,support_guest_messages');
+        Route::post('/support-chat/guest/messages', [SupportChatGuestController::class, 'send'])
+            ->name('support-chat.guest.send')
+            ->middleware('throttle:20,1,support_guest_send')
+            ->withoutMiddleware(\Illuminate\Foundation\Http\Middleware\ValidateCsrfToken::class);
+        Route::post('/support-chat/guest/contact', [SupportChatGuestController::class, 'contact'])
+            ->name('support-chat.guest.contact')
+            ->middleware('throttle:10,1,support_guest_contact')
+            ->withoutMiddleware(\Illuminate\Foundation\Http\Middleware\ValidateCsrfToken::class);
+        Route::post('/support-chat/guest/read', [SupportChatGuestController::class, 'read'])
+            ->name('support-chat.guest.read')
+            ->middleware('throttle:60,1,support_guest_read')
+            ->withoutMiddleware(\Illuminate\Foundation\Http\Middleware\ValidateCsrfToken::class);
+    };
+
+    if (config('app.is_testing')) {
+        Route::group([], $supportChatGuestRoutes);
+    } else {
+        Route::domain(_base_domain())->group($supportChatGuestRoutes);
+    }
 }
 
 // Blog routes: use /blog path for local dev, testing, and selfhosted users

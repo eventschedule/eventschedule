@@ -13,8 +13,11 @@
     $classes = $hasDisplayClass ? $baseClasses : $baseClasses . ' inline-flex items-center';
 @endphp
 
-<a 
-    href="{{ $href ?? $attributes->get('href') }}" 
+{{-- No href at all when none was passed, so a Vue template can bind one (v-bind:href). Vue
+     keeps the FIRST of two same-named attributes, so a static href="" rendered here would
+     silently beat the binding. --}}
+<a
+    @if (($href ?? $attributes->get('href')) !== null) href="{{ $href ?? $attributes->get('href') }}" @endif
     {{ $attributes->except(['href', 'target'])->merge(['class' => $classes]) }}
     @if($target ?? $attributes->get('target'))
         target="{{ $target ?? $attributes->get('target') }}"

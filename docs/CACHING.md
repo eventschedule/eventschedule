@@ -113,6 +113,15 @@ is in `EXCLUDED_ROUTES` precisely so the 10-minute page header cannot overwrite 
 never be recorded as a landing page, and `TrackMarketingVisit::NON_PAGE_ROUTES` (the same
 routes) keeps it out of the page-view counters.
 
+The visitor support chat (`SupportChatGuestController`, `resources/js/components/SupportChatWidget.vue`)
+adds five more: `support-chat.guest.status`, `.messages`, `.send`, `.contact` and `.read`. The
+widget polls them from cached pages, so a session cookie on any one would take a chatting visitor
+off the edge for the rest of their session. They are deliberately named outside `marketing.*`, so
+this middleware can never mark one public: the messages GET is per visitor (its token rides in an
+`X-Support-Chat-Token` header, which a URL-keyed shared cache ignores), and every response sets
+`private, no-store`. Whether anyone is online is fetched by the widget after load for the same
+reason nothing visitor-specific may be rendered into the page: the HTML is shared.
+
 ## Any shared cache, not just Cloudflare
 
 Whatever sits in front of the app must do two things. They are not optional, and no header

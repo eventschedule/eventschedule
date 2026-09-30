@@ -52,6 +52,16 @@ It also breaks cache invalidation across containers: `app:sync-domain-statuses` 
 `custom_domain:{host}` after activating a domain, and the web container caches that key for ten
 minutes.
 
+Support chat depends on it too:
+- **Unique-job locks:** `SendSupportReplyEmail` and `NotifyAdminOfUnreadSupport` take their locks
+  in the cache when a web request dispatches them. With a per-container cache, the worker releases
+  a lock the web container never sees, and replies sent in the next ten minutes are never emailed.
+- **Presence keys:** the admin's `support_presence*` keys, and the `support_guest_online_*` and
+  `support_user_online_*` keys the web requests write, are what the queued jobs read to decide
+  whether someone is still in the chat.
+
+On the file driver the worker sees none of them.
+
 No migration is needed. `database/migrations/0001_01_01_000001_create_cache_table.php` already ran,
 so `cache` and `cache_locks` exist. Cache is not durable state, so the switch just starts cold.
 

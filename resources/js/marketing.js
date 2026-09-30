@@ -5,6 +5,7 @@ import './cookie-consent';
 // The authenticated app (resources/js/app.js) still loads it.
 import { createApp } from 'vue';
 import { mountAccessibilityWidget } from './accessibility-widget-boot';
+import { bootSupportChat } from './support-chat-boot';
 
 window.Vue = { createApp };
 
@@ -13,3 +14,5 @@ if (document.readyState === 'loading') {
 } else {
     mountAccessibilityWidget();
 }
+
+bootSupportChat();

@@ -90,6 +90,11 @@ class CacheableMarketingResponse
      * here (the beacons are POSTs), and none of the responses is ever marked public - the JSON
      * route sets its own `public, max-age=3600` and the two beacons stay private.
      *
+     * The support-chat.guest.* routes are the visitor chat widget's polls and posts. They are
+     * deliberately NOT marketing.*, so isEligible() can never mark one public: a shared cache
+     * keys on the URL alone, and the messages GET is per visitor (its token rides in a header).
+     * They set `private, no-store` themselves.
+     *
      * The same routes are TrackMarketingVisit::NON_PAGE_ROUTES, for the same underlying
      * reason (neither is a page); MarketingEdgeCacheTest pins the two lists together.
      */
@@ -97,6 +102,11 @@ class CacheableMarketingResponse
         'marketing.visit',
         'marketing.docs.search_index',
         'marketing.hero_event',
+        'support-chat.guest.status',
+        'support-chat.guest.messages',
+        'support-chat.guest.send',
+        'support-chat.guest.contact',
+        'support-chat.guest.read',
     ];
 
     /**
@@ -128,8 +138,9 @@ class CacheableMarketingResponse
 
     public function handle(Request $request, Closure $next): Response
     {
-        // Mutually exclusive by construction: the two beacons are POSTs and
-        // marketing.docs.search_index is in EXCLUDED_ROUTES, so none can be eligible.
+        // Mutually exclusive by construction: the two beacons are POSTs,
+        // marketing.docs.search_index is in EXCLUDED_ROUTES, and the support-chat.guest.*
+        // routes are not marketing.* at all, so none can be eligible.
         $stateless = $this->isStateless($request);
         $eligible = $this->isEligible($request);
         // Not cacheable itself, but it must not leave a session cookie behind either - see

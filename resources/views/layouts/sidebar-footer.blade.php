@@ -13,6 +13,11 @@
     // The trigger glyph below renders all three modes and hides two. Same source as the icons
     // above each mode in components/theme-picker.blade.php, so the two cannot drift.
     $themeModeIcons = config('app.ap_theme_mode_icons');
+
+    // An admin is the person ANSWERING the support chat, so their chat button opens the
+    // availability switch and the inbox rather than a chat with themselves. The state is driven
+    // by partials/support-presence, which layouts/app-admin renders for the same condition.
+    $supportAdmin = config('app.hosted') && auth()->user()?->isAdmin();
 @endphp
 
 {{-- No padding of its own: the band below is full-bleed and owns the rail's whole width, so
@@ -27,13 +32,36 @@
 
          No aria-label on the group: the two radiogroups inside carry their own, and each is
          preceded by a visible heading saying the same thing. --}}
-    <div class="js-theme-popover theme-popover-panel absolute inset-x-6 bottom-full mb-2 hidden rounded-xl p-2 shadow-lg"
-        role="group">
+    <div class="js-theme-popover js-sidebar-popover theme-popover-panel absolute inset-x-6 bottom-full mb-2 hidden rounded-xl p-2 shadow-lg"
+        data-popover="theme" role="group">
         {{-- Same component the Appearance tab in settings renders, in its rail tone. Only the
              palette row's "show just this brightness" behaviour is dynamic, and that lives in
              the component's driver, so nothing about it is popover-specific. --}}
         <x-theme-picker tone="rail" headings="compact" />
     </div>
+
+    @if ($supportAdmin)
+    {{-- Support chat, for the admin answering it. English only, like /admin/support itself. --}}
+    <div class="js-sidebar-popover theme-popover-panel support-popover absolute inset-x-6 bottom-full mb-2 hidden rounded-xl p-4 shadow-lg"
+        data-popover="support" role="group" aria-label="Support chat">
+        <div class="flex items-center justify-between gap-3">
+            <div class="min-w-0">
+                <div class="text-sm font-semibold support-popover-ink">Support chat</div>
+                <div class="js-support-presence-label mt-0.5 text-xs support-popover-ink-2">Offline</div>
+            </div>
+            <button type="button" role="switch" aria-checked="false" aria-label="Available for chat"
+                class="js-support-presence-switch support-switch relative h-6 w-11 shrink-0 rounded-full transition-colors duration-200">
+                <span class="support-switch-knob absolute top-0.5 h-5 w-5 rounded-full bg-white shadow-md transition-transform duration-200"></span>
+            </button>
+        </div>
+        <p class="js-support-presence-hint mt-3 text-xs leading-relaxed support-popover-ink-2">Switch on to show you're available to chat.</p>
+        <a href="{{ route('admin.support') }}"
+            class="mt-3 flex items-center justify-between rounded-lg px-3 py-2 text-sm font-medium support-popover-link transition-all duration-200">
+            <span>Open inbox</span>
+            <span class="js-support-chat-sidebar-badge inline-flex items-center justify-center min-w-[1.25rem] h-5 px-1.5 text-xs font-bold text-white bg-red-500 rounded-full" style="display: none;"></span>
+        </a>
+    </div>
+    @endif
 
     {{-- The action strip: a full-bleed band across the foot of the rail rather than a rounded
          card inset in its gutter, so it reads as the rail's footer instead of a widget parked
@@ -77,7 +105,18 @@
 
              `contact_us`, not the short `contact` key the caption used to carry: a tooltip has
              no width to clip against, so this and its translations finally fit whole. --}}
-        @if (config('app.hosted'))
+        @if ($supportAdmin)
+        <button type="button"
+            class="theme-btn js-sidebar-popover-btn flex-1 rounded-lg py-2.5 transition-all duration-200"
+            data-popover="support" aria-label="Support chat" aria-haspopup="dialog" aria-expanded="false">
+            <svg class="h-5 w-5 mx-auto" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" />
+            </svg>
+            <span class="sidebar-tip absolute bottom-full left-1/2 z-10 mb-2 -translate-x-1/2 whitespace-nowrap rounded-md px-2 py-1 text-xs font-medium" aria-hidden="true">Support chat</span>
+            <span class="js-support-presence-dot support-presence-dot absolute bottom-1.5 end-1.5 h-2.5 w-2.5 rounded-full" aria-hidden="true"></span>
+            <span class="js-support-chat-sidebar-badge absolute top-0.5 end-0.5 inline-flex items-center justify-center min-w-[1rem] h-4 px-1 text-[10px] font-bold text-white bg-red-500 rounded-full" style="display: none;"></span>
+        </button>
+        @elseif (config('app.hosted'))
         <button type="button"
             class="theme-btn js-support-chat-sidebar-btn flex-1 rounded-lg py-2.5 transition-all duration-200"
             aria-label="{{ __('messages.contact_us') }}">
@@ -113,8 +152,8 @@
              haspopup="dialog", not "true": "true" resolves to `menu`, and what opens is a pair
              of radiogroups. --}}
         <button type="button"
-            class="theme-btn js-theme-popover-btn flex-1 rounded-lg py-2.5 transition-all duration-200"
-            aria-label="{{ __('messages.theme') }}" aria-haspopup="dialog" aria-expanded="false">
+            class="theme-btn js-theme-popover-btn js-sidebar-popover-btn flex-1 rounded-lg py-2.5 transition-all duration-200"
+            data-popover="theme" aria-label="{{ __('messages.theme') }}" aria-haspopup="dialog" aria-expanded="false">
             @foreach ($themeModeIcons as $glyph => $iconPath)
                 <svg class="js-theme-glyph h-5 w-5 mx-auto {{ $glyph === 'system' ? '' : 'hidden' }}" data-theme-glyph="{{ $glyph }}"
                     fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
@@ -192,7 +231,35 @@
     .theme-btn:focus-visible .sidebar-tip { opacity: 1; }
     /* The popover opens into exactly the strip of space the label wants. All three rules here
        compute to the same specificity, so this one wins by being last - keep it last. */
-    .js-theme-popover-btn[aria-expanded="true"] .sidebar-tip { opacity: 0; }
+    .js-sidebar-popover-btn[aria-expanded="true"] .sidebar-tip { opacity: 0; }
+
+    /* The admin's support popover, in the rail's own inks so it tracks all six palettes. */
+    .support-popover-ink { color: rgb(var(--ap-rail-ink)); }
+    .support-popover-ink-2 { color: rgb(var(--ap-rail-ink-2)); }
+    .support-popover-link {
+        color: rgb(var(--ap-rail-ink));
+        background: rgba(255, 255, 255, 0.06);
+    }
+    .support-popover-link:hover { background: rgba(255, 255, 255, 0.12); }
+    .support-popover-link:focus-visible,
+    .support-switch:focus-visible {
+        outline: 2px solid var(--brand-blue);
+        outline-offset: 2px;
+    }
+    .support-switch { background: rgba(255, 255, 255, 0.18); }
+    .support-switch[aria-checked="true"] { background: #22c55e; }
+    .support-switch-knob { inset-inline-start: 2px; }
+    .support-switch[aria-checked="true"] .support-switch-knob { transform: translateX(20px); }
+    [dir="rtl"] .support-switch[aria-checked="true"] .support-switch-knob { transform: translateX(-20px); }
+    /* Grey when offline, green when a visitor would see the chat, amber when switched on but
+       not reaching anyone yet (no AP tab has checked in). */
+    .support-presence-dot {
+        background: rgb(var(--ap-rail-ink-2));
+        box-shadow: 0 0 0 2px rgb(var(--ap-rail-hover));
+        opacity: 0.6;
+    }
+    .support-presence-dot[data-state="available"] { background: #22c55e; opacity: 1; }
+    .support-presence-dot[data-state="online"] { background: #f59e0b; opacity: 1; }
 </style>
 
 <script {!! nonce_attr() !!}>
@@ -221,16 +288,22 @@
     // comments just the same, and an unbalanced one 500s every admin page.)
     syncThemeGlyphs(window.getCurrentTheme ? window.getCurrentTheme() : 'system');
 
-    // Closes every open theme popover. `except` is the trigger being toggled (so a click on an
+    // The popover a trigger opens: the .js-sidebar-popover in the same footer with the same
+    // data-popover name (theme, or support for an admin).
+    function sidebarPopoverFor(btn) {
+        var wrap = btn.closest('.sidebar-footer-actions');
+        return wrap ? wrap.querySelector('.js-sidebar-popover[data-popover="' + btn.getAttribute('data-popover') + '"]') : null;
+    }
+
+    // Closes every open footer popover. `except` is the trigger being toggled (so a click on an
     // already-open trigger is not closed twice); `restoreFocus` pulls focus back to the trigger,
     // which Escape wants and an outside click does not.
     function closeThemePopovers(except, restoreFocus) {
-        document.querySelectorAll('.js-theme-popover-btn[aria-expanded="true"]').forEach(function(btn) {
+        document.querySelectorAll('.js-sidebar-popover-btn[aria-expanded="true"]').forEach(function(btn) {
             if (btn === except) {
                 return;
             }
-            var wrap = btn.closest('.sidebar-footer-actions');
-            var popover = wrap ? wrap.querySelector('.js-theme-popover') : null;
+            var popover = sidebarPopoverFor(btn);
             // Opening moves focus INTO the popover, so hiding it (display:none) would drop the
             // keyboard user back on <body> with their place in the page lost. Pull focus to the
             // trigger whenever it was inside, whatever the caller asked for.
@@ -252,10 +325,9 @@
     if (!window.__sidebarFooterBound) {
         window.__sidebarFooterBound = true;
         document.addEventListener('click', function(e) {
-            var popoverBtn = e.target.closest('.js-theme-popover-btn');
+            var popoverBtn = e.target.closest('.js-sidebar-popover-btn');
             if (popoverBtn) {
-                var wrap = popoverBtn.closest('.sidebar-footer-actions');
-                var popover = wrap ? wrap.querySelector('.js-theme-popover') : null;
+                var popover = sidebarPopoverFor(popoverBtn);
                 if (!popover) {
                     return;
                 }
@@ -268,7 +340,8 @@
                     // Land a keyboard user inside the popover rather than leaving them on the
                     // trigger with the controls unreachable without a fresh Tab run.
                     var first = popover.querySelector('.js-theme-mode-btn.active')
-                        || popover.querySelector('.js-theme-mode-btn');
+                        || popover.querySelector('.js-theme-mode-btn')
+                        || popover.querySelector('.js-support-presence-switch');
                     if (first) {
                         first.focus();
                     }
@@ -286,8 +359,18 @@
                 return;
             }
 
+            // The admin's availability switch. partials/support-presence owns the request and
+            // answers with support-presence-changed, which repaints every copy below.
+            var presenceSwitch = e.target.closest('.js-support-presence-switch');
+            if (presenceSwitch) {
+                window.dispatchEvent(new CustomEvent('support-presence-set', {
+                    detail: { available: presenceSwitch.getAttribute('aria-checked') !== 'true' }
+                }));
+                return;
+            }
+
             // Anything else outside an open popover dismisses it.
-            if (!e.target.closest('.js-theme-popover')) {
+            if (!e.target.closest('.js-sidebar-popover')) {
                 closeThemePopovers(null, false);
             }
         });
@@ -296,7 +379,7 @@
             if (e.key !== 'Escape') {
                 return;
             }
-            if (!document.querySelector('.js-theme-popover-btn[aria-expanded="true"]')) {
+            if (!document.querySelector('.js-sidebar-popover-btn[aria-expanded="true"]')) {
                 return;
             }
             // The mobile drawer binds its own Escape-to-close on document while it is open.
@@ -305,6 +388,44 @@
             e.stopImmediatePropagation();
             e.preventDefault();
             closeThemePopovers(null, true);
+        });
+
+        // Repaints the admin's support controls (both footer copies) from the state
+        // partials/support-presence broadcasts.
+        window.addEventListener('support-presence-changed', function(e) {
+            var presence = (e.detail && e.detail.presence) || {};
+            var state = presence.available ? 'available' : (presence.online ? 'online' : 'offline');
+            var label = presence.available ? 'Online, shown as available'
+                : (presence.online ? 'Online, waiting for a tab to check in' : 'Offline');
+            var hint = 'Switch on to show you\'re available to chat.';
+            if (presence.online && !presence.is_agent) {
+                // Another admin switched chat on. Off here is off for everyone.
+                label = (presence.agent_name || 'Another admin') + ' is online';
+                hint = 'Switching off takes the chat offline for everyone.';
+            } else if (presence.online && presence.confirm_in !== null) {
+                var minutes = Math.max(0, Math.ceil(presence.confirm_in / 60));
+                hint = minutes > 0
+                    ? 'We will ask if you are still here in ' + minutes + ' min.'
+                    : 'Waiting for you to confirm you are still here.';
+            }
+            document.querySelectorAll('.js-support-presence-dot').forEach(function(dot) {
+                dot.setAttribute('data-state', state);
+            });
+            document.querySelectorAll('.js-support-presence-label').forEach(function(el) {
+                el.textContent = label;
+            });
+            document.querySelectorAll('.js-support-presence-hint').forEach(function(el) {
+                el.textContent = hint;
+            });
+            document.querySelectorAll('.js-support-presence-switch').forEach(function(el) {
+                el.setAttribute('aria-checked', presence.online ? 'true' : 'false');
+            });
+            if (e.detail && typeof e.detail.unread_count === 'number') {
+                document.querySelectorAll('.js-support-chat-sidebar-badge').forEach(function(badge) {
+                    badge.textContent = e.detail.unread_count;
+                    badge.style.display = e.detail.unread_count > 0 ? '' : 'none';
+                });
+            }
         });
     }
 </script>
