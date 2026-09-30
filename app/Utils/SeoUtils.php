@@ -44,6 +44,9 @@ class SeoUtils
     /** Punctuation that already ends a sentence or a clause, so a boundary after it needs no ". ". */
     private const ENDING_PUNCTUATION = '.!?…:;。！？؟';
 
+    /** Commas: the sentence goes on past them, so a boundary after one is a space, never ",. ". */
+    private const CONTINUING_PUNCTUATION = ',،，、';
+
     /** The publisher logo, relative to the site root. See organization(). */
     private const ORGANIZATION_LOGO = '/images/dark_logo.png';
 
@@ -252,6 +255,14 @@ class SeoUtils
      * so far has no ending punctuation (a heading, a list item, a line of a poster), otherwise a
      * space. Table cells are a plain space: a row is one line, not a sentence per cell.
      *
+     * Two boundaries are a space even without ending punctuation, because the sentence carries on
+     * across them. One follows a comma, since ",. " is never right. The other is a <br> whose next
+     * line starts with a lowercase letter: that is an owner who hard-wrapped a paragraph, and a
+     * ". " there put "filled with. secrets" in Google's snippet of a production event. The end of
+     * a block is still ". " before lowercase, because a new paragraph or list item is a break the
+     * owner chose, and so is a <br> that sits right against one. Scripts without case (Hebrew,
+     * Arabic, CJK) have no lowercase, so their lines join exactly as before.
+     *
      * Entities are decoded ONCE here, so Blade's {{ }} escapes the result exactly once: the old
      * value went out still encoded and "&amp;" reached the page as "&amp;amp;". The U+00A0 spacer
      * paragraphs MarkdownUtils::appendBlankRun() writes for extra blank lines collapse with the rest
@@ -268,12 +279,22 @@ class SeoUtils
         // Cells first, before the split below eats the row they sit in.
         $html = preg_replace('~</t[dh]\s*>~i', ' ', $html) ?? $html;
 
-        $segments = preg_split('~<br\s*/?>|</(?:p|div|li|h[1-6]|blockquote|tr|pre)\s*>~i', $html) ?: [$html];
+        // The delimiters are kept (odd indexes) so each join knows what kind of boundary it crosses.
+        $parts = preg_split('~(<br\s*/?>|</(?:p|div|li|h[1-6]|blockquote|tr|pre)\s*>)~i', $html, -1, PREG_SPLIT_DELIM_CAPTURE) ?: [$html];
 
         $text = '';
+        // Whether every delimiter since the last segment kept was a <br>. Empty segments are
+        // skipped, so "<br></p>" reaches one join as two delimiters, and that is a block end.
+        $onlyBreaks = true;
 
-        foreach ($segments as $segment) {
-            $segment = self::cleanText(strip_tags($segment));
+        foreach ($parts as $index => $part) {
+            if ($index % 2 === 1) {
+                $onlyBreaks = $onlyBreaks && stripos($part, '<br') === 0;
+
+                continue;
+            }
+
+            $segment = self::cleanText(strip_tags($part));
 
             if ($segment === '') {
                 continue;
@@ -281,11 +302,17 @@ class SeoUtils
 
             if ($text === '') {
                 $text = $segment;
+                $onlyBreaks = true;
 
                 continue;
             }
 
-            $text .= (self::endsWithPunctuation($text) ? ' ' : '. ').$segment;
+            $continues = self::endsWithPunctuation($text)
+                || mb_strpos(self::CONTINUING_PUNCTUATION, mb_substr($text, -1)) !== false
+                || ($onlyBreaks && preg_match('/^\p{Ll}/u', $segment) === 1);
+
+            $text .= ($continues ? ' ' : '. ').$segment;
+            $onlyBreaks = true;
         }
 
         return $text;

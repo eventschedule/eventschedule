@@ -34,6 +34,32 @@ class SeoUtilsTextTest extends TestCase
         $this->assertSame('A B. C D', SeoUtils::plainText('<table><tr><td>A</td><td>B</td></tr><tr><td>C</td><td>D</td></tr></table>'));
     }
 
+    public function test_a_hard_wrapped_line_carries_its_sentence_on(): void
+    {
+        // A production event's owner wrapped their paragraphs, and every wrap read as a full stop
+        // in Google's snippet: "filled with. secrets", "before the mystery. unfolds".
+        $this->assertSame(
+            'A dinner filled with secrets, suspects and twists. Welcome mocktail',
+            SeoUtils::plainText('<p>A dinner filled with<br />secrets, suspects and twists.<br />Welcome mocktail</p>')
+        );
+        // A poster's lines still read as separate items.
+        $this->assertSame('WHAT IS INCLUDED. • Mocktail. • Dinner', SeoUtils::plainText('<p>WHAT IS INCLUDED<br>• Mocktail<br>• Dinner</p>'));
+    }
+
+    public function test_only_a_line_break_continues_before_lowercase_not_a_block_end(): void
+    {
+        $this->assertSame('Lineup. band a', SeoUtils::plainText('<p>Lineup</p><p>band a</p>'));
+        $this->assertSame('Lineup. band a. band b', SeoUtils::plainText('<ul><li>Lineup</li><li>band a</li><li>band b</li></ul>'));
+        // A <br> right against a paragraph end is that paragraph end.
+        $this->assertSame('foo. bar', SeoUtils::plainText('<p>foo<br></p><p>bar</p>'));
+    }
+
+    public function test_a_boundary_after_a_comma_is_a_plain_space(): void
+    {
+        $this->assertSame('Join us, Friday night', SeoUtils::plainText('<p>Join us,<br>Friday night</p>'));
+        $this->assertSame('Apples, Pears', SeoUtils::plainText('<ul><li>Apples,</li><li>Pears</li></ul>'));
+    }
+
     public function test_a_boundary_after_ending_punctuation_is_a_plain_space(): void
     {
         $this->assertSame('Welcome! Doors at 7', SeoUtils::plainText('<p>Welcome!<br>Doors at 7</p>'));
