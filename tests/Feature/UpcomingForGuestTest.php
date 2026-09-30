@@ -149,4 +149,29 @@ class UpcomingForGuestTest extends TestCase
         $this->assertSame(['One Night Only'], $names);
         Exceptions::assertReported(QueryException::class);
     }
+
+    /**
+     * Same day, by the time each starts in the schedule's clock. A series' starts_at is its first
+     * date, so ordering on it puts a weekly 10pm show ahead of that night's 8pm one-off.
+     */
+    public function test_a_days_events_are_ordered_by_time_not_by_first_date(): void
+    {
+        $role = $this->createRole($this->createOwner(), 'venue');
+        $day = Carbon::now('America/New_York')->addDays(3)->startOfDay();
+        $at = fn (Carbon $d, string $time) => Carbon::parse($d->format('Y-m-d').' '.$time, 'America/New_York')->utc()->format('Y-m-d H:i:s');
+
+        $this->createEvent($role, [
+            'name' => 'DJ',
+            'creator_role_id' => $role->id,
+            'starts_at' => $at($day->copy()->subWeeks(8), '22:00'),
+            'days_of_week' => str_pad(str_repeat('0', $day->dayOfWeek).'1', 7, '0'),
+            'recurring_frequency' => 'weekly',
+        ]);
+        $this->createEvent($role, ['name' => 'Live Music', 'creator_role_id' => $role->id, 'starts_at' => $at($day, '20:00')]);
+
+        $rows = app(EventRepo::class)->upcomingForGuest($role);
+
+        $this->assertSame(['Live Music', 'DJ'], $rows->map(fn ($row) => $row['event']->name)->all());
+        $this->assertSame([$day->format('Y-m-d'), $day->format('Y-m-d')], $rows->pluck('date')->all());
+    }
 }

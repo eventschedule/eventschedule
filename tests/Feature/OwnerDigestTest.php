@@ -6,6 +6,7 @@ use App\Jobs\SendQueuedEmail;
 use App\Mail\OwnerDigest;
 use App\Models\User;
 use App\Services\DemoService;
+use Carbon\Carbon;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Queue;
@@ -271,6 +272,58 @@ class OwnerDigestTest extends TestCase
         $this->run_();
 
         $this->assertSame('This Week', $this->digests()[0]['mailable']->sections[0]['upcoming'][0]['name']);
+    }
+
+    /** A New York wall-clock time as the UTC starts_at the schedule stores. */
+    private function nyStartsAt(Carbon $day, string $time): string
+    {
+        return Carbon::parse($day->format('Y-m-d').' '.$time, 'America/New_York')->utc()->format('Y-m-d H:i:s');
+    }
+
+    /** Only $day's weekday set, Sunday first - the Event::matchesFrequency() convention. */
+    private function weekdayOnly(Carbon $day): string
+    {
+        return str_pad(str_repeat('0', $day->dayOfWeek).'1', 7, '0');
+    }
+
+    /**
+     * A series' starts_at is its first date, so the SQL order (series first, then starts_at)
+     * listed a weekly 10pm show ahead of that night's 8pm one-off. Same day, so time decides.
+     */
+    public function test_a_days_dates_are_listed_by_time_not_by_series_first(): void
+    {
+        $role = $this->createRole($this->owner());
+        $day = Carbon::now('America/New_York')->addDays(3)->startOfDay();
+
+        $this->createRecurringEvent($role, ['name' => 'DJ', 'days_of_week' => $this->weekdayOnly($day), 'starts_at' => $this->nyStartsAt($day->copy()->subWeeks(8), '22:00'), 'creator_role_id' => $role->id]);
+        $this->createEvent($role, ['name' => 'Live Music', 'starts_at' => $this->nyStartsAt($day, '20:00'), 'creator_role_id' => $role->id]);
+
+        $this->run_();
+
+        $upcoming = $this->digests()[0]['mailable']->sections[0]['upcoming'];
+        $this->assertSame(['Live Music', 'DJ'], array_column($upcoming, 'name'));
+    }
+
+    /** The five kept on a busy night are its five earliest, not every series then the rest. */
+    public function test_the_cut_keeps_a_busy_days_earliest_dates(): void
+    {
+        $role = $this->createRole($this->owner());
+        $day = Carbon::now('America/New_York')->addDays(3)->startOfDay();
+
+        foreach (['21:00', '22:00', '23:00'] as $time) {
+            $this->createRecurringEvent($role, ['name' => "Series {$time}", 'days_of_week' => $this->weekdayOnly($day), 'starts_at' => $this->nyStartsAt($day->copy()->subWeeks(8), $time), 'creator_role_id' => $role->id]);
+        }
+        foreach (['17:00', '18:00', '19:00', '20:00'] as $time) {
+            $this->createEvent($role, ['name' => "One-off {$time}", 'starts_at' => $this->nyStartsAt($day, $time), 'creator_role_id' => $role->id]);
+        }
+
+        $this->run_();
+
+        $upcoming = $this->digests()[0]['mailable']->sections[0]['upcoming'];
+        $this->assertSame(
+            ['One-off 17:00', 'One-off 18:00', 'One-off 19:00', 'One-off 20:00', 'Series 21:00'],
+            array_column($upcoming, 'name')
+        );
     }
 
     public function test_the_command_is_scheduled_on_both_rails_without_now(): void

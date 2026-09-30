@@ -2746,7 +2746,7 @@ class EventRepo
 
         // Same day: by the time it starts, in its own schedule's clock.
         return $oneOff->concat($series)
-            ->sortBy(fn (array $row) => $row['date'].' '.$this->localTimeOfDay($row['event']))
+            ->sortBy(fn (array $row) => $row['date'].' '.$row['event']->localTimeOfDay())
             ->take($limit)
             ->values();
     }
@@ -2798,16 +2798,6 @@ class EventRepo
 
             return null;
         }
-    }
-
-    /** starts_at's time of day in the event's own schedule timezone, for ordering one day. */
-    private function localTimeOfDay(Event $event): string
-    {
-        if (! $event->starts_at || $event->hasDateOnlyStart()) {
-            return '00:00';
-        }
-
-        return $event->getStartDateTime(null, true)->format('H:i');
     }
 
     public function getEvent($subdomain, $slug, $date = null, $eventId = null, ?Role $role = null)

@@ -5274,6 +5274,19 @@ class Event extends Model
     }
 
     /**
+     * starts_at's time of day in the event's own schedule timezone, for ordering one day. For a
+     * series this is every occurrence's start, which the full starts_at (its first date) is not.
+     */
+    public function localTimeOfDay(): string
+    {
+        if (! $this->starts_at || $this->hasDateOnlyStart()) {
+            return '00:00';
+        }
+
+        return $this->getStartDateTime(null, true)->format('H:i');
+    }
+
+    /**
      * The calendar day a date-only event's occurrence on $date falls on. Untyped like
      * isOccurrenceDate(), which is what vets it.
      */

@@ -3046,11 +3046,7 @@ const calendarApp = createApp({
                 const dateComparison = a.occurrenceDate.localeCompare(b.occurrenceDate);
                 if (dateComparison !== 0) return dateComparison;
 
-                // If same date, sort by time
-                if (a.local_starts_at && b.local_starts_at) {
-                    return new Date(a.local_starts_at) - new Date(b.local_starts_at);
-                }
-                return 0;
+                return this.compareSameDay(a, b, a.occurrenceDate);
             });
         },
         mobileEventsList() {
@@ -3187,10 +3183,7 @@ const calendarApp = createApp({
             return events.sort((a, b) => {
                 const dateComparison = (b.occurrenceDate || '').localeCompare(a.occurrenceDate || '');
                 if (dateComparison !== 0) return dateComparison;
-                if (a.local_starts_at && b.local_starts_at) {
-                    return new Date(a.local_starts_at) - new Date(b.local_starts_at);
-                }
-                return 0;
+                return this.compareSameDay(a, b, a.occurrenceDate || '');
             });
         },
         pastEventsGroupedByDate() {
@@ -3870,7 +3863,7 @@ const calendarApp = createApp({
                 const eventIds = this.eventsMap[dateStr];
                 return this.filteredEvents.filter(event => {
                     return eventIds.includes(event.id);
-                });
+                }).sort((a, b) => this.compareSameDay(a, b, dateStr));
             }
             return [];
         },
@@ -4118,6 +4111,20 @@ const calendarApp = createApp({
                 return event.venue_name || event.name;
             }
             return event.name;
+        },
+        // Where an event falls within dateStr: 'HH:MM' in its schedule's clock, or '' (first)
+        // for a multi-day event already running when dateStr begins. local_starts_at is a
+        // series' ANCHOR (its first date), so only its time of day belongs to the occurrence -
+        // comparing the full value put every older series ahead of that night's one-off events.
+        sameDaySortKey(event, dateStr) {
+            const startDate = event._originalOccurrenceDate || (event.days_of_week ? dateStr : event.local_date);
+            if (startDate && startDate < dateStr) return '';
+            return (event.local_starts_at || '').slice(11, 16);
+        },
+        compareSameDay(a, b, dateStr) {
+            const ka = this.sameDaySortKey(a, dateStr);
+            const kb = this.sameDaySortKey(b, dateStr);
+            return ka < kb ? -1 : (ka > kb ? 1 : 0);
         },
         getEventTime(event) {
             if (!event.local_starts_at) return '';

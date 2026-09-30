@@ -91,14 +91,9 @@ class FeedController extends Controller
         $now = Carbon::now('UTC');
         $timezone = $role->timezone ?: 'UTC';
 
-        $events = Event::where(function ($query) use ($now) {
-            $query->where('starts_at', '>=', $now)
-                ->orWhereNotNull('days_of_week')
-                ->orWhere(function ($q) use ($now) {
-                    $q->where('duration', '>=', 24)
-                        ->whereRaw('DATE_ADD(starts_at, INTERVAL duration HOUR) >= ?', [$now]);
-                });
-        })
+        // hasUpcomingOccurrence() rather than "any series": every item is now expanded before the
+        // cut below, so a finished series would cost 91 matchesDate() calls to find nothing.
+        $events = Event::hasUpcomingOccurrence($now)
             ->whereIn('id', function ($query) use ($role) {
                 $query->select('event_id')
                     ->from('event_role')
@@ -113,8 +108,7 @@ class FeedController extends Controller
             ->orderBy('starts_at')
             ->get();
 
-        // For non-recurring events, take up to 50
-        // For recurring events, include next occurrence only
+        // One item per one-off event, and the next occurrence of each series
         $items = collect();
 
         foreach ($events as $event) {
@@ -138,11 +132,17 @@ class FeedController extends Controller
                     'date' => null,
                 ]);
             }
-
-            if ($items->count() >= 50) {
-                break;
-            }
         }
+
+        // Soonest 50 by when each item actually starts - the instant pubDate shows. The query's
+        // starts_at order is a series' FIRST date, which put every running series ahead of every
+        // one-off and let them crowd the one-offs out of the cut.
+        $items = $items
+            ->sortBy(fn (array $item) => ($item['date']
+                ? $item['event']->occurrenceStartUtc($item['date'])
+                : $item['event']->getStartDateTime())->getTimestamp())
+            ->take(50)
+            ->values();
 
         return response()
             ->view('feed.rss', [

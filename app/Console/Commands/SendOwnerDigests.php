@@ -267,7 +267,9 @@ class SendOwnerDigests extends Command
             foreach ($event->adminOccurrenceDates(0, 7, 14) as $date) {
                 $day = Carbon::parse($date);
                 if ($day->betweenIncluded($today, $last)) {
-                    $occurrences[] = ['sort' => $date, 'name' => $event->name, 'date' => $day->locale($locale)->translatedFormat('D j M')];
+                    // Date, then time of day: a series' starts_at is its first date, so the SQL
+                    // order put every series ahead of a same-day one-off, and the cut below kept it.
+                    $occurrences[] = ['sort' => $date.' '.$event->localTimeOfDay(), 'name' => $event->name, 'date' => $day->locale($locale)->translatedFormat('D j M')];
                 }
             }
         }
