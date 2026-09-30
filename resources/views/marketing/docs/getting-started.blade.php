@@ -24,7 +24,7 @@
         <p class="text-gray-600 dark:text-gray-300 mb-6">Signing up is free and takes no credit card. All you need is an email address you can check right away, because Event Schedule confirms it with a code before the account is created.</p>
 
         <ol class="doc-list doc-list-numbered mb-6">
-            <li>Open <a href="{{ app_url('/sign_up') }}" class="doc-link">the sign-up page</a>, tick <strong class="text-gray-900 dark:text-white">"I accept the Terms of Service and Privacy Policy"</strong>, and type your email address in the <strong class="text-gray-900 dark:text-white">Email</strong> field.</li>
+            <li>Open <a href="{{ app_url('/sign_up') }}" class="doc-link">the sign-up page</a>, type your email address in the <strong class="text-gray-900 dark:text-white">Email</strong> field, and tick <strong class="text-gray-900 dark:text-white">"I accept the Terms of Service and Privacy Policy"</strong>.</li>
             <li>Click <strong class="text-gray-900 dark:text-white">"Continue"</strong>. A six-digit code is emailed to that address and stays valid for 10 minutes. If the address looks like a typo of a common provider (gmial.com, say), the page offers the corrected address first, so no code is sent to an inbox nobody reads.</li>
             <li>Type or paste the code into the six boxes. It is checked straight away: the boxes turn green when it is right, or red, with the reason, when it is not.</li>
             <li>Enter your <strong class="text-gray-900 dark:text-white">Full Name</strong> and a <strong class="text-gray-900 dark:text-white">Password</strong> of at least 8 characters, then click <strong class="text-gray-900 dark:text-white">"Create Account"</strong>.</li>
@@ -389,7 +389,7 @@
                 {
                     "@type": "HowToStep",
                     "name": "Create Your Account",
-                    "text": "Accept the terms, enter your email on the sign-up page and click Continue, then type the six-digit code from the email, your full name and a password of at least 8 characters, and click Create Account. Continuing with Google skips the code.",
+                    "text": "Enter your email on the sign-up page, accept the terms and click Continue, then type the six-digit code from the email, your full name and a password of at least 8 characters, and click Create Account. Continuing with Google skips the code.",
                     "url": "{{ url(route('marketing.docs.getting_started')) }}#create-account"
                 },
                 {

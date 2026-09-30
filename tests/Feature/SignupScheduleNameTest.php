@@ -113,6 +113,44 @@ class SignupScheduleNameTest extends TestCase
         $this->assertSame('blue-room', $role->subdomain);
     }
 
+    /**
+     * create() can only guess the casing and punctuation ("Dj Mc"), so fixing it is the likeliest
+     * edit anyone makes - and it must not cost them the address. An exact match against the
+     * prefill dropped the claim here and handed out "dj".
+     */
+    public function test_fixing_the_prefilled_casing_keeps_the_claimed_subdomain(): void
+    {
+        $this->actingAs($this->createOwner())->withSession(['signup_schedule_name' => 'dj-mc']);
+
+        $role = $this->submitNewScheduleForm('talent', ['name' => 'DJ MC']);
+
+        $this->assertSame('DJ MC', $role->name);
+        $this->assertSame('dj-mc', $role->subdomain);
+    }
+
+    /** Punctuation the claim box stripped, put back: still the same address. */
+    public function test_restoring_punctuation_keeps_the_claimed_subdomain(): void
+    {
+        $this->actingAs($this->createOwner())->withSession(['signup_schedule_name' => 'oreillys-bar']);
+
+        $role = $this->submitNewScheduleForm('venue', ['name' => "O'Reilly's Bar"]);
+
+        $this->assertSame('oreillys-bar', $role->subdomain);
+    }
+
+    /**
+     * Reaching /login means this is not the claim-then-register flow, so an abandoned claim must
+     * not name a later account's first schedule. Same rule as signup_role_type.
+     */
+    public function test_the_login_page_forgets_an_abandoned_claim(): void
+    {
+        $this->withSession(['signup_schedule_name' => 'blue-room'])
+            ->get(route('login'))
+            ->assertOk();
+
+        $this->assertNull(session('signup_schedule_name'));
+    }
+
     /** Renaming it in the form is a new choice: the claim no longer applies. */
     public function test_a_renamed_schedule_gets_a_subdomain_from_its_new_name(): void
     {

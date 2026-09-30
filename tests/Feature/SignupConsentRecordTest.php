@@ -242,5 +242,31 @@ class SignupConsentRecordTest extends TestCase
         $this->assertLessThan($email, $social, 'Google no longer comes first');
         $this->assertGreaterThan($email, $terms, 'the consent box is above the address');
         $this->assertLessThan($continue, $terms, 'the consent box is below Continue');
+
+        // Step two reads code, Name, Password, box, Create account. The sixth digit's
+        // auto-submit moves to the first unfilled field in PAGE order, so on a restored code
+        // step (box unticked, Name and Password empty) this order is what sends it to Name.
+        $this->assertLessThan($terms, strpos($html, 'id="name"'), 'Name comes after the consent box');
+        $this->assertLessThan($terms, strpos($html, 'id="password"'), 'Password comes after the consent box');
+    }
+
+    /**
+     * The sixth digit used to check the box FIRST - from when it sat at the top of the form - and
+     * after the move that sent focus down past an empty Name and Password to the box. It now
+     * reaches the box only as the first unfilled field, through the form's own validity check.
+     */
+    public function test_the_sixth_digit_reaches_the_consent_box_only_in_page_order(): void
+    {
+        config(['app.hosted' => true, 'app.is_testing' => false]);
+
+        $html = $this->get(app_url('/sign_up'))->getContent();
+
+        $this->assertSame(1, preg_match('/function maybeAutoSubmit\(codeInput\) \{(.*?)\n        \}\n/s', $html, $body));
+        $this->assertSame(1, substr_count($body[1], 'requireTerms()'), 'maybeAutoSubmit() asks for the tick more than once');
+        $this->assertMatchesRegularExpression(
+            "/!form\.checkValidity\(\)\) \{[\s\S]*?Array\.prototype\.find\.call\(form\.elements[\s\S]*?if \(next && next\.id === 'terms'\) \{\s*requireTerms\(\);/",
+            $body[1],
+            'the tick is asked for outside the first-unfilled-field branch'
+        );
     }
 }

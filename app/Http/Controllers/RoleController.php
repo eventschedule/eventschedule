@@ -4679,12 +4679,15 @@ class RoleController extends Controller
         $role->subdomain = Role::generateSubdomain($request->name);
 
         // The address the homepage's claim box promised ("blue-room.eventschedule.com"), while the
-        // name still reads as what create() filled in from it. generateSubdomain() hands out the
-        // shortest free prefix, so "Blue Room" would get "blue" - not what the visitor typed. A
+        // name still spells it. generateSubdomain() hands out the shortest free prefix, so "Blue
+        // Room" would get "blue" - not what the visitor typed. Compared as slugs, not as the exact
+        // prefill: create() can only guess the casing and punctuation ("Dj Mc", "Oreillys Bar"),
+        // and fixing that ("DJ MC", "O'Reilly's Bar") is the likeliest edit anyone makes - it must
+        // not cost them the address, while a real rename ("Green Hall") does drop the claim. A
         // claim that is taken, reserved or too short keeps the generated one.
         $claimed = session('signup_schedule_name');
         if (is_string($claimed)
-            && trim((string) $request->name) === Str::headline($claimed)
+            && Str::slug((string) $request->name) === $claimed
             && Role::isCleanSubdomain($claimed)
             && ! Role::where('subdomain', $claimed)->exists()) {
             $role->subdomain = $claimed;

@@ -30,8 +30,10 @@ class AuthenticatedSessionController extends Controller
         // re-render returns to register, not here), so drop any schedule-type choice left over
         // from an abandoned earlier /register?type= visit. Otherwise a later brand-new Google
         // sign-in would be dropped straight into that stale type's create form. The
-        // register->Google path never passes through here, so its choice is preserved.
-        session()->forget('signup_role_type');
+        // register->Google path never passes through here, so its choice is preserved. The name
+        // typed into a marketing page's claim box goes too, for the same reason: it would
+        // otherwise name that later account's first schedule.
+        session()->forget(['signup_role_type', 'signup_schedule_name']);
 
         restore_pending_action();
 

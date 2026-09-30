@@ -275,7 +275,7 @@
             var sendCodeBtn = document.getElementById('send-code-btn');
             if (sendCodeBtn) sendCodeBtn.style.display = '';
 
-            // And step one's ways in, which showCodeSentState() folded away.
+            // And what showCodeSentState() folded away: the social buttons, and a ticked consent box.
             var googleSection = document.getElementById('google-signup-section');
             if (googleSection) googleSection.style.display = '';
             var termsField = document.getElementById('terms-field');
@@ -744,8 +744,9 @@
         }
 
         /**
-         * The email path's consent box. It gates the code request only: Google and Facebook
-         * take no tick (their consent is the line beside them, as on /login).
+         * The email path's consent box. It gates the code request, and the sixth digit's
+         * auto-submit reaches it when the box is the next field to fill (maybeAutoSubmit()).
+         * Google and Facebook take no tick (their consent is the line beside them, as on /login).
          *
          * The code request is a fetch, so it is not covered by the form's own constraint
          * validation - this is the check for it. Returns false and says why, at the box, when it
@@ -1465,33 +1466,33 @@
                 return;
             }
 
-            // Unticked is normal only on a page that was restored into the code step (a reload, or
-            // the "Continue sign-up" link): the box was ticked before the code was sent, but this is a fresh page. Say so, once, instead of the sixth digit doing
-            // nothing at all. Consent stays an explicit tick - it is never set for them.
-            var terms = document.getElementById('terms');
-            if (terms && !terms.checked) {
-                if (!autoSubmitReported) {
-                    autoSubmitReported = true;
-                    requireTerms();
-                }
-                return;
-            }
-
             var form = codeInput.form;
             if (!form) return;
 
             // The code now comes BEFORE Name and Password, so an incomplete form here is the normal
-            // case, not a mistake: move on to the first field still to fill, quietly. Not
-            // reportValidity(), whose "please fill in this field" bubble would scold somebody for
+            // case, not a mistake: move on to the first field still to fill, in page order, quietly.
+            // Not reportValidity(), whose "please fill in this field" bubble would scold somebody for
             // doing things in the order the page laid out. Once only, so a seventh keystroke does
             // not yank the caret out of the code box again.
+            //
+            // The consent box is one of those fields (it is `required`), and it sits under Password,
+            // directly above Create account. It is unticked only on a page restored into the code
+            // step (a reload, or the "Continue sign-up" link): the box was ticked before the code was
+            // sent, but this is a fresh page. When it is the next thing to fill, say why rather than
+            // just focusing it. It used to be checked FIRST, from when it sat at the top of the form,
+            // which after the move sent the sixth digit down past an empty Name and Password.
+            // Consent stays an explicit tick - it is never set for them.
             if (typeof form.checkValidity === 'function' && !form.checkValidity()) {
                 if (!autoSubmitReported) {
                     autoSubmitReported = true;
                     var next = Array.prototype.find.call(form.elements, function (el) {
                         return el !== codeInput && el.willValidate && !el.checkValidity() && el.offsetParent !== null;
                     });
-                    if (next) next.focus();
+                    if (next && next.id === 'terms') {
+                        requireTerms();
+                    } else if (next) {
+                        next.focus();
+                    }
                 }
                 return;
             }
@@ -1960,9 +1961,9 @@
             {{-- No checkbox in front of these buttons: pressing one is the consent, so the terms are
                  stated beside them, the same line as /login (whose Google button creates accounts
                  through the same callback). SocialAuthController stamps terms_accepted_at on the new
-                 account. From 2026-09-23 to 09-30 the box above gated them instead, on the path
-                 that brings in most accounts. Both documents are replaceable by the operator, so
-                 policy_url() resolves them, never marketing_url(). --}}
+                 account. From 2026-09-23 to 09-30 the email path's box sat above them and gated
+                 them too, on the path that brings in most accounts. Both documents are replaceable
+                 by the operator, so policy_url() resolves them, never marketing_url(). --}}
             <p class="mt-3 text-xs text-center text-gray-500 dark:text-gray-400">
                 {!! str_replace([':terms', ':privacy'], [
                     '<a href="' . policy_url('terms') . '" target="_blank" class="underline hover:no-underline">' . __('messages.terms_of_service') . '</a>',
