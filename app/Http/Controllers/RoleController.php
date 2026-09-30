@@ -4573,6 +4573,19 @@ class RoleController extends Controller
             $role->name = auth()->user()->name;
         }
 
+        // The name typed into the homepage's "your-name.eventschedule.com" box, carried through
+        // sign-up by RegisteredUserController::create(): "blue-room" is shown as "Blue Room", and
+        // store() turns it back into the blue-room subdomain while the name is left as is. Read,
+        // not pulled, so going back to the type chooser keeps it; only a FIRST schedule gets it,
+        // and the first visit here after one exists discards it.
+        if (session()->has('signup_schedule_name')) {
+            if (auth()->user()->owner()->exists()) {
+                session()->forget('signup_schedule_name');
+            } else {
+                $role->name = Str::headline(session('signup_schedule_name'));
+            }
+        }
+
         // Header images
         $headers = file_get_contents(base_path('storage/headers.json'));
         $headers = json_decode($headers);
@@ -4664,6 +4677,19 @@ class RoleController extends Controller
         }
 
         $role->subdomain = Role::generateSubdomain($request->name);
+
+        // The address the homepage's claim box promised ("blue-room.eventschedule.com"), while the
+        // name still reads as what create() filled in from it. generateSubdomain() hands out the
+        // shortest free prefix, so "Blue Room" would get "blue" - not what the visitor typed. A
+        // claim that is taken, reserved or too short keeps the generated one.
+        $claimed = session('signup_schedule_name');
+        if (is_string($claimed)
+            && trim((string) $request->name) === Str::headline($claimed)
+            && Role::isCleanSubdomain($claimed)
+            && ! Role::where('subdomain', $claimed)->exists()) {
+            $role->subdomain = $claimed;
+        }
+
         $role->user_id = $user->id;
 
         if (! config('app.hosted')) {

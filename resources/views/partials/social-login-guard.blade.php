@@ -3,8 +3,8 @@
     starts a second OAuth state that invalidates the first, which comes back as "authentication
     failed". Plain script, not Vue: the auth pages mount no Vue app.
 
-    Delegated on document so it runs AFTER the sign-up page's [data-requires-terms] listener: a
-    click that listener cancels (terms unticked) must not leave the button marked busy.
+    Delegated on document so it runs after any listener on the button's own section: a click
+    something else cancels must not leave the button marked busy.
 --}}
 <script {!! nonce_attr() !!}>
     (function () {

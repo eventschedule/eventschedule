@@ -191,4 +191,56 @@ class SignupConsentRecordTest extends TestCase
             $this->assertStringContainsString(policy_url('privacy'), $html, $path);
         }
     }
+
+    /**
+     * Google and Facebook take no tick on /sign_up: pressing them is the consent, stated beside
+     * them - the design SocialAuthController records, and what /login already did.
+     *
+     * From 2026-09-23 to 09-30 the email path's box sat above the social buttons and a
+     * [data-requires-terms] listener cancelled their click until it was ticked, on the path that
+     * brings in most accounts (and /login let the same visitor through Google with no tick).
+     */
+    public function test_the_social_buttons_are_not_gated_by_the_consent_box(): void
+    {
+        config(['app.hosted' => true, 'app.is_testing' => false, 'services.google.client_id' => 'x']);
+
+        $html = $this->get(app_url('/sign_up'))->getContent();
+
+        $this->assertStringNotContainsString('data-requires-terms', $html);
+
+        $this->assertSame(1, preg_match('/<div id="google-signup-section"[^>]*>(.*?)<div id="email-entry"/s', $html, $social));
+
+        $clickwrap = str_replace([':terms', ':privacy'], [__('messages.terms_of_service'), __('messages.privacy_policy')], __('messages.by_continuing_you_accept'));
+        $this->assertStringContainsString(
+            $clickwrap,
+            preg_replace('/\s+/', ' ', strip_tags($social[1])),
+            'the social section does not state the terms beside its buttons'
+        );
+        $this->assertStringNotContainsString('id="terms"', $social[1], 'the consent box is back in front of the social buttons');
+    }
+
+    /**
+     * The box belongs to the email path, so it sits on it: under the address and directly above
+     * Continue, where it reads as part of that step rather than a gate on every way in.
+     */
+    public function test_the_consent_box_sits_between_the_address_and_continue(): void
+    {
+        config(['app.hosted' => true, 'app.is_testing' => false, 'services.google.client_id' => 'x']);
+
+        $html = $this->get(app_url('/sign_up'))->getContent();
+
+        $social = strpos($html, 'id="google-signup-section"');
+        $email = strpos($html, 'id="email"');
+        $terms = strpos($html, 'id="terms-field"');
+        $continue = strpos($html, 'id="send-code-btn"');
+
+        $this->assertNotFalse($social);
+        $this->assertNotFalse($email);
+        $this->assertNotFalse($terms);
+        $this->assertNotFalse($continue);
+        $this->assertSame(1, substr_count($html, 'id="terms-field"'));
+        $this->assertLessThan($email, $social, 'Google no longer comes first');
+        $this->assertGreaterThan($email, $terms, 'the consent box is above the address');
+        $this->assertLessThan($continue, $terms, 'the consent box is below Continue');
+    }
 }

@@ -600,6 +600,9 @@ function initClaim() {
     if (!input) {
         return;
     }
+    const cta = input.closest('.es-claim')?.parentElement?.querySelector('a[href]');
+    const baseHref = cta?.getAttribute('href');
+
     input.addEventListener('input', () => {
         const slug = input.value.toLowerCase()
             .replace(/['’]/g, '')
@@ -610,6 +613,22 @@ function initClaim() {
         if (input.value !== slug) {
             input.value = slug;
         }
+
+        // The box promises "your-name.eventschedule.com", so the name has to reach sign-up:
+        // it used to be thrown away at the click. RegisteredUserController::create() keeps it
+        // in the session (through Google too) and the new-schedule form starts with it.
+        // Trailing hyphens are dropped here, not above, or typing "blue-" could never
+        // continue to "blue-room".
+        if (cta && baseHref) {
+            const name = slug.replace(/-+$/, '');
+            if (name) {
+                const url = new URL(baseHref, window.location.href);
+                url.searchParams.set('schedule', name);
+                cta.setAttribute('href', url.toString());
+            } else {
+                cta.setAttribute('href', baseHref);
+            }
+        }
     });
 
     // The input is not inside a form, so Enter did nothing at all: somebody typed the
@@ -618,7 +637,6 @@ function initClaim() {
         if (event.key !== 'Enter') {
             return;
         }
-        const cta = input.closest('.es-claim')?.parentElement?.querySelector('a[href]');
         if (cta) {
             event.preventDefault();
             cta.click();

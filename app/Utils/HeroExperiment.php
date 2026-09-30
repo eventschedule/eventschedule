@@ -66,16 +66,13 @@ final class HeroExperiment
             'line2' => 'that sells the tickets.',
             'subtitle' => 'Put your events and your open hours on one page. People buy a ticket or book a time, and the money lands in your own Stripe or PayPal.',
         ],
-        'sellout' => [
-            'line1' => 'Pack the room.',
-            'line2' => 'Sell out every date.',
-            'subtitle' => 'Share one event calendar, sell tickets and take bookings for your open hours, and get paid straight to your own Stripe or PayPal.',
-        ],
-        'crowd' => [
-            'line1' => 'Your events, one link.',
-            'line2' => 'Your crowd, coming back.',
-            'subtitle' => 'One event calendar where people book a time, buy a ticket, and follow you so they hear about the next date.',
-        ],
+        // Removed 2026-09-30, two days in, at about 12 visitors each: 'sellout' ("Pack the room.
+        // Sell out every date.") and 'crowd' ("Your events, one link. Your crowd, coming back.").
+        // Not because they were losing - nothing was measurable yet - but because at roughly 40
+        // homepage visitors a day five arms take months just to finish burn-in. What is left is
+        // the clever control against two plain "what it is" headlines. Their counts stay in
+        // marketing_experiment_stats and users.hero_variant under their keys; stats() reads only
+        // the keys listed here, so re-adding one under the SAME key would resume its history.
     ];
 
     /** A variant with fewer visitors than this gets at least an even share of traffic. */
@@ -94,6 +91,13 @@ final class HeroExperiment
 
     public const WIN_MIN_SIGNUPS = 25;
 
+    /**
+     * Visitors the LEADER needs before it can become the candidate. Every other variant needs only
+     * BURN_IN_VISITORS: once burn-in ends a trailing variant is held at FLOOR, which at this
+     * traffic is a couple of visitors a day, so requiring 800 of every variant meant the test could
+     * never lock at all. A thinly sampled variant is not waved through - its wide posterior keeps
+     * the leader's probability of being best under WIN_PROBABILITY until the data says otherwise.
+     */
     public const WIN_MIN_VISITORS = 800;
 
     public const WIN_HOLD_DAYS = 7;
@@ -437,7 +441,8 @@ final class HeroExperiment
 
         $qualifies = $pSignups[$leader] >= self::WIN_PROBABILITY
             && $stats[$leader]['signups'] >= self::WIN_MIN_SIGNUPS
-            && min(array_column($stats, 'visitors')) >= self::WIN_MIN_VISITORS;
+            && $stats[$leader]['visitors'] >= self::WIN_MIN_VISITORS
+            && min(array_column($stats, 'visitors')) >= self::BURN_IN_VISITORS;
 
         if ($stored !== null) {
             $holding = $stored['key'] === $leader && $pSignups[$leader] >= self::CANDIDATE_DROP_PROBABILITY;

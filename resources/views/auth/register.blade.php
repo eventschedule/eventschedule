@@ -544,8 +544,9 @@
                 var emailInput = document.getElementById('email');
 
                 // Both checks, then one decision, so an unticked box and a bad address are reported
-                // together rather than one per press. requireTerms() focuses the box, which sits
-                // above the address, so it is the first thing to fix either way.
+                // together rather than one per press. requireTerms() focuses the box, but the box
+                // sits BELOW the address, so a bad address takes the focus back: it is the first
+                // thing to fix in reading order.
                 var termsOk = requireTerms();
 
                 var emailError = null;
@@ -557,7 +558,7 @@
 
                 if (emailError) {
                     showCodeMessageError(emailError);
-                    if (termsOk) emailInput.focus();
+                    emailInput.focus();
                 }
 
                 if (!termsOk || emailError) return;
@@ -743,11 +744,12 @@
         }
 
         /**
-         * The consent box sits above both ways in and gates both.
+         * The email path's consent box. It gates the code request only: Google and Facebook
+         * take no tick (their consent is the line beside them, as on /login).
          *
-         * Google is a plain link and the code request is a fetch, so neither is covered by the
-         * form's own constraint validation - this is the check for them. Returns false and says
-         * why, at the box, when it is not ticked.
+         * The code request is a fetch, so it is not covered by the form's own constraint
+         * validation - this is the check for it. Returns false and says why, at the box, when it
+         * is not ticked.
          */
         function requireTerms() {
             var terms = document.getElementById('terms');
@@ -1124,19 +1126,10 @@
                 });
             }
 
-            // Selected by what it needs rather than by id: the script never reaches for the Google
-            // section itself, which is how it used to get hidden (see SignupCodeStepTest).
-            // auxclick too: a middle-click opens the link in a new tab without firing `click`.
-            document.querySelectorAll('[data-requires-terms]').forEach(function (section) {
-                ['click', 'auxclick'].forEach(function (type) {
-                    section.addEventListener(type, function (e) {
-                        if (e.target.closest('a') && !requireTerms()) {
-                            e.preventDefault();
-                        }
-                    });
-                });
-            });
-
+            // Google and Facebook are deliberately NOT stopped by the box: pressing them is the
+            // consent, stated beside them, exactly as on /login (which creates accounts through the
+            // same callback). A tick in front of the path that brings in most accounts was friction
+            // on the wrong path - see SocialAuthController, where the consent is recorded.
             var termsBox = document.getElementById('terms');
             if (termsBox) {
                 termsBox.addEventListener('change', function () {
@@ -1946,43 +1939,15 @@
             </div>
         @endif
 
-        @if (config('app.hosted'))
-        {{-- One consent box, ABOVE both ways in, so it visibly gates Google and the emailed code
-             alike. Always required: it is on screen from the first moment, so the #124 rule
-             (never require a control inside a hidden container) does not apply to it. Clicking
-             Google or Continue unticked is stopped client-side by requireTerms(); the
-             server still validates `terms => accepted` on the email path. Both documents are
-             replaceable by the operator, so policy_url() resolves them, never marketing_url(). --}}
-        <div id="terms-field" class="mb-5">
-            <div class="relative flex items-start">
-                <div class="flex h-6 items-center">
-                    <input id="terms" name="terms" type="checkbox" value="1" {{ old('terms') ? 'checked' : '' }} required aria-describedby="terms-error"
-                        class="h-4 w-4 rounded border-gray-300 dark:border-gray-700 dark:bg-gray-900 text-[var(--brand-blue)] focus:ring-[var(--brand-blue)] dark:focus:ring-offset-gray-800">
-                </div>
-                <div class="ms-3 text-sm leading-6">
-                    <label for="terms" class="text-gray-700 dark:text-gray-300">
-                        {!! str_replace([':terms', ':privacy'], [
-                            '<a href="' . policy_url('terms') . '" target="_blank" class="text-[var(--brand-blue)] hover:underline">' . __('messages.terms_of_service') . '</a>',
-                            '<a href="' . policy_url('privacy') . '" target="_blank" class="text-[var(--brand-blue)] hover:underline">' . __('messages.privacy_policy') . '</a>'
-                        ], __('messages.i_accept_the_terms_and_privacy')) !!}
-                    </label>
-                </div>
-            </div>
-            <p id="terms-error" role="alert" class="mt-1 text-sm text-red-600 dark:text-red-400" style="display: none;">{{ __('messages.terms_must_be_accepted') }}</p>
-            <x-input-error :messages="$errors->get('terms')" class="mt-2" />
-        </div>
-        @endif
-
         {{-- Hosted puts Google FIRST: about half of all accounts arrive this way, and it is the
              one path with no code to wait for. It folds away in step two once a code is out, and
              "Use a different email" brings it back - see showCodeSentState(). Selfhost keeps it
              below the form (further down). --}}
         @if (config('app.hosted') && (config('services.google.client_id') || facebook_login_enabled()) && public_registration_enabled())
-        <div id="google-signup-section" class="w-full" data-requires-terms>
+        <div id="google-signup-section" class="w-full">
             {{-- "Continue with", not "Sign up with": a returning Google user reaching this page
                  should not be told they are signing up. Google first, Facebook second: Google is
-                 the proven path. Both sit inside [data-requires-terms], so the terms check covers
-                 them alike. --}}
+                 the proven path. --}}
             <div class="space-y-3">
                 @if (config('services.google.client_id'))
                 <x-google-button>{{ __('messages.continue_with_google') }}</x-google-button>
@@ -1991,6 +1956,19 @@
                 <x-facebook-button>{{ __('messages.continue_with_facebook') }}</x-facebook-button>
                 @endif
             </div>
+
+            {{-- No checkbox in front of these buttons: pressing one is the consent, so the terms are
+                 stated beside them, the same line as /login (whose Google button creates accounts
+                 through the same callback). SocialAuthController stamps terms_accepted_at on the new
+                 account. From 2026-09-23 to 09-30 the box above gated them instead, on the path
+                 that brings in most accounts. Both documents are replaceable by the operator, so
+                 policy_url() resolves them, never marketing_url(). --}}
+            <p class="mt-3 text-xs text-center text-gray-500 dark:text-gray-400">
+                {!! str_replace([':terms', ':privacy'], [
+                    '<a href="' . policy_url('terms') . '" target="_blank" class="underline hover:no-underline">' . __('messages.terms_of_service') . '</a>',
+                    '<a href="' . policy_url('privacy') . '" target="_blank" class="underline hover:no-underline">' . __('messages.privacy_policy') . '</a>'
+                ], __('messages.by_continuing_you_accept')) !!}
+            </p>
 
             {{-- A flex rule, not a line behind an opaque label: .auth-card is a gradient, so no
                  flat mask colour can match the surface behind it. --}}
@@ -2134,6 +2112,36 @@
 
             <x-input-error :messages="$errors->get('password')" class="mt-2" />
         </div>
+
+        @if (config('app.hosted'))
+        {{-- The email path's consent box, directly above the button it applies to: Continue in step
+             one (under the address) and Create account in step two (under the password). Google
+             and Facebook take no tick - their consent is the line beside them - so the box sits
+             below them, where it no longer reads as a gate on every way in. Always required: it is
+             on screen from the first moment, so the #124 rule (never require a control inside a
+             hidden container) does not apply to it. Continue unticked is stopped client-side by
+             requireTerms(); the server still validates `terms => accepted` on this path. Both
+             documents are replaceable by the operator, so policy_url() resolves them, never
+             marketing_url(). --}}
+        <div id="terms-field" class="mt-4">
+            <div class="relative flex items-start">
+                <div class="flex h-6 items-center">
+                    <input id="terms" name="terms" type="checkbox" value="1" {{ old('terms') ? 'checked' : '' }} required aria-describedby="terms-error"
+                        class="h-4 w-4 rounded border-gray-300 dark:border-gray-700 dark:bg-gray-900 text-[var(--brand-blue)] focus:ring-[var(--brand-blue)] dark:focus:ring-offset-gray-800">
+                </div>
+                <div class="ms-3 text-sm leading-6">
+                    <label for="terms" class="text-gray-700 dark:text-gray-300">
+                        {!! str_replace([':terms', ':privacy'], [
+                            '<a href="' . policy_url('terms') . '" target="_blank" class="text-[var(--brand-blue)] hover:underline">' . __('messages.terms_of_service') . '</a>',
+                            '<a href="' . policy_url('privacy') . '" target="_blank" class="text-[var(--brand-blue)] hover:underline">' . __('messages.privacy_policy') . '</a>'
+                        ], __('messages.i_accept_the_terms_and_privacy')) !!}
+                    </label>
+                </div>
+            </div>
+            <p id="terms-error" role="alert" class="mt-1 text-sm text-red-600 dark:text-red-400" style="display: none;">{{ __('messages.terms_must_be_accepted') }}</p>
+            <x-input-error :messages="$errors->get('terms')" class="mt-2" />
+        </div>
+        @endif
 
         <x-honeypot />
 

@@ -59,17 +59,17 @@ class HeroExperimentTest extends TestCase
 
     public function test_a_locked_winner_is_rendered_by_the_server_with_no_picker(): void
     {
-        Setting::set(HeroExperiment::WINNER_SETTING, HeroExperiment::setHash().'|crowd|2026-09-01');
+        Setting::set(HeroExperiment::WINNER_SETTING, HeroExperiment::setHash().'|sells|2026-09-01');
 
         $response = $this->get('/')->assertOk();
 
-        $response->assertSee('data-hero="l1">'.e(HeroExperiment::VARIANTS['crowd']['line1']).'<', false);
+        $response->assertSee('data-hero="l1">'.e(HeroExperiment::VARIANTS['sells']['line1']).'<', false);
         $response->assertDontSee('var variants =', false);
     }
 
     public function test_a_winner_from_a_different_variant_set_is_ignored(): void
     {
-        Setting::set(HeroExperiment::WINNER_SETTING, 'stalehash000|crowd|2026-09-01');
+        Setting::set(HeroExperiment::WINNER_SETTING, 'stalehash000|sells|2026-09-01');
 
         $this->get('/')->assertOk()->assertSee('var variants =', false);
     }
@@ -94,11 +94,11 @@ class HeroExperimentTest extends TestCase
     public function test_the_beacon_counts_each_visitor_once_per_day(): void
     {
         foreach (range(1, 3) as $i) {
-            $this->beacon(['variant' => 'crowd', 'event' => 'view'])->assertNoContent();
-            $this->beacon(['variant' => 'crowd', 'event' => 'click'])->assertNoContent();
+            $this->beacon(['variant' => 'booked', 'event' => 'view'])->assertNoContent();
+            $this->beacon(['variant' => 'booked', 'event' => 'click'])->assertNoContent();
         }
 
-        $row = MarketingExperimentStat::where('variant', 'crowd')->firstOrFail();
+        $row = MarketingExperimentStat::where('variant', 'booked')->firstOrFail();
 
         $this->assertSame(1, $row->visitors);
         $this->assertSame(1, $row->clicks);
@@ -148,7 +148,7 @@ class HeroExperimentTest extends TestCase
     {
         config(['app.hosted' => true]);
 
-        $this->withUnencryptedCookie('es_attribution', json_encode(['landing' => '/', 'hero' => 'sellout']))
+        $this->withUnencryptedCookie('es_attribution', json_encode(['landing' => '/', 'hero' => 'sells']))
             ->post('/sign_up', [
                 'terms' => '1',
                 'name' => 'Headline Visitor',
@@ -158,9 +158,9 @@ class HeroExperimentTest extends TestCase
 
         $user = User::where('email', 'headline@gmail.com')->firstOrFail();
 
-        $this->assertSame('sellout', $user->hero_variant);
+        $this->assertSame('sells', $user->hero_variant);
         $this->assertSame('/', $user->landing_page, 'the variant must ride alongside the attribution, not replace it');
-        $this->assertSame(1, HeroExperiment::stats()['sellout']['signups']);
+        $this->assertSame(1, HeroExperiment::stats()['sells']['signups']);
     }
 
     /**
@@ -184,10 +184,10 @@ class HeroExperimentTest extends TestCase
 
         \Laravel\Socialite\Facades\Socialite::shouldReceive('driver')->with('google')->andReturn($provider);
 
-        $this->withUnencryptedCookie('es_attribution', json_encode(['landing' => '/', 'hero' => 'crowd']))
+        $this->withUnencryptedCookie('es_attribution', json_encode(['landing' => '/', 'hero' => 'sells']))
             ->get(route('auth.google.callback'));
 
-        $this->assertSame('crowd', User::where('email', 'google-hero@eventschedule-test.org')->firstOrFail()->hero_variant);
+        $this->assertSame('sells', User::where('email', 'google-hero@eventschedule-test.org')->firstOrFail()->hero_variant);
     }
 
     public function test_an_unknown_variant_in_es_attribution_is_not_stored(): void
@@ -238,16 +238,41 @@ class HeroExperimentTest extends TestCase
     public function test_a_click_leader_is_never_the_candidate(): void
     {
         $stats = $this->stats(visitors: 2000, clicks: 100, signups: 30);
-        $stats['crowd']['clicks'] = 600;
+        $stats['sells']['clicks'] = 600;
 
         $this->assertNull(HeroExperiment::evaluate($stats)['candidate']);
     }
 
-    public function test_no_candidate_until_every_variant_has_enough_visitors(): void
+    /** Every variant has to have finished burn-in before anything can be the candidate. */
+    public function test_no_candidate_while_any_variant_is_still_in_burn_in(): void
     {
         $stats = $this->stats(visitors: 2000, clicks: 100, signups: 20);
         $stats['plan']['signups'] = 80;
-        $stats['crowd']['visitors'] = HeroExperiment::WIN_MIN_VISITORS - 1;
+        $stats['sells'] = ['visitors' => HeroExperiment::BURN_IN_VISITORS - 1, 'clicks' => 3, 'signups' => 2];
+
+        $this->assertNull(HeroExperiment::evaluate($stats)['candidate']);
+    }
+
+    /**
+     * After burn-in a trailing variant sits at FLOOR, a couple of visitors a day at this traffic,
+     * so it may never reach WIN_MIN_VISITORS. It must not hold the lock back forever when the
+     * leader has clearly won: that rule made the test impossible to finish.
+     */
+    public function test_a_floored_variant_short_of_the_win_minimum_does_not_block_the_leader(): void
+    {
+        $stats = $this->stats(visitors: 2000, clicks: 100, signups: 20);
+        $stats['plan']['signups'] = 80;
+        $stats['sells'] = ['visitors' => HeroExperiment::BURN_IN_VISITORS, 'clicks' => 15, 'signups' => 3];
+
+        $this->assertLessThan(HeroExperiment::WIN_MIN_VISITORS, $stats['sells']['visitors']);
+        $this->assertSame('plan', HeroExperiment::evaluate($stats)['candidate']['key']);
+    }
+
+    /** The leader itself still needs WIN_MIN_VISITORS, however far ahead it looks. */
+    public function test_no_candidate_until_the_leader_has_enough_visitors(): void
+    {
+        $stats = $this->stats(visitors: 2000, clicks: 100, signups: 20);
+        $stats['plan'] = ['visitors' => HeroExperiment::WIN_MIN_VISITORS - 1, 'clicks' => 100, 'signups' => 80];
 
         $this->assertNull(HeroExperiment::evaluate($stats)['candidate']);
     }

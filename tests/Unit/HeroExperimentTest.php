@@ -69,12 +69,12 @@ class HeroExperimentTest extends TestCase
     public function test_the_weights_sum_to_one_and_respect_the_floor(): void
     {
         $stats = $this->stats(visitors: 2000, clicks: 100);
-        $stats['crowd']['clicks'] = 300;
+        $stats['sells']['clicks'] = 300;
 
         $weights = $this->weights($stats, 1.0);
 
         $this->assertEqualsWithDelta(1.0, array_sum($weights), 1e-9);
-        $this->assertGreaterThan(0.7, $weights['crowd'], 'a clear click leader should take most of the traffic');
+        $this->assertGreaterThan(0.7, $weights['sells'], 'a clear click leader should take most of the traffic');
 
         foreach ($weights as $key => $weight) {
             $this->assertGreaterThanOrEqual(HeroExperiment::FLOOR - 1e-9, $weight, "{$key} fell under the floor");
@@ -88,7 +88,7 @@ class HeroExperimentTest extends TestCase
     public function test_a_variant_still_in_burn_in_gets_at_least_an_even_share(): void
     {
         $stats = $this->stats(visitors: 2000, clicks: 100);
-        $stats['crowd']['clicks'] = 300;
+        $stats['sells']['clicks'] = 300;
         $stats['plan'] = ['visitors' => 0, 'clicks' => 0, 'signups' => 0];
 
         $weights = $this->weights($stats, 1.0);
@@ -126,14 +126,14 @@ class HeroExperimentTest extends TestCase
     public function test_traffic_moves_from_the_click_leader_to_the_signup_leader(): void
     {
         $stats = $this->stats(visitors: 2000, clicks: 100, signups: 10);
-        $stats['crowd']['clicks'] = 300;   // leads on clicks
+        $stats['sells']['clicks'] = 300;   // leads on clicks
         $stats['plan']['signups'] = 40;    // leads on signups
 
         $early = $this->weights($stats, 1.0);
         $late = $this->weights($stats, 0.0);
 
-        $this->assertGreaterThan($early['plan'], $early['crowd']);
-        $this->assertGreaterThan($late['crowd'], $late['plan']);
+        $this->assertGreaterThan($early['plan'], $early['sells']);
+        $this->assertGreaterThan($late['sells'], $late['plan']);
     }
 
     public function test_more_successes_than_visitors_does_not_break_the_sampler(): void
