@@ -1,51 +1,652 @@
 # Nexus release runbook
 
-How a release reaches the hosted install (eventschedule.com), and the ordered cutover for the
-two pieces of infrastructure that ship with **v1.0.130**: edge caching of marketing HTML, and
-moving the scheduler onto a DigitalOcean App Platform worker.
+How code reaches the hosted install (eventschedule.com), one section per version, **newest at the
+top**. Each version lists what it needs: what ships, the migrations and env vars, what to do
+before and after the deploy, what to watch, and how to undo it.
 
 Selfhosted installs are unaffected by everything here. Cutting the GitHub release that
-selfhosters update from is a **separate, later act** - see [Selfhost release](#selfhost-release)
-at the end.
+selfhosters update from is a **separate, later act** - see [Selfhost release](#selfhost-release).
 
-Steps marked **[one-time]** are the v1.0.130 infrastructure cutover and will not recur. The rest
-is the standing shape of a hosted deploy.
+## Using this file
 
-**This file is self-contained for the cutover.** Everything you need to do on the day, verify
-after it, and reach for when something goes wrong is here - you should not have to open another
-document mid-deploy. [`CACHING.md`](CACHING.md) and
-[`DIGITALOCEAN_WORKER.md`](DIGITALOCEAN_WORKER.md) go deeper on *why* each mechanism works the
-way it does: the origin cache contract the middleware implements, what moved into the browser,
-and the full worker reference. Read them before changing any of it; you do not need them to run
-the cutover.
+1. **Find what is live.** The running version is in the admin sidebar footer, and in the
+   `<!-- Version: ... -->` comment at the top of every app page's source. It is
+   `config('self-update.version_installed')`, which only moves at an "Update version" commit, so
+   code committed after a bump ships under the bumped number.
+2. **Work through every newer version, oldest first.** One deploy ships all of `main`, so it can
+   carry several versions at once. Each version's "before" steps must still run before that deploy.
+3. **Check the one-time steps of older versions are done.** The v1.0.130 scheduler worker cutover
+   is the one still to check (see [v1.0.130](#v10130)).
 
-## What is shipping
+Item labels are stable, because code and other docs cite them: P1 to P8 are v1.0.130's
+pre-flight, P9 to P11 are v1.0.132's, and steps 1 to 9 are v1.0.130's runbook.
 
-`main` is **21 migrations** ahead of what is live (`git log v1.0.128..HEAD` for the commits - a
-number written here goes stale the next time anyone commits, including commits to this file). Deploys are manual
-(`deploy_on_push` is unset on the app spec), so nothing in this release has reached production.
+| Version | Tagged | What it needs from you |
+|---|---|---|
+| [v1.0.134](#v10134) | not yet | A last `/admin/growth` download, a Stripe portal setting, an `audit_logs` size check, a privacy-notice decision, then `GROWTH_DATA_TOKEN` |
+| [v1.0.133](#v10133) | 2026-09-25 | Four read-only queries, the image backfill, a sitemap cache key, a Cloudflare purge |
+| [v1.0.132](#v10132) | 2026-09-23 | The ticket amnesty migration by hand, a `SESSION_LIFETIME` decision, a MySQL check, the federation welcome order |
+| [v1.0.131](#v10131) | 2026-09-10 | Nothing; four optional features |
+| [v1.0.130](#v10130) | 2026-09-04 | The edge-cache and scheduler-worker cutover, nine steps |
 
-The deploy itself is two actions:
+## Every deploy
 
-1. **Push to `main`.** CI runs the whole Unit and Feature suite on every push
-   (`.github/workflows/test.yml`), plus a check that `config/sitemap_lastmod.php` is current.
-   A red build is the signal to stop; there is nothing else to run by hand.
-2. **Click Deploy in the DigitalOcean console.** `deploy_on_push` is unset on the app spec, so
-   the deploy is deliberate rather than automatic.
+1. **Push to `main` and wait for green CI** (P8). `.github/workflows/test.yml` runs the Unit and
+   Feature suites and the sitemap-manifest check on every push. CI cannot see an untracked file,
+   so check `git status` for `??` lines first.
+2. **Read the app spec** (P3; how, below), and note the active deployment ID: a rollback targets
+   it.
+3. **Snapshot the database** (P1) when the version has a migration whose `down()` cannot restore
+   data.
+4. **Click Deploy in the DigitalOcean console.** `deploy_on_push` is unset, so nothing deploys on
+   its own. `migrate --force` runs in the start command, so a slow migration shows as a slow
+   deploy. The version sections say which migrations to run by hand first.
+5. **Check after:**
+   - the deployment is `ACTIVE`;
+   - `/admin` shows no new alerts;
+   - `/admin/queue` shows no failed-job spike and a fresh Scheduler card;
+   - spot-check the homepage, a schedule page, an event page and checkout.
+6. **Cached marketing HTML stays up to 10 minutes stale**, plus serve-stale. For an urgent marketing
+   fix, purge Cloudflare after the deploy.
+
+*Undo:* console rollback to the deployment ID from item 2. A rollback restores code, not data. If
+the scheduler stops, see [If something goes wrong](#if-something-goes-wrong).
+
+### The app spec is production config
+
+Production config for the hosted install IS the app spec - there is no `.env` on the container.
+The console's spec editor shows it, and this reads it without a browser:
+
+```bash
+TOKEN=$(grep '^DO_API_TOKEN=' .env | cut -d= -f2- | tr -d '"')
+APPID=$(grep '^DO_APP_ID=' .env | cut -d= -f2- | tr -d '"')
+curl -s -H "Authorization: Bearer $TOKEN" "https://api.digitalocean.com/v2/apps/$APPID" \
+  | jq -r '.app.spec.envs[] | "\(.key)=\(.value)"' | sort
+```
+
+> **Never commit an app spec to this repo, and never `doctl apps update --spec` from a stored
+> file.** `DigitalOceanService::syncDomains()` reads the live spec and PUTs it back at runtime to
+> add and remove customer custom domains. Applying an older spec deletes every domain added since
+> it was captured. The console's spec editor is safe because it loads the live spec first.
+
+### Never save an env var blank
+
+**Never save an app spec variable blank.** `env()`'s second argument fires only for a *missing* key, never
+for a present-but-empty one, which is why most of these read `env('X') ?: default` instead. A
+blank `CACHE_STORE=` is not a fallback to `file`: it is `''` reaching `CacheManager::resolve()`,
+throwing `Cache store [] is not defined` on the first cache read anywhere in the app. P3 checks
+for exactly this, because a blank value looks identical to a set one in the console.
+
+### Must not add: `APP_NAME` and `SESSION_COOKIE`
+
+`APP_NAME` and `SESSION_COOKIE` are both absent, and have to stay that way unless v1.0.130's step 4
+Cloudflare rule changes with them.
+
+`config('app.name')` is the hardcoded string `Event Schedule`, so `APP_NAME` is never the display
+name. It is read in exactly three places, each as an input to a *default* for something else: the
+session cookie name (`config/session.php`), the cache key prefix (`config/cache.php`) and the
+Redis key prefix (`config/database.php`). Setting it renames the session cookie to
+`event_schedule_session`, which signs everyone out and silently breaks the bypass expression that
+hardcodes `laravel_session`. It also moves the cache prefix, which with `CACHE_STORE=database`
+orphans every existing key, the scheduler heartbeat and every `withoutOverlapping()` mutex
+included.
+
+A new secret goes in the console as an **encrypted, app-level** variable, never in a stored spec
+file.
+
+## v1.0.134
+
+**Not deployed yet.** Everything on `main` after v1.0.133. The version was bumped on 2026-09-28;
+commits since then ship under the same number. Three parts need steps of their own, below the
+checklist:
+- [Conversion, churn and owner emails](#conversion-churn-and-owner-emails)
+- [Realtime](#realtime-adminrealtime)
+- [Growth data pull](#growth-data-pull-apiinternalgrowth)
+
+Smaller features ship with them and need nothing but the deploy: the photo gallery, the homepage
+headline test, guest support chat, list animations on schedule pages, and per-schedule custom
+field values on shared events.
+
+### Checklist
+
+**Before the deploy:**
+1. The [every-deploy](#every-deploy) checks.
+2. **Take a last download from `/admin/growth`** (Download JSON). The button disappears with this
+   release, and this download is the baseline for the Pro-only selling change, the conversion batch
+   and the growth payload's new schema.
+3. **In the Stripe dashboard, turn on cancellation reason** in the customer portal settings, or
+   portal cancels arrive with no reason.
+4. **`SELECT COUNT(*) FROM audit_logs`.** If it is large, run
+   `2026_10_01_000001_add_action_created_at_index_to_audit_logs` by hand from the console first
+   (see [Realtime](#realtime-adminrealtime)).
+5. **Decide whether this release sends the privacy-policy change notice** (see
+   [Realtime](#realtime-adminrealtime)).
+
+**Deploy**, then:
+
+6. **Run the realtime checks** (see [Realtime](#realtime-adminrealtime)), the same hour.
+7. **Turn on the growth data pull:**
+   1. Generate a token: `openssl rand -hex 32`.
+   2. In the DigitalOcean console, add it as `GROWTH_DATA_TOKEN`, **encrypted, app-level**. Deploy
+      again so the container picks it up.
+   3. Put the same value in your local `.env` as `GROWTH_DATA_TOKEN`.
+   4. Run `php artisan app:pull-growth`. It names the failure if anything is off; see
+      [Growth data pull](#growth-data-pull-apiinternalgrowth).
+8. **The next morning:** check the Activation nudges card on `/admin/growth`.
+9. **The first Monday after:** check the owner digests row on the same page.
+
+### Migrations
+
+Sixteen, none irreversible. The two that touch large tables are first.
+
+| Migration | What it does |
+|---|---|
+| `2026_10_01_000001_add_action_created_at_index_to_audit_logs` | Index build that reads all of `audit_logs` (checklist step 4) |
+| `2026_09_29_000000_add_custom_field_values_role_id_to_events_table` | A nullable column at the end of `events` plus an index on it: the index build reads `events` |
+| `2026_09_25_000002_canonicalize_timezone_aliases` | Reads the distinct timezone values in `users`, `roles`, `events` and `sales.guest_timezone`, then rewrites only rows holding an alias such as `Asia/Calcutta` |
+| `2026_09_27_000000_add_list_animation_to_roles_table`, `2026_09_28_000001_add_ticket_trial_to_roles_table` | A `varchar(20)` and two timestamps at the end of `roles`: about 90 bytes against v1.0.132's P11 row-size limit |
+| `2026_09_28_000000_add_ticket_paywall_viewed_at_to_users_table`, `2026_09_28_000004_add_ticket_trial_used_at_to_users_table`, `2026_09_28_000006_add_hero_variant_to_users_table` | Nullable columns on `users`; the last also indexes its column |
+| `2026_09_25_000001_add_signup_code_invalid_to_marketing_daily_stats` | One counter column on a small table |
+| `2026_09_30_000000_add_guest_support_to_support_conversations`, `2026_09_30_000001_add_reply_tracking_to_support` | Support chat columns. The second updates every `support_conversations` row and indexes `support_messages` |
+| `2026_09_28_000000_create_gallery_images_table`, `2026_09_28_000002_create_subscription_cancellations_table`, `2026_09_28_000003_create_owner_digests_table`, `2026_09_28_000005_create_marketing_experiment_stats_table`, `2026_10_01_000000_create_realtime_hits_table` | New tables |
+
+### Env vars
+
+- **`GROWTH_DATA_TOKEN`** is new and optional. Unset, `/api/internal/growth` answers 404 (checklist
+  step 7).
+- **`GROWTH_DATA_URL`** belongs in a developer's `.env`, never on the app spec.
+
+### Scheduled entries
+
+All run on both rails:
+- `app-send-activation-nudges`, hourly;
+- `app-send-owner-digests`, hourly;
+- `realtime-prune`, every five minutes.
+
+### Conversion, churn and owner emails
+
+**What ships:**
+- the paid-ticket paywall shown as a price is typed, and counted (`hit_ticket_paywall`);
+- a card-free 7-day selling trial (`roles.ticket_trial_ends_at`, paid selling only, not Pro);
+- cancellation reasons (`subscription_cancellations`), from the plan tab and the Stripe webhooks;
+- two owner emails that start sending on their own: the activation nudges and the weekly digest.
+
+**Four migrations, all cheap.** Two nullable columns at the end of `users` and `roles` (no
+`->after()`, so INSTANT) and two new tables, `subscription_cancellations` and `owner_digests`.
+No new env vars.
+
+**Two new scheduled entries, hourly on both rails:** `app-send-activation-nudges` and
+`app-send-owner-digests`. Neither has ever run on production. Each sends to an owner only in
+their own local morning (the digest only on Monday), and the nudges are paced to one per owner
+per week, never within two days of their digest. From the 2026-09-28 growth export, expect:
+- **nudges:** up to about 100 owners over the first day, mostly `no_ticket_type` and
+  `no_ticket_type_free`, then a trickle;
+- **digests:** about 110 owners on the first Monday after the deploy.
+
+#### Before the deploy
+
+- The last `/admin/growth` download (checklist step 2) is the baseline for this batch. The
+  previous one predates both the Pro-only selling change and these commits.
+- In the Stripe dashboard, turn on **cancellation reason** in the customer portal settings, or
+  portal cancels arrive with no reason.
+
+#### After the deploy
+
+- **The next morning,** open `/admin/growth`. The Activation nudges card should list keys with
+  counts in line with the estimates above. The digests row fills in after the first Monday.
+- **If the nudges card still says none were sent a day later,** the scheduler is not reaching
+  the command: check the Scheduler card on `/admin/queue`.
+- **To stop either email at once,** comment out its `Schedule::call` in `routes/console.php` and
+  its call in `AppController::translateData()` (`CronRailSyncTest` requires both), then deploy.
+  There is no kill switch in settings.
+
+### Realtime (`/admin/realtime`)
+
+**What ships:** a live view of who is on the site, fed by a small beacon on every page
+(`POST /api/realtime`). On by default here; off by default on every other install. The privacy
+policy, the cookie banner copy and the `/features/analytics` page were updated in the same commits, so
+they must ship together - do not deploy the code without them.
+
+**The cookie banner:** realtime needs it, so it now shows wherever it did not already. If
+`ANALYTICS_ID` is set in the app spec, the banner is already shown and nothing changes; otherwise
+this release starts showing it (never inside embedded calendars).
+
+**Two migrations:** a new `realtime_hits` table (instant), and an `(action, created_at)` index on
+`audit_logs` for the Activity card. The index build reads the whole table inside the start
+command's `migrate --force`, so first run `SELECT COUNT(*) FROM audit_logs` (it is pruned to 90
+days, apart from the few actions now kept for good). If it is large, run
+`2026_10_01_000001_add_action_created_at_index_to_audit_logs` by hand from the console before
+Deploy, as P2 and P9 do. No new env vars.
+
+**Decide before deploying:** the privacy policy promises an email notice for material changes
+(`privacy.blade.php`, "Changes to this policy"). Identified page-level records for visitors who
+accept cookies are arguably one; decide whether this release sends that notice.
+
+**One new scheduled entry, every five minutes on both rails:** `realtime-prune`, which deletes
+page views about an hour after the visitor's last activity. That deletion is what makes the
+privacy policy true; `AdminAlertService` raises `realtime_prune_stalled` if a row ever outlives two
+hours.
+
+#### After the deploy
+
+- Open `/admin/realtime` in one tab and the site in a private window; accept cookies there and
+  watch yourself appear within ten seconds. Decline in another window and you should appear only as
+  a gray "not identified" page view.
+- Cached marketing pages start reporting within ten minutes (or purge Cloudflare): pages cached
+  before the deploy carry no beacon, so expect no marketing-site rows at all until they expire.
+- Check the country column fills in (Cloudflare's `CF-IPCountry`, else GeoIP).
+- `curl -sI https://eventschedule.com/pricing` still shows `cf-cache-status: HIT` and no
+  `set-cookie`.
+- In Cloudflare **Security > Events**, make sure `POST /api/realtime` is not being challenged:
+  a challenged beacon fails silently and the page just looks empty.
+- After an hour, `realtime_hits` should hold roughly an hour of rows and no more.
+
+#### To stop it
+
+Switch it off at `/admin/settings#realtime`. That deletes every row at once, and beacons from
+pages still cached at the edge are dropped by the endpoint.
+
+### Growth data pull (`/api/internal/growth`)
+
+**What ships:**
+- The `/admin/growth` Download button is replaced by a token-secured endpoint. Pull from your
+  machine with `php artisan app:pull-growth` (see `docs/GROWTH_DATA.md`).
+- The payload moves to `schema_version` 8:
+  - attribution values are anonymised;
+  - "paying" means billing, not the tier;
+  - sales go to the seller instead of every listed schedule;
+  - ids are 12 characters, so they do not match older pulls.
+- `audit:prune` now keeps the subscription, plan, trial, claim and gateway or calendar connection
+  rows forever.
+- Then `schema_version` 9 adds:
+  - `daily` series and `meta.releases`, so changes can be dated to the deploy;
+  - nudge outcomes;
+  - the audience side (buyers, attendees who became organizers, weekly reach);
+  - feature usage, payment gateways and activity buckets per row;
+  - geography, boost revenue, referrals and federated installs.
+
+  `meta.releases` fills from the first scheduler tick after this deploy, so it is empty before it.
+
+**No migrations.** `GROWTH_DATA_TOKEN` is new and optional: unset, the endpoint answers 404.
+
+#### Before the deploy
+
+- Take the last download with the old button (checklist step 2). It disappears with this
+  release.
+
+#### After the deploy
+
+1. Generate a token with `openssl rand -hex 32`.
+2. Add it in the DigitalOcean console as an **encrypted, app-level** env var named
+   `GROWTH_DATA_TOKEN`. Use the console, not a spec file, which would wipe the custom domains.
+   Then deploy again so the container picks it up.
+3. Put the same value in your local `.env` as `GROWTH_DATA_TOKEN`.
+4. Run `php artisan app:pull-growth`. It names the failure if anything is off:
+   - a **404** means the token is not live on the server yet;
+   - a **403 HTML page** means Cloudflare challenged the request. Add a WAF skip rule for
+     `/api/internal/growth`.
+5. `/admin` &rarr; Audit log shows an `admin.growth_data_pull` row per pull, with its duration and
+   peak memory. Watch `peak_memory_mb` against the 128MB FPM worker as the install grows.
+
+## v1.0.133
+
+**Tagged 2026-09-25.** SEO round 3 and its fixes, plus five commits after them:
+- the embeddable signup form ([#125](https://github.com/eventschedule/eventschedule/issues/125));
+- notification email settings.
+
+**Two migrations, both cheap:**
+- `2026_09_24_000000_add_banner_image_variants_to_roles`, below;
+- `2026_09_25_000000_add_notification_email_to_roles`, which adds a `text`, a `timestamp` and a
+  `json` column at the end of `roles`. The `text` and `json` are stored off-page.
+
+### SEO round 3 and its fixes
+
+The 66 commits `git log v1.0.132..8e02425f0`. They cover three things.
+
+**Guest-page SEO:**
+- one canonical per recurring series;
+- one indexability rule behind the sitemaps and the robots tag;
+- real titles, descriptions and structured data;
+- resized headers and backgrounds.
+
+**New marketing pages:** the ticket fee calculator, booking requests, the event landing page, and
+four comparison pages.
+
+**The fixes its review found,** including older bugs of the same kinds:
+- the hourly demo reset deleting real `demo-*` schedules along with their events' sales;
+- one schedule deleting another's image files, and CSS injection;
+- `javascript:` links;
+- hidden schedules, password events and appointment bookings showing on public pages;
+- about 60 corrected public claims.
+
+**Its migration is cheap.** `2026_09_24_000000_add_banner_image_variants_to_roles` adds two
+nullable `json` columns at the end of `roles`, with no `->after()`, so it runs INSTANT. JSON is
+stored off-page, so v1.0.132's P11 row-size concern does not apply.
+
+**No new env vars, no new scheduled commands.** CI passed on `8e02425f0` (run 36117719257): the
+feature tests, Dusk and the security audit.
+
+#### Before the deploy - read-only
+
+The [every-deploy](#every-deploy) checks apply as always, P1's snapshot included. Then four queries. None of them blocks the
+deploy; each tells you what the old code has already done.
+
+**Q1. Real schedules on a `demo-` address.**
+
+```sql
+SELECT r.id, r.subdomain, r.name, r.created_at
+FROM roles r
+LEFT JOIN users u ON u.id = r.user_id
+WHERE r.subdomain LIKE 'demo-%'
+  AND r.subdomain <> 'simpsons'
+  AND (u.email IS NULL OR u.email <> 'contact@eventschedule.com');
+```
+
+`contact@eventschedule.com` is `DemoService::DEMO_EMAIL`.
+- On v1.0.132, `app:setup-demo` deletes every `demo-*` schedule within the hour, along with the
+  tickets and sales of every event attached to one. So this can only show schedules created since
+  the last run.
+- Any row at all means real customers are hitting this, and earlier ones were already deleted.
+  Check the support inbox, and restore from the P1 snapshot or the backups.
+- Deploying stops the deletions.
+
+**Q2. Image files shared between rows.**
+
+```sql
+SELECT name, COUNT(*) AS uses,
+       GROUP_CONCAT(CONCAT(col, '#', id) ORDER BY col, id SEPARATOR ', ') AS used_by
+FROM (
+    SELECT profile_image_url COLLATE utf8mb4_bin AS name, 'roles.profile_image_url' AS col, id FROM roles
+    UNION ALL SELECT header_image_url COLLATE utf8mb4_bin, 'roles.header_image_url', id FROM roles
+    UNION ALL SELECT background_image_url COLLATE utf8mb4_bin, 'roles.background_image_url', id FROM roles
+    UNION ALL SELECT flyer_image_url COLLATE utf8mb4_bin, 'events.flyer_image_url', id FROM events
+) AS image
+WHERE name IS NOT NULL AND name <> '' AND name NOT LIKE 'demo\_%' AND name NOT LIKE 'http%'
+GROUP BY name HAVING COUNT(*) > 1 ORDER BY uses DESC, name;
+```
+
+Rows listed together share one file, so replacing or deleting the image on one of them deletes the
+other's. A same-install backup restore produced these legitimately before this release. The
+release stops new sharing, but existing pairs stay shared until every row but one gets its own
+copy of the file.
+
+**Q3. Stored `..` paths.**
+
+```sql
+SELECT 'roles' AS tbl, id FROM roles
+ WHERE CONCAT_WS('|', profile_image_url, header_image_url, background_image_url, sponsor_logos) LIKE '%..%'
+UNION ALL
+SELECT 'events', id FROM events
+ WHERE CONCAT_WS('|', flyer_image_url, agenda_image_url, sponsor_logos) LIKE '%..%'
+UNION ALL
+SELECT 'users', id FROM users WHERE profile_image_url LIKE '%..%';
+```
+
+A row here came from an older or hand-edited backup restore. `Storage::delete()` resolves `..`, so
+clear the value.
+
+**Q4. Appointment bookings stored as listed.**
+
+```sql
+SELECT COUNT(*) AS bookings_not_unlisted
+FROM events
+WHERE appointment_type_id IS NOT NULL AND is_private = 0;
+```
+
+A booking is named after its guest, and the public lists hide an event only for being unlisted. The
+event's saving hook now keeps every booking unlisted, but it fixes an existing row only on its next
+save. To fix them all now, from the console:
+
+```
+php artisan tinker
+> App\Models\Event::whereNotNull('appointment_type_id')->where('is_private', false)->get()->each->save();
+```
+
+#### Deploy
+
+Console, then Deploy, as in [Every deploy](#every-deploy).
+
+**Verify:**
+- The log shows the one migration done, and the deployment is `ACTIVE`.
+- `/admin` shows no new alerts, and `/admin/queue` no failed-job spike.
+- Spot-check the homepage, a schedule page, an event page and checkout.
+
+#### Right after the deploy
+
+1. **Backfill the image derivatives.** Run v1.0.130 step 3's schedule-image, dimensions and
+   animation commands, in that step's order. The flyer commands at the top of the step already ran
+   for v1.0.130, and re-running them is harmless because they resume.
+
+   ```
+   php artisan images:backfill-variants --roles --slot=background
+   php artisan images:backfill-variants --roles --slot=header
+   php artisan images:backfill-variants --roles
+   php artisan images:backfill-variants --dimensions
+   php artisan images:backfill-variants --roles --slot=all --dimensions
+   php artisan images:backfill-variants --animated
+   php artisan images:backfill-variants --roles --slot=all --animated
+   ```
+
+   Until the `--animated` pair runs, an existing animated flyer shows as a still on its own event
+   page.
+2. **Drop the old sitemap index.** `sitemap:sections:{APP_URL}` is served fresh for an hour and
+   stale for two more, and its key did not change. So on the database cache store (v1.0.130 step 5
+   done) the index can list the old code's ranges for up to 3 hours. Forget it:
+
+   ```
+   php artisan cache:forget "sitemap:sections:https://eventschedule.com"
+   ```
+
+   On the `file` store there is nothing to do: the new web container started with an empty cache.
+   A console container could not reach that cache anyway.
+3. **Purge Cloudflare,** if v1.0.130's step 4 rule is live. The corrected copy and the new pages are then
+   served now, instead of within 10 minutes plus serve-stale.
+
+**Verify:**
+- `curl -s https://eventschedule.com/robots.txt` lists `/ticket/view/`, `/appointment/view/` and
+  `/feedback/`.
+- A schedule host's robots.txt lists `/ticket/view/` but not `/feedback/`. There `/feedback/{id}`
+  can be a real event page.
+- `/sitemap.xml` answers 200, and an events child lists each recurring series once, at its undated
+  URL.
+- A dated occurrence of a recurring event carries the series' undated URL as its canonical.
+- After the `--animated` run, an event with an animated GIF flyer shows the `.gif` itself on its
+  page.
+- The new pages answer 200:
+  - `/ticket-fee-calculator`
+  - `/features/booking-requests`
+  - `/event-landing-page`
+  - `/ticketleap-alternative`
+  - `/songkick-alternative`
+  - `/allevents-alternative`
+  - `/universe-alternative`
+
+#### Search Console over the next weeks
+
+Resubmitting `sitemap.xml` is optional; Google re-reads it anyway.
+
+**Expected, and not a regression:**
+- **Fewer submitted URLs.** Events drop out 30 days after they end, sub-schedules are no longer
+  listed, and one-off rows from a calendar sync collapse to one URL each.
+- **"Alternate page with proper canonical tag"** grows as the dated URLs of recurring events point
+  at their series.
+- **"Excluded by 'noindex' tag"** now covers:
+  - the submit, import, booking-request, gift-card, carpool and password pages;
+  - `/examples`;
+  - `/search`.
+- **"Blocked by robots.txt"** now covers the ticket, subscription, newsletter and appointment
+  links.
+
+**Worth a look if it moves:**
+- "Server error (5xx)" should stay at zero.
+- "Duplicate, Google chose different canonical than user" should fall.
+- Watch the Events rich-result report for new errors. Run the Rich Results Test on one event page
+  and one schedule page.
+
+#### What users will notice - tell support
+
+- **Reserved schedule names.** 187 route words are now reserved.
+  - A new schedule named exactly "Store" or "Feedback" gets a random address.
+  - Renaming a schedule onto one of them gives a random address, as any reserved name always has.
+  - Existing schedules that hold one keep it.
+- **Slugs that collide with routes.** A new or retyped event slug that is a route word gets
+  `-event`, and a sub-schedule slug gets `-schedule`. Existing slugs stay until they are changed.
+- **Registration links.** One that is not a web address is cleared on the event's next save.
+  Until then the page shows no registration button for it.
+- **Online events.** Free-text join details show as "Online" on public pages. Ticket holders and
+  booked guests still see them in full.
+- **Appointment bookings** are always unlisted, and their event page is visible only to the
+  schedule's members.
+- **Deleted and unpublished schedules** answer every guest route as an unknown address does. Their
+  members are taken into the app instead.
+- **Password events** no longer appear in graphics or the carousel, for members too.
+- **AI images.** One generated just before the deploy may ask to be generated again: the name it
+  was issued under lived in the cache.
+- **White-label.** `twitter:site` is gone from guest pages.
+
+#### Undo
+
+Console rollback to the v1.0.132 deployment ID from P3.
+
+**Safe for data:**
+- The old code ignores the two new `roles` columns and the new `animated` key in the image
+  variant JSON.
+- It reads everything the new code normalized without trouble: registration links, unlisted
+  bookings and suffixed slugs.
+
+**But a rollback reopens every hole this release closes,** starting with the hourly deletion of
+real `demo-*` schedules. Prefer fixing forward.
+
+#### Selfhost
+
+The same code reaches selfhosters with the next GitHub release.
+- Make the usual "Update version" commit (`config/self-update.php`, `build.yml`) after the hosted
+  soak, and write the release notes by the process in `CLAUDE.md`.
+- The migration runs inline in `AppUpdateService` and is trivial.
+- **Selfhost-specific:**
+  - robots.txt gains wildcards for the path-routed secret links (`/*/promo/`,
+    `/*/checkout/success/`, `/*/gift-cards/payment/` and so on);
+  - the reserved names matter most there, because schedules share the path space with the app's
+    routes.
+
+## v1.0.132
+
+**Tagged 2026-09-23.** Paid ticket selling and paid appointments move back behind Pro, and federated
+installs get onboarding.
+
+**It carries the heaviest migration of any recent release.** The two one-time amnesty backfills
+that decide which existing events and appointment types keep working ship with the Pro gate.
+**P9** covers this and says to run the ticket one by hand before triggering the deploy; **P10**
+and **P11** are two config reads and two SQL queries that each prevent a failed
+`migrate --force`. Read them alongside v1.0.130's P2, which they follow.
+
+### Pre-flight
+
+| # | Check | Why it matters |
+|---|---|---|
+| P9 | **Run `2026_09_20_000000_add_tickets_grandfathered_at_to_events_table` by hand from the console first**, then watch the rest of the deploy log | This is v1.0.132's P2, and the single most expensive statement in it. Paid ticket selling goes back behind Pro, and this migration is the one-time amnesty that decides which existing events keep selling. Its backfill is a four-table join (`sale_tickets` x `sales` x `tickets` x `events`) with `DISTINCT`, `ORDER BY` and `LIMIT 1000`, looped until exhausted, over the two largest tables in the schema - and it runs inside the start command's `migrate --force`, before the container passes its health check. If it blocks long enough, App Platform times the health check out and the deploy rolls back with nothing obvious in the log. `EXPLAIN` the first iteration against a production-sized copy before you push. The column add is guarded with `Schema::hasColumn`, so a part-way failure is retryable rather than stranding the deploy on `Duplicate column name` - that guard is the only reason a retry works, do not remove it. Two smaller writers ship alongside: `2026_09_17_000001_unwrap_double_encoded_json_settings` (read-only scans of `events` and `roles`, logs every row it rewrites and every one it cannot decode - check the log after) and `2026_09_17_000003_keep_event_interest_on_where_it_has_signups` (now plucked and chunked rather than one unbounded `UPDATE roles`). |
+| P10 | Read `SESSION_LIFETIME` on the app spec | `config/session.php` moved its default from 120 to 1440 this release. Two different failures, depending on what the spec says. If the var is **absent**, every session on the site silently goes from 2 hours to 24 the moment you deploy - a security-relevant change nobody asked for at deploy time. If it is **present and still 120**, the new admin re-auth defaults are silently capped by the session that carries them: `ADMIN_REAUTH_TIMEOUT` defaults to 86400s (24h), which cannot outlive a 2-hour session, so the knob looks like it does nothing. `config/auth.php:149` documents the dependency. Decide which value you want and set it explicitly rather than inheriting either default. |
+| P11 | `SELECT VERSION()` and `SHOW CREATE TABLE roles` | Two cheap queries that each prevent a failed `migrate --force`. **Version:** `2026_09_20_000001_add_contact_details_to_events_table` adds three columns with `->after()`, which forfeits `ALGORITHM=INSTANT` below MySQL 8.0.29 and rebuilds `events` instead. Above it, this is free. **Row size:** three migrations widen `roles`, which is already near MySQL's 65,535-byte limit (171 columns - see `2026_09_07_000000`). One is a `json` column (stored off-page, ~12 bytes toward the limit) and two are `TINYINT`, so this almost certainly fits - but `Row size too large` at ALTER time aborts the whole deploy. |
+
+### Federation onboarding
+
+Approving a federated install now emails its operator a welcome with the steps to list their
+schedules (`FederationWelcomeService`), and selfhost installs get one-click listing. The order
+matters:
+
+1. **Deploy the nexus.** Approvals from then on send the welcome. Migration
+   `2026_09_17_000004` adds `federated_instances.welcomed_at` and `locale`; existing rows stay
+   null, which is what makes the admin screen offer them the welcome.
+2. **Publish the selfhost release** with `config/self-update.php` at the version in
+   `FederatedInstance::ONE_CLICK_LISTING_VERSION` (`v1.0.132`). If the release goes out under a
+   different number, change the constant with it: the email picks its step-one copy and its
+   update tip from it. The tip never names a version newer than the nexus's own
+   `version_installed`, so it stays hidden until step 2's version bump is deployed.
+3. **Redeploy the nexus with that version bump**, or the welcomes below go out without the update
+   tip (it only names a version the nexus itself has reached).
+4. **Only then welcome the installs approved before this shipped**: `/admin/federation?status=approved`,
+   "Preview welcome email" first, then "Send welcome email" on each row, or tick them and use the
+   bulk button, which skips anyone already welcomed. Approved rows with nothing live carry a
+   "No listings yet" pill. Give updated installs an hour first: they report their version on
+   their next sync, and the welcome picks its step one from it.
+
+Watch for:
+
+- **Pending installs are no longer pruned while they still check in.** A registration that never
+  sent an event is only dropped once it has also been quiet for three days. Approve an empty
+  install (it gets the setup steps) or suspend it; the pending queue caps at 500.
+- **Suspended installs are never deleted any more**, only their listings, once quiet for 60 days,
+  so a suspension cannot be undone by the automatic reconnect below.
+- **Deleted installs come back.** An install that gets a 403 re-registers on its next hourly run
+  and reappears as a fresh pending row. Suspend, rather than delete, to keep one out. Suspended
+  rows the old pruning deleted can return the same way; a pending row on the host of a suspended
+  one carries a warning panel.
+- **Installs re-register once after updating.** Each updated install sends its contact address
+  again on its first hourly run (it now remembers what the network last accepted). An unchanged
+  address mails nothing, but an install whose site address has changed since it joined goes back
+  to review at that point - by design, a moved host is a new review.
+- **Versions now arrive on every sync.** The admin rows show what each install is actually
+  running, not what it ran when it registered.
+- **Suspending an unreviewed registration sends no email.** Junk registrations carry
+  attacker-chosen names and addresses, so only installs that were welcomed are told.
+- **The Flagged tab now has two shapes, and they drain differently.** A row showing two
+  addresses is a live claim: press Accept new address to adopt it, or Suspend to reject it.
+  A row showing only the address on record has nothing to adopt - check that address is
+  genuine and press Mark as reviewed (or tick it and press Approve selected, which is the
+  same operation). Before this, that second shape offered nothing but Suspend, so the
+  dashboard's "changed its address" alert could not be cleared without dropping the install
+  off the network and mailing its operator twice to put it back.
+
+## v1.0.131
+
+**Tagged 2026-09-10.** Nothing to do. It adds four groups of env vars, all **correct to leave
+unset** on the nexus. Each has a working default:
+
+| Variable | Default |
+|---|---|
+| `ACCESSIBILITY_PUBLIC_PAGES_MEASURED` | `153` |
+| `ACCESSIBILITY_PUBLIC_MEASUREMENT_DATE` | `2026-09-04` |
+| `EVENT_INTEREST_REMINDER_HOURS` | `48` |
+| `EVENT_INTEREST_RECIPIENT_BATCH` | `2000`, the cap that bounds outbound interest mail |
+| `EVENT_INTEREST_TICKETS_MAX_AGE_DAYS` | `180` |
+| `PAYPAL_CLIENT_ID` / `PAYPAL_CLIENT_SECRET` / `PAYPAL_SANDBOX` / `PAYPAL_WEBHOOK_ID` | unset. `PayPalGateway::platformCredentials()` returns `[]` when hosted, so these are selfhost-only by construction - each owner connects their own account |
+| `GOOGLE_WALLET_ISSUER_ID` / `GOOGLE_WALLET_SERVICE_ACCOUNT` | unset. Wallet passes are opt-in **per install**, and `GoogleWalletService::isConfigured()` gates everything about them: every button, the route handler, the confirmation email, the privacy page's processor row and every marketing claim about the button. Unset, eventschedule.com neither offers passes nor says it does; `GoogleWalletMarketingClaimTest` pins the claims |
+| `GOOGLE_WALLET_ID_PREFIX` | `es`. Irrelevant until the two above are set |
+
+Switching wallet passes on later takes only those env vars; setup is `docs/GOOGLE_WALLET_SETUP.md`.
+Set them only once the issuer account is out of demo mode: from that moment the button renders
+for every buyer and the marketing pages describe it, but in demo only registered test accounts can
+save a pass. App Platform has no writable file mount, so `GOOGLE_WALLET_SERVICE_ACCOUNT` takes the
+base64 contents of the key. Google can neither delete nor rename a pass class once made, so
+production and any staging install sharing the issuer account MUST use different
+`GOOGLE_WALLET_ID_PREFIX` values or they collide permanently. The marketing copy returns within
+the edge cache's 10 minutes, or purge.
+
+## v1.0.130
+
+**Tagged 2026-09-04.** Two pieces of infrastructure ship with it:
+- edge caching of marketing HTML;
+- moving the scheduler onto a DigitalOcean App Platform worker.
+
+Steps marked **[one-time]** are that cutover and will not recur. Steps 5 to 9 are separate from any
+deploy and stay open until someone does them. As of this writing, `CLAUDE.md` still says
+`CACHE_STORE` "is currently unset there", which step 9 removes once the cutover is done.
+
+**This section is self-contained for the cutover.** Everything you need to do on the day, verify
+after it, and reach for when something goes wrong is here. [`CACHING.md`](CACHING.md) and
+[`DIGITALOCEAN_WORKER.md`](DIGITALOCEAN_WORKER.md) go deeper on *why* each mechanism works the way
+it does. Read them before changing any of it; you do not need them to run the cutover.
+
+### What ships
+
+v1.0.130 carried **21 migrations** over v1.0.128 (`git log v1.0.128..v1.0.130`; v1.0.129 was
+bumped but never tagged, so its commits ship here). The deploy itself is the usual pair of
+actions in [Every deploy](#every-deploy).
 
 Everything else is either a one-time infrastructure step or something you *look at* afterwards -
 the deploy log, `/admin`, `/admin/queue`. Two steps do need the App Platform console, so budget
 for it: **step 3** backfills the image derivatives and must run before step 4, and **P2** may want
 the three `events` migrations run by hand first if the table is large.
-
-**Since v1.0.132 the heaviest migration is a different one.** Paid ticket selling and paid
-appointments move back behind Pro, and the two one-time amnesty backfills that decide which existing
-events and appointment types keep working ship with them. **P9** covers this and says to run the
-ticket one by hand before triggering the deploy; **P10** and **P11** are two config reads and two
-SQL queries that each prevent a failed `migrate --force`. Read P9 to P11 alongside P2.
-
-**The next deploy also carries SEO round 3 and its fixes**, the 66 commits after v1.0.132. They
-have their own checklist: [SEO round 3 and its fixes](#seo-round-3-and-its-fixes-the-66-commits-after-v10132).
 
 The pre-deploy baseline, confirmed live:
 
@@ -70,7 +671,7 @@ Two changes need operator action **outside the repo** before they do anything at
    the named and bounded overlap mutexes and the runbook; the worker component itself has to be
    created in the DigitalOcean console.
 
-## Environment variables at a glance
+### Environment variables at a glance
 
 Every app-spec edit the cutover needs, in one place, so that what has been saved is checkable
 without re-reading three steps. The reasoning, the verification and the undo for each one live in
@@ -80,7 +681,7 @@ Checked against the live spec rather than against this file. At the time of writ
 **69 app-level variables and none at component scope**, and every "add" below is genuinely absent
 from it.
 
-### Must add
+#### Must add
 
 | Variable | Value | Scope | Step |
 |---|---|---|---|
@@ -101,7 +702,7 @@ is app-level because the *web* container is what reads it, so a component-scoped
 as not setting it. Nothing else belongs at component scope: the rest is inherited, and a copy
 there is a second place to rotate every key.
 
-### Should add: the four display-price amounts
+#### Should add: the four display-price amounts
 
 `STRIPE_PRICE_MONTHLY`, `STRIPE_PRICE_YEARLY`, `STRIPE_ENTERPRISE_PRICE_MONTHLY` and
 `STRIPE_ENTERPRISE_PRICE_YEARLY` hold the Stripe price **IDs** and are set. The four matching
@@ -123,7 +724,7 @@ itself on this deploy instead.
 Pin all four, after confirming the amounts against the four Stripe Price objects: nothing in the
 app reconciles the two. See P5 in Pre-flight.
 
-### New this release, and correct to leave unset
+#### New in v1.0.130, and correct to leave unset
 
 Listed so the omission reads as a decision. Each has a working default.
 
@@ -136,52 +737,13 @@ Listed so the omission reads as a decision. Each has a working default.
 | `AUDIENCE_ANNOUNCEMENT_RECIPIENT_BATCH` | `2000`, the cap that actually bounds outbound mail |
 | `AUDIENCE_ANNOUNCEMENT_MIN_HOURS` | `72` |
 | `AUDIENCE_MAIL_UNVERIFIED_MAX_RECIPIENTS` | `50` |
-| `ACCESSIBILITY_PUBLIC_PAGES_MEASURED` | `153` |
-| `ACCESSIBILITY_PUBLIC_MEASUREMENT_DATE` | `2026-09-04` |
-| `EVENT_INTEREST_REMINDER_HOURS` | `48` |
-| `EVENT_INTEREST_RECIPIENT_BATCH` | `2000`, the cap that bounds outbound interest mail |
-| `EVENT_INTEREST_TICKETS_MAX_AGE_DAYS` | `180` |
-| `PAYPAL_CLIENT_ID` / `PAYPAL_CLIENT_SECRET` / `PAYPAL_SANDBOX` / `PAYPAL_WEBHOOK_ID` | unset. `PayPalGateway::platformCredentials()` returns `[]` when hosted, so these are selfhost-only by construction - each owner connects their own account |
-| `GOOGLE_WALLET_ISSUER_ID` / `GOOGLE_WALLET_SERVICE_ACCOUNT` | unset. Wallet passes are opt-in **per install**, and `GoogleWalletService::isConfigured()` gates everything about them: every button, the route handler, the confirmation email, the privacy page's processor row and every marketing claim about the button. Unset, eventschedule.com neither offers passes nor says it does; `GoogleWalletMarketingClaimTest` pins the claims |
-| `GOOGLE_WALLET_ID_PREFIX` | `es`. Irrelevant until the two above are set |
 
-Switching wallet passes on later takes only those env vars; setup is `docs/GOOGLE_WALLET_SETUP.md`.
-Set them only once the issuer account is out of demo mode: from that moment the button renders
-for every buyer and the marketing pages describe it, but in demo only registered test accounts can
-save a pass. App Platform has no writable file mount, so `GOOGLE_WALLET_SERVICE_ACCOUNT` takes the
-base64 contents of the key. Google can neither delete nor rename a pass class once made, so
-production and any staging install sharing the issuer account MUST use different
-`GOOGLE_WALLET_ID_PREFIX` values or they collide permanently. The marketing copy returns within
-the edge cache's 10 minutes, or purge.
-
-### Nothing to remove
+#### Nothing to remove
 
 The five `STRIPE_LEGACY_*` variables retired with the price-recognition mechanism are not on the
 live spec, so there is nothing to delete. What replaces them is P4's alert.
 
-### Must not add
-
-`APP_NAME` and `SESSION_COOKIE` are both absent, and have to stay that way unless the Cloudflare
-rule in step 4 changes with them.
-
-`config('app.name')` is the hardcoded string `Event Schedule`, so `APP_NAME` is never the display
-name. It is read in exactly three places, each as an input to a *default* for something else: the
-session cookie name (`config/session.php`), the cache key prefix (`config/cache.php`) and the
-Redis key prefix (`config/database.php`). Setting it renames the session cookie to
-`event_schedule_session`, which signs everyone out and silently breaks the bypass expression that
-hardcodes `laravel_session`. It also moves the cache prefix, which with `CACHE_STORE=database`
-orphans every existing key, the scheduler heartbeat and every `withoutOverlapping()` mutex
-included.
-
-### The one trap that applies to all of them
-
-**Never save any of these blank.** `env()`'s second argument fires only for a *missing* key, never
-for a present-but-empty one, which is why most of these read `env('X') ?: default` instead. A
-blank `CACHE_STORE=` is not a fallback to `file`: it is `''` reaching `CacheManager::resolve()`,
-throwing `Cache store [] is not defined` on the first cache read anywhere in the app. P3 checks
-for exactly this, because a blank value looks identical to a set one in the console.
-
-## Pre-flight
+### Pre-flight
 
 Read-only. Do all of it before touching anything. It is worth the ten minutes because most of
 what it catches is invisible from the outside: an unpushed commit or an untracked asset (the
@@ -199,11 +761,8 @@ release - so read the table once now and revisit P4 as soon as step 2 is `ACTIVE
 | P6 | Run `php artisan app:pull-growth --range=last_30_days` on your machine (before the release that added it, `/admin/growth/export?range=last_30_days`) and keep the JSON | **Not `/admin/users`** - its funnel carries only "Visited site". The page-view, docs and pricing counters live in `GrowthExportService::traffic()`, which reaches neither the users funnel nor the growth dashboard, so the JSON export is the only place all four are readable. Record the "Visited site", page-view, docs and pricing funnel numbers. After the Cloudflare rule, origin-side counting stops and the beacon takes over; without a before-number a broken beacon is indistinguishable from normal variance. |
 | P7 | Confirm the external cron can be disabled in one click, and record the current `APP_CRON_SECRET` | Re-enabling the cron is the only emergency fallback that does not require fixing the worker. Step 8 says **disable, not delete**. |
 | P8 | A green CI run on the pushed commit | The deploy ships `origin/main`, so pushing is what makes your work real - and CI runs against exactly the commit that will deploy. `.github/workflows/test.yml` runs the whole Unit and Feature suite plus the sitemap-manifest check on every push. One thing CI cannot see: an **untracked** file. `git commit -am` silently leaves those behind, and an asset referenced by committed code then deploys as a 404 that nothing local ever notices, because locally the file is on disk. Check `git status` for `??` lines before pushing. There is **no release gate** on `build.yml`. |
-| P9 | **Run `2026_09_20_000000_add_tickets_grandfathered_at_to_events_table` by hand from the console first**, then watch the rest of the step 2 log | This is the P2 of this release, and the single most expensive statement in it. Paid ticket selling goes back behind Pro, and this migration is the one-time amnesty that decides which existing events keep selling. Its backfill is a four-table join (`sale_tickets` x `sales` x `tickets` x `events`) with `DISTINCT`, `ORDER BY` and `LIMIT 1000`, looped until exhausted, over the two largest tables in the schema - and it runs inside the start command's `migrate --force`, before the container passes its health check. If it blocks long enough, App Platform times the health check out and the deploy rolls back with nothing obvious in the log. `EXPLAIN` the first iteration against a production-sized copy before you push. The column add is guarded with `Schema::hasColumn`, so a part-way failure is retryable rather than stranding the deploy on `Duplicate column name` - that guard is the only reason a retry works, do not remove it. Two smaller writers ship alongside: `2026_09_17_000001_unwrap_double_encoded_json_settings` (read-only scans of `events` and `roles`, logs every row it rewrites and every one it cannot decode - check the log after) and `2026_09_17_000003_keep_event_interest_on_where_it_has_signups` (now plucked and chunked rather than one unbounded `UPDATE roles`). |
-| P10 | Read `SESSION_LIFETIME` on the app spec | `config/session.php` moved its default from 120 to 1440 this release. Two different failures, depending on what the spec says. If the var is **absent**, every session on the site silently goes from 2 hours to 24 the moment you deploy - a security-relevant change nobody asked for at deploy time. If it is **present and still 120**, the new admin re-auth defaults are silently capped by the session that carries them: `ADMIN_REAUTH_TIMEOUT` defaults to 86400s (24h), which cannot outlive a 2-hour session, so the knob looks like it does nothing. `config/auth.php:149` documents the dependency. Decide which value you want and set it explicitly rather than inheriting either default. |
-| P11 | `SELECT VERSION()` and `SHOW CREATE TABLE roles` | Two cheap queries that each prevent a failed `migrate --force`. **Version:** `2026_09_20_000001_add_contact_details_to_events_table` adds three columns with `->after()`, which forfeits `ALGORITHM=INSTANT` below MySQL 8.0.29 and rebuilds `events` instead. Above it, this is free. **Row size:** three migrations widen `roles`, which is already near MySQL's 65,535-byte limit (171 columns - see `2026_09_07_000000`). One is a `json` column (stored off-page, ~12 bytes toward the limit) and two are `TINYINT`, so this almost certainly fits - but `Row size too large` at ALTER time aborts the whole deploy. |
 
-### The three things that need production data
+#### The three things that need production data
 
 None of them need a command, and none of them are reachable from your machine - the production
 database is not exposed to it. They are answered where the data already is:
@@ -220,22 +779,7 @@ database is not exposed to it. They are answered where the data already is:
   service's start command, so a slow migration surfaces there as a slow deploy rather than as a
   silent risk.
 
-Production config for the hosted install IS the app spec - there is no `.env` on the container.
-The console's spec editor shows it, and this reads it without a browser:
-
-```bash
-TOKEN=$(grep '^DO_API_TOKEN=' .env | cut -d= -f2- | tr -d '"')
-APPID=$(grep '^DO_APP_ID=' .env | cut -d= -f2- | tr -d '"')
-curl -s -H "Authorization: Bearer $TOKEN" "https://api.digitalocean.com/v2/apps/$APPID" \
-  | jq -r '.app.spec.envs[] | "\(.key)=\(.value)"' | sort
-```
-
-> **Never commit an app spec to this repo, and never `doctl apps update --spec` from a stored
-> file.** `DigitalOceanService::syncDomains()` reads the live spec and PUTs it back at runtime to
-> add and remove customer custom domains. Applying an older spec deletes every domain added since
-> it was captured. The console's spec editor is safe because it loads the live spec first.
-
-## The runbook
+### The runbook
 
 Each step carries its own verification and its own undo. Do not advance past a failed
 verification.
@@ -265,7 +809,7 @@ has one of its own: never between 00:00 and 00:05 UTC):
   deliberately so: step 8 has to follow step 7 *within the same hour*, so a 23:02 start puts step
   8 on top of the 00:00 daily block - the exact collision the rule exists to prevent.
 
-### 1. Create the backups bucket - [one-time] [DO infra]
+#### 1. Create the backups bucket - [one-time] [DO infra]
 
 A **new Spaces bucket**, distinct from `DO_SPACES_BUCKET`.
 
@@ -294,7 +838,7 @@ and phone number. `BACKUP_SPACES_BUCKET` deliberately has no fallback, and
 
 *Undo:* delete the bucket. Nothing references it yet.
 
-### 2. Deploy `main` on its own - [DO deploy]
+#### 2. Deploy `main` on its own - [DO deploy]
 
 Console, then Deploy. This runs `migrate --force` (21 migrations) and ships all the code.
 
@@ -320,7 +864,7 @@ curl -sI 'https://eventschedule.com/pricing?lang=fr'
 *Undo:* console rollback to the deployment ID from P3. Note the two irreversible migrations from
 P1: a rollback restores code, not data.
 
-### 3. Backfill the image derivatives - [one-time] [console command]
+#### 3. Backfill the image derivatives - [one-time] [console command]
 
 Do this **before** the Cloudflare rule, or cached HTML will reference the original flyers for up
 to 10 minutes. The homepage poster wall was 18 MB of originals and a 28.7 s mobile LCP; the fix
@@ -417,7 +961,7 @@ shows the `.gif` itself, with no `srcset`, on its own page, and a `_w480.webp` s
 
 *Undo:* none needed; a missing variant falls back to the original.
 
-### 4. Cloudflare Cache Rule - [one-time] [Cloudflare dashboard]
+#### 4. Cloudflare Cache Rule - [one-time] [Cloudflare dashboard]
 
 Rules, then Cache Rules, then Create rule. Name `Marketing HTML edge cache`. Confirm the page
 header reads **Cache Rules** and not **Cache Response Rules**, which is a different and newer
@@ -519,7 +1063,7 @@ Match: `(http.host eq "www.eventschedule.com")`. Then, as a Dynamic redirect:
 It has to sit ahead of whatever performs the `www` to apex redirect today, and it needs the HTTP
 (port 80) scheme included - that inclusion is what removes the extra hop.
 
-### 5. Set `BACKUP_*` and `CACHE_STORE` - [one-time] [DO app spec, one save]
+#### 5. Set `BACKUP_*` and `CACHE_STORE` - [one-time] [DO app spec, one save]
 
 App-level environment variables, saved together so they cost one redeploy:
 
@@ -579,7 +1123,7 @@ the queue to the worker, which is exactly when it can.
 where the worker is parked on `sleep infinity` and runs nothing. From step 7 onward this is
 effectively one-way: removing it re-introduces the double-charge and double-translate hazard.
 
-### 6. Create the `scheduler` worker, parked - [one-time] [DO console]
+#### 6. Create the `scheduler` worker, parked - [one-time] [DO console]
 
 Create, then Create Component, then **Worker**.
 
@@ -622,7 +1166,7 @@ early.
 
 *Undo:* delete the component. It runs nothing, so nothing else is affected.
 
-### 7. Go live: switch the run command - [one-time] [DO console]
+#### 7. Go live: switch the run command - [one-time] [DO console]
 
 **Timing: start between :02 and :20 past the hour, and not during the 23:00 or 00:00 UTC hours.**
 Just after the hour means the hourly tier has just fired on both rails and the daily tasks are
@@ -656,7 +1200,7 @@ carry the same value, but only as a hover tooltip, so it is unreadable on a phon
 
 *Undo:* set the run command back to `sleep infinity`.
 
-### 8. Disable the external cron - [one-time] [external, within the same hour as step 7]
+#### 8. Disable the external cron - [one-time] [external, within the same hour as step 7]
 
 **Disable, do not delete.** Re-enabling must be one click.
 
@@ -673,7 +1217,7 @@ so a delayed dispatch does not read as one. `/admin` should carry no new alerts.
 
 *Undo:* re-enable the cron and park the worker. A few duplicate emails beats a stopped scheduler.
 
-### 9. Restate the docs - [one-time] [code]
+#### 9. Restate the docs - [one-time] [code]
 
 Once verified, turn the two "still to do" claims into fact:
 
@@ -682,7 +1226,7 @@ Once verified, turn the two "still to do" claims into fact:
 - [`DIGITALOCEAN_WORKER.md`](DIGITALOCEAN_WORKER.md), section 2 prerequisites and the section 4
   cutover table, annotated as applied.
 
-## Verification after the cutover
+### Verification after the cutover
 
 Nothing here is a command. Two pages and one browser check:
 
@@ -712,9 +1256,9 @@ Then the things a page cannot tell you:
 For an urgent marketing fix, purge the zone after the deploy finishes. Automating a zone purge
 from the release flow is a known un-wired follow-up.
 
-## If something goes wrong
+### If something goes wrong
 
-### "Scheduled tasks are not running"
+#### "Scheduled tasks are not running"
 
 Expect this alert **between step 6 and step 7** - it is not a fault there. `SchedulerHealth::isStalled()`
 treats an expected rail that has never been seen as stalled, and a worker parked on
@@ -744,7 +1288,7 @@ without leaving the page:
 4. **Worker logs, then the per-task list on `/admin/queue`**, which names the individual task
    rather than just reporting that something is wrong.
 
-### Emergency fallback to the HTTP cron
+#### Emergency fallback to the HTTP cron
 
 The one recovery path that does not require fixing the worker. Restore `APP_CRON_SECRET` to a
 known value and re-enable the external cron against `GET /translate_data?secret=...` once a
@@ -756,7 +1300,7 @@ If both rails end up live for more than a few minutes, re-read step 8: most comm
 idempotent through row-level watermarks, but the subscription reminders, the three `app:notify-*`
 commands and both blog generators will duplicate mail and spend.
 
-### Restarting the worker
+#### Restarting the worker
 
 Console, the `scheduler` component, Actions, Restart. A deploy does the same thing.
 
@@ -765,7 +1309,7 @@ Console, the `scheduler` component, Actions, Restart. A deploy does the same thi
 worst case is one skipped run - but it is a reason to avoid restarting at the top of an hour if
 you have the choice.
 
-### Where to look
+#### Where to look
 
 The worker's **runtime log in the App Platform console** is the real log. `schedule:work` streams
 each `schedule:run` subprocess's output there, so a healthy worker shows a `Running [...] DONE`
@@ -782,7 +1326,7 @@ before the `Running [...]` line, so a wedged task is indistinguishable from one 
 The per-task list on `/admin/queue` is the only place it shows, and it ages from the last
 *completion* rather than the last start.
 
-## Watch for a week
+### Watch for a week
 
 - **Worker memory.** `app:send-graphic-emails` can raise `memory_limit` toward 512 MB, the whole
   box.
@@ -828,424 +1372,28 @@ The per-task list on `/admin/queue` is the only place it shows, and it ages from
   payment configuration and sales for that schedule's events. Intended, but it is a data-visibility
   change that takes effect the moment the code ships.
 
-## Federation onboarding (ships with v1.0.132)
-
-Approving a federated install now emails its operator a welcome with the steps to list their
-schedules (`FederationWelcomeService`), and selfhost installs get one-click listing. The order
-matters:
-
-1. **Deploy the nexus.** Approvals from then on send the welcome. Migration
-   `2026_09_17_000004` adds `federated_instances.welcomed_at` and `locale`; existing rows stay
-   null, which is what makes the admin screen offer them the welcome.
-2. **Publish the selfhost release** with `config/self-update.php` at the version in
-   `FederatedInstance::ONE_CLICK_LISTING_VERSION` (`v1.0.132`). If the release goes out under a
-   different number, change the constant with it: the email picks its step-one copy and its
-   update tip from it. The tip never names a version newer than the nexus's own
-   `version_installed`, so it stays hidden until step 2's version bump is deployed.
-3. **Redeploy the nexus with that version bump**, or the welcomes below go out without the update
-   tip (it only names a version the nexus itself has reached).
-4. **Only then welcome the installs approved before this shipped**: `/admin/federation?status=approved`,
-   "Preview welcome email" first, then "Send welcome email" on each row, or tick them and use the
-   bulk button, which skips anyone already welcomed. Approved rows with nothing live carry a
-   "No listings yet" pill. Give updated installs an hour first: they report their version on
-   their next sync, and the welcome picks its step one from it.
-
-Watch for:
-
-- **Pending installs are no longer pruned while they still check in.** A registration that never
-  sent an event is only dropped once it has also been quiet for three days. Approve an empty
-  install (it gets the setup steps) or suspend it; the pending queue caps at 500.
-- **Suspended installs are never deleted any more**, only their listings, once quiet for 60 days,
-  so a suspension cannot be undone by the automatic reconnect below.
-- **Deleted installs come back.** An install that gets a 403 re-registers on its next hourly run
-  and reappears as a fresh pending row. Suspend, rather than delete, to keep one out. Suspended
-  rows the old pruning deleted can return the same way; a pending row on the host of a suspended
-  one carries a warning panel.
-- **Installs re-register once after updating.** Each updated install sends its contact address
-  again on its first hourly run (it now remembers what the network last accepted). An unchanged
-  address mails nothing, but an install whose site address has changed since it joined goes back
-  to review at that point - by design, a moved host is a new review.
-- **Versions now arrive on every sync.** The admin rows show what each install is actually
-  running, not what it ran when it registered.
-- **Suspending an unreviewed registration sends no email.** Junk registrations carry
-  attacker-chosen names and addresses, so only installs that were welcomed are told.
-- **The Flagged tab now has two shapes, and they drain differently.** A row showing two
-  addresses is a live claim: press Accept new address to adopt it, or Suspend to reject it.
-  A row showing only the address on record has nothing to adopt - check that address is
-  genuine and press Mark as reviewed (or tick it and press Approve selected, which is the
-  same operation). Before this, that second shape offered nothing but Suspend, so the
-  dashboard's "changed its address" alert could not be cleared without dropping the install
-  off the network and mailing its operator twice to put it back.
-
-## SEO round 3 and its fixes (the 66 commits after v1.0.132)
-
-The commits are `git log v1.0.132..8e02425f0`. They cover three things.
-
-**Guest-page SEO:**
-- one canonical per recurring series;
-- one indexability rule behind the sitemaps and the robots tag;
-- real titles, descriptions and structured data;
-- resized headers and backgrounds.
-
-**New marketing pages:** the ticket fee calculator, booking requests, the event landing page, and
-four comparison pages.
-
-**The fixes its review found,** including older bugs of the same kinds:
-- the hourly demo reset deleting real `demo-*` schedules along with their events' sales;
-- one schedule deleting another's image files, and CSS injection;
-- `javascript:` links;
-- hidden schedules, password events and appointment bookings showing on public pages;
-- about 60 corrected public claims.
-
-**One migration, and it is cheap.** `2026_09_24_000000_add_banner_image_variants_to_roles` adds
-two nullable `json` columns at the end of `roles`, with no `->after()`, so it runs INSTANT. JSON is
-stored off-page, so P11's row-size concern does not apply.
-
-**No new env vars, no new scheduled commands.** CI passed on `8e02425f0` (run 36117719257): the
-feature tests, Dusk and the security audit.
-
-### Before the deploy - read-only
-
-P1 (snapshot) and P3 (app spec) apply as always. Then four queries. None of them blocks the
-deploy; each tells you what the old code has already done.
-
-**Q1. Real schedules on a `demo-` address.**
-
-```sql
-SELECT r.id, r.subdomain, r.name, r.created_at
-FROM roles r
-LEFT JOIN users u ON u.id = r.user_id
-WHERE r.subdomain LIKE 'demo-%'
-  AND r.subdomain <> 'simpsons'
-  AND (u.email IS NULL OR u.email <> 'contact@eventschedule.com');
-```
-
-`contact@eventschedule.com` is `DemoService::DEMO_EMAIL`.
-- On v1.0.132, `app:setup-demo` deletes every `demo-*` schedule within the hour, along with the
-  tickets and sales of every event attached to one. So this can only show schedules created since
-  the last run.
-- Any row at all means real customers are hitting this, and earlier ones were already deleted.
-  Check the support inbox, and restore from the P1 snapshot or the backups.
-- Deploying stops the deletions.
-
-**Q2. Image files shared between rows.**
-
-```sql
-SELECT name, COUNT(*) AS uses,
-       GROUP_CONCAT(CONCAT(col, '#', id) ORDER BY col, id SEPARATOR ', ') AS used_by
-FROM (
-    SELECT profile_image_url COLLATE utf8mb4_bin AS name, 'roles.profile_image_url' AS col, id FROM roles
-    UNION ALL SELECT header_image_url COLLATE utf8mb4_bin, 'roles.header_image_url', id FROM roles
-    UNION ALL SELECT background_image_url COLLATE utf8mb4_bin, 'roles.background_image_url', id FROM roles
-    UNION ALL SELECT flyer_image_url COLLATE utf8mb4_bin, 'events.flyer_image_url', id FROM events
-) AS image
-WHERE name IS NOT NULL AND name <> '' AND name NOT LIKE 'demo\_%' AND name NOT LIKE 'http%'
-GROUP BY name HAVING COUNT(*) > 1 ORDER BY uses DESC, name;
-```
-
-Rows listed together share one file, so replacing or deleting the image on one of them deletes the
-other's. A same-install backup restore produced these legitimately before this release. The
-release stops new sharing, but existing pairs stay shared until every row but one gets its own
-copy of the file.
-
-**Q3. Stored `..` paths.**
-
-```sql
-SELECT 'roles' AS tbl, id FROM roles
- WHERE CONCAT_WS('|', profile_image_url, header_image_url, background_image_url, sponsor_logos) LIKE '%..%'
-UNION ALL
-SELECT 'events', id FROM events
- WHERE CONCAT_WS('|', flyer_image_url, agenda_image_url, sponsor_logos) LIKE '%..%'
-UNION ALL
-SELECT 'users', id FROM users WHERE profile_image_url LIKE '%..%';
-```
-
-A row here came from an older or hand-edited backup restore. `Storage::delete()` resolves `..`, so
-clear the value.
-
-**Q4. Appointment bookings stored as listed.**
-
-```sql
-SELECT COUNT(*) AS bookings_not_unlisted
-FROM events
-WHERE appointment_type_id IS NOT NULL AND is_private = 0;
-```
-
-A booking is named after its guest, and the public lists hide an event only for being unlisted. The
-event's saving hook now keeps every booking unlisted, but it fixes an existing row only on its next
-save. To fix them all now, from the console:
-
-```
-php artisan tinker
-> App\Models\Event::whereNotNull('appointment_type_id')->where('is_private', false)->get()->each->save();
-```
-
-### Deploy
-
-Runbook step 2: Console, then Deploy.
-
-**Verify:**
-- The log shows the one migration done, and the deployment is `ACTIVE`.
-- `/admin` shows no new alerts, and `/admin/queue` no failed-job spike.
-- Spot-check the homepage, a schedule page, an event page and checkout.
-
-### Right after the deploy
-
-1. **Backfill the image derivatives.** Run runbook step 3's schedule-image, dimensions and
-   animation commands, in that step's order. The flyer commands at the top of the step already ran
-   for v1.0.130, and re-running them is harmless because they resume.
-
-   ```
-   php artisan images:backfill-variants --roles --slot=background
-   php artisan images:backfill-variants --roles --slot=header
-   php artisan images:backfill-variants --roles
-   php artisan images:backfill-variants --dimensions
-   php artisan images:backfill-variants --roles --slot=all --dimensions
-   php artisan images:backfill-variants --animated
-   php artisan images:backfill-variants --roles --slot=all --animated
-   ```
-
-   Until the `--animated` pair runs, an existing animated flyer shows as a still on its own event
-   page.
-2. **Drop the old sitemap index.** `sitemap:sections:{APP_URL}` is served fresh for an hour and
-   stale for two more, and its key did not change. So on the database cache store (runbook step 5
-   done) the index can list the old code's ranges for up to 3 hours. Forget it:
-
-   ```
-   php artisan cache:forget "sitemap:sections:https://eventschedule.com"
-   ```
-
-   On the `file` store there is nothing to do: the new web container started with an empty cache.
-   A console container could not reach that cache anyway.
-3. **Purge Cloudflare,** if the step 4 rule is live. The corrected copy and the new pages are then
-   served now, instead of within 10 minutes plus serve-stale.
-
-**Verify:**
-- `curl -s https://eventschedule.com/robots.txt` lists `/ticket/view/`, `/appointment/view/` and
-  `/feedback/`.
-- A schedule host's robots.txt lists `/ticket/view/` but not `/feedback/`. There `/feedback/{id}`
-  can be a real event page.
-- `/sitemap.xml` answers 200, and an events child lists each recurring series once, at its undated
-  URL.
-- A dated occurrence of a recurring event carries the series' undated URL as its canonical.
-- After the `--animated` run, an event with an animated GIF flyer shows the `.gif` itself on its
-  page.
-- The new pages answer 200:
-  - `/ticket-fee-calculator`
-  - `/features/booking-requests`
-  - `/event-landing-page`
-  - `/ticketleap-alternative`
-  - `/songkick-alternative`
-  - `/allevents-alternative`
-  - `/universe-alternative`
-
-### Search Console over the next weeks
-
-Resubmitting `sitemap.xml` is optional; Google re-reads it anyway.
-
-**Expected, and not a regression:**
-- **Fewer submitted URLs.** Events drop out 30 days after they end, sub-schedules are no longer
-  listed, and one-off rows from a calendar sync collapse to one URL each.
-- **"Alternate page with proper canonical tag"** grows as the dated URLs of recurring events point
-  at their series.
-- **"Excluded by 'noindex' tag"** now covers:
-  - the submit, import, booking-request, gift-card, carpool and password pages;
-  - `/examples`;
-  - `/search`.
-- **"Blocked by robots.txt"** now covers the ticket, subscription, newsletter and appointment
-  links.
-
-**Worth a look if it moves:**
-- "Server error (5xx)" should stay at zero.
-- "Duplicate, Google chose different canonical than user" should fall.
-- Watch the Events rich-result report for new errors. Run the Rich Results Test on one event page
-  and one schedule page.
-
-### What users will notice - tell support
-
-- **Reserved schedule names.** 187 route words are now reserved.
-  - A new schedule named exactly "Store" or "Feedback" gets a random address.
-  - Renaming a schedule onto one of them gives a random address, as any reserved name always has.
-  - Existing schedules that hold one keep it.
-- **Slugs that collide with routes.** A new or retyped event slug that is a route word gets
-  `-event`, and a sub-schedule slug gets `-schedule`. Existing slugs stay until they are changed.
-- **Registration links.** One that is not a web address is cleared on the event's next save.
-  Until then the page shows no registration button for it.
-- **Online events.** Free-text join details show as "Online" on public pages. Ticket holders and
-  booked guests still see them in full.
-- **Appointment bookings** are always unlisted, and their event page is visible only to the
-  schedule's members.
-- **Deleted and unpublished schedules** answer every guest route as an unknown address does. Their
-  members are taken into the app instead.
-- **Password events** no longer appear in graphics or the carousel, for members too.
-- **AI images.** One generated just before the deploy may ask to be generated again: the name it
-  was issued under lived in the cache.
-- **White-label.** `twitter:site` is gone from guest pages.
-
-### Undo
-
-Console rollback to the v1.0.132 deployment ID from P3.
-
-**Safe for data:**
-- The old code ignores the two new `roles` columns and the new `animated` key in the image
-  variant JSON.
-- It reads everything the new code normalized without trouble: registration links, unlisted
-  bookings and suffixed slugs.
-
-**But a rollback reopens every hole this release closes,** starting with the hourly deletion of
-real `demo-*` schedules. Prefer fixing forward.
-
-### Selfhost
-
-The same code reaches selfhosters with the next GitHub release.
-- Make the usual "Update version" commit (`config/self-update.php`, `build.yml`) after the hosted
-  soak, and write the release notes by the process in `CLAUDE.md`.
-- The migration runs inline in `AppUpdateService` and is trivial.
-- **Selfhost-specific:**
-  - robots.txt gains wildcards for the path-routed secret links (`/*/promo/`,
-    `/*/checkout/success/`, `/*/gift-cards/payment/` and so on);
-  - the reserved names matter most there, because schedules share the path space with the app's
-    routes.
-
-## Conversion, churn and owner emails (the commits after `8e02425f0`)
-
-**What ships:**
-- the paid-ticket paywall shown as a price is typed, and counted (`hit_ticket_paywall`);
-- a card-free 7-day selling trial (`roles.ticket_trial_ends_at`, paid selling only, not Pro);
-- cancellation reasons (`subscription_cancellations`), from the plan tab and the Stripe webhooks;
-- two owner emails that start sending on their own: the activation nudges and the weekly digest.
-
-**Four migrations, all cheap.** Two nullable columns at the end of `users` and `roles` (no
-`->after()`, so INSTANT) and two new tables, `subscription_cancellations` and `owner_digests`.
-No new env vars.
-
-**Two new scheduled entries, hourly on both rails:** `app-send-activation-nudges` and
-`app-send-owner-digests`. Neither has ever run on production. Each sends to an owner only in
-their own local morning (the digest only on Monday), and the nudges are paced to one per owner
-per week, never within two days of their digest. From the 2026-09-28 growth export, expect:
-- **nudges:** up to about 100 owners over the first day, mostly `no_ticket_type` and
-  `no_ticket_type_free`, then a trickle;
-- **digests:** about 110 owners on the first Monday after the deploy.
-
-### Before the deploy
-
-- Take a growth export (`/admin/growth`, Download). The last one is from before the Pro-only
-  selling change and this release, so it is the baseline for both. If the growth data pull below
-  is already live, the button is gone: run `php artisan app:pull-growth` instead.
-- In the Stripe dashboard, turn on **cancellation reason** in the customer portal settings, or
-  portal cancels arrive with no reason.
-
-### After the deploy
-
-- **The next morning,** open `/admin/growth`. The Activation nudges card should list keys with
-  counts in line with the estimates above. The digests row fills in after the first Monday.
-- **If the nudges card still says none were sent a day later,** the scheduler is not reaching
-  the command: check the Scheduler card on `/admin/queue`.
-- **To stop either email at once,** comment out its `Schedule::call` in `routes/console.php` and
-  its call in `AppController::translateData()` (`CronRailSyncTest` requires both), then deploy.
-  There is no kill switch in settings.
-
-## Realtime (`/admin/realtime`)
-
-**What ships:** a live view of who is on the site, fed by a small beacon on every page
-(`POST /api/realtime`). On by default here; off by default on every other install. The privacy
-policy, the cookie banner copy and the `/features/analytics` page were updated in the same commits, so
-they must ship together - do not deploy the code without them.
-
-**The cookie banner:** realtime needs it, so it now shows wherever it did not already. If
-`ANALYTICS_ID` is set in the app spec, the banner is already shown and nothing changes; otherwise
-this release starts showing it (never inside embedded calendars).
-
-**Two migrations:** a new `realtime_hits` table (instant), and an `(action, created_at)` index on
-`audit_logs` for the Activity card. The index build reads the whole table inside the start
-command's `migrate --force`, so first run `SELECT COUNT(*) FROM audit_logs` (it is pruned to 90
-days). If it is large, run `2026_10_01_000001_add_action_created_at_index_to_audit_logs` by hand
-from the console before Deploy, as P2 and P9 do. No new env vars.
-
-**Decide before deploying:** the privacy policy promises an email notice for material changes
-(`privacy.blade.php`, "Changes to this policy"). Identified page-level records for visitors who
-accept cookies are arguably one; decide whether this release sends that notice.
-
-**One new scheduled entry, every five minutes on both rails:** `realtime-prune`, which deletes
-page views about an hour after the visitor's last activity. That deletion is what makes the
-privacy policy true; `AdminAlertService` raises `realtime_prune_stalled` if a row ever outlives two
-hours.
-
-### After the deploy
-
-- Open `/admin/realtime` in one tab and the site in a private window; accept cookies there and
-  watch yourself appear within ten seconds. Decline in another window and you should appear only as
-  a gray "not identified" page view.
-- Cached marketing pages start reporting within ten minutes (or purge Cloudflare): pages cached
-  before the deploy carry no beacon, so expect no marketing-site rows at all until they expire.
-- Check the country column fills in (Cloudflare's `CF-IPCountry`, else GeoIP).
-- `curl -sI https://eventschedule.com/pricing` still shows `cf-cache-status: HIT` and no
-  `set-cookie`.
-- In Cloudflare **Security > Events**, make sure `POST /api/realtime` is not being challenged:
-  a challenged beacon fails silently and the page just looks empty.
-- After an hour, `realtime_hits` should hold roughly an hour of rows and no more.
-
-### To stop it
-
-Switch it off at `/admin/settings#realtime`. That deletes every row at once, and beacons from
-pages still cached at the edge are dropped by the endpoint.
-
-## Growth data pull (`/api/internal/growth`)
-
-**What ships:**
-- The `/admin/growth` Download button is replaced by a token-secured endpoint. Pull from your
-  machine with `php artisan app:pull-growth` (see `docs/GROWTH_DATA.md`).
-- The payload moves to `schema_version` 8:
-  - attribution values are anonymised;
-  - "paying" means billing, not the tier;
-  - sales go to the seller instead of every listed schedule;
-  - ids are 12 characters, so they do not match older pulls.
-- `audit:prune` now keeps the subscription, plan, trial, claim and gateway or calendar connection
-  rows forever.
-- Then `schema_version` 9 adds:
-  - `daily` series and `meta.releases`, so changes can be dated to the deploy;
-  - nudge outcomes;
-  - the audience side (buyers, attendees who became organizers, weekly reach);
-  - feature usage, payment gateways and activity buckets per row;
-  - geography, boost revenue, referrals and federated installs.
-
-  `meta.releases` fills from the first scheduler tick after this deploy, so it is empty before it.
-
-**No migrations.** `GROWTH_DATA_TOKEN` is new and optional: unset, the endpoint answers 404.
-
-### Before the deploy
-
-- Take a last pull with the old Download button if you want a schema-7 baseline. It disappears
-  with this release.
-
-### After the deploy
-
-1. Generate a token with `openssl rand -hex 32`.
-2. Add it in the DigitalOcean console as an **encrypted, app-level** env var named
-   `GROWTH_DATA_TOKEN`. Use the console, not a spec file, which would wipe the custom domains.
-   Then deploy again so the container picks it up.
-3. Put the same value in your local `.env` as `GROWTH_DATA_TOKEN`.
-4. Run `php artisan app:pull-growth`. It names the failure if anything is off:
-   - a **404** means the token is not live on the server yet;
-   - a **403 HTML page** means Cloudflare challenged the request. Add a WAF skip rule for
-     `/api/internal/growth`.
-5. `/admin` &rarr; Audit log shows an `admin.growth_data_pull` row per pull, with its duration and
-   peak memory. Watch `peak_memory_mb` against the 128MB FPM worker as the install grows.
-
 ## Selfhost release
 
-Cutting v1.0.130 for selfhosters is deliberately **not** part of the hosted deploy. Do it after
-the hosted soak.
+Cutting a GitHub release for selfhosters is deliberately **not** part of a hosted deploy. Do it
+after the hosted soak of the version it carries.
 
-The version is already bumped in `config/self-update.php` and `.github/workflows/build.yml`.
-`build.yml` is `workflow_dispatch` only and has no `needs:` on the test workflow, so publishing
-does not re-run the suite.
-
-Before publishing, note that `AppUpdateService::performUpdate()` runs `migrate --force` **inline
-in the web request**, and this release's 21 migrations include the irreversible
-`federated_events.event_url` drop. Release notes follow the process in `CLAUDE.md`.
+- **The version bump.** Make the "Update version" commit (`config/self-update.php` and
+  `.github/workflows/build.yml`) if it is not already there.
+- **Release notes.** Write them by the process in `CLAUDE.md`.
+- **Publish from a commit CI has passed.** `build.yml` is `workflow_dispatch` only and has no
+  `needs:` on the test workflow, so publishing does not re-run the suite.
+- **Read the version's migrations as a selfhoster would meet them.**
+  `AppUpdateService::performUpdate()` runs `migrate --force` **inline in the web request** on each
+  install, on whatever MySQL the operator runs. v1.0.130's 21 included the irreversible
+  `federated_events.event_url` drop.
+- **Per-version selfhost notes:**
+  - v1.0.133 [SEO round 3](#seo-round-3-and-its-fixes) has its own.
+  - v1.0.132 [Federation onboarding](#federation-onboarding) ties
+    `FederatedInstance::ONE_CLICK_LISTING_VERSION` to the published version.
 
 ## Deferred
+
+Left over from the v1.0.130 cutover:
 
 - Rotating `APP_CRON_SECRET`. Set a new value on the app spec and confirm
   `GET /translate_data?secret=<old>` returns 403; the undo is restoring the previous secret. It
@@ -1254,7 +1402,7 @@ in the web request**, and this release's 21 migrations include the irreversible
 - Adding `php artisan translations:publish --no-prune || true` to the *web* service's run command.
   Same gap, predates this change, and it edits the live service spec.
 - The resident `queue:work` supervisor. It would also require removing `process-queue` from
-  `routes/console.php` while keeping it on the HTTP rail, . Note the blocker is not the test suite:
+  `routes/console.php` while keeping it on the HTTP rail. Note the blocker is not the test suite:
   `CronRailSyncTest::commandsIn()` strips every `queue:*` command, so removing `process-queue`
   from one rail passes all four sync tests. The reason to be careful is the behaviour, not a
   guard rail that would catch you.
