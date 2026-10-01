@@ -80,6 +80,25 @@ class GrowthSummaryTest extends TestCase
         $this->assertSame(6095.0, $this->value($kpis, 'Ticket GMV RON, 2026-09'));
     }
 
+    /** The rolling KPIs read the trailing 30 days of daily[], not all of it. */
+    public function test_rolling_kpis_sum_the_trailing_window(): void
+    {
+        $rows = [];
+        foreach (range(1, 40) as $n) {
+            $rows[] = ['2026-09-'.$n, 1, $n === 40 ? 2 : 0];
+        }
+        $pull = $this->pull();
+        $pull['daily'] = ['columns' => ['date', 'paid_orders', 'stripe_connected'], 'rows' => $rows];
+        $pull['buyers'] = [['attendees_who_became_organizers' => 2], ['attendees_who_became_organizers' => 1]];
+
+        $kpis = GrowthSummary::kpis($pull);
+
+        $this->assertSame(30, $this->value($kpis, 'Paid orders, last 30 days'));
+        $this->assertSame(2, $this->value($kpis, 'Stripe Connect completed, last 30 days'));
+        $this->assertSame(3, $this->value($kpis, 'Attendees who became organizers, 12 months'));
+        $this->assertNull($this->value(GrowthSummary::kpis($this->pull()), 'Paid orders, last 30 days'), 'absent before schema 9');
+    }
+
     /** An older pull lacks newer fields: they read as unknown, never as a zero. */
     public function test_a_field_an_older_schema_lacks_is_unknown_not_zero(): void
     {

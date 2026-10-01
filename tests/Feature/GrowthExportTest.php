@@ -112,9 +112,10 @@ class GrowthExportTest extends TestCase
         $this->assertArrayHasKey('schedules', $data);
         // 3 since the claims section landed, 6 since gmv_recent_by_currency and the demo-free
         // gmv_by_currency, 7 since mrr came from RecurringRevenue, 8 since paying meant billing,
-        // sales went to the seller and attribution was anonymised. Bumping this is deliberate: a
-        // reader diffing two pulls needs to know the shape (or the meaning) moved.
-        $this->assertSame(8, $data['meta']['schema_version']);
+        // sales went to the seller and attribution was anonymised, 9 since the daily, nudge
+        // outcome, audience, reach and adoption data. Bumping this is deliberate: a reader diffing
+        // two pulls needs to know the shape (or the meaning) moved.
+        $this->assertSame(9, $data['meta']['schema_version']);
         $this->assertSame(GrowthExportService::SCHEMA_VERSION, $data['meta']['schema_version']);
         $this->assertSame(now()->format('Y-m'), $data['meta']['partial_month']['month']);
         $this->assertSame(['funnel', 'funnel_trend'], $data['meta']['range_applies_to']);
@@ -1429,6 +1430,234 @@ class GrowthExportTest extends TestCase
         foreach ($trend['periods'] as $period) {
             $this->assertMatchesRegularExpression('/^\d{4}-W\d{2}$/', $period);
         }
+    }
+
+    // ---------------------------------------------------------------------
+    // Schema 9: new data
+    // ---------------------------------------------------------------------
+
+    /** daily[]'s row for one date, as metric => count. */
+    private function dailyRow(array $data, string $date): array
+    {
+        $row = collect($data['daily']['rows'])->firstWhere(0, $date);
+        $this->assertNotNull($row, "no daily row for {$date}");
+
+        return array_combine($data['daily']['columns'], $row);
+    }
+
+    /**
+     * Monthly figures could not place a conversion either side of a mid-month change. daily[] dates
+     * each first step to the day, and only the FIRST: an older schedule's owner adding another
+     * schedule today is not a first schedule.
+     */
+    public function test_daily_dates_each_first_step_to_the_day(): void
+    {
+        $role = $this->freeRole();
+        $event = $this->createEvent($role);
+        $ticket = $this->createTicket($event, ['price' => 20, 'quantity' => 100]);
+        $this->createSale($event, $role, ['status' => 'paid', 'payment_amount' => 20], $ticket, 1);
+
+        $veteran = $this->createOwner();
+        $old = $this->freeRole($veteran);
+        DB::table('roles')->where('id', $old->id)->update(['created_at' => now()->subDays(400)]);
+        DB::table('users')->where('id', $veteran->id)->update(['created_at' => now()->subDays(400)]);
+        $this->freeRole($veteran);
+
+        $data = $this->build();
+        $today = $this->dailyRow($data, now()->toDateString());
+
+        $this->assertCount(180, $data['daily']['rows']);
+        $this->assertSame(1, $today['signups_organizer'], 'the veteran signed up 400 days ago');
+        $this->assertSame(1, $today['first_schedule'], 'the veteran\'s second schedule is not a first');
+        $this->assertSame(1, $today['first_event']);
+        $this->assertSame(1, $today['first_ticket_type']);
+        $this->assertSame(1, $today['first_paid_ticket_type']);
+        $this->assertSame(1, $today['first_paid_sale']);
+        $this->assertSame(1, $today['paid_orders']);
+    }
+
+    /**
+     * What followed a nudge, within 14 days, counted only once the 14 days have passed - so the
+     * newest nudges cannot read as failures.
+     */
+    public function test_nudge_outcomes_count_only_what_followed_within_the_window(): void
+    {
+        $acted = $this->freeRole();
+        $late = $this->freeRole();
+        $fresh = $this->freeRole();
+        foreach ([[$acted, 20], [$late, 20], [$fresh, 3]] as [$role, $daysAgo]) {
+            DB::table('schedule_nudges')->insert(['role_id' => $role->id, 'nudge_key' => 'no_ticket_type_free', 'created_at' => now()->subDays($daysAgo)]);
+        }
+
+        $event = $this->createEvent($acted, ['creator_role_id' => $acted->id]);
+        DB::table('events')->where('id', $event->id)->update(['created_at' => now()->subDays(10)]);
+        $ticket = $this->createTicket($event, ['price' => 10, 'quantity' => 10]);
+        DB::table('tickets')->where('id', $ticket->id)->update(['created_at' => now()->subDays(10)]);
+
+        $tooLate = $this->createEvent($late, ['creator_role_id' => $late->id]);
+        DB::table('events')->where('id', $tooLate->id)->update(['created_at' => now()->subDays(2)]);
+        $this->createEvent($fresh, ['creator_role_id' => $fresh->id]);
+
+        $outcome = $this->build()['nudge_outcomes']['no_ticket_type_free'];
+
+        $this->assertSame(3, $outcome['sent']);
+        $this->assertSame(2, $outcome['matured'], 'a 3-day-old nudge has not had its 14 days');
+        $this->assertSame(1, $outcome['acted_event'], 'an event 18 days after the nudge is outside the window');
+        $this->assertSame(1, $outcome['acted_ticket_type']);
+        $this->assertSame(0, $outcome['acted_paid_sale']);
+    }
+
+    /**
+     * The audience side: a fan buying again is a returning buyer, and an attendee whose account
+     * goes on to make a schedule is the viral loop the payload had no way to see.
+     */
+    public function test_buyers_count_returning_fans_and_attendees_who_became_organizers(): void
+    {
+        $role = $this->freeRole();
+        $event = $this->createEvent($role);
+        $ticket = $this->createTicket($event, ['price' => 15, 'quantity' => 100]);
+
+        $earlier = $this->createSale($event, $role, ['status' => 'paid', 'payment_amount' => 15, 'email' => 'fan@fans.test'], $ticket, 1);
+        DB::table('sales')->where('id', $earlier->id)->update(['paid_at' => now()->startOfMonth()->subMonths(2)->addDays(3)]);
+        $this->createSale($event, $role, ['status' => 'paid', 'payment_amount' => 15, 'email' => ' Fan@Fans.test'], $ticket, 1);
+        $this->createSale($event, $role, ['status' => 'paid', 'payment_method' => 'rsvp', 'email' => 'newbie@fans.test']);
+
+        $newbie = $this->createOwner();
+        DB::table('users')->where('id', $newbie->id)->update(['email' => 'newbie@fans.test']);
+        $theirs = $this->freeRole($newbie);
+        DB::table('roles')->where('id', $theirs->id)->update(['created_at' => now()->addMinutes(5)]);
+
+        $month = collect($this->build()['buyers'])->firstWhere('month', now()->format('Y-m'));
+
+        $this->assertSame(1, $month['paid_orders']);
+        $this->assertSame(1, $month['buyers'], 'one person, however the address was typed');
+        $this->assertSame(1, $month['returning_buyers']);
+        $this->assertSame(0, $month['new_buyers']);
+        $this->assertSame(1, $month['rsvps']);
+        $this->assertSame(1, $month['new_attendees'], 'the fan first attended two months ago');
+        $this->assertSame(1, $month['attendees_who_became_organizers']);
+    }
+
+    public function test_reach_counts_this_weeks_audience(): void
+    {
+        $role = $this->freeRole();
+        $this->followRole($this->createOwner(), $role);
+        \App\Models\RoleSubscriber::create(['role_id' => $role->id, 'email' => 'reader@fans.test',
+            'confirmed_at' => now(), 'token' => \App\Models\RoleSubscriber::newToken()]);
+        \App\Models\AnalyticsDaily::create(['role_id' => $role->id, 'date' => now()->toDateString(), 'desktop_views' => 7]);
+
+        $reach = $this->build()['reach'];
+        $week = array_combine($reach['columns'], end($reach['rows']));
+
+        $this->assertSame(now()->format('o-\WW'), $week['week']);
+        $this->assertSame(1, $week['followers_added']);
+        $this->assertSame(1, $week['subscribers_added']);
+        $this->assertSame(7, $week['page_views']);
+        $this->assertCount(26, $reach['rows']);
+    }
+
+    public function test_schedule_rows_carry_gateways_sources_and_the_features_actually_used(): void
+    {
+        $owner = $this->createOwner();
+        DB::table('users')->where('id', $owner->id)->update(['stripe_account_id' => 'acct_TEST', 'stripe_completed_at' => now()]);
+        $role = $this->freeRole($owner);
+
+        $own = $this->createEvent($role, ['creator_role_id' => $role->id]);
+        $this->createTicket($own, ['price' => 50, 'quantity' => 10, 'is_pass' => true]);
+        $this->createEvent($role, ['creator_role_id' => $role->id, 'is_guest_submission' => true]);
+
+        $teammate = $this->createOwner();
+        $role->users()->attach($teammate->id, ['level' => 'admin']);
+        $this->followRole($this->createOwner(), $role);
+
+        DB::table('dismissed_next_steps')->insert(['user_id' => $owner->id, 'role_id' => $role->id,
+            'step_type' => 'next_step_tickets', 'created_at' => now(), 'updated_at' => now()]);
+        DB::table('usage_daily')->insert(['date' => now()->toDateString(), 'operation' => 'gemini_parse_event', 'role_id' => $role->id, 'count' => 2]);
+
+        $plain = $this->freeRole();
+
+        $data = $this->build();
+        $row = $this->scheduleRow($data, $role);
+
+        $this->assertSame(['stripe'], $row['gateways']);
+        $this->assertSame(now()->format('Y-m'), $row['stripe_connected_month']);
+        $this->assertSame(['tickets'], $row['dismissed_steps']);
+        $this->assertSame(2, $row['events_by_source']['created']);
+        $this->assertSame(1, $row['events_by_source']['guest']);
+        foreach (['passes', 'team', 'ai_import'] as $flag) {
+            $this->assertContains($flag, $row['features'], "{$flag} was used");
+        }
+
+        $this->assertSame([], $this->scheduleRow($data, $plain)['gateways']);
+        $this->assertNotContains('team', $this->scheduleRow($data, $plain)['features'], 'the owner alone is not a team, and a follower is audience');
+
+        $this->assertSame(['tickets' => ['total' => 1, 'by_month' => [now()->format('Y-m') => 1]]], $data['dismissed_steps']);
+        $this->assertSame(['count' => 2, 'schedules' => 1], $data['usage']['gemini_parse_event'][now()->format('Y-m')]);
+    }
+
+    /** With type, month and plan beside it, a country few schedules share would name them. */
+    public function test_a_country_fewer_than_five_schedules_share_is_hidden(): void
+    {
+        $common = [];
+        foreach (range(1, 5) as $n) {
+            $common[] = $this->freeRole(null, 'venue');
+        }
+        $rare = $this->freeRole(null, 'venue');
+        DB::table('roles')->whereIn('id', array_map(fn ($r) => $r->id, $common))->update(['country_code' => 'us']);
+        DB::table('roles')->where('id', $rare->id)->update(['country_code' => 'IS']);
+
+        $data = $this->build();
+
+        $this->assertSame('US', $this->scheduleRow($data, $common[0])['country']);
+        $this->assertSame('(other)', $this->scheduleRow($data, $rare)['country']);
+        $this->assertSame(5, collect($data['geography'])->firstWhere('country', 'US')['schedules']);
+        $this->assertNull(collect($data['geography'])->firstWhere('country', 'IS'));
+    }
+
+    public function test_signup_rows_carry_bucketed_activity_and_the_variant_they_saw(): void
+    {
+        $referrer = $this->createOwner();
+        $user = $this->createOwner();
+        DB::table('users')->where('id', $user->id)->update(['hero_variant' => 'sell', 'referred_by_user_id' => $referrer->id]);
+
+        foreach (range(1, 3) as $n) {
+            DB::table('audit_logs')->insert(['user_id' => $user->id, 'action' => AuditService::AUTH_LOGIN,
+                'ip_address' => '0.0.0.0', 'user_agent' => 'Mozilla/5.0', 'created_at' => now()->subDays($n)]);
+        }
+        DB::table('audit_logs')->insert(['user_id' => $user->id, 'action' => AuditService::AUTH_LOGIN,
+            'ip_address' => '0.0.0.0', 'created_at' => now()->subDays(120)]);
+        // An edit made by a sync job, not by the person.
+        DB::table('audit_logs')->insert(['user_id' => $user->id, 'action' => AuditService::EVENT_UPDATE,
+            'ip_address' => '0.0.0.0', 'user_agent' => 'Symfony', 'created_at' => now()->subDay()]);
+
+        $data = $this->build();
+        $i = array_flip($data['signups']['columns']);
+        $uid = 'u:'.substr(hash_hmac('sha256', (string) $user->id, (string) config('app.key')), 0, 12);
+        $row = collect($data['signups']['rows'])->firstWhere($i['uid'], $uid);
+
+        $this->assertSame('sell', $row[$i['hero_variant']]);
+        $this->assertTrue($row[$i['referred']]);
+        $this->assertSame('2-5', $row[$i['logins_90d']], 'three recent sign-ins; the one 120 days ago is outside');
+        $this->assertSame('0', $row[$i['event_edits_90d']], 'a system edit is not the owner doing anything');
+    }
+
+    /** Deploy dates, from the first scheduler tick after each release. */
+    public function test_release_history_records_each_version_once_in_order(): void
+    {
+        config(['self-update.version_installed' => 'v1.0.140']);
+        \App\Utils\ReleaseHistory::touch();
+        \App\Utils\ReleaseHistory::touch();
+
+        config(['self-update.version_installed' => 'v1.0.141']);
+        \App\Utils\ReleaseHistory::touch();
+        // A lost cache must not duplicate the entry it already recorded.
+        \Illuminate\Support\Facades\Cache::forget('release_history.current');
+        \App\Utils\ReleaseHistory::touch();
+
+        $releases = $this->build()['meta']['releases'];
+
+        $this->assertSame(['v1.0.140', 'v1.0.141'], array_column($releases, 'version'));
+        $this->assertNotEmpty($releases[1]['first_seen_at']);
     }
 
     /**

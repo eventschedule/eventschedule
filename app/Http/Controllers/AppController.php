@@ -627,6 +627,13 @@ class AppController extends Controller
             // Per-rail sibling key, so /admin can tell a live worker from a live HTTP cron. This
             // rail is always 'http'; the scheduler rail names itself via config('app.scheduler_rail').
             Cache::put('scheduler.last_run_at.http', now()->timestamp, now()->addDays(7));
+
+            // Dates the release, as the scheduler rail's heartbeat does (growth meta.releases).
+            try {
+                \App\Utils\ReleaseHistory::touch();
+            } catch (\Throwable $e) {
+                report($e);
+            }
         } finally {
             $lock->release();
         }

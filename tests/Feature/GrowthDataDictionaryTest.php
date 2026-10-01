@@ -64,18 +64,31 @@ class GrowthDataDictionaryTest extends TestCase
         $this->assertSame([], $missing, "Document these in docs/GROWTH_DATA.md:\n".implode("\n", $missing));
     }
 
-    /** Feature flags are read straight off the schedule; a new one is a new column in all but name. */
+    /**
+     * Feature flags come off the schedule (featuresOf()) and from other tables (adoptionByRole());
+     * a new one is a new column in all but name.
+     */
     public function test_every_feature_flag_is_documented(): void
     {
         $source = file_get_contents(app_path('Services/GrowthExportService.php'));
-        $start = strpos($source, 'private function featuresOf(');
-        $this->assertNotFalse($start, 'featuresOf() moved; point this test at it');
-        preg_match_all("/'([a-z_]+)' => \\\$r->/", substr($source, $start, 3000), $flags);
-        $this->assertNotEmpty($flags[1]);
+        $flags = [];
+        foreach ([
+            'private function featuresOf(' => ['foreach ([', '] as $key'],
+            'private function adoptionByRole(' => ['$sets = [', "\n        ];"],
+        ] as $method => [$opener, $closer]) {
+            $start = strpos($source, $method);
+            $this->assertNotFalse($start, "{$method} moved; point this test at it");
+            $body = substr($source, $start);
+            $open = strpos($body, $opener);
+            $list = substr($body, $open, strpos($body, $closer, $open) - $open);
+            preg_match_all("/^\s*'([a-z_0-9]+)' =>/m", $list, $found);
+            $this->assertNotEmpty($found[1], "found no flags in {$method}");
+            $flags = [...$flags, ...$found[1]];
+        }
 
         $section = substr($this->doc(), strpos($this->doc(), '| `features` |'));
         $line = strtok($section, "\n");
-        foreach ($flags[1] as $flag) {
+        foreach (array_unique($flags) as $flag) {
             $this->assertStringContainsString("`{$flag}`", $line, "features flag {$flag} is not in the docs/GROWTH_DATA.md features row");
         }
     }

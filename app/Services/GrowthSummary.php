@@ -48,6 +48,13 @@ class GrowthSummary
                 ? ($money['ticket_trials']['started'] ?? 0).' / '.($money['ticket_trials']['converted'] ?? 0)
                 : null],
             ['label' => 'Cancellations (all time)', 'value' => $data['churn']['cancelled'] ?? null],
+            // Rolling windows off daily[] and buyers[] (schema 9+), so they compare between any two
+            // pulls without a calendar month having to close first.
+            ['label' => 'Paid orders, last 30 days', 'value' => self::dailySum($data, 'paid_orders', 30)],
+            ['label' => 'Stripe Connect completed, last 30 days', 'value' => self::dailySum($data, 'stripe_connected', 30)],
+            ['label' => 'Attendees who became organizers, 12 months', 'value' => isset($data['buyers'])
+                ? array_sum(array_column($data['buyers'], 'attendees_who_became_organizers'))
+                : null],
         ];
 
         foreach ([$month => ' (to date)', $lastMonth => ''] as $m => $suffix) {
@@ -97,6 +104,16 @@ class GrowthSummary
     {
         return $data['meta']['partial_month']['month']
             ?? substr((string) ($data['meta']['generated_at'] ?? ''), 0, 7);
+    }
+
+    private static function dailySum(array $data, string $metric, int $days): ?int
+    {
+        $i = array_search($metric, $data['daily']['columns'] ?? [], true);
+        if ($i === false) {
+            return null;
+        }
+
+        return array_sum(array_column(array_slice($data['daily']['rows'] ?? [], -$days), $i));
     }
 
     private static function sellers(array $data): ?int

@@ -64,6 +64,12 @@ identifier, subdomain, custom domain or token appears in it.
     - a schedule's subdomain or custom domain as referrer becomes `(schedule)`;
     - token-shaped path segments become `:token`.
   - Residual risk: a personal website that refers 3 or more signups appears by name.
+- **Country** (`schedules.country`): a country shared by fewer than 5 schedules reads `(other)`.
+  The threshold is higher than attribution's 3 because a schedule row carries more beside it.
+- **Activity** (`logins_90d`, `event_edits_90d`): exported as buckets (`0`, `1`, `2-5`, `6+`),
+  never exact counts.
+- **The audience** (`buyers`): computed in SQL and exported only as monthly counts. No buyer
+  address leaves the database, hashed or not.
 
 ## Populations and windows
 
@@ -79,6 +85,13 @@ any two numbers.
 | `traffic` | Marketing-site counters (nexus only) and verified signups | Monthly, all time |
 | `claims` | OWNERLESS placeholder schedules, which every other section excludes | Monthly, last 6 months |
 | `churn` | `subscription_cancellations` rows | All time, since 2026-09-28 |
+| `daily` | Mixed: organizer and other signups, real schedules and events, sellers, subscriptions | Last 180 UTC days |
+| `nudge_outcomes` | Schedules sent an activation nudge | All time; outcomes 14 days after each nudge |
+| `onboarding_nudges` | Organizer cohort signed up since 2026-08-10 | Since 2026-08-10 |
+| `buyers` | Everyone with a paid sale on a non-demo event (money, or free RSVP) | Last 12 months |
+| `reach` | Guest traffic and audience on non-demo schedules | Last 26 ISO weeks |
+| `usage`, `boost`, `referrals`, `federation` | Install-wide | Recent months, as named |
+| `geography` | Same as the `schedules` rows | All time |
 
 `meta.range_applies_to` lists the range-scoped sections. `meta.partial_month` names the month in
 progress: every month-keyed count for it is month-to-date.
@@ -100,7 +113,7 @@ credits, legacy `plan_expires` rows and trials, which is most paid-tier schedule
   - `generated_at`;
   - `range` (start/end of the funnel window) and `range_applies_to`;
   - `recent_months`, the 6 months that `*_recent` arrays cover, oldest first;
-  - `partial_month`, `is_hosted`, `is_nexus`, `app_version`, `schema_version`;
+  - `partial_month`, `is_hosted`, `is_nexus`, `app_version`, `releases` (see below), `schema_version`;
   - `row_cap` and `truncated` (whether a row table hit the cap, with the true total);
   - `notes`: caveats that travel with the data. Read them.
 - `funnel` is the onboarding funnel for the window.
@@ -166,6 +179,49 @@ credits, legacy `plan_expires` rows and trials, which is most paid-tier schedule
   A null is "not tracked yet", never zero.
 - `claims`: `unclaimed_total`, `unclaimed_with_event`, `auto_created{month}`,
   `claimed{month}` (null before 2026-09).
+- `meta.releases`: `[{version, first_seen_at}]`, when each version first ran here. It is stamped by
+  the scheduler heartbeat (`App\Utils\ReleaseHistory`), so it is empty before 2026-10-01. Use it to
+  date a change in `daily` to its release.
+- `daily` (columnar, one row per UTC day) holds:
+  - `signups_organizer`, `signups_other`;
+  - `first_schedule`, `first_event` (users reaching each for the first time);
+  - `events_created`;
+  - per selling schedule, firsts: `first_ticket_type`, `first_paid_ticket_type`, `first_paid_sale`;
+  - `paid_orders`, `stripe_connected` (Stripe Connect onboarding completed), `paywall_views`
+    (first view per user), `trial_starts`;
+  - `subscriptions_started` (not declined), `subscriptions_ended`, `cancellations`.
+- `nudge_outcomes`: per activation-nudge key, `{sent, matured, acted_event, acted_ticket_type,
+  acted_stripe_connected, acted_paid_sale}`.
+  - `acted_*` counts matured nudges (14+ days old) whose schedule did that within 14 days.
+  - There is no holdout group: compare keys and periods, never read a rate as the nudge's effect.
+- `onboarding_nudges[]`: `{stage, users, saved_schedule}`. The stage is how many pre-schedule
+  onboarding emails the user was sent (0-3); emails stop once a schedule exists.
+- `dismissed_steps`: per dashboard next step (`tickets`, `payments`, `first_event`, ...),
+  `{total, by_month}`. Each one is an owner explicitly saying "not for me".
+- `buyers[]` (per month) holds:
+  - `paid_orders`, `buyers`, `new_buyers` (first purchase on the platform), `returning_buyers`;
+  - `rsvps`, `rsvp_people`;
+  - `new_attendees` (first paid or free registration);
+  - `attendees_who_became_organizers`: by the month they first attended, those whose account
+    later created a real schedule. This is the viral loop.
+- `reach` (columnar, one row per ISO week) holds:
+  - `page_views`, plus `views_direct`, `views_search`, `views_social`, `views_email`, `views_other`;
+  - `followers_added`, `subscribers_added`, `interests_added`;
+  - `event_page_views`, `event_page_sales`.
+- `usage`: `{operation: {month: {count, schedules}}}` from `usage_daily`. For example,
+  `gemini_parse_event` is AI import and `gcal_sync` is Google Calendar sync. `schedules` counts
+  distinct schedules; install-level operations count toward `count` only.
+- `geography[]`: `{country, schedules, with_event, with_paid_sale, billing}`, over the
+  k-anonymised `schedules.country`.
+- `boost`:
+  - `net_markup[]` (`{month, currency, net_markup}`) is our revenue from paid promotions, net of
+    refunds;
+  - `campaigns[]` is `{month, campaigns, schedules}`.
+- `referrals`: `by_status`, `created_by_month`.
+- `federation`: the selfhost installs that registered for federation, which is only a floor on
+  selfhost installs. Fields: `by_status`, `active_30d`, `by_version`, `registered_by_month`.
+- `hero_test`: the homepage headline experiment, as the `/admin/growth` card shows it (nexus only,
+  else null). Join `signups.hero_variant` to judge a variant on sellers, not signups.
 
 ## Row tables
 
@@ -190,6 +246,10 @@ Both are columnar: read `columns[]`, then `rows[][]`. They are newest first and 
 | `saved_ticket`, `saved_paid_ticket` | Has a live, non-add-on ticket type on one of their events; a priced one |
 | `schedules_count` | Live (non-deleted) schedules |
 | `days_to_first_schedule` | Signup to first schedule, days |
+| `hero_variant` | The homepage headline variant they saw before signing up (our own key), or null |
+| `referred` | Signed up through a referral link |
+| `logins_90d` | Sign-ins in the last 90 days, bucketed `0`/`1`/`2-5`/`6+`. A lower bound: a remember-me session writes no row |
+| `event_edits_90d` | Events they created or edited in the last 90 days, bucketed; system edits (imports, syncs) excluded |
 
 ### `schedules` (one row per owned, non-deleted, non-demo schedule)
 
@@ -213,8 +273,13 @@ Both are columnar: read `columns[]`, then `rows[][]`. They are newest first and 
 | `interests_90d`, `interests_total` | Confirmed "notify me" addresses on its events, last 90 days and all time |
 | `appointment_types`, `photos` | Non-deleted appointment types; event photos |
 | `newsletter_emails_this_month` | Newsletter emails sent, month-to-date |
-| `features` | Flags switched on: `gcal`, `mscal`, `caldav`, `custom_domain`, `custom_css`, `custom_fields`, `banner`, `feedback`, `carpool`, `gift_cards`, `accept_requests` (on for nearly everyone by default), `sponsors`, `own_smtp`, `event_interest`, `no_subscribe_panel` |
+| `features` | Settings switched on: `gcal`, `mscal`, `caldav`, `custom_domain` (working, not failed or pending), `custom_css`, `custom_fields`, `banner`, `feedback`, `carpool`, `gift_cards` (enabled), `accept_requests` (on for nearly everyone by default), `sponsors`, `own_smtp`, `event_interest`, `no_subscribe_panel`, `stay22`, `federation`, `announce_events`, `fan_content`; on the owner's account: `api_key`, `webhooks`; and features actually used: `passes`, `seating`, `promo_codes`, `waitlist`, `sub_schedules`, `newsletter_sent`, `gift_cards_sold`, `gallery`, `boost`, `ai_import`, `team` (anyone but the owner has access) |
 | `days_to_upgrade` | Creation to first real subscription, days; null = never |
+| `country` | ISO country code, or `(other)` when fewer than 5 schedules share it |
+| `gateways` | Payment gateways on the owner's account: `stripe` (Connect onboarding completed), `paypal`, `payfast`, `invoiceninja` |
+| `stripe_connected_month` | Month the owner completed Stripe Connect (the only gateway that records when) |
+| `dismissed_steps` | Dashboard next steps dismissed for this schedule (`tickets`, `payments`, ...) |
+| `events_by_source` | Of its listed events: `created` by it, from `other_schedules`, `guest` submissions, synced from `google` or `caldav`, `auto_sourced` (curator rules). These overlap; they do not sum to `events_total` |
 
 ## Caveats that outlast any one pull
 
@@ -233,6 +298,16 @@ Both are columnar: read `columns[]`, then `rows[][]`. They are newest first and 
 
 ## Changelog (`meta.schema_version`)
 
+- **9** (2026-10-01)
+  - **New sections:** `daily`, `nudge_outcomes`, `onboarding_nudges`, `dismissed_steps`,
+    `buyers`, `reach`, `usage`, `geography`, `boost`, `referrals`, `federation`, `hero_test`, and
+    `meta.releases`.
+  - **New signup columns:** `hero_variant`, `referred`, `logins_90d`, `event_edits_90d`.
+  - **New schedule columns:** `country`, `gateways`, `stripe_connected_month`, `dismissed_steps`,
+    `events_by_source`.
+  - **`features` changes:**
+    - it gains settings flags and the used-feature flags;
+    - `custom_domain` now means a working one.
 - **8** (2026-10-01)
   - **Payload changes:**
     - pulled with `app:pull-growth` instead of downloaded;

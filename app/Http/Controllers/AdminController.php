@@ -1316,8 +1316,9 @@ class AdminController extends Controller
             'range' => $range,
             'data' => $data,
             // Since the last reset rather than the selected range: the test decides on everything
-            // it has seen since then. Only the nexus serves the homepage the test runs on.
-            'heroTest' => config('app.is_nexus') ? HeroExperiment::report() : null,
+            // it has seen since then. Only the nexus serves the homepage the test runs on. The
+            // payload already carries it (null off the nexus), so it is not computed twice.
+            'heroTest' => $data['hero_test'],
         ]);
     }
 

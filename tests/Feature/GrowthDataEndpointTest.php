@@ -214,6 +214,24 @@ class GrowthDataEndpointTest extends TestCase
             $this->signup(['utm_source' => 'promo-'.$n.'@gmail.com']);
         }
 
+        // Schema 9 reads more tables, each with people in it: none of them may surface.
+        DB::table('federated_instances')->insert([
+            'instance_id' => (string) \Illuminate\Support\Str::uuid(), 'site_url' => 'https://events.hiddeninstall.org',
+            'name' => 'Hidden Install Collective', 'contact_email' => 'admin@hiddeninstall.org', 'secret' => 'x',
+            'app_version' => 'v1.0.130', 'status' => 'approved', 'last_seen_at' => now(), 'created_at' => now(), 'updated_at' => now(),
+        ]);
+        DB::table('gift_cards')->insert([
+            'role_id' => $role->id, 'code' => 'GIFTCODE1234', 'secret' => str_repeat('s', 32), 'amount' => 50,
+            'remaining_amount' => 50, 'currency_code' => 'USD', 'status' => 'active',
+            'purchaser_name' => 'Gideon Giver', 'purchaser_email' => 'gideon@gmail.com',
+            'recipient_name' => 'Rhea Receiver', 'recipient_email' => 'rhea@gmail.com',
+            'created_at' => now(), 'updated_at' => now(),
+        ]);
+        DB::table('ticket_waitlists')->insert(['event_id' => $event->id, 'event_date' => now()->toDateString(),
+            'name' => 'Wanda Waiting', 'email' => 'wanda@gmail.com', 'subdomain' => $role->subdomain,
+            'created_at' => now(), 'updated_at' => now()]);
+        $this->createSale($event, $role, ['status' => 'paid', 'payment_method' => 'rsvp', 'email' => 'rory.rsvp@gmail.com', 'name' => 'Rory Rsvp']);
+
         $body = $this->pull()->assertOk()->getContent();
 
         foreach ([
@@ -221,6 +239,7 @@ class GrowthDataEndpointTest extends TestCase
             'Pat Buyer', 'leak@gmail.com', '19 Rue Lepic', 'cus_TESTCUSTOMER', $role->subdomain,
             'marina-delacroix-photography', 'marinadelacroix.fr', '203.0.113.7',
             'k3Jd9sLq2mZx8vB1nC4tY6wR0pE5hG7a', 'Summa', 'summa-30th',
+            'hiddeninstall', 'Hidden Install', 'Gideon', 'Rhea', 'GIFTCODE1234', 'Wanda', 'Rory',
         ] as $secret) {
             $this->assertStringNotContainsStringIgnoringCase($secret, $body, "the payload leaked: {$secret}");
         }

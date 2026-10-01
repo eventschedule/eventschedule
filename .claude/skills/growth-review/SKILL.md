@@ -80,7 +80,23 @@ for s in sorted(S, key=lambda s: -s['paid_tickets_90d'])[:15]:
 # Channel -> activation -> selling, organizers only
 org = [u for u in U if u['signup_intent'] in (None, 'organizer')]
 by = Counter(u['referrer_channel'] or '(none)' for u in org)
+
+# The step between a paid ticket type and a sale: is a payment gateway connected?
+ptt = [s for s in S if s['paid_ticket_types'] > 0]
+print(len(ptt), sum(bool(s['gateways']) for s in ptt), sum(bool(s['first_paid_sale_month']) for s in ptt))
+
+# Day-level series, to put a change next to a release (meta.releases)
+D = [dict(zip(d['daily']['columns'], r)) for r in d['daily']['rows']]
 ```
+
+Schema 9 also answers these directly:
+
+- `nudge_outcomes`: did the nudged schedules act within 14 days?
+- `buyers`: returning fans, and `attendees_who_became_organizers` (the viral loop).
+- `reach`: weekly audience growth.
+- `dismissed_steps`: owners saying "not for me" to tickets or payments.
+- `usage`: which features get used, e.g. AI import as `gemini_parse_event`.
+- Activity: `logins_90d` and `event_edits_90d` on the signup rows.
 
 To compare two pulls, keep the same `schema_version`; ids changed length at 8. Join on `sid` to
 find sellers who stopped, comps that started paying, and schedules that newly sold.
@@ -88,10 +104,12 @@ find sellers who stopped, comps that started paying, and schedules that newly so
 ## 4. Put the numbers next to what shipped
 
 - `git log --since=<previous pull date> --oneline` shows what changed in between.
-- `git tag --sort=-creatordate --format='%(refname:short) %(creatordate:short)' | head` gives
-  release dates.
-- Deploys are manual, so a tag date is only an upper bound on when something went live.
-  `meta.app_version` is what was live for this pull.
+- `jq '.meta.releases' $F` gives when each version actually went live. It is recorded from
+  2026-10-01 on.
+- For older releases, `git tag --sort=-creatordate --format='%(refname:short) %(creatordate:short)' | head`.
+  Deploys are manual, so a tag date only says the version existed by then.
+- Line `daily` up with those dates. Compare equal windows either side of a release, and say how
+  many events each side holds.
 
 ## 5. Discipline (each of these has been gotten wrong before)
 

@@ -5,7 +5,10 @@ namespace App\Services;
 use App\Models\AnalyticsDaily;
 use App\Models\MarketingDailyStat;
 use App\Models\Role;
+use App\Models\SubscriptionCancellation;
 use App\Models\User;
+use App\Utils\HeroExperiment;
+use App\Utils\ReleaseHistory;
 use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Collection as EloquentCollection;
 use Illuminate\Support\Facades\DB;
@@ -26,7 +29,7 @@ class GrowthExportService
      * pulls knows whether they compare. Every bump is described in docs/GROWTH_DATA.md's changelog,
      * which GrowthDataDictionaryTest holds to this number.
      */
-    public const SCHEMA_VERSION = 8;
+    public const SCHEMA_VERSION = 9;
 
     /** The month the schedule.claim audit action shipped; nothing before it can be counted. */
     private const CLAIMS_TRACKED_FROM = '2026-09';
@@ -609,6 +612,13 @@ class GrowthExportService
                 .'contact address, the showcase schedules) since schema_version 8. Before, it was the '
                 .'demo-% subdomain shape, which kept the fabricated showcase schedules and hid real '
                 .'schedules named demo-something.',
+            'Since schema_version 9: daily[] dates a change to the day (UTC); meta.releases says when each '
+                .'version first ran here (recorded from 2026-10-01 on, so earlier releases are absent); '
+                .'nudge_outcomes says what nudged schedules did in the 14 days after (no holdout group, so '
+                .'NOT causal); buyers counts the audience side, including attendees who later created a '
+                .'schedule; reach is weekly guest traffic; usage is feature use by operation. Activity '
+                .'(signups.logins_90d, event_edits_90d) comes from audit rows: a lower bound, because a '
+                .'remember-me login writes none. country is k-anonymised like attribution, at 5.',
         ];
         // Every derived section is computed from the row tables, so if those were capped
         // the sections describe the most recent N rows and not the whole population.
@@ -635,6 +645,9 @@ class GrowthExportService
                     'days_in_month' => (int) now()->format('t'),
                 ],
                 'app_version' => config('self-update.version_installed'),
+                // When each version first ran on this install (ReleaseHistory, stamped by the
+                // scheduler heartbeat). Deploys are manual, so a git tag only bounds this from below.
+                'releases' => ReleaseHistory::all(),
                 'schema_version' => self::SCHEMA_VERSION,
                 'row_cap' => $this->rowCap(),
                 'truncated' => [
@@ -664,6 +677,21 @@ class GrowthExportService
             'retention' => $this->retentionFrom($schedules),
             'traffic' => $this->traffic(),
             'claims' => $this->claims($months),
+            'daily' => $this->daily(),
+            'nudge_outcomes' => $this->nudgeOutcomes(),
+            'onboarding_nudges' => $this->onboardingNudges(),
+            'dismissed_steps' => $this->dismissedSteps(),
+            'buyers' => $this->buyers(),
+            'reach' => $this->reach(),
+            'usage' => $this->usage($months),
+            'geography' => $this->geographyFrom($schedules),
+            'boost' => $this->boost(),
+            'referrals' => $this->referrals(),
+            'federation' => $this->federation(),
+            // The homepage headline test, as /admin/growth shows it - and signups.hero_variant, so a
+            // variant can be judged on the sellers it produced rather than on signups alone. Nexus
+            // only: no other install serves the homepage the test runs on.
+            'hero_test' => config('app.is_nexus') ? HeroExperiment::report() : null,
             'signups' => ['columns' => $signups['columns'], 'rows' => $signups['rows']],
             'schedules' => ['columns' => $schedules['columns'], 'rows' => $schedules['rows']],
         ];
@@ -749,6 +777,25 @@ class GrowthExportService
             ->groupBy('events.user_id')
             ->get()->keyBy('user_id');
 
+        // The activity proxy the payload never had (there is no users.last_login_at): sign-ins and
+        // event edits in the last 90 days, from audit rows - which the pruner keeps for exactly 90
+        // days, so the window is the whole of what exists. A lower bound: a remember-me login
+        // writes no row. Edits made by the system (CLI, user agent "Symfony" - imports, syncs,
+        // scheduled jobs) are not the owner doing anything and are left out.
+        $since = now()->copy()->subDays(90);
+        $logins = DB::table('audit_logs')
+            ->whereIn('action', [AuditService::AUTH_LOGIN, AuditService::AUTH_GOOGLE_LOGIN,
+                AuditService::AUTH_FACEBOOK_LOGIN, AuditService::API_LOGIN])
+            ->where('created_at', '>=', $since)->whereNotNull('user_id')
+            ->selectRaw('user_id, COUNT(*) as c')->groupBy('user_id')
+            ->pluck('c', 'user_id');
+        $edits = DB::table('audit_logs')
+            ->whereIn('action', [AuditService::EVENT_CREATE, AuditService::EVENT_UPDATE])
+            ->where('created_at', '>=', $since)->whereNotNull('user_id')
+            ->where(fn ($q) => $q->whereNull('user_agent')->orWhere('user_agent', '!=', 'Symfony'))
+            ->selectRaw('user_id, COUNT(*) as c')->groupBy('user_id')
+            ->pluck('c', 'user_id');
+
         $rows = [];
         foreach ((clone $base)->orderByDesc('id')->limit($this->rowCap())->cursor() as $u) {
             $roleAgg = $rolesByUser[$u->id] ?? null;
@@ -783,13 +830,18 @@ class GrowthExportService
                 (int) ($ticketAgg->paid ?? 0) > 0,
                 (int) ($roleAgg->c ?? 0),
                 ($firstAt && $u->created_at) ? max(0, $u->created_at->diffInDays($firstAt)) : null,
+                // The homepage headline variant they saw before signing up (one of our own keys).
+                $u->hero_variant,
+                $u->referred_by_user_id !== null,
+                $this->bucket((int) ($logins[$u->id] ?? 0)),
+                $this->bucket((int) ($edits[$u->id] ?? 0)),
             ];
         }
 
         $columns = ['uid', 'created_month', 'signup_intent', 'utm_source', 'utm_medium',
             'referrer_domain', 'referrer_channel', 'landing_path', 'auth', 'reached_schedule_form',
             'saved_schedule', 'saved_event', 'saved_ticket', 'saved_paid_ticket', 'schedules_count',
-            'days_to_first_schedule'];
+            'days_to_first_schedule', 'hero_variant', 'referred', 'logins_90d', 'event_edits_90d'];
 
         return [
             'columns' => $columns,
@@ -1035,6 +1087,20 @@ class GrowthExportService
             || ($len >= 32 && preg_match('/^[a-z0-9_-]+$/i', $segment) === 1 && preg_match('/\d/', $segment) === 1);
     }
 
+    /**
+     * An activity count as a coarse bucket. Exact counts per person add nothing an analysis needs
+     * and make a row easier to single out.
+     */
+    private function bucket(int $n): string
+    {
+        return match (true) {
+            $n <= 0 => '0',
+            $n === 1 => '1',
+            $n <= 5 => '2-5',
+            default => '6+',
+        };
+    }
+
     /** @return array<string, true> */
     private function publishedBlogSlugs(): array
     {
@@ -1100,9 +1166,37 @@ class GrowthExportService
                 ->orWhereColumn('events.creator_role_id', 'event_role.role_id'))
             ->selectRaw('event_role.role_id, COUNT(*) as total, '
                 .'SUM(CASE WHEN events.is_draft = 0 AND events.is_private = 0 AND events.is_internal = 0 THEN 1 ELSE 0 END) as public_total, '
-                .'SUM(CASE WHEN events.created_at >= ? THEN 1 ELSE 0 END) as recent_total', [$recentCutoff])
+                .'SUM(CASE WHEN events.created_at >= ? THEN 1 ELSE 0 END) as recent_total, '
+                // Where the listed events came from - which features actually fill a calendar.
+                .'SUM(CASE WHEN events.creator_role_id = event_role.role_id THEN 1 ELSE 0 END) as src_created, '
+                .'SUM(CASE WHEN events.creator_role_id IS NOT NULL AND events.creator_role_id <> event_role.role_id THEN 1 ELSE 0 END) as src_other_schedules, '
+                .'SUM(CASE WHEN events.is_guest_submission = 1 THEN 1 ELSE 0 END) as src_guest, '
+                .'SUM(CASE WHEN event_role.google_event_id IS NOT NULL THEN 1 ELSE 0 END) as src_google, '
+                .'SUM(CASE WHEN event_role.caldav_event_uid IS NOT NULL THEN 1 ELSE 0 END) as src_caldav, '
+                .'SUM(CASE WHEN event_role.is_auto_sourced = 1 THEN 1 ELSE 0 END) as src_auto_sourced', [$recentCutoff])
             ->groupBy('event_role.role_id')
             ->get()->keyBy('role_id');
+
+        // The owner's payment gateways. Selling needs one, so this is the step between "made a
+        // paid ticket type" and "sold" - which the payload could not see. Read off the owner's
+        // columns (gateways are per account); only Stripe Connect records when it completed.
+        $owners = DB::table('users')
+            ->where(fn ($q) => $q->whereNotNull('stripe_completed_at')->orWhereNotNull('paypal_client_id')
+                ->orWhereNotNull('payfast_merchant_id')->orWhereNotNull('invoiceninja_api_key')
+                ->orWhereNotNull('api_key_hash'))
+            ->get(['id', 'stripe_account_id', 'stripe_completed_at', 'paypal_client_id',
+                'payfast_merchant_id', 'invoiceninja_api_key', 'api_key_hash'])
+            ->keyBy('id');
+        $webhookOwners = DB::table('webhooks')->where('is_active', true)->distinct()->pluck('user_id')->flip();
+
+        $dismissed = DB::table('dismissed_next_steps')
+            ->select('role_id', 'step_type')->distinct()->get()
+            ->groupBy('role_id')
+            ->map(fn ($rows) => $rows->pluck('step_type')
+                ->map(fn ($type) => str_starts_with($type, 'next_step_') ? substr($type, 10) : $type)
+                ->sort()->values()->all());
+
+        $adoption = $this->adoptionByRole();
 
         // paid_c is the commercial signal. COUNT(*) alone counts free RSVP/registration types
         // too, so it says nothing about whether a schedule takes money - which made it useless
@@ -1274,22 +1368,40 @@ class GrowthExportService
                 (int) ($apptTypes[$r->id]->c ?? 0),
                 (int) ($photos[$r->id]->c ?? 0),
                 (int) ($newsletterEmails[$r->id]->c ?? 0),
-                $this->featuresOf($r),
+                $this->featuresOf($r, $adoption, $owners[$r->user_id] ?? null, isset($webhookOwners[$r->user_id])),
                 ($subAt && $r->created_at) ? max(0, $r->created_at->diffInDays(Carbon::parse($subAt))) : null,
+                // k-anonymised across the rows below (geographyFrom() reads the result).
+                $r->country_code ? strtoupper((string) $r->country_code) : null,
+                $this->gatewaysOf($owners[$r->user_id] ?? null),
+                ($owner = $owners[$r->user_id] ?? null) && $owner->stripe_completed_at
+                    ? Carbon::parse($owner->stripe_completed_at)->format('Y-m')
+                    : null,
+                $dismissed[$r->id] ?? [],
+                [
+                    'created' => (int) ($events[$r->id]->src_created ?? 0),
+                    'other_schedules' => (int) ($events[$r->id]->src_other_schedules ?? 0),
+                    'guest' => (int) ($events[$r->id]->src_guest ?? 0),
+                    'google' => (int) ($events[$r->id]->src_google ?? 0),
+                    'caldav' => (int) ($events[$r->id]->src_caldav ?? 0),
+                    'auto_sourced' => (int) ($events[$r->id]->src_auto_sourced ?? 0),
+                ],
             ];
         }
 
+        $columns = ['sid', 'uid', 'created_month', 'type', 'plan', 'plan_source',
+            'billing', 'ever_subscribed',
+            'events_total', 'events_public', 'events_recent_90d', 'ticket_types',
+            'paid_ticket_types', 'paid_tickets_total', 'paid_tickets_90d',
+            'paid_tickets_recent', 'first_paid_sale_month', 'gmv_currency', 'gmv_recent',
+            'gmv_recent_by_currency',
+            'views_90d', 'followers', 'subscribers', 'interests_90d', 'interests_total',
+            'appointment_types',
+            'photos', 'newsletter_emails_this_month', 'features', 'days_to_upgrade',
+            'country', 'gateways', 'stripe_connected_month', 'dismissed_steps', 'events_by_source'];
+
         return [
-            'columns' => ['sid', 'uid', 'created_month', 'type', 'plan', 'plan_source',
-                'billing', 'ever_subscribed',
-                'events_total', 'events_public', 'events_recent_90d', 'ticket_types',
-                'paid_ticket_types', 'paid_tickets_total', 'paid_tickets_90d',
-                'paid_tickets_recent', 'first_paid_sale_month', 'gmv_currency', 'gmv_recent',
-                'gmv_recent_by_currency',
-                'views_90d', 'followers', 'subscribers', 'interests_90d', 'interests_total',
-                'appointment_types',
-                'photos', 'newsletter_emails_this_month', 'features', 'days_to_upgrade'],
-            'rows' => $rows,
+            'columns' => $columns,
+            'rows' => $this->suppressRareCountries($rows, array_search('country', $columns, true)),
             'total' => $total,
             'truncated' => $total > $this->rowCap(),
         ];
@@ -1423,15 +1535,95 @@ class GrowthExportService
         return $map;
     }
 
-    /** Feature adoption flags read straight off the schedule row. */
-    private function featuresOf(Role $r): array
+    /**
+     * A schedule's country, unless fewer than 5 schedules share it: with type, month and plan beside
+     * it, a country with one or two schedules in it names them. Higher than the attribution rule's 3
+     * because a row carries far more alongside it.
+     */
+    private function suppressRareCountries(array $rows, int $i): array
+    {
+        $counts = array_count_values(array_filter(array_column($rows, $i), fn ($c) => $c !== null));
+
+        foreach ($rows as &$row) {
+            if ($row[$i] !== null && ($counts[$row[$i]] ?? 0) < 5) {
+                $row[$i] = '(other)';
+            }
+        }
+
+        return $rows;
+    }
+
+    /** @return list<string> */
+    private function gatewaysOf(?object $owner): array
+    {
+        if ($owner === null) {
+            return [];
+        }
+
+        return array_keys(array_filter([
+            // A Connect account is only usable once onboarding completed.
+            'stripe' => $owner->stripe_account_id && $owner->stripe_completed_at,
+            'paypal' => (bool) $owner->paypal_client_id,
+            'payfast' => (bool) $owner->payfast_merchant_id,
+            'invoiceninja' => (bool) $owner->invoiceninja_api_key,
+        ]));
+    }
+
+    /**
+     * Features whose use lives in other tables, as role_id => [flag => true]. One grouped query per
+     * feature over the whole install, never one per schedule. Ticketing features are credited to
+     * the selling schedule, like everything else about tickets here.
+     *
+     * @return array<int, array<string, true>>
+     */
+    private function adoptionByRole(): array
+    {
+        $sellerIds = fn ($query) => $this->attributeToSeller($query)
+            ->selectRaw(self::SELLER.' as role_id')->distinct()->pluck('role_id');
+
+        $sets = [
+            'passes' => $sellerIds(DB::table('tickets')->join('events', 'events.id', '=', 'tickets.event_id')
+                ->where('tickets.is_pass', true)->where('tickets.is_deleted', false)),
+            'seating' => $sellerIds(DB::table('events')->whereNotNull('events.seating_plan_id')),
+            'promo_codes' => $sellerIds(DB::table('promo_codes')->join('events', 'events.id', '=', 'promo_codes.event_id')),
+            'waitlist' => $sellerIds(DB::table('ticket_waitlists')->join('events', 'events.id', '=', 'ticket_waitlists.event_id')),
+            'sub_schedules' => DB::table('groups')->distinct()->pluck('role_id'),
+            'newsletter_sent' => DB::table('newsletters')->whereNotNull('sent_at')->distinct()->pluck('role_id'),
+            'gift_cards_sold' => DB::table('gift_cards')->whereIn('status', ['active', 'refunded'])->distinct()->pluck('role_id'),
+            'gallery' => DB::table('gallery_images')->whereNull('draft_token')->distinct()->pluck('role_id'),
+            'boost' => DB::table('boost_campaigns')->where('status', '!=', 'draft')->distinct()->pluck('role_id'),
+            'ai_import' => DB::table('usage_daily')->where('operation', UsageTrackingService::GEMINI_PARSE_EVENT)
+                ->where('role_id', '>', 0)->distinct()->pluck('role_id'),
+            // Anyone besides the owner with access (admins, editors, viewers): the team plan's
+            // whole reason to exist. Followers are audience, not team.
+            'team' => DB::table('role_user')->join('roles', 'roles.id', '=', 'role_user.role_id')
+                ->where('role_user.level', '!=', 'follower')
+                ->whereColumn('role_user.user_id', '!=', 'roles.user_id')
+                ->distinct()->pluck('role_user.role_id'),
+        ];
+
+        $byRole = [];
+        foreach ($sets as $flag => $ids) {
+            foreach ($ids as $id) {
+                if ($id !== null) {
+                    $byRole[(int) $id][$flag] = true;
+                }
+            }
+        }
+
+        return $byRole;
+    }
+
+    /** Feature adoption flags, off the schedule row and from adoptionByRole(). */
+    private function featuresOf(Role $r, array $adoption = [], ?object $owner = null, bool $ownerHasWebhook = false): array
     {
         $flags = [];
         foreach ([
             'gcal' => $r->google_calendar_id,
             'mscal' => $r->microsoft_sync_token,
             'caldav' => $r->caldav_settings,
-            'custom_domain' => $r->custom_domain,
+            // Set but failed or still pending is not a working custom domain.
+            'custom_domain' => $r->custom_domain && ! in_array($r->custom_domain_status, ['failed', 'pending'], true),
             'custom_css' => $r->custom_css,
             'custom_fields' => $r->custom_fields,
             'banner' => $r->banner_enabled,
@@ -1446,10 +1638,21 @@ class GrowthExportService
             // so it is the owners who turned it OFF that are worth a flag.
             'event_interest' => $r->show_event_interest,
             'no_subscribe_panel' => $r->show_subscribe_panel === false,
+            'stay22' => $r->stay22_enabled,
+            'federation' => $r->federation_enabled,
+            'announce_events' => $r->announce_new_events,
+            'fan_content' => $r->fan_comments_enabled || $r->fan_photos_enabled || $r->fan_videos_enabled,
+            // Per account, so every schedule of an owner who set one up carries it.
+            'api_key' => $owner?->api_key_hash,
+            'webhooks' => $ownerHasWebhook,
         ] as $key => $value) {
             if (! empty($value)) {
                 $flags[] = $key;
             }
+        }
+
+        foreach (array_keys($adoption[$r->id] ?? []) as $key) {
+            $flags[] = $key;
         }
 
         return $flags;
@@ -2117,6 +2320,434 @@ class GrowthExportService
                 'verified_signups' => (int) ($signups[$m]->c ?? 0),
             ];
         })->all();
+    }
+
+    // ---------------------------------------------------------------------
+    // Schema 9 sections
+    // ---------------------------------------------------------------------
+
+    /** How many trailing days daily[] covers. */
+    private const DAILY_DAYS = 180;
+
+    /**
+     * Day-by-day counts of the events that matter, so a change can be dated against a release.
+     * Everything else here is monthly or all-time, and the 2026-08 read could not tell whether a
+     * conversion landed before or after a mid-month price change. UTC days. Columnar.
+     */
+    private function daily(): array
+    {
+        $from = now()->copy()->subDays(self::DAILY_DAYS - 1)->startOfDay();
+        $metrics = ['signups_organizer', 'signups_other', 'first_schedule', 'first_event', 'events_created',
+            'first_ticket_type', 'first_paid_ticket_type', 'first_paid_sale', 'paid_orders', 'stripe_connected',
+            'paywall_views', 'trial_starts', 'subscriptions_started', 'subscriptions_ended', 'cancellations'];
+
+        $days = [];
+        for ($d = $from->copy(); $d->lte(now()); $d->addDay()) {
+            $days[$d->toDateString()] = array_fill_keys($metrics, 0);
+        }
+
+        $tally = function (string $metric, $query, string $dateColumn) use (&$days) {
+            $counts = DB::query()->fromSub($query, 't')
+                ->selectRaw("DATE(t.{$dateColumn}) as d, COUNT(*) as c")
+                ->groupBy(DB::raw("DATE(t.{$dateColumn})"))
+                ->pluck('c', 'd');
+            foreach ($counts as $day => $n) {
+                if (isset($days[$day])) {
+                    $days[$day][$metric] = (int) $n;
+                }
+            }
+        };
+
+        $users = fn () => DB::table('users')->whereNotNull('email_verified_at')
+            ->where('email', '!=', DemoService::DEMO_EMAIL);
+        $realEvents = fn () => DB::table('events')->whereNotIn('events.id', $this->demoEventIds());
+        // A "first" is a MIN per entity, and only counts on its day if it falls inside the window.
+        $firsts = fn ($query, $key, string $at) => $query->groupBy($key)
+            ->selectRaw("MIN({$at}) as first_at")->havingRaw("MIN({$at}) >= ?", [$from]);
+        // Seller-keyed firsts: a row attributed to nobody must not form a NULL group of its own.
+        $bySeller = fn ($query) => $query->whereRaw(self::SELLER.' IS NOT NULL');
+
+        $tally('signups_organizer', $users()->where('created_at', '>=', $from)
+            ->where(fn ($q) => $q->whereNull('signup_intent')->orWhere('signup_intent', 'organizer'))
+            ->select('created_at'), 'created_at');
+        $tally('signups_other', $users()->where('created_at', '>=', $from)
+            ->whereNotNull('signup_intent')->where('signup_intent', '!=', 'organizer')
+            ->select('created_at'), 'created_at');
+        $tally('first_schedule', $firsts($this->excludeDemoRoles(DB::table('roles')->whereNotNull('user_id')),
+            'user_id', 'created_at'), 'first_at');
+        $tally('first_event', $firsts($realEvents(), 'events.user_id', 'events.created_at'), 'first_at');
+        $tally('events_created', $realEvents()->where('events.created_at', '>=', $from)->select('events.created_at'), 'created_at');
+
+        $ticketTypes = fn () => $this->attributeToSeller(DB::table('tickets')->join('events', 'events.id', '=', 'tickets.event_id'))
+            ->whereNotIn('events.id', $this->demoEventIds())
+            ->where('tickets.is_deleted', false)->where('tickets.is_addon', false);
+        $tally('first_ticket_type', $firsts($bySeller($ticketTypes()), DB::raw(self::SELLER), 'tickets.created_at'), 'first_at');
+        $tally('first_paid_ticket_type', $firsts($bySeller($ticketTypes()->where('tickets.price', '>', 0)),
+            DB::raw(self::SELLER), 'tickets.created_at'), 'first_at');
+        $tally('first_paid_sale', $firsts($bySeller($this->paidTicketLines()->whereNotIn('events.id', $this->demoEventIds())),
+            DB::raw(self::SELLER), 'sales.paid_at'), 'first_at');
+
+        $tally('paid_orders', DB::table('sales')
+            ->where('status', 'paid')->where('is_deleted', false)
+            ->whereNotIn('payment_method', ['rsvp', 'import'])->where('payment_amount', '>', 0)
+            ->whereNotIn('event_id', $this->demoEventIds())
+            ->where('paid_at', '>=', $from)->select('paid_at'), 'paid_at');
+        $tally('stripe_connected', $users()->where('stripe_completed_at', '>=', $from)->select('stripe_completed_at'), 'stripe_completed_at');
+        $tally('paywall_views', $users()->where('ticket_paywall_viewed_at', '>=', $from)->select('ticket_paywall_viewed_at'), 'ticket_paywall_viewed_at');
+        $tally('trial_starts', DB::table('audit_logs')->where('action', AuditService::TICKET_TRIAL_START)
+            ->where('created_at', '>=', $from)->select('created_at'), 'created_at');
+
+        $subscriptions = fn () => $this->excludeDemoRoles(
+            DB::table('subscriptions')->join('roles', 'roles.id', '=', 'subscriptions.role_id')
+        );
+        $tally('subscriptions_started', $subscriptions()
+            ->whereNotIn('subscriptions.stripe_status', ['incomplete', 'incomplete_expired'])
+            ->where('subscriptions.created_at', '>=', $from)->select('subscriptions.created_at'), 'created_at');
+        $tally('subscriptions_ended', $subscriptions()
+            ->whereBetween('subscriptions.ends_at', [$from, now()])->select('subscriptions.ends_at'), 'ends_at');
+        $tally('cancellations', DB::table('subscription_cancellations')
+            ->whereNull('resumed_at')->whereNotIn('source', SubscriptionCancellation::NOT_CHURN_SOURCES)
+            ->where('created_at', '>=', $from)->select('created_at'), 'created_at');
+
+        return [
+            'columns' => ['date', ...$metrics],
+            'rows' => array_map(fn ($day, $values) => [$day, ...array_values($values)], array_keys($days), $days),
+        ];
+    }
+
+    /**
+     * What a nudged schedule did in the 14 days after each activation nudge, per nudge key.
+     * nudges says what was SENT; this says whether anything followed. Only nudges at least 14 days
+     * old count toward the acted_* columns (matured), so the newest ones cannot drag a rate down.
+     *
+     * There is no holdout group: a schedule that would have acted anyway counts the same. Compare
+     * keys with each other and over time, never read a rate as the nudge's effect.
+     */
+    private function nudgeOutcomes(): array
+    {
+        $window = 'DATE_ADD(n.created_at, INTERVAL 14 DAY)';
+        $matured = 'n.created_at <= ?';
+        $acted = [
+            'event' => "EXISTS (SELECT 1 FROM events e WHERE e.creator_role_id = n.role_id
+                AND e.created_at > n.created_at AND e.created_at <= {$window})",
+            'ticket_type' => "EXISTS (SELECT 1 FROM tickets t JOIN events e ON e.id = t.event_id
+                WHERE e.creator_role_id = n.role_id AND t.is_deleted = 0 AND t.is_addon = 0
+                AND t.created_at > n.created_at AND t.created_at <= {$window})",
+            'stripe_connected' => "EXISTS (SELECT 1 FROM roles r JOIN users u ON u.id = r.user_id
+                WHERE r.id = n.role_id AND u.stripe_completed_at > n.created_at AND u.stripe_completed_at <= {$window})",
+            'paid_sale' => "EXISTS (SELECT 1 FROM sales s JOIN events e ON e.id = s.event_id
+                WHERE e.creator_role_id = n.role_id AND s.status = 'paid' AND s.is_deleted = 0
+                AND s.payment_method NOT IN ('rsvp', 'import') AND s.payment_amount > 0
+                AND s.paid_at > n.created_at AND s.paid_at <= {$window})",
+        ];
+
+        $cutoff = now()->copy()->subDays(14);
+        $select = 'n.nudge_key, COUNT(*) as sent, SUM('.$matured.') as matured';
+        $bindings = [$cutoff];
+        foreach ($acted as $name => $exists) {
+            $select .= ", SUM(CASE WHEN {$matured} AND {$exists} THEN 1 ELSE 0 END) as acted_{$name}";
+            $bindings[] = $cutoff;
+        }
+
+        return DB::table('schedule_nudges as n')
+            ->selectRaw($select, $bindings)
+            ->groupBy('n.nudge_key')->orderBy('n.nudge_key')
+            ->get()
+            ->mapWithKeys(fn ($row) => [$row->nudge_key => collect((array) $row)
+                ->except('nudge_key')->map(fn ($v) => (int) $v)->all()])
+            ->all();
+    }
+
+    /**
+     * The pre-schedule onboarding emails (SendOnboardingNudges): how many organizer signups ended at
+     * each stage - the number of nudges they were sent, 0 to 3 - and how many of them have a schedule
+     * now. Nudging stops once a schedule exists, so a schedule at stage 2 means it came after the
+     * second email. Signups from 2026-08-10, because every older account was backfilled to stage 3.
+     */
+    private function onboardingNudges(): array
+    {
+        $cohort = fn () => $this->cohort(Carbon::parse('2026-08-10'), now());
+        $saved = $cohort()->whereHas('createdRoles', $this->scheduleFilter())
+            ->selectRaw('COALESCE(onboarding_nudge_stage, 0) as stage, COUNT(*) as c')
+            ->groupBy(DB::raw('COALESCE(onboarding_nudge_stage, 0)'))->pluck('c', 'stage');
+
+        // A list of {stage, ...}, not a stage-keyed map: keys 0..3 encode as a JSON array or an
+        // object depending on which stages happen to exist.
+        return $cohort()
+            ->selectRaw('COALESCE(onboarding_nudge_stage, 0) as stage, COUNT(*) as c')
+            ->groupBy(DB::raw('COALESCE(onboarding_nudge_stage, 0)'))->orderBy('stage')
+            ->pluck('c', 'stage')
+            ->map(fn ($n, $stage) => ['stage' => (int) $stage, 'users' => (int) $n, 'saved_schedule' => (int) ($saved[$stage] ?? 0)])
+            ->values()->all();
+    }
+
+    /** Next steps owners dismissed from their dashboard - an explicit "not for me". */
+    private function dismissedSteps(): array
+    {
+        $rows = DB::table('dismissed_next_steps')
+            ->selectRaw("step_type, DATE_FORMAT(created_at, '%Y-%m') as ym, COUNT(*) as c")
+            ->groupBy('step_type', DB::raw("DATE_FORMAT(created_at, '%Y-%m')"))
+            ->get();
+
+        $out = [];
+        foreach ($rows as $row) {
+            $key = str_starts_with($row->step_type, 'next_step_') ? substr($row->step_type, 10) : $row->step_type;
+            $out[$key]['total'] = ($out[$key]['total'] ?? 0) + (int) $row->c;
+            $out[$key]['by_month'][$row->ym] = (int) $row->c;
+        }
+        ksort($out);
+
+        return $out;
+    }
+
+    /**
+     * The audience side, per month of the last twelve: paying buyers, how many came back, free
+     * RSVPs - and the viral loop, attendees who later created a schedule of their own. All in SQL
+     * and aggregate only; no address ever leaves the database, hashed or not.
+     */
+    private function buyers(): array
+    {
+        $from = now()->copy()->startOfMonth()->subMonths(11);
+        $sales = fn () => DB::table('sales')->where('sales.status', 'paid')->where('sales.is_deleted', false)
+            ->whereNotNull('sales.paid_at')->whereNotIn('sales.event_id', $this->demoEventIds());
+        $money = fn () => $sales()->whereNotIn('sales.payment_method', ['rsvp', 'import'])->where('sales.payment_amount', '>', 0);
+
+        // Each person's first purchase, by address, over all time - so a "new" buyer is new to the
+        // platform, not just to the month.
+        $firstPurchase = $money()->selectRaw('LOWER(TRIM(sales.email)) as em, MIN(sales.paid_at) as first_at')
+            ->groupBy(DB::raw('LOWER(TRIM(sales.email))'));
+
+        $monthly = $money()->where('sales.paid_at', '>=', $from)
+            ->joinSub($firstPurchase, 'fp', 'fp.em', '=', DB::raw('LOWER(TRIM(sales.email))'))
+            ->selectRaw("DATE_FORMAT(sales.paid_at, '%Y-%m') as ym, COUNT(*) as orders, "
+                .'COUNT(DISTINCT LOWER(TRIM(sales.email))) as buyers, '
+                ."COUNT(DISTINCT CASE WHEN DATE_FORMAT(fp.first_at, '%Y-%m') < DATE_FORMAT(sales.paid_at, '%Y-%m') "
+                .'THEN LOWER(TRIM(sales.email)) END) as returning_buyers')
+            ->groupBy(DB::raw("DATE_FORMAT(sales.paid_at, '%Y-%m')"))
+            ->get()->keyBy('ym');
+
+        $rsvps = $sales()->where('sales.payment_method', 'rsvp')->where('sales.paid_at', '>=', $from)
+            ->selectRaw("DATE_FORMAT(sales.paid_at, '%Y-%m') as ym, COUNT(*) as c, COUNT(DISTINCT LOWER(TRIM(sales.email))) as people")
+            ->groupBy(DB::raw("DATE_FORMAT(sales.paid_at, '%Y-%m')"))
+            ->get()->keyBy('ym');
+
+        // Attendees (paid or free) whose account went on to create a real schedule after they first
+        // attended, by the month they first attended.
+        $firstAttended = $sales()->selectRaw('LOWER(TRIM(sales.email)) as em, MIN(sales.paid_at) as first_at')
+            ->groupBy(DB::raw('LOWER(TRIM(sales.email))'));
+        $converted = DB::query()->fromSub($firstAttended, 'fa')
+            ->join('users', DB::raw('LOWER(users.email)'), '=', 'fa.em')
+            ->where('fa.first_at', '>=', $from)
+            ->whereExists(fn ($q) => $this->excludeDemoRoles($q->select(DB::raw(1))->from('roles')
+                ->whereColumn('roles.user_id', 'users.id')->whereColumn('roles.created_at', '>', 'fa.first_at')))
+            ->selectRaw("DATE_FORMAT(fa.first_at, '%Y-%m') as ym, COUNT(DISTINCT fa.em) as c")
+            ->groupBy(DB::raw("DATE_FORMAT(fa.first_at, '%Y-%m')"))
+            ->pluck('c', 'ym');
+        $attendees = DB::query()->fromSub($firstAttended, 'fa')->where('fa.first_at', '>=', $from)
+            ->selectRaw("DATE_FORMAT(fa.first_at, '%Y-%m') as ym, COUNT(*) as c")
+            ->groupBy(DB::raw("DATE_FORMAT(fa.first_at, '%Y-%m')"))
+            ->pluck('c', 'ym');
+
+        $out = [];
+        for ($m = $from->copy(); $m->lte(now()); $m->addMonth()) {
+            $ym = $m->format('Y-m');
+            $buyers = (int) ($monthly[$ym]->buyers ?? 0);
+            $returning = (int) ($monthly[$ym]->returning_buyers ?? 0);
+            $out[] = [
+                'month' => $ym,
+                'paid_orders' => (int) ($monthly[$ym]->orders ?? 0),
+                'buyers' => $buyers,
+                'new_buyers' => $buyers - $returning,
+                'returning_buyers' => $returning,
+                'rsvps' => (int) ($rsvps[$ym]->c ?? 0),
+                'rsvp_people' => (int) ($rsvps[$ym]->people ?? 0),
+                'new_attendees' => (int) ($attendees[$ym] ?? 0),
+                'attendees_who_became_organizers' => (int) ($converted[$ym] ?? 0),
+            ];
+        }
+
+        return $out;
+    }
+
+    /** How many trailing ISO weeks reach[] covers. */
+    private const REACH_WEEKS = 26;
+
+    /**
+     * Weekly guest-side reach: what schedules' audiences do. Page views by referrer source, the
+     * audience captured (followers, email subscribers, "notify me"), and event-page views against
+     * the sales made on them. Demo schedules and events excluded. Columnar.
+     */
+    private function reach(): array
+    {
+        $from = now()->copy()->startOfWeek(Carbon::MONDAY)->subWeeks(self::REACH_WEEKS - 1)->startOfDay();
+        $week = fn (string $column) => "DATE_FORMAT({$column}, '%x-W%v')";
+        $demoRoles = Role::constrainDemoContent(DB::table('roles'))->select('roles.id');
+        $sources = ['direct', 'search', 'social', 'email', 'other'];
+        $metrics = ['page_views', ...array_map(fn ($s) => 'views_'.$s, $sources), 'followers_added',
+            'subscribers_added', 'interests_added', 'event_page_views', 'event_page_sales'];
+
+        $weeks = [];
+        for ($w = $from->copy(); $w->lte(now()); $w->addWeek()) {
+            $weeks[$w->format('o-\WW')] = array_fill_keys($metrics, 0);
+        }
+        $put = function (string $metric, $rows) use (&$weeks) {
+            foreach ($rows as $key => $n) {
+                if (isset($weeks[$key])) {
+                    $weeks[$key][$metric] = (int) $n;
+                }
+            }
+        };
+
+        $put('page_views', DB::table('analytics_daily')->where('date', '>=', $from->toDateString())
+            ->whereNotIn('role_id', $demoRoles)
+            ->selectRaw($week('date').' as w, SUM(desktop_views + mobile_views + tablet_views + unknown_views) as n')
+            ->groupBy(DB::raw($week('date')))->pluck('n', 'w'));
+
+        $bySource = DB::table('analytics_referrers_daily')->where('date', '>=', $from->toDateString())
+            ->whereNotIn('role_id', $demoRoles)
+            ->selectRaw($week('date').' as w, source, SUM(views) as n')
+            ->groupBy(DB::raw($week('date')), 'source')->get();
+        foreach ($bySource as $row) {
+            $metric = 'views_'.(in_array($row->source, $sources, true) ? $row->source : 'other');
+            if (isset($weeks[$row->w])) {
+                $weeks[$row->w][$metric] += (int) $row->n;
+            }
+        }
+
+        $put('followers_added', DB::table('role_user')->where('level', 'follower')
+            ->where('created_at', '>=', $from)->whereNotIn('role_id', $demoRoles)
+            ->selectRaw($week('created_at').' as w, COUNT(*) as n')->groupBy(DB::raw($week('created_at')))->pluck('n', 'w'));
+        $put('subscribers_added', DB::table('role_subscribers')->whereNotNull('confirmed_at')
+            ->where('created_at', '>=', $from)->whereNotIn('role_id', $demoRoles)
+            ->selectRaw($week('created_at').' as w, COUNT(*) as n')->groupBy(DB::raw($week('created_at')))->pluck('n', 'w'));
+        $put('interests_added', DB::table('event_interests')->whereNotNull('confirmed_at')
+            ->where('created_at', '>=', $from)->whereNotIn('event_id', $this->demoEventIds())
+            ->selectRaw($week('created_at').' as w, COUNT(*) as n')->groupBy(DB::raw($week('created_at')))->pluck('n', 'w'));
+
+        $eventPages = DB::table('analytics_events_daily')->where('date', '>=', $from->toDateString())
+            ->whereNotIn('event_id', $this->demoEventIds())
+            ->selectRaw($week('date').' as w, SUM(desktop_views + mobile_views + tablet_views + unknown_views) as v, SUM(sales_count) as s')
+            ->groupBy(DB::raw($week('date')))->get()->keyBy('w');
+        $put('event_page_views', $eventPages->map(fn ($r) => $r->v));
+        $put('event_page_sales', $eventPages->map(fn ($r) => $r->s));
+
+        return [
+            'columns' => ['week', ...$metrics],
+            'rows' => array_map(fn ($w, $values) => [$w, ...array_values($values)], array_keys($weeks), $weeks),
+        ];
+    }
+
+    /**
+     * Feature use by operation (usage_daily: AI imports, calendar syncs, emails sent, ...), per
+     * month of the recent window: how often, and by how many schedules. Install-level operations
+     * (role 0) count toward the total and not the schedules.
+     */
+    private function usage(array $months): array
+    {
+        $rows = DB::table('usage_daily')
+            ->where('date', '>=', $months[0].'-01')
+            ->whereNotIn('role_id', Role::constrainDemoContent(DB::table('roles'))->select('roles.id'))
+            ->selectRaw("operation, DATE_FORMAT(date, '%Y-%m') as ym, SUM(count) as n, "
+                .'COUNT(DISTINCT CASE WHEN role_id > 0 THEN role_id END) as schedules')
+            ->groupBy('operation', DB::raw("DATE_FORMAT(date, '%Y-%m')"))
+            ->orderBy('operation')
+            ->get();
+
+        $out = [];
+        foreach ($rows as $row) {
+            $out[$row->operation][$row->ym] = ['count' => (int) $row->n, 'schedules' => (int) $row->schedules];
+        }
+
+        return $out;
+    }
+
+    /** Activation and selling by country, from the (k-anonymised) schedule rows. */
+    private function geographyFrom(array $schedules): array
+    {
+        $i = array_flip($schedules['columns']);
+        $by = [];
+        foreach ($schedules['rows'] as $row) {
+            $country = $row[$i['country']] ?? '(none)';
+            $by[$country] ??= ['country' => $country, 'schedules' => 0, 'with_event' => 0,
+                'with_paid_sale' => 0, 'billing' => 0];
+            $by[$country]['schedules']++;
+            $by[$country]['with_event'] += $row[$i['events_total']] > 0 ? 1 : 0;
+            $by[$country]['with_paid_sale'] += $row[$i['first_paid_sale_month']] !== null ? 1 : 0;
+            $by[$country]['billing'] += $row[$i['billing']] ? 1 : 0;
+        }
+        $out = array_values($by);
+        usort($out, fn ($a, $b) => $b['schedules'] <=> $a['schedules']);
+
+        return $out;
+    }
+
+    /**
+     * Our own non-subscription revenue: the markup on boosted (paid promotion) campaigns, net of
+     * refunds, per month and campaign currency - the same netting as /admin/boost.
+     */
+    private function boost(): array
+    {
+        $from = now()->copy()->startOfMonth()->subMonths(11);
+
+        $markup = DB::table('boost_billing_records')
+            ->join('boost_campaigns', 'boost_campaigns.id', '=', 'boost_billing_records.boost_campaign_id')
+            ->where('boost_billing_records.status', 'completed')
+            ->whereIn('boost_billing_records.type', ['charge', 'refund'])
+            ->where('boost_billing_records.created_at', '>=', $from)
+            ->selectRaw("DATE_FORMAT(boost_billing_records.created_at, '%Y-%m') as ym, boost_campaigns.currency_code as currency, "
+                ."SUM(CASE WHEN boost_billing_records.type = 'charge' THEN boost_billing_records.markup_amount "
+                .'ELSE -boost_billing_records.markup_amount END) as net')
+            ->groupBy(DB::raw("DATE_FORMAT(boost_billing_records.created_at, '%Y-%m')"), 'boost_campaigns.currency_code')
+            ->orderBy('ym')->get()
+            ->map(fn ($r) => ['month' => $r->ym, 'currency' => $r->currency, 'net_markup' => round((float) $r->net, 2)])
+            ->all();
+
+        $campaigns = DB::table('boost_campaigns')->where('created_at', '>=', $from)->where('status', '!=', 'draft')
+            ->whereNotIn('role_id', Role::constrainDemoContent(DB::table('roles'))->select('roles.id'))
+            ->selectRaw("DATE_FORMAT(created_at, '%Y-%m') as ym, COUNT(*) as campaigns, COUNT(DISTINCT role_id) as schedules")
+            ->groupBy(DB::raw("DATE_FORMAT(created_at, '%Y-%m')"))->orderBy('ym')->get()
+            ->map(fn ($r) => ['month' => $r->ym, 'campaigns' => (int) $r->campaigns, 'schedules' => (int) $r->schedules])
+            ->all();
+
+        return ['net_markup' => $markup, 'campaigns' => $campaigns];
+    }
+
+    /** The referral programme: where referrals stand, and how many start each month. */
+    private function referrals(): array
+    {
+        return [
+            'by_status' => DB::table('referrals')->selectRaw('status, COUNT(*) as c')->groupBy('status')
+                ->pluck('c', 'status')->map(fn ($n) => (int) $n)->all(),
+            'created_by_month' => DB::table('referrals')->where('created_at', '>=', now()->copy()->startOfMonth()->subMonths(11))
+                ->selectRaw("DATE_FORMAT(created_at, '%Y-%m') as ym, COUNT(*) as c")
+                ->groupBy(DB::raw("DATE_FORMAT(created_at, '%Y-%m')"))->orderBy('ym')
+                ->pluck('c', 'ym')->map(fn ($n) => (int) $n)->all(),
+        ];
+    }
+
+    /**
+     * The selfhost side of the user base that the nexus can see: installs that registered for
+     * federation. Only those - CheckVersion talks to GitHub, not to us - so this is a floor on
+     * selfhost installs, never a count of them. Never the site URL, name or contact.
+     */
+    private function federation(): array
+    {
+        $instances = DB::table('federated_instances');
+
+        return [
+            'by_status' => (clone $instances)->selectRaw('status, COUNT(*) as c')->groupBy('status')
+                ->pluck('c', 'status')->map(fn ($n) => (int) $n)->all(),
+            'active_30d' => (clone $instances)->where('status', 'approved')
+                ->where('last_seen_at', '>=', now()->copy()->subDays(30))->count(),
+            'by_version' => (clone $instances)->where('status', 'approved')
+                ->selectRaw("COALESCE(app_version, 'unknown') as v, COUNT(*) as c")
+                ->groupBy(DB::raw("COALESCE(app_version, 'unknown')"))->orderByDesc('c')->limit(10)
+                ->pluck('c', 'v')->map(fn ($n) => (int) $n)->all(),
+            'registered_by_month' => (clone $instances)->where('created_at', '>=', now()->copy()->startOfMonth()->subMonths(11))
+                ->selectRaw("DATE_FORMAT(created_at, '%Y-%m') as ym, COUNT(*) as c")
+                ->groupBy(DB::raw("DATE_FORMAT(created_at, '%Y-%m')"))->orderBy('ym')
+                ->pluck('c', 'ym')->map(fn ($n) => (int) $n)->all(),
+        ];
     }
 
     /** Median of an int list, or null when empty. */

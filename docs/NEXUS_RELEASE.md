@@ -1202,6 +1202,14 @@ pages still cached at the edge are dropped by the endpoint.
   - ids are 12 characters, so they do not match older pulls.
 - `audit:prune` now keeps the subscription, plan, trial, claim and gateway or calendar connection
   rows forever.
+- Then `schema_version` 9 adds:
+  - `daily` series and `meta.releases`, so changes can be dated to the deploy;
+  - nudge outcomes;
+  - the audience side (buyers, attendees who became organizers, weekly reach);
+  - feature usage, payment gateways and activity buckets per row;
+  - geography, boost revenue, referrals and federated installs.
+
+  `meta.releases` fills from the first scheduler tick after this deploy, so it is empty before it.
 
 **No migrations.** `GROWTH_DATA_TOKEN` is new and optional: unset, the endpoint answers 404.
 

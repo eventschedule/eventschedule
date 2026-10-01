@@ -284,6 +284,14 @@ class AppServiceProvider extends ServiceProvider
             // A week, not a day: a rail retired last month should disappear from the card, but one
             // that died yesterday must still be visible AS stale rather than silently absent.
             Cache::put('scheduler.last_run_at.'.config('app.scheduler_rail', 'cron'), now()->timestamp, now()->addDays(7));
+
+            // The first tick after a deploy dates the release (growth payload meta.releases).
+            // Guarded: a heartbeat must never fail because a stamp could not be written.
+            try {
+                \App\Utils\ReleaseHistory::touch();
+            } catch (\Throwable $e) {
+                report($e);
+            }
         });
 
         // Per-task health for /admin/queue. Every handler is internally guarded - see the
