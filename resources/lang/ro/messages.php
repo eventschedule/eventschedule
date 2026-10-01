@@ -1808,6 +1808,7 @@ return [
     'active_subs' => 'Abonamente Active',
     'expiring_soon' => 'Expiră Curând',
     'stripe_paid' => 'Plătit Stripe',
+    'recurring_revenue_excludes_trials' => 'Exclude :count în perioada de probă',
     'all_sources' => 'Toate Sursele',
     'all_plans' => 'Toate Planurile',
     'all_status' => 'Toate Statusurile',

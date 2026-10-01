@@ -3115,6 +3115,7 @@ return [
     'ticket_sales_end_at_help' => 'De verkoop stopt automatisch op deze datum en tijd',
     'ticket_sales_ended' => 'De ticketverkoop is beëindigd',
     'stripe_paid' => 'Stripe betaald',
+    'recurring_revenue_excludes_trials' => 'Exclusief :count in proefperiode',
     'all_sources' => 'Alle bronnen',
     'whatsapp_user_not_found' => 'Uw telefoonnummer is niet gekoppeld aan een account. Verifieer eerst uw telefoon in uw accountinstellingen.',
     'whatsapp_no_default_schedule' => 'Geen standaard schedule ingesteld. Stel er een in via uw accountinstellingen.',

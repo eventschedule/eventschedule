@@ -3172,6 +3172,7 @@ return [
     'ticket_sales_end_at_help' => 'המכירות ייפסקו אוטומטית בתאריך ובשעה אלה',
     'ticket_sales_ended' => 'מכירת הכרטיסים הסתיימה',
     'stripe_paid' => 'שולם ב-Stripe',
+    'recurring_revenue_excludes_trials' => 'לא כולל :count בתקופת ניסיון',
     'all_sources' => 'כל המקורות',
     'whatsapp_user_not_found' => 'מספר הטלפון שלך אינו מקושר לחשבון. אמת את מספר הטלפון בהגדרות החשבון תחילה.',
     'whatsapp_no_default_schedule' => 'לא הוגדר לוח זמנים ברירת מחדל. הגדר אחד בהגדרות החשבון.',

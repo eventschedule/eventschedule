@@ -110,9 +110,9 @@ class GrowthExportTest extends TestCase
         $this->assertArrayHasKey('signups', $decoded);
         $this->assertArrayHasKey('schedules', $decoded);
         // 3 since the claims section landed, 6 since gmv_recent_by_currency and the demo-free
-        // gmv_by_currency. Bumping this is deliberate: a reader diffing two pulls needs to know
-        // the shape (or the meaning) moved.
-        $this->assertSame(6, $decoded['meta']['schema_version']);
+        // gmv_by_currency, 7 since mrr came from RecurringRevenue. Bumping this is deliberate: a
+        // reader diffing two pulls needs to know the shape (or the meaning) moved.
+        $this->assertSame(7, $decoded['meta']['schema_version']);
     }
 
     public function test_claims_reports_untracked_months_as_null_not_zero(): void
@@ -641,26 +641,46 @@ class GrowthExportTest extends TestCase
         $this->assertSame(40.0, $byCurrency['EUR']);
     }
 
-    public function test_mrr_excludes_admin_granted_and_referral_plans(): void
+    /**
+     * Grants and referral credits are plans, so they count in plan_counts and by_plan_source - but
+     * nothing bills them, so MRR is the one subscription alone.
+     */
+    public function test_plan_counts_include_grants_but_mrr_is_only_what_is_billed(): void
     {
+        config(['services.stripe_platform.price_monthly' => 'price_test_monthly']);
+
         $paying = $this->createRole($this->createOwner(), 'venue', [
-            'plan_type' => 'pro', 'plan_expires' => now()->addYear()->format('Y-m-d'),
+            'plan_type' => 'pro', 'plan_expires' => null,
             'plan_term' => 'month', 'plan_source' => null,
+        ]);
+        $paying->subscriptions()->create([
+            'type' => 'default',
+            'stripe_id' => 'sub_'.Str::random(14),
+            'stripe_status' => 'active',
+            'stripe_price' => 'price_test_monthly',
+            'quantity' => 1,
         ]);
         $granted = $this->createRole($this->createOwner(), 'venue', [
             'plan_type' => 'pro', 'plan_expires' => now()->addYear()->format('Y-m-d'),
             'plan_term' => 'month', 'plan_source' => 'admin',
         ]);
+        $referred = $this->createRole($this->createOwner(), 'venue', [
+            'plan_type' => 'pro', 'plan_expires' => now()->addMonth()->format('Y-m-d'),
+            'plan_term' => 'month', 'plan_source' => 'referral',
+        ]);
 
         $money = $this->build()['monetization'];
         $monthly = (float) config('services.stripe_platform.price_monthly_amount', 5);
 
-        $this->assertSame(2, $money['plan_counts']['pro']);
-        $this->assertSame(round($monthly, 2), $money['mrr'], 'the admin grant pays nothing');
+        $this->assertSame(3, $money['plan_counts']['pro']);
+        $this->assertSame(round($monthly, 2), $money['mrr'], 'the grant and the referral credit pay nothing');
+        $this->assertSame(round($monthly, 2), $money['arpu'], 'and do not dilute ARPU either');
         $this->assertSame(1, $money['by_plan_source']['admin']);
+        $this->assertSame(1, $money['by_plan_source']['referral']);
         $this->assertSame(1, $money['by_plan_source']['stripe']);
         $this->assertNotNull($paying->fresh());
         $this->assertNotNull($granted->fresh());
+        $this->assertNotNull($referred->fresh());
     }
 
     public function test_demo_data_is_excluded_everywhere(): void

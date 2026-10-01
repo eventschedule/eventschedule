@@ -3116,6 +3116,7 @@ return [
     'ticket_sales_end_at_help' => 'Les ventes s\'arrêteront automatiquement à cette date et heure',
     'ticket_sales_ended' => 'La vente des billets est terminée',
     'stripe_paid' => 'Payé via Stripe',
+    'recurring_revenue_excludes_trials' => 'Hors :count en essai',
     'all_sources' => 'Toutes les sources',
     'whatsapp_user_not_found' => 'Votre numéro de téléphone n\'est associé à aucun compte. Vérifiez d\'abord votre téléphone dans les paramètres de votre compte.',
     'whatsapp_no_default_schedule' => 'Aucun calendrier par défaut défini. Définissez-en un dans les paramètres de votre compte.',

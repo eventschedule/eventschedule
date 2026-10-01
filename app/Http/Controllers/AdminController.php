@@ -31,6 +31,7 @@ use App\Services\DemoService;
 use App\Services\DigitalOceanService;
 use App\Services\GrowthExportService;
 use App\Services\OneSignalService;
+use App\Services\RecurringRevenue;
 use App\Services\ScheduleDeletionService;
 use App\Services\SchedulerHealth;
 use App\Services\SubdomainUnavailableException;
@@ -40,7 +41,6 @@ use App\Services\WorkBacklog;
 use App\Utils\AdminReauthUtils;
 use App\Utils\HeroExperiment;
 use App\Utils\MoneyUtils;
-use App\Utils\PlanPriceUtils;
 use App\Utils\PlatformCurrency;
 use App\Utils\PlatformPricing;
 use App\Utils\UrlUtils;
@@ -353,44 +353,11 @@ class AdminController extends Controller
             ->whereHas('subscriptions', $validSubscriptionScope)
             ->count();
 
-        $activeSubscriptions = Subscription::where('type', 'default')
-            ->where(function ($q) {
-                $q->where(function ($q) {
-                    $q->active();
-                })->orWhere(function ($q) {
-                    $q->onTrial();
-                })->orWhere(function ($q) {
-                    $q->onGracePeriod();
-                });
-            })
-            ->whereHas('owner', function ($q) {
-                $q->whereNotNull('user_id')
-                    ->where(function ($q) {
-                        $q->whereNotNull('email_verified_at')
-                            ->orWhereNotNull('phone_verified_at');
-                    })
-                    ->where('subdomain', '!=', DemoService::DEMO_ROLE_SUBDOMAIN)
-                    ->where('subdomain', 'not like', 'demo-%');
-            })
-            ->pluck('stripe_price');
-
-        // ARR. Only the four configured price IDs resolve to an amount, so a subscription left
-        // on any other price contributes nothing here. That is the honest answer rather than a
-        // good one - falling back to the current amount would overstate revenue after a price
-        // change - but note MRR estimates such a role by tier instead, so the two disagree.
-        $arr = 0;
-        foreach ($activeSubscriptions as $priceId) {
-            $amount = PlanPriceUtils::amountFor($priceId);
-            $term = PlanPriceUtils::termFor($priceId);
-
-            // Both, or neither: annualizing an amount whose term we had to assume is how a
-            // yearly price gets counted twelve times over.
-            if (! $amount || ! $term) {
-                continue;
-            }
-
-            $arr += $term === 'year' ? $amount : $amount * 12;
-        }
+        // The same figure the growth page reports as MRR, from the same class - see RecurringRevenue
+        // for what it counts. Trials are left out of it and shown beside it.
+        $recurringRevenue = RecurringRevenue::summary();
+        $arr = $recurringRevenue['arr'];
+        $arrTrialingCount = $recurringRevenue['trialing_count'];
 
         // Domains overview
         $totalCustomDomains = Role::whereNotNull('custom_domain')->count();
@@ -442,6 +409,7 @@ class AdminController extends Controller
             'recentSignups',
             'stripePaidCount',
             'arr',
+            'arrTrialingCount',
             'totalCustomDomains',
             'directCount',
             'activeCount',
@@ -779,9 +747,11 @@ class AdminController extends Controller
         // AdminAlertService's subscriptions_unrecognized row, which links here - the alert says
         // how many, this says which, because the operator cannot query production themselves.
         //
-        // These are the rows the ARR loop above skipped: PlanPriceUtils::amountFor() returns
-        // null for an unrecognized price, so they contribute nothing to revenue while Stripe
-        // keeps charging them.
+        // PlanPriceUtils::amountFor() returns null for an unrecognized price, so the billing ones
+        // among these contribute nothing to the dashboard's ARR or the growth page's MRR while
+        // Stripe keeps charging them. This list is wider than what RecurringRevenue counts - it
+        // also carries trials and deleted schedules - because it is about the withdrawn tier, not
+        // the revenue figure.
         $configuredPriceIds = AdminAlertService::configuredPriceIds();
 
         // leftJoin, not join. subscriptions.role_id carries no foreign key, and until every delete

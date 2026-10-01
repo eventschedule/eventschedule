@@ -116,6 +116,9 @@
             </x-stat-panel>
             <x-stat-panel label="ARR" color="green">
                 {{ plan_price($arr) }}
+                @if ($arrTrialingCount > 0)
+                    <x-slot:subtitle>{{ __('messages.recurring_revenue_excludes_trials', ['count' => number_format($arrTrialingCount)]) }}</x-slot:subtitle>
+                @endif
             </x-stat-panel>
             <x-stat-panel label="{{ __('messages.active_boost_campaigns') }}">
                 {{ number_format($activeBoostCampaigns) }}

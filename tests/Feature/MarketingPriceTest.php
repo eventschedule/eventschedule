@@ -725,6 +725,7 @@ class MarketingPriceTest extends TestCase
         $mustNotUse = [
             'app/Utils/PlanPriceUtils.php' => app_path('Utils/PlanPriceUtils.php'),
             'app/Services/GrowthExportService.php' => app_path('Services/GrowthExportService.php'),
+            'app/Services/RecurringRevenue.php' => app_path('Services/RecurringRevenue.php'),
         ];
 
         foreach ($mustNotUse as $relative => $path) {

@@ -104,10 +104,19 @@
                         <dd class="font-medium text-gray-900 dark:text-white">{{ plan_price($money['mrr']) }}</dd>
                     </div>
                     <div class="flex items-center justify-between">
+                        <dt class="text-gray-600 dark:text-gray-400">ARR</dt>
+                        <dd class="font-medium text-gray-900 dark:text-white">{{ plan_price($money['arr']) }}</dd>
+                    </div>
+                    <div class="flex items-center justify-between">
                         <dt class="text-gray-600 dark:text-gray-400">ARPU</dt>
                         <dd class="font-medium text-gray-900 dark:text-white">
                             {{ $money['arpu'] === null ? __('messages.funnel_na') : plan_price($money['arpu']) }}
                         </dd>
+                    </div>
+                    {{-- Left out of MRR, ARR and ARPU above: a trial has not paid anything yet. --}}
+                    <div class="flex items-center justify-between">
+                        <dt class="text-gray-600 dark:text-gray-400">@lang('messages.trialing_subscriptions')</dt>
+                        <dd class="font-medium text-gray-900 dark:text-white">{{ number_format($money['trialing_subscriptions']) }}</dd>
                     </div>
                 </dl>
             </div>

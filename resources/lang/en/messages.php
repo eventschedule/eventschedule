@@ -2145,6 +2145,7 @@ return [
     'active_subs' => 'Active Subs',
     'expiring_soon' => 'Expiring Soon',
     'stripe_paid' => 'Stripe Paid',
+    'recurring_revenue_excludes_trials' => 'Excludes :count in trial',
     'all_sources' => 'All Sources',
     'all_plans' => 'All Plans',
     'all_status' => 'All Status',

@@ -115,7 +115,7 @@ there is a second place to rotate every key.
 This release moves their fallbacks in `config/services.php` from 9 / 90 / 29 / 290 to
 5 / 50 / 15 / 150, and production is running on the fallback, so the numbers change on deploy with
 no spec edit. Display is unaffected, because `PlatformPricing` prefers the admin `settings` row
-and that already reads 5 / 50 / 15 / 150. But `GrowthExportService` (ARR and MRR) and the renewal
+and that already reads 5 / 50 / 15 / 150. But `RecurringRevenue` (ARR and MRR) and the renewal
 emails read `config('services.stripe_platform.*')` directly and deliberately, precisely so that a
 marketing change cannot restate revenue already booked. Left unset, revenue reporting re-bases
 itself on this deploy instead.

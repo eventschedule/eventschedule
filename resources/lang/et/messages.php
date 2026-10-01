@@ -3112,6 +3112,7 @@ return [
     'ticket_sales_end_at_help' => 'Müük peatub automaatselt sellel kuupäeval ja kellaajal',
     'ticket_sales_ended' => 'Piletimüük on lõppenud',
     'stripe_paid' => 'Stripe\'iga makstud',
+    'recurring_revenue_excludes_trials' => 'Välja arvatud :count prooviperioodil',
     'all_sources' => 'Kõik allikad',
     'whatsapp_user_not_found' => 'Teie telefoninumber ei ole kontoga seotud. Kinnitage esmalt oma telefon konto seadetes.',
     'whatsapp_no_default_schedule' => 'Vaikekava pole määratud. Määrake see oma konto seadetes.',

@@ -208,8 +208,9 @@ class AdminAlertService
             // PlanPriceUtils resolves a tier ONLY by exact match against those four, so an
             // unrecognized ID means hasActiveEnterpriseSubscription() returns false while Stripe
             // keeps charging the Enterprise rate, both webhook handlers decline to write, and
-            // AdminController::revenue()'s ARR loop contributes zero for that customer - with
-            // nothing but a Log::warning to announce any of it. See PlanPriceUtils::tierFor().
+            // RecurringRevenue (the dashboard's ARR, the growth page's MRR) books that customer
+            // at zero - with nothing but a Log::warning to announce any of it. See
+            // PlanPriceUtils::tierFor().
             //
             // Reads the four through PlanPriceUtils rather than re-listing the config keys, so
             // this row cannot disagree with the recognition the rest of the app performs.

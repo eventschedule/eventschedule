@@ -6,7 +6,6 @@ use App\Models\AnalyticsDaily;
 use App\Models\MarketingDailyStat;
 use App\Models\Role;
 use App\Models\User;
-use App\Utils\PlanPriceUtils;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\DB;
 
@@ -497,6 +496,14 @@ class GrowthExportService
                 .'pages, and daily visitors fell about 4x across that line. Whether that removed bots or '
                 .'the beacon under-counts is not established - see MarketingDailyStat::COLUMN_REBASED_AT. '
                 .'Do not compare visit counts across bases. signup_* counters are unaffected.',
+            'monetization.mrr and .arr come from live Stripe subscriptions (active, past_due, or '
+                .'cancelled but paid until ends_at) at their configured price, and match the /admin '
+                .'dashboard ARR. From schema_version 7 trialing subscriptions are excluded (counted in '
+                .'trialing_subscriptions), a paid plan with no live subscription counts 0, and a price '
+                .'config no longer names counts 0 (unrecognized_price_subscriptions). Before 7, mrr '
+                .'counted trials and booked the last two at a by-tier estimate: do not compare mrr '
+                .'across that line. arpu divides by the priced subscriptions, not by plan_counts, '
+                .'which include admin grants and referral credits.',
             'monetization.ticket_trials counts the card-free paid-selling trial, which is not a plan: '
                 .'those schedules stay "free" in plan_counts. converted means a real subscription created '
                 .'after the trial started and within 14 days of its end; sold_during means a paid sale '
@@ -518,7 +525,7 @@ class GrowthExportService
                 'is_hosted' => (bool) config('app.hosted'),
                 'is_nexus' => (bool) config('app.is_nexus'),
                 'app_version' => config('self-update.version_installed'),
-                'schema_version' => 6,
+                'schema_version' => 7,
                 'row_cap' => $this->rowCap(),
                 'truncated' => [
                     'signups' => ['capped' => $signups['truncated'], 'total' => $signups['total']],
@@ -1218,20 +1225,14 @@ class GrowthExportService
         $byTerm = [];
         $daysToUpgrade = [];
 
-        // Only NULL plan_source is a genuine Stripe conversion; admin grants and referral
-        // credits pay nothing and would inflate MRR.
-        //
-        // config(), NOT PlatformPricing - do not "fix" this. These four are the fallback for a
-        // paid schedule with no subscription row, and the primary branch below is
-        // PlanPriceUtils::amountFor(), which stays on config because it answers what Stripe
-        // actually charges. Sourcing the fallback from the admin-settable amounts would build
-        // one MRR figure from two sources and let a marketing change restate revenue that was
-        // already booked. MarketingPriceTest pins this in both directions.
+        // config(), NOT PlatformPricing - do not "fix" this. list_prices reports what subscribers
+        // are billed, beside an MRR built from the same config through PlanPriceUtils::amountFor().
+        // Sourcing these from the admin-settable amounts would let a marketing change restate
+        // revenue that was already booked. MarketingPriceTest pins this in both directions.
         $monthly = (float) config('services.stripe_platform.price_monthly_amount', 5);
         $yearly = (float) config('services.stripe_platform.price_yearly_amount', 50);
         $entMonthly = (float) config('services.stripe_platform.enterprise_price_monthly_amount', 15);
         $entYearly = (float) config('services.stripe_platform.enterprise_price_yearly_amount', 150);
-        $mrr = 0.0;
 
         // lazy(), not get(): this is every schedule on the install, and actualPlanTier()
         // needs a hydrated model, so the whole table would otherwise sit in memory at once.
@@ -1253,37 +1254,18 @@ class GrowthExportService
             if ($first && $role->created_at) {
                 $daysToUpgrade[] = max(0, $role->created_at->diffInDays(Carbon::parse($first)));
             }
-
-            if ($role->plan_source === null) {
-                // Prefer the amount tied to this subscriber's own price ID over the by-tier
-                // estimate below, so MRR agrees with the dashboard's ARR, which reads the same
-                // source. Only the four configured IDs resolve; a subscription on any other
-                // price falls through to the estimate, where ARR drops it entirely - the one
-                // place the two figures can legitimately disagree. Roles with no subscription
-                // row (legacy plan_type backfills) have only ever had the estimate.
-                $subscription = $role->subscriptions->first(
-                    fn ($s) => in_array($s->stripe_status, ['active', 'trialing', 'past_due'], true)
-                );
-                $actual = PlanPriceUtils::amountFor($subscription->stripe_price ?? null);
-
-                if ($actual !== null) {
-                    $mrr += PlanPriceUtils::termFor($subscription->stripe_price) === 'year'
-                        ? $actual / 12
-                        : $actual;
-                } else {
-                    $isYear = $role->plan_term === 'year';
-                    $mrr += $tier === 'enterprise'
-                        ? ($isYear ? $entYearly / 12 : $entMonthly)
-                        : ($isYear ? $yearly / 12 : $monthly);
-                }
-            }
         }
 
         $statuses = DB::table('subscriptions')
             ->selectRaw('stripe_status, COUNT(*) as c')->groupBy('stripe_status')
             ->pluck('c', 'stripe_status');
 
-        $paying = ($tiers['pro'] ?? 0) + ($tiers['enterprise'] ?? 0);
+        // The same figure the dashboard reports as ARR, from the same class - see RecurringRevenue
+        // for what it counts. ARPU divides by the subscriptions that figure is made of, not by the
+        // Pro + Enterprise counts above, which include admin grants and referral credits that pay
+        // nothing - and not by the ones on an unrecognized price either, which it books at zero.
+        $revenue = RecurringRevenue::summary();
+        $priced = $revenue['billing_count'] - $revenue['unrecognized_count'];
 
         return [
             'plan_counts' => $tiers,
@@ -1291,8 +1273,13 @@ class GrowthExportService
             'by_plan_term' => $byTerm,
             'subscription_status' => $statuses,
             // Not *_usd: these are in the platform currency, whatever the operator set.
-            'mrr' => round($mrr, 2),
-            'arpu' => $paying > 0 ? round($mrr / $paying, 2) : null,
+            'mrr' => $revenue['mrr'],
+            'arr' => $revenue['arr'],
+            // From the exact annual sum, not the rounded mrr, so the cent is rounded once.
+            'arpu' => $priced > 0 ? round($revenue['arr'] / 12 / $priced, 2) : null,
+            'billing_subscriptions' => $revenue['billing_count'],
+            'trialing_subscriptions' => $revenue['trialing_count'],
+            'unrecognized_price_subscriptions' => $revenue['unrecognized_count'],
             'list_prices' => ['pro_monthly' => $monthly, 'pro_yearly' => $yearly,
                 'enterprise_monthly' => $entMonthly, 'enterprise_yearly' => $entYearly],
             'median_days_to_upgrade' => $this->median($daysToUpgrade),

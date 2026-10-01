@@ -81,9 +81,9 @@ class PlanPriceUtils
      * What an unrecognized ID actually costs, so the strictness is a known trade and not a
      * surprise: hasActiveEnterpriseSubscription() goes false, so Enterprise features are withdrawn
      * while the card keeps being charged the Enterprise rate; both webhook handlers decline to
-     * write, so the role row freezes out of sync with Stripe; ARR counts the subscriber at zero
-     * while MRR books them at the Pro estimate; and the renewal email is either skipped or
-     * labelled "Pro". Only a Log::warning announces any of it.
+     * write, so the role row freezes out of sync with Stripe; ARR and MRR (RecurringRevenue)
+     * count the subscriber at zero; and the renewal email is either skipped or labelled "Pro".
+     * Only a Log::warning and AdminAlertService's subscriptions_unrecognized row announce it.
      *
      * @return string|null enterprise|pro|null
      */

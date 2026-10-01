@@ -3177,6 +3177,7 @@ return [
     'ticket_sales_end_at_help' => 'ستتوقف المبيعات تلقائيًا في هذا التاريخ والوقت',
     'ticket_sales_ended' => 'انتهى بيع التذاكر',
     'stripe_paid' => 'مدفوع عبر Stripe',
+    'recurring_revenue_excludes_trials' => 'باستثناء :count في الفترة التجريبية',
     'all_sources' => 'جميع المصادر',
     'whatsapp_user_not_found' => 'رقم هاتفك غير مرتبط بحساب. تحقق من رقم هاتفك في إعدادات حسابك أولاً.',
     'whatsapp_no_default_schedule' => 'لم يتم تعيين جدول افتراضي. قم بتعيينه في إعدادات حسابك.',

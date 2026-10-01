@@ -409,17 +409,21 @@ class PlatformPricingTest extends TestCase
 
     public function test_the_admin_price_does_not_move_revenue_reporting(): void
     {
+        // ARR and MRR both come from RecurringRevenue, so a promotion set at /admin/settings must
+        // leave them on what the subscriber is billed: 9 a month, not the advertised 4321.
+        config(['services.stripe_platform.price_monthly' => 'price_pro_monthly_test']);
+        $role = $this->createRole($this->createOwner(), 'venue', ['plan_type' => 'free', 'plan_expires' => null]);
+        $role->subscriptions()->create([
+            'type' => 'default',
+            'stripe_id' => 'sub_'.\Illuminate\Support\Str::random(14),
+            'stripe_status' => 'active',
+            'stripe_price' => 'price_pro_monthly_test',
+            'quantity' => 1,
+        ]);
+
         $this->usePrices();
 
-        $reflection = new \ReflectionClass(\App\Services\GrowthExportService::class);
-        $source = file_get_contents($reflection->getFileName());
-
-        // Belt and braces alongside the grep guard in MarketingPriceTest: this asserts the value
-        // in force, not just the absence of a symbol.
-        $this->assertStringContainsString(
-            "config('services.stripe_platform.price_monthly_amount', 5)",
-            $source,
-            'MRR must keep reading config, not the admin-settable amounts.'
-        );
+        $this->assertSame(9.0, \App\Services\RecurringRevenue::summary()['mrr']);
+        $this->assertSame(108.0, \App\Services\RecurringRevenue::summary()['arr']);
     }
 }
