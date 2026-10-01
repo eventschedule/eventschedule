@@ -1,3 +1,11 @@
+@php
+    // A lone schedule is listed with the Dashboard as a regular nav item. A "Talent Schedules"
+    // heading over a one-row list reads as a section waiting for more entries.
+    $allNavSchedules = $schedules->concat($venues)->concat($curators);
+    $singleSchedule = $allNavSchedules->count() === 1 ? $allNavSchedules->first() : null;
+    $singleScheduleActive = $singleSchedule
+        && (request()->is($singleSchedule->subdomain) || request()->is($singleSchedule->subdomain . '/*'));
+@endphp
 <a href="{{ marketing_url() }}">
     <div class="flex h-16 pt-2 shrink-0 items-center">
         <picture>
@@ -22,8 +30,35 @@
                     </a>
                 </li>
 
+                @if ($singleSchedule)
+                <li>
+                    <div class="dark-nav-hover group flex items-center rounded-lg p-2 text-lg font-semibold leading-6 hover:text-white {{ $singleScheduleActive ? 'dark-nav-active text-white' : 'text-gray-400' }}">
+                        <a href="{{ route('role.view_admin', ['subdomain' => $singleSchedule->subdomain, 'tab' => $singleSchedule->subdomain == request()->subdomain ? 'schedule' : (request()->tab ? request()->tab : 'schedule')]) }}"
+                            class="flex gap-x-4 items-center min-w-0 flex-1">
+                            <svg class="h-8 w-8 shrink-0" viewBox="0 0 24 24"
+                                fill="{{ $singleScheduleActive ? '#ccc' : '#666' }}" aria-hidden="true">
+                                <path d="M9,10V12H7V10H9M13,10V12H11V10H13M17,10V12H15V10H17M19,3A2,2 0 0,1 21,5V19A2,2 0 0,1 19,21H5C3.89,21 3,20.1 3,19V5A2,2 0 0,1 5,3H6V1H8V3H16V1H18V3H19M19,19V8H5V19H19M9,14V16H7V14H9M13,14V16H11V14H13M17,14V16H15V14H17Z" />
+                            </svg>
+                            <span class="truncate">{{ $singleSchedule->name }}</span>
+                        </a>
+                        <div class="hidden group-hover:flex items-center gap-1 shrink-0">
+                            <a href="{{ route('role.edit', ['subdomain' => $singleSchedule->subdomain]) }}" title="{{ __('messages.edit') }}" class="p-2 rounded hover:bg-gray-700">
+                                <svg class="w-4 h-4" viewBox="0 0 24 24" fill="currentColor"><path d="M20.71,7.04C21.1,6.65 21.1,6 20.71,5.63L18.37,3.29C18,2.9 17.35,2.9 16.96,3.29L15.12,5.12L18.87,8.87M3,17.25V21H6.75L17.81,9.93L14.06,6.18L3,17.25Z"/></svg>
+                            </a>
+                            @if ($singleSchedule->isClaimed())
+                            <a href="{{ $singleSchedule->getGuestUrl() }}" target="_blank" title="{{ __('messages.view') }}" class="p-2 rounded hover:bg-gray-700">
+                                <svg class="w-4 h-4" viewBox="0 0 24 24" fill="currentColor"><path d="M14,3V5H17.59L7.76,14.83L9.17,16.24L19,6.41V10H21V3M19,19H5V5H12V3H5C3.89,3 3,3.9 3,5V19A2,2 0 0,0 5,21H19A2,2 0 0,0 21,19V12H19V19Z"/></svg>
+                            </a>
+                            @endif
+                        </div>
+                    </div>
+                </li>
+                @endif
+
             </ul>
         </li>
+
+        @if (! $singleSchedule)
 
         @if ($schedules->isNotEmpty())
         <li>
@@ -122,6 +157,8 @@
 
             </ul>
         </li>
+        @endif
+
         @endif
 
         <li>
