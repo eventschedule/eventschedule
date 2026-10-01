@@ -13,22 +13,10 @@
             $pct = fn ($n) => round($n / $accounts * 100, 1);
         @endphp
 
-        {{-- Header + download --}}
-        <div class="ap-card rounded-xl shadow p-6 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-            <div>
-                <h2 class="text-lg font-semibold text-gray-900 dark:text-white">@lang('messages.growth')</h2>
-                <p class="text-sm text-gray-500 dark:text-gray-400 mt-1">@lang('messages.growth_description')</p>
-                <p class="text-xs text-gray-400 dark:text-gray-500 mt-2 max-w-xl">@lang('messages.growth_download_help')</p>
-            </div>
-            <div class="sm:ms-auto">
-                <x-secondary-link :href="route('admin.growth.export', ['range' => $range])">
-                    <svg class="w-4 h-4 me-1.5" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                              d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
-                    </svg>
-                    @lang('messages.growth_download')
-                </x-secondary-link>
-            </div>
+        {{-- Header. The full payload is pulled with `php artisan app:pull-growth` (docs/GROWTH_DATA.md), not downloaded here. --}}
+        <div class="ap-card rounded-xl shadow p-6">
+            <h2 class="text-lg font-semibold text-gray-900 dark:text-white">@lang('messages.growth')</h2>
+            <p class="text-sm text-gray-500 dark:text-gray-400 mt-1">@lang('messages.growth_description')</p>
         </div>
 
         {{-- Activation: how far the whole verified base actually gets --}}

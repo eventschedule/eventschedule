@@ -2541,8 +2541,6 @@ return [
     'usage' => 'Utilisation',
     'growth' => 'Croissance',
     'growth_description' => 'Où les inscriptions deviennent des plannings actifs, et où elles deviennent payantes.',
-    'growth_download' => 'Télécharger le JSON',
-    'growth_download_help' => 'Données agrégées et pseudonymisées : chaque identifiant est haché et aucun nom, e-mail, adresse ou identifiant de paiement n\'est inclus.',
     'growth_free_pressure' => 'Pression du forfait gratuit',
     'growth_free_pressure_help' => 'Nombre maximal de billets payants sur un seul mois par planning gratuit, avant que la vente ne devienne une fonctionnalité Pro. Tout ce qui dépasse zéro est un planning qui a déjà vendu et reste au forfait Gratuit.',
     'growth_acquisition' => 'Acquisition',

@@ -24,6 +24,7 @@ foreach ([
     'DEFAULT_PAYMENT_METHOD',
     'MARKETING_WALL_CACHE_SECONDS',
     'SESSION_LIFETIME',
+    'GROWTH_DATA_TOKEN',
 ] as $pinned) {
     if (array_key_exists($pinned, $_ENV)) {
         $_SERVER[$pinned] = $_ENV[$pinned];

@@ -3,6 +3,7 @@
 namespace Tests\Feature;
 
 use App\Models\Role;
+use App\Services\DemoService;
 use App\Services\GrowthExportService;
 use App\Services\RecurringRevenue;
 use Illuminate\Foundation\Testing\RefreshDatabase;
@@ -104,7 +105,10 @@ class RecurringRevenueTest extends TestCase
             'plan_type' => 'enterprise', 'plan_expires' => now()->addYear()->format('Y-m-d'), 'plan_source' => 'admin',
         ]);
         $this->subscribe($this->schedule(['is_deleted' => true]), 'price_ent_m'); // orphaned billing
-        $this->subscribe($this->schedule(['subdomain' => 'demo-'.Str::random(6)]), 'price_ent_m');
+        // Demo CONTENT (the schedule's contact address is the demo's), not the `demo-` subdomain
+        // shape: a real schedule that holds that prefix is a real customer - see
+        // test_a_real_schedule_on_a_demo_prefixed_subdomain_is_revenue.
+        $this->subscribe($this->schedule(['email' => DemoService::DEMO_EMAIL]), 'price_ent_m');
         $this->subscribe($this->schedule(), 'price_pro_m', 'canceled', ['ends_at' => now()->subDay()]);
         $this->subscribe($this->schedule(), 'price_pro_m', 'active', ['ends_at' => now()->subDay()]); // webhook not in yet
         $this->subscribe($this->schedule(), 'price_pro_m', 'incomplete');
@@ -150,6 +154,46 @@ class RecurringRevenueTest extends TestCase
         // Over the six priced subscriptions, not the unrecognized ones booked at zero and not the
         // Pro + Enterprise plan counts, which include the comp and the legacy plan.
         $this->assertSame(round($arr / 12 / 6, 2), $money['arpu']);
+    }
+
+    /**
+     * The subdomain shape used to be the demo test here, and it hid a paying customer: real
+     * schedules named before cleanSubdomain() reserved the prefix still hold one ("Demo Night" got
+     * `demo-night`). Demo content is keyed on the demo's contact address and owner instead.
+     */
+    public function test_a_real_schedule_on_a_demo_prefixed_subdomain_is_revenue(): void
+    {
+        $this->subscribe($this->schedule(['subdomain' => 'demo-night-'.Str::lower(Str::random(4))]), 'price_pro_m');
+
+        $this->assertSame(60.0, RecurringRevenue::summary()['arr']);
+    }
+
+    /**
+     * billingRoleIds() is what the growth payload calls a paying schedule, so it has to agree with
+     * summary() row for row: a trial, a comp and a legacy plan are not paying, an unrecognized
+     * price still is (it is being charged; it only books at zero).
+     */
+    public function test_billing_role_ids_are_the_schedules_summary_counts_as_billing(): void
+    {
+        $paying = $this->schedule();
+        $this->subscribe($paying, 'price_pro_m');
+        $pastDue = $this->schedule();
+        $this->subscribe($pastDue, 'price_pro_m', 'past_due');
+        $retired = $this->schedule();
+        $this->subscribe($retired, 'price_retired_2024');
+        $trial = $this->schedule();
+        $this->subscribe($trial, 'price_pro_m', 'trialing', ['trial_ends_at' => now()->addDays(7)]);
+        $comp = $this->schedule(['plan_type' => 'pro', 'plan_expires' => now()->addYear()->format('Y-m-d'), 'plan_source' => 'admin']);
+        $lapsed = $this->schedule();
+        $this->subscribe($lapsed, 'price_pro_m', 'canceled', ['ends_at' => now()->subDay()]);
+
+        $ids = RecurringRevenue::billingRoleIds();
+
+        $this->assertEqualsCanonicalizing([$paying->id, $pastDue->id, $retired->id], array_keys($ids));
+        $this->assertSame(RecurringRevenue::summary()['billing_count'], count($ids));
+        $this->assertArrayNotHasKey($trial->id, $ids);
+        $this->assertArrayNotHasKey($comp->id, $ids);
+        $this->assertArrayNotHasKey($lapsed->id, $ids);
     }
 
     public function test_an_install_with_no_subscriptions_reports_zero_and_no_arpu(): void

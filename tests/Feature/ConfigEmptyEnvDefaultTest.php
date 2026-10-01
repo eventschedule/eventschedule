@@ -50,6 +50,11 @@ class ConfigEmptyEnvDefaultTest extends TestCase
             // arising at all.
             'admin re-auth idle window' => ['auth.php', 'ADMIN_REAUTH_TIMEOUT'],
             'admin re-auth ceiling' => ['auth.php', 'ADMIN_REAUTH_MAX_LIFETIME'],
+            // Blank would cap every growth row table at ONE row (max(1, 0)), and the export would
+            // then derive every rollup from it while reporting the truncation as if it were real.
+            'growth row cap' => ['usage.php', 'GROWTH_ROW_CAP'],
+            // Blank would send app:pull-growth to an empty base URL instead of the default.
+            'growth data url' => ['app.php', 'GROWTH_DATA_URL'],
         ];
     }
 

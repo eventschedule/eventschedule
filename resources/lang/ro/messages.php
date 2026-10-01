@@ -2558,8 +2558,6 @@ return [
     'usage' => 'Utilizare',
     'growth' => 'Creștere',
     'growth_description' => 'Unde înregistrările devin programe active și unde devin plătite.',
-    'growth_download' => 'Descarcă JSON',
-    'growth_download_help' => 'Date agregate și pseudonimizate: fiecare identificator este criptat și nu sunt incluse nume, adrese de e-mail, adrese sau identificatori de plată.',
     'growth_free_pressure' => 'Presiunea planului gratuit',
     'growth_free_pressure_help' => 'Numărul maxim de bilete cu plată într-o singură lună pentru fiecare program gratuit, din perioada de dinainte ca vânzarea să devină o funcție Pro. Orice valoare peste zero este un program care a vândut deja și a rămas pe Gratuit.',
     'growth_acquisition' => 'Achiziție',

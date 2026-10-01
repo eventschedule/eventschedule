@@ -217,6 +217,10 @@ class AuditService
 
     const ADMIN_REVOKE = 'admin.revoke';
 
+    // A pull of the growth payload by app:pull-growth (GrowthDataController). No user: the caller
+    // is identified by the bearer token, and new_values carries its real IP and the build cost.
+    const ADMIN_GROWTH_DATA_PULL = 'admin.growth_data_pull';
+
     // Subscription actions
     const SUBSCRIPTION_CREATE = 'subscription.create';
 
@@ -300,6 +304,10 @@ class AuditService
 
     /**
      * Log an audit event. Silently fails so auditing never disrupts actual operations.
+     *
+     * Returns the row (null when logging failed) for the rare caller that records an outcome
+     * onto it afterwards - see GrowthDataController, which logs before a long build so a pull
+     * that dies is still on record.
      */
     public static function log(
         string $action,
@@ -309,9 +317,9 @@ class AuditService
         ?array $oldValues = null,
         ?array $newValues = null,
         ?string $metadata = null,
-    ): void {
+    ): ?AuditLog {
         try {
-            AuditLog::create([
+            return AuditLog::create([
                 'user_id' => $userId,
                 'action' => $action,
                 'model_type' => $modelType,
@@ -325,6 +333,8 @@ class AuditService
             ]);
         } catch (\Throwable $e) {
             \Log::warning('Audit logging failed: '.$e->getMessage());
+
+            return null;
         }
     }
 

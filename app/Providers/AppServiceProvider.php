@@ -238,6 +238,18 @@ class AppServiceProvider extends ServiceProvider
             return Limit::perMinute(600)->by('realtime|'.hash_hmac('sha256', $ip.'|'.gmdate('Y-m-d'), (string) config('app.key')));
         });
 
+        // GET /api/internal/growth (app:pull-growth). Keyed on the real client IP for the same
+        // reason as the beacon above: the positional `throttle:N,M,x` form keys on $request->ip(),
+        // which on hosted is a Cloudflare edge address, so every caller in the world would share
+        // one bucket and anyone could 429 the operator's pulls. The path is public (open source),
+        // so that is a real lockout, not a theoretical one. Tight, because each pull is a full
+        // build; GrowthDataController also refuses to run two builds at once.
+        RateLimiter::for('growth_data', function ($request) {
+            $ip = \App\Utils\RealtimeTracker::clientIp($request);
+
+            return Limit::perMinute(10)->by('growth_data|'.hash_hmac('sha256', $ip, (string) config('app.key')));
+        });
+
         // Scheduler heartbeat, read by AdminAlertService's scheduler_stalled row.
         //
         // CommandFinished rather than ScheduledTaskFinished: this has to tick even on the minutes

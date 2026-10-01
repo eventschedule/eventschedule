@@ -229,6 +229,23 @@ v1.0.112
 - Fixed: Markdown not formatting correctly in some event descriptions [#90](https://github.com/eventschedule/eventschedule/issues/90)
 ```
 
+## Growth Data
+
+When the user asks how to grow, what to build next, or how the funnel, conversion, retention, MRR
+or sellers are doing, use the `growth-review` skill (`.claude/skills/growth-review/SKILL.md`).
+
+- `php artisan app:pull-growth` downloads the pseudonymous growth payload from the hosted install
+  into `storage/app/growth/` (`latest.json`, plus a timestamped copy per pull) and prints the
+  headline numbers against the previous pull. It needs `GROWTH_DATA_TOKEN` in `.env`, the same value
+  as on the server. `--local` re-prints the summary without downloading.
+- `docs/GROWTH_DATA.md` defines every field, population and window, and lists the caveats. Read it
+  before drawing conclusions. Query the JSON with `jq` or `python3`; it is too big to Read.
+- **Never commit a pull or any figure from one.** The repository is public. Conclusions and
+  hypotheses go to memory (`hub_growth_funnel`, `project_growth_experiments_ledger`).
+- **Changing `GrowthExportService`'s output** means bumping `SCHEMA_VERSION` and updating
+  `docs/GROWTH_DATA.md` (`GrowthDataDictionaryTest` enforces both). Anything visitor-controlled must
+  pass the same anonymisation (`GrowthDataEndpointTest` holds the sentinel list).
+
 ## Feature Tiers (Free / Pro / Enterprise)
 
 See `docs/FEATURES.md` for the complete reference of which features belong to each plan tier. **Always consult `docs/FEATURES.md`** when:

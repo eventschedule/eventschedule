@@ -3,13 +3,14 @@
 namespace App\Console\Commands;
 
 use App\Services\GrowthExportService;
+use App\Utils\AdminDateRange;
 use Illuminate\Console\Command;
 
 /**
- * CLI twin of /admin/growth/export. Same service, same payload - useful when the export
- * is wanted without a browser session, or when it runs long enough that a request would
- * time out. Deliberately not scheduled, so it belongs in neither
- * AppController::translateData() nor routes/console.php.
+ * Server-side twin of GET /api/internal/growth: same service, same window, same payload. For when
+ * the payload is wanted from a shell on the server itself, or a build runs longer than a request
+ * may. On a dev machine, `app:pull-growth` is the way in. Deliberately not scheduled, so it belongs
+ * in neither AppController::translateData() nor routes/console.php.
  */
 class ExportGrowth extends Command
 {
@@ -19,7 +20,7 @@ class ExportGrowth extends Command
      * @var string
      */
     protected $signature = 'app:export-growth
-                            {--days=30 : Size of the reporting window in days}
+                            {--range=last_30_days : last_7_days, last_30_days, last_90_days or all_time - the funnel window, as on /admin/growth}
                             {--path= : Write to this file instead of stdout}';
 
     /**
@@ -31,13 +32,11 @@ class ExportGrowth extends Command
 
     public function handle(GrowthExportService $growth): int
     {
-        $days = max(1, (int) $this->option('days'));
-        $end = now();
-        $start = $end->copy()->subDays($days)->startOfDay();
-        $prevEnd = $start->copy()->subDay();
-        $prevStart = $prevEnd->copy()->subDays($days)->startOfDay();
+        // AdminDateRange, so a range here is the exact window the endpoint and the page use. This
+        // command used to do its own arithmetic, a day short of theirs.
+        $dates = AdminDateRange::for($this->option('range'));
 
-        $data = $growth->build($start, $end, $prevStart, $prevEnd);
+        $data = $growth->build($dates['start'], $dates['end'], $dates['previous_start'], $dates['previous_end']);
         $json = json_encode($data, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES | JSON_THROW_ON_ERROR);
 
         $path = $this->option('path');

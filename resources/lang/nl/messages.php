@@ -2540,8 +2540,6 @@ return [
     'usage' => 'Gebruik',
     'growth' => 'Groei',
     'growth_description' => 'Waar aanmeldingen actieve schema\'s worden, en waar ze betalend worden.',
-    'growth_download' => 'JSON downloaden',
-    'growth_download_help' => 'Geaggregeerd en gepseudonimiseerd: elke id is gehasht en er zijn geen namen, e-mailadressen, adressen of betaalkenmerken opgenomen.',
     'growth_free_pressure' => 'Druk op het gratis abonnement',
     'growth_free_pressure_help' => 'Hoogste aantal betaalde tickets in één maand per gratis schema, van voordat verkopen een Pro-functie werd. Alles boven nul is een schema dat eerder heeft verkocht en nu op Gratis zit.',
     'growth_acquisition' => 'Acquisitie',

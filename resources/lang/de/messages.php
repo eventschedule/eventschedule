@@ -2540,8 +2540,6 @@ return [
     'usage' => 'Nutzung',
     'growth' => 'Wachstum',
     'growth_description' => 'Wo aus Anmeldungen aktive Zeitpläne werden und wo daraus zahlende werden.',
-    'growth_download' => 'JSON herunterladen',
-    'growth_download_help' => 'Aggregiert und pseudonymisiert: Jede ID ist gehasht, und es sind keine Namen, E-Mail-Adressen, Anschriften oder Zahlungskennungen enthalten.',
     'growth_free_pressure' => 'Auslastung des kostenlosen Tarifs',
     'growth_free_pressure_help' => 'Höchstzahl bezahlter Tickets in einem einzelnen Monat je kostenlosem Zeitplan, aus der Zeit vor der Pro-Pflicht für den Verkauf. Alles über null ist ein Zeitplan, der schon einmal verkauft hat und jetzt im Gratis-Tarif sitzt.',
     'growth_acquisition' => 'Akquise',

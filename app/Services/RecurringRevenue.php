@@ -2,6 +2,7 @@
 
 namespace App\Services;
 
+use App\Models\Role;
 use App\Utils\PlanPriceUtils;
 use Illuminate\Support\Facades\DB;
 
@@ -45,19 +46,7 @@ class RecurringRevenue
      */
     public static function summary(): array
     {
-        $rows = DB::table('subscriptions')
-            ->join('roles', 'roles.id', '=', 'subscriptions.role_id')
-            ->where('subscriptions.type', 'default')
-            ->whereIn('subscriptions.stripe_status', [...self::BILLING_STATUSES, 'trialing'])
-            ->where(fn ($q) => $q->whereNull('subscriptions.ends_at')->orWhere('subscriptions.ends_at', '>', now()))
-            // No verification filter: a card being charged is verification enough. A deleted
-            // schedule's live subscription is AdminAlertService's subscriptions_orphaned row, to
-            // be cancelled and refunded, not revenue that will recur.
-            ->whereNotNull('roles.user_id')
-            ->where('roles.is_deleted', false)
-            ->where('roles.subdomain', '!=', DemoService::DEMO_ROLE_SUBDOMAIN)
-            ->where('roles.subdomain', 'not like', 'demo-%')
-            ->get(['subscriptions.id', 'subscriptions.stripe_status', 'subscriptions.stripe_price', 'subscriptions.ends_at']);
+        $rows = self::liveRows();
 
         // Cashier fills stripe_price only for a single-price subscription. A multi-price one keeps
         // NULL there and its prices on subscription_items, which is where hasPrice() and
@@ -119,5 +108,46 @@ class RecurringRevenue
             'trialing_count' => $trialing,
             'unrecognized_count' => $unrecognized,
         ];
+    }
+
+    /**
+     * The schedules summary() counts as billing: a live subscription that is not a trial. Whether
+     * its price is recognized does not matter here - an unrecognized price is still a customer
+     * being charged, it only contributes zero to the amount.
+     *
+     * This is what the growth payload means by a PAYING schedule. actualPlanTier() cannot answer
+     * that: it returns pro for admin grants, referral credits, legacy plan_expires rows and trials,
+     * which made the old "paid vs free" comparisons mostly comped-vs-free.
+     *
+     * @return array<int, true> role_id => true
+     */
+    public static function billingRoleIds(): array
+    {
+        return self::liveRows()
+            ->where('stripe_status', '!=', 'trialing')
+            ->pluck('role_id')
+            ->mapWithKeys(fn ($id) => [(int) $id => true])
+            ->all();
+    }
+
+    private static function liveRows(): \Illuminate\Support\Collection
+    {
+        return DB::table('subscriptions')
+            ->join('roles', 'roles.id', '=', 'subscriptions.role_id')
+            ->where('subscriptions.type', 'default')
+            ->whereIn('subscriptions.stripe_status', [...self::BILLING_STATUSES, 'trialing'])
+            ->where(fn ($q) => $q->whereNull('subscriptions.ends_at')->orWhere('subscriptions.ends_at', '>', now()))
+            // No verification filter: a card being charged is verification enough. A deleted
+            // schedule's live subscription is AdminAlertService's subscriptions_orphaned row, to
+            // be cancelled and refunded, not revenue that will recur.
+            ->whereNotNull('roles.user_id')
+            ->where('roles.is_deleted', false)
+            // Demo CONTENT, not the `demo-%` subdomain shape: a real schedule named before the
+            // prefix was reserved (a "Demo Night" got `demo-night`) is a real customer, and its
+            // subscription is real revenue. Every arm is null-safe, so whereNot() keeps rows with
+            // no contact email - see Role::constrainDemoContent().
+            ->whereNot(fn ($q) => Role::constrainDemoContent($q))
+            ->get(['subscriptions.id', 'subscriptions.role_id', 'subscriptions.stripe_status',
+                'subscriptions.stripe_price', 'subscriptions.ends_at']);
     }
 }

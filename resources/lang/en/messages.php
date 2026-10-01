@@ -2895,8 +2895,6 @@ return [
     'usage' => 'Usage',
     'growth' => 'Growth',
     'growth_description' => 'Where signups turn into active schedules, and where they turn into paying ones.',
-    'growth_download' => 'Download JSON',
-    'growth_download_help' => 'Aggregated and pseudonymous: every id is hashed and no names, emails, addresses or payment identifiers are included.',
     'growth_free_pressure' => 'Free plan pressure',
     'growth_free_pressure_help' => 'Peak paid tickets in a single month per free schedule, from before paid selling became a Pro feature. Anything above zero is a schedule that has sold before and is now sitting on Free.',
     'growth_acquisition' => 'Acquisition',

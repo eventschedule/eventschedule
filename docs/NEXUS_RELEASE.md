@@ -196,7 +196,7 @@ release - so read the table once now and revisit P4 as soon as step 2 is `ACTIVE
 | P3 | Read the app spec in the DO console | Production config is the app spec, not any `.env`. Confirm `QUEUE_CONNECTION=database`, `APP_URL=https://eventschedule.com`, `IS_HOSTED=true` and `IS_NEXUS=true`; note whether `CACHE_STORE` is set (step 5 sets it); and confirm the web service is **`instance_count: 1`** - more than one container on the `file` cache store means every lock in the app serialises against nothing. Note the active deployment ID while you are there: it is what a rollback targets. |
 | P4 | `/admin` tells you, permanently | **The highest-value check in this table, and the one that was missing.** The legacy price recognition mechanism was removed this release, so `PlanPriceUtils` now matches a tier *only* against the four `STRIPE_PRICE_*` IDs on the spec. `AdminAlertService` compares every live subscription's price ID against those four using `PlanPriceUtils` itself, so the alert cannot drift from what the app believes, and `/admin` &rarr; Revenue lists the affected schedules. Anything it flags is a customer whose card is still being charged while `hasActiveEnterpriseSubscription()` returns false, both webhook handlers decline to write and ARR counts them at zero - the cost is spelled out in `PlanPriceUtils::tierFor()`'s docblock. Note the four configured IDs all share a `price_1T3s...` prefix, i.e. one creation batch, so anyone predating it is already stranded. **This is a post-deploy check, unavoidably**: the alert ships in this release, so it cannot report before step 2. That is acceptable because the condition predates the deploy rather than being caused by it - but look at `/admin` as soon as step 2 is `ACTIVE`, because the release also removes the `STRIPE_LEGACY_*` mechanism that used to absorb it. |
 | P5 | `/admin` &rarr; Revenue after the deploy | The *defaults* changed from 9/90/29/290 to 5/50/15/150. **The env vars are named `STRIPE_PRICE_MONTHLY_AMOUNT`, `STRIPE_PRICE_YEARLY_AMOUNT`, `STRIPE_ENTERPRISE_PRICE_MONTHLY_AMOUNT` and `STRIPE_ENTERPRISE_PRICE_YEARLY_AMOUNT`** - earlier revisions of this file named `STRIPE_PRO_MONTHLY_AMOUNT`, which exists nowhere in the codebase. But config is only the *second* layer: `PlatformPricing` reads the `settings` row first, so what the site advertises is decided by that row, not by the spec. As of writing production already advertises 5/50/15/150, so the config change is an alignment and the displayed price does not move. Note ARR, MRR and renewal emails deliberately read **config**, never `PlatformPricing` - so those figures *will* restate on deploy. That is a reporting artefact, not lost revenue. |
-| P6 | Open `/admin/growth/export?range=last_30_days` and save the JSON | **Not `/admin/users`** - its funnel carries only "Visited site". The page-view, docs and pricing counters live in `GrowthExportService::traffic()`, which reaches neither the users funnel nor the growth dashboard, so the JSON export is the only place all four are readable. Record the "Visited site", page-view, docs and pricing funnel numbers. After the Cloudflare rule, origin-side counting stops and the beacon takes over; without a before-number a broken beacon is indistinguishable from normal variance. |
+| P6 | Run `php artisan app:pull-growth --range=last_30_days` on your machine (before the release that added it, `/admin/growth/export?range=last_30_days`) and keep the JSON | **Not `/admin/users`** - its funnel carries only "Visited site". The page-view, docs and pricing counters live in `GrowthExportService::traffic()`, which reaches neither the users funnel nor the growth dashboard, so the JSON export is the only place all four are readable. Record the "Visited site", page-view, docs and pricing funnel numbers. After the Cloudflare rule, origin-side counting stops and the beacon takes over; without a before-number a broken beacon is indistinguishable from normal variance. |
 | P7 | Confirm the external cron can be disabled in one click, and record the current `APP_CRON_SECRET` | Re-enabling the cron is the only emergency fallback that does not require fixing the worker. Step 8 says **disable, not delete**. |
 | P8 | A green CI run on the pushed commit | The deploy ships `origin/main`, so pushing is what makes your work real - and CI runs against exactly the commit that will deploy. `.github/workflows/test.yml` runs the whole Unit and Feature suite plus the sitemap-manifest check on every push. One thing CI cannot see: an **untracked** file. `git commit -am` silently leaves those behind, and an asset referenced by committed code then deploys as a 404 that nothing local ever notices, because locally the file is on disk. Check `git status` for `??` lines before pushing. There is **no release gate** on `build.yml`. |
 | P9 | **Run `2026_09_20_000000_add_tickets_grandfathered_at_to_events_table` by hand from the console first**, then watch the rest of the step 2 log | This is the P2 of this release, and the single most expensive statement in it. Paid ticket selling goes back behind Pro, and this migration is the one-time amnesty that decides which existing events keep selling. Its backfill is a four-table join (`sale_tickets` x `sales` x `tickets` x `events`) with `DISTINCT`, `ORDER BY` and `LIMIT 1000`, looped until exhausted, over the two largest tables in the schema - and it runs inside the start command's `migrate --force`, before the container passes its health check. If it blocks long enough, App Platform times the health check out and the deploy rolls back with nothing obvious in the log. `EXPLAIN` the first iteration against a production-sized copy before you push. The column add is guarded with `Schema::hasColumn`, so a part-way failure is retryable rather than stranding the deploy on `Duplicate column name` - that guard is the only reason a retry works, do not remove it. Two smaller writers ship alongside: `2026_09_17_000001_unwrap_double_encoded_json_settings` (read-only scans of `events` and `roles`, logs every row it rewrites and every one it cannot decode - check the log after) and `2026_09_17_000003_keep_event_interest_on_where_it_has_signups` (now plucked and chunked rather than one unbounded `UPDATE roles`). |
@@ -1130,7 +1130,8 @@ per week, never within two days of their digest. From the 2026-09-28 growth expo
 ### Before the deploy
 
 - Take a growth export (`/admin/growth`, Download). The last one is from before the Pro-only
-  selling change and this release, so it is the baseline for both.
+  selling change and this release, so it is the baseline for both. If the growth data pull below
+  is already live, the button is gone: run `php artisan app:pull-growth` instead.
 - In the Stripe dashboard, turn on **cancellation reason** in the customer portal settings, or
   portal cancels arrive with no reason.
 
@@ -1188,6 +1189,40 @@ hours.
 
 Switch it off at `/admin/settings#realtime`. That deletes every row at once, and beacons from
 pages still cached at the edge are dropped by the endpoint.
+
+## Growth data pull (`/api/internal/growth`)
+
+**What ships:**
+- The `/admin/growth` Download button is replaced by a token-secured endpoint. Pull from your
+  machine with `php artisan app:pull-growth` (see `docs/GROWTH_DATA.md`).
+- The payload moves to `schema_version` 8:
+  - attribution values are anonymised;
+  - "paying" means billing, not the tier;
+  - sales go to the seller instead of every listed schedule;
+  - ids are 12 characters, so they do not match older pulls.
+- `audit:prune` now keeps the subscription, plan, trial, claim and gateway or calendar connection
+  rows forever.
+
+**No migrations.** `GROWTH_DATA_TOKEN` is new and optional: unset, the endpoint answers 404.
+
+### Before the deploy
+
+- Take a last pull with the old Download button if you want a schema-7 baseline. It disappears
+  with this release.
+
+### After the deploy
+
+1. Generate a token with `openssl rand -hex 32`.
+2. Add it in the DigitalOcean console as an **encrypted, app-level** env var named
+   `GROWTH_DATA_TOKEN`. Use the console, not a spec file, which would wipe the custom domains.
+   Then deploy again so the container picks it up.
+3. Put the same value in your local `.env` as `GROWTH_DATA_TOKEN`.
+4. Run `php artisan app:pull-growth`. It names the failure if anything is off:
+   - a **404** means the token is not live on the server yet;
+   - a **403 HTML page** means Cloudflare challenged the request. Add a WAF skip rule for
+     `/api/internal/growth`.
+5. `/admin` &rarr; Audit log shows an `admin.growth_data_pull` row per pull, with its duration and
+   peak memory. Watch `peak_memory_mb` against the 128MB FPM worker as the install grows.
 
 ## Selfhost release
 

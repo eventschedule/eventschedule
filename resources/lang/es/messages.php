@@ -2540,8 +2540,6 @@ return [
     'usage' => 'Uso',
     'growth' => 'Crecimiento',
     'growth_description' => 'Dónde los registros se convierten en horarios activos y dónde se convierten en horarios de pago.',
-    'growth_download' => 'Descargar JSON',
-    'growth_download_help' => 'Datos agregados y seudonimizados: cada identificador está cifrado y no se incluyen nombres, correos electrónicos, direcciones ni identificadores de pago.',
     'growth_free_pressure' => 'Presión del plan gratuito',
     'growth_free_pressure_help' => 'Máximo de entradas de pago en un solo mes por agenda gratuita, de antes de que vender pasara a ser una función Pro. Todo lo que supere cero es una agenda que ya ha vendido y sigue en el plan Gratis.',
     'growth_acquisition' => 'Adquisición',

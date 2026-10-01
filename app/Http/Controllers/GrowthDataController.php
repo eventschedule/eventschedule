@@ -1,0 +1,107 @@
+<?php
+
+namespace App\Http\Controllers;
+
+use App\Services\AuditService;
+use App\Services\GrowthExportService;
+use App\Utils\AdminDateRange;
+use App\Utils\RealtimeTracker;
+use Illuminate\Http\JsonResponse;
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Cache;
+
+/**
+ * GET /api/internal/growth - the growth payload, for `php artisan app:pull-growth`.
+ *
+ * Internal. It is not part of the public REST API: not in public/api/openapi.json, not on
+ * /for-ai-agents, and not the Pro "REST API access" feature that docs/FEATURES.md maps
+ * Controllers/Api/* to, which is why it lives outside that directory. It replaced the "Download
+ * JSON" button on /admin/growth so the operator's dev machine can fetch the data without a browser
+ * session and hand it to Claude for analysis - see docs/GROWTH_DATA.md and the growth-review skill.
+ *
+ * Authenticated by one shared bearer token (GROWTH_DATA_TOKEN), read from the Authorization header
+ * only. A query parameter would put the token in every access log and Sentry breadcrumb it passes
+ * through; Sentry already filters Authorization, and SentryScrubber does again as a backstop.
+ *
+ * The payload is pseudonymous by construction (GrowthExportService), but it is still the whole
+ * business in one file, so: hosted only, disabled outright unless a long token is configured,
+ * throttled per real client IP (the `growth_data` limiter), one build at a time, never cached, and
+ * every pull - successful or not - audit-logged.
+ */
+class GrowthDataController extends Controller
+{
+    /** Anything shorter disables the endpoint rather than guarding it with a guessable secret. */
+    public const MIN_TOKEN_LENGTH = 32;
+
+    /**
+     * Longer than any build can live: public/.user.ini caps a request at 90 seconds and Cloudflare
+     * gives up at about 100, so a lock that outlived its request would only block the retry.
+     */
+    private const LOCK_SECONDS = 120;
+
+    public function show(Request $request, GrowthExportService $growth): JsonResponse
+    {
+        $expected = (string) config('app.growth_data_token');
+
+        // 404 rather than 401 while disabled: there is nothing to authenticate against. A selfhost
+        // install has no tiers or subscriptions, so the payload would be empty or misleading -
+        // the same reason /admin/growth is hosted-only.
+        if (! config('app.hosted') || strlen($expected) < self::MIN_TOKEN_LENGTH) {
+            return response()->json(['error' => 'Not found'], 404);
+        }
+
+        $given = $request->bearerToken();
+        if (! is_string($given) || $given === '' || ! hash_equals($expected, $given)) {
+            // A fixed code, never the value sent. no_bearer is what a proxy stripping the
+            // Authorization header looks like, which is otherwise indistinguishable from a typo.
+            AuditService::log(
+                AuditService::API_AUTH_FAILED,
+                newValues: ['client_ip' => RealtimeTracker::clientIp($request)],
+                metadata: ($given === null || $given === '') ? 'growth_data:no_bearer' : 'growth_data:mismatch',
+            );
+
+            return response()->json(['error' => __('messages.unauthorized')], 401);
+        }
+
+        // Hosted is one small container: a build holds an FPM worker for its whole run, so even
+        // the limiter's ten a minute could otherwise take several workers at once.
+        $lock = Cache::lock('growth_data_build', self::LOCK_SECONDS);
+        if (! $lock->get()) {
+            return response()->json(['error' => 'A pull is already running.'], 429, ['Retry-After' => '30']);
+        }
+
+        try {
+            $range = $request->query('range', 'last_30_days');
+            $dates = AdminDateRange::for($range);
+
+            // Logged BEFORE the build, so a pull that times out or runs out of memory is still on
+            // record - and its missing duration says how it ended.
+            $started = hrtime(true);
+            $audit = AuditService::log(
+                AuditService::ADMIN_GROWTH_DATA_PULL,
+                newValues: [
+                    'client_ip' => RealtimeTracker::clientIp($request),
+                    'range' => is_string($range) && in_array($range, AdminDateRange::RANGES, true) ? $range : 'all_time',
+                ],
+            );
+
+            $data = $growth->build($dates['start'], $dates['end'], $dates['previous_start'], $dates['previous_end']);
+
+            // The cost of a build, so growth toward the worker's memory ceiling shows up here
+            // long before it shows up as an out-of-memory error.
+            $audit?->update(['new_values' => array_merge($audit->new_values ?? [], [
+                'duration_ms' => (int) round((hrtime(true) - $started) / 1e6),
+                'peak_memory_mb' => round(memory_get_peak_usage(true) / 1048576, 1),
+            ])]);
+
+            return response()->json(
+                $data,
+                200,
+                ['Cache-Control' => 'no-store, private'],
+                JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES
+            );
+        } finally {
+            $lock->release();
+        }
+    }
+}

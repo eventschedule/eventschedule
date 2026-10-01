@@ -6,7 +6,7 @@ use Sentry\Breadcrumb;
 use Sentry\Event;
 
 /**
- * Keeps appointment booking secrets out of Sentry.
+ * Keeps appointment booking secrets, the cron secret and bearer tokens out of Sentry.
  *
  * The guest booking surfaces (view, cancel, pay, ical, reschedule) authenticate on a 32-char secret in
  * the URL PATH, so an error on any of them would otherwise ship a working link to a stranger's booking
@@ -52,6 +52,15 @@ class SentryScrubber
      * Matches the value up to the next separator so a following parameter stays readable.
      */
     private const SECRET_QUERY = '#((?:^|[?&])(?:secret|token|api_key)=)[^&\s"\']+#i';
+
+    /**
+     * `Authorization: Bearer ...`, which carries GROWTH_DATA_TOKEN to /api/internal/growth.
+     *
+     * Sentry already drops the Authorization header while send_default_pii is off (its
+     * RequestIntegration default), so this is a backstop for an operator who turns that on: the
+     * header value then reaches `headers` here, which scrubDeep() walks.
+     */
+    private const BEARER = '#(\bBearer\s+)[^\s,"\']+#i';
 
     public static function beforeSend(Event $event): ?Event
     {
@@ -146,6 +155,7 @@ class SentryScrubber
     public static function scrub(string $value): string
     {
         $value = preg_replace(self::SECRET_PATH, '$1[secret]', $value) ?? $value;
+        $value = preg_replace(self::BEARER, '$1[secret]', $value) ?? $value;
 
         return preg_replace(self::SECRET_QUERY, '$1[secret]', $value) ?? $value;
     }

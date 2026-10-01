@@ -5,6 +5,7 @@ namespace Tests\Feature;
 use App\Models\MarketingDailyStat;
 use App\Models\Role;
 use App\Models\User;
+use App\Services\AuditService;
 use App\Services\DemoService;
 use App\Services\GrowthExportService;
 use Illuminate\Foundation\Testing\RefreshDatabase;
@@ -93,26 +94,30 @@ class GrowthExportTest extends TestCase
             ->assertSee('no_ticket_type_free');
     }
 
-    public function test_the_page_renders_and_the_download_is_valid_json(): void
+    /**
+     * The download button is gone - the payload is pulled from /api/internal/growth (see
+     * GrowthDataEndpointTest) - but the page still renders from the same build().
+     */
+    public function test_the_page_renders_without_a_download_and_the_payload_carries_its_schema(): void
     {
         $admin = $this->createOwner(true);
         $this->freeRole();
 
-        $this->adminActing($admin)->get('/admin/growth')->assertOk();
+        $this->adminActing($admin)->get('/admin/growth')->assertOk()
+            ->assertDontSee('/admin/growth/export');
 
-        $response = $this->adminActing($admin)->get('/admin/growth/export');
-        $response->assertOk();
-        $response->assertHeader('Content-Type', 'application/json');
-
-        // streamDownload writes to the output buffer, so getContent() would be empty.
-        $decoded = json_decode($response->streamedContent(), true, 512, JSON_THROW_ON_ERROR);
-        $this->assertArrayHasKey('meta', $decoded);
-        $this->assertArrayHasKey('signups', $decoded);
-        $this->assertArrayHasKey('schedules', $decoded);
+        $data = $this->build();
+        $this->assertArrayHasKey('meta', $data);
+        $this->assertArrayHasKey('signups', $data);
+        $this->assertArrayHasKey('schedules', $data);
         // 3 since the claims section landed, 6 since gmv_recent_by_currency and the demo-free
-        // gmv_by_currency, 7 since mrr came from RecurringRevenue. Bumping this is deliberate: a
+        // gmv_by_currency, 7 since mrr came from RecurringRevenue, 8 since paying meant billing,
+        // sales went to the seller and attribution was anonymised. Bumping this is deliberate: a
         // reader diffing two pulls needs to know the shape (or the meaning) moved.
-        $this->assertSame(7, $decoded['meta']['schema_version']);
+        $this->assertSame(8, $data['meta']['schema_version']);
+        $this->assertSame(GrowthExportService::SCHEMA_VERSION, $data['meta']['schema_version']);
+        $this->assertSame(now()->format('Y-m'), $data['meta']['partial_month']['month']);
+        $this->assertSame(['funnel', 'funnel_trend'], $data['meta']['range_applies_to']);
     }
 
     public function test_claims_reports_untracked_months_as_null_not_zero(): void
@@ -121,12 +126,7 @@ class GrowthExportTest extends TestCase
         // roles.created_at and is real for every month; claimed comes from schedule.claim audit
         // rows, which did not exist before the feature, so an earlier month must say "not measured"
         // rather than "nobody claimed anything".
-        $admin = $this->createOwner(true);
-
-        $response = $this->adminActing($admin)->get('/admin/growth/export');
-        $response->assertOk();
-
-        $claims = json_decode($response->streamedContent(), true, 512, JSON_THROW_ON_ERROR)['claims'];
+        $claims = $this->build()['claims'];
 
         $this->assertArrayHasKey('unclaimed_total', $claims);
         $this->assertNotEmpty($claims['claimed']);
@@ -462,8 +462,10 @@ class GrowthExportTest extends TestCase
         $this->assertDoesNotMatchRegularExpression('/[\w.+-]+@[\w-]+\.[\w.]+/', $json);
         $this->assertDoesNotMatchRegularExpression('/\b\d{1,3}(\.\d{1,3}){3}\b/', $json);
 
-        // The referrer survives as a bare host and the landing page as a bare path.
-        $this->assertStringContainsString('ref.example.org', $json);
+        // The landing page survives as a bare path, because it is one of our marketing pages. The
+        // referrer is a host only one signup shares, so it does not survive at all: a site that
+        // sent one person is as good as that person's name.
+        $this->assertStringNotContainsString('ref.example.org', $json);
         $this->assertStringContainsString('/for-musicians', $json);
     }
 
@@ -481,6 +483,10 @@ class GrowthExportTest extends TestCase
         $this->assertStringStartsWith('s:', $sid);
         $this->assertStringStartsWith('u:', $uid);
         $this->assertNotSame((string) $role->id, $sid);
+        // 12 hex characters: 6 collide with even odds at a few thousand users, silently joining
+        // one person's schedule to another person's signup row.
+        $this->assertMatchesRegularExpression('/^s:[0-9a-f]{12}$/', $sid);
+        $this->assertMatchesRegularExpression('/^u:[0-9a-f]{12}$/', $uid);
 
         // Stable across pulls, so two exports can be diffed.
         $this->assertSame($first['schedules']['rows'], $second['schedules']['rows']);
@@ -719,26 +725,31 @@ class GrowthExportTest extends TestCase
 
     public function test_acquisition_groups_signups_by_landing_page(): void
     {
+        // Three, because a utm value shared by fewer signups is exported as "(other)".
         $activating = $this->createOwner();
-        $activating->landing_page = 'https://eventschedule.com/for-venues';
+        $activating->landing_page = 'for-venues';
         $activating->utm_source = 'newsletter';
         $activating->save();
         $this->freeRole($activating);
 
-        $bouncing = $this->createOwner();
-        $bouncing->landing_page = 'https://eventschedule.com/for-venues';
-        $bouncing->utm_source = 'newsletter';
-        $bouncing->save();
+        foreach (range(1, 2) as $n) {
+            $bouncing = $this->createOwner();
+            $bouncing->landing_page = 'for-venues';
+            $bouncing->utm_source = 'Newsletter ';
+            $bouncing->save();
+        }
 
         $acquisition = $this->build()['acquisition'];
         $landing = collect($acquisition['by_landing_path'])->firstWhere('key', '/for-venues');
 
         $this->assertNotNull($landing);
-        $this->assertSame(2, $landing['signups']);
-        $this->assertSame(1, $landing['saved_schedule'], 'one of the two got as far as a schedule');
+        $this->assertSame(3, $landing['signups']);
+        $this->assertSame(1, $landing['saved_schedule'], 'one of the three got as far as a schedule');
 
+        // Trimmed and lowercased, so a capitalised tag does not split the group (and fall under
+        // the group-size rule on its own).
         $source = collect($acquisition['by_utm_source'])->firstWhere('key', 'newsletter');
-        $this->assertSame(2, $source['signups']);
+        $this->assertSame(3, $source['signups']);
     }
 
     public function test_non_admins_are_rejected(): void
@@ -746,7 +757,6 @@ class GrowthExportTest extends TestCase
         $user = $this->createOwner();
 
         $this->actingAs($user)->get('/admin/growth')->assertRedirect();
-        $this->actingAs($user)->get('/admin/growth/export')->assertRedirect();
     }
 
     public function test_the_page_is_absent_on_a_selfhosted_install(): void
@@ -757,7 +767,6 @@ class GrowthExportTest extends TestCase
         // A single-tenant selfhost has no tiers and no subscriptions, so every
         // monetization section would be empty or actively misleading.
         $this->adminActing($admin)->get('/admin/growth')->assertNotFound();
-        $this->adminActing($admin)->get('/admin/growth/export')->assertNotFound();
     }
 
     /**
@@ -1082,5 +1091,363 @@ class GrowthExportTest extends TestCase
 
         $stages = array_column($data['funnel']['stages'], 'count', 'key');
         $this->assertSame(0, $stages['saved_paid_ticket'], 'the funnel is the organizer cohort only');
+    }
+
+    // ---------------------------------------------------------------------
+    // Schema 8: anonymised attribution
+    // ---------------------------------------------------------------------
+
+    /** A verified signup with raw attribution columns, the way the capture middleware leaves them. */
+    private function signupWith(array $attrs): User
+    {
+        $user = $this->createOwner();
+        $user->forceFill($attrs)->save();
+
+        return $user;
+    }
+
+    /** @return array<string, int> exported value => signups */
+    private function signupValues(array $data, string $column): array
+    {
+        $i = array_flip($data['signups']['columns']);
+
+        return array_count_values(array_map(
+            fn ($v) => (string) $v,
+            array_filter(array_column($data['signups']['rows'], $i[$column]), fn ($v) => $v !== null)
+        ));
+    }
+
+    /**
+     * Landing paths in the shape production stores them - $request->path(), so no host and no
+     * leading slash - which none of the older fixtures used: they all passed full URLs, which
+     * normalise either way and so could not catch the leading-slash lookup against the sitemap.
+     */
+    public function test_landing_paths_keep_our_pages_and_hide_everything_rare(): void
+    {
+        DB::table('blog_posts')->insert([
+            'title' => 'Sell tickets', 'slug' => 'how-to-sell-tickets-2026', 'content' => '...',
+            'is_published' => true, 'published_at' => now()->subDay(), 'created_at' => now(), 'updated_at' => now(),
+        ]);
+
+        $this->signupWith(['landing_page' => 'for-musicians']);                // one signup, but our page
+        $this->signupWith(['landing_page' => 'how-to-sell-tickets-2026']);     // a blog post, from blog.<domain>
+        $this->signupWith(['landing_page' => 'summa-30th-anniversary-party']); // a tenant event slug, alone
+        // One invisible format character (pasted from a chat app) used to split this group in two.
+        $this->signupWith(['landing_page' => 'guest-add%E2%81%A0']);
+        $this->signupWith(['landing_page' => 'guest-add']);
+        $this->signupWith(['landing_page' => '/Guest-Add/']);
+        // One buyer's ticket link, forwarded to friends who all signed up: three clears the group
+        // size, and the secret in it must still never be exported.
+        foreach (range(1, 3) as $n) {
+            $this->signupWith(['landing_page' => 'ticket/view/x7Kq2/k3Jd9sLq2mZx8vB1nC4tY6wR0pE5hG7a']);
+        }
+
+        $data = $this->build();
+        $paths = $this->signupValues($data, 'landing_path');
+        $json = json_encode($data);
+
+        $this->assertSame(1, $paths['/for-musicians'] ?? null, 'a marketing page is kept at any count, with its slash');
+        $this->assertSame(1, $paths['/blog/how-to-sell-tickets-2026'] ?? null, 'a published blog post is named as one');
+        $this->assertSame(3, $paths['/guest-add'] ?? null, 'normalised before counting, so the three are one group');
+        $this->assertSame(3, $paths['/ticket/view/x7kq2/:token'] ?? null, 'the shared link survives, its secret does not');
+        $this->assertSame(1, $paths['(other)'] ?? null, 'the lone tenant slug');
+
+        $this->assertStringNotContainsString('summa-30th', $json);
+        $this->assertStringNotContainsString('k3Jd9sLq2mZx8vB1nC4tY6wR0pE5hG7a', $json);
+        $this->assertStringNotContainsString(strtolower('k3Jd9sLq2mZx8vB1nC4tY6wR0pE5hG7a'), $json);
+
+        // The rollups are built from the same rows, so they inherit all of it.
+        $byPath = collect($data['acquisition']['by_landing_path'])->pluck('signups', 'key');
+        $this->assertSame(3, $byPath['/guest-add']);
+        $this->assertSame(1, $byPath['(other)']);
+    }
+
+    public function test_referrers_are_canonicalised_and_only_shared_hosts_survive(): void
+    {
+        $role = $this->freeRole();
+        // custom_domain always holds a URL. Written directly: the model's hooks would try to
+        // provision the domain.
+        DB::table('roles')->where('id', $role->id)->update(['custom_domain' => 'https://events.example-venue.com']);
+
+        $this->signupWith(['referrer_url' => 'https://claude.ai/chat/0f3c']);                 // one, but a platform
+        $this->signupWith(['referrer_url' => 'https://www.google.co.uk/']);
+        $this->signupWith(['referrer_url' => 'android-app://com.google.android.googlequicksearchbox/']);
+        $this->signupWith(['referrer_url' => 'https://johns-personal-blog.net/post?ref=me']);  // one, nobody's platform
+        foreach (range(1, 3) as $n) {
+            $this->signupWith(['referrer_url' => 'http://203.0.113.7:8080/']);
+            $this->signupWith(['referrer_url' => 'https://events.example-venue.com/calendar']);
+            $this->signupWith(['referrer_url' => 'https://www.bigvenue-partner.org/whats-on']);
+        }
+
+        $data = $this->build();
+        $hosts = $this->signupValues($data, 'referrer_domain');
+        $channels = $this->signupValues($data, 'referrer_channel');
+        $json = json_encode($data);
+
+        $this->assertSame(1, $hosts['claude'] ?? null, 'a rare AI referrer is still visible');
+        $this->assertSame(2, $hosts['google'] ?? null, 'google.co.uk and the Android search app are one source');
+        $this->assertSame(3, $hosts['(ip)'] ?? null, 'an IP never survives, however many share it');
+        $this->assertSame(3, $hosts['(schedule)'] ?? null, 'a customer domain is a channel, not a name');
+        $this->assertSame(3, $hosts['bigvenue-partner.org'] ?? null, 'a host three signups share is kept');
+        $this->assertSame(1, $hosts['(other)'] ?? null, 'a site that sent one person is as good as their name');
+
+        $this->assertSame(1, $channels['ai']);
+        $this->assertSame(2, $channels['search']);
+        $this->assertSame(3, $channels['schedule']);
+
+        foreach (['johns-personal-blog', '203.0.113.7', 'example-venue.com'] as $leak) {
+            $this->assertStringNotContainsString($leak, $json, "the export leaked: {$leak}");
+        }
+
+        $this->assertSame(1, collect($data['acquisition']['by_referrer_channel'])->firstWhere('key', 'ai')['signups']);
+    }
+
+    public function test_a_utm_with_an_address_in_it_is_redacted_however_many_share_it(): void
+    {
+        foreach (range(1, 3) as $n) {
+            $this->signupWith(['utm_source' => 'newsletter-jane.doe@gmail.com', 'utm_medium' => 'email']);
+        }
+        $this->signupWith(['utm_source' => 'one-off-campaign']);
+
+        $data = $this->build();
+        $sources = $this->signupValues($data, 'utm_source');
+
+        $this->assertSame(3, $sources['(redacted)'] ?? null);
+        $this->assertSame(1, $sources['(other)'] ?? null);
+        $this->assertSame(3, $this->signupValues($data, 'utm_medium')['email'] ?? null);
+        $this->assertStringNotContainsString('jane.doe', json_encode($data));
+    }
+
+    /**
+     * A top-N cut with no remainder made a rollup read as "this is everyone". Marketing paths are
+     * exempt from the group-size rule, so 52 of them, one signup each, make 52 groups.
+     */
+    public function test_rollups_fold_the_tail_into_a_rest_row_that_reconciles(): void
+    {
+        $pages = array_slice(array_keys(config('sitemap_lastmod')), 0, 52);
+        $this->assertCount(52, $pages);
+        foreach ($pages as $page) {
+            $this->signupWith(['landing_page' => ltrim($page, '/') ?: '/']);
+        }
+
+        $byPath = $this->build()['acquisition']['by_landing_path'];
+
+        $this->assertCount(51, $byPath);
+        $rest = end($byPath);
+        $this->assertSame('(rest)', $rest['key']);
+        $this->assertSame(2, $rest['groups']);
+        $this->assertSame(52, array_sum(array_column($byPath, 'signups')));
+    }
+
+    // ---------------------------------------------------------------------
+    // Schema 8: corrected definitions
+    // ---------------------------------------------------------------------
+
+    /** The row for one schedule. sid is hashId('s', id), so recompute it rather than search by id. */
+    private function scheduleRow(array $data, Role $role): array
+    {
+        $i = array_flip($data['schedules']['columns']);
+        $sid = 's:'.substr(hash_hmac('sha256', (string) $role->id, (string) config('app.key')), 0, 12);
+        $row = collect($data['schedules']['rows'])->firstWhere($i['sid'], $sid);
+        $this->assertNotNull($row, "no schedule row for role {$role->id}");
+
+        return array_combine($data['schedules']['columns'], $row);
+    }
+
+    /**
+     * A venue's event with a talent booked on it: one sale, and before schema 8 BOTH schedules were
+     * credited with it - so a talent that never sold anything read as a seller, and per-schedule
+     * revenue summed to more than the platform total.
+     */
+    public function test_sales_and_ticket_types_are_credited_to_the_seller_not_every_listed_schedule(): void
+    {
+        $venue = $this->freeRole(null, 'venue');
+        $talent = $this->freeRole(null, 'talent');
+
+        $event = $this->createEvent($venue, ['creator_role_id' => $venue->id]);
+        $event->roles()->attach($talent->id, ['is_accepted' => true]);
+        $ticket = $this->createTicket($event, ['price' => 25, 'quantity' => 100]);
+        $this->createSale($event, $venue, ['status' => 'paid', 'payment_amount' => 50], $ticket, 2);
+
+        $data = $this->build();
+        $seller = $this->scheduleRow($data, $venue);
+        $listed = $this->scheduleRow($data, $talent);
+
+        $this->assertSame(2, $seller['paid_tickets_total']);
+        $this->assertSame(2, $seller['paid_tickets_90d']);
+        $this->assertSame(1, $seller['paid_ticket_types']);
+        $this->assertNotNull($seller['first_paid_sale_month']);
+
+        $this->assertSame(0, $listed['paid_tickets_total'], 'listed on the event, but not the seller');
+        $this->assertSame(0, $listed['paid_ticket_types']);
+        $this->assertNull($listed['first_paid_sale_month']);
+        $this->assertNull($listed['gmv_currency']);
+        // ...though it is the talent's event too, so it is still on its page.
+        $this->assertSame(1, $listed['events_total']);
+
+        $gmv = array_sum(array_column($data['monetization']['gmv_by_currency'], 'amount'));
+        $this->assertSame(50.0, $gmv);
+        $this->assertSame(50.0, array_sum($seller['gmv_recent'] ?? []), 'the per-schedule sum is the platform total');
+    }
+
+    /**
+     * Legacy events have no creator_role_id - createEvent() leaves it null, like rows written
+     * before the column existed - and keep the old every-listed-schedule credit, rather than
+     * crediting nobody.
+     */
+    public function test_an_event_with_no_creator_falls_back_to_its_listed_schedules(): void
+    {
+        $role = $this->freeRole();
+        $event = $this->createEvent($role);
+        $this->assertNull($event->creator_role_id);
+        $ticket = $this->createTicket($event, ['price' => 10, 'quantity' => 100]);
+        $this->createSale($event, $role, ['status' => 'paid', 'payment_amount' => 10], $ticket, 1);
+
+        $this->assertSame(1, $this->scheduleRow($this->build(), $role)['paid_tickets_total']);
+    }
+
+    public function test_event_counts_only_include_events_the_schedule_created_or_accepted(): void
+    {
+        $venue = $this->freeRole(null, 'venue');
+        $promoter = $this->freeRole(null, 'curator');
+
+        // The promoter's own event, requested onto the venue and never accepted there.
+        $event = $this->createEvent($promoter, ['creator_role_id' => $promoter->id]);
+        $event->roles()->attach($venue->id, ['is_accepted' => null]);
+        $declined = $this->createEvent($promoter, ['creator_role_id' => $promoter->id]);
+        $declined->roles()->attach($venue->id, ['is_accepted' => false]);
+
+        $data = $this->build();
+
+        $this->assertSame(0, $this->scheduleRow($data, $venue)['events_total'], 'pending and declined requests are not the venue\'s events');
+        $this->assertSame(2, $this->scheduleRow($data, $promoter)['events_total']);
+    }
+
+    /**
+     * events_recent_90d read updated_at, and system writes bump it: Translate::markChecked() touches
+     * every event it checks, calendar sync rewrites rows. A schedule nobody had opened in a year
+     * read as active.
+     */
+    public function test_an_old_event_touched_by_the_system_does_not_make_a_schedule_active(): void
+    {
+        $role = $this->freeRole();
+        $event = $this->createEvent($role);
+        DB::table('events')->where('id', $event->id)->update(['created_at' => now()->subDays(200), 'updated_at' => now()]);
+
+        $data = $this->build();
+
+        $this->assertSame(0, $this->scheduleRow($data, $role)['events_recent_90d']);
+        $month = collect($data['retention'])->firstWhere('month', $role->created_at->format('Y-m'));
+        $this->assertSame(0, $month['active_recently']);
+    }
+
+    /**
+     * Paying is billing. A comp, a legacy plan_expires row and a Stripe trial all have a paid TIER,
+     * and every "paid vs free" section used to count them as customers.
+     */
+    public function test_paying_means_billing_not_a_paid_tier(): void
+    {
+        config(['services.stripe_platform.price_monthly' => 'price_test_monthly']);
+
+        $paying = $this->createRole($this->createOwner(), 'venue', ['plan_type' => 'pro', 'plan_expires' => null, 'plan_source' => null]);
+        $paying->subscriptions()->create(['type' => 'default', 'stripe_id' => 'sub_'.Str::random(14),
+            'stripe_status' => 'active', 'stripe_price' => 'price_test_monthly', 'quantity' => 1]);
+        $comp = $this->createRole($this->createOwner(), 'venue', ['plan_type' => 'pro',
+            'plan_expires' => now()->addYear()->format('Y-m-d'), 'plan_source' => 'admin']);
+        $legacy = $this->createRole($this->createOwner(), 'venue', ['plan_type' => 'pro',
+            'plan_expires' => now()->addYear()->format('Y-m-d'), 'plan_source' => null]);
+        $declined = $this->freeRole();
+        $declined->subscriptions()->create(['type' => 'default', 'stripe_id' => 'sub_'.Str::random(14),
+            'stripe_status' => 'incomplete', 'stripe_price' => 'price_test_monthly', 'quantity' => 1]);
+
+        $data = $this->build();
+
+        $this->assertTrue($this->scheduleRow($data, $paying)['billing']);
+        $this->assertTrue($this->scheduleRow($data, $paying)['ever_subscribed']);
+        $this->assertFalse($this->scheduleRow($data, $comp)['billing']);
+        $this->assertSame('pro', $this->scheduleRow($data, $comp)['plan'], 'the tier is still reported as the tier');
+        $this->assertFalse($this->scheduleRow($data, $legacy)['billing']);
+
+        // A declined first checkout is neither a subscription nor an upgrade.
+        $this->assertFalse($this->scheduleRow($data, $declined)['ever_subscribed']);
+        $this->assertNull($this->scheduleRow($data, $declined)['days_to_upgrade']);
+
+        $this->assertSame(1, $data['payers_vs_free']['paid']['schedules']);
+        $this->assertSame(3, $data['payers_vs_free']['free']['schedules'], 'the comp and the legacy plan are not payers');
+
+        $venue = collect($data['segments']['by_schedule_type'])->firstWhere('key', 'venue');
+        $this->assertSame(1, $venue['billing']);
+        $this->assertSame(3, $venue['paid_plan'], 'paid_plan stays the tier count');
+
+        $this->assertSame(1, array_sum(array_column($data['retention'], 'paid')));
+
+        $this->assertSame(1, $data['monetization']['by_plan_source']['stripe'], '"stripe" matches billing_subscriptions');
+        $this->assertSame(1, $data['monetization']['by_plan_source']['legacy']);
+        $this->assertSame(1, $data['monetization']['by_plan_source']['admin']);
+    }
+
+    /**
+     * Demo is demo CONTENT. The `demo-%` shape hid real schedules named before the prefix was
+     * reserved, and kept the /examples showcase schedules, which sit on ordinary subdomains under
+     * ordinary accounts and are recognisable only by their contact address.
+     */
+    public function test_demo_content_is_excluded_by_what_it_is_not_by_its_subdomain(): void
+    {
+        $real = $this->freeRole(null, 'venue');
+        DB::table('roles')->where('id', $real->id)->update(['subdomain' => 'demo-night-'.Str::lower(Str::random(4))]);
+        $showcase = $this->freeRole(null, 'venue');
+        DB::table('roles')->where('id', $showcase->id)->update(['email' => DemoService::DEMO_EMAIL]);
+
+        $data = $this->build();
+        $i = array_flip($data['schedules']['columns']);
+        $sids = array_column($data['schedules']['rows'], $i['sid']);
+
+        $this->assertContains($this->scheduleRow($data, $real)['sid'], $sids, 'a real demo-something schedule is a real schedule');
+        $this->assertCount(1, $sids, 'the showcase schedule is fabricated');
+    }
+
+    public function test_free_pressure_ever_sold_means_ever(): void
+    {
+        $role = $this->freeRole();
+        $event = $this->createEvent($role);
+        $ticket = $this->createTicket($event, ['price' => 10, 'quantity' => 100]);
+        $sale = $this->createSale($event, $role, ['status' => 'paid', 'payment_amount' => 10], $ticket, 1);
+        DB::table('sales')->where('id', $sale->id)->update(['paid_at' => now()->subYear()]);
+
+        $pressure = $this->build()['free_pressure'];
+
+        $this->assertSame(1, $pressure['ever_sold_paid'], 'a sale a year ago is still a sale');
+        $this->assertSame(1, $pressure['peak_month_paid_tickets']['0'], 'but not in the last six months');
+    }
+
+    public function test_the_weekly_funnel_trend_is_keyed_by_iso_week(): void
+    {
+        $trend = app(GrowthExportService::class)->funnelTrendData(now()->subDays(60), now());
+
+        $this->assertSame('weekly', $trend['granularity']);
+        $this->assertSame(count($trend['labels']), count($trend['periods']));
+        foreach ($trend['periods'] as $period) {
+            $this->assertMatchesRegularExpression('/^\d{4}-W\d{2}$/', $period);
+        }
+    }
+
+    /**
+     * audit:prune used to delete everything past 90 days, which silently turned claims, trial
+     * starts and checkout sources into zeros that read as "nothing happened".
+     */
+    public function test_pruning_keeps_the_audit_rows_the_growth_history_depends_on(): void
+    {
+        $old = now()->subDays(400);
+        foreach ([AuditService::SCHEDULE_CLAIM, AuditService::SUBSCRIPTION_CREATE, AuditService::TICKET_TRIAL_START, AuditService::AUTH_LOGIN] as $action) {
+            DB::table('audit_logs')->insert(['action' => $action, 'ip_address' => '0.0.0.0', 'created_at' => $old]);
+        }
+
+        $this->artisan('audit:prune')->assertSuccessful();
+
+        $left = DB::table('audit_logs')->pluck('action')->all();
+        $this->assertEqualsCanonicalizing(
+            [AuditService::SCHEDULE_CLAIM, AuditService::SUBSCRIPTION_CREATE, AuditService::TICKET_TRIAL_START],
+            $left
+        );
     }
 }

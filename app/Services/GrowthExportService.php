@@ -7,7 +7,9 @@ use App\Models\MarketingDailyStat;
 use App\Models\Role;
 use App\Models\User;
 use Carbon\Carbon;
+use Illuminate\Database\Eloquent\Collection as EloquentCollection;
 use Illuminate\Support\Facades\DB;
+use Laravel\Cashier\Cashier;
 
 /**
  * Growth analytics: the onboarding funnel plus the wider activation/monetization picture.
@@ -19,11 +21,30 @@ use Illuminate\Support\Facades\DB;
  */
 class GrowthExportService
 {
+    /**
+     * Bumped whenever the payload's shape OR the meaning of a field changes, so a reader diffing two
+     * pulls knows whether they compare. Every bump is described in docs/GROWTH_DATA.md's changelog,
+     * which GrowthDataDictionaryTest holds to this number.
+     */
+    public const SCHEMA_VERSION = 8;
+
     /** The month the schedule.claim audit action shipped; nothing before it can be counted. */
     private const CLAIMS_TRACKED_FROM = '2026-09';
 
     /** How many trailing months of per-schedule ticket volume to emit. */
     public const RECENT_MONTHS = 6;
+
+    /**
+     * How many signups must share an attribution value (utm, referrer host, landing path) before it
+     * is exported as itself. Below it the value reads "(other)": a group of one or two describes a
+     * person, and those values are visitor-controlled strings - a personal site, a customer's
+     * domain, a forwarded link with a secret in it. Public pages and known platforms are exempt,
+     * because naming them identifies nobody.
+     */
+    public const MIN_ATTRIBUTION_GROUP = 3;
+
+    /** Rows past the top N of an acquisition/segment rollup are folded into one "(rest)" row. */
+    private const ROLLUP_TOP = 50;
 
     /**
      * Row-table ceiling. Hit it and the export records the fact plus the true total in
@@ -52,32 +73,33 @@ class GrowthExportService
     }
 
     /**
-     * Constraint for "has a real (non-demo) schedule", matching the demo exclusions used
-     * by the schedules metric in getTrendData().
+     * Constraint for "has a real (non-demo) schedule".
+     *
+     * Demo CONTENT (Role::constrainDemoContent()), not the `demo-%` subdomain shape it used to be:
+     * that shape hid real schedules named before the prefix was reserved (a "Demo Night" got
+     * `demo-night`) and kept the twelve /examples showcase schedules, which live on ordinary
+     * subdomains and are fabricated. Every arm is null-safe, so whereNot() keeps a schedule with no
+     * contact email.
+     *
+     * Deleted schedules still count, here and in the signup rows' saved_schedule: they were saved,
+     * which is what the stage asks, and dropping them would let saved_event (whose events outlive a
+     * deleted schedule) exceed saved_schedule.
      */
     public function scheduleFilter(): \Closure
     {
-        $demoRole = DemoService::DEMO_ROLE_SUBDOMAIN;
-
-        return function ($query) use ($demoRole) {
-            $query->where('subdomain', '!=', $demoRole)
-                ->where('subdomain', 'not like', 'demo-%');
+        return function ($query) {
+            $query->whereNot(fn ($q) => Role::constrainDemoContent($q));
         };
     }
 
     /**
-     * Constraint for "has a real (non-demo) event", matching getTrendData(): an event is
-     * demo when any of its associated schedules is the demo schedule.
+     * Constraint for "has a real (non-demo) event": an event is demo when any of its schedules is
+     * demo content - the same predicate as scheduleFilter().
      */
     public function eventFilter(): \Closure
     {
-        $demoRole = DemoService::DEMO_ROLE_SUBDOMAIN;
-
-        return function ($query) use ($demoRole) {
-            $query->whereDoesntHave('roles', function ($roleQuery) use ($demoRole) {
-                $roleQuery->where('subdomain', $demoRole)
-                    ->orWhere('subdomain', 'like', 'demo-%');
-            });
+        return function ($query) {
+            $query->whereDoesntHave('roles', fn ($roleQuery) => Role::constrainDemoContent($roleQuery));
         };
     }
 
@@ -364,9 +386,14 @@ class GrowthExportService
 
         // $column is always a hardcoded literal ('created_at' or 'date'), never user input;
         // the format string is whitelisted by $formatKey (mirrors getTrendData()).
+        //
+        // Weeks are ISO (%x-W%v: ISO year + Monday-based week 01-53). %Y-%u was neither - a Monday
+        // week numbered within the CALENDAR year, so the days around New Year split into a week 00
+        // and a week 52/53 of two different years, and the key could not be joined to anything
+        // else keyed by ISO week (owner_digests is).
         $expr = fn (string $column) => match ($formatKey) {
             'daily' => DB::raw("DATE_FORMAT({$column}, '%Y-%m-%d') as period"),
-            'weekly' => DB::raw("DATE_FORMAT({$column}, '%Y-%u') as period"),
+            'weekly' => DB::raw("DATE_FORMAT({$column}, '%x-W%v') as period"),
             'monthly' => DB::raw("DATE_FORMAT({$column}, '%Y-%m') as period"),
         };
 
@@ -396,7 +423,7 @@ class GrowthExportService
 
         $labels = $allPeriods->map(function ($period) use ($labelFormat, $formatKey) {
             if ($formatKey === 'weekly') {
-                $parts = explode('-', $period);
+                $parts = explode('-W', $period);
                 if (count($parts) === 2) {
                     return 'Week '.ltrim($parts[1], '0');
                 }
@@ -424,12 +451,55 @@ class GrowthExportService
 
         return [
             'labels' => $labels,
+            // The machine-readable keys behind the labels: YYYY-MM-DD, ISO YYYY-Www, or YYYY-MM.
+            // "Week 39" alone cannot be placed in a year.
+            'periods' => $allPeriods->all(),
+            'granularity' => $formatKey,
+            // visitor_to_signup divides by visitors, whose counting method changed on 2026-09-07
+            // (server to a JS beacon). Same per-period basis as traffic[].visitors_basis, so a
+            // ratio is never compared across that line by accident.
+            'visitors_basis' => $allPeriods->map(fn ($period) => $isNexus
+                ? $this->visitorsBasisFor((string) $period, $formatKey)
+                : null)->all(),
             'visitor_to_signup' => $visitorToSignup,
             'signup_to_schedule' => $signupToSchedule,
             'signup_to_event' => $signupToEvent,
             'last_index' => count($labels) - 1,
             'has_traffic' => $isNexus && $trafficTrend->sum('visitors') > 0,
         ];
+    }
+
+    /**
+     * server / mixed / beacon for one funnel_trend period, to the day - basisInMonth() would call
+     * every September week "mixed" when only the one containing 2026-09-07 is.
+     */
+    private function visitorsBasisFor(string $period, string $granularity): ?string
+    {
+        $rebasedAt = MarketingDailyStat::COLUMN_REBASED_AT['visitors'] ?? null;
+        if ($rebasedAt === null) {
+            return null;
+        }
+
+        try {
+            [$from, $to] = match ($granularity) {
+                'daily' => [Carbon::parse($period), Carbon::parse($period)],
+                'weekly' => (function () use ($period) {
+                    [$year, $week] = array_map('intval', explode('-W', $period));
+                    $monday = Carbon::now()->setISODate($year, $week)->startOfWeek(Carbon::MONDAY);
+
+                    return [$monday, $monday->copy()->addDays(6)];
+                })(),
+                default => [Carbon::parse($period.'-01'), Carbon::parse($period.'-01')->endOfMonth()],
+            };
+        } catch (\Throwable $e) {
+            return null;
+        }
+
+        if ($to->toDateString() < $rebasedAt) {
+            return 'server';
+        }
+
+        return $from->toDateString() >= $rebasedAt ? 'beacon' : 'mixed';
     }
 
     // ---------------------------------------------------------------------
@@ -508,6 +578,37 @@ class GrowthExportService
                 .'those schedules stay "free" in plan_counts. converted means a real subscription created '
                 .'after the trial started and within 14 days of its end; sold_during means a paid sale '
                 .'on a schedule-created event inside the trial window.',
+            'Since schema_version 8, PAYING means billing: a live, non-trialing Stripe subscription (the '
+                .'MRR definition, schedules.billing). plan is the tier, which also covers admin grants, '
+                .'referral credits, legacy plan_expires rows and trials. payers_vs_free, retention.paid and '
+                .'segments.by_schedule_type.billing use billing; paid_plan and free_pressure stay tier-based. '
+                .'Before 8, "paid" meant the tier, so those sections were mostly comped-vs-free.',
+            'Since schema_version 8, tickets, revenue and ticket types are credited to the schedule that '
+                .'CREATED the event (events.creator_role_id), not to every schedule listed on it - a venue '
+                .'and the talent playing there used to both get the same sale. Legacy events with no '
+                .'creator fall back to every listed schedule. Event counts only include events the schedule '
+                .'created or accepted, and events_recent_90d counts events CREATED in the window (it read '
+                .'updated_at, which translation and sync writes bump).',
+            'Since schema_version 8, attribution values (utm_source, utm_medium, referrer_domain, '
+                .'landing_path) shared by fewer than '.self::MIN_ATTRIBUTION_GROUP.' signups read "(other)". '
+                .'Exempt: our own marketing/docs pages, published blog posts (/blog/<slug>), and known '
+                .'platforms, which are canonicalised (google.co.uk and the Android search app both read '
+                .'google). referrer_channel groups referrers as search, ai, social, community, email, '
+                .'messaging, auth, own, schedule or other, so a rare AI referrer still counts as ai. '
+                .'Always replaced, whatever the count: a value containing @ ("(redacted)"), an IP referrer '
+                .'("(ip)"), a schedule subdomain or customer domain ("(schedule)"), and token-shaped path '
+                .'segments (":token"). Landing paths are lowercased with a leading slash. A personal site '
+                .'that refers 3+ signups can still appear by name.',
+            'Since schema_version 8, uid and sid are 12 hex characters (6 could collide at a few '
+                .'thousand users), so ids do not match across that line. Rollups past the top '
+                .self::ROLLUP_TOP.' groups end in one "(rest)" row, so their signups sum to the row total.',
+            'meta.range applies only to funnel and funnel_trend (see meta.range_applies_to). Every '
+                .'section derived from the row tables is all-time or trailing. meta.partial_month names the '
+                .'month in progress: its counts are month-to-date, never compare them to a full month.',
+            'demo exclusion is demo CONTENT (Role::constrainDemoContent: the demo account, its '
+                .'contact address, the showcase schedules) since schema_version 8. Before, it was the '
+                .'demo-% subdomain shape, which kept the fabricated showcase schedules and hid real '
+                .'schedules named demo-something.',
         ];
         // Every derived section is computed from the row tables, so if those were capped
         // the sections describe the most recent N rows and not the whole population.
@@ -524,8 +625,17 @@ class GrowthExportService
                 'recent_months' => $months,
                 'is_hosted' => (bool) config('app.hosted'),
                 'is_nexus' => (bool) config('app.is_nexus'),
+                'range_applies_to' => ['funnel', 'funnel_trend'],
+                // The month in progress, and how far into it this pull is. Month-keyed counts for it
+                // (gmv_by_currency, paid_tickets_recent, churn.by_month, claims, traffic,
+                // newsletter_emails_this_month) are month-to-date.
+                'partial_month' => [
+                    'month' => now()->format('Y-m'),
+                    'days_elapsed' => (int) now()->format('j'),
+                    'days_in_month' => (int) now()->format('t'),
+                ],
                 'app_version' => config('self-update.version_installed'),
-                'schema_version' => 7,
+                'schema_version' => self::SCHEMA_VERSION,
                 'row_cap' => $this->rowCap(),
                 'truncated' => [
                     'signups' => ['capped' => $signups['truncated'], 'total' => $signups['total']],
@@ -566,7 +676,9 @@ class GrowthExportService
      */
     private function hashId(string $prefix, $id): string
     {
-        return $prefix.':'.substr(hash_hmac('sha256', (string) $id, (string) config('app.key')), 0, 6);
+        // 12 hex characters, not 6: at 16.7M values six collide with even odds by ~5,000 users, and
+        // a collision silently joins one person's schedule to another's signup row.
+        return $prefix.':'.substr(hash_hmac('sha256', (string) $id, (string) config('app.key')), 0, 12);
     }
 
     /** The trailing months emitted in paid_tickets_recent, oldest first. */
@@ -580,27 +692,19 @@ class GrowthExportService
         return $months;
     }
 
-    /** Demo exclusion applied to a roles query, matching funnelScheduleFilter(). */
+    /** Demo exclusion applied to a roles query - the same predicate as scheduleFilter(). */
     private function excludeDemoRoles($query)
     {
-        return $query->where('subdomain', '!=', DemoService::DEMO_ROLE_SUBDOMAIN)
-            ->where('subdomain', 'not like', 'demo-%');
+        return $query->whereNot(fn ($q) => Role::constrainDemoContent($q));
     }
 
     /**
-     * Subquery of every event id attached to a demo schedule, by subdomain shape - the same
-     * predicate as excludeDemoRoles(), so the signup and schedule sections agree. Sales use
-     * DemoService::demoEventIdsQuery() instead; see gmvByCurrency().
+     * Subquery of every event id attached to a demo schedule - the same predicate as
+     * excludeDemoRoles() and gmvByCurrency(), so the signup, schedule and revenue sections agree.
      */
     private function demoEventIds()
     {
-        return DB::table('event_role')
-            ->join('roles', 'roles.id', '=', 'event_role.role_id')
-            ->where(function ($q) {
-                $q->where('roles.subdomain', DemoService::DEMO_ROLE_SUBDOMAIN)
-                    ->orWhere('roles.subdomain', 'like', 'demo-%');
-            })
-            ->select('event_role.event_id');
+        return DemoService::demoEventIdsQuery();
     }
 
     /**
@@ -615,11 +719,13 @@ class GrowthExportService
 
         $total = (clone $base)->count();
 
-        // Schedules and first-schedule timestamp, per user, in one pass.
-        $rolesByUser = $this->excludeDemoRoles(
-            DB::table('roles')->where('is_deleted', false)->whereNotNull('user_id')
-        )
-            ->selectRaw('user_id, COUNT(*) as c, MIN(created_at) as first_at')
+        // Schedules and first-schedule timestamp, per user, in one pass. `c` is the live count
+        // (schedules_count); `ever` includes deleted ones, because saved_schedule asks whether they
+        // saved one - the funnel's stage counts them too, and so must this, or a user's events
+        // (which outlive a deleted schedule) would put them in saved_event and not saved_schedule.
+        $rolesByUser = $this->excludeDemoRoles(DB::table('roles')->whereNotNull('user_id'))
+            ->selectRaw('user_id, SUM(CASE WHEN is_deleted = 0 THEN 1 ELSE 0 END) as c, '
+                .'COUNT(*) as ever, MIN(created_at) as first_at')
             ->groupBy('user_id')
             ->get()->keyBy('user_id');
 
@@ -649,14 +755,19 @@ class GrowthExportService
             $ticketAgg = $ticketsByUser[$u->id] ?? null;
             $firstAt = $roleAgg?->first_at ? Carbon::parse($roleAgg->first_at) : null;
 
+            $savedSchedule = (int) ($roleAgg->ever ?? 0) > 0;
+
             $rows[] = [
                 $this->hashId('u', $u->id),
                 $u->created_at?->format('Y-m'),
                 $u->signup_intent,
+                // The four attribution columns are RAW here and made safe to export by
+                // anonymizeAttribution() below, which needs every row to count group sizes.
                 $u->utm_source,
                 $u->utm_medium,
                 $this->hostOf($u->referrer_url),
-                $this->pathOf($u->landing_page),
+                null, // referrer_channel, filled by anonymizeAttribution()
+                $u->landing_page,
                 $u->google_oauth_id ? 'google' : ($u->facebook_id ? 'facebook' : ($u->password ? 'email' : 'other')),
                 // OR-defined, exactly as funnelData()'s reached_schedule stage is, so the step
                 // can never come out BELOW the saved_schedule it contains. The timestamp alone
@@ -665,8 +776,8 @@ class GrowthExportService
                 // existed - read as "never reached the form" while also reading as "saved a
                 // schedule". That made activation.reached_schedule_form 88 against 491 saves.
                 // admin/users.blade.php already does it this way.
-                $u->schedule_form_viewed_at !== null || (int) ($roleAgg->c ?? 0) > 0,
-                (int) ($roleAgg->c ?? 0) > 0,
+                $u->schedule_form_viewed_at !== null || $savedSchedule,
+                $savedSchedule,
                 (int) ($eventsByUser[$u->id]->c ?? 0) > 0,
                 $ticketAgg !== null,
                 (int) ($ticketAgg->paid ?? 0) > 0,
@@ -675,15 +786,273 @@ class GrowthExportService
             ];
         }
 
+        $columns = ['uid', 'created_month', 'signup_intent', 'utm_source', 'utm_medium',
+            'referrer_domain', 'referrer_channel', 'landing_path', 'auth', 'reached_schedule_form',
+            'saved_schedule', 'saved_event', 'saved_ticket', 'saved_paid_ticket', 'schedules_count',
+            'days_to_first_schedule'];
+
         return [
-            'columns' => ['uid', 'created_month', 'signup_intent', 'utm_source', 'utm_medium',
-                'referrer_domain', 'landing_path', 'auth', 'reached_schedule_form', 'saved_schedule',
-                'saved_event', 'saved_ticket', 'saved_paid_ticket', 'schedules_count',
-                'days_to_first_schedule'],
-            'rows' => $rows,
+            'columns' => $columns,
+            'rows' => $this->anonymizeAttribution($rows, array_flip($columns)),
             'total' => $total,
             'truncated' => $total > $this->rowCap(),
         ];
+    }
+
+    /**
+     * Make the four visitor-controlled attribution columns safe to export, in two passes.
+     *
+     * Pass one canonicalises each value, and replaces the ones that are never safe whatever the
+     * count: a "@" in a utm, an IP or a schedule's own host as referrer, a token in a path. It also
+     * marks values that identify nobody as exempt from pass two - our own pages, published blog
+     * posts, known platforms, and the placeholders themselves.
+     *
+     * Pass two replaces every non-exempt value shared by fewer than MIN_ATTRIBUTION_GROUP signups
+     * with "(other)". This is the part that catches what no rule can name in advance: a personal
+     * site, a customer's domain we have no record of, a tenant event slug, a link forwarded by one
+     * buyer. It runs over the (capped) row set, so a value's group size is counted on what is
+     * exported - the rollups are built from these rows and inherit it.
+     */
+    private function anonymizeAttribution(array $rows, array $i): array
+    {
+        $context = [
+            'marketing' => array_change_key_case(array_flip(array_keys((array) config('sitemap_lastmod', []))), CASE_LOWER),
+            'blog' => $this->publishedBlogSlugs(),
+            'customHosts' => $this->customDomainHosts(),
+            'baseDomain' => strtolower((string) _base_domain()),
+        ];
+
+        $columns = ['utm_source', 'utm_medium', 'referrer_domain', 'landing_path'];
+        $exempt = array_fill_keys($columns, []);
+
+        foreach ($rows as &$row) {
+            foreach (['utm_source', 'utm_medium'] as $column) {
+                [$row[$i[$column]], $isExempt] = $this->cleanUtm($row[$i[$column]]);
+                if ($isExempt) {
+                    $exempt[$column][$row[$i[$column]]] = true;
+                }
+            }
+
+            [$host, $channel, $isExempt] = $this->classifyReferrer($row[$i['referrer_domain']], $context);
+            $row[$i['referrer_domain']] = $host;
+            $row[$i['referrer_channel']] = $channel;
+            if ($isExempt) {
+                $exempt['referrer_domain'][$host] = true;
+            }
+
+            [$row[$i['landing_path']], $isExempt] = $this->classifyLanding($row[$i['landing_path']], $context);
+            if ($isExempt) {
+                $exempt['landing_path'][$row[$i['landing_path']]] = true;
+            }
+        }
+        unset($row);
+
+        foreach ($columns as $column) {
+            $counts = [];
+            foreach ($rows as $row) {
+                $value = $row[$i[$column]];
+                if ($value !== null && ! isset($exempt[$column][$value])) {
+                    $counts[$value] = ($counts[$value] ?? 0) + 1;
+                }
+            }
+            foreach ($rows as &$row) {
+                $value = $row[$i[$column]];
+                if ($value !== null && isset($counts[$value]) && $counts[$value] < self::MIN_ATTRIBUTION_GROUP) {
+                    $row[$i[$column]] = '(other)';
+                }
+            }
+            unset($row);
+        }
+
+        return $rows;
+    }
+
+    /**
+     * Lowercased and trimmed so "Newsletter" and "newsletter" are one group. A utm containing "@"
+     * is somebody's address (or a tracking id built from one): redacted however many share it.
+     *
+     * @return array{0: ?string, 1: bool} [value, exempt from the group-size rule]
+     */
+    private function cleanUtm(?string $value): array
+    {
+        $value = $value === null ? '' : mb_strtolower(trim($value));
+        if ($value === '') {
+            return [null, false];
+        }
+        if (str_contains($value, '@')) {
+            return ['(redacted)', true];
+        }
+
+        return [mb_substr($value, 0, 64), false];
+    }
+
+    /**
+     * Canonical platforms: [host pattern, exported name, channel]. Specific hosts come before the
+     * generic ones that would also match them (gemini.google.com before google.*). A platform name
+     * identifies nobody, so these are exempt from the group-size rule - which is what keeps a rare
+     * but telling referrer (one signup from perplexity.ai) visible instead of folded into "(other)".
+     */
+    private const REFERRER_PLATFORMS = [
+        // AI assistants
+        ['/(^|\.)(chatgpt\.com|chat\.openai\.com|openai\.com)$/', 'chatgpt', 'ai'],
+        ['/(^|\.)claude\.ai$/', 'claude', 'ai'],
+        ['/(^|\.)perplexity\.ai$/', 'perplexity', 'ai'],
+        ['/^gemini\.google\.com$/', 'gemini', 'ai'],
+        ['/(^|\.)copilot\.microsoft\.com$/', 'copilot', 'ai'],
+        ['/(^|\.)deepseek\.com$/', 'deepseek', 'ai'],
+        ['/(^|\.)grok\.com$/', 'grok', 'ai'],
+        // Email and messaging, before the generic google.* below
+        ['/^(mail\.google\.com|com\.google\.android\.gm)$/', 'gmail', 'email'],
+        ['/(^|\.)(outlook\.live\.com|outlook\.office\.com|outlook\.office365\.com)$/', 'outlook', 'email'],
+        ['/^mail\.yahoo\.com$/', 'yahoo-mail', 'email'],
+        ['/^messages\.google\.com$/', 'google-messages', 'messaging'],
+        ['/(^|\.)(whatsapp\.com|com\.whatsapp)$/', 'whatsapp', 'messaging'],
+        ['/(^|\.)(t\.me|telegram\.org|org\.telegram\.messenger)$/', 'telegram', 'messaging'],
+        // Back from a sign-in provider: the real referrer was lost on the way.
+        ['/^accounts\.google\.com$/', 'google-signin', 'auth'],
+        // Search
+        ['/(^|\.)google\.(com?\.)?[a-z]{2,3}$|^com\.google\.android\.googlequicksearchbox$/', 'google', 'search'],
+        ['/(^|\.)bing\.com$/', 'bing', 'search'],
+        ['/(^|\.)duckduckgo\.com$/', 'duckduckgo', 'search'],
+        ['/(^|\.)search\.yahoo\.com$|^yahoo\.com$/', 'yahoo', 'search'],
+        ['/(^|\.)ecosia\.org$/', 'ecosia', 'search'],
+        ['/(^|\.)yandex\.[a-z.]+$/', 'yandex', 'search'],
+        ['/(^|\.)baidu\.com$/', 'baidu', 'search'],
+        ['/^search\.brave\.com$/', 'brave', 'search'],
+        ['/(^|\.)qwant\.com$/', 'qwant', 'search'],
+        ['/(^|\.)startpage\.com$/', 'startpage', 'search'],
+        ['/(^|\.)naver\.com$/', 'naver', 'search'],
+        // Social
+        ['/(^|\.)facebook\.com$|^com\.facebook\.katana$/', 'facebook', 'social'],
+        ['/(^|\.)instagram\.com$|^com\.instagram\.android$/', 'instagram', 'social'],
+        ['/(^|\.)linkedin\.com$|^lnkd\.in$|^com\.linkedin\.android$/', 'linkedin', 'social'],
+        ['/^(t\.co|twitter\.com|x\.com|mobile\.twitter\.com)$/', 'x', 'social'],
+        ['/(^|\.)youtube\.com$|^youtu\.be$/', 'youtube', 'social'],
+        ['/(^|\.)tiktok\.com$/', 'tiktok', 'social'],
+        ['/(^|\.)pinterest\.[a-z.]+$/', 'pinterest', 'social'],
+        ['/(^|\.)threads\.net$/', 'threads', 'social'],
+        ['/^bsky\.app$/', 'bluesky', 'social'],
+        // Communities and directories
+        ['/(^|\.)reddit\.com$|^com\.reddit\.frontpage$/', 'reddit', 'community'],
+        ['/^news\.ycombinator\.com$/', 'hackernews', 'community'],
+        ['/^github\.com$/', 'github', 'community'],
+        ['/(^|\.)producthunt\.com$/', 'producthunt', 'community'],
+        ['/(^|\.)alternativeto\.net$/', 'alternativeto', 'community'],
+        ['/(^|\.)medium\.com$/', 'medium', 'community'],
+        ['/^dev\.to$/', 'dev.to', 'community'],
+        ['/(^|\.)stackoverflow\.com$/', 'stackoverflow', 'community'],
+        ['/(^|\.)discord\.com$/', 'discord', 'community'],
+    ];
+
+    /**
+     * @return array{0: ?string, 1: ?string, 2: bool} [host or placeholder, channel, exempt]
+     */
+    private function classifyReferrer(?string $host, array $context): array
+    {
+        if ($host === null || $host === '') {
+            return [null, null, false];
+        }
+
+        if (filter_var(trim($host, '[]'), FILTER_VALIDATE_IP)) {
+            return ['(ip)', 'other', true];
+        }
+
+        // A schedule's custom domain, or a tenant subdomain of ours: "referred by a schedule page"
+        // is the channel worth seeing, the schedule's name is not ours to export. Both capture
+        // paths drop same-base-domain referrers, so the subdomain arm mostly guards old rows.
+        $base = $context['baseDomain'];
+        if (isset($context['customHosts'][$host])) {
+            return ['(schedule)', 'schedule', true];
+        }
+        if ($base !== '' && str_ends_with($host, '.'.$base)) {
+            $label = substr($host, 0, -strlen('.'.$base));
+            if (! in_array($label, ['www', 'app', 'blog'], true)) {
+                return ['(schedule)', 'schedule', true];
+            }
+        }
+        if ($base !== '' && ($host === $base || str_ends_with($host, '.'.$base))) {
+            return [$host, 'own', true];
+        }
+
+        foreach (self::REFERRER_PLATFORMS as [$pattern, $name, $channel]) {
+            if (preg_match($pattern, $host) === 1) {
+                return [$name, $channel, true];
+            }
+        }
+
+        return [$host, 'other', false];
+    }
+
+    /**
+     * Normalise a stored landing page (a bare path with no leading slash, as both capture paths
+     * store it, or a full URL in older rows) and decide whether it may be exported as itself.
+     *
+     * @return array{0: ?string, 1: bool} [path, exempt from the group-size rule]
+     */
+    private function classifyLanding(?string $value, array $context): array
+    {
+        if ($value === null || trim($value) === '') {
+            return [null, false];
+        }
+
+        $path = preg_match('#^[a-z][a-z0-9+.-]*://#i', $value) === 1
+            ? (string) (parse_url($value, PHP_URL_PATH) ?? '')
+            : (string) preg_split('/[?#]/', $value, 2)[0];
+
+        // %E2%81%A0 (a word joiner) and other invisible format characters arrive from links pasted
+        // out of documents and chat apps; real data had /guest-add twice over because of one.
+        $path = preg_replace('/\p{Cf}/u', '', rawurldecode($path)) ?? $path;
+        $path = '/'.trim(mb_strtolower(trim($path)), '/');
+
+        if (isset($context['marketing'][$path])) {
+            return [$path, true];
+        }
+
+        // Blog posts are served from blog.<domain>/<slug>, which records only "<slug>".
+        $slug = ltrim($path, '/');
+        if ($slug !== '' && ! str_contains($slug, '/') && isset($context['blog'][$slug])) {
+            return ['/blog/'.$slug, true];
+        }
+
+        // A credential in the path survives no count: a ticket link forwarded to three friends who
+        // all signed up would otherwise clear the group-size rule with its secret intact.
+        $segments = array_map(fn ($segment) => $this->isTokenSegment($segment) ? ':token' : $segment, explode('/', $path));
+
+        return [mb_substr(implode('/', $segments), 0, 120), false];
+    }
+
+    /**
+     * A random-looking path segment: long, letters and digits, no hyphen (event and page slugs
+     * have hyphens; Str::random() secrets do not) - or very long with a digit, which also catches
+     * a UUID.
+     */
+    private function isTokenSegment(string $segment): bool
+    {
+        $len = strlen($segment);
+
+        return ($len >= 16 && preg_match('/^[a-z0-9_]+$/i', $segment) === 1
+                && preg_match('/\d/', $segment) === 1 && preg_match('/[a-z]/i', $segment) === 1)
+            || ($len >= 32 && preg_match('/^[a-z0-9_-]+$/i', $segment) === 1 && preg_match('/\d/', $segment) === 1);
+    }
+
+    /** @return array<string, true> */
+    private function publishedBlogSlugs(): array
+    {
+        return DB::table('blog_posts')->where('is_published', true)->whereNotNull('slug')
+            ->pluck('slug')
+            ->mapWithKeys(fn ($slug) => [mb_strtolower((string) $slug) => true])
+            ->all();
+    }
+
+    /** Every host a schedule serves from on a custom domain. @return array<string, true> */
+    private function customDomainHosts(): array
+    {
+        return DB::table('roles')->whereNotNull('custom_domain')->where('custom_domain', '!=', '')
+            ->pluck('custom_domain')
+            ->map(fn ($url) => $this->hostOf((string) $url))
+            ->filter()
+            ->mapWithKeys(fn ($host) => [$host => true])
+            ->all();
     }
 
     /**
@@ -698,17 +1067,6 @@ class GrowthExportService
         $host = parse_url($url, PHP_URL_HOST);
 
         return $host ? preg_replace('/^www\./', '', strtolower($host)) : null;
-    }
-
-    /** Landing page reduced to its path - same query-string reasoning as hostOf(). */
-    private function pathOf(?string $url): ?string
-    {
-        if (! $url) {
-            return null;
-        }
-        $path = parse_url($url, PHP_URL_PATH);
-
-        return $path ? mb_substr($path, 0, 120) : '/';
     }
 
     /**
@@ -728,27 +1086,55 @@ class GrowthExportService
         // and therefore reported ~100% retention forever.
         $recentCutoff = now()->copy()->subDays(90)->toDateTimeString();
 
+        // LISTED events: ones the schedule created, or accepted onto its page - the same rule as
+        // claims below and SendActivationNudges::listedEvents(). A pending or declined request
+        // from another schedule is not this schedule's event, and counting it made a venue that
+        // ignores its inbox look busy.
+        //
+        // recent_total counts events CREATED in the window. It read updated_at, which system
+        // writes bump (Translate::markChecked() touches every event it checks, and calendar sync
+        // rewrites rows), so a schedule nobody had opened in a year could read as active.
         $events = DB::table('event_role')
             ->join('events', 'events.id', '=', 'event_role.event_id')
+            ->where(fn ($q) => $q->where('event_role.is_accepted', true)
+                ->orWhereColumn('events.creator_role_id', 'event_role.role_id'))
             ->selectRaw('event_role.role_id, COUNT(*) as total, '
                 .'SUM(CASE WHEN events.is_draft = 0 AND events.is_private = 0 AND events.is_internal = 0 THEN 1 ELSE 0 END) as public_total, '
-                .'SUM(CASE WHEN events.updated_at >= ? THEN 1 ELSE 0 END) as recent_total', [$recentCutoff])
+                .'SUM(CASE WHEN events.created_at >= ? THEN 1 ELSE 0 END) as recent_total', [$recentCutoff])
             ->groupBy('event_role.role_id')
             ->get()->keyBy('role_id');
 
         // paid_c is the commercial signal. COUNT(*) alone counts free RSVP/registration types
         // too, so it says nothing about whether a schedule takes money - which made it useless
         // for sizing anything gated on paid ticketing.
-        $ticketTypes = DB::table('tickets')
-            ->join('event_role', 'event_role.event_id', '=', 'tickets.event_id')
+        //
+        // Credited to the selling schedule and shaped like Event::tickets() (no deleted types, no
+        // add-ons), so it means the same thing as the signup rows' saved_ticket and the funnel's
+        // ticket stages. It used to count add-ons and credit every schedule on the event.
+        $ticketTypes = $this->attributeToSeller(
+            DB::table('tickets')->join('events', 'events.id', '=', 'tickets.event_id')
+        )
             ->where('tickets.is_deleted', false)
-            ->selectRaw('event_role.role_id, COUNT(*) as c, '
+            ->where('tickets.is_addon', false)
+            ->groupBy(DB::raw(self::SELLER))
+            ->selectRaw(self::SELLER.' as role_id, COUNT(*) as c, '
                 .'SUM(CASE WHEN tickets.price > 0 THEN 1 ELSE 0 END) as paid_c')
-            ->groupBy('event_role.role_id')
             ->get()->keyBy('role_id');
 
         $paidByMonth = $this->paidTicketsByRoleMonth();
+        $paid90d = $this->paidTickets90dByRole();
         $gmvByMonth = $this->gmvByRoleMonth();
+
+        // Paying = billing (RecurringRevenue's definition), not the tier - see the schema 8 note.
+        $billing = RecurringRevenue::billingRoleIds();
+
+        // actualPlanTier() reads $role->subscription('default'), which lazy-loads the relation per
+        // row, and cursor() cannot eager-load - one query per schedule. Preloaded and set below,
+        // in the relation's own order (newest first), so the tier logic is untouched.
+        $subscriptionsByRole = Cashier::$subscriptionModel::query()
+            ->orderBy('created_at', 'desc')
+            ->get()
+            ->groupBy('role_id');
 
         $views = AnalyticsDaily::query()
             ->where('date', '>=', now()->copy()->subDays(90)->toDateString())
@@ -792,7 +1178,11 @@ class GrowthExportService
             ->selectRaw('role_id, COUNT(*) as c')->groupBy('role_id')
             ->get()->keyBy('role_id');
 
+        // A declined first checkout leaves an `incomplete` row: that is not an upgrade, and dating
+        // days_to_upgrade from it made people look faster to pay than they were. The same
+        // exclusion as the funnel's subscribed stage, which is also what ever_subscribed means.
         $firstSub = DB::table('subscriptions')
+            ->whereNotIn('stripe_status', ['incomplete', 'incomplete_expired'])
             ->selectRaw('role_id, MIN(created_at) as first_at')->groupBy('role_id')
             ->get()->keyBy('role_id');
 
@@ -814,6 +1204,8 @@ class GrowthExportService
 
         $rows = [];
         foreach ((clone $base)->orderByDesc('id')->limit($this->rowCap())->cursor() as $r) {
+            $r->setRelation('subscriptions', $subscriptionsByRole[$r->id] ?? new EloquentCollection);
+
             $perMonth = [];
             foreach ($months as $m) {
                 $perMonth[] = (int) ($paidByMonth[$r->id][$m] ?? 0);
@@ -860,12 +1252,15 @@ class GrowthExportService
                 $r->type,
                 $r->actualPlanTier(),
                 $r->plan_source,
+                isset($billing[$r->id]),
+                $subAt !== null,
                 (int) ($events[$r->id]->total ?? 0),
                 (int) ($events[$r->id]->public_total ?? 0),
                 (int) ($events[$r->id]->recent_total ?? 0),
                 (int) ($ticketTypes[$r->id]->c ?? 0),
                 (int) ($ticketTypes[$r->id]->paid_c ?? 0),
                 array_sum($paidByMonth[$r->id] ?? []),
+                (int) ($paid90d[$r->id] ?? 0),
                 $perMonth,
                 $firstPaidMonth,
                 $gmvCurrency,
@@ -886,8 +1281,9 @@ class GrowthExportService
 
         return [
             'columns' => ['sid', 'uid', 'created_month', 'type', 'plan', 'plan_source',
+                'billing', 'ever_subscribed',
                 'events_total', 'events_public', 'events_recent_90d', 'ticket_types',
-                'paid_ticket_types', 'paid_tickets_total',
+                'paid_ticket_types', 'paid_tickets_total', 'paid_tickets_90d',
                 'paid_tickets_recent', 'first_paid_sale_month', 'gmv_currency', 'gmv_recent',
                 'gmv_recent_by_currency',
                 'views_90d', 'followers', 'subscribers', 'interests_90d', 'interests_total',
@@ -907,31 +1303,88 @@ class GrowthExportService
      */
     private function paidTicketsByRoleMonth(): array
     {
-        $rows = DB::table('sales')
-            ->join('sale_tickets', 'sale_tickets.sale_id', '=', 'sales.id')
-            ->join('tickets', 'tickets.id', '=', 'sale_tickets.ticket_id')
-            ->join('events', 'events.id', '=', 'sales.event_id')
-            ->join('event_role', 'event_role.event_id', '=', 'events.id')
+        $rows = $this->paidTicketLines()
+            // Group by the expression, never the select alias - an alias binds to a
+            // same-named real column and raises 1055 under ONLY_FULL_GROUP_BY.
+            ->groupBy(DB::raw(self::SELLER), DB::raw("DATE_FORMAT(sales.paid_at, '%Y-%m')"))
+            ->selectRaw(self::SELLER." as role_id, DATE_FORMAT(sales.paid_at, '%Y-%m') as ym, SUM(sale_tickets.quantity) as qty")
+            ->get();
+
+        $map = [];
+        foreach ($rows as $row) {
+            if ($row->role_id !== null) {
+                $map[$row->role_id][$row->ym] = (int) $row->qty;
+            }
+        }
+
+        return $map;
+    }
+
+    /**
+     * Paid tickets per schedule over the trailing 90 days by paid_at - what retention's
+     * active_recently has always claimed to use. It used to read the six calendar months of
+     * paid_tickets_recent instead, so a sale five months ago kept a schedule "active".
+     *
+     * @return array<int, int>
+     */
+    private function paidTickets90dByRole(): array
+    {
+        return $this->paidTicketLines()
+            ->where('sales.paid_at', '>=', now()->copy()->subDays(90))
+            ->groupBy(DB::raw(self::SELLER))
+            ->selectRaw(self::SELLER.' as role_id, SUM(sale_tickets.quantity) as qty')
+            ->get()
+            ->filter(fn ($row) => $row->role_id !== null)
+            ->mapWithKeys(fn ($row) => [(int) $row->role_id => (int) $row->qty])
+            ->all();
+    }
+
+    /**
+     * The paid-ticket shape the paid-ticket gate and its 2026_09_20 grandfather backfill count:
+     * paid, not deleted, not an RSVP or bulk import, not an add-on, priced above zero, never an
+     * appointment booking - attributed to the selling schedule (see attributeToSeller()).
+     */
+    private function paidTicketLines()
+    {
+        return $this->attributeToSeller(
+            DB::table('sales')
+                ->join('sale_tickets', 'sale_tickets.sale_id', '=', 'sales.id')
+                ->join('tickets', 'tickets.id', '=', 'sale_tickets.ticket_id')
+                ->join('events', 'events.id', '=', 'sales.event_id')
+        )
             ->where('sales.status', 'paid')
             ->where('sales.is_deleted', false)
             ->whereNotIn('sales.payment_method', ['rsvp', 'import'])
             ->whereNotNull('sales.paid_at')
             ->where('tickets.is_addon', false)
             ->where('tickets.price', '>', 0)
-            ->whereNull('events.appointment_type_id')
-            // Group by the expression, never the select alias - an alias binds to a
-            // same-named real column and raises 1055 under ONLY_FULL_GROUP_BY.
-            ->groupBy('event_role.role_id', DB::raw("DATE_FORMAT(sales.paid_at, '%Y-%m')"))
-            ->selectRaw("event_role.role_id as role_id, DATE_FORMAT(sales.paid_at, '%Y-%m') as ym, SUM(sale_tickets.quantity) as qty")
-            ->get();
-
-        $map = [];
-        foreach ($rows as $row) {
-            $map[$row->role_id][$row->ym] = (int) $row->qty;
-        }
-
-        return $map;
+            ->whereNull('events.appointment_type_id');
     }
+
+    /**
+     * The schedule a sale, ticket type or revenue belongs to: the one that CREATED the event
+     * (events.creator_role_id), which is the seller - its gateway took the money.
+     *
+     * Every one of these used to join event_role, which credited the same sale to every schedule
+     * on the event: the venue, each talent playing there, and any curator listing it. So a venue
+     * that never sold a ticket read as a seller, per-schedule GMV summed to more than
+     * gmv_by_currency, and first_paid_sale_month, ever_sold_paid and with_paid_sale overstated the
+     * one cliff this export exists to measure. ticketTrials() already keyed on the creator.
+     *
+     * Legacy events with no creator_role_id fall back to every listed schedule, the old behaviour,
+     * through a LEFT JOIN that only matches them: the join condition carries the null test, so an
+     * event with a creator contributes exactly one row and never duplicates.
+     */
+    private function attributeToSeller($query)
+    {
+        return $query->leftJoin('event_role', function ($join) {
+            $join->on('event_role.event_id', '=', 'events.id')
+                ->whereNull('events.creator_role_id');
+        });
+    }
+
+    /** The seller expression attributeToSeller() makes available. */
+    private const SELLER = 'COALESCE(events.creator_role_id, event_role.role_id)';
 
     /**
      * Money taken per schedule per month, in the schedule's own currency.
@@ -946,23 +1399,25 @@ class GrowthExportService
      */
     private function gmvByRoleMonth(): array
     {
-        $rows = DB::table('sales')
-            ->join('events', 'events.id', '=', 'sales.event_id')
-            ->join('event_role', 'event_role.event_id', '=', 'events.id')
+        $rows = $this->attributeToSeller(
+            DB::table('sales')->join('events', 'events.id', '=', 'sales.event_id')
+        )
             ->where('sales.status', 'paid')
             ->where('sales.is_deleted', false)
             ->whereNotIn('sales.payment_method', ['rsvp', 'import'])
             ->whereNotNull('sales.paid_at')
             // Group by the expression, never the select alias - an alias binds to a
             // same-named real column and raises 1055 under ONLY_FULL_GROUP_BY.
-            ->groupBy('event_role.role_id', 'events.ticket_currency_code', DB::raw("DATE_FORMAT(sales.paid_at, '%Y-%m')"))
-            ->selectRaw('event_role.role_id as role_id, events.ticket_currency_code as currency, '
+            ->groupBy(DB::raw(self::SELLER), 'events.ticket_currency_code', DB::raw("DATE_FORMAT(sales.paid_at, '%Y-%m')"))
+            ->selectRaw(self::SELLER.' as role_id, events.ticket_currency_code as currency, '
                 ."DATE_FORMAT(sales.paid_at, '%Y-%m') as ym, SUM(sales.payment_amount) as amount")
             ->get();
 
         $map = [];
         foreach ($rows as $row) {
-            $map[$row->role_id][$row->currency][$row->ym] = round((float) $row->amount, 2);
+            if ($row->role_id !== null) {
+                $map[$row->role_id][$row->currency][$row->ym] = round((float) $row->amount, 2);
+            }
         }
 
         return $map;
@@ -1049,6 +1504,7 @@ class GrowthExportService
             'by_utm_source' => $this->groupActivation($signups, 'utm_source'),
             'by_utm_medium' => $this->groupActivation($signups, 'utm_medium'),
             'by_referrer_domain' => $this->groupActivation($signups, 'referrer_domain'),
+            'by_referrer_channel' => $this->groupActivation($signups, 'referrer_channel'),
             'by_landing_path' => $this->groupActivation($signups, 'landing_path'),
             'by_auth' => $this->groupActivation($signups, 'auth'),
         ];
@@ -1063,7 +1519,7 @@ class GrowthExportService
             $t = $row[$si['type']] ?? 'unknown';
             $byType[$t] ??= ['key' => $t, 'schedules' => 0, 'with_event' => 0, 'with_public_event' => 0,
                 'with_ticket_type' => 0, 'with_paid_ticket_type' => 0, 'with_paid_sale' => 0,
-                'paid_plan' => 0];
+                'paid_plan' => 0, 'billing' => 0];
             $byType[$t]['schedules']++;
             $byType[$t]['with_event'] += $row[$si['events_total']] > 0 ? 1 : 0;
             $byType[$t]['with_public_event'] += $row[$si['events_public']] > 0 ? 1 : 0;
@@ -1072,7 +1528,9 @@ class GrowthExportService
             $byType[$t]['with_ticket_type'] += $row[$si['ticket_types']] > 0 ? 1 : 0;
             $byType[$t]['with_paid_ticket_type'] += $row[$si['paid_ticket_types']] > 0 ? 1 : 0;
             $byType[$t]['with_paid_sale'] += $row[$si['paid_tickets_total']] > 0 ? 1 : 0;
+            // paid_plan is the TIER (grants, credits and trials included); billing is who pays.
             $byType[$t]['paid_plan'] += $row[$si['plan']] !== 'free' ? 1 : 0;
+            $byType[$t]['billing'] += $row[$si['billing']] ? 1 : 0;
         }
         ksort($byType);
 
@@ -1108,7 +1566,23 @@ class GrowthExportService
         $out = array_values($by);
         usort($out, fn ($a, $b) => $b['signups'] <=> $a['signups']);
 
-        return array_slice($out, 0, 50);
+        if (count($out) <= self::ROLLUP_TOP) {
+            return $out;
+        }
+
+        // The long tail folded into one row rather than dropped, so the column's signups always sum
+        // to the row total - a top-N cut with no remainder reads as "this is everyone".
+        $rest = ['key' => '(rest)', 'signups' => 0, 'saved_schedule' => 0, 'saved_event' => 0,
+            'saved_ticket' => 0, 'saved_paid_ticket' => 0];
+        $tail = array_slice($out, self::ROLLUP_TOP);
+        foreach ($tail as $group) {
+            foreach (['signups', 'saved_schedule', 'saved_event', 'saved_ticket', 'saved_paid_ticket'] as $metric) {
+                $rest[$metric] += $group[$metric];
+            }
+        }
+        $rest['groups'] = count($tail);
+
+        return [...array_slice($out, 0, self::ROLLUP_TOP), $rest];
     }
 
     /**
@@ -1143,7 +1617,9 @@ class GrowthExportService
                 $buckets['0']++;
             }
 
-            if ($peak >= 1) {
+            // EVER, from the all-time first sale month. It used to be "sold in one of the six
+            // months above", so a free schedule that sold last year read as never having sold.
+            if ($row[$i['first_paid_sale_month']] !== null) {
                 $everSoldPaid++;
             }
 
@@ -1174,14 +1650,19 @@ class GrowthExportService
         ];
     }
 
-    /** What paying schedules do that free ones do not. */
+    /**
+     * What paying schedules do that the rest do not. "paid" is BILLING (a live, non-trialing
+     * subscription); "free" is everyone else, comps and trials included. Splitting on the tier
+     * instead put ~350 admin grants on the paid side, so this compared comped schedules - mostly
+     * dormant - with free ones and said nothing about customers.
+     */
     private function payersVsFreeFrom(array $schedules): array
     {
         $i = array_flip($schedules['columns']);
         $acc = ['paid' => ['n' => 0], 'free' => ['n' => 0]];
 
         foreach ($schedules['rows'] as $row) {
-            $side = $row[$i['plan']] === 'free' ? 'free' : 'paid';
+            $side = $row[$i['billing']] ? 'paid' : 'free';
             $acc[$side]['n']++;
             foreach ($row[$i['features']] as $f) {
                 $acc[$side][$f] = ($acc[$side][$f] ?? 0) + 1;
@@ -1240,24 +1721,45 @@ class GrowthExportService
             Role::query()->whereNotNull('user_id')->where('is_deleted', false)
         )->with('subscriptions')->lazy();
 
+        $billing = RecurringRevenue::billingRoleIds();
+
         foreach ($roles as $role) {
+            // Before the free-tier skip: everyone who ever upgraded, including those who have
+            // since churned back to free. Measuring only current payers made the median a
+            // survivor statistic. A declined first checkout (incomplete) is not an upgrade.
+            $first = $role->subscriptions
+                ->whereNotIn('stripe_status', ['incomplete', 'incomplete_expired'])
+                ->min('created_at');
+            if ($first && $role->created_at) {
+                $daysToUpgrade[] = max(0, $role->created_at->diffInDays(Carbon::parse($first)));
+            }
+
             $tier = $role->actualPlanTier();
             $tiers[$tier] = ($tiers[$tier] ?? 0) + 1;
             if ($tier === 'free') {
                 continue;
             }
-            $source = $role->plan_source ?? 'stripe';
+            // A null plan_source used to be labelled 'stripe' whatever was behind the tier. Only a
+            // billing subscription is; a Stripe trial, a generic trial and a legacy plan_expires
+            // row are named for what they are, so 'stripe' here matches billing_subscriptions.
+            $source = $role->plan_source ?? match (true) {
+                isset($billing[$role->id]) => 'stripe',
+                $role->subscriptions->contains('stripe_status', 'trialing') => 'stripe_trial',
+                $role->onGenericTrial() => 'trial',
+                default => 'legacy',
+            };
             $bySource[$source] = ($bySource[$source] ?? 0) + 1;
             $byTerm[$role->plan_term ?? 'unknown'] = ($byTerm[$role->plan_term ?? 'unknown'] ?? 0) + 1;
-
-            $first = $role->subscriptions->min('created_at');
-            if ($first && $role->created_at) {
-                $daysToUpgrade[] = max(0, $role->created_at->diffInDays(Carbon::parse($first)));
-            }
         }
 
-        $statuses = DB::table('subscriptions')
-            ->selectRaw('stripe_status, COUNT(*) as c')->groupBy('stripe_status')
+        // The same population as every other section: no demo or deleted schedules.
+        $statuses = $this->excludeDemoRoles(
+            DB::table('subscriptions')
+                ->join('roles', 'roles.id', '=', 'subscriptions.role_id')
+                ->where('roles.is_deleted', false)
+        )
+            ->selectRaw('subscriptions.stripe_status, COUNT(*) as c')
+            ->groupBy('subscriptions.stripe_status')
             ->pluck('c', 'stripe_status');
 
         // The same figure the dashboard reports as ARR, from the same class - see RecurringRevenue
@@ -1348,9 +1850,11 @@ class GrowthExportService
      */
     private function ticketTrials(): array
     {
-        $roles = $this->excludeDemoRoles(Role::query()->whereNotNull('ticket_trial_ends_at'))
+        $roles = $this->excludeDemoRoles(
+            Role::query()->whereNotNull('ticket_trial_ends_at')->where('is_deleted', false)
+        )
             ->with('subscriptions')
-            ->get(['id', 'subdomain', 'ticket_trial_ends_at']);
+            ->get(['id', 'ticket_trial_ends_at']);
 
         $starts = DB::table('audit_logs')
             ->where('action', AuditService::TICKET_TRIAL_START)
@@ -1369,11 +1873,40 @@ class GrowthExportService
             $counts['started_from'][$from] = ($counts['started_from'][$from] ?? 0) + 1;
         }
 
+        $windows = [];
         foreach ($roles as $role) {
             $ends = $role->ticket_trial_ends_at;
-            $start = isset($starts[$role->id])
-                ? Carbon::parse($starts[$role->id])
-                : $ends->copy()->subDays((int) config('app.trial_days', 7));
+            $windows[$role->id] = [
+                isset($starts[$role->id])
+                    ? Carbon::parse($starts[$role->id])
+                    : $ends->copy()->subDays((int) config('app.trial_days', 7)),
+                $ends,
+            ];
+        }
+
+        // Every real paid sale on a trial schedule's own events, between the earliest trial start
+        // and the latest end, in ONE query - this used to be an exists() per trial. Same "real paid
+        // sale" filter as the first_sale nudge: RSVPs and imports are not money.
+        $salesByRole = [];
+        if ($windows) {
+            $salesByRole = DB::table('sales')
+                ->join('events', 'events.id', '=', 'sales.event_id')
+                ->whereIn('events.creator_role_id', array_keys($windows))
+                ->where('sales.status', 'paid')
+                ->where('sales.is_deleted', false)
+                ->whereNotIn('sales.payment_method', ['rsvp', 'import'])
+                ->where('sales.payment_amount', '>', 0)
+                ->whereBetween('sales.paid_at', [
+                    min(array_map(fn ($w) => $w[0], $windows)),
+                    max(array_map(fn ($w) => $w[1], $windows)),
+                ])
+                ->get(['events.creator_role_id', 'sales.paid_at'])
+                ->groupBy('creator_role_id')
+                ->all();
+        }
+
+        foreach ($roles as $role) {
+            [$start, $ends] = $windows[$role->id];
 
             $counts['started']++;
 
@@ -1389,16 +1922,11 @@ class GrowthExportService
                 $counts['expired_unconverted']++;
             }
 
-            // Same "real paid sale" filter as the first_sale nudge: RSVPs and imports are not money.
-            $soldDuring = DB::table('sales')
-                ->join('events', 'events.id', '=', 'sales.event_id')
-                ->where('events.creator_role_id', $role->id)
-                ->where('sales.status', 'paid')
-                ->where('sales.is_deleted', false)
-                ->whereNotIn('sales.payment_method', ['rsvp', 'import'])
-                ->where('sales.payment_amount', '>', 0)
-                ->whereBetween('sales.paid_at', [$start, $ends])
-                ->exists();
+            $soldDuring = collect($salesByRole[$role->id] ?? [])->contains(function ($sale) use ($start, $ends) {
+                $paidAt = Carbon::parse($sale->paid_at);
+
+                return $paidAt->betweenIncluded($start, $ends);
+            });
 
             if ($soldDuring) {
                 $counts['sold_during']++;
@@ -1433,11 +1961,13 @@ class GrowthExportService
     /**
      * Are schedules still publishing months after they were created?
      *
-     * active_recently means the OWNER did something: touched an event, or sold a paid ticket,
-     * in the last 90 days. It deliberately no longer counts page views. Views measure whether
-     * anyone visited the public page - including crawlers and a single stray click - so every
-     * cohort scored ~100% retained and the metric could not fall, which made it worthless as a
-     * health signal. `visited_recently` keeps the old audience-side reading alongside it.
+     * active_recently means the schedule did something: created an event, or sold a paid
+     * ticket, in the last 90 days. It deliberately no longer counts page views. Views measure
+     * whether anyone visited the public page - including crawlers and a single stray click - so
+     * every cohort scored ~100% retained and the metric could not fall, which made it worthless
+     * as a health signal. `visited_recently` keeps the old audience-side reading alongside it.
+     *
+     * paid is BILLING since schema 8, not the tier.
      */
     private function retentionFrom(array $schedules): array
     {
@@ -1450,9 +1980,9 @@ class GrowthExportService
             $by[$m]['schedules']++;
             $by[$m]['with_event'] += $row[$i['events_total']] > 0 ? 1 : 0;
             $by[$m]['active_recently'] += $row[$i['events_recent_90d']] > 0
-                || array_sum($row[$i['paid_tickets_recent']]) > 0 ? 1 : 0;
+                || $row[$i['paid_tickets_90d']] > 0 ? 1 : 0;
             $by[$m]['visited_recently'] += $row[$i['views_90d']] > 0 ? 1 : 0;
-            $by[$m]['paid'] += $row[$i['plan']] !== 'free' ? 1 : 0;
+            $by[$m]['paid'] += $row[$i['billing']] ? 1 : 0;
         }
         ksort($by);
 

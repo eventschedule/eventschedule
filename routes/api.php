@@ -8,6 +8,7 @@ use App\Http\Controllers\Api\ApiGroupController;
 use App\Http\Controllers\Api\ApiSaleController;
 use App\Http\Controllers\Api\ApiScheduleController;
 use App\Http\Controllers\Api\ApiTranslationSuggestionController;
+use App\Http\Controllers\GrowthDataController;
 use App\Http\Controllers\RealtimeBeaconController;
 use App\Http\Middleware\ApiAuthentication;
 use Illuminate\Support\Facades\Route;
@@ -25,6 +26,15 @@ Route::post('/login', [ApiAuthController::class, 'login']);
 Route::post('/realtime', [RealtimeBeaconController::class, 'store'])
     ->name('realtime.beacon')
     ->middleware('throttle:realtime');
+
+// The growth payload, for `php artisan app:pull-growth` on the operator's machine. Bearer-token
+// auth, hosted only; see GrowthDataController. Here for the same reasons as the beacon: no session,
+// cookie or CSRF, and Cloudflare's cache rule already excludes /api. Not part of the public API:
+// not in public/api/openapi.json or on /for-ai-agents. Above the ApiAuthentication group, because
+// MarketingCountedClaimsTest counts the public endpoints from that marker down.
+Route::get('/internal/growth', [GrowthDataController::class, 'show'])
+    ->name('api.growth_data')
+    ->middleware('throttle:growth_data');
 
 // Nexus only: receives translation suggestions shared by other installs.
 // The api group carries no default throttle, so the route sets its own.

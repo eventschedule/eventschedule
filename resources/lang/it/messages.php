@@ -2539,8 +2539,6 @@ return [
     'usage' => 'Utilizzo',
     'growth' => 'Crescita',
     'growth_description' => 'Dove le iscrizioni diventano programmi attivi e dove diventano a pagamento.',
-    'growth_download' => 'Scarica JSON',
-    'growth_download_help' => 'Dati aggregati e pseudonimizzati: ogni identificativo è cifrato e non sono inclusi nomi, email, indirizzi o identificativi di pagamento.',
     'growth_free_pressure' => 'Pressione del piano gratuito',
     'growth_free_pressure_help' => 'Numero massimo di biglietti a pagamento in un singolo mese per ogni programma gratuito, da prima che la vendita diventasse una funzione Pro. Qualsiasi valore sopra zero è un programma che ha già venduto e ora resta sul piano Gratuito.',
     'growth_acquisition' => 'Acquisizione',

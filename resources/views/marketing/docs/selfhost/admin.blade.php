@@ -629,7 +629,7 @@
 
         <div class="doc-callout doc-callout-info">
             <div class="doc-callout-title">Entries are pruned after 90 days</div>
-            <p>A daily scheduled task deletes audit entries older than 90 days, so the table cannot grow without bound. If you need to keep them longer, export or replicate them yourself; the retention is set by the pruning command, not by a setting on this page.</p>
+            <p>A daily scheduled task deletes audit entries older than 90 days, so the table cannot grow without bound. A few rare entries are kept for good, because they are the only record of what happened: subscription and plan changes, selling-trial starts, schedule claims, and payment gateway and calendar connections. If you need to keep the rest longer, export or replicate them yourself; the retention is set by the pruning command, not by a setting on this page.</p>
         </div>
     </section>
 

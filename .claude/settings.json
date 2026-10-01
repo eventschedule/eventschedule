@@ -9,7 +9,9 @@
       "Bash(php artisan migrate:status:*)",
       "Bash(sips -g:*)",
       "Bash(npm audit:*)",
-      "Bash(xmllint --noout:*)"
+      "Bash(xmllint --noout:*)",
+      "Bash(php artisan app:pull-growth:*)",
+      "Bash(jq:*)"
     ]
   }
 }

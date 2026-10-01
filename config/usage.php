@@ -43,9 +43,10 @@ return [
     // number here. Advanced scheduling is gated the same way, in AppointmentTypeController::fill().
     'appointment_type_limit_free' => (int) env('APPOINTMENT_TYPE_LIMIT_FREE', 1),
 
-    // Ceiling on each row table in the /admin/growth export. Hitting it is reported in
-    // meta.truncated rather than silently shortening the table.
-    'growth_row_cap' => (int) env('GROWTH_ROW_CAP', 20000),
+    // Ceiling on each row table in the growth payload (/admin/growth and app:pull-growth). Hitting
+    // it is reported in meta.truncated rather than silently shortening the table. `?:` because a
+    // blank variable would otherwise cast to 0 and cap every table at one row.
+    'growth_row_cap' => (int) (env('GROWTH_ROW_CAP') ?: 20000),
 
     // Accounts one onboarding-nudge run may reach. A cap on PEOPLE for the whole run, not on
     // each stage query: per stage, the overflow from stage 3 fell into the stage 2 query in the

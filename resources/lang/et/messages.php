@@ -2537,8 +2537,6 @@ return [
     'usage' => 'Kasutus',
     'growth' => 'Kasv',
     'growth_description' => 'Kus registreerumistest saavad aktiivsed ajakavad ja kus neist saavad tasulised.',
-    'growth_download' => 'Laadi alla JSON',
-    'growth_download_help' => 'Koondatud ja pseudonüümitud: iga tunnus on räsitud ning nimesid, e-posti aadresse, aadresse ega makseandmeid ei kaasata.',
     'growth_free_pressure' => 'Tasuta paketi surve',
     'growth_free_pressure_help' => 'Suurim tasuliste piletite arv ühes kuus tasuta ajakava kohta, ajast enne seda, kui müük sai Pro funktsiooniks. Kõik üle nulli on ajakava, mis on juba müünud ja on nüüd tasuta paketis.',
     'growth_acquisition' => 'Kliendihange',

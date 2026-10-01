@@ -2540,8 +2540,6 @@ return [
     'usage' => 'Uso',
     'growth' => 'Crescimento',
     'growth_description' => 'Onde as inscrições se tornam agendas ativas e onde se tornam pagas.',
-    'growth_download' => 'Baixar JSON',
-    'growth_download_help' => 'Dados agregados e pseudonimizados: cada identificador é criptografado e não são incluídos nomes, e-mails, endereços ou identificadores de pagamento.',
     'growth_free_pressure' => 'Pressão do plano gratuito',
     'growth_free_pressure_help' => 'Máximo de bilhetes pagos num único mês por agenda gratuita, de antes de vender passar a ser uma funcionalidade Pro. Tudo acima de zero é uma agenda que já vendeu e continua no plano Gratuito.',
     'growth_acquisition' => 'Aquisição',

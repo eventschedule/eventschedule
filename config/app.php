@@ -30,6 +30,21 @@ return [
     'cron_secret' => env('APP_CRON_SECRET', ''),
 
     /*
+     * Bearer token for GET /api/internal/growth, the pseudonymous growth payload that
+     * `php artisan app:pull-growth` downloads to a dev machine for analysis. Hosted only. Unset, or
+     * shorter than GrowthDataController::MIN_TOKEN_LENGTH, and the endpoint answers 404: a weak
+     * value disables it rather than guarding it weakly. The same variable in a developer's local
+     * .env is what the pull command sends, so one value lives in both places.
+     *
+     * Trimmed, because a trailing space pasted into the DigitalOcean console would otherwise make
+     * every pull read as a token mismatch.
+     */
+    'growth_data_token' => trim((string) env('GROWTH_DATA_TOKEN', '')),
+
+    // Where app:pull-growth fetches from. `?:` so a present-but-blank variable still gets the default.
+    'growth_data_url' => env('GROWTH_DATA_URL') ?: 'https://eventschedule.com',
+
+    /*
      * How stale the scheduler heartbeat may get before /admin raises "scheduler stalled".
      * Both rails write scheduler.last_run_at every tick, so this is many missed ticks rather than
      * one slow one - long enough that a deploy or a long-running command does not cry wolf, short

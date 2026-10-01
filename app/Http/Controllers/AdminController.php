@@ -38,6 +38,7 @@ use App\Services\SubdomainUnavailableException;
 use App\Services\TranslationQueue;
 use App\Services\WebhookService;
 use App\Services\WorkBacklog;
+use App\Utils\AdminDateRange;
 use App\Utils\AdminReauthUtils;
 use App\Utils\HeroExperiment;
 use App\Utils\MoneyUtils;
@@ -1290,7 +1291,9 @@ class AdminController extends Controller
 
     /**
      * Growth reporting: the onboarding funnel carried past "saved an event" into
-     * activation and monetization, plus the downloadable payload behind it.
+     * activation and monetization. The full payload behind it is not downloadable from here:
+     * it is pulled by `php artisan app:pull-growth` from GrowthDataController (see
+     * docs/GROWTH_DATA.md).
      *
      * Hosted-only at runtime rather than at registration: a single-tenant selfhost has no
      * tiers and no subscriptions (actualPlanTier() short-circuits to enterprise), so every
@@ -1348,73 +1351,12 @@ class AdminController extends Controller
     }
 
     /**
-     * Download the growth payload as JSON. Aggregate and pseudonymous by construction -
-     * see GrowthExportService, which hashes every id and strips referrer/landing URLs to
-     * host and path, because this file is meant to be shared outside the install.
+     * Get date range based on selection. See AdminDateRange, which the growth endpoint and
+     * app:export-growth share so a range means the same window everywhere.
      */
-    public function growthExport(Request $request)
+    private function getDateRange(mixed $range): array
     {
-        if (! auth()->user()->isAdmin()) {
-            return redirect()->back()->with('error', __('messages.not_authorized'));
-        }
-        abort_unless(config('app.hosted'), 404);
-
-        $range = $request->input('range', 'last_30_days');
-        $dates = $this->getDateRange($range);
-
-        $data = app(GrowthExportService::class)
-            ->build($dates['start'], $dates['end'], $dates['previous_start'], $dates['previous_end']);
-
-        $filename = 'growth-'.now()->format('Y-m-d').'.json';
-
-        return response()->streamDownload(function () use ($data) {
-            echo json_encode($data, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES | JSON_THROW_ON_ERROR);
-        }, $filename, [
-            'Content-Type' => 'application/json',
-        ]);
-    }
-
-    /**
-     * Get date range based on selection.
-     */
-    private function getDateRange(string $range): array
-    {
-        $now = now();
-
-        switch ($range) {
-            case 'last_7_days':
-                $start = $now->copy()->subDays(7)->startOfDay();
-                $end = $now->copy()->endOfDay();
-                $previousStart = $start->copy()->subDays(7);
-                $previousEnd = $start->copy()->subSecond();
-                break;
-            case 'last_30_days':
-                $start = $now->copy()->subDays(30)->startOfDay();
-                $end = $now->copy()->endOfDay();
-                $previousStart = $start->copy()->subDays(30);
-                $previousEnd = $start->copy()->subSecond();
-                break;
-            case 'last_90_days':
-                $start = $now->copy()->subDays(90)->startOfDay();
-                $end = $now->copy()->endOfDay();
-                $previousStart = $start->copy()->subDays(90);
-                $previousEnd = $start->copy()->subSecond();
-                break;
-            case 'all_time':
-            default:
-                $start = Carbon::createFromDate(2020, 1, 1)->startOfDay();
-                $end = $now->copy()->endOfDay();
-                $previousStart = $start->copy();
-                $previousEnd = $start->copy();
-                break;
-        }
-
-        return [
-            'start' => $start,
-            'end' => $end,
-            'previous_start' => $previousStart,
-            'previous_end' => $previousEnd,
-        ];
+        return AdminDateRange::for($range);
     }
 
     /**

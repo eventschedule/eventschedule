@@ -31,6 +31,25 @@ class SentryScrubberTest extends TestCase
         );
     }
 
+    /**
+     * GROWTH_DATA_TOKEN travels as a bearer token. Sentry drops Authorization while
+     * send_default_pii is off; this is the backstop for an install that turns it on, where the
+     * header arrives PSR-7 shaped (an array of strings).
+     */
+    public function test_it_scrubs_a_bearer_token_from_an_authorization_header(): void
+    {
+        $event = SentryEvent::createEvent();
+        $event->setRequest(['url' => 'https://x.test/api/internal/growth', 'headers' => [
+            'Authorization' => ['Bearer '.self::SECRET.self::SECRET],
+            'Host' => ['x.test'],
+        ]]);
+
+        $request = SentryScrubber::beforeSend($event)->getRequest();
+
+        $this->assertSame(['Bearer [secret]'], $request['headers']['Authorization']);
+        $this->assertStringNotContainsString(self::SECRET, json_encode($request));
+    }
+
     public function test_it_leaves_other_paths_readable(): void
     {
         foreach (['/appointment/checkout/success/Qk9', '/venue/events/Qk9', '/'.self::SECRET] as $path) {
