@@ -1,6 +1,6 @@
 {{-- theme-variants opts this layout in to the six palettes. The guest portal
      renders through the same <x-app-layout> shell and deliberately does not. --}}
-<x-app-layout :theme-variants="true" :title="(request()->path() != '/' ? implode(' > ', array_map('ucwords', array_slice(explode('/', str_replace(['-', '_'], ' ', request()->path())), 0, 2))) : '') . ' | Event Schedule'">
+<x-app-layout :theme-variants="true" realtime-surface="ap" :title="(request()->path() != '/' ? implode(' > ', array_map('ucwords', array_slice(explode('/', str_replace(['-', '_'], ' ', request()->path())), 0, 2))) : '') . ' | Event Schedule'">
 
     <x-slot name="head">
         {{-- The admin portal is the one surface that genuinely is the Event Schedule app, so it

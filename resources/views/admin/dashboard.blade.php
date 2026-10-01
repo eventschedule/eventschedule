@@ -10,6 +10,16 @@
             <x-needs-attention :items="$adminAlerts" />
         @endif
 
+        {{-- Page views, not visitors: it counts people who have not accepted cookies too, and never
+             overstates who can be seen. No live dot: this page does not update itself. --}}
+        @if ($realtimeRecentViews !== null)
+            <p class="text-sm text-gray-600 dark:text-gray-400">
+                {{ trans_choice('messages.realtime_recent_views', $realtimeRecentViews, ['count' => number_format($realtimeRecentViews)]) }}
+                &middot;
+                <x-link :href="route('admin.realtime')">@lang('messages.realtime_view')</x-link>
+            </p>
+        @endif
+
         {{-- Key Metrics Cards --}}
         <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
             {{-- Total Users --}}

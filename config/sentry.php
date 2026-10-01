@@ -54,6 +54,10 @@ return [
     'ignore_transactions' => [
         // Ignore Laravel's default health URL
         '/up',
+        // The /admin/realtime beacon (a heartbeat a minute per open tab) and the page's 10-second
+        // poll would otherwise dominate tracing whenever SENTRY_TRACES_SAMPLE_RATE is set.
+        '/api/realtime',
+        '/admin/realtime/data',
     ],
 
     // Breadcrumb specific configuration

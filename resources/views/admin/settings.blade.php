@@ -592,6 +592,33 @@
             </form>
         </div>
 
+        {{-- Its own form and route (admin.settings.update_realtime): the shared settings endpoint
+             overwrites the header and footer code unless the federation marker is posted. --}}
+        <div id="realtime" class="ap-card rounded-xl p-6 scroll-mt-24">
+            <div class="mb-4">
+                <h2 class="text-lg font-semibold text-gray-900 dark:text-gray-100">@lang('messages.realtime_settings_title')</h2>
+                <p class="mt-1 text-sm text-gray-500 dark:text-gray-400">@lang('messages.realtime_settings_description')</p>
+            </div>
+
+            <form method="POST" action="{{ route('admin.settings.update_realtime') }}" class="{{ is_demo_mode() ? 'opacity-50 pointer-events-none' : '' }}">
+                @csrf
+
+                <div class="mb-6">
+                    <x-toggle
+                        id="realtime_enabled"
+                        name="realtime_enabled"
+                        :checked="old('realtime_enabled', $realtimeEnabled)"
+                        :label="e(__('messages.realtime_settings_toggle'))"
+                        :help="e(__('messages.realtime_settings_help'))"
+                        :disabled="is_demo_mode()" />
+                </div>
+
+                <div class="flex justify-end">
+                    <x-brand-button type="submit">@lang('messages.save')</x-brand-button>
+                </div>
+            </form>
+        </div>
+
         @if ($stay22Available)
         <div id="accommodation" class="ap-card rounded-xl p-6 scroll-mt-24">
             <div class="mb-4">

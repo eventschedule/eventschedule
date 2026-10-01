@@ -405,7 +405,11 @@ class AdminController extends Controller
         // Everything across /admin that is waiting on an admin, as one to-do list.
         $adminAlerts = AdminAlertService::items();
 
+        // The teaser line above the metrics; null when realtime is off.
+        $realtimeRecentViews = \App\Services\RealtimeDashboard::recentViews();
+
         return view('admin.dashboard', compact(
+            'realtimeRecentViews',
             'adminAlerts',
             'totalUsers',
             'totalSchedules',
@@ -3313,6 +3317,7 @@ class AdminController extends Controller
             // nexus is precisely the operator most likely to want a fallback affiliate ID.
             'stay22Available' => \App\Services\Stay22Service::isEnabled(),
             'stay22Aid' => \App\Services\Stay22Service::operatorAid(),
+            'realtimeEnabled' => \App\Utils\RealtimeTracker::enabled(),
         ]);
     }
 

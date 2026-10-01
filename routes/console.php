@@ -71,6 +71,13 @@ Schedule::call(function () {
     Artisan::call('app:sync-curator-sources');
 })->everyFiveMinutes()->name('app-sync-curator-sources')->withoutOverlapping(10)->appendOutputTo(storage_path('logs/scheduler.log'));
 
+// The privacy policy promises /admin/realtime page views are deleted about an hour after the
+// visitor's last activity; this is what keeps that true. Ungated: selfhost installs that turn
+// realtime on rely on it as much as hosted does.
+Schedule::call(function () {
+    Artisan::call('realtime:prune');
+})->everyFiveMinutes()->name('realtime-prune')->withoutOverlapping(10)->appendOutputTo(storage_path('logs/scheduler.log'));
+
 // Every 15 minutes rather than hourly: the command stops cleanly at its budget and resumes with
 // the longest-waiting rows, so more frequent short runs drain the queue faster than one long run
 // that may be killed.

@@ -226,10 +226,11 @@ class CaptureUtmParameters
      * resources/js/cookie-consent.js mirrors it into an unencrypted `cookie_consent`
      * cookie (exempted in bootstrap/app.php) purely so this check is possible.
      *
-     * Where consent_required() is false no banner is ever shown, so this is always false
+     * Where cookie_banner_required() is false no banner is ever shown, so this is always false
      * and the attribution cookies are simply never written. That is deliberate: an install
      * with nothing consent-gated turned on should not have to ask about cookies it can
-     * manage without.
+     * manage without. Turning /admin/realtime on is consent-gated, so it brings the banner,
+     * and with it these cookies for visitors who accept.
      */
     private function hasConsent(Request $request): bool
     {

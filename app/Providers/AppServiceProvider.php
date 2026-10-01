@@ -225,6 +225,19 @@ class AppServiceProvider extends ServiceProvider
             return Limit::perMinutes(10, 5)->by((string) $request->route('token'));
         });
 
+        // The /admin/realtime beacon. Keyed on the visitor's real IP (CF-Connecting-IP on hosted),
+        // which the default guest signature ignores: without it, everyone behind Cloudflare or on
+        // one venue wifi would share a single budget and a busy event page would throttle itself.
+        // HMAC'd rather than raw because Laravel stores limiter keys as an unsalted md5 in the cache,
+        // and the file store never clears expired entries - a raw IP there would sit on disk,
+        // reversible, which the privacy policy says never happens.
+        RateLimiter::for('realtime', function ($request) {
+            $ip = \App\Utils\RealtimeTracker::clientIp($request);
+
+            // Dated, so the key rotates daily like the visitor key the privacy policy describes.
+            return Limit::perMinute(600)->by('realtime|'.hash_hmac('sha256', $ip.'|'.gmdate('Y-m-d'), (string) config('app.key')));
+        });
+
         // Scheduler heartbeat, read by AdminAlertService's scheduler_stalled row.
         //
         // CommandFinished rather than ScheduledTaskFinished: this has to tick even on the minutes
@@ -273,6 +286,9 @@ class AppServiceProvider extends ServiceProvider
         // database and a cache round trip, and deliberately NOT the scheduler, because a failing
         // health check is grounds for App Platform to recycle the container.
         EventFacade::listen(DiagnosingHealth::class, [VerifyApplicationHealth::class, 'handle']);
+
+        // Hide a site admin's own sign-in page views from /admin/realtime. See the listener.
+        EventFacade::listen(\Illuminate\Auth\Events\Login::class, [\App\Listeners\MarkRealtimeAdminVisits::class, 'handle']);
 
         View::composer('marketing.partials.header', function ($view) {
             $view->with('githubStars', \App\Utils\GitHubUtils::getStars());

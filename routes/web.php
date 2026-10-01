@@ -4,6 +4,7 @@ use App\Http\Controllers\AdminController;
 use App\Http\Controllers\AdminFederationController;
 use App\Http\Controllers\AdminLegalController;
 use App\Http\Controllers\AdminNewsletterController;
+use App\Http\Controllers\AdminRealtimeController;
 use App\Http\Controllers\AdminTranslationController;
 use App\Http\Controllers\AnalyticsController;
 use App\Http\Controllers\Api\ApiSettingsController;
@@ -974,6 +975,11 @@ Route::middleware(['auth', 'verified', 'app_subdomain'])->group(function () {
     Route::middleware(['admin', 'throttle:30,1'])->group(function () {
         Route::get('/admin/dashboard', [AdminController::class, 'dashboard'])->name('admin.dashboard');
         Route::redirect('/admin', '/admin/dashboard');
+        // Realtime. On every install: tracking is off by default off the nexus, and the page
+        // explains how to turn it on rather than disappearing.
+        Route::get('/admin/realtime', [AdminRealtimeController::class, 'index'])->name('admin.realtime');
+        Route::get('/admin/realtime/data', [AdminRealtimeController::class, 'data'])->name('admin.realtime.data');
+        Route::post('/admin/settings/realtime', [AdminRealtimeController::class, 'updateSettings'])->name('admin.settings.update_realtime');
         Route::get('/admin/users', [AdminController::class, 'users'])->name('admin.users');
         Route::get('/admin/revenue', [AdminController::class, 'revenue'])->name('admin.revenue');
         // Only ever acts on a subscription still billing for a deleted schedule - see

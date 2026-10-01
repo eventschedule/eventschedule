@@ -1,4 +1,4 @@
-<x-app-layout :title="$guestTitle()">
+<x-app-layout :title="$guestTitle()" realtime-surface="gp" :realtime-role="$role" :realtime-event="$event">
 
     <noscript>
       <div class="bg-amber-100 dark:bg-amber-900/30 text-amber-800 dark:text-amber-200 p-4 text-center text-base">

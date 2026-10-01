@@ -138,6 +138,9 @@ class UtmConsentCookieTest extends TestCase
             'stay22.enabled' => false,
             'app.cookie_consent_banner' => false,
         ]);
+        // /admin/realtime is consent-gated too, and on by default for the nexus these tests run
+        // as; RealtimeBeaconRenderTest covers that it brings the banner.
+        \App\Models\Setting::set('realtime_enabled', '0');
 
         $this->get('/')->assertOk()->assertDontSee('data-cookie-consent', false);
 
@@ -203,6 +206,7 @@ class UtmConsentCookieTest extends TestCase
     public function test_the_domain_is_published_even_when_the_banner_is_hidden(): void
     {
         config(['app.cookie_consent_banner' => false, 'session.domain' => '.eventschedule.com']);
+        \App\Models\Setting::set('realtime_enabled', '0');
 
         $this->get('/')->assertOk()
             ->assertDontSee('data-cookie-consent', false)

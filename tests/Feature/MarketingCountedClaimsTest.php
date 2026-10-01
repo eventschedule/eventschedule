@@ -168,9 +168,10 @@ class MarketingCountedClaimsTest extends TestCase
      * matters is that each printed row is a route that exists, because a reader
      * of that page is an agent about to call it.
      *
-     * 27, not 31: the page documents the three auth routes plus the 24 behind the
+     * 27, not 32: the page documents the three auth routes plus the 24 behind the
      * key, and leaves out the four machine-to-machine ones (translation
-     * suggestions, federation) that nothing on that page would ever call.
+     * suggestions, federation) and the /admin/realtime browser beacon, none of
+     * which anything on that page would ever call.
      */
     public function test_the_ai_agent_ledger_matches_the_routes(): void
     {

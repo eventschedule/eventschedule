@@ -49,8 +49,8 @@ GEMINI_API_KEY=your_api_key_here
 4. **Content Security Policy**: Environment-aware with nonce support
 5. **Input Validation**: Comprehensive validation throughout the application
 6. **File Upload Security**: MIME type and file signature validation
-7. **API Rate Limiting**: 300 reads and 30 writes a minute per IP, each counted in a fixed one-minute window, with brute force protection
-8. **CSRF Protection**: Enabled for all routes except webhooks
+7. **API Rate Limiting**: 300 reads and 30 writes a minute per IP on the API-key endpoints, each counted in a fixed one-minute window, with brute force protection. The `/admin/realtime` beacon (`POST /api/realtime`) is not an API-key endpoint: it has its own `realtime` limiter, 600 a minute per visitor IP, keyed on an HMAC of the IP so no raw address reaches the cache
+8. **CSRF Protection**: Enabled for all web routes except webhooks. The realtime beacon lives in the sessionless `api` group and carries a signed page context instead. It refuses anything a browser marks as not same-origin (`Sec-Fetch-Site`), so another site cannot make its visitors' browsers post here, treats `Sec-GPC: 1` as count-only, and never lets a context it cannot type-check reach the signature check
 9. **SQL Injection Prevention**: Using Eloquent ORM with parameterized queries
 10. **XSS Prevention**: HTML Purifier for markdown content
 11. **Admin Re-Authentication**: `/admin` needs a password confirmation on top of being signed in. It lapses after `ADMIN_REAUTH_TIMEOUT` of idle (sliding - any admin page load restarts it) and after `ADMIN_REAUTH_MAX_LIFETIME` in total regardless of activity, and is bound to the browser that confirmed it. Confirming regenerates the session id, which also rotates the CSRF token, so another tab left open may need a reload before its next submit.

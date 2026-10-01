@@ -57,6 +57,12 @@
     </div>
 
     @include('partials.cookie-banner')
+
+    {{-- The sign-in pages are their own surface on /admin/realtime; this layout's other pages
+         (unsubscribe, manage, transfer accept) are reached from emails by guests. --}}
+    @include('partials.realtime-beacon', [
+        'surface' => request()->routeIs('login', 'sign_up', 'register', 'password.*', 'verification.*', 'two-factor.*') ? 'auth' : 'gp',
+    ])
 </body>
 
 </html>

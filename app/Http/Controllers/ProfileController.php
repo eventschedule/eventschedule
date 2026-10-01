@@ -337,6 +337,13 @@ class ProfileController extends Controller
         // the user never knew existed would break that promise, and they would keep being mailed.
         \App\Models\RoleSubscriber::where('email', strtolower($user->email))->delete();
 
+        // Same promise for the last hour of /admin/realtime page views: realtime_hits has no
+        // foreign keys (see its migration), so nothing else takes them with the account. Guarded: a
+        // selfhost install that pulled the code without migrating must still be able to delete.
+        if (\App\Utils\RealtimeTracker::tableExists()) {
+            \App\Models\RealtimeHit::where('user_id', $user->id)->delete();
+        }
+
         // The account's schedules and events go by database cascade (roles.user_id,
         // events.user_id, events.creator_role_id), which never reaches GalleryImage's deleting
         // hook, so their gallery files are removed here first.

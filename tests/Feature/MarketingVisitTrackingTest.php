@@ -349,7 +349,9 @@ class MarketingVisitTrackingTest extends TestCase
         $page = $this->withHeaders($this->browserHeaders())->get('/pricing');
 
         $page->assertOk();
-        $page->assertSee('sendBeacon', false);
+        // The URL, not the word sendBeacon: the realtime beacon on the same page calls sendBeacon
+        // too, so that would still pass with this beacon gone.
+        $page->assertSee('marketing\\/visit', false);
         $this->assertNull($this->stat(), 'The origin must not count a page that ships the beacon.');
 
         $this->beacon('marketing.pricing')->assertNoContent();

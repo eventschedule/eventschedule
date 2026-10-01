@@ -76,6 +76,26 @@ if (! function_exists('consent_required')) {
     }
 }
 
+if (! function_exists('cookie_banner_required')) {
+    /**
+     * Whether visitors are asked for consent at all: consent_required(), or /admin/realtime being
+     * on, which identifies a visitor only after they click "Allow".
+     *
+     * A separate helper rather than a fifth clause in consent_required(), which must stay env-only:
+     * this one reads the settings map (a cached Setting::get that fails open), so only the banner
+     * and the privacy page's "change your choice" button ask it.
+     *
+     * Realtime never asks for consent inside an embedded calendar (it is always count-only there)
+     * or on a rendered graphic, so on its own it does not put a banner in either: an install with
+     * nothing else consent-gated would otherwise show one in every iframe on its users' sites.
+     */
+    function cookie_banner_required(): bool
+    {
+        return consent_required()
+            || (\App\Utils\RealtimeTracker::enabled() && ! request()->embed && ! request()->graphic);
+    }
+}
+
 if (! function_exists('get_translated_categories')) {
     /**
      * Returns an [id => translated name] map of categories.

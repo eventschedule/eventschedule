@@ -28,11 +28,23 @@
 
 <div class="ap-tab-container border-b border-gray-200 dark:border-gray-700">
     <div class="flex justify-between items-center">
-        <nav class="-mb-px flex gap-8" x-data="{ openDropdown: null }">
+        {{-- gap-4 below sm: <html> and <body> clip horizontal overflow, so a tab that does not fit
+             is cut off rather than scrollable. --}}
+        <nav class="-mb-px flex gap-4 sm:gap-8" x-data="{ openDropdown: null }">
             {{-- Dashboard --}}
             <a href="{{ route('admin.dashboard') }}"
                 class="whitespace-nowrap border-b-2 {{ $active === 'dashboard' ? $tabActive : $tabInactive }} px-1 pb-4 text-base font-medium">
                 @lang('messages.dashboard')
+            </a>
+
+            {{-- Realtime. A plain tab, label only: nav badges mean "needs attention", so a live
+                 count here would read as an alert. Below sm it is just its icon. --}}
+            <a href="{{ route('admin.realtime') }}"
+                class="whitespace-nowrap border-b-2 {{ $active === 'realtime' ? $tabActive : $tabInactive }} px-1 pb-4 text-base font-medium inline-flex items-center">
+                <svg class="w-5 h-5 sm:hidden" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24" aria-hidden="true">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="{{ \App\Utils\RealtimeIcons::PATHS['signal'] }}" />
+                </svg>
+                <span class="sr-only sm:not-sr-only sm:whitespace-nowrap">@lang('messages.realtime')</span>
             </a>
 
             {{-- Insights Dropdown --}}

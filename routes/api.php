@@ -8,6 +8,7 @@ use App\Http\Controllers\Api\ApiGroupController;
 use App\Http\Controllers\Api\ApiSaleController;
 use App\Http\Controllers\Api\ApiScheduleController;
 use App\Http\Controllers\Api\ApiTranslationSuggestionController;
+use App\Http\Controllers\RealtimeBeaconController;
 use App\Http\Middleware\ApiAuthentication;
 use Illuminate\Support\Facades\Route;
 
@@ -15,6 +16,15 @@ use Illuminate\Support\Facades\Route;
 Route::post('/register/send-code', [ApiAuthController::class, 'sendCode']);
 Route::post('/register', [ApiAuthController::class, 'register']);
 Route::post('/login', [ApiAuthController::class, 'login']);
+
+// The /admin/realtime beacon, sent by every page's inline script (partials/realtime-beacon).
+// Here rather than in web.php because this group has no session, cookies or CSRF: a beacon must
+// never create or slide a session, and API routes register before web routes with no domain, so it
+// answers same-origin on the apex, app., tenant subdomains and custom domains alike. Not part of the
+// public API: it is not in public/api/openapi.json or on /for-ai-agents.
+Route::post('/realtime', [RealtimeBeaconController::class, 'store'])
+    ->name('realtime.beacon')
+    ->middleware('throttle:realtime');
 
 // Nexus only: receives translation suggestions shared by other installs.
 // The api group carries no default throttle, so the route sets its own.

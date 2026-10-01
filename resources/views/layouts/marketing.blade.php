@@ -344,6 +344,10 @@
 
     @include('partials.cookie-banner')
 
+    @unless ($errorPage ?? false)
+        @include('partials.realtime-beacon', ['surface' => 'wp'])
+    @endunless
+
     @guest
         {{-- Anonymous marketing HTML is cached at the edge (see docs/CACHING.md and
              App\Http\Middleware\CacheableMarketingResponse), so the origin never sees most

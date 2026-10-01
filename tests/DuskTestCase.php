@@ -16,6 +16,23 @@ use Throwable;
 abstract class DuskTestCase extends BaseTestCase
 {
     /**
+     * Keep /admin/realtime off in the served app. Both Dusk configs set IS_NEXUS=true, where it
+     * defaults ON, and turning it on shows the cookie banner - fixed to the bottom corner, where
+     * WebDriver scrolls the element it is about to click, so it can intercept clicks no journey was
+     * written to expect (GeneralTest and TicketTest happen to pass either way; this keeps every
+     * journey on the page it was written against). After parent::setUp(), because
+     * DatabaseTruncation empties `settings` there (and its afterTruncatingDatabase() hook is skipped
+     * on the first test, which runs migrate:fresh instead). Setting::set() also clears the cached
+     * map the served app reads.
+     */
+    protected function setUp(): void
+    {
+        parent::setUp();
+
+        \App\Models\Setting::set('realtime_enabled', '0');
+    }
+
+    /**
      * Prepare for Dusk test execution.
      */
     #[BeforeClass]

@@ -822,6 +822,14 @@
 
     @include('partials.cookie-banner')
 
+    @if ($realtime)
+        @include('partials.realtime-beacon', [
+            'surface' => $realtimeSurface ?: (auth()->check() ? 'ap' : 'gp'),
+            'role' => $realtimeRole,
+            'event' => $realtimeEvent,
+        ])
+    @endif
+
     {{-- Global operator-configured footer code (guest pages only); rendered here,
          after $slot and outside Vue's #app mount, so injected <script> tags run. --}}
     {{ isset($footCode) ? $footCode : '' }}

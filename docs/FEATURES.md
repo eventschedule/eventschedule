@@ -167,6 +167,14 @@ operator, not per schedule.
 | Federation | `FederationService::isEnabled()` - `! config('app.is_nexus') && Setting::get('federation_enabled')` | Shares public events with the eventschedule.com listings; every listing links back to the event on the origin site. Off by default, enabled by an admin at `/admin/settings`. Each schedule is opt-in via `roles.federation_enabled` (null = undecided, the default, and shares nothing; false vetoes co-listed events). Owners are offered one-click listing on the dashboard, admins on the settings card (for schedules they own), and anyone who can edit a schedule on its page |
 | Federation moderation | `AdminFederationController`, `config('app.is_nexus')` | Nexus-only. Approve, suspend or delist instances, and block individual listings, at `/admin/federation`. The first approval emails the operator a welcome with setup steps (`FederationWelcomeService`); installs approved before that can be sent it from the same screen. An install whose reported address stops matching the record is flagged: accept the new address, confirm the one on record, or suspend the install |
 
+## Platform Admin (every install)
+
+Site-admin tools at `/admin`, not tied to any plan tier.
+
+| Feature | Gate location | Notes |
+|---------|--------------|-------|
+| Realtime | `RealtimeTracker::enabled()` - `Setting::get('realtime_enabled')`, defaulting to on when `IS_NEXUS` and off everywhere else; toggled on `/admin/settings#realtime` | `/admin/realtime`: who is on the site right now (marketing site, schedule pages, app, sign-up and log-in), page views per minute, top pages, sources, countries, and the last 24 hours of sign-ups and orders from the audit log. Only visitors who accept cookies are identified; everyone else is counted anonymously. Rows live in `realtime_hits` for about an hour after last activity (`realtime:prune` on both cron rails). Turning it on also shows the cookie banner (`cookie_banner_required()`); turning it off deletes every row |
+
 ## Monetization (operator-enabled)
 
 Off by default and **not a plan tier feature**: it exists only when the instance operator sets

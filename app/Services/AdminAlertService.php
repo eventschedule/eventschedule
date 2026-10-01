@@ -52,6 +52,10 @@ class AdminAlertService
         // ever reaching the dashboard panel or the nav badge.
         'jobs_stalled',
         'jobs_failed',
+        // Amber, beside the queue rows: nothing is broken for visitors, but the privacy policy
+        // promises realtime page views are deleted about an hour after last activity, and rows
+        // twice that old mean neither cron rail is running realtime:prune.
+        'realtime_prune_stalled',
         // Above subscriptions_unrecognized: that customer at least still has the schedule they
         // are paying for. This one is being charged for a schedule that no longer exists, and
         // nothing left in the app lets them stop it.
@@ -186,6 +190,18 @@ class AdminAlertService
             },
 
             'jobs_failed' => fn () => DB::table('failed_jobs')->count(),
+
+            // A flag, not a count: one stale row is as much of a broken promise as a thousand.
+            // Guarded because the table is new and a selfhost install may not have migrated yet.
+            'realtime_prune_stalled' => function () {
+                try {
+                    return DB::table('realtime_hits')
+                        ->where('last_seen_at', '<', \App\Utils\RealtimeTracker::ts(\App\Utils\RealtimeTracker::now()->subHours(2)))
+                        ->exists() ? 1 : 0;
+                } catch (\Throwable) {
+                    return 0;
+                }
+            },
 
             // A live subscription whose stripe_price is none of the four configured IDs.
             //
@@ -462,6 +478,7 @@ class AdminAlertService
             'scheduler_stalled' => ['system', 'queue', 'admin.queue', [], '', 'red', __('messages.queue')],
             'jobs_stalled' => ['system', 'queue', 'admin.queue', [], '', 'red', __('messages.queue')],
             'jobs_failed' => ['system', 'queue', 'admin.queue', [], '', 'red', __('messages.queue')],
+            'realtime_prune_stalled' => ['system', 'queue', 'admin.queue', [], '', 'amber', __('messages.queue')],
             // Its own anchor, not #amount-mismatch: that block is a table of mismatched SALES,
             // and landing there would scroll past the thing the row is about.
             'subscriptions_orphaned' => ['insights', 'revenue', 'admin.revenue', [], '#orphaned-subscriptions', 'red', __('messages.revenue')],

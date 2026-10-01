@@ -48,8 +48,8 @@ New Feature-test suites added this session (all use `tests/Feature/Concerns/Crea
 | Developer / API | 7 / 9 |
 | Billing & Plans | 1 / 3 |
 | Guest Portal | 7 / 8 |
-| Platform Admin | 7 / 8 |
-| **Total** | **128 / 166** |
+| Platform Admin | 8 / 9 |
+| **Total** | **129 / 167** |
 
 ## Coverage by feature
 
@@ -289,6 +289,7 @@ New Feature-test suites added this session (all use `tests/Feature/Concerns/Crea
 | Audit logs | ✓ | `AdminFeaturesTest` |
 | Admin newsletter broadcast | ✓ | `AdminFeaturesTest` |
 | Federation moderation and welcome email (nexus) | ✓ | `FederationReviewTest`, `FederationWelcomeTest` (first-approval welcome, one-send claim, resend, bulk, locale) |
+| Realtime (`/admin/realtime` and its beacon) | ✓ | `RealtimeBeaconTest`, `RealtimeTrackerTest`, `RealtimeBeaconRenderTest`, `AdminRealtimeTest` (consent modes, upgrade and revoke, retention, people rules, filters, Activity, settings switch) |
 
 ## Notes (findings, blockers, and pre-existing issues)
 

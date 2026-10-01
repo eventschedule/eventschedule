@@ -1144,6 +1144,51 @@ per week, never within two days of their digest. From the 2026-09-28 growth expo
   its call in `AppController::translateData()` (`CronRailSyncTest` requires both), then deploy.
   There is no kill switch in settings.
 
+## Realtime (`/admin/realtime`)
+
+**What ships:** a live view of who is on the site, fed by a small beacon on every page
+(`POST /api/realtime`). On by default here; off by default on every other install. The privacy
+policy, the cookie banner copy and the `/features/analytics` page were updated in the same commits, so
+they must ship together - do not deploy the code without them.
+
+**The cookie banner:** realtime needs it, so it now shows wherever it did not already. If
+`ANALYTICS_ID` is set in the app spec, the banner is already shown and nothing changes; otherwise
+this release starts showing it (never inside embedded calendars).
+
+**Two migrations:** a new `realtime_hits` table (instant), and an `(action, created_at)` index on
+`audit_logs` for the Activity card. The index build reads the whole table inside the start
+command's `migrate --force`, so first run `SELECT COUNT(*) FROM audit_logs` (it is pruned to 90
+days). If it is large, run `2026_10_01_000001_add_action_created_at_index_to_audit_logs` by hand
+from the console before Deploy, as P2 and P9 do. No new env vars.
+
+**Decide before deploying:** the privacy policy promises an email notice for material changes
+(`privacy.blade.php`, "Changes to this policy"). Identified page-level records for visitors who
+accept cookies are arguably one; decide whether this release sends that notice.
+
+**One new scheduled entry, every five minutes on both rails:** `realtime-prune`, which deletes
+page views about an hour after the visitor's last activity. That deletion is what makes the
+privacy policy true; `AdminAlertService` raises `realtime_prune_stalled` if a row ever outlives two
+hours.
+
+### After the deploy
+
+- Open `/admin/realtime` in one tab and the site in a private window; accept cookies there and
+  watch yourself appear within ten seconds. Decline in another window and you should appear only as
+  a gray "not identified" page view.
+- Cached marketing pages start reporting within ten minutes (or purge Cloudflare): pages cached
+  before the deploy carry no beacon, so expect no marketing-site rows at all until they expire.
+- Check the country column fills in (Cloudflare's `CF-IPCountry`, else GeoIP).
+- `curl -sI https://eventschedule.com/pricing` still shows `cf-cache-status: HIT` and no
+  `set-cookie`.
+- In Cloudflare **Security > Events**, make sure `POST /api/realtime` is not being challenged:
+  a challenged beacon fails silently and the page just looks empty.
+- After an hour, `realtime_hits` should hold roughly an hour of rows and no more.
+
+### To stop it
+
+Switch it off at `/admin/settings#realtime`. That deletes every row at once, and beacons from
+pages still cached at the edge are dropped by the endpoint.
+
 ## Selfhost release
 
 Cutting v1.0.130 for selfhosters is deliberately **not** part of the hosted deploy. Do it after

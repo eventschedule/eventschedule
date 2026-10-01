@@ -18,6 +18,18 @@ class AppLayout extends Component
          * palettes cannot override a schedule owner's configured colours.
          */
         public bool $themeVariants = false,
+        /**
+         * What the /admin/realtime beacon reports this page as. app-guest passes 'gp' with its
+         * schedule and event, app-admin passes 'ap'; a page using this shell directly
+         * (getting-started, ticket views, ...) falls back to 'ap' when signed in and 'gp' when not.
+         * Untyped on purpose: a component model prop that a view leaves out arrives as an EMPTY
+         * model rather than null, and the beacon checks ->exists itself.
+         */
+        public $realtimeSurface = null,
+        public $realtimeRole = null,
+        public $realtimeEvent = null,
+        /** False on a page that must not carry the beacon at all (the PayFast auto-post). */
+        public bool $realtime = true,
     ) {}
 
     /**

@@ -201,6 +201,13 @@ class AppController extends Controller
                     \Log::error('Scheduled command app:sync-curator-sources failed: '.$e->getMessage());
                     report($e);
                 }
+
+                try {
+                    \Artisan::call('realtime:prune');
+                } catch (\Throwable $e) {
+                    \Log::error('Scheduled command realtime:prune failed: '.$e->getMessage());
+                    report($e);
+                }
             }
 
             // === EVERY 15 MINUTES ===

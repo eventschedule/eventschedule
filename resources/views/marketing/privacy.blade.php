@@ -588,7 +588,7 @@
            campaign probe does NOT measure (it scores text nodes only). At 0.45
            alpha the edge computed 2.16:1 on the white sheet; 0.7 computes
            3.58:1 on #ffffff and 0.6 computes 4.45:1 on the #12141a sheet.
-           NOTE: this button only renders when consent_required() is true, so it is
+           NOTE: this button only renders when cookie_banner_required() is true, so it is
            absent from a local render and cannot be probed here.
            If you re-ink it, recompute both edges by hand. */
         .es-fine-btn {
@@ -973,6 +973,7 @@
                                                     <li>For paid accounts: billing information including the last four digits of your card, expiration date, and billing address</li>
                                                     <li>For updates about a single event, asked for without an account: the email address you enter, the IP address it came from, and the language of the page</li>
                                                     <li>For a performer or venue page an organizer creates while listing an event: the name, and any email address or phone number the organizer enters, which is never shown in full</li>
+                                                    <li>If you accept analytics cookies while signed in: the pages you view, and those you viewed in this browser just before signing in, kept for about one hour after your last activity (see "Analytics &amp; Cookies")</li>
                                                 </ul>
 
                                                 {{-- Round 3 (2026-09-10): two capture points that shipped after this clause was
@@ -1045,10 +1046,24 @@
 
                                             @case('analytics-cookies')
                                                 <p>
-                                                    We use Google Analytics 4 to understand how visitors use the site. Tracking is opt-in: when you first visit, all analytics, advertising, and personalization signals are set to <em>denied</em> via Google Consent Mode v2. Nothing is read or written to your browser until you click "Allow" in the cookie banner. If you click "Decline", or never respond, we do not set any analytics cookies and only cookieless pings are sent.
+                                                    We use Google Analytics 4 to understand how visitors use the site. Google Analytics is opt-in: when you first visit, all analytics, advertising, and personalization signals are set to <em>denied</em> via Google Consent Mode v2. Nothing is read or written to your browser until you click "Allow" in the cookie banner. If you click "Decline", or never respond, we do not set any analytics cookies and only cookieless pings are sent.
                                                 </p>
                                                 <p>
-                                                    Separately from Google, we keep our own visit statistics, and those are deliberately built so that no individual can be picked out of them. We store only daily totals: views per device type, per referring source, per country, per campaign tag. There is no per-visitor record anywhere in the system. To avoid counting the same person twice in a day, and to filter out bots, your IP address and browser user-agent are combined into a one-way hash using a secret key and a salt that changes every day; that hash lives only in a temporary cache entry that expires at midnight and is never written to our database. Because none of this reads or writes anything on your device, it needs no cookie and no consent.
+                                                    Separately from Google, we keep our own visit statistics, and those are deliberately built so that no individual can be picked out of them. We store only daily totals: views per device type, per referring source, per country, per campaign tag. These daily totals contain no per-visitor record. To avoid counting the same person twice in a day, and to filter out bots, your IP address and browser user-agent are combined into a one-way hash using a secret key and a salt that changes every day; that hash lives only in a temporary cache entry that expires at midnight and is never written to our database. Because none of this reads or writes anything on your device, it needs no cookie and no consent.
+                                                </p>
+
+                                                {{-- /admin/realtime (RealtimeTracker, RealtimeBeaconController). The two modes are
+                                                     enforced server-side: a count-only page view is stored with no visitor key, user,
+                                                     title, browser or OS whatever the browser sends, and a withdrawal strips those
+                                                     (and swaps a path that names the visitor for its route template) from every
+                                                     row this browser still has on its network, plus the account's when the
+                                                     withdrawing page is signed in. An anonymous page view joins an account only if
+                                                     it came before that account's latest signed-in page view in the browser. Rows
+                                                     are pruned about an hour after last activity (realtime:prune on both cron
+                                                     rails, plus a request-time backstop). Keep this paragraph in step with that
+                                                     code. --}}
+                                                <p>
+                                                    We also keep a short-lived record for a live view of the site that only our administrators can see, never schedule owners. What it holds depends on your choice in the cookie banner. If you click "Allow", each page you view is recorded with the page, the referring site and campaign tag, your country (looked up from your IP address, which itself is not stored), your device type, browser and operating system, and how long the page stays open, under a one-way hash of your IP address, browser and language settings that changes every day; while you are signed in it is linked to your account, including the pages you viewed in this browser just before signing in. If you click "Decline", do not answer, or your browser sends Global Privacy Control, each page view is still counted, but with no identifier and nothing that links it to you or to your other page views: only the page (for pages behind sign-in, just which kind of page), your country, your device type and, when you arrive from another site or a tagged link, that site and campaign tag. Either way, records are deleted about an hour after your last activity, and if you withdraw your consent, the identifiers are removed from what this browser still has on its current network and, if you are signed in when you withdraw, from your account's records. This record sets no cookie of its own; it reads only the choice described below.
                                                 </p>
                                                 <p>
                                                     We honor the <a href="https://globalprivacycontrol.org/" target="_blank" rel="noopener" class="es-fine-link">Global Privacy Control<svg class="es-fine-ext" aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><path stroke-linecap="round" stroke-linejoin="round" d="M13 5h6v6M19 5L9 15M15 19H5V9" /></svg></a> signal: if your browser sends GPC, we treat that as a "Decline" automatically and the banner does not appear.
@@ -1104,7 +1119,7 @@
                                                 <p>
                                                     {{ __('messages.cookie_consent_privacy_body') }}
                                                 </p>
-                                                @if (consent_required())
+                                                @if (cookie_banner_required())
                                                     <button type="button" data-cookie-consent-reopen class="es-fine-btn">
                                                         <svg class="h-4 w-4" aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
                                                             <path stroke-linecap="round" stroke-linejoin="round" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" />

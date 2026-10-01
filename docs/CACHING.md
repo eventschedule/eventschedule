@@ -122,6 +122,16 @@ this middleware can never mark one public: the messages GET is per visitor (its 
 `private, no-store`. Whether anyone is online is fetched by the widget after load for the same
 reason nothing visitor-specific may be rendered into the page: the HTML is shared.
 
+The `/admin/realtime` beacon (`POST /api/realtime`, `RealtimeBeaconController`) needs none of this,
+because it is registered in `routes/api.php`: the `api` group has no session, cookie or CSRF
+middleware at all, so it can never set `laravel_session` and is not in `STATELESS_ROUTES`. The
+context the marketing layout renders into it (`partials/realtime-beacon`) is the same for every
+anonymous visitor - the user field is filled only for a signed-in render, which is never cached -
+so the shared HTML stays shareable. The beacon reads the visitor's cookie choice in the browser and
+sends a count-only page view when there is no consent; that decision, too, is made client-side for
+exactly this reason. Cached marketing pages keep carrying the script for up to ten minutes after the
+feature is switched off, and the endpoint simply drops those beacons.
+
 ## Any shared cache, not just Cloudflare
 
 Whatever sits in front of the app must do two things. They are not optional, and no header

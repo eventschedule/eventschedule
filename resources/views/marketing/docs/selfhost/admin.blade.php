@@ -8,6 +8,7 @@
         <x-doc-nav-link href="#overview">Overview</x-doc-nav-link>
         <x-doc-nav-link href="#accessing">Accessing /admin</x-doc-nav-link>
         <x-doc-nav-link href="#dashboard">Dashboard</x-doc-nav-link>
+        <x-doc-nav-link href="#realtime">Realtime</x-doc-nav-link>
         <div class="text-xs font-semibold text-gray-600 dark:text-gray-400 uppercase tracking-wider mb-2 mt-4 pt-3 border-t border-gray-200 dark:border-white/10">Insights</div>
         <x-doc-nav-link href="#insights-users">Users</x-doc-nav-link>
         <x-doc-nav-link href="#insights-revenue">Revenue</x-doc-nav-link>
@@ -38,7 +39,7 @@
             </svg>
             Overview
         </h2>
-        <p class="text-gray-600 dark:text-gray-300 mb-6">The admin panel gives the operator of an installation platform-wide visibility and a small set of platform-wide controls. It is separate from a schedule owner's own admin portal: nothing here is scoped to one schedule. The navigation is one plain tab plus three dropdowns, and which items appear depends on how the install is configured.</p>
+        <p class="text-gray-600 dark:text-gray-300 mb-6">The admin panel gives the operator of an installation platform-wide visibility and a small set of platform-wide controls. It is separate from a schedule owner's own admin portal: nothing here is scoped to one schedule. The navigation is two plain tabs plus three dropdowns, and which items appear depends on how the install is configured.</p>
 
         <div class="doc-table-wrap">
             <table class="doc-table">
@@ -54,6 +55,11 @@
                         <td>Dashboard</td>
                         <td>Key metrics, growth trends, and the Needs attention list</td>
                         <td>Every install</td>
+                    </tr>
+                    <tr>
+                        <td>Realtime</td>
+                        <td>Who is on the site right now: visitors, pages, sources, countries and the last 24 hours of sign-ups and orders</td>
+                        <td>Every install (off by default except on eventschedule.com)</td>
                     </tr>
                     <tr>
                         <td>Insights</td>
@@ -305,6 +311,37 @@
         </div>
     </section>
 
+    <!-- Realtime -->
+    <section id="realtime" class="doc-section">
+        <h2 class="doc-heading">
+            <svg aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-5 h-5 text-gray-500 dark:text-gray-400 flex-shrink-0">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M9.348 14.651a3.75 3.75 0 010-5.303m5.304 0a3.75 3.75 0 010 5.303m-7.425 2.122a6.75 6.75 0 010-9.546m9.546 0a6.75 6.75 0 010 9.546M5.106 18.894c-3.808-3.808-3.808-9.98 0-13.789m13.788 0c3.808 3.808 3.808 9.981 0 13.79M12 12h.008v.008H12V12zm.375 0a.375.375 0 11-.75 0 .375.375 0 01.75 0z" />
+            </svg>
+            Realtime
+        </h2>
+        <p class="text-gray-600 dark:text-gray-300 mb-6">Realtime shows who is on the site right now: the marketing site, schedule and event pages (custom domains included), the signed-in app, and the sign-up and log-in pages. It is switched on and off at <a href="#system-settings" class="doc-link">Settings</a>; it starts on for eventschedule.com and off on every other install. The page updates itself every ten seconds and slows to once a minute while its tab is hidden.</p>
+        <ul class="doc-list mb-6">
+            <li><strong class="text-gray-900 dark:text-white">Visitors right now</strong> - people with a page open and visible in the last couple of minutes, split into signed in and anonymous, with the last 30 minutes beneath</li>
+            <li><strong class="text-gray-900 dark:text-white">Page views per minute</strong> - the last 30 minutes, with page views from visitors who have not accepted cookies shown separately</li>
+            <li><strong class="text-gray-900 dark:text-white">Activity</strong> - the last 24 hours of sign-ups, new schedules and events, orders, plan changes and support chats, read from the <a href="#system-audit-log" class="doc-link">audit log</a></li>
+            <li><strong class="text-gray-900 dark:text-white">Visitors</strong> - one row per person, right now first. Click a row for their last hour: each page in order, how long they stayed, and for a signed-in visitor their schedules, an email link and their support chat. A brand-new user who has spent ten minutes in the app without creating an event is marked, so you can offer help.</li>
+            <li><strong class="text-gray-900 dark:text-white">Top pages, Sources, Countries, Surfaces</strong> - click any row to filter the whole page to it; the filters stay in the address, so a filtered view can be bookmarked</li>
+        </ul>
+
+        <h3 class="doc-subheading">Consent decides who is identified</h3>
+        <p class="text-gray-600 dark:text-gray-300 mb-6">Turning Realtime on also turns on the cookie consent banner. A visitor who clicks <strong>Allow</strong> is shown as a person, with a daily-rotating one-way key and, when signed in, their account, including the pages they viewed in that browser just before signing in (not what the browser shows after they sign out). Anyone who declines, does not answer, or whose browser sends Global Privacy Control is only counted: their page views appear in the chart and the four lists, with no identifier and nothing that links one page view to another (pages behind sign-in are recorded by kind, such as "/{subdomain}/{tab}", rather than by address). Withdrawing consent later, including through the privacy page, strips the identifiers from what that browser still has on its current network, and from the account's records when they are signed in at the time. The Visitors card says what share of page views comes from visitors who accepted.</p>
+        <p class="text-gray-600 dark:text-gray-300 mb-6">Records are deleted about an hour after a visitor's last activity. Realtime stores no IP address or user-agent string and sets no cookie of its own, and site administrators are the only people who can see its records; schedule owners never do. Admins are hidden unless <strong>Show admins</strong> is on.</p>
+
+        <div class="doc-callout doc-callout-info">
+            <div class="doc-callout-title">Who is never counted</div>
+            <p>REST API clients, including apps and AI agents using an API key; calendar feeds; email opens; visitors with JavaScript turned off; and embedded calendars on other websites, which appear only as a count under Surfaces. A schedule owner signed in on their own custom domain appears anonymous there, because their session belongs to the main domain. Identical phones with the same language setting on one network can count as one visitor.</p>
+        </div>
+        <div class="doc-callout doc-callout-warning mt-6">
+            <div class="doc-callout-title">Selfhost: update your privacy policy</div>
+            <p>If you turn Realtime on, say so in your own privacy policy at <a href="#system-legal-pages" class="doc-link">Legal Pages</a>: what is recorded, for how long, and that only visitors who accept cookies are identified.</p>
+        </div>
+    </section>
+
     <!-- Insights: Users -->
     <section id="insights-users" class="doc-section">
         <h2 class="doc-heading">
@@ -386,7 +423,7 @@
 
         <div class="doc-callout doc-callout-info">
             <div class="doc-callout-title">What is not here</div>
-            <p>Page views are counted per day and per device, not per visitor, so there is no unique-visitor figure and no per-visitor location. The nearest thing to a geographic view is <strong class="text-gray-900 dark:text-white">Upcoming events by country</strong> on the dashboard, which is based on the venue's country rather than the visitor's.</p>
+            <p>Page views here are counted per day and per device, not per visitor, so there is no unique-visitor figure and no per-visitor location. The nearest thing to a geographic view is <strong class="text-gray-900 dark:text-white">Upcoming events by country</strong> on the dashboard, which is based on the venue's country rather than the visitor's. For visitors and countries over the last 30 minutes, see <a href="#realtime" class="doc-link">Realtime</a>.</p>
         </div>
     </section>
 
@@ -787,13 +824,16 @@
             <p>Injected analytics are not automatically gated by the cookie-consent banner. You are responsible for configuring consent (for example, Google consent mode) to comply with the privacy regulations in your region.</p>
         </div>
 
+        <h3 class="doc-subheading">Realtime visitors</h3>
+        <p class="text-gray-600 dark:text-gray-300 mb-6">One toggle switches <a href="#realtime" class="doc-link">Realtime</a> on or off for the whole install. Turning it on also shows the cookie consent banner, since visitors are identified only after they accept. Turning it off deletes every live activity record straight away.</p>
+
         <h3 class="doc-subheading">Cookie consent banner</h3>
-        <p class="text-gray-600 dark:text-gray-300 mb-6">The banner appears only when something on the page actually needs consent: Google Analytics (<code class="doc-inline-code">ANALYTICS_ID</code>), advertising (<code class="doc-inline-code">ADS_ENABLED</code>) or the accommodation map (<code class="doc-inline-code">STAY22_ENABLED</code>). A plain install that has none of those shows no banner at all, and sets no cookie that is not needed to make the site work.</p>
+        <p class="text-gray-600 dark:text-gray-300 mb-6">The banner appears only when something on the page actually needs consent: Google Analytics (<code class="doc-inline-code">ANALYTICS_ID</code>), advertising (<code class="doc-inline-code">ADS_ENABLED</code>), the accommodation map (<code class="doc-inline-code">STAY22_ENABLED</code>) or <a href="#realtime" class="doc-link">Realtime</a>, which identifies visitors only after they accept. A plain install that has none of those shows no banner at all, and sets no cookie that is not needed to make the site work.</p>
         <p class="text-gray-600 dark:text-gray-300 mb-6">That includes the three attribution cookies, <code class="doc-inline-code">utm_params</code>, <code class="doc-inline-code">utm_referrer_url</code> and <code class="doc-inline-code">utm_landing_page</code>, which remember for 30 days which campaign or referring site brought a visitor in, so a later signup or ticket sale can be credited to it. They are written only after a visitor clicks Allow. Without the banner they are never written, and attribution lasts for the current session only, which is enough for a visitor who buys on the same visit.</p>
         <p class="text-gray-600 dark:text-gray-300 mb-6">Set <code class="doc-inline-code">COOKIE_CONSENT_BANNER=true</code> in <code class="doc-inline-code">.env</code> to show the banner regardless, which is what you want if you run marketing campaigns and need attribution to survive across visits.</p>
         <div class="doc-callout doc-callout-info mb-6">
             <div class="doc-callout-title">Your own visit statistics need no consent</div>
-            <p>The built-in analytics store daily totals only: views per device type, referrer, country and campaign tag. There is no per-visitor record. IP address and user-agent are hashed with your <code class="doc-inline-code">APP_KEY</code> and a salt that rotates daily, purely to deduplicate and filter bots, and that hash lives in the cache until midnight rather than in the database. Nothing is read from or written to the visitor's device, so no banner is required for it.</p>
+            <p>The built-in analytics store daily totals only: views per device type, referrer, country and campaign tag. These totals hold no per-visitor record (Realtime, when on, is the one place that keeps a per-visitor record, for about an hour). IP address and user-agent are hashed with your <code class="doc-inline-code">APP_KEY</code> and a salt that rotates daily, purely to deduplicate and filter bots, and that hash lives in the cache until midnight rather than in the database. Nothing is read from or written to the visitor's device, so no banner is required for it.</p>
         </div>
 
         <h3 class="doc-subheading">Event Schedule network</h3>

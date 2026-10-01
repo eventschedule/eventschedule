@@ -3,7 +3,8 @@
     shows it when localStorage has no 'cookie_consent' entry, and Allow/Decline
     write the choice + flip Consent Mode v2.
 
-    consent_required() covers Google Analytics, ads, Stay22 and COOKIE_CONSENT_BANNER.
+    cookie_banner_required() covers Google Analytics, ads, Stay22, COOKIE_CONSENT_BANNER and
+    /admin/realtime being on (it identifies visitors only after they accept).
     Where it is false nothing on the page needs consent: the UTM attribution cookies are
     then never written either, so there is nothing to ask about.
 --}}
@@ -18,7 +19,7 @@
      a later withdrawal through the banner clears only one of them: consent state becomes
      order-dependent, which is the whole thing this was meant to make deterministic. --}}
 <meta name="cookie-domain" content="{{ config('session.domain') }}">
-@if (consent_required() && (! auth()->user() || ! auth()->user()->isAdmin()))
+@if (cookie_banner_required() && (! auth()->user() || ! auth()->user()->isAdmin()))
 <div data-cookie-consent
      hidden
      role="region"

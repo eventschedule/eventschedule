@@ -8,7 +8,7 @@
     The passphrase is deliberately absent. It is the shared secret that makes an ITN signature
     meaningful, so it belongs in the signature calculation only, never in a field the browser can read.
 --}}
-<x-app-layout :title="__('messages.redirecting_to_payment')">
+<x-app-layout :title="__('messages.redirecting_to_payment')" :realtime="false">
 
     <x-slot name="meta">
         @include('partials.private-page-meta')
