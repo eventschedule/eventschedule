@@ -171,6 +171,45 @@ class PullGrowthTest extends TestCase
         Http::assertNothingSent();
     }
 
+    /**
+     * The funnel rows are range-scoped. Set a 30-day pull against an all-time one and signups read
+     * as collapsing when only the window changed, so a same-window pull is preferred.
+     */
+    public function test_the_comparison_prefers_a_pull_over_the_same_window(): void
+    {
+        File::ensureDirectoryExists($this->dir);
+        $thirty = ['start' => '2026-09-01', 'end' => '2026-10-01'];
+        $sameWindow = $this->payload(['generated_at' => '2026-09-20T10:00:00+00:00', 'range' => $thirty]);
+        $sameWindow['monetization']['mrr'] = 41.0;
+        $allTime = $this->payload(['generated_at' => '2026-09-28T10:00:00+00:00', 'range' => ['start' => '2020-01-01', 'end' => '2026-10-01']]);
+        $allTime['monetization']['mrr'] = 99.0;
+        File::put($this->dir.'/growth-2026-09-20-100000.json', json_encode($sameWindow));
+        File::put($this->dir.'/growth-2026-09-28-100000.json', json_encode($allTime));
+
+        Http::fake(['*' => Http::response($this->payload(['range' => $thirty]))]);
+
+        [$code, $output] = $this->pullCommand();
+
+        $this->assertSame(0, $code, $output);
+        $this->assertStringContainsString('2026-09-20T10:00:00', $output, 'the older same-window pull, not the newer all-time one');
+        $this->assertStringContainsString('41.00', $output);
+        $this->assertStringNotContainsString('funnel window differs', $output);
+    }
+
+    /** A truncated or hand-edited newest file is skipped, not a crash. */
+    public function test_local_skips_an_unreadable_newest_file(): void
+    {
+        Http::fake();
+        File::ensureDirectoryExists($this->dir);
+        File::put($this->dir.'/growth-2026-10-01-100000.json', json_encode($this->payload()));
+        File::put($this->dir.'/growth-2026-10-02-100000.json', '{"meta": {"schema_ver');
+
+        [$code, $output] = $this->pullCommand(['--local' => true]);
+
+        $this->assertSame(0, $code, $output);
+        $this->assertStringContainsString('62.50', $output);
+    }
+
     public function test_local_resummarises_the_latest_pull_without_a_request(): void
     {
         Http::fake();

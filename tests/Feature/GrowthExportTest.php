@@ -103,8 +103,19 @@ class GrowthExportTest extends TestCase
         $admin = $this->createOwner(true);
         $this->freeRole();
 
-        $this->adminActing($admin)->get('/admin/growth')->assertOk()
+        $page = $this->adminActing($admin)->get('/admin/growth')->assertOk()
             ->assertDontSee('/admin/growth/export');
+
+        // The page builds on every view, without the endpoint's lock, so it skips the
+        // analysis-only sections it never renders - and keeps everything it does.
+        $pageData = $page->viewData('data');
+        foreach (['daily', 'buyers', 'reach', 'nudge_outcomes', 'usage', 'federation'] as $section) {
+            $this->assertArrayNotHasKey($section, $pageData, "/admin/growth should not build {$section}");
+        }
+        foreach (['activation', 'free_pressure', 'monetization', 'nudges', 'owner_digests', 'churn', 'acquisition', 'funnel'] as $section) {
+            $this->assertArrayHasKey($section, $pageData);
+        }
+        $this->assertArrayHasKey('hero_test', $pageData);
 
         $data = $this->build();
         $this->assertArrayHasKey('meta', $data);
@@ -1658,6 +1669,30 @@ class GrowthExportTest extends TestCase
 
         $this->assertSame(['v1.0.140', 'v1.0.141'], array_column($releases, 'version'));
         $this->assertNotEmpty($releases[1]['first_seen_at']);
+    }
+
+    /**
+     * touch() is a read-modify-write, so it reads the row, not Setting's cached map: with a worker
+     * and a web container on separate file caches, the map one of them holds can be stale, and
+     * appending to it would drop what the other container wrote.
+     */
+    public function test_release_history_appends_to_the_stored_row_not_a_stale_cached_map(): void
+    {
+        \App\Models\Setting::get('release_history');   // warm the map while the row is empty
+        DB::table('settings')->insert(['key' => 'release_history', 'created_at' => now(), 'updated_at' => now(),
+            'value' => json_encode([['version' => 'v1.0.150', 'first_seen_at' => now()->subWeek()->toIso8601String()]])]);
+
+        config(['self-update.version_installed' => 'v1.0.151']);
+        \App\Utils\ReleaseHistory::touch();
+
+        $stored = json_decode(DB::table('settings')->where('key', 'release_history')->value('value'), true);
+        $this->assertSame(['v1.0.150', 'v1.0.151'], array_column($stored, 'version'));
+    }
+
+    /** An unrecognised range would quietly build the all-time window under the asked-for name. */
+    public function test_export_growth_refuses_an_unknown_range(): void
+    {
+        $this->artisan('app:export-growth', ['--range' => 'last_60_days'])->assertFailed();
     }
 
     /**

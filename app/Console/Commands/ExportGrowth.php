@@ -32,12 +32,21 @@ class ExportGrowth extends Command
 
     public function handle(GrowthExportService $growth): int
     {
+        // Refused rather than passed through: AdminDateRange quietly reads anything it does not
+        // recognise as all time, so a typo would build the heaviest window under the asked-for name.
+        $range = (string) $this->option('range');
+        if (! in_array($range, AdminDateRange::RANGES, true)) {
+            $this->error('--range must be one of: '.implode(', ', AdminDateRange::RANGES));
+
+            return self::FAILURE;
+        }
+
         // AdminDateRange, so a range here is the exact window the endpoint and the page use. This
         // command used to do its own arithmetic, a day short of theirs.
-        $dates = AdminDateRange::for($this->option('range'));
+        $dates = AdminDateRange::for($range);
 
         $data = $growth->build($dates['start'], $dates['end'], $dates['previous_start'], $dates['previous_end']);
-        $json = json_encode($data, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES | JSON_THROW_ON_ERROR);
+        $json = json_encode($data, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES | JSON_PRESERVE_ZERO_FRACTION | JSON_THROW_ON_ERROR);
 
         $path = $this->option('path');
         if (! $path) {

@@ -510,11 +510,26 @@ class GrowthExportService
     // ---------------------------------------------------------------------
 
     /**
+     * Per-build memo of RecurringRevenue::billingRoleIds() and every subscription keyed by role:
+     * scheduleRows() and monetization() both need them, and each is a whole-table read.
+     */
+    private ?array $billingIds = null;
+
+    private ?\Illuminate\Support\Collection $subscriptionsByRole = null;
+
+    /**
      * The whole payload. Aggregates are derived from the two row tables rather than
      * queried separately, so a section can never disagree with the rows beneath it.
+     *
+     * $full = false skips the analysis-only sections (daily onward) that /admin/growth never
+     * renders. The page builds on every view with no lock, and those sections are the heaviest
+     * queries here - buyers() joins every sale to users by address - so it should not pay for them.
+     * The pulled payload (GrowthDataController, app:export-growth) is always full.
      */
-    public function build(Carbon $startDate, Carbon $endDate, Carbon $prevStartDate, Carbon $prevEndDate): array
+    public function build(Carbon $startDate, Carbon $endDate, Carbon $prevStartDate, Carbon $prevEndDate, bool $full = true): array
     {
+        $this->billingIds = null;
+        $this->subscriptionsByRole = null;
         $months = $this->recentMonths();
         $signups = $this->signupRows();
         $schedules = $this->scheduleRows($months);
@@ -677,17 +692,19 @@ class GrowthExportService
             'retention' => $this->retentionFrom($schedules),
             'traffic' => $this->traffic(),
             'claims' => $this->claims($months),
-            'daily' => $this->daily(),
-            'nudge_outcomes' => $this->nudgeOutcomes(),
-            'onboarding_nudges' => $this->onboardingNudges(),
-            'dismissed_steps' => $this->dismissedSteps(),
-            'buyers' => $this->buyers(),
-            'reach' => $this->reach(),
-            'usage' => $this->usage($months),
-            'geography' => $this->geographyFrom($schedules),
-            'boost' => $this->boost(),
-            'referrals' => $this->referrals(),
-            'federation' => $this->federation(),
+            ...($full ? [
+                'daily' => $this->daily(),
+                'nudge_outcomes' => $this->nudgeOutcomes(),
+                'onboarding_nudges' => $this->onboardingNudges(),
+                'dismissed_steps' => $this->dismissedSteps(),
+                'buyers' => $this->buyers(),
+                'reach' => $this->reach(),
+                'usage' => $this->usage($months),
+                'geography' => $this->geographyFrom($schedules),
+                'boost' => $this->boost(),
+                'referrals' => $this->referrals(),
+                'federation' => $this->federation(),
+            ] : []),
             // The homepage headline test, as /admin/growth shows it - and signups.hero_variant, so a
             // variant can be judged on the sellers it produced rather than on signups alone. Nexus
             // only: no other install serves the homepage the test runs on.
@@ -1220,15 +1237,12 @@ class GrowthExportService
         $gmvByMonth = $this->gmvByRoleMonth();
 
         // Paying = billing (RecurringRevenue's definition), not the tier - see the schema 8 note.
-        $billing = RecurringRevenue::billingRoleIds();
+        $billing = $this->billingIds();
 
         // actualPlanTier() reads $role->subscription('default'), which lazy-loads the relation per
         // row, and cursor() cannot eager-load - one query per schedule. Preloaded and set below,
         // in the relation's own order (newest first), so the tier logic is untouched.
-        $subscriptionsByRole = Cashier::$subscriptionModel::query()
-            ->orderBy('created_at', 'desc')
-            ->get()
-            ->groupBy('role_id');
+        $subscriptionsByRole = $this->subscriptionsByRole();
 
         $views = AnalyticsDaily::query()
             ->where('date', '>=', now()->copy()->subDays(90)->toDateString())
@@ -1405,6 +1419,21 @@ class GrowthExportService
             'total' => $total,
             'truncated' => $total > $this->rowCap(),
         ];
+    }
+
+    /** @return array<int, true> */
+    private function billingIds(): array
+    {
+        return $this->billingIds ??= RecurringRevenue::billingRoleIds();
+    }
+
+    /** Every subscription, grouped by role_id, newest first - the Cashier relation's own order. */
+    private function subscriptionsByRole(): \Illuminate\Support\Collection
+    {
+        return $this->subscriptionsByRole ??= Cashier::$subscriptionModel::query()
+            ->orderBy('created_at', 'desc')
+            ->get()
+            ->groupBy('role_id');
     }
 
     /**
@@ -1922,11 +1951,16 @@ class GrowthExportService
         // needs a hydrated model, so the whole table would otherwise sit in memory at once.
         $roles = $this->excludeDemoRoles(
             Role::query()->whereNotNull('user_id')->where('is_deleted', false)
-        )->with('subscriptions')->lazy();
+        )->lazy();
 
-        $billing = RecurringRevenue::billingRoleIds();
+        $billing = $this->billingIds();
+        // The same preload scheduleRows() uses, set as the relation rather than eager-loaded a
+        // second time.
+        $subscriptionsByRole = $this->subscriptionsByRole();
 
         foreach ($roles as $role) {
+            $role->setRelation('subscriptions', $subscriptionsByRole[$role->id] ?? new EloquentCollection);
+
             // Before the free-tier skip: everyone who ever upgraded, including those who have
             // since churned back to free. Measuring only current payers made the median a
             // survivor statistic. A declined first checkout (incomplete) is not an upgrade.

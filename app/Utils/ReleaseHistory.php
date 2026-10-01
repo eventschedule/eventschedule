@@ -35,7 +35,10 @@ class ReleaseHistory
             return;
         }
 
-        $history = self::all();
+        // Read from the table, not Setting::get()'s cached map: this is a read-modify-write, and a
+        // map cached in another container's store (CACHE_STORE=file with a worker beside the web
+        // container) would be stale - appending to it would drop whatever that container wrote.
+        $history = self::decode(Setting::query()->where('key', self::SETTING)->value('value'));
         if (($history[count($history) - 1]['version'] ?? null) !== $version) {
             $history[] = ['version' => $version, 'first_seen_at' => now()->toIso8601String()];
             Setting::set(self::SETTING, json_encode(array_slice($history, -self::MAX_ENTRIES)));
@@ -47,7 +50,12 @@ class ReleaseHistory
     /** @return list<array{version: string, first_seen_at: string}> oldest first */
     public static function all(): array
     {
-        $decoded = json_decode((string) Setting::get(self::SETTING, '[]'), true);
+        return self::decode(Setting::get(self::SETTING, '[]'));
+    }
+
+    private static function decode(?string $json): array
+    {
+        $decoded = json_decode((string) ($json ?? '[]'), true);
 
         return is_array($decoded) ? array_values($decoded) : [];
     }

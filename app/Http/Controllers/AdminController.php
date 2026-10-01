@@ -1310,7 +1310,9 @@ class AdminController extends Controller
         $dates = $this->getDateRange($range);
 
         $growth = app(GrowthExportService::class);
-        $data = $growth->build($dates['start'], $dates['end'], $dates['previous_start'], $dates['previous_end']);
+        // Not $full: the page renders none of the analysis-only sections, and it builds on every
+        // view without the endpoint's one-at-a-time lock.
+        $data = $growth->build($dates['start'], $dates['end'], $dates['previous_start'], $dates['previous_end'], full: false);
 
         return view('admin.growth', [
             'range' => $range,

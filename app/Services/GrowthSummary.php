@@ -41,7 +41,9 @@ class GrowthSummary
             ['label' => '  subscribed', 'value' => $stages['subscribed'] ?? null],
             ['label' => 'Biggest funnel drop', 'value' => self::biggestDrop($data['funnel']['biggest_drop'] ?? null)],
             ['label' => 'Billing subscriptions', 'value' => $money['billing_subscriptions'] ?? null],
-            ['label' => 'MRR', 'value' => $money['mrr'] ?? null],
+            // Cast: an older pull (or any JSON without PRESERVE_ZERO_FRACTION) turns 60.0 into 60,
+            // which would print as "60" beside "62.50".
+            ['label' => 'MRR', 'value' => isset($money['mrr']) ? (float) $money['mrr'] : null],
             ['label' => 'Schedules selling (paid ticket in 90 days)', 'value' => self::sellers($data)],
             ['label' => 'Admin-granted plans', 'value' => $money['by_plan_source']['admin'] ?? null],
             ['label' => 'Selling trials started / converted', 'value' => isset($money['ticket_trials'])

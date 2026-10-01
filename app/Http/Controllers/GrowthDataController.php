@@ -34,10 +34,14 @@ class GrowthDataController extends Controller
     public const MIN_TOKEN_LENGTH = 32;
 
     /**
-     * Longer than any build can live: public/.user.ini caps a request at 90 seconds and Cloudflare
-     * gives up at about 100, so a lock that outlived its request would only block the retry.
+     * Longer than a build can run, by a wide margin. public/.user.ini's 90-second cap is no bound:
+     * on Linux max_execution_time counts CPU time only, not time waiting on MySQL, and this build is
+     * mostly that wait. Cloudflare gives up on the CLIENT at about 100 seconds while the build keeps
+     * going, so a lock shorter than the real run would let the retry start a second build beside it.
+     * The finally below releases it the moment a build ends; the TTL only matters when a worker
+     * dies mid-build, and then it blocks pulls for at most this long.
      */
-    private const LOCK_SECONDS = 120;
+    private const LOCK_SECONDS = 600;
 
     public function show(Request $request, GrowthExportService $growth): JsonResponse
     {
@@ -88,17 +92,23 @@ class GrowthDataController extends Controller
             $data = $growth->build($dates['start'], $dates['end'], $dates['previous_start'], $dates['previous_end']);
 
             // The cost of a build, so growth toward the worker's memory ceiling shows up here
-            // long before it shows up as an out-of-memory error.
-            $audit?->update(['new_values' => array_merge($audit->new_values ?? [], [
-                'duration_ms' => (int) round((hrtime(true) - $started) / 1e6),
-                'peak_memory_mb' => round(memory_get_peak_usage(true) / 1048576, 1),
-            ])]);
+            // long before it shows up as an out-of-memory error. A diagnostic: if the write fails,
+            // the pull still succeeds - AuditService::log() itself never breaks its caller either.
+            try {
+                $audit?->update(['new_values' => array_merge($audit->new_values ?? [], [
+                    'duration_ms' => (int) round((hrtime(true) - $started) / 1e6),
+                    'peak_memory_mb' => round(memory_get_peak_usage(true) / 1048576, 1),
+                ])]);
+            } catch (\Throwable $e) {
+                report($e);
+            }
 
             return response()->json(
                 $data,
                 200,
                 ['Cache-Control' => 'no-store, private'],
-                JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES
+                // PRESERVE_ZERO_FRACTION: an amount of 60.0 stays a float (60.0), not an int (60).
+                JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES | JSON_PRESERVE_ZERO_FRACTION
             );
         } finally {
             $lock->release();

@@ -95,7 +95,7 @@ class PullGrowth extends Command
         }
 
         $previous = $this->previousFor($data, $this->pulls($dir));
-        $json = json_encode($data, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES | JSON_THROW_ON_ERROR);
+        $json = json_encode($data, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES | JSON_PRESERVE_ZERO_FRACTION | JSON_THROW_ON_ERROR);
 
         $file = $dir.'/growth-'.now()->format('Y-m-d-His').'.json';
         File::put($file, $json);
@@ -118,10 +118,20 @@ class PullGrowth extends Command
             return self::FAILURE;
         }
 
-        $current = $this->read(array_pop($pulls));
-        $this->printSummary($current, $this->previousFor($current, $pulls));
+        // The newest file that is actually a payload: a truncated or hand-edited one is skipped
+        // rather than crashing the summary.
+        while ($pulls !== []) {
+            $current = $this->read(array_pop($pulls));
+            if ($current !== null) {
+                $this->printSummary($current, $this->previousFor($current, $pulls));
 
-        return self::SUCCESS;
+                return self::SUCCESS;
+            }
+        }
+
+        $this->error("No readable pull in {$dir}. Run php artisan app:pull-growth.");
+
+        return self::FAILURE;
     }
 
     /**
@@ -158,6 +168,10 @@ class PullGrowth extends Command
                 .(($previous['meta']['schema_version'] ?? null) !== $meta['schema_version']
                     ? ' (schema '.($previous['meta']['schema_version'] ?? '?').': definitions differ, read the notes)'
                     : ''));
+            if ($this->rangeDays($previous) !== $this->rangeDays($current)) {
+                $this->line('<comment>Its funnel window differs</comment> ('.($this->rangeDays($previous) ?? '?').' vs '
+                    .($this->rangeDays($current) ?? '?').' days): the "in range" rows do not compare.');
+            }
         }
 
         $this->table(['Metric', 'Now', 'Previous pull', 'Change'], GrowthSummary::compare($current, $previous));
@@ -176,24 +190,39 @@ class PullGrowth extends Command
     }
 
     /**
-     * The newest earlier pull with the same schema version, else the newest earlier pull of any
-     * version - so a comparison is like with like whenever one exists.
+     * The newest earlier pull that compares like with like: the same schema AND the same funnel
+     * window, else the same schema, else anything. The funnel rows are range-scoped, so a
+     * last_30_days pull set against an all_time one reads as signups collapsing when only the
+     * window changed.
      */
     private function previousFor(array $current, array $earlier): ?array
     {
-        $fallback = null;
+        $sameSchema = null;
+        $any = null;
         foreach (array_reverse($earlier) as $path) {
             $candidate = $this->read($path);
             if ($candidate === null) {
                 continue;
             }
             if (($candidate['meta']['schema_version'] ?? null) === $current['meta']['schema_version']) {
-                return $candidate;
+                if ($this->rangeDays($candidate) === $this->rangeDays($current)) {
+                    return $candidate;
+                }
+                $sameSchema ??= $candidate;
             }
-            $fallback ??= $candidate;
+            $any ??= $candidate;
         }
 
-        return $fallback;
+        return $sameSchema ?? $any;
+    }
+
+    /** Length of a pull's funnel window in days (meta.range), or null if it has none. */
+    private function rangeDays(array $pull): ?int
+    {
+        $start = strtotime((string) ($pull['meta']['range']['start'] ?? ''));
+        $end = strtotime((string) ($pull['meta']['range']['end'] ?? ''));
+
+        return $start && $end ? (int) round(($end - $start) / 86400) : null;
     }
 
     /** Timestamped pulls, oldest first. Their names sort chronologically. @return list<string> */
