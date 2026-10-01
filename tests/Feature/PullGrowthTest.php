@@ -160,6 +160,54 @@ class PullGrowthTest extends TestCase
         Http::assertSent(fn ($request) => str_starts_with($request->url(), 'http://eventschedule.test/api/internal/growth'));
     }
 
+    /**
+     * --url decides where a production secret goes, and the command is auto-approved for agents. It
+     * only ever sends the token to GROWTH_DATA_URL's host or a local install.
+     */
+    public function test_the_token_is_never_sent_to_another_host(): void
+    {
+        Http::fake(['*' => Http::response($this->payload())]);
+
+        [$code, $output] = $this->pullCommand(['--url' => 'https://collector.example.net']);
+
+        $this->assertSame(1, $code);
+        $this->assertStringContainsString('GROWTH_DATA_URL', $output);
+        Http::assertNothingSent();
+    }
+
+    /** The saved pull records its window; all_time's own length changes every day. */
+    public function test_a_pull_records_its_window_and_all_time_pulls_compare_across_days(): void
+    {
+        File::ensureDirectoryExists($this->dir);
+        $yesterday = $this->payload(['generated_at' => '2026-09-30T10:00:00+00:00', 'range' => ['start' => '2020-01-01', 'end' => '2026-09-30']]);
+        $yesterday['monetization']['mrr'] = 41.0;
+        File::put($this->dir.'/growth-2026-09-30-100000.json', json_encode($yesterday));
+        $thirty = $this->payload(['generated_at' => '2026-09-30T12:00:00+00:00', 'range' => ['start' => '2026-08-31', 'end' => '2026-09-30']]);
+        File::put($this->dir.'/growth-2026-09-30-120000.json', json_encode($thirty));
+
+        Http::fake(['*' => Http::response($this->payload(['range' => ['start' => '2020-01-01', 'end' => '2026-10-01']]))]);
+
+        [$code, $output] = $this->pullCommand(['--range' => 'all_time']);
+
+        $this->assertSame(0, $code, $output);
+        $this->assertStringContainsString('2026-09-30T10:00:00', $output, 'yesterday\'s all-time pull, not the newer 30-day one');
+        $this->assertSame('all_time', json_decode(File::get($this->dir.'/latest.json'), true)['meta']['pulled_range']);
+    }
+
+    /** A file with meta but no schema is not a payload, and must not crash the summary. */
+    public function test_local_skips_a_file_that_is_not_a_payload(): void
+    {
+        Http::fake();
+        File::ensureDirectoryExists($this->dir);
+        File::put($this->dir.'/growth-2026-10-01-100000.json', json_encode($this->payload()));
+        File::put($this->dir.'/growth-2026-10-02-100000.json', json_encode(['meta' => ['generated_at' => 'x']]));
+
+        [$code, $output] = $this->pullCommand(['--local' => true]);
+
+        $this->assertSame(0, $code, $output);
+        $this->assertStringContainsString('62.50', $output);
+    }
+
     public function test_an_unknown_range_is_refused_before_any_request(): void
     {
         Http::fake();

@@ -68,6 +68,15 @@ class RealtimeTracker
         'web.whatsapp.com', 'discord.com',
     ];
 
+    /**
+     * Google products that are not Google Search, which SEARCH_HOSTS' "google.*" would otherwise
+     * claim: an event link clicked in a Calendar invite or a shared Doc is not a search visit.
+     */
+    private const GOOGLE_PRODUCT_HOSTS = [
+        'calendar.google.com', 'docs.google.com', 'drive.google.com', 'sites.google.com',
+        'groups.google.com', 'meet.google.com', 'photos.google.com', 'keep.google.com', 'chat.google.com',
+    ];
+
     /** Hosts a visitor passes through mid-visit (sign-in, payment); they never start a new source. */
     private const HANDOFF_HOSTS = [
         'accounts.google.com', 'appleid.apple.com', 'checkout.stripe.com', 'connect.stripe.com',
@@ -415,15 +424,28 @@ class RealtimeTracker
             return ['inherit' => true];
         }
 
-        $channel = match (true) {
+        return ['inherit' => false, 'channel' => self::hostChannel($host) ?? 'other', 'name' => $host, 'campaign' => null];
+    }
+
+    /**
+     * The channel a referring host belongs to - ai, email, search or social - or null when it is
+     * none of the known ones. One table for every surface that classifies referrers (this tracker
+     * and the growth payload), so the same visit cannot be "social" on /admin/realtime and
+     * something else in an export.
+     */
+    public static function hostChannel(?string $host): ?string
+    {
+        $host = self::normalizeHost($host);
+
+        return match (true) {
+            $host === null => null,
             self::hostIn($host, self::AI_HOSTS) => 'ai',
             self::hostIn($host, self::EMAIL_HOSTS) => 'email',
+            self::hostIn($host, self::GOOGLE_PRODUCT_HOSTS) => null,
             self::hostIn($host, self::SEARCH_HOSTS) => 'search',
             self::hostIn($host, self::SOCIAL_HOSTS) => 'social',
-            default => 'other',
+            default => null,
         };
-
-        return ['inherit' => false, 'channel' => $channel, 'name' => $host, 'campaign' => null];
     }
 
     public static function isInternalHost(string $host, Request $request): bool

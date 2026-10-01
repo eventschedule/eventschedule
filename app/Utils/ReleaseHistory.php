@@ -47,10 +47,16 @@ class ReleaseHistory
         Cache::forever(self::CACHE_KEY, $version);
     }
 
-    /** @return list<array{version: string, first_seen_at: string}> oldest first */
+    /**
+     * From the table, not Setting::get()'s cached map, for the reason touch() reads it there: the
+     * worker writes this row and the web container serves the payload, and a map cached in the web
+     * container's own store would never show the release. One indexed read per build.
+     *
+     * @return list<array{version: string, first_seen_at: string}> oldest first
+     */
     public static function all(): array
     {
-        return self::decode(Setting::get(self::SETTING, '[]'));
+        return self::decode(Setting::query()->where('key', self::SETTING)->value('value'));
     }
 
     private static function decode(?string $json): array

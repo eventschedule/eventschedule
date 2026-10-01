@@ -36,6 +36,10 @@ class RealtimeTrackerTest extends TestCase
             'gemini is AI, not Search' => ['gemini.google.com', [], 'ai', 'gemini.google.com'],
             'gmail is Email, not Search' => ['mail.google.com', [], 'email', 'mail.google.com'],
             'country google is Search' => ['www.google.co.uk', [], 'search', 'google.co.uk'],
+            // google.* used to claim every Google product: a Calendar invite or a shared Doc is not
+            // a search visit.
+            'a calendar invite is not Search' => ['calendar.google.com', [], 'other', 'calendar.google.com'],
+            'a shared doc is not Search' => ['docs.google.com', [], 'other', 'docs.google.com'],
             't.co is Social' => ['t.co', [], 'social', 't.co'],
             'facebook link shim is Social' => ['l.facebook.com', [], 'social', 'l.facebook.com'],
             'a look-alike is not Social' => ['notfacebook.com', [], 'other', 'notfacebook.com'],

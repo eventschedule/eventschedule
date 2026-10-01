@@ -10,7 +10,12 @@
       "Bash(sips -g:*)",
       "Bash(npm audit:*)",
       "Bash(xmllint --noout:*)",
-      "Bash(php artisan app:pull-growth:*)",
+      "Bash(php artisan app:pull-growth)",
+      "Bash(php artisan app:pull-growth --local)",
+      "Bash(php artisan app:pull-growth --range=last_7_days)",
+      "Bash(php artisan app:pull-growth --range=last_30_days)",
+      "Bash(php artisan app:pull-growth --range=last_90_days)",
+      "Bash(php artisan app:pull-growth --range=all_time)",
       "Bash(jq:*)"
     ]
   }

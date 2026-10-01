@@ -26,7 +26,7 @@ use Illuminate\Support\Facades\Cache;
  * The payload is pseudonymous by construction (GrowthExportService), but it is still the whole
  * business in one file, so: hosted only, disabled outright unless a long token is configured,
  * throttled per real client IP (the `growth_data` limiter), one build at a time, never cached, and
- * every pull - successful or not - audit-logged.
+ * every pull audit-logged, as is a rejected token (once per caller per hour).
  */
 class GrowthDataController extends Controller
 {
@@ -58,11 +58,15 @@ class GrowthDataController extends Controller
         if (! is_string($given) || $given === '' || ! hash_equals($expected, $given)) {
             // A fixed code, never the value sent. no_bearer is what a proxy stripping the
             // Authorization header looks like, which is otherwise indistinguishable from a typo.
-            AuditService::log(
-                AuditService::API_AUTH_FAILED,
-                newValues: ['client_ip' => RealtimeTracker::clientIp($request)],
-                metadata: ($given === null || $given === '') ? 'growth_data:no_bearer' : 'growth_data:mismatch',
-            );
+            //
+            // At most one row per caller, per code, per hour: the path is public (open source), so
+            // a row per refused request would let anyone grow audit_logs at will. The first refusal
+            // is what an investigation needs; the throttle already bounds the rest.
+            $code = ($given === null || $given === '') ? 'growth_data:no_bearer' : 'growth_data:mismatch';
+            $ip = RealtimeTracker::clientIp($request);
+            if (Cache::add('growth_data_refused:'.$code.':'.hash_hmac('sha256', $ip, (string) config('app.key')), 1, 3600)) {
+                AuditService::log(AuditService::API_AUTH_FAILED, newValues: ['client_ip' => $ip], metadata: $code);
+            }
 
             return response()->json(['error' => __('messages.unauthorized')], 401);
         }

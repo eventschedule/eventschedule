@@ -11,7 +11,8 @@ php artisan app:pull-growth --local              # re-print the summary of the l
 ```
 
 Each pull is saved as `storage/app/growth/growth-YYYY-MM-DD-His.json` and copied to
-`storage/app/growth/latest.json` (the folder is gitignored). The command prints about fifteen
+`storage/app/growth/latest.json` (the folder is gitignored), with `meta.pulled_range` added: the
+`--range` it was pulled with, so the summary can compare a pull with one over the same window. The command prints about fifteen
 headline numbers against the previous pull of the same schema, plus any `meta.notes` that are new.
 
 **Never commit a pull, and never put figures from one into a committed file.** This repository is
@@ -29,13 +30,15 @@ bearer token.
    console, then deploy. Use the console, not a spec file: a stored spec wipes the custom domains
    added since it was written.
 3. Dev machine: put the same value in `.env` as `GROWTH_DATA_TOKEN`. `GROWTH_DATA_URL` defaults
-   to `https://eventschedule.com`.
+   to `https://eventschedule.com`. The command sends the token only to that host or to a local one
+   (`localhost`, `127.0.0.1`, `*.test`), whatever `--url` says; another host takes an edit to `.env`.
 
 The endpoint is hosted-only. It answers 404 while the token is unset or shorter than 32 characters,
 and it is throttled per real client IP (10 a minute). Only one build runs at a time. Responses are
-`no-store`, and every pull and every refused attempt is written to the audit log, with the caller's
-IP and the build's duration and peak memory. The command names each failure: 401, 404, 429, a
-redirect, a Cloudflare challenge.
+`no-store`. Every pull is written to the audit log with the caller's IP and the build's duration
+and peak memory. A rejected token is logged too, but only the first one per caller per hour, so the
+public path cannot be used to fill the table. The disabled 404 and the throttle's 429 are not
+logged. The command names each failure: 401, 404, 429, a redirect, a Cloudflare challenge.
 
 `php artisan app:export-growth --range=... --path=...` builds the same payload from a shell on the
 server itself.
@@ -59,9 +62,10 @@ identifier, subdomain, custom domain or token appears in it.
     - published blog posts (as `/blog/<slug>`);
     - known platforms, canonicalised (`google.co.uk` and the Android search app both read `google`).
   - Always replaced, whatever the count:
-    - a value containing `@` becomes `(redacted)`;
+    - a utm or landing path containing `@` becomes `(redacted)`;
     - an IP referrer becomes `(ip)`;
-    - a schedule's subdomain or custom domain as referrer becomes `(schedule)`;
+    - a schedule's subdomain, its custom domain, or another host under that domain
+      (`tickets.venue.com` beside `events.venue.com`) as referrer becomes `(schedule)`;
     - token-shaped path segments become `:token`.
   - Residual risk: a personal website that refers 3 or more signups appears by name.
 - **Country** (`schedules.country`): a country shared by fewer than 5 schedules reads `(other)`.
@@ -237,7 +241,7 @@ Both are columnar: read `columns[]`, then `rows[][]`. They are newest first and 
 | `signup_intent` | Why they signed up: null or `organizer` for organizers, else an attendee intent (`follow`, `ticket`, ...) |
 | `utm_source`, `utm_medium` | First-touch UTMs, lowercased; see Privacy |
 | `referrer_domain` | First-touch referrer host, or a canonical platform name or placeholder; see Privacy |
-| `referrer_channel` | `search`, `ai`, `social`, `community`, `email`, `messaging`, `auth` (back from Google sign-in, real referrer lost), `own` (our own domain), `schedule`, `other`; null = no referrer |
+| `referrer_channel` | `search`, `ai`, `social`, `community`, `email`, `messaging`, `calendar` (an invite), `auth` (back from Google sign-in, real referrer lost), `own` (our own domain), `schedule`, `other`; null = no referrer. For any host `/admin/realtime` classifies, the channel is its (`RealtimeTracker::hostChannel()`), so the two never disagree: reddit and discord are `social` there and here |
 | `landing_path` | First page seen, lowercased, leading slash. Tenant pages record their PATH only, so a schedule homepage reads `/` like ours |
 | `auth` | `google`, `facebook`, `email`, `other` |
 | `reached_schedule_form` | Opened the new-schedule form, or saved a schedule |

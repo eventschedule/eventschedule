@@ -1214,6 +1214,49 @@ class GrowthExportTest extends TestCase
         $this->assertSame(1, collect($data['acquisition']['by_referrer_channel'])->firstWhere('key', 'ai')['signups']);
     }
 
+    /**
+     * A schedule's custom domain is not the only host that names its customer: the domain it sits
+     * under and its siblings do too. But a public suffix must never become a "customer domain", or
+     * one venue on venue.co.uk would fold every .co.uk referrer into "(schedule)".
+     */
+    public function test_hosts_under_a_customer_domain_are_schedule_referrers_but_public_suffixes_are_not(): void
+    {
+        $a = $this->freeRole();
+        $b = $this->freeRole();
+        DB::table('roles')->where('id', $a->id)->update(['custom_domain' => 'https://events.examplevenue.com']);
+        DB::table('roles')->where('id', $b->id)->update(['custom_domain' => 'https://venue.co.uk']);
+
+        foreach (range(1, 3) as $n) {
+            $this->signupWith(['referrer_url' => 'https://tickets.examplevenue.com/']);   // a sibling
+            $this->signupWith(['referrer_url' => 'https://www.examplevenue.com/']);       // the parent
+            $this->signupWith(['referrer_url' => 'https://other-business.co.uk/']);       // shares only the suffix
+            $this->signupWith(['referrer_url' => 'https://calendar.google.com/calendar']); // an invite, not a search
+        }
+
+        $data = $this->build();
+        $hosts = $this->signupValues($data, 'referrer_domain');
+
+        $this->assertSame(6, $hosts['(schedule)'] ?? null);
+        $this->assertSame(3, $hosts['other-business.co.uk'] ?? null, 'co.uk is a public suffix, not a customer');
+        $this->assertSame(3, $hosts['google-calendar'] ?? null);
+        $this->assertSame(3, $this->signupValues($data, 'referrer_channel')['calendar'] ?? null);
+        $this->assertArrayNotHasKey('search', $this->signupValues($data, 'referrer_channel'));
+        $this->assertStringNotContainsString('examplevenue', json_encode($data));
+    }
+
+    /** An address in a path (an unsubscribe link, %40-encoded) never survives, however many share it. */
+    public function test_a_landing_path_with_an_address_in_it_is_redacted(): void
+    {
+        foreach (range(1, 3) as $n) {
+            $this->signupWith(['landing_page' => 'nl/manage/jane.doe%40gmail.com']);
+        }
+
+        $data = $this->build();
+
+        $this->assertSame(3, $this->signupValues($data, 'landing_path')['(redacted)'] ?? null);
+        $this->assertStringNotContainsString('jane.doe', json_encode($data));
+    }
+
     public function test_a_utm_with_an_address_in_it_is_redacted_however_many_share_it(): void
     {
         foreach (range(1, 3) as $n) {
@@ -1538,15 +1581,28 @@ class GrowthExportTest extends TestCase
         $theirs = $this->freeRole($newbie);
         DB::table('roles')->where('id', $theirs->id)->update(['created_at' => now()->addMinutes(5)]);
 
+        // An organizer already: test-bought on their own event, then added a second schedule. Not a
+        // conversion - the loop is attendees whose FIRST schedule came after they attended.
+        $organizer = $this->createOwner();
+        DB::table('users')->where('id', $organizer->id)->update(['email' => 'organizer@fans.test']);
+        $mine = $this->freeRole($organizer);
+        DB::table('roles')->where('id', $mine->id)->update(['created_at' => now()->subYear()]);
+        $this->createSale($event, $role, ['status' => 'paid', 'payment_method' => 'rsvp', 'email' => 'organizer@fans.test']);
+        $second = $this->freeRole($organizer);
+        DB::table('roles')->where('id', $second->id)->update(['created_at' => now()->addMinutes(5)]);
+
+        // A bulk-imported attendee list is not people who came.
+        $this->createSale($event, $role, ['status' => 'paid', 'payment_method' => 'import', 'email' => 'imported@fans.test']);
+
         $month = collect($this->build()['buyers'])->firstWhere('month', now()->format('Y-m'));
 
         $this->assertSame(1, $month['paid_orders']);
         $this->assertSame(1, $month['buyers'], 'one person, however the address was typed');
         $this->assertSame(1, $month['returning_buyers']);
         $this->assertSame(0, $month['new_buyers']);
-        $this->assertSame(1, $month['rsvps']);
-        $this->assertSame(1, $month['new_attendees'], 'the fan first attended two months ago');
-        $this->assertSame(1, $month['attendees_who_became_organizers']);
+        $this->assertSame(2, $month['rsvps']);
+        $this->assertSame(2, $month['new_attendees'], 'the newbie and the organizer; the fan first attended two months ago, the import never did');
+        $this->assertSame(1, $month['attendees_who_became_organizers'], 'the newbie, not the organizer who already had a schedule');
     }
 
     public function test_reach_counts_this_weeks_audience(): void
@@ -1687,6 +1743,33 @@ class GrowthExportTest extends TestCase
 
         $stored = json_decode(DB::table('settings')->where('key', 'release_history')->value('value'), true);
         $this->assertSame(['v1.0.150', 'v1.0.151'], array_column($stored, 'version'));
+
+        // And the payload reads it the same way: the web container's cached map may be stale.
+        \Illuminate\Support\Facades\Cache::forever('site_settings', ['release_history' => '[]']);
+        $this->assertSame(['v1.0.150', 'v1.0.151'], array_column($this->build()['meta']['releases'], 'version'));
+    }
+
+    /** The breakdown of trial starts adds up to the trials it breaks down, deleted schedules aside. */
+    public function test_ticket_trial_sources_sum_to_the_trials_started(): void
+    {
+        $kept = $this->freeRole();
+        $deleted = $this->freeRole();
+        DB::table('roles')->whereIn('id', [$kept->id, $deleted->id])->update(['ticket_trial_ends_at' => now()->addDays(5)]);
+        DB::table('roles')->where('id', $deleted->id)->update(['is_deleted' => true]);
+        foreach ([$kept, $deleted] as $role) {
+            DB::table('audit_logs')->insert(['action' => AuditService::TICKET_TRIAL_START, 'model_type' => 'Role',
+                'model_id' => $role->id, 'new_values' => json_encode(['source' => 'tickets']), 'ip_address' => '0.0.0.0',
+                'created_at' => now()->subDays(2)]);
+        }
+        // A restart of the same trial is still one trial.
+        DB::table('audit_logs')->insert(['action' => AuditService::TICKET_TRIAL_START, 'model_type' => 'Role',
+            'model_id' => $kept->id, 'new_values' => json_encode(['source' => 'plan']), 'ip_address' => '0.0.0.0',
+            'created_at' => now()->subDay()]);
+
+        $trials = $this->build()['monetization']['ticket_trials'];
+
+        $this->assertSame(1, $trials['started']);
+        $this->assertSame(['tickets' => 1], $trials['started_from']);
     }
 
     /** An unrecognised range would quietly build the all-time window under the asked-for name. */

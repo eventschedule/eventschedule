@@ -57,8 +57,8 @@ class PullGrowth extends Command
         }
 
         $base = rtrim((string) ($this->option('url') ?: config('app.growth_data_url')), '/');
-        if (! $this->isAcceptableUrl($base)) {
-            $this->error("Refusing {$base}: the token would travel in cleartext. Use https (plain http only for localhost or *.test).");
+        if ($problem = $this->urlProblem($base)) {
+            $this->error("Refusing {$base}: {$problem}");
 
             return self::FAILURE;
         }
@@ -93,6 +93,10 @@ class PullGrowth extends Command
 
             return self::FAILURE;
         }
+
+        // Which window was asked for, so a later pull can be set against one over the same window.
+        // meta.range alone cannot say: all_time's length changes every day.
+        $data['meta']['pulled_range'] = $range;
 
         $previous = $this->previousFor($data, $this->pulls($dir));
         $json = json_encode($data, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES | JSON_PRESERVE_ZERO_FRACTION | JSON_THROW_ON_ERROR);
@@ -168,9 +172,9 @@ class PullGrowth extends Command
                 .(($previous['meta']['schema_version'] ?? null) !== $meta['schema_version']
                     ? ' (schema '.($previous['meta']['schema_version'] ?? '?').': definitions differ, read the notes)'
                     : ''));
-            if ($this->rangeDays($previous) !== $this->rangeDays($current)) {
-                $this->line('<comment>Its funnel window differs</comment> ('.($this->rangeDays($previous) ?? '?').' vs '
-                    .($this->rangeDays($current) ?? '?').' days): the "in range" rows do not compare.');
+            if ($this->windowOf($previous) !== $this->windowOf($current)) {
+                $this->line('<comment>Its funnel window differs</comment> ('.($this->windowOf($previous) ?? '?').' vs '
+                    .($this->windowOf($current) ?? '?').'): the "in range" rows do not compare.');
             }
         }
 
@@ -205,7 +209,7 @@ class PullGrowth extends Command
                 continue;
             }
             if (($candidate['meta']['schema_version'] ?? null) === $current['meta']['schema_version']) {
-                if ($this->rangeDays($candidate) === $this->rangeDays($current)) {
+                if ($this->windowOf($candidate) === $this->windowOf($current)) {
                     return $candidate;
                 }
                 $sameSchema ??= $candidate;
@@ -216,13 +220,24 @@ class PullGrowth extends Command
         return $sameSchema ?? $any;
     }
 
-    /** Length of a pull's funnel window in days (meta.range), or null if it has none. */
-    private function rangeDays(array $pull): ?int
+    /**
+     * Which funnel window a pull covers: the --range it was pulled with (meta.pulled_range), or for
+     * a pull made before that was recorded, all_time when it starts at the all-time origin and its
+     * length in days otherwise.
+     */
+    private function windowOf(array $pull): ?string
     {
-        $start = strtotime((string) ($pull['meta']['range']['start'] ?? ''));
-        $end = strtotime((string) ($pull['meta']['range']['end'] ?? ''));
+        if (isset($pull['meta']['pulled_range'])) {
+            return (string) $pull['meta']['pulled_range'];
+        }
 
-        return $start && $end ? (int) round(($end - $start) / 86400) : null;
+        $start = (string) ($pull['meta']['range']['start'] ?? '');
+        $end = (string) ($pull['meta']['range']['end'] ?? '');
+        if ($start === '' || $end === '') {
+            return null;
+        }
+
+        return $start === '2020-01-01' ? 'all_time' : 'last_'.(int) round((strtotime($end) - strtotime($start)) / 86400).'_days';
     }
 
     /** Timestamped pulls, oldest first. Their names sort chronologically. @return list<string> */
@@ -238,20 +253,32 @@ class PullGrowth extends Command
     {
         $data = json_decode((string) @file_get_contents($path), true);
 
-        return is_array($data) && isset($data['meta']) ? $data : null;
+        // A payload, or nothing: everything downstream indexes meta.schema_version.
+        return is_array($data) && isset($data['meta']['schema_version']) ? $data : null;
     }
 
-    private function isAcceptableUrl(string $url): bool
+    /**
+     * Why the token must not go to this URL, or null when it may.
+     *
+     * The token is only ever sent to GROWTH_DATA_URL's own host or to a local install. --url exists
+     * for local testing, and it is the one argument that decides where a production secret goes: an
+     * agent running this command could be talked into pointing it elsewhere by any text it reads -
+     * including values in a pull - and .claude/settings.json auto-approves the command. Pointing at
+     * another host takes an edit to .env, which is a person's decision.
+     */
+    private function urlProblem(string $url): ?string
     {
         $parts = parse_url($url);
         $scheme = strtolower($parts['scheme'] ?? '');
         $host = strtolower($parts['host'] ?? '');
+        $local = in_array($host, ['localhost', '127.0.0.1'], true) || str_ends_with($host, '.test');
+        $configured = strtolower((string) parse_url((string) config('app.growth_data_url'), PHP_URL_HOST));
 
-        if ($host === '') {
-            return false;
-        }
-
-        return $scheme === 'https'
-            || ($scheme === 'http' && (in_array($host, ['localhost', '127.0.0.1'], true) || str_ends_with($host, '.test')));
+        return match (true) {
+            $host === '' => 'not a URL.',
+            ! $local && $host !== $configured => "the token is only sent to GROWTH_DATA_URL's host ({$configured}) or a local install. To pull from another host, set GROWTH_DATA_URL in .env.",
+            $scheme !== 'https' && ! ($scheme === 'http' && $local) => 'the token would travel in cleartext. Use https (plain http only for localhost or *.test).',
+            default => null,
+        };
     }
 }

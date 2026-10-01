@@ -83,11 +83,16 @@ class GrowthDataEndpointTest extends TestCase
         // Never from the query string, where it would land in every access log.
         $this->pull(null, '?token='.self::TOKEN)->assertUnauthorized();
 
+        // One row per caller per code per hour: a stripped header stays distinguishable from a
+        // wrong token, and five refusals from one address cannot write five rows.
         $codes = AuditLog::forAction(AuditService::API_AUTH_FAILED)->pluck('metadata')->all();
-        $this->assertSame([
-            'growth_data:no_bearer', 'growth_data:mismatch', 'growth_data:mismatch',
-            'growth_data:no_bearer', 'growth_data:no_bearer',
-        ], $codes, 'a stripped header must be distinguishable from a wrong token');
+        $this->assertSame(['growth_data:no_bearer', 'growth_data:mismatch'], $codes);
+
+        // A different caller is logged in its own right.
+        $this->withServerVariables(['REMOTE_ADDR' => '198.51.100.9'])
+            ->withHeaders(['CF-Connecting-IP' => '198.51.100.9', 'Authorization' => 'Bearer nope'])
+            ->getJson('/api/internal/growth')->assertUnauthorized();
+        $this->assertSame(3, AuditLog::forAction(AuditService::API_AUTH_FAILED)->count());
 
         foreach (AuditLog::all() as $row) {
             $this->assertStringNotContainsString(self::TOKEN, json_encode($row->toArray()), 'the audit trail must never hold the token');

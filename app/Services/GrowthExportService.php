@@ -8,6 +8,7 @@ use App\Models\Role;
 use App\Models\SubscriptionCancellation;
 use App\Models\User;
 use App\Utils\HeroExperiment;
+use App\Utils\RealtimeTracker;
 use App\Utils\ReleaseHistory;
 use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Collection as EloquentCollection;
@@ -536,7 +537,8 @@ class GrowthExportService
 
         $notes = [
             'Revenue is reported per currency: sales has no currency column, it comes from events.ticket_currency_code.',
-            'There is no users.last_login_at; no activity proxy is reported here rather than a misleading one.',
+            'There is no users.last_login_at. From schema_version 9 the signup rows carry an activity proxy built '
+                .'from audit rows (logins_90d, event_edits_90d): a lower bound, because a remember-me login writes none.',
             'marketing_daily_stats.visitors is nexus-only and is null elsewhere.',
             'The newest cohort is always immature - see funnel_trend.last_index.',
             'Row tables are columnar: read columns[] then rows[][].',
@@ -612,9 +614,9 @@ class GrowthExportService
                 .'Exempt: our own marketing/docs pages, published blog posts (/blog/<slug>), and known '
                 .'platforms, which are canonicalised (google.co.uk and the Android search app both read '
                 .'google). referrer_channel groups referrers as search, ai, social, community, email, '
-                .'messaging, auth, own, schedule or other, so a rare AI referrer still counts as ai. '
-                .'Always replaced, whatever the count: a value containing @ ("(redacted)"), an IP referrer '
-                .'("(ip)"), a schedule subdomain or customer domain ("(schedule)"), and token-shaped path '
+                .'messaging, calendar, auth, own, schedule or other, so a rare AI referrer still counts as ai. '
+                .'Always replaced, whatever the count: a utm or path containing @ ("(redacted)"), an IP referrer '
+                .'("(ip)"), a schedule subdomain or customer domain or a host under it ("(schedule)"), and token-shaped path '
                 .'segments (":token"). Landing paths are lowercased with a leading slash. A personal site '
                 .'that refers 3+ signups can still appear by name.',
             'Since schema_version 8, uid and sid are 12 hex characters (6 could collide at a few '
@@ -860,9 +862,13 @@ class GrowthExportService
             'saved_schedule', 'saved_event', 'saved_ticket', 'saved_paid_ticket', 'schedules_count',
             'days_to_first_schedule', 'hero_variant', 'referred', 'logins_90d', 'event_edits_90d'];
 
+        // In place: by value, every row it rewrote would be copied while the caller's array was
+        // still alive, doubling the row table's memory on a 128MB worker.
+        $this->anonymizeAttribution($rows, array_flip($columns));
+
         return [
             'columns' => $columns,
-            'rows' => $this->anonymizeAttribution($rows, array_flip($columns)),
+            'rows' => $rows,
             'total' => $total,
             'truncated' => $total > $this->rowCap(),
         ];
@@ -882,12 +888,12 @@ class GrowthExportService
      * buyer. It runs over the (capped) row set, so a value's group size is counted on what is
      * exported - the rollups are built from these rows and inherit it.
      */
-    private function anonymizeAttribution(array $rows, array $i): array
+    private function anonymizeAttribution(array &$rows, array $i): void
     {
         $context = [
             'marketing' => array_change_key_case(array_flip(array_keys((array) config('sitemap_lastmod', []))), CASE_LOWER),
             'blog' => $this->publishedBlogSlugs(),
-            'customHosts' => $this->customDomainHosts(),
+            'customRoots' => $this->customDomainRoots(),
             'baseDomain' => strtolower((string) _base_domain()),
         ];
 
@@ -932,8 +938,6 @@ class GrowthExportService
             }
             unset($row);
         }
-
-        return $rows;
     }
 
     /**
@@ -956,10 +960,14 @@ class GrowthExportService
     }
 
     /**
-     * Canonical platforms: [host pattern, exported name, channel]. Specific hosts come before the
-     * generic ones that would also match them (gemini.google.com before google.*). A platform name
+     * Canonical platform NAMES: [host pattern, exported name, channel]. Specific hosts come before
+     * the generic ones that would also match them (gemini.google.com before google). A platform name
      * identifies nobody, so these are exempt from the group-size rule - which is what keeps a rare
      * but telling referrer (one signup from perplexity.ai) visible instead of folded into "(other)".
+     *
+     * The CHANNEL is RealtimeTracker::hostChannel()'s whenever it knows the host, so /admin/realtime
+     * and this payload never put the same visit in different channels; the channel here only covers
+     * what that table has no word for (community, messaging, calendar, sign-in).
      */
     private const REFERRER_PLATFORMS = [
         // AI assistants
@@ -970,17 +978,23 @@ class GrowthExportService
         ['/(^|\.)copilot\.microsoft\.com$/', 'copilot', 'ai'],
         ['/(^|\.)deepseek\.com$/', 'deepseek', 'ai'],
         ['/(^|\.)grok\.com$/', 'grok', 'ai'],
-        // Email and messaging, before the generic google.* below
+        ['/^meta\.ai$/', 'meta-ai', 'ai'],
+        ['/(^|\.)mistral\.ai$/', 'mistral', 'ai'],
+        ['/^you\.com$/', 'you', 'ai'],
+        // Email, messaging and calendars - before the generic google below, which they would match
         ['/^(mail\.google\.com|com\.google\.android\.gm)$/', 'gmail', 'email'],
         ['/(^|\.)(outlook\.live\.com|outlook\.office\.com|outlook\.office365\.com)$/', 'outlook', 'email'],
         ['/^mail\.yahoo\.com$/', 'yahoo-mail', 'email'],
         ['/^messages\.google\.com$/', 'google-messages', 'messaging'],
         ['/(^|\.)(whatsapp\.com|com\.whatsapp)$/', 'whatsapp', 'messaging'],
         ['/(^|\.)(t\.me|telegram\.org|org\.telegram\.messenger)$/', 'telegram', 'messaging'],
+        ['/^calendar\.google\.com$/', 'google-calendar', 'calendar'],
+        // Other Google products: named, never Search.
+        ['/^(docs|drive|sites|groups|meet|photos|keep|chat)\.google\.com$/', 'google-workspace', 'other'],
         // Back from a sign-in provider: the real referrer was lost on the way.
         ['/^accounts\.google\.com$/', 'google-signin', 'auth'],
-        // Search
-        ['/(^|\.)google\.(com?\.)?[a-z]{2,3}$|^com\.google\.android\.googlequicksearchbox$/', 'google', 'search'],
+        // Search. Google is the bare (www-stripped) domain only; its product subdomains are above.
+        ['/^google\.(com?\.)?[a-z]{2,3}$|^com\.google\.android\.googlequicksearchbox$/', 'google', 'search'],
         ['/(^|\.)bing\.com$/', 'bing', 'search'],
         ['/(^|\.)duckduckgo\.com$/', 'duckduckgo', 'search'],
         ['/(^|\.)search\.yahoo\.com$|^yahoo\.com$/', 'yahoo', 'search'],
@@ -990,6 +1004,7 @@ class GrowthExportService
         ['/^search\.brave\.com$/', 'brave', 'search'],
         ['/(^|\.)qwant\.com$/', 'qwant', 'search'],
         ['/(^|\.)startpage\.com$/', 'startpage', 'search'],
+        ['/(^|\.)kagi\.com$/', 'kagi', 'search'],
         ['/(^|\.)naver\.com$/', 'naver', 'search'],
         // Social
         ['/(^|\.)facebook\.com$|^com\.facebook\.katana$/', 'facebook', 'social'],
@@ -1001,7 +1016,7 @@ class GrowthExportService
         ['/(^|\.)pinterest\.[a-z.]+$/', 'pinterest', 'social'],
         ['/(^|\.)threads\.net$/', 'threads', 'social'],
         ['/^bsky\.app$/', 'bluesky', 'social'],
-        // Communities and directories
+        // Communities and directories (reddit and discord take the shared table's "social")
         ['/(^|\.)reddit\.com$|^com\.reddit\.frontpage$/', 'reddit', 'community'],
         ['/^news\.ycombinator\.com$/', 'hackernews', 'community'],
         ['/^github\.com$/', 'github', 'community'],
@@ -1030,8 +1045,10 @@ class GrowthExportService
         // is the channel worth seeing, the schedule's name is not ours to export. Both capture
         // paths drop same-base-domain referrers, so the subdomain arm mostly guards old rows.
         $base = $context['baseDomain'];
-        if (isset($context['customHosts'][$host])) {
-            return ['(schedule)', 'schedule', true];
+        foreach ($context['customRoots'] as $root => $_) {
+            if ($host === $root || str_ends_with($host, '.'.$root)) {
+                return ['(schedule)', 'schedule', true];
+            }
         }
         if ($base !== '' && str_ends_with($host, '.'.$base)) {
             $label = substr($host, 0, -strlen('.'.$base));
@@ -1043,10 +1060,17 @@ class GrowthExportService
             return [$host, 'own', true];
         }
 
+        $shared = RealtimeTracker::hostChannel($host);
         foreach (self::REFERRER_PLATFORMS as [$pattern, $name, $channel]) {
             if (preg_match($pattern, $host) === 1) {
-                return [$name, $channel, true];
+                return [$name, $shared ?? $channel, true];
             }
+        }
+
+        // A platform the shared table knows that has no canonical name here: still a platform,
+        // so named and exempt.
+        if ($shared !== null) {
+            return [$host, $shared, true];
         }
 
         return [$host, 'other', false];
@@ -1072,6 +1096,12 @@ class GrowthExportService
         // out of documents and chat apps; real data had /guest-add twice over because of one.
         $path = preg_replace('/\p{Cf}/u', '', rawurldecode($path)) ?? $path;
         $path = '/'.trim(mb_strtolower(trim($path)), '/');
+
+        // An address in a path (an unsubscribe or "manage" link, %40 decoded above) is redacted
+        // however many share it - the same promise as a utm with an @ in it.
+        if (str_contains($path, '@')) {
+            return ['(redacted)', true];
+        }
 
         if (isset($context['marketing'][$path])) {
             return [$path, true];
@@ -1127,15 +1157,39 @@ class GrowthExportService
             ->all();
     }
 
-    /** Every host a schedule serves from on a custom domain. @return array<string, true> */
-    private function customDomainHosts(): array
+    /**
+     * The domains schedules serve from, as roots a referrer matches by suffix: each custom domain
+     * itself, and the domain it sits under. A schedule on events.venue.com is referred to from
+     * venue.com and tickets.venue.com too, and naming any of them names the customer - an exact
+     * match alone let those clear the group-size rule by name.
+     *
+     * The parent is only taken when it cannot be a public suffix: three or more labels
+     * (venue.co.uk), or two with a first label longer than three characters (venue.com, never
+     * co.uk or com.au), so one customer cannot fold a whole country's referrers into "(schedule)".
+     * Short real domains (abc.com) are missed; that errs toward the group-size rule, not a leak.
+     *
+     * @return array<string, true>
+     */
+    private function customDomainRoots(): array
     {
-        return DB::table('roles')->whereNotNull('custom_domain')->where('custom_domain', '!=', '')
-            ->pluck('custom_domain')
-            ->map(fn ($url) => $this->hostOf((string) $url))
-            ->filter()
-            ->mapWithKeys(fn ($host) => [$host => true])
-            ->all();
+        $roots = [];
+        foreach (DB::table('roles')->whereNotNull('custom_domain')->where('custom_domain', '!=', '')->pluck('custom_domain') as $url) {
+            $host = $this->hostOf((string) $url);
+            if ($host === null) {
+                continue;
+            }
+            $roots[$host] = true;
+
+            $labels = explode('.', $host);
+            if (count($labels) >= 3) {
+                $parent = array_slice($labels, 1);
+                if (count($parent) >= 3 || strlen($parent[0]) > 3) {
+                    $roots[implode('.', $parent)] = true;
+                }
+            }
+        }
+
+        return $roots;
     }
 
     /**
@@ -2104,9 +2158,22 @@ class GrowthExportService
         $counts = ['started' => 0, 'running' => 0, 'sold_during' => 0, 'converted' => 0, 'expired_unconverted' => 0,
             'started_from' => []];
 
-        // Where each was started (the editor's paywall or the plan tab), from the same audit rows.
-        foreach (DB::table('audit_logs')->where('action', AuditService::TICKET_TRIAL_START)->pluck('new_values') as $values) {
-            $from = json_decode((string) $values, true)['source'] ?? 'unknown';
+        // Where each was started (the editor's paywall or the plan tab): the FIRST start row of each
+        // schedule counted in `started`, so the breakdown always sums to it. Counting every audit row
+        // took in deleted and demo schedules, and the rows are kept forever now, so the gap would
+        // only have grown. A schedule with no row (started before the audit action existed) is
+        // "unknown".
+        $sourceByRole = [];
+        foreach (DB::table('audit_logs')
+            ->where('action', AuditService::TICKET_TRIAL_START)
+            ->where('model_type', 'Role')
+            ->whereIn('model_id', $roles->pluck('id'))
+            ->orderBy('created_at')->orderBy('id')
+            ->get(['model_id', 'new_values']) as $row) {
+            $sourceByRole[$row->model_id] ??= json_decode((string) $row->new_values, true)['source'] ?? 'unknown';
+        }
+        foreach ($roles as $role) {
+            $from = $sourceByRole[$role->id] ?? 'unknown';
             $counts['started_from'][$from] = ($counts['started_from'][$from] ?? 0) + 1;
         }
 
@@ -2565,22 +2632,42 @@ class GrowthExportService
             ->groupBy(DB::raw("DATE_FORMAT(sales.paid_at, '%Y-%m')"))
             ->get()->keyBy('ym');
 
-        // Attendees (paid or free) whose account went on to create a real schedule after they first
-        // attended, by the month they first attended.
-        $firstAttended = $sales()->selectRaw('LOWER(TRIM(sales.email)) as em, MIN(sales.paid_at) as first_at')
-            ->groupBy(DB::raw('LOWER(TRIM(sales.email))'));
-        $converted = DB::query()->fromSub($firstAttended, 'fa')
-            ->join('users', DB::raw('LOWER(users.email)'), '=', 'fa.em')
-            ->where('fa.first_at', '>=', $from)
-            ->whereExists(fn ($q) => $this->excludeDemoRoles($q->select(DB::raw(1))->from('roles')
-                ->whereColumn('roles.user_id', 'users.id')->whereColumn('roles.created_at', '>', 'fa.first_at')))
-            ->selectRaw("DATE_FORMAT(fa.first_at, '%Y-%m') as ym, COUNT(DISTINCT fa.em) as c")
-            ->groupBy(DB::raw("DATE_FORMAT(fa.first_at, '%Y-%m')"))
-            ->pluck('c', 'ym');
-        $attendees = DB::query()->fromSub($firstAttended, 'fa')->where('fa.first_at', '>=', $from)
-            ->selectRaw("DATE_FORMAT(fa.first_at, '%Y-%m') as ym, COUNT(*) as c")
-            ->groupBy(DB::raw("DATE_FORMAT(fa.first_at, '%Y-%m')"))
-            ->pluck('c', 'ym');
+        // New attendees (paid or free, never a bulk import - an imported list is not people who came)
+        // by the month they FIRST attended anywhere on the platform: one aggregate over sales, kept
+        // only when that first time falls in the window. The addresses stay in this method; only
+        // monthly counts leave it.
+        $newAttendees = $sales()->where('sales.payment_method', '!=', 'import')
+            ->selectRaw('LOWER(TRIM(sales.email)) as em, MIN(sales.paid_at) as first_at')
+            ->groupBy(DB::raw('LOWER(TRIM(sales.email))'))
+            ->havingRaw('MIN(sales.paid_at) >= ?', [$from])
+            ->pluck('first_at', 'em');
+
+        // The viral loop: of those, the ones whose account created its FIRST real schedule after
+        // they first attended. "Any schedule after" would also count organizers who test-bought on
+        // their own event and later added a second schedule - organizers already, converted by
+        // nothing. Looked up by email against the users index (the column's collation already
+        // ignores case), in chunks.
+        $attendees = [];
+        $converted = [];
+        foreach ($newAttendees->chunk(1000) as $chunk) {
+            $userIds = DB::table('users')->whereIn('email', $chunk->keys()->all())->pluck('id', 'email')
+                ->mapWithKeys(fn ($id, $email) => [mb_strtolower(trim($email)) => $id]);
+            $firstSchedule = $userIds->isEmpty() ? collect() : $this->excludeDemoRoles(DB::table('roles'))
+                ->whereIn('user_id', $userIds->values()->all())
+                ->groupBy('user_id')
+                ->selectRaw('user_id, MIN(created_at) as first_at')
+                ->pluck('first_at', 'user_id');
+
+            foreach ($chunk as $email => $firstAttendedAt) {
+                $ym = Carbon::parse($firstAttendedAt)->format('Y-m');
+                $attendees[$ym] = ($attendees[$ym] ?? 0) + 1;
+
+                $schedule = $firstSchedule[$userIds[$email] ?? 0] ?? null;
+                if ($schedule !== null && Carbon::parse($schedule)->gt(Carbon::parse($firstAttendedAt))) {
+                    $converted[$ym] = ($converted[$ym] ?? 0) + 1;
+                }
+            }
+        }
 
         $out = [];
         for ($m = $from->copy(); $m->lte(now()); $m->addMonth()) {
