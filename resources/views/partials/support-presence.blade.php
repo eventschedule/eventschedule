@@ -380,7 +380,7 @@
                 },
                 claimAlert(latest) {
                     writeStorage(ALERTED_KEY, String(latest.id));
-                    // Only while switched on: offline, the email and push are the channel.
+                    // Only while switched on: offline, the email and push are the only channels.
                     if (!this.presence.online) return;
 
                     this.chime();

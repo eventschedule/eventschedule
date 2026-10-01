@@ -53,9 +53,12 @@ It also breaks cache invalidation across containers: `app:sync-domain-statuses` 
 minutes.
 
 Support chat depends on it too:
-- **Unique-job locks:** `SendSupportReplyEmail` and `NotifyAdminOfUnreadSupport` take their locks
-  in the cache when a web request dispatches them. With a per-container cache, the worker releases
-  a lock the web container never sees, and replies sent in the next ten minutes are never emailed.
+- **Unique-job locks:** `SendSupportReplyEmail` takes its lock in the cache when a web request
+  dispatches it. With a per-container cache, the worker releases a lock the web container never
+  sees, and replies sent in the next ten minutes are never emailed.
+- **Admin email limit:** `support_admin_mail_*` holds back the primary admin's email for the rest
+  of a burst, and the admin's reply clears it. Each container would keep its own, so a burst could
+  email once per container, and a reply could leave another container still holding it back.
 - **Presence keys:** the admin's `support_presence*` keys, and the `support_guest_online_*` and
   `support_user_online_*` keys the web requests write, are what the queued jobs read to decide
   whether someone is still in the chat.

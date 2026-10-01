@@ -2,12 +2,13 @@
 
 namespace Tests\Feature;
 
+use App\Mail\SupportMessageNotification;
 use App\Models\AuditLog;
 use App\Models\Newsletter;
 use App\Models\NewsletterSegment;
 use App\Models\SupportConversation;
 use App\Models\User;
-use App\Models\Webhook;
+use App\Utils\SupportPresence;
 use App\Utils\UrlUtils;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Mail;
@@ -17,8 +18,8 @@ use Tests\TestCase;
 
 class AdminFeaturesTest extends TestCase
 {
-    use RefreshDatabase;
     use CreatesScheduleData;
+    use RefreshDatabase;
 
     private function adminActing(User $admin)
     {
@@ -64,6 +65,30 @@ class AdminFeaturesTest extends TestCase
             'body' => 'How can I help?',
             'is_from_admin' => true,
         ]);
+    }
+
+    /**
+     * An account holder's message reaches the primary admin (lowest id) by email even while
+     * another admin is online, once per burst.
+     */
+    public function test_an_account_holders_message_emails_the_primary_admin_while_online(): void
+    {
+        Mail::fake();
+        Queue::fake();
+        $primary = $this->createOwner(true);
+        $agent = $this->createOwner(true);
+        $customer = $this->createOwner();
+
+        SupportPresence::goOnline($agent);
+        $this->assertTrue(SupportPresence::isAvailable());
+
+        $this->actingAs($customer)->postJson(route('support-chat.send'), ['body' => 'Need help please'])->assertOk();
+        $this->actingAs($customer)->postJson(route('support-chat.send'), ['body' => 'With tickets'])->assertOk();
+
+        Mail::assertQueued(SupportMessageNotification::class, 1);
+        Mail::assertQueued(SupportMessageNotification::class, fn ($mail) => $mail->hasTo($primary->email)
+            && ! $mail->hasTo($agent->email)
+            && $mail->envelope()->subject === 'New support message from '.$customer->name);
     }
 
     public function test_admin_newsletter_broadcast(): void
@@ -136,7 +161,7 @@ class AdminFeaturesTest extends TestCase
             'meta' => ['version' => '1.0', 'exported_at' => now()->toIso8601String(), 'includes_images' => false],
             'schedules' => [[
                 'role' => [
-                    'subdomain' => 'imported' . strtolower(\Illuminate\Support\Str::random(6)),
+                    'subdomain' => 'imported'.strtolower(\Illuminate\Support\Str::random(6)),
                     'name' => 'Imported Schedule',
                     'type' => 'venue',
                     'email' => 'imported@gmail.com',
@@ -146,7 +171,7 @@ class AdminFeaturesTest extends TestCase
             ]],
         ];
 
-        $zipPath = tempnam(sys_get_temp_dir(), 'bk') . '.zip';
+        $zipPath = tempnam(sys_get_temp_dir(), 'bk').'.zip';
         $zip = new \ZipArchive;
         $zip->open($zipPath, \ZipArchive::CREATE);
         $zip->addFromString('backup.json', json_encode($backup));

@@ -2,10 +2,18 @@
 
 namespace App\Models;
 
+use App\Mail\SupportMessageNotification;
+use App\Utils\SupportPresence;
+use App\Utils\UrlUtils;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Support\Facades\Cache;
+use Illuminate\Support\Facades\Mail;
 
 class SupportConversation extends Model
 {
+    /** The primary admin is emailed about a conversation at most once per this many minutes. */
+    public const ADMIN_EMAIL_DEBOUNCE_MINUTES = 10;
+
     protected $fillable = [
         'user_id',
         'status',
@@ -107,5 +115,43 @@ class SupportConversation extends Model
     public static function typingKeyFor(int $id): string
     {
         return "support_typing_{$id}";
+    }
+
+    /**
+     * Held while the primary admin has been emailed about this conversation's latest burst.
+     * An admin reply clears it, so the next message after an answer is emailed again.
+     */
+    public function adminMailKey(): string
+    {
+        return "support_admin_mail_{$this->id}";
+    }
+
+    /**
+     * Emails the primary admin about a new message, whether or not anyone is online in the AP,
+     * so every conversation reaches one inbox. One email per burst: someone typing line by line
+     * would otherwise send one per line.
+     */
+    public function emailPrimaryAdmin(string $body): void
+    {
+        $admin = SupportPresence::primaryAdmin();
+
+        if (! $admin || ! Cache::add($this->adminMailKey(), true, now()->addMinutes(self::ADMIN_EMAIL_DEBOUNCE_MINUTES))) {
+            return;
+        }
+
+        try {
+            Mail::to($admin->email)->queue(new SupportMessageNotification(
+                $body,
+                $this->isGuest() ? $this->visitorLabel() : $this->displayName(),
+                false,
+                app_url('/admin/support?c='.UrlUtils::encodeId($this->id)),
+                $this->isGuest()
+            ));
+        } catch (\Throwable $e) {
+            // Nothing went out, so the next message must not be held back as if it had.
+            Cache::forget($this->adminMailKey());
+
+            throw $e;
+        }
     }
 }

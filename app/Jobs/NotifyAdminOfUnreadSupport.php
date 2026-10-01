@@ -12,21 +12,17 @@ use Illuminate\Foundation\Queue\Queueable;
 use Illuminate\Support\Facades\Mail;
 
 /**
- * The email safety net while the admin is shown as available.
+ * No longer dispatched: delete in a later release.
  *
- * A message that arrives while the admin is available is announced in the AP (toast, chime, tab
- * title) rather than by email. That only works if they are actually looking: an AP tab left open
- * in the background keeps them "present", and a tab nobody has clicked cannot even play the
- * chime. So each such conversation gets one delayed check, and whatever is still unread when it
- * runs is emailed after all.
- *
- * Unique per conversation until it has run, so a burst of messages is one check and one email.
+ * This was the delayed email for a message that arrived while the admin was shown as available.
+ * Every new message now emails the primary admin straight away, online or not
+ * (SupportConversation::emailPrimaryAdmin). The class stays for one release so a check queued by
+ * the previous release still runs after the deploy, rather than failing to unserialize into
+ * failed_jobs (which raises the jobs_failed admin alert) and never emailing that message at all.
  */
 class NotifyAdminOfUnreadSupport implements ShouldBeUnique, ShouldQueue
 {
     use Queueable;
-
-    public const DELAY_MINUTES = 5;
 
     public int $tries = 3;
 
@@ -41,23 +37,10 @@ class NotifyAdminOfUnreadSupport implements ShouldBeUnique, ShouldQueue
         return 'support-admin-unread-'.$this->conversationId;
     }
 
-    /**
-     * Not under the sync driver: it ignores the delay, so the check would email at once and the
-     * in-AP alert would never get its five minutes.
-     */
-    public static function queueFor(SupportConversation $conversation): void
-    {
-        if (SendSupportReplyEmail::queueIsSync()) {
-            return;
-        }
-
-        self::dispatch($conversation->id)->delay(now()->addMinutes(self::DELAY_MINUTES));
-    }
-
     public function handle(): void
     {
         $conversation = SupportConversation::with('user')->find($this->conversationId);
-        $admin = SupportPresence::agentUser();
+        $admin = SupportPresence::primaryAdmin();
 
         if (! $conversation || ! $admin) {
             return;

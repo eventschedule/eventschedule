@@ -207,24 +207,72 @@ class SupportChatGuestTest extends TestCase
         $this->assertSame('/x', SupportConversation::latest('id')->first()->guest_page);
     }
 
-    public function test_the_admin_is_emailed_only_when_away_and_at_most_once_per_burst(): void
+    /**
+     * Online or away, every burst reaches the PRIMARY admin (lowest id), not whoever switched
+     * chat on, and a reply ends the burst so the next question is emailed too.
+     */
+    public function test_the_primary_admin_is_emailed_online_or_away_once_per_burst(): void
     {
         Mail::fake();
-        $admin = $this->admin();
+        Queue::fake();
+        $primary = $this->admin();
+        $agent = $this->createOwner(true);
+        $mailedTo = fn (User $user) => count(Mail::queued(SupportMessageNotification::class, fn ($mail) => $mail->hasTo($user->email)));
 
-        // Available: the in-AP alert is the channel, not email.
-        SupportPresence::goOnline($admin);
-        $this->startChat()->assertOk();
-        Mail::assertNothingQueued();
-
-        // Away: one email for a burst of messages.
-        SupportPresence::goOffline();
-        $token = $this->startChat(['email' => 'visitor@example.com'])->json('token');
-        $this->startChat(['body' => 'Hello?'], [self::TOKEN_HEADER => $token]);
-        $this->startChat(['body' => 'Anyone?'], [self::TOKEN_HEADER => $token]);
-
+        // Available: the in-AP alert fires, and the email goes out anyway.
+        SupportPresence::goOnline($agent);
+        $this->assertTrue(SupportPresence::isAvailable());
+        $token = $this->startChat()->assertOk()->json('token');
         Mail::assertQueued(SupportMessageNotification::class, 1);
-        Mail::assertQueued(SupportMessageNotification::class, fn ($mail) => $mail->hasTo($admin->email));
+        $this->assertSame(1, $mailedTo($primary));
+        $this->assertSame(0, $mailedTo($agent));
+
+        // The rest of the burst is not emailed again.
+        $this->startChat(['body' => 'Hello?'], [self::TOKEN_HEADER => $token])->assertOk();
+        $this->startChat(['body' => 'Anyone?'], [self::TOKEN_HEADER => $token])->assertOk();
+        Mail::assertQueued(SupportMessageNotification::class, 1);
+
+        // An answer ends the burst.
+        $id = UrlUtils::encodeId(SupportConversation::firstOrFail()->id);
+        $this->adminActing($agent)->postJson(route('admin.support.reply', ['id' => $id]), ['body' => 'Hi there'])->assertOk();
+        $this->startChat(['body' => 'Thanks, one more question'], [self::TOKEN_HEADER => $token])->assertOk();
+        $this->assertSame(2, $mailedTo($primary));
+
+        // So does time. The agent's AP tab is still open, so they are still available.
+        $this->travel(SupportConversation::ADMIN_EMAIL_DEBOUNCE_MINUTES + 1)->minutes();
+        SupportPresence::heartbeat($agent);
+        $this->startChat(['body' => 'Still there?'], [self::TOKEN_HEADER => $token])->assertOk();
+        $this->assertSame(3, $mailedTo($primary));
+
+        // Away: a new conversation is emailed to the same inbox. withHeaders() persists, so drop
+        // the first visitor's token or this would continue their conversation.
+        SupportPresence::goOffline();
+        $this->flushHeaders();
+        $this->assertNotNull($this->startChat(['email' => 'visitor@example.com'])->assertOk()->json('token'));
+        $this->assertSame(4, $mailedTo($primary));
+        $this->assertSame(0, $mailedTo($agent));
+    }
+
+    /**
+     * Closing without replying still ends the burst: a message after that reopens the
+     * conversation as a new question.
+     */
+    public function test_closing_a_conversation_ends_the_burst(): void
+    {
+        Mail::fake();
+        Queue::fake();
+        $admin = $this->admin();
+        SupportPresence::goOnline($admin);
+
+        $token = $this->startChat()->assertOk()->json('token');
+        Mail::assertQueued(SupportMessageNotification::class, 1);
+
+        $id = UrlUtils::encodeId(SupportConversation::firstOrFail()->id);
+        $this->adminActing($admin)->postJson(route('admin.support.close', ['id' => $id]))->assertOk();
+
+        $this->startChat(['body' => 'Sorry, one more thing'], [self::TOKEN_HEADER => $token])->assertOk();
+        $this->assertSame('open', SupportConversation::firstOrFail()->status);
+        Mail::assertQueued(SupportMessageNotification::class, 2);
     }
 
     public function test_the_read_endpoint_clears_the_visitors_unread_replies(): void
@@ -463,18 +511,6 @@ class SupportChatGuestTest extends TestCase
         $this->startChat(['body' => 'We run <50 events a month, is Pro worth it?'])->assertOk();
 
         $this->assertSame('We run <50 events a month, is Pro worth it?', SupportMessage::firstOrFail()->body);
-    }
-
-    public function test_an_available_admin_gets_a_delayed_email_check_instead_of_an_email(): void
-    {
-        Queue::fake();
-        Mail::fake();
-        SupportPresence::goOnline($this->admin());
-
-        $this->startChat()->assertOk();
-
-        Mail::assertNothingQueued();
-        Queue::assertPushed(\App\Jobs\NotifyAdminOfUnreadSupport::class, fn ($job) => $job->delay !== null);
     }
 
     public function test_leaving_an_email_after_a_reply_queues_the_reply_email(): void

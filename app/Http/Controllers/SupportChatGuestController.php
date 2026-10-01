@@ -2,9 +2,7 @@
 
 namespace App\Http\Controllers;
 
-use App\Jobs\NotifyAdminOfUnreadSupport;
 use App\Jobs\SendSupportReplyEmail;
-use App\Mail\SupportMessageNotification;
 use App\Models\PageView;
 use App\Models\SupportConversation;
 use App\Models\SupportMessage;
@@ -15,7 +13,6 @@ use App\Utils\UrlUtils;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Cache;
-use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Facades\RateLimiter;
 use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Str;
@@ -38,9 +35,6 @@ use Illuminate\Validation\ValidationException;
 class SupportChatGuestController extends Controller
 {
     public const TOKEN_HEADER = 'X-Support-Chat-Token';
-
-    /** A visitor is emailed-about at most once per this many minutes per conversation. */
-    public const ADMIN_EMAIL_DEBOUNCE_MINUTES = 10;
 
     /** How long one visible poll counts as "looking at the chat". */
     public const PRESENCE_MINUTES = 2;
@@ -295,37 +289,21 @@ class SupportChatGuestController extends Controller
     private function notifyAdmin(SupportConversation $conversation, string $body): void
     {
         try {
+            // Online or not: while available the AP alert (toast, chime, tab title) fires too.
+            $conversation->emailPrimaryAdmin($body);
+
             $admin = SupportPresence::agentUser();
-
-            if (! $admin) {
-                return;
-            }
-
-            $replyUrl = app_url('/admin/support?c='.UrlUtils::encodeId($conversation->id));
-
-            if (SupportPresence::isAvailable()) {
-                // At the AP the presence alert (toast, chime, tab title) is quicker than an
-                // email, with an emailed safety net if it is still unread in five minutes.
-                NotifyAdminOfUnreadSupport::queueFor($conversation);
-            } else {
-                // Away: one email per burst of messages rather than one per line typed.
-                if (Cache::add("support_guest_mail_{$conversation->id}", true, now()->addMinutes(self::ADMIN_EMAIL_DEBOUNCE_MINUTES))) {
-                    Mail::to($admin->email)->queue(
-                        new SupportMessageNotification($body, $conversation->visitorLabel(), false, $replyUrl, true)
-                    );
-                }
-            }
 
             // One push per burst of messages, available or not: a visitor typing line by line
             // would otherwise buzz the admin's phone for every line.
-            if (! Cache::add("support_guest_push_{$conversation->id}", true, now()->addMinutes(self::PUSH_DEBOUNCE_MINUTES))) {
+            if (! $admin || ! Cache::add("support_guest_push_{$conversation->id}", true, now()->addMinutes(self::PUSH_DEBOUNCE_MINUTES))) {
                 return;
             }
 
             OneSignalService::pushToUser($admin, [
                 'title_key' => 'messages.push_support_message_title',
                 'body_key' => 'messages.push_support_message_body',
-                'url' => $replyUrl,
+                'url' => app_url('/admin/support?c='.UrlUtils::encodeId($conversation->id)),
             ], null);
         } catch (\Exception $e) {
             report($e);

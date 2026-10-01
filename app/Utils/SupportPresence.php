@@ -172,7 +172,16 @@ class SupportPresence
         $data = self::data();
         $user = $data ? User::find($data['user_id']) : null;
 
-        return $user ?? User::where('is_admin', true)->orderBy('id')->first();
+        return $user ?? self::primaryAdmin();
+    }
+
+    /**
+     * The platform's first admin account. Every new chat message is emailed here, whoever is
+     * online, so there is always one inbox that holds every conversation.
+     */
+    public static function primaryAdmin(): ?User
+    {
+        return User::where('is_admin', true)->orderBy('id')->first();
     }
 
     public static function agent(): ?array

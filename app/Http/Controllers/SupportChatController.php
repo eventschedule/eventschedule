@@ -2,9 +2,7 @@
 
 namespace App\Http\Controllers;
 
-use App\Jobs\NotifyAdminOfUnreadSupport;
 use App\Jobs\SendSupportReplyEmail;
-use App\Mail\SupportMessageNotification;
 use App\Models\SupportConversation;
 use App\Models\SupportMessage;
 use App\Models\User;
@@ -14,7 +12,6 @@ use App\Utils\SupportPresence;
 use App\Utils\UrlUtils;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Cache;
-use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Str;
 
 class SupportChatController extends Controller
@@ -111,24 +108,17 @@ class SupportChatController extends Controller
 
         $conversation->update(['last_message_at' => now()]);
 
-        // Email the admin, unless they are at the AP right now, where the support-presence alert
-        // (toast, chime, tab title) has already told them. Then it is emailed only if still
-        // unread five minutes later (NotifyAdminOfUnreadSupport).
+        // The primary admin is emailed online or not (once per burst); while available the
+        // support-presence alert (toast, chime, tab title) fires in the AP too.
         try {
+            $conversation->emailPrimaryAdmin($body);
+
             $admin = SupportPresence::agentUser();
             if ($admin) {
-                $replyUrl = app_url('/admin/support?c='.UrlUtils::encodeId($conversation->id));
-                if (SupportPresence::isAvailable()) {
-                    NotifyAdminOfUnreadSupport::queueFor($conversation);
-                } else {
-                    Mail::to($admin->email)->queue(
-                        new SupportMessageNotification($body, $user->name ?? $user->email, false, $replyUrl)
-                    );
-                }
                 OneSignalService::pushToUser($admin, [
                     'title_key' => 'messages.push_support_message_title',
                     'body_key' => 'messages.push_support_message_body',
-                    'url' => $replyUrl,
+                    'url' => app_url('/admin/support?c='.UrlUtils::encodeId($conversation->id)),
                 ], null);
             }
         } catch (\Exception $e) {
@@ -384,6 +374,8 @@ class SupportChatController extends Controller
 
         $conversation->update(['last_message_at' => now()]);
         Cache::forget($conversation->typingKey());
+        // An answer ends the burst: their next message is a new question, and is emailed.
+        Cache::forget($conversation->adminMailKey());
 
         // Queued whether or not they are in the chat right now: SendSupportReplyEmail decides
         // when it runs, from what is still unread and whether they are still there. Deciding
@@ -471,6 +463,8 @@ class SupportChatController extends Controller
         $conversationId = UrlUtils::decodeIdOrFail($id);
         $conversation = SupportConversation::findOrFail($conversationId);
         $conversation->update(['status' => 'closed']);
+        // A message after closing reopens it as a new question, so it is emailed.
+        Cache::forget($conversation->adminMailKey());
 
         return response()->json(['success' => true]);
     }

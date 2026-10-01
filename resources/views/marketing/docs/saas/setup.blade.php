@@ -865,9 +865,9 @@ BACKUP_SPACES_BUCKET=your-private-backups-bucket</code></pre>
 
         <h3 class="doc-subheading">Who Gets Notified</h3>
         <ul class="doc-list">
-            <li>While you are not available (offline, or away from the admin portal), each new message emails you. While you are available the in-app alert tells you instead, and the message is emailed only if it is still unread five minutes later. Every message also sends a push notification if OneSignal is configured</li>
+            <li>Every new message emails the first account flagged as a platform admin (the one with the lowest ID), whether you are online or not, so every conversation reaches one inbox. A burst of messages is one email: the next message is emailed once 10 minutes have passed, or once you have replied to or closed the conversation. While you are available the in-app alert tells you as well. New messages also send a push notification if OneSignal is configured (for a website visitor, at most one every two minutes)</li>
             <li>Your replies email the customer only once they have left the chat without reading them. The email waits at least two minutes, and carries every unread reply at once, so a quick back-and-forth does not fill their inbox</li>
-            <li>Notifications go to the admin who switched the chat on, or to the first account flagged as a platform admin while nobody is online, so keep one dedicated admin account with a monitored address</li>
+            <li>Emails always go to that first platform admin account, so give it a monitored address. Push notifications go to the admin who switched the chat on, or to the same first admin while nobody is online</li>
         </ul>
 
         <h3 class="doc-subheading">Website Visitors</h3>
