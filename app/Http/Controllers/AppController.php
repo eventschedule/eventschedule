@@ -536,7 +536,10 @@ class AppController extends Controller
                     report($e);
                 }
 
-                if (config('app.hosted')) {
+                // The blog is the marketing site's, so it is written on the nexus only: a
+                // selfhosted SaaS is hosted too, and these were publishing Event Schedule's SEO
+                // posts to its own blog on its own AI key.
+                if (config('app.is_nexus')) {
                     try {
                         \Artisan::call('app:generate-sub-audience-blog');
                     } catch (\Throwable $e) {
@@ -549,6 +552,9 @@ class AppController extends Controller
                         \Log::error('Scheduled command app:generate-daily-blog-post failed: '.$e->getMessage());
                         report($e);
                     }
+                }
+
+                if (config('app.hosted')) {
                     try {
                         \Artisan::call('app:send-subscription-reminders');
                     } catch (\Throwable $e) {

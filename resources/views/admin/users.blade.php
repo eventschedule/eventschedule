@@ -7,14 +7,22 @@
 
         {{-- ===================== Onboarding Funnel ===================== --}}
         @php
-            $funnelStages = $funnel['stages'];
+            $isNexus = (bool) config('app.is_nexus');
+            // Filtered here rather than in GrowthExportService, so the export keeps one shape.
+            // Marketing visitors are counted only on the nexus, the one install with a marketing
+            // site, so off it 'visited' is a bar that can never fill. The plan stages are about
+            // buying a plan, which a plain selfhost has none of. Both sit at an end of the funnel
+            // with no step ratio drawn across them, so dropping them changes no other bar.
+            $funnelStages = array_values(array_filter($funnel['stages'], fn ($stage) => ! (
+                (! $isNexus && $stage['key'] === 'visited')
+                || (! config('app.hosted') && $stage['group'] === 'plan')
+            )));
             $funnelStageLabel = fn ($key) => __('messages.funnel_stage_' . $key);
             $biggestDropToKey = $funnel['biggest_drop']['to_key'] ?? null;
-            $isNexus = (bool) config('app.is_nexus');
+            // Sign-up page views are tracked on every install, so off the nexus too a missing bar
+            // means the window starts before tracking did, not that nothing is tracked.
             $trafficNote = null;
-            if (! $isNexus) {
-                $trafficNote = __('messages.funnel_traffic_not_tracked');
-            } elseif (! $funnel['traffic_tracked']) {
+            if (! $funnel['traffic_tracked']) {
                 $trafficNote = $funnel['tracking_started_at']
                     ? __('messages.funnel_tracking_began', ['date' => \Illuminate\Support\Carbon::parse($funnel['tracking_started_at'])->format('M j, Y')])
                     : __('messages.funnel_tracking_pending');
@@ -29,12 +37,13 @@
             </div>
             <div>
                 <h3 class="text-lg font-semibold text-gray-900 dark:text-white">@lang('messages.funnel_onboarding_title')</h3>
-                <p class="text-sm text-gray-500 dark:text-gray-400">@lang('messages.funnel_onboarding_subtitle')</p>
+                <p class="text-sm text-gray-500 dark:text-gray-400">{{ $isNexus ? __('messages.funnel_onboarding_subtitle') : __('messages.funnel_onboarding_subtitle_signup') }}</p>
             </div>
         </div>
 
-        {{-- Hero KPIs: north-star, biggest leak, overall --}}
-        <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+        {{-- Hero KPIs: north-star, biggest leak, overall. The overall one starts from marketing
+             visitors, so it exists on the nexus only. --}}
+        <div class="grid grid-cols-1 {{ $isNexus ? 'sm:grid-cols-3' : 'sm:grid-cols-2' }} gap-4">
             {{-- North-star: Signup to first event, with period-over-period change --}}
             <div class="ap-card rounded-xl shadow p-6 flex flex-col items-center">
                 <div class="flex items-center gap-3 mb-3 self-start">
@@ -73,12 +82,14 @@
             </x-stat-panel>
 
             {{-- Overall visitor to first event --}}
+            @if ($isNexus)
             <x-stat-panel label="{{ __('messages.funnel_visitor_to_event') }}">
                 {{ $funnel['visitor_to_event_conv'] === null ? __('messages.funnel_na') : $funnel['visitor_to_event_conv'] . '%' }}
                 @if($funnel['visitor_to_event_conv'] === null && $trafficNote)
                     <x-slot:subtitle>{{ $trafficNote }}</x-slot:subtitle>
                 @endif
             </x-stat-panel>
+            @endif
         </div>
 
         {{-- Funnel bars + conversion-over-time chart --}}

@@ -75,7 +75,9 @@
                 'turnOn' => __('messages.realtime_turn_on'),
                 'mentionPolicy' => __('messages.realtime_mention_policy'),
                 'waitingTitle' => __('messages.realtime_waiting_title'),
-                'waitingBody' => __('messages.realtime_waiting_body'),
+                // Edge-cached marketing pages exist on the nexus only; elsewhere every page reports
+                // as soon as it is opened.
+                'waitingBody' => config('app.is_nexus') ? __('messages.realtime_waiting_body') : __('messages.realtime_waiting_body_app'),
                 'noVisitors30' => __('messages.realtime_no_visitors_30'),
                 'adminsHiddenTip' => __('messages.realtime_admins_hidden_tip'),
                 'noMatch' => __('messages.realtime_no_match'),

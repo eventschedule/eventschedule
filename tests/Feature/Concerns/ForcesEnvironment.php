@@ -5,9 +5,9 @@ namespace Tests\Feature\Concerns;
 /**
  * Boot the app as a different kind of install for one test: forceEnv(), then refreshApplication().
  *
- * routes/web.php registers different halves on hosted and selfhost, and gates the hosted subdomain
- * and blog groups on `hosted && ! is_testing`, so the only honest way to exercise those routes is to
- * change the env and rebuild the app. See RouteLoadTest::test_hosted_gp_routes_load() for the whole
+ * routes/web.php registers different halves on hosted and selfhost, gates the hosted subdomain
+ * group on `hosted && ! is_testing`, and the blog host on that plus `is_nexus`, so the only honest
+ * way to exercise those routes is to change the env and rebuild the app. See RouteLoadTest::test_hosted_gp_routes_load() for the whole
  * sequence, including the transaction the test has to close itself.
  *
  * Every value is restored after the test, because these decide which half of routes/web.php the

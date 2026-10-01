@@ -1342,10 +1342,39 @@ class AdminController extends Controller
         return view('admin.growth', [
             'range' => $range,
             'data' => $data,
-            // All-time rather than the selected range: the test decides on its whole history.
-            // Only the nexus serves the homepage the test runs on.
+            // Since the last reset rather than the selected range: the test decides on everything
+            // it has seen since then. Only the nexus serves the homepage the test runs on.
             'heroTest' => config('app.is_nexus') ? HeroExperiment::report() : null,
         ]);
+    }
+
+    /**
+     * Start the homepage headline test over from zero. See HeroExperiment::reset() for what is
+     * kept and what is cleared.
+     */
+    public function growthResetHeroTest(Request $request): RedirectResponse
+    {
+        if (! auth()->user()->isAdmin()) {
+            return redirect()->back()->with('error', __('messages.not_authorized'));
+        }
+        abort_unless(config('app.hosted') && config('app.is_nexus'), 404);
+
+        HeroExperiment::reset();
+
+        AuditService::log(
+            AuditService::ADMIN_UPDATE,
+            auth()->id(),
+            null,
+            null,
+            null,
+            null,
+            'Reset the homepage headline test',
+        );
+
+        $range = $request->input('range');
+
+        return redirect(route('admin.growth', is_string($range) && $range !== '' ? ['range' => $range] : []).'#hero-test')
+            ->with('message', __('messages.hero_test_reset_done'));
     }
 
     /**
@@ -1823,8 +1852,13 @@ class AdminController extends Controller
             });
         }
 
+        // The plan, plan-status and source filters only mean something where there are plans. On
+        // a plain selfhost the page does not offer them, and every schedule is enterprise
+        // whatever plan_type says, so a stale query string must not narrow the list.
+        $hosted = (bool) config('app.hosted');
+
         // Plan type filter
-        if ($planType = $request->input('plan_type')) {
+        if ($hosted && ($planType = $request->input('plan_type'))) {
             $query->where('plan_type', $planType);
         }
 
@@ -1842,7 +1876,7 @@ class AdminController extends Controller
         }
 
         // Status filter
-        if ($status && $status !== 'deleted') {
+        if ($hosted && $status && $status !== 'deleted') {
             if ($status === 'active') {
                 $query->where(function ($q) use ($validSubscriptionScope) {
                     $q->where('plan_expires', '>=', now()->format('Y-m-d'))
@@ -1860,7 +1894,7 @@ class AdminController extends Controller
         }
 
         // Source filter
-        if ($source = $request->input('source')) {
+        if ($hosted && ($source = $request->input('source'))) {
             if ($source === 'stripe') {
                 $query->whereHas('subscriptions', $validSubscriptionScope);
             } elseif ($source === 'manual') {
@@ -1932,6 +1966,9 @@ class AdminController extends Controller
         if (! auth()->user()->isAdmin()) {
             return redirect()->back()->with('error', __('messages.not_authorized'));
         }
+        // Plans exist only on a hosted install: off it actualPlanTier() is enterprise for every
+        // schedule, so what this saves would be read by nothing.
+        abort_unless(config('app.hosted'), 404);
 
         $decodedId = UrlUtils::decodeId($roleId);
         $role = Role::findOrFail($decodedId);
@@ -2310,9 +2347,11 @@ class AdminController extends Controller
         $schedulerHttpRailOnly = SchedulerHealth::isHttpRailOnly();
 
         // Per-task health. Ordered worst-first so the exceptions block reads top-down, then by
-        // staleness, so the task that has been silent longest leads.
+        // staleness, so the task that has been silent longest leads. Tasks that are a no-op on
+        // this kind of install are left out, so the card does not vouch for work that never runs.
         $severity = ['failed' => 0, 'never_finished' => 1, 'overdue' => 2, 'running' => 3, 'ok' => 4, 'not_yet_run' => 5, 'unknown' => 6];
         $scheduledTasks = SchedulerHealth::tasks()
+            ->filter(fn ($task) => SchedulerHealth::appliesHere($task->name))
             ->sortBy([
                 fn ($a, $b) => ($severity[$a->state] ?? 9) <=> ($severity[$b->state] ?? 9),
                 fn ($a, $b) => ($a->lastSeenAt?->timestamp ?? 0) <=> ($b->lastSeenAt?->timestamp ?? 0),
@@ -3130,6 +3169,9 @@ class AdminController extends Controller
         if (! auth()->user()->isAdmin()) {
             return redirect()->back()->with('error', __('messages.not_authorized'));
         }
+        // Hosted only: credit pays a boost's charge, and a plain selfhost charges none, so a
+        // granted balance is only ever spent on nothing.
+        abort_unless(config('app.hosted'), 404);
 
         $request->validate([
             'subdomain' => 'required|exists:roles,subdomain',
@@ -3162,6 +3204,9 @@ class AdminController extends Controller
         if (! auth()->user()->isAdmin()) {
             return redirect()->back()->with('error', __('messages.not_authorized'));
         }
+        // Hosted only: Role::getBoostMaxBudget() reads boost_max_budget on hosted installs alone,
+        // so off them a saved limit is never applied.
+        abort_unless(config('app.hosted'), 404);
 
         $request->validate([
             'subdomain' => 'required|exists:roles,subdomain',
@@ -3456,6 +3501,12 @@ class AdminController extends Controller
     {
         if (! auth()->user()->isAdmin()) {
             return redirect()->back()->with('error', __('messages.not_authorized'));
+        }
+
+        // Same condition as the card's own visibility ('planPricingAvailable' in settings()), as
+        // updateAdsSettings() does, so a POST cannot store prices nothing on this install renders.
+        if (! config('app.hosted') && ! config('app.is_nexus')) {
+            return redirect()->route('admin.settings')->with('error', __('messages.not_authorized'));
         }
 
         // nullable, so clearing a field is how an operator reverts to .env - there is no other

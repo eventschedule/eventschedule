@@ -48,7 +48,10 @@ class HomeController extends Controller
             return redirect()->route('role.view_guest', ['subdomain' => $role->subdomain]);
         }
 
-        if ($slug) {
+        // The blog and the old WordPress URLs are eventschedule.com's, so only the nexus redirects
+        // them. A selfhosted SaaS reaches this catch-all too, and has no blog host to send a post
+        // slug to (it would 301 onto a 404) and no business sending visitors to eventschedule.com.
+        if ($slug && config('app.is_nexus')) {
             // Matched against the same published() scope the sitemap uses, so the set that
             // redirects is exactly the set that is advertised.
             if (BlogPost::published()->where('slug', $slug)->exists()) {
@@ -62,7 +65,9 @@ class HomeController extends Controller
             if ($target = LegacyRedirects::targetFor($slug)) {
                 return redirect(marketing_url($target), 301);
             }
+        }
 
+        if ($slug) {
             abort(404);
         }
 

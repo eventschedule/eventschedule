@@ -17,7 +17,7 @@ use Tests\TestCase;
  * https://blog.eventschedule.com/use-cases, a 404, into their structured data.
  *
  * BlogSeoTest cannot see that, because in the test env the blog is registered path-based at /blog:
- * routes/web.php registers the blog host only for `hosted && ! is_testing` outside local. So the
+ * routes/web.php registers the blog host only for `hosted && is_nexus && ! is_testing` outside local. So the
  * hosted half boots the app as the hosted install, the RouteLoadTest::test_hosted_gp_routes_load()
  * way, and the path-based half is checked alongside it so the two registrations cannot drift.
  */
@@ -81,7 +81,7 @@ class HostedBlogBreadcrumbTest extends TestCase
         }
     }
 
-    /** The path-based registration (selfhost, local and the test env) answers the same way. */
+    /** The path-based registration (local dev and the test env, nexus only) answers the same way. */
     public function test_blog_pages_under_the_blog_path_crumb_home_blog_post(): void
     {
         $this->assertSame(url('/blog'), blog_url(), 'fixture: the blog is path-based here');

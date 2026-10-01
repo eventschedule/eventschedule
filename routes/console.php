@@ -243,8 +243,9 @@ Schedule::call(function () {
     }
 })->hourly()->name('app-setup-demo')->withoutOverlapping(30)->appendOutputTo(storage_path('logs/scheduler.log'));
 
+// Nexus only: the blog is the marketing site's. Keep in sync with AppController::translateData().
 Schedule::call(function () {
-    if (config('app.hosted')) {
+    if (config('app.is_nexus')) {
         Artisan::call('app:generate-sub-audience-blog');
     }
 })->daily()->at('03:00')->name('app-generate-sub-audience-blog')->withoutOverlapping(60)->appendOutputTo(storage_path('logs/sub-audience-blog.log'));
@@ -346,8 +347,9 @@ Schedule::call(function () {
     Artisan::call('app:send-carpool-reminders');
 })->hourly()->name('app-send-carpool-reminders')->withoutOverlapping(30)->appendOutputTo(storage_path('logs/scheduler.log'));
 
+// Nexus only: the blog is the marketing site's. Keep in sync with AppController::translateData().
 Schedule::call(function () {
-    if (config('app.hosted')) {
+    if (config('app.is_nexus')) {
         Artisan::call('app:generate-daily-blog-post');
     }
 })->daily()->name('app-generate-daily-blog-post')->withoutOverlapping(60)->appendOutputTo(storage_path('logs/scheduler.log'));

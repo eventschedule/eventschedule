@@ -106,7 +106,10 @@
             </x-stat-panel>
         </div>
 
-        {{-- Boost & Revenue Stats --}}
+        {{-- Boost & Revenue Stats. Hosted only: a plain selfhost has no subscriptions and charges
+             no boost markup, so three of the four tiles would always read zero. The fourth, active
+             boost campaigns, is on /admin/boost. --}}
+        @if (config('app.hosted'))
         <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
             <x-stat-panel label="{{ __('messages.stripe_paid') }}" color="green">
                 {{ number_format($stripePaidCount) }}
@@ -121,6 +124,7 @@
                 {{ \App\Utils\MoneyUtils::format($boostMarkupRevenue, $boostMarkupCurrency) }}
             </x-stat-panel>
         </div>
+        @endif
 
         {{-- Events by Country --}}
         @if($eventsByCountry->count() > 0)

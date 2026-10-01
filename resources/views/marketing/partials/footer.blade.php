@@ -55,7 +55,7 @@
                             API
                         </a>
                     </li>
-                    @if (!config('app.hosted') || config('app.is_nexus'))
+                    @if (config('app.is_nexus'))
                     <li>
                         <a href="{{ blog_url() }}" class="text-gray-600 dark:text-gray-400 hover:text-blue-600 dark:hover:text-blue-400 transition-colors">
                             Blog

@@ -3,10 +3,16 @@
     <div class="space-y-4">
         @include('admin.partials._navigation', ['active' => 'schedules'])
 
+        {{-- Plans, their status and their source exist only on a hosted install. A plain selfhost
+             has none (actualPlanTier() is enterprise for every schedule), so it gets the
+             verification split and the columns that apply to it. --}}
+        @php $hosted = (bool) config('app.hosted'); @endphp
+
         {{-- Row 1: Plan Breakdown. The three plan counts are verified-only, so Unverified
              completes the row: free + pro + enterprise + unverified is every non-demo
              schedule with an owner. --}}
-        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+        <div class="grid grid-cols-1 sm:grid-cols-2 {{ $hosted ? 'lg:grid-cols-4' : '' }} gap-4">
+            @if ($hosted)
             {{-- Free Count --}}
             <div class="ap-card rounded-xl shadow p-6 flex flex-col items-center">
                 <div class="flex items-center gap-3 mb-3 self-start">
@@ -48,6 +54,21 @@
                 </div>
                 <p class="dashboard-stat-value text-3xl font-bold text-gray-900 dark:text-white text-center">{{ number_format($enterpriseCount) }}</p>
             </div>
+            @else
+            {{-- Verified Count: the three plan counts above, which are verified-only, summed. --}}
+            <div class="ap-card rounded-xl shadow p-6 flex flex-col items-center">
+                <div class="flex items-center gap-3 mb-3 self-start">
+                    <div class="dashboard-icon p-2 rounded-xl bg-green-50 dark:bg-green-500/10"
+                         style="--icon-glow: rgba(16, 185, 129, 0.15)">
+                        <svg class="w-5 h-5 text-green-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
+                        </svg>
+                    </div>
+                    <p class="text-sm font-medium text-gray-500 dark:text-gray-400">@lang('messages.verified')</p>
+                </div>
+                <p class="dashboard-stat-value text-3xl font-bold text-gray-900 dark:text-white text-center">{{ number_format($freeCount + $proCount + $enterpriseCount) }}</p>
+            </div>
+            @endif
 
             {{-- Unverified Count. Deliberately the only clickable card on this page: it
                  replaces the dashboard alert row that used to deep-link here. --}}
@@ -67,6 +88,7 @@
         </div>
 
         {{-- Row 2: Payment/Status Breakdown --}}
+        @if ($hosted)
         <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
             {{-- Stripe Paid --}}
             <div class="ap-card rounded-xl shadow p-6 flex flex-col items-center">
@@ -124,6 +146,7 @@
                 <p class="dashboard-stat-value text-3xl font-bold text-gray-900 dark:text-white text-center">{{ number_format($expiringSoon) }}</p>
             </div>
         </div>
+        @endif
 
         {{-- Filters --}}
         <div class="ap-card rounded-xl shadow p-4">
@@ -139,6 +162,7 @@
                         class="block w-full rounded-lg border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white shadow-sm focus:border-[var(--brand-blue)] focus:ring-[var(--brand-blue)]">
                     <div data-subdomain-dropdown class="hidden absolute left-0 right-0 mt-1 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl shadow-lg max-h-60 overflow-y-auto z-50"></div>
                 </div>
+                @if ($hosted)
                 <div class="w-full sm:w-44 flex-none">
                     <select name="plan_type" class="block w-full rounded-lg border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white shadow-sm focus:border-[var(--brand-blue)] focus:ring-[var(--brand-blue)]">
                         <option value="">@lang('messages.all_plans')</option>
@@ -147,12 +171,15 @@
                         <option value="enterprise" {{ request('plan_type') === 'enterprise' ? 'selected' : '' }}>@lang('messages.enterprise')</option>
                     </select>
                 </div>
+                @endif
                 <div class="w-full sm:w-44 flex-none">
                     <select name="status" class="block w-full rounded-lg border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white shadow-sm focus:border-[var(--brand-blue)] focus:ring-[var(--brand-blue)]">
                         <option value="">@lang('messages.all_status')</option>
+                        @if ($hosted)
                         <option value="active" {{ request('status') === 'active' ? 'selected' : '' }}>@lang('messages.active')</option>
                         <option value="expired" {{ request('status') === 'expired' ? 'selected' : '' }}>@lang('messages.expired')</option>
                         <option value="trial" {{ request('status') === 'trial' ? 'selected' : '' }}>@lang('messages.trial')</option>
+                        @endif
                         <option value="deleted" {{ request('status') === 'deleted' ? 'selected' : '' }}>@lang('messages.deleted')</option>
                     </select>
                 </div>
@@ -163,6 +190,7 @@
                         <option value="any" {{ request('owner') === 'any' ? 'selected' : '' }}>@lang('messages.all_owners')</option>
                     </select>
                 </div>
+                @if ($hosted)
                 <div class="w-full sm:w-44 flex-none">
                     <select name="source" class="block w-full rounded-lg border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white shadow-sm focus:border-[var(--brand-blue)] focus:ring-[var(--brand-blue)]">
                         <option value="">@lang('messages.all_sources')</option>
@@ -171,6 +199,7 @@
                         <option value="trial" {{ request('source') === 'trial' ? 'selected' : '' }}>@lang('messages.trial')</option>
                     </select>
                 </div>
+                @endif
                 <div class="w-full sm:w-44 flex-none">
                     <select name="verification" class="block w-full rounded-lg border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white shadow-sm focus:border-[var(--brand-blue)] focus:ring-[var(--brand-blue)]">
                         <option value="">@lang('messages.all')</option>
@@ -203,6 +232,7 @@
                             <th scope="col" class="px-6 py-3 text-start text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
                                 @lang('messages.type')
                             </th>
+                            @if ($hosted)
                             <th scope="col" class="px-6 py-3 text-start text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
                                 @lang('messages.plan')
                             </th>
@@ -218,6 +248,7 @@
                             <th scope="col" class="px-6 py-3 text-start text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
                                 @lang('messages.source')
                             </th>
+                            @endif
                             <th scope="col" class="px-6 py-3 text-end text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
                                 @lang('messages.actions')
                             </th>
@@ -287,6 +318,7 @@
                                 <td class="px-6 py-4 whitespace-nowrap">
                                     <span class="text-sm text-gray-900 dark:text-white capitalize">{{ $role->type }}</span>
                                 </td>
+                                @if ($hosted)
                                 <td class="px-6 py-4 whitespace-nowrap">
                                     @php
                                         $planType = $role->actualPlanTier();
@@ -349,6 +381,7 @@
                                         <span class="text-sm text-gray-400 dark:text-gray-500">-</span>
                                     @endif
                                 </td>
+                                @endif
                                 <td class="px-6 py-4 whitespace-nowrap text-end text-sm font-medium">
                                     {{-- One action beside Edit, not three: the row is already the
                                          widest on the page, and the full set (with the copy that
@@ -381,7 +414,7 @@
                             </tr>
                         @empty
                             <tr>
-                                <td colspan="8" class="px-6 py-4 text-center text-gray-500 dark:text-gray-400">
+                                <td colspan="{{ $hosted ? 8 : 3 }}" class="px-6 py-4 text-center text-gray-500 dark:text-gray-400">
                                     @lang('messages.no_schedules_found')
                                 </td>
                             </tr>

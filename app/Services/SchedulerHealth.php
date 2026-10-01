@@ -31,6 +31,50 @@ class SchedulerHealth
      */
     public const RAILS = ['worker', 'cron', 'http'];
 
+    /**
+     * Tasks that do nothing on some kinds of install, by schedule name, and the kind they run on.
+     *
+     * The scheduler still runs them everywhere - the gate is an `if` inside the routes/console.php
+     * closure or an early return inside the command - so they finish cleanly and would report a
+     * healthy "ran X ago" for work that never happens. The admin card hides them instead.
+     *
+     * SchedulerTaskScopeTest holds this list to the gates themselves: a closure gated on
+     * config('app.hosted') or config('app.is_nexus') that is missing here, or listed under the
+     * wrong kind, fails the build.
+     *
+     * @var array<string, 'hosted'|'not_hosted'|'nexus'|'not_nexus'>
+     */
+    public const ONLY_ON = [
+        // Gated in routes/console.php.
+        'app-setup-demo' => 'hosted',
+        'app-sync-domain-statuses' => 'hosted',
+        'app-send-subscription-reminders' => 'hosted',
+        'send-onboarding-nudges' => 'hosted',
+        'app-send-activation-nudges' => 'hosted',
+        'app-send-owner-digests' => 'hosted',
+        'app-process-referral-credits' => 'hosted',
+        'app-generate-sub-audience-blog' => 'nexus',
+        'app-generate-daily-blog-post' => 'nexus',
+        'app-import-curator-events' => 'not_hosted',
+        // Gated inside the command.
+        'app-check-github-stars' => 'nexus',
+        'federation-maintain' => 'nexus',
+        'app-check-version' => 'not_nexus',
+        'federation-push' => 'not_nexus',
+    ];
+
+    /** Whether this scheduled task does anything on this install. */
+    public static function appliesHere(string $name): bool
+    {
+        return match (self::ONLY_ON[$name] ?? null) {
+            'hosted' => (bool) config('app.hosted'),
+            'not_hosted' => ! config('app.hosted'),
+            'nexus' => (bool) config('app.is_nexus'),
+            'not_nexus' => ! config('app.is_nexus'),
+            default => true,
+        };
+    }
+
     /** The rail that MUST be alive. Empty means "any rail will do", which is the selfhost case. */
     public static function expectedRail(): ?string
     {

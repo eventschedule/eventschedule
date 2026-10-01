@@ -28,8 +28,9 @@ class GenerateDailyBlogPost extends Command
      */
     public function handle()
     {
-        if (! config('app.hosted')) {
-            $this->info('Daily blog post generation is only available in hosted mode.');
+        // The blog is the marketing site's, so it exists on the nexus only (see routes/web.php).
+        if (! config('app.is_nexus')) {
+            $this->info('Daily blog post generation only runs on eventschedule.com.');
 
             return 0;
         }

@@ -33,6 +33,13 @@ class GenerateSubAudienceBlog extends Command
      */
     public function handle()
     {
+        // The blog is the marketing site's, so it exists on the nexus only (see routes/web.php).
+        if (! config('app.is_nexus')) {
+            $this->info('Sub-audience blog generation only runs on eventschedule.com.');
+
+            return 0;
+        }
+
         $config = config('sub_audiences');
 
         if (empty($config)) {

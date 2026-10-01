@@ -32,10 +32,11 @@ use Tests\TestCase;
  *   alternative syntax, and the scheduler's own ->when() / ->skip() / ->environments() all read as
  *   'ungated'. Moving an existing `if (config('app.hosted'))` into ->when() - a tidy-up a reviewer
  *   would wave through - deletes the gate from this file's view entirely.
- * - hostedGate() reads negation from the text immediately before config('app.hosted'). It is right
- *   for `!`, `!config(...)` and `$x && ! config(...)`, and WRONG for `! (config('app.hosted'))`,
- *   `config('app.hosted') === false` and `$x !== config('app.hosted')`, all of which report
- *   'hosted'. Hoisting a negation over a compound condition on one rail only passes green.
+ * - installGate() reads negation from the text immediately before config('app.hosted') or
+ *   config('app.is_nexus'). It is right for `!`, `!config(...)` and `$x && ! config(...)`, and WRONG
+ *   for `! (config('app.hosted'))`, `config('app.hosted') === false` and
+ *   `$x !== config('app.hosted')`, all of which report 'hosted'. Hoisting a negation over a compound
+ *   condition on one rail only passes green.
  * - consoleCadences() splits on Schedule::call(, so each chunk carries the FOLLOWING entry's
  *   comment block. preg_match takes the first hit, which is safe only while every entry uses a
  *   frequency method from self::CADENCES. ->cron(), ->twiceDaily(), ->weekly(),
@@ -164,7 +165,8 @@ class CronRailSyncTest extends TestCase
     }
 
     /**
-     * A command gated on config('app.hosted') on one rail must be gated the SAME WAY on the other.
+     * A command gated on config('app.hosted') or config('app.is_nexus') on one rail must be gated
+     * the SAME WAY on the other.
      *
      * This is the exact shape of the drift that shipped: routes/console.php wrapped
      * app:send-onboarding-nudges in a hosted check and translateData() did not.
@@ -175,17 +177,21 @@ class CronRailSyncTest extends TestCase
      * which ships a hosted-only command to every selfhost or suppresses app:import-curator-events
      * on the only installs meant to run it, passed green. That is strictly worse than the drift the
      * test was written to catch.
+     *
+     * is_nexus is read too: the blog generators moved from a hosted gate to a nexus one, and a
+     * reader that only knew config('app.hosted') would have reported both rails as 'ungated' and
+     * passed whatever either of them said.
      */
-    public function test_the_hosted_gate_matches_on_both_rails(): void
+    public function test_the_install_gate_matches_on_both_rails(): void
     {
         $console = $this->console();
         $http = $this->translateData();
 
         foreach ($this->commandsIn($console) as $command) {
             $this->assertSame(
-                $this->hostedGate($console, $command),
-                $this->hostedGate($http, $command),
-                "{$command} is gated on config('app.hosted') differently on the two cron rails. ".
+                $this->installGate($console, $command),
+                $this->installGate($http, $command),
+                "{$command} is gated on config('app.hosted') or config('app.is_nexus') differently on the two cron rails. ".
                 'An install driving cron through the other rail will run it when this one would not.'
             );
         }
@@ -379,28 +385,31 @@ class CronRailSyncTest extends TestCase
     ];
 
     /**
-     * 'hosted' | 'not-hosted' | 'ungated' for this command's call site.
+     * Every install-kind gate on this command's call site, outermost first, as e.g. 'hosted',
+     * 'not-nexus' or 'hosted + nexus'; 'ungated' when there is none.
      *
-     * Negation is read from the text immediately before config('app.hosted') rather than from
+     * Negation is read from the text immediately before each config() call rather than from
      * anywhere in the condition, so `$x && ! config('app.hosted')` is read as negated and
      * `! $x && config('app.hosted')` is not.
      */
-    private function hostedGate(string $source, string $command): string
+    private function installGate(string $source, string $command): string
     {
+        $gates = [];
+
         foreach ($this->enclosingConditions($source, $command) as $condition) {
-            $at = strpos($condition, self::HOSTED);
+            foreach (self::INSTALL_FLAGS as $flag => $needle) {
+                $at = strpos($condition, $needle);
 
-            if ($at === false) {
-                continue;
+                if ($at !== false) {
+                    $gates[] = (str_ends_with(rtrim(substr($condition, 0, $at)), '!') ? 'not-' : '').$flag;
+                }
             }
-
-            return str_ends_with(rtrim(substr($condition, 0, $at)), '!') ? 'not-hosted' : 'hosted';
         }
 
-        return 'ungated';
+        return $gates === [] ? 'ungated' : implode(' + ', $gates);
     }
 
-    private const HOSTED = "config('app.hosted')";
+    private const INSTALL_FLAGS = ['hosted' => "config('app.hosted')", 'nexus' => "config('app.is_nexus')"];
 
     /**
      * The conditions of every `if` block enclosing this command's call site, outermost first.

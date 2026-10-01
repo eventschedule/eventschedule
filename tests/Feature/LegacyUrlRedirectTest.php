@@ -81,6 +81,26 @@ class LegacyUrlRedirectTest extends TestCase
         $this->assertSame(blog_url(), $response->getTargetUrl());
     }
 
+    /**
+     * Off the nexus there is no blog host to send a post to, and the old WordPress URLs are
+     * eventschedule.com's. A selfhosted SaaS reaches this catch-all too, so each of these must
+     * 404 there rather than 301 onto a dead blog.{domain} or out to eventschedule.com.
+     */
+    public function test_off_the_nexus_blog_and_legacy_slugs_are_404(): void
+    {
+        config(['app.hosted' => true, 'app.is_nexus' => false]);
+        $post = $this->publishedPost('moved-post');
+
+        foreach ([$post->slug, 'blog', 'who-we-help'] as $slug) {
+            try {
+                $this->landing($slug);
+                $this->fail("{$slug} should 404 off the nexus");
+            } catch (NotFoundHttpException) {
+                $this->addToAssertionCount(1);
+            }
+        }
+    }
+
     public function test_legacy_marketing_urls_redirect(): void
     {
         foreach (['events-roles', 'who-we-help', 'help-center'] as $slug) {

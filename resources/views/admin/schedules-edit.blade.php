@@ -33,6 +33,10 @@
             </div>
         @endif
 
+        {{-- The subscription box and the plan form are hosted only. On a plain selfhost every
+             schedule is enterprise whatever plan_type says (Role::actualPlanTier()), so the form
+             saved values nothing read, and updateSchedule() 404s there. --}}
+        @if (config('app.hosted'))
         {{-- Current Status Info Box --}}
         <div class="bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-lg p-4">
             <h3 class="text-sm font-medium text-blue-800 dark:text-blue-300 mb-3">@lang('messages.current_subscription_status')</h3>
@@ -59,6 +63,7 @@
                 @endif
             </div>
         </div>
+        @endif
 
         {{-- Schedule Details --}}
         <form method="POST" action="{{ route('admin.schedules.update_details', ['role' => $role->encodeId()]) }}" class="ap-card rounded-xl shadow">
@@ -194,6 +199,7 @@
         @endif
 
         {{-- Edit Form --}}
+        @if (config('app.hosted'))
         <form method="POST" action="{{ route('admin.schedules.update', ['role' => $role->encodeId()]) }}" class="ap-card rounded-xl shadow">
             @csrf
             @method('PUT')
@@ -262,6 +268,7 @@
                 </x-brand-button>
             </div>
         </form>
+        @endif
 
         {{-- Deletion / subdomain release.
 
@@ -345,6 +352,11 @@
 
     <script {!! nonce_attr() !!}>
         document.addEventListener('DOMContentLoaded', function() {
+            // The plan form is hosted only, so there may be nothing to wire up.
+            if (! document.getElementById('plan_expires')) {
+                return;
+            }
+
             var fp = flatpickr('#plan_expires', {
                 allowInput: true,
                 enableTime: false,

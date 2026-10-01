@@ -31,6 +31,12 @@ use Throwable;
  * editing a variant's text in place keeps crediting the old copy's history to the new text.
  * Adding, removing or editing any variant changes setHash(), which discards a stored candidate
  * or winner, so the test resumes on its own.
+ *
+ * STARTING OVER: reset() (the button on /admin/growth) restarts the counts for every key without
+ * deleting history: stats() only reads what came after RESET_SETTING. A visitor assigned before a
+ * reset keeps their pick in es_attribution and never beacons a second `view`, so a signup of
+ * theirs after it is credited with no visit to match; probabilityBest() clamps that, and it falls
+ * on each variant roughly in proportion to its old share.
  */
 final class HeroExperiment
 {
@@ -76,7 +82,8 @@ final class HeroExperiment
         // only to cut the number of arms: 'sellout' ("Pack the room. Sell out every date.") and
         // 'crowd' ("Your events, one link. Your crowd, coming back."). Their counts stay in
         // marketing_experiment_stats and users.hero_variant under their keys; stats() reads only
-        // the keys listed here, so re-adding one under the SAME key would resume its history.
+        // the keys listed here, so re-adding one under the SAME key would resume its history
+        // (from the last reset, if there has been one).
     ];
 
     /** A variant with fewer visitors than this gets at least an even share of traffic. */
@@ -117,6 +124,9 @@ final class HeroExperiment
     public const CANDIDATE_SETTING = 'hero_experiment_candidate';
 
     public const WINNER_SETTING = 'hero_experiment_winner';
+
+    /** When the stats were last reset; stats() counts nothing from before it. */
+    public const RESET_SETTING = 'hero_experiment_reset_at';
 
     public const EVENTS = ['view' => 'visitors', 'click' => 'clicks'];
 
@@ -199,7 +209,7 @@ final class HeroExperiment
     public static function state(): ?array
     {
         try {
-            return Cache::remember('hero_experiment:'.self::setHash(), self::CACHE_TTL, fn () => self::evaluate(self::stats()));
+            return Cache::remember(self::cacheKey(), self::CACHE_TTL, fn () => self::evaluate(self::stats()));
         } catch (Throwable $e) {
             report($e);
 
@@ -208,18 +218,33 @@ final class HeroExperiment
     }
 
     /**
-     * All-time totals per variant. Visitors and clicks come from the beacon counters; signups
-     * are the accounts that carried the variant in es_attribution when they were created.
+     * Keyed on the variant set and on the last reset, so a reset moves the key rather than
+     * forgetting it: a homepage request still inside evaluate() when the reset lands writes its
+     * pre-reset numbers under the OLD key, which nothing reads any more.
+     */
+    private static function cacheKey(): string
+    {
+        return 'hero_experiment:'.self::setHash().':'.(self::resetAt()?->timestamp ?? 0);
+    }
+
+    /**
+     * Totals per variant since the last reset (all-time if there has not been one). Visitors and
+     * clicks come from the beacon counters; signups are the accounts that carried the variant in
+     * es_attribution when they were created.
      *
      * @return array<string, array{visitors: int, clicks: int, signups: int}>
      */
     public static function stats(): array
     {
         $keys = array_keys(self::VARIANTS);
+        $since = self::resetAt();
 
+        // By day: reset() deletes the reset day's rows, so the first day counted here holds only
+        // beacons that arrived after it.
         $beacons = MarketingExperimentStat::query()
             ->where('experiment', self::EXPERIMENT)
             ->whereIn('variant', $keys)
+            ->when($since, fn ($query) => $query->where('date', '>=', $since->toDateString()))
             ->groupBy('variant')
             ->select('variant', DB::raw('SUM(visitors) AS visitors'), DB::raw('SUM(clicks) AS clicks'))
             ->get()
@@ -227,6 +252,7 @@ final class HeroExperiment
 
         $signups = User::query()
             ->whereIn('hero_variant', $keys)
+            ->when($since, fn ($query) => $query->where('created_at', '>=', $since))
             ->groupBy('hero_variant')
             ->select('hero_variant', DB::raw('COUNT(*) AS signups'))
             ->pluck('signups', 'hero_variant');
@@ -241,6 +267,46 @@ final class HeroExperiment
         }
 
         return $stats;
+    }
+
+    /**
+     * Start the test over: every variant back to zero, and any candidate or locked winner
+     * cleared, so the weights return to the burn-in split.
+     *
+     * History is kept rather than deleted (stats() reads only what came after RESET_SETTING),
+     * with one exception: the counters are per day, so today's rows mix beacons from before and
+     * after the reset and cannot be split. Those are deleted, and today's count starts again.
+     *
+     * No cache to clear: RESET_SETTING is part of cacheKey(). Not covered: an evaluate() already
+     * in flight can still write the candidate or winner setting just after the ones cleared here.
+     * That needs a lock to land in the same few milliseconds as the click, so it is accepted.
+     */
+    public static function reset(): void
+    {
+        MarketingExperimentStat::query()
+            ->where('experiment', self::EXPERIMENT)
+            ->where('date', '>=', now()->toDateString())
+            ->delete();
+
+        Setting::set(self::RESET_SETTING, now()->toDateTimeString());
+        Setting::set(self::CANDIDATE_SETTING, null);
+        Setting::set(self::WINNER_SETTING, null);
+    }
+
+    /** When the stats were last reset, or null if they never have been. */
+    public static function resetAt(): ?Carbon
+    {
+        $value = Setting::get(self::RESET_SETTING);
+
+        if (! is_string($value) || $value === '') {
+            return null;
+        }
+
+        try {
+            return Carbon::parse($value);
+        } catch (Throwable) {
+            return null;
+        }
     }
 
     /**
@@ -535,6 +601,7 @@ final class HeroExperiment
             'lock_date' => $state['candidate'] !== null
                 ? Carbon::parse($state['candidate']['date'])->addDays(self::WIN_HOLD_DAYS)->toDateString()
                 : null,
+            'reset_at' => self::resetAt()?->toDateString(),
         ];
     }
 }

@@ -10,6 +10,11 @@
         @include('admin.partials._navigation', ['active' => 'boost'])
         @include('admin.partials._date-range-filter', ['range' => $range])
 
+        {{-- Markup, refunds, credit, spending limits and billing records are hosted only. A plain
+             selfhost boosts on the operator's own Meta account: it charges no markup and no fee,
+             and Role::getBoostMaxBudget() never reads a per-schedule limit off hosted. --}}
+        @php $hosted = (bool) config('app.hosted'); @endphp
+
         {{-- Summary Metric Cards --}}
         <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
             <x-stat-panel label="{{ __('messages.total_campaigns') }}" padding="p-4">
@@ -19,10 +24,17 @@
             <x-stat-panel label="{{ __('messages.active_campaigns') }}" color="green" padding="p-4">
                 {{ number_format($activeCampaigns) }}
             </x-stat-panel>
+            @if ($hosted)
             <x-stat-panel label="{{ __('messages.markup_revenue') }}" padding="p-4">
                 {{ \App\Utils\MoneyUtils::format($markupRevenue, $markupCurrency) }}
             </x-stat-panel>
+            @else
+            <x-stat-panel label="{{ __('messages.total_ad_spend') }}" padding="p-4">
+                {{ \App\Utils\MoneyUtils::format($totalAdSpend, $boostCurrency) }}
+            </x-stat-panel>
+            @endif
         </div>
+        @if ($hosted)
         <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <x-stat-panel label="{{ __('messages.total_ad_spend') }}" padding="p-4">
                 {{ \App\Utils\MoneyUtils::format($totalAdSpend, $boostCurrency) }}
@@ -31,6 +43,7 @@
                 {{ \App\Utils\MoneyUtils::format($totalRefunds, $boostCurrency) }}
             </x-stat-panel>
         </div>
+        @endif
 
         {{-- Average Performance Cards --}}
         <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
@@ -194,7 +207,9 @@
             </div>
         </div>
 
-        {{-- Performance Line Chart --}}
+        {{-- Performance Line Chart. Both lines come from boost billing records, which only a
+             hosted install writes, so off it the chart could only ever be empty. --}}
+        @if ($hosted)
         <div class="ap-card rounded-xl shadow p-6">
             <h3 class="text-lg font-semibold text-gray-900 dark:text-white mb-4">@lang('messages.revenue_trend')</h3>
             @if (count($trendLabels) > 0)
@@ -317,6 +332,7 @@
             <p class="text-sm text-gray-500 dark:text-gray-400">@lang('messages.no_custom_limits', ['amount' => \App\Utils\MoneyUtils::format(config('services.meta.boost_default_limit', 10), config('services.meta.default_currency', 'USD'))])</p>
             @endif
         </div>
+        @endif
 
         {{-- Campaigns Table --}}
         <div class="ap-card rounded-xl shadow p-6">
@@ -401,6 +417,7 @@
             </div>
         </div>
 
+        @if ($hosted)
         {{-- Recent Billing Records --}}
         <div class="ap-card rounded-xl shadow p-6">
             <h3 class="text-lg font-semibold text-gray-900 dark:text-white mb-4">@lang('messages.recent_billing_records')</h3>
@@ -441,6 +458,7 @@
                 </table>
             </div>
         </div>
+        @endif
 
     </div>
 
@@ -512,7 +530,7 @@
         @endif
 
         // Performance Line Chart
-        @if (count($trendLabels) > 0)
+        @if ($hosted && count($trendLabels) > 0)
         new Chart(document.getElementById('performanceChart'), {
             type: 'line',
             data: {

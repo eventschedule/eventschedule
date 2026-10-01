@@ -312,9 +312,9 @@
     @include('partials.theme-script', ['variants' => false])
 
 
-    @if(config('app.hosted') && !config('app.is_nexus'))
-    <link rel="alternate" type="application/rss+xml" title="Event Schedule Blog" href="https://blog.eventschedule.com/feed">
-    @else
+    {{-- The blog exists on the nexus only, but this layout also renders the legal pages and the
+         404 off it, so the feed is linked only where the route is registered. --}}
+    @if (Route::has('blog.feed'))
     <link rel="alternate" type="application/rss+xml" title="Event Schedule Blog" href="{{ route('blog.feed') }}">
     @endif
 

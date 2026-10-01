@@ -425,7 +425,9 @@ class AdminNewsletterController extends Controller
     {
         $validated = $request->validate([
             'name' => 'required|string|max:255',
-            'type' => 'required|in:all_users,plan_tier,signup_date,admins,manual',
+            // plan_tier only where there are plans: on a plain selfhost every schedule is
+            // enterprise whatever roles.plan_type says, so "Free" would reach everyone.
+            'type' => 'required|in:all_users,'.(config('app.hosted') ? 'plan_tier,' : '').'signup_date,admins,manual',
             'filter_criteria' => 'nullable|array',
             'filter_criteria.plan_type' => 'nullable|string|in:free,pro,enterprise',
             'filter_criteria.date_from' => 'nullable|date',

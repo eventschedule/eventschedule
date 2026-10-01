@@ -70,7 +70,10 @@ use Illuminate\Support\Facades\Route;
 Route::get('/robots.txt', [AppController::class, 'robots'])->withoutMiddleware('web');
 
 if (config('app.hosted') && ! config('app.is_testing')) {
-    if (config('app.env') != 'local') {
+    // The blog is the marketing site's (eventschedule.com's), so it exists on the nexus only. A
+    // selfhosted SaaS is hosted too, and used to get a blog.{its domain} serving whatever the
+    // daily generator wrote there: Event Schedule's own SEO posts, on the operator's AI key.
+    if (config('app.env') != 'local' && config('app.is_nexus')) {
         Route::domain('blog.'._base_domain())->group(function () {
             Route::get('/', [BlogController::class, 'index'])->name('blog.index');
             Route::get('/feed', [BlogController::class, 'feed'])->name('blog.feed');
@@ -993,6 +996,7 @@ Route::middleware(['auth', 'verified', 'app_subdomain'])->group(function () {
         // phpunit leaves IS_HOSTED unset, so a registration-time gate would be untestable.
         Route::get('/admin/growth', [AdminController::class, 'growth'])->name('admin.growth');
         Route::get('/admin/growth/export', [AdminController::class, 'growthExport'])->name('admin.growth.export');
+        Route::post('/admin/growth/hero-test/reset', [AdminController::class, 'growthResetHeroTest'])->name('admin.growth.hero_test_reset');
         Route::get('/admin/boost', [AdminController::class, 'boost'])->name('admin.boost');
         Route::post('/admin/boost/grant-credit', [AdminController::class, 'boostGrantCredit'])->name('admin.boost.grant_credit');
         Route::post('/admin/boost/set-limit', [AdminController::class, 'boostSetLimit'])->name('admin.boost.set_limit');
@@ -1158,8 +1162,9 @@ Route::middleware(['auth', 'verified', 'app_subdomain'])->group(function () {
             Route::post('/admin/support/{id}/close', [SupportChatController::class, 'adminCloseConversation'])->name('admin.support.close');
         }
 
-        // Admin blog routes
-        if (config('app.hosted')) {
+        // Admin blog routes. Nexus only: the blog is the marketing site's (see the blog host at the
+        // top of this file).
+        if (config('app.is_nexus')) {
             Route::get('/admin/blog', [BlogController::class, 'adminIndex'])->name('blog.admin.index');
             Route::get('/admin/blog/create', [BlogController::class, 'create'])->name('blog.create');
             Route::post('/admin/blog', [BlogController::class, 'store'])->name('blog.store');
@@ -2158,9 +2163,10 @@ if (config('app.hosted') && config('app.is_nexus')) {
     }
 }
 
-// Blog routes: use /blog path for local dev, testing, and selfhosted users
-// Hosted mode uses blog.eventschedule.com subdomain (defined above)
-if (config('app.is_testing') || config('app.env') == 'local' || ! config('app.hosted')) {
+// Blog routes, path-based for local dev and testing. Nexus only, like the blog host above: a
+// plain selfhost used to serve /blog and /blog/feed here with no screen to write a post, so they
+// were always empty. The production nexus uses the blog.{domain} host instead.
+if (config('app.is_nexus') && (config('app.is_testing') || config('app.env') == 'local')) {
     Route::get('/blog', [BlogController::class, 'index'])->name('blog.index');
     Route::get('/blog/feed', [BlogController::class, 'feed'])->name('blog.feed');
     Route::get('/blog/{slug}', [BlogController::class, 'show'])->name('blog.show');

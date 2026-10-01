@@ -4,10 +4,14 @@
 @php
     $insightsActive = in_array($active, ['users', 'revenue', 'analytics', 'usage', 'growth']);
     // Schedules is on every install (it is the only way back from a takedown), so it lights the
-    // Manage tab everywhere; domains, referrals and blog are hosted-only.
+    // Manage tab everywhere; domains and referrals are hosted-only, and blog is the marketing
+    // site's, so nexus-only.
     $manageKeys = ['boost', 'schedules', 'newsletters'];
     if (config('app.hosted')) {
-        $manageKeys = array_merge($manageKeys, ['domains', 'referrals', 'blog']);
+        $manageKeys = array_merge($manageKeys, ['domains', 'referrals']);
+    }
+    if (config('app.is_nexus')) {
+        $manageKeys[] = 'blog';
     }
     $manageActive = in_array($active, $manageKeys);
     $systemActive = in_array($active, ['audit-log', 'queue', 'logs', 'app-update', 'support', 'settings', 'translations', 'legal', 'federation']);
@@ -134,7 +138,7 @@
                         <a href="{{ route('admin.newsletters.index') }}" class="{{ $active === 'newsletters' ? $dropdownItemActive : $dropdownItem }}">
                             @lang('messages.newsletters')
                         </a>
-                        @if (config('app.hosted'))
+                        @if (config('app.is_nexus'))
                         <a href="{{ route('blog.admin.index') }}" class="{{ $active === 'blog' ? $dropdownItemActive : $dropdownItem }}">
                             @lang('messages.blog')
                         </a>

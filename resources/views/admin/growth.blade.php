@@ -244,12 +244,24 @@
             @endif
         </div>
 
-        {{-- The homepage headline A/B test (App\Utils\HeroExperiment). Read-only: it allocates
-             traffic and picks its winner by itself. --}}
+        {{-- The homepage headline A/B test (App\Utils\HeroExperiment). It allocates traffic and
+             picks its winner by itself; the only control is the reset, which starts it over. --}}
         @if (config('app.is_nexus'))
-            <div class="ap-card rounded-xl shadow p-6">
-                <h3 class="text-lg font-medium text-gray-900 dark:text-white mb-1">@lang('messages.hero_test')</h3>
-                <p class="text-xs text-gray-500 dark:text-gray-400 mb-4">@lang('messages.hero_test_help')</p>
+            <div id="hero-test" class="ap-card rounded-xl shadow p-6">
+                <div class="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between mb-4">
+                    <div>
+                        <h3 class="text-lg font-medium text-gray-900 dark:text-white mb-1">@lang('messages.hero_test')</h3>
+                        <p class="text-xs text-gray-500 dark:text-gray-400 max-w-xl">@lang('messages.hero_test_help')</p>
+                    </div>
+                    @if ($heroTest !== null)
+                        <form method="POST" action="{{ route('admin.growth.hero_test_reset') }}" class="sm:ms-auto"
+                              data-confirm="{{ __('messages.hero_test_reset_confirm') }}">
+                            @csrf
+                            <input type="hidden" name="range" value="{{ $range }}">
+                            <x-danger-button>@lang('messages.hero_test_reset')</x-danger-button>
+                        </form>
+                    @endif
+                </div>
 
                 @if ($heroTest === null)
                     <p class="text-sm text-gray-500 dark:text-gray-400">@lang('messages.hero_test_unavailable')</p>
@@ -259,7 +271,7 @@
                         $heroHeadline = fn ($key) => (collect($heroTest['rows'])->firstWhere('key', $key)['headline'] ?? $key).' ('.$key.')';
                         $heroPct = fn ($value) => $value === null ? __('messages.funnel_na') : round($value * 100, 1).'%';
                     @endphp
-                    <p class="text-sm font-medium text-gray-800 dark:text-gray-200 mb-4">
+                    <p class="text-sm font-medium text-gray-800 dark:text-gray-200 {{ $heroTest['reset_at'] ? 'mb-1' : 'mb-4' }}">
                         @if ($heroTest['phase'] === 'winner')
                             {{ __('messages.hero_test_phase_winner', ['variant' => $heroHeadline($heroTest['winner']['key']), 'date' => $heroTest['winner']['date']]) }}
                         @elseif ($heroTest['phase'] === 'candidate')
@@ -270,6 +282,9 @@
                             @lang('messages.hero_test_phase_signups')
                         @endif
                     </p>
+                    @if ($heroTest['reset_at'])
+                        <p class="text-xs text-gray-500 dark:text-gray-400 mb-4">{{ __('messages.hero_test_since', ['date' => $heroTest['reset_at']]) }}</p>
+                    @endif
 
                     <div class="overflow-x-auto">
                         <table class="min-w-full text-sm">

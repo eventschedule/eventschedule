@@ -72,13 +72,17 @@
                         <x-input-label :value="__('messages.type')" />
                         <select name="type" x-model="segmentType" class="mt-1 block w-full border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-[var(--brand-blue)] focus:ring-[var(--brand-blue)] rounded-lg shadow-sm">
                             <option value="all_users">{{ __('messages.all_platform_users') }}</option>
+                            {{-- Hosted only: a plain selfhost has no plans to segment by. --}}
+                            @if (config('app.hosted'))
                             <option value="plan_tier">{{ __('messages.plan_tier') }}</option>
+                            @endif
                             <option value="signup_date">{{ __('messages.signup_date') }}</option>
                             <option value="admins">{{ __('messages.admins') }}</option>
                             <option value="manual">{{ __('messages.manual') }}</option>
                         </select>
                     </div>
 
+                    @if (config('app.hosted'))
                     <div x-show="segmentType === 'plan_tier'" x-cloak>
                         <x-input-label :value="__('messages.plan_tier')" />
                         <select name="filter_criteria[plan_type]" x-bind:disabled="segmentType !== 'plan_tier'" class="mt-1 block w-full border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-[var(--brand-blue)] focus:ring-[var(--brand-blue)] rounded-lg shadow-sm">
@@ -87,6 +91,7 @@
                             <option value="enterprise">Enterprise</option>
                         </select>
                     </div>
+                    @endif
 
                     <div x-show="segmentType === 'signup_date'" x-cloak>
                         <div class="grid grid-cols-2 gap-4">

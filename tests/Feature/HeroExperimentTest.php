@@ -307,7 +307,100 @@ class HeroExperimentTest extends TestCase
             ->get('/admin/growth')
             ->assertOk()
             ->assertSee(__('messages.hero_test'))
-            ->assertSee(HeroExperiment::VARIANTS['plan']['line1']);
+            ->assertSee(HeroExperiment::VARIANTS['plan']['line1'])
+            ->assertSee(__('messages.hero_test_reset'))
+            ->assertDontSee(__('messages.hero_test_since', ['date' => now()->toDateString()]));
+    }
+
+    /**
+     * A reset starts every count from zero and restarts the decision, but keeps the history: only
+     * the reset day's rows go, because a day's counter cannot be split at the moment of the reset.
+     */
+    public function test_a_reset_starts_the_counts_from_zero_and_keeps_history(): void
+    {
+        $this->travelTo('2026-10-01 12:00:00');
+
+        MarketingExperimentStat::create(['experiment' => HeroExperiment::EXPERIMENT, 'variant' => 'plan', 'date' => '2026-09-30', 'visitors' => 40, 'clicks' => 4]);
+        MarketingExperimentStat::create(['experiment' => HeroExperiment::EXPERIMENT, 'variant' => 'plan', 'date' => '2026-10-01', 'visitors' => 10, 'clicks' => 1]);
+        User::factory()->create(['hero_variant' => 'plan']);
+        Setting::set(HeroExperiment::CANDIDATE_SETTING, HeroExperiment::setHash().'|plan|2026-09-30');
+        Setting::set(HeroExperiment::WINNER_SETTING, HeroExperiment::setHash().'|plan|2026-09-30');
+
+        $this->assertSame(['visitors' => 50, 'clicks' => 5, 'signups' => 1], HeroExperiment::stats()['plan']);
+
+        $this->travelTo('2026-10-01 15:00:00');
+        $this->resetAsAdmin(['range' => 'last_7_days'])
+            ->assertRedirect(route('admin.growth', ['range' => 'last_7_days']).'#hero-test')
+            ->assertSessionHas('message', __('messages.hero_test_reset_done'));
+
+        foreach (HeroExperiment::stats() as $key => $row) {
+            $this->assertSame(['visitors' => 0, 'clicks' => 0, 'signups' => 0], $row, "{$key} was not reset");
+        }
+        $this->assertNull(Setting::get(HeroExperiment::CANDIDATE_SETTING));
+        $this->assertNull(Setting::get(HeroExperiment::WINNER_SETTING));
+        $this->assertTrue(HeroExperiment::forPage()['running'], 'a locked winner must not survive a reset');
+
+        // History stays; only the day the reset split is gone.
+        $this->assertTrue(MarketingExperimentStat::whereDate('date', '2026-09-30')->exists());
+        $this->assertFalse(MarketingExperimentStat::whereDate('date', '2026-10-01')->exists());
+        $this->assertSame(1, User::where('hero_variant', 'plan')->count());
+
+        // Everything after the reset counts, on the reset day and after it. Signed out first: the
+        // beacon ignores signed-in users, and the client is still the admin who reset.
+        auth()->logout();
+        $this->travelTo('2026-10-01 16:00:00');
+        $this->beacon(['variant' => 'plan', 'event' => 'view'])->assertNoContent();
+        User::factory()->create(['hero_variant' => 'plan']);
+
+        $this->travelTo('2026-10-02 09:00:00');
+        $this->beacon(['variant' => 'plan', 'event' => 'view'], ['CF-Connecting-IP' => '203.0.113.21'])->assertNoContent();
+
+        $this->assertSame(['visitors' => 2, 'clicks' => 0, 'signups' => 1], HeroExperiment::stats()['plan']);
+        $this->assertSame('2026-10-01', HeroExperiment::report()['reset_at']);
+    }
+
+    public function test_the_growth_page_says_when_the_counts_start(): void
+    {
+        $this->travelTo('2026-10-01 15:00:00');
+        $this->resetAsAdmin();
+
+        $this->get('/admin/growth')
+            ->assertOk()
+            ->assertSee(__('messages.hero_test_since', ['date' => '2026-10-01']));
+    }
+
+    public function test_only_an_admin_can_reset_and_only_on_the_nexus(): void
+    {
+        config(['app.hosted' => true]);
+        MarketingExperimentStat::create(['experiment' => HeroExperiment::EXPERIMENT, 'variant' => 'plan', 'date' => now()->toDateString(), 'visitors' => 10, 'clicks' => 1]);
+
+        $this->actingAs(User::factory()->create(['email_verified_at' => now()]))
+            ->post('/admin/growth/hero-test/reset')
+            ->assertRedirect();
+
+        // A selfhosted SaaS: hosted, but not the install whose homepage runs the test.
+        config(['app.is_nexus' => false]);
+        $this->resetAsAdmin()->assertNotFound();
+
+        // A plain selfhost.
+        config(['app.is_nexus' => false]);
+        $this->resetAsAdmin(hosted: false)->assertNotFound();
+
+        $this->assertNull(Setting::get(HeroExperiment::RESET_SETTING));
+        $this->assertSame(1, MarketingExperimentStat::count());
+    }
+
+    private function resetAsAdmin(array $data = [], bool $hosted = true)
+    {
+        config(['app.hosted' => $hosted]);
+
+        $admin = User::factory()->create(['email_verified_at' => now()]);
+        $admin->forceFill(['is_admin' => true])->save();
+
+        // The admin group re-auths; without this key the request bounces to confirm-password.
+        return $this->withSession(['admin_password_confirmed_at' => now()->timestamp])
+            ->actingAs($admin)
+            ->post('/admin/growth/hero-test/reset', $data);
     }
 
     private function beacon(array $payload, array $headers = [])

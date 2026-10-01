@@ -19,7 +19,6 @@
         <x-doc-nav-link href="#manage-plans">Schedules and plans</x-doc-nav-link>
         <x-doc-nav-link href="#manage-domains">Domains</x-doc-nav-link>
         <x-doc-nav-link href="#manage-newsletters">Newsletters</x-doc-nav-link>
-        <x-doc-nav-link href="#manage-blog">Blog</x-doc-nav-link>
         <div class="text-xs font-semibold text-gray-600 dark:text-gray-400 uppercase tracking-wider mb-2 mt-4 pt-3 border-t border-gray-200 dark:border-white/10">System</div>
         <x-doc-nav-link href="#system-audit-log">Audit Log</x-doc-nav-link>
         <x-doc-nav-link href="#system-queue">Queue</x-doc-nav-link>
@@ -78,7 +77,7 @@
                     </tr>
                     <tr>
                         <td>Manage</td>
-                        <td>Domains, Referrals, Blog</td>
+                        <td>Domains, Referrals</td>
                         <td>Only when <code class="doc-inline-code">IS_HOSTED=true</code></td>
                     </tr>
                     <tr>
@@ -179,7 +178,7 @@
             <li><strong class="text-gray-900 dark:text-white">Needs attention</strong> - everything waiting on an admin, when there is anything (see below)</li>
             <li><strong class="text-gray-900 dark:text-white">Total users, schedules and events</strong> - each with the change against the previous period and how many were added inside the selected range</li>
             <li><strong class="text-gray-900 dark:text-white">Activity</strong> - active users in the last 7 and 30 days, upcoming online events, and private events with how many of those are password protected</li>
-            <li><strong class="text-gray-900 dark:text-white">Money</strong> - schedules paying through Stripe, annual recurring revenue (the tile is labelled <strong class="text-gray-900 dark:text-white">ARR</strong>), active boost campaigns, and boost markup revenue for the period</li>
+            <li><strong class="text-gray-900 dark:text-white">Money</strong> (hosted installs) - schedules paying through Stripe, annual recurring revenue (the tile is labelled <strong class="text-gray-900 dark:text-white">ARR</strong>), active boost campaigns, and boost markup revenue for the period. A plain selfhost has no subscriptions and charges no markup, so this row is left out there; active boost campaigns are on the <a href="#manage-boost" class="doc-link">Boost</a> page.</li>
             <li><strong class="text-gray-900 dark:text-white">Upcoming events by country</strong> - the top ten countries, taken from the venue's country, and hidden when no upcoming event has a venue country set</li>
             <li><strong class="text-gray-900 dark:text-white">Growth trends</strong> - users, schedules and events over the selected range, grouped by day, week or month depending on its length</li>
             <li><strong class="text-gray-900 dark:text-white">Recent signups</strong> - the ten newest accounts with the source they arrived from</li>
@@ -352,7 +351,7 @@
         </h2>
         <p class="text-gray-600 dark:text-gray-300 mb-6">The Users page is an aggregate report about how people arrive and whether they get their first event published. It is not a user directory: there is no search box, no per-user row to open, and no way to edit an account from here. Only confirmed accounts are counted, and the demo account is excluded.</p>
         <ul class="doc-list mb-6">
-            <li><strong class="text-gray-900 dark:text-white">Onboarding funnel</strong> - visited the site, viewed the sign-up page, created an account, reached the schedule step, saved a schedule, reached the event step, saved an event. Highlighted above it are the signup-to-first-event rate with its change against the previous period, the biggest single drop between stages, and the visitor-to-first-event rate.</li>
+            <li><strong class="text-gray-900 dark:text-white">Onboarding funnel</strong> - visited the site, viewed the sign-up page, created an account, reached the schedule step, saved a schedule, reached the event step, saved an event, then the ticket stages and, on hosted installs, the plan stages. Highlighted above it are the signup-to-first-event rate with its change against the previous period, the biggest single drop between stages, and, on eventschedule.com, the visitor-to-first-event rate.</li>
             <li><strong class="text-gray-900 dark:text-white">Funnel over time</strong> - the same conversion rates per day, week or month. The most recent period is marked as still in progress, because its accounts have not had time to finish onboarding.</li>
             <li><strong class="text-gray-900 dark:text-white">Totals</strong> - total users, active users in the last 7 and 30 days, and newsletter subscribers with the number who unsubscribed.</li>
             <li><strong class="text-gray-900 dark:text-white">Signup method</strong> - email, Google, and hybrid, both all time and for the selected period.</li>
@@ -363,8 +362,8 @@
         <x-doc-screenshot id="selfhost-admin--users" alt="Admin users list with search and user details" />
 
         <div class="doc-callout doc-callout-info mb-6">
-            <div class="doc-callout-title">The first funnel stage is blank on a selfhost</div>
-            <p>The two anonymous stages come from marketing-site traffic, which is only recorded on eventschedule.com. On any other installation the funnel notes that site traffic is not tracked and starts at "Created account", and the visitor-to-first-event rate is left empty.</p>
+            <div class="doc-callout-title">The funnel starts at the sign-up page on a selfhost</div>
+            <p>Site visits come from marketing-site traffic, which is only recorded on eventschedule.com. On any other installation the funnel starts at "Viewed sign-up page", which every install counts, and the visitor-to-first-event rate is not shown. The plan stages (the paid-ticket paywall, checkout and subscribing) only appear on hosted installs, since a plain selfhost has no plans.</p>
         </div>
 
         <p class="text-gray-600 dark:text-gray-300">To act on a single account or schedule, use <a href="#manage-plans" class="doc-link">Manage &gt; Schedules</a>, which is where the search, filters, plan editing and manual verification live.</p>
@@ -474,6 +473,11 @@
             <li><strong class="text-gray-900 dark:text-white">Revenue trend</strong> - ad spend against markup over the selected range</li>
         </ul>
 
+        <div class="doc-callout doc-callout-info mb-6">
+            <div class="doc-callout-title">Billing sections are hosted only</div>
+            <p>On a plain selfhost a boost runs on your own Meta account and charges no markup or fee, so the page leaves out markup revenue, refunds, the revenue trend, the two forms below and the billing records. Total ad spend is shown in their place.</p>
+        </div>
+
         <h3 class="doc-subheading">Granting credit and capping budgets</h3>
         <p class="text-gray-600 dark:text-gray-300 mb-4">Below the revenue trend, two forms act on a single schedule, identified by its subdomain (the field autocompletes as you type):</p>
         <ol class="doc-list doc-list-numbered mb-6">
@@ -503,9 +507,9 @@
         </h2>
         <p class="text-gray-600 dark:text-gray-300 mb-6">This is the <strong class="text-gray-900 dark:text-white">Schedules</strong> item in the Manage menu, at <code class="doc-inline-code">/admin/schedules</code>, and it is there on every install. On a hosted install the older <code class="doc-inline-code">/admin/plans</code> address redirects to it. It is the one place in the admin panel where you change something about an individual schedule.</p>
         <ul class="doc-list mb-6">
-            <li><strong class="text-gray-900 dark:text-white">Plan counts</strong> - how many verified, non-demo schedules resolve to Free, Pro and Enterprise, plus how many pay through Stripe, how many were granted a plan by hand, how many are on trial, and how many expire in the next 30 days. An <strong class="text-gray-900 dark:text-white">Unverified</strong> card beside them counts the schedules with an owner that have verified neither an email address nor a phone number</li>
+            <li><strong class="text-gray-900 dark:text-white">Plan counts</strong> (hosted installs; a plain selfhost shows Verified and Unverified instead) - how many verified, non-demo schedules resolve to Free, Pro and Enterprise, plus how many pay through Stripe, how many were granted a plan by hand, how many are on trial, and how many expire in the next 30 days. An <strong class="text-gray-900 dark:text-white">Unverified</strong> card beside them counts the schedules with an owner that have verified neither an email address nor a phone number</li>
             <li><strong class="text-gray-900 dark:text-white">Search</strong> - by schedule name, subdomain or email address</li>
-            <li><strong class="text-gray-900 dark:text-white">Filters</strong> - plan type, status (active, expired, trial or deleted), source (Stripe, manual or trial), verification (verified or unverified) and owner</li>
+            <li><strong class="text-gray-900 dark:text-white">Filters</strong> - plan type, status (active, expired, trial or deleted), source (Stripe, manual or trial), verification (verified or unverified) and owner. On a plain selfhost only the status filter's deleted option, verification and owner are offered, and the plan columns are left out of the table.</li>
             <li><strong class="text-gray-900 dark:text-white">Owner filter</strong> - <strong class="text-gray-900 dark:text-white">Claimed</strong>, the default, shows schedules with an owner. Switch it to <strong class="text-gray-900 dark:text-white">Unclaimed</strong> to reach the venue and performer schedules the app created automatically when an event named them: they have no owner, and their page is a claim page kept out of search engines, but they do hold a subdomain, so they are the usual reason a good name is unavailable. <strong class="text-gray-900 dark:text-white">All owners</strong> shows both.</li>
             <li><strong class="text-gray-900 dark:text-white">Listing</strong> - twenty schedules per page, newest first. Demo schedules are left out, deleted ones appear only under the Deleted status, and unverified ones are listed even though the plan counts exclude them. Each row has <strong class="text-gray-900 dark:text-white">Edit</strong> and one quick action: <strong class="text-gray-900 dark:text-white">Delete</strong>, or on a deleted schedule <strong class="text-gray-900 dark:text-white">Restore</strong>, or <strong class="text-gray-900 dark:text-white">Release</strong> when it was deleted without giving up its name.</li>
         </ul>
@@ -516,7 +520,7 @@
             <li><strong class="text-gray-900 dark:text-white">Edit the schedule's details</strong> - in the <strong class="text-gray-900 dark:text-white">Schedule Details</strong> card, change its name, subdomain, email address and phone number, then choose <strong class="text-gray-900 dark:text-white">Save Changes</strong>. Changing the email address clears the verified badge and sends a fresh verification email, so the page warns you before you do. A subdomain that is reserved or already in use is refused with a message rather than quietly changed to something else, and a renamed subdomain is rewritten in every curator's approved list, so the trust a curator gave that schedule follows it to the new name.</li>
             <li><strong class="text-gray-900 dark:text-white">Mark Email as Verified</strong> - mark the schedule's email address as verified without the owner clicking the link.</li>
             <li><strong class="text-gray-900 dark:text-white">Mark Phone as Verified</strong> - the same for a phone number.</li>
-            <li><strong class="text-gray-900 dark:text-white">Assign a plan</strong> (hosted installs) - set <strong class="text-gray-900 dark:text-white">Plan Type</strong> to Free, Pro or Enterprise, set <strong class="text-gray-900 dark:text-white">Plan Term</strong> to monthly or yearly, and set <strong class="text-gray-900 dark:text-white">Plan Expires</strong>. The expiry field has <strong class="text-gray-900 dark:text-white">+30 days</strong>, <strong class="text-gray-900 dark:text-white">+90 days</strong>, <strong class="text-gray-900 dark:text-white">+1 year</strong> and <strong class="text-gray-900 dark:text-white">Clear</strong> shortcuts. A paid plan granted this way is tagged as an admin grant, which is what keeps the small Event Schedule credit on that schedule's public pages. Setting it back to Free, or editing a schedule that pays through Stripe, clears that tag. On a selfhosted install the form is there but changes nothing, because every schedule already has the Enterprise feature set.</li>
+            <li><strong class="text-gray-900 dark:text-white">Assign a plan</strong> (hosted installs) - set <strong class="text-gray-900 dark:text-white">Plan Type</strong> to Free, Pro or Enterprise, set <strong class="text-gray-900 dark:text-white">Plan Term</strong> to monthly or yearly, and set <strong class="text-gray-900 dark:text-white">Plan Expires</strong>. The expiry field has <strong class="text-gray-900 dark:text-white">+30 days</strong>, <strong class="text-gray-900 dark:text-white">+90 days</strong>, <strong class="text-gray-900 dark:text-white">+1 year</strong> and <strong class="text-gray-900 dark:text-white">Clear</strong> shortcuts. A paid plan granted this way is tagged as an admin grant, which is what keeps the small Event Schedule credit on that schedule's public pages. Setting it back to Free, or editing a schedule that pays through Stripe, clears that tag. The form is not shown on a plain selfhost, because every schedule there already has the Enterprise feature set.</li>
             <li><strong class="text-gray-900 dark:text-white">Mark as Deleted</strong> - takes the schedule's public page down and <strong class="text-gray-900 dark:text-white">releases its subdomain</strong>, so a newer schedule can use the name straight away. The schedule itself is kept, along with its events, ticket sales and statistics, and the action can be undone. For a schedule with no owner, this also takes down the claim page that invites the performer or venue to take it over. Releasing a name also removes it from every curator's approved list, so the automatic approval a curator gave the old holder does not pass to whoever takes the name next. A deleted schedule that still holds its original name, which some other ways of deleting a schedule leave behind, offers <strong class="text-gray-900 dark:text-white">Release Subdomain</strong> here instead: it frees the name and changes nothing else.</li>
             <li><strong class="text-gray-900 dark:text-white">Restore</strong> - brings a deleted schedule back. It takes its original subdomain back if nothing else has claimed it in the meantime; if something has, the schedule keeps the name it was given when it was deleted, and the page tells you which will happen before you click. Restore is also the undo for a takedown you did not start: the same release runs when someone who holds the contact address on an unclaimed page signs in and chooses <strong class="text-gray-900 dark:text-white">This is not me</strong>, and when a schedule is deleted through the API.</li>
         </ol>
@@ -529,7 +533,7 @@
 
         <div class="doc-callout doc-callout-info">
             <div class="doc-callout-title">Plans are the only hosted part</div>
-            <p>This page is on every install, because a schedule can be deleted and its name released on a selfhosted install too, and this is where you undo it. Only plans behave differently: a selfhosted install resolves every schedule to the Enterprise feature set, so assigning a plan changes nothing, and the plan counts and the Plan and Source filters only reflect what is stored on each schedule, which puts most of them under Free. Prices, terms and the features in each tier come from your Stripe configuration and the application itself; they cannot be edited from the admin panel.</p>
+            <p>This page is on every install, because a schedule can be deleted and its name released on a selfhosted install too, and this is where you undo it. Only plans behave differently: a plain selfhost resolves every schedule to the Enterprise feature set, so the plan counts, the plan filters and columns, and the form to assign a plan only appear on hosted installs. Prices, terms and the features in each tier come from your Stripe configuration and the application itself; they cannot be edited from the admin panel.</p>
         </div>
     </section>
 
@@ -590,7 +594,7 @@
         <p class="text-gray-600 dark:text-gray-300 mb-4">Segments are managed from the <strong class="text-gray-900 dark:text-white">Segments</strong> button on the newsletter listing. Five kinds are available:</p>
         <ul class="doc-list mb-6">
             <li><strong class="text-gray-900 dark:text-white">All Platform Users</strong> - every confirmed account</li>
-            <li><strong class="text-gray-900 dark:text-white">Plan Tier</strong> - the owners and admins of schedules on Free, Pro or Enterprise</li>
+            <li><strong class="text-gray-900 dark:text-white">Plan Tier</strong> (hosted installs) - the owners and admins of schedules on Free, Pro or Enterprise</li>
             <li><strong class="text-gray-900 dark:text-white">Signup Date</strong> - accounts created between two dates</li>
             <li><strong class="text-gray-900 dark:text-white">Admins</strong> - other admins, useful for testing</li>
             <li><strong class="text-gray-900 dark:text-white">Manual</strong> - a list you add people to by hand</li>
@@ -601,31 +605,6 @@
         <div class="doc-callout doc-callout-info">
             <div class="doc-callout-title">Large sends need a queue worker</div>
             <p>With the default <code class="doc-inline-code">QUEUE_CONNECTION=sync</code> the send runs inside the web request, so sending to more than 50 recipients is refused and you are asked to schedule it instead. Scheduled sends are picked up by the cron entry every minute. To send large newsletters immediately, switch to a real queue connection and keep <code class="doc-inline-code">php artisan queue:work</code> running.</p>
-        </div>
-    </section>
-
-    <!-- Manage: Blog (hosted only) -->
-    <section id="manage-blog" class="doc-section">
-        <h2 class="doc-heading">
-            <svg aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-5 h-5 text-gray-500 dark:text-gray-400 flex-shrink-0">
-                <path stroke-linecap="round" stroke-linejoin="round" d="M16.862 4.487l1.687-1.688a1.875 1.875 0 112.652 2.652L10.582 16.07a4.5 4.5 0 01-1.897 1.13L6 18l.8-2.685a4.5 4.5 0 011.13-1.897l8.932-8.931zm0 0L19.5 7.125M18 14v4.75A2.25 2.25 0 0115.75 21H5.25A2.25 2.25 0 013 18.75V8.25A2.25 2.25 0 015.25 6H10" />
-            </svg>
-            Blog (Manage)
-        </h2>
-        <p class="text-gray-600 dark:text-gray-300 mb-6">The Blog section publishes posts to your public blog, with an RSS feed. Each post has:</p>
-        <ul class="doc-list mb-6">
-            <li>A title, a Markdown body, and an optional short excerpt</li>
-            <li>Comma-separated tags</li>
-            <li>A published state and a publish date, so a post can be written ahead of time</li>
-            <li>A meta title and meta description for search results</li>
-            <li>A header image chosen from the set that ships with the application</li>
-            <li>An author name</li>
-        </ul>
-        <p class="text-gray-600 dark:text-gray-300 mb-6">If AI is configured, a <strong class="text-gray-900 dark:text-white">Generate</strong> action drafts a post from a topic you type in, which you then edit before publishing. See <a href="{{ route('marketing.docs.selfhost.ai') }}" class="doc-link">AI Setup</a> for the API key it needs.</p>
-
-        <div class="doc-callout doc-callout-info">
-            <div class="doc-callout-title">Authoring is hosted only</div>
-            <p>The Blog item only appears when <code class="doc-inline-code">IS_HOSTED=true</code>. A selfhosted install still serves the public blog routes at <code class="doc-inline-code">/blog</code> and <code class="doc-inline-code">/blog/feed</code>, but has no screen for writing posts, so they stay empty.</p>
         </div>
     </section>
 
@@ -669,7 +648,7 @@
         <ul class="doc-list mb-6">
             <li><strong class="text-gray-900 dark:text-white">Last tick</strong> - every scheduler run stamps a heartbeat, even on minutes when nothing was due, so a stale value means the scheduler itself stopped rather than that the queue is quiet. The threshold is <code class="doc-inline-code">SCHEDULER_STALE_MINUTES</code> (default 20).</li>
             <li><strong class="text-gray-900 dark:text-white">Rails</strong> - each way of running the schedule ages separately: a crontab or worker running <code class="doc-inline-code">schedule:run</code>, and the <code class="doc-inline-code">/translate_data</code> cron endpoint. They are listed apart on purpose, so a worker that has died is visible even while another rail keeps the overall heartbeat fresh. Label a dedicated scheduler container with <code class="doc-inline-code">SCHEDULER_RAIL=worker</code>.</li>
-            <li><strong class="text-gray-900 dark:text-white">Scheduled tasks</strong> - every task with its cadence and when it last ran. A task is only called overdue relative to its own schedule, so "20 hours ago" is fine for a daily task and a problem for an hourly one. Failures show the error; tasks skipped because the previous run was still going are not failures. While the scheduler is stopped these are hidden, because none of them would mean anything.</li>
+            <li><strong class="text-gray-900 dark:text-white">Scheduled tasks</strong> - every task that does something on this install, with its cadence and when it last ran. Tasks that are a no-op on this kind of install, such as the subscription reminders on a plain selfhost, are left out. A task is only called overdue relative to its own schedule, so "20 hours ago" is fine for a daily task and a problem for an hourly one. Failures show the error; tasks skipped because the previous run was still going are not failures. While the scheduler is stopped these are hidden, because none of them would mean anything.</li>
         </ul>
         <p class="text-gray-600 dark:text-gray-300 mb-6">Installs driven only by the <code class="doc-inline-code">/translate_data</code> endpoint see a note instead of the task list: that route reports a single heartbeat rather than per-task results.</p>
 
@@ -758,7 +737,7 @@
             </svg>
             Settings (System)
         </h2>
-        <p class="text-gray-600 dark:text-gray-300 mb-6">The Settings page holds the handful of settings that apply to the whole installation. It is built from separate cards, each with its own Save button, and a card is only rendered when it can do something on this install. There are six, and a plain selfhost sees three of them: Header / Footer Code, Event Schedule network and Platform currency. None of these settings can be changed while the install is in demo mode.</p>
+        <p class="text-gray-600 dark:text-gray-300 mb-6">The Settings page holds the handful of settings that apply to the whole installation. It is built from separate cards, each with its own Save button, and a card is only rendered when it can do something on this install. There are seven, and a plain selfhost sees four of them: Header / Footer Code, Event Schedule network, Realtime visitors and Platform currency, plus Accommodation affiliate when it is enabled. None of these settings can be changed while the install is in demo mode.</p>
 
         <div class="doc-table-wrap">
             <table class="doc-table">
@@ -779,6 +758,11 @@
                         <td>Event Schedule network</td>
                         <td>Shares your public events with the eventschedule.com listings</td>
                         <td>Every install except eventschedule.com</td>
+                    </tr>
+                    <tr>
+                        <td>Realtime visitors</td>
+                        <td>Turns <a href="#realtime" class="doc-link">Realtime</a> on or off for the whole install</td>
+                        <td>Always</td>
                     </tr>
                     <tr>
                         <td>Monetization</td>
