@@ -140,7 +140,8 @@ class SupportConversation extends Model
         }
 
         try {
-            Mail::to($admin->email)->queue(new SupportMessageNotification(
+            // In the admin's own language, like every other mail to an account holder.
+            Mail::to($admin->email)->locale(is_valid_language_code($admin->language_code) ? $admin->language_code : 'en')->queue(new SupportMessageNotification(
                 $body,
                 $this->isGuest() ? $this->visitorLabel() : $this->displayName(),
                 false,

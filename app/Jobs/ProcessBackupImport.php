@@ -10,10 +10,11 @@ use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Queue\Queueable;
 use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Traits\Localizable;
 
 class ProcessBackupImport implements ShouldQueue
 {
-    use Queueable;
+    use Localizable, Queueable;
 
     public int $tries = 1;
 
@@ -90,8 +91,12 @@ class ProcessBackupImport implements ShouldQueue
                 return;
             }
 
+            // The report's messages and the mail that carries them are the user's to read, so both
+            // are written in the user's language rather than the queue worker's.
+            $locale = is_valid_language_code($job->user?->language_code) ? $job->user->language_code : 'en';
+
             $service = new BackupService;
-            $report = $service->importSchedules($data, $this->selectedIndices, $job->user_id, $job);
+            $report = $this->withLocale($locale, fn () => $service->importSchedules($data, $this->selectedIndices, $job->user_id, $job));
 
             $job->update([
                 'status' => 'completed',
@@ -104,7 +109,7 @@ class ProcessBackupImport implements ShouldQueue
             $job->update(['file_path' => null]);
 
             // Send email report
-            Mail::to($job->user->email)->send(
+            Mail::to($job->user->email)->locale($locale)->send(
                 new BackupImportComplete($report)
             );
 

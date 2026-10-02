@@ -58,8 +58,6 @@ class OwnerDigest extends Mailable
                 'more' => $this->more,
                 'dashboardUrl' => app_url(route('home', [], false)),
                 'unsubscribeUrl' => $this->unsubscribeUrl(),
-                // Schedule and event names are interpolated into prose.
-                'isRtl' => in_array(app()->getLocale(), ['ar', 'he']),
             ],
         );
     }

@@ -53,10 +53,6 @@ class ActivationNudge extends Mailable
                 'nudgeKey' => $this->nudgeKey,
                 'bodyKey' => $this->bodyKey(),
                 'ctaUrl' => $this->ctaUrl(),
-                // This mail interpolates a user-supplied schedule name into prose, so an
-                // unmarked RTL body renders the Latin name in the wrong place. Same test
-                // EventChanged and EventCancelled use.
-                'isRtl' => in_array(app()->getLocale(), ['ar', 'he']),
                 'unsubscribeUrl' => UrlUtils::userUnsubscribeUrl($user->email, app()->getLocale()),
             ],
         );

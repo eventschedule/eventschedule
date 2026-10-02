@@ -73,7 +73,6 @@ class EventDeclined extends Mailable
                 // message is being sent in, and in the recipient's own 12/24-hour preference.
                 'eventDate' => $event->localStartsAt(true, null, false, null, $locale, (bool) $this->recipient->use_24_hour_time),
                 'unsubscribeUrl' => $this->unsubscribeUrl(),
-                'isRtl' => is_rtl(),
             ]
         );
     }

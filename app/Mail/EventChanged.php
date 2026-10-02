@@ -63,7 +63,6 @@ class EventChanged extends Mailable
                 'eventUrl' => $this->eventUrl,
                 'icalUrl' => $this->icalUrl,
                 'display' => $this->buildDisplay(),
-                'isRtl' => in_array(app()->getLocale(), ['ar', 'he']),
             ],
         );
     }
@@ -94,6 +93,10 @@ class EventChanged extends Mailable
             $display['date'] = [
                 'old' => $hasOld ? $this->formatOccurrence($oldStart, $oldDuration, $use24) : null,
                 'new' => $this->formatOccurrence($newStart, $newDuration, $use24),
+                // The same values split into date and time, for the HTML part: each is isolated on
+                // its own there, or an RTL line reorders "8:00 PM - 11:00 PM" around the month name.
+                'old_parts' => $hasOld ? $this->occurrenceParts($oldStart, $oldDuration, $use24) : null,
+                'new_parts' => $this->occurrenceParts($newStart, $newDuration, $use24),
                 'old_tz' => $hasOld ? $oldStart->format('T') : '',
                 'new_tz' => $newStart->format('T'),
                 'delta' => $hasOld ? $this->formatDelta($oldStart, $oldDuration, $newStart, $newDuration) : null,
@@ -117,24 +120,34 @@ class EventChanged extends Mailable
 
     protected function formatOccurrence(Carbon $start, float $duration, bool $use24): string
     {
+        $parts = $this->occurrenceParts($start, $duration, $use24);
+
+        return $parts['time'] === null ? $parts['date'] : $parts['date'].', '.$parts['time'];
+    }
+
+    /**
+     * ['date' => ..., 'time' => ...|null]. Multi-day (duration >= 24h) is a date range with no time;
+     * single-day is the date plus a time range.
+     */
+    protected function occurrenceParts(Carbon $start, float $duration, bool $use24): array
+    {
         $dateFmt = 'F j, Y';
         $timeFmt = $use24 ? 'H:i' : 'g:i A';
 
-        // Multi-day (duration >= 24h) renders as a date range; single-day shows date + time range.
         if ($duration >= 24) {
             $end = $start->copy()->addMinutes(Event::durationHoursToMinutes($duration));
 
-            return $start->translatedFormat($dateFmt).' - '.$end->translatedFormat($dateFmt);
+            return ['date' => $start->translatedFormat($dateFmt).' - '.$end->translatedFormat($dateFmt), 'time' => null];
         }
 
-        $str = $start->translatedFormat($dateFmt).', '.$start->translatedFormat($timeFmt);
+        $time = $start->translatedFormat($timeFmt);
 
         if ($duration > 0) {
             $end = $start->copy()->addMinutes(Event::durationHoursToMinutes($duration));
-            $str .= ' - '.$end->translatedFormat($timeFmt);
+            $time .= ' - '.$end->translatedFormat($timeFmt);
         }
 
-        return $str;
+        return ['date' => $start->translatedFormat($dateFmt), 'time' => $time];
     }
 
     protected function formatDelta(Carbon $oldStart, float $oldDuration, Carbon $newStart, float $newDuration): ?string

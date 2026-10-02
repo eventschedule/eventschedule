@@ -15,6 +15,14 @@ class EventCancelled extends Mailable
 {
     use Queueable, SerializesModels;
 
+    /**
+     * The cancelled occurrence (the sale's event_date), so a recurring event's mail shows the date
+     * the buyer holds rather than the series' first one. A class property with a default rather
+     * than a promoted one: a mail queued before it existed unserializes without it, and an
+     * uninitialised typed property would throw.
+     */
+    protected ?string $date = null;
+
     public function __construct(
         protected Event $event,
         protected ?Role $role,
@@ -22,7 +30,10 @@ class EventCancelled extends Mailable
         protected ?string $note = null,
         protected ?string $recipientName = null,
         protected bool $partOfOrder = false,
-    ) {}
+        ?string $date = null,
+    ) {
+        $this->date = $date;
+    }
 
     public function envelope(): Envelope
     {
@@ -57,7 +68,7 @@ class EventCancelled extends Mailable
                 'recipientName' => $this->recipientName,
                 'eventUrl' => $this->eventUrl,
                 'partOfOrder' => $this->partOfOrder,
-                'isRtl' => in_array(app()->getLocale(), ['ar', 'he']),
+                'date' => $this->date,
             ],
         );
     }

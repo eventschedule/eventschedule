@@ -1,55 +1,38 @@
-<!DOCTYPE html>
-<html>
-<head>
-    <meta charset="utf-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>{{ $kind === 'overdue' ? __('messages.installment_digest_overdue_heading') : __('messages.installment_digest_due_heading') }}</title>
-</head>
-<body style="font-family: Arial, sans-serif; line-height: 1.6; color: #333; max-width: 600px; margin: 0 auto; padding: 20px;">
-    <div style="background-color: {{ $kind === 'overdue' ? '#d97706' : '#4E81FA' }}; color: white; padding: 20px; text-align: center; border-radius: 8px 8px 0 0;">
-        <h1 style="margin: 0; font-size: 24px;">
-            {{ $kind === 'overdue' ? __('messages.installment_digest_overdue_heading') : __('messages.installment_digest_due_heading') }}
-        </h1>
-    </div>
+@php
+    $theme = \App\Utils\EmailTheme::owner($role ?? null);
+    $overdue = $kind === 'overdue';
+    $heading = $overdue ? __('messages.installment_digest_overdue_heading') : __('messages.installment_digest_due_heading');
+    $body = $overdue ? __('messages.installment_digest_overdue_body') : __('messages.installment_digest_due_body');
+    $totalLabel = \App\Utils\MoneyUtils::format($total, $currency ?? 'USD');
+    $across = trans_choice('messages.installment_digest_across', count($rows), ['count' => count($rows)]);
 
-    <div style="background-color: #f9f9f9; padding: 20px; border-radius: 0 0 8px 8px;">
-        <p style="font-size: 16px; margin-top: 0;">
-            {{ $kind === 'overdue' ? __('messages.installment_digest_overdue_body') : __('messages.installment_digest_due_body') }}
-        </p>
+    // Buyer-supplied names and event names. Escaped by the table component, and this is an
+    // email so there is no Vue mount to worry about.
+    //
+    // The date arrives as Y-m-d and is formatted here, in the organizer's language. Its day and
+    // month are held together so four columns at phone width break it in two, not three, while
+    // the year may still wrap so the table fits the card.
+    $dueDate = fn ($value) => filled($value)
+        ? preg_replace('/^(\d+) /u', "\$1\u{00A0}", \Carbon\Carbon::parse($value)->translatedFormat('j M Y'))
+        : '';
+    $tableRows = array_map(fn ($row) => [
+        $row['name'],
+        $row['event'],
+        str_replace(' ', "\u{00A0}", \App\Utils\MoneyUtils::format($row['amount'], $row['currency'])),
+        $dueDate($row['due_at']),
+    ], $rows);
+@endphp
+<x-email.layout :theme="$theme" :title="$heading" :preheader="$totalLabel.' '.$across">
+{{-- The total is the headline: what the organizer is being told about, at a glance. --}}
+<x-email.heading :eyebrow="$heading" :tone="$overdue ? 'warning' : null" :subtitle="$across">{{ $totalLabel }}</x-email.heading>
 
-        <div style="background-color: white; padding: 16px; border-radius: 8px; margin: 20px 0;">
-            <table style="width: 100%; border-collapse: collapse; font-size: 14px;">
-                <tr style="border-bottom: 1px solid #eee;">
-                    <th style="text-align: left; padding: 8px 0; color: #666;">{{ __('messages.name') }}</th>
-                    <th style="text-align: left; padding: 8px 0; color: #666;">{{ __('messages.event') }}</th>
-                    <th style="text-align: right; padding: 8px 0; color: #666;">{{ __('messages.amount') }}</th>
-                    <th style="text-align: right; padding: 8px 0; color: #666;">{{ __('messages.date') }}</th>
-                </tr>
-                @foreach ($rows as $row)
-                    <tr style="border-bottom: 1px solid #f5f5f5;">
-                        {{-- Buyer-supplied. Escaped by Blade, and this is an email so there is no
-                             Vue mount to worry about. --}}
-                        <td style="padding: 8px 0;">{{ $row['name'] }}</td>
-                        <td style="padding: 8px 0; color: #555;">{{ $row['event'] }}</td>
-                        <td style="padding: 8px 0; text-align: right;">{{ \App\Utils\MoneyUtils::format($row['amount'], $row['currency']) }}</td>
-                        <td style="padding: 8px 0; text-align: right; color: #555;">{{ $row['due_at'] }}</td>
-                    </tr>
-                @endforeach
-            </table>
+<x-email.text>{{ $body }}</x-email.text>
 
-            <p style="margin: 14px 0 0 0; padding-top: 12px; border-top: 1px solid #eee; font-size: 14px;">
-                <strong>{{ \App\Utils\MoneyUtils::format($total, $currency ?? 'USD') }}</strong>
-                {{ trans_choice('messages.installment_digest_across', count($rows), ['count' => count($rows)]) }}
-            </p>
-        </div>
+<x-email.table :head="[__('messages.name'), __('messages.event'), __('messages.amount'), __('messages.date')]" :align="['start', 'start', 'end', 'end']" :rows="$tableRows" />
 
-        <div style="text-align: center; margin: 30px 0;">
-            <a href="{{ route('sales', ['tab' => 'installments']) }}"
-               style="display: inline-block; background-color: {{ $kind === 'overdue' ? '#d97706' : '#4E81FA' }}; color: white; padding: 15px 30px; text-decoration: none; border-radius: 5px; font-weight: bold; font-size: 16px;">
-                {{ __('messages.installment_digest_view_tab') }}
-            </a>
-        </div>
-        @include('emails.partials.notification_email_footer', ['scheduleName' => $role?->name])
-    </div>
-</body>
-</html>
+<x-email.button :href="route('sales', ['tab' => 'installments'])">{{ __('messages.installment_digest_view_tab') }}</x-email.button>
+
+<x-slot:footer>
+@include('emails.partials.notification_email_footer', ['scheduleName' => $role?->name])
+</x-slot:footer>
+</x-email.layout>

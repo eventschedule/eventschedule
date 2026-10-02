@@ -1143,7 +1143,7 @@ class ActivationNudgeTest extends TestCase
      * An RTL locale marks the body direction.
      *
      * The mail interpolates a user-supplied schedule name into prose, so an unmarked RTL body
-     * renders the Latin name in the wrong place - the same reason EventChanged passes isRtl.
+     * renders the Latin name in the wrong place. <x-email.layout> sets the direction from the locale.
      */
     public function test_rtl_locales_mark_the_body_direction(): void
     {

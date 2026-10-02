@@ -1,66 +1,51 @@
-<!DOCTYPE html>
-<html>
-<head>
-    <meta charset="utf-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>{{ __('messages.pass_booking_confirmation') }}</title>
-</head>
-<body style="font-family: Arial, sans-serif; line-height: 1.6; color: #333; max-width: 600px; margin: 0 auto; padding: 20px;">
-    <div style="background-color: #4E81FA; color: white; padding: 20px; text-align: center; border-radius: 8px 8px 0 0;">
-        <h1 style="margin: 0; font-size: 24px;">{{ __('messages.pass_booking_confirmation') }}</h1>
-    </div>
+@php
+    $theme = \App\Utils\EmailTheme::guest($role ?? null);
+    $start = $bookedEvent->starts_at ? $bookedEvent->getStartDateTime($date, true) : null;
+    $when = $start ? ($bookedEvent->is_multi_day ? $bookedEvent->getDateRangeDisplay($date) : $start->translatedFormat('l, F j')) : null;
+@endphp
+<x-email.layout :theme="$theme" :title="__('messages.pass_booking_confirmation')" :preheader="$bookedEvent->name.($when ? ' · '.$when : '')">
+<x-slot:hero>
+<x-email.flyer :event="$bookedEvent" />
+</x-slot:hero>
 
-    <div style="background-color: #f9f9f9; padding: 20px; border-radius: 0 0 8px 8px;">
-        <p style="font-size: 16px; margin-top: 0;">{{ __('messages.hello') }} {{ $sale->name }},</p>
+<x-email.heading :eyebrow="__('messages.pass_booking_confirmation')" auto>{{ $bookedEvent->name }}</x-email.heading>
 
-        <p>{{ __('messages.pass_booking_confirmation_intro') }}</p>
+<x-email.text>{{ __('messages.hello') }} {{ $sale->name }},</x-email.text>
+<x-email.text>{{ __('messages.pass_booking_confirmation_intro') }}</x-email.text>
 
-        <div style="background-color: white; padding: 20px; border-radius: 8px; margin: 20px 0;">
-            <h2 style="margin-top: 0; color: #4E81FA;">{{ $bookedEvent->name }}</h2>
-            <p style="margin: 10px 0;"><strong>{{ __('messages.date') }}:</strong> {{ $dateLabel }}</p>
-            <p style="margin: 10px 0;"><strong>{{ __('messages.attendee') }}:</strong> {{ $sale->name }}</p>
-            @if (! empty($cancelDeadlineLabel))
-            <p style="margin: 10px 0; color: #b45309;">
-                @if (! empty($cancelDeadlinePassed))
-                    {{ $lateCancelPolicy === 'block'
-                        ? __('messages.pass_cancel_email_closed', ['minutes' => \App\Services\PassBookingService::CANCEL_GRACE_MINUTES])
-                        : __('messages.pass_cancel_email_no_credit', ['minutes' => \App\Services\PassBookingService::CANCEL_GRACE_MINUTES]) }}
-                @else
-                    {{ $lateCancelPolicy === 'block'
-                        ? __('messages.pass_cancel_email_deadline_block', ['deadline' => $cancelDeadlineLabel])
-                        : __('messages.pass_cancel_email_deadline_forfeit', ['deadline' => $cancelDeadlineLabel]) }}
-                @endif
-            </p>
-            @endif
-        </div>
+<x-email.event :event="$bookedEvent" :date="$date" :role="$role ?? null" />
 
-        <div style="background-color: white; padding: 20px; border-radius: 8px; margin: 20px 0; text-align: center;">
-            <div style="display: inline-block; padding: 15px; background-color: #f9f9f9; border-radius: 8px;">
-                <img src="{{ $message->embedData($qrCodeData, 'pass-qr-code.png', 'image/png') }}" alt="QR Code" style="max-width: 200px; height: auto;" />
-            </div>
-            <p style="margin-top: 15px; font-size: 14px; color: #666;">{{ __('messages.scan_qr_code_to_view_ticket') }}</p>
-        </div>
+<x-email.details>
+<x-email.item :label="__('messages.attendee')">{{ $sale->name }}</x-email.item>
+</x-email.details>
 
-        <div style="text-align: center; margin: 30px 0;">
-            <a href="{{ $manageUrl }}"
-               style="display: inline-block; background-color: #4E81FA; color: white; padding: 15px 30px; text-decoration: none; border-radius: 5px; font-weight: bold; font-size: 16px;">
-                {{ __('messages.manage_my_pass') }}
-            </a>
-        </div>
+@if (! empty($cancelDeadlineLabel))
+<x-email.callout tone="warning">
+@if (! empty($cancelDeadlinePassed))
+{{ $lateCancelPolicy === 'block'
+    ? __('messages.pass_cancel_email_closed', ['minutes' => \App\Services\PassBookingService::CANCEL_GRACE_MINUTES])
+    : __('messages.pass_cancel_email_no_credit', ['minutes' => \App\Services\PassBookingService::CANCEL_GRACE_MINUTES]) }}
+@else
+{{ $lateCancelPolicy === 'block'
+    ? __('messages.pass_cancel_email_deadline_block', ['deadline' => $cancelDeadlineLabel])
+    : __('messages.pass_cancel_email_deadline_forfeit', ['deadline' => $cancelDeadlineLabel]) }}
+@endif
+</x-email.callout>
+@endif
 
-        @php $ticketNotes = $bookedEvent->parsedTicketNotesHtml($date, $role); @endphp
-        @if ($ticketNotes && trim(strip_tags($ticketNotes)) !== '')
-        <div style="background-color: white; padding: 20px; border-radius: 8px; margin: 20px 0;">
-            <h3 style="margin-top: 0; color: #4E81FA;">{{ __('messages.important_information') }}</h3>
-            <div style="color: #333;">
-                {!! \App\Utils\UrlUtils::convertUrlsToLinks($ticketNotes) !!}
-            </div>
-        </div>
-        @endif
+<x-email.qr :src="$message->embedData($qrCodeData, 'pass-qr-code.png', 'image/png')" :alt="__('messages.ticket_qr_code')" :caption="__('messages.scan_qr_code_to_view_ticket')" />
 
-        <p style="font-size: 12px; color: #999; margin-top: 30px; border-top: 1px solid #ddd; padding-top: 20px;">
-            {{ __('messages.event_support_contact') }}: <a href="mailto:{{ $bookedEvent->user->email }}" style="color: #4E81FA;">{{ $bookedEvent->user->email }}</a>
-        </p>
-    </div>
-</body>
-</html>
+<x-email.button :href="$manageUrl">{{ __('messages.manage_my_pass') }}</x-email.button>
+
+@php($ticketNotes = $bookedEvent->parsedTicketNotesHtml($date, $role))
+@if ($ticketNotes && trim(strip_tags($ticketNotes)) !== '')
+<x-email.section :label="__('messages.important_information')" />
+<x-email.prose>{!! \App\Utils\UrlUtils::convertUrlsToLinks($ticketNotes) !!}</x-email.prose>
+@endif
+
+@if ($bookedEvent->user?->email)
+<x-slot:footer>
+<x-email.footer>{{ __('messages.event_support_contact') }}: <x-email.link :href="'mailto:'.$bookedEvent->user->email" muted>{{ $bookedEvent->user->email }}</x-email.link></x-email.footer>
+</x-slot:footer>
+@endif
+</x-email.layout>

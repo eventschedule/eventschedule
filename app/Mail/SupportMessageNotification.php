@@ -48,16 +48,18 @@ class SupportMessageNotification extends Mailable
 
     public function envelope(): Envelope
     {
+        $app = config('app.name');
+
         if ($this->isAdminReply) {
             $subject = $this->isGuest
-                ? 'New reply from '.($this->senderName ?: 'Event Schedule').' at Event Schedule'
-                : 'New reply from Event Schedule Support';
+                ? __('messages.support_reply_subject_guest', ['name' => $this->senderName ?: $app, 'app' => $app])
+                : __('messages.support_reply_subject', ['app' => $app]);
         } elseif ($this->isGuest) {
             $subject = $this->senderName
-                ? 'New chat from a website visitor: '.$this->senderName
-                : 'New chat from a website visitor';
+                ? __('messages.support_chat_subject_named', ['name' => $this->senderName])
+                : __('messages.support_chat_subject');
         } else {
-            $subject = 'New support message from '.$this->senderName;
+            $subject = __('messages.support_message_subject', ['name' => $this->senderName]);
         }
 
         return new Envelope(

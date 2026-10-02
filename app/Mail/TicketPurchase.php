@@ -11,6 +11,7 @@ use App\Utils\UrlUtils;
 use Illuminate\Bus\Queueable;
 use Illuminate\Mail\Mailable;
 use Illuminate\Mail\Mailables\Address;
+use Illuminate\Mail\Mailables\Attachment;
 use Illuminate\Mail\Mailables\Content;
 use Illuminate\Mail\Mailables\Envelope;
 use Illuminate\Mail\Mailables\Headers;
@@ -71,12 +72,7 @@ class TicketPurchase extends Mailable
      */
     public function content(): Content
     {
-        $ticketUrl = canonical_url(route('ticket.view', [
-            'event_id' => UrlUtils::encodeId($this->event->id),
-            'secret' => $this->sale->secret,
-        ], false));
-
-        $qrCodeData = QrCodeUtils::png($ticketUrl);
+        $ticketUrl = $this->ticketUrl();
 
         // Our own route, not a signed pay.google.com link: the JWT behind one is short-lived and
         // building it calls Google, neither of which belongs inside a queued mailable. Null when
@@ -110,7 +106,6 @@ class TicketPurchase extends Mailable
                 'event' => $this->event,
                 'role' => $this->role,
                 'ticketUrl' => $ticketUrl,
-                'qrCodeData' => $qrCodeData,
                 'googleWalletUrl' => $googleWalletUrl,
                 'googleWalletBadge' => $googleWalletBadge,
                 'giftCardAmount' => $giftCardAmount,
@@ -143,6 +138,22 @@ class TicketPurchase extends Mailable
      */
     public function attachments(): array
     {
-        return [];
+        // The ticket's QR code, attached rather than shown in the body. The user guide and the
+        // marketing pages promise a QR code with every confirmation email, free registrations
+        // included. It used to ride along as an inline image stranded in an HTML comment after the
+        // body's QR block was hidden (cd43333dc): nothing showed in the body, but mail clients still
+        // listed the image. Now it is deliberate, a named attachment every client shows, and the
+        // body stays as that commit decided.
+        return [
+            Attachment::fromData(fn () => QrCodeUtils::png($this->ticketUrl()), 'ticket-qr-code.png')->withMime('image/png'),
+        ];
+    }
+
+    private function ticketUrl(): string
+    {
+        return canonical_url(route('ticket.view', [
+            'event_id' => UrlUtils::encodeId($this->event->id),
+            'secret' => $this->sale->secret,
+        ], false));
     }
 }

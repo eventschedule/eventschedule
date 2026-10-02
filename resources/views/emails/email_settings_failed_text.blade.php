@@ -1,6 +1,6 @@
 {{ __('messages.email_settings_failed_email_heading') }}
 
-{{ __('messages.email_settings_failed_email_greeting', ['name' => $recipient->name ?? $recipient->email]) }},
+{{ __('messages.email_settings_failed_email_greeting', ['name' => $recipient->name ?? $recipient->email]) }}
 
 {{ __('messages.email_settings_failed_email_intro', [
     'schedule' => $role->name,

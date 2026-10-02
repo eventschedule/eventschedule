@@ -1,36 +1,23 @@
-<!DOCTYPE html>
-<html>
-<head>
-    <meta charset="utf-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>{{ __('messages.gift_card_sold') }}</title>
-</head>
-<body style="font-family: Arial, sans-serif; line-height: 1.6; color: #333; max-width: 600px; margin: 0 auto; padding: 20px;">
-    <div style="background-color: #4E81FA; color: white; padding: 20px; text-align: center; border-radius: 8px 8px 0 0;">
-        <h1 style="margin: 0; font-size: 24px;">{{ __('messages.gift_card_sold') }}</h1>
-    </div>
+@php($theme = \App\Utils\EmailTheme::owner($role ?? null))
+<x-email.layout :theme="$theme" :title="__('messages.gift_card_sold')" :preheader="$amount.' · '.__('messages.gift_card_sale_notification_intro', ['schedule' => $role->name])">
+<x-email.heading>{{ __('messages.gift_card_sold') }}</x-email.heading>
 
-    <div style="background-color: #f9f9f9; padding: 20px; border-radius: 0 0 8px 8px;">
-        @if ($recipient)
-        <p style="font-size: 16px; margin-top: 0;">{{ __('messages.hello') }} {{ $recipient->name }},</p>
-        @endif
+@if ($recipient)
+<x-email.text>{{ __('messages.hello') }} {{ $recipient->name }},</x-email.text>
+@endif
 
-        <p>{{ __('messages.gift_card_sale_notification_intro', ['schedule' => $role->name]) }}</p>
+<x-email.text>{{ __('messages.gift_card_sale_notification_intro', ['schedule' => $role->name]) }}</x-email.text>
 
-        <div style="background-color: white; padding: 20px; border-radius: 8px; margin: 20px 0;">
-            <p style="margin: 10px 0;"><strong>{{ __('messages.amount') }}:</strong> {{ $amount }}</p>
-            <p style="margin: 10px 0;"><strong>{{ __('messages.purchaser') }}:</strong> {{ $giftCard->purchaser_name }} ({{ $giftCard->purchaser_email }})</p>
-            <p style="margin: 10px 0;"><strong>{{ __('messages.recipient') }}:</strong> {{ $giftCard->recipient_name }} ({{ $giftCard->recipient_email }})</p>
-            <p style="margin: 10px 0;"><strong>{{ __('messages.payment') }}:</strong> {{ __('messages.'.$giftCard->payment_method) }}</p>
-        </div>
+<x-email.highlight :value="$amount" :caption="__('messages.payment').': '.__('messages.'.$giftCard->payment_method)" />
 
-        <div style="text-align: center; margin: 30px 0;">
-            <a href="{{ $salesUrl }}"
-               style="display: inline-block; background-color: #4E81FA; color: white; padding: 15px 30px; text-decoration: none; border-radius: 5px; font-weight: bold; font-size: 16px;">
-                {{ __('messages.view_gift_cards') }}
-            </a>
-        </div>
-        @include('emails.partials.notification_email_footer', ['scheduleName' => $role?->name])
-    </div>
-</body>
-</html>
+<x-email.details>
+<x-email.item :label="__('messages.purchaser')" :caption="$giftCard->purchaser_email">{{ $giftCard->purchaser_name }}</x-email.item>
+<x-email.item :label="__('messages.recipient')" :caption="$giftCard->recipient_email">{{ $giftCard->recipient_name }}</x-email.item>
+</x-email.details>
+
+<x-email.button :href="$salesUrl">{{ __('messages.view_gift_cards') }}</x-email.button>
+
+<x-slot:footer>
+@include('emails.partials.notification_email_footer', ['scheduleName' => $role?->name])
+</x-slot:footer>
+</x-email.layout>

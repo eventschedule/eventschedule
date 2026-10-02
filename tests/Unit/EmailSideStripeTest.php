@@ -24,7 +24,9 @@ class EmailSideStripeTest extends TestCase
     {
         $offenders = [];
 
-        foreach (['emails', 'mail'] as $dir) {
+        // components/email is the shared design system every email is built on, and vendor/mail the
+        // theme Laravel inlines into its Markdown mail, so a stripe in either reaches every message.
+        foreach (['emails', 'mail', 'components/email', 'vendor/mail', 'vendor/notifications'] as $dir) {
             foreach (File::allFiles(resource_path('views/'.$dir)) as $file) {
                 if (str_contains($file->getRelativePathname(), 'newsletter')) {
                     continue;

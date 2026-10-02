@@ -50,7 +50,6 @@ class SetPassword extends Mailable
             view: 'emails.set_password',
             text: 'emails.set_password_text',
             with: [
-                'isRtl' => in_array(app()->getLocale(), ['ar', 'he']),
                 'expiresInMinutes' => config('auth.passwords.users.expire', 60),
             ],
         );

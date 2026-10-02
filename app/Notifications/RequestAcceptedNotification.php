@@ -43,7 +43,6 @@ class RequestAcceptedNotification extends Notification
             ->subject(str_replace(':venue', $venue->name, __('messages.'.$role->type.'_request_accepted')))
             ->line(str_replace(':venue', $venue->name, __('messages.'.$role->type.'_request_accepted')))
             ->action(__('messages.view_event'), $this->event->getGuestUrl($venue->subdomain, null, true))
-            ->line(__('messages.thank_you_for_using'))
             ->withSymfonyMessage(function ($message) {
                 $unsubscribeUrl = route('role.unsubscribe', ['subdomain' => $this->event->venue->subdomain]);
                 $message->getHeaders()->addTextHeader('List-Unsubscribe', '<'.$unsubscribeUrl.'>');

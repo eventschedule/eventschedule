@@ -597,7 +597,9 @@ class ChargeInstallments extends Command
             'event' => $plan->sale?->event?->name,
             'amount' => (float) ($installment?->amount ?? 0),
             'currency' => $plan->currency,
-            'due_at' => $installment?->due_at?->format('j M Y'),
+            // A date, not a label: the digest renders in the organizer's language, so the views
+            // format it (translatedFormat) at send time. Formatting here used the CLI's locale.
+            'due_at' => $installment?->due_at?->toDateString(),
             'progress' => $plan->paidCount().' / '.$plan->installment_count,
             'remaining' => $plan->amountRemaining(),
         ];

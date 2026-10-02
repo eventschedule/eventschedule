@@ -1,28 +1,15 @@
-{{-- Shared payment-schedule table for the installment emails. Expects $plan. --}}
+{{-- Shared payment-schedule table for the installment emails. Expects $plan. Rendered inside an
+     <x-email.layout>, whose theme the components read. --}}
 @php
     $currency = $plan->currency;
+    $scheduleRows = $plan->installments->map(fn ($row) => [
+        $row->due_at?->translatedFormat('j M Y'),
+        \App\Utils\MoneyUtils::format($row->amount, $currency),
+        $row->status === 'paid'
+            ? [__('messages.paid'), 'success']
+            : ($row->status === 'cancelled' ? __('messages.cancelled') : __('messages.scheduled')),
+    ])->all();
 @endphp
-<div style="background-color: white; padding: 20px; border-radius: 8px; margin: 20px 0;">
-    <p style="margin: 0 0 12px 0; font-weight: bold; color: #4E81FA;">{{ __('messages.your_payment_schedule') }}</p>
-    <table style="width: 100%; border-collapse: collapse; font-size: 14px;">
-        @foreach ($plan->installments as $row)
-            <tr>
-                <td style="padding: 6px 0; color: #555;">{{ $row->due_at?->translatedFormat('j M Y') }}</td>
-                <td style="padding: 6px 0; text-align: right; color: #333;">{{ \App\Utils\MoneyUtils::format($row->amount, $currency) }}</td>
-                <td style="padding: 6px 0 6px 12px; text-align: right; color: {{ $row->status === 'paid' ? '#16a34a' : '#999' }};">
-                    @if ($row->status === 'paid')
-                        {{ __('messages.paid') }}
-                    @elseif ($row->status === 'cancelled')
-                        {{ __('messages.cancelled') }}
-                    @else
-                        {{ __('messages.scheduled') }}
-                    @endif
-                </td>
-            </tr>
-        @endforeach
-    </table>
-    <p style="margin: 14px 0 0 0; padding-top: 12px; border-top: 1px solid #eee; font-size: 14px; color: #333;">
-        <strong>{{ __('messages.total') }} {{ \App\Utils\MoneyUtils::format($plan->total_amount, $currency) }}.</strong>
-        {{ __('messages.installments_no_interest_short') }}
-    </p>
-</div>
+<x-email.section :label="__('messages.your_payment_schedule')" />
+<x-email.table :align="['start', 'end', 'end']" :rows="$scheduleRows" />
+<x-email.text variant="small"><strong>{{ __('messages.total') }} {{ \App\Utils\MoneyUtils::format($plan->total_amount, $currency) }}.</strong> {{ __('messages.installments_no_interest_short') }}</x-email.text>

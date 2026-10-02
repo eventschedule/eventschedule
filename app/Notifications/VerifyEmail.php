@@ -52,7 +52,7 @@ class VerifyEmail extends BaseVerifyEmail
             public function envelope(): Envelope
             {
                 return new Envelope(
-                    subject: 'Welcome to Event Schedule!',
+                    subject: __('messages.verify_email_subject', ['app' => config('app.name')]),
                 );
             }
 
@@ -61,13 +61,13 @@ class VerifyEmail extends BaseVerifyEmail
                 return new Content(
                     markdown: 'vendor.notifications.email',
                     with: [
-                        'greeting' => 'Hello!',
-                        'introLines' => ['Please click the button below to verify your email address.'],
-                        'actionText' => 'Verify Email Address',
+                        'greeting' => __('messages.hello').'!',
+                        'introLines' => [__('messages.verify_email_intro')],
+                        'actionText' => __('messages.verify_email_button'),
                         'actionUrl' => $this->verificationUrl,
                         'displayableActionUrl' => $this->verificationUrl,
                         'outroLines' => [],
-                        'salutation' => "Regards,\n\nThe Event Schedule team",
+                        'salutation' => __('messages.thanks').",\n\n".config('app.name'),
                         'level' => 'primary',
                     ],
                 );

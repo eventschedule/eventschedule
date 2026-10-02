@@ -82,10 +82,6 @@ class EventInterestNotification extends Mailable
             view: 'emails.event_interest',
             text: 'emails.event_interest_text',
             with: [
-                // The body interpolates a user-supplied event name into prose, so the direction has
-                // to follow the recipient's locale - the same reason EventChanged and
-                // EventCancelled set it and OnboardingNudge does not.
-                'isRtl' => in_array(app()->getLocale(), ['ar', 'he']),
                 'heading' => __('messages.event_interest_'.$this->kind.'_heading'),
                 'body' => __('messages.event_interest_'.$this->kind.'_body', ['event' => $this->event->name]),
                 'button' => __('messages.event_interest_'.$this->kind.'_button'),

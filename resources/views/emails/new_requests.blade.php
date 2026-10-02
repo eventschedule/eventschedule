@@ -1,39 +1,17 @@
-<!DOCTYPE html>
-<html>
-<head>
-    <meta charset="utf-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>{{ __('messages.new_requests_notification_subject', ['name' => $role->name, 'count' => $requestCount]) }}</title>
-</head>
-<body style="font-family: Arial, sans-serif; line-height: 1.6; color: #333; max-width: 600px; margin: 0 auto; padding: 20px;">
-    <div style="background-color: #4E81FA; color: white; padding: 30px 20px; text-align: center; border-radius: 8px 8px 0 0;">
-        <h1 style="margin: 0; font-size: 24px; font-weight: 600;">{{ __('messages.pending') }} {{ __('messages.requests') }}</h1>
-    </div>
+@php($theme = \App\Utils\EmailTheme::owner($role ?? null))
+<x-email.layout :theme="$theme" :title="__('messages.new_requests_notification_subject', ['name' => $role->name, 'count' => $requestCount])" :preheader="__('messages.new_requests_notification_subject', ['name' => $role->name, 'count' => $requestCount])">
+<x-email.heading>{{ __('messages.pending') }} {{ __('messages.requests') }}</x-email.heading>
 
-    <div style="background-color: #f9f9f9; padding: 20px; border-radius: 0 0 8px 8px;">
-        <p style="font-size: 16px; margin-top: 0;">{{ __('messages.hello') }},</p>
+<x-email.text>{{ __('messages.hello') }},</x-email.text>
 
-        <div style="background-color: white; padding: 20px; border-radius: 8px; margin: 20px 0;">
-            <p style="margin: 0; font-size: 18px; color: #333;">
-                <strong>{{ $requestCount }}</strong> pending {{ Str::plural('request', $requestCount) }} for <strong>{{ $role->name }}</strong>
-            </p>
-        </div>
+<x-email.highlight :value="(string) $requestCount" :caption="trans_choice('messages.new_requests_caption', $requestCount, ['name' => $role->name])" />
 
-        <div style="text-align: center; margin: 30px 0;">
-            <a href="{{ $actionUrl }}"
-               style="display: inline-block; background-color: #4E81FA; color: white; padding: 15px 30px; text-decoration: none; border-radius: 5px; font-weight: bold; font-size: 16px;">
-                {{ __('messages.view_details') }}
-            </a>
-        </div>
+<x-email.button :href="$actionUrl">{{ __('messages.view_details') }}</x-email.button>
 
-        <p style="font-size: 12px; color: #999; margin-top: 30px; border-top: 1px solid #ddd; padding-top: 20px;">
-            {{ __('messages.thank_you_for_using') }}
-            @if (empty($notificationEmailUnsubscribeUrl))
-            <br><br>
-            <a href="{{ $unsubscribeUrl }}" style="color: #4E81FA;">{{ __('messages.unsubscribe') }}</a>
-            @endif
-        </p>
-        @include('emails.partials.notification_email_footer', ['scheduleName' => $role?->name])
-    </div>
-</body>
-</html>
+<x-slot:footer>
+@if (empty($notificationEmailUnsubscribeUrl))
+<x-email.footer :links="[[__('messages.unsubscribe'), $unsubscribeUrl]]" />
+@endif
+@include('emails.partials.notification_email_footer', ['scheduleName' => $role?->name])
+</x-slot:footer>
+</x-email.layout>

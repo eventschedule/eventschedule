@@ -48,7 +48,6 @@ class SubscriptionConfirmation extends Mailable
             view: 'emails.subscription_confirmation',
             text: 'emails.subscription_confirmation_text',
             with: [
-                'isRtl' => in_array(app()->getLocale(), ['ar', 'he']),
             ],
         );
     }

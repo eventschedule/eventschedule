@@ -52,7 +52,7 @@ class NotifyAdminOfUnreadSupport implements ShouldBeUnique, ShouldQueue
             return;
         }
 
-        Mail::to($admin->email)->send(new SupportMessageNotification(
+        Mail::to($admin->email)->locale(is_valid_language_code($admin->language_code) ? $admin->language_code : 'en')->send(new SupportMessageNotification(
             $bodies,
             $conversation->isGuest() ? $conversation->visitorLabel() : $conversation->displayName(),
             false,

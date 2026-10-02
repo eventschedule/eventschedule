@@ -1,137 +1,75 @@
-<!DOCTYPE html>
-<html>
-<head>
-    <meta charset="utf-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-</head>
-<body style="font-family: Arial, sans-serif; line-height: 1.6; color: #333; max-width: 600px; margin: 0 auto; padding: 20px;">
-    <div style="background-color: {{ $role?->accent_color ?? '#4E81FA' }}; color: white; padding: 30px 20px; text-align: center; border-radius: 8px 8px 0 0;">
-        <h1 style="margin: 0; font-size: 24px; font-weight: 600;">
-            @if ($type === 'carpool_ride_requested')
-                {{ __('messages.carpool_email_ride_requested_heading') }}
-            @elseif ($type === 'carpool_request_approved')
-                {{ __('messages.carpool_email_request_approved_heading') }}
-            @elseif ($type === 'carpool_request_declined')
-                {{ __('messages.carpool_email_request_declined_heading') }}
-            @elseif ($type === 'carpool_offer_cancelled')
-                {{ __('messages.carpool_email_offer_cancelled_heading') }}
-            @elseif ($type === 'carpool_request_cancelled')
-                {{ __('messages.carpool_email_request_cancelled_heading') }}
-            @elseif ($type === 'carpool_reminder')
-                {{ __('messages.carpool_email_reminder_heading') }}
-            @endif
-        </h1>
-    </div>
+@php
+    $theme = \App\Utils\EmailTheme::guest($role ?? null);
 
-    <div style="background-color: #f9f9f9; padding: 20px; border-radius: 0 0 8px 8px;">
-        <p style="font-size: 16px; margin-top: 0;">{{ __('messages.hello') }} {{ $recipient?->name }},</p>
+    $heading = match ($type) {
+        'carpool_ride_requested' => __('messages.carpool_email_ride_requested_heading'),
+        'carpool_request_approved' => __('messages.carpool_email_request_approved_heading'),
+        'carpool_request_declined' => __('messages.carpool_email_request_declined_heading'),
+        'carpool_offer_cancelled' => __('messages.carpool_email_offer_cancelled_heading'),
+        'carpool_request_cancelled' => __('messages.carpool_email_request_cancelled_heading'),
+        'carpool_reminder' => __('messages.carpool_email_reminder_heading'),
+        default => '',
+    };
+    $tone = match ($type) {
+        'carpool_request_approved' => 'success',
+        'carpool_request_declined' => 'warning',
+        'carpool_offer_cancelled', 'carpool_request_cancelled' => 'danger',
+        default => null,
+    };
 
-        <div style="background-color: white; padding: 20px; border-radius: 8px; margin: 20px 0;">
-            <p style="margin: 0 0 10px 0; font-size: 18px; color: #333;">
-                <strong>{{ $event->name }}</strong>
-            </p>
+    $offerDate = $offer->event_date?->format('Y-m-d');
+    $showDriver = $type === 'carpool_request_approved'
+        || ($type === 'carpool_reminder' && $carpoolRequest && $carpoolRequest->status === 'approved' && $recipient?->id !== $offer->user_id);
+@endphp
+<x-email.layout :theme="$theme" :title="$heading" :preheader="$heading.' · '.$event->name">
+<x-email.heading :eyebrow="$heading" :tone="$tone" auto>{{ $event->name }}</x-email.heading>
 
-            @if ($offer->event_date)
-            <p style="margin: 0 0 10px 0; font-size: 14px; color: #666;">
-                {{ $event->is_multi_day ? $event->getDateRangeDisplay($offer->event_date?->format('Y-m-d')) : $event->getStartDateTime($offer->event_date?->format('Y-m-d'), true)?->translatedFormat('F j, Y') }}
-            </p>
-            @endif
+<x-email.text>{{ __('messages.hello') }} {{ $recipient?->name }},</x-email.text>
 
-            <p style="margin: 0 0 5px 0; font-size: 14px; color: #666;">
-                <strong>{{ __('messages.carpool_direction') }}:</strong> {{ $offer->directionLabel() }}
-            </p>
+@if ($type === 'carpool_ride_requested' && $carpoolRequest)
+<x-email.text>{{ __('messages.carpool_email_ride_requested_body', ['name' => $carpoolRequest->user->name]) }}</x-email.text>
+@if ($carpoolRequest->message)
+<x-email.quote :text="$carpoolRequest->message" />
+@endif
+@elseif ($type === 'carpool_request_approved')
+<x-email.text>{{ __('messages.carpool_email_request_approved_body') }}</x-email.text>
+@elseif ($type === 'carpool_request_declined')
+<x-email.text>{{ __('messages.carpool_email_request_declined_body') }}</x-email.text>
+@elseif ($type === 'carpool_offer_cancelled')
+<x-email.text>{{ __('messages.carpool_email_offer_cancelled_body', ['name' => $offer->user->name]) }}</x-email.text>
+@elseif ($type === 'carpool_request_cancelled')
+<x-email.text>{{ __('messages.carpool_email_request_cancelled_body', ['name' => $carpoolRequest->user->name]) }}</x-email.text>
+@elseif ($type === 'carpool_reminder')
+<x-email.text>{{ __('messages.carpool_email_reminder_body') }}</x-email.text>
+@endif
 
-            <p style="margin: 0 0 5px 0; font-size: 14px; color: #666;">
-                <strong>{{ __('messages.carpool_city') }}:</strong> {{ $offer->city }}
-            </p>
+@if ($showDriver)
+<x-email.details panel>
+<x-email.item :label="__('messages.carpool_driver')">{{ $offer->user->name }}</x-email.item>
+@if ($offer->user->phone)
+<x-email.item :label="__('messages.phone')" ltr>{{ $offer->user->phone }}</x-email.item>
+@endif
+<x-email.item :label="__('messages.email')" ltr wide>{{ $offer->user->email }}</x-email.item>
+</x-email.details>
+@endif
 
-            @if ($offer->departure_time)
-            <p style="margin: 0 0 5px 0; font-size: 14px; color: #666;">
-                <strong>{{ __('messages.carpool_departure_time') }}:</strong> {{ \Carbon\Carbon::parse($offer->departure_time)->format('H:i') }}
-            </p>
-            @endif
+<x-email.event :event="$event" :date="$offerDate" :role="$role ?? null" :calendar="false" />
 
-            @if ($offer->meeting_point)
-            <p style="margin: 0 0 5px 0; font-size: 14px; color: #666;">
-                <strong>{{ __('messages.carpool_meeting_point') }}:</strong> {{ $offer->meeting_point }}
-            </p>
-            @endif
-        </div>
+<x-email.section :label="__('messages.carpool')" />
+<x-email.details>
+<x-email.item :label="__('messages.carpool_direction')">{{ $offer->directionLabel() }}</x-email.item>
+<x-email.item :label="__('messages.carpool_city')">{{ $offer->city }}</x-email.item>
+@if ($offer->departure_time)
+<x-email.item :label="__('messages.carpool_departure_time')" ltr>{{ \Carbon\Carbon::parse($offer->departure_time)->format('H:i') }}</x-email.item>
+@endif
+@if ($offer->meeting_point)
+<x-email.item :label="__('messages.carpool_meeting_point')" wide>{{ $offer->meeting_point }}</x-email.item>
+@endif
+</x-email.details>
 
-        @if ($type === 'carpool_ride_requested' && $carpoolRequest)
-        <p style="font-size: 14px; color: #333;">
-            {{ __('messages.carpool_email_ride_requested_body', ['name' => $carpoolRequest->user->name]) }}
-        </p>
-        @if ($carpoolRequest->message)
-        <div style="background-color: #f3f4f6; padding: 15px; border-radius: 8px; margin: 10px 0;">
-            <p style="margin: 0; font-size: 14px; color: #666; font-style: italic;">{{ $carpoolRequest->message }}</p>
-        </div>
-        @endif
-        @endif
-
-        @if ($type === 'carpool_request_approved')
-        <p style="font-size: 14px; color: #333;">
-            {{ __('messages.carpool_email_request_approved_body') }}
-        </p>
-        <div style="background-color: #f0fdf4; padding: 15px; border-radius: 8px; margin: 10px 0; border: 1px solid #86efac;">
-            <p style="margin: 0 0 5px 0; font-size: 14px;">
-                <strong>{{ __('messages.carpool_driver') }}:</strong> {{ $offer->user->name }}
-            </p>
-            <p style="margin: 0 0 5px 0; font-size: 14px;">
-                <strong>{{ __('messages.email') }}:</strong> {{ $offer->user->email }}
-            </p>
-            @if ($offer->user->phone)
-            <p style="margin: 0; font-size: 14px;">
-                <strong>{{ __('messages.phone') }}:</strong> {{ $offer->user->phone }}
-            </p>
-            @endif
-        </div>
-        @endif
-
-        @if ($type === 'carpool_request_declined')
-        <p style="font-size: 14px; color: #333;">
-            {{ __('messages.carpool_email_request_declined_body') }}
-        </p>
-        @endif
-
-        @if ($type === 'carpool_offer_cancelled')
-        <p style="font-size: 14px; color: #333;">
-            {{ __('messages.carpool_email_offer_cancelled_body', ['name' => $offer->user->name]) }}
-        </p>
-        @endif
-
-        @if ($type === 'carpool_request_cancelled')
-        <p style="font-size: 14px; color: #333;">
-            {{ __('messages.carpool_email_request_cancelled_body', ['name' => $carpoolRequest->user->name]) }}
-        </p>
-        @endif
-
-        @if ($type === 'carpool_reminder')
-        <p style="font-size: 14px; color: #333;">
-            {{ __('messages.carpool_email_reminder_body') }}
-        </p>
-        @if ($carpoolRequest && $carpoolRequest->status === 'approved' && $recipient?->id !== $offer->user_id)
-        <div style="background-color: #f0fdf4; padding: 15px; border-radius: 8px; margin: 10px 0; border: 1px solid #86efac;">
-            <p style="margin: 0 0 5px 0; font-size: 14px;">
-                <strong>{{ __('messages.carpool_driver') }}:</strong> {{ $offer->user->name }}
-            </p>
-            <p style="margin: 0 0 5px 0; font-size: 14px;">
-                <strong>{{ __('messages.email') }}:</strong> {{ $offer->user->email }}
-            </p>
-            @if ($offer->user->phone)
-            <p style="margin: 0; font-size: 14px;">
-                <strong>{{ __('messages.phone') }}:</strong> {{ $offer->user->phone }}
-            </p>
-            @endif
-        </div>
-        @endif
-        @endif
-
-        <p style="font-size: 12px; color: #999; margin-top: 30px; border-top: 1px solid #ddd; padding-top: 20px;">
-            {{ __('messages.thank_you_for_using') }}
-            <br><br>
-            <a href="{{ $unsubscribeUrl }}" style="color: {{ $role?->accent_color ?? '#4E81FA' }};">{{ __('messages.unsubscribe') }}</a>
-        </p>
-    </div>
-</body>
-</html>
+@if ($unsubscribeUrl)
+<x-slot:footer>
+<x-email.footer :links="[[__('messages.unsubscribe'), $unsubscribeUrl]]" />
+</x-slot:footer>
+@endif
+</x-email.layout>

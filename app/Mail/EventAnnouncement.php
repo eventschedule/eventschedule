@@ -85,7 +85,6 @@ class EventAnnouncement extends Mailable
             view: 'emails.event_announcement',
             text: 'emails.event_announcement_text',
             with: [
-                'isRtl' => in_array(app()->getLocale(), ['ar', 'he']),
                 // Derived here rather than added to the constructor: the subscriber is already in
                 // hand, and every queued EventAnnouncement payload written before this shipped
                 // would otherwise fail to unserialize with a missing argument.

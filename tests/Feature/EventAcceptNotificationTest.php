@@ -353,7 +353,6 @@ class EventAcceptNotificationTest extends TestCase
             app()->setLocale($previous);
         }
 
-        $this->assertTrue($content->with['isRtl']);
         $this->assertStringContainsString('dir="rtl"', $html);
         $this->assertMatchesRegularExpression('/\p{Hebrew}/u', $content->with['eventDate']);
         $this->assertStringContainsString('lang=he', html_entity_decode($content->with['unsubscribeUrl']));

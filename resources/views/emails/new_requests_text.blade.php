@@ -2,7 +2,7 @@
 
 {{ __('messages.hello') }},
 
-{{ $requestCount }} pending {{ Str::plural('request', $requestCount) }} for {{ $role->name }}
+{!! trans_choice('messages.new_requests_line', $requestCount, ['count' => $requestCount, 'name' => $role->name]) !!}
 
 {{ __('messages.view_details') }}: {{ $actionUrl }}
 

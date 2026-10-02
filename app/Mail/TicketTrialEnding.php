@@ -39,8 +39,6 @@ class TicketTrialEnding extends Mailable
                 'role' => $this->role,
                 'endDate' => $this->endDate,
                 'planUrl' => route('role.view_admin', ['subdomain' => $this->role->subdomain, 'tab' => 'plan']),
-                // The schedule name is interpolated into prose, so ar/he need the direction set.
-                'isRtl' => in_array(app()->getLocale(), ['ar', 'he']),
             ]
         );
     }

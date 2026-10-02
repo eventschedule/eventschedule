@@ -50,6 +50,12 @@ abstract class AppointmentLifecycleMail extends Mailable
         return false;
     }
 
+    /** The state the eyebrow is coloured with (EmailTheme::TONES), or null for the accent. */
+    protected function tone(): ?string
+    {
+        return null;
+    }
+
     public function envelope(): Envelope
     {
         $fromAddress = config('mail.from.address');
@@ -94,6 +100,7 @@ abstract class AppointmentLifecycleMail extends Mailable
                 'intro' => __('messages.'.$this->introKey(), ['schedule' => $this->role?->name ?? '']),
                 'manageUrl' => $manageUrl,
                 'rebookUrl' => $rebookUrl,
+                'tone' => $this->tone(),
             ],
         );
     }

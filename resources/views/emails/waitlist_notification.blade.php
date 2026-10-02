@@ -1,46 +1,23 @@
-<!DOCTYPE html>
-<html>
-<head>
-    <meta charset="utf-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>{{ ($isRsvp ?? false) ? __('messages.waitlist_spots_available') : __('messages.waitlist_tickets_available') }}</title>
-</head>
-<body style="font-family: Arial, sans-serif; line-height: 1.6; color: #333; max-width: 600px; margin: 0 auto; padding: 20px;">
-    <div style="background-color: #4E81FA; color: white; padding: 30px 20px; text-align: center; border-radius: 8px 8px 0 0;">
-        <h1 style="margin: 0; font-size: 24px; font-weight: 600;">{{ ($isRsvp ?? false) ? __('messages.waitlist_spots_available') : __('messages.waitlist_tickets_available') }}</h1>
-    </div>
+@php
+    $theme = \App\Utils\EmailTheme::guest($role ?? null);
+    $title = ($isRsvp ?? false) ? __('messages.waitlist_spots_available') : __('messages.waitlist_tickets_available');
+    $start = $event->starts_at ? $event->getStartDateTime($entry->event_date, true) : null;
+    $when = $start ? ($event->is_multi_day ? $event->getDateRangeDisplay($entry->event_date) : $start->translatedFormat('l, F j')) : null;
+@endphp
+<x-email.layout :theme="$theme" :title="$title" :preheader="$event->name.($when ? ' · '.$when : '')">
+<x-email.heading :eyebrow="$title" auto>{{ $event->name }}</x-email.heading>
 
-    <div style="background-color: #f9f9f9; padding: 20px; border-radius: 0 0 8px 8px;">
-        <p style="font-size: 16px; margin-top: 0;">{{ __('messages.hello') }}, {{ $entry->name }}!</p>
+<x-email.text>{{ __('messages.hello') }}, {{ $entry->name }}!</x-email.text>
+<x-email.text>{{ ($isRsvp ?? false) ? __('messages.waitlist_rsvp_notification_body') : __('messages.waitlist_notification_body') }}</x-email.text>
 
-        <p style="font-size: 16px;">{{ ($isRsvp ?? false) ? __('messages.waitlist_rsvp_notification_body') : __('messages.waitlist_notification_body') }}</p>
+{{-- Nothing is booked yet, so nothing to add to a calendar. --}}
+<x-email.event :event="$event" :date="$entry->event_date" :role="$role ?? null" :calendar="false" />
 
-        <div style="background-color: white; padding: 20px; border-radius: 8px; margin: 20px 0;">
-            <p style="margin: 0 0 10px 0; font-size: 18px; color: #333;">
-                <strong>{{ $event->name }}</strong>
-            </p>
-            @if ($entry->event_date)
-            <p style="margin: 0; font-size: 14px; color: #666;">
-                {{ $event->is_multi_day ? $event->getDateRangeDisplay($entry->event_date) : $event->getStartDateTime($entry->event_date, true)->format('F j, Y') }}
-                @if ($event->getStartEndTime($entry->event_date)) {{ $event->getStartEndTime($entry->event_date) }}@endif
-            </p>
-            @endif
-        </div>
+<x-email.button :href="$eventUrl">{{ ($isRsvp ?? false) ? __('messages.waitlist_rsvp_notification_cta') : __('messages.waitlist_notification_cta') }}</x-email.button>
 
-        <div style="text-align: center; margin: 30px 0;">
-            <a href="{{ $eventUrl }}"
-               style="display: inline-block; background-color: #4E81FA; color: white; padding: 15px 30px; text-decoration: none; border-radius: 5px; font-weight: bold; font-size: 16px;">
-                {{ ($isRsvp ?? false) ? __('messages.waitlist_rsvp_notification_cta') : __('messages.waitlist_notification_cta') }}
-            </a>
-        </div>
-
-        <p style="font-size: 12px; color: #999; margin-top: 30px; border-top: 1px solid #ddd; padding-top: 20px;">
-            {{ __('messages.thank_you_for_using') }}
-            @if ($unsubscribeUrl)
-            <br><br>
-            <a href="{{ $unsubscribeUrl }}" style="color: #4E81FA;">{{ __('messages.unsubscribe') }}</a>
-            @endif
-        </p>
-    </div>
-</body>
-</html>
+@if ($unsubscribeUrl)
+<x-slot:footer>
+<x-email.footer :links="[[__('messages.unsubscribe'), $unsubscribeUrl]]" />
+</x-slot:footer>
+@endif
+</x-email.layout>

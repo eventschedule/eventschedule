@@ -3601,10 +3601,16 @@ class Event extends Model
         return \App\Utils\GuestSeo::eventDescription($this, is_string($date) ? $date : null, $want, $viewingRole);
     }
 
-    public function getGoogleCalendarUrl($date = null)
+    /**
+     * $details replaces the event's description in the entry. Emails pass the event's page URL:
+     * the description rides in the link URL-encoded, at about 3.4KB per 1,000 characters and with
+     * no length cap, so twice over (Google and Outlook) it can push a ticket email past Gmail's
+     * 102KB clip, which hides everything below it, unsubscribe link included.
+     */
+    public function getGoogleCalendarUrl($date = null, ?string $details = null)
     {
         $title = $this->getTitle();
-        $description = $this->description_html ? strip_tags($this->description_html) : ($this->role() ? strip_tags($this->role()->description_html) : '');
+        $description = $details ?? $this->calendarDescription();
         $location = $this->venue ? $this->venue->bestAddress() : '';
         $duration = $this->duration > 0 ? $this->duration : 2;
         // Stamped as UTC: a dated occurrence must be rebuilt from the venue's time-of-day, or the
@@ -3625,11 +3631,12 @@ class Event extends Model
     /**
      * The .ics download, on $subdomain when given. The event page passes the schedule it is showing:
      * the canonical schedule (false) can be an act that has not accepted the event yet, and the
-     * download answers only where the event is accepted, as that schedule's page does.
+     * download answers only where the event is accepted, as that schedule's page does. Emails pass
+     * $useCustomDomain, as they do for every guest link.
      */
-    public function getAppleCalendarUrl($date = null, $subdomain = false)
+    public function getAppleCalendarUrl($date = null, $subdomain = false, bool $useCustomDomain = false)
     {
-        $guestUrl = $this->getGuestUrl($subdomain, $date);
+        $guestUrl = $this->getGuestUrl($subdomain, $date, $useCustomDomain);
 
         if (! $guestUrl) {
             return '';
@@ -3638,10 +3645,11 @@ class Event extends Model
         return $guestUrl.'/ical';
     }
 
-    public function getMicrosoftCalendarUrl($date = null)
+    /** $details: see getGoogleCalendarUrl(). */
+    public function getMicrosoftCalendarUrl($date = null, ?string $details = null)
     {
         $title = $this->getTitle();
-        $description = $this->description_html ? strip_tags($this->description_html) : ($this->role() ? strip_tags($this->role()->description_html) : '');
+        $description = $details ?? $this->calendarDescription();
         $location = $this->venue ? $this->venue->bestAddress() : '';
         $duration = $this->duration > 0 ? $this->duration : 2;
         // See getGoogleCalendarUrl(): the stamp is UTC, so a dated occurrence needs the venue's
@@ -3659,6 +3667,12 @@ class Event extends Model
         $url .= '&allday=false';
 
         return $url;
+    }
+
+    /** The text an add-to-calendar link describes the event with: its own description, else its schedule's. */
+    private function calendarDescription(): string
+    {
+        return $this->description_html ? strip_tags($this->description_html) : ($this->role() ? strip_tags($this->role()->description_html) : '');
     }
 
     /**

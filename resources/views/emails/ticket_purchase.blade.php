@@ -1,155 +1,149 @@
-<!DOCTYPE html>
-<html>
-<head>
-    <meta charset="utf-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    @php
-        // A gift-card-covered order is a purchase, not a free reservation
-        $isFreeReservation = $sale->payment_amount == 0 && ($giftCardAmount ?? 0) == 0;
-    @endphp
-    <title>{{ $sale->isRsvp() ? __('messages.registration_confirmation') : ($isFreeReservation ? __('messages.ticket_reservation_confirmation') : __('messages.ticket_purchase_confirmation')) }}</title>
-</head>
-<body style="font-family: Arial, sans-serif; line-height: 1.6; color: #333; max-width: 600px; margin: 0 auto; padding: 20px;">
-    <div style="background-color: #4E81FA; color: white; padding: 20px; text-align: center; border-radius: 8px 8px 0 0;">
-        <h1 style="margin: 0; font-size: 24px;">{{ $sale->isRsvp() ? __('messages.registration_confirmation') : ($isFreeReservation ? __('messages.ticket_reservation_confirmation') : __('messages.ticket_purchase_confirmation')) }}</h1>
-    </div>
+@php
+    $theme = \App\Utils\EmailTheme::guest($role ?? null);
 
-    <div style="background-color: #f9f9f9; padding: 20px; border-radius: 0 0 8px 8px;">
-        <p style="font-size: 16px; margin-top: 0;">{{ __('messages.hello') }} {{ $sale->name }},</p>
+    // A gift-card-covered order is a purchase, not a free reservation
+    $isFreeReservation = $sale->payment_amount == 0 && ($giftCardAmount ?? 0) == 0;
+    $thanks = $sale->isRsvp() ? __('messages.registration_confirmation') : ($isFreeReservation ? __('messages.thank_you_for_reserving_tickets') : __('messages.thank_you_for_purchasing_tickets'));
+    $eyebrow = $sale->isRsvp() ? __('messages.registration_confirmation') : ($isFreeReservation ? __('messages.ticket_reservation_confirmation') : __('messages.ticket_purchase_confirmation'));
 
-        <p>{{ $sale->isRsvp() ? __('messages.registration_confirmation') : ($isFreeReservation ? __('messages.thank_you_for_reserving_tickets') : __('messages.thank_you_for_purchasing_tickets')) }}</p>
+    $start = $event->starts_at ? $event->getStartDateTime($sale->event_date, true) : null;
+    $when = $start ? ($event->is_multi_day ? $event->getDateRangeDisplay($sale->event_date) : $start->translatedFormat('l, F j')) : null;
+    $currency = $event->ticket_currency_code ?: 'USD';
 
-        <div style="background-color: white; padding: 20px; border-radius: 8px; margin: 20px 0;">
-            <h2 style="margin-top: 0; color: #4E81FA;">{{ $event->name }}</h2>
-            <p style="margin: 10px 0;"><strong>{{ __('messages.date') }}:</strong> {{ $event->is_multi_day ? $event->getDateRangeDisplay($sale->event_date) : $event->getStartDateTime($sale->event_date, true)->format('F j, Y') }}</p>
-            <p style="margin: 10px 0;"><strong>{{ __('messages.time') }}:</strong> {{ $event->getStartEndTime($sale->event_date) }}</p>
-            <p style="margin: 10px 0;"><strong>{{ __('messages.attendee') }}:</strong> {{ $sale->name }}</p>
-            @if (! $sale->isRsvp())
-            <p style="margin: 10px 0;"><strong>{{ __('messages.number_of_attendees') }}:</strong> {{ $sale->quantity() }}</p>
-            @endif
-        </div>
+    $passTerms = function ($ticket) {
+        if (! $ticket->is_pass) {
+            return null;
+        }
+        if ($ticket->pass_usage_type === 'per_occurrence') {
+            return __('messages.season_pass').' · '.__('messages.pass_valid_all_dates');
+        }
+        $terms = __('messages.subscription');
+        if ($ticket->pass_usage_type === 'total' && $ticket->pass_max_uses) {
+            $terms .= ' · '.$ticket->pass_max_uses.' '.__('messages.visits');
+        } elseif ($ticket->pass_usage_type === 'unlimited') {
+            $terms .= ' · '.__('messages.pass_unlimited_visits');
+        }
 
-        @php
-            $regularTickets = $sale->saleTickets->filter(fn($st) => $st->ticket && !$st->ticket->is_addon);
-            $addonTickets = $sale->saleTickets->filter(fn($st) => $st->ticket && $st->ticket->is_addon);
-        @endphp
-        @if ($regularTickets->count() > 0)
-        <div style="background-color: white; padding: 20px; border-radius: 8px; margin: 20px 0;">
-            <h3 style="margin-top: 0; color: #4E81FA;">{{ __('messages.ticket_details') }}</h3>
-            @foreach ($regularTickets as $saleTicket)
-                <p style="margin: 10px 0;">
-                    <strong>{{ $saleTicket->ticket->type ?: __('messages.ticket') }}</strong>
-                    @php $seatLabels = $saleTicket->seatLabels(); @endphp
-                    @if (count($seatLabels))
-                    <br><span style="color: #6b7280; font-size: 13px;">{{ implode(' &middot; ', $seatLabels) }}</span>
-                    @endif
-                    x {{ $saleTicket->quantity }}
-                    @if ($saleTicket->ticket->is_pass)
-                    <br><span style="display: inline-block; margin-top: 4px; font-size: 12px; color: #4E81FA;">@if ($saleTicket->ticket->pass_usage_type === 'per_occurrence'){{ __('messages.season_pass') }} &middot; {{ __('messages.pass_valid_all_dates') }}@else{{ __('messages.subscription') }}@if ($saleTicket->ticket->pass_usage_type === 'total' && $saleTicket->ticket->pass_max_uses) &middot; {{ $saleTicket->ticket->pass_max_uses }} {{ __('messages.visits') }}@elseif ($saleTicket->ticket->pass_usage_type === 'unlimited') &middot; {{ __('messages.pass_unlimited_visits') }}@endif @endif</span>
-                    @endif
-                </p>
-            @endforeach
-        </div>
-        @endif
-        @if ($addonTickets->count() > 0)
-        <div style="background-color: white; padding: 20px; border-radius: 8px; margin: 20px 0;">
-            <h3 style="margin-top: 0; color: #4E81FA;">{{ __('messages.add_ons') }}</h3>
-            @foreach ($addonTickets as $saleTicket)
-                <p style="margin: 10px 0;">
-                    <strong>{{ $saleTicket->ticket->type ?: __('messages.add_on') }}</strong>
-                    x {{ $saleTicket->quantity }}
-                    @if ($saleTicket->ticket->url)
-                        <br><a href="{{ $saleTicket->ticket->url }}" style="color: #4E81FA; font-size: 13px;">{{ $saleTicket->ticket->url }}</a>
-                    @endif
-                </p>
-            @endforeach
-        </div>
-        @endif
+        return $terms;
+    };
 
-        {{-- Payment plan. This is the buyer's FIRST email after paying, so without it the message
-             reads "thank you for your purchase" and says nothing about the three further charges
-             coming to their card. --}}
-        @php $plan = $sale->installmentPlan; @endphp
-        @if ($plan && $plan->status !== 'cancelled')
-        <div style="background-color: white; padding: 20px; border-radius: 8px; margin: 20px 0;">
-            <h3 style="margin-top: 0; color: #4E81FA;">{{ __('messages.payment_plan') }}</h3>
-            <table style="width: 100%; border-collapse: collapse; font-size: 14px;">
-                @foreach ($plan->installments as $row)
-                    <tr>
-                        <td style="padding: 6px 0; color: #555;">{{ $row->due_at?->translatedFormat('j M Y') }}</td>
-                        <td style="padding: 6px 0; text-align: right; color: #333;">{{ \App\Utils\MoneyUtils::format($row->amount, $plan->currency) }}</td>
-                        <td style="padding: 6px 0 6px 12px; text-align: right; color: {{ $row->status === 'paid' ? '#16a34a' : '#999' }};">
-                            {{ $row->status === 'paid' ? __('messages.paid') : __('messages.scheduled') }}
-                        </td>
-                    </tr>
-                @endforeach
-            </table>
-            <p style="margin: 14px 0 0 0; padding-top: 12px; border-top: 1px solid #eee; font-size: 14px; color: #333;">
-                <strong>{{ __('messages.total') }} {{ \App\Utils\MoneyUtils::format($plan->total_amount, $plan->currency) }}.</strong>
-                {{ __('messages.installments_no_interest_short') }}
-            </p>
-            @if (! empty($plan->id))
-            <p style="margin: 10px 0 0 0; font-size: 13px;">
-                <a href="{{ route('installment.view', ['plan_id' => \App\Utils\UrlUtils::encodeId($plan->id), 'secret' => $plan->secret]) }}" style="color: #4E81FA;">{{ __('messages.payment_plan') }}</a>
-            </p>
-            @endif
-        </div>
-        @endif
+    $ticketRows = $sale->saleTickets->filter(fn ($st) => $st->ticket && ! $st->ticket->is_addon)->map(fn ($st) => [
+        'name' => $st->ticket->type ?: __('messages.ticket'),
+        'caption' => implode(' · ', array_filter([implode(' · ', $st->seatLabels()), $passTerms($st->ticket)])),
+        'value' => '× '.$st->quantity,
+    ])->values()->all();
+    $addonRows = $sale->saleTickets->filter(fn ($st) => $st->ticket && $st->ticket->is_addon)->map(fn ($st) => [
+        'name' => $st->ticket->type ?: __('messages.add_on'),
+        'url' => $st->ticket->url,
+        'value' => '× '.$st->quantity,
+    ])->values()->all();
 
-        <!--
-        <div style="background-color: white; padding: 20px; border-radius: 8px; margin: 20px 0; text-align: center;">
-            <h3 style="margin-top: 0; color: #4E81FA; margin-bottom: 15px;">{{ __('messages.ticket_qr_code') ?: 'Your Ticket QR Code' }}</h3>
-            <div style="display: inline-block; padding: 15px; background-color: #f9f9f9; border-radius: 8px;">
-                <img src="{{ $message->embedData($qrCodeData, 'ticket-qr-code.png', 'image/png') }}" alt="Ticket QR Code" style="max-width: 200px; height: auto;" />
-            </div>
-            <p style="margin-top: 15px; font-size: 14px; color: #666;">{{ __('messages.scan_qr_code_to_view_ticket') ?: 'Scan this QR code to view your ticket' }}</p>
-        </div>
-        -->
+    // Payment plan. This is the buyer's FIRST email after paying, so without it the message
+    // reads "thank you for your purchase" and says nothing about the further charges coming to
+    // their card.
+    $plan = $sale->installmentPlan;
+    $hasPlan = $plan && $plan->status !== 'cancelled';
 
-        @if (($giftCardAmount ?? 0) > 0 && $giftCard)
-        {{-- The ticket buyer may not be the card recipient, so do NOT link the secret-authed card
-             view page here (it exposes the purchaser's name/message). Show amounts only. --}}
-        <div style="background-color: white; padding: 20px; border-radius: 8px; margin: 20px 0;">
-            <h3 style="margin-top: 0; color: #4E81FA;">{{ __('messages.gift_card') }}</h3>
-            <p style="margin: 10px 0;">{{ __('messages.gift_card_applied_summary') }}: <strong>-{{ \App\Utils\MoneyUtils::format($giftCardAmount, $giftCard->currency_code) }}</strong></p>
-            <p style="margin: 10px 0;">{{ __('messages.gift_card_remaining_balance') }}: <strong>{{ \App\Utils\MoneyUtils::format($giftCard->remaining_amount, $giftCard->currency_code) }}</strong></p>
-        </div>
-        @endif
+    // What the order came to, so the confirmation doubles as a receipt. Only on a plain single-event
+    // order: on a group or multi-event primary, payment_amount is deliberately the per-seat figure
+    // (see Sale::legTotalPayment()) and the gift-card lines below cover the whole group, so a
+    // total there would not add up. Left to the payment plan when there is one, whose table
+    // already carries it.
+    $showTotal = ! $sale->isRsvp() && ! $isFreeReservation && ! $hasPlan && ! $sale->group_id && ! $sale->order_id;
 
-        <div style="text-align: center; margin: 30px 0;">
-            <a href="{{ $ticketUrl }}"
-               style="display: inline-block; background-color: #4E81FA; color: white; padding: 15px 30px; text-decoration: none; border-radius: 5px; font-weight: bold; font-size: 16px;">
-                @if ($sale->isPass()){{ __('messages.manage_my_pass') }}@elseif ($sale->isRsvp()){{ __('messages.view_registration') }}@else{{ __('messages.view_your_tickets') }}@endif
-            </a>
-        </div>
+    // A gift card's deduction sits directly above the total it explains, as at checkout, so
+    // "-$30" then "Total $70" reads as what was charged. Printed after the total, it read as a
+    // second deduction from it. The card's remaining balance stays in its own section below.
+    $hasGiftCard = ($giftCardAmount ?? 0) > 0 && $giftCard;
+    $giftRow = $hasGiftCard && $showTotal
+        ? ['name' => __('messages.gift_card_applied_summary'), 'value' => '-'.\App\Utils\MoneyUtils::format($giftCardAmount, $giftCard->currency_code)]
+        : null;
+    if ($giftRow && $addonRows) {
+        $addonRows[] = $giftRow;
+    } elseif ($giftRow) {
+        $ticketRows[] = $giftRow;
+    }
+@endphp
+<x-email.layout :theme="$theme" :title="$eyebrow" :preheader="$event->name.($when ? ' · '.$when : '')">
+<x-slot:hero>
+<x-email.flyer :event="$event" />
+</x-slot:hero>
 
-        @if ($googleWalletUrl && $googleWalletBadge && is_file($googleWalletBadge))
-        {{-- embedData, not a hotlink: this app never asks a recipient's mail client to fetch an
-             asset from someone else's server. Google's badge may not be recoloured or rebuilt, so
-             it ships as their own artwork under public/images/wallet/google. --}}
-        <div style="text-align: center; margin: 0 0 30px 0;">
-            <a href="{{ $googleWalletUrl }}" style="text-decoration: none;">
-                <img src="{{ $message->embedData(file_get_contents($googleWalletBadge), 'add-to-google-wallet.png', 'image/png') }}"
-                     alt="{{ __('messages.add_to_google_wallet') }}"
-                     height="50" style="height: 50px; width: auto; border: 0;" />
-            </a>
-        </div>
-        @endif
-        
-        @php $ticketNotes = $event->parsedTicketNotesHtml($sale->event_date, $role); @endphp
-        @if ($ticketNotes && trim(strip_tags($ticketNotes)) !== '')
-        <div style="background-color: white; padding: 20px; border-radius: 8px; margin: 20px 0;">
-            <h3 style="margin-top: 0; color: #4E81FA;">{{ __('messages.important_information') }}</h3>
-            <div style="color: #333;">
-                {!! \App\Utils\UrlUtils::convertUrlsToLinks($ticketNotes) !!}
-            </div>
-        </div>
-        @endif
-        
-        <p style="font-size: 12px; color: #999; margin-top: 30px; border-top: 1px solid #ddd; padding-top: 20px;">
-            {{ __('messages.event_support_contact') }}: <a href="mailto:{{ $event->user->email }}" style="color: #4E81FA;">{{ $event->user->email }}</a>
-        </p>
-    </div>
-</body>
-</html>
+<x-email.heading :eyebrow="$eyebrow" auto>{{ $event->name }}</x-email.heading>
 
+<x-email.text>{{ __('messages.hello') }} {{ $sale->name }},</x-email.text>
+<x-email.text>{{ $thanks }}</x-email.text>
+
+<x-email.event :event="$event" :date="$sale->event_date" :role="$role ?? null" />
+
+<x-email.details>
+<x-email.item :label="__('messages.attendee')">{{ $sale->name }}</x-email.item>
+@if (! $sale->isRsvp())
+<x-email.item :label="__('messages.number_of_attendees')">{{ $sale->quantity() }}</x-email.item>
+@endif
+</x-email.details>
+
+<x-email.button :href="$ticketUrl">@if ($sale->isPass()){{ __('messages.manage_my_pass') }}@elseif ($sale->isRsvp()){{ __('messages.view_registration') }}@else{{ __('messages.view_your_tickets') }}@endif</x-email.button>
+
+@if ($googleWalletUrl && $googleWalletBadge && is_file($googleWalletBadge))
+    @php($badgeSize = getimagesize($googleWalletBadge) ?: [283, 50])
+    {{-- embedData, not a hotlink: this app never asks a recipient's mail client to fetch an
+         asset from someone else's server. Google's badge may not be recoloured or rebuilt, so
+         it ships as their own artwork under public/images/wallet/google. The <img> stays split
+         over several lines: Mailer::render() swaps a one-line cid: image for a data: URI, and
+         GoogleWalletPassTest asserts the cid: survives. --}}
+    <x-email.text align="center" :gap="24">
+        <a href="{{ $googleWalletUrl }}" target="_blank" rel="noopener" style="text-decoration: none;">
+            <img src="{{ $message->embedData(file_get_contents($googleWalletBadge), 'add-to-google-wallet.png', 'image/png') }}"
+                 alt="{{ __('messages.add_to_google_wallet') }}"
+                 width="{{ (int) round($badgeSize[0] * 50 / max(1, $badgeSize[1])) }}" height="50"
+                 style="display: inline-block; height: 50px; width: auto; border: 0;" />
+        </a>
+    </x-email.text>
+@endif
+
+@if ($ticketRows)
+<x-email.section :label="__('messages.ticket_details')" />
+<x-email.items :rows="$ticketRows" :total="$showTotal && ! $addonRows ? \App\Utils\MoneyUtils::format($sale->payment_amount, $currency) : null" :total-label="__('messages.total')" />
+@endif
+
+@if ($addonRows)
+<x-email.section :label="__('messages.add_ons')" />
+<x-email.items :rows="$addonRows" :total="$showTotal ? \App\Utils\MoneyUtils::format($sale->payment_amount, $currency) : null" :total-label="__('messages.total')" />
+@endif
+
+@if ($hasPlan)
+<x-email.section :label="__('messages.payment_plan')" />
+<x-email.table :align="['start', 'end', 'end']" :rows="$plan->installments->map(fn ($row) => [
+    $row->due_at?->translatedFormat('j M Y'),
+    \App\Utils\MoneyUtils::format($row->amount, $plan->currency),
+    $row->status === 'paid' ? [__('messages.paid'), 'success'] : __('messages.scheduled'),
+])->all()" />
+<x-email.text variant="small"><strong>{{ __('messages.total') }} {{ \App\Utils\MoneyUtils::format($plan->total_amount, $plan->currency) }}.</strong> {{ __('messages.installments_no_interest_short') }}</x-email.text>
+@if (! empty($plan->id))
+<x-email.text variant="small"><x-email.link :href="route('installment.view', ['plan_id' => \App\Utils\UrlUtils::encodeId($plan->id), 'secret' => $plan->secret])">{{ __('messages.payment_plan') }}</x-email.link></x-email.text>
+@endif
+@endif
+
+@if ($hasGiftCard)
+{{-- The ticket buyer may not be the card recipient, so do NOT link the secret-authed card
+     view page here (it exposes the purchaser's name/message). Show amounts only. --}}
+<x-email.section :label="__('messages.gift_card')" />
+<x-email.items :rows="array_values(array_filter([
+    $giftRow ? null : ['name' => __('messages.gift_card_applied_summary'), 'value' => '-'.\App\Utils\MoneyUtils::format($giftCardAmount, $giftCard->currency_code)],
+    ['name' => __('messages.gift_card_remaining_balance'), 'value' => \App\Utils\MoneyUtils::format($giftCard->remaining_amount, $giftCard->currency_code)],
+]))" />
+@endif
+
+@php($ticketNotes = $event->parsedTicketNotesHtml($sale->event_date, $role))
+@if ($ticketNotes && trim(strip_tags($ticketNotes)) !== '')
+<x-email.section :label="__('messages.important_information')" />
+<x-email.prose>{!! \App\Utils\UrlUtils::convertUrlsToLinks($ticketNotes) !!}</x-email.prose>
+@endif
+
+@if ($event->user?->email)
+<x-slot:footer>
+<x-email.footer>{{ __('messages.event_support_contact') }}: <x-email.link :href="'mailto:'.$event->user->email" muted>{{ $event->user->email }}</x-email.link></x-email.footer>
+</x-slot:footer>
+@endif
+</x-email.layout>

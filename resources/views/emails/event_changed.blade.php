@@ -1,86 +1,74 @@
-<!DOCTYPE html>
-<html @if ($isRtl ?? false) dir="rtl" @endif>
-<head>
-    <meta charset="utf-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>{{ __('messages.event_changed_heading') }}</title>
-</head>
-<body style="font-family: Arial, sans-serif; line-height: 1.6; color: #333; max-width: 600px; margin: 0 auto; padding: 20px; @if ($isRtl ?? false) text-align: right; @endif">
-    <div style="background-color: #4E81FA; color: white; padding: 30px 20px; text-align: center; border-radius: 8px 8px 0 0;">
-        <h1 style="margin: 0; font-size: 24px; font-weight: 600;">{{ __('messages.event_changed_heading') }}</h1>
-    </div>
+@php
+    $theme = \App\Utils\EmailTheme::guest($role ?? null);
+    $label = 'margin: 0 0 6px; font-size: 12px; line-height: 16px; font-weight: 600; letter-spacing: 0.08em; text-transform: uppercase; color: #64748b;';
+    $was = 'margin: 0; font-size: 14px; line-height: 22px; color: #64748b;';
+    $now = 'margin: 0; font-size: 15px; line-height: 24px; color: #0f172a;';
+    $plain = 'margin: 0; font-size: 15px; line-height: 24px; color: #334155;';
 
-    <div style="background-color: #f9f9f9; padding: 20px; border-radius: 0 0 8px 8px;">
-        <p style="font-size: 16px; margin-top: 0;">{{ __('messages.hello') }}@if (! empty($recipientName)), {{ $recipientName }}@endif,</p>
+    // The date and the time range each isolated on its own: inside an RTL line the bidi algorithm
+    // otherwise pulls the numbers into the month's run and reorders the range into
+    // "PM - 11:00 PM EDT 8:00". The date follows its own script; the time always reads left to right.
+    $when = function (?array $parts, ?string $joined, ?string $tz) {
+        $parts ??= ['date' => (string) $joined, 'time' => null];
+        $html = '<bdi>'.e($parts['date']).'</bdi>';
+        $tail = trim(($parts['time'] ?? '').' '.$tz);
 
-        <p style="font-size: 16px;">{{ __('messages.event_changed_body', ['event' => $event->name]) }}</p>
+        return new \Illuminate\Support\HtmlString($tail === '' ? $html : $html.($parts['time'] !== null ? ', ' : ' ').'<bdi dir="ltr">'.e($tail).'</bdi>');
+    };
+@endphp
+<x-email.layout :theme="$theme" :title="__('messages.event_changed_heading')" :preheader="__('messages.event_changed_body', ['event' => $event->name])">
+<x-email.heading :eyebrow="__('messages.event_changed_heading')" auto>{{ $event->name }}</x-email.heading>
 
-        @if (! empty($note))
-        <div style="background-color: #fff; padding: 15px 20px; border-radius: 8px; margin: 20px 0;">
-            <p style="margin: 0 0 6px 0; font-size: 13px; color: #666; font-weight: bold;">{{ __('messages.organizer_note') }}</p>
-            <p style="margin: 0; font-size: 15px; color: #333;">{!! nl2br(e($note)) !!}</p>
-        </div>
-        @endif
+<x-email.text>{{ __('messages.hello') }}@if (! empty($recipientName)), {{ $recipientName }}@endif,</x-email.text>
+<x-email.text>{{ __('messages.event_changed_body', ['event' => $event->name]) }}</x-email.text>
 
-        <div style="background-color: white; padding: 20px; border-radius: 8px; margin: 20px 0;">
-            <p style="margin: 0 0 15px 0; font-size: 13px; color: #666; text-transform: uppercase; letter-spacing: 0.05em;">{{ __('messages.event_changed_whats_changed') }}</p>
+@if (! empty($note))
+<x-email.quote :label="__('messages.organizer_note')" :text="$note" />
+@endif
 
-            @if (isset($display['date']))
-            <p style="margin: 0 0 6px 0; font-size: 14px; color: #333;"><strong>{{ __('messages.event_changed_date_label') }}</strong></p>
-            @if (! empty($display['date']['old']))
-            <p style="margin: 0; font-size: 14px; color: #999;">{{ __('messages.event_changed_previously') }}: <s>{{ $display['date']['old'] }} {{ $display['date']['old_tz'] }}</s></p>
-            @endif
-            <p style="margin: 0 0 6px 0; font-size: 15px; color: #333;">{{ __('messages.event_changed_now') }}: <strong>{{ $display['date']['new'] }} {{ $display['date']['new_tz'] }}</strong></p>
-            @if (! empty($display['date']['delta']))
-            <p style="margin: 0 0 16px 0; font-size: 13px; color: #4E81FA;">{{ $display['date']['delta'] }}</p>
-            @endif
-            @endif
+{{-- No when/where card: the organizer's preview (EventController::notifyPreview) renders this from
+     an unsaved clone whose venue is still the OLD one, so a card would contradict the "Now" line
+     below. The new date and venue are both stated here. --}}
+<x-email.panel>
+<p class="es-ink-3" style="{{ $label }}">{{ __('messages.event_changed_whats_changed') }}</p>
 
-            @if (isset($display['location']))
-            <p style="margin: {{ isset($display['date']) ? '16px' : '0' }} 0 6px 0; font-size: 14px; color: #333;"><strong>{{ __('messages.event_changed_location_label') }}</strong></p>
-            @php($loc = $display['location'])
-            @if ($loc['variant'] === 'moved_online')
-            <p style="margin: 0; font-size: 14px; color: #333;">{{ __('messages.event_changed_moved_online') }}</p>
-            @elseif ($loc['variant'] === 'moved_in_person')
-            <p style="margin: 0; font-size: 14px; color: #333;">{{ __('messages.event_changed_moved_in_person', ['venue' => $loc['new_venue']]) }}</p>
-            @elseif ($loc['variant'] === 'online_updated')
-            <p style="margin: 0; font-size: 14px; color: #333;">{{ __('messages.event_changed_online_updated') }}</p>
-            @else
-            <p style="margin: 0; font-size: 14px; color: #333;">{{ __('messages.event_changed_venue') }}</p>
-            @if (! empty($loc['old_venue']))
-            <p style="margin: 6px 0 0 0; font-size: 14px; color: #999;">{{ __('messages.event_changed_previously') }}: <s>{{ $loc['old_venue'] }}</s></p>
-            @endif
-            @if (! empty($loc['new_venue']))
-            <p style="margin: 0; font-size: 15px; color: #333;">{{ __('messages.event_changed_now') }}: <strong>{{ $loc['new_venue'] }}</strong></p>
-            @endif
-            @endif
-            @endif
-        </div>
+@if (isset($display['date']))
+<p class="es-ink" style="margin: 10px 0 4px; font-size: 15px; line-height: 22px; font-weight: 600; color: #0f172a;">{{ __('messages.event_changed_date_label') }}</p>
+@if (! empty($display['date']['old']))
+<p class="es-ink-3" style="{{ $was }}">{{ __('messages.event_changed_previously') }}: <s>{{ $when($display['date']['old_parts'] ?? null, $display['date']['old'], $display['date']['old_tz']) }}</s></p>
+@endif
+<p class="es-ink" style="{{ $now }}">{{ __('messages.event_changed_now') }}: <strong>{{ $when($display['date']['new_parts'] ?? null, $display['date']['new'], $display['date']['new_tz']) }}</strong></p>
+@if (! empty($display['date']['delta']))
+<p class="es-accent-ink" style="margin: 2px 0 0; font-size: 13px; line-height: 20px; font-weight: 600; color: {{ $theme->accentInk }};">{{ $display['date']['delta'] }}</p>
+@endif
+@endif
 
-        <div style="background-color: white; padding: 15px 20px; border-radius: 8px; margin: 20px 0;">
-            <p style="margin: 0 0 6px 0; font-size: 16px;"><strong>{{ $event->name }}</strong></p>
-            <p style="margin: 0; font-size: 14px; color: #666;">
-                @if (isset($display['date'])){{ $display['date']['new'] }} {{ $display['date']['new_tz'] }}@endif
-            </p>
-        </div>
+@if (isset($display['location']))
+@php($loc = $display['location'])
+<p class="es-ink" style="margin: {{ isset($display['date']) ? '16px' : '10px' }} 0 4px; font-size: 15px; line-height: 22px; font-weight: 600; color: #0f172a;">{{ __('messages.event_changed_location_label') }}</p>
+@if ($loc['variant'] === 'moved_online')
+<p class="es-ink-2" style="{{ $plain }}">{{ __('messages.event_changed_moved_online') }}</p>
+@elseif ($loc['variant'] === 'moved_in_person')
+<p class="es-ink-2" style="{{ $plain }}">{{ __('messages.event_changed_moved_in_person', ['venue' => $loc['new_venue']]) }}</p>
+@elseif ($loc['variant'] === 'online_updated')
+<p class="es-ink-2" style="{{ $plain }}">{{ __('messages.event_changed_online_updated') }}</p>
+@else
+<p class="es-ink-2" style="{{ $plain }}">{{ __('messages.event_changed_venue') }}</p>
+@if (! empty($loc['old_venue']))
+<p class="es-ink-3" style="margin: 6px 0 0; font-size: 14px; line-height: 22px; color: #64748b;">{{ __('messages.event_changed_previously') }}: <s dir="auto">{{ $loc['old_venue'] }}</s></p>
+@endif
+@if (! empty($loc['new_venue']))
+<p class="es-ink" style="{{ $now }}">{{ __('messages.event_changed_now') }}: <strong dir="auto">{{ $loc['new_venue'] }}</strong></p>
+@endif
+@endif
+@endif
+<div style="height: 16px; line-height: 16px; font-size: 0;">&nbsp;</div>
+</x-email.panel>
 
-        <div style="text-align: center; margin: 30px 0;">
-            <a href="{{ $eventUrl }}"
-               style="display: inline-block; background-color: #4E81FA; color: white; padding: 15px 30px; text-decoration: none; border-radius: 5px; font-weight: bold; font-size: 16px;">
-                {{ __('messages.event_changed_cta') }}
-            </a>
-        </div>
+<x-email.button :href="$eventUrl">{{ __('messages.event_changed_cta') }}</x-email.button>
 
-        @if (! empty($icalUrl))
-        <p style="text-align: center; font-size: 14px; margin: 0 0 6px 0;">
-            <a href="{{ $icalUrl }}" style="color: #4E81FA;">{{ __('messages.update_your_calendar') }}</a>
-        </p>
-        <p style="text-align: center; font-size: 12px; color: #999; margin: 0;">{{ __('messages.update_your_calendar_note') }}</p>
-        @endif
-
-        <p style="font-size: 12px; color: #999; margin-top: 30px; border-top: 1px solid #ddd; padding-top: 20px;">
-            {{ __('messages.thank_you_for_using') }}
-        </p>
-    </div>
-</body>
-</html>
+@if (! empty($icalUrl))
+<x-email.text variant="small" align="center" :gap="4"><x-email.link :href="$icalUrl">{{ __('messages.update_your_calendar') }}</x-email.link></x-email.text>
+<x-email.text variant="muted" align="center">{{ __('messages.update_your_calendar_note') }}</x-email.text>
+@endif
+</x-email.layout>

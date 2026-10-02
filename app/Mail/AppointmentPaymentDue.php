@@ -18,4 +18,9 @@ class AppointmentPaymentDue extends AppointmentLifecycleMail
     {
         return 'appointment_payment_due_intro';
     }
+
+    protected function tone(): ?string
+    {
+        return 'warning';
+    }
 }

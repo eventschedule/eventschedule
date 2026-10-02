@@ -1,35 +1,20 @@
-<!DOCTYPE html>
-<html @if ($isRtl ?? false) dir="rtl" @endif>
-<head>
-    <meta charset="utf-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>{{ __('messages.event_cancelled_heading') }}</title>
-</head>
-<body style="font-family: Arial, sans-serif; line-height: 1.6; color: #333; max-width: 600px; margin: 0 auto; padding: 20px; @if ($isRtl ?? false) text-align: right; @endif">
-    <div style="background-color: #dc2626; color: white; padding: 30px 20px; text-align: center; border-radius: 8px 8px 0 0;">
-        <h1 style="margin: 0; font-size: 24px; font-weight: 600;">{{ __('messages.event_cancelled_heading') }}</h1>
-    </div>
+@php($theme = \App\Utils\EmailTheme::guest($role ?? null))
+<x-email.layout :theme="$theme" :title="__('messages.event_cancelled_heading')" :preheader="__('messages.event_cancelled_body', ['event' => $event->name])">
+<x-email.heading :eyebrow="__('messages.event_cancelled_heading')" tone="danger" auto>{{ $event->name }}</x-email.heading>
 
-    <div style="background-color: #f9f9f9; padding: 20px; border-radius: 0 0 8px 8px;">
-        <p style="font-size: 16px; margin-top: 0;">{{ __('messages.hello') }}@if (! empty($recipientName)), {{ $recipientName }}@endif,</p>
+<x-email.text>{{ __('messages.hello') }}@if (! empty($recipientName)), {{ $recipientName }}@endif,</x-email.text>
+<x-email.text>{{ __('messages.event_cancelled_body', ['event' => $event->name]) }}</x-email.text>
 
-        <p style="font-size: 16px;">{{ __('messages.event_cancelled_body', ['event' => $event->name]) }}</p>
+@if (! empty($partOfOrder))
+<x-email.text>{{ __('messages.event_cancelled_rest_of_order_stands') }}</x-email.text>
+@endif
 
-                @if (! empty($partOfOrder))
-            <p style="font-size: 15px; color: #333;">{{ __('messages.event_cancelled_rest_of_order_stands') }}</p>
-        @endif
+{{-- The date that is off, with nothing to add to a calendar or travel to. --}}
+<x-email.event :event="$event" :date="$date ?? null" :role="$role ?? null" :calendar="false" :map="false" />
+
 @if (! empty($note))
-        <div style="background-color: #fff; padding: 15px 20px; border-radius: 8px; margin: 20px 0;">
-            <p style="margin: 0 0 6px 0; font-size: 13px; color: #666; font-weight: bold;">{{ __('messages.organizer_note') }}</p>
-            <p style="margin: 0; font-size: 15px; color: #333;">{!! nl2br(e($note)) !!}</p>
-        </div>
-        @endif
+<x-email.quote :label="__('messages.organizer_note')" :text="$note" />
+@endif
 
-        <p style="font-size: 14px; color: #666;">{{ __('messages.event_cancelled_refund_guidance') }}</p>
-
-        <p style="font-size: 12px; color: #999; margin-top: 30px; border-top: 1px solid #ddd; padding-top: 20px;">
-            {{ __('messages.thank_you_for_using') }}
-        </p>
-    </div>
-</body>
-</html>
+<x-email.text variant="small">{{ __('messages.event_cancelled_refund_guidance') }}</x-email.text>
+</x-email.layout>

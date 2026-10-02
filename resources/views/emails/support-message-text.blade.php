@@ -1,30 +1,32 @@
+{{-- Plain text, so {!! !!}: an escaped apostrophe would print as &#039;. --}}
+@php($app = config('app.name'))
 @if ($isAdminReply && $isGuest)
-{{ $senderName }} from Event Schedule answered your question:
+{!! __('messages.support_answered_intro', ['name' => $senderName, 'app' => $app]) !!}
 @elseif ($isAdminReply)
-You have a new reply from Event Schedule Support:
+{!! __('messages.support_new_reply_intro', ['app' => $app]) !!}
 @elseif ($isGuest && $senderName)
-{{ $senderName }}, a website visitor, wrote:
+{!! __('messages.support_visitor_named_intro', ['name' => $senderName]) !!}
 @elseif ($isGuest)
-A website visitor wrote:
+{!! __('messages.support_visitor_intro') !!}
 @else
-New support message from {{ $senderName }}:
+{!! __('messages.support_new_message_intro', ['name' => $senderName]) !!}
 @endif
 
 @foreach ($messageBodies as $messageBody)
-{{ $messageBody }}
+{!! $messageBody !!}
 
 @endforeach
 @if ($isAdminReply && $isGuest)
-Continue the conversation: {{ $replyUrl }}
+{!! __('messages.support_continue_conversation') !!}: {!! $replyUrl !!}
 
-Or just reply to this email.
+{!! __('messages.support_or_reply') !!}
 @elseif ($isAdminReply)
-Log in to reply: {{ $replyUrl }}
+{!! __('messages.support_log_in_to_reply') !!}: {!! $replyUrl !!}
 
-Or just reply to this email.
+{!! __('messages.support_or_reply') !!}
 @else
-View conversation: {{ $replyUrl }}
+{!! __('messages.support_view_conversation') !!}: {!! $replyUrl !!}
 @endif
 
-Thanks,
-{{ config('app.name') }}
+{!! __('messages.thanks') !!},
+{!! $app !!}

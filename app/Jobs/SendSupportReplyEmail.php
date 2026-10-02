@@ -107,7 +107,10 @@ class SendSupportReplyEmail implements ShouldBeUniqueUntilProcessing, ShouldQueu
                 true
             ));
         } else {
-            Mail::to($email)->send(new SupportMessageNotification(
+            // An account holder reads it in their own language. A guest chatted on the English-only
+            // marketing site, so the branch above leaves that mail in English.
+            $locale = $conversation->user?->language_code;
+            Mail::to($email)->locale(is_valid_language_code($locale) ? $locale : 'en')->send(new SupportMessageNotification(
                 $unread->pluck('body')->all(),
                 'Event Schedule Support',
                 true,

@@ -1,50 +1,24 @@
-<!DOCTYPE html>
-<html>
-<head>
-    <meta charset="utf-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>{{ __('messages.signup_verification_code_heading') }}</title>
-</head>
-<body style="font-family: Arial, sans-serif; line-height: 1.6; color: #333; max-width: 600px; margin: 0 auto; padding: 20px;">
-    {{-- Preview text. Without it the inbox shows the heading and "Hello," - the code is what the
-         reader came for, and a clear, early code is what mail clients' "Copy code" detection keys on. --}}
-    <div style="display: none; max-height: 0; max-width: 0; overflow: hidden; opacity: 0; mso-hide: all;">{{ $code }} - {{ __('messages.your_verification_code') }}</div>
-    <div style="background-color: #4E81FA; color: white; padding: 30px 20px; text-align: center; border-radius: 8px 8px 0 0;">
-        <h1 style="margin: 0; font-size: 24px; font-weight: 600;">{{ __('messages.signup_verification_code_heading') }}</h1>
-    </div>
-    
-    <div style="background-color: #f9f9f9; padding: 20px; border-radius: 0 0 8px 8px;">
-        <p style="font-size: 16px; margin-top: 0;">{{ __('messages.hello') }},</p>
-        
-        <p>{{ __('messages.signup_verification_code_intro') }}</p>
-        
-        <div style="background-color: white; padding: 20px; border-radius: 8px; margin: 20px 0;">
-            {{-- One text node, no per-digit markup, so a copy (ours or Gmail's) yields exactly the code. --}}
-            <div style="margin: 0 0 10px; color: #4E81FA; text-align: center; font-family: 'Courier New', Courier, monospace; font-size: 32px; letter-spacing: 4px; font-weight: bold;">{{ $code }}</div>
-            <p style="margin: 10px 0; text-align: center; color: #666; font-size: 14px;">{{ __('messages.your_verification_code') }}</p>
-        </div>
-        
-        <div style="background-color: white; padding: 20px; border-radius: 8px; margin: 20px 0;">
-            <p style="margin: 10px 0; color: #666;">{{ __('messages.signup_verification_code_expiry') }}</p>
-        </div>
+@php($theme = \App\Utils\EmailTheme::account())
+{{-- Preview text leads with the code. Without it the inbox shows the heading and "Hello," - the
+     code is what the reader came for, and a clear, early code is what mail clients' "Copy code"
+     detection keys on. --}}
+<x-email.layout :theme="$theme" :title="__('messages.signup_verification_code_heading')" :preheader="$code.' - '.__('messages.your_verification_code')">
+<x-email.heading>{{ __('messages.signup_verification_code_heading') }}</x-email.heading>
 
-        {{-- For whoever opens this somewhere other than the sign-up tab: a phone, or a browser that
-             discarded the tab while they were in their inbox. Brings them to the code step with the
-             address filled in; the code itself is never in the link. --}}
-        @if (! empty($continueUrl))
-        <div style="text-align: center; margin: 24px 0;">
-            <a href="{{ $continueUrl }}" style="display: inline-block; background-color: #4E81FA; color: #ffffff; text-decoration: none; font-weight: 600; padding: 12px 24px; border-radius: 6px;">{{ __('messages.continue_signup') }}</a>
-        </div>
-        @endif
+<x-email.text>{{ __('messages.hello') }},</x-email.text>
+<x-email.text>{{ __('messages.signup_verification_code_intro') }}</x-email.text>
 
-        <div style="background-color: #f0f4ff; padding: 15px; border-radius: 8px; margin: 20px 0;">
-            <p style="margin: 0; color: #555; font-size: 14px;">{{ __('messages.signup_verification_code_security_notice') }}</p>
-        </div>
+{{-- One text node, no per-digit markup, so a copy (ours or Gmail's) yields exactly the code. --}}
+<x-email.highlight :value="$code" :caption="__('messages.your_verification_code')" mono ltr />
 
-        <p style="font-size: 12px; color: #999; margin-top: 30px; border-top: 1px solid #ddd; padding-top: 20px;">
-            {{ __('messages.thank_you_for_using') }}
-        </p>
-    </div>
-</body>
-</html>
+<x-email.text variant="small">{{ __('messages.signup_verification_code_expiry') }}</x-email.text>
 
+{{-- For whoever opens this somewhere other than the sign-up tab: a phone, or a browser that
+     discarded the tab while they were in their inbox. Brings them to the code step with the
+     address filled in; the code itself is never in the link. --}}
+@if (! empty($continueUrl))
+<x-email.button :href="$continueUrl">{{ __('messages.continue_signup') }}</x-email.button>
+@endif
+
+<x-email.callout tone="info">{{ __('messages.signup_verification_code_security_notice') }}</x-email.callout>
+</x-email.layout>

@@ -51,7 +51,6 @@ class FederationInstanceReviewed extends Mailable
                 // The only thing printed about the install. Its name and site_url are whatever the
                 // registrant sent, so the name is never printed and the host is link-broken.
                 'host' => $this->instance->displayHost(),
-                'isRtl' => in_array(app()->getLocale(), ['ar', 'he'], true),
             ],
         );
     }

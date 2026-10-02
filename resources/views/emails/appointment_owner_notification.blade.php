@@ -1,72 +1,65 @@
-<!DOCTYPE html>
-<html>
-<head>
-    <meta charset="utf-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    @php
-        $heading = match ($kind) {
-            'pending' => __('messages.appointment_owner_pending_heading'),
-            'cancelled' => __('messages.appointment_owner_cancelled_heading'),
-            // Both move kinds lead with "a booking has moved": a re-pending move is a change to
-            // something already approved first, and a decision second.
-            'rescheduled', 'rescheduled_pending' => __('messages.appointment_owner_rescheduled_heading'),
-            default => __('messages.appointment_owner_booked_heading'),
-        };
-    @endphp
-    <title>{{ $heading }}</title>
-</head>
-<body style="font-family: Arial, sans-serif; line-height: 1.6; color: #333; max-width: 600px; margin: 0 auto; padding: 20px;">
-    <div style="background-color: #4E81FA; color: white; padding: 20px; text-align: center; border-radius: 8px 8px 0 0;">
-        <h1 style="margin: 0; font-size: 24px;">{{ $heading }}</h1>
-    </div>
+@php
+    $theme = \App\Utils\EmailTheme::owner($role ?? null);
+    $heading = match ($kind) {
+        'pending' => __('messages.appointment_owner_pending_heading'),
+        'cancelled' => __('messages.appointment_owner_cancelled_heading'),
+        // Both move kinds lead with "a booking has moved": a re-pending move is a change to
+        // something already approved first, and a decision second.
+        'rescheduled', 'rescheduled_pending' => __('messages.appointment_owner_rescheduled_heading'),
+        default => __('messages.appointment_owner_booked_heading'),
+    };
+    $tone = match ($kind) {
+        'cancelled' => 'danger',
+        'pending', 'rescheduled_pending' => 'warning',
+        default => null,
+    };
 
-    <div style="background-color: #f9f9f9; padding: 20px; border-radius: 0 0 8px 8px;">
-        <div style="background-color: white; padding: 20px; border-radius: 8px; margin: 0 0 20px;">
-            <h2 style="margin-top: 0; color: #4E81FA;">{{ $type?->name ?? $event->name }}</h2>
-            <p style="margin: 8px 0;"><strong>{{ __('messages.name') }}:</strong> {{ $sale->name }}</p>
-            <p style="margin: 8px 0;"><strong>{{ __('messages.email') }}:</strong> {{ $sale->email }}</p>
-            @if ($sale->phone)
-                <p style="margin: 8px 0;"><strong>{{ __('messages.phone') }}:</strong> {{ $sale->phone }}</p>
-            @endif
-            @php
-                // Owner-facing: the SCHEDULE's zone stays primary because that is the owner's own
-                // clock. The guest's zone is appended so the owner knows what the guest was shown.
-                $ownerUse24 = (bool) ($role->use_24_hour_time ?? false);
-                $ownerScheduleTz = \App\Utils\AppointmentTimeUtils::scheduleTimezone($event);
-                $ownerShown = \App\Utils\AppointmentTimeUtils::render($event, $ownerScheduleTz, $ownerUse24);
-                $ownerGuestTz = $sale->guestTimezone();
-                $ownerGuestShown = ($ownerGuestTz && $ownerGuestTz !== $ownerScheduleTz)
-                    ? \App\Utils\AppointmentTimeUtils::render($event, $ownerGuestTz, $ownerUse24)
-                    : null;
-            @endphp
-            <p style="margin: 8px 0;"><strong>{{ __('messages.date') }}:</strong> {{ $ownerShown['date'] }} {{ $ownerShown['time'] }} ({{ $ownerShown['tz'] }})</p>
-            @if ($ownerGuestShown)
-                <p style="margin: 4px 0; font-size: 13px; color: #888;">{{ __('messages.appointments_times_shown_in') }} {{ $ownerGuestShown['tz'] }}: {{ $ownerGuestShown['time'] }}</p>
-            @endif
-            @if ((float) $sale->payment_amount > 0)
-                <p style="margin: 8px 0;"><strong>{{ __('messages.price') }}:</strong> {{ strtoupper($event->ticket_currency_code) }} {{ number_format((float) $sale->payment_amount, 2) }} &middot; {{ ($paidLabel ?? ($sale->status === 'paid')) ? __('messages.paid') : __('messages.unpaid') }}</p>
-            @endif
-            @if ($event->description)
-                <p style="margin: 8px 0;">{{ $event->description }}</p>
-            @endif
-        </div>
+    // Owner-facing: the SCHEDULE's zone stays primary because that is the owner's own
+    // clock. The guest's zone is appended so the owner knows what the guest was shown.
+    $ownerUse24 = (bool) ($role->use_24_hour_time ?? false);
+    $ownerScheduleTz = \App\Utils\AppointmentTimeUtils::scheduleTimezone($event);
+    $ownerShown = \App\Utils\AppointmentTimeUtils::render($event, $ownerScheduleTz, $ownerUse24);
+    $ownerGuestTz = $sale->guestTimezone();
+    $ownerGuestShown = ($ownerGuestTz && $ownerGuestTz !== $ownerScheduleTz)
+        ? \App\Utils\AppointmentTimeUtils::render($event, $ownerGuestTz, $ownerUse24)
+        : null;
+    // The zone and time read left to right in every language; isolated (U+2066/U+2069) so an RTL
+    // mail does not reorder them.
+    $ownerGuestLine = $ownerGuestShown
+        ? __('messages.appointments_times_shown_in')." \u{2066}".$ownerGuestShown['tz'].': '.$ownerGuestShown['time']."\u{2069}"
+        : null;
+    $apptName = $type?->name ?? $event->name;
+@endphp
+<x-email.layout :theme="$theme" :title="$heading" :preheader="$apptName.' · '.$sale->name.' · '.$ownerShown['date']">
+<x-email.heading :eyebrow="$heading" :tone="$tone" auto>{{ $apptName }}</x-email.heading>
 
-        @if (! empty($shortNotice))
-            <div style="background-color: #fef3c7; border: 1px solid #fcd34d; padding: 12px; border-radius: 8px; margin-bottom: 20px; font-size: 14px;">
-                {{ $shortNotice }}
-            </div>
-        @endif
+@if (! empty($shortNotice))
+<x-email.callout tone="warning">{{ $shortNotice }}</x-email.callout>
+@endif
 
-        @if ($showRefund)
-            <div style="background-color: #fef3c7; border: 1px solid #fcd34d; padding: 12px; border-radius: 8px; margin-bottom: 20px; font-size: 14px;">
-                {{ __('messages.appointment_owner_refund_note', ['amount' => strtoupper($event->ticket_currency_code).' '.number_format((float) $sale->payment_amount, 2), 'reference' => $sale->transaction_reference ?: '-']) }}
-            </div>
-        @endif
+@if ($showRefund)
+<x-email.callout tone="warning">{{ __('messages.appointment_owner_refund_note', ['amount' => strtoupper($event->ticket_currency_code).' '.number_format((float) $sale->payment_amount, 2), 'reference' => $sale->transaction_reference ?: '-']) }}</x-email.callout>
+@endif
 
-        <div style="text-align: center; margin: 20px 0;">
-            <a href="{{ $bookingsUrl }}" style="background-color: #4E81FA; color: white; padding: 12px 24px; text-decoration: none; border-radius: 6px; display: inline-block; font-weight: bold;">{{ in_array($kind, ['pending', 'rescheduled_pending'], true) ? __('messages.appointment_owner_review') : __('messages.view') }}</a>
-        </div>
-        @include('emails.partials.notification_email_footer', ['scheduleName' => $role?->name])
-    </div>
-</body>
-</html>
+<x-email.details panel>
+<x-email.item :label="__('messages.date')" wide :caption="$ownerGuestLine">{{ $ownerShown['date'] }} &middot; <bdi dir="ltr">{{ $ownerShown['time'] }} ({{ $ownerShown['tz'] }})</bdi></x-email.item>
+<x-email.item :label="__('messages.name')">{{ $sale->name }}</x-email.item>
+@if ($sale->phone)
+<x-email.item :label="__('messages.phone')" ltr>{{ $sale->phone }}</x-email.item>
+@endif
+<x-email.item :label="__('messages.email')" wide ltr>{{ $sale->email }}</x-email.item>
+@if ((float) $sale->payment_amount > 0)
+<x-email.item :label="__('messages.price')" wide>{{ strtoupper($event->ticket_currency_code) }} {{ number_format((float) $sale->payment_amount, 2) }} &middot; {{ ($paidLabel ?? ($sale->status === 'paid')) ? __('messages.paid') : __('messages.unpaid') }}</x-email.item>
+@endif
+</x-email.details>
+
+@if ($event->description)
+<x-email.quote :text="$event->description" />
+@endif
+
+<x-email.button :href="$bookingsUrl">{{ in_array($kind, ['pending', 'rescheduled_pending'], true) ? __('messages.appointment_owner_review') : __('messages.view') }}</x-email.button>
+
+<x-slot:footer>
+@include('emails.partials.notification_email_footer', ['scheduleName' => $role?->name])
+</x-slot:footer>
+</x-email.layout>

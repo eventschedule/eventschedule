@@ -121,7 +121,6 @@ class FederationInstanceWelcome extends Mailable
             'guideUrl' => $guideUrl,
             'updateGuideUrl' => marketing_url('/docs/selfhost/admin').'#system-app-update',
             'browseUrl' => marketing_url('/browse').'#network',
-            'isRtl' => in_array(app()->getLocale(), ['ar', 'he'], true),
             'bold' => fn (string $key, array $replace = [], array $boldKeys = []) => $this->bold($key, $replace, $boldKeys),
         ];
     }

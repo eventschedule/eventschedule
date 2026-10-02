@@ -23,4 +23,9 @@ class AppointmentCancelled extends AppointmentLifecycleMail
     {
         return true;
     }
+
+    protected function tone(): ?string
+    {
+        return 'danger';
+    }
 }

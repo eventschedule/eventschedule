@@ -1,37 +1,21 @@
-<!DOCTYPE html>
-<html>
-<head>
-    <meta charset="utf-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>{{ __('messages.boost_email_created_subject') }}</title>
-</head>
-<body style="font-family: Arial, sans-serif; line-height: 1.6; color: #333; max-width: 600px; margin: 0 auto; padding: 20px;">
-    <div style="background-color: #4E81FA; color: white; padding: 20px; text-align: center; border-radius: 8px 8px 0 0;">
-        <h1 style="margin: 0; font-size: 24px;">{{ __('messages.boost_email_created_subject') }}</h1>
-    </div>
+@php
+    $theme = \App\Utils\EmailTheme::account();
+    $eventName = $event?->name ?? __('messages.deleted_event');
+    $money = fn ($amount) => $campaign->getCurrencySymbol().number_format($amount, 2);
+@endphp
+<x-email.layout :theme="$theme" :title="__('messages.boost_email_created_subject')" :preheader="__('messages.boost_email_created_body')">
+<x-email.heading :eyebrow="__('messages.boost_email_created_subject')" auto>{{ $eventName }}</x-email.heading>
 
-    <div style="background-color: #f9f9f9; padding: 20px; border-radius: 0 0 8px 8px;">
-        <p style="font-size: 16px; margin-top: 0;">{{ __('messages.hello') }} {{ $campaign->user?->name ?? '' }},</p>
+<x-email.text>{{ __('messages.hello') }} {{ $campaign->user?->name ?? '' }},</x-email.text>
+<x-email.text>{{ __('messages.boost_email_created_body') }}</x-email.text>
 
-        <p>{{ __('messages.boost_email_created_body') }}</p>
+<x-email.details panel>
+<x-email.item :label="__('messages.budget')">{{ $money($campaign->user_budget) }}</x-email.item>
+<x-email.item :label="__('messages.total_charged')">{{ $money($campaign->getTotalCost()) }}</x-email.item>
+@if ($campaign->scheduled_end)
+<x-email.item :label="__('messages.ends')">{{ $campaign->scheduled_end->translatedFormat('F j, Y') }}</x-email.item>
+@endif
+</x-email.details>
 
-        <div style="background-color: white; padding: 20px; border-radius: 8px; margin: 20px 0;">
-            <h2 style="margin-top: 0; color: #4E81FA;">{{ $event?->name ?? __('messages.deleted_event') }}</h2>
-            <p style="margin: 10px 0;"><strong>{{ __('messages.budget') }}:</strong> {{ $campaign->getCurrencySymbol() }}{{ number_format($campaign->user_budget, 2) }}</p>
-            <p style="margin: 10px 0;"><strong>{{ __('messages.total_charged') }}:</strong> {{ $campaign->getCurrencySymbol() }}{{ number_format($campaign->getTotalCost(), 2) }}</p>
-            @if ($campaign->scheduled_end)
-            <p style="margin: 10px 0;"><strong>{{ __('messages.ends') }}:</strong> {{ $campaign->scheduled_end->format('F j, Y') }}</p>
-            @endif
-        </div>
-
-        <div style="text-align: center; margin: 30px 0;">
-            <a href="{{ $boostUrl }}"
-               style="display: inline-block; background-color: #4E81FA; color: white; padding: 15px 30px; text-decoration: none; border-radius: 5px; font-weight: bold; font-size: 16px;">
-                {{ __('messages.view_campaign') }}
-            </a>
-        </div>
-
-        <p style="font-size: 12px; color: #999;">{{ config('app.name') }}</p>
-    </div>
-</body>
-</html>
+<x-email.button :href="$boostUrl">{{ __('messages.view_campaign') }}</x-email.button>
+</x-email.layout>

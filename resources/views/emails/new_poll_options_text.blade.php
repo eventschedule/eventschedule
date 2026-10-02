@@ -2,7 +2,7 @@
 
 {{ __('messages.hello') }},
 
-{{ $optionCount }} pending poll option {{ Str::plural('suggestion', $optionCount) }} for {{ $role->name }}
+{!! trans_choice('messages.new_poll_options_line', $optionCount, ['count' => $optionCount, 'name' => $role->name]) !!}
 
 {{ __('messages.view_details') }}: {{ $actionUrl }}
 

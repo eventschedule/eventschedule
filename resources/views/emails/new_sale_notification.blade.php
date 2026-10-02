@@ -1,118 +1,71 @@
-<!DOCTYPE html>
-<html>
-<head>
-    <meta charset="utf-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>{{ __('messages.new_sale_notification_subject', ['event' => $event->name]) }}</title>
-</head>
-<body style="font-family: Arial, sans-serif; line-height: 1.6; color: #333; max-width: 600px; margin: 0 auto; padding: 20px;">
-    <div style="background-color: #4E81FA; color: white; padding: 30px 20px; text-align: center; border-radius: 8px 8px 0 0;">
-        <h1 style="margin: 0; font-size: 24px; font-weight: 600;">{{ __('messages.new_sale') }}</h1>
-    </div>
+@php
+    $theme = \App\Utils\EmailTheme::owner($role ?? null);
 
-    <div style="background-color: #f9f9f9; padding: 20px; border-radius: 0 0 8px 8px;">
-        <p style="font-size: 16px; margin-top: 0;">{{ __('messages.new_sale_notification_greeting', ['name' => $recipient?->name ?? __('messages.hello')]) }},</p>
+    $start = $event->starts_at && $sale->event_date ? $event->getStartDateTime($sale->event_date, true) : null;
+    $when = $start ? ($event->is_multi_day ? $event->getDateRangeDisplay($sale->event_date) : $start->translatedFormat('l, F j, Y')) : null;
+    $time = $start && ! $event->is_multi_day ? $event->getStartEndTime($sale->event_date, (bool) $role?->use_24_hour_time) : null;
 
-        <div style="background-color: white; padding: 20px; border-radius: 8px; margin: 20px 0;">
-            <p style="margin: 0 0 10px 0; font-size: 18px; color: #333;">
-                <strong>{{ $event->name }}</strong>
-            </p>
-            @if ($sale->event_date)
-            <p style="margin: 0 0 15px 0; font-size: 14px; color: #666;">
-                {{ $event->is_multi_day ? $event->getDateRangeDisplay($sale->event_date) : $event->getStartDateTime($sale->event_date, true)->format('F j, Y') }}
-                @if ($event->getStartEndTime($sale->event_date)) {{ $event->getStartEndTime($sale->event_date) }}@endif
-            </p>
-            @endif
+    $allSaleTickets = $sale->saleTickets->toBase();
+    if (! empty($groupedSales) && $groupedSales->count() > 0) {
+        foreach ($groupedSales as $gs) {
+            $allSaleTickets = $allSaleTickets->merge($gs->saleTickets);
+        }
+    }
+    $summarise = fn ($tickets, string $fallback) => $tickets->groupBy(fn ($st) => $st->ticket->type)
+        ->map(fn ($group, $type) => ['name' => $type ?: $fallback, 'value' => '× '.$group->sum('quantity')])
+        ->values()->all();
+    $ticketRows = $summarise($allSaleTickets->filter(fn ($st) => $st->ticket && ! $st->ticket->is_addon), __('messages.ticket'));
+    $addonRows = $summarise($allSaleTickets->filter(fn ($st) => $st->ticket && $st->ticket->is_addon), __('messages.add_on'));
 
-            <hr style="border: none; border-top: 1px solid #eee; margin: 15px 0;">
+    $plan = $sale->installmentPlan;
+@endphp
+<x-email.layout :theme="$theme" :title="__('messages.new_sale_notification_subject', ['event' => $event->name])" :preheader="$total.' · '.$event->name">
+<x-email.heading :eyebrow="__('messages.new_sale')" auto>{{ $event->name }}</x-email.heading>
 
-            <p style="margin: 0 0 5px 0; font-size: 14px; color: #666;">
-                <strong>{{ __('messages.buyer') }}:</strong> {{ $sale->name }} ({{ $sale->email }})
-            </p>
-            @if ($sale->phone)
-            <p style="margin: 0 0 5px 0; font-size: 14px; color: #666;">
-                <strong>{{ __('messages.phone_number') }}:</strong> {{ $sale->phone }}
-            </p>
-            @endif
+<x-email.text>{{ __('messages.new_sale_notification_greeting', ['name' => $recipient?->name ?? __('messages.hello')]) }},</x-email.text>
 
-            @if (!empty($groupedSales) && $groupedSales->count() > 0)
-            <hr style="border: none; border-top: 1px solid #eee; margin: 15px 0;">
-            <p style="margin: 0 0 5px 0; font-size: 14px; color: #333; font-weight: bold;">{{ __('messages.guests') }}:</p>
-            @foreach ($groupedSales as $guestSale)
-            <p style="margin: 0 0 3px 0; font-size: 13px; color: #666;">
-                {{ $guestSale->name }} ({{ $guestSale->email }})@if ($guestSale->phone) - {{ $guestSale->phone }}@endif
-            </p>
-            @endforeach
-            @endif
+<x-email.highlight :value="$total" :caption="$paymentStatus.($when ? ' · '.$when : '').($time ? ' · '.$time : '')" />
 
-            <hr style="border: none; border-top: 1px solid #eee; margin: 15px 0;">
+{{-- Without this the organizer reads "Paid, EUR 1,200" when EUR 300 arrived. The total above is
+     the ticket price, which is genuinely what was sold; this says how much of it has actually
+     been collected so far. --}}
+@if ($plan && $plan->status !== 'cancelled')
+<x-email.callout tone="warning" :title="__('messages.payment_plan')">
+{{ __('messages.installments_progress', ['paid' => $plan->paidCount(), 'count' => $plan->installment_count]) }}
+&middot; {{ \App\Utils\MoneyUtils::format($plan->amount_paid, $plan->currency) }} {{ __('messages.installments_collected') }}
+&middot; {{ \App\Utils\MoneyUtils::format($plan->amountRemaining(), $plan->currency) }} {{ __('messages.installments_outstanding') }}
+</x-email.callout>
+@endif
 
-            @php
-                $allSaleTickets = $sale->saleTickets->toBase();
-                if (!empty($groupedSales) && $groupedSales->count() > 0) {
-                    foreach ($groupedSales as $gs) {
-                        $allSaleTickets = $allSaleTickets->merge($gs->saleTickets);
-                    }
-                }
-                $regularTickets = $allSaleTickets->filter(fn($st) => $st->ticket && !$st->ticket->is_addon);
-                $addonTickets = $allSaleTickets->filter(fn($st) => $st->ticket && $st->ticket->is_addon);
-                $ticketSummary = $regularTickets->groupBy(fn($st) => $st->ticket->type)
-                    ->map(fn($group) => $group->sum('quantity'));
-                $addonSummary = $addonTickets->groupBy(fn($st) => $st->ticket->type)
-                    ->map(fn($group) => $group->sum('quantity'));
-            @endphp
-            @foreach ($ticketSummary as $ticketType => $qty)
-            <p style="margin: 0 0 5px 0; font-size: 14px; color: #333;">
-                {{ $ticketType ?: __('messages.ticket') }} x {{ $qty }}
-            </p>
-            @endforeach
-            @if ($addonSummary->count() > 0)
-            <p style="margin: 10px 0 5px 0; font-size: 13px; color: #666; font-weight: bold;">{{ __('messages.add_ons') }}:</p>
-            @foreach ($addonSummary as $addonType => $qty)
-            <p style="margin: 0 0 5px 0; font-size: 14px; color: #333;">
-                {{ $addonType ?: __('messages.add_on') }} x {{ $qty }}
-            </p>
-            @endforeach
-            @endif
+<x-email.details>
+<x-email.item :label="__('messages.buyer')">{{ $sale->name }}</x-email.item>
+@if ($sale->phone)
+<x-email.item :label="__('messages.phone_number')" ltr>{{ $sale->phone }}</x-email.item>
+@endif
+<x-email.item :label="__('messages.email')" ltr wide>{{ $sale->email }}</x-email.item>
+</x-email.details>
 
-            <hr style="border: none; border-top: 1px solid #eee; margin: 15px 0;">
+@if (! empty($groupedSales) && $groupedSales->count() > 0)
+<x-email.section :label="__('messages.guests')" />
+<x-email.list :items="$groupedSales->map(fn ($g) => $g->name.' ('.$g->email.')'.($g->phone ? ' - '.$g->phone : ''))->all()" />
+@endif
 
-            <p style="margin: 0 0 5px 0; font-size: 14px; color: #333;">
-                <strong>{{ __('messages.total') }}:</strong> {{ $total }}
-            </p>
-            <p style="margin: 0; font-size: 14px; color: #333;">
-                <strong>{{ __('messages.status') }}:</strong> {{ $paymentStatus }}
-            </p>
+@if ($ticketRows)
+<x-email.section :label="__('messages.ticket_details')" />
+<x-email.items :rows="$ticketRows" />
+@endif
 
-            {{-- Without this the organizer reads "Paid, EUR 1,200" when EUR 300 arrived. The
-                 total above is the ticket price, which is genuinely what was sold; this line says
-                 how much of it has actually been collected so far. --}}
-            @php $plan = $sale->installmentPlan; @endphp
-            @if ($plan && $plan->status !== 'cancelled')
-                <p style="margin: 8px 0 0 0; font-size: 14px; color: #b45309;">
-                    <strong>{{ __('messages.payment_plan') }}:</strong>
-                    {{ __('messages.installments_progress', ['paid' => $plan->paidCount(), 'count' => $plan->installment_count]) }}
-                    &middot; {{ \App\Utils\MoneyUtils::format($plan->amount_paid, $plan->currency) }} {{ __('messages.installments_collected') }}
-                    &middot; {{ \App\Utils\MoneyUtils::format($plan->amountRemaining(), $plan->currency) }} {{ __('messages.installments_outstanding') }}
-                </p>
-            @endif
-        </div>
+@if ($addonRows)
+<x-email.section :label="__('messages.add_ons')" />
+<x-email.items :rows="$addonRows" />
+@endif
 
-        <div style="text-align: center; margin: 30px 0;">
-            <a href="{{ $salesUrl }}"
-               style="display: inline-block; background-color: #4E81FA; color: white; padding: 15px 30px; text-decoration: none; border-radius: 5px; font-weight: bold; font-size: 16px;">
-                {{ __('messages.view_sales') }}
-            </a>
-        </div>
+<x-email.button :href="$salesUrl">{{ __('messages.view_sales') }}</x-email.button>
 
-        <p style="font-size: 12px; color: #999; margin-top: 30px; border-top: 1px solid #ddd; padding-top: 20px;">
-            {{ __('messages.thank_you_for_using') }}
-            @if ($unsubscribeUrl && empty($notificationEmailUnsubscribeUrl))
-            <br><br>
-            <a href="{{ $unsubscribeUrl }}" style="color: #4E81FA;">{{ __('messages.unsubscribe') }}</a>
-            @endif
-        </p>
-        @include('emails.partials.notification_email_footer', ['scheduleName' => $role?->name])
-    </div>
-</body>
-</html>
+<x-slot:footer>
+@if ($unsubscribeUrl && empty($notificationEmailUnsubscribeUrl))
+<x-email.footer :links="[[__('messages.unsubscribe'), $unsubscribeUrl]]" />
+@endif
+@include('emails.partials.notification_email_footer', ['scheduleName' => $role?->name])
+</x-slot:footer>
+</x-email.layout>

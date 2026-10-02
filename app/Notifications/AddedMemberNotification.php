@@ -50,7 +50,6 @@ class AddedMemberNotification extends Notification
             ->action(
                 $newUser ? __('messages.set_new_password') : __('messages.get_started'),
                 $newUser ? route('password.request', ['email' => $this->user->email]) : route('role.view_admin', ['subdomain' => $this->role->subdomain, 'tab' => 'schedule']))
-            ->line(__('messages.thank_you_for_using'))
             ->withSymfonyMessage(function ($message) {
                 $unsubscribeUrl = route('role.unsubscribe', ['subdomain' => $this->role->subdomain]);
                 $message->getHeaders()->addTextHeader('List-Unsubscribe', '<'.$unsubscribeUrl.'>');

@@ -1,19 +1,27 @@
+/*
+ * Inlined into Laravel's Markdown mail by CssToInlineStyles, so this is the light design of the
+ * MailMessage notifications, verify email and password reset. It mirrors <x-email.layout>'s account
+ * voice (App\Utils\EmailTheme): the same tokens, every ink at least 4.5:1 on its surface. Dark mode
+ * and phone widths live in vendor/mail/html/layout.blade.php, inside @media, which is not inlined.
+ *
+ * No text-align: left anywhere - the layout sets dir, and an explicit left would pin RTL mail to the
+ * wrong side. No side stripes, and no 18px border trick on the button (CLAUDE.md, EmailSideStripeTest).
+ */
+
 /* Base */
 
 body,
 body *:not(html):not(style):not(br):not(tr):not(code) {
     box-sizing: border-box;
-    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif,
-        'Apple Color Emoji', 'Segoe UI Emoji', 'Segoe UI Symbol';
-    position: relative;
+    font-family: -apple-system, BlinkMacSystemFont, Segoe UI, Roboto, Helvetica, Arial, sans-serif;
 }
 
 body {
     -webkit-text-size-adjust: none;
-    background-color: #ffffff;
-    color: #718096;
+    background-color: #f1f5f9;
+    color: #334155;
     height: 100%;
-    line-height: 1.4;
+    line-height: 26px;
     margin: 0;
     padding: 0;
     width: 100% !important;
@@ -23,12 +31,12 @@ p,
 ul,
 ol,
 blockquote {
-    line-height: 1.4;
-    text-align: left;
+    line-height: 26px;
 }
 
 a {
-    color: #3869d4;
+    color: #2161f9;
+    text-decoration: underline;
 }
 
 a img {
@@ -38,36 +46,42 @@ a img {
 /* Typography */
 
 h1 {
-    color: #3d4852;
-    font-size: 18px;
-    font-weight: bold;
+    color: #0f172a;
+    font-size: 26px;
+    font-weight: 700;
+    letter-spacing: -0.02em;
+    line-height: 32px;
     margin-top: 0;
-    text-align: left;
+    margin-bottom: 20px;
 }
 
 h2 {
-    font-size: 16px;
-    font-weight: bold;
+    color: #0f172a;
+    font-size: 18px;
+    font-weight: 700;
+    line-height: 26px;
     margin-top: 0;
-    text-align: left;
 }
 
 h3 {
-    font-size: 14px;
-    font-weight: bold;
+    color: #0f172a;
+    font-size: 16px;
+    font-weight: 700;
+    line-height: 24px;
     margin-top: 0;
-    text-align: left;
 }
 
 p {
+    color: #334155;
     font-size: 16px;
-    line-height: 1.5em;
+    line-height: 26px;
     margin-top: 0;
-    text-align: left;
+    margin-bottom: 16px;
 }
 
 p.sub {
-    font-size: 12px;
+    font-size: 13px;
+    line-height: 20px;
 }
 
 img {
@@ -80,17 +94,22 @@ img {
     -premailer-cellpadding: 0;
     -premailer-cellspacing: 0;
     -premailer-width: 100%;
-    background-color: #edf2f7;
+    background-color: #f1f5f9;
     margin: 0;
     padding: 0;
     width: 100%;
+}
+
+.wrapper-cell {
+    padding: 32px 16px 40px;
 }
 
 .content {
     -premailer-cellpadding: 0;
     -premailer-cellspacing: 0;
     -premailer-width: 100%;
-    margin: 0;
+    margin: 0 auto;
+    max-width: 600px;
     padding: 0;
     width: 100%;
 }
@@ -98,23 +117,15 @@ img {
 /* Header */
 
 .header {
-    padding: 25px 0;
-    text-align: center;
+    padding: 0 4px 16px;
 }
 
-.header a {
-    color: #3d4852;
-    font-size: 19px;
-    font-weight: bold;
-    text-decoration: none;
-}
-
-/* Logo */
-
-.logo {
-    height: 75px;
-    max-height: 75px;
-    width: 75px;
+.header-name {
+    color: #0f172a;
+    font-size: 17px;
+    font-weight: 700;
+    letter-spacing: -0.01em;
+    line-height: 24px;
 }
 
 /* Body */
@@ -123,9 +134,7 @@ img {
     -premailer-cellpadding: 0;
     -premailer-cellspacing: 0;
     -premailer-width: 100%;
-    background-color: #edf2f7;
-    border-bottom: 1px solid #edf2f7;
-    border-top: 1px solid #edf2f7;
+    background-color: #f1f5f9;
     margin: 0;
     padding: 0;
     width: 100%;
@@ -134,27 +143,32 @@ img {
 .inner-body {
     -premailer-cellpadding: 0;
     -premailer-cellspacing: 0;
-    -premailer-width: 570px;
+    -premailer-width: 600px;
     background-color: #ffffff;
-    border-color: #e8e5ef;
-    border-radius: 2px;
-    border-width: 1px;
-    box-shadow: 0 2px 0 rgba(0, 0, 150, 0.025), 2px 4px 0 rgba(0, 0, 150, 0.015);
+    border: 1px solid #e2e8f0;
+    border-radius: 16px;
     margin: 0 auto;
     padding: 0;
-    width: 570px;
+    width: 600px;
+}
+
+.content-cell {
+    max-width: 100vw;
+    padding: 40px 40px 24px;
 }
 
 /* Subcopy */
 
 .subcopy {
-    border-top: 1px solid #e8e5ef;
-    margin-top: 25px;
-    padding-top: 25px;
+    border-top: 1px solid #e2e8f0;
+    margin-top: 8px;
+    padding-top: 20px;
 }
 
 .subcopy p {
-    font-size: 14px;
+    color: #64748b;
+    font-size: 13px;
+    line-height: 20px;
 }
 
 /* Footer */
@@ -162,21 +176,26 @@ img {
 .footer {
     -premailer-cellpadding: 0;
     -premailer-cellspacing: 0;
-    -premailer-width: 570px;
+    -premailer-width: 600px;
     margin: 0 auto;
     padding: 0;
     text-align: center;
-    width: 570px;
+    width: 600px;
+}
+
+.footer-cell {
+    padding: 24px 24px 0;
 }
 
 .footer p {
-    color: #b0adc5;
-    font-size: 12px;
+    color: #475569;
+    font-size: 13px;
+    line-height: 20px;
     text-align: center;
 }
 
 .footer a {
-    color: #b0adc5;
+    color: #475569;
     text-decoration: underline;
 }
 
@@ -186,27 +205,30 @@ img {
     -premailer-cellpadding: 0;
     -premailer-cellspacing: 0;
     -premailer-width: 100%;
-    margin: 30px auto;
+    border-collapse: collapse;
+    margin: 8px auto 24px;
     width: 100%;
 }
 
 .table th {
-    border-bottom: 1px solid #edeff2;
+    border-bottom: 1px solid #e2e8f0;
+    color: #64748b;
+    font-size: 12px;
+    font-weight: 600;
+    letter-spacing: 0.06em;
+    line-height: 16px;
     margin: 0;
     padding-bottom: 8px;
+    text-transform: uppercase;
 }
 
 .table td {
-    color: #74787e;
-    font-size: 15px;
-    line-height: 18px;
+    border-bottom: 1px solid #e2e8f0;
+    color: #334155;
+    font-size: 14px;
+    line-height: 20px;
     margin: 0;
     padding: 10px 0;
-}
-
-.content-cell {
-    max-width: 100vw;
-    padding: 32px;
 }
 
 /* Buttons */
@@ -215,7 +237,7 @@ img {
     -premailer-cellpadding: 0;
     -premailer-cellspacing: 0;
     -premailer-width: 100%;
-    margin: 30px auto;
+    margin: 8px auto 24px;
     padding: 0;
     text-align: center;
     width: 100%;
@@ -223,64 +245,32 @@ img {
 
 .button {
     -webkit-text-size-adjust: none;
-    border-radius: 4px;
-    color: #fff;
+    border-radius: 10px;
+    color: #ffffff;
     display: inline-block;
-    overflow: hidden;
+    font-size: 16px;
+    font-weight: 600;
+    line-height: 20px;
+    padding: 14px 28px;
     text-decoration: none;
-}
-
-.button-blue,
-.button-primary {
-    background-color: #2d3748;
-    border-bottom: 8px solid #2d3748;
-    border-left: 18px solid #2d3748;
-    border-right: 18px solid #2d3748;
-    border-top: 8px solid #2d3748;
-}
-
-.button-green,
-.button-success {
-    background-color: #48bb78;
-    border-bottom: 8px solid #48bb78;
-    border-left: 18px solid #48bb78;
-    border-right: 18px solid #48bb78;
-    border-top: 8px solid #48bb78;
-}
-
-.button-red,
-.button-error {
-    background-color: #e53e3e;
-    border-bottom: 8px solid #e53e3e;
-    border-left: 18px solid #e53e3e;
-    border-right: 18px solid #e53e3e;
-    border-top: 8px solid #e53e3e;
 }
 
 /* Panels */
 
 .panel {
-    border-left: #2d3748 solid 4px;
-    margin: 21px 0;
+    margin: 0 0 24px;
 }
 
 .panel-content {
-    background-color: #edf2f7;
-    color: #718096;
-    padding: 16px;
+    background-color: #f8fafc;
+    border: 1px solid #e2e8f0;
+    border-radius: 12px;
+    color: #334155;
+    padding: 16px 20px;
 }
 
 .panel-content p {
-    color: #718096;
-}
-
-.panel-item {
-    padding: 0;
-}
-
-.panel-item p:last-of-type {
-    margin-bottom: 0;
-    padding-bottom: 0;
+    color: #334155;
 }
 
 /* Utilities */

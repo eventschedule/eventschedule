@@ -3,7 +3,7 @@
 {{ $kind === 'overdue' ? __('messages.installment_digest_overdue_body') : __('messages.installment_digest_due_body') }}
 
 @foreach ($rows as $row)
-- {{ $row['name'] }} ({{ $row['event'] }}): {{ \App\Utils\MoneyUtils::format($row['amount'], $row['currency']) }} {{ $row['due_at'] }}
+- {{ $row['name'] }} ({{ $row['event'] }}): {{ \App\Utils\MoneyUtils::format($row['amount'], $row['currency']) }} {{ filled($row['due_at']) ? \Carbon\Carbon::parse($row['due_at'])->translatedFormat('j M Y') : '' }}
 @endforeach
 
 {{ \App\Utils\MoneyUtils::format($total, $currency ?? 'USD') }} {{ trans_choice('messages.installment_digest_across', count($rows), ['count' => count($rows)]) }}

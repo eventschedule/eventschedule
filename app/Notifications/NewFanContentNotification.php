@@ -47,20 +47,21 @@ class NewFanContentNotification extends Notification
         $encodedEmail = base64_encode($notifiable->email);
         $unsubscribeUrl = route('user.unsubscribe', ['email' => $encodedEmail, 'sig' => \App\Utils\UrlUtils::signEmail($encodedEmail)]);
 
+        $data = [
+            'event' => $this->event,
+            // So the mail shows which schedule it is about, as every other owner notification does.
+            'role' => $this->event->roles->firstWhere('subdomain', $this->subdomain),
+            'fanContentCount' => $this->fanContentCount,
+            'actionUrl' => $actionUrl,
+            'unsubscribeUrl' => $unsubscribeUrl,
+        ];
+
         return (new MailMessage)
             ->subject($subject)
-            ->view('emails.new_fan_content', [
-                'event' => $this->event,
-                'fanContentCount' => $this->fanContentCount,
-                'actionUrl' => $actionUrl,
-                'unsubscribeUrl' => $unsubscribeUrl,
-            ])
-            ->text('emails.new_fan_content_text', [
-                'event' => $this->event,
-                'fanContentCount' => $this->fanContentCount,
-                'actionUrl' => $actionUrl,
-                'unsubscribeUrl' => $unsubscribeUrl,
-            ])
+            // One array for both parts: MailMessage::text() re-calls view() with its own data, so
+            // whatever the HTML part needs has to be in the array given last.
+            ->view('emails.new_fan_content', $data)
+            ->text('emails.new_fan_content_text', $data)
             ->withSymfonyMessage(function ($message) use ($unsubscribeUrl) {
                 $message->getHeaders()->addTextHeader('List-Unsubscribe', '<'.$unsubscribeUrl.'>');
                 $message->getHeaders()->addTextHeader('List-Unsubscribe-Post', 'List-Unsubscribe=One-Click');

@@ -3,7 +3,7 @@
 {{ __('messages.hello') }},
 
 {{ $event->name }}
-{{ $event->localStartsAt(true) }}
+{{ $event->localStartsAt(true, null, false, null, app()->getLocale()) }}
 @if($event->getVenueDisplayName())
 {{ $event->getVenueDisplayName() }}
 @endif

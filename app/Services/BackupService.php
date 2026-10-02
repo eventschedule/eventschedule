@@ -1172,7 +1172,7 @@ class BackupService
 
             $preview[] = [
                 'subdomain' => $role['subdomain'] ?? 'unknown',
-                'name' => $role['name'] ?? 'Unknown',
+                'name' => $role['name'] ?? __('messages.unknown'),
                 'type' => $role['type'] ?? 'talent',
                 'events' => count($events),
                 'tickets' => $ticketCount,
@@ -1198,7 +1198,7 @@ class BackupService
             }
 
             $scheduleData = $schedules[$index];
-            $scheduleName = $scheduleData['role']['name'] ?? 'Unknown';
+            $scheduleName = $scheduleData['role']['name'] ?? __('messages.unknown');
 
             $job->update(['progress' => [
                 'current' => $step + 1,
@@ -1213,8 +1213,8 @@ class BackupService
                 report($e);
                 $report[] = [
                     'name' => $scheduleName,
-                    'error' => 'Failed to import schedule.',
-                    'schedules' => ['success' => 0, 'failed' => 1, 'failures' => [$scheduleName.': Import failed']],
+                    'error' => __('messages.backup_import_schedule_failed'),
+                    'schedules' => ['success' => 0, 'failed' => 1, 'failures' => [__('messages.backup_import_item_failed', ['name' => $scheduleName])]],
                 ];
             }
         }
@@ -1269,7 +1269,7 @@ class BackupService
                 } catch (\Exception $e) {
                     report($e);
                     $report['sub_schedules']['failed']++;
-                    $report['sub_schedules']['failures'][] = ($groupData['name'] ?? 'Unknown').': Import failed';
+                    $report['sub_schedules']['failures'][] = __('messages.backup_import_item_failed', ['name' => $groupData['name'] ?? __('messages.unknown')]);
                 }
             }
 
@@ -1368,7 +1368,7 @@ class BackupService
                         } catch (\Exception $e) {
                             report($e);
                             $report['tickets']['failed']++;
-                            $report['tickets']['failures'][] = ($ticketData['type'] ?? 'Unknown').': Import failed';
+                            $report['tickets']['failures'][] = __('messages.backup_import_item_failed', ['name' => $ticketData['type'] ?? __('messages.unknown')]);
                         }
                     }
 
@@ -1384,7 +1384,7 @@ class BackupService
                         } catch (\Exception $e) {
                             report($e);
                             $report['promo_codes']['failed']++;
-                            $report['promo_codes']['failures'][] = ($promoData['code'] ?? 'Unknown').': Import failed';
+                            $report['promo_codes']['failures'][] = __('messages.backup_import_item_failed', ['name' => $promoData['code'] ?? __('messages.unknown')]);
                         }
                     }
 
@@ -1420,7 +1420,7 @@ class BackupService
                             } catch (\Exception $e) {
                                 report($e);
                                 $report['sales']['failed']++;
-                                $report['sales']['failures'][] = ($saleData['name'] ?? 'Unknown').': Import failed';
+                                $report['sales']['failures'][] = __('messages.backup_import_item_failed', ['name' => $saleData['name'] ?? __('messages.unknown')]);
                             }
                         }
                     }
@@ -1512,7 +1512,7 @@ class BackupService
                 } catch (\Exception $e) {
                     report($e);
                     $report['events']['failed']++;
-                    $report['events']['failures'][] = ($eventData['name'] ?? 'Unknown').': Import failed';
+                    $report['events']['failures'][] = __('messages.backup_import_item_failed', ['name' => $eventData['name'] ?? __('messages.unknown')]);
                 }
             }
 
@@ -1621,7 +1621,7 @@ class BackupService
                 } catch (\Exception $e) {
                     report($e);
                     $report['newsletters']['failed']++;
-                    $report['newsletters']['failures'][] = ($nlData['subject'] ?? 'Unknown').': Import failed';
+                    $report['newsletters']['failures'][] = __('messages.backup_import_item_failed', ['name' => $nlData['subject'] ?? __('messages.unknown')]);
                 }
             }
 

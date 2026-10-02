@@ -1,31 +1,23 @@
-<!DOCTYPE html>
-<html>
-<head>
-    <meta charset="utf-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>{{ __('messages.appointment_reminder_heading') }}</title>
-</head>
-<body style="font-family: Arial, sans-serif; line-height: 1.6; color: #333; max-width: 600px; margin: 0 auto; padding: 20px;">
-    <div style="background-color: #4E81FA; color: white; padding: 20px; text-align: center; border-radius: 8px 8px 0 0;">
-        <h1 style="margin: 0; font-size: 24px;">{{ __('messages.appointment_reminder_heading') }}</h1>
-    </div>
+@php
+    $theme = \App\Utils\EmailTheme::guest($role ?? null);
+    $apptName = $type?->name ?? $event->name;
+    $apptWhen = \App\Utils\AppointmentTimeUtils::render($event, $sale->guestTimezone(), (bool) ($role->use_24_hour_time ?? false));
+@endphp
+<x-email.layout :theme="$theme" :title="__('messages.appointment_reminder_heading')" :preheader="$apptName.' · '.$apptWhen['date'].' · '.$apptWhen['time']">
+<x-email.heading :eyebrow="__('messages.appointment_reminder_heading')" auto>{{ $apptName }}</x-email.heading>
 
-    <div style="background-color: #f9f9f9; padding: 20px; border-radius: 0 0 8px 8px;">
-        <p style="font-size: 16px; margin-top: 0;">{{ __('messages.hello') }} {{ $sale->name }},</p>
+<x-email.text>{{ __('messages.hello') }} {{ $sale->name }},</x-email.text>
+<x-email.text>{{ __('messages.appointment_reminder_intro', ['schedule' => $role?->name ?? '']) }}</x-email.text>
 
-        <p>{{ __('messages.appointment_reminder_intro', ['schedule' => $role?->name ?? '']) }}</p>
+<x-email.details panel>
+@include('emails.partials.appointment_datetime')
+{{-- Only a web link is ever an href; free text (a meeting ID, "call me") is printed as text. --}}
+@if ($event->event_url)
+<x-email.item :label="__('messages.online')" wide :ltr="(bool) $event->eventUrlHref()">@if ($joinHref = $event->eventUrlHref())<x-email.link :href="$joinHref">{{ $event->event_url }}</x-email.link>@else<bdi>{{ $event->event_url }}</bdi>@endif</x-email.item>
+@endif
+</x-email.details>
 
-        <div style="background-color: white; padding: 20px; border-radius: 8px; margin: 20px 0;">
-            <h2 style="margin-top: 0; color: #4E81FA;">{{ $type?->name ?? $event->name }}</h2>
-            @include('emails.partials.appointment_datetime')
-            @if ($event->event_url)
-                <p style="margin: 10px 0;"><strong>{{ __('messages.online') }}:</strong> @if ($joinHref = $event->eventUrlHref()) <a href="{{ $joinHref }}" style="color: #4E81FA;">{{ $event->event_url }}</a> @else {{ $event->event_url }} @endif</p>
-            @endif
-        </div>
+@include('emails.partials.appointment_calendar')
 
-        <div style="text-align: center; margin: 30px 0;">
-            <a href="{{ $manageUrl }}" style="background-color: #4E81FA; color: white; padding: 12px 24px; text-decoration: none; border-radius: 6px; display: inline-block; font-weight: bold;">{{ __('messages.appointments_manage_booking') }}</a>
-        </div>
-    </div>
-</body>
-</html>
+<x-email.button :href="$manageUrl">{{ __('messages.appointments_manage_booking') }}</x-email.button>
+</x-email.layout>
