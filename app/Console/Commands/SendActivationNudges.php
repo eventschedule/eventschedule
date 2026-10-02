@@ -8,6 +8,7 @@ use App\Models\DismissedNextStep;
 use App\Models\Role;
 use App\Services\DemoService;
 use App\Utils\OwnerLocalTime;
+use App\Utils\UrlUtils;
 use Illuminate\Console\Command;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
@@ -38,12 +39,14 @@ class SendActivationNudges extends Command
     protected $description = 'Nudge schedules that stalled after creating their first schedule';
 
     /**
-     * Every trigger is bounded at BOTH ends, and that is the load-bearing part.
+     * Every time-triggered nudge is bounded at BOTH ends, and that is the load-bearing part.
      *
      * A lower bound stops us nagging someone who is mid-task. The UPPER bound is what stops the
      * first run emailing the entire historical base: 226 schedules have never had an event and
      * 542 are dormant, so an unbounded no_event or idle query is a mailshot to every account
      * this app has ever had. SendOnboardingNudges learned the same lesson with MAX_AGE_DAYS.
+     * The setup asks (tickets, gateway) carry only a lower bound: their upper bound is the
+     * upcoming-event condition, which ends them when the date passes.
      *
      * The existing backlog is reached by the dashboard next-steps panel instead, which nobody
      * has to receive.
@@ -51,6 +54,16 @@ class SendActivationNudges extends Command
     private const WINDOWS = [
         // Schedule created between 1 and 14 days ago, still with no event at all.
         'no_event' => ['min_hours' => 24, 'max_days' => 14],
+        // The setup asks wait a day after the thing that makes them due, like no_event: someone
+        // who has just published their first event is usually about to add tickets to it, and an
+        // email telling them to, sent at the next run, lands in the middle of that session. No
+        // upper bound needed - the upcoming-event condition already ends them.
+        'no_ticket_type' => ['min_hours' => 24],
+        'no_ticket_type_free' => ['min_hours' => 24],
+        // Measured from when the priced ticket row was created. Tickets are updated in place, so a
+        // $0 row priced today keeps its older created_at and is not held back - acceptable, since
+        // that ticket was set up more than a day ago.
+        'no_gateway' => ['min_hours' => 24],
         // First paid sale landed in the last 7 days. Congratulating someone on a sale from
         // last year reads as a bug, not a nudge.
         'first_sale' => ['max_days' => 7],
@@ -69,6 +82,14 @@ class SendActivationNudges extends Command
 
     /** No activation email this soon after the owner's weekly digest, which already covers it. */
     private const DIGEST_QUIET_DAYS = 2;
+
+    /**
+     * No activation email this soon after an onboarding nudge (users.onboarding_nudge_sent_at).
+     * The two programmes reach the same person at the hand-over: someone who creates their first
+     * schedule the day after onboarding stage 2 is due no_event a day later, which made three of
+     * our emails on three consecutive days. no_event's 14-day window outlasts the wait.
+     */
+    private const ONBOARDING_QUIET_DAYS = 3;
 
     /**
      * How many candidates each trigger fetches. Deliberately larger than the send budget: the
@@ -191,7 +212,7 @@ class SendActivationNudges extends Command
                     // written by then, so that nudge would never be sent or retried.
                     // Same rule as SendOnboardingNudges and WindDownReminder.
                     SendQueuedEmail::dispatch(
-                        new ActivationNudge($role, $key),
+                        new ActivationNudge($role, $key, $this->ticketsUrlFor($role, $key)),
                         $role->user->email,
                         null,
                         $role->user->language_code ?? app()->getLocale()
@@ -275,7 +296,11 @@ class SendActivationNudges extends Command
                 ->whereNotExists(fn ($q) => $q->select(DB::raw(1))
                     ->from('owner_digests')
                     ->whereColumn('owner_digests.user_id', 'roles.user_id')
-                    ->where('owner_digests.created_at', '>=', now()->subDays(self::DIGEST_QUIET_DAYS)));
+                    ->where('owner_digests.created_at', '>=', now()->subDays(self::DIGEST_QUIET_DAYS)))
+                // NULL (never sent one, or sent before the column existed) passes, so this can only
+                // hold mail back, never drop an owner.
+                ->whereHas('user', fn ($q) => $q->where(fn ($w) => $w->whereNull('onboarding_nudge_sent_at')
+                    ->orWhere('onboarding_nudge_sent_at', '<', now()->subDays(self::ONBOARDING_QUIET_DAYS))));
         }
 
         // An in-app dismissal is an answer. The dashboard panel offers the same steps, and if
@@ -320,6 +345,44 @@ class SendActivationNudges extends Command
         }
 
         return $query->orderBy('id');
+    }
+
+    /**
+     * Where a ticket nudge's button goes: the Tickets section of the next upcoming public event
+     * this schedule CREATED, or null for the schedule admin page.
+     *
+     * Created, not merely owned. ownedEvents() also counts an event a venue accepted from another
+     * schedule, and that is right for deciding WHO to nudge, but the event's Tickets section follows
+     * its ticketingRole() - the creator's plan and the creator's trial button - so a Pro venue would
+     * land on a free talent's paywall, and the no_ticket_type_free "try it free for 7 days" mail on
+     * a page with no trial button. Those fall back to the admin page.
+     *
+     * A plain query, not ownedEvents(): that reads roles.type, which only exists inside a whereHas
+     * on roles, and $role->events() joins event_role alone.
+     */
+    private function ticketsUrlFor(Role $role, string $key): ?string
+    {
+        if (! in_array($key, ['no_ticket_type', 'no_ticket_type_free'], true)) {
+            return null;
+        }
+
+        // The same day-old, not-cancelled event the trigger is about, so the button lands on the
+        // event the email means rather than one added an hour ago or called off.
+        $event = $this->publicEvents($role->events()->where('events.creator_role_id', $role->id))
+            ->where('events.is_cancelled', false)
+            ->where('events.created_at', '<=', now()->subHours(self::WINDOWS[$key]['min_hours']))
+            ->hasUpcomingOccurrence()
+            ->orderBy('events.starts_at')
+            ->first(['events.id']);
+
+        if (! $event) {
+            return null;
+        }
+
+        return app_url(route('event.edit', [
+            'subdomain' => $role->subdomain,
+            'hash' => UrlUtils::encodeId($event->id),
+        ], false).'#section-tickets');
     }
 
     /** Events on this schedule that the public can actually see. */
@@ -406,7 +469,8 @@ class SendActivationNudges extends Command
         return $this->base('no_ticket_type')
             ->whereCanSellPaidTickets()
             ->whereHas('events', fn ($q) => $this->ownedEvents($this->publicEvents($q))
-                ->hasUpcomingOccurrence())
+                ->hasUpcomingOccurrence()
+                ->where('events.created_at', '<=', now()->subHours(self::WINDOWS['no_ticket_type']['min_hours'])))
             // Any ticket type on any event this schedule owns counts as "they know how".
             ->whereDoesntHave('events', fn ($q) => $this->ownedEvents($q)
                 ->whereHas('tickets', fn ($t) => $t->where('tickets.is_deleted', false)))
@@ -429,7 +493,8 @@ class SendActivationNudges extends Command
         return $this->base('no_ticket_type_free')
             ->whereNotIn('roles.id', Role::query()->whereCanSellPaidTickets()->select('roles.id'))
             ->whereHas('events', fn ($q) => $this->ownedEvents($this->publicEvents($q))
-                ->hasUpcomingOccurrence())
+                ->hasUpcomingOccurrence()
+                ->where('events.created_at', '<=', now()->subHours(self::WINDOWS['no_ticket_type_free']['min_hours'])))
             ->whereDoesntHave('events', fn ($q) => $this->ownedEvents($q)
                 ->whereHas('tickets', fn ($t) => $t->where('tickets.is_deleted', false)))
             // Registration is the free way to sign up, so a schedule taking it has done this.
@@ -462,7 +527,8 @@ class SendActivationNudges extends Command
             ->where('events.is_cancelled', false)
             ->hasUpcomingOccurrence()
             ->whereHas('tickets', fn ($t) => $t->where('tickets.is_deleted', false)
-                ->where('tickets.price', '>', 0));
+                ->where('tickets.price', '>', 0)
+                ->where('tickets.created_at', '<=', now()->subHours(self::WINDOWS['no_gateway']['min_hours'])));
 
         return $this->base('no_gateway')
             // Only where that event can actually take money. Same reasoning as

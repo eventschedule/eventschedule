@@ -6,6 +6,7 @@ use App\Jobs\SendQueuedEmail;
 use App\Mail\OnboardingNudge;
 use App\Models\User;
 use App\Services\DemoService;
+use Carbon\Carbon;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Facades\Queue;
@@ -45,22 +46,36 @@ class OnboardingNudgeTest extends TestCase
         return $user->fresh();
     }
 
-    private function nudge(): void
+    /**
+     * --now skips the local-morning window for stages 2 and 3, which every test below except the
+     * ones about that window would otherwise depend on the hour the suite happens to run at.
+     */
+    private function nudge(bool $now = true): void
     {
-        $this->artisan('app:send-onboarding-nudges', ['--apply' => true])->assertExitCode(0);
+        $args = ['--apply' => true];
+        if ($now) {
+            $args['--now'] = true;
+        }
+
+        $this->artisan('app:send-onboarding-nudges', $args)->assertExitCode(0);
+    }
+
+    private function dryRun()
+    {
+        return $this->artisan('app:send-onboarding-nudges', ['--now' => true]);
     }
 
     public function test_it_sends_the_stage_matching_how_long_they_have_been_stalled(): void
     {
         $fresh = $this->stalled(2);      // past the 1h mark only
-        $threeDays = $this->stalled(80); // past all three
+        $aWeek = $this->stalled(170);    // past all three
 
         $this->nudge();
 
         $this->assertSame(1, $fresh->refresh()->onboarding_nudge_stage);
-        // Not stage 1 - someone gone three days should not have to wait another three
-        // days to receive the message that actually fits.
-        $this->assertSame(3, $threeDays->refresh()->onboarding_nudge_stage);
+        // Not stage 1 - someone gone a week should not have to wait another week to
+        // receive the message that actually fits.
+        $this->assertSame(3, $aWeek->refresh()->onboarding_nudge_stage);
 
         Mail::assertSent(OnboardingNudge::class, 2);
     }
@@ -84,11 +99,11 @@ class OnboardingNudgeTest extends TestCase
         $this->nudge();
         $this->assertSame(1, $user->refresh()->onboarding_nudge_stage);
 
-        $this->travel(23)->hours();
+        $this->travel(47)->hours();
         $this->nudge();
         $this->assertSame(2, $user->refresh()->onboarding_nudge_stage);
 
-        $this->travel(48)->hours();
+        $this->travel(120)->hours();
         $this->nudge();
         $this->assertSame(3, $user->refresh()->onboarding_nudge_stage);
 
@@ -155,7 +170,7 @@ class OnboardingNudgeTest extends TestCase
     {
         $user = $this->stalled(80);
 
-        $this->artisan('app:send-onboarding-nudges')->assertExitCode(0);
+        $this->dryRun()->assertExitCode(0);
 
         Mail::assertNothingSent();
         $this->assertSame(0, $user->refresh()->onboarding_nudge_stage);
@@ -193,9 +208,9 @@ class OnboardingNudgeTest extends TestCase
      */
     public function test_the_dry_run_counts_each_account_once(): void
     {
-        $this->stalled(80); // matches the stage 3, 2 and 1 queries
+        $this->stalled(170); // matches the stage 3, 2 and 1 queries
 
-        $this->artisan('app:send-onboarding-nudges')
+        $this->dryRun()
             ->expectsOutputToContain('DRY RUN - 1 would be sent.')
             ->assertExitCode(0);
     }
@@ -227,13 +242,13 @@ class OnboardingNudgeTest extends TestCase
      */
     public function test_one_run_nudges_each_account_at_most_once(): void
     {
-        // A run budget of one, and three accounts all past the 72h mark so every one of them
+        // A run budget of one, and three accounts all past the 168h mark so every one of them
         // matches every stage query. Applied per stage, accounts 2 and 3 would fall through to
         // the stage 2 and stage 1 queries in this same run.
         config(['usage.onboarding_nudge_batch' => 1]);
 
         foreach (range(1, 3) as $i) {
-            $this->stalled(80, ['email' => "stalled{$i}@gmail.com"]);
+            $this->stalled(170, ['email' => "stalled{$i}@gmail.com"]);
         }
 
         $this->nudge();
@@ -264,11 +279,11 @@ class OnboardingNudgeTest extends TestCase
         config(['usage.onboarding_nudge_batch' => 2]);
 
         foreach (range(1, 3) as $i) {
-            $this->stalled(80, ['email' => "stalled{$i}@gmail.com"]);
+            $this->stalled(170, ['email' => "stalled{$i}@gmail.com"]);
         }
 
         // Both numbers are the run budget, not a multiple of it.
-        $this->artisan('app:send-onboarding-nudges')
+        $this->dryRun()
             ->expectsOutputToContain('DRY RUN - 2 would be sent.')
             ->assertExitCode(0);
 
@@ -311,5 +326,251 @@ class OnboardingNudgeTest extends TestCase
 
         $this->post($url)->assertOk();
         $this->assertFalse((bool) $user->refresh()->is_subscribed);
+    }
+
+    //
+    // Pacing: spread across the first week, stages 2 and 3 in the recipient's morning.
+    //
+
+    /** The boundaries, so the spacing cannot quietly drift back to three emails in three days. */
+    public function test_the_stages_are_spread_across_the_first_week(): void
+    {
+        $this->freezeTime();
+
+        $notYetTwo = $this->stalled(47, ['onboarding_nudge_stage' => 1]);
+        $two = $this->stalled(48, ['onboarding_nudge_stage' => 1]);
+        $notYetThree = $this->stalled(167, ['onboarding_nudge_stage' => 2]);
+        $three = $this->stalled(168, ['onboarding_nudge_stage' => 2]);
+
+        $this->nudge();
+
+        $this->assertSame(1, $notYetTwo->refresh()->onboarding_nudge_stage);
+        $this->assertSame(2, $two->refresh()->onboarding_nudge_stage);
+        $this->assertSame(2, $notYetThree->refresh()->onboarding_nudge_stage);
+        $this->assertSame(3, $three->refresh()->onboarding_nudge_stage);
+    }
+
+    /**
+     * Outside the morning a due stage 2 or 3 waits - and the account must not be handed a LOWER
+     * stage instead. Its stage is below theirs, so the stage 1 query matches it too: left unmarked,
+     * an account that never got stage 1 was sent stage 1 at night and "last note" the next morning.
+     */
+    public function test_a_later_stage_waits_for_the_morning_without_falling_back_to_stage_1(): void
+    {
+        $this->travelTo(Carbon::parse('2026-10-07 03:00:00', 'UTC'));
+        $user = $this->stalled(170, ['timezone' => 'UTC']);
+
+        $this->nudge(now: false);
+
+        Mail::assertNothingSent();
+        $this->assertSame(0, $user->refresh()->onboarding_nudge_stage);
+
+        $this->travelTo(Carbon::parse('2026-10-07 09:30:00', 'UTC'));
+        $this->nudge(now: false);
+
+        $this->assertSame(3, $user->refresh()->onboarding_nudge_stage);
+        Mail::assertSent(OnboardingNudge::class, 1);
+    }
+
+    /** The morning is the recipient's, not the server's. */
+    public function test_the_morning_is_in_the_recipients_timezone(): void
+    {
+        // 03:00 UTC is 11:00 in Singapore.
+        $this->travelTo(Carbon::parse('2026-10-07 03:00:00', 'UTC'));
+        $user = $this->stalled(50, ['timezone' => 'Asia/Singapore', 'onboarding_nudge_stage' => 1]);
+
+        $this->nudge(now: false);
+
+        $this->assertSame(2, $user->refresh()->onboarding_nudge_stage);
+    }
+
+    /** Stage 1 follows the signup session itself, whatever the hour. */
+    public function test_stage_1_is_not_held_for_the_morning(): void
+    {
+        $this->travelTo(Carbon::parse('2026-10-07 03:00:00', 'UTC'));
+        $user = $this->stalled(2, ['timezone' => 'UTC']);
+
+        $this->nudge(now: false);
+
+        $this->assertSame(1, $user->refresh()->onboarding_nudge_stage);
+    }
+
+    /** The window is what makes an hourly schedule reach each account at a sensible time. */
+    public function test_the_command_is_scheduled_on_both_rails_without_now(): void
+    {
+        foreach (['routes/console.php', 'app/Http/Controllers/AppController.php'] as $file) {
+            $body = file_get_contents(base_path($file));
+
+            $this->assertStringContainsString("app:send-onboarding-nudges', ['--apply' => true]", $body, $file);
+            $this->assertDoesNotMatchRegularExpression("/app:send-onboarding-nudges'[^;]*--now/", $body, $file);
+        }
+    }
+
+    /** SendActivationNudges reads it to leave a few quiet days after an onboarding email. */
+    public function test_the_claim_records_when_it_was_sent(): void
+    {
+        $this->freezeTime();
+        $user = $this->stalled(2);
+
+        $this->nudge();
+
+        $this->assertEquals(now()->startOfSecond(), $user->refresh()->onboarding_nudge_sent_at);
+    }
+
+    //
+    // What the mail says and where its button goes.
+    //
+
+    private function mail(User $user, int $stage): OnboardingNudge
+    {
+        return new OnboardingNudge($user->fresh(), $stage);
+    }
+
+    public function test_the_button_resumes_at_the_type_they_picked(): void
+    {
+        $picked = $this->stalled(2, ['pending_schedule_type' => 'venue']);
+        $html = $this->mail($picked, 2)->render();
+        $this->assertStringContainsString('/getting-started?type=venue', $html);
+
+        $unpicked = $this->stalled(2);
+        $html = $this->mail($unpicked, 2)->render();
+        $this->assertStringContainsString('/getting-started', $html);
+        $this->assertStringNotContainsString('/getting-started?type=', $html);
+    }
+
+    /** Stage 1 swaps "choose whether you perform, run a venue or curate" for the type they chose. */
+    public function test_stage_1_talks_about_the_type_they_picked(): void
+    {
+        $choose = __('messages.onboarding_nudge_body_1');
+
+        $html = $this->mail($this->stalled(2, ['pending_schedule_type' => 'venue']), 1)->render();
+        $this->assertStringContainsString(e(__('messages.onboarding_nudge_type_venue')), $html);
+        $this->assertStringNotContainsString(e($choose), $html);
+
+        $html = $this->mail($this->stalled(2), 1)->render();
+        $this->assertStringContainsString(e($choose), $html);
+    }
+
+    public function test_a_claimed_name_is_named_in_the_first_subject(): void
+    {
+        $user = $this->stalled(2, ['pending_schedule_name' => 'blue-room']);
+
+        $this->assertSame('Finish setting up Blue Room', $this->mail($user, 1)->envelope()->subject);
+        // Only the first: the later stages are about the account, not a page they are building.
+        $this->assertSame(__('messages.onboarding_nudge_subject_2'), $this->mail($user, 2)->envelope()->subject);
+    }
+
+    /** No "Hola there," in a translated mail, and no email address used as a name. */
+    public function test_a_missing_or_address_name_greets_without_one(): void
+    {
+        foreach (['', 'sam@example.com'] as $name) {
+            $html = $this->mail($this->stalled(2, ['name' => $name]), 1)->render();
+
+            $this->assertStringContainsString('Hello,', $html, var_export($name, true));
+            $this->assertStringNotContainsString('Hello there', $html);
+            $this->assertStringNotContainsString('Hello sam@', $html);
+        }
+
+        $html = $this->mail($this->stalled(2, ['name' => 'Sam Lee']), 1)->render();
+        $this->assertStringContainsString('Hello Sam,', $html);
+    }
+
+    /** The founder's note, the reply invitation and our inbox, on eventschedule.com. */
+    public function test_the_personal_parts_appear_on_the_nexus(): void
+    {
+        config(['app.is_nexus' => true, 'app.support_email' => 'contact@eventschedule.com']);
+        $user = $this->stalled(2);
+
+        $first = $this->mail($user, 1);
+        $html = $first->render();
+        $this->assertStringContainsString('/examples', $html);
+        $this->assertStringContainsString('Hillel', $html);
+        $this->assertSame('contact@eventschedule.com', $first->envelope()->replyTo[0]->address);
+
+        $this->assertStringContainsString(e(__('messages.onboarding_nudge_reply_2')), $this->mail($user, 2)->render());
+
+        // The last one asks what stopped them, and no longer points at examples.
+        $html = $this->mail($user, 3)->render();
+        $this->assertStringContainsString(e(__('messages.onboarding_nudge_reply_3')), $html);
+        $this->assertStringNotContainsString('/examples', $html);
+    }
+
+    /** The plain-text part carries the same additions as the HTML one. */
+    public function test_the_text_version_carries_them_too(): void
+    {
+        config(['app.is_nexus' => true]);
+        $mail = $this->mail($this->stalled(2, ['pending_schedule_type' => 'talent']), 2);
+
+        $text = view('emails.onboarding_nudge_text', $mail->content()->with)->render();
+
+        $this->assertStringContainsString('/getting-started?type=talent', $text);
+        $this->assertStringContainsString('/examples', $text);
+        $this->assertStringContainsString(__('messages.onboarding_nudge_reply_2'), $text);
+        $this->assertStringContainsString('Hillel', $text);
+    }
+
+    /**
+     * An operator platform (IS_HOSTED=true, IS_NEXUS=false) runs this command too. It has no
+     * /examples route, and our founder's name and inbox are not theirs to send. phpunit.xml forces
+     * is_nexus on, so nothing else in the suite ever renders this branch.
+     */
+    public function test_an_operator_platform_gets_none_of_the_personal_parts(): void
+    {
+        config(['app.is_nexus' => false]);
+        $user = $this->stalled(2);
+
+        foreach ([1, 2, 3] as $stage) {
+            $mail = $this->mail($user, $stage);
+            $html = $mail->render();
+
+            $this->assertStringNotContainsString('/examples', $html, "stage {$stage}");
+            $this->assertStringNotContainsString('Hillel', $html, "stage {$stage}");
+            $this->assertStringNotContainsString(e(__('messages.onboarding_nudge_reply_2')), $html);
+            $this->assertStringNotContainsString(e(__('messages.onboarding_nudge_reply_3')), $html);
+            $this->assertSame([], $mail->envelope()->replyTo, "stage {$stage}");
+        }
+    }
+
+    /**
+     * Every language actually DEFINES every key, and none of them is the English string.
+     * Asserted against the files, because __() falls back to English for a missing key.
+     */
+    public function test_every_language_defines_its_own_copy(): void
+    {
+        $en = require resource_path('lang/en/messages.php');
+        $keys = array_values(array_filter(array_keys($en), fn ($k) => str_starts_with($k, 'onboarding_nudge_')));
+
+        $this->assertContains('onboarding_nudge_signoff', $keys, 'sanity: the new keys are in the list');
+
+        foreach (array_keys(config('app.supported_languages')) as $lang) {
+            $lines = require resource_path("lang/{$lang}/messages.php");
+
+            foreach ($keys as $key) {
+                $this->assertArrayHasKey($key, $lines, "{$lang} is missing {$key}");
+
+                if ($lang !== 'en') {
+                    $this->assertNotSame($en[$key], $lines[$key], "{$lang}/{$key} is the English string copied over");
+                }
+
+                foreach (['schedule', 'app'] as $placeholder) {
+                    if (str_contains($en[$key], ':'.$placeholder)) {
+                        $this->assertStringContainsString(':'.$placeholder, $lines[$key], "{$lang}/{$key} lost :{$placeholder}");
+                    }
+                }
+            }
+        }
+    }
+
+    public function test_rtl_locales_mark_the_body_direction(): void
+    {
+        $user = $this->stalled(2, ['pending_schedule_name' => 'blue-room']);
+
+        foreach (array_keys(config('app.supported_languages')) as $lang) {
+            app()->setLocale($lang);
+            $rendered = $this->mail($user, 1)->render();
+
+            $this->assertSame(in_array($lang, ['ar', 'he']), str_contains($rendered, 'dir="rtl"'), "{$lang} direction");
+            $this->assertStringContainsString('Blue Room', $rendered, "{$lang} lost the name");
+        }
     }
 }

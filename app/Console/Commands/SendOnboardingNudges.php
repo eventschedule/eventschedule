@@ -6,6 +6,7 @@ use App\Jobs\SendQueuedEmail;
 use App\Mail\OnboardingNudge;
 use App\Models\User;
 use App\Services\DemoService;
+use App\Utils\OwnerLocalTime;
 use Illuminate\Console\Command;
 use Illuminate\Support\Facades\Log;
 
@@ -25,12 +26,28 @@ use Illuminate\Support\Facades\Log;
 class SendOnboardingNudges extends Command
 {
     protected $signature = 'app:send-onboarding-nudges
-        {--apply : Send the emails. Without this the command only reports.}';
+        {--apply : Send the emails. Without this the command only reports.}
+        {--now : Ignore the local-morning window for stages 2 and 3. For hand runs and tests; the scheduler never passes it.}';
 
     protected $description = 'Nudge verified accounts that never created their first schedule';
 
-    /** stage => hours since signup at which it becomes due. */
-    private const STAGES = [1 => 1, 2 => 24, 3 => 72];
+    /**
+     * stage => hours since signup at which it becomes due.
+     *
+     * Stage 1 follows the signup session itself, while it is still fresh. The other two are spread
+     * across the first week rather than packed into three days: the few late activators there are
+     * arrive anywhere between day 1 and day 14, and three emails on three of the first four days
+     * read as pressure, not help. With the local-morning gate no two of them land on consecutive
+     * days.
+     */
+    private const STAGES = [1 => 1, 2 => 48, 3 => 168];
+
+    /**
+     * How many candidates each stage fetches. Larger than the send budget because the
+     * local-morning gate runs after the fetch: fetching only as many as can be sent would let
+     * accounts outside their morning (oldest first) hide the ones inside it.
+     */
+    private const CANDIDATE_LIMIT = 1000;
 
     /**
      * How old a signup may be and still be nudged.
@@ -41,8 +58,8 @@ class SendOnboardingNudges extends Command
      * email we will send" to people who never got a first one. A per-run cap alone does not
      * fix that; it only spreads the same blast over more hours.
      *
-     * The sequence ends at 72 hours, so anything beyond a few days is already past the moment
-     * this exists to catch. The generous margin is for a scheduler that was down for a while.
+     * The sequence ends at seven days, so anything much beyond that is already past the moment
+     * this exists to catch. The margin is for a scheduler that was down for a while.
      */
     private const MAX_AGE_DAYS = 14;
 
@@ -64,6 +81,7 @@ class SendOnboardingNudges extends Command
         }
 
         $apply = (bool) $this->option('apply');
+        $ignoreLocalTime = (bool) $this->option('now');
         $sent = 0;
 
         // ONE budget for the whole run, not one per stage.
@@ -80,14 +98,14 @@ class SendOnboardingNudges extends Command
         $handled = [];
 
         // Descending, so an account that has been sitting for days receives the stage that
-        // matches where it actually is rather than starting at stage 1 and taking three more
-        // days to catch up.
+        // matches where it actually is rather than starting at stage 1 and taking a week to
+        // catch up.
         foreach (array_reverse(self::STAGES, true) as $stage => $hours) {
             if ($budget <= 0) {
                 break;
             }
 
-            $users = $this->dueForStage($stage, $hours, $budget);
+            $users = $this->dueForStage($stage, $hours, self::CANDIDATE_LIMIT);
 
             foreach ($users as $user) {
                 if ($budget <= 0) {
@@ -98,7 +116,19 @@ class SendOnboardingNudges extends Command
                     continue;
                 }
 
+                // Marked BEFORE the morning check, deliberately. An account skipped here is still
+                // due this stage, and the lower stages' queries match it too (its stage is below
+                // theirs), so leaving it unmarked would hand a week-old account that never got
+                // stage 1 the stage 1 copy tonight and "last note" tomorrow morning.
                 $handled[$user->id] = true;
+
+                // Stages 2 and 3 go out in the recipient's local morning (OwnerLocalTime), like the
+                // activation nudges, rather than at whatever hour the stage fell due. Not claimed
+                // outside it, so a run inside their morning picks it up. Stage 1 is exempt: it
+                // follows the session they just had.
+                if ($stage > 1 && ! $ignoreLocalTime && ! OwnerLocalTime::isMorning($user)) {
+                    continue;
+                }
 
                 if (! $apply) {
                     $this->line("  would send stage {$stage} to {$user->email}");
@@ -113,9 +143,12 @@ class SendOnboardingNudges extends Command
                 // AppController::translateData) hold different mutexes, so a concurrent run can
                 // otherwise read the same rows and email everyone twice. A conditional UPDATE is
                 // atomic, so exactly one runner claims each row.
+                //
+                // onboarding_nudge_sent_at rides the same UPDATE: SendActivationNudges reads it to
+                // leave a few quiet days after an onboarding email.
                 $claimed = User::where('id', $user->id)
                     ->where('onboarding_nudge_stage', '<', $stage)
-                    ->update(['onboarding_nudge_stage' => $stage]);
+                    ->update(['onboarding_nudge_stage' => $stage, 'onboarding_nudge_sent_at' => now()]);
 
                 if ($claimed === 0) {
                     continue;

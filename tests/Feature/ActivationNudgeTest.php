@@ -5,9 +5,12 @@ namespace Tests\Feature;
 use App\Jobs\SendQueuedEmail;
 use App\Mail\ActivationNudge;
 use App\Models\DismissedNextStep;
+use App\Models\Event;
 use App\Models\Role;
+use App\Models\Ticket;
 use App\Models\User;
 use App\Services\DemoService;
+use App\Utils\UrlUtils;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Queue;
@@ -24,8 +27,27 @@ use Tests\TestCase;
  */
 class ActivationNudgeTest extends TestCase
 {
-    use CreatesScheduleData;
+    use CreatesScheduleData {
+        createEvent as baseCreateEvent;
+        createTicket as baseCreateTicket;
+    }
     use RefreshDatabase;
+
+    /**
+     * Events and ticket types default to two days old here. The setup nudges wait a day after the
+     * event or priced ticket that makes them due (SendActivationNudges::WINDOWS min_hours), so a
+     * fixture made "now" would test the wait instead of the trigger. The tests about the wait pass
+     * created_at themselves.
+     */
+    protected function createEvent(Role $role, array $attrs = []): Event
+    {
+        return $this->baseCreateEvent($role, $attrs + ['created_at' => now()->subDays(2)]);
+    }
+
+    protected function createTicket(Event $event, array $attrs = []): Ticket
+    {
+        return $this->baseCreateTicket($event, $attrs + ['created_at' => now()->subDays(2)]);
+    }
 
     protected function setUp(): void
     {
@@ -1115,6 +1137,8 @@ class ActivationNudgeTest extends TestCase
             }
         }
         $keys[] = 'activation_nudge_body_no_ticket_type_free_no_trial';
+        $keys[] = 'activation_nudge_import_no_event';
+        $keys[] = 'activation_nudge_import_cta_no_event';
 
         $en = require resource_path('lang/en/messages.php');
 
@@ -1363,5 +1387,231 @@ class ActivationNudgeTest extends TestCase
         $this->nudge('first_sale');
 
         $this->assertSent('first_sale');
+    }
+
+    //
+    // Pacing: the setup asks wait a day, and nothing follows an onboarding email too closely.
+    //
+
+    /**
+     * Someone who has just published their first event is usually about to add tickets to it.
+     * Mailing them at the next run lands in the middle of that session.
+     */
+    public function test_the_ticket_nudge_waits_a_day_after_the_event(): void
+    {
+        $role = $this->createFreeRole($this->owner());
+        $this->createEvent($role, [
+            'starts_at' => now()->addDays(10)->format('Y-m-d H:i:s'),
+            'created_at' => now()->subHours(23),
+        ]);
+
+        $this->nudge('no_ticket_type_free');
+        $this->assertNothingSent();
+
+        $this->travel(2)->hours();
+        $this->nudge('no_ticket_type_free');
+        $this->assertSent('no_ticket_type_free');
+    }
+
+    public function test_the_paid_ticket_nudge_waits_a_day_after_the_event(): void
+    {
+        $role = $this->createRole($this->owner());
+        $this->createEvent($role, [
+            'starts_at' => now()->addDays(10)->format('Y-m-d H:i:s'),
+            'created_at' => now()->subHours(23),
+        ]);
+
+        $this->nudge('no_ticket_type');
+        $this->assertNothingSent();
+
+        $this->travel(2)->hours();
+        $this->nudge('no_ticket_type');
+        $this->assertSent('no_ticket_type');
+    }
+
+    /** Measured from the priced ticket, the thing that needs a gateway. */
+    public function test_the_gateway_nudge_waits_a_day_after_the_priced_ticket(): void
+    {
+        $role = $this->createRole($this->owner(['stripe_account_id' => null]));
+        $event = $this->createEvent($role, [
+            'starts_at' => now()->addDays(10)->format('Y-m-d H:i:s'),
+            'creator_role_id' => $role->id,
+        ]);
+        $this->createTicket($event, ['price' => 20, 'created_at' => now()->subHours(23)]);
+
+        $this->nudge('no_gateway');
+        $this->assertNothingSent();
+
+        $this->travel(2)->hours();
+        $this->nudge('no_gateway');
+        $this->assertSent('no_gateway');
+    }
+
+    /**
+     * The hand-over from the onboarding emails: a schedule created the day after onboarding stage
+     * 2 would otherwise be due no_event a day later, three of our emails on three days running.
+     */
+    public function test_an_owner_just_sent_an_onboarding_nudge_is_left_alone_for_a_few_days(): void
+    {
+        $owner = $this->owner(['onboarding_nudge_sent_at' => now()->subDays(2)]);
+        $role = $this->createRole($owner);
+        $role->forceFill(['created_at' => now()->subDays(2)])->save();
+
+        $this->nudge('no_event');
+        $this->assertNothingSent();
+
+        $owner->forceFill(['onboarding_nudge_sent_at' => now()->subDays(4)])->save();
+        $this->nudge('no_event');
+        $this->assertSent('no_event');
+    }
+
+    /** A congratulation is not held back by the quiet period, as it is not by the cooldown. */
+    public function test_a_first_sale_goes_out_inside_the_onboarding_quiet_period(): void
+    {
+        $owner = $this->owner(['onboarding_nudge_sent_at' => now()->subDay()]);
+        $role = $this->createRole($owner);
+        $event = $this->createEvent($role);
+        $ticket = $this->createTicket($event, ['price' => 20]);
+        $this->createSale($event, $role, ['payment_amount' => 20, 'paid_at' => now()->subDay()], $ticket);
+
+        $this->nudge('first_sale');
+
+        $this->assertSent('first_sale');
+    }
+
+    //
+    // Where the buttons go.
+    //
+
+    /** The fastest way to a first event, offered only where the import can work. */
+    public function test_the_no_event_mail_offers_ai_import_only_when_an_ai_key_is_set(): void
+    {
+        $role = $this->createRole($this->owner());
+        $importPath = '/'.$role->subdomain.'/import/ai';
+
+        config(['services.google.gemini_key' => 'test-key', 'services.openai.api_key' => null]);
+        $this->assertStringContainsString($importPath, (new ActivationNudge($role, 'no_event'))->render());
+
+        config(['services.google.gemini_key' => null]);
+        $this->assertStringNotContainsString($importPath, (new ActivationNudge($role, 'no_event'))->render());
+
+        // And only on the nudge it belongs to.
+        config(['services.google.gemini_key' => 'test-key']);
+        $this->assertStringNotContainsString($importPath, (new ActivationNudge($role, 'idle_30'))->render());
+    }
+
+    /** Captures the ActivationNudge each queued job carries. */
+    private function queuedNudges(): array
+    {
+        $mails = [];
+        Queue::assertPushed(SendQueuedEmail::class, function ($job) use (&$mails) {
+            $mailable = new \ReflectionProperty($job, 'mailable');
+            $mailable->setAccessible(true);
+            $mails[] = $mailable->getValue($job);
+
+            return true;
+        });
+
+        return $mails;
+    }
+
+    /** The ticket nudges land on the Tickets section of the event that needs them. */
+    public function test_the_ticket_nudge_links_to_its_events_tickets_section(): void
+    {
+        $role = $this->createFreeRole($this->owner());
+        $event = $this->createEvent($role, [
+            'starts_at' => now()->addDays(10)->format('Y-m-d H:i:s'),
+            'creator_role_id' => $role->id,
+        ]);
+
+        $this->nudge('no_ticket_type_free');
+
+        [$mail] = $this->queuedNudges();
+        $expected = '/'.$role->subdomain.'/edit-event/'.UrlUtils::encodeId($event->id).'#section-tickets';
+        $this->assertStringEndsWith($expected, (string) $mail->ticketsUrl);
+        $this->assertStringContainsString(e($mail->ticketsUrl), $mail->render(), 'the button uses it');
+    }
+
+    /** The event the email means: not one that was called off, nor one added an hour ago. */
+    public function test_the_ticket_link_skips_cancelled_and_brand_new_events(): void
+    {
+        $role = $this->createFreeRole($this->owner());
+        $own = ['creator_role_id' => $role->id];
+        $this->createEvent($role, $own + ['starts_at' => now()->addDays(2)->format('Y-m-d H:i:s'), 'is_cancelled' => true]);
+        $this->createEvent($role, $own + ['starts_at' => now()->addDays(3)->format('Y-m-d H:i:s'), 'created_at' => now()->subHour()]);
+        $meant = $this->createEvent($role, $own + ['starts_at' => now()->addDays(9)->format('Y-m-d H:i:s')]);
+
+        $this->nudge('no_ticket_type_free');
+
+        [$mail] = $this->queuedNudges();
+        $this->assertStringEndsWith('/edit-event/'.UrlUtils::encodeId($meant->id).'#section-tickets', (string) $mail->ticketsUrl);
+    }
+
+    /**
+     * A job queued before the deploy that added $ticketsUrl, or a failed one retried later by
+     * app:retry-failed-jobs, carries no such key. SerializesModels skips a missing key, leaving the
+     * typed property UNINITIALIZED, so a plain read of it throws; only the ?? in ctaUrl() keeps
+     * those emails sending.
+     */
+    public function test_a_payload_queued_before_tickets_url_existed_still_renders(): void
+    {
+        $role = $this->createRole($this->owner());
+        $values = (new ActivationNudge($role, 'no_ticket_type', 'https://example.test/x'))->__serialize();
+        unset($values['ticketsUrl']);
+
+        $old = (new \ReflectionClass(ActivationNudge::class))->newInstanceWithoutConstructor();
+        $old->__unserialize($values);
+
+        $this->assertStringContainsString('/'.$role->subdomain.'/schedule', $old->render(), 'falls back to the admin page');
+    }
+
+    /**
+     * Not for an event the venue only accepted. Its Tickets section follows the creator's plan and
+     * the creator's trial button, so the link would show another schedule's paywall.
+     */
+    public function test_an_accepted_event_falls_back_to_the_schedule_admin_page(): void
+    {
+        $talent = $this->createFreeRole($this->owner(), 'talent');
+        $event = $this->createEvent($talent, [
+            'starts_at' => now()->addDays(10)->format('Y-m-d H:i:s'),
+            'creator_role_id' => $talent->id,
+        ]);
+
+        $venue = $this->createRole($this->owner(), 'venue');
+        $event->roles()->attach($venue->id, ['is_accepted' => true]);
+
+        $this->nudge('no_ticket_type');
+
+        $mails = array_values(array_filter($this->queuedNudges(), fn ($m) => $m->role->id === $venue->id));
+        $this->assertCount(1, $mails, 'sanity: the accepting venue was nudged');
+        $this->assertNull($mails[0]->ticketsUrl);
+        $this->assertStringContainsString('/'.$venue->subdomain.'/schedule', $mails[0]->render());
+    }
+
+    /** Replies reach a person on eventschedule.com, and never our inbox from an operator platform. */
+    public function test_replies_go_to_support_only_on_the_nexus(): void
+    {
+        $role = $this->createRole($this->owner());
+        config(['app.support_email' => 'contact@eventschedule.com']);
+
+        config(['app.is_nexus' => true]);
+        $this->assertSame('contact@eventschedule.com', (new ActivationNudge($role, 'no_event'))->envelope()->replyTo[0]->address);
+
+        config(['app.is_nexus' => false]);
+        $this->assertSame([], (new ActivationNudge($role, 'no_event'))->envelope()->replyTo);
+    }
+
+    /** No "Hello there," in a translated mail, and no email address used as a name. */
+    public function test_a_missing_or_address_name_greets_without_one(): void
+    {
+        foreach (['', 'sam@example.com'] as $name) {
+            $role = $this->createRole($this->owner(['name' => $name]));
+
+            $html = (new ActivationNudge($role, 'no_event'))->render();
+
+            $this->assertStringContainsString('Hello,', $html, var_export($name, true));
+            $this->assertStringNotContainsString('Hello there', $html);
+            $this->assertStringNotContainsString('Hello sam@', $html);
+        }
     }
 }

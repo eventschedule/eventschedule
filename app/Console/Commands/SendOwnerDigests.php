@@ -28,6 +28,7 @@ use Illuminate\Support\Facades\Log;
  *    is never a mailshot to the 542 dormant schedules;
  *  - a schedule with nothing to report (no views, no sign-ups, no sales, nothing coming up) is
  *    left out, and an owner with no schedule left gets no email that week;
+ *  - so is a schedule in its first week, which has no week to summarise yet;
  *  - one email per owner per ISO week, claimed with a unique index before sending;
  *  - the owner's own weekly_digest notification setting (default on) and users.is_subscribed.
  *
@@ -53,6 +54,9 @@ class SendOwnerDigests extends Command
 
     /** Fewer views than this, and nothing else, is not news. */
     private const MIN_VIEWS = 5;
+
+    /** How old a schedule must be to appear in a digest: see candidateRoles(). */
+    private const MIN_AGE_DAYS = 6;
 
     public function handle(): int
     {
@@ -167,6 +171,11 @@ class SendOwnerDigests extends Command
             ->whereNotNull('user_id')
             ->where('subdomain', '!=', DemoService::DEMO_ROLE_SUBDOMAIN)
             ->where('subdomain', 'not like', 'demo-%')
+            // A week old before its first digest. Otherwise a schedule set up on Sunday got a
+            // "weekly" summary of near-zero numbers the next morning, on top of the setup emails
+            // it was already being sent. Not claimed until then, so nothing is lost: it joins the
+            // Monday after its first full week.
+            ->where('created_at', '<=', now()->subDays(self::MIN_AGE_DAYS))
             ->whereHas('user', fn ($u) => $u->where('is_subscribed', true)
                 ->where('email', '!=', DemoService::DEMO_EMAIL)
                 ->whereNotNull('email_verified_at'))

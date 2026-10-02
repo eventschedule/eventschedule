@@ -199,6 +199,8 @@ class GrowthDataEndpointTest extends TestCase
             'referrer_url' => 'https://marina-delacroix-photography.fr/about?email=leak@gmail.com',
             'landing_page' => 'ticket/view/x7Kq2/k3Jd9sLq2mZx8vB1nC4tY6wR0pE5hG7a',
             'utm_source' => 'marina.delacroix@gmail.com',
+            // The homepage claim box's slug, kept on the account for the onboarding email.
+            'pending_schedule_name' => 'marinas-hidden-loft',
         ])->save();
 
         $role = $this->freeRole($owner);
@@ -245,6 +247,7 @@ class GrowthDataEndpointTest extends TestCase
             'marina-delacroix-photography', 'marinadelacroix.fr', '203.0.113.7',
             'k3Jd9sLq2mZx8vB1nC4tY6wR0pE5hG7a', 'Summa', 'summa-30th',
             'hiddeninstall', 'Hidden Install', 'Gideon', 'Rhea', 'GIFTCODE1234', 'Wanda', 'Rory',
+            'marinas-hidden-loft', 'hidden-loft',
         ] as $secret) {
             $this->assertStringNotContainsStringIgnoringCase($secret, $body, "the payload leaked: {$secret}");
         }

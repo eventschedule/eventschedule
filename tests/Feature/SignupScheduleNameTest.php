@@ -3,7 +3,10 @@
 namespace Tests\Feature;
 
 use App\Models\Role;
+use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Laravel\Socialite\Facades\Socialite;
+use Mockery;
 use Tests\Feature\Concerns\CreatesScheduleData;
 use Tests\TestCase;
 
@@ -184,5 +187,136 @@ class SignupScheduleNameTest extends TestCase
 
             $this->assertNotSame($claim, $role->subdomain, $claim.' was handed out');
         }
+    }
+
+    //
+    // Kept on the account (users.pending_schedule_type / pending_schedule_name), so the onboarding
+    // email - or a visit after /login has cleared the session - can send them back to the form
+    // they left rather than to the type chooser.
+    //
+
+    public function test_signing_up_keeps_the_type_and_claim_on_the_account(): void
+    {
+        $this->withSession(['signup_role_type' => 'venue', 'signup_schedule_name' => 'blue-room'])
+            ->post('/sign_up', [
+                'terms' => '1',
+                'name' => 'Claimant',
+                'email' => 'claimant@gmail.com',
+                'password' => 'password',
+            ])->assertSessionHasNoErrors();
+
+        $user = User::whereEmail('claimant@gmail.com')->firstOrFail();
+        $this->assertSame('venue', $user->pending_schedule_type);
+        $this->assertSame('blue-room', $user->pending_schedule_name);
+    }
+
+    /** About half of all accounts are created through Google, which has its own create(). */
+    public function test_signing_up_with_google_keeps_them_too(): void
+    {
+        $socialUser = Mockery::mock(\Laravel\Socialite\Two\User::class);
+        $socialUser->shouldReceive('getId')->andReturn('google-oauth-claim');
+        $socialUser->shouldReceive('getEmail')->andReturn('googleclaim@gmail.com');
+        $socialUser->shouldReceive('getName')->andReturn('Google Claimant');
+        $socialUser->shouldReceive('getAvatar')->andReturn(null);
+        $socialUser->user = ['locale' => 'en'];
+
+        $provider = Mockery::mock(\Laravel\Socialite\Contracts\Provider::class);
+        $provider->shouldReceive('redirectUrl')->andReturnSelf();
+        $provider->shouldReceive('user')->andReturn($socialUser);
+        Socialite::shouldReceive('driver')->with('google')->andReturn($provider);
+
+        $this->withSession(['signup_role_type' => 'talent', 'signup_schedule_name' => 'jane-sings'])
+            ->get(route('auth.google.callback'));
+
+        $user = User::whereEmail('googleclaim@gmail.com')->firstOrFail();
+        $this->assertSame('talent', $user->pending_schedule_type);
+        $this->assertSame('jane-sings', $user->pending_schedule_name);
+    }
+
+    /** Picking a type in the chooser is the most common way to reach the form, with no ?type= at signup. */
+    public function test_opening_the_form_records_the_type_on_the_account(): void
+    {
+        $user = $this->createOwner();
+
+        $this->actingAs($user)->get(route('new', ['type' => 'curator']))->assertOk();
+
+        $this->assertSame('curator', $user->fresh()->pending_schedule_type);
+    }
+
+    /** The claim from signup outlives the session: the prefill no longer depends on it. */
+    public function test_the_claim_kept_on_the_account_prefills_a_later_visit(): void
+    {
+        $user = $this->createOwner();
+        $user->forceFill(['pending_schedule_name' => 'blue-room'])->save();
+
+        $this->actingAs($user)
+            ->get(route('new', ['type' => 'talent']))
+            ->assertOk()
+            ->assertSee('value="Blue Room"', false);
+
+        $this->assertSame('blue-room', $user->fresh()->pending_schedule_name, 'a visit with no session claim keeps it');
+        $this->assertSame('talent', $user->fresh()->pending_schedule_type, 'the latest pick wins');
+    }
+
+    public function test_the_claim_kept_on_the_account_gives_the_first_schedule_its_address(): void
+    {
+        $user = $this->createOwner();
+        $user->forceFill(['pending_schedule_name' => 'blue-room'])->save();
+
+        $this->actingAs($user);
+        $role = $this->submitNewScheduleForm('venue');
+
+        $this->assertSame('blue-room', $role->subdomain);
+
+        // Done with: the schedule they were setting up exists now.
+        $user->refresh();
+        $this->assertNull($user->pending_schedule_name);
+        $this->assertNull($user->pending_schedule_type);
+    }
+
+    /**
+     * store() has no first-schedule guard for the session copy because create() drops that one for
+     * an existing owner. The account copy needs its own, or a second schedule that shares the name
+     * inherits the address.
+     */
+    public function test_a_second_schedule_never_inherits_the_kept_claim(): void
+    {
+        $user = $this->createOwner();
+        $this->createRole($user);
+        $user->forceFill(['pending_schedule_name' => 'blue-room'])->save();
+
+        $this->actingAs($user);
+        $role = $this->submitNewScheduleForm('venue', ['name' => 'Blue Room']);
+
+        $this->assertNotSame('blue-room', $role->subdomain);
+    }
+
+    //
+    // /getting-started?type= is the onboarding email's button for someone who had picked a type.
+    //
+
+    public function test_getting_started_forwards_a_picked_type_to_its_form(): void
+    {
+        $this->actingAs($this->createOwner())
+            ->get(route('getting-started', ['type' => 'venue']))
+            ->assertRedirect(route('new', ['type' => 'venue']));
+    }
+
+    public function test_getting_started_ignores_a_type_that_does_not_exist(): void
+    {
+        $this->actingAs($this->createOwner())
+            ->get(route('getting-started', ['type' => 'vendor']))
+            ->assertOk();
+    }
+
+    /** A days-old email opened after they set up a schedule must not offer a second one. */
+    public function test_getting_started_still_sends_an_owner_home_with_a_type(): void
+    {
+        $user = $this->createOwner();
+        $this->createRole($user);
+
+        $this->actingAs($user)
+            ->get(route('getting-started', ['type' => 'venue']))
+            ->assertRedirect(route('home'));
     }
 }

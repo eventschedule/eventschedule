@@ -826,6 +826,28 @@ if (! function_exists('signup_intent_from_session')) {
     }
 }
 
+if (! function_exists('pending_schedule_from_session')) {
+    /**
+     * The schedule type and name a visitor picked before signing up, as users columns.
+     *
+     * RegisteredUserController::create() keeps both in the session (signup_role_type from a
+     * for-* page's ?type=, signup_schedule_name from the homepage claim box), which /login clears.
+     * Writing them to the account at sign-up is what lets an onboarding email, or a visit from
+     * another browser, send the person back to the form they left. Re-validated here because a
+     * session value is only as good as the last thing that wrote it.
+     */
+    function pending_schedule_from_session(): array
+    {
+        $type = session('signup_role_type');
+        $name = session('signup_schedule_name');
+
+        return [
+            'pending_schedule_type' => in_array($type, ['talent', 'venue', 'curator'], true) ? $type : null,
+            'pending_schedule_name' => is_string($name) && preg_match('/^[a-z0-9](?:[a-z0-9-]{0,28}[a-z0-9])?$/', $name) ? $name : null,
+        ];
+    }
+}
+
 if (! function_exists('post_signup_redirect_url')) {
     /**
      * Destination right after account creation. Attendee flows (follow/request/

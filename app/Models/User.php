@@ -75,6 +75,8 @@ class User extends Authenticatable implements MustVerifyEmail
         'landing_page',
         'hero_variant',
         'signup_intent',
+        'pending_schedule_type',
+        'pending_schedule_name',
         'referral_code',
         'referred_by_user_id',
         'use_24_hour_time',
@@ -265,6 +267,7 @@ class User extends Authenticatable implements MustVerifyEmail
             'subscribe_form_viewed_at' => 'datetime',
             'ticket_paywall_viewed_at' => 'datetime',
             'ticket_trial_used_at' => 'datetime',
+            'onboarding_nudge_sent_at' => 'datetime',
         ];
     }
 
@@ -1000,6 +1003,24 @@ class User extends Authenticatable implements MustVerifyEmail
         $nameParts = explode(' ', trim($this->name));
 
         return $nameParts[0] ?: 'there';
+    }
+
+    /**
+     * The first name to greet this user by, or null when there is none worth using.
+     *
+     * firstName() falls back to the English word "there", which reads "Hola there," in a
+     * translated email, and returns a whole address when someone typed their email as their
+     * name. A greeting that has no name should just be "Hello,".
+     */
+    public function greetingName(): ?string
+    {
+        $name = trim((string) $this->name);
+
+        if ($name === '' || str_contains($name, '@')) {
+            return null;
+        }
+
+        return explode(' ', $name)[0];
     }
 
     /**

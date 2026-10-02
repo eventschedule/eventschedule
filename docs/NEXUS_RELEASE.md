@@ -137,7 +137,7 @@ field values on shared events.
 
 ### Migrations
 
-Sixteen, none irreversible. The two that touch large tables are first.
+Seventeen, none irreversible. The two that touch large tables are first.
 
 | Migration | What it does |
 |---|---|
@@ -146,6 +146,7 @@ Sixteen, none irreversible. The two that touch large tables are first.
 | `2026_09_25_000002_canonicalize_timezone_aliases` | Reads the distinct timezone values in `users`, `roles`, `events` and `sales.guest_timezone`, then rewrites only rows holding an alias such as `Asia/Calcutta` |
 | `2026_09_27_000000_add_list_animation_to_roles_table`, `2026_09_28_000001_add_ticket_trial_to_roles_table` | A `varchar(20)` and two timestamps at the end of `roles`: about 90 bytes against v1.0.132's P11 row-size limit |
 | `2026_09_28_000000_add_ticket_paywall_viewed_at_to_users_table`, `2026_09_28_000004_add_ticket_trial_used_at_to_users_table`, `2026_09_28_000006_add_hero_variant_to_users_table` | Nullable columns on `users`; the last also indexes its column |
+| `2026_10_02_000000_add_onboarding_columns_to_users` | Three nullable columns at the end of `users` (`pending_schedule_type`, `pending_schedule_name`, `onboarding_nudge_sent_at`), no `->after()`, so INSTANT |
 | `2026_09_25_000001_add_signup_code_invalid_to_marketing_daily_stats` | One counter column on a small table |
 | `2026_09_30_000000_add_guest_support_to_support_conversations`, `2026_09_30_000001_add_reply_tracking_to_support` | Support chat columns. The second updates every `support_conversations` row and indexes `support_messages` |
 | `2026_09_28_000000_create_gallery_images_table`, `2026_09_28_000002_create_subscription_cancellations_table`, `2026_09_28_000003_create_owner_digests_table`, `2026_09_28_000005_create_marketing_experiment_stats_table`, `2026_10_01_000000_create_realtime_hits_table` | New tables |
@@ -166,6 +167,11 @@ All run on both rails:
 ### Conversion, churn and owner emails
 
 **What ships:**
+- the get-started emails reworked (2026-10-02): the onboarding emails go out 1 hour, 2 days and
+  7 days after signup instead of 1/24/72 hours, stages 2 and 3 only in the recipient's local
+  morning; their button resumes at the type the person picked; on the nexus they carry a reply
+  invitation (Reply-To `support_email`) and a sign-off. Replies to stages 2 and 3 land in the
+  support inbox;
 - the paid-ticket paywall shown as a price is typed, and counted (`hit_ticket_paywall`);
 - a card-free 7-day selling trial (`roles.ticket_trial_ends_at`, paid selling only, not Pro);
 - cancellation reasons (`subscription_cancellations`), from the plan tab and the Stripe webhooks;
@@ -178,7 +184,10 @@ No new env vars.
 **Two new scheduled entries, hourly on both rails:** `app-send-activation-nudges` and
 `app-send-owner-digests`. Neither has ever run on production. Each sends to an owner only in
 their own local morning (the digest only on Monday), and the nudges are paced to one per owner
-per week, never within two days of their digest. From the 2026-09-28 growth export, expect:
+per week, never within two days of their digest, and never within three days of an onboarding
+email. The ticket and payment nudges also wait 24 hours after the event or priced ticket that makes
+them due, and a schedule gets no digest in its first six days. From the 2026-09-28 growth export,
+expect slightly fewer than these, because of those waits:
 - **nudges:** up to about 100 owners over the first day, mostly `no_ticket_type` and
   `no_ticket_type_free`, then a trickle;
 - **digests:** about 110 owners on the first Monday after the deploy.

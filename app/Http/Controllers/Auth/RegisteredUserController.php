@@ -577,6 +577,7 @@ class RegisteredUserController extends Controller
                 // Keep the stub's original acquisition context (team invite,
                 // newsletter subscriber) rather than re-labeling it organizer
                 'signup_intent' => $existingUser->signup_intent ?? $signupIntent,
+                ...pending_schedule_from_session(),
             ]);
             $user = $existingUser;
         } else {
@@ -596,6 +597,7 @@ class RegisteredUserController extends Controller
                 'landing_page' => $landingPage,
                 'hero_variant' => $clientAttribution['hero_variant'],
                 'signup_intent' => $signupIntent,
+                ...pending_schedule_from_session(),
             ]);
         }
 

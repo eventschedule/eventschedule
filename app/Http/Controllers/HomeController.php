@@ -88,6 +88,15 @@ class HomeController extends Controller
             return redirect()->route('home');
         }
 
+        // The onboarding email's button for someone who had already picked a type. It comes here
+        // rather than straight to /new/{type} so the bounce above still applies: a days-old email
+        // opened after they set up a schedule lands on the dashboard, not on a second new-schedule
+        // form.
+        $type = $request->query('type');
+        if (in_array($type, ['talent', 'venue', 'curator'], true)) {
+            return redirect()->route('new', ['type' => $type]);
+        }
+
         return view('getting-started');
     }
 

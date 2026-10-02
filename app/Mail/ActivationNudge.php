@@ -6,6 +6,7 @@ use App\Models\Role;
 use App\Utils\UrlUtils;
 use Illuminate\Bus\Queueable;
 use Illuminate\Mail\Mailable;
+use Illuminate\Mail\Mailables\Address;
 use Illuminate\Mail\Mailables\Content;
 use Illuminate\Mail\Mailables\Envelope;
 use Illuminate\Queue\SerializesModels;
@@ -21,22 +22,35 @@ use Illuminate\Queue\SerializesModels;
  * a schedule that has sold recently is a paying customer 55.6% of the time against 0.47% for
  * one that never has.
  *
- * One shell, one CTA, keyed on the nudge. Each key is an independent trigger rather than a
- * stage in a sequence - see the schedule_nudges table.
+ * One shell and one primary button, keyed on the nudge (no_event adds AI Import as a second
+ * one where it works). Each key is an independent trigger rather than a stage in a sequence -
+ * see the schedule_nudges table.
  */
 class ActivationNudge extends Mailable
 {
     use Queueable, SerializesModels;
 
+    /**
+     * $ticketsUrl is the Tickets section of the event the ticket nudges are about, built by the
+     * command. A URL rather than the Event: SendQueuedEmail sets deleteWhenMissingModels, so a
+     * model that is deleted before the job runs would silently discard this email after its
+     * schedule_nudges claim was written, and it would never be sent.
+     */
     public function __construct(
         public Role $role,
         public string $nudgeKey,
+        public ?string $ticketsUrl = null,
     ) {}
 
     public function envelope(): Envelope
     {
         return new Envelope(
             subject: __('messages.activation_nudge_subject_'.$this->nudgeKey, ['schedule' => $this->role->name]),
+            // Replies reach a person on eventschedule.com. An operator platform runs this command
+            // too, and support_email defaults to our address, which must not reach their owners.
+            replyTo: config('app.is_nexus') && config('app.support_email')
+                ? [new Address((string) config('app.support_email'))]
+                : [],
         );
     }
 
@@ -53,6 +67,11 @@ class ActivationNudge extends Mailable
                 'nudgeKey' => $this->nudgeKey,
                 'bodyKey' => $this->bodyKey(),
                 'ctaUrl' => $this->ctaUrl(),
+                'importUrl' => $this->importUrl(),
+                // "Hello Sam," or just "Hello,", never firstName()'s English "there".
+                'greeting' => $user->greetingName()
+                    ? __('messages.hello').' '.$user->greetingName().','
+                    : __('messages.hello').',',
                 'unsubscribeUrl' => UrlUtils::userUnsubscribeUrl($user->email, app()->getLocale()),
             ],
         );
@@ -73,7 +92,7 @@ class ActivationNudge extends Mailable
     }
 
     /**
-     * Where the one button goes. Every nudge lands on the screen that does the thing it asks
+     * Where the primary button goes. Every nudge lands on the screen that does the thing it asks
      * for, never a generic dashboard: the ask is the whole point of the email.
      *
      * route(..., false) inside app_url(), never an absolute route() - app_url() prepends the
@@ -88,12 +107,34 @@ class ActivationNudge extends Mailable
             'no_gateway' => app_url(route('profile.edit', [], false).'#section-payment-methods'),
             // The money already arrived; show them where it landed.
             'first_sale' => app_url(route('sales', [], false)),
-            // Tickets hang off an event, and idle schedules need a new date, so both land on
-            // the schedule's own admin page.
-            default => app_url(route('role.view_admin', [
-                'subdomain' => $this->role->subdomain,
-                'tab' => 'schedule',
-            ], false)),
+            // Straight to the Tickets section of the event that needs them, when the command found
+            // one this schedule created; otherwise the schedule's admin page, as before.
+            'no_ticket_type', 'no_ticket_type_free' => $this->ticketsUrl ?? $this->scheduleAdminUrl(),
+            // Idle schedules need a new date, so they land on the schedule's own admin page.
+            default => $this->scheduleAdminUrl(),
         };
+    }
+
+    private function scheduleAdminUrl(): string
+    {
+        return app_url(route('role.view_admin', [
+            'subdomain' => $this->role->subdomain,
+            'tab' => 'schedule',
+        ], false));
+    }
+
+    /**
+     * The quickest way to a first event: paste a flyer or a list of dates into AI Import. Only
+     * offered where it works - the import needs an AI key, and an operator platform running this
+     * command may have none.
+     */
+    private function importUrl(): ?string
+    {
+        if ($this->nudgeKey !== 'no_event'
+            || (! config('services.google.gemini_key') && ! config('services.openai.api_key'))) {
+            return null;
+        }
+
+        return app_url(route('event.show_import_ai', ['subdomain' => $this->role->subdomain], false));
     }
 }

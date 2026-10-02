@@ -251,6 +251,7 @@ class SocialAuthController extends Controller
             // Only es_attribution carries it: the session seed copies the utm_* values, not this.
             'hero_variant' => CaptureUtmParameters::clientAttribution(request())['hero_variant'],
             'signup_intent' => signup_intent_from_session(),
+            ...pending_schedule_from_session(),
         ]);
 
         // Facebook's picture URL is signed and expires within weeks, so it is not kept.

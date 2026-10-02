@@ -4,6 +4,7 @@ namespace Tests\Feature;
 
 use App\Jobs\SendQueuedEmail;
 use App\Mail\OwnerDigest;
+use App\Models\Role;
 use App\Models\User;
 use App\Services\DemoService;
 use Carbon\Carbon;
@@ -22,8 +23,19 @@ use Tests\TestCase;
  */
 class OwnerDigestTest extends TestCase
 {
-    use CreatesScheduleData;
+    use CreatesScheduleData {
+        createRole as baseCreateRole;
+    }
     use RefreshDatabase;
+
+    /**
+     * Schedules default to a month old here: a schedule in its first week gets no digest
+     * (SendOwnerDigests::MIN_AGE_DAYS), and the test about that passes created_at itself.
+     */
+    protected function createRole(User $user, string $type = 'venue', array $attrs = []): Role
+    {
+        return $this->baseCreateRole($user, $type, $attrs + ['created_at' => now()->subMonth()]);
+    }
 
     protected function setUp(): void
     {
@@ -421,5 +433,26 @@ class OwnerDigestTest extends TestCase
                 }
             }
         }
+    }
+
+    /**
+     * A schedule set up on Sunday got a "weekly" summary of near-zero numbers the next morning, on
+     * top of the setup emails it was already being sent. Its first digest waits for its first
+     * full week, and is not claimed until then, so it is not lost.
+     */
+    public function test_a_schedule_in_its_first_week_gets_no_digest(): void
+    {
+        $role = $this->createRole($this->owner(), 'venue', ['created_at' => now()->subDays(5)]);
+        $this->createEvent($role, ['starts_at' => now()->addDays(3)->format('Y-m-d H:i:s')]);
+
+        $this->run_();
+
+        Queue::assertNothingPushed();
+        $this->assertSame(0, DB::table('owner_digests')->count());
+
+        $role->forceFill(['created_at' => now()->subDays(6)])->save();
+        $this->run_();
+
+        $this->assertCount(1, $this->digests());
     }
 }

@@ -4529,6 +4529,21 @@ class RoleController extends Controller
             ->whereNull('schedule_form_viewed_at')
             ->update(['schedule_form_viewed_at' => now()]);
 
+        $firstSchedule = ! auth()->user()->owner()->exists();
+
+        // The schedule they are setting up, kept on the account so the onboarding email can send
+        // them back to this form rather than to the type chooser, and so the claimed name survives
+        // /login (which clears the session copy). The latest pick wins; a name is never replaced
+        // by an absent one. Same base-query write as above, for the same updated_at reason.
+        if ($firstSchedule) {
+            DB::table('users')
+                ->where('id', auth()->id())
+                ->update(array_filter([
+                    'pending_schedule_type' => $type,
+                    'pending_schedule_name' => pending_schedule_from_session()['pending_schedule_name'],
+                ]));
+        }
+
         $role = new Role;
         $role->type = $type;
         $role->require_account = $type === 'curator';
@@ -4578,12 +4593,17 @@ class RoleController extends Controller
         // store() turns it back into the blue-room subdomain while the name is left as is. Read,
         // not pulled, so going back to the type chooser keeps it; only a FIRST schedule gets it,
         // and the first visit here after one exists discards it.
+        //
+        // When the session copy is gone (they logged in again, or came back from an onboarding
+        // email in another browser), the one kept on the account stands in for it.
         if (session()->has('signup_schedule_name')) {
-            if (auth()->user()->owner()->exists()) {
+            if (! $firstSchedule) {
                 session()->forget('signup_schedule_name');
             } else {
                 $role->name = Str::headline(session('signup_schedule_name'));
             }
+        } elseif ($firstSchedule && auth()->user()->pending_schedule_name) {
+            $role->name = Str::headline(auth()->user()->pending_schedule_name);
         }
 
         // Header images
@@ -4685,7 +4705,14 @@ class RoleController extends Controller
         // and fixing that ("DJ MC", "O'Reilly's Bar") is the likeliest edit anyone makes - it must
         // not cost them the address, while a real rename ("Green Hall") does drop the claim. A
         // claim that is taken, reserved or too short keeps the generated one.
-        $claimed = session('signup_schedule_name');
+        //
+        // The copy kept on the account (users.pending_schedule_name) stands in when the session one
+        // is gone, but only for a FIRST schedule, checked here before the owner pivot below exists.
+        // The session copy is safe without that check because create() drops it for an existing
+        // owner; the column is not dropped until a first schedule is saved, so without the guard a
+        // second schedule that happened to share the name would inherit the address.
+        $firstSchedule = ! $user->owner()->exists();
+        $claimed = session('signup_schedule_name') ?? ($firstSchedule ? $user->pending_schedule_name : null);
         if (is_string($claimed)
             && Str::slug((string) $request->name) === $claimed
             && Role::isCleanSubdomain($claimed)
@@ -4746,6 +4773,14 @@ class RoleController extends Controller
         ]);
 
         AuditService::log(AuditService::SCHEDULE_CREATE, $user->id, 'Role', $role->id, null, null, $role->name);
+
+        // The schedule they were setting up now exists. Base query, so updated_at is untouched.
+        if ($firstSchedule && ($user->pending_schedule_type || $user->pending_schedule_name)) {
+            DB::table('users')->where('id', $user->id)->update([
+                'pending_schedule_type' => null,
+                'pending_schedule_name' => null,
+            ]);
+        }
 
         // Handle sync direction and calendar setup for new role
         $syncDirection = $request->input('sync_direction');

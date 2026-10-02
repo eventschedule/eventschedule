@@ -1,10 +1,21 @@
 {{ __('messages.onboarding_nudge_heading_'.$stage) }}
 
-{{ __('messages.hello') }} {{ $user->firstName() }},
+{{ $greeting }}
 
-{{ __('messages.onboarding_nudge_body_'.$stage) }}
+{{ __($typeKey ?? 'messages.onboarding_nudge_body_'.$stage) }}
 
-{{ __('messages.onboarding_nudge_cta') }}: {{ $startUrl }}
+{{ __('messages.onboarding_nudge_cta') }}: {!! $startUrl !!}
+@if ($examplesUrl)
+{{ __('messages.onboarding_nudge_examples_cta') }}: {!! $examplesUrl !!}
+@endif
+@if ($replyKey)
+
+{{ __($replyKey) }}
+@endif
+@if ($signoff)
+
+{{ $signoff }}
+@endif
 
 {{ __('messages.onboarding_nudge_free_note') }}
 

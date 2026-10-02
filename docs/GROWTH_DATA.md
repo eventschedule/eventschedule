@@ -200,6 +200,9 @@ credits, legacy `plan_expires` rows and trials, which is most paid-tier schedule
   - There is no holdout group: compare keys and periods, never read a rate as the nudge's effect.
 - `onboarding_nudges[]`: `{stage, users, saved_schedule}`. The stage is how many pre-schedule
   onboarding emails the user was sent (0-3); emails stop once a schedule exists.
+  - The cadence changed on 2026-10-02, from 1h / 24h / 72h after signup to 1h / 48h / 168h, so a
+    signup that activates on day 1 or 2 now counts at stage 1 rather than stage 2. Compare
+    cohorts on either side of that date, never one stage's rate across it.
 - `dismissed_steps`: per dashboard next step (`tickets`, `payments`, `first_event`, ...),
   `{total, by_month}`. Each one is an owner explicitly saying "not for me".
 - `buyers[]` (per month) holds:
@@ -244,7 +247,7 @@ Both are columnar: read `columns[]`, then `rows[][]`. They are newest first and 
 | `referrer_channel` | `search`, `ai`, `social`, `community`, `email`, `messaging`, `calendar` (an invite), `auth` (back from Google sign-in, real referrer lost), `own` (our own domain), `schedule`, `other`; null = no referrer. For any host `/admin/realtime` classifies, the channel is its (`RealtimeTracker::hostChannel()`), so the two never disagree: reddit and discord are `social` there and here |
 | `landing_path` | First page seen, lowercased, leading slash. Tenant pages record their PATH only, so a schedule homepage reads `/` like ours |
 | `auth` | `google`, `facebook`, `email`, `other` |
-| `reached_schedule_form` | Opened the new-schedule form, or saved a schedule |
+| `reached_schedule_form` | Opened the new-schedule form, or saved a schedule. From 2026-10-02 the onboarding email's button opens the form for anyone who had picked a type, so this rises for email clicks that are not new progress: judge onboarding on `saved_schedule` per organizer signup, not on the form-to-save step |
 | `saved_schedule` | Ever saved a non-demo schedule (deleted ones count) |
 | `saved_event` | Has an event with `events.user_id` = them (includes imported and guest-submitted ones) |
 | `saved_ticket`, `saved_paid_ticket` | Has a live, non-add-on ticket type on one of their events; a priced one |

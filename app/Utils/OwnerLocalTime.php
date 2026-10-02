@@ -9,8 +9,9 @@ use Carbon\Carbon;
 /**
  * "Now" for an owner we are about to email, in their own timezone.
  *
- * The scheduled owner mail (activation nudges, the weekly digest) runs hourly and sends to each
- * owner only inside their local morning, rather than at one UTC hour that is midnight somewhere.
+ * The scheduled mail (activation nudges, the weekly digest, and onboarding stages 2 and 3, whose
+ * recipients have no schedule yet) runs hourly and sends to each person only inside their local
+ * morning, rather than at one UTC hour that is midnight somewhere.
  * An owner's zone is users.timezone, then their own first schedule's, then the app's. A value PHP does not
  * recognise falls through rather than throwing: one bad row must not stop a run for everyone.
  */
