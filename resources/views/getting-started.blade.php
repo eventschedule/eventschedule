@@ -8,7 +8,7 @@
         @include('partials.web-app-manifest', ['platformApp' => true])
     </x-slot>
 
-    <div class="flex flex-col items-center px-4 pt-8 pb-12 sm:px-6 lg:px-8">
+    <div class="flex flex-col items-center px-4 pt-8 pb-16 sm:px-6 lg:px-8">
         {{-- Deliberately not a link: the dashboard would forward zero-schedule users straight back here --}}
         <x-application-logo />
 
@@ -16,18 +16,26 @@
             <x-step-indicator :currentStep="2" />
         </div>
 
-        <div class="w-full max-w-6xl mt-8">
-            <div class="text-center mb-6">
-                <h1 class="text-2xl font-semibold text-gray-900 dark:text-white mb-2">
+        {{-- isolate: the glow sits at -z-10, behind the heading and cards but still above the
+             body's background. It starts below the step indicator, whose own panel background
+             would otherwise cut a hard rectangle out of it. Never move it onto html/body (see
+             CLAUDE.md on containing blocks). --}}
+        <div class="relative isolate w-full max-w-6xl mt-8">
+            <div class="getting-started-glow" aria-hidden="true"></div>
+
+            <div class="text-center mb-8">
+                <p class="text-sm sm:text-base font-semibold text-[var(--brand-blue)]">
                     {{ __('messages.getting_started_welcome', ['name' => auth()->user()->firstName()]) }}
+                </p>
+                <h1 class="mt-2 text-3xl sm:text-4xl font-bold tracking-tight text-gray-900 dark:text-white">
+                    {{ __('messages.schedule_type_question') }}
                 </h1>
-                <p class="text-gray-500 dark:text-gray-400">{{ __('messages.create_your_first_schedule') }}</p>
-                <p class="mt-1 text-sm text-gray-400 dark:text-gray-500">{{ __('messages.can_create_more_schedules_later') }}</p>
+                <p class="mt-3 text-base text-gray-500 dark:text-gray-400">{{ __('messages.can_create_more_schedules_later') }}</p>
             </div>
 
             @include('partials.schedule-type-cards')
 
-            <div class="text-center mt-6">
+            <div class="text-center mt-8">
                 <a href="{{ route('home', ['skip_onboarding' => 1]) }}"
                    class="text-sm text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-200 hover:underline">
                     {{ __('messages.skip_for_now') }}

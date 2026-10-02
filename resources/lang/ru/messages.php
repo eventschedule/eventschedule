@@ -311,6 +311,7 @@ return [
     'create_your_first_schedule' => 'Выберите тип графика, который лучше всего соответствует вашим потребностям',
     'getting_started_welcome' => 'Добро пожаловать, :name! Давайте начнём',
     'can_create_more_schedules_later' => 'Вы всегда сможете создать больше расписаний позже',
+    'schedule_type_question' => 'Что лучше всего вас описывает?',
     'skip_for_now' => 'Пропустить пока',
     'setting_up_your_schedule' => 'Настраиваем ваше расписание: :type',
     'choose_different_type' => 'Выбрать другой тип',

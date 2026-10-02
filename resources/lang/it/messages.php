@@ -601,6 +601,7 @@ return [
     'create_your_first_schedule' => 'Scegli il tipo di programma che meglio si adatta alle tue esigenze',
     'getting_started_welcome' => 'Benvenuto :name, iniziamo',
     'can_create_more_schedules_later' => 'Potrai sempre creare altri programmi in seguito',
+    'schedule_type_question' => 'Cosa ti descrive meglio?',
     'skip_for_now' => 'Salta per ora',
     'setting_up_your_schedule' => 'Configurazione del tuo programma :type',
     'choose_different_type' => 'Scegli un altro tipo',

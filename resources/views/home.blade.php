@@ -88,7 +88,7 @@
                 <p class="text-gray-500 dark:text-gray-400">{{ __('messages.create_your_first_schedule') }}</p>
             </div>
 
-            @include('partials.schedule-type-cards')
+            @include('partials.schedule-type-cards', ['cardHeading' => 'h3'])
         </div>
         @endif
 

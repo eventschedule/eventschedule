@@ -265,6 +265,7 @@ return [
     'create_your_first_schedule' => 'اختر نوع الجدول الزمني الذي يناسب احتياجاتك',
     'getting_started_welcome' => 'مرحباً :name، لنبدأ',
     'can_create_more_schedules_later' => 'يمكنك دائماً إنشاء المزيد من الجداول الزمنية لاحقاً',
+    'schedule_type_question' => 'ما الذي يصفك بشكل أفضل؟',
     'skip_for_now' => 'تخطي الآن',
     'setting_up_your_schedule' => 'جارٍ إعداد جدول :type الخاص بك',
     'choose_different_type' => 'اختر نوعاً مختلفاً',

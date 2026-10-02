@@ -106,6 +106,29 @@ class StepIndicatorTest extends TestCase
     }
 
     /**
+     * The steps must stay in 1-2-3 SOURCE order in RTL too. dir="rtl" already lays the flex row out
+     * right to left, so the component used to reverse the step numbers as well, which cancelled it
+     * out: Hebrew and Arabic read "Create Account" on the left, and space-x's one-sided margins
+     * made the labels collide.
+     */
+    public function test_rtl_keeps_source_order_and_lets_the_direction_flip_it(): void
+    {
+        $this->actingAs($this->createOwner());
+
+        foreach (['en', 'he'] as $locale) {
+            app()->setLocale($locale);
+            $html = $this->render();
+
+            $first = strpos($html, __('messages.create_account'));
+            $last = strpos($html, __('messages.create_event'));
+
+            $this->assertNotFalse($first, $locale);
+            $this->assertNotFalse($last, $locale);
+            $this->assertLessThan($last, $first, "$locale: step 1 must come before step 3 in the markup");
+        }
+    }
+
+    /**
      * :compact="true" was passed at three call sites and silently discarded - it is not a declared
      * prop and the root element does not spread $attributes. There is no compact variant, so the
      * argument was decoration that read like configuration.

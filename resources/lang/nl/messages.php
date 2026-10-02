@@ -596,6 +596,7 @@ return [
     'create_your_first_schedule' => 'Kies het type schema dat het beste bij je behoeften past',
     'getting_started_welcome' => 'Welkom :name, laten we beginnen',
     'can_create_more_schedules_later' => 'Je kunt later altijd meer schema\'s aanmaken',
+    'schedule_type_question' => 'Wat past het best bij jou?',
     'skip_for_now' => 'Voorlopig overslaan',
     'setting_up_your_schedule' => 'Je :type-schema wordt ingesteld',
     'choose_different_type' => 'Kies een ander type',

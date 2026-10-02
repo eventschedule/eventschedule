@@ -601,6 +601,7 @@ return [
     'create_your_first_schedule' => 'Escolha o tipo de agenda que melhor se adapta às suas necessidades',
     'getting_started_welcome' => 'Bem-vindo :name, vamos começar',
     'can_create_more_schedules_later' => 'Você sempre pode criar mais agendas depois',
+    'schedule_type_question' => 'O que melhor descreve você?',
     'skip_for_now' => 'Pular por enquanto',
     'setting_up_your_schedule' => 'Configurando sua agenda de :type',
     'choose_different_type' => 'Escolher outro tipo',

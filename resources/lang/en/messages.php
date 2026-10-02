@@ -311,6 +311,7 @@ return [
     'create_your_first_schedule' => 'Choose the type of schedule that best fits your needs',
     'getting_started_welcome' => 'Welcome :name, let\'s get started',
     'can_create_more_schedules_later' => 'You can always create more schedules later',
+    'schedule_type_question' => 'What best describes you?',
     'skip_for_now' => 'Skip for now',
     'setting_up_your_schedule' => 'Setting up your :type schedule',
     'choose_different_type' => 'Choose a different type',

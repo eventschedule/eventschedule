@@ -36,10 +36,14 @@
 <div class="step-indicator p-6 relative overflow-hidden bg-gray-100 dark:bg-gray-900">
 
     <!-- Steps Layout - Always Mobile Style -->
-    <div class="flex items-start justify-center space-x-6 relative z-10">
+    <div class="flex items-start justify-center gap-6 relative z-10">
+        {{-- No RTL reversal here: dir="rtl" already lays this row out right to left. Reversing the
+             step numbers as well cancelled that out, so Hebrew and Arabic read 1-2-3 left to right,
+             and space-x's one-sided margins made the labels collide. gap and start-14 are both
+             direction-neutral. --}}
         @for ($i = 1; $i <= $totalSteps; $i++)
             @php
-                $stepNumber = is_rtl() ? ($totalSteps - $i + 1) : $i;
+                $stepNumber = $i;
             @endphp
             <div class="flex flex-col items-center">
                 <!-- Step Circle -->
@@ -78,7 +82,7 @@
                     
                     <!-- Progress line (except for last step) -->
                     @if ($i < $totalSteps)
-                        <div class="absolute top-7 left-14 w-20 h-1 {{ $stepNumber < $currentStep ? 'bg-gradient-to-r from-green-500 to-green-400' : 'bg-gray-200 dark:bg-gray-700' }} transition-all duration-500 ease-out rounded-full -z-10"></div>
+                        <div class="absolute top-7 start-14 w-20 h-1 {{ $stepNumber < $currentStep ? 'bg-gradient-to-r from-green-500 to-green-400' : 'bg-gray-200 dark:bg-gray-700' }} transition-all duration-500 ease-out rounded-full -z-10"></div>
                     @endif
                 </div>
                 
@@ -95,7 +99,7 @@
 
     <!-- Clear Steps Button -->
     @if (session('pending_request'))
-    <div class="absolute top-8 right-4 z-20">
+    <div class="absolute top-8 end-4 z-20">
         <form method="POST" action="{{ route('event.clear_pending_request') }}" class="inline">
             @csrf
             <input type="hidden" name="redirect_url" value="{{ request()->fullUrl() }}">
@@ -145,6 +149,10 @@
     background: linear-gradient(90deg, #3b82f6 0%, #60a5fa 50%, #10b981 100%);
 }
 
+[dir="rtl"] .step-indicator .bg-gradient-to-r {
+    background: linear-gradient(270deg, #3b82f6 0%, #60a5fa 50%, #10b981 100%);
+}
+
 /* Enhanced animations */
 @keyframes pulse-glow {
     0% {
@@ -167,10 +175,6 @@
     }
     
     .step-indicator .flex {
-        gap: 0.75rem;
-    }
-    
-    .step-indicator .space-x-6 {
         gap: 0.75rem;
     }
 }

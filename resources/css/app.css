@@ -930,40 +930,74 @@ input[type="search"], textarea, select {
     border-top: 1px solid var(--ap-hairline);
 }
 
-/* Get Started panel */
-.get-started-container {
-    background: linear-gradient(135deg, rgb(var(--ap-card-from)) 0%,
-                rgb(var(--ap-card-mid)) 30%, rgb(var(--ap-card-to)) 100%);
-    position: relative;
-    box-shadow: var(--ap-shadow-card);
+/* Schedule type chooser (partials/schedule-type-cards.blade.php). Each card is an
+   .ap-card, so its resting background, shadow and top-edge glow come from there;
+   these rules only add the type accent, the hover lift and the entrance.
+   The hover shadow re-states var(--ap-shadow-card) first because a box-shadow
+   replaces the whole list - dropping it would lose the card's inset highlight.
+   --st-ink is the accent darkened (light) or lightened (dark) far enough to pass
+   AA as small text on the card's tinted band. */
+.schedule-type-card[data-type="talent"]  { --st-accent: 59 130 246; --st-ink: 29 78 216; }
+.schedule-type-card[data-type="venue"]   { --st-accent: 14 165 233; --st-ink: 3 105 161; }
+.schedule-type-card[data-type="curator"] { --st-accent: 99 102 241; --st-ink: 79 70 229; }
+.dark .schedule-type-card[data-type="talent"]  { --st-ink: 147 197 253; }
+.dark .schedule-type-card[data-type="venue"]   { --st-ink: 125 211 252; }
+.dark .schedule-type-card[data-type="curator"] { --st-ink: 165 180 252; }
+
+.schedule-type-card {
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+    animation: schedule-type-rise 0.5s cubic-bezier(0.2, 0.7, 0.2, 1) backwards;
 }
-.get-started-container::before {
-    content: '';
+.schedule-type-card:nth-child(2) { animation-delay: 70ms; }
+.schedule-type-card:nth-child(3) { animation-delay: 140ms; }
+.schedule-type-card:hover,
+.schedule-type-card:focus-visible {
+    transform: translateY(-3px);
+    box-shadow: var(--ap-shadow-card),
+                0 0 0 1px rgb(var(--st-accent) / 0.45),
+                0 18px 36px -18px rgb(var(--st-accent) / 0.55);
+}
+.schedule-type-card:focus-visible {
+    outline: 2px solid var(--brand-blue);
+    outline-offset: 3px;
+}
+/* `backwards`, not `both`: a filled transform would outrank the hover lift above. */
+@keyframes schedule-type-rise {
+    from { opacity: 0; transform: translateY(12px); }
+}
+@media (prefers-reduced-motion: reduce) {
+    .schedule-type-card {
+        animation: none;
+    }
+    .schedule-type-card:hover,
+    .schedule-type-card:focus-visible {
+        transform: none;
+    }
+}
+
+.schedule-type-rule b {
+    font-weight: 600;
+    color: rgb(var(--st-ink));
+}
+.schedule-type-rule i {
+    font-style: normal;
+}
+
+/* Soft brand glow behind the heading of /getting-started. Wider than its
+   container so it fades out well before the edges instead of stopping at them. */
+.getting-started-glow {
     position: absolute;
-    top: 0;
-    left: 10%;
-    right: 10%;
-    height: 1px;
-    background: linear-gradient(90deg, transparent, var(--ap-hairline), transparent);
-    border-radius: 9999px;
-    z-index: 1;
+    top: -3rem;
+    left: 50%;
+    width: min(64rem, 100vw);
+    height: 30rem;
+    margin-left: calc(min(64rem, 100vw) / -2);
+    z-index: -10;
     pointer-events: none;
+    background: radial-gradient(50% 50% at 50% 35%, rgb(78 129 250 / 0.14), transparent 75%);
 }
-/* Hover RECESSES this card - note the pressed inset shadow below. It must use
-   the sunken surface, not --ap-surface-hover, or in dark mode the surface
-   lightens while the shadow still reads as pushed-in. */
-.get-started-card:hover {
-    background: rgb(var(--ap-surface-sunken));
-    box-shadow: var(--ap-inset-pressed);
-}
-.get-started-container [aria-hidden="true"] > div {
-    transition: opacity 0.2s;
-}
-.get-started-card:hover + div > div,
-.get-started-card:hover + div + div > div,
-div:has(+ .get-started-card:hover) > div,
-div:has(+ div + .get-started-card:hover) > div {
-    opacity: 0;
+.dark .getting-started-glow {
+    background: radial-gradient(50% 50% at 50% 35%, rgb(78 129 250 / 0.13), transparent 75%);
 }
 
 /* Dashboard panels */
@@ -1266,8 +1300,7 @@ div:has(+ div + .get-started-card:hover) > div {
 .dark .dashboard-panel,
 .dark .section-content,
 .dark .ap-modal,
-.dark .auth-card,
-.dark .get-started-container {
+.dark .auth-card {
     border-color: transparent;
 }
 

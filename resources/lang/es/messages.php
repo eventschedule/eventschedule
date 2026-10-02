@@ -291,6 +291,7 @@ return [
     'create_your_first_schedule' => 'Elige el tipo de horario que mejor se adapte a tus necesidades',
     'getting_started_welcome' => 'Hola :name, ¡empecemos!',
     'can_create_more_schedules_later' => 'Siempre podrás crear más horarios más adelante',
+    'schedule_type_question' => '¿Qué te describe mejor?',
     'skip_for_now' => 'Omitir por ahora',
     'setting_up_your_schedule' => 'Configurando tu horario de :type',
     'choose_different_type' => 'Elegir otro tipo',

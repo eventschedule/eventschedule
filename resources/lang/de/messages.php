@@ -264,6 +264,7 @@ return [
     'create_your_first_schedule' => 'Wählen Sie den Zeitplantyp, der am besten zu Ihren Bedürfnissen passt',
     'getting_started_welcome' => 'Willkommen :name, legen wir los',
     'can_create_more_schedules_later' => 'Sie können später jederzeit weitere Zeitpläne erstellen',
+    'schedule_type_question' => 'Was beschreibt Sie am besten?',
     'skip_for_now' => 'Vorerst überspringen',
     'setting_up_your_schedule' => 'Ihr :type-Zeitplan wird eingerichtet',
     'choose_different_type' => 'Einen anderen Typ wählen',

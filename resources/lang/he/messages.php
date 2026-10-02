@@ -836,6 +836,7 @@ return [
     'create_your_first_schedule' => 'בחר את סוג לוח הזמנים המתאים ביותר לצרכים שלך',
     'getting_started_welcome' => 'ברוכים הבאים :name, בואו נתחיל',
     'can_create_more_schedules_later' => 'תמיד אפשר ליצור לוחות זמנים נוספים מאוחר יותר',
+    'schedule_type_question' => 'מה הכי מתאר אותך?',
     'skip_for_now' => 'דלגו בינתיים',
     'setting_up_your_schedule' => 'מגדירים את לוח הזמנים שלך מסוג :type',
     'choose_different_type' => 'בחרו סוג אחר',

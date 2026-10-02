@@ -295,6 +295,7 @@ return [
     'create_your_first_schedule' => 'Choisissez le type de planning qui correspond le mieux à vos besoins',
     'getting_started_welcome' => 'Bienvenue :name, commençons',
     'can_create_more_schedules_later' => 'Vous pourrez toujours créer d\'autres plannings plus tard',
+    'schedule_type_question' => 'Qu\'est-ce qui vous décrit le mieux ?',
     'skip_for_now' => 'Ignorer pour le moment',
     'setting_up_your_schedule' => 'Configuration de votre planning « :type »',
     'choose_different_type' => 'Choisir un autre type',

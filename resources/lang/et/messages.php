@@ -311,6 +311,7 @@ return [
     'create_your_first_schedule' => 'Valige oma vajadustele kõige paremini vastav ajakava tüüp',
     'getting_started_welcome' => 'Tere tulemast, :name! Alustame',
     'can_create_more_schedules_later' => 'Saate hiljem alati rohkem ajakavasid luua',
+    'schedule_type_question' => 'Mis kirjeldab teid kõige paremini?',
     'skip_for_now' => 'Jätke praegu vahele',
     'setting_up_your_schedule' => 'Teie :type ajakava seadistamine',
     'choose_different_type' => 'Valige teine tüüp',

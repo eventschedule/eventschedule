@@ -312,6 +312,7 @@ return [
     'create_your_first_schedule' => 'Alege tipul de program care se potrivește cel mai bine nevoilor tale',
     'getting_started_welcome' => 'Bine ai venit, :name! Să începem',
     'can_create_more_schedules_later' => 'Poți crea oricând mai multe programe mai târziu',
+    'schedule_type_question' => 'Ce te descrie cel mai bine?',
     'skip_for_now' => 'Omite deocamdată',
     'setting_up_your_schedule' => 'Se configurează programul tău de tip :type',
     'choose_different_type' => 'Alege alt tip',
