@@ -6,7 +6,13 @@ use Sentry\Breadcrumb;
 use Sentry\Event;
 
 /**
- * Keeps appointment booking secrets, the cron secret and bearer tokens out of Sentry.
+ * Keeps URL secrets, the cron secret, bearer tokens, email addresses in links and visitors' IP
+ * addresses out of Sentry.
+ *
+ * Secrets in the current route (every parameter RealtimeTracker::SECRET_PARAM matches: ticket,
+ * order, gift card, installment and feedback secrets, password-reset, confirm and unsubscribe
+ * tokens, verification hashes) are replaced wherever they appear in the event. `?email=` and
+ * `?sig=` are blanked like `?secret=`: sign-up, login and unsubscribe links carry an address there.
  *
  * The guest booking surfaces (view, cancel, pay, ical, reschedule) authenticate on a 32-char secret in
  * the URL PATH, so an error on any of them would otherwise ship a working link to a stranger's booking
@@ -51,7 +57,24 @@ class SentryScrubber
      *
      * Matches the value up to the next separator so a following parameter stays readable.
      */
-    private const SECRET_QUERY = '#((?:^|[?&])(?:secret|token|api_key)=)[^&\s"\']+#i';
+    private const SECRET_QUERY = '#((?:^|[?&])(?:secret|token|api_key|email|sig)=)[^&\s"\']+#i';
+
+    /**
+     * Request headers that carry the visitor's real IP address. Sentry's own sanitiser drops
+     * X-Forwarded-For and X-Real-IP while send_default_pii is off, but not the ones Cloudflare
+     * adds in front of hosted, which would otherwise put every visitor's address in every report.
+     */
+    private const IP_HEADERS = ['cf-connecting-ip', 'cf-connecting-ipv6', 'true-client-ip', 'x-forwarded-for', 'x-real-ip'];
+
+    /**
+     * The current request's secret route parameters (RealtimeTracker::SECRET_PARAM: ticket and
+     * order secrets, reset, confirm and unsubscribe tokens, verification hashes), value to
+     * placeholder, for the duration of one beforeSend(). Read from the matched route rather than
+     * kept as a list of URL shapes, so a new secret route is covered the day it is added.
+     *
+     * @var array<string, string>
+     */
+    private static array $routeSecrets = [];
 
     /**
      * `Authorization: Bearer ...`, which carries GROWTH_DATA_TOKEN to /api/internal/growth.
@@ -64,7 +87,26 @@ class SentryScrubber
 
     public static function beforeSend(Event $event): ?Event
     {
+        self::$routeSecrets = self::routeSecrets();
+
+        try {
+            return self::scrubEvent($event);
+        } finally {
+            self::$routeSecrets = [];
+        }
+    }
+
+    private static function scrubEvent(Event $event): Event
+    {
         $request = $event->getRequest();
+
+        if (isset($request['headers']) && is_array($request['headers'])) {
+            $request['headers'] = array_filter(
+                $request['headers'],
+                fn ($name) => ! in_array(strtolower((string) $name), self::IP_HEADERS, true),
+                ARRAY_FILTER_USE_KEY
+            );
+        }
 
         // Walked recursively, because these are NOT all flat strings and guessing wrong makes the whole
         // scrub a silent no-op. RequestIntegration builds `headers` from PSR-7 getHeaders(), which
@@ -152,8 +194,40 @@ class SentryScrubber
         return $value;
     }
 
+    /**
+     * @return array<string, string>
+     */
+    private static function routeSecrets(): array
+    {
+        try {
+            $route = app()->bound('request') ? request()->route() : null;
+        } catch (\Throwable) {
+            return [];
+        }
+
+        $secrets = [];
+
+        foreach ($route?->parameters() ?? [] as $name => $value) {
+            // Eight characters at least, so a short value cannot blank out ordinary text that
+            // happens to contain it.
+            if (is_scalar($value) && strlen((string) $value) >= 8 && preg_match(RealtimeTracker::SECRET_PARAM, (string) $name) === 1) {
+                $secrets[(string) $value] = '['.$name.']';
+            }
+        }
+
+        return $secrets;
+    }
+
     public static function scrub(string $value): string
     {
+        if (self::$routeSecrets) {
+            $value = strtr($value, self::$routeSecrets);
+        }
+
+        // Email addresses anywhere: a mail transport quoting the recipient back in an exception
+        // message, a log breadcrumb, a URL. The domain is kept for debugging.
+        $value = mask_emails($value);
+
         $value = preg_replace(self::SECRET_PATH, '$1[secret]', $value) ?? $value;
         $value = preg_replace(self::BEARER, '$1[secret]', $value) ?? $value;
 

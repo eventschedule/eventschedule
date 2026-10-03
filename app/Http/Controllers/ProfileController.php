@@ -10,6 +10,7 @@ use App\Models\BackupJob;
 use App\Models\BoostCampaign;
 use App\Models\Role;
 use App\Notifications\DeletedUserNotification;
+use App\Services\AccountDeletionService;
 use App\Services\AppUpdateService;
 use App\Services\AuditService;
 use App\Services\BoostBillingService;
@@ -158,6 +159,16 @@ class ProfileController extends Controller
 
         $user = $request->user();
 
+        // A selfhosted install is run by its admins: deleting the last one would leave nobody able
+        // to reach /admin, and RegisteredUserController makes the next sign-up the admin when the
+        // install has a single user. The settings page hides the button for an admin, but the
+        // route is reachable on its own, so the rule lives here.
+        if (! config('app.hosted') && $user->isAdmin()
+            && \App\Models\User::where('is_admin', true)->where('id', '!=', $user->id)->doesntExist()) {
+            return Redirect::to(route('profile.edit').'#section-delete')
+                ->with('error', __('messages.delete_last_admin'));
+        }
+
         // Only require password validation if user has a password set
         $rules = [
             'feedback' => ['nullable', 'string', 'max:2000'],
@@ -190,8 +201,10 @@ class ProfileController extends Controller
         }
 
         // Send feedback email if provided (before logout so we have user data)
-        // Skip for demo mode to prevent spam
-        if ($request->filled('feedback') && ! is_demo_mode()) {
+        // Skip for demo mode to prevent spam. Hosted only: the address is Event Schedule's own, and
+        // a selfhosted install must not send its users' names, emails and words to us
+        // (self-hosting terms, "what crosses the line").
+        if ($request->filled('feedback') && ! is_demo_mode() && config('app.hosted')) {
             Mail::to('contact@eventschedule.com')->send(new SupportEmail(
                 $user->name ?? $user->email,
                 $user->email,
@@ -329,6 +342,12 @@ class ProfileController extends Controller
                 ]);
             }
         }
+
+        // Everything around the user row: hand events, newsletters and templates made for someone
+        // else's schedule to its owner, delete the files the cascades would strand, forget the
+        // address where it is the key, and end every session. Before the gallery purge below,
+        // which must not reach the galleries of events that are about to stay.
+        app(AccountDeletionService::class)->prepare($user);
 
         // Account-less audience rows are keyed on the EMAIL, not on a user id, so no foreign key
         // takes them with the account. The privacy policy's erasure section promises deletion of

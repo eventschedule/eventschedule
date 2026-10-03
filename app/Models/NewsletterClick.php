@@ -12,8 +12,6 @@ class NewsletterClick extends Model
         'newsletter_recipient_id',
         'url',
         'clicked_at',
-        'ip_address',
-        'user_agent',
     ];
 
     protected $casts = [

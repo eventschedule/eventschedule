@@ -1,35 +1,35 @@
 {{--
-    Google Analytics 4 with Consent Mode v2.
+    Google Analytics 4, loaded only with consent ("basic" Consent Mode).
 
-    Default-denied for every consent flag. The same inline tick checks
-    localStorage and replays a 'granted' update for returning visitors who
-    accepted, so the first beacon on the next visit already fires with
-    cookies. The banner (resources/views/partials/cookie-banner.blade.php)
-    and resources/js/cookie-consent.js are what flip the localStorage flag.
+    gtag.js is not requested at all until the visitor grants the analytics category, so a visitor
+    who declines, never answers or sends Global Privacy Control sends Google nothing - not even
+    the cookieless pings "advanced" Consent Mode would send, which carry the page address and the
+    visitor's IP and which several EU regulators treat as needing consent anyway. The consent
+    defaults are still pushed first, so the moment the script does load it starts from the
+    visitor's actual choice. Ad signals follow the marketing category, separately.
 
-    No <noscript> fallback: GA4 has no image-pixel beacon, so an image tag
-    here would either 404 or bypass Consent Mode entirely.
+    window.esConsent (partials/consent-state.blade.php, included just before this) answers the
+    question; cookie-consent.js announces a change made on the page with 'es:consent-change'.
+
+    What Google is told about the page is redacted for every page, not a list of known ones:
+      - the path, with every secret route parameter (ticket and order secrets, reset, confirm and
+        unsubscribe tokens, ...) replaced by its name, the same rule /admin/realtime uses
+        (RealtimeTracker::redactedPath). Null when the route has none, so an edge-cached
+        marketing page renders identically for everyone and the browser uses its own path;
+      - the query string, reduced to utm_* tags. Everything else goes, including the ?email= that
+        sign-up, login and reset links carry (base64, which Google's own email redaction misses)
+        and the signature on account unsubscribe links;
+      - the referrer, reduced to its origin, because the page someone came FROM can be a ticket
+        link too.
+
+    No embed: an embedded calendar is a page on someone else's site, where storage is partitioned
+    and this banner is not the right place to ask. No <noscript> fallback: GA4 has no image-pixel
+    beacon, so an image tag here would either 404 or bypass consent entirely.
 --}}
-@if (config('services.google.analytics') && (! auth()->user() || ! auth()->user()->isAdmin()))
+@if (config('services.google.analytics') && ! request()->embed && (! auth()->user() || ! auth()->user()->isAdmin()))
     @php
         $gaId = config('services.google.analytics');
-
-        // gtag('config') sends page_location, which is the FULL current URL. On these routes the
-        // URL is the credential: /sub/u/{token} and /nl/u/{token} carry a bearer token that
-        // suppresses an address, and sub/u is CSRF-exempt for RFC 8058, so anyone holding one can
-        // unsubscribe that person everywhere with ?all=1. Consent Mode denies storage, not the hit
-        // itself, so the token would reach Google either way.
-        //
-        // Redacted to the route's own URI pattern - "sub/u/{token}" - which is what an analytics
-        // report actually wants anyway: one row per page instead of one per recipient.
-        $tokenRoutes = [
-            'subscriber.show_confirm', 'subscriber.confirm',
-            'subscriber.show_unsubscribe', 'subscriber.unsubscribe',
-            'newsletter.show_unsubscribe', 'newsletter.unsubscribe',
-        ];
-        $gaRedactedLocation = in_array(request()->route()?->getName(), $tokenRoutes, true)
-            ? url(request()->route()->uri())
-            : null;
+        $gaRedactedPath = request()->route() ? \App\Utils\RealtimeTracker::redactedPath(request()) : null;
     @endphp
     <script {!! nonce_attr() !!}>
         window.dataLayer = window.dataLayer || [];
@@ -47,24 +47,71 @@
             analytics_storage: 'denied'
         });
         gtag('set', 'ads_data_redaction', true);
-        try {
-            if (navigator.globalPrivacyControl === true) {
-                localStorage.setItem('cookie_consent', 'denied');
-            } else if (localStorage.getItem('cookie_consent') === 'granted') {
+        (function () {
+            var id = @json($gaId);
+            var redactedPath = @json($gaRedactedPath);
+            // From this script element rather than printed into it, so the page body carries no
+            // per-request value. document.currentScript is only set while this runs, so read now.
+            var nonce = (document.currentScript && document.currentScript.nonce) || '';
+            var loaded = false;
+
+            var pageLocation = function () {
+                var l = window.location;
+                var keep = [];
+                try {
+                    new URLSearchParams(l.search).forEach(function (value, key) {
+                        if (/^utm_/.test(key)) {
+                            keep.push(encodeURIComponent(key) + '=' + encodeURIComponent(value));
+                        }
+                    });
+                } catch (e) {}
+
+                return l.origin + (redactedPath || l.pathname) + (keep.length ? '?' + keep.join('&') : '');
+            };
+
+            var pageReferrer = function () {
+                try {
+                    return document.referrer ? new URL(document.referrer).origin + '/' : '';
+                } catch (e) {
+                    return '';
+                }
+            };
+
+            var apply = function () {
+                var consent = window.esConsent;
+                var analytics = !!(consent && consent.has('analytics'));
+                var marketing = !!(consent && consent.has('marketing'));
+
                 gtag('consent', 'update', {
-                    ad_storage: 'granted',
-                    ad_user_data: 'granted',
-                    ad_personalization: 'granted',
-                    analytics_storage: 'granted'
+                    ad_storage: marketing ? 'granted' : 'denied',
+                    ad_user_data: marketing ? 'granted' : 'denied',
+                    ad_personalization: marketing ? 'granted' : 'denied',
+                    analytics_storage: analytics ? 'granted' : 'denied'
                 });
-            }
-        } catch (e) {}
-        gtag('js', new Date());
-        @if ($gaRedactedLocation)
-            gtag('config', @json($gaId), { page_location: @json($gaRedactedLocation) });
-        @else
-            gtag('config', @json($gaId));
-        @endif
+
+                if (!analytics || loaded) {
+                    return;
+                }
+
+                loaded = true;
+                gtag('js', new Date());
+                gtag('config', id, { page_location: pageLocation(), page_referrer: pageReferrer() });
+
+                var script = document.createElement('script');
+                script.async = true;
+                script.src = 'https://www.googletagmanager.com/gtag/js?id=' + encodeURIComponent(id);
+                script.nonce = nonce;
+                document.head.appendChild(script);
+            };
+
+            try {
+                apply();
+            } catch (e) {}
+            document.addEventListener('es:consent-change', function () {
+                try {
+                    apply();
+                } catch (e) {}
+            });
+        })();
     </script>
-    <script async src="https://www.googletagmanager.com/gtag/js?id={{ $gaId }}" {!! nonce_attr() !!}></script>
 @endif

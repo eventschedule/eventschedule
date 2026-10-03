@@ -490,9 +490,11 @@
 
         function onChangeFont() {
             var font_family = $('#font_family').find(':selected').text();
+            var font_value = $('#font_family').val() || '';
             var link = document.createElement('link');
 
-            link.href = 'https://fonts.googleapis.com/css2?family=' + encodeURIComponent(font_family.trim()) + ':wght@400;700&display=swap';
+            // The copy this install serves (php artisan fonts:download), never Google Fonts.
+            link.href = @json(asset('vendor/fonts')) + '/' + encodeURIComponent(font_value.trim().replace(/ /g, '_')) + '/font.css';
             link.rel = 'stylesheet';
 
             document.head.appendChild(link);

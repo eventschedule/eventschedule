@@ -761,12 +761,21 @@ class MetaAdsService
      * outage must never unwind it. Everything is inside the try, and a sale on an event with no
      * active campaign is a cheap no-op.
      *
+     * Only for a buyer who granted the marketing cookie category at checkout (sales.ad_consent,
+     * stamped by TicketController). The event carries a hash of their email address to Meta for
+     * advertising measurement, so without that consent nothing is sent at all: an event stripped
+     * of user_data would still tell Meta that someone bought a ticket to this event.
+     *
      * @param  float  $amount  The LEG total, not the order total - conversions are attributed per
      *                         event, the same way AnalyticsEventsDaily::incrementSale() is.
      */
     public function sendSaleConversion(\App\Models\Sale $sale, float $amount): void
     {
         try {
+            if (! $sale->ad_consent) {
+                return;
+            }
+
             $event = $sale->event;
 
             if (! $event || ! $event->activeBoostCampaign) {

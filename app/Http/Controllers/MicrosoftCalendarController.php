@@ -10,7 +10,6 @@ use Carbon\Carbon;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 
 class MicrosoftCalendarController extends Controller
@@ -120,38 +119,10 @@ class MicrosoftCalendarController extends Controller
     {
         $user = Auth::user();
 
-        // Clean up any active subscriptions before disconnecting (owned roles only)
+        // Deletes the Graph subscriptions and forgets every token, cursor and sync record
+        // (MicrosoftCalendarService::forgetAuthorization).
         try {
-            $ownedRoles = $user->owner()->whereNotNull('microsoft_webhook_id')->get();
-
-            foreach ($ownedRoles as $role) {
-                if ($role->microsoft_webhook_id) {
-                    if ($this->microsoftCalendarService->ensureValidToken($user)) {
-                        $this->microsoftCalendarService->deleteSubscription($user, $role->microsoft_webhook_id);
-                    }
-
-                    // Clear subscription + delta state from role (dead without the account).
-                    // forceFill: these are system-managed columns kept out of $fillable.
-                    $role->forceFill([
-                        'microsoft_webhook_id' => null,
-                        'microsoft_webhook_expires_at' => null,
-                        'microsoft_sync_token' => null,
-                        'microsoft_last_sync_at' => null,
-                    ])->save();
-                }
-            }
-
-            // Clear sync direction on owned roles only
-            $user->owner()->update(['microsoft_sync_direction' => null]);
-
-            // Clear all Microsoft calendar sync records for this user
-            MicrosoftCalendarSync::where('user_id', $user->id)->delete();
-
-            // Clear per-schedule calendar selections for this user (all roles)
-            DB::table('role_user')
-                ->where('user_id', $user->id)
-                ->whereNotNull('microsoft_calendar_id')
-                ->update(['microsoft_calendar_id' => null]);
+            $this->microsoftCalendarService->forgetAuthorization($user, true);
         } catch (\Exception $e) {
             Log::warning('Failed to clean up subscriptions during Outlook Calendar disconnect', [
                 'user_id' => $user->id,

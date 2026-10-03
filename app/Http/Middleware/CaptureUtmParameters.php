@@ -22,10 +22,10 @@ class CaptureUtmParameters
      * Anonymous marketing HTML is cached at the edge (CacheableMarketingResponse), so on most
      * marketing page views this middleware never runs and there is no server session to hold
      * the marketing-to-signup hop. This cookie carries exactly what that session used to -
-     * landing page, off-site referrer, the utm_* values and ?ref= - and nothing else, which is
-     * why it is strictly necessary in the same sense the session cookie it stands in for was
-     * and is deliberately NOT gated on consent. The consented 30-day ATTRIBUTION_COOKIES above
-     * are a different thing (cross-session marketing attribution) and are unchanged.
+     * landing page, off-site referrer, the utm_* values and ?ref= - and nothing else. It is
+     * attribution, not something the visitor asked for, so the browser writes it only with
+     * marketing consent, like the 30-day ATTRIBUTION_COOKIES above; a visitor who declines
+     * reaches sign-up with no client attribution, and this middleware simply finds none.
      *
      * Exempt from cookie encryption in bootstrap/app.php, since the browser writes it.
      */
@@ -220,11 +220,14 @@ class CaptureUtmParameters
     }
 
     /**
-     * Has the visitor accepted cookies?
+     * Has the visitor accepted marketing cookies?
      *
      * The choice really lives in localStorage, which is invisible from here, so
      * resources/js/cookie-consent.js mirrors it into an unencrypted `cookie_consent`
-     * cookie (exempted in bootstrap/app.php) purely so this check is possible.
+     * cookie (exempted in bootstrap/app.php) purely so this check is possible. These are
+     * attribution cookies, so it is the MARKETING category they need: an analytics-only choice,
+     * including a version-1 "granted" from the banner that only ever said "analytics", does not
+     * allow them.
      *
      * Where cookie_banner_required() is false no banner is ever shown, so this is always false
      * and the attribution cookies are simply never written. That is deliberate: an install
@@ -234,7 +237,7 @@ class CaptureUtmParameters
      */
     private function hasConsent(Request $request): bool
     {
-        return $request->cookie('cookie_consent') === 'granted';
+        return consent_granted('marketing', $request);
     }
 
     /**

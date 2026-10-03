@@ -72,7 +72,99 @@ if (! function_exists('consent_required')) {
         return (bool) config('services.google.analytics')
             || (bool) config('ads.enabled')
             || (bool) config('stay22.enabled')
+            || (bool) config('services.meta.pixel_id')
             || (bool) config('app.cookie_consent_banner');
+    }
+}
+
+if (! function_exists('consent_granted')) {
+    /**
+     * Has the visitor granted a cookie-consent category, 'analytics' or 'marketing'?
+     *
+     * Reads the mirror cookie resources/js/cookie-consent.js writes beside the real choice in
+     * localStorage (resources/js/consent-state.js documents both). A version-1 'granted', from a
+     * banner that only ever named analytics, counts as analytics and never as marketing. Global
+     * Privacy Control refuses everything, whatever the cookie says.
+     *
+     * For request-scoped server decisions only: CaptureUtmParameters, and checkout recording
+     * whether the Meta Conversions API may be told about a sale. NEVER call it from a view.
+     * Anonymous marketing HTML is edge-cached (docs/CACHING.md), so a choice read while rendering
+     * would be served to every later visitor; pages decide in the browser, through
+     * window.esConsent. ConsentCategoriesTest fails the build if a view calls it.
+     */
+    function consent_granted(string $category, ?\Illuminate\Http\Request $request = null): bool
+    {
+        $request ??= request();
+
+        if ($request->header('Sec-GPC') === '1') {
+            return false;
+        }
+
+        $value = $request->cookie('cookie_consent');
+
+        if (! is_string($value) || $value === '') {
+            return false;
+        }
+
+        $granted = $value === 'granted' ? ['analytics'] : explode('.', $value);
+
+        return in_array($category, $granted, true);
+    }
+}
+
+if (! function_exists('font_stylesheet_url')) {
+    /**
+     * The local stylesheet for a schedule font, public/vendor/fonts/<value>/font.css, written by
+     * `php artisan fonts:download` (see App\Console\Commands\DownloadFonts for why fonts are never
+     * loaded from Google). Null for a font with no local copy, which then falls back to the page's
+     * sans-serif rather than to Google.
+     */
+    function font_stylesheet_url(string $font): ?string
+    {
+        $dir = str_replace(' ', '_', trim($font));
+
+        if (! preg_match('/^[A-Za-z0-9_]{1,100}\z/', $dir) || ! is_file(public_path('vendor/fonts/'.$dir.'/font.css'))) {
+            return null;
+        }
+
+        return asset('vendor/fonts/'.$dir.'/font.css');
+    }
+}
+
+if (! function_exists('mask_emails')) {
+    /**
+     * Every email address in a string reduced to its first character and its domain
+     *
+     * ("s***@example.com"). For log lines and error reports, where the domain is what helps and
+     * the address is personal data nobody debugging needs. App\Logging\MaskPersonalData applies
+     * it to every log record and SentryScrubber to every error report.
+     */
+    function mask_emails(string $text): string
+    {
+        if (! str_contains($text, '@')) {
+            return $text;
+        }
+
+        return preg_replace(
+            '/(?<![A-Za-z0-9._%+-])([A-Za-z0-9])[A-Za-z0-9._%+-]*@((?:[A-Za-z0-9-]+\.)+[A-Za-z]{2,})/',
+            '$1***@$2',
+            $text
+        ) ?? $text;
+    }
+}
+
+if (! function_exists('consent_state_script')) {
+    /**
+     * resources/js/consent-state.js, for partials/consent-state.blade.php to inline into <head>.
+     * Inlined rather than built so the inline Google Analytics and realtime-beacon partials can
+     * read the visitor's choice before any module loads, from the same parser cookie-consent.js
+     * imports.
+     */
+    function consent_state_script(): string
+    {
+        static $script = null;
+
+        return $script ??= (string) file_get_contents(resource_path('js/consent-state.js'));
     }
 }
 
@@ -85,14 +177,21 @@ if (! function_exists('cookie_banner_required')) {
      * this one reads the settings map (a cached Setting::get that fails open), so only the banner
      * and the privacy page's "change your choice" button ask it.
      *
-     * Realtime never asks for consent inside an embedded calendar (it is always count-only there)
-     * or on a rendered graphic, so on its own it does not put a banner in either: an install with
-     * nothing else consent-gated would otherwise show one in every iframe on its users' sites.
+     * Never inside an embedded calendar. It is a page on someone else's site, where our storage
+     * is partitioned per embedding site and a banner in every iframe would ask the same visitor
+     * again on each one; nothing consent-gated runs there instead (Google Analytics, the Meta
+     * Pixel, OneSignal and AdSense all skip ?embed, realtime is always count-only), and a map,
+     * video or accommodation widget loads only on a click, which is consent for that one item.
+     * Realtime does not ask on a rendered graphic either.
      */
     function cookie_banner_required(): bool
     {
+        if (request()->embed) {
+            return false;
+        }
+
         return consent_required()
-            || (\App\Utils\RealtimeTracker::enabled() && ! request()->embed && ! request()->graphic);
+            || (\App\Utils\RealtimeTracker::enabled() && ! request()->graphic);
     }
 }
 

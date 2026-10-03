@@ -412,6 +412,8 @@ class Role extends Model implements MustVerifyEmail
         // its /{subdomain}/... routes: it would take every two-segment path of a schedule by that
         // name - its sub-schedule pages, its events' short links, its sitemap.
         'map-image',
+        // Owned by the YouTube thumbnail proxy (/yt-thumb/{id}), for the same reason as map-image.
+        'yt-thumb',
         // Every other literal first segment of a route outside a schedule's own address, on
         // either kind of install. Selfhost serves a schedule at /{subdomain}/..., in the same path
         // space, so a schedule with one of these names lost pages to the route: /new/{type} took

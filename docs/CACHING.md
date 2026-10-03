@@ -377,11 +377,14 @@ expiry) first-party cookie on `config('session.domain')` holding the landing pat
 off-site referrer, the `utm_*` values and `ref` from the query string, JSON-encoded and
 capped at ~2 KB.
 
-It carries exactly what the server session used to hold for the marketing-to-signup hop, so
-it is strictly necessary in the same sense the session cookie it stands in for was, and it
-is deliberately **not** gated on cookie consent. The consented 30-day attribution cookies
-`CaptureUtmParameters` writes are a different thing (cross-session marketing attribution)
-and are unchanged.
+It carries exactly what the server session used to hold for the marketing-to-signup hop. That
+is attribution, not something the visitor asked for, so it is written **only with marketing
+consent** (`window.esConsent.has('marketing')`, the same category as the 30-day cookies
+`CaptureUtmParameters` writes). A visitor who grants it later on the same page is recorded
+then; withdrawing marketing consent deletes it (`resources/js/cookie-consent.js`). A visitor
+who declines reaches sign-up with no client attribution, by design. The decision is made in
+the browser, which is what keeps it safe on an edge-cached page: never read the consent
+cookie while rendering a marketing view (`consent_granted()` documents why).
 
 `CaptureUtmParameters::clientAttribution()` reads it back defensively (malformed JSON
 ignored, unknown keys dropped, every value through the same sanitiser and length caps), and
@@ -425,9 +428,11 @@ has to stay that way:
   ten minutes. A variant **cookie** set by the server is worse: `responseIsAnonymous()`
   refuses to mark a response that sets any cookie public, so the homepage would silently stop
   being cached. `HeroExperimentTest` pins that the homepage still sets no cookie.
-- The script writes to `sessionStorage` rather than to the cookie itself: if it created
-  `es_attribution`, the attribution script would find a cookie and skip, losing the landing
-  page and `utm_*` values.
+- With analytics consent the script remembers the pick in `sessionStorage` (`es_hero`,
+  `es_hero_clicked`) rather than in the cookie itself: if it created `es_attribution`, the
+  attribution script would find a cookie and skip, losing the landing page and `utm_*` values.
+  Without analytics consent it stores nothing, picks afresh on each view, and counts per page
+  view instead of per session.
 - It beacons `POST /marketing/hero` with `view` on a visitor's first pick and `click` on their
   first click on any sign-up link, filtered exactly like the page-view beacon.
 - The weights baked into a cached page are up to ~20 minutes old (the app caches the

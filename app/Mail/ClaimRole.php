@@ -112,13 +112,21 @@ class ClaimRole extends Mailable
         return [];
     }
 
+    /**
+     * RFC 8058 one-click, signed for the invited schedule's own address, so the mail client's POST
+     * actually works (the unsigned form behind role.unsubscribe needs a CSRF token it never has).
+     */
     public function headers(): Headers
     {
         $role = $this->invitedRole();
 
+        if (! $role->email) {
+            return new Headers;
+        }
+
         return new Headers(
             text: [
-                'List-Unsubscribe' => '<'.route('role.unsubscribe', ['subdomain' => $role->subdomain]).'>',
+                'List-Unsubscribe' => '<'.\App\Utils\UrlUtils::roleUnsubscribeOneClickUrl($role->email).'>',
                 'List-Unsubscribe-Post' => 'List-Unsubscribe=One-Click',
             ],
         );

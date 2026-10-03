@@ -10,7 +10,6 @@ use Illuminate\Mail\Mailable;
 use Illuminate\Mail\Mailables\Address;
 use Illuminate\Mail\Mailables\Content;
 use Illuminate\Mail\Mailables\Envelope;
-use Illuminate\Mail\Mailables\Headers;
 use Illuminate\Queue\SerializesModels;
 
 class WaitlistNotification extends Mailable
@@ -73,20 +72,6 @@ class WaitlistNotification extends Mailable
                 'unsubscribeUrl' => $this->role ? route('role.unsubscribe', ['subdomain' => $this->role->subdomain]) : '',
             ]
         );
-    }
-
-    public function headers(): Headers
-    {
-        if ($this->role) {
-            return new Headers(
-                text: [
-                    'List-Unsubscribe' => '<'.route('role.unsubscribe', ['subdomain' => $this->role->subdomain]).'>',
-                    'List-Unsubscribe-Post' => 'List-Unsubscribe=One-Click',
-                ],
-            );
-        }
-
-        return new Headers;
     }
 
     public function attachments(): array

@@ -139,14 +139,17 @@ class RealtimeBeaconRenderTest extends TestCase
     {
         $html = $this->get('/pricing')->getContent();
 
-        $this->assertStringContainsString("getItem('cookie_consent') === 'granted'", $html);
+        // The analytics category, read through window.esConsent, which applies Global Privacy
+        // Control itself (partials/consent-state.blade.php inlines resources/js/consent-state.js).
+        $this->assertStringContainsString("w.esConsent.has('analytics')", $html);
         $this->assertStringContainsString('globalPrivacyControl', $html);
+        $this->assertStringContainsString('window.esConsent', $html);
         $this->assertStringContainsString("'es:consent-change'", $html);
 
-        // Withdrawal: the privacy page's "change your choice" announces null, not 'denied', so
-        // anything but 'granted' must withdraw; and every heartbeat re-reads the stored choice, so a
+        // Withdrawal: anything short of a current analytics grant withdraws, re-read from the
+        // stored choice rather than the event's payload; and every heartbeat re-reads it, so a
         // withdrawal in another tab is noticed. Both were missing once, and the policy promises them.
-        $this->assertStringContainsString("} else if (value !== 'granted') {", $html);
+        $this->assertStringContainsString('} else if (!granted) {', $html);
         $this->assertMatchesRegularExpression('/var beat = function \(\) \{\s*if \(!stillConsented\(\)/', $html);
         // An embed never runs in full mode.
         $this->assertStringContainsString('var full = !embed && consented();', $html);
@@ -156,22 +159,25 @@ class RealtimeBeaconRenderTest extends TestCase
         $this->assertMatchesRegularExpression("/addEventListener\('storage'.*?!consented\(\)\) withdraw\(\);/s", $html);
     }
 
-    public function test_realtime_alone_puts_no_cookie_banner_in_an_embedded_calendar(): void
+    public function test_an_embedded_calendar_never_shows_the_cookie_banner(): void
     {
-        config(['services.google.analytics' => null, 'ads.enabled' => false, 'stay22.enabled' => false, 'app.cookie_consent_banner' => false]);
+        config(['services.google.analytics' => null, 'ads.enabled' => false, 'stay22.enabled' => false, 'services.meta.pixel_id' => null, 'app.cookie_consent_banner' => false]);
         $role = $this->createRole($this->createOwner());
 
         $this->get('/'.$role->subdomain)->assertOk()->assertSee('data-cookie-consent-action', false);
         $this->get('/'.$role->subdomain.'?embed=true')->assertOk()->assertDontSee('data-cookie-consent-action', false);
 
-        // Anything else consent-gated still shows it there, as before.
-        config(['app.cookie_consent_banner' => true]);
-        $this->get('/'.$role->subdomain.'?embed=true')->assertOk()->assertSee('data-cookie-consent-action', false);
+        // Not even with something else consent-gated on: an embed is a page on someone else's
+        // site, and nothing consent-gated runs inside one (cookie_banner_required()).
+        config(['app.cookie_consent_banner' => true, 'services.google.analytics' => 'G-TEST123']);
+        $embed = $this->get('/'.$role->subdomain.'?embed=true')->assertOk();
+        $embed->assertDontSee('data-cookie-consent-action', false);
+        $embed->assertDontSee('googletagmanager.com/gtag/js', false);
     }
 
     public function test_turning_realtime_on_brings_the_cookie_banner_even_with_nothing_else_consent_gated(): void
     {
-        config(['services.google.analytics' => null, 'ads.enabled' => false, 'stay22.enabled' => false, 'app.cookie_consent_banner' => false]);
+        config(['services.google.analytics' => null, 'ads.enabled' => false, 'stay22.enabled' => false, 'services.meta.pixel_id' => null, 'app.cookie_consent_banner' => false]);
 
         $this->get('/pricing')->assertOk()->assertSee('data-cookie-consent-action', false);
 

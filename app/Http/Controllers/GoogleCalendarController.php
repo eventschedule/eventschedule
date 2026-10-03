@@ -136,39 +136,12 @@ class GoogleCalendarController extends Controller
     {
         $user = Auth::user();
 
-        // Clean up any active webhooks before disconnecting (owned roles only)
+        // Stops the webhooks, revokes the grant at Google and forgets every token, cursor and sync
+        // record (GoogleCalendarService::forgetAuthorization).
         try {
-            $ownedRoles = $user->owner()->whereNotNull('google_webhook_id')->get();
-
-            foreach ($ownedRoles as $role) {
-                if ($role->google_webhook_id && $role->google_webhook_resource_id) {
-                    // Ensure user has valid token before deleting webhook
-                    if ($this->googleCalendarService->ensureValidToken($user)) {
-                        $this->googleCalendarService->deleteWebhook($role->google_webhook_id, $role->google_webhook_resource_id);
-                    }
-
-                    // Clear webhook data from role
-                    $role->update([
-                        'google_webhook_id' => null,
-                        'google_webhook_resource_id' => null,
-                        'google_webhook_expires_at' => null,
-                    ]);
-                }
-            }
-            // Clear sync direction and the incremental sync cursor on owned roles only.
-            // (Bulk query-builder update writes google_sync_token even though it is not fillable.)
-            $user->owner()->update(['sync_direction' => null, 'google_sync_token' => null]);
-
-            // Clear all calendar sync records for this user
-            \App\Models\CalendarSync::where('user_id', $user->id)->delete();
-
-            // Clear calendar settings for this user (all roles)
-            \DB::table('role_user')
-                ->where('user_id', $user->id)
-                ->whereNotNull('google_calendar_id')
-                ->update(['google_calendar_id' => null]);
+            $this->googleCalendarService->forgetAuthorization($user, true);
         } catch (\Exception $e) {
-            Log::warning('Failed to clean up webhooks during Google Calendar disconnect', [
+            Log::warning('Failed to clean up during Google Calendar disconnect', [
                 'user_id' => $user->id,
                 'error' => $e->getMessage(),
             ]);

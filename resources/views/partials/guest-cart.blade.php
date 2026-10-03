@@ -456,9 +456,12 @@ window.addEventListener('DOMContentLoaded', function () {
                     if (value) this[field] = value;
                 }, this);
 
+                // With the time it was saved: restoreBuyer() forgets it after 30 days, and the
+                // purchase landing page forgets it once the cart is empty (partials/cart-clear).
+                // A shared or borrowed device should not keep a buyer's details for good.
                 try {
                     localStorage.setItem(buyerKey, JSON.stringify({
-                        name: this.name, email: this.email, phone: this.phone,
+                        name: this.name, email: this.email, phone: this.phone, t: Date.now(),
                     }));
                 } catch (e) {}
             },
@@ -469,6 +472,10 @@ window.addEventListener('DOMContentLoaded', function () {
 
                 try {
                     var saved = JSON.parse(localStorage.getItem(buyerKey) || '{}');
+                    if (! saved.t || Date.now() - saved.t > 30 * 24 * 60 * 60 * 1000) {
+                        localStorage.removeItem(buyerKey);
+                        saved = {};
+                    }
                     this.name = this.name || saved.name || '';
                     this.email = this.email || saved.email || '';
                     this.phone = this.phone || saved.phone || '';

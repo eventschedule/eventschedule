@@ -267,11 +267,13 @@
              whereas the alternative here is showing OUR logo full screen to their audience. --}}
         @include('partials.web-app-manifest', ['manifestRole' => $role])
 
-        <link rel="preconnect" href="https://fonts.googleapis.com">
-        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-        {{-- array_filter: the Role accessor reads an invalid font as null, as it does a missing one. --}}
+        {{-- array_filter: the Role accessor reads an invalid font as null, as it does a missing one.
+             Served from this install (font_stylesheet_url()), never from Google Fonts, which would
+             hand every visitor's IP address to Google without asking. --}}
         @foreach(array_filter($fonts) as $font)
-            <link href="https://fonts.googleapis.com/css2?family={{ str_replace(['_', ' '], '+', $font) }}:wght@400;700&display=swap" rel="stylesheet">
+            @if ($fontStylesheet = font_stylesheet_url($font))
+            <link href="{{ $fontStylesheet }}" rel="stylesheet">
+            @endif
         @endforeach
 
         <style {!! nonce_attr() !!}>
@@ -517,29 +519,48 @@
             @endforeach
         @endif
 
-        {{-- Meta Pixel for boosted events --}}
-        @if ($event && $event->exists && $event->activeBoostCampaign)
+        {{-- Meta Pixel for boosted events. Measures the Boost campaign the schedule paid for, so
+             it is the MARKETING consent category: nothing is requested from Facebook until the
+             visitor grants it (window.esConsent, partials/consent-state.blade.php), here or later
+             on this page. consent_required() turns the banner on whenever META_PIXEL_ID is set.
+             No <noscript> image: it would fire without anyone being asked. Never in an embed,
+             which is a page on someone else's site. --}}
+        @if ($event && $event->exists && $event->activeBoostCampaign && ! request()->embed)
         @php $metaPixelId = config('services.meta.pixel_id'); @endphp
         @if ($metaPixelId)
         <script {!! nonce_attr() !!}>
-            !function(f,b,e,v,n,t,s)
-            {if(f.fbq)return;n=f.fbq=function(){n.callMethod?
-            n.callMethod.apply(n,arguments):n.queue.push(arguments)};
-            if(!f._fbq)f._fbq=n;n.push=n;n.loaded=!0;n.version='2.0';
-            n.queue=[];t=b.createElement(e);t.async=!0;
-            t.src=v;s=b.getElementsByTagName(e)[0];
-            s.parentNode.insertBefore(t,s)}(window, document,'script',
-            'https://connect.facebook.net/en_US/fbevents.js');
-            fbq('init', '{{ $metaPixelId }}');
-            fbq('track', 'PageView');
-            fbq('track', 'ViewContent', {
-                content_ids: ['{{ $event->id }}'],
-                content_name: @json($guestEventName),
-                content_type: 'product',
-                content_category: '{{ $event->getSchemaAttendanceMode() === "https://schema.org/OnlineEventAttendanceMode" ? "online_event" : "event" }}'
-            });
+            (function () {
+                // Read while this runs: the page body carries no per-request value.
+                var nonce = (document.currentScript && document.currentScript.nonce) || '';
+                var loaded = false;
+                var load = function () {
+                    if (loaded || !(window.esConsent && window.esConsent.has('marketing'))) {
+                        return;
+                    }
+                    loaded = true;
+                    !function(f,b,e,v,n,t,s)
+                    {if(f.fbq)return;n=f.fbq=function(){n.callMethod?
+                    n.callMethod.apply(n,arguments):n.queue.push(arguments)};
+                    if(!f._fbq)f._fbq=n;n.push=n;n.loaded=!0;n.version='2.0';
+                    n.queue=[];t=b.createElement(e);t.async=!0;t.nonce=nonce;
+                    t.src=v;s=b.getElementsByTagName(e)[0];
+                    s.parentNode.insertBefore(t,s)}(window, document,'script',
+                    'https://connect.facebook.net/en_US/fbevents.js');
+                    fbq('init', @json($metaPixelId));
+                    fbq('track', 'PageView');
+                    fbq('track', 'ViewContent', {
+                        content_ids: [@json((string) $event->id)],
+                        content_name: @json($guestEventName),
+                        content_type: 'product',
+                        content_category: @json($event->getSchemaAttendanceMode() === 'https://schema.org/OnlineEventAttendanceMode' ? 'online_event' : 'event')
+                    });
+                };
+                try { load(); } catch (e) {}
+                document.addEventListener('es:consent-change', function () {
+                    try { load(); } catch (e) {}
+                });
+            })();
         </script>
-        <noscript><img height="1" width="1" style="display:none" src="https://www.facebook.com/tr?id={{ $metaPixelId }}&ev=PageView&noscript=1" /></noscript>
         @endif
         @endif
 
@@ -673,6 +694,21 @@
         ];
         $creditUrl = 'https://eventschedule.com'.($creditUtm[$creditReason] ?? '');
     @endphp
+
+    {{-- The privacy policy that covers this page, and the way back into the cookie banner (GDPR
+         Art. 7(3): withdrawing consent must be as easy as giving it). A pill rather than bare
+         text, like the credit chip below, so it stays legible on any schedule background. --}}
+    @if (! request()->embed)
+    <nav aria-label="{{ __('messages.privacy_policy') }}" class="flex justify-center px-4 pt-6">
+        <p class="inline-flex flex-wrap items-center justify-center gap-x-2 gap-y-1 rounded-full bg-white/80 px-3 py-1.5 text-xs font-medium text-gray-600 shadow-sm ring-1 ring-black/5 backdrop-blur">
+            <a href="{{ policy_url('privacy') }}" class="hover:text-gray-900 hover:underline">{{ __('messages.privacy_policy') }}</a>
+            @if (cookie_banner_required())
+                <span aria-hidden="true">&middot;</span>
+                <button type="button" data-cookie-consent-reopen class="hover:text-gray-900 hover:underline">{{ __('messages.cookie_consent_manage') }}</button>
+            @endif
+        </p>
+    </nav>
+    @endif
 
     {{-- es-credit-chip: lifted clear of the mobile CTA bar by accessibility-widget.css. --}}
     @if (! request()->embed && $creditReason)

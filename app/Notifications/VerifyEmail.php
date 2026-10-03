@@ -98,9 +98,9 @@ class VerifyEmail extends BaseVerifyEmail
      */
     public function toMailHeaders(): array
     {
-        if ($this->type == 'role' && $this->subdomain) {
+        if ($this->type == 'role' && $this->subdomain && $this->notifiable?->email) {
             return [
-                'List-Unsubscribe' => '<'.route('role.unsubscribe', ['subdomain' => $this->subdomain]).'>',
+                'List-Unsubscribe' => '<'.\App\Utils\UrlUtils::roleUnsubscribeOneClickUrl($this->notifiable->email).'>',
                 'List-Unsubscribe-Post' => 'List-Unsubscribe=One-Click',
             ];
         }

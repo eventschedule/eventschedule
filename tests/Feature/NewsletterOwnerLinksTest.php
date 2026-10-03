@@ -164,7 +164,9 @@ class NewsletterOwnerLinksTest extends TestCase
         $this->assertLinksOnlyToPagesAndAddresses($html, 'video');
         $this->assertStringNotContainsString('alert(', $html);
         $this->assertStringContainsString('href="https://www.youtube.com/watch?v=dQw4w9WgXcQ"', $html);
-        $this->assertStringContainsString('https://img.youtube.com/vi/dQw4w9WgXcQ/hqdefault.jpg', $html);
+        // Through this install's thumbnail proxy, so opening the email does not contact Google.
+        $this->assertStringContainsString('/yt-thumb/dQw4w9WgXcQ?q=hq', $html);
+        $this->assertStringNotContainsString('img.youtube.com', $html);
         $this->assertStringNotContainsString('tracker.example.com', $html, 'a video with no YouTube link is left out');
     }
 

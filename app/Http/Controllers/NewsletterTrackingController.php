@@ -56,11 +56,7 @@ class NewsletterTrackingController extends Controller
             abort(404);
         }
 
-        $isFirstClick = $recipient->recordClick(
-            $url,
-            request()->ip(),
-            request()->userAgent()
-        );
+        $isFirstClick = $recipient->recordClick($url);
 
         $newsletter = $recipient->newsletter;
 

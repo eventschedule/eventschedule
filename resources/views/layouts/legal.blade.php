@@ -38,6 +38,7 @@
     <meta name="twitter:title" content="{{ $title }}">
     <meta name="twitter:description" content="{{ $title }} - {{ config('app.name') }}">
 
+    @include('partials.consent-state')
     @include('partials.google-analytics')
 
     @vite(['resources/css/app.css', 'resources/js/app.js'])

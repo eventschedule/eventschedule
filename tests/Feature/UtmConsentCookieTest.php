@@ -48,7 +48,7 @@ class UtmConsentCookieTest extends TestCase
 
     public function test_attribution_cookies_are_written_once_consent_is_granted(): void
     {
-        $response = $this->withUnencryptedCookie('cookie_consent', 'granted')
+        $response = $this->withUnencryptedCookie('cookie_consent', 'analytics.marketing')
             ->withHeader('Referer', 'https://example.org/blog')
             ->get('/?utm_source=newsletter&utm_medium=email')
             ->assertOk();
@@ -70,9 +70,50 @@ class UtmConsentCookieTest extends TestCase
      */
     public function test_the_consent_cookie_is_readable_unencrypted(): void
     {
-        $this->withUnencryptedCookie('cookie_consent', 'granted')->get('/')->assertOk();
+        $this->withUnencryptedCookie('cookie_consent', 'analytics.marketing')->get('/')->assertOk();
 
-        $this->assertSame('granted', request()->cookie('cookie_consent'));
+        $this->assertSame('analytics.marketing', request()->cookie('cookie_consent'));
+    }
+
+    /**
+     * The attribution cookies are MARKETING, so analytics consent alone does not allow them - and
+     * neither does a version-1 "granted", from the banner that only ever said "analytics".
+     */
+    public function test_analytics_consent_alone_writes_no_attribution_cookie(): void
+    {
+        foreach (['analytics', 'granted'] as $choice) {
+            $this->flushSession();
+
+            $response = $this->withUnencryptedCookie('cookie_consent', $choice)
+                ->get('/?utm_source=newsletter&utm_medium=email')
+                ->assertOk();
+
+            foreach (self::ATTRIBUTION as $name) {
+                $this->assertNull($this->cookie($response, $name), "{$name} must not be written for '{$choice}'");
+            }
+        }
+    }
+
+    public function test_marketing_consent_on_its_own_writes_the_attribution_cookies(): void
+    {
+        $response = $this->withUnencryptedCookie('cookie_consent', 'marketing')
+            ->get('/?utm_source=newsletter&utm_medium=email')
+            ->assertOk();
+
+        $this->assertNotNull($this->cookie($response, 'utm_params'));
+    }
+
+    /** Global Privacy Control refuses everything, whatever the stored choice says. */
+    public function test_global_privacy_control_overrides_a_stored_grant(): void
+    {
+        $response = $this->withUnencryptedCookie('cookie_consent', 'analytics.marketing')
+            ->withHeader('Sec-GPC', '1')
+            ->get('/?utm_source=newsletter&utm_medium=email')
+            ->assertOk();
+
+        $this->assertNull($this->cookie($response, 'utm_params'));
+        $this->assertFalse(consent_granted('marketing'));
+        $this->assertFalse(consent_granted('analytics'));
     }
 
     public function test_a_cookie_set_before_the_gate_existed_is_cleared(): void
@@ -115,12 +156,13 @@ class UtmConsentCookieTest extends TestCase
             'services.google.analytics' => null,
             'ads.enabled' => false,
             'stay22.enabled' => false,
+            'services.meta.pixel_id' => null,
             'app.cookie_consent_banner' => false,
         ]);
 
         $this->assertFalse(consent_required());
 
-        foreach (['app.cookie_consent_banner', 'ads.enabled', 'stay22.enabled'] as $key) {
+        foreach (['app.cookie_consent_banner', 'ads.enabled', 'stay22.enabled', 'services.meta.pixel_id'] as $key) {
             config([$key => true]);
             $this->assertTrue(consent_required(), $key.' must raise the banner');
             config([$key => false]);
@@ -136,6 +178,7 @@ class UtmConsentCookieTest extends TestCase
             'services.google.analytics' => null,
             'ads.enabled' => false,
             'stay22.enabled' => false,
+            'services.meta.pixel_id' => null,
             'app.cookie_consent_banner' => false,
         ]);
         // /admin/realtime is consent-gated too, and on by default for the nexus these tests run
@@ -183,7 +226,7 @@ class UtmConsentCookieTest extends TestCase
         config(['session.domain' => '.eventschedule.com']);
         app('cookie')->setDefaultPathAndDomain('/', '.eventschedule.com', true, 'Lax');
 
-        $response = $this->withUnencryptedCookie('cookie_consent', 'granted')->get('/?utm_source=news');
+        $response = $this->withUnencryptedCookie('cookie_consent', 'analytics.marketing')->get('/?utm_source=news');
 
         $this->assertSame('.eventschedule.com', $this->cookie($response, 'utm_params')?->getDomain());
     }
@@ -205,7 +248,7 @@ class UtmConsentCookieTest extends TestCase
      */
     public function test_the_domain_is_published_even_when_the_banner_is_hidden(): void
     {
-        config(['app.cookie_consent_banner' => false, 'session.domain' => '.eventschedule.com']);
+        config(['app.cookie_consent_banner' => false, 'services.meta.pixel_id' => null, 'session.domain' => '.eventschedule.com']);
         \App\Models\Setting::set('realtime_enabled', '0');
 
         $this->get('/')->assertOk()
@@ -230,7 +273,7 @@ class UtmConsentCookieTest extends TestCase
     {
         $this->flushSession();
 
-        $response = $this->withUnencryptedCookie('cookie_consent', 'granted')
+        $response = $this->withUnencryptedCookie('cookie_consent', 'analytics.marketing')
             ->withCookie('utm_landing_page', 'for-musicians')
             ->withCookie('utm_referrer_url', 'https://first.example.org/')
             ->withHeader('Referer', 'https://later.example.org/')
@@ -254,7 +297,7 @@ class UtmConsentCookieTest extends TestCase
     {
         $this->flushSession();
 
-        $response = $this->withUnencryptedCookie('cookie_consent', 'granted')
+        $response = $this->withUnencryptedCookie('cookie_consent', 'analytics.marketing')
             ->withCookie('utm_params', json_encode(['utm_source' => 'newsletter', 'utm_medium' => 'email']))
             ->get('/pricing?utm_source=facebook&utm_medium=cpc')
             ->assertOk();
@@ -274,7 +317,7 @@ class UtmConsentCookieTest extends TestCase
         $campaignHash = \App\Utils\UrlUtils::encodeId(42);
         $token = \App\Services\PromotionService::clickToken(42);
 
-        $response = $this->withUnencryptedCookie('cookie_consent', 'granted')
+        $response = $this->withUnencryptedCookie('cookie_consent', 'analytics.marketing')
             ->withCookie('utm_params', json_encode(['utm_source' => 'newsletter', 'utm_medium' => 'email']))
             ->get('/pricing?utm_source=boost&utm_medium=network&utm_campaign='.$campaignHash.'&utm_token='.$token)
             ->assertOk();
@@ -571,7 +614,7 @@ class UtmConsentCookieTest extends TestCase
      */
     public function test_seeding_defers_to_the_consented_thirty_day_cookies(): void
     {
-        $this->withUnencryptedCookie('cookie_consent', 'granted')
+        $this->withUnencryptedCookie('cookie_consent', 'analytics.marketing')
             ->withUnencryptedCookie('es_attribution', $this->clientAttribution([
                 'landing' => 'this-visit',
                 'referrer' => 'https://this-visit.example.org/',
@@ -596,7 +639,7 @@ class UtmConsentCookieTest extends TestCase
     {
         $this->pinAppUrl('https://eventschedule.test');
 
-        $response = $this->withUnencryptedCookie('cookie_consent', 'granted')
+        $response = $this->withUnencryptedCookie('cookie_consent', 'analytics.marketing')
             ->withUnencryptedCookie('es_attribution', $this->clientAttribution(['landing' => 'for-musicians']))
             ->get('/faq')
             ->assertOk();
@@ -614,13 +657,13 @@ class UtmConsentCookieTest extends TestCase
     {
         $this->pinAppUrl('https://eventschedule.test');
 
-        $index = $this->withUnencryptedCookie('cookie_consent', 'granted')->get('/docs/search-index.json');
+        $index = $this->withUnencryptedCookie('cookie_consent', 'analytics.marketing')->get('/docs/search-index.json');
 
         $index->assertOk();
         $this->assertNull($this->cookie($index, 'utm_landing_page'));
         $this->assertNull(session('utm_landing_page'));
 
-        $beacon = $this->withUnencryptedCookie('cookie_consent', 'granted')
+        $beacon = $this->withUnencryptedCookie('cookie_consent', 'analytics.marketing')
             ->postJson('/marketing/visit', ['route' => 'marketing.pricing']);
 
         $beacon->assertNoContent();

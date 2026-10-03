@@ -492,7 +492,7 @@
                     </tr>
                     <tr>
                         <td><span class="font-semibold text-gray-900 dark:text-white">Account followers</span></td>
-                        <td>Presses Follow while signed in on eventschedule.com, or is imported</td>
+                        <td>Presses Follow while signed in on eventschedule.com</td>
                         <td>Nothing</td>
                         <td>Yes, through the All Followers segment or the default send</td>
                     </tr>
@@ -513,7 +513,7 @@
         <div class="doc-fields">
             <div class="doc-field">
                 <h4 class="font-semibold text-gray-900 dark:text-white mb-2">All Followers</h4>
-                <p class="text-sm text-gray-500 dark:text-gray-400">Account holders who follow your schedule, by pressing Follow or through an import, and have not opted out of emails. Confirmed email subscribers are left out even though confirming gives them an account, so add the Email subscribers segment, or tick nothing, to reach both. Learn how to <a href="{{ route('marketing.docs.sharing') }}#followers" class="doc-link">build your follower base</a>.</p>
+                <p class="text-sm text-gray-500 dark:text-gray-400">Account holders who pressed Follow on your schedule and have not opted out of emails. Confirmed email subscribers are left out even though confirming gives them an account, so add the Email subscribers segment, or tick nothing, to reach both. Learn how to <a href="{{ route('marketing.docs.sharing') }}#followers" class="doc-link">build your follower base</a>.</p>
             </div>
             <div class="doc-field">
                 <h4 class="font-semibold text-gray-900 dark:text-white mb-2">Email subscribers</h4>
@@ -618,8 +618,8 @@
         </p>
 
         <div class="doc-callout doc-callout-warning">
-            <div class="doc-callout-title">Imported contacts also become followers</div>
-            <p>Importing adds each address to the segment and follows your schedule with it, so imported people appear on your followers list and are reachable through the All Followers segment too. Only import lists that have agreed to hear from you, and remember that every recipient counts against your monthly allowance.</p>
+            <div class="doc-callout-title">Only import people who agreed to hear from you</div>
+            <p>Importing adds each address to the segment and nothing else: no account is created for anyone, and nobody is added to your followers. You are responsible for having their permission to email them, and every recipient counts against your monthly allowance.</p>
         </div>
     </section>
 

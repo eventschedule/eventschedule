@@ -131,6 +131,17 @@
                             Self-Hosting Terms
                         </a>
                     </li>
+                    {{-- GDPR Art. 7(3): withdrawing consent must be as easy as giving it, so the
+                         banner can be reopened from every page that asked, not only from the
+                         privacy policy. Added with the owner's sign-off (the footer links are
+                         otherwise curated by hand). --}}
+                    @if (cookie_banner_required())
+                    <li>
+                        <button type="button" data-cookie-consent-reopen class="text-gray-600 dark:text-gray-400 hover:text-blue-600 dark:hover:text-blue-400 transition-colors">
+                            {{ __('messages.cookie_consent_manage') }}
+                        </button>
+                    </li>
+                    @endif
                 </ul>
             </div>
         </div>

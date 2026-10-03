@@ -19,6 +19,7 @@
     <link rel="icon" type="image/png" href="{{ asset('images/favicon.png') }}" sizes="32x32">
     <link rel="icon" type="image/png" href="{{ asset('images/favicon-96.png') }}" sizes="96x96">
 
+    @include('partials.consent-state')
     @include('partials.google-analytics')
 
     <meta charset="utf-8">

@@ -1138,7 +1138,7 @@
                         </li>
                         <li class="flex gap-2.5">
                             <span class="es-reel-accent mt-px flex-none font-bold" aria-hidden="true">&rarr;</span>
-                            <span>A fan who is signed in when they post is added as a follower, so they are on the list next time you write a newsletter.</span>
+                            <span>Posting does not sign a fan up for anything: they hear from you only if they choose Follow or subscribe to your updates.</span>
                         </li>
                     </ul>
                 </div>

@@ -80,7 +80,7 @@ class OpenAIUtils
                 $scope->setTag('service', 'openai');
                 $scope->setTag('error_type', 'timeout');
                 $scope->setContext('openai_api', [
-                    'prompt_preview' => substr($prompt, 0, 100),
+                    'prompt_length' => strlen($prompt),
                 ]);
                 \Sentry\captureException($exception);
             });
@@ -105,7 +105,7 @@ class OpenAIUtils
                         $scope->setContext('openai_api', [
                             'http_code' => $httpCode,
                             'response' => $response,
-                            'prompt_preview' => substr($prompt, 0, 100),
+                            'prompt_length' => strlen($prompt),
                         ]);
                         \Sentry\captureException($exception);
                     });
@@ -123,7 +123,7 @@ class OpenAIUtils
                         $scope->setContext('openai_api', [
                             'http_code' => $httpCode,
                             'response' => $response,
-                            'prompt_preview' => substr($prompt, 0, 100),
+                            'prompt_length' => strlen($prompt),
                         ]);
                         \Sentry\captureException($exception);
                     });
@@ -209,7 +209,7 @@ class OpenAIUtils
 
         if ($curlErrno === CURLE_OPERATION_TIMEDOUT) {
             \Log::warning('OpenAI image generation request timed out', [
-                'prompt_preview' => substr($prompt, 0, 100),
+                'prompt_length' => strlen($prompt),
             ]);
 
             $exception = new \Exception('OpenAI API request timed out');
@@ -219,7 +219,7 @@ class OpenAIUtils
                 $scope->setTag('service', 'openai');
                 $scope->setTag('error_type', 'timeout');
                 $scope->setContext('openai_api', [
-                    'prompt_preview' => substr($prompt, 0, 100),
+                    'prompt_length' => strlen($prompt),
                 ]);
                 \Sentry\captureException($exception);
             });
@@ -339,7 +339,7 @@ class OpenAIUtils
                         $scope->setContext('openai_api', [
                             'http_code' => $httpCode,
                             'response' => $response,
-                            'prompt_preview' => substr($prompt, 0, 100),
+                            'prompt_length' => strlen($prompt),
                         ]);
                         \Sentry\captureException($exception);
                     });

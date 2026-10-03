@@ -233,7 +233,9 @@ class GuestStyleSanitizingTest extends TestCase
             ->assertSee('background-image: linear-gradient(45deg, #aabbcc, #112233);', false)
             ->assertSee("font-family: 'Playfair Display', sans-serif;", false)
             ->assertSee('background-color: #ff8800', false)
-            ->assertSee('https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700&display=swap', false);
+            // From this install, never from Google Fonts (App\Console\Commands\DownloadFonts).
+            ->assertSee('vendor/fonts/Playfair_Display/font.css', false)
+            ->assertDontSee('fonts.googleapis.com', false);
 
         // The one preset whose colours have no #, kept exactly as it is stored.
         $bare = $this->createRole($this->createOwner(), 'venue', [

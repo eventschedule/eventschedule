@@ -449,7 +449,7 @@
                       @php $sLinkEmbedUrl = \App\Utils\UrlUtils::getYouTubeEmbed($sLink->url); @endphp
                       @continue (! $sLinkEmbedUrl)
                       <div class="rounded-lg overflow-hidden">
-                        <iframe class="w-full" style="aspect-ratio:16/9" src="{{ $sLinkEmbedUrl }}" title="{{ $each->nameInLanguage($displayLang) }} - YouTube video" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen loading="lazy"></iframe>
+                        <x-consent-embed :src="$sLinkEmbedUrl" :title="$each->nameInLanguage($displayLang).' - YouTube video'" frame-class="w-full" frame-style="aspect-ratio:16/9" :poster="\App\Utils\UrlUtils::getYouTubeThumbnail($sLink->url)" />
                         @if ($canRemoveVideos)
                           @include('partials.remove-video-button', [
                             'schedule' => $role,
@@ -662,13 +662,15 @@
           </div>
           @if ($event->venue->formatted_address && config('services.google.maps') && !request()->attributes->get('custom_domain_host'))
           <div id="gp-venue-map" class="overflow-hidden sm:rounded-b-2xl" style="height: 200px;">
-            <iframe
-                width="100%" height="200" style="border:0"
-                loading="lazy" allowfullscreen
-                referrerpolicy="no-referrer-when-downgrade"
-                title="{{ __('messages.map_of_venue', ['venue' => $event->venue->nameInLanguage($displayLang)]) }}"
-                src="https://www.google.com/maps/embed/v1/place?key={{ config('services.google.maps') }}&q={{ $event->venue->google_place_id ? 'place_id:' . $event->venue->google_place_id : urlencode($event->venue->bestAddress()) }}">
-            </iframe>
+            {{-- Interactive Google Maps only once the visitor wants it (components/consent-embed);
+                 until then the static map this install proxies, which sends Google nothing. --}}
+            <x-consent-embed
+                kind="map"
+                :src="'https://www.google.com/maps/embed/v1/place?key='.config('services.google.maps').'&q='.($event->venue->google_place_id ? 'place_id:'.$event->venue->google_place_id : urlencode($event->venue->bestAddress()))"
+                :title="__('messages.map_of_venue', ['venue' => $event->venue->nameInLanguage($displayLang)])"
+                frame-class="w-full border-0"
+                frame-style="height: 200px;"
+                :poster="config('services.google.backend') && $event->venue->geo_lat ? route('map.image', ['id' => \App\Utils\UrlUtils::encodeId($event->venue->id)]) : null" />
           </div>
           @elseif ($event->venue->formatted_address && config('services.google.backend') && $event->venue->geo_lat)
           <div id="gp-venue-map" class="overflow-hidden sm:rounded-b-2xl" style="height: 200px;">
@@ -1559,7 +1561,7 @@
                     @foreach ($partVideos as $video)
                     <div>
                       <div class="rounded-lg overflow-hidden">
-                        <iframe class="w-full" style="aspect-ratio:16/9" src="{{ \App\Utils\UrlUtils::getYouTubeEmbed($video->youtube_url) }}" title="{{ $part->nameInLanguage($displayLang, $eventTargetLang) }} - YouTube video" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen loading="lazy"></iframe>
+                        <x-consent-embed :src="\App\Utils\UrlUtils::getYouTubeEmbed($video->youtube_url)" :title="$part->nameInLanguage($displayLang, $eventTargetLang).' - YouTube video'" frame-class="w-full" frame-style="aspect-ratio:16/9" :poster="\App\Utils\UrlUtils::getYouTubeThumbnail($video->youtube_url)" />
                       </div>
                       <p class="text-xs text-gray-500 dark:text-gray-400 mt-1">{{ $video->submitterName() }}</p>
                     </div>
@@ -1601,7 +1603,7 @@
                   <div class="mt-2 space-y-2 opacity-60">
                     @foreach ($myPartPendingVideos as $video)
                     <div id="pending-video-{{ $video->id }}" class="rounded-lg overflow-hidden relative">
-                      <iframe class="w-full" style="aspect-ratio:16/9" src="{{ \App\Utils\UrlUtils::getYouTubeEmbed($video->youtube_url) }}" title="{{ $part->nameInLanguage($displayLang, $eventTargetLang) }} - YouTube video" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen loading="lazy"></iframe>
+                      <x-consent-embed :src="\App\Utils\UrlUtils::getYouTubeEmbed($video->youtube_url)" :title="$part->nameInLanguage($displayLang, $eventTargetLang).' - YouTube video'" frame-class="w-full" frame-style="aspect-ratio:16/9" :poster="\App\Utils\UrlUtils::getYouTubeThumbnail($video->youtube_url)" />
                       <span class="absolute top-2 {{ $role->isRtl() ? 'left-2' : 'right-2' }} inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-amber-100 text-amber-800 dark:bg-amber-900/50 dark:text-amber-300">{{ __('messages.pending_approval') }}</span>
                     </div>
                     @endforeach
@@ -1753,7 +1755,7 @@
                     @foreach ($partVideos as $video)
                     <div>
                       <div class="rounded-lg overflow-hidden">
-                        <iframe class="w-full" style="aspect-ratio:16/9" src="{{ \App\Utils\UrlUtils::getYouTubeEmbed($video->youtube_url) }}" title="{{ $part->nameInLanguage($displayLang, $eventTargetLang) }} - YouTube video" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen loading="lazy"></iframe>
+                        <x-consent-embed :src="\App\Utils\UrlUtils::getYouTubeEmbed($video->youtube_url)" :title="$part->nameInLanguage($displayLang, $eventTargetLang).' - YouTube video'" frame-class="w-full" frame-style="aspect-ratio:16/9" :poster="\App\Utils\UrlUtils::getYouTubeThumbnail($video->youtube_url)" />
                       </div>
                       <p class="text-xs text-gray-500 dark:text-gray-400 mt-1">{{ $video->submitterName() }}</p>
                     </div>
@@ -1795,7 +1797,7 @@
                   <div class="mt-2 space-y-2 opacity-60">
                     @foreach ($myPartPendingVideos as $video)
                     <div id="pending-video-{{ $video->id }}" class="rounded-lg overflow-hidden relative">
-                      <iframe class="w-full" style="aspect-ratio:16/9" src="{{ \App\Utils\UrlUtils::getYouTubeEmbed($video->youtube_url) }}" title="{{ $part->nameInLanguage($displayLang, $eventTargetLang) }} - YouTube video" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen loading="lazy"></iframe>
+                      <x-consent-embed :src="\App\Utils\UrlUtils::getYouTubeEmbed($video->youtube_url)" :title="$part->nameInLanguage($displayLang, $eventTargetLang).' - YouTube video'" frame-class="w-full" frame-style="aspect-ratio:16/9" :poster="\App\Utils\UrlUtils::getYouTubeThumbnail($video->youtube_url)" />
                       <span class="absolute top-2 {{ $role->isRtl() ? 'left-2' : 'right-2' }} inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-amber-100 text-amber-800 dark:bg-amber-900/50 dark:text-amber-300">{{ __('messages.pending_approval') }}</span>
                     </div>
                     @endforeach
@@ -2102,7 +2104,7 @@
             @foreach ($eventLevelVideos as $video)
             <div>
               <div class="rounded-lg overflow-hidden">
-                <iframe class="w-full" style="aspect-ratio:16/9" src="{{ \App\Utils\UrlUtils::getYouTubeEmbed($video->youtube_url) }}" title="{{ $eventName }} - YouTube video" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen loading="lazy"></iframe>
+                <x-consent-embed :src="\App\Utils\UrlUtils::getYouTubeEmbed($video->youtube_url)" :title="$eventName.' - YouTube video'" frame-class="w-full" frame-style="aspect-ratio:16/9" :poster="\App\Utils\UrlUtils::getYouTubeThumbnail($video->youtube_url)" />
               </div>
               <p class="text-xs text-gray-500 dark:text-gray-400 mt-1">{{ $video->submitterName() }}</p>
             </div>
@@ -2145,7 +2147,7 @@
           <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4 opacity-60">
             @foreach ($myEventLevelPendingVideos as $video)
             <div id="pending-video-{{ $video->id }}" class="rounded-lg overflow-hidden relative">
-              <iframe class="w-full" style="aspect-ratio:16/9" src="{{ \App\Utils\UrlUtils::getYouTubeEmbed($video->youtube_url) }}" title="{{ $eventName }} - YouTube video" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen loading="lazy"></iframe>
+              <x-consent-embed :src="\App\Utils\UrlUtils::getYouTubeEmbed($video->youtube_url)" :title="$eventName.' - YouTube video'" frame-class="w-full" frame-style="aspect-ratio:16/9" :poster="\App\Utils\UrlUtils::getYouTubeThumbnail($video->youtube_url)" />
               <span class="absolute top-2 {{ $role->isRtl() ? 'left-2' : 'right-2' }} inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-amber-100 text-amber-800 dark:bg-amber-900/50 dark:text-amber-300">{{ __('messages.pending_approval') }}</span>
             </div>
             @endforeach

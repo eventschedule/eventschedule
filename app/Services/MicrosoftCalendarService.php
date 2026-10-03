@@ -222,6 +222,17 @@ class MicrosoftCalendarService
                 return true;
             }
 
+            if (($newToken['error'] ?? null) === 'invalid_grant') {
+                // The grant is gone for good: the user removed access in their Microsoft account (or
+                // it lapsed). What we stored to sync with it has to go, as the privacy policy says.
+                Log::info('Outlook Calendar access was revoked; forgetting the stored authorization', [
+                    'user_id' => $user->id,
+                ]);
+                $this->forgetAuthorization($user, false);
+
+                return false;
+            }
+
             Log::error('Failed to refresh Microsoft Calendar token', [
                 'user_id' => $user->id,
                 'error' => $newToken['error'] ?? 'unknown',
@@ -239,6 +250,57 @@ class MicrosoftCalendarService
         } finally {
             $lock->release();
         }
+    }
+
+    /**
+     * Forget everything stored to sync this user's Outlook calendar: the tokens, each owned
+     * schedule's subscription and delta cursor, the per-event sync records and the per-schedule
+     * calendar choice.
+     *
+     * $tellMicrosoft on a manual disconnect, where the token still works, so each Graph
+     * subscription is deleted first. Off when a refresh has just come back invalid_grant, which is
+     * how a user withdrawing access from their Microsoft account reaches us. Microsoft offers no way
+     * for an app to revoke one grant on its own, so forgetting the tokens is the whole of it.
+     *
+     * microsoft_id is the account link, not calendar data, so it is the caller's to clear.
+     */
+    public function forgetAuthorization(User $user, bool $tellMicrosoft): void
+    {
+        if ($tellMicrosoft && $user->microsoft_token) {
+            foreach ($user->owner()->whereNotNull('microsoft_webhook_id')->get() as $role) {
+                try {
+                    $this->deleteSubscription($user, $role->microsoft_webhook_id);
+                } catch (\Throwable $e) {
+                    Log::warning('Failed to delete an Outlook subscription while disconnecting', [
+                        'user_id' => $user->id,
+                        'role_id' => $role->id,
+                        'error' => $e->getMessage(),
+                    ]);
+                }
+            }
+        }
+
+        // Query-builder updates: system-managed columns kept out of $fillable.
+        Role::where('user_id', $user->id)->whereNotNull('microsoft_webhook_id')->update([
+            'microsoft_webhook_id' => null,
+            'microsoft_webhook_expires_at' => null,
+            'microsoft_sync_token' => null,
+            'microsoft_last_sync_at' => null,
+        ]);
+        Role::where('user_id', $user->id)->update(['microsoft_sync_direction' => null]);
+
+        MicrosoftCalendarSync::where('user_id', $user->id)->delete();
+
+        \Illuminate\Support\Facades\DB::table('role_user')
+            ->where('user_id', $user->id)
+            ->whereNotNull('microsoft_calendar_id')
+            ->update(['microsoft_calendar_id' => null]);
+
+        $user->forceFill([
+            'microsoft_token' => null,
+            'microsoft_refresh_token' => null,
+            'microsoft_token_expires_at' => null,
+        ])->save();
     }
 
     /**

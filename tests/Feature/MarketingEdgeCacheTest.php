@@ -162,7 +162,7 @@ class MarketingEdgeCacheTest extends TestCase
      */
     public function test_a_response_that_writes_a_consented_attribution_cookie_stays_private(): void
     {
-        $response = $this->withUnencryptedCookie('cookie_consent', 'granted')
+        $response = $this->withUnencryptedCookie('cookie_consent', 'analytics.marketing')
             ->get('/pricing?utm_source=newsletter');
 
         $response->assertOk();
@@ -241,7 +241,7 @@ class MarketingEdgeCacheTest extends TestCase
 
     public function test_a_consented_visitor_is_cacheable_from_the_second_page(): void
     {
-        $first = $this->withUnencryptedCookie('cookie_consent', 'granted')->get('/pricing');
+        $first = $this->withUnencryptedCookie('cookie_consent', 'analytics.marketing')->get('/pricing');
 
         $first->assertOk();
         $this->assertStringContainsString('private', $first->headers->get('Cache-Control'));
@@ -257,7 +257,7 @@ class MarketingEdgeCacheTest extends TestCase
         // first-touch record - otherwise this passes on the session and pins nothing.
         $this->flushSession();
 
-        $second = $this->withUnencryptedCookie('cookie_consent', 'granted')
+        $second = $this->withUnencryptedCookie('cookie_consent', 'analytics.marketing')
             ->withCookie('utm_landing_page', 'pricing')
             ->get('/faq');
 

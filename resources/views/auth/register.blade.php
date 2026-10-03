@@ -2142,6 +2142,40 @@
             <p id="terms-error" role="alert" class="mt-1 text-sm text-red-600 dark:text-red-400" style="display: none;">{{ __('messages.terms_must_be_accepted') }}</p>
             <x-input-error :messages="$errors->get('terms')" class="mt-2" />
         </div>
+
+        {{-- The chance to object at sign-up that product email (users.is_subscribed, on by default:
+             platform newsletters, onboarding tips, owner digests) needs. Unticked means "send them";
+             every one of those emails also carries a one-click unsubscribe. Applies to Google and
+             Facebook sign-up too: the script below copies it onto their links, and
+             SocialAuthController::redirectToProvider() keeps it in the session for the callback. --}}
+        <div class="mt-3 relative flex items-start">
+            <div class="flex h-6 items-center">
+                <input id="no_product_updates" name="no_product_updates" type="checkbox" value="1" {{ old('no_product_updates') ? 'checked' : '' }}
+                    class="h-4 w-4 rounded border-gray-300 dark:border-gray-700 dark:bg-gray-900 text-[var(--brand-blue)] focus:ring-[var(--brand-blue)] dark:focus:ring-offset-gray-800">
+            </div>
+            <label for="no_product_updates" class="ms-3 text-sm leading-6 text-gray-700 dark:text-gray-300">{{ __('messages.no_product_updates') }}</label>
+        </div>
+        <script {!! nonce_attr() !!}>
+            (function () {
+                var box = document.getElementById('no_product_updates');
+                if (!box) return;
+                var sync = function () {
+                    document.querySelectorAll('[data-social-login]').forEach(function (link) {
+                        try {
+                            var url = new URL(link.href, window.location.href);
+                            if (box.checked) {
+                                url.searchParams.set('no_product_updates', '1');
+                            } else {
+                                url.searchParams.delete('no_product_updates');
+                            }
+                            link.href = url.toString();
+                        } catch (e) {}
+                    });
+                };
+                box.addEventListener('change', sync);
+                sync();
+            })();
+        </script>
         @endif
 
         <x-honeypot />

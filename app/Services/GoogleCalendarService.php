@@ -155,6 +155,15 @@ class GoogleCalendarService
                     $this->setAccessToken($newToken);
 
                     return true;
+                } elseif ($newToken['error'] === 'invalid_grant') {
+                    // The grant is gone for good: the user removed access in their Google account
+                    // (or it lapsed). Retrying every fifteen minutes would change nothing, and what
+                    // we stored to sync with it has to go - the privacy policy and Google's Limited
+                    // Use policy both say so.
+                    Log::info('Google Calendar access was revoked; forgetting the stored authorization', [
+                        'user_id' => $user->id,
+                    ]);
+                    $this->forgetAuthorization($user, false);
                 } else {
                     Log::error('Failed to refresh Google Calendar token', [
                         'user_id' => $user->id,
@@ -175,6 +184,83 @@ class GoogleCalendarService
         }
 
         return false;
+    }
+
+    /**
+     * Forget everything stored to sync this user's Google Calendar: the tokens, each owned
+     * schedule's webhook and sync cursor, the per-event sync records and the per-schedule calendar
+     * choice.
+     *
+     * $tellGoogle on a manual disconnect, where the token still works: the webhooks are stopped and
+     * the grant itself is revoked, so Google stops holding a token for us too. Off when a refresh
+     * has just come back invalid_grant, which is how a user withdrawing access from their Google
+     * account reaches us, and there is nothing left to tell Google with.
+     *
+     * google_id is the Google SIGN-IN link, not calendar data, so it is the caller's to clear.
+     */
+    public function forgetAuthorization(User $user, bool $tellGoogle): void
+    {
+        if ($tellGoogle && $user->google_token && $this->ensureValidToken($user)) {
+            foreach ($user->owner()->whereNotNull('google_webhook_id')->get() as $role) {
+                if ($role->google_webhook_resource_id) {
+                    try {
+                        $this->deleteWebhook($role->google_webhook_id, $role->google_webhook_resource_id);
+                    } catch (\Throwable $e) {
+                        Log::warning('Failed to stop a Google Calendar webhook while disconnecting', [
+                            'user_id' => $user->id,
+                            'role_id' => $role->id,
+                            'error' => $e->getMessage(),
+                        ]);
+                    }
+                }
+            }
+
+            $this->revoke($user);
+        }
+
+        // Query-builder updates: these are system-managed columns, and google_sync_token is not
+        // fillable.
+        Role::where('user_id', $user->id)->whereNotNull('google_webhook_id')->update([
+            'google_webhook_id' => null,
+            'google_webhook_resource_id' => null,
+            'google_webhook_expires_at' => null,
+        ]);
+        Role::where('user_id', $user->id)->update(['sync_direction' => null, 'google_sync_token' => null]);
+
+        \App\Models\CalendarSync::where('user_id', $user->id)->delete();
+
+        \Illuminate\Support\Facades\DB::table('role_user')
+            ->where('user_id', $user->id)
+            ->whereNotNull('google_calendar_id')
+            ->update(['google_calendar_id' => null]);
+
+        $user->forceFill([
+            'google_token' => null,
+            'google_refresh_token' => null,
+            'google_token_expires_at' => null,
+        ])->save();
+    }
+
+    /**
+     * Ask Google to revoke this user's grant, so the token stops working at Google's end too and
+     * not just ours. Best effort: an already revoked or expired token is the outcome we wanted.
+     */
+    public function revoke(User $user): void
+    {
+        $token = $user->google_refresh_token ?: $user->google_token;
+
+        if (! $token) {
+            return;
+        }
+
+        try {
+            $this->client->revokeToken($token);
+        } catch (\Throwable $e) {
+            Log::warning('Failed to revoke the Google grant', [
+                'user_id' => $user->id,
+                'error' => $e->getMessage(),
+            ]);
+        }
     }
 
     /**

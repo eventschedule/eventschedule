@@ -19,20 +19,12 @@
     @if (config('services.google.analytics'))
     <link rel="dns-prefetch" href="https://www.googletagmanager.com">
     @endif
-    @if (config('app.hosted') || config('app.report_errors'))
-    <link rel="dns-prefetch" href="https://browser.sentry-cdn.com">
-    @endif
 
     @if (config('app.hosted') || config('app.report_errors'))
     <script {!! nonce_attr() !!}>
         @include('layouts.sentry')
-        window.addEventListener('load', function() {
-            var s = document.createElement('script');
-            s.src = "{{ config('app.sentry_js_dsn') }}";
-            s.crossOrigin = 'anonymous';
-            document.head.appendChild(s);
-        });
     </script>
+    @include('partials.sentry-sdk', ['afterLoad' => true])
     @endif
 
     <!-- Theme color -->
@@ -279,6 +271,7 @@
     @endif
     @endif
 
+    @include('partials.consent-state')
     @include('partials.google-analytics')
 
     {{ $preload ?? '' }}
@@ -385,11 +378,13 @@
             </script>
         @endif
 
-        {{-- First-touch attribution. This replaces exactly what the server session used to
-             hold for the marketing-to-signup hop (landing page, off-site referrer, ?utm_* and
-             ?ref=), so it is strictly necessary in the same sense the session cookie it stands
-             in for was, and is deliberately NOT gated on cookie consent. The consented 30-day
-             marketing cookies CaptureUtmParameters writes are unchanged and still gated.
+        {{-- First-touch attribution: the landing page, off-site referrer, ?utm_* and ?ref= for
+             the marketing-to-signup hop, which the server session used to hold before this HTML
+             became edge-cacheable. Attribution is not strictly necessary for anything the visitor
+             asked for, so under ePrivacy Art. 5(3) it is written only with MARKETING consent, the
+             same category as the 30-day cookies CaptureUtmParameters writes. A visitor who grants
+             it later on the same page is recorded then, from this page. Withdrawing marketing
+             consent deletes it (cookie-consent.js). Without it, sign-up simply carries no source.
 
              Written by the browser, so it never appears in a server response and cannot make
              a page uncacheable. Session-scoped (no expiry) and first-touch (never overwritten
@@ -401,72 +396,90 @@
              merged into it rather than skipped; every other field is left as it was. --}}
         <script {!! nonce_attr() !!}>
             (function () {
-                try {
-                    var domain = @json(config('session.domain'));
-                    var write = function (value) {
-                        document.cookie = 'es_attribution=' + value
-                            + '; path=/'
-                            + (domain ? '; domain=' + domain : '')
-                            + '; samesite=lax'
-                            + (location.protocol === 'https:' ? '; secure' : '');
-                    };
-                    var hero = window.esHero && window.esHero.key;
+                var record = function () {
+                    try {
+                        var domain = @json(config('session.domain'));
+                        var write = function (value) {
+                            document.cookie = 'es_attribution=' + value
+                                + '; path=/'
+                                + (domain ? '; domain=' + domain : '')
+                                + '; samesite=lax'
+                                + (location.protocol === 'https:' ? '; secure' : '');
+                        };
+                        var hero = window.esHero && window.esHero.key;
 
-                    var existing = document.cookie.match(/(?:^|;\s*)es_attribution=([^;]*)/);
-                    if (existing) {
-                        if (hero) {
-                            var current = JSON.parse(decodeURIComponent(existing[1]));
-                            if (current && typeof current === 'object' && current.hero !== hero) {
-                                current.hero = hero;
-                                var merged = encodeURIComponent(JSON.stringify(current));
-                                if (merged.length <= 2048) {
-                                    write(merged);
+                        var existing = document.cookie.match(/(?:^|;\s*)es_attribution=([^;]*)/);
+                        if (existing) {
+                            if (hero) {
+                                var current = JSON.parse(decodeURIComponent(existing[1]));
+                                if (current && typeof current === 'object' && current.hero !== hero) {
+                                    current.hero = hero;
+                                    var merged = encodeURIComponent(JSON.stringify(current));
+                                    if (merged.length <= 2048) {
+                                        write(merged);
+                                    }
                                 }
                             }
+                            return;
                         }
-                        return;
-                    }
 
-                    var data = { landing: location.pathname.replace(/^\/+/, '') || '/' };
+                        var data = { landing: location.pathname.replace(/^\/+/, '') || '/' };
 
-                    if (hero) {
-                        data.hero = hero;
-                    }
-
-                    if (document.referrer) {
-                        var a = document.createElement('a');
-                        a.href = document.referrer;
-                        var base = function (h) { return h.toLowerCase().split('.').slice(-2).join('.'); };
-                        if (a.hostname && base(a.hostname) !== base(location.hostname)) {
-                            // 512, not 2048: encodeURIComponent roughly triples the URL
-                            // characters in a referrer, so an untrimmed one on its own could
-                            // push the whole cookie past the limit below and lose the landing
-                            // page and the utm_* values with it.
-                            data.referrer = document.referrer.slice(0, 512);
+                        if (hero) {
+                            data.hero = hero;
                         }
-                    }
 
-                    var params = new URLSearchParams(location.search);
-                    ['utm_source', 'utm_medium', 'utm_campaign', 'utm_content', 'utm_term', 'ref'].forEach(function (key) {
-                        var value = params.get(key);
-                        if (value) {
-                            data[key] = value.slice(0, 255);
+                        if (document.referrer) {
+                            var a = document.createElement('a');
+                            a.href = document.referrer;
+                            var base = function (h) { return h.toLowerCase().split('.').slice(-2).join('.'); };
+                            if (a.hostname && base(a.hostname) !== base(location.hostname)) {
+                                // 512, not 2048: encodeURIComponent roughly triples the URL
+                                // characters in a referrer, so an untrimmed one on its own could
+                                // push the whole cookie past the limit below and lose the landing
+                                // page and the utm_* values with it.
+                                data.referrer = document.referrer.slice(0, 512);
+                            }
                         }
-                    });
 
-                    var value = encodeURIComponent(JSON.stringify(data));
-                    if (value.length > 2048 && data.referrer) {
-                        // The referrer is the only unbounded field left, and the least
-                        // valuable: drop it rather than the landing page and the campaign.
-                        delete data.referrer;
-                        value = encodeURIComponent(JSON.stringify(data));
-                    }
-                    if (value.length > 2048) {
-                        return;
-                    }
+                        var params = new URLSearchParams(location.search);
+                        ['utm_source', 'utm_medium', 'utm_campaign', 'utm_content', 'utm_term', 'ref'].forEach(function (key) {
+                            var value = params.get(key);
+                            if (value) {
+                                data[key] = value.slice(0, 255);
+                            }
+                        });
 
-                    write(value);
-                } catch (e) {}
+                        var value = encodeURIComponent(JSON.stringify(data));
+                        if (value.length > 2048 && data.referrer) {
+                            // The referrer is the only unbounded field left, and the least
+                            // valuable: drop it rather than the landing page and the campaign.
+                            delete data.referrer;
+                            value = encodeURIComponent(JSON.stringify(data));
+                        }
+                        if (value.length > 2048) {
+                            return;
+                        }
+
+                        write(value);
+                    } catch (e) {}
+                };
+
+                var consented = function () {
+                    try { return !!(window.esConsent && window.esConsent.has('marketing')); } catch (e) { return false; }
+                };
+
+                if (consented()) {
+                    record();
+                } else {
+                    var onChange = function () {
+                        if (consented()) {
+                            document.removeEventListener('es:consent-change', onChange);
+                            record();
+                        }
+                    };
+                    document.addEventListener('es:consent-change', onChange);
+                }
             })();
         </script>
 

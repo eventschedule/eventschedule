@@ -168,6 +168,22 @@ class UrlUtils
         ]));
     }
 
+    /**
+     * The RFC 8058 one-click opt-out for a SCHEDULE'S contact address (roles.is_subscribed): what
+     * a claim invitation or a schedule verification email puts in its List-Unsubscribe header.
+     * Signed over the base64 value like userUnsubscribeUrl(); the route is CSRF-exempt because a
+     * mail client's POST carries no session, and an unsigned POST writes nothing.
+     */
+    public static function roleUnsubscribeOneClickUrl(string $email): string
+    {
+        $encodedEmail = base64_encode($email);
+
+        return route('role.unsubscribe.one_click', [
+            'email' => $encodedEmail,
+            'sig' => self::signEmail($encodedEmail),
+        ]);
+    }
+
     public static function detectPlatform(string $url): string
     {
         $parsed = parse_url($url);
@@ -837,8 +853,10 @@ class UrlUtils
     {
         $videoId = self::extractYouTubeVideoId($url);
 
-        if ($videoId) {
-            return 'https://i.ytimg.com/vi/'.$videoId.'/mqdefault.jpg';
+        // Through this install (AppController::youtubeThumbnail), never i.ytimg.com directly: a
+        // thumbnail is shown before anyone chooses to play the video.
+        if ($videoId && preg_match('/^[A-Za-z0-9_-]{11}$/', $videoId)) {
+            return route('youtube.thumbnail', ['id' => $videoId]);
         }
 
         return null;

@@ -64,6 +64,8 @@
                 localStorage.setItem(key, JSON.stringify(remaining));
             } else {
                 localStorage.removeItem(key);
+                // Nothing left to buy, so the name, email and phone kept for the checkout go too.
+                localStorage.removeItem(key + '_buyer');
             }
         } catch (e) {}
     });

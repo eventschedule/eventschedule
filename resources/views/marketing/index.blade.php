@@ -463,11 +463,15 @@
             @guest
                 @if ($hero['running'])
                     {{-- Runs before the entrance animations reveal the text, so the swap never
-                         shows. The pick is remembered in sessionStorage here and copied into the
-                         es_attribution cookie by the layout's attribution script (which reads
-                         window.esHero), so it reaches sign-up on the app host. Writing that cookie
-                         from here instead would make the attribution script think it already ran
-                         and lose the landing page and utm_* values. --}}
+                         shows. With analytics consent the pick is remembered in sessionStorage
+                         (es_hero, es_hero_clicked) so a visitor sees one headline and is counted
+                         once per session; without it nothing is stored, the headline is picked
+                         afresh on each view, and a view and a click are counted per page view.
+                         The pick is copied into the es_attribution cookie by the layout's
+                         attribution script (which reads window.esHero, and writes the cookie only
+                         with marketing consent), so it reaches sign-up on the app host. Writing
+                         that cookie from here instead would make the attribution script think it
+                         already ran and lose the landing page and utm_* values. --}}
                     <script {!! nonce_attr() !!}>
                         (function () {
                             try {
@@ -476,6 +480,8 @@
                                 var endpoint = @json(url('/marketing/hero'));
                                 var key = null;
                                 var fresh = false;
+                                var remember = !!(window.esConsent && window.esConsent.has('analytics'));
+                                var clicked = false;
 
                                 var match = document.cookie.match(/(?:^|;\s*)es_attribution=([^;]*)/);
                                 if (match) {
@@ -483,7 +489,7 @@
                                         key = JSON.parse(decodeURIComponent(match[1])).hero || null;
                                     } catch (e) {}
                                 }
-                                if (!key || !variants[key]) {
+                                if ((!key || !variants[key]) && remember) {
                                     try {
                                         key = sessionStorage.getItem('es_hero');
                                     } catch (e) {}
@@ -501,9 +507,11 @@
                                     }
                                     fresh = true;
                                 }
-                                try {
-                                    sessionStorage.setItem('es_hero', key);
-                                } catch (e) {}
+                                if (remember) {
+                                    try {
+                                        sessionStorage.setItem('es_hero', key);
+                                    } catch (e) {}
+                                }
 
                                 window.esHero = { key: key, fresh: fresh };
 
@@ -530,18 +538,22 @@
 
                                 // Any sign-up link on the page, not only the hero button: the
                                 // headline is what is being tested, wherever the reader acts on it.
-                                // First click per session, so the rate is per visitor.
+                                // First click per session with consent, so the rate is per
+                                // visitor; per page view without it, matching how views count.
                                 document.addEventListener('click', function (e) {
                                     var link = e.target && e.target.closest ? e.target.closest('a[href*="/sign_up"]') : null;
-                                    if (!link) {
+                                    if (!link || clicked) {
                                         return;
                                     }
-                                    try {
-                                        if (sessionStorage.getItem('es_hero_clicked') === key) {
-                                            return;
-                                        }
-                                        sessionStorage.setItem('es_hero_clicked', key);
-                                    } catch (e) {}
+                                    if (remember) {
+                                        try {
+                                            if (sessionStorage.getItem('es_hero_clicked') === key) {
+                                                return;
+                                            }
+                                            sessionStorage.setItem('es_hero_clicked', key);
+                                        } catch (e) {}
+                                    }
+                                    clicked = true;
                                     send('click');
                                 }, true);
                             } catch (e) {}

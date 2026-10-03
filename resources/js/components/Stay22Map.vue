@@ -60,7 +60,7 @@
 </template>
 
 <script>
-import { CONSENT_EVENT, readConsent } from '../cookie-consent';
+import { CONSENT_EVENT, hasConsent } from '../cookie-consent';
 
 export default {
   name: 'Stay22Map',
@@ -104,8 +104,8 @@ export default {
   },
   data() {
     return {
-      // null (never answered) | 'granted' | 'denied'
-      consent: readConsent(),
+      // The marketing category: Stay22 sets its own cookies to attribute bookings.
+      consent: hasConsent('marketing'),
       // Opt-in for THIS page view only, and deliberately not persisted. localStorage would
       // create a second durable consent record that the privacy page's withdrawal button
       // does not clear, so a visitor who withdrew consent would still get the iframe.
@@ -119,7 +119,7 @@ export default {
         return false;
       }
 
-      return this.consent === 'granted' || this.optedIn;
+      return this.consent || this.optedIn;
     },
     headingId() {
       return 'es-stay22-heading';
@@ -162,11 +162,11 @@ export default {
       // silently grant analytics and advertising consent site-wide.
       this.optedIn = true;
     },
-    onConsentChange(e) {
-      this.consent = (e.detail && e.detail.value) || null;
+    onConsentChange() {
+      this.consent = hasConsent('marketing');
 
       // Withdrawal unloads the map, so the iframe leaves the DOM (GDPR Article 7(3)).
-      if (this.consent !== 'granted') {
+      if (!this.consent) {
         this.optedIn = false;
       }
     },

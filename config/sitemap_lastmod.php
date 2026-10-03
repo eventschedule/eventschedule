@@ -21,7 +21,7 @@
 
 return [
     '/' => '2026-10-03',
-    '/about' => '2026-09-22',
+    '/about' => '2026-10-03',
     '/accelevents-alternative' => '2026-09-25',
     '/accessibility' => '2026-09-10',
     '/addevent-alternative' => '2026-09-25',
@@ -51,7 +51,7 @@ return [
     '/docs/getting-started' => '2026-09-30',
     '/docs/gift-cards' => '2026-09-22',
     '/docs/managing-schedules' => '2026-09-29',
-    '/docs/newsletters' => '2026-09-25',
+    '/docs/newsletters' => '2026-10-03',
     '/docs/referral-program' => '2026-09-13',
     '/docs/saas' => '2026-10-01',
     '/docs/saas/custom-domains' => '2026-09-10',
@@ -101,7 +101,7 @@ return [
     '/features/embed-calendar' => '2026-09-25',
     '/features/embed-tickets' => '2026-09-25',
     '/features/event-graphics' => '2026-09-24',
-    '/features/fan-videos' => '2026-09-24',
+    '/features/fan-videos' => '2026-10-03',
     '/features/feedback' => '2026-09-24',
     '/features/gift-cards' => '2026-09-24',
     '/features/installments' => '2026-09-24',

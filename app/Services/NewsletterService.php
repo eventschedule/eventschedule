@@ -426,7 +426,7 @@ class NewsletterService
                 if (is_string($videoUrl) && preg_match('/(?:youtube\.com\/watch\?.*v=|youtu\.be\/|youtube\.com\/shorts\/)([a-zA-Z0-9_-]{11})/', $videoUrl, $m)) {
                     $block['data']['videoId'] = $m[1];
                     $block['data']['url'] = 'https://www.youtube.com/watch?v='.$m[1];
-                    $block['data']['thumbnailUrl'] = 'https://img.youtube.com/vi/'.$m[1].'/hqdefault.jpg';
+                    $block['data']['thumbnailUrl'] = route('youtube.thumbnail', ['id' => $m[1], 'q' => 'hq']);
                 }
             }
 

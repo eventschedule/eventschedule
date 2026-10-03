@@ -120,12 +120,14 @@ class CacheableMarketingResponse
      * page they opened afterwards, for the whole SESSION_LIFETIME. That is all paid, social,
      * email and referral traffic - most of what these pages are optimised for.
      *
-     * Dropping the session here loses nothing, because it was never the carrier on this path:
-     * layouts/marketing.blade.php writes the es_attribution cookie client-side on every marketing
-     * page, deliberately un-gated on consent (CaptureUtmParameters::CLIENT_COOKIE), and it holds
-     * the landing page, the off-site referrer, all five utm_* values and ref - exactly what the
-     * session held. Every read site is already a `session ?? cookie ?? es_attribution` chain, and
-     * seedSessionFromClientAttribution() re-seeds on the first request that HAS a real session.
+     * Dropping the session here loses nothing a visitor agreed to, because it was never the
+     * carrier on this path: layouts/marketing.blade.php writes the es_attribution cookie
+     * client-side on every marketing page for a visitor with marketing consent
+     * (CaptureUtmParameters::CLIENT_COOKIE), and it holds the landing page, the off-site
+     * referrer, all five utm_* values and ref - exactly what the session held. Every read site is
+     * already a `session ?? cookie ?? es_attribution` chain, and seedSessionFromClientAttribution()
+     * re-seeds on the first request that HAS a real session. A visitor without that consent is
+     * not attributed, which is the point of asking.
      *
      * `lang` is deliberately absent: it is the one query parameter whose whole purpose is to
      * persist a choice into the session, so it keeps its cookie and stays off the edge.

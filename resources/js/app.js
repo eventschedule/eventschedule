@@ -3,6 +3,7 @@ import './cookie-consent';
 
 import { mountAccessibilityWidget } from './accessibility-widget-boot';
 import { mountStay22Map } from './stay22-boot';
+import { mountConsentEmbeds } from './consent-embed-boot';
 
 import Alpine from 'alpinejs';
 window.Alpine = Alpine;
@@ -218,9 +219,10 @@ window.initTinyMDE = function(element, onChange) {
 
 const mountVueWidgets = () => {
     mountAccessibilityWidget();
-    // Both bail out immediately when their host element is absent, so this stays cheap on
-    // the pages that render neither.
+    // Each bails out immediately when its host element is absent, so this stays cheap on
+    // the pages that render none.
     mountStay22Map();
+    mountConsentEmbeds();
 };
 
 if (document.readyState === 'loading') {

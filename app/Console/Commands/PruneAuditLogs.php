@@ -44,7 +44,15 @@ class PruneAuditLogs extends Command
             ->whereNotIn('action', self::KEEP_ACTIONS)
             ->delete();
 
-        $this->info("Pruned {$deleted} audit log entries older than {$days} days.");
+        // The rows kept forever keep what happened, not where from: the IP address and browser
+        // were for spotting abuse at the time, and the privacy policy says they go after 90 days.
+        $stripped = AuditLog::where('created_at', '<', now()->subDays($days))
+            ->whereIn('action', self::KEEP_ACTIONS)
+            ->where(fn ($query) => $query->where('ip_address', '!=', '')->orWhereNotNull('user_agent'))
+            // ip_address is NOT NULL, so it is blanked rather than nulled.
+            ->update(['ip_address' => '', 'user_agent' => null]);
+
+        $this->info("Pruned {$deleted} audit log entries older than {$days} days, and removed the IP address and browser from {$stripped} kept ones.");
 
         return Command::SUCCESS;
     }

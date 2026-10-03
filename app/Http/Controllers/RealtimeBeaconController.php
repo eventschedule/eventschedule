@@ -57,8 +57,12 @@ class RealtimeBeaconController extends Controller
             return response()->noContent();
         }
 
-        // Global Privacy Control is treated as "Decline" here too, not only in the browser.
-        $full = ($data['m'] ?? 'f') !== 'c' && $request->header('Sec-GPC') !== '1';
+        // A page view is identified only when the page says so: one without a mode is count-only,
+        // never the other way round. Heartbeats and ends carry no mode and only ever touch a row a
+        // full page view already marked consented. Global Privacy Control is treated as "Decline"
+        // here too, not only in the browser.
+        $mode = $data['m'] ?? ($type === 'pv' ? 'c' : 'f');
+        $full = $mode === 'f' && $request->header('Sec-GPC') !== '1';
 
         RealtimeTracker::write(function () use ($type, $request, $data, $full, $key) {
             // Inside write(): a context nobody signed must never be able to throw out of here.

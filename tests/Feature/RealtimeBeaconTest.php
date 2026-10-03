@@ -73,6 +73,27 @@ class RealtimeBeaconTest extends TestCase
         $this->assertNotNull($hit->engaged_at, 'count-only views are sent at the moment of engagement');
     }
 
+    /**
+     * The mode is the page's claim, and an identified row needs it said out loud: a page view that
+     * arrives without one (an old cached page, a hand-made request) is stored count-only.
+     */
+    public function test_a_page_view_without_a_mode_is_count_only(): void
+    {
+        $user = $this->createOwner();
+
+        $this->beacon([
+            't' => 'pv', 'k' => $this->key(1),
+            'c' => $this->context(['u' => UrlUtils::encodeId($user->id), 's' => 'ap', 'p' => '/home']),
+            'ti' => 'Dashboard | Event Schedule',
+        ])->assertNoContent();
+
+        $hit = RealtimeHit::sole();
+        $this->assertFalse($hit->consented);
+        $this->assertNull($hit->visitor_key);
+        $this->assertNull($hit->user_id);
+        $this->assertNull($hit->title);
+    }
+
     public function test_a_count_only_internal_navigation_keeps_no_source(): void
     {
         $this->beacon(['t' => 'pv', 'm' => 'c', 'k' => $this->key(1), 'c' => $this->context(), 'r' => parse_url(config('app.url'), PHP_URL_HOST)]);

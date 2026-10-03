@@ -3,15 +3,16 @@
      for years; vanilla rather than Vue because it is a background beacon with no UI.
 
      Two modes, chosen here from the visitor's cookie choice and enforced again by the server:
-       full        clicked "Allow": page view, heartbeats while visible, end on hide/close.
-       count-only  declined, never answered, or Global Privacy Control: ONE page view at the
+       full        granted the analytics category: page view, heartbeats while visible, end on
+                   hide/close.
+       count-only  declined analytics, never answered, or Global Privacy Control: ONE page view at the
                    moment of engagement, carrying nothing that links it to the visitor or to
                    their other page views.
      Accepting mid-page upgrades the current page view in place (same key). Withdrawing - a
-     "Decline", the privacy page's "change your choice" (which clears the choice, so it arrives as
-     null), or a withdrawal in another tab (the storage event, re-checked before any identified
-     send) - sends a revoke that strips identity from what the server still holds. An embedded
-     calendar is always count-only.
+     "Decline", saving the banner with analytics switched off, or a withdrawal in another tab (the
+     storage event, re-checked before any identified send) - sends a revoke that strips identity
+     from what the server still holds. An embedded calendar is always count-only. The choice is
+     read through window.esConsent (partials/consent-state.blade.php), which also applies GPC.
 
      It must never throw: errors in an inline script are reported against the page URL, which
      Sentry's denyUrls cannot filter, so every entry point is wrapped.
@@ -33,9 +34,8 @@
         var w = window, d = document, nav = w.navigator;
         if (!nav.sendBeacon && !w.fetch) return;
 
-        var gpc = function () { return nav.globalPrivacyControl === true; };
         var consented = function () {
-            try { return !gpc() && w.localStorage.getItem('cookie_consent') === 'granted'; } catch (e) { return false; }
+            try { return !!(w.esConsent && w.esConsent.has('analytics')); } catch (e) { return false; }
         };
         var newKey = function () {
             var out = '';
@@ -217,12 +217,12 @@
             } catch (e) {}
         });
 
-        // cookie-consent.js announces a choice made on this page: 'granted', 'denied', or null when
-        // the privacy page's "change your choice" clears it.
-        d.addEventListener('es:consent-change', function (event) {
+        // cookie-consent.js announces a choice made on this page; re-read rather than trusting the
+        // event's payload, so this tab and the stored choice can never disagree.
+        d.addEventListener('es:consent-change', function () {
             try {
-                var value = event.detail && event.detail.value;
-                if (value === 'granted' && !full && !embed && !gpc()) {
+                var granted = consented();
+                if (granted && !full && !embed) {
                     full = true;
                     if (d.visibilityState === 'visible') {
                         // Same key: the server upgrades this page view's count-only row in place.
@@ -231,7 +231,7 @@
                         startHeartbeats();
                         if (engaged) beat();
                     }
-                } else if (value !== 'granted') {
+                } else if (!granted) {
                     withdraw();
                 }
             } catch (e) {}

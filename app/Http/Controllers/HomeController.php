@@ -1368,10 +1368,6 @@ class HomeController extends Controller
                 ]);
                 $returnUrl = $event->fanContentReturnUrl($pending['subdomain'], $eventDate);
                 session()->flash('scroll_to', 'pending-video-'.$video->id);
-
-                if ($role && ! auth()->user()->isConnected($role->subdomain)) {
-                    auth()->user()->roles()->attach($role->id, ['level' => 'follower', 'created_at' => now()]);
-                }
             }
 
             session()->flash('message', __('messages.video_submitted'));
@@ -1391,10 +1387,6 @@ class HomeController extends Controller
             ]);
             $returnUrl = $event->fanContentReturnUrl($pending['subdomain'], $eventDate);
             session()->flash('scroll_to', 'pending-comment-'.$comment->id);
-
-            if ($role && ! auth()->user()->isConnected($role->subdomain)) {
-                auth()->user()->roles()->attach($role->id, ['level' => 'follower', 'created_at' => now()]);
-            }
 
             session()->flash('message', __('messages.comment_submitted'));
         } elseif ($pending['type'] === 'photo') {
@@ -1437,10 +1429,6 @@ class HomeController extends Controller
                 'photo_url' => $filename,
                 'is_approved' => false,
             ]);
-
-            if ($role && ! auth()->user()->isConnected($role->subdomain)) {
-                auth()->user()->roles()->attach($role->id, ['level' => 'follower', 'created_at' => now()]);
-            }
 
             if (($pending['return_to'] ?? null) === 'gallery') {
                 $returnUrl = $event->fanContentReturnUrl($pending['subdomain'], $eventDate, gallery: true);

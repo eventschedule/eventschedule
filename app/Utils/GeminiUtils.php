@@ -204,7 +204,7 @@ class GeminiUtils
                 $scope->setTag('service', 'gemini');
                 $scope->setTag('error_type', 'timeout');
                 $scope->setContext('gemini_api', [
-                    'prompt_preview' => substr($prompt, 0, 100),
+                    'prompt_length' => strlen($prompt),
                 ]);
                 \Sentry\captureException($exception);
             });
@@ -233,7 +233,7 @@ class GeminiUtils
                         $scope->setContext('gemini_api', [
                             'http_code' => $httpCode,
                             'response' => $response,
-                            'prompt_preview' => substr($prompt, 0, 100),
+                            'prompt_length' => strlen($prompt),
                         ]);
                         \Sentry\captureException($exception);
                     });
@@ -257,7 +257,7 @@ class GeminiUtils
                             'http_code' => $httpCode,
                             'status' => $errorStatus,
                             'response' => $response,
-                            'prompt_preview' => substr($prompt, 0, 100),
+                            'prompt_length' => strlen($prompt),
                         ]);
                         \Sentry\captureException($exception);
                     });
@@ -1706,7 +1706,7 @@ class GeminiUtils
                         $scope->setContext('gemini_api', [
                             'http_code' => $httpCode,
                             'response' => $response,
-                            'prompt_preview' => substr($prompt, 0, 100),
+                            'prompt_length' => strlen($prompt),
                         ]);
                         \Sentry\captureException($exception);
                     });
@@ -1728,7 +1728,7 @@ class GeminiUtils
                             'http_code' => $httpCode,
                             'status' => $errorStatus,
                             'response' => $response,
-                            'prompt_preview' => substr($prompt, 0, 100),
+                            'prompt_length' => strlen($prompt),
                         ]);
                         \Sentry\captureException($exception);
                     });

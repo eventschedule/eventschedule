@@ -93,7 +93,11 @@ return [
      * key looks stale would raise a false alarm for the full week its TTL lasts.
      */
     'scheduler_expected_rail' => env('SCHEDULER_EXPECTED_RAIL'),
-    'sentry_js_dsn' => env('SENTRY_JS_DSN', 'https://js.sentry-cdn.com/e40010dda2802390fc7a031a3db09b63.min.js'),
+    // Browser error reporting. The SDK is served from public/vendor/sentry and told this DSN
+    // (partials/sentry-sdk.blade.php). SENTRY_JS_DSN, a Sentry CDN loader URL, is the old way and
+    // still overrides it when set.
+    'sentry_browser_dsn' => env('SENTRY_BROWSER_DSN', 'https://e40010dda2802390fc7a031a3db09b63@o4509513336291328.ingest.us.sentry.io/4509513340289024'),
+    'sentry_js_dsn' => env('SENTRY_JS_DSN'),
 
     'hosted' => (bool) env('IS_HOSTED', false),
     // Selfhost only: lift the single-user restriction so visitors can create accounts.

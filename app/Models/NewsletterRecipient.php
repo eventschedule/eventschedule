@@ -55,7 +55,11 @@ class NewsletterRecipient extends Model
         return $updated > 0;
     }
 
-    public function recordClick(string $url, ?string $ipAddress = null, ?string $userAgent = null): bool
+    /**
+     * Which link, and when: what the newsletter stats show. Not the IP address or browser, which
+     * nothing ever read and which identified the reader beyond what the owner already sees.
+     */
+    public function recordClick(string $url): bool
     {
         $this->increment('click_count');
 
@@ -66,8 +70,6 @@ class NewsletterRecipient extends Model
         $this->clicks()->create([
             'url' => $url,
             'clicked_at' => now(),
-            'ip_address' => $ipAddress,
-            'user_agent' => $userAgent ? substr($userAgent, 0, 500) : null,
         ]);
 
         return $updated > 0;

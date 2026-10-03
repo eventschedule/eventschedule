@@ -628,6 +628,12 @@ class RegisteredUserController extends Controller
             $user->terms_accepted_at = now();
         }
 
+        // The sign-up form's "Don't email me news, tips or digests" box: the objection product
+        // email needs the chance of at the moment the address is collected.
+        if (config('app.hosted') && $request->boolean('no_product_updates')) {
+            $user->is_subscribed = false;
+        }
+
         // On any non-nexus install (selfhost or a self-hosted SaaS), make the first user the
         // instance admin so they can reach the admin portal and self-updater.
         if (! config('app.is_nexus') && User::count() === 1) {

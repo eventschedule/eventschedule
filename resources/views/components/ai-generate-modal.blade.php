@@ -481,7 +481,8 @@ document.addEventListener('alpine:init', function() {
                 var link = document.createElement('link');
                 link.id = id;
                 link.rel = 'stylesheet';
-                link.href = 'https://fonts.googleapis.com/css?family=' + encodeURIComponent(fontFamily.replace(/_/g, ' ')) + '&display=swap';
+                // The copy this install serves (php artisan fonts:download), never Google Fonts.
+                link.href = @json(asset('vendor/fonts')) + '/' + encodeURIComponent(fontFamily.replace(/ /g, '_')) + '/font.css';
                 document.head.appendChild(link);
             },
             retryPreviewElement: function(key) {

@@ -1229,7 +1229,14 @@ class TicketController extends Controller
 
             session()->forget(['utm_params', 'utm_referrer_url', 'utm_landing_page']);
 
-            $user->roles()->attach($role->id, ['level' => 'follower', 'created_at' => now()]);
+            // Record the consent the form just took, as RegisteredUserController does: the Terms
+            // say creating an account is accepting them, so the account carries when it happened.
+            if ($request->boolean('terms')) {
+                $user->forceFill(['terms_accepted_at' => now()])->save();
+            }
+
+            // No follower link: buying a ticket is not following the schedule, and followers get its
+            // newsletters. The checkout's own unticked "Email me updates" box is the way onto its list.
         }
 
         // In payment link mode, quantities are selected on the Invoice Ninja purchase page
@@ -1675,6 +1682,10 @@ class TicketController extends Controller
         $sale->user_id = $user ? $user->id : null;
         $sale->secret = strtolower(Str::random(32));
         $sale->payment_method = $event->payment_method;
+
+        // Whether Meta may hear about this purchase (MetaAdsService::sendSaleConversion): the
+        // buyer's marketing consent at checkout, the same choice that gates the browser Pixel.
+        $sale->ad_consent = consent_granted('marketing', $request);
 
         // Capture UTM attribution
         $utmParams = $request->session()->get('utm_params', []);
@@ -2317,7 +2328,15 @@ class TicketController extends Controller
             ]);
 
             session()->forget(['utm_params', 'utm_referrer_url', 'utm_landing_page']);
-            $user->roles()->attach($role->id, ['level' => 'follower', 'created_at' => now()]);
+
+            // Record the consent the form just took, as RegisteredUserController does: the Terms
+            // say creating an account is accepting them, so the account carries when it happened.
+            if ($request->boolean('terms')) {
+                $user->forceFill(['terms_accepted_at' => now()])->save();
+            }
+
+            // No follower link: an RSVP is not following the schedule, and followers get its
+            // newsletters. The form's own unticked "Email me updates" box is the way onto its list.
         }
 
         try {
@@ -2377,6 +2396,7 @@ class TicketController extends Controller
                 $sale->payment_method = 'rsvp';
                 $sale->payment_amount = 0;
                 $sale->status = 'paid';
+                $sale->ad_consent = consent_granted('marketing', $request);
 
                 // Capture UTM attribution
                 $utmParams = $request->session()->get('utm_params', []);

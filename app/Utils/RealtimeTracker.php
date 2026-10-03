@@ -40,8 +40,11 @@ class RealtimeTracker
     /** A context older than this is refused. Edge-cached pages are at most ten minutes old. */
     private const CONTEXT_MAX_AGE = 86400;
 
-    /** Route parameters whose values never reach the table (ticket secrets, reset tokens, ...). */
-    private const SECRET_PARAM = '/token|secret|hash|code|signature|key/i';
+    /**
+     * Route parameters whose values never reach the table (ticket secrets, reset tokens, ...).
+     * SentryScrubber and Google Analytics (via redactedPath()) apply the same rule.
+     */
+    public const SECRET_PARAM = '/token|secret|hash|code|signature|key/i';
 
     private const PAID_MEDIUMS = ['cpc', 'ppc', 'paid', 'paidsocial', 'paid_social', 'display', 'cpm', 'banner'];
 
@@ -271,6 +274,23 @@ class RealtimeTracker
         }
 
         return mb_substr('/'.$path, 0, 255);
+    }
+
+    /**
+     * path(), but only when the route carries a secret parameter, and null otherwise. Google
+     * Analytics sends the page's location, so a ticket, reset or unsubscribe page must report
+     * "/ticket/view/{event_id}/{secret}" rather than the link that opens it; every other page,
+     * including an edge-cached marketing page, renders null and the browser uses its own path.
+     */
+    public static function redactedPath(Request $request): ?string
+    {
+        foreach ($request->route()?->parameters() ?? [] as $name => $value) {
+            if (is_scalar($value) && (string) $value !== '' && preg_match(self::SECRET_PARAM, $name) === 1) {
+                return self::path($request);
+            }
+        }
+
+        return null;
     }
 
     /**

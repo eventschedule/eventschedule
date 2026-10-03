@@ -7575,6 +7575,26 @@ class RoleController extends Controller
     }
 
     /**
+     * A mail client's RFC 8058 one-click POST from a claim invitation or a schedule verification
+     * email: stop mailing that schedule contact address. Only a correctly signed address writes
+     * anything, which is what makes the CSRF exemption safe. Answers 2xx either way, as the RFC
+     * asks, so the response says nothing about which addresses exist.
+     */
+    public function unsubscribeOneClick(Request $request)
+    {
+        $email = $this->signedUnsubscribeEmail($request);
+
+        if ($email !== null) {
+            foreach (Role::where('email', $email)->get() as $role) {
+                $role->is_subscribed = false;
+                $role->save();
+            }
+        }
+
+        return response()->noContent();
+    }
+
+    /**
      * The decoded address, or null when the link is missing, malformed or not ours.
      *
      * is_string() first: ?email[]= arrives as an array, and verifyEmailSignature() is typed
@@ -8691,7 +8711,7 @@ class RoleController extends Controller
             // Log the full error server-side but return generic message to user
             \Log::error('Test email failed: '.$e->getMessage(), [
                 'role_id' => $role->id,
-                'email' => $email,
+                'email' => mask_emails((string) $email),
             ]);
 
             return response()->json([

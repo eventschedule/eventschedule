@@ -40,7 +40,7 @@ class SmsService
             }
 
             Log::error('Twilio SMS failed', [
-                'to' => $to,
+                'to' => self::maskPhone($to),
                 'status' => $response->status(),
                 'body' => $response->body(),
             ]);
@@ -48,11 +48,22 @@ class SmsService
             return false;
         } catch (\Exception $e) {
             Log::error('Twilio SMS exception', [
-                'to' => $to,
+                'to' => self::maskPhone($to),
                 'error' => $e->getMessage(),
             ]);
 
             return false;
         }
+    }
+
+    /**
+     * The last three digits only. Log lines become Sentry breadcrumbs, and a full number is
+     * personal data that nobody debugging a Twilio failure needs.
+     */
+    private static function maskPhone(?string $phone): string
+    {
+        $digits = preg_replace('/\D/', '', (string) $phone);
+
+        return strlen($digits) > 3 ? str_repeat('*', strlen($digits) - 3).substr($digits, -3) : '***';
     }
 }

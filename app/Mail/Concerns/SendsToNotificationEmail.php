@@ -35,8 +35,10 @@ trait SendsToNotificationEmail
     {
         $url = $this->notificationEmailUnsubscribeUrl;
 
-        if (! $url && $withRoleFallback && $role) {
-            $url = route('role.unsubscribe', ['subdomain' => $role->subdomain]);
+        // Signed for the schedule's own address: the unsigned role.unsubscribe form needs a CSRF
+        // token a mail client's one-click POST never has.
+        if (! $url && $withRoleFallback && $role?->email) {
+            $url = \App\Utils\UrlUtils::roleUnsubscribeOneClickUrl($role->email);
         }
 
         if (! $url) {

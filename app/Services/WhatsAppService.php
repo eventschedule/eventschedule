@@ -39,7 +39,7 @@ class WhatsAppService
             }
 
             Log::error('Twilio WhatsApp failed', [
-                'to' => $to,
+                'to' => '***'.substr(preg_replace('/\\D/', '', (string) $to), -3),
                 'status' => $response->status(),
                 'body' => $response->body(),
             ]);
@@ -47,7 +47,7 @@ class WhatsAppService
             return false;
         } catch (\Exception $e) {
             Log::error('Twilio WhatsApp exception', [
-                'to' => $to,
+                'to' => '***'.substr(preg_replace('/\\D/', '', (string) $to), -3),
                 'error' => $e->getMessage(),
             ]);
 

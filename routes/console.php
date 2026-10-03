@@ -269,6 +269,12 @@ Schedule::call(function () {
     Artisan::call('app:prune-gallery-drafts');
 })->daily()->name('app-prune-gallery-drafts')->withoutOverlapping(30)->appendOutputTo(storage_path('logs/scheduler.log'));
 
+// Personal data past its retention period (the periods the privacy policy states). Keep in sync
+// with AppController::translateData(). Not hosted-gated: a selfhost install keeps the same data.
+Schedule::call(function () {
+    Artisan::call('app:prune-personal-data');
+})->daily()->name('app-prune-personal-data')->withoutOverlapping(30)->appendOutputTo(storage_path('logs/scheduler.log'));
+
 // Keep in sync with AppController::translateData(). Daily is plenty: a video having embedding
 // switched off is not urgent, and the command no-ops without a YouTube key.
 Schedule::call(function () {

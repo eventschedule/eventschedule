@@ -9,6 +9,7 @@ use Illuminate\Mail\Mailable;
 use Illuminate\Mail\Mailables\Address;
 use Illuminate\Mail\Mailables\Content;
 use Illuminate\Mail\Mailables\Envelope;
+use Illuminate\Mail\Mailables\Headers;
 use Illuminate\Queue\SerializesModels;
 
 /**
@@ -51,6 +52,20 @@ class ActivationNudge extends Mailable
             replyTo: config('app.is_nexus') && config('app.support_email')
                 ? [new Address((string) config('app.support_email'))]
                 : [],
+        );
+    }
+
+    /**
+     * RFC 8058 one-click, the same signed account-wide opt-out (users.is_subscribed) as the footer
+     * link, so a mail client's own unsubscribe button works without opening the email.
+     */
+    public function headers(): Headers
+    {
+        return new Headers(
+            text: [
+                'List-Unsubscribe' => '<'.UrlUtils::userUnsubscribeUrl($this->role->user->email).'>',
+                'List-Unsubscribe-Post' => 'List-Unsubscribe=One-Click',
+            ],
         );
     }
 

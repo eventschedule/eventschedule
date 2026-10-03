@@ -35,6 +35,11 @@ return [
     // @see: https://docs.sentry.io/platforms/php/guides/laravel/configuration/options/#send-default-pii
     'send_default_pii' => env('SENTRY_SEND_DEFAULT_PII', false),
 
+    // Never attach the request body. The SDK's default ("medium", about 10 KB) is sent whatever
+    // send_default_pii says, so an error during checkout, registration or a guest form would ship
+    // the buyer's name, email, phone and answers to the issue tracker.
+    'max_request_body_size' => env('SENTRY_MAX_REQUEST_BODY_SIZE', 'never'),
+
     // Strips the 32-char booking secret out of /appointment/* URLs, Referer headers, transaction names
     // and exception messages, so an error on a guest booking page never ships a working link to
     // someone else's appointment. Expressed as a [class, method] pair rather than a closure: only the

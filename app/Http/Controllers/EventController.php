@@ -3231,6 +3231,11 @@ class EventController extends Controller
         session()->forget(['utm_params', 'utm_referrer_url', 'utm_landing_page', 'guest_language']);
 
         $user->email_verified_at = now();
+        // The form's terms checkbox, recorded as RegisteredUserController does (hosted only, where
+        // the box is shown with the privacy policy).
+        if (config('app.hosted') && $request->boolean('terms')) {
+            $user->terms_accepted_at = now();
+        }
         $user->save();
 
         Auth::login($user);
@@ -3384,6 +3389,12 @@ class EventController extends Controller
         ]);
 
         session()->forget(['utm_params', 'utm_referrer_url', 'utm_landing_page', 'guest_language']);
+
+        // The form's terms checkbox, recorded as RegisteredUserController does (hosted only, where
+        // the box is shown with the privacy policy).
+        if (config('app.hosted') && $request->boolean('terms')) {
+            $user->forceFill(['terms_accepted_at' => now()])->save();
+        }
 
         // Nothing on these forms proves the address, so on hosted it stays unverified until the
         // emailed link is clicked - the same bar as registration, whose emailed code is its proof
@@ -4079,9 +4090,8 @@ class EventController extends Controller
             'is_approved' => $isApproved,
         ], $guestAttributes));
 
-        if ($request->user() && ! $request->user()->isConnected($role->subdomain)) {
-            $request->user()->roles()->attach($role->id, ['level' => 'follower', 'created_at' => now()]);
-        }
+        // Posting a comment, photo or video does not make anyone a follower: followers get the
+        // schedule's newsletters, and only an explicit Follow says they want them.
 
         $message = $isApproved
             ? __('messages.video_submitted_approved')
@@ -4175,9 +4185,8 @@ class EventController extends Controller
             'is_approved' => $isApproved,
         ], $guestAttributes));
 
-        if ($request->user() && ! $request->user()->isConnected($role->subdomain)) {
-            $request->user()->roles()->attach($role->id, ['level' => 'follower', 'created_at' => now()]);
-        }
+        // Posting a comment, photo or video does not make anyone a follower: followers get the
+        // schedule's newsletters, and only an explicit Follow says they want them.
 
         $message = $isApproved
             ? __('messages.comment_submitted_approved')
@@ -4359,9 +4368,8 @@ class EventController extends Controller
             'is_approved' => $isApproved,
         ], $guestAttributes));
 
-        if ($request->user() && ! $request->user()->isConnected($role->subdomain)) {
-            $request->user()->roles()->attach($role->id, ['level' => 'follower', 'created_at' => now()]);
-        }
+        // Posting a comment, photo or video does not make anyone a follower: followers get the
+        // schedule's newsletters, and only an explicit Follow says they want them.
 
         $message = $isApproved
             ? __('messages.photo_submitted_approved')

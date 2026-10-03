@@ -835,28 +835,12 @@ class NewsletterController extends Controller
             return back()->with('error', __('messages.email_already_in_segment'));
         }
 
-        $user = User::where('email', $email)->first();
-        if (! $user) {
-            $user = User::create([
-                'email' => $email,
-                'name' => $validated['name'] ?? '',
-                'is_subscribed' => true,
-                'signup_intent' => 'subscriber',
-            ]);
-        }
-
-        $isFollower = DB::table('role_user')
-            ->where('role_id', $role->id)
-            ->where('user_id', $user->id)
-            ->exists();
-
-        if (! $isFollower) {
-            $role->followers()->attach($user->id, ['level' => 'follower', 'created_at' => now()]);
-        }
-
+        // A manual segment is a list of addresses (NewsletterSegment::resolveManual()), so adding
+        // one creates no account for that person and makes them nobody's follower: they never
+        // signed up for either. An existing account is linked only so its opt-outs apply.
         NewsletterSegmentUser::create([
             'newsletter_segment_id' => $segment->id,
-            'user_id' => $user->id,
+            'user_id' => User::where('email', $email)->value('id'),
             'email' => $email,
             'name' => $validated['name'] ?? '',
             'created_at' => now(),
@@ -1175,16 +1159,17 @@ class NewsletterController extends Controller
                 ->firstOrFail();
         }
 
-        $result = DB::transaction(function () use ($segment, $validated, $role) {
+        $result = DB::transaction(function () use ($segment, $validated) {
             $existingEmails = $segment->segmentUsers()
                 ->pluck('email')
                 ->map(fn ($e) => strtolower($e))
                 ->toArray();
 
+            // Addresses only, as in storeSegmentUser(): an import creates no accounts and no
+            // follower links for people who never signed up. Existing accounts are linked so their
+            // opt-outs apply.
             $allEmails = collect($validated['entries'])->pluck('email')->map(fn ($e) => strtolower(trim($e)))->unique();
             $existingUsers = User::whereIn('email', $allEmails)->get()->keyBy(fn ($u) => strtolower($u->email));
-            $existingFollowerIds = DB::table('role_user')->where('role_id', $role->id)
-                ->whereIn('user_id', $existingUsers->pluck('id'))->pluck('user_id')->flip();
 
             $imported = 0;
             $duplicates = 0;
@@ -1198,25 +1183,9 @@ class NewsletterController extends Controller
                 }
                 $seen[] = $email;
 
-                $user = $existingUsers->get($email);
-                if (! $user) {
-                    $user = User::create([
-                        'email' => $email,
-                        'name' => $entry['name'] ?? '',
-                        'is_subscribed' => true,
-                        'signup_intent' => 'subscriber',
-                    ]);
-                    $existingUsers->put($email, $user);
-                }
-
-                if (! $existingFollowerIds->has($user->id)) {
-                    $role->followers()->attach($user->id, ['level' => 'follower', 'created_at' => now()]);
-                    $existingFollowerIds->put($user->id, true);
-                }
-
                 NewsletterSegmentUser::create([
                     'newsletter_segment_id' => $segment->id,
-                    'user_id' => $user->id,
+                    'user_id' => $existingUsers->get($email)?->id,
                     'email' => $email,
                     'name' => $entry['name'] ?? '',
                     'created_at' => now(),

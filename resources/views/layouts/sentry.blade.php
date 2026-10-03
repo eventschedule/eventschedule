@@ -1,5 +1,71 @@
+@php
+    // The DSN is passed explicitly for the bundle served from public/vendor/sentry; the CDN loader
+    // (only when SENTRY_JS_DSN names one) carries its own, so nothing is added for it.
+    $sentryOptions = config('app.sentry_js_dsn') ? [] : ['dsn' => config('app.sentry_browser_dsn')];
+    $sentryRedactedPath = request()->route() ? \App\Utils\RealtimeTracker::redactedPath(request()) : null;
+@endphp
 window.sentryOnLoad = function () {
-    Sentry.init({
+    // What a report says about WHERE it happened, without anything that opens someone's ticket or
+    // account. Every URL in the event - the page, the referrer, breadcrumbs, stack frames, which
+    // for an inline script are the page itself - loses its query string and fragment (?email=,
+    // ?sig=, tokens), and the current page's path has its secret route parameters replaced by
+    // their names, as RealtimeTracker::redactedPath() does for Google Analytics. Applied last in
+    // beforeSend, after every filter below has read the event as it arrived.
+    var redactedPath = @json($sentryRedactedPath);
+    var scrubUrl = function (value) {
+        var match = /^([a-z][a-z0-9+.-]*:\/\/[^\/?#]*)?([^?#]*)/i.exec(value);
+        if (!match) {
+            return value;
+        }
+        var origin = match[1] || '';
+        var path = match[2] || '';
+        if (redactedPath && typeof location !== 'undefined' && path === location.pathname
+            && (!origin || origin === location.origin)) {
+            path = redactedPath;
+        }
+
+        return origin + path;
+    };
+    var scrubEvent = function (event) {
+        try {
+            if (event.request) {
+                if (typeof event.request.url === 'string') {
+                    event.request.url = scrubUrl(event.request.url);
+                }
+                delete event.request.query_string;
+                var headers = event.request.headers;
+                if (headers && typeof headers.Referer === 'string') {
+                    headers.Referer = scrubUrl(headers.Referer);
+                }
+            }
+            (event.breadcrumbs || []).forEach(function (crumb) {
+                var data = crumb && crumb.data;
+                if (!data) {
+                    return;
+                }
+                ['url', 'from', 'to'].forEach(function (key) {
+                    if (typeof data[key] === 'string') {
+                        data[key] = scrubUrl(data[key]);
+                    }
+                });
+            });
+            ((event.exception && event.exception.values) || []).forEach(function (value) {
+                var frames = (value && value.stacktrace && value.stacktrace.frames) || [];
+                frames.forEach(function (frame) {
+                    if (frame && typeof frame.filename === 'string') {
+                        frame.filename = scrubUrl(frame.filename);
+                    }
+                    if (frame && typeof frame.abs_path === 'string') {
+                        frame.abs_path = scrubUrl(frame.abs_path);
+                    }
+                });
+            });
+        } catch (e) {}
+
+        return event;
+    };
+
+    Sentry.init(Object.assign(@json((object) $sentryOptions), {
         // Third-party scripts we neither ship nor control. Cloudflare injects its Web Analytics
         // beacon same-origin on proxied customer domains, so its crashes arrive with a real message
         // and a full stack rather than the opaque 'Script error.' the list below already drops.
@@ -10,13 +76,14 @@ window.sentryOnLoad = function () {
         //
         // denyUrls matches only the throwing frame, so our own errors are still reported when a
         // third party merely triggers them. Reach verified against @sentry/browser 8.55.2, the
-        // bundle the loader in config/app.php actually serves: InboundFilters._getEventFilterUrl
+        // bundle served from public/vendor/sentry (partials/sentry-sdk.blade.php):
+        // InboundFilters._getEventFilterUrl
         // reads exception.values[0].stacktrace.frames, walks BACKWARDS to the innermost frame,
         // skips only '<anonymous>' and '[native code]', and reads filename and never abs_path. A
         // frameless event, or an innermost frame with no filename, yields no URL and nothing here
-        // can fire - which is what EVENTSCHEDULE-JS-35 and -36 turned out to be. That version is
-        // chosen in Sentry's UI rather than pinned in this repo, so SentryJsFilterTest restates
-        // those two functions to pin this list; the version named there has to match this one.
+        // can fire - which is what EVENTSCHEDULE-JS-35 and -36 turned out to be. SentryJsFilterTest
+        // restates those two functions to pin this list; the version named there, here and in the
+        // bundle's file name have to match.
         denyUrls: [
             /\/beacon\.min\.js/i,        // Cloudflare Web Analytics
             /\/cdn-cgi\//i,              // Cloudflare Rocket Loader, email decode, RUM
@@ -176,7 +243,7 @@ window.sentryOnLoad = function () {
                 }
             }
 
-            return event;
+            return scrubEvent(event);
         }
-    });
+    }));
 };

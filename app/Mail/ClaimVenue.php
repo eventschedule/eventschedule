@@ -118,9 +118,14 @@ class ClaimVenue extends Mailable
         // silence somebody else's invitations.
         $venue = $this->event->venue;
 
+        // Signed for the venue's own address, so a mail client's one-click POST actually works.
+        if (! $venue?->email) {
+            return new Headers;
+        }
+
         return new Headers(
             text: [
-                'List-Unsubscribe' => '<'.route('role.unsubscribe', ['subdomain' => $venue->subdomain]).'>',
+                'List-Unsubscribe' => '<'.\App\Utils\UrlUtils::roleUnsubscribeOneClickUrl($venue->email).'>',
                 'List-Unsubscribe-Post' => 'List-Unsubscribe=One-Click',
             ],
         );

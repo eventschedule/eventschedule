@@ -56,8 +56,9 @@ class ClaimInvitationMailTest extends TestCase
         $this->assertStringNotContainsString(urlencode(base64_encode($actA->email)), $html);
 
         $unsubscribe = $mail->headers()->text['List-Unsubscribe'];
-        $this->assertStringContainsString($actB->subdomain, $unsubscribe);
-        $this->assertStringNotContainsString($actA->subdomain, $unsubscribe);
+        $this->assertStringContainsString(urlencode(base64_encode($actB->email)), $unsubscribe);
+        $this->assertStringNotContainsString(urlencode(base64_encode($actA->email)), $unsubscribe);
+        $this->assertStringContainsString('/unsubscribe/one-click', $unsubscribe, 'a signed link a one-click POST can use');
     }
 
     public function test_the_invitation_links_to_the_page_it_is_about(): void
@@ -97,6 +98,6 @@ class ClaimInvitationMailTest extends TestCase
 
         $this->assertStringContainsString('The Old Hall', $mail->envelope()->subject);
         $this->assertStringContainsString(urlencode(base64_encode($venue->email)), $mail->render());
-        $this->assertStringContainsString($venue->subdomain, $mail->headers()->text['List-Unsubscribe']);
+        $this->assertStringContainsString(urlencode(base64_encode($venue->email)), $mail->headers()->text['List-Unsubscribe']);
     }
 }

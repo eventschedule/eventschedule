@@ -17,7 +17,7 @@
     {{-- Host-aware: this layout's head renders on guest pages too, custom domains included. --}}
     <link rel="sitemap" type="application/xml" href="{{ sitemap_url() }}">
 
-    @if (\App\Services\OneSignalService::isConfigured())
+    @if (\App\Services\OneSignalService::isConfigured() && ! request()->embed)
         @include('partials.onesignal')
     @endif
     
@@ -25,7 +25,7 @@
         <script {!! nonce_attr() !!}>
             @include('layouts.sentry')
         </script>
-        <script src="{{ config('app.sentry_js_dsn') }}" crossorigin="anonymous" {!! nonce_attr() !!}></script>
+        @include('partials.sentry-sdk')
     @endif
 
     @if (isset($meta))
@@ -52,6 +52,7 @@
     <script src="{{ asset('js/searchable-select.js') }}" defer {!! nonce_attr() !!}></script>
     <link rel="stylesheet" type="text/css" href="{{ asset('css/toastify.min.css') }}">
 
+    @include('partials.consent-state')
     @include('partials.google-analytics')
 
     <script {!! nonce_attr() !!}>

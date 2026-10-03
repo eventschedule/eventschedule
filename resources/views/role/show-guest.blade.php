@@ -183,17 +183,8 @@ html[data-es-view="list"] #gp-calendar {
                     $carouselVenue = $eventData['event']->getVenueDisplayName(true, $carouselLang);
                   @endphp
                   <div class="carousel-item flex-shrink-0 w-full sm:w-80 bg-white dark:bg-gray-800 rounded-xl shadow-md overflow-hidden group/card">
-                    <!-- Video iframe -->
-                    <iframe
-                      class="w-full h-48 object-cover"
-                      src="{{ $carouselEmbedUrl }}"
-                      title="{{ $videoRole->translatedName() }} - YouTube video"
-                      frameborder="0"
-                      allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
-                      referrerpolicy="strict-origin-when-cross-origin"
-                      allowfullscreen
-                      loading="lazy">
-                    </iframe>
+                    <!-- Video, loaded once the visitor wants it (components/consent-embed) -->
+                    <x-consent-embed :src="$carouselEmbedUrl" :title="$videoRole->translatedName().' - YouTube video'" frame-class="w-full h-48 object-cover" :poster="\App\Utils\UrlUtils::getYouTubeThumbnail($carouselVideoUrl)" />
 
                     <!-- Event details below video -->
                     <div class="p-4">
@@ -451,7 +442,7 @@ html[data-es-view="list"] #gp-calendar {
               <div class="grid grid-cols-1 md:grid-cols-{{ $gridCols }} gap-8">
               @foreach ($videoLinks as $link)
                 <div class="bg-white dark:bg-gray-800 rounded-lg shadow-sm overflow-hidden">
-                  <iframe class="w-full" style="height:{{ $role->getVideoHeight() }}px" src="{{ \App\Utils\UrlUtils::getYouTubeEmbed($link->url) }}" title="{{ $role->translatedName() }} - YouTube video" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen loading="lazy"></iframe>
+                  <x-consent-embed :src="\App\Utils\UrlUtils::getYouTubeEmbed($link->url)" :title="$role->translatedName().' - YouTube video'" frame-class="w-full" :frame-style="'height:'.$role->getVideoHeight().'px'" :poster="\App\Utils\UrlUtils::getYouTubeThumbnail($link->url)" />
                   @if ($canRemoveVideos)
                     @include('partials.remove-video-button', [
                       'schedule' => $role,

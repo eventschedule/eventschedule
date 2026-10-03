@@ -90,6 +90,10 @@ class SocialAuthController extends Controller
             ? 'sign_up'
             : 'login']);
 
+        // The sign-up page's "Don't email me news, tips or digests" box, copied onto this link by
+        // the page; applied in the callback only if an account is created.
+        session(['pending_no_product_updates' => request()->boolean('no_product_updates')]);
+
         // Socialite caches one driver instance per provider, and reRequest() is a flag on it, so
         // the re-request gets a provider of its own rather than marking the shared one.
         $driver = $reRequest && $provider === 'facebook'
@@ -273,6 +277,9 @@ class SocialAuthController extends Controller
 
         if (session()->pull('pending_follow_consent_dismissed')) {
             $user->follow_consent_dismissed = true;
+        }
+        if (config('app.hosted') && session()->pull('pending_no_product_updates')) {
+            $user->is_subscribed = false;
         }
         $user->save();
 

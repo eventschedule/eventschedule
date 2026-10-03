@@ -537,6 +537,13 @@ class AppController extends Controller
                     \Log::error('Scheduled command app:prune-gallery-drafts failed: '.$e->getMessage());
                     report($e);
                 }
+                // Personal data past its retention period. Keep in sync with routes/console.php.
+                try {
+                    \Artisan::call('app:prune-personal-data');
+                } catch (\Throwable $e) {
+                    \Log::error('Scheduled command app:prune-personal-data failed: '.$e->getMessage());
+                    report($e);
+                }
                 // Not hosted-gated: a selfhost install with a YouTube key gets the same rot.
                 try {
                     \Artisan::call('app:recheck-video-embeds');
@@ -972,6 +979,44 @@ class AppController extends Controller
                     ['src' => config('app.logo_light'), 'sizes' => 'any', 'purpose' => 'any'],
                 ],
         ];
+    }
+
+    /**
+     * A YouTube video's thumbnail, fetched by this server and cached, so a schedule page that
+     * lists videos does not send every visitor's IP address to Google before anyone has chosen
+     * to play one. The same arrangement as mapImage() below. Only the 11-character video id is
+     * accepted (the route constrains it), so this cannot be pointed at anything else.
+     */
+    public function youtubeThumbnail(Request $request, string $id)
+    {
+        // mqdefault (320x180) for cards; hqdefault (480x360) where it is shown large, as in emails.
+        $quality = $request->query('q') === 'hq' ? 'hq' : 'mq';
+        $cacheDir = storage_path('app/youtube_thumb_cache');
+        $cachePath = $cacheDir.'/'.$id.'_'.$quality.'.jpg';
+        $headers = ['Content-Type' => 'image/jpeg', 'Cache-Control' => 'public, max-age=86400'];
+
+        if (is_file($cachePath) && time() - filemtime($cachePath) < 30 * 24 * 60 * 60) {
+            return response()->file($cachePath, $headers);
+        }
+
+        try {
+            $response = Http::timeout(10)->get('https://i.ytimg.com/vi/'.$id.'/'.$quality.'default.jpg');
+        } catch (\Exception $e) {
+            report($e);
+            abort(404);
+        }
+
+        if (! $response->successful() || ! str_starts_with((string) $response->header('Content-Type'), 'image/')) {
+            abort(404);
+        }
+
+        if (! is_dir($cacheDir)) {
+            mkdir($cacheDir, 0755, true);
+        }
+
+        file_put_contents($cachePath, $response->body());
+
+        return response($response->body(), 200, $headers);
     }
 
     public function mapImage(Request $request)

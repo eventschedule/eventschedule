@@ -59,6 +59,7 @@ return [
         ],
 
         'single' => [
+            'tap' => [App\Logging\MaskPersonalData::class],
             'driver' => 'single',
             'path' => storage_path('logs/laravel.log'),
             'level' => env('LOG_LEVEL', 'debug'),
@@ -66,6 +67,7 @@ return [
         ],
 
         'daily' => [
+            'tap' => [App\Logging\MaskPersonalData::class],
             'driver' => 'daily',
             'path' => storage_path('logs/laravel.log'),
             'level' => env('LOG_LEVEL', 'debug'),
@@ -95,6 +97,7 @@ return [
         ],
 
         'stderr' => [
+            'tap' => [App\Logging\MaskPersonalData::class],
             'driver' => 'monolog',
             'level' => env('LOG_LEVEL', 'debug'),
             'handler' => StreamHandler::class,
@@ -106,6 +109,7 @@ return [
         ],
 
         'syslog' => [
+            'tap' => [App\Logging\MaskPersonalData::class],
             'driver' => 'syslog',
             'level' => env('LOG_LEVEL', 'debug'),
             'facility' => env('LOG_SYSLOG_FACILITY', LOG_USER),
@@ -113,6 +117,7 @@ return [
         ],
 
         'errorlog' => [
+            'tap' => [App\Logging\MaskPersonalData::class],
             'driver' => 'errorlog',
             'level' => env('LOG_LEVEL', 'debug'),
             'replace_placeholders' => true,

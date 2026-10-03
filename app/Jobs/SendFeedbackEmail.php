@@ -62,6 +62,12 @@ class SendFeedbackEmail implements ShouldBeUnique, ShouldQueue
             return;
         }
 
+        // A request for feedback is not a receipt: a buyer who unsubscribed from this schedule's
+        // emails is not asked. feedback_sent_at stays set, so the sweep does not queue it again.
+        if (\App\Models\NewsletterUnsubscribe::where('role_id', $role->id)->where('email', $sale->email)->exists()) {
+            return;
+        }
+
         OneSignalService::pushToGuestEmail($sale->email, $this->locale, [
             'title_key' => 'messages.push_feedback_request_title',
             'title_params' => ['event' => $event->name],
