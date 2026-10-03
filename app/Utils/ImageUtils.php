@@ -2,7 +2,12 @@
 
 namespace App\Utils;
 
+use Aws\Exception\AwsException;
 use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Str;
+use League\Flysystem\UnableToReadFile;
+use League\Flysystem\UnableToSetVisibility;
+use League\Flysystem\UnableToWriteFile;
 
 class ImageUtils
 {
@@ -225,6 +230,40 @@ class ImageUtils
     public static function isTransientVariantReason(?string $reason): bool
     {
         return $reason !== null && in_array($reason, self::VARIANT_TRANSIENT_REASONS, true);
+    }
+
+    /**
+     * One line saying why the disk refused, for the `detail` of a transient reason.
+     *
+     * The do_spaces disk sets no `throw`, so FilesystemAdapter swallows Flysystem's exception and
+     * returns false or null - which is how a Sentry alert came to say only "write_failed", with
+     * nothing to tell DO Spaces throttling from a timeout from a refused key. The S3 error lives in
+     * the previous-exception chain, and only there on a read: AwsS3V3Adapter::readObject() throws
+     * UnableToReadFile with an EMPTY reason and the S3Exception as its previous.
+     *
+     * An AwsException with a code gives "503 SlowDown: Please reduce your request rate."; one
+     * without (a connection that never got a response) falls through to the innermost message,
+     * which is Guzzle's "cURL error 28: ..." line. Capped, because the SDK's own message quotes
+     * the whole request.
+     */
+    public static function describeStorageFailure(\Throwable $e): string
+    {
+        $innermost = $e;
+
+        for ($cause = $e; $cause !== null; $cause = $cause->getPrevious()) {
+            if ($cause instanceof AwsException && $cause->getAwsErrorCode()) {
+                $message = trim($cause->getStatusCode().' '.$cause->getAwsErrorCode());
+                $awsMessage = $cause->getAwsErrorMessage();
+
+                return Str::limit($awsMessage ? $message.': '.$awsMessage : $message, 200);
+            }
+
+            if ($cause->getMessage() !== '') {
+                $innermost = $cause;
+            }
+        }
+
+        return Str::limit($innermost->getMessage() ?: class_basename($e), 200);
     }
 
     /**
@@ -798,7 +837,8 @@ class ImageUtils
      *
      * The result is keyed by width. `reason` is one of VARIANT_DETERMINISTIC_REASONS or
      * VARIANT_TRANSIENT_REASONS. `detail` is an optional human-readable note about the reason
-     * (currently the source dimensions behind a `too_large`); it is for display only and is never
+     * (the source dimensions behind a `too_large`, the disk's own error behind a `read_failed` or
+     * `write_failed` - see describeStorageFailure()); it is for display only and is never
      * persisted, so read it with `?? null`.
      *
      * `src` is the original's size as a browser displays it, after the EXIF rotation above
@@ -870,10 +910,10 @@ class ImageUtils
         // both would send really-absent originals round the retry loop forever.
         try {
             $exists = Storage::exists($sourcePath);
-        } catch (\Throwable) {
+        } catch (\Throwable $e) {
             // Deliberately not report()ed: the backfill walks thousands of rows, and the caller
-            // already reports whatever it decides to do about this.
-            return $skipAll('read_failed');
+            // already reports whatever it decides to do about this - with this detail in it.
+            return $skipAll('read_failed', self::describeStorageFailure($e));
         }
 
         if (! $exists) {
@@ -891,7 +931,16 @@ class ImageUtils
         $previousMemoryLimit = ini_get('memory_limit');
 
         try {
-            $read = Storage::readStream($sourcePath);
+            // The driver, not Storage::readStream(): that is the same call wrapped in a catch of
+            // UnableToReadFile that returns null and DROPS the exception, and the exception is the
+            // only place the S3 error survives. Anything else still escapes, as it did through
+            // the adapter.
+            try {
+                $read = Storage::getDriver()->readStream($sourcePath);
+            } catch (UnableToReadFile $e) {
+                return $skipAll('read_failed', self::describeStorageFailure($e));
+            }
+
             if (! $read) {
                 // The file exists (checked above), so this is the disk failing to hand it over -
                 // worth retrying, unlike a genuinely missing original.
@@ -994,7 +1043,7 @@ class ImageUtils
      */
     private static function writeStoredVariant(\GdImage $sourceImage, string $storedName, int $width, int $srcWidth, int $srcHeight, string $tempOut): array
     {
-        $skip = fn (string $reason) => ['ok' => false, 'filename' => null, 'reason' => $reason];
+        $skip = fn (string $reason, ?string $detail = null) => ['ok' => false, 'filename' => null, 'reason' => $reason, 'detail' => $detail];
 
         $destWidth = min($width, $srcWidth);
         $destHeight = max(1, (int) round($srcHeight * ($destWidth / $srcWidth)));
@@ -1031,16 +1080,25 @@ class ImageUtils
 
             // Explicitly public: the do_spaces disk defaults to public visibility, but the
             // local/public disks and any future S3 bucket must not be left to a default.
-            $stored = Storage::put(self::storagePathFor($destName), $stream, 'public');
+            //
+            // The driver call Storage::put() makes for a stream, with the same options and the
+            // same two exceptions caught - but kept. put() returns false on a disk without
+            // `throw` (do_spaces sets none) and discards the S3 error, which is how an outage
+            // reached Sentry as a bare "write_failed". Transient: worth another attempt.
+            $failure = null;
 
-            if (is_resource($stream)) {
-                fclose($stream);
+            try {
+                Storage::getDriver()->writeStream(self::storagePathFor($destName), $stream, ['visibility' => 'public']);
+            } catch (UnableToWriteFile|UnableToSetVisibility $e) {
+                $failure = self::describeStorageFailure($e);
+            } finally {
+                if (is_resource($stream)) {
+                    fclose($stream);
+                }
             }
 
-            if (! $stored) {
-                // Flysystem returns false rather than throwing on a disk without `throw`, so an
-                // S3 outage looks exactly like this. Transient: worth another attempt.
-                return $skip('write_failed');
+            if ($failure !== null) {
+                return $skip('write_failed', $failure);
             }
 
             return ['ok' => true, 'filename' => $destName, 'reason' => null];

@@ -30,8 +30,12 @@ use Illuminate\Support\Facades\Log;
  *    reason is recorded on the row and the job returns normally. A retry would decode the same
  *    bytes with the same extensions and reach the same answer.
  *  - Transient (the disk would not hand the file over, or would not take the derivative): the job
- *    THROWS and records nothing, so $tries brings it back and the column stays null for the
- *    backfill to find - but ONLY on a connection where $tries means something. On `sync` there is
+ *    records nothing, so the column stays null for the retry and the backfill to find. A first
+ *    failure is release()d for $backoff seconds, QUIETLY: the queue worker report()s every
+ *    exception from every attempt, so throwing to get a retry paged Sentry over a blip the retry
+ *    then fixed. Only the last attempt THROWS, which fails the job into failed_jobs, reports it
+ *    once with the disk's own error attached, and hands it to app:retry-failed-jobs. All of that
+ *    holds ONLY on a connection where $tries means something. On `sync` there is
  *    no retry loop (SyncQueue::executeJob catches once and rethrows), so the throw would be the
  *    500 this list exists to prevent; there the reason is recorded like a deterministic one and
  *    `images:backfill-variants` re-selects it, which its baseQuery() does for a transient
@@ -50,6 +54,13 @@ abstract class GenerateImageVariants implements ShouldQueue
      * that gets better on the tenth try.
      */
     public int $tries = 2;
+
+    /**
+     * Seconds before the second attempt after a transient failure. Without it the worker retried
+     * within milliseconds, which is close to pointless: the S3 client has already retried the
+     * request itself before the disk gave up, so whatever went wrong outlasted that.
+     */
+    public int $backoff = 60;
 
     public int $timeout = 120;
 
@@ -139,6 +150,7 @@ abstract class GenerateImageVariants implements ShouldQueue
         // or removed below rather than merged, so a stale reason cannot survive a good run.
         $variants = [];
         $transient = null;
+        $transientDetail = null;
         $deterministic = null;
         $deterministicDetail = null;
         $src = $knownSrc;
@@ -170,7 +182,12 @@ abstract class GenerateImageVariants implements ShouldQueue
             }
 
             if (ImageUtils::isTransientVariantReason($result['reason'])) {
-                $transient ??= $result['reason'];
+                if ($transient === null) {
+                    $transient = $result['reason'];
+                    // The disk's own error, for the log line and the exception below. Display
+                    // only, like $deterministicDetail.
+                    $transientDetail = $result['detail'] ?? null;
+                }
             } elseif ($deterministic === null) {
                 $deterministic = $result['reason'];
                 // Display only, and only for the log line below: recordImageVariants() must keep
@@ -183,11 +200,26 @@ abstract class GenerateImageVariants implements ShouldQueue
         // unusable, so trying again can genuinely produce a different answer - but only where
         // trying again actually happens. See willBeRetried(): on the `sync` connection nothing
         // retries, and a throw here escapes the save() that dispatched this job.
+        $described = $transient === null ? null
+            : $transient.($transientDetail !== null ? ' ('.$transientDetail.')' : '');
+
         if ($transient !== null && $this->willBeRetried()) {
-            // Deliberately before any recording: the column stays null, so the retry (and the
-            // backfill after it) still sees a row that needs doing.
+            // Both branches are deliberately before any recording: the column stays null, so
+            // the retry (and the backfill after it) still sees a row that needs doing.
+            //
+            // A release, not a throw, while attempts remain: release() is a retry the worker
+            // does not report. $this->job is null when handle() is invoked directly, and there
+            // is nothing to release, so that falls through to the throw as it always has.
+            if ($this->job && $this->attempts() < $this->tries) {
+                Log::info(class_basename($this).' could not reach storage for '
+                    .$this->subject().': '.$described.'; retrying in '.$this->backoff.'s');
+                $this->release($this->backoff);
+
+                return;
+            }
+
             throw new \RuntimeException(
-                class_basename($this).' could not reach storage for '.$this->subject().': '.$transient
+                class_basename($this).' could not reach storage for '.$this->subject().': '.$described
             );
         }
 
@@ -198,7 +230,7 @@ abstract class GenerateImageVariants implements ShouldQueue
             // either - that command is operator-run (see the class docblock) - which is why
             // this logs at WARNING: the save succeeded, but somebody has work to do.
             Log::warning(class_basename($this).' could not reach storage for '
-                .$this->subject().': '.$transient.' (left for images:backfill-variants)');
+                .$this->subject().': '.$described.' (left for images:backfill-variants)');
         }
 
         if ($deterministic !== null) {

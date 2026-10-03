@@ -10,6 +10,9 @@ use App\Models\Event;
 use App\Models\Role;
 use App\Services\BackupService;
 use App\Utils\ImageUtils;
+use Aws\Command;
+use Aws\S3\Exception\S3Exception;
+use GuzzleHttp\Psr7\Response;
 use Illuminate\Filesystem\FilesystemAdapter;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Artisan;
@@ -17,6 +20,11 @@ use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Queue;
 use Illuminate\Support\Facades\Storage;
+use League\Flysystem\Config;
+use League\Flysystem\Filesystem;
+use League\Flysystem\Local\LocalFilesystemAdapter;
+use League\Flysystem\UnableToReadFile;
+use League\Flysystem\UnableToWriteFile;
 use Tests\Feature\Concerns\CreatesScheduleData;
 use Tests\TestCase;
 
@@ -289,53 +297,75 @@ class ImageVariantsTest extends TestCase
     /**
      * Put a misbehaving disk in front of the faked one.
      *
-     * S3 through Flysystem swallows its own exceptions unless the disk sets `throw` (do_spaces
-     * does not), so a network failure reaches the helper as a null stream or a false write and is
-     * otherwise indistinguishable from a real answer. There is no way to provoke that from the
-     * local fake, so the two methods that can lie are overridden directly.
+     * The failure is raised where S3 raises it: in the Flysystem ADAPTER, as the same exception
+     * AwsS3V3Adapter throws. Laravel's FilesystemAdapter then swallows it exactly as it does in
+     * production (do_spaces sets no `throw`) for a caller going through Storage::put() or
+     * readStream(), while ImageUtils, which calls the driver so it can keep the S3 error, sees it.
+     * Faking one level up, on Laravel's adapter, would hide whichever of the two paths the helper
+     * does not happen to take.
      */
     private function swapDisk(FilesystemAdapter $disk): void
     {
         Storage::set(config('filesystems.default'), $disk);
     }
 
+    /** The faked disk's files, read through the given Flysystem adapter. */
+    private function diskOver(LocalFilesystemAdapter $adapter): FilesystemAdapter
+    {
+        $config = Storage::disk()->getConfig();
+
+        return new FilesystemAdapter(new Filesystem($adapter, $config), $adapter, $config);
+    }
+
+    /**
+     * S3's shape for a GET that never got a response: UnableToReadFile with an EMPTY reason
+     * (AwsS3V3Adapter::readObject() passes ''), an AwsException with no error code, and the
+     * transport's message at the bottom of the chain.
+     */
     private function diskThatCannotRead(): FilesystemAdapter
     {
-        $fake = Storage::disk();
-
-        return new class($fake->getDriver(), $fake->getAdapter(), $fake->getConfig()) extends FilesystemAdapter
+        return $this->diskOver(new class(Storage::disk()->getConfig()['root']) extends LocalFilesystemAdapter
         {
-            public function readStream($path)
+            public function readStream(string $path)
             {
-                return null;
+                throw UnableToReadFile::fromLocation($path, '', new S3Exception(
+                    'Error executing "GetObject"',
+                    new Command('GetObject'),
+                    ['connection_error' => true],
+                    new \RuntimeException('cURL error 28: Operation timed out after 30001 milliseconds')
+                ));
             }
-        };
+        });
     }
 
+    /** S3's shape for a throttled PUT: UnableToWriteFile wrapping a coded S3Exception. */
     private function diskThatCannotWrite(): FilesystemAdapter
     {
-        $fake = Storage::disk();
-
-        return new class($fake->getDriver(), $fake->getAdapter(), $fake->getConfig()) extends FilesystemAdapter
+        return $this->diskOver(new class(Storage::disk()->getConfig()['root']) extends LocalFilesystemAdapter
         {
-            public function put($path, $contents, $options = [])
+            public function writeStream(string $path, $contents, Config $config): void
             {
-                return false;
+                $s3 = new S3Exception(
+                    'Error executing "PutObject"',
+                    new Command('PutObject'),
+                    ['code' => 'SlowDown', 'message' => 'Please reduce your request rate.', 'response' => new Response(503)]
+                );
+
+                throw UnableToWriteFile::atLocation($path, $s3->getMessage(), $s3);
             }
-        };
+        });
     }
 
+    /** Not a Flysystem failure at all: nothing in the helper catches it, so the job's catch must. */
     private function diskThatThrows(): FilesystemAdapter
     {
-        $fake = Storage::disk();
-
-        return new class($fake->getDriver(), $fake->getAdapter(), $fake->getConfig()) extends FilesystemAdapter
+        return $this->diskOver(new class(Storage::disk()->getConfig()['root']) extends LocalFilesystemAdapter
         {
-            public function readStream($path)
+            public function readStream(string $path)
             {
                 throw new \RuntimeException('the object store hung up');
             }
-        };
+        });
     }
 
     /** Undo setUp()'s Queue::fake() so ->afterCommit() dispatches run inline, as on selfhost. */
@@ -765,6 +795,8 @@ class ImageVariantsTest extends TestCase
         // The file EXISTS. Calling this 'missing' is what filed an S3 blip as permanent.
         $this->assertSame('read_failed', $result['reason']);
         $this->assertTrue(ImageUtils::isTransientVariantReason($result['reason']));
+        // S3 reads fail with an empty reason, so this only arrives by walking the chain.
+        $this->assertSame('cURL error 28: Operation timed out after 30001 milliseconds', $result['detail'] ?? null);
     }
 
     public function test_a_disk_that_will_not_take_the_derivative_is_transient(): void
@@ -777,6 +809,39 @@ class ImageVariantsTest extends TestCase
         $this->assertFalse($result['ok']);
         $this->assertSame('write_failed', $result['reason']);
         $this->assertTrue(ImageUtils::isTransientVariantReason($result['reason']));
+        // What Storage::put() used to throw away, and all a bare "write_failed" alert lacked.
+        $this->assertSame('503 SlowDown: Please reduce your request rate.', $result['detail'] ?? null);
+    }
+
+    public function test_describe_storage_failure_names_the_s3_error_wherever_it_sits_in_the_chain(): void
+    {
+        $throttled = new S3Exception(
+            'Error executing "PutObject" on "https://bucket.example/flyer_w480.webp"; AWS HTTP error: ...',
+            new Command('PutObject'),
+            ['code' => 'SlowDown', 'message' => 'Please reduce your request rate.', 'response' => new Response(503)]
+        );
+
+        $this->assertSame(
+            '503 SlowDown: Please reduce your request rate.',
+            ImageUtils::describeStorageFailure(UnableToWriteFile::atLocation('flyer_w480.webp', $throttled->getMessage(), $throttled))
+        );
+
+        // No response, so no code: the transport's own line is the useful part.
+        $timedOut = new S3Exception(
+            'Error executing "GetObject"',
+            new Command('GetObject'),
+            ['connection_error' => true],
+            new \RuntimeException('cURL error 28: Operation timed out')
+        );
+
+        $this->assertSame(
+            'cURL error 28: Operation timed out',
+            ImageUtils::describeStorageFailure(UnableToReadFile::fromLocation('flyer.png', '', $timedOut))
+        );
+
+        // A local disk has no AWS layer at all.
+        $this->assertSame('disk full', ImageUtils::describeStorageFailure(new \RuntimeException('disk full')));
+        $this->assertSame('RuntimeException', ImageUtils::describeStorageFailure(new \RuntimeException('')));
     }
 
     // ----------------------------------------------------------- model reads
@@ -1068,6 +1133,57 @@ class ImageVariantsTest extends TestCase
             $event->fresh()->image_variants,
             'Recording a transient failure is what made $tries inert and hid the row from the backfill'
         );
+    }
+
+    /**
+     * EVENTSCHEDULE-PHP-4C: the queue worker report()s every exception from every attempt, so
+     * throwing to get a retry paged Sentry over a blip the retry then fixed - and with no backoff
+     * the retry ran milliseconds later, into the same outage.
+     */
+    public function test_a_first_transient_failure_is_released_with_a_backoff_not_thrown(): void
+    {
+        $owner = $this->createOwner();
+        $role = $this->createRole($owner, 'talent', ['name' => 'Blue Room']);
+        $event = $this->createEvent($role, ['name' => 'Autumn Session', 'flyer_image_url' => 'flyer_abc123.png']);
+        $this->storeFlyer('flyer_abc123.png', 400, 500);
+
+        $this->swapDisk($this->diskThatCannotWrite());
+        config(['queue.default' => 'database']);
+
+        $job = (new GenerateEventImageVariants($event->id, 'flyer_abc123.png'))->withFakeQueueInteractions();
+        $job->handle();
+
+        $job->assertReleased(60);
+        $this->assertNull($event->fresh()->image_variants, 'The retry must still find a row that needs doing');
+    }
+
+    public function test_the_last_transient_attempt_throws_with_the_storage_error(): void
+    {
+        $owner = $this->createOwner();
+        $role = $this->createRole($owner, 'talent', ['name' => 'Blue Room']);
+        $event = $this->createEvent($role, ['name' => 'Autumn Session', 'flyer_image_url' => 'flyer_abc123.png']);
+        $this->storeFlyer('flyer_abc123.png', 400, 500);
+
+        $this->swapDisk($this->diskThatCannotWrite());
+        config(['queue.default' => 'database']);
+
+        $job = (new GenerateEventImageVariants($event->id, 'flyer_abc123.png'))->withFakeQueueInteractions();
+        $job->job->attempts = $job->tries;
+
+        try {
+            $job->handle();
+            $this->fail('The last attempt must throw, so the job fails into failed_jobs and is reported once');
+        } catch (\RuntimeException $e) {
+            // The cause, not just the reason token: that is what the original alert was missing.
+            $this->assertSame(
+                'GenerateEventImageVariants could not reach storage for event '.$event->id
+                    .': write_failed (503 SlowDown: Please reduce your request rate.)',
+                $e->getMessage()
+            );
+        }
+
+        $job->assertNotReleased();
+        $this->assertNull($event->fresh()->image_variants);
     }
 
     /**
