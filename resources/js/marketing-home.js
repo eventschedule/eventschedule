@@ -535,13 +535,14 @@ function initVideoFacade() {
             return;
         }
         const shell = facade.parentElement;
-        // The showreel loops under the facade; stop it so it is not still
-        // downloading and decoding behind the YouTube player.
-        const reel = shell.querySelector('[data-showreel]');
-        if (reel) {
+        // The showreel loops under the facade; stop both cuts so neither is
+        // still downloading and decoding behind the YouTube player, and drop
+        // the pause button that controlled them.
+        shell.querySelectorAll('[data-showreel]').forEach((reel) => {
             reel.pause();
             reel.remove();
-        }
+        });
+        document.querySelector('[data-showreel-toggle]')?.remove();
         const iframe = document.createElement('iframe');
         iframe.className = 'absolute inset-0 h-full w-full';
         iframe.src = src + (src.indexOf('?') !== -1 ? '&' : '?') + 'autoplay=1';
@@ -558,37 +559,176 @@ function initVideoFacade() {
 /* Showreel                                                            */
 /* ------------------------------------------------------------------ */
 
-// The showreel in the showcase frame. It is preload="none" (14MB that
-// most visitors never scroll to), so play() is what starts the download: only
-// once the frame is on screen, and never for reduced motion or Save-Data,
-// where the poster stands in for it.
+// The showreel in the showcase frame comes in two cuts on one timeline,
+// data-showreel="dark" and "light", stacked over their lazy posters, with CSS
+// showing the pair that matches html.dark. Both reels are preload="none"
+// (16MB that most visitors never scroll to), so nothing downloads until the
+// visitor nears the frame, and then only the cut on screen. Reduced motion
+// and Save-Data keep the poster until the visitor presses the play button.
 function initShowreel() {
-    const video = document.querySelector('[data-showreel]');
-    const saveData = navigator.connection && navigator.connection.saveData;
-    if (!video || reduceMotion.matches || saveData || !('IntersectionObserver' in window)) {
+    const reels = [...document.querySelectorAll('[data-showreel]')];
+    const toggle = document.querySelector('[data-showreel-toggle]');
+    if (!reels.length || !('IntersectionObserver' in window)) {
         return;
     }
+    const frame = reels[0].parentElement;
+    const root = document.documentElement;
+    const wanted = () => reels.find((v) => v.dataset.showreel === (root.classList.contains('dark') ? 'dark' : 'light')) || reels[0];
+    const saveData = navigator.connection && navigator.connection.saveData;
+
+    // The 540p phone cut is the first <source>, picked by its media query.
+    // Browsers before Chrome and Firefox 120 ignore media on <source> and
+    // would play it on a desktop too, so drop a source whose query does not
+    // match, and re-run source selection only where the browser had picked
+    // it: load() fetches the file's opening seconds even under
+    // preload="none", so calling it everywhere would cost every desktop
+    // visitor a download of both cuts.
+    reels.forEach((v) => {
+        const misfits = [...v.querySelectorAll('source[media]')].filter((s) => !window.matchMedia(s.media).matches);
+        const chosen = misfits.some((s) => s.src === v.currentSrc);
+        misfits.forEach((s) => s.remove());
+        if (chosen) {
+            v.load();
+        }
+    });
+
+    let active = wanted();
     let visible = false;
+    // The visitor's own pause outranks scrolling back into view. Under
+    // reduced motion or Save-Data the reel starts out paused this way.
+    let paused = reduceMotion.matches || Boolean(saveData);
+    // While a theme switch hands over (see switchTo): the cut being replaced,
+    // and the AbortController that cancels that handover's timer and listeners.
+    let outgoing = null;
+    let handover = null;
+
     const sync = () => {
-        if (!video.isConnected) {
+        const play = visible && !document.hidden && !paused;
+        reels.forEach((v) => {
+            // The outgoing cut keeps playing under its successor's seek, but
+            // stops with everything else on a pause, a hidden tab or a scroll away.
+            if (v !== active && !(v === outgoing && play)) {
+                v.pause();
+            }
+        });
+        if (!active.isConnected) {
             return;
         }
-        if (visible && !document.hidden) {
+        if (play) {
             // Autoplay can still be refused (e.g. iOS Low Power Mode); the
             // poster is the fallback, so there is nothing to report.
-            video.play().catch(() => {});
+            active.play().catch(() => {});
         } else {
-            video.pause();
+            active.pause();
         }
     };
+
+    // A theme switch mid-play continues from the same moment in the other
+    // cut. The old cut stays on top (inline opacity beats the dark: classes)
+    // until the new one has seeked there, then the inline styles clear and
+    // the classes' transition crossfades. Before the reel has played there is
+    // only a poster, and the classes alone swap it.
+    const settle = () => {
+        if (handover) {
+            handover.abort();
+            handover = null;
+        }
+        reels.forEach((v) => { v.style.opacity = ''; });
+        if (outgoing) {
+            // Pausing does not stop a preload="auto" download; ask the
+            // browser to stop buffering a cut that is no longer shown.
+            outgoing.preload = 'metadata';
+            outgoing = null;
+        }
+    };
+    const switchTo = (next) => {
+        const prev = active;
+        settle();
+        active = next;
+        if (!prev.isConnected || prev.readyState < 2) {
+            sync();
+            return;
+        }
+        const ctl = new AbortController();
+        const once = { once: true, signal: ctl.signal };
+        handover = ctl;
+        outgoing = prev;
+        prev.style.opacity = '1';
+        next.style.opacity = '0';
+        const release = () => {
+            if (handover !== ctl) {
+                return;
+            }
+            settle();
+            // Let the crossfade finish before the old cut stops.
+            setTimeout(sync, 350);
+        };
+        const timer = setTimeout(release, 2000);
+        ctl.signal.addEventListener('abort', () => clearTimeout(timer));
+        // Aim slightly ahead: the old cut keeps playing while the seek lands.
+        const seek = () => {
+            next.currentTime = (prev.currentTime + (paused ? 0 : 0.15)) % (next.duration || Infinity);
+        };
+        next.addEventListener('seeked', release, once);
+        if (next.readyState >= 1) {
+            seek();
+        } else {
+            next.addEventListener('loadedmetadata', seek, once);
+            if (paused) {
+                // Nothing will call play(). Metadata plus the seek fetches
+                // just the frame to show, not the whole cut.
+                next.preload = 'metadata';
+                next.load();
+            }
+        }
+        sync();
+    };
+    new MutationObserver(() => {
+        const next = wanted();
+        if (next !== active) {
+            switchTo(next);
+        }
+    }).observe(root, { attributes: true, attributeFilter: ['class'] });
+
     const io = new IntersectionObserver((entries) => {
         entries.forEach((entry) => {
             visible = entry.isIntersecting;
         });
         sync();
     }, { threshold: 0.35 });
-    io.observe(video);
+    io.observe(frame);
     document.addEventListener('visibilitychange', sync);
+
+    // Start buffering once the visitor scrolls the frame to within a quarter
+    // screen of the fold, so the reel is moving by the time it plays instead
+    // of sitting on its poster. Not an IntersectionObserver root margin: the
+    // frame starts about a screen and a half down, so any margin wide enough
+    // to help would already be satisfied on page load, and every visitor would
+    // pay for a reel most never scroll to.
+    const warm = () => {
+        if (frame.getBoundingClientRect().top < window.innerHeight * 1.25) {
+            window.removeEventListener('scroll', warm);
+            if (!paused && active.isConnected) {
+                active.preload = 'auto';
+            }
+        }
+    };
+    window.addEventListener('scroll', warm, { passive: true });
+
+    if (toggle) {
+        const label = () => {
+            toggle.setAttribute('aria-label', paused ? toggle.dataset.labelPlay : toggle.dataset.labelPause);
+            toggle.querySelector('[data-icon="pause"]').classList.toggle('hidden', paused);
+            toggle.querySelector('[data-icon="play"]').classList.toggle('hidden', !paused);
+        };
+        toggle.addEventListener('click', () => {
+            paused = !paused;
+            label();
+            sync();
+        });
+        label();
+        toggle.classList.replace('hidden', 'inline-flex');
+    }
 }
 
 /* ------------------------------------------------------------------ */

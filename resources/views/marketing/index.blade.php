@@ -688,65 +688,96 @@
     <!-- 3. Showcase: the 3D screening room                           -->
     <!-- ============================================================ -->
     <section id="showcase" class="relative scroll-mt-24 bg-white px-2 pb-20 pt-14 dark:bg-[#0a0a0f] sm:px-4 lg:pb-28 lg:pt-20">
-        <div class="es-band-dark noise relative overflow-hidden rounded-[2.5rem] border border-white/[0.06] px-4 py-16 sm:px-6 lg:px-8 lg:py-24 2xl:mx-auto 2xl:max-w-[100rem]">
+        <div class="es-band-showcase noise relative overflow-hidden rounded-[2.5rem] border border-slate-200/80 px-4 py-16 dark:border-white/[0.06] sm:px-6 lg:px-8 lg:py-24 2xl:mx-auto 2xl:max-w-[100rem]">
             <div class="pointer-events-none absolute inset-0" aria-hidden="true">
                 <div class="es-aurora es-aurora-1" style="opacity: 0.3;"></div>
                 <div class="es-aurora es-aurora-2" style="opacity: 0.25;"></div>
-                <div class="absolute left-1/2 top-0 h-[420px] w-[820px] -translate-x-1/2 rounded-full bg-gradient-to-b from-blue-600/20 to-transparent blur-[100px]"></div>
+                <div class="absolute left-1/2 top-0 h-[420px] w-[820px] -translate-x-1/2 rounded-full bg-gradient-to-b from-blue-500/10 to-transparent blur-[100px] dark:from-blue-600/20"></div>
                 <div class="grid-overlay absolute inset-0 opacity-30"></div>
             </div>
             <div class="relative z-10 mx-auto max-w-6xl">
                 <div class="mx-auto mb-12 max-w-3xl text-center">
-                    <h2 class="es-balance mb-4 text-3xl font-black tracking-tight text-white md:text-5xl" data-reveal>
+                    <h2 class="es-balance mb-4 text-3xl font-black tracking-tight text-gray-900 dark:text-white md:text-5xl" data-reveal>
                         See it in <span class="text-gradient">action</span>
                     </h2>
-                    <p class="text-lg text-gray-500 dark:text-gray-400 sm:text-xl" data-reveal style="--reveal-delay: 0.1s;">
+                    <p class="text-lg text-gray-600 dark:text-gray-400 sm:text-xl" data-reveal style="--reveal-delay: 0.1s;">
                         From first event to sold-out show, in one short tour.
                     </p>
                 </div>
 
                 <div class="es-persp relative" data-scene="showcase">
-                    <div class="es-frame relative overflow-hidden rounded-2xl border border-white/10 bg-[#101016] shadow-2xl shadow-black/50">
+                    <div class="es-frame relative overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-2xl shadow-slate-900/15 dark:border-white/10 dark:bg-[#101016] dark:shadow-black/50">
                         <!-- Browser chrome -->
-                        <div class="flex items-center gap-3 border-b border-white/10 bg-white/5 px-4 py-3" aria-hidden="true">
-                            <span class="flex gap-1.5">
+                        <div class="flex items-center gap-3 border-b border-slate-200 bg-slate-50 px-4 py-3 dark:border-white/10 dark:bg-white/5">
+                            <span class="flex w-14 gap-1.5" aria-hidden="true">
                                 <span class="h-3 w-3 rounded-full bg-[#FF5F57]"></span>
                                 <span class="h-3 w-3 rounded-full bg-[#FEBC2E]"></span>
                                 <span class="h-3 w-3 rounded-full bg-[#28C840]"></span>
                             </span>
-                            <span class="mx-auto flex items-center gap-1.5 rounded-lg bg-white/10 px-4 py-1 text-xs font-medium text-gray-300">
+                            <span class="mx-auto flex items-center gap-1.5 rounded-lg bg-white px-4 py-1 text-xs font-medium text-gray-600 ring-1 ring-inset ring-slate-200 dark:bg-white/10 dark:text-gray-300 dark:ring-0" aria-hidden="true">
                                 <svg aria-hidden="true" class="h-3 w-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" /></svg>
                                 eventschedule.com
                             </span>
-                            <span class="w-14"></span>
+                            {{-- An auto-looping reel needs a way to stop it (WCAG 2.2.2). It sits up here,
+                                 outside the facade link that covers the whole picture, and stays hidden
+                                 until initShowreel() wires it, so it never shows as a dead control. --}}
+                            <span class="flex w-14 justify-end">
+                                <button type="button" data-showreel-toggle
+                                        data-label-pause="Pause the showreel" data-label-play="Play the showreel"
+                                        aria-label="Pause the showreel"
+                                        class="hidden h-8 w-8 items-center justify-center rounded-lg text-gray-500 transition-all duration-200 hover:bg-slate-200/70 hover:text-gray-900 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#4E81FA] dark:text-gray-400 dark:hover:bg-white/10 dark:hover:text-white">
+                                    <svg data-icon="pause" aria-hidden="true" class="h-3.5 w-3.5" fill="currentColor" viewBox="0 0 24 24"><rect x="6" y="5" width="4" height="14" rx="1.2"/><rect x="14" y="5" width="4" height="14" rx="1.2"/></svg>
+                                    <svg data-icon="play" aria-hidden="true" class="hidden h-3.5 w-3.5 ltr:ml-0.5 rtl:mr-0.5 rtl:rotate-180" fill="currentColor" viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg>
+                                </button>
+                            </span>
                         </div>
-                    {{-- The showreel loops muted while the frame is on screen (see
-                         initShowreel() in marketing-home.js); clicking anywhere swaps in the
-                         3-minute YouTube overview. Source: resources/promo/showreel. Bump
-                         $showreelV whenever the reel is re-rendered: the files keep their names,
+                    {{-- The showreel loops muted while the frame is on screen (see initShowreel() in
+                         marketing-home.js); clicking anywhere swaps in the 3-minute YouTube overview.
+                         Source: resources/promo/showreel. It comes in a dark and a light cut on one
+                         timeline, stacked, and the dark: classes show the cut matching the theme, so
+                         a theme switch mid-play carries on from the same moment. Phones get the 540p
+                         cut through the media source.
+                         The posters are lazy <img>s under the reels, not poster attributes: a browser
+                         fetches every <video poster> on page load, even an invisible one, whereas a
+                         lazy image waits until the frame is near and is never fetched while
+                         display:none, so a visitor loads only their own theme's poster, and only if
+                         they scroll this far.
+                         Bump $showreelV whenever the reel is re-rendered: the files keep their names,
                          so the query string is the only thing that busts a cached copy. --}}
-                    @php $showreelV = '2026-09-28'; @endphp
-                    <div class="relative aspect-video bg-black">
-                        <video data-showreel class="absolute inset-0 h-full w-full object-cover" muted loop playsinline preload="none"
-                               poster="{{ asset('videos/event-schedule-showreel-poster.jpg') }}?v={{ $showreelV }}"
-                               width="1920" height="1080" aria-hidden="true" tabindex="-1">
-                            <source src="{{ asset('videos/event-schedule-showreel.mp4') }}?v={{ $showreelV }}" type="video/mp4">
-                            <source src="{{ asset('videos/event-schedule-showreel.webm') }}?v={{ $showreelV }}" type="video/webm">
-                        </video>
+                    @php
+                        $showreelV = '2026-10-03';
+                        $showreelCuts = ['light' => 'event-schedule-showreel-light', 'dark' => 'event-schedule-showreel'];
+                    @endphp
+                    <div class="relative aspect-video bg-[#f4f7fd] dark:bg-black">
+                        @foreach ($showreelCuts as $cut => $reel)
+                            <img data-showreel-poster="{{ $cut }}" src="{{ asset('videos/' . $reel . '-poster.jpg') }}?v={{ $showreelV }}" alt=""
+                                 width="1920" height="1080" loading="lazy" decoding="async"
+                                 class="absolute inset-0 h-full w-full object-cover {{ $cut === 'light' ? 'dark:hidden' : 'hidden dark:block' }}">
+                        @endforeach
+                        @foreach ($showreelCuts as $cut => $reel)
+                            <video data-showreel="{{ $cut }}" class="absolute inset-0 h-full w-full object-cover transition-opacity duration-300 {{ $cut === 'light' ? 'dark:opacity-0' : 'opacity-0 dark:opacity-100' }}" muted loop playsinline preload="none"
+                                   width="1920" height="1080" aria-hidden="true" tabindex="-1">
+                                <source src="{{ asset('videos/' . $reel . '-mobile.mp4') }}?v={{ $showreelV }}" type="video/mp4" media="(max-width: 767px)">
+                                <source src="{{ asset('videos/' . $reel . '.mp4') }}?v={{ $showreelV }}" type="video/mp4">
+                                <source src="{{ asset('videos/' . $reel . '.webm') }}?v={{ $showreelV }}" type="video/webm">
+                            </video>
+                        @endforeach
                         <a href="https://www.youtube-nocookie.com/embed/w1JLIvGmIjQ"
                            target="_blank"
                            rel="noopener"
                            data-video-facade
                            data-video-src="https://www.youtube-nocookie.com/embed/w1JLIvGmIjQ"
                            data-video-title="Event Schedule Overview"
-                           class="group absolute inset-0 block transition-colors duration-200 hover:bg-black/10 focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-inset focus-visible:ring-[#22D3EE]"
+                           class="group absolute inset-0 block transition-colors duration-200 hover:bg-black/10 focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-inset focus-visible:ring-[#0284C7] dark:focus-visible:ring-[#22D3EE]"
                            aria-label="Play the 3-minute Event Schedule overview video">
-                            <span class="absolute inset-x-0 bottom-0 h-1/3 bg-gradient-to-t from-black/55 to-transparent" aria-hidden="true"></span>
-                            <span class="absolute bottom-4 left-1/2 inline-flex -translate-x-1/2 items-center gap-2.5 whitespace-nowrap rounded-full bg-white/95 py-2 pe-5 ps-2 text-sm font-semibold text-gray-900 shadow-xl shadow-black/30 transition-all duration-200 group-hover:-translate-y-0.5 group-hover:bg-white group-hover:shadow-2xl sm:bottom-6 sm:text-base" aria-hidden="true">
-                                <span class="flex h-8 w-8 items-center justify-center rounded-full bg-gradient-to-br from-[#4E81FA] to-[#0EA5E9] text-white">
-                                    <svg aria-hidden="true" class="h-3.5 w-3.5 ltr:ml-0.5 rtl:mr-0.5 rtl:rotate-180" fill="currentColor" viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg>
+                            <span class="absolute inset-x-0 bottom-0 h-1/4 bg-gradient-to-t from-slate-900/15 to-transparent dark:from-black/35" aria-hidden="true"></span>
+                            {{-- Compact on phones, where the full label covered most of the picture. --}}
+                            <span class="absolute bottom-2 left-1/2 inline-flex -translate-x-1/2 items-center gap-2 whitespace-nowrap rounded-full bg-white/95 py-1 pe-3.5 ps-1 text-xs font-semibold text-gray-900 shadow-xl shadow-black/30 transition-all duration-200 group-hover:-translate-y-0.5 group-hover:bg-white group-hover:shadow-2xl sm:bottom-6 sm:gap-2.5 sm:py-2 sm:pe-5 sm:ps-2 sm:text-base" aria-hidden="true">
+                                <span class="flex h-6 w-6 items-center justify-center rounded-full bg-gradient-to-br from-[#4E81FA] to-[#0EA5E9] text-white sm:h-8 sm:w-8">
+                                    <svg aria-hidden="true" class="h-3 w-3 ltr:ml-0.5 rtl:mr-0.5 rtl:rotate-180 sm:h-3.5 sm:w-3.5" fill="currentColor" viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg>
                                 </span>
-                                Watch the 3-minute overview
+                                <span class="sm:hidden">3-min overview</span>
+                                <span class="hidden sm:inline">Watch the 3-minute overview</span>
                             </span>
                         </a>
                     </div>

@@ -4,11 +4,14 @@
 // Playwright ships (mjpeg in, VP8 WebM out). See README.md.
 //
 //   node render.mjs --preview --out=preview.webm       960x540, 30fps, no motion blur
-//   node render.mjs --final --out=showreel.webm        1920x1080, 60fps, 4-sample motion blur
+//   node render.mjs --final --out=showreel.webm        1920x1080, 60fps, 8 to 16-sample motion blur
+//   node render.mjs --mobile --mp4=showreel-m.mp4      960x540, 30fps, motion blur, H.264 only
 //   node render.mjs --stills=1,6.8,14.5 --out=dir      PNG stills at those times
 //
-// Options: --from=S --to=S (seconds), --workers=N, --scale=F, --fps=N, --samples=N, --keep,
-//          --mp4=FILE (also write H.264; needs a full ffmpeg on PATH or FFMPEG_FULL), --poster=FILE
+// Options: --theme=dark|light (default dark), --from=S --to=S (seconds), --workers=N, --scale=F,
+//          --fps=N, --samples=N, --keep, --port-base=N (default 9400; give two parallel renders
+//          different bases), --mp4=FILE (also write H.264; needs a full ffmpeg on PATH or
+//          FFMPEG_FULL), --poster=FILE with --poster-at=S (the frame at S seconds; default the last)
 
 import { spawn } from 'node:child_process';
 import fs from 'node:fs';
@@ -21,12 +24,25 @@ const A = Object.fromEntries(process.argv.slice(2).map(a => { const [k, v] = a.r
 const CHROME = process.env.CHROME || '/Applications/Google Chrome.app/Contents/MacOS/Google Chrome';
 const FFMPEG = process.env.FFMPEG || path.join(os.homedir(), 'Library/Caches/ms-playwright/ffmpeg-1011/ffmpeg-mac');
 const DUR = +fs.readFileSync(path.join(here, 'showreel.html'), 'utf8').match(/\bDUR = (\d+(?:\.\d+)?)/)[1];
-const preset = A.final ? { scale: 1, fps: 60, samples: 8, fast: 16, bitrate: '3800k' } : { scale: .5, fps: 30, samples: 1, fast: 1, bitrate: '2000k' };
+// The presets are exclusive: --final would win the preset while --mobile still dropped the WebM,
+// leaving a stale WebM beside a new MP4, i.e. two different films behind one <video>.
+if (A.final && A.mobile) throw new Error('--final and --mobile are separate renders: pass one');
+// --mobile is the cut phones get (the homepage serves it under 768px): a quarter of the pixels and
+// half the frames of --final, so about a quarter of the bytes, still with real motion blur, which
+// matters more at 30fps than at 60.
+const preset = A.final ? { scale: 1, fps: 60, samples: 8, fast: 16, bitrate: '3800k' }
+  : A.mobile ? { scale: .5, fps: 30, samples: 8, fast: 16, bitrate: '900k' }
+  : { scale: .5, fps: 30, samples: 1, fast: 1, bitrate: '2000k' };
 const scale = +(A.scale ?? preset.scale), fps = +(A.fps ?? preset.fps), samples = +(A.samples ?? preset.samples), fastSamples = +(A['fast-samples'] ?? Math.max(samples, preset.fast));
 const shutter = .5; // 180 degree shutter
 const workers = +(A.workers ?? Math.max(1, Math.min(6, os.cpus().length - 4)));
+const theme = A.theme === 'light' ? 'light' : 'dark';
+const portBase = +(A['port-base'] ?? 9400);
+// Phones all decode H.264, so the mobile cut skips the VP8 WebM fallback.
+const webm = !A.mobile;
+if (!webm && !A.mp4 && !A.stills) throw new Error('--mobile writes H.264 only: pass --mp4=FILE');
 const out = path.resolve(A.out || (A.stills ? 'stills' : 'showreel.webm'));
-const page = pathToFileURL(path.join(here, 'showreel.html')).href + `?render=1&scale=${scale}`;
+const page = pathToFileURL(path.join(here, 'showreel.html')).href + `?render=1&scale=${scale}&theme=${theme}`;
 const sleep = ms => new Promise(r => setTimeout(r, ms));
 
 class CDP {
@@ -51,7 +67,7 @@ class CDP {
 }
 
 async function launch(i) {
-  const port = 9400 + i, dir = fs.mkdtempSync(path.join(os.tmpdir(), 'showreel-chrome-'));
+  const port = portBase + i, dir = fs.mkdtempSync(path.join(os.tmpdir(), 'showreel-chrome-'));
   const proc = spawn(CHROME, ['--headless=new', `--remote-debugging-port=${port}`, `--user-data-dir=${dir}`, '--hide-scrollbars', '--force-device-scale-factor=1',
     '--no-first-run', '--no-default-browser-check', '--disable-background-timer-throttling', '--disable-renderer-backgrounding', '--mute-audio', 'about:blank'], { stdio: 'ignore' });
   let targets;
@@ -67,7 +83,11 @@ async function launch(i) {
     if (k > 300) throw new Error('page never became ready');
     await sleep(50);
   }
-  return { cdp, close: () => { proc.kill('SIGKILL'); fs.rmSync(dir, { recursive: true, force: true }); } };
+  const shown = (await cdp.send('Runtime.evaluate', { expression: 'window.THEME', returnByValue: true })).result.value;
+  if (shown !== theme) throw new Error(`asked for the ${theme} cut but the page rendered ${shown}`);
+  // A SIGKILLed Chrome can still be flushing its profile while we delete it (ENOTEMPTY), and a
+  // failed cleanup must not abort a render whose frames are already captured.
+  return { cdp, close: () => { proc.kill('SIGKILL'); try { fs.rmSync(dir, { recursive: true, force: true, maxRetries: 10, retryDelay: 100 }); } catch {} } };
 }
 
 async function grab(cdp, t, format = 'jpeg') {
@@ -142,7 +162,7 @@ async function video() {
   const vp8 = pass => ['-c:v', 'libvpx', '-b:v', A.bitrate || preset.bitrate, '-maxrate', '9000k', '-bufsize', '9000k', '-qmin', '2', '-qmax', '42', '-auto-alt-ref', '1', '-lag-in-frames', '16',
     '-deadline', 'good', '-cpu-used', pass === 1 ? '4' : '1', '-pix_fmt', 'yuv420p', '-pass', String(pass), '-passlogfile', log,
     ...(pass === 1 ? ['-f', 'webm', '/dev/null'] : [out])];
-  await pipeFrames(FFMPEG, vp8(1), 'webm pass 1'); await pipeFrames(FFMPEG, vp8(2), 'webm pass 2');
+  if (webm) { await pipeFrames(FFMPEG, vp8(1), 'webm pass 1'); await pipeFrames(FFMPEG, vp8(2), 'webm pass 2'); }
 
   // Safari and iOS play VP8 unreliably, so --mp4 also writes H.264. Playwright's ffmpeg has no
   // x264, so this needs a full build (brew install ffmpeg); FFMPEG_FULL overrides the PATH lookup.
@@ -158,9 +178,20 @@ async function video() {
     await pipeFrames(full, x264(1), 'mp4 pass 1'); await pipeFrames(full, x264(2), 'mp4 pass 2');
     console.log(`${mp4} (${(fs.statSync(mp4).size / 1048576).toFixed(1)} MB)`);
   }
-  if (A.poster) fs.copyFileSync(path.join(tmp, files[files.length - 1]), path.resolve(A.poster));
+  // The poster is what a visitor sees before the reel plays, and all they ever see under reduced
+  // motion, Save-Data or iOS Low Power Mode, so it is a chosen frame (--poster-at), not just the
+  // last one. Re-encoded at quality 82: it is a 1080p frame that phones load too.
+  if (A.poster) {
+    const at = A['poster-at'] != null ? Math.round(+A['poster-at'] * fps) - f0 : files.length - 1;
+    if (at < 0 || at >= files.length) throw new Error(`--poster-at=${A['poster-at']} is outside the rendered range`);
+    await new Promise((res, rej) => {
+      const p = spawn('python3', ['-c', 'import sys; from PIL import Image; Image.open(sys.argv[1]).save(sys.argv[2], quality=82, optimize=True, progressive=True)', path.join(tmp, files[at]), path.resolve(A.poster)], { stdio: 'inherit' });
+      p.on('close', c => c ? rej(new Error(`poster encode exited ${c}`)) : res());
+    });
+    console.log(`${path.resolve(A.poster)} (frame at ${((at + f0) / fps).toFixed(2)}s)`);
+  }
   if (A.keep) console.log(`frames kept in ${tmp}`); else fs.rmSync(tmp, { recursive: true, force: true });
-  console.log(`${out} (${(fs.statSync(out).size / 1048576).toFixed(1)} MB) in ${((Date.now() - started) / 1000).toFixed(0)}s`);
+  if (webm) console.log(`${out} (${(fs.statSync(out).size / 1048576).toFixed(1)} MB) in ${((Date.now() - started) / 1000).toFixed(0)}s`);
 }
 
 (A.stills ? stills() : video()).catch(e => { console.error(e); process.exit(1); });
