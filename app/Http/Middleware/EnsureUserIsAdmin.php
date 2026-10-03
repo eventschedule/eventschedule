@@ -33,6 +33,18 @@ class EnsureUserIsAdmin
             return redirect()->route('home')->with('error', __('messages.not_authorized'));
         }
 
+        // Check 1b: two-factor authentication on (auth.admin_requires_two_factor). Before the
+        // password re-confirmation, so an admin without it is sent to turn it on rather than asked
+        // for a password that would not be enough anyway.
+        if (config('auth.admin_requires_two_factor') && ! $request->user()->hasTwoFactorEnabled()) {
+            if ($request->expectsJson()) {
+                return response()->json(['error' => __('messages.admin_two_factor_required')], 403);
+            }
+
+            return redirect()->to(route('profile.edit').'#section-two-factor')
+                ->with('error', __('messages.admin_two_factor_required'));
+        }
+
         $session = $request->session();
         $currentUserAgent = (string) $request->userAgent();
 

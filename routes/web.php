@@ -673,6 +673,9 @@ Route::middleware(['auth', 'verified', 'app_subdomain'])->group(function () {
     // Throttled: this makes an outbound request to a user-chosen destination.
     Route::patch('/settings/payments', [ProfileController::class, 'updatePayments'])->name('profile.update_payments')->middleware('throttle:10,1');
     Route::delete('/settings', [ProfileController::class, 'destroy'])->name('profile.destroy');
+    // "Download my data" (GDPR Arts. 15 and 20). The link in the email is signed and expires with the file.
+    Route::post('/settings/data-export', [ProfileController::class, 'requestDataExport'])->name('profile.data_export')->middleware('throttle:3,60');
+    Route::get('/settings/data-export/{backupJob}', [ProfileController::class, 'downloadDataExport'])->name('profile.data_export.download')->middleware('signed');
     Route::delete('/settings/profile-image', [ProfileController::class, 'deleteImage'])->name('profile.delete_image');
 
     // Push notifications (device subscription state + test send)

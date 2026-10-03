@@ -38,7 +38,7 @@
 
            CONCEPT: an executed legal instrument, given the apparatus a
            contract deserves. Not one legal word changes; what changes is
-           the reading. Sixteen clauses get a section sign and a number
+           the reading. Seventeen clauses get a section sign and a number
            you can cite and link to, the run-on warranties are unpacked
            into their own lettered limbs, the defined terms are set in
            small caps wherever they appear, and the whole schedule of
@@ -571,7 +571,7 @@
                 'endorse' => true,
                 'blocks' => [
                     ['p', 'The User owns all data generated in their eventschedule.com account.'],
-                    ['p', 'Event Schedule will not access, modify or distribute User account data.'],
+                    ['p', 'Event Schedule will not access, modify or distribute User account data, except as needed to provide, secure and support the service, as described in the Privacy Policy, or as required by law.'],
                 ],
             ],
             [
@@ -579,6 +579,19 @@
                 'title' => 'Platform Service & Data Use',
                 'blocks' => [
                     ['p', 'You hereby grant Event Schedule a non-exclusive, fully sublicensable, worldwide, royalty-free right to collect, use, copy, store, and transmit data solely for the purpose of providing services to User Accounts.'],
+                ],
+            ],
+            [
+                // Added 2026-10-04 (GDPR review). Event Schedule processes the details an
+                // organizer's audience gives them on the organizer's behalf (privacy policy,
+                // clause 01); this is the organizer's side of that, and the authority Boost
+                // conversion measurement (MetaAdsService::sendSaleConversion) runs on.
+                'id' => 'personal-data-you-collect',
+                'title' => 'Personal Data You Collect',
+                'blocks' => [
+                    ['p', 'When people buy tickets, RSVP, book, follow or sign up for emails through your profile or events, you are the controller of the personal data they give you, and Event Schedule processes it on your behalf: only to provide the service to you, and as described in the Privacy Policy.'],
+                    ['p', 'You are responsible for having a lawful basis for collecting that data and for every message you send, including permission to email any contacts you import, and for answering your attendees\' requests about their data. Event Schedule will help you do so.'],
+                    ['p', 'If you buy a Boost, you authorise Event Schedule to measure the campaign by telling Meta about ticket purchases on the boosted event, for buyers who allowed marketing cookies.'],
                 ],
             ],
             [
@@ -699,7 +712,7 @@
                 <p class="es-fine-lede es-fade-up es-d-3 mt-3">Event Schedule LLC</p>
 
                 <p class="es-fine-intro es-fade-up es-d-3 mt-5">
-                    The whole agreement: the acceptance paragraph, then sixteen numbered clauses. Every
+                    The whole agreement: the acceptance paragraph, then seventeen numbered clauses. Every
                     clause carries a section number you can cite and link to, and nothing here has been
                     summarised or shortened.
                 </p>
@@ -719,15 +732,15 @@
                 </div>
                 <div class="es-fine-fact">
                     <dt>Governing law</dt>
-                    <dd>United States of America, State of Florida <a href="#governing-law" class="es-fine-mono es-fine-link text-xs" aria-label="Clause 13, Governing Law">&sect;&nbsp;13</a></dd>
+                    <dd>United States of America, State of Florida <a href="#governing-law" class="es-fine-mono es-fine-link text-xs" aria-label="Clause 14, Governing Law">&sect;&nbsp;14</a></dd>
                 </div>
                 <div class="es-fine-fact">
                     <dt>Questions</dt>
-                    <dd><a href="mailto:legal@eventschedule.com" class="es-fine-link">legal@eventschedule.com</a> <a href="#communication-resolution" class="es-fine-mono es-fine-link text-xs" aria-label="Clause 16, Communication and Resolution">&sect;&nbsp;16</a></dd>
+                    <dd><a href="mailto:legal@eventschedule.com" class="es-fine-link">legal@eventschedule.com</a> <a href="#communication-resolution" class="es-fine-mono es-fine-link text-xs" aria-label="Clause 17, Communication and Resolution">&sect;&nbsp;17</a></dd>
                 </div>
                 <div class="es-fine-fact">
                     <dt>Contents</dt>
-                    <dd><a href="#contents" class="es-fine-link">Sixteen clauses, in the order they appear</a></dd>
+                    <dd><a href="#contents" class="es-fine-link">Seventeen clauses, in the order they appear</a></dd>
                 </div>
             </dl>
             </div>
@@ -803,7 +816,7 @@
                         <dl class="es-fine-facts mt-7">
                             <div class="es-fine-fact">
                                 <dt>Instrument</dt>
-                                <dd>Sixteen clauses, <span class="es-fine-mono">&sect;&nbsp;01</span> to <span class="es-fine-mono">&sect;&nbsp;16</span>, under the <a href="#acceptance" class="es-fine-link">acceptance paragraph</a></dd>
+                                <dd>Seventeen clauses, <span class="es-fine-mono">&sect;&nbsp;01</span> to <span class="es-fine-mono">&sect;&nbsp;17</span>, under the <a href="#acceptance" class="es-fine-link">acceptance paragraph</a></dd>
                             </div>
                             <div class="es-fine-fact">
                                 <dt>Counterparts</dt>

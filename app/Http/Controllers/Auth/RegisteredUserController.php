@@ -230,16 +230,13 @@ class RegisteredUserController extends Controller
             }
         }
 
-        $response = [
+        // No name here, even for a stub account (a past buyer or subscriber): anyone can ask for a
+        // code to any address, so answering with the name told a stranger who that address
+        // belongs to. checkSignupCode() returns it once the right code proves the inbox.
+        return response()->json([
             'success' => true,
             'message' => __('messages.code_sent'),
-        ];
-
-        if (isset($existingUser) && $existingUser && $existingUser->name) {
-            $response['name'] = $existingUser->name;
-        }
-
-        return response()->json($response);
+        ]);
     }
 
     /**
@@ -291,7 +288,11 @@ class RegisteredUserController extends Controller
             ]);
         }
 
-        return response()->json(['valid' => true]);
+        // The inbox is proven, so the name a stub account (a past buyer or subscriber) already
+        // holds can be offered back to pre-fill the form.
+        $knownName = User::where('email', $email)->value('name');
+
+        return response()->json(array_filter(['valid' => true, 'name' => $knownName ?: null], fn ($value) => $value !== null));
     }
 
     /**

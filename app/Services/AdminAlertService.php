@@ -81,6 +81,11 @@ class AdminAlertService
         'boosts_disapproved',
         'domains_pending',
         'translations_unshared',
+        // A selfhosted install that collects personal data but still points its visitors at
+        // eventschedule.com's privacy policy, which names our company, our providers and our
+        // retention - none of it theirs. Amber: nothing is broken, but the operator owes their
+        // visitors their own notice (GDPR Art. 13), and the built-in one is not it.
+        'privacy_policy_missing',
         // Last: informational, and unlike every other row above it does not drain by the
         // operator clearing a queue, only by them choosing to update.
         'app_update_available',
@@ -190,6 +195,23 @@ class AdminAlertService
             },
 
             'jobs_failed' => fn () => DB::table('failed_jobs')->count(),
+
+            // A flag. Not on the nexus, whose built-in pages ARE its policy. Only where the install
+            // collects something from people other than its operator: consent-gated tracking, open
+            // registration, or sales.
+            'privacy_policy_missing' => function () use ($isNexus) {
+                if ($isNexus) {
+                    return 0;
+                }
+
+                $privacy = \App\Models\LegalDocument::index()['privacy'] ?? null;
+
+                if ($privacy && ($privacy['url'] || $privacy['has_content'])) {
+                    return 0;
+                }
+
+                return (consent_required() || public_registration_enabled() || Sale::query()->exists()) ? 1 : 0;
+            },
 
             // A flag, not a count: one stale row is as much of a broken promise as a thousand.
             // Guarded because the table is new and a selfhost install may not have migrated yet.
@@ -504,6 +526,7 @@ class AdminAlertService
             'boosts_disapproved' => ['manage', 'boost', 'admin.boost', [], '#boost-alerts', 'amber', 'Boost'],
             'domains_pending' => ['manage', 'domains', 'admin.domains', ['status' => 'pending'], '', 'amber', __('messages.domains')],
             'translations_unshared' => ['system', 'translations', 'admin.translations', [], '', 'blue', __('messages.translations')],
+            'privacy_policy_missing' => ['system', 'legal', 'admin.legal', [], '', 'amber', __('messages.legal_pages')],
             // Blue, not red or amber: SEVERITY above reserves red for breakage, and an operator
             // who has decided not to update yet would otherwise carry a permanent alarm.
             'app_update_available' => ['system', 'app-update', 'admin.app_update', [], '', 'blue', __('messages.app_update')],

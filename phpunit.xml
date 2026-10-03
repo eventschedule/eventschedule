@@ -116,6 +116,9 @@
              there), and tests load .env. Pinned empty so it can never back a test request: the
              endpoint tests set their own. -->
         <env name="GROWTH_DATA_TOKEN" value="" force="true"/>
+        <!-- Hosted admins must use two-factor authentication (auth.admin_requires_two_factor).
+             Off here so admin tests need no 2FA fixture; AdminTwoFactorRequiredTest turns it on. -->
+        <env name="ADMIN_REQUIRE_2FA" value="false" force="true"/>
         <env name="TELESCOPE_ENABLED" value="false"/>
         <env name="APP_TESTING" value="true"/>
         <env name="IS_NEXUS" value="true"/>

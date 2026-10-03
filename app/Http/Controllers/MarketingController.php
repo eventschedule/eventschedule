@@ -7754,6 +7754,7 @@ class MarketingController extends Controller
             ['page' => 'Account Settings', 'section' => 'App Update', 'description' => 'Check application update status (selfhosted).', 'url' => $r['account_settings'].'#app-update', 'category' => 'User Guide', 'keywords' => 'update version selfhosted'],
             ['page' => 'Account Settings', 'section' => 'Update Password', 'description' => 'Change your account password.', 'url' => $r['account_settings'].'#password', 'category' => 'User Guide', 'keywords' => 'password change security'],
             ['page' => 'Account Settings', 'section' => 'Two-Factor Authentication', 'description' => 'Enable 2FA for account security.', 'url' => $r['account_settings'].'#two-factor', 'category' => 'User Guide', 'keywords' => '2fa two-factor authentication security totp'],
+            ['page' => 'Account Settings', 'section' => 'Your Data', 'description' => 'Download a copy of everything held about your account and email address.', 'url' => $r['account_settings'].'#your-data', 'category' => 'User Guide', 'keywords' => 'download my data export gdpr personal data access portability copy'],
             ['page' => 'Account Settings', 'section' => 'Delete Account', 'description' => 'Permanently delete your account.', 'url' => $r['account_settings'].'#delete-account', 'category' => 'User Guide', 'keywords' => 'delete remove account'],
 
             // Scan Agenda

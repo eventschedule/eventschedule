@@ -21,7 +21,8 @@ class CleanupBackups extends Command
         // on 'local', because the import job runs inline on the container that received the
         // upload. Every disk choice below follows from that split. The 'local' arm here is for
         // export rows written before the 'backups' disk existed and can go once they have aged out.
-        $expired = BackupJob::where('type', 'export')
+        // 'personal': the "Download my data" files (App\Jobs\ExportPersonalData), same 7-day link.
+        $expired = BackupJob::whereIn('type', ['export', 'personal'])
             ->whereNotNull('file_path')
             ->where('file_expires_at', '<', now())
             ->get();

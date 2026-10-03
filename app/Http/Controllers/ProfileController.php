@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Exceptions\BillingCancellationException;
 use App\Exceptions\InvoiceNinjaException;
 use App\Http\Requests\ProfileUpdateRequest;
+use App\Jobs\ExportPersonalData;
 use App\Mail\SupportEmail;
 use App\Models\BackupJob;
 use App\Models\BoostCampaign;
@@ -149,6 +150,50 @@ class ProfileController extends Controller
     /**
      * Delete the user's account.
      */
+    /**
+     * "Download my data": queue the export and say a link is on its way. One request at a time, so
+     * the button cannot be used to queue the same work over and over.
+     */
+    public function requestDataExport(Request $request): RedirectResponse
+    {
+        $user = $request->user();
+
+        $pending = BackupJob::where('user_id', $user->id)
+            ->where('type', 'personal')
+            ->whereIn('status', ['pending', 'processing'])
+            ->where('created_at', '>', now()->subHour())
+            ->exists();
+
+        if (! $pending) {
+            $job = BackupJob::create([
+                'user_id' => $user->id,
+                'type' => 'personal',
+                'status' => 'pending',
+                'role_ids' => [],
+            ]);
+
+            ExportPersonalData::dispatch($job->id);
+        }
+
+        return Redirect::to(route('profile.edit').'#section-data')->with('message', __('messages.data_export_requested'));
+    }
+
+    /**
+     * The file, through the signed link in the email. The signature proves the link is ours and
+     * unexpired; the account check means a forwarded link is useless to anyone else.
+     */
+    public function downloadDataExport(Request $request, BackupJob $backupJob)
+    {
+        abort_unless($backupJob->type === 'personal' && $backupJob->user_id === $request->user()->id, 403);
+        abort_unless($backupJob->status === 'completed' && $backupJob->file_path
+            && $backupJob->file_expires_at?->isFuture(), 404);
+        abort_unless(Storage::disk('backups')->exists($backupJob->file_path), 404);
+
+        return Storage::disk('backups')->download($backupJob->file_path, 'my-data-'.now()->format('Y-m-d').'.json', [
+            'Content-Type' => 'application/json',
+        ]);
+    }
+
     public function destroy(Request $request): RedirectResponse
     {
         // Demo mode: prevent account deletion

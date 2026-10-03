@@ -481,15 +481,16 @@
             ['Crash reports', 'Off unless you set REPORT_ERRORS=true', 'Received only if you opt in'],
             ['Update checks', 'Your instance asks GitHub for the newest release', 'Nothing, that request goes to GitHub'],
             ['Public listings', 'Federation stays off until an admin turns it on', 'Public event details, if you opt in'],
+            ['Translation edits', 'Interface wording an admin changes', 'Only edits an admin shares'],
         ];
 
-        // Everything in the codebase that crosses the line. Three of the four
-        // are off until you switch them on; the fourth reads a version number.
+        // Everything in the codebase that crosses the line. Four of the five
+        // are off until you switch them on; the fifth reads a version number.
         $crossings = [
             [
                 'label' => 'Off by default',
                 'title' => 'Crash reports',
-                'body' => 'Error reporting is off out of the box. Until REPORT_ERRORS is set to true there is no reporting endpoint configured at all, so nothing is sent when something breaks.',
+                'body' => 'Error reporting is off out of the box. Until REPORT_ERRORS is set to true there is no reporting endpoint configured at all, so nothing is sent when something breaks. Turned on, it sends the server\'s errors and the errors your visitors\' browsers hit to Event Schedule\'s Sentry project: the error, the browser, and the page address with its query string, ticket and unsubscribe secrets and email addresses removed. Never form contents.',
             ],
             [
                 'label' => 'Off by default',
@@ -500,6 +501,11 @@
                 'label' => 'Your keys',
                 'title' => 'Anything you connect',
                 'body' => 'Stripe, PayPal, Google and Microsoft calendars, CalDAV, Google Wallet passes, AI parsing: each one runs on credentials you add yourself, and each one talks to that provider directly rather than through Event Schedule.',
+            ],
+            [
+                'label' => 'Off by default',
+                'title' => 'Translation sharing',
+                'body' => 'If an admin edits the interface translations, they can choose to share the edits so they reach every install. Sharing sends the edited strings with the install\'s random ID and version number, and nothing else. It only happens when an admin presses Share, or turns on automatic sharing.',
             ],
             [
                 'label' => 'Read only',
@@ -578,7 +584,7 @@
         ];
 
         $documents = [
-            ['/terms', 'Terms of Service', 'The terms for the hosted app at eventschedule.com.'],
+            ['/terms-of-service', 'Terms of Service', 'The terms for the hosted app at eventschedule.com.'],
             ['/privacy', 'Privacy Policy', 'What the hosted app collects, and how to have it deleted.'],
             ['/selfhost', 'Selfhosting', 'What you get when you run it yourself, and what it costs to run.'],
             ['/docs/selfhost/installation', 'Installation guide', 'Requirements, install steps and the scheduler.'],
@@ -729,7 +735,7 @@
                     </table>
                 </div>
                 <p class="es-fine-muted mt-4 px-1 text-xs">
-                    The rule between the last two columns is the whole argument of this page. Nothing on the left of it is reachable from eventschedule.com. Only the last three rows reach anyone other than you and the providers whose keys you add, and the two that carry any of your own data are off until you turn them on.
+                    The rule between the last two columns is the whole argument of this page. Nothing on the left of it is reachable from eventschedule.com. Only the last four rows reach anyone other than you and the providers whose keys you add, and the three that carry any of your own data are off until you turn them on.
                 </p>
             </div>
         </div>
@@ -749,16 +755,17 @@
                     <div class="es-fine-corner mb-6" data-reveal aria-hidden="true"><span>04</span></div>
                     <p class="es-fine-tag mb-4" data-reveal style="--reveal-delay: 0.05s;">What crosses it</p>
                     <h2 class="es-balance text-3xl font-black tracking-tight text-white md:text-4xl" data-reveal style="--reveal-delay: 0.1s;">
-                        Four things cross it. <span class="es-fine-lit">Three start off.</span>
+                        Five things cross it. <span class="es-fine-lit">Four start off.</span>
                     </h2>
                     <p class="mt-5 text-lg text-gray-400" data-reveal style="--reveal-delay: 0.15s;">
-                        The Data Use clause below only reaches data your instance actually transmits. This is that list in full: three switches that begin in the off position, and one read-only version check.
+                        The Data Use clause below only reaches data your instance actually transmits. This is that list in full: four switches that begin in the off position, and one read-only version check.
                     </p>
                 </div>
 
                 <div class="grid gap-4 md:grid-cols-2" data-reveal-group="110">
                     @foreach ($crossings as $crossing)
-                        <div class="es-fine-card flex flex-col p-6" data-reveal="panel">
+                        {{-- An odd count leaves the last card alone on its row, so it takes the whole row. --}}
+                        <div class="es-fine-card flex flex-col p-6 {{ $loop->last && $loop->count % 2 === 1 ? 'md:col-span-2' : '' }}" data-reveal="panel">
                             <p class="es-fine-tag mb-3">{{ $crossing['label'] }}</p>
                             <h3 class="mb-2 text-lg font-bold text-white">{{ $crossing['title'] }}</h3>
                             <p class="text-sm leading-relaxed text-gray-400">{{ $crossing['body'] }}</p>

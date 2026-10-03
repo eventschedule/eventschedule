@@ -137,6 +137,7 @@ class HelpUtils
                 'section-app' => '/docs/account-settings#app-update',
                 'section-password' => '/docs/account-settings#password',
                 'section-two-factor' => '/docs/account-settings#two-factor',
+                'section-data' => '/docs/account-settings#your-data',
                 'section-delete' => '/docs/account-settings#delete-account',
             ],
         ],

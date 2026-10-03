@@ -547,7 +547,7 @@
             ],
             [
                 'Analytics',
-                'Opt-in. Analytics, advertising and personalization signals are set to denied until you press Allow in the cookie banner, and declining sets no analytics cookies at all.',
+                'Opt-in. Google Analytics is not loaded at all until you allow analytics in the cookie banner, advertising and embedded content wait for a separate choice, and declining sets no analytics or marketing cookies at all.',
                 policy_url('privacy'), 'Privacy policy', false,
             ],
             [

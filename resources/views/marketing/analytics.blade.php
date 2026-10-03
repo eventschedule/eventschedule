@@ -492,7 +492,7 @@
             ],
             [
                 'q' => 'Do you send my visitors to Google Analytics or any other tracker?',
-                'a' => 'No. The app counts views itself, into its own tables in its own database. No third-party analytics service is contacted, no analytics script from another company runs on your schedule page, and counting a view does not set a tracking cookie. On a selfhosted install the numbers never leave your own server, including the country lookup, which reads a database file that ships with the app.',
+                'a' => 'Not for these numbers. The app counts views itself, into its own tables in its own database, and counting a view does not set a tracking cookie. Separately, eventschedule.com runs Google Analytics on its own pages, schedule pages included, and only for a visitor who allows analytics cookies in the banner: until then not even the script is loaded. On a selfhosted install the numbers never leave your own server, including the country lookup, which reads a database file that ships with the app, and Google Analytics runs only if you add your own ID.',
             ],
             [
                 'q' => 'Can I see who visited my schedule?',
@@ -1076,7 +1076,7 @@
                                 <h3 class="es-dash-ink text-xl font-bold">Nothing phones home</h3>
                                 <span class="es-dash-plan">Free</span>
                             </div>
-                            <p class="es-dash-muted mb-4">There is no third-party analytics service behind this and no analytics script from another company on your schedule page. Counting a view does not set a tracking cookie either: the dedup key is a hash that expires at midnight.</p>
+                            <p class="es-dash-muted mb-4">There is no third-party analytics service behind these numbers. Counting a view does not set a tracking cookie either: the dedup key is a hash that expires at midnight. Any other analytics on the page waits for the visitor to allow it.</p>
                             <p class="es-dash-muted text-sm">
                                 Selfhost it and the numbers never leave your own database. The country lookup reads a file that ships with the app, so even that is a local read.
                                 <a href="{{ marketing_url('/selfhost') }}" class="es-dash-link font-medium hover:underline">About selfhosting</a>

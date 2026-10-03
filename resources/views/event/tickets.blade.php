@@ -1938,6 +1938,8 @@
             </button>
         </div>
 
+        @include('partials.guest-privacy-note', ['privacyNoteRole' => $event->creatorRole ?? $role ?? null])
+
         @if (payment_gateways()->usesPaymentInstructions($event->payment_method) && $event->payment_instructions_html)
             {{-- v-pre: this user content is inside the #ticket-selector Vue mount; without it a {{ }} in the
                  payment instructions would be compiled as a Vue expression (CSTI) in the buyer's browser.

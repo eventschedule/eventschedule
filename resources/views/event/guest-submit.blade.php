@@ -144,7 +144,9 @@
                       <svg class="h-5 w-5 shrink-0 text-[var(--brand-blue)]" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M9.813 15.904 9.374 17.5l-.439-1.596a3.375 3.375 0 0 0-2.339-2.34L5 13.126l1.596-.439a3.375 3.375 0 0 0 2.34-2.34L9.374 8.75l.439 1.596a3.375 3.375 0 0 0 2.34 2.34l1.596.438-1.596.439a3.375 3.375 0 0 0-2.34 2.34ZM18.259 8.715 18 9.75l-.259-1.035a2.625 2.625 0 0 0-1.91-1.91L14.796 6.546l1.035-.259a2.625 2.625 0 0 0 1.91-1.91L18 3.34l.259 1.035a2.625 2.625 0 0 0 1.91 1.91l1.035.259-1.035.259a2.625 2.625 0 0 0-1.91 1.91Z" /></svg>
                       <span class="font-medium text-sm text-gray-900 dark:text-gray-100">{{ __('messages.auto_fill_pitch') }}</span>
                     </div>
-                    <p class="text-sm text-gray-500 dark:text-gray-400 mb-3">{{ __('messages.auto_fill_hint') }}</p>
+                    <p class="text-sm text-gray-500 dark:text-gray-400 mb-1">{{ __('messages.auto_fill_hint') }}</p>
+                    {{-- Art. 13: a visitor's text and flyer go to the AI provider when they press Auto Fill. --}}
+                    <p class="text-xs text-gray-500 dark:text-gray-400 mb-3">{{ __('messages.ai_processing_notice') }}</p>
                     <textarea v-model="autoFillText" rows="2" :placeholder="autoFillPlaceholder" @paste="onAutoFillPaste" dir="auto"
                       class="block w-full border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-[var(--brand-blue)] focus:ring-[var(--brand-blue)] rounded-lg shadow-sm"></textarea>
                     <input type="file" ref="autoFillImageInput" accept="image/*" class="hidden" @change="onAutoFillImageSelected">

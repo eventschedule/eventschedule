@@ -23,6 +23,7 @@
         <x-doc-nav-link href="#app-update">App Update</x-doc-nav-link>
         <x-doc-nav-link href="#password">Update Password</x-doc-nav-link>
         <x-doc-nav-link href="#two-factor">Two-Factor Authentication</x-doc-nav-link>
+        <x-doc-nav-link href="#your-data">Your Data</x-doc-nav-link>
         <x-doc-nav-link href="#delete-account">Delete Account</x-doc-nav-link>
         <x-doc-nav-link href="#see-also">See Also</x-doc-nav-link>
     </x-slot:toc>
@@ -585,6 +586,22 @@
         </div>
     </section>
 
+    <!-- Your Data -->
+    <section id="your-data" class="doc-section">
+        <h2 class="doc-heading">
+            <svg aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-5 h-5 text-gray-500 dark:text-gray-400 flex-shrink-0">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M3 16.5v2.25A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75V16.5M16.5 12L12 16.5m0 0L7.5 12m4.5 4.5V3" />
+            </svg>
+            Your Data
+        </h2>
+        <p class="text-gray-600 dark:text-gray-300 mb-4">
+            <strong class="text-gray-900 dark:text-white">Download my data</strong> prepares a copy of everything held about your account and its email address, and emails you a link to it, valid for seven days. It covers your profile, the schedules you belong to, tickets and bookings you made (including ones bought before you had an account), schedules you follow or get emails from, newsletters you received with whether you opened them, comments, photos and videos you posted, support chats, and the security log of your account. It is one JSON file, which a text editor can open and other services can import.
+        </p>
+        <p class="text-gray-600 dark:text-gray-300 mb-4">
+            It is not a backup of your schedules: for their events, settings and audience, use <a href="#backup" class="doc-link">Backup &amp; Restore</a>.
+        </p>
+    </section>
+
     <!-- Delete Account -->
     <section id="delete-account" class="doc-section">
         <h2 class="doc-heading">
@@ -599,12 +616,17 @@
         <ul class="doc-list mb-6">
             <li>Your user account, profile and profile image</li>
             <li>Every schedule you own, with its events, tickets and sales</li>
-            <li>Connections to linked services such as Stripe and Google, including any calendar sync they were running</li>
+            <li>Comments, photos and videos you posted, your follows and email sign-ups, and any waitlist entry or request for event updates under your address</li>
+            <li>Connections to linked services such as Stripe and Google, including any calendar sync they were running; Event Schedule also asks Google to revoke its access</li>
             <li>Any paid plan on those schedules, which is cancelled immediately rather than at the end of the billing period. The rest of the period is not refunded, and the confirmation dialog warns you when you have a paid plan</li>
         </ul>
 
         <p class="text-gray-600 dark:text-gray-300 mb-4">
-            Clicking <strong class="text-gray-900 dark:text-white">Delete Account</strong> opens a confirmation dialog with an optional <strong class="text-gray-900 dark:text-white">Why are you leaving?</strong> box. Anything you write there is emailed to the Event Schedule team as feedback and helps us improve the platform. Before that, download anything you want to keep, for example with <a href="#backup" class="doc-link">Backup &amp; Restore</a>.
+            Two things stay, because they belong to other people. Tickets and bookings you bought stay in the organizer's sales records, under the name and email you used. Events and newsletters you created on a schedule someone else owns stay on that schedule, handed to its owner.
+        </p>
+
+        <p class="text-gray-600 dark:text-gray-300 mb-4">
+            Clicking <strong class="text-gray-900 dark:text-white">Delete Account</strong> opens a confirmation dialog with an optional <strong class="text-gray-900 dark:text-white">Why are you leaving?</strong> box. On eventschedule.com, anything you write there is emailed to the Event Schedule team as feedback and helps us improve the platform. Before that, download anything you want to keep, for example with <a href="#your-data" class="doc-link">Download my data</a> and <a href="#backup" class="doc-link">Backup &amp; Restore</a>.
         </p>
 
         <div class="doc-callout doc-callout-warning">
@@ -614,7 +636,7 @@
 
         <div class="doc-callout doc-callout-info">
             <div class="doc-callout-title">Note</div>
-            <p>The Delete Account section is only shown on the hosted platform (eventschedule.com). On a selfhosted installation the administrator manages accounts on the server instead.</p>
+            <p>On a selfhosted installation, every user except an administrator can delete their own account here. The installation always keeps at least one administrator, so the last one cannot.</p>
         </div>
     </section>
 

@@ -105,6 +105,12 @@
                             </svg>
                             {{ __('messages.two_factor_authentication') }}
                         </a>
+                        <a href="#section-data" class="section-nav-link" data-section="section-data">
+                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-5 h-5">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M3 16.5v2.25A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75V16.5M16.5 12L12 16.5m0 0L7.5 12m4.5 4.5V3" />
+                            </svg>
+                            {{ __('messages.data_export_title') }}
+                        </a>
                         {{-- Hidden from a selfhost admin only: ProfileController::destroy() refuses the last one. --}}
                         @if (config('app.hosted') || config('app.is_testing') || ! auth()->user()->isAdmin())
                         <a href="#section-delete" class="section-nav-link" data-section="section-delete">
@@ -309,6 +315,23 @@
                 <div id="section-two-factor" class="section-content lg:mt-0">
                     <div class="max-w-xl">
                         @include('profile.partials.two-factor-form')
+                    </div>
+                </div>
+
+                <button type="button" class="mobile-section-header" data-section="section-data">
+                    <span class="flex items-center gap-2 text-sm font-medium text-gray-700 dark:text-gray-300">
+                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-5 h-5">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M3 16.5v2.25A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75V16.5M16.5 12L12 16.5m0 0L7.5 12m4.5 4.5V3" />
+                        </svg>
+                        {{ __('messages.data_export_title') }}
+                    </span>
+                    <svg class="w-5 h-5 text-gray-400 transition-transform duration-200 accordion-chevron" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
+                    </svg>
+                </button>
+                <div id="section-data" class="section-content lg:mt-0">
+                    <div class="max-w-xl">
+                        @include('profile.partials.data-export-form')
                     </div>
                 </div>
 

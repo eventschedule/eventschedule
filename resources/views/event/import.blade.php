@@ -95,6 +95,9 @@
                         </div>
                         @endif
 
+                        {{-- Art. 13: what is pasted or dropped here goes to the AI provider. --}}
+                        <p class="mb-2 text-xs text-gray-500 dark:text-gray-400">{{ __('messages.ai_processing_notice') }}</p>
+
                         <!-- Combined textarea and image section -->
                         <div class="mb-1">
                             <div class="relative">

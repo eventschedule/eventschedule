@@ -645,6 +645,8 @@
                 <span v-else>{{ __('messages.submit') }}</span>
             </button>
         </div>
+
+        @include('partials.guest-privacy-note', ['privacyNoteRole' => $event->creatorRole ?? $role ?? null])
     </form>
     @endif
 </div>

@@ -116,7 +116,10 @@
             ads</strong> toggle in the Monetization card is off until you turn it on, and doing so
             is your decision and your legal responsibility. The app also always honours a visitor's
             <code class="doc-inline-code">Sec-GPC</code> (Global Privacy Control) header by forcing
-            non-personalized ads for that request, whatever the setting says.
+            non-personalized ads for that request, whatever the setting says. Even non-personalized
+            ads use cookies, so the AdSense script itself is not loaded until a visitor allows
+            <strong>Marketing</strong> in the cookie banner; until then the ad slot stays empty and
+            collapses.
         </p>
         <p>
             Two more things are yours to handle: enabling AdSense means your visitors' browsers
@@ -133,13 +136,13 @@
         <p>
             The <a href="#accommodation" class="doc-link">accommodation affiliate</a> is a third case.
             It does involve a third party that sets its own cookies, so the same disclosure obligation
-            applies, but it is never loaded on page load. A visitor who has not accepted cookies sees
-            an explanation and a button, and nothing reaches Stay22 until they click it.
+            applies, but it is never loaded on page load. A visitor who has not allowed marketing
+            cookies sees an explanation and a button, and nothing reaches Stay22 until they click it.
         </p>
         <p>
             The consent banner that all of this hangs off appears as soon as any of these is on, so
-            turning on <code class="doc-inline-code">ADS_ENABLED</code> brings it with you. Accepting
-            also enables three first-party attribution cookies,
+            turning on <code class="doc-inline-code">ADS_ENABLED</code> brings it with you. Allowing
+            marketing also enables three first-party attribution cookies,
             <code class="doc-inline-code">utm_params</code>,
             <code class="doc-inline-code">utm_referrer_url</code> and
             <code class="doc-inline-code">utm_landing_page</code>, which remember for 30 days which
@@ -373,7 +376,7 @@
         <h3 class="doc-subheading">Consent, and when the map loads</h3>
         <p>
             Stay22 sets its own third-party cookies to attribute bookings, so the map is never loaded
-            when the page opens. Visitors who have already accepted cookies get it immediately.
+            when the page opens. Visitors who have already allowed marketing cookies get it immediately.
             Everyone else sees a short explanation and a button, and no request reaches Stay22 until
             they click. Visitors sending a
             <a href="https://globalprivacycontrol.org/" target="_blank" rel="noopener" class="doc-link">Global Privacy Control</a>

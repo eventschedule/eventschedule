@@ -849,12 +849,9 @@
                                 showResentNote();
                             }
 
-                            // Pre-fill a known name (a stub account), but focus the field the
-                            // visitor actually has to fill: they have just been sent a code.
-                            var nameInput = document.getElementById('name');
-                            if (nameInput && data.name) {
-                                nameInput.value = data.name;
-                            }
+                            // Focus the field the visitor actually has to fill: they have just
+                            // been sent a code. A known name is offered only once the code is
+                            // right (checkSignupCode), never to whoever asked for the code.
                             var codeInput = document.getElementById('verification_code');
                             if (codeInput) {
                                 codeInput.focus();
@@ -1388,6 +1385,12 @@
                 if (codeInput.value !== value) return;
 
                 if (result.ok && result.data.valid === true) {
+                    // Pre-fill the name a stub account (a past buyer or subscriber) already holds,
+                    // now that the code has proven the inbox.
+                    var knownNameInput = document.getElementById('name');
+                    if (knownNameInput && result.data.name && ! knownNameInput.value) {
+                        knownNameInput.value = result.data.name;
+                    }
                     setCodeBoxesState('is-valid', true);
                     setCodeHelpRows(false);
                     var note = document.getElementById('code-verified-note');
