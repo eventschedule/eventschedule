@@ -637,7 +637,9 @@ class GuestEventSchemaRulesTest extends TestCase
 
         $open = $this->createEvent($venue, ['duration' => 0]);
         [$node] = $this->eventPage($venue, $open);
-        // getEndDateTime() assumes two hours for these, a guess the page never shows.
+        // getEndDateTime() assumes two hours for these, a guess the page never shows. Search
+        // Console's 'Missing field "endDate"' warning on such pages is expected: see
+        // Event::getSchemaEndDate() before turning this assertion around.
         $this->assertArrayNotHasKey('endDate', $node);
 
         $timed = $this->createEvent($venue, ['duration' => 3]);

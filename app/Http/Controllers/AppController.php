@@ -407,6 +407,15 @@ class AppController extends Controller
                     }
                 }
 
+                // After the mail and money commands, so its 20-second budget never pushes them
+                // toward the request timeout; see routes/console.php for why it exists.
+                try {
+                    \Artisan::call('app:prune-cache');
+                } catch (\Throwable $e) {
+                    \Log::error('Scheduled command app:prune-cache failed: '.$e->getMessage());
+                    report($e);
+                }
+
                 // Run the slow one last: federation:maintain downloads images and deletes
                 // from object storage, so a timeout in it must not starve the commands above.
                 try {

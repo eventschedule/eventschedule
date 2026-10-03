@@ -5330,6 +5330,13 @@ class Event extends Model
      * The end of that occurrence, or null when the event has no duration: getEndDateTime() assumes
      * two hours for those, a guess the page never shows. A date-only event ends on the last
      * calendar day it covers.
+     *
+     * Search Console flags every node without one as 'Missing field "endDate"'. That warning is
+     * non-critical (the item stays valid and eligible) and expected here. Neither way of silencing
+     * it holds up: Google asks for endDate in the same format as startDate, so a bare day beside a
+     * timed start can read as midnight, before the event begins, and is wrong anyway for a night
+     * that runs past midnight; start plus two hours is the very guess this method refuses. The
+     * owner fixes it by giving the event an end time in the editor, which sets its duration.
      */
     public function getSchemaEndDate($date = null): ?string
     {

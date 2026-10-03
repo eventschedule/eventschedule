@@ -70,7 +70,7 @@ return [
     '/docs/selfhost/federation' => '2026-09-17',
     '/docs/selfhost/google-calendar' => '2026-09-10',
     '/docs/selfhost/google-wallet' => '2026-09-10',
-    '/docs/selfhost/installation' => '2026-09-23',
+    '/docs/selfhost/installation' => '2026-10-03',
     '/docs/selfhost/microsoft-calendar' => '2026-09-10',
     '/docs/selfhost/stripe' => '2026-09-20',
     '/docs/sharing' => '2026-09-29',

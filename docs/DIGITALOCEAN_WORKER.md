@@ -68,7 +68,10 @@ On the file driver the worker sees none of them.
 No migration is needed. `database/migrations/0001_01_01_000001_create_cache_table.php` already ran,
 so `cache` and `cache_locks` exist. Cache is not durable state, so the switch just starts cold.
 
-**Verify:** `SELECT COUNT(*) FROM cache;` climbs within a minute of the deploy.
+**Verify:** `SELECT COUNT(*) FROM cache;` climbs within a minute of the deploy. After that it should
+level off rather than climb forever: Laravel's database store deletes an expired row only when the
+same key is read again, so the hourly `app:prune-cache` deletes the rest (the per-visitor daily
+counters and throttle keys that nothing reads twice).
 
 ### `BACKUP_*`
 

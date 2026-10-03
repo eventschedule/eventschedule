@@ -347,6 +347,16 @@ Schedule::call(function () {
     Artisan::call('app:send-carpool-reminders');
 })->hourly()->name('app-send-carpool-reminders')->withoutOverlapping(30)->appendOutputTo(storage_path('logs/scheduler.log'));
 
+// Laravel's database cache never deletes an expired row unless the same key is read again, and the
+// per-visitor daily counters and throttle keys never are, so on CACHE_STORE=database the `cache`
+// table grew without bound. Ungated (a no-op on any other store), registered after the hourly mail
+// so it never delays it, and bounded to 20 seconds by its own default. The 00:00 UTC run is the
+// heavy one: every per-visitor daily key expires at end of day, and what does not fit is finished
+// over the next few hours.
+Schedule::call(function () {
+    Artisan::call('app:prune-cache');
+})->hourly()->name('app-prune-cache')->withoutOverlapping(30)->appendOutputTo(storage_path('logs/scheduler.log'));
+
 // Nexus only: the blog is the marketing site's. Keep in sync with AppController::translateData().
 Schedule::call(function () {
     if (config('app.is_nexus')) {

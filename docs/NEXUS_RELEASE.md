@@ -23,7 +23,7 @@ pre-flight, P9 to P11 are v1.0.132's, and steps 1 to 9 are v1.0.130's runbook.
 
 | Version | Tagged | What it needs from you |
 |---|---|---|
-| [v1.0.134](#v10134) | not yet | A last `/admin/growth` download, a Stripe portal setting, an `audit_logs` size check, a privacy-notice decision, then `GROWTH_DATA_TOKEN` |
+| [v1.0.134](#v10134) | not yet (partly live since 2026-09-30) | A last `/admin/growth` download, a Stripe portal setting, an `audit_logs` size check, a `cache` table purge, a privacy-notice decision, then `GROWTH_DATA_TOKEN` |
 | [v1.0.133](#v10133) | 2026-09-25 | Four read-only queries, the image backfill, a sitemap cache key, a Cloudflare purge |
 | [v1.0.132](#v10132) | 2026-09-23 | The ticket amnesty migration by hand, a `SESSION_LIFETIME` decision, a MySQL check, the federation welcome order |
 | [v1.0.131](#v10131) | 2026-09-10 | Nothing; four optional features |
@@ -96,16 +96,22 @@ file.
 
 ## v1.0.134
 
-**Not deployed yet.** Everything on `main` after v1.0.133. The version was bumped on 2026-09-28;
-commits since then ship under the same number. Three parts need steps of their own, below the
+**Partly deployed.** Everything on `main` after v1.0.133. The version was bumped on 2026-09-28;
+commits since then ship under the same number. Production has run `dcf7bd8b6` since the
+2026-09-30 deploy, so everything committed up to then is **already live**: the conversion, churn
+and owner-email batch (its emails have been sending since 2026-09-28), the photo gallery, the
+homepage headline test, guest support chat, list animations on schedule pages, per-schedule custom
+field values on shared events, and 14 of this version's 18 migrations. Their "before the deploy"
+steps below are now overdue rather than ahead.
+
+Still to ship: realtime, the growth data pull, the get-started and email-design rework of
+2026-10-02, and the cache pruning of 2026-10-03. Four parts need steps of their own, below the
 checklist:
-- [Conversion, churn and owner emails](#conversion-churn-and-owner-emails)
+- [Conversion, churn and owner emails](#conversion-churn-and-owner-emails) (live; the Stripe
+  setting in step 3 is the one step left)
 - [Realtime](#realtime-adminrealtime)
 - [Growth data pull](#growth-data-pull-apiinternalgrowth)
-
-Smaller features ship with them and need nothing but the deploy: the photo gallery, the homepage
-headline test, guest support chat, list animations on schedule pages, and per-schedule custom
-field values on shared events.
+- [Cache pruning](#cache-pruning-appprune-cache)
 
 ### Checklist
 
@@ -115,54 +121,61 @@ field values on shared events.
    release, and this download is the baseline for the Pro-only selling change, the conversion batch
    and the growth payload's new schema.
 3. **In the Stripe dashboard, turn on cancellation reason** in the customer portal settings, or
-   portal cancels arrive with no reason.
+   portal cancels arrive with no reason. The code that reads it is already live, so do this now.
 4. **`SELECT COUNT(*) FROM audit_logs`.** If it is large, run
    `2026_10_01_000001_add_action_created_at_index_to_audit_logs` by hand from the console first
    (see [Realtime](#realtime-adminrealtime)).
-5. **Decide whether this release sends the privacy-policy change notice** (see
+5. **Shrink the `cache` table** before its new index is built (see
+   [Cache pruning](#cache-pruning-appprune-cache)).
+6. **Decide whether this release sends the privacy-policy change notice** (see
    [Realtime](#realtime-adminrealtime)).
 
 **Deploy**, then:
 
-6. **Run the realtime checks** (see [Realtime](#realtime-adminrealtime)), the same hour.
-7. **Turn on the growth data pull:**
+7. **Run the realtime checks** (see [Realtime](#realtime-adminrealtime)), the same hour.
+8. **Turn on the growth data pull:**
    1. Generate a token: `openssl rand -hex 32`.
    2. In the DigitalOcean console, add it as `GROWTH_DATA_TOKEN`, **encrypted, app-level**. Deploy
       again so the container picks it up.
    3. Put the same value in your local `.env` as `GROWTH_DATA_TOKEN`.
    4. Run `php artisan app:pull-growth`. It names the failure if anything is off; see
       [Growth data pull](#growth-data-pull-apiinternalgrowth).
-8. **The next morning:** check the Activation nudges card on `/admin/growth`.
-9. **The first Monday after:** check the owner digests row on the same page.
+9. **The nudges and digests have been live since 2026-09-28,** so check the Activation nudges card
+   and the owner digests row on `/admin/growth` now rather than after this deploy.
+10. **The next day:** check that the `cache` table stopped growing (see
+    [Cache pruning](#cache-pruning-appprune-cache)).
 
 ### Migrations
 
-Seventeen, none irreversible. The two that touch large tables are first.
+Eighteen, none irreversible. Fourteen already ran with the 2026-09-27 to 2026-09-30 deploys; these
+four are left, the two that read large tables first:
 
 | Migration | What it does |
 |---|---|
 | `2026_10_01_000001_add_action_created_at_index_to_audit_logs` | Index build that reads all of `audit_logs` (checklist step 4) |
-| `2026_09_29_000000_add_custom_field_values_role_id_to_events_table` | A nullable column at the end of `events` plus an index on it: the index build reads `events` |
-| `2026_09_25_000002_canonicalize_timezone_aliases` | Reads the distinct timezone values in `users`, `roles`, `events` and `sales.guest_timezone`, then rewrites only rows holding an alias such as `Asia/Calcutta` |
-| `2026_09_27_000000_add_list_animation_to_roles_table`, `2026_09_28_000001_add_ticket_trial_to_roles_table` | A `varchar(20)` and two timestamps at the end of `roles`: about 90 bytes against v1.0.132's P11 row-size limit |
-| `2026_09_28_000000_add_ticket_paywall_viewed_at_to_users_table`, `2026_09_28_000004_add_ticket_trial_used_at_to_users_table`, `2026_09_28_000006_add_hero_variant_to_users_table` | Nullable columns on `users`; the last also indexes its column |
+| `2026_10_03_000000_add_expiration_and_failed_at_indexes` | Online index builds on `cache.expiration`, `cache_locks.expiration` and `failed_jobs.failed_at`. The `cache` one reads the whole table (checklist step 5). Each waits at most 10 seconds for its metadata lock and then fails the migration rather than stalling every cache query behind it; re-run `php artisan migrate --force` from the console, and it adds only what is missing |
 | `2026_10_02_000000_add_onboarding_columns_to_users` | Three nullable columns at the end of `users` (`pending_schedule_type`, `pending_schedule_name`, `onboarding_nudge_sent_at`), no `->after()`, so INSTANT |
-| `2026_09_25_000001_add_signup_code_invalid_to_marketing_daily_stats` | One counter column on a small table |
-| `2026_09_30_000000_add_guest_support_to_support_conversations`, `2026_09_30_000001_add_reply_tracking_to_support` | Support chat columns. The second updates every `support_conversations` row and indexes `support_messages` |
-| `2026_09_28_000000_create_gallery_images_table`, `2026_09_28_000002_create_subscription_cancellations_table`, `2026_09_28_000003_create_owner_digests_table`, `2026_09_28_000005_create_marketing_experiment_stats_table`, `2026_10_01_000000_create_realtime_hits_table` | New tables |
+| `2026_10_01_000000_create_realtime_hits_table` | New table |
+
+Already run: `2026_09_25_000001_add_signup_code_invalid_to_marketing_daily_stats`,
+`2026_09_25_000002_canonicalize_timezone_aliases`, `2026_09_27_000000_add_list_animation_to_roles_table`,
+the eight `2026_09_28_*` (paywall, gallery, the two ticket-trial columns, cancellations, owner
+digests, experiment stats, hero variant), `2026_09_29_000000_add_custom_field_values_role_id_to_events_table`, and the
+two `2026_09_30_*` support chat migrations.
 
 ### Env vars
 
 - **`GROWTH_DATA_TOKEN`** is new and optional. Unset, `/api/internal/growth` answers 404 (checklist
-  step 7).
+  step 8).
 - **`GROWTH_DATA_URL`** belongs in a developer's `.env`, never on the app spec.
 
 ### Scheduled entries
 
 All run on both rails:
-- `app-send-activation-nudges`, hourly;
-- `app-send-owner-digests`, hourly;
-- `realtime-prune`, every five minutes.
+- `app-send-activation-nudges`, hourly (live since 2026-09-28);
+- `app-send-owner-digests`, hourly (live since 2026-09-28);
+- `realtime-prune`, every five minutes;
+- `app-prune-cache`, hourly.
 
 ### Conversion, churn and owner emails
 
@@ -182,7 +195,7 @@ All run on both rails:
 No new env vars.
 
 **Two new scheduled entries, hourly on both rails:** `app-send-activation-nudges` and
-`app-send-owner-digests`. Neither has ever run on production. Each sends to an owner only in
+`app-send-owner-digests`. Both have been live since the 2026-09-28 deploys. Each sends to an owner only in
 their own local morning (the digest only on Monday), and the nudges are paced to one per owner
 per week, never within two days of their digest, and never within three days of an onboarding
 email. The ticket and payment nudges also wait 24 hours after the event or priced ticket that makes
@@ -296,6 +309,68 @@ pages still cached at the edge are dropped by the endpoint.
      `/api/internal/growth`.
 5. `/admin` &rarr; Audit log shows an `admin.growth_data_pull` row per pull, with its duration and
    peak memory. Watch `peak_memory_mb` against the 128MB FPM worker as the install grows.
+
+### Cache pruning (`app:prune-cache`)
+
+**What ships:** an hourly command on both rails that deletes expired rows from the database cache,
+and the indexes it reads. Laravel's database store deletes an expired row only when the same key
+is read again, and many keys never are: the per-visitor daily page-view counters and visit
+dedupe, the promo counters, and every throttle key. So since `CACHE_STORE=database` went live on
+2026-09-06, the `cache` table has grown without bound. Its key is a random string, so inserts
+land across the whole table, and all of it stays hot in the 1 GB MySQL's buffer pool. This is the
+app side of the October 2026 "Memory Utilization is running high" alerts. On any other cache
+store the command does nothing. No new env vars.
+
+**What to expect:** MySQL keeps the buffer pool memory it has allocated, so the DigitalOcean
+memory graph may not drop until the database restarts. This stops the growth. If the alert
+continues after a restart, the fix is the 2 GB plan, not code.
+
+#### Before the deploy
+
+The index migration reads all of `cache` inside the start command's `migrate --force`, so shrink
+the table first:
+
+1. **Check the database has free disk.** The binlog is row-based, so every deleted row's value is
+   written to it.
+2. **Run `SELECT COUNT(*), SUM(expiration <= UNIX_TIMESTAMP()) FROM cache`** and
+   `SELECT COUNT(*) FROM failed_jobs` (the same migration indexes it).
+3. **If `cache` holds more than a few hundred thousand rows, purge the expired ones first.** Do it
+   from `php artisan tinker` in the web container console, outside 00:00 to 00:05 UTC:
+
+   ```php
+   $now = time(); $total = 0;
+   do {
+       $keys = DB::table('cache')->where('expiration', '<=', $now)->limit(5000)->pluck('key');
+       $total += $keys->isEmpty() ? 0 : DB::table('cache')->whereIn('key', $keys->all())->where('expiration', '<=', $now)->delete();
+   } while ($keys->count() === 5000);
+   echo $total;
+   ```
+
+   It reads keys and then deletes by key, never one ranged `DELETE`, which takes its locks in the
+   opposite order to a live cache read and can deadlock against it (see `PruneExpiredCache`). The
+   repeated `expiration` test keeps a key that was rewritten in between.
+4. **If `cache` or `failed_jobs` is still large, build its index by hand, off-peak.** The migration
+   skips any index that already exists, so after this the deploy's `migrate --force` has nothing
+   slow left to do:
+   `ALTER TABLE cache ADD INDEX cache_expiration_index (expiration), ALGORITHM=INPLACE, LOCK=NONE;`
+   and likewise `failed_jobs_failed_at_index (failed_at)` on `failed_jobs`.
+
+**Never use `php artisan cache:clear` for this.** It is one unbounded `DELETE` that also drops every
+live key, including the `td_*` tier markers, so the hourly and daily blocks run again (the same
+effect as flipping the store, described under v1.0.130).
+
+#### After the deploy
+
+- After the first hourly tick, `app-prune-cache` appears on the Scheduler card on `/admin/queue`.
+- **The next day,** run `SELECT COUNT(*), SUM(expiration <= UNIX_TIMESTAMP()) FROM cache`. The
+  expired count should be no more than about an hour's worth, and the total should stay roughly
+  level from day to day instead of climbing. The 00:00 UTC run is the heavy one: every
+  per-visitor daily key expires at midnight, and whatever does not fit in its 20-second budget is
+  finished over the next few hours.
+- **If the deploy log shows `Lock wait timeout exceeded`** for
+  `2026_10_03_000000_add_expiration_and_failed_at_indexes`, it gave up rather than stall the site
+  behind a busy `cache` table. Run `php artisan migrate --force` from the console. It adds only the
+  indexes that are missing.
 
 ## v1.0.133
 

@@ -322,11 +322,13 @@ counted by a `sendBeacon` and first-touch attribution by a browser-written `es_a
 rather than by the session. Read `docs/CACHING.md` before touching either, or before adding a
 marketing page that renders anything visitor-specific.
 
-**Hosted (eventschedule.com) runs `QUEUE_CONNECTION=database`, and `CACHE_STORE` must be set to
-`database` before a second container exists** - it is currently unset there, which resolves to the
-`file` driver, and that is safe only while one container serves everything. Every scheduler mutex
-and every cross-rail lock lives in the cache, so on `file` two containers serialise against
-nothing. Setting it is a step in `docs/DIGITALOCEAN_WORKER.md`; restate it as fact once done.
+**Hosted (eventschedule.com) runs `QUEUE_CONNECTION=database` and `CACHE_STORE=database`** (set on
+2026-09-06, before the scheduler worker became a second container). Every scheduler mutex and every
+cross-rail lock lives in the cache, so it must stay a store all containers share: on `file`, two
+containers serialise against nothing. Laravel's database store never deletes an expired row unless
+that key is read again, so `app:prune-cache` (hourly, both rails) is what keeps the `cache` table
+bounded. Without it the per-visitor daily keys pile up for good, which is what turned up when the
+1 GB MySQL started alerting on memory in October 2026.
 
 ## Environment Variables
 
