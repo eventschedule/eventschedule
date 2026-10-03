@@ -2,6 +2,7 @@
 
 namespace Tests\Browser;
 
+use Facebook\WebDriver\Exception\TimeoutException;
 use Illuminate\Foundation\Testing\DatabaseTruncation;
 use Laravel\Dusk\Browser;
 use Tests\Browser\Traits\AccountSetupTrait;
@@ -73,9 +74,7 @@ class CartTest extends DuskTestCase
 
             // ...and once they have typed them into the ticket form, the panel stops asking again.
             $browser->script('localStorage.clear();');
-            $browser->visit('/talent/venue')->waitForText('Buy Tickets', 15)->pause(500);
-            $browser->script("window.dispatchEvent(new CustomEvent('show-event-form'))");
-            $browser->pause(1200);
+            $this->showTicketForm($browser);
             // Scoped to the ticket form, and it has to be. Dusk's resolveForTyping() has no
             // "#{$field}" step, so a bare field name is an input[name=...] lookup that takes the
             // FIRST match in document order - and event/partials/interest-capture.blade.php now
@@ -85,8 +84,23 @@ class CartTest extends DuskTestCase
             // asked again: the exact regression below, arriving from a page this test never names.
             $browser->within('#ticket-selector', function (Browser $form) {
                 $form->type('name', 'Guest Buyer')->type('email', 'guest@example.com');
-            })->pause(400);
+            });
+
+            // Two probes, one per hop the typed buyer makes, because this step failed on CI with
+            // only "Saw unexpected element [#es-cart-name]" while passing every local run - which
+            // says the panel asked again, but not whether the text missed the ticket form's
+            // v-model or was lost crossing into the cart. Both fail with buyerTrail() attached.
+            $this->waitForBuyer(
+                $browser,
+                'vm.name === "Guest Buyer" && vm.email === "guest@example.com"',
+                "what was typed never reached the ticket form's own name and email",
+            );
             $this->pickTwoTicketsAndAddToCart($browser);
+            $this->waitForBuyer(
+                $browser,
+                'stored.name === "Guest Buyer" && stored.email === "guest@example.com"',
+                'the ticket form had the buyer, but the cart did not keep what addToCart() sent',
+            );
 
             $browser->waitFor('@cart-checkout', 10);
             $browser->assertMissing('#es-cart-name');
@@ -100,6 +114,12 @@ class CartTest extends DuskTestCase
 
     private function openCartWithTickets(Browser $browser): void
     {
+        $this->showTicketForm($browser);
+        $this->pickTwoTicketsAndAddToCart($browser);
+    }
+
+    private function showTicketForm(Browser $browser): void
+    {
         $browser->visit('/talent/venue')->waitForText('Buy Tickets', 15);
         $browser->script("window.dispatchEvent(new CustomEvent('show-event-form'))");
         // #ticket-0 is the quantity select, and the ticket app's own v-for renders it - so one wait
@@ -107,7 +127,46 @@ class CartTest extends DuskTestCase
         // proved neither, which on a page where the button below is on screen from the start (see
         // the auto-select note) left nothing to tell "not ready yet" from "broken".
         $browser->waitFor('#ticket-0', 10);
-        $this->pickTwoTicketsAndAddToCart($browser);
+    }
+
+    /**
+     * Wait for $check to hold, and on a timeout fail with where the typed buyer actually got to.
+     *
+     * $check is a JS expression over `vm` (the ticket form's Vue instance, reached the way
+     * TicketTest reaches it) and `stored` (the buyer the cart remembered, {} when none).
+     */
+    private function waitForBuyer(Browser $browser, string $check, string $failure): void
+    {
+        try {
+            $browser->waitUntil('(function (vm, stored) { return '.$check.'; })('
+                .'document.querySelector("#ticket-selector").__vue_app__._container._vnode.component.proxy, '
+                .'JSON.parse(localStorage.getItem("es_cart_talent_buyer") || "{}"))', 10);
+        } catch (TimeoutException $e) {
+            $this->fail($failure."\n".$this->buyerTrail($browser));
+        }
+    }
+
+    /** The buyer's name and email at each hop: the inputs on screen, the ticket form, the cart. */
+    private function buyerTrail(Browser $browser): string
+    {
+        $raw = $browser->script('
+            var form = document.querySelector("#ticket-selector");
+            var app = form && form.__vue_app__;
+            var vm = app && app._container._vnode.component.proxy;
+            var input = function (name) {
+                var el = form && form.querySelector("input[name=" + name + "]");
+                return el ? el.value : null;
+            };
+            var stored = null;
+            try { stored = JSON.parse(localStorage.getItem("es_cart_talent_buyer")); } catch (e) {}
+            return JSON.stringify({
+                inputs: { name: input("name"), email: input("email") },
+                ticket_form: vm ? { name: vm.name, email: vm.email } : null,
+                cart_remembered: stored,
+            });
+        ');
+
+        return 'buyer trail: '.$raw[0];
     }
 
     /**
