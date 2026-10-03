@@ -1340,15 +1340,31 @@ a.text-blue-600:visited { color: rgb(37 99 235); }
 }
 
 @keyframes cookie-banner-in {
-    from { opacity: 0; transform: translateY(8px); }
-    to   { opacity: 1; transform: translateY(0); }
+    from { opacity: 0; transform: translateY(16px) scale(0.98); }
+    to   { opacity: 1; transform: translateY(0) scale(1); }
 }
 [data-cookie-consent]:not([hidden]) {
-    animation: cookie-banner-in 200ms ease-out both;
+    animation: cookie-banner-in 320ms cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+/* Closing is an animation, not a transition: the entrance animation's `both` fill keeps holding
+   opacity 1 over any plain declaration, so a transition here never ran and the banner just
+   vanished when cookie-consent.js set hidden 150ms later. Same specificity, later in the file. */
+@keyframes cookie-banner-out {
+    to { opacity: 0; transform: translateY(8px); }
 }
 [data-cookie-consent][data-state="closing"] {
-    opacity: 0;
-    transition: opacity 150ms ease-out;
+    animation: cookie-banner-out 150ms ease-in both;
+}
+@media (prefers-reduced-motion: reduce) {
+    [data-cookie-consent]:not([hidden]) { animation: none; }
+    [data-cookie-consent][data-state="closing"] { opacity: 0; transition: opacity 150ms ease-out; }
+}
+/* Sit above the guest event page's mobile ticket bar instead of covering it, so the banner never
+   stands between a guest and the tickets. show-guest.blade.php sets the class (only while the bar
+   is visible) and the clearance; gate on the class, since the var is never cleared. The compound
+   selector outranks the banner's bottom-* utility. */
+html.es-a11y-cta-offset [data-cookie-consent] {
+    bottom: calc(var(--es-a11y-cta-clearance, 0px) + 0.75rem);
 }
 
 /*
