@@ -40,6 +40,22 @@ class GeminiUtils
         'category_name' => 100,           // events.category_name
     ];
 
+    /** Set by fakeResponses(). Never consulted outside a test run. */
+    private static ?\Closure $fakeResponder = null;
+
+    /**
+     * Stand in for the AI provider in tests: the closure receives sendRequest()'s arguments
+     * ($prompt, $imageData, $purpose, $options) and returns what the provider would have, a list
+     * of rows or null. Pass null to remove it.
+     *
+     * Both providers are called over raw curl, which Http::fake() cannot see, so without this
+     * nothing downstream of the model's answer could be exercised by a test at all.
+     */
+    public static function fakeResponses(?\Closure $responder): void
+    {
+        self::$fakeResponder = $responder;
+    }
+
     public static function normalizeForMatch(?string $value): string
     {
         if ($value === null) {
@@ -114,6 +130,10 @@ class GeminiUtils
 
     private static function sendRequest($prompt, $imageData = null, $purpose = 'content', $options = [])
     {
+        if (self::$fakeResponder !== null && app()->runningUnitTests()) {
+            return (self::$fakeResponder)($prompt, $imageData, $purpose, $options);
+        }
+
         $textProvider = config('services.ai.text_provider', 'gemini');
 
         if ($textProvider === 'openai') {

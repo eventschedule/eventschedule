@@ -16,8 +16,9 @@ use Tests\TestCase;
  * only as good as the widths it declares, and a migration that narrows a column would otherwise
  * make it silently wrong.
  *
- * The clamp loop itself is wired by inspection: parseEvent() reaches the provider through raw curl,
- * so no test can drive it without a network call.
+ * The clamp loop itself is driven by ParseEventCharacterizationTest, through
+ * GeminiUtils::fakeResponses(): parseEvent() reaches the provider over raw curl, which no HTTP fake
+ * can see.
  */
 class AiParsedFieldLengthTest extends TestCase
 {
