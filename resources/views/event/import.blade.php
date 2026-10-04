@@ -346,7 +346,7 @@
         @endif
 
         <!-- Show All Fields and Save All buttons when events are parsed -->
-        <div v-if="preview && preview.parsed && preview.parsed.length > 0" class="ap-card p-4 sm:p-8 shadow-md rounded-lg mb-4">
+        <div v-if="preview && preview.parsed && preview.parsed.length > 0 && !listMode" class="ap-card p-4 sm:p-8 shadow-md rounded-lg mb-4">
             <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between">
                 @if (auth()->user() && auth()->user()->isAdmin())
                 <div class="flex items-center mb-3 sm:mb-0">
@@ -380,15 +380,99 @@
                 accept="image/*"
                 class="hidden">
 
+        @unless ($isGuestPage)
+        {{-- A link that read fine and found nothing new. --}}
+        <div v-if="preview && preview.parsed && preview.parsed.length === 0 && preview.meta" v-cloak class="ap-card mb-4 rounded-xl p-6" role="status">
+            <p class="text-sm text-gray-700 dark:text-gray-300">{{ __('messages.import_all_on_schedule') }}</p>
+        </div>
+
+        {{-- Two or more events are a list to choose from, whatever they were read from: one row
+             each, the full card on request, and one button that says how many it will add. --}}
+        <div v-if="listMode" v-cloak class="ap-card mb-4 rounded-xl p-4 sm:p-6">
+            <div class="flex flex-wrap items-start justify-between gap-3">
+                <div class="min-w-0">
+                    <h3 id="import-list-heading" tabindex="-1" class="text-base font-semibold text-gray-900 focus:outline-none dark:text-gray-100" v-text="foundLabel"></h3>
+                    <p class="mt-1 text-sm text-gray-500 dark:text-gray-400">
+                        <span v-text="timezoneLabel"></span>
+                        &middot;
+                        <a href="{{ route('role.edit', ['subdomain' => $role->subdomain]) }}" class="js-leave-import font-medium text-[var(--brand-blue)] hover:underline">{{ __('messages.change_timezone') }}</a>
+                    </p>
+                </div>
+                <button type="button" @click="handleClear" :disabled="isAddingAll" class="flex-shrink-0 rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm font-medium text-gray-700 transition-all duration-200 hover:bg-gray-50 focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--brand-blue)] disabled:opacity-50 dark:border-gray-600 dark:bg-gray-800 dark:text-gray-300 dark:hover:bg-gray-700">
+                    {{ __('messages.import_start_over') }}
+                </button>
+            </div>
+
+            <ul v-if="listNotes.length" class="mt-3 space-y-1 text-sm text-gray-600 dark:text-gray-400">
+                <li v-for="note in listNotes" :key="note" v-text="note"></li>
+            </ul>
+
+            <button v-if="preview.meta && preview.meta.can_read_whole_page" type="button" @click="fetchPreview(true)" :disabled="isAddingAll"
+                    class="mt-3 text-sm font-medium text-[var(--brand-blue)] hover:underline focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--brand-blue)]">
+                {{ __('messages.import_read_whole_page') }}
+            </button>
+
+            <label class="mt-4 flex cursor-pointer items-center gap-3 border-t border-gray-100 pt-4 text-sm text-gray-700 dark:border-gray-700/50 dark:text-gray-300">
+                <input type="checkbox" ref="selectAll" :checked="allSelected" @change="toggleAll" :disabled="isAddingAll || selectableCount === 0"
+                       class="h-5 w-5 rounded border-gray-300 text-[var(--brand-blue)] focus:ring-[var(--brand-blue)] dark:border-gray-600 dark:bg-gray-900">
+                <span class="font-medium">{{ __('messages.eventbrite_select_all') }}</span>
+                <span class="text-gray-500 dark:text-gray-400" v-text="selectedLabel"></span>
+            </label>
+        </div>
+        @endunless
+
         <!-- Events cards - Moved outside the main div -->
-        <div v-if="preview && preview.parsed && preview.parsed.length > 0" class="space-y-6">
-            <div v-for="(event, idx) in preview.parsed" :key="idx"
-                    :class="['ap-card p-4 sm:p-8 shadow-md sm:rounded-xl mt-4',
-                            savedEvents[idx] ? 'border-2 border-green-500 dark:border-green-600' : '']">
+        <div v-if="preview && preview.parsed && preview.parsed.length > 0"
+             :class="listMode ? 'ap-card overflow-hidden rounded-xl divide-y divide-gray-100 dark:divide-gray-700/50' : 'space-y-6'">
+            <template v-for="(event, idx) in preview.parsed" :key="idx">
+            @unless ($isGuestPage)
+            <div v-if="listMode && isRowVisible(idx)"
+                 :class="['flex items-center gap-3 px-4 py-3 transition-colors duration-200',
+                        expandedRow === idx ? 'bg-gray-50 dark:bg-[#252526]' : '',
+                        rowState(idx) === 'idle' && !rowSelected(idx) ? 'opacity-60' : '']">
+                {{-- A checkbox until it is being saved; then what became of it, in a shape as
+                     well as a colour. --}}
+                <span class="flex h-6 w-6 flex-shrink-0 items-center justify-center">
+                    <svg v-if="rowState(idx) === 'saving'" class="h-5 w-5 text-[var(--brand-blue)] motion-safe:animate-spin" fill="none" viewBox="0 0 24 24" aria-hidden="true">
+                        <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                        <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"></path>
+                    </svg>
+                    <svg v-else-if="rowState(idx) === 'saved'" class="h-5 w-5 text-green-600 dark:text-green-400" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" role="img" aria-label="{{ __('messages.saved') }}">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M9 12.75L11.25 15 15 9.75M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                    </svg>
+                    <svg v-else-if="rowState(idx) === 'error'" class="h-5 w-5 text-red-600 dark:text-red-400" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" role="img" aria-label="{{ __('messages.error') }}">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M9.75 9.75l4.5 4.5m0-4.5l-4.5 4.5M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                    </svg>
+                    <input v-else type="checkbox" :checked="rowSelected(idx)" @change="toggleRow(idx)" :disabled="isAddingAll || !rowComplete(idx)"
+                           :aria-label="event.event_name"
+                           class="h-5 w-5 rounded border-gray-300 text-[var(--brand-blue)] focus:ring-[var(--brand-blue)] dark:border-gray-600 dark:bg-gray-900">
+                </span>
+
+                <span class="flex h-12 w-12 flex-shrink-0 flex-col items-center justify-center rounded-lg bg-gray-100 dark:bg-gray-700" aria-hidden="true">
+                    <span class="text-[10px] font-semibold uppercase tracking-wide text-gray-500 dark:text-gray-400" v-text="rowDate(idx).month"></span>
+                    <span class="text-base font-bold leading-none text-gray-900 dark:text-gray-100" v-text="rowDate(idx).day"></span>
+                </span>
+
+                <button type="button" @click="expandRow(idx)" :aria-expanded="expandedRow === idx ? 'true' : 'false'" title="{{ __('messages.import_show_details') }}"
+                        class="group flex min-h-[44px] min-w-0 flex-1 items-center gap-3 rounded-md text-start focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--brand-blue)]">
+                    <span class="min-w-0 flex-1">
+                        <span class="block truncate text-sm font-medium text-gray-900 dark:text-gray-100" dir="auto" v-text="event.event_name"></span>
+                        <span class="mt-0.5 block truncate text-xs text-gray-500 dark:text-gray-400" v-text="rowMeta(idx)"></span>
+                        <span v-if="rowProblem(idx)" class="mt-0.5 block text-xs font-medium text-amber-700 dark:text-amber-400" v-text="rowProblem(idx)"></span>
+                    </span>
+                    <svg :class="['h-5 w-5 flex-shrink-0 text-gray-400 transition-transform duration-200 dark:text-gray-500', expandedRow === idx ? 'rotate-90' : 'rtl:rotate-180']" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" aria-hidden="true">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M8.25 4.5l7.5 7.5-7.5 7.5" />
+                    </svg>
+                </button>
+            </div>
+            @endunless
+            <div v-if="!listMode || expandedRow === idx"
+                    :class="[listMode ? 'bg-gray-50 p-4 dark:bg-[#252526] sm:p-6' : 'ap-card p-4 sm:p-8 shadow-md sm:rounded-xl mt-4',
+                            (!listMode && savedEvents[idx]) ? 'border-2 border-green-500 dark:border-green-600' : '']">
                 
                 <!-- Card header -->
                 @if (auth()->user())
-                <div v-if="savedEvents[idx] || saveErrors[idx]" :class="['px-4 py-3 -m-4 sm:-m-8 mt-4 sm:mb-4 flex justify-between items-center rounded-t-lg', 
+                <div v-if="!listMode && (savedEvents[idx] || saveErrors[idx])" :class="['px-4 py-3 -m-4 sm:-m-8 mt-4 sm:mb-4 flex justify-between items-center rounded-t-lg', 
                                 savedEvents[idx] ? 'bg-green-50 dark:bg-green-900/30' : 'bg-red-50 dark:bg-red-900/30']">
                     <h3 class="font-medium text-lg">
                         <span v-if="savedEvents[idx]" class="ms-2 text-sm text-green-600 dark:text-green-400">
@@ -973,9 +1057,9 @@
                                 </button>
                                 <button @click="handleSave(idx)" 
                                         type="button" 
-                                        :disabled="savingEvents[idx] || !canCreateAccount"
+                                        :disabled="savingEvents[idx] || !canSaveRow(idx)"
                                         :class="['px-4 py-2 rounded-lg transition-all duration-200',
-                                            (savingEvents[idx] || !canCreateAccount)
+                                            (savingEvents[idx] || !canSaveRow(idx))
                                                 ? 'bg-gray-400 text-gray-200 cursor-not-allowed'
                                                 : '{{ (isset($isGuest) && $isGuest) ? 'bg-blue-500 text-white hover:bg-blue-600' : 'bg-[var(--brand-button-bg)] text-white hover:bg-[var(--brand-button-bg-hover)]' }} hover:scale-105']">
                                     <span v-if="savingEvents[idx]" class="inline-flex items-center">
@@ -1157,7 +1241,34 @@
                     </div>
                 </div>
             </div>
+            </template>
         </div>
+
+        @unless ($isGuestPage)
+        {{-- Sticky, not fixed: it stays with the list and leaves the rest of the page alone. --}}
+        <div v-if="listMode" v-cloak class="ap-card sticky bottom-0 z-10 mt-4 flex flex-wrap items-center justify-between gap-4 rounded-xl p-4">
+            <div class="min-w-0 flex-1" role="status" aria-live="polite">
+                <template v-if="isAddingAll">
+                    <div class="mb-2 text-sm font-medium text-gray-700 dark:text-gray-300" v-text="progressLabel"></div>
+                    <div class="h-2.5 w-full rounded-full bg-gray-200 dark:bg-gray-700" role="progressbar" aria-valuemin="0" :aria-valuemax="addProgress.total" :aria-valuenow="addProgress.done">
+                        <div class="h-2.5 rounded-full bg-[var(--brand-button-bg)] transition-all duration-300" :style="{ width: (addProgress.total ? Math.round(addProgress.done / addProgress.total * 100) : 0) + '%' }"></div>
+                    </div>
+                </template>
+                <p v-else-if="addSummary" class="text-sm text-gray-700 dark:text-gray-300" v-text="summaryLabel"></p>
+                <p v-else class="text-sm text-gray-500 dark:text-gray-400" v-text="selectedLabel"></p>
+            </div>
+            <button type="button" @click="addSelected" :disabled="isAddingAll || allDone || selectedCount === 0"
+                    :class="['inline-flex items-center justify-center gap-2 rounded-lg px-4 py-3 text-base font-semibold shadow-sm transition-all duration-200 focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--brand-blue)] focus-visible:ring-offset-2 dark:focus-visible:ring-offset-gray-800',
+                        (isAddingAll || allDone || selectedCount === 0)
+                            ? 'cursor-not-allowed bg-gray-300 text-gray-500 dark:bg-gray-600 dark:text-gray-400'
+                            : 'bg-[var(--brand-button-bg)] text-white hover:bg-[var(--brand-button-bg-hover)] hover:shadow-md']">
+                <svg v-if="allDone" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" aria-hidden="true">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M4.5 12.75l6 6 9-13.5" />
+                </svg>
+                <span v-text="addLabel"></span>
+            </button>
+        </div>
+        @endunless
 
 </form>
 
@@ -1241,6 +1352,14 @@
                 readingHost: '',
                 isSlow: false,
                 slowTimer: null,
+                // The list a preview of two or more becomes.
+                selectedRows: [],
+                expandedRow: null,
+                isAddingAll: false,
+                addProgress: { done: 0, total: 0 },
+                addSummary: null,
+                stoppedByLimit: false,
+                allDone: false,
                 savingEvents: [], // Track which events are currently being saved
                 createAccount: false, // New data property for guest user account creation
                 userName: '',
@@ -1344,29 +1463,106 @@
                     .filter(group => group.length > 0).length;
             },
 
+            // Two or more events, for an editor: a list to choose from rather than a stack of forms.
+            listMode() {
+                return ! this.isGuestPage && !! (this.preview && this.preview.parsed && this.preview.parsed.length > 1);
+            },
+
+            // Rows that could be added: complete, and not added already.
+            selectableCount() {
+                return this.listMode ? this.preview.parsed.filter((event, idx) => ! this.savedEvents[idx] && this.isEventComplete(event)).length : 0;
+            },
+
+            selectedCount() {
+                return this.listMode ? this.preview.parsed.filter((event, idx) => this.selectedRows[idx] && ! this.savedEvents[idx]).length : 0;
+            },
+
+            allSelected() {
+                return this.selectableCount > 0 && this.selectedCount === this.selectableCount;
+            },
+
+            selectedLabel() {
+                return @json(__('messages.import_selected_count', ['selected' => '__S__', 'total' => '__T__']), JSON_UNESCAPED_UNICODE)
+                    .replace('__S__', this.selectedCount).replace('__T__', this.preview.parsed.length - this.savedEvents.filter(Boolean).length);
+            },
+
+            addLabel() {
+                if (this.allDone) {
+                    return @json(__('messages.import_added_all', ['count' => '__N__']), JSON_UNESCAPED_UNICODE).replace('__N__', this.savedEvents.filter(Boolean).length);
+                }
+
+                // While it works the button keeps the number it was pressed with; the bar beside
+                // it is what counts down.
+                const count = this.isAddingAll ? this.addProgress.total : this.selectedCount;
+
+                return count === 1
+                    ? @json(__('messages.import_add_one'), JSON_UNESCAPED_UNICODE)
+                    : @json(__('messages.import_add_many', ['count' => '__N__']), JSON_UNESCAPED_UNICODE).replace('__N__', count);
+            },
+
+            progressLabel() {
+                return @json(__('messages.import_saving_progress', ['done' => '__D__', 'total' => '__T__']), JSON_UNESCAPED_UNICODE)
+                    .replace('__D__', Math.min(this.addProgress.done + 1, this.addProgress.total)).replace('__T__', this.addProgress.total);
+            },
+
+            summaryLabel() {
+                if (! this.addSummary) {
+                    return '';
+                }
+                let label = this.addSummary.failed
+                    ? @json(__('messages.import_added_summary', ['added' => '__A__', 'failed' => '__F__']), JSON_UNESCAPED_UNICODE)
+                        .replace('__A__', this.addSummary.added).replace('__F__', this.addSummary.failed)
+                    : @json(__('messages.import_added_all', ['count' => '__A__']), JSON_UNESCAPED_UNICODE).replace('__A__', this.addSummary.added);
+                if (this.stoppedByLimit) {
+                    label += ' ' + @json(__('messages.import_stopped_daily_limit'), JSON_UNESCAPED_UNICODE);
+                }
+
+                return label;
+            },
+
+            foundLabel() {
+                const meta = this.preview.meta;
+                const count = meta ? meta.shown : this.preview.parsed.length;
+
+                return meta && meta.host
+                    ? @json(__('messages.import_found_on_host', ['host' => '__H__', 'count' => '__N__']), JSON_UNESCAPED_UNICODE).replace('__H__', meta.host).replace('__N__', count)
+                    : @json(__('messages.import_found_events', ['count' => '__N__']), JSON_UNESCAPED_UNICODE).replace('__N__', count);
+            },
+
+            // The zone the times are in is said out loud: a wrong one is otherwise invisible until
+            // every event is an hour or three off.
+            timezoneLabel() {
+                const zone = (this.preview.meta && this.preview.meta.timezone) || @json($role->captureTimezone());
+
+                return @json(__('messages.import_times_shown_in', ['timezone' => '__Z__']), JSON_UNESCAPED_UNICODE).replace('__Z__', zone.replace(/_/g, ' '));
+            },
+
+            // What the person should know before choosing: what was left out and why, and that a
+            // link is copied once, not followed.
+            listNotes() {
+                const meta = this.preview.meta;
+                if (! meta) {
+                    return [];
+                }
+                const notes = [];
+                if (meta.already_on_schedule > 0) {
+                    notes.push(@json(__('messages.import_already_on_schedule', ['count' => '__N__']), JSON_UNESCAPED_UNICODE).replace('__N__', meta.already_on_schedule));
+                }
+                if (meta.found - meta.already_on_schedule > meta.shown) {
+                    notes.push(@json(__('messages.import_showing_next', ['shown' => '__S__', 'found' => '__F__']), JSON_UNESCAPED_UNICODE)
+                        .replace('__S__', meta.shown).replace('__F__', meta.found - meta.already_on_schedule));
+                }
+                if (meta.text_truncated) {
+                    notes.push(@json(__('messages.import_text_truncated'), JSON_UNESCAPED_UNICODE));
+                }
+                notes.push(@json(__('messages.import_one_time_copy'), JSON_UNESCAPED_UNICODE));
+
+                return notes;
+            },
+
             canCreateAccount() {
                 // Always check event fields regardless of createAccount status
-                const eventFieldsValid = this.preview?.parsed?.every(event => {
-                    const hasName = event.event_name?.trim();
-                    const hasDate = event.event_date && event.event_start_time;
-
-                    // Any venue field (name, address, or city) is sufficient
-                    const hasVenueInfo = event.venue_name?.trim() ||
-                                         event.event_address?.trim() ||
-                                         event.event_city?.trim() ||
-                                         ({{ $role->isCurator() ? 'true' : 'false' }} && @json($role->city));
-
-                    // Check required import fields
-                    if (this.requiredFields.short_description && !event.short_description?.trim()) return false;
-                    if (this.requiredFields.description && !event.event_details?.trim()) return false;
-                    if (this.requiredFields.ticket_price && !event.ticket_price) return false;
-                    if (this.requiredFields.coupon_code && !event.coupon_code?.trim()) return false;
-                    if (this.requiredFields.registration_url && !event.registration_url?.trim()) return false;
-                    if (this.requiredFields.category_id && !event.category_id) return false;
-                    if (this.requiredFields.group_id && !event.group_id) return false;
-
-                    return hasName && hasVenueInfo && hasDate;
-                }) || false;
+                const eventFieldsValid = this.preview?.parsed?.every(event => this.isEventComplete(event)) || false;
                 
                 // If createAccount is checked, also validate user fields
                 if (this.createAccount) {
@@ -1736,6 +1932,274 @@
                 this.playNotificationChime();
             },
 
+            // Whether one event has what the save needs. Asked per row: one incomplete row used to
+            // disable Save on every card, with nothing saying why.
+            isEventComplete(event) {
+                const hasName = event.event_name?.trim();
+                const hasDate = event.event_date && event.event_start_time;
+
+                // Any venue field (name, address, or city) is sufficient. A row read from a link
+                // needs none: the server does not ask for one, and a feed often has no location.
+                const hasVenueInfo = event.venue_name?.trim() ||
+                                     event.event_address?.trim() ||
+                                     event.event_city?.trim() ||
+                                     ({{ $role->isCurator() ? 'true' : 'false' }} && @json($role->city)) ||
+                                     !! (this.preview && this.preview.meta);
+
+                // Check required import fields
+                if (this.requiredFields.short_description && !event.short_description?.trim()) return false;
+                if (this.requiredFields.description && !event.event_details?.trim()) return false;
+                if (this.requiredFields.ticket_price && !event.ticket_price) return false;
+                if (this.requiredFields.coupon_code && !event.coupon_code?.trim()) return false;
+                if (this.requiredFields.registration_url && !event.registration_url?.trim()) return false;
+                if (this.requiredFields.category_id && !event.category_id) return false;
+                if (this.requiredFields.group_id && !event.group_id) return false;
+
+                return !! (hasName && hasVenueInfo && hasDate);
+            },
+
+            // A card's own Save: its own row for an editor, everything (and the account fields)
+            // for a guest, who has one event.
+            canSaveRow(idx) {
+                return this.isGuestPage ? this.canCreateAccount : this.isEventComplete(this.preview.parsed[idx]);
+            },
+
+            // The dates of a series that could not be one repeating event arrive as separate
+            // rows sharing series.id. The list shows the first and treats them as one.
+            rowIndexes(idx) {
+                const series = this.preview.parsed[idx] && this.preview.parsed[idx].series;
+                if (! series) {
+                    return [idx];
+                }
+
+                return this.preview.parsed.map((event, i) => i).filter(i => this.preview.parsed[i].series && this.preview.parsed[i].series.id === series.id);
+            },
+
+            isRowVisible(idx) {
+                const series = this.preview.parsed[idx].series;
+
+                return ! series || series.position === 1;
+            },
+
+            rowSelected(idx) {
+                return this.rowIndexes(idx).some(i => this.selectedRows[i]);
+            },
+
+            rowComplete(idx) {
+                return this.rowIndexes(idx).every(i => this.isEventComplete(this.preview.parsed[i]));
+            },
+
+            rowState(idx) {
+                const indexes = this.rowIndexes(idx);
+                if (indexes.some(i => this.savingEvents[i])) return 'saving';
+                if (indexes.every(i => this.savedEvents[i])) return 'saved';
+                if (indexes.some(i => this.saveErrors[i])) return 'error';
+
+                return 'idle';
+            },
+
+            toggleRow(idx) {
+                const on = ! this.rowSelected(idx);
+                this.rowIndexes(idx).forEach(i => {
+                    this.selectedRows[i] = on && ! this.savedEvents[i] && this.isEventComplete(this.preview.parsed[i]);
+                });
+            },
+
+            toggleAll() {
+                const on = ! this.allSelected;
+                this.preview.parsed.forEach((event, i) => {
+                    this.selectedRows[i] = on && ! this.savedEvents[i] && this.isEventComplete(event);
+                });
+            },
+
+            // What is ticked when a preview arrives: everything that could be added as it stands
+            // and does not look like something the schedule already has.
+            resetSelection() {
+                this.selectedRows = this.preview.parsed.map(event => this.isEventComplete(event) && ! event.event_url);
+                this.expandedRow = null;
+                this.addSummary = null;
+                this.stoppedByLimit = false;
+                this.allDone = false;
+            },
+
+            parseLocalDate(value) {
+                const parts = /^(\d{4})-(\d{2})-(\d{2})/.exec(value || '');
+
+                return parts ? new Date(parseInt(parts[1]), parseInt(parts[2]) - 1, parseInt(parts[3])) : null;
+            },
+
+            // The row's date chip. A repeating event shows when it next happens, not the first
+            // date it ever had.
+            rowDate(idx) {
+                const event = this.preview.parsed[idx];
+                const date = this.parseLocalDate(event.recurrence && event.sort_at ? event.sort_at : event.event_date);
+                if (! date) {
+                    return { month: '', day: '?' };
+                }
+                const locale = document.documentElement.lang || undefined;
+
+                return { month: date.toLocaleDateString(locale, { month: 'short' }), day: String(date.getDate()) };
+            },
+
+            shortDate(value) {
+                const date = this.parseLocalDate(value);
+
+                return date ? date.toLocaleDateString(document.documentElement.lang || undefined, { day: 'numeric', month: 'short' }) : '';
+            },
+
+            repeatLabel(recurrence) {
+                const locale = document.documentElement.lang || undefined;
+                // 1 January 2023 was a Sunday, which is day 0.
+                const days = (recurrence.days || []).map(day => new Date(2023, 0, 1 + day).toLocaleDateString(locale, { weekday: 'short' })).join(', ');
+                let label = '';
+                if (recurrence.frequency === 'daily') {
+                    label = @json(__('messages.import_repeats_daily'), JSON_UNESCAPED_UNICODE);
+                } else if (recurrence.frequency === 'weekly') {
+                    label = @json(__('messages.import_repeats_weekly', ['days' => '__D__']), JSON_UNESCAPED_UNICODE).replace('__D__', days);
+                } else if (recurrence.frequency === 'every_n_weeks') {
+                    label = @json(__('messages.import_repeats_every_n_weeks', ['count' => '__N__', 'days' => '__D__']), JSON_UNESCAPED_UNICODE).replace('__N__', recurrence.interval).replace('__D__', days);
+                } else if (recurrence.frequency === 'yearly') {
+                    label = @json(__('messages.import_repeats_yearly'), JSON_UNESCAPED_UNICODE);
+                } else {
+                    label = @json(__('messages.import_repeats_monthly'), JSON_UNESCAPED_UNICODE);
+                }
+                if (recurrence.until) {
+                    label += ' ' + @json(__('messages.import_repeats_until', ['date' => '__U__']), JSON_UNESCAPED_UNICODE).replace('__U__', this.shortDate(recurrence.until));
+                }
+
+                return label;
+            },
+
+            // The line under the name: when, where, and how it repeats.
+            rowMeta(idx) {
+                const event = this.preview.parsed[idx];
+                const parts = [];
+
+                parts.push(event.is_all_day ? @json(__('messages.import_all_day'), JSON_UNESCAPED_UNICODE) : (event.event_start_time || ''));
+                if (event.recurrence) {
+                    parts.push(this.repeatLabel(event.recurrence));
+                } else if (event.series) {
+                    const dates = this.rowIndexes(idx);
+                    const last = this.preview.parsed[dates[dates.length - 1]];
+                    parts.push(@json(__('messages.import_series_dates', ['count' => '__N__', 'date' => '__D__']), JSON_UNESCAPED_UNICODE)
+                        .replace('__N__', dates.length).replace('__D__', this.shortDate(last.event_date)));
+                }
+                const venue = (this.eventVenueTypes[idx] === 'use_existing' && this.eventSelectedVenues[idx])
+                    ? this.eventSelectedVenues[idx].name
+                    : event.venue_name;
+                if (venue) {
+                    parts.push(venue);
+                }
+                if (event.local_time_zone) {
+                    parts.push(@json(__('messages.import_local_time', ['timezone' => '__Z__']), JSON_UNESCAPED_UNICODE).replace('__Z__', String(event.local_time_zone).replace(/_/g, ' ')));
+                }
+
+                return parts.filter(Boolean).join(' \u00B7 ');
+            },
+
+            // Why a row is not ticked or did not save, said on the row.
+            rowProblem(idx) {
+                const indexes = this.rowIndexes(idx);
+                const failed = indexes.find(i => this.saveErrors[i]);
+                if (failed !== undefined) {
+                    return this.saveErrors[failed];
+                }
+                if (this.rowState(idx) === 'saved') {
+                    return '';
+                }
+                if (! this.rowComplete(idx)) {
+                    return @json(__('messages.import_row_incomplete'), JSON_UNESCAPED_UNICODE);
+                }
+                if (this.preview.parsed[idx].event_url) {
+                    return @json(__('messages.import_already_listed'), JSON_UNESCAPED_UNICODE);
+                }
+
+                return '';
+            },
+
+            // Open one row's full card in place, and close whichever was open. The card's date
+            // pickers and editor exist only while it is open.
+            expandRow(idx) {
+                this.destroyDescriptionEditors();
+                this.expandedRow = this.expandedRow === idx ? null : idx;
+
+                if (this.expandedRow === null) {
+                    return;
+                }
+
+                this.$nextTick(() => {
+                    initializeFlatpickr();
+                    this.initDescriptionEditors();
+                    const venue = this.eventSelectedVenues[idx];
+                    const select = document.getElementById('selected_venue_' + idx);
+                    if (venue && select) {
+                        select.value = venue.id;
+                    }
+                    // Looked up now, for the one event on screen, instead of for every row at once.
+                    const performer = this.preview.parsed[idx].performers && this.preview.parsed[idx].performers[0];
+                    if (performer && ! performer.talent_id && performer.videos === null && ! performer.searching) {
+                        this.searchVideos(idx, 0);
+                    }
+                });
+            },
+
+            // Add every ticked row, one after another, saying how far along it is.
+            async addSelected() {
+                if (this.isAddingAll) {
+                    return;
+                }
+                const queue = this.preview.parsed.map((event, i) => i).filter(i => this.selectedRows[i] && ! this.savedEvents[i]);
+                if (! queue.length) {
+                    return;
+                }
+
+                this.destroyDescriptionEditors();
+                this.expandedRow = null;
+                this.errorMessage = null;
+                this.isAddingAll = true;
+                this.addSummary = null;
+                this.stoppedByLimit = false;
+                this.addProgress = { done: 0, total: queue.length };
+                window.onbeforeunload = () => true;
+
+                let added = 0;
+                let failed = 0;
+                for (const idx of queue) {
+                    let result = await this.handleSave(idx, true);
+                    // The request limit is sized so a full import stays under it. If it is met
+                    // anyway, wait it out once rather than fail every row after it.
+                    if (! result.ok && result.status === 429) {
+                        await new Promise(resolve => setTimeout(resolve, Math.min(result.retryAfter || 60, 65) * 1000));
+                        result = await this.handleSave(idx, true);
+                    }
+                    if (result.ok) {
+                        added++;
+                        this.selectedRows[idx] = false;
+                    } else {
+                        failed++;
+                        if (result.limit) {
+                            // Today's allowance is used up: every row after this would fail the same way.
+                            this.stoppedByLimit = true;
+                            break;
+                        }
+                    }
+                    this.addProgress.done++;
+                    await new Promise(resolve => setTimeout(resolve, 150));
+                }
+
+                window.onbeforeunload = null;
+                this.isAddingAll = false;
+                this.addSummary = { added, failed };
+
+                // Everything asked for is on the schedule: show that for a beat, then go and see it.
+                if (failed === 0 && ! this.stoppedByLimit) {
+                    this.allDone = true;
+                    setTimeout(() => {
+                        window.location.href = @json(route('role.view_admin', ['subdomain' => $role->subdomain, 'tab' => 'schedule']));
+                    }, 900);
+                }
+            },
+
             cancelReading() {
                 // The answer, when it comes, is for a request nobody is waiting on any more.
                 this.currentRequestId = null;
@@ -2007,8 +2471,10 @@
                                     error: null
                                 });
 
-                                // Only search for videos for the first performer when there are multiple performers
-                                if (performerIdx === 0 && ! performer.talent_id) {
+                                // Only search for videos for the first performer when there are multiple performers.
+                                // In a list it waits until the row is opened: a hundred lookups for
+                                // rows nobody may look at is a hundred lookups too many.
+                                if (performerIdx === 0 && ! performer.talent_id && ! this.listMode) {
                                     this.$nextTick(() => {
                                         this.searchVideos(eventIdx, performerIdx);
                                     });
@@ -2018,8 +2484,19 @@
                     });
                     }
 
+                    if (Array.isArray(this.preview.parsed)) {
+                        this.resetSelection();
+                    }
+
                     // Initialize datepickers after preview is loaded
                     this.$nextTick(() => {
+                        if (this.listMode) {
+                            // Say what arrived to whoever cannot see it arrive.
+                            const heading = document.getElementById('import-list-heading');
+                            if (heading) {
+                                heading.focus();
+                            }
+                        }
                         initializeFlatpickr();
                         // Initialize EasyMDE editors for description fields
                         this.initDescriptionEditors();
@@ -2137,8 +2614,13 @@
                 }
             },
 
-            async handleSave(idx) {
-                this.errorMessage = null;
+            // quiet: called for each row of a bulk add, which reports once at the end instead of
+            // raising a toast and a page-level error per row. Answers with what happened.
+            async handleSave(idx, quiet = false) {
+                const result = { ok: false, status: 0, limit: false, retryAfter: 0 };
+                if (! quiet) {
+                    this.errorMessage = null;
+                }
                 // Reset error state for this event
                 this.saveErrors[idx] = false;
                 // Set saving state for this event
@@ -2306,10 +2788,14 @@
                         if (response.status === 429) {
                             msg = @json(__('messages.too_many_attempts'));
                         }
+                        result.status = response.status;
+                        result.retryAfter = parseInt(response.headers.get('Retry-After')) || 0;
+                        result.limit = errorData.code === 'event_create_limit';
                         throw new Error(msg);
                     }
 
                     const data = await response.json();
+                    result.ok = true;
 
                     // Store the response data in savedEventData array
                     this.savedEvents[idx] = true;
@@ -2323,7 +2809,7 @@
                     // For guest users, automatically redirect to view the event
                     if ({{ isset($isGuest) && $isGuest ? 'true' : 'false' }} && data.event.view_url) {
                         window.location.href = data.event.view_url;
-                    } else {
+                    } else if (! quiet) {
                         // Show success message for non-guest users
                         Toastify({
                             text: @json(__("messages.event_created")),
@@ -2338,12 +2824,16 @@
                     
                 } catch (error) {
                     console.error('Error saving event:', error);
-                    this.errorMessage = error.message;
-                    this.saveErrors[idx] = error.message || 'An error occurred while saving the event';
+                    if (! quiet) {
+                        this.errorMessage = error.message;
+                    }
+                    this.saveErrors[idx] = error.message || @json(__('messages.error_occurred'), JSON_UNESCAPED_UNICODE);
                 } finally {
                     // Clear saving state for this event
                     this.savingEvents[idx] = false;
                 }
+
+                return result;
             },
 
             getYouTubeEmbedUrl(url) {
@@ -2377,6 +2867,11 @@
                 this.savedEvents = [];
                 this.savedEventData = [];
                 this.savingEvents = [];
+                this.saveErrors = [];
+                this.selectedRows = [];
+                this.expandedRow = null;
+                this.addSummary = null;
+                this.allDone = false;
                 this.errorMessage = null;
                 // Clear user creation fields
                 this.createAccount = false;
@@ -2389,6 +2884,10 @@
             },
 
             handleClearForNext() {
+                this.selectedRows = [];
+                this.expandedRow = null;
+                this.addSummary = null;
+                this.allDone = false;
                 this.destroyDescriptionEditors();
                 // Clear the form state to import another event
                 this.preview = null;
@@ -2562,11 +3061,12 @@
 
                     // Remove the event from the parsed array
                     this.preview.parsed.splice(idx, 1);
-                    // Remove the corresponding entry in savedEvents array
-                    this.savedEvents.splice(idx, 1);
-                    this.savedEventData.splice(idx, 1);
-                    // Remove the corresponding entry in savingEvents array
-                    this.savingEvents.splice(idx, 1);
+                    // And its entry in every array kept beside it. Four of these were missed,
+                    // so the venue chosen for one event slid onto the next after a removal.
+                    [this.savedEvents, this.savedEventData, this.savingEvents, this.saveErrors,
+                        this.eventVenueTypes, this.eventSelectedVenues, this.eventClaimVenue,
+                        this.selectedRows].forEach(list => list.splice(idx, 1));
+                    this.expandedRow = null;
                     
                     // If no events left, clear the preview
                     if (this.preview.parsed.length === 0) {

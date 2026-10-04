@@ -869,7 +869,9 @@ Route::middleware(['auth', 'verified', 'app_subdomain'])->group(function () {
     Route::delete('/{subdomain}/uncurate-event/{hash}', [EventController::class, 'uncurate'])->name('event.uncurate');
     Route::get('/{subdomain}/import', [EventController::class, 'showImportHub'])->name('event.show_import');
     Route::get('/{subdomain}/import/ai', [EventController::class, 'showImport'])->name('event.show_import_ai');
-    Route::post('/{subdomain}/import/ai', [EventController::class, 'import'])->name('event.import')->middleware('throttle:60,1');
+    // One request per event, and an import offers up to 100 at a time. At 60 a minute a full
+    // import met the limit two thirds of the way through.
+    Route::post('/{subdomain}/import/ai', [EventController::class, 'import'])->name('event.import')->middleware('throttle:120,1');
     Route::get('/{subdomain}/import/eventbrite', [EventbriteController::class, 'show'])->name('event.show_import_eventbrite');
     Route::post('/{subdomain}/import/eventbrite/connect', [EventbriteController::class, 'connect'])->name('event.eventbrite_connect')->middleware('throttle:10,1');
     Route::post('/{subdomain}/import/eventbrite/import', [EventbriteController::class, 'import'])->name('event.eventbrite_import')->middleware('throttle:60,1');

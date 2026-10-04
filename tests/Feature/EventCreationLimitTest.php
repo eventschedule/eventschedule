@@ -134,6 +134,8 @@ class EventCreationLimitTest extends TestCase
         $json = Request::create('/x', 'POST');
         $json->headers->set('Accept', 'application/json');
         $this->assertSame(422, $exception->render($json)->getStatusCode(), 'JSON clients (AI import, API) get a 422');
+        // The code is what a bulk import stops on: without it, it tries every remaining row.
+        $this->assertSame('event_create_limit', $exception->render($json)->getData(true)['code']);
 
         $web = Request::create('/x', 'POST');
         $this->assertInstanceOf(RedirectResponse::class, $exception->render($web), 'native form submissions get a redirect back');

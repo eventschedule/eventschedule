@@ -16,7 +16,9 @@ class EventCreationLimitException extends \Exception
         $message = $this->getMessage() ?: __('messages.event_create_daily_limit_reached');
 
         if ($request->expectsJson()) {
-            return response()->json(['error' => $message], 422);
+            // The code is what lets a bulk import stop at the first refusal instead of trying,
+            // and failing, every remaining row.
+            return response()->json(['error' => $message, 'code' => 'event_create_limit'], 422);
         }
 
         return back()->withInput()->with('error', $message)->withErrors(['event' => $message]);

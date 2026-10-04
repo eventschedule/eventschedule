@@ -116,6 +116,33 @@ class ImportPageRenderTest extends TestCase
         $this->assertStringNotContainsString('More Options', $html);
     }
 
+    public function test_two_or_more_events_are_a_list_to_choose_from(): void
+    {
+        $html = $this->importPage();
+
+        // One row per event with the full card on request, a count on the button, and a bar
+        // that says how far a bulk add has got.
+        $this->assertStringContainsString('v-if="listMode && isRowVisible(idx)"', $html);
+        $this->assertStringContainsString('v-if="!listMode || expandedRow === idx"', $html);
+        $this->assertStringContainsString('@click="addSelected"', $html);
+        $this->assertStringContainsString('role="progressbar"', $html);
+        $this->assertStringContainsString('id="import-list-heading"', $html);
+        // The zone the times are in is on the page, with a way to change it.
+        $this->assertStringContainsString('Times shown in __Z__', $html);
+        $this->assertStringContainsString(route('role.edit', ['subdomain' => $this->role->subdomain]), $html);
+        // The old "Save All" header is for a single result now.
+        $this->assertStringContainsString('preview.parsed.length > 0 && !listMode', $html);
+
+        // A full import is up to 100 saves, one request each.
+        $this->assertContains('throttle:120,1', app('router')->getRoutes()->getByName('event.import')->gatherMiddleware());
+
+        // The guest form has one event and none of this.
+        $guest = $this->guestPage();
+        $this->assertStringNotContainsString('isRowVisible(idx)"', $guest);
+        $this->assertStringNotContainsString('@click="addSelected"', $guest);
+        $this->assertStringNotContainsString('id="import-list-heading"', $guest);
+    }
+
     public function test_the_old_source_list_address_lands_on_the_import_page(): void
     {
         $this->actingAs($this->owner)
