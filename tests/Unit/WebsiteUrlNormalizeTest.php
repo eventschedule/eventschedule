@@ -171,15 +171,15 @@ class WebsiteUrlNormalizeTest extends TestCase
     }
 
     /**
-     * The rule above is only worth anything if parseEvent() actually calls the non-stripping one,
-     * and swapping the two would leave every other test green while silently deleting sellers'
-     * campaign attribution. parseEvent() reaches the provider through raw curl, so it cannot be
-     * driven without a network call - pinned by inspection, the way AiParsedFieldLengthTest pins
-     * the clamp loop in the same method.
+     * The rule above is only worth anything if the import actually calls the non-stripping one,
+     * and swapping the two would silently delete sellers' campaign attribution. Pinned by
+     * inspection of enrichParsedEvents(), where parseEvent() does this since its enrichment
+     * moved there (the link, feed and calendar imports go through the same lines).
+     * EnrichParsedEventsTest drives it too: a feed link keeps its utm_source.
      */
     public function test_gemini_unwraps_the_registration_url_without_stripping_it(): void
     {
-        $method = new \ReflectionMethod(GeminiUtils::class, 'parseEvent');
+        $method = new \ReflectionMethod(GeminiUtils::class, 'enrichParsedEvents');
         $source = implode('', array_slice(
             file($method->getFileName()),
             $method->getStartLine() - 1,
@@ -203,7 +203,7 @@ class WebsiteUrlNormalizeTest extends TestCase
         $this->assertStringContainsString(
             'UrlUtils::unwrapRedirect(',
             $code,
-            'parseEvent() must unwrap link shims on registration_url'
+            'enrichParsedEvents() must unwrap link shims on registration_url'
         );
 
         $this->assertStringNotContainsString(
