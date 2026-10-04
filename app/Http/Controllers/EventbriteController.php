@@ -2,9 +2,11 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Event;
 use App\Models\Role;
 use App\Repos\EventRepo;
 use App\Services\EventbriteService;
+use App\Utils\ImportRun;
 use App\Utils\MarkdownUtils;
 use App\Utils\UrlUtils;
 use Carbon\Carbon;
@@ -31,6 +33,8 @@ class EventbriteController extends Controller
         if (! $role->isPro()) {
             abort(403, __('messages.not_authorized'));
         }
+
+        ImportRun::begin($role);
 
         return view('event.import-eventbrite', [
             'role' => $role,
@@ -281,7 +285,11 @@ class EventbriteController extends Controller
                 return auth()->user();
             });
 
-            $event = $this->eventRepo->saveEvent($role, $eventRequest, null, false);
+            $event = $this->eventRepo->saveEvent(
+                $role, $eventRequest, null, false,
+                importSource: Event::IMPORT_EVENTBRITE,
+                importBatch: ImportRun::batch($role),
+            );
 
             // Store downloaded image
             if ($imageFilename) {

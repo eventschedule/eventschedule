@@ -390,7 +390,7 @@ class EventRepo
      * caller grants explicitly, and it defaults to false, because there is nothing about the
      * request itself that can tell the two cases apart safely - see the gate below.
      */
-    public function saveEvent($currentRole, $request, $event = null, $followNewRoles = true, ?string $timezoneOverride = null, bool $allowExistingVenueClaim = false)
+    public function saveEvent($currentRole, $request, $event = null, $followNewRoles = true, ?string $timezoneOverride = null, bool $allowExistingVenueClaim = false, ?string $importSource = null, ?string $importBatch = null)
     {
         $this->aiImageRejected = false;
 
@@ -783,6 +783,11 @@ class EventRepo
             $event->user_id = $user->id;
             $event->is_guest_submission = $isGuestSubmission;
             $event->creator_role_id = $creatorRoleId;
+            // Which import made this event, and in which sitting. Stamped here, once, from what
+            // the calling controller passed - neither column is fillable, so the fill() below
+            // cannot write them from the request.
+            $event->import_source = in_array($importSource, Event::IMPORT_SOURCES, true) ? $importSource : null;
+            $event->import_batch = $event->import_source ? $importBatch : null;
         }
 
         // Decode event-level custom_fields from JSON string

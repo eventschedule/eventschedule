@@ -913,6 +913,7 @@ class GoogleCalendarService
         $event = new Event;
         $event->user_id = $role->user_id;
         $event->creator_role_id = $role->id;
+        $event->import_source = Event::IMPORT_GOOGLE;
         $event->name = $googleEvent['summary'] ?: __('messages.untitled_event');
         $event->description = MarkdownUtils::convertHtmlToMarkdown($googleEvent['description'] ?? '');
 

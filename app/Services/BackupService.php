@@ -114,6 +114,11 @@ class BackupService
         // round-trip already skip it - listed here so a future $fillable addition for event
         // cloning cannot silently reopen the backup loophole the stamp exists to close.
         'tickets_grandfathered_at',
+        // How and in which sitting an event was imported on THIS install. Non-fillable, so both
+        // halves of the round-trip already skip them; listed so that stays a decision. A restored
+        // event was not imported by anyone, and a batch id from elsewhere must never line up with
+        // a live one here (it is what "Undo this import" deletes by).
+        'import_source', 'import_batch',
         // Points at a seating_plans row on THIS install. It is fillable so event cloning
         // carries it, and both the exporter and importEvent() walk getFillable() - so a raw id
         // would either abort the WHOLE restore on the foreign key, or (restoring onto the same

@@ -714,6 +714,7 @@ class CalDAVService
             $event = new Event;
             $event->user_id = $role->user_id;
             $event->creator_role_id = $role->id;
+            $event->import_source = Event::IMPORT_CALDAV;
             $event->name = $eventData['summary'] ?: __('messages.untitled_event');
 
             // CalDAV descriptions may contain HTML; convert to Markdown (the storage

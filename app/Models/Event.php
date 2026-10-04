@@ -258,6 +258,35 @@ class Event extends Model
      */
     public const DEFAULT_COUPON_DISCOUNT_TYPE = 'fixed';
 
+    /**
+     * What events.import_source can hold: how an event that was not typed into the event form
+     * got here. Null means made by hand, or created before this was recorded.
+     *
+     * import_source and import_batch are deliberately NOT fillable. EventRepo::saveEvent() fills
+     * an Event from the whole request, so a fillable column would be writable from every event
+     * form; the code that creates the event stamps them instead.
+     */
+    public const IMPORT_AI = 'ai';                 // text or a flyer read by the model
+
+    public const IMPORT_ICS = 'ics';               // a calendar feed
+
+    public const IMPORT_PAGE = 'page';             // a web page's own event data
+
+    public const IMPORT_PAGE_AI = 'page_ai';       // a web page's text read by the model
+
+    public const IMPORT_EVENTBRITE = 'eventbrite';
+
+    public const IMPORT_GOOGLE = 'google';
+
+    public const IMPORT_MICROSOFT = 'microsoft';
+
+    public const IMPORT_CALDAV = 'caldav';
+
+    public const IMPORT_SOURCES = [
+        self::IMPORT_AI, self::IMPORT_ICS, self::IMPORT_PAGE, self::IMPORT_PAGE_AI,
+        self::IMPORT_EVENTBRITE, self::IMPORT_GOOGLE, self::IMPORT_MICROSOFT, self::IMPORT_CALDAV,
+    ];
+
     /** How long an event stays in the sitemaps after it ends. See constrainSitemapWindow(). */
     public const SITEMAP_GRACE_DAYS = 30;
 

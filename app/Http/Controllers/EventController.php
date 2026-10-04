@@ -53,6 +53,7 @@ use App\Utils\GalleryUtils;
 use App\Utils\GeminiUtils;
 use App\Utils\HoneypotUtils;
 use App\Utils\ImageUtils;
+use App\Utils\ImportRun;
 use App\Utils\MoneyUtils;
 use App\Utils\UrlUtils;
 use App\Utils\VenueUtils;
@@ -2054,6 +2055,9 @@ class EventController extends Controller
 
         $currencies = json_decode(file_get_contents(base_path('storage/currencies.json')));
 
+        // The events saved from this visit share a batch (events.import_batch).
+        ImportRun::begin($role);
+
         return view('event.admin-import', [
             'role' => $role,
             'venues' => $venues,
@@ -2760,7 +2764,12 @@ class EventController extends Controller
         //
         // This is the only endpoint whose UI offers "I manage this venue" for a venue that
         // already exists, and the isEditor() check above is what earns it that capability.
-        $event = $this->eventRepo->saveEvent($role, $request, null, true, $role->captureTimezone(), allowExistingVenueClaim: true);
+        $event = $this->eventRepo->saveEvent(
+            $role, $request, null, true, $role->captureTimezone(),
+            allowExistingVenueClaim: true,
+            importSource: Event::IMPORT_AI,
+            importBatch: ImportRun::batch($role),
+        );
 
         if ($request->social_image) {
             $tempDir = storage_path('app/temp');
