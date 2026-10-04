@@ -785,9 +785,12 @@ class EventRepo
             $event->creator_role_id = $creatorRoleId;
             // Which import made this event, and in which sitting. Stamped here, once, from what
             // the calling controller passed - neither column is fillable, so the fill() below
-            // cannot write them from the request.
-            $event->import_source = in_array($importSource, Event::IMPORT_SOURCES, true) ? $importSource : null;
-            $event->import_batch = $event->import_source ? $importBatch : null;
+            // cannot write them from the request. Only when there is an import to name: an
+            // event made by hand does not mention the columns at all.
+            if (in_array($importSource, Event::IMPORT_SOURCES, true)) {
+                $event->import_source = $importSource;
+                $event->import_batch = $importBatch;
+            }
         }
 
         // Decode event-level custom_fields from JSON string

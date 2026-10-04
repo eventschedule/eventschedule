@@ -903,7 +903,9 @@ class MicrosoftCalendarService
         $event = new Event;
         $event->user_id = $role->user_id;
         $event->creator_role_id = $role->id;
-        $event->import_source = Event::IMPORT_MICROSOFT;
+        if (Event::importColumnsReady()) {
+            $event->import_source = Event::IMPORT_MICROSOFT;
+        }
         $event->name = ($item['subject'] ?? '') ?: __('messages.untitled_event');
         $event->description = MarkdownUtils::convertHtmlToMarkdown($item['body']['content'] ?? '');
 

@@ -114,6 +114,8 @@ checklist:
 - [Realtime](#realtime-adminrealtime)
 - [Growth data pull](#growth-data-pull-apiinternalgrowth)
 - [Cache pruning](#cache-pruning-appprune-cache)
+- [Event import](#event-import-2026-10-05) (a link, a list to choose from, Undo, and Google
+  Calendar as a read-only source; nothing to do before the deploy, three checks after)
 
 ### Checklist
 
@@ -277,6 +279,69 @@ stays with Google until its retention setting runs out or the property is delete
 To turn it back on, set `ANALYTICS_ID` again and move `$lastUpdated`: every one of those
 statements comes back by itself. The one exception is the accessibility statement, whose list of
 third parties no longer mentions analytics either way.
+
+### Event import (2026-10-05)
+
+**What ships:**
+- The import page (Actions > Import Events) takes a pasted link as well as text or an image: a
+  calendar feed and a page's own event data are read directly, any other page is read by the model
+  and counts as one AI parse. Results are a list with one "Add N events" button, an import ends
+  on the schedule with an "Events added" panel, and "Undo this import" removes what it added.
+- Google Calendar is a source on that page for a schedule's owner. It asks Google for
+  `calendar.readonly` only. No new OAuth scope: it is a subset of what the app already requests.
+- `/{subdomain}/import` redirects to `/{subdomain}/import/ai`; the source list it showed is gone.
+- The growth payload is `schema_version` 12 (`events_by_source.imported*`, `daily.events_imported`).
+  `events_by_source.google` and `features.gcal` are counted from other tables than before: do not
+  compare either with an earlier pull.
+
+**Behaviour that changes for people already using the app:**
+- **A schedule's Google sync is its owner's alone.** Other team members no longer see "Sync
+  Events" or the calendar and direction controls, and `POST /google-calendar/sync/{subdomain}`
+  answers 403 for them. Followers could drive it before, which was the bug.
+- **The Google webhook pulls with the owner's token.** A schedule whose pulls only ever worked
+  through another member's Google connection stops pulling until the owner connects.
+- **A failed Google connect shows our own message.** Google's error text is logged, not shown. A
+  grant with the calendar permission unticked is refused and the existing connection kept.
+- **A connection made from the import page is read-only.** "To Google" and "both ways" are off
+  for it in Edit Schedule > Integrations until the owner presses "Allow at Google". Existing
+  connections are unaffected: `users.google_token_scopes` is NULL for them, which means the full
+  grant.
+- **With no AI key, the editor's import page renders** (links only) instead of the setup panel.
+  Hosted has a key, so this is a selfhost change.
+- `event.import` allows 120 requests a minute per user, up from 60.
+
+**Migrations**, both quick, each waits at most 10 seconds for its lock and can be re-run:
+
+| Migration | What it does |
+|---|---|
+| `2026_10_04_000003_add_import_source_to_events_table` | Two nullable columns at the end of `events` (`import_source`, `import_batch`) and an index on `import_batch`. No backfill |
+| `2026_10_04_000004_add_google_token_scopes_to_users_table` | One nullable column at the end of `users` |
+
+The scheduler worker starts on the new code while the web container is still migrating. Nothing
+it creates depends on the new columns during that minute: an event made by hand does not mention
+them, and the calendar syncs stamp `import_source` only once `Event::importColumnsReady()` says
+the column is there.
+
+**No new env vars and no new scheduled entries.**
+
+**After the deploy:**
+1. **As a schedule's owner, open Actions > Import Events.** Paste a public calendar link (a
+   Google Calendar "public address in iCal format" works) and confirm a list comes back. Add two
+   events, land on the panel, and press Undo.
+2. **On the same page choose Google Calendar > Connect.** Google's screen must say it will
+   *see* your calendars, not edit them. This is the one path that was never run against Google
+   before shipping: no development machine has the credentials. Pick a calendar and confirm its
+   events list.
+3. **Check a schedule that already syncs to Google still does:** edit one of its events and see
+   the change arrive. Then search the log for `Failed to sync individual Google Calendar event`
+   for the minutes around the deploy.
+
+**Watch:** `storage/app/temp` on the web container. A link read can fetch up to 25 preview
+pictures; each read now removes `event_*` files older than a day, which is the first thing that
+ever has.
+
+**Undo:** revert and redeploy. Both migrations' `down()` drop only what they added, and old code
+runs fine on the new schema.
 
 ### Conversion, churn and owner emails
 

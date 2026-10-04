@@ -287,6 +287,20 @@ class Event extends Model
         self::IMPORT_EVENTBRITE, self::IMPORT_GOOGLE, self::IMPORT_MICROSOFT, self::IMPORT_CALDAV,
     ];
 
+    /**
+     * Whether the import columns are in the database yet. The scheduler worker starts on new
+     * code while the web container is still running that release's migrations, and for that
+     * minute a calendar sync that names its source fails on an unknown column: the event is
+     * skipped, the sync moves its cursor on, and it is never pulled again. The syncs ask this
+     * before stamping. One query per process, and removable a release after 2026-10.
+     */
+    public static function importColumnsReady(): bool
+    {
+        static $ready = null;
+
+        return $ready ??= \Illuminate\Support\Facades\Schema::hasColumn('events', 'import_source');
+    }
+
     /** How long an event stays in the sitemaps after it ends. See constrainSitemapWindow(). */
     public const SITEMAP_GRACE_DAYS = 30;
 
