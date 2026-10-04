@@ -42,7 +42,7 @@
 
         <div class="doc-callout doc-callout-info">
             <div class="doc-callout-title">Optional Setup</div>
-            <p>AI features are entirely optional. With no keys configured, the AI buttons are hidden and the import screen shows a <strong class="text-gray-900 dark:text-white">Setup Required: Gemini API Key</strong> panel walking through <strong class="text-gray-900 dark:text-white">Get API Key</strong>, <strong class="text-gray-900 dark:text-white">Add to Environment</strong> and <strong class="text-gray-900 dark:text-white">Restart Application</strong>. Despite the heading, an OpenAI key satisfies it just as well. Nothing else in the app is affected.</p>
+            <p>AI features are entirely optional. With no keys configured, the AI buttons are hidden. The import screen still takes a link to a calendar or to a page that publishes its events as data, since reading those involves no AI, and shows the installation's admin a <strong class="text-gray-900 dark:text-white">Get API Key</strong> panel marked <em>Optional</em>. The public submission form, which reads only text and images, shows a <strong class="text-gray-900 dark:text-white">Setup Required: Gemini API Key</strong> panel instead. Both walk through <strong class="text-gray-900 dark:text-white">Get API Key</strong>, <strong class="text-gray-900 dark:text-white">Add to Environment</strong> and <strong class="text-gray-900 dark:text-white">Restart Application</strong>. Despite the heading, an OpenAI key satisfies it just as well. Nothing else in the app is affected.</p>
         </div>
     </section>
 
@@ -327,9 +327,9 @@
 
         <div class="doc-fields">
             <div class="doc-field">
-                <h3 class="font-semibold text-gray-900 dark:text-white mb-2">"Setup Required: Gemini API Key" on the import screen</h3>
+                <h3 class="font-semibold text-gray-900 dark:text-white mb-2">"Setup Required: Gemini API Key" on the submission form, or "Get API Key" on the import screen</h3>
                 <ul class="doc-list text-sm">
-                    <li>This panel shows when neither key is readable, so check that <code class="doc-inline-code">GEMINI_API_KEY</code> or <code class="doc-inline-code">OPENAI_API_KEY</code> is set in <code class="doc-inline-code">.env</code></li>
+                    <li>Either panel shows when neither key is readable, so check that <code class="doc-inline-code">GEMINI_API_KEY</code> or <code class="doc-inline-code">OPENAI_API_KEY</code> is set in <code class="doc-inline-code">.env</code></li>
                     <li>Run <code class="doc-inline-code">php artisan config:clear</code>, and <code class="doc-inline-code">php artisan config:cache</code> again if you cache your config</li>
                     <li>Confirm the web server user can read the <code class="doc-inline-code">.env</code> file</li>
                 </ul>

@@ -137,10 +137,10 @@
         </div>
 
         <ul class="doc-list mb-6">
-            <li><strong class="text-gray-900 dark:text-white">Repeating events</strong> - A repeating calendar entry arrives as one repeating event when your schedule can express its rule: daily, weekly on chosen days, every few weeks, monthly or yearly, with an end date or a number of occurrences. A rule it cannot express, such as the last Friday of every month, arrives as one row holding its next 12 dates</li>
+            <li><strong class="text-gray-900 dark:text-white">Repeating events</strong> - A repeating calendar entry arrives as one repeating event when your schedule can express its rule: daily, weekly on chosen days, every few weeks, monthly or yearly, with an end date or a number of occurrences. A rule it cannot express, such as the last Friday of every month, arrives as one row holding its next 12 dates. So does a series with a moved date, and one whose clock time would drift on your schedule because it is set in another time zone</li>
             <li><strong class="text-gray-900 dark:text-white">Time zone</strong> - A line above the results reads <em>Times shown in</em> followed by your schedule's time zone, with a link to change it. On a talent or curator schedule, an event that states its own time zone keeps its local clock time, so an 8 PM show in another city stays 8 PM, and its row says so</li>
             <li><strong class="text-gray-900 dark:text-white">All-day entries</strong> - Shown as <em>All day</em>, and saved starting at midnight for the full day</li>
-            <li><strong class="text-gray-900 dark:text-white">Left out</strong> - From a calendar or a page's event data: cancelled entries, entries marked private, past events, and events your schedule already has. The results say how many were left out because you already have them. From a page the AI read, a likely duplicate comes back unticked instead</li>
+            <li><strong class="text-gray-900 dark:text-white">Left out</strong> - From a calendar or a page's event data: cancelled entries, entries marked private, past events, and events your schedule already has, including dates a repeating event of the same name already covers. The results say how many were left out because you already have them, and how many entries could not be read at all. From a page the AI read, a likely duplicate comes back unticked instead</li>
             <li><strong class="text-gray-900 dark:text-white">More than 100</strong> - A read returns up to 100 events and says how many more there are. Add those, then read the link again for the rest</li>
             <li><strong class="text-gray-900 dark:text-white">Missing some?</strong> - When a page's event data does not cover everything on the page, <strong class="text-gray-900 dark:text-white">Missing some? Read the whole page</strong> reads the page's text with AI instead</li>
         </ul>
@@ -267,7 +267,7 @@ Tickets: $20</code></pre>
 
         <ul class="doc-list mb-6">
             <li><strong class="text-gray-900 dark:text-white">Several events at once</strong> - Paste a whole list. If the text names several distinct performers the AI splits them into separate events, and events that share a start time and address are merged back into one event with several participants</li>
-            <li><strong class="text-gray-900 dark:text-white">Sensible dates only</strong> - A parsed date that is more than three days in the past, or more than about two months away, is left blank for you to fill in rather than guessed. This applies to whatever the AI reads; a calendar feed or a page's own event data keeps the dates it gives</li>
+            <li><strong class="text-gray-900 dark:text-white">Sensible dates only</strong> - A parsed date that is more than three days in the past is left blank for you to fill in rather than guessed. This applies to whatever the AI reads; a calendar feed or a page's own event data keeps the dates it gives</li>
             <li><strong class="text-gray-900 dark:text-white">Other languages</strong> - For a schedule whose language is not English, the AI keeps the original language and adds English translations alongside it</li>
             <li><strong class="text-gray-900 dark:text-white">Which fields appear</strong> - Name, date and time, and venue are always on the card. The extra fields (short description, description, price, coupon code and its discount, registration URL, category and sub-schedule) are switched on per schedule, and can be marked required. The sub-schedule field only appears once the schedule has sub-schedules</li>
             <li><strong class="text-gray-900 dark:text-white">Performer videos</strong> - On a curator schedule, when a parsed performer does not match a talent schedule you already have, the card searches YouTube for that name and offers up to six clips. Pick one and it becomes the new talent schedule's video</li>
@@ -327,7 +327,8 @@ Tickets: $20</code></pre>
             <li><strong class="text-gray-900 dark:text-white">Details</strong> - Click a row to open its full card in place, where every field can be edited. One row is open at a time</li>
             <li><strong class="text-gray-900 dark:text-white">Rows that start unticked</strong> - A row missing a name, date or time reads <em>Add a name, date and time</em>. A row that matches an event you already have reads <em>Looks like one you already have</em>. Open the row to fix or check it, then tick it</li>
             <li><strong class="text-gray-900 dark:text-white">Adding</strong> - The button at the foot of the list carries the count, for example <strong class="text-gray-900 dark:text-white">Add 12 events</strong>. While it works a bar reads <em>Saving 3 of 12</em> and each row shows a tick as it lands. When everything is added you are taken to your schedule</li>
-            <li><strong class="text-gray-900 dark:text-white">When something does not save</strong> - The page stays, says how many were added and how many need attention, and shows the reason on each row concerned</li>
+            <li><strong class="text-gray-900 dark:text-white">When something does not save</strong> - The page stays, says how many were added and how many need attention, and shows the reason on each row concerned. Such a row stays ticked to be tried again: untick it to leave it out</li>
+            <li><strong class="text-gray-900 dark:text-white">A series listed by date</strong> - One row stands for all of its dates. Ticking, removing or saving it applies to every date, and what you change on its card (its name, its venue) is carried to each of them</li>
             <li><strong class="text-gray-900 dark:text-white">Start over</strong> - Clears the results and returns to the empty box, after asking when there are events you have not added yet</li>
         </ul>
 
@@ -342,7 +343,7 @@ Tickets: $20</code></pre>
         <ul class="doc-list mb-6">
             <li><strong class="text-gray-900 dark:text-white">Add to your website</strong> - Opens the embed dialog on the calendar, see <a href="{{ route('marketing.docs.sharing') }}#embed" class="doc-link">Embedding on Your Website</a></li>
             <li><strong class="text-gray-900 dark:text-white">View schedule</strong> - Opens the public page your guests see</li>
-            <li><strong class="text-gray-900 dark:text-white">Import more</strong> - Returns to the import page</li>
+            <li><strong class="text-gray-900 dark:text-white">Import more</strong> - Returns to the import page. After an import of fewer than five events this button reads <strong class="text-gray-900 dark:text-white">Add more events</strong> and is the one highlighted</li>
             <li><strong class="text-gray-900 dark:text-white">Undo this import</strong> - Removes the events that import added, after asking you to confirm</li>
         </ul>
 

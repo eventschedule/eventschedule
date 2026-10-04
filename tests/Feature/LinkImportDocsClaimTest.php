@@ -109,7 +109,7 @@ class LinkImportDocsClaimTest extends TestCase
         $page = $this->source(self::AI_PAGE);
         $section = Str::between($page, '<section id="crosses"', '</section>');
         $this->assertStringContainsString('A link to where they are listed', $section);
-        foreach (['A sign-in wall does not', 'Facebook and Instagram', 'A private calendar cannot be read from its link', 'one-time copy, not a subscription', 'not on the public submission form'] as $limit) {
+        foreach (['A sign-in wall does not', 'Facebook and Instagram', 'A private calendar cannot be read from its link', 'one-time copy, not a subscription', 'not on the public submission form', 'reported as one with no events found'] as $limit) {
             $this->assertStringContainsString($limit, $section, "The section on what the import reads no longer says: {$limit}");
         }
         $answer = Str::between($page, "'q' => 'What can the AI parser read?'", '],');
@@ -148,6 +148,7 @@ class LinkImportDocsClaimTest extends TestCase
             'import_row_incomplete', 'import_already_listed', 'import_start_over', 'import_all_day',
             'eventbrite_select_all', 'add_image', 'get_api_key',
             'import_panel_undo', 'import_panel_embed', 'import_panel_view_schedule', 'import_panel_import_more',
+            'import_panel_add_more',
             // Google Calendar as a source.
             'google_calendar_integration', 'connect_google_calendar', 'import_google_read_only',
             'import_google_choose_calendar', 'import_google_main_calendar', 'import_google_show_events',
@@ -174,6 +175,17 @@ class LinkImportDocsClaimTest extends TestCase
     {
         $guide = $this->source(self::GUIDE);
         $page = $this->source(self::AI_PAGE);
+
+        // The parser blanks a date more than three days past. It has never blanked a date for
+        // being far ahead (ParseEventCharacterizationTest pins that), and the guide said it did.
+        $this->assertStringContainsString('more than three days in the past is left blank', $guide);
+        $this->assertStringNotContainsString('two months away', $guide);
+
+        // With no AI key the import screen takes links, and says so; it used to be described
+        // as showing a "Setup Required" panel and nothing else.
+        $selfhost = $this->source('resources/views/marketing/docs/selfhost/ai.blade.php');
+        $this->assertStringContainsString('The import screen still takes a link', $selfhost);
+        $this->assertStringNotContainsString('the import screen shows a <strong class="text-gray-900 dark:text-white">Setup Required', $selfhost);
 
         $this->assertStringContainsString('Up to '.LinkImportService::MAX_EVENTS.' events come back per read', $guide);
         $this->assertStringContainsString('returns up to '.LinkImportService::MAX_EVENTS.' events', $guide);

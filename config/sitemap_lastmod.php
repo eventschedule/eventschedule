@@ -64,7 +64,7 @@ return [
     '/docs/selfhost' => '2026-09-25',
     '/docs/selfhost/accessibility' => '2026-09-10',
     '/docs/selfhost/admin' => '2026-10-04',
-    '/docs/selfhost/ai' => '2026-09-10',
+    '/docs/selfhost/ai' => '2026-10-04',
     '/docs/selfhost/boost' => '2026-09-23',
     '/docs/selfhost/email' => '2026-09-17',
     '/docs/selfhost/federation' => '2026-09-17',

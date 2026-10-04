@@ -860,7 +860,7 @@
                 <div class="es-spark-card flex h-full flex-col p-7" data-reveal="panel">
                     <span class="es-spark-num mb-4">NOT IN</span>
                     <h3 class="es-spark-ink mb-3 text-xl font-bold">A page behind a sign-in</h3>
-                    <p class="es-spark-muted mb-5">Facebook and Instagram do not let other sites read their pages. A private calendar cannot be read from its link. A page that only fills in its events after it loads has nothing in it to read. The import tells you which of those it met instead of guessing, and for all three a screenshot crosses the gap: drop it in the same box.</p>
+                    <p class="es-spark-muted mb-5">Facebook and Instagram do not let other sites read their pages. A private calendar cannot be read from its link. A page that only fills in its events after it loads has nothing in it to read. A Facebook or Instagram link and a private Google calendar are each named for what they are; a page that gives up nothing is reported as one with no events found. For all three a screenshot crosses the gap: drop it in the same box.</p>
                     <p class="es-spark-muted mt-auto text-sm">
                         Reading a link is something you do, once. A <a href="{{ marketing_url('/selfhost') }}" class="es-spark-link font-semibold hover:underline">selfhosted install</a> can also be given a list of source pages and cities and swept once a day by the import command. That runs on your own server with your own keys, so it is not part of the hosted service.
                     </p>
