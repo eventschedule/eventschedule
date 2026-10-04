@@ -492,7 +492,7 @@
                     </tr>
                     <tr>
                         <td><span class="font-semibold text-gray-900 dark:text-white">Account followers</span></td>
-                        <td>Presses Follow while signed in on eventschedule.com</td>
+                        <td>Presses Follow while signed in on eventschedule.com, or submits an event through your curator submission form (the form says so)</td>
                         <td>Nothing</td>
                         <td>Yes, through the All Followers segment or the default send</td>
                     </tr>

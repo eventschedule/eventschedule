@@ -25,13 +25,19 @@ class ConsentCategoriesTest extends TestCase
     use CreatesScheduleData;
     use RefreshDatabase;
 
-    public function test_the_mirror_cookie_maps_to_categories(): void
+    public function test_the_consent_cookie_maps_to_categories(): void
     {
+        $now = time();
         $cases = [
-            'analytics.marketing' => [true, true],
-            'marketing.analytics' => [true, true],
-            'analytics' => [true, false],
-            'marketing' => [false, true],
+            "analytics.marketing.{$now}" => [true, true],
+            "marketing.analytics.{$now}" => [true, true],
+            "analytics.{$now}" => [true, false],
+            "marketing.{$now}" => [false, true],
+            "denied.{$now}" => [false, false],
+            // Undated, which only a version-1 value may be.
+            'analytics.marketing' => [false, false],
+            // Made more than twelve months ago: lapsed, whatever the browser still sends.
+            'analytics.marketing.'.($now - 366 * 24 * 60 * 60) => [false, false],
             // Version 1, from a banner that only ever said "analytics": never marketing.
             'granted' => [true, false],
             'denied' => [false, false],
@@ -49,9 +55,32 @@ class ConsentCategoriesTest extends TestCase
         $this->assertFalse(consent_granted('marketing', Request::create('/')), 'no cookie at all');
     }
 
+    /**
+     * An undated version-1 "granted" cannot lapse after twelve months, so it stops counting on a
+     * fixed day; consent-state.js and consent_granted() must agree on which.
+     */
+    public function test_a_version_one_grant_stops_counting_on_the_same_day_in_php_and_js(): void
+    {
+        $request = Request::create('/', 'GET', [], ['cookie_consent' => 'granted']);
+
+        $this->travelTo(\Carbon\Carbon::parse('2027-01-03 23:59:59'));
+        $this->assertTrue(consent_granted('analytics', $request));
+
+        $this->travelTo(\Carbon\Carbon::parse('2027-01-04 00:00:00'));
+        $this->assertFalse(consent_granted('analytics', $request));
+
+        $this->travelBack();
+
+        $this->assertStringContainsString(
+            'Date.UTC(2027, 0, 4)',
+            file_get_contents(resource_path('js/consent-state.js')),
+            'consent-state.js must stop honouring "granted" on the same day as consent_granted()'
+        );
+    }
+
     public function test_global_privacy_control_refuses_every_category(): void
     {
-        $request = Request::create('/', 'GET', [], ['cookie_consent' => 'analytics.marketing'], [], ['HTTP_SEC_GPC' => '1']);
+        $request = Request::create('/', 'GET', [], ['cookie_consent' => 'analytics.marketing.'.time()], [], ['HTTP_SEC_GPC' => '1']);
 
         $this->assertFalse(consent_granted('analytics', $request));
         $this->assertFalse(consent_granted('marketing', $request));

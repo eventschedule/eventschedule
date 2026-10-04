@@ -480,7 +480,7 @@
             ['AI features', 'Your own provider API key, read from your .env', 'Not proxied by us'],
             ['Crash reports', 'Off unless you set REPORT_ERRORS=true', 'Received only if you opt in'],
             ['Update checks', 'Your instance asks GitHub for the newest release', 'Nothing, that request goes to GitHub'],
-            ['Public listings', 'Federation stays off until an admin turns it on', 'Public event details, if you opt in'],
+            ['Public listings', 'Federation stays off until an admin turns it on', 'Public event details and your site\'s address, name and contact email, if you opt in'],
             ['Translation edits', 'Interface wording an admin changes', 'Only edits an admin shares'],
         ];
 
@@ -490,12 +490,12 @@
             [
                 'label' => 'Off by default',
                 'title' => 'Crash reports',
-                'body' => 'Error reporting is off out of the box. Until REPORT_ERRORS is set to true there is no reporting endpoint configured at all, so nothing is sent when something breaks. Turned on, it sends the server\'s errors and the errors your visitors\' browsers hit to Event Schedule\'s Sentry project: the error, the browser, and the page address with its query string, ticket and unsubscribe secrets and email addresses removed. Never form contents.',
+                'body' => 'Error reporting is off out of the box. Until REPORT_ERRORS is set to true there is no reporting endpoint configured at all, so nothing is sent when something breaks. Turned on, it sends the server\'s errors and the errors your visitors\' browsers hit to Event Schedule\'s Sentry project: the error, the browser and the IP address it connects from, and the page address with its query string and its ticket and unsubscribe secrets removed and email addresses masked. Never form contents. An install that sets IS_HOSTED to run its own hosted service reports nowhere either, unless it sets REPORT_ERRORS or names its own project in SENTRY_BROWSER_DSN.',
             ],
             [
                 'label' => 'Off by default',
                 'title' => 'Public listings',
-                'body' => 'Federation shares your public events with the eventschedule.com listings, and every listing links back to the event on your own site. An admin has to turn it on, and a schedule is only listed once someone who manages it chooses to list it.',
+                'body' => 'Federation shares your public events with the eventschedule.com listings, and every listing links back to the event on your own site. Turning it on also registers your instance: its address, its name and the contact email the admin enters. An admin has to turn it on, and a schedule is only listed once someone who manages it chooses to list it.',
             ],
             [
                 'label' => 'Your keys',
@@ -561,7 +561,7 @@
                 'id' => 'data-use',
                 'title' => 'Data Use & Privacy',
                 'body' => 'For self-hosted instances, <strong>this section applies only to data explicitly transmitted to Event Schedule</strong> (e.g., via opted-in crash reports, update checks, or cloud-relay features). In such cases, you grant Event Schedule a non-exclusive, fully sublicensable, worldwide, royalty-free right to use, copy, and store that specific data solely for the purpose of providing services to your instance.',
-                'gloss' => 'This clause can only reach what your instance actually sends. Leave crash reporting and federation switched off and there is nothing for it to act on: the release check reads a version number from GitHub, not from us.',
+                'gloss' => 'This clause can only reach what your instance actually sends. Leave crash reporting, federation and translation sharing switched off and there is nothing for it to act on: the release check reads a version number from GitHub, not from us.',
             ],
             [
                 'id' => 'restricted-businesses',

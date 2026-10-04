@@ -91,4 +91,67 @@ class GdprNoticesTest extends TestCase
         $response = $this->actingAs($admin->fresh())->get('/admin/dashboard');
         $this->assertNotSame(route('profile.edit').'#section-two-factor', $response->headers->get('Location'));
     }
+
+    /**
+     * The support-chat presence routes sit outside the admin middleware and return visitors'
+     * names and message previews, so they must not be the way around the 2FA rule.
+     */
+    public function test_support_presence_refuses_an_admin_without_two_factor_where_it_is_required(): void
+    {
+        config(['auth.admin_requires_two_factor' => true]);
+        $admin = $this->createOwner(admin: true);
+        $this->actingAs($admin);
+
+        try {
+            app(\App\Http\Controllers\SupportChatController::class)->presencePing(request());
+            $this->fail('presence answered an admin without two-factor authentication');
+        } catch (\Symfony\Component\HttpKernel\Exception\HttpException $e) {
+            $this->assertSame(403, $e->getStatusCode());
+        }
+    }
+
+    /** GDPR Art. 7(3): withdrawing must be as easy as giving, on the pages that ask. */
+    public function test_the_cookie_banner_can_be_reopened_from_the_sign_in_pages_but_not_by_an_admin(): void
+    {
+        config(['services.google.analytics' => 'G-TEST123']);
+
+        $this->get('/login')->assertOk()->assertSee('data-cookie-consent-reopen', false);
+
+        // No banner is rendered for an admin, so a reopen control would do nothing.
+        $admin = $this->createOwner(admin: true);
+        $html = $this->actingAs($admin)->get(route('profile.edit'))->assertOk()->getContent();
+        $this->assertDoesNotMatchRegularExpression('/<div data-cookie-consent\s/', $html);
+        $this->assertStringNotContainsString('data-cookie-consent-reopen', $html);
+    }
+
+    /** ?graphic=1 is turned into an image by a headless browser that can never answer a banner. */
+    public function test_a_rendered_graphic_carries_no_banner_and_no_legal_pill(): void
+    {
+        config(['services.google.analytics' => 'G-TEST123']);
+        $role = $this->createRole($this->createOwner());
+
+        $page = $this->get(route('role.view_guest', ['subdomain' => $role->subdomain]))->assertOk()->getContent();
+        $this->assertStringContainsString('data-cookie-consent-reopen', $page, 'the ordinary page has both');
+
+        $graphic = $this->get(route('role.view_guest', ['subdomain' => $role->subdomain, 'graphic' => 1]))->assertOk()->getContent();
+        $this->assertStringNotContainsString('data-cookie-consent-reopen', $graphic);
+        $this->assertDoesNotMatchRegularExpression('/<div data-cookie-consent\s/', $graphic);
+        $this->assertMatchesRegularExpression('/<div data-cookie-consent\s/', $page, 'the ordinary page renders the banner');
+    }
+
+    /**
+     * The export is delivered only as an emailed link, so an install whose mailer writes to the
+     * log offers no button and refuses the request.
+     */
+    public function test_download_my_data_is_not_offered_where_mail_cannot_be_sent(): void
+    {
+        config(['app.hosted' => false, 'mail.default' => 'log']);
+        $user = $this->createOwner();
+
+        $this->actingAs($user)->get(route('profile.edit'))->assertOk()
+            ->assertDontSee('action="'.route('profile.data_export').'"', false);
+
+        $this->actingAs($user)->post(route('profile.data_export'))->assertSessionHas('error');
+        $this->assertSame(0, \App\Models\BackupJob::where('user_id', $user->id)->where('type', 'personal')->count());
+    }
 }

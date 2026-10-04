@@ -81,8 +81,8 @@ if (! function_exists('consent_granted')) {
     /**
      * Has the visitor granted a cookie-consent category, 'analytics' or 'marketing'?
      *
-     * Reads the mirror cookie resources/js/cookie-consent.js writes beside the real choice in
-     * localStorage (resources/js/consent-state.js documents both). A version-1 'granted', from a
+     * Reads the `cookie_consent` cookie, which is the record of the choice (resources/js/consent-state.js
+     * documents its format and the localStorage copy beside it). A version-1 'granted', from a
      * banner that only ever named analytics, counts as analytics and never as marketing. Global
      * Privacy Control refuses everything, whatever the cookie says.
      *
@@ -106,7 +106,20 @@ if (! function_exists('consent_granted')) {
             return false;
         }
 
-        $granted = $value === 'granted' ? ['analytics'] : explode('.', $value);
+        // Version 1: a bare "granted" (analytics only) or "denied", undated. "granted" stops
+        // counting on the same day as LEGACY_UNTIL in consent-state.js.
+        if ($value === 'granted') {
+            return $category === 'analytics' && now()->lt('2027-01-04 00:00:00');
+        }
+
+        // "<categories>.<unix seconds>", or "denied.<unix seconds>". A choice lapses after twelve
+        // months; the cookie's own max-age says so too, but the browser is not the only client.
+        $granted = explode('.', $value);
+        $madeAt = array_pop($granted);
+
+        if (! ctype_digit($madeAt) || now()->timestamp - (int) $madeAt > 365 * 24 * 60 * 60) {
+            return false;
+        }
 
         return in_array($category, $granted, true);
     }
@@ -182,16 +195,43 @@ if (! function_exists('cookie_banner_required')) {
      * again on each one; nothing consent-gated runs there instead (Google Analytics, the Meta
      * Pixel, OneSignal and AdSense all skip ?embed, realtime is always count-only), and a map,
      * video or accommodation widget loads only on a click, which is consent for that one item.
-     * Realtime does not ask on a rendered graphic either.
+     *
+     * Nor on a rendered graphic (?graphic=1): that page is turned into a shareable image by a
+     * headless browser that can never answer, and a banner would be printed into the picture.
      */
     function cookie_banner_required(): bool
     {
-        if (request()->embed) {
+        if (request()->embed || request()->graphic) {
             return false;
         }
 
-        return consent_required()
-            || (\App\Utils\RealtimeTracker::enabled() && ! request()->graphic);
+        return consent_required() || \App\Utils\RealtimeTracker::enabled();
+    }
+}
+
+if (! function_exists('browser_error_reporting')) {
+    /**
+     * Whether pages load the browser error SDK (layouts/sentry.blade.php + partials/sentry-sdk):
+     * on the hosted service or with REPORT_ERRORS, and only when there is somewhere to report to
+     * (config/app.php sentry_browser_dsn, or a SENTRY_JS_DSN loader).
+     */
+    function browser_error_reporting(): bool
+    {
+        return (config('app.hosted') || config('app.report_errors'))
+            && (config('app.sentry_js_dsn') || config('app.sentry_browser_dsn'));
+    }
+}
+
+if (! function_exists('cookie_banner_visible')) {
+    /**
+     * Whether the banner is rendered on this page, and so whether a "Cookie preferences" control
+     * can reopen it: cookie_banner_required(), and not an admin, whom nothing consent-gated
+     * tracks (Google Analytics and the realtime beacon skip admins). Every reopen control asks
+     * this one helper, so none of them is ever a button that does nothing.
+     */
+    function cookie_banner_visible(): bool
+    {
+        return cookie_banner_required() && ! auth()->user()?->isAdmin();
     }
 }
 

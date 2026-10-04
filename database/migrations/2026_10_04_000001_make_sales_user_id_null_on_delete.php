@@ -33,14 +33,17 @@ return new class extends Migration
         DB::statement('SET SESSION lock_wait_timeout = 10');
 
         try {
-            $exists = DB::selectOne(
-                "SELECT COUNT(*) AS n FROM information_schema.TABLE_CONSTRAINTS
-                  WHERE CONSTRAINT_SCHEMA = DATABASE() AND TABLE_NAME = 'sales'
-                    AND CONSTRAINT_NAME = 'sales_user_id_foreign' AND CONSTRAINT_TYPE = 'FOREIGN KEY'"
-            )->n > 0;
+            // Every foreign key from sales.user_id to users, whatever it is called: an install whose
+            // key has another name would otherwise keep its CASCADE beside the new one, and the
+            // fix would silently not apply.
+            $names = array_map(fn ($row) => $row->name, DB::select(
+                "SELECT DISTINCT CONSTRAINT_NAME AS name FROM information_schema.KEY_COLUMN_USAGE
+                  WHERE TABLE_SCHEMA = DATABASE() AND TABLE_NAME = 'sales' AND COLUMN_NAME = 'user_id'
+                    AND REFERENCED_TABLE_NAME = 'users'"
+            ));
 
-            if ($exists) {
-                DB::statement('ALTER TABLE `sales` DROP FOREIGN KEY `sales_user_id_foreign`');
+            foreach ($names as $name) {
+                DB::statement('ALTER TABLE `sales` DROP FOREIGN KEY `'.str_replace('`', '``', $name).'`');
             }
 
             DB::statement('SET foreign_key_checks = 0');

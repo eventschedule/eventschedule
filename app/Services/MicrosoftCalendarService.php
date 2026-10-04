@@ -223,12 +223,14 @@ class MicrosoftCalendarService
             }
 
             if (($newToken['error'] ?? null) === 'invalid_grant') {
-                // The grant is gone for good: the user removed access in their Microsoft account (or
-                // it lapsed). What we stored to sync with it has to go, as the privacy policy says.
-                Log::info('Outlook Calendar access was revoked; forgetting the stored authorization', [
+                // The grant no longer works: removed in the Microsoft account, or ended by a password
+                // change or a sign-in policy, which Microsoft reports the same way. The tokens and
+                // the sync go; the record of which event became which calendar entry stays, so
+                // reconnecting picks up where it left off instead of copying everything again.
+                Log::info('Outlook Calendar access ended; forgetting the stored authorization', [
                     'user_id' => $user->id,
                 ]);
-                $this->forgetAuthorization($user, false);
+                $this->forgetAuthorization($user, false, keepEventLinks: true);
 
                 return false;
             }
@@ -262,9 +264,13 @@ class MicrosoftCalendarService
      * how a user withdrawing access from their Microsoft account reaches us. Microsoft offers no way
      * for an app to revoke one grant on its own, so forgetting the tokens is the whole of it.
      *
+     * $keepEventLinks when the grant merely stopped working (invalid_grant): the per-event sync
+     * records and each schedule's calendar choice stay, so a reconnect resumes without duplicating
+     * every event. A manual disconnect and account deletion remove them too.
+     *
      * microsoft_id is the account link, not calendar data, so it is the caller's to clear.
      */
-    public function forgetAuthorization(User $user, bool $tellMicrosoft): void
+    public function forgetAuthorization(User $user, bool $tellMicrosoft, bool $keepEventLinks = false): void
     {
         if ($tellMicrosoft && $user->microsoft_token) {
             foreach ($user->owner()->whereNotNull('microsoft_webhook_id')->get() as $role) {
@@ -289,12 +295,14 @@ class MicrosoftCalendarService
         ]);
         Role::where('user_id', $user->id)->update(['microsoft_sync_direction' => null]);
 
-        MicrosoftCalendarSync::where('user_id', $user->id)->delete();
+        if (! $keepEventLinks) {
+            MicrosoftCalendarSync::where('user_id', $user->id)->delete();
 
-        \Illuminate\Support\Facades\DB::table('role_user')
-            ->where('user_id', $user->id)
-            ->whereNotNull('microsoft_calendar_id')
-            ->update(['microsoft_calendar_id' => null]);
+            \Illuminate\Support\Facades\DB::table('role_user')
+                ->where('user_id', $user->id)
+                ->whereNotNull('microsoft_calendar_id')
+                ->update(['microsoft_calendar_id' => null]);
+        }
 
         $user->forceFill([
             'microsoft_token' => null,

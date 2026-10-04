@@ -54,6 +54,16 @@
             </div>
         </div>
 
+        {{-- The way back into the cookie banner (GDPR Art. 7(3): withdrawing consent must be as
+             easy as giving it), on the pages that asked for it. --}}
+        @if (cookie_banner_visible())
+        <p class="mt-8 flex flex-wrap items-center justify-center gap-x-2 gap-y-1 px-4 text-xs text-gray-500 dark:text-gray-400">
+            <a href="{{ policy_url('privacy') }}" class="hover:text-gray-700 dark:hover:text-gray-200 hover:underline">{{ __('messages.privacy_policy') }}</a>
+            <span aria-hidden="true">&middot;</span>
+            <button type="button" data-cookie-consent-reopen class="hover:text-gray-700 dark:hover:text-gray-200 hover:underline">{{ __('messages.cookie_consent_manage') }}</button>
+        </p>
+        @endif
+
         <div class="pt-20"></div>
     </div>
 

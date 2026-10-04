@@ -16,6 +16,7 @@ use App\Services\AppUpdateService;
 use App\Services\AuditService;
 use App\Services\BoostBillingService;
 use App\Services\MetaAdsService;
+use App\Services\PersonalDataExportService;
 use App\Utils\InvoiceNinja;
 use Codedge\Updater\UpdaterManager;
 use Illuminate\Http\RedirectResponse;
@@ -158,6 +159,10 @@ class ProfileController extends Controller
     {
         $user = $request->user();
 
+        if (! PersonalDataExportService::canDeliver()) {
+            return Redirect::to(route('profile.edit').'#section-data')->with('error', __('messages.data_export_unavailable'));
+        }
+
         $pending = BackupJob::where('user_id', $user->id)
             ->where('type', 'personal')
             ->whereIn('status', ['pending', 'processing'])
@@ -245,11 +250,24 @@ class ProfileController extends Controller
             }
         }
 
+        // Events, newsletters and templates this account made for schedules other people own are
+        // re-keyed to those owners, in one transaction, BEFORE anything irreversible. If that
+        // fails, stop: the cascades below would take other people's events with the account.
+        try {
+            app(AccountDeletionService::class)->handOver($user);
+        } catch (\Throwable $e) {
+            report($e);
+
+            return Redirect::to(route('profile.edit').'#section-delete')
+                ->with('error', __('messages.error_occurred'));
+        }
+
         // Send feedback email if provided (before logout so we have user data)
-        // Skip for demo mode to prevent spam. Hosted only: the address is Event Schedule's own, and
-        // a selfhosted install must not send its users' names, emails and words to us
-        // (self-hosting terms, "what crosses the line").
-        if ($request->filled('feedback') && ! is_demo_mode() && config('app.hosted')) {
+        // Skip for demo mode to prevent spam. eventschedule.com only: the address is Event
+        // Schedule's own, and no other install, a selfhosted SaaS included (IS_HOSTED without
+        // IS_NEXUS), may send its users' names, emails and words to us (self-hosting terms,
+        // "what crosses the line").
+        if ($request->filled('feedback') && ! is_demo_mode() && config('app.is_nexus')) {
             Mail::to('contact@eventschedule.com')->send(new SupportEmail(
                 $user->name ?? $user->email,
                 $user->email,
@@ -388,18 +406,11 @@ class ProfileController extends Controller
             }
         }
 
-        // Everything around the user row: hand events, newsletters and templates made for someone
-        // else's schedule to its owner, delete the files the cascades would strand, forget the
-        // address where it is the key, and end every session. Before the gallery purge below,
-        // which must not reach the galleries of events that are about to stay.
+        // Everything else around the user row, best effort: delete the files the cascades would
+        // strand, forget the address where it is the key (the account-less sign-ups to schedule
+        // emails among them), and end every session. Before the gallery purge below, which must
+        // not reach the galleries of events the hand-over kept.
         app(AccountDeletionService::class)->prepare($user);
-
-        // Account-less audience rows are keyed on the EMAIL, not on a user id, so no foreign key
-        // takes them with the account. The privacy policy's erasure section promises deletion of
-        // "your account and all associated data" and calls it final, total and irreversible, and
-        // there is no separate erasure flow in the app - so leaving the address behind in a table
-        // the user never knew existed would break that promise, and they would keep being mailed.
-        \App\Models\RoleSubscriber::where('email', strtolower($user->email))->delete();
 
         // Same promise for the last hour of /admin/realtime page views: realtime_hits has no
         // foreign keys (see its migration), so nothing else takes them with the account. Guarded: a

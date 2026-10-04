@@ -168,10 +168,10 @@ return [
     | server logs, so on the hosted service /admin is refused to an admin who has not
     | turned on two-factor authentication (EnsureUserIsAdmin). The privacy policy says
     | so. On by default when hosted; a selfhost operator can opt in. phpunit.xml pins it
-    | off so admin tests need no 2FA fixture; AdminTwoFactorRequiredTest turns it on.
+    | off so admin tests need no 2FA fixture; GdprNoticesTest turns it on.
     |
     */
 
-    'admin_requires_two_factor' => (bool) (env('ADMIN_REQUIRE_2FA') ?? (env('IS_HOSTED') == 'true')),
+    'admin_requires_two_factor' => (bool) (env('ADMIN_REQUIRE_2FA') ?? env('IS_HOSTED', false)),
 
 ];

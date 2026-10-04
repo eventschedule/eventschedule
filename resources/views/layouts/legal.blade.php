@@ -95,10 +95,15 @@
         </main>
 
         <footer class="border-t border-gray-200 dark:border-gray-800 mt-8">
-            <div class="max-w-3xl mx-auto px-4 sm:px-6 py-6 text-sm text-gray-500 dark:text-gray-400">
+            <div class="max-w-3xl mx-auto px-4 sm:px-6 py-6 flex flex-wrap items-center justify-between gap-3 text-sm text-gray-500 dark:text-gray-400">
                 <a href="{{ url('/') }}" class="hover:text-gray-700 dark:hover:text-gray-200 transition-colors duration-200">
                     &larr; {{ __('messages.home') }}
                 </a>
+                @if (cookie_banner_visible())
+                <button type="button" data-cookie-consent-reopen class="hover:text-gray-700 dark:hover:text-gray-200 transition-colors duration-200">
+                    {{ __('messages.cookie_consent_manage') }}
+                </button>
+                @endif
             </div>
         </footer>
     </div>

@@ -57,6 +57,17 @@ class PersonalDataExportService
         'support_messages' => 'Exported inside support_conversations.',
     ];
 
+    /**
+     * Whether this install can deliver the file. It goes out only as a link in an email, never
+     * shown in the app: a selfhost sign-up proves nothing about its address (RegisteredUserController),
+     * and the export includes what other people recorded against that address. An install whose
+     * mailer only writes to the log would accept the request and deliver nothing.
+     */
+    public static function canDeliver(): bool
+    {
+        return (bool) config('app.hosted') || config('mail.default') !== 'log';
+    }
+
     public function build(User $user): array
     {
         $email = strtolower((string) $user->email);

@@ -30,53 +30,103 @@ use Illuminate\Support\Facades\Storage;
  *    someone else's schedule. A buyer's purchases are the organiser's records and stay with the
  *    organiser: sales.user_id is nullOnDelete (2026_10_04_000001), so they are only detached.
  *
- * Every step is best effort and reports rather than throws: the account deletion the person asked
- * for must not fail because a file is already gone or the backups disk is slow to answer.
+ * Two entry points, in this order:
+ *
+ *  - handOver() re-keys the contributions, in one transaction, and THROWS. ProfileController
+ *    runs it before anything irreversible and stops the deletion if it fails: going on would let
+ *    the cascades take other people's events with the account.
+ *
+ *  - prepare() does everything else. Every step there is best effort and reports rather than
+ *    throws: the account deletion the person asked for must not fail because a file is already
+ *    gone, the backups disk is slow to answer or a busy table times out.
  */
 class AccountDeletionService
 {
+    private const CHUNK = 500;
+
+    /**
+     * Events, newsletters and newsletter templates this user made for a schedule someone else
+     * owns stay with that schedule, re-keyed to its owner. All or nothing.
+     */
+    public function handOver(User $user): void
+    {
+        DB::transaction(fn () => $this->handOverContributions($user));
+    }
+
     public function prepare(User $user): void
     {
         $ownedRoleIds = Role::where('user_id', $user->id)->pluck('id')->all();
 
-        $this->handOverContributions($user, $ownedRoleIds);
-
         // What the cascades are about to take: the events still keyed to this user after the
         // hand-over, and every event created by a schedule they own.
-        $cascadingEventIds = Event::where(function ($query) use ($user, $ownedRoleIds) {
+        $cascadingEventIds = $this->attempt(fn () => Event::where(function ($query) use ($user, $ownedRoleIds) {
             $query->where('user_id', $user->id);
             if ($ownedRoleIds) {
                 $query->orWhereIn('creator_role_id', $ownedRoleIds);
             }
-        })->pluck('id')->all();
+        })->pluck('id')->all()) ?? [];
 
-        $this->purgeEventFiles($cascadingEventIds);
-        $this->purgeRoleFiles($ownedRoleIds);
-        $this->purgePhotos($user, $cascadingEventIds);
-        $this->forgetAddress($user);
-        $this->deleteExports($user);
+        $this->attempt(fn () => $this->purgeEventFiles($cascadingEventIds));
+        $this->attempt(fn () => $this->purgeRoleFiles($ownedRoleIds));
+        $this->attempt(fn () => $this->purgePhotos($user, $cascadingEventIds));
+        $this->attempt(fn () => $this->forgetAccountRows($user));
+        if ($this->addressIsProven($user)) {
+            $this->attempt(fn () => $this->forgetAddress($user));
+        }
+        $this->attempt(fn () => $this->deleteExports($user));
 
         // No foreign key on sessions.user_id: every other device would keep a live row.
-        DB::table('sessions')->where('user_id', $user->id)->delete();
+        $this->attempt(fn () => DB::table('sessions')->where('user_id', $user->id)->delete());
 
         // The calendar grant dies at Google's end too, not only with the row that held it.
         // Microsoft offers an app no way to revoke one grant, so its tokens just go with the row.
         if ($user->google_token || $user->google_refresh_token) {
-            try {
-                app(GoogleCalendarService::class)->revoke($user);
-            } catch (\Throwable $e) {
-                report($e);
-            }
+            $this->attempt(fn () => app(GoogleCalendarService::class)->revoke($user));
         }
     }
 
     /**
-     * Events, newsletters and newsletter templates this user made for a schedule someone else
-     * owns stay with that schedule, re-keyed to its owner.
-     *
-     * @param  array<int, int>  $ownedRoleIds
+     * Whether this account has shown it owns its address, so its deletion may erase what other
+     * people keyed to that address. Hosted sign-up verifies an emailed code; Google and Facebook
+     * sign-in vouch for the address. A selfhost sign-up marks the address verified with no proof
+     * at all (RegisteredUserController), so there, registering someone else's address and then
+     * deleting the account would erase THEIR interest lists, waitlists, sign-ups and chats.
      */
-    private function handOverContributions(User $user, array $ownedRoleIds): void
+    private function addressIsProven(User $user): bool
+    {
+        return (bool) config('app.hosted') || $user->google_oauth_id || $user->facebook_id;
+    }
+
+    /** Runs one step; a failure is reported and the deletion goes on. */
+    private function attempt(\Closure $step): mixed
+    {
+        try {
+            return $step();
+        } catch (\Throwable $e) {
+            report($e);
+
+            return null;
+        }
+    }
+
+    /**
+     * Ids by a plain (non-locking) read, then deleted or updated by primary key a chunk at a
+     * time. A ranged DELETE over an unindexed column, such as newsletter_recipients.email, would
+     * lock every row it scanned for as long as it ran, stalling sends and posts.
+     *
+     * @param  array<string, mixed>|null  $update  null deletes
+     */
+    private function byIds(\Illuminate\Database\Query\Builder $query, ?array $update = null): void
+    {
+        $table = $query->from;
+
+        foreach ($query->pluck($table.'.id')->chunk(self::CHUNK) as $ids) {
+            $rows = DB::table($table)->whereIn('id', $ids->all());
+            $update === null ? $rows->delete() : $rows->update($update);
+        }
+    }
+
+    private function handOverContributions(User $user): void
     {
         DB::table('events')
             ->join('roles', 'roles.id', '=', 'events.creator_role_id')
@@ -208,8 +258,21 @@ class AccountDeletionService
             });
     }
 
+    /** Rows of this account that no foreign key takes with it. */
+    private function forgetAccountRows(User $user): void
+    {
+        $this->byIds(DB::table('newsletter_segment_users')->where('user_id', $user->id));
+
+        // Recipient rows of the platform's own newsletters. A schedule's newsletter recipients are
+        // that organiser's send record and only lose the account link.
+        $this->byIds(DB::table('newsletter_recipients')
+            ->whereIn('newsletter_id', DB::table('newsletters')->whereNull('role_id')->select('id'))
+            ->where('user_id', $user->id));
+    }
+
     /**
-     * Rows keyed by the address rather than by the account, which no foreign key reaches.
+     * Rows keyed by the address rather than by the account, which no foreign key reaches. Only for
+     * an address the account has proven (addressIsProven()).
      *
      * Kept on purpose: a sale (the organiser's record of a purchase), and a newsletter_unsubscribes
      * row, which is the opt-out itself - deleting it would let a schedule that imports the address
@@ -223,25 +286,22 @@ class AccountDeletionService
             return;
         }
 
-        DB::table('event_interests')->where('email', $email)->delete();
-        DB::table('ticket_waitlists')->where('email', $email)->delete();
-        DB::table('newsletter_segment_users')->where('user_id', $user->id)->delete();
-
-        // Recipient rows of the platform's own newsletters. A schedule's newsletter recipients are
-        // that organiser's send record and only lose the account link.
-        DB::table('newsletter_recipients')
+        // Sign-ups to a schedule's emails, confirmed or not: the account-less audience.
+        $this->byIds(DB::table('role_subscribers')->where('email', $email));
+        $this->byIds(DB::table('event_interests')->where('email', $email));
+        $this->byIds(DB::table('ticket_waitlists')->where('email', $email));
+        $this->byIds(DB::table('newsletter_recipients')
             ->whereIn('newsletter_id', DB::table('newsletters')->whereNull('role_id')->select('id'))
-            ->where(fn ($query) => $query->where('user_id', $user->id)->orWhere('email', $email))
-            ->delete();
+            ->where('email', $email));
 
         // Posted without being signed in, under this address.
         foreach (['event_comments', 'event_photos', 'event_videos'] as $table) {
-            DB::table($table)->where('guest_email', $email)->update(['guest_email' => null]);
+            $this->byIds(DB::table($table)->where('guest_email', $email), ['guest_email' => null]);
         }
 
         // Support chats started from the marketing site before signing in (support_messages
         // cascade with their conversation).
-        DB::table('support_conversations')->where('guest_email', $email)->delete();
+        $this->byIds(DB::table('support_conversations')->where('guest_email', $email));
     }
 
     /** Export archives the user asked for; backup_jobs rows cascade, the files would not. */

@@ -246,7 +246,9 @@
                     return this.request(ENDPOINTS.ping)
                         .then((data) => this.applyPayload(data, false, !!fromSync))
                         .catch((r) => {
-                            if (this.isSessionError(r)) {
+                            // 403: an admin without the two-factor authentication this install
+                            // requires. Asking again every tick would not change the answer.
+                            if (this.isSessionError(r) || (r && r.status === 403)) {
                                 this.pingStopped = true;
                                 clearInterval(this.pingTimer);
                             }

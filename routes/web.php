@@ -226,7 +226,7 @@ if (config('app.hosted') && ! config('app.is_testing')) {
         Route::post('/carpool/{event_hash}/offer/{offer_hash}/report/{user_hash}', [CarpoolController::class, 'report'])->name('carpool.report')->middleware('throttle:5,60');
         // Static map image (must be before catch-all /{slug}/{id} routes)
         Route::get('/map-image/{id}', [AppController::class, 'mapImage']);
-        Route::get('/yt-thumb/{id}', [AppController::class, 'youtubeThumbnail'])->where('id', '[A-Za-z0-9_-]{11}');
+        Route::get('/yt-thumb/{id}', [AppController::class, 'youtubeThumbnail'])->where('id', '[A-Za-z0-9_-]{11}')->middleware('throttle:300,1');
 
         // Photo gallery
         Route::get('/{slug}/{id}/{date}/photos', [EventController::class, 'photoGallery'])->where(['date' => '\d{4}-\d{2}-\d{2}', 'id' => '[A-Za-z0-9+=]+']);
@@ -356,6 +356,8 @@ Route::get('/unsubscribe', [RoleController::class, 'showUnsubscribe'])->name('ro
 Route::post('/unsubscribe', [RoleController::class, 'unsubscribe'])->name('role.unsubscribe')->middleware('throttle:2,2');
 // RFC 8058 one-click, signed (UrlUtils::roleUnsubscribeOneClickUrl). CSRF-exempt in bootstrap/app.php.
 Route::post('/unsubscribe/one-click', [RoleController::class, 'unsubscribeOneClick'])->name('role.unsubscribe.one_click')->middleware('throttle:user_unsubscribe');
+// A mail app that opens the same link in a browser sends a GET: hand it to the unsubscribe page.
+Route::get('/unsubscribe/one-click', [RoleController::class, 'showUnsubscribeOneClick'])->middleware('throttle:user_unsubscribe');
 // Account-wide email opt-out (users.is_subscribed). Same GET-shows / POST-acts split as /sub/u and
 // /int/u below: the link ships in high-volume mail (event request decisions, the owner digest, the
 // nudges), and a mutating GET is fetched by corporate mail scanners, which would opt people out of
@@ -1184,7 +1186,7 @@ Route::middleware(['auth', 'verified', 'app_subdomain'])->group(function () {
 
 Route::get('/tmp/event-image/{filename?}', [AppController::class, 'tempEventImage'])->name('event.tmp_image');
 Route::get('/map-image/{id}', [AppController::class, 'mapImage'])->name('map.image');
-Route::get('/yt-thumb/{id}', [AppController::class, 'youtubeThumbnail'])->where('id', '[A-Za-z0-9_-]{11}')->name('youtube.thumbnail');
+Route::get('/yt-thumb/{id}', [AppController::class, 'youtubeThumbnail'])->where('id', '[A-Za-z0-9_-]{11}')->middleware('throttle:300,1')->name('youtube.thumbnail');
 
 // Marketing pages - only shown on the nexus (eventschedule.com)
 if (config('app.is_nexus')) {

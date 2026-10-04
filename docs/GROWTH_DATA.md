@@ -297,6 +297,10 @@ Both are columnar: read `columns[]`, then `rows[][]`. They are newest first and 
 - **History lost before 2026-10-01.** `audit_logs` was pruned at 90 days, so anything read from it
   is missing before roughly early July 2026: checkout `source`, trial `started_from`, claims. The
   growth-relevant actions are kept forever from this release on (`PruneAuditLogs::KEEP_ACTIONS`).
+- **Pruned rows shrink history, from 2026-10-04.** `app:prune-personal-data` deletes interest-list
+  and waitlist rows 30 days after their event, and unconfirmed sign-ups after 30 days, so
+  `interests_added` for past weeks and the `waitlist` used-feature flag fall between pulls as those
+  rows go. Compare them only within one pull.
 - **Tiny numbers.** Conversions, sellers and cancellations are small counts. At one a month, a month
   with none and a month with two are both ordinary; never read a single month's change in a small
   count as an effect.

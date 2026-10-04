@@ -621,7 +621,7 @@
             ],
             [
                 'q' => 'What happens to my data?',
-                'a' => 'It is never sold. It reaches only the service providers that run the platform, and the privacy policy lists every one. Analytics and marketing cookies are opt-in: nothing from Google Analytics loads until you allow it in the cookie banner, and declining keeps it that way. When somebody follows your schedule or buys a ticket, you see their name and email so you can reach them. Selfhost and none of it leaves your server.',
+                'a' => 'It is never sold. It reaches only the service providers that run the platform and, only with your consent, the analytics and advertising partners the privacy policy names; the policy lists every one. Analytics and marketing cookies are opt-in: nothing from Google Analytics loads until you allow it in the cookie banner, and declining keeps it that way. When somebody follows your schedule or buys a ticket, you see their name and email so you can reach them. Selfhost and none of it leaves your server.',
             ],
         ];
 
@@ -1005,7 +1005,7 @@
                             <p class="es-colo-fig es-colo-second" aria-hidden="true">02</p>
                             <div>
                                 <h3 class="es-colo-title es-colo-ink mb-2 text-xl">Your data is yours</h3>
-                                <p class="es-colo-muted text-sm leading-relaxed">It is never sold, and it reaches only the service providers that run the platform. Analytics are opt-in and stay off until you allow them. Export the whole schedule whenever you like, and if that is still not enough, selfhost and it never leaves your server.</p>
+                                <p class="es-colo-muted text-sm leading-relaxed">It is never sold, and it reaches only the service providers that run the platform, and analytics and advertising partners only with your consent. Analytics are opt-in and stay off until you allow them. Export the whole schedule whenever you like, and if that is still not enough, selfhost and it never leaves your server.</p>
                             </div>
                         </li>
                         <li class="es-colo-standing-row">

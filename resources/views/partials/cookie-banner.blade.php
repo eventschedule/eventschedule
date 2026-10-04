@@ -5,8 +5,9 @@
     "Decline" and "Allow all" are the same size, and "Choose" opens a toggle for each. The
     privacy page and the footers reopen it with both toggles showing the current choice.
 
-    cookie_banner_required() covers Google Analytics, ads, Stay22, COOKIE_CONSENT_BANNER and
-    /admin/realtime being on (it identifies visitors only after they accept).
+    cookie_banner_visible() covers Google Analytics, ads, Stay22, COOKIE_CONSENT_BANNER and
+    /admin/realtime being on (it identifies visitors only after they accept), and leaves admins
+    out; every "Cookie preferences" control asks the same helper.
     Where it is false nothing on the page needs consent: the UTM attribution cookies are
     then never written either, so there is nothing to ask about.
 --}}
@@ -25,7 +26,7 @@
      support chat launcher and the accessibility widget. mx-auto between inset-x-4 does the
      centring, so the entrance animation is free to use transform. The bottom offset clears the
      iPhone home indicator where the layout opts into viewport-fit=cover. --}}
-@if (cookie_banner_required() && (! auth()->user() || ! auth()->user()->isAdmin()))
+@if (cookie_banner_visible())
 <div data-cookie-consent
      hidden
      role="region"
@@ -74,6 +75,11 @@
          this opens, so the reopened banner shows what is in force rather than a blank form. --}}
     <div id="cookie-consent-choices" data-cookie-consent-choices hidden
          class="mt-4 border-t border-gray-200/80 dark:border-white/10 pt-4">
+        {{-- Shown by cookie-consent.js only when the browser sends Global Privacy Control, which
+             declines both categories whatever the switches say; the switches are disabled then. --}}
+        <p data-cookie-consent-gpc hidden class="mb-4 text-xs leading-relaxed text-gray-600 dark:text-gray-400">
+            {{ __('messages.cookie_consent_gpc_note') }}
+        </p>
         <div class="space-y-4">
             @foreach (['analytics', 'marketing'] as $consentCategory)
                 <div class="flex items-start justify-between gap-4">

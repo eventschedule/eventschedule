@@ -66,6 +66,9 @@ window.sentryOnLoad = function () {
     };
 
     Sentry.init(Object.assign(@json((object) $sentryOptions), {
+        // No release-health sessions: each one is a request to Sentry on page load, from every
+        // visitor, when nothing has gone wrong. Reports are for errors (privacy policy, clause 10).
+        autoSessionTracking: false,
         // Third-party scripts we neither ship nor control. Cloudflare injects its Web Analytics
         // beacon same-origin on proxied customer domains, so its crashes arrive with a real message
         // and a full stack rather than the opaque 'Script error.' the list below already drops.

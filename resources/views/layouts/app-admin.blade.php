@@ -394,6 +394,18 @@
                     </svg>
                 </a>
                 @endif
+
+                {{-- The way back into the cookie banner from anywhere in the app (GDPR Art. 7(3)).
+                     data-close-modal hands the screen to the banner. --}}
+                @if (cookie_banner_visible())
+                <button type="button" data-cookie-consent-reopen data-close-modal="about-app" class="{{ $aboutRow }} w-full text-start">
+                    <svg class="{{ $aboutIcon }}" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" aria-hidden="true">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M12 2a10 10 0 1 0 10 10 4 4 0 0 1-5-5 4 4 0 0 1-5-5" />
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M8.5 8.5v.01M16 15.5v.01M12 12v.01M11 17v.01M7 14v.01" />
+                    </svg>
+                    <span>{{ __('messages.cookie_consent_manage') }}</span>
+                </button>
+                @endif
             </div>
 
             <div class="flex items-center justify-between gap-3 border-t border-gray-200 dark:border-gray-700 px-6 py-4">

@@ -23,7 +23,7 @@ pre-flight, P9 to P11 are v1.0.132's, and steps 1 to 9 are v1.0.130's runbook.
 
 | Version | Tagged | What it needs from you |
 |---|---|---|
-| [v1.0.134](#v10134) | not yet (partly live since 2026-09-30) | A last `/admin/growth` download, a Stripe portal setting, an `audit_logs` size check, a `cache` table purge, a privacy-notice decision, then `GROWTH_DATA_TOKEN` |
+| [v1.0.134](#v10134) | not yet (partly live since 2026-09-30) | A last `/admin/growth` download, a Stripe portal setting, an `audit_logs` size check, a `cache` table purge, a privacy-notice decision, then `GROWTH_DATA_TOKEN`; [GDPR](#gdpr-2026-10-04): 2FA on every admin first, then the policy-change notice |
 | [v1.0.133](#v10133) | 2026-09-25 | Four read-only queries, the image backfill, a sitemap cache key, a Cloudflare purge |
 | [v1.0.132](#v10132) | 2026-09-23 | The ticket amnesty migration by hand, a `SESSION_LIFETIME` decision, a MySQL check, the federation welcome order |
 | [v1.0.131](#v10131) | 2026-09-10 | Nothing; four optional features |
@@ -176,6 +176,40 @@ All run on both rails:
 - `app-send-owner-digests`, hourly (live since 2026-09-28);
 - `realtime-prune`, every five minutes;
 - `app-prune-cache`, hourly.
+
+### GDPR (2026-10-04)
+
+Consent categories, erasure, export, retention, and a rewritten privacy policy and terms. Steps:
+
+**Before the deploy:**
+1. **Turn on two-factor authentication for every admin account** (Settings > Two-factor
+   authentication). `ADMIN_REQUIRE_2FA` defaults to on when `IS_HOSTED` is set, so after this
+   deploy `/admin`, `/update` and the support-chat presence switch refuse an admin without it.
+   Locked out anyway? Set `ADMIN_REQUIRE_2FA=false` on the app spec, deploy, turn 2FA on, remove it.
+2. **If the app spec sets `SENTRY_JS_DSN`, remove it,** so pages use the bundled Sentry SDK
+   instead of Sentry's CDN loader. Check the project setting "Prevent Storing of IP Addresses"
+   in both Sentry projects (server and browser).
+3. **Expect different numbers.** Google Analytics loads only after analytics consent and
+   `utm_*` attribution needs marketing consent, so GA sessions and attributed sign-ups drop. Meta
+   is told about a sale only when the buyer allowed marketing cookies (`sales.ad_consent`).
+
+**Migrations**, all quick:
+
+| Migration | What it does |
+|---|---|
+| `2026_10_04_000000_add_ad_consent_to_sales_table` | One nullable column on `sales`; waits at most 10 seconds for its lock |
+| `2026_10_04_000001_make_sales_user_id_null_on_delete` | Swaps every foreign key from `sales.user_id` to `users` for one with `ON DELETE SET NULL`, in place. Takes a brief metadata lock on `sales` and `users`, waits at most 10 seconds for it, and fails rather than queueing checkouts; re-run `php artisan migrate --force` if it does |
+| `2026_10_04_000002_drop_ip_and_user_agent_from_newsletter_clicks` | Empties `newsletter_clicks.ip_address` and `user_agent` in batches. The columns stay until a later release, because the old containers still write them during the rollover |
+
+**Scheduled entry:** `app-prune-personal-data`, daily on both rails.
+
+**After the deploy:**
+4. **Send the change notice.** Privacy policy clause 20 promises an email for material changes,
+   and the terms (clause 15) take effect 7 days after notice. Send an admin newsletter to all
+   users linking `/privacy` and `/terms-of-service`.
+5. **Open the cookie banner** on the marketing site, the app and a schedule page, choose, then
+   withdraw on another of them: the choice is one cookie on `.eventschedule.com`, so it should
+   hold everywhere.
 
 ### Conversion, churn and owner emails
 

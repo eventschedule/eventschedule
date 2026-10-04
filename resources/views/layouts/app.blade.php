@@ -21,7 +21,7 @@
         @include('partials.onesignal')
     @endif
     
-    @if (config('app.hosted') || config('app.report_errors'))
+    @if (browser_error_reporting())
         <script {!! nonce_attr() !!}>
             @include('layouts.sentry')
         </script>

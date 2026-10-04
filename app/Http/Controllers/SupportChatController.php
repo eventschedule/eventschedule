@@ -209,9 +209,17 @@ class SupportChatController extends Controller
             && ($boundAgent === null || $boundAgent === (string) $request->userAgent());
     }
 
+    /**
+     * Admin, and with two-factor authentication on where EnsureUserIsAdmin demands it (check 1b):
+     * these routes sit outside that middleware, and the payload carries visitors' names and the
+     * start of their messages, so they must not be the way around it.
+     */
     private function ensureAdmin(): void
     {
-        abort_unless(auth()->user()?->isAdmin(), 403);
+        $user = auth()->user();
+
+        abort_unless($user?->isAdmin(), 403);
+        abort_if(config('auth.admin_requires_two_factor') && ! $user->hasTwoFactorEnabled(), 403);
     }
 
     private function presencePayload(Request $request): array

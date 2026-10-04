@@ -534,7 +534,15 @@
                 var nonce = (document.currentScript && document.currentScript.nonce) || '';
                 var loaded = false;
                 var load = function () {
-                    if (loaded || !(window.esConsent && window.esConsent.has('marketing'))) {
+                    var granted = !!(window.esConsent && window.esConsent.has('marketing'));
+                    // Withdrawn on this page after the pixel loaded: cookie-consent.js deletes its
+                    // cookies, and this stops it sending (its automatic events included) or
+                    // writing them again. Granted again, it resumes.
+                    if (loaded) {
+                        fbq('consent', granted ? 'grant' : 'revoke');
+                        return;
+                    }
+                    if (!granted) {
                         return;
                     }
                     loaded = true;
@@ -698,11 +706,11 @@
     {{-- The privacy policy that covers this page, and the way back into the cookie banner (GDPR
          Art. 7(3): withdrawing consent must be as easy as giving it). A pill rather than bare
          text, like the credit chip below, so it stays legible on any schedule background. --}}
-    @if (! request()->embed)
+    @if (! request()->embed && ! request()->graphic)
     <nav aria-label="{{ __('messages.privacy_policy') }}" class="flex justify-center px-4 pt-6">
         <p class="inline-flex flex-wrap items-center justify-center gap-x-2 gap-y-1 rounded-full bg-white/80 px-3 py-1.5 text-xs font-medium text-gray-600 shadow-sm ring-1 ring-black/5 backdrop-blur">
             <a href="{{ policy_url('privacy') }}" class="hover:text-gray-900 hover:underline">{{ __('messages.privacy_policy') }}</a>
-            @if (cookie_banner_required())
+            @if (cookie_banner_visible())
                 <span aria-hidden="true">&middot;</span>
                 <button type="button" data-cookie-consent-reopen class="hover:text-gray-900 hover:underline">{{ __('messages.cookie_consent_manage') }}</button>
             @endif

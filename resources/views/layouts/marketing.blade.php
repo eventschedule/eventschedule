@@ -10,17 +10,11 @@
     <link rel="icon" type="image/png" href="{{ asset('images/favicon-96.png') }}" sizes="96x96">
     <link rel="apple-touch-icon" sizes="180x180" href="{{ asset('images/apple-touch-icon.png') }}">
 
-    <!-- Preconnect to external resources -->
-    @if (config('services.google.analytics'))
-    <link rel="preconnect" href="https://www.googletagmanager.com">
-    @endif
+    {{-- No preconnect or dns-prefetch to Google Analytics: either one opens a connection (and
+         shows Google the visitor's IP) on every page view, before anyone has been asked. gtag.js
+         is requested only after analytics consent (partials/google-analytics.blade.php). --}}
 
-    <!-- DNS prefetch fallback for browsers that don't support preconnect -->
-    @if (config('services.google.analytics'))
-    <link rel="dns-prefetch" href="https://www.googletagmanager.com">
-    @endif
-
-    @if (config('app.hosted') || config('app.report_errors'))
+    @if (browser_error_reporting())
     <script {!! nonce_attr() !!}>
         @include('layouts.sentry')
     </script>

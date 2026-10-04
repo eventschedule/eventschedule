@@ -48,6 +48,13 @@ class MaskPersonalData
             return array_map([self::class, 'maskDeep'], $value);
         }
 
+        // report() logs ['exception' => $e], and the formatter prints the exception's message,
+        // which is exactly where a mail transport quotes the recipient. As text, masked, with its
+        // class, message and stack trace, rather than as an object nothing here could reach into.
+        if ($value instanceof \Throwable) {
+            return mask_emails((string) $value);
+        }
+
         return $value;
     }
 }

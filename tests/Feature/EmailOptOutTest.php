@@ -61,6 +61,11 @@ class EmailOptOutTest extends TestCase
         $url = trim($header, '<>');
         $this->assertStringContainsString('/unsubscribe/one-click', $url);
 
+        // Opened in a browser instead, the link lands on the unsubscribe page and changes nothing:
+        // link scanners GET every URL in a message.
+        $this->get($url)->assertRedirectContains('/unsubscribe?email=');
+        $this->assertTrue((bool) Role::find($act->id)->is_subscribed);
+
         // A forged signature writes nothing, and the answer gives nothing away.
         $forged = preg_replace('/sig=[0-9a-f]+/', 'sig='.str_repeat('0', 64), $url);
         $this->post($forged, ['List-Unsubscribe' => 'One-Click'])->assertNoContent();

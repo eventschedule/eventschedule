@@ -595,7 +595,7 @@
             Your Data
         </h2>
         <p class="text-gray-600 dark:text-gray-300 mb-4">
-            <strong class="text-gray-900 dark:text-white">Download my data</strong> prepares a copy of everything held about your account and its email address, and emails you a link to it, valid for seven days. It covers your profile, the schedules you belong to, tickets and bookings you made (including ones bought before you had an account), schedules you follow or get emails from, newsletters you received with whether you opened them, comments, photos and videos you posted, support chats, and the security log of your account. It is one JSON file, which a text editor can open and other services can import.
+            <strong class="text-gray-900 dark:text-white">Download my data</strong> prepares a copy of the personal data held about your account and its email address, and emails you a link to it, valid for seven days. It covers your profile, the schedules you belong to, tickets and bookings you made (including ones bought before you had an account), schedules you follow or get emails from, newsletters you received with whether you opened them, comments, photos and videos you posted, support chats, and the security log of your account. It is one JSON file, which a text editor can open and other services can import. Your schedules' own content and images are not in it: those are in each schedule's <a href="#backup" class="doc-link">backup</a>. The link is sent by email only, so the button is not offered on an install that cannot send email.
         </p>
         <p class="text-gray-600 dark:text-gray-300 mb-4">
             It is not a backup of your schedules: for their events, settings and audience, use <a href="#backup" class="doc-link">Backup &amp; Restore</a>.
@@ -616,13 +616,13 @@
         <ul class="doc-list mb-6">
             <li>Your user account, profile and profile image</li>
             <li>Every schedule you own, with its events, tickets and sales</li>
-            <li>Comments, photos and videos you posted, your follows and email sign-ups, and any waitlist entry or request for event updates under your address</li>
+            <li>Comments, photos and videos you posted while signed in (on ones you posted without signing in, your email address is removed), your follows and email sign-ups, and any waitlist entry or request for event updates under your address</li>
             <li>Connections to linked services such as Stripe and Google, including any calendar sync they were running; Event Schedule also asks Google to revoke its access</li>
             <li>Any paid plan on those schedules, which is cancelled immediately rather than at the end of the billing period. The rest of the period is not refunded, and the confirmation dialog warns you when you have a paid plan</li>
         </ul>
 
         <p class="text-gray-600 dark:text-gray-300 mb-4">
-            Two things stay, because they belong to other people. Tickets and bookings you bought stay in the organizer's sales records, under the name and email you used. Events and newsletters you created on a schedule someone else owns stay on that schedule, handed to its owner.
+            Some records stay, because they belong to other people or are needed to honor your choices. Tickets, bookings and gift cards you bought stay in the organizer's records, under the name and email you used. Events and newsletters you created on a schedule someone else owns stay on that schedule, handed to its owner. A schedule keeps its record of the newsletters it sent you, with whether you opened them, and any mailing list an organizer imported your address into. An unsubscribe is kept, so that schedule cannot email you again. The security log keeps its entries for up to 90 days, no longer linked to the account.
         </p>
 
         <p class="text-gray-600 dark:text-gray-300 mb-4">

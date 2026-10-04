@@ -8,11 +8,17 @@ use App\Utils\UrlUtils;
 use Codedge\Updater\UpdaterManager;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Cache;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Str;
 
 class AppController extends Controller
 {
+    /** Under storage/app; app:prune-personal-data deletes files older than the TTL. */
+    public const YOUTUBE_THUMB_CACHE_DIR = 'youtube_thumb_cache';
+
+    public const YOUTUBE_THUMB_TTL_DAYS = 30;
+
     /**
      * The Settings > App Update action.
      *
@@ -984,19 +990,35 @@ class AppController extends Controller
     /**
      * A YouTube video's thumbnail, fetched by this server and cached, so a schedule page that
      * lists videos does not send every visitor's IP address to Google before anyone has chosen
-     * to play one. The same arrangement as mapImage() below. Only the 11-character video id is
-     * accepted (the route constrains it), so this cannot be pointed at anything else.
+     * to play one. Only the 11-character video id is accepted (the route constrains it), so this
+     * cannot be pointed at anything else.
+     *
+     * Like mapImage(), it only fetches for content this install actually shows: a signed-out
+     * request must name a video some schedule, event or newsletter links to, so the route cannot be
+     * used to fill the disk with arbitrary thumbnails or to make this server fetch on demand. A
+     * signed-in organizer may preview any id (the newsletter editor shows a video before it is
+     * saved). Cached files are pruned by app:prune-personal-data.
      */
-    public function youtubeThumbnail(Request $request, string $id)
+    public function youtubeThumbnail(Request $request)
     {
+        // By name, never by position: on a schedule's own host this route sits inside the
+        // Route::domain('{subdomain}...') group, whose {subdomain} would otherwise arrive as the id.
+        $id = (string) $request->route('id');
+
         // mqdefault (320x180) for cards; hqdefault (480x360) where it is shown large, as in emails.
         $quality = $request->query('q') === 'hq' ? 'hq' : 'mq';
-        $cacheDir = storage_path('app/youtube_thumb_cache');
+        $cacheDir = storage_path('app/'.self::YOUTUBE_THUMB_CACHE_DIR);
         $cachePath = $cacheDir.'/'.$id.'_'.$quality.'.jpg';
         $headers = ['Content-Type' => 'image/jpeg', 'Cache-Control' => 'public, max-age=86400'];
 
-        if (is_file($cachePath) && time() - filemtime($cachePath) < 30 * 24 * 60 * 60) {
+        if (is_file($cachePath) && time() - filemtime($cachePath) < self::YOUTUBE_THUMB_TTL_DAYS * 24 * 60 * 60) {
             return response()->file($cachePath, $headers);
+        }
+
+        $missingKey = 'yt-thumb-missing:'.$id.':'.$quality;
+
+        if (Cache::has($missingKey) || (! auth()->check() && ! $this->youtubeIdIsReferenced($id))) {
+            abort(404);
         }
 
         try {
@@ -1007,16 +1029,38 @@ class AppController extends Controller
         }
 
         if (! $response->successful() || ! str_starts_with((string) $response->header('Content-Type'), 'image/')) {
+            // Only ids that passed the check above get here, so this key set is bounded by content.
+            Cache::put($missingKey, true, now()->addDay());
             abort(404);
         }
 
         if (! is_dir($cacheDir)) {
-            mkdir($cacheDir, 0755, true);
+            @mkdir($cacheDir, 0755, true);
         }
 
-        file_put_contents($cachePath, $response->body());
+        // Written beside the target and renamed into place, so a concurrent request for the same
+        // video is served the old file or the new one, never half of one.
+        $tmpPath = $cachePath.'.'.Str::random(8).'.tmp';
+
+        if (@file_put_contents($tmpPath, $response->body()) !== false && ! @rename($tmpPath, $cachePath)) {
+            @unlink($tmpPath);
+        }
 
         return response($response->body(), 200, $headers);
+    }
+
+    /**
+     * Whether any stored content links to this video: a schedule's videos, a fan or performer
+     * video on an event, or a newsletter's video block. Only reached on a cache miss.
+     */
+    private function youtubeIdIsReferenced(string $id): bool
+    {
+        // The id may contain "_", a LIKE wildcard.
+        $like = '%'.str_replace(['\\', '%', '_'], ['\\\\', '\\%', '\\_'], $id).'%';
+
+        return DB::table('event_videos')->where('youtube_url', 'like', $like)->exists()
+            || DB::table('roles')->where('youtube_links', 'like', $like)->exists()
+            || DB::table('newsletters')->where('blocks', 'like', $like)->exists();
     }
 
     public function mapImage(Request $request)

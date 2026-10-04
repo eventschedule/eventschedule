@@ -6,6 +6,7 @@
   -->
   <iframe
     v-if="loaded"
+    ref="frame"
     :class="frameClass"
     :style="frameStyle"
     :src="src"
@@ -28,7 +29,7 @@
       type="button"
       class="relative inline-flex items-center gap-2 rounded-lg bg-black/75 px-4 py-2 text-sm font-semibold text-white transition-all duration-200 hover:bg-black/90 focus:outline-none focus:ring-2 focus:ring-white"
       :aria-label="title ? button + ': ' + title : button"
-      @click="optedIn = true"
+      @click="load"
     >
       <svg v-if="kind === 'video'" class="h-4 w-4" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M8 5v14l11-7z" /></svg>
       <svg v-else class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M15 10.5a3 3 0 11-6 0 3 3 0 016 0z" /><path stroke-linecap="round" stroke-linejoin="round" d="M19.5 10.5c0 7.142-7.5 11.25-7.5 11.25S4.5 17.642 4.5 10.5a7.5 7.5 0 1115 0z" /></svg>
@@ -83,6 +84,12 @@ export default {
     document.removeEventListener(CONSENT_EVENT, this.onConsentChange);
   },
   methods: {
+    // The button that had focus is replaced by the frame, so focus moves with it rather than
+    // dropping to the top of the page.
+    load() {
+      this.optedIn = true;
+      this.$nextTick(() => this.$refs.frame?.focus());
+    },
     onConsentChange() {
       this.consent = hasConsent('marketing');
 

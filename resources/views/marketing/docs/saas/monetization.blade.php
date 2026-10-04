@@ -114,12 +114,11 @@
             Event Schedule defaults to <strong>non-personalized ads</strong>, which is the safer
             setting and the one that requires the least of you. The <strong>Allow personalized
             ads</strong> toggle in the Monetization card is off until you turn it on, and doing so
-            is your decision and your legal responsibility. The app also always honours a visitor's
-            <code class="doc-inline-code">Sec-GPC</code> (Global Privacy Control) header by forcing
-            non-personalized ads for that request, whatever the setting says. Even non-personalized
-            ads use cookies, so the AdSense script itself is not loaded until a visitor allows
-            <strong>Marketing</strong> in the cookie banner; until then the ad slot stays empty and
-            collapses.
+            is your decision and your legal responsibility. Even non-personalized ads use cookies, so the
+            AdSense script itself is not loaded until a visitor allows <strong>Marketing</strong> in the
+            cookie banner; until then the ad slot stays empty and collapses. A visitor whose browser
+            sends the <code class="doc-inline-code">Sec-GPC</code> (Global Privacy Control) header is
+            treated as declining Marketing, so no ad loads for them at all.
         </p>
         <p>
             Two more things are yours to handle: enabling AdSense means your visitors' browsers

@@ -39,14 +39,13 @@
            Privacy "The Fine Print" styles.
 
            CONCEPT: THE INSTRUMENT. A privacy policy is not a landing page.
-           The words ARE the product here, so not one of them has been
-           changed, softened, strengthened, reordered, added or removed in
-           this rebuild - every clause below is verbatim from the first-wave
-           page. What changed is the apparatus around the words: this is now
-           laid out as a legal instrument, with a masthead register, six
-           numbered parts, sixteen hanging clause numbers on a continuous
-           margin rule, a standing contents rail, and schedules where the
-           source was already a list.
+           The words ARE the product here. They were rewritten on 2026-10-04
+           to describe what the code does (the $doc comment below), and every
+           change to them is a change of policy, made in the same commit as
+           the code it describes. The apparatus around the words lays the
+           page out as a legal instrument: a masthead register, roman-numeral
+           parts, hanging clause numbers on a continuous margin rule, a
+           standing contents rail, and schedules where the content is a list.
 
            THE ARGUMENT IS THE FORM. The product's privacy position is that
            everything is enumerable: a named list of processors, a named list
@@ -56,14 +55,14 @@
 
              1. THE MARGIN RULE - a continuous hairline down the left of the
                 text block with a monospace clause number hanging in the
-                gutter. It is what makes sixteen paragraphs a document
+                gutter. It is what makes the clauses a document
                 rather than a scroll. The number is an ANCHOR, not an
                 ornament, carrying its own aria-label ("Clause 8,
                 Restriction/Erasure...") so the citation the masthead
                 promises is real and reaches assistive tech. /terms does the
                 same; if you demote it back to a decorative <p>, delete the
                 masthead sentence about citing a single line.
-             2. THE DOCKET - a masthead register of three cells (scope,
+             2. THE DOCKET - a masthead register of cells (scope,
                 erasure, privacy contact) under a single 2px rule, the way a
                 statute states its own extent before its first section. Each
                 cell ends in a cross-reference to the clause that governs it
@@ -77,8 +76,8 @@
                 The fourth cell is the date the policy last changed, which
                 is a fact about the document: $lastUpdated in the php block
                 below, moved only in a commit that changes a clause.
-             3. THE CONTENTS RAIL - a standing index, six roman-numeral
-                parts over sixteen clauses, sticky on desktop and printed at
+             3. THE CONTENTS RAIL - a standing index, the roman-numeral
+                parts over their clauses ($partCount and $clauseCount below), sticky on desktop and printed at
                 the head of the document on mobile.
              4. SCHEDULES - the third-party processors become a real
                 <table> (vendor / purpose, split on the dash the source
@@ -506,29 +505,15 @@
             white-space: nowrap;
         }
         .dark .es-fine-vendor { color: #e9ebef; }
+        /* The same weight for a cell that holds a sentence, which must wrap: legal text never
+           scrolls sideways on a phone. */
+        .es-fine-label {
+            font-weight: 700;
+            color: #16181c;
+        }
+        .dark .es-fine-label { color: #e9ebef; }
 
         /* --- Schedule: the identifier register ----------------------- */
-        .es-fine-aside {
-            margin-top: 1.2rem;
-            padding: 0.9rem 1rem;
-            border: 1px solid rgba(22, 24, 28, 0.12);
-            border-inline-start: 2px solid #1d4ed8;
-            border-radius: 0.35rem;
-            background-color: rgba(22, 24, 28, 0.03);
-        }
-        .dark .es-fine-aside {
-            border-color: rgba(233, 235, 239, 0.12);
-            border-inline-start-color: #93c5fd;
-            background-color: rgba(233, 235, 239, 0.035);
-        }
-        .es-fine-aside-k {
-            font-size: 0.62rem;
-            font-weight: 700;
-            letter-spacing: 0.16em;
-            text-transform: uppercase;
-            color: #4b5158;
-        }
-        .dark .es-fine-aside-k { color: #9aa1ab; }
         .es-fine-chip {
             display: inline-flex;
             align-items: center;
@@ -586,7 +571,7 @@
            campaign probe does NOT measure (it scores text nodes only). At 0.45
            alpha the edge computed 2.16:1 on the white sheet; 0.7 computes
            3.58:1 on #ffffff and 0.6 computes 4.45:1 on the #12141a sheet.
-           NOTE: this button only renders when cookie_banner_required() is true, so it is
+           NOTE: this button only renders when cookie_banner_visible() is true, so it is
            absent from a local render and cannot be probed here.
            If you re-ink it, recompute both edges by hand. */
         .es-fine-btn {
@@ -811,8 +796,8 @@
         // verification read this page: keep the Wallet and Facebook Login rows' wording exact.
         $processors = array_values(array_filter([
             ['DigitalOcean', 'Hosting, database and file storage, in New York, United States. Everything described in this policy is stored here.'],
-            ['Cloudflare', 'Content delivery and security for every page, which means it sees every visitor\'s IP address; and the bot check on sign-up and checkout forms.'],
-            config('sentry.dsn') ? ['Sentry', 'Error reports. When something breaks: the address of the page or request, with ticket, reset and unsubscribe secrets and email addresses removed, your browser, and the error. Never what you typed into a form.'] : null,
+            ['Cloudflare', 'Content delivery and security for every page, which means it sees every visitor\'s IP address; and the bot check on the sign-up, sign-in, password reset, checkout, booking, gift card and contact forms.'],
+            config('sentry.dsn') || browser_error_reporting() ? ['Sentry', 'Error reports. When something breaks: the address of the page or request, with ticket, reset and unsubscribe secrets removed and email addresses masked, your browser, the IP address it connects from, and the error. Never what you typed into a form.'] : null,
             ['Google Apps', 'Email and productivity services'],
             ['SendGrid/Twilio', 'Email delivery'],
             ['Stripe', 'Payment processing: paid plans and Boost, and ticket sales on schedules whose owner has connected Stripe, where Stripe receives the buyer\'s name and email address. Card details are entered with Stripe and never reach us.'],
@@ -822,8 +807,11 @@
             config('services.google.analytics') ? ['Google Analytics', 'Site statistics, and only if you allow analytics cookies (clause 12).'] : null,
             config('services.google.backend') || config('services.google.maps') ? ['Google Maps', 'Placing venues on a map from their address. The interactive map on an event page loads only if you allow marketing cookies or ask to see it.'] : null,
             $aiProviders ? [implode(', ', $aiProviders), 'AI features (clause 05): the text and images a feature is asked to read, translate or write from.'] : null,
-            config('services.google.client_id') || config('services.microsoft.client_id') ? ['Google and Microsoft', 'Sign-in with Google, and calendar sync, only when you connect your calendar (clauses 07 to 09).'] : null,
-            ['YouTube', 'Videos added to schedules and events, which load only when you press play or allow marketing cookies. Thumbnails are fetched by us, not by your browser.'],
+            config('services.google.client_id') || config('services.microsoft.client_id') ? [
+                implode(' and ', array_filter([config('services.google.client_id') ? 'Google' : null, config('services.microsoft.client_id') ? 'Microsoft' : null])),
+                config('services.google.client_id') ? 'Sign-in with Google, and calendar sync, only when you connect your calendar (clauses 07 to 09).' : 'Calendar sync, only when you connect your calendar (clauses 07 to 09).',
+            ] : null,
+            ['YouTube', 'Videos added to schedules and events. On public pages they load only when you press play or allow marketing cookies, and their thumbnails are fetched by us, not by your browser.'],
             // Listed only when the install can actually issue a pass, so the register describes
             // what this deployment does rather than what the software supports. The same predicate
             // gates every button, the route handler and the confirmation email.
@@ -835,23 +823,23 @@
             // Same rule: listed only while facebook_login_enabled(), the predicate behind every
             // Facebook button and route. Meta's app review reads this page for exactly this.
             facebook_login_enabled()
-                ? ['Meta (Facebook Login)', 'Sign-in, and only when you choose Continue with Facebook. Facebook tells us your name, email address and Facebook account ID; we keep the name and email on your account and store the ID to recognise you next time. We never receive your password and never store a Facebook access token. You can disconnect Facebook in Settings at any time, and deleting your account removes all of it']
+                ? ['Meta (Facebook Login)', 'Sign-in, and only when you choose Continue with Facebook. Facebook tells us your name, email address and Facebook account ID; we keep the name and email on your account and store the ID to recognize you next time. We never receive your password and never store a Facebook access token. You can disconnect Facebook in Settings at any time, and deleting your account removes all of it']
                 : null,
             config('services.meta.access_token') || config('services.meta.pixel_id')
-                ? ['Meta (Boost)', 'Advertising for events whose organizer buys a Boost. On those event pages, the Meta Pixel; and when someone buys a ticket to one, the purchase with a one-way hash of the buyer\'s email address, so the organizer can see what the campaign sold. Both only for visitors and buyers who allowed marketing cookies.']
+                ? ['Meta (Boost)', 'Advertising for events whose organizer buys a Boost. On those event pages, the Meta Pixel; and when someone buys a ticket to one, the purchase with a one-way hash of the buyer\'s email address, which Meta matches to a Meta account if there is one, so the organizer can see what the campaign sold. Both only for visitors and buyers who allowed marketing cookies.']
                 : null,
             config('ads.enabled') && config('ads.adsense_enabled')
                 ? ['Google AdSense', 'Ads on the pages of free schedules, loaded only if you allow marketing cookies.']
                 : null,
             config('services.twilio.sid')
-                ? ['Twilio', 'Text messages: phone verification codes and invitations to claim a page. On Enterprise schedules, WhatsApp messages sent to add events.']
+                ? ['Twilio', 'Text messages: phone verification codes, invitations to claim a page, and invitations to join a schedule\'s team. On Enterprise schedules, WhatsApp messages sent to add events.']
                 : null,
             \App\Services\OneSignalService::isConfigured()
                 ? ['OneSignal', 'Push notifications, only for a browser that has turned them on. Nothing is sent to OneSignal from a browser that has not.']
                 : null,
             ['Stay22', 'Accommodation search, on event pages where the schedule has enabled the accommodation map, and only once the map has been loaded'],
             config('app.growth_data_token')
-                ? ['Anthropic', 'Help analysing product usage statistics that carry no names, email addresses, IP addresses or anything you wrote.']
+                ? ['Anthropic', 'Help analyzing product usage statistics that carry no names, email addresses, IP addresses or anything you wrote.']
                 : null,
         ]));
 
@@ -905,7 +893,7 @@
                 <div>
                     <dt class="es-fine-docket-key">Scope</dt>
                     <dd class="es-fine-docket-val">
-                        EventSchedule.com and all associated subdomains
+                        EventSchedule.com, its subdomains, and the schedules it serves on their owners' own domains
                         <a href="#who-we-are" class="es-fine-cite" aria-label="Clause 1, Who We Are and What This Covers">&sect;&nbsp;01</a>
                     </dd>
                 </div>
@@ -992,10 +980,10 @@
 
                                             @case('security')
                                                 <p>
-                                                    We implement technical safeguards to protect your data from unauthorized access. All data transmitted between our systems and users is encrypted using industry-standard encryption protocols (HTTPS/TLS). Passwords are stored only as one-way hashes, and the access tokens and credentials of the services you connect are encrypted at rest. Access to user data is restricted through authentication mechanisms and role-based access controls, and our administrators sign in with two-factor authentication.
+                                                    We implement technical safeguards to protect your data from unauthorized access. All data transmitted between our systems and users is encrypted using industry-standard encryption protocols (HTTPS/TLS). Passwords are stored only as one-way hashes, and the access tokens and credentials of the services you connect are encrypted at rest. Access to user data is restricted through authentication mechanisms and role-based access controls, and our administrators must use two-factor authentication to reach the admin tools.
                                                 </p>
                                                 <p>
-                                                    Data obtained through Google APIs is handled in accordance with Google's policies and is never sold or shared with third parties. Such data is retained only as long as necessary for service provision and is deleted upon revocation of access.
+                                                    Data obtained through Google APIs is handled in accordance with Google's policies. It is used only for the features you asked for, is never sold or used for advertising, and is shared only with the service providers in clause 10 as needed to run them. When you revoke access we delete the tokens and our sync records (clause 08); events already copied into your schedule stay there until you delete them.
                                                 </p>
                                                 @break
 
@@ -1004,10 +992,10 @@
                                                     We collect the following personal information:
                                                 </p>
                                                 <ul class="es-fine-list">
-                                                    <li><strong>Your account:</strong> your name and email address, your password (stored only as a one-way hash), your language and timezone, and, if you add them, a profile photo and a phone number. If you sign in with Google or Facebook, the name, email address and account ID that service shares.</li>
+                                                    <li><strong>Your account:</strong> your name and email address, your password (stored only as a one-way hash), your language and timezone, and, if you add them, a profile photo and a phone number. If you sign in with Google or Facebook, the name, email address and account ID that service shares, and with Google your profile photo.</li>
                                                     <li><strong>What you publish:</strong> your schedules and events, with their descriptions, images, venues and addresses. For a performer or venue page an organizer creates while listing an event: the name, and any email address or phone number the organizer enters, which is never shown in full.</li>
-                                                    <li><strong>Buying, booking and RSVPs:</strong> the name, email address, and phone number if the organizer asks for one, answers to the organizer's questions, what was bought or booked, and whether it was paid. Card details are entered with the payment provider and never reach us.</li>
-                                                    <li><strong>Following and email lists:</strong> which schedules you follow. For a schedule's email sign-up: the address and name, the page language, and the IP address and time it was confirmed from, which are the record of your consent. For updates about a single event, asked for without an account: the email address you enter, the IP address it came from, and the language of the page. Schedule newsletters record whether each one was opened and which links were clicked.</li>
+                                                    <li><strong>Buying, booking and RSVPs:</strong> the name, email address, and phone number if the organizer asks for one, answers to the organizer's questions, what was bought or booked, and whether it was paid. Card details are entered with the payment provider and never reach us; for a ticket paid in installments we keep the card type and its last four digits.</li>
+                                                    <li><strong>Following and email lists:</strong> which schedules you follow. For a schedule's email sign-up: the address and name, the page language, the IP address it was entered from and the time it was confirmed, which are the record of your consent. For updates about a single event, asked for without an account: the email address you enter, the IP address it came from, and the language of the page. Schedule newsletters record whether each one was opened and which links were clicked.</li>
                                                     <li><strong>What you send us:</strong> support chat messages, with the page you wrote from and your country; and comments, photos and videos you post to events.</li>
                                                     <li><strong>Paid plans:</strong> billing is handled by Stripe, and we keep the card type, its last four digits, and the history of your plan.</li>
                                                     <li><strong>How you found us:</strong> when you create an account, the page you first landed on, the site that sent you and any campaign tags, if you allowed marketing cookies or signed up in the same visit.</li>
@@ -1052,21 +1040,23 @@
                                                                 ['Keep the service secure, stop fraud and abuse, fix errors, keep the security log', 'Legitimate interests'],
                                                                 ['Count visits as daily totals, and the anonymous version of our live view', 'Legitimate interests'],
                                                                 ['Google Analytics and the identified live view', 'Your consent (analytics cookies)'],
-                                                                ['Campaign attribution, the Meta Pixel and Conversions API, ads, and maps, videos and booking widgets from other sites', 'Your consent (marketing cookies), or your click on that one item'],
-                                                                ['Send account holders product news, tips and schedule digests', 'Legitimate interests, with a way to say no when you sign up and in every email'],
+                                                                ['Record the page or site that brought you, when you create an account or buy in the same visit', 'Legitimate interests'],
+                                                                ['Campaign attribution kept across visits, the Meta Pixel and Conversions API, ads, and maps, videos and booking widgets from other sites', 'Your consent (marketing cookies), or your click on that one item'],
+                                                                ['Push notifications', 'Your consent (your browser\'s permission)'],
+                                                                ['Send account holders product news, tips and schedule digests', 'Legitimate interests, with a way to say no on the sign-up page and in every email'],
                                                                 ['A schedule\'s newsletters and email updates', 'The organizer\'s basis, which is normally your consent: a confirmed sign-up, a Follow, or the unticked box at checkout'],
                                                                 ['AI features you use, and translations of what organizers publish', 'Contract'],
                                                             ] as [$purpose, $basis])
                                                                 <tr>
                                                                     <td>{{ $purpose }}</td>
-                                                                    <td class="es-fine-vendor">{{ $basis }}</td>
+                                                                    <td class="es-fine-label">{{ $basis }}</td>
                                                                 </tr>
                                                             @endforeach
                                                         </tbody>
                                                     </table>
                                                 </div>
                                                 <p>
-                                                    Where we rely on legitimate interests you can object, and where we rely on consent you can withdraw it at any time (clause 16).
+                                                    Where we rely on legitimate interests you can object, and where we rely on consent you can withdraw it at any time (clause 16). No decision about you is made by automated means alone.
                                                 </p>
                                                 @break
 
@@ -1076,7 +1066,7 @@
                                                     @if ($aiProviders)
                                                         On this service the provider is {{ implode(' or ', $aiProviders) }}, depending on the feature.
                                                     @endif
-                                                    A provider receives only what the feature needs, such as the text or the image being read, and never your password or payment details. What it returns is shown to be checked and edited before anything is published.
+                                                    A provider receives only what the feature needs, such as the text or the image being read, and never your password or payment details. Translations are published as they come back, and an event sent by WhatsApp message is created straight away; everything else the provider returns is shown to be checked and edited before it is published.
                                                 </p>
                                                 @break
 
@@ -1090,10 +1080,13 @@
                                                      this hosted install, any claimed schedule that is not a demo). The address is
                                                      listed on the owner's Followers tab as an account-less subscriber from the
                                                      moment it is entered (role/show-admin-followers.blade.php).
-                                                     2026-10-04: buying, RSVPing and posting content no longer make anyone a
-                                                     follower, and an organizer's contact import creates no accounts. --}}
+                                                     2026-10-04: buying, RSVPing, posting content and asking to add an event no
+                                                     longer make anyone a follower, and an organizer's contact import creates no
+                                                     accounts. Still a follow: the curator guest-submit form, which says so
+                                                     (EventController), and a venue or performer schedule an organizer lists on
+                                                     their own event (EventRepo), so it is offered in their lists next time. --}}
                                                 <p>
-                                                    Signing up for a schedule's email updates works the same way: the schedule owner sees the address you enter, and confirming the link we send also sets up an account for you that follows the schedule. Buying a ticket or posting to an event does not make you a follower.
+                                                    Signing up for a schedule's email updates works the same way: the schedule owner sees the address you enter, and confirming the link we send also sets up an account for you that follows the schedule. Submitting an event to a curator's schedule makes you a follower too, as the submission form says, and so does listing another schedule's venue or performer on an event you create, so it appears in your lists. Buying a ticket, RSVPing, or posting a comment, photo or video does not make you a follower.
                                                 </p>
                                                 @break
 
@@ -1113,7 +1106,7 @@
 
                                             @case('google-calendar-retention')
                                                 <p>
-                                                    The access tokens are stored encrypted. If you disconnect a calendar in Settings, we stop syncing at once and delete the tokens and our record of which events are synced; for Google we also ask Google to revoke our access. If you remove our access in your Google Account or Microsoft account settings instead, we notice the next time we try to sync, within about fifteen minutes, and delete the same things then. Events already copied into your schedule stay there as your events until you delete them.
+                                                    The access tokens are stored encrypted. If you disconnect a calendar in Settings, we stop syncing at once and delete the tokens and our record of which events are synced; for Google we also ask Google to revoke our access. If you remove our access in your Google Account or Microsoft account settings instead, we notice the next time we use the connection, which for a calendar we sync from is usually within a couple of hours. For Google we then delete the same things. For Outlook we delete the tokens and stop syncing, but keep the record of which events are synced, because Microsoft reports a password change the same way and reconnecting should not copy every event again; that record goes when you disconnect in Settings or delete your account. Events already copied into your schedule stay there as your events until you delete them.
                                                 </p>
                                                 @break
 
@@ -1166,7 +1159,7 @@
                                                 </p>
                                                 <ul class="es-fine-list">
                                                     <li><strong>Analytics:</strong> Google Analytics 4, and the identified version of our live view (below). Google Analytics is not loaded at all until you allow this: no script and no request to Google.</li>
-                                                    <li><strong>Marketing and embedded content:</strong> campaign attribution cookies; on events whose organizer runs a Boost, the Meta Pixel, and telling Meta about a ticket you buy as a one-way hash of your email address; ads on free schedules, where they are switched on; and maps, videos and booking widgets from other sites (Google Maps, YouTube, Stay22), which set their own cookies.</li>
+                                                    <li><strong>Marketing and embedded content:</strong> campaign attribution cookies; Google Analytics' advertising features; on events whose organizer runs a Boost, the Meta Pixel, and telling Meta about a ticket you buy as a one-way hash of your email address; ads on free schedules, where they are switched on; and maps, videos and booking widgets from other sites (Google Maps, YouTube, Stay22), which set their own cookies.</li>
                                                 </ul>
                                                 <p>
                                                     "Allow all" turns on both, "Decline" neither, and "Choose" lets you pick. Your choice is kept for twelve months and then asked again. Without marketing consent, a map or a video shows a button instead, and pressing it loads that one item and nothing else. Stay22, which pays a commission on bookings made through its map, is never loaded if your browser sends Global Privacy Control.
@@ -1190,7 +1183,7 @@
                                                     We honor the <a href="https://globalprivacycontrol.org/" target="_blank" rel="noopener" class="es-fine-link">Global Privacy Control<svg class="es-fine-ext" aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><path stroke-linecap="round" stroke-linejoin="round" d="M13 5h6v6M19 5L9 15M15 19H5V9" /></svg></a> signal: if your browser sends GPC, we treat it as declining both categories, and the banner does not appear.
                                                 </p>
                                                 <p>
-                                                    Your choice is stored in your browser's <code class="es-fine-code">localStorage</code> under the key <code class="es-fine-code">cookie_consent</code>, with the categories you allowed and when, and mirrored into a cookie of the same name so our server can honor it too. It records nothing but the choice itself, and we do not store it against any account.
+                                                    Your choice is stored in a cookie named <code class="es-fine-code">cookie_consent</code>, with the categories you allowed and when, so one choice holds across EventSchedule.com and its subdomains and our server can honor it too; your browser keeps a copy in <code class="es-fine-code">localStorage</code> under the same name. A schedule on its own domain asks separately. It records nothing but the choice itself, and we do not store it against any account.
                                                 </p>
 
                                                 <div class="es-fine-scroll">
@@ -1210,13 +1203,16 @@
                                                                 ['Always', 'last_login_method', 'Whether you last signed in with a password, Google or Facebook, to show that option first. 1 year.'],
                                                                 ['Always', 'browser_timezone, browser_language', 'Sets up a new account in your timezone and language. 1 hour, on the sign-in and sign-up pages only.'],
                                                                 ['Always', 'cookie_consent', 'Your choice in the cookie banner. 12 months.'],
-                                                                ['Always', 'Stripe (__stripe_mid, __stripe_sid)', 'Fraud prevention by the payment provider, on payment pages only.'],
+                                                                ['Always', '__cf_bm', 'Bot protection by Cloudflare, which may set it on any page. 30 minutes.'],
+                                                                ['Always', 'Stripe (__stripe_mid, __stripe_sid)', 'Fraud prevention by the payment provider, on payment pages only. __stripe_mid 1 year, __stripe_sid 30 minutes.'],
+                                                                ['Push', 'OneSignal (browser storage)', 'Only if you turn on push notifications: the identifier the push service gives this browser. Until you turn them off.'],
                                                                 ['Analytics', '_ga, _ga_<measurement-id>', 'Google Analytics: tells visits and visitors apart. Up to 2 years, and deleted when you withdraw.'],
                                                                 ['Analytics', 'es_hero, es_hero_clicked', 'Session storage: which homepage headline you saw and whether you then clicked sign up. Until the tab closes.'],
                                                                 ['Marketing', 'utm_params, utm_referrer_url, utm_landing_page', 'Which link, campaign or site brought you here, credited if you later create an account or buy a ticket. 30 days.'],
                                                                 ['Marketing', 'es_attribution', 'The same, written by your browser for the step from our marketing pages to sign-up: the page you landed on, the site that sent you, campaign and referral tags, and the homepage headline you saw. Until the browser closes; at most 2 KB.'],
                                                                 ['Marketing', '_fbp, _fbc', 'The Meta Pixel, on the pages of Boosted events. Up to 90 days, and deleted when you withdraw.'],
-                                                                ['Marketing', 'Google AdSense, Google Maps, YouTube, Stay22', 'Set by those services when they load. Their own policies apply.'],
+                                                                ['Marketing', '__gads, __gpi, __eoi', 'Google AdSense, on free schedules where ads are switched on. Up to 13 months, and deleted when you withdraw.'],
+                                                                ['Marketing', 'Third-party cookies', 'Set by Google Maps, YouTube and Stay22 when one of them loads. Their own policies apply.'],
                                                             ] as [$kind, $name, $what])
                                                                 <tr>
                                                                     <td><span class="es-fine-chip">{{ $name }}</span><br><span class="es-fine-muted text-xs">{{ $kind }}</span></td>
@@ -1227,10 +1223,10 @@
                                                     </table>
                                                 </div>
                                                 <p>
-                                                    Your browser also keeps a few things for your convenience, in <code class="es-fine-code">localStorage</code>, which never leave it: your theme and accessibility settings, the calendar view you picked, unsent form drafts, your cart, and the name, email and phone you entered at checkout, so you do not have to type them again. Those details are forgotten after 30 days, or once everything in the cart has been bought. A support chat started before signing in is remembered by a random identifier.
+                                                    Your browser also keeps a few things for your convenience, in <code class="es-fine-code">localStorage</code>, which stay in your browser until you use them: your theme and accessibility settings, the calendar view you picked, unsent form drafts, your cart, and the name, email and phone you entered at checkout, so you do not have to type them again. Those details are forgotten after 30 days, or once everything in the cart has been bought. A support chat started before signing in is remembered by a random identifier.
                                                 </p>
                                                 <p>
-                                                    You can withdraw consent at any time, as easily as you gave it (GDPR Article 7(3)): use "Cookie preferences" at the bottom of any page, or the button in the next section. Withdrawing deletes the cookies the withdrawn category set on this site, unloads any map, video or accommodation search already on the page, and clears the attribution cookies.
+                                                    You can withdraw consent at any time, as easily as you gave it (GDPR Article 7(3)): use "Cookie preferences" at the bottom of the page (in the app, under About in the menu), or the button in the next section. Withdrawing deletes the cookies the withdrawn category set on this site, unloads any map, video or accommodation search already on the page, and clears the attribution cookies.
                                                 </p>
                                                 @break
 
@@ -1238,7 +1234,7 @@
                                                 <p>
                                                     {{ __('messages.cookie_consent_privacy_body') }}
                                                 </p>
-                                                @if (cookie_banner_required())
+                                                @if (cookie_banner_visible())
                                                     <button type="button" data-cookie-consent-reopen class="es-fine-btn">
                                                         <svg class="h-4 w-4" aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
                                                             <path stroke-linecap="round" stroke-linejoin="round" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" />
@@ -1266,19 +1262,23 @@
                                                             @foreach ([
                                                                 ['Your account, and the schedules and events you publish', 'Until you delete them, or your account'],
                                                                 ['Sales, bookings and RSVPs', 'As long as the organizer keeps them. When an organizer deletes one, the buyer\'s name, email, phone and answers are removed 30 days later; the amounts stay in their books.'],
-                                                                ['Email sign-ups that were never confirmed', '30 days'],
-                                                                ['Interest lists and waitlists for an event', 'Until you unsubscribe, the event is deleted, or 30 days after the event'],
+                                                                ['Email sign-ups that were never confirmed', '30 days after the last confirmation email'],
+                                                                ['Confirmed sign-ups and follows', 'Until you leave, or delete your account'],
+                                                                ['A schedule\'s newsletters: who they were sent to, and opens and clicks', 'As long as the schedule keeps its newsletters'],
+                                                                ['The list of addresses that unsubscribed', 'Kept, so the unsubscribe keeps working'],
+                                                                ['Interest lists for an event', 'Until you unsubscribe, the event is deleted, or 30 days after the event'],
+                                                                ['Waitlists for an event', 'Until the organizer removes you, the event is deleted, or 30 days after the event'],
                                                                 ['Support chats started without an account', '12 months after the last message'],
                                                                 ['Live view records', 'About an hour after your last activity'],
                                                                 ['Sessions', $sessionHours.' hours after your last request'],
-                                                                ['Security log', '90 days. For records of billing changes and connected accounts, which are kept, the IP address and browser are removed after 90 days.'],
+                                                                ['Security log', '90 days. For records of plan changes, schedule claims and connected payment or calendar accounts, which are kept, the IP address and browser are removed after 90 days.'],
                                                                 ['Background tasks that failed, which can contain an email address', '30 days'],
                                                                 ['Exports you download', '7 days'],
                                                                 ['Records of webhooks sent to organizers\' systems', '30 days'],
                                                                 ['Visit statistics', 'Kept as daily totals, which contain nothing about you'],
                                                             ] as [$what, $kept])
                                                                 <tr>
-                                                                    <td class="es-fine-vendor">{{ $what }}</td>
+                                                                    <td class="es-fine-label">{{ $what }}</td>
                                                                     <td>{{ $kept }}</td>
                                                                 </tr>
                                                             @endforeach
@@ -1286,7 +1286,7 @@
                                                     </table>
                                                 </div>
                                                 <p>
-                                                    Error reports, server logs and database backups are kept by our providers for their own limited periods, and then deleted.
+                                                    Error reports, server logs and database backups are kept for limited periods, by us and by our providers, and then deleted or overwritten.
                                                 </p>
                                                 @break
 
@@ -1307,7 +1307,7 @@
                                                     Deleting your account removes it at once, together with the schedules you own and their events, your images and other uploads, the comments, photos and videos you posted while signed in (and your email address on any you posted without signing in), your follows and email sign-ups, any interest list or waitlist entry under your address, your support chats, your sessions on every device, and your calendar connections, whose access we ask Google to revoke. The above method of data purge is final and irreversible.
                                                 </p>
                                                 <p>
-                                                    Two kinds of record stay, because they are other people's. A ticket or booking you bought stays in the organizer's sales records under the name and email you used, because it is their record of a sale; ask the organizer to remove your details. And an event or newsletter you created for a schedule someone else owns stays with that schedule. The security log keeps a note that the account was deleted, for 90 days.
+                                                    Some records stay, because they are other people's or because we need them. A ticket, booking or gift card you bought stays in the organizer's records under the name and email you used, because it is their record of a sale; ask the organizer to remove your details. An event or newsletter you created for a schedule someone else owns stays with that schedule. A schedule keeps its record of the newsletters it sent you, including whether you opened them, and any mailing list an organizer imported your address into. If you unsubscribed from a schedule's emails, that opt-out is kept so the schedule cannot email you again. The security log keeps its entries for the account, with the IP address and browser, for up to 90 days, no longer linked to the account; records of plan changes, schedule claims and connected payment and calendar accounts are kept after that, without the IP address and browser.
                                                 </p>
                                                 {{-- Round 3 (2026-09-10). Step 2 said "Profile" in a top right menu: the only link
                                                      to this screen is the main-menu entry labelled "Settings"
@@ -1328,7 +1328,7 @@
                                                     Wherever you are, you can ask us to:
                                                 </p>
                                                 <ul class="es-fine-list">
-                                                    <li><strong>Give you a copy</strong> of your data. "Download my data" in Settings emails you a link to a file with everything held about your account, in a format other services can read.</li>
+                                                    <li><strong>Give you a copy</strong> of your data. "Download my data" in Settings emails you a link to a file with the personal data held about your account and email address, in a format other services can read. Your schedules' own content and images are in each schedule's backup.</li>
                                                     <li><strong>Correct it.</strong> Most of it you can change yourself in Settings.</li>
                                                     <li><strong>Delete it</strong> (clause 15), or <strong>restrict</strong> what we do with it while a question about it is settled.</li>
                                                     <li><strong>Stop</strong> a use based on our legitimate interests, including product email (clause 17).</li>
@@ -1341,7 +1341,7 @@
 
                                             @case('newsletter')
                                                 <p>
-                                                    We send account holders occasional product news, tips, and digests about their own schedules to the email address on the account. You can say no when you sign up, switch them off under Settings, or use the "unsubscribe" link in any of them, which your email app may also show as a button; you can also write to <a href="mailto:privacy@eventschedule.com" class="es-fine-link">privacy@eventschedule.com</a>. Note that we may still send legally required notifications, and the emails your account needs, such as receipts, password resets and security notices, to your registered email.
+                                                    We send account holders occasional product news, tips, and digests about their own schedules to the email address on the account. You can say no on the sign-up page, switch them off under Settings, or use the "unsubscribe" link in any of them, which your email app may also show as a button; you can also write to <a href="mailto:privacy@eventschedule.com" class="es-fine-link">privacy@eventschedule.com</a>. Note that we may still send legally required notifications, and the emails your account needs, such as receipts, password resets and security notices, to your registered email.
                                                 </p>
                                                 @break
 

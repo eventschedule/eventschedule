@@ -5,6 +5,7 @@ namespace Tests\Feature;
 use App\Models\Event;
 use App\Models\Sale;
 use App\Models\User;
+use App\Services\AccountDeletionService;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
@@ -75,6 +76,8 @@ class AccountErasureTest extends TestCase
         config(['filesystems.default' => 'local']);
 
         $user = User::factory()->create();
+        // Google vouches for the address, so what others keyed to it may go too (addressIsProven()).
+        $user->forceFill(['google_oauth_id' => 'google-123'])->save();
         $role = $this->createRole($user);
         Storage::put('public/flyer-mine.jpg', 'x');
         $event = $this->createEvent($role, ['creator_role_id' => $role->id, 'flyer_image_url' => 'flyer-mine.jpg']);
@@ -108,6 +111,50 @@ class AccountErasureTest extends TestCase
         $this->deleteAccount($user);
 
         Storage::assertExists('public/shared.jpg');
+    }
+
+    /**
+     * A selfhost sign-up marks the address verified without any proof, so deleting that account
+     * must not erase what other people keyed to the address: here, someone else's interest-list
+     * entry under it.
+     */
+    public function test_an_unproven_selfhost_address_does_not_erase_records_keyed_to_it(): void
+    {
+        config(['app.hosted' => false]);
+        $event = $this->createEvent($this->createRole($this->createOwner()));
+        $user = User::factory()->create();
+
+        DB::table('event_interests')->insert([
+            'event_id' => $event->id, 'event_date' => now()->addDays(3)->format('Y-m-d'), 'email' => strtolower($user->email),
+            'token' => str_repeat('b', 32), 'created_at' => now(), 'updated_at' => now(),
+        ]);
+
+        $this->deleteAccount($user);
+
+        $this->assertSame(1, DB::table('event_interests')->where('email', strtolower($user->email))->count());
+    }
+
+    /**
+     * The hand-over runs first and stops the deletion when it fails: going on would let the
+     * cascades take other people's events with the account.
+     */
+    public function test_a_failed_hand_over_stops_the_deletion_before_anything_is_lost(): void
+    {
+        $user = User::factory()->create();
+        $this->app->instance(AccountDeletionService::class, new class extends AccountDeletionService
+        {
+            public function handOver(User $user): void
+            {
+                throw new \RuntimeException('Lock wait timeout exceeded');
+            }
+        });
+
+        $this->actingAs($user)->delete('/settings', ['password' => 'password'])
+            ->assertRedirect(route('profile.edit').'#section-delete')
+            ->assertSessionHas('error');
+
+        $this->assertNotNull(User::find($user->id));
+        $this->assertAuthenticatedAs($user);
     }
 
     public function test_the_last_selfhost_admin_cannot_delete_their_account(): void

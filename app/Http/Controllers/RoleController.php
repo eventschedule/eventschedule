@@ -7306,11 +7306,9 @@ class RoleController extends Controller
                 );
             }
 
-            // Prevent demo account from following other roles
-            if (! DemoService::isDemoUser($user) && ! $user->isConnected($subdomain)) {
-                $user->roles()->attach($role->id, ['level' => 'follower', 'created_at' => now()]);
-            }
-
+            // No follow here. Asking to add an event is not asking for the schedule's emails, and
+            // nothing on the way here says it would be (the curator guest-submit form, which does
+            // follow, says so on the form). The pending request carries the schedule on its own.
             $pendingData = [
                 'pending_request' => $subdomain,
                 'pending_request_allow_guest' => false,
@@ -7592,6 +7590,19 @@ class RoleController extends Controller
         }
 
         return response()->noContent();
+    }
+
+    /**
+     * The one-click link opened in a browser rather than POSTed by a mail app (List-Unsubscribe
+     * without List-Unsubscribe-Post support). A GET must not unsubscribe anyone, since link
+     * scanners fetch every URL in a message, so it goes to the unsubscribe page, where the button
+     * does it.
+     */
+    public function showUnsubscribeOneClick(Request $request)
+    {
+        $email = $request->query('email');
+
+        return redirect()->route('role.show_unsubscribe', is_string($email) ? ['email' => $email] : []);
     }
 
     /**

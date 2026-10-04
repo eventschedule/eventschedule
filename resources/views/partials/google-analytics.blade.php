@@ -30,6 +30,9 @@
     @php
         $gaId = config('services.google.analytics');
         $gaRedactedPath = request()->route() ? \App\Utils\RealtimeTracker::redactedPath(request()) : null;
+        // The install's own cookie domain on the hosted service; null on a custom domain (where
+        // ResolveCustomDomain clears it) and on a bare selfhost, where GA then writes host-only.
+        $gaCookieDomain = ltrim((string) config('session.domain'), '.') ?: null;
     @endphp
     <script {!! nonce_attr() !!}>
         window.dataLayer = window.dataLayer || [];
@@ -50,6 +53,7 @@
         (function () {
             var id = @json($gaId);
             var redactedPath = @json($gaRedactedPath);
+            var cookieDomain = @json($gaCookieDomain);
             // From this script element rather than printed into it, so the page body carries no
             // per-request value. document.currentScript is only set while this runs, so read now.
             var nonce = (document.currentScript && document.currentScript.nonce) || '';
@@ -95,7 +99,13 @@
 
                 loaded = true;
                 gtag('js', new Date());
-                gtag('config', id, { page_location: pageLocation(), page_referrer: pageReferrer() });
+                // Never 'auto', which writes on the registrable domain: on events.venue.com that is
+                // venue.com's cookie jar, where withdrawing could neither find nor fairly delete it.
+                gtag('config', id, {
+                    page_location: pageLocation(),
+                    page_referrer: pageReferrer(),
+                    cookie_domain: cookieDomain || window.location.hostname
+                });
 
                 var script = document.createElement('script');
                 script.async = true;

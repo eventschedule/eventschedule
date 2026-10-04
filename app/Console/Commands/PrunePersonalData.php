@@ -2,6 +2,7 @@
 
 namespace App\Console\Commands;
 
+use App\Http\Controllers\AppController;
 use Illuminate\Console\Command;
 use Illuminate\Support\Facades\DB;
 
@@ -17,7 +18,7 @@ class PrunePersonalData extends Command
 {
     protected $signature = 'app:prune-personal-data';
 
-    protected $description = 'Delete personal data past its retention period: failed jobs, expired reset tokens, unconfirmed sign-ups, old guest support chats, waitlists and interest lists of past events, and the buyer details on deleted sales';
+    protected $description = 'Delete personal data past its retention period: failed jobs, expired reset tokens, unconfirmed sign-ups, old guest support chats, waitlists and interest lists of past events, the buyer details on deleted sales, and stale cached video thumbnails';
 
     /** A failed job's payload is a serialized mail or task, addresses and all. */
     public const FAILED_JOB_DAYS = 30;
@@ -48,10 +49,12 @@ class PrunePersonalData extends Command
             'expired password reset tokens' => DB::table('password_reset_tokens')
                 ->where('created_at', '<', now()->subMinutes((int) config('auth.passwords.users.expire', 60)))
                 ->delete(),
+            // updated_at, not created_at: signing up again re-sends the email with a fresh token on
+            // the same row, and that new link must not be pruned the next morning.
             'unconfirmed sign-ups' => $this->deleteInBatches(
                 DB::table('role_subscribers')
                     ->whereNull('confirmed_at')
-                    ->where('created_at', '<', now()->subDays(self::UNCONFIRMED_SUBSCRIBER_DAYS))
+                    ->where('updated_at', '<', now()->subDays(self::UNCONFIRMED_SUBSCRIBER_DAYS))
             ),
             // support_messages cascade with their conversation.
             'guest support chats' => $this->deleteInBatches(
@@ -62,14 +65,21 @@ class PrunePersonalData extends Command
                         ->orWhere(fn ($inner) => $inner->whereNull('last_message_at')
                             ->where('created_at', '<', now()->subMonths(self::GUEST_SUPPORT_CHAT_MONTHS))))
             ),
-            // event_date is the occurrence's Y-m-d, so a string comparison orders it correctly.
+            // event_date is the occurrence's Y-m-d, so a string comparison orders it correctly. An
+            // event with no date at all stores '' (EventInterestController::resolveDate()), which
+            // sorts before every date: without the != '' it would empty those lists every day.
             'waitlist entries' => $this->deleteInBatches(
-                DB::table('ticket_waitlists')->where('event_date', '<', now()->subDays(self::AFTER_EVENT_DAYS)->format('Y-m-d'))
+                DB::table('ticket_waitlists')
+                    ->where('event_date', '!=', '')
+                    ->where('event_date', '<', now()->subDays(self::AFTER_EVENT_DAYS)->format('Y-m-d'))
             ),
             'interest list addresses' => $this->deleteInBatches(
-                DB::table('event_interests')->where('event_date', '<', now()->subDays(self::AFTER_EVENT_DAYS)->format('Y-m-d'))
+                DB::table('event_interests')
+                    ->where('event_date', '!=', '')
+                    ->where('event_date', '<', now()->subDays(self::AFTER_EVENT_DAYS)->format('Y-m-d'))
             ),
             'deleted sales' => $this->forgetDeletedBuyers(),
+            'cached video thumbnails' => $this->pruneThumbnailCache(),
         ];
 
         foreach ($counts as $what => $count) {
@@ -86,9 +96,11 @@ class PrunePersonalData extends Command
     private function forgetDeletedBuyers(): int
     {
         $blank = ['name' => '', 'email' => '', 'phone' => null, 'guest_timezone' => null];
+        $ticketBlank = [];
 
         for ($i = 1; $i <= 10; $i++) {
             $blank['custom_value'.$i] = null;
+            $ticketBlank['custom_value'.$i] = null;
         }
 
         $total = 0;
@@ -103,11 +115,32 @@ class PrunePersonalData extends Command
 
             if ($ids->isNotEmpty()) {
                 // Query builder on purpose: no saving hooks, and updated_at keeps the delete's date.
+                // The per-ticket answers go first: the blanked email is what marks the sale done.
+                DB::table('sale_tickets')->whereIn('sale_id', $ids)->update($ticketBlank);
                 $total += DB::table('sales')->whereIn('id', $ids)->update($blank);
             }
         } while ($ids->count() === self::BATCH);
 
         return $total;
+    }
+
+    /**
+     * AppController::youtubeThumbnail() caches each poster on local disk. A thumbnail is public,
+     * but the cache would otherwise only ever grow.
+     */
+    private function pruneThumbnailCache(): int
+    {
+        $dir = storage_path('app/'.AppController::YOUTUBE_THUMB_CACHE_DIR);
+        $cutoff = time() - AppController::YOUTUBE_THUMB_TTL_DAYS * 24 * 60 * 60;
+        $deleted = 0;
+
+        foreach (glob($dir.'/*') ?: [] as $file) {
+            if (is_file($file) && @filemtime($file) < $cutoff && @unlink($file)) {
+                $deleted++;
+            }
+        }
+
+        return $deleted;
     }
 
     private function deleteInBatches(\Illuminate\Database\Query\Builder $query): int

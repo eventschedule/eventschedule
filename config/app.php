@@ -96,7 +96,14 @@ return [
     // Browser error reporting. The SDK is served from public/vendor/sentry and told this DSN
     // (partials/sentry-sdk.blade.php). SENTRY_JS_DSN, a Sentry CDN loader URL, is the old way and
     // still overrides it when set.
-    'sentry_browser_dsn' => env('SENTRY_BROWSER_DSN', 'https://e40010dda2802390fc7a031a3db09b63@o4509513336291328.ingest.us.sentry.io/4509513340289024'),
+    //
+    // Event Schedule's own project is the default only on eventschedule.com and on an install that
+    // opted in with REPORT_ERRORS. Any other install, a selfhosted SaaS running IS_HOSTED among
+    // them, reports nowhere unless it names its own SENTRY_BROWSER_DSN: its visitors' errors are
+    // not ours to receive (self-hosting terms, "what crosses the line").
+    'sentry_browser_dsn' => env('SENTRY_BROWSER_DSN') ?: ((env('IS_NEXUS', false) || env('REPORT_ERRORS', false))
+        ? 'https://e40010dda2802390fc7a031a3db09b63@o4509513336291328.ingest.us.sentry.io/4509513340289024'
+        : null),
     'sentry_js_dsn' => env('SENTRY_JS_DSN'),
 
     'hosted' => (bool) env('IS_HOSTED', false),

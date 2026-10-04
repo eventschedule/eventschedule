@@ -38,7 +38,9 @@ class ExportPersonalData implements ShouldQueue
         $job->update(['status' => 'processing', 'started_at' => now()]);
 
         try {
-            $filename = 'personal-data-'.Str::uuid().'.json';
+            // Under backups/{user_id}/ like a schedule export, so an operator's lifecycle or
+            // access rules scoped to that prefix (config/filesystems.php) cover this file too.
+            $filename = "backups/{$job->user_id}/personal-data-".Str::uuid().'.json';
             $json = json_encode($service->build($job->user), JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES | JSON_INVALID_UTF8_SUBSTITUTE);
 
             Storage::disk('backups')->put($filename, (string) $json, 'private');
@@ -67,10 +69,20 @@ class ExportPersonalData implements ShouldQueue
             URL::forceRootUrl($previousRootUrl);
         }
 
+        // The emailed link is the only way to the file, so a send that fails leaves nothing to
+        // download: say so on the row and delete the file now rather than in a week.
         try {
             Mail::to($job->user->email)->send(new PersonalDataExportReady($downloadUrl, $expiresAt));
         } catch (\Throwable $e) {
             report($e);
+
+            try {
+                Storage::disk('backups')->delete($filename);
+            } catch (\Throwable $deleteFailure) {
+                report($deleteFailure);
+            }
+
+            $job->update(['status' => 'failed', 'file_path' => null, 'error_message' => 'The email with the link could not be sent.']);
         }
     }
 }

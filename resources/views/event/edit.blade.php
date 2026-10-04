@@ -5278,7 +5278,21 @@
                                 <div class="flex flex-col sm:flex-row sm:items-center gap-3 p-4 bg-yellow-50 dark:bg-yellow-900/20 rounded-lg border border-yellow-200 dark:border-yellow-800">
                                     <div class="flex-1">
                                         <div class="rounded overflow-hidden mb-2">
-                                            <iframe class="w-full" style="aspect-ratio:16/9" src="{{ \App\Utils\UrlUtils::getYouTubeEmbed($video->youtube_url) }}" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen loading="lazy"></iframe>
+                                            {{-- A thumbnail from this install that opens the video on YouTube, not an
+                                                 embed: nothing is requested from Google until someone chooses to watch
+                                                 (privacy policy, clause 10). The link is rebuilt from the video id, never
+                                                 the submitted URL. --}}
+                                            @php
+                                                $moderationVideoId = \App\Utils\UrlUtils::extractYouTubeVideoId($video->youtube_url);
+                                            @endphp
+                                            @if (is_string($moderationVideoId) && preg_match('/^[A-Za-z0-9_-]{11}$/', $moderationVideoId))
+                                            <a href="https://www.youtube.com/watch?v={{ $moderationVideoId }}" target="_blank" rel="noopener noreferrer" class="group relative block" aria-label="{{ __('messages.consent_embed_video_button') }}">
+                                                <img src="{{ \App\Utils\UrlUtils::getYouTubeThumbnail($video->youtube_url) }}" alt="" loading="lazy" class="w-full object-cover" style="aspect-ratio:16/9">
+                                                <span class="absolute inset-0 flex items-center justify-center bg-black/30 transition-all duration-200 group-hover:bg-black/45" aria-hidden="true">
+                                                    <svg class="h-10 w-10 text-white" viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z" /></svg>
+                                                </span>
+                                            </a>
+                                            @endif
                                         </div>
                                         <p class="text-sm text-gray-600 dark:text-gray-400">
                                             {{ $video->eventPart ? $video->eventPart->name : __('messages.general') }}
@@ -5353,7 +5367,21 @@
                                 <div class="flex flex-col sm:flex-row sm:items-center gap-3 p-4 bg-gray-50 dark:bg-gray-700 rounded-lg">
                                     <div class="flex-1">
                                         <div class="rounded overflow-hidden mb-2">
-                                            <iframe class="w-full" style="aspect-ratio:16/9" src="{{ \App\Utils\UrlUtils::getYouTubeEmbed($video->youtube_url) }}" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen loading="lazy"></iframe>
+                                            {{-- A thumbnail from this install that opens the video on YouTube, not an
+                                                 embed: nothing is requested from Google until someone chooses to watch
+                                                 (privacy policy, clause 10). The link is rebuilt from the video id, never
+                                                 the submitted URL. --}}
+                                            @php
+                                                $moderationVideoId = \App\Utils\UrlUtils::extractYouTubeVideoId($video->youtube_url);
+                                            @endphp
+                                            @if (is_string($moderationVideoId) && preg_match('/^[A-Za-z0-9_-]{11}$/', $moderationVideoId))
+                                            <a href="https://www.youtube.com/watch?v={{ $moderationVideoId }}" target="_blank" rel="noopener noreferrer" class="group relative block" aria-label="{{ __('messages.consent_embed_video_button') }}">
+                                                <img src="{{ \App\Utils\UrlUtils::getYouTubeThumbnail($video->youtube_url) }}" alt="" loading="lazy" class="w-full object-cover" style="aspect-ratio:16/9">
+                                                <span class="absolute inset-0 flex items-center justify-center bg-black/30 transition-all duration-200 group-hover:bg-black/45" aria-hidden="true">
+                                                    <svg class="h-10 w-10 text-white" viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z" /></svg>
+                                                </span>
+                                            </a>
+                                            @endif
                                         </div>
                                         <p class="text-sm text-gray-600 dark:text-gray-400">
                                             {{ $video->eventPart ? $video->eventPart->name : __('messages.general') }}

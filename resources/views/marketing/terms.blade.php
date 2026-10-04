@@ -80,7 +80,7 @@
            typographic watermark, an execution block and a real print
            edition. None of those appear anywhere else in the WP.
 
-           THE EXECUTION BLOCK closes the instrument after clause 16 and
+           THE EXECUTION BLOCK closes the instrument after the last clause and
            reuses the cover sheet's own .es-fine-facts register, so the
            document is book-ended by one device instead of stopping mid
            air. Its rows are facts about the DOCUMENT (how many clauses,
@@ -410,7 +410,7 @@
         /* --- Execution: the closing apparatus ------------------------
            The cover sheet opens with a document-control register, so the
            close carries the same register rather than trailing off after
-           clause 16. The endmark's own hairlines are the closing rule,
+           the last clause. The endmark's own hairlines are the closing rule,
            which is why there is no border-top here as well. */
         .es-fine-close {
             max-width: 64ch;
@@ -591,7 +591,7 @@
                 'blocks' => [
                     ['p', 'When people buy tickets, RSVP, book, follow or sign up for emails through your profile or events, you are the controller of the personal data they give you, and Event Schedule processes it on your behalf: only to provide the service to you, and as described in the Privacy Policy.'],
                     ['p', 'You are responsible for having a lawful basis for collecting that data and for every message you send, including permission to email any contacts you import, and for answering your attendees\' requests about their data. Event Schedule will help you do so.'],
-                    ['p', 'If you buy a Boost, you authorise Event Schedule to measure the campaign by telling Meta about ticket purchases on the boosted event, for buyers who allowed marketing cookies.'],
+                    ['p', 'If you buy a Boost, you authorize Event Schedule to measure the campaign by telling Meta about ticket purchases on the boosted event, for buyers who allowed marketing cookies.'],
                 ],
             ],
             [
