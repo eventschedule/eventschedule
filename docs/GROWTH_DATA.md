@@ -259,7 +259,8 @@ credits, legacy `plan_expires` rows and trials, which is most paid-tier schedule
     - `visitors`: people given that headline, counted once per visitor per day per variant, bots
       and signed-in users excluded;
     - `clicks`: their first click on any sign-up link on the homepage, counted the same way;
-    - `signups`: accounts created carrying the variant;
+    - `signups`: accounts created carrying the variant, on the sign-up link or in the
+      attribution cookie;
     - `click_rate`, `signup_rate`: per visitor, null with no visitors;
     - `p_best`: the probability it is the best variant on signups; `p_best_clicks`: on clicks.
   - `click_share`: how far the split still follows clicks rather than signups. It falls from 1 to
@@ -279,17 +280,33 @@ credits, legacy `plan_expires` rows and trials, which is most paid-tier schedule
       `created_month`.
     - **Retired variants are absent here** but still appear in `signups.hero_variant`, which is
       the raw column.
-    - **The rates are not bounded.** Visitors and clicks are deduplicated beacons and a signup
-      needs only the attribution cookie, so `signups` can exceed `clicks`.
+    - **The rates are not bounded.** Visitors and clicks are deduplicated beacons, and a signup
+      is credited from the variant on its sign-up link or in the attribution cookie, neither
+      of which needs a counted click, so `signups` can exceed `clicks`.
     - **`p_best` moves between pulls on the same counts.** It is a 4000-draw simulation, and the
       section is cached for up to 10 minutes.
-    - **Consent changed what is counted**, from the release committed on 2026-10-04 (see
-      `meta.releases` for when it went live). The attribution cookie is written only with
-      marketing consent and the beacons need none, so a visitor who declines counts in `visitors`
-      and `clicks` and can never count in `signups`: `signup_rate` understates every variant
-      alike. Without analytics consent the headline is picked afresh on each page view, so one
-      person can count as a visitor of several variants. Compare variants with each other, never
-      a rate here with a funnel number, and never across that release.
+    - **How a signup reaches a variant changed twice**, in two releases committed on 2026-10-04.
+      - Schema 9 and 10 pulls taken after the consent release: the attribution cookie only,
+        which is written only with marketing consent. The beacons need none, so a visitor who
+        did not allow it counts in `visitors` and `clicks` and never in `signups`.
+      - From schema 11: the homepage also puts the variant on its sign-up and sign-in links,
+        which stores nothing in the browser and needs no consent. A visitor who clicks through
+        and signs up in that visit counts whatever they answered.
+      - Still not counted without marketing consent: a visitor who signs up from another page
+        or on a later visit, a browser that sends no `Referer` (the link is only accepted with
+        the marketing site as the referrer, since a link can be copied), a visitor who signs up
+        from inside the demo (leaving it ends the session), and a code email's continue link
+        opened on another device. `signup_rate` understates every variant alike by that much.
+      - Never counted, whatever the consent: a stub account (a follower or an invitee) made
+        before `reset_at` that then finishes signing up. Its `hero_variant` is stored, but the
+        count goes by the day the account was created.
+      - With both carriers present the cookie is used: when they differ it is the headline
+        the visitor saw last.
+      - Without analytics consent the headline is picked afresh on each page view, so one
+        person can count as a visitor of several variants.
+      - Compare variants with each other, never a rate here with a funnel number, and never
+        across either release. `reset_at` says when the current counts began.
+
 
 ## Row tables
 
@@ -403,7 +420,8 @@ created over the API or WhatsApp cannot carry a price.
   committed on 2026-10-04.** The first-touch cookie is written only once a visitor allows marketing cookies, and
   no answer counts as no. It is the only carrier off an edge-cached marketing page, so a visitor
   who did not allow it and first touched one signs up with `landing_path` `/sign_up` or `/login`
-  and no UTM or referrer. `hero_variant` has no other carrier at all. A first touch on a page that
+  and no UTM or referrer. `hero_variant` is the exception from schema 11: the homepage puts it on
+  the sign-up link, which needs no consent (see `hero_test`). A first touch on a page that
   has a session is still recorded without consent: a schedule's page, `/sign_up` reached straight
   from another site, or the few marketing pages that are not cached (contact, search, `?lang=`). The stored values stay with the signup, so every pull keeps full
   attribution for signups made before that release. Compare marketing-page channels and landing
@@ -423,6 +441,13 @@ created over the API or WhatsApp cannot carry a price.
 
 ## Changelog (`meta.schema_version`)
 
+- **11** (2026-10-04)
+  - **A meaning changed; no field was added or removed.** `hero_test.rows[].signups` (and so
+    `signup_rate`, `p_best` and `click_share`) and the `signups.hero_variant` column: a headline
+    variant now reaches sign-up on the link as well as in the consented cookie, so both count
+    visitors that a schema 9 or 10 pull taken after the consent release could not. See
+    `hero_test`, "Reading it".
+  - Everything else compares with schema 10.
 - **10** (2026-10-04)
   - **Additive.** Nothing in schema 9 changed meaning, so a schema 9 pull compares with a
     schema 10 one on every field they share.

@@ -125,9 +125,10 @@ class GrowthExportTest extends TestCase
         // gmv_by_currency, 7 since mrr came from RecurringRevenue, 8 since paying meant billing,
         // sales went to the seller and attribution was anonymised, 9 since the daily, nudge
         // outcome, audience, reach and adoption data, 10 since outside ticket links and the
-        // reachable placeholders. Bumping this is deliberate: a reader diffing two pulls needs to
-        // know the shape (or the meaning) moved.
-        $this->assertSame(10, $data['meta']['schema_version']);
+        // reachable placeholders, 11 since a headline variant reached sign-up on the link as well
+        // as in the consented cookie. Bumping this is deliberate: a reader diffing two pulls needs
+        // to know the shape (or the meaning) moved.
+        $this->assertSame(11, $data['meta']['schema_version']);
         $this->assertSame(GrowthExportService::SCHEMA_VERSION, $data['meta']['schema_version']);
         $this->assertSame(now()->format('Y-m'), $data['meta']['partial_month']['month']);
         $this->assertSame(['funnel', 'funnel_trend'], $data['meta']['range_applies_to']);

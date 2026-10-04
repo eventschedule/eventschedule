@@ -31,7 +31,7 @@ class GrowthExportService
      * pulls knows whether they compare. Every bump is described in docs/GROWTH_DATA.md's changelog,
      * which GrowthDataDictionaryTest holds to this number.
      */
-    public const SCHEMA_VERSION = 10;
+    public const SCHEMA_VERSION = 11;
 
     /** The month the schedule.claim audit action shipped; nothing before it can be counted. */
     private const CLAIMS_TRACKED_FROM = '2026-09';
@@ -654,10 +654,12 @@ class GrowthExportService
             'From the release committed on 2026-10-04 the first-touch cookie is written only with marketing '
                 .'consent, and no answer counts as no. It is the only carrier off an edge-cached marketing '
                 .'page, so a visitor who did not allow it and first touched one signs up with landing_path '
-                .'/sign_up or /login and no utm or referrer; hero_variant has no other carrier at all. A '
-                .'first touch on a page that has a session (a schedule\'s page, /sign_up reached from '
-                .'off-site) is still recorded. Compare marketing-page channels and landing pages as shares '
-                .'of attributed signups, never as counts across that release.',
+                .'/sign_up or /login and no utm or referrer. hero_variant is the exception from schema 11: '
+                .'the homepage puts it on the sign-up link, so a visitor who clicks through and signs up in '
+                .'that visit carries it whatever they answered. A first touch on a page that has a session '
+                .'(a schedule\'s page, /sign_up reached from off-site) is still recorded. Compare '
+                .'marketing-page channels and landing pages as shares of attributed signups, never as '
+                .'counts across that release.',
         ];
         // Every derived section is computed from the row tables, so if those were capped
         // the sections describe the most recent N rows and not the whole population.

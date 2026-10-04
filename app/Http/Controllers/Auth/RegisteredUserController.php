@@ -12,6 +12,7 @@ use App\Notifications\SignupVerificationCode;
 use App\Rules\NoFakeEmail;
 use App\Rules\ValidTurnstile;
 use App\Services\AuditService;
+use App\Utils\HeroExperiment;
 use App\Utils\HoneypotUtils;
 use App\Utils\TimezoneUtils;
 use App\Utils\TurnstileUtils;
@@ -574,7 +575,7 @@ class RegisteredUserController extends Controller
                 'utm_term' => $utmParams['utm_term'] ?? null,
                 'referrer_url' => $referrerUrl,
                 'landing_page' => $landingPage,
-                'hero_variant' => $clientAttribution['hero_variant'],
+                'hero_variant' => CaptureUtmParameters::heroVariant($request),
                 // Keep the stub's original acquisition context (team invite,
                 // newsletter subscriber) rather than re-labeling it organizer
                 'signup_intent' => $existingUser->signup_intent ?? $signupIntent,
@@ -596,7 +597,7 @@ class RegisteredUserController extends Controller
                 'utm_term' => $utmParams['utm_term'] ?? null,
                 'referrer_url' => $referrerUrl,
                 'landing_page' => $landingPage,
-                'hero_variant' => $clientAttribution['hero_variant'],
+                'hero_variant' => CaptureUtmParameters::heroVariant($request),
                 'signup_intent' => $signupIntent,
                 ...pending_schedule_from_session(),
             ]);
@@ -620,7 +621,7 @@ class RegisteredUserController extends Controller
             }
         }
 
-        session()->forget(['utm_params', 'utm_referrer_url', 'utm_landing_page', 'guest_language', 'referral_code']);
+        session()->forget(['utm_params', 'utm_referrer_url', 'utm_landing_page', 'guest_language', 'referral_code', HeroExperiment::SESSION_KEY]);
 
         // Record the consent that was just validated. `terms` is only required on hosted - on
         // selfhost the first account is the operator installing their own software - so a null

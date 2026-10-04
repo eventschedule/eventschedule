@@ -17,9 +17,19 @@ use Throwable;
  * (CacheableMarketingResponse, docs/CACHING.md), so a variant chosen on the server would be
  * served to every visitor for ten minutes, and a response that set a variant cookie would stop
  * being cacheable at all. The server therefore renders the DEFAULT copy plus every variant and
- * the current traffic weights; an inline script on the homepage picks one, swaps the text,
- * remembers the pick in the es_attribution cookie (which reaches sign-up), and beacons a `view`
- * on the first pick and a `click` on the first sign-up link click.
+ * the current traffic weights; an inline script on the homepage picks one, swaps the text, and
+ * beacons a `view` on the first pick and a `click` on the first sign-up link click.
+ *
+ * HOW A SIGNUP IS CREDITED: the pick has two ways to reach sign-up on the app host, and
+ * CaptureUtmParameters::heroVariant() reads both, the cookie first.
+ * - The LINK. The script adds ?hero=<key> (LINK_PARAMETER) to the homepage's sign-up and sign-in
+ *   links as they are pressed, and CaptureUtmParameters keeps it in the session (SESSION_KEY)
+ *   until the account exists. Nothing is stored on the visitor's device, so this needs no consent
+ *   and is what counts a visitor who never answers the cookie banner. It is only accepted with
+ *   the marketing site as the Referer, because a link, unlike a cookie, can be copied.
+ * - The es_attribution COOKIE, which the marketing layout writes only with marketing consent. It
+ *   covers what the link cannot: a visitor who saw the homepage and signed up from another page.
+ *   It outranks the link because, when the two differ, it is the headline shown last.
  *
  * HOW IT DECIDES: probability matching (Thompson sampling). Each variant gets traffic in
  * proportion to the chance that it has the best rate. Signups are the real goal but are rare,
@@ -36,7 +46,8 @@ use Throwable;
  *
  * STARTING OVER: reset() (the button on /admin/growth) restarts the counts for every key without
  * deleting history: stats() only reads what came after RESET_SETTING. A visitor assigned before a
- * reset keeps their pick in es_attribution and never beacons a second `view`, so a signup of
+ * reset keeps their pick (in es_attribution if they allowed marketing cookies, in the session if
+ * they had already pressed a sign-up link) and need not beacon a second `view`, so a signup of
  * theirs after it is credited with no visit to match; probabilityBest() clamps that. With the same
  * variants on both sides of the reset those signups fall on each variant roughly in proportion to
  * its old share. A reset that follows a change of variants is skewed instead: only a key that
@@ -147,6 +158,15 @@ final class HeroExperiment
     public const RESET_SETTING = 'hero_experiment_reset_at';
 
     public const EVENTS = ['view' => 'visitors', 'click' => 'clicks'];
+
+    /** The query parameter the homepage's hero script adds to its sign-up and sign-in links. */
+    public const LINK_PARAMETER = 'hero';
+
+    /**
+     * Where the linked variant waits for the account to be created. Deliberately not a signup_*
+     * name: /login forgets those, and a social sign-in from /login still creates accounts.
+     */
+    public const SESSION_KEY = 'hero_variant';
 
     public static function isVariant(mixed $key): bool
     {
@@ -263,8 +283,8 @@ final class HeroExperiment
 
     /**
      * Totals per variant since the last reset (all-time if there has not been one). Visitors and
-     * clicks come from the beacon counters; signups are the accounts that carried the variant in
-     * es_attribution when they were created.
+     * clicks come from the beacon counters; signups are the accounts that carried the variant when
+     * they were created, on the sign-up link or in es_attribution.
      *
      * @return array<string, array{visitors: int, clicks: int, signups: int}>
      */

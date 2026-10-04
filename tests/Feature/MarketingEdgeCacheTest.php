@@ -202,9 +202,9 @@ class MarketingEdgeCacheTest extends TestCase
      * so every clean-URL page afterwards would miss the edge too. That is all paid, social, email
      * and referral traffic.
      *
-     * Nothing is lost by dropping the session here: layouts/marketing.blade.php writes the
-     * es_attribution cookie client-side on this very page, un-gated on consent, carrying the
-     * landing path, the referrer, the utm_* values and ref.
+     * What that session would have held is carried by the es_attribution cookie instead, which
+     * layouts/marketing.blade.php writes client-side on this very page for a visitor who has
+     * allowed marketing cookies: the landing path, the referrer, the utm_* values and ref.
      */
     public function test_an_attribution_query_string_does_not_cost_the_visitor_the_edge(): void
     {

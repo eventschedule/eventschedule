@@ -20,8 +20,8 @@ use Tests\TestCase;
  * different justification: the browser writes it, it holds exactly what the server session
  * used to hold for the marketing-to-signup hop, and it exists because anonymous marketing
  * HTML is now served from the CDN and so has no server session at all (docs/CACHING.md).
- * That makes it strictly necessary in the same sense the session cookie it replaces was, so
- * it is deliberately not consent-gated - and the tests below pin that it is the LAST
+ * It is attribution all the same, so the browser writes it only with marketing consent
+ * (layouts/marketing.blade.php). The tests below pin how the server reads it: as the LAST
  * fallback, never an override of the session or the consented cookies.
  */
 class UtmConsentCookieTest extends TestCase
@@ -670,6 +670,39 @@ class UtmConsentCookieTest extends TestCase
         $beacon->assertNoContent();
         $this->assertNull($this->cookie($beacon, 'utm_landing_page'));
         $this->assertNull(session('utm_landing_page'));
+    }
+
+    /**
+     * `?ref[]=a` arrives as an array. The referral code went straight into substr() and the utm_*
+     * values into a ?string parameter, so either was a TypeError and a 500 on whatever page a
+     * scanner or a mangled link pointed at. An array is not a value: nothing is recorded.
+     */
+    public function test_an_array_where_a_value_belongs_is_ignored_not_a_500(): void
+    {
+        $this->get('/sign_up?ref[]=abc123')->assertOk();
+        $this->assertNull(session('referral_code'));
+
+        $this->get('/sign_up?utm_source[]=newsletter&utm_medium[]=email&utm_campaign[]=x&utm_content[]=y&utm_term[]=z')->assertOk();
+        $this->assertNull(session('utm_params'));
+
+        // The paid-placement branch hands two more of them to a ?string parameter.
+        $this->get('/sign_up?utm_source=boost&utm_medium=network&utm_token[]=t&utm_campaign[]=c')->assertOk();
+        $this->assertSame('boost', session('utm_params')['utm_source']);
+        $this->assertNull(session('utm_params')['utm_campaign']);
+
+        // The edge-cacheable shape, where the session is an in-memory one.
+        $this->get('/pricing?ref[]=abc123')->assertOk();
+        $this->get('/pricing?utm_source[]=newsletter')->assertOk();
+    }
+
+    /** The same values as strings still land, so the guard above did not swallow them. */
+    public function test_a_string_ref_and_utm_values_are_still_recorded(): void
+    {
+        $this->get('/sign_up?ref=abc-123!&utm_source=newsletter&utm_medium=email')->assertOk();
+
+        $this->assertSame('abc123', session('referral_code'));
+        $this->assertSame('newsletter', session('utm_params')['utm_source']);
+        $this->assertSame('email', session('utm_params')['utm_medium']);
     }
 
     private function clientAttribution(array $data): string

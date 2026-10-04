@@ -382,7 +382,8 @@ is attribution, not something the visitor asked for, so it is written **only wit
 consent** (`window.esConsent.has('marketing')`, the same category as the 30-day cookies
 `CaptureUtmParameters` writes). A visitor who grants it later on the same page is recorded
 then; withdrawing marketing consent deletes it (`resources/js/cookie-consent.js`). A visitor
-who declines reaches sign-up with no client attribution, by design. The decision is made in
+who declines reaches sign-up with no client attribution, by design (the homepage headline
+variant is the one exception: it rides the sign-up link, next section). The decision is made in
 the browser, which is what keeps it safe on an edge-cached page: never read the consent
 cookie while rendering a marketing view (`consent_granted()` documents why).
 
@@ -421,9 +422,21 @@ has to stay that way:
 
 - The server renders the default copy (or the locked winner), every variant, and the current
   traffic weights. An inline script right after the subtitle picks a variant, swaps the text
-  before the entrance animation reveals it, and leaves the pick in `window.esHero`; the
-  attribution script above copies it into `es_attribution`, which is how a signup is
-  credited (`users.hero_variant`).
+  before the entrance animation reveals it, and leaves the pick in `window.esHero`.
+- A signup is credited (`users.hero_variant`) from either of two carriers, read by
+  `CaptureUtmParameters::heroVariant()`:
+  - **The link.** The same script adds `?hero=<key>` to the homepage's sign-up and sign-in
+    links as they are pressed, and `CaptureUtmParameters` keeps it in the session on the app
+    host until the account exists. Nothing is stored in the browser, so it needs no consent,
+    and the HTML stays identical for every visitor. It is accepted only when the `Referer` is
+    the marketing host itself (`_base_domain()`, with or without `www`): the parameter stays
+    in the address bar, and a copied or autocompleted URL would otherwise credit a headline
+    to someone who never saw the homepage. The base domain is not enough, because the app
+    host and every schedule's subdomain share it.
+  - **The cookie.** The attribution script above copies the pick into `es_attribution`, so
+    only with marketing consent. It covers a visitor who signs up from another page.
+  - The cookie is read first. While it holds a variant the homepage shows that one, so a
+    link pressed since carries the same key; the two differ only when the link is the older.
 - A variant chosen on the server would be stored at the edge and served to every visitor for
   ten minutes. A variant **cookie** set by the server is worse: `responseIsAnonymous()`
   refuses to mark a response that sets any cookie public, so the homepage would silently stop
@@ -465,6 +478,7 @@ reused against a page an attacker can write into. The reasoning is repeated in
 - The homepage headline test: `curl -sI -X POST https://eventschedule.com/marketing/hero`
   must carry no `set-cookie` (it answers 422 with no body, which is fine). Within a day the
   "Homepage headline test" card on `/admin/growth` should show visitors for every variant, and
-  new sign-ups that came through the homepage should carry a non-null `hero_variant`. If
+  new sign-ups that came through the homepage should carry a non-null `hero_variant`,
+  whether or not they answered the cookie banner (the variant rides the sign-up link). If
   Cloudflare floors `s-maxage` to its 2-hour minimum, the weights baked into a cached homepage
   lag by up to 2 hours instead of ~20 minutes, which is harmless.

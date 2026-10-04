@@ -7,6 +7,7 @@ use App\Http\Middleware\CaptureUtmParameters;
 use App\Models\Referral;
 use App\Models\User;
 use App\Services\AuditService;
+use App\Utils\HeroExperiment;
 use App\Utils\SocialLoginUtils;
 use App\Utils\TimezoneUtils;
 use Illuminate\Auth\Events\Registered;
@@ -252,8 +253,9 @@ class SocialAuthController extends Controller
             'utm_term' => $utmParams['utm_term'] ?? null,
             'referrer_url' => session('utm_referrer_url') ?? request()->cookie('utm_referrer_url'),
             'landing_page' => session('utm_landing_page') ?? request()->cookie('utm_landing_page'),
-            // Only es_attribution carries it: the session seed copies the utm_* values, not this.
-            'hero_variant' => CaptureUtmParameters::clientAttribution(request())['hero_variant'],
+            // The sign-up link's own session key, else es_attribution: the session seed copies
+            // the utm_* values, not this.
+            'hero_variant' => CaptureUtmParameters::heroVariant(request()),
             'signup_intent' => signup_intent_from_session(),
             ...pending_schedule_from_session(),
         ]);
@@ -301,7 +303,7 @@ class SocialAuthController extends Controller
             }
         }
 
-        session()->forget(['utm_params', 'utm_referrer_url', 'utm_landing_page', 'guest_language', 'referral_code']);
+        session()->forget(['utm_params', 'utm_referrer_url', 'utm_landing_page', 'guest_language', 'referral_code', HeroExperiment::SESSION_KEY]);
 
         // Half of all accounts are created here rather than by RegisteredUserController::store(),
         // and only that one fired this.

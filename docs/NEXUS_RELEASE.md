@@ -163,6 +163,14 @@ checklist:
     from the headline the server renders (`HeroExperiment::meta()`), so they follow the default
     and then the winner. Nothing to run. Google picks it up on its next crawl of `/`; "Request
     indexing" for the homepage in Search Console shortens the wait and is optional.
+
+    **Reset once more after the release that puts the variant on the sign-up link.** Between
+    the consent release and that one, only visitors who allowed marketing cookies could be
+    credited with a sign-up, while every visitor was counted. Once view-source on the signed-out
+    homepage shows `searchParams.set(param, key)`, press **Reset stats** again so visitors and
+    sign-ups are counted on the same basis. Then check it: in a private window, leave the cookie
+    banner unanswered, click a sign-up button on the homepage (the address bar shows
+    `/sign_up?hero=...`) and create an account. The card's sign-up count rises within 10 minutes.
 11. **The next day:** check that the `cache` table stopped growing (see
     [Cache pruning](#cache-pruning-appprune-cache)).
 

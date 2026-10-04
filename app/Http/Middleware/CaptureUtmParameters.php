@@ -25,7 +25,9 @@ class CaptureUtmParameters
      * landing page, off-site referrer, the utm_* values and ?ref= - and nothing else. It is
      * attribution, not something the visitor asked for, so the browser writes it only with
      * marketing consent, like the 30-day ATTRIBUTION_COOKIES above; a visitor who declines
-     * reaches sign-up with no client attribution, and this middleware simply finds none.
+     * reaches sign-up with no client attribution, and this middleware simply finds none. The one
+     * thing that still arrives without it is the homepage headline variant, which rides the
+     * sign-up link instead (rememberHeroLink()).
      *
      * Exempt from cookie encryption in bootstrap/app.php, since the browser writes it.
      */
@@ -65,9 +67,12 @@ class CaptureUtmParameters
         // two stub-account paths read the session and the consented cookies only.
         $this->seedSessionFromClientAttribution($request);
 
+        $this->rememberHeroLink($request);
+
         // Capture referral code (first-touch)
-        if (! $request->session()->has('referral_code') && $request->has('ref')) {
-            $refCode = preg_replace('/[^a-zA-Z0-9]/', '', $request->query('ref'));
+        $ref = self::queryString($request, 'ref');
+        if (! $request->session()->has('referral_code') && $ref !== null) {
+            $refCode = preg_replace('/[^a-zA-Z0-9]/', '', $ref);
             $refCode = substr($refCode, 0, 8);
             if ($refCode) {
                 $request->session()->put('referral_code', $refCode);
@@ -88,8 +93,8 @@ class CaptureUtmParameters
         $isPaidPlacement = $request->query('utm_source') === 'boost'
             && $request->query('utm_medium') === 'network'
             && \App\Services\PromotionService::verifyClickToken(
-                $request->query('utm_token'),
-                $request->query('utm_campaign')
+                self::queryString($request, 'utm_token'),
+                self::queryString($request, 'utm_campaign')
             );
 
         // Only capture if UTM params are present and neither carrier already holds them
@@ -107,11 +112,11 @@ class CaptureUtmParameters
 
         if (($isPaidPlacement || ! $holdsUtmParams) && $this->hasUtmParams($request)) {
             $utmParams = [
-                'utm_source' => self::sanitize($request->query('utm_source')),
-                'utm_medium' => self::sanitize($request->query('utm_medium')),
-                'utm_campaign' => self::sanitize($request->query('utm_campaign')),
-                'utm_content' => self::sanitize($request->query('utm_content')),
-                'utm_term' => self::sanitize($request->query('utm_term')),
+                'utm_source' => self::sanitize(self::queryString($request, 'utm_source')),
+                'utm_medium' => self::sanitize(self::queryString($request, 'utm_medium')),
+                'utm_campaign' => self::sanitize(self::queryString($request, 'utm_campaign')),
+                'utm_content' => self::sanitize(self::queryString($request, 'utm_content')),
+                'utm_term' => self::sanitize(self::queryString($request, 'utm_term')),
             ];
 
             $request->session()->put('utm_params', $utmParams);
@@ -220,6 +225,81 @@ class CaptureUtmParameters
     }
 
     /**
+     * Keep the homepage headline variant a sign-up link carried (?hero=, added by the homepage's
+     * hero script as the link is pressed) until the account exists.
+     *
+     * This is the carrier that needs no consent: nothing is stored on the visitor's device, the
+     * key rides the click and then the strictly-necessary session, like the rest of same-visit
+     * attribution. es_attribution carries it as well, for a visitor who allowed marketing cookies
+     * and signs up from some other page.
+     *
+     * Only from the marketing site. The parameter stays in the address bar, so a copied,
+     * bookmarked or autocompleted URL would otherwise credit a headline to someone who never saw
+     * the homepage, with no visitor to match. A click from the marketing host sends its origin as
+     * the Referer (strict-origin-when-cross-origin, SecurityHeaders); a pasted or typed URL sends
+     * none. A browser that withholds the Referer is not counted, which costs every variant alike.
+     */
+    private function rememberHeroLink(Request $request): void
+    {
+        if (! config('app.is_nexus') || ! $request->hasSession()) {
+            return;
+        }
+
+        $variant = $request->query(HeroExperiment::LINK_PARAMETER);
+
+        if (! HeroExperiment::isVariant($variant)) {
+            return;
+        }
+
+        if (! self::fromMarketingSite($request)) {
+            return;
+        }
+
+        $request->session()->put(HeroExperiment::SESSION_KEY, $variant);
+    }
+
+    /**
+     * Did this request come from a page on the marketing site? Its host exactly (with or without
+     * www), not merely our base domain as isSameDomain() asks: the app host and every schedule's
+     * subdomain share that, and a tagged URL re-requested from one of those is not a homepage
+     * click. A failed sign-in, for one, redirects back to its own URL with itself as the Referer.
+     */
+    private static function fromMarketingSite(Request $request): bool
+    {
+        $referer = $request->header('Referer');
+        $host = is_string($referer) ? parse_url($referer, PHP_URL_HOST) : null;
+
+        if (! is_string($host) || $host === '') {
+            return false;
+        }
+
+        return preg_replace('/^www\./', '', strtolower($host)) === strtolower(_base_domain());
+    }
+
+    /**
+     * The homepage headline variant to credit a new account to: the one in es_attribution, else
+     * the one its sign-up link carried (rememberHeroLink()).
+     *
+     * The cookie comes first because it is never the older of the two. While it holds a variant
+     * the homepage shows that variant instead of rolling one, so every link pressed since carries
+     * the same key. They differ only when the link was pressed BEFORE the cookie got its pick: a
+     * button pressed without consent, then cookies allowed and a new headline shown on a later
+     * view. The cookie is the headline the visitor saw last.
+     */
+    public static function heroVariant(Request $request): ?string
+    {
+        $cookie = self::clientAttribution($request)['hero_variant'];
+
+        if ($cookie !== null) {
+            return $cookie;
+        }
+
+        $linked = $request->hasSession() ? $request->session()->get(HeroExperiment::SESSION_KEY) : null;
+
+        return HeroExperiment::isVariant($linked) ? $linked : null;
+    }
+
+    /**
      * Has the visitor accepted marketing cookies?
      *
      * The choice really lives in localStorage, which is invisible from here, so
@@ -288,11 +368,26 @@ class CaptureUtmParameters
 
     private function hasUtmParams(Request $request): bool
     {
-        return $request->has('utm_source')
-            || $request->has('utm_medium')
-            || $request->has('utm_campaign')
-            || $request->has('utm_content')
-            || $request->has('utm_term');
+        foreach (self::CLIENT_UTM_KEYS as $key) {
+            // An array (?utm_source[]=) is not a campaign value: see queryString().
+            if ($request->has($key) && ! is_array($request->query($key))) {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+    /**
+     * A query parameter as a string, or null. ?ref[]=a arrives as an array, which the string
+     * functions and typed parameters here refuse with a TypeError, so one malformed link was a
+     * 500 on whatever page it pointed at.
+     */
+    private static function queryString(Request $request, string $key): ?string
+    {
+        $value = $request->query($key);
+
+        return is_string($value) ? $value : null;
     }
 
     private function isSameDomain(string $referer, Request $request): bool

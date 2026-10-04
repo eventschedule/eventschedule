@@ -139,11 +139,12 @@ Schema 9 also answers these directly:
   ```
 
   The test's own signup count and these rows count different populations, retired variants show
-  up only in the rows, and consent changed what is counted on 2026-10-04: read the `hero_test`
-  entry in `docs/GROWTH_DATA.md` before quoting a rate.
+  up only in the rows, and how a signup reaches a variant changed twice on 2026-10-04 (the consent
+  release, then the sign-up link from schema 11): read the `hero_test` entry in
+  `docs/GROWTH_DATA.md` before quoting a rate.
 
 To compare two pulls, keep the same `schema_version`; ids changed length at 8. Schema 10 only added
-fields, so it compares with 9. Join on `sid` to find sellers who stopped, comps that started
+fields, so it compares with 9; schema 11 changed only how `hero_variant` is credited. Join on `sid` to find sellers who stopped, comps that started
 paying, and schedules that newly sold.
 
 ## 4. Put the numbers next to what shipped

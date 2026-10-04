@@ -213,24 +213,14 @@ class HeroExperimentTest extends TestCase
 
     /**
      * Google sign-up is roughly half of all accounts, and its controller reads attribution from
-     * the session seed, which copies the utm_* values but not the variant.
+     * the session seed, which copies the utm_* values but not the variant: that comes from
+     * CaptureUtmParameters::heroVariant(), here with only the cookie to read.
      */
     public function test_a_google_signup_is_credited_to_the_variant(): void
     {
         config(['app.hosted' => true]);
 
-        $socialUser = \Mockery::mock(\Laravel\Socialite\Two\User::class);
-        $socialUser->shouldReceive('getId')->andReturn('google-hero-1');
-        $socialUser->shouldReceive('getEmail')->andReturn('google-hero@eventschedule-test.org');
-        $socialUser->shouldReceive('getName')->andReturn('Google Visitor');
-        $socialUser->shouldReceive('getAvatar')->andReturn(null);
-        $socialUser->user = ['locale' => 'en'];
-
-        $provider = \Mockery::mock(\Laravel\Socialite\Contracts\Provider::class);
-        $provider->shouldReceive('redirectUrl')->andReturnSelf();
-        $provider->shouldReceive('user')->andReturn($socialUser);
-
-        \Laravel\Socialite\Facades\Socialite::shouldReceive('driver')->with('google')->andReturn($provider);
+        $this->fakeGoogleUser('google-hero@eventschedule-test.org');
 
         $this->withUnencryptedCookie('es_attribution', json_encode(['landing' => '/', 'hero' => 'promote_sell']))
             ->get(route('auth.google.callback'));
@@ -251,6 +241,249 @@ class HeroExperimentTest extends TestCase
             ]);
 
         $this->assertNull(User::where('email', 'forged@gmail.com')->firstOrFail()->hero_variant);
+    }
+
+    /**
+     * The carrier that needs no consent. The homepage adds ?hero=<key> to a sign-up link as it is
+     * pressed, and CaptureUtmParameters keeps it in the session until the account exists: no
+     * cookie is sent here at all, which is every visitor who never answers the banner.
+     */
+    public function test_a_signup_is_credited_to_the_variant_on_the_sign_up_link(): void
+    {
+        config(['app.hosted' => true]);
+
+        $this->get('/sign_up?hero=promote_sell', $this->fromOurSite());
+
+        $this->assertSame('promote_sell', session(HeroExperiment::SESSION_KEY));
+
+        $this->post('/sign_up', [
+            'terms' => '1',
+            'name' => 'Linked Visitor',
+            'email' => 'linked@gmail.com',
+            'password' => 'password',
+        ]);
+
+        $this->assertSame('promote_sell', User::where('email', 'linked@gmail.com')->firstOrFail()->hero_variant);
+        $this->assertSame(1, HeroExperiment::stats()['promote_sell']['signups']);
+        $this->assertNull(session(HeroExperiment::SESSION_KEY), 'used once, like the utm_* keys beside it');
+    }
+
+    /**
+     * Its own branch in RegisteredUserController::store(): an address that already followed a
+     * schedule or was invited is upgraded in place, not created.
+     */
+    public function test_a_stub_account_finishing_sign_up_is_credited_to_the_link(): void
+    {
+        config(['app.hosted' => true]);
+
+        $stub = User::factory()->create(['email' => 'stub-upgrade@gmail.com']);
+        $stub->forceFill(['password' => null, 'google_id' => null, 'google_oauth_id' => null, 'facebook_id' => null])->save();
+        $this->assertTrue($stub->fresh()->isStub());
+
+        $this->get('/sign_up?hero=promote_sell', $this->fromOurSite());
+
+        $this->post('/sign_up', [
+            'terms' => '1',
+            'name' => 'Stub Visitor',
+            'email' => 'stub-upgrade@gmail.com',
+            'password' => 'password',
+        ]);
+
+        $this->assertFalse($stub->fresh()->isStub(), 'the sign-up did not go through');
+        $this->assertSame('promote_sell', $stub->fresh()->hero_variant);
+    }
+
+    /** The session carries it through the OAuth round trip, like the claimed schedule name. */
+    public function test_a_google_signup_is_credited_to_the_variant_on_the_sign_up_link(): void
+    {
+        config(['app.hosted' => true]);
+
+        $this->fakeGoogleUser('google-linked@eventschedule-test.org');
+
+        $this->withSession([HeroExperiment::SESSION_KEY => 'promote_sell'])
+            ->get(route('auth.google.callback'));
+
+        $this->assertSame('promote_sell', User::where('email', 'google-linked@eventschedule-test.org')->firstOrFail()->hero_variant);
+        $this->assertNull(session(HeroExperiment::SESSION_KEY), 'used once, like the utm_* keys beside it');
+    }
+
+    /**
+     * A link can be copied, which a cookie cannot. ?hero= stays in the address bar, so a pasted,
+     * bookmarked or autocompleted URL would credit a headline to someone who never saw the
+     * homepage. Only a click from our own site counts; those arrive with no Referer or a
+     * stranger's.
+     */
+    public function test_a_sign_up_link_from_anywhere_but_our_own_site_is_not_credited(): void
+    {
+        foreach ([[], ['Referer' => ''], ['Referer' => 'https://example.org/sign-up-here'], ['Referer' => 'not a url']] as $headers) {
+            $this->flushSession();
+
+            $this->get('/sign_up?hero=promote_sell', $headers);
+
+            $this->assertNull(session(HeroExperiment::SESSION_KEY), json_encode($headers).' was credited');
+        }
+    }
+
+    /**
+     * The shape production has and no other test here does: the homepage on the apex, sign-up on
+     * the app host. Under is_testing the two are one host, so a check that compared hosts wrongly
+     * would pass every test above and credit nobody once deployed.
+     *
+     * And "our own site" has to mean the marketing site, not the base domain. A failed sign-in
+     * redirects back to its own URL, which then arrives with itself as the Referer, so a tagged
+     * URL the browser autocompleted would be credited on the second request. A schedule's page is
+     * on the base domain too, and its owner writes the links on it.
+     */
+    public function test_on_hosted_only_the_marketing_host_can_credit_a_link(): void
+    {
+        config([
+            'app.hosted' => true,
+            'app.is_testing' => false,
+            'app.env' => 'production',
+            'app.url' => 'https://eventschedule.test',
+        ]);
+
+        $cases = [
+            'https://eventschedule.test/' => 'promote_sell',
+            'https://www.eventschedule.test/' => 'promote_sell',
+            'https://EVENTSCHEDULE.test/' => 'promote_sell',
+            'https://app.eventschedule.test/login?hero=promote_sell' => null,
+            'https://someschedule.eventschedule.test/' => null,
+            'https://blog.eventschedule.test/' => null,
+            'https://noteventschedule.test/' => null,
+            'https://eventschedule.test.example.org/' => null,
+        ];
+
+        foreach ($cases as $referer => $expected) {
+            $this->flushSession();
+
+            $this->get('https://app.eventschedule.test/login?hero=promote_sell', ['Referer' => $referer])->assertOk();
+
+            $this->assertSame($expected, session(HeroExperiment::SESSION_KEY), $referer);
+        }
+    }
+
+    /**
+     * The header's "Sign In" is tagged too: a social sign-in from /login creates accounts. And
+     * /login must not forget it afterwards, the way it forgets the claimed schedule name.
+     */
+    public function test_the_sign_in_link_carries_the_variant_and_login_keeps_it(): void
+    {
+        $this->get('/login?hero=plan_sell_short', $this->fromOurSite());
+
+        $this->assertSame('plan_sell_short', session(HeroExperiment::SESSION_KEY));
+
+        $this->get('/login');
+
+        $this->assertSame('plan_sell_short', session(HeroExperiment::SESSION_KEY));
+    }
+
+    public function test_only_a_current_variant_on_the_link_is_kept(): void
+    {
+        // 'plan' is a real key from round two: retired keys are not credited either.
+        foreach (['hero=%3Cscript%3E', 'hero=plan', 'hero=', 'hero[]=plan_sell'] as $query) {
+            $this->flushSession();
+
+            $this->get('/sign_up?'.$query, $this->fromOurSite());
+
+            $this->assertNull(session(HeroExperiment::SESSION_KEY), $query.' was kept');
+        }
+    }
+
+    /**
+     * While the cookie holds a variant the homepage shows that one instead of rolling another, so
+     * every link pressed since carries the same key. The two can differ only when the link is the
+     * OLDER of them: pressed before cookies were allowed, with a new headline shown afterwards.
+     * So the cookie is the headline the visitor saw last.
+     */
+    public function test_the_cookie_wins_over_an_earlier_link(): void
+    {
+        config(['app.hosted' => true]);
+
+        $this->get('/sign_up?hero=plan_sell_short', $this->fromOurSite());
+
+        $this->withUnencryptedCookie('es_attribution', json_encode(['landing' => '/', 'hero' => 'promote_sell']))
+            ->post('/sign_up', [
+                'terms' => '1',
+                'name' => 'Both Carriers',
+                'email' => 'both@gmail.com',
+                'password' => 'password',
+            ]);
+
+        $this->assertSame('promote_sell', User::where('email', 'both@gmail.com')->firstOrFail()->hero_variant);
+    }
+
+    /** A cookie from an earlier round holds a retired key, which is no pick at all. */
+    public function test_the_link_is_used_when_the_cookie_holds_no_current_variant(): void
+    {
+        config(['app.hosted' => true]);
+
+        $this->get('/sign_up?hero=plan_sell_short', $this->fromOurSite());
+
+        $this->withUnencryptedCookie('es_attribution', json_encode(['landing' => '/', 'hero' => 'plan']))
+            ->post('/sign_up', [
+                'terms' => '1',
+                'name' => 'Retired Cookie',
+                'email' => 'retired@gmail.com',
+                'password' => 'password',
+            ]);
+
+        $this->assertSame('plan_sell_short', User::where('email', 'retired@gmail.com')->firstOrFail()->hero_variant);
+    }
+
+    /** The test only runs on the nexus, so nowhere else has a headline to credit. */
+    public function test_the_link_is_ignored_off_the_nexus(): void
+    {
+        config(['app.is_nexus' => false]);
+
+        $this->get('/sign_up?hero=promote_sell', $this->fromOurSite());
+
+        $this->assertNull(session(HeroExperiment::SESSION_KEY));
+    }
+
+    /**
+     * The half the server cannot see: the homepage has to put the variant on the link. The
+     * literal is also what docs/NEXUS_RELEASE.md tells the operator to look for in view-source.
+     */
+    public function test_the_homepage_tags_its_sign_up_and_sign_in_links(): void
+    {
+        $response = $this->get('/')->assertOk();
+
+        $response->assertSee('var param = '.json_encode(HeroExperiment::LINK_PARAMETER).';', false);
+        $response->assertSee('var targets = ['.json_encode(app_url('/sign_up')).', '.json_encode(app_url('/login')).'];', false);
+        $response->assertSee('url.searchParams.set(param, key)', false);
+        $response->assertSee("document.addEventListener('pointerdown', tag, true)", false);
+        $response->assertSee("document.addEventListener('click', tag, true)", false);
+
+        // The targets are compared whole. A substring selector would also tag a showcase card
+        // for a schedule called "loginlounge" and send its page a query string.
+        $response->assertSee('targets.indexOf(url.origin + url.pathname)', false);
+        $response->assertDontSee('a[href*="/login"]', false);
+    }
+
+    /**
+     * A click from the marketing site: its origin is all strict-origin-when-cross-origin sends.
+     * Under is_testing that host and the app's are the same one.
+     */
+    private function fromOurSite(): array
+    {
+        return ['Referer' => rtrim((string) config('app.url'), '/').'/'];
+    }
+
+    private function fakeGoogleUser(string $email): void
+    {
+        $socialUser = \Mockery::mock(\Laravel\Socialite\Two\User::class);
+        $socialUser->shouldReceive('getId')->andReturn('google-'.md5($email));
+        $socialUser->shouldReceive('getEmail')->andReturn($email);
+        $socialUser->shouldReceive('getName')->andReturn('Google Visitor');
+        $socialUser->shouldReceive('getAvatar')->andReturn(null);
+        $socialUser->user = ['locale' => 'en'];
+
+        $provider = \Mockery::mock(\Laravel\Socialite\Contracts\Provider::class);
+        $provider->shouldReceive('redirectUrl')->andReturnSelf();
+        $provider->shouldReceive('user')->andReturn($socialUser);
+
+        \Laravel\Socialite\Facades\Socialite::shouldReceive('driver')->with('google')->andReturn($provider);
     }
 
     /**

@@ -474,17 +474,40 @@
                          (es_hero, es_hero_clicked) so a visitor sees one headline and is counted
                          once per session; without it nothing is stored, the headline is picked
                          afresh on each view, and a view and a click are counted per page view.
-                         The pick is copied into the es_attribution cookie by the layout's
-                         attribution script (which reads window.esHero, and writes the cookie only
-                         with marketing consent), so it reaches sign-up on the app host. Writing
-                         that cookie from here instead would make the attribution script think it
-                         already ran and lose the landing page and utm_* values. --}}
+
+                         The pick reaches sign-up on the app host two ways. It rides the link:
+                         ?hero=<key> is added to a sign-up or sign-in link as it is pressed, and
+                         CaptureUtmParameters keeps it in the session, so nothing is stored in the
+                         browser and no consent is needed. And it is copied into the
+                         es_attribution cookie by the layout's attribution script (which reads
+                         window.esHero, and writes the cookie only with marketing consent), which
+                         covers a visitor who signs up from another page. Writing that cookie from
+                         here instead would make the attribution script think it already ran and
+                         lose the landing page and utm_* values.
+
+                         tag() is what puts the pick on the link:
+                         - Only the two app URLs in `targets`, compared whole. A substring match
+                           on /login would also tag a showcase card for a schedule called
+                           "loginlounge", and send its page a query string it has no use for.
+                         - Sign-in as well as sign-up: a social sign-in from there creates
+                           accounts.
+                         - As the link is pressed, not once on load: the links below this script
+                           do not exist yet, and initClaim() (marketing-home.js) rebuilds the
+                           claim button's href from its original each time the visitor types.
+                         - On both events: pointerdown covers a middle click and a long press,
+                           click covers the keyboard and the claim box's Enter, and a phone
+                           keyboard can commit its text between the two.
+                         - In its own listeners: the click-beacon listener stops acting after
+                           the first click.
+                         These notes are up here so they are not sent to every visitor. --}}
                     <script {!! nonce_attr() !!}>
                         (function () {
                             try {
                                 var variants = @json($hero['variants']);
                                 var weights = @json($hero['weights']);
                                 var endpoint = @json(url('/marketing/hero'));
+                                var targets = [@json(app_url('/sign_up')), @json(app_url('/login'))];
+                                var param = @json(\App\Utils\HeroExperiment::LINK_PARAMETER);
                                 var key = null;
                                 var fresh = false;
                                 var remember = !!(window.esConsent && window.esConsent.has('analytics'));
@@ -542,6 +565,22 @@
                                 if (fresh) {
                                     send('view');
                                 }
+
+                                var tag = function (e) {
+                                    try {
+                                        var link = e.target && e.target.closest ? e.target.closest('a[href]') : null;
+                                        if (!link) {
+                                            return;
+                                        }
+                                        var url = new URL(link.getAttribute('href'), location.href);
+                                        if (targets.indexOf(url.origin + url.pathname) !== -1 && url.searchParams.get(param) !== key) {
+                                            url.searchParams.set(param, key);
+                                            link.setAttribute('href', url.toString());
+                                        }
+                                    } catch (e) {}
+                                };
+                                document.addEventListener('pointerdown', tag, true);
+                                document.addEventListener('click', tag, true);
 
                                 // Any sign-up link on the page, not only the hero button: the
                                 // headline is what is being tested, wherever the reader acts on it.
