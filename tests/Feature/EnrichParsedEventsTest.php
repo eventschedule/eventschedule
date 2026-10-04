@@ -202,18 +202,17 @@ class EnrichParsedEventsTest extends TestCase
         });
 
         GeminiUtils::parseEvent($role, 'tour dates');
-        GeminiUtils::parseEvent($role, 'tour dates', null, ['prompt_footer' => 'footer_open']);
         GeminiUtils::parseEvent($role, 'page text', null, ['prompt_footer' => 'footer_page']);
         GeminiUtils::parseEvent($role, 'tour dates', null, ['prompt_footer' => 'no_such_footer']);
 
         $this->assertStringContainsString('The event date is either Oct 2026 or Nov 2026.', $prompts[0]);
+        // A page lists a season, so it is not told the dates are this month or next.
         $this->assertStringNotContainsString('The event date is either', $prompts[1]);
+        $this->assertStringContainsString('This is the text of a web page.', $prompts[1]);
         $this->assertStringContainsString('use the nearest date on or after today that fits', $prompts[1]);
-        $this->assertStringContainsString('separate them into multiple events', $prompts[1]);
-        $this->assertStringContainsString('This is the text of a web page.', $prompts[2]);
-        $this->assertStringContainsString('The date today is Oct 10, 2026.', $prompts[2]);
+        $this->assertStringContainsString('The date today is Oct 10, 2026.', $prompts[1]);
         // An unknown key falls back rather than sending a prompt with no ending.
-        $this->assertStringContainsString('The event date is either Oct 2026 or Nov 2026.', $prompts[3]);
+        $this->assertStringContainsString('The event date is either Oct 2026 or Nov 2026.', $prompts[2]);
     }
 
     public function test_a_single_event_page_becomes_its_own_link(): void

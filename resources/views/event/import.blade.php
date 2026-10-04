@@ -56,7 +56,16 @@
     }
 </style>
 
-@if (! config('services.google.gemini_key') && ! config('services.openai.api_key'))
+@php
+    // The guest submission form shares this view. Everything about links is the editor's alone:
+    // a signed-out visitor must never be able to make the server fetch an address.
+    $isGuestPage = isset($isGuest) && $isGuest;
+    $hasAi = (bool) (config('services.google.gemini_key') || config('services.openai.api_key'));
+    // An editor on an install with no AI key still gets the box: a calendar link, or a page that
+    // publishes its own event data, needs no model.
+    $linksOnly = ! $hasAi && ! $isGuestPage;
+@endphp
+@if (! $hasAi && $isGuestPage)
 <div class="ap-card p-4 sm:p-8 shadow-md rounded-lg">
     <div class="max-w-3xl mx-auto">
         <x-gemini-setup-guide />
@@ -96,7 +105,13 @@
                         @endif
 
                         {{-- Art. 13: what is pasted or dropped here goes to the AI provider. --}}
+                        {{-- An editor's notice also covers a pasted link. With no AI on this install
+                             nothing here reaches an AI service, so there is nothing to disclose. --}}
+                        @if ($isGuestPage)
                         <p class="mb-2 text-xs text-gray-500 dark:text-gray-400">{{ __('messages.ai_processing_notice') }}</p>
+                        @elseif (! $linksOnly)
+                        <p class="mb-2 text-xs text-gray-500 dark:text-gray-400">{{ __('messages.ai_processing_notice_links') }}</p>
+                        @endif
 
                         <!-- Combined textarea and image section -->
                         <div class="mb-1">
@@ -115,11 +130,11 @@
                                     @dragleave.prevent="dragLeaveDetails"
                                     @drop.prevent="handleDetailsImageDrop"
                                     @dragend="dragEndDetails"
-                                    autofocus {{ (config('services.google.gemini_key') || config('services.openai.api_key')) ? '' : 'disabled' }}
+                                    autofocus
                                     :class="['mt-1 block w-full border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-[var(--brand-blue)] focus:ring-[var(--brand-blue)] rounded-lg shadow-sm transition-all duration-200', 
                                         isDraggingDetails ? 'border-blue-500 bg-blue-50 dark:bg-blue-900/30 ring-2 ring-blue-200 dark:ring-blue-800' : '']"
                                     dir="auto"
-                                    placeholder="{{ __('messages.drag_drop_image_or_type_text') }}"></textarea>
+                                    placeholder="{{ $isGuestPage ? __('messages.drag_drop_image_or_type_text') : ($linksOnly ? __('messages.import_box_placeholder_links') : __('messages.import_box_placeholder')) }}"></textarea>
                                 
                                 <!-- Drop message overlay for textarea -->
                                 <div v-show="isDraggingDetails" 
@@ -165,40 +180,66 @@
                                     </button>
                                 </div>
                                 
+                                {{-- The two buttons sit together at the box's end. An editor's carry their label:
+                                     an icon alone is a guess on a phone, where there is no hover to explain it. --}}
+                                <div class="absolute bottom-3 end-5 flex items-center gap-3">
+                                @unless ($linksOnly)
                                 <!-- Plus icon button for file picker -->
                                 <button 
                                     type="button"
                                     @click="openDetailsFileSelector"
                                     :disabled="isLoading || detailsImage"
-                                    :class="['absolute p-2 rounded-lg transition-all duration-200 shadow-md', 
-                                        'end-16 bottom-3',
+                                    :class="['inline-flex items-center gap-1.5 p-2 rounded-lg transition-all duration-200 shadow-md {{ $isGuestPage ? '' : 'min-h-[44px]' }}', 
                                         (isLoading || detailsImage)
                                             ? 'bg-gray-300 dark:bg-gray-600 text-gray-500 dark:text-gray-400 cursor-not-allowed border border-gray-400 dark:border-gray-500'
                                             : '{{ (isset($isGuest) && $isGuest) ? 'bg-gradient-to-br from-blue-500 via-blue-600 to-blue-700 hover:from-blue-600 hover:via-blue-700 hover:to-blue-800 text-white cursor-pointer border border-blue-400/30 hover:border-blue-300/50 shadow-lg hover:shadow-xl' : 'bg-[var(--brand-button-bg)] hover:bg-[var(--brand-button-bg-hover)] text-white cursor-pointer border border-[var(--brand-blue-a30)] shadow-lg hover:shadow-xl' }}']"
                                     title="{{ __('messages.add_image') }}">
-                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
                                     </svg>
+                                    @unless ($isGuestPage)
+                                    <span class="pe-1 text-sm font-medium">{{ __('messages.add_image') }}</span>
+                                    @endunless
                                 </button>
-                                
+                                @endunless
+
                                 <!-- Submit button with up arrow -->
                                 <button 
                                     type="button"
                                     @click="handleSubmit"
                                     :disabled="!canSubmit || isLoading"
-                                    :class="['absolute p-2 rounded-lg transition-all duration-200 shadow-md', 
-                                        'end-5 bottom-3',
+                                    :class="['inline-flex items-center gap-1.5 p-2 rounded-lg transition-all duration-200 shadow-md {{ $isGuestPage ? '' : 'min-h-[44px]' }}', 
                                         canSubmit && !isLoading
                                             ? '{{ (isset($isGuest) && $isGuest) ? 'bg-gradient-to-br from-blue-500 via-blue-600 to-blue-700 hover:from-blue-600 hover:via-blue-700 hover:to-blue-800 text-white cursor-pointer border border-blue-400/30 hover:border-blue-300/50 shadow-lg hover:shadow-xl' : 'bg-[var(--brand-button-bg)] hover:bg-[var(--brand-button-bg-hover)] text-white cursor-pointer border border-[var(--brand-blue-a30)] shadow-lg hover:shadow-xl' }}'
                                             : 'bg-gray-300 dark:bg-gray-600 text-gray-500 dark:text-gray-400 cursor-not-allowed border border-gray-400 dark:border-gray-500']"
                                     title="{{ __('messages.submit') }}">
-                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    @unless ($isGuestPage)
+                                    {{-- Says what pressing it will do with what is in the box. --}}
+                                    <span class="ps-1 text-sm font-semibold" v-text="submitLabel"></span>
+                                    @endunless
+                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 10l7-7m0 0l7 7m-7-7v18" />
                                     </svg>
                                 </button>
+                                </div>
                             </div>
+
+                            @unless ($isGuestPage)
+                            {{-- The box holds a link and nothing else: say so, and name where it goes. --}}
+                            <p v-if="isLink && !errorMessage" v-cloak class="mt-2 inline-flex max-w-full items-center gap-2 rounded-lg bg-blue-50 px-3 py-1.5 text-sm text-blue-800 dark:bg-blue-500/10 dark:text-blue-200">
+                                <svg class="h-4 w-4 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" aria-hidden="true">
+                                    <path stroke-linecap="round" stroke-linejoin="round" d="M13.19 8.688a4.5 4.5 0 0 1 1.242 7.244l-4.5 4.5a4.5 4.5 0 0 1-6.364-6.364l1.757-1.757m13.35-.622 1.757-1.757a4.5 4.5 0 0 0-6.364-6.364l-4.5 4.5a4.5 4.5 0 0 0 1.242 7.244" />
+                                </svg>
+                                <span dir="ltr" class="truncate font-medium" v-text="linkLabel"></span>
+                                <span class="flex-shrink-0 opacity-80">{{ __('messages.import_link_detected') }}</span>
+                            </p>
+                            <p v-else-if="!eventDetails.trim() && !detailsImage && !isLoading && !errorMessage" v-cloak class="mt-2 text-sm text-gray-500 dark:text-gray-400">
+                                {{ $linksOnly ? __('messages.import_box_examples_links') : __('messages.import_box_examples') }}
+                            </p>
+                            @endunless
                             <x-input-error class="mt-2" :messages="$errors->get('event_details')" />
 
+                            @if ($isGuestPage)
                             <!-- Error message display -->
                             <div v-if="errorMessage" class="mt-4 p-3 text-sm text-red-600 dark:text-red-400 bg-red-100 dark:bg-red-900/30 rounded-lg">
                                 @{{ errorMessage }}
@@ -216,16 +257,75 @@
                                     <span class="ms-1 inline-flex animate-[ellipsis_1.5s_steps(4,end)_infinite]">...</span>
                                 </div>
                             </div>
+                            @else
+                            {{-- What went wrong and what to do instead, in place and until the next try.
+                                 What the person typed stays in the box. --}}
+                            <div v-if="errorMessage" v-cloak role="alert" class="mt-4 flex items-start gap-3 rounded-lg border border-amber-200 bg-amber-50 p-3 dark:border-amber-700 dark:bg-amber-900/20">
+                                <svg class="h-5 w-5 flex-shrink-0 text-amber-600 dark:text-amber-400" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" aria-hidden="true">
+                                    <path stroke-linecap="round" stroke-linejoin="round" d="M12 9v3.75m-9.303 3.376c-.866 1.5.217 3.374 1.948 3.374h14.71c1.73 0 2.813-1.874 1.948-3.374L13.949 3.378c-.866-1.5-3.032-1.5-3.898 0L2.697 16.126ZM12 15.75h.007v.008H12v-.008Z" />
+                                </svg>
+                                <p class="whitespace-pre-line text-sm text-amber-800 dark:text-amber-200" v-text="errorMessage"></p>
+                            </div>
+
+                            {{-- A read can take a minute. Say what is being read, show the shape of what
+                                 is coming, and leave a way out. --}}
+                            <div v-if="isLoading" v-cloak class="mt-4">
+                                <div class="flex items-center gap-3 text-sm text-gray-600 dark:text-gray-400" role="status" aria-live="polite">
+                                    <span class="relative flex-shrink-0">
+                                        <span class="block h-4 w-4 rounded-full bg-blue-500/30"></span>
+                                        <span class="absolute start-0 top-0 block h-4 w-4 rounded-full border-2 border-blue-500 border-t-transparent motion-safe:animate-spin"></span>
+                                    </span>
+                                    <span class="min-w-0 flex-1 truncate" v-text="readingLabel"></span>
+                                    <button type="button" @click="cancelReading" class="flex-shrink-0 rounded-md px-2 py-1 font-medium text-gray-700 hover:bg-gray-100 focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--brand-blue)] dark:text-gray-300 dark:hover:bg-gray-700">
+                                        {{ __('messages.cancel') }}
+                                    </button>
+                                </div>
+                                <p v-if="isSlow" class="mt-2 text-sm text-gray-500 dark:text-gray-400">{{ __('messages.import_reading_slow') }}</p>
+                                <div class="mt-4 space-y-3" aria-hidden="true">
+                                    @foreach ([70, 55, 80, 60, 45] as $width)
+                                    <div class="flex items-center gap-3">
+                                        <span class="h-10 w-10 flex-shrink-0 rounded-lg bg-gray-200 motion-safe:animate-pulse dark:bg-gray-700"></span>
+                                        <span class="h-4 rounded bg-gray-200 motion-safe:animate-pulse dark:bg-gray-700" style="width: {{ $width }}%"></span>
+                                    </div>
+                                    @endforeach
+                                </div>
+                            </div>
+
+                            @if ($linksOnly)
+                            <p class="mt-4 text-sm text-gray-500 dark:text-gray-400">{{ __('messages.import_ai_optional') }}</p>
+                            @endif
+                            @endif
                         </div>
                     </div>
                 </div>
 
             </div>
+            </div>
+
+            @unless ($isGuestPage)
+            {{-- Where else events can come from. After a failed read it is the way out, so it says so. --}}
+            <div class="mt-4">
+                <h3 v-if="errorMessage" v-cloak class="mb-2 text-sm font-medium text-gray-700 dark:text-gray-300">{{ __('messages.import_try_another_way') }}</h3>
+                <h3 v-else class="mb-2 text-sm font-medium text-gray-500 dark:text-gray-400">{{ __('messages.import_other_sources') }}</h3>
+                @include('event.partials.import-other-sources')
+            </div>
+
+            @if ($linksOnly && auth()->user()?->isAdmin())
+            {{-- Only whoever runs the install can act on this, and nothing above needs it. --}}
+            <div class="mt-4">
+                <x-gemini-setup-guide :optional="true" />
+            </div>
+            @endif
+            @endunless
         </div>
 
+        {{-- The block above used to be left open here, one closing tag short, so everything down
+             to a stray closing tag after the Save All card sat inside it and vanished with it the
+             moment a preview appeared: "Show all fields" and "Save All" were never on screen. The
+             terms panel keeps the condition it had by that accident. --}}
         @if(isset($isGuest) && $isGuest && $role->accept_requests && $role->request_terms)
         <!-- Request Terms Panel -->
-        <div class="ap-card p-4 sm:p-8 shadow-md rounded-lg mb-4 mt-4">
+        <div v-if="!preview || !preview.parsed || preview.parsed.length === 0" class="ap-card p-4 sm:p-8 shadow-md rounded-lg mb-4 mt-4">
             <div class="max-w-3xl mx-auto">
                 <div class="flex justify-center">
                     <div class="w-full max-w-2xl md:max-w-xl lg:max-w-2xl">
@@ -270,7 +370,6 @@
                     </button>
                 </div>
             </div>
-        </div>
         </div>
 
 
@@ -1135,6 +1234,13 @@
                 detailsImage: null,
                 detailsImageUrl: null,
                 currentRequestId: null,
+                // Links are an editor's: the guest submission form shares this component.
+                isGuestPage: {{ $isGuestPage ? 'true' : 'false' }},
+                // No AI key on this install: the box takes links only.
+                linksOnly: {{ $linksOnly ? 'true' : 'false' }},
+                readingHost: '',
+                isSlow: false,
+                slowTimer: null,
                 savingEvents: [], // Track which events are currently being saved
                 createAccount: false, // New data property for guest user account creation
                 userName: '',
@@ -1162,7 +1268,63 @@
 
         computed: {
             canSubmit() {
+                if (this.linksOnly) {
+                    return this.isLink;
+                }
+
                 return this.eventDetails.trim() || this.detailsImage;
+            },
+
+            // The box holds one web address and nothing else, so it is read as a link rather than
+            // as text. Decided here, by what is in the box: the server never looks for an address
+            // inside pasted text.
+            isLink() {
+                if (this.isGuestPage || this.detailsImage) {
+                    return false;
+                }
+                const text = this.eventDetails.trim();
+                if (! text || /\s/.test(text)) {
+                    return false;
+                }
+
+                return /^(https?|webcals?):\/\/\S+\.\S+/i.test(text)
+                    // "venue.com/events" without the scheme. The last label has to be letters, or
+                    // "8.30pm" would count.
+                    || /^(?:[a-z0-9-]+\.)+[a-z]{2,}(?:[\/?#]\S*)?$/i.test(text);
+            },
+
+            linkUrl() {
+                const text = this.eventDetails.trim();
+
+                return /^[a-z][a-z0-9+.-]*:\/\//i.test(text) ? text : 'https://' + text;
+            },
+
+            // Where the link goes, without the scheme: what the person recognises.
+            linkLabel() {
+                return this.linkUrl.replace(/^[a-z][a-z0-9+.-]*:\/\//i, '').replace(/\/$/, '');
+            },
+
+            linkHost() {
+                return this.linkLabel.split(/[\/?#]/)[0];
+            },
+
+            submitLabel() {
+                if (this.isLink) {
+                    return @json(__('messages.import_read_link'), JSON_UNESCAPED_UNICODE);
+                }
+                if (this.detailsImage && ! this.eventDetails.trim()) {
+                    return @json(__('messages.import_read_flyer'), JSON_UNESCAPED_UNICODE);
+                }
+
+                return this.linksOnly
+                    ? @json(__('messages.import_read_link'), JSON_UNESCAPED_UNICODE)
+                    : @json(__('messages.import_read_text'), JSON_UNESCAPED_UNICODE);
+            },
+
+            readingLabel() {
+                return this.readingHost
+                    ? @json(__('messages.import_reading_host', ['host' => '__HOST__']), JSON_UNESCAPED_UNICODE).replace('__HOST__', this.readingHost)
+                    : @json(__('messages.import_reading'), JSON_UNESCAPED_UNICODE);
             },
 
             memberVenues() {
@@ -1533,6 +1695,11 @@
             handleInputChange() {
                 // Just update the model, don't auto-submit
                 // The submit button will be enabled/disabled based on canSubmit computed property
+
+                // What went wrong was about what the box held. Editing it is the next try.
+                if (! this.isGuestPage) {
+                    this.errorMessage = null;
+                }
             },
 
             handleSubmit() {
@@ -1569,11 +1736,29 @@
                 this.playNotificationChime();
             },
 
-            async fetchPreview() {
+            cancelReading() {
+                // The answer, when it comes, is for a request nobody is waiting on any more.
+                this.currentRequestId = null;
+                this.isLoading = false;
+                this.stopSlowTimer();
+            },
+
+            stopSlowTimer() {
+                clearTimeout(this.slowTimer);
+                this.slowTimer = null;
+                this.isSlow = false;
+            },
+
+            async fetchPreview(wholePage = false) {
                 if (!this.eventDetails.trim() && !this.detailsImage) {
                     this.preview = null;
                     return;
                 }
+
+                const readingLink = this.isLink;
+                this.readingHost = readingLink ? this.linkHost : '';
+                this.stopSlowTimer();
+                this.slowTimer = setTimeout(() => { this.isSlow = true; }, 5000);
 
                 this.isLoading = true;
                 this.preview = null;
@@ -1591,7 +1776,14 @@
                 
                 try {
                     const formData = new FormData();
-                    formData.append('event_details', this.eventDetails);
+                    if (readingLink) {
+                        formData.append('source_url', this.linkUrl);
+                        if (wholePage) {
+                            formData.append('source_mode', 'page');
+                        }
+                    } else {
+                        formData.append('event_details', this.eventDetails);
+                    }
                     @if (isset($isGuest) && $isGuest)
                     formData.append('website', this.honeypot);
                     @endif
@@ -1612,43 +1804,33 @@
                         return;
                     }
 
-                    // Handle HTTP error responses before trying to parse JSON
-                    if (!response.ok) {
-                        if (response.status === 429) {
-                            throw new Error(@json(__('messages.ai_rate_limit')));
-                        }
-                        if (response.status === 405) {
-                            throw new Error('Invalid request method');
-                        }
-                        if (response.status === 404) {
-                            throw new Error('Resource not found');
-                        }
-                        if (response.status === 403) {
-                            throw new Error('Permission denied');
-                        }
-                        if (response.status === 401) {
-                            throw new Error('Unauthorized');
-                        }
-                        if (response.status === 500) {
-                            throw new Error('Server error');
-                        }
-                    }
-
-                    let data;
+                    // The server's own message first: it is written for the person and already in
+                    // their language. Only an answer that carries none gets a general one.
+                    let data = null;
                     try {
                         data = await response.json();
                     } catch (e) {
-                        throw new Error('Invalid response from server');
+                        data = null;
                     }
 
                     if (!response.ok) {
-                        // Handle validation errors
-                        if (data.errors) {
-                            const errorMessages = Object.values(data.errors).flat();
-                            throw new Error(errorMessages.join('\n'));
+                        if (data && data.errors) {
+                            throw new Error(Object.values(data.errors).flat().join('\n'));
                         }
-                        // Handle other types of errors
-                        throw new Error(data.message || data.error || 'An unexpected error occurred');
+                        if (data && data.error) {
+                            throw new Error(data.error);
+                        }
+                        if (response.status === 429) {
+                            throw new Error(@json(__('messages.ai_rate_limit'), JSON_UNESCAPED_UNICODE));
+                        }
+                        if (response.status === 401 || response.status === 403 || response.status === 419) {
+                            throw new Error(@json(__('messages.not_authorized'), JSON_UNESCAPED_UNICODE));
+                        }
+                        throw new Error(@json(__('messages.error_occurred'), JSON_UNESCAPED_UNICODE));
+                    }
+
+                    if (data === null) {
+                        throw new Error(@json(__('messages.error_occurred'), JSON_UNESCAPED_UNICODE));
                     }
 
                     // Ensure preview.parsed is always an array            
@@ -1854,25 +2036,27 @@
                     // Only show error if this is still the latest request
                     if (this.currentRequestId === requestId) {
                         console.error('Error fetching preview:', error)
-                        this.errorMessage = error.message || 'An error occurred while fetching the preview';
+                        this.errorMessage = error.message || @json(__('messages.error_occurred'), JSON_UNESCAPED_UNICODE);
                     }
                 } finally {
                     // Only update loading state if this is still the latest request
                     if (this.currentRequestId === requestId) {
                         this.isLoading = false;
+                        this.stopSlowTimer();
                     }
                 }
             },
             
             handlePaste(event) {
-
-                // If no image data, handle as text paste
-                event.preventDefault();
-                // Get the pasted text
-                const pastedText = event.clipboardData.getData('text');
-                // Update the model manually
-                this.eventDetails = pastedText;
-                // Don't auto-submit - user must click the submit button
+                // A pasted picture (a screenshot, usually) is a flyer.
+                const files = (event.clipboardData && event.clipboardData.files) ? Array.from(event.clipboardData.files) : [];
+                const image = files.find(file => file.type.startsWith('image/'));
+                if (image && ! this.linksOnly) {
+                    event.preventDefault();
+                    this.uploadDetailsImage(image);
+                }
+                // Text is left to the browser, which puts it where the cursor is. This used to
+                // replace the whole box with the clipboard, and blank it when a picture was pasted.
             },
 
             shouldShowVenueFields(idx) {
@@ -2160,6 +2344,13 @@
             },
 
             handleClear() {
+                const rows = (this.preview && this.preview.parsed) ? this.preview.parsed : [];
+                const unsaved = rows.filter((row, idx) => ! this.savedEvents[idx]).length;
+                // One unsaved row is the one being cleared. More than that is work about to be lost.
+                if (rows.length > 1 && unsaved > 0 && ! confirm(@json(__('messages.import_clear_unsaved'), JSON_UNESCAPED_UNICODE))) {
+                    return;
+                }
+
                 this.destroyDescriptionEditors();
                 this.eventDetails = '';
                 this.detailsImage = null;
@@ -2743,10 +2934,13 @@
                     return;
                 }
 
-                // Check file size (2.5 MB = 2.5 * 1024 * 1024 bytes)
-                const maxSize = 2.5 * 1024 * 1024;
-                if (file.size > maxSize) {
-                    this.errorMessage = @json(__("messages.image_size_warning"));
+                // A phone photo is routinely several megabytes. It is made smaller here rather
+                // than refused: the server takes 10 MB, and a flyer read needs far less.
+                if (file.size > 2.5 * 1024 * 1024) {
+                    file = await this.shrinkImage(file);
+                }
+                if (file.size > 10 * 1024 * 1024) {
+                    this.errorMessage = @json(__("messages.import_image_too_large"), JSON_UNESCAPED_UNICODE);
                     return;
                 }
 
@@ -2774,6 +2968,24 @@
                     this.detailsImageUrl = null;
                 } finally {
                     this.isUploadingDetailsImage = false;
+                }
+            },
+
+            // Redraw a picture at no more than 2000px on its longer side, as a JPEG. Returns the
+            // original when the browser cannot decode it, and the size check decides from there.
+            async shrinkImage(file) {
+                try {
+                    const bitmap = await createImageBitmap(file);
+                    const scale = Math.min(1, 2000 / Math.max(bitmap.width, bitmap.height));
+                    const canvas = document.createElement('canvas');
+                    canvas.width = Math.round(bitmap.width * scale);
+                    canvas.height = Math.round(bitmap.height * scale);
+                    canvas.getContext('2d').drawImage(bitmap, 0, 0, canvas.width, canvas.height);
+                    const blob = await new Promise(resolve => canvas.toBlob(resolve, 'image/jpeg', 0.85));
+
+                    return blob && blob.size < file.size ? new File([blob], 'flyer.jpg', { type: 'image/jpeg' }) : file;
+                } catch (e) {
+                    return file;
                 }
             },
 

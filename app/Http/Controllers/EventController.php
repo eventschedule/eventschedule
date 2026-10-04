@@ -1975,9 +1975,10 @@ class EventController extends Controller
 
         $role = Role::subdomain($subdomain)->firstOrFail();
 
-        return view('event.import-hub', [
-            'role' => $role,
-        ]);
+        // This was a page listing the ways to import, one click away from the import page
+        // behind "More Options". They are on the import page itself now; the address stays so
+        // old links and bookmarks land somewhere.
+        return redirect()->route('event.show_import_ai', ['subdomain' => $role->subdomain]);
     }
 
     public function showImport(Request $request, $subdomain)

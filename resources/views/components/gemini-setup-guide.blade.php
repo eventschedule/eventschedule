@@ -1,3 +1,4 @@
+@props(['optional' => false])
 @if (! config('services.google.gemini_key') && ! config('services.openai.api_key'))
 <div class="bg-gradient-to-br from-amber-50 via-orange-50 to-yellow-50 dark:from-amber-900/20 dark:via-orange-900/20 dark:to-yellow-900/20 border border-amber-200 dark:border-amber-800 rounded-xl p-6 shadow-sm">
     <div class="flex items-start gap-4">
@@ -9,6 +10,18 @@
             </div>
         </div>
         <div class="flex-1 min-w-0">
+            @if ($optional)
+            {{-- On a page that works without a key: say what the key adds, not that it is missing. --}}
+            <h3 class="text-lg font-semibold text-gray-900 dark:text-gray-100 flex items-center gap-2">
+                {{ __('messages.get_api_key') }}
+                <span class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-amber-100 dark:bg-amber-900/50 text-amber-800 dark:text-amber-300">
+                    {{ __('messages.optional') }}
+                </span>
+            </h3>
+            <p class="mt-1 text-sm text-gray-600 dark:text-gray-400">
+                {{ __('messages.import_ai_optional') }}
+            </p>
+            @else
             <h3 class="text-lg font-semibold text-gray-900 dark:text-gray-100 flex items-center gap-2">
                 {{ __('messages.setup_required_gemini') }}
                 <span class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-amber-100 dark:bg-amber-900/50 text-amber-800 dark:text-amber-300">
@@ -18,6 +31,7 @@
             <p class="mt-1 text-sm text-gray-600 dark:text-gray-400">
                 {{ __('messages.gemini_setup_description') }}
             </p>
+            @endif
         </div>
     </div>
 
