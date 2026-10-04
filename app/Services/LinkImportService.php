@@ -348,7 +348,7 @@ class LinkImportService
         $found = $this->countEvents($rows);
         $rows = $this->dropAlreadyOnSchedule($role, $rows, $timezone);
         $alreadyOnSchedule = $found - $this->countEvents($rows);
-        $rows = $this->cap($rows);
+        $rows = $this->renumber($this->cap($rows));
 
         $rows = $this->fetchImages($rows);
         $rows = GeminiUtils::enrichParsedEvents($role, $rows, ['source' => $source, 'timezone' => $timezone]);
@@ -390,27 +390,97 @@ class LinkImportService
     }
 
     /**
-     * Leave out what an earlier import already added: the same name at the same start, among
-     * the events this schedule created. One query, however long the feed.
+     * Leave out what the schedule already has, among the events it created itself.
+     *
+     * The same name at the same start is the plain case. The other two are what reading a link
+     * a second time runs into, because a series does not always come back in the shape it was
+     * saved in: once somebody moves one of its dates the source lists it date by date, and when
+     * that date has passed it is a rule again.
+     *  - A dated row is already there when a repeating event of that name falls on that day at
+     *    that time. Otherwise twelve single events were offered on top of the repeating one.
+     *  - A repeating row is already there when an event of that name exists at its next date.
      */
     private function dropAlreadyOnSchedule(Role $role, array $rows, string $timezone): array
     {
+        $key = fn ($name, $utc) => mb_strtolower(trim((string) $name)).'|'.$utc;
+
         $existing = DB::table('events')
             ->where('creator_role_id', $role->id)
             ->whereNotNull('starts_at')
             ->get(['name', 'starts_at'])
-            ->mapWithKeys(fn ($event) => [mb_strtolower(trim((string) $event->name)).'|'.Carbon::parse($event->starts_at)->format('Y-m-d H:i') => true]);
+            ->mapWithKeys(fn ($event) => [$key($event->name, Carbon::parse($event->starts_at)->format('Y-m-d H:i')) => true]);
 
         if ($existing->isEmpty()) {
             return $rows;
         }
 
-        return array_values(array_filter($rows, function (array $row) use ($existing, $timezone) {
-            // The preview's time is a wall-clock time the save reads in the schedule's zone.
-            $startsAt = Carbon::parse($row['event_date_time'], $timezone)->utc()->format('Y-m-d H:i');
+        // Whole models, not a narrowed select: Event::matchesDate() reads a dozen columns.
+        $repeating = Event::where('creator_role_id', $role->id)
+            ->whereNotNull('starts_at')
+            ->whereNotNull('days_of_week')
+            ->get()
+            ->groupBy(fn (Event $event) => mb_strtolower(trim((string) $event->name)));
 
-            return ! isset($existing[mb_strtolower(trim((string) $row['event_name'])).'|'.$startsAt]);
+        return array_values(array_filter($rows, function (array $row) use ($existing, $repeating, $key, $timezone) {
+            // The preview's time is a wall-clock time the save reads in the schedule's zone.
+            $start = Carbon::parse($row['event_date_time'], $timezone);
+
+            if (isset($existing[$key($row['event_name'], $start->copy()->utc()->format('Y-m-d H:i'))])) {
+                return false;
+            }
+
+            if (! empty($row['recurrence'])) {
+                $next = Carbon::parse($row['sort_at'] ?? $row['event_date_time'], $timezone)->utc()->format('Y-m-d H:i');
+
+                return ! isset($existing[$key($row['event_name'], $next)]);
+            }
+
+            foreach ($repeating[mb_strtolower(trim((string) $row['event_name']))] ?? [] as $event) {
+                if (Carbon::parse($event->starts_at, 'UTC')->setTimezone($timezone)->format('H:i') === $start->format('H:i')
+                    && $event->matchesDate($start->format('Y-m-d'), $timezone)) {
+                    return false;
+                }
+            }
+
+            return true;
         }));
+    }
+
+    /**
+     * Number each listed series again after rows were dropped or cut. The preview shows a series
+     * as its first row and selects the rest with it, so "first" has to mean the first that is
+     * still here: when the first date was already on the schedule, the others were left with no
+     * row to stand under, were ticked all the same, and were added unseen.
+     */
+    private function renumber(array $rows): array
+    {
+        $counts = [];
+        foreach ($rows as $row) {
+            if ($id = $row['series']['id'] ?? null) {
+                $counts[$id] = ($counts[$id] ?? 0) + 1;
+            }
+        }
+
+        $positions = [];
+        foreach ($rows as $index => $row) {
+            $id = $row['series']['id'] ?? null;
+            if ($id === null) {
+                continue;
+            }
+
+            // One date left is just an event.
+            if ($counts[$id] === 1) {
+                $rows[$index]['series'] = null;
+
+                continue;
+            }
+
+            $positions[$id] = ($positions[$id] ?? 0) + 1;
+            $rows[$index]['series']['position'] = $positions[$id];
+            $rows[$index]['series']['count'] = $counts[$id];
+        }
+
+        return $rows;
     }
 
     /** The first MAX_EVENTS events. A listed series is kept or cut whole. */
@@ -450,6 +520,7 @@ class LinkImportService
      */
     private function fetchImages(array $rows): array
     {
+        $this->pruneOldImages();
         $deadline = microtime(true) + self::IMAGE_SECONDS;
         $fetched = 0;
         $byUrl = [];
@@ -467,7 +538,8 @@ class LinkImportService
                     continue;
                 }
                 $fetched++;
-                $byUrl[$url] = $this->storeImage($url);
+                // No single picture gets longer than what is left for all of them.
+                $byUrl[$url] = $this->storeImage($url, (int) max(1, min(8, ceil($deadline - microtime(true)))));
             }
 
             if ($byUrl[$url]) {
@@ -478,9 +550,25 @@ class LinkImportService
         return $rows;
     }
 
-    private function storeImage(string $url): ?string
+    /**
+     * A preview's pictures are for the page that is open now, and its token is good for a day.
+     * Nothing else removes them, and every read can add twenty-five, so each read clears out
+     * what is older than that before adding its own.
+     */
+    private function pruneOldImages(): void
     {
-        $contents = UrlUtils::safeFetch($url, 8);
+        $cutoff = time() - 86400;
+
+        foreach (glob(storage_path('app/temp').'/event_*') ?: [] as $file) {
+            if (is_file($file) && @filemtime($file) < $cutoff) {
+                @unlink($file);
+            }
+        }
+    }
+
+    private function storeImage(string $url, int $seconds = 8): ?string
+    {
+        $contents = UrlUtils::safeFetch($url, $seconds);
 
         if (! is_string($contents) || $contents === '' || strlen($contents) > self::MAX_IMAGE_BYTES) {
             return null;

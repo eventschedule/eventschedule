@@ -10,6 +10,12 @@ use Illuminate\Support\Str;
 
 class GeminiUtils
 {
+    /** Ticket links opened for one parse, for their destination and picture. */
+    private const MAX_PREVIEWS = 10;
+
+    /** Seconds one parse may spend opening them. */
+    private const PREVIEW_SECONDS = 20;
+
     /**
      * Longest value each parseEvent() field can hold, taken from the column it ends up in.
      *
@@ -882,6 +888,12 @@ class GeminiUtils
             }
         }
 
+        // Each ticket link is opened for where it leads and for its picture. One link is opened
+        // once however many rows share it, and only so many links for so long: every one is a
+        // page fetched while the person waits, one after another.
+        $previews = [];
+        $previewsUntil = microtime(true) + self::PREVIEW_SECONDS;
+
         foreach ($data as $key => $item) {
             // Check if the registration url is a redirect
             if (! empty($item['registration_url'])) {
@@ -891,7 +903,13 @@ class GeminiUtils
                 $item['registration_url'] = UrlUtils::unwrapRedirect($item['registration_url']);
 
                 if ($fromModel) {
-                    $links = UrlUtils::getUrlMetadata($item['registration_url']);
+                    $link = $item['registration_url'];
+                    if (! array_key_exists($link, $previews)) {
+                        $previews[$link] = count($previews) < self::MAX_PREVIEWS && microtime(true) < $previewsUntil
+                            ? UrlUtils::getUrlMetadata($link)
+                            : ['redirect_url' => $link, 'image_path' => null];
+                    }
+                    $links = $previews[$link];
                     $data[$key]['registration_url'] = $links['redirect_url'];
                     $data[$key]['social_image'] = $links['image_path'];
                 } else {

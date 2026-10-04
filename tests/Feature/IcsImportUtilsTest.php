@@ -227,4 +227,163 @@ class IcsImportUtilsTest extends TestCase
 
         IcsImportUtils::read('<html><body>Our events</body></html>', self::ZONE, false);
     }
+
+    public function test_a_series_that_began_years_ago_is_still_read(): void
+    {
+        // The calendar library stops counting at 3,500 dates and throws. A daily class since
+        // 2012 is that many dates before it reaches today, and used to vanish as "unreadable".
+        $read = $this->read($this->feed(
+            "UID:daily\nSUMMARY:Open every day\nDTSTART;TZID=America/New_York:20120102T090000\nDTEND;TZID=America/New_York:20120102T100000\nRRULE:FREQ=DAILY",
+            "UID:weekdays\nSUMMARY:Weekday class\nDTSTART;TZID=America/New_York:20100104T180000\nRRULE:FREQ=WEEKLY;BYDAY=MO,TU,WE,TH,FR",
+        ));
+
+        $this->assertSame(['Open every day', 'Weekday class'], array_column($read['rows'], 'event_name'));
+        $this->assertSame('daily', $read['rows'][0]['recurrence']['frequency']);
+        $this->assertSame('2026-10-10 09:00', $read['rows'][0]['sort_at']);
+        $this->assertSame(0, $read['skipped']['unreadable']);
+    }
+
+    public function test_a_rule_that_is_not_about_days_is_left_out_and_counted(): void
+    {
+        $read = $this->read($this->feed(
+            "UID:tick\nSUMMARY:Every second\nDTSTART:20261001T000000Z\nRRULE:FREQ=SECONDLY",
+            "UID:hour\nSUMMARY:Every hour\nDTSTART:20261001T000000Z\nRRULE:FREQ=HOURLY",
+            "UID:ok\nSUMMARY:A real event\nDTSTART;TZID=America/New_York:20261020T190000",
+        ));
+
+        $this->assertSame(['A real event'], array_column($read['rows'], 'event_name'));
+        $this->assertSame(2, $read['skipped']['unreadable']);
+    }
+
+    public function test_added_dates_do_not_replace_the_rule(): void
+    {
+        // The library follows RDATE instead of RRULE when an entry has both.
+        $rows = $this->rows($this->feed(
+            "UID:both\nSUMMARY:Mondays and one more\nDTSTART;TZID=America/New_York:20260105T180000\nRRULE:FREQ=WEEKLY;BYDAY=MO\nRDATE;TZID=America/New_York:20261015T180000",
+        ));
+
+        $this->assertCount(1, $rows);
+        $this->assertSame('weekly', $rows[0]['recurrence']['frequency']);
+        $this->assertSame(['2026-10-15'], $rows[0]['recurrence']['fields']['recurring_include_dates']);
+        // Listed by the next Monday, not by the added Thursday.
+        $this->assertSame('2026-10-12 18:00', $rows[0]['sort_at']);
+
+        // Added dates and no rule: the start and each added date, as one listed series.
+        $rows = $this->rows($this->feed(
+            "UID:dates\nSUMMARY:Three nights\nDTSTART;TZID=America/New_York:20261013T200000\nDTEND;TZID=America/New_York:20261013T220000\nRDATE;TZID=America/New_York:20261020T200000,20261117T200000",
+        ));
+        $this->assertSame(['2026-10-13 20:00', '2026-10-20 20:00', '2026-11-17 20:00'], array_column($rows, 'event_date_time'));
+        $this->assertSame([2.0, 2.0, 2.0], array_column($rows, 'event_duration'));
+        $this->assertSame(3, $rows[0]['series']['count']);
+
+        // The same when the start itself is over.
+        $rows = $this->rows($this->feed(
+            "UID:late\nSUMMARY:Later dates\nDTSTART;TZID=America/New_York:20260901T200000\nRDATE;TZID=America/New_York:20261020T200000,20261117T200000",
+        ));
+        $this->assertSame(['2026-10-20 20:00', '2026-11-17 20:00'], array_column($rows, 'event_date_time'));
+    }
+
+    public function test_a_rule_is_only_repeated_when_its_clock_time_holds_all_year(): void
+    {
+        // 23:00 UTC every Tuesday is 6 PM in New York in winter and 7 PM in summer. One repeating
+        // event has one clock time, so this is listed by date instead of saved an hour wrong.
+        $rows = $this->rows($this->feed(
+            "UID:utc\nSUMMARY:Anchored in UTC\nDTSTART:20260106T230000Z\nRRULE:FREQ=WEEKLY",
+        ));
+        $this->assertNull($rows[0]['recurrence']);
+        $this->assertNotNull($rows[0]['series']);
+        $this->assertSame('2026-10-13 19:00', $rows[0]['event_date_time']);
+        $this->assertContains('2026-11-03 18:00', array_column($rows, 'event_date_time'));
+
+        // Another zone with other clock-change dates, on a venue schedule that converts.
+        $rows = $this->rows($this->feed(
+            "UID:london\nSUMMARY:From London\nDTSTART;TZID=Europe/London:20260105T180000\nRRULE:FREQ=WEEKLY",
+        ));
+        $this->assertNull($rows[0]['recurrence']);
+
+        // The schedule's own zone, a floating time, and a kept local clock all hold.
+        foreach ([
+            ["UID:own\nSUMMARY:Own zone\nDTSTART;TZID=America/New_York:20260105T180000\nRRULE:FREQ=WEEKLY", false],
+            ["UID:float\nSUMMARY:No zone\nDTSTART:20260105T180000\nRRULE:FREQ=WEEKLY", false],
+            ["UID:kept\nSUMMARY:Kept clock\nDTSTART;TZID=Europe/London:20260105T180000\nRRULE:FREQ=WEEKLY", true],
+        ] as [$event, $keepLocalClock]) {
+            $rows = $this->rows($this->feed($event), $keepLocalClock);
+            $this->assertCount(1, $rows, $event);
+            $this->assertSame('weekly', $rows[0]['recurrence']['frequency'], $event);
+        }
+    }
+
+    public function test_a_removed_or_moved_date_written_in_utc_is_read_on_the_series_own_clock(): void
+    {
+        // On a touring schedule the series keeps its own clock. A removed date written in UTC
+        // (midnight UTC on the 13th is 8 PM on the 12th in New York) is still the 12th.
+        $rows = $this->rows($this->feed(
+            "UID:show\nSUMMARY:Monday show\nDTSTART;TZID=America/Chicago:20260907T190000\nRRULE:FREQ=WEEKLY;BYDAY=MO\nEXDATE:20261013T000000Z",
+        ), true);
+        $this->assertSame(['2026-10-12'], $rows[0]['recurrence']['fields']['recurring_exclude_dates']);
+
+        // And a moved date written in UTC lands at its Chicago time, not at UTC's.
+        $rows = $this->rows($this->feed(
+            "UID:jam\nSUMMARY:Jam\nDTSTART;TZID=America/Chicago:20261005T190000\nRRULE:FREQ=WEEKLY;BYDAY=MO;COUNT=3",
+            "UID:jam\nSUMMARY:Jam (late)\nRECURRENCE-ID;TZID=America/Chicago:20261012T190000\nDTSTART:20261013T020000Z",
+        ), true);
+        $this->assertSame(['2026-10-12 21:00', '2026-10-19 19:00'], array_column($rows, 'event_date_time'));
+        $this->assertSame(['America/Chicago', 'America/Chicago'], array_column($rows, 'local_time_zone'));
+    }
+
+    public function test_entries_that_share_an_id_are_each_read(): void
+    {
+        $read = $this->read($this->feed(
+            "UID:same\nSUMMARY:Show A\nDTSTART;TZID=America/New_York:20261020T190000",
+            "UID:same\nSUMMARY:Show B\nDTSTART;TZID=America/New_York:20261021T190000",
+            "UID:same\nSUMMARY:Show C\nDTSTART;TZID=America/New_York:20261022T190000",
+            // The same entry twice is one event: a feed that repeats itself, or a revision.
+            "UID:twice\nSUMMARY:Once\nDTSTART;TZID=America/New_York:20261023T190000",
+            "UID:twice\nSUMMARY:Once\nDTSTART;TZID=America/New_York:20261023T190000",
+        ));
+
+        $this->assertSame(['Show A', 'Show B', 'Show C', 'Once'], array_column($read['rows'], 'event_name'));
+    }
+
+    public function test_a_zone_nobody_knows_is_read_as_the_schedules_own_clock(): void
+    {
+        // Exchange writes "Customized Time Zone" and the like. Reading it as the server's zone
+        // put a 7 PM event at 3 PM.
+        $rows = $this->rows($this->feed(
+            "UID:odd\nSUMMARY:Odd zone\nDTSTART;TZID=Customized Time Zone:20261020T190000\nDTEND;TZID=Customized Time Zone:20261020T210000",
+        ));
+
+        $this->assertSame('2026-10-20 19:00', $rows[0]['event_date_time']);
+        $this->assertSame(2.0, $rows[0]['event_duration']);
+        $this->assertNull($rows[0]['local_time_zone']);
+    }
+
+    public function test_a_rule_with_no_frequency_is_one_event(): void
+    {
+        $rows = $this->rows($this->feed(
+            "UID:bad\nSUMMARY:Broken rule\nDTSTART;TZID=America/New_York:20261020T190000\nRRULE:BYDAY=MO",
+        ));
+
+        $this->assertCount(1, $rows);
+        $this->assertNull($rows[0]['series']);
+        $this->assertNull($rows[0]['recurrence']);
+    }
+
+    public function test_a_long_feed_is_read_in_time_that_grows_with_its_length(): void
+    {
+        // Each repeating entry used to make the library search the whole feed for its id, so
+        // 8,000 entries took 23 seconds. It is handed the entry instead.
+        $events = [];
+        for ($n = 0; $n < 6000; $n++) {
+            $events[] = "UID:n{$n}\nSUMMARY:Entry {$n}\nDTSTART;TZID=America/New_York:20261020T190000\nRRULE:FREQ=WEEKLY";
+        }
+        $feed = $this->feed(...$events);
+
+        $started = microtime(true);
+        $read = $this->read($feed);
+        $seconds = microtime(true) - $started;
+
+        $this->assertCount(6000, $read['rows']);
+        $this->assertLessThan(6.0, $seconds, 'Reading 6,000 repeating entries took '.round($seconds, 1).'s');
+    }
 }

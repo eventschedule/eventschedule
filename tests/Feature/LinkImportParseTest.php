@@ -540,4 +540,85 @@ class LinkImportParseTest extends TestCase
             @unlink((string) $path);
         }
     }
+
+    private function saveRow(array $row, array $meta): Event
+    {
+        // What the page sends: the preview's fields, and the repeat as the row gives it.
+        $this->postJson(route('event.import', ['subdomain' => $this->role->subdomain]), ($row['recurrence']['fields'] ?? ['schedule_type' => 'one_time']) + [
+            'name' => $row['event_name'],
+            'starts_at' => $row['event_date_time'].':00',
+            'duration' => $row['event_duration'] ?: 2,
+            'import_token' => $meta['import_token'],
+        ])->assertOk();
+
+        return Event::query()->latest('id')->firstOrFail();
+    }
+
+    public function test_reading_a_link_again_shows_the_dates_that_are_left_of_a_listed_series(): void
+    {
+        // The last Friday of the month is a rule the app cannot repeat, so it comes as dates.
+        $this->serveFeed($this->feed(
+            "UID:jam\nSUMMARY:Last Friday Jam\nDTSTART;TZID=America/New_York:20260130T200000\nDTEND;TZID=America/New_York:20260130T220000\nRRULE:FREQ=MONTHLY;BYDAY=-1FR",
+        ));
+        $first = $this->parse(self::FEED)->assertOk();
+        $this->assertSame(range(1, 12), array_column(array_column($first->json('parsed'), 'series'), 'position'));
+        $this->assertSame('2026-10-30 20:00', $first->json('parsed.0.event_date_time'));
+
+        // The first date is added, and the link is read again a little later.
+        $this->saveRow($first->json('parsed.0'), $first->json('meta'));
+        $second = $this->parse(self::FEED)->assertOk();
+
+        // The preview shows a series under its first row. With the first date gone, the rest
+        // used to keep positions 2 to 12: no row showed them, and they were added all the same.
+        $this->assertSame('2026-11-27 20:00', $second->json('parsed.0.event_date_time'));
+        $this->assertSame(range(1, 11), array_column(array_column($second->json('parsed'), 'series'), 'position'));
+        $this->assertSame(array_fill(0, 11, 11), array_column(array_column($second->json('parsed'), 'series'), 'count'));
+    }
+
+    public function test_a_series_that_comes_back_date_by_date_is_the_repeating_event_already_there(): void
+    {
+        $weekly = "UID:class\nSUMMARY:Monday Class\nDTSTART;TZID=America/New_York:20260907T180000\nDTEND;TZID=America/New_York:20260907T190000\nRRULE:FREQ=WEEKLY;BYDAY=MO";
+
+        // Two addresses, faked together: a second Http::fake() for the same address is not
+        // consulted, the first one still answers.
+        Http::fake([
+            '93.184.216.34/calendar.ics' => Http::response($this->feed($weekly), 200, ['Content-Type' => 'text/calendar']),
+            // Somebody moved one Monday to a Tuesday. The source now lists the series by date.
+            '93.184.216.34/later.ics' => Http::response($this->feed(
+                $weekly,
+                "UID:class\nSUMMARY:Monday Class\nRECURRENCE-ID;TZID=America/New_York:20261019T180000\nDTSTART;TZID=America/New_York:20261020T183000\nDTEND;TZID=America/New_York:20261020T193000",
+            ), 200, ['Content-Type' => 'text/calendar']),
+        ]);
+
+        $first = $this->parse(self::FEED)->assertOk();
+        $this->assertSame('weekly', $first->json('parsed.0.recurrence.frequency'));
+        $saved = $this->saveRow($first->json('parsed.0'), $first->json('meta'));
+        $this->assertSame('0100000', $saved->days_of_week);
+
+        $second = $this->parse('https://93.184.216.34/later.ics')->assertOk();
+
+        // Every date the repeating event already covers is left out. Only the moved one is new.
+        // (It used to offer all twelve, ticked: twelve single events on top of the repeating one.)
+        $this->assertSame(['2026-10-20 18:30'], array_column($second->json('parsed'), 'event_date_time'));
+        $this->assertNull($second->json('parsed.0.series'));
+    }
+
+    public function test_a_series_saved_date_by_date_is_not_offered_again_as_a_repeating_event(): void
+    {
+        // The reverse: its next date is already a single event of that name on the schedule.
+        $this->createEvent($this->role, [
+            'creator_role_id' => $this->role->id,
+            'name' => 'Monday Class',
+            'starts_at' => Carbon::parse('2026-10-12 18:00', 'America/New_York')->utc()->format('Y-m-d H:i:s'),
+        ]);
+        $this->serveFeed($this->feed(
+            "UID:class\nSUMMARY:Monday Class\nDTSTART;TZID=America/New_York:20260907T180000\nRRULE:FREQ=WEEKLY;BYDAY=MO",
+            "UID:other\nSUMMARY:Something else\nDTSTART;TZID=America/New_York:20261015T180000",
+        ));
+
+        $response = $this->parse(self::FEED)->assertOk();
+
+        $this->assertSame(['Something else'], array_column($response->json('parsed'), 'event_name'));
+        $this->assertSame(1, $response->json('meta.already_on_schedule'));
+    }
 }

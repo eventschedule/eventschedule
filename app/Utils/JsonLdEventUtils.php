@@ -55,6 +55,49 @@ class JsonLdEventUtils
     private const MAX_PERFORMERS = 10;
 
     /**
+     * The contents of a page's JSON-LD script blocks, found by walking the text once.
+     *
+     * Not one pattern over the whole page: "a script tag, then anything, then its end" is
+     * retried from every opening tag when the end never comes, and a page made of opening tags
+     * took most of a minute. The page is somebody else's, so that is theirs to choose.
+     *
+     * @return list<string>
+     */
+    private static function blocks(string $html): array
+    {
+        $blocks = [];
+        $offset = 0;
+
+        while (($open = stripos($html, '<script', $offset)) !== false) {
+            $tagEnd = strpos($html, '>', $open);
+            if ($tagEnd === false) {
+                break;
+            }
+
+            // An opening tag is short. One that is not is not one worth reading.
+            $tag = substr($html, $open, min($tagEnd - $open + 1, 2000));
+            if ($tagEnd - $open >= 2000 || ! preg_match('#^<script\b#i', $tag)) {
+                $offset = $open + 7;
+
+                continue;
+            }
+
+            $close = stripos($html, '</script', $tagEnd + 1);
+            if ($close === false) {
+                break;
+            }
+
+            if (preg_match('#\btype\s*=\s*(["\']?)application/ld\+json\1#i', $tag)) {
+                $blocks[] = substr($html, $tagEnd + 1, $close - $tagEnd - 1);
+            }
+
+            $offset = $close + 8;
+        }
+
+        return $blocks;
+    }
+
+    /**
      * @param  string  $pageUrl  The address the HTML was finally served from, for relative links.
      * @param  bool  $keepLocalClock  False for a venue schedule: see ImportedTime::place().
      * @return array{rows: list<array>, skipped: array{past: int, cancelled: int, unreadable: int}}
@@ -66,14 +109,12 @@ class JsonLdEventUtils
         $to = $from->addDays(self::WINDOW_DAYS);
 
         $nodes = [];
-        if (preg_match_all('#<script\b[^>]*type\s*=\s*(["\']?)application/ld\+json\1[^>]*>(.*?)</script>#is', $html, $blocks)) {
-            foreach ($blocks[2] as $block) {
-                // Some pages wrap the JSON in a comment or CDATA; none of that is JSON.
-                $block = trim(preg_replace('#^\s*(<!--|//\s*<!\[CDATA\[|<!\[CDATA\[)|(-->|//\s*\]\]>|\]\]>)\s*$#', '', trim($block)));
-                $data = json_decode($block, true);
-                if (is_array($data)) {
-                    self::collect($data, $nodes, 0);
-                }
+        foreach (self::blocks($html) as $block) {
+            // Some pages wrap the JSON in a comment or CDATA; none of that is JSON.
+            $block = trim(preg_replace('#^\s*(<!--|//\s*<!\[CDATA\[|<!\[CDATA\[)|(-->|//\s*\]\]>|\]\]>)\s*$#', '', trim($block)));
+            $data = json_decode($block, true);
+            if (is_array($data)) {
+                self::collect($data, $nodes, 0);
             }
         }
 
@@ -139,7 +180,8 @@ class JsonLdEventUtils
             return;
         }
 
-        $types = array_map('strval', (array) ($data['@type'] ?? []));
+        // A type is a word or a list of words. Anything else in its place is not a type.
+        $types = array_map('strval', array_filter((array) ($data['@type'] ?? []), 'is_scalar'));
 
         if (array_intersect($types, self::EVENT_TYPES)) {
             $nodes[] = $data;

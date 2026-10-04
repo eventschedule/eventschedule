@@ -254,4 +254,35 @@ class JsonLdEventUtilsTest extends TestCase
         $this->assertSame([], $result['rows']);
         $this->assertSame(['past' => 0, 'cancelled' => 0, 'unreadable' => 0], $result['skipped']);
     }
+
+    public function test_a_type_that_is_not_a_word_does_not_cost_the_page_its_other_events(): void
+    {
+        $start = \Carbon\Carbon::now('America/New_York')->addDays(10)->setTime(19, 0)->format('Y-m-d\TH:i:sP');
+        $html = '<script type="application/ld+json">[{"@type": [["Event"]], "name": "Malformed", "startDate": "'.$start.'"},'
+            .'{"@type": "Event", "name": "Well formed", "startDate": "'.$start.'"}]</script>';
+
+        $read = JsonLdEventUtils::read($html, 'https://example.com/events', 'America/New_York', false);
+
+        $this->assertSame(['Well formed'], array_column($read['rows'], 'event_name'));
+    }
+
+    public function test_a_page_of_script_tags_that_never_end_is_read_in_one_pass(): void
+    {
+        // One pattern over the whole page retried from every opening tag: 160 KB took 12 seconds.
+        $start = \Carbon\Carbon::now('America/New_York')->addDays(10)->setTime(19, 0)->format('Y-m-d\TH:i:sP');
+        $real = '<script type="application/ld+json">{"@type": "Event", "name": "Still found", "startDate": "'.$start.'"}</script>';
+
+        foreach ([
+            $real.str_repeat('<script ', 60000),
+            $real.str_repeat('<script type="application/ld+json">', 20000),
+            str_repeat('<script x="', 40000).'">'.$real,
+        ] as $index => $html) {
+            $started = microtime(true);
+            $read = JsonLdEventUtils::read($html, 'https://example.com/events', 'America/New_York', false);
+            $this->assertLessThan(2.0, microtime(true) - $started, "Page {$index} took too long");
+            if ($index < 2) {
+                $this->assertSame(['Still found'], array_column($read['rows'], 'event_name'), "Page {$index}");
+            }
+        }
+    }
 }

@@ -249,4 +249,32 @@ class EnrichParsedEventsTest extends TestCase
         // Without the option the caller gets a blank event to fill in, as before.
         $this->assertCount(1, GeminiUtils::parseEvent($role, 'page text'));
     }
+
+    public function test_a_ticket_link_is_opened_once_however_many_rows_share_it_and_only_so_many(): void
+    {
+        Http::fake(['93.184.216.34/*' => Http::response('<html><head><title>Tickets</title></head></html>', 200)]);
+        $role = $this->createRole($this->owner, 'curator', ['timezone' => 'America/New_York']);
+
+        // Three of the model's rows, one link: a festival page with one "Tickets" address.
+        $rows = [];
+        foreach (['One', 'Two', 'Three'] as $index => $name) {
+            $rows[] = $this->row(['event_name' => $name, 'event_date_time' => '2026-10-2'.$index.' 20:00', 'registration_url' => 'https://93.184.216.34/tickets']);
+        }
+        $out = GeminiUtils::enrichParsedEvents($role, $rows);
+
+        $this->assertSame(array_fill(0, 3, 'https://93.184.216.34/tickets'), array_column($out, 'registration_url'));
+        Http::assertSentCount(1);
+
+        // Twenty-five rows, each with its own link: the person is waiting on every fetch, so the
+        // first ten are opened and the rest keep their link as it was written.
+        $rows = [];
+        for ($n = 0; $n < 25; $n++) {
+            $rows[] = $this->row(['event_name' => 'Show '.$n, 'event_date_time' => '2026-11-'.str_pad((string) ($n + 1), 2, '0', STR_PAD_LEFT).' 20:00', 'registration_url' => 'https://93.184.216.34/show/'.$n]);
+        }
+        $out = GeminiUtils::enrichParsedEvents($role, $rows);
+
+        $this->assertCount(25, $out);
+        $this->assertSame('https://93.184.216.34/show/24', $out[24]['registration_url']);
+        Http::assertSentCount(1 + 10);
+    }
 }

@@ -7,6 +7,8 @@ use Sabre\VObject\Component\VCalendar;
 use Sabre\VObject\Component\VEvent;
 use Sabre\VObject\Reader;
 use Sabre\VObject\Recur\EventIterator;
+use Sabre\VObject\Settings;
+use Sabre\VObject\TimeZoneUtil;
 
 /**
  * Reads a calendar feed (iCalendar, the text behind an .ics or webcal link) into the rows the
@@ -35,6 +37,20 @@ class IcsImportUtils
     public const SERIES_DATES = 12;
 
     /**
+     * How many dates the calendar library may step through for one series. It walks a series
+     * from its first date and stops at 3,500 by default, which a daily class reaches in under
+     * ten years: such an entry used to be dropped without a word. This is a daily entry for
+     * over a century.
+     */
+    private const MAX_STEPS = 40000;
+
+    /** Seconds one feed may take to read. What is left after that is counted as unreadable. */
+    private const MAX_SECONDS = 10;
+
+    /** Rules that are not about days. Nothing that repeats every hour is an event listing. */
+    private const SUB_DAILY = ['SECONDLY', 'MINUTELY', 'HOURLY'];
+
+    /**
      * @param  bool  $keepLocalClock  False for a venue schedule: see ImportedTime::place().
      * @return array{rows: list<array>, skipped: array{past: int, cancelled: int, private: int, unreadable: int}}
      *
@@ -59,52 +75,134 @@ class IcsImportUtils
 
         // A repeating entry and its moved or edited dates share a UID.
         $entries = [];
+        $starts = [];
+        $zones = [];
         foreach ($calendar->select('VEVENT') as $index => $vevent) {
+            self::normalise($vevent, $calendar, $zones);
+
             if (! isset($vevent->UID) || trim((string) $vevent->UID) === '') {
                 $vevent->UID = 'no-uid-'.$index;
             }
-            $kind = isset($vevent->{'RECURRENCE-ID'}) ? 'overrides' : 'masters';
-            $entries[(string) $vevent->UID][$kind][] = $vevent;
+            $uid = (string) $vevent->UID;
+
+            if (isset($vevent->{'RECURRENCE-ID'})) {
+                $entries[$uid]['overrides'][] = $vevent;
+
+                continue;
+            }
+
+            // Some feeds give every entry the same id. The same start is the same entry said
+            // twice; another start is another event, and gets an id of its own.
+            $start = isset($vevent->DTSTART) ? $vevent->DTSTART->serialize() : '';
+            if (isset($starts[$uid][$start])) {
+                continue;
+            }
+            $starts[$uid][$start] = true;
+            if (count($starts[$uid]) > 1) {
+                $uid .= '#'.count($starts[$uid]);
+                $vevent->UID = $uid;
+            }
+
+            $entries[$uid]['masters'][] = $vevent;
         }
 
         $rows = [];
         $skipped = ['past' => 0, 'cancelled' => 0, 'private' => 0, 'unreadable' => 0];
+        $deadline = microtime(true) + self::MAX_SECONDS;
+        $libraryLimit = Settings::$maxRecurrences;
+        Settings::$maxRecurrences = self::MAX_STEPS;
 
-        foreach ($entries as $uid => $entry) {
-            // Edited dates whose series is not in the feed are events in their own right.
-            $standalone = isset($entry['masters']) ? [$entry['masters'][0]] : ($entry['overrides'] ?? []);
+        try {
+            foreach ($entries as $uid => $entry) {
+                // Edited dates whose series is not in the feed are events in their own right.
+                $standalone = isset($entry['masters']) ? [$entry['masters'][0]] : ($entry['overrides'] ?? []);
 
-            foreach ($standalone as $vevent) {
-                if ($reason = self::skipReason($vevent)) {
-                    $skipped[$reason]++;
+                foreach ($standalone as $vevent) {
+                    if ($reason = self::skipReason($vevent)) {
+                        $skipped[$reason]++;
 
-                    continue;
+                        continue;
+                    }
+
+                    // A feed built to keep the reader busy must not hold the request.
+                    if (microtime(true) > $deadline) {
+                        $skipped['unreadable']++;
+
+                        continue;
+                    }
+
+                    try {
+                        $found = isset($entry['masters']) && (isset($vevent->RRULE) || isset($vevent->RDATE))
+                            ? self::series($vevent, $entry['overrides'] ?? [], (string) $uid, $zone, $keepLocalClock, $from, $to)
+                            : self::single($vevent, $zone, $keepLocalClock, $now, $to);
+                    } catch (\Throwable $e) {
+                        // One malformed entry must not cost the person the rest of their calendar.
+                        $skipped['unreadable']++;
+
+                        continue;
+                    }
+
+                    if (! $found) {
+                        $skipped['past']++;
+
+                        continue;
+                    }
+
+                    array_push($rows, ...$found);
                 }
-
-                try {
-                    $found = isset($vevent->RRULE) && isset($entry['masters'])
-                        ? self::series($calendar, $vevent, (string) $uid, ! empty($entry['overrides']), $zone, $keepLocalClock, $from, $to)
-                        : self::single($vevent, $zone, $keepLocalClock, $now, $to);
-                } catch (\Throwable $e) {
-                    // One malformed entry must not cost the person the rest of their calendar.
-                    $skipped['unreadable']++;
-
-                    continue;
-                }
-
-                if (! $found) {
-                    $skipped['past']++;
-
-                    continue;
-                }
-
-                array_push($rows, ...$found);
             }
+        } finally {
+            Settings::$maxRecurrences = $libraryLimit;
         }
 
         usort($rows, fn ($a, $b) => [$a['sort_at'], $a['event_name']] <=> [$b['sort_at'], $b['event_name']]);
 
         return ['rows' => $rows, 'skipped' => $skipped];
+    }
+
+    /**
+     * Two things a feed gets wrong often enough to matter, put right before anything reads it.
+     *
+     * A zone nobody knows (Exchange writes "Customized Time Zone"): the library reads such a
+     * time in the SERVER's zone, which put a 7 PM event at 3 PM. Without its zone the time is
+     * read as it is written, on the schedule's own clock.
+     *
+     * A rule with no frequency: not a rule. The entry is what it would be without one.
+     */
+    private static function normalise(VEvent $vevent, VCalendar $calendar, array &$zones): void
+    {
+        foreach (['DTSTART', 'DTEND', 'RECURRENCE-ID', 'EXDATE', 'RDATE'] as $name) {
+            foreach ($vevent->select($name) as $property) {
+                if (! isset($property['TZID'])) {
+                    continue;
+                }
+
+                $tzid = (string) $property['TZID'];
+                if (! array_key_exists($tzid, $zones)) {
+                    try {
+                        TimeZoneUtil::getTimeZone($tzid, $calendar, true);
+                        $zones[$tzid] = true;
+                    } catch (\Throwable $e) {
+                        $zones[$tzid] = false;
+                    }
+                }
+
+                if (! $zones[$tzid]) {
+                    unset($property['TZID']);
+                }
+            }
+        }
+
+        if (isset($vevent->RRULE)) {
+            try {
+                $frequency = $vevent->RRULE->getParts()['FREQ'] ?? null;
+            } catch (\Throwable $e) {
+                $frequency = null;
+            }
+            if (! $frequency) {
+                unset($vevent->RRULE);
+            }
+        }
     }
 
     private static function skipReason(VEvent $vevent): ?string
@@ -140,23 +238,58 @@ class IcsImportUtils
         return [self::row($vevent, $start, $end, $zone, $keepLocalClock)];
     }
 
-    /** A repeating entry: one row when the app can repeat it itself, otherwise its next dates. */
-    private static function series(VCalendar $calendar, VEvent $master, string $uid, bool $hasOverrides, \DateTimeZone $zone, bool $keepLocalClock, CarbonImmutable $from, CarbonImmutable $to): array
+    /**
+     * A repeating entry: one row when the app can repeat it itself, otherwise its next dates.
+     *
+     * @param  list<VEvent>  $overrides  Its moved or edited dates.
+     */
+    private static function series(VEvent $master, array $overrides, string $uid, \DateTimeZone $zone, bool $keepLocalClock, CarbonImmutable $from, CarbonImmutable $to): array
     {
-        $iterator = new EventIterator($calendar, $uid, $zone);
-        $iterator->fastForward($from);
-
-        if (! $iterator->valid() || $iterator->getDtStart() > $to) {
-            return [];
+        $hasRule = isset($master->RRULE);
+        if ($hasRule && in_array(strtoupper((string) ($master->RRULE->getParts()['FREQ'] ?? '')), self::SUB_DAILY, true)) {
+            throw new \DomainException('A rule that is not about days.');
         }
 
         $masterStart = $master->DTSTART->getDateTime($zone);
         $statesZone = self::statesZone($master);
 
+        // Everything about a series is read on the series' own clock. A removed, added or moved
+        // date is often written in UTC even when the series names a zone, and midnight UTC on
+        // the 13th is the evening of the 12th in Chicago: taken on UTC's clock, the wrong date
+        // was removed.
+        $own = fn (\DateTimeInterface $at) => \DateTimeImmutable::createFromInterface($at)->setTimezone($masterStart->getTimezone());
+        $place = fn (\DateTimeInterface $at) => ImportedTime::place($own($at), $statesZone, $zone->getName(), $keepLocalClock)[0];
+
+        // Added dates (RDATE). The library follows them INSTEAD of the rule when an entry has
+        // both, so they are taken off the entry and handled here.
+        $added = [];
+        foreach ($master->select('RDATE') as $property) {
+            foreach ($property->getDateTimes($zone) as $at) {
+                $added[] = $own($at);
+            }
+        }
+        unset($master->RDATE);
+        $addedAhead = array_values(array_filter($added, fn ($at) => $at >= $from && $at <= $to));
+        usort($addedAhead, fn ($a, $b) => $a <=> $b);
+
+        // Handed the entry itself: given the feed and an id, the library searches the whole feed
+        // for every repeating entry, which made a long feed take minutes.
+        $iterate = function () use ($master, $overrides, $zone, $from) {
+            $iterator = new EventIterator(array_merge([$master], $overrides), null, $zone);
+            $iterator->fastForward($from);
+
+            return $iterator;
+        };
+        $iterator = $iterate();
+        $ruleAhead = $iterator->valid() && $iterator->getDtStart() <= $to;
+
+        if (! $ruleAhead && ! $addedAhead) {
+            return [];
+        }
+
         // An edited date cannot ride along on a repeating event, so such a series is listed.
-        if (! $hasOverrides) {
-            [$placedStart] = ImportedTime::place($masterStart, $statesZone, $zone->getName(), $keepLocalClock);
-            $place = fn (\DateTimeInterface $at) => ImportedTime::place($at, $statesZone, $zone->getName(), $keepLocalClock)[0];
+        if ($hasRule && $ruleAhead && ! $overrides) {
+            $placedStart = $place($masterStart);
 
             $excluded = [];
             foreach ($master->select('EXDATE') as $property) {
@@ -167,12 +300,10 @@ class IcsImportUtils
 
             $included = [];
             $sameTime = true;
-            foreach ($master->select('RDATE') as $property) {
-                foreach ($property->getDateTimes($zone) as $at) {
-                    $placed = $place($at);
-                    $sameTime = $sameTime && $placed->format('H:i') === $placedStart->format('H:i');
-                    $included[] = $placed->format('Y-m-d');
-                }
+            foreach ($added as $at) {
+                $placed = $place($at);
+                $sameTime = $sameTime && $placed->format('H:i') === $placedStart->format('H:i');
+                $included[] = $placed->format('Y-m-d');
             }
 
             $recurrence = $sameTime
@@ -180,12 +311,22 @@ class IcsImportUtils
                 : null;
 
             if ($recurrence) {
-                $row = self::row($master, $masterStart, self::endOf($master, $masterStart, $zone), $zone, $keepLocalClock);
-                $row['recurrence'] = $recurrence;
-                // Listed by when it next happens, not by a first date that may be years back.
-                $row['sort_at'] = $place($iterator->getDtStart())->format('Y-m-d H:i');
+                $next = $iterator->getDtStart();
 
-                return [$row];
+                if (self::clockHolds($master, $masterStart, $statesZone, $zone, $keepLocalClock, $iterator, $to)) {
+                    $row = self::row($master, $masterStart, self::endOf($master, $masterStart, $zone), $zone, $keepLocalClock);
+                    $row['recurrence'] = $recurrence;
+                    // Listed by when it next happens, not by a first date that may be years back.
+                    if ($addedAhead && $addedAhead[0] < $next) {
+                        $next = $addedAhead[0];
+                    }
+                    $row['sort_at'] = $place($next)->format('Y-m-d H:i');
+
+                    return [$row];
+                }
+
+                // The check walked the iterator through the year. Start it again for the list.
+                $iterator = $iterate();
             }
         }
 
@@ -194,12 +335,38 @@ class IcsImportUtils
             $occurrence = $iterator->getEventObject();
             // A date the owner cancelled or hid on its own.
             if (! self::skipReason($occurrence)) {
-                $rows[] = self::row($occurrence, $iterator->getDtStart(), $iterator->getDtEnd(), $zone, $keepLocalClock, $statesZone);
+                $start = $iterator->getDtStart();
+                $end = $iterator->getDtEnd();
+                // A moved date written in UTC, on a series that names its zone.
+                if ($statesZone && ! self::statesZone($occurrence)) {
+                    $start = $own($start);
+                    $end = $end ? $own($end) : null;
+                }
+                $rows[] = self::row($occurrence, $start, $end, $zone, $keepLocalClock, $statesZone);
             }
             $iterator->next();
         }
 
         $more = $iterator->valid() && $iterator->getDtStart() <= $to;
+
+        // The added dates, each as long as the entry itself.
+        $masterEnd = self::endOf($master, $masterStart, $zone);
+        $seconds = $masterEnd ? $masterEnd->getTimestamp() - $masterStart->getTimestamp() : 0;
+        foreach ($addedAhead as $at) {
+            $rows[] = self::row($master, $at, $seconds > 0 ? $at->modify('+'.$seconds.' seconds') : null, $zone, $keepLocalClock, $statesZone);
+        }
+
+        // In order, each moment once (a feed can add the date its rule already gives).
+        usort($rows, fn ($a, $b) => $a['sort_at'] <=> $b['sort_at']);
+        $unique = [];
+        foreach ($rows as $row) {
+            $unique[$row['sort_at']] ??= $row;
+        }
+        $rows = array_values($unique);
+        if (count($rows) > self::SERIES_DATES) {
+            $rows = array_slice($rows, 0, self::SERIES_DATES);
+            $more = true;
+        }
 
         // A "series" of one date is just an event.
         if (count($rows) > 1 || $more) {
@@ -210,6 +377,36 @@ class IcsImportUtils
         }
 
         return $rows;
+    }
+
+    /**
+     * Whether every date of a series falls at the same clock time on the schedule. One repeating
+     * event has one clock time; a rule anchored in UTC, or in a zone whose clocks change on
+     * other dates, drifts by an hour for part of the year (and across midnight, by a day), so
+     * such a series is listed by date instead of being saved an hour wrong.
+     *
+     * Walks the iterator it is given through the window.
+     */
+    private static function clockHolds(VEvent $master, \DateTimeInterface $masterStart, bool $statesZone, \DateTimeZone $zone, bool $keepLocalClock, EventIterator $iterator, CarbonImmutable $to): bool
+    {
+        // No time to drift, its own clock is kept, or it is already on the schedule's clock
+        // (a time with no zone at all was read in the schedule's).
+        if (! $master->DTSTART->hasTime()
+            || ($statesZone && $keepLocalClock)
+            || $masterStart->getTimezone()->getName() === $zone->getName()) {
+            return true;
+        }
+
+        $clock = \DateTimeImmutable::createFromInterface($masterStart)->setTimezone($zone)->format('H:i');
+
+        for ($steps = 0; $steps < 400 && $iterator->valid() && $iterator->getDtStart() <= $to; $steps++) {
+            if (\DateTimeImmutable::createFromInterface($iterator->getDtStart())->setTimezone($zone)->format('H:i') !== $clock) {
+                return false;
+            }
+            $iterator->next();
+        }
+
+        return true;
     }
 
     private static function row(VEvent $vevent, \DateTimeInterface $start, ?\DateTimeInterface $end, \DateTimeZone $zone, bool $keepLocalClock, ?bool $statesZone = null): array
