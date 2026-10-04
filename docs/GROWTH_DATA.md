@@ -207,7 +207,8 @@ credits, legacy `plan_expires` rows and trials, which is most paid-tier schedule
 - `daily` (columnar, one row per UTC day) holds:
   - `signups_organizer`, `signups_other`;
   - `first_schedule`, `first_event` (users reaching each for the first time);
-  - `events_created`;
+  - `events_created`, and `events_imported` (schema 12): the ones an import or a calendar pull
+    made, a subset of it;
   - per selling schedule, firsts: `first_ticket_type`, `first_paid_ticket_type`, `first_paid_sale`;
   - `paid_orders`, `stripe_connected` (Stripe Connect onboarding completed), `paywall_views`
     (first view per user), `trial_starts`;
@@ -358,14 +359,39 @@ Both are columnar: read `columns[]`, then `rows[][]`. They are newest first and 
 | `interests_90d`, `interests_total` | Confirmed "notify me" addresses on its events, last 90 days and all time |
 | `appointment_types`, `photos` | Non-deleted appointment types; event photos |
 | `newsletter_emails_this_month` | Newsletter emails sent, month-to-date |
-| `features` | Settings switched on: `gcal`, `mscal`, `caldav`, `custom_domain` (working, not failed or pending), `custom_css`, `custom_fields`, `banner`, `feedback`, `carpool`, `gift_cards` (enabled), `accept_requests` (on for nearly everyone by default), `sponsors`, `own_smtp`, `event_interest`, `no_subscribe_panel`, `stay22`, `federation`, `announce_events`, `fan_content`; on the owner's account: `api_key`, `webhooks`; and features actually used: `passes`, `seating`, `promo_codes`, `waitlist`, `sub_schedules`, `newsletter_sent`, `gift_cards_sold`, `gallery`, `boost`, `ai_import`, `team` (anyone but the owner has access) |
+| `features` | Settings switched on: `gcal` (a Google sync direction is set; before schema 12 it read a column nothing wrote), `mscal`, `caldav`, `custom_domain` (working, not failed or pending), `custom_css`, `custom_fields`, `banner`, `feedback`, `carpool`, `gift_cards` (enabled), `accept_requests` (on for nearly everyone by default), `sponsors`, `own_smtp`, `event_interest`, `no_subscribe_panel`, `stay22`, `federation`, `announce_events`, `fan_content`; on the owner's account: `api_key`, `webhooks`; and features actually used: `passes`, `seating`, `promo_codes`, `waitlist`, `sub_schedules`, `newsletter_sent`, `gift_cards_sold`, `gallery`, `boost`, `ai_import`, `team` (anyone but the owner has access) |
 | `days_to_upgrade` | Creation to first real subscription, days; null = never |
 | `country` | ISO country code, or `(other)` when fewer than 5 schedules share it |
 | `gateways` | Payment gateways on the owner's account: `stripe` (Connect onboarding completed), `paypal`, `payfast`, `invoiceninja` |
 | `stripe_connected_month` | Month the owner completed Stripe Connect (the only gateway that records when) |
 | `dismissed_steps` | Dashboard next steps dismissed for this schedule (`tickets`, `payments`, ...) |
-| `events_by_source` | Of its listed events: `created` by it, from `other_schedules`, `guest` submissions, synced from `google` or `caldav`, `auto_sourced` (curator rules). These overlap; they do not sum to `events_total` |
+| `events_by_source` | Of its listed events: `created` by it, from `other_schedules`, `guest` submissions, linked to a `google` entry by the owner's sync (in either direction), synced from `caldav`, `auto_sourced` (curator rules). These overlap; they do not sum to `events_total`. From schema 12 also `imported` and one `imported_{source}` per import source. See below |
 | `external_tickets_90d` | Events it lists with a registration link instead of our tickets or RSVP: `{events, priced, self_serve, box_office, platforms}`, or null when it has none. See below |
+
+#### Reading the `imported` buckets of `events_by_source`
+
+`imported` counts the events a schedule **created through an import**, and `imported_{source}`
+splits it by which one. They are a subset of `created`, credited to the schedule that did the
+importing and not to a venue or talent the event is also listed on.
+
+| Bucket | The event came from |
+|---|---|
+| `imported_ai` | text or a flyer read by the model on the import page |
+| `imported_ics` | a calendar feed pasted as a link |
+| `imported_page` | a web page's own event data |
+| `imported_page_ai` | a web page whose text the model read |
+| `imported_eventbrite` | the Eventbrite import |
+| `imported_google`, `imported_microsoft`, `imported_caldav` | a calendar: a standing sync's pull, or a one-time import from it |
+
+- **They start at the release that added `events.import_source`.** Nothing recorded how an earlier
+  event was made, so every older import reads as made by hand. A schedule with `imported` 0 and a
+  long history did not necessarily type its events in.
+- **`google` is not `imported_google`.** `google` counts events linked to a Google entry, which
+  includes every event pushed out to Google. `imported_google` counts events that came in from it.
+- **Count owners, not schedules.** A calendar pull creates a venue schedule for each location it
+  meets, owned by the same account. Asking "how many organizers have a full calendar" per schedule
+  gets a share that falls as importing works. Group by `uid` and take each owner's fullest
+  schedule, as the pull summary's "Organizers with 5+ events" row does.
 
 #### Reading `external_tickets_90d`
 
@@ -441,6 +467,17 @@ created over the API or WhatsApp cannot carry a price.
 
 ## Changelog (`meta.schema_version`)
 
+- **12** (2026-10-04)
+  - **New in `events_by_source`:** `imported` and one `imported_{source}` per import source
+    (`ai`, `ics`, `page`, `page_ai`, `eventbrite`, `google`, `microsoft`, `caldav`). Zero for every
+    event made before this release.
+  - **New `daily` column:** `events_imported`.
+  - **Two meanings changed.** `events_by_source.google` and `features.gcal` read columns nothing
+    had written since April 2026 (the ids moved to `calendar_syncs` and the owner's pivot), so both
+    were frozen in every earlier pull. `google` is now events linked to a Google entry by the
+    owner's sync; `gcal` is a Google sync direction being set. Do not compare either across this
+    version.
+  - Everything else compares with schema 11.
 - **11** (2026-10-04)
   - **A meaning changed; no field was added or removed.** `hero_test.rows[].signups` (and so
     `signup_rate`, `p_best` and `click_share`) and the `signups.hero_variant` column: a headline

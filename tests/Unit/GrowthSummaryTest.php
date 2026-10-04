@@ -152,6 +152,60 @@ class GrowthSummaryTest extends TestCase
     }
 
     /**
+     * Asked per owner, of their fullest schedule: a calendar pull gives one account a venue
+     * schedule per location, and a per-schedule share would fall as importing works.
+     */
+    public function test_organizers_with_a_full_calendar_are_counted_per_owner(): void
+    {
+        $label = 'Organizers with 5+ events, signed up since 2026-07 (of those with a schedule)';
+
+        $pull = $this->pull();
+        $pull['schedules'] = [
+            'columns' => ['sid', 'uid', 'events_total'],
+            'rows' => [
+                // One owner, a venue stub and a real calendar: counted once, on the fuller one.
+                ['s:1', 'u:a', 1],
+                ['s:2', 'u:a', 5],
+                // Four is not five.
+                ['s:3', 'u:b', 4],
+                // Minted by submitting an event to someone else's schedule.
+                ['s:4', 'u:c', 9],
+                // Signed up before the window.
+                ['s:5', 'u:d', 20],
+            ],
+        ];
+        $pull['signups'] = [
+            'columns' => ['uid', 'signup_intent', 'created_month'],
+            'rows' => [
+                ['u:a', 'organizer', '2026-09'],
+                ['u:b', null, '2026-07'],
+                ['u:c', 'request', '2026-09'],
+                ['u:d', 'organizer', '2026-06'],
+                // Never saved a schedule: not in the denominator.
+                ['u:e', 'organizer', '2026-10'],
+            ],
+        ];
+
+        $this->assertSame('1 / 2', $this->value(GrowthSummary::kpis($pull), $label));
+
+        // A pull without the columns reads as not measured.
+        $this->assertNull($this->value(GrowthSummary::kpis($this->pull()), $label));
+    }
+
+    public function test_events_imported_is_a_rolling_sum_and_unknown_before_schema_12(): void
+    {
+        $pull = $this->pull();
+        $pull['daily'] = ['columns' => ['date', 'events_created', 'events_imported'], 'rows' => [
+            ['2026-10-13', 9, 4], ['2026-10-14', 3, 0], ['2026-10-15', 7, 6],
+        ]];
+
+        $this->assertSame(10, $this->value(GrowthSummary::kpis($pull), 'Events imported, last 30 days'));
+
+        $pull['daily'] = ['columns' => ['date', 'events_created'], 'rows' => [['2026-10-15', 7]]];
+        $this->assertNull($this->value(GrowthSummary::kpis($pull), 'Events imported, last 30 days'));
+    }
+
+    /**
      * The previous pull is read for the CURRENT pull's months, so "this month to date" compares the
      * same month at two moments instead of two different months.
      */

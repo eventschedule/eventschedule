@@ -26,6 +26,8 @@ class GrowthSummary
         $month ??= self::monthOf($data);
         $lastMonth = $month !== '' ? date('Y-m', strtotime($month.'-01 -1 month')) : '';
 
+        $since = $month !== '' ? date('Y-m', strtotime($month.'-01 -3 months')) : '';
+
         $traffic = collect($data['traffic'] ?? [])->keyBy('month');
         $stages = collect($data['funnel']['stages'] ?? [])->pluck('count', 'key');
         $money = $data['monetization'] ?? [];
@@ -44,6 +46,8 @@ class GrowthSummary
             // Cast: an older pull (or any JSON without PRESERVE_ZERO_FRACTION) turns 60.0 into 60,
             // which would print as "60" beside "62.50".
             ['label' => 'MRR', 'value' => isset($money['mrr']) ? (float) $money['mrr'] : null],
+            ['label' => "Organizers with 5+ events, signed up since {$since} (of those with a schedule)", 'value' => self::organizersWithFullCalendar($data, $since)],
+            ['label' => 'Events imported, last 30 days', 'value' => self::dailySum($data, 'events_imported', 30)],
             ['label' => 'Schedules selling (paid ticket in 90 days)', 'value' => self::sellers($data)],
             ['label' => 'Owners linking events to a self-serve ticketing platform (any / 2+ events)', 'value' => self::linkingToSelfServe($data)],
             ['label' => 'Admin-granted plans', 'value' => $money['by_plan_source']['admin'] ?? null],
@@ -168,6 +172,48 @@ class GrowthSummary
         }
 
         return count(array_filter($data['schedules']['rows'] ?? [], fn ($row) => ($row[$i] ?? 0) > 0));
+    }
+
+    /**
+     * Organizers whose fullest schedule holds five or more events, out of the organizers who
+     * signed up from $since on and have a schedule at all: "n / N".
+     *
+     * The question is whether a new organizer ends up with a calendar worth showing anyone. It is
+     * asked per owner, of their fullest schedule, because a calendar pull creates a venue schedule
+     * for each location under the same account: a per-schedule share would fall as importing
+     * works. Accounts made by submitting an event to someone else's schedule are left out, as in
+     * linkingToSelfServe(). Null when the pull lacks a column it needs.
+     */
+    private static function organizersWithFullCalendar(array $data, string $since): ?string
+    {
+        $schedules = $data['schedules']['columns'] ?? [];
+        $uid = array_search('uid', $schedules, true);
+        $events = array_search('events_total', $schedules, true);
+
+        $signups = $data['signups']['columns'] ?? [];
+        $signupUid = array_search('uid', $signups, true);
+        $intent = array_search('signup_intent', $signups, true);
+        $created = array_search('created_month', $signups, true);
+
+        if (in_array(false, [$uid, $events, $signupUid, $intent, $created], true) || $since === '') {
+            return null;
+        }
+
+        $organizers = [];
+        foreach ($data['signups']['rows'] ?? [] as $row) {
+            if (in_array($row[$intent] ?? null, [null, 'organizer'], true) && ($row[$created] ?? '') >= $since) {
+                $organizers[$row[$signupUid]] = true;
+            }
+        }
+
+        $fullest = [];
+        foreach ($data['schedules']['rows'] ?? [] as $row) {
+            if (isset($organizers[$row[$uid]])) {
+                $fullest[$row[$uid]] = max($fullest[$row[$uid]] ?? 0, (int) ($row[$events] ?? 0));
+            }
+        }
+
+        return count(array_filter($fullest, fn ($n) => $n >= 5)).' / '.count($fullest);
     }
 
     /**

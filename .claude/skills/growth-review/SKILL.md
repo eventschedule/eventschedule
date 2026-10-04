@@ -143,8 +143,29 @@ Schema 9 also answers these directly:
   release, then the sign-up link from schema 11): read the `hero_test` entry in
   `docs/GROWTH_DATA.md` before quoting a rate.
 
+- `events_by_source.imported` and `imported_{source}` on the schedule rows (schema 12): events a
+  schedule created through an import, by which one (`ai`, `ics`, `page`, `page_ai`, `eventbrite`,
+  `google`, `microsoft`, `caldav`), and `daily.events_imported`. Zero for anything made before the
+  release, so an older import reads as made by hand. Read "Reading the `imported` buckets" in
+  `docs/GROWTH_DATA.md` first, and count owners, not schedules: a calendar pull gives one account a
+  venue schedule per location.
+
+  ```python
+  # Organizers since a month whose fullest schedule has 5+ events, and how they filled it
+  org = {u['uid'] for u in U if u['signup_intent'] in (None, 'organizer') and u['created_month'] >= '2026-07'}
+  best = {}
+  for s in S:
+      if s['uid'] in org and (s['events_total'] or 0) >= (best.get(s['uid'], s)['events_total'] or 0):
+          best[s['uid']] = s
+  full = [s for s in best.values() if (s['events_total'] or 0) >= 5]
+  print(len(full), 'of', len(best), Counter(
+      k for s in full for k, v in s['events_by_source'].items() if k.startswith('imported_') and v))
+  ```
+
 To compare two pulls, keep the same `schema_version`; ids changed length at 8. Schema 10 only added
-fields, so it compares with 9; schema 11 changed only how `hero_variant` is credited. Join on `sid` to find sellers who stopped, comps that started
+fields, so it compares with 9; schema 11 changed only how `hero_variant` is credited. Schema 12 added
+the import buckets and changed what `events_by_source.google` and `features.gcal` mean (both were
+frozen before it), so do not compare those two across it. Join on `sid` to find sellers who stopped, comps that started
 paying, and schedules that newly sold.
 
 ## 4. Put the numbers next to what shipped

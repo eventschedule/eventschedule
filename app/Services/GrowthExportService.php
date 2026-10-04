@@ -3,6 +3,7 @@
 namespace App\Services;
 
 use App\Models\AnalyticsDaily;
+use App\Models\Event;
 use App\Models\MarketingDailyStat;
 use App\Models\Role;
 use App\Models\SubscriptionCancellation;
@@ -31,7 +32,7 @@ class GrowthExportService
      * pulls knows whether they compare. Every bump is described in docs/GROWTH_DATA.md's changelog,
      * which GrowthDataDictionaryTest holds to this number.
      */
-    public const SCHEMA_VERSION = 11;
+    public const SCHEMA_VERSION = 12;
 
     /** The month the schedule.claim audit action shipped; nothing before it can be counted. */
     private const CLAIMS_TRACKED_FROM = '2026-09';
@@ -660,6 +661,18 @@ class GrowthExportService
                 .'(a schedule\'s page, /sign_up reached from off-site) is still recorded. Compare '
                 .'marketing-page channels and landing pages as shares of attributed signups, never as '
                 .'counts across that release.',
+            'Since schema_version 12: events_by_source carries imported (events the schedule created '
+                .'through an import) and one imported_{source} per source: ai (text or a flyer), ics (a '
+                .'calendar feed), page (a web page\'s own event data), page_ai (a web page read by the '
+                .'model), eventbrite, google, microsoft, caldav. They are a subset of created, and are 0 '
+                .'for every event made before the release that added events.import_source: an older '
+                .'import reads as made by hand. daily.events_imported is the same count by day. TWO '
+                .'MEANINGS CHANGED: events_by_source.google is now events linked to a Google entry by '
+                .'the owner\'s sync, in either direction, and features.gcal is a Google sync direction '
+                .'being set. Both used to read columns nothing has written since April 2026, so they sat '
+                .'frozen in every earlier pull: do not compare them across this version. A calendar pull '
+                .'creates a venue schedule per location, owned by the same account, so count OWNERS '
+                .'(uid), not schedules, when asking how many organizers have a full calendar.',
         ];
         // Every derived section is computed from the row tables, so if those were capped
         // the sections describe the most recent N rows and not the whole population.
@@ -1462,8 +1475,20 @@ class GrowthExportService
         // recent_total counts events CREATED in the window. It read updated_at, which system
         // writes bump (Translate::markChecked() touches every event it checks, and calendar sync
         // rewrites rows), so a schedule nobody had opened in a year could read as active.
+        // Imported events are credited to the schedule that imported them (the creator), one
+        // SUM per source. The names are Event's own constants, never input.
+        $importedSums = collect(Event::IMPORT_SOURCES)->map(fn (string $source) => "SUM(CASE WHEN events.import_source = '{$source}' "
+            ."AND events.creator_role_id = event_role.role_id THEN 1 ELSE 0 END) as src_imported_{$source}")->implode(', ');
+
         $events = DB::table('event_role')
             ->join('events', 'events.id', '=', 'event_role.event_id')
+            // The OWNER's link to a Google entry for this event. calendar_syncs is unique on
+            // (user, event, schedule), so this adds no rows. event_role.google_event_id, which this
+            // used to read, has had no writer since the ids moved here in April 2026.
+            ->leftJoin('roles as schedule', 'schedule.id', '=', 'event_role.role_id')
+            ->leftJoin('calendar_syncs', fn ($join) => $join->on('calendar_syncs.event_id', '=', 'events.id')
+                ->on('calendar_syncs.role_id', '=', 'event_role.role_id')
+                ->on('calendar_syncs.user_id', '=', 'schedule.user_id'))
             ->where(fn ($q) => $q->where('event_role.is_accepted', true)
                 ->orWhereColumn('events.creator_role_id', 'event_role.role_id'))
             ->selectRaw('event_role.role_id, COUNT(*) as total, '
@@ -1473,9 +1498,10 @@ class GrowthExportService
                 .'SUM(CASE WHEN events.creator_role_id = event_role.role_id THEN 1 ELSE 0 END) as src_created, '
                 .'SUM(CASE WHEN events.creator_role_id IS NOT NULL AND events.creator_role_id <> event_role.role_id THEN 1 ELSE 0 END) as src_other_schedules, '
                 .'SUM(CASE WHEN events.is_guest_submission = 1 THEN 1 ELSE 0 END) as src_guest, '
-                .'SUM(CASE WHEN event_role.google_event_id IS NOT NULL THEN 1 ELSE 0 END) as src_google, '
+                .'SUM(CASE WHEN calendar_syncs.google_event_id IS NOT NULL THEN 1 ELSE 0 END) as src_google, '
                 .'SUM(CASE WHEN event_role.caldav_event_uid IS NOT NULL THEN 1 ELSE 0 END) as src_caldav, '
-                .'SUM(CASE WHEN event_role.is_auto_sourced = 1 THEN 1 ELSE 0 END) as src_auto_sourced', [$recentCutoff])
+                .'SUM(CASE WHEN event_role.is_auto_sourced = 1 THEN 1 ELSE 0 END) as src_auto_sourced, '
+                .$importedSums, [$recentCutoff])
             ->groupBy('event_role.role_id')
             ->get()->keyBy('role_id');
 
@@ -1685,6 +1711,8 @@ class GrowthExportService
                     'google' => (int) ($events[$r->id]->src_google ?? 0),
                     'caldav' => (int) ($events[$r->id]->src_caldav ?? 0),
                     'auto_sourced' => (int) ($events[$r->id]->src_auto_sourced ?? 0),
+                    // Flat and always present: a nested object would encode as a list when empty.
+                    ...$this->importedCounts($events[$r->id] ?? null),
                 ],
                 // Null, not an empty shape, when there are none: an empty `platforms` would encode
                 // as a JSON list here and an object everywhere it has an entry.
@@ -1936,12 +1964,28 @@ class GrowthExportService
         return $byRole;
     }
 
+    /**
+     * events_by_source's import buckets: `imported` (any source) and one `imported_{source}` per
+     * Event::IMPORT_SOURCES entry. Events this schedule created through an import, by which one.
+     */
+    private function importedCounts(?object $counts): array
+    {
+        $bySource = [];
+        foreach (Event::IMPORT_SOURCES as $source) {
+            $bySource['imported_'.$source] = (int) ($counts->{'src_imported_'.$source} ?? 0);
+        }
+
+        return ['imported' => array_sum($bySource)] + $bySource;
+    }
+
     /** Feature adoption flags, off the schedule row and from adoptionByRole(). */
     private function featuresOf(Role $r, array $adoption = [], ?object $owner = null, bool $ownerHasWebhook = false): array
     {
         $flags = [];
         foreach ([
-            'gcal' => $r->google_calendar_id,
+            // The Google sync direction. roles.google_calendar_id, which this used to read, has
+            // had no writer since the calendar id moved to the owner's pivot in April 2026.
+            'gcal' => $r->sync_direction,
             'mscal' => $r->microsoft_sync_token,
             'caldav' => $r->caldav_settings,
             // Set but failed or still pending is not a working custom domain.
@@ -2687,7 +2731,7 @@ class GrowthExportService
     {
         $from = now()->copy()->subDays(self::DAILY_DAYS - 1)->startOfDay();
         $metrics = ['signups_organizer', 'signups_other', 'first_schedule', 'first_event', 'events_created',
-            'first_ticket_type', 'first_paid_ticket_type', 'first_paid_sale', 'paid_orders', 'stripe_connected',
+            'events_imported', 'first_ticket_type', 'first_paid_ticket_type', 'first_paid_sale', 'paid_orders', 'stripe_connected',
             'paywall_views', 'trial_starts', 'subscriptions_started', 'subscriptions_ended', 'cancellations'];
 
         $days = [];
@@ -2726,6 +2770,9 @@ class GrowthExportService
             'user_id', 'created_at'), 'first_at');
         $tally('first_event', $firsts($realEvents(), 'events.user_id', 'events.created_at'), 'first_at');
         $tally('events_created', $realEvents()->where('events.created_at', '>=', $from)->select('events.created_at'), 'created_at');
+        // A subset of events_created: the ones an import or a calendar pull made.
+        $tally('events_imported', $realEvents()->where('events.created_at', '>=', $from)
+            ->whereNotNull('events.import_source')->select('events.created_at'), 'created_at');
 
         $ticketTypes = fn () => $this->attributeToSeller(DB::table('tickets')->join('events', 'events.id', '=', 'tickets.event_id'))
             ->whereNotIn('events.id', $this->demoEventIds())

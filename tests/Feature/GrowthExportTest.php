@@ -126,9 +126,10 @@ class GrowthExportTest extends TestCase
         // sales went to the seller and attribution was anonymised, 9 since the daily, nudge
         // outcome, audience, reach and adoption data, 10 since outside ticket links and the
         // reachable placeholders, 11 since a headline variant reached sign-up on the link as well
-        // as in the consented cookie. Bumping this is deliberate: a reader diffing two pulls needs
-        // to know the shape (or the meaning) moved.
-        $this->assertSame(11, $data['meta']['schema_version']);
+        // as in the consented cookie, 12 since imports are counted by source and the two Google
+        // fields read where the ids live. Bumping this is deliberate: a reader diffing two pulls
+        // needs to know the shape (or the meaning) moved.
+        $this->assertSame(12, $data['meta']['schema_version']);
         $this->assertSame(GrowthExportService::SCHEMA_VERSION, $data['meta']['schema_version']);
         $this->assertSame(now()->format('Y-m'), $data['meta']['partial_month']['month']);
         $this->assertSame(['funnel', 'funnel_trend'], $data['meta']['range_applies_to']);
@@ -1493,6 +1494,67 @@ class GrowthExportTest extends TestCase
     // ---------------------------------------------------------------------
 
     /** daily[]'s row for one date, as metric => count. */
+    /**
+     * Schema 12. An imported event was indistinguishable from one typed in, so the export could
+     * not say whether importing is what fills a schedule. And two Google fields read columns that
+     * nothing has written since the ids moved to calendar_syncs and the owner's pivot.
+     */
+    public function test_imports_are_counted_by_source_and_google_reads_where_the_ids_live(): void
+    {
+        $owner = $this->createOwner();
+        $role = $this->freeRole($owner, 'curator');
+        $venue = $this->freeRole($owner);
+
+        $byHand = $this->createEvent($role, ['creator_role_id' => $role->id]);
+        $flyer = $this->createEvent($role, ['creator_role_id' => $role->id, 'import_source' => 'ai']);
+        $this->createEvent($role, ['creator_role_id' => $role->id, 'import_source' => 'ics']);
+        $this->createEvent($role, ['creator_role_id' => $role->id, 'import_source' => 'ics']);
+        $pulled = $this->createEvent($role, ['creator_role_id' => $role->id, 'import_source' => 'google']);
+        // Listed on the venue's schedule too: the import is the curator's, not the venue's.
+        $flyer->roles()->attach($venue->id, ['is_accepted' => true]);
+
+        // The owner's sync links two events to Google entries: one pulled in, one pushed out.
+        foreach ([$pulled, $byHand] as $event) {
+            DB::table('calendar_syncs')->insert(['user_id' => $owner->id, 'event_id' => $event->id, 'role_id' => $role->id,
+                'google_event_id' => 'g'.$event->id, 'created_at' => now(), 'updated_at' => now()]);
+        }
+        // A team member's own "sync to my calendar" is not the schedule's sync.
+        $member = $this->createOwner();
+        $role->users()->attach($member->id, ['level' => 'admin']);
+        DB::table('calendar_syncs')->insert(['user_id' => $member->id, 'event_id' => $flyer->id, 'role_id' => $role->id,
+            'google_event_id' => 'member', 'created_at' => now(), 'updated_at' => now()]);
+
+        // The column the old flag read is set and the direction is not, and the other way round.
+        DB::table('roles')->where('id', $venue->id)->update(['google_calendar_id' => 'legacy@group.calendar.google.com']);
+        DB::table('roles')->where('id', $role->id)->update(['sync_direction' => 'from']);
+
+        $data = $this->build();
+        $sources = $this->scheduleRow($data, $role)['events_by_source'];
+
+        $this->assertSame(5, $sources['created']);
+        $this->assertSame(4, $sources['imported']);
+        $this->assertSame(1, $sources['imported_ai']);
+        $this->assertSame(2, $sources['imported_ics']);
+        $this->assertSame(1, $sources['imported_google']);
+        $this->assertSame(0, $sources['imported_eventbrite']);
+        // Every source in the vocabulary has a key, used or not.
+        foreach (\App\Models\Event::IMPORT_SOURCES as $source) {
+            $this->assertArrayHasKey('imported_'.$source, $sources);
+        }
+        $this->assertSame(2, $sources['google']);
+
+        $venueSources = $this->scheduleRow($data, $venue)['events_by_source'];
+        $this->assertSame(1, $venueSources['other_schedules']);
+        $this->assertSame(0, $venueSources['imported']);
+
+        $this->assertContains('gcal', $this->scheduleRow($data, $role)['features']);
+        $this->assertNotContains('gcal', $this->scheduleRow($data, $venue)['features']);
+
+        $today = $this->dailyRow($data, now()->toDateString());
+        $this->assertSame(5, $today['events_created']);
+        $this->assertSame(4, $today['events_imported']);
+    }
+
     private function dailyRow(array $data, string $date): array
     {
         $row = collect($data['daily']['rows'])->firstWhere(0, $date);
