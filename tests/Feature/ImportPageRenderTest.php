@@ -36,10 +36,10 @@ class ImportPageRenderTest extends TestCase
         $this->role = $this->createRole($this->owner, 'curator', ['accept_requests' => true, 'require_account' => false]);
     }
 
-    private function importPage(?User $user = null): string
+    private function importPage(?User $user = null, array $query = []): string
     {
         return $this->actingAs($user ?? $this->owner)
-            ->get(route('event.show_import_ai', ['subdomain' => $this->role->subdomain]))
+            ->get(route('event.show_import_ai', ['subdomain' => $this->role->subdomain] + $query))
             ->assertOk()
             ->getContent();
     }
@@ -130,8 +130,13 @@ class ImportPageRenderTest extends TestCase
         // The zone the times are in is on the page, with a way to change it.
         $this->assertStringContainsString('Times shown in __Z__', $html);
         $this->assertStringContainsString(route('role.edit', ['subdomain' => $this->role->subdomain]), $html);
-        // The old "Save All" header is for a single result now.
-        $this->assertStringContainsString('preview.parsed.length > 0 && !listMode', $html);
+        // What was read is summed up above one event from a link as well as above a list.
+        $this->assertStringContainsString('v-if="showsReadSummary"', $html);
+        // A card's Save saves its row, which for a listed series is each of its dates; nothing
+        // on a row opens while the list is being added; and a failed row keeps its checkbox.
+        $this->assertStringContainsString('@click="saveRow(idx)"', $html);
+        $this->assertStringContainsString('@click="expandRow(idx)" :disabled="isAddingAll"', $html);
+        $this->assertStringNotContainsString("rowState(idx) === 'error'\" class=\"h-5 w-5", $html);
 
         // A full import is up to 100 saves, one request each.
         $this->assertContains('throttle:120,1', app('router')->getRoutes()->getByName('event.import')->gatherMiddleware());
@@ -216,7 +221,8 @@ class ImportPageRenderTest extends TestCase
     {
         $hidesWithAPreview = '!preview || !preview.parsed || preview.parsed.length === 0';
 
-        $inside = $this->enclosingConditions($this->importPage(), [
+        // ?automate is what puts Save All on the page for somebody who is not the admin.
+        $inside = $this->enclosingConditions($this->importPage(null, ['automate' => 1]), [
             '@click="handleSaveAll"', 'id="event_details"', 'Import from Eventbrite',
         ]);
 
@@ -225,5 +231,22 @@ class ImportPageRenderTest extends TestCase
         $this->assertSame([$hidesWithAPreview], $inside['Import from Eventbrite']);
         // What is for a preview is not inside them.
         $this->assertNotContains($hidesWithAPreview, $inside['@click="handleSaveAll"']);
+    }
+
+    public function test_the_card_above_a_single_result_is_there_only_when_it_holds_something(): void
+    {
+        // It holds a checkbox for the installation's admin and Save All for an automated run.
+        // Since it stopped being hidden by accident it was an empty card for everybody else.
+        $card = 'preview.parsed.length > 0 && !listMode" class="ap-card';
+
+        $this->assertStringNotContainsString($card, $this->importPage());
+        $this->assertStringNotContainsString($card, $this->guestPage());
+
+        $this->assertStringContainsString('@click="handleSaveAll"', $this->importPage(null, ['automate' => 1]));
+
+        $admin = $this->createOwner();
+        $admin->forceFill(['is_admin' => true])->save();
+        $this->followRole($admin, $this->role, 'admin');
+        $this->assertStringContainsString('id="show_all_fields"', $this->importPage($admin));
     }
 }

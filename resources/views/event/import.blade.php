@@ -445,6 +445,9 @@
         @endif
 
         <!-- Show All Fields and Save All buttons when events are parsed -->
+        {{-- Only when it has something in it: the checkbox is the installation admin's, and Save
+             All is for an automated run. For everyone else, guests included, it was an empty card. --}}
+        @if ((auth()->user() && auth()->user()->isAdmin()) || (request()->has('automate') && ! $isGuestPage))
         <div v-if="preview && preview.parsed && preview.parsed.length > 0 && !listMode" class="ap-card p-4 sm:p-8 shadow-md rounded-lg mb-4">
             <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between">
                 @if (auth()->user() && auth()->user()->isAdmin())
@@ -470,6 +473,7 @@
                 </div>
             </div>
         </div>
+        @endif
 
 
         <!-- Hidden file input for details image -->
@@ -488,14 +492,14 @@
 
         {{-- Two or more events are a list to choose from, whatever they were read from: one row
              each, the full card on request, and one button that says how many it will add. --}}
-        <div v-if="listMode" v-cloak class="ap-card mb-4 rounded-xl p-4 sm:p-6">
+        <div v-if="showsReadSummary" v-cloak class="ap-card mb-4 rounded-xl p-4 sm:p-6">
             <div class="flex flex-wrap items-start justify-between gap-3">
                 <div class="min-w-0">
                     <h3 id="import-list-heading" tabindex="-1" class="text-base font-semibold text-gray-900 focus:outline-none dark:text-gray-100" v-text="foundLabel"></h3>
                     <p class="mt-1 text-sm text-gray-500 dark:text-gray-400">
                         <span v-text="timezoneLabel"></span>
                         &middot;
-                        <a href="{{ route('role.edit', ['subdomain' => $role->subdomain]) }}" class="js-leave-import font-medium text-[var(--brand-blue)] hover:underline">{{ __('messages.change_timezone') }}</a>
+                        <x-link :href="route('role.edit', ['subdomain' => $role->subdomain])" class="js-leave-import">{{ __('messages.change_timezone') }}</x-link>
                     </p>
                 </div>
                 <div class="flex flex-shrink-0 items-center gap-2">
@@ -519,7 +523,7 @@
                 {{ __('messages.import_read_whole_page') }}
             </button>
 
-            <label class="mt-4 flex cursor-pointer items-center gap-3 border-t border-gray-100 pt-4 text-sm text-gray-700 dark:border-gray-700/50 dark:text-gray-300">
+            <label v-if="listMode" class="mt-4 flex cursor-pointer items-center gap-3 border-t border-gray-100 pt-4 text-sm text-gray-700 dark:border-gray-700/50 dark:text-gray-300">
                 <input type="checkbox" ref="selectAll" :checked="allSelected" @change="toggleAll" :disabled="isAddingAll || selectableCount === 0"
                        class="h-5 w-5 rounded border-gray-300 text-[var(--brand-blue)] focus:ring-[var(--brand-blue)] dark:border-gray-600 dark:[&:not(:checked)]:bg-gray-900">
                 <span class="font-medium">{{ __('messages.eventbrite_select_all') }}</span>
@@ -536,7 +540,7 @@
             <div v-if="listMode && isRowVisible(idx)"
                  :class="['flex items-center gap-3 px-4 py-3 transition-colors duration-200',
                         expandedRow === idx ? 'bg-gray-50 dark:bg-[#252526]' : '',
-                        rowState(idx) === 'idle' && !rowSelected(idx) ? 'opacity-60' : '']">
+                        (rowState(idx) === 'idle' || rowState(idx) === 'error') && !rowSelected(idx) ? 'opacity-60' : '']">
                 {{-- A checkbox until it is being saved; then what became of it, in a shape as
                      well as a colour. --}}
                 <span class="flex h-6 w-6 flex-shrink-0 items-center justify-center">
@@ -547,9 +551,8 @@
                     <svg v-else-if="rowState(idx) === 'saved'" class="h-5 w-5 text-green-600 dark:text-green-400" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" role="img" aria-label="{{ __('messages.saved') }}">
                         <path stroke-linecap="round" stroke-linejoin="round" d="M9 12.75L11.25 15 15 9.75M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
                     </svg>
-                    <svg v-else-if="rowState(idx) === 'error'" class="h-5 w-5 text-red-600 dark:text-red-400" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" role="img" aria-label="{{ __('messages.error') }}">
-                        <path stroke-linecap="round" stroke-linejoin="round" d="M9.75 9.75l4.5 4.5m0-4.5l-4.5 4.5M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-                    </svg>
+                    {{-- A row that failed keeps its checkbox, so it can be left out of the next
+                         try: what went wrong is said in words on the row. --}}
                     <input v-else type="checkbox" :checked="rowSelected(idx)" @change="toggleRow(idx)" :disabled="isAddingAll || !rowComplete(idx)"
                            :aria-label="event.event_name"
                            class="h-5 w-5 rounded border-gray-300 text-[var(--brand-blue)] focus:ring-[var(--brand-blue)] dark:border-gray-600 dark:[&:not(:checked)]:bg-gray-900">
@@ -560,12 +563,12 @@
                     <span class="text-base font-bold leading-none text-gray-900 dark:text-gray-100" v-text="rowDate(idx).day"></span>
                 </span>
 
-                <button type="button" @click="expandRow(idx)" :aria-expanded="expandedRow === idx ? 'true' : 'false'" title="{{ __('messages.import_show_details') }}"
+                <button type="button" @click="expandRow(idx)" :disabled="isAddingAll" :aria-expanded="expandedRow === idx ? 'true' : 'false'" title="{{ __('messages.import_show_details') }}"
                         class="group flex min-h-[44px] min-w-0 flex-1 items-center gap-3 rounded-md text-start focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--brand-blue)]">
                     <span class="min-w-0 flex-1">
                         <span class="block truncate text-sm font-medium text-gray-900 dark:text-gray-100"><bdi v-text="event.event_name"></bdi></span>
                         <span class="mt-0.5 block truncate text-xs text-gray-500 dark:text-gray-400" v-text="rowMeta(idx)"></span>
-                        <span v-if="rowProblem(idx)" class="mt-0.5 block text-xs font-medium text-amber-700 dark:text-amber-400" v-text="rowProblem(idx)"></span>
+                        <span v-if="rowProblem(idx)" :class="['mt-0.5 block text-xs font-medium', rowState(idx) === 'error' ? 'text-red-700 dark:text-red-400' : 'text-amber-700 dark:text-amber-400']" v-text="rowProblem(idx)"></span>
                     </span>
                     <svg :class="['h-5 w-5 flex-shrink-0 text-gray-400 transition-transform duration-200 dark:text-gray-500', expandedRow === idx ? 'rotate-90' : 'rtl:rotate-180']" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" aria-hidden="true">
                         <path stroke-linecap="round" stroke-linejoin="round" d="M8.25 4.5l7.5 7.5-7.5 7.5" />
@@ -1151,7 +1154,7 @@
                                 <button v-if="{{ auth()->check() ? 'true' : 'false' }}" @click="handleView(idx)" type="button" class="px-4 py-2 bg-green-500 text-white rounded-lg hover:bg-green-600 transition-all duration-200 hover:scale-105 hover:shadow-md">
                                     {{ __('messages.view') }}
                                 </button>
-                                <button @click="handleClearForNext" type="button" class="px-4 py-2 bg-gray-200 dark:bg-gray-700 text-gray-900 dark:text-gray-100 rounded-lg hover:bg-gray-300 dark:hover:bg-gray-600 transition-all duration-200 hover:scale-105 hover:shadow-md">
+                                <button v-if="!listMode" @click="handleClearForNext" type="button" class="px-4 py-2 bg-gray-200 dark:bg-gray-700 text-gray-900 dark:text-gray-100 rounded-lg hover:bg-gray-300 dark:hover:bg-gray-600 transition-all duration-200 hover:scale-105 hover:shadow-md">
                                     {{ __('messages.clear') }}
                                 </button>
                             </template>
@@ -1162,7 +1165,7 @@
                                 <button @click="handleClear" type="button" v-if="preview.parsed.length == 1" class="px-4 py-2 bg-gray-200 dark:bg-gray-700 text-gray-900 dark:text-gray-100 rounded-lg hover:bg-gray-300 dark:hover:bg-gray-600 transition-all duration-200 hover:scale-105 hover:shadow-md">
                                     {{ __('messages.clear') }}
                                 </button>
-                                <button @click="handleSave(idx)" 
+                                <button @click="saveRow(idx)" 
                                         type="button" 
                                         :disabled="savingEvents[idx] || !canSaveRow(idx)"
                                         :class="['px-4 py-2 rounded-lg transition-all duration-200',
@@ -1480,6 +1483,8 @@
                 addSummary: null,
                 stoppedByLimit: false,
                 allDone: false,
+                // Each listed series as it arrived, to tell what was edited on its first row.
+                seriesOriginals: {},
                 savingEvents: [], // Track which events are currently being saved
                 createAccount: false, // New data property for guest user account creation
                 userName: '',
@@ -1591,22 +1596,41 @@
                 return ! this.isGuestPage && !! (this.preview && this.preview.parsed && this.preview.parsed.length > 1);
             },
 
-            // Rows that could be added: complete, and not added already.
-            selectableCount() {
-                return this.listMode ? this.preview.parsed.filter((event, idx) => ! this.savedEvents[idx] && this.isEventComplete(event)).length : 0;
+            // The header above the results: for a list, and for a single event that came from
+            // a link or a calendar, which has the same things to say (where it was read, what
+            // was left out, that it is a one-time copy, "Read the whole page").
+            showsReadSummary() {
+                return this.listMode || (! this.isGuestPage && !! (this.preview && this.preview.meta && this.preview.parsed && this.preview.parsed.length === 1));
             },
 
+            // The rows on screen. A listed series is one row, under the first of its dates.
+            visibleRows() {
+                return this.listMode ? this.preview.parsed.map((event, i) => i).filter(i => this.isRowVisible(i)) : [];
+            },
+
+            // Rows that could be added: complete, and not added already.
+            selectableCount() {
+                return this.visibleRows.filter(i => this.rowState(i) !== 'saved' && this.rowComplete(i)).length;
+            },
+
+            // Rows, for "3 of 4 selected". The button counts events: a series of twelve dates is
+            // one row and twelve events, and the row says so.
+            selectedRowCount() {
+                return this.visibleRows.filter(i => this.rowState(i) !== 'saved' && this.rowSelected(i)).length;
+            },
+
+            // Events the button would add.
             selectedCount() {
-                return this.listMode ? this.preview.parsed.filter((event, idx) => this.selectedRows[idx] && ! this.savedEvents[idx]).length : 0;
+                return this.listMode ? this.preview.parsed.filter((event, idx) => this.isQueued(idx)).length : 0;
             },
 
             allSelected() {
-                return this.selectableCount > 0 && this.selectedCount === this.selectableCount;
+                return this.selectableCount > 0 && this.selectedRowCount === this.selectableCount;
             },
 
             selectedLabel() {
                 return @json(__('messages.import_selected_count', ['selected' => '__S__', 'total' => '__T__']), JSON_UNESCAPED_UNICODE)
-                    .replace('__S__', this.selectedCount).replace('__T__', this.preview.parsed.length - this.savedEvents.filter(Boolean).length);
+                    .replace('__S__', this.selectedRowCount).replace('__T__', this.visibleRows.filter(i => this.rowState(i) !== 'saved').length);
             },
 
             addLabel() {
@@ -1645,7 +1669,8 @@
 
             foundLabel() {
                 const meta = this.preview.meta;
-                const count = meta ? meta.shown : this.preview.parsed.length;
+                // Counted off the page, so it stays true when a row is removed.
+                const count = this.listMode ? this.visibleRows.length : this.preview.parsed.length;
 
                 // The host is isolated (LRI ... PDI): inside a right-to-left sentence it otherwise
                 // takes the count that follows it into its own left-to-right run.
@@ -1684,6 +1709,9 @@
                 }
                 if (meta.text_truncated) {
                     notes.push(@json(__('messages.import_text_truncated'), JSON_UNESCAPED_UNICODE));
+                }
+                if (meta.skipped && meta.skipped.unreadable > 0) {
+                    notes.push(@json(__('messages.import_unreadable_left_out', ['count' => '__N__']), JSON_UNESCAPED_UNICODE).replace('__N__', meta.skipped.unreadable));
                 }
                 notes.push(meta.source === 'google'
                     ? @json(__('messages.import_one_time_copy_google'), JSON_UNESCAPED_UNICODE)
@@ -2093,7 +2121,11 @@
             // A card's own Save: its own row for an editor, everything (and the account fields)
             // for a guest, who has one event.
             canSaveRow(idx) {
-                return this.isGuestPage ? this.canCreateAccount : this.isEventComplete(this.preview.parsed[idx]);
+                if (this.isGuestPage) {
+                    return this.canCreateAccount;
+                }
+
+                return ! this.isAddingAll && (this.listMode ? this.rowComplete(idx) : this.isEventComplete(this.preview.parsed[idx]));
             },
 
             // The dates of a series that could not be one repeating event arrive as separate
@@ -2107,18 +2139,51 @@
                 return this.preview.parsed.map((event, i) => i).filter(i => this.preview.parsed[i].series && this.preview.parsed[i].series.id === series.id);
             },
 
+            // The first of its series that is in the list. Not "the first date of the series":
+            // when that one is already on the schedule it is not here, and the rest were left
+            // with no row to show them, ticked all the same, and added unseen.
             isRowVisible(idx) {
-                const series = this.preview.parsed[idx].series;
-
-                return ! series || series.position === 1;
+                return this.rowIndexes(idx)[0] === idx;
             },
 
-            rowSelected(idx) {
-                return this.rowIndexes(idx).some(i => this.selectedRows[i]);
+            // One date of a listed series as it will be saved: its own date, and whatever was
+            // changed on the series' card. The card edits the first date's row, and only what
+            // was actually changed there is carried over, so a date the source itself names
+            // differently keeps its own name.
+            effectiveRow(idx) {
+                const row = this.preview.parsed[idx];
+                const lead = row && row.series ? this.rowIndexes(idx)[0] : idx;
+                if (lead === idx) {
+                    return row;
+                }
+
+                const edited = this.preview.parsed[lead];
+                const original = this.seriesOriginals[row.series.id] || {};
+                const merged = Object.assign({}, row);
+                Object.keys(edited).forEach(key => {
+                    if (['event_date', 'event_date_time', 'sort_at', 'series', 'event_url', 'event_id', 'source_uid'].includes(key)) {
+                        return;
+                    }
+                    if (JSON.stringify(edited[key]) !== JSON.stringify(original[key])) {
+                        merged[key] = edited[key];
+                    }
+                });
+
+                return merged;
             },
 
             rowComplete(idx) {
-                return this.rowIndexes(idx).every(i => this.isEventComplete(this.preview.parsed[i]));
+                return this.rowIndexes(idx).every(i => this.isEventComplete(this.effectiveRow(i)));
+            },
+
+            // Ticked, and still able to be added: a row emptied of its name after it was ticked
+            // is neither counted nor sent.
+            isQueued(idx) {
+                return !! this.selectedRows[idx] && ! this.savedEvents[idx] && this.isEventComplete(this.effectiveRow(idx));
+            },
+
+            rowSelected(idx) {
+                return this.rowIndexes(idx).some(i => this.isQueued(i));
             },
 
             rowState(idx) {
@@ -2133,21 +2198,40 @@
             toggleRow(idx) {
                 const on = ! this.rowSelected(idx);
                 this.rowIndexes(idx).forEach(i => {
-                    this.selectedRows[i] = on && ! this.savedEvents[i] && this.isEventComplete(this.preview.parsed[i]);
+                    this.selectedRows[i] = on && ! this.savedEvents[i] && this.isEventComplete(this.effectiveRow(i));
                 });
             },
 
             toggleAll() {
                 const on = ! this.allSelected;
                 this.preview.parsed.forEach((event, i) => {
-                    this.selectedRows[i] = on && ! this.savedEvents[i] && this.isEventComplete(event);
+                    this.selectedRows[i] = on && ! this.savedEvents[i] && this.isEventComplete(this.effectiveRow(i));
                 });
+            },
+
+            // A card's Save. For a listed series that is every one of its dates, said once.
+            async saveRow(idx) {
+                if (this.isAddingAll) {
+                    return;
+                }
+
+                for (const i of this.rowIndexes(idx)) {
+                    if (! this.savedEvents[i]) {
+                        await this.handleSave(i, i !== idx);
+                    }
+                }
             },
 
             // What is ticked when a preview arrives: everything that could be added as it stands
             // and does not look like something the schedule already has.
             resetSelection() {
                 this.selectedRows = this.preview.parsed.map(event => this.isEventComplete(event) && ! event.event_url);
+                this.seriesOriginals = {};
+                this.preview.parsed.forEach((event, i) => {
+                    if (event.series && this.rowIndexes(i)[0] === i) {
+                        this.seriesOriginals[event.series.id] = JSON.parse(JSON.stringify(event));
+                    }
+                });
                 this.expandedRow = null;
                 this.addSummary = null;
                 this.stoppedByLimit = false;
@@ -2253,6 +2337,11 @@
             // Open one row's full card in place, and close whichever was open. The card's date
             // pickers and editor exist only while it is open.
             expandRow(idx) {
+                // Not while the list is being added: a Save or a Remove from an open card would
+                // send a row twice, or move every row after it under the queue.
+                if (this.isAddingAll) {
+                    return;
+                }
                 this.destroyDescriptionEditors();
                 this.expandedRow = this.expandedRow === idx ? null : idx;
 
@@ -2281,7 +2370,7 @@
                 if (this.isAddingAll) {
                     return;
                 }
-                const queue = this.preview.parsed.map((event, i) => i).filter(i => this.selectedRows[i] && ! this.savedEvents[i]);
+                const queue = this.preview.parsed.map((event, i) => i).filter(i => this.isQueued(i));
                 if (! queue.length) {
                     return;
                 }
@@ -2298,6 +2387,11 @@
                 let added = 0;
                 let failed = 0;
                 for (const idx of queue) {
+                    if (this.savedEvents[idx]) {
+                        this.addProgress.done++;
+
+                        continue;
+                    }
                     let result = await this.handleSave(idx, true);
                     // The request limit is sized so a full import stays under it. If it is met
                     // anyway, wait it out once rather than fail every row after it.
@@ -2534,7 +2628,19 @@
 
                         // Split event_date_time into separate date, start time, end time fields
                         this.preview.parsed.forEach((event) => {
-                            if (event.event_date_time) {
+                            // Read as written. Going through a Date put the browser's own clock
+                            // changes into it: midnight on a day the browser's zone skips midnight
+                            // came out as 1 AM, whatever zone the schedule is in.
+                            var written = /^(\d{4})-(\d{2})-(\d{2})[ T](\d{1,2}):(\d{2})/.exec(event.event_date_time || '');
+                            if (written) {
+                                event.event_date = written[1] + '-' + written[2] + '-' + written[3];
+                                var writtenMinutes = parseInt(written[4]) * 60 + parseInt(written[5]);
+                                event.event_start_time = this.formatMinutesToTime(writtenMinutes);
+                                event.event_end_time = event.event_duration
+                                    ? this.formatMinutesToTime((writtenMinutes + Math.round(event.event_duration * 60)) % 1440)
+                                    : '';
+                                delete event.event_date_time;
+                            } else if (event.event_date_time) {
                                 try {
                                     var dt = new Date(event.event_date_time.replace(' ', 'T'));
                                     if (!isNaN(dt.getTime())) {
@@ -2822,6 +2928,10 @@
             // raising a toast and a page-level error per row. Answers with what happened.
             async handleSave(idx, quiet = false) {
                 const result = { ok: false, status: 0, limit: false, retryAfter: 0 };
+                // A card's Save while the list is being added would send its row a second time.
+                if (! quiet && this.isAddingAll) {
+                    return result;
+                }
                 if (! quiet) {
                     this.errorMessage = null;
                 }
@@ -2836,7 +2946,10 @@
                         throw new Error('Event data not found');
                     }
                     
-                    const parsed = this.preview.parsed[idx];
+                    // What was edited on a listed series' card goes with each of its dates, and so
+                    // does the venue chosen there.
+                    const parsed = this.effectiveRow(idx);
+                    const venueIdx = this.preview.parsed[idx].series ? this.rowIndexes(idx)[0] : idx;
                     
                     // Build starts_at from split date/time fields
                     var eventDate = parsed.event_date;
@@ -2901,12 +3014,12 @@
                     let venueAddress = parsed.event_address || "{{ $role->isCurator() ? $role->city : '' }}";
                     let venueCity = parsed.event_city;
 
-                    if (this.eventVenueTypes[idx] === 'use_existing' && this.eventSelectedVenues[idx]) {
+                    if (this.eventVenueTypes[venueIdx] === 'use_existing' && this.eventSelectedVenues[venueIdx]) {
                         // Use selected existing venue
-                        venueId = this.eventSelectedVenues[idx].id;
-                        venueName = this.eventSelectedVenues[idx].name;
-                        venueAddress = this.eventSelectedVenues[idx].address1;
-                        venueCity = this.eventSelectedVenues[idx].city;
+                        venueId = this.eventSelectedVenues[venueIdx].id;
+                        venueName = this.eventSelectedVenues[venueIdx].name;
+                        venueAddress = this.eventSelectedVenues[venueIdx].address1;
+                        venueCity = this.eventSelectedVenues[venueIdx].city;
                     }
 
                     // Get event name from VueJS model
@@ -2933,7 +3046,7 @@
                             venue_country_code: parsed.event_country_code || '{{ $role->country_code }}',
                             venue_id: venueId,
                             venue_language_code: '{{ $role->language_code }}',
-                            claim_venue_ownership: this.canClaimVenue(idx) && !!this.eventClaimVenue[idx],
+                            claim_venue_ownership: this.canClaimVenue(venueIdx) && !!this.eventClaimVenue[venueIdx],
                             members: members,
                             name: eventName,
                             name_en: parsed.event_name_en,
@@ -3244,32 +3357,26 @@
                     return;
                 }
 
-                if (confirm(@json(__("messages.confirm_remove_event")))) {
-                    // Destroy description editor for this event
-                    if (this.descriptionEditors[idx]) {
-                        this.descriptionEditors[idx]._stopEditorObserver?.();
-                        this.descriptionEditors[idx].toTextArea();
-                        delete this.descriptionEditors[idx];
-                    }
-                    // Re-index remaining editors
-                    const newEditors = {};
-                    Object.keys(this.descriptionEditors).forEach(key => {
-                        const k = parseInt(key);
-                        if (k > idx) {
-                            newEditors[k - 1] = this.descriptionEditors[k];
-                        } else {
-                            newEditors[k] = this.descriptionEditors[k];
-                        }
-                    });
-                    this.descriptionEditors = newEditors;
+                // Not while the list is being added: every row after this one would move under
+                // the queue.
+                if (this.isAddingAll) {
+                    return;
+                }
 
-                    // Remove the event from the parsed array
-                    this.preview.parsed.splice(idx, 1);
-                    // And its entry in every array kept beside it. Four of these were missed,
-                    // so the venue chosen for one event slid onto the next after a removal.
-                    [this.savedEvents, this.savedEventData, this.savingEvents, this.saveErrors,
-                        this.eventVenueTypes, this.eventSelectedVenues, this.eventClaimVenue,
-                        this.selectedRows].forEach(list => list.splice(idx, 1));
+                if (confirm(@json(__("messages.confirm_remove_event")))) {
+                    // The open card's editor goes with it. Whatever is on screen afterwards gets
+                    // a fresh one below.
+                    this.destroyDescriptionEditors();
+
+                    // A listed series is removed whole: its other dates have no row of their
+                    // own, and were added all the same when only the first was taken out.
+                    // Highest index first, so the ones still to go do not move.
+                    const lists = [this.savedEvents, this.savedEventData, this.savingEvents, this.saveErrors,
+                        this.eventVenueTypes, this.eventSelectedVenues, this.eventClaimVenue, this.selectedRows];
+                    this.rowIndexes(idx).slice().reverse().forEach(i => {
+                        this.preview.parsed.splice(i, 1);
+                        lists.forEach(list => list.splice(i, 1));
+                    });
                     this.expandedRow = null;
                     
                     // If no events left, clear the preview
@@ -3277,9 +3384,17 @@
                         this.preview = null;
                     }
                     
-                    // Re-initialize datepickers after removing an event
+                    // What is left on screen needs its date pickers, and when one event is left
+                    // it is a card again: its editor too, and the video lookup a list defers.
                     this.$nextTick(() => {
                         initializeFlatpickr();
+                        this.initDescriptionEditors();
+                        if (this.preview && this.preview.parsed.length === 1) {
+                            const performer = this.preview.parsed[0].performers && this.preview.parsed[0].performers[0];
+                            if (performer && ! performer.talent_id && performer.videos === null && ! performer.searching) {
+                                this.searchVideos(0, 0);
+                            }
+                        }
                     });
                     
                     // Show success message
@@ -3644,6 +3759,11 @@
 
             async handleDetailsImageDrop(e) {
                 this.resetDragState();
+                // With no AI on this install nothing can read an image, and one attached here
+                // left the button disabled with nothing saying why.
+                if (this.linksOnly) {
+                    return;
+                }
                 const files = e.dataTransfer.files;
                 if (files.length > 0) {
                     await this.uploadDetailsImage(files[0]);

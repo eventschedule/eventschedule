@@ -5896,4 +5896,5 @@ return [
     'import_found_in_calendar' => 'الفعاليات التي عُثر عليها في :calendar: :count',
     'import_one_time_copy_google' => 'هذه نسخة لمرة واحدة. الفعاليات التي تُضاف إلى ذلك التقويم لاحقاً لن تظهر هنا: اختره مرة أخرى لإضافتها.',
     'import_all_on_schedule_google' => 'كل ما هو قادم في ذلك التقويم موجود بالفعل في جدولك.',
+    'import_unreadable_left_out' => 'الإدخالات التي تعذّرت قراءتها وتم استبعادها: :count',
 ];

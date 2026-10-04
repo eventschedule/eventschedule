@@ -5901,4 +5901,5 @@ return [
     'import_found_in_calendar' => 'Événements trouvés dans :calendar : :count',
     'import_one_time_copy_google' => 'Il s\'agit d\'une copie ponctuelle. Les événements ajoutés plus tard à cet agenda n\'apparaîtront pas ici : choisissez-le de nouveau pour les ajouter.',
     'import_all_on_schedule_google' => 'Tout ce qui est à venir dans cet agenda figure déjà dans votre planning.',
+    'import_unreadable_left_out' => 'Entrées illisibles et laissées de côté : :count',
 ];

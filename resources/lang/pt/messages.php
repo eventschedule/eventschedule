@@ -5884,7 +5884,7 @@ return [
     'google_allow_edit_access' => 'Permitir no Google',
     'link_import_calendar_empty' => 'Essa agenda não tem eventos futuros.',
     'import_google_tile_description' => 'Escolha eventos de uma das suas agendas',
-    'import_google_back' => 'Usar um link, texto ou um cartaz em vez disso',
+    'import_google_back' => 'Usar um link, texto ou um flyer em vez disso',
     'import_google_intro' => 'Conecte o Google Agenda, escolha uma agenda e depois selecione quais eventos adicionar à sua agenda de eventos.',
     'import_google_read_only' => 'Somente leitura. Nunca alteramos sua agenda.',
     'import_google_different_account' => 'Usar outra conta',
@@ -5897,4 +5897,5 @@ return [
     'import_found_in_calendar' => 'Eventos encontrados em :calendar: :count',
     'import_one_time_copy_google' => 'Esta é uma cópia única. Eventos adicionados depois a essa agenda não aparecerão aqui: escolha-a novamente para adicioná-los.',
     'import_all_on_schedule_google' => 'Tudo o que está por vir nessa agenda já está na sua agenda de eventos.',
+    'import_unreadable_left_out' => 'Entradas que não puderam ser lidas e foram deixadas de fora: :count',
 ];

@@ -5895,4 +5895,5 @@ return [
     'import_found_in_calendar' => 'אירועים שנמצאו ביומן :calendar: :count',
     'import_one_time_copy_google' => 'זהו העתק חד-פעמי. אירועים שיתווספו ליומן הזה מאוחר יותר לא יופיעו כאן: בחרו בו שוב כדי להוסיף אותם.',
     'import_all_on_schedule_google' => 'כל מה שצפוי ביומן הזה כבר נמצא בלוח הזמנים שלך.',
+    'import_unreadable_left_out' => 'רשומות שלא ניתן היה לקרוא והושמטו: :count',
 ];

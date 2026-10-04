@@ -68,6 +68,12 @@
                     window.location.href = @json(route('event.import_done', ['subdomain' => $role->subdomain]));
                     return;
                 }
+                // Straight from Google's permission screen, the page before this one is Google's.
+                if (new URLSearchParams(window.location.search).has('source')
+                    || (document.referrer && document.referrer.indexOf(window.location.origin) !== 0)) {
+                    window.location.href = @json(route('role.view_admin', ['subdomain' => $role->subdomain, 'tab' => 'schedule']));
+                    return;
+                }
                 history.back();
             }
             // Leaving for another way to import throws the preview away, like Back.

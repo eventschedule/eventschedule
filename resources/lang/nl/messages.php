@@ -5898,4 +5898,5 @@ return [
     'import_found_in_calendar' => 'Evenementen gevonden in :calendar: :count',
     'import_one_time_copy_google' => 'Dit is een eenmalige kopie. Evenementen die later aan die agenda worden toegevoegd, verschijnen hier niet: kies hem opnieuw om ze toe te voegen.',
     'import_all_on_schedule_google' => 'Alles wat in die agenda aankomt, staat al in je schema.',
+    'import_unreadable_left_out' => 'Items die niet gelezen konden worden en zijn weggelaten: :count',
 ];

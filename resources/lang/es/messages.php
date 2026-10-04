@@ -5896,4 +5896,5 @@ return [
     'import_found_in_calendar' => 'Eventos encontrados en :calendar: :count',
     'import_one_time_copy_google' => 'Esta es una copia única. Los eventos que se añadan después a ese calendario no aparecerán aquí: elígelo de nuevo para añadirlos.',
     'import_all_on_schedule_google' => 'Todo lo próximo de ese calendario ya está en tu horario.',
+    'import_unreadable_left_out' => 'Entradas que no se pudieron leer y se omitieron: :count',
 ];

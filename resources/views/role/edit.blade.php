@@ -5187,7 +5187,7 @@
                                                    name="sync_direction"
                                                    value="to"
                                                    @disabled($googleReadOnly)
-                                                   {{ $role->sync_direction === 'to' ? 'checked' : '' }}
+                                                   {{ ! $googleReadOnly && $role->sync_direction === 'to' ? 'checked' : '' }}
                                                    class="border-gray-300 dark:border-gray-700 focus:ring-[var(--brand-blue)] h-4 w-4">
                                             <div class="ms-2 text-sm text-gray-700 dark:text-gray-300">
                                                 <div class="font-medium">{{ __('messages.to_google_calendar') }}</div>
@@ -5198,7 +5198,10 @@
                                             <input type="radio"
                                                    name="sync_direction"
                                                    value="from"
-                                                   {{ $role->sync_direction === 'from' ? 'checked' : '' }}
+                                                   {{-- A disabled radio posts nothing. Were "both ways" left checked and
+                                                        disabled, an ordinary save would read as "no sync" and switch off
+                                                        the half this connection can still do. --}}
+                                                   {{ $role->sync_direction === 'from' || ($googleReadOnly && $role->sync_direction === 'both') ? 'checked' : '' }}
                                                    class="border-gray-300 dark:border-gray-700 focus:ring-[var(--brand-blue)] h-4 w-4">
                                             <div class="ms-2 text-sm text-gray-700 dark:text-gray-300">
                                                 <div class="font-medium">{{ __('messages.from_google_calendar') }}</div>
@@ -5210,7 +5213,7 @@
                                                    name="sync_direction"
                                                    value="both"
                                                    @disabled($googleReadOnly)
-                                                   {{ $role->sync_direction === 'both' ? 'checked' : '' }}
+                                                   {{ ! $googleReadOnly && $role->sync_direction === 'both' ? 'checked' : '' }}
                                                    class="border-gray-300 dark:border-gray-700 focus:ring-[var(--brand-blue)] h-4 w-4">
                                             <div class="ms-2 text-sm text-gray-700 dark:text-gray-300">
                                                 <div class="font-medium">{{ __('messages.bidirectional_sync') }}</div>
@@ -5221,7 +5224,7 @@
                                             <input type="radio"
                                                    name="sync_direction"
                                                    value=""
-                                                   {{ !$role->sync_direction ? 'checked' : '' }}
+                                                   {{ ! $role->sync_direction || ($googleReadOnly && $role->sync_direction === 'to') ? 'checked' : '' }}
                                                    class="border-gray-300 dark:border-gray-700 focus:ring-[var(--brand-blue)] h-4 w-4">
                                             <div class="ms-2 text-sm text-gray-700 dark:text-gray-300">
                                                 <div class="font-medium">{{ __('messages.no_sync') }}</div>

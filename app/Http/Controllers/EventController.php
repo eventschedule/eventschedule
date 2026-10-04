@@ -2108,18 +2108,19 @@ class EventController extends Controller
         $role = Role::subdomain($subdomain)->firstOrFail();
         $redirect = redirect(route('role.view_admin', ['subdomain' => $role->subdomain, 'tab' => 'schedule']));
 
-        $batch = ImportRun::finish($role) ?? ImportRun::last($role);
-        if ($batch === null) {
+        // Only a sitting that added something is an import to announce. With nothing added the
+        // one before it stays exactly as it was, its Undo included: this used to fall back to
+        // that earlier import and show its count again as though it had just happened.
+        $open = ImportRun::batch($role);
+        if ($open === null || ! $this->importedEvents($role, $request->user(), $open)->exists()) {
+            ImportRun::abandon($role);
+
             return $redirect;
         }
 
+        $batch = ImportRun::finish($role);
         $events = $this->importedEvents($role, $request->user(), $batch);
         $count = $events->count();
-        if ($count === 0) {
-            ImportRun::forgetLast($role);
-
-            return $redirect;
-        }
 
         return $redirect->with('events_imported', [
             'count' => $count,
@@ -2911,7 +2912,10 @@ class EventController extends Controller
             // Which import the row came from: the token a link preview handed the page, and
             // "ai" (text or a flyer) for anything without a valid one.
             importSource: LinkImportService::sourceFromToken($request->input('import_token'), $role, (int) $request->user()->id),
-            importBatch: ImportRun::batch($role),
+            // A page can outlive its run: a second tab, or one the browser restored after the
+            // run was closed. What it saves then starts a run of its own instead of belonging
+            // to none, which left it uncounted and beyond Undo.
+            importBatch: ImportRun::batch($role) ?? ImportRun::begin($role),
         );
 
         if ($request->social_image) {

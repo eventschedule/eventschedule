@@ -5968,4 +5968,5 @@ return [
     'import_found_in_calendar' => 'Events found in :calendar: :count',
     'import_one_time_copy_google' => 'This is a one-time copy. Events added to that calendar later will not appear here: choose it again to add them.',
     'import_all_on_schedule_google' => 'Everything upcoming in that calendar is already on your schedule.',
+    'import_unreadable_left_out' => 'Entries that could not be read and were left out: :count',
 ];

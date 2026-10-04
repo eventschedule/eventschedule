@@ -5882,7 +5882,7 @@ return [
     'google_allow_edit_access' => 'Consenti su Google',
     'link_import_calendar_empty' => 'Quel calendario non ha eventi in programma.',
     'import_google_tile_description' => 'Scegli gli eventi da uno dei tuoi calendari',
-    'import_google_back' => 'Usa invece un link, del testo o una locandina',
+    'import_google_back' => 'Usa invece un link, del testo o un volantino',
     'import_google_intro' => 'Collega Google Calendar, scegli un calendario e poi quali dei suoi eventi aggiungere al tuo programma.',
     'import_google_read_only' => 'Sola lettura. Non modifichiamo mai il tuo calendario.',
     'import_google_different_account' => 'Usa un altro account',
@@ -5895,4 +5895,5 @@ return [
     'import_found_in_calendar' => 'Eventi trovati in :calendar: :count',
     'import_one_time_copy_google' => 'Questa è una copia una tantum. Gli eventi aggiunti in seguito a quel calendario non compariranno qui: sceglilo di nuovo per aggiungerli.',
     'import_all_on_schedule_google' => 'Tutto ciò che è in programma in quel calendario è già nel tuo programma.',
+    'import_unreadable_left_out' => 'Voci che non è stato possibile leggere e sono state escluse: :count',
 ];

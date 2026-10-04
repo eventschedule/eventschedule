@@ -329,7 +329,9 @@ class AiImportVenueClaimTest extends TestCase
 
         // The checkbox is now driven by canClaimVenue(), outside the create-new fields block.
         $this->assertStringContainsString('v-if="canClaimVenue(idx)"', $html);
-        $this->assertStringContainsString('claim_venue_ownership: this.canClaimVenue(idx)', $html);
+        // venueIdx is idx, except for the dates of a listed series, which take the venue chosen
+        // on the series' card.
+        $this->assertStringContainsString('claim_venue_ownership: this.canClaimVenue(venueIdx)', $html);
 
         // Every dropdown venue carries the flag, and it tracks ownership.
         $venues = collect(json_decode(

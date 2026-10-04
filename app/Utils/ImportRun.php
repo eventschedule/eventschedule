@@ -78,6 +78,16 @@ class ImportRun
         return $batch;
     }
 
+    /**
+     * Forget the run in progress and leave the last finished one as it is. For a sitting that
+     * added nothing: closing it as a run would put an empty batch where the previous import's
+     * Undo was.
+     */
+    public static function abandon(Role $role): void
+    {
+        session()->forget(self::key($role));
+    }
+
     /** The batch of the last finished run, while it can still be undone. */
     public static function last(Role $role): ?string
     {

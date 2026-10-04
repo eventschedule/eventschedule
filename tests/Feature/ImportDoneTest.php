@@ -252,4 +252,37 @@ class ImportDoneTest extends TestCase
         $this->assertNotNull($first->import_batch);
         $this->assertSame($first->import_batch, $second->import_batch);
     }
+
+    public function test_a_sitting_that_added_nothing_leaves_the_last_import_and_its_undo_alone(): void
+    {
+        $this->openImportPage();
+        $earlier = $this->import('Earlier');
+        $this->done();
+
+        // Back on the import page, nothing added, and out through "done".
+        $this->openImportPage();
+        $this->done()->assertRedirect($this->schedule())->assertSessionMissing('events_imported');
+
+        // The earlier import is neither announced again nor out of reach.
+        $this->undo()->assertSessionHas('import_undone', ['removed' => 1, 'kept' => 0]);
+        $this->assertNull($earlier->fresh());
+    }
+
+    public function test_a_page_that_outlived_its_run_starts_one_of_its_own(): void
+    {
+        $this->openImportPage();
+        $first = $this->import('First');
+        $this->done();
+
+        // The same page again, as a second tab or a restored one has it: no visit in between.
+        $later = $this->import('Later');
+        $this->assertNotNull($later->import_batch);
+        $this->assertNotSame($first->import_batch, $later->import_batch);
+
+        // It is the import that is announced, and the one Undo removes.
+        $this->done()->assertSessionHas('events_imported', ['count' => 1, 'names' => ['Later']]);
+        $this->undo()->assertSessionHas('import_undone', ['removed' => 1, 'kept' => 0]);
+        $this->assertNull($later->fresh());
+        $this->assertNotNull($first->fresh());
+    }
 }

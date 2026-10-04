@@ -111,12 +111,14 @@ class ImportSourceTest extends TestCase
         $this->assertSame([$batch, $batch], $events->pluck('import_batch')->all());
     }
 
-    public function test_an_import_posted_without_visiting_the_page_has_a_source_and_no_batch(): void
+    public function test_an_import_posted_without_visiting_the_page_has_a_source_and_a_run_of_its_own(): void
     {
+        // A second tab, or a page the browser restored after its run was closed, saves with no
+        // run open. It used to belong to none, which left it uncounted and beyond Undo.
         $this->import()->assertOk();
 
         $this->assertSame('ai', $this->lastEvent()->import_source);
-        $this->assertNull($this->lastEvent()->import_batch);
+        $this->assertMatchesRegularExpression('/^[a-z0-9]{12}$/', (string) $this->lastEvent()->import_batch);
     }
 
     public function test_what_the_request_says_about_either_column_is_ignored(): void
@@ -162,9 +164,11 @@ class ImportSourceTest extends TestCase
 
         $this->postJson(route('event.import', ['subdomain' => $other->subdomain]), $this->payload())->assertOk();
 
-        // The run was opened on the first schedule's page, so this event belongs to no batch.
-        $this->assertNull($this->lastEvent()->import_batch);
+        // The run was opened on the first schedule's page. This event is in one of the other
+        // schedule's own, not in that.
         $this->assertNotNull($batch);
+        $this->assertNotNull($this->lastEvent()->import_batch);
+        $this->assertNotSame($batch, $this->lastEvent()->import_batch);
     }
 
     public function test_the_eventbrite_import_stamps_its_own_source(): void

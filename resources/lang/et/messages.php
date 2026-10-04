@@ -5897,4 +5897,5 @@ return [
     'import_found_in_calendar' => 'Kalendrist :calendar leitud sündmusi: :count',
     'import_one_time_copy_google' => 'See on ühekordne koopia. Hiljem sellesse kalendrisse lisatud sündmused siia ei ilmu: nende lisamiseks vali kalender uuesti.',
     'import_all_on_schedule_google' => 'Kõik selle kalendri eelseisvad sündmused on juba sinu ajakavas.',
+    'import_unreadable_left_out' => 'Kirjeid, mida ei õnnestunud lugeda ja mis jäeti välja: :count',
 ];
