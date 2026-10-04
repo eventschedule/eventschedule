@@ -6,7 +6,7 @@
     <x-slot name="structuredData">
     <x-seo.webpage
         name="Event Schedule AI Features"
-        description="Paste the text or drop the image and AI fills the event form: name, date, duration, venue, address, performers, price, currency and registration link. Agenda scanning, description writing, flyer and style generation, WhatsApp event creation and whole-schedule translation."
+        description="Paste the text, drop the image or paste a link and the event form is filled in: name, date, duration, venue, address, performers, price, currency and registration link. Agenda scanning, description writing, flyer and style generation, WhatsApp event creation and whole-schedule translation."
         keywords="AI event import, parse event from flyer, event data extraction, AI agenda scanning, AI event flyer, schedule translation" />
     </x-slot>
 
@@ -32,11 +32,19 @@
            ticket_price, event_country_code. The gap is real, it is
            narrow, and exactly one thing crosses it. That framing is also
            the product argument, because it forces the page to say what
-           does NOT cross: the parser never reads a web page for event
-           details. A registration link is followed for its preview image
-           only (UrlUtils::getUrlMetadata pulls og:image and the final
-           redirect target, nothing else), so you paste the text, not the
-           link.
+           does NOT cross.
+
+           Until October 2026 that was "a link": the parser read only the
+           text and the image it was handed. LinkImportService changed it.
+           An editor's pasted link is now opened: a calendar feed and a
+           page's own event data (JSON-LD) are read directly with no model
+           call, and any other page has its text read by the parser. What
+           still does not cross is a page behind a sign-in (Facebook and
+           Instagram are refused before any request is made), a private
+           calendar, and a page that fills in its events with script. The
+           public submission form takes no links at all. Section 01 and
+           the first FAQ say exactly that, and LinkImportDocsClaimTest
+           fails the build if the old claim comes back.
 
            DEVICES
              1. .es-spark-arcv / .es-spark-arc - the gap itself: two pads
@@ -629,7 +637,10 @@
         // Honest allowance board. Caps come from config/usage.php; every one of
         // them returns null (no cap) when the install is selfhosted.
         $board = [
-            ['Parse an event from text or an image', 'Every plan', '10 to 100 a day, by plan'],
+            ['Parse an event from text, an image or a web page', 'Every plan', '10 to 100 a day, by plan'],
+            // LinkImportService: a feed or a page's JSON-LD never reaches the model, so it
+            // writes no usage row and needs no AI key.
+            ['Read a calendar feed or a page\'s own event data from a link', 'Every plan', 'No AI involved, so not counted'],
             ['Translate the whole schedule', 'Every plan', 'Scheduled background job'],
             ['Scan an agenda into event parts', 'Enterprise', '10 a day'],
             ['Write a schedule or event description', 'Enterprise', '50 a day'],
@@ -647,7 +658,7 @@
         $faqs = [
             [
                 'q' => 'What can the AI parser read?',
-                'a' => 'Text you paste or type, and one image you drop, paste from the clipboard, or pick from a file dialog. Images can be JPEG, PNG, GIF or WebP, so a photo of a poster, a screenshot of a message and an exported flyer all work. What it cannot do is read a web page for you. A registration link is followed once for its preview image, but nothing on that page is mined for the details, so paste the text off the page rather than the link to it.',
+                'a' => 'Text you paste or type, one image you drop, paste from the clipboard or pick from a file dialog, and a link you paste on your own import screen. Images can be JPEG, PNG, GIF or WebP, so a photo of a poster, a screenshot of a message and an exported flyer all work. A link to a calendar feed, or to a page that publishes its events as data, is read directly and uses no AI at all. Any other page has its text read by the parser, as if you had pasted it yourself. What it cannot read is a page behind a sign-in, which includes Facebook and Instagram, or a page that only loads its events after it opens. For those, add a screenshot instead.',
             ],
             [
                 'q' => 'Can one image become several events?',
@@ -657,7 +668,7 @@
                 // EventController::guestParse: the same GeminiUtils::parseEvent call, on the
                 // public submission route, metered against the RECEIVING schedule's allowance.
                 'q' => 'Do the people submitting events to me get the parser too?',
-                'a' => 'Yes, and it is the same parser. Somebody filling in your public submission form can paste the text or drop the flyer exactly as you would, and the fields come back filled for them to check before they send it. Nobody needs an account to use it. It draws on your schedule\'s daily parse allowance rather than theirs, which is the trade: your form is far easier to fill in, and a busy day of submissions spends the same budget your own imports do.',
+                'a' => 'Yes, and it is the same parser. Somebody filling in your public submission form can paste the text or drop the flyer exactly as you would, and the fields come back filled for them to check before they send it. Nobody needs an account to use it. The one thing their form does not take is a link: reading a web page or a calendar is on your own import screen only. It draws on your schedule\'s daily parse allowance rather than theirs, which is the trade: your form is far easier to fill in, and a busy day of submissions spends the same budget your own imports do.',
             ],
             [
                 'q' => 'Which AI features are free and which are Enterprise?',
@@ -739,7 +750,7 @@
                     </h1>
 
                     <p class="es-fade-up es-d-2 es-spark-muted mb-10 max-w-xl text-lg sm:text-xl">
-                        On one side, the scrap somebody sent you. On the other, the fields a listing needs: a date, a duration, a venue, a price, a currency. Paste the text or drop the image, and the AI fills the form. You still get the last word on every field.
+                        On one side, the scrap somebody sent you. On the other, the fields a listing needs: a date, a duration, a venue, a price, a currency. Paste the text, drop the image or hand over the link, and the form is filled in. You still get the last word on every field.
                     </p>
 
                     <div class="es-fade-up es-d-3 flex flex-col items-start gap-4 sm:flex-row">
@@ -802,14 +813,16 @@
                 </div>
                 <p class="es-spark-tag mb-4" data-reveal style="--reveal-delay: 0.05s;">The gap is narrow on purpose</p>
                 <h2 class="es-balance es-spark-ink text-3xl font-black tracking-tight md:text-4xl" data-reveal style="--reveal-delay: 0.1s;">
-                    Two inputs cross it. <span class="es-spark-accent">A link does not.</span>
+                    Three inputs cross it. <span class="es-spark-accent">A sign-in wall does not.</span>
                 </h2>
                 <p class="es-spark-muted mx-auto mt-5 max-w-2xl text-lg" data-reveal style="--reveal-delay: 0.15s;">
-                    Most tools are vague about this and you find out the hard way. So here it is plainly: the parser reads what you hand it, and it does not go browsing.
+                    Most tools are vague about this and you find out the hard way. So here it is plainly: what the import reads, how it reads it, and the one kind of page it cannot.
                 </p>
             </div>
 
-            <div class="grid gap-4 lg:grid-cols-3" data-reveal-group="90">
+            {{-- Two by two: three that cross and the one that does not. Four cards in three
+                 columns would leave the last row a third full. --}}
+            <div class="grid gap-4 sm:grid-cols-2" data-reveal-group="90">
                 <div class="es-spark-card flex h-full flex-col p-7" data-reveal="panel">
                     <span class="es-spark-num mb-4">IN</span>
                     <h3 class="es-spark-ink mb-3 text-xl font-bold">Text you paste or type</h3>
@@ -833,11 +846,23 @@
                 </div>
 
                 <div class="es-spark-card flex h-full flex-col p-7" data-reveal="panel">
+                    <span class="es-spark-num mb-4">IN</span>
+                    <h3 class="es-spark-ink mb-3 text-xl font-bold">A link to where they are listed</h3>
+                    <p class="es-spark-muted mb-5">Paste the address of your events page or of a calendar and the import opens it for you. A calendar feed is read as written, repeating events included. A page that publishes its events as data is read from that data. Neither one uses AI. Any other page has its text read by the parser, exactly as if you had pasted it yourself.</p>
+                    <p class="es-spark-muted mb-5 text-sm">It is a one-time copy, not a subscription: read the link again to pick up what was added since. Links are read on your own import screen, not on the public submission form.</p>
+                    <div class="mt-auto flex flex-wrap gap-2">
+                        <span class="es-spark-chip">Calendar feed</span>
+                        <span class="es-spark-chip">Events page</span>
+                        <span class="es-spark-chip">Up to 100 at a time</span>
+                    </div>
+                </div>
+
+                <div class="es-spark-card flex h-full flex-col p-7" data-reveal="panel">
                     <span class="es-spark-num mb-4">NOT IN</span>
-                    <h3 class="es-spark-ink mb-3 text-xl font-bold">A URL for it to read</h3>
-                    <p class="es-spark-muted mb-5">The parser never reads a web page for event details, so a bare link on its own gives it nothing to work with. Open the page, copy the text, paste that. A ticket link inside your text is kept as the registration link and followed once for its preview image, which becomes the event image, but the page behind it is never mined for the date, the venue or the price.</p>
+                    <h3 class="es-spark-ink mb-3 text-xl font-bold">A page behind a sign-in</h3>
+                    <p class="es-spark-muted mb-5">Facebook and Instagram do not let other sites read their pages. A private calendar cannot be read from its link. A page that only fills in its events after it loads has nothing in it to read. The import tells you which of those it met instead of guessing, and for all three a screenshot crosses the gap: drop it in the same box.</p>
                     <p class="es-spark-muted mt-auto text-sm">
-                        A <a href="{{ marketing_url('/selfhost') }}" class="es-spark-link font-semibold hover:underline">selfhosted install</a> is the one exception: a schedule there can be given a list of source pages and cities and swept once a day by the import command. That runs on your own server with your own keys, so it is not part of the hosted service.
+                        Reading a link is something you do, once. A <a href="{{ marketing_url('/selfhost') }}" class="es-spark-link font-semibold hover:underline">selfhosted install</a> can also be given a list of source pages and cities and swept once a day by the import command. That runs on your own server with your own keys, so it is not part of the hosted service.
                     </p>
                 </div>
             </div>

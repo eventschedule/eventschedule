@@ -251,7 +251,7 @@
             </div>
             <div class="doc-field">
                 <h4 class="font-semibold text-gray-900 dark:text-white mb-2">Can I import events from my existing calendar?</h4>
-                <p class="text-sm text-gray-500 dark:text-gray-400">Yes, and it is free. Connect a calendar under <strong class="text-gray-900 dark:text-white">Edit Schedule &rarr; Integrations</strong>, which has a tab for <strong class="text-gray-900 dark:text-white">Google Calendar</strong>, <strong class="text-gray-900 dark:text-white">Outlook Calendar</strong> and <strong class="text-gray-900 dark:text-white">CalDAV Calendar</strong>. For each one you pick a direction: push your events to the calendar, pull its events in, or both. You can also <a href="{{ route('marketing.docs.ai_import') }}" class="doc-link">import events with AI</a> from pasted text or a photo of a flyer.</p>
+                <p class="text-sm text-gray-500 dark:text-gray-400">Yes, and it is free. Connect a calendar under <strong class="text-gray-900 dark:text-white">Edit Schedule &rarr; Integrations</strong>, which has a tab for <strong class="text-gray-900 dark:text-white">Google Calendar</strong>, <strong class="text-gray-900 dark:text-white">Outlook Calendar</strong> and <strong class="text-gray-900 dark:text-white">CalDAV Calendar</strong>. For each one you pick a direction: push your events to the calendar, pull its events in, or both. For a one-time copy instead, <a href="{{ route('marketing.docs.ai_import') }}" class="doc-link">import events</a> by pasting a link to a calendar or an events page, some text or a photo of a flyer.</p>
             </div>
             <div class="doc-field">
                 <h4 class="font-semibold text-gray-900 dark:text-white mb-2">Is Event Schedule free?</h4>
@@ -332,7 +332,7 @@
                     "name": "Can I import events from my existing calendar?",
                     "acceptedAnswer": {
                         "@type": "Answer",
-                        "text": "Yes, and it is free. Connect a calendar under Edit Schedule and then Integrations, which has a tab for Google Calendar, Outlook Calendar and CalDAV Calendar. For each one you pick a direction: push your events to the calendar, pull its events in, or both. You can also import events with AI from pasted text or a photo of a flyer."
+                        "text": "Yes, and it is free. Connect a calendar under Edit Schedule and then Integrations, which has a tab for Google Calendar, Outlook Calendar and CalDAV Calendar. For each one you pick a direction: push your events to the calendar, pull its events in, or both. For a one-time copy instead, use Import Events and paste a link to a calendar or an events page, some text or a photo of a flyer."
                     }
                 },
                 {

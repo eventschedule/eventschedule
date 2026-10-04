@@ -1,14 +1,17 @@
 <x-docs-page
     key="ai-import"
-    title="AI Import Guide: Text and Flyers - Event Schedule"
-    description="Paste event text or add a flyer image and AI fills in each event's name, date, venue, price and performers on a card you review before saving."
-    lede="Save hours of manual data entry. Paste event text or add a flyer image and let AI extract the event details automatically."
+    title="AI Import Guide: Links, Text and Flyers - Event Schedule"
+    description="Paste a link, event text or a flyer image and each event's name, date, venue, price and performers are filled in for you to review before adding."
+    lede="Save hours of manual data entry. Paste a link to your events, paste event text or add a flyer image, and the details are filled in for you."
 >
     <x-slot:toc>
         <x-doc-nav-group label="AI Import" href="#ai-import" expanded>
+            <x-doc-nav-link href="#link-import">From a Link</x-doc-nav-link>
             <x-doc-nav-link href="#text-import">From Text</x-doc-nav-link>
             <x-doc-nav-link href="#new-pages">New Pages and Requests</x-doc-nav-link>
             <x-doc-nav-link href="#image-import">From Images/Flyers</x-doc-nav-link>
+            <x-doc-nav-link href="#choosing-events">Choosing What to Add</x-doc-nav-link>
+            <x-doc-nav-link href="#undo-import">Undoing an Import</x-doc-nav-link>
             <x-doc-nav-link href="#custom-prompts">Custom AI Prompts</x-doc-nav-link>
         </x-doc-nav-group>
         <x-doc-nav-link href="#see-also">See Also</x-doc-nav-link>
@@ -22,7 +25,7 @@
             </svg>
             Let AI Do the Heavy Lifting
         </h2>
-        <p class="text-gray-600 dark:text-gray-300 mb-6">AI import takes unstructured event information and turns it into events you review before saving. It accepts two kinds of input: <strong class="text-gray-900 dark:text-white">text</strong> you type or paste, and an <strong class="text-gray-900 dark:text-white">image</strong> such as a flyer or poster. The AI extracts the name, date and time, venue, description, price and more, then shows one editable card per event it found. Nothing is added to your schedule until you save it.</p>
+        <p class="text-gray-600 dark:text-gray-300 mb-6">The import page takes event information from wherever it already lives and turns it into events you review before adding. It accepts three kinds of input: a <strong class="text-gray-900 dark:text-white">link</strong> to an events page or a calendar, <strong class="text-gray-900 dark:text-white">text</strong> you type or paste, and an <strong class="text-gray-900 dark:text-white">image</strong> such as a flyer or poster. Each event comes back with its name, date and time, venue, description, price and more. One event comes back as an editable card; two or more come back as a <a href="#choosing-events" class="doc-link">list you choose from</a>. Nothing is added to your schedule until you add it.</p>
 
         <x-doc-screenshot id="creating-events--import" alt="Import events page" loading="eager" />
 
@@ -32,27 +35,28 @@
             <li>Click <strong class="text-gray-900 dark:text-white">Actions</strong> in the top right</li>
             <li>Choose <strong class="text-gray-900 dark:text-white">Import Events</strong></li>
         </ol>
-        <p class="text-gray-600 dark:text-gray-300 mb-6"><strong class="text-gray-900 dark:text-white">More Options</strong> at the top of the import page opens the <strong class="text-gray-900 dark:text-white">Import Events</strong> source list, which holds AI import alongside <strong class="text-gray-900 dark:text-white">Import from Eventbrite</strong> <x-doc-badge plan="pro" />, the connector that pulls your events, tickets and venues from a connected Eventbrite account.</p>
+        <p class="text-gray-600 dark:text-gray-300 mb-6">Under the box, <strong class="text-gray-900 dark:text-white">Other ways to bring events in</strong> holds <strong class="text-gray-900 dark:text-white">Import from Eventbrite</strong> <x-doc-badge plan="pro" />, the connector that pulls your events, tickets and venues from a connected Eventbrite account.</p>
 
         <div class="doc-callout doc-callout-info">
-            <div class="doc-callout-title">Text or image, not a link</div>
-            <p>The AI only reads the text and the image you hand it. It does not go and fetch a web page, so pasting a URL on its own will not produce an event: copy the listing text itself, or add the flyer image. A ticket link found <em>inside</em> the text is kept as the event's registration URL, and the link's own preview image is used as the event image when the submission had no image of its own.</p>
+            <div class="doc-callout-title">A link is a one-time copy</div>
+            <p>Reading a link copies what is listed there now. Events added to that page or calendar later do not appear on your schedule by themselves: read the link again and the ones you already have are left out, or come back unticked. To keep a calendar in step continuously, connect it under <a href="{{ route('marketing.docs.creating_schedules') }}#integrations" class="doc-link">Integrations</a> instead.</p>
         </div>
 
         <div class="doc-callout doc-callout-tip mt-4">
             <div class="doc-callout-title">AI-Powered</div>
-            <p>Parsing is done by Google Gemini or by OpenAI, whichever is configured. On the hosted service it is ready to use. On a selfhosted install the import page shows a <strong class="text-gray-900 dark:text-white">Setup Required: Gemini API Key</strong> panel until <code class="doc-inline-code">GEMINI_API_KEY</code> or <code class="doc-inline-code">OPENAI_API_KEY</code> is set, see <a href="{{ route('marketing.docs.selfhost.ai') }}" class="doc-link">AI Setup</a>.</p>
+            <p>Text, images and pages without event data are read by Google Gemini or by OpenAI, whichever is configured. A calendar link, or a page that publishes its events as data, is read directly and involves no AI. On the hosted service everything is ready to use. On a selfhosted install with neither <code class="doc-inline-code">GEMINI_API_KEY</code> nor <code class="doc-inline-code">OPENAI_API_KEY</code> set, the box takes links only, and an installation admin sees a <strong class="text-gray-900 dark:text-white">Get API Key</strong> panel marked <em>Optional</em>, see <a href="{{ route('marketing.docs.selfhost.ai') }}" class="doc-link">AI Setup</a>.</p>
         </div>
 
         <h3 class="doc-subheading">What You Can Send</h3>
         <ul class="doc-list mb-6">
+            <li><strong class="text-gray-900 dark:text-white">Link</strong> - One web address on its own: an events page, or a calendar. Up to 100 events come back per read</li>
             <li><strong class="text-gray-900 dark:text-white">Text</strong> - Up to 10,000 characters per submission</li>
-            <li><strong class="text-gray-900 dark:text-white">Image</strong> - One JPG, PNG, GIF or WebP file of up to 10 MB per submission</li>
+            <li><strong class="text-gray-900 dark:text-white">Image</strong> - One JPG, PNG, GIF or WebP file of up to 10 MB per submission. A large photo is shrunk in your browser before it is sent, so a picture straight off a phone camera is fine</li>
             <li><strong class="text-gray-900 dark:text-white">Both together</strong> - A flyer plus a line of text covering whatever the flyer leaves out</li>
         </ul>
 
         <h3 class="doc-subheading">Daily Limits</h3>
-        <p class="text-gray-600 dark:text-gray-300 mb-4">Each submission counts as one AI request, whether it is text, an image or both, and one request can return several events. The allowance is counted per schedule per day on the hosted service. When it runs out the page asks you to try again tomorrow.</p>
+        <p class="text-gray-600 dark:text-gray-300 mb-4">Each text or image submission counts as one AI request, whether it is text, an image or both, and one request can return several events. A link counts only when the AI has to read the page: a calendar feed, or a page that publishes its events as data, is read directly and uses none of the allowance. The allowance is counted per schedule per day on the hosted service. When it runs out the page asks you to try again tomorrow.</p>
         <div class="doc-table-wrap">
             <table class="doc-table">
                 <thead>
@@ -81,8 +85,69 @@
                 </tbody>
             </table>
         </div>
-        <p class="text-gray-600 dark:text-gray-300 mb-6">The trial row is checked first, so a schedule inside a paid-plan trial gets the trial allowance rather than its plan's. Separately from the daily count there is a short-term ceiling of 30 submissions a minute, which shows "Too many requests. Please wait a minute and try again." and clears on its own.</p>
-        <p class="text-gray-600 dark:text-gray-300">A venue or curator schedule that accepts event requests without requiring visitors to have an account shows those visitors this same AI box instead of a structured form. Their submissions count against the schedule's daily allowance too. See <a href="{{ route('marketing.docs.creating_schedules') }}#engagement-requests" class="doc-link">Requests</a> for the submission form options.</p>
+        <p class="text-gray-600 dark:text-gray-300 mb-6">The trial row is checked first, so a schedule inside a paid-plan trial gets the trial allowance rather than its plan's. Separately from the daily count there are two short-term ceilings: 30 submissions a minute, and 10 links a minute. Meeting either shows a message asking you to wait a minute, and it clears on its own.</p>
+        <p class="text-gray-600 dark:text-gray-300">A venue or curator schedule that accepts event requests without requiring visitors to have an account shows those visitors this same AI box instead of a structured form. Their box takes text and images, not links. Their submissions count against the schedule's daily allowance too. See <a href="{{ route('marketing.docs.creating_schedules') }}#engagement-requests" class="doc-link">Requests</a> for the submission form options.</p>
+    </section>
+
+    <!-- Link Import -->
+    <section id="link-import" class="doc-section">
+        <h3 class="doc-subheading">Importing from a Link</h3>
+        <p class="text-gray-600 dark:text-gray-300 mb-6">Paste the address of the page or calendar where your events are already listed. When the box holds a link and nothing else, a line under it reads <em>We will read this page</em> and the button reads <strong class="text-gray-900 dark:text-white">Read link</strong>.</p>
+
+        <ol class="doc-list doc-list-numbered mb-6">
+            <li>Paste the link into the box. The <code class="doc-inline-code">https://</code> is optional, so <code class="doc-inline-code">yourvenue.com/events</code> works</li>
+            <li>Click <strong class="text-gray-900 dark:text-white">Read link</strong>, or press <strong class="text-gray-900 dark:text-white">Ctrl+Enter</strong>. The page names the site it is reading, and <strong class="text-gray-900 dark:text-white">Cancel</strong> stops it</li>
+            <li>Review what came back: one event as a card, two or more as a <a href="#choosing-events" class="doc-link">list</a></li>
+            <li>Click <strong class="text-gray-900 dark:text-white">Save</strong> on a single card, or the button under a list, which carries the number you ticked, for example <strong class="text-gray-900 dark:text-white">Add 12 events</strong></li>
+        </ol>
+
+        <div class="doc-table-wrap">
+            <table class="doc-table">
+                <thead>
+                    <tr>
+                        <th>What the link points to</th>
+                        <th>How it is read</th>
+                        <th>Uses AI</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>A calendar feed: an <code class="doc-inline-code">.ics</code> or <code class="doc-inline-code">webcal://</code> address</td>
+                        <td>As written, for the next 12 months</td>
+                        <td>No</td>
+                    </tr>
+                    <tr>
+                        <td>A public Google Calendar link, or a published Outlook calendar page</td>
+                        <td>Swapped for that calendar's feed address, then read as a feed</td>
+                        <td>No</td>
+                    </tr>
+                    <tr>
+                        <td>A page that publishes its events as data, the structured event data many website builders and ticketing sites add for search engines</td>
+                        <td>From that data, for the next 12 months</td>
+                        <td>No</td>
+                    </tr>
+                    <tr>
+                        <td>Any other web page</td>
+                        <td>The page's main text, up to 10,000 characters, is read the way pasted text is</td>
+                        <td>Yes, one request</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+
+        <ul class="doc-list mb-6">
+            <li><strong class="text-gray-900 dark:text-white">Repeating events</strong> - A repeating calendar entry arrives as one repeating event when your schedule can express its rule: daily, weekly on chosen days, every few weeks, monthly or yearly, with an end date or a number of occurrences. A rule it cannot express, such as the last Friday of every month, arrives as one row holding its next 12 dates</li>
+            <li><strong class="text-gray-900 dark:text-white">Time zone</strong> - A line above the results reads <em>Times shown in</em> followed by your schedule's time zone, with a link to change it. On a talent or curator schedule, an event that states its own time zone keeps its local clock time, so an 8 PM show in another city stays 8 PM, and its row says so</li>
+            <li><strong class="text-gray-900 dark:text-white">All-day entries</strong> - Shown as <em>All day</em>, and saved starting at midnight for the full day</li>
+            <li><strong class="text-gray-900 dark:text-white">Left out</strong> - From a calendar or a page's event data: cancelled entries, entries marked private, past events, and events your schedule already has. The results say how many were left out because you already have them. From a page the AI read, a likely duplicate comes back unticked instead</li>
+            <li><strong class="text-gray-900 dark:text-white">More than 100</strong> - A read returns up to 100 events and says how many more there are. Add those, then read the link again for the rest</li>
+            <li><strong class="text-gray-900 dark:text-white">Missing some?</strong> - When a page's event data does not cover everything on the page, <strong class="text-gray-900 dark:text-white">Missing some? Read the whole page</strong> reads the page's text with AI instead</li>
+        </ul>
+
+        <div class="doc-callout doc-callout-info">
+            <div class="doc-callout-title">What a link cannot reach</div>
+            <p>Facebook and Instagram do not let other sites read their pages, so those links are turned down straight away: add a screenshot of your events instead. A Google Calendar that is not public cannot be read from its link. A page behind a sign-in, or one that only fills in its events after it loads, comes back with no events: paste its text or add a screenshot. Links are read on this import page only, not on the public request form.</p>
+        </div>
     </section>
 
     <!-- Text Import -->
@@ -91,10 +156,10 @@
         <p class="text-gray-600 dark:text-gray-300 mb-6">Copy event information from an email, a website listing, a social media post or a message, and paste it into the import box.</p>
 
         <ol class="doc-list doc-list-numbered mb-6">
-            <li>Type or paste the event text into the box, which reads <em>Type event details or drag &amp; drop an image here</em> while it is empty</li>
-            <li>Click the <strong class="text-gray-900 dark:text-white">arrow button</strong> at the end of the box to submit it, or press <strong class="text-gray-900 dark:text-white">Ctrl+Enter</strong>. Enter on its own starts a new line</li>
-            <li>Review the card for each event the AI found and correct anything it got wrong</li>
-            <li>Click <strong class="text-gray-900 dark:text-white">Save</strong> on a card to create that event. When more than one event was parsed, <strong class="text-gray-900 dark:text-white">Save All</strong> appears above the cards</li>
+            <li>Type or paste the event text into the box, which reads <em>Paste a link, paste text, or add a flyer</em> while it is empty</li>
+            <li>Click <strong class="text-gray-900 dark:text-white">Read text</strong> at the end of the box, or press <strong class="text-gray-900 dark:text-white">Ctrl+Enter</strong>. Enter on its own starts a new line</li>
+            <li>Review what the AI found and correct anything it got wrong. One event comes back as a card; two or more come back as a <a href="#choosing-events" class="doc-link">list</a></li>
+            <li>Click <strong class="text-gray-900 dark:text-white">Save</strong> on the card to create the event</li>
             <li>A saved card turns green and offers <strong class="text-gray-900 dark:text-white">Edit</strong>, <strong class="text-gray-900 dark:text-white">View</strong> and <strong class="text-gray-900 dark:text-white">Clear</strong> so you can move straight on to the next import</li>
         </ol>
 
@@ -176,7 +241,7 @@ Tickets: $20</code></pre>
 
         <ul class="doc-list mb-6">
             <li><strong class="text-gray-900 dark:text-white">Several events at once</strong> - Paste a whole list. If the text names several distinct performers the AI splits them into separate events, and events that share a start time and address are merged back into one event with several participants</li>
-            <li><strong class="text-gray-900 dark:text-white">Sensible dates only</strong> - A parsed date that is more than three days in the past, or more than about two months away, is left blank for you to fill in rather than guessed</li>
+            <li><strong class="text-gray-900 dark:text-white">Sensible dates only</strong> - A parsed date that is more than three days in the past, or more than about two months away, is left blank for you to fill in rather than guessed. This applies to whatever the AI reads; a calendar feed or a page's own event data keeps the dates it gives</li>
             <li><strong class="text-gray-900 dark:text-white">Other languages</strong> - For a schedule whose language is not English, the AI keeps the original language and adds English translations alongside it</li>
             <li><strong class="text-gray-900 dark:text-white">Which fields appear</strong> - Name, date and time, and venue are always on the card. The extra fields (short description, description, price, coupon code and its discount, registration URL, category and sub-schedule) are switched on per schedule, and can be marked required. The sub-schedule field only appears once the schedule has sub-schedules</li>
             <li><strong class="text-gray-900 dark:text-white">Performer videos</strong> - On a curator schedule, when a parsed performer does not match a talent schedule you already have, the card searches YouTube for that name and offers up to six clips. Pick one and it becomes the new talent schedule's video</li>
@@ -208,10 +273,10 @@ Tickets: $20</code></pre>
         <p class="text-gray-600 dark:text-gray-300 mb-6">Give the AI a flyer, poster or screenshot and it reads the text out of the image.</p>
 
         <ol class="doc-list doc-list-numbered mb-6">
-            <li>Add the image in whichever way suits you: click the <strong class="text-gray-900 dark:text-white">+</strong> button to pick a file, paste an image from your clipboard into the box, or drag and drop the file onto the box</li>
+            <li>Add the image in whichever way suits you: click <strong class="text-gray-900 dark:text-white">Add Image</strong> to pick a file, paste an image from your clipboard into the box, or drag and drop the file onto the box</li>
             <li>A thumbnail appears in the corner of the box. Use the red x on it to remove the image if you picked the wrong one</li>
             <li>Optionally type a note in the box as well, for anything the flyer leaves out</li>
-            <li>Click the <strong class="text-gray-900 dark:text-white">arrow button</strong> to submit</li>
+            <li>Click <strong class="text-gray-900 dark:text-white">Read flyer</strong> to submit</li>
             <li>Review the card, then click <strong class="text-gray-900 dark:text-white">Save</strong></li>
         </ol>
 
@@ -219,10 +284,44 @@ Tickets: $20</code></pre>
 
         <div class="doc-callout doc-callout-info">
             <div class="doc-callout-title">Image Tips</div>
-            <p>One image per submission, in JPG, PNG, GIF or WebP, up to 10 MB. Use a clear, high-contrast picture where the text is large enough to read: the AI can only extract what is legible. Photograph the flyer flat and in full frame rather than at an angle.</p>
+            <p>One image per submission, in JPG, PNG, GIF or WebP, up to 10 MB. A large photo is shrunk in your browser before it is sent. Use a clear, high-contrast picture where the text is large enough to read: the AI can only extract what is legible. Photograph the flyer flat and in full frame rather than at an angle.</p>
         </div>
 
         <p class="text-gray-600 dark:text-gray-300 mt-6">Photographing a printed <em>agenda</em> to create timed parts inside one existing event is a separate feature. See <a href="{{ route('marketing.docs.scan_agenda') }}" class="doc-link">Scan Agenda</a> <x-doc-badge plan="enterprise" />.</p>
+    </section>
+
+    <!-- Choosing What to Add -->
+    <section id="choosing-events" class="doc-section">
+        <h3 class="doc-subheading">Choosing What to Add</h3>
+        <p class="text-gray-600 dark:text-gray-300 mb-6">When a read finds two or more events, from a link, from text or from an image, they come back as one list rather than a card each.</p>
+
+        <ul class="doc-list mb-6">
+            <li><strong class="text-gray-900 dark:text-white">Rows</strong> - Each row shows the date, the name, and a line with the time, the venue and how the event repeats</li>
+            <li><strong class="text-gray-900 dark:text-white">Ticking</strong> - Tick the rows you want. <strong class="text-gray-900 dark:text-white">Select all</strong> ticks every row that can be added, and the count beside it keeps track, for example <em>12 of 14 selected</em></li>
+            <li><strong class="text-gray-900 dark:text-white">Details</strong> - Click a row to open its full card in place, where every field can be edited. One row is open at a time</li>
+            <li><strong class="text-gray-900 dark:text-white">Rows that start unticked</strong> - A row missing a name, date or time reads <em>Add a name, date and time</em>. A row that matches an event you already have reads <em>Looks like one you already have</em>. Open the row to fix or check it, then tick it</li>
+            <li><strong class="text-gray-900 dark:text-white">Adding</strong> - The button at the foot of the list carries the count, for example <strong class="text-gray-900 dark:text-white">Add 12 events</strong>. While it works a bar reads <em>Saving 3 of 12</em> and each row shows a tick as it lands. When everything is added you are taken to your schedule</li>
+            <li><strong class="text-gray-900 dark:text-white">When something does not save</strong> - The page stays, says how many were added and how many need attention, and shows the reason on each row concerned</li>
+            <li><strong class="text-gray-900 dark:text-white">Start over</strong> - Clears the results and returns to the empty box, after asking when there are events you have not added yet</li>
+        </ul>
+
+        <p class="text-gray-600 dark:text-gray-300">On the hosted service a schedule can only create so many events in one day. An import that reaches that limit stops there and says so; the rest can be added the next day.</p>
+    </section>
+
+    <!-- Undoing an Import -->
+    <section id="undo-import" class="doc-section">
+        <h3 class="doc-subheading">Undoing an Import</h3>
+        <p class="text-gray-600 dark:text-gray-300 mb-6">An import ends on your schedule, under a panel headed <strong class="text-gray-900 dark:text-white">Events added to your schedule</strong> with the count, the first few names and your schedule's link to copy.</p>
+
+        <ul class="doc-list mb-6">
+            <li><strong class="text-gray-900 dark:text-white">Add to your website</strong> - Opens the embed dialog on the calendar, see <a href="{{ route('marketing.docs.sharing') }}#embed" class="doc-link">Embedding on Your Website</a></li>
+            <li><strong class="text-gray-900 dark:text-white">View schedule</strong> - Opens the public page your guests see</li>
+            <li><strong class="text-gray-900 dark:text-white">Import more</strong> - Returns to the import page</li>
+            <li><strong class="text-gray-900 dark:text-white">Undo this import</strong> - Removes the events that import added, after asking you to confirm</li>
+        </ul>
+
+        <p class="text-gray-600 dark:text-gray-300 mb-4">Undo only touches what that import added. Events you created by hand stay, earlier imports stay, and an imported event that someone already holds a ticket or a booking for is kept; the page then says how many were removed and how many were kept.</p>
+        <p class="text-gray-600 dark:text-gray-300">Undo is offered for 24 hours, in the browser you imported with and while you stay signed in. If you left the import page without finishing, the next time you open it your last import is named at the top with the same <strong class="text-gray-900 dark:text-white">Undo this import</strong> button.</p>
     </section>
 
     <!-- Custom AI Prompts -->
@@ -304,7 +403,7 @@ Tickets: $20</code></pre>
             "@context": "https://schema.org",
             "@type": "HowTo",
             "name": "How to Import Events Using AI in Event Schedule",
-            "description": "Learn how to import events using AI by pasting event text or adding a flyer image.",
+            "description": "Learn how to import events by pasting a link to an events page or calendar, pasting event text, or adding a flyer image.",
             "totalTime": "PT3M",
             "step": [
                 {
@@ -315,15 +414,15 @@ Tickets: $20</code></pre>
                 },
                 {
                     "@type": "HowToStep",
-                    "name": "Paste Text or Add an Image",
-                    "text": "Type or paste the event text into the box, or add a flyer image, then click the arrow button to submit it.",
+                    "name": "Paste a Link or Text, or Add an Image",
+                    "text": "Paste a link to your events page or calendar, type or paste the event text, or add a flyer image, then click the Read button at the end of the box.",
                     "url": "{{ url(route('marketing.docs.ai_import')) }}#text-import"
                 },
                 {
                     "@type": "HowToStep",
-                    "name": "Review and Save",
-                    "text": "Review the card for each event the AI found, correct anything it got wrong, and click Save.",
-                    "url": "{{ url(route('marketing.docs.ai_import')) }}#text-import"
+                    "name": "Review and Add",
+                    "text": "Review what came back, correct anything that is wrong, tick the events you want and click Add events.",
+                    "url": "{{ url(route('marketing.docs.ai_import')) }}#choosing-events"
                 }
             ]
         }

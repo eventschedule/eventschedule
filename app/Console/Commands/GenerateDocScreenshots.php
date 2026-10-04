@@ -258,7 +258,7 @@ class GenerateDocScreenshots extends Command
             'creating-events' => [
                 ['id' => 'creating-events--schedule-tab', 'route' => '/simpsons/schedule'],
                 ['id' => 'creating-events--add-event', 'route' => '/simpsons/add-event'],
-                ['id' => 'creating-events--import', 'route' => '/simpsons/import'],
+                ['id' => 'creating-events--import', 'route' => '/simpsons/import/ai'],
             ],
             'fan-content' => [
                 ['id' => 'fan-content--videos-tab', 'route' => '/simpsons/videos'],

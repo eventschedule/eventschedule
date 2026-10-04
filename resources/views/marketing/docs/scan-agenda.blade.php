@@ -300,7 +300,7 @@
         </h2>
         <ul class="doc-list">
             <li><a href="{{ route('marketing.docs.creating_events') }}#agenda" class="doc-link">Creating Events: Agenda</a> - Build and edit event parts by hand on any plan</li>
-            <li><a href="{{ route('marketing.docs.ai_import') }}" class="doc-link">AI Import</a> - Create whole events from pasted text or a flyer image</li>
+            <li><a href="{{ route('marketing.docs.ai_import') }}" class="doc-link">AI Import</a> - Create whole events from a link, pasted text or a flyer image</li>
             <li><a href="{{ route('marketing.docs.selfhost.ai') }}" class="doc-link">Selfhost: AI Features</a> - Configure the Gemini or OpenAI key that the parser needs</li>
         </ul>
     </section>

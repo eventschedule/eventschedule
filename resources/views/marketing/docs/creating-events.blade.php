@@ -144,7 +144,7 @@
 
         <div class="doc-callout doc-callout-tip">
             <div class="doc-callout-title">Import with AI</div>
-            <p>Don't want to type everything manually? You can also <a href="{{ route('marketing.docs.ai_import') }}" class="doc-link">import events using AI</a> from text or images.</p>
+            <p>Don't want to type everything manually? You can also <a href="{{ route('marketing.docs.ai_import') }}" class="doc-link">import events</a> from a link, text or images.</p>
         </div>
 
         <div class="doc-callout doc-callout-info">
@@ -1033,7 +1033,7 @@
             See Also
         </h2>
         <ul class="doc-list">
-            <li><a href="{{ route('marketing.docs.ai_import') }}" class="doc-link">AI Import</a> - Import events from text or images using AI</li>
+            <li><a href="{{ route('marketing.docs.ai_import') }}" class="doc-link">AI Import</a> - Import events from a link, text or images</li>
             <li><a href="{{ route('marketing.docs.tickets') }}" class="doc-link">Selling Tickets</a> - Add tickets or free registration to your events</li>
             <li><a href="{{ route('marketing.docs.event_graphics') }}" class="doc-link">Event Graphics</a> - Create promotional images</li>
             <li><a href="{{ route('marketing.docs.sharing') }}" class="doc-link">Sharing Your Schedule</a> - Share, embed, and subscribe to your events</li>

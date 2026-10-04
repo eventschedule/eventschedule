@@ -264,10 +264,11 @@
 
                     @php
                         $curatorTiles = [
-                            // Was "Paste a URL or image": the AI import screen takes pasted text
-                            // or a dropped image only. Nothing fetches a URL for you - the
-                            // URL/city importer is the selfhost-only ImportCuratorEvents command.
-                            ['AI Import', 'Paste the text or drop a flyer photo, AI fills in the details', 'M13 10V3L4 14h7v7l9-11h-7z'],
+                            // A link is read too since October 2026 (LinkImportService), once, when
+                            // an editor pastes it. The DAILY sweep of a list of URLs and cities is
+                            // still the selfhost-only ImportCuratorEvents command: do not let this
+                            // tile promise that.
+                            ['AI Import', 'Paste a link, the text or a flyer photo and the details are filled in', 'M13 10V3L4 14h7v7l9-11h-7z'],
                             ['Aggregation', 'Pull events from venues, performers, and other curators', 'M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zM14 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z'],
                             ['Approval Workflow', 'Review and approve events before publishing', 'M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z'],
                             // Careful wording, and it has to stay careful: the automatic digest

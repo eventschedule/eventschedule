@@ -962,7 +962,7 @@
                         </li>
                         <li class="flex gap-3">
                             <svg aria-hidden="true" class="es-colo-second mt-1 h-4 w-4 flex-none" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7" /></svg>
-                            <span class="es-colo-muted text-sm">Importing events from a URL or by city, also selfhost-only</span>
+                            <span class="es-colo-muted text-sm">A daily automatic import from a list of URLs, filtered by city, also selfhost-only</span>
                         </li>
                         <li class="flex gap-3">
                             <svg aria-hidden="true" class="es-colo-second mt-1 h-4 w-4 flex-none" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7" /></svg>

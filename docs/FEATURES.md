@@ -79,6 +79,7 @@ All users get these features with no subscription required.
 | Backup & restore | Export and import schedule data with optional images |
 | 10 newsletter emails per month | Basic newsletter email sending limit (counts each recipient as one email). Automatic new-event announcements are separate and do not draw on it |
 | AI event parsing | `EventController::parse`, capped by `Role::aiParseDailyLimit()`: 10 a day while a schedule is on its trial, 50 a day otherwise (free and Pro alike - there is no free-tier branch), 100 a day on Enterprise, unlimited selfhosted. Parses event details from text and images via Gemini |
+| Import from a link | `EventController::parseLink()` / `App\Services\LinkImportService`. An editor pastes a link on the import page (never the guest request form, never demo mode). A calendar feed (`.ics` / `webcal`, a public Google Calendar link, a published Outlook calendar) and a page's own event data (JSON-LD) are read directly: no AI key, no usage row. Any other page has its text read by the parser and counts as one request against `aiParseDailyLimit()`. Up to 100 events per read, 10 link reads a minute per user. Facebook and Instagram are refused before any request. A one-time copy, not a subscription: ongoing sync is the calendar integrations, and the daily URL sweep is the selfhost-only row below. Results are a list ("Add N events"), end on the schedule tab with an "Events added" panel, and can be undone for 24 hours (`EventController::importUndo()`, `App\Utils\ImportRun`) |
 
 ## Pro Features
 

@@ -218,7 +218,7 @@ return [
             'path' => '/docs/ai-import',
             'feature' => 'marketing.ai',
             'title' => 'AI Import',
-            'blurb' => 'Import events from text or images using AI.',
+            'blurb' => 'Import events from a link, text or images.',
             'icon' => 'sparkles',
             'published' => '2024-01-01',
             'modified' => '2026-03-08',

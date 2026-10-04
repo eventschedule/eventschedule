@@ -155,7 +155,7 @@
                 <tbody>
                     <tr>
                         <td><strong>Import Events</strong></td>
-                        <td>Opens <a href="{{ route('marketing.docs.ai_import') }}" class="doc-link">AI Import</a> to bulk-import events from text, a file, or a link</td>
+                        <td>Opens <a href="{{ route('marketing.docs.ai_import') }}" class="doc-link">AI Import</a> to bring in events from a link, pasted text or a flyer image</td>
                         <td>Owners and admins</td>
                     </tr>
                     <tr>

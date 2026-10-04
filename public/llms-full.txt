@@ -1906,6 +1906,7 @@ Everything needed to publish events and gather an audience:
 - Interest list, email subscribers and automatic new-event digests
 - Up to 10 newsletter emails per month (each recipient counts as one)
 - AI event parsing (50 a day, 10 during the trial)
+- Import events from a link: a calendar feed or a page's own event data is read directly with no AI; any other page counts as one AI parse. A one-time copy of up to 100 events per read, not a subscription
 
 ### Pro Plan
 
@@ -1997,7 +1998,7 @@ Event Schedule charges no percentage-based fees on ticket sales. You only pay th
 
 ### Google Gemini
 
-- Powers AI event parsing from text and images.
+- Powers AI event parsing from text, images, and the text of a web page whose link an editor pastes.
 - Powers automatic translation of events to all supported languages.
 - Requires `GEMINI_API_KEY` in environment configuration.
 
@@ -2034,7 +2035,7 @@ Event Schedule supports 12 languages:
 
 Event Schedule can be selfhosted on your own infrastructure. Requires PHP 8.2+, MySQL, and a web server. Install via Softaculous (one-click), Docker, or manual setup.
 
-Key differences from hosted mode: path-based routing instead of subdomains, no email verification, every Pro and Enterprise feature included, Stripe on the install's own API keys (PayPal and Payfast can also be supplied for the whole install), one-click updates, and importing events from a URL or by city.
+Key differences from hosted mode: path-based routing instead of subdomains, no email verification, every Pro and Enterprise feature included, Stripe on the install's own API keys (PayPal and Payfast can also be supplied for the whole install), one-click updates, and a daily automatic import from a list of URLs, filtered by city.
 
 For full installation instructions, see the [Selfhost Guide](https://eventschedule.com/docs/selfhost/installation).
 
