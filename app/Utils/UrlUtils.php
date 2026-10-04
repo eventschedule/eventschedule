@@ -1089,8 +1089,15 @@ class UrlUtils
             $host = substr($host, 1, -1);
         }
 
-        // Drop an IPv6 zone id: fe80::1%eth0 / fe80::1%25eth0 -> fe80::1
         if (($pos = strpos($host, '%')) !== false) {
+            // A percent sign belongs in a host in one place only: the zone id of an IPv6
+            // literal (fe80::1%eth0, fe80::1%25eth0). Anywhere else it is an encoded character,
+            // and cutting the host there checked a different host from the one a client that
+            // decodes it goes on to reach. Such a host is refused outright.
+            if (! str_contains(substr($host, 0, $pos), ':')) {
+                return '';
+            }
+
             $host = substr($host, 0, $pos);
         }
 
@@ -1275,10 +1282,18 @@ class UrlUtils
     {
         $currentUrl = is_string($url) ? $url : '';
         $response = null;
+        // One budget for the whole chase. Applied to each hop it was five timeouts, and a
+        // server that redirects slowly could hold a request for over a minute.
+        $deadline = microtime(true) + $timeout;
 
         for ($hop = 0; $hop <= $maxRedirects; $hop++) {
             $target = self::validatedTarget($currentUrl);
             if ($target === null) {
+                return ['response' => null, 'url' => $currentUrl];
+            }
+
+            $remaining = $deadline - microtime(true);
+            if ($remaining <= 0) {
                 return ['response' => null, 'url' => $currentUrl];
             }
 
@@ -1293,29 +1308,82 @@ class UrlUtils
                 $curlOptions[CURLOPT_RESOLVE] = $resolve;
             }
 
-            $response = \Illuminate\Support\Facades\Http::timeout($timeout)
-                ->withHeaders($headers)
+            // The size cap above counts bytes on the wire. With compression on, the client
+            // inflates as it reads, and 200 KB of gzip is 200 MB by the time it is a string: so
+            // none is asked for, and none is undone here. A server that compresses anyway is
+            // inflated by self::inflated(), which stops at the cap.
+            $response = \Illuminate\Support\Facades\Http::timeout(max(1, (int) ceil($remaining)))
+                ->withHeaders(array_merge($headers, ['Accept-Encoding' => 'identity']))
                 ->withOptions([
                     'allow_redirects' => false,
+                    'decode_content' => false,
                     'curl' => $curlOptions,
                 ])
                 ->get($currentUrl);
 
             // Stop unless this is a redirect we can still follow.
             if (! $response->redirect() || $hop === $maxRedirects) {
-                return ['response' => $response, 'url' => $currentUrl];
+                return ['response' => self::inflated($response), 'url' => $currentUrl];
             }
 
             $location = $response->header('Location');
             $next = ($location !== '') ? self::resolveRedirectUrl($location, $currentUrl) : null;
             if ($next === null) {
-                return ['response' => $response, 'url' => $currentUrl];
+                return ['response' => self::inflated($response), 'url' => $currentUrl];
             }
 
             $currentUrl = $next;
         }
 
-        return ['response' => $response, 'url' => $currentUrl];
+        return ['response' => $response ? self::inflated($response) : null, 'url' => $currentUrl];
+    }
+
+    /** The most a fetched body may come to once it is no longer compressed. */
+    private const MAX_INFLATED_BYTES = 10485760;
+
+    /**
+     * A response whose body is as the server meant it: unchanged when it was sent plain, inflated
+     * up to MAX_INFLATED_BYTES when the server compressed it without being asked. Null (which
+     * every caller already reads as "could not be fetched") when it is larger than that, is not
+     * what it claims to be, or uses a compression nobody asked for and nothing here reads.
+     */
+    private static function inflated(\Illuminate\Http\Client\Response $response): ?\Illuminate\Http\Client\Response
+    {
+        $encoding = strtolower(trim((string) $response->header('Content-Encoding')));
+
+        if ($encoding === '' || $encoding === 'identity') {
+            return $response;
+        }
+
+        if (! in_array($encoding, ['gzip', 'x-gzip', 'deflate'], true)) {
+            return null;
+        }
+
+        $context = inflate_init($encoding === 'deflate' ? ZLIB_ENCODING_DEFLATE : ZLIB_ENCODING_GZIP);
+        if ($context === false) {
+            return null;
+        }
+
+        $body = '';
+        // A little at a time: one call can return a thousand times what it is given.
+        foreach (str_split($response->body(), 4096) as $chunk) {
+            $piece = @inflate_add($context, $chunk, ZLIB_SYNC_FLUSH);
+            if ($piece === false) {
+                return null;
+            }
+            $body .= $piece;
+            if (strlen($body) > self::MAX_INFLATED_BYTES) {
+                return null;
+            }
+        }
+
+        $headers = array_filter(
+            $response->headers(),
+            fn ($name) => ! in_array(strtolower($name), ['content-encoding', 'content-length'], true),
+            ARRAY_FILTER_USE_KEY
+        );
+
+        return new \Illuminate\Http\Client\Response(new \GuzzleHttp\Psr7\Response($response->status(), $headers, $body));
     }
 
     /**
