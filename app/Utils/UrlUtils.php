@@ -1252,6 +1252,17 @@ class UrlUtils
     }
 
     /**
+     * safeHttpGet() for a caller that also needs to know where the redirects ended: a page's
+     * relative links have to be resolved against the address it was finally served from.
+     *
+     * @return array{response:\Illuminate\Http\Client\Response|null,url:string}
+     */
+    public static function safeHttpGetWithUrl($url, array $headers = [], int $timeout = 30, int $maxRedirects = 4): array
+    {
+        return self::safeHttpGetFollowing($url, $headers, $timeout, $maxRedirects);
+    }
+
+    /**
      * Bounded, SSRF-safe redirect following. Every hop - including each redirect
      * target - is re-validated and IP-pinned, so a validated host that 30x's to an
      * internal address is stopped at the unsafe hop (Guzzle's own redirect follower

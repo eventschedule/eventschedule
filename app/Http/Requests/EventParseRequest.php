@@ -16,6 +16,12 @@ class EventParseRequest extends FormRequest
         return [
             'event_details' => ['nullable', 'string', 'max:10000'],
             'details_image' => ['nullable', 'file', 'mimes:jpg,jpeg,png,gif,webp', 'max:10240'],
+            // A link to read instead of text or an image. Only EventController::parse() looks at
+            // these, and only for an editor: the guest submit form posts to guestParse(), which
+            // never fetches anything. 'page' asks for the whole page to be read by the model even
+            // when it publishes event data of its own.
+            'source_url' => ['nullable', 'string', 'max:2048'],
+            'source_mode' => ['nullable', 'in:auto,page'],
         ];
     }
 }

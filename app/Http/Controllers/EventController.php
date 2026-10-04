@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Exceptions\LinkImportException;
 use App\Http\Controllers\Traits\RendersGuestNotFound;
 use App\Http\Requests\Concerns\ValidatesCouponDiscount;
 use App\Http\Requests\EventCommentSubmitRequest;
@@ -42,6 +43,7 @@ use App\Services\AuditService;
 use App\Services\BoostBillingService;
 use App\Services\DemoService;
 use App\Services\EventChangeNotifier;
+use App\Services\LinkImportService;
 use App\Services\MetaAdsService;
 use App\Services\NotificationEmailService;
 use App\Services\OneSignalService;
@@ -2293,6 +2295,12 @@ class EventController extends Controller
 
         $role = Role::subdomain($subdomain)->firstOrFail();
 
+        // A link instead of text or a flyer. Before the AI allowance check: a calendar feed or a
+        // page's own event data costs no AI request, and works with the allowance used up.
+        if ($request->filled('source_url')) {
+            return $this->parseLink($request, $role);
+        }
+
         if (! $role->canMakeAiParseRequest()) {
             return response()->json(['error' => __('messages.ai_text_daily_limit_reached', ['limit' => $role->aiParseDailyLimit()])], 422);
         }
@@ -2308,6 +2316,43 @@ class EventController extends Controller
             ]);
 
             return response()->json(['error' => __('messages.event_parsing_failed')], 500);
+        }
+    }
+
+    /**
+     * The link half of parse(): fetch what an editor pasted and answer with a preview of the
+     * events behind it. See LinkImportService for what is read and in what order.
+     */
+    private function parseLink(EventParseRequest $request, Role $role)
+    {
+        // The demo signs every visitor into an editor account, which would make this a way for
+        // anyone at all to have the server fetch an address of their choosing.
+        if (is_demo_mode()) {
+            return response()->json(['error' => __('messages.demo_mode_restriction'), 'reason' => 'demo'], 422);
+        }
+
+        // A feed read costs no AI request, so the AI allowance does not slow these down. This does.
+        $limiter = 'link-import:'.$request->user()->id;
+        if (RateLimiter::tooManyAttempts($limiter, 10)) {
+            return response()->json(['error' => __('messages.link_import_too_many'), 'reason' => 'too_many'], 429);
+        }
+        RateLimiter::hit($limiter, 60);
+
+        try {
+            $preview = app(LinkImportService::class)->preview(
+                $role,
+                (string) $request->input('source_url'),
+                $request->input('source_mode') === 'page'
+            );
+
+            return response()->json($preview);
+        } catch (LinkImportException $e) {
+            // Written for the person, already translated, and says nothing of what the server saw.
+            return response()->json(['error' => $e->getMessage(), 'reason' => $e->reason()], 422);
+        } catch (\Throwable $e) {
+            report($e);
+
+            return response()->json(['error' => __('messages.link_import_failed'), 'reason' => 'failed'], 422);
         }
     }
 
@@ -2767,7 +2812,9 @@ class EventController extends Controller
         $event = $this->eventRepo->saveEvent(
             $role, $request, null, true, $role->captureTimezone(),
             allowExistingVenueClaim: true,
-            importSource: Event::IMPORT_AI,
+            // Which import the row came from: the token a link preview handed the page, and
+            // "ai" (text or a flyer) for anything without a valid one.
+            importSource: LinkImportService::sourceFromToken($request->input('import_token'), $role, (int) $request->user()->id),
             importBatch: ImportRun::batch($role),
         );
 
