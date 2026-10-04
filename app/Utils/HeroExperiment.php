@@ -35,15 +35,19 @@ use Throwable;
  * STARTING OVER: reset() (the button on /admin/growth) restarts the counts for every key without
  * deleting history: stats() only reads what came after RESET_SETTING. A visitor assigned before a
  * reset keeps their pick in es_attribution and never beacons a second `view`, so a signup of
- * theirs after it is credited with no visit to match; probabilityBest() clamps that, and it falls
- * on each variant roughly in proportion to its old share.
+ * theirs after it is credited with no visit to match; probabilityBest() clamps that. With the same
+ * variants on both sides of the reset those signups fall on each variant roughly in proportion to
+ * its old share. A reset that follows a change of variants is skewed instead: only a key that
+ * carried over keeps such visitors, so their signups all land on it, while a visitor holding a
+ * retired key is picked again on their next homepage visit (and one who signs up without coming
+ * back is credited to no variant at all).
  */
 final class HeroExperiment
 {
     public const EXPERIMENT = 'home_hero';
 
     /** Rendered by the server while the test runs, and to visitors without JS. */
-    public const DEFAULT = 'plan';
+    public const DEFAULT = 'plan_sell';
 
     /**
      * line1/line2 must each fit the 24-character .es-mask budget (see the h1 in
@@ -51,32 +55,37 @@ final class HeroExperiment
      * say "event calendar", say it takes bookings, name no paid plan. HeroExperimentTest
      * checks each one.
      *
-     * Round two (from 2026-09-30): 'plan' is the control, and each challenger changes ONE thing
-     * about it, so a win says which change earned it.
+     * Round three (from 2026-10-04): 'plan_sell' is the control, and each challenger changes ONE
+     * thing about it, so a win says which change earned it. Round two ran 'plan' against two
+     * one-change challengers the same way.
      */
     public const VARIANTS = [
-        // Picked by hand as the winner of round one (against 'booked' and 'sells'), before the
-        // test's own lock rules were met. The fold before 2026-09-19, with "take bookings" added
-        // to its subtitle so it keeps the booking claim every variant has to make.
-        'plan' => [
-            'line1' => 'Plan, promote, and share',
-            'line2' => 'your event calendar',
-            'subtitle' => 'One page for your events and your open hours. Sell tickets and take bookings with zero platform fees, and scan people in at the door.',
-        ],
-        // Headline only: "sell" in the H1 instead of "share", since selling is what turns
-        // sign-ups into paying customers. Same subtitle as 'plan'.
+        // Picked by hand as the winner of round two (against 'plan' and 'plan_fees'), before the
+        // test's own lock rules were met. Round two's headline challenger: "sell" in the H1 instead
+        // of "share", since selling is what turns sign-ups into paying customers.
         'plan_sell' => [
             'line1' => 'Plan, promote, and sell',
             'line2' => 'from your event calendar',
             'subtitle' => 'One page for your events and your open hours. Sell tickets and take bookings with zero platform fees, and scan people in at the door.',
         ],
-        // Subtitle only: opens with the zero-fee point instead of "one page". Same headline as 'plan'.
-        'plan_fees' => [
-            'line1' => 'Plan, promote, and share',
-            'line2' => 'your event calendar',
-            'subtitle' => 'Sell tickets and take bookings with zero platform fees. Put your events and open hours on one page, and scan people in at the door.',
+        // Headline only: drops "Plan," so the money verb is one of two, not lost in a list of
+        // three. Same subtitle as 'plan_sell'.
+        'promote_sell' => [
+            'line1' => 'Promote and sell',
+            'line2' => 'from your event calendar',
+            'subtitle' => 'One page for your events and your open hours. Sell tickets and take bookings with zero platform fees, and scan people in at the door.',
         ],
-        // Retired 2026-09-30 when 'plan' was picked as the winner of round one: 'booked'
+        // Subtitle only: drops the door-scanning clause, so it is shorter and ends on the zero-fee
+        // point. Same headline as 'plan_sell'.
+        'plan_sell_short' => [
+            'line1' => 'Plan, promote, and sell',
+            'line2' => 'from your event calendar',
+            'subtitle' => 'One page for your events and your open hours. Sell tickets and take bookings with zero platform fees.',
+        ],
+        // Retired 2026-10-04 when 'plan_sell' was picked as the winner of round two: 'plan' ("Plan,
+        // promote, and share your event calendar", the round-two control and round-one winner) and
+        // 'plan_fees' (the same headline, with the subtitle reordered to open on zero platform
+        // fees). Retired 2026-09-30 when 'plan' was picked as the winner of round one: 'booked'
         // ("Everything you have on. Booked solid.") and 'sells' ("The event calendar that sells
         // the tickets."). Removed earlier the same day, two days in at about 12 visitors each and
         // only to cut the number of arms: 'sellout' ("Pack the room. Sell out every date.") and

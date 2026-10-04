@@ -105,7 +105,8 @@ field values on shared events, and 14 of this version's 18 migrations. Their "be
 steps below are now overdue rather than ahead.
 
 Still to ship: realtime, the growth data pull, the get-started and email-design rework of
-2026-10-02, and the cache pruning of 2026-10-03. Four parts need steps of their own, below the
+2026-10-02, the cache pruning of 2026-10-03, and round three of the homepage headline test of
+2026-10-04 with the Reset stats button it needs. Four parts need steps of their own, below the
 checklist:
 - [Conversion, churn and owner emails](#conversion-churn-and-owner-emails) (live; the Stripe
   setting in step 3 is the one step left)
@@ -142,7 +143,16 @@ checklist:
       [Growth data pull](#growth-data-pull-apiinternalgrowth).
 9. **The nudges and digests have been live since 2026-09-28,** so check the Activation nudges card
    and the owner digests row on `/admin/growth` now rather than after this deploy.
-10. **The next day:** check that the `cache` table stopped growing (see
+10. **Reset the homepage headline test** once round three is the only copy being served. This
+    deploy retires `plan` and `plan_fees` and makes `plan_sell` the default against two new
+    challengers, and its consent change alters what the test counts (`docs/GROWTH_DATA.md`,
+    `hero_test`). Cached homepage HTML keeps serving round two for about 20 minutes, or up to 2
+    hours if Cloudflare floors `s-maxage` to its minimum (`docs/CACHING.md`). So purge Cloudflare's
+    cache for `/` or wait, check that view-source on the signed-out homepage shows `promote_sell`,
+    then press **Reset stats** on `/admin/growth`. Resetting earlier counts round-two traffic
+    against round three, and not resetting starts `plan_sell` on its round-two counts while the
+    two new arms start from nothing.
+11. **The next day:** check that the `cache` table stopped growing (see
     [Cache pruning](#cache-pruning-appprune-cache)).
 
 ### Migrations

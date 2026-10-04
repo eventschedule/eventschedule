@@ -132,7 +132,8 @@ class GrowthDataEndpointTest extends TestCase
     {
         Cache::flush();
 
-        $variant = array_key_last(HeroExperiment::VARIANTS);
+        // Any variant but the default, wherever VARIANTS lists it: the default is asserted at zero below.
+        $variant = array_key_last(array_diff_key(HeroExperiment::VARIANTS, [HeroExperiment::DEFAULT => true]));
         HeroExperiment::recordEvent($variant, 'view');
         HeroExperiment::recordEvent($variant, 'view');
         HeroExperiment::recordEvent($variant, 'click');

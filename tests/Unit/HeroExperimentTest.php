@@ -69,12 +69,12 @@ class HeroExperimentTest extends TestCase
     public function test_the_weights_sum_to_one_and_respect_the_floor(): void
     {
         $stats = $this->stats(visitors: 2000, clicks: 100);
-        $stats['plan_sell']['clicks'] = 300;
+        $stats['promote_sell']['clicks'] = 300;
 
         $weights = $this->weights($stats, 1.0);
 
         $this->assertEqualsWithDelta(1.0, array_sum($weights), 1e-9);
-        $this->assertGreaterThan(0.7, $weights['plan_sell'], 'a clear click leader should take most of the traffic');
+        $this->assertGreaterThan(0.7, $weights['promote_sell'], 'a clear click leader should take most of the traffic');
 
         foreach ($weights as $key => $weight) {
             $this->assertGreaterThanOrEqual(HeroExperiment::FLOOR - 1e-9, $weight, "{$key} fell under the floor");
@@ -88,16 +88,16 @@ class HeroExperimentTest extends TestCase
     public function test_a_variant_still_in_burn_in_gets_at_least_an_even_share(): void
     {
         $stats = $this->stats(visitors: 2000, clicks: 100);
-        $stats['plan_sell']['clicks'] = 300;
-        $stats['plan'] = ['visitors' => 0, 'clicks' => 0, 'signups' => 0];
+        $stats['promote_sell']['clicks'] = 300;
+        $stats['plan_sell'] = ['visitors' => 0, 'clicks' => 0, 'signups' => 0];
 
         $weights = $this->weights($stats, 1.0);
 
-        $this->assertGreaterThanOrEqual(1 / count($stats) - 1e-9, $weights['plan']);
+        $this->assertGreaterThanOrEqual(1 / count($stats) - 1e-9, $weights['plan_sell']);
 
         // Nor much more: with a flat prior its wide posterior won most draws and it took ~0.72
         // of the traffic. The pooled-rate prior starts it near its fair share.
-        $this->assertLessThan(0.5, $weights['plan'], 'a variant with no data should not take most of the traffic');
+        $this->assertLessThan(0.5, $weights['plan_sell'], 'a variant with no data should not take most of the traffic');
         $this->assertEqualsWithDelta(1.0, array_sum($weights), 1e-9);
     }
 
@@ -126,14 +126,14 @@ class HeroExperimentTest extends TestCase
     public function test_traffic_moves_from_the_click_leader_to_the_signup_leader(): void
     {
         $stats = $this->stats(visitors: 2000, clicks: 100, signups: 10);
-        $stats['plan_sell']['clicks'] = 300;   // leads on clicks
-        $stats['plan']['signups'] = 40;        // leads on signups
+        $stats['promote_sell']['clicks'] = 300;  // leads on clicks
+        $stats['plan_sell']['signups'] = 40;     // leads on signups
 
         $early = $this->weights($stats, 1.0);
         $late = $this->weights($stats, 0.0);
 
-        $this->assertGreaterThan($early['plan'], $early['plan_sell']);
-        $this->assertGreaterThan($late['plan_sell'], $late['plan']);
+        $this->assertGreaterThan($early['plan_sell'], $early['promote_sell']);
+        $this->assertGreaterThan($late['promote_sell'], $late['plan_sell']);
     }
 
     public function test_more_successes_than_visitors_does_not_break_the_sampler(): void
