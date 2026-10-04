@@ -1776,6 +1776,11 @@
                 
                 try {
                     const formData = new FormData();
+                    @if ($isGuestPage)
+                    {{-- The guest form sends text and nothing else: no link field exists for it to send. --}}
+                    formData.append('event_details', this.eventDetails);
+                    formData.append('website', this.honeypot);
+                    @else
                     if (readingLink) {
                         formData.append('source_url', this.linkUrl);
                         if (wholePage) {
@@ -1784,8 +1789,6 @@
                     } else {
                         formData.append('event_details', this.eventDetails);
                     }
-                    @if (isset($isGuest) && $isGuest)
-                    formData.append('website', this.honeypot);
                     @endif
                     if (this.detailsImage) {
                         formData.append('details_image', this.detailsImage);
@@ -2166,6 +2169,12 @@
                         var diff = endMinutes - startMinutes;
                         if (diff < 0) diff += 1440;
                         computedDuration = (diff / 60);
+                        // The two clock times say how far into its last day the event ends, not
+                        // how many days it runs. A three-day festival kept only its final hours.
+                        var wholeDays = Math.floor((parseFloat(parsed.event_duration) || 0) / 24);
+                        if (wholeDays > 0) {
+                            computedDuration = Math.round((wholeDays * 24 + (diff / 60)) * 1000) / 1000;
+                        }
                     }
                     
                     // Prepare members data
@@ -2259,6 +2268,14 @@
                             current_role_group_id: parsed.group_id || null,
                             custom_field_values: parsed.custom_field_values || {},
                             category_id: parsed.category_id,
+                            @unless ($isGuestPage)
+                            // A repeating entry from a feed or a calendar, as the fields the event
+                            // form itself posts for a repeating event (RecurrenceMapper).
+                            ...(parsed.recurrence && parsed.recurrence.fields ? parsed.recurrence.fields : {}),
+                            // Which import this preview came from. The server reads it to label
+                            // the event, and treats anything it cannot verify as a pasted row.
+                            import_token: (this.preview.meta && this.preview.meta.import_token) || null,
+                            @endunless
                             @if (isset($isGuest) && $isGuest)
                                 website: this.honeypot,
                             @endif
@@ -2280,7 +2297,8 @@
                     // Handle response
                     if (!response.ok) {
                         const errorData = await response.json().catch(() => ({}));
-                        let msg = errorData.message || @json(__('messages.error'));
+                        // The daily creation cap and a refused request answer with {error}.
+                        let msg = errorData.message || errorData.error || @json(__('messages.error'));
                         if (errorData.errors) {
                             const first = Object.values(errorData.errors)[0];
                             if (Array.isArray(first) && first[0]) msg = first[0];

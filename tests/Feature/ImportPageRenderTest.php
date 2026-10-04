@@ -105,6 +105,9 @@ class ImportPageRenderTest extends TestCase
         $this->assertStringContainsString("formData.append('source_url', this.linkUrl)", $html);
         $this->assertStringContainsString('isGuestPage: false', $html);
         $this->assertStringContainsString('linksOnly: false', $html);
+        // And a row is saved as what it is: with its repeat, and naming the import it came from.
+        $this->assertStringContainsString('parsed.recurrence.fields', $html);
+        $this->assertStringContainsString('import_token: (this.preview.meta', $html);
         // The notice about the AI service says what happens to a link too.
         $this->assertStringContainsString('A link is read directly when it is a calendar', $html);
         // The other ways in are on the page, not behind a button.
@@ -161,6 +164,9 @@ class ImportPageRenderTest extends TestCase
         $this->assertStringNotContainsString('For example: your website', $html);
         $this->assertStringNotContainsString('Other ways to bring events in', $html);
         $this->assertStringNotContainsString('Import from Eventbrite', $html);
+        $this->assertStringNotContainsString('parsed.recurrence', $html);
+        $this->assertStringNotContainsString('import_token', $html);
+        $this->assertStringNotContainsString('source_url', $html);
         // It still posts to the endpoint that never fetches.
         $this->assertStringContainsString('guest-parse', $html);
     }
