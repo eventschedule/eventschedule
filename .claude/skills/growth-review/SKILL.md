@@ -100,6 +100,28 @@ Schema 9 also answers these directly:
 - `dismissed_steps`: owners saying "not for me" to tickets or payments.
 - `usage`: which features get used, e.g. AI import as `gemini_parse_event`.
 - Activity: `logins_90d` and `event_edits_90d` on the signup rows.
+- `hero_test`: the homepage headline A/B test, per variant. `app:pull-growth` prints it under the
+  KPI table; the full rows are:
+
+  ```bash
+  jq '.hero_test | {phase, candidate, winner, lock_date, reset_at,
+    rows: [.rows[] | {key, share, visitors, clicks, signups, signup_rate, p_best, p_best_clicks}]}' $F
+  ```
+
+  With `S` and `U` from above, what each variant's signups went on to do, which the test itself
+  never looks at (signups, saved a schedule, made a paid ticket type, sold):
+
+  ```python
+  sold = {s['uid'] for s in S if s['first_paid_sale_month']}
+  for k in sorted({u['hero_variant'] for u in U if u['hero_variant']}):
+      us = [u for u in U if u['hero_variant'] == k]
+      print(k, len(us), sum(u['saved_schedule'] for u in us), sum(u['saved_paid_ticket'] for u in us),
+            sum(u['uid'] in sold for u in us))
+  ```
+
+  The test's own signup count and these rows count different populations, retired variants show
+  up only in the rows, and consent changed what is counted on 2026-10-04: read the `hero_test`
+  entry in `docs/GROWTH_DATA.md` before quoting a rate.
 
 To compare two pulls, keep the same `schema_version`; ids changed length at 8. Join on `sid` to
 find sellers who stopped, comps that started paying, and schedules that newly sold.

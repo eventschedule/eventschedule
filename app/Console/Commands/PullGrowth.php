@@ -180,6 +180,11 @@ class PullGrowth extends Command
 
         $this->table(['Metric', 'Now', 'Previous pull', 'Change'], GrowthSummary::compare($current, $previous));
 
+        if ($hero = GrowthSummary::heroTest($current)) {
+            $this->line('Headline test. '.$hero['status']);
+            $this->table(['Variant', 'Share now', 'Visitors', 'Clicks', 'Signups', 'Chance best (signups)'], $hero['rows']);
+        }
+
         // Every note is "new" against nothing, and twenty of them would bury the table.
         if ($previous === null) {
             $this->line(sprintf('<comment>%d caveats travel with this data</comment> in meta.notes - read them before drawing conclusions.',

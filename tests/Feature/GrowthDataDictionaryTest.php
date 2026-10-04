@@ -26,7 +26,8 @@ class GrowthDataDictionaryTest extends TestCase
 
     public function test_every_section_and_row_column_is_documented(): void
     {
-        config(['app.hosted' => true]);
+        // The nexus, so hero_test is built and its fields can be held to the document too.
+        config(['app.hosted' => true, 'app.is_nexus' => true]);
 
         $owner = $this->createOwner();
         $role = $this->createRole($owner, 'venue', [
@@ -58,6 +59,18 @@ class GrowthDataDictionaryTest extends TestCase
         foreach (array_keys($data['acquisition']) as $rollup) {
             if (! str_contains($doc, "`{$rollup}`")) {
                 $missing[] = "acquisition.{$rollup}";
+            }
+        }
+
+        // The headline test's fields are looked for in its OWN entry: `signups`, `visitors` and
+        // `clicks` are all documented elsewhere as something else, which would pass them for free.
+        $this->assertNotNull($data['hero_test'], 'the headline test builds on the nexus');
+        $start = strpos($doc, '- `hero_test`:');
+        $this->assertNotFalse($start, 'the hero_test entry moved; point this test at it');
+        $entry = substr($doc, $start, strpos($doc, "\n## ", $start) - $start);
+        foreach ([...array_keys($data['hero_test']), ...array_keys($data['hero_test']['rows'][0])] as $field) {
+            if (! str_contains($entry, "`{$field}`")) {
+                $missing[] = "hero_test.{$field}";
             }
         }
 

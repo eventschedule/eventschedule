@@ -81,6 +81,31 @@ class PullGrowthTest extends TestCase
         $this->assertStringContainsString('MRR', $output);
         $this->assertStringContainsString('62.50', $output);
         $this->assertStringContainsString('docs/GROWTH_DATA.md', $output);
+        $this->assertStringNotContainsString('Headline test', $output, 'this pull carries no test');
+    }
+
+    public function test_the_summary_shows_the_headline_test_the_pull_carries(): void
+    {
+        $payload = $this->payload(['schema_version' => 9]);
+        $payload['hero_test'] = [
+            'phase' => 'clicks',
+            'candidate' => null,
+            'winner' => null,
+            'lock_date' => null,
+            'reset_at' => null,
+            'rows' => [
+                ['key' => 'plan_sell', 'is_default' => false, 'share' => 0.6, 'visitors' => 410, 'clicks' => 37, 'signups' => 11, 'p_best' => 0.812],
+                ['key' => 'plan', 'is_default' => true, 'share' => 0.4, 'visitors' => 395, 'clicks' => 21, 'signups' => 6, 'p_best' => 0.188],
+            ],
+        ];
+        Http::fake(['*' => Http::response($payload)]);
+
+        [$code, $output] = $this->pullCommand();
+
+        $this->assertSame(0, $code, $output);
+        $this->assertStringContainsString('Headline test. Learning', $output);
+        $this->assertMatchesRegularExpression('/plan_sell\s+\|\s+60\.0%\s+\|\s+410\s+\|\s+37\s+\|\s+11\s+\|\s+81\.2%/', $output);
+        $this->assertStringContainsString('plan (default)', $output);
     }
 
     public function test_the_summary_is_compared_with_the_previous_pull(): void

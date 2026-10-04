@@ -90,6 +90,46 @@ class GrowthSummary
     }
 
     /**
+     * The homepage headline test the pull carries (hero_test, schema 9+): where it stands, and a
+     * row per variant in the payload's own order, the largest current share first. Null when the
+     * pull has no test in it - an older schema, or an install off the nexus - so the caller prints
+     * nothing instead of an empty table.
+     *
+     * @return ?array{status: string, rows: list<array{0: string, 1: string, 2: string, 3: string, 4: string, 5: string}>}
+     */
+    public static function heroTest(array $data): ?array
+    {
+        $test = $data['hero_test'] ?? null;
+        if (! is_array($test) || empty($test['rows'])) {
+            return null;
+        }
+
+        // The same four sentences the /admin/growth card shows.
+        $status = match ($test['phase'] ?? null) {
+            'winner' => sprintf('Winner: %s, since %s.', $test['winner']['key'] ?? '?', $test['winner']['date'] ?? '?'),
+            'candidate' => sprintf('%s is leading, and becomes the winner on %s if it keeps the lead.', $test['candidate']['key'] ?? '?', $test['lock_date'] ?? '?'),
+            'clicks' => 'Learning: traffic follows sign-up clicks until enough signups come in.',
+            default => 'Deciding on signups.',
+        };
+
+        if (! empty($test['reset_at'])) {
+            $status .= " Counting since {$test['reset_at']}.";
+        }
+
+        return [
+            'status' => $status,
+            'rows' => array_map(fn (array $row) => [
+                ($row['key'] ?? '?').(($row['is_default'] ?? false) ? ' (default)' : ''),
+                self::percent($row['share'] ?? null),
+                self::show($row['visitors'] ?? null),
+                self::show($row['clicks'] ?? null),
+                self::show($row['signups'] ?? null),
+                self::percent($row['p_best'] ?? null),
+            ], $test['rows']),
+        ];
+    }
+
+    /**
      * meta.notes present in this pull and absent from the previous one - where a schema bump or a
      * new caveat announces itself.
      *
@@ -156,6 +196,11 @@ class GrowthSummary
         }
 
         return is_float($value) ? number_format($value, 2) : (is_int($value) ? number_format($value) : $value);
+    }
+
+    private static function percent(int|float|null $ratio): string
+    {
+        return $ratio === null ? '-' : number_format($ratio * 100, 1).'%';
     }
 
     private static function signed(int|float $n): string

@@ -138,6 +138,43 @@ class GrowthSummaryTest extends TestCase
         $this->assertSame(['MRR', '62.50', '-', ''], $rows['MRR']);
     }
 
+    /** The headline test, when the pull carries one: where it stands, and a row per variant. */
+    public function test_it_reads_the_headline_test(): void
+    {
+        $test = [
+            'phase' => 'candidate',
+            'candidate' => ['key' => 'plan_sell', 'date' => '2026-10-10'],
+            'winner' => null,
+            'lock_date' => '2026-10-17',
+            'reset_at' => '2026-09-30',
+            'rows' => [
+                ['key' => 'plan_sell', 'is_default' => false, 'share' => 0.9, 'visitors' => 1200, 'clicks' => 90, 'signups' => 31, 'p_best' => 0.962],
+                ['key' => 'plan', 'is_default' => true, 'share' => 0.1, 'visitors' => 800, 'clicks' => 40, 'signups' => 9, 'p_best' => 0.038],
+            ],
+        ];
+
+        $hero = GrowthSummary::heroTest($this->pull(['hero_test' => $test]));
+
+        $this->assertSame('plan_sell is leading, and becomes the winner on 2026-10-17 if it keeps the lead. Counting since 2026-09-30.', $hero['status']);
+        $this->assertSame([
+            ['plan_sell', '90.0%', '1,200', '90', '31', '96.2%'],
+            ['plan (default)', '10.0%', '800', '40', '9', '3.8%'],
+        ], $hero['rows']);
+
+        $learning = GrowthSummary::heroTest(['hero_test' => ['phase' => 'clicks', 'reset_at' => null] + $test]);
+        $this->assertSame('Learning: traffic follows sign-up clicks until enough signups come in.', $learning['status']);
+
+        $won = GrowthSummary::heroTest(['hero_test' => ['phase' => 'winner', 'winner' => ['key' => 'plan_sell', 'date' => '2026-10-17'], 'reset_at' => null] + $test]);
+        $this->assertSame('Winner: plan_sell, since 2026-10-17.', $won['status']);
+    }
+
+    /** No test in the pull - an older schema, or an install off the nexus - is nothing to print. */
+    public function test_a_pull_without_a_headline_test_has_none_to_show(): void
+    {
+        $this->assertNull(GrowthSummary::heroTest($this->pull()));
+        $this->assertNull(GrowthSummary::heroTest($this->pull(['hero_test' => null])));
+    }
+
     public function test_new_notes_are_the_ones_the_previous_pull_did_not_carry(): void
     {
         $current = $this->pull(['meta' => ['notes' => ['note a', 'note b']]]);

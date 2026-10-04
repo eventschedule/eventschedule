@@ -96,6 +96,7 @@ any two numbers.
 | `reach` | Guest traffic and audience on non-demo schedules | Last 26 ISO weeks |
 | `usage`, `boost`, `referrals`, `federation` | Install-wide | Recent months, as named |
 | `geography` | Same as the `schedules` rows | All time |
+| `hero_test` | Homepage visitors given a headline (nexus only), and EVERY account created carrying a current variant, with no verified or demo filter | Since `hero_test.reset_at`, all time when null |
 
 `meta.range_applies_to` lists the range-scoped sections. `meta.partial_month` names the month in
 progress: every month-keyed count for it is month-to-date.
@@ -227,8 +228,51 @@ credits, legacy `plan_expires` rows and trials, which is most paid-tier schedule
 - `referrals`: `by_status`, `created_by_month`.
 - `federation`: the selfhost installs that registered for federation, which is only a floor on
   selfhost installs. Fields: `by_status`, `active_30d`, `by_version`, `registered_by_month`.
-- `hero_test`: the homepage headline experiment, as the `/admin/growth` card shows it (nexus only,
-  else null). Join `signups.hero_variant` to judge a variant on sellers, not signups.
+- `hero_test`: the homepage headline A/B test (`App\Utils\HeroExperiment`), as the `/admin/growth`
+  card shows it. Null off the nexus, and null if the test could not be evaluated.
+  - `phase` is where the test stands:
+    - `clicks`: learning, the traffic split still follows sign-up clicks;
+    - `signups`: enough signups have come in to decide on them alone;
+    - `candidate`: one variant is leading and waiting out its hold;
+    - `winner`: locked, and every visitor now sees it.
+  - `rows` has one entry per CURRENT variant, largest `share` first:
+    - `key`, `headline`, `subtitle`, and `is_default` for the control;
+    - `share`: the fraction of new visitors being given it now. Every variant keeps at least 0.05
+      until a winner is locked, and one with under 300 visitors gets at least an even share;
+    - `visitors`: people given that headline, counted once per visitor per day per variant, bots
+      and signed-in users excluded;
+    - `clicks`: their first click on any sign-up link on the homepage, counted the same way;
+    - `signups`: accounts created carrying the variant;
+    - `click_rate`, `signup_rate`: per visitor, null with no visitors;
+    - `p_best`: the probability it is the best variant on signups; `p_best_clicks`: on clicks.
+  - `click_share`: how far the split still follows clicks rather than signups. It falls from 1 to
+    0 as signups reach 60 across all variants.
+  - `candidate` (`{key, date}`): the signup leader and the day it took the lead. It needs `p_best`
+    of 0.95, 25 signups and 800 visitors, with every variant past 300 visitors, and is dropped if
+    it loses the lead or falls under 0.90.
+  - `lock_date`: the day the candidate becomes the winner if it holds, 7 days after it took the
+    lead.
+  - `winner` (`{key, date}`): the locked variant and the day it locked.
+  - `reset_at`: the day the counts were last started over from `/admin/growth`, or null.
+  - Reading it:
+    - **Join `signups.hero_variant` to `schedules` on `uid` to judge a variant on the sellers it
+      produced**, not on signups alone.
+    - **The two signup counts will not match.** `rows[].signups` is every account since
+      `reset_at`; the `signups` rows are verified, non-demo users, all time, and carry only
+      `created_month`.
+    - **Retired variants are absent here** but still appear in `signups.hero_variant`, which is
+      the raw column.
+    - **The rates are not bounded.** Visitors and clicks are deduplicated beacons and a signup
+      needs only the attribution cookie, so `signups` can exceed `clicks`.
+    - **`p_best` moves between pulls on the same counts.** It is a 4000-draw simulation, and the
+      section is cached for up to 10 minutes.
+    - **Consent changed what is counted**, from the release committed on 2026-10-04 (see
+      `meta.releases` for when it went live). The attribution cookie is written only with
+      marketing consent and the beacons need none, so a visitor who declines counts in `visitors`
+      and `clicks` and can never count in `signups`: `signup_rate` understates every variant
+      alike. Without analytics consent the headline is picked afresh on each page view, so one
+      person can count as a visitor of several variants. Compare variants with each other, never
+      a rate here with a funnel number, and never across that release.
 
 ## Row tables
 

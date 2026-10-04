@@ -6,6 +6,7 @@ use App\Models\AuditLog;
 use App\Models\User;
 use App\Services\AuditService;
 use App\Services\GrowthExportService;
+use App\Utils\HeroExperiment;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Cache;
@@ -120,6 +121,42 @@ class GrowthDataEndpointTest extends TestCase
         $this->assertSame('last_90_days', $pull->new_values['range']);
         $this->assertArrayHasKey('duration_ms', $pull->new_values, 'the build cost is recorded once it finishes');
         $this->assertArrayHasKey('peak_memory_mb', $pull->new_values);
+    }
+
+    /**
+     * The homepage headline test travels with the pull: its counts per variant in hero_test, and
+     * the variant on each signup row. Elsewhere only the key's presence on /admin/growth is
+     * asserted, so the section could come back null or empty here and nothing would notice.
+     */
+    public function test_the_payload_carries_the_headline_test_results(): void
+    {
+        Cache::flush();
+
+        $variant = array_key_last(HeroExperiment::VARIANTS);
+        HeroExperiment::recordEvent($variant, 'view');
+        HeroExperiment::recordEvent($variant, 'view');
+        HeroExperiment::recordEvent($variant, 'click');
+        $this->signup(['hero_variant' => $variant]);
+
+        // Nexus only: no other install serves the homepage the test runs on.
+        config(['app.is_nexus' => false]);
+        $this->assertNull($this->pull()->assertOk()->json('hero_test'));
+
+        config(['app.is_nexus' => true]);
+        $payload = $this->pull()->assertOk()->json();
+
+        $this->assertNotNull($payload['hero_test'], 'the pull has no headline test in it');
+        $rows = collect($payload['hero_test']['rows'])->keyBy('key');
+        $this->assertEqualsCanonicalizing(array_keys(HeroExperiment::VARIANTS), $rows->keys()->all());
+        $this->assertSame(2, $rows[$variant]['visitors']);
+        $this->assertSame(1, $rows[$variant]['clicks']);
+        $this->assertSame(1, $rows[$variant]['signups']);
+        $this->assertSame(0, $rows[HeroExperiment::DEFAULT]['visitors'], 'the counts are per variant');
+        $this->assertTrue($rows[HeroExperiment::DEFAULT]['is_default']);
+
+        $column = array_search('hero_variant', $payload['signups']['columns'], true);
+        $this->assertNotFalse($column);
+        $this->assertSame([$variant], array_values(array_filter(array_column($payload['signups']['rows'], $column))));
     }
 
     /** ?range[]=x arrives as an array, which used to TypeError into a 500 on every admin page. */
