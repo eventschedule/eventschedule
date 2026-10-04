@@ -73,8 +73,10 @@ class GoogleCalendarWebhookController extends Controller
                 return response('Sync from Google not enabled', 200);
             }
 
-            // Get the user for this role
-            $user = $role->users()->first();
+            // The owner, whose pivot holds the calendar id and whose token google:sync uses.
+            // Role::users() is every pivot ordered by name, followers included, so its first row
+            // was whoever sorted first alphabetically: a pull with the wrong account's token.
+            $user = $role->user;
             if (! $user || ! $user->google_token) {
                 Log::warning('No user with Google token found for role', [
                     'role_id' => $role->id,

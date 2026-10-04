@@ -5311,12 +5311,24 @@ class RoleController extends Controller
 
         $existingSettings = $role->getEmailSettings();
 
-        // Handle sync_direction and calendar changes and webhook management
+        // Handle sync_direction and calendar changes and webhook management.
+        //
+        // The schedule-level Google controls render only for the connected owner, beside a hidden
+        // marker. Without that marker, or from anyone but the owner, this save must leave them
+        // alone: an absent select used to read as "calendar cleared", which nulled the owner's
+        // pivot, and Role::getGoogleCalendarId() then fell back to 'primary' - so the standing
+        // sync started pulling the owner's main calendar onto the public schedule.
+        $googleSubmitted = $request->has('google_integration_submitted')
+            && (int) auth()->id() === (int) $role->user_id;
         $oldSyncDirection = $role->sync_direction;
-        $newSyncDirection = $request->input('sync_direction');
+        $newSyncDirection = $googleSubmitted ? $request->input('sync_direction') : $oldSyncDirection;
         $ownerPivot = RoleUser::where('role_id', $role->id)->where('user_id', $role->user_id)->first();
         $oldCalendarId = $ownerPivot?->google_calendar_id;
-        $newCalendarId = $request->input('google_calendar_id');
+        // An empty select is its placeholder or a list that had not loaded yet (the options
+        // arrive by fetch after the page renders), never a choice, so it cannot clear the id.
+        $newCalendarId = $googleSubmitted && $request->filled('google_calendar_id')
+            ? $request->input('google_calendar_id')
+            : $oldCalendarId;
 
         // Outlook / Microsoft sync direction + calendar changes. The new direction is read from
         // the model AFTER fill() (below), not the raw request, so a hand-crafted POST that sets
@@ -5333,6 +5345,11 @@ class RoleController extends Controller
         $oldListAnimation = $role->listAnimation();
 
         $role->fill($request->all());
+
+        // sync_direction is fillable, so undo it when the Google controls were not submitted.
+        if (! $googleSubmitted) {
+            $role->sync_direction = $oldSyncDirection;
+        }
 
         // The "offer a second language" toggle maps onto the target column: when it is off (or the
         // submitted target is blank), the target equals the authored language = "no translation".

@@ -5143,7 +5143,13 @@
                                 {{ __('messages.sync_events_between_schedules') }}
                             </p>
 
-                            @if (auth()->user()->google_token)
+                            {{-- Owner only, like the Outlook tab below. The calendar id lives on the OWNER's
+                                 pivot and the standing sync runs with the owner's token, but this select is
+                                 filled from the VIEWER's Google account: an editor choosing here stored an id
+                                 the owner's token cannot read. --}}
+                            @if (auth()->id() === $role->user_id && auth()->user()->google_token)
+                            {{-- Marker so a save that did not render this tab cannot clear the stored calendar --}}
+                            <input type="hidden" name="google_integration_submitted" value="1">
                             <div class="space-y-6 {{ is_demo_mode() ? 'opacity-50 pointer-events-none' : '' }}">
                                 <!-- Calendar Selection -->
                                 <div>
@@ -5254,7 +5260,7 @@
                                 </div>
                                 @endif
                             </div>
-                            @else
+                            @elseif (! auth()->user()->google_token)
                             <x-link href="{{ route('profile.edit') }}#section-google-calendar" target="_blank">
                                 {{ __('messages.connect_google_calendar') }}
                             </x-link>

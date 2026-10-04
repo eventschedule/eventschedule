@@ -1354,7 +1354,7 @@
 
         <div class="doc-callout doc-callout-tip mb-6">
             <div class="doc-callout-title">Team members</div>
-            <p>Under <strong class="text-gray-900 dark:text-white">Sync to my calendar</strong>, each team member can point the schedule's events at a calendar of their own. That choice is theirs alone and is separate from the schedule-wide sync above, so everyone can follow the schedule in their own Google account.</p>
+            <p>Under <strong class="text-gray-900 dark:text-white">Sync to my calendar</strong>, each team member can point the schedule's events at a calendar of their own. That choice is theirs alone and is separate from the schedule-wide sync above, so everyone can follow the schedule in their own Google account. The schedule-wide sync itself is set by the schedule's owner, because it runs on the owner's Google account.</p>
         </div>
 
         <div class="doc-callout doc-callout-info mb-6">

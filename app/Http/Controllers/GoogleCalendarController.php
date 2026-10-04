@@ -336,9 +336,14 @@ class GoogleCalendarController extends Controller
         try {
             $role = \App\Models\Role::subdomain($subdomain)->firstOrFail();
 
-            // Check if user has permission to sync this role
-            if (! $role->users->contains($user)) {
-                return response()->json(['error' => 'Unauthorized'], 403);
+            // Owner only. This endpoint changes the schedule's sync direction and pulls with the
+            // CALLER's token, and the calendar id it pulls ('primary' by default) resolves against
+            // that token's account. Role::users() includes followers, so the old membership check
+            // let anyone following the schedule publish their own calendar onto it. The standing
+            // sync (google:sync, the webhook) runs as the owner; a member's own calendar goes
+            // through memberSync() instead.
+            if ((int) $user->id !== (int) $role->user_id) {
+                return response()->json(['error' => __('messages.not_authorized')], 403);
             }
 
             // Get sync direction from request, default to role's current setting
