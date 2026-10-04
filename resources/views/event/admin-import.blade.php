@@ -40,6 +40,14 @@
         @endif
     </div>
 
+    {{-- The import before this one, while it can still be taken back. Outside the Vue mount. --}}
+    @if (! empty($lastImportCount))
+    <div class="ap-card mb-4 flex flex-wrap items-center justify-between gap-3 rounded-xl p-4">
+        <p class="text-sm text-gray-700 dark:text-gray-300">{{ __('messages.import_last_run', ['count' => $lastImportCount]) }}</p>
+        @include('event.partials.import-undo', ['count' => $lastImportCount])
+    </div>
+    @endif
+
     @include('event.import')
 
     <script {!! nonce_attr() !!}>
@@ -52,6 +60,14 @@
         document.addEventListener('click', function(e) {
             if (e.target.closest('.js-back-btn')) {
                 if (hasUnsavedImportChanges() && !confirm(@json(__('messages.unsaved_changes_warning')))) return;
+                // With events added, Back means "show me": through the route that counts them
+                // and shows the panel. history.back() would land on whatever was open before,
+                // and after a trip to Google that is Google.
+                var app = window.__importApp;
+                if (app && app.savedEvents && app.savedEvents.some(Boolean)) {
+                    window.location.href = @json(route('event.import_done', ['subdomain' => $role->subdomain]));
+                    return;
+                }
                 history.back();
             }
             // Leaving for another way to import throws the preview away, like Back.

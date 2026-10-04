@@ -398,9 +398,16 @@
                         <a href="{{ route('role.edit', ['subdomain' => $role->subdomain]) }}" class="js-leave-import font-medium text-[var(--brand-blue)] hover:underline">{{ __('messages.change_timezone') }}</a>
                     </p>
                 </div>
-                <button type="button" @click="handleClear" :disabled="isAddingAll" class="flex-shrink-0 rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm font-medium text-gray-700 transition-all duration-200 hover:bg-gray-50 focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--brand-blue)] disabled:opacity-50 dark:border-gray-600 dark:bg-gray-800 dark:text-gray-300 dark:hover:bg-gray-700">
-                    {{ __('messages.import_start_over') }}
-                </button>
+                <div class="flex flex-shrink-0 items-center gap-2">
+                    <button type="button" @click="handleClear" :disabled="isAddingAll" class="rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm font-medium text-gray-700 transition-all duration-200 hover:bg-gray-50 focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--brand-blue)] disabled:opacity-50 dark:border-gray-600 dark:bg-gray-800 dark:text-gray-300 dark:hover:bg-gray-700">
+                        {{ __('messages.import_start_over') }}
+                    </button>
+                    {{-- Once anything is added there is somewhere to go and see it. --}}
+                    <a v-if="savedEvents.some(Boolean) && !isAddingAll" href="{{ route('event.import_done', ['subdomain' => $role->subdomain]) }}"
+                       class="rounded-lg bg-[var(--brand-button-bg)] px-3 py-2 text-sm font-semibold text-white transition-all duration-200 hover:bg-[var(--brand-button-bg-hover)] focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--brand-blue)] focus-visible:ring-offset-2 dark:focus-visible:ring-offset-gray-800">
+                        {{ __('messages.import_see_schedule') }}
+                    </a>
+                </div>
             </div>
 
             <ul v-if="listNotes.length" class="mt-3 space-y-1 text-sm text-gray-600 dark:text-gray-400">
@@ -414,7 +421,7 @@
 
             <label class="mt-4 flex cursor-pointer items-center gap-3 border-t border-gray-100 pt-4 text-sm text-gray-700 dark:border-gray-700/50 dark:text-gray-300">
                 <input type="checkbox" ref="selectAll" :checked="allSelected" @change="toggleAll" :disabled="isAddingAll || selectableCount === 0"
-                       class="h-5 w-5 rounded border-gray-300 text-[var(--brand-blue)] focus:ring-[var(--brand-blue)] dark:border-gray-600 dark:bg-gray-900">
+                       class="h-5 w-5 rounded border-gray-300 text-[var(--brand-blue)] focus:ring-[var(--brand-blue)] dark:border-gray-600 dark:[&:not(:checked)]:bg-gray-900">
                 <span class="font-medium">{{ __('messages.eventbrite_select_all') }}</span>
                 <span class="text-gray-500 dark:text-gray-400" v-text="selectedLabel"></span>
             </label>
@@ -445,7 +452,7 @@
                     </svg>
                     <input v-else type="checkbox" :checked="rowSelected(idx)" @change="toggleRow(idx)" :disabled="isAddingAll || !rowComplete(idx)"
                            :aria-label="event.event_name"
-                           class="h-5 w-5 rounded border-gray-300 text-[var(--brand-blue)] focus:ring-[var(--brand-blue)] dark:border-gray-600 dark:bg-gray-900">
+                           class="h-5 w-5 rounded border-gray-300 text-[var(--brand-blue)] focus:ring-[var(--brand-blue)] dark:border-gray-600 dark:[&:not(:checked)]:bg-gray-900">
                 </span>
 
                 <span class="flex h-12 w-12 flex-shrink-0 flex-col items-center justify-center rounded-lg bg-gray-100 dark:bg-gray-700" aria-hidden="true">
@@ -456,7 +463,7 @@
                 <button type="button" @click="expandRow(idx)" :aria-expanded="expandedRow === idx ? 'true' : 'false'" title="{{ __('messages.import_show_details') }}"
                         class="group flex min-h-[44px] min-w-0 flex-1 items-center gap-3 rounded-md text-start focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--brand-blue)]">
                     <span class="min-w-0 flex-1">
-                        <span class="block truncate text-sm font-medium text-gray-900 dark:text-gray-100" dir="auto" v-text="event.event_name"></span>
+                        <span class="block truncate text-sm font-medium text-gray-900 dark:text-gray-100"><bdi v-text="event.event_name"></bdi></span>
                         <span class="mt-0.5 block truncate text-xs text-gray-500 dark:text-gray-400" v-text="rowMeta(idx)"></span>
                         <span v-if="rowProblem(idx)" class="mt-0.5 block text-xs font-medium text-amber-700 dark:text-amber-400" v-text="rowProblem(idx)"></span>
                     </span>
@@ -1524,8 +1531,10 @@
                 const meta = this.preview.meta;
                 const count = meta ? meta.shown : this.preview.parsed.length;
 
+                // The host is isolated (LRI ... PDI): inside a right-to-left sentence it otherwise
+                // takes the count that follows it into its own left-to-right run.
                 return meta && meta.host
-                    ? @json(__('messages.import_found_on_host', ['host' => '__H__', 'count' => '__N__']), JSON_UNESCAPED_UNICODE).replace('__H__', meta.host).replace('__N__', count)
+                    ? @json(__('messages.import_found_on_host', ['host' => '__H__', 'count' => '__N__']), JSON_UNESCAPED_UNICODE).replace('__H__', '\u2066' + meta.host + '\u2069').replace('__N__', count)
                     : @json(__('messages.import_found_events', ['count' => '__N__']), JSON_UNESCAPED_UNICODE).replace('__N__', count);
             },
 
@@ -1534,7 +1543,7 @@
             timezoneLabel() {
                 const zone = (this.preview.meta && this.preview.meta.timezone) || @json($role->captureTimezone());
 
-                return @json(__('messages.import_times_shown_in', ['timezone' => '__Z__']), JSON_UNESCAPED_UNICODE).replace('__Z__', zone.replace(/_/g, ' '));
+                return @json(__('messages.import_times_shown_in', ['timezone' => '__Z__']), JSON_UNESCAPED_UNICODE).replace('__Z__', '\u2066' + zone.replace(/_/g, ' ') + '\u2069');
             },
 
             // What the person should know before choosing: what was left out and why, and that a
@@ -2094,7 +2103,8 @@
                     parts.push(@json(__('messages.import_local_time', ['timezone' => '__Z__']), JSON_UNESCAPED_UNICODE).replace('__Z__', String(event.local_time_zone).replace(/_/g, ' ')));
                 }
 
-                return parts.filter(Boolean).join(' \u00B7 ');
+                // Each part keeps its own direction (FSI ... PDI) and the parts keep the page's order.
+                return parts.filter(Boolean).map(part => '\u2068' + part + '\u2069').join(' \u00B7 ');
             },
 
             // Why a row is not ticked or did not save, said on the row.
@@ -2195,7 +2205,7 @@
                 if (failed === 0 && ! this.stoppedByLimit) {
                     this.allDone = true;
                     setTimeout(() => {
-                        window.location.href = @json(route('role.view_admin', ['subdomain' => $role->subdomain, 'tab' => 'schedule']));
+                        window.location.href = @json(route('event.import_done', ['subdomain' => $role->subdomain]));
                     }, 900);
                 }
             },

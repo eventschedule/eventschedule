@@ -3,7 +3,7 @@
 {{-- A read-only URL with a Copy button beside it. The input is there so the link can still be
      selected by hand where the clipboard API is unavailable (an http:// selfhost install). --}}
 <div {{ $attributes->merge(['class' => 'flex gap-2']) }}>
-    <input type="text" id="{{ $id }}" readonly value="{{ $value }}" @if ($label) aria-label="{{ $label }}" @endif
+    <input type="text" id="{{ $id }}" readonly dir="ltr" value="{{ $value }}" @if ($label) aria-label="{{ $label }}" @endif
         class="flex-1 min-w-0 rounded-lg border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 text-sm shadow-sm focus:border-[var(--brand-blue)] focus:ring-[var(--brand-blue)]">
     <button type="button" data-copy-link="{{ $id }}"
         class="inline-flex shrink-0 items-center rounded-lg bg-[var(--brand-button-bg)] px-4 py-2 text-sm font-semibold text-white shadow-sm hover:bg-[var(--brand-button-bg-hover)] transition-colors">

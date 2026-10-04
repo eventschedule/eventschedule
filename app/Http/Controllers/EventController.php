@@ -187,22 +187,7 @@ class EventController extends Controller
             return redirect()->back()->with('error', __('messages.cannot_delete_event_with_sales'));
         }
 
-        AuditService::log(AuditService::EVENT_DELETE, $user->id, 'Event', $event->id, null, null, $event->name);
-
-        // Cancel active boost campaigns before deletion (prevents orphaned Meta campaigns)
-        $this->cancelActiveBoosts($event);
-
-        // Capture webhook payload before deletion
-        if (! $event->is_draft) {
-            $webhookPayload = [
-                'event' => 'event.deleted',
-                'timestamp' => now()->toIso8601String(),
-                'data' => $event->toApiData(),
-            ];
-            WebhookService::dispatch('event.deleted', $event, $webhookPayload);
-        }
-
-        $event->delete();
+        $this->deleteEventRecord($event, $user);
 
         /*
         $role = $event->role;
@@ -222,6 +207,30 @@ class EventController extends Controller
 
         return redirect(route('role.view_admin', $data))
             ->with('message', __('messages.event_deleted'));
+    }
+
+    /**
+     * Delete an event nobody holds a ticket or booking for: the audit row, its boosts stopped, the
+     * webhook, then the row. The caller has already decided this event may go.
+     */
+    private function deleteEventRecord(Event $event, $user): void
+    {
+        AuditService::log(AuditService::EVENT_DELETE, $user->id, 'Event', $event->id, null, null, $event->name);
+
+        // Cancel active boost campaigns before deletion (prevents orphaned Meta campaigns)
+        $this->cancelActiveBoosts($event);
+
+        // Capture webhook payload before deletion
+        if (! $event->is_draft) {
+            $webhookPayload = [
+                'event' => 'event.deleted',
+                'timestamp' => now()->toIso8601String(),
+                'data' => $event->toApiData(),
+            ];
+            WebhookService::dispatch('event.deleted', $event, $webhookPayload);
+        }
+
+        $event->delete();
     }
 
     /**
@@ -2058,15 +2067,101 @@ class EventController extends Controller
 
         $currencies = json_decode(file_get_contents(base_path('storage/currencies.json')));
 
+        // A run left with events in it (the page was left without going through "done") is
+        // closed here, so it can be undone, and this visit starts a batch of its own.
+        $open = ImportRun::batch($role);
+        if ($open && $this->importedEvents($role, $request->user(), $open)->exists()) {
+            ImportRun::finish($role);
+        }
+        $last = ImportRun::last($role);
+
         // The events saved from this visit share a batch (events.import_batch).
         ImportRun::begin($role);
 
         return view('event.admin-import', [
+            'lastImportCount' => $last ? $this->importedEvents($role, $request->user(), $last)->count() : 0,
             'role' => $role,
             'venues' => $venues,
             'currencies' => $currencies,
             'defaultCurrency' => MoneyUtils::getCurrencyForCountry($role->country_code),
         ]);
+    }
+
+    /** The events one person added to one schedule in one sitting on an import page. */
+    private function importedEvents(Role $role, $user, string $batch)
+    {
+        return Event::where('import_batch', $batch)
+            ->where('creator_role_id', $role->id)
+            ->where('user_id', $user->id);
+    }
+
+    /**
+     * Where an import ends: the schedule, with a panel saying what was added. The count comes from
+     * the database, by the batch in the session. Nothing the browser says is taken for it.
+     */
+    public function importDone(Request $request, $subdomain)
+    {
+        if (! $request->user()->isEditor($subdomain)) {
+            abort(403, __('messages.not_authorized'));
+        }
+
+        $role = Role::subdomain($subdomain)->firstOrFail();
+        $redirect = redirect(route('role.view_admin', ['subdomain' => $role->subdomain, 'tab' => 'schedule']));
+
+        $batch = ImportRun::finish($role) ?? ImportRun::last($role);
+        if ($batch === null) {
+            return $redirect;
+        }
+
+        $events = $this->importedEvents($role, $request->user(), $batch);
+        $count = $events->count();
+        if ($count === 0) {
+            ImportRun::forgetLast($role);
+
+            return $redirect;
+        }
+
+        return $redirect->with('events_imported', [
+            'count' => $count,
+            'names' => (clone $events)->orderBy('starts_at')->limit(3)->pluck('name')->all(),
+        ]);
+    }
+
+    /**
+     * Take back the last import: every event it added that nobody holds a ticket or a booking
+     * for. Which events is decided by the batch in the session, never by the request.
+     */
+    public function importUndo(Request $request, $subdomain)
+    {
+        if (! $request->user()->isEditor($subdomain)) {
+            abort(403, __('messages.not_authorized'));
+        }
+
+        $role = Role::subdomain($subdomain)->firstOrFail();
+        $redirect = redirect(route('role.view_admin', ['subdomain' => $role->subdomain, 'tab' => 'schedule']));
+
+        $batch = ImportRun::last($role);
+        if ($batch === null) {
+            return $redirect;
+        }
+
+        $removed = 0;
+        $kept = 0;
+        foreach ($this->importedEvents($role, $request->user(), $batch)->get() as $event) {
+            // The same two refusals as deleting one by hand.
+            if ($request->user()->cannot('delete', $event) || $event->appointment_type_id || $event->sales()->exists()) {
+                $kept++;
+
+                continue;
+            }
+
+            $this->deleteEventRecord($event, $request->user());
+            $removed++;
+        }
+
+        ImportRun::forgetLast($role);
+
+        return $redirect->with('import_undone', ['removed' => $removed, 'kept' => $kept]);
     }
 
     public function showGuestImport(Request $request, $subdomain)

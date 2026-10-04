@@ -110,6 +110,8 @@
 </div>
 @endif
 
+@include('role.partials.events-imported')
+
 {{-- Flashed by EventController::update()/store() and RoleController::update() the first time a
      gallery goes from empty to published: the photos, and a way to see them as guests do. A draft
      or unlisted event (or a schedule with no public page) has nothing to open yet. --}}
