@@ -3922,6 +3922,7 @@ return [
     'cookie_consent_save' => 'حفظ الاختيارات',
     'cookie_consent_analytics' => 'التحليلات',
     'cookie_consent_analytics_help' => 'Google Analytics وإحصاءات الزيارات التي تتعرف على متصفحك، لنعرف كيف يُستخدم الموقع.',
+    'cookie_consent_analytics_help_no_ga' => 'إحصاءات الزيارات التي تتعرف على متصفحك، لنعرف كيف يُستخدم الموقع.',
     'cookie_consent_marketing' => 'التسويق والمحتوى المضمّن',
     'cookie_consent_marketing_help' => 'نسب الحملات وقياس الإعلانات، والخرائط ومقاطع الفيديو وأدوات الحجز من مواقع أخرى، والتي تضع ملفات تعريف الارتباط الخاصة بها.',
     'cookie_consent_manage' => 'تفضيلات ملفات تعريف الارتباط',

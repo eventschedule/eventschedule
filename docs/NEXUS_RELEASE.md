@@ -106,7 +106,8 @@ steps below are now overdue rather than ahead.
 
 Still to ship: realtime, the growth data pull, the get-started and email-design rework of
 2026-10-02, the cache pruning of 2026-10-03, and round three of the homepage headline test of
-2026-10-04 with the Reset stats button it needs. Four parts need steps of their own, below the
+2026-10-04 with the Reset stats button it needs and the homepage search title and description
+that now read from it. Four parts need steps of their own, below the
 checklist:
 - [Conversion, churn and owner emails](#conversion-churn-and-owner-emails) (live; the Stripe
   setting in step 3 is the one step left)
@@ -129,7 +130,10 @@ checklist:
 5. **Shrink the `cache` table** before its new index is built (see
    [Cache pruning](#cache-pruning-appprune-cache)).
 6. **Decide whether this release sends the privacy-policy change notice** (see
-   [Realtime](#realtime-adminrealtime)).
+   [Realtime](#realtime-adminrealtime)). If `ANALYTICS_ID` is being removed, do that with this
+   deploy and before the notice, following
+   [Turning Google Analytics off](#turning-google-analytics-off): the notice should describe the
+   policy as it will stand.
 
 **Deploy**, then:
 
@@ -152,6 +156,13 @@ checklist:
     then press **Reset stats** on `/admin/growth`. Resetting earlier counts round-two traffic
     against round three, and not resetting starts `plan_sell` on its round-two counts while the
     two new arms start from nothing.
+
+    The same view-source should open on
+    `<title>Plan, promote, and sell from your event calendar | Event Schedule</title>`, with the
+    subtitle as the meta description: the homepage's search title and description are now built
+    from the headline the server renders (`HeroExperiment::meta()`), so they follow the default
+    and then the winner. Nothing to run. Google picks it up on its next crawl of `/`; "Request
+    indexing" for the homepage in Search Console shortens the wait and is optional.
 11. **The next day:** check that the `cache` table stopped growing (see
     [Cache pruning](#cache-pruning-appprune-cache)).
 
@@ -200,8 +211,10 @@ Consent categories, erasure, export, retention, and a rewritten privacy policy a
    instead of Sentry's CDN loader. Check the project setting "Prevent Storing of IP Addresses"
    in both Sentry projects (server and browser).
 3. **Expect different numbers.** Google Analytics loads only after analytics consent and
-   `utm_*` attribution needs marketing consent, so GA sessions and attributed sign-ups drop. Meta
-   is told about a sale only when the buyer allowed marketing cookies (`sales.ad_consent`).
+   `utm_*` attribution needs marketing consent, so GA sessions and attributed sign-ups drop (GA
+   sessions stop altogether if `ANALYTICS_ID` is removed in this deploy, see
+   [Turning Google Analytics off](#turning-google-analytics-off)). Meta is told about a sale only
+   when the buyer allowed marketing cookies (`sales.ad_consent`).
 
 **Migrations**, all quick:
 
@@ -220,6 +233,42 @@ Consent categories, erasure, export, retention, and a rewritten privacy policy a
 5. **Open the cookie banner** on the marketing site, the app and a schedule page, choose, then
    withdraw on another of them: the choice is one cookie on `.eventschedule.com`, so it should
    hold everywhere.
+
+#### Turning Google Analytics off
+
+Google Analytics is one env var, `ANALYTICS_ID`. Everything that tells a visitor it is in use asks
+the same predicate as the tag (`google_analytics_enabled()`), so removing the variable also takes
+Google Analytics out of the privacy policy (the provider row, the legal basis, clause 12 and the
+`_ga` cookie row), the cookie banner's Analytics line, and the answers on `/about` and
+`/features/analytics`. Nothing else in the app depends on it. What the code cannot do for you:
+
+1. **Order.** Deploy the release that carries `google_analytics_enabled()` first, or in the same
+   deploy, then **remove** `ANALYTICS_ID` from the app spec (remove it, never save it blank). The
+   other way round, the copy keeps naming Google Analytics until the code lands. If it rides the
+   GDPR deploy, do it before step 4 above, so the one change notice describes the policy as it
+   will stand.
+2. **The policy's date.** Clause 20 says the date at the top shows when the page last changed,
+   and it changes on the day the variable is removed, not the day the code was committed. Set
+   `$lastUpdated` in `resources/views/marketing/privacy.blade.php` to that day in the same deploy.
+3. **Header and footer code.** Check `/admin/settings` holds no Google Tag Manager or Google
+   Analytics snippet. That box runs ungated and no config check can see it, so the pages would
+   say there is no Google Analytics while it ran.
+4. **`/admin/legal`.** A privacy or cookie document written there replaces the built-in page, and
+   it is text the code never edits: change it by hand.
+5. **Search Console.** If the property is verified through the Google Analytics tag, add another
+   verification method first, or removing the tag unverifies it.
+6. **Blog posts** live in the database and may mention Google Analytics. Search them.
+7. **Edge cache.** Cached marketing pages keep the old wording, and the old tag, until they expire
+   (`docs/CACHING.md`). Purge Cloudflare or wait.
+
+What stays: the banner keeps showing, because Realtime and the marketing category still need it.
+`_ga` cookies already in consenting browsers are left to expire (up to two years) and are deleted
+earlier if the visitor withdraws; nothing reads them. Data already in the Google Analytics property
+stays with Google until its retention setting runs out or the property is deleted.
+
+To turn it back on, set `ANALYTICS_ID` again and move `$lastUpdated`: every one of those
+statements comes back by itself. The one exception is the accessibility statement, whose list of
+third parties no longer mentions analytics either way.
 
 ### Conversion, churn and owner emails
 
@@ -311,6 +360,10 @@ hours.
 
 Switch it off at `/admin/settings#realtime`. That deletes every row at once, and beacons from
 pages still cached at the edge are dropped by the endpoint.
+
+With Google Analytics off as well, Realtime is all that the cookie banner's Analytics line and
+privacy policy clause 12 describe. Neither follows this switch, so switching Realtime off then
+leaves both describing a live view that no longer runs: change that copy in the same release.
 
 ### Growth data pull (`/api/internal/growth`)
 

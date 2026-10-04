@@ -229,7 +229,7 @@ class MarketingTicketingTierTest extends TestCase
             File::glob(resource_path('views/marketing/*/*.blade.php')),
             File::glob(resource_path('views/marketing/*/*/*.blade.php')),
             // ALL twelve locales, not just en. The English-only scan is exactly why eleven
-            // translated home_description / pricing_description claims survived three sweeps.
+            // translated homepage and pricing descriptions survived three sweeps.
             File::glob(lang_path('*/marketing.php')),
             [
                 app_path('Http/Controllers/MarketingController.php'),
@@ -249,6 +249,10 @@ class MarketingTicketingTierTest extends TestCase
                 // (SeoUtils::softwareApplication()). It replaced 92 per-page nodes that these
                 // globs did see, so without this line their claims would move out of view.
                 app_path('Utils/SeoUtils.php'),
+                // The homepage's headline and subtitle, which are also its <title> and meta
+                // description (HeroExperiment::meta()). That pair sat in lang/en/marketing.php,
+                // which the glob above reads, until the page started building it from here.
+                app_path('Utils/HeroExperiment.php'),
             ]
         );
 

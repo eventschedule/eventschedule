@@ -8,9 +8,6 @@
  */
 
 return [
-    'home_title' => 'Event Schedule - Free Event Calendar, Ticketing & Booking',
-    'home_description' => 'Publish your events on one calendar page, take unlimited free registrations and sell tickets with zero platform fees. Paid ticketing is on the Pro plan.',
-
     'pricing_title' => 'Event Schedule Pricing: Free Plan, Zero Platform Fees',
     'pricing_description' => 'Start free with unlimited events and unlimited free registration. Pro adds paid ticketing, Enterprise adds reserved seating. Zero platform fees on every plan.',
 

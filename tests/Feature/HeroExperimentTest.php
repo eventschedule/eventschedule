@@ -69,6 +69,52 @@ class HeroExperimentTest extends TestCase
         $response->assertDontSee('var variants =', false);
     }
 
+    /**
+     * What a search result prints for the homepage is the headline and subtitle the page opens on,
+     * built by HeroExperiment::meta() rather than typed a second time in a lang file. The same two
+     * slots feed the Open Graph pair, so a shared link reads the same.
+     */
+    public function test_the_search_result_carries_the_default_headline_and_subtitle(): void
+    {
+        $meta = HeroExperiment::meta(HeroExperiment::VARIANTS[HeroExperiment::DEFAULT]);
+
+        $this->assertSame($meta, $this->searchResult($this->get('/')->assertOk()->getContent()));
+    }
+
+    public function test_the_search_result_follows_a_locked_winner(): void
+    {
+        Setting::set(HeroExperiment::WINNER_SETTING, HeroExperiment::setHash().'|promote_sell|2026-09-01');
+
+        $meta = HeroExperiment::meta(HeroExperiment::VARIANTS['promote_sell']);
+
+        $this->assertNotSame($meta, HeroExperiment::meta(HeroExperiment::VARIANTS[HeroExperiment::DEFAULT]));
+        $this->assertSame($meta, $this->searchResult($this->get('/')->assertOk()->getContent()));
+    }
+
+    /**
+     * The page's <title> and meta description, after checking the Open Graph pair says the same.
+     *
+     * @return array{title: string, description: string}
+     */
+    private function searchResult(string $html): array
+    {
+        $read = function (string $pattern) use ($html): string {
+            $this->assertSame(1, preg_match($pattern, $html, $m), "the homepage has no {$pattern}");
+
+            return html_entity_decode(trim($m[1]), ENT_QUOTES | ENT_HTML5);
+        };
+
+        $result = [
+            'title' => $read('~<title>(.*?)</title>~s'),
+            'description' => $read('~<meta name="description" content="(.*?)">~s'),
+        ];
+
+        $this->assertSame($result['title'], $read('~<meta property="og:title" content="(.*?)">~s'));
+        $this->assertSame($result['description'], $read('~<meta property="og:description" content="(.*?)">~s'));
+
+        return $result;
+    }
+
     public function test_a_winner_from_a_different_variant_set_is_ignored(): void
     {
         Setting::set(HeroExperiment::WINNER_SETTING, 'stalehash000|promote_sell|2026-09-01');

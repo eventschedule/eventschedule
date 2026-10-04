@@ -53,6 +53,27 @@ if (! function_exists('inject_csp_nonce')) {
     }
 }
 
+if (! function_exists('google_analytics_enabled')) {
+    /**
+     * Whether this install loads Google Analytics for its visitors: ANALYTICS_ID is set.
+     *
+     * The one predicate behind the tag itself (partials/google-analytics), the banner it raises
+     * (consent_required()) and everything that tells a visitor Google Analytics is in use: the
+     * privacy policy, the banner's Analytics line, /about and /features/analytics. Remove the ID
+     * and all of them stop naming it; GoogleAnalyticsDisclosureTest fails the build if a claim is
+     * made without asking here.
+     *
+     * Env-only, like consent_required(): the answer is the same for every visitor, so it is safe
+     * in edge-cached marketing HTML and on pages that must not touch the database. It cannot see
+     * a Google tag an operator pastes into the header code box (/admin/settings), which runs
+     * ungated and is theirs to disclose.
+     */
+    function google_analytics_enabled(): bool
+    {
+        return (bool) config('services.google.analytics');
+    }
+}
+
 if (! function_exists('consent_required')) {
     /**
      * Whether this install has anything a visitor must consent to.
@@ -69,7 +90,7 @@ if (! function_exists('consent_required')) {
      */
     function consent_required(): bool
     {
-        return (bool) config('services.google.analytics')
+        return google_analytics_enabled()
             || (bool) config('ads.enabled')
             || (bool) config('stay22.enabled')
             || (bool) config('services.meta.pixel_id')
@@ -172,12 +193,26 @@ if (! function_exists('consent_state_script')) {
      * Inlined rather than built so the inline Google Analytics and realtime-beacon partials can
      * read the visitor's choice before any module loads, from the same parser cookie-consent.js
      * imports.
+     *
+     * Without the file's header comment. That block is for whoever edits the file: inlined, it
+     * was a couple of kilobytes of render-blocking script on every page, and it lists what the
+     * analytics category can cover, so every page's source named Google Analytics on installs
+     * that do not load it. Cut with string functions, never preg_replace(): a PCRE failure
+     * returns null, which would inline an empty script and take window.esConsent off every page
+     * with nothing failing. A file that does not open with a block comment is inlined whole.
      */
     function consent_state_script(): string
     {
         static $script = null;
 
-        return $script ??= (string) file_get_contents(resource_path('js/consent-state.js'));
+        if ($script !== null) {
+            return $script;
+        }
+
+        $source = ltrim((string) file_get_contents(resource_path('js/consent-state.js')));
+        $end = str_starts_with($source, '/*') ? strpos($source, '*/') : false;
+
+        return $script = $end === false ? $source : ltrim(substr($source, $end + 2));
     }
 }
 

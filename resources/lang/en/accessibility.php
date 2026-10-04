@@ -27,7 +27,7 @@ return [
     'section_measures_body' => 'We provide skip links and document structure where implemented, a built-in accessibility panel for common display adjustments, keyboard-accessible paths as we identify gaps, and contrast-aware styling in parts of the product. We train support to route accessibility feedback.',
 
     'section_third_party_title' => 'Third-party content and services',
-    'section_third_party_body' => 'Parts of the service rely on third parties, including payment processing (for example Stripe), optional analytics, error reporting, embedded media or maps added by organizers, outbound links to social networks, and our blog which may be hosted on a separate domain. We cannot fully control the accessibility of third-party interfaces or user-generated content; we document limits here in good faith.',
+    'section_third_party_body' => 'Parts of the service rely on third parties, including payment processing (for example Stripe), error reporting, embedded media or maps added by organizers, outbound links to social networks, and our blog which may be hosted on a separate domain. We cannot fully control the accessibility of third-party interfaces or user-generated content; we document limits here in good faith.',
 
     'section_feedback_title' => 'Feedback and requests',
     'section_feedback_body' => 'If you encounter an accessibility barrier, contact us at :email. We aim to respond within :sla business days. Complex fixes may require more time; we will keep you informed when possible.',

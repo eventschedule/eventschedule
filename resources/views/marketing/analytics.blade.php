@@ -492,7 +492,14 @@
             ],
             [
                 'q' => 'Do you send my visitors to Google Analytics or any other tracker?',
-                'a' => 'Not for these numbers. The app counts views itself, into its own tables in its own database, and counting a view does not set a tracking cookie. Separately, eventschedule.com runs Google Analytics on its own pages, schedule pages included, and only for a visitor who allows analytics cookies in the banner: until then not even the script is loaded. On a selfhosted install the numbers never leave your own server, including the country lookup, which reads a database file that ships with the app, and Google Analytics runs only if you add your own ID.',
+                // What eventschedule.com itself runs follows google_analytics_enabled(), the predicate
+                // behind the tag, so this answer cannot outlive the tracker it describes. The answer
+                // without it still says what waits for consent: the question is "any other tracker".
+                'a' => 'Not for these numbers. The app counts views itself, into its own tables in its own database, and counting a view does not set a tracking cookie. '
+                    .(google_analytics_enabled()
+                        ? 'Separately, eventschedule.com runs Google Analytics on its own pages, schedule pages included, and only for a visitor who allows analytics cookies in the banner: until then not even the script is loaded.'
+                        : 'eventschedule.com does not run Google Analytics on its own pages either, schedule pages included; what waits for a visitor to allow it in the cookie banner is the administrators\' live view identifying them, and advertising and embedded content from other sites.')
+                    .' On a selfhosted install the numbers never leave your own server, including the country lookup, which reads a database file that ships with the app, and Google Analytics runs only if you add your own ID.',
             ],
             [
                 'q' => 'Can I see who visited my schedule?',

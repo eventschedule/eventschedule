@@ -86,10 +86,15 @@
             return $half;
         }, $wallColumns);
         $wallDurations = [58, 72, 50, 66, 62];
+
+        // The search result says what the page opens on: the title and description are built
+        // from the headline and subtitle the server renders below (the headline test's default,
+        // or its winner once one is locked), never from a string kept in step by hand.
+        $heroMeta = \App\Utils\HeroExperiment::meta($hero['default']);
     @endphp
 
-    <x-slot name="title">{{ __('marketing.home_title') }}</x-slot>
-    <x-slot name="description">{{ __('marketing.home_description') }}</x-slot>
+    <x-slot name="title">{{ $heroMeta['title'] }}</x-slot>
+    <x-slot name="description">{{ $heroMeta['description'] }}</x-slot>
     <x-slot name="breadcrumbTitle">Home</x-slot>
     <x-slot name="headMeta">
         @if ($wallPreconnect)
@@ -453,10 +458,12 @@
                  (docs/CACHING.md).
 
                  The rules every variant must keep, which HeroExperimentTest checks:
-                 - 24 characters per headline line (see the note above the h1).
-                 - "event calendar" somewhere in the fold: the <title> says "Free Event Calendar",
-                   and an H1 + subhead that never confirm it is the usual trigger for Google
-                   rewriting the title.
+                 - 24 characters per headline line (see the note above the h1), and 48 for the two
+                   together: the headline is also the page's <title>, with the brand after it.
+                 - "event calendar" in the headline: it is the <title>, which the keyword map
+                   checks, and an H1 that does not confirm the title is the usual trigger for
+                   Google rewriting it.
+                 - A subtitle of 80 to 165 characters: it is also the meta description.
                  - It says the product takes bookings, and names no paid plan (MarketingHeroClaimTest). --}}
             <p class="es-fade-up es-d-2 mx-auto mb-10 max-w-2xl text-lg text-gray-500 dark:text-gray-400 sm:text-xl" data-hero="sub">{{ $hero['default']['subtitle'] }}</p>
 

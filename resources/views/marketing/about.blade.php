@@ -547,7 +547,12 @@
             ],
             [
                 'Analytics',
-                'Opt-in. Google Analytics is not loaded at all until you allow analytics in the cookie banner, advertising and embedded content wait for a separate choice, and declining sets no analytics or marketing cookies at all.',
+                // Names Google Analytics only where this install loads it (google_analytics_enabled(),
+                // the predicate behind the tag). Without it, analytics here are the first-party daily
+                // totals and the live view, in the privacy policy's own terms (clause 12).
+                google_analytics_enabled()
+                    ? 'Opt-in. Google Analytics is not loaded at all until you allow analytics in the cookie banner, advertising and embedded content wait for a separate choice, and declining sets no analytics or marketing cookies at all.'
+                    : 'First-party. Visits are counted as daily totals without a cookie, the live view that identifies a visitor waits until you allow analytics in the cookie banner, advertising and embedded content wait for a separate choice, and declining sets no analytics or marketing cookies at all.',
                 policy_url('privacy'), 'Privacy policy', false,
             ],
             [
@@ -621,7 +626,11 @@
             ],
             [
                 'q' => 'What happens to my data?',
-                'a' => 'It is never sold. It reaches only the service providers that run the platform and, only with your consent, the analytics and advertising partners the privacy policy names; the policy lists every one. Analytics and marketing cookies are opt-in: nothing from Google Analytics loads until you allow it in the cookie banner, and declining keeps it that way. When somebody follows your schedule or buys a ticket, you see their name and email so you can reach them. Selfhost and none of it leaves your server.',
+                'a' => 'It is never sold. It reaches only the service providers that run the platform and, only with your consent, '
+                    .(google_analytics_enabled()
+                        ? 'the analytics and advertising partners the privacy policy names; the policy lists every one. Analytics and marketing cookies are opt-in: nothing from Google Analytics loads until you allow it in the cookie banner, and declining keeps it that way.'
+                        : 'any advertising partners the privacy policy names; the policy lists every one. Analytics and marketing cookies are opt-in: nothing optional is stored or loaded until you allow it in the cookie banner, and declining keeps it that way.')
+                    .' When somebody follows your schedule or buys a ticket, you see their name and email so you can reach them. Selfhost and none of it leaves your server.',
             ],
         ];
 
@@ -1005,7 +1014,7 @@
                             <p class="es-colo-fig es-colo-second" aria-hidden="true">02</p>
                             <div>
                                 <h3 class="es-colo-title es-colo-ink mb-2 text-xl">Your data is yours</h3>
-                                <p class="es-colo-muted text-sm leading-relaxed">It is never sold, and it reaches only the service providers that run the platform, and analytics and advertising partners only with your consent. Analytics are opt-in and stay off until you allow them. Export the whole schedule whenever you like, and if that is still not enough, selfhost and it never leaves your server.</p>
+                                <p class="es-colo-muted text-sm leading-relaxed">It is never sold, and it reaches only the service providers that run the platform, and {{ google_analytics_enabled() ? 'analytics and advertising partners only with your consent. Analytics are opt-in and stay off until you allow them.' : 'advertising partners only with your consent. Analytics that identify a visitor are opt-in and stay off until you allow them.' }} Export the whole schedule whenever you like, and if that is still not enough, selfhost and it never leaves your server.</p>
                             </div>
                         </li>
                         <li class="es-colo-standing-row">

@@ -27,7 +27,7 @@ return [
     'section_measures_body' => 'Oferim legături de sărit și structură de document unde este implementat, panou integrat de accesibilitate, trasee de tastatură unde identificăm lacune și stil sensibil la contrast în părți ale produsului.',
 
     'section_third_party_title' => 'Conținut și servicii terțe',
-    'section_third_party_body' => 'Părți ale serviciului se bazează pe terți: plăți (ex. Stripe), analitică opțională, raportare erori, media sau hărți încorporate de organizatori, legături sociale și blog pe domeniu separat. Nu controlăm pe deplin accesibilitatea interfețelor terțe sau a conținutului generat de utilizatori.',
+    'section_third_party_body' => 'Părți ale serviciului se bazează pe terți: plăți (ex. Stripe), raportare erori, media sau hărți încorporate de organizatori, legături sociale și blog pe domeniu separat. Nu controlăm pe deplin accesibilitatea interfețelor terțe sau a conținutului generat de utilizatori.',
 
     'section_feedback_title' => 'Feedback',
     'section_feedback_body' => 'Dacă întâmpinați o barieră, scrieți la :email. Obiectiv: prim răspuns în :sla zile lucrătoare. Remedierile complexe pot dura mai mult.',

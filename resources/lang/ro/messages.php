@@ -3880,6 +3880,7 @@ return [
     'cookie_consent_save' => 'Salvează alegerile',
     'cookie_consent_analytics' => 'Analiză',
     'cookie_consent_analytics_help' => 'Google Analytics și statistici de vizitare care vă recunosc browserul, ca să vedem cum este folosit site-ul.',
+    'cookie_consent_analytics_help_no_ga' => 'Statistici de vizitare care vă recunosc browserul, ca să vedem cum este folosit site-ul.',
     'cookie_consent_marketing' => 'Marketing și conținut încorporat',
     'cookie_consent_marketing_help' => 'Atribuirea campaniilor, măsurarea reclamelor și hărți, videoclipuri și widgeturi de rezervare de pe alte site-uri, care își setează propriile cookie-uri.',
     'cookie_consent_manage' => 'Preferințe cookie',

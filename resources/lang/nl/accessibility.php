@@ -27,7 +27,7 @@ return [
     'section_measures_body' => 'We bieden skiplinks en documentstructuur waar geïmplementeerd, een ingebouwd toegankelijkheidspaneel, toetsenbordpaden waar we hiaten vinden, en contrastbewuste opmaak in delen van het product.',
 
     'section_third_party_title' => 'Derden',
-    'section_third_party_body' => 'Delen van de dienst gebruiken derden: betalingen (bijv. Stripe), optionele analytics, foutrapportage, ingesloten media of kaarten door organisatoren, sociale links en een blog op een apart domein. We beheersen de toegankelijkheid van externe interfaces of gebruikersinhoud niet volledig.',
+    'section_third_party_body' => 'Delen van de dienst gebruiken derden: betalingen (bijv. Stripe), foutrapportage, ingesloten media of kaarten door organisatoren, sociale links en een blog op een apart domein. We beheersen de toegankelijkheid van externe interfaces of gebruikersinhoud niet volledig.',
 
     'section_feedback_title' => 'Feedback',
     'section_feedback_body' => 'Bij een barrière: mail :email. We streven naar eerste reactie binnen :sla werkdagen. Complexe fixes kunnen langer duren.',

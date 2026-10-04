@@ -5,12 +5,16 @@
     $sentryRedactedPath = request()->route() ? \App\Utils\RealtimeTracker::redactedPath(request()) : null;
 @endphp
 window.sentryOnLoad = function () {
-    // What a report says about WHERE it happened, without anything that opens someone's ticket or
-    // account. Every URL in the event - the page, the referrer, breadcrumbs, stack frames, which
-    // for an inline script are the page itself - loses its query string and fragment (?email=,
-    // ?sig=, tokens), and the current page's path has its secret route parameters replaced by
-    // their names, as RealtimeTracker::redactedPath() does for Google Analytics. Applied last in
-    // beforeSend, after every filter below has read the event as it arrived.
+    {{-- What a report says about WHERE it happened, without anything that opens someone's ticket or
+         account. Every URL in the event - the page, the referrer, breadcrumbs, stack frames, which
+         for an inline script are the page itself - loses its query string and fragment (?email=,
+         ?sig=, tokens), and the current page's path has its secret route parameters replaced by
+         their names, as RealtimeTracker::redactedPath() does for Google Analytics. Applied last in
+         beforeSend, after every filter below has read the event as it arrived.
+
+         A Blade comment, not a script one: this file renders inside an inline script, so a script
+         comment is sent to every browser, and this one named Google Analytics on installs that do
+         not load it (GoogleAnalyticsDisclosureTest asserts on the raw page). --}}
     var redactedPath = @json($sentryRedactedPath);
     var scrubUrl = function (value) {
         var match = /^([a-z][a-z0-9+.-]*:\/\/[^\/?#]*)?([^?#]*)/i.exec(value);

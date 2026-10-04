@@ -20,7 +20,7 @@
  */
 
 return [
-    '/' => '2026-10-03',
+    '/' => '2026-10-04',
     '/about' => '2026-10-04',
     '/accelevents-alternative' => '2026-09-25',
     '/accessibility' => '2026-09-10',
@@ -63,7 +63,7 @@ return [
     '/docs/schedule-styling' => '2026-09-28',
     '/docs/selfhost' => '2026-09-25',
     '/docs/selfhost/accessibility' => '2026-09-10',
-    '/docs/selfhost/admin' => '2026-10-03',
+    '/docs/selfhost/admin' => '2026-10-04',
     '/docs/selfhost/ai' => '2026-09-10',
     '/docs/selfhost/boost' => '2026-09-23',
     '/docs/selfhost/email' => '2026-09-17',
@@ -86,7 +86,7 @@ return [
     '/features' => '2026-09-25',
     '/features/ai' => '2026-09-29',
     '/features/allocated-seating' => '2026-09-24',
-    '/features/analytics' => '2026-10-03',
+    '/features/analytics' => '2026-10-04',
     '/features/appointments' => '2026-09-24',
     '/features/availability' => '2026-09-24',
     '/features/booking-requests' => '2026-09-25',

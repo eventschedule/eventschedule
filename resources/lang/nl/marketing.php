@@ -1,9 +1,6 @@
 <?php
 
 return [
-    'home_title' => 'Event Schedule - Gratis evenementenagenda, tickets en boekingen',
-    'home_description' => 'Publiceer je evenementen op één agendapagina, verkoop tickets zonder platformkosten en neem afspraken aan. Onbeperkt gratis inschrijven, betaalde tickets zijn Pro.',
-
     'pricing_title' => 'Prijzen van Event Schedule: gratis plan, geen platformkosten',
     'pricing_description' => 'Begin gratis: onbeperkte evenementen en onbeperkt gratis inschrijven. Betaalde tickets zijn Pro, Enterprise voegt genummerde plaatsen toe. Nooit platformkosten.',
 

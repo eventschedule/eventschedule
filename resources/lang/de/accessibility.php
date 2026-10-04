@@ -27,7 +27,7 @@ return [
     'section_measures_body' => 'Wir bieten Skip-Links und Dokumentstruktur wo umgesetzt, ein integriertes Barrierefreiheitsfeld für gängige Anpassungen, tastaturbedienbare Pfade nach identifizierten Lücken und kontrastbewusstes Styling in Teilen des Produkts.',
 
     'section_third_party_title' => 'Drittanbieter',
-    'section_third_party_body' => 'Teile des Dienstes nutzen Dritte, z. B. Zahlungsabwicklung (Stripe), optionale Analyse, Fehlerberichte, eingebettete Medien oder Karten von Veranstaltern, Social-Links und ein Blog auf separater Domain. Wir können die Barrierefreiheit fremder Oberflächen oder nutzergenerierter Inhalte nicht vollständig steuern.',
+    'section_third_party_body' => 'Teile des Dienstes nutzen Dritte, z. B. Zahlungsabwicklung (Stripe), Fehlerberichte, eingebettete Medien oder Karten von Veranstaltern, Social-Links und ein Blog auf separater Domain. Wir können die Barrierefreiheit fremder Oberflächen oder nutzergenerierter Inhalte nicht vollständig steuern.',
 
     'section_feedback_title' => 'Rückmeldung',
     'section_feedback_body' => 'Bei Barrieren kontaktieren Sie uns unter :email. Wir antworten in der Regel innerhalb von :sla Werktagen. Komplexe Korrekturen können länger dauern; wir informieren nach Möglichkeit.',

@@ -1,9 +1,6 @@
 <?php
 
 return [
-    'home_title' => 'Event Schedule - Calendario de eventos, entradas y reservas, gratis',
-    'home_description' => 'Publica tus eventos en una sola página de calendario, acepta inscripciones gratuitas sin límite y recibe reservas de citas. Las entradas de pago son de Pro.',
-
     'pricing_title' => 'Precios de Event Schedule: gratis y sin comisión de plataforma',
     'pricing_description' => 'Empieza gratis: eventos e inscripciones ilimitados. Pro añade la venta de entradas de pago y Enterprise los asientos numerados. Sin comisión de plataforma.',
 

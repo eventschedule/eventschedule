@@ -3860,6 +3860,7 @@ return [
     'cookie_consent_save' => 'Salva le scelte',
     'cookie_consent_analytics' => 'Analisi',
     'cookie_consent_analytics_help' => 'Google Analytics e statistiche delle visite che riconoscono il tuo browser, per capire come viene usato il sito.',
+    'cookie_consent_analytics_help_no_ga' => 'Statistiche delle visite che riconoscono il tuo browser, per capire come viene usato il sito.',
     'cookie_consent_marketing' => 'Marketing e contenuti incorporati',
     'cookie_consent_marketing_help' => 'Attribuzione delle campagne, misurazione pubblicitaria e mappe, video e widget di prenotazione di altri siti, che impostano i propri cookie.',
     'cookie_consent_manage' => 'Preferenze cookie',

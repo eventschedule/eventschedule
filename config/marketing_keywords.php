@@ -30,7 +30,9 @@
 
 return [
     // Home and hubs
-    '/' => ['keyword' => 'free event calendar'],
+    // The title is the headline test's copy (App\Utils\HeroExperiment::meta()), which says "event
+    // calendar" without "free". The h1 still carries the whole keyword, in its eyebrow pill.
+    '/' => ['keyword' => 'free event calendar', 'match' => ['event calendar']],
     '/features' => ['keyword' => 'event management software'],
     '/pricing' => ['keyword' => 'Event Schedule pricing'],
     '/about' => ['keyword' => 'open source event management platform'],

@@ -3921,6 +3921,7 @@ return [
     'cookie_consent_save' => 'Сохранить выбор',
     'cookie_consent_analytics' => 'Аналитика',
     'cookie_consent_analytics_help' => 'Google Analytics и статистика посещений, которая распознаёт ваш браузер, чтобы мы видели, как используется сайт.',
+    'cookie_consent_analytics_help_no_ga' => 'Статистика посещений, которая распознаёт ваш браузер, чтобы мы видели, как используется сайт.',
     'cookie_consent_marketing' => 'Маркетинг и встроенный контент',
     'cookie_consent_marketing_help' => 'Атрибуция кампаний, измерение рекламы, а также карты, видео и виджеты бронирования с других сайтов, которые устанавливают собственные cookie.',
     'cookie_consent_manage' => 'Настройки файлов cookie',

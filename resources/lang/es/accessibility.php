@@ -27,7 +27,7 @@ return [
     'section_measures_body' => 'Ofrecemos enlaces de salto y estructura de documento donde está implementado, un panel de accesibilidad integrado, rutas de teclado según detectemos brechas, y estilo consciente del contraste en partes del producto.',
 
     'section_third_party_title' => 'Contenido y servicios de terceros',
-    'section_third_party_body' => 'Partes del servicio dependen de terceros: pagos (p. ej. Stripe), analítica opcional, informes de error, medios o mapas incrustados por organizadores, enlaces a redes sociales y blog en dominio separado. No controlamos plenamente la accesibilidad de interfaces de terceros ni del contenido generado por usuarios.',
+    'section_third_party_body' => 'Partes del servicio dependen de terceros: pagos (p. ej. Stripe), informes de error, medios o mapas incrustados por organizadores, enlaces a redes sociales y blog en dominio separado. No controlamos plenamente la accesibilidad de interfaces de terceros ni del contenido generado por usuarios.',
 
     'section_feedback_title' => 'Comentarios',
     'section_feedback_body' => 'Si encuentra una barrera, escriba a :email. Objetivo de primera respuesta en :sla días laborables. Las correcciones complejas pueden tardar más.',

@@ -26,7 +26,7 @@
     and this banner is not the right place to ask. No <noscript> fallback: GA4 has no image-pixel
     beacon, so an image tag here would either 404 or bypass consent entirely.
 --}}
-@if (config('services.google.analytics') && ! request()->embed && (! auth()->user() || ! auth()->user()->isAdmin()))
+@if (google_analytics_enabled() && ! request()->embed && (! auth()->user() || ! auth()->user()->isAdmin()))
     @php
         $gaId = config('services.google.analytics');
         $gaRedactedPath = request()->route() ? \App\Utils\RealtimeTracker::redactedPath(request()) : null;

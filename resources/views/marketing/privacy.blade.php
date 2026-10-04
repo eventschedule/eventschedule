@@ -804,7 +804,7 @@
             ['PayPal', 'Payment processing, on schedules whose owner has connected a PayPal account'],
             ['Payfast', 'Payment processing, on schedules whose owner has connected a Payfast account'],
             ['Invoice Ninja', 'Invoicing, on schedules whose owner has connected Invoice Ninja: the buyer\'s name, email address and what they bought.'],
-            config('services.google.analytics') ? ['Google Analytics', 'Site statistics, and only if you allow analytics cookies (clause 12).'] : null,
+            google_analytics_enabled() ? ['Google Analytics', 'Site statistics, and only if you allow analytics cookies (clause 12).'] : null,
             config('services.google.backend') || config('services.google.maps') ? ['Google Maps', 'Placing venues on a map from their address. The interactive map on an event page loads only if you allow marketing cookies or ask to see it.'] : null,
             $aiProviders ? [implode(', ', $aiProviders), 'AI features (clause 05): the text and images a feature is asked to read, translate or write from.'] : null,
             config('services.google.client_id') || config('services.microsoft.client_id') ? [
@@ -1039,7 +1039,7 @@
                                                                 ['Keep sales records for organizers and for tax', 'Contract, and legal obligation'],
                                                                 ['Keep the service secure, stop fraud and abuse, fix errors, keep the security log', 'Legitimate interests'],
                                                                 ['Count visits as daily totals, and the anonymous version of our live view', 'Legitimate interests'],
-                                                                ['Google Analytics and the identified live view', 'Your consent (analytics cookies)'],
+                                                                [(google_analytics_enabled() ? 'Google Analytics, the identified live view' : 'The identified version of our live view').', and remembering which homepage headline you saw', 'Your consent (analytics cookies)'],
                                                                 ['Record the page or site that brought you, when you create an account or buy in the same visit', 'Legitimate interests'],
                                                                 ['Campaign attribution kept across visits, the Meta Pixel and Conversions API, ads, and maps, videos and booking widgets from other sites', 'Your consent (marketing cookies), or your click on that one item'],
                                                                 ['Push notifications', 'Your consent (your browser\'s permission)'],
@@ -1153,19 +1153,33 @@
                                             @case('analytics-cookies')
                                                 {{-- Two consent categories (resources/js/consent-state.js, cookie-consent.js,
                                                      partials/cookie-banner.blade.php). Every item named below waits for its category
-                                                     in the browser; ConsentCategoriesTest and ConsentEmbedTest pin that. --}}
+                                                     in the browser; ConsentCategoriesTest and ConsentEmbedTest pin that.
+
+                                                     Google Analytics is named only where this install loads it
+                                                     (google_analytics_enabled(), the predicate behind the tag itself): here, in the
+                                                     legal bases, in the provider schedule and in the cookie table. Without it the
+                                                     Analytics category is the realtime beacon's identified mode and the homepage
+                                                     headline test's memory, which is everything that reads consent.has('analytics').
+                                                     GoogleAnalyticsDisclosureTest pins both states. --}}
                                                 <p>
                                                     When you first visit, a banner asks about two kinds of optional cookies and similar storage, and nothing optional is stored, or loaded from another company, until you choose:
                                                 </p>
                                                 <ul class="es-fine-list">
-                                                    <li><strong>Analytics:</strong> Google Analytics 4, and the identified version of our live view (below). Google Analytics is not loaded at all until you allow this: no script and no request to Google.</li>
-                                                    <li><strong>Marketing and embedded content:</strong> campaign attribution cookies; Google Analytics' advertising features; on events whose organizer runs a Boost, the Meta Pixel, and telling Meta about a ticket you buy as a one-way hash of your email address; ads on free schedules, where they are switched on; and maps, videos and booking widgets from other sites (Google Maps, YouTube, Stay22), which set their own cookies.</li>
+                                                    <li>
+                                                        <strong>Analytics:</strong>
+                                                        @if (google_analytics_enabled())
+                                                            Google Analytics 4, the identified version of our live view (below), and remembering until the tab closes which homepage headline you saw. Google Analytics is not loaded at all until you allow this: no script and no request to Google.
+                                                        @else
+                                                            the identified version of our live view (below), and remembering until the tab closes which homepage headline you saw.
+                                                        @endif
+                                                    </li>
+                                                    <li><strong>Marketing and embedded content:</strong> campaign attribution cookies;@if (google_analytics_enabled()) Google Analytics' advertising features;@endif on events whose organizer runs a Boost, the Meta Pixel, and telling Meta about a ticket you buy as a one-way hash of your email address; ads on free schedules, where they are switched on; and maps, videos and booking widgets from other sites (Google Maps, YouTube, Stay22), which set their own cookies.</li>
                                                 </ul>
                                                 <p>
                                                     "Allow all" turns on both, "Decline" neither, and "Choose" lets you pick. Your choice is kept for twelve months and then asked again. Without marketing consent, a map or a video shows a button instead, and pressing it loads that one item and nothing else. Stay22, which pays a commission on bookings made through its map, is never loaded if your browser sends Global Privacy Control.
                                                 </p>
                                                 <p>
-                                                    Separately from Google, we keep our own visit statistics, and those are deliberately built so that no individual can be picked out of them. We store only daily totals: views per device type, per referring source, per country, per campaign tag. These daily totals contain no per-visitor record. To avoid counting the same person twice in a day, and to filter out bots, your IP address and browser user-agent are combined into a one-way hash using a secret key and a salt that changes every day; that hash exists only as the key of a short-lived cache entry that expires by midnight, and is never stored in a record of your visit. Because none of this reads or writes anything on your device, it needs no cookie and no consent.
+                                                    {{ google_analytics_enabled() ? 'Separately from Google, we' : 'Separately, we' }} keep our own visit statistics, and those are deliberately built so that no individual can be picked out of them. We store only daily totals: views per device type, per referring source, per country, per campaign tag. These daily totals contain no per-visitor record. To avoid counting the same person twice in a day, and to filter out bots, your IP address and browser user-agent are combined into a one-way hash using a secret key and a salt that changes every day; that hash exists only as the key of a short-lived cache entry that expires by midnight, and is never stored in a record of your visit. Because none of this reads or writes anything on your device, it needs no cookie and no consent.
                                                 </p>
 
                                                 {{-- /admin/realtime (RealtimeTracker, RealtimeBeaconController). The two modes are
@@ -1196,7 +1210,7 @@
                                                             </tr>
                                                         </thead>
                                                         <tbody>
-                                                            @foreach ([
+                                                            @foreach (array_filter([
                                                                 ['Always', $sessionCookie, 'Keeps you signed in, holds your cart and checkout, and protects forms. '.$sessionHours.' hours after your last request.'],
                                                                 ['Always', 'XSRF-TOKEN', 'Protects forms against requests forged by other sites. As long as the session.'],
                                                                 ['Always', 'remember_web_*', 'Keeps you signed in on this device. Set when you sign in or create an account; up to 400 days, or until you log out.'],
@@ -1206,14 +1220,14 @@
                                                                 ['Always', '__cf_bm', 'Bot protection by Cloudflare, which may set it on any page. 30 minutes.'],
                                                                 ['Always', 'Stripe (__stripe_mid, __stripe_sid)', 'Fraud prevention by the payment provider, on payment pages only. __stripe_mid 1 year, __stripe_sid 30 minutes.'],
                                                                 ['Push', 'OneSignal (browser storage)', 'Only if you turn on push notifications: the identifier the push service gives this browser. Until you turn them off.'],
-                                                                ['Analytics', '_ga, _ga_<measurement-id>', 'Google Analytics: tells visits and visitors apart. Up to 2 years, and deleted when you withdraw.'],
+                                                                google_analytics_enabled() ? ['Analytics', '_ga, _ga_<measurement-id>', 'Google Analytics: tells visits and visitors apart. Up to 2 years, and deleted when you withdraw.'] : null,
                                                                 ['Analytics', 'es_hero, es_hero_clicked', 'Session storage: which homepage headline you saw and whether you then clicked sign up. Until the tab closes.'],
                                                                 ['Marketing', 'utm_params, utm_referrer_url, utm_landing_page', 'Which link, campaign or site brought you here, credited if you later create an account or buy a ticket. 30 days.'],
                                                                 ['Marketing', 'es_attribution', 'The same, written by your browser for the step from our marketing pages to sign-up: the page you landed on, the site that sent you, campaign and referral tags, and the homepage headline you saw. Until the browser closes; at most 2 KB.'],
                                                                 ['Marketing', '_fbp, _fbc', 'The Meta Pixel, on the pages of Boosted events. Up to 90 days, and deleted when you withdraw.'],
                                                                 ['Marketing', '__gads, __gpi, __eoi', 'Google AdSense, on free schedules where ads are switched on. Up to 13 months, and deleted when you withdraw.'],
                                                                 ['Marketing', 'Third-party cookies', 'Set by Google Maps, YouTube and Stay22 when one of them loads. Their own policies apply.'],
-                                                            ] as [$kind, $name, $what])
+                                                            ]) as [$kind, $name, $what])
                                                                 <tr>
                                                                     <td><span class="es-fine-chip">{{ $name }}</span><br><span class="es-fine-muted text-xs">{{ $kind }}</span></td>
                                                                     <td>{{ $what }}</td>

@@ -3862,6 +3862,7 @@ return [
     'cookie_consent_save' => 'Enregistrer mes choix',
     'cookie_consent_analytics' => 'Analyse',
     'cookie_consent_analytics_help' => 'Google Analytics et des statistiques de visite qui reconnaissent votre navigateur, pour comprendre comment le site est utilisé.',
+    'cookie_consent_analytics_help_no_ga' => 'Des statistiques de visite qui reconnaissent votre navigateur, pour comprendre comment le site est utilisé.',
     'cookie_consent_marketing' => 'Marketing et contenu intégré',
     'cookie_consent_marketing_help' => 'Attribution des campagnes, mesure publicitaire, ainsi que cartes, vidéos et widgets de réservation d\'autres sites, qui déposent leurs propres cookies.',
     'cookie_consent_manage' => 'Préférences des cookies',

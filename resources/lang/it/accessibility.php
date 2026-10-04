@@ -27,7 +27,7 @@ return [
     'section_measures_body' => 'Offriamo link per saltare al contenuto e struttura del documento dove implementati, un pannello di accessibilità integrato, percorsi da tastiera dove individuiamo lacune e stile attento al contrasto in parti del prodotto.',
 
     'section_third_party_title' => 'Contenuti e servizi di terze parti',
-    'section_third_party_body' => 'Parti del servizio si appoggiano a terzi: pagamenti (es. Stripe), analisi opzionali, segnalazione errori, media o maphe incorporate dagli organizzatori, link ai social, blog su dominio separato. Non controlliamo pienamente l\'accessibilità delle interfacce di terze parti o dei contenuti generati dagli utenti.',
+    'section_third_party_body' => 'Parti del servizio si appoggiano a terzi: pagamenti (es. Stripe), segnalazione errori, media o maphe incorporate dagli organizzatori, link ai social, blog su dominio separato. Non controlliamo pienamente l\'accessibilità delle interfacce di terze parti o dei contenuti generati dagli utenti.',
 
     'section_feedback_title' => 'Feedback',
     'section_feedback_body' => 'In caso di barriera scrivere a :email. Obiettivo di prima risposta entro :sla giorni lavorativi. Correzioni complesse possono richiedere più tempo.',

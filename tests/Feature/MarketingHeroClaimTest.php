@@ -21,8 +21,9 @@ use Tests\TestCase;
  * take bookings" without anyone noticing, and a visitor who does not scroll then never learns the
  * product does bookings.
  *
- * The second is that the fold makes no tier claim. Appointment booking is free with one type and
- * selling tickets is free to 25 paid tickets a month, so a plan name appearing up here is either
+ * The second is that the fold makes no tier claim. Appointment booking is free with one type, and
+ * the fold says tickets are sold with zero platform fees without saying that selling them is free
+ * (a ticket with a price is Pro), so a plan name appearing up here is either
  * wrong or is a paid feature being advertised beside a badge reading "Free event calendar. No credit card."
  * and a button reading "Start for free". An earlier version of this fold carried a chip row that
  * named Pro and Enterprise; it was removed deliberately, and this is what stops it drifting back in
@@ -82,8 +83,10 @@ class MarketingHeroClaimTest extends TestCase
     {
         $hero = $this->heroText();
 
-        // The <title> says "Free Event Calendar". An H1 and subhead that never confirm the title's
-        // subject is the usual trigger for Google rewriting the title in the SERP.
+        // The <title> is the headline itself (HeroExperiment::meta()), so the two agree by
+        // construction. What is left to hold here is that the fold names the category at all: an
+        // H1 that never says what the product is is the usual trigger for Google rewriting the
+        // title in the SERP.
         $this->assertStringContainsStringIgnoringCase('event calendar', $hero,
             'the fold no longer says what the product is, so the title has nothing on the page to confirm it');
     }

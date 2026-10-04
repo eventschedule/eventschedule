@@ -27,7 +27,7 @@ return [
     'section_measures_body' => 'Pakume vahelejätmislinke ja dokumendistruktuuri seal, kus see on rakendatud, sisseehitatud juurdepääsetavuse paneeli, klaviatuuriteid, kui tuvastame lünki, ja kontrastiteadlikku kujundust toote osades.',
 
     'section_third_party_title' => 'Kolmandad osapooled',
-    'section_third_party_body' => 'Teenuse osad tuginevad kolmandatele osapooltele: maksete töötlemine (nt Stripe), valikuline analüütika, veateated, korraldajate manustatud meedia või kaardid, sotsiaalvõrgustiku lingid ja blogi eraldi domeenil. Me ei kontrolli täielikult kolmandate osapoolte liideste ega kasutajate loodud sisu juurdepääsetavust.',
+    'section_third_party_body' => 'Teenuse osad tuginevad kolmandatele osapooltele: maksete töötlemine (nt Stripe), veateated, korraldajate manustatud meedia või kaardid, sotsiaalvõrgustiku lingid ja blogi eraldi domeenil. Me ei kontrolli täielikult kolmandate osapoolte liideste ega kasutajate loodud sisu juurdepääsetavust.',
 
     'section_feedback_title' => 'Tagasiside',
     'section_feedback_body' => 'Kui kohtate takistust, kirjutage aadressile :email. Eesmärk on vastata :sla tööpäeva jooksul. Keerukad parandused võivad võtta kauem aega.',

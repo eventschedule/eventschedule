@@ -3918,6 +3918,7 @@ return [
     'cookie_consent_save' => 'שמירת הבחירה',
     'cookie_consent_analytics' => 'ניתוח נתונים',
     'cookie_consent_analytics_help' => 'Google Analytics וסטטיסטיקת ביקורים שמזהה את הדפדפן שלכם, כדי שנבין כיצד משתמשים באתר.',
+    'cookie_consent_analytics_help_no_ga' => 'סטטיסטיקת ביקורים שמזהה את הדפדפן שלכם, כדי שנבין כיצד משתמשים באתר.',
     'cookie_consent_marketing' => 'שיווק ותוכן מוטמע',
     'cookie_consent_marketing_help' => 'ייחוס קמפיינים, מדידת פרסום, ומפות, סרטונים ווידג\'טים להזמנה מאתרים אחרים, שמגדירים עוגיות משלהם.',
     'cookie_consent_manage' => 'העדפות עוגיות',

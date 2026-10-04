@@ -31,6 +31,12 @@ abstract class TestCase extends BaseTestCase
         \App\Utils\PlatformCurrency::flush();
         \App\Utils\PlatformPricing::flush();
 
+        // And this one: which legal documents the operator has written, memoized per process. A
+        // test that writes one and removes it with a query (no model event, so no flush) left
+        // every later test in the run believing /privacy was an operator document, which then
+        // rendered as an empty page instead of the built-in policy.
+        \App\Models\LegalDocument::flush();
+
         // Memoizes whether scheduled_task_runs exists; RefreshDatabase rebuilds the schema under it.
         \App\Services\ScheduledTaskRecorder::flush();
     }

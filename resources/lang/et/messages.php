@@ -3858,6 +3858,7 @@ return [
     'cookie_consent_save' => 'Salvesta valik',
     'cookie_consent_analytics' => 'Analüütika',
     'cookie_consent_analytics_help' => 'Google Analytics ja külastusstatistika, mis tunneb sinu brauseri ära, et näha, kuidas saiti kasutatakse.',
+    'cookie_consent_analytics_help_no_ga' => 'Külastusstatistika, mis tunneb sinu brauseri ära, et näha, kuidas saiti kasutatakse.',
     'cookie_consent_marketing' => 'Turundus ja manustatud sisu',
     'cookie_consent_marketing_help' => 'Kampaaniate omistamine, reklaami mõõtmine ning teiste saitide kaardid, videod ja broneerimisvidinad, mis seavad oma küpsised.',
     'cookie_consent_manage' => 'Küpsiste eelistused',

@@ -1,9 +1,6 @@
 <?php
 
 return [
-    'home_title' => 'Event Schedule - Kostenloser Veranstaltungskalender & Buchungen',
-    'home_description' => 'Veröffentliche deine Veranstaltungen auf einer Kalenderseite, verkaufe Tickets ohne Plattformgebühren und nimm Terminbuchungen an. Kostenlose Anmeldungen ohne Limit.',
-
     'pricing_title' => 'Event Schedule Preise: Gratis-Plan, keine Plattformgebühren',
     'pricing_description' => 'Kostenlos starten: unbegrenzte Events und Anmeldungen ohne Limit. Bezahlte Tickets gibt es ab Pro, Enterprise bringt nummerierte Plätze. Keine Plattformgebühr.',
 

@@ -80,12 +80,21 @@
         <p data-cookie-consent-gpc hidden class="mb-4 text-xs leading-relaxed text-gray-600 dark:text-gray-400">
             {{ __('messages.cookie_consent_gpc_note') }}
         </p>
+        {{-- The Analytics line names Google Analytics only where this install loads it
+             (google_analytics_enabled(), the predicate behind the tag itself). Without it the
+             category is the identified realtime view, which the _no_ga line describes. --}}
+        @php
+            $consentHelp = [
+                'analytics' => google_analytics_enabled() ? 'cookie_consent_analytics_help' : 'cookie_consent_analytics_help_no_ga',
+                'marketing' => 'cookie_consent_marketing_help',
+            ];
+        @endphp
         <div class="space-y-4">
             @foreach (['analytics', 'marketing'] as $consentCategory)
                 <div class="flex items-start justify-between gap-4">
                     <div class="min-w-0">
                         <p id="cookie-consent-{{ $consentCategory }}-label" class="text-sm font-semibold text-gray-900 dark:text-gray-100">{{ __('messages.cookie_consent_'.$consentCategory) }}</p>
-                        <p class="mt-0.5 text-xs leading-relaxed text-gray-600 dark:text-gray-400">{{ __('messages.cookie_consent_'.$consentCategory.'_help') }}</p>
+                        <p class="mt-0.5 text-xs leading-relaxed text-gray-600 dark:text-gray-400">{{ __('messages.'.$consentHelp[$consentCategory]) }}</p>
                     </div>
                     <label class="relative mt-0.5 h-6 w-11 shrink-0 cursor-pointer">
                         <input type="checkbox" data-cookie-consent-category="{{ $consentCategory }}"

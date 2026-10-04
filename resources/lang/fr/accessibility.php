@@ -27,7 +27,7 @@ return [
     'section_measures_body' => 'Nous proposons des liens d\'évitement et une structure de document lorsque c\'est implémenté, un panneau d\'accessibilité intégré, des parcours clavier lorsque nous identifions des lacunes, et une mise en forme sensible au contraste dans certaines parties du produit.',
 
     'section_third_party_title' => 'Contenu et services tiers',
-    'section_third_party_body' => 'Certaines parties s\'appuient sur des tiers : paiements (par ex. Stripe), analyses optionnelles, rapports d\'erreurs, médias ou cartes intégrés par les organisateurs, liens vers les réseaux sociaux, blog sur un domaine séparé. Nous ne maîtrisons pas entièrement l\'accessibilité des interfaces tierces ni du contenu généré par les utilisateurs.',
+    'section_third_party_body' => 'Certaines parties s\'appuient sur des tiers : paiements (par ex. Stripe), rapports d\'erreurs, médias ou cartes intégrés par les organisateurs, liens vers les réseaux sociaux, blog sur un domaine séparé. Nous ne maîtrisons pas entièrement l\'accessibilité des interfaces tierces ni du contenu généré par les utilisateurs.',
 
     'section_feedback_title' => 'Retours',
     'section_feedback_body' => 'En cas de barrière d\'accessibilité, écrivez à :email. Nous visons une première réponse sous :sla jours ouvrables. Les correctifs complexes peuvent prendre plus de temps.',

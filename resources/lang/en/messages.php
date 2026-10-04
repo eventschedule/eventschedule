@@ -4378,6 +4378,7 @@ return [
     'cookie_consent_save' => 'Save choices',
     'cookie_consent_analytics' => 'Analytics',
     'cookie_consent_analytics_help' => 'Google Analytics, and visit statistics that recognise your browser, so we can see how the site is used.',
+    'cookie_consent_analytics_help_no_ga' => 'Visit statistics that recognise your browser, so we can see how the site is used.',
     'cookie_consent_marketing' => 'Marketing and embedded content',
     'cookie_consent_marketing_help' => 'Campaign attribution, advertising measurement, and maps, videos and booking widgets from other sites, which set their own cookies.',
     'cookie_consent_manage' => 'Cookie preferences',

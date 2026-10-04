@@ -3861,6 +3861,7 @@ return [
     'cookie_consent_save' => 'Keuze opslaan',
     'cookie_consent_analytics' => 'Analyse',
     'cookie_consent_analytics_help' => 'Google Analytics en bezoekstatistieken die je browser herkennen, zodat we zien hoe de site wordt gebruikt.',
+    'cookie_consent_analytics_help_no_ga' => 'Bezoekstatistieken die je browser herkennen, zodat we zien hoe de site wordt gebruikt.',
     'cookie_consent_marketing' => 'Marketing en ingesloten inhoud',
     'cookie_consent_marketing_help' => 'Campagnetoewijzing, advertentiemeting en kaarten, video\'s en boekingswidgets van andere sites, die hun eigen cookies plaatsen.',
     'cookie_consent_manage' => 'Cookievoorkeuren',
