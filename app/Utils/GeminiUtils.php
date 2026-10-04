@@ -401,6 +401,54 @@ class GeminiUtils
             }
         }
 
+        $schema = self::parseSchema($role);
+        $fields = $schema['fields'];
+
+        // Build prompt from fields
+        $config = config('ai_prompts.event_parse');
+        $prompt = str_replace(':source', $imageData ? 'image and ' : '', $config['base']);
+        foreach ($fields as $field => $note) {
+            $prompt .= $field.($note ? " ({$note})" : '').",\n";
+        }
+        // Add language preservation instruction
+        if ($role->language_code && $role->language_code !== 'en') {
+            $langName = config('app.supported_languages')[$role->language_code] ?? $role->language_code;
+            $prompt .= "\nIMPORTANT: The input is in ".ucfirst($langName).'. Keep event_name, short_description, event_details, event_address, event_city, event_state, venue_name, and performer_name in the original '.ucfirst($langName).". Only the _en fields should contain English translations.\n";
+        }
+
+        $prompt .= $details;
+
+        $now = Carbon::now(auth()->user() ? auth()->user()->timezone : 'UTC');
+        $thisMonth = $now->format('M Y');
+        $nextMonth = $now->copy()->addMonth()->format('M Y');
+
+        $prompt .= str_replace(
+            [':today', ':this_month', ':next_month'],
+            [$now->format('M d, Y'), $thisMonth, $nextMonth],
+            $config['footer']
+        );
+
+        // Model is resolved from config (services.google.gemini_content_model)
+        $data = self::sendRequest($prompt, $imageData);
+
+        // Handle quota exceeded or other errors gracefully
+        if ($data === null || empty($data)) {
+            return [];
+        }
+
+        UsageTrackingService::track(UsageTrackingService::GEMINI_PARSE_EVENT, $role->id ?? 0);
+
+        return self::enrichParsedEvents($role, $data, [
+            'schema' => $schema,
+            'uploaded_image' => $imageData ? ['path' => $filename] : null,
+        ]);
+    }
+
+    /**
+     * The fields the model is asked for, and the lists its answers are matched against.
+     */
+    private static function parseSchema($role): array
+    {
         // Get available categories from the target schedule's effective list (custom + defaults).
         $roleCategories = $role->getEventCategories();
         $categories = collect($roleCategories)->pluck('name', 'id')->all();
@@ -474,39 +522,30 @@ class GeminiUtils
             $fields[$customFieldKey] = $hint;
         }
 
-        // Build prompt from fields
-        $config = config('ai_prompts.event_parse');
-        $prompt = str_replace(':source', $imageData ? 'image and ' : '', $config['base']);
-        foreach ($fields as $field => $note) {
-            $prompt .= $field.($note ? " ({$note})" : '').",\n";
-        }
-        // Add language preservation instruction
-        if ($role->language_code && $role->language_code !== 'en') {
-            $langName = config('app.supported_languages')[$role->language_code] ?? $role->language_code;
-            $prompt .= "\nIMPORTANT: The input is in ".ucfirst($langName).'. Keep event_name, short_description, event_details, event_address, event_city, event_state, venue_name, and performer_name in the original '.ucfirst($langName).". Only the _en fields should contain English translations.\n";
-        }
+        return [
+            'fields' => $fields,
+            'categories' => $categories,
+            'custom_field_keys' => $customFieldKeys,
+            'event_custom_fields' => $eventCustomFields,
+        ];
+    }
 
-        $prompt .= $details;
-
-        $now = Carbon::now(auth()->user() ? auth()->user()->timezone : 'UTC');
-        $thisMonth = $now->format('M Y');
-        $nextMonth = $now->copy()->addMonth()->format('M Y');
-
-        $prompt .= str_replace(
-            [':today', ':this_month', ':next_month'],
-            [$now->format('M d, Y'), $thisMonth, $nextMonth],
-            $config['footer']
-        );
-
-        // Model is resolved from config (services.google.gemini_content_model)
-        $data = self::sendRequest($prompt, $imageData);
-
-        // Handle quota exceeded or other errors gracefully
-        if ($data === null || empty($data)) {
-            return [];
-        }
-
-        UsageTrackingService::track(UsageTrackingService::GEMINI_PARSE_EVENT, $role->id ?? 0);
+    /**
+     * Turn rows in the model's flat shape into what the import preview shows: defaults,
+     * category and custom-field matching, the same-time merge, clamps, the registration link,
+     * venue and talent matching, the date window and the already-on-the-schedule hints.
+     *
+     * Options: 'schema' (parseSchema()'s result, to save recomputing it) and 'uploaded_image'
+     * (['path' => ...] when a flyer came with the request).
+     */
+    public static function enrichParsedEvents($role, array $data, array $options = []): array
+    {
+        $schema = $options['schema'] ?? self::parseSchema($role);
+        $fields = $schema['fields'];
+        $categories = $schema['categories'];
+        $customFieldKeys = $schema['custom_field_keys'];
+        $eventCustomFields = $schema['event_custom_fields'];
+        $uploadedImage = $options['uploaded_image'] ?? null;
 
         foreach ($data as $key => $item) {
 
@@ -821,8 +860,8 @@ class GeminiUtils
         }
 
         foreach ($data as $key => $item) {
-            if ($imageData && empty($data[$key]['social_image'])) {
-                $data[$key]['social_image'] = $filename;
+            if ($uploadedImage && empty($data[$key]['social_image'])) {
+                $data[$key]['social_image'] = $uploadedImage['path'];
             }
 
             if ($role->isVenue()) {
